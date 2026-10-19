@@ -1,0 +1,210 @@
+{
+  "raw-opaque-preview.png": {
+    "size": [
+      1920,
+      1080
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "fully_transparent": false,
+    "rgb_all_zero": true
+  },
+  "raw-preserved.png": {
+    "size": [
+      1920,
+      1080
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "fully_transparent": true,
+    "rgb_all_zero": true
+  },
+  "record-frame-01.png": {
+    "size": [
+      1280,
+      720
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        13
+      ],
+      [
+        0,
+        13
+      ],
+      [
+        0,
+        13
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "fully_transparent": false,
+    "rgb_all_zero": false
+  },
+  "record-frame-02.png": {
+    "size": [
+      1280,
+      720
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "fully_transparent": false,
+    "rgb_all_zero": true
+  },
+  "record-frame-03.png": {
+    "size": [
+      1280,
+      720
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "fully_transparent": false,
+    "rgb_all_zero": true
+  },
+  "record-frame-04.png": {
+    "size": [
+      1280,
+      720
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "fully_transparent": false,
+    "rgb_all_zero": true
+  },
+  "screenshot.png": {
+    "size": [
+      1920,
+      1080
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "fully_transparent": true,
+    "rgb_all_zero": true
+  },
+  "uiautomation.png": {
+    "size": [
+      1920,
+      1080
+    ],
+    "rgba_extrema": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "fully_transparent": false,
+    "rgb_all_zero": true
+  }
+}

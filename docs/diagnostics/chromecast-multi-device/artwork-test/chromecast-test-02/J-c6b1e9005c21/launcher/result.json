@@ -1,0 +1,62 @@
+{
+  "status": "verified",
+  "home": "com.google.android.apps.tv.launcherx/.home.HomeActivity",
+  "apk": "8027b8e5abe3bf7bb16350d3ba4112a934adb805e0290070f69301fddcdce312.apk",
+  "attempts": [
+    {
+      "bounds": [
+        495,
+        255,
+        617,
+        377
+      ],
+      "reference": "expected-icon-1.png",
+      "resource": "res/drawable-nodpi-v4/cat_boom_icon.png",
+      "kind": "icon",
+      "mean_absolute_error": 56.361037818821465,
+      "rms_error": 72.66600346552843,
+      "worst_region_error": 69.86697247706422,
+      "brightness_gain": 0.6903176542455711,
+      "verified": false,
+      "screenshot": "attempt-1-view-2.png",
+      "hierarchy": "attempt-1-view-2.xml",
+      "attempt": 1
+    },
+    {
+      "verified": false,
+      "reason": "No identifiable tile geometry or comparable artwork",
+      "screenshot": "attempt-2-view-1.png",
+      "hierarchy": "attempt-2-view-1.xml",
+      "attempt": 2
+    },
+    {
+      "bounds": [
+        500,
+        655,
+        652,
+        807
+      ],
+      "reference": "expected-icon-1.png",
+      "resource": "res/drawable-nodpi-v4/cat_boom_icon.png",
+      "kind": "icon",
+      "mean_absolute_error": 8.846745822339491,
+      "rms_error": 9.886202991585002,
+      "worst_region_error": 13.786458333333334,
+      "brightness_gain": 0.7200729230299329,
+      "verified": true,
+      "screenshot": "attempt-3-view-2.png",
+      "hierarchy": "attempt-3-view-2.xml",
+      "attempt": 3
+    }
+  ],
+  "refreshes": [
+    {
+      "operation": "launcher-force-stop-and-home",
+      "package": "com.google.android.apps.tv.launcherx"
+    },
+    {
+      "operation": "launcher-data-reset-and-home",
+      "package": "com.google.android.apps.tv.launcherx"
+    }
+  ]
+}

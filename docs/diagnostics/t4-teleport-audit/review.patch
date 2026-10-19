@@ -1,0 +1,1020 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c0ce2ce3..f9aea44b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -30,6 +30,7 @@ cmake_dependent_option(WF_NEURAL_FORTH
+ set(WF_PHYSICS_ENGINE "jolt"    CACHE STRING "legacy | jolt")
+ option(WF_REST_API        "REST API box PoC (HTTP runtime-mutation debug)" ON)
+ option(WF_DEBUG_BRIDGE    "TCP/JSON debug bridge — level-design + AI-agent debugging (Blender live edit, etc.). Independent of WF_ENABLE_EDITOR." ON)
++option(WF_TELEPORT_UBSAN "Instrument room transitions for teleport regression diagnostics" OFF)
+ option(WF_ENABLE_STEAM    "Steamworks SDK"                OFF)
+ # AddressSanitizer + UBSan. Default **ON for host Debug builds** — Debug exists
+ # to catch bugs, computers are fast, and the whole engine+editor lifecycle is
+@@ -945,6 +946,14 @@ set_target_properties(wf_property_core PROPERTIES IMPORTED_LOCATION "${WF_PROPER
+ add_dependencies(wf_property_core wf_property_core_build)
+ list(APPEND WF_SOURCES "${CMAKE_SOURCE_DIR}/engine/runtime_properties.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_property_form.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_property_host.cpp")
+ add_library(wfengine STATIC ${WF_SOURCES})
++if(WF_TELEPORT_UBSAN)
++    if(NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
++        message(FATAL_ERROR "WF_TELEPORT_UBSAN requires GCC or Clang")
++    endif()
++    set_source_files_properties(${SRC}/room/actrooms.cc PROPERTIES
++        COMPILE_OPTIONS "-fsanitize=undefined;-fno-sanitize-recover=all")
++    target_link_options(wfengine INTERFACE -fsanitize=undefined)
++endif()
+ target_link_libraries(wfengine PUBLIC wf_property_core)
+ target_include_directories(wfengine PUBLIC ${WF_INCLUDES})
+ target_compile_definitions(wfengine PUBLIC ${WF_DEFS})
+@@ -1259,6 +1268,24 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
+                 COMMAND ${Python3_EXECUTABLE}
+                     ${CMAKE_SOURCE_DIR}/tests/debug_listener_smb_transitions.py
+                     $<TARGET_FILE:wf_game>)
++            add_test(NAME cross_room_teleports
++                COMMAND ${Python3_EXECUTABLE}
++                    ${CMAKE_SOURCE_DIR}/tests/verify_cross_room_teleports.py
++                    --binary $<TARGET_FILE:wf_game>
++                    --level ${CMAKE_SOURCE_DIR}/wflevels/teleport_regression-standalone.iff
++                    --out ${CMAKE_BINARY_DIR}/teleport-regression --laps 5
++                    --require-camera --audit-boundary)
++            set_tests_properties(cross_room_teleports PROPERTIES
++                LABELS "gl;teleport" ENVIRONMENT "DISPLAY=:0" TIMEOUT 60)
++            add_test(NAME cross_room_teleports_mutation
++                COMMAND ${Python3_EXECUTABLE}
++                    ${CMAKE_SOURCE_DIR}/tests/verify_cross_room_teleports.py
++                    --binary $<TARGET_FILE:wf_game>
++                    --level ${CMAKE_SOURCE_DIR}/wflevels/teleport_regression-standalone.iff
++                    --out ${CMAKE_BINARY_DIR}/teleport-regression-mutation --laps 5
++                    --mutation --require-camera --audit-boundary)
++            set_tests_properties(cross_room_teleports_mutation PROPERTIES
++                LABELS "gl;teleport" ENVIRONMENT "DISPLAY=:0" TIMEOUT 60)
+             set_tests_properties(debug_listener_smb_transitions PROPERTIES
+                 LABELS "gl" ENVIRONMENT "DISPLAY=:0" TIMEOUT 120)
+             if(WF_DEBUG_DEFINES)
+diff --git a/docs/BUGS.md b/docs/BUGS.md
+index 7a39fbde..3ba05698 100644
+--- a/docs/BUGS.md
++++ b/docs/BUGS.md
+@@ -13,6 +13,30 @@ Format per entry:
+ 
+ ---
+ 
++## Departing room unbind uses the destination pointer — 2026-10-08
++
++**Status:** FIXED [`c92ca353`](https://github.com/wbniv/WorldFoundry/commit/c92ca353) (`teleport-audit`).
++
++**Symptom:** A cross-room teleport from a room with two neighbours to a disconnected room triggers UBSan: member call on null pointer of type `Room`.
++
++**Root cause:** `ActiveRooms::ChangeActiveRoom` clears `_fromActiveRooms[idxActiveRoom]`, then calls `UnBindAssets` through `_activeRooms[idxActiveRoom]`. The latter is already the destination table, whose entry can be a different room or null. Baseline `git blame` attributes both statements to imported commit `a2784f6e` (2010-05-01), before this catalogue's cutoff.
++
++**Why dormant:** Walking typically replaces one overlapping neighbourhood with another. In addition, `Room::UnBindAssets` is empty, so a null member call can survive without an obvious native crash despite being undefined behavior.
++
++**Fix:** Unbind the departing room before clearing its pointer.
++
++**Diff** (`wfsource/source/room/actrooms.cc`):
++```diff
++- _fromActiveRooms[idxActiveRoom] = NULL;
++- _activeRooms[idxActiveRoom]->UnBindAssets();
+++ _fromActiveRooms[idxActiveRoom]->UnBindAssets();
+++ _fromActiveRooms[idxActiveRoom] = NULL;
++```
++
++**Investigation:** [Cross-room teleport audit](teleport-audit.md), including the real-engine UBSan baseline and standalone regression.
++
++---
++
+ ## `List`/`SNode` overlay breaks strict aliasing — the camera's collision loop reprocessed a freed message — 2026-10-08
+ 
+ **Status:** FIXED [`20a2e10a`](https://github.com/wbniv/WorldFoundry/commit/20a2e10a) (`wfsource/source/hal/_list.h` — `SNode` is `may_alias`).
+diff --git a/engine/mutation/wfmut.cpp b/engine/mutation/wfmut.cpp
+index 4142b2d1..4ec570f9 100644
+--- a/engine/mutation/wfmut.cpp
++++ b/engine/mutation/wfmut.cpp
+@@ -127,6 +127,7 @@ bool SetActorPos(Level& level, ActorIdx idx, const Vector3& pos)
+     // surfaces inside setCurrentPos itself in DBSTREAM1 builds — we treat
+     // that as a warning, not a failure, and still return true.
+     actor->setCurrentPos(pos);
++    level.NotifyPositionWrite(*actor);
+     ok();
+     return true;
+ }
+diff --git a/tests/generate_teleport_level.py b/tests/generate_teleport_level.py
+new file mode 100644
+index 00000000..2e9520b8
+--- /dev/null
++++ b/tests/generate_teleport_level.py
+@@ -0,0 +1,159 @@
++"""Build a small four-room teleport regression from checked-in engine assets.
++
++No Blender, chapter checkout, APK or live device is required. Room D has no
++neighbours; A has B and C. Every room owns a non-permanent mesh so its RM chunk
++exists. The anchored permanent Player moves only through its Forth script.
++"""
++import argparse
++import hashlib
++import json
++from pathlib import Path
++import re
++import shutil
++import subprocess
++
++
++def field(obj, name, value, tag='STR'):
++    pattern=r"(\{ '"+tag+r"'\s+\{ 'NAME' \""+re.escape(name)+r"\" \}\s+\{ '(?:STR|DATA)' )[^}]+"
++    result,count=re.subn(pattern,lambda m:m[1]+value+' ',obj)
++    if not count:
++        end=obj.rfind('}')
++        assert end>=0
++        result=obj[:end]+"{ '"+tag+"' { 'NAME' "+json.dumps(name)+" } { 'DATA' "+value+" } }\n"+obj[end:]
++    return result
++
++
++def name(obj, value):
++    return re.sub(r"\{ 'NAME' \"[^\"]*\" \}",lambda m:"{ 'NAME' "+json.dumps(value)+" }",obj,count=1)
++
++
++def enum(obj, key, index, label):
++    # levcomp follows the displayed STR for enum fields, even when DATA differs.
++    pattern=r"(\{ 'I32'\s+\{ 'NAME' \""+re.escape(key)+r"\" \}\s+\{ 'DATA' )[^}]+(\}\s+\{ 'STR' )\"[^\"]*\""
++    result,count=re.subn(pattern,lambda m:m[1]+str(index)+'l '+m[2]+json.dumps(label),obj)
++    assert count==1,key
++    return result
++
++
++def vector(obj, key, values, tag):
++    return field(obj,key,' '.join(f'{v:.16f}(1.15.16)' for v in values),tag)
++
++
++def generate(repo, tools, out, camera='fixed', autonomous=False):
++    out.mkdir(parents=True,exist_ok=True)
++    source=repo/'wflevels/qbert_practice'
++    text=(source/'qbert_practice.lev').read_text()
++    objects={}
++    for obj in text.split("\n\t{ 'OBJ'")[1:]:
++        obj=obj.rsplit('\n}',1)[0] if obj.endswith('\n}\n') else obj
++        objects[re.search(r"\{ 'NAME' \"([^\"]*)\"",obj)[1]]=obj
++    entries=[]
++    for index,(a,b) in enumerate([('B','C'),('A',''),('A',''),('','')]):
++        obj=name(objects['Room01'],chr(65+index))
++        obj=vector(obj,'Position',(index*100,0,0),'VEC3')
++        obj=vector(obj,'Global Bounding Box',(-20,-30,-20,20,30,40),'BOX3')
++        obj=field(obj,'Adjacent Room 1',json.dumps(a))
++        entries.append(field(obj,'Adjacent Room 2',json.dumps(b)))
++    for key in ['Level','Camera','Director','cs_pyramid','Player','Target01','Target02']:
++        obj=objects[key]
++        obj=vector(obj,'Position',(0,0,7),'VEC3')
++        if key=='Camera':obj=vector(obj,'Position',(0,-15,12),'VEC3')
++        if key=='Player':
++            obj=field(obj,'Tool A','""')
++            script=('\\ t4 teleport command script\n'
++                '470 read-mailbox 471 read-mailbox <> if\n'
++                '470 read-mailbox 1 = if 300 INDEXOF_X_POS write-mailbox then\n'
++                '470 read-mailbox 2 = if 100 INDEXOF_X_POS write-mailbox then\n'
++                '470 read-mailbox 3 = if 200 INDEXOF_X_POS write-mailbox then\n'
++                '470 read-mailbox 4 = if 0 INDEXOF_X_POS write-mailbox then\n'
++                '470 read-mailbox 6 = if 5 INDEXOF_X_POS write-mailbox then\n'
++                '470 read-mailbox 5 = if 300 INDEXOF_X_POS write-mailbox '
++                '100 INDEXOF_X_POS write-mailbox 200 INDEXOF_X_POS write-mailbox then\n'
++                '0 INDEXOF_Y_POS write-mailbox 7 INDEXOF_Z_POS write-mailbox\n'
++                '470 read-mailbox 471 write-mailbox then\n')
++            if autonomous:
++                emit=' '.join(f'{ord(c)} 0 sys' for c in 'T4_ARRIVAL ')
++                prefix=('\\ autonomous device regression; report on the next actor update\n'
++                    '0.25 INDEXOF_Z_SCALE 18 write-actor-mailbox\n'
++                    '474 read-mailbox 1 = if '+emit+' '
++                    '473 read-mailbox 1 sys 471 read-mailbox 1 sys INDEXOF_X_POS read-mailbox 1 sys '
++                    'INDEXOF_X_POS 6 read-actor-mailbox 1 sys INDEXOF_Z_SCALE 18 read-actor-mailbox 1 sys '
++                    'INDEXOF_X_POS read-mailbox INDEXOF_X_POS 6 read-actor-mailbox - abs 0.01 < '
++                    'INDEXOF_Z_SCALE 18 read-actor-mailbox 0.25 = & 1 sys 10 0 sys '
++                    '0 474 write-mailbox then\n'
++                    '472 read-mailbox INDEXOF_DELTA_TIME read-mailbox + 472 write-mailbox\n'
++                    '472 read-mailbox 0.5 >= if 0 472 write-mailbox '
++                    '473 read-mailbox dup 7 / 0 | 7 * - '
++                    'dup 0 = if 2 470 write-mailbox then '
++                    'dup 1 = if 4 470 write-mailbox then '
++                    'dup 2 = if 1 470 write-mailbox then '
++                    'dup 3 = if 2 470 write-mailbox then '
++                    'dup 4 = if 5 470 write-mailbox then '
++                    'dup 5 = if 1 470 write-mailbox then '
++                    '6 = if 4 470 write-mailbox then '
++                    '473 read-mailbox 1 + 473 write-mailbox 1 474 write-mailbox then\n')
++                script=prefix+script
++            obj=field(obj,'Script',json.dumps(script))
++        if key=='Director':
++            # Four room objects precede Level, Camera, Director and this shot.
++            # The integration test checks these indices in real engine output.
++            obj=field(obj,'Script',json.dumps('\\ t4 camera\n8 INDEXOF_CAMSHOT write-mailbox\n'))
++        if key=='cs_pyramid':
++            obj=field(obj,'Track Object','"Player"')
++            for ref in ['Follow','Target']:obj=field(obj,ref,'"Target01"')
++            obj=vector(obj,'Position',(0,-15,5),'VEC3')
++            for axis in ['X','Y','Z']:
++                obj=enum(obj,'Position '+axis,1 if camera=='follow' else 0,
++                         'Relative' if camera=='follow' else 'Absolute')
++            obj=enum(obj,'Rotation',0,'Fixed')
++        entries.append(obj)
++    for index in range(4):
++        marker=name(objects['redball_0'],f'Marker{index}')
++        marker=vector(marker,'Position',(index*100+5,0,7),'VEC3')
++        marker=field(marker,'Script','""')
++        marker=field(marker,'Mobility','"Anchored"','I32')
++        marker=field(marker,'Moves Between Rooms','0l','I32')
++        marker=field(marker,'Visibility Mailbox','1l','I32')
++        entries.append(marker)
++        light=name(objects['Light01'],f'Light{index}')
++        entries.append(vector(light,'Position',(index*100,0,15),'VEC3'))
++    level='teleport_regression'
++    (out/(level+'.lev')).write_text("{ 'LVL'\n"+''.join("\n\t{ 'OBJ'"+o for o in entries)+'\n}\n')
++    for mesh in ['player.iff','redball.iff']:shutil.copy2(source/mesh,out/mesh)
++    for image in source.glob('*.tga'):shutil.copy2(image,out/image.name)
++    log=[]
++    def run(tool,*args):
++        command=[str(tools/(tool+'-rs')/'target/release'/tool),*map(str,args)]
++        result=subprocess.run(command,cwd=out,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)
++        log.extend(['$ '+repr(command),result.stdout,'Exit status: '+str(result.returncode)])
++        (out/'compile.log').write_text('\n'.join(log))
++        if result.returncode:raise RuntimeError(result.stdout[-2000:])
++    run('iffcomp','-binary','-o='+level+'.lev.bin',level+'.lev')
++    run('levcomp',level+'.lev.bin',repo/'wfsource/source/oas/objects.lc',level+'.lvl',repo/'wfsource/source/oas',
++        '--mesh-dir','.','--iff-txt',level+'.iff.txt','--textile-ini',level+'.ini')
++    run('textile','-ini='+level+'.ini','-Tlinux','-transparent=0,0,0','-pagex=1024','-pagey=1024',
++        '-permpagex=1024','-permpagey=1024','-palx=256','-paly=8','-alignx=w','-aligny=h','-flipyout')
++    run('iffcomp','-binary','-o='+level+'.iff',level+'.iff.txt')
++    (out/(level+'-standalone.iff.txt')).write_text("{ 'L4' { 'ALGN' .align(2048) } { 'RAM' 'OBJD' 4194304l 'PERM' 16777216l 'ROOM' 8388608l 'FLAG' 1l 1l } { 'ALGN' .align(2048) } [ \""+level+".iff\" ] }\n")
++    run('iffcomp','-binary','-o='+level+'-standalone.iff',level+'-standalone.iff.txt')
++    receipt={'rooms':{'A':['B','C'],'B':['A'],'C':['A'],'D':[]},
++        'camera':camera,
++        'autonomous':autonomous,
++        'player_index':9,'camera_shot_index':8,'unloaded_marker_index':18,
++        'inputs':{str(p.relative_to(repo)):hashlib.sha256(p.read_bytes()).hexdigest()
++                  for p in [source/'qbert_practice.lev',source/'player.iff',source/'redball.iff']},
++        'tools':{tool:hashlib.sha256((tools/(tool+'-rs')/'target/release'/tool).read_bytes()).hexdigest()
++                 for tool in ['iffcomp','levcomp','textile']},
++        'files':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in out.glob(level+'*') if p.is_file()}}
++    (out/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
++    print(out/(level+'-standalone.iff'))
++
++
++if __name__=='__main__':
++    parser=argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[1])
++    parser.add_argument('--tools',type=Path,required=True)
++    parser.add_argument('--out',type=Path,required=True)
++    parser.add_argument('--camera',choices=['fixed','follow'],default='fixed')
++    parser.add_argument('--autonomous',action='store_true',help='Cycle teleports and print next-frame pose/scale assertions for coordinated device tests')
++    args=parser.parse_args();generate(args.repo,args.tools,args.out,args.camera,args.autonomous)
+diff --git a/tests/verify_cross_room_teleports.py b/tests/verify_cross_room_teleports.py
+new file mode 100644
+index 00000000..917ee611
+--- /dev/null
++++ b/tests/verify_cross_room_teleports.py
+@@ -0,0 +1,141 @@
++"""Drive script-owned non-adjacent teleports in one real engine session.
++
++Artifacts are retained in --out even when the engine crashes. No live device,
++input automation, raw ADB or chapter dependency is used. Requires a GL display.
++"""
++import argparse
++import json
++import os
++from pathlib import Path
++import re
++import socket
++import shutil
++import subprocess
++import sys
++import time
++
++
++def run(args):
++    sys.path.insert(0,str(args.repo/'tests'))
++    from debug_bridge_client import BridgeClient
++    args.out.mkdir(parents=True,exist_ok=True)
++    log=args.out/'engine.log'
++    with socket.socket() as sock:
++        sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
++    command=[str(args.binary.resolve()),'-L'+str(args.level.resolve()),'--windowed',
++             '--debug-print-actors','--debug-port',str(port),'--debug-bind','127.0.0.1']
++    # ValidPtr uses printf. Keep its diagnostics visible before process cleanup,
++    # instead of losing buffered stdout when the harness terminates the child.
++    if shutil.which('stdbuf'):command=['stdbuf','-oL','-eL',*command]
++    records=[];client=None
++    with log.open('w') as output:
++        process=subprocess.Popen(command,cwd=args.level.parent,stdout=output,stderr=subprocess.STDOUT,
++            env={**os.environ,'DISPLAY':os.environ.get('DISPLAY',':0'),'WF_REST_PORT':'0'})
++        try:
++            client=BridgeClient(port=port,timeout=10)
++            text=log.read_text(errors='replace')
++            # Release omits constructor debug printing; both configurations
++            # verify the actual Player by its script acknowledgement and pose.
++            if '[Actor]' in text:
++                assert re.search(r'\[Actor\] idx=9 class=22 ',text),'fixture Player index mismatch'
++                assert re.search(r'\[Actor\] idx=8 class=16 ',text),'fixture camera index mismatch'
++            for mb in (470,471,3009,3010,3011,1903):client.watch(9,mb)
++            for mb in (3009,3010,3011):client.watch(6,mb)
++            def wait(predicate,timeout=5):
++                deadline=time.monotonic()+timeout
++                while time.monotonic()<deadline:
++                    assert process.poll() is None,f'engine exited: {process.returncode}'
++                    if predicate():return
++                    time.sleep(.01)
++                raise AssertionError('timeout waiting for teleport evidence')
++            wait(lambda:client.mailbox_values.get((9,1903),0)>0)
++            # Destination D's mesh is initially unbound. This should cache the
++            # requested scale without diagnosing a pointer failure.
++            client.watch(18,3042)
++            client.set_mailbox(3042,.25,idx=18)
++            wait(lambda:client.mailbox_values.get((18,3042))==.25)
++            print('PASS: unloaded room D actor caches scale 0.25',flush=True)
++            for lap in range(args.laps):
++                scale=.25 if lap%2==0 else .5
++                # Every lap starts in A with D unloaded. Test fresh deferred
++                # scale writes after an actual unload, as well as at startup.
++                client.set_mailbox(3042,scale,idx=18)
++                wait(lambda:client.mailbox_values.get((18,3042))==scale)
++                # A→D: completely disjoint set, D→B: two rooms load,
++                # B→C: retained A, C→D→A: all three A rooms load on return.
++                for phase,x in [(2,100),(4,0),(1,300),(2,100),(5,200),(1,300),(4,0)]:
++                    if args.mutation:
++                        client.send({'op':'scene:set_transform','idx':9,'pos':[x,0,7]})
++                    else:
++                        client.set_mailbox(470,phase,idx=9)
++                    wait(lambda:(args.mutation or client.mailbox_values.get((9,471))==phase)
++                        and abs(client.mailbox_values.get((9,3009),-999)-x)<.01)
++                    # Observe multiple completed frames after the script write.
++                    time.sleep(.1)
++                    assert process.poll() is None,f'engine exited after arrival: {process.returncode}'
++                    assert client.mailbox_values.get((18,3042))==scale,'room reload lost scale'
++                    records.append({'lap':lap+1,'command':phase,'x':client.mailbox_values[(9,3009)],
++                        'camera_x':client.mailbox_values.get((6,3009)),
++                        'fps':client.mailbox_values.get((9,1903))})
++                    print(json.dumps(records[-1]),flush=True)
++                    if args.require_camera:
++                        wait(lambda:abs(client.mailbox_values.get((6,3009),-999)-x)<.01,timeout=2)
++            if args.audit_boundary:
++                client.send({'op':'pause'})
++                assert client.wait_for(lambda m:m.get('op')=='paused',timeout=5)
++                time.sleep(.1)
++                if args.require_camera:
++                    # Room-local script movement must retain camera smoothing.
++                    client.set_mailbox(470,6,idx=9)
++                    client.send({'op':'step','frames':1})
++                    wait(lambda:client.mailbox_values.get((9,471))==6
++                        and abs(client.mailbox_values.get((9,3009),-999)-5)<.01)
++                    assert abs(client.mailbox_values.get((6,3009),-999)-5)>.1,'room-local move incorrectly snapped camera'
++                def screenshot(label):
++                    destination=args.out/(label+'.png')
++                    client.send({'op':'screenshot','filename':str(destination.resolve())})
++                    assert client.wait_for(lambda m:m.get('op')=='screenshot_done'
++                        and m.get('filename')==str(destination.resolve()),timeout=5)
++                screenshot('before-teleport')
++                client.set_mailbox(470,1,idx=9)
++                client.send({'op':'step','frames':1})
++                wait(lambda:client.mailbox_values.get((9,471))==1)
++                if args.require_camera:
++                    # The engine remains paused: the camera must arrive in the
++                    # same single script frame, with no smoothing frames.
++                    wait(lambda:abs(client.mailbox_values.get((6,3009),-999)-300)<.01)
++                screenshot('script-frame')
++                client.send({'op':'step','frames':1})
++                time.sleep(.1)
++                screenshot('following-frame')
++                client.send({'op':'step','frames':3})
++                time.sleep(.1)
++                screenshot('three-more-frames')
++                client.send({'op':'resume'})
++            text=log.read_text(errors='replace')
++            assert not re.search(r'ASSERTION FAILED|runtime error:|zforth error|SIGSEGV|ValidPtr\( \(nil\) \) failed',text), 'engine diagnostics failed'
++            entry='transform' if args.mutation else 'script'
++            print(f'PASS: {len(records)} {entry} teleports in one engine session',flush=True)
++        finally:
++            if client:client.close()
++            exit_before_cleanup=process.poll()
++            if process.poll() is None:
++                process.terminate()
++                try:process.wait(timeout=5)
++                except subprocess.TimeoutExpired:process.kill();process.wait()
++            (args.out/'receipt.json').write_text(json.dumps({'command':command,'arrivals':records,
++                'exit_before_cleanup':exit_before_cleanup,'cleanup_exit':process.returncode},indent=2)+'\n')
++            print('Engine evidence: '+str(log),flush=True)
++
++
++if __name__=='__main__':
++    parser=argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[1])
++    parser.add_argument('--binary',type=Path,required=True)
++    parser.add_argument('--level',type=Path,required=True)
++    parser.add_argument('--out',type=Path,required=True)
++    parser.add_argument('--laps',type=int,default=5)
++    parser.add_argument('--audit-boundary',action='store_true',help='Capture a paused one-frame teleport boundary for timing policy review')
++    parser.add_argument('--require-camera',action='store_true',help='Assert immediate following-camera arrival at the destination')
++    parser.add_argument('--mutation',action='store_true',help='Exercise wfmut::SetActorPos through the transform bridge')
++    args=parser.parse_args();run(args)
+diff --git a/tests/verify_teleport_device_evidence.py b/tests/verify_teleport_device_evidence.py
+new file mode 100644
+index 00000000..c8b8c9c9
+--- /dev/null
++++ b/tests/verify_teleport_device_evidence.py
+@@ -0,0 +1,22 @@
++"""Validate coordinator-downloaded autonomous teleport logs, offline."""
++import argparse,hashlib,json,re
++from pathlib import Path
++p=argparse.ArgumentParser();p.add_argument('evidence',type=Path);p.add_argument('--minimum',type=int,default=70)
++args=p.parse_args();results=[]
++for path in sorted(args.evidence.rglob('wf.log')):
++    text=path.read_text(errors='replace').rsplit('=== wf_game android_main',1)[-1]
++    rows=[list(map(float,s.split())) for s in re.findall(r'T4_ARRIVAL ([^\r\n]+)',text)]
++    assert len(rows)>=args.minimum,f'{path}: only {len(rows)} arrivals'
++    expected={1:300,2:100,3:200,4:0,5:200};sequence=[2,4,1,2,5,1,4]
++    for row in rows:
++        step,command,x,camera,scale,ok=row
++        assert command==sequence[(int(step)-1)%7],f'{path}: wrong command sequence {row}'
++        assert abs(x-expected[int(command)])<.01 and abs(camera-x)<.01 and scale==.25 and ok!=0,f'{path}: failed arrival {row}'
++    assert all(int(b[0])==int(a[0])+1 for a,b in zip(rows,rows[1:])),f'{path}: missing arrival records'
++    assert not any(s in text for s in ['Fatal signal','FATAL EXCEPTION','ASSERTION FAILED','zforth compile error','zforth eval error','ValidPtr( (nil) ) failed','runtime error:']),f'{path}: engine diagnostic'
++    result=dict(log=str(path),log_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),arrivals=len(rows),
++        first_step=int(rows[0][0]),last_step=int(rows[-1][0]),full_laps=len(rows)//7,
++        camera_max_error=max(abs(r[2]-r[3]) for r in rows),scale=.25,passed=True)
++    results.append(result);print(json.dumps(result),flush=True)
++assert len(results)==2,f'expected both Chromecast logs; found {len(results)}'
++(args.evidence/'validation.json').write_text(json.dumps(results,indent=2)+'\n')
+diff --git a/wflevels/teleport_regression-standalone.iff b/wflevels/teleport_regression-standalone.iff
+new file mode 100644
+index 00000000..64e88569
+Binary files /dev/null and b/wflevels/teleport_regression-standalone.iff differ
+diff --git a/wfsource/source/game/actor.cc b/wfsource/source/game/actor.cc
+index f0d2ebff..28e8d7a9 100644
+--- a/wfsource/source/game/actor.cc
++++ b/wfsource/source/game/actor.cc
+@@ -1473,6 +1473,7 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
+                     JoltCharacterSetPosition(charID, tVect);
+             }
+ #endif
++            theLevel->NotifyPositionWrite(*this);
+             break;
+         }
+         case EMAILBOX_Y_POS:
+@@ -1489,6 +1490,7 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
+                     JoltCharacterSetPosition(charID, tVect);
+             }
+ #endif
++            theLevel->NotifyPositionWrite(*this);
+             break;
+         }
+         case EMAILBOX_Z_POS:
+@@ -1505,6 +1507,7 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
+                     JoltCharacterSetPosition(charID, tVect);
+             }
+ #endif
++            theLevel->NotifyPositionWrite(*this);
+             break;
+         }
+         case EMAILBOX_ROTATION_A:
+@@ -1632,7 +1635,9 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
+             if (boxnum == EMAILBOX_X_SCALE) _scaleX = value;
+             else if (boxnum == EMAILBOX_Y_SCALE) _scaleY = value;
+             else                                  _scaleZ = value;
+-            if (ValidPtr(_renderActor))
++            // An unloaded room intentionally has no render actor. Retain the
++            // cached scale for BindAssets without diagnosing that normal state.
++            if (_renderActor && ValidPtr(_renderActor))
+                 _renderActor->SetActorScale(Vector3(_scaleX, _scaleY, _scaleZ));
+             break;
+         }
+@@ -1933,4 +1938,3 @@ Actor::NonStatPlatData::NonStatPlatData(SMemPool * memPool, const _Movement* mov
+ }
+ 
+ //==============================================================================
+-
+diff --git a/wfsource/source/game/camera.cc b/wfsource/source/game/camera.cc
+index 61c7ae27..9f9fa1f4 100644
+--- a/wfsource/source/game/camera.cc
++++ b/wfsource/source/game/camera.cc
+@@ -119,6 +119,12 @@ Camera::ValidView() const
+ 
+ //============================================================================
+ 
++void
++Camera::SnapToShot()
++{
++	static_cast<CameraHandler*>(&GetMovementManager().GetMovementHandler(*this))->SnapToShot(*this);
++}
++
+ void
+ Camera::update()
+ {
+diff --git a/wfsource/source/game/camera.hp b/wfsource/source/game/camera.hp
+index b507e467..c3ed0b1d 100644
+--- a/wfsource/source/game/camera.hp
++++ b/wfsource/source/game/camera.hp
+@@ -58,6 +58,7 @@ public:
+ 
+ 	// update functions
+ 	virtual void update();
++	void SnapToShot();
+ 
+ 	cameraPosition	cameraPos;
+ 
+diff --git a/wfsource/source/game/level.cc b/wfsource/source/game/level.cc
+index 800ee282..2ebdf94c 100755
+--- a/wfsource/source/game/level.cc
++++ b/wfsource/source/game/level.cc
+@@ -976,6 +976,7 @@ Level::update(Scalar deltaTime)
+ 	// make sure any pending room request gets fulfilled
+ 	assert( ValidPtr( _theActiveRooms ) );
+ 	_theActiveRooms->WaitRoomLoad( false );
++	finishWatchTeleport();
+ 
+ 	DBSTREAM2( cflow << "Level::update: updating current room selection" << std::endl; )
+ 	if ( _camera && _camera->GetWatchObject() )
+@@ -1007,6 +1008,7 @@ Level::update(Scalar deltaTime)
+ 
+ 	DBSTREAM2( cflow << "Level::update: room contents" << std::endl; )
+ 	Validate();
++	finishWatchTeleport();
+ 	updateRoomContents();
+ 	// FIX - manually update director until we get priorities working in updates
+ 	// right now it is not a renderAndUpdate object
+@@ -1017,6 +1019,7 @@ Level::update(Scalar deltaTime)
+ 		_director->predictPosition(LevelClock());
+ 		_director->update();
+ 	}
++	finishWatchTeleport();
+ 
+ 	DBSTREAM2( cflow << "Level::update: remove pending objects" << std::endl; )
+ 	// execute pending deletetions
+@@ -1282,6 +1285,38 @@ Level::RenderScene()
+ //==============================================================================
+ // this is supposed to reset the level to its initial state
+ 
++void
++Level::NotifyPositionWrite(const PhysicalObject& object)
++{
++	if (_camera && _camera->GetWatchObject() == &object)
++		_positionWrittenWatch = &object;
++}
++
++void
++Level::finishWatchTeleport()
++{
++	if (!_positionWrittenWatch || !_camera || !_theActiveRooms)
++		return;
++	const PhysicalObject* watch = _camera->GetWatchObject();
++	const PhysicalObject* written = _positionWrittenWatch;
++	_positionWrittenWatch = NULL;
++	if (!watch || watch != written || _theActiveRooms->GetActiveRoom(0)->CheckCollision(*watch))
++		return;
++	// Match UpdateRoom's all-room search; leave outside-room policy unchanged.
++	for (int room = 0; room < _theLevelRooms->NumberOfRooms(); ++room)
++	{
++		if (_theLevelRooms->GetRoom(room).CheckCollision(*watch))
++		{
++			_camera->SnapToShot();
++			// Migrate both actors while the departing rooms still have assets
++			// and are still visited. Only then replace the active room set.
++			updateRoomContents();
++			_theActiveRooms->UpdateRoom(watch);
++			return;
++		}
++	}
++}
++
+ void
+ Level::reset( )
+ {
+diff --git a/wfsource/source/game/level.hp b/wfsource/source/game/level.hp
+index 735b7e2f..ace78519 100644
+--- a/wfsource/source/game/level.hp
++++ b/wfsource/source/game/level.hp
+@@ -163,6 +163,8 @@ class Level
+ 
+ 	// update and render methods
+ 	void update(Scalar deltaTime);
++	// Position mailboxes request teleport handling after the complete script.
++	void NotifyPositionWrite(const PhysicalObject& object);
+     void RefreshHardwareInput();
+ 	void RenderScene();
+ 	inline bool done() const;                          // returns false when level ends
+@@ -205,6 +207,8 @@ private:
+ 
+ 	// Checks for things that have moved between rooms
+ 	void updateRoomContents();
++	void finishWatchTeleport();
++	const PhysicalObject* _positionWrittenWatch = NULL;
+ 	void removePendingObjects();
+ 
+ 	// level data load methods
+diff --git a/wfsource/source/game/movecam.cc b/wfsource/source/game/movecam.cc
+index b12b34b3..996b96c8 100644
+--- a/wfsource/source/game/movecam.cc
++++ b/wfsource/source/game/movecam.cc
+@@ -407,6 +407,34 @@ SetCameraParametersFromShot(const Actor* tempcamShotActor,cameraPosition& outPos
+ 
+ //============================================================================
+ 
++void
++CameraHandler::SnapToShot(MovementObject& movementObject)
++{
++	if (gEditorCameraOverride.load(std::memory_order_relaxed))
++		return;
++	cameraData& cd = GetCameraMovementData(movementObject);
++	int32 shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
++	if (!shotIndex)
++		shotIndex = cd.idxOldCamShotActor;
++	const Actor* shot = shotIndex > 0 && shotIndex < theLevel->GetMaxObjectIndex()
++		? theLevel->getActor(shotIndex) : NULL;
++	if (!shot || shot->kind() != BaseObject::CamShot_KIND)
++		return;
++	cameraPosition destination;
++	cd.idxTrackObject = SetCameraParametersFromShot(shot, destination, theLevel->GetObjectList());
++	cd.idxOldCamShotActor = shotIndex;
++	cd.idxCamShotActor = shotIndex;
++	cd.oldCameraPosition = destination.position;
++	cd.direction = destination.direction;
++	cd.validView = true;
++	cd.collisionDirections = 0;
++	PhysicalAttributes& pa = movementObject.GetWritablePhysicalAttributes();
++	pa.SetPredictedPosition(destination.position);
++	pa.SetLinVelocity(Vector3::zero);
++	SetCamera(movementObject, destination);
++	static_cast<Camera&>(movementObject).cameraPos = destination;
++}
++
+ CameraHandler::cameraData&
+ CameraHandler::GetCameraMovementData(MovementObject& movementObject)
+ {
+diff --git a/wfsource/source/game/movecam.hp b/wfsource/source/game/movecam.hp
+index bd87d5f9..d709a90a 100644
+--- a/wfsource/source/game/movecam.hp
++++ b/wfsource/source/game/movecam.hp
+@@ -56,6 +56,7 @@ public:
+ 	// recycled slot resolves to whatever now owns it (see the actor-identity /
+ 	// safe-handle follow-up in TODO.md).
+ 	static const PhysicalObject* ResolveTrackObject(int32 idxTrackObject);
++	void SnapToShot(MovementObject& movementObject);
+ protected:
+ 	void SetCamera(PhysicalObject& physicalObject, const cameraPosition& destCam);         // will attempt to cast to Camera&
+ 	struct cameraData
+diff --git a/wfsource/source/room/actrooms.cc b/wfsource/source/room/actrooms.cc
+index 08a892a4..17871341 100644
+--- a/wfsource/source/room/actrooms.cc
++++ b/wfsource/source/room/actrooms.cc
+@@ -186,9 +186,10 @@ ActiveRooms::ChangeActiveRoom( int toRoom )
+ 		   					(*rendIter).UnBindAssets();
+ 							++rendIter;
+ 						}
++						// The destination array may have fewer neighbours, or a different
++						// room at this index. Unbind the departing room before clearing it.
++						_fromActiveRooms[ idxActiveRoom ]->UnBindAssets();
+ 						_fromActiveRooms[ idxActiveRoom ] = NULL;
+-
+-						_activeRooms[ idxActiveRoom ]->UnBindAssets();
+ 						break;
+ 					}
+ 				}
+@@ -459,4 +460,3 @@ ActiveRooms::DetectCollision(const Clock& currentTime)
+ }
+ 
+ //==============================================================================
+-
+diff --git a/docs/teleport-audit.md b/docs/teleport-audit.md
+new file mode 100644
+index 00000000..f8d928ea
+--- /dev/null
++++ b/docs/teleport-audit.md
+@@ -0,0 +1,80 @@
++# Cross-room teleport audit
++
++Status: three reproduced problems fixed in engine commit [`c92ca353`](https://github.com/wbniv/WorldFoundry/commit/c92ca353) on `teleport-audit`, based on `2b893d484a11cb7398d8ce482ad830cd31b82e22`. Desktop and Chromecast verification passed. Main checkout edits are preserved.
++
++Will chose immediate camera jumps on cross-room teleports. Script position-mailbox writes and `wfmut::SetActorPos` identify this path; ordinary physics movement does not request a camera jump. All writes in one actor script are evaluated before deciding whether the final pose is in another room. Within-room writes retain camera smoothing.
++
++## Confirmed findings and fixes
++
++| Finding | Code evidence | Reproduction | Change |
++| --- | --- | --- | --- |
++| Departing-room unbind uses a destination pointer, which can be null when the arriving set has fewer neighbours | [`ChangeActiveRoom`](../wfsource/source/room/actrooms.cc), old line 191; baseline blame traces this statement to imported 2010 source | [Baseline engine log](diagnostics/t4-teleport-audit/baseline-transition/engine.log): UBSan reports a member call on null `Room` during A-to-D | Unbind `_fromActiveRooms` before clearing its entry |
++| Scale writes to unloaded actors print a nil-pointer diagnostic even though null rendering state is expected | [`Actor` scale mailbox cases](../wfsource/source/game/actor.cc); `BindAssets` forwards cached scale | [Independent scale-only baseline](diagnostics/t4-teleport-audit/baseline-scale/engine.log), with zero teleports; cache reads back 0.25 | Check for null before invoking diagnostic `ValidPtr`. Preserve the cache and validation of live pointers |
++| Following camera crosses a gap, loses room membership and stops updating | [`BungeeCameraHandler::predictPosition`](../wfsource/source/game/movecam.cc), [`Room::UpdateRoomContents`](../wfsource/source/room/room.cc), [`AddObjectToRoom`](../wfsource/source/room/rooms.cc), [`SetPendingRemove`](../wfsource/source/game/level.cc) | [Correctly authored relative-camera baseline](diagnostics/t4-teleport-audit/baseline-camera/engine.log): Player X=100; camera reaches X≈23.7242, falls outside every room; engine refuses camera deletion after removing its room-list entry | Record watched-player position writes. Snap to the authored current camera shot, migrate membership while source rooms are active, then load the destination set |
++
++The scale warning itself is harmless in this reproduced path: the setter retains the scale and does not dereference null. This conclusion does not apply to arbitrary nil-pointer warnings. Its implementation dates to May 2026, so it does not qualify for the dormant-bug catalogue in `BUGS.md`.
++
++The camera fault also reproduces through [`wfmut::SetActorPos`](../engine/mutation/wfmut.cpp), reached by the bridge's `scene:set_transform`. [That baseline](diagnostics/t4-teleport-audit/baseline-mutation/engine.log) strands camera X≈23.5563 after Player X=100. The transform API now records the same position-write notification. A separate permanent CTest exercises this entry point. Direct path-following calls to `Actor::setCurrentPos` remain ordinary movement and do not request a snap.
++
++## Transition and frame ordering
++
++```mermaid
++flowchart LR
++    W[Script writes X Y Z] --> F[Finish actor scripts]
++    F --> Q{Watched actor changed rooms?}
++    Q -->|position writes and valid destination| C[Snap camera to authored shot]
++    C --> M[Migrate membership using departing active rooms]
++    M --> U[Unload departing rooms]
++    U --> L[Load destination and neighbours]
++    L --> R[Render destination in this frame]
++    Q -->|same room or physics walking| N[Existing camera movement]
++```
++
++Teleport completion runs before the usual start-of-frame selection for external mailbox writes, after physics/actor updates for actor scripts, and after the director for director scripts. Membership migration precedes unloading, so both Player and camera remain scheduled in the destination. The camera retains the authored shot's offset, orientation and clipping data; its smoothing velocity is cleared. Player velocity is preserved.
++
++## Audit matrix and existing boundaries
++
++| Area | Finding and evidence | Verification or limit |
++| --- | --- | --- |
++| Destination search | `ActiveRooms::UpdateRoom` scans all rooms, not only neighbours, when outside current room | Regression includes disconnected D and returns |
++| From/to tables and reuse | `ChangeActiveRoom` computes departures/arrivals by room identity and completes unloading before loading | Three-room A set to lone D, retained A during B/C transitions, repeated reuse |
++| Permanent assets | Prior `2b893d48` binds MBR actors to permanent slot once and leaves them bound during unload | Repeated visits exercise the fixed Player asset lifetime |
++| Slot map | `InitRoomSlotMap` requires distinct transient slots for co-active rooms; disconnected rooms can reuse slot 0 | Regression graph is legal. No new arbitrary-topology guarantee |
++| Membership | `Room::UpdateRoomContents` removes and re-adds movers; null-hole iteration does not skip the next live entry (`Int16ListIter`) | Watched Player and following camera remain live across repeated returns |
++| Multiple writes | Pose setters update current and predicted coordinates separately; room resolution occurs after actor scripts | Command 5 writes X=300,100,200 in one script; final room C is selected |
++| Scale/render assets | Setter caches scale; `BindAssets` reapplies it on renderer construction | Unloaded writes alternate 0.25/0.5; cache survives load/unload. No pixel measurement of scale |
++| Physics | Position mailboxes synchronise Jolt characters; body sync also occurs at physical update. Mailbox writes retain velocity | Standalone Player is anchored. General dynamic-body and stale-contact behavior is not certified by that fixture |
++| Camera/audio | Camera jump updates pose, matrix, handler state and `cameraPos`; sound listener consumes `cameraPos` | Camera arrival is tested; audio continuity is a source-based inference, not an audible test |
++| Inactive actors | Membership updates visit active rooms only; moving an actor out of an unloaded room is not generally handled by this patch | Source finding, not reproduced here; no claim that arbitrary unloaded actors can teleport |
++| Non-MBR actors | Room-owned mesh assets keep compiler room identity; cross-room relocation is unsupported by this contract | Do not remove the MBR authoring requirement |
++| Archive | Compiler can omit rooms without non-permanent assets; loader accesses TOC by room index | Every regression room has a room-owned mesh. No empty-room/archive format change |
++
++## Decisions reserved for Will
++
++Camera policy is resolved: jump immediately on teleport.
++
++`ESCALATE: Teleports outside all rooms and ambiguous overlapping destinations need an explicit gameplay policy before changing their behavior.` `UpdateRoom` retains the old active set when no destination matches; `AddObjectToRoom` instead requests removal. The current room wins when it still contains the actor; otherwise the first matching room wins. These are code findings, not new runtime reproductions.
++
++`ESCALATE: Supporting arbitrary actors moved from unloaded rooms, non-MBR relocation, empty-room archives or arbitrary room graphs requires a broader architecture decision.` Active-only membership iteration, compiler asset ownership, positional room TOC lookup and static slot-map assertions provide the evidence. Those paths remain outside the supported contract of these targeted fixes.
++
++Player velocity/contact resets remain unchanged. Destination collision is not rerun after scripts in the same frame; normal collision detection resumes next frame. An immediate same-frame physics guarantee would require a separate decision and reproduction.
++
++## Regression and review evidence
++
++The checked-in [generator](../tests/generate_teleport_level.py), [test](../tests/verify_cross_room_teleports.py) and [standalone level](../wflevels/teleport_regression-standalone.iff) use existing engine assets and Forth. They do not require Blender, an APK or a chapter checkout. See [reproduction instructions](teleport-regression.md).
++
++- [x] Assertions + transition UBSan: original mechanical-fix suite passed 22/22.
++- [x] Assertions: corrected permanent regression passed 35 teleports before the camera fix.
++- [x] Assertions off + transition UBSan: camera fix passed 140 teleports and a paused single-frame camera-arrival check.
++- [x] Final assertions-on full suite: 22/22; permanent teleport test includes exact camera arrival, one-frame arrival and same-room smoothing guard.
++- [x] Final assertions-off build: script teleport regression passed; after adding the transform notification, both teleport regressions and both available `wfmut` tests passed (4/4).
++- [x] Parmenides scene9 level-owned tour integration: 15 Truth/God/Being transitions, including repeated return tours; dynamic player and following camera stay in the expected realms.
++- [x] Android Release on both 32-bit Chromecasts: 151/146 autonomous teleports, zero logged camera X error, scale preserved; repeated chapter cycles pass. [Device verification and evidence](diagnostics/t4-teleport-audit/android-review.md).
++
++The chapter probe accelerates only the existing review timer mailbox, not Player coordinates; the level's `fy-review-setup`/`fy-teleport` performs each jump. [Probe source](diagnostics/t4-teleport-audit/chapter-probe.py), [chapter receipt](diagnostics/t4-teleport-audit/chapter-integration/receipt.json) and [chapter log](diagnostics/t4-teleport-audit/chapter-integration/engine.log) retain exact inputs and results. Observed dynamic Z positions settle near the authored floors; this is a smoke test, not a systematic collision/contact test.
++
++Raw logs and receipts live in [the evidence directory](diagnostics/t4-teleport-audit/). Earlier camera probes with incorrect enum strings or an incorrectly authored follow target are excluded; the cited baseline uses both correct enum labels and a fixed origin helper.
++
++Baselines are incremental: the null-room and scale reproductions precede their fixes; the camera reproduction includes those mechanical fixes; the transform reproduction includes the script-camera fix but precedes the transform notification. [Metadata](diagnostics/t4-teleport-audit/metadata.md) records configuration and final hashes; [scoped patch](diagnostics/t4-teleport-audit/review.patch) captures source, test and documentation changes. The binary fixture is included separately in `wflevels`.
++
++The original task paste contains a literal “45 lines hidden”; omitted acceptance requirements remain unavailable. This report records the visible audit scope and limits rather than certifying unspecified requirements.
+diff --git a/docs/teleport-regression.md b/docs/teleport-regression.md
+new file mode 100644
+index 00000000..e6165632
+--- /dev/null
++++ b/docs/teleport-regression.md
+@@ -0,0 +1,32 @@
++# Cross-room teleport regression
++
++The four-room fixture uses A at X=0, B=100, C=200 and disconnected D=300. A lists B and C; B and C list A; D has no neighbours. Every room owns a transient mesh. Player and camera use permanent MBR assets. The Player's Forth script performs teleports through ordinary position mailboxes.
++
++Build with the existing engine configuration, `WF_DEBUG_BRIDGE=ON`, zForth enabled and optional `WF_TELEPORT_UBSAN=ON`. The latter instruments the production room-transition translation unit with UBSan. A GL display is required; validation used the desktop display `:0`, an owned process and a private loopback debug port.
++
++```sh
++ctest --test-dir build-teleport -R cross_room_teleports --output-on-failure
++```
++
++For a longer session:
++
++```sh
++python3 tests/verify_cross_room_teleports.py --binary engine/wf_game --level wflevels/teleport_regression-standalone.iff --out /tmp/teleport-regression --laps 20 --require-camera --audit-boundary
++```
++
++The test checks script acknowledgement, final Player pose, exact following-camera X, unloaded scale caching and absence of pointer/sanitizer/script diagnostics. It captures a paused single script frame to establish immediate camera arrival, and confirms a small same-room position write does not force a camera jump. It owns and terminates only its own engine process. Receipts and logs survive failures.
++
++`cross_room_teleports_mutation` uses the same fixture with `--mutation`, driving `wfmut::SetActorPos` through `scene:set_transform`. Its main loop checks actual pose rather than the script acknowledgement. Its paused boundary checks still exercise the script entry point.
++
++Regenerate the fixture using existing compiler binaries:
++
++```sh
++python3 tests/generate_teleport_level.py --tools /home/will/WorldFoundry-wbniv/wftools --out /tmp/teleport-fixture --camera follow
++cp /tmp/teleport-fixture/teleport_regression-standalone.iff wflevels/teleport_regression-standalone.iff
++```
++
++The generator records source, tool and output hashes. `--camera fixed` isolates room-memory and scale behavior from camera movement; use that variant for the historical unbind/null and scale-only reproductions. A scale-only run uses `--laps 0` without `--require-camera` or `--audit-boundary`.
++
++The contract tested here is a watched, MBR Player moving between valid rooms, with a camera shot authored to follow its destination. Ordinary physics walking retains its current camera behavior. This anchored fixture does not establish all dynamic-body collisions or arbitrary actor relocation. See [the audit review](teleport-audit.md) for evidence and unresolved boundaries.
++
++For coordinator-owned device testing, generate with `--camera follow --autonomous`. That variant cycles the same seven teleport commands without a debug client and reports actual Player/camera positions and scale on the next actor update. `tests/verify_teleport_device_evidence.py` validates the downloaded coordinator logs offline; it does not access devices. The command-driven fixture remains unchanged. [Android Release verification](diagnostics/t4-teleport-audit/android-review.md) passed on both 32-bit Chromecasts.
+diff --git a/docs/plans/2026-10-08-t4-cross-room-teleport-audit.md b/docs/plans/2026-10-08-t4-cross-room-teleport-audit.md
+new file mode 100644
+index 00000000..5bdd371f
+--- /dev/null
++++ b/docs/plans/2026-10-08-t4-cross-room-teleport-audit.md
+@@ -0,0 +1,119 @@
++# T4: cross-room teleport audit
++
++Status: three reproduced faults fixed and verified on desktop and both Chromecasts. Engine commit `c92ca353`. Broader architecture boundaries are recorded in [the audit review](../teleport-audit.md).
++
++Will explicitly requested engine investigation and targeted fixes on 2026-10-08.
++This authorizes the engine work in this task. Preserve unrelated working changes.
++The pasted task contains “45 lines hidden”; the omitted scope and acceptance
++requirements have been requested and remain unresolved.
++
++## Baseline and isolation
++
++- [x] Inspect main engine checkout and prior fix `2b893d48`.
++- [x] Use isolated `~/WorldFoundry-wbniv/.worktrees/teleport-audit`.
++- [x] Record exact baseline, configuration, level hashes and diagnostic paths.
++
++The supplied worktree was absent in this session's filesystem and Git worktree
++registry. Created the named isolated branch/worktree at `2b893d48` with
++`task feature-start NAME=teleport-audit BASE=2b893d48`, as authorised by Will.
++No existing worktree or branch was removed. Main checkout at `514e642e` and its
++unrelated edits were preserved.
++
++## Diagrams and invariants
++
++```mermaid
++flowchart LR
++    A[Room A and neighbours loaded] -->|script position writes| C[Player in non-adjacent room C]
++    C --> M[Move object membership to C]
++    M --> S[Select C and its neighbours]
++    S --> U[Unbind and unload departing rooms]
++    U --> L[Load arriving rooms using freed slots]
++    L --> B[Bind room actors; retain permanent moving actors]
++    B --> R[Update collision, camera, sound and render]
++```
++
++The diagram describes the invariants to establish, not a proposed ordering fix.
++Compare actual frame ordering and trace it in regression runs before changing it.
++
++```mermaid
++flowchart LR
++    A[Room A: slot 0] --- B[Room B: slot 2]
++    A --- C[Room C: slot 1]
++    D[Disconnected room D: slot 0]
++    A -. non-adjacent teleport .-> D
++    D -. return; repeat .-> A
++    P[Player: permanent assets] --> A
++    P --> D
++```
++
++The regression must exercise both retained rooms and complete active-set
++replacement, fewer arriving neighbours, multiple loads/unloads, and slot reuse.
++Every co-active room must occupy a distinct transient slot. Moving actors must
++retain permanent allocation and appear exactly once in room object lists.
++
++## Audit matrix
++
++| Area | Source to inspect | Evidence required |
++| --- | --- | --- |
++| Destination selection | `room/actrooms.cc::UpdateRoom` | Non-adjacent jump finds actual destination; gaps and overlaps reported |
++| Transition lifecycle | `ChangeActiveRoom`, `_tblFromRooms`, `_tblToRooms` | Exact departing/retained/arriving sets; unload before reuse; correct room unbound |
++| Slot assignment | `room/rooms.cc::InitRoomSlotMap` | Distinct slots for each active set; disconnected room components |
++| Object membership | `room.cc::UpdateRoomContents`, `rooms.cc::AddObjectToRoom` | Moving actor leaves source, enters destination once; inactive destination works |
++| Frame sequencing | `game/level.cc::update` | Script teleport versus selection, physics, membership, director and rendering |
++| Asset lifetime | `asset/assets.cc`, `baseobject`, `game/actor.cc` | Stable permanent assets; unloaded actors cannot use freed memory; reload restores state |
++| Scale writes | `game/actor.cc` scale mailbox cases and `BindAssets` | Reproduce nil diagnostic; prove cached scale survives reload or report loss |
++| Collision and physics | `room/actrooms.cc`, movement/physical attributes, Jolt | Destination collision and pose; stale events and velocity semantics |
++| Camera, scripts, sound | Director/watch object, scripting mailbox writes, sound lifecycle | No invalid unloaded dependency; destination view and sound stay consistent |
++| Compiler and archive | levcomp room assignment and room-chunk TOC | Regression builds reproducibly; empty room/chunk behavior recorded |
++
++Findings must include file/line references, observed behavior and reproduction
++commands or an explicit “not reproduced”. Do not infer correctness from a model
++of the code alone. Distinguish existing constraints from confirmed defects.
++
++## Ordered work
++
++1. [x] Finish plan and open it with `task md` before changes to engine code.
++2. [x] Add a standalone multi-room regression level and engine-backed test.
++   Record a failing run against the fixed baseline before each new fix.
++3. [x] Audit the visible matrix and classify findings, reproductions and limits.
++4. [x] Fix confirmed faults; Will chose immediate camera jumps on teleport.
++5. [x] Run regression loops with assertions enabled and disabled, existing engine
++   tests, and the Parmenides non-adjacent return tour as an integration check.
++6. [x] Save review, scoped diff and raw evidence with limitations; update BUGS docs.
++
++## Camera decision and implemented ordering
++
++Will selected “Jump immediately on teleport” on 2026-10-08. Position-mailbox
++writes and `wfmut::SetActorPos` mark the watched actor; normal physics walking does not mark it. After
++actor scripts, resolve the final pose. For a different valid room, snap the
++camera to the authored shot, migrate room membership before unloading, then
++select/load the destination. Within-room writes keep smoothing. External writes
++and director scripts have corresponding safe completion points.
++
++The regression proves arrival in one paused script frame, repeated adjacent and
++non-adjacent teleports, multiple writes in one script, retained rooms, complete
++set replacement, slot reuse and unloaded scale caching. The scene9 chapter tour
++adds 15 real level-script teleports with the dynamic player. It does not certify
++all terrain/contact cases or every chapter route.
++
++## Decisions reserved for Will
++
++Stop only the affected part and record `ESCALATE: <why>` with code references and
++reproduction evidence when a fix requires a gameplay or architecture policy:
++teleport outside every room, ambiguous overlapping-room destination, velocity or
++collision reset semantics, when a teleport becomes visible within a frame,
++moving a non-permanent actor across rooms, or changing legal room topology and
++archive formats. Continue independent investigation and mechanical fixes.
++
++## Evidence bundle
++
++- [x] Build the audited Android release library for both Chromecast ABIs (`armeabi-v7a` on both registered devices).
++- [x] Freeze and hash autonomous four-room and chapter-tour diagnostic APKs.
++- [x] Run coordinator-owned recording sessions on Chromecast 01 and 02.
++- [x] Validate every recorded standalone arrival (151/146), inspect repeated chapter cycles and verify cleanup.
++- [x] Save [device review and raw evidence](../diagnostics/t4-teleport-audit/android-review.md).
++
++Use `docs/diagnostics/t4-teleport-audit/` for raw commands, build/test output,
++baseline metadata, traces and reproduction receipts. The engine worktree's
++review links the standalone regression, findings and scoped patch. Device
++verification uses only the coordinator's `task chromecast:*` workflow.
+diff --git a/docs/diagnostics/t4-teleport-audit/metadata.md b/docs/diagnostics/t4-teleport-audit/metadata.md
+new file mode 100644
+index 00000000..4b99355b
+--- /dev/null
++++ b/docs/diagnostics/t4-teleport-audit/metadata.md
+@@ -0,0 +1,34 @@
++# T4 validation metadata
++
++- Base commit: `2b893d484a11cb7398d8ce482ad830cd31b82e22`.
++- Branch/worktree: `teleport-audit`, `/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit`.
++- Configuration: native Linux Release, Jolt, zForth, Lua 5.4, debug bridge enabled; JavaScript/WASM/Fennel/Wren disabled; ASan off; `WF_TELEPORT_UBSAN=ON` instruments production `room/actrooms.cc`.
++- Both `WF_DEBUG_DEFINES=ON` and `OFF` exercised. Final worktree build has assertions off.
++- GL display: existing `:0`; each harness owned its process and private loopback port. Xvfb was unavailable.
++- Final following-camera standalone fixture SHA-256: `9f452ca4c2102c572104c100aa1d6c95e52ffbee4cd3cf25a506202aac4a4f57`.
++- Assertions-on camera/position-mailbox binary SHA-256: `223edefe044454f2813d73d6c62e4f70076ec3640d6450d532825a950556490d` (before the one-line transform notification).
++- Final assertions-off binary SHA-256: `fb5141010e1537f464a7eefb1d1412d612ae775e11006f59f852b53a83d2dd91`.
++
++## Evidence layout
++
++| Directory/file | Meaning |
++| --- | --- |
++| `baseline-transition/` | Real-engine null `Room` member call under UBSan before unbind fix |
++| `baseline-scale/` | Independent unloaded scale write with zero teleports; line-buffered stdout |
++| `baseline-camera/` | Correctly authored relative camera strands between A/B before camera fix |
++| `baseline-mutation/` | Transform API bypasses teleport notification before one-line mutation fix |
++| `camera-release/` | 140 script teleports plus single-frame boundary screenshots, assertions off |
++| `t4-camera-final-ctest.log` | Final assertions-on full suite, 22/22 including the permanent script-camera regression |
++| `final-release/` | Permanent script-camera regression, final release configuration |
++| `final-mutation/` | Permanent transform-API regression, final release configuration |
++| `chapter-integration/` | 15 level-owned Parmenides scene9 tour transitions; exact level/runtime hashes |
++| `fixture-fixed/`, `fixture-follow/`, `fixture-final/` | Baseline and final fixture receipts and historical input levels |
++| `*.log` | Configure/build/test output, including failing runs |
++| `chapter-probe.py` | Integration probe; accelerates review timer only |
++| `review.patch` | Reviewable text diff against the base, including new tests/docs |
++
++Receipts preserve original run paths and commands, including temporary paths. Copies here retain those historical records. Android Release verification subsequently passed on both 32-bit Chromecasts; see [the device review](android-review.md). The assertions-on full suite predates the final one-line transform notification; transform integration was verified in the final assertions-off build with both existing `wfmut` tests.
++
++Generated OAS `.ht` files and the existing `wfmut` test screenshot are build/test products, outside the scoped patch. Engine implementation and regression tooling are committed as `c92ca353`; this evidence accompanies that change. No merge to the main checkout was made.
++
++Frozen device APKs and the original/stripped native libraries are retained locally under `build-teleport/android-verification/` (ignored build artifacts). Their hashes are recorded in the Android input receipts; the coordinator retains its immutable APK inputs and job evidence.
+diff --git a/docs/diagnostics/t4-teleport-audit/android-review.md b/docs/diagnostics/t4-teleport-audit/android-review.md
+new file mode 100644
+index 00000000..70cb0eee
+--- /dev/null
++++ b/docs/diagnostics/t4-teleport-audit/android-review.md
+@@ -0,0 +1,47 @@
++# Android / Chromecast teleport verification
++
++Status: standalone assertions and repeated chapter tours passed on both Chromecasts.
++
++Engine implementation commit: [`c92ca353`](https://github.com/wbniv/WorldFoundry/commit/c92ca353). Review updated 2026-10-09, Asia/Bangkok.
++
++The audited `teleport-audit` source was built with NDK 26.2.11394342 for `armeabi-v7a`, Android API 21, Release (`-O3`, thin LTO), Jolt and zForth. Engine assertions and UBSan were off. This tests the shipping-style configuration rather than relying on assertions to mask release failures. Debug-bridge support was compiled in, with no subscribed client during the device runs.
++
++Both APKs reuse the existing Parmenides Android manifest and Java glue, with the audited native library substituted. Only the four-room variant substitutes the level. The chapter variant keeps its existing scene9 `cd.iff` bytes. Both store the level archive uncompressed, add `--frame-profile`, and retain the existing development signing identity. They are diagnostic APKs, not production releases. Debug sections were removed from the device library to fit the coordinator's 32 MiB upload limit; the original library is retained for symbolization.
++
++## Standalone regression
++
++Batch `B-885c3c12bc09`, APK SHA-256 `0fa01b422c335947272912906c9817d1899eb5eb0756a63b4687d7aed57c6303`.
++
++| Device | Android / ABI | Coordinator job | Recorded arrivals | Complete seven-step tours | Largest camera X error | Result |
++| --- | --- | --- | --- | --- | --- | --- |
++| Chromecast 01, HD | 14 / armeabi-v7a | `J-c24317f2ceae` | 151 | 21 | 0 | PASS |
++| Chromecast 02 | 12 / armeabi-v7a | `J-eadb0ef85fcd` | 146 | 20 | 0 | PASS |
++
++The autonomous Forth fixture cycles the desktop regression's seven commands every 0.5 game seconds. It reports on the next actor update, after teleport completion. Every record includes a monotonic step, command, actual Player X, actual camera X, cached unloaded-marker scale and a boolean assertion. The host validator checks every expected destination, camera position, scale 0.25, command sequence and contiguous record count. It also rejects runtime/script/pointer diagnostics.
++
++The sequence includes adjacent-room jumps, disconnected-room jumps, retained rooms, complete active-set replacement, slot reuse and three X writes within one script with final destination C. Neither a running process nor a successful coordinator job alone constitutes the assertion result.
++
++The coordinator owned installation, launch, recording, capture, transfer and cleanup. Downloaded artifacts were hash-verified by `task chromecast:evidence`; both jobs reached `completed`. Screen captures show the Player and room mesh present after repeated slot reuse. The 1920×1080 recordings were approximately 47.64 s and 49.77 s; screenrecord's frame rate is not an engine FPS measurement.
++
++See [raw batch evidence](android/regression/batch.json), [arrival validation](android/regression/validation.json), [offline validator](android/validate-device.py), [APK receipts](android/inputs/receipts.json) and the per-device logs/videos beneath `android/regression/`.
++
++## Chapter integration
++
++Batch `B-7a616ae227c9`, APK SHA-256 `dcd09d9ac4eb55d80398e1850e6f47e373f0f39de0366c073f90962c6b1dec1e`.
++
++The existing scene9 g1/view1 loop runs the chapter's own `fy-teleport` through Truth, God and Being and returns to repeat. Requested coordinator recordings are 135 seconds on each device. Jobs: `J-e01b28ace7cd` (01), `J-819e6fd27240` (02).
++
++- [x] Both chapter jobs complete with clean coordinator cleanup and captured logs.
++- [x] Decode both recordings and inspect realm changes and repeat visits.
++
++The retained log tails contain 243 pose samples and 9 realm transitions on 01, and 283 samples and 10 transitions on 02. Both show repeated Truth → God → Being → Truth cycles in the correct order. These are counts evidenced by the downloaded log tails, not an estimate of transitions omitted earlier in the session. Both logs pass runtime/script/pointer checks.
++
++Recordings decode and were visually inspected via frames sampled every 18 seconds. Actual durations are 132.06 s (01) and 134.76 s (02), at 1920×1080. The views show the three realms rendering through repeat visits. Their changing frame content and live pose records establish that the tour continues after return/slot reuse.
++
++See [chapter batch](android/chapter/batch.json), [chapter validation](android/chapter/validation.json), [offline chapter validator](android/validate-chapter.py), and [01 contact sheet](android/chapter-01-sheet.png) / [02 contact sheet](android/chapter-02-sheet.png). Contact sheets are sampled evidence, not a frame-by-frame visual review.
++
++## Scope
++
++This verifies scripted Player teleports and following-camera arrival on both dedicated 32-bit Chromecasts. The transform API is verified by desktop CTest; no transform bridge was used outside coordinator ownership on devices. The phone/arm64 build, invalid/overlapping destinations, arbitrary unloaded actors, and systematic contact/terrain cases remain outside these runs. No new gameplay policy is implied.
++
++The autonomous fixture was first checked on desktop (28 successful arrivals). Its authoring uses the existing Forth `EMIT`/`PRINT` host syscalls; it does not require a new engine diagnostic API. The default command-driven desktop fixture remains unchanged.

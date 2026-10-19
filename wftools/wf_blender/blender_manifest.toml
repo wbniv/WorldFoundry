@@ -1,0 +1,12 @@
+schema_version = "1.0.0"
+id = "wf_blender"
+name = "World Foundry Level Editor"
+tagline = "OAD attributes editor + Level importer/exporter"
+version = "0.2.1"
+type = "add-on"
+blender_version_min = "4.2.0"
+maintainer = "World Foundry <wbnorris@gmail.com>"
+license = ["SPDX:GPL-2.0-or-later"]
+
+[build]
+paths_exclude_pattern = ["__pycache__/", ".git", "*.zip", "*.log", "docs/"]

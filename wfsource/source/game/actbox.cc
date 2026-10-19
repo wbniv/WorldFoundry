@@ -80,8 +80,9 @@ ActBox::activate( const Actor* pActor )
 {
     assert( ValidPtr( pActor ) );
     DBSTREAM1( cactor << "actbox update: writing " << getOad()->MailBoxValue << " to mailbox " << getOad()->MailBox << std::endl; )
-    GetMailboxes().WriteMailbox( getOad()->MailBox, Scalar::FromFixed32( getOad()->MailBoxValue ) );
-    GetMailboxes().WriteMailbox( getOad()->ActivatedActorMailbox, Scalar( pActor->GetActorIndex(), 0 ) );
+    GetMailboxes().WriteMailbox( getOad()->MailBox, Scalar( (float)getOad()->MailBoxValue ) );
+    if ( getOad()->ActivatedActorMailbox >= 2 )
+        GetMailboxes().WriteMailbox( getOad()->ActivatedActorMailbox, Scalar( pActor->GetActorIndex(), 0 ) );
 }
 
 //============================================================================
@@ -101,19 +102,19 @@ ActBox::doFieldEffect( BaseObject& pColObject )
 	if ( (temp = getOad()->GetVectorX()).AsBool() )
 	{
 		pColObject.sendMsg( MsgPort::MOVEMENT_FORCE_X, &temp,sizeof(Scalar) );
-		count++;
+		++count;
 	}
 
 	if ( (temp = getOad()->GetVectorY()).AsBool() )
 	{
 		pColObject.sendMsg( MsgPort::MOVEMENT_FORCE_Y, &temp,sizeof(Scalar) );
-		count++;
+		++count;
 	}
 
 	if ( (temp = getOad()->GetVectorZ()).AsBool() )
 	{
 		pColObject.sendMsg( MsgPort::MOVEMENT_FORCE_Z, &temp,sizeof(Scalar) );
-		count++;
+		++count;
 	}
 }
 
@@ -128,7 +129,8 @@ ActBox::update()
 	if ( getOad()->ClearOnExit )
     {
 		GetMailboxes().WriteMailbox( getOad()->MailBox, getOad()->GetMailboxExitValue() );
-        GetMailboxes().WriteMailbox( getOad()->ActivatedActorMailbox, Scalar::zero );
+        if ( getOad()->ActivatedActorMailbox >= 2 )
+            GetMailboxes().WriteMailbox( getOad()->ActivatedActorMailbox, Scalar::zero );
     }
 
 	DBSTREAM1( cnull << "actbox::update on " << *this << std::endl; )
@@ -137,8 +139,8 @@ ActBox::update()
 	if ( colObject )
 	{
 		assert( ValidPtr( colObject ) );
-      Actor* colActor = dynamic_cast<Actor*>(colObject);
-      assert(ValidPtr(colActor));
+      assert(IsActor(colObject));
+      Actor* colActor = static_cast<Actor*>(colObject);
       activate( colActor );
 		doFieldEffect( *colObject );
 	}

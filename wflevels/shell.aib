@@ -1,0 +1,15 @@
+\ wf
+\ shell.aib — default World Foundry game shell (ported from Lua to Forth
+\ for the Forth-only Android build; desktop Linux runs this same script
+\ now too since game.cc/level.cc hardcode the shell language to Forth).
+\ Toggles a "phase" mailbox (6000) on odd/even ticks; on the first tick
+\ (phase clear) also writes 0 to INDEXOF_LEVEL_TO_RUN as the default-level
+\ bootstrap.
+
+6000 read-mailbox  0 <>
+if
+    0 6000                   write-mailbox
+else
+    1 6000                   write-mailbox
+    0 INDEXOF_LEVEL_TO_RUN   write-mailbox
+then

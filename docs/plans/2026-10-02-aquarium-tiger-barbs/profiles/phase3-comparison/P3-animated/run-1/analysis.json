@@ -1,0 +1,61 @@
+{
+  "combined": {
+    "frames": 2128,
+    "fps": 34.974575201494325,
+    "p50_ms": 33.366662,
+    "p90_ms": 33.366935,
+    "p95_ms": 50.050058,
+    "p99_ms": 50.05018,
+    "missed_refresh_percent": 63.34586466165413
+  },
+  "scenarios": {
+    "swarm": {
+      "frames": 432,
+      "fps": 36.11446421046456,
+      "p50_ms": 33.366606,
+      "p90_ms": 33.366853,
+      "p95_ms": 50.05006,
+      "p99_ms": 50.050114,
+      "missed_refresh_percent": 57.870370370370374
+    },
+    "school-right": {
+      "frames": 414,
+      "fps": 34.32247807973382,
+      "p50_ms": 33.366666,
+      "p90_ms": 33.366993,
+      "p95_ms": 50.050045,
+      "p99_ms": 50.050184,
+      "missed_refresh_percent": 66.42512077294685
+    },
+    "dart": {
+      "frames": 428,
+      "fps": 35.7302382907336,
+      "p50_ms": 33.366601,
+      "p90_ms": 33.366954,
+      "p95_ms": 50.050056,
+      "p99_ms": 50.050104,
+      "missed_refresh_percent": 58.87850467289719
+    },
+    "turn-left": {
+      "frames": 439,
+      "fps": 34.44195123631407,
+      "p50_ms": 33.366672,
+      "p90_ms": 33.366972,
+      "p95_ms": 50.050065,
+      "p99_ms": 50.050107,
+      "missed_refresh_percent": 66.51480637813212
+    },
+    "close-up-right": {
+      "frames": 415,
+      "fps": 34.310470927233574,
+      "p50_ms": 33.36668,
+      "p90_ms": 33.366845,
+      "p95_ms": 50.050052,
+      "p99_ms": 50.050116,
+      "missed_refresh_percent": 67.2289156626506
+    }
+  },
+  "clock_offset_seconds": 101068.44091534999,
+  "clock_alignment_note": "Median latest-present timestamp minus poll start; boundaries approximate within one poll round trip plus a frame.",
+  "PSS_MiB": 29.818359375
+}

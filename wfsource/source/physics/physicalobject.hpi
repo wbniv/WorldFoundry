@@ -69,9 +69,8 @@ inline PhysicalObject&
 UpcastToPhysicalObject(BaseObject* base)
 {
    assert(ValidPtr(base));
-   PhysicalObject* result = dynamic_cast<PhysicalObject*>(base);
-   assert(ValidPtr(result));
-   return *result;
+   assert(IsPhysicalObject(base));
+   return *static_cast<PhysicalObject*>(base);
 }
 
 //==============================================================================
@@ -80,9 +79,8 @@ inline const PhysicalObject&
 UpcastToPhysicalObject(const BaseObject* base)
 {
    assert(ValidPtr(base));
-   const PhysicalObject* result = dynamic_cast<const PhysicalObject*>(base);
-   assert(ValidPtr(result));
-   return *result;
+   assert(IsPhysicalObject(base));
+   return *static_cast<const PhysicalObject*>(base);
 }
 
 //==============================================================================

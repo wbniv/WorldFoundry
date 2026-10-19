@@ -59,8 +59,8 @@ class Mailboxes
 {
 public:
    virtual ~Mailboxes();
-   virtual Scalar ReadMailbox(long mailbox) const = 0;
-   virtual void WriteMailbox(long mailbox, Scalar value) = 0;
+   virtual Scalar ReadMailbox(int32 mailbox) const = 0;
+   virtual void WriteMailbox(int32 mailbox, Scalar value) = 0;
 #if SW_DBSTREAM
 	friend std::ostream& operator <<( std::ostream& s, const Mailboxes& mailboxes );
 #endif
@@ -76,16 +76,20 @@ private:
 class MailboxesWithStorage : public Mailboxes
 {
 public:
-   MailboxesWithStorage(long mailboxBase, long numberOfLocalMailboxes, Mailboxes* parent);
+   // `memory` defaults to HALLmalloc for the long-lived global/persistent
+   // mailboxes. Per-actor ActorMailboxes (created mid-Level-construction and
+   // destroyed mid-teardown) MUST pass the per-level pool so HALLmalloc's
+   // LIFO discipline stays intact — see actor.cc.
+   MailboxesWithStorage(int32 mailboxBase, int32 numberOfLocalMailboxes, Mailboxes* parent, Memory* memory = &HALLmalloc);
    ~MailboxesWithStorage();
-   virtual Scalar ReadMailbox(long mailbox) const;
-   virtual void WriteMailbox(long mailbox, Scalar value);
+   virtual Scalar ReadMailbox(int32 mailbox) const;
+   virtual void WriteMailbox(int32 mailbox, Scalar value);
 protected:
 #if SW_DBSTREAM
     virtual void _Print(std::ostream& s) const;
 #endif
 private:
-   long _mailboxBase;
+   int32 _mailboxBase;
    Array<Scalar>  _localMailboxes;
    Mailboxes* _parent;
 };

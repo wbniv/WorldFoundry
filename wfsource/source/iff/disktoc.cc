@@ -38,8 +38,27 @@ DiskTOC::DiskTOC()
 
 DiskTOC::~DiskTOC()
 {
+	// _toc is NULL when LoadTOC was never called — happens on the -L<path>
+	// dev bypass (game.cc:155–162 returns before reaching _gameTOC.LoadTOC).
+	// DO_CD_IFF is currently only #defined inside game.cc, so this assert
+	// compiles out here; it stays as a marker for if/when the macro is
+	// promoted to a build-wide flag for a cd.iff-only build configuration.
+#if defined(DO_CD_IFF)
 	assert(ValidPtr(_toc));
-	HALLmalloc.Free(_toc);
+#endif
+	Clear();
+}
+
+//=============================================================================
+
+void
+DiskTOC::Clear()
+{
+	if (_toc) {
+		HALLmalloc.Free(_toc);
+		_toc = NULL;
+		_tocEntries = 0;
+	}
 }
 
 //=============================================================================
@@ -105,7 +124,7 @@ DiskTOC::LoadTOC(_DiskFile& diskFile, int32 tocOffset)
 //#pragma message ("KTS " __FILE__ ": turn this assertion back on when iffcomp is fixed")
 		assert(tocOnDisk.size >= 0); 
 		_toc[_tocEntries]._size = tocOnDisk.size + (DiskFileCD::_SECTOR_SIZE-(tocOnDisk.size%DiskFileCD::_SECTOR_SIZE));  // round up to next sector size
-		_tocEntries++;
+		++_tocEntries;
 		assert(_tocEntries <= entryCount);
 	}
 	HALScratchLmalloc.Free(tocMem,DiskFileCD::_SECTOR_SIZE);

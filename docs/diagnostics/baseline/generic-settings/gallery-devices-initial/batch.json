@@ -1,0 +1,62 @@
+{
+  "id": "B-b21d1310c9cf",
+  "owner": "fcf55d9829c4dcde80f1638e",
+  "targets": [
+    "chromecast-test-01",
+    "chromecast-test-02"
+  ],
+  "created": 1791269534.295744,
+  "jobs": [
+    {
+      "id": "J-d4d88b9b9740",
+      "owner": "fcf55d9829c4dcde80f1638e",
+      "accepted": 1791269534.296022,
+      "state": "failed",
+      "phase": "failed",
+      "request": {
+        "app": "baseline",
+        "apk": "0ec319be2e08c3ad14ca6bfd0821324eabf17175b69d6e4f607816315dca4bc4.apk",
+        "duration": 2.0,
+        "validator": "baseline-settings",
+        "workflow": "check",
+        "device": "chromecast-test-01"
+      },
+      "device": "chromecast-test-01",
+      "generation": 210,
+      "cancel": 0,
+      "error": "'NoneType' object is not subscriptable",
+      "started": 1791269534.3275735,
+      "finished": 1791269557.395324,
+      "worker_pid": 1339437,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-01"
+    },
+    {
+      "id": "J-17f2b5121f63",
+      "owner": "fcf55d9829c4dcde80f1638e",
+      "accepted": 1791269534.2962604,
+      "state": "failed",
+      "phase": "failed",
+      "request": {
+        "app": "baseline",
+        "apk": "0ec319be2e08c3ad14ca6bfd0821324eabf17175b69d6e4f607816315dca4bc4.apk",
+        "duration": 2.0,
+        "validator": "baseline-settings",
+        "workflow": "check",
+        "device": "chromecast-test-02"
+      },
+      "device": "chromecast-test-02",
+      "generation": 66,
+      "cancel": 0,
+      "error": "'NoneType' object is not subscriptable",
+      "started": 1791269534.3278391,
+      "finished": 1791269552.9170551,
+      "worker_pid": 1339438,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-02"
+    }
+  ],
+  "state": "failed"
+}

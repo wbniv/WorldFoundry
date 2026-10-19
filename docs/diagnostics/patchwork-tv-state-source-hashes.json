@@ -1,0 +1,15 @@
+{
+  "party-games/games/patchwork/client/controller.css": "8dffedcd1527f2f29dd6e94f0a16af0d1c078c098756472dad8248c7c4b3bb26",
+  "party-games/games/patchwork/client/geometry.js": "dcd06139eb8aa38fb717c579d7fe53781e514a5e489eec511f0251d409cfaac8",
+  "party-games/games/patchwork/client/controller.js": "f6c7448e2b788c96d0ed4c84f90de83df406778a7f0c2386c0fe88f513894060",
+  "party-games/games/patchwork/client/device-check.js": "24eb250f600484f075862403179591cfb75c4cb1d682acbe46c86158ae8a9955",
+  "party-games/games/patchwork/client/receiver.js": "d8bd2b007f1a1c656e2d6926e6c79eb962dcab1a84f10cbb249a02e93a8a210a",
+  "party-games/games/patchwork/client/ui.js": "f90b34fd476d490e5b868567fc421db5e51ed9e394584ce5d8917458bbc3e3b4",
+  "party-games/games/patchwork/client/receiver.css": "532c8f517625edc01d52bee10ed5889826b09ff0b92b89aded525e3345f2d7a3",
+  "party-games/games/patchwork/client/common.css": "c2feed2c99d8e430a638b71e80fa94d587c0a95f007c168e3962dd067bfd1cbd",
+  "party-games/platform/receiver-shell/receiver.js": "62c6c98645cdb3774c30909bc30fbd88a2f2d2fe19bd9871501e5b278b1eb779",
+  "party-games/platform/receiver-shell/index.html": "5632f5cc717795b428a743d2f1a7018996832001a1ce115ae4796ad590687ade",
+  "party-games/platform/receiver-shell/receiver.css": "3b441576661b9b2c096d6cd5faf7abdfb59c86e39b697a3ebe8b06d188e650d4",
+  "party-games/platform/server/index.js": "6870cfdff9e8a7a2b89cc63bcac9ccb39e0dc202e71863b2cd063ef8786cbf5c",
+  "party-games/platform/server/createServer.js": "086ca520077bca7646b7340135fd92919c22c4723252d552dc9d93aaee3c5d90"
+}

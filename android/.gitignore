@@ -1,0 +1,13 @@
+# Gradle caches (the wrapper jar + script + properties stay tracked)
+.gradle/
+build/
+local.properties
+
+# IDE
+.idea/
+*.iml
+.cxx/
+
+# Build outputs
+*.apk
+*.aab

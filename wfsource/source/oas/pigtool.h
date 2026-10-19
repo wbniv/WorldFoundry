@@ -29,11 +29,28 @@
 #endif	/*!defined(SYS_UINT16)*/
 
 #ifndef	SYS_INT32
+#if defined(__LP64__)
+// LP64 (x86-64 Linux/Android, arm64 iOS/macOS): `long` is 8 bytes — use `int`
+// so int32 stays 32 bits (mirrors pigtypes.h). Key off the data model, not the
+// OS: __LP64__ is what actually makes `long` 64-bit, so this also covers iOS,
+// which defines WF_TARGET_IOS (not __LINUX__/__ANDROID__) and would otherwise
+// fall through to the `long` branch. PSX/x86-32 (ILP32) and Win64 (LLP64) have
+// long==32, which is why the original `long` worked there. Without this guard,
+// any TU pulling pigtool.h (via oad.h) before pigtypes.h gets a 64-bit int32 —
+// e.g. it bloated typeDescriptor by 12 bytes (3× int32 min/max/def), breaking
+// .oad reads.
+#define	SYS_INT32		signed int
+#else
 #define	SYS_INT32		signed long
+#endif
 #endif	/*!defined(SYS_INT32)*/
 
 #ifndef	SYS_UINT32
+#if defined(__LP64__)
+#define	SYS_UINT32		unsigned int
+#else
 #define	SYS_UINT32		unsigned long
+#endif
 #endif	/*!defined(SYS_UINT32)*/
 
 #ifndef	SYS_UCHAR

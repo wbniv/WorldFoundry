@@ -1,0 +1,1008 @@
+# Codemagic CI — WorldFoundry
+#
+# Workflows:
+#   android-apk-debug   (push to 2026-ios) — Linux arm64 APK, no signing.
+#   ios-simulator-debug (manual)           — Simulator .app, run on iPhone + iPad, no signing.
+#   ios-device-release  (manual/tag)       — Phase 4+, signed arm64 IPA.
+#
+# Build budget: 500 free Mac-min/month on the individual plan (the free-tier
+# hook — Mac runners are the expensive resource elsewhere). Linux minutes
+# are paid. iOS Mac builds avg 3.4 min/build as of 2026-04-22 — ~100-150
+# Mac builds/mo feasible.
+
+workflows:
+  #------------------------------------------------------------------------------
+  # android-apk-debug — debug APK (arm64-v8a) for phone + Google TV sideload.
+  #
+  # See docs/plans/2026-04-23-chromecast-googletv-port.md Phase 1.
+  # Triggers on every push to 2026-ios so each commit has a downloadable APK.
+  #------------------------------------------------------------------------------
+  android-apk-debug:
+    name: Android APK (Debug, arm64)
+    instance_type: linux_x2
+    max_build_duration: 30
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: '2026-ios'
+          include: true
+          source: true
+      cancel_previous_builds: true
+
+    environment:
+      vars:
+        # NDK r26c — matches local 26.2.11394342. sdkmanager will install it if
+        # the agent ships a different version; the exact string is the NDK
+        # directory name under $ANDROID_SDK_ROOT/ndk/.
+        WF_NDK_VERSION: "26.2.11394342"
+
+    scripts:
+      - name: Toolchain versions
+        script: |
+          set -euo pipefail
+          java -version
+          gradle --version || true
+          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-unset}"
+          echo "ANDROID_HOME=${ANDROID_HOME:-unset}"
+          cmake --version
+
+      - name: Install NDK r26c
+        script: |
+          set -euo pipefail
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME}}"
+          if [ ! -d "$SDK/ndk/$WF_NDK_VERSION" ]; then
+            echo "Installing NDK $WF_NDK_VERSION..."
+            yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" \
+              "ndk;$WF_NDK_VERSION" \
+              "platforms;android-34" \
+              "build-tools;34.0.0" \
+              --sdk_root="$SDK"
+          else
+            echo "NDK $WF_NDK_VERSION already present."
+          fi
+          echo "NDK path: $SDK/ndk/$WF_NDK_VERSION"
+
+      - name: Build debug APK
+        script: |
+          set -euo pipefail
+          cd android
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME}}"
+          ./gradlew :app:assembleDebug \
+            -Pandroid.ndkVersion="$WF_NDK_VERSION" \
+            -Psdk.dir="$SDK" \
+            --no-daemon \
+            --stacktrace \
+            | tee ../gradle-build.log
+          echo "--- APK ---"
+          find . -name '*.apk' -exec ls -lh {} \;
+
+    artifacts:
+      - android/app/build/outputs/apk/*/debug/*.apk
+      - gradle-build.log
+
+  ios-simulator-debug:
+    name: iOS Simulator (Debug)
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+
+    cache:
+      cache_paths:
+        # CMake/Xcode project dir — avoids full project re-gen + recompile.
+        - build-ios-sim
+        # Jolt extraction — Jolt is the physics engine on iOS too (the iOS-only
+        # force to legacy physics was deleted in 92b325a2), so configure needs
+        # the extracted tree. Caching it keeps the tar -xzf step off every run.
+        - engine/vendor/jolt-physics-5.5.0
+        # Rust toolchain (rustup + cargo) installed by the 'Install Rust
+        # toolchain' step — keeps the rustup download + target add off every run.
+        - ~/.rustup
+        - ~/.cargo
+
+    environment:
+      xcode: latest
+
+    # python-tui-lib submodule points at a local dev path; not needed for engine
+    # build, so skip submodule init on CI.
+    #
+    # STOP-BLEED 2026-05-12: 490/500 Mac-min used by day 12. Auto-trigger
+    # disabled (events list emptied) until 2026-06-01. Manual builds from the
+    # Codemagic dashboard still work. To restore: uncomment the events + branch
+    # blocks below.
+    # See docs/plans/2026-05-12-codemagic-budget-monitor.md.
+    triggering:
+      events: []
+      # events:
+      #   - push
+      # branch_patterns:
+      #   - pattern: '2026-ios'
+      #     include: true
+      #     source: true
+      cancel_previous_builds: true
+
+    # Every step tees into cm-build.log (listed under artifacts:) — Codemagic
+    # has no log API, so that file is the only way to read a red build from
+    # the shell (~/.claude/skills/codemagic-build).
+    # WF_BUILD_TYPE (unset = Debug) picks CMAKE_BUILD_TYPE and the xcodebuild
+    # configuration; ios-simulator-release reuses these steps with Release.
+    scripts: &ios_sim_scripts
+      - name: Toolchain versions
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          sw_vers
+          xcodebuild -version
+          cmake --version
+          which xcrun
+          xcrun --sdk iphonesimulator --show-sdk-path
+          # Which simulator runtimes/devices this image ships — the last step
+          # needs an iPhone AND an iPad on one iOS runtime.
+          xcrun simctl list runtimes available
+
+      # The runtime property core (wftools/wf_attr_edit -> libwf_attr_edit.a)
+      # is built by scripts/build-runtime-property-core.py with cargo; the
+      # Codemagic Mac image ships no Rust toolchain.
+      - name: Install Rust toolchain
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          if ! command -v cargo >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/cargo" ]; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --no-modify-path
+          fi
+          export PATH="$HOME/.cargo/bin:$PATH"
+          rustup target add aarch64-apple-ios-sim
+          echo "PATH=$PATH" >> "$CM_ENV"
+          cargo --version
+
+      - name: Extract Jolt vendor archive
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          # Same as macos-desktop-debug. CMakeLists.txt defaults
+          # WF_PHYSICS_ENGINE=jolt and include()s
+          # engine/vendor/jolt-physics-5.5.0/Jolt/Jolt.cmake, which only exists
+          # once the vendored tarball is extracted. Without this step configure
+          # stops at "include could not find requested file" (CMakeLists.txt,
+          # Jolt Physics block) — the 2026-09-30 failure of this workflow.
+          cd engine/vendor
+          if [ ! -d jolt-physics-5.5.0 ]; then
+            echo "Extracting jolt-physics-5.5.0.tar.gz..."
+            tar -xzf jolt-physics-5.5.0.tar.gz
+            # GitHub archive extracts to jrouwe-JoltPhysics-<sha>/; rename to
+            # match the JOLT_DIR path CMakeLists.txt expects.
+            extracted=$(tar -tzf jolt-physics-5.5.0.tar.gz | head -1 | cut -d/ -f1)
+            mv "$extracted" jolt-physics-5.5.0
+            echo "Renamed $extracted -> jolt-physics-5.5.0"
+          else
+            echo "Jolt already extracted"
+          fi
+
+      - name: Configure CMake for iOS Simulator (arm64)
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          # CMakeLists.txt has full if(IOS) branches (Forth-only scripting,
+          # hal/ios + gfx/metal, Jolt, MACOSX_BUNDLE with ios/Info.plist and
+          # ios/LaunchScreen.storyboard). A configure failure here is a real
+          # regression, not an expected Phase 0 signal.
+          # A cached CMakeCache.txt can pin options from an older tree; start
+          # every configure clean (the Xcode build products stay cached).
+          mkdir -p build-ios-sim
+          rm -rf build-ios-sim/CMakeCache.txt build-ios-sim/CMakeFiles
+          cd build-ios-sim
+          cmake -G Xcode \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_SYSROOT=iphonesimulator \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
+            -DCMAKE_BUILD_TYPE="${WF_BUILD_TYPE:-Debug}" \
+            -DCMAKE_XCODE_GENERATE_SCHEME=ON \
+            .. 2>&1 | tee ../ios-configure.log
+
+      - name: Build
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          cd build-ios-sim
+          # The full xcodebuild transcript (thousands of lines) goes to
+          # xcodebuild.log only; cm-build.log gets the error lines and the
+          # BUILD SUCCEEDED/FAILED line. ContinueBuildingAfterErrors makes one
+          # red run report every failing TU instead of the first.
+          status=0
+          xcodebuild \
+            -project wf_game.xcodeproj \
+            -scheme wf_game \
+            -configuration "${WF_BUILD_TYPE:-Debug}" \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -IDEBuildingContinueBuildingAfterErrors=YES \
+            build \
+            > ../xcodebuild.log 2>&1 || status=$?
+          cd "$CM_BUILD_DIR"
+          echo "xcodebuild exit status: $status ($(wc -l < xcodebuild.log) lines in xcodebuild.log)"
+          echo "--- errors (first 120 lines) ---"
+          grep -E -A3 ': (fatal )?error:|^ld: |Undefined symbols|\*\* BUILD' xcodebuild.log \
+            | head -120 || true
+          if [ "$status" -ne 0 ]; then
+            echo "--- last 40 lines of xcodebuild.log ---"
+            tail -40 xcodebuild.log
+          fi
+          exit "$status"
+
+      - name: Run on iPhone + iPad Simulators (screenshot, log, verdict)
+        # Proxy for users without a local Mac: install the one .app on an
+        # iPhone Simulator and then an iPad Simulator of the same iOS runtime
+        # (TARGETED_DEVICE_FAMILY is "1,2"), launch it, and keep a screenshot
+        # + launch log per device. A device is OK when install + launch
+        # succeed, the app is still alive 20 s later (the old CoreAudio abort
+        # hit at ~11 s, after an 8 s check had already passed), and the CENTRE
+        # CROP of its screenshot (middle 40% x 40%, downscaled to 240 px) has
+        # more than 50 distinct colours. A flat fill — clear colour, or the
+        # old cornflower blue with black letterbox bars that a whole-frame
+        # count mistook for a scene — is FAIL; a rendered scene is OK.
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          cd "$CM_BUILD_DIR"
+          BUNDLE_ID="org.worldfoundry.wf-game"
+          VERDICT="$CM_BUILD_DIR/ios-verdict.txt"
+          : > "$VERDICT"
+
+          # RUNTIME_OUTPUT_DIRECTORY is engine/, and the Xcode generator adds a
+          # per-config subdirectory (Debug or Debug-iphonesimulator depending on
+          # CMake's EFFECTIVE_PLATFORM_NAME handling) — find it, don't guess.
+          # engine/ first: build-ios-sim/ is cached and could hold a stale one.
+          { find engine -type d -name wf_game.app -prune
+            find build-ios-sim -type d -name wf_game.app -prune; } 2>/dev/null \
+            > ios-app-candidates.txt || true
+          echo "wf_game.app candidates:"; cat ios-app-candidates.txt
+          APP=$(head -1 ios-app-candidates.txt)
+          if [ -z "$APP" ]; then
+            echo "no wf_game.app under engine/ or build-ios-sim/"
+            echo "IOS IPHONE: FAIL (no .app)"
+            echo "IOS IPAD: FAIL (no .app)"
+            exit 1
+          fi
+          APP="$CM_BUILD_DIR/$APP"
+          echo "App bundle: $APP"
+          plutil -p "$APP/Info.plist" \
+            | grep -E -A2 'CFBundleIdentifier|CFBundleSupportedPlatforms|MinimumOSVersion|UIDeviceFamily' \
+            || true
+
+          # Newest iOS runtime that has both an iPhone and an iPad; if none
+          # does, the newest with an iPhone (the iPad half then FAILs with the
+          # device list printed). Output: runtime|phone udid|phone name|pad udid|pad name
+          SEL=$(xcrun simctl list -j devices available | python3 -c '
+          import json, re, sys
+          devs = json.load(sys.stdin)["devices"]
+          def ver(rt):
+              m = re.search(r"iOS-(\d+)-(\d+)", rt)
+              return tuple(int(x) for x in m.groups()) if m else (0, 0)
+          def first(ds, kind):
+              return next((d for d in ds if d["name"].startswith(kind)), None)
+          rts = sorted((r for r in devs if "SimRuntime.iOS" in r), key=ver, reverse=True)
+          for need_pad in (True, False):
+              for rt in rts:
+                  ds = [d for d in devs[rt] if d.get("isAvailable")]
+                  phone, pad = first(ds, "iPhone"), first(ds, "iPad")
+                  if phone and (pad or not need_pad):
+                      print("|".join([rt, phone["udid"], phone["name"],
+                                      pad["udid"] if pad else "", pad["name"] if pad else ""]))
+                      sys.exit(0)
+          sys.exit(1)
+          ' || true)
+          IFS='|' read -r RUNTIME IPHONE_ID IPHONE_NAME IPAD_ID IPAD_NAME <<EOF
+          $SEL
+          EOF
+          echo "runtime: ${RUNTIME:-none}"
+          echo "iPhone:  ${IPHONE_NAME:-none} ${IPHONE_ID:-}"
+          echo "iPad:    ${IPAD_NAME:-none} ${IPAD_ID:-}"
+          if [ -z "${IPAD_ID:-}" ]; then
+            echo "--- no iPad on an iOS runtime with an iPhone; simctl shows ---"
+            xcrun simctl list devices available || true
+          fi
+
+          # run_device LABEL UDID NAME — never aborts the step; appends one
+          # "label|name|install|launch|alive|colours" line to $VERDICT.
+          run_device() {
+            local label="$1" udid="$2" name="$3"
+            local shot="$CM_BUILD_DIR/ios-$label-screenshot.png"
+            local log="$CM_BUILD_DIR/ios-$label-launch.log"
+            local out="$CM_BUILD_DIR/ios-$label-stdout.tmp"
+            local err="$CM_BUILD_DIR/ios-$label-stderr.tmp"
+            local install=no launch=no alive=no colours=0 dominant=100 pid="" launch_out=""
+            local marker="$CM_BUILD_DIR/.ios-$label-start"
+            touch "$marker"
+            echo "=== $label: $name ($udid) ==="
+            # "Unable to boot device in current state: Booted" is not an error.
+            xcrun simctl boot "$udid" || true
+            if ! xcrun simctl bootstatus "$udid" -b; then
+              echo "$label: boot failed"
+              echo "$label|$name|$install|$launch|$alive|$colours|$dominant" >> "$VERDICT"
+              return 0
+            fi
+            echo "--- install ---"
+            xcrun simctl install "$udid" "$APP" && install=yes
+            if [ "$install" = yes ]; then
+              echo "--- launch ---"
+              if launch_out=$(SIMCTL_CHILD_WF_FRAME_RATE_CHECKS=1 xcrun simctl launch --terminate-running-process \
+                    --stdout="$out" --stderr="$err" "$udid" "$BUNDLE_ID"); then
+                launch=yes
+                pid=$(echo "$launch_out" | awk '{print $NF}')
+                echo "$launch_out (pid $pid)"
+              fi
+            fi
+            if [ "$launch" = yes ]; then
+              # 20 s: HALStart, cd.iff load, steady-state frames, and well past
+              # the ~11 s at which the simulator CoreAudio RPC used to abort.
+              sleep 20
+              # Exercise real UIKit background/resume, retaining this process.
+              xcrun simctl launch "$udid" com.apple.Preferences
+              sleep 2
+              xcrun simctl launch "$udid" "$BUNDLE_ID"
+              sleep 3
+              python3 "$CM_BUILD_DIR/tests/check_frame_rate_log.py" "$out" --resume || {
+                grep 'FPS CHECK' "$out" || true
+                tail -50 "$out"
+                return 1
+              }
+              # Simulator apps are host processes, so ps sees the launched pid.
+              if ps -p "$pid" > /dev/null 2>&1; then alive=yes; fi
+              echo "--- screenshot ---"
+              xcrun simctl io "$udid" screenshot "$shot" || true
+              if [ -s "$shot" ]; then
+                stats=$(python3 - "$shot" <<'PY' || echo "0 100"
+          import os, subprocess, sys, tempfile
+          sys.path.insert(0, "tests")
+          from compare_renderer_frames import read_png   # no-dependency 8-bit PNG reader
+          small = os.path.join(tempfile.mkdtemp(), "small.png")
+          subprocess.run(["sips", "-Z", "240", "-s", "format", "png", sys.argv[1], "--out", small],
+                         check=True, stdout=subprocess.DEVNULL)
+          w, h, px = read_png(small)
+          from collections import Counter
+          # Middle 40% x 40%: clear of letterbox bars, rounded corners and the
+          # home indicator on both iPhone and iPad.
+          c = Counter(bytes(px[(y * w + x) * 3:(y * w + x) * 3 + 3])
+                      for y in range(h * 3 // 10, h * 7 // 10)
+                      for x in range(w * 3 // 10, w * 7 // 10))
+          n = sum(c.values()) or 1
+          print(len(c), c.most_common(1)[0][1] * 100 // n if c else 100)
+          PY
+                )
+                colours=${stats%% *}; dominant=${stats##* }
+              fi
+            fi
+            {
+              echo "=== $label: $name ($udid) on ${RUNTIME} ==="
+              echo "install=$install launch=$launch pid=${pid:-none} alive_after_20s=$alive centre_colours=$colours dominant_pct=$dominant"
+              echo "=== stdout ==="; cat "$out" 2>/dev/null || true
+              echo "=== stderr ==="; cat "$err" 2>/dev/null || true
+              echo "=== unified log (wf_game, last 2m) ==="
+              # log show reads finished entries — no streaming, no GNU timeout.
+              xcrun simctl spawn "$udid" log show \
+                  --predicate 'processImagePath CONTAINS "wf_game"' \
+                  --style compact --last 2m 2>&1 || true
+            } > "$log"
+            rm -f "$out" "$err"
+            echo "--- last 30 lines of ios-$label-launch.log ---"
+            tail -30 "$log" || true
+            # A crash leaves an .ips on the host; keep this run's next to the log.
+            find "$HOME/Library/Logs/DiagnosticReports" -name 'wf_game*' \
+                -newer "$marker" 2>/dev/null > "$marker.crashes" || true
+            while IFS= read -r f; do
+              echo "crash report: $f"
+              cp "$f" "$CM_BUILD_DIR/ios-crash-$label-$(basename "$f")" || true
+            done < "$marker.crashes"
+            rm -f "$marker" "$marker.crashes"
+            xcrun simctl terminate "$udid" "$BUNDLE_ID" 2>/dev/null || true
+            xcrun simctl shutdown "$udid" || true
+            echo "$label|$name|$install|$launch|$alive|$colours|$dominant" >> "$VERDICT"
+          }
+
+          if [ -n "${IPHONE_ID:-}" ]; then run_device iphone "$IPHONE_ID" "$IPHONE_NAME"; fi
+          if [ -n "${IPAD_ID:-}" ]; then run_device ipad "$IPAD_ID" "$IPAD_NAME"; fi
+
+          # Aquarium screenshots — informational, never part of the verdict or
+          # exit code. A COPY of the built .app gets wflevels/aquarium-cd.iff
+          # in place of its cd.iff (the default bundle is untouched; the
+          # simulator build is unsigned, so no re-sign). Same checks as above;
+          # set WF_IOS_AQUARIUM=0 to skip (about 1 Mac-minute).
+          AQ_IFF="$CM_BUILD_DIR/wflevels/aquarium-cd.iff"
+          if [ "${WF_IOS_AQUARIUM:-1}" != 0 ] && [ -f "$AQ_IFF" ]; then
+            rm -rf "$CM_BUILD_DIR/aquarium-app"; mkdir -p "$CM_BUILD_DIR/aquarium-app"
+            AQ_APP="$CM_BUILD_DIR/aquarium-app/wf_game.app"
+            cp -R "$APP" "$AQ_APP"
+            find "$AQ_APP" -name cd.iff > aquarium-cdiff.txt || true
+            echo "aquarium: replacing $(wc -l < aquarium-cdiff.txt) cd.iff in the copy"
+            while IFS= read -r f; do cp "$AQ_IFF" "$f"; done < aquarium-cdiff.txt
+            DEFAULT_APP="$APP"; APP="$AQ_APP"
+            if [ -n "${IPHONE_ID:-}" ]; then run_device aquarium-iphone "$IPHONE_ID" "$IPHONE_NAME"; fi
+            if [ -n "${IPAD_ID:-}" ]; then run_device aquarium-ipad "$IPAD_ID" "$IPAD_NAME"; fi
+            APP="$DEFAULT_APP"
+            for d in iphone ipad; do
+              if [ -s "ios-aquarium-$d-screenshot.png" ]; then
+                mv "ios-aquarium-$d-screenshot.png" "ios-aquarium-$d.png"
+              fi
+            done
+          else
+            echo "aquarium: skipped (WF_IOS_AQUARIUM=${WF_IOS_AQUARIUM:-1}, $AQ_IFF present: $([ -f "$AQ_IFF" ] && echo yes || echo no))"
+          fi
+
+          echo "=== iOS simulator verdict (runtime ${RUNTIME:-none}) ==="
+          rc=0
+          for label in iphone ipad; do
+            line=$(grep "^$label|" "$VERDICT" || true)
+            upper=$(echo "$label" | tr '[:lower:]' '[:upper:]')
+            if [ -z "$line" ]; then
+              echo "IOS $upper: FAIL (no $label simulator available)"; rc=1; continue
+            fi
+            IFS='|' read -r _ name install launch alive colours dominant <<EOF
+          $line
+          EOF
+            echo "$label: $name install=$install launch=$launch alive_after_20s=$alive centre_colours=$colours dominant_pct=${dominant:-100} (OK needs centre_colours > 50)"
+            if [ "$install" = yes ] && [ "$launch" = yes ] && [ "$alive" = yes ] \
+               && [ "${colours:-0}" -gt 50 ] 2>/dev/null; then
+              echo "IOS $upper: OK"
+            else
+              echo "IOS $upper: FAIL"; rc=1
+            fi
+          done
+          for label in aquarium-iphone aquarium-ipad; do
+            line=$(grep "^$label|" "$VERDICT" || true)
+            [ -n "$line" ] || continue
+            upper=$(echo "$label" | tr '[:lower:]-' '[:upper:] ')
+            IFS='|' read -r _ name install launch alive colours dominant <<EOF
+          $line
+          EOF
+            echo "$label: $name install=$install launch=$launch alive_after_20s=$alive centre_colours=$colours dominant_pct=${dominant:-100}"
+            if [ "$install" = yes ] && [ "$launch" = yes ] && [ "$alive" = yes ] \
+               && [ "${colours:-0}" -gt 50 ] 2>/dev/null; then
+              echo "IOS $upper: OK (informational)"
+            else
+              echo "IOS $upper: FAIL (informational)"
+            fi
+          done
+          exit "$rc"
+
+    artifacts: &ios_sim_artifacts
+      - cm-build.log
+      - ios-configure.log
+      - xcodebuild.log
+      - ios-iphone-screenshot.png
+      - ios-ipad-screenshot.png
+      - ios-aquarium-iphone.png
+      - ios-aquarium-ipad.png
+      - ios-aquarium-*-launch.log
+      - ios-iphone-launch.log
+      - ios-ipad-launch.log
+      - ios-*-stdout.tmp
+      - ios-*-stderr.tmp
+      - ios-crash-*
+      - ios-verdict.txt
+      # RUNTIME_OUTPUT_DIRECTORY is ${CMAKE_SOURCE_DIR}/engine, so the .app
+      # (+ dSYM, if generated) lands under engine/<config>/.
+      - engine/**/*.app
+      - engine/**/*.dSYM
+      - build-ios-sim/**/*.app
+      - build-ios-sim/CMakeFiles/**/*.log
+      - build-ios-sim/CMakeFiles/CMakeConfigureLog.yaml
+
+  #------------------------------------------------------------------------------
+  # ios-simulator-release — the same steps and artifacts as ios-simulator-debug,
+  # built Release: CMakeLists.txt then turns WF_DEBUG_DEFINES off (no asserts,
+  # no DBSTREAM). Manual only. The codemagic-build driver cannot pass per-build
+  # variables, so the build type lives here.
+  #------------------------------------------------------------------------------
+  ios-simulator-release:
+    name: iOS Simulator (Release defines)
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    cache:
+      cache_paths:
+        - build-ios-sim
+        - engine/vendor/jolt-physics-5.5.0
+        - ~/.rustup
+        - ~/.cargo
+    environment:
+      xcode: latest
+      vars:
+        WF_BUILD_TYPE: Release
+    triggering:
+      events: []
+      cancel_previous_builds: true
+    scripts: *ios_sim_scripts
+    artifacts: *ios_sim_artifacts
+
+  #------------------------------------------------------------------------------
+  # android-apk-debug — debug APK (arm64-v8a) for phone + Google TV sideload.
+  #
+  # See docs/plans/2026-04-23-chromecast-googletv-port.md Phase 1.
+  # Trigger manually from the Codemagic dashboard (no webhook configured yet).
+  #------------------------------------------------------------------------------
+  android-apk-debug:
+    name: Android APK (Debug, arm64)
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+
+    environment:
+      vars:
+        # NDK r26c — matches local 26.2.11394342. sdkmanager installs it if the
+        # agent ships a different version; the exact string is the NDK directory
+        # name under $ANDROID_SDK_ROOT/ndk/.
+        WF_NDK_VERSION: "26.2.11394342"
+
+    cache:
+      cache_paths:
+        # NDK install (~500 MB) — skip sdkmanager on warm builds
+        - /usr/local/share/android-sdk/ndk/26.2.11394342
+        # Gradle dependency cache — avoids re-downloading AGP + deps each build
+        - ~/.gradle/caches
+        # Jolt extracted source — skip tar extraction on warm builds
+        - engine/vendor/jolt-physics-5.5.0
+
+    scripts:
+      - name: Toolchain versions
+        script: |
+          set -euo pipefail
+          java -version
+          cmake --version
+          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-unset}"
+          echo "ANDROID_HOME=${ANDROID_HOME:-unset}"
+
+      - name: Install NDK r26c if absent
+        script: |
+          set -euo pipefail
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          if [ -z "$SDK" ]; then
+            echo "error: ANDROID_SDK_ROOT and ANDROID_HOME are both unset" >&2; exit 1
+          fi
+          # sdkmanager lives under cmdline-tools (new layout) or tools (old layout)
+          SDKMANAGER=""
+          for candidate in \
+              "$SDK/cmdline-tools/latest/bin/sdkmanager" \
+              "$SDK/cmdline-tools/bin/sdkmanager" \
+              "$SDK/tools/bin/sdkmanager"; do
+            if [ -x "$candidate" ]; then SDKMANAGER="$candidate"; break; fi
+          done
+          if [ -z "$SDKMANAGER" ]; then
+            # last resort: search the whole SDK dir
+            SDKMANAGER="$(find "$SDK" -name sdkmanager -type f 2>/dev/null | head -1)"
+          fi
+          echo "sdkmanager: ${SDKMANAGER:-NOT FOUND}"
+          if [ ! -d "$SDK/ndk/$WF_NDK_VERSION" ]; then
+            echo "Installing NDK $WF_NDK_VERSION..."
+            # 'yes' exits with SIGPIPE (141) once sdkmanager closes stdin;
+            # run in a subshell with pipefail off so that doesn't fail the step.
+            ( set +o pipefail; yes | "$SDKMANAGER" "ndk;$WF_NDK_VERSION" )
+          else
+            echo "NDK $WF_NDK_VERSION already present"
+          fi
+
+      - name: Extract Jolt vendor archive
+        script: |
+          set -euo pipefail
+          cd engine/vendor
+          if [ ! -d jolt-physics-5.5.0 ]; then
+            echo "Extracting jolt-physics-5.5.0.tar.gz..."
+            tar -xzf jolt-physics-5.5.0.tar.gz
+            # GitHub archive extracts to jrouwe-JoltPhysics-<sha>/; rename to
+            # match the JOLT_DIR path CMakeLists.txt expects.
+            extracted=$(tar -tzf jolt-physics-5.5.0.tar.gz | head -1 | cut -d/ -f1)
+            mv "$extracted" jolt-physics-5.5.0
+            echo "Renamed $extracted -> jolt-physics-5.5.0"
+          else
+            echo "Jolt already extracted"
+          fi
+
+      - name: Build debug APK
+        script: |
+          set -euo pipefail
+          cd android
+          # pipefail propagates Gradle's exit code through tee
+          ./gradlew :app:assembleDebug --info 2>&1 | tee ../gradle-build.log
+
+    artifacts:
+      # One APK per app flavor: apk/<flavor>/debug/worldfoundry-<flavor>-debug.apk
+      # (snowgoons, aquarium, condo, smb, qbert: assembleDebug builds every flavor;
+      # docs/plans/2026-09-30-aquarium-chromecast.md, docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md).
+      - android/app/build/outputs/apk/*/debug/*.apk
+      - gradle-build.log
+
+  #------------------------------------------------------------------------------
+  # macos-desktop-debug — native macOS build of wf_game (renderer-agnostic
+  # bring-up: compile + link + headless --frame-step-smoke; rendering is a TRUE
+  # no-op, no window). See docs/plans/2026-05-26-macos-port-runtime-bringup.md.
+  #
+  # Ninja generator (NOT -G Xcode) so Jolt's add_library target stays modifiable
+  # (the Xcode-generator limitation is why iOS fell back to legacy physics).
+  # The first bring-up forces legacy physics (-DWF_PHYSICS_ENGINE=legacy) +
+  # WF_ASAN=OFF so the scarce Mac-min compile the *novel* macOS code rather than
+  # re-compiling Jolt (upstream, known-portable). Re-enable Jolt once green.
+  #
+  # Trigger manually from the Codemagic dashboard (events: [] — no auto-fire;
+  # Mac-budget-sensitive). Build branch: 2026-new-level.
+  #------------------------------------------------------------------------------
+  macos-desktop-debug:
+    name: macOS Desktop (Debug, headless)
+    instance_type: mac_mini_m2
+    # 60, not the 20 a headless build needs: with "Enable SSH/VNC access"
+    # ticked on Start new build, the VM stays connectable for 10 min after the
+    # steps finish and a connected VNC session then lives until this limit.
+    # That session is how a human plays the .app without owning a Mac
+    # (docs/plans/2026-09-21-macos-human-verification.md). Unattended runs
+    # still end at ~4 min; only a connected session uses the headroom.
+    max_build_duration: 60
+
+    cache:
+      cache_paths:
+        # CMake build dir — .o files + libwfengine.a + libzforth.a survive
+        # between runs so only changed TUs recompile on fix-iterate cycles.
+        - build-macos
+        # Jolt extraction — Jolt IS the physics engine on macOS (CMakeLists.txt
+        # defaults WF_PHYSICS_ENGINE=jolt and the macOS gate does not override
+        # it; the old -DWF_PHYSICS_ENGINE=legacy is gone from the configure step
+        # below). Caching the extraction keeps the tar -xzf step off every run.
+        - engine/vendor/jolt-physics-5.5.0
+        # Rust toolchain (rustup + cargo) installed by the 'Install Rust
+        # toolchain' step — keeps the rustup download + target add off every run.
+        - ~/.rustup
+        - ~/.cargo
+
+    environment:
+      xcode: latest
+
+    triggering:
+      events: []
+      cancel_previous_builds: true
+
+    # WF_BUILD_TYPE (unset = Debug) picks CMAKE_BUILD_TYPE; macos-desktop-release
+    # reuses these steps with Release.
+    scripts: &macos_desktop_scripts
+      - name: Toolchain versions
+        script: |
+          set -euo pipefail
+          sw_vers
+          clang --version
+          cmake --version
+          ninja --version 2>/dev/null || brew install ninja
+
+      # The runtime property core (wftools/wf_attr_edit -> libwf_attr_edit.a)
+      # is built by scripts/build-runtime-property-core.py with cargo; the
+      # Codemagic Mac image ships no Rust toolchain.
+      - name: Install Rust toolchain
+        script: |
+          set -euo pipefail
+          if ! command -v cargo >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/cargo" ]; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --no-modify-path
+          fi
+          export PATH="$HOME/.cargo/bin:$PATH"
+          echo "PATH=$PATH" >> "$CM_ENV"
+          cargo --version
+
+      - name: Extract Jolt vendor archive
+        script: |
+          set -euo pipefail
+          cd engine/vendor
+          if [ ! -d jolt-physics-5.5.0 ]; then
+            echo "Extracting jolt-physics-5.5.0.tar.gz..."
+            tar -xzf jolt-physics-5.5.0.tar.gz
+            # GitHub archive extracts to jrouwe-JoltPhysics-<sha>/; rename to
+            # match the JOLT_DIR path CMakeLists.txt expects.
+            extracted=$(tar -tzf jolt-physics-5.5.0.tar.gz | head -1 | cut -d/ -f1)
+            mv "$extracted" jolt-physics-5.5.0
+            echo "Renamed $extracted -> jolt-physics-5.5.0"
+          else
+            echo "Jolt already extracted"
+          fi
+
+      - name: Configure CMake for macOS desktop (arm64, Ninja)
+        script: |
+          set -euo pipefail
+          mkdir -p build-macos
+          rm -rf build-macos/CMakeCache.txt build-macos/CMakeFiles
+          cd build-macos
+          cmake -G Ninja \
+            -DCMAKE_BUILD_TYPE="${WF_BUILD_TYPE:-Debug}" \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DWF_ASAN=OFF \
+            .. 2>&1 | tee ../macos-configure.log
+
+      - name: Build wf_game
+        script: |
+          set -euo pipefail
+          cd build-macos
+          # --target wf_game pulls in libwfengine.a + zforth. tee preserves the
+          # exit code via pipefail so a compile/link failure fails the step.
+          cmake --build . --target wf_game 2>&1 | tee ../macos-build.log
+
+      - name: Verify portable box colors
+        script: |
+          set -euo pipefail
+          c++ -std=c++17 -Iwfsource/source tests/box_color_test.cc -o /tmp/wf-box-color-test
+          /tmp/wf-box-color-test
+
+      - name: Run headless frame-step smoke
+        script: |
+          set -euo pipefail
+          # wf_game is a .app bundle; the Mach-O lives inside it.
+          # -L bypasses the cd.iff AssetAccessor path so the NSBundle lookup
+          # for cd.iff is never exercised — the smoke verifies compile+link+load
+          # with a standalone level. Level path must be absolute (resolved here).
+          WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
+          LEVEL="$CM_BUILD_DIR/wflevels/snowgoons-blender/snowgoons-standalone.iff"
+          cd wfsource/source/game
+          # Watchdog: a hung wf_game otherwise burns the whole build timeout and
+          # publishes no artifacts (the 2026-10-08 Release twin did exactly that).
+          # After 300 s, sample the process (where is it stuck?), then kill it so
+          # the step fails and the logs and macos-hang-sample.txt are published.
+          # The watchdog's sleep must not hold the tee pipe open, so its fds are
+          # redirected and the subshell's children are reaped.
+          wf_run() {
+            "$@" &
+            local pid=$!
+            ( sleep 300 </dev/null >/dev/null 2>&1
+              echo "WATCHDOG: '$*' still running after 300 s; sampling, then killing pid $pid"
+              /usr/bin/sample "$pid" 5 -file "$CM_BUILD_DIR/macos-hang-sample.txt" >/dev/null 2>&1 || true
+              kill -9 "$pid" 2>/dev/null || true ) &
+            local wd=$!
+            local rc=0
+            wait "$pid" || rc=$?
+            pkill -P "$wd" 2>/dev/null || true
+            kill "$wd" 2>/dev/null || true
+            return "$rc"
+          }
+          # Allocator self-check first — sub-second, no level/window/assets, and
+          # it is the one check that is *about* this arm64 ABI (the compiler's
+          # array cookie is 16 bytes here vs 8 on x86_64). Fails loudly and
+          # early rather than as a cookie assert 30 frames in.
+          wf_run "$WF_GAME" --memory-test 2>&1 | tee "$CM_BUILD_DIR/macos-smoke.log"
+          # --capture-frame=N counts frames that reached the BACKEND, not engine
+          # steps: Phase 1 measured 29 rendered frames for 30 steps (the render
+          # block is gated on camera()->ValidView()). So capture at 20, safely
+          # inside the range and late enough for the scene to have settled —
+          # asking for 30 would silently never fire.
+          # -rate20 pins the level clock to a fixed 20 Hz step (FakeFrameRate,
+          # level.cc:821) instead of the wall-clock delta. Without it the run is
+          # not reproducible even on the same machine, let alone comparable with
+          # a Linux capture — which is what plan steps 9 and 10 need. Verified
+          # locally: two -rate20 runs produce byte-identical PNGs.
+          wf_run "$WF_GAME" --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
+            --no-fps --capture-frame=20="$CM_BUILD_DIR/macos-frame20.png" \
+            2>&1 | tee -a "$CM_BUILD_DIR/macos-smoke.log"
+
+      - name: Verify raw FPS through script mailboxes and unswapped frame steps
+        script: |
+          set -euo pipefail
+          WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
+          LEVEL="$CM_BUILD_DIR/wflevels/snowgoons-blender/snowgoons-standalone.iff"
+          cd wfsource/source/game
+          "$WF_GAME" --frame-step-smoke=60 --cycles=2 --frame-rate-checks \
+            --frame-step-no-swap -L"$LEVEL" -rate20 \
+            2>&1 | tee "$CM_BUILD_DIR/macos-framerate.log"
+          python3 "$CM_BUILD_DIR/tests/check_frame_rate_log.py" "$CM_BUILD_DIR/macos-framerate.log"
+
+      - name: Verify number-only FPS overlay capture
+        script: |
+          set -euo pipefail
+          WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
+          LEVEL="$CM_BUILD_DIR/wflevels/snowgoons-blender/snowgoons-standalone.iff"
+          cd wfsource/source/game
+          "$WF_GAME" --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
+            --capture-frame=20="$CM_BUILD_DIR/macos-fps-overlay.png" \
+            2>&1 | tee "$CM_BUILD_DIR/macos-fps-overlay.log"
+          python3 "$CM_BUILD_DIR/tests/check_fps_overlay_capture.py" \
+            "$CM_BUILD_DIR/macos-frame20.png" "$CM_BUILD_DIR/macos-fps-overlay.png"
+
+      - name: Compare deterministic capture with Linux reference
+        script: |
+          set -euo pipefail
+          # Small interpolation/filter rounding differences are allowed; the
+          # former solid-face color mismatch had a channel delta of 148.
+          python3 tests/compare_renderer_frames.py \
+            tests/fixtures/renderer/snowgoons-linux-frame20.png \
+            macos-frame20.png --tolerance 3 | tee macos-comparison.log
+
+      - name: Compare aquarium capture with Linux reference (informational)
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          # Same method as the snowgoons gate above, on the newest level
+          # (docs/plans/2026-09-30-aquarium-level.md step 21): frame 20 of a
+          # 30-step, 1-cycle, -rate20 run against a Linux capture that two runs
+          # reproduced byte for byte. The aquarium has never been through the
+          # Metal backend, so this step reports and does NOT fail the build:
+          # snowgoons already differs by 455 of 307200 pixels for a cause not
+          # yet established, and we want this level's real numbers before
+          # choosing a tolerance. Once they are known, drop the `|| true`s.
+          WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
+          LEVEL="$CM_BUILD_DIR/wflevels/aquarium-standalone.iff"
+          cd wfsource/source/game
+          "$WF_GAME" --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
+            --no-fps --capture-frame=20="$CM_BUILD_DIR/macos-aquarium-frame20.png" \
+            2>&1 | tee "$CM_BUILD_DIR/macos-aquarium.log" || true
+          cd "$CM_BUILD_DIR"
+
+          echo "--- aquarium parity verdict ---"
+          status=1
+          if [ -s macos-aquarium-frame20.png ]; then
+            status=0
+            python3 tests/compare_renderer_frames.py \
+              tests/fixtures/renderer/aquarium-linux-frame20.png \
+              macos-aquarium-frame20.png --tolerance 3 \
+              | tee macos-aquarium-comparison.log || status=$?
+          else
+            echo "no capture written (see macos-aquarium.log)" \
+              | tee macos-aquarium-comparison.log
+          fi
+          # Counts come from the compare script's own report: pixels that differ
+          # at all (total - exact) and the largest per-channel delta.
+          python3 - macos-aquarium-comparison.log <<'PY' || true
+          import ast, re, sys
+          log = open(sys.argv[1]).read()
+          m = re.search(r"exact=(\d+)/(\d+)", log)
+          h = re.search(r"histogram: (\{.*\})", log)
+          if m and h:
+              exact, total = int(m.group(1)), int(m.group(2))
+              print(f"differing pixels: {total - exact} of {total}")
+              print(f"maximum channel delta: {max(ast.literal_eval(h.group(1)))}")
+          else:
+              print("differing pixels: n/a (no comparison output)")
+              print("maximum channel delta: n/a")
+          PY
+          if [ "$status" -eq 0 ]; then
+            echo "AQUARIUM PARITY: MATCH"
+          else
+            echo "AQUARIUM PARITY: DIFFERS"
+          fi
+
+      - name: Aquarium screenshots through Metal (later frames + a real window)
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          # Same flags as the parity step. Frame 20 is already captured there; later frames
+          # show the idle animation (anemone sway, tail, pectorals), and the --windowed run
+          # shows the aquarium presented to a real CAMetalLayer window. Informational.
+          WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
+          LEVEL="$CM_BUILD_DIR/wflevels/aquarium-standalone.iff"
+          cd wfsource/source/game
+          for N in 100 200; do
+            "$WF_GAME" --frame-step-smoke=$((N + 10)) --cycles=1 -L"$LEVEL" -rate20 \
+              --no-fps --capture-frame=$N="$CM_BUILD_DIR/macos-aquarium-frame$N.png" \
+              2>&1 | tee "$CM_BUILD_DIR/macos-aquarium-frame$N.log" || true
+          done
+          "$WF_GAME" --windowed --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
+            --no-fps --capture-frame=20="$CM_BUILD_DIR/macos-aquarium-windowed.png" \
+            2>&1 | tee "$CM_BUILD_DIR/macos-aquarium-windowed.log" || true
+          echo "AQUARIUM SHOTS: $(ls "$CM_BUILD_DIR"/macos-aquarium-frame*.png "$CM_BUILD_DIR"/macos-aquarium-windowed.png 2>/dev/null | wc -l) png file(s) written"
+
+      - name: Run windowed smoke (Phase 4 proxy gate)
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          # Phase 4's real exit criterion is "an interactive .app that plays
+          # snowgoons", which no CI job can assert. This is the machine-checkable
+          # proxy: with --windowed the engine must create a GLFW window, attach a
+          # CAMetalLayer, and PRESENT drawables to it — "presented=N" with N>0 is
+          # the part a window that exists but draws nothing cannot fake.
+          #
+          # Deliberately NOT allowed to fail the build yet: whether a Codemagic
+          # mac_mini_m2 has a window-server session is exactly what this run is
+          # here to find out, and the code falls back to the offscreen target
+          # when it does not. The log distinguishes the two cases explicitly.
+          WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
+          LEVEL="$CM_BUILD_DIR/wflevels/snowgoons-blender/snowgoons-standalone.iff"
+          cd wfsource/source/game
+          "$WF_GAME" --windowed --frame-step-smoke=30 --cycles=1 -L"$LEVEL" -rate20 \
+            --no-fps --capture-frame=20="$CM_BUILD_DIR/macos-frame20-windowed.png" \
+            2>&1 | tee "$CM_BUILD_DIR/macos-windowed.log" || true
+          # TODO.md:7 — -width/-height must actually reach the window, not just
+          # compile. Second short run at a non-default size; the window line
+          # echoes the size it was created with, so a mismatch is visible.
+          "$WF_GAME" --windowed --frame-step-smoke=3 --cycles=1 -L"$LEVEL" -rate20 \
+            -width=800 -height=600 \
+            2>&1 | tee "$CM_BUILD_DIR/macos-windowsize.log" || true
+
+          echo "--- windowed run verdict ---"
+          if grep -q "CAMetalLayer attached" "$CM_BUILD_DIR/macos-windowed.log"; then
+            echo "WINDOW: created"
+            grep -o "presented=[0-9]*" "$CM_BUILD_DIR/macos-windowed.log" | tail -1
+          else
+            echo "WINDOW: NOT created (see macos-windowed.log for the reason)"
+            grep -E "glfwInit failed|glfwCreateWindow.*failed|glfw error" \
+              "$CM_BUILD_DIR/macos-windowed.log" | head -3 || true
+          fi
+          echo "--- -width/-height verdict (TODO.md:7) ---"
+          grep -E "^macos: window " "$CM_BUILD_DIR/macos-windowsize.log" || \
+            echo "SIZE: no window line — flags not verified"
+
+      - name: Close paths and fullscreen (⌘Q, red button, Esc, -fullscreen)
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          # docs/plans/2026-09-21-macos-close-paths.md ("CI step"). The windowed
+          # smoke above proved this runner has a window-server session, so the
+          # close paths can be driven here with real OS events and no human:
+          # launch wf_game --windowed on snowgoons in real time (no
+          # --frame-step-smoke, so it runs until closed), send ⌘Q / press the
+          # red button / send Esc / launch with -fullscreen, and assert on the
+          # process: exit status 0, still running, window frame == display.
+          #
+          # The script grants Accessibility/PostEvent/ScreenCapture (and Apple
+          # Events -> System Events) in this VM's TCC database with sudo. That is
+          # acceptable ONLY because the Codemagic VM is destroyed after the
+          # build; the grant is printed in the log, never done on a kept machine.
+          #
+          # CLOSE_PATHS_STRICT lists the checks that fail the build. Build
+          # 6abd322f passed cmdq/red/fullscreen with real System Events input,
+          # so those are strict; esc stays informational until its key-handler
+          # control is proven, and the native-mode line is a known engine gap.
+          CLOSE_PATHS_STRICT="cmdq red fullscreen" OUT_DIR="$CM_BUILD_DIR" \
+            bash scripts/macos/close-paths-ci.sh \
+            2>&1 | tee "$CM_BUILD_DIR/macos-close-paths.log"
+
+    artifacts: &macos_desktop_artifacts
+      - macos-configure.log
+      - macos-build.log
+      - macos-smoke.log
+      - macos-hang-sample.txt
+      - macos-framerate.log
+      - macos-comparison.log
+      # Phase 2's deliverable: a real Metal frame rendered with no window. This
+      # is what turns macos-desktop-debug from a build gate into a visual gate.
+      - macos-fps-overlay.png
+      - macos-fps-overlay.log
+      - macos-frame20.png
+      # Aquarium Metal-vs-GL parity (informational; plan step 21).
+      - macos-aquarium-frame20.png
+      - macos-aquarium-comparison.log
+      - macos-aquarium-frame100.png
+      - macos-aquarium-frame200.png
+      - macos-aquarium-windowed.png
+      - macos-aquarium-windowed.log
+      - macos-frame20-windowed.png
+      - macos-windowed.log
+      - macos-windowsize.log
+      # Close paths + -fullscreen (scripts/macos/close-paths-ci.sh): the
+      # verdict log, one log per wf_game run, display/window probes, and a
+      # screenshot taken while -fullscreen was up.
+      - macos-close-paths.log
+      - macos-close-*.log
+      - macos-close-*.txt
+      - macos-screen-*.txt
+      - macos-fullscreen-windows.txt
+      - macos-fullscreen.png
+      - cm-build.log
+      # The runnable product on macOS is the .app bundle, not a bare binary:
+      # `engine/wf_game` matches nothing here (the Mach-O lives at
+      # engine/wf_game.app/Contents/MacOS/wf_game), which is why earlier
+      # artifact zips were ~200 KB of logs and PNGs with no app in them. The
+      # bundle carries cd.iff/level0.mid in Resources (CMakeLists.txt bundles
+      # whatever assets exist at configure time) so a human can double-click it.
+      - engine/wf_game.app
+
+  #------------------------------------------------------------------------------
+  # macos-desktop-release — the same steps and artifacts as macos-desktop-debug,
+  # built Release: CMakeLists.txt then turns WF_DEBUG_DEFINES off (no asserts,
+  # no DBSTREAM). Manual only. The codemagic-build driver cannot pass per-build
+  # variables, so the build type lives here.
+  #------------------------------------------------------------------------------
+  macos-desktop-release:
+    name: macOS Desktop (Release defines, headless)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    cache:
+      cache_paths:
+        - build-macos
+        - engine/vendor/jolt-physics-5.5.0
+        - ~/.rustup
+        - ~/.cargo
+    environment:
+      xcode: latest
+      vars:
+        WF_BUILD_TYPE: Release
+    triggering:
+      events: []
+      cancel_previous_builds: true
+    scripts: *macos_desktop_scripts
+    artifacts: *macos_desktop_artifacts

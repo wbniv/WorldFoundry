@@ -1,0 +1,62 @@
+{
+  "id": "B-0311b70f1758",
+  "owner": "fcf55d9829c4dcde80f1638e",
+  "targets": [
+    "chromecast-test-01",
+    "chromecast-test-02"
+  ],
+  "created": 1791272963.0211082,
+  "jobs": [
+    {
+      "id": "J-4cc047e0b1e1",
+      "owner": "fcf55d9829c4dcde80f1638e",
+      "accepted": 1791272963.0213263,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "app": "baseline",
+        "apk": "b1f91d72ddcf33f55514d76e598979a261e1248347e92bc48506804292127393.apk",
+        "duration": 2.0,
+        "validator": "baseline-settings",
+        "workflow": "check",
+        "device": "chromecast-test-01"
+      },
+      "device": "chromecast-test-01",
+      "generation": 231,
+      "cancel": 0,
+      "error": null,
+      "started": 1791273024.888911,
+      "finished": 1791273088.8533852,
+      "worker_pid": 1385184,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-01"
+    },
+    {
+      "id": "J-4e30129df9c6",
+      "owner": "fcf55d9829c4dcde80f1638e",
+      "accepted": 1791272963.0215647,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "app": "baseline",
+        "apk": "b1f91d72ddcf33f55514d76e598979a261e1248347e92bc48506804292127393.apk",
+        "duration": 2.0,
+        "validator": "baseline-settings",
+        "workflow": "check",
+        "device": "chromecast-test-02"
+      },
+      "device": "chromecast-test-02",
+      "generation": 86,
+      "cancel": 0,
+      "error": null,
+      "started": 1791273017.1005116,
+      "finished": 1791273070.6836927,
+      "worker_pid": 1385101,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-02"
+    }
+  ],
+  "state": "completed"
+}

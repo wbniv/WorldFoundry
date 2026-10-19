@@ -1,0 +1,12 @@
+Accepted J-6ea1dec58246: queued; check
+Follow: task chromecast:watch JOB=J-6ea1dec58246
+J-6ea1dec58246: accepted {"pool": "chromecast-test", "app": "patchwork", "apk": "1e38300f3fabe3d8281f4006f9728b00f28123c8fc07ddfa0397aa60a611874f.apk", "duration": 40.0, "workflow": "check"}
+J-6ea1dec58246: granted {"device": "chromecast-test-01", "generation": 14}
+J-6ea1dec58246: phase {"phase": "connecting"}
+J-6ea1dec58246: phase {"phase": "installing"}
+J-6ea1dec58246: phase {"phase": "installing"}
+J-6ea1dec58246: phase {"phase": "launching"}
+J-6ea1dec58246: phase {"phase": "restoring"}
+J-6ea1dec58246: failed {"error": "JavaScript receiver did not mount in the TV WebView", "health": "ready"}
+J-6ea1dec58246: failed: JavaScript receiver did not mount in the TV WebView
+task: Failed to run task "chromecast:check": exit status 1

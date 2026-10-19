@@ -34,14 +34,23 @@
 void
 PIGSMain( int argc, char* argv[] )
 {
-	{ // random number test
-	for ( int i=0; i<100; ++i )
+	{ // random number test — regression guard for the RangeCheck-with-Scalar
+	  // abort + the >>16/>>15 half-range bug (docs/BUGS.md, 2026-06-12). Before
+	  // the fix: Scalar::Random() aborted on the first call in assertion builds
+	  // (RangeCheck cast the Scalar to bool), and in release only spanned [0,0.5).
+	Scalar maxSeen = Scalar::zero;
+	for ( int i=0; i<1000; ++i )
 	{
-		//s.Random();
-		std::cout << Scalar::Random() << '\t';
-		//s.Random( Scalar::negativeOne, Scalar::two );
-		std::cout << Scalar::Random( Scalar::negativeOne, Scalar::two ) << std::endl;
+		Scalar r = Scalar::Random();
+		AssertMsg( r >= Scalar::zero && r < Scalar::one, "Random() out of [0,1): " << r );
+		if ( r > maxSeen ) maxSeen = r;
+
+		Scalar rr = Scalar::Random( Scalar::negativeOne, Scalar::two );
+		AssertMsg( rr >= Scalar::negativeOne && rr < Scalar::two, "Random(-1,2) out of range: " << rr );
 	}
+	// >>15 (not >>16): the full [0,1) range must be reachable, not just [0,0.5).
+	AssertMsg( maxSeen > SCALAR_CONSTANT(0.5), "Random() never exceeded 0.5 over 1000 draws (range bug?): max = " << maxSeen );
+	std::cout << "Scalar::Random: 1000 draws in range, max = " << maxSeen << std::endl;
 	}
 
 	std::cout << "MathTest:" << std::endl;
@@ -102,6 +111,22 @@ PIGSMain( int argc, char* argv[] )
 #endif
 
 		MATH_DEBUG( std::cout << "divResult = " << divResult.AsUnsignedFraction() << std::endl; )
+	}
+
+	{
+		// Regression: AsUnsignedFraction must treat the fraction as MODULAR.
+		// A negative revolution is the same binary-angular value as frac+1:
+		// -0.25 rev == 0.75 rev == 49152/65536. The fixed path got this for free
+		// via two's-complement uint16 truncation; the float path used to do
+		// uint16(negativeFloat) which is UB — wasm's saturating fptoui clamped it
+		// to 0, so Angle::Revolution(-turnRate) produced zero rotation and the
+		// right-turn was dead on the web build. See scalar.hpi AsUnsignedFraction.
+		AssertMsg( SCALAR_CONSTANT(-0.25).AsUnsignedFraction() == 49152,
+			"neg AsUnsignedFraction = " << SCALAR_CONSTANT(-0.25).AsUnsignedFraction() );
+		AssertMsg( Angle::Revolution(SCALAR_CONSTANT(-0.25)) == Angle::Revolution(SCALAR_CONSTANT(0.75)),
+			"Angle::Revolution(-0.25) must equal Revolution(0.75)" );
+		AssertMsg( -Angle::Revolution(SCALAR_CONSTANT(0.25)) == Angle::Revolution(SCALAR_CONSTANT(0.75)),
+			"-Angle::Revolution(0.25) must equal Revolution(0.75)" );
 	}
 
 #if defined(SCALAR_TYPE_FIXED)
@@ -171,7 +196,7 @@ PIGSMain( int argc, char* argv[] )
 	int index=0;
 	// sin
    MATH_DEBUG( std::cout << "testing sin\n");
-	for(index=0;index<ENTRIES;index++)
+	for(index=0;index<ENTRIES;++index)
 	{
 		unsigned int temp = index % 4;
 		temp *= 0x4000;
@@ -184,7 +209,7 @@ PIGSMain( int argc, char* argv[] )
 
 	// cos
    MATH_DEBUG( std::cout << "testing cos\n");
-	for(index=0;index<ENTRIES;index++)
+	for(index=0;index<ENTRIES;++index)
 	{
 		unsigned int temp = index % 4;
 		temp *= 0x4000;
@@ -196,7 +221,7 @@ PIGSMain( int argc, char* argv[] )
 
 	// now do atan2
    MATH_DEBUG( std::cout << "testing atan2\n");
-	for(index=0;index<360;index++)
+	for(index=0;index<360;++index)
 	{
 		Angle angle = Angle(Angle::Degree(Scalar(index,0)));
 		Scalar Y = angle.Sin();
@@ -232,7 +257,7 @@ PIGSMain( int argc, char* argv[] )
 #endif
    MATH_DEBUG( std::cout << "testing positive asin\n");
 	// now do positive asin
-	for(index=0;index<ENTRIES/4;index++)
+	for(index=0;index<ENTRIES/4;++index)
 	{
 		unsigned int temp = index % 4;
 		temp *= 0x4000;
@@ -251,7 +276,7 @@ PIGSMain( int argc, char* argv[] )
 
    MATH_DEBUG( std::cout << "testing negative asin\n");
 	// now do negative asin
-	for(index=ENTRIES/2;index<(ENTRIES/2)+(ENTRIES/4);index++)
+	for(index=ENTRIES/2;index<(ENTRIES/2)+(ENTRIES/4);++index)
 	{
 		unsigned int temp = index % 4;
 		temp *= 0x4000;
@@ -406,7 +431,7 @@ PIGSMain( int argc, char* argv[] )
    AssertMsg(outEuler == euler, "euler = " << euler << ", outEuler = " << outEuler << std::endl);
 
 #define max(a,b) ((a)>(b)?(a):(b))
-	for(index=0;index<360;index++)
+	for(index=0;index<360;++index)
 	{
 		Angle angle = Angle(Angle::Degree(Scalar(index,0)));
       euler.SetA(angle);
@@ -419,8 +444,8 @@ PIGSMain( int argc, char* argv[] )
 
       // now compare the 2 matricies
 
-      for(int y=0;y<2;y++)
-         for(int x=0;x<2;x++)
+      for(int y=0;y<2;++y)
+         for(int x=0;x<2;++x)
          {
             Scalar orig = matrix[y][x];
             Scalar comp = compmatrix[y][x];
@@ -463,7 +488,7 @@ PIGSMain( int argc, char* argv[] )
 
    euler = Euler::zero;
 
-	for(index=0;index<360;index++)
+	for(index=0;index<360;++index)
 	{
 		Angle angle = Angle(Angle::Degree(Scalar(index,0)));
       euler.SetB(angle);
@@ -477,8 +502,8 @@ PIGSMain( int argc, char* argv[] )
 
       // now compare the 2 matricies
 
-      for(int y=0;y<2;y++)
-         for(int x=0;x<2;x++)
+      for(int y=0;y<2;++y)
+         for(int x=0;x<2;++x)
          {
             Scalar orig = matrix[y][x];
             Scalar comp = compmatrix[y][x];
@@ -496,7 +521,7 @@ PIGSMain( int argc, char* argv[] )
 
    euler = Euler::zero;
 
-	for(index=0;index<360;index++)
+	for(index=0;index<360;++index)
 	{
 		Angle angle = Angle(Angle::Degree(Scalar(index,0)));
       euler.SetC(angle);
@@ -510,8 +535,8 @@ PIGSMain( int argc, char* argv[] )
 
       // now compare the 2 matricies
 
-      for(int y=0;y<2;y++)
-         for(int x=0;x<2;x++)
+      for(int y=0;y<2;++y)
+         for(int x=0;x<2;++x)
          {
             Scalar orig = matrix[y][x];
             Scalar comp = compmatrix[y][x];

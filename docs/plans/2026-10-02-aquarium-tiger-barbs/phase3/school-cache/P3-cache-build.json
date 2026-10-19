@@ -1,0 +1,14 @@
+{
+  "asset": "barb_refined",
+  "count": 29,
+  "updates": 5,
+  "static": false,
+  "frozen": false,
+  "profile": false,
+  "name": "P3-cache",
+  "out": "/tmp/aquarium-school-cache",
+  "base_apk": "/tmp/aquarium-combined-before-school.apk",
+  "base_apk_sha256": "02c841541d9bf44ab652d606d559b274cce2ddd81cd40f398cb36bb43830390f",
+  "revision": "24fdef05a374fd813c4af430f5139663c75e6f40",
+  "source_diff_sha256": "e46f85cfa1d2e13bcb05b860ae4123155c404a811c31f9fec4fda2a0475e7a97"
+}

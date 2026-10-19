@@ -1,0 +1,65 @@
+| Date | Change |
+|------|--------|
+| [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/8b23b54d) | The dart startles the school: a fast start (heading flipped at once, 2.5x speed for 0.6 s) for every follower within 5 body lengths |
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/4a906de5) | A hard wall limit for the followers (one left the tank on the Chromecast), the poster with Chromecast-only numbers, and the schooling demo clip |
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/0797aab2) | The school is the default aquarium level: it schools (p_group 0.77 swimming), the ten followers vary 60 to 93 % in size |
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/83099032) | TODO: Android size trim iter 2 done (243 KB per APK; the snowgoons sideload is left under Verify) |
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/ace2e0be) | Aquarium: ten more fish that school and swarm round the player's fish (AQUARIUM_SCHOOL_N=10), running on the Chromecast HD |
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/bec1d758) | Mailbox calls cost 4.2 us each on the Chromecast: three per-call debug streams moved to DBSTREAM5; opt-in --script-profile; a bench level |
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/aa821f80) | school.fth: every mailbox slot has a name (MB_X, MB_VX, MB_DRO ...), long lines split into short helper words; the poster shows the named code in four columns |
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/61f6a8bd) | Swarming plan: a mailbox map drawn from a real run (800..1009 for school.fth), the layout the tests now use, and the open follower-rig item |
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/2460bd2a) | Swarming: the Couzin zone model as a Forth core (school.fth, 2179 B, 6.2 ms/11 fish on the Chromecast), tested against numpy, and an A3 poster |
+| [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/50c932a2) | Plan: ten more aquarium fish that school and swarm around the player (Couzin zone model, player as leader), with rendered mockups |
+
+<!--history-meta v1
+8b23b54d	author	Will Norris
+8b23b54d	added	2
+8b23b54d	deleted	1
+8b23b54d	files	1
+8b23b54d	body	Nothing in the level called sch-startle-all, so pressing A did nothing to the followers, and the old gentle startle (turn away at normal speed) scattered them little even in the model.\nschool_rig.fth: sd-dart-check (the rising edge of aq-dart-t, mailbox 1039). school.fth: a C-start in sch-startle-all, MB_KICK (parameter 981) as the startled speed gain.\nOn the real engine (scripts/analyse-aquarium-school.py --dart): mean distance to the leader 1.55 -> 4.17 BL within 1 s, back to about 2.4 by 4 s. Tests: the model, the built Director. The poster no longer says the dart does nothing.\nNot yet seen on the Chromecast (the TV was not reachable). Plan: docs/plans/2026-10-02-school-dart-startle.md.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
+4a906de5	author	Will Norris
+4a906de5	added	2
+4a906de5	deleted	2
+4a906de5	files	1
+4a906de5	body	school.fth: a follower that would leave the box is put back on its edge and its heading reflected inward (test added); 3,216 B, 7.5 ms a step on the Chromecast.\nThe poster prints Chromecast timings only (no PC numbers), including the real level: 59.9 fps, p90 33.4 ms.\ntests/recordings/aquarium_school_demo.mp4: 51 s from the Chromecast's own screen (rest/swarm, swim right/school, rest, swim left, rest, swim and climb), captions burnt in;\nrecorded before the wall limit, so one frame shows a follower outside the glass. scripts/record-aquarium-school-chromecast.py records a new one when nobody is using the TV.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
+0797aab2	author	Will Norris
+0797aab2	added	9
+0797aab2	deleted	8
+0797aab2	files	1
+0797aab2	body	Fix (the 'they don't interact' report): sd-setup never wrote the swarm and school zone widths, so every follower had no orientation or attraction zone. Measured on the real engine\n(scripts/analyse-aquarium-school.py): swimming p_group 0.24 -> 0.77, alignment with the leader +0.40; resting 0.31 to 0.39 (a swarm).\nAlso: each step uses the real time since that follower's last update (round robin, one or two a tick); a third of the followers are posed a frame (fish-dt scaled by the 1037 multiplier);\nsizes via a size mailbox in the rig block's 40th slot (fish-size scales the part offsets and the dorsal's Z); AQUARIUM_SCHOOL_N defaults to 10 so the tracked level, cd.iff and APK carry the school;\nthe wrapper's room/object memory 3 MB / 400 KB; the Taskfile level tasks now list school.fth and school_rig.fth as sources; level tests: 82 actors, the follower actor table, the mailbox blocks.\nThe idle-animation spike level is regenerated (the rig library changed). Cost probes: AQUARIUM_SCHOOL_IDLE=1|hide builds wflevels/aquarium_probe.\nMeasured: unprofiled release on the Chromecast HD 59.9 fps median, p90 33.4 ms; the profiler build itself runs at 30 fps and is not a frame-rate measurement.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
+83099032	author	Will Norris
+83099032	added	6
+83099032	deleted	0
+83099032	files	1
+83099032	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01DxMP4jUNjCjDz8E9DWzXcM
+ace2e0be	author	Will Norris
+ace2e0be	added	16
+ace2e0be	deleted	2
+ace2e0be	files	1
+ace2e0be	body	Phase 1 (the rig made per-fish): every rig mailbox goes through fish-off (mailbox 1016, 0 for the player), so the one rig poses a follower from its own 40 mailboxes\nat 1100 + 40 (k - 1) and its own five part actors (the Director's actor words read them from slots 1017..1021 when fish-off is not 0). The followers share the player's\nfive meshes: 50 part actors, no new assets. The default level is unchanged in behaviour (regenerated: its scripts carry the new header).\nPhase 2 (the behaviour, wired, untuned): the player's fish is the leader; school above 1.0 body lengths a second, swarm below 0.45, blended into the zone width;\ntwo followers updated a frame (12 Hz each), all ten posed every frame (school_rig.fth). Level built into wflevels/aquarium_school (git-ignored) with larger room/object memory.\nOn the real Chromecast HD, release build: 59.9 fps median, p90 33.4 ms; the Director 10.2 ms a tick. Screenshot in the plan. scripts/capture-aquarium-school.py renders it on the PC.\nNot done: anemone avoidance, the startle on the dart, sizes, tuning.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
+bec1d758	author	Will Norris
+bec1d758	added	1
+bec1d758	deleted	1
+bec1d758	files	1
+bec1d758	body	Found timing school.fth inside the engine on the real Chromecast HD: the Director took 39 to 43 ms a tick (20 fps); 7,750 mailbox calls x 4.2 us = 34 ms. The calls\nstreamed 'cmailbox << ... << std::endl' at DBSTREAM1 (LevelMailboxes::ReadMailbox, GameMailboxes::ReadMailbox, WorldFoundryMailboxesManager::LookupMailboxes), and CMake\ndefines SW_DBSTREAM=1 in every build, release included; dbstrm.hp says DBSTREAM1 is startup and shutdown only. At DBSTREAM5 the call costs 0.28 us (timer included) and the\nDirector takes 11.3 ms: 59.9 fps on the device. Origin: the lines are in the first commit (a2784f6e), harmless when SW_DBSTREAM was 0.\n\n- tests/test_mailbox_hot_path.py guards the mailbox read/write functions against a stream below level 5.\n- --script-profile (or WF_SCRIPT_PROFILE=1): every 5 s, the five most expensive actor scripts and the mean mailbox-call cost; off by default (one untaken branch); the flag is weak-linked so other Forth backends build.\n- AQUARIUM_SCHOOL_BENCH=1: a git-ignored bench level whose Director also runs school.fth.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
+aa821f80	author	Will Norris
+aa821f80	added	2
+aa821f80	deleted	2
+aa821f80	files	1
+aa821f80	body	2,936 B and 7.0 ms a step on the Chromecast (was 2,179 B and 6.2 ms): each name is a word call. Still equal to the numpy reference to 1e-03.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
+61f6a8bd	author	Will Norris
+61f6a8bd	added	2
+61f6a8bd	deleted	0
+61f6a8bd	files	1
+61f6a8bd	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
+2460bd2a	author	Will Norris
+2460bd2a	added	30
+2460bd2a	deleted	1
+2460bd2a	files	1
+2460bd2a	body	Reference model, standalone zForth host, tank runs in the real 13.4x3.4x4.7 BL box, zone-width sweep, device bench, data sheet with chips, poster generator,\n26 tests, Taskfile tasks, a plan with diagrams and mockups, and the findings folded into the schooling plan (leader weak, paper's turn rate does not fit the tank).\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
+50c932a2	author	Will Norris
+50c932a2	added	153
+50c932a2	deleted	0
+50c932a2	files	1
+50c932a2	body	Revised after the user asked whether swarming had been researched first: it had not. The plan now cites the literature (Pitcher's shoal/school\ndistinction; Couzin et al. 2002, read from the paper: zones of repulsion/orientation/attraction, the four collective states, p_group and m_group,\nhysteresis; Couzin et al. 2005 on informed leaders; real ocellaris clownfish are site-attached, not schooling) and builds the behaviour on that model.\nThe startle on a dart is decided (yes). A C++ flocking fallback is explained as a ladder and left as the user's decision after Phase 0 measures.\nAdds a TODO item (unranked: tiers are set in a Fable session).\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01NNPhRbrqjqMDkScPvTE9yC
+-->

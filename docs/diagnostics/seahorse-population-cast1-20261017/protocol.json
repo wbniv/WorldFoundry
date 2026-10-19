@@ -1,0 +1,52 @@
+{
+  "device": "chromecast-test-01",
+  "counts": [
+    0,
+    1,
+    2,
+    6
+  ],
+  "release_repeats": 3,
+  "duration_seconds": 60,
+  "warmup_seconds": 15,
+  "scene": "planted-tank",
+  "view": "wide-idle",
+  "orders": [
+    [
+      "none",
+      "pair1",
+      "pair2",
+      "pair6"
+    ],
+    [
+      "pair6",
+      "pair2",
+      "pair1",
+      "none"
+    ],
+    [
+      "pair1",
+      "pair6",
+      "none",
+      "pair2"
+    ]
+  ],
+  "cpu_repeats": 1,
+  "cpu_order": [
+    "none",
+    "pair1",
+    "pair2",
+    "pair6"
+  ],
+  "settings": {
+    "seed": 713,
+    "age": 150,
+    "speed": 0,
+    "water": "saltwater",
+    "random_entry": false,
+    "sway": true,
+    "textures": true,
+    "greeting": true
+  },
+  "memory_note": "All count variants allocate the same twelve residents; settings control visibility and execution, not actor allocation."
+}

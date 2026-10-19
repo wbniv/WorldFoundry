@@ -101,7 +101,7 @@ protected:
 
 	inline const _Tool* getOad() const;
 	_Tool _toolOAD;				// copy of original data
-	long _objectToGenerate;		// which template object to spew
+	int32 _objectToGenerate;	// template-object index to spew (was long; matches _owner below)
 	int32 _owner;				// actor index of owner
 	Scalar _timeAvailableToFire;
    const void* _pScript;

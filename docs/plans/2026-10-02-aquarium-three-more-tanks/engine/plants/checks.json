@@ -1,0 +1,36 @@
+{
+  "level": "aquarium_plants",
+  "animals": 1,
+  "actors": 25,
+  "profile": "keyboard",
+  "static_plant_groups": [
+    "plant_broad_groups",
+    "plant_rear_stems",
+    "plant_foreground"
+  ],
+  "wall_right": [
+    4.690007,
+    0.0,
+    0.865
+  ],
+  "wall_left": [
+    -4.690006,
+    0.0,
+    0.865
+  ],
+  "wall_away": [
+    0.000625,
+    0.87,
+    0.865
+  ],
+  "wall_toward": [
+    0.0,
+    -0.87,
+    0.865
+  ],
+  "view_toggle_and_input_release": "PASS",
+  "urchin_stays_on_substrate": "PASS",
+  "status": "PASS",
+  "desktop_debug_ms_per_frame_estimate": 10.522203329892363,
+  "cost_note": "Two-point local debug wall-time estimate without vsync; not release/device frame distributions."
+}

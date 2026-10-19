@@ -1,0 +1,61 @@
+/*============================================================================*/
+/* movebloc.ht: created from OADTYPES.S and movebloc.oas DO NOT MODIFY */
+/*============================================================================*/
+#include <pigsys/pigsys.hp>
+#include <math/scalar.hp>
+/*      maximum value of a long int     */
+/* minimum value of a long int  */
+#ifndef movebloc_HT
+#define movebloc_HT
+ struct _Movement {
+	int32 MovementClass;               /* Minumum: 0 Maximum: 100 Default: Movement_KIND */
+	int32 Mobility;               /* Minumum: 0 Maximum: 4 Default: 0 */
+  	fixed32 Mass;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0)) */
+    Scalar GetMass() const { return Scalar::FromFixed32(Mass); }
+	int32 MovesBetweenRooms;        /* Default: 0 */
+	int32 MovementMailbox;               /* Minumum: 0 Maximum: 3999 Default: 1 */
+	fixed32 StepSize;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0)) */
+    Scalar GetStepSize() const { return Scalar::FromFixed32(StepSize); }
+	fixed32 VerticalElasticity;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1 * 65536.0)) */
+    Scalar GetVerticalElasticity() const { return Scalar::FromFixed32(VerticalElasticity); }
+	fixed32 HorizontalElasticity;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1 * 65536.0)) */
+    Scalar GetHorizontalElasticity() const { return Scalar::FromFixed32(HorizontalElasticity); }
+	fixed32 SurfaceFriction;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1.0 * 65536.0)) */
+    Scalar GetSurfaceFriction() const { return Scalar::FromFixed32(SurfaceFriction); }
+		int32 AtEndOfPath;               /* Minumum: 0 Maximum: 5 Default: 0 */
+		int32 ObjectToFollow;                               /* index into master object list, = OBJECT_NULL if no reference */
+		int32 FollowOffset;                               /* index into master object list, = OBJECT_NULL if no reference */
+		fixed32 RunningAcceleration;         /* Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0)) */
+    Scalar GetRunningAcceleration() const { return Scalar::FromFixed32(RunningAcceleration); }
+		fixed32 RunningDeceleration;         /* Minumum: ( ((long) -1.0 * 65536.0)) Maximum: ( ((long) 1.0 * 65536.0)) */
+    Scalar GetRunningDeceleration() const { return Scalar::FromFixed32(RunningDeceleration); }
+		fixed32 MaxGroundSpeed;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0)) */
+    Scalar GetMaxGroundSpeed() const { return Scalar::FromFixed32(MaxGroundSpeed); }
+		fixed32 TurnRate;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0)) */
+    Scalar GetTurnRate() const { return Scalar::FromFixed32(TurnRate); }
+		fixed32 CrawlingAcceleration;         /* Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0)) */
+    Scalar GetCrawlingAcceleration() const { return Scalar::FromFixed32(CrawlingAcceleration); }
+		fixed32 JumpingAcceleration;         /* Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0)) */
+    Scalar GetJumpingAcceleration() const { return Scalar::FromFixed32(JumpingAcceleration); }
+		fixed32 JumpingMomentumTransfer;         /* Minumum: ( ((long) -1.0 * 65536.0)) Maximum: ( ((long) 1.0 * 65536.0)) */
+    Scalar GetJumpingMomentumTransfer() const { return Scalar::FromFixed32(JumpingMomentumTransfer); }
+		fixed32 AirAcceleration;         /* Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0)) */
+    Scalar GetAirAcceleration() const { return Scalar::FromFixed32(AirAcceleration); }
+		fixed32 HorizAirDrag;         /* Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0)) */
+    Scalar GetHorizAirDrag() const { return Scalar::FromFixed32(HorizAirDrag); }
+		fixed32 VertAirDrag;         /* Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0)) */
+    Scalar GetVertAirDrag() const { return Scalar::FromFixed32(VertAirDrag); }
+		fixed32 MaxAirSpeed;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0)) */
+    Scalar GetMaxAirSpeed() const { return Scalar::FromFixed32(MaxAirSpeed); }
+		fixed32 FallingAcceleration;         /* Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0)) */
+    Scalar GetFallingAcceleration() const { return Scalar::FromFixed32(FallingAcceleration); }
+		fixed32 FallAnimThreshold;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0)) */
+    Scalar GetFallAnimThreshold() const { return Scalar::FromFixed32(FallAnimThreshold); }
+	fixed32 StunThreshold;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0)) */
+    Scalar GetStunThreshold() const { return Scalar::FromFixed32(StunThreshold); }
+	fixed32 StunDuration;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0)) */
+    Scalar GetStunDuration() const { return Scalar::FromFixed32(StunDuration); }
+};
+/*============================================================================*/
+#endif         /* movebloc_HT */
+/*============================================================================*/

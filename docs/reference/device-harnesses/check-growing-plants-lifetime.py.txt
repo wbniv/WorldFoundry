@@ -1,0 +1,44 @@
+Historical pre-coordinator procedure. Do not execute; device operations must use task chromecast:* under coordinator ownership. Specialized phone/lifetime checks require typed-workflow migration.
+
+#!/usr/bin/env python3
+"""Check repeated level entry ownership and measure phone-ready entry latency."""
+import argparse,hashlib,json,re,statistics,subprocess,time
+from pathlib import Path
+from playwright.sync_api import sync_playwright,expect
+p=argparse.ArgumentParser(description=__doc__)
+p.add_argument('--variants-dir',type=Path,required=True);p.add_argument('--normal-apk',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--serial',required=True);p.add_argument('--cycles',type=int,default=6);a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
+ADB='/home/will/android-sdk-local/platform-tools/adb';PKG='org.worldfoundry.wf_game.aquarium'
+def adb(*args):return subprocess.check_output([ADB,'-s',a.serial,*args],timeout=45)
+def key(code):adb('shell','input','keyevent',str(code))
+def launch(apk):
+ adb('install','-r',str(apk));adb('shell','am','force-stop',PKG);adb('logcat','-c');adb('shell','am','start','-n',PKG+'/android.app.NativeActivity');time.sleep(4);key(4)
+ for _ in range(5):key(20);time.sleep(.15)
+def pss():
+ text=adb('shell','dumpsys','meminfo',PKG).decode();return int(re.search(r'TOTAL PSS:\s*(\d+)',text)[1])/1024
+results={}
+try:
+ with sync_playwright() as play:
+  browser=play.chromium.launch(headless=True)
+  for mode in ['freshwater','saltwater']:
+   launch(a.variants_dir/(mode+'-young-static.apk'))
+   url=re.findall(r'phone controller: open (http://[^ ]+)',adb('logcat','-d','-s','wf_game').decode())[-1]
+   context=browser.new_context(viewport={'width':844,'height':390});page=context.new_page();page.goto(url);expect(page.locator('#stext')).to_have_text('Connected to the TV');expect(page.locator('#plant-open')).to_be_hidden()
+   pid=adb('shell','pidof',PKG).strip();entries=[]
+   for cycle in range(a.cycles):
+    began=time.monotonic();key(23);expect(page.locator('#plant-open')).to_be_visible(timeout=12000);elapsed=(time.monotonic()-began)*1000
+    time.sleep(2);memory=pss();assert adb('shell','pidof',PKG).strip()==pid
+    page.locator('#plant-open').click();expect(page.locator('#plant-settings')).to_be_visible();expect(page.locator('#plant-seed')).to_have_value('713');expect(page.locator('#plant-mode')).to_have_value(str(int(mode=='saltwater')));page.locator('#plant-cancel').click();expect(page.locator('#plant-settings')).to_be_hidden()
+    if cycle in [0,a.cycles-1]:(a.out/f'{mode}-entry-{cycle+1}.png').write_bytes(adb('exec-out','screencap','-p'))
+    entries.append(dict(cycle=cycle+1,entry_to_phone_ready_ms=elapsed,PSS_MiB=memory));key(4);expect(page.locator('#plant-open')).to_be_hidden();time.sleep(.3)
+   context.close();steady=[e['PSS_MiB'] for e in entries[2:]];spread=max(steady)-min(steady)
+   # Same seed and frozen geometry: after allocator warmup, a room-sized leak must not accumulate.
+   assert spread<4,f'{mode}: retained-memory spread {spread:.2f} MiB exceeds the 4 MiB allowance'
+   results[mode]=dict(entries=entries,entry_to_phone_ready_median_ms=statistics.median(e['entry_to_phone_ready_ms'] for e in entries),steady_PSS_spread_MiB=spread,same_process=True)
+  browser.close()
+ (a.out/'checks.json').write_text(json.dumps(dict(method='Six entries per water type, seed 713, frozen young topology, same process. Latency is key submission to first available-plant phone acknowledgement; it includes ADB and the 150 ms status transport interval and is an upper-bound readiness proxy, not pure asset-loading time.',results=results),indent=2)+'\n')
+ print('Plant repeated-entry and readiness checks passed',flush=True)
+finally:
+ adb('install','-r',str(a.normal_apk));installed=adb('shell','pm','path',PKG).decode().strip().removeprefix('package:');sha=adb('shell','sha256sum',installed).decode().split()[0];assert sha==hashlib.sha256(a.normal_apk.read_bytes()).hexdigest()
+ adb('shell','am','force-stop',PKG);adb('shell','am','start','-n',PKG+'/android.app.NativeActivity');time.sleep(4);key(4)
+ for _ in range(5):key(20);time.sleep(.15)
+ key(23);time.sleep(3);(a.out/'restored-normal.png').write_bytes(adb('exec-out','screencap','-p'));(a.out/'restored.json').write_text(json.dumps(dict(apk_sha256=sha,normal_menu_release_restored=True,profile_enabled=False),indent=2)+'\n')

@@ -1,0 +1,9 @@
+{
+  "apk": "/tmp/wf-colour-device-fixture-2/colour-picker-fixture.apk",
+  "sha256": "bdc90a9d38fa5f6d32b87b0bfffbb2f25a7d8efe273f2a187f5dee7be4c78340",
+  "base_sha256": "021c239e900cc4aca4a36687887345f1cdf3912791adc24c9e27fe5613d29112",
+  "actor": 4,
+  "field": 201,
+  "schema": "actor.oad / Background Color / SHOW_AS_COLOR",
+  "gameplay_consumer": false
+}

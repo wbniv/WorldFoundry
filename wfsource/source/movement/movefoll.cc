@@ -76,8 +76,8 @@ FollowHandler::update(MovementManager& movementManager,  MovementObject& movemen
 
    BaseObject* targetBase = baseObjectList[_owner];
    AssertMsg(ValidPtr(targetBase),"owner (index " << _owner << ") not found in object " << movementObject);
-   MovementObject* pOwner = dynamic_cast<MovementObject*>(targetBase);
-   assert(ValidPtr(pOwner));
+   assert(IsMovementObject(targetBase));
+   MovementObject* pOwner = static_cast<MovementObject*>(targetBase);
    
 	if ( !pOwner->GetPhysicalAttributes().HasRunUpdate() )
 		pOwner->update();
@@ -102,8 +102,8 @@ FollowHandler::predictPosition( MovementManager& movementManager, MovementObject
 	assert( _owner > 0 );
    BaseObject* baseObject = baseObjectList[_owner];
    assert(ValidPtr(baseObject));
-   MovementObject* mo = dynamic_cast<MovementObject*>(baseObject);
-   assert(ValidPtr(mo));
+   assert(IsMovementObject(baseObject));
+   MovementObject* mo = static_cast<MovementObject*>(baseObject);
 
 	if ( !mo->GetPhysicalAttributes().HasRunPredictPosition())
       mo->predictPosition(currentTime);

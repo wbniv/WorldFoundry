@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Q*bert app's labels; override src/main/res/values/strings.xml.
+     "WF Q*bert" is a placeholder until the user picks a name
+     (docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md). -->
+<resources>
+    <string name="app_name">WF Q*bert</string>
+    <string name="log_viewer_label">Q*bert Log</string>
+</resources>

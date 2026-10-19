@@ -1,0 +1,21 @@
+diff --git a/yffi/src/lib.rs b/yffi/src/lib.rs
+index 10bb677..c66e204 100644
+--- a/yffi/src/lib.rs
++++ b/yffi/src/lib.rs
+@@ -1792,7 +1792,7 @@ impl Prelim for YInput {
+                 let map = Map::from(inner_ref);
+                 let keys = self.value.map.keys;
+                 let values = self.value.map.values;
+-                let i = 0;
++                let mut i = 0;
+                 while i < self.len as isize {
+                     let key = CStr::from_ptr(keys.offset(i).read())
+                         .to_str()
+@@ -1800,6 +1800,7 @@ impl Prelim for YInput {
+                         .to_owned();
+                     let value = values.offset(i).read().into();
+                     map.insert(txn, key, value);
++                    i += 1;
+                 }
+             } else if self.tag == Y_ARRAY {
+                 let array = Array::from(inner_ref);

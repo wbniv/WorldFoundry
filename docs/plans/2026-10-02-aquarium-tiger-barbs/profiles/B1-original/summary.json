@@ -1,0 +1,63 @@
+{
+  "receipt": {
+    "apk": "/tmp/aquarium-barb-baselines/B1.apk",
+    "apk_sha256": "3e42bc672774102fd5a20d52b42c1c8a979e38048d9cdc3318bc0646a9ac10cd",
+    "protocol": "30 s warmup; 60 s fixed trace (five 12 s segments); 3 runs by default; SurfaceFlinger sampled every 0.75 s",
+    "serial": "adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp",
+    "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+    "revision": "77377cb60a5d2ab73e4cad63145d929ab734a12a"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#1003",
+      "frames": 4050,
+      "refresh_ms": 16.683333,
+      "p50_ms": 16.683356,
+      "p90_ms": 16.683485,
+      "p95_ms": 16.68354,
+      "p99_ms": 16.683692,
+      "worst_ms": 33.366895,
+      "fps": 59.85131059019662,
+      "missed_refresh_percent": 0.14814814814814814
+    },
+    {
+      "run": 2,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#1013",
+      "frames": 4050,
+      "refresh_ms": 16.683333,
+      "p50_ms": 16.683358,
+      "p90_ms": 16.683489,
+      "p95_ms": 16.683545,
+      "p99_ms": 16.683693,
+      "worst_ms": 33.366803,
+      "fps": 59.83655784905926,
+      "missed_refresh_percent": 0.1728395061728395
+    },
+    {
+      "run": 3,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#1036",
+      "frames": 4046,
+      "refresh_ms": 16.683333,
+      "p50_ms": 16.683356,
+      "p90_ms": 16.683484,
+      "p95_ms": 16.683549,
+      "p99_ms": 16.683717,
+      "worst_ms": 33.366825,
+      "fps": 59.76272928752634,
+      "missed_refresh_percent": 0.2965892239248641
+    }
+  ],
+  "median": {
+    "run": 2,
+    "frames": 4050,
+    "refresh_ms": 16.683333,
+    "p50_ms": 16.683356,
+    "p90_ms": 16.683485,
+    "p95_ms": 16.683545,
+    "p99_ms": 16.683693,
+    "worst_ms": 33.366825,
+    "fps": 59.83655784905926,
+    "missed_refresh_percent": 0.1728395061728395
+  }
+}

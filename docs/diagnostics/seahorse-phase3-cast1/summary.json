@@ -1,0 +1,43 @@
+{
+  "device": "chromecast-test-01 (Chromecast HD, Android 14)",
+  "date": "2026-10-16",
+  "test_apk": {
+    "source": "frozen fallback; fresh build from origin/2026-new-level 4d318485 skipped because / had 4.1 GB free (limit 5 GB)",
+    "commit": "0401c619",
+    "base_sha256": "b758d5933c3e17a5684fa75b7d0fdcb143f2302553a9c547d415abb0408c3216",
+    "variants_sha256": {
+      "pair2": "c88612a0c485fbe1980d1ab7ce2495cb0e05481e7e70d444d48b0a322fff8640",
+      "pair1": "ed069f09d449d694ebe83b3f60293217c33704577536ec7a8c043f72c9de3bdf",
+      "none": "c0de73cdd3c87cd9512c553d2df7d528845ad1e6231683ac80c6752bd543484f",
+      "freshwater": "af62434ef6985a682c066aea8bb4f87be966a3fe2b53d6b5e0f91470e06e2413"
+    }
+  },
+  "installed_before_this_session_sha256": "c119b3725112684a41d6e810052ec88750380e8c47f540244589458474cd306e",
+  "menu_check": {
+    "validator": "menu-back",
+    "pair2": {"job": "J-c662cfe8b72c", "scenes_pass": 8, "betta_animated_pixels": 2575, "fatal_assert_crash_forth_lines": 0,
+              "planted_tank": "saltwater, 4 seahorses as 2 pairs, one pair on each post (red whip left, grey T-post right), 18.9 FPS"},
+    "pair1": {"job": "J-2949cf86700c", "scenes_pass": 8, "betta_animated_pixels": 2632, "fatal_assert_crash_forth_lines": 0,
+              "planted_tank": "saltwater, 2 seahorses (1 pair) on the red whip; grey T-post shown and empty, as in the desktop capture wide-pair1.png; 19.9 FPS"},
+    "none": {"job": "J-0ec6295b9e58", "scenes_pass": 8, "betta_animated_pixels": 2054, "fatal_assert_crash_forth_lines": 0,
+             "planted_tank": "saltwater, no seahorses and no posts, urchin present; 21.2 FPS"},
+    "freshwater": {"job": "J-cc8fe71434ad", "scenes_pass": 8, "betta_animated_pixels": 2498, "fatal_assert_crash_forth_lines": 0,
+                   "planted_tank": "freshwater plants, rocks and the freshwater resident; no seahorses, no posts, no urchin; 19.9 FPS"}
+  },
+  "aquarium_seahorses": {
+    "job": "J-534fd47d24cc",
+    "apk_sha256": "b758d5933c3e17a5684fa75b7d0fdcb143f2302553a9c547d415abb0408c3216",
+    "result": "FAIL at the first assertion (seahorses_sheet_fields); plugin-error, automatic readd J-0bae7529a0df returned the device to ready",
+    "cause": "validator predicate: seahorse_fields() requires Greeting kind == 4, but the app sends every checkbox (Textures, Sway, Greeting) as kind 2, show 8, choices False|True; the level declares Greeting TYPEENTRYBOOLEAN(...SHOW_AS_CHECKBOX). Field 8 (None|1 pair|2 pairs, value 2) and field 9 (value 1) are present on the phone model and the Seahorses sheet shows on the TV.",
+    "not_reached": ["saltwater_applied", "seahorses_apply_two_pairs", "seahorses_apply_one_pair", "seahorses_apply_none", "seahorses_apply_two_pairs_again", "plant_only_apply_keeps_seahorse_fields", "freshwater_applied_keeps_count", "saltwater_restored"]
+  },
+  "restored_apk": {
+    "branch": "2026-new-level",
+    "commit": "e941e460",
+    "sha256": "3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88",
+    "install_job": "J-fdb7dc91844e",
+    "installed_sha256": "3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88",
+    "confirm_job": "J-37aa68f6ecdc",
+    "confirm_before_hash": "3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88"
+  }
+}

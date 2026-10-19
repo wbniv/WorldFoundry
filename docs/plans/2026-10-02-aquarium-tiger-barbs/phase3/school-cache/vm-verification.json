@@ -1,0 +1,21 @@
+{
+  "behavior": "480 sequential follower update/commit comparisons, including startle, blind volumes, zone changes, coincident positions and walls; identical float state and accumulation outputs",
+  "mailbox_calls": {
+    "population_11": {
+      "before": 147606,
+      "cached": 126714,
+      "reduction_percent": 14.154
+    },
+    "population_30": {
+      "before": 330574,
+      "cached": 260029,
+      "reduction_percent": 21.3402
+    }
+  },
+  "test_result": "10 passed: differential scan and existing continuity/turn tests",
+  "new_mailbox_cells": 0,
+  "behavior_updates_per_frame": 5,
+  "follower_actors": 29,
+  "existing_school_regressions": "8 passed",
+  "final_integrated_checks": "73 passed against regenerated assets and release APK"
+}

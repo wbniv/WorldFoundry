@@ -1,0 +1,26 @@
+{
+  "identical_native_libraries_in_all_four_phases": true,
+  "native_sha256": {
+    "lib/arm64-v8a/libwf_game.so": "def91ed87e233688e24469c4e84865337144b62f8a6300476e92879e7ca5ef90",
+    "lib/armeabi-v7a/libwf_game.so": "1284a37230be29f64cb8dffeb84044e63b8c2a9266168e6b811fb27e7ee4cc50"
+  },
+  "comparison_scope": "Level content and Forth change; native renderer, Android activity and engine libraries remain frozen",
+  "phases": {
+    "0": {
+      "release": "4ebf1634ac16c60d2d1a3bf80b2ae2ea32fa85cf8dadace8a151ab1a43d5d152",
+      "cpu": "5aaa83ff863f62511a10313fc2e7d481cc37eb5a8666bf41c6bd225910fca052"
+    },
+    "1": {
+      "release": "899b766c0fd832e1b6df483584bc080c8cd49418b6f4f00799bf5ebd021ceb91",
+      "cpu": "91ce5ec010bc13b0d619cfc4d8430d3a6510daf1e7764b0de6bdc1104cc3e43b"
+    },
+    "2": {
+      "release": "04b04656a17f0cc8b7cb9ffabb53078cb7f0915eecea1756bd80d9327bdb26a0",
+      "cpu": "d28afe00afc804266e5798950b794a90e5859480aed5eb92c811bd076ebe4cce"
+    },
+    "3": {
+      "release": "a4f8bfe6567dc96cc20feedbf78f4fac9e6b5f7b4b51336e0b94256e5611a641",
+      "cpu": "1f34321b9f6fa654c21349b90189218782577d02836b4774a46d9fafdad80522"
+    }
+  }
+}

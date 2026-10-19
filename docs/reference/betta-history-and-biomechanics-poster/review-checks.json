@@ -1,0 +1,21 @@
+{
+  "outside": [],
+  "svgOutside": [],
+  "images": [
+    {
+      "loaded": true,
+      "width": 2200,
+      "height": 1400
+    },
+    {
+      "loaded": true,
+      "width": 2200,
+      "height": 1400
+    }
+  ],
+  "page": {
+    "width": 1122.515625,
+    "height": 1587.390625
+  },
+  "js_errors": []
+}

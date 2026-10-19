@@ -26,17 +26,7 @@
 
 #include <gfx/viewport.hp>
 
-#if defined ( RENDERER_PSX )
-#include <gfx/psx/viewport.cc>
-#elif defined ( RENDERER_GL )
 #include <gfx/gl/viewport.cc>
-#elif defined ( RENDERER_XWINDOWS )
-#include <gfx/xwindows/viewport.cc>
-#elif defined ( RENDERER_DIRECTX )
-#include <gfx/directx/viewport.cc>
-#else
-#error no viewport code for this platform!
-#endif
 
 //============================================================================
 
@@ -48,7 +38,7 @@ ViewPort::DuplicatePrimitive(const Primitive& original, int count)
 	Primitive* prims = (Primitive*)_primitives[_display.GetConstructionOrderTableIndex()].Allocate(count*sizeof(Primitive) ASSERTIONS( COMMA __FILE__ COMMA __LINE__ ));
 	assert(ValidPtr(prims));
 	if(prims)
-		for (int index=0;index<count;index++ )
+		for (int index=0;index<count;++index)
 		{
 			// kts note: this could cause a read from invalid memory
 			memcpy((void*)&prims[index],(void*)&original,sizeof(Primitive));

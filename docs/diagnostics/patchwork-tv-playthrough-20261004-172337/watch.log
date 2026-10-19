@@ -1,0 +1,9 @@
+J-24ea2aa0734c: accepted {"pool": "chromecast-test", "app": "patchwork", "apk": "832f394d7829a1b4526e8b17bc680e055594729bf635f778418fb641816f5bd5.apk", "duration": 180.0, "workflow": "check"}
+J-24ea2aa0734c: granted {"device": "chromecast-test-01", "generation": 38}
+J-24ea2aa0734c: phase {"phase": "connecting"}
+J-24ea2aa0734c: phase {"phase": "installing"}
+J-24ea2aa0734c: phase {"phase": "installing"}
+J-24ea2aa0734c: phase {"phase": "launching"}
+J-24ea2aa0734c: phase {"phase": "restoring"}
+J-24ea2aa0734c: completed {"error": null, "health": "ready"}
+J-24ea2aa0734c: completed

@@ -25,6 +25,7 @@
 //============================================================================
 
 #include <hal/hal.h>
+#include <cstdio>
 #include <gfx/rendobj3.hp>
 #include <math/vector3.hp>
 #include <iff/iffread.hp>
@@ -32,32 +33,16 @@
 #include "material.hp"
 #include "callbacks.hp"
 
-#if defined ( __PSX__ )
-#	include <libgte.h>
-#	include <libgpu.h>
-#	include <inline_c.h>
-#elif defined ( __WIN__ )
-#	include <new.h>
-#endif
 
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-	#include <gfx/softwarepipeline/rendobj3.cc>
-#elif defined ( RENDERER_PIPELINE_PSX )
-	#include <gfx/psx/rendobj3.cc>
-#elif defined ( RENDERER_PIPELINE_GL )
 	#include <gfx/glpipeline/rendobj3.cc>
-#elif defined ( RENDERER_PIPELINE_DIRECTX )
-	#include <gfx/directxpipeline/rendobj3.cc>
-#else
-	#error no platform specific rendobj3 code!
-#endif
 
 //============================================================================
 // keeps pointers to facelist and vertexlist
 
-RenderObject3D::RenderObject3D( Memory& memory, int vertexCount,Vertex3D* vertexList, int faceCount, TriFace* faceList, const Material* materialList )
+RenderObject3D::RenderObject3D( Memory& memory, int vertexCount,Vertex3D* vertexList, int faceCount, TriFace* faceList, Material* materialList )
 {
 	_handleCount = 0;
+	_materialCount = 0;	// caller path; materialCount unknown — SetMaterialColor will reject out-of-range writes via the (idx >= _materialCount) check
 	Construct(memory, vertexCount,vertexList,faceCount,faceList,materialList);
 }
 
@@ -68,7 +53,7 @@ RenderObject3D::_InitPrimList( Memory& memory )
 {
 	_primList[0] = new (memory) Primitive[ORDER_TABLES*_faceCount];
 	assert(ValidPtr(_primList[0]));
-	for(int index=1;index<ORDER_TABLES;index++)
+	for(int index=1;index<ORDER_TABLES;++index)
 	{
 		_primList[index] = _primList[0] + (_faceCount*index);			// kts to reduce # of allocations
 	}
@@ -80,14 +65,34 @@ RenderObject3D::RenderObject3D( Memory& memory, const RenderObject3D& obj3d )
 {
 #pragma message( __FILE__ ": use reference counting" )
 
+    _lionRig=obj3d._lionRig;
+	_dfrm=obj3d._dfrm;
 	_materialList = obj3d._materialList;
+	_materialCount = obj3d._materialCount;
 
 	_handleCount = obj3d._handleCount;
 	_handleList = obj3d._handleList;
+	// Shares vertices, faces and (usually) materials with obj3d, so a change
+	// made through either would not be seen by the other's bake. Particles
+	// are the user; they are short-lived, so a bake each would churn anyway.
+	_staticState = STATIC_SHARED_COPY;
 	_vertexCount = obj3d._vertexCount;
 	_vertexList = obj3d._vertexList;
+    if(!_lionRig.empty()) {
+        _vertexList=new(memory) Vertex3D[_vertexCount];
+        for(int i=0;i<_vertexCount;i++) _vertexList[i]=obj3d._vertexList[i];
+        _materialList=new(memory) Material[_materialCount];
+        for(int i=0;i<_materialCount;i++) _materialList[i]=obj3d._materialList[i];
+    }
 	_faceCount = obj3d._faceCount;
 	_faceList = obj3d._faceList;
+	if(_dfrm) {
+		// DFRM writes positions and face normals: each copy needs its own.
+		_vertexList=new(memory) Vertex3D[_vertexCount];
+		for(int i=0;i<_vertexCount;i++) _vertexList[i]=obj3d._vertexList[i];
+		_faceList=new(memory) TriFace[_faceCount+1];
+		for(int i=0;i<=_faceCount;i++) _faceList[i]=obj3d._faceList[i];
+	}
 
 #if defined(USE_ORDER_TABLES)
 	_InitPrimList( memory );
@@ -99,7 +104,7 @@ RenderObject3D::RenderObject3D( Memory& memory, const RenderObject3D& obj3d )
 //=============================================================================
 
 void
-RenderObject3D::Construct( Memory& memory, int vertexCount,Vertex3D* vertexList, int faceCount, TriFace* faceList, const Material* materialList )
+RenderObject3D::Construct( Memory& memory, int vertexCount,Vertex3D* vertexList, int faceCount, TriFace* faceList, Material* materialList )
 {
 	assert(vertexCount > 0);
 	assert(faceCount > 0);
@@ -111,14 +116,11 @@ RenderObject3D::Construct( Memory& memory, int vertexCount,Vertex3D* vertexList,
 	_faceList = faceList;
 
 #if DO_ASSERTIONS
-	for(int debugIndex = 0;debugIndex < _faceCount;debugIndex++)
+	for(int debugIndex = 0;debugIndex < _faceCount;++debugIndex)
 	{
 		assert(_faceList[debugIndex].v1Index < _vertexCount);
 		assert(_faceList[debugIndex].v2Index < _vertexCount);
 		assert(_faceList[debugIndex].v3Index < _vertexCount);
-#if defined(__WIN__)
-		AssertMsg((faceList[debugIndex].normal.Length()) > Scalar::zero,"normal = " << faceList[debugIndex].normal << ", length = " << faceList[debugIndex].normal.Length());
-#endif
 	}
 #endif
 	_InitPrimList( memory );
@@ -130,16 +132,18 @@ RenderObject3D::Construct( Memory& memory, int vertexCount,Vertex3D* vertexList,
 
 RenderObject3D::~RenderObject3D()
 {
+	StaticMeshDiscard();	// frees the GPU buffers and bookkeeping of a bake
 }
 
 //============================================================================
 
 void
-RenderObject3D::ApplyMaterials(const Material* materialList )
+RenderObject3D::ApplyMaterials(Material* materialList )
 {
+	++_staticVersion;		// primitives (colours, texture pages) are rebuilt: a bake is stale
 	_materialList = materialList;
-	for(int page=0;page<ORDER_TABLES;page++)
-		for(int index=0;index<_faceCount;index++)
+	for(int page=0;page<ORDER_TABLES;++page)
+		for(int index=0;index<_faceCount;++index)
 		{
 			const TriFace& face = _faceList[index];
 			const Material* pMaterial = &( materialList[face.materialIndex] );
@@ -151,18 +155,6 @@ RenderObject3D::ApplyMaterials(const Material* materialList )
 				_vertexList[face.v3Index] );
 		}
 
-#if defined(RENDERER_PIPELINE_DIRECTX)
-	for(int index=0;index<_faceCount;index++)
-	{
-		TriFace& face = _faceList[index];
-		const Material* pMaterial = &( materialList[face.materialIndex] );
-		assert( pMaterial );
-		pMaterial->InitPrimitive(face,
-			_vertexList[face.v1Index],
-			_vertexList[face.v2Index],
-			_vertexList[face.v3Index] );
-	}
-#endif
 }
 
 
@@ -202,7 +194,7 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 				vertexList = new (memory) Vertex3D[vertexCount];
 				assert(ValidPtr(vertexList));
 				Vertex3DOnDisk tempVertex;
-				for(int count=0;count<vertexCount;count++)
+				for(int count=0;count<vertexCount;++count)
 				{
 					chunkIter->ReadBytes(&tempVertex,sizeof(Vertex3DOnDisk));
 
@@ -223,7 +215,7 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 //				ciffread << "materialCount = " << materialCount << std::endl;
 				materials = new (memory) Material[materialCount];
 				assert(ValidPtr(materials));
-				for(int index=0;index < materialCount; index++)
+				for(int index=0;index < materialCount; ++index)
 				{
 #pragma message ("KTS: this causes two memory copies, is there a better way?")
 					_MaterialOnDisk mod;
@@ -245,6 +237,52 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 				assert(chunkIter->BytesLeft() == 0);
 				break;
 			}
+            case IFFTAG('L','R','I','G'):
+            {
+                // v1: version/count followed by region, weight and pivot XYZ (16.16).
+                // Invalid optional metadata is discarded, never partially applied.
+                uint32 version=0,count=0;
+                if(chunkIter->BytesLeft()<8) break;
+                chunkIter->ReadBytes(&version,4); chunkIter->ReadBytes(&count,4);
+                if(version!=1 || count!=uint32(vertexCount) || count>32767 ||
+                    chunkIter->BytesLeft()!=count*20 || !_lionRig.empty()) break;
+                std::vector<wf_render::LionRig> rig; rig.reserve(count); bool valid=true;
+                for(uint32 i=0;i<count;i++) {
+                    int32 v[5]; chunkIter->ReadBytes(v,sizeof(v));
+                    if(v[0]<0 || v[0]>=wf_render::LionRegionCount || v[1]<0 || v[1]>65536) valid=false;
+                    rig.push_back({unsigned(v[0]),v[1]/65536.f,v[2]/65536.f,v[3]/65536.f,v[4]/65536.f});
+                }
+                if(valid) _lionRig.swap(rig);
+                break;
+            }
+            case IFFTAG('D','F','R','M'):
+            {
+                // DFRM v1 (renderassets/dfrm_deform.h). Same rule as LRIG: invalid
+                // optional metadata is discarded, never partially applied.
+                std::vector<uint8> bytes(chunkIter->BytesLeft());
+                if(!bytes.empty()) chunkIter->ReadBytes(bytes.data(),int(bytes.size()));
+                auto data=std::make_shared<wf_render::DfrmData>();
+                const char* reason="";
+                if(!_dfrm && wf_render::ParseDfrm(bytes.data(),bytes.size(),vertexCount,*data,reason)) _dfrm=data;
+                else std::fprintf(stderr,"DFRM: chunk dropped, mesh keeps its rest pose (%s)\n",_dfrm?"duplicate chunk":reason);
+                break;
+            }
+            case IFFTAG('O','P','A','C'):
+            {
+                uint32 version, count;
+                assert(materials != NULL);
+                chunkIter->ReadBytes(&version, sizeof(version));
+                chunkIter->ReadBytes(&count, sizeof(count));
+                assert(version == 1 && count == uint32(materialCount));
+                assert(chunkIter->BytesLeft() == count * sizeof(uint32));
+                for (uint32 index = 0; index < count; ++index) {
+                    uint32 opacity;
+                    chunkIter->ReadBytes(&opacity, sizeof(opacity));
+                    assert(opacity <= 65536);
+                    materials[index].SetOpacity(float(opacity) / 65536.0f);
+                }
+                break;
+            }
 			case IFFTAG('F','A','C','E'):
 			{
 				assert(ValidPtr(vertexList));  			// need vertex list so we can calc normals
@@ -258,7 +296,7 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 				assert(ValidPtr(faceList));
 				TriFace* tempFaceList = new(memory) TriFace[faceCount];
 				assert(ValidPtr(tempFaceList));
-				for(int index=0;index < faceCount; index++)
+				for(int index=0;index < faceCount; ++index)
 				{
 #pragma message ("KTS: this causes two memory copies, is there a better way?")
 					// kts since TriFaceOnDisk is a sub-set of triface, this works
@@ -267,9 +305,6 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 					Vector3 v1( PSToVector3(vertexList[tempFaceList[index].v2Index].position));
 					Vector3 v2( PSToVector3(vertexList[tempFaceList[index].v3Index].position));
 					tempFaceList[index].normal = Vector3ToPS12(CalculateNormal(v0,v1,v2));
-#if defined(__WIN__)
-					assert((tempFaceList[index].normal.Length()) > Scalar::zero);
-#endif
 					AssertMsg(tempFaceList[index].materialIndex < materialCount,"Object ??? tried to refernce material index " << tempFaceList[index].materialIndex  << " when there are only " << materialCount << " materials");
 					RangeCheck(0,tempFaceList[index].materialIndex,materialCount);
 				}
@@ -283,19 +318,19 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 				{
 					// find next unused material index
 					materialIndex = MATERIAL_CLEARED;
-					for(int faceIndex=0;faceIndex < faceCount&&materialIndex == MATERIAL_CLEARED;faceIndex++)
+					for(int faceIndex=0;faceIndex < faceCount&&materialIndex == MATERIAL_CLEARED;++faceIndex)
 						materialIndex = tempFaceList[faceIndex].materialIndex;
 
 					if(materialIndex != MATERIAL_CLEARED)
 					{
 						// now copy all of the faces which use this material to the facelist
-						for(int index=0;index< faceCount;index++)
+						for(int index=0;index< faceCount;++index)
 						{
 							if(tempFaceList[index].materialIndex == materialIndex)
 							{
 								faceList[nextFreeFace] = tempFaceList[index];
 								tempFaceList[index].materialIndex = MATERIAL_CLEARED;
-								nextFreeFace++;
+								++nextFreeFace;
 							}
 						}
 					}
@@ -331,7 +366,43 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 	assert( meshIter.BytesLeft() == 0 );
 	assert(vertexCount > 0);
 	assert(faceCount > 0);
+	_materialCount = materialCount;	// captured for SetMaterialColor() range checks
 	Construct(memory,vertexCount,vertexList,faceCount,faceList, materials);
 }
 
 //============================================================================
+
+void
+RenderObject3D::SetMaterialColor(int idx, const Color& color)
+{
+	if (idx < 0 || idx >= _materialCount) return;	// silently ignore out-of-range
+	if (!ValidPtr(_materialList)) return;
+	if (_materialList[idx].GetColor() == color) return;	// no-op shortcut
+	_materialList[idx].SetColor(color);
+	// Re-bake the prim list so the next Render() picks up the new color.
+	// SetColor() already updated Material._cdColor; this re-runs InitPrimitive
+	// for every face × ORDER_TABLES, which writes the new RGB into each Primitive.
+	ApplyMaterials(_materialList);
+}
+
+//============================================================================
+
+// Level-owned runtime buffers; publication happens between scene renders.
+bool RenderObject3D::SetRuntimeGeometry(int vertices, Vertex3D* vertexList, int faces, TriFace* faceList, bool textured)
+{
+ if(vertices<1||vertices>=32000||faces<1||faces>=32000||!vertexList||!faceList)return false;
+ for(int i=0;i<faces;i++)if(faceList[i].v1Index<0||faceList[i].v2Index<0||faceList[i].v3Index<0||faceList[i].v1Index>=vertices||faceList[i].v2Index>=vertices||faceList[i].v3Index>=vertices||faceList[i].materialIndex!=0)return false;
+ _staticState=STATIC_RUNTIME_GEOMETRY;	// its vertices are rewritten in place each frame
+ _runtimePrimitives.resize(size_t(faces)*ORDER_TABLES);
+ _vertexCount=vertices;_vertexList=vertexList;_faceCount=faces;_faceList=faceList;
+ for(int page=0;page<ORDER_TABLES;page++)_primList[page]=_runtimePrimitives.data()+size_t(page)*faces;
+ // Preserve the exported texture binding when replacing runtime geometry.
+ _materialList[0].SetMaterialFlags(Material::GOURAUD_SHADED|(textured?Material::TEXTURE_MODULATE:0)|(textured?(_materialList[0].GetMaterialFlags()&Material::TEXTURE_MAPPED):0)|Material::LIGHTING_PRELIT);
+ ApplyMaterials(_materialList);return true;
+}
+
+void RenderObject3D::SetLionPalette(unsigned dark,unsigned light)
+{
+    for(int i=0;i<_materialCount;i++) if(_materialList[i].GetMaterialFlags() & Material::TEXTURE_PALETTE)
+        _materialList[i].SetTexturePalette(dark,light);
+}

@@ -55,8 +55,6 @@ Shield::Shield( const SObjectStartupData* startupData ) : Actor( startupData )
 	_owner = startupData->idxCreator;
 	assert( _owner > 0 );
 
-//	GetMailboxes().WriteMailbox(EMAILBOX_SOUND, 38);
-
 	GetMovementManager().SetMovementHandler( &theFollowHandler, *this );
 	((FollowHandler*)&GetMovementManager().GetMovementHandler(*this))->SetTrackedObject( this, _owner );
 
@@ -74,7 +72,6 @@ Shield::Shield( const SObjectStartupData* startupData ) : Actor( startupData )
 void
 Shield::operator++()
 {
-//	GetMailboxes().WriteMailbox(EMAILBOX_SOUND, 44);
 	++_shieldLevel;
 	_displayUntil = theLevel->LevelClock().Current() + getOad()->GetShieldPurchaseDisplay();
 	_toggleWhen = theLevel->LevelClock().Current() + getOad()->GetBlinkFrequency();
@@ -87,7 +84,6 @@ void
 Shield::operator--()
 {
 	assert( _shieldLevel > 0 );
-//	GetMailboxes().WriteMailbox(EMAILBOX_SOUND, 39);
 	--_shieldLevel;
 	_displayUntil = theLevel->LevelClock().Current() + getOad()->GetShieldPurchaseDisplay();
 	_toggleWhen = theLevel->LevelClock().Current() + getOad()->GetBlinkFrequency();

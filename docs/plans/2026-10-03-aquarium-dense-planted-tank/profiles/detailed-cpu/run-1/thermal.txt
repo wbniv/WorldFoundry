@@ -1,0 +1,31 @@
+IsStatusOverride: false
+ThermalEventListeners:
+	callbacks: 2
+	killed: false
+	broadcasts count: -1
+ThermalStatusListeners:
+	callbacks: 2
+	killed: false
+	broadcasts count: -1
+Thermal Status: 0
+Cached temperatures:
+	Temperature{mValue=31.745, mType=3, mName=board_soc_thermal, mStatus=0}
+	Temperature{mValue=31.292002, mType=3, mName=skin_thermal, mStatus=0}
+	Temperature{mValue=34.800003, mType=0, mName=core_soc_thermal, mStatus=0}
+	Temperature{mValue=30.605001, mType=3, mName=board_wifi_thermal, mStatus=0}
+HAL Ready: true
+HAL connection:
+	ThermalHAL AIDL 1  connected: yes
+Current temperatures from HAL:
+	Temperature{mValue=40.654003, mType=3, mName=board_soc_thermal, mStatus=0}
+	Temperature{mValue=39.089, mType=3, mName=board_wifi_thermal, mStatus=0}
+	Temperature{mValue=44.9, mType=0, mName=core_soc_thermal, mStatus=0}
+	Temperature{mValue=39.903004, mType=3, mName=skin_thermal, mStatus=0}
+Current cooling devices from HAL:
+	CoolingDevice{mValue=0, mType=2, mName=cpufreq-cpu0}
+	CoolingDevice{mValue=0, mType=3, mName=thermal-gpufreq-0}
+Temperature static thresholds from HAL:
+	TemperatureThreshold{mType=3, mName=board_soc_thermal, mHotThrottlingThresholds=[NaN, 78.0, 80.0, 83.0, 84.0, 86.0, 90.0], mColdThrottlingThresholds=[NaN, NaN, NaN, NaN, NaN, NaN, NaN]}
+	TemperatureThreshold{mType=3, mName=board_wifi_thermal, mHotThrottlingThresholds=[NaN, 78.0, 80.0, 83.0, 84.0, 86.0, 90.0], mColdThrottlingThresholds=[NaN, NaN, NaN, NaN, NaN, NaN, NaN]}
+	TemperatureThreshold{mType=0, mName=core_soc_thermal, mHotThrottlingThresholds=[NaN, 88.0, 91.0, 94.0, 97.0, 100.0, 115.0], mColdThrottlingThresholds=[NaN, NaN, NaN, NaN, NaN, NaN, NaN]}
+	TemperatureThreshold{mType=3, mName=skin_thermal, mHotThrottlingThresholds=[NaN, 69.0, 70.0, 71.0, 72.0, 73.0, 75.0], mColdThrottlingThresholds=[NaN, NaN, NaN, NaN, NaN, NaN, NaN]}

@@ -1,0 +1,26 @@
+{
+  "status": "verified",
+  "home": "com.google.android.apps.tv.launcherx/.home.HomeActivity",
+  "apk": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40.apk",
+  "attempts": [
+    {
+      "bounds": [
+        1390,
+        906,
+        1542,
+        1058
+      ],
+      "reference": "expected-icon-1.png",
+      "resource": "res/drawable-nodpi-v4/cat_boom_icon.png",
+      "kind": "icon",
+      "mean_absolute_error": 11.314423922603341,
+      "rms_error": 13.212609532696256,
+      "worst_region_error": 15.63671875,
+      "brightness_gain": 0.822423590623047,
+      "verified": true,
+      "screenshot": "attempt-1-view-1.png",
+      "hierarchy": "attempt-1-view-1.xml",
+      "attempt": 1
+    }
+  ]
+}

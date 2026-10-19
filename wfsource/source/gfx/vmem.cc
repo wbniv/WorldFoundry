@@ -28,10 +28,24 @@
 #include "display.hp"
 
 //=============================================================================
+// Runtime-overridable VRAM slot sizes — defaults match the legacy compile-
+// time enums (256² everywhere). main.cc sets these from CLI flags before
+// VideoMemory is constructed. See
+// docs/plans/2026-05-30-runtime-vram-cli-overrides.md.
+#if !defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
+int VideoMemory::VRAMPaletteWidth    = 256;
+int VideoMemory::VRAMPaletteHeight   = 8;
+int VideoMemory::VRAMPermanentWidth  = 256;
+int VideoMemory::VRAMPermanentHeight = 256;
+int VideoMemory::VRAMTransientWidth  = 256;
+int VideoMemory::VRAMTransientHeight = 256;
+#endif
+
+//=============================================================================
 
 VideoMemory::VideoMemory(Display& display)
 {
-	for(int index=0;index < MAX_SLOTS;index++)
+	for(int index=0;index < MAX_SLOTS;++index)
 	{
 		_textures[index] = NULL;
 		_palettes[index] = NULL;
@@ -45,7 +59,7 @@ VideoMemory::VideoMemory(Display& display)
 VideoMemory::~VideoMemory()
 {
 	Validate();
-	for(int index=MAX_TRANSIENT_SLOTS-1;index >= 0;index--)
+	for(int index=MAX_TRANSIENT_SLOTS-1;index >= 0;--index)
 	{
 		MEMORY_DELETE(HALLmalloc,_textures[index],PixelMap);
 		MEMORY_DELETE(HALLmalloc,_palettes[index],PixelMap);
@@ -134,11 +148,17 @@ VideoMemory::AllocateTextureSlots(Display& display)
 	 );
 	assert( ValidPtr( _textures[PERMANENT_SLOT] ) );
 
+	// Legacy VIDEO_MEMORY_IN_ONE_PIXELMAP packs all slots into one VRAM rect, so
+	// it assumed exactly 3 transient slots. The modern GL path gives each slot its
+	// own texture (AllocateTextureSlot below), so any count works — the chunk-
+	// streaming grid raises this to 9. Keep the hard ==3 guard only for the legacy
+	// packed-VRAM build.
+#if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
 	assert( MAX_TRANSIENT_SLOTS == 3 );
-	// ^FAIL: may need to reconsider VRAM * constants w.r.t. PSX constraints
+#endif
 
 	// allocate the transient texture slots
-	for( int transientIndex = 0; transientIndex < MAX_TRANSIENT_SLOTS; transientIndex++ )
+	for( int transientIndex = 0; transientIndex < MAX_TRANSIENT_SLOTS; ++transientIndex)
 	{
 		_palettes[transientIndex] = AllocateTextureSlot
 		(
@@ -171,7 +191,7 @@ VideoMemory::AllocateTextureSlots(Display& display)
 
 #if defined(DESIGNER_CHEATS)
     // so that designer can tell by looking at video memory which slots have been loaded
-	for(int slotIndex=0;slotIndex<MAX_SLOTS;slotIndex++)
+	for(int slotIndex=0;slotIndex<MAX_SLOTS;++slotIndex)
 		ClearSlot(slotIndex);
 #endif
 }

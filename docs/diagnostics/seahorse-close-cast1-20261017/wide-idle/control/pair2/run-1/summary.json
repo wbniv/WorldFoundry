@@ -1,0 +1,22 @@
+{
+  "run": 1,
+  "frames": 1092,
+  "interval_count": 1092,
+  "fps": 18.202018192148532,
+  "refresh_ms": 16.683333,
+  "p50_ms": 50.05009,
+  "p90_ms": 66.733443,
+  "p95_ms": 66.733477,
+  "p99_ms": 66.733751,
+  "worst_ms": 83.416834,
+  "missed_refresh_percent": 100.0,
+  "duration_seconds": 60,
+  "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#3343",
+  "measurement_anchor_ns": 72690585501685,
+  "measurement_start_wall_time": 1792208593.3709323,
+  "settling_reads": 2,
+  "sampling_holes": [],
+  "empty_sample_indices": [],
+  "latency_statistics_may_include_unobserved_bridges": false,
+  "observed_span_seconds": 59.993347357
+}

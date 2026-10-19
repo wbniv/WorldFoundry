@@ -1,0 +1,13 @@
+{
+  "status": "INSTALLED_VERIFIED",
+  "apk_sha256": "6236ade65122ff712556be9a183ca83f1240bf9d85549830eb6f1bcc6de352b0",
+  "package": "org.worldfoundry.wf_game.aquarium",
+  "serial": "adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp",
+  "selector_rows": 5,
+  "device_cold_launch": "PASS",
+  "device_first_tank": "PASS",
+  "all_tanks_and_returns": "Desktop PASS; full device sequence stopped due to concurrent input",
+  "held_back": "Physical remote check pending; adb combination has zero event-held timestamp",
+  "resume_relaunch": "Not fully verified for this selector release",
+  "profiling": false
+}

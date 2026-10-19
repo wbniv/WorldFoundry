@@ -1,0 +1,16 @@
+--------- beginning of system
+10-03 17:33:55.888   655   771 I ActivityManager: Start proc 10765:org.worldfoundry.wf_game.aquarium/u0a147 for next-top-activity {org.worldfoundry.wf_game.aquarium/android.app.NativeActivity}
+10-03 17:33:56.121   655  1192 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10147. pid: 10765
+--------- beginning of main
+10-03 17:33:56.316 10765 10788 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log
+10-03 17:33:56.316 10765 10788 I wf_game : android_main: enter
+10-03 17:33:56.316 10765 10788 I wf_game : android_main: assetMgr=0xee08c800
+10-03 17:33:56.317 10765 10788 I wf_game : android_main: uiMode=4 (tv=1)
+10-03 17:33:56.317 10765 10788 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-03 17:33:56.323 10765 10788 I wf_game : APP_CMD_RESUME
+10-03 17:33:56.324 10765 10788 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-03 17:33:56.324 10765 10788 I wf_game : phone controller: open http://192.168.4.43:8765/?k=516796 (PIN 516796)
+10-03 17:33:56.388 10765 10788 I wf_game : APP_CMD_INIT_WINDOW
+10-03 17:33:56.484 10765 10788 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-03 17:33:56.484 10765 10788 I wf_game : android_main: EGL ready, entering HALStart
+10-03 17:33:56.585 10765 10788 I wf_game : level-menu: showing 8 entries ("WF Aquarium"), cursor on 0

@@ -81,11 +81,11 @@ Warp::update()
 		DBSTREAM5( cdebug << "Warp::update: activated by object " << colObject << std::endl; )
 		const BaseObject* bo = theLevel->GetObject( getOad()->Target );
 		assert( ValidPtr( bo ) );
-      const PhysicalObject* target = dynamic_cast<const PhysicalObject*>(bo);
-		assert( ValidPtr( target ) );
+      assert(IsPhysicalObject(bo));
+      const PhysicalObject* target = static_cast<const PhysicalObject*>(bo);
 
-      PhysicalObject* po = dynamic_cast<PhysicalObject*>(colObject);
-      assert(ValidPtr(po)); 
+      assert(IsPhysicalObject(colObject));
+      PhysicalObject* po = static_cast<PhysicalObject*>(colObject);
 
 		DBSTREAM1( if ( !po->GetMovementBlockPtr()->Mobility )
 			cerror << *this << " tried to move anchored " << *colObject << std::endl; )
@@ -110,14 +110,14 @@ Warp::update()
 				break;
 			case MsgPort::SPECIAL_COLLISION:
 			{
-				Actor* colActor = (Actor*)msgData;
+				Actor* colActor = reinterpret_cast<Actor*>(*(uintptr_t*)msgData);   // pointer is stored IN msgData, not the buffer's address
 				DBSTREAM4( cdebug << "Warp::update: collision with actor  " << colActor << std::endl; )
 				if ( activation.Activated(theLevel->GetActiveRooms().GetObjectIter(ROOM_OBJECT_LIST_COLLIDE), (struct _Activation*)&GetActivateBlockPtr()->ActivatedBy, colActor, *GetActivationBlockPtr(), theLevel->GetObjectList()) )
 				{
 					DBSTREAM5( cdebug << "Warp::update: activated by " << colActor << std::endl; )
 					BaseObject* bo = theLevel->GetObject( getOad()->Target );
-               const PhysicalObject* target = dynamic_cast<PhysicalObject*>(bo);
-               assert( ValidPtr( target ) );
+               assert(IsPhysicalObject(bo));
+               const PhysicalObject* target = static_cast<PhysicalObject*>(bo);
 					assert( target );
 					DBSTREAM1
 					(	if ( !target->GetMovementBlockPtr()->Mobility )

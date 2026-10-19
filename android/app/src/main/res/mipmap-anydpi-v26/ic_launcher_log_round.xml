@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Round-icon variant of ic_launcher_log.xml — same layers. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_log_background" />
+    <foreground android:drawable="@mipmap/ic_launcher_log_foreground" />
+</adaptive-icon>

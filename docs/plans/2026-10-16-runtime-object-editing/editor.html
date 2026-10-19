@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<!--
+  Plan mockup — runtime object editing on OAS/OAD.
+  Self-contained; 1440x900. TV styling follows the Cast1 capture
+  plant-cast1-final/selector-properties-screenshot.png; phone colours follow
+  wfsource/source/hal/phonepad/controller.html.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup — runtime object editing</title>
+<style>
+  :root { --bg:#ffffff; --fg:#1f2328; --muted:#656d76; --line:#d1d9e0; --panel:#f6f8fa; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --line:#30363d; --panel:#161b22; } }
+  * { box-sizing:border-box; }
+  body { margin:0; width:1440px; height:900px; overflow:hidden; background:var(--bg); color:var(--fg); font:14px/1.45 ui-sans-serif,system-ui,sans-serif; }
+  header { display:flex; align-items:baseline; gap:14px; height:56px; padding:14px 24px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header h1 { margin:0; font-size:16px; font-weight:600; } header .sub { color:var(--muted); font-size:13px; }
+  header .tag { margin-left:auto; font:600 11px ui-monospace,monospace; color:var(--muted); border:1px solid var(--line); border-radius:10px; padding:2px 8px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:22px; padding:16px 24px 0; }
+  .card h2 { margin:0 0 3px; font-size:14px; } .card p { margin:0 0 8px; color:var(--muted); font-size:12.5px; height:34px; }
+  .tv { height:330px; background:#081009; padding:18px 24px; border-radius:6px; font:13px ui-monospace,"DejaVu Sans Mono",monospace; color:#e3ecd8; }
+  .tv .box { background:#173326; height:100%; padding:14px 16px; }
+  .tv .title { font-size:14px; margin-bottom:12px; }
+  .row { background:#21402f; padding:7px 10px; margin-bottom:7px; display:flex; justify-content:space-between; }
+  .row.sel { background:#4f8452; } .row .k { color:#bcd0b4; font-size:11.5px; }
+  .ro { opacity:.5; } .lock { float:right; color:#e3ecd8; vertical-align:middle; }
+  .seg { display:inline-flex; gap:0; } .seg span { padding:0 8px; color:#bcd0b4; } .seg span.on { background:#eef3df; color:#14261b; }
+  .hint { color:#d9c36a; font-size:11.5px; margin-top:6px; display:flex; justify-content:space-between; }
+  .row2 { display:grid; grid-template-columns:330px 1fr; gap:22px; padding:14px 24px 0; }
+  .phone { width:300px; height:330px; background:#0d1117; border:9px solid #3b3f46; border-radius:28px; padding:14px; color:#e6edf3; font:13px system-ui,sans-serif; }
+  .phone .t { font-weight:700; } .phone .s { color:#8b98a9; font-size:12px; margin-bottom:8px; }
+  .phone label { display:block; color:#8b98a9; font-size:12px; margin:7px 0 3px; }
+  .phone .v { border:1px solid #3a4a63; border-radius:8px; padding:7px 10px; background:#111826; }
+  .phone .v.ro { opacity:.5; } .lock { float:right; color:#e3ecd8; vertical-align:middle; }
+  .phone .btns { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; } .phone .btns span { text-align:center; padding:9px 0; border-radius:8px; background:#1d2a3f; } .phone .btns .ok { background:#56d364; color:#0d1117; font-weight:700; }
+  pre { margin:0; padding:12px 14px; border-radius:8px; background:#0b0f14; color:#d6dde6; font:12px/1.5 ui-monospace,monospace; white-space:pre-wrap; }
+  .err { color:#ff7b72; } .ok2 { color:#56d364; } .note { margin-top:10px; font-size:12.5px; color:var(--muted); }
+</style>
+</head>
+<body>
+<header><h1>Runtime object editing on OAS/OAD</h1><span class="sub">editable = type has a field the engine re-reads · labels from export · form from the type's .oad · no RP01/RP02</span><span class="tag">MOCKUP — NOT SHIPPED</span></header>
+<div class="grid">
+  <div class="card">
+    <h2>1. TV picker: the export's Editable Objects list</h2>
+    <p>Listed: every object whose type has a field the engine re-reads (decided at export). Labels are automatic ("Seahorse 2") unless an Editor Label overrides one ("Goldie"). No runtime scan.</p>
+    <div class="tv"><div class="box">
+      <div class="title">Choose an object</div>
+      <div class="row sel"><span>Planted Tank Settings</span></div>
+      <div class="row"><span>Goldie</span></div>
+      <div class="row"><span>Seahorse 2</span></div>
+      <div class="row"><span>Seahorse 3</span></div>
+      <div class="row"><span>Seahorse 4</span></div>
+      <div class="hint"><span>Arrows: select&nbsp;&nbsp; OK: open</span><span>← Back</span></div>
+    </div></div>
+  </div>
+  <div class="card">
+    <h2>2. TV form: built from plantedtanksettings.oad</h2>
+    <p>Labels, help, ranges and choices come from the descriptors. Editable fields carry no marker; read-only fields (read once at construction) are dimmed with a padlock.</p>
+    <div class="tv"><div class="box">
+      <div class="title">Planted Tank Settings</div>
+      <div class="row sel"><span>Seed: 1234567</span><span class="k">0 – 2 147 483 647</span></div>
+      <div class="row"><span>Water type <span class="seg"><span>Freshwater</span><span class="on">Saltwater</span></span></span></div>
+      <div class="row"><span>Growth speed: 1x</span></div>
+      <div class="row ro"><span>Initial age: 150 s</span><svg class="lock" width="18" height="20" viewBox="0 0 18 20" aria-label="read-only" role="img"><path d="M5 9V6a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="2.5" y="9" width="13" height="10" rx="2" fill="currentColor"/></svg></div>
+      <div class="row"><span>Seahorses: 2 pairs · Greeting: On</span></div>
+      <div class="hint"><span>Arrows: select&nbsp;&nbsp; A: edit</span><span>← Apply / close</span></div>
+    </div></div>
+  </div>
+</div>
+<div class="row2">
+  <div class="card">
+    <h2>3. Phone (narrow)</h2>
+    <div class="phone">
+      <div class="t">Planted Tank Settings</div><div class="s">from the level's Editable Objects</div>
+      <label>Seed</label><div class="v">1234567</div>
+      <label>Water type</label><div class="v">Saltwater</div>
+      <label>Initial age</label><div class="v ro">150 s <svg class="lock" width="18" height="20" viewBox="0 0 18 20" aria-label="read-only" role="img"><path d="M5 9V6a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="2.5" y="9" width="13" height="10" rx="2" fill="currentColor"/></svg></div>
+      <div class="btns"><span>Cancel</span><span class="ok">Apply</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>4. Export: resolved once, errors stop the build</h2>
+<pre>$ bash wflevels/aquarium_plants/build.sh
+levcomp: LevelObj.Editable Objects = 5   (types with SHOW_AS_LIVE fields: PlantedTankSettings, Seahorse)
+  PlantedTankSettings   "Planted Tank Settings"   (auto)
+  Seahorse.001          "Goldie"                  (Editor Label)
+  Seahorse.002..004     "Seahorse 2".."Seahorse 4" (auto)
+levcomp: OAD chunks: PlantedTankSettings 12.0 KB, Seahorse 9.0 KB
+<span class="ok2">ok</span>
+
+$ bash wflevels/aquarium_plants/build.sh      # after a duplicate override
+<span class="err">levcomp: error: Editor Label "Goldie" is used by Seahorse.001 and Seahorse.003;
+  labels must be unique within a level</span></pre>
+    <div class="note">Not shown: a level built before the actor.inc / levelobj.oas appends loads with "nothing editable" (its LevelObj record is shorter than the new layout).</div>
+  </div>
+</div>
+</body>
+</html>

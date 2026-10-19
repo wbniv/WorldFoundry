@@ -46,31 +46,5 @@ max(TYPE& a, TYPE& b)
 
 
 
-#if 0
-template <class T> inline const T&
-min( const T& _1, const T& _2 )
-{
-	return _1 < _2 ? _1 : _2;
-}
-
-template <class T> inline T
-min( T _1, T _2 )
-{
-	return _1 < _2 ? _1 : _2;
-}
-
-
-template <class T> inline const T&
-max( const T& _1, const T& _2 )
-{
-	return _1 > _2 ? _1 : _2;
-}
-
-template <class T> inline T
-max( T _1, T _2 )
-{
-	return _1 > _2 ? _1 : _2;
-}
-#endif
 
 #endif	// MINMAX_HP

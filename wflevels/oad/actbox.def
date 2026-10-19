@@ -1,0 +1,28 @@
+;============================================================================
+; ActBox.def: created from OADdef.S and ActBox.oas DO NOT MODIFY
+;============================================================================
+;##ifndef ActBox_HT
+;##define ActBox_HT
+	( define OAD_moveblocPageOffset 0 )	; common block: offset in page data for this objects page
+	( define OAD_toolsetPageOffset 4 )	; common block: offset in page data for this objects page
+	( define OAD_commonPageOffset 8 )	; common block: offset in page data for this objects page
+	( define OAD_MeshName 12 )	;file Mesh Name: This is a packedAssetID
+	( define OAD_meshPageOffset 16 )	; common block: offset in page data for this objects page
+	( define OAD_shadowPageOffset 20 )	; common block: offset in page data for this objects page
+	( define OAD_TemplateObject 24 )	; boolean: Default: 0
+	( define OAD_ActivatedBy 28 )	; int32: Minumum: 0 Maximum: 3 Default: 1
+	( define OAD_ActivatedByActor 32 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+	( define OAD_ActivatedByClass 36 )	; class reference: index into master class list, = CLASS_NULL if no reference
+	( define OAD_ActivatedByObjectList 40 )	; xdata_convert:
+	( define OAD_MailBox 44 )	; int32: Minumum: 0 Maximum: 3999 Default: 2
+	( define OAD_MailBoxValue 48 )	; int32: Minumum: 0 Maximum: 65536 Default: 1
+	( define OAD_ActivatedActorMailbox 52 )	; int32: Minumum: 0 Maximum: 3999 Default: 0
+	( define OAD_ClearOnExit 56 )	; boolean: Default: 0
+	( define OAD_MailboxExitValue 60 )	; fixed32: Minumum: ( ((long) -32767 * 65536.0)) Maximum: ( ((long) 32767 * 65536.0))
+	( define OAD_ActivationMailbox 64 )	; int32: Minumum: 0 Maximum: 3999 Default: 1
+	( define OAD_VectorX 68 )	; fixed32: Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0))
+	( define OAD_VectorY 72 )	; fixed32: Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0))
+	( define OAD_VectorZ 76 )	; fixed32: Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0))
+;============================================================================
+;##endif         ; ActBox_DEF
+;============================================================================

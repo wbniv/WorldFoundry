@@ -1,0 +1,16 @@
+task: [build-cd-iff-condo] cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
+warning: function `pad_to_sector` is never used
+   --> src/main.rs:120:4
+    |
+120 | fn pad_to_sector(buf: &mut Vec<u8>) {
+    |    ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `cdpack` (bin "cdpack") generated 1 warning
+    Finished `release` profile [optimized] target(s) in 0.05s
+task: [build-cd-iff-condo] mkdir -p "$(dirname 'wflevels/condo-cd.iff')"
+task: [build-cd-iff-condo] wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell.fth wflevels/condo_639_640-standalone.iff -o 'wflevels/condo-cd.iff'
+cdpack: wrote 2435072 bytes to wflevels/condo-cd.iff
+  SHEL: 98 bytes (sector 1)
+  L0: 2430976 bytes at sector 2 (condo_639_640-standalone.iff)

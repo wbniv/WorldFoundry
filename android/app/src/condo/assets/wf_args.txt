@@ -1,0 +1,6 @@
+--vram-width=4096
+--vram-height=2048
+--vram-slot-width=1024
+--vram-slot-height=1024
+--vram-perm-width=1024
+--vram-perm-height=1024

@@ -1,0 +1,12 @@
+Accepted J-5326f48d6612: queued; check
+Follow: task chromecast:watch JOB=J-5326f48d6612
+J-5326f48d6612: accepted {"pool": "chromecast-test", "app": "patchwork", "apk": "46f411783c6458b40516677fa4760db527a9c35dca2798df3002fe6ec518e98f.apk", "duration": 15.0, "validator": "poke-resume", "workflow": "check"}
+J-5326f48d6612: granted {"device": "chromecast-test-01", "generation": 17}
+J-5326f48d6612: phase {"phase": "connecting"}
+J-5326f48d6612: phase {"phase": "installing"}
+J-5326f48d6612: phase {"phase": "installing"}
+J-5326f48d6612: phase {"phase": "launching"}
+J-5326f48d6612: phase {"phase": "restoring"}
+J-5326f48d6612: failed {"error": "Target app left foreground; measurement invalid", "health": "ready"}
+J-5326f48d6612: failed: Target app left foreground; measurement invalid
+task: Failed to run task "chromecast:check": exit status 1

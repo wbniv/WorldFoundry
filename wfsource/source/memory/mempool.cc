@@ -30,6 +30,7 @@
 
 #include <hal/hal.h>
 #include <memory/mempool.hp>
+#include <cpplib/align.hp>
 
 #define MEMPOOL_REALTRACKING 1
 #define MEMPOOL_TRASHMEMORY DO_ASSERTIONS
@@ -42,7 +43,7 @@ MemPool::MemPool(size_t size,int entries,Memory& memory MEMORY_NAMED( COMMA cons
 	: Memory( MEMORY_NAMED( name ) )
 {
 	assert(size);
-	AssertMsg((size % 4) == 0,"MemPool size must be long-word alligned, size was " << size);								// must be long-word aligned
+	AssertMsg((size % WF_POINTER_ALIGN) == 0,"MemPool entry size must be a multiple of " << WF_POINTER_ALIGN << " bytes, got " << size);
 	assert(entries);
 	assert(size >= sizeof(MemPoolFreeEntry));				// make sure our free entry struct will fit
 	assert(size*entries);
@@ -88,7 +89,7 @@ MemPool::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 	if(_firstFree._next)
 	 {
 //#if DO_ASSERTIONS
-		_currentEntries++;
+		++_currentEntries;
 //#endif
 		void* mem = (void*)_firstFree._next;
 		_firstFree._next = _firstFree._next->_next;
@@ -99,7 +100,7 @@ MemPool::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 		return(0);					// out of entries
 #else					// ! MEMPOOL_REALTRACKING
 //#if DO_ASSERTIONS
-	_currentEntries++;
+	++_currentEntries;
 //#endif
 #error !!!
 	void* mem = malloc(_size);
@@ -119,7 +120,7 @@ MemPool::Free(const void* mem)
 	Validate();
 	assert(ValidPtr(mem));
 //#if DO_ASSERTIONS
-	_currentEntries--;
+	--_currentEntries;
 //#endif
 	DBSTREAM5(cprogress << "Freeing an entry from Memory Pool " << this << " at address " << mem ASSERTIONS( << " leaving " << _currentEntries << " entries") << std::endl; )
 	assert(_currentEntries >= 0);
@@ -237,7 +238,7 @@ MemPool::_Validate() const
 		assert(((char*)fe->_next) < (_buffer+(_maxEntries*_size)));
 		fe = fe->_next;
 		AssertMsg(count < _maxEntries, "mempool list must be looped");
-		count++;
+		++count;
 	 }
 }
 #endif

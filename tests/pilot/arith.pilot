@@ -1,0 +1,16 @@
+R:pilot
+R:@tier vm
+R:@desc C: arithmetic, Scalar-/ vs truncating-// division, T: interpolation
+R:@expect-exit 0
+R:@expect-out sum=7
+R:@expect-out half=2.5
+R:@expect-out idiv=2
+C:#a = 3
+C:#b = 4
+C:#sum = #a + #b
+T:sum=$#sum
+C:#half = 5 / 2
+T:half=$#half
+C:#idiv = 5 // 2
+T:idiv=$#idiv
+E:

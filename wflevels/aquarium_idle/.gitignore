@@ -1,0 +1,17 @@
+# Committed: blender_create_aquarium_idle.py, make_idle_mockup.py,
+# aquarium_idle-standalone.iff.txt, aquarium_idle.lev (so the test can read it
+# without Blender) and ../aquarium_idle-standalone.iff. Everything else is
+# regenerable with `task aquarium-idle-level`.
+*.lev.bin
+*.lvl
+aquarium_idle.iff.txt
+*.ini
+asset.inc
+*.tga
+*.ruv
+*.cyc
+*.iff
+*.blend
+*.blend1
+__pycache__/
+textile.log.htm

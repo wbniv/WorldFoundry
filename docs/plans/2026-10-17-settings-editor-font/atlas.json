@@ -1,0 +1,46 @@
+{
+ "codepoints": 198,
+ "variants": [
+  [
+   "small",
+   "Regular",
+   28
+  ],
+  [
+   "body",
+   "Regular",
+   36
+  ],
+  [
+   "body-bold",
+   "SemiBold",
+   36
+  ],
+  [
+   "title",
+   "SemiBold",
+   46
+  ],
+  [
+   "menu",
+   "Regular",
+   56
+  ],
+  [
+   "menu-bold",
+   "SemiBold",
+   56
+  ],
+  [
+   "display",
+   "SemiBold",
+   80
+  ]
+ ],
+ "glyphs": 1386,
+ "atlas": [
+  1024,
+  2048
+ ],
+ "bytes": 2097152
+}

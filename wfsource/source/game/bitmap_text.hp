@@ -1,0 +1,76 @@
+//==============================================================================
+// game/bitmap_text.hp — native-pixel bitmap font layout
+// Copyright ( c ) 2026 World Foundry Group
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License Version 2.
+// This program is distributed without ANY WARRANTY. See www.fsf.org.
+//==============================================================================
+// Description: bounded, allocation-free UTF-8 layout over a pre-rendered atlas.
+// Original Author: Codex (gpt-6.1-sol, effort high), for Will Norris.
+//==============================================================================
+#ifndef _BITMAP_TEXT_HP
+#define _BITMAP_TEXT_HP
+
+#include <stddef.h>
+
+namespace bitmaptext
+{
+struct Glyph
+{
+    int variant, codepoint, x, y, width, height, bearingX, bearingY, advance;
+};
+struct Variant { int id, face, pixels, ascent, descent, lineStep; };
+struct Text { int id; const char* title; int titleBytes; const char* body; int bodyBytes; };
+struct Label { int actor, visibility, realm; const char* text; int bytes; };
+struct Quad { float x0, y0, x1, y1, u0, v0, u1, v1, depth; unsigned rgba; };
+struct Line { int begin, end; float width; };
+
+// Bundle storage belongs to the caller (the Level's explicit Memory allocator).
+class Catalog
+{
+public:
+    bool Load(const void* bytes, size_t size, const char*& error);
+    bool Valid() const { return _bytes != NULL; }
+    void Validate() const;
+    Variant GetVariant(int index) const;
+    int SelectVariant(int face, int desiredPixels) const;
+    bool FindGlyph(int variant, int codepoint, Glyph& glyph) const;
+    int Kerning(int variant, int left, int right) const;
+    bool GetText(int id, Text& text) const;
+    Label GetLabel(int index) const;
+    const unsigned char* Pixels() const { return _bytes + _pixelOffset; }
+    int Width() const { return _width; }
+    int Height() const { return _height; }
+    int LabelCount() const { return _labels; }
+    int Binding(int index) const;
+private:
+    const unsigned char* _bytes = NULL;
+    size_t _size = 0;
+    int _width=0, _height=0, _variants=0, _glyphs=0, _kerns=0, _texts=0, _labels=0;
+    int _glyphOffset=0, _kernOffset=0, _textOffset=0, _labelOffset=0, _pixelOffset=0;
+};
+
+// One semantic beat is bounded to 1024 lines; no frame-path allocations.
+class Layout
+{
+public:
+    enum { MAX_LINES=1024, MAX_QUADS=4096 };
+    bool Wrap(const Catalog& catalog, int variant, const char* text, int bytes,
+              int width, const char*& error);
+    int LineCount() const { return _count; }
+    const Line& GetLine(int i) const { return _lines[i]; }
+    int PageCount(int capacity) const;
+    int PageForAnchor(int offset, int capacity) const;
+    int Anchor(int page, int capacity) const;
+    bool Draw(const Catalog& catalog, int variant, const char* text, int bytes,
+              int firstLine, int lineCount, int x, int baseline, int lineStep,
+              float depth, unsigned color, Quad* quads, int& count, int limit,
+              const char*& error) const;
+    void Validate() const;
+private:
+    Line _lines[MAX_LINES];
+    int _count=0;
+};
+bool Decode(const char* text, int bytes, int& offset, int& codepoint);
+}
+#endif

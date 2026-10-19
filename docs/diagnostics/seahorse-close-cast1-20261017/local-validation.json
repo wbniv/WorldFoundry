@@ -1,0 +1,10 @@
+{
+  "build": "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ./gradlew --offline --no-daemon --max-workers=4 assembleAquariumRelease",
+  "build_result": "BUILD SUCCESSFUL in 9m 3s; 51 actionable tasks",
+  "tests": "PYTHONPATH=scripts pytest -q tests/test_seahorse_close_fixtures.py",
+  "test_result": "2 passed in 69.12s",
+  "source_revision": "d8d215ae0d67b2a23a8f1fce89a65e69eccb7f93",
+  "engine_source_modified": false,
+  "packaged_asset_audit": "All 24 frozen APKs verified: structured GAME/TOC extraction, level SHA matches receipt, and pre-catalog bytes preserved except two complete script slots plus known size/locator fields. Per-view prefix hashes recorded in variants.json.",
+  "default_pytest_import_check": "pytest -q tests/test_seahorse_close_fixtures.py::test_baked_slots_and_fail_closed: 1 passed in 0.14s"
+}

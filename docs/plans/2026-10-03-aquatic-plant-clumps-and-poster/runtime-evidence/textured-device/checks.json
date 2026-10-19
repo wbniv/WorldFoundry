@@ -1,0 +1,18 @@
+{
+  "apk_sha256": "eabc18940d8ab8ba7d62b71a05ab9607d8533d599d1153b4e64d291d5c751e2c",
+  "remote_and_selector_settings": true,
+  "phone_settings": true,
+  "exact_seed_replay": 713,
+  "freshwater_saltwater": true,
+  "draft_survives_disconnect": true,
+  "fresh_seed_on_reentry": true,
+  "home_resume": true,
+  "freshwater_albedo": {
+    "green_pixels": 127066,
+    "brown_pixels": 281
+  },
+  "saltwater_albedo": {
+    "green_pixels": 131955,
+    "brown_pixels": 1469
+  }
+}

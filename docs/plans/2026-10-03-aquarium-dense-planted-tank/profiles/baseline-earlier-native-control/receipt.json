@@ -1,0 +1,9 @@
+{
+  "apk": "/tmp/planted-tank-variants/baseline.apk",
+  "apk_sha256": "d620d867cf03cda92189121a23db06c5e7c237739f45f780d787d0029cedb33b",
+  "protocol": "30.0 s warmup; 36 s planted-tank trace (wide idle, close idle, close crawl; 12 s each); 3 run(s); SurfaceFlinger sampled every 0.75 s",
+  "serial": "",
+  "menu_index": 5,
+  "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+  "revision": "50982a16d52f32ec6e317bda16ada9fb007bf386"
+}

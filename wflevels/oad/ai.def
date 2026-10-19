@@ -1,0 +1,13 @@
+;============================================================================
+; ai.def: created from OADdef.S and ai.oas DO NOT MODIFY
+;============================================================================
+;##ifndef ai_HT
+;##define ai_HT
+	( define OAD_Jump 0 )	; boolean: Default: 1
+	( define OAD_JumpRate 4 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0))
+	( define OAD_JumpDuration 8 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 10 * 65536.0))
+	( define OAD_TurnaroundRate 12 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0))
+	( define OAD_RightTurnAtObstacles 16 )	; boolean: Default: 1
+;============================================================================
+;##endif         ; ai_DEF
+;============================================================================

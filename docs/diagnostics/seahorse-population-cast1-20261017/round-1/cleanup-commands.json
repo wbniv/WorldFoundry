@@ -1,0 +1,74 @@
+[
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792198678.3333967,
+    "end": 1792198678.604806,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~9Y1fyJ6AHU2vkBl7DMOFOg==/org.worldfoundry.wf_game.aquarium-LP6E_xg94OFUQNSObmKs1w==/base.apk'"
+    ],
+    "start": 1792198678.6060598,
+    "end": 1792198679.0082111,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792198679.0430737,
+    "end": 1792198679.4448109,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~9Y1fyJ6AHU2vkBl7DMOFOg==/org.worldfoundry.wf_game.aquarium-LP6E_xg94OFUQNSObmKs1w==/base.apk'"
+    ],
+    "start": 1792198679.4459155,
+    "end": 1792198679.8521206,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792198679.8946285,
+    "end": 1792198680.3218648,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1792198680.323235,
+    "end": 1792198680.7040312,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792198680.7052882,
+    "end": 1792198680.8905838,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792198680.8945868,
+    "end": 1792198681.066235,
+    "returncode": 0
+  }
+]

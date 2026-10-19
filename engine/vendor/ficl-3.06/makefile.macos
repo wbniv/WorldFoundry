@@ -1,0 +1,114 @@
+# === Toolchain & flags ===
+# C11 required for static_assert, stdint.h, and dynamic arrays in data structures
+CC       = clang
+CFLAGS   = -O2 -std=c11
+DEPFLAGS = -MMD -MP
+
+LIB      = ar cr
+RANLIB   = ranlib
+
+
+OBJDIR          = obj
+FICL_OBJDIR     = $(OBJDIR)/ficl
+FICLMIN_OBJDIR  = $(OBJDIR)/ficlmin
+
+FICL_SRCS = dict.c ficl.c fileaccess.c float.c dpmath.c \
+            prefix.c search.c softcore.c stack.c \
+            sysdep.c tools.c unity.c vm.c words.c
+FICL_OBJS = $(FICL_SRCS:.c=.o)
+
+CFLAGS_FICL     =
+CFLAGS_FICLMIN  = -DFICL_MINIMAL=1
+
+LIBFICL_OBJS     = $(addprefix $(FICL_OBJDIR)/,$(FICL_OBJS))
+LIBFICLMIN_OBJS  = $(addprefix $(FICLMIN_OBJDIR)/,$(FICL_OBJS))
+
+FICL_TEST_OBJ     = $(FICL_OBJDIR)/testmain.o
+FICLMIN_TEST_OBJ  = $(FICLMIN_OBJDIR)/testmain.o
+
+DEPS = $(LIBFICL_OBJS:.o=.d) $(LIBFICLMIN_OBJS:.o=.d) \
+       $(FICL_TEST_OBJ:.o=.d) $(FICLMIN_TEST_OBJ:.o=.d)
+
+# === Softcore.c is generated from softwords folder ===
+softcore.c:
+	make -C softwords softcore.c
+	cp softwords/softcore.c .
+
+# === Default target ===
+ficl: $(FICL_TEST_OBJ) libficl.a
+	$(CC) $(FICL_TEST_OBJ) -o ficl -L. -lficl -lm
+
+# === Static library ===
+libficl.a: $(LIBFICL_OBJS)
+	$(LIB) $@ $(LIBFICL_OBJS)
+	$(RANLIB) $@
+
+libficlmin.a: $(LIBFICLMIN_OBJS)
+	$(LIB) $@ $(LIBFICLMIN_OBJS)
+	$(RANLIB) $@
+
+ficlmin: $(FICLMIN_TEST_OBJ) libficlmin.a
+	$(CC) $(FICLMIN_TEST_OBJ) -o ficlmin -L. -lficlmin -lm
+
+# === Compile rules ===
+.SUFFIXES: .c .o
+
+$(FICL_OBJDIR)/%.o: %.c | $(FICL_OBJDIR) softcore.c
+	$(CC) $(CFLAGS) $(CFLAGS_FICL) $(DEPFLAGS) -MF $(@:.o=.d) -c $< -o $@
+
+$(FICLMIN_OBJDIR)/%.o: %.c | $(FICLMIN_OBJDIR) softcore.c
+	$(CC) $(CFLAGS) $(CFLAGS_FICLMIN) $(DEPFLAGS) -MF $(@:.o=.d) -c $< -o $@
+
+$(FICL_OBJDIR):
+	@mkdir -p $(FICL_OBJDIR)
+
+$(FICLMIN_OBJDIR):
+	@mkdir -p $(FICLMIN_OBJDIR)
+
+-include $(DEPS)
+
+#
+#  === utility targets ===
+#
+.PHONY: clean cleanobj cleanocd tags wasm
+
+clean:
+	rm -rf $(OBJDIR)
+	rm -f *.a tags softcore.c
+
+cleanobj:
+	rm -rf $(OBJDIR)
+	rm -f *.a
+
+cleanocd:
+	rm -rf $(OBJDIR)
+	rm -f *.a tags softcore.c ficl ficl_wasm.* ficlmin
+
+
+tags:
+	ctags -w *
+
+
+# === WASM build ===
+# macos only - used to build the web demo
+#
+WASM_SOURCES = dict.c ficl.c float.c dpmath.c prefix.c search.c softcore.c \
+               stack.c sysdep.c tools.c vm.c words.c wasm_main.c
+
+EMCC     = emcc
+# Note: Emscripten writes to its cache under EMSDK (outside this repo).
+# If sandboxed, run with escalated permissions or set EM_CACHE to a writable path.
+EM_CACHE ?= /tmp/emscripten_cache
+WASM_CFLAGS  = -O2 -std=c11 -DFICL_WANT_FILE=0 -DFICL_UNIT_TEST=0 -DFICL_PLATFORM_EXTEND=0
+WASM_LDFLAGS = -s WASM=1 -s NO_FILESYSTEM=1 -s ALLOW_MEMORY_GROWTH=1 \
+               -s ASYNCIFY=1 -s ASYNCIFY_IMPORTS="['emscripten_sleep']" \
+               -s MODULARIZE=1 -s EXPORT_ES6=1 \
+               -s EXPORTED_RUNTIME_METHODS="['UTF8ToString','stringToUTF8','lengthBytesUTF8','stackSave','stackAlloc','stackRestore']" \
+               -s EXPORTED_FUNCTIONS="['_ficlWasmInit','_ficlWasmEval','_ficlWasmStackHex','_ficlWasmReset','_ficlWasmGetOutput','_ficlWasmClearOutput','_ficlWasmGetOutputLen']"
+
+wasm: ficl_wasm.js
+	@mkdir -p doc
+	cp ficl_wasm.js ficl_wasm.wasm doc/
+
+ficl_wasm.js: $(WASM_SOURCES)
+	EM_CACHE=$(EM_CACHE) $(EMCC) $(WASM_CFLAGS) $(WASM_SOURCES) -o $@ $(WASM_LDFLAGS)

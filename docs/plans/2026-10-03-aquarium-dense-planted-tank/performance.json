@@ -1,0 +1,154 @@
+{
+  "method": "Three normal runs each; separate one instrumented CPU run each. Medians of measured segments; SurfaceFlinger presented FPS, CPU submission includes driver work but is not GPU timing. Matched native libraries and seven other level payloads. Earlier unmatched native baseline excluded.",
+  "variants": {
+    "baseline": {
+      "plants": 57,
+      "triangles": 2328,
+      "foliage_groups": 3,
+      "presented": {
+        "frames": 1449,
+        "fps": 39.86871170256923,
+        "p50_ms": 33.366059,
+        "p90_ms": 33.366947,
+        "p95_ms": 33.367113,
+        "p99_ms": 33.367315,
+        "missed_refresh_percent": 50.34340659340659
+      },
+      "PSS_MiB": 45.2060546875,
+      "fps_run_range": [
+        39.85856478333068,
+        39.98758280189894
+      ],
+      "scenario_fps": {
+        "wide-idle": 59.77301537350067,
+        "close-idle": 30.346181998777613,
+        "crawl-close": 29.96998971376691
+      },
+      "CPU_ms_and_counters": {
+        "update": 1.4826446139180172,
+        "actors": 1.2831217349857007,
+        "director": 0.13894938036224977,
+        "render": 3.702152526215443,
+        "school": 0.0,
+        "pose": 0.0,
+        "animation": 0.0,
+        "total": 5.184797140133461,
+        "level-objects": 33.0,
+        "render-actors": 21.0,
+        "draws": 20.0,
+        "triangles": 1603.2946139180171,
+        "actor-mailbox-writes": 29.0,
+        "fish-deformations": 0.0
+      },
+      "CPU_complete_windows": 5,
+      "delta_vs_baseline": {
+        "fps": 0.0,
+        "p95_ms": 0.0,
+        "fps_percent": 0.0,
+        "PSS_MiB": 0.0,
+        "render_cpu_ms": 0.0
+      }
+    },
+    "density": {
+      "plants": 384,
+      "triangles": 26112,
+      "foliage_groups": 8,
+      "presented": {
+        "frames": 1094,
+        "fps": 29.942619559811728,
+        "p50_ms": 33.366712,
+        "p90_ms": 33.366795,
+        "p95_ms": 33.366889,
+        "p99_ms": 33.367274,
+        "missed_refresh_percent": 99.36014625228519
+      },
+      "PSS_MiB": 54.779296875,
+      "fps_run_range": [
+        29.928727806549507,
+        29.95629852935696
+      ],
+      "scenario_fps": {
+        "wide-idle": 29.96998962539501,
+        "close-idle": 29.928191231751544,
+        "crawl-close": 29.890703959116586
+      },
+      "CPU_ms_and_counters": {
+        "update": 1.4470199999999998,
+        "actors": 1.26518,
+        "director": 0.11694000000000002,
+        "render": 18.15796,
+        "school": 0.0,
+        "pose": 0.0,
+        "animation": 0.0,
+        "total": 19.60502,
+        "level-objects": 38.0,
+        "render-actors": 26.0,
+        "draws": 25.0,
+        "triangles": 12882.892,
+        "actor-mailbox-writes": 29.0,
+        "fish-deformations": 0.0
+      },
+      "CPU_complete_windows": 5,
+      "delta_vs_baseline": {
+        "fps": -9.9260921427575,
+        "p95_ms": -0.00022400000000288856,
+        "fps_percent": -24.89694730245784,
+        "PSS_MiB": 9.5732421875,
+        "render_cpu_ms": 14.455807473784557
+      }
+    },
+    "detailed": {
+      "plants": 384,
+      "triangles": 66048,
+      "foliage_groups": 8,
+      "presented": {
+        "frames": 732,
+        "fps": 20.21007124427258,
+        "p50_ms": 50.050064,
+        "p90_ms": 50.050295,
+        "p95_ms": 66.73299,
+        "p99_ms": 66.73377,
+        "missed_refresh_percent": 99.59016393442623
+      },
+      "PSS_MiB": 79.7861328125,
+      "fps_run_range": [
+        20.180522120673416,
+        20.266875717531487
+      ],
+      "scenario_fps": {
+        "wide-idle": 20.93275568599862,
+        "close-idle": 19.924415829866547,
+        "crawl-close": 19.74400883477407
+      },
+      "CPU_ms_and_counters": {
+        "update": 1.5108435960591133,
+        "actors": 1.321765024630542,
+        "director": 0.12197290640394089,
+        "render": 42.88430640394088,
+        "school": 0.0,
+        "pose": 0.0,
+        "animation": 0.0,
+        "total": 44.395125615763554,
+        "level-objects": 38.0,
+        "render-actors": 26.0,
+        "draws": 25.0,
+        "triangles": 32943.32758866995,
+        "actor-mailbox-writes": 29.0,
+        "fish-deformations": 0.0
+      },
+      "CPU_complete_windows": 4,
+      "delta_vs_baseline": {
+        "fps": -19.65864045829665,
+        "p95_ms": 33.365877,
+        "fps_percent": -49.308441679668825,
+        "PSS_MiB": 34.580078125,
+        "render_cpu_ms": 39.18215387772544
+      },
+      "delta_vs_density": {
+        "fps": -9.732548315539148,
+        "fps_percent": -32.50399750796,
+        "render_cpu_ms": 24.726346403940884
+      }
+    }
+  }
+}

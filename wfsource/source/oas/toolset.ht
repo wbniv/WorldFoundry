@@ -1,0 +1,20 @@
+/*============================================================================*/
+/* toolset.ht: created from OADTYPES.S and toolset.oas DO NOT MODIFY */
+/*============================================================================*/
+#include <pigsys/pigsys.hp>
+#include <math/scalar.hp>
+/*      maximum value of a long int     */
+/* minimum value of a long int  */
+#ifndef toolset_HT
+#define toolset_HT
+ struct _Toolset {
+	int32 ToolA;                               /* index into master object list, = OBJECT_NULL if no reference */
+	int32 ToolB;                               /* index into master object list, = OBJECT_NULL if no reference */
+	int32 ToolC;                               /* index into master object list, = OBJECT_NULL if no reference */
+	int32 ToolD;                               /* index into master object list, = OBJECT_NULL if no reference */
+	int32 ToolE;                               /* index into master object list, = OBJECT_NULL if no reference */
+	int32 ToolF;                               /* index into master object list, = OBJECT_NULL if no reference */
+};
+/*============================================================================*/
+#endif         /* toolset_HT */
+/*============================================================================*/

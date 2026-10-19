@@ -1,0 +1,407 @@
+[
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792117682.2190235,
+    "end": 1792117682.4483573,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792117682.5327797,
+    "end": 1792117682.7799976,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~UZ6SAxTRxrdUQmtm5egPGQ==/org.worldfoundry.wf_game.aquarium-02chxKWw6JUMorY9_gF3tw==/base.apk'"
+    ],
+    "start": 1792117682.7814274,
+    "end": 1792117683.0243788,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792117683.0460296,
+    "end": 1792117683.495271,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792117683.496465,
+    "end": 1792117683.826079,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n org.worldfoundry.wf_game.aquarium/android.app.NativeActivity"
+    ],
+    "start": 1792117683.9777777,
+    "end": 1792117684.7080784,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792117689.7110362,
+    "end": 1792117690.0755532,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792117690.0823588,
+    "end": 1792117690.2696502,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_BACK"
+    ],
+    "start": 1792117690.2722168,
+    "end": 1792117690.713459,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792117691.8652298,
+    "end": 1792117692.1063995,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792117692.1096182,
+    "end": 1792117692.4112554,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792117692.4163399,
+    "end": 1792117692.704782,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_DOWN"
+    ],
+    "start": 1792117692.706066,
+    "end": 1792117693.2269468,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_CENTER"
+    ],
+    "start": 1792117693.3788953,
+    "end": 1792117693.8056479,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792117695.9610116,
+    "end": 1792117696.4123142,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792117696.4177778,
+    "end": 1792117696.8048983,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "tail -c 4000000 /sdcard/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log"
+    ],
+    "start": 1792117696.8061192,
+    "end": 1792117698.2573764,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "logcat",
+      "-d",
+      "-t",
+      "2000",
+      "-v",
+      "brief"
+    ],
+    "start": 1792117698.2624967,
+    "end": 1792117698.7759058,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792117703.7880702,
+    "end": 1792117703.986311,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792117703.9913573,
+    "end": 1792117704.3681083,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "screenrecord --time-limit 4 /data/local/tmp/wf-J-8d94a0fb4bd7.mp4 >/dev/null 2>&1 & echo $!"
+    ],
+    "start": 1792117704.3860323,
+    "end": 1792117704.732687,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792117704.7521806,
+    "end": 1792117705.0006678,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792117705.0063205,
+    "end": 1792117705.5097804,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /proc/30494/cmdline"
+    ],
+    "start": 1792117705.5109942,
+    "end": 1792117705.8942614,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792117706.3968675,
+    "end": 1792117706.7672389,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792117706.772463,
+    "end": 1792117707.0859911,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /proc/30494/cmdline"
+    ],
+    "start": 1792117707.087174,
+    "end": 1792117707.2705717,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792117707.7741566,
+    "end": 1792117708.1548467,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792117708.1598935,
+    "end": 1792117708.5471523,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /proc/30494/cmdline"
+    ],
+    "start": 1792117708.5483758,
+    "end": 1792117708.9820113,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792117709.4848135,
+    "end": 1792117709.697573,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792117709.7047644,
+    "end": 1792117710.1044865,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /proc/30494/cmdline"
+    ],
+    "start": 1792117710.1057112,
+    "end": 1792117710.495983,
+    "returncode": 1
+  },
+  {
+    "args": [
+      "shell",
+      "stat -c %s /data/local/tmp/wf-J-8d94a0fb4bd7.mp4"
+    ],
+    "start": 1792117710.4971962,
+    "end": 1792117710.7000194,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "cat",
+      "/data/local/tmp/wf-J-8d94a0fb4bd7.mp4"
+    ],
+    "start": 1792117710.7163029,
+    "end": 1792117711.1632996,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-8d94a0fb4bd7.mp4"
+    ],
+    "start": 1792117711.165419,
+    "end": 1792117711.518615,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792117711.520947,
+    "end": 1792117711.7448914,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792117711.7520351,
+    "end": 1792117712.1867,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1792117712.1880593,
+    "end": 1792117714.1711504,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792117714.1725733,
+    "end": 1792117714.4174845,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "logcat",
+      "-d",
+      "-v",
+      "threadtime",
+      "--pid=30387"
+    ],
+    "start": 1792117714.4185834,
+    "end": 1792117714.6012073,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "tail -c 4000000 /sdcard/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log"
+    ],
+    "start": 1792117714.6022449,
+    "end": 1792117715.8170328,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys meminfo org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792117715.8313694,
+    "end": 1792117716.290908,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys thermalservice"
+    ],
+    "start": 1792117716.2919304,
+    "end": 1792117716.6492083,
+    "returncode": 0
+  }
+]

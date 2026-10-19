@@ -1,0 +1,36 @@
+//============================================================================
+// dir.hp:  FSN-style directory tower — template-only spawnable actor.
+//          Placed by Director Forth script at runtime via ConstructTemplateObject.
+//          Scale mailboxes 3040-3042 drive visual height (√file_count in subdir).
+//============================================================================
+
+#ifndef _Dir_HP
+#define _Dir_HP
+
+//============================================================================
+
+#include "actor.hp"
+#include <oas/dir.ht>
+
+//============================================================================
+
+class Dir: public Actor
+{
+public:
+	INLINE const _Dir* getOad() const { return (const _Dir*)_oadData; }
+	Dir(const SObjectStartupData* startupData);
+	virtual ~Dir() { }
+
+	virtual EActorKind kind() const;
+	virtual void Collision(PhysicalObject& other, const Vector3& normal);
+	virtual void update();
+};
+
+//============================================================================
+
+Actor*
+OadDir(const SObjectStartupData* startupData);
+
+//============================================================================
+#endif // !_Dir_HP
+//============================================================================

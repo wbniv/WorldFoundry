@@ -1,0 +1,9 @@
+00:02.791  blend            | Read blend: "/home/will/docs/aircon/units-639-640.blend"
+BlenderMCP addon registered
+GLASS_PROBE (0.6000000238418579, 0.8500000238418579, 1.0, 0.30000001192092896) {}
+NODES [('Principled BSDF', [('Base Color', '<bpy_float[4], NodeSocketColor.default_value>'), ('Alpha', '0.30000001192092896'), ('Transmission Weight', '0.0')]), ('Material Output', [])]
+MESHES [('639-window-1', 6), ('640-curve-window-1', 6), ('640-curve-window-2', 6), ('640-curve-window-3', 6), ('640-curve-window-4', 6), ('640-curve-window-5', 6), ('640-curve-window-6', 6), ('640-window-0', 6)]
+BlenderMCP addon unregistered
+Blender 5.0.1
+
+Blender quit

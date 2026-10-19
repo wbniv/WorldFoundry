@@ -1,0 +1,371 @@
+diff --git a/scripts/build-aquarium-variant.py b/scripts/build-aquarium-variant.py
+index 28ddf45b..c86cb30f 100644
+--- a/scripts/build-aquarium-variant.py
++++ b/scripts/build-aquarium-variant.py
+@@ -6,9 +6,10 @@ import os
+ from pathlib import Path
+ import shutil
+ import subprocess
++import zipfile
+ 
+ ap=argparse.ArgumentParser(description=__doc__)
+-ap.add_argument('--asset', choices=['clownfish','barb_quad','barb_mesh'], required=True)
++ap.add_argument('--asset', choices=['clownfish','barb_quad','barb_mesh','barb_refined'], required=True)
+ ap.add_argument('--count', type=int, required=True)
+ ap.add_argument('--updates', type=int, default=5)
+ ap.add_argument('--static', action='store_true')
+@@ -16,12 +17,52 @@ ap.add_argument('--frozen', action='store_true')
+ ap.add_argument('--profile', action='store_true')
+ ap.add_argument('--name', required=True)
+ ap.add_argument('--out', default='/tmp/aquarium-barb-baselines')
++ap.add_argument('--base-apk', type=Path, help='Reuse the exact native libraries and app resources; replace only cd.iff and profiling args, then align/sign with the local debug key')
+ a=ap.parse_args()
+ ROOT=Path(__file__).resolve().parents[1]
+ env=dict(os.environ,AQUARIUM_FOLLOWER_ASSET=a.asset,AQUARIUM_SCHOOL_N=str(a.count),
+          AQUARIUM_BARB_UPDATES=str(a.updates),AQUARIUM_BARB_ANIMATE='0' if a.static else '1',
+          AQUARIUM_BARB_FROZEN='1' if a.frozen else '0')
+-subprocess.run(['task','--force','aquarium-level'],cwd=ROOT,env=env,check=True)
++if a.base_apk:
++    # Existing host tools suffice for asset-only experiments. Their outputs are
++    # confined to this checkout; no shared Cargo/Gradle build cache is mutated.
++    subprocess.run(['blender','--background','--python-exit-code','1','--python',
++                    'wflevels/aquarium/blender_create_aquarium.py'],cwd=ROOT,env=env,check=True)
++    subprocess.run(['bash','wftools/wf_blender/build_level_binary.sh','aquarium'],cwd=ROOT,check=True)
++    subprocess.run(['wftools/cdpack-rs/target/release/cdpack','wfsource/source/game/shell.fth',
++                    'wflevels/aquarium-standalone.iff','-o','wflevels/aquarium-cd.iff'],cwd=ROOT,check=True)
++else:
++    subprocess.run(['task','--force','aquarium-level'],cwd=ROOT,env=env,check=True)
++out=Path(a.out); out.mkdir(parents=True,exist_ok=True)
++if a.base_apk:
++    import hashlib
++    properties=ROOT/'android/local.properties'
++    configured=next((line.split('=',1)[1] for line in properties.read_text().splitlines()
++                     if line.startswith('sdk.dir=')), '') if properties.exists() else ''
++    sdk=Path(configured or os.environ.get('ANDROID_HOME',str(Path.home()/'android-sdk-local')))
++    build_tools=sdk/'build-tools/34.0.0'
++    unsigned=out/(a.name+'-unsigned.apk'); aligned=out/(a.name+'-aligned.apk')
++    with zipfile.ZipFile(a.base_apk) as src, zipfile.ZipFile(unsigned,'w') as dst:
++        for entry in src.infolist():
++            if entry.filename.startswith('META-INF/') or entry.filename in ('assets/cd.iff','assets/wf_args.txt'):
++                continue
++            dst.writestr(entry,src.read(entry.filename))
++        dst.write(ROOT/'wflevels/aquarium-cd.iff','assets/cd.iff',compress_type=zipfile.ZIP_DEFLATED)
++        if a.profile: dst.writestr('assets/wf_args.txt','--frame-profile\n')
++    subprocess.run([str(build_tools/'zipalign'),'-f','-p','4',str(unsigned),str(aligned)],check=True)
++    subprocess.run([str(build_tools/'apksigner'),'sign','--ks',str(Path.home()/'.android/debug.keystore'),
++                    '--ks-pass','pass:android','--key-pass','pass:android','--out',str(out/(a.name+'.apk')),str(aligned)],check=True)
++    unsigned.unlink(); aligned.unlink()
++    receipt=vars(a).copy()
++    receipt['base_apk']=str(a.base_apk.resolve())
++    receipt['base_apk_sha256']=hashlib.sha256(a.base_apk.read_bytes()).hexdigest()
++    receipt['revision']=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
++    receipt['source_diff_sha256']=hashlib.sha256(subprocess.check_output(['git','diff'],cwd=ROOT)).hexdigest()
++    for source,suffix in [('wflevels/aquarium/aquarium.lev','.lev'),('wflevels/aquarium-cd.iff','-cd.iff'),('wflevels/aquarium-standalone.iff','-standalone.iff')]:
++        shutil.copyfile(ROOT/source,out/(a.name+suffix))
++    (out/(a.name+'.json')).write_text(json.dumps(receipt,indent=2,default=str))
++    print(f'Archived {a.name}',flush=True)
++    raise SystemExit(0)
+ argsfile=ROOT/'android/app/src/aquarium/assets/wf_args.txt'
+ if a.profile: argsfile.write_text('--frame-profile\n')
+ else: argsfile.unlink(missing_ok=True)
+@@ -35,10 +76,9 @@ try:
+ finally:
+     asset.unlink(missing_ok=True)
+     asset.symlink_to(original_target)
+-out=Path(a.out); out.mkdir(parents=True,exist_ok=True)
+ for source,suffix in [('android/app/build/outputs/apk/aquarium/release/worldfoundry-aquarium-release.apk','.apk'),
+                       ('wflevels/aquarium/aquarium.lev','.lev'),('wflevels/aquarium-cd.iff','-cd.iff'),
+                       ('wflevels/aquarium-standalone.iff','-standalone.iff')]:
+     shutil.copyfile(ROOT/source,out/(a.name+suffix))
+-(out/(a.name+'.json')).write_text(json.dumps(vars(a),indent=2))
++(out/(a.name+'.json')).write_text(json.dumps(vars(a),indent=2,default=str))
+ print(f'Archived {a.name}',flush=True)
+diff --git a/scripts/profile-aquarium-chromecast.py b/scripts/profile-aquarium-chromecast.py
+index 7bd05d52..ae908ead 100644
+--- a/scripts/profile-aquarium-chromecast.py
++++ b/scripts/profile-aquarium-chromecast.py
+@@ -31,6 +31,12 @@ def adb(*words, binary=False):
+ def sh(command):
+     return adb('shell', command)
+ 
++def require_foreground():
++    activity=sh('dumpsys activity activities')
++    resumed=[line for line in activity.splitlines() if 'topResumedActivity=' in line or 'mResumedActivity:' in line]
++    if not any(PKG+'/' in line for line in resumed):
++        raise RuntimeError('Aquarium left the foreground; exclude this interrupted run: '+repr(resumed))
++
+ def pct(values, p):
+     s=sorted(values)
+     return s[min(len(s)-1, int((len(s)-1)*p))] if s else None
+@@ -52,8 +58,11 @@ for run in range(1,args.runs+1):
+     sh(f'am start -n {PKG}/android.app.NativeActivity')
+     time.sleep(9)
+     sh('input keyevent KEYCODE_BACK')  # hides the controller panel on its first opening
++    require_foreground()
++    (work/'launch.png').write_bytes(adb('exec-out','screencap','-p',binary=True))
+     print(f'run {run}: warming {args.warmup}s',flush=True)
+     time.sleep(args.warmup)
++    require_foreground()
+     layers=sh('dumpsys SurfaceFlinger --list').splitlines()
+     candidates=[s for s in layers if PKG in s and ('SurfaceView' in s or s.startswith(PKG+'/'))]
+     if not candidates: raise RuntimeError('No aquarium SurfaceView layer: '+repr(layers))
+@@ -82,6 +91,7 @@ for run in range(1,args.runs+1):
+             if key and key != 'KEYCODE_DPAD_CENTER': sh('input keyevent --longpress '+key)
+             else: time.sleep(min(.25,max(0,deadline-time.monotonic())))
+         segments.append({'name':name,'start':start,'end':time.monotonic()-t0})
++        require_foreground()
+         (work/f'{name}.png').write_bytes(adb('exec-out','screencap','-p',binary=True))
+         print(f'run {run}: captured {name}',flush=True)
+     stop.set(); thread.join()
+diff --git a/tests/test_aquarium_level.py b/tests/test_aquarium_level.py
+index d2af9ddd..e37c69b0 100644
+--- a/tests/test_aquarium_level.py
++++ b/tests/test_aquarium_level.py
+@@ -215,7 +215,7 @@ def test_each_barb_is_one_mass_zero_scriptless_mesh_actor(objs):
+     assert len(names) == len(set(names))
+     followers=[by_name(objs,f'tiger-barb-{k}') for k in range(1,SCHOOL_N+1)]
+     assert len({o['mesh'] for o in followers}) == 1
+-    assert followers[0]['mesh'] in ('tiger_barb_quad.iff','tiger_barb_mesh.iff')
++    assert followers[0]['mesh'] in ('tiger_barb_quad.iff','tiger_barb_mesh.iff','tiger_barb_refined.iff')
+     for fish in followers:
+         assert fish['class']=='platform' and fish['mass']==0
+         assert not fish['script']
+diff --git a/tests/test_fish_deform.py b/tests/test_fish_deform.py
+index 1d4970d3..8c1860e7 100644
+--- a/tests/test_fish_deform.py
++++ b/tests/test_fish_deform.py
+@@ -4,6 +4,7 @@ import itertools
+ import math
+ import subprocess
+ import sys
++import pytest
+ 
+ 
+ def test_wave_preserves_head_and_rest_pose_without_accumulation(tmp_path):
+@@ -36,11 +37,12 @@ int main() {
+     subprocess.run([str(binary)], check=True)
+ 
+ 
+-def test_exported_mesh_has_no_polygons_below_engine_normalisation_limit():
++@pytest.mark.parametrize("refined", [False, True])
++def test_exported_mesh_has_no_polygons_below_engine_normalisation_limit(refined):
+     root = Path(__file__).resolve().parents[1]
+     sys.path.insert(0, str(root / 'wflevels/aquarium'))
+     import tiger_barb
+-    vertices, faces = tiger_barb.geometry()
++    vertices, faces = tiger_barb.geometry(refined=refined)
+     # Quantise as the level exporter does, and cover both possible quad diagonals.
+     vertices = [tuple(round(x*65536)/65536 for x in p) for p in vertices]
+     for face in faces:
+@@ -51,33 +53,36 @@ def test_exported_mesh_has_no_polygons_below_engine_normalisation_limit():
+             assert math.sqrt(sum(x*x for x in cross)) > 4/65536
+ 
+ 
+-def test_body_uvs_keep_the_mesh_closed_in_the_cutout_texture():
++@pytest.mark.parametrize("refined", [False, True])
++@pytest.mark.parametrize("resolution", [None, (256,128)])
++def test_body_uvs_keep_the_mesh_closed_in_the_cutout_texture(refined, resolution):
+     from PIL import Image
+     root = Path(__file__).resolve().parents[1]
+     sys.path.insert(0, str(root / 'wflevels/aquarium'))
+     import tiger_barb as tb
+     im = Image.open(root / 'wflevels/aquarium/art/tiger-barb-source.png')
+-    vertices, faces = tb.geometry()
++    if resolution: im=im.resize(resolution,Image.Resampling.LANCZOS)
++    vertices, faces = tb.geometry(refined=refined)
+     for face in faces:
+-        if max(face) >= tb.BODY_VERTEX_COUNT:
++        if max(face) >= (tb.REFINED_BODY_VERTEX_COUNT if refined else tb.BODY_VERTEX_COUNT):
+             continue
+         for tri in itertools.combinations(face, 3):
+             for a in range(9):
+                 for b in range(9-a):
+                     weights = (a/8, b/8, (8-a-b)/8)
+-                    x = sum(vertices[i][0]*w for i,w in zip(tri,weights))
+-                    z = sum(vertices[i][2]*w for i,w in zip(tri,weights))
+-                    u,v=tb.body_uv(x,z)
++                    uvs=[(tb.refined_body_uv if refined else tb.body_uv)(vertices[i][0],vertices[i][2]) for i in tri]
++                    u,v=[sum(uv[j]*w for uv,w in zip(uvs,weights)) for j in range(2)]
+                     assert im.getpixel((int(u*im.width),int((1-v)*im.height)))[3] >= 128, (u,v,tri,weights)
+ 
+ 
+-def test_body_faces_point_outward_and_each_fin_has_two_sides():
++@pytest.mark.parametrize("refined", [False, True])
++def test_body_faces_point_outward_and_each_fin_has_two_sides(refined):
+     root = Path(__file__).resolve().parents[1]
+     sys.path.insert(0, str(root / 'wflevels/aquarium'))
+     import tiger_barb as tb
+-    vertices, faces = tb.geometry()
++    vertices, faces = tb.geometry(refined=refined)
+     for face in faces:
+-        if max(face) >= tb.BODY_VERTEX_COUNT:
++        if max(face) >= (tb.REFINED_BODY_VERTEX_COUNT if refined else tb.BODY_VERTEX_COUNT):
+             assert tuple(reversed(face)) in faces
+             continue
+         a,b,c = [vertices[i] for i in face[:3]]
+@@ -88,3 +93,15 @@ def test_body_faces_point_outward_and_each_fin_has_two_sides():
+             assert normal[0]*centre[0] > 0
+         else:
+             assert normal[1]*centre[1]+normal[2]*centre[2] > 0
++
++
++def test_refined_asset_keeps_full_length_and_a_bounded_single_mesh():
++    root = Path(__file__).resolve().parents[1]
++    sys.path.insert(0, str(root / 'wflevels/aquarium'))
++    import tiger_barb as tb
++    vertices, faces = tb.geometry(refined=True)
++    assert max(p[0] for p in vertices)-min(p[0] for p in vertices) == pytest.approx(tb.LENGTH_M)
++    assert len(vertices) == 98
++    assert sum(len(face)-2 for face in faces) == 172
++    assert len(tb.REFINED_FIN_UVS)==len(vertices)-tb.REFINED_BODY_VERTEX_COUNT
++    assert tb.REFINED_BODY_VERTEX_COUNT == 74
+diff --git a/wflevels/aquarium/blender_create_aquarium.py b/wflevels/aquarium/blender_create_aquarium.py
+index f2e3c648..890c63d4 100644
+--- a/wflevels/aquarium/blender_create_aquarium.py
++++ b/wflevels/aquarium/blender_create_aquarium.py
+@@ -64,14 +64,14 @@ assert PROFILE in ('keyboard', 'touch'), f'AQUARIUM_PROFILE={PROFILE!r}: keyboar
+ SCHOOL_BENCH  = os.environ.get('AQUARIUM_SCHOOL_BENCH') == '1'
+ # AQUARIUM_SCHOOL_N: how many more fish school and swarm round the player's fish (school.fth + school_rig.fth,
+ # docs/plans/2026-10-01-aquarium-schooling.md). Default 29 barbs (10 for the clownfish baseline); 0 builds one fish.
+-FOLLOWER_ASSET = os.environ.get('AQUARIUM_FOLLOWER_ASSET', 'barb_mesh')
+-assert FOLLOWER_ASSET in ('clownfish', 'barb_quad', 'barb_mesh')
++FOLLOWER_ASSET = os.environ.get('AQUARIUM_FOLLOWER_ASSET', 'barb_refined')
++assert FOLLOWER_ASSET in ('clownfish', 'barb_quad', 'barb_mesh', 'barb_refined')
+ BARBS = FOLLOWER_ASSET != 'clownfish'
+ SCHOOL_N = int(os.environ.get('AQUARIUM_SCHOOL_N', '29' if BARBS else '10') or 0)
+ assert 0 <= SCHOOL_N <= (29 if BARBS else 10), 'follower count exceeds allocated mailbox blocks'
+ BARB_UPDATES = int(os.environ.get('AQUARIUM_BARB_UPDATES', '5'))
+ assert 1 <= BARB_UPDATES <= 29
+-BARB_ANIMATE = FOLLOWER_ASSET == 'barb_mesh' and os.environ.get('AQUARIUM_BARB_ANIMATE', '1') != '0'
++BARB_ANIMATE = FOLLOWER_ASSET in ('barb_mesh', 'barb_refined') and os.environ.get('AQUARIUM_BARB_ANIMATE', '1') != '0'
+ BARB_FROZEN = os.environ.get('AQUARIUM_BARB_FROZEN') == '1'
+ if SCHOOL_BENCH:
+     SCHOOL_N = 0                                 # the bench level is the one-fish level plus the invisible Forth
+@@ -335,7 +335,7 @@ if BARBS and SCHOOL_N:
+             pixels[x, y] = (0, 0, 0, 0) if a < 128 else (r, g, b, 255)
+     texture = os.path.join(OUT_DIR, 'tiger_barb.tga')
+     image.save(texture)
+-    barb_mesh = TB.blender_mesh(bpy, FOLLOWER_ASSET == 'barb_quad', texture)
++    barb_mesh = TB.blender_mesh(bpy, FOLLOWER_ASSET == 'barb_quad', texture, refined=FOLLOWER_ASSET == 'barb_refined')
+ for k in range(1, SCHOOL_N + 1):
+     follower_objs[k] = {}
+     if BARBS:
+diff --git a/wflevels/aquarium/tiger_barb.py b/wflevels/aquarium/tiger_barb.py
+index 924aeeed..627299f5 100644
+--- a/wflevels/aquarium/tiger_barb.py
++++ b/wflevels/aquarium/tiger_barb.py
+@@ -23,8 +23,10 @@ def body_uv(x,z):
+     # Follow the flank centre from peduncle to snout; avoid the fin cutout gaps.
+     return .03+.91*(x/LENGTH_M+.5), .51-.06*(x/LENGTH_M+.28)/.78+.45*z/LENGTH_M
+ 
+-def geometry(quad=False):
++def geometry(quad=False, refined=False):
+     """Return metre-space vertices and polygons; fins stay in the same mesh."""
++    if refined and not quad:
++        return refined_geometry()
+     if quad:
+         # Texture silhouette occupies about 94% of its width; retain the texture's
+         # aspect and account for that margin in the physical card dimensions.
+@@ -61,9 +63,83 @@ def geometry(quad=False):
+         fin([(.24,side*.07,-.05),(.13,side*.085,-.10),(.025,side*.19,-.145)],[(0,1,2)])
+     return [(x*LENGTH_M,y*LENGTH_M,z*LENGTH_M) for x,y,z in verts], faces
+ 
+-def blender_mesh(bpy, quad, texture):
+-    name='tiger_barb_quad' if quad else 'tiger_barb_mesh'
+-    verts,faces=geometry(quad)
++# Phase 3: nine anatomical sections, still eight vertices around each section.
++# (X, half-width, half-height, vertical centre, atlas bottom, atlas top).
++# The body atlas coordinates stop short of fin roots and transparent edges.
++REFINED_SECTIONS = (
++    (-.28,.018,.037,0,.450,.570),
++    (-.19,.052,.095,0,.450,.570),
++    (-.08,.085,.155,0,.315,.656),
++    (.06,.100,.180,0,.225,.755),
++    (.19,.088,.168,.015,.225,.736),
++    (.30,.062,.132,0,.285,.655),
++    (.39,.040,.085,-.010,.355,.570),
++    (.46,.024,.044,-.015,.421,.499),
++    (.50,.018,.022,-.018,.450,.480),
++)
++REFINED_BODY_VERTEX_COUNT = len(REFINED_SECTIONS)*8+2
++# Dedicated atlas islands for caudal/dorsal/anal/paired pectoral fins.
++# They share the body's texture/material, but do not sample its flank stripes.
++REFINED_FIN_UVS = (
++    (.236,.435),(.236,.580),(.033,.758),(.100,.635),
++    (.140,.490),(.100,.355),(.050,.280),
++    (.395,.680),(.635,.755),(.448,.945),(.435,.850),(.389,.673),
++    (.300,.397),(.423,.287),(.371,.225),(.330,.335),
++    (.778,.353),(.730,.307),(.634,.391),(.680,.391),
++    (.778,.353),(.730,.307),(.634,.391),(.680,.391),
++)
++
++def refined_body_uv(x,z):
++    """Map body rings onto the actual flank rather than compressing its height."""
++    x/=LENGTH_M; z/=LENGTH_M
++    for left,right in zip(REFINED_SECTIONS,REFINED_SECTIONS[1:]):
++        if x <= right[0]:
++            t=max(0,min(1,(x-left[0])/(right[0]-left[0])))
++            values=[a+(b-a)*t for a,b in zip(left,right)]
++            break
++    else:
++        values=REFINED_SECTIONS[-1]
++    _,_,height,centre,bottom,top=values
++    v=(bottom+top)/2+(z-centre)/height*(top-bottom)/2
++    return min(.9512,.03+.94*(x+.5)),v
++
++def refined_geometry():
++    """Closed tapered body, forked caudal fin and swept paired fins, one mesh."""
++    verts=[]; faces=[]
++    for x,ry,rz,zc,_,_ in REFINED_SECTIONS:
++        for j in range(8):
++            a=2*math.pi*j/8
++            verts.append((x,ry*math.sin(a),zc+rz*math.cos(a)))
++    for i in range(len(REFINED_SECTIONS)-1):
++        for j in range(8):
++            faces.append(((i+1)*8+j,(i+1)*8+(j+1)%8,i*8+(j+1)%8,i*8+j))
++    for ring,reverse in ((0,False),(len(REFINED_SECTIONS)-1,True)):
++        centre=len(verts)
++        verts.append((REFINED_SECTIONS[ring][0],0,REFINED_SECTIONS[ring][3]))
++        for j in range(8):
++            p=(centre,ring*8+j,ring*8+(j+1)%8)
++            faces.append(tuple(reversed(p)) if reverse else p)
++    def fin(points,polygons):
++        start=len(verts); verts.extend(points)
++        for p in polygons:
++            face=tuple(start+j for j in p)
++            faces.extend((face,tuple(reversed(face))))
++    # Extra points shape the lobes and preserve a genuine open fork at the tip.
++    fin([(-.28,0,-.035),(-.28,0,.035),(-.50,0,.185),
++         (-.445,0,.095),(-.395,0,0),(-.445,0,-.095),(-.50,0,-.185)],
++        [(0,1,4),(1,2,3),(1,3,4),(0,4,5),(0,5,6)])
++    fin([(-.13,0,.151),(.19,0,.183),(-.015,0,.345),(-.10,0,.30),(-.17,0,.175)],
++        [(0,1,2),(0,2,3),(0,3,4)])
++    fin([(-.20,0,-.09),(-.065,0,-.16),(-.155,0,-.275),(-.235,0,-.14)],
++        [(0,1,2),(0,2,3)])
++    for side in (-1,1):
++        fin([(.28,side*.058,-.055),(.18,side*.085,-.105),
++             (.05,side*.18,-.135),(.12,side*.13,-.085)],[(0,1,2),(0,2,3)])
++    return [(x*LENGTH_M,y*LENGTH_M,z*LENGTH_M) for x,y,z in verts],faces
++
++def blender_mesh(bpy, quad, texture, refined=False):
++    name='tiger_barb_quad' if quad else ('tiger_barb_refined' if refined else 'tiger_barb_mesh')
++    verts,faces=geometry(quad,refined)
+     me=bpy.data.meshes.new(name)
+     me.from_pydata(verts,[],faces); me.update()
+     mat=bpy.data.materials.new('tiger-barb-textured')
+@@ -90,10 +166,13 @@ def blender_mesh(bpy, quad, texture):
+                 u=.03+.94*(x/LENGTH_M+.5)
+                 v=.50+1.30*z/LENGTH_M
+                 v=max(.04,min(.96,v))
+-                if me.loops[loop].vertex_index < BODY_VERTEX_COUNT:
++                body_count=REFINED_BODY_VERTEX_COUNT if refined else BODY_VERTEX_COUNT
++                if me.loops[loop].vertex_index < body_count:
+                     # Keep the closed body inside opaque flank texels. Only fins
+                     # sample the cutout silhouette; the nose cap must stay solid.
+-                    u,v=body_uv(x,z)
++                    u,v=(refined_body_uv if refined else body_uv)(x,z)
++                elif refined:
++                    u,v=REFINED_FIN_UVS[me.loops[loop].vertex_index-body_count]
+             uv.data[loop].uv=(u,v)
+     return me
+ 

@@ -1,22 +1,58 @@
-// psx/device.cc
+#include <audio/linux/audio_internal.hp>
+#include <cstdio>
+#include <cmath>
 
-#include <audio/device.hp>
-#include <audio/buffer.hp>
-#include <hal/hal.h>
-#include <pigsys/pigsys.hp>
+SoundDevice* gSoundDevice = nullptr;
 
-SoundDevice::SoundDevice()
+SoundDevice::SoundDevice() : _ready(false), _impl(nullptr)
 {
-}
+	_impl = new Impl();
 
+	ma_engine_config cfg = ma_engine_config_init();
+	ma_result r = ma_engine_init(&cfg, &_impl->engine);
+	if (r != MA_SUCCESS) {
+		fprintf(stderr, "audio: ma_engine_init failed (%d) — running silent\n", r);
+		delete _impl;
+		_impl = nullptr;
+		return;
+	}
+
+	ma_sound_group_init(&_impl->engine, 0, nullptr, &_impl->sfxGroup);
+	_ready = true;
+	fprintf(stderr, "audio: miniaudio v%s ready\n", ma_version_string());
+}
 
 SoundDevice::~SoundDevice()
 {
+	if (!_impl) return;
+	if (_ready) {
+		ma_sound_group_uninit(&_impl->sfxGroup);
+		ma_engine_uninit(&_impl->engine);
+	}
+	delete _impl;
 }
 
-
-SoundBuffer*
-SoundDevice::CreateSoundBuffer( binistream& binis )
+void SoundDevice::setMasterVolume(float v)
 {
-	return new (HALLmalloc) SoundBuffer( binis );
+	if (_ready) ma_engine_set_volume(&_impl->engine, v);
+}
+
+void SoundDevice::setSfxVolume(float v)
+{
+	if (_ready) ma_sound_group_set_volume(&_impl->sfxGroup, v);
+}
+
+void SoundDevice::tick(float px, float py, float pz,
+                       float fx, float fy, float fz,
+                       float ux, float uy, float uz)
+{
+	if (!_ready) return;
+	DrainDoneSounds();
+	ma_engine_listener_set_position(&_impl->engine, 0, px, py, pz);
+	float fLen2 = fx*fx + fy*fy + fz*fz;
+	float uLen2 = ux*ux + uy*uy + uz*uz;
+	if (fLen2 > 1e-6f && uLen2 > 1e-6f) {
+		ma_engine_listener_set_direction(&_impl->engine, 0, fx, fy, fz);
+		ma_engine_listener_set_world_up(&_impl->engine, 0, ux, uy, uz);
+	}
 }

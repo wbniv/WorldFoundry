@@ -1,0 +1,1184 @@
+[INFO] palette tap=true
+[INFO] field 'P1 Left (Up-Left)' found=true
+[INFO] field 'P1 Right (Down-Right)' found=true
+[INFO] field 'P1 Up (Up-Right)' found=true
+[INFO] field 'P1 Down (Down-Left)' found=true
+[pos] frame=900 0x0081=3 (qrow=0 qcol=0 cubes=0)
+[bot] reset_to_apex  L1R1  cubes=1  deaths=1  frame=1000
+[bot] PLAY started at frame 1000
+=== PALETTE L1R1 (frame 1060, pal_writes=6336) ===
+pen00: #312176  (raw: 27 03)
+pen01: #56A998  (raw: A9 05)
+pen02: #DEDE00  (raw: D0 0D)
+pen03: #314646  (raw: 44 03)
+pen04: #5646EE  (raw: 4E 05)
+pen05: #FF6666  (raw: 66 0F)
+pen06: #000000  (raw: 00 00)
+pen07: #EE1021  (raw: 12 0E)
+pen08: #EE5600  (raw: 50 0E)
+pen09: #FF7600  (raw: 70 0F)
+pen10: #006600  (raw: 60 00)
+pen11: #008800  (raw: 80 00)
+pen12: #760066  (raw: 06 07)
+pen13: #00B900  (raw: B0 00)
+pen14: #EE6698  (raw: 69 0E)
+pen15: #FFFFFF  (raw: FF 0F)
+===
+[palette] unchanged at L1R1
+[pos] frame=1200 0x0081=4 (qrow=0 qcol=0 cubes=1)
+[walker-snap] idx=0000 L1R1 state0 frame=1360
+[bot] new cube (1,1) idx=2  2/28  L1R1  frame=1450
+[pos] frame=1500 0x0081=5 (qrow=0 qcol=0 cubes=2)
+[walker-snap] idx=0001 L1R1 state1 frame=1540
+[bot] new cube (1,0) idx=1  3/28  L1R1  frame=1630
+[bot] new cube (2,0) idx=3  4/28  L1R1  frame=1720
+[pos] frame=1800 0x0081=7 (qrow=3 qcol=0 cubes=4)
+[bot] new cube (3,0) idx=6  5/28  L1R1  frame=1810
+[bot] new cube (4,0) idx=10  6/28  L1R1  frame=1900
+[bot] new cube (5,0) idx=15  7/28  L1R1  frame=1990
+[bot] new cube (6,0) idx=21  8/28  L1R1  frame=2080
+[pos] frame=2100 0x0081=8 (qrow=5 qcol=0 cubes=8)
+[bot] new cube (6,1) idx=22  9/28  L1R1  frame=2260
+[bot] new cube (5,1) idx=16  10/28  L1R1  frame=2350
+[pos] frame=2400 0x0081=9 (qrow=6 qcol=2 cubes=10)
+[bot] new cube (6,2) idx=23  11/28  L1R1  frame=2440
+[bot] new cube (5,2) idx=17  12/28  L1R1  frame=2530
+[bot] new cube (6,3) idx=24  13/28  L1R1  frame=2620
+[pos] frame=2700 0x0081=10 (qrow=5 qcol=3 cubes=13)
+[bot] new cube (5,3) idx=18  14/28  L1R1  frame=2710
+[bot] new cube (6,4) idx=25  15/28  L1R1  frame=2800
+[bot] new cube (5,4) idx=19  16/28  L1R1  frame=2890
+[bot] new cube (6,5) idx=26  17/28  L1R1  frame=2980
+[pos] frame=3000 0x0081=11 (qrow=5 qcol=5 cubes=17)
+[bot] new cube (5,5) idx=20  18/28  L1R1  frame=3070
+[bot] new cube (6,6) idx=27  19/28  L1R1  frame=3160
+[pos] frame=3300 0x0081=12 (qrow=4 qcol=4 cubes=19)
+[bot] new cube (4,4) idx=14  20/28  L1R1  frame=3340
+[bot] new cube (3,3) idx=9  21/28  L1R1  frame=3430
+[bot] new cube (2,2) idx=5  22/28  L1R1  frame=3520
+[pos] frame=3600 0x0081=14 (qrow=3 qcol=2 cubes=22)
+[bot] new cube (3,2) idx=8  23/28  L1R1  frame=3610
+[bot] new cube (4,2) idx=12  24/28  L1R1  frame=3700
+[bot] new cube (3,1) idx=7  25/28  L1R1  frame=3790
+[bot] new cube (4,1) idx=11  26/28  L1R1  frame=3880
+[pos] frame=3900 0x0081=15 (qrow=3 qcol=0 cubes=26)
+[pos] frame=4200 0x0081=16 (qrow=6 qcol=1 cubes=26)
+[pos] frame=4500 0x0081=17 (qrow=5 qcol=0 cubes=26)
+[pos] frame=4800 0x0081=18 (qrow=5 qcol=2 cubes=26)
+[pos] frame=5100 0x0081=19 (qrow=4 qcol=3 cubes=26)
+[bot] new cube (4,3) idx=13  27/28  L1R1  frame=5140
+[pos] frame=5400 0x0081=21 (qrow=5 qcol=4 cubes=27)
+[pos] frame=5700 0x0081=22 (qrow=3 qcol=2 cubes=27)
+[bot] new cube (2,1) idx=4  28/28  L1R1  frame=5860
+[pos] frame=6000 0x0081=23 (qrow=2 qcol=0 cubes=28)
+[pos] frame=6300 0x0081=24 (qrow=3 qcol=1 cubes=28)
+[pos] frame=6600 0x0081=25 (qrow=1 qcol=1 cubes=28)
+[pos] frame=6900 0x0081=26 (qrow=4 qcol=4 cubes=28)
+[pos] frame=7200 0x0081=28 (qrow=5 qcol=5 cubes=28)
+[bot] ROUND COMPLETE L1R1  total_rounds=1  frame=7300
+[pos] frame=7500 0x0081=29 (qrow=0 qcol=0 cubes=0)
+=== PALETTE L1R2 (frame 7540, pal_writes=6336) ===
+pen00: #312176  (raw: 27 03)
+pen01: #56A998  (raw: A9 05)
+pen02: #DEDE00  (raw: D0 0D)
+pen03: #314646  (raw: 44 03)
+pen04: #5646EE  (raw: 4E 05)
+pen05: #FF6666  (raw: 66 0F)
+pen06: #000000  (raw: 00 00)
+pen07: #EE1021  (raw: 12 0E)
+pen08: #EE5600  (raw: 50 0E)
+pen09: #FF7600  (raw: 70 0F)
+pen10: #006600  (raw: 60 00)
+pen11: #008800  (raw: 80 00)
+pen12: #760066  (raw: 06 07)
+pen13: #00B900  (raw: B0 00)
+pen14: #EE6698  (raw: 69 0E)
+pen15: #FFFFFF  (raw: FF 0F)
+===
+[palette] unchanged at L1R2
+[bot] new cube (0,0) idx=0  1/28  L1R2  frame=7750
+[walker-snap] idx=0002 L1R2 state0 frame=7750
+[pos] frame=7800 0x0081=30 (qrow=1 qcol=1 cubes=1)
+[bot] new cube (1,1) idx=2  2/28  L1R2  frame=7840
+[walker-snap] idx=0003 L1R2 state1 frame=7930
+[bot] new cube (1,0) idx=1  3/28  L1R2  frame=8020
+[pos] frame=8100 0x0081=31 (qrow=2 qcol=0 cubes=3)
+[bot] new cube (2,0) idx=3  4/28  L1R2  frame=8110
+[bot] new cube (3,0) idx=6  5/28  L1R2  frame=8200
+[bot] new cube (4,0) idx=10  6/28  L1R2  frame=8290
+[bot] new cube (5,0) idx=15  7/28  L1R2  frame=8380
+[pos] frame=8400 0x0081=32 (qrow=6 qcol=0 cubes=7)
+[bot] new cube (6,0) idx=21  8/28  L1R2  frame=8470
+[bot] new cube (6,1) idx=22  9/28  L1R2  frame=8650
+[pos] frame=8700 0x0081=33 (qrow=5 qcol=1 cubes=9)
+[bot] new cube (5,1) idx=16  10/28  L1R2  frame=8740
+[bot] new cube (6,2) idx=23  11/28  L1R2  frame=8830
+[bot] new cube (5,2) idx=17  12/28  L1R2  frame=8920
+[pos] frame=9000 0x0081=35 (qrow=6 qcol=3 cubes=12)
+[bot] new cube (6,3) idx=24  13/28  L1R2  frame=9010
+[bot] new cube (5,3) idx=18  14/28  L1R2  frame=9100
+[bot] new cube (6,4) idx=25  15/28  L1R2  frame=9190
+[bot] new cube (5,4) idx=19  16/28  L1R2  frame=9280
+[pos] frame=9300 0x0081=36 (qrow=6 qcol=5 cubes=16)
+[bot] new cube (6,5) idx=26  17/28  L1R2  frame=9370
+[bot] new cube (5,5) idx=20  18/28  L1R2  frame=9460
+[bot] new cube (6,6) idx=27  19/28  L1R2  frame=9550
+[pos] frame=9600 0x0081=37 (qrow=5 qcol=5 cubes=19)
+[bot] new cube (4,4) idx=14  20/28  L1R2  frame=9730
+[bot] new cube (3,3) idx=9  21/28  L1R2  frame=9820
+[pos] frame=9900 0x0081=38 (qrow=2 qcol=2 cubes=21)
+[bot] new cube (2,2) idx=5  22/28  L1R2  frame=9910
+[bot] new cube (3,2) idx=8  23/28  L1R2  frame=10000
+[bot] new cube (4,2) idx=12  24/28  L1R2  frame=10090
+[bot] new cube (3,1) idx=7  25/28  L1R2  frame=10180
+[pos] frame=10200 0x0081=39 (qrow=4 qcol=1 cubes=25)
+[bot] new cube (4,1) idx=11  26/28  L1R2  frame=10270
+[pos] frame=10500 0x0081=41 (qrow=5 qcol=1 cubes=26)
+[pos] frame=10800 0x0081=42 (qrow=6 qcol=0 cubes=26)
+[pos] frame=11100 0x0081=43 (qrow=6 qcol=2 cubes=26)
+[pos] frame=11400 0x0081=44 (qrow=5 qcol=3 cubes=26)
+[bot] new cube (4,3) idx=13  27/28  L1R2  frame=11530
+[pos] frame=11700 0x0081=45 (qrow=4 qcol=4 cubes=27)
+[pos] frame=12000 0x0081=46 (qrow=4 qcol=3 cubes=27)
+[bot] new cube (2,1) idx=4  28/28  L1R2  frame=12250
+[pos] frame=12300 0x0081=48 (qrow=1 qcol=0 cubes=28)
+[pos] frame=12600 0x0081=49 (qrow=4 qcol=2 cubes=28)
+[pos] frame=12900 0x0081=50 (qrow=2 qcol=1 cubes=28)
+[pos] frame=13200 0x0081=51 (qrow=3 qcol=3 cubes=28)
+[pos] frame=13500 0x0081=52 (qrow=6 qcol=6 cubes=28)
+[bot] ROUND COMPLETE L1R2  total_rounds=2  frame=13690
+[pos] frame=13800 0x0081=53 (qrow=0 qcol=0 cubes=0)
+=== PALETTE L1R3 (frame 13930, pal_writes=6336) ===
+pen00: #312176  (raw: 27 03)
+pen01: #56A998  (raw: A9 05)
+pen02: #DEDE00  (raw: D0 0D)
+pen03: #314646  (raw: 44 03)
+pen04: #5646EE  (raw: 4E 05)
+pen05: #FF6666  (raw: 66 0F)
+pen06: #000000  (raw: 00 00)
+pen07: #EE1021  (raw: 12 0E)
+pen08: #EE5600  (raw: 50 0E)
+pen09: #FF7600  (raw: 70 0F)
+pen10: #006600  (raw: 60 00)
+pen11: #008800  (raw: 80 00)
+pen12: #760066  (raw: 06 07)
+pen13: #00B900  (raw: B0 00)
+pen14: #EE6698  (raw: 69 0E)
+pen15: #FFFFFF  (raw: FF 0F)
+===
+[palette] unchanged at L1R3
+[pos] frame=14100 0x0081=55 (qrow=0 qcol=0 cubes=0)
+[bot] new cube (0,0) idx=0  1/28  L1R3  frame=14140
+[walker-snap] idx=0004 L1R3 state0 frame=14140
+[bot] new cube (1,1) idx=2  2/28  L1R3  frame=14230
+[walker-snap] idx=0005 L1R3 state1 frame=14320
+[pos] frame=14400 0x0081=56 (qrow=1 qcol=0 cubes=2)
+[bot] new cube (1,0) idx=1  3/28  L1R3  frame=14410
+[bot] new cube (2,0) idx=3  4/28  L1R3  frame=14500
+[bot] new cube (3,0) idx=6  5/28  L1R3  frame=14590
+[bot] new cube (4,0) idx=10  6/28  L1R3  frame=14680
+[pos] frame=14700 0x0081=57 (qrow=5 qcol=0 cubes=6)
+[bot] new cube (5,0) idx=15  7/28  L1R3  frame=14770
+[bot] new cube (6,0) idx=21  8/28  L1R3  frame=14860
+[pos] frame=15000 0x0081=58 (qrow=6 qcol=1 cubes=8)
+[bot] new cube (6,1) idx=22  9/28  L1R3  frame=15040
+[bot] new cube (5,1) idx=16  10/28  L1R3  frame=15130
+[bot] new cube (6,2) idx=23  11/28  L1R3  frame=15220
+[pos] frame=15300 0x0081=59 (qrow=5 qcol=2 cubes=11)
+[bot] new cube (5,2) idx=17  12/28  L1R3  frame=15310
+[bot] new cube (6,3) idx=24  13/28  L1R3  frame=15400
+[bot] new cube (5,3) idx=18  14/28  L1R3  frame=15490
+[bot] new cube (6,4) idx=25  15/28  L1R3  frame=15580
+[pos] frame=15600 0x0081=60 (qrow=5 qcol=4 cubes=15)
+[bot] new cube (5,4) idx=19  16/28  L1R3  frame=15670
+[bot] new cube (6,5) idx=26  17/28  L1R3  frame=15760
+[bot] new cube (5,5) idx=20  18/28  L1R3  frame=15850
+[pos] frame=15900 0x0081=62 (qrow=6 qcol=6 cubes=18)
+[bot] new cube (6,6) idx=27  19/28  L1R3  frame=15940
+[bot] new cube (4,4) idx=14  20/28  L1R3  frame=16120
+[pos] frame=16200 0x0081=63 (qrow=3 qcol=3 cubes=20)
+[bot] new cube (3,3) idx=9  21/28  L1R3  frame=16210
+[bot] new cube (2,2) idx=5  22/28  L1R3  frame=16300
+[bot] new cube (3,2) idx=8  23/28  L1R3  frame=16390
+[bot] new cube (4,2) idx=12  24/28  L1R3  frame=16480
+[pos] frame=16500 0x0081=64 (qrow=3 qcol=1 cubes=24)
+[bot] new cube (3,1) idx=7  25/28  L1R3  frame=16570
+[bot] new cube (4,1) idx=11  26/28  L1R3  frame=16660
+[pos] frame=16800 0x0081=65 (qrow=4 qcol=0 cubes=26)
+[pos] frame=17100 0x0081=66 (qrow=5 qcol=0 cubes=26)
+[pos] frame=17400 0x0081=67 (qrow=5 qcol=1 cubes=26)
+[pos] frame=17700 0x0081=69 (qrow=6 qcol=3 cubes=26)
+[bot] new cube (4,3) idx=13  27/28  L1R3  frame=17920
+[pos] frame=18000 0x0081=70 (qrow=3 qcol=3 cubes=27)
+[pos] frame=18300 0x0081=71 (qrow=5 qcol=3 cubes=27)
+[pos] frame=18600 0x0081=72 (qrow=2 qcol=1 cubes=27)
+[bot] new cube (2,1) idx=4  28/28  L1R3  frame=18640
+[pos] frame=18900 0x0081=73 (qrow=3 qcol=1 cubes=28)
+[pos] frame=19200 0x0081=74 (qrow=3 qcol=1 cubes=28)
+[pos] frame=19500 0x0081=76 (qrow=2 qcol=2 cubes=28)
+[pos] frame=19800 0x0081=77 (qrow=5 qcol=5 cubes=28)
+[bot] ROUND COMPLETE L1R3  total_rounds=3  frame=20080
+[pos] frame=20100 0x0081=78 (qrow=0 qcol=0 cubes=0)
+=== PALETTE L1R4 (frame 20320, pal_writes=6336) ===
+pen00: #312176  (raw: 27 03)
+pen01: #56A998  (raw: A9 05)
+pen02: #DEDE00  (raw: D0 0D)
+pen03: #314646  (raw: 44 03)
+pen04: #5646EE  (raw: 4E 05)
+pen05: #FF6666  (raw: 66 0F)
+pen06: #000000  (raw: 00 00)
+pen07: #EE1021  (raw: 12 0E)
+pen08: #EE5600  (raw: 50 0E)
+pen09: #FF7600  (raw: 70 0F)
+pen10: #006600  (raw: 60 00)
+pen11: #008800  (raw: 80 00)
+pen12: #760066  (raw: 06 07)
+pen13: #00B900  (raw: B0 00)
+pen14: #EE6698  (raw: 69 0E)
+pen15: #FFFFFF  (raw: FF 0F)
+===
+[palette] unchanged at L1R4
+[pos] frame=20400 0x0081=79 (qrow=0 qcol=0 cubes=0)
+[bot] new cube (0,0) idx=0  1/28  L1R4  frame=20530
+[walker-snap] idx=0006 L1R4 state0 frame=20530
+[bot] new cube (1,1) idx=2  2/28  L1R4  frame=20620
+[pos] frame=20700 0x0081=80 (qrow=0 qcol=0 cubes=2)
+[walker-snap] idx=0007 L1R4 state1 frame=20710
+[bot] new cube (1,0) idx=1  3/28  L1R4  frame=20800
+[bot] new cube (2,0) idx=3  4/28  L1R4  frame=20890
+[bot] new cube (3,0) idx=6  5/28  L1R4  frame=20980
+[pos] frame=21000 0x0081=82 (qrow=4 qcol=0 cubes=5)
+[bot] new cube (4,0) idx=10  6/28  L1R4  frame=21070
+[bot] new cube (5,0) idx=15  7/28  L1R4  frame=21160
+[bot] new cube (6,0) idx=21  8/28  L1R4  frame=21250
+[pos] frame=21300 0x0081=83 (qrow=5 qcol=0 cubes=8)
+[bot] new cube (6,1) idx=22  9/28  L1R4  frame=21430
+[bot] new cube (5,1) idx=16  10/28  L1R4  frame=21520
+[pos] frame=21600 0x0081=84 (qrow=6 qcol=2 cubes=10)
+[bot] new cube (6,2) idx=23  11/28  L1R4  frame=21610
+[bot] new cube (5,2) idx=17  12/28  L1R4  frame=21700
+[bot] new cube (6,3) idx=24  13/28  L1R4  frame=21790
+[bot] new cube (5,3) idx=18  14/28  L1R4  frame=21880
+[pos] frame=21900 0x0081=85 (qrow=6 qcol=4 cubes=14)
+[bot] new cube (6,4) idx=25  15/28  L1R4  frame=21970
+[bot] new cube (5,4) idx=19  16/28  L1R4  frame=22060
+[bot] new cube (6,5) idx=26  17/28  L1R4  frame=22150
+[pos] frame=22200 0x0081=86 (qrow=5 qcol=5 cubes=17)
+[bot] new cube (5,5) idx=20  18/28  L1R4  frame=22240
+[bot] new cube (6,6) idx=27  19/28  L1R4  frame=22330
+[pos] frame=22500 0x0081=87 (qrow=4 qcol=4 cubes=19)
+[bot] new cube (4,4) idx=14  20/28  L1R4  frame=22510
+[bot] new cube (3,3) idx=9  21/28  L1R4  frame=22600
+[bot] new cube (2,2) idx=5  22/28  L1R4  frame=22690
+[bot] new cube (3,2) idx=8  23/28  L1R4  frame=22780
+[pos] frame=22800 0x0081=89 (qrow=4 qcol=2 cubes=23)
+[bot] new cube (4,2) idx=12  24/28  L1R4  frame=22870
+[bot] new cube (3,1) idx=7  25/28  L1R4  frame=22960
+[bot] new cube (4,1) idx=11  26/28  L1R4  frame=23050
+[pos] frame=23100 0x0081=90 (qrow=3 qcol=0 cubes=26)
+[pos] frame=23400 0x0081=91 (qrow=6 qcol=1 cubes=26)
+[pos] frame=23700 0x0081=92 (qrow=6 qcol=1 cubes=26)
+[pos] frame=24000 0x0081=93 (qrow=5 qcol=2 cubes=26)
+[pos] frame=24300 0x0081=94 (qrow=4 qcol=3 cubes=26)
+[bot] new cube (4,3) idx=13  27/28  L1R4  frame=24310
+[pos] frame=24600 0x0081=96 (qrow=6 qcol=4 cubes=27)
+[pos] frame=24900 0x0081=97 (qrow=3 qcol=2 cubes=27)
+[bot] new cube (2,1) idx=4  28/28  L1R4  frame=25030
+[pos] frame=25200 0x0081=98 (qrow=2 qcol=0 cubes=28)
+[pos] frame=25500 0x0081=99 (qrow=4 qcol=1 cubes=28)
+[pos] frame=25800 0x0081=100 (qrow=1 qcol=1 cubes=28)
+[pos] frame=26100 0x0081=101 (qrow=4 qcol=4 cubes=28)
+[pos] frame=26400 0x0081=103 (qrow=6 qcol=5 cubes=28)
+[bot] ROUND COMPLETE L1R4  total_rounds=4  frame=26470
+[pos] frame=26700 0x0081=104 (qrow=0 qcol=0 cubes=0)
+=== PALETTE L2R1 (frame 26710, pal_writes=6336) ===
+pen00: #312176  (raw: 27 03)
+pen01: #56A998  (raw: A9 05)
+pen02: #DEDE00  (raw: D0 0D)
+pen03: #314646  (raw: 44 03)
+pen04: #5646EE  (raw: 4E 05)
+pen05: #FF6666  (raw: 66 0F)
+pen06: #000000  (raw: 00 00)
+pen07: #EE1021  (raw: 12 0E)
+pen08: #EE5600  (raw: 50 0E)
+pen09: #FF7600  (raw: 70 0F)
+pen10: #006600  (raw: 60 00)
+pen11: #008800  (raw: 80 00)
+pen12: #760066  (raw: 06 07)
+pen13: #00B900  (raw: B0 00)
+pen14: #EE6698  (raw: 69 0E)
+pen15: #FFFFFF  (raw: FF 0F)
+===
+[palette] unchanged at L2R1
+[bot] new cube (0,0) idx=0  1/28  L2R1  frame=26920
+[walker-snap] idx=0008 L2R1 state0 frame=26920
+[pos] frame=27000 0x0081=105 (qrow=1 qcol=1 cubes=1)
+[bot] new cube (1,1) idx=2  2/28  L2R1  frame=27010
+[walker-snap] idx=0009 L2R1 state1 frame=27100
+[bot] new cube (1,0) idx=1  3/28  L2R1  frame=27190
+[bot] new cube (2,0) idx=3  4/28  L2R1  frame=27280
+[pos] frame=27300 0x0081=106 (qrow=3 qcol=0 cubes=4)
+[bot] new cube (3,0) idx=6  5/28  L2R1  frame=27370
+[bot] new cube (4,0) idx=10  6/28  L2R1  frame=27460
+[bot] new cube (5,0) idx=15  7/28  L2R1  frame=27550
+[pos] frame=27600 0x0081=107 (qrow=6 qcol=0 cubes=7)
+[bot] new cube (6,0) idx=21  8/28  L2R1  frame=27640
+[bot] new cube (6,1) idx=22  9/28  L2R1  frame=27820
+[pos] frame=27900 0x0081=108 (qrow=5 qcol=1 cubes=9)
+[bot] new cube (5,1) idx=16  10/28  L2R1  frame=27910
+[bot] new cube (6,2) idx=23  11/28  L2R1  frame=28000
+[bot] new cube (5,2) idx=17  12/28  L2R1  frame=28090
+[bot] new cube (6,3) idx=24  13/28  L2R1  frame=28180
+[pos] frame=28200 0x0081=110 (qrow=5 qcol=3 cubes=13)
+[bot] new cube (5,3) idx=18  14/28  L2R1  frame=28270
+[bot] new cube (6,4) idx=25  15/28  L2R1  frame=28360
+[bot] new cube (5,4) idx=19  16/28  L2R1  frame=28450
+[pos] frame=28500 0x0081=111 (qrow=6 qcol=5 cubes=16)
+[bot] new cube (6,5) idx=26  17/28  L2R1  frame=28540
+[bot] new cube (5,5) idx=20  18/28  L2R1  frame=28630
+[bot] new cube (6,6) idx=27  19/28  L2R1  frame=28720
+[pos] frame=28800 0x0081=112 (qrow=5 qcol=5 cubes=19)
+[bot] new cube (4,4) idx=14  20/28  L2R1  frame=28900
+[bot] new cube (3,3) idx=9  21/28  L2R1  frame=28990
+[bot] new cube (2,2) idx=5  22/28  L2R1  frame=29080
+[pos] frame=29100 0x0081=113 (qrow=3 qcol=2 cubes=22)
+[bot] new cube (3,2) idx=8  23/28  L2R1  frame=29170
+[bot] new cube (4,2) idx=12  24/28  L2R1  frame=29260
+[bot] new cube (3,1) idx=7  25/28  L2R1  frame=29350
+[pos] frame=29400 0x0081=114 (qrow=4 qcol=1 cubes=25)
+[bot] new cube (4,1) idx=11  26/28  L2R1  frame=29440
+[pos] frame=29700 0x0081=116 (qrow=5 qcol=1 cubes=26)
+[pos] frame=30000 0x0081=117 (qrow=5 qcol=0 cubes=26)
+[pos] frame=30300 0x0081=118 (qrow=6 qcol=2 cubes=26)
+[pos] frame=30600 0x0081=119 (qrow=5 qcol=3 cubes=26)
+[bot] new cube (4,3) idx=13  27/28  L2R1  frame=30700
+[pos] frame=30900 0x0081=120 (qrow=5 qcol=4 cubes=27)
+[pos] frame=31200 0x0081=121 (qrow=4 qcol=3 cubes=27)
+[bot] new cube (2,1) idx=4  28/28  L2R1  frame=31420
+[pos] frame=31500 0x0081=123 (qrow=1 qcol=0 cubes=28)
+[pos] frame=31800 0x0081=124 (qrow=3 qcol=1 cubes=28)
+[pos] frame=32100 0x0081=125 (qrow=2 qcol=1 cubes=28)
+[pos] frame=32400 0x0081=126 (qrow=3 qcol=3 cubes=28)
+[pos] frame=32700 0x0081=127 (qrow=5 qcol=5 cubes=28)
+[bot] ROUND COMPLETE L2R1  total_rounds=5  frame=32860
+[pos] frame=33000 0x0081=128 (qrow=0 qcol=0 cubes=0)
+=== PALETTE L2R2 (frame 33100, pal_writes=6336) ===
+pen00: #312176  (raw: 27 03)
+pen01: #56A998  (raw: A9 05)
+pen02: #DEDE00  (raw: D0 0D)
+pen03: #314646  (raw: 44 03)
+pen04: #5646EE  (raw: 4E 05)
+pen05: #FF6666  (raw: 66 0F)
+pen06: #000000  (raw: 00 00)
+pen07: #EE1021  (raw: 12 0E)
+pen08: #EE5600  (raw: 50 0E)
+pen09: #FF7600  (raw: 70 0F)
+pen10: #006600  (raw: 60 00)
+pen11: #008800  (raw: 80 00)
+pen12: #760066  (raw: 06 07)
+pen13: #00B900  (raw: B0 00)
+pen14: #EE6698  (raw: 69 0E)
+pen15: #FFFFFF  (raw: FF 0F)
+===
+[palette] unchanged at L2R2
+[pos] frame=33300 0x0081=130 (qrow=0 qcol=0 cubes=0)
+[bot] new cube (0,0) idx=0  1/28  L2R2  frame=33310
+[walker-snap] idx=0010 L2R2 state0 frame=33310
+[bot] new cube (1,1) idx=2  2/28  L2R2  frame=33400
+[walker-snap] idx=0011 L2R2 state1 frame=33490
+[bot] new cube (1,0) idx=1  3/28  L2R2  frame=33580
+[pos] frame=33600 0x0081=131 (qrow=2 qcol=0 cubes=3)
+[bot] new cube (2,0) idx=3  4/28  L2R2  frame=33670
+[bot] new cube (3,0) idx=6  5/28  L2R2  frame=33760
+[bot] new cube (4,0) idx=10  6/28  L2R2  frame=33850
+[pos] frame=33900 0x0081=132 (qrow=5 qcol=0 cubes=6)
+[bot] new cube (5,0) idx=15  7/28  L2R2  frame=33940
+[bot] new cube (6,0) idx=21  8/28  L2R2  frame=34030
+[pos] frame=34200 0x0081=133 (qrow=6 qcol=1 cubes=8)
+[bot] new cube (6,1) idx=22  9/28  L2R2  frame=34210
+[bot] new cube (5,1) idx=16  10/28  L2R2  frame=34300
+[bot] new cube (6,2) idx=23  11/28  L2R2  frame=34390
+[bot] new cube (5,2) idx=17  12/28  L2R2  frame=34480
+[pos] frame=34500 0x0081=134 (qrow=6 qcol=3 cubes=12)
+[bot] new cube (6,3) idx=24  13/28  L2R2  frame=34570
+[bot] new cube (5,3) idx=18  14/28  L2R2  frame=34660
+[bot] new cube (6,4) idx=25  15/28  L2R2  frame=34750
+[pos] frame=34800 0x0081=135 (qrow=5 qcol=4 cubes=15)
+[bot] new cube (5,4) idx=19  16/28  L2R2  frame=34840
+[bot] new cube (6,5) idx=26  17/28  L2R2  frame=34930
+[bot] new cube (5,5) idx=20  18/28  L2R2  frame=35020
+[pos] frame=35100 0x0081=137 (qrow=6 qcol=6 cubes=18)
+[bot] new cube (6,6) idx=27  19/28  L2R2  frame=35110
+[bot] new cube (4,4) idx=14  20/28  L2R2  frame=35290
+[bot] new cube (3,3) idx=9  21/28  L2R2  frame=35380
+[pos] frame=35400 0x0081=138 (qrow=2 qcol=2 cubes=21)
+[bot] new cube (2,2) idx=5  22/28  L2R2  frame=35470
+[bot] new cube (3,2) idx=8  23/28  L2R2  frame=35560
+[bot] new cube (4,2) idx=12  24/28  L2R2  frame=35650
+[pos] frame=35700 0x0081=139 (qrow=3 qcol=1 cubes=24)
+[bot] new cube (3,1) idx=7  25/28  L2R2  frame=35740
+[bot] new cube (4,1) idx=11  26/28  L2R2  frame=35830
+[pos] frame=36000 0x0081=140 (qrow=4 qcol=0 cubes=26)
+[pos] frame=36300 0x0081=141 (qrow=6 qcol=0 cubes=26)
+[pos] frame=36600 0x0081=142 (qrow=5 qcol=1 cubes=26)
+[pos] frame=36900 0x0081=144 (qrow=6 qcol=3 cubes=26)
+[bot] new cube (4,3) idx=13  27/28  L2R2  frame=37090
+[pos] frame=37200 0x0081=145 (qrow=4 qcol=4 cubes=27)
+[pos] frame=37500 0x0081=146 (qrow=5 qcol=3 cubes=27)
+[pos] frame=37800 0x0081=147 (qrow=2 qcol=1 cubes=27)
+[bot] new cube (2,1) idx=4  28/28  L2R2  frame=37810
+[pos] frame=38100 0x0081=148 (qrow=4 qcol=2 cubes=28)
+[pos] frame=38400 0x0081=149 (qrow=3 qcol=1 cubes=28)
+[pos] frame=38700 0x0081=151 (qrow=2 qcol=2 cubes=28)
+[pos] frame=39000 0x0081=152 (qrow=6 qcol=6 cubes=28)
+[bot] ROUND COMPLETE L2R2  total_rounds=6  frame=39250
+[pos] frame=39300 0x0081=153 (qrow=0 qcol=0 cubes=0)
+=== PALETTE L2R3 (frame 39490, pal_writes=6336) ===
+pen00: #312176  (raw: 27 03)
+pen01: #56A998  (raw: A9 05)
+pen02: #DEDE00  (raw: D0 0D)
+pen03: #314646  (raw: 44 03)
+pen04: #5646EE  (raw: 4E 05)
+pen05: #FF6666  (raw: 66 0F)
+pen06: #000000  (raw: 00 00)
+pen07: #EE1021  (raw: 12 0E)
+pen08: #EE5600  (raw: 50 0E)
+pen09: #FF7600  (raw: 70 0F)
+pen10: #006600  (raw: 60 00)
+pen11: #008800  (raw: 80 00)
+pen12: #760066  (raw: 06 07)
+pen13: #00B900  (raw: B0 00)
+pen14: #EE6698  (raw: 69 0E)
+pen15: #FFFFFF  (raw: FF 0F)
+===
+[palette] unchanged at L2R3
+[pos] frame=39600 0x0081=154 (qrow=0 qcol=0 cubes=0)
+[bot] new cube (0,0) idx=0  1/28  L2R3  frame=39700
+[walker-snap] idx=0012 L2R3 state0 frame=39700
+[bot] new cube (1,1) idx=2  2/28  L2R3  frame=39790
+[walker-snap] idx=0013 L2R3 state1 frame=39880
+[pos] frame=39900 0x0081=155 (qrow=1 qcol=0 cubes=2)
+[bot] new cube (1,0) idx=1  3/28  L2R3  frame=39970
+[bot] new cube (2,0) idx=3  4/28  L2R3  frame=40060
+[bot] new cube (3,0) idx=6  5/28  L2R3  frame=40150
+[pos] frame=40200 0x0081=157 (qrow=4 qcol=0 cubes=5)
+[bot] new cube (4,0) idx=10  6/28  L2R3  frame=40240
+[bot] new cube (5,0) idx=15  7/28  L2R3  frame=40330
+[bot] new cube (6,0) idx=21  8/28  L2R3  frame=40420
+[pos] frame=40500 0x0081=158 (qrow=5 qcol=0 cubes=8)
+[bot] new cube (6,1) idx=22  9/28  L2R3  frame=40600
+[bot] new cube (5,1) idx=16  10/28  L2R3  frame=40690
+[bot] new cube (6,2) idx=23  11/28  L2R3  frame=40780
+[pos] frame=40800 0x0081=159 (qrow=5 qcol=2 cubes=11)
+[bot] new cube (5,2) idx=17  12/28  L2R3  frame=40870
+[bot] new cube (6,3) idx=24  13/28  L2R3  frame=40960
+[bot] new cube (5,3) idx=18  14/28  L2R3  frame=41050
+[pos] frame=41100 0x0081=160 (qrow=6 qcol=4 cubes=14)
+[bot] new cube (6,4) idx=25  15/28  L2R3  frame=41140
+[bot] new cube (5,4) idx=19  16/28  L2R3  frame=41230
+[bot] new cube (6,5) idx=26  17/28  L2R3  frame=41320
+[pos] frame=41400 0x0081=161 (qrow=5 qcol=5 cubes=17)
+[bot] new cube (5,5) idx=20  18/28  L2R3  frame=41410
+[bot] new cube (6,6) idx=27  19/28  L2R3  frame=41500
+[bot] new cube (4,4) idx=14  20/28  L2R3  frame=41680
+[pos] frame=41700 0x0081=162 (qrow=3 qcol=3 cubes=20)
+[bot] new cube (3,3) idx=9  21/28  L2R3  frame=41770
+[bot] new cube (2,2) idx=5  22/28  L2R3  frame=41860
+[bot] new cube (3,2) idx=8  23/28  L2R3  frame=41950
+[pos] frame=42000 0x0081=164 (qrow=4 qcol=2 cubes=23)
+[bot] new cube (4,2) idx=12  24/28  L2R3  frame=42040
+[bot] new cube (3,1) idx=7  25/28  L2R3  frame=42130
+[bot] new cube (4,1) idx=11  26/28  L2R3  frame=42220
+[pos] frame=42300 0x0081=165 (qrow=3 qcol=0 cubes=26)
+[pos] frame=42600 0x0081=166 (qrow=5 qcol=0 cubes=26)
+[pos] frame=42900 0x0081=167 (qrow=6 qcol=1 cubes=26)
+[pos] frame=43200 0x0081=168 (qrow=5 qcol=2 cubes=26)
+[bot] new cube (4,3) idx=13  27/28  L2R3  frame=43480
+[pos] frame=43500 0x0081=169 (qrow=3 qcol=3 cubes=27)
+[pos] frame=43800 0x0081=171 (qrow=6 qcol=4 cubes=27)
+[pos] frame=44100 0x0081=172 (qrow=3 qcol=2 cubes=27)
+[bot] new cube (2,1) idx=4  28/28  L2R3  frame=44200
+[pos] frame=44400 0x0081=173 (qrow=3 qcol=1 cubes=28)
+[pos] frame=44700 0x0081=174 (qrow=4 qcol=1 cubes=28)
+[pos] frame=45000 0x0081=175 (qrow=1 qcol=1 cubes=28)
+[pos] frame=45300 0x0081=176 (qrow=5 qcol=5 cubes=28)
+[pos] frame=45600 0x0081=178 (qrow=6 qcol=5 cubes=28)
+[bot] ROUND COMPLETE L2R3  total_rounds=7  frame=45640
+=== PALETTE L2R4 (frame 45880, pal_writes=6336) ===
+pen00: #312176  (raw: 27 03)
+pen01: #56A998  (raw: A9 05)
+pen02: #DEDE00  (raw: D0 0D)
+pen03: #314646  (raw: 44 03)
+pen04: #5646EE  (raw: 4E 05)
+pen05: #FF6666  (raw: 66 0F)
+pen06: #000000  (raw: 00 00)
+pen07: #EE1021  (raw: 12 0E)
+pen08: #EE5600  (raw: 50 0E)
+pen09: #FF7600  (raw: 70 0F)
+pen10: #006600  (raw: 60 00)
+pen11: #008800  (raw: 80 00)
+pen12: #760066  (raw: 06 07)
+pen13: #00B900  (raw: B0 00)
+pen14: #EE6698  (raw: 69 0E)
+pen15: #FFFFFF  (raw: FF 0F)
+===
+[palette] unchanged at L2R4
+[pos] frame=45900 0x0081=179 (qrow=0 qcol=0 cubes=0)
+[bot] new cube (0,0) idx=0  1/28  L2R4  frame=46090
+[walker-snap] idx=0014 L2R4 state0 frame=46090
+[bot] new cube (1,1) idx=2  2/28  L2R4  frame=46180
+[pos] frame=46200 0x0081=180 (qrow=0 qcol=0 cubes=2)
+[walker-snap] idx=0015 L2R4 state1 frame=46270
+[bot] new cube (1,0) idx=1  3/28  L2R4  frame=46360
+[bot] new cube (2,0) idx=3  4/28  L2R4  frame=46450
+[pos] frame=46500 0x0081=181 (qrow=3 qcol=0 cubes=4)
+[bot] new cube (3,0) idx=6  5/28  L2R4  frame=46540
+[bot] new cube (4,0) idx=10  6/28  L2R4  frame=46630
+[bot] new cube (5,0) idx=15  7/28  L2R4  frame=46720
+[pos] frame=46800 0x0081=182 (qrow=6 qcol=0 cubes=7)
+[bot] new cube (6,0) idx=21  8/28  L2R4  frame=46810
+[bot] new cube (6,1) idx=22  9/28  L2R4  frame=46990
+[bot] new cube (5,1) idx=16  10/28  L2R4  frame=47080
+[pos] frame=47100 0x0081=183 (qrow=6 qcol=2 cubes=10)
+[bot] new cube (6,2) idx=23  11/28  L2R4  frame=47170
+[bot] new cube (5,2) idx=17  12/28  L2R4  frame=47260
+[bot] new cube (6,3) idx=24  13/28  L2R4  frame=47350
+[pos] frame=47400 0x0081=185 (qrow=5 qcol=3 cubes=13)
+[bot] new cube (5,3) idx=18  14/28  L2R4  frame=47440
+[bot] new cube (6,4) idx=25  15/28  L2R4  frame=47530
+[bot] new cube (5,4) idx=19  16/28  L2R4  frame=47620
+[pos] frame=47700 0x0081=186 (qrow=6 qcol=5 cubes=16)
+[bot] new cube (6,5) idx=26  17/28  L2R4  frame=47710
+[bot] new cube (5,5) idx=20  18/28  L2R4  frame=47800
+[bot] new cube (6,6) idx=27  19/28  L2R4  frame=47890
+[pos] frame=48000 0x0081=187 (qrow=4 qcol=4 cubes=19)
+[bot] new cube (4,4) idx=14  20/28  L2R4  frame=48070
+[bot] new cube (3,3) idx=9  21/28  L2R4  frame=48160
+[bot] new cube (2,2) idx=5  22/28  L2R4  frame=48250
+[pos] frame=48300 0x0081=188 (qrow=3 qcol=2 cubes=22)
+[bot] new cube (3,2) idx=8  23/28  L2R4  frame=48340
+[bot] new cube (4,2) idx=12  24/28  L2R4  frame=48430
+[bot] new cube (3,1) idx=7  25/28  L2R4  frame=48520
+[pos] frame=48600 0x0081=189 (qrow=4 qcol=1 cubes=25)
+[bot] new cube (4,1) idx=11  26/28  L2R4  frame=48610
+[pos] frame=48900 0x0081=191 (qrow=6 qcol=1 cubes=26)
+[pos] frame=49200 0x0081=192 (qrow=5 qcol=0 cubes=26)
+[pos] frame=49500 0x0081=193 (qrow=6 qcol=2 cubes=26)
+[pos] frame=49800 0x0081=194 (qrow=4 qcol=3 cubes=26)
+[bot] new cube (4,3) idx=13  27/28  L2R4  frame=49870
+[pos] frame=50100 0x0081=195 (qrow=5 qcol=4 cubes=27)
+[pos] frame=50400 0x0081=196 (qrow=4 qcol=3 cubes=27)
+[bot] new cube (2,1) idx=4  28/28  L2R4  frame=50590
+[pos] frame=50700 0x0081=198 (qrow=2 qcol=0 cubes=28)
+[pos] frame=51000 0x0081=199 (qrow=3 qcol=1 cubes=28)
+[pos] frame=51300 0x0081=200 (qrow=2 qcol=1 cubes=28)
+[pos] frame=51600 0x0081=201 (qrow=4 qcol=4 cubes=28)
+[pos] frame=51900 0x0081=202 (qrow=5 qcol=5 cubes=28)
+[bot] ROUND COMPLETE L2R4  total_rounds=8  frame=52030
+[pos] frame=52200 0x0081=203 (qrow=0 qcol=0 cubes=0)
+=== PALETTE L3R1 (frame 52270, pal_writes=6336) ===
+pen00: #312176  (raw: 27 03)
+pen01: #56A998  (raw: A9 05)
+pen02: #DEDE00  (raw: D0 0D)
+pen03: #314646  (raw: 44 03)
+pen04: #5646EE  (raw: 4E 05)
+pen05: #FF6666  (raw: 66 0F)
+pen06: #000000  (raw: 00 00)
+pen07: #EE1021  (raw: 12 0E)
+pen08: #EE5600  (raw: 50 0E)
+pen09: #FF7600  (raw: 70 0F)
+pen10: #006600  (raw: 60 00)
+pen11: #008800  (raw: 80 00)
+pen12: #760066  (raw: 06 07)
+pen13: #00B900  (raw: B0 00)
+pen14: #EE6698  (raw: 69 0E)
+pen15: #FFFFFF  (raw: FF 0F)
+===
+[palette] unchanged at L3R1
+[bot] new cube (0,0) idx=0  1/28  L3R1  frame=52480
+[walker-snap] idx=0016 L3R1 state0 frame=52480
+[pos] frame=52500 0x0081=205 (qrow=1 qcol=1 cubes=1)
+[bot] new cube (1,1) idx=2  2/28  L3R1  frame=52570
+[walker-snap] idx=0017 L3R1 state1 frame=52660
+[bot] new cube (1,0) idx=1  3/28  L3R1  frame=52750
+[pos] frame=52800 0x0081=206 (qrow=2 qcol=0 cubes=3)
+[bot] new cube (2,0) idx=3  4/28  L3R1  frame=52840
+[bot] new cube (3,0) idx=6  5/28  L3R1  frame=52930
+[bot] new cube (4,0) idx=10  6/28  L3R1  frame=53020
+[pos] frame=53100 0x0081=207 (qrow=5 qcol=0 cubes=6)
+[bot] new cube (5,0) idx=15  7/28  L3R1  frame=53110
+[bot] new cube (6,0) idx=21  8/28  L3R1  frame=53200
+[bot] new cube (6,1) idx=22  9/28  L3R1  frame=53380
+[pos] frame=53400 0x0081=208 (qrow=5 qcol=1 cubes=9)
+[bot] new cube (5,1) idx=16  10/28  L3R1  frame=53470
+[bot] new cube (6,2) idx=23  11/28  L3R1  frame=53560
+[bot] new cube (5,2) idx=17  12/28  L3R1  frame=53650
+[pos] frame=53700 0x0081=209 (qrow=6 qcol=3 cubes=12)
+[bot] new cube (6,3) idx=24  13/28  L3R1  frame=53740
+[bot] new cube (5,3) idx=18  14/28  L3R1  frame=53830
+[bot] new cube (6,4) idx=25  15/28  L3R1  frame=53920
+[pos] frame=54000 0x0081=210 (qrow=5 qcol=4 cubes=15)
+[bot] new cube (5,4) idx=19  16/28  L3R1  frame=54010
+[bot] new cube (6,5) idx=26  17/28  L3R1  frame=54100
+[bot] new cube (5,5) idx=20  18/28  L3R1  frame=54190
+[bot] new cube (6,6) idx=27  19/28  L3R1  frame=54280
+[pos] frame=54300 0x0081=212 (qrow=5 qcol=5 cubes=19)
+[bot] new cube (4,4) idx=14  20/28  L3R1  frame=54460
+[bot] new cube (3,3) idx=9  21/28  L3R1  frame=54550
+[pos] frame=54600 0x0081=213 (qrow=2 qcol=2 cubes=21)
+[bot] new cube (2,2) idx=5  22/28  L3R1  frame=54640
+[bot] new cube (3,2) idx=8  23/28  L3R1  frame=54730
+[bot] new cube (4,2) idx=12  24/28  L3R1  frame=54820
+[pos] frame=54900 0x0081=214 (qrow=3 qcol=1 cubes=24)
+[bot] new cube (3,1) idx=7  25/28  L3R1  frame=54910
+[bot] new cube (4,1) idx=11  26/28  L3R1  frame=55000
+[pos] frame=55200 0x0081=215 (qrow=5 qcol=1 cubes=26)
+[pos] frame=55500 0x0081=216 (qrow=6 qcol=0 cubes=26)
+[pos] frame=55800 0x0081=217 (qrow=5 qcol=1 cubes=26)
+[pos] frame=56100 0x0081=219 (qrow=5 qcol=3 cubes=26)
+[bot] new cube (4,3) idx=13  27/28  L3R1  frame=56260
+[pos] frame=56400 0x0081=220 (qrow=4 qcol=4 cubes=27)
+[pos] frame=56700 0x0081=221 (qrow=5 qcol=3 cubes=27)
+[bot] new cube (2,1) idx=4  28/28  L3R1  frame=56980
+[pos] frame=57000 0x0081=222 (qrow=1 qcol=0 cubes=28)
+[pos] frame=57300 0x0081=223 (qrow=4 qcol=2 cubes=28)
+[pos] frame=57600 0x0081=224 (qrow=3 qcol=1 cubes=28)
+[pos] frame=57900 0x0081=226 (qrow=3 qcol=3 cubes=28)
+[pos] frame=58200 0x0081=227 (qrow=6 qcol=6 cubes=28)
+[bot] ROUND COMPLETE L3R1  total_rounds=9  frame=58420
+[pos] frame=58500 0x0081=228 (qrow=0 qcol=0 cubes=0)
+=== PALETTE L3R2 (frame 58660, pal_writes=6336) ===
+pen00: #312176  (raw: 27 03)
+pen01: #56A998  (raw: A9 05)
+pen02: #DEDE00  (raw: D0 0D)
+pen03: #314646  (raw: 44 03)
+pen04: #5646EE  (raw: 4E 05)
+pen05: #FF6666  (raw: 66 0F)
+pen06: #000000  (raw: 00 00)
+pen07: #EE1021  (raw: 12 0E)
+pen08: #EE5600  (raw: 50 0E)
+pen09: #FF7600  (raw: 70 0F)
+pen10: #006600  (raw: 60 00)
+pen11: #008800  (raw: 80 00)
+pen12: #760066  (raw: 06 07)
+pen13: #00B900  (raw: B0 00)
+pen14: #EE6698  (raw: 69 0E)
+pen15: #FFFFFF  (raw: FF 0F)
+===
+[palette] unchanged at L3R2
+[pos] frame=58800 0x0081=229 (qrow=0 qcol=0 cubes=0)
+[bot] new cube (0,0) idx=0  1/28  L3R2  frame=58870
+[walker-snap] idx=0018 L3R2 state0 frame=58870
+[bot] new cube (1,1) idx=2  2/28  L3R2  frame=58960
+[walker-snap] idx=0019 L3R2 state1 frame=59050
+[pos] frame=59100 0x0081=230 (qrow=1 qcol=0 cubes=2)
+[bot] new cube (1,0) idx=1  3/28  L3R2  frame=59140
+[bot] new cube (2,0) idx=3  4/28  L3R2  frame=59230
+[bot] new cube (3,0) idx=6  5/28  L3R2  frame=59320
+[pos] frame=59400 0x0081=232 (qrow=4 qcol=0 cubes=5)
+[bot] new cube (4,0) idx=10  6/28  L3R2  frame=59410
+[bot] new cube (5,0) idx=15  7/28  L3R2  frame=59500
+[bot] new cube (6,0) idx=21  8/28  L3R2  frame=59590
+[pos] frame=59700 0x0081=233 (qrow=6 qcol=1 cubes=8)
+[bot] new cube (6,1) idx=22  9/28  L3R2  frame=59770
+[bot] new cube (5,1) idx=16  10/28  L3R2  frame=59860
+[bot] new cube (6,2) idx=23  11/28  L3R2  frame=59950
+[pos] frame=60000 0x0081=234 (qrow=5 qcol=2 cubes=11)
+[bot] new cube (5,2) idx=17  12/28  L3R2  frame=60040
+[bot] new cube (6,3) idx=24  13/28  L3R2  frame=60130
+[bot] new cube (5,3) idx=18  14/28  L3R2  frame=60220
+[pos] frame=60300 0x0081=235 (qrow=6 qcol=4 cubes=14)
+[bot] new cube (6,4) idx=25  15/28  L3R2  frame=60310
+[bot] new cube (5,4) idx=19  16/28  L3R2  frame=60400
+[bot] new cube (6,5) idx=26  17/28  L3R2  frame=60490
+[bot] new cube (5,5) idx=20  18/28  L3R2  frame=60580
+[pos] frame=60600 0x0081=236 (qrow=6 qcol=6 cubes=18)
+[bot] new cube (6,6) idx=27  19/28  L3R2  frame=60670
+[bot] new cube (4,4) idx=14  20/28  L3R2  frame=60850
+[pos] frame=60900 0x0081=237 (qrow=3 qcol=3 cubes=20)
+[bot] new cube (3,3) idx=9  21/28  L3R2  frame=60940
+[bot] new cube (2,2) idx=5  22/28  L3R2  frame=61030
+[bot] new cube (3,2) idx=8  23/28  L3R2  frame=61120
+[pos] frame=61200 0x0081=239 (qrow=4 qcol=2 cubes=23)
+[bot] new cube (4,2) idx=12  24/28  L3R2  frame=61210
+[bot] new cube (3,1) idx=7  25/28  L3R2  frame=61300
+[bot] new cube (4,1) idx=11  26/28  L3R2  frame=61390
+[pos] frame=61500 0x0081=240 (qrow=4 qcol=0 cubes=26)
+[pos] frame=61800 0x0081=241 (qrow=5 qcol=0 cubes=26)
+[pos] frame=62100 0x0081=242 (qrow=6 qcol=1 cubes=26)
+[pos] frame=62400 0x0081=243 (qrow=6 qcol=3 cubes=26)
+[bot] new cube (4,3) idx=13  27/28  L3R2  frame=62650
+[pos] frame=62700 0x0081=244 (qrow=3 qcol=3 cubes=27)
+[pos] frame=63000 0x0081=246 (qrow=6 qcol=4 cubes=27)
+[pos] frame=63300 0x0081=247 (qrow=2 qcol=1 cubes=27)
+[bot] new cube (2,1) idx=4  28/28  L3R2  frame=63370
+[pos] frame=63600 0x0081=248 (qrow=3 qcol=1 cubes=28)
+[pos] frame=63900 0x0081=249 (qrow=4 qcol=1 cubes=28)
+[pos] frame=64200 0x0081=250 (qrow=2 qcol=2 cubes=28)
+[pos] frame=64500 0x0081=251 (qrow=5 qcol=5 cubes=28)
+[pos] frame=64800 0x0081=253 (qrow=6 qcol=5 cubes=28)
+[bot] ROUND COMPLETE L3R2  total_rounds=10  frame=64810
+=== PALETTE L3R3 (frame 65050, pal_writes=6336) ===
+pen00: #312176  (raw: 27 03)
+pen01: #56A998  (raw: A9 05)
+pen02: #DEDE00  (raw: D0 0D)
+pen03: #314646  (raw: 44 03)
+pen04: #5646EE  (raw: 4E 05)
+pen05: #FF6666  (raw: 66 0F)
+pen06: #000000  (raw: 00 00)
+pen07: #EE1021  (raw: 12 0E)
+pen08: #EE5600  (raw: 50 0E)
+pen09: #FF7600  (raw: 70 0F)
+pen10: #006600  (raw: 60 00)
+pen11: #008800  (raw: 80 00)
+pen12: #760066  (raw: 06 07)
+pen13: #00B900  (raw: B0 00)
+pen14: #EE6698  (raw: 69 0E)
+pen15: #FFFFFF  (raw: FF 0F)
+===
+[palette] unchanged at L3R3
+[pos] frame=65100 0x0081=254 (qrow=0 qcol=0 cubes=0)
+[bot] new cube (0,0) idx=0  1/28  L3R3  frame=65260
+[walker-snap] idx=0020 L3R3 state0 frame=65260
+[bot] new cube (1,1) idx=2  2/28  L3R3  frame=65350
+[pos] frame=65400 0x0081=255 (qrow=0 qcol=0 cubes=2)
+[walker-snap] idx=0021 L3R3 state1 frame=65440
+[bot] new cube (1,0) idx=1  3/28  L3R3  frame=65530
+[bot] new cube (2,0) idx=3  4/28  L3R3  frame=65620
+[pos] frame=65700 0x0081=0 (qrow=3 qcol=0 cubes=4)
+[bot] new cube (3,0) idx=6  5/28  L3R3  frame=65710
+[bot] death detected: 0x0081=0→1 at (4,0)  frame=65796
+[bot] reset_to_apex  L3R3  cubes=1  deaths=2  frame=65796
+[pos] frame=66000 0x0081=1 (qrow=0 qcol=0 cubes=1)
+[walker-snap] idx=0022 L3R3 state0 frame=66156
+[bot] new cube (1,1) idx=2  2/28  L3R3  frame=66246
+[pos] frame=66300 0x0081=2 (qrow=0 qcol=0 cubes=2)
+[walker-snap] idx=0023 L3R3 state1 frame=66336
+[bot] new cube (1,0) idx=1  3/28  L3R3  frame=66426
+[bot] new cube (2,0) idx=3  4/28  L3R3  frame=66516
+[pos] frame=66600 0x0081=4 (qrow=3 qcol=0 cubes=4)
+[bot] new cube (3,0) idx=6  5/28  L3R3  frame=66606
+[bot] new cube (4,0) idx=10  6/28  L3R3  frame=66696
+[bot] new cube (5,0) idx=15  7/28  L3R3  frame=66786
+[bot] new cube (6,0) idx=21  8/28  L3R3  frame=66876
+[pos] frame=66900 0x0081=5 (qrow=5 qcol=0 cubes=8)
+[bot] new cube (6,1) idx=22  9/28  L3R3  frame=67056
+[bot] new cube (5,1) idx=16  10/28  L3R3  frame=67146
+[pos] frame=67200 0x0081=6 (qrow=6 qcol=2 cubes=10)
+[bot] new cube (6,2) idx=23  11/28  L3R3  frame=67236
+[bot] new cube (5,2) idx=17  12/28  L3R3  frame=67326
+[bot] new cube (6,3) idx=24  13/28  L3R3  frame=67416
+[pos] frame=67500 0x0081=7 (qrow=5 qcol=3 cubes=13)
+[bot] new cube (5,3) idx=18  14/28  L3R3  frame=67506
+[bot] new cube (6,4) idx=25  15/28  L3R3  frame=67596
+[bot] new cube (5,4) idx=19  16/28  L3R3  frame=67686
+[bot] new cube (6,5) idx=26  17/28  L3R3  frame=67776
+[pos] frame=67800 0x0081=8 (qrow=5 qcol=5 cubes=17)
+[bot] new cube (5,5) idx=20  18/28  L3R3  frame=67866
+[bot] new cube (6,6) idx=27  19/28  L3R3  frame=67956
+[pos] frame=68100 0x0081=10 (qrow=4 qcol=4 cubes=19)
+[bot] new cube (4,4) idx=14  20/28  L3R3  frame=68136
+[bot] new cube (3,3) idx=9  21/28  L3R3  frame=68226
+[bot] new cube (2,2) idx=5  22/28  L3R3  frame=68316
+[pos] frame=68400 0x0081=11 (qrow=3 qcol=2 cubes=22)
+[bot] new cube (3,2) idx=8  23/28  L3R3  frame=68406
+[bot] new cube (4,2) idx=12  24/28  L3R3  frame=68496
+[bot] new cube (3,1) idx=7  25/28  L3R3  frame=68586
+[bot] new cube (4,1) idx=11  26/28  L3R3  frame=68676
+[pos] frame=68700 0x0081=12 (qrow=3 qcol=0 cubes=26)
+[pos] frame=69000 0x0081=13 (qrow=6 qcol=1 cubes=26)
+[pos] frame=69300 0x0081=14 (qrow=5 qcol=0 cubes=26)
+[pos] frame=69600 0x0081=15 (qrow=5 qcol=2 cubes=26)
+[pos] frame=69900 0x0081=17 (qrow=4 qcol=3 cubes=26)
+[bot] new cube (4,3) idx=13  27/28  L3R3  frame=69936
+[pos] frame=70200 0x0081=18 (qrow=5 qcol=4 cubes=27)
+[pos] frame=70500 0x0081=19 (qrow=3 qcol=2 cubes=27)
+[bot] new cube (2,1) idx=4  28/28  L3R3  frame=70656
+[pos] frame=70800 0x0081=20 (qrow=2 qcol=0 cubes=28)
+[pos] frame=71100 0x0081=21 (qrow=3 qcol=1 cubes=28)
+[pos] frame=71400 0x0081=22 (qrow=1 qcol=1 cubes=28)
+[pos] frame=71700 0x0081=24 (qrow=4 qcol=4 cubes=28)
+[pos] frame=72000 0x0081=25 (qrow=5 qcol=5 cubes=28)
+[bot] ROUND COMPLETE L3R3  total_rounds=11  frame=72096
+[pos] frame=72300 0x0081=26 (qrow=0 qcol=0 cubes=0)
+=== PALETTE L3R4 (frame 72336, pal_writes=6336) ===
+pen00: #312176  (raw: 27 03)
+pen01: #56A998  (raw: A9 05)
+pen02: #DEDE00  (raw: D0 0D)
+pen03: #314646  (raw: 44 03)
+pen04: #5646EE  (raw: 4E 05)
+pen05: #FF6666  (raw: 66 0F)
+pen06: #000000  (raw: 00 00)
+pen07: #EE1021  (raw: 12 0E)
+pen08: #EE5600  (raw: 50 0E)
+pen09: #FF7600  (raw: 70 0F)
+pen10: #006600  (raw: 60 00)
+pen11: #008800  (raw: 80 00)
+pen12: #760066  (raw: 06 07)
+pen13: #00B900  (raw: B0 00)
+pen14: #EE6698  (raw: 69 0E)
+pen15: #FFFFFF  (raw: FF 0F)
+===
+[palette] unchanged at L3R4
+[bot] new cube (0,0) idx=0  1/28  L3R4  frame=72546
+[walker-snap] idx=0024 L3R4 state0 frame=72546
+[pos] frame=72600 0x0081=27 (qrow=1 qcol=1 cubes=1)
+[bot] new cube (1,1) idx=2  2/28  L3R4  frame=72636
+[walker-snap] idx=0025 L3R4 state1 frame=72726
+[bot] new cube (1,0) idx=1  3/28  L3R4  frame=72816
+[pos] frame=72900 0x0081=28 (qrow=2 qcol=0 cubes=3)
+[bot] new cube (2,0) idx=3  4/28  L3R4  frame=72906
+[bot] new cube (3,0) idx=6  5/28  L3R4  frame=72996
+[bot] new cube (4,0) idx=10  6/28  L3R4  frame=73086
+[bot] new cube (5,0) idx=15  7/28  L3R4  frame=73176
+[pos] frame=73200 0x0081=29 (qrow=6 qcol=0 cubes=7)
+[bot] new cube (6,0) idx=21  8/28  L3R4  frame=73266
+[bot] new cube (6,1) idx=22  9/28  L3R4  frame=73446
+[pos] frame=73500 0x0081=31 (qrow=5 qcol=1 cubes=9)
+[bot] new cube (5,1) idx=16  10/28  L3R4  frame=73536
+[bot] new cube (6,2) idx=23  11/28  L3R4  frame=73626
+[bot] new cube (5,2) idx=17  12/28  L3R4  frame=73716
+[pos] frame=73800 0x0081=32 (qrow=6 qcol=3 cubes=12)
+[bot] new cube (6,3) idx=24  13/28  L3R4  frame=73806
+[bot] new cube (5,3) idx=18  14/28  L3R4  frame=73896
+[bot] new cube (6,4) idx=25  15/28  L3R4  frame=73986
+[bot] new cube (5,4) idx=19  16/28  L3R4  frame=74076
+[pos] frame=74100 0x0081=33 (qrow=6 qcol=5 cubes=16)
+[bot] new cube (6,5) idx=26  17/28  L3R4  frame=74166
+[bot] new cube (5,5) idx=20  18/28  L3R4  frame=74256
+[bot] new cube (6,6) idx=27  19/28  L3R4  frame=74346
+[pos] frame=74400 0x0081=34 (qrow=5 qcol=5 cubes=19)
+[bot] new cube (4,4) idx=14  20/28  L3R4  frame=74526
+[bot] new cube (3,3) idx=9  21/28  L3R4  frame=74616
+[pos] frame=74700 0x0081=35 (qrow=2 qcol=2 cubes=21)
+[bot] new cube (2,2) idx=5  22/28  L3R4  frame=74706
+[bot] new cube (3,2) idx=8  23/28  L3R4  frame=74796
+[bot] new cube (4,2) idx=12  24/28  L3R4  frame=74886
+[bot] new cube (3,1) idx=7  25/28  L3R4  frame=74976
+[pos] frame=75000 0x0081=36 (qrow=4 qcol=1 cubes=25)
+[bot] new cube (4,1) idx=11  26/28  L3R4  frame=75066
+[pos] frame=75300 0x0081=38 (qrow=5 qcol=1 cubes=26)
+[pos] frame=75600 0x0081=39 (qrow=6 qcol=0 cubes=26)
+[pos] frame=75900 0x0081=40 (qrow=6 qcol=2 cubes=26)
+[pos] frame=76200 0x0081=41 (qrow=5 qcol=3 cubes=26)
+[bot] new cube (4,3) idx=13  27/28  L3R4  frame=76326
+[pos] frame=76500 0x0081=42 (qrow=4 qcol=4 cubes=27)
+[pos] frame=76800 0x0081=43 (qrow=4 qcol=3 cubes=27)
+[bot] new cube (2,1) idx=4  28/28  L3R4  frame=77046
+[pos] frame=77100 0x0081=45 (qrow=1 qcol=0 cubes=28)
+[pos] frame=77400 0x0081=46 (qrow=4 qcol=2 cubes=28)
+[pos] frame=77700 0x0081=47 (qrow=2 qcol=1 cubes=28)
+[pos] frame=78000 0x0081=48 (qrow=3 qcol=3 cubes=28)
+[pos] frame=78300 0x0081=49 (qrow=6 qcol=6 cubes=28)
+[bot] ROUND COMPLETE L3R4  total_rounds=12  frame=78486
+[pos] frame=78600 0x0081=51 (qrow=0 qcol=0 cubes=0)
+=== PALETTE L4R1 (frame 78726, pal_writes=6336) ===
+pen00: #312176  (raw: 27 03)
+pen01: #56A998  (raw: A9 05)
+pen02: #DEDE00  (raw: D0 0D)
+pen03: #314646  (raw: 44 03)
+pen04: #5646EE  (raw: 4E 05)
+pen05: #FF6666  (raw: 66 0F)
+pen06: #000000  (raw: 00 00)
+pen07: #EE1021  (raw: 12 0E)
+pen08: #EE5600  (raw: 50 0E)
+pen09: #FF7600  (raw: 70 0F)
+pen10: #006600  (raw: 60 00)
+pen11: #008800  (raw: 80 00)
+pen12: #760066  (raw: 06 07)
+pen13: #00B900  (raw: B0 00)
+pen14: #EE6698  (raw: 69 0E)
+pen15: #FFFFFF  (raw: FF 0F)
+===
+[palette] unchanged at L4R1
+[pos] frame=78900 0x0081=52 (qrow=0 qcol=0 cubes=0)
+[bot] new cube (0,0) idx=0  1/28  L4R1  frame=78936
+[walker-snap] idx=0026 L4R1 state0 frame=78936
+[bot] new cube (1,1) idx=2  2/28  L4R1  frame=79026
+[walker-snap] idx=0027 L4R1 state1 frame=79116
+[pos] frame=79200 0x0081=53 (qrow=1 qcol=0 cubes=2)
+[bot] new cube (1,0) idx=1  3/28  L4R1  frame=79206
+[bot] new cube (2,0) idx=3  4/28  L4R1  frame=79296
+[bot] new cube (3,0) idx=6  5/28  L4R1  frame=79386
+[bot] new cube (4,0) idx=10  6/28  L4R1  frame=79476
+[pos] frame=79500 0x0081=54 (qrow=5 qcol=0 cubes=6)
+[bot] new cube (5,0) idx=15  7/28  L4R1  frame=79566
+[bot] new cube (6,0) idx=21  8/28  L4R1  frame=79656
+[pos] frame=79800 0x0081=55 (qrow=6 qcol=1 cubes=8)
+[bot] new cube (6,1) idx=22  9/28  L4R1  frame=79836
+[bot] new cube (5,1) idx=16  10/28  L4R1  frame=79926
+[bot] new cube (6,2) idx=23  11/28  L4R1  frame=80016
+[pos] frame=80100 0x0081=56 (qrow=5 qcol=2 cubes=11)
+[bot] new cube (5,2) idx=17  12/28  L4R1  frame=80106
+[bot] new cube (6,3) idx=24  13/28  L4R1  frame=80196
+[bot] new cube (5,3) idx=18  14/28  L4R1  frame=80286
+[bot] new cube (6,4) idx=25  15/28  L4R1  frame=80376
+[pos] frame=80400 0x0081=58 (qrow=5 qcol=4 cubes=15)
+[bot] new cube (5,4) idx=19  16/28  L4R1  frame=80466
+[bot] new cube (6,5) idx=26  17/28  L4R1  frame=80556
+[bot] new cube (5,5) idx=20  18/28  L4R1  frame=80646
+[pos] frame=80700 0x0081=59 (qrow=6 qcol=6 cubes=18)
+[bot] new cube (6,6) idx=27  19/28  L4R1  frame=80736
+[bot] new cube (4,4) idx=14  20/28  L4R1  frame=80916
+[pos] frame=81000 0x0081=60 (qrow=3 qcol=3 cubes=20)
+[bot] new cube (3,3) idx=9  21/28  L4R1  frame=81006
+[bot] new cube (2,2) idx=5  22/28  L4R1  frame=81096
+[bot] new cube (3,2) idx=8  23/28  L4R1  frame=81186
+[bot] new cube (4,2) idx=12  24/28  L4R1  frame=81276
+[pos] frame=81300 0x0081=61 (qrow=3 qcol=1 cubes=24)
+[bot] new cube (3,1) idx=7  25/28  L4R1  frame=81366
+[bot] new cube (4,1) idx=11  26/28  L4R1  frame=81456
+[pos] frame=81600 0x0081=62 (qrow=4 qcol=0 cubes=26)
+[pos] frame=81900 0x0081=63 (qrow=5 qcol=0 cubes=26)
+[pos] frame=82200 0x0081=65 (qrow=5 qcol=1 cubes=26)
+[pos] frame=82500 0x0081=66 (qrow=6 qcol=3 cubes=26)
+[bot] new cube (4,3) idx=13  27/28  L4R1  frame=82716
+[pos] frame=82800 0x0081=67 (qrow=3 qcol=3 cubes=27)
+[pos] frame=83100 0x0081=68 (qrow=5 qcol=3 cubes=27)
+[pos] frame=83400 0x0081=69 (qrow=2 qcol=1 cubes=27)
+[bot] new cube (2,1) idx=4  28/28  L4R1  frame=83436
+[pos] frame=83700 0x0081=70 (qrow=3 qcol=1 cubes=28)
+[pos] frame=84000 0x0081=72 (qrow=3 qcol=1 cubes=28)
+[pos] frame=84300 0x0081=73 (qrow=2 qcol=2 cubes=28)
+[pos] frame=84600 0x0081=74 (qrow=5 qcol=5 cubes=28)
+[bot] ROUND COMPLETE L4R1  total_rounds=13  frame=84876
+[pos] frame=84900 0x0081=75 (qrow=0 qcol=0 cubes=0)
+=== PALETTE L4R2 (frame 85116, pal_writes=6336) ===
+pen00: #312176  (raw: 27 03)
+pen01: #56A998  (raw: A9 05)
+pen02: #DEDE00  (raw: D0 0D)
+pen03: #314646  (raw: 44 03)
+pen04: #5646EE  (raw: 4E 05)
+pen05: #FF6666  (raw: 66 0F)
+pen06: #000000  (raw: 00 00)
+pen07: #EE1021  (raw: 12 0E)
+pen08: #EE5600  (raw: 50 0E)
+pen09: #FF7600  (raw: 70 0F)
+pen10: #006600  (raw: 60 00)
+pen11: #008800  (raw: 80 00)
+pen12: #760066  (raw: 06 07)
+pen13: #00B900  (raw: B0 00)
+pen14: #EE6698  (raw: 69 0E)
+pen15: #FFFFFF  (raw: FF 0F)
+===
+[palette] unchanged at L4R2
+[pos] frame=85200 0x0081=76 (qrow=0 qcol=0 cubes=0)
+[bot] new cube (0,0) idx=0  1/28  L4R2  frame=85326
+[walker-snap] idx=0028 L4R2 state0 frame=85326
+[bot] new cube (1,1) idx=2  2/28  L4R2  frame=85416
+[pos] frame=85500 0x0081=77 (qrow=0 qcol=0 cubes=2)
+[walker-snap] idx=0029 L4R2 state1 frame=85506
+[bot] new cube (1,0) idx=1  3/28  L4R2  frame=85596
+[bot] new cube (2,0) idx=3  4/28  L4R2  frame=85686
+[bot] new cube (3,0) idx=6  5/28  L4R2  frame=85776
+[pos] frame=85800 0x0081=79 (qrow=4 qcol=0 cubes=5)
+[bot] new cube (4,0) idx=10  6/28  L4R2  frame=85866
+[bot] new cube (5,0) idx=15  7/28  L4R2  frame=85956
+[bot] new cube (6,0) idx=21  8/28  L4R2  frame=86046
+[pos] frame=86100 0x0081=80 (qrow=5 qcol=0 cubes=8)
+[bot] new cube (6,1) idx=22  9/28  L4R2  frame=86226
+[bot] new cube (5,1) idx=16  10/28  L4R2  frame=86316
+[pos] frame=86400 0x0081=81 (qrow=6 qcol=2 cubes=10)
+[bot] new cube (6,2) idx=23  11/28  L4R2  frame=86406
+[bot] new cube (5,2) idx=17  12/28  L4R2  frame=86496
+[bot] new cube (6,3) idx=24  13/28  L4R2  frame=86586
+[bot] new cube (5,3) idx=18  14/28  L4R2  frame=86676
+[pos] frame=86700 0x0081=82 (qrow=6 qcol=4 cubes=14)
+[bot] new cube (6,4) idx=25  15/28  L4R2  frame=86766
+[bot] new cube (5,4) idx=19  16/28  L4R2  frame=86856
+[bot] new cube (6,5) idx=26  17/28  L4R2  frame=86946
+[pos] frame=87000 0x0081=83 (qrow=5 qcol=5 cubes=17)
+[bot] new cube (5,5) idx=20  18/28  L4R2  frame=87036
+[bot] new cube (6,6) idx=27  19/28  L4R2  frame=87126
+[pos] frame=87300 0x0081=85 (qrow=4 qcol=4 cubes=19)
+[bot] new cube (4,4) idx=14  20/28  L4R2  frame=87306
+[bot] new cube (3,3) idx=9  21/28  L4R2  frame=87396
+[bot] new cube (2,2) idx=5  22/28  L4R2  frame=87486
+[bot] new cube (3,2) idx=8  23/28  L4R2  frame=87576
+[pos] frame=87600 0x0081=86 (qrow=4 qcol=2 cubes=23)
+[bot] new cube (4,2) idx=12  24/28  L4R2  frame=87666
+[bot] new cube (3,1) idx=7  25/28  L4R2  frame=87756
+[bot] new cube (4,1) idx=11  26/28  L4R2  frame=87846
+[pos] frame=87900 0x0081=87 (qrow=3 qcol=0 cubes=26)
+[pos] frame=88200 0x0081=88 (qrow=6 qcol=1 cubes=26)
+[pos] frame=88500 0x0081=89 (qrow=6 qcol=1 cubes=26)
+[pos] frame=88800 0x0081=90 (qrow=5 qcol=2 cubes=26)
+[pos] frame=89100 0x0081=92 (qrow=4 qcol=3 cubes=26)
+[bot] new cube (4,3) idx=13  27/28  L4R2  frame=89106
+[pos] frame=89400 0x0081=93 (qrow=6 qcol=4 cubes=27)
+[pos] frame=89700 0x0081=94 (qrow=3 qcol=2 cubes=27)
+[bot] new cube (2,1) idx=4  28/28  L4R2  frame=89826
+[pos] frame=90000 0x0081=95 (qrow=2 qcol=0 cubes=28)
+[pos] frame=90300 0x0081=96 (qrow=4 qcol=1 cubes=28)
+[pos] frame=90600 0x0081=97 (qrow=1 qcol=1 cubes=28)
+[pos] frame=90900 0x0081=99 (qrow=4 qcol=4 cubes=28)
+[pos] frame=91200 0x0081=100 (qrow=6 qcol=5 cubes=28)
+[bot] ROUND COMPLETE L4R2  total_rounds=14  frame=91266
+[pos] frame=91500 0x0081=101 (qrow=0 qcol=0 cubes=0)
+=== PALETTE L4R3 (frame 91506, pal_writes=6336) ===
+pen00: #312176  (raw: 27 03)
+pen01: #56A998  (raw: A9 05)
+pen02: #DEDE00  (raw: D0 0D)
+pen03: #314646  (raw: 44 03)
+pen04: #5646EE  (raw: 4E 05)
+pen05: #FF6666  (raw: 66 0F)
+pen06: #000000  (raw: 00 00)
+pen07: #EE1021  (raw: 12 0E)
+pen08: #EE5600  (raw: 50 0E)
+pen09: #FF7600  (raw: 70 0F)
+pen10: #006600  (raw: 60 00)
+pen11: #008800  (raw: 80 00)
+pen12: #760066  (raw: 06 07)
+pen13: #00B900  (raw: B0 00)
+pen14: #EE6698  (raw: 69 0E)
+pen15: #FFFFFF  (raw: FF 0F)
+===
+[palette] unchanged at L4R3
+[bot] new cube (0,0) idx=0  1/28  L4R3  frame=91716
+[walker-snap] idx=0030 L4R3 state0 frame=91716
+[pos] frame=91800 0x0081=102 (qrow=1 qcol=1 cubes=1)
+[bot] new cube (1,1) idx=2  2/28  L4R3  frame=91806
+[walker-snap] idx=0031 L4R3 state1 frame=91896
+[bot] new cube (1,0) idx=1  3/28  L4R3  frame=91986
+[bot] new cube (2,0) idx=3  4/28  L4R3  frame=92076
+[pos] frame=92100 0x0081=103 (qrow=3 qcol=0 cubes=4)
+[bot] new cube (3,0) idx=6  5/28  L4R3  frame=92166
+[bot] new cube (4,0) idx=10  6/28  L4R3  frame=92256
+[bot] new cube (5,0) idx=15  7/28  L4R3  frame=92346
+[pos] frame=92400 0x0081=104 (qrow=6 qcol=0 cubes=7)
+[bot] new cube (6,0) idx=21  8/28  L4R3  frame=92436
+[bot] new cube (6,1) idx=22  9/28  L4R3  frame=92616
+[pos] frame=92700 0x0081=106 (qrow=5 qcol=1 cubes=9)
+[bot] new cube (5,1) idx=16  10/28  L4R3  frame=92706
+[bot] new cube (6,2) idx=23  11/28  L4R3  frame=92796
+[bot] new cube (5,2) idx=17  12/28  L4R3  frame=92886
+[bot] new cube (6,3) idx=24  13/28  L4R3  frame=92976
+[pos] frame=93000 0x0081=107 (qrow=5 qcol=3 cubes=13)
+[bot] new cube (5,3) idx=18  14/28  L4R3  frame=93066
+[bot] new cube (6,4) idx=25  15/28  L4R3  frame=93156
+[bot] new cube (5,4) idx=19  16/28  L4R3  frame=93246
+[pos] frame=93300 0x0081=108 (qrow=6 qcol=5 cubes=16)
+[bot] new cube (6,5) idx=26  17/28  L4R3  frame=93336
+[bot] new cube (5,5) idx=20  18/28  L4R3  frame=93426
+[bot] new cube (6,6) idx=27  19/28  L4R3  frame=93516
+[pos] frame=93600 0x0081=109 (qrow=5 qcol=5 cubes=19)
+[bot] new cube (4,4) idx=14  20/28  L4R3  frame=93696
+[bot] new cube (3,3) idx=9  21/28  L4R3  frame=93786
+[bot] new cube (2,2) idx=5  22/28  L4R3  frame=93876
+[pos] frame=93900 0x0081=110 (qrow=3 qcol=2 cubes=22)
+[bot] new cube (3,2) idx=8  23/28  L4R3  frame=93966
+[bot] new cube (4,2) idx=12  24/28  L4R3  frame=94056
+[bot] new cube (3,1) idx=7  25/28  L4R3  frame=94146
+[pos] frame=94200 0x0081=111 (qrow=4 qcol=1 cubes=25)
+[bot] new cube (4,1) idx=11  26/28  L4R3  frame=94236
+[pos] frame=94500 0x0081=113 (qrow=5 qcol=1 cubes=26)
+[pos] frame=94800 0x0081=114 (qrow=5 qcol=0 cubes=26)
+[pos] frame=95100 0x0081=115 (qrow=6 qcol=2 cubes=26)
+[pos] frame=95400 0x0081=116 (qrow=5 qcol=3 cubes=26)
+[bot] new cube (4,3) idx=13  27/28  L4R3  frame=95496
+[pos] frame=95700 0x0081=117 (qrow=5 qcol=4 cubes=27)
+[pos] frame=96000 0x0081=118 (qrow=4 qcol=3 cubes=27)
+[bot] new cube (2,1) idx=4  28/28  L4R3  frame=96216
+[pos] frame=96300 0x0081=120 (qrow=1 qcol=0 cubes=28)
+[pos] frame=96600 0x0081=121 (qrow=3 qcol=1 cubes=28)
+[pos] frame=96900 0x0081=122 (qrow=2 qcol=1 cubes=28)
+[pos] frame=97200 0x0081=123 (qrow=3 qcol=3 cubes=28)
+[pos] frame=97500 0x0081=124 (qrow=5 qcol=5 cubes=28)
+[bot] ROUND COMPLETE L4R3  total_rounds=15  frame=97656
+[pos] frame=97800 0x0081=126 (qrow=0 qcol=0 cubes=0)
+=== PALETTE L4R4 (frame 97896, pal_writes=6336) ===
+pen00: #312176  (raw: 27 03)
+pen01: #56A998  (raw: A9 05)
+pen02: #DEDE00  (raw: D0 0D)
+pen03: #314646  (raw: 44 03)
+pen04: #5646EE  (raw: 4E 05)
+pen05: #FF6666  (raw: 66 0F)
+pen06: #000000  (raw: 00 00)
+pen07: #EE1021  (raw: 12 0E)
+pen08: #EE5600  (raw: 50 0E)
+pen09: #FF7600  (raw: 70 0F)
+pen10: #006600  (raw: 60 00)
+pen11: #008800  (raw: 80 00)
+pen12: #760066  (raw: 06 07)
+pen13: #00B900  (raw: B0 00)
+pen14: #EE6698  (raw: 69 0E)
+pen15: #FFFFFF  (raw: FF 0F)
+===
+[palette] unchanged at L4R4
+[pos] frame=98100 0x0081=127 (qrow=0 qcol=0 cubes=0)
+[bot] new cube (0,0) idx=0  1/28  L4R4  frame=98106
+[walker-snap] idx=0032 L4R4 state0 frame=98106
+[bot] new cube (1,1) idx=2  2/28  L4R4  frame=98196
+[walker-snap] idx=0033 L4R4 state1 frame=98286
+[bot] new cube (1,0) idx=1  3/28  L4R4  frame=98376
+[pos] frame=98400 0x0081=128 (qrow=2 qcol=0 cubes=3)
+[bot] new cube (2,0) idx=3  4/28  L4R4  frame=98466
+[bot] new cube (3,0) idx=6  5/28  L4R4  frame=98556
+[bot] new cube (4,0) idx=10  6/28  L4R4  frame=98646
+[pos] frame=98700 0x0081=129 (qrow=5 qcol=0 cubes=6)
+[bot] new cube (5,0) idx=15  7/28  L4R4  frame=98736
+[bot] new cube (6,0) idx=21  8/28  L4R4  frame=98826
+[pos] frame=99000 0x0081=130 (qrow=6 qcol=1 cubes=8)
+[bot] new cube (6,1) idx=22  9/28  L4R4  frame=99006
+[bot] new cube (5,1) idx=16  10/28  L4R4  frame=99096
+[bot] new cube (6,2) idx=23  11/28  L4R4  frame=99186
+[bot] new cube (5,2) idx=17  12/28  L4R4  frame=99276
+[pos] frame=99300 0x0081=131 (qrow=6 qcol=3 cubes=12)
+[bot] new cube (6,3) idx=24  13/28  L4R4  frame=99366
+[bot] new cube (5,3) idx=18  14/28  L4R4  frame=99456
+[bot] new cube (6,4) idx=25  15/28  L4R4  frame=99546
+[pos] frame=99600 0x0081=133 (qrow=5 qcol=4 cubes=15)
+[bot] new cube (5,4) idx=19  16/28  L4R4  frame=99636
+[bot] new cube (6,5) idx=26  17/28  L4R4  frame=99726
+[bot] new cube (5,5) idx=20  18/28  L4R4  frame=99816
+[pos] frame=99900 0x0081=134 (qrow=6 qcol=6 cubes=18)
+[bot] new cube (6,6) idx=27  19/28  L4R4  frame=99906
+[bot] new cube (4,4) idx=14  20/28  L4R4  frame=100086
+[bot] new cube (3,3) idx=9  21/28  L4R4  frame=100176
+[pos] frame=100200 0x0081=135 (qrow=2 qcol=2 cubes=21)
+[bot] new cube (2,2) idx=5  22/28  L4R4  frame=100266
+[bot] new cube (3,2) idx=8  23/28  L4R4  frame=100356
+[bot] new cube (4,2) idx=12  24/28  L4R4  frame=100446
+[pos] frame=100500 0x0081=136 (qrow=3 qcol=1 cubes=24)
+[bot] new cube (3,1) idx=7  25/28  L4R4  frame=100536
+[bot] new cube (4,1) idx=11  26/28  L4R4  frame=100626
+[pos] frame=100800 0x0081=137 (qrow=4 qcol=0 cubes=26)
+[pos] frame=101100 0x0081=138 (qrow=6 qcol=0 cubes=26)
+[pos] frame=101400 0x0081=140 (qrow=5 qcol=1 cubes=26)
+[pos] frame=101700 0x0081=141 (qrow=6 qcol=3 cubes=26)
+[bot] new cube (4,3) idx=13  27/28  L4R4  frame=101886
+[pos] frame=102000 0x0081=142 (qrow=4 qcol=4 cubes=27)
+[pos] frame=102300 0x0081=143 (qrow=5 qcol=3 cubes=27)
+[pos] frame=102600 0x0081=144 (qrow=2 qcol=1 cubes=27)
+[bot] new cube (2,1) idx=4  28/28  L4R4  frame=102606
+[pos] frame=102900 0x0081=145 (qrow=4 qcol=2 cubes=28)
+[pos] frame=103200 0x0081=147 (qrow=3 qcol=1 cubes=28)
+[pos] frame=103500 0x0081=148 (qrow=2 qcol=2 cubes=28)
+[pos] frame=103800 0x0081=149 (qrow=6 qcol=6 cubes=28)
+[bot] ROUND COMPLETE L4R4  total_rounds=16  frame=104046
+[pos] frame=104100 0x0081=150 (qrow=0 qcol=0 cubes=0)
+=== PALETTE L5R1 (frame 104286, pal_writes=6336) ===
+pen00: #312176  (raw: 27 03)
+pen01: #56A998  (raw: A9 05)
+pen02: #DEDE00  (raw: D0 0D)
+pen03: #314646  (raw: 44 03)
+pen04: #5646EE  (raw: 4E 05)
+pen05: #FF6666  (raw: 66 0F)
+pen06: #000000  (raw: 00 00)
+pen07: #EE1021  (raw: 12 0E)
+pen08: #EE5600  (raw: 50 0E)
+pen09: #FF7600  (raw: 70 0F)
+pen10: #006600  (raw: 60 00)
+pen11: #008800  (raw: 80 00)
+pen12: #760066  (raw: 06 07)
+pen13: #00B900  (raw: B0 00)
+pen14: #EE6698  (raw: 69 0E)
+pen15: #FFFFFF  (raw: FF 0F)
+===
+[palette] unchanged at L5R1
+[pos] frame=104400 0x0081=151 (qrow=0 qcol=0 cubes=0)
+[bot] new cube (0,0) idx=0  1/28  L5R1  frame=104496
+[walker-snap] idx=0034 L5R1 state0 frame=104496
+[bot] new cube (1,1) idx=2  2/28  L5R1  frame=104586
+[walker-snap] idx=0035 L5R1 state1 frame=104676
+[done] L5R1  rounds=16  deaths=2  pal_writes=6336  frame=104676

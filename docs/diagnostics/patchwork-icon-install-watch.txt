@@ -1,0 +1,9 @@
+J-ad568e19a6c1: accepted {"pool": "chromecast-test", "app": "patchwork", "apk": "a5b0bcf9b50511cd8dc4173a02c8b6420e7be534aef2852c8c66c55d3181c1c5.apk", "duration": 15.0, "workflow": "check"}
+J-ad568e19a6c1: granted {"device": "chromecast-test-01", "generation": 25}
+J-ad568e19a6c1: phase {"phase": "connecting"}
+J-ad568e19a6c1: phase {"phase": "installing"}
+J-ad568e19a6c1: phase {"phase": "installing"}
+J-ad568e19a6c1: phase {"phase": "launching"}
+J-ad568e19a6c1: phase {"phase": "restoring"}
+J-ad568e19a6c1: completed {"error": null, "health": "ready"}
+J-ad568e19a6c1: completed

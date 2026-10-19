@@ -1,0 +1,74 @@
+{
+  "reviewed_screenshots": [
+    {
+      "path": "round-1/none/run-1/idle.png",
+      "result": "Correct wide planted tank, 0 pairs; same mature plant layout."
+    },
+    {
+      "path": "round-1/pair1/run-1/idle.png",
+      "result": "Correct wide planted tank, 1 pairs; same mature plant layout."
+    },
+    {
+      "path": "round-1/pair2/run-1/idle.png",
+      "result": "Correct wide planted tank, 2 pairs; same mature plant layout."
+    },
+    {
+      "path": "round-1/pair6/run-1/idle.png",
+      "result": "Correct wide planted tank, 6 pairs; same mature plant layout."
+    },
+    {
+      "path": "round-2/pair1/run-1/idle.png",
+      "result": "Correct wide planted tank, 1 pairs; same mature plant layout."
+    },
+    {
+      "path": "round-2/pair2/run-1/idle.png",
+      "result": "Correct wide planted tank, 2 pairs; same mature plant layout."
+    },
+    {
+      "path": "round-2/pair6/run-1/idle.png",
+      "result": "Correct wide planted tank, 6 pairs; same mature plant layout."
+    },
+    {
+      "path": "cpu-failed/none/run-1/idle.png",
+      "result": "Correct wide planted tank, no seahorses or posts."
+    },
+    {
+      "path": "round-3/none/run-1/idle.png",
+      "result": "Correct wide planted tank, 0 pairs; same mature plant layout."
+    },
+    {
+      "path": "round-3/pair1/run-1/idle.png",
+      "result": "Correct wide planted tank, 1 pairs; same mature plant layout."
+    },
+    {
+      "path": "round-3/pair2/run-1/idle.png",
+      "result": "Correct wide planted tank, 2 pairs; same mature plant layout."
+    },
+    {
+      "path": "round-3/pair6/run-1/idle.png",
+      "result": "Correct wide planted tank, 6 pairs; same mature plant layout."
+    },
+    {
+      "path": "none-replacement/none/run-1/idle.png",
+      "result": "Correct wide planted tank, no seahorses or posts."
+    },
+    {
+      "path": "cpu/pair1/run-1/idle.png",
+      "result": "Correct wide planted tank, 1 pairs; same mature plant layout."
+    },
+    {
+      "path": "cpu/pair2/run-1/idle.png",
+      "result": "Correct wide planted tank, 2 pairs; same mature plant layout."
+    },
+    {
+      "path": "cpu/pair6/run-1/idle.png",
+      "result": "Correct wide planted tank, 6 pairs; same mature plant layout."
+    }
+  ],
+  "rejected_screenshots": [
+    {
+      "path": "round-2/none/run-1/idle.png",
+      "result": "Wrong scene: lionfish, no plants. Excluded."
+    }
+  ]
+}

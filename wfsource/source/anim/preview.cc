@@ -23,13 +23,6 @@
 #include <anim/anim.hp>
 #include <anim/animcycl.hp>
 
-#if defined ( __PSX__)
-#	include <sys/types.h>
-#	include <libetc.h>
-#	include <libgte.h>
-#	include <libgpu.h>
-#else
-#endif
 
 //-----------------------------------------------------------------------------
 
@@ -141,10 +134,6 @@ AdjustCameraParameters(Vector3& position,Euler& rotation,joystickButtonsF button
 	if (buttons1 & EJ_BUTTONF_H)
 		position.SetZ(position.Z() + SCALAR_CONSTANT(ADJUST_DELTA));
 
-#if defined( __PSX__ )
-//	DBSTREAM1(cscreen << "camera position:" << endl << position << endl;)
-//	DBSTREAM1(cscreen << "camera rotation:" << endl << rotation << endl;)
-#endif
 }
 
 //=============================================================================
@@ -265,9 +254,6 @@ Preview(char* objectFileName)
 	Euler cameraRotation(0,Angle(Angle::Degree(SCALAR_CONSTANT(180))),0);
 //      Euler cameraRotation = Euler(Angle(Angle::Degree(SCALAR_CONSTANT(7.998046))),Angle(Angle::Degree(SCALAR_CONSTANT(187.998046))),Angle(Angle::Degree(SCALAR_CONSTANT(0))));
 
-#if defined( __PSX__ )
-	PadInit(0);
-#endif
 	LoadTextures(vram);
 
 // kts load a model from disk
@@ -277,7 +263,7 @@ Preview(char* objectFileName)
 	AnimationCycleArray* animCycleArray[MODEL_COUNT];
 //	AnimateRenderObject3D* animArray[MODEL_COUNT];
 #endif
-	for(int index=0;index<MODEL_COUNT;index++)
+	for(int index=0;index<MODEL_COUNT;++index)
 	{
 		binistream binis( objectFileName );
 		{
@@ -312,14 +298,11 @@ Preview(char* objectFileName)
 
 	for (;;)
 	{
-#if defined(__PSX__)
-    DBSTREAM1( cscreen << "Preview V0.2: cycle = " << animationCycle << endl; )
-#endif
 	buttons1 = JoystickGetButtonsF(joy1);
 	buttons2 = JoystickGetButtonsF(joy2);
 
 #if ANIMATE_OBJECT
-	for(int index=0;index<MODEL_COUNT;index++)
+	for(int index=0;index<MODEL_COUNT;++index)
 	{
 		if(animCycleArray[index])
 		{
@@ -349,7 +332,7 @@ Preview(char* objectFileName)
 		vp.Clear();
 		camera.RenderBegin();
 
-		for(int objectIndex=0;objectIndex<MODEL_COUNT;objectIndex++)
+		for(int objectIndex=0;objectIndex<MODEL_COUNT;++objectIndex)
 		{
 			Vector3 position(position3D3);
 			position += Vector3(SCALAR_CONSTANT(2)*Scalar(objectIndex%3,0),SCALAR_CONSTANT(2)*Scalar(objectIndex/3,0),Scalar::zero);
@@ -366,22 +349,10 @@ Preview(char* objectFileName)
 
 		vp.Render();
 		deltaTime = display.PageFlip();
-#if defined(__PSX__)
-		DBSTREAM1( cscreen << "deltaTime:" << deltaTime << endl; )
-#endif
 		if(deltaTime > SCALAR_CONSTANT(0.1))
 			deltaTime = SCALAR_CONSTANT(0.1);
 		absoluteTime += deltaTime;
 
-#if defined( __PSX__ )
-#if DEBUG
-		if((PadRead(1) & (PADL2|PADL1|PADR2|PADR1)) == (PADL2|PADL1|PADR2|PADR1) )
-		{
-			DBSTREAM1( cout << "Viewing Video memory:" << endl; )
-			ViewVideoMemory();
-		}
-#endif
-#endif
 //		while(JoystickGetButtonsF(joy1) & EJ_BUTTONF_I)
 //			;		// freeze on start
 
@@ -389,12 +360,9 @@ Preview(char* objectFileName)
 		{
 			while (JoystickGetButtonsF(joy1) & EJ_BUTTONF_I)
 				;
-			animationCycle++;
+			++animationCycle;
 			if(animationCycle > AnimationManager::MAX_ANIMATION_CYCLES)
 				animationCycle = 0;
-#if defined(__WIN__)
-    DBSTREAM1( cout << "Preview V0.2: cycle = " << animationCycle << endl; )
-#endif
 		}
 	}
 	JoystickDelete(joy1);
@@ -411,7 +379,7 @@ ParseCommandLine(int argc, char** argv)
 	int index;
 	const char szDebugger[] = "debugger";
 
-	for( index=1; index < argc && argv[index] && ((*argv[index] == '-') || (*argv[index] == '/')); index++)
+	for( index=1; index < argc && argv[index] && ((*argv[index] == '-') || (*argv[index] == '/')); ++index)
 	{
 		if ( 0 )
 			;

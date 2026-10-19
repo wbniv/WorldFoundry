@@ -1,0 +1,51 @@
+.FFF                                                                     [100%]
+=================================== FAILURES ===================================
+_________ test_phone_picker_isolation_fractional_values_and_reconnect __________
+
+builds = (PosixPath('/tmp/pytest-of-will/pytest-422/generic-settings0'), PosixPath('/tmp/pytest-of-will/pytest-422/generic-settings0/baseline.rprp'))
+tmp_path = PosixPath('/tmp/pytest-of-will/pytest-422/test_phone_picker_isolation_fr0')
+
+    def test_phone_picker_isolation_fractional_values_and_reconnect(builds,tmp_path):
+        from playwright.sync_api import sync_playwright,expect
+        out,catalog=builds
+        process=subprocess.Popen([str(out/'phone'),str(catalog),str(ROOT/'wfsource/source/hal/phonepad/controller.html'),str(ROOT/'android/app/src/aquarium/assets/layout.json')],stdout=subprocess.PIPE,text=True)
+        try:
+>           port=int(process.stdout.readline())
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           ValueError: invalid literal for int() with base 10: ''
+
+tests/test_runtime_property_host.py:32: ValueError
+________________ test_complete_phone_settings_and_reconnection _________________
+
+executable = PosixPath('/tmp/pytest-of-will/pytest-422/plant-phone0/host')
+tmp_path = PosixPath('/tmp/pytest-of-will/pytest-422/test_complete_phone_settings_a0')
+
+    def test_complete_phone_settings_and_reconnection(executable,tmp_path):
+        from playwright.sync_api import sync_playwright,expect
+        process=subprocess.Popen([str(executable),str(ROOT/'wfsource/source/hal/phonepad/controller.html'),str(ROOT/'android/app/src/aquarium/assets/layout.json')],stdout=subprocess.PIPE,text=True)
+        try:
+>           port=int(process.stdout.readline());url=f'http://127.0.0.1:{port}/?k=123456'
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           ValueError: invalid literal for int() with base 10: ''
+
+tests/test_plant_phone.py:16: ValueError
+__________________ test_generic_colour_and_text_transactions ___________________
+
+executable = PosixPath('/tmp/pytest-of-will/pytest-422/plant-phone0/host')
+tmp_path = PosixPath('/tmp/pytest-of-will/pytest-422/test_generic_colour_and_text_t0')
+
+    def test_generic_colour_and_text_transactions(executable,tmp_path):
+        """Packed RGB and UTF-8 travel through the actual native edit transaction."""
+        from playwright.sync_api import sync_playwright,expect
+        process=subprocess.Popen([str(executable),str(ROOT/'wfsource/source/hal/phonepad/controller.html'),str(ROOT/'android/app/src/aquarium/assets/layout.json'),'controls'],stdout=subprocess.PIPE,text=True)
+        try:
+>           port=int(process.stdout.readline());url=f'http://127.0.0.1:{port}/?k=123456'
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           ValueError: invalid literal for int() with base 10: ''
+
+tests/test_plant_phone.py:47: ValueError
+=========================== short test summary info ============================
+FAILED tests/test_runtime_property_host.py::test_phone_picker_isolation_fractional_values_and_reconnect
+FAILED tests/test_plant_phone.py::test_complete_phone_settings_and_reconnection
+FAILED tests/test_plant_phone.py::test_generic_colour_and_text_transactions
+3 failed, 1 passed in 26.42s

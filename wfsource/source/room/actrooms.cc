@@ -52,7 +52,7 @@ ActiveRooms::Construct(int numRooms)
 	ValidatePtr( _tblFromRooms );
 	_tblToRooms = new (_memory) int[_numRooms];
 	ValidatePtr( _tblToRooms );
-	for(int index=0;index<MAX_ACTIVE_ROOMS;index++)
+	for(int index=0;index<MAX_ACTIVE_ROOMS;++index)
 		_activeRooms[index] = NULL;
 	Validate();
 }
@@ -84,8 +84,8 @@ ActiveRooms::InitActiveRoom( int roomIndex, const LevelRooms& lRooms)
 			while(!rendIter.Empty())
 			{
             rendIter.Validate();
-            PhysicalObject* po = dynamic_cast<PhysicalObject*>(&(*rendIter));
-            assert(ValidPtr(po));
+            assert(IsPhysicalObject(&(*rendIter)));
+            PhysicalObject* po = static_cast<PhysicalObject*>(&(*rendIter));
 				int assetSlot = lRooms.GetSlotIndex(roomIndex);
 
 				if(po->GetMovementBlockPtr()->MovesBetweenRooms )
@@ -104,6 +104,21 @@ ActiveRooms::InitActiveRoom( int roomIndex, const LevelRooms& lRooms)
 //==============================================================================
 
 void
+ActiveRooms::BindUnboundMovingObjects()
+{
+	// A script can move an object from an unloaded room into an already active
+	// one. No room load occurs to bind it, so bind its permanent assets here.
+	BaseObjectIteratorWrapper iter = GetObjectIter(ROOM_OBJECT_LIST_RENDER);
+	while (!iter.Empty())
+	{
+		PhysicalObject& po = static_cast<PhysicalObject&>(*iter);
+		if (po.GetMovementBlockPtr()->MovesBetweenRooms && !po.AssetsBound())
+			po.BindAssets(_assetManager.GetAssetSlot(VideoMemory::PERMANENT_SLOT).GetSlotMemory());
+		++iter;
+	}
+}
+
+void
 ActiveRooms::ChangeActiveRoom( int toRoom )
 {
 	Validate();
@@ -117,12 +132,12 @@ ActiveRooms::ChangeActiveRoom( int toRoom )
 
 #if SW_DBSTREAM
 	croomslots << "active room array before:" << std::endl;
-	for( int debugactiveRoomIndex = 0; debugactiveRoomIndex<MAX_ACTIVE_ROOMS; debugactiveRoomIndex++)
+	for( int debugactiveRoomIndex = 0; debugactiveRoomIndex<MAX_ACTIVE_ROOMS; ++debugactiveRoomIndex)
 		croomslots << debugactiveRoomIndex << ": " << _activeRooms[debugactiveRoomIndex] << std::endl;
 #endif
 
     {		                            // until msvc gets with the 90's
-	for(int activeRoomIndex=0;activeRoomIndex<MAX_ACTIVE_ROOMS;activeRoomIndex++)
+	for(int activeRoomIndex=0;activeRoomIndex<MAX_ACTIVE_ROOMS;++activeRoomIndex)
 		_fromActiveRooms[activeRoomIndex] = _activeRooms[activeRoomIndex];
 	}
 
@@ -150,7 +165,7 @@ ActiveRooms::ChangeActiveRoom( int toRoom )
 #if SW_DBSTREAM
 	{
 	croomslots << "from active rooms, active room array after:" << std::endl;
-	for( int debugactiveRoomIndex = 0; debugactiveRoomIndex<MAX_ACTIVE_ROOMS; debugactiveRoomIndex++)
+	for( int debugactiveRoomIndex = 0; debugactiveRoomIndex<MAX_ACTIVE_ROOMS; ++debugactiveRoomIndex)
 		croomslots << debugactiveRoomIndex << ": " << _fromActiveRooms[debugactiveRoomIndex] << "," << _activeRooms[debugactiveRoomIndex] << std::endl;
 	croomslots << "from and to arrays: " << std::endl;
 	for( int debugroomIndex = 0; debugroomIndex < _numRooms; ++debugroomIndex )
@@ -179,12 +194,17 @@ ActiveRooms::ChangeActiveRoom( int toRoom )
 
 						while(!rendIter.Empty())
 						{
-		   				(*rendIter).UnBindAssets();
+							// Moves Between Rooms objects live in the permanent slot (see the load
+							// loop below and InitActiveRoom); leaving a room must not unbind them.
+							assert(IsPhysicalObject(&(*rendIter)));
+							if(!static_cast<PhysicalObject&>(*rendIter).GetMovementBlockPtr()->MovesBetweenRooms)
+		   					(*rendIter).UnBindAssets();
 							++rendIter;
 						}
+						// The destination array may have fewer neighbours, or a different
+						// room at this index. Unbind the departing room before clearing it.
+						_fromActiveRooms[ idxActiveRoom ]->UnBindAssets();
 						_fromActiveRooms[ idxActiveRoom ] = NULL;
-
-						_activeRooms[ idxActiveRoom ]->UnBindAssets();
 						break;
 					}
 				}
@@ -216,7 +236,20 @@ ActiveRooms::ChangeActiveRoom( int toRoom )
 						BaseObjectIteratorWrapper rendIter = _activeRooms[idxActiveRoom]->ListIter(ROOM_OBJECT_LIST_RENDER);
 						while(!rendIter.Empty())
 						{
-		   				(*rendIter).BindAssets(_assetManager.GetAssetSlot(_levelRooms.GetSlotIndex(newRoomIndex)).GetSlotMemory());
+							assert(IsPhysicalObject(&(*rendIter)));
+							PhysicalObject& po = static_cast<PhysicalObject&>(*rendIter);
+							// As in InitActiveRoom: a Moves Between Rooms object binds into the
+							// permanent slot, never into this room's slot. Binding it here put its
+							// render actor in room memory; once the object moved on to a room that
+							// stayed active and this slot was reused, the render actor was overwritten
+							// (SIGSEGV in AnimationManagerActual::UpdateAnimation). Bind it once only.
+							if(po.GetMovementBlockPtr()->MovesBetweenRooms)
+							{
+								if(!po.AssetsBound())
+									po.BindAssets(_assetManager.GetAssetSlot(VideoMemory::PERMANENT_SLOT).GetSlotMemory());
+							}
+							else
+								po.BindAssets(_assetManager.GetAssetSlot(_levelRooms.GetSlotIndex(newRoomIndex)).GetSlotMemory());
 							++rendIter;
 						}
 						_activeRooms[ idxActiveRoom ]->BindAssets();
@@ -230,7 +263,7 @@ ActiveRooms::ChangeActiveRoom( int toRoom )
 #if SW_DBSTREAM
 	{
 	croomslots << "from active rooms, active room array way after:" << std::endl;
-	for( int debugactiveRoomIndex = 0; debugactiveRoomIndex<MAX_ACTIVE_ROOMS; debugactiveRoomIndex++)
+	for( int debugactiveRoomIndex = 0; debugactiveRoomIndex<MAX_ACTIVE_ROOMS; ++debugactiveRoomIndex)
 		croomslots << debugactiveRoomIndex << ": " << _fromActiveRooms[debugactiveRoomIndex] << "," << _activeRooms[debugactiveRoomIndex] << std::endl;
 	croomslots << "from and to arrays: " << std::endl;
 	for( int debugroomIndex = 0; debugroomIndex < _numRooms; ++debugroomIndex )
@@ -300,7 +333,7 @@ ActiveRooms::UpdateRoom(const PhysicalObject* watchObject)
 	assert( ValidPtr( _activeRooms[0] ) );									// insure current room is set
 	if( !_activeRooms[0]->CheckCollision( * watchObject ))
 	{ // figure out new room that I'm in now
-		for ( int roomIndex = 0; roomIndex < _numRooms; roomIndex++ )
+		for ( int roomIndex = 0; roomIndex < _numRooms; ++roomIndex)
 		{
 			assert(ValidPtr(&_levelRooms.GetRoom(roomIndex)));
 			if ( _levelRooms.GetRoom(roomIndex).CheckCollision( * watchObject ))
@@ -417,7 +450,7 @@ ActiveRooms::DetectCollision(const Clock& currentTime)
 		{
 			// Process the collision at the END of the list, and decrement the list length
 			ResolveCollisionEvent( collisionEventList[collisionEventListLength-1], currentTime );
-			collisionEventListLength--;
+			--collisionEventListLength;
 		}
 
 		// re-collide any objects who changed their position as a result of collision
@@ -435,11 +468,10 @@ ActiveRooms::DetectCollision(const Clock& currentTime)
 				room1->CheckCollisionWithObjects( *recollisionList[(recollisionListLength) - 1], currentTime, ROOM_OBJECT_LIST_COLLIDE );
 			if (room2)
 				room2->CheckCollisionWithObjects( *recollisionList[(recollisionListLength) - 1], currentTime, ROOM_OBJECT_LIST_COLLIDE );
-			recollisionListLength--;
+			--recollisionListLength;
 		}
 	}
 	Validate();
 }
 
 //==============================================================================
-

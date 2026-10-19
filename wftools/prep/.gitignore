@@ -1,0 +1,3 @@
+# prep is a build output (build.sh / apt.worldfoundry.org), not source — don't track it.
+# Its sources, including the committed bison/flex output under eval/, are enough to rebuild.
+/prep

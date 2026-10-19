@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Demo</title>
+    <link rel="icon" href="ficl-icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="demostyles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="index.html">
+          <img class="brand-mark" src="ficl-icon.svg" alt="Ficl logo">
+          <div>
+            <span class="brand-name">Ficl</span>
+            <span class="brand-tag">Forth Inspired Command Language</span>
+          </div>
+        </a>
+        <nav class="site-nav">
+          <a href="ficl.html">Docs</a>
+          <a href="demo.html">Demo</a>
+          <a href="ficl_rel.html">Release Notes</a>
+          <a class="nav-cta" href="http://sourceforge.net/project/showfiles.php?group_id=24441">Download</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-hero">
+        <div class="wrap">
+          <p class="eyebrow">Ficl Web Demo</p>
+        </div>
+      </section>
+
+      <div class="wrap content">
+        <section class="demo-shell">
+          <div class="stack-overlay">
+            <pre id="stack" class="stack-body"></pre>
+          </div>
+          <div id="output" class="output" aria-live="polite"></div>
+          <div class="input-row">
+            <span class="prompt">ok&gt;</span>
+            <input id="input" class="input" autocomplete="off" spellcheck="false" />
+          </div>
+          <div id="status" class="status">Loading WASM...</div>
+          <div class="terminal-actions">
+            <button id="clear-btn" class="btn">Clear</button>
+            <button id="reset-btn" class="btn">Reset</button>
+            <div class="led-row" role="group" aria-label="Simulated LEDs">
+              <span class="led" aria-hidden="true"></span>
+              <span class="led" aria-hidden="true"></span>
+              <span class="led" aria-hidden="true"></span>
+              <span class="led" aria-hidden="true"></span>
+              <span class="led" aria-hidden="true"></span>
+              <span class="led" aria-hidden="true"></span>
+              <span class="led" aria-hidden="true"></span>
+              <span class="led" aria-hidden="true"></span>
+            </div>
+          </div>
+        </section>
+        <div class="demo-notes">
+          <h3>Getting started</h3>
+          <p>This is a full Ficl system running in your browser.
+            At the top right you will see the state of the parameter stack.
+            Bottom right are some simulated LEDS.
+            If you are new to Forth, please follow along with <a href="https://www.taygeta.com/forth_intro/stackflo.html" target="_blank">this tutorial in a split view</a>.
+            You can find more information on Ficl <a href="ficl.html" target="_blank">here</a>.
+          </p>
+          <h3>Demo words</h3>
+          <dl>
+            <dt><code>!led  ( n -- ) </code></dt>
+            <dd>Control simulated LEDs with the low 8 bits of n</dd>
+            <dt><code>ms  ( ms -- ) </code></dt>
+            <dd>Insert delay in milliseconds </dd>
+            <dt><code>yield  ( -- ) </code></dt>
+            <dd>Give the browser a chance to refresh the display</dd>
+          </dl>
+          <pre class="demo-code">
+\ Try these examples - this is a comment
+( this is also a comment )
+1 value led
+: step led 1 lshift 0x80 over < if drop 1 endif dup to led !led ;
+: steps 0 do step 100 ms loop ;
+16 steps
+          </pre>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-grid">
+        <div>Ficl - Forth Inspired Command Language</div>
+        <div>Questions or contributions: <a href="https://sourceforge.net/u/jsadler/profile/">John Sadler</a></div>
+      </div>
+    </footer>
+
+    <script type="module" src="demo.js"></script>
+  </body>
+</html>

@@ -138,15 +138,15 @@ INLINE Color
 Color::operator+(const Color& other) const
 {
 	Color result;
-	register long temp = long(Red())+long(other.Red());
+	register int temp = int(Red())+int(other.Red());
 	if(temp > 255)
 		temp = 255;
 	result.SetRed(temp);
-	temp = long(Green())+long(other.Green());
+	temp = int(Green())+int(other.Green());
 	if(temp > 255)
 		temp = 255;
 	result.SetGreen(temp);
-	temp = long(Blue())+long(other.Blue());
+	temp = int(Blue())+int(other.Blue());
 	if(temp > 255)
 		temp = 255;
 	result.SetBlue(temp);
@@ -160,15 +160,15 @@ INLINE Color
 Color::operator-(const Color& other) const
 {
 	Color result;
-	register long temp = long(Red())-long(other.Red());
+	register int temp = int(Red())-int(other.Red());
 	if(temp < 0)
 		temp = 0;
 	result.SetRed(temp);
-	temp = long(Green())-long(other.Green());
+	temp = int(Green())-int(other.Green());
 	if(temp < 0)
 		temp = 0;
 	result.SetGreen(temp);
-	temp = long(Blue())-long(other.Blue());
+	temp = int(Blue())-int(other.Blue());
 	if(temp < 0)
 		temp = 0;
 	result.SetBlue(temp);
@@ -193,15 +193,15 @@ INLINE Color
 Color::operator*(const Color& other) const
 {
 	Color result;
-	register long temp = (long(Red())*long(other.Red()))/128;
+	register int temp = (int(Red())*int(other.Red()))/128;
 	if(temp > 255)
 		temp = 355;
 	result.SetRed(temp);
-	temp = (long(Green())*long(other.Green()))/128;
+	temp = (int(Green())*int(other.Green()))/128;
 	if(temp > 255)
 		temp = 355;
 	result.SetGreen(temp);
-	temp = (long(Blue())*long(other.Blue()))/128;
+	temp = (int(Blue())*int(other.Blue()))/128;
 	if(temp > 255)
 		temp = 355;
 	result.SetBlue(temp);
@@ -282,7 +282,7 @@ INLINE
 Color48::operator Color () const
 {
 	Color result;
-	long temp = _color[0]>>4;
+	int temp = _color[0]>>4;
 	if(temp > 255)
 		temp = 255;
 	result.SetRed(temp);

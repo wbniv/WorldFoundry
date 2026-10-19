@@ -1,0 +1,26 @@
+{
+  "source": "leaf-surfaces-source.png",
+  "creation": "Original artwork generated using the imagegen tool, then resampled and edge-extruded by scripts/package-plant-textures.py.",
+  "atlas": "leaf_surfaces.tga",
+  "resolution": [
+    256,
+    256
+  ],
+  "format": "RGB TGA source; packed by textile to 16-bit opaque room texture",
+  "interior_texels": [
+    72,
+    112
+  ],
+  "gutter_texels": 4,
+  "tiles": [
+    "freshwater broad leaf",
+    "freshwater ribbon",
+    "freshwater whorl leaflet",
+    "saltwater seagrass ribbon",
+    "saltwater paddle leaf",
+    "brown algae tissue"
+  ],
+  "alpha_cutout": false,
+  "mesh_groups": 8,
+  "actors_added": 0
+}

@@ -1,0 +1,1 @@
+../../../.claude/memory/home_src_layout.md

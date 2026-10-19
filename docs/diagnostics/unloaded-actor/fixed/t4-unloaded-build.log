@@ -1,0 +1,16 @@
+-- WF: release engine defines (no asserts, no DBSTREAM)
+-- Configuring done (0.4s)
+-- Generating done (0.2s)
+-- Build files have been written to: /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/build-teleport
+[  1%] Built target wf_property_core_build
+[  2%] Built target zforth
+[ 11%] Built target lua54
+[ 12%] Built target frame_rate_test
+[ 13%] Built target fps_overlay_test
+[ 16%] Built target nf_test
+[ 51%] Built target Jolt
+[ 99%] Built target wfengine
+[ 99%] Built target wf_host_gl_e2e_test
+[100%] Built target wf_game
+[100%] Built target texture_atlas_address_test
+[100%] Built target debug_listener_reconnect_test

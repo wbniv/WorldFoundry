@@ -121,9 +121,8 @@ Level::getActor( int idxActor ) const
 	RangeCheck(0,idxActor,_actors.Size());
    if(_actors[idxActor])
    {
-      Actor* result = dynamic_cast<Actor*>(_actors[idxActor]);
-      assert(ValidPtr(result));
-      return result;
+      assert(IsActor(_actors[idxActor]));
+      return static_cast<Actor*>(_actors[idxActor]);
    }
    else
       return NULL;
@@ -146,9 +145,8 @@ Level::GetActorNoTemplate( int idxActor ) const
 	AssertMsg( !_templateObjects[ idxActor ], "tried to read to a templated actor's pointer" );
    if(_actors[idxActor])
    {
-      Actor* result = dynamic_cast<Actor*>(_actors[idxActor]);
-      assert(ValidPtr(result));
-      return result;
+      assert(IsActor(_actors[idxActor]));
+      return static_cast<Actor*>(_actors[idxActor]);
    }
    else
       return NULL;

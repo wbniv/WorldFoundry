@@ -1,0 +1,12 @@
+--------- beginning of main
+10-02 15:18:52.333 17342 17363 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.smb/files/wf.log
+10-02 15:18:52.333 17342 17363 I wf_game : android_main: enter
+10-02 15:18:52.333 17342 17363 I wf_game : android_main: assetMgr=0xee08c400
+10-02 15:18:52.333 17342 17363 I wf_game : phone controller: off (no assets/layout.json)
+10-02 15:18:52.333 17342 17363 I wf_game : android_main: uiMode=4 (tv=1)
+10-02 15:18:52.333 17342 17363 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-02 15:18:52.337 17342 17363 I wf_game : APP_CMD_RESUME
+10-02 15:18:52.376 17342 17363 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:18:52.426 17342 17363 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-02 15:18:52.426 17342 17363 I wf_game : android_main: EGL ready, entering HALStart
+10-02 15:18:52.532 17342 17363 I wf_game : level-menu: showing 4 entries ("WF SMB"), cursor on 0

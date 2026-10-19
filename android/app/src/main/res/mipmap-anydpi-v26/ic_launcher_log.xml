@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 8+ adaptive icon for the "WF Log Viewer" launcher entry
+     (LogViewerActivity). Distinct background color + document glyph so it
+     doesn't get confused with the main "World Foundry" icon — see
+     docs/plans/2026-04-18-android-launcher-polish.md step 4. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_log_background" />
+    <foreground android:drawable="@mipmap/ic_launcher_log_foreground" />
+</adaptive-icon>

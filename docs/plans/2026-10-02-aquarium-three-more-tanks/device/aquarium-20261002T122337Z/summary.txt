@@ -1,0 +1,12 @@
+PASS  device adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp online
+INFO  model 'Chromecast HD', SoC 'AMLS805X2', API 34, ABIs armeabi-v7a,armeabi, Physical size: 1920x1080, mCurUiMode=0x24
+INFO  APK ABIs: arm64-v8a armeabi-v7a ; usable on this device: armeabi-v7a 
+PASS  installed org.worldfoundry.wf_game.aquarium
+PASS  launched (TotalTime: 439 ms)
+PASS  process alive after 3 s (pid 3117)
+INFO  memory: TOTAL PSS 35672 KB (meminfo.txt)
+PASS  screenshot /home/will/WorldFoundry-wbniv/docs/plans/2026-10-02-aquarium-three-more-tanks/device/aquarium-20261002T122337Z/screen.png (1082 1920x1080 distinct colours at 160x90) — open it and look
+PASS  no crash lines in logcat
+INFO  TV mode detected (android_main: uiMode=4 (tv=1)): the touch HUD is hidden
+PASS  EGL context up (android_main: EGL ready)
+INFO  frame pacing (org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#1809): 126 frames: min 16.7 ms, median 16.7 ms (59.9 fps), p90 16.7 ms, worst 16.7 ms; display refresh 16.68 ms

@@ -1,0 +1,8 @@
+Accepted J-ef12b3c32ecc: queued; readd
+Follow: task chromecast:watch JOB=J-ef12b3c32ecc
+J-ef12b3c32ecc: accepted {"device": "chromecast-test-02", "address": "192.168.4.49", "workflow": "readd"}
+J-ef12b3c32ecc: granted {"device": "chromecast-test-02", "generation": 5}
+J-ef12b3c32ecc: phase {"phase": "connecting"}
+J-ef12b3c32ecc: phase {"phase": "restoring"}
+J-ef12b3c32ecc: completed {"error": null, "health": "ready"}
+J-ef12b3c32ecc: completed

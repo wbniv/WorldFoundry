@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Project Room Door Wall</title>
+<style>
+  :root {
+    --bg: #f6f5f2; --ink: #1d2024; --muted: #6b7280; --line: #b9bec6;
+    --room: #ffffff; --patio: #eef3f7; --wall: #9aa2ad; --wrong: #d9534f;
+    --glass: #3ea8cf; --glass-soft: #bfe3f0; --amber: #d98324; --ok: #2f7d4f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14171a; --ink: #e8eaed; --muted: #9aa2ad; --line: #3a4048;
+      --room: #1e2227; --patio: #1a2630; --wall: #5c6570;
+      --glass: #4fc3e8; --glass-soft: #26485a; --amber: #e8a23d; --ok: #59b37d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14171a; --ink: #e8eaed; --muted: #9aa2ad; --line: #3a4048;
+    --room: #1e2227; --patio: #1a2630; --wall: #5c6570;
+    --glass: #4fc3e8; --glass-soft: #26485a; --amber: #e8a23d; --ok: #59b37d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 24px 16px 40px;
+  }
+  .wrap { max-width: 1392px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0 0 20px; font-size: 14px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 18px; }
+  .card {
+    flex: 1 1 420px; min-width: 300px; background: var(--room);
+    border: 1px solid var(--line); border-radius: 10px; padding: 14px;
+  }
+  .card h2 { font-size: 14px; margin: 0 0 2px; text-transform: uppercase; letter-spacing: .06em; }
+  .card p { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
+  svg { width: 100%; height: auto; display: block; }
+  .t { font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; fill: var(--muted); }
+  .tb { font: 12px ui-sans-serif, system-ui, sans-serif; fill: var(--ink); font-weight: 600; }
+  .key { margin-top: 18px; font-size: 13px; color: var(--muted); }
+  .key b { color: var(--ink); }
+  .sw { display: inline-block; width: 11px; height: 11px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; }
+  .note { margin-top: 16px; padding: 12px 14px; border-left: 3px solid var(--amber);
+          background: color-mix(in srgb, var(--amber) 10%, transparent); font-size: 13px; border-radius: 0 6px 6px 0; }
+  .bad { border-left-color: var(--wrong); background: color-mix(in srgb, var(--wrong) 10%, transparent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>639‑project‑rm — the door wall, corrected</h1>
+  <p class="sub">Top‑down, drawn to the surveyed coordinates. +X to the right (compass north), +Y up (compass west). Room x&nbsp;3.80→7.80, y&nbsp;−8.00→−2.00, z&nbsp;0→2.70.</p>
+
+  <div class="grid">
+
+    <div class="card">
+      <h2>Wrong wall (first pass, withdrawn)</h2>
+      <p>The x&nbsp;≈&nbsp;7.80 face, where <code>639-window-1</code> sits. A genuine exterior wall carried by <code>unit-639</code>'s shell — 49 collidable faces, nothing beyond it.</p>
+      <svg viewBox="0 0 420 320" role="img" aria-label="The x=7.8 exterior wall, incorrectly targeted">
+        <rect x="60" y="60" width="240" height="200" fill="var(--patio)" opacity=".25"/>
+        <rect x="60" y="60" width="240" height="200" fill="none" stroke="var(--line)"/>
+        <text class="tb" x="180" y="165" text-anchor="middle">639-project-rm</text>
+        <text class="t" x="180" y="182" text-anchor="middle">x 3.80…7.80 · y −8.00…−2.00</text>
+        <rect x="300" y="60" width="10" height="200" fill="var(--wrong)"/>
+        <line x1="316" y1="60" x2="316" y2="260" stroke="var(--wrong)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text class="t" x="180" y="204" text-anchor="middle" fill="var(--wrong)">x = 7.80 — solid shell wall, 49 faces</text>
+        <text class="t" x="180" y="218" text-anchor="middle" fill="var(--wrong)">nothing beyond it · NOT the doors</text>
+        <text class="t" x="60" y="285">west / +Y ↑ · north / +X →</text>
+      </svg>
+    </div>
+
+    <div class="card">
+      <h2>Right wall — closed</h2>
+      <p>The y&nbsp;=&nbsp;−2.00 face, shared with the two patios. Three floor‑to‑ceiling panels, 1.33&nbsp;m each, across x&nbsp;3.80→7.80.</p>
+      <svg viewBox="0 0 420 320" role="img" aria-label="Corrected wall, doors closed across the full 4 m span">
+        <rect x="60" y="120" width="240" height="140" fill="var(--patio)" opacity=".25"/>
+        <rect x="60" y="120" width="240" height="140" fill="none" stroke="var(--line)"/>
+        <text class="tb" x="180" y="200" text-anchor="middle">639-project-rm</text>
+        <rect x="9" y="60" width="171" height="55" fill="var(--patio)"/>
+        <rect x="9" y="60" width="171" height="55" fill="none" stroke="var(--line)"/>
+        <text class="t" x="94" y="92" text-anchor="middle">639-patio-recessed</text>
+        <rect x="180" y="60" width="144" height="55" fill="var(--patio)"/>
+        <rect x="180" y="60" width="144" height="55" fill="none" stroke="var(--line)"/>
+        <text class="t" x="252" y="92" text-anchor="middle">639-patio</text>
+        <rect x="51" y="113" width="9" height="9" fill="var(--wall)"/>
+        <text class="t" x="18" y="135">jamb2 trimmed → x 3.65…3.80</text>
+        <rect x="60" y="114" width="80" height="7" fill="var(--glass)"/>
+        <rect x="140" y="114" width="80" height="7" fill="var(--glass)"/>
+        <rect x="220" y="114" width="80" height="7" fill="var(--glass)"/>
+        <line x1="60" y1="278" x2="300" y2="278" stroke="var(--glass)" stroke-width="1.5"/>
+        <text class="t" x="180" y="294" text-anchor="middle" fill="var(--glass)">3 × 1.33 m · y −2.16…−1.84 · z 0…2.70</text>
+      </svg>
+    </div>
+
+    <div class="card">
+      <h2>Right wall — open (the default)</h2>
+      <p>All three telescoped into the x&nbsp;6.47→7.80 bay, at the corner the wide main patio starts from. The other 2.67&nbsp;m is an open threshold.</p>
+      <svg viewBox="0 0 420 320" role="img" aria-label="Corrected wall, doors gathered at the x=7.8 end">
+        <rect x="60" y="120" width="240" height="140" fill="var(--patio)" opacity=".25"/>
+        <rect x="60" y="120" width="240" height="140" fill="none" stroke="var(--line)"/>
+        <text class="tb" x="180" y="200" text-anchor="middle">639-project-rm</text>
+        <rect x="9" y="60" width="171" height="55" fill="var(--patio)"/>
+        <rect x="9" y="60" width="171" height="55" fill="none" stroke="var(--line)"/>
+        <text class="t" x="94" y="92" text-anchor="middle">639-patio-recessed</text>
+        <rect x="180" y="60" width="144" height="55" fill="var(--patio)"/>
+        <rect x="180" y="60" width="144" height="55" fill="none" stroke="var(--line)"/>
+        <text class="t" x="252" y="92" text-anchor="middle">639-patio</text>
+        <rect x="51" y="113" width="9" height="9" fill="var(--wall)"/>
+        <rect x="60" y="112" width="160" height="11" fill="var(--glass-soft)" opacity=".5"/>
+        <text class="t" x="140" y="140" text-anchor="middle" fill="var(--ok)">open threshold · 2.67 m</text>
+        <rect x="220" y="110" width="80" height="4" fill="var(--glass)"/>
+        <rect x="220" y="115" width="80" height="4" fill="var(--glass)"/>
+        <rect x="220" y="120" width="80" height="4" fill="var(--glass)"/>
+        <line x1="220" y1="278" x2="300" y2="278" stroke="var(--glass)" stroke-width="1.5"/>
+        <text class="t" x="260" y="294" text-anchor="middle" fill="var(--glass)">stack x 6.47…7.80</text>
+      </svg>
+    </div>
+
+  </div>
+
+  <p class="key">
+    <span class="sw" style="background:var(--glass)"></span><b>Glass panel</b> (3 tracks, 0.11 m apart in Y, 0.10 m thick) &nbsp;·&nbsp;
+    <span class="sw" style="background:var(--wall)"></span><b>639-front-strip-S-wall-jamb2</b>, the wall being replaced &nbsp;·&nbsp;
+    <span class="sw" style="background:var(--wrong)"></span><b>The wall the first pass targeted</b>, left untouched.
+  </p>
+
+  <div class="note bad">
+    <b>Correction, 2026‑09‑20.</b> The first implementation put the doors on the x&nbsp;≈&nbsp;7.80 face and cited an
+    unaccounted 1.25&nbsp;m gap in <code>639-window-1</code> as evidence. That gap was real but irrelevant: the window
+    is a real window on a real exterior wall. The door wall is the y&nbsp;=&nbsp;−2.00 face.
+  </div>
+
+  <div class="note">
+    <b>Still assumptions.</b> Three equal 1.33&nbsp;m bays (no source data on the real panel split), and the choice of the
+    x&nbsp;=&nbsp;7.80 end to gather at — this wall's faces point ±Y, so neither end is literally “east” under the
+    level's <code>+X north / −Y east</code> convention. Both are cosmetic.
+  </div>
+</div>
+</body>
+</html>

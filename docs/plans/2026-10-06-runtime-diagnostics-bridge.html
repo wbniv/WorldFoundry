@@ -1,0 +1,175 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Runtime diagnostics bridge plan</title><style>body{font:17px/1.6 system-ui;max-width:1100px;margin:40px auto;padding:0 26px;background:#f5f7f6;color:#21343b}h1,h2{line-height:1.2}h2{margin-top:2em}table{width:100%;border-collapse:collapse;font-size:15px}th,td{border:1px solid #c6d4d0;padding:10px;text-align:left;vertical-align:top}th{background:#e3ece7}pre{background:#102833;color:#e9f3ef;padding:20px;overflow:auto}svg{width:100%}a{color:#146b75}</style></head><body><h1>Runtime diagnostics through the coordinated Android debug bridge</h1>
+<p>Date: 2026-10-06. Status: Will approved the proposed engine diagnostics direction;
+this plan documents scope before implementation. No engine changes have been
+made for this plan. Start with coherent snapshots and input acknowledgements.</p>
+<h2>Purpose</h2>
+<p>Give device tests facts about the running game: what input arrived, what consumed
+it, which simulation frame moved an actor, and when a settings transaction took
+effect. ADB supplies transport and Android lifecycle operations. The game engine
+supplies game state; the coordinator owns the complete device session.</p>
+<p>The cast1 plant-settings test illustrates the problem: it held a direction for
+650 ms and compared the latest <code>ball pos</code> lines, but those lines are emitted only
+every 30 physics ticks. A repeated position could mean a stale sample rather than
+failed movement. The interim validator uses longer holds and explicitly checks
+for new telemetry; the planned bridge makes sampling independent of frame rate.</p>
+<h2>Existing code to reuse</h2>
+<table>
+<thead>
+<tr>
+<th>Existing source</th>
+<th>Behavior</th>
+<th>Planned extension</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>engine/stubs/debug_server.cc</code> / <code>.hp</code></td>
+<td><code>WF_DEBUG_BRIDGE</code> TCP/JSON listener, queued commands, actor position broadcasts, basic perf and mailbox watches</td>
+<td>Versioned read requests, correlated replies and bounded diagnostic events</td>
+</tr>
+<tr>
+<td><code>wfsource/source/game/game.cc</code></td>
+<td>Drains bridge queue before update; broadcasts after update</td>
+<td>Frame/level generations, coherent snapshot boundary and lifecycle events</td>
+</tr>
+<tr>
+<td><code>wfsource/source/hal/android/native_app_entry.cc</code>, <code>input.cc</code></td>
+<td>Android input ingestion and hardware state</td>
+<td>Input receipt sequences and subsequent routing/consumption records</td>
+</tr>
+<tr>
+<td><code>engine/runtime_properties.hpp</code>, runtime property UI</td>
+<td>Instance generations/revisions, effective values, modal/session state</td>
+<td>Read committed state using existing APIs; separate draft and effective values</td>
+</tr>
+<tr>
+<td><code>scripts/wf_device/workflows.py</code></td>
+<td>Owned installation/input/capture/cleanup sessions</td>
+<td>Owned bridge connection, event waits and saved diagnostic evidence</td>
+</tr>
+</tbody>
+</table>
+<p>The existing actor stream is emitted every six broadcasts and supplies index and
+position, without a frame or level generation. Existing <code>perf.frame_ms</code> reports
+the delta passed by the game loop; it must not be relabelled measured CPU work.
+Audit the Android build/link path before choosing how to enable the bridge in a
+diagnostic APK. Reuse the protocol; do not import wf-edit or build another editor.</p>
+<h2>Data flow</h2>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 155" role="img" aria-label="Coordinator connects through owned ADB transport to the engine snapshot queue and saves replies as evidence"><defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#428774"/></marker></defs><rect x="10" y="35" width="180" height="75" rx="10" fill="#173c35"/><text x="100" y="77" text-anchor="middle" font-family="sans-serif" font-size="13" fill="white">Coordinator validator</text><path d="M190 72h18" stroke="#428774" stroke-width="2" marker-end="url(#a)"/><rect x="210" y="35" width="180" height="75" rx="10" fill="#173c35"/><text x="300" y="77" text-anchor="middle" font-family="sans-serif" font-size="13" fill="white">Owned ADB transport</text><path d="M390 72h18" stroke="#428774" stroke-width="2" marker-end="url(#a)"/><rect x="410" y="35" width="180" height="75" rx="10" fill="#173c35"/><text x="500" y="77" text-anchor="middle" font-family="sans-serif" font-size="13" fill="white">Existing bridge queue</text><path d="M590 72h18" stroke="#428774" stroke-width="2" marker-end="url(#a)"/><rect x="610" y="35" width="180" height="75" rx="10" fill="#173c35"/><text x="700" y="77" text-anchor="middle" font-family="sans-serif" font-size="13" fill="white">Game-thread snapshot</text><path d="M790 72h18" stroke="#428774" stroke-width="2" marker-end="url(#a)"/><rect x="810" y="35" width="180" height="75" rx="10" fill="#173c35"/><text x="900" y="77" text-anchor="middle" font-family="sans-serif" font-size="13" fill="white">Replies → saved evidence</text></svg>
+<p>The socket thread handles bounded messages and queues requests. Only the game
+thread reads actor/property state. Serialization operates on copied snapshots;
+a slow reader must never block rendering. Inspect and address the existing
+<code>send_all_locked</code> path before relying on that guarantee.</p>
+<h2>Phase 1: snapshots and input acknowledgements</h2>
+<p>Every reply carries protocol version, request ID, process/run ID, level
+generation, host-independent monotonic time and frame sequence. Include a
+simulation-update sequence separately: frames can continue while a modal pauses
+simulation. Reject a stale actor generation rather than reading a reused slot.</p>
+<table>
+<thead>
+<tr>
+<th>Snapshot group</th>
+<th>Fields</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Game</td>
+<td>Active level, selector/game mode, focus, modal kind/session, paused state</td>
+</tr>
+<tr>
+<td>Player/selected actor</td>
+<td>Instance ID and generation, position, velocity, active/visible status</td>
+</tr>
+<tr>
+<td>Properties</td>
+<td>Qualified field IDs, committed values and revision; draft/error state separately when requested</td>
+</tr>
+<tr>
+<td>Input</td>
+<td>Source, receipt sequence, held mask, last press/release and last consumed sequence</td>
+</tr>
+</tbody>
+</table>
+<p>Input observations must distinguish <strong>received</strong>, <strong>routed</strong> and <strong>consumed</strong>.
+Capture receipt at Android ingestion, then routing to keypad/form/selector/game
+and consumption at the relevant update. Report reasons such as modal capture,
+focus loss or waiting for release; do not infer rejection merely from no movement.
+Hardware and phone sources remain distinguishable. Clear/release transitions
+must be observable. ADB's successful key command is not an engine acknowledgement.</p>
+<p>Example proposed response, with illustrative values:</p>
+<pre><code class="language-json">{&quot;v&quot;:1,&quot;request&quot;:42,&quot;run&quot;:&quot;boot-7&quot;,&quot;level_generation&quot;:4,
+ &quot;frame&quot;:910,&quot;simulation_step&quot;:802,&quot;op&quot;:&quot;snapshot&quot;,
+ &quot;player&quot;:{&quot;actor&quot;:3,&quot;generation&quot;:8,&quot;position&quot;:[0.3,-0.85,1.365]},
+ &quot;input&quot;:{&quot;received&quot;:55,&quot;consumed&quot;:55,&quot;route&quot;:&quot;game&quot;}}
+</code></pre>
+<p>The validator requests a snapshot after a known sequence, observes input receipt,
+and compares positions from subsequent simulation steps in the same generation.
+It records release consumption too. Requests time out explicitly when simulation
+is paused, the level changes or the process exits; they never accept old samples.</p>
+<h2>Phase 2: completion events</h2>
+<p>Add correlated <code>level-ready</code>, <code>properties-committed</code>, <code>generation-complete</code>,
+<code>focus-changed</code> and modal open/close events. Define “level ready” after loading and
+actor initialization; define plant completion as regeneration completion, not
+completion of biological growth. Property events include actor generation,
+revision and edit session. Events carry a monotonic sequence; reconnect reports
+any gap and obtains a new snapshot rather than replaying stale commands.</p>
+<h2>Phase 3: actor inspection and profiling</h2>
+<p>Read-only actor inspection adds mesh/material identifiers, resolved texture
+status and visibility source where available. Cap actor and field lists; use
+pagination tied to a level generation. This should explain missing rocks and
+white textures without changing gameplay state.</p>
+<p>Profile actual wall/CPU work at existing boundaries: script/actor update,
+physics, animation and rendering. Add mailbox read/write counters, optional
+per-actor script totals, and resettable measurement windows. Distinguish CPU
+submission time from GPU time and presentation pacing. Use existing profiling
+hooks first; detailed timings are opt-in and measured for their own overhead.</p>
+<h2>Minimal core surface and boundaries</h2>
+<p>Initial changes are the existing bridge protocol/parser, game-loop sequence and
+snapshot hooks, input receipt/routing observation hooks, and a small read-only
+diagnostic adapter to existing actor/property APIs. Build manifests may need to
+include or enable the existing bridge for Android. Later phases add event hooks
+at real completion points and counters at measured subsystem boundaries.</p>
+<p>No physics behavior, asset formats, animation algorithm or gameplay control
+policy changes are required. Do not implement a second OAD writer: diagnostics
+read the generic instance registry; any future editing uses its existing
+transaction/validation path. Existing bridge mutation features must be audited
+and excluded from a read-only diagnostic capability rather than exposed by default.</p>
+<p>Use a local-only bridge endpoint reached through coordinator-owned ADB transport.
+Startup/shutdown, forwarding and cleanup belong to the same owned session. Never
+expose this endpoint through the phone controller or accept arbitrary coordinator
+scripts. Preserve personal reservations and Chromium/WebView 91 compatibility.
+Android packaging must explicitly distinguish diagnostic and ordinary builds.</p>
+<h2>Delivery and verification</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Acceptance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0: audit</td>
+<td>Android build path, existing bridge threading/backpressure and property getters documented; concrete file list established</td>
+</tr>
+<tr>
+<td>1: snapshots/input</td>
+<td>Cast1 verifies held/released directions using fresh simulation sequences, and keypad/form/selector routing; evidence includes acknowledgements and positions</td>
+</tr>
+<tr>
+<td>2: events</td>
+<td>Settings apply/cancel, regeneration, level transition, Home/resume and disconnect/reconnect checks use completion events</td>
+</tr>
+<tr>
+<td>3: inspection/perf</td>
+<td>Missing/hidden asset fixture is distinguishable; timings/counters report defined work and measurement windows</td>
+</tr>
+</tbody>
+</table>
+<p>Test malformed/oversized requests, queue limits, slow clients, stale generations,
+actor deletion, modal pauses and disconnect cleanup. Test actual cast2 when its
+local setup is restored. Profile bridge disabled, enabled without a client, and
+subscribed at a bounded rate on the same device/seed/camera/growth state. Save
+frame pacing, PSS, APK size and overhead deltas; desktop load is not the baseline.</p>
+<p>Related: <a href="2026-10-06-runtime-oas-oad-object-editor.md">generic runtime OAS/OAD editor</a>.</p></body></html>

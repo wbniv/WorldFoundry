@@ -1,0 +1,398 @@
+{
+  "job": {
+    "id": "J-ad44a9cdd524",
+    "owner": "5c3060b287de0099d24b3975",
+    "accepted": 1791093976.2961853,
+    "state": "running",
+    "phase": "capturing-record",
+    "request": {
+      "device": "chromecast-test-02",
+      "method": "compare",
+      "workflow": "capture"
+    },
+    "device": "chromecast-test-02",
+    "generation": 11,
+    "cancel": 0,
+    "error": null,
+    "started": 1791093976.3327544,
+    "finished": null,
+    "worker_pid": 264064,
+    "recovery_resolved": 0
+  },
+  "device": {
+    "id": "chromecast-test-02",
+    "serial": "26031HFDD67QH7",
+    "name": "Project Room",
+    "model": "Chromecast",
+    "device": "sabrina",
+    "android": "12",
+    "sdk": "31",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "legacy-tcp",
+    "endpoint": "192.168.4.49:5555",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:cc0c:96e5:4ca4:6cc0",
+      "fd5d:59ce:7438:1:2555:eb86:7321:678",
+      "fe80::7156:9529:ebee:236b"
+    ],
+    "cast_udn": "5e305387-266b-84a6-639e-50805d1f06c2",
+    "generation": 11,
+    "last_seen": 1791093977.1565933,
+    "boot_id": "e16e2745-fc4e-4e9c-8996-96108117a466"
+  },
+  "result": "completed",
+  "error": null,
+  "cleanup_verified": true,
+  "restoration": "unchanged: current display captured without input",
+  "commands": [
+    {
+      "args": [
+        "connect",
+        "192.168.4.49:5555"
+      ],
+      "start": 1791093977.0382323,
+      "end": 1791093977.081421,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.serialno"
+      ],
+      "start": 1791093977.0825272,
+      "end": 1791093977.1565616,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/sys/kernel/random/boot_id"
+      ],
+      "start": 1791093977.157735,
+      "end": 1791093977.2282968,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.model"
+      ],
+      "start": 1791093977.2299185,
+      "end": 1791093977.2775047,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.release"
+      ],
+      "start": 1791093977.2786407,
+      "end": 1791093977.331395,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.sdk"
+      ],
+      "start": 1791093977.3324523,
+      "end": 1791093977.3794253,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.device"
+      ],
+      "start": 1791093977.381203,
+      "end": 1791093977.4361007,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.cpu.abilist"
+      ],
+      "start": 1791093977.4373643,
+      "end": 1791093977.4788997,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "ip -6 addr show wlan0"
+      ],
+      "start": 1791093977.4801311,
+      "end": 1791093977.5349793,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "start": 1791093977.5770824,
+      "end": 1791093979.0030887,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "screencap"
+      ],
+      "start": 1791093979.0297701,
+      "end": 1791093986.346208,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "push",
+        "/opt/wf-device-coordinator/config/capture-helper.jar",
+        "/data/local/tmp/wf-J-ad44a9cdd524-helper.jar"
+      ],
+      "start": 1791093987.317191,
+      "end": 1791093987.5134077,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "CLASSPATH=/data/local/tmp/wf-J-ad44a9cdd524-helper.jar timeout 15 app_process /system/bin WfCapture /data/local/tmp/wf-J-ad44a9cdd524-automation.png"
+      ],
+      "start": 1791093987.5145507,
+      "end": 1791093989.9275866,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "cat",
+        "/data/local/tmp/wf-J-ad44a9cdd524-automation.png"
+      ],
+      "start": 1791093989.9289033,
+      "end": 1791093989.9925916,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "screenrecord --time-limit 3 --size 1280x720 --bit-rate 6000000 /data/local/tmp/wf-J-ad44a9cdd524.mp4 >/data/local/tmp/wf-J-ad44a9cdd524-screenrecord.txt 2>&1 & echo $!"
+      ],
+      "start": 1791093990.0161831,
+      "end": 1791093990.0573294,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/22098/cmdline"
+      ],
+      "start": 1791093990.0590467,
+      "end": 1791093990.107664,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/22098/cmdline"
+      ],
+      "start": 1791093990.359251,
+      "end": 1791093990.445383,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/22098/cmdline"
+      ],
+      "start": 1791093990.6965234,
+      "end": 1791093990.761612,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/22098/cmdline"
+      ],
+      "start": 1791093991.013348,
+      "end": 1791093991.1948555,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/22098/cmdline"
+      ],
+      "start": 1791093991.4463003,
+      "end": 1791093991.6071882,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/22098/cmdline"
+      ],
+      "start": 1791093991.8588362,
+      "end": 1791093991.989369,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/22098/cmdline"
+      ],
+      "start": 1791093992.2407212,
+      "end": 1791093992.424414,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/22098/cmdline"
+      ],
+      "start": 1791093992.675974,
+      "end": 1791093992.9344492,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/22098/cmdline"
+      ],
+      "start": 1791093993.1855972,
+      "end": 1791093993.2507098,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/22098/cmdline"
+      ],
+      "start": 1791093993.5020852,
+      "end": 1791093993.6562629,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /data/local/tmp/wf-J-ad44a9cdd524-screenrecord.txt"
+      ],
+      "start": 1791093993.657448,
+      "end": 1791093993.7227523,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "cat",
+        "/data/local/tmp/wf-J-ad44a9cdd524.mp4"
+      ],
+      "start": 1791093993.7241898,
+      "end": 1791093993.7726781,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys power"
+      ],
+      "start": 1791093993.7743325,
+      "end": 1791093994.1169322,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys display"
+      ],
+      "start": 1791093994.1188948,
+      "end": 1791093994.2282348,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys window"
+      ],
+      "start": 1791093994.229611,
+      "end": 1791093994.357194,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791093994.358918,
+      "end": 1791093994.462806,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys dreams"
+      ],
+      "start": 1791093994.4640768,
+      "end": 1791093994.5523005,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys SurfaceFlinger"
+      ],
+      "start": 1791093994.5534458,
+      "end": 1791093994.7030463,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "rm -f /data/local/tmp/wf-J-ad44a9cdd524-helper.jar"
+      ],
+      "start": 1791093994.712269,
+      "end": 1791093994.7729623,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "rm -f /data/local/tmp/wf-J-ad44a9cdd524-automation.png"
+      ],
+      "start": 1791093994.7741199,
+      "end": 1791093994.856755,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "rm -f /data/local/tmp/wf-J-ad44a9cdd524.mp4"
+      ],
+      "start": 1791093994.857838,
+      "end": 1791093994.904614,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "rm -f /data/local/tmp/wf-J-ad44a9cdd524-screenrecord.txt"
+      ],
+      "start": 1791093994.9059286,
+      "end": 1791093994.953245,
+      "returncode": 0
+    }
+  ],
+  "finished": 1791093994.9541135,
+  "concurrent_jobs": [
+    "J-8fab5343f20e"
+  ]
+}

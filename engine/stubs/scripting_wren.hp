@@ -1,0 +1,54 @@
+// scripting_wren.hp — Wren engine plug interface used by ScriptRouter.
+//
+// Compiled in when WF_ENABLE_WREN is defined (via build_game.sh).
+// Sigil: `//wren\n` — ScriptRouter tests for this BEFORE the generic `//`
+// (JS) check so Wren scripts aren't mis-dispatched to the JS engine.
+//
+// Game scripts use the foreign class Env for mailbox access:
+//   Env.read_mailbox(idx)       // ( idx -- float )
+//   Env.write_mailbox(idx, val) // ( idx, float -- )
+//
+// INDEXOF_* constants are injected as module-level `var` declarations in a
+// preamble that is prepended to every script at AddConstantArray time.
+// Scripts can reference bare names (INDEXOF_INPUT, INDEXOF_HARDWARE_JOYSTICK1_RAW)
+// without an import.
+//
+// Dispatch order (see scripting_stub.cc ScriptRouter::RunScript):
+//   `\`        → Forth
+//   `//wren\n` → Wren     (this header — checked before `//`)
+//   `//`       → JS       (QuickJS or JerryScript)
+//   `#b64\n`   → Wasm     (wasm3 or WAMR)
+//   `;`        → Fennel   (inside lua_engine)
+//   fallthrough→ Lua
+
+#ifndef WF_SCRIPTING_WREN_HP
+#define WF_SCRIPTING_WREN_HP
+
+#ifdef WF_ENABLE_WREN
+
+class MailboxesManager;
+struct IntArrayEntry;
+
+namespace wren_engine {
+
+// Lifetime hooks — called from ScriptRouter ctor/dtor.
+void Init(MailboxesManager& mgr);
+void Shutdown();
+
+// Register INDEXOF_* / JOYSTICK_BUTTON_* constants as Wren module-level
+// variables. Appends `var NAME = VALUE\n` lines to the shared preamble that
+// is prepended to every script before execution.
+void AddConstantArray(IntArrayEntry* entryList);
+void DeleteConstantArray(IntArrayEntry* entryList);  // no-op (preamble only grows)
+
+// Execute a Wren script. The leading `//wren` comment line is a no-op in
+// Wren (it's a valid `//` line comment). `objectIndex` sets the current
+// actor for Env.read_mailbox / Env.write_mailbox. Always returns 0.0f —
+// Wren scripts communicate through mailboxes, not return values.
+float RunScript(const char* src, int objectIndex);
+
+} // namespace wren_engine
+
+#endif // WF_ENABLE_WREN
+
+#endif // WF_SCRIPTING_WREN_HP

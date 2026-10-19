@@ -55,7 +55,9 @@ RoomCallbacks::Validate() const
 //============================================================================
 
 Room::Room() :
-	_physicalAttributes()
+	_physicalAttributes(),
+	_objectLists(NULL),
+	_memory(NULL)
 {
 	for( int roomIndex=0; roomIndex < MAX_ACTIVE_ROOMS; ++roomIndex )
 		adjacentRooms[ roomIndex ] = 0;
@@ -66,7 +68,14 @@ Room::Room() :
 Room::~Room()
 {
    Validate();
-   delete [] _objectLists;
+   // _objectLists was allocated via `new (memory) Int16List[N]` — a placement
+   // array-new from the WF Memory pool, NOT libc malloc. Calling `delete[]`
+   // here used to call libc free on a pool pointer → "free(): invalid pointer"
+   // on every clean shutdown. Use MEMORY_DELETE_ARRAY (manual element dtor
+   // loop + pool free) instead. Skip if Construct never ran.
+   if (_objectLists && _memory) {
+      MEMORY_DELETE_ARRAY((*_memory), _objectLists, Int16List, _checkListEntries);
+   }
 }
 
 //============================================================================
@@ -97,7 +106,7 @@ Room::Construct
    RangeCheck(1,levelNumRooms, 1000);             // arbitrary
    RangeCheck(0,roomIndex,1000);                      // arbitrary
    memory.Validate();
-   RangeCheck(0,numberOfTemporaryObjects,1000);  // arbitrary
+   RangeCheck(0,numberOfTemporaryObjects,4000);  // arbitrary (raised 1000→4000 for the fs-viz levels)
    assert(ValidPtr(listCheckFuncList));
    RangeCheck(0,checkListEntries,100);           // arbitrary
    assert(ValidPtr(roomCallbacks));
@@ -110,7 +119,12 @@ Room::Construct
    _roomCallbacks = roomCallbacks;
    _masterObjectList = &masterObjectList;
    assert(ValidPtr(_masterObjectList));
-   _objectLists = new (memory) Int16List[_checkListEntries];
+   _memory = &memory;                       // remember pool for ~Room
+   // MEMORY_NEW_ARRAY, not `new (memory) Int16List[n]` — the latter prefixes the
+   // block with an ABI-sized array cookie (8 bytes on x86_64, 16 on every
+   // arm64) that ~Room's MEMORY_DELETE_ARRAY would have to guess at. See
+   // memory.hp.
+   _objectLists = MEMORY_NEW_ARRAY(memory, Int16List, _checkListEntries);
 
 	DBSTREAM1( croom << "Room::Construct: roomIndex  = " << roomIndex << std::endl; )
 
@@ -144,7 +158,7 @@ Room::Construct
 		// create list of rooms to be active when this one is
 		// the current room is always in index 0, followed by the others
 	DBSTREAM1( croom << "  Creating adjacent room list" << std::endl; )
-	for (entry = 0; entry < MAX_ADJACENT_ROOMS; entry++)
+	for (entry = 0; entry < MAX_ADJACENT_ROOMS; ++entry)
 	 {
 		int roomnum = roomData->adjacentRooms[entry];
 		if (roomnum == ADJACENT_ROOM_NULL)
@@ -163,7 +177,7 @@ Room::Construct
    RangeCheck(0,_checkListEntries, 20);         // kts if this fires just increase the size of the following array
    int maxListEntries[20];
 
-   for(int index=0;index<_checkListEntries;index++)
+   for(int index=0;index<_checkListEntries;++index)
    {
       maxListEntries[index] = 0;
    }
@@ -176,16 +190,16 @@ Room::Construct
 	while(!allIter.Empty())
 	 {
 		BaseObject& object = *allIter;
-      for(int listIndex=0;listIndex<_checkListEntries;listIndex++)
+      for(int listIndex=0;listIndex<_checkListEntries;++listIndex)
       {
          PRoomObjectListCheckFunc func = _listCheckFuncList[listIndex];
          if((object.*func)())
-            maxListEntries[listIndex]++;
+            ++maxListEntries[listIndex];
       }
 		++allIter;
 	 }
 	 // kts this is not really right, since objects can move between rooms
-   for(int listIndex=0;listIndex<_checkListEntries;listIndex++)
+   for(int listIndex=0;listIndex<_checkListEntries;++listIndex)
    {
       _objectLists[listIndex].Construct(memory,maxListEntries[listIndex]+numberOfTemporaryObjects);
    }
@@ -203,7 +217,7 @@ Room::Construct
 		 {
  			DBSTREAM1( croom << "checking object <" << *allObjectsIter <<">, object->kind() = " << object->kind() << std::endl; )
 
-         for(int listIndex=0;listIndex<_checkListEntries;listIndex++)
+         for(int listIndex=0;listIndex<_checkListEntries;++listIndex)
          {
             PRoomObjectListCheckFunc func = _listCheckFuncList[listIndex];
             if((object->*func)())
@@ -253,7 +267,7 @@ Room::UnBindAssets()
 // KTS(how about if we check objects WHEN they move!, then this routine doesn't need to exist)
 
 void
-Room::UpdateRoomContents(int updateIndex, LevelRooms& levelRooms)
+Room::UpdateRoomContents(int updateIndex, LevelRooms& levelRooms, bool movingObjectsOnly)
 {
 	DBSTREAM2( croom << "Room::updateRoomContents" << std::endl; )
 
@@ -263,11 +277,13 @@ Room::UpdateRoomContents(int updateIndex, LevelRooms& levelRooms)
 	while(!alIter.Empty())
 	 {
 		BaseObject* object = (*_masterObjectList)[*alIter];
-      PhysicalObject* po = dynamic_cast<PhysicalObject*>(object);
-      assert(ValidPtr(po));
-		if (!CheckCollision(*po))
+      assert(IsPhysicalObject(object));
+      PhysicalObject* po = static_cast<PhysicalObject*>(object);
+		if ((!movingObjectsOnly || po->GetMovementBlockPtr()->MovesBetweenRooms) && !CheckCollision(*po))
 		 {
 			int32 objectIndex = *alIter;
+			Vector3 pp = po->GetPhysicalAttributes().Position();
+			DBSTREAM1( cerror << "Room::UpdateRoomContents: object " << objectIndex << " kind=" << object->kind() << " pos=(" << pp.X().AsFloat() << "," << pp.Y().AsFloat() << "," << pp.Z().AsFloat() << ") fell out of room " << GetRoomIndex() << " roompos=(" << _physicalAttributes.Position().X().AsFloat() << "," << _physicalAttributes.Position().Y().AsFloat() << "," << _physicalAttributes.Position().Z().AsFloat() << ") roombox=(" << _physicalAttributes.GetColSpace().Min().X().AsFloat() << "," << _physicalAttributes.GetColSpace().Min().Y().AsFloat() << "," << _physicalAttributes.GetColSpace().Min().Z().AsFloat() << ")-(" << _physicalAttributes.GetColSpace().Max().X().AsFloat() << "," << _physicalAttributes.GetColSpace().Max().Y().AsFloat() << "," << _physicalAttributes.GetColSpace().Max().Z().AsFloat() << "); re-adding" << std::endl; )
 			RemoveObject(objectIndex);
 
          Validate();
@@ -289,7 +305,7 @@ Room::AddObject( int32 objectIndex )
 	BaseObject* object = (*_masterObjectList)[ objectIndex ];
 	assert( ValidPtr( object ) );
 
-   for(int listIndex=0;listIndex<_checkListEntries;listIndex++)
+   for(int listIndex=0;listIndex<_checkListEntries;++listIndex)
    {
       PRoomObjectListCheckFunc func = _listCheckFuncList[listIndex];
       if((object->*func)())
@@ -310,7 +326,7 @@ Room::RemoveObject(int32 objectIndex)
 	BaseObject* object = (*_masterObjectList)[objectIndex];
 	assert(object);
 
-   for(int listIndex=0;listIndex<_checkListEntries;listIndex++)
+   for(int listIndex=0;listIndex<_checkListEntries;++listIndex)
    {
       PRoomObjectListCheckFunc func = _listCheckFuncList[listIndex];
       if((object->*func)())
@@ -346,8 +362,8 @@ CheckSameRoom( BaseObjectIteratorWrapper boIter, const Room& room, const Clock& 
 	while( !boIter.Empty() )										// iterate through all objects in this room
 	{
 //		DBSTREAM2( clevel << "QL::dC:CR: cIter loop" << std::endl; )
-      PhysicalObject* po = dynamic_cast<PhysicalObject*>(&(*boIter));
-      assert(ValidPtr(po));
+      assert(IsPhysicalObject(&(*boIter)));
+      PhysicalObject* po = static_cast<PhysicalObject*>(&(*boIter));
 		room.CheckCollisionWithObjects( *po,clock, listIndex, count );
 		++boIter;
 		++count;
@@ -366,8 +382,8 @@ CheckOverlappedRoom( BaseObjectIteratorWrapper boIter, const Room& room, const C
 	{
 //		DBSTREAM2( clevel << "QL::dC:CR: cIter loop" << std::endl; )
 
-      PhysicalObject* po = dynamic_cast<PhysicalObject*>(&(*boIter));
-      assert(ValidPtr(po));
+      assert(IsPhysicalObject(&(*boIter)));
+      PhysicalObject* po = static_cast<PhysicalObject*>(&(*boIter));
 
 		if ( room.CheckCollision( *po ) )
       {
@@ -385,4 +401,3 @@ RoomCallbacks::~RoomCallbacks()
 }
 
 //==============================================================================
-

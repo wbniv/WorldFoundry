@@ -1,0 +1,23 @@
+// aquarium_spike-standalone.iff.txt — L4-wrapped form of aquarium_spike for wf_game -L.
+//
+// aquarium_spike is the Phase 0 translucency test card for the aquarium level
+// (docs/plans/2026-09-30-aquarium-level.md): a checker backdrop, a bit-15 pane, two fish.
+//
+// Build (the standard pipeline emits both inner and standalone):
+//   bash wftools/wf_blender/build_level_binary.sh aquarium_spike
+//
+// Run:
+//   task run-level -- wflevels/aquarium_spike-standalone.iff
+//
+// Pools are snowgoons-class (generous) — this level is tiny (a dozen objects), so these are far more than enough.
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 200000l
+        'PERM' 1000000l
+        'ROOM' 1000000l
+        'FLAG' 1l 1l                    // doomstick, bungeecam (snowgoons defaults)
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../aquarium_spike.iff" ]
+}

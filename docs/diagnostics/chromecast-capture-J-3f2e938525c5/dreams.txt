@@ -1,0 +1,17 @@
+DREAM MANAGER (dumpsys dreams)
+
+mCurrentDream=null
+mForceAmbientDisplayEnabled=false
+mDreamsOnlyEnabledForDockUser=false
+mDreamsEnabledSetting=true
+mDreamsActivatedOnDockByDefault=true
+mDreamsActivatedOnChargeByDefault=true
+mIsDocked=false
+mIsCharging=true
+mWhenToDream=3
+mKeepDreamingWhenUnpluggingDefault=false
+getDozeComponent()=null
+
+Dreamland:
+  mCurrentDream: null
+  mSentStartBroadcast=false

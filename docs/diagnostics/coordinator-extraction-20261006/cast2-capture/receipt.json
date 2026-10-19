@@ -1,0 +1,246 @@
+{
+  "job": {
+    "id": "J-a5d0b7e94d93",
+    "owner": "c8a11cf5242d54a539d885fa",
+    "accepted": 1791263655.7217014,
+    "state": "running",
+    "phase": "capturing-uiautomation",
+    "request": {
+      "device": "chromecast-test-02",
+      "method": "uiautomation",
+      "workflow": "capture"
+    },
+    "device": "chromecast-test-02",
+    "generation": 56,
+    "cancel": 0,
+    "error": null,
+    "started": 1791263655.8402216,
+    "finished": null,
+    "worker_pid": 1257298,
+    "recovery_resolved": 0,
+    "installation": null
+  },
+  "device": {
+    "id": "chromecast-test-02",
+    "serial": "26031HFDD67QH7",
+    "name": "Project Room",
+    "model": "Chromecast",
+    "device": "sabrina",
+    "android": "12",
+    "sdk": "31",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "legacy-tcp",
+    "endpoint": "192.168.4.56:5555",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:5067:dd88:3e0c:6a5c",
+      "fd5d:59ce:7438:1:2555:eb86:7321:678",
+      "fe80::7156:9529:ebee:236b"
+    ],
+    "cast_udn": "5e305387-266b-84a6-639e-50805d1f06c2",
+    "generation": 56,
+    "last_seen": 1791263656.866152,
+    "boot_id": "7e3574a7-c2fa-4d99-b99f-09ff64981e94",
+    "reservation": null
+  },
+  "result": "completed",
+  "error": null,
+  "cleanup_verified": true,
+  "restoration": "unchanged: current display captured without input",
+  "commands": [
+    {
+      "args": [
+        "connect",
+        "192.168.4.56:5555"
+      ],
+      "start": 1791263656.667496,
+      "end": 1791263656.7641776,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.serialno"
+      ],
+      "start": 1791263656.7660902,
+      "end": 1791263656.8661244,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/sys/kernel/random/boot_id"
+      ],
+      "start": 1791263656.8673096,
+      "end": 1791263656.9681554,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.model"
+      ],
+      "start": 1791263656.9692798,
+      "end": 1791263657.0644295,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.release"
+      ],
+      "start": 1791263657.066196,
+      "end": 1791263657.1653159,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.sdk"
+      ],
+      "start": 1791263657.1672697,
+      "end": 1791263657.2668447,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.device"
+      ],
+      "start": 1791263657.2684126,
+      "end": 1791263657.5689745,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.cpu.abilist"
+      ],
+      "start": 1791263657.570092,
+      "end": 1791263657.6715498,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "ip -6 addr show wlan0"
+      ],
+      "start": 1791263657.672717,
+      "end": 1791263657.865791,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "push",
+        "/opt/wf-device-coordinator/scripts/wf_device/resources/capture-helper.jar",
+        "/data/local/tmp/wf-J-a5d0b7e94d93-helper.jar"
+      ],
+      "start": 1791263657.9093082,
+      "end": 1791263658.3676047,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "CLASSPATH=/data/local/tmp/wf-J-a5d0b7e94d93-helper.jar timeout 15 app_process /system/bin WfCapture /data/local/tmp/wf-J-a5d0b7e94d93-automation.png"
+      ],
+      "start": 1791263658.3688533,
+      "end": 1791263660.4712868,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "cat",
+        "/data/local/tmp/wf-J-a5d0b7e94d93-automation.png"
+      ],
+      "start": 1791263660.4726853,
+      "end": 1791263660.5798616,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys power"
+      ],
+      "start": 1791263660.5821445,
+      "end": 1791263661.6869326,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys display"
+      ],
+      "start": 1791263661.6884103,
+      "end": 1791263661.972482,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys window"
+      ],
+      "start": 1791263661.974589,
+      "end": 1791263662.4678426,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791263662.4694252,
+      "end": 1791263663.1736586,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys dreams"
+      ],
+      "start": 1791263663.175674,
+      "end": 1791263663.786339,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys SurfaceFlinger"
+      ],
+      "start": 1791263663.7880201,
+      "end": 1791263664.2551746,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "rm -f /data/local/tmp/wf-J-a5d0b7e94d93-helper.jar"
+      ],
+      "start": 1791263664.257133,
+      "end": 1791263664.4292657,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "rm -f /data/local/tmp/wf-J-a5d0b7e94d93-automation.png"
+      ],
+      "start": 1791263664.4305289,
+      "end": 1791263664.6106832,
+      "returncode": 0
+    }
+  ],
+  "finished": 1791263664.6120288,
+  "launcher": null,
+  "concurrent_jobs": [
+    "J-77cad3b00e9f"
+  ]
+}

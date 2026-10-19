@@ -1,0 +1,25 @@
+[INFO] qbert_capture_bot starting
+[round 1 START] frame=1200
+[snap s0] round=1 frame=1350 0x81=0x05 qpos=(0,0)
+[snap hop1] round=1 frame=1411 0x81=0x05 qpos=(1,1)
+[snap hop2] round=1 frame=1533 0x81=0x05 qpos=(1,1)
+[round 1] all cubes visited 2+ times → wait for round-end animation
+[round 2 START] frame=20316
+[snap s0] round=2 frame=20466 0x81=0x4F qpos=(0,0)
+[snap hop1] round=2 frame=20527 0x81=0x50 qpos=(1,1)
+[snap hop2] round=2 frame=20649 0x81=0x50 qpos=(1,1)
+[round 2] all cubes visited 2+ times → wait for round-end animation
+[round 3 START] frame=39252
+[snap s0] round=3 frame=39402 0x81=0x99 qpos=(0,0)
+[snap hop1] round=3 frame=39463 0x81=0x9A qpos=(1,1)
+[snap hop2] round=3 frame=39585 0x81=0x9A qpos=(1,1)
+[round 3] all cubes visited 2+ times → wait for round-end animation
+[round 4 START] frame=58188
+[snap s0] round=4 frame=58338 0x81=0xE3 qpos=(0,0)
+[snap hop1] round=4 frame=58399 0x81=0xE4 qpos=(1,1)
+[snap hop2] round=4 frame=58521 0x81=0xE4 qpos=(1,1)
+[round 4] all cubes visited 2+ times → wait for round-end animation
+[round 5 START] frame=77124
+[snap s0] round=5 frame=77274 0x81=0x2D qpos=(0,0)
+[snap hop1] round=5 frame=77335 0x81=0x2E qpos=(1,1)
+[snap hop2] round=5 frame=77457 0x81=0x2E qpos=(1,1)

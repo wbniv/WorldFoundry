@@ -1,0 +1,42 @@
+[
+  {
+    "name": "P3-before",
+    "apk_sha256": "5eca15e30b09d8dcfa8a3debf0df89d7aa247dd682afc9073f60121694144764",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "6b52fa4cfbc4f7c3132e6d6427792577bc74bff7148619b4c7cbfaf1a2c2ab85",
+      "lib/armeabi-v7a/libwf_game.so": "0496dbfddd8888f47dd0eeb93674166ed80c280342c68bab1b4daa841dea8188"
+    },
+    "profile_enabled": false,
+    "bundle_sha256": "6abb68ed4a7d693a95497c6d225a3ea1dcb37d8d39ae5e6d683c3223a128e08b"
+  },
+  {
+    "name": "P3-before-cpu",
+    "apk_sha256": "f771c9c2e9213a758b5389628ef1004a36dfef4d7c2387b1595e25ede307b42e",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "6b52fa4cfbc4f7c3132e6d6427792577bc74bff7148619b4c7cbfaf1a2c2ab85",
+      "lib/armeabi-v7a/libwf_game.so": "0496dbfddd8888f47dd0eeb93674166ed80c280342c68bab1b4daa841dea8188"
+    },
+    "profile_enabled": true,
+    "bundle_sha256": "6abb68ed4a7d693a95497c6d225a3ea1dcb37d8d39ae5e6d683c3223a128e08b"
+  },
+  {
+    "name": "P3-cache",
+    "apk_sha256": "e33e3c228220a9d7d327c0f5f623a0d43106d7e946669fa260471d696d8f1f1e",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "6b52fa4cfbc4f7c3132e6d6427792577bc74bff7148619b4c7cbfaf1a2c2ab85",
+      "lib/armeabi-v7a/libwf_game.so": "0496dbfddd8888f47dd0eeb93674166ed80c280342c68bab1b4daa841dea8188"
+    },
+    "profile_enabled": false,
+    "bundle_sha256": "6eed76bcc3c78c4615d2a0b6e07c1a74f89e3d5971b0c09eedcaeeb2956f2c72"
+  },
+  {
+    "name": "P3-cache-cpu",
+    "apk_sha256": "23dc437dc154a22f61ebb5759ff5fde4586499327659bb79bfa69fc954434118",
+    "native": {
+      "lib/arm64-v8a/libwf_game.so": "6b52fa4cfbc4f7c3132e6d6427792577bc74bff7148619b4c7cbfaf1a2c2ab85",
+      "lib/armeabi-v7a/libwf_game.so": "0496dbfddd8888f47dd0eeb93674166ed80c280342c68bab1b4daa841dea8188"
+    },
+    "profile_enabled": true,
+    "bundle_sha256": "6eed76bcc3c78c4615d2a0b6e07c1a74f89e3d5971b0c09eedcaeeb2956f2c72"
+  }
+]

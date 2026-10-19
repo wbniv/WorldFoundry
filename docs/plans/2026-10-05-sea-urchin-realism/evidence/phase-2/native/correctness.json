@@ -1,0 +1,10 @@
+{
+  "purpose": "Correctness only; no desktop timing or performance claims",
+  "frames": 400,
+  "attached_pairs": 2411,
+  "max_attached_anchor_drift_world_units": 0,
+  "max_stem_endpoint_error_world_units": 0.0003947030768100407,
+  "completed_contact_cycles": 38.0,
+  "camera": "Debug stepping remained wide; close-camera review uses Chromecast captures",
+  "limitation": "Rigid stem/disc prototype: disc tilts with the stem, not a flexible foot"
+}

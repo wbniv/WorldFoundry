@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>World Foundry — wf-edit (web)</title>
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #14161a; overflow: hidden;
+                font-family: system-ui, sans-serif; color: #cfd3da; }
+  #canvas { display: block; width: 100vw; height: 100vh; border: 0; outline: none; }
+  #status { position: fixed; left: 12px; bottom: 10px; font-size: 12px; color: #7d8694;
+            pointer-events: none; }
+  /* A/V: remote/self video are HTML <video> elements overlaid on the canvas, positioned
+     over the Collaborators-panel thumbnails by webrtc_web.cc. pointer-events:none keeps
+     the editor canvas interactive underneath. */
+  #wf-video-layer { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+  #wf-video-layer video { background: #000; border: 1px solid #2a2e35; border-radius: 3px; }
+</style>
+</head>
+<body>
+<canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+<div id="wf-video-layer"></div>
+<div id="status">loading wf-edit…</div>
+<script>
+  // Editor args. The browser editor reuses the engine's -L viewport level plus a
+  // .lev tree for the CRDT Doc/Outliner; both are preloaded into MEMFS by the
+  // build (--preload-file). A ?room=/?relay= query param (Phase 2) joins a relay
+  // room; v1 with no room runs local-only.
+  const qs = new URLSearchParams(location.search);
+  const args = [
+    '--leveltree=' + (qs.get('leveltree') || '/level/snowgoons-blender.lev'),
+    '--level='     + (qs.get('level')     || '/snowgoons-standalone.iff'),
+  ];
+  if (qs.get('room'))  { args.push('--room='  + qs.get('room')); }
+  if (qs.get('relay')) { args.push('--relay=' + qs.get('relay')); }
+
+  // ?wfenv=KEY=VAL (repeatable) → set an emscripten ENV var read via getenv() —
+  // lets headless tests drive the editor's WF_EDIT_* hooks (e.g. WF_EDIT_ADD_UI)
+  // without a real GUI. Harmless when absent.
+  const wfenvs = qs.getAll('wfenv');
+
+  var Module = {
+    arguments: args,
+    canvas: document.getElementById('canvas'),
+    print:    (t) => console.log(t),
+    printErr: (t) => console.error(t),
+    setStatus: (t) => { const s = document.getElementById('status');
+                        if (s) { s.textContent = t || ''; if (!t) s.style.display = 'none'; } },
+    preRun: [function() {
+      for (const kv of wfenvs) { const i = kv.indexOf('=');
+        if (i > 0) { ENV[kv.slice(0, i)] = kv.slice(i + 1); } }
+    }],
+    onRuntimeInitialized: () => { Module.setStatus(''); },
+  };
+  window.onerror = (e) => Module.setStatus('error: ' + e);
+
+  // Close any open RTCPeerConnections on tab close so peers see the drop promptly
+  // (the relay/presence eviction would catch it eventually, but this is immediate).
+  window.addEventListener('beforeunload', () => {
+    const S = globalThis.__WFRTC;
+    if (S) for (const pid in S.peers) { try { S.peers[pid].pc.close(); } catch (e) {} }
+  });
+</script>
+{{{ SCRIPT }}}
+</body>
+</html>

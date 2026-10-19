@@ -1,0 +1,10 @@
+PASS: shell/default boot unchanged (98 bytes)
+PASS: existing level 0 unchanged (149504 bytes)
+PASS: existing level 1 unchanged (163840 bytes)
+PASS: existing level 2 unchanged (133120 bytes)
+PASS: existing level 3 unchanged (126976 bytes)
+PASS: existing level 4 unchanged (167936 bytes)
+PASS: existing level 5 unchanged (366592 bytes)
+PASS: Astra appended at level 6, sector 543, 272384 bytes; exact standalone payload
+PASS: main and Astra bundles identical, 7 levels, 1384448 bytes
+SHA-256: d6e82c87e0b54510d99d90267db49351df68a8432d802c948569e4bbbc6fd996

@@ -1,0 +1,27 @@
+[
+  {
+    "game": "aquarium",
+    "sha256": "b0d0a4486487a481e3c3f2c3965f0cda72a1e6262167b46005a5875a3b53b25d",
+    "bytes": 2654169
+  },
+  {
+    "game": "snowgoons",
+    "sha256": "5da859bcee267d595fb65eda3b3185a4a34a957facc88af37bf75569c83d23a0",
+    "bytes": 9575366
+  },
+  {
+    "game": "condo",
+    "sha256": "80d784b36c002a8ae4af800e78a4926028ada6a9ca7497a5856bb094c18a478b",
+    "bytes": 2645984
+  },
+  {
+    "game": "smb",
+    "sha256": "ed5db672bebe159f28465aa18400d3314cbf9ddc33f71e4455c4a045d1a6cbca",
+    "bytes": 2363362
+  },
+  {
+    "game": "qbert",
+    "sha256": "991eec0fdb4cbb86360335272da7733453cf6d2254570284a73718589807281c",
+    "bytes": 2586845
+  }
+]

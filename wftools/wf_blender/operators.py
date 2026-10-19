@@ -545,6 +545,327 @@ class WF_OT_pick_color(bpy.types.Operator):
 
 # ── registration ──────────────────────────────────────────────────────────────
 
+def _detect_script_language(script_text: str) -> str:
+    """
+    Heuristic scan of script text → ScriptLanguage label.
+
+    Checks for unambiguous syntactic markers anywhere in the body.
+    Returns one of the enum strings from common.oad ScriptLanguage field.
+    Does NOT look at leading sigils — those are legacy and may be stripped.
+    """
+    t = script_text
+
+    # WebAssembly: base64-only content or WAT s-expression opener
+    import re
+    stripped = t.strip()
+    if stripped.startswith('(module') or re.fullmatch(r'[A-Za-z0-9+/=\s]+', stripped):
+        return "WebAssembly"
+
+    # Fennel: Lisp s-expression keywords
+    if any(kw in t for kw in ('(defn ', '(defn\t', '(let [', '(fn ', '(var ', '(local ')):
+        return "Fennel"
+
+    # Wren: class-based OO keywords or Fiber
+    if any(kw in t for kw in ('class ', 'Fiber.', '.new()', 'import "')):
+        return "Wren"
+
+    # Forth: colon definitions, stack comments, typical Forth words
+    if any(kw in t for kw in (': ', 'VARIABLE ', 'CREATE ', 'CONSTANT ', ': ?')):
+        return "Forth"
+
+    # JavaScript: ES keywords not valid in Lua
+    if any(kw in t for kw in ('function ', 'const ', 'let ', '=>', 'var ', 'console.')):
+        return "JavaScript"
+
+    return "Lua"
+
+
+class WF_OT_detect_script_language(bpy.types.Operator):
+    """Scan the object's Script text and pre-fill ScriptLanguage."""
+    bl_idname = "wf.detect_script_language"
+    bl_label  = "Detect Script Language"
+
+    def execute(self, context):
+        obj = context.active_object
+        if obj is None:
+            self.report({'WARNING'}, "No active object")
+            return {'CANCELLED'}
+
+        script_key   = _prop_key("Script")
+        language_key = _prop_key("ScriptLanguage")
+
+        script_text = obj.get(script_key, "")
+        if not script_text:
+            self.report({'INFO'}, "No script text on object — defaulting to Lua")
+            obj[language_key] = "Lua"
+            return {'FINISHED'}
+
+        lang = _detect_script_language(str(script_text))
+        obj[language_key] = lang
+        self.report({'INFO'}, f"Detected: {lang}")
+        return {'FINISHED'}
+
+
+# ── repo-root detection ───────────────────────────────────────────────────────
+
+def _find_repo_root(start: str) -> str | None:
+    """Walk up from start looking for Taskfile.yml; return its directory or None."""
+    import os
+    d = os.path.abspath(start)
+    for _ in range(10):
+        if os.path.isfile(os.path.join(d, "Taskfile.yml")):
+            return d
+        parent = os.path.dirname(d)
+        if parent == d:
+            break
+        d = parent
+    return None
+
+
+# ── WF_OT_run_level ───────────────────────────────────────────────────────────
+
+class WF_OT_run_level(bpy.types.Operator):
+    """Export current scene, build level binary, and launch wf_game"""
+    bl_idname  = "wf.run_level"
+    bl_label   = "Run in Engine"
+    bl_options = {'REGISTER'}
+
+    def execute(self, context):
+        import subprocess
+        import os
+        from pathlib import Path
+        from . import export_level as _el
+
+        blend_path = bpy.data.filepath
+        if not blend_path:
+            self.report({'ERROR'}, "Save the .blend file first")
+            return {'CANCELLED'}
+
+        scene      = context.scene
+        level_name = scene.wf_level_name or Path(blend_path).stem
+
+        prefs     = context.preferences.addons[__package__].preferences
+        repo_root = prefs.repo_root or _find_repo_root(os.path.dirname(blend_path))
+        if not repo_root:
+            self.report({'ERROR'},
+                "Cannot find repo root (Taskfile.yml). "
+                "Set it in Edit > Preferences > Add-ons > World Foundry.")
+            return {'CANCELLED'}
+
+        lev_path  = os.path.join(repo_root, "wflevels", level_name, f"{level_name}.lev")
+        iff_path  = os.path.join(repo_root, "wflevels", f"{level_name}.iff")
+        build_sh  = os.path.join(repo_root, "wftools", "wf_blender", "build_level_binary.sh")
+        game_bin  = os.path.join(repo_root, "engine", "wf_game")
+        libs_path = os.path.join(repo_root, "engine", "libs")
+
+        for path, label in [(build_sh, "build_level_binary.sh"), (game_bin, "engine/wf_game")]:
+            if not os.path.isfile(path):
+                self.report({'ERROR'}, f"Not found: {label} ({path})")
+                return {'CANCELLED'}
+
+        wm = context.window_manager
+        wm.progress_begin(0, 3)
+
+        self.report({'INFO'}, f"[1/3] Exporting {level_name}.lev ...")
+        wm.progress_update(1)
+        ok, msg = _el.export_scene_to_lev(context, lev_path)
+        if not ok:
+            self.report({'ERROR'}, f"Export failed: {msg}")
+            wm.progress_end()
+            return {'CANCELLED'}
+
+        # Capture the authoritative actor-index map for the live bridge: the
+        # objects just written define the engine's 1-based actor indices.
+        from . import debug_bridge as _db
+        _db.get_bridge().update_index_map(_el.scene_index_map(context))
+
+        self.report({'INFO'}, f"[2/3] Building {level_name}.iff ...")
+        wm.progress_update(2)
+        result = subprocess.run(
+            ["bash", build_sh, level_name],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            self.report({'ERROR'}, f"Build failed: {result.stderr[-400:]}")
+            wm.progress_end()
+            return {'CANCELLED'}
+
+        self.report({'INFO'}, f"[3/3] Launching wf_game ...")
+        wm.progress_update(3)
+        env = os.environ.copy()
+        env["LD_LIBRARY_PATH"] = libs_path
+        env.setdefault("DISPLAY", ":0")
+        debug_port = int(getattr(prefs, "debug_port", 7777))
+        subprocess.Popen(
+            [game_bin, f"-L{iff_path}", "--debug-port", str(debug_port)],
+            cwd=repo_root,
+            env=env,
+            start_new_session=True,
+        )
+
+        wm.progress_end()
+        self.report(
+            {'INFO'},
+            f"Launched {level_name} (debug bridge :{debug_port}) — "
+            f"click Connect to push live edits",
+        )
+        return {'FINISHED'}
+
+
+class WF_OT_bridge_connect(bpy.types.Operator):
+    """Connect to a running wf_game debug bridge"""
+    bl_idname = "wf.bridge_connect"
+    bl_label  = "Connect to Engine"
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        prefs = context.preferences.addons.get(__package__)
+        prefs = prefs.preferences if prefs else None
+        host = getattr(prefs, 'debug_host', 'localhost') if prefs else 'localhost'
+        port = int(getattr(prefs, 'debug_port', 7777))    if prefs else 7777
+        bridge = _db.get_bridge()
+        bridge.connect(host, port)
+        if bridge.connected:
+            # Rebuild the name↔idx map from the current scene so connecting to an
+            # already-running engine (without re-running this session) still
+            # resolves object→actor — valid as long as the schema-bearing object
+            # set is unchanged since the level was exported.
+            from . import export_level as _el
+            bridge.update_index_map(_el.scene_index_map(context))
+            self.report({'INFO'}, f"Connected to {host}:{port}")
+        else:
+            self.report({'WARNING'}, f"Connection failed: {bridge.error}")
+        return {'FINISHED'}
+
+
+class WF_OT_bridge_disconnect(bpy.types.Operator):
+    """Disconnect from the wf_game debug bridge"""
+    bl_idname = "wf.bridge_disconnect"
+    bl_label  = "Disconnect from Engine"
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        _db.get_bridge().disconnect()
+        self.report({'INFO'}, "Disconnected")
+        return {'FINISHED'}
+
+
+class WF_OT_bridge_pause(bpy.types.Operator):
+    """Pause the running wf_game simulation"""
+    bl_idname = "wf.bridge_pause"
+    bl_label  = "Pause"
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        _db.get_bridge().pause()
+        return {'FINISHED'}
+
+
+class WF_OT_bridge_resume(bpy.types.Operator):
+    """Resume the paused wf_game simulation"""
+    bl_idname = "wf.bridge_resume"
+    bl_label  = "Resume"
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        _db.get_bridge().resume()
+        return {'FINISHED'}
+
+
+class WF_OT_bridge_step(bpy.types.Operator):
+    """Step the simulation forward one frame"""
+    bl_idname = "wf.bridge_step"
+    bl_label  = "Step"
+
+    frames: bpy.props.IntProperty(name="Frames", default=1, min=1)
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        _db.get_bridge().step(self.frames)
+        return {'FINISHED'}
+
+
+class WF_OT_bridge_undo(bpy.types.Operator):
+    """Undo the last bridge change in the running engine"""
+    bl_idname = "wf.bridge_undo"
+    bl_label  = "Undo Last Change"
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        _db.get_bridge().undo_step()
+        return {'FINISHED'}
+
+
+class WF_OT_bridge_revert_all(bpy.types.Operator):
+    """Revert all bridge changes — restore every actor to its pre-session state"""
+    bl_idname = "wf.bridge_revert_all"
+    bl_label  = "Revert All Changes"
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        _db.get_bridge().revert_all()
+        return {'FINISHED'}
+
+
+class WF_OT_bridge_pick(bpy.types.Operator):
+    """Click in the 3D viewport to select the closest engine actor"""
+    bl_idname   = "wf.bridge_pick"
+    bl_label    = "Pick Object"
+    bl_options  = {'REGISTER'}
+
+    def modal(self, context, event):
+        if event.type == 'LEFTMOUSE' and event.value == 'PRESS':
+            region = context.region
+            rv3d   = context.region_data
+            if region and rv3d:
+                from bpy_extras.view3d_utils import region_2d_to_ray_3d
+                coord = (event.mouse_region_x, event.mouse_region_y)
+                origin, direction = region_2d_to_ray_3d(region, rv3d, coord)
+                from . import debug_bridge as _db
+                _db.get_bridge().scene_pick(list(origin), list(direction))
+            return {'FINISHED'}
+        if event.type in {'RIGHTMOUSE', 'ESC'}:
+            return {'CANCELLED'}
+        return {'RUNNING_MODAL'}
+
+    def invoke(self, context, event):
+        if context.area and context.area.type == 'VIEW_3D':
+            context.window_manager.modal_handler_add(self)
+            return {'RUNNING_MODAL'}
+        self.report({'WARNING'}, "Must be invoked from the 3D viewport")
+        return {'CANCELLED'}
+
+
+class WF_OT_bridge_watch_mailbox(bpy.types.Operator):
+    """Start watching a mailbox value in the running engine"""
+    bl_idname = "wf.bridge_watch_mailbox"
+    bl_label  = "Watch Mailbox"
+
+    actor_idx:   bpy.props.IntProperty()
+    mailbox_idx: bpy.props.IntProperty()
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        _db.get_bridge().watch_mailbox(self.actor_idx, self.mailbox_idx)
+        return {'FINISHED'}
+
+
+class WF_OT_bridge_unwatch_mailbox(bpy.types.Operator):
+    """Stop watching a mailbox value"""
+    bl_idname = "wf.bridge_unwatch_mailbox"
+    bl_label  = "Unwatch Mailbox"
+
+    actor_idx:   bpy.props.IntProperty()
+    mailbox_idx: bpy.props.IntProperty()
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        _db.get_bridge().unwatch_mailbox(self.actor_idx, self.mailbox_idx)
+        return {'FINISHED'}
+
+
 _CLASSES = [
     WF_OT_attach_schema,
     WF_OT_detach_schema,
@@ -554,10 +875,22 @@ _CLASSES = [
     WF_OT_pick_color,
     WF_OT_pick_file,
     WF_OT_validate,
+    WF_OT_detect_script_language,
     WF_OT_export_iff_txt,
     WF_OT_import_iff_txt,
     WF_OT_export_iff,
     WF_OT_import_iff,
+    WF_OT_run_level,
+    WF_OT_bridge_connect,
+    WF_OT_bridge_disconnect,
+    WF_OT_bridge_pause,
+    WF_OT_bridge_resume,
+    WF_OT_bridge_step,
+    WF_OT_bridge_pick,
+    WF_OT_bridge_undo,
+    WF_OT_bridge_revert_all,
+    WF_OT_bridge_watch_mailbox,
+    WF_OT_bridge_unwatch_mailbox,
 ]
 
 

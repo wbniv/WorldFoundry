@@ -1,0 +1,41 @@
+{
+  "observed_at_utc": "2026-10-03T13:46:35Z",
+  "proposed_registry_id": "chromecast-test-02",
+  "ip_address": "192.168.4.46",
+  "cast_friendly_name": "Project Room",
+  "cast_manufacturer": "Google",
+  "cast_advertised_model": "Eureka Dongle",
+  "cast_udn": "5e305387-266b-84a6-639e-50805d1f06c2",
+  "cast_build_revision": "3.72.446070",
+  "build_version": "446070",
+  "cast_http_reachable": true,
+  "adb_connected": true,
+  "adb_mdns_advertised_at_check": false,
+  "android_app_capability": "Android runtime verified; workflow install/launch test pending",
+  "hardware_serial": "26031HFDD67QH7",
+  "android_version": "12",
+  "supported_abis": [
+    "armeabi-v7a",
+    "armeabi"
+  ],
+  "adb_connect_endpoint": "192.168.4.46:5555",
+  "sources": [
+    "http://192.168.4.46:8008/setup/eureka_info",
+    "http://192.168.4.46:8008/ssdp/device-desc.xml",
+    "adb mdns services",
+    "adb devices -l"
+  ],
+  "user_confirmed_google_tv_menus": true,
+  "wireless_debugging_menu": "not found by user",
+  "legacy_adb_5555_probe": "reachable after USB debugging enabled",
+  "android_version_source": "targeted ADB getprop; agrees with Settings reported by Will",
+  "usb_debugging_enabled": "confirmed by Will",
+  "adb_authorization_state": "device; Will authorized the TV prompt",
+  "model": "Chromecast",
+  "device": "sabrina",
+  "product": "sabrina_prod_stable",
+  "android_sdk": 31,
+  "build_fingerprint": "google/sabrina_prod_stable/sabrina:12/STTE.240615.007/12033466:user/release-keys",
+  "transport_type": "legacy-tcp",
+  "coordinator_enrollment": "pending implementation; current host authorized only"
+}

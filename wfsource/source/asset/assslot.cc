@@ -54,18 +54,11 @@ AssetSlot::AssetSlot(int slotIndex, int roomIndex, binistream& roomStream, int m
 
 #if defined(DESIGNER_CHEATS)
 	_videoMemory.ClearSlot(slotIndex);
-#if defined(__PSX__)
-#include <libgte.h>
-#include <libgpu.h>
-#include <libetc.h>
-	FntLoad(960,256);
-	SetDumpFnt(FntOpen(0,12, 320, 200, 0, 1024));
-#endif
 #endif
 
 	// loop through all strings, loading each asset into memory, and add it to the asset map
 	DBSTREAM3( casset << "maxAsset = " << maxAsset << std::endl; )
-	for(int assetIndex=0;assetIndex < maxAsset;assetIndex++)
+	for(int assetIndex=0;assetIndex < maxAsset;++assetIndex)
 	{
 		DBSTREAM3 (casset << "assetIndex = " << assetIndex << std::endl; )
 		assert(roomStream.good());

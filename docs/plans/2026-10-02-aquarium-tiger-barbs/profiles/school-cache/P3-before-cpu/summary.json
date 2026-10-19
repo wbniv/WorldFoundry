@@ -1,0 +1,37 @@
+{
+  "receipt": {
+    "apk": "/tmp/aquarium-school-cache/P3-before-cpu.apk",
+    "apk_sha256": "f771c9c2e9213a758b5389628ef1004a36dfef4d7c2387b1595e25ede307b42e",
+    "protocol": "30 s warmup; 60 s fixed trace (five 12 s segments); 1 run(s); SurfaceFlinger sampled every 0.75 s",
+    "serial": "adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp",
+    "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+    "revision": "09f0eb6b502a4143b38d1d67cc418839b1036fbb"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#4420",
+      "frames": 2430,
+      "refresh_ms": 16.683333,
+      "p50_ms": 33.366634,
+      "p90_ms": 33.366967,
+      "p95_ms": 50.050058,
+      "p99_ms": 50.050146,
+      "worst_ms": 66.733534,
+      "fps": 35.56877882778085,
+      "missed_refresh_percent": 59.91769547325103
+    }
+  ],
+  "median": {
+    "run": 1,
+    "frames": 2430,
+    "refresh_ms": 16.683333,
+    "p50_ms": 33.366634,
+    "p90_ms": 33.366967,
+    "p95_ms": 50.050058,
+    "p99_ms": 50.050146,
+    "worst_ms": 66.733534,
+    "fps": 35.56877882778085,
+    "missed_refresh_percent": 59.91769547325103
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "receipt": {
+    "apk": "/tmp/aquarium-barb-baselines/P1-two-updates-profile.apk",
+    "apk_sha256": "abd893f7d8f016909849d4e486bcdd4d92f3a619ca5f8671e2d3074419818cbf",
+    "protocol": "30 s warmup; 12 s swarm-only diagnostic; 1 run(s); SurfaceFlinger sampled every 0.75 s",
+    "serial": "adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp",
+    "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+    "revision": "77377cb60a5d2ab73e4cad63145d929ab734a12a"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#1456",
+      "frames": 769,
+      "refresh_ms": 16.683333,
+      "p50_ms": 16.683355,
+      "p90_ms": 16.683469,
+      "p95_ms": 16.683532,
+      "p99_ms": 16.683779,
+      "worst_ms": 33.366708,
+      "fps": 59.475927571848246,
+      "missed_refresh_percent": 0.7802340702210663
+    }
+  ],
+  "median": {
+    "run": 1,
+    "frames": 769,
+    "refresh_ms": 16.683333,
+    "p50_ms": 16.683355,
+    "p90_ms": 16.683469,
+    "p95_ms": 16.683532,
+    "p99_ms": 16.683779,
+    "worst_ms": 33.366708,
+    "fps": 59.475927571848246,
+    "missed_refresh_percent": 0.7802340702210663
+  }
+}

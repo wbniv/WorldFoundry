@@ -1,0 +1,38 @@
+{
+  "receipt": {
+    "apk": "/tmp/planted-tank-variants/baseline-cpu.apk",
+    "apk_sha256": "f98e1b7fb21b3466560fe30b49542f1eeee420c0c735301c8968993a21c396cf",
+    "protocol": "30.0 s warmup; 36 s planted-tank trace (wide idle, close idle, close crawl; 12 s each); 1 run(s); SurfaceFlinger sampled every 0.75 s",
+    "serial": "",
+    "menu_index": 5,
+    "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+    "revision": "16a77ebc7d19b792bddbb0eaca2b1f420cd6c858"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#4734",
+      "frames": 1645,
+      "refresh_ms": 16.683333,
+      "p50_ms": 16.683643,
+      "p90_ms": 33.366925,
+      "p95_ms": 33.367111,
+      "p99_ms": 33.367298,
+      "worst_ms": 33.36752,
+      "fps": 40.21258824351079,
+      "missed_refresh_percent": 49.05775075987842
+    }
+  ],
+  "median": {
+    "run": 1,
+    "frames": 1645,
+    "refresh_ms": 16.683333,
+    "p50_ms": 16.683643,
+    "p90_ms": 33.366925,
+    "p95_ms": 33.367111,
+    "p99_ms": 33.367298,
+    "worst_ms": 33.36752,
+    "fps": 40.21258824351079,
+    "missed_refresh_percent": 49.05775075987842
+  }
+}

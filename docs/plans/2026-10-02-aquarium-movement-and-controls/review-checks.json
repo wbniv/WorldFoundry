@@ -1,0 +1,21 @@
+{
+  "status": "STATIC PASS; browser interaction recheck pending for seventh-tab revision",
+  "scope": "Documentation visuals, not engine movement",
+  "seven_player_data": "PASS",
+  "svg_text_y_within_viewbox": "PASS",
+  "previous_six_player_browser_review": {
+    "status": "PASS",
+    "scope": "Documentation visuals, not engine movement",
+    "six_player_tabs": "PASS",
+    "contraction_recovery_coast_and_play_pause": "PASS",
+    "svg_text_within_viewbox": [
+      "six-players.svg",
+      "movement-models.svg",
+      "controls.svg",
+      "poster-layout.svg",
+      "location-map.svg"
+    ],
+    "local_links": "PASS",
+    "browser_javascript_errors": []
+  }
+}

@@ -1,0 +1,27 @@
+PASS: default cd.iff boot reached rendered frame 45
+PASS: task run-marble-3d-astra loaded bundled level 6 with active race HUD
+t=0 waypoint=0 xyz=-0.00,0.00,0.48 race=1 falls=0 time=59.8
+t=1 waypoint=0 xyz=2.32,2.33,0.43 race=1 falls=0 time=58.8
+t=2 waypoint=1 xyz=3.57,5.90,-0.44 race=1 falls=0 time=57.9
+t=3 waypoint=1 xyz=3.98,9.62,-0.85 race=1 falls=0 time=56.8
+t=4 waypoint=3 xyz=4.47,13.14,-1.24 race=1 falls=0 time=55.8
+t=5 waypoint=4 xyz=5.75,16.25,-1.81 race=1 falls=0 time=54.8
+t=6 waypoint=5 xyz=8.23,19.05,-2.01 race=1 falls=0 time=53.8
+t=7 waypoint=5 xyz=12.56,19.08,-2.89 race=1 falls=0 time=52.8
+t=8 waypoint=5 xyz=17.08,19.28,-3.17 race=1 falls=0 time=51.8
+t=9 waypoint=6 xyz=20.46,20.72,-3.19 race=1 falls=0 time=50.8
+t=10 waypoint=6 xyz=23.28,23.46,-3.19 race=1 falls=0 time=49.8
+t=11 waypoint=6 xyz=26.16,26.19,-3.15 race=1 falls=0 time=48.8
+t=12 waypoint=6 xyz=29.16,28.96,-3.80 race=1 falls=0 time=47.8
+t=13 waypoint=6 xyz=31.85,31.87,-3.17 race=1 falls=0 time=46.8
+t=14 waypoint=8 xyz=34.84,32.62,-3.49 race=1 falls=0 time=45.9
+t=15 waypoint=8 xyz=37.70,34.75,-4.05 race=1 falls=0 time=44.9
+t=16 waypoint=9 xyz=38.93,38.29,-4.07 race=1 falls=0 time=43.8
+t=17 waypoint=10 xyz=39.04,41.55,-4.08 race=1 falls=0 time=42.8
+t=18 waypoint=11 xyz=42.12,43.48,-3.93 race=1 falls=0 time=41.8
+t=19 waypoint=12 xyz=45.88,43.66,-3.98 race=1 falls=0 time=40.8
+t=20 waypoint=13 xyz=48.56,45.67,-4.03 race=1 falls=0 time=39.8
+t=21 waypoint=13 xyz=48.88,49.69,-4.05 race=1 falls=0 time=38.8
+t=22 waypoint=14 xyz=48.79,53.93,-4.02 race=1 falls=0 time=37.8
+PASS: bundled Astra completed using directional input only; zero falls; 37.34s remaining
+PASS: no AddressSanitizer or script compilation errors

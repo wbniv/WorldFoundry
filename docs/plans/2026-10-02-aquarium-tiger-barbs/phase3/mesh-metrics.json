@@ -1,0 +1,12 @@
+{
+  "source_vertices": 98,
+  "exported_vertices": 98,
+  "triangles": 172,
+  "materials": 1,
+  "material_flags": "0x16",
+  "mesh_bytes": 4024,
+  "mesh_sha256": "ecbf94bcdc836521f98200f91789fc95575447826d1c99b0797c2305b8f1a8b1",
+  "actor_count": 61,
+  "barb_actors": 29,
+  "barb_meshes_per_actor": 1
+}

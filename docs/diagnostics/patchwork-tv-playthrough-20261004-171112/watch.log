@@ -1,0 +1,9 @@
+J-eb2b4eb96725: accepted {"pool": "chromecast-test", "app": "patchwork", "apk": "51f3eb0ffa799805fc489b12bb9461b3fbca6a8bb2be7b4ca0db8b2f00b4fc7a.apk", "duration": 150.0, "workflow": "check"}
+J-eb2b4eb96725: granted {"device": "chromecast-test-01", "generation": 26}
+J-eb2b4eb96725: phase {"phase": "connecting"}
+J-eb2b4eb96725: phase {"phase": "installing"}
+J-eb2b4eb96725: phase {"phase": "installing"}
+J-eb2b4eb96725: phase {"phase": "launching"}
+J-eb2b4eb96725: phase {"phase": "restoring"}
+J-eb2b4eb96725: completed {"error": null, "health": "ready"}
+J-eb2b4eb96725: completed

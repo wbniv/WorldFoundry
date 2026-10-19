@@ -1,0 +1,18 @@
+;============================================================================
+; mesh.def: created from OADdef.S and mesh.oas DO NOT MODIFY
+;============================================================================
+;##ifndef mesh_HT
+;##define mesh_HT
+	( define OAD_ModelType 0 )	; int32: Minumum: 0 Maximum: 4 Default: 0
+	( define OAD_RenderType 4 )	; int32: Minumum: 0 Maximum: 2 Default: 0
+	( define OAD_HasOrderTable 8 )	; boolean: Default: 0
+	( define OAD_SortPrimitives 12 )	; boolean: Default: 0
+	( define OAD_PrimitiveDepthValue 16 )	; int32: Minumum: 0 Maximum: 3 Default: 3
+	( define OAD_OrderTableSize 20 )	; int32: Minumum: 1 Maximum: 32767 Default: 1
+	( define OAD_OrderTableRangeUpdate 24 )	; int32: Minumum: 0 Maximum: 2 Default: 2
+	( define OAD_OrderTableDepthValue 28 )	; int32: Minumum: 0 Maximum: 2 Default: 2
+	( define OAD_AnimationMailbox 32 )	; int32: Minumum: 0 Maximum: 3999 Default: 1
+	( define OAD_VisibilityMailbox 36 )	; int32: Minumum: 0 Maximum: 3999 Default: DEFAULT_VISIBILITY
+;============================================================================
+;##endif         ; mesh_DEF
+;============================================================================

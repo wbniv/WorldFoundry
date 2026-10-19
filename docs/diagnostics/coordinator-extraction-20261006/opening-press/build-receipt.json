@@ -1,0 +1,14 @@
+{
+  "apk_sha256": "801cebf080a6a3f8561be5eb416a7b174968b0d04d981fb93fae79cac47d81e9",
+  "apk": "/tmp/wf-opening-press-20261006/diagnostic.apk",
+  "source_hashes": {
+    "engine/runtime_property_form.cpp": "6cd5fd284094da68f9962c51b908034ef9775787b12558c99249434bcd1f1939",
+    "engine/runtime_property_host.cpp": "15bfee0d3e6788b299aa01c13ada74479a126af4f43885393050884d8e286f10",
+    "wfsource/source/game/runtime_property_ui.cc": "ec83dd21904b20be2201b47b39dc2aa59950c5dc93ef757136c1ffe6ff34a649",
+    "tests/object_property_core_test.cpp": "16b6bb05f85be9342b9580cbd8e6c48153706db86e181d3a97081f7b7867d2d8"
+  },
+  "ui_capability": {
+    "version": 1,
+    "systemTextInput": true
+  }
+}

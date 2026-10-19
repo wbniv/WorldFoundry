@@ -150,9 +150,9 @@ Path::Rotation( const Scalar time )
 
 
    // kts why is channel rotation data stored as Radians?
-	rotation.SetA( Angle::Radian( Scalar::FromFixed32( _rotationAChannel->Value(time, long(SCALAR_ONE_LS * PI * 2.0)))) );
-	rotation.SetB( Angle::Radian( Scalar::FromFixed32( _rotationBChannel->Value(time, long(SCALAR_ONE_LS * PI * 2.0)))) );
-	rotation.SetC( Angle::Radian( Scalar::FromFixed32( _rotationCChannel->Value(time, long(SCALAR_ONE_LS * PI * 2.0)))) );
+	rotation.SetA( Angle::Radian( Scalar::FromFixed32( _rotationAChannel->Value(time, int32(SCALAR_ONE_LS * PI * 2.0)))) );
+	rotation.SetB( Angle::Radian( Scalar::FromFixed32( _rotationBChannel->Value(time, int32(SCALAR_ONE_LS * PI * 2.0)))) );
+	rotation.SetC( Angle::Radian( Scalar::FromFixed32( _rotationCChannel->Value(time, int32(SCALAR_ONE_LS * PI * 2.0)))) );
 
 	rotation += _baseRot;	// Add offset for relative path or zero for absolute path
 	return rotation;

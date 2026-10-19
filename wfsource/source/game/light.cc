@@ -61,13 +61,9 @@ Light::Light(const SObjectStartupData* startupData)
 
 	if(myOAD->lightType == DIRECTIONAL_LIGHT)
 	{
-//		std::cout << "making directional light" << std::endl;
-//		std::cout << "rgb: " << myRedValue << ',' << myGreenValue << ',' << myBlueValue << std::endl;
-
 	}
 	else
 	{
-//		std::cout << "ambient light constructed" << std::endl;
 //		assert(0);
 	}
 

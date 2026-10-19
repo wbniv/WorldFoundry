@@ -1,0 +1,58 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check-md-links.sh",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check-wf-status-sentences.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/no-stop-suggestions.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(/usr/games/mame *)",
+      "Bash(task md *)",
+      "Bash(task build)",
+      "Bash(task build-cmake-android)",
+      "Bash(task build-apk)",
+      "Bash(wf_game *)",
+      "Bash(./wf_game *)",
+      "Bash(pkill -f wf_game)",
+      "Bash(pkill -9 -f wf_game)",
+      "Bash(pkill -9 -f wf_game *)",
+      "Bash(touch *)",
+      "Bash(strings *)",
+      "Bash(wftools/wf_blender/build_level_binary.sh *)",
+      "Bash(./wftools/wf_blender/build_level_binary.sh *)",
+      "Bash(blender --background --python wflevels/*)",
+      "Bash(python3 tests/cheat_trigger_coin_spawn.py*)",
+      "Bash(awk *)",
+      "Bash(ss *)",
+      "Bash(echo *)",
+      "Bash(env)",
+      "Bash(env | *)",
+      "Bash(bash -c *)"
+    ]
+  }
+}

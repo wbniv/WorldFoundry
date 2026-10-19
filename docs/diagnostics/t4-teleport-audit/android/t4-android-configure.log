@@ -1,0 +1,103 @@
+CMake Deprecation Warning at /home/will/android-sdk-local/ndk/26.2.11394342/build/cmake/android.toolchain.cmake:34 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  /usr/share/cmake-4.2/Modules/CMakeDetermineSystem.cmake:146 (include)
+  CMakeLists.txt:2 (project)
+
+
+CMake Deprecation Warning at /home/will/android-sdk-local/ndk/26.2.11394342/build/cmake/android-legacy.toolchain.cmake:34 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  /home/will/android-sdk-local/ndk/26.2.11394342/build/cmake/android.toolchain.cmake:54 (include)
+  /usr/share/cmake-4.2/Modules/CMakeDetermineSystem.cmake:146 (include)
+  CMakeLists.txt:2 (project)
+
+
+CMake Deprecation Warning at /home/will/android-sdk-local/ndk/26.2.11394342/build/cmake/android.toolchain.cmake:34 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  /tmp/t4-android-armv7/CMakeFiles/4.2.3/CMakeSystem.cmake:6 (include)
+  CMakeLists.txt:2 (project)
+
+
+-- The CXX compiler identification is Clang 17.0.2
+-- The C compiler identification is Clang 17.0.2
+-- Detecting CXX compiler ABI info
+CMake Deprecation Warning at /home/will/android-sdk-local/ndk/26.2.11394342/build/cmake/android.toolchain.cmake:34 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  /tmp/t4-android-armv7/CMakeFiles/4.2.3/CMakeSystem.cmake:6 (include)
+  /tmp/t4-android-armv7/CMakeFiles/CMakeScratch/TryCompile-iCammF/CMakeLists.txt:2 (project)
+
+
+CMake Deprecation Warning at /home/will/android-sdk-local/ndk/26.2.11394342/build/cmake/android-legacy.toolchain.cmake:34 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  /home/will/android-sdk-local/ndk/26.2.11394342/build/cmake/android.toolchain.cmake:54 (include)
+  /tmp/t4-android-armv7/CMakeFiles/4.2.3/CMakeSystem.cmake:6 (include)
+  /tmp/t4-android-armv7/CMakeFiles/CMakeScratch/TryCompile-iCammF/CMakeLists.txt:2 (project)
+
+
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /home/will/android-sdk-local/ndk/26.2.11394342/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting C compiler ABI info
+CMake Deprecation Warning at /home/will/android-sdk-local/ndk/26.2.11394342/build/cmake/android.toolchain.cmake:34 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  /tmp/t4-android-armv7/CMakeFiles/4.2.3/CMakeSystem.cmake:6 (include)
+  /tmp/t4-android-armv7/CMakeFiles/CMakeScratch/TryCompile-PyT1nw/CMakeLists.txt:2 (project)
+
+
+CMake Deprecation Warning at /home/will/android-sdk-local/ndk/26.2.11394342/build/cmake/android-legacy.toolchain.cmake:34 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+Call Stack (most recent call first):
+  /home/will/android-sdk-local/ndk/26.2.11394342/build/cmake/android.toolchain.cmake:54 (include)
+  /tmp/t4-android-armv7/CMakeFiles/4.2.3/CMakeSystem.cmake:6 (include)
+  /tmp/t4-android-armv7/CMakeFiles/CMakeScratch/TryCompile-PyT1nw/CMakeLists.txt:2 (project)
+
+
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /home/will/android-sdk-local/ndk/26.2.11394342/toolchains/llvm/prebuilt/linux-x86_64/bin/clang - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- WF: release engine defines (no asserts, no DBSTREAM)
+-- Configuring done (0.8s)
+-- Generating done (0.1s)
+-- Build files have been written to: /tmp/t4-android-armv7

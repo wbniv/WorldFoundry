@@ -1,0 +1,28 @@
+{
+  "level_sha256": "ab8e9787397ee2122cc67ebf748d7f90cea15fade54874c68a82b82fb6a6f4e5",
+  "wall_ms_per_frame_runs": [
+    11.930838987987954,
+    11.828847703989595,
+    12.12785123597132
+  ],
+  "wall_ms_per_frame_median": 11.930838987987954,
+  "CPU_ms_per_frame": {
+    "update": 2.9304029484029486,
+    "actors": 1.1009522113022112,
+    "director": 1.6596818181818178,
+    "render": 8.565310565110565,
+    "school": 1.2875438574938576,
+    "pose": 0.6415379606879607,
+    "animation": 0.045844840294840296
+  },
+  "counters": {
+    "actor-slots": 241.0,
+    "render-actors": 28.0,
+    "draws": 27.0,
+    "triangles": 1121.76392997543,
+    "actor-mailbox-writes": 126.0
+  },
+  "exported_actors": 41,
+  "population": "dynamic, starting at 3",
+  "note": "Desktop ASAN debug engine, vsync off, fixed 60Hz simulation; 3 subtraction runs (600\u2212100 frames), separate 1200-frame CPU probe. Auto-capture disabled only in fixed-population copies; chase-capture keeps natural feeding and no automatic replenishment. School measures the entire feeding tick, including resident pose; section timings overlap and must not be summed."
+}

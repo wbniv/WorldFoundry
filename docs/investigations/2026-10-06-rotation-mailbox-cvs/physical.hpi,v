@@ -1,0 +1,1310 @@
+head	1.19;
+access;
+symbols
+	start:1.1.1.1 WorldFoundry:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.19
+date	2010.05.21.07.37.22;	author wbniv;	state dead;
+branches;
+next	1.18;
+
+1.18
+date	2003.06.12.01.30.38;	author kts;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	2002.12.12.21.18.30;	author kts;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	2002.12.10.08.20.16;	author kts;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	2002.12.09.01.20.24;	author kts;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	2002.12.08.16.21.36;	author kts;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	2002.12.07.23.56.44;	author kts;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	2002.12.07.23.22.30;	author kts;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	2002.12.07.18.21.55;	author kts;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2002.12.06.09.52.59;	author kts;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2002.12.06.06.25.44;	author kts;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2002.12.05.23.02.24;	author kts;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2002.12.05.07.07.01;	author kts;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2002.12.04.06.02.54;	author kts;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2002.12.03.21.08.42;	author kts;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2002.12.03.19.42.43;	author kts;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2002.10.30.08.31.21;	author kts;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2000.09.14.19.17.00;	author kts;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2000.02.12.09.10.52;	author kts;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2000.02.12.09.10.52;	author kts;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.19
+log
+@development moved to http://github.com/WorldFoundry/WorldFoundry/tree/master/wfsource/
+@
+text
+@//==============================================================================
+// physical.hpi:
+// Copyright ( c ) 1996,97,98,99 World Foundry Group  
+// Part of the World Foundry 3D video game engine/production environment
+// for more information about World Foundry, see www.worldfoundry.org
+//==============================================================================
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// Version 2 as published by the Free Software Foundation
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// or see www.fsf.org
+
+//=============================================================================
+// Description: The PhysicalAttributes class encapsulates
+//
+// Original Author: Kevin T. Seghetti
+//==============================================================================
+
+#include <math/angle.hp>
+#include <oas/levelcon.h>
+#include <math/matrix34.hp>
+
+//==============================================================================
+
+inline void
+PhysicalAttributes::Validate() const
+{
+#if DO_ASSERTIONS
+   //kts write more validation code here
+
+#if defined PHYSICS_ENGINE_ODE
+#elif defined PHYSICS_ENGINE_WF
+// Validate the colBox expansion vector against the PredictedPosition vector
+	Vector3 expansionVector, predictedMotionVector;
+
+	predictedMotionVector = PredictedPosition() - Position();
+
+	Vector3 expminpoint = _colSpace.Min();
+	Vector3 unexpminpoint = _colSpace.UnExpMin();
+	Vector3 expmaxpoint = _colSpace.Max();
+	Vector3 unexpmaxpoint = _colSpace.UnExpMax();
+
+
+	if ( expminpoint.X() == unexpminpoint.X() )
+		expansionVector.SetX( expmaxpoint.X() - unexpmaxpoint.X() );
+	else
+		expansionVector.SetX( expminpoint.X() - unexpminpoint.X() );
+
+	if ( expminpoint.Y() == unexpminpoint.Y() )
+		expansionVector.SetY( expmaxpoint.Y() - unexpmaxpoint.Y() );
+	else
+		expansionVector.SetY( expminpoint.Y() - unexpminpoint.Y() );
+
+	if ( expminpoint.Z() == unexpminpoint.Z() )
+		expansionVector.SetZ( expmaxpoint.Z() - unexpmaxpoint.Z() );
+	else
+		expansionVector.SetZ( expminpoint.Z() - unexpminpoint.Z() );
+
+
+	if ( !(expansionVector == predictedMotionVector) )
+	{
+		DBSTREAM1(
+			cerror << "FATAL ERROR: PhysicalAttributes::Validate() failed." << std::endl;
+			cerror << "predictedMotionVector = " << predictedMotionVector << std::endl;
+			cerror << "      expansionVector = " << expansionVector << std::endl;
+			cerror << *this << std::endl;
+		)
+		assert(0);
+	}
+#else
+#error physics engine not defined! 
+#endif
+
+
+#endif
+}
+
+//==============================================================================
+
+INLINE
+PhysicalAttributes::PhysicalAttributes()
+	: _predictedPosition(Vector3::zero), linVelocity(Vector3::zero), oldLinVelocity(Vector3::zero)
+{
+#if defined(PHYSICAL_INTERNAL_EULER)
+	_position = Vector3::zero;
+#elif defined(PHYSICAL_INTERNAL_MATRIX)
+    _matrix.ConstructIdentity();
+#else
+#error PHYSICAL_INTERNAL not defined
+#endif
+	_hasRunPredictPosition = false;
+	_hasRunUpdate = false;
+
+#if defined PHYSICS_ENGINE_ODE
+   _body = 0;
+   _geom = 0;
+#endif
+}
+
+//==============================================================================
+
+inline bool 
+PhysicalAttributes::HasRunPredictPosition() const
+{
+    return _hasRunPredictPosition;
+    
+}
+
+inline void 
+PhysicalAttributes::HasRunPredictPosition(bool newSetting)
+{
+    _hasRunPredictPosition = newSetting;
+}
+
+
+inline bool 
+PhysicalAttributes::HasRunUpdate() const
+{
+    return _hasRunUpdate;
+    
+}
+
+inline void
+PhysicalAttributes::HasRunUpdate(bool newSetting)
+{
+    _hasRunUpdate = newSetting;
+}
+
+
+//==============================================================================
+
+INLINE
+PhysicalAttributes::PhysicalAttributes(const Vector3& position,
+                      const Euler& euler,
+                      const Vector3& minPoint, const Vector3& maxPoint,
+                      Scalar slopeA,
+                      Scalar slopeB,
+                      Scalar slopeC,
+                      Scalar slopeD) 
+	: _predictedPosition(Vector3::zero), linVelocity(Vector3::zero), oldLinVelocity(Vector3::zero)
+{
+   Construct(position,euler,minPoint,maxPoint,slopeA,slopeB,slopeC,slopeD);
+}
+
+//==============================================================================
+
+INLINE void
+PhysicalAttributes::Construct(const Vector3& position, const Euler& rotation, const Vector3& min, const Vector3& max, 
+								Scalar slopeA,
+								Scalar slopeB,
+								Scalar slopeC,
+								Scalar slopeD)
+{
+	_colSpace.SetBox(min, max);
+	_colSpace.SetSlope( slopeA, slopeB, slopeC, slopeD );
+
+#if defined(PHYSICAL_INTERNAL_EULER)
+	_position = position;
+   _orientation = rotation;
+#elif defined(PHYSICAL_INTERNAL_MATRIX)
+    _matrix.ConstructEuler(rotation,position);
+#else
+#error PHYSICAL_INTERNAL not defined
+#endif
+	_predictedPosition = Position();
+
+#if defined PHYSICS_ENGINE_ODE
+   assert(_body == 0);
+   assert(_geom == 0);
+   assert(odeWorld.Space() != 0);
+
+    _body = ode::dBodyCreate (odeWorld());
+    ode::dBodySetPosition (_body, position[0].AsFloat(),position[1].AsFloat(),position[2].AsFloat());
+
+#if defined(PHYSICAL_INTERNAL_EULER)              
+    Matrix34 temp(_orientation,_position);
+   ode::dBodySetRotation (_body,temp.AsFLoatArray());
+#elif defined(PHYSICAL_INTERNAL_MATRIX)
+    ode::dBodySetRotation (_body,_matrix.AsFLoatArray());
+#else
+#error PHYSICAL_INTERNAL not defined
+#endif
+
+    //dBodySetRotation (_body,R);
+    //dBodySetData (temp->body,(void*) i);
+    Vector3 size = _colSpace.Max()-_colSpace.Min();
+    _geom = dCreateBox (odeWorld.Space(),size.X().AsFloat(),size.Y().AsFloat(),size.Z().AsFloat());
+    ode::dGeomSetBody (_geom,_body);
+    ode::dMass m;
+#define DENSITY (5.0)		// density of all objects
+
+    ode::dMassSetBox (&m,DENSITY,size.X().AsFloat(),size.Y().AsFloat(),size.Z().AsFloat());
+    ode::dBodySetMass (_body,&m);
+#endif
+}
+
+//==============================================================================
+
+INLINE
+PhysicalAttributes::~PhysicalAttributes()
+{
+}
+
+//==============================================================================
+
+INLINE const ColSpace&
+PhysicalAttributes::GetColSpace() const
+{
+	return(_colSpace);
+}
+
+//==============================================================================
+
+INLINE
+const Vector3&
+PhysicalAttributes::Position() const
+{
+#if defined(PHYSICAL_INTERNAL_EULER)
+    return(_position);
+#elif defined(PHYSICAL_INTERNAL_MATRIX)
+    return _matrix[3];
+#else
+#error PHYSICAL_INTERNAL not defined
+#endif
+}
+
+//==============================================================================
+
+INLINE void
+PhysicalAttributes::SetColSpace(const Vector3& minPoint, const Vector3& maxPoint)
+{
+	_colSpace.SetBox(minPoint, maxPoint);
+}
+
+//==============================================================================
+
+INLINE
+const Vector3&
+PhysicalAttributes::PredictedPosition() const
+{
+	assert(sizeof(Vector3) == sizeof(Scalar[3]));
+	return(_predictedPosition);                                                                     // kts kludge
+}
+
+//==============================================================================
+
+INLINE void
+PhysicalAttributes::SetPosition(const Vector3& position)
+{
+#if defined(PHYSICAL_INTERNAL_EULER)
+	_position = position;
+#elif defined(PHYSICAL_INTERNAL_MATRIX)
+    _matrix[3] = position;
+#else
+#error PHYSICAL_INTERNAL not defined
+#endif
+}
+
+//==============================================================================
+
+INLINE void
+PhysicalAttributes::SetPredictedPosition(const Vector3& newPosition)
+{
+	_predictedPosition = newPosition;
+	_colSpace.Expand(_predictedPosition - Position());
+	Validate();
+}
+
+//==============================================================================
+
+INLINE Euler
+PhysicalAttributes::Rotation() const
+{
+#if defined(PHYSICAL_INTERNAL_EULER)
+    return(_orientation);
+#elif defined(PHYSICAL_INTERNAL_MATRIX)
+   return _matrix.AsEuler();
+#else
+#error PHYSICAL_INTERNAL not defined
+#endif
+}
+
+//==============================================================================
+
+INLINE void
+PhysicalAttributes::AddRotation(const Euler rotation)
+{
+#if defined(PHYSICAL_INTERNAL_EULER)
+   _orientation += rotation;
+#elif defined(PHYSICAL_INTERNAL_MATRIX)
+    Matrix34 temp = Matrix34(rotation,Vector3::zero);
+    temp *= _matrix;
+    _matrix = temp;              // kts should we have a premultiply matrix function?
+#else
+#error PHYSICAL_INTERNAL not defined
+#endif
+}
+
+//==============================================================================
+
+INLINE void 
+PhysicalAttributes::SetRotation(const Euler& newRot)
+{
+#if defined(PHYSICAL_INTERNAL_EULER)
+    _orientation = newRot;
+#elif defined(PHYSICAL_INTERNAL_MATRIX)
+    _matrix = Matrix34(newRot,_matrix[3]);
+#else
+#error PHYSICAL_INTERNAL not defined
+#endif
+}
+
+
+INLINE const Matrix34
+PhysicalAttributes::Matrix() const              // returns a 3x4 matrix representing current state
+{
+#if defined(PHYSICAL_INTERNAL_EULER)
+    return Matrix34(_orientation,_position);
+#elif defined(PHYSICAL_INTERNAL_MATRIX)
+    return(_matrix);
+#else
+#error PHYSICAL_INTERNAL not defined
+#endif
+}
+
+INLINE void 
+PhysicalAttributes::SetMatrix(const Matrix34& matrix)
+{
+
+#if defined(PHYSICAL_INTERNAL_EULER)
+   _position = matrix[3];
+   _orientation = matrix.AsEuler();
+#elif defined(PHYSICAL_INTERNAL_MATRIX)
+    _matrix = matrix;
+#else
+#error PHYSICAL_INTERNAL not defined
+#endif
+}
+
+//==============================================================================
+
+#if 0
+INLINE void
+PhysicalAttributes::ApplyToVisualActor()
+{
+        _vactor.Rotate(_orientation);
+        _vactor.PostTranslate(Position());
+//      _orientation.ApplyPre();
+}
+#endif
+
+//==============================================================================
+
+INLINE
+const Vector3
+PhysicalAttributes::GetDeltaPos() const
+{
+    return (_predictedPosition - Position());
+}
+
+//==============================================================================
+// Returns velocity from last frame
+
+INLINE const Vector3&
+PhysicalAttributes::OldLinVelocity() const
+{
+	return oldLinVelocity;
+}
+
+//==============================================================================
+// Only DoneWithPhysics() can call this!
+
+INLINE void
+PhysicalAttributes::SetOldLinVelocity(const Vector3& velocity)
+{
+	oldLinVelocity = velocity;
+}
+
+//==============================================================================
+
+INLINE Vector3
+PhysicalAttributes::MeanVelocity() const
+{
+	return ( (linVelocity + oldLinVelocity) * Scalar::half);
+}
+
+//==============================================================================
+
+INLINE
+const Vector3&
+PhysicalAttributes::LinVelocity() const
+{
+        assert(sizeof(Vector3) == sizeof(Scalar[3]));
+        return(linVelocity);
+}
+
+//==============================================================================
+
+INLINE void
+PhysicalAttributes::SetLinVelocity(const Vector3& newLinVelocity)
+{
+        linVelocity = newLinVelocity;
+}
+
+//==============================================================================
+
+INLINE void
+PhysicalAttributes::AddLinVelocity(const Vector3& addedLinVelocity)
+{
+        linVelocity = linVelocity + addedLinVelocity;
+}
+
+//==============================================================================
+
+#if 0
+INLINE void
+PhysicalAttributes::SetLookAtUp(Vector3 lookAt, Vector3 lookUp)         // only used by camera
+{
+        _vactor.LookUp(lookAt, lookUp,Position());
+}
+#endif
+
+//==============================================================================
+// returns true if any portion of fine collision space overlaps in 3space
+
+INLINE bool
+PhysicalAttributes::CheckCollision(const PhysicalAttributes& other) const
+{
+      return(_colSpace.CheckCollision(Position(), other._colSpace, other.Position()));
+}
+
+//==============================================================================
+// returns true if any portion of coarse collision space overlaps in 3space
+
+INLINE bool
+PhysicalAttributes::CheckCoarseCollision(const PhysicalAttributes& other) const
+{
+      return(_colSpace.CheckCoarseCollision(Position(), other._colSpace, other.Position()));
+}
+
+//==============================================================================
+
+INLINE bool
+PhysicalAttributes::CheckCollision(const Vector3& other) const
+{
+      return(_colSpace.CheckCollision(Position(), other));
+}
+
+//==============================================================================
+
+INLINE bool
+PhysicalAttributes::CheckSurrounds(const PhysicalAttributes& other) const                       // returns true if any portion overlaps in 3space
+{
+	return(_colSpace.CheckSurrounds(Position(), other._colSpace, other.Position()));
+}
+
+//==============================================================================
+// Were these objects inside of each other before either one moved?
+// (Which is to say, do their UNexpanded colboxes intersect?
+
+INLINE bool
+PhysicalAttributes::PremoveCollisionCheck(const PhysicalAttributes& other) const
+{
+    return ( _colSpace.PremoveCollisionCheck(Position(), other._colSpace, other.Position()) );
+}
+
+//==============================================================================
+
+INLINE bool
+PhysicalAttributes::ContainsSlope() const
+{
+	return _colSpace.ContainsSlope();
+}
+
+//==============================================================================
+
+#if 0
+INLINE Scalar
+PhysicalAttributes::EvaluateSlope(const PhysicalAttributes& other, colSide whichSide) const
+{
+	return _colSpace.EvaluateSlope(Position(), other._colSpace, other._predictedPosition, whichSide);
+}
+#endif
+
+//==============================================================================
+
+INLINE Scalar
+PhysicalAttributes::TimeToHitSlope(const PhysicalAttributes& other, Scalar deltaT) const
+{
+	return _colSpace.TimeToHitSlope(Position(), other._colSpace, other.Position(), other.MeanVelocity(), deltaT);
+}
+
+//==============================================================================
+
+INLINE const Vector3&
+PhysicalAttributes::SlopeNormal() const
+{
+	return _colSpace.SlopeNormal();
+}
+
+//==============================================================================
+
+INLINE Vector3
+PhysicalAttributes::Min() const
+{
+        return (_colSpace.Min(Position()));
+}
+
+//==============================================================================
+
+INLINE Vector3
+PhysicalAttributes::Max() const
+{
+        return (_colSpace.Max(Position()));
+}
+
+//==============================================================================
+
+#if defined PHYSICS_ENGINE_ODE
+#include "ode/physical.hpi"
+#elif defined PHYSICS_ENGINE_WF
+#include "wf/physical.hpi"
+#else
+#error physics engine not defined! 
+#endif
+
+//==============================================================================
+@
+
+
+1.18
+log
+@moved hasRunUpdate and hasRunPredictPosition flags from Actor to Physical, some cleanup
+@
+text
+@@
+
+
+1.17
+log
+@added constructor which takes all of the parameters of the Construct function (eventually the Construct function and the default constructor will go away)
+@
+text
+@d99 3
+d107 30
+@
+
+
+1.16
+log
+@more cleanup
+@
+text
+@d107 15
+@
+
+
+1.15
+log
+@more cleanup
+@
+text
+@d39 2
+d78 5
+@
+
+
+1.14
+log
+@more interface cleanup, general code cleanup
+@
+text
+@d36 1
+a36 1
+   ValidateCollisionSpace();
+a37 3
+}
+
+//==============================================================================
+a39 4
+inline void
+PhysicalAttributes::ValidateCollisionSpace() const
+{
+#if DO_ASSERTIONS
+d69 1
+a69 1
+			cerror << "FATAL ERROR: ValidateCollisionSpace() failed." << std::endl;
+d219 1
+a219 1
+	ValidateCollisionSpace();
+d255 1
+a255 1
+PhysicalAttributes::Rotation(const Euler& newRot)
+@
+
+
+1.13
+log
+@removed individual Min & Max axis accesors from colbox & colspace (use Vector3 versions instead)
+@
+text
+@d33 9
+d105 1
+a105 1
+
+a184 1
+
+a196 9
+//INLINE
+//ColBox&
+//PhysicalAttributes::GetWritableColBox()
+//{
+//	return(_coarseColBox);
+//}
+
+//==============================================================================
+
+a243 61
+//
+// INLINE void
+// PhysicalAttributes::SetRotationA(const Angle rotation)
+// {
+// #if defined(PHYSICAL_INTERNAL_EULER)
+//     _orientation.SetA(rotation);
+// #elif defined(PHYSICAL_INTERNAL_MATRIX)
+//     Euler euler(rotattion,Angle::zero,Angle::zero);
+//     Matrix34(euler,
+//     assert(0);
+// #else
+// #error PHYSICAL_INTERNAL not defined
+// #endif
+// }
+//
+// //==============================================================================
+//
+// INLINE void
+// PhysicalAttributes::SetRotationB(const Angle rotation)
+// {
+// #if defined(PHYSICAL_INTERNAL_EULER)
+//     _orientation.SetB(rotation);
+// #elif defined(PHYSICAL_INTERNAL_MATRIX)
+//     assert(0);
+// #else
+// #error PHYSICAL_INTERNAL not defined
+// #endif
+// }
+//
+// //==============================================================================
+//
+// INLINE void
+// PhysicalAttributes::SetRotationC(const Angle rotation)
+// {
+// #if defined(PHYSICAL_INTERNAL_EULER)
+//     _orientation.SetC(rotation);
+// #elif defined(PHYSICAL_INTERNAL_MATRIX)
+//     assert(0);
+// #else
+// #error PHYSICAL_INTERNAL not defined
+// #endif
+// }
+//
+//==============================================================================
+
+INLINE void
+PhysicalAttributes::AddRotationA(const Angle rotation)
+{
+#if defined(PHYSICAL_INTERNAL_EULER)
+    _orientation.SetA(_orientation.GetA() + rotation);
+#elif defined(PHYSICAL_INTERNAL_MATRIX)
+    Euler euler(rotation,Angle::zero,Angle::zero);
+    Matrix34 temp = Matrix34(euler,Vector3::zero);
+    temp *= _matrix;
+    _matrix = temp;              // kts should we have a premultiply matrix function?
+#else
+#error PHYSICAL_INTERNAL not defined
+#endif
+}
+
+//==============================================================================
+d246 1
+a246 1
+PhysicalAttributes::AddRotationB(const Angle rotation)
+d249 1
+a249 1
+   _orientation.SetB(_orientation.GetB() + rotation);
+d251 1
+a251 2
+    Euler euler(Angle::zero,rotation,Angle::zero);
+    Matrix34 temp = Matrix34(euler,Vector3::zero);
+a253 2
+
+    _matrix *= Matrix34(euler,Vector3::zero);
+a260 15
+INLINE void
+PhysicalAttributes::AddRotationC(const Angle rotation)
+{
+#if defined(PHYSICAL_INTERNAL_EULER)
+   _orientation.SetC(_orientation.GetC() + rotation);
+#elif defined(PHYSICAL_INTERNAL_MATRIX)
+    Euler euler(Angle::zero,Angle::zero,rotation);
+    Matrix34 temp = Matrix34(euler,Vector3::zero);
+    temp *= _matrix;
+    _matrix = temp;              // kts should we have a premultiply matrix function?
+#else
+#error PHYSICAL_INTERNAL not defined
+#endif
+}
+
+a297 1
+
+d323 1
+d332 1
+a367 24
+PhysicalAttributes::SetLinVelocityX(const Scalar& newLinVelocity)
+{
+        linVelocity.SetX(newLinVelocity);
+}
+
+//==============================================================================
+
+INLINE void
+PhysicalAttributes::SetLinVelocityY(const Scalar& newLinVelocity)
+{
+        linVelocity.SetY(newLinVelocity);
+}
+
+//==============================================================================
+
+INLINE void
+PhysicalAttributes::SetLinVelocityZ(const Scalar& newLinVelocity)
+{
+        linVelocity.SetZ(newLinVelocity);
+}
+
+//==============================================================================
+
+INLINE void
+a374 24
+INLINE void
+PhysicalAttributes::AddLinVelocityX(const Scalar& addedLinVelocity)
+{
+        linVelocity.SetX(linVelocity.X() + addedLinVelocity);
+}
+
+//==============================================================================
+
+INLINE void
+PhysicalAttributes::AddLinVelocityY(const Scalar& addedLinVelocity)
+{
+        linVelocity.SetY(linVelocity.Y() + addedLinVelocity);
+}
+
+//==============================================================================
+
+INLINE void
+PhysicalAttributes::AddLinVelocityZ(const Scalar& addedLinVelocity)
+{
+        linVelocity.SetZ(linVelocity.Z() + addedLinVelocity);
+}
+
+//==============================================================================
+
+d385 1
+d394 1
+d420 1
+@
+
+
+1.12
+log
+@added Min & Max functions which return Vector3 (moving toward removing individual axis accessors
+@
+text
+@a602 43
+INLINE Scalar
+PhysicalAttributes::MinX() const
+{
+        return (_colSpace.MinX(Position()));
+}
+
+//==============================================================================
+INLINE Scalar
+PhysicalAttributes::MinY() const
+{
+        return (_colSpace.MinY(Position()));
+}
+
+//==============================================================================
+INLINE Scalar
+PhysicalAttributes::MinZ() const
+{
+        return (_colSpace.MinZ(Position()));
+}
+
+//==============================================================================
+INLINE Scalar
+PhysicalAttributes::MaxX() const
+{
+        return (_colSpace.MaxX(Position()));
+}
+
+//==============================================================================
+INLINE Scalar
+PhysicalAttributes::MaxY() const
+{
+        return (_colSpace.MaxY(Position()));
+}
+
+//==============================================================================
+INLINE Scalar
+PhysicalAttributes::MaxZ() const
+{
+        return (_colSpace.MaxZ(Position()));
+}
+
+//==============================================================================
+
+@
+
+
+1.11
+log
+@first creating of ode & wf phyiscs engine specific sub directories
+@
+text
+@d587 16
+@
+
+
+1.10
+log
+@still working towards ODE integration
+@
+text
+@d630 9
+@
+
+
+1.9
+log
+@more progress integrating ODE
+@
+text
+@a97 1
+#if defined PHYSICS_ENGINE_ODE
+d99 5
+a103 1
+PhysicalAttributes::Construct(const Vector3& position, const Euler& rotation, const Vector3& min, const Vector3& max, ode::dSpaceID space)
+d105 2
+a106 2
+   assert(_body == 0);
+   assert(_geom == 0);
+a107 1
+   _colSpace.SetBox(min,max);
+d110 1
+d116 6
+a134 1
+
+d138 1
+a138 1
+    _geom = dCreateBox (space,size.X().AsFloat(),size.Y().AsFloat(),size.Z().AsFloat());
+d145 1
+a146 2
+#endif
+
+a176 19
+}
+
+//==============================================================================
+
+INLINE void
+PhysicalAttributes::SetColSpace(const struct _CollisionRectOnDisk* cod,
+								const Vector3& position,
+								Scalar slopeA,
+								Scalar slopeB,
+								Scalar slopeC,
+								Scalar slopeD)
+{
+	_colSpace.SetBox(
+		Vector3( Scalar::FromFixed32( cod->minX ), Scalar::FromFixed32( cod->minY ), Scalar::FromFixed32( cod->minZ ) ),
+		Vector3( Scalar::FromFixed32( cod->maxX ), Scalar::FromFixed32( cod->maxY ), Scalar::FromFixed32( cod->maxZ ) ) );
+	_colSpace.SetSlope( slopeA, slopeB, slopeC, slopeD );
+
+   SetPosition(position);
+	_predictedPosition = Position();
+@
+
+
+1.8
+log
+@more ODE integration work
+@
+text
+@d79 18
+d99 2
+a100 3
+INLINE 
+PhysicalAttributes::PhysicalAttributes(const Vector3& position, const Euler& rotation, const Vector3& min, const Vector3& max)
+	: _predictedPosition(position), _colSpace(min,max), linVelocity(Vector3::zero), oldLinVelocity(Vector3::zero)
+d102 4
+d114 2
+a115 1
+}
+d117 3
+a119 7
+#else
+INLINE
+PhysicalAttributes::PhysicalAttributes()
+	: _predictedPosition(Vector3::zero), linVelocity(Vector3::zero), oldLinVelocity(Vector3::zero)
+{
+#if defined(PHYSICAL_INTERNAL_EULER)
+	_position = Vector3::zero;
+d121 1
+a121 1
+    _matrix.ConstructIdentity();
+d126 11
+a140 3
+
+
+
+a377 1
+#if defined(PHYSICAL_INTERNAL_MATRIX)
+d381 5
+d387 4
+a391 1
+#endif
+d641 1
+@
+
+
+1.7
+log
+@fixed AddRotation* (was post-multiplying, need to pre-multiply)
+@
+text
+@d79 17
+d109 5
+@
+
+
+1.6
+log
+@removed apostrophe in #errror since gnu doesn't like it, removed external SetRotation functions, so AddRotation functions changed to use internal variables
+@
+text
+@d261 3
+a263 1
+    _matrix *= Matrix34(euler,Vector3::zero);
+d278 4
+d297 3
+a299 1
+    _matrix *= Matrix34(euler,Vector3::zero);
+@
+
+
+1.5
+log
+@* started on a switch which changes PhysicalAttributes' internal storage format from
+Euler/Vector3 to Matrix34 (since ODE uses a matrix as its native format). There are several
+issues which need to be resolved, the biggest is we sometimes read the Euler angles back, which
+cannot be done reliably from a matrix
+*Added a Matrix function which converts the PhysicalAttributes internal representation (whichever
+it is) to a Matrix34
+
+*some compartmentalization, for example, PhysicalAttributes no longer has individual functions
+to retreive the 3 rotation components, it just has an Euler accessor, which the caller can then
+retreive the rotation components from
+
+*removed redundant accesor orientation from PhysicalAttributes (use Rotation instead)
+@
+text
+@d29 1
+d196 1
+a196 1
+INLINE const Euler&
+d202 1
+a202 1
+    assert(0);          // kts write code to convert from matrix back to euler
+a205 1
+
+d258 1
+a258 1
+    SetRotationA(Rotation().GetA() + rotation);
+d273 1
+a273 1
+    SetRotationB(Rotation().GetB() + rotation);
+d288 1
+a288 1
+    SetRotationC(Rotation().GetC() + rotation);
+d310 1
+a310 1
+INLINE const Matrix34& 
+d314 1
+a314 1
+    return  Matrix34(orientation,position);
+@
+
+
+1.4
+log
+@
+*messaging system now passes any array of bytes instead of a long (so that floats and doubles can be passed)
+*preliminary work on intergrating ODE, source/physics test program uses our renderer and ODEs physics
+*more optimizations turned on for release build
+
+*added support for float/double based Scalars, basically works, except physics occasionally asserts
+(this is probably due to differences in rounding compared to fixed point, but I don't care, I just
+want to replace it with ODE anyway). A lot of stuff was touched to do this, including channels
+(their on disk storage is fixed, but their accessors need to return float (if built for float), also
+touched path code, joystick recorder, mailbox interface, .. Many places where integers were being
+passing into Scalar constructors without a proper adapter
+
+*standardized common block names and created accessor functions for common block entries (since
+a cast or conversion is now requred to make them Scalars)
+
+Removed Angle::AsScalar, it was the same as AsRevolution
+
+added more validation to math classes, added some tests to mathtest
+added Scalar::AsText (used by scripting languages)
+
+added std:: to c++ lib references
+@
+text
+@d80 1
+a80 1
+	: _position(Vector3::zero), _predictedPosition(Vector3::zero), linVelocity(Vector3::zero), oldLinVelocity(Vector3::zero)
+d82 8
+d113 8
+a120 1
+	return(_position);
+d137 2
+a138 1
+	_position = position;
+d174 1
+d176 5
+d198 1
+d200 5
+a204 3
+}
+
+//==============================================================================
+a205 12
+INLINE const Angle
+PhysicalAttributes::RotationA() const
+{
+    return(_orientation.GetA());
+}
+
+//==============================================================================
+
+INLINE const Angle
+PhysicalAttributes::RotationB() const
+{
+    return(_orientation.GetB());
+d209 43
+a251 7
+
+INLINE const Angle
+PhysicalAttributes::RotationC() const
+{
+    return(_orientation.GetC());
+}
+
+d255 1
+a255 1
+PhysicalAttributes::SetRotationA(const Angle rotation)
+d257 8
+a264 1
+	_orientation.SetA(rotation);
+d270 1
+a270 1
+PhysicalAttributes::SetRotationB(const Angle rotation)
+d272 8
+a279 1
+    _orientation.SetB(rotation);
+d285 1
+a285 1
+PhysicalAttributes::SetRotationC(const Angle rotation)
+d287 8
+a294 1
+    _orientation.SetC(rotation);
+d297 2
+a298 4
+//==============================================================================
+
+INLINE void
+PhysicalAttributes::AddRotationA(const Angle rotation)
+d300 7
+a306 1
+    _orientation.SetA(_orientation.GetA() + rotation);
+a308 1
+//==============================================================================
+d310 2
+a311 2
+INLINE void
+PhysicalAttributes::AddRotationB(const Angle rotation)
+d313 7
+a319 1
+    _orientation.SetB(_orientation.GetB() + rotation);
+d322 3
+a324 4
+//==============================================================================
+
+INLINE void
+PhysicalAttributes::AddRotationC(const Angle rotation)
+d326 1
+a326 1
+    _orientation.SetC(_orientation.GetC() + rotation);
+d328 1
+d337 1
+a337 1
+        _vactor.PostTranslate(_position);
+d348 1
+a348 1
+        return (_predictedPosition - _position);
+d464 1
+a464 1
+      return(_colSpace.CheckCollision(_position, other._colSpace, other._position));
+d472 1
+a472 1
+      return(_colSpace.CheckCoarseCollision(_position, other._colSpace, other._position));
+d480 1
+a480 1
+      return(_colSpace.CheckCollision(_position, other));
+d488 1
+a488 1
+	return(_colSpace.CheckSurrounds(_position, other._colSpace, other._position));
+d497 1
+a497 1
+    return ( _colSpace.PremoveCollisionCheck(_position, other._colSpace, other._position) );
+d514 1
+a514 1
+	return _colSpace.EvaluateSlope(_position, other._colSpace, other._predictedPosition, whichSide);
+d523 1
+a523 1
+	return _colSpace.TimeToHitSlope(_position, other._colSpace, other._position, other.MeanVelocity(), deltaT);
+@
+
+
+1.3
+log
+@moved path.* from source/game to source/anim
+@
+text
+@d119 2
+a120 2
+		Vector3( Scalar( cod->minX ), Scalar( cod->minY ), Scalar( cod->minZ ) ),
+		Vector3( Scalar( cod->maxX ), Scalar( cod->maxY ), Scalar( cod->maxZ ) ) );
+@
+
+
+1.2
+log
+@removed using namespace std, all standard library references now have std:: in front of them
+@
+text
+@d28 1
+a28 2
+#pragma message ("KTS " __FILE__ ": move levelcon.h out of game directory")
+#include <game/levelcon.h>
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d67 4
+a70 4
+			cerror << "FATAL ERROR: ValidateCollisionSpace() failed." << endl;
+			cerror << "predictedMotionVector = " << predictedMotionVector << endl;
+			cerror << "      expansionVector = " << expansionVector << endl;
+			cerror << *this << endl;
+@
+
+
+1.1.1.1
+log
+@First source add
+@
+text
+@@

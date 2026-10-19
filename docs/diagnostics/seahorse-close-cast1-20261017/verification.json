@@ -1,0 +1,31 @@
+{
+  "accepted_close_release_runs": 24,
+  "accepted_close_cpu_runs": 8,
+  "accepted_wide_controls": 4,
+  "rejected_runs": 0,
+  "verified_sessions": 9,
+  "thermal_statuses": [
+    0
+  ],
+  "observed_seconds_range": [
+    59.876564099,
+    60.310330989
+  ],
+  "cpu_windows_per_case": {
+    "close-idle": {
+      "0": 11,
+      "1": 11,
+      "2": 11,
+      "6": 11
+    },
+    "close-crawl": {
+      "0": 11,
+      "1": 11,
+      "2": 10,
+      "6": 11
+    }
+  },
+  "all_36_run_captures_visually_reviewed": true,
+  "compressed_reanalysis": "byte-identical comparison.json after gzip archival",
+  "engine_source_modified": false
+}

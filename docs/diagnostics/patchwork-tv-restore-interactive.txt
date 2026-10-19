@@ -1,0 +1,11 @@
+Accepted J-59b39dae068a: queued; check
+Follow: task chromecast:watch JOB=J-59b39dae068a
+J-59b39dae068a: accepted {"pool": "chromecast-test", "app": "patchwork", "apk": "46f411783c6458b40516677fa4760db527a9c35dca2798df3002fe6ec518e98f.apk", "duration": 10.0, "workflow": "check"}
+J-59b39dae068a: granted {"device": "chromecast-test-01", "generation": 20}
+J-59b39dae068a: phase {"phase": "connecting"}
+J-59b39dae068a: phase {"phase": "installing"}
+J-59b39dae068a: phase {"phase": "installing"}
+J-59b39dae068a: phase {"phase": "launching"}
+J-59b39dae068a: phase {"phase": "restoring"}
+J-59b39dae068a: completed {"error": null, "health": "ready"}
+J-59b39dae068a: completed

@@ -28,7 +28,7 @@
 #define STACK_CALL_MAX_DEPTH	1024
 
 static int call_depth = 0;
-char* callStack[ STACK_CALL_MAX_DEPTH ];
+const char* callStack[ STACK_CALL_MAX_DEPTH ];
 
 //==============================================================================
 
@@ -65,19 +65,19 @@ printCallStack( void )
 	{
 		int i;
 
-    	puts( "цддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд╢" );
-    	puts( "ЁCall stack                                                                   Ё" );
+    	puts( "О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫д╢" );
+    	puts( "О©╫Call stack                                                                   О©╫" );
 		for ( i=call_depth-1; i>=0; --i )
 		{
 			char szRoutineName[ 256 ];
-			char* pRoutineName = callStack[ i ];
+			const char* pRoutineName = callStack[ i ];
 
 			strncpy( szRoutineName, pRoutineName-*pRoutineName, *pRoutineName );
 			szRoutineName[ *pRoutineName ] = '\0';
 
-			printf( "Ё%2d  %s()%*sЁ\n", i, szRoutineName, 70-strlen( szRoutineName ), "" );
+			printf( "О©╫%2d  %s()%*sО©╫\n", i, szRoutineName, 70-strlen( szRoutineName ), "" );
 		}
-    	puts( "юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды" );
+    	puts( "О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫" );
 	}
 }
 

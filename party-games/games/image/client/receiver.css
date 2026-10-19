@@ -1,0 +1,205 @@
+/* Image-game receiver — TV UI, scoped via #game-root. */
+
+#game-root .stage-panel[hidden] { display: none; }
+#game-root .phase-label {
+  font-size: 2vh;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-bottom: 1vh;
+}
+#game-root .hint {
+  opacity: 0.5;
+  font-size: 1.8vh;
+  margin-top: 2vh;
+  font-style: italic;
+}
+
+/* lobby player list */
+#game-root #im-player-list {
+  list-style: none;
+  font-size: 2.4vh;
+}
+#game-root #im-player-list li {
+  padding: 0.5vh 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+#game-root #im-player-list .empty {
+  opacity: 0.35;
+  font-style: italic;
+  border-bottom: none;
+}
+
+/* ───── image panels ─────────────────────────────────────────────────── */
+#game-root .image-display {
+  font-size: 32vh;
+  line-height: 1;
+  text-align: center;
+  margin: 2vh auto;
+  user-select: none;
+}
+/* New distractor flashes in briefly so players see the image changed. */
+#game-root .image-flash { animation: im-img-flash 0.12s ease-out; }
+@keyframes im-img-flash {
+  from { opacity: 0.3; transform: scale(0.85); }
+  to   { opacity: 1;   transform: scale(1); }
+}
+/* CLEAR sub-phase of REVEAL — brief blank to clear short-term memory. */
+#game-root .image-display.cleared { opacity: 0; }
+
+/* REVEAL countdown bar — shrinks over showMs. */
+#game-root .reveal-bar {
+  width: 60vw;
+  height: 2vh;
+  margin: 2vh auto 0;
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+#game-root #im-reveal-bar-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #86efac, #facc15);
+  transform-origin: left center;
+  transform: scaleX(1);
+  border-radius: 999px;
+}
+
+/* ───── round results (shared shape with reaction's scoped styles) ──── */
+#game-root #im-round-ranks,
+#game-root #im-scoreboard,
+#game-root #im-final-scoreboard {
+  list-style: none;
+  font-size: 2.3vh;
+  line-height: 1.6;
+  margin-top: 1vh;
+  padding-left: 0;
+}
+#game-root #im-round-ranks li {
+  padding: 0.6vh 0.5vw;
+  display: grid;
+  grid-template-columns: 1fr auto 12vw;
+  gap: 1.5vw;
+  align-items: baseline;
+  opacity: 0;
+  transform: translateY(1vh);
+  animation: im-rank-enter 0.35s ease-out forwards;
+  animation-delay: calc(var(--i, 0) * 150ms);
+}
+#game-root #im-round-ranks li.scored .rank-badge {
+  color: #86efac;
+  font-weight: 700;
+  animation: im-badge-pop 0.4s ease-out;
+  animation-delay: calc((var(--i, 0) * 150ms) + 200ms);
+  display: inline-block;
+}
+#game-root #im-round-ranks li.locked-out { opacity: 0.55; }
+#game-root #im-round-ranks li.locked-out .rank-badge { color: #fca5a5; }
+#game-root #im-round-ranks .rank-name { text-align: left; }
+#game-root #im-round-ranks .rank-badge {
+  text-align: right;
+  min-width: 4vw;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+#game-root #im-round-ranks .rank-reaction {
+  text-align: right;
+  opacity: 0.55;
+  font-size: 1.9vh;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@keyframes im-rank-enter {
+  from { opacity: 0; transform: translateY(1.5vh); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes im-badge-pop {
+  0%   { transform: scale(1);    filter: none; }
+  40%  { transform: scale(1.35); filter: drop-shadow(0 0 1.5vh rgba(134, 239, 172, 0.6)); }
+  100% { transform: scale(1);    filter: none; }
+}
+
+#game-root #im-scoreboard  li,
+#game-root #im-final-scoreboard li { padding: 0.3vh 0; opacity: 0.85; }
+#game-root #im-scoreboard  li.changed {
+  opacity: 1;
+  color: #fef3c7;
+  animation: im-score-update 0.6s ease-out;
+  animation-delay: 1000ms;
+  animation-fill-mode: backwards;
+}
+@keyframes im-score-update {
+  0%   { background: rgba(250, 204, 21, 0.2); transform: translateX(-0.6vw); }
+  40%  { background: rgba(250, 204, 21, 0.15); }
+  100% { background: transparent; transform: translateX(0); }
+}
+
+#game-root .winner {
+  font-size: 6vh;
+  font-weight: 700;
+  margin: 2vh 0 3vh;
+  color: #60a5fa;
+}
+
+#game-root .final-scoreboard {
+  list-style: none;
+  counter-reset: rank;
+  padding: 0;
+  margin: 2vh 0;
+  max-width: 70vw;
+}
+#game-root .final-scoreboard li {
+  counter-increment: rank;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2vw;
+  padding: 1vh 2vw;
+  margin-bottom: 0.8vh;
+  border-radius: 1vh;
+  background: rgba(255,255,255,0.03);
+  font-size: 2.6vh;
+}
+#game-root .final-scoreboard li::before {
+  content: counter(rank);
+  min-width: 2.5vw;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  opacity: 0.4;
+  font-size: 2vh;
+}
+#game-root .final-scoreboard li .name { flex: 1; }
+#game-root .final-scoreboard li .pts  { font-weight: 600; opacity: 0.85; }
+#game-root .final-scoreboard li.winner {
+  background: linear-gradient(90deg, rgba(96, 165, 250, 0.15), transparent);
+  color: #60a5fa;
+}
+#game-root .final-scoreboard li.winner::before {
+  content: '🥇';
+  font-size: 2.6vh;
+}
+
+/* Live commit indicator — shared look with reaction but scoped to this game. */
+#game-root .commit-indicator {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1vh 1.5vw;
+  margin-top: 3vh;
+  padding: 0;
+  min-height: 4vh;
+}
+#game-root .commit-indicator li {
+  padding: 0.6vh 1.5vw;
+  border-radius: 999px;
+  font-size: 2vh;
+  background: rgba(255,255,255,0.06);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6vw;
+  animation: im-commit-pop 0.35s ease-out;
+}
+#game-root .commit-indicator li.pressed { color: #86efac; }
+#game-root .commit-indicator li.lockedOut { color: #fca5a5; opacity: 0.8; }
+@keyframes im-commit-pop {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}

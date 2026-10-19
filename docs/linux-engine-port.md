@@ -10,13 +10,13 @@ renders geometry with moving objects. Clean exit on quit.
 ## Build
 
 ```bash
-cd wftools/wf_engine
+cd engine
 bash build_game.sh
 ```
 
 Compiles all engine source under `wfsource/source/`, skipping test files, Windows MFC
 dialogs, and unreachable platform code. Scripting and platform stubs are in
-`wftools/wf_viewer/stubs/`.
+`wftools/engine/stubs/`.
 
 ### Key compile flags
 
@@ -38,7 +38,7 @@ dialogs, and unreachable platform code. Scripting and platform stubs are in
 
 ### Isolated GLU library
 
-`wftools/wf_engine/libs/libGLU.so.1` — copied from container overlay to avoid
+`engine/libs/libGLU.so.1` — copied from container overlay to avoid
 conflicting libc dependencies at runtime.
 
 ---
@@ -47,7 +47,7 @@ conflicting libc dependencies at runtime.
 
 ```bash
 cd wfsource/source/game
-LD_LIBRARY_PATH=../../../wftools/wf_engine/libs DISPLAY=:0 ../../../wftools/wf_engine/wf_game
+LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 ../../../engine/wf_game
 ```
 
 The `-l N` command-line flag selects a level (0–6) overriding the default (4 = snowgoons).
@@ -151,7 +151,7 @@ until scripting is re-enabled.
 ## Scripting
 
 Tcl scripting is fully stubbed out (intentional — will be replaced with a non-Tcl system).
-See `wftools/wf_viewer/stubs/scripting_stub.cc`.
+See `wftools/engine/stubs/scripting_stub.cc`.
 
 Consequences of disabled scripting:
 - Player input forwarding (`write-mailbox $INDEXOF_INPUT ...`) doesn't run — player

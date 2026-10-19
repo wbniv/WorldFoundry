@@ -1,0 +1,9 @@
+{
+  "apk": "/tmp/planted-tank-variants/density.apk",
+  "apk_sha256": "78e73a30744cd38c968b1e92971b09d283a8379bdd2aab5dd6ac9e893583391c",
+  "protocol": "30.0 s warmup; 36 s planted-tank trace (wide idle, close idle, close crawl; 12 s each); 3 run(s); SurfaceFlinger sampled every 0.75 s",
+  "serial": "",
+  "menu_index": 5,
+  "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+  "revision": "16a77ebc7d19b792bddbb0eaca2b1f420cd6c858"
+}

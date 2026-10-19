@@ -1,0 +1,12 @@
+{
+  "name": "party-games-worst-take-wins",
+  "version": "0.1.0",
+  "private": true,
+  "main": "worst-take-wins.js",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "id": "B-edf562de0055",
+  "owner": "50834354a173f73472469f04",
+  "targets": [
+    "chromecast-test-01",
+    "chromecast-test-02"
+  ],
+  "created": 1791167899.5157206,
+  "jobs": [
+    {
+      "id": "J-ff0063bc7a64",
+      "owner": "50834354a173f73472469f04",
+      "accepted": 1791167899.5159297,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "workflow": "variant-benchmark",
+        "app": "aquarium",
+        "scene": "lionfish",
+        "apk": "4777c1e894535564456d03dc7d0e8d0df1ac13272b6a7c53635328b6e7e427ed.apk",
+        "restore_apk": "4777c1e894535564456d03dc7d0e8d0df1ac13272b6a7c53635328b6e7e427ed.apk",
+        "variants": [
+          {
+            "label": "optimized-0",
+            "apk": "f47d4af73a6e79cb3f2d0450d72958a01b1b0d3a1418413e5640e5f94ecfc6f4.apk",
+            "runs": 3,
+            "warmup": 15
+          },
+          {
+            "label": "optimized-0-cpu",
+            "apk": "2d4ac68fb01f4b67201b49fb67669c12d28ed0cd04b7eaa2918c38085bb63220.apk",
+            "runs": 1,
+            "warmup": 5
+          },
+          {
+            "label": "optimized-3",
+            "apk": "ebccc3e38d712c44a1ef806046d35db1875328767fa29a411a99f2d99bdca6f6.apk",
+            "runs": 3,
+            "warmup": 15
+          },
+          {
+            "label": "optimized-3-cpu",
+            "apk": "79e3c0fd4f60bc952963dc77bdc0635f29f6300a7ea392ea6ba9e2993f66cea7.apk",
+            "runs": 1,
+            "warmup": 5
+          }
+        ],
+        "trace": "idle",
+        "duration": 30,
+        "device": "chromecast-test-01"
+      },
+      "device": "chromecast-test-01",
+      "generation": 87,
+      "cancel": 0,
+      "error": null,
+      "started": 1791167899.5931494,
+      "finished": 1791168439.8578324,
+      "worker_pid": 603089,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-01"
+    },
+    {
+      "id": "J-f75b3a9c25e6",
+      "owner": "50834354a173f73472469f04",
+      "accepted": 1791167899.5161743,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "workflow": "variant-benchmark",
+        "app": "aquarium",
+        "scene": "lionfish",
+        "apk": "4777c1e894535564456d03dc7d0e8d0df1ac13272b6a7c53635328b6e7e427ed.apk",
+        "restore_apk": "4777c1e894535564456d03dc7d0e8d0df1ac13272b6a7c53635328b6e7e427ed.apk",
+        "variants": [
+          {
+            "label": "optimized-0",
+            "apk": "f47d4af73a6e79cb3f2d0450d72958a01b1b0d3a1418413e5640e5f94ecfc6f4.apk",
+            "runs": 3,
+            "warmup": 15
+          },
+          {
+            "label": "optimized-0-cpu",
+            "apk": "2d4ac68fb01f4b67201b49fb67669c12d28ed0cd04b7eaa2918c38085bb63220.apk",
+            "runs": 1,
+            "warmup": 5
+          },
+          {
+            "label": "optimized-3",
+            "apk": "ebccc3e38d712c44a1ef806046d35db1875328767fa29a411a99f2d99bdca6f6.apk",
+            "runs": 3,
+            "warmup": 15
+          },
+          {
+            "label": "optimized-3-cpu",
+            "apk": "79e3c0fd4f60bc952963dc77bdc0635f29f6300a7ea392ea6ba9e2993f66cea7.apk",
+            "runs": 1,
+            "warmup": 5
+          }
+        ],
+        "trace": "idle",
+        "duration": 30,
+        "device": "chromecast-test-02"
+      },
+      "device": "chromecast-test-02",
+      "generation": 42,
+      "cancel": 0,
+      "error": null,
+      "started": 1791167899.5934544,
+      "finished": 1791168414.0563247,
+      "worker_pid": 603091,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-02"
+    }
+  ],
+  "state": "completed"
+}

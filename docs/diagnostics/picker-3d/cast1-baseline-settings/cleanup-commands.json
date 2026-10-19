@@ -1,0 +1,56 @@
+[
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-28f5619ea275-keyhold.jar"
+    ],
+    "start": 1792204155.4469638,
+    "end": 1792204155.669937,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test ! -e /data/local/tmp/wf-J-28f5619ea275-keyhold.jar; echo wf-status=$?"
+    ],
+    "start": 1792204155.6708682,
+    "end": 1792204155.801721,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.wf_game.baseline"
+    ],
+    "start": 1792204155.8220725,
+    "end": 1792204156.0956335,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1792204156.0970674,
+    "end": 1792204156.3528793,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792204156.3537838,
+    "end": 1792204156.519257,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792204156.5214484,
+    "end": 1792204156.8428557,
+    "returncode": 0
+  }
+]

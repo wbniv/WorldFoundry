@@ -69,19 +69,12 @@
 #define TEST_ITEM	1
 #define TEST_MEMPOOL	1
 #define TEST_DISKFILE	1
-#if defined( DO_MULTITASKING )
-#	define TEST_TASKER	1
-//#	define TEST_TIMER	1
-#	define TEST_TIMER	0
-#endif
 #else
 #define TEST_LIST	0
 #define TEST_JOYSTICK	0
-#define TEST_TASKER	0
 #define TEST_SIGNAL	0
 #define TEST_MESSAGE	0
 #define TEST_GENERAL	0
-#define TEST_TIMER	0
 #define TEST_ITEM	0
 #define TEST_MEMPOOL	0
 #define TEST_DISKFILE	0
@@ -146,6 +139,18 @@ enum
 	PRIORITY_LOWEST = -1000			// only runs when even background tasks are waiting
 };
 
+//=============================================================================
+// Item handle macros — no-ops when DO_VALIDATION=0 (item.h was removed)
+#if !DO_VALIDATION
+#define NULLITEM NULL
+#define ITEMCREATE(ptr,type) (type*)(ptr)
+#define ITEMRETRIEVE(item,type) (type*)(item)
+#define ITEMDESTROY(item,type)
+#define VALIDATEITEM(item)
+#define ITEMLOOKUP(ptr,type) (ptr)
+// ITEMTYPECREATE(IFoo,SFoo) — with validation off, just typedef the pointer type
+#define ITEMTYPECREATE(itype,stype) typedef stype* itype;
+#endif
 //=============================================================================
 #endif
 //=============================================================================

@@ -1,0 +1,143 @@
+{
+  "runs": [
+    {
+      "combined": {
+        "frames": 718,
+        "fps": 19.832674742295836,
+        "p50_ms": 50.050069,
+        "p90_ms": 50.05031,
+        "p95_ms": 66.732818,
+        "p99_ms": 66.733519,
+        "missed_refresh_percent": 99.86072423398329
+      },
+      "scenarios": {
+        "wide-idle": {
+          "frames": 239,
+          "fps": 19.979992672356914,
+          "p50_ms": 50.050072,
+          "p90_ms": 50.050405,
+          "p95_ms": 66.733125,
+          "p99_ms": 66.733633,
+          "missed_refresh_percent": 100.0
+        },
+        "close-idle": {
+          "frames": 236,
+          "fps": 19.756752108788504,
+          "p50_ms": 50.050067,
+          "p90_ms": 50.050238,
+          "p95_ms": 50.050545,
+          "p99_ms": 66.733407,
+          "missed_refresh_percent": 100.0
+        },
+        "crawl-close": {
+          "frames": 243,
+          "fps": 19.763113887376022,
+          "p50_ms": 50.050065,
+          "p90_ms": 50.05031,
+          "p95_ms": 50.050637,
+          "p99_ms": 66.733586,
+          "missed_refresh_percent": 99.58847736625515
+        }
+      },
+      "clock_offset_seconds": 146518.060672773,
+      "clock_alignment_note": "Median latest-present timestamp minus poll start; boundaries approximate within one poll round trip plus a frame.",
+      "PSS_MiB": 87.6552734375
+    },
+    {
+      "combined": {
+        "frames": 716,
+        "fps": 19.924338672401962,
+        "p50_ms": 50.050069,
+        "p90_ms": 50.050342,
+        "p95_ms": 50.051032,
+        "p99_ms": 66.733922,
+        "missed_refresh_percent": 99.16201117318435
+      },
+      "scenarios": {
+        "wide-idle": {
+          "frames": 241,
+          "fps": 20.23184215783442,
+          "p50_ms": 50.050066,
+          "p90_ms": 50.05019,
+          "p95_ms": 50.050735,
+          "p99_ms": 66.733423,
+          "missed_refresh_percent": 100.0
+        },
+        "close-idle": {
+          "frames": 237,
+          "fps": 19.84046818656144,
+          "p50_ms": 50.050071,
+          "p90_ms": 50.05039,
+          "p95_ms": 66.732834,
+          "p99_ms": 83.416729,
+          "missed_refresh_percent": 98.31223628691983
+        },
+        "crawl-close": {
+          "frames": 238,
+          "fps": 19.70402621954829,
+          "p50_ms": 50.05007,
+          "p90_ms": 50.050407,
+          "p95_ms": 66.733298,
+          "p99_ms": 66.73346,
+          "missed_refresh_percent": 99.15966386554622
+        }
+      },
+      "clock_offset_seconds": 146612.43589262202,
+      "clock_alignment_note": "Median latest-present timestamp minus poll start; boundaries approximate within one poll round trip plus a frame.",
+      "PSS_MiB": 86.4521484375
+    },
+    {
+      "combined": {
+        "frames": 716,
+        "fps": 19.69574355195047,
+        "p50_ms": 50.050068,
+        "p90_ms": 50.050447,
+        "p95_ms": 66.733337,
+        "p99_ms": 66.733526,
+        "missed_refresh_percent": 100.0
+      },
+      "scenarios": {
+        "wide-idle": {
+          "frames": 239,
+          "fps": 19.924415851459727,
+          "p50_ms": 50.050069,
+          "p90_ms": 50.050273,
+          "p95_ms": 66.733377,
+          "p99_ms": 66.733465,
+          "missed_refresh_percent": 100.0
+        },
+        "close-idle": {
+          "frames": 235,
+          "fps": 19.645600020031356,
+          "p50_ms": 50.050075,
+          "p90_ms": 50.050432,
+          "p95_ms": 66.732952,
+          "p99_ms": 66.733517,
+          "missed_refresh_percent": 100.0
+        },
+        "crawl-close": {
+          "frames": 242,
+          "fps": 19.522846550913535,
+          "p50_ms": 50.050064,
+          "p90_ms": 50.050558,
+          "p95_ms": 66.733397,
+          "p99_ms": 66.73353,
+          "missed_refresh_percent": 100.0
+        }
+      },
+      "clock_offset_seconds": 146708.523739053,
+      "clock_alignment_note": "Median latest-present timestamp minus poll start; boundaries approximate within one poll round trip plus a frame.",
+      "PSS_MiB": 87.6474609375
+    }
+  ],
+  "median": {
+    "frames": 716,
+    "fps": 19.832674742295836,
+    "p50_ms": 50.050069,
+    "p90_ms": 50.050342,
+    "p95_ms": 66.732818,
+    "p99_ms": 66.733526,
+    "missed_refresh_percent": 99.86072423398329
+  },
+  "PSS_MiB_median": 87.6474609375
+}

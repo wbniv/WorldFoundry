@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+"""Verify seeded growth, remote settings and a real phone connection on Chromecast."""
+import argparse,hashlib,json,re,subprocess,time
+from pathlib import Path
+from playwright.sync_api import sync_playwright,expect
+from PIL import Image
+ROOT=Path(__file__).resolve().parents[1]
+p=argparse.ArgumentParser(description=__doc__);p.add_argument('--apk',type=Path,required=True);p.add_argument('--serial',required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
+ADB='/home/will/android-sdk-local/platform-tools/adb';PKG='org.worldfoundry.wf_game.aquarium'
+def adb(*words):return subprocess.check_output([ADB,'-s',a.serial,*words],timeout=40)
+def key(code,hold=120):
+ if code==4:adb('shell','input','keyevent','4')
+ else:adb('shell','input','keycombination','-t',str(hold),str(code),'59')
+ time.sleep(.2)
+def shot(label):(a.out/(label+'.png')).write_bytes(adb('exec-out','screencap','-p'))
+def verify_foliage(label,salt=False):
+ pixels=Image.open(a.out/(label+'.png')).convert('RGB').crop((500,430,1400,700)).getdata()
+ green=sum(g>r*1.2 and g>b*1.15 and g>35 for r,g,b in pixels)
+ brown=sum(r>g*1.06 and g>b*1.2 and r>40 for r,g,b in pixels)
+ assert green>3000, f'{label}: missing green leaf albedo ({green} pixels); shaded white foliage is invalid'
+ if salt:assert brown>1000, f'{label}: missing brown algae albedo ({brown} pixels)'
+ return dict(green_pixels=green,brown_pixels=brown)
+def logs():return adb('logcat','-d','-v','brief').decode(errors='replace')
+adb('install','-r',str(a.apk));installed=adb('shell','pm','path',PKG).decode().strip().removeprefix('package:');sha=adb('shell','sha256sum',installed).decode().split()[0];assert sha==hashlib.sha256(a.apk.read_bytes()).hexdigest()
+adb('shell','am','force-stop',PKG);adb('logcat','-c');adb('shell','am','start','-n',PKG+'/android.app.NativeActivity');time.sleep(4);key(4)
+for _ in range(5):key(20)
+key(22);shot('selector-settings');key(4);key(23);time.sleep(5);shot('initial-seedlings');key(23,1400);time.sleep(.5);shot('remote-settings');key(20);key(23);key(22);key(23);key(21);key(21);key(21);key(23);shot('remote-keypad-entry')
+text=logs();url=re.findall(r'phone controller: open (http://[^ ]+)',text)[-1];pin=url.split('k=')[1]
+with sync_playwright() as p:
+ browser=p.chromium.launch(headless=True);context=browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True);page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(url);expect(page.locator('#plant-settings')).to_be_visible();expect(page.locator('#plant-seed')).to_have_value('1');expect(page.locator('#plant-speed')).to_have_value('4')
+ def regen(seed,salt,speed):
+  page.locator('#plant-seed').fill(str(seed));page.locator('[data-water="'+str(int(salt))+'"]').click();page.locator('#plant-speed').fill(str(speed));page.locator('#plant-speed').dispatch_event('input');page.locator('#plant-regen').click();expect(page.locator('#plant-settings')).to_be_hidden()
+ regen(713,False,6);time.sleep(4);shot('freshwater-spreading');time.sleep(14);shot('freshwater-mature');fresh_colours=verify_foliage('freshwater-mature');page.locator('#plant-open').click();expect(page.locator('#plant-settings')).to_be_visible();expect(page.locator('#plant-seed')).to_have_value('713');page.screenshot(path=str(a.out/'phone-settings.png'),full_page=True)
+ regen(713,True,6);time.sleep(18);shot('saltwater-mature');salt_colours=verify_foliage('saltwater-mature',True);page.locator('#plant-open').click();page.locator('#plant-seed').fill('4294967295');page.wait_for_timeout(300);context.close();time.sleep(1.3);shot('phone-disconnected-tv-draft')
+ context=browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True);page=context.new_page();page.goto(url);expect(page.locator('#plant-settings')).to_be_visible();expect(page.locator('#plant-seed')).to_have_value('4294967295');page.locator('#plant-cancel').click();expect(page.locator('#plant-settings')).to_be_hidden();page.locator('#plant-open').click();page.locator('#plant-speed').fill('3');page.locator('#plant-speed').dispatch_event('input');page.locator('#plant-back').click();expect(page.locator('#plant-settings')).to_be_hidden();context.close();browser.close();assert not errors
+key(4);time.sleep(1);shot('returned-selector');key(23);time.sleep(3);shot('fresh-selection');runtime=adb('shell','tail','-c','4000000',f'/sdcard/Android/data/{PKG}/files/wf.log').decode(errors='replace');(a.out/'wf.log').write_text(runtime);assert len(set(re.findall(r'PLANTS generation=\d+ seed=(\d+)',runtime)))>=2
+text=logs();(a.out/'logcat.txt').write_text(text);assert not any(s in text for s in ('Fatal signal','ASSERTION FAILED','zforth compile error','zforth eval error'))
+key(3);time.sleep(1);adb('shell','am','start','-n',PKG+'/android.app.NativeActivity');time.sleep(2);assert adb('shell','pidof',PKG).strip();shot('resumed')
+(a.out/'checks.json').write_text(json.dumps({'apk_sha256':sha,'remote_and_selector_settings':True,'phone_settings':True,'exact_seed_replay':713,'freshwater_saltwater':True,'draft_survives_disconnect':True,'fresh_seed_on_reentry':True,'home_resume':True,'freshwater_albedo':fresh_colours,'saltwater_albedo':salt_colours},indent=2)+'\n');print('Growing plants device checks passed',flush=True)

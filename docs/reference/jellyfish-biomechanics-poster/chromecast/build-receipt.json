@@ -1,0 +1,10 @@
+{
+  "source_commit": "2597330516d76c148a950c084e1ec427537f07cf",
+  "apk_sha256": "de95d99a5220a97687a98ab35f2337cdb75b72e636db6d0eec7e7d486060d3ea",
+  "menu_sha256": "144b826320cd9aee5234830a243facb8f6bc46616a6f937854726e571795ae79",
+  "libraries": {
+    "lib/arm64-v8a/libwf_game.so": "60039b5ce8ad56d83c77d17a4d4ecb90c20dd107ac7c640f3690e50b52fab076",
+    "lib/armeabi-v7a/libwf_game.so": "288379fb072de200efc73b5f309b7c2c52a5697c45febe34819933520be8fb78"
+  },
+  "embedded_translucent_jellyfish_entry": true
+}

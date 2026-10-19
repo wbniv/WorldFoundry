@@ -13,8 +13,16 @@ use std::collections::HashSet;
 use std::io::Write;
 use std::path::Path;
 
-/// Default wrapper chunk FOURCC list (space-separated, matching `iffdump.cc`).
-pub const DEFAULT_CHUNKS: &str = "OADL TYPE LVAS L0   L1   L2   L3   PERM RM0  RM1  RM2  RM3  RM4  UDM  IFFC";
+/// Default wrapper chunk FOURCC list (space-separated, matching `iffdump/chunks.txt`
+/// plus the level containers we routinely recurse into. PERM/RM0-RM4 are level
+/// asset containers; ASS is not a wrapper (opaque packed vertex/texture data),
+/// nor are TOC / ASMP / LVL (all three carry flat binary payloads).
+pub const DEFAULT_CHUNKS: &str =
+    "GAME \
+     L0   L1   L2   L3   L4   L5   L6   L7   L8   L9   \
+     LVAS \
+     PERM RM0  RM1  RM2  RM3  RM4  \
+     OADL TYPE UDM  IFFC";
 
 /// Parse the default wrapper list into a HashSet.
 pub fn default_wrappers() -> HashSet<u32> {

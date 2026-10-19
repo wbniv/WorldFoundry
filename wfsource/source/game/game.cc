@@ -1,3 +1,6 @@
+#include "../../../engine/runtime_options.hpp"
+#include <game/plant_ui.h>
+#include <game/runtime_property_ui.h>
 //==============================================================================
 // game.cc: 
 // Copyright ( c ) 1994,1995,1996,1997,1998,1999,2001,2002,2003 World Foundry Group  
@@ -29,45 +32,87 @@
 
 #include "level.hp"
 #include "game.hp"
+#include <hal/lifecycle.h>
+#include <unistd.h>
+#include <algorithm>
+#include <chrono>
+#include "runtime_profile.hp"
+#if defined(__EMSCRIPTEN__)
+#  include <emscripten.h>
+#endif
+#include <audio/music.hp>
+#include <audio/sfx_library.hp>
+#include "rest_api.hp"
+#include "debug_server.hp"
+#include "../../../engine/runtime_diagnostics.hpp"
+#include "editor_hook.h"
+#include "wfmut_smoke.hpp"
+#include "physics_jolt.hp"
 #include "oas/matte.ht"
 #include "gamestrm.hp"
 #include "camera.hp"
+#include "sim_constants.hp"   // kMaxSimDeltaSeconds
 #include "oas/matte.ht"
 #include "matte.hp"
 #include "mailbox.hp"
-#if TCL
-#include <scripting/tcl.hp>
-#endif
 #include <gfx/vmem.hp>
+#include <asset/assets.hp>     // AssetManager::LookupTexture (Moon minimap ground-atlas accessor)
+#include <streams/asset.hp>    // packedAssetID
 #include <cpplib/libstrm.hp>
-
-#if defined( __PSX__ ) && defined( DO_PROFILE )
-#	include <profile/sampprof.hp>
+#if DESIGNER_CHEATS
+#include "hscore.h"
+#include <cstring>
 #endif
+#include "level_menu.h"   // the level menu (docs/plans/2026-10-01-level-menu-selector.md)
+#include "frame_rate_checks.hp"
 
-#if defined( __PSX__ )
-extern "C"
-{
-#	include "libetc.h"
-};
-#endif
+
 
 //==============================================================================
 
 Level* theLevel;
+
+// Resident ground-atlas accessor for the Moon position-display minimap.
+// terrain_texture.tga fills RM0's texture atlas (Room0.ruv: a single
+// 0,0,1024,1024 entry) and each VRAM slot is its own GL texture, so the minimap
+// samples the whole resident texture (UV 0..1) — the live ground the player is
+// standing on — instead of a separate baked minimap.tga. Returns the atlas
+// PixelMap, or nullptr if no level is loaded. Lives here (not display.cc)
+// because it needs theLevel/AssetManager, mirroring the wf_moon_* game->display
+// global pattern. When chunks later share an atlas (Phase 2+), swap UV 0..1 for
+// the texture's RMUV sub-rect (theLevel->GetAssetManager().LookupTexture(...).texture).
+// See docs/plans/2026-06-04-moon-overhead-map-and-chunk-texture-streaming.md.
+const PixelMap* wf_moon_ground_atlas()
+{
+	if (!theLevel)
+		return nullptr;
+	packedAssetID rm0(0, packedAssetID::TGA, 0xFFF);   // RM0 ground-atlas slot; LookupTexture keys on Room()
+	LookupTextureStruct lt = theLevel->GetAssetManager().LookupTexture("terrain_texture.tga", rm0.ID());
+	return &lt.texturePixelMap;
+}
 
 // Simulated actor for the "meta-script" run
 //const WFGame::LevelActor WFGame::_ActorLevel;
 
 //==============================================================================
 
+// The message-port pool packs SMsg entries at a pointer-aligned stride (4 on 32-bit ARM): SMsg must not need more (no int64/double).
+static_assert( alignof( SMsg ) <= alignof( void* ), "SMsg needs more than pointer alignment: the mem pool stride is pointer-aligned" );
+
 WFGame::WFGame( const int nStartingLevel )
 	:
 	// Memory pool for allocating MsgPort messages
 	_msgPortMemPool( MemPoolConstruct( sizeof( SMsg ), MSGPORTPOOLSIZE, HALLmalloc ) ),
-	_overrideLevelNum( nStartingLevel )
+	_overrideLevelNum( nStartingLevel ),
+	_desiredLevelNum( 0 ),		// default to first level in TOC; overridden by -l flag or shell script
+	_curLevel( nullptr ),
+	_gameMailboxes( nullptr ),
+	_bContinue( true ),
+	_deltaTime( Scalar::zero )
 {
 	DBSTREAM1( cprogress << "WFGame::WFGame" << std::endl; )
+	JoltRuntimeInit();
+
 
 	assert(ValidPtr(_msgPortMemPool));
 
@@ -75,11 +120,7 @@ WFGame::WFGame( const int nStartingLevel )
 	extern int _halWindowYPos;
 	extern int _halWindowWidth;
 	extern int _halWindowHeight;
-	_display = new (HALLmalloc) Display(10,_halWindowXPos, _halWindowYPos, _halWindowWidth, _halWindowHeight, HALLmalloc
-#if defined(DO_STEREOGRAM)
-	,true
-#endif
-	);
+	_display = new (HALLmalloc) Display(10,_halWindowXPos, _halWindowYPos, _halWindowWidth, _halWindowHeight, HALLmalloc);
 	assert(ValidPtr(_display));
 
 	_videoMemory = new (HALLmalloc) VideoMemory(*_display);
@@ -89,10 +130,22 @@ WFGame::WFGame( const int nStartingLevel )
 	_viewPort = new (HALLmalloc) ViewPort( *_display, 3001, Scalar( 320, 0 ), Scalar( 240, 0 ), HALLmalloc, 2000 );
 	assert( ValidPtr( _viewPort ) );
 	DBSTREAM3( cprogress << "WFGame::WFGame done" << std::endl; )
+#ifdef WF_RUNTIME_DIAGNOSTICS
+	extern int gDebugPort;
+	DebugServer_Start(gDebugPort);
+#endif
 #if defined( DO_CD_IFF )
-	DBSTREAM1( std::cout <<"Opening cd.iff" << std::endl; )
-	_gameFile = ConstructDiskFile( "cd.iff", HALLmalloc );
-	assert( ValidPtr( _gameFile ) );
+	extern const char* gLevelOverridePath;
+	if ( gLevelOverridePath == nullptr )
+	{
+		DBSTREAM1( std::cout <<"Opening cd.iff" << std::endl; )
+		_gameFile = ConstructDiskFile( "cd.iff", HALLmalloc );
+		assert( ValidPtr( _gameFile ) );
+	}
+	else
+	{
+		_gameFile = nullptr;	// -L<path> mode: opened in RunGameScript instead
+	}
 #endif
 }
 
@@ -100,12 +153,26 @@ WFGame::WFGame( const int nStartingLevel )
 
 WFGame::~WFGame()
 {
+#ifdef WF_RUNTIME_DIAGNOSTICS
+	DebugServer_Stop();
+#endif
 	DBSTREAM1( cprogress << "WFGame::~WFGame" << std::endl; )
 
+	// Hosts (editor, replay driver) must call UnloadLevel before destructing.
+	// Standalone RunLevel always does. Tripping this assert means a level
+	// was loaded but never unloaded.
+	assert(!_curLevel);
+	assert(!_gameMailboxes);
+
 #if defined(DO_CD_IFF)
-	DBSTREAM1( std::cout <<"closing cd.iff" << std::endl; )
-	assert(ValidPtr(_gameFile));
-	MEMORY_DELETE(HALLmalloc,_gameFile,_DiskFile);
+	// LoadTOC allocates after _gameFile. Release it before the older game
+	// resources; waiting for the member destructor would violate HAL LIFO.
+	_gameTOC.Clear();
+	if ( _gameFile != nullptr )
+	{
+		DBSTREAM1( std::cout <<"closing cd.iff" << std::endl; )
+		MEMORY_DELETE(HALLmalloc,_gameFile,_DiskFile);
+	}
 #endif
 
 //#ifdef DO_PROFILE
@@ -113,11 +180,20 @@ WFGame::~WFGame()
 //	DELETE_CLASS( testProfile );
 //#endif
 
-	MemPoolDestruct( _msgPortMemPool );
-
+	// HALLmalloc allocs in WFGame, time order:
+	//   1. _msgPortMemPool obj + buffer (member init line 66, via MemPoolConstruct)
+	//   2. _display (body line 84)
+	//   3. _videoMemory (line 87)
+	//   4. _viewPort (line 91)
+	//   5. _gameFile (line 99, freed above)
+	// LIFO-reverse Free: _gameFile, _viewPort, _videoMemory, _display, then
+	// MemPoolDestruct (which Frees _buffer then memPool obj — both LIFO-
+	// correct since _buffer was alloc'd just after the obj).
 	MEMORY_DELETE(HALLmalloc,_viewPort,ViewPort);
 	MEMORY_DELETE(HALLmalloc,_videoMemory,VideoMemory);
 	MEMORY_DELETE(HALLmalloc,_display,Display);
+	MemPoolDestruct( _msgPortMemPool );
+	JoltRuntimeShutdown();
 	DBSTREAM1( cprogress << "game destructor finished" << std::endl; )
 }
 
@@ -131,10 +207,42 @@ struct CHUNKHDR
 
 //-----------------------------------------------------------------------------
 
+// Set by `-L<path>` on the command line. When non-null, RunGameScript opens
+// this single level file directly and skips the cd.iff bundle / SHEL meta
+// script entirely. The file must be a complete L<N> chunk (8-byte chunk
+// header + ALGN + RAM + ...), exactly as it would appear inside cd.iff.
+// Seek to SECTOR_SIZE then puts us at the RAM tag, just like the cd.iff
+// path. Build with: `iffcomp { 'L0' [ "level.iff" ] }` or pre-pend the
+// 8-byte chunk header by hand.
+const char* gLevelOverridePath = nullptr;
+
 void
 WFGame::RunGameScript()				// runs the whole game, returns when game (really) over (quit to OS)
 {
 	DBSTREAM2( cflow << "WFGame::RunGameScript" << std::endl; )
+
+	if ( gLevelOverridePath != nullptr )
+	{
+		DBSTREAM1( cprogress << "Loading single level from path: " << gLevelOverridePath << std::endl; )
+		_DiskFile* diskFile = ConstructDiskFile( const_cast<char*>( gLevelOverridePath ), HALLmalloc );
+		assert( ValidPtr( diskFile ) );
+		// File is a complete L<N> chunk: header + ALGN + RAM + ... — same
+		// layout as inside cd.iff. RAM lands at SECTOR_SIZE.
+		diskFile->SeekRandom( DiskFileCD::_SECTOR_SIZE );
+#if defined(__EMSCRIPTEN__)
+		// v2 (plan Phase 7): hand the level to the browser's frame scheduler
+		// instead of spinning a blocking while loop. RunLevelWeb does not return
+		// — it unwinds the C stack and the browser drives StepFrame from here on,
+		// so the diskFile is freed by WebTick on level-done, not here.
+		RunLevelWeb( diskFile );
+		// unreachable
+#else
+		RunLevel( diskFile );
+		MEMORY_DELETE( HALLmalloc, diskFile, DiskFile );
+#endif
+		return;
+	}
+
 #if defined(DO_CD_IFF)
 	assert(ValidPtr(_gameFile));
 	_gameFile->SeekRandom(0);
@@ -169,44 +277,64 @@ WFGame::RunGameScript()				// runs the whole game, returns when game (really) ov
 	const void* _pScript = (const void*)pMetaScript;
 #endif
 	
-	DBSTREAM2( cflow << "WFGame::RunGameScript:construct MetaScript" << std::endl; )
-	assert( ValidPtr( _pScript ) );
-   GameMailboxes mailboxes(*this);
-   SingleMailboxesManager mailboxesManager(mailboxes);
-   ScriptInterpreter* interpreter = ScriptInterpreterFactory(mailboxesManager, HALLmalloc);
-   assert(ValidPtr(interpreter));
-	DBSTREAM1( cprogress << "meta script interpreter created" << std::endl; )
-
 	char* pScript = (char*)_pScript;
-	for ( ;; )
+	// Destroy mailbox storage before freeing the older script allocation.
 	{
-		DBSTREAM2( cflow << "WFGame::RunGameScript::loop top" << std::endl; )
-      //Scalar data = 
-      interpreter->RunScript(pScript,0);
-  		//  cerr << "EvalScript(" << szScript << ")=" << data << endl;
-  		//return data;
-      
-		assert(_desiredLevelNum >= 0);
-		assert(_desiredLevelNum < 9999);
-		DBSTREAM3( cprogress << "Loading level " << _desiredLevelNum << std::endl; )
+		DBSTREAM2( cflow << "WFGame::RunGameScript:construct MetaScript" << std::endl; )
+		assert( ValidPtr( _pScript ) );
+		GameMailboxes mailboxes(*this);
+		SingleMailboxesManager mailboxesManager(mailboxes);
+
+		for ( ;; )
+		{
+			DBSTREAM2( cflow << "WFGame::RunGameScript::loop top" << std::endl; )
+			// The scripting backends hold process-global VM state. Release the
+			// shell interpreter before RunLevel creates its own interpreter, and
+			// recreate it for the next shell evaluation. Persistent state lives in
+			// GameMailboxes, which stays alive across level transitions.
+			ScriptInterpreter* interpreter = ScriptInterpreterFactory(mailboxesManager, HALLmalloc);
+			assert(ValidPtr(interpreter));
+			interpreter->RunScript(pScript,0,3);  // meta script is always Forth (shell.aib)
+			MEMORY_DELETE(HALLmalloc, interpreter, ScriptInterpreter);
+
+			if(_overrideLevelNum != -1)
+				_desiredLevelNum = _overrideLevelNum;
+
+#if defined(DO_CD_IFF)
+			// shell-menu.fth (and a return request) write -1: "ask the player".
+			// Any negative value counts: a Forth -1 arrives as -2, because the
+			// float build's WholePart floors with int(s - 1.0) (math/scalar.hpi).
+			// Plain shell.fth never writes one, so other bundles never get here.
+			if (_desiredLevelNum < 0)
+			{
+				_desiredLevelNum = RunLevelMenu();
+				if (HALWindowCloseRequested())
+					break;
+			}
+			if (_levelMenuActive)
+				levelmenu::Log("level %d starts", int(_desiredLevelNum));
+#endif
+
+			assert(_desiredLevelNum >= 0);
+			assert(_desiredLevelNum < 9999);
+			DBSTREAM3( cprogress << "Loading level " << _desiredLevelNum << std::endl; )
 #if defined(DO_CD_IFF)
 
-      if(_overrideLevelNum != -1)
-         _desiredLevelNum  = _overrideLevelNum;
-
-		const DiskTOC::TOCEntry& tocLevelEntry = _gameTOC.GetTOCEntry(GAMEFILE_LEVELSTART+_desiredLevelNum);
-//		std::cout << "seeking to level at offset " << tocLevelEntry._offsetInDiskFile+DiskFileCD::_SECTOR_SIZE << std::endl;
-		_gameFile->SeekRandom(tocLevelEntry._offsetInDiskFile+DiskFileCD::_SECTOR_SIZE);
-		RunLevel(_gameFile);
+			const DiskTOC::TOCEntry& tocLevelEntry = _gameTOC.GetTOCEntry(GAMEFILE_LEVELSTART+_desiredLevelNum);
+			_gameFile->SeekRandom(tocLevelEntry._offsetInDiskFile+DiskFileCD::_SECTOR_SIZE);
+			RunLevel(_gameFile);
 #else
-		char szLevelName[ _MAX_PATH ];
-		sprintf( szLevelName, "level%d.iff", _desiredLevelNum );
-		_DiskFile* diskFile = CreateDiskFile(szLevelName, HALLmalloc);
-		assert(ValidPtr(diskFile));
-		RunLevel(diskFile);
-		assert(ValidPtr(diskFile));
-		MEMORY_DELETE( HALLmalloc, diskFile,DiskFile);
+			char szLevelName[ _MAX_PATH ];
+			sprintf( szLevelName, "level%d.iff", _desiredLevelNum );
+			_DiskFile* diskFile = CreateDiskFile(szLevelName, HALLmalloc);
+			assert(ValidPtr(diskFile));
+			RunLevel(diskFile);
+			assert(ValidPtr(diskFile));
+			MEMORY_DELETE( HALLmalloc, diskFile,DiskFile);
 #endif
+			if (HALWindowCloseRequested())
+				break;
+		}
 	}
 #if defined(DO_CD_IFF)
 	HALLmalloc.Free((void*)pScript);
@@ -215,152 +343,793 @@ WFGame::RunGameScript()				// runs the whole game, returns when game (really) ov
 
 //==============================================================================
 
-#if defined(__PSX__) && defined(DO_PROFILE)
-extern bool bProfileMainLoop;
-extern bool bProfileMemLoad;
+
+//-----------------------------------------------------------------------------
+
+void
+WFGame::LoadLevel(_DiskFile* levelFile)
+{
+#ifdef WF_RUNTIME_DIAGNOSTICS
+	DebugServer_DiagnosticLevel(_desiredLevelNum);
 #endif
+    _frameRate.Reset();
+    const auto loadStarted = std::chrono::steady_clock::now();
+    DBSTREAM3( cprogress << "WFGame::LoadLevel (sizeof level = " << sizeof(Level) << std::endl; )
+    assert(!_curLevel);
+    assert(!_gameMailboxes);
+
+    _gameMailboxes = new (HALLmalloc) GameMailboxes(*this);
+    assert( ValidPtr(_gameMailboxes));
+    _curLevel = new (HALLmalloc) Level( *this, levelFile, *_viewPort, *_videoMemory, _gameMailboxes );
+	DBSTREAM3( cprogress << "new level at address " << _curLevel << ", sizeof " << sizeof(Level) << std::endl; )
+	assert( ValidPtr(_curLevel));
+	// Level-owned opt-in, read from this level's own Level Object: link the
+	// no-palette opaque program now, as part of the level transition, rather
+	// than on the level's first ordinary opaque batch during play. Without
+	// it the program is created only if such a batch is drawn.
+	if ( _curLevel->PrewarmNoPaletteProgram() )
+		RendererBackendGet().PrepareNoPaletteProgram();
+	// --frame-profile: the level construction (+ prewarm) span on the
+	// frame-window clock, for placing program creation in a device trace.
+	if ( wf_profile::enabled() )
+	{
+		const auto ns = [](std::chrono::steady_clock::time_point t) {
+			return (long long)std::chrono::duration_cast<std::chrono::nanoseconds>(t.time_since_epoch()).count();
+		};
+		fprintf( stderr, "level-load: index=%d start-ns=%lld end-ns=%lld prewarm-no-palette-program=%d\n",
+		         int(_desiredLevelNum), ns(loadStarted), ns(std::chrono::steady_clock::now()),
+		         _curLevel->PrewarmNoPaletteProgram() ? 1 : 0 );
+	}
+	DBSTREAM3( cprogress << "WFGame::LoadLevel done" << std::endl; )
+
+	// Start per-level music: look for level<N>.mid alongside cd.iff.
+	if (gMusicPlayer) {
+		char midiName[64];
+		if (_desiredLevelNum >= 0)
+			snprintf(midiName, sizeof(midiName), "level%d.mid", _desiredLevelNum);
+		else
+			snprintf(midiName, sizeof(midiName), "music.mid");
+		// play() silently ignores missing files
+		gMusicPlayer->play(midiName);
+	}
+
+	// Load Q*bert SFX. Paths are relative to the process cwd (project root).
+	// Silently no-ops on levels where these files don't exist (e.g. snowgoons).
+	SfxLibrary::Load(0, "wflevels/qbert_practice/sfx/qbert_hop.wav");
+	SfxLibrary::Load(1, "wflevels/qbert_practice/sfx/qbert_land.wav");
+	SfxLibrary::Load(2, "wflevels/qbert_practice/sfx/qbert_fall.wav");
+	SfxLibrary::Load(3, "wflevels/qbert_practice/sfx/qbert_swear.wav");
+	SfxLibrary::Load(4, "wflevels/qbert_practice/sfx/qbert_round_clear.wav");
+	SfxLibrary::Load(5, "wflevels/qbert_practice/sfx/qbert_kill.wav");
+	SfxLibrary::Load(6, "wflevels/qbert_practice/sfx/qbert_disc.wav");
+
+	_bContinue = true;
+	_deltaTime = Scalar::zero;
+	DBSTREAM1 ( cprogress << "Entering main game loop\n"; );
+	RestApi_Start();
+	{
+		extern int gDebugPort;
+		DebugServer_Start(gDebugPort);
+	}
+}
+
+//-----------------------------------------------------------------------------
+
+void
+WFGame::UnloadLevel()
+{
+	planted::leave();
+	_frameRate.Reset();
+	DBSTREAM3( cprogress << "WFGame::UnloadLevel" << std::endl; )
+	assert(_curLevel);
+	assert(_gameMailboxes);
+
+	// Flush any in-flight ordertable renderings before tearing down the level.
+	// (Previously the trailing pair of PageFlips at the end of RunLevel.)
+	_display->PageFlip();
+	_display->PageFlip();
+
+	RestApi_Stop();
+#ifndef WF_RUNTIME_DIAGNOSTICS
+	DebugServer_Stop();
+#endif
+	if (gMusicPlayer) gMusicPlayer->stop();
+	SfxLibrary::Clear();
+
+	// Level must be destroyed before _gameMailboxes — the level's
+	// _scratchMailboxes holds a parent pointer to it.
+	MEMORY_DELETE(HALLmalloc,_curLevel,Level);
+	_curLevel = nullptr;
+	MEMORY_DELETE(HALLmalloc,_gameMailboxes,GameMailboxes);
+	_gameMailboxes = nullptr;
+}
+
+//-----------------------------------------------------------------------------
+
+bool
+WFGame::LevelDone() const
+{
+	// Treat "no level loaded" as done — callers can poll between
+	// UnloadLevel and a future LoadLevel without crashing.
+	return !_curLevel || _curLevel->done();
+}
+
+//-----------------------------------------------------------------------------
+
+void
+WFGame::SmokeRunFrameStep(int frames, int cycles)
+{
+	extern const char* gLevelOverridePath;
+	AssertMsg(gLevelOverridePath, "--frame-step-smoke requires -L<level-path>");
+	assert(cycles >= 1);
+
+	DBSTREAM1(cprogress << "SmokeRunFrameStep: opening " << gLevelOverridePath
+	                    << " (frames=" << frames << " cycles=" << cycles << ")" << std::endl;)
+	_DiskFile* df = ConstructDiskFile(const_cast<char*>(gLevelOverridePath), HALLmalloc);
+	assert(ValidPtr(df));
+
+	for (int cycle = 0; cycle < cycles; ++cycle) {
+		DBSTREAM1(cprogress << "SmokeRunFrameStep: cycle " << (cycle+1) << "/" << cycles << std::endl;)
+		// File is a complete L<N> chunk; RAM lands at SECTOR_SIZE
+		// (matches RunGameScript's -L path). Re-seek each cycle.
+		df->SeekRandom(DiskFileCD::_SECTOR_SIZE);
+
+		LoadLevel(df);
+		assert(_curLevel->GetMailboxes().ReadMailbox(EMAILBOX_FRAMERATE) == Scalar::zero);
+		DBSTREAM1(cprogress << "SmokeRunFrameStep: LoadLevel done, stepping " << frames << " frames" << std::endl;)
+
+		for (int i = 0; i < frames && !HALWindowCloseRequested() && ContinueRequested(); ++i) {
+			// An external host may spend time presenting/doing other work between
+			// calls. The raw sample must include that gap even without PageFlip.
+			if (gFrameRateChecks && gFrameStepNoSwap && i > 0) usleep(20000);
+			Scalar dt;
+			FrameResult r = StepFrame(!gFrameStepNoSwap, &dt);
+			if (gFrameRateChecks && gFrameStepNoSwap && i > 1) {
+				AssertMsg(DiagnosticFrameRate().AsFloat() <= 50.1f, "FPS must include the host's 20 ms gap");
+			}
+			if (r == FrameResult::Done) {
+				DBSTREAM1(cprogress << "SmokeRunFrameStep: level done at frame " << i << std::endl;)
+				break;
+			}
+		}
+
+		UnloadLevel();
+		assert(DiagnosticFrameRate() == Scalar::zero);
+	}
+
+	MEMORY_DELETE(HALLmalloc, df, _DiskFile);
+	DBSTREAM1(cprogress << "SmokeRunFrameStep: complete" << std::endl;)
+}
+
+//-----------------------------------------------------------------------------
+
+#if (defined(WF_DEBUG_BRIDGE) && !defined(WF_RUNTIME_DIAGNOSTICS)) || defined(WF_ENABLE_EDITOR)
+int
+WFGame::RunWfmutSmoke()
+{
+	extern const char* gLevelOverridePath;
+	AssertMsg(gLevelOverridePath, "--wfmut-smoke requires -L<level-path>");
+
+	DBSTREAM1(cprogress << "RunWfmutSmoke: opening " << gLevelOverridePath << std::endl;)
+	_DiskFile* df = ConstructDiskFile(const_cast<char*>(gLevelOverridePath), HALLmalloc);
+	assert(ValidPtr(df));
+	df->SeekRandom(DiskFileCD::_SECTOR_SIZE);
+
+	LoadLevel(df);
+	int failures = wfmut::RunSmokeTests(*_curLevel);
+	UnloadLevel();
+
+	MEMORY_DELETE(HALLmalloc, df, _DiskFile);
+	DBSTREAM1(cprogress << "RunWfmutSmoke: " << failures << " failures" << std::endl;)
+	return failures;
+}
+
+int
+WFGame::RunWfmutThreadTest()
+{
+	extern const char* gLevelOverridePath;
+	AssertMsg(gLevelOverridePath, "--wfmut-thread-test requires -L<level-path>");
+
+	_DiskFile* df = ConstructDiskFile(const_cast<char*>(gLevelOverridePath), HALLmalloc);
+	assert(ValidPtr(df));
+	df->SeekRandom(DiskFileCD::_SECTOR_SIZE);
+
+	LoadLevel(df);
+	// Expected to abort inside the off-thread wfmut call (X5 guard). If it
+	// returns, the guard didn't fire (non-assertion build).
+	int r = wfmut::RunThreadGuardDeathTest(*_curLevel);
+	UnloadLevel();
+
+	MEMORY_DELETE(HALLmalloc, df, _DiskFile);
+	return r;
+}
+#endif // WF_DEBUG_BRIDGE || WF_ENABLE_EDITOR
+
+//-----------------------------------------------------------------------------
+
+#if defined(WF_ENABLE_EDITOR)
+namespace {
+	EditorBuildCallback   sEditorBuild   = nullptr;
+	EditorPresentCallback sEditorPresent = nullptr;
+	void*                 sEditorCtx     = nullptr;
+}
+
+extern "C" void
+SetEditorFrameCallbacks( EditorBuildCallback build, EditorPresentCallback present, void* ctx )
+{
+	sEditorBuild   = build;
+	sEditorPresent = present;
+	sEditorCtx     = ctx;
+}
+
+void
+WFGame::RunEditor()
+{
+	extern const char* gLevelOverridePath;
+	AssertMsg(gLevelOverridePath, "--editor requires -L<level-path>");
+
+	_DiskFile* df = ConstructDiskFile(const_cast<char*>(gLevelOverridePath), HALLmalloc);
+	assert(ValidPtr(df));
+	df->SeekRandom(DiskFileCD::_SECTOR_SIZE);
+
+	LoadLevel(df);
+	DBSTREAM1( cprogress << "RunEditor: level loaded, entering editor loop" << std::endl; )
+
+	// Editor owns cadence + the swap. Each iteration: the editor builds its UI
+	// and applies pending edits to the engine (build), THEN StepFrame renders
+	// the now-up-to-date scene into the back buffer (do_swap=false), THEN the
+	// editor composites its overlay and swaps (present). Build-before-render is
+	// what makes a same-frame edit visible the same frame. Loop until build
+	// returns false (window closed); a null build makes this a no-op loop body.
+	for (;;) {
+		Scalar dt;
+		if (!sEditorBuild || !sEditorBuild(sEditorCtx))
+			break;
+		StepFrame(false, &dt);
+		if (sEditorPresent)
+			sEditorPresent(sEditorCtx);
+	}
+
+	UnloadLevel();
+	MEMORY_DELETE(HALLmalloc, df, _DiskFile);
+	DBSTREAM1( cprogress << "RunEditor: complete" << std::endl; )
+}
+#endif // WF_ENABLE_EDITOR
+
+//-----------------------------------------------------------------------------
+
+Scalar
+WFGame::DiagnosticFrameRate() const
+{
+	if (HALIsSuspended())
+		return Scalar::zero;
+	return _frameRate.Read(HALLifecycleGeneration());
+}
+
+WFGame::FrameResult
+WFGame::StepFrame(bool do_swap, Scalar* out_dt)
+{
+	assert(_curLevel);
+
+	// v2 web (plan Phase 7): no per-frame yield here — the browser calls
+	// WebTick once per animation frame and the canvas presents when WebTick
+	// returns. (v1 yielded via emscripten_sleep(0) under ASYNCIFY; removed with
+	// the loop inversion.) Suspend on web is handled by pausing the main loop
+	// (emscripten_pause_main_loop in the visibility callback), so the suspended
+	// branch below is only reached on Android/Linux.
+
+	if ( HALIsSuspended() )
+	{
+		_frameRate.Reset();
+		// Platform has backgrounded us (Android onPause). Skip render +
+		// PageFlip to avoid touching a torn-down GL context; pump platform
+		// events so APP_CMD_RESUME actually reaches HALNotifyResume and
+		// unsticks us. Linux never enters this branch — HALIsSuspended()
+		// is always false there.
+		HALPumpSuspendedEvents();
+        wfprops::host().suspend();
+#ifdef WF_RUNTIME_DIAGNOSTICS
+		DebugServer_DiagnosticPump(_curLevel, true);
+#endif
+		usleep(16000);
+		if (out_dt) *out_dt = Scalar::zero;
+		return FrameResult::Suspended;
+	}
+
+	_frameRate.BeginFrame(FrameRateSampler::Clock::now(), HALLifecycleGeneration());
+#ifdef WF_RUNTIME_DIAGNOSTICS
+	DebugServer_DiagnosticBegin(false, "game");
+#endif
+	CheckFrameRateMailbox(*_curLevel, DiagnosticFrameRate(), HALLifecycleGeneration());
+	RestApi_DrainQueue();
+	DebugServer_DrainQueue(*_curLevel);
+	assert(HALScratchLmalloc.Empty());
+	// The game debug streams (gamestrm.cc) hit a cross-TU static-init-order issue
+	// on web — cframeinfo's streambuf isn't wired when the first write runs, so
+	// operator<< calls a null streambuf vtable slot ("null function" wasm trap).
+	// This per-frame DBSTREAM1 also violates dbstrm.hp's own "nothing in the game
+	// loop" contract for DBSTREAM1, and writes to a null sink (no output), so skip
+	// it on web. See docs/plans/2026-06-12-wf-edit-in-the-browser.md.
+#if !defined(__EMSCRIPTEN__)
+	DBSTREAM1( cframeinfo << char(12) << std::endl << "Frame Info:" << std::endl; )
+#endif
+	DBSTREAM2( cflow << "Top of WFGame::update" << std::endl; )
+
+
+#if defined(DESIGNER_CHEATS)
+	if ( PIGSUserAborted() )
+	{
+		DBSTREAM1( cwarn << "Level Aborted" << std::endl; )
+		_bContinue = false;
+		while(PIGSUserAborted())
+			;						// wait for buttons to be released
+	}
+#endif
+
+	assert( ValidPtr(_curLevel ));
+	_curLevel->Validate();
+	DBSTREAM2( cflow << "WFGame::update: curLevel->Update" << std::endl; )
+    int optionsWidth=0,optionsHeight=0;_display->GetSurfaceSize(optionsWidth,optionsHeight);
+    wfoptions::surfaceSize(optionsWidth,optionsHeight);
+	auto& settings=wfprops::host();
+    if(settings.modal||settings.waitingForRelease())_curLevel->RefreshHardwareInput();
+    auto buttons=uint32_t(_curLevel->GetMailboxes().ReadMailbox(1909).AsFloat());
+    if(settings.gesture(buttons,_deltaTime.AsFloat())&&planted::state().active){auto& mb=_curLevel->GetMailboxes();mb.WriteMailbox(625,Scalar::one-mb.ReadMailbox(625));}
+    propertyui::inputHost(buttons);
+
+	if ( !DebugServer_IsPaused() && !settings.modal && !settings.waitingForRelease() ) {
+#ifdef WF_RUNTIME_DIAGNOSTICS
+		DebugServer_DiagnosticSimulation();
+#endif
+		_curLevel->update(_deltaTime);
+	}
+	DBSTREAM2( cflow << "WFGame::update: render scene" << std::endl; )
+
+	if(_curLevel->camera() && _curLevel->camera()->ValidView())
+	{
+		_display->RenderBegin();
+		_curLevel->RenderScene();
+		RestApi_RenderBoxes();
+        int textWidth=0,textHeight=0;_display->GetSurfaceSize(textWidth,textHeight);
+        _curLevel->RenderBitmapText(textWidth,textHeight);
+		if (fpscounter::enabled)
+		{
+			int w = 0, h = 0;
+			_display->GetSurfaceSize(w, h);
+			const int count = _fpsOverlay.Build(_curLevel->GetMailboxes().ReadMailbox(EMAILBOX_FRAMERATE), w, h);
+			RendererBackendGet().DrawOverlay(_fpsOverlay.Rects(), count, w, h);
+			wfui::Draw(_fpsOverlay.Glyphs(), w, h);
+		}
+		_display->RenderEnd();
+	}
+#if DO_ASSERTIONS
+	else if(_curLevel->camera())
+		AssertMsg(_curLevel->LevelClock().Current() < SCALAR_CONSTANT(10),"No Valid View after 10 seconds");
+#endif
+
+	DebugServer_BroadcastState(*_curLevel);
+#ifdef WF_RUNTIME_DIAGNOSTICS
+	DebugServer_DiagnosticPump(_curLevel);
+#endif
+	DebugServer_BroadcastPerf(_deltaTime.AsFloat() * 1000.0f,
+	                          _curLevel->GetObjectList().Size());
+	DebugServer_BroadcastMailboxes(*_curLevel);
+	DBSTREAM2( cflow << "WFGame::update: page flip" << std::endl; )
+#if DESIGNER_CHEATS
+		{
+			extern int wf_hud_score, wf_hud_timer, wf_hud_lives, wf_hud_game_over;
+			extern int wf_hud_marble_state, wf_hud_marble_falls;
+			extern int wf_hud_entering_initials, wf_hud_initials_pos;
+			extern char wf_hud_initials[4];
+			// Moon Site 01 position-display HUD overlay — see docs/plans/2026-05-31-position-display-hud-overlay-on-the-moon-level-tex.md
+			extern int   wf_moon_overlay_enabled;
+			extern float wf_moon_player_x_m, wf_moon_player_y_m, wf_moon_player_z_m;
+			extern float wf_moon_player_heading_rev;
+			// Moon lander launch sequence — see docs/plans/2026-06-02-moon-lander-launch-sequence.md
+			extern int   wf_moon_launch_phase;
+			extern float wf_moon_launch_t_minus;
+			Mailboxes& mb = _curLevel->GetMailboxes();
+			wf_hud_score     = mb.ReadMailbox(70).WholePart();
+			wf_hud_timer     = mb.ReadMailbox(71).WholePart();
+			wf_hud_lives     = mb.ReadMailbox(72).WholePart();
+			// Opt-in standalone Marble Madness HUD (0 disables it).
+			wf_hud_marble_state = mb.ReadMailbox(1770).WholePart();
+			wf_hud_marble_falls = mb.ReadMailbox(1771).WholePart();
+			wf_hud_game_over = mb.ReadMailbox(420).WholePart();
+			wf_moon_overlay_enabled     = mb.ReadMailbox(1875).WholePart();
+			wf_moon_player_x_m          = mb.ReadMailbox(1876).AsFloat();
+			wf_moon_player_y_m          = mb.ReadMailbox(1877).AsFloat();
+			wf_moon_player_z_m          = mb.ReadMailbox(1878).AsFloat();
+			wf_moon_player_heading_rev  = mb.ReadMailbox(1879).AsFloat();
+			wf_moon_launch_phase        = mb.ReadMailbox(1881).WholePart();
+			wf_moon_launch_t_minus      = mb.ReadMailbox(1882).AsFloat();
+
+			// High-score initials entry — triggered on fresh game-over edge.
+			// Joystick bits from mb 1910 (JUSTPRESSED, already edge-detected):
+			//   0x0800 UP   → prev letter
+			//   0x1000 DOWN → next letter
+			//   0x2000 RIGHT → advance / confirm last char
+			//   0x4000 LEFT  → back one position
+			static int s_prev_game_over = 0;
+			static int s_initials_pos = 0;
+			static char s_initials[4] = {'A','A','A','\0'};
+
+			// GO_HOLD_TIMER (mb 591): C++ decrements each frame; Forth won't
+			// restart while > 0.  GO_BLOCK (mb 590): set 1 while initials entry
+			// is live so Forth ignores joystick for restart entirely.
+			{
+				int hold = mb.ReadMailbox(591).WholePart();
+				if (hold > 0)
+					mb.WriteMailbox(591, Scalar(hold - 1, 0));
+			}
+
+			if (wf_hud_game_over && !s_prev_game_over)
+			{
+				// Arm 3 s minimum hold regardless of whether score qualifies.
+				mb.WriteMailbox(591, Scalar(180, 0));
+				HScore_Load();
+				if (HScore_IsHigh(wf_hud_score))
+				{
+					s_initials_pos = 0;
+					s_initials[0] = s_initials[1] = s_initials[2] = 'A';
+					wf_hud_entering_initials = 1;
+					mb.WriteMailbox(590, Scalar(1, 0));  // block Forth restart
+				}
+			}
+			s_prev_game_over = wf_hud_game_over;
+
+			if (wf_hud_entering_initials)
+			{
+				int joy = mb.ReadMailbox(1910).WholePart();
+				if (joy & 0x0800)  // UP: prev letter
+					s_initials[s_initials_pos] = (s_initials[s_initials_pos] - 'A' + 25) % 26 + 'A';
+				if (joy & 0x1000)  // DOWN: next letter
+					s_initials[s_initials_pos] = (s_initials[s_initials_pos] - 'A' + 1) % 26 + 'A';
+				if (joy & 0x2000)  // RIGHT: advance / confirm
+				{
+					if (s_initials_pos < 2)
+					{
+						++s_initials_pos;
+					}
+					else
+					{
+						HScore_Insert(wf_hud_score, mb.ReadMailbox(425).WholePart(), s_initials);
+						HScore_Save();
+						wf_hud_entering_initials = 0;
+						s_initials_pos = 0;
+						mb.WriteMailbox(590, Scalar(0, 0));   // unblock Forth restart
+						mb.WriteMailbox(591, Scalar(180, 0)); // 3 s to view updated table
+					}
+				}
+				if ((joy & 0x4000) && s_initials_pos > 0)  // LEFT: back
+					--s_initials_pos;
+
+				memcpy(wf_hud_initials, s_initials, 4);
+				wf_hud_initials_pos = s_initials_pos;
+			}
+		}
+#endif
+	_deltaTime = do_swap ? _display->PageFlip() : _display->MeasureDelta();
+	if (HALIsSuspended())
+		_frameRate.Reset();
+	else
+		_frameRate.EndFrame(FrameRateSampler::Clock::now(), HALLifecycleGeneration());
+
+	// Host stalls (editor paused on a modal, breakpoint hit, GL hiccup)
+	// would otherwise hand the next StepFrame a multi-second deltaTime.
+	// PageFlip / MeasureDelta already cap at 1/5 s (200 ms); StepFrame
+	// tightens to 100 ms which lines up with Jolt's substep tolerance
+	// (project_variable_tick_rate_loadbearing). Standalone wf_game
+	// rarely trips this — only on real stalls — so its behaviour is
+	// unchanged in practice. Editor-as-host needs the tighter cap to
+	// stay simulable across pauses.
+	if (_deltaTime > kMaxSimDeltaSeconds)
+		_deltaTime = kMaxSimDeltaSeconds;
+
+	DBSTREAM2( cflow << "WFGame::update: done" << std::endl; )
+
+	assert(HALScratchLmalloc.Empty());		// make sure everyone remembered to free their scratch memory
+
+	if (out_dt) *out_dt = _deltaTime;
+	return _curLevel->done() ? FrameResult::Done : FrameResult::Rendered;
+}
 
 //-----------------------------------------------------------------------------
 
 void
 WFGame::RunLevel(_DiskFile* levelFile)
 {
-    DBSTREAM3( cprogress << "WFGame::RunLevel (sizeof level = " << sizeof(Level) << std::endl; )
-    GameMailboxes gmb(*this);
-    Level* _curLevel = new (HALLmalloc) Level( levelFile, *_viewPort, *_videoMemory, &gmb );
-	DBSTREAM3( cprogress << "new level at address " << _curLevel << ", sizeof " << sizeof(Level) << std::endl; )
-	assert( ValidPtr(_curLevel));
-	DBSTREAM3( cprogress << "WFGame::loadLevel done" << std::endl; )
-#if defined(__PSX__) && defined(DO_PROFILE)
-    if ( bProfileMemLoad )
-		sys_exit( -1 );
-#endif
+	LoadLevel(levelFile);
 
-	Scalar deltaTime = Scalar::zero;
-	bool _bContinue = true;
-	DBSTREAM1 ( cprogress << "Entering main game loop\n"; );
-#if defined(__PSX__ ) && defined(DO_PROFILE)
-	profileSample sampler;
-	if ( bProfileMainLoop )
-		sampler.start();
-#endif
-
-#if defined(DO_SLOW_STEREOGRAM)
-	InitVSyncCallback(*_display);
-#endif
-	while ( !_curLevel->done() && _bContinue )
+	while ( !LevelDone() && ContinueRequested() && !HALWindowCloseRequested() )
 	{
-		assert(HALScratchLmalloc.Empty());
-		DBSTREAM1( cframeinfo << char(12) << std::endl << "Frame Info:" << std::endl; )
-		DBSTREAM2( cflow << "Top of WFGame::update" << std::endl; )
-
-#if defined( __PSX__ ) && defined(DO_PROFILE)
-  		static int frameCount;
-  		frameCount++;
-
-  		if(bProfileMainLoop && frameCount > 20*5)
-			_bContinue = false;
-#endif
-
-#if defined(DESIGNER_CHEATS)
-		if ( PIGSUserAborted() )
-		{
-			DBSTREAM1( cwarn << "Level Aborted" << std::endl; )
-			_bContinue = false;
-			while(PIGSUserAborted())
-				;						// wait for buttons to be released
-		}
-#endif
-
-		assert( ValidPtr(_curLevel ));
-		_curLevel->Validate();
-		DBSTREAM2( cflow << "WFGame::update: curLevel->Update" << std::endl; )
-		_curLevel->update(deltaTime);
-		DBSTREAM2( cflow << "WFGame::update: render scene" << std::endl; )
-
-		if(_curLevel->camera()->ValidView())
-		{
-			_display->RenderBegin();
-#if defined(DO_SLOW_STEREOGRAM)
-			int localOffset = vsyncCallbackInterface.orderTableOffset ^ 2;
-			int secondLocalOffset = localOffset+1;
-			vsyncCallbackInterface.constructLock = localOffset;
-			if(localOffset == vsyncCallbackInterface.renderLock)
-			{
-				secondLocalOffset = localOffset;
-				localOffset = secondLocalOffset+1;
-			}
-
-			vsyncCallbackInterface.constructLock = localOffset;
-			_display->SetConstructionOrderTableIndex(localOffset);
-			assert(localOffset != vsyncCallbackInterface.renderLock);
-			if(localOffset == vsyncCallbackInterface.renderLock)
-				printf(__FILE__ ":%d: renderLock falied\n",__LINE__);
-			_display->ClearConstructionOrderTable();
-			_curLevel->RenderScene();
-			assert(localOffset != vsyncCallbackInterface.renderLock);
-
-			while(secondLocalOffset == vsyncCallbackInterface.renderLock)
-				;				        // lock waiting for renderer to catch up
-
-			vsyncCallbackInterface.constructLock = secondLocalOffset;
-			assert(secondLocalOffset != vsyncCallbackInterface.renderLock);
-			if(secondLocalOffset == vsyncCallbackInterface.renderLock)
-				printf(__FILE__ ":%d: renderLock falied\n",__LINE__);
-			_display->SetConstructionOrderTableIndex(secondLocalOffset);
-			_display->ClearConstructionOrderTable();
-			_curLevel->RenderScene();
-			assert(secondLocalOffset != vsyncCallbackInterface.renderLock);
-
-			vsyncCallbackInterface.constructLock = -1;
-			vsyncCallbackInterface.orderTableOffset ^= 2;
-			vsyncCallbackInterface.pagesDirty[0] = 1;
-			vsyncCallbackInterface.pagesDirty[1] = 1;
-#else
-			_curLevel->RenderScene();
-#endif
-			_display->RenderEnd();
-		}
-#if DO_ASSERTIONS
-		else
-			AssertMsg(_curLevel->LevelClock().Current() < SCALAR_CONSTANT(10),"No Valid View after 10 seconds");
-#endif
-
-		DBSTREAM2( cflow << "WFGame::update: page flip" << std::endl; )
-#if defined(DO_SLOW_STEREOGRAM)
-		deltaTime = VSyncCallBackReadVSyncCount();
-#else
-		deltaTime = _display->PageFlip();
-#endif
-#if defined(__PSX__)
-//		cscreen << "deltaTime = " << deltaTime << ", frame rate = " << Scalar::one / deltaTime << std::endl;
-#endif
-		DBSTREAM2( cflow << "WFGame::update: done" << std::endl; )
-
-		assert(HALScratchLmalloc.Empty());		// make sure everyone remembered to free their scratch memory
+		StepFrame(true);
+		PollLevelMenu();
 	}
-	_display->PageFlip();			    // insure no pending ordertable renderings
-	_display->PageFlip();
-#if defined(DO_SLOW_STEREOGRAM)
-	UnInitVSyncCallback();
-#endif
-
-#if defined(__PSX__ ) && defined(DO_PROFILE)
-	if ( bProfileMainLoop )
-	{
-		sampler.stop();
-		sampler.save( "mainloop.smp" );
-		printf("sampler done\n");
-		sys_exit(0);
-	}
-#endif
 
 #pragma message ("KTS: write code to handle lives and restarting same level, etc.")
 	DBSTREAM1( std::cout << ", _bContinue = " << _bContinue << ", _curLevel->done() = " << _curLevel->done() << std::endl; )
 
-	MEMORY_DELETE(HALLmalloc,_curLevel,Level);
-	_curLevel = NULL;
+	UnloadLevel();
 }
+
+//==============================================================================
+// Level menu (game/level_menu.h; docs/plans/2026-10-01-level-menu-selector.md)
+
+void
+WFGame::PollLevelMenu()
+{
+	levelmenu::ScriptFrame f;
+	if (levelmenu::Script().Next(&f))		// wf_game --menu-input=...: back/quit at scripted frames
+	{
+		if (f.back) levelmenu::RequestReturn();
+		if (f.quit) HALRequestClose();
+	}
+	// Back to the menu: the same early exit as the "level aborted" cheat
+	// (_bContinue = false ends RunLevel), with LEVEL_TO_RUN = "ask the player",
+	// so the next pass of RunGameScript's loop shows the menu again. Only while
+	// a menu bundle runs; elsewhere the request is left alone.
+	if (_levelMenuActive && levelmenu::ConsumeReturnRequest())
+	{
+        if(wfprops::host().modal){wfprops::host().back();return;}
+		levelmenu::Log("back to the menu");
+		_desiredLevelNum = levelmenu::kAskPlayer;
+		_bContinue = false;
+	}
+}
+
+//-----------------------------------------------------------------------------
+
+static_assert(levelmenu::kButtonA == EJ_BUTTONF_A && levelmenu::kButtonUp == EJ_BUTTONF_UP
+              && levelmenu::kButtonDown == EJ_BUTTONF_DOWN, "level_menu.h's button bits must be the engine's");
+
+int
+WFGame::RunLevelMenu()
+{
+#if defined(DO_CD_IFF)
+	using namespace levelmenu;
+	assert(ValidPtr(_gameFile));
+
+	// The TOC sector, read again here (DiskTOC keeps no tags), and the MENU chunk.
+	std::vector<uint8_t> sector(DiskFileCD::_SECTOR_SIZE);
+	_gameFile->SeekRandom(0);
+	_gameFile->ReadBytes(sector.data(), int32(sector.size()));
+	std::vector<TocEntry> toc;
+	TocEntry menuEntry{};
+	int levelCount = 0;
+	if (!ParseToc(sector.data(), sector.size(), &toc) || !FindMenu(toc, &menuEntry, &levelCount))
+	{
+		levelmenu::Log("no MENU chunk in cd.iff: starting level 0");
+		return 0;
+	}
+	const size_t sectors = (size_t(menuEntry.size) + DiskFileCD::_SECTOR_SIZE - 1) / DiskFileCD::_SECTOR_SIZE;
+	std::vector<uint8_t> chunk(sectors * DiskFileCD::_SECTOR_SIZE);
+	_gameFile->SeekRandom(int32(menuEntry.offset));
+	_gameFile->ReadBytes(chunk.data(), int32(chunk.size()));
+	Bundle bundle;
+	std::string err;
+	if (!ParseMenu(chunk.data(), menuEntry.size, levelCount, &bundle, &err))
+	{
+		levelmenu::Log("bad MENU chunk (%s): starting level 0", err.c_str());
+		return 0;
+	}
+	const int autoLevel = AutoPick(bundle);
+	if (autoLevel >= 0)
+	{
+		levelmenu::Log("%zu entr%s, no menu: LEVEL_TO_RUN=%d",
+		        bundle.entries.size(), bundle.entries.size() == 1 ? "y" : "ies", autoLevel);
+		return autoLevel;
+	}
+	if (!Drawer())
+	{
+		levelmenu::Log("no menu drawer on this platform: LEVEL_TO_RUN=%d (%s)",
+		        bundle.entries[0].level, bundle.entries[0].name.c_str());
+		return bundle.entries[0].level;
+	}
+
+	_levelMenuActive = true;
+	SetMenuRunning(true);
+	SetSelectorVisible(true);
+#ifdef WF_RUNTIME_DIAGNOSTICS
+	DebugServer_DiagnosticLevel(-1);
+#endif
+	Menu menu(bundle, _levelMenuCursor, PlatformHint());
+	levelmenu::Log("showing %zu entries (\"%s\"), cursor on %d",
+	        bundle.entries.size(), bundle.title.c_str(), menu.Cursor());
+
+#if DESIGNER_CHEATS
+	{
+		// The arcade HUD (gfx/gl/display.cc PageFlip) draws while any of these is set;
+		// they still hold the last level's values when Backspace brought us back here.
+		extern int wf_hud_score, wf_hud_timer, wf_hud_lives, wf_hud_game_over;
+		extern int wf_hud_marble_state, wf_hud_entering_initials, wf_moon_overlay_enabled;
+		wf_hud_score = wf_hud_timer = wf_hud_lives = wf_hud_game_over = 0;
+		wf_hud_marble_state = wf_hud_entering_initials = wf_moon_overlay_enabled = 0;
+	}
+#endif
+
+	IJoystick stick = JoystickNew(EJW_JOYSTICK1);
+	std::vector<PhonepadRect> rects;
+	std::vector<bitmaptext::Quad> glyphs;
+	_display->ResetTime();
+	int64_t nowMs = 0;
+	int lastCursor = menu.Cursor();
+	while (!HALWindowCloseRequested())
+	{
+		if (HALIsSuspended())			// Android onPause: no surface to draw into (as StepFrame)
+		{
+			HALPumpSuspendedEvents();
+        wfprops::host().suspend();
+#ifdef WF_RUNTIME_DIAGNOSTICS
+			DebugServer_DiagnosticPump(nullptr, true);
+#endif
+			usleep(16000);
+			continue;
+		}
+		uint32_t buttons = 0;
+		ScriptFrame f;
+		if (Script().Next(&f))			// --menu-input: the script drives the menu
+		{
+			buttons = f.buttons;
+			if (f.quit || f.back) HALRequestClose();
+		}
+		else
+			buttons = uint32_t(JoystickGetButtonsF(stick));
+#ifdef WF_RUNTIME_DIAGNOSTICS
+        DebugServer_DiagnosticBegin(false, "selector", menu.Cursor());
+#endif
+        if(ConsumeReturnRequest()){if(wfprops::host().modal)wfprops::host().back();else HALRequestClose();}
+        auto& ps=planted::state();ps.selector=bundle.entries[size_t(menu.Cursor())].name=="Planted Tank";
+        if(ps.selector){planted::registerSettings();wfprops::host().bind(&planted::previewProperties());}
+        else wfprops::host().bind(nullptr);
+        static uint32_t settingsPrevious=0;uint32_t settingsEdge=buttons&~settingsPrevious;settingsPrevious=buttons;
+        if(ps.selector&&!wfprops::host().modal&&(settingsEdge&(1u<<13)))planted::open(buttons);
+        wfprops::host().gesture(buttons,0);
+        propertyui::inputHost(buttons);
+        if(ps.pending){menu.Update(kButtonA,nowMs);menu.Update(0,nowMs+1);ps.pending=false;}
+        else if(!wfprops::host().modal&&!wfprops::host().waitingForRelease()){
+            menu.Update(buttons, nowMs);
+            wfdiag::Consume("selector", menu.WaitingForRelease()?"waiting-for-release":"menu-update", buttons);
+        }
+#ifdef WF_RUNTIME_DIAGNOSTICS
+        DebugServer_DiagnosticPump(nullptr);
+#endif
+		if (menu.Cursor() != lastCursor)
+		{
+			lastCursor = menu.Cursor();
+			levelmenu::Log("cursor on %d (%s)", lastCursor, bundle.entries[size_t(lastCursor)].name.c_str());
+		}
+		if (menu.Done())
+			break;
+		int w = 0, h = 0;
+		_display->GetSurfaceSize(w, h);
+        // The settings screens rebuild every frame; the menu only when it changed, so it
+        // must rebuild once they close (they share the rectangle and glyph lists).
+        if(wfprops::host().modal){rects.clear();glyphs.clear();propertyui::buildHost(w,h,rects,&glyphs);menu.Invalidate();}
+        else menu.Build(w, h, &rects, &glyphs);
+		_display->RenderBegin();
+		Drawer()(rects.data(), int(rects.size()), w, h);
+		wfui::Draw(glyphs, w, h);		// the text, over the rectangles (game/ui_font.hp)
+		_display->RenderEnd();
+		nowMs += int64_t(_display->PageFlip().AsFloat() * 1000.0f);	// also pumps the window's input
+	}
+	JoystickDelete(stick);
+	wfprops::host().bind(nullptr);
+	planted::state().selector=false;
+	SetSelectorVisible(false);
+	ConsumeReturnRequest();			// a Backspace pressed while the menu was up is not for the next level
+	_levelMenuCursor = menu.Cursor();
+	const int level = menu.ChosenLevel();
+	levelmenu::Log("LEVEL_TO_RUN=%d (%s)", level, bundle.entries[size_t(menu.Cursor())].name.c_str());
+	return level;
+#else
+	return 0;
+#endif
+}
+
+//==============================================================================
+
+#if defined(__EMSCRIPTEN__)
+//-----------------------------------------------------------------------------
+// v2 web main loop (plan Phase 7). One WFGame is live for the page, so a
+// file-static back-pointer is enough for the C-ABI emscripten callback to reach
+// it. This replaces RunLevel's blocking while loop + per-frame ASYNCIFY yield.
+
+namespace {
+	WFGame*    s_webGame      = nullptr;
+	_DiskFile* s_webLevelFile = nullptr;
+	void WebMainLoopThunk() { assert(s_webGame); s_webGame->WebTick(); }
+}
+
+void
+WFGame::RunLevelWeb(_DiskFile* levelFile)
+{
+	s_webGame      = this;
+	s_webLevelFile = levelFile;     // kept alive (chunk streaming) until WebTick unloads
+	LoadLevel(levelFile);
+
+	// fps=0 → requestAnimationFrame cadence; simulate_infinite_loop=1 throws the
+	// Emscripten 'unwind' to escape the C stack and keep the runtime alive with
+	// NO ASYNCIFY. This call never returns; the browser now drives WebTick, so
+	// the HALStart/PIGSMain teardown after us is intentionally skipped (the page
+	// owns process lifetime — same as any emscripten_set_main_loop app).
+	emscripten_set_main_loop(WebMainLoopThunk, 0, 1);
+}
+
+void
+WFGame::WebTick()
+{
+	// Same termination predicate as RunLevel's while condition; on the web -L
+	// path there is no next level, so we stop (the last frame stays presented).
+	if ( LevelDone() || !ContinueRequested() || HALWindowCloseRequested() )
+	{
+		emscripten_cancel_main_loop();
+		UnloadLevel();
+		if (s_webLevelFile)
+		{
+			MEMORY_DELETE(HALLmalloc, s_webLevelFile, DiskFile);
+			s_webLevelFile = nullptr;
+		}
+		return;
+	}
+	StepFrame(true);                // browser composites the canvas when this returns
+}
+#endif // __EMSCRIPTEN__
+
+#if defined(__EMSCRIPTEN__) && defined(WF_ENABLE_EDITOR)
+//-----------------------------------------------------------------------------
+// Web editor main loop. The browser owns cadence, so RunEditor's blocking
+// for(;;) is inverted into a per-frame callback (same shape as RunLevelWeb).
+// build → StepFrame(false) → present is preserved (the zero-latency local-edit
+// invariant). engine/wf_edit/main.cc registers the build/present callbacks via
+// SetEditorFrameCallbacks before HALStart, exactly as the native editor does.
+
+namespace {
+	WFGame*    s_webEditorGame = nullptr;
+	_DiskFile* s_webEditorDf   = nullptr;
+	void WebEditorLoopThunk() { assert(s_webEditorGame); s_webEditorGame->WebTickEditor(); }
+}
+
+void
+WFGame::RunEditorWeb()
+{
+	extern const char* gLevelOverridePath;
+	AssertMsg(gLevelOverridePath, "--editor requires -L<level-path>");
+
+	_DiskFile* df = ConstructDiskFile(const_cast<char*>(gLevelOverridePath), HALLmalloc);
+	assert(ValidPtr(df));
+	df->SeekRandom(DiskFileCD::_SECTOR_SIZE);
+	LoadLevel(df);
+
+	s_webEditorGame = this;
+	s_webEditorDf   = df;     // kept alive until WebTickEditor unloads
+
+	// Never returns; the browser drives WebTickEditor each animation frame. The
+	// HALStart / main() teardown after us is intentionally skipped (the page
+	// owns process lifetime) — same as RunLevelWeb.
+	emscripten_set_main_loop(WebEditorLoopThunk, 0, 1);
+}
+
+void
+WFGame::WebTickEditor()
+{
+	Scalar dt;
+	if (!sEditorBuild || !sEditorBuild(sEditorCtx))
+	{
+		emscripten_cancel_main_loop();
+		UnloadLevel();
+		if (s_webEditorDf)
+		{
+			MEMORY_DELETE(HALLmalloc, s_webEditorDf, _DiskFile);
+			s_webEditorDf = nullptr;
+		}
+		return;
+	}
+	StepFrame(false, &dt);
+	if (sEditorPresent)
+		sEditorPresent(sEditorCtx);
+}
+#endif // __EMSCRIPTEN__ && WF_ENABLE_EDITOR
 
 //==============================================================================
 

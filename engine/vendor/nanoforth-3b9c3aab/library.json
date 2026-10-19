@@ -1,0 +1,22 @@
+{
+  "name": "nanoFORTH",
+  "keywords": "Forth, Nano, UNO, multi-task",
+  "description": "Interactive via Serial Monitor or Bluetooth. Multi-tasking. Can save 'app' to EEPROM, autorun on reboot.",
+  "authors":
+  [
+    {
+      "name": "Chochain Lee",
+      "email": "chochain@yahoo.com",
+      "maintainer": true
+    }
+  ],
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/chochain/nanoforth.git"
+  },
+  "version": "2.2.0",
+  "license": "MIT",
+  "frameworks": "arduino",
+  "platforms": "atmelmegaavr"
+}

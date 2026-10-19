@@ -1,0 +1,58 @@
+{
+  "id": "B-29d91b215624",
+  "owner": "50834354a173f73472469f04",
+  "targets": [
+    "chromecast-test-01",
+    "chromecast-test-02"
+  ],
+  "created": 1791158567.8361526,
+  "jobs": [
+    {
+      "id": "J-48b01b19fc82",
+      "owner": "50834354a173f73472469f04",
+      "accepted": 1791158567.8363633,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "app": "bomberman",
+        "workflow": "install",
+        "apk": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40.apk",
+        "device": "chromecast-test-01"
+      },
+      "device": "chromecast-test-01",
+      "generation": 73,
+      "cancel": 0,
+      "error": null,
+      "started": 1791158574.7415729,
+      "finished": 1791158591.207045,
+      "worker_pid": 546510,
+      "recovery_resolved": 0,
+      "installation": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40.apk",
+      "target": "chromecast-test-01"
+    },
+    {
+      "id": "J-a9096e12bf4a",
+      "owner": "50834354a173f73472469f04",
+      "accepted": 1791158567.8365777,
+      "state": "failed",
+      "phase": "failed",
+      "request": {
+        "app": "bomberman",
+        "workflow": "install",
+        "apk": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40.apk",
+        "device": "chromecast-test-02"
+      },
+      "device": "chromecast-test-02",
+      "generation": 23,
+      "cancel": 0,
+      "error": "APK installed, but launcher artwork is stale or unverified after bounded recovery; inspect launcher evidence.",
+      "started": 1791158571.9930477,
+      "finished": 1791158592.658144,
+      "worker_pid": 546470,
+      "recovery_resolved": 0,
+      "installation": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40.apk",
+      "target": "chromecast-test-02"
+    }
+  ],
+  "state": "failed"
+}

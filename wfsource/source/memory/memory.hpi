@@ -71,7 +71,6 @@ operator delete(void* value, Memory& memory)
 #endif
 //==============================================================================
 
-#if !defined(__WIN__)
 
 #if DO_ASSERTIONS
 inline void *
@@ -91,7 +90,6 @@ operator new[] (size_t size, Memory& memory)
 	memory.Validate();
 	return memory.Allocate(size ASSERTIONS( COMMA "Unknown Array" COMMA 0));
 }
-#endif
 //#endif
 
 //inline void

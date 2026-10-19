@@ -1,0 +1,3585 @@
+{
+  "job": {
+    "id": "J-e01b28ace7cd",
+    "owner": "3806194e6c401f5be6d452fc",
+    "accepted": 1791476174.6984398,
+    "state": "running",
+    "phase": "restoring",
+    "request": {
+      "app": "parmenides",
+      "apk": "dcd09d9ac4eb55d80398e1850e6f47e373f0f39de0366c073f90962c6b1dec1e.apk",
+      "duration": 135.0,
+      "workflow": "record",
+      "device": "chromecast-test-01"
+    },
+    "device": "chromecast-test-01",
+    "generation": 480,
+    "cancel": 0,
+    "error": null,
+    "started": 1791476215.8440592,
+    "finished": null,
+    "worker_pid": 2241374,
+    "recovery_resolved": 0,
+    "installation": null
+  },
+  "device": {
+    "id": "chromecast-test-01",
+    "serial": "2628105GN0GT7C",
+    "model": "Chromecast HD",
+    "device": "boreal",
+    "android": "14",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "tls",
+    "endpoint": "192.168.4.43:41277",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:4c0d:b8a4:e53a:49a8",
+      "fd5d:59ce:7438:1:b56b:d5f6:5f9d:1068",
+      "fd5d:59ce:7438:1:57e3:5f71:591b:6993",
+      "fd5d:59ce:7438:1:5817:ea6d:792c:d2e5",
+      "fd5d:59ce:7438:1:7104:7f7e:6f75:edbe",
+      "fd5d:59ce:7438:1:581b:d19a:27a5:c4db",
+      "fd5d:59ce:7438:1:3b82:772d:8d07:d5f6",
+      "fd5d:59ce:7438:1:401f:2bff:fe13:98df",
+      "fe80::401f:2bff:fe13:98df"
+    ],
+    "generation": 480,
+    "last_seen": 1791476216.3429003,
+    "boot_id": "9ec069a1-861f-449a-a777-29554a2f1ed4",
+    "sdk": "34",
+    "reservation": null
+  },
+  "result": "completed",
+  "error": null,
+  "workflow_error": null,
+  "cleanup_error": null,
+  "cleanup_attempts": [],
+  "failure_phase": null,
+  "workflow_elapsed": 196.33777594566345,
+  "cleanup_elapsed": 1.5167536735534668,
+  "failure_category": null,
+  "cleanup_verified": true,
+  "recovery_context": {
+    "previous": "com.google.android.apps.tv.launcherx/.home.HomeActivity",
+    "package": "org.worldfoundry.wf_game.parmenides",
+    "record_pid": null,
+    "capture_remote": [],
+    "launcher_touched": false,
+    "uncertain_install": false,
+    "record_started": true,
+    "boot_id": "9ec069a1-861f-449a-a777-29554a2f1ed4"
+  },
+  "restoration": "home-fallback: previous app launcher unavailable",
+  "commands": [
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791476216.1053798,
+      "end": 1791476216.109106,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "connect",
+        "192.168.4.43:41277"
+      ],
+      "start": 1791476216.1104083,
+      "end": 1791476216.1992753,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.serialno"
+      ],
+      "start": 1791476216.2005205,
+      "end": 1791476216.3425562,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/sys/kernel/random/boot_id"
+      ],
+      "start": 1791476216.3444757,
+      "end": 1791476216.450766,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.model"
+      ],
+      "start": 1791476216.4519284,
+      "end": 1791476216.5691376,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.release"
+      ],
+      "start": 1791476216.570352,
+      "end": 1791476216.634531,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.sdk"
+      ],
+      "start": 1791476216.6356442,
+      "end": 1791476216.7163565,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.device"
+      ],
+      "start": 1791476216.7180376,
+      "end": 1791476216.8132846,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.cpu.abilist"
+      ],
+      "start": 1791476216.8149073,
+      "end": 1791476216.9237094,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "ip -6 addr show wlan0"
+      ],
+      "start": 1791476216.9249206,
+      "end": 1791476217.0147357,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476217.039709,
+      "end": 1791476217.1730435,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "install",
+        "-r",
+        "/var/lib/wf-device-coordinator/inputs/dcd09d9ac4eb55d80398e1850e6f47e373f0f39de0366c073f90962c6b1dec1e.apk"
+      ],
+      "start": 1791476217.2781022,
+      "end": 1791476225.3335598,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pm path org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476225.334759,
+      "end": 1791476225.6417284,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "sha256sum '/data/app/~~icRibTYcxkxgQz2OPnuRIw==/org.worldfoundry.wf_game.parmenides-sucFaMEPXgtPQ4qUeBP8VQ==/base.apk'"
+      ],
+      "start": 1791476225.6431718,
+      "end": 1791476226.1804652,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am force-stop org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476226.212256,
+      "end": 1791476226.4285069,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_WAKEUP"
+      ],
+      "start": 1791476226.429808,
+      "end": 1791476226.6952593,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -n org.worldfoundry.wf_game.parmenides/android.app.NativeActivity"
+      ],
+      "start": 1791476226.846644,
+      "end": 1791476227.8475327,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476232.8506055,
+      "end": 1791476233.1859937,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476233.1876974,
+      "end": 1791476233.3042517,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_BACK"
+      ],
+      "start": 1791476233.3057463,
+      "end": 1791476233.48999,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476234.6418216,
+      "end": 1791476234.7731955,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476234.7757225,
+      "end": 1791476234.869956,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476234.871965,
+      "end": 1791476234.9615703,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476249.9648066,
+      "end": 1791476250.1431584,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476250.145802,
+      "end": 1791476250.2452316,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "screenrecord --time-limit 135 /data/local/tmp/wf-J-e01b28ace7cd.mp4 >/dev/null 2>&1 & echo $!"
+      ],
+      "start": 1791476250.2469275,
+      "end": 1791476250.29948,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476250.3242161,
+      "end": 1791476250.4323626,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476250.4343255,
+      "end": 1791476250.5355556,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476250.53719,
+      "end": 1791476250.6211815,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476251.1238682,
+      "end": 1791476251.4879713,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476251.490252,
+      "end": 1791476251.7322402,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476251.733534,
+      "end": 1791476251.9093735,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476252.4124715,
+      "end": 1791476252.785386,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476252.7867718,
+      "end": 1791476253.0478222,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476253.0489986,
+      "end": 1791476253.252516,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476253.7547154,
+      "end": 1791476254.1466146,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476254.1482792,
+      "end": 1791476254.5201967,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476254.521455,
+      "end": 1791476254.8359106,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476255.3379967,
+      "end": 1791476255.8564847,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476255.857944,
+      "end": 1791476256.1636271,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476256.1651106,
+      "end": 1791476256.2691298,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476256.7724411,
+      "end": 1791476257.003066,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476257.0045514,
+      "end": 1791476257.1798959,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476257.1813333,
+      "end": 1791476257.296576,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476257.8001454,
+      "end": 1791476258.027513,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476258.0292897,
+      "end": 1791476258.243768,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476258.2457037,
+      "end": 1791476258.5386963,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476259.0408676,
+      "end": 1791476259.4416664,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476259.4436264,
+      "end": 1791476259.6020133,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476259.6032622,
+      "end": 1791476259.6939192,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476260.197515,
+      "end": 1791476260.508438,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476260.5103488,
+      "end": 1791476260.687153,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476260.6886039,
+      "end": 1791476260.8220708,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476261.3244212,
+      "end": 1791476261.5271773,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476261.5283966,
+      "end": 1791476261.7425025,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476261.7440538,
+      "end": 1791476261.9025712,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476262.4053223,
+      "end": 1791476262.6997418,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476262.7018602,
+      "end": 1791476262.9611542,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476262.963221,
+      "end": 1791476263.120426,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476263.6237793,
+      "end": 1791476264.0608537,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476264.063018,
+      "end": 1791476264.361936,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476264.36339,
+      "end": 1791476264.7328231,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476265.235349,
+      "end": 1791476265.72436,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476265.726364,
+      "end": 1791476265.9417856,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476265.9433985,
+      "end": 1791476266.1554642,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476266.657775,
+      "end": 1791476266.9119337,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476266.9135478,
+      "end": 1791476267.187299,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476267.188964,
+      "end": 1791476267.4604828,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476267.962559,
+      "end": 1791476268.3317134,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476268.3335772,
+      "end": 1791476268.443042,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476268.444581,
+      "end": 1791476268.5434666,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476269.045967,
+      "end": 1791476269.3723586,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476269.3747318,
+      "end": 1791476269.5500968,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476269.5517046,
+      "end": 1791476269.6897755,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476270.1920748,
+      "end": 1791476271.104421,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476271.1065192,
+      "end": 1791476271.2048852,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476271.206615,
+      "end": 1791476271.3385038,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476271.8412945,
+      "end": 1791476272.1835096,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476272.184926,
+      "end": 1791476272.4537628,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476272.4555614,
+      "end": 1791476272.5766935,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476273.080155,
+      "end": 1791476273.4948056,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476273.4964821,
+      "end": 1791476273.727167,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476273.7285497,
+      "end": 1791476273.9323866,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476274.436007,
+      "end": 1791476274.6259687,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476274.6275344,
+      "end": 1791476274.9171815,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476274.918563,
+      "end": 1791476275.3230677,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476275.8257065,
+      "end": 1791476276.1134062,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476276.1151764,
+      "end": 1791476276.3346965,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476276.3359637,
+      "end": 1791476276.472936,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476276.9756484,
+      "end": 1791476277.3124516,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476277.3148854,
+      "end": 1791476277.4831662,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476277.4845917,
+      "end": 1791476277.688183,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476278.190756,
+      "end": 1791476278.3227177,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476278.3243394,
+      "end": 1791476278.4843116,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476278.4858115,
+      "end": 1791476278.6165307,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476279.118869,
+      "end": 1791476279.293292,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476279.2953598,
+      "end": 1791476279.421557,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476279.423073,
+      "end": 1791476279.6788127,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476280.1819937,
+      "end": 1791476280.4049623,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476280.406506,
+      "end": 1791476280.5691857,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476280.5706604,
+      "end": 1791476280.7461534,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476281.2488568,
+      "end": 1791476281.4228857,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476281.424339,
+      "end": 1791476281.6472597,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476281.6486812,
+      "end": 1791476281.7967484,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476282.2997696,
+      "end": 1791476282.708329,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476282.7098665,
+      "end": 1791476282.913627,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476282.9149916,
+      "end": 1791476283.1179972,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476283.6207166,
+      "end": 1791476283.943662,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476283.9452565,
+      "end": 1791476284.217307,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476284.2192624,
+      "end": 1791476284.3860314,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476284.8886468,
+      "end": 1791476285.1341114,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476285.135803,
+      "end": 1791476285.2836106,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476285.2851074,
+      "end": 1791476285.4962456,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476285.9991114,
+      "end": 1791476286.5129647,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476286.5146408,
+      "end": 1791476286.6307485,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476286.632379,
+      "end": 1791476286.8748395,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476287.3795316,
+      "end": 1791476287.6563008,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476287.6578488,
+      "end": 1791476287.793504,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476287.7951632,
+      "end": 1791476287.9983194,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476288.5007021,
+      "end": 1791476288.9289608,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476288.9308197,
+      "end": 1791476289.0894594,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476289.09073,
+      "end": 1791476289.1966145,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476289.699348,
+      "end": 1791476289.9668036,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476289.9683764,
+      "end": 1791476290.1098235,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476290.1113486,
+      "end": 1791476290.2620733,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476290.7646136,
+      "end": 1791476291.019621,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476291.0212362,
+      "end": 1791476291.168899,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476291.1702828,
+      "end": 1791476291.3109727,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476291.813288,
+      "end": 1791476292.1281435,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476292.1299412,
+      "end": 1791476292.2635486,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476292.2648711,
+      "end": 1791476292.3995237,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476292.9052615,
+      "end": 1791476293.1542277,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476293.1557772,
+      "end": 1791476293.316242,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476293.3191037,
+      "end": 1791476293.4729936,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476293.9754825,
+      "end": 1791476294.3187225,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476294.3203495,
+      "end": 1791476294.4879642,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476294.4898922,
+      "end": 1791476294.634039,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476295.1364274,
+      "end": 1791476295.3157823,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476295.3173044,
+      "end": 1791476295.4667299,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476295.4689767,
+      "end": 1791476295.6779923,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476296.1806278,
+      "end": 1791476296.3639805,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476296.3661494,
+      "end": 1791476296.5474663,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476296.5487597,
+      "end": 1791476296.6813505,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476297.1838932,
+      "end": 1791476297.4329176,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476297.4345803,
+      "end": 1791476297.6173978,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476297.618665,
+      "end": 1791476297.7824254,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476298.2850637,
+      "end": 1791476298.6663754,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476298.6678739,
+      "end": 1791476298.8572495,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476298.8586214,
+      "end": 1791476299.1237862,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476299.6262615,
+      "end": 1791476300.1154351,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476300.11715,
+      "end": 1791476300.3690283,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476300.3710527,
+      "end": 1791476300.4919386,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476300.994327,
+      "end": 1791476301.3776226,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476301.3792481,
+      "end": 1791476301.5627475,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476301.5640724,
+      "end": 1791476301.714411,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476302.2166088,
+      "end": 1791476302.571717,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476302.573285,
+      "end": 1791476302.7841902,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476302.7855332,
+      "end": 1791476302.9885263,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476303.490862,
+      "end": 1791476303.77786,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476303.7797956,
+      "end": 1791476303.9952452,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476303.9969625,
+      "end": 1791476304.157181,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476304.6603522,
+      "end": 1791476304.8040879,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476304.806011,
+      "end": 1791476305.0292969,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476305.0308266,
+      "end": 1791476305.2047536,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476305.707802,
+      "end": 1791476306.020394,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476306.0227242,
+      "end": 1791476306.2160594,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476306.2174377,
+      "end": 1791476306.3687985,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476306.8721406,
+      "end": 1791476307.2661343,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476307.2677336,
+      "end": 1791476307.4256868,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476307.4274201,
+      "end": 1791476307.6082351,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476308.1113982,
+      "end": 1791476308.4374852,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476308.4393213,
+      "end": 1791476308.6216063,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476308.6230657,
+      "end": 1791476308.7542305,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476309.2570689,
+      "end": 1791476309.5118787,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476309.5143886,
+      "end": 1791476309.684263,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476309.6857224,
+      "end": 1791476309.8859239,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476310.3888757,
+      "end": 1791476310.5979598,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476310.5999796,
+      "end": 1791476310.781599,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476310.7833357,
+      "end": 1791476310.9536154,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476311.4563062,
+      "end": 1791476311.6285582,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476311.6304069,
+      "end": 1791476311.7993054,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476311.801166,
+      "end": 1791476311.9368489,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476312.4392364,
+      "end": 1791476312.6418755,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476312.6432476,
+      "end": 1791476312.7978673,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476312.799766,
+      "end": 1791476312.9472632,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476313.4509122,
+      "end": 1791476313.6904066,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476313.6920567,
+      "end": 1791476313.9540155,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476313.9555392,
+      "end": 1791476314.2072392,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476314.71023,
+      "end": 1791476314.939914,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476314.9438827,
+      "end": 1791476315.1385088,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476315.1402702,
+      "end": 1791476315.2854657,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476315.7880104,
+      "end": 1791476316.0943744,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476316.0964758,
+      "end": 1791476316.2267742,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476316.2282186,
+      "end": 1791476316.4015944,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476316.904198,
+      "end": 1791476317.2086906,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476317.2109764,
+      "end": 1791476317.3795776,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476317.3809958,
+      "end": 1791476317.5351493,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476318.0378988,
+      "end": 1791476318.1992488,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476318.2018301,
+      "end": 1791476318.3846343,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476318.386331,
+      "end": 1791476318.4894173,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476318.9939969,
+      "end": 1791476319.3091774,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476319.3114543,
+      "end": 1791476319.5179057,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476319.5204325,
+      "end": 1791476319.7233,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476320.2260222,
+      "end": 1791476320.4717944,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476320.473807,
+      "end": 1791476320.6659062,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476320.6674824,
+      "end": 1791476320.8538702,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476321.3575063,
+      "end": 1791476321.8664222,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476321.8686447,
+      "end": 1791476321.9768462,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476321.9781544,
+      "end": 1791476322.1377847,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476322.6399362,
+      "end": 1791476323.1929595,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476323.1985633,
+      "end": 1791476323.436364,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476323.43831,
+      "end": 1791476323.6345696,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476324.1375368,
+      "end": 1791476324.3791473,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476324.3813622,
+      "end": 1791476324.563606,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476324.5651627,
+      "end": 1791476324.8419712,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476325.3455415,
+      "end": 1791476325.81803,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476325.81945,
+      "end": 1791476325.989173,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476325.990901,
+      "end": 1791476326.155586,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476326.6584015,
+      "end": 1791476326.889937,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476326.8915825,
+      "end": 1791476327.0979116,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476327.0991642,
+      "end": 1791476327.2824547,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476327.784888,
+      "end": 1791476327.9291537,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476327.9307203,
+      "end": 1791476328.173711,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476328.1756139,
+      "end": 1791476328.368183,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476328.8709707,
+      "end": 1791476329.1498284,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476329.1521943,
+      "end": 1791476329.3793573,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476329.380681,
+      "end": 1791476329.6119852,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476330.1170685,
+      "end": 1791476330.4194098,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476330.420892,
+      "end": 1791476330.6640496,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476330.6654077,
+      "end": 1791476330.8401577,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476331.343615,
+      "end": 1791476331.6341956,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476331.6364145,
+      "end": 1791476332.0340395,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476332.0356975,
+      "end": 1791476332.198309,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476332.7004516,
+      "end": 1791476332.8910716,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476332.8931527,
+      "end": 1791476333.0413952,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476333.0430298,
+      "end": 1791476333.1476638,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476333.6500356,
+      "end": 1791476333.907351,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476333.9099565,
+      "end": 1791476334.0783398,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476334.0797718,
+      "end": 1791476334.293806,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476334.7962337,
+      "end": 1791476335.1223843,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476335.1241179,
+      "end": 1791476335.412638,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476335.4140043,
+      "end": 1791476335.5123513,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476336.0146048,
+      "end": 1791476336.2955046,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476336.2971122,
+      "end": 1791476336.473917,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476336.4754324,
+      "end": 1791476336.6189437,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476337.1215522,
+      "end": 1791476337.3660345,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476337.3677819,
+      "end": 1791476337.5493753,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476337.5512648,
+      "end": 1791476337.7178211,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476338.2213523,
+      "end": 1791476338.3809056,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476338.3824563,
+      "end": 1791476338.6620936,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476338.6639667,
+      "end": 1791476339.026249,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476339.5296748,
+      "end": 1791476339.884428,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476339.8860443,
+      "end": 1791476340.105972,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476340.107468,
+      "end": 1791476340.2888324,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476340.7916899,
+      "end": 1791476341.3829432,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476341.3845747,
+      "end": 1791476341.6195836,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476341.6208022,
+      "end": 1791476341.7760777,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476342.278902,
+      "end": 1791476342.61451,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476342.6161482,
+      "end": 1791476342.8339465,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476342.835333,
+      "end": 1791476342.967087,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476343.4692717,
+      "end": 1791476344.0481703,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476344.0498652,
+      "end": 1791476344.1876042,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476344.1889124,
+      "end": 1791476344.2743258,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476344.7771358,
+      "end": 1791476345.052774,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476345.055188,
+      "end": 1791476345.22858,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476345.230549,
+      "end": 1791476345.3754017,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476345.8788443,
+      "end": 1791476346.0027466,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476346.004389,
+      "end": 1791476346.130345,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476346.1318088,
+      "end": 1791476346.2786262,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476346.7811143,
+      "end": 1791476347.0000165,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476347.0016136,
+      "end": 1791476347.1746557,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476347.1764247,
+      "end": 1791476347.3766446,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476347.8793528,
+      "end": 1791476348.156563,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476348.1586971,
+      "end": 1791476348.3209352,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476348.3224869,
+      "end": 1791476348.4800565,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476348.9827607,
+      "end": 1791476349.3723164,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476349.3740292,
+      "end": 1791476349.5355961,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476349.5370476,
+      "end": 1791476349.723289,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476350.2261221,
+      "end": 1791476350.4254043,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476350.4273133,
+      "end": 1791476350.5479941,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476350.5493658,
+      "end": 1791476350.6945324,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476351.1971378,
+      "end": 1791476351.409527,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476351.4113016,
+      "end": 1791476351.5666106,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476351.567907,
+      "end": 1791476351.7295685,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476352.2332926,
+      "end": 1791476352.4132903,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476352.4157414,
+      "end": 1791476352.5718775,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476352.5734432,
+      "end": 1791476352.9617167,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476353.4647512,
+      "end": 1791476353.9201138,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476353.9217062,
+      "end": 1791476354.0990808,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476354.1006486,
+      "end": 1791476354.2889087,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476354.7918928,
+      "end": 1791476355.0114143,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476355.0131075,
+      "end": 1791476355.2125769,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476355.2138813,
+      "end": 1791476355.3322306,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476355.8350928,
+      "end": 1791476356.2068624,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476356.2085655,
+      "end": 1791476356.4744587,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476356.4775102,
+      "end": 1791476356.6216023,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476357.1240418,
+      "end": 1791476357.3934786,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476357.3951452,
+      "end": 1791476357.518693,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476357.5199873,
+      "end": 1791476357.6830003,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476358.186066,
+      "end": 1791476358.5382547,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476358.5397248,
+      "end": 1791476358.7833784,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476358.7847924,
+      "end": 1791476358.9494421,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476359.452311,
+      "end": 1791476360.0206084,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476360.022681,
+      "end": 1791476360.1194997,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476360.121047,
+      "end": 1791476360.263497,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476360.7666283,
+      "end": 1791476361.0275211,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476361.029949,
+      "end": 1791476361.557023,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476361.5586588,
+      "end": 1791476361.7909667,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476362.2944262,
+      "end": 1791476362.6861691,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476362.6879795,
+      "end": 1791476362.8324435,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476362.8337917,
+      "end": 1791476363.0487509,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476363.5509598,
+      "end": 1791476364.4855008,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476364.4870412,
+      "end": 1791476364.6663015,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476364.6677814,
+      "end": 1791476364.8110578,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476365.3147104,
+      "end": 1791476365.5225754,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476365.5241754,
+      "end": 1791476365.7540903,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476365.7560575,
+      "end": 1791476365.9996228,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476366.5020285,
+      "end": 1791476366.8119464,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476366.813883,
+      "end": 1791476366.9876623,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476366.9894288,
+      "end": 1791476367.1671586,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476367.6715343,
+      "end": 1791476368.0067809,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476368.0086114,
+      "end": 1791476368.305403,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476368.3072214,
+      "end": 1791476368.5941865,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476369.0964983,
+      "end": 1791476369.4943027,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476369.4960756,
+      "end": 1791476369.6200128,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476369.6213875,
+      "end": 1791476369.7551641,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476370.2583091,
+      "end": 1791476370.6202238,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476370.6223197,
+      "end": 1791476370.8080935,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476370.8096008,
+      "end": 1791476371.0031586,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476371.5060105,
+      "end": 1791476371.894179,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476371.8962293,
+      "end": 1791476372.0552452,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476372.0568275,
+      "end": 1791476372.2434428,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476372.7458303,
+      "end": 1791476372.8833609,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476372.8850608,
+      "end": 1791476373.0467477,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476373.0481913,
+      "end": 1791476373.2261028,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476373.7282996,
+      "end": 1791476374.0490918,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476374.0514927,
+      "end": 1791476374.2683277,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476374.2699332,
+      "end": 1791476374.4455616,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476374.9486318,
+      "end": 1791476375.1749322,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476375.176756,
+      "end": 1791476375.4806063,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476375.482061,
+      "end": 1791476375.7102582,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476376.2127364,
+      "end": 1791476376.6809812,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476376.6827478,
+      "end": 1791476376.8966365,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476376.8986166,
+      "end": 1791476377.05078,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476377.5533695,
+      "end": 1791476377.8140142,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476377.8158586,
+      "end": 1791476377.986846,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476377.988294,
+      "end": 1791476378.180707,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476378.684275,
+      "end": 1791476379.0112672,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476379.013462,
+      "end": 1791476379.2691293,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476379.2705088,
+      "end": 1791476379.371892,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476379.8741875,
+      "end": 1791476380.0635262,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476380.0657516,
+      "end": 1791476380.2335975,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476380.2350278,
+      "end": 1791476380.3773894,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476380.8799853,
+      "end": 1791476381.0667095,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476381.0687191,
+      "end": 1791476381.2539432,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476381.2552705,
+      "end": 1791476381.417321,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476381.9200177,
+      "end": 1791476382.1872008,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476382.1888397,
+      "end": 1791476382.3683639,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476382.3697002,
+      "end": 1791476382.534142,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476383.036411,
+      "end": 1791476383.3674905,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476383.3705914,
+      "end": 1791476383.610354,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476383.6118145,
+      "end": 1791476383.7995055,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476384.3030632,
+      "end": 1791476384.5663183,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476384.568454,
+      "end": 1791476384.741612,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476384.7431016,
+      "end": 1791476385.0349448,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476385.5372462,
+      "end": 1791476385.665823,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476385.6674073,
+      "end": 1791476385.817041,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476385.8183625,
+      "end": 1791476386.0846462,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476386.5876002,
+      "end": 1791476386.752696,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476386.7543554,
+      "end": 1791476386.8410199,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/9719/cmdline"
+      ],
+      "start": 1791476386.84249,
+      "end": 1791476386.9194639,
+      "returncode": 1
+    },
+    {
+      "args": [
+        "shell",
+        "stat -c %s /data/local/tmp/wf-J-e01b28ace7cd.mp4"
+      ],
+      "start": 1791476386.9211524,
+      "end": 1791476387.0011992,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "cat",
+        "/data/local/tmp/wf-J-e01b28ace7cd.mp4"
+      ],
+      "start": 1791476387.0338128,
+      "end": 1791476406.2632747,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "rm -f /data/local/tmp/wf-J-e01b28ace7cd.mp4"
+      ],
+      "start": 1791476406.2831695,
+      "end": 1791476406.3964956,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791476406.3997602,
+      "end": 1791476406.5060258,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476406.5077543,
+      "end": 1791476406.5976193,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "start": 1791476406.599493,
+      "end": 1791476408.7734506,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476408.7751985,
+      "end": 1791476408.9213989,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "logcat",
+        "-d",
+        "-v",
+        "threadtime",
+        "--pid=9633"
+      ],
+      "start": 1791476408.9227242,
+      "end": 1791476409.114471,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "tail -c 4000000 /sdcard/Android/data/org.worldfoundry.wf_game.parmenides/files/wf.log"
+      ],
+      "start": 1791476409.116002,
+      "end": 1791476411.353025,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys meminfo org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476411.3581831,
+      "end": 1791476412.0019128,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys thermalservice"
+      ],
+      "start": 1791476412.0034263,
+      "end": 1791476412.1542382,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "ps -A -o PID,ARGS"
+      ],
+      "start": 1791476412.2103193,
+      "end": 1791476412.4611156,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "rm -f /data/local/tmp/wf-J-e01b28ace7cd.mp4"
+      ],
+      "start": 1791476412.4629476,
+      "end": 1791476412.5422769,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am force-stop org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476412.5437183,
+      "end": 1791476413.0281847,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -a android.intent.action.MAIN -c android.intent.category.LEANBACK_LAUNCHER -p com.google.android.apps.tv.launcherx"
+      ],
+      "start": 1791476413.0295117,
+      "end": 1791476413.1659358,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_HOME"
+      ],
+      "start": 1791476413.167341,
+      "end": 1791476413.337137,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.parmenides"
+      ],
+      "start": 1791476413.48889,
+      "end": 1791476413.6974552,
+      "returncode": 1
+    }
+  ],
+  "finished": 1791476413.6986115,
+  "launcher": null,
+  "concurrent_jobs": [
+    "J-819e6fd27240"
+  ]
+}

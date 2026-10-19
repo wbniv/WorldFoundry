@@ -1,0 +1,38 @@
+{
+  "receipt": {
+    "apk": "/tmp/planted-tank-variants/density-cpu.apk",
+    "apk_sha256": "9430ddb98539705d4ea42bbaaedf763c20225460ffa03ace44c574faadc0529d",
+    "protocol": "30.0 s warmup; 36 s planted-tank trace (wide idle, close idle, close crawl; 12 s each); 1 run(s); SurfaceFlinger sampled every 0.75 s",
+    "serial": "",
+    "menu_index": 5,
+    "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+    "revision": "16a77ebc7d19b792bddbb0eaca2b1f420cd6c858"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#4749",
+      "frames": 1239,
+      "refresh_ms": 16.683333,
+      "p50_ms": 33.366712,
+      "p90_ms": 33.366779,
+      "p95_ms": 33.366877,
+      "p99_ms": 33.36706,
+      "worst_ms": 50.050106,
+      "fps": 29.982088869983375,
+      "missed_refresh_percent": 99.75786924939467
+    }
+  ],
+  "median": {
+    "run": 1,
+    "frames": 1239,
+    "refresh_ms": 16.683333,
+    "p50_ms": 33.366712,
+    "p90_ms": 33.366779,
+    "p95_ms": 33.366877,
+    "p99_ms": 33.36706,
+    "worst_ms": 50.050106,
+    "fps": 29.982088869983375,
+    "missed_refresh_percent": 99.75786924939467
+  }
+}

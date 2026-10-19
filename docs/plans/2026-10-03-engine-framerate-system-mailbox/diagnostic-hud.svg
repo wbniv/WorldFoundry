@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="550" viewBox="0 0 1100 550" role="img" aria-labelledby="title desc">
+  <title id="title">Proposed frame-rate diagnostic overlay</title>
+  <desc id="desc">Two mockups show steady cadence at 60 FPS and a completed 500 millisecond hitch at 2 FPS. An optional second-phase smoothed display remains separate from the raw value.</desc>
+  <style>
+    text { font-family: sans-serif; fill: #e7edf5; }
+    .muted { fill: #a8b9ce; font-size: 15px; }
+    .label { font-size: 16px; font-weight: 600; }
+    .value { font-size: 42px; font-weight: 700; }
+    .note { font-size: 16px; fill: #334155; }
+  </style>
+  <rect width="1100" height="550" fill="#f1f5f9"/>
+  <text x="36" y="42" style="fill:#0f172a;font-size:25px;font-weight:700">Frame-rate telemetry • diagnostic HUD concept</text>
+  <text x="36" y="70" class="note">Illustrative values; games opt in to displaying the mailbox readings.</text>
+  <g transform="translate(36 98)">
+    <rect width="500" height="338" rx="14" fill="#182b3c"/>
+    <path d="M0 250 L110 180 L220 220 L330 140 L500 240 L500 338 L0 338Z" fill="#25495b"/>
+    <path d="M0 295 L160 245 L290 280 L420 210 L500 270 L500 338 L0 338Z" fill="#316373"/>
+    <text x="22" y="32" class="label">A • STEADY CADENCE</text>
+    <rect x="22" y="52" width="456" height="225" rx="10" fill="#0b1423" fill-opacity=".94"/>
+    <text x="42" y="81" class="muted">PERFORMANCE / DEV OVERLAY</text>
+    <text x="42" y="116" class="label">FPS · raw</text>
+    <text x="280" y="125" class="value" style="fill:#6ee7b7">60.0</text>
+    <text x="42" y="146" class="muted">Latest interval: 16.67 ms</text>
+    <line x1="42" y1="164" x2="458" y2="164" stroke="#334155"/>
+    <text x="42" y="194" class="label">FPS · smoothed</text>
+    <text x="280" y="203" class="value" style="fill:#93c5fd">60.0</text>
+    <text x="42" y="233" class="muted">Optional Phase 2 · ≥ 0.5 s window</text>
+    <text x="42" y="256" class="muted">Diagnostic display only</text>
+  </g>
+  <g transform="translate(564 98)">
+    <rect width="500" height="338" rx="14" fill="#182b3c"/>
+    <path d="M0 250 L110 180 L220 220 L330 140 L500 240 L500 338 L0 338Z" fill="#25495b"/>
+    <path d="M0 295 L160 245 L290 280 L420 210 L500 270 L500 338 L0 338Z" fill="#316373"/>
+    <text x="22" y="32" class="label">B • AFTER AN ACTIVE HITCH</text>
+    <rect x="22" y="52" width="456" height="225" rx="10" fill="#0b1423" fill-opacity=".94"/>
+    <text x="42" y="81" class="muted">PERFORMANCE / DEV OVERLAY</text>
+    <text x="42" y="116" class="label">FPS · raw</text>
+    <text x="280" y="125" class="value" style="fill:#fbbf24">2.0</text>
+    <text x="42" y="146" class="muted">Latest interval: 500.00 ms</text>
+    <line x1="42" y1="164" x2="458" y2="164" stroke="#334155"/>
+    <text x="42" y="194" class="label">FPS · smoothed</text>
+    <text x="280" y="203" class="value" style="fill:#93c5fd">31.0</text>
+    <text x="42" y="233" class="muted">Example window: 31 intervals / 1.0 s</text>
+    <text x="42" y="256" class="muted">Raw value preserves the individual hitch</text>
+  </g>
+  <text x="36" y="470" class="note">Phase 1: FPS · raw reads FRAMERATE (1903). No averaging or simulation caps.</text>
+  <text x="36" y="498" class="note">Phase 2: FPS · smoothed reads a separate mailbox; its number remains to be allocated.</text>
+  <text x="36" y="526" class="note">Samples publish at frame completion; a script-drawn HUD displays them on the following frame.</text>
+</svg>

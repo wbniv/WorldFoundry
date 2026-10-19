@@ -1,0 +1,141 @@
+--- a/scripts/wf_device/service.py
++++ b/scripts/wf_device/service.py
+@@ -21,7 +21,7 @@
+ MAX_APK = 32*1024*1024
+ MAX_REQUEST = 48*1024*1024
+ WORKFLOWS = {'check','profile','record','variant-benchmark','readd','capture','install'}
+-VALIDATORS = {'menu-back','poke-resume','prime-study','plant-settings','runtime-diagnostics','runtime-diagnostics-overhead'}
++VALIDATORS = {'baseline-settings', 'menu-back','poke-resume','prime-study','plant-settings','runtime-diagnostics','runtime-diagnostics-overhead'}
+ REQUEST_KEYS = {'device','pool','require_abi','workflow','app','scene','warmup','duration','runs',
+                 'apk','restore_apk','variants','validator','trace','address','method'}
+ 
+@@ -60,6 +60,8 @@
+         variants=request.get('variants')
+         if not isinstance(variants,list) or not all(isinstance(v,dict) for v in variants) or [v.get('label') for v in variants]!=['disabled','enabled-no-client','subscribed'] or any(v.get('runs',1)!=1 for v in variants):
+             raise ValueError('Diagnostic overhead requires disabled, enabled-no-client, subscribed variants')
++    if request.get('validator') == 'baseline-settings' and (request.get('app') != 'baseline' or request['workflow'] != 'check' or request.get('scene')):
++        raise ValueError('Baseline settings requires a Baseline check without SCENE')
+     if request.get('validator') == 'plant-settings' and (request.get('app') != 'aquarium' or request['workflow'] != 'check' or request.get('scene')):
+         raise ValueError('Plant settings validator requires an Aquarium check without SCENE')
+     if request.get('validator') == 'prime-study' and (request.get('app') != 'primes' or request['workflow'] != 'check'):
+--- a/scripts/wf_device/workflows.py
++++ b/scripts/wf_device/workflows.py
+@@ -13,7 +13,7 @@
+ from pathlib import Path
+ from .store import Store
+ 
+-APPS = {'aquarium', 'condo', 'snowgoons', 'smb', 'qbert', 'patchwork', 'bomberman', 'parmenides', 'primes'}
++APPS = {'baseline', 'aquarium', 'condo', 'snowgoons', 'smb', 'qbert', 'patchwork', 'bomberman', 'parmenides', 'primes'}
+ JAVA_APPS = {'patchwork', 'bomberman', 'primes'}
+ SCENES = ['clownfish', 'blue-shrimp', 'betta', 'jellyfish', 'lionfish', 'planted-tank', 'arowana', 'tiger-barbs']
+ ENGINE_LOG_TAIL_BYTES = 4_000_000
+@@ -562,7 +562,7 @@
+                     self.store.event(db,old['id'],'recovery-resolved',{'maintenance_job':self.job['id']})
+             return
+         foreground=' '.join(self.foreground())
+-        if self.req.get('validator')=='runtime-diagnostics':
++        if self.req.get('validator') in {'runtime-diagnostics','baseline-settings'}:
+             with zipfile.ZipFile(self.store.root/'inputs'/self.req['apk']) as bundle:
+                 try:
+                     marker=json.loads(bundle.read('assets/runtime-diagnostics.json'))
+@@ -593,6 +593,9 @@
+             if self.req.get('validator')=='runtime-diagnostics':
+                 from .diagnostics import check_runtime
+                 check_runtime(self)
++            elif self.req.get('validator')=='baseline-settings':
++                from .baseline_checks import check_baseline
++                check_baseline(self)
+             elif self.req.get('validator')=='plant-settings':
+                 from .plant_checks import check_plants
+                 check_plants(self)
+--- /dev/null
++++ b/scripts/wf_device/baseline_checks.py
+@@ -0,0 +1,88 @@
++"""Fixed baseline catalog, remote input and lifecycle acceptance in one lease."""
++import json
++import time
++from .diagnostics import Bridge
++from .plant_checks import Phone, values
++
++
++def check_baseline(a):
++    bridge=phone=None
++    checks={};samples=[];models=[]
++    def check(condition,name):
++        checks[name]=bool(condition)
++        if not condition:raise RuntimeError('Baseline assertion failed: '+name)
++    def snap(label,**kwargs):
++        result=bridge.snapshot(**kwargs);samples.append({'label':label,'snapshot':result});return result
++    def wait(label,predicate,**kwargs):
++        deadline=time.monotonic()+8
++        while time.monotonic()<deadline:
++            result=snap(label,**kwargs)
++            if predicate(result):return result
++            a.wait(.1)
++        raise RuntimeError('Baseline state not reached: '+label)
++    def tap(code):a.key('KEYCODE_'+code);a.wait(.2)
++    def hold(code,ms):a.shell('input','keycombination','-t',str(ms),code,'59');a.wait(.3)
++    def model(predicate=lambda m:True):
++        result=phone.model(predicate);models.append(result);return result
++    try:
++        bridge=Bridge(a)
++        initial=wait('ready',lambda s:s['player'] and s['game']['mode']=='game' and not s['game']['paused'])
++        check(initial['properties']['schema']=='BaselineSettings','baseline_catalog_attached')
++        pos=initial['player']['position'];check(abs(pos[0])<.1 and abs(pos[1]+5)<.1 and .85<pos[2]<1.05,'grounded_spawn')
++        hold('19',2200)
++        moved=snap('held-up-released',since_input=initial['input']['received'])
++        check(moved['player']['position'][1]>pos[1]+.5,'hardware_up_moves_positive_y')
++        history=moved['input']['history']
++        check(any(e['source']=='hardware' and e['pressed']&2048 for e in history) and any(e['source']=='hardware' and e['released']&2048 for e in history),'hardware_press_release_received')
++        a.wait(1);settled=snap('settled')
++        check(not settled['input']['held'] and sum(v*v for v in settled['player']['velocity'])<.05,'released_input_settles')
++        for code in ['20','22','21']:
++            hold(code,800);current=snap('held-released-'+code)
++            check(not current['input']['held'],'released_direction_'+code)
++        # Opening OK is consumed by the picker until its release.
++        hold('23',1500)
++        picker=wait('tv-picker',lambda s:s['game']['modal']=='object-picker')
++        check(picker['game']['paused'],'picker_pauses_simulation')
++        a.capture('tv-picker-')
++        tap('DPAD_DOWN');tap('DPAD_CENTER')
++        form=wait('tv-owner-form',lambda s:s['game']['modal']=='form',draft=True)
++        check(form['properties']['edit']['open'] and form['properties']['actor']!=initial['properties']['actor'],'tv_selects_second_owner')
++        a.capture('tv-form-');tap('BACK');wait('tv-closed',lambda s:s['game']['modal']=='none')
++        phone=Phone(a);model();phone.send('r:open');picker_model=model(lambda m:m.get('picker'))
++        owners=picker_model['objects'];check(len(owners)==2 and owners[0]['actor']<owners[1]['actor'],'stable_two_owner_picker')
++        first,second=[str(o['actor']) for o in owners]
++        phone.command(picker_model,'select',second);edited=model(lambda m:m['open'] and not m.get('picker'))
++        stale=picker_model['session'];phone.send('r:'+str(stale)+':set:40:9');a.wait(.3)
++        check(values(model(lambda m:not m.get('picker')))['40']=='-3','stale_picker_session_ignored')
++        phone.command(edited,'set','40:8');phone.command(edited,'set','64:0.5');phone.command(edited,'set','70:Device%20baseline')
++        edited=model(lambda m:values(m).get('40')=='8' and values(m).get('64')=='0.5' and values(m).get('70')=='Device baseline')
++        a.capture('phone-draft-');phone.command(edited,'apply');model(lambda m:not m['open'])
++        phone.send('r:open');picker_model=model(lambda m:m.get('picker'));phone.command(picker_model,'select',first)
++        original=model(lambda m:m['open'] and not m.get('picker'))
++        check(values(original)['40']=='-3' and values(original)['70']=='Baseline','other_instance_unchanged')
++        phone.command(original,'set','40:13');invalid=model(lambda m:values(m).get('40')=='13');phone.command(invalid,'apply')
++        invalid=model(lambda m:m['open'] and bool(m['error']));session=invalid['session']
++        phone.close();phone=None;a.wait(.8);a.capture('disconnected-draft-')
++        phone=Phone(a);reconnected=model(lambda m:m['open'] and m['session']==session)
++        check(values(reconnected)['40']=='13' and bool(reconnected['error']),'reconnect_preserves_invalid_draft')
++        phone.command(reconnected,'cancel');model(lambda m:not m['open']);phone.send('r:open');picker_model=model(lambda m:m.get('picker'))
++        phone.command(picker_model,'select',second);saved=model(lambda m:m['open'] and not m.get('picker'))
++        check(values(saved)['40']=='8' and values(saved)['64']=='0.5','apply_readback')
++        phone.command(saved,'set','40:7');model(lambda m:values(m).get('40')=='7');phone.close();phone=None
++        process=a.shell('pidof',a.package).strip();a.key('KEYCODE_HOME');a.wait(1)
++        a.shell('am','start','-W','-n',a.activity());a.wait(2);a.dismiss_panel()
++        resumed=wait('resumed',lambda s:not s['game']['suspended'] and s['game']['modal']=='none')
++        check(a.shell('pidof',a.package).strip()==process,'home_resume_same_process')
++        check(not resumed['input']['held'],'home_resume_releases_input')
++        phone=Phone(a);model();phone.send('r:open');picker_model=model(lambda m:m.get('picker'));phone.command(picker_model,'select',second)
++        saved=model(lambda m:m['open'] and not m.get('picker'))
++        check(values(saved)['40']=='8','home_cancels_uncommitted_draft')
++        phone.command(saved,'cancel');model(lambda m:not m['open']);phone.send('b:801');a.wait(.25);phone.send('b:0');a.wait(.6)
++        reset=snap('remote-reset-chord');pos=reset['player']['position']
++        check(abs(pos[0])<.1 and abs(pos[1]+5)<.1 and .85<pos[2]<1.05,'reset_chord_without_settings_or_jump')
++        check(reset['game']['modal']=='none','reset_chord_keeps_gameplay')
++        a.capture('final-');a.require_foreground()
++    finally:
++        if phone:phone.close()
++        if bridge:bridge.close()
++        (a.out/'baseline-checks.json').write_text(json.dumps({'assertions':checks,'snapshots':samples,'phone_models':models},indent=2)+'\n')

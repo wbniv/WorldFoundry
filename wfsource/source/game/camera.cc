@@ -52,13 +52,21 @@ Camera::Camera( const SObjectStartupData* startupData ) :
 //	assert( _path );
 	_path = NULL;		// I want this to blow chunks if someone refers to it -- Phil
 
+	// Vector3 and Scalar have empty default constructors, so cameraPos starts as arena garbage until a
+	// camera handler's first predictPosition stores a real one. Level::updateSound reads it every frame,
+	// including the first, so start from zeros (a zero direction/up makes SoundDevice::tick keep the old
+	// listener orientation).
+	cameraPos.position = Vector3::zero;
+	cameraPos.direction = Vector3::zero;
+	cameraPos.up = Vector3::zero;
+	cameraPos.field = Scalar::zero;
+	cameraPos.hither = Scalar::zero;
+	cameraPos.yon = Scalar::zero;
+
 	// set camera defaults
 	Color color(Color::FromInt(getOad()->FoggingColor));
 	GetRenderCamera().SetFog( color, Scalar(getOad()->GetFoggingStartDistance()), Scalar(getOad()->GetFoggingCompleteDistance()) );
 
-#if defined(DO_STEREOGRAM)
-	GetRenderCamera().SetStereogram( Scalar(getOad()->EyeDistance), Angle(Angle::Degree(Scalar(getOad()->EyeAngle))) );
-#endif
 	// Create collision box for the Camera actor, since some handlers do collision checking
 	_physicalAttributes.SetColSpace( Vector3( SCALAR_CONSTANT(-0.1), SCALAR_CONSTANT(-0.1), SCALAR_CONSTANT(-0.1) ),
 									 Vector3( SCALAR_CONSTANT(0.1), SCALAR_CONSTANT(0.1), SCALAR_CONSTANT(0.1) ) );
@@ -93,14 +101,9 @@ Camera::CanUpdate() const
 const PhysicalObject*
 Camera::GetWatchObject() const
 {
-#pragma message ("KTS: assuming camera always runs something derived from CameraMovementHandler")
-
    Validate();
    assert(ValidPtr(_nonStatPlat));
-	assert(ValidPtr(&_nonStatPlat->_movementManager.GetMovementHandler(*this)));
-	const CameraHandler* cHandler = dynamic_cast<const CameraHandler*>(&_nonStatPlat->_movementManager.GetMovementHandler(*this));
-   assert(ValidPtr(cHandler));
-	return cHandler->GetWatchObject(*this);
+	return _nonStatPlat->_movementManager.GetMovementHandler(*this).GetWatchObject(*this);
 }
 
 //============================================================================
@@ -115,6 +118,12 @@ Camera::ValidView() const
 }
 
 //============================================================================
+
+void
+Camera::SnapToShot()
+{
+	static_cast<CameraHandler*>(&GetMovementManager().GetMovementHandler(*this))->SnapToShot(*this);
+}
 
 void
 Camera::update()

@@ -1,0 +1,22 @@
+[
+  {
+    "log": "docs/diagnostics/unloaded-actor/android/devices/chromecast-test-01/J-dc0208160ed7/wf.log",
+    "sha256": "469df31bb76a2eaf0fa377f2c5af9f11a42f8b2771a493d073a23b748c42a869",
+    "observations": 117,
+    "complete_cycles": 9,
+    "active_intervals": 59,
+    "inactive_intervals": 58,
+    "initial_never_loaded_verified": true,
+    "passed": true
+  },
+  {
+    "log": "docs/diagnostics/unloaded-actor/android/devices/chromecast-test-02/J-459777d97f8a/wf.log",
+    "sha256": "8208b0f6be8e06e4100a2affcbfc57ee66307c607feeb562ea05cbba87fa5f4e",
+    "observations": 114,
+    "complete_cycles": 9,
+    "active_intervals": 57,
+    "inactive_intervals": 57,
+    "initial_never_loaded_verified": true,
+    "passed": true
+  }
+]

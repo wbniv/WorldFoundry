@@ -1,0 +1,25 @@
+{
+  "apk_sha256": "02c841541d9bf44ab652d606d559b274cce2ddd81cd40f398cb36bb43830390f",
+  "apk_bytes": 3629328,
+  "native": {
+    "lib/arm64-v8a/libwf_game.so": "6b52fa4cfbc4f7c3132e6d6427792577bc74bff7148619b4c7cbfaf1a2c2ab85",
+    "lib/armeabi-v7a/libwf_game.so": "0496dbfddd8888f47dd0eeb93674166ed80c280342c68bab1b4daa841dea8188"
+  },
+  "menu_bundle_sha256": "012766f5650a768a0edd55e9aab8b57d83b43feb01270fbb1f53eb6b0543447c",
+  "standalones": {
+    "wflevels/aquarium_bench-standalone.iff": "047cddeda75788d947bb9f69e02c431f093b318c5f538ae3e6767381d6ea6cea",
+    "wflevels/aquarium_arowana-standalone.iff": "f116a9604b00c7c6edf2fe4dd3e68127d5662e57df28dc66483467a4e868b350",
+    "wflevels/aquarium-standalone.iff": "8923701cc4990193ff2dab8fdb62af669b15ac2b8d46b281cde34864c1347f81",
+    "wflevels/aquarium_lionfish-standalone.iff": "71fe1b40cd92190b5e54f97a1222506ccabd76322b4cad7217edd0746f0760f9",
+    "wflevels/aquarium_jellyfish-standalone.iff": "fcbf6802b30a7ab661d7cc97c95e620b2b69d15fd1a430c37689cc8c06eb2888",
+    "wflevels/aquarium_blue_shrimp-standalone.iff": "79df6b0921dc574e7ccc05198de3704961715f069bf75461bd909e4ea2b5c581",
+    "wflevels/aquarium_idle-standalone.iff": "24e8d6a261bd8130d5e6e0302ec03a2acaa2d4268f6e9882885b1118404d56ab",
+    "wflevels/aquarium_betta-standalone.iff": "64ea80d81089f4174630b4647a7cdafb8497ee7222bad1ceaf26d901f0840a85",
+    "wflevels/aquarium_plants-standalone.iff": "b569b06569e446cb98089c3b437b0908e2a787aea6bc1dc160d3e4fc4d9d91d8"
+  },
+  "release_asset_check": "PASS",
+  "species_tests": "66 passed",
+  "phase3_menu_startle_tests": "70 passed; stale-debug package check rerun against release",
+  "release_android_tests": "14 passed",
+  "desktop_runtime_scope": "earlier phase 3 and species evidence; current combined Android ABI builds verified"
+}

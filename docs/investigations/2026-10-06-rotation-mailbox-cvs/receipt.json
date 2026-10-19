@@ -1,0 +1,15 @@
+{
+  "source": "https://sourceforge.net/code-snapshots/cvs/w/wf/wf-gdk.zip",
+  "retrieved": "2026-10-06",
+  "archive_sha256": "9453828aca1e933b8e3a4a6a47d63c63f1330ed281502f1867d4ef0232f6855b",
+  "members": {
+    "wfsource/source/game/Attic/actor.cc,v": "439ec0db6a8b2467b1c20752d02e9d524f1371359806a7f632759e3588e57457",
+    "wfsource/source/physics/Attic/physical.hpi,v": "f177def6799135fc9e5e750582cf08a66e8313e136ce203874cfbcb9e8af1f8a"
+  },
+  "checked_trunk_revisions": 90,
+  "pre_defect_revisions": 18,
+  "defective_trunk_revisions": 72,
+  "first_defective_revision": "1.19",
+  "vendor_import_matches_initial_trunk": true,
+  "latest_cvs_matches_git_first_commit": true
+}

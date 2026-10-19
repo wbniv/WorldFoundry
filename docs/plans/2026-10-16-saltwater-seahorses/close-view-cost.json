@@ -1,0 +1,94 @@
+{
+  "method": "Linear interpolation of median frame time between measured 2 and 6 pairs; FPS = 1000/frame_ms.",
+  "source": "docs/diagnostics/seahorse-close-cast1-20261017/comparison.json",
+  "views": {
+    "close-idle": {
+      "measured": [
+        {
+          "pairs": 0,
+          "frame_ms": 47.18670152742947,
+          "fps": 21.192411582714747
+        },
+        {
+          "pairs": 1,
+          "frame_ms": 51.564139133561646,
+          "fps": 19.393322894614723
+        },
+        {
+          "pairs": 2,
+          "frame_ms": 54.966786368613135,
+          "fps": 18.192804529154994
+        },
+        {
+          "pairs": 6,
+          "frame_ms": 68.52160508779932,
+          "fps": 14.593937178188723
+        }
+      ],
+      "interpolated": [
+        {
+          "pairs": 3,
+          "frame_ms": 58.35549104840968,
+          "measured": false,
+          "fps": 17.136347960304796
+        },
+        {
+          "pairs": 4,
+          "frame_ms": 61.74419572820622,
+          "measured": false,
+          "fps": 16.19585433425892
+        },
+        {
+          "pairs": 5,
+          "frame_ms": 65.13290040800277,
+          "measured": false,
+          "fps": 15.353223850555436
+        }
+      ]
+    },
+    "close-crawl": {
+      "measured": [
+        {
+          "pairs": 0,
+          "frame_ms": 47.333252252173914,
+          "fps": 21.126796753207934
+        },
+        {
+          "pairs": 1,
+          "frame_ms": 51.646492025,
+          "fps": 19.362399280011893
+        },
+        {
+          "pairs": 2,
+          "frame_ms": 54.954240727106225,
+          "fps": 18.196957810150387
+        },
+        {
+          "pairs": 6,
+          "frame_ms": 68.57447665870308,
+          "fps": 14.582685114419839
+        }
+      ],
+      "interpolated": [
+        {
+          "pairs": 3,
+          "frame_ms": 58.35929971000544,
+          "measured": false,
+          "fps": 17.135229602978846
+        },
+        {
+          "pairs": 4,
+          "frame_ms": 61.76435869290465,
+          "measured": false,
+          "fps": 16.19056720028533
+        },
+        {
+          "pairs": 5,
+          "frame_ms": 65.16941767580386,
+          "measured": false,
+          "fps": 15.344620769433094
+        }
+      ]
+    }
+  }
+}

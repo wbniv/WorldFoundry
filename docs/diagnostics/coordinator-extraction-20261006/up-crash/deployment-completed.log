@@ -1,0 +1,3 @@
+Release and installed hashes match review; no files changed.
+Protected state/config backup: /var/lib/wf-device-coordinator/backups/standalone-20261006-135354-1341004
+Standalone release verified; queue resumed; reservations and device identities retained.

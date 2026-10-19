@@ -1,0 +1,1 @@
+J-b606660f3fc6: recovery-required; verified 1 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/coordinator-readd-02-evidence

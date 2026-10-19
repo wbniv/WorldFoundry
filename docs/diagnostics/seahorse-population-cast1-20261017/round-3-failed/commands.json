@@ -1,0 +1,289 @@
+[
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792199124.3788261,
+    "end": 1792199124.5860124,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792199125.120109,
+    "end": 1792199125.3601928,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~29n7tVI7z7A1QAA0TyOV3g==/org.worldfoundry.wf_game.aquarium-fQrZFBEpUa_t7_H0gh6wTw==/base.apk'"
+    ],
+    "start": 1792199125.3625202,
+    "end": 1792199125.7738316,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792199125.1163473,
+    "end": 1792199125.820882,
+    "returncode": 0,
+    "session_wake": true,
+    "error": null,
+    "interrupted": false
+  },
+  {
+    "args": [
+      "install",
+      "-r",
+      "/var/lib/wf-device-coordinator/inputs/417b449ac6b700fff1889f091da8e8efc5fecaf770a7e5ed2723351c87cc3fdf.apk"
+    ],
+    "start": 1792199125.8209338,
+    "end": 1792199130.066564,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792199130.0722191,
+    "end": 1792199130.6123266,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~tRenq_UWWuZqdOw9i8-ccQ==/org.worldfoundry.wf_game.aquarium-GphS1oY0Deqs99K482ikjQ==/base.apk'"
+    ],
+    "start": 1792199130.6147773,
+    "end": 1792199131.0426738,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792199131.0704336,
+    "end": 1792199131.4291127,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792199131.4318101,
+    "end": 1792199131.8647585,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n org.worldfoundry.wf_game.aquarium/android.app.NativeActivity"
+    ],
+    "start": 1792199132.0196688,
+    "end": 1792199132.9592218,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792199135.1214468,
+    "end": 1792199135.4410439,
+    "returncode": 0,
+    "session_wake": true,
+    "error": null,
+    "interrupted": false
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792199137.962299,
+    "end": 1792199138.1792114,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792199138.1861472,
+    "end": 1792199138.4194567,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_BACK"
+    ],
+    "start": 1792199138.4221728,
+    "end": 1792199138.6733992,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792199139.8275287,
+    "end": 1792199140.0444322,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792199140.048979,
+    "end": 1792199140.2437253,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792199140.2505047,
+    "end": 1792199140.6219487,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_DOWN"
+    ],
+    "start": 1792199140.6248586,
+    "end": 1792199140.9710581,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_DOWN"
+    ],
+    "start": 1792199141.1250644,
+    "end": 1792199141.5103698,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_DOWN"
+    ],
+    "start": 1792199141.6626678,
+    "end": 1792199141.9940977,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_DOWN"
+    ],
+    "start": 1792199142.1469927,
+    "end": 1792199142.5575337,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_DOWN"
+    ],
+    "start": 1792199142.7112458,
+    "end": 1792199143.1745987,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_CENTER"
+    ],
+    "start": 1792199143.3287303,
+    "end": 1792199143.5937505,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792199145.189216,
+    "end": 1792199145.601865,
+    "returncode": 0,
+    "session_wake": true,
+    "error": null,
+    "interrupted": false
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792199145.74819,
+    "end": 1792199145.974672,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792199145.9785888,
+    "end": 1792199146.3576884,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "tail -c 4000000 /sdcard/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log"
+    ],
+    "start": 1792199146.3589814,
+    "end": 1792199147.8232553,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "logcat",
+      "-d",
+      "-t",
+      "2000",
+      "-v",
+      "brief"
+    ],
+    "start": 1792199147.8295727,
+    "end": 1792199148.4377232,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792199155.2762756,
+    "end": 1792199155.4829402,
+    "returncode": 0,
+    "session_wake": true,
+    "error": null,
+    "interrupted": false
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792199163.4697742,
+    "end": 1792199163.8585799,
+    "returncode": 0
+  }
+]

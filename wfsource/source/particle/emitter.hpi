@@ -30,14 +30,14 @@ Emitter::Validate() const
 	const int MAX_PARTICLES = 1000;		// kts arbirrary
 #endif
 	_memory.Validate();
-	RangeCheck(0,_nParticles,MAX_PARTICLES);
-	RangeCheck(Scalar::zero,_currentSphereRadius,SCALAR_CONSTANT(100));  // kts arbitrary
+	RangeCheck(0,_nParticles,MAX_PARTICLES);   // int args — RangeCheck is correct here
+	RangeCheckScalar(Scalar::zero,_currentSphereRadius,SCALAR_CONSTANT(100));  // kts arbitrary
 
-	RangeCheck(Scalar::zero,_period,SCALAR_CONSTANT(50));  // kts arbitrary
-	RangeCheck(_timeStart,_timeToGenerate, _timeStart + _period);
+	RangeCheckScalar(Scalar::zero,_period,SCALAR_CONSTANT(50));  // kts arbitrary
+	RangeCheckScalar(_timeStart,_timeToGenerate, _timeStart + _period);
 
-	RangeCheckInclusive( Scalar::zero, _particleParameters.initialAlpha, Scalar::one );
-	RangeCheckInclusive( Scalar::zero, _particleParameters.alphaDecrement, Scalar::one );
+	RangeCheckScalarInclusive( Scalar::zero, _particleParameters.initialAlpha, Scalar::one );
+	RangeCheckScalarInclusive( Scalar::zero, _particleParameters.alphaDecrement, Scalar::one );
 	assert( _particleParameters.templateObject );
 
 	RangeCheck(0,_nParticlesAvailable,_nParticles);

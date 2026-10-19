@@ -1,0 +1,213 @@
+{
+  "job": {
+    "id": "J-23b3f5658ab4",
+    "owner": "d15f47a5d533edf02af1e3e1",
+    "accepted": 1791110630.8840551,
+    "state": "running",
+    "phase": "capturing-png",
+    "request": {
+      "device": "chromecast-test-01",
+      "workflow": "capture"
+    },
+    "device": "chromecast-test-01",
+    "generation": 47,
+    "cancel": 0,
+    "error": null,
+    "started": 1791110630.9205506,
+    "finished": null,
+    "worker_pid": 377414,
+    "recovery_resolved": 0
+  },
+  "device": {
+    "id": "chromecast-test-01",
+    "serial": "2628105GN0GT7C",
+    "model": "Chromecast HD",
+    "device": "boreal",
+    "android": "14",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "tls",
+    "endpoint": "192.168.4.43:41277",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:7104:7f7e:6f75:edbe",
+      "fd5d:59ce:7438:1:581b:d19a:27a5:c4db",
+      "fd5d:59ce:7438:1:3b82:772d:8d07:d5f6",
+      "fd5d:59ce:7438:1:401f:2bff:fe13:98df",
+      "fe80::401f:2bff:fe13:98df"
+    ],
+    "generation": 47,
+    "last_seen": 1791110631.397356,
+    "boot_id": "9ec069a1-861f-449a-a777-29554a2f1ed4",
+    "sdk": "34",
+    "reservation": null
+  },
+  "result": "completed",
+  "error": null,
+  "cleanup_verified": true,
+  "restoration": "unchanged: current display captured without input",
+  "commands": [
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791110631.1452937,
+      "end": 1791110631.1492198,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "connect",
+        "192.168.4.43:41277"
+      ],
+      "start": 1791110631.1502676,
+      "end": 1791110631.3012831,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.serialno"
+      ],
+      "start": 1791110631.302659,
+      "end": 1791110631.3973243,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/sys/kernel/random/boot_id"
+      ],
+      "start": 1791110631.398783,
+      "end": 1791110631.478218,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.model"
+      ],
+      "start": 1791110631.4794858,
+      "end": 1791110631.5920796,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.release"
+      ],
+      "start": 1791110631.5935485,
+      "end": 1791110631.6572547,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.sdk"
+      ],
+      "start": 1791110631.6586156,
+      "end": 1791110631.725229,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.device"
+      ],
+      "start": 1791110631.726589,
+      "end": 1791110631.8022926,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.cpu.abilist"
+      ],
+      "start": 1791110631.8036158,
+      "end": 1791110631.8731658,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "ip -6 addr show wlan0"
+      ],
+      "start": 1791110631.8741548,
+      "end": 1791110631.9476216,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "start": 1791110632.041689,
+      "end": 1791110636.1425679,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys power"
+      ],
+      "start": 1791110636.1455958,
+      "end": 1791110636.4944131,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys display"
+      ],
+      "start": 1791110636.4962645,
+      "end": 1791110636.6046317,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys window"
+      ],
+      "start": 1791110636.606144,
+      "end": 1791110636.7202985,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791110636.721934,
+      "end": 1791110636.802906,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys dreams"
+      ],
+      "start": 1791110636.8044639,
+      "end": 1791110636.8798003,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys SurfaceFlinger"
+      ],
+      "start": 1791110636.8813841,
+      "end": 1791110637.0599434,
+      "returncode": 0
+    }
+  ],
+  "finished": 1791110637.0612185,
+  "concurrent_jobs": []
+}

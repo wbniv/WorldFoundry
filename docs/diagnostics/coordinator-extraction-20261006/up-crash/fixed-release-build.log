@@ -1,0 +1,76 @@
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preAquariumReleaseBuild UP-TO-DATE
+> Task :app:javaPreCompileAquariumRelease UP-TO-DATE
+> Task :app:checkAquariumReleaseAarMetadata UP-TO-DATE
+> Task :app:generateAquariumReleaseResValues UP-TO-DATE
+> Task :app:mapAquariumReleaseSourceSetPaths UP-TO-DATE
+> Task :app:generateAquariumReleaseResources UP-TO-DATE
+> Task :app:mergeAquariumReleaseResources UP-TO-DATE
+> Task :app:packageAquariumReleaseResources UP-TO-DATE
+> Task :app:parseAquariumReleaseLocalResources UP-TO-DATE
+> Task :app:createAquariumReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksAquariumRelease UP-TO-DATE
+> Task :app:processAquariumReleaseMainManifest UP-TO-DATE
+> Task :app:processAquariumReleaseManifest UP-TO-DATE
+> Task :app:processAquariumReleaseManifestForPackage UP-TO-DATE
+> Task :app:processAquariumReleaseResources UP-TO-DATE
+
+> Task :app:compileAquariumReleaseJavaWithJavac
+Java compiler version 21 has deprecated support for compiling with source/target version 8.
+Try one of the following options:
+    1. [Recommended] Use Java toolchain with a lower language version
+    2. Set a higher source/target version
+    3. Use a lower version of the JDK running the build (if you're not using Java toolchain)
+For more details on how to configure these settings, see https://developer.android.com/build/jdks.
+To suppress this warning, set android.javaCompile.suppressSourceTargetDeprecationWarning=true in gradle.properties.
+warning: [options] source value 8 is obsolete and will be removed in a future release
+warning: [options] target value 8 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /home/will/WorldFoundry-wbniv/android/app/src/main/java/org/worldfoundry/wf_game/WorldFoundryActivity.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+3 warnings
+
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :app:generateAquariumReleaseLintVitalReportModel
+> Task :app:preQbertReleaseBuild UP-TO-DATE
+> Task :app:configureCMakeRelease[arm64-v8a]
+> Task :app:lintVitalAnalyzeAquariumRelease
+> Task :app:buildCMakeRelease[arm64-v8a]
+> Task :app:configureCMakeRelease[armeabi-v7a]
+> Task :app:lintVitalReportAquariumRelease
+> Task :app:buildCMakeRelease[armeabi-v7a]
+> Task :app:lintVitalAquariumRelease
+> Task :app:mergeAquariumReleaseJniLibFolders UP-TO-DATE
+> Task :app:mergeAquariumReleaseArtProfile UP-TO-DATE
+> Task :app:desugarAquariumReleaseFileDependencies UP-TO-DATE
+> Task :app:mergeAquariumReleaseNativeLibs
+> Task :app:dexBuilderAquariumRelease
+> Task :app:mergeAquariumReleaseGlobalSynthetics UP-TO-DATE
+> Task :app:checkAquariumReleaseDuplicateClasses UP-TO-DATE
+> Task :app:mergeAquariumReleaseStartupProfile UP-TO-DATE
+> Task :app:mergeExtDexAquariumRelease UP-TO-DATE
+> Task :app:mergeAquariumReleaseShaders UP-TO-DATE
+> Task :app:compileAquariumReleaseShaders NO-SOURCE
+> Task :app:generateAquariumReleaseAssets UP-TO-DATE
+> Task :app:mergeAquariumReleaseAssets
+> Task :app:extractAquariumReleaseVersionControlInfo UP-TO-DATE
+> Task :app:compressAquariumReleaseAssets
+> Task :app:processAquariumReleaseJavaRes NO-SOURCE
+> Task :app:mergeAquariumReleaseJavaResource UP-TO-DATE
+> Task :app:optimizeAquariumReleaseResources UP-TO-DATE
+> Task :app:collectAquariumReleaseDependencies UP-TO-DATE
+> Task :app:sdkAquariumReleaseDependencyData UP-TO-DATE
+> Task :app:validateSigningAquariumRelease UP-TO-DATE
+> Task :app:writeAquariumReleaseAppMetadata UP-TO-DATE
+> Task :app:writeAquariumReleaseSigningConfigVersions UP-TO-DATE
+> Task :app:mergeDexAquariumRelease
+> Task :app:compileAquariumReleaseArtProfile
+> Task :app:stripAquariumReleaseDebugSymbols
+> Task :app:extractAquariumReleaseNativeSymbolTables
+> Task :app:packageAquariumRelease
+> Task :app:createAquariumReleaseApkListingFileRedirect UP-TO-DATE
+> Task :app:mergeAquariumReleaseNativeDebugMetadata
+> Task :app:assembleAquariumRelease
+
+BUILD SUCCESSFUL in 1m 25s
+51 actionable tasks: 19 executed, 32 up-to-date

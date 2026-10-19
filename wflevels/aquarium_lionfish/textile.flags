@@ -1,0 +1,5 @@
+# Two shared 256-square lionfish maps and the tiny goldfish palette.
+PAGEX=512
+PAGEY=512
+PERMPAGEX=512
+PERMPAGEY=512

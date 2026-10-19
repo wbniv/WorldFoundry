@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The condo app's labels; override src/main/res/values/strings.xml.
+     See docs/plans/2026-10-01-condo-chromecast.md. -->
+<resources>
+    <string name="app_name">WF Condo</string>
+    <string name="log_viewer_label">Condo Log</string>
+</resources>

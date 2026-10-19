@@ -1,0 +1,437 @@
+--------- beginning of main
+10-02 18:58:55.998  1504 32321 I SupervisionStateUtils: State no supervision required [CONTEXT service_id=42 ]
+10-02 18:58:56.015  1504 32321 I SupervisionStateUtils: State recover:NO_SUPERVISION_REQUIRED [CONTEXT service_id=42 ]
+10-02 18:58:56.018 32344 32385 I Finsky  : [66] SCH: Scheduling phonesky job Id: 12-1, CT: 1790942335434, Constraints: [{ L: 15000, D: 86400000, C: CHARGING_NONE, I: IDLE_NONE, N: NET_ANY, B: BATTERY_ANY }]
+10-02 18:58:56.023 32344 32378 I Finsky  : [60] SCH: Scheduling 1 system job(s)
+10-02 18:58:56.024 32344 32378 I Finsky  : [60] SCH: Scheduling system job Id: 9801, L: 14411, D: 60538601, C: false, I: false, N: 1
+10-02 18:58:56.041  3907 32307 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:58:56.042  3907 32307 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:58:56.042  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:58:56.042  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:58:56.042  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:58:56.043 32344 32374 I Finsky  : [56] [ContentSync] finished, scheduled=true
+10-02 18:58:56.079   655   749 I system_server: Background concurrent mark compact GC freed 680615(29MB) AllocSpace objects, 31(908KB) LOS objects, 49% free, 24MB/48MB, paused 20.386ms,17.499ms total 1.366s
+10-02 18:58:56.079  1504  1515 I gle.android.gms: Background concurrent mark compact GC freed 44631(3146KB) AllocSpace objects, 6(248KB) LOS objects, 49% free, 13MB/27MB, paused 4.276ms,8.382ms total 1.350s
+10-02 18:58:56.084  1504  1517 W gle.android.gms: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~bHC90e0asAUp0NU206DE7A==/org.worldfoundry.wf_game.aquarium-b6_swBdisFpP8a9DdFVxiw==/base.apk' with 1 weak references
+10-02 18:58:56.085  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:58:56.087  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:58:56.088  3907 32394 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:58:56.100   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~GwseEc3D4eLMUDbo2vVeZA==/com.google.android.marvin.talkback-Ptf25zQ8SyCnqyP_BYKefg==/base.apk' with 1 weak references
+10-02 18:58:56.100   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~GwseEc3D4eLMUDbo2vVeZA==/com.google.android.marvin.talkback-Ptf25zQ8SyCnqyP_BYKefg==/split_config.armeabi_v7a.apk' with 1 weak references
+10-02 18:58:56.101   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~GwseEc3D4eLMUDbo2vVeZA==/com.google.android.marvin.talkback-Ptf25zQ8SyCnqyP_BYKefg==/split_config.en.apk' with 1 weak references
+10-02 18:58:56.101   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~GwseEc3D4eLMUDbo2vVeZA==/com.google.android.marvin.talkback-Ptf25zQ8SyCnqyP_BYKefg==/split_config.xhdpi.apk' with 1 weak references
+10-02 18:58:56.101   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~OLK_jBIB8eB6B2Rgu_1Dcw==/com.google.android.gms-yeguewCt5is5g_puQtSQ8A==/base.apk' with 3 weak references
+10-02 18:58:56.103   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~OLK_jBIB8eB6B2Rgu_1Dcw==/com.google.android.gms-yeguewCt5is5g_puQtSQ8A==/split_AdsDynamite_installtime.apk' with 2 weak references
+10-02 18:58:56.103   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~bHC90e0asAUp0NU206DE7A==/org.worldfoundry.wf_game.aquarium-b6_swBdisFpP8a9DdFVxiw==/base.apk' with 1 weak references
+10-02 18:58:56.105   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~OLK_jBIB8eB6B2Rgu_1Dcw==/com.google.android.gms-yeguewCt5is5g_puQtSQ8A==/split_CronetDynamite_installtime.apk' with 2 weak references
+10-02 18:58:56.105   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~OLK_jBIB8eB6B2Rgu_1Dcw==/com.google.android.gms-yeguewCt5is5g_puQtSQ8A==/split_DynamiteLoader_installtime.apk' with 2 weak references
+10-02 18:58:56.105   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~OLK_jBIB8eB6B2Rgu_1Dcw==/com.google.android.gms-yeguewCt5is5g_puQtSQ8A==/split_DynamiteModulesA_installtime.apk' with 2 weak references
+10-02 18:58:56.105   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~OLK_jBIB8eB6B2Rgu_1Dcw==/com.google.android.gms-yeguewCt5is5g_puQtSQ8A==/split_DynamiteModulesC_installtime.apk' with 2 weak references
+10-02 18:58:56.106   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~OLK_jBIB8eB6B2Rgu_1Dcw==/com.google.android.gms-yeguewCt5is5g_puQtSQ8A==/split_GoogleCertificates_installtime.apk' with 2 weak references
+10-02 18:58:56.106   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~OLK_jBIB8eB6B2Rgu_1Dcw==/com.google.android.gms-yeguewCt5is5g_puQtSQ8A==/split_MapsDynamite_installtime.apk' with 2 weak references
+10-02 18:58:56.106   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~OLK_jBIB8eB6B2Rgu_1Dcw==/com.google.android.gms-yeguewCt5is5g_puQtSQ8A==/split_MeasurementDynamite_installtime.apk' with 2 weak references
+10-02 18:58:56.106   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~OLK_jBIB8eB6B2Rgu_1Dcw==/com.google.android.gms-yeguewCt5is5g_puQtSQ8A==/split_config.en.apk' with 3 weak references
+10-02 18:58:56.106   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~OLK_jBIB8eB6B2Rgu_1Dcw==/com.google.android.gms-yeguewCt5is5g_puQtSQ8A==/split_config.xhdpi.apk' with 3 weak references
+10-02 18:58:56.107   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~wNh09VfIwIzbUFNhZVyJ_Q==/com.google.android.videos-s2EeCTMSeKkdatfZzE_5Bw==/base.apk' with 2 weak references
+10-02 18:58:56.107   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~wNh09VfIwIzbUFNhZVyJ_Q==/com.google.android.videos-s2EeCTMSeKkdatfZzE_5Bw==/split_config.armeabi_v7a.apk' with 2 weak references
+10-02 18:58:56.107   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~wNh09VfIwIzbUFNhZVyJ_Q==/com.google.android.videos-s2EeCTMSeKkdatfZzE_5Bw==/split_config.xhdpi.apk' with 2 weak references
+10-02 18:58:56.108   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /product/app/GoogleCalendarSyncAdapter/GoogleCalendarSyncAdapter.apk' with 1 weak references
+10-02 18:58:56.109   655   751 W System  : A resource failed to call release. 
+10-02 18:58:56.109   655   751 W System  : A resource failed to call release. 
+10-02 18:58:56.109   655   751 W System  : A resource failed to call close. 
+10-02 18:58:56.110   655   751 W System  : A resource failed to call CursorWindow.close. 
+10-02 18:58:56.111   655   751 W system_server: ApkAssets: Deleting an ApkAssets object '<empty> and /system/priv-app/InputDevices/InputDevices.apk' with 1 weak references
+--------- beginning of system
+10-02 18:58:56.173   655  1296 W ActivityTaskManager: callingPackage for (uid=2000, pid=32403) has no WPC
+10-02 18:58:56.176   655  1296 D CompatibilityChangeReporter: Compat change id reported: 265464455; UID 10147; state: DISABLED
+10-02 18:58:56.177   655  1296 D CompatibilityChangeReporter: Compat change id reported: 265452344; UID 10147; state: DISABLED
+10-02 18:58:56.177   655  1296 D CompatibilityChangeReporter: Compat change id reported: 266124927; UID 10147; state: DISABLED
+10-02 18:58:56.177   655  1296 D CompatibilityChangeReporter: Compat change id reported: 265451093; UID 10147; state: DISABLED
+10-02 18:58:56.177   655  1296 D CompatibilityChangeReporter: Compat change id reported: 265456536; UID 10147; state: DISABLED
+10-02 18:58:56.177   655  1296 D CompatibilityChangeReporter: Compat change id reported: 255940284; UID 10147; state: DISABLED
+10-02 18:58:56.178   655  1296 D CompatibilityChangeReporter: Compat change id reported: 236283604; UID 10147; state: DISABLED
+10-02 18:58:56.178   655  1296 D CompatibilityChangeReporter: Compat change id reported: 263959004; UID 10147; state: DISABLED
+10-02 18:58:56.178   655  1296 D CompatibilityChangeReporter: Compat change id reported: 264304459; UID 10147; state: DISABLED
+10-02 18:58:56.179   655  1296 D CompatibilityChangeReporter: Compat change id reported: 264301586; UID 10147; state: DISABLED
+10-02 18:58:56.179   655  1296 D CompatibilityChangeReporter: Compat change id reported: 254631730; UID 10147; state: DISABLED
+10-02 18:58:56.179   655  1296 D CompatibilityChangeReporter: Compat change id reported: 273509367; UID 10147; state: DISABLED
+10-02 18:58:56.179   655  1296 D CompatibilityChangeReporter: Compat change id reported: 263259275; UID 10147; state: DISABLED
+10-02 18:58:56.179   655  1296 D CompatibilityChangeReporter: Compat change id reported: 174042980; UID 10147; state: DISABLED
+10-02 18:58:56.180   655  1296 D CompatibilityChangeReporter: Compat change id reported: 174042936; UID 10147; state: DISABLED
+10-02 18:58:56.180   655  1296 D CompatibilityChangeReporter: Compat change id reported: 181136395; UID 10147; state: DISABLED
+10-02 18:58:56.184   655  1296 D CompatibilityChangeReporter: Compat change id reported: 194480991; UID 10147; state: ENABLED
+10-02 18:58:56.186   655  1296 E CellBroadcastUtils: getDefaultCellBroadcastReceiverPackageName: no package found
+10-02 18:58:56.189   655  1296 D CompatibilityChangeReporter: Compat change id reported: 184838306; UID 10147; state: DISABLED
+10-02 18:58:56.190   655  1296 D CompatibilityChangeReporter: Compat change id reported: 185004937; UID 10147; state: DISABLED
+10-02 18:58:56.193   655  1296 D CompatibilityChangeReporter: Compat change id reported: 205907456; UID 10147; state: ENABLED
+10-02 18:58:56.197   655  1296 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=org.worldfoundry.wf_game.aquarium/android.app.NativeActivity} with LAUNCH_SINGLE_TASK from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-02 18:58:56.198   935   994 V WindowManagerShell: Transition requested: android.os.BinderProxy@ee08a19 TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=291 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=org.worldfoundry.wf_game.aquarium/android.app.NativeActivity } baseActivity=ComponentInfo{org.worldfoundry.wf_game.aquarium/android.app.NativeActivity} topActivity=ComponentInfo{org.worldfoundry.wf_game.aquarium/android.app.NativeActivity} origActivity=null realActivity=ComponentInfo{org.worldfoundry.wf_game.aquarium/android.app.NativeActivity} numActivities=1 lastActiveTime=45494042 supportsMultiWindow=false resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@8049ade} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=true launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{6d9c4bf android.app.NativeActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-02 18:58:56.205   655   760 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10147; state: DISABLED
+10-02 18:58:56.206   655   771 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10147; state: ENABLED
+10-02 18:58:56.224   655   810 D CompatibilityChangeReporter: Compat change id reported: 265195908; UID 10147; state: ENABLED
+10-02 18:58:56.226   382   382 D Zygote  : Forked child process 32413
+10-02 18:58:56.227   655   771 I ActivityManager: Start proc 32413:org.worldfoundry.wf_game.aquarium/u0a147 for next-top-activity {org.worldfoundry.wf_game.aquarium/android.app.NativeActivity}
+10-02 18:58:56.232   472   472 I BpBinder: onLastStrongRef automatically unlinking death recipients: 
+10-02 18:58:56.249 32413 32413 I f_game.aquarium: Using CollectorTypeCMC GC.
+10-02 18:58:56.259 32413 32413 E f_game.aquarium: Not starting debugger since process cannot load the jdwp agent.
+10-02 18:58:56.288  1119 13973 D NetflixService: onForegroundActivitiesChanged pid:32413,uid:10147,fg:true
+10-02 18:58:56.300 32413 32413 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10147; state: ENABLED
+10-02 18:58:56.300 32413 32413 D CompatibilityChangeReporter: Compat change id reported: 242716250; UID 10147; state: ENABLED
+10-02 18:58:56.305   655  2304 D CompatibilityChangeReporter: Compat change id reported: 170503758; UID 10147; state: ENABLED
+10-02 18:58:56.316  1119 13973 I NetflixService: onTaskStackChanged
+10-02 18:58:56.316 32413 32413 D nativeloader: Configuring clns-4 for other apk /data/app/~~PQsa6z7ggvlYsbTq1yu-ig==/org.worldfoundry.wf_game.aquarium-_QLdUMepzBW0rG0c7Xci0A==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~PQsa6z7ggvlYsbTq1yu-ig==/org.worldfoundry.wf_game.aquarium-_QLdUMepzBW0rG0c7Xci0A==/lib/arm:/data/app/~~PQsa6z7ggvlYsbTq1yu-ig==/org.worldfoundry.wf_game.aquarium-_QLdUMepzBW0rG0c7Xci0A==/base.apk!/lib/armeabi-v7a, permitted_path=/data:/mnt/expand:/data/user/0/org.worldfoundry.wf_game.aquarium
+10-02 18:58:56.320   935   994 D WindowManagerShell: TvPipController: onTaskStackChanged()
+10-02 18:58:56.333 32413 32413 V GraphicsEnvironment: Currently set values for:
+10-02 18:58:56.333 32413 32413 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+10-02 18:58:56.333 32413 32413 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+10-02 18:58:56.333 32413 32413 V GraphicsEnvironment: ANGLE GameManagerService for org.worldfoundry.wf_game.aquarium: false
+10-02 18:58:56.334 32413 32413 V GraphicsEnvironment: org.worldfoundry.wf_game.aquarium is not listed in per-application setting
+10-02 18:58:56.334 32413 32413 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-02 18:58:56.339   655  2304 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10147. pid: 32413
+10-02 18:58:56.400 32413 32440 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log
+10-02 18:58:56.400 32413 32440 I wf_game : android_main: enter
+10-02 18:58:56.400 32413 32440 I wf_game : android_main: assetMgr=0xee08c600
+10-02 18:58:56.401 32413 32440 I wf_game : android_main: uiMode=4 (tv=1)
+10-02 18:58:56.401 32413 32440 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-02 18:58:56.405 32413 32413 D CompatibilityChangeReporter: Compat change id reported: 210923482; UID 10147; state: ENABLED
+10-02 18:58:56.406 32413 32440 I wf_game : APP_CMD_RESUME
+10-02 18:58:56.407  1119  1119 I ThermalService: CPU temperatures: [49.500004]
+10-02 18:58:56.409 32413 32440 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-02 18:58:56.409 32413 32440 I wf_game : phone controller: open http://192.168.4.43:8765/?k=711578 (PIN 711578)
+10-02 18:58:56.410 32413 32413 D CompatibilityChangeReporter: Compat change id reported: 237531167; UID 10147; state: DISABLED
+10-02 18:58:56.420   655  1852 D CoreBackPreview: Window{6f984ee u0 org.worldfoundry.wf_game.aquarium/android.app.NativeActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@4c6c81c, mPriority=0, mIsAnimationCallback=false}
+10-02 18:58:56.436 32413 32440 I wf_game : APP_CMD_INIT_WINDOW
+10-02 18:58:56.436 32413 32440 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-02 18:58:56.438 32413 32440 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-02 18:58:56.438 32413 32440 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-02 18:58:56.439 32413 32440 W libc    : Access denied finding property "vendor.mali.base_max_nr_instances"
+10-02 18:58:56.440 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_unnamed"
+10-02 18:58:56.440 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_default_heap"
+10-02 18:58:56.440 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_base_internal"
+10-02 18:58:56.440 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_framepool"
+10-02 18:58:56.440 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_tiler"
+10-02 18:58:56.440 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_program"
+10-02 18:58:56.440 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane"
+10-02 18:58:56.440 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane_imported"
+10-02 18:58:56.441 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vao"
+10-02 18:58:56.441 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_img"
+10-02 18:58:56.441 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_internal_surface"
+10-02 18:58:56.441 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_buf"
+10-02 18:58:56.441 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_crc"
+10-02 18:58:56.441 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_hmem"
+10-02 18:58:56.441 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_rsd"
+10-02 18:58:56.441 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_mbs2"
+10-02 18:58:56.441 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_static"
+10-02 18:58:56.442 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_hmem"
+10-02 18:58:56.442 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_sample_pos"
+10-02 18:58:56.442 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_discard"
+10-02 18:58:56.442 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_tess_geom"
+10-02 18:58:56.442 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cobj_hmem"
+10-02 18:58:56.442 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_hmem"
+10-02 18:58:56.442 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_prof_dump"
+10-02 18:58:56.442 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cblend_hmem"
+10-02 18:58:56.442 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_hmem"
+10-02 18:58:56.442 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query"
+10-02 18:58:56.443 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query_host"
+10-02 18:58:56.443 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_multiview"
+10-02 18:58:56.443 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cdeps_hmem"
+10-02 18:58:56.443 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_suballoc"
+10-02 18:58:56.443 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_hoard"
+10-02 18:58:56.443 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_registry"
+10-02 18:58:56.443 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_payload"
+10-02 18:58:56.443 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_wlm_tls"
+10-02 18:58:56.443 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_hmem"
+10-02 18:58:56.443 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_svm"
+10-02 18:58:56.443 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_protected"
+10-02 18:58:56.443 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cinstr"
+10-02 18:58:56.444 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_uncached"
+10-02 18:58:56.444 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_cached"
+10-02 18:58:56.444 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_transient"
+10-02 18:58:56.444 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_protected"
+10-02 18:58:56.444 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external"
+10-02 18:58:56.444 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external_swapchain"
+10-02 18:58:56.444 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal"
+10-02 18:58:56.444 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_tls"
+10-02 18:58:56.444 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_host"
+10-02 18:58:56.444 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_protected"
+10-02 18:58:56.444 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_transient"
+10-02 18:58:56.444 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_descriptor_pool"
+10-02 18:58:56.444 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator"
+10-02 18:58:56.445 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_host"
+10-02 18:58:56.445 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_protected"
+10-02 18:58:56.445 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_host"
+10-02 18:58:56.445 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device"
+10-02 18:58:56.445 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device_transient"
+10-02 18:58:56.445 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_buffer"
+10-02 18:58:56.445 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_image"
+10-02 18:58:56.445 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_signal"
+10-02 18:58:56.445 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_flush_chain"
+10-02 18:58:56.445 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_metadata_list"
+10-02 18:58:56.445 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_jit"
+10-02 18:58:56.445 32413 32440 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_mmu"
+10-02 18:58:56.447 32413 32440 W libc    : Access denied finding property "vendor.mali.osu_protected_memory_heap_name"
+10-02 18:58:56.447 32413 32440 W libc    : Access denied finding property "vendor.mali.osu_ion_protected_memory_heap_name"
+10-02 18:58:56.447 32413 32440 W libc    : Access denied finding property "vendor.mali.platform_agt_frequency_khz"
+10-02 18:58:56.447 32413 32440 W libc    : Access denied finding property "vendor.mali.hal_dump_dir"
+10-02 18:58:56.448 32413 32440 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-02 18:58:56.448 32413 32440 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-02 18:58:56.448 32413 32440 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-02 18:58:56.451   935   994 V WindowManagerShell: onTransitionReady android.os.BinderProxy@ee08a19: {id=245 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@1efeddb} m=OPEN f=NONE leash=Surface(name=Task=291)/@0xf65278c sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0},{WCT{android.window.IWindowContainerToken$Stub$Proxy@33078} m=TO_BACK f=NONE leash=Surface(name=Task=220)/@0x266aed5 sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0}]}
+10-02 18:58:56.451   935   994 V WindowManagerShell: Playing animation for (#245)android.os.BinderProxy@ee08a19@0
+10-02 18:58:56.451   935   994 V WindowManagerShell:  try handler com.android.wm.shell.keyguard.KeyguardTransitionHandler@e46053b
+10-02 18:58:56.451   935   994 V WindowManagerShell:  try handler com.android.wm.shell.activityembedding.ActivityEmbeddingController@a6458
+10-02 18:58:56.451   935   994 V WindowManagerShell:  try handler com.android.wm.shell.pip.tv.TvPipTransition@30fb9b1
+10-02 18:58:56.451   935   994 V WindowManagerShell:  try handler com.android.wm.shell.transition.RemoteTransitionHandler@82c2e96
+10-02 18:58:56.451   935   994 V WindowManagerShell: Transition doesn't have explicit remote, search filters for match for {id=245 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@1efeddb} m=OPEN f=NONE leash=Surface(name=Task=291)/@0xf65278c sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0},{WCT{android.window.IWindowContainerToken$Stub$Proxy@33078} m=TO_BACK f=NONE leash=Surface(name=Task=220)/@0x266aed5 sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0}]}
+10-02 18:58:56.451   935   994 V WindowManagerShell:  Delegate animation for #245 to null
+10-02 18:58:56.451   935   994 V WindowManagerShell:  try handler com.android.wm.shell.transition.DefaultTransitionHandler@f05ba17
+10-02 18:58:56.452   935   994 V WindowManagerShell: start default transition animation, info = {id=245 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@1efeddb} m=OPEN f=NONE leash=Surface(name=Task=291)/@0xf65278c sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0},{WCT{android.window.IWindowContainerToken$Stub$Proxy@33078} m=TO_BACK f=NONE leash=Surface(name=Task=220)/@0x266aed5 sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0}]}
+10-02 18:58:56.453   935   994 V WindowManagerShell: loadAnimation: anim=android.view.animation.AlphaAnimation@b758cb7 animAttr=0x9 type=OPEN isEntrance=false
+10-02 18:58:56.454   935   994 V WindowManagerShell: loadAnimation: anim=android.view.animation.AlphaAnimation@786e38d animAttr=0x8 type=OPEN isEntrance=true
+10-02 18:58:56.456 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.hal_format"
+10-02 18:58:56.457 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.recordable"
+10-02 18:58:56.457 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.dataspaces_to_exclude"
+10-02 18:58:56.457   935   994 V WindowManagerShell:  animated by com.android.wm.shell.transition.DefaultTransitionHandler@f05ba17
+10-02 18:58:56.457 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.hal_format"
+10-02 18:58:56.457 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.recordable"
+10-02 18:58:56.457 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.dataspaces_to_exclude"
+10-02 18:58:56.457 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.hal_format"
+10-02 18:58:56.457 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.recordable"
+10-02 18:58:56.457 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.dataspaces_to_exclude"
+10-02 18:58:56.457 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.hal_format"
+10-02 18:58:56.457 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.recordable"
+10-02 18:58:56.458 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.dataspaces_to_exclude"
+10-02 18:58:56.458 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.hal_format"
+10-02 18:58:56.458 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.recordable"
+10-02 18:58:56.458 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.dataspaces_to_exclude"
+10-02 18:58:56.458 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.hal_format"
+10-02 18:58:56.458 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.recordable"
+10-02 18:58:56.459 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.dataspaces_to_exclude"
+10-02 18:58:56.459 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.hal_format"
+10-02 18:58:56.459 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.recordable"
+10-02 18:58:56.459 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.dataspaces_to_exclude"
+10-02 18:58:56.459 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.hal_format"
+10-02 18:58:56.459 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.recordable"
+10-02 18:58:56.459 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.dataspaces_to_exclude"
+10-02 18:58:56.459 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.hal_format"
+10-02 18:58:56.459 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.recordable"
+10-02 18:58:56.460 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.dataspaces_to_exclude"
+10-02 18:58:56.460 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.hal_format"
+10-02 18:58:56.460 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.recordable"
+10-02 18:58:56.460 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.dataspaces_to_exclude"
+10-02 18:58:56.460 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.hal_format"
+10-02 18:58:56.460 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.recordable"
+10-02 18:58:56.460 32413 32440 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.dataspaces_to_exclude"
+10-02 18:58:56.461   655   757 I ActivityTaskManager: Displayed org.worldfoundry.wf_game.aquarium/android.app.NativeActivity for user 0: +269ms
+10-02 18:58:56.461   216   216 I hwservicemanager: getTransport: Cannot find entry android.hardware.configstore@1.0::ISurfaceFlingerConfigs/default in either framework or device VINTF manifest.
+10-02 18:58:56.462   655   757 V WindowManager: Sent Transition #245 createdAt=10-02 18:58:56.185 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=291 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=org.worldfoundry.wf_game.aquarium/android.app.NativeActivity } baseActivity=ComponentInfo{org.worldfoundry.wf_game.aquarium/android.app.NativeActivity} topActivity=ComponentInfo{org.worldfoundry.wf_game.aquarium/android.app.NativeActivity} origActivity=null realActivity=ComponentInfo{org.worldfoundry.wf_game.aquarium/android.app.NativeActivity} numActivities=1 lastActiveTime=45494042 supportsMultiWindow=false resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{d864a08 Task{5128bec #291 type=standard A=10147:org.worldfoundry.wf_game.aquarium}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=true launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{6ec25a1 android.app.NativeActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-02 18:58:56.462   655   757 V WindowManager:     startWCT=WindowContainerTransaction { changes = {} hops = [] errorCallbackToken=null taskFragmentOrganizer=null }
+10-02 18:58:56.462   655   757 V WindowManager:     info={id=245 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{RemoteToken{d864a08 Task{5128bec #291 type=standard A=10147:org.worldfoundry.wf_game.aquarium}}} m=OPEN f=NONE leash=Surface(name=Task=291)/@0xb43ec25 sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0},{WCT{RemoteToken{4416ec7 Task{c8300d4 #220 type=home}}} m=TO_BACK f=NONE leash=Surface(name=Task=220)/@0x94d012e sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0}]}
+10-02 18:58:56.472   655  1296 D CompatibilityChangeReporter: Compat change id reported: 214016041; UID 10147; state: ENABLED
+10-02 18:58:56.472   655  1296 I ImeTracker: org.worldfoundry.wf_game.aquarium:faade12a: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-02 18:58:56.472   655  1296 I ImeTracker: org.worldfoundry.wf_game.aquarium:faade12a: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-02 18:58:56.481 32413 32440 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-02 18:58:56.481 32413 32440 I wf_game : android_main: EGL ready, entering HALStart
+10-02 18:58:56.483 32413 32440 I AAudio  : AAudioStreamBuilder_openStream() called ----------------------------------------
+10-02 18:58:56.483 32413 32440 I AudioStreamBuilder: rate   =      0, channels  = 0, channelMask = 0, format   = 5, sharing = SH, dir = OUTPUT
+10-02 18:58:56.483 32413 32440 I AudioStreamBuilder: device =      0, sessionId = -1, perfMode = 12, callback: ON with frames = 0
+10-02 18:58:56.483 32413 32440 I AudioStreamBuilder: usage  =      0, contentType = 0, inputPreset = 0, allowedCapturePolicy = 0
+10-02 18:58:56.483 32413 32440 I AudioStreamBuilder: privacy sensitive = false, opPackageName = (null), attributionTag = (null)
+10-02 18:58:56.485   427  2163 I audio_hw_primary: [audiohal_get_latency:1251] io 13: out:0xe8943e00 frames:3072 rate:48000 whole_latency:64 alsa_latency:64
+10-02 18:58:56.485 32413 32440 D f_game.aquarium: PlayerBase::PlayerBase()
+10-02 18:58:56.488   464  2779 D audioserver: PlayerBase::PlayerBase()
+10-02 18:58:56.489   464  2779 D AAudioServiceEndpointMMAP: openWithFormat trying to open MMAP stream with format=0x5, sample_rate=48000, channel_mask=0x3, device=0
+10-02 18:58:56.490   464  2779 W ServiceUtilities: doIsAllowed: Playback capture for uid 1041 is denied as no package name could be retrieved from the package manager.
+10-02 18:58:56.491   464  2779 D AAudioServiceEndpointMMAP: openWithFormat() mMapClient.attributionSource = AttributionSourceState{pid: 464, uid: 1041, packageName: (null), attributionTag: (null), token: binder:0xf783df48, renouncedPermissions: (null), next: []} => portHandle = 0
+10-02 18:58:56.491   464  2779 D AAudioServiceEndpointMMAP: openWithFormat() - openMmapStream() returned status=-38, suggested format=0x1, sample_rate=48000, channel_mask=0x3
+10-02 18:58:56.491   464  2779 D AAudioServiceEndpointMMAP: open() 0x5 failed, perhaps due to format. Try again with 0x1
+10-02 18:58:56.491   464  2779 D AAudioServiceEndpointMMAP: openWithFormat trying to open MMAP stream with format=0x1, sample_rate=48000, channel_mask=0x3, device=0
+10-02 18:58:56.492   464  2779 W ServiceUtilities: doIsAllowed: Playback capture for uid 1041 is denied as no package name could be retrieved from the package manager.
+10-02 18:58:56.493   464  2779 I AudioFlinger: openOutput() this 0xf79ed000, module 10 Device AUDIO_DEVICE_OUT_HDMI, @:, SamplingRate 48000, Format 0x000001, Channels 0x3, flags 0x4001
+10-02 18:58:56.494   427  1263 I audio_hw_primary: [adev_open_output_stream:3129] io 533: out:0xe8944400 dev:OUT_HDMI(0x400) addr:
+10-02 18:58:56.494   427  1263 I audio_hw_primary: [adev_open_output_stream:3131] ch_mask:0x3 rate:48000 format:PCM_16_BIT(0x1) flags:0x4001
+10-02 18:58:56.494   427  1263 I aml_mmap_audio: [outMmapInit:668] stream:0xe8944400
+10-02 18:58:56.494   427  1263 I aml_mmap_audio: [dma_buffer_allocate:627] enter
+10-02 18:58:56.494   427  1263 I DMABUFHEAPS: Using DMA-BUF heap named: system-uncached
+10-02 18:58:56.494   427  1263 I aml_mmap_audio: [dma_buffer_allocate:661] s32DmaFd:24, pu8MmapAddr:0xe82ce000
+10-02 18:58:56.494   427  1263 I aml_mmap_audio: [mmap_audio_register_client:914] OK ! stream 0xe8944400, client id 0
+10-02 18:58:56.495   427  1263 I audio_hw_primary: [adev_open_output_stream:3377] vendor.media.llp 0
+10-02 18:58:56.495   427  1263 I audio_hw_primary: [adev_open_output_stream:3445] result profile ch_mask:0x3 rate:48000 format:PCM_16_BIT(0x1) usecase:PCM_MMAP
+10-02 18:58:56.495   427  1263 I sub_mixing_factory: [initSubMixingInputPcm:949] ++ io 533: out 0xe8944400, flags 0x4001, hwsync lpcm 0
+10-02 18:58:56.495   427  1263 I audio_hw_utils: aml_get_stream_dump_file_name line 2607 file_name /data/vendor/audiohal/stream_pid427_tid1263.pcm
+10-02 18:58:56.495   427  1263 I audio_hw_primary: [adev_open_output_stream_new:7337] io 533: out: 0xe8944400 card:0 alsa devices:0 exit ------
+10-02 18:58:56.496   427  1263 I audio_hw_primary: [out_get_buffer_size:527] out:0xe8944400 config.rate=48000, format:PCM_16_BIT(0x1), stream format:PCM_16_BIT(0x1)
+10-02 18:58:56.496   464 32451 I AudioFlinger: AudioFlinger's thread 0xf747c000 tid=32451 ready to run
+10-02 18:58:56.505   427  1263 I audio_hw_primary: [out_set_volume:1325] out:0xe8944400 left:1.000000 continuous:0 internal_format:PCM_16_BIT dolby:0 direct pcm:1 mmap_pcm:1
+10-02 18:58:56.512   464  2779 I UsecaseValidator: verifyAudioAttributes update usage: 1 to AUDIO_USAGE_GAME for output: 533 pid: 464 package: 
+10-02 18:58:56.513   464  2779 D AAudioServiceEndpointMMAP: openWithFormat() mMapClient.attributionSource = AttributionSourceState{pid: 464, uid: 1041, packageName: (null), attributionTag: (null), token: binder:0xf783df48, renouncedPermissions: (null), next: []} => portHandle = 278
+10-02 18:58:56.513   464  2779 D AAudioServiceEndpointMMAP: openWithFormat(format = 0x1) deviceId = 14, sessionId = -1
+10-02 18:58:56.514   427  1263 I aml_mmap_audio: [outMmapCreateBuffer:479] stream:0xe8944400, min_size_frames:384
+10-02 18:58:56.514   427  1263 I aml_mmap_audio: [outMmapCreateBuffer:501] mmap_fd:24, mmap address:0xe82ce000
+10-02 18:58:56.514   464  2779 D AAudioServiceEndpointMMAP: createMmapBuffer() createMmapBuffer() buffer_size = 1536 fr, burst_size 384 fr, Sharable FD: Yes
+10-02 18:58:56.514   427  1263 W aml_mmap_audio: [outMmapGetPosition:524] status:0 not start done or position:0 is 0
+10-02 18:58:56.515   427  1263 I aml_mmap_audio: [outMmapGetPosition:531]   is first_fetch_position and return -ENOSYS
+10-02 18:58:56.515   427  1263 W StreamHAL: Error from HAL stream in function get_mmap_position: Function not implemented
+10-02 18:58:56.515   464  2779 D AAudioServiceEndpointMMAP: openWithFormat() got rate = 48000, channels = 2 channelMask = 0x3, deviceId = 14, capacity = 1536
+10-02 18:58:56.515   464  2779 D AAudioServiceEndpointMMAP: openWithFormat() got format = 0x1 = AUDIO_FORMAT_PCM_16_BIT, frame size = 4, burst size = 384
+10-02 18:58:56.515   464  2779 I AAudioServiceEndpointMMAP: Opened format=0x1 with result=0
+10-02 18:58:56.516   464 32452 D AAudioServiceStreamBase: run() MMAP entering >>>>>>>>>>>>>> COMMANDS
+10-02 18:58:56.519   464 32452 D SharedMemoryWrapper: fillParcelable counterFdIndex=2 readCounterSize=0, writeCounterSize=8
+10-02 18:58:56.519   464  2779 D AudioStreamInternal_Service: configureDataInformation() original HW burst = 384, minMicros = 1000 => SW burst = 384
+10-02 18:58:56.519   464  2779 D IsochronousClockModel: setFramesPerBurst() - mFramesPerBurst = 384 - mBurstPeriodNanos = 8000000
+10-02 18:58:56.519   464  2779 D AAudioStream: setState(s#55) from 0 to 2
+10-02 18:58:56.519   464  2779 I AAudioFlowGraph: configure() source format = 0x00000005, channels = 2, sink format = 0x00000001, channels = 2, useMonoBlend = 0, audioBalance = 0.000000, isExclusive 1
+10-02 18:58:56.520   464 32454 D AAudioServiceStreamBase: run() Shared entering >>>>>>>>>>>>>> COMMANDS
+10-02 18:58:56.523 32413 32440 D AudioStreamInternal_Client: configureDataInformation() original HW burst = 384, minMicros = 1000 => SW burst = 384
+10-02 18:58:56.523 32413 32440 D IsochronousClockModel: setFramesPerBurst() - mFramesPerBurst = 384 - mBurstPeriodNanos = 8000000
+10-02 18:58:56.523 32413 32440 D AAudioStream: setState(s#1) from 0 to 2
+10-02 18:58:56.523 32413 32440 I AAudioFlowGraph: configure() source format = 0x00000005, channels = 2, sink format = 0x00000005, channels = 2, useMonoBlend = 0, audioBalance = 0.000000, isExclusive 0
+10-02 18:58:56.524  1119  1320 I AudioSystemCmdService: onAudioPortListUpdate
+10-02 18:58:56.524  1119  1320 I AudioSystemCmdService: mAudioSink:[{{mHandle: 14, mRole: SINK}, mType: hdmi, mAddress: }], previousSink:[{{mHandle: 14, mRole: SINK}, mType: hdmi, mAddress: }]
+10-02 18:58:56.524  1119  1320 I AudioSystemCmdService: updateAudioPatch cur sink does not change.
+10-02 18:58:56.524 32413 32440 I AAudio  : AAudioStreamBuilder_openStream() returns 0 = AAUDIO_OK for s#1 ----------------
+10-02 18:58:56.525 32413 32440 D AAudio  : AAudioStream_requestStart(s#1) called --------------
+10-02 18:58:56.525 32413 32440 D AAudioStream: setState(s#1) from 2 to 3
+10-02 18:58:56.526   464 32454 D AAudioStream: setState(s#55) from 2 to 3
+10-02 18:58:56.528   464 32456 D AAudioServiceEndpointShared: aaudio_endpoint_thread_proc() called
+10-02 18:58:56.528   464 32456 D AAudioServiceEndpointPlay: callbackLoop() entering >>>>>>>>>>>>>>> MIXER
+10-02 18:58:56.528   464 32456 D AudioStreamInternal_Service: onEventFromServer - got AAUDIO_SERVICE_EVENT_STARTED
+10-02 18:58:56.528   464 32456 D AAudioStream: setState(s#55) from 3 to 4
+10-02 18:58:56.534   427  1263 I audio_hw_primary: [aml_audio_output_routing:3761] cur_devices:0x400 unmute_devices:0, mute_devices:0
+10-02 18:58:56.534   427  1263 I audio_hw_primary: [adev_create_audio_patch:7600] Patch 57: MIX->DEVICE, num_src:1 num_sink:1 patch_src:INVAL
+10-02 18:58:56.534   427  1263 I audio_hw_primary: [adev_create_audio_patch:7604] sink[0]: OUT_HDMI(id:14)
+10-02 18:58:56.534   427  1263 I audio_hw_primary: [adev_create_audio_patch:7661] Patch 57: mix(io:533) -> dev[OUT_HDMI(id:14)]
+10-02 18:58:56.534  1119  1322 D UEventObserver: change@/devices/platform/auge_sound/sound/card0/controlC0À€ACTION=changeÀ€DEVPATH=/devices/platform/auge_sound/sound/card0/controlC0À€SUBSYSTEM=soundÀ€AUDIO_FORMAT=0À€MAJOR=116À€MINOR=10À€DEVNAME=snd/controlC0À€SEQNUM=4102À€
+10-02 18:58:56.536  1119  1322 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.sendBroadcast:1220 android.content.ContextWrapper.sendBroadcast:504 com.droidlogic.audioservice.services.AudioSystemCmdService$1.onUEvent:175 com.droidlogic.UEventObserver$UEventThread.sendEvent:213 com.droidlogic.UEventObserver$UEventThread.run:190 
+10-02 18:58:56.546   464 32452 D audioserver: FGS Logger Transaction failed
+10-02 18:58:56.546   464 32452 D audioserver: -129
+10-02 18:58:56.547   427  1263 I aml_mmap_audio: [outMmapStart:428] stream:0xe8944400
+10-02 18:58:56.547   427  1263 I aml_mmap_audio: [outMmapStart:445] --stream:0xe8944400
+10-02 18:58:56.548   427   478 W aml_mmap_audio: [outMmapGetPosition:524] status:1 not start done or position:0 is 0
+10-02 18:58:56.548   427  1263 I audio_hw_primary: [out_set_volume:1325] out:0xe8944400 left:1.000000 continuous:0 internal_format:PCM_16_BIT dolby:0 direct pcm:1 mmap_pcm:1
+10-02 18:58:56.554   427   613 I aml_mmap_audio: [mmap_audio_process_client_data:1085] client 0 ====> start
+10-02 18:58:56.557 32413 32440 D AAudio  : AAudioStream_requestStart(s#1) returned 0 ---------
+10-02 18:58:56.559 32413 32458 D AudioStreamInternalPlay_Client: callbackLoop() entering >>>>>>>>>>>>>>>
+10-02 18:58:56.559 32413 32458 D AudioStreamInternal_Client: onEventFromServer - got AAUDIO_SERVICE_EVENT_STARTED
+10-02 18:58:56.559 32413 32458 D AAudioStream: setState(s#1) from 3 to 4
+10-02 18:58:56.560  1119  1320 I AudioSystemCmdService: onAudioPatchListUpdate
+10-02 18:58:56.562  1119  1320 I AudioSystemCmdService: mAudioSink:[{{mHandle: 14, mRole: SINK}, mType: hdmi, mAddress: }], previousSink:[{{mHandle: 14, mRole: SINK}, mType: hdmi, mAddress: }]
+10-02 18:58:56.562  1119  1320 I AudioSystemCmdService: updateAudioPatch cur sink does not change.
+10-02 18:58:56.584 32413 32440 I wf_game : level-menu: showing 5 entries ("WF Aquarium"), cursor on 0
+10-02 18:58:56.717   464 32452 W AAudioServiceEndpointMMAP: getExternalPosition too many frozen external position from HAL.
+10-02 18:58:56.872   935   994 V WindowManagerShell: Transition animation finished (aborted=false), notifying core (#245)android.os.BinderProxy@ee08a19@0
+10-02 18:58:56.878   655   757 V WindowManager: Finish Transition #245: created at 10-02 18:58:56.185 collect-started=0.097ms request-sent=11.459ms started=18.929ms ready=94.556ms sent=261.143ms finished=692.639ms
+10-02 18:58:56.880   935   994 V WindowManagerShell: Track 0 became idle
+10-02 18:58:56.880   935   994 V WindowManagerShell: All active transition animations finished
+10-02 18:58:56.917 14013 14013 W BackgroundControllerHea: Memory trim level 20, clearing 0 preloads
+10-02 18:58:56.917 14013 14013 W BackgroundControllerHea: Memory trim level 20, clearing 1 preloads
+10-02 18:58:56.929 14013 14013 W BootModeAppToBackground: LauncherX to background
+10-02 18:58:56.934 14013 14060 W TifLauncherHelper: Allow remove LastInput? org.worldfoundry.wf_game.aquarium in foreground
+10-02 18:58:56.950 14013 14013 W KatnissIntegrationServi: disconnect Katniss service
+10-02 18:58:56.989  1119  1119 D NetflixService: handleMessage
+10-02 18:58:56.991 14013 14060 W LastUsedInputProtoDataS: Sending last used input update broadcast
+10-02 18:58:56.994  1119  1119 D NetflixService: org.worldfoundry.wf_game.aquarium is visible.
+10-02 18:58:56.994  1119  1119 D NetflixService: com.netflix.ninja is not top activity.
+10-02 18:58:56.994  1119  1119 I NetflixService: fg: false  mIsNetflixFg: false
+10-02 18:58:56.995  1119 13973 D NetflixService: onForegroundActivitiesChanged pid:14013,uid:10052,fg:false
+10-02 18:58:56.997  1119  1119 D NetflixService: org.worldfoundry.wf_game.aquarium is visible.
+10-02 18:58:56.997  1119  1119 D NetflixService: com.google.android.youtube.tv is not top activity.
+10-02 18:58:57.006 14013 14013 W LastUsedInputUpdateRece: Notify last used input data change
+10-02 18:58:57.017  1119  1119 D NetflixService: handleMessage
+10-02 18:58:57.020  1119  1119 D NetflixService: org.worldfoundry.wf_game.aquarium is visible.
+10-02 18:58:57.020  1119  1119 D NetflixService: com.netflix.ninja is not top activity.
+10-02 18:58:57.020  1119  1119 I NetflixService: fg: false  mIsNetflixFg: false
+10-02 18:58:57.024  1119  1119 D NetflixService: org.worldfoundry.wf_game.aquarium is visible.
+10-02 18:58:57.024  1119  1119 D NetflixService: com.google.android.youtube.tv is not top activity.
+10-02 18:58:57.089  3907 32394 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:58:57.089  3907 32394 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:58:57.090  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:58:57.090  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:58:57.091  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:58:57.122  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:58:57.124  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:58:57.125  3907 32462 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:58:57.500   655  1431 E TaskPersister: File error accessing recents directory (directory doesn't exist?).
+10-02 18:58:57.696  1119  1119 D NetflixService: handleMessage
+10-02 18:58:57.708  1119  1119 D NetflixService: org.worldfoundry.wf_game.aquarium is visible.
+10-02 18:58:57.708  1119  1119 D NetflixService: com.netflix.ninja is not top activity.
+10-02 18:58:57.708  1119  1119 I NetflixService: fg: false  mIsNetflixFg: false
+10-02 18:58:57.711  1119  1119 D NetflixService: org.worldfoundry.wf_game.aquarium is visible.
+10-02 18:58:57.711  1119  1119 D NetflixService: com.google.android.youtube.tv is not top activity.
+10-02 18:58:57.941 32261 32281 I AidlLazyServiceRegistrar: Process has 0 (of 1 available) client(s) in use after notification artd has clients: 0
+10-02 18:58:57.941 32261 32281 I AidlLazyServiceRegistrar: Trying to shut down the service. No clients in use for any service in process.
+10-02 18:58:57.942 32261 32281 I AidlLazyServiceRegistrar: Unregistered all clients and exiting
+10-02 18:58:58.126  3907 32462 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:58:58.126  3907 32462 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:58:58.126  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:58:58.126  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:58:58.126  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:58:58.174  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:58:58.175  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:58:58.176  3907 32463 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:58:58.411  1119  1119 I ThermalService: CPU temperatures: [48.500004]
+10-02 18:58:58.507  1329  1329 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+10-02 18:58:59.177  3907 32463 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:58:59.177  3907 32463 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:58:59.177  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:58:59.177  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:58:59.178  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:58:59.210  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:58:59.212  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:58:59.212  3907 32464 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:59:00.213  3907 32464 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:59:00.214  3907 32464 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:59:00.214  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:59:00.214  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:59:00.214  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:59:00.272  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:59:00.275  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:59:00.277  3907 32465 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:59:00.415  1119  1119 I ThermalService: CPU temperatures: [48.4]
+10-02 18:59:01.278  3907 32465 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:59:01.278  3907 32465 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:59:01.278  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:59:01.278  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:59:01.278  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:59:01.322  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:59:01.326  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:59:01.328  3907 32466 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:59:01.964   655  1296 D ActivityManager: freezer override set to true
+10-02 18:59:01.964   655  1296 D ActivityManager: sync unfroze 31464 com.google.android.tv.dfuservice for 19
+10-02 18:59:01.965   655  1296 D ActivityManager: sync unfroze 14106 com.google.android.youtube.tv for 19
+10-02 18:59:01.965   655  1296 D ActivityManager: sync unfroze 25135 com.google.android.rkpdapp for 19
+10-02 18:59:01.966   655  1296 D ActivityManager: sync unfroze 28298 com.google.android.tts for 19
+10-02 18:59:01.967   655  1296 D ActivityManager: sync unfroze 18713 com.google.android.syncadapters.calendar for 19
+10-02 18:59:01.967   655  1296 D ActivityManager: sync unfroze 18765 com.android.providers.calendar for 19
+10-02 18:59:01.967   655  1296 D ActivityManager: sync unfroze 28683 com.google.process.gservices for 19
+10-02 18:59:01.968   655  1296 D ActivityManager: sync unfroze 29059 com.google.android.partnersetup for 19
+10-02 18:59:02.125 32413 32428 I f_game.aquarium: Explicit concurrent mark compact GC freed 2984(989KB) AllocSpace objects, 3(60KB) LOS objects, 49% free, 2155KB/4310KB, paused 237us,1.410ms total 21.456ms
+10-02 18:59:02.255   655  1296 D ActivityManager: freezer override set to false
+10-02 18:59:02.329  3907 32466 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:59:02.329  3907 32466 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:59:02.330  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:59:02.330  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:59:02.330  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:59:02.378  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:59:02.380  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:59:02.381  3907 32488 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:59:02.420  1119  1119 I ThermalService: CPU temperatures: [50.000004]
+10-02 18:59:02.503   655  1296 W ActivityManager: stopServiceToken startId 7 is last, but have 1 remaining args
+10-02 18:59:02.748 32487 32487 W BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+10-02 18:59:02.748 32487 32487 W ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+10-02 18:59:02.791 32487 32487 I DMABUFHEAPS: Using : Non-legacy ION heaps
+10-02 18:59:02.792 32487 32487 E DMABUFHEAPS: No ion heap of name ion-dev exists
+10-02 18:59:02.792 32487 32487 E DMABUFHEAPS: No ion heap of name ion-fb exists
+10-02 18:59:02.792 32487 32487 E DMABUFHEAPS: No ion heap of name ion_secure exists
+10-02 18:59:02.790 32487 32487 W screencap: type=1400 audit(0.0:1657): avc:  denied  { read } for  name="heap-gfx" dev="tmpfs" ino=538 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:59:02.790 32487 32487 W screencap: type=1400 audit(0.0:1658): avc:  denied  { read } for  name="heap-fb" dev="tmpfs" ino=546 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:59:02.790 32487 32487 W screencap: type=1400 audit(0.0:1659): avc:  denied  { read } for  name="heap-cached-codecmm" dev="tmpfs" ino=537 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:59:02.790 32487 32487 W screencap: type=1400 audit(0.0:1660): avc:  denied  { read } for  name="heap-codecmm" dev="tmpfs" ino=535 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:59:03.382  3907 32488 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:59:03.382  3907 32488 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:59:03.383  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:59:03.383  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:59:03.383  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:59:03.421  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:59:03.423  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:59:03.423  3907 32490 I adbd    : UsbFfs-monitor thread spawned

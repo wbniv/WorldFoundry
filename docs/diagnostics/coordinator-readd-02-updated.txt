@@ -1,0 +1,8 @@
+Accepted J-0f21f9f77ef7: queued; readd
+Follow: task chromecast:watch JOB=J-0f21f9f77ef7
+J-0f21f9f77ef7: accepted {"device": "chromecast-test-02", "workflow": "readd"}
+J-0f21f9f77ef7: granted {"device": "chromecast-test-02", "generation": 2}
+J-0f21f9f77ef7: phase {"phase": "connecting"}
+J-0f21f9f77ef7: needs-local-setup {"error": "Registered Cast identity not found near last address; supply a verified new discovery hint", "health": "needs-local-setup"}
+J-0f21f9f77ef7: needs-local-setup: Registered Cast identity not found near last address; supply a verified new discovery hint
+task: Failed to run task "chromecast:readd": exit status 1

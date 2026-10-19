@@ -1,0 +1,8 @@
+Accepted J-b606660f3fc6: queued; readd
+Follow: task chromecast:watch JOB=J-b606660f3fc6
+J-b606660f3fc6: accepted {"device": "chromecast-test-02", "workflow": "readd"}
+J-b606660f3fc6: granted {"device": "chromecast-test-02", "generation": 1}
+J-b606660f3fc6: phase {"phase": "connecting"}
+J-b606660f3fc6: recovery-required {"error": "Device identity/connection not verified; recovery required before further control", "health": "recovery-required"}
+J-b606660f3fc6: recovery-required: Device identity/connection not verified; recovery required before further control
+task: Failed to run task "chromecast:readd": exit status 1

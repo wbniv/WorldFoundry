@@ -1,0 +1,261 @@
+00:04.233  blend            | Read blend: "/home/will/WorldFoundry-wbniv/wflevels/condo_639_640/condo_639_640.blend"
+Blender 5.0.1
+BlenderMCP addon registered
+PASS 639-balcony-shade-slat-0 one two-sided optical quad (two exported triangles)
+PASS 639-balcony-shade-slat-0 fabric opacity 0.32, prelit and two-sided
+PASS 639-balcony-shade-slat-0 original collision sides retained
+PASS 639-balcony-shade-slat-1 one two-sided optical quad (two exported triangles)
+PASS 639-balcony-shade-slat-1 fabric opacity 0.32, prelit and two-sided
+PASS 639-balcony-shade-slat-1 original collision sides retained
+PASS 639-balcony-shade-slat-2 one two-sided optical quad (two exported triangles)
+PASS 639-balcony-shade-slat-2 fabric opacity 0.32, prelit and two-sided
+PASS 639-balcony-shade-slat-2 original collision sides retained
+PASS 639-balcony-shade-slat-3 one two-sided optical quad (two exported triangles)
+PASS 639-balcony-shade-slat-3 fabric opacity 0.32, prelit and two-sided
+PASS 639-balcony-shade-slat-3 original collision sides retained
+PASS 639-balcony-shade-slat-4 one two-sided optical quad (two exported triangles)
+PASS 639-balcony-shade-slat-4 fabric opacity 0.32, prelit and two-sided
+PASS 639-balcony-shade-slat-4 original collision sides retained
+PASS 639-balcony-shade-slat-5 one two-sided optical quad (two exported triangles)
+PASS 639-balcony-shade-slat-5 fabric opacity 0.32, prelit and two-sided
+PASS 639-balcony-shade-slat-5 original collision sides retained
+PASS 639-balcony-shade-slat-6 one two-sided optical quad (two exported triangles)
+PASS 639-balcony-shade-slat-6 fabric opacity 0.32, prelit and two-sided
+PASS 639-balcony-shade-slat-6 original collision sides retained
+PASS 639-balcony-shade-slat-7 one two-sided optical quad (two exported triangles)
+PASS 639-balcony-shade-slat-7 fabric opacity 0.32, prelit and two-sided
+PASS 639-balcony-shade-slat-7 original collision sides retained
+PASS closedness 0.00: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.00: bottom sheet meets the moving bar
+PASS raised optical fabric has zero area, parked above cassette bottom
+PASS closedness 0.01: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.01: bottom sheet meets the moving bar
+PASS closedness 0.02: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.02: bottom sheet meets the moving bar
+PASS closedness 0.03: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.03: bottom sheet meets the moving bar
+PASS closedness 0.04: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.04: bottom sheet meets the moving bar
+PASS closedness 0.05: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.05: bottom sheet meets the moving bar
+PASS closedness 0.06: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.06: bottom sheet meets the moving bar
+PASS closedness 0.07: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.07: bottom sheet meets the moving bar
+PASS closedness 0.08: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.08: bottom sheet meets the moving bar
+PASS closedness 0.09: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.09: bottom sheet meets the moving bar
+PASS closedness 0.10: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.10: bottom sheet meets the moving bar
+PASS closedness 0.11: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.11: bottom sheet meets the moving bar
+PASS closedness 0.12: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.12: bottom sheet meets the moving bar
+PASS closedness 0.13: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.13: bottom sheet meets the moving bar
+PASS closedness 0.14: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.14: bottom sheet meets the moving bar
+PASS closedness 0.15: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.15: bottom sheet meets the moving bar
+PASS closedness 0.16: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.16: bottom sheet meets the moving bar
+PASS closedness 0.17: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.17: bottom sheet meets the moving bar
+PASS closedness 0.18: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.18: bottom sheet meets the moving bar
+PASS closedness 0.19: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.19: bottom sheet meets the moving bar
+PASS closedness 0.20: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.20: bottom sheet meets the moving bar
+PASS closedness 0.21: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.21: bottom sheet meets the moving bar
+PASS closedness 0.22: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.22: bottom sheet meets the moving bar
+PASS closedness 0.23: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.23: bottom sheet meets the moving bar
+PASS closedness 0.24: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.24: bottom sheet meets the moving bar
+PASS closedness 0.25: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.25: bottom sheet meets the moving bar
+PASS closedness 0.26: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.26: bottom sheet meets the moving bar
+PASS closedness 0.27: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.27: bottom sheet meets the moving bar
+PASS closedness 0.28: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.28: bottom sheet meets the moving bar
+PASS closedness 0.29: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.29: bottom sheet meets the moving bar
+PASS closedness 0.30: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.30: bottom sheet meets the moving bar
+PASS closedness 0.31: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.31: bottom sheet meets the moving bar
+PASS closedness 0.32: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.32: bottom sheet meets the moving bar
+PASS closedness 0.33: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.33: bottom sheet meets the moving bar
+PASS closedness 0.34: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.34: bottom sheet meets the moving bar
+PASS closedness 0.35: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.35: bottom sheet meets the moving bar
+PASS closedness 0.36: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.36: bottom sheet meets the moving bar
+PASS closedness 0.37: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.37: bottom sheet meets the moving bar
+PASS closedness 0.38: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.38: bottom sheet meets the moving bar
+PASS closedness 0.39: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.39: bottom sheet meets the moving bar
+PASS closedness 0.40: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.40: bottom sheet meets the moving bar
+PASS closedness 0.41: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.41: bottom sheet meets the moving bar
+PASS closedness 0.42: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.42: bottom sheet meets the moving bar
+PASS closedness 0.43: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.43: bottom sheet meets the moving bar
+PASS closedness 0.44: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.44: bottom sheet meets the moving bar
+PASS closedness 0.45: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.45: bottom sheet meets the moving bar
+PASS closedness 0.46: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.46: bottom sheet meets the moving bar
+PASS closedness 0.47: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.47: bottom sheet meets the moving bar
+PASS closedness 0.48: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.48: bottom sheet meets the moving bar
+PASS closedness 0.49: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.49: bottom sheet meets the moving bar
+PASS closedness 0.50: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.50: bottom sheet meets the moving bar
+PASS closedness 0.51: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.51: bottom sheet meets the moving bar
+PASS closedness 0.52: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.52: bottom sheet meets the moving bar
+PASS closedness 0.53: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.53: bottom sheet meets the moving bar
+PASS closedness 0.54: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.54: bottom sheet meets the moving bar
+PASS closedness 0.55: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.55: bottom sheet meets the moving bar
+PASS closedness 0.56: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.56: bottom sheet meets the moving bar
+PASS closedness 0.57: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.57: bottom sheet meets the moving bar
+PASS closedness 0.58: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.58: bottom sheet meets the moving bar
+PASS closedness 0.59: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.59: bottom sheet meets the moving bar
+PASS closedness 0.60: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.60: bottom sheet meets the moving bar
+PASS closedness 0.61: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.61: bottom sheet meets the moving bar
+PASS closedness 0.62: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.62: bottom sheet meets the moving bar
+PASS closedness 0.63: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.63: bottom sheet meets the moving bar
+PASS closedness 0.64: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.64: bottom sheet meets the moving bar
+PASS closedness 0.65: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.65: bottom sheet meets the moving bar
+PASS closedness 0.66: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.66: bottom sheet meets the moving bar
+PASS closedness 0.67: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.67: bottom sheet meets the moving bar
+PASS closedness 0.68: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.68: bottom sheet meets the moving bar
+PASS closedness 0.69: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.69: bottom sheet meets the moving bar
+PASS closedness 0.70: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.70: bottom sheet meets the moving bar
+PASS closedness 0.71: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.71: bottom sheet meets the moving bar
+PASS closedness 0.72: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.72: bottom sheet meets the moving bar
+PASS closedness 0.73: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.73: bottom sheet meets the moving bar
+PASS closedness 0.74: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.74: bottom sheet meets the moving bar
+PASS closedness 0.75: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.75: bottom sheet meets the moving bar
+PASS closedness 0.76: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.76: bottom sheet meets the moving bar
+PASS closedness 0.77: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.77: bottom sheet meets the moving bar
+PASS closedness 0.78: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.78: bottom sheet meets the moving bar
+PASS closedness 0.79: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.79: bottom sheet meets the moving bar
+PASS closedness 0.80: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.80: bottom sheet meets the moving bar
+PASS closedness 0.81: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.81: bottom sheet meets the moving bar
+PASS closedness 0.82: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.82: bottom sheet meets the moving bar
+PASS closedness 0.83: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.83: bottom sheet meets the moving bar
+PASS closedness 0.84: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.84: bottom sheet meets the moving bar
+PASS closedness 0.85: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.85: bottom sheet meets the moving bar
+PASS closedness 0.86: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.86: bottom sheet meets the moving bar
+PASS closedness 0.87: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.87: bottom sheet meets the moving bar
+PASS closedness 0.88: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.88: bottom sheet meets the moving bar
+PASS closedness 0.89: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.89: bottom sheet meets the moving bar
+PASS closedness 0.90: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.90: bottom sheet meets the moving bar
+PASS closedness 0.91: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.91: bottom sheet meets the moving bar
+PASS closedness 0.92: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.92: bottom sheet meets the moving bar
+PASS closedness 0.93: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.93: bottom sheet meets the moving bar
+PASS closedness 0.94: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.94: bottom sheet meets the moving bar
+PASS closedness 0.95: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.95: bottom sheet meets the moving bar
+PASS closedness 0.96: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.96: bottom sheet meets the moving bar
+PASS closedness 0.97: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.97: bottom sheet meets the moving bar
+PASS closedness 0.98: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.98: bottom sheet meets the moving bar
+PASS closedness 0.99: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 0.99: bottom sheet meets the moving bar
+PASS closedness 1.00: all seven joins meet without overlap/gaps, including oblique views
+PASS closedness 1.00: bottom sheet meets the moving bar
+PASS 639-project-door-panel-0 exactly one optical pane from either side
+PASS 639-project-door-panel-0 0.12 glass uses dedicated material
+PASS 639-project-door-panel-0 glass inset 10 cm within black aluminum border
+PASS 639-project-door-panel-0 black frame coverage from side -1
+PASS 639-project-door-panel-0 black frame coverage from side 1
+PASS handle and lock on both sides fit inside the black frame
+PASS 639-project-door-panel-0 closed collision box retained
+PASS 639-project-door-panel-0 collision mass stays 75
+PASS 639-project-door-panel-1 exactly one optical pane from either side
+PASS 639-project-door-panel-1 0.12 glass uses dedicated material
+PASS 639-project-door-panel-1 glass inset 10 cm within black aluminum border
+PASS 639-project-door-panel-1 black frame coverage from side -1
+PASS 639-project-door-panel-1 black frame coverage from side 1
+PASS 639-project-door-panel-1 closed collision box retained
+PASS 639-project-door-panel-1 collision mass stays 75
+PASS 639-project-door-panel-2 exactly one optical pane from either side
+PASS 639-project-door-panel-2 0.12 glass uses dedicated material
+PASS 639-project-door-panel-2 glass inset 10 cm within black aluminum border
+PASS 639-project-door-panel-2 black frame coverage from side -1
+PASS 639-project-door-panel-2 black frame coverage from side 1
+PASS 639-project-door-panel-2 closed collision box retained
+PASS 639-project-door-panel-2 collision mass stays 75
+PASS door-hardware-black stays opaque
+PASS door-key-metal stays opaque
+PASS shade-cassette stays opaque
+PASS shade-solar stays opaque
+PASS shade-guide stays opaque
+PASS shade-bar stays opaque
+PASS unrelated windows keep imported glass opacity contract
+RESULT: PASS
+BlenderMCP addon unregistered

@@ -1,0 +1,20 @@
+// aquarium_idle-standalone.iff.txt — L4-wrapped form of aquarium_idle for wf_game -L.
+//
+// Build:  task aquarium-idle-level      (Blender export + build_level_binary.sh)
+// Run:    task run-aquarium-idle
+//
+// Clownfish idle-animation spike: the canonical aquarium clownfish
+// (wflevels/aquarium/clownfish.py) as an invisible Physics hull plus five
+// Director-posed statplat parts, a backdrop, a sand strip and a side-on camera.
+// Plan: docs/plans/2026-09-30-clownfish-idle-animation.md
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 200000l                  // 16 actors + margin
+        'PERM' 1000000l
+        'ROOM' 1000000l
+        'FLAG' 1l 1l                    // doomstick, bungeecam (the first camshot sticks; no ActBoxOR needed)
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../aquarium_idle.iff" ]
+}

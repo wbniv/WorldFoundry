@@ -1,0 +1,175 @@
+{
+  "level": "aquarium_arowana",
+  "title": "Asian Arowana",
+  "kind": "arowana",
+  "count": 1,
+  "profile": "remote",
+  "indices": {
+    "Room": 1,
+    "SunLight": 2,
+    "Camera": 3,
+    "Director": 4,
+    "LevelObj": 5,
+    "Matte": 6,
+    "cs_wide": 7,
+    "LookAt": 8,
+    "Player": 9,
+    "animal-00-ar_body": 10,
+    "animal-00-ar_tail": 11,
+    "animal-00-ar_dorsal": 12,
+    "animal-00-ar_anal": 13,
+    "animal-00-ar_pec_near": 14,
+    "animal-00-ar_pec_far": 15,
+    "animal-00-ar_pelvic_near": 16,
+    "animal-00-ar_pelvic_far": 17,
+    "animal-00-ar_barbel_near": 18,
+    "animal-00-ar_barbel_far": 19,
+    "tank-base": 20,
+    "water-back": 21,
+    "back-air": 22,
+    "tank-end--1": 23,
+    "tank-end-1": 24,
+    "front-collider": 25,
+    "rim": 26,
+    "floor": 27,
+    "stand": 28,
+    "room-backdrop": 29,
+    "AmbientLight": 30,
+    "LookClose": 31,
+    "cs_close": 32
+  },
+  "mailboxes": {
+    "aq-prev": 700,
+    "aq-mode": 701,
+    "aq-dart-t": 702,
+    "aq-dart-req": 703,
+    "aq-in-b": 704,
+    "aq-dx": 705,
+    "aq-dy": 706,
+    "aq-dz": 707,
+    "aq-vx": 708,
+    "aq-vy": 709,
+    "aq-vz": 710,
+    "aq-t1": 711,
+    "aq-cap": 712,
+    "aq-brake": 713,
+    "aq-flat": 714,
+    "aq-was-moving": 715,
+    "aq-yaw": 740,
+    "aq-yaw-w": 741,
+    "aq-yaw-t": 742,
+    "aq-pitch": 743,
+    "aq-pitch-w": 744,
+    "aq-pitch-t": 745,
+    "aq-roll": 746,
+    "aq-speed": 747,
+    "aq-cyc": 748,
+    "aq-burst": 749,
+    "aq-fx": 750,
+    "aq-fy": 751,
+    "aq-fz": 752,
+    "aq-pushed": 753,
+    "aq-lox": 754,
+    "aq-hix": 755,
+    "aq-loy": 756,
+    "aq-hiy": 757,
+    "aq-loz": 758,
+    "aq-hiz": 759,
+    "aq-sway-b": 720,
+    "ar-init": 760,
+    "ar-neutral": 761,
+    "ar-cool": 762,
+    "ar-turn": 763,
+    "ar-radius": 764,
+    "ar-yaw-cap": 765,
+    "ar-error": 766,
+    "ar-state": 767,
+    "ar-room-mb": 768,
+    "ar-bend": 769,
+    "ar-cam-x": 770,
+    "ar-cam-z": 771,
+    "ar-cam-init": 772,
+    "ar-target-last": 773,
+    "ar-turn-side": 774,
+    "ar-yaw-old": 775
+  },
+  "parts": [
+    "ar_body",
+    "ar_tail",
+    "ar_dorsal",
+    "ar_anal",
+    "ar_pec_near",
+    "ar_pec_far",
+    "ar_pelvic_near",
+    "ar_pelvic_far",
+    "ar_barbel_near",
+    "ar_barbel_far"
+  ],
+  "offsets": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ]
+  ],
+  "animal": "arowana",
+  "spawn": [
+    0,
+    0,
+    6
+  ],
+  "bottom": 0.35,
+  "top": 11.65,
+  "limits": [
+    16.39,
+    13.65
+  ],
+  "rows": [],
+  "betta_fins": null,
+  "feeding": null
+}

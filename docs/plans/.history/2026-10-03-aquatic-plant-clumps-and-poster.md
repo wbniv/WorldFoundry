@@ -1,0 +1,45 @@
+| Date | Change |
+|------|--------|
+| [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/8d165c7c) | Record plant atlas resolution profiles and retain 256 default |
+| [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/e45a7ac1) | Reconcile plant docs with implemented runtime and final texture measurements |
+| [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/d7e70afb) | Record current-build plant texture cost and verified APK restoration |
+| [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/0aa37847) | Add seeded growing plant tank, settings and leaf textures |
+| [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/6f7f9df4) | Plan complete plant settings on connected phone with TV fallback |
+| [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/14c1a1dc) | Specify ten-key and phone seed entry for plant growth |
+| [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/a0c9c44a) | Plan visible seeded plant growth with regeneration and speed controls |
+| [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/55d87fb3) | Split tiger-barb tank and add profiled dense planting with A3 growth poster |
+
+<!--history-meta v1
+8d165c7c	author	Will Norris
+8d165c7c	added	149
+8d165c7c	deleted	2
+8d165c7c	files	1
+e45a7ac1	author	Will Norris
+e45a7ac1	added	34
+e45a7ac1	deleted	16
+e45a7ac1	files	1
+d7e70afb	author	Will Norris
+d7e70afb	added	29
+d7e70afb	deleted	5
+d7e70afb	files	1
+0aa37847	author	Will Norris
+0aa37847	added	141
+0aa37847	deleted	19
+0aa37847	files	1
+6f7f9df4	author	Will Norris
+6f7f9df4	added	13
+6f7f9df4	deleted	2
+6f7f9df4	files	1
+14c1a1dc	author	Will Norris
+14c1a1dc	added	2
+14c1a1dc	deleted	2
+14c1a1dc	files	1
+a0c9c44a	author	Will Norris
+a0c9c44a	added	88
+a0c9c44a	deleted	16
+a0c9c44a	files	1
+55d87fb3	author	Will Norris
+55d87fb3	added	96
+55d87fb3	deleted	0
+55d87fb3	files	1
+-->

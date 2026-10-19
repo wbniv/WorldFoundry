@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Project room telescoping doors</title>
+<style>
+  :root { --bg:#1c1f26; --panel:#262b35; --ink:#e8ecf1; --dim:#9aa4b2; --wall:#5fa8e0; --glass:#8fd8e8; --accent:#ffcf5f; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; width:1440px; height:900px; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; overflow:hidden; }
+  .wrap { display:flex; flex-direction:column; height:100%; padding:26px 34px; gap:14px; }
+  h1 { margin:0; font-size:21px; font-weight:600; }
+  h1 span { color:var(--dim); font-weight:400; font-size:14px; margin-left:10px; }
+  .row { display:flex; gap:20px; flex:1; min-height:0; }
+  .panel { background:var(--panel); border-radius:10px; padding:14px 16px; display:flex; flex-direction:column; gap:8px; flex:1; }
+  .panel h2 { margin:0; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); }
+  .panel svg { flex:1; width:100%; }
+  .legend { display:flex; gap:14px; font-size:11px; color:var(--dim); flex-wrap:wrap; }
+  .legend span { display:inline-flex; align-items:center; gap:5px; }
+  .sw { width:14px; height:8px; display:inline-block; border-radius:2px; }
+  .notes { background:var(--panel); border-radius:10px; padding:12px 16px; font-size:12.5px; color:var(--dim); line-height:1.5; }
+  .notes b { color:var(--ink); }
+  code { background:#12151a; padding:1px 5px; border-radius:4px; color:#ffcf5f; font-size:11.5px; }
+  .assume { color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>639-project-rm north wall — window band → telescoping glass doors <span>docs/plans/2026-09-20-condo-project-room-telescoping-doors.md</span></h1>
+  <div class="row">
+    <div class="panel">
+      <h2>Current (source model) — top-down</h2>
+      <svg viewBox="0 0 380 260">
+        <!-- room: x 3.8..7.8 (south..north) mapped to svg-y (north=up); y -8.0(E)..-2.0(W) mapped to svg-x
+             with EAST ON THE RIGHT (standard north-up map convention: svgx = 40 - (roomY+2.0)*40) -->
+        <rect x="40" y="20" width="240" height="200" fill="#12151a" stroke="#333a48"/>
+        <text x="45" y="14" fill="#9aa4b2" font-size="10">N ↑ (x=7.8)</text>
+        <text x="45" y="234" fill="#9aa4b2" font-size="10">S (x=3.8)</text>
+        <text x="10" y="120" fill="#9aa4b2" font-size="10">W (y=-2.0)</text>
+        <text x="288" y="120" fill="#9aa4b2" font-size="10">E (y=-8.0)</text>
+        <!-- north wall, full span, solid -->
+        <rect x="40" y="16" width="240" height="6" fill="var(--wall)"/>
+        <!-- existing partial window band: y -6.75(near-E)..-2.0(W) -> svgx 40(W)..230(near-E) -->
+        <rect x="40" y="16" width="190" height="6" fill="var(--glass)"/>
+        <text x="60" y="10" fill="var(--glass)" font-size="9">existing "glass" window, 4.75 m of 6 m wall</text>
+        <text x="225" y="46" fill="#9aa4b2" font-size="9" text-anchor="end">1.25 m unaccounted gap (east end)</text>
+        <rect x="130" y="100" width="70" height="16" fill="none"/>
+        <text x="160" y="130" fill="#e8ecf1" font-size="11" text-anchor="middle">639-project-rm</text>
+        <text x="160" y="146" fill="#9aa4b2" font-size="10" text-anchor="middle">4.0 × 6.0 m</text>
+      </svg>
+      <div class="legend"><span><span class="sw" style="background:var(--wall)"></span>solid wall</span><span><span class="sw" style="background:var(--glass)"></span>glass (partial, z 0.9–2.3 m only)</span></div>
+    </div>
+    <div class="panel">
+      <h2>Corrected — closed state (3 panels, floor-to-ceiling)</h2>
+      <svg viewBox="0 0 380 260">
+        <rect x="40" y="20" width="240" height="200" fill="#12151a" stroke="#333a48"/>
+        <text x="45" y="14" fill="#9aa4b2" font-size="10">N ↑</text>
+        <!-- C(west,movable) 40-120 | B(mid,movable) 120-200 | A(east,fixed) 200-280 -->
+        <rect x="40" y="16" width="80" height="6" fill="var(--accent)"/>
+        <rect x="122" y="16" width="76" height="6" fill="var(--accent)"/>
+        <rect x="200" y="16" width="80" height="6" fill="var(--glass)"/>
+        <line x1="120" y1="12" x2="120" y2="22" stroke="#12151a" stroke-width="2"/>
+        <line x1="200" y1="12" x2="200" y2="22" stroke="#12151a" stroke-width="2"/>
+        <text x="80" y="10" fill="var(--accent)" font-size="9">movable</text>
+        <text x="160" y="10" fill="var(--accent)" font-size="9">movable</text>
+        <text x="240" y="10" fill="var(--glass)" font-size="9">fixed</text>
+        <text x="10" y="120" fill="#9aa4b2" font-size="10">W</text>
+        <text x="288" y="120" fill="#9aa4b2" font-size="10">E</text>
+        <text x="160" y="130" fill="#e8ecf1" font-size="11" text-anchor="middle">closed: full 6 m</text>
+        <text x="160" y="146" fill="#9aa4b2" font-size="10" text-anchor="middle">3 × ~2.0 m, floor–ceiling</text>
+      </svg>
+      <div class="legend"><span><span class="sw" style="background:var(--glass)"></span>fixed panel (east)</span><span><span class="sw" style="background:var(--accent)"></span>movable panels</span></div>
+    </div>
+    <div class="panel">
+      <h2>Corrected — open / gathered (default depicted state)</h2>
+      <svg viewBox="0 0 380 260">
+        <rect x="40" y="20" width="240" height="200" fill="#12151a" stroke="#333a48"/>
+        <text x="45" y="14" fill="#9aa4b2" font-size="10">N ↑</text>
+        <!-- gathered stack anchored at east (RIGHT, svgx 222-280) -->
+        <rect x="222" y="16" width="58" height="6" fill="var(--glass)"/>
+        <rect x="216" y="14" width="58" height="4" fill="var(--accent)" opacity="0.85"/>
+        <rect x="210" y="12" width="58" height="4" fill="var(--accent)" opacity="0.7"/>
+        <text x="245" y="8" fill="var(--accent)" font-size="9" text-anchor="middle">gathered stack ≈ 1.3 m<tspan class="assume">*</tspan></text>
+        <line x1="40" y1="19" x2="220" y2="19" stroke="#4a5468" stroke-width="2" stroke-dasharray="6,4"/>
+        <text x="130" y="10" fill="#9aa4b2" font-size="9" text-anchor="middle">open threshold ≈ 4.7 m</text>
+        <text x="10" y="120" fill="#9aa4b2" font-size="10">W</text>
+        <text x="288" y="120" fill="#9aa4b2" font-size="10">E</text>
+        <text x="160" y="130" fill="#e8ecf1" font-size="11" text-anchor="middle">open: room joins whatever's</text>
+        <text x="160" y="146" fill="#9aa4b2" font-size="10" text-anchor="middle">beyond the north wall</text>
+      </svg>
+      <div class="legend"><span><span class="sw" style="background:var(--glass)"></span>fixed</span><span><span class="sw" style="background:var(--accent)"></span>folded movable</span></div>
+    </div>
+  </div>
+  <div class="notes">
+    <b>Assumptions marked <span class="assume">*</span> need your confirmation:</b> equal ~2.0 m panel widths
+    (6 m ÷ 3, no survey data on actual panel widths); gathered/open stack depth ≈ 1.3 m (typical bi-fold/telescoping
+    hardware compresses to roughly 1–1.5 panel-widths — not measured). Also open: <b>what's beyond the north wall</b>
+    when open — the source model has nothing mapped past x=7.8 for this room; if it's a balcony, patio, or exterior
+    drop, that needs its own geometry (or the "open" state just shows the skybox/site geometry already there).
+    Room: <code>639-project-rm</code>, x 3.8→7.8 (S→N), y −8.0→−2.0 (E→W), z 0–2.7. Wall replaces the existing
+    partial <code>639-window-1</code> glass object (z 0.9–2.3 only, y −6.75→−2.0 only).
+  </div>
+</div>
+</body>
+</html>

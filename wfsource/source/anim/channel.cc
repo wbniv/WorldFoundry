@@ -92,7 +92,7 @@ LinearChannel::Value(Scalar time, int32 period)
 			indexBelow = index;
 		if (Scalar::FromFixed32(thisEntry.time) >= time)
 			indexAbove = index;
-		index++;
+		++index;
 	}
 
    DBSTREAM1( canim << "LinearChannel::Value: indexBelow = " << indexBelow << ", indexAbove = " << indexAbove << std::endl; )

@@ -1,0 +1,14 @@
+○ wf-device-coordinator.service - World Foundry shared Chromecast coordinator
+     Loaded: loaded (/etc/systemd/system/wf-device-coordinator.service; enabled; preset: enabled)
+     Active: inactive (dead) since Sun 2026-10-04 18:47:29 +07; 7min ago
+   Duration: 309ms
+ Invocation: 09439270137e4bf8be718f7ce4a905fa
+    Process: 434086 ExecStart=/usr/bin/python3 /opt/wf-device-coordinator/scripts/chromecast.py serve --config /etc/wf-device-coordinator/devices.json (code=killed, signal=TERM)
+   Main PID: 434086 (code=killed, signal=TERM)
+   Mem peak: 14.2M
+        CPU: 205ms
+
+Oct 04 18:47:28 will-latitude5320 systemd[1]: Started wf-device-coordinator.service - World Foundry shared Chromecast coordinator.
+Oct 04 18:47:29 will-latitude5320 systemd[1]: Stopping wf-device-coordinator.service - World Foundry shared Chromecast coordinator...
+Oct 04 18:47:29 will-latitude5320 systemd[1]: wf-device-coordinator.service: Deactivated successfully.
+Oct 04 18:47:29 will-latitude5320 systemd[1]: Stopped wf-device-coordinator.service - World Foundry shared Chromecast coordinator.

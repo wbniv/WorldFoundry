@@ -1,0 +1,56 @@
+// scripting_wamr.hp — WAMR engine plug interface used by ScriptRouter.
+//
+// Compiled in when WF_WASM_ENGINE=wamr (via build_game.sh).
+// Sigil: `#b64\n` — same as wasm3; WF_WASM_ENGINE selects exactly one of
+// {none, wasm3, wamr} and the dispatch arm in ScriptRouter::RunScript routes
+// to whichever wasm_engine implementation is compiled in.
+//
+// Scripts are base64-encoded WebAssembly modules, identical format to wasm3.
+// The key difference from wasm3: WAMR supports host-supplied (global …)
+// imports at instantiation time.  INDEXOF_* constants are declared as:
+//   (import "consts" "INDEXOF_INPUT" (global $inp i32))
+// and resolved from AddConstantArray data — no baked literals needed.
+//
+// Host functions (same as wasm3):
+//   (import "env" "read_mailbox"  (func $read  (param i32) (result f32)))
+//   (import "env" "write_mailbox" (func $write (param i32 f32)))
+//
+// Dispatch order (see scripting_stub.cc ScriptRouter::RunScript):
+//   `\`        → Forth
+//   `//wren\n` → Wren
+//   `//`       → JS      (QuickJS or JerryScript)
+//   `#b64\n`   → Wasm    (wasm3 or WAMR — this header; WF_WASM_ENGINE picks which)
+//   `;`        → Fennel  (inside lua_engine)
+//   fallthrough→ Lua
+
+#ifndef WF_SCRIPTING_WAMR_HP
+#define WF_SCRIPTING_WAMR_HP
+
+#if defined(WF_WASM_ENGINE_WAMR)
+#define WF_WITH_WASM 1
+
+class MailboxesManager;
+struct IntArrayEntry;
+
+namespace wamr_engine {
+
+// Lifetime hooks — called from ScriptRouter ctor/dtor.
+void Init(MailboxesManager& mgr);
+void Shutdown();
+
+// Register/unregister INDEXOF_* / JOYSTICK_BUTTON_* constants.
+// These are supplied as host globals to wasm modules that declare
+//   (import "consts" "<NAME>" (global i32))
+void AddConstantArray(IntArrayEntry* entryList);
+void DeleteConstantArray(IntArrayEntry* entryList);
+
+// Execute a `#b64\n` base64-encoded wasm script.
+// `objectIndex` sets the active actor for read_mailbox / write_mailbox.
+// Always returns 0.0f — communication is through mailboxes.
+float RunScript(const char* src, int objectIndex);
+
+} // namespace wamr_engine
+
+#endif // WF_WASM_ENGINE_WAMR
+
+#endif // WF_SCRIPTING_WAMR_HP

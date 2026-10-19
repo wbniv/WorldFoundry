@@ -1,0 +1,17 @@
+;============================================================================
+; Room.def: created from OADdef.S and Room.oas DO NOT MODIFY
+;============================================================================
+;##ifndef Room_HT
+;##define Room_HT
+	( define OAD_commonPageOffset 0 )	; common block: offset in page data for this objects page
+	( define OAD_AdjacentRoom1 4 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+	( define OAD_AdjacentRoom2 8 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+	( define OAD_AdjacentRoom3 12 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+	( define OAD_RoomLoadedMailbox 16 )	; int32: Minumum: 0 Maximum: 3999 Default: 0
+	( define OAD_PrimitiveDepthValue 20 )	; int32: Minumum: 0 Maximum: 3 Default: 3
+	( define OAD_OrderTableSize 24 )	; int32: Minumum: 1 Maximum: 32767 Default: 32
+	( define OAD_OrderTableRangeUpdate 28 )	; int32: Minumum: 0 Maximum: 2 Default: 2
+	( define OAD_OrderTableDepthValue 32 )	; int32: Minumum: 0 Maximum: 2 Default: 2
+;============================================================================
+;##endif         ; Room_DEF
+;============================================================================

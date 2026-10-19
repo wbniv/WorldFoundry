@@ -1,0 +1,18 @@
+{
+  "remote_regular_keypad_grid": "PASS",
+  "back_closes_keypad_first": "PASS",
+  "back_applies_and_closes_form": "PASS",
+  "selector_seed_applied_to_level": "PASS",
+  "hold_A_opens_level_settings": "PASS",
+  "phone_receives_oas_fields": "PASS",
+  "phone_seed_and_water_applied": "PASS",
+  "speed_only_preserves_generation": "PASS",
+  "stale_phone_session_ignored": "PASS",
+  "saltwater_regenerates_and_selects_urchin": "PASS",
+  "invalid_seed_does_not_commit": "PASS",
+  "reconnect_keeps_invalid_draft": "PASS",
+  "cancel_restores_effective_values": "PASS",
+  "uint32_seed_and_goby_restored": "PASS",
+  "goby_settles_on_central_rock": "PASS",
+  "held_direction_22": "PASS"
+}

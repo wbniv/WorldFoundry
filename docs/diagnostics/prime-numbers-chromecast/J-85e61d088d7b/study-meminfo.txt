@@ -1,0 +1,50 @@
+Applications Memory Usage (in Kilobytes):
+Uptime: 333060627 Realtime: 333060627
+
+** MEMINFO in pid 1697 [org.worldfoundry.wf_game.primes] **
+                   Pss  Private  Private  SwapPss      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap     5100     5012       20       17     5732     9180     8410      769
+  Dalvik Heap     6811     1268     5440       38     7276     5879     2940     2939
+ Dalvik Other      889      820       44        0     1276                           
+        Stack      996      996        0        0     1000                           
+       Ashmem      561      196        0        0     1004                           
+    Other dev       45       32        8        0      268                           
+     .so mmap    23455      232    19060        7    40760                           
+    .jar mmap     9416        0     4144        0    25240                           
+    .apk mmap    22058      464    10960        0    33244                           
+    .dex mmap      335       12       44        0     1104                           
+    .oat mmap     2259        0      812        0     9072                           
+    .art mmap     4278      672     2528      181    13400                           
+   Other mmap     1193       48      296        0     2684                           
+    GL mtrack    26192    26192        0        0    26192                           
+      Unknown     5143     5056       40        0     5280                           
+        TOTAL   108974    41000    43396      243   173532    15059    11350     3708
+ 
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     4468                          20676
+         Native Heap:     5012                           5732
+                Code:    35744                         109444
+               Stack:      996                           1000
+            Graphics:    26192                          26192
+       Private Other:    11984
+              System:    24578
+             Unknown:                                   10488
+ 
+           TOTAL PSS:   108974            TOTAL RSS:   173532       TOTAL SWAP PSS:      243
+ 
+ Objects
+               Views:        5         ViewRootImpl:        1
+         AppContexts:        8           Activities:        1
+              Assets:       21        AssetManagers:        0
+       Local Binders:       45        Proxy Binders:       44
+       Parcel memory:       11         Parcel count:       46
+    Death Recipients:        6             WebViews:        1
+ 
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+ 

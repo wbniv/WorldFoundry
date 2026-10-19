@@ -1,0 +1,256 @@
+{
+  "job": {
+    "id": "J-575c80406bd8",
+    "owner": "c8a11cf5242d54a539d885fa",
+    "accepted": 1791269971.3547535,
+    "state": "running",
+    "phase": "restoring",
+    "request": {
+      "device": "chromecast-test-02",
+      "app": "aquarium",
+      "apk": "f8d2ab74534c962b9cb1519a7f350816607d2cfdf41ccaceea88b196bd002f04.apk",
+      "validator": "plant-settings",
+      "workflow": "check"
+    },
+    "device": "chromecast-test-02",
+    "generation": 69,
+    "cancel": 0,
+    "error": null,
+    "started": 1791269971.4331667,
+    "finished": null,
+    "worker_pid": 1345215,
+    "recovery_resolved": 0,
+    "installation": null
+  },
+  "device": {
+    "id": "chromecast-test-02",
+    "serial": "26031HFDD67QH7",
+    "name": "Project Room",
+    "model": "Chromecast",
+    "device": "sabrina",
+    "android": "12",
+    "sdk": "31",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "legacy-tcp",
+    "endpoint": "192.168.4.56:5555",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:5067:dd88:3e0c:6a5c",
+      "fd5d:59ce:7438:1:2555:eb86:7321:678",
+      "fe80::7156:9529:ebee:236b"
+    ],
+    "cast_udn": "5e305387-266b-84a6-639e-50805d1f06c2",
+    "generation": 69,
+    "last_seen": 1791269972.0908833,
+    "boot_id": "7e3574a7-c2fa-4d99-b99f-09ff64981e94",
+    "reservation": null
+  },
+  "result": "failed",
+  "error": "Target app left foreground; measurement invalid",
+  "cleanup_verified": true,
+  "restoration": "home-fallback: previous app launcher unavailable",
+  "commands": [
+    {
+      "args": [
+        "connect",
+        "192.168.4.56:5555"
+      ],
+      "start": 1791269971.9167936,
+      "end": 1791269971.9341445,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.serialno"
+      ],
+      "start": 1791269971.9360087,
+      "end": 1791269972.0908496,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/sys/kernel/random/boot_id"
+      ],
+      "start": 1791269972.092676,
+      "end": 1791269972.1765113,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.model"
+      ],
+      "start": 1791269972.1776965,
+      "end": 1791269972.2529101,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.release"
+      ],
+      "start": 1791269972.2544608,
+      "end": 1791269972.3017561,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.sdk"
+      ],
+      "start": 1791269972.303554,
+      "end": 1791269972.3617196,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.device"
+      ],
+      "start": 1791269972.3630924,
+      "end": 1791269972.4444818,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.cpu.abilist"
+      ],
+      "start": 1791269972.4457207,
+      "end": 1791269972.5081475,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "ip -6 addr show wlan0"
+      ],
+      "start": 1791269972.509406,
+      "end": 1791269972.5651107,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791269972.5868404,
+      "end": 1791269972.728607,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "install",
+        "-r",
+        "/var/lib/wf-device-coordinator/inputs/f8d2ab74534c962b9cb1519a7f350816607d2cfdf41ccaceea88b196bd002f04.apk"
+      ],
+      "start": 1791269972.8160632,
+      "end": 1791269978.9327786,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pm path org.worldfoundry.wf_game.aquarium"
+      ],
+      "start": 1791269978.9340098,
+      "end": 1791269979.05622,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "sha256sum '/data/app/~~irOCG7f8Rh6GLurUiCNxlw==/org.worldfoundry.wf_game.aquarium-r1Bh3WXQJDp-OljDmg3CNA==/base.apk'"
+      ],
+      "start": 1791269979.0573623,
+      "end": 1791269979.1382012,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am force-stop org.worldfoundry.wf_game.aquarium"
+      ],
+      "start": 1791269979.155127,
+      "end": 1791269979.341683,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_WAKEUP"
+      ],
+      "start": 1791269979.343179,
+      "end": 1791269979.4367483,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -n org.worldfoundry.wf_game.aquarium/android.app.NativeActivity"
+      ],
+      "start": 1791269979.5898235,
+      "end": 1791269980.51417,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791269985.5161355,
+      "end": 1791269985.6918027,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am force-stop org.worldfoundry.wf_game.aquarium"
+      ],
+      "start": 1791269985.7060685,
+      "end": 1791269985.7943933,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -a android.intent.action.MAIN -c android.intent.category.LEANBACK_LAUNCHER -p org.worldfoundry.wf_game.baseline"
+      ],
+      "start": 1791269985.7956345,
+      "end": 1791269985.874248,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_HOME"
+      ],
+      "start": 1791269985.8756688,
+      "end": 1791269985.9494193,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.aquarium"
+      ],
+      "start": 1791269986.1014323,
+      "end": 1791269986.2412114,
+      "returncode": 1
+    }
+  ],
+  "finished": 1791269986.242629,
+  "launcher": null,
+  "concurrent_jobs": [
+    "J-2b93477c9b6c"
+  ]
+}

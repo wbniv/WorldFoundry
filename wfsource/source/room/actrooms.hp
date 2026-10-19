@@ -64,6 +64,7 @@ public:
 	// active room methods
 	void InitActiveRoom( int nRoom, const LevelRooms& lRooms );
 	void FreeActiveRooms();
+	void BindUnboundMovingObjects();
 
 	bool IsActiveRoom( int idxRoom ) const;             // return true if room is in active room list
 	INLINE int GetActiveRoomIndex( int idxRoom ) const;

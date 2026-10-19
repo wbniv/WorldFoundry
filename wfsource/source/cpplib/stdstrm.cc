@@ -28,15 +28,13 @@
 // guarantee it will be constructed first, must create a local null stream
 // to get around this
 
-#if !defined(__PSX__)
-#		if defined( __WIN__) || defined(__LINUX__)
+#		if defined(__LINUX__)
 #			include <cpplib/strmnull.hp>
 			CREATENULLSTREAM(stdstream_null);		 		// must be in same file to insure proper order of construction
             CREATEANDASSIGNOSTREAM(cnull,stdstream_null);
 #		else
 			ostream_withassign cnull( NULL );
 #		endif
-#endif
 
 CREATEANDASSIGNOSTREAM(cstats,std::cout);
 CREATEANDASSIGNOSTREAM(cdebug,cnull);
@@ -64,7 +62,7 @@ std::ostream *
 _FindOpenStream( const char * fname )
 {
 	DBSTREAM1( cdebug << "_FindOpenStream( " << fname << " )"; )
-	for( int i = 0; i < gNumStreams; i++ )
+	for( int i = 0; i < gNumStreams; ++i)
 	{
 		if( !strcmp( fname, gStreamNames[i] ) )
 		{
@@ -87,7 +85,7 @@ _RegisterStream( const char * fname, std::ostream * os )
 	assert( fname );
 	assert( strlen( fname ) + 1 < _MAX_PATH );
 	strcpy( gStreamNames[gNumStreams], fname );
-	gNumStreams++;
+	++gNumStreams;
 }
 
 // ------------------------------------------------------------------------
@@ -103,12 +101,6 @@ _RedirectStream( const char* selector )
 			return( std::cout );
 		case 'e':
 			return( std::cerr );
-#if defined ( __PSX__ )
-		case 'c':
-			return( cscreen );
-		case 'u':
-			return( cscreenflush );
-#endif
 #if DO_DEBUG_FILE_SYSTEM
 		case 'f':
 		 {
@@ -188,3 +180,12 @@ RedirectStandardStream( const char * str )
 }
 
 //==============================================================================
+
+// Read actual stream-buffer ownership, including startup file redirects.
+std::string DescribeStandardStream(std::ostream& stream) {
+    if(stream.rdbuf()==cnull.rdbuf())return "n";
+    if(stream.rdbuf()==std::cout.rdbuf())return "s";
+    if(stream.rdbuf()==std::cerr.rdbuf())return "e";
+    for(int i=0;i<gNumStreams;++i)if(stream.rdbuf()==gStreams[i]->rdbuf())return std::string("f")+gStreamNames[i];
+    return "unavailable";
+}

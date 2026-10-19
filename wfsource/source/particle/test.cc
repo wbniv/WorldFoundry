@@ -68,15 +68,6 @@
 #include <particle/emitter.hp>
 #endif
 
-#if defined ( __PSX__)
-#	include <sys/types.h>
-#	include <libetc.h>
-#	include <libgte.h>
-#	include <libgpu.h>
-
-#	include <profile/sampprof.hp>
-#else
-#endif
 
 //-----------------------------------------------------------------------------
 
@@ -225,10 +216,6 @@ AdjustCameraParameters(Vector3& position,Euler& rotation,joystickButtonsF button
 		position.SetZ(position.Z() - SCALAR_CONSTANT(ADJUST_DELTA));
 	if (buttons1 & EJ_BUTTONF_H)
 		position.SetZ(position.Z() + SCALAR_CONSTANT(ADJUST_DELTA));
-#if defined( __PSX__ )
-//	DBSTREAM1(cscreen << "camera position:" << endl << position << endl;)
-//	DBSTREAM1(cscreen << "camera rotation:" << endl << rotation << endl;)
-#endif
 }
 
 //=============================================================================
@@ -435,9 +422,6 @@ GFXTester::GFXTester() :
 	joy2 = JoystickNew(EJW_JOYSTICK2);
 
 	display.SetBackgroundColor(Color(60,60,60));
-#if defined( __PSX__ )
-	PadInit(0);
-#endif
 
 
 #if 0
@@ -502,18 +486,18 @@ GFXTester::GFXTester() :
 	cubeVertexList[6] = Vertex3D( SCALAR_CONSTANT( 1), SCALAR_CONSTANT( 0),Color(0,0,128), Vector3_PS( PS_SCALAR_CONSTANT( SIZE),PS_SCALAR_CONSTANT( SIZE),PS_SCALAR_CONSTANT(-SIZE)) );
 	cubeVertexList[7] = Vertex3D( SCALAR_CONSTANT( 0), SCALAR_CONSTANT( 0),Color(128,128,0), Vector3_PS( PS_SCALAR_CONSTANT(-SIZE),PS_SCALAR_CONSTANT( SIZE),PS_SCALAR_CONSTANT(-SIZE)) );
 
-	cubeFaceList[0] = TriFace(0,1,2,0,cubeVertexList);                       // front(top)
-	cubeFaceList[1] = TriFace(1,3,2,0,cubeVertexList);
-	cubeFaceList[2] = TriFace(4,0,2,1,cubeVertexList);                       // left side
-	cubeFaceList[3] = TriFace(2,7,4,1,cubeVertexList);
-	cubeFaceList[4] = TriFace(1,5,6,2,cubeVertexList);                       // right side
-	cubeFaceList[5] = TriFace(3,1,6,2,cubeVertexList);
-	cubeFaceList[6] = TriFace(4,5,1,3,cubeVertexList);                       // top(back)
-	cubeFaceList[7] = TriFace(4,1,0,3,cubeVertexList);
-	cubeFaceList[8] = TriFace(2,3,6,4,cubeVertexList);                       // bottom(front)
-	cubeFaceList[9] = TriFace(6,7,2,4,cubeVertexList);
-	cubeFaceList[10] = TriFace(5,4,7,5,cubeVertexList);                       // back(bottom)
-	cubeFaceList[11] = TriFace(5,7,6,5,cubeVertexList);
+	cubeFaceList[0] = TriFace(0,2,1,0,cubeVertexList);                       // front(top)
+	cubeFaceList[1] = TriFace(1,2,3,0,cubeVertexList);
+	cubeFaceList[2] = TriFace(4,2,0,1,cubeVertexList);                       // left side
+	cubeFaceList[3] = TriFace(2,4,7,1,cubeVertexList);
+	cubeFaceList[4] = TriFace(1,6,5,2,cubeVertexList);                       // right side
+	cubeFaceList[5] = TriFace(3,6,1,2,cubeVertexList);
+	cubeFaceList[6] = TriFace(4,1,5,3,cubeVertexList);                       // top(back)
+	cubeFaceList[7] = TriFace(4,0,1,3,cubeVertexList);
+	cubeFaceList[8] = TriFace(2,6,3,4,cubeVertexList);                       // bottom(front)
+	cubeFaceList[9] = TriFace(6,2,7,4,cubeVertexList);
+	cubeFaceList[10] = TriFace(5,7,4,5,cubeVertexList);                       // back(bottom)
+	cubeFaceList[11] = TriFace(5,6,7,5,cubeVertexList);
 	cubeFaceList[12] = TriFace(0,0,0,-1);  // end of face list marker
 
 	object3D = new (testMemory) RenderObject3D (testMemory,8,cubeVertexList,12,cubeFaceList,cubeMaterialList);
@@ -536,7 +520,7 @@ GFXTester::GFXTester() :
 #endif
 // kts load a model from disk
 #if TEST_MODEL_LOAD
-	for(int index=0;index<MODEL_COUNT;index++)
+	for(int index=0;index<MODEL_COUNT;++index)
 	{
 		//binistream binis( "torus.iff" );
 		binistream binis( "axis.iff" );
@@ -649,9 +633,6 @@ GFXTester::Update()
 
 #if TEST_3D
 #if ANIMATE_POSITION
-#if defined( __PSX__ )
-//	if (((PadRead(1)) & PADselect) == 0)                    // freeze on select
-#endif
 	{
  		SetDelta3D(position3D,delta3D);
  		SetDelta3D(position3D2,delta3D2);
@@ -724,7 +705,7 @@ GFXTester::Render()
 #endif
 
 #if TEST_MODEL_LOAD
-		for(int index=0;index<MODEL_COUNT;index++)
+		for(int index=0;index<MODEL_COUNT;++index)
 		{
 			Vector3 position(position3D3);
 			position += Vector3(SCALAR_CONSTANT(2)*Scalar(index%3,0),SCALAR_CONSTANT(2)*Scalar(index/3,0),Scalar::zero);
@@ -755,29 +736,6 @@ GFXTester::PageFlip()
 {
 	display.PageFlip();
 
-#if defined( __PSX__ )
-//              while (((PadRead(1)) & PADR1) != 0)                     // debounce triangle
-//                      ;
-
-#if DO_TEST_CODE
-	if((PadRead(1) & (PADstart|PADselect)) == (PADstart|PADselect) )
-	{
-		DBSTREAM1( cout << "Viewing Video memory:" << endl; )
-		ViewVideoMemory();
-	}
-#endif
-//	while (((PadRead(1)) & PADstart) != 0)                  // freeze on select
-//	{
-//                      if(((PadRead(1)) & PADR1) != 0)                 // debounce down
-//                              break;
-//	}
-//	if (((PadRead(1)) & PADselect) != 0)                    // freeze on select
-//	{
-//		for(int i=0;i<1000;i++)
-//			for(int j=0;j<10;j++)
-//				PadRead(1);
-//	}
-#endif
 
 }
 
@@ -824,21 +782,12 @@ TestGFX()
 	printf("Test gfx\n");
 	TestGFXInit();
 	printf("Test gfx init done\n");
-#if defined(__PSX__ ) && defined(DO_PROFILE)
-	profileSample sampler;
-		sampler.start();
-#endif
 
 #if defined(DO_SLOW_STEREOGRAM)
 	InitVSyncCallback(tester->GetDisplay());
 #endif
-#if defined( __PSX__ )
-	for (;;)
-//	for ( long i=0; i<1000; ++i )
-#else
 //	for ( long i=0; i<1000; ++i )
 	for (;;)
-#endif
 	{
 #if defined(DO_SLOW_STEREOGRAM)
 	if(((PadRead(1)) & PADselect) == 0)                  // freeze on select
@@ -909,10 +858,6 @@ TestGFX()
 
 	}
 	printf("shutting down\n");
-#if defined(__PSX__ ) && defined(DO_PROFILE)
-	sampler.stop();
-	sampler.save( "test.smp" );
-#endif
 #if defined(DO_SLOW_STEREOGRAM)
 	UnInitVSyncCallback();
 #endif
@@ -932,7 +877,7 @@ ParseCommandLine(int argc, char** argv)
 	int index;
 	const char szDebugger[] = "debugger";
 
-	for( index=1; index < argc && argv[index] && ((*argv[index] == '-') || (*argv[index] == '/')); index++)
+	for( index=1; index < argc && argv[index] && ((*argv[index] == '-') || (*argv[index] == '/')); ++index)
 	{
 		if ( 0 )
 			;
@@ -957,11 +902,6 @@ ParseCommandLine(int argc, char** argv)
 //============================================================================
 
 #if DO_DEBUG_FILE_SYSTEM
-#ifdef __PSX__
-#if defined(GTELAB)
-extern void GTELab();
-#endif
-#endif
 #endif
 
 //============================================================================
@@ -982,11 +922,6 @@ PIGSMain(int argc, char* argv[])
 	ParseCommandLine(argc,argv);
 
 #if DO_DEBUG_FILE_SYSTEM
-#if defined( __PSX__)
-#if defined(GTELAB)
-//	GTELab();
-#endif
-#endif
 #endif
 	TestGFX();
 	printf("gfx test complete\n");

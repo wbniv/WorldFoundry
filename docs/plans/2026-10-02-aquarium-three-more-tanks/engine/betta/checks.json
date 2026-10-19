@@ -1,0 +1,41 @@
+{
+  "level": "aquarium_betta",
+  "animals": 1,
+  "actors": 28,
+  "profile": "keyboard",
+  "animated_mailboxes_changed": 3,
+  "wall_right": [
+    4.7,
+    0.0,
+    2.7
+  ],
+  "wall_left": [
+    -4.7,
+    0.0,
+    2.7
+  ],
+  "wall_up": [
+    0.042457,
+    0.0,
+    4.1
+  ],
+  "wall_down": [
+    0.0,
+    0.0,
+    1.3
+  ],
+  "wall_away": [
+    0.0,
+    0.264567,
+    2.742457
+  ],
+  "wall_toward": [
+    0.0,
+    -0.264597,
+    2.7
+  ],
+  "action_velocity": 0.742222,
+  "status": "PASS",
+  "desktop_debug_ms_per_frame_estimate": 11.025660669838544,
+  "cost_note": "Two-point local debug wall-time estimate without vsync; not release/device frame distributions."
+}

@@ -1,0 +1,37 @@
+{
+  "receipt": {
+    "apk": "/tmp/aquarium-barb-baselines/P2-culled-animated-profile.apk",
+    "apk_sha256": "3d7d61abf5cf1e6c43bc736984630636cea9101720775ef8faef04f8cd2ff02d",
+    "protocol": "30 s warmup; 60 s fixed trace (five 12 s segments); 1 run(s); SurfaceFlinger sampled every 0.75 s",
+    "serial": "adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp",
+    "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+    "revision": "77377cb60a5d2ab73e4cad63145d929ab734a12a"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#1441",
+      "frames": 2587,
+      "refresh_ms": 16.683333,
+      "p50_ms": 16.683528,
+      "p90_ms": 33.366861,
+      "p95_ms": 50.050053,
+      "p99_ms": 50.050104,
+      "worst_ms": 66.733748,
+      "fps": 38.69845922759079,
+      "missed_refresh_percent": 47.27483571704677
+    }
+  ],
+  "median": {
+    "run": 1,
+    "frames": 2587,
+    "refresh_ms": 16.683333,
+    "p50_ms": 16.683528,
+    "p90_ms": 33.366861,
+    "p95_ms": 50.050053,
+    "p99_ms": 50.050104,
+    "worst_ms": 66.733748,
+    "fps": 38.69845922759079,
+    "missed_refresh_percent": 47.27483571704677
+  }
+}

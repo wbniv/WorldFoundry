@@ -1,0 +1,18 @@
+00:02.669  blend            | Read blend: "/home/will/WorldFoundry-wbniv/wflevels/condo_639_640/condo_639_640.blend"
+Blender 5.0.1
+BlenderMCP addon registered
+PASS  floor over the frontage: z values [-0.07], area 5.1800 m² of 5.1800 (x 2.75…5.55, y -1.95…-0.1)
+PASS  step risers close the recess: riser area by side {'x1': 0.1295, 'y0': 0.196, 'y1': 0.196, 'x0': 0.1295}
+PASS  shell parapet cap at z 1.00: 0 cap faces (must be none)
+PASS  artificial grass covers the recess, top z −0.06: x 2.750…5.550 y -1.950…-0.100 z -0.070…-0.060 → step from the interior floor 6 cm
+PASS  all shade actors present: 15/15
+PASS  pony-wall cap z 1.04: cap z 1.040, y -0.100…0.000
+PASS  soffit z 2.15: west-facade-ledge z 2.150…2.700, y -0.350…0.000
+PASS  ledge runs the whole west façade, full depth over the opening: x -4.21…7.90 (640's rounded corner → 639's north wall); over the opening y -0.350…0.000; 214 tris
+PASS  ledge colour matches the wall it sits on (no ochre over blue): ledge materials ['unit-639', 'unit-639.001']; mismatches []
+PASS  clear opening width 2.680 m: south wall face x 2.750 → north jamb x 5.430 = 2.680 m
+PASS  8 slats + bar tile the drop (baked closed), overlapping at every seam: slat 0 top 2.052 (cassette bottom 2.050), seam overlaps [2.0, 4.0] mm, bar 1.042…1.072, slat y centres [-0.0525, -0.052, -0.0515, -0.0505, -0.0495, -0.0485, -0.048, -0.0475]
+PASS  wall switch on the south jamb beside the opening: x 2.750…2.775 y -0.345…-0.255 z 1.070…1.210, Mass 0.0
+PASS  cassette carries the solar-strip material: ['shade-cassette', 'shade-solar']
+RESULT: PASS
+BlenderMCP addon unregistered

@@ -1,0 +1,4 @@
+640x480: exact=259570/307200 (84.495443%)
+coverage IoU=14732/62181 (23.692125%)
+pixels exceeding tolerance 3: 39808
+difference bbox (inclusive): 0,287–639,479

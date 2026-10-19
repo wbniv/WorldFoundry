@@ -1,0 +1,2 @@
+// shim: cpplib/scalar.hp — scalar.hp lives at math/scalar.hp in this tree
+#include <math/scalar.hp>

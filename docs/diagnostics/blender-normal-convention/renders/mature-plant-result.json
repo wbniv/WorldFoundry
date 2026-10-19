@@ -1,0 +1,22 @@
+{
+  "exit_code": 0,
+  "simulation_hz": 5,
+  "capture_frame": 300,
+  "cull": 1,
+  "command": [
+    "/home/will/WorldFoundry-wbniv/.worktrees/blender-normal-convention/engine/wf_game",
+    "--frame-step-smoke=310",
+    "--cycles=1",
+    "-rate5",
+    "--no-fps",
+    "-record_video",
+    "--capture-frame=300=/home/will/WorldFoundry-wbniv/.worktrees/blender-normal-convention/docs/diagnostics/blender-normal-convention/renders/aquarium_plants-mature.png",
+    "-L/home/will/WorldFoundry-wbniv/.worktrees/blender-normal-convention/wflevels/aquarium_plants-standalone.iff",
+    "--vram-width=2048",
+    "--vram-height=1024",
+    "--vram-slot-width=512",
+    "--vram-slot-height=512",
+    "--vram-perm-width=512",
+    "--vram-perm-height=512"
+  ]
+}

@@ -32,8 +32,11 @@
 #include <asset/assslot.hp>
 #include <oas/matte.ht>
 #include <cpplib/libstrm.hp>
+#include <map>
+#include <cmath>
 
 #include "rendacto.hp"
+#include <renderassets/box_color.h>
                                      
 //============================================================================
 
@@ -57,24 +60,6 @@ void
 RenderActor::Validate() const
 {
 #if DO_VALIDATION
-#if defined(__WIN__)
-	// Validate this object's vtable
-	long* vtable = (long*) this;
-	long* fptr = (long*)*vtable;
-	assert(*fptr);
-	assert(*(fptr+1));
-	assert(*(fptr+2));
-	assert(*(fptr+3));
-	assert(*(fptr+4));
-	assert( *fptr > 0x0100000L );
-	assert( *(fptr+1) > 0x0100000L );
-	assert( *(fptr+2) > 0x0100000L );
-	assert( *(fptr+3) > 0x0100000L );
-	assert( *(fptr+4) > 0x0100000L );
-
-	// let the derived class do specific validations
-	_Validate();
-#endif
 #endif
 }
 
@@ -164,18 +149,19 @@ Material cubeMaterialList[] =
 
 static TriFace cubeFaceList[12] =
 {
-	TriFace(4,5,1,3,cubeVertexList),	   		// top(back)
-	TriFace(4,1,0,3,cubeVertexList),
-	TriFace(5,4,6,5,cubeVertexList),			// back(bottom)
-	TriFace(4,7,6,5,cubeVertexList),
-	TriFace(0,1,2,0,cubeVertexList),			// front(top)
-	TriFace(1,3,2,0,cubeVertexList),
-	TriFace(4,0,2,1,cubeVertexList),			// left side
-	TriFace(2,7,4,1,cubeVertexList),
-	TriFace(1,5,6,2,cubeVertexList),			// right side
-	TriFace(3,1,6,2,cubeVertexList),
-	TriFace(2,3,6,4,cubeVertexList),			// bottom(front)
-	TriFace(6,7,2,4,cubeVertexList)
+	// Blender-order normals use (v1-v0) x (v2-v0). All 12 faces point outward.
+	TriFace(4,1,5,3,cubeVertexList),	   		// top(back)
+	TriFace(4,0,1,3,cubeVertexList),
+	TriFace(5,6,4,5,cubeVertexList),			// back(bottom)
+	TriFace(4,6,7,5,cubeVertexList),
+	TriFace(0,2,1,0,cubeVertexList),			// front(top)
+	TriFace(1,2,3,0,cubeVertexList),
+	TriFace(4,2,0,1,cubeVertexList),			// left side
+	TriFace(2,4,7,1,cubeVertexList),
+	TriFace(1,6,5,2,cubeVertexList),			// right side
+	TriFace(3,6,1,2,cubeVertexList),
+	TriFace(2,6,3,4,cubeVertexList),			// bottom(front)
+	TriFace(6,2,7,4,cubeVertexList)
 };
 
 //============================================================================
@@ -255,15 +241,19 @@ MakeCube(Memory& memory, const Vector3& min, const Vector3& max)
 
 
 Material*
-MakeRandMaterialList(Memory& memory, int count)
+MakeBoxMaterialList(Memory& memory, int count)
 {
 	assert(count > 0);
 #pragma message ("KTS: yet another memory leak brought to you by the cool guys at KevCo")
 	Material* materialList = new (memory) Material[count];
 	assert(ValidPtr(materialList));
-   //Color tempColor(rand()%128 + 128,rand()%128 + 128,rand()%128 + 128);
-   Color tempColor(rand()%230 + 26,rand()%230 + 26,rand()%230 + 26);
-	for(int index=0;index < count; index++)
+   // Preserve the old three libc draws per box so existing gameplay random
+   // sequences do not shift; only the visual color uses the portable stream.
+   for (int i = 0; i < 3; ++i) (void)rand();
+   static wf_render::BoxColorSequence colors;
+   const auto rgb = colors.NextColor();
+   const Color tempColor(rgb.red, rgb.green, rgb.blue);
+	for(int index=0;index < count; ++index)
 	{
 		materialList[index] = Material(tempColor,Material::FLAT_SHADED|Material::SOLID_COLOR,emptyTexture,NULL);
 	}
@@ -429,7 +419,7 @@ RenderActor3DAnimates::Render(RenderCamera& renderCamera, const PhysicalObject& 
 #include <cstddef>
 
 RenderActor3DBox::RenderActor3DBox(Memory& memory, const Vector3 min, const Vector3 max)
-: RenderActor3D(memory, 8,MakeCube(memory,min,max),12,cubeFaceList,MakeRandMaterialList(memory,6))
+: RenderActor3D(memory, 8,MakeCube(memory,min,max),12,cubeFaceList,MakeBoxMaterialList(memory,6))
 {
 //	std::cout << "RenderActor3DBox::sizeof( TriFace ) = " << sizeof( TriFace ) << std::endl;
 
@@ -492,6 +482,14 @@ RenderActor3D::Render(RenderCamera& renderCamera, const PhysicalObject& physical
 //	ciff << "position = " << physicalObject.GetPhysicalAttributes().Position() << std::endl;
 //	ciff << "RenderActor3d::Render: renderCamera matrix = " << renderCamera.GetPosition() << std::endl;
 
+	// Per-actor non-uniform scale: scale each rotation row by the matching
+	// component so the actor's local +X / +Y / +Z basis vectors stretch by
+	// _scale.X / Y / Z. Default _scale is (1,1,1) — no-op for actors that
+	// never write a scale mailbox. (qbert stretch-and-squash, 2026-05-10.)
+	matrix[0] *= _scale.X();
+	matrix[1] *= _scale.Y();
+	matrix[2] *= _scale.Z();
+
 	DBSTREAM3(cgfx << "RenderActor3D::Render: matrix = " << std::endl << matrix << std::endl; )
 	renderCamera.RenderObject(_object,matrix);
 	DBSTREAM2(cgfx << "RenderActor3D::Render: done" << std::endl; )
@@ -543,3 +541,59 @@ RenderActorEmitter::_Validate() const
 #endif
 
 //============================================================================
+
+void RenderActor3D::SetPlantGeometry(const plantgrowth::Chunk& chunk,float age,float phase,unsigned generation,bool sway,bool publish,bool textured)
+{
+ if(chunk.vertices.size()>=32000)return;
+ bool fresh=_plantGeneration!=generation;
+ if(fresh){_plantMaxBirth=0;for(const auto& f:chunk.faces)_plantMaxBirth=std::max(_plantMaxBirth,f.birth);}
+ const int bucket=std::min(int(age*2),int(_plantMaxBirth*2)+1);
+ if(!fresh&&age==_plantLastAge&&(!sway||phase==_plantLastPhase)&&bucket==_plantBucket)return;
+ if(fresh){_plantVertices.resize(std::max(size_t(1),chunk.vertices.size()));
+  if(chunk.vertices.empty())_plantVertices[0]=Vertex3D(Scalar::zero,Scalar::zero,Color(0,0,0),Vector3::zero);for(size_t i=0;i<chunk.vertices.size();i++){uint32_t c=textured?chunk.vertices[i].textureColor:chunk.vertices[i].color;_plantVertices[i]=Vertex3D(Scalar(chunk.vertices[i].u),Scalar(chunk.vertices[i].v),Color((c>>16)&255,(c>>8)&255,c&255),Vector3::zero);}_plantBucket=-1;}
+ plantgrowth::Point lastRoot={1e20f,0,0};float wave=0,secondWave=0;
+ for(size_t i=0;i<chunk.vertices.size();i++){const auto& v=chunk.vertices[i];if(v.root.x!=lastRoot.x||v.root.y!=lastRoot.y){lastRoot=v.root;wave=std::sin(phase*2*plantgrowth::pi/7.f+v.root.x*.10f+v.root.y*.15f);secondWave=std::sin(phase*2*plantgrowth::pi/9.f+.4f+v.root.x*.10f);}auto p=plantgrowth::deformedWave(v,age,wave,secondWave,sway);_plantVertices[i].position=Vector3(Scalar(p.x),Scalar(p.y),Scalar(p.z));}
+ if(fresh||(publish&&bucket!=_plantBucket)){
+  _plantFaces.clear();_plantVisibleVertices=1;_plantFaces.reserve(chunk.faces.size()+1);
+  for(const auto& f:chunk.faces)if(age>=f.birth){
+   TriFace face(f.a,f.b,f.c,0);const auto& a=chunk.vertices[f.a].rest;const auto& b=chunk.vertices[f.b].rest;const auto& c=chunk.vertices[f.c].rest;
+   auto ab=plantgrowth::sub(b,a),ac=plantgrowth::sub(c,a);float x=ab.y*ac.z-ab.z*ac.y,y=ab.z*ac.x-ab.x*ac.z,z=ab.x*ac.y-ab.y*ac.x;float n=std::sqrt(x*x+y*y+z*z);if(n<1e-7f)continue;
+   face.normal=Vector3(Scalar(x/n),Scalar(y/n),Scalar(z/n));_plantFaces.push_back(face);_plantVisibleVertices=std::max(_plantVisibleVertices,1+int(std::max(f.a,std::max(f.b,f.c))));
+  }
+  if(_plantFaces.empty()){TriFace face(0,0,0,0);face.normal=Vector3(Scalar::zero,Scalar::zero,Scalar::one);_plantFaces.push_back(face);}
+  if(_object.SetRuntimeGeometry(_plantVisibleVertices,_plantVertices.data(),int(_plantFaces.size()),_plantFaces.data(),textured)){_plantGeneration=generation;_plantBucket=bucket;}
+ }
+ _plantLastAge=age;_plantLastPhase=phase;
+}
+
+
+//=============================================================================
+// The one deformer slot (docs/plans/2026-10-16-saltwater-seahorses.md, E0).
+// The order matches the five per-kind methods it replaced: reject non-finite
+// input, run the kind's own input checks, take the writable vertex list (which
+// moves the actor to the streamed path), refuse a second kind, bind once, pose.
+
+DeformStatus RenderActor3D::Deform(DeformKind kind, const float* channels, int n, double time, const float* worldRotation)
+{
+    if (n < 0 || (n > 0 && !channels)) return DeformStatus::BadInput;
+    for (int i = 0; i < n; ++i) if (!std::isfinite(channels[i])) return DeformStatus::NotFinite;
+    if (_deformer && _deformer->Kind() != kind) return DeformStatus::OtherKindBound;
+    std::unique_ptr<MeshDeformer> fresh;
+    MeshDeformer* deformer = _deformer.get();
+    if (!deformer) {
+        fresh = MakeDeformer(kind);
+        if (!fresh) return DeformStatus::BadInput;
+        deformer = fresh.get();
+    }
+    if (n > deformer->MaxChannels()) return DeformStatus::BadInput;
+    DeformStatus status = deformer->Check(channels, n);
+    if (status != DeformStatus::Ok) return status;
+    const DeformTarget target{_object.GetWrittableVertexList(), _object.GetVertexCount(), _object, time, worldRotation};
+    if (!target.vertices || target.count <= 0) return DeformStatus::BadInput;
+    if (fresh) {
+        status = fresh->Bind(target, channels, n);
+        if (status != DeformStatus::Ok) return status;
+        _deformer = std::move(fresh);
+    }
+    return _deformer->Pose(target, channels, n);
+}

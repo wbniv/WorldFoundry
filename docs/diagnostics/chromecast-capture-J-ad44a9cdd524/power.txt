@@ -1,0 +1,2618 @@
+POWER MANAGER (dumpsys power)
+
+Power Manager State:
+  Settings power_manager_constants:
+    no_cached_wake_locks=true
+  mDirty=0x0
+  mWakefulness=Awake
+  mWakefulnessChanging=false
+  mIsPowered=true
+  mPlugType=1
+  mBatteryLevel=50
+  mBatteryLevelWhenDreamStarted=0
+  mDockState=0
+  mStayOn=true
+  mProximityPositive=false
+  mBootCompleted=true
+  mSystemReady=true
+  mEnhancedDischargeTimeElapsed=0
+  mLastEnhancedDischargeTimeUpdatedElapsed=0
+  mEnhancedDischargePredictionIsPersonalized=false
+  mHalAutoSuspendModeEnabled=false
+  mHalInteractiveModeEnabled=true
+  mWakeLockSummary=0x23
+  mNotifyLongScheduled=+7s117ms
+  mNotifyLongDispatched=-1m33s659ms
+  mNotifyLongNextCheck=(none)
+  mRequestWaitForNegativeProximity=false
+  mInterceptedPowerKeyForProximity=false
+  mSandmanScheduled=false
+  mBatteryLevelLow=false
+  mLightDeviceIdleMode=false
+  mDeviceIdleMode=false
+  mDeviceIdleWhitelist=[2000, 10011, 10013, 10040, 10044, 10046]
+  mDeviceIdleTempWhitelist=[]
+  mLastWakeTime=0 (26424351 ms ago)
+  mLastSleepTime=0 (26424351 ms ago)
+  mLastSleepReason=application
+  mLastInteractivePowerHintTime=26419214 (5137 ms ago)
+  mLastScreenBrightnessBoostTime=0 (26424351 ms ago)
+  mScreenBrightnessBoostInProgress=false
+  mHoldingWakeLockSuspendBlocker=true
+  mHoldingDisplaySuspendBlocker=true
+  mLastFlipTime=0
+  mIsFaceDown=false
+
+Settings and Configuration:
+  mDecoupleHalAutoSuspendModeFromDisplayConfig=false
+  mDecoupleHalInteractiveModeFromDisplayConfig=false
+  mWakeUpWhenPluggedOrUnpluggedConfig=false
+  mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig=false
+  mTheaterModeEnabled=false
+  mSuspendWhenScreenOffDueToProximityConfig=false
+  mDreamsSupportedConfig=true
+  mDreamsEnabledByDefaultConfig=true
+  mDreamsActivatedOnSleepByDefaultConfig=true
+  mDreamsActivatedOnDockByDefaultConfig=true
+  mDreamsEnabledOnBatteryConfig=false
+  mDreamsBatteryLevelMinimumWhenPoweredConfig=-1
+  mDreamsBatteryLevelMinimumWhenNotPoweredConfig=15
+  mDreamsBatteryLevelDrainCutoffConfig=5
+  mDreamsEnabledSetting=true
+  mDreamsActivateOnSleepSetting=true
+  mDreamsActivateOnDockSetting=true
+  mDozeAfterScreenOff=false
+  mMinimumScreenOffTimeoutConfig=10000
+  mMaximumScreenDimDurationConfig=7000
+  mMaximumScreenDimRatioConfig=0.20000005
+  mAttentiveTimeoutConfig=-1
+  mAttentiveTimeoutSetting=-1
+  mAttentiveWarningDurationConfig=30000
+  mScreenOffTimeoutSetting=600000
+  mSleepTimeoutSetting=1800000
+  mMaximumScreenOffTimeoutFromDeviceAdmin=9223372036854775807 (enforced=false)
+  mStayOnWhilePluggedInSetting=3
+  mScreenBrightnessModeSetting=0
+  mScreenBrightnessOverrideFromWindowManager=NaN
+  mUserActivityTimeoutOverrideFromWindowManager=-1
+  mUserInactiveOverrideFromWindowManager=false
+  mDozeScreenStateOverrideFromDreamManager=0
+  mDrawWakeLockOverrideFromSidekick=false
+  mDozeScreenBrightnessOverrideFromDreamManager=-1
+  mScreenBrightnessMinimum=0.035433073
+  mScreenBrightnessMaximum=1.0
+  mScreenBrightnessDefault=0.39763778
+  mDoubleTapWakeEnabled=false
+  mIsVrModeEnabled=false
+  mForegroundProfile=0
+  mUserId=0
+
+Attentive timeout: -1 ms
+Sleep timeout: 1800000 ms
+Screen off timeout: 600000 ms
+Screen dim duration: 7000 ms
+
+UID states (changing=false changed=false):
+  UID 1000:   ACTIVE  count=1 state=0
+  UID 1002:   ACTIVE  count=0 state=0
+  UID 1041: INACTIVE  count=1 state=20
+  UID 1068:   ACTIVE  count=0 state=0
+  UID u0a17:   ACTIVE  count=0 state=5
+  UID u0a21: INACTIVE  count=0 state=19
+  UID u0a33:   ACTIVE  count=0 state=4
+  UID u0a35: INACTIVE  count=0 state=19
+  UID u0a36:   ACTIVE  count=0 state=5
+  UID u0a40:   ACTIVE  count=0 state=3
+  UID u0a44:   ACTIVE  count=0 state=5
+  UID u0a45:   ACTIVE  count=0 state=0
+  UID u0a46:   ACTIVE  count=0 state=4
+  UID u0a49:   ACTIVE  count=0 state=4
+  UID u0a50: INACTIVE  count=0 state=19
+  UID u0a51:   ACTIVE  count=0 state=4
+  UID u0a63:   ACTIVE  count=0 state=7
+  UID u0a77: INACTIVE  count=0 state=19
+  UID u0a85:   ACTIVE  count=0 state=0
+  UID u0a90:   ACTIVE  count=0 state=0
+  UID u0a92:   ACTIVE  count=0 state=2
+
+Looper state:
+  Looper (PowerManagerService, tid 40) {179b8b6}
+    Message 0: { when=+7s116ms what=4 target=android.os.Handler }
+    Message 1: { when=+4m55s917ms what=1 target=android.os.Handler }
+    (Total messages: 2, polling=true, quitting=false)
+
+Wake Locks: size=2
+  PARTIAL_WAKE_LOCK              'AudioMix' ACQ=-4s263ms (uid=1041 ws=WorkSource{10092})
+  SCREEN_BRIGHT_WAKE_LOCK        'WindowManager' ON_AFTER_RELEASE ACQ=-4s253ms (uid=1000 pid=3907 ws=WorkSource{10092})
+
+Suspend Blockers: size=5
+  PowerManagerService.Booting: ref count=0
+  PowerManagerService.WakeLocks: ref count=1
+  PowerManagerService.Display: ref count=1
+  PowerManagerService.Broadcasts: ref count=0
+  PowerManagerService.WirelessChargerDetector: ref count=0
+
+Display Power: com.android.server.power.PowerManagerService$1@9df49b7
+
+Battery saving stats:
+  Battery Saver is currently: OFF
+    Times full enabled: 0
+    Times adaptive enabled: 0
+  
+  Drain stats:
+                     Battery saver OFF                          ON
+  NonDoze NonIntr:      0m      0mAh(  0%)      0.0mAh/h          0m      0mAh(  0%)      0.0mAh/h
+             Intr:      0m      0mAh(  0%)      0.0mAh/h          0m      0mAh(  0%)      0.0mAh/h
+  Deep    NonIntr:      0m      0mAh(  0%)      0.0mAh/h          0m      0mAh(  0%)      0.0mAh/h
+             Intr:      0m      0mAh(  0%)      0.0mAh/h          0m      0mAh(  0%)      0.0mAh/h
+  Light   NonIntr:      0m      0mAh(  0%)      0.0mAh/h          0m      0mAh(  0%)      0.0mAh/h
+             Intr:      0m      0mAh(  0%)      0.0mAh/h          0m      0mAh(  0%)      0.0mAh/h
+
+Battery saver policy (*NOTE* they only apply when battery saver is ON):
+  Settings: battery_saver_constants
+    value: 
+  Settings: (overlay)
+    value: 
+  DeviceConfig: battery_saver
+    location_mode: 
+  mAccessibilityEnabled=false
+  mAutomotiveProjectionActive=false
+  mPolicyLevel=0
+  
+  Policy 'default full'
+    advertise_is_enabled=true
+    disable_vibration=true
+    disable_animation=false
+    defer_full_backup=true
+    defer_keyvalue_backup=true
+    enable_firewall=true
+    enable_datasaver=false
+    disable_launch_boost=true
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=0.5
+    location_mode=3
+    force_all_apps_standby=true
+    force_background_check=true
+    disable_optional_sensors=true
+    disable_aod=true
+    soundtrigger_mode=1
+    enable_quick_doze=true
+    enable_night_mode=true
+    Interactive File values:
+      N/A
+    
+    Noninteractive File values:
+      N/A
+  
+  Policy 'current full'
+    advertise_is_enabled=true
+    disable_vibration=true
+    disable_animation=false
+    defer_full_backup=true
+    defer_keyvalue_backup=true
+    enable_firewall=true
+    enable_datasaver=false
+    disable_launch_boost=true
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=0.5
+    location_mode=3
+    force_all_apps_standby=true
+    force_background_check=true
+    disable_optional_sensors=true
+    disable_aod=true
+    soundtrigger_mode=1
+    enable_quick_doze=true
+    enable_night_mode=true
+    Interactive File values:
+      N/A
+    
+    Noninteractive File values:
+      N/A
+  
+  Policy 'default adaptive'
+    advertise_is_enabled=false
+    disable_vibration=false
+    disable_animation=false
+    defer_full_backup=false
+    defer_keyvalue_backup=false
+    enable_firewall=false
+    enable_datasaver=false
+    disable_launch_boost=false
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=1.0
+    location_mode=0
+    force_all_apps_standby=false
+    force_background_check=false
+    disable_optional_sensors=false
+    disable_aod=false
+    soundtrigger_mode=0
+    enable_quick_doze=false
+    enable_night_mode=false
+    Interactive File values:
+      N/A
+    
+    Noninteractive File values:
+      N/A
+  
+  Policy 'current adaptive'
+    advertise_is_enabled=false
+    disable_vibration=false
+    disable_animation=false
+    defer_full_backup=false
+    defer_keyvalue_backup=false
+    enable_firewall=false
+    enable_datasaver=false
+    disable_launch_boost=false
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=1.0
+    location_mode=0
+    force_all_apps_standby=false
+    force_background_check=false
+    disable_optional_sensors=false
+    disable_aod=false
+    soundtrigger_mode=0
+    enable_quick_doze=false
+    enable_night_mode=false
+    Interactive File values:
+      N/A
+    
+    Noninteractive File values:
+      N/A
+  
+  Policy 'effective'
+    advertise_is_enabled=false
+    disable_vibration=false
+    disable_animation=false
+    defer_full_backup=false
+    defer_keyvalue_backup=false
+    enable_firewall=false
+    enable_datasaver=false
+    disable_launch_boost=false
+    enable_brightness_adjustment=false
+    adjust_brightness_factor=1.0
+    location_mode=0
+    force_all_apps_standby=false
+    force_background_check=false
+    disable_optional_sensors=false
+    disable_aod=false
+    soundtrigger_mode=0
+    enable_quick_doze=false
+    enable_night_mode=false
+    Interactive File values:
+      N/A
+    
+    Noninteractive File values:
+      N/A
+
+Battery saver state machine:
+  Enabled=false
+    full=false
+    adaptive=false
+  mState=1
+  mLastChangedIntReason=0
+  mLastChangedStrReason=null
+  mBootCompleted=true
+  mSettingsLoaded=true
+  mBatteryStatusSet=true
+  mIsPowered=true
+  mBatteryLevel=50
+  mIsBatteryLevelLow=false
+  mSettingAutomaticBatterySaver=0
+  mSettingBatterySaverEnabled=false
+  mSettingBatterySaverEnabledSticky=false
+  mSettingBatterySaverStickyAutoDisableEnabled=true
+  mSettingBatterySaverStickyAutoDisableThreshold=90
+  mSettingBatterySaverTriggerThreshold=0
+  mBatterySaverStickyBehaviourDisabled=false
+  mDynamicPowerSavingsDefaultDisableThreshold=80
+  mDynamicPowerSavingsDisableThreshold=80
+  mDynamicPowerSavingsEnableBatterySaver=false
+  mLastAdaptiveBatterySaverChangedExternallyElapsed=0
+AttentionDetector:
+ mIsSettingEnabled=false
+ mMaxExtensionMillis=900000
+ mPreDimCheckDurationMillis=2000
+ mEffectivePostDimTimeout=0
+ mLastUserActivityTime(excludingAttention)=26419214
+ mAttentionServiceSupported=false
+ mRequested=false
+
+Profile power states: size=0
+Display Group User Activity:
+  displayGroupId=0
+  userActivitySummary=0x1
+  lastUserActivityTime=26127268 (297090 ms ago)
+  lastUserActivityTimeNoChangeLights=26419214 (5144 ms ago)
+  mWakeLockSummary=0x23
+
+Wireless Charger Detector State:
+  mGravitySensor=null
+  mPoweredWirelessly=false
+  mAtRest=false
+  mRestX=0.0, mRestY=0.0, mRestZ=0.0
+  mDetectionInProgress=false
+  mDetectionStartTime=0 (never)
+  mMustUpdateRestPosition=false
+  mTotalSamples=0
+  mMovingSamples=0
+  mFirstSampleX=0.0, mFirstSampleY=0.0, mFirstSampleZ=0.0
+  mLastSampleX=0.0, mLastSampleY=0.0, mLastSampleZ=0.0
+Wake Lock Log
+  10-04 08:46:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 08:46:00.005 - 1000 - REL *alarm*
+  10-04 08:46:00.009 - 1000 - ACQ *alarm* (partial)
+  10-04 08:46:00.011 - 1000 - REL *alarm*
+  10-04 08:46:09.674 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 08:46:09.675 - 1002 - REL bluetooth_timer
+  10-04 08:46:17.339 - 1000 - ACQ *alarm* (partial)
+  10-04 08:46:17.341 - 1000 - ACQ com.android.server.stats.StatsCompanionService.PullingAlarmListener (partial)
+  10-04 08:46:17.343 - 1000 - REL *alarm*
+  10-04 08:46:17.347 - 1000 - ACQ NetworkStats (partial)
+  10-04 08:46:17.396 - 1000 - REL NetworkStats
+  10-04 08:46:17.469 - 1000 - REL com.android.server.stats.StatsCompanionService.PullingAlarmListener
+  10-04 08:47:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 08:47:00.004 - 1000 - REL *alarm*
+  10-04 08:47:33.716 - 1000 - ACQ *alarm* (partial)
+  10-04 08:47:33.747 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 08:47:33.782 - 1000 - REL *alarm*
+  10-04 08:47:33.791 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 08:47:33.797 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 08:47:34.112 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 08:47:56.116 - 1000 - ACQ *alarm* (partial)
+  10-04 08:47:56.127 - 1000 - ACQ NetworkStats (partial)
+  10-04 08:47:56.171 - 1000 - REL NetworkStats
+  10-04 08:47:56.178 - 1000 - ACQ *job*/c.g.a.i.l/c.g.a.a.i.l.d.s.SuperpacksBackgroundJobService (partial)
+  10-04 08:47:56.184 - 1000 - ACQ *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService (partial)
+  10-04 08:47:56.187 - 1000 - REL *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService
+  10-04 08:47:56.213 - 1000 - REL *alarm*
+  10-04 08:47:56.228 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 08:47:56.239 - 10040 - REL *gms_scheduler*:internal
+  10-04 08:47:56.270 - 1000 - REL *job*/c.g.a.i.l/c.g.a.a.i.l.d.s.SuperpacksBackgroundJobService
+  10-04 08:47:56.312 - 1000 - ACQ *job*/c.g.a.p/.InstalledAppJobService (partial)
+  10-04 08:47:56.353 - 1000 - REL *job*/c.g.a.p/.InstalledAppJobService
+  10-04 08:48:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 08:48:00.006 - 1000 - REL *alarm*
+  10-04 08:49:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 08:49:00.007 - 1000 - REL *alarm*
+  10-04 08:49:39.604 - 10040 - ACQ GCM_READ (partial)
+  10-04 08:49:39.610 - 10040 - ACQ GCM_WORK (partial)
+  10-04 08:49:39.614 - 10040 - REL GCM_READ
+  10-04 08:49:39.625 - 10040 - REL GCM_WORK
+  10-04 08:50:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 08:50:00.003 - 1000 - REL *alarm*
+  10-04 08:50:37.720 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 08:50:37.723 - 1002 - REL bluetooth_timer
+  10-04 08:50:37.728 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 08:50:37.729 - 1002 - REL bluetooth_timer
+  10-04 08:50:37.734 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 08:50:37.735 - 1002 - REL bluetooth_timer
+  10-04 08:50:37.739 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 08:50:37.741 - 1002 - REL bluetooth_timer
+  10-04 08:50:37.743 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 08:50:37.744 - 1002 - REL bluetooth_timer
+  10-04 08:51:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 08:51:00.007 - 1000 - REL *alarm*
+  10-04 08:51:00.014 - 1000 - ACQ *alarm* (partial)
+  10-04 08:51:00.015 - 1000 - REL *alarm*
+  10-04 08:52:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 08:52:00.006 - 1000 - REL *alarm*
+  10-04 08:52:04.334 - 1000 - ACQ *alarm* (partial)
+  10-04 08:52:04.349 - 10040 - ACQ GmsAlarm:NetworkLocationScanner (partial)
+  10-04 08:52:04.352 - 10040 - ACQ NetworkLocationScanner (partial)
+  10-04 08:52:04.355 - 1000 - REL *alarm*
+  10-04 08:52:04.358 - 10040 - ACQ CallbackRunner (partial)
+  10-04 08:52:04.360 - 10040 - REL GmsAlarm:NetworkLocationScanner
+  10-04 08:52:04.374 - 10040 - REL CallbackRunner
+  10-04 08:52:05.857 - 10040 - REL NetworkLocationScanner
+  10-04 08:52:05.860 - 10040 - ACQ NetworkLocationLocator (partial)
+  10-04 08:52:05.892 - 10040 - ACQ PendingIntentClient (partial)
+  10-04 08:52:05.901 - 10040 - REL PendingIntentClient
+  10-04 08:52:05.901 - 10040 - ACQ GCoreFlp (partial)
+  10-04 08:52:05.921 - 10040 - REL GCoreFlp
+  10-04 08:52:05.923 - 1000 - ACQ *location* (partial)
+  10-04 08:52:05.924 - 1000 - ACQ *location* (partial)
+  10-04 08:52:05.928 - 1000 - REL *location*
+  10-04 08:52:05.928 - 1000 - REL *location*
+  10-04 08:52:05.931 - 10040 - ACQ CallbackRunner (partial)
+  10-04 08:52:05.931 - 1000 - ACQ *location* (partial)
+  10-04 08:52:05.932 - 1000 - ACQ *location* (partial)
+  10-04 08:52:05.932 - 1000 - REL *location*
+  10-04 08:52:05.933 - 1000 - REL *location*
+  10-04 08:52:05.939 - 10040 - REL NetworkLocationLocator
+  10-04 08:52:05.940 - 10040 - REL CallbackRunner
+  10-04 08:52:58.861 - 10040 - ACQ Icing (partial)
+  10-04 08:52:58.868 - 10040 - REL Icing
+  10-04 08:53:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 08:53:00.008 - 1000 - REL *alarm*
+  10-04 08:54:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 08:54:00.005 - 1000 - REL *alarm*
+  10-04 08:54:43.678 - 1000 - ACQ *alarm* (partial)
+  10-04 08:54:43.699 - 1000 - REL *alarm*
+  10-04 08:54:43.709 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 08:54:43.737 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService (partial)
+  10-04 08:54:43.783 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.k.JobService (partial)
+  10-04 08:54:43.801 - 10040 - REL *gms_scheduler*:internal
+  10-04 08:54:43.811 - 10040 - REL *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService
+  10-04 08:54:43.813 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 08:54:43.830 - 10040 - REL *gms_scheduler*:internal
+  10-04 08:54:43.833 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 08:54:43.864 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-04 08:54:43.905 - 10040 - REL *gms_scheduler*:internal
+  10-04 08:54:43.934 - 10040 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-04 08:54:43.936 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 08:54:43.963 - 10040 - REL *gms_scheduler*:internal
+  10-04 08:54:43.965 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 08:54:44.021 - 10040 - ACQ *gms_scheduler*/c.g.a.g/c.g.a.c.s.ContextManagerLogsUploadBoundService (partial)
+  10-04 08:54:44.026 - 10040 - REL *gms_scheduler*:internal
+  10-04 08:54:44.031 - 10040 - ACQ CMWakeLock (partial)
+  10-04 08:54:44.034 - 10040 - REL *gms_scheduler*/c.g.a.g/c.g.a.c.s.ContextManagerLogsUploadBoundService
+  10-04 08:54:44.037 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 08:54:44.059 - 10040 - REL *gms_scheduler*:internal
+  10-04 08:54:44.062 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 08:54:44.103 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-04 08:54:44.106 - 10040 - REL CMWakeLock
+  10-04 08:54:44.133 - 10040 - REL *gms_scheduler*:internal
+  10-04 08:54:44.134 - 10040 - REL *gms_scheduler*/c.g.a.g/.k.JobService
+  10-04 08:54:44.141 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 08:54:44.156 - 10040 - REL *gms_scheduler*:internal
+  10-04 08:54:44.160 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 08:54:44.166 - 10040 - REL *gms_scheduler*:internal
+  10-04 08:54:44.964 - 10040 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-04 08:54:44.967 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 08:54:44.985 - 10040 - REL *gms_scheduler*:internal
+  10-04 08:54:44.987 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 08:54:44.993 - 10040 - REL *gms_scheduler*:internal
+  10-04 08:54:51.019 - 1041 - ACQ AudioMix (partial)
+  10-04 08:54:51.021 - 1041 - REL AudioMix
+  10-04 08:54:51.021 - 1041 - ACQ AudioMix (partial)
+  10-04 08:54:51.027 - 1000 - ACQ WindowManager (screen-bright,on-after-release)
+  10-04 08:55:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 08:55:00.005 - 1000 - REL *alarm*
+  10-04 08:55:38.876 - 1000 - REL WindowManager
+  10-04 08:55:38.894 - 1041 - REL AudioMix
+  10-04 08:55:38.894 - 1041 - ACQ AudioMix (partial)
+  10-04 08:55:41.762 - 1041 - REL AudioMix
+  10-04 08:55:46.185 - 1041 - ACQ AudioMix (partial)
+  10-04 08:55:46.192 - 1041 - ACQ AudioMix (partial)
+  10-04 08:55:46.192 - 1041 - REL AudioMix
+  10-04 08:55:46.192 - 1041 - ACQ AudioMix (partial)
+  10-04 08:55:46.239 - 1000 - ACQ WindowManager (screen-bright,on-after-release)
+  10-04 08:55:49.191 - 1041 - REL AudioMix
+  10-04 08:55:55.277 - 1000 - REL WindowManager
+  10-04 08:55:55.309 - 1041 - REL AudioMix
+  10-04 08:55:55.309 - 1041 - ACQ AudioMix (partial)
+  10-04 08:55:55.873 - 1041 - ACQ AudioMix (partial)
+  10-04 08:55:55.880 - 1041 - REL AudioMix
+  10-04 08:55:55.880 - 1041 - ACQ AudioMix (partial)
+  10-04 08:55:55.919 - 1000 - ACQ WindowManager (screen-bright,on-after-release)
+  10-04 08:55:58.874 - 1041 - REL AudioMix
+  10-04 08:56:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 08:56:00.004 - 1000 - REL *alarm*
+  10-04 08:56:00.219 - 1000 - REL WindowManager
+  10-04 08:56:00.348 - 1041 - REL AudioMix
+  10-04 08:56:00.348 - 1041 - ACQ AudioMix (partial)
+  10-04 08:56:03.246 - 1041 - REL AudioMix
+  10-04 08:56:39.622 - 1000 - ACQ *alarm* (partial)
+  10-04 08:56:39.625 - 1000 - REL *alarm*
+  10-04 08:56:39.630 - 10040 - ACQ GCM_HB_ALARM (partial)
+  10-04 08:56:39.635 - 10040 - ACQ GCM_WORK (partial)
+  10-04 08:56:39.638 - 10040 - REL GCM_HB_ALARM
+  10-04 08:56:39.640 - 10040 - REL GCM_WORK
+  10-04 08:56:39.643 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 08:56:39.649 - 10040 - REL *gms_scheduler*:internal
+  10-04 08:57:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 08:57:00.002 - 1000 - REL *alarm*
+  10-04 08:57:39.641 - 1000 - ACQ *alarm* (partial)
+  10-04 08:57:39.648 - 1000 - REL *alarm*
+  10-04 08:57:39.655 - 10040 - ACQ GCM_WORK (partial)
+  10-04 08:57:39.661 - 10040 - ACQ GCM_READ (partial)
+  10-04 08:57:39.664 - 10040 - REL GCM_READ
+  10-04 08:57:39.668 - 10040 - ACQ GCM_CONN_ALARM (partial)
+  10-04 08:57:39.672 - 10040 - REL GCM_WORK
+  10-04 08:57:39.773 - 10040 - ACQ GCM_WORK (partial)
+  10-04 08:57:39.780 - 10040 - REL GCM_WORK
+  10-04 08:57:39.782 - 10040 - ACQ GCM_WORK (partial)
+  10-04 08:57:39.785 - 10040 - REL GCM_WORK
+  10-04 08:57:39.903 - 10040 - ACQ GCM_READ (partial)
+  10-04 08:57:39.904 - 10040 - ACQ GCM_WORK (partial)
+  10-04 08:57:39.905 - 10040 - REL GCM_READ
+  10-04 08:57:39.908 - 10040 - ACQ GCM_READ (partial)
+  10-04 08:57:39.911 - 10040 - REL GCM_READ
+  10-04 08:57:39.923 - 10040 - REL GCM_CONN_ALARM
+  10-04 08:57:39.932 - 10040 - REL GCM_WORK
+  10-04 08:57:39.933 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 08:57:39.940 - 10040 - REL *gms_scheduler*:internal
+  10-04 08:58:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 08:58:00.006 - 1000 - REL *alarm*
+  10-04 08:59:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 08:59:00.009 - 1000 - REL *alarm*
+  10-04 09:00:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 09:00:00.004 - 1000 - REL *alarm*
+  10-04 09:00:00.009 - 1000 - ACQ *alarm* (partial)
+  10-04 09:00:00.009 - 1000 - REL *alarm*
+  10-04 09:00:14.968 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:00:14.972 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:00:14.974 - 10040 - REL GCM_READ
+  10-04 09:00:14.981 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 09:00:15.026 - 10040 - ACQ IntentOp:c.g.a.g/.c.PersistentIntentOperationService (partial)
+  10-04 09:00:15.030 - 10040 - REL GCM_WORK
+  10-04 09:00:15.035 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:00:15.041 - 10040 - REL GOOGLE_C2DM
+  10-04 09:00:15.046 - 10040 - REL GCM_WORK
+  10-04 09:00:15.047 - 10040 - ACQ IntentOp:.g.GcmInternalReceiverIntentOperation (partial)
+  10-04 09:00:15.051 - 10040 - REL IntentOp:c.g.a.g/.c.PersistentIntentOperationService
+  10-04 09:00:15.061 - 10040 - REL IntentOp:.g.GcmInternalReceiverIntentOperation
+  10-04 09:00:39.542 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:00:39.544 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:00:39.546 - 10040 - REL GCM_READ
+  10-04 09:00:39.562 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 09:00:39.586 - 10040 - REL GCM_WORK
+  10-04 09:00:39.627 - 10040 - REL GOOGLE_C2DM
+  10-04 09:01:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 09:01:00.007 - 1000 - REL *alarm*
+  10-04 09:01:00.232 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:01:00.238 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:01:00.240 - 10040 - REL GCM_READ
+  10-04 09:01:00.248 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 09:01:00.291 - 10040 - REL GCM_WORK
+  10-04 09:01:00.307 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:01:00.319 - 10040 - REL GCM_WORK
+  10-04 09:01:00.323 - 10040 - REL GOOGLE_C2DM
+  10-04 09:02:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 09:02:00.007 - 1000 - REL *alarm*
+  10-04 09:02:34.120 - 1000 - ACQ *alarm* (partial)
+  10-04 09:02:34.122 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 09:02:34.136 - 1000 - REL *alarm*
+  10-04 09:02:34.141 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 09:02:34.146 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 09:02:34.402 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 09:03:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 09:03:00.006 - 1000 - REL *alarm*
+  10-04 09:04:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 09:04:00.003 - 1000 - REL *alarm*
+  10-04 09:04:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 09:04:00.008 - 1000 - REL *alarm*
+  10-04 09:04:49.660 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:04:49.661 - 1002 - REL bluetooth_timer
+  10-04 09:04:49.665 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:04:49.667 - 1002 - REL bluetooth_timer
+  10-04 09:04:49.670 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:04:49.672 - 1002 - REL bluetooth_timer
+  10-04 09:04:49.674 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:04:49.676 - 1002 - REL bluetooth_timer
+  10-04 09:04:49.678 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:04:49.679 - 1002 - REL bluetooth_timer
+  10-04 09:05:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 09:05:00.007 - 1000 - REL *alarm*
+  10-04 09:06:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 09:06:00.007 - 1000 - REL *alarm*
+  10-04 09:07:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 09:07:00.009 - 1000 - REL *alarm*
+  10-04 09:07:00.316 - 1000 - ACQ *alarm* (partial)
+  10-04 09:07:00.321 - 1000 - REL *alarm*
+  10-04 09:07:00.327 - 10040 - ACQ GCM_HB_ALARM (partial)
+  10-04 09:07:00.334 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:07:00.339 - 10040 - REL GCM_HB_ALARM
+  10-04 09:07:00.339 - 10040 - REL GCM_WORK
+  10-04 09:08:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 09:08:00.005 - 1000 - REL *alarm*
+  10-04 09:08:00.334 - 1000 - ACQ *alarm* (partial)
+  10-04 09:08:00.340 - 1000 - REL *alarm*
+  10-04 09:08:00.347 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:08:00.354 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:08:00.356 - 10040 - ACQ GCM_CONN_ALARM (partial)
+  10-04 09:08:00.357 - 10040 - REL GCM_READ
+  10-04 09:08:00.361 - 10040 - REL GCM_WORK
+  10-04 09:08:00.455 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:08:00.461 - 10040 - REL GCM_WORK
+  10-04 09:08:00.463 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:08:00.468 - 10040 - REL GCM_WORK
+  10-04 09:08:00.575 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:08:00.577 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:08:00.579 - 10040 - REL GCM_READ
+  10-04 09:08:00.583 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:08:00.588 - 10040 - REL GCM_READ
+  10-04 09:08:00.600 - 10040 - REL GCM_CONN_ALARM
+  10-04 09:08:00.609 - 10040 - REL GCM_WORK
+  10-04 09:09:00.009 - 1000 - ACQ *alarm* (partial)
+  10-04 09:09:00.012 - 1000 - REL *alarm*
+  10-04 09:10:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 09:10:00.008 - 1000 - REL *alarm*
+  10-04 09:10:17.804 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:10:17.808 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:10:17.810 - 10040 - REL GCM_READ
+  10-04 09:10:17.818 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 09:10:17.855 - 10040 - ACQ IntentOp:c.g.a.g/.c.PersistentIntentOperationService (partial)
+  10-04 09:10:17.860 - 10040 - REL GCM_WORK
+  10-04 09:10:17.871 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:10:17.875 - 10040 - REL GOOGLE_C2DM
+  10-04 09:10:17.877 - 10040 - REL GCM_WORK
+  10-04 09:10:17.878 - 10040 - ACQ IntentOp:.g.GcmInternalReceiverIntentOperation (partial)
+  10-04 09:10:17.881 - 10040 - REL IntentOp:c.g.a.g/.c.PersistentIntentOperationService
+  10-04 09:10:17.885 - 10040 - REL IntentOp:.g.GcmInternalReceiverIntentOperation
+  10-04 09:11:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 09:11:00.009 - 1000 - REL *alarm*
+  10-04 09:12:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 09:12:00.004 - 1000 - REL *alarm*
+  10-04 09:12:00.009 - 1000 - ACQ *alarm* (partial)
+  10-04 09:12:00.009 - 1000 - REL *alarm*
+  10-04 09:13:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 09:13:00.007 - 1000 - REL *alarm*
+  10-04 09:14:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 09:14:00.008 - 1000 - REL *alarm*
+  10-04 09:14:00.013 - 1000 - ACQ *alarm* (partial)
+  10-04 09:14:00.014 - 1000 - REL *alarm*
+  10-04 09:14:08.098 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:14:08.104 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:14:08.108 - 10040 - REL GCM_READ
+  10-04 09:14:08.121 - 10040 - REL GCM_WORK
+  10-04 09:15:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 09:15:00.007 - 1000 - REL *alarm*
+  10-04 09:15:45.071 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:15:45.075 - 1002 - REL bluetooth_timer
+  10-04 09:15:45.077 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:15:45.079 - 1002 - REL bluetooth_timer
+  10-04 09:15:45.081 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:15:45.082 - 1002 - REL bluetooth_timer
+  10-04 09:15:45.084 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:15:45.086 - 1002 - REL bluetooth_timer
+  10-04 09:15:45.088 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:15:45.089 - 1002 - REL bluetooth_timer
+  10-04 09:16:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 09:16:00.008 - 1000 - REL *alarm*
+  10-04 09:16:09.728 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:16:09.730 - 1002 - REL bluetooth_timer
+  10-04 09:17:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 09:17:00.008 - 1000 - REL *alarm*
+  10-04 09:17:34.400 - 1000 - ACQ *alarm* (partial)
+  10-04 09:17:34.420 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 09:17:34.440 - 1000 - REL *alarm*
+  10-04 09:17:34.446 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 09:17:34.452 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 09:17:34.734 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 09:17:58.601 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:17:58.605 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:17:58.609 - 10040 - REL GCM_READ
+  10-04 09:17:58.619 - 10040 - REL GCM_WORK
+  10-04 09:18:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 09:18:00.003 - 1000 - REL *alarm*
+  10-04 09:19:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 09:19:00.005 - 1000 - REL *alarm*
+  10-04 09:20:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 09:20:00.004 - 1000 - REL *alarm*
+  10-04 09:20:22.168 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:20:22.175 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:20:22.177 - 10040 - REL GCM_READ
+  10-04 09:20:22.202 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 09:20:22.223 - 10040 - REL GCM_WORK
+  10-04 09:20:22.226 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:20:22.237 - 10040 - REL GCM_WORK
+  10-04 09:20:22.248 - 10040 - ACQ IntentOp:c.g.a.g/.c.PersistentIntentOperationService (partial)
+  10-04 09:20:22.261 - 10040 - REL GOOGLE_C2DM
+  10-04 09:20:22.264 - 10040 - ACQ IntentOp:.g.GcmInternalReceiverIntentOperation (partial)
+  10-04 09:20:22.266 - 10040 - REL IntentOp:c.g.a.g/.c.PersistentIntentOperationService
+  10-04 09:20:22.269 - 10040 - REL IntentOp:.g.GcmInternalReceiverIntentOperation
+  10-04 09:21:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 09:21:00.009 - 1000 - REL *alarm*
+  10-04 09:22:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 09:22:00.005 - 1000 - REL *alarm*
+  10-04 09:22:05.828 - 1000 - ACQ *alarm* (partial)
+  10-04 09:22:05.837 - 10040 - ACQ GmsAlarm:NetworkLocationScanner (partial)
+  10-04 09:22:05.838 - 10040 - ACQ NetworkLocationScanner (partial)
+  10-04 09:22:05.841 - 1000 - REL *alarm*
+  10-04 09:22:05.843 - 10040 - ACQ CallbackRunner (partial)
+  10-04 09:22:05.845 - 10040 - REL GmsAlarm:NetworkLocationScanner
+  10-04 09:22:05.856 - 10040 - REL CallbackRunner
+  10-04 09:22:07.337 - 10040 - REL NetworkLocationScanner
+  10-04 09:22:07.340 - 10040 - ACQ NetworkLocationLocator (partial)
+  10-04 09:22:07.376 - 10040 - ACQ PendingIntentClient (partial)
+  10-04 09:22:07.381 - 10040 - ACQ GCoreFlp (partial)
+  10-04 09:22:07.383 - 10040 - REL PendingIntentClient
+  10-04 09:22:07.400 - 1000 - ACQ *location* (partial)
+  10-04 09:22:07.402 - 10040 - REL GCoreFlp
+  10-04 09:22:07.402 - 1000 - ACQ *location* (partial)
+  10-04 09:22:07.404 - 1000 - REL *location*
+  10-04 09:22:07.405 - 1000 - REL *location*
+  10-04 09:22:07.410 - 10040 - ACQ CallbackRunner (partial)
+  10-04 09:22:07.411 - 1000 - ACQ *location* (partial)
+  10-04 09:22:07.412 - 1000 - ACQ *location* (partial)
+  10-04 09:22:07.413 - 1000 - REL *location*
+  10-04 09:22:07.414 - 1000 - REL *location*
+  10-04 09:22:07.419 - 10040 - REL NetworkLocationLocator
+  10-04 09:22:07.420 - 10040 - REL CallbackRunner
+  10-04 09:23:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 09:23:00.009 - 1000 - REL *alarm*
+  10-04 09:23:37.780 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:23:37.785 - 1002 - REL bluetooth_timer
+  10-04 09:23:37.792 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:23:37.793 - 1002 - REL bluetooth_timer
+  10-04 09:23:37.799 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:23:37.801 - 1002 - REL bluetooth_timer
+  10-04 09:23:37.803 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:23:37.805 - 1002 - REL bluetooth_timer
+  10-04 09:23:37.808 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:23:37.809 - 1002 - REL bluetooth_timer
+  10-04 09:24:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 09:24:00.008 - 1000 - REL *alarm*
+  10-04 09:24:12.504 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:24:12.510 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:24:12.513 - 10040 - REL GCM_READ
+  10-04 09:24:12.526 - 10040 - REL GCM_WORK
+  10-04 09:24:12.529 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:24:12.555 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.s.s.SnetNormalTaskService (partial)
+  10-04 09:24:12.581 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:24:12.600 - 10040 - REL *gms_scheduler*/c.g.a.g/.s.s.SnetNormalTaskService
+  10-04 09:24:12.606 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:24:12.645 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:24:12.647 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:24:12.653 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:24:12.689 - 10040 - ACQ chxh:SnetNormal (partial)
+  10-04 09:24:12.763 - 10040 - REL chxh:SnetNormal
+  10-04 09:25:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 09:25:00.003 - 1000 - REL *alarm*
+  10-04 09:25:58.449 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:25:58.455 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:25:58.462 - 10040 - REL GCM_READ
+  10-04 09:25:58.491 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 09:25:58.515 - 10040 - REL GCM_WORK
+  10-04 09:25:58.522 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:25:58.532 - 10040 - REL GCM_WORK
+  10-04 09:25:58.543 - 10044 - ACQ androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService (partial)
+  10-04 09:25:58.548 - 10040 - REL GOOGLE_C2DM
+  10-04 09:25:58.563 - 10044 - REL androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService
+  10-04 09:26:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 09:26:00.009 - 1000 - REL *alarm*
+  10-04 09:26:00.436 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:26:00.440 - 10040 - ACQ CallbackRunner (partial)
+  10-04 09:26:00.465 - 10040 - REL CallbackRunner
+  10-04 09:26:00.481 - 1002 - REL bluetooth_timer
+  10-04 09:27:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 09:27:00.006 - 1000 - REL *alarm*
+  10-04 09:28:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 09:28:00.011 - 1000 - REL *alarm*
+  10-04 09:29:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 09:29:00.007 - 1000 - REL *alarm*
+  10-04 09:29:49.163 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:29:49.166 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:29:49.169 - 10040 - REL GCM_READ
+  10-04 09:29:49.183 - 10040 - REL GCM_WORK
+  10-04 09:30:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 09:30:00.007 - 1000 - REL *alarm*
+  10-04 09:31:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 09:31:00.008 - 1000 - REL *alarm*
+  10-04 09:32:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 09:32:00.010 - 1000 - REL *alarm*
+  10-04 09:32:00.782 - 1000 - ACQ *alarm* (partial)
+  10-04 09:32:00.787 - 1000 - ACQ NetworkStats (partial)
+  10-04 09:32:00.904 - 1000 - REL NetworkStats
+  10-04 09:32:00.908 - 1000 - REL *alarm*
+  10-04 09:32:01.127 - 1000 - ACQ *job*/c.g.a.y.t/c.g.a.l.y.t.r.RecommendationService (partial)
+  10-04 09:32:02.840 - 1000 - REL *job*/c.g.a.y.t/c.g.a.l.y.t.r.RecommendationService
+  10-04 09:32:34.703 - 1000 - ACQ *alarm* (partial)
+  10-04 09:32:34.737 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 09:32:34.754 - 1000 - REL *alarm*
+  10-04 09:32:34.760 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 09:32:34.765 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 09:32:35.053 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 09:33:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 09:33:00.008 - 1000 - REL *alarm*
+  10-04 09:33:46.237 - 1000 - ACQ *alarm* (partial)
+  10-04 09:33:46.242 - 1000 - REL *alarm*
+  10-04 09:33:46.259 - 1000 - ACQ *job*/c.g.a.y.t/a.w.i.b.s.SystemJobService (partial)
+  10-04 09:33:46.278 - 1000 - REL *job*/c.g.a.y.t/a.w.i.b.s.SystemJobService
+  10-04 09:33:52.749 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:33:52.752 - 1002 - REL bluetooth_timer
+  10-04 09:33:52.756 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:33:52.759 - 1002 - REL bluetooth_timer
+  10-04 09:33:52.766 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:33:52.767 - 1002 - REL bluetooth_timer
+  10-04 09:33:52.771 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:33:52.835 - 1002 - REL bluetooth_timer
+  10-04 09:33:52.838 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:33:52.839 - 1002 - REL bluetooth_timer
+  10-04 09:33:52.840 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:33:52.841 - 1002 - REL bluetooth_timer
+  10-04 09:33:52.842 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:33:52.843 - 1002 - REL bluetooth_timer
+  10-04 09:34:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 09:34:00.007 - 1000 - REL *alarm*
+  10-04 09:34:39.494 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:34:39.500 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:34:39.504 - 10040 - REL GCM_READ
+  10-04 09:34:39.517 - 10040 - REL GCM_WORK
+  10-04 09:35:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 09:35:00.011 - 1000 - REL *alarm*
+  10-04 09:36:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 09:36:00.005 - 1000 - REL *alarm*
+  10-04 09:36:33.227 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:36:33.232 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:36:33.235 - 10040 - REL GCM_READ
+  10-04 09:36:33.257 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 09:36:33.288 - 10040 - REL GCM_WORK
+  10-04 09:36:33.291 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:36:33.296 - 10040 - REL GCM_WORK
+  10-04 09:36:33.297 - 10040 - ACQ IntentOp:c.g.a.g/.c.PersistentIntentOperationService (partial)
+  10-04 09:36:33.308 - 10040 - REL GOOGLE_C2DM
+  10-04 09:36:33.312 - 10040 - ACQ IntentOp:.g.GcmInternalReceiverIntentOperation (partial)
+  10-04 09:36:33.315 - 10040 - REL IntentOp:c.g.a.g/.c.PersistentIntentOperationService
+  10-04 09:36:33.318 - 10040 - REL IntentOp:.g.GcmInternalReceiverIntentOperation
+  10-04 09:37:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 09:37:00.010 - 1000 - REL *alarm*
+  10-04 09:38:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 09:38:00.006 - 1000 - REL *alarm*
+  10-04 09:39:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 09:39:00.007 - 1000 - REL *alarm*
+  10-04 09:40:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 09:40:00.009 - 1000 - REL *alarm*
+  10-04 09:41:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 09:41:00.004 - 1000 - REL *alarm*
+  10-04 09:41:23.534 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:41:23.537 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:41:23.539 - 10040 - REL GCM_READ
+  10-04 09:41:23.551 - 10040 - REL GCM_WORK
+  10-04 09:42:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 09:42:00.010 - 1000 - REL *alarm*
+  10-04 09:43:00.009 - 1000 - ACQ *alarm* (partial)
+  10-04 09:43:00.010 - 1000 - REL *alarm*
+  10-04 09:44:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 09:44:00.003 - 1000 - REL *alarm*
+  10-04 09:44:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 09:44:00.009 - 1000 - REL *alarm*
+  10-04 09:45:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 09:45:00.004 - 1000 - REL *alarm*
+  10-04 09:46:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 09:46:00.007 - 1000 - REL *alarm*
+  10-04 09:46:09.733 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:46:09.734 - 1002 - REL bluetooth_timer
+  10-04 09:46:14.044 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:46:14.051 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:46:14.057 - 10040 - REL GCM_READ
+  10-04 09:46:14.072 - 10040 - REL GCM_WORK
+  10-04 09:46:17.340 - 1000 - ACQ *alarm* (partial)
+  10-04 09:46:17.344 - 1000 - ACQ com.android.server.stats.StatsCompanionService.PullingAlarmListener (partial)
+  10-04 09:46:17.345 - 1000 - REL *alarm*
+  10-04 09:46:17.349 - 1000 - ACQ NetworkStats (partial)
+  10-04 09:46:17.402 - 1000 - REL NetworkStats
+  10-04 09:46:17.468 - 1000 - REL com.android.server.stats.StatsCompanionService.PullingAlarmListener
+  10-04 09:46:43.915 - 1000 - ACQ *alarm* (partial)
+  10-04 09:46:43.917 - 1000 - REL *alarm*
+  10-04 09:47:00.010 - 1000 - ACQ *alarm* (partial)
+  10-04 09:47:00.012 - 1000 - REL *alarm*
+  10-04 09:47:35.025 - 1000 - ACQ *alarm* (partial)
+  10-04 09:47:35.047 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 09:47:35.056 - 1000 - REL *alarm*
+  10-04 09:47:35.070 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 09:47:35.078 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 09:47:35.412 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 09:48:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 09:48:00.005 - 1000 - REL *alarm*
+  10-04 09:48:17.038 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:48:17.039 - 1002 - REL bluetooth_timer
+  10-04 09:48:17.043 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:48:17.045 - 1002 - REL bluetooth_timer
+  10-04 09:48:17.047 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:48:17.050 - 1002 - REL bluetooth_timer
+  10-04 09:48:17.054 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:48:17.094 - 1002 - REL bluetooth_timer
+  10-04 09:48:17.096 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:48:17.097 - 1002 - REL bluetooth_timer
+  10-04 09:48:17.099 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:48:17.100 - 1002 - REL bluetooth_timer
+  10-04 09:48:17.102 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:48:17.103 - 1002 - REL bluetooth_timer
+  10-04 09:49:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 09:49:00.005 - 1000 - REL *alarm*
+  10-04 09:50:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 09:50:00.004 - 1000 - REL *alarm*
+  10-04 09:51:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 09:51:00.005 - 1000 - REL *alarm*
+  10-04 09:51:04.657 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:51:04.663 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:51:04.668 - 10040 - REL GCM_READ
+  10-04 09:51:04.680 - 10040 - REL GCM_WORK
+  10-04 09:51:38.625 - 1000 - ACQ *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService (partial)
+  10-04 09:51:38.628 - 1000 - REL *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService
+  10-04 09:51:38.640 - 1000 - ACQ *job*/a/c.a.s.b.KeyValueBackupJob (partial)
+  10-04 09:51:38.649 - 1000 - REL *job*/a/c.a.s.b.KeyValueBackupJob
+  10-04 09:52:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 09:52:00.009 - 1000 - REL *alarm*
+  10-04 09:52:07.301 - 1000 - ACQ *alarm* (partial)
+  10-04 09:52:07.308 - 10040 - ACQ GmsAlarm:NetworkLocationScanner (partial)
+  10-04 09:52:07.319 - 10040 - ACQ NetworkLocationScanner (partial)
+  10-04 09:52:07.319 - 1000 - REL *alarm*
+  10-04 09:52:07.323 - 10040 - ACQ CallbackRunner (partial)
+  10-04 09:52:07.329 - 10040 - REL GmsAlarm:NetworkLocationScanner
+  10-04 09:52:07.331 - 10040 - REL CallbackRunner
+  10-04 09:52:08.815 - 10040 - REL NetworkLocationScanner
+  10-04 09:52:08.820 - 10040 - ACQ NetworkLocationLocator (partial)
+  10-04 09:52:08.857 - 10040 - ACQ PendingIntentClient (partial)
+  10-04 09:52:08.861 - 10040 - REL PendingIntentClient
+  10-04 09:52:08.862 - 10040 - ACQ GCoreFlp (partial)
+  10-04 09:52:08.881 - 1000 - ACQ *location* (partial)
+  10-04 09:52:08.881 - 10040 - REL GCoreFlp
+  10-04 09:52:08.883 - 1000 - REL *location*
+  10-04 09:52:08.884 - 1000 - ACQ *location* (partial)
+  10-04 09:52:08.885 - 1000 - REL *location*
+  10-04 09:52:08.889 - 1000 - ACQ *location* (partial)
+  10-04 09:52:08.890 - 10040 - ACQ CallbackRunner (partial)
+  10-04 09:52:08.891 - 1000 - REL *location*
+  10-04 09:52:08.893 - 1000 - ACQ *location* (partial)
+  10-04 09:52:08.894 - 1000 - REL *location*
+  10-04 09:52:08.896 - 10040 - REL NetworkLocationLocator
+  10-04 09:52:08.897 - 10040 - REL CallbackRunner
+  10-04 09:53:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 09:53:00.006 - 1000 - REL *alarm*
+  10-04 09:54:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 09:54:00.002 - 1000 - REL *alarm*
+  10-04 09:54:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 09:54:00.006 - 1000 - REL *alarm*
+  10-04 09:55:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 09:55:00.005 - 1000 - REL *alarm*
+  10-04 09:55:59.263 - 10040 - ACQ GCM_READ (partial)
+  10-04 09:55:59.268 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:55:59.273 - 10040 - REL GCM_READ
+  10-04 09:55:59.298 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 09:55:59.329 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:55:59.334 - 10040 - REL GCM_WORK
+  10-04 09:55:59.338 - 10044 - ACQ androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService (partial)
+  10-04 09:55:59.340 - 10040 - ACQ GCM_WORK (partial)
+  10-04 09:55:59.344 - 10040 - REL GOOGLE_C2DM
+  10-04 09:55:59.346 - 10044 - REL androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService
+  10-04 09:55:59.360 - 10040 - REL GCM_WORK
+  10-04 09:55:59.379 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.s.PlatformStatsCollectorService (partial)
+  10-04 09:55:59.430 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.p.s.s.PhenotypeConfigurator (partial)
+  10-04 09:55:59.467 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:55:59.468 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:55:59.479 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:55:59.495 - 10040 - REL *gms_scheduler*/c.g.a.g/.s.PlatformStatsCollectorService
+  10-04 09:55:59.500 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:55:59.545 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:55:59.548 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:55:59.579 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-04 09:55:59.606 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:55:59.616 - 10040 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-04 09:55:59.617 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:55:59.635 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:55:59.637 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:55:59.658 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.k.JobService (partial)
+  10-04 09:55:59.676 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:55:59.897 - 10040 - REL *gms_scheduler*/c.g.a.g/.k.JobService
+  10-04 09:55:59.899 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:55:59.943 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:55:59.944 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:55:59.967 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService (partial)
+  10-04 09:55:59.982 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:55:59.991 - 10040 - REL *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService
+  10-04 09:55:59.994 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:56:00.000 - 1000 - ACQ *alarm* (partial)
+  10-04 09:56:00.002 - 1000 - REL *alarm*
+  10-04 09:56:00.048 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:56:00.049 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:56:00.069 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-04 09:56:00.089 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:56:01.501 - 10040 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-04 09:56:01.506 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:56:01.525 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:56:01.526 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:56:01.549 - 10040 - ACQ *gms_scheduler*/c.g.a.g/c.g.a.c.s.ContextManagerLogsUploadBoundService (partial)
+  10-04 09:56:01.553 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:56:01.559 - 10040 - ACQ CMWakeLock (partial)
+  10-04 09:56:01.560 - 10040 - REL *gms_scheduler*/c.g.a.g/c.g.a.c.s.ContextManagerLogsUploadBoundService
+  10-04 09:56:01.563 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:56:01.588 - 10040 - REL CMWakeLock
+  10-04 09:56:01.588 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:56:01.589 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:56:01.605 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:56:04.205 - 10040 - REL *gms_scheduler*/c.g.a.g/.p.s.s.PhenotypeConfigurator
+  10-04 09:56:04.216 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:56:04.241 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:56:04.244 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 09:56:04.253 - 10040 - REL *gms_scheduler*:internal
+  10-04 09:56:09.836 - 1000 - ACQ *alarm* (partial)
+  10-04 09:56:09.839 - 1000 - ACQ NetworkStats (partial)
+  10-04 09:56:09.893 - 1000 - REL NetworkStats
+  10-04 09:56:09.897 - 1000 - REL *alarm*
+  10-04 09:56:35.399 - 10036 - ACQ SyncManager: Scheduling in parallel (partial)
+  10-04 09:56:35.404 - 10036 - ACQ SyncManager: Syncing (partial)
+  10-04 09:56:35.432 - 10036 - REL SyncManager: Syncing
+  10-04 09:56:35.515 - 10036 - REL SyncManager: Scheduling in parallel
+  10-04 09:57:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 09:57:00.007 - 1000 - REL *alarm*
+  10-04 09:58:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 09:58:00.004 - 1000 - REL *alarm*
+  10-04 09:59:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 09:59:00.006 - 1000 - REL *alarm*
+  10-04 09:59:09.085 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:59:09.092 - 1002 - REL bluetooth_timer
+  10-04 09:59:09.102 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:59:09.103 - 1002 - REL bluetooth_timer
+  10-04 09:59:09.105 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:59:09.107 - 1002 - REL bluetooth_timer
+  10-04 09:59:09.109 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:59:09.111 - 1002 - REL bluetooth_timer
+  10-04 09:59:09.114 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:59:09.115 - 1002 - REL bluetooth_timer
+  10-04 09:59:09.118 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:59:09.119 - 1002 - REL bluetooth_timer
+  10-04 09:59:09.120 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 09:59:09.121 - 1002 - REL bluetooth_timer
+  10-04 10:00:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 10:00:00.006 - 1000 - REL *alarm*
+  10-04 10:01:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 10:01:00.005 - 1000 - REL *alarm*
+  10-04 10:02:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 10:02:00.008 - 1000 - REL *alarm*
+  10-04 10:02:35.418 - 1000 - ACQ *alarm* (partial)
+  10-04 10:02:35.426 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 10:02:35.440 - 1000 - REL *alarm*
+  10-04 10:02:35.451 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 10:02:35.457 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 10:02:35.717 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 10:02:59.360 - 1000 - ACQ *alarm* (partial)
+  10-04 10:02:59.364 - 1000 - REL *alarm*
+  10-04 10:02:59.370 - 10040 - ACQ GCM_HB_ALARM (partial)
+  10-04 10:02:59.375 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:02:59.378 - 10040 - REL GCM_HB_ALARM
+  10-04 10:02:59.381 - 10040 - REL GCM_WORK
+  10-04 10:03:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 10:03:00.009 - 1000 - REL *alarm*
+  10-04 10:03:59.376 - 1000 - ACQ *alarm* (partial)
+  10-04 10:03:59.380 - 1000 - REL *alarm*
+  10-04 10:03:59.387 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:03:59.393 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:03:59.395 - 10040 - REL GCM_READ
+  10-04 10:03:59.397 - 10040 - ACQ GCM_CONN_ALARM (partial)
+  10-04 10:03:59.403 - 10040 - REL GCM_WORK
+  10-04 10:03:59.506 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:03:59.512 - 10040 - REL GCM_WORK
+  10-04 10:03:59.514 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:03:59.517 - 10040 - REL GCM_WORK
+  10-04 10:03:59.646 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:03:59.648 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:03:59.649 - 10040 - REL GCM_READ
+  10-04 10:03:59.653 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:03:59.654 - 10040 - REL GCM_READ
+  10-04 10:03:59.669 - 10040 - REL GCM_CONN_ALARM
+  10-04 10:03:59.678 - 10040 - REL GCM_WORK
+  10-04 10:04:00.009 - 1000 - ACQ *alarm* (partial)
+  10-04 10:04:00.011 - 1000 - REL *alarm*
+  10-04 10:04:00.237 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:04:00.243 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:04:00.247 - 10040 - REL GCM_READ
+  10-04 10:04:00.258 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 10:04:00.285 - 10040 - REL GCM_WORK
+  10-04 10:04:00.304 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:04:00.304 - 10040 - ACQ IntentOp:c.g.a.g/.c.PersistentIntentOperationService (partial)
+  10-04 10:04:00.309 - 10040 - REL GCM_WORK
+  10-04 10:04:00.320 - 10040 - REL GOOGLE_C2DM
+  10-04 10:04:00.322 - 10040 - ACQ IntentOp:.g.GcmInternalReceiverIntentOperation (partial)
+  10-04 10:04:00.325 - 10040 - REL IntentOp:c.g.a.g/.c.PersistentIntentOperationService
+  10-04 10:04:00.328 - 10040 - REL IntentOp:.g.GcmInternalReceiverIntentOperation
+  10-04 10:05:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 10:05:00.006 - 1000 - REL *alarm*
+  10-04 10:06:00.009 - 1000 - ACQ *alarm* (partial)
+  10-04 10:06:00.012 - 1000 - REL *alarm*
+  10-04 10:07:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 10:07:00.007 - 1000 - REL *alarm*
+  10-04 10:08:00.010 - 1000 - ACQ *alarm* (partial)
+  10-04 10:08:00.012 - 1000 - REL *alarm*
+  10-04 10:08:50.486 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:08:50.493 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:08:50.495 - 10040 - REL GCM_READ
+  10-04 10:08:50.508 - 10040 - REL GCM_WORK
+  10-04 10:09:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 10:09:00.008 - 1000 - REL *alarm*
+  10-04 10:10:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 10:10:00.008 - 1000 - REL *alarm*
+  10-04 10:11:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 10:11:00.008 - 1000 - REL *alarm*
+  10-04 10:11:13.137 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:11:13.139 - 1002 - REL bluetooth_timer
+  10-04 10:11:13.143 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:11:13.145 - 1002 - REL bluetooth_timer
+  10-04 10:11:13.152 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:11:13.153 - 1002 - REL bluetooth_timer
+  10-04 10:11:13.158 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:11:13.220 - 1002 - REL bluetooth_timer
+  10-04 10:11:13.224 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:11:13.226 - 1002 - REL bluetooth_timer
+  10-04 10:11:13.228 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:11:13.229 - 1002 - REL bluetooth_timer
+  10-04 10:11:13.232 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:11:13.233 - 1002 - REL bluetooth_timer
+  10-04 10:11:25.375 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:11:25.385 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:11:25.388 - 10040 - REL GCM_READ
+  10-04 10:11:25.417 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 10:11:25.456 - 10040 - ACQ IntentOp:c.g.a.g/.c.PersistentIntentOperationService (partial)
+  10-04 10:11:25.458 - 10040 - REL GCM_WORK
+  10-04 10:11:25.469 - 10040 - REL GOOGLE_C2DM
+  10-04 10:11:25.474 - 10040 - ACQ IntentOp:.g.GcmInternalReceiverIntentOperation (partial)
+  10-04 10:11:25.476 - 10040 - REL IntentOp:c.g.a.g/.c.PersistentIntentOperationService
+  10-04 10:11:25.479 - 10040 - REL IntentOp:.g.GcmInternalReceiverIntentOperation
+  10-04 10:12:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 10:12:00.005 - 1000 - REL *alarm*
+  10-04 10:13:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 10:13:00.006 - 1000 - REL *alarm*
+  10-04 10:14:00.009 - 1000 - ACQ *alarm* (partial)
+  10-04 10:14:00.011 - 1000 - REL *alarm*
+  10-04 10:15:00.000 - 1000 - ACQ *alarm* (partial)
+  10-04 10:15:00.002 - 1000 - REL *alarm*
+  10-04 10:16:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 10:16:00.004 - 1000 - REL *alarm*
+  10-04 10:16:09.726 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:16:09.728 - 1002 - REL bluetooth_timer
+  10-04 10:16:15.985 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:16:15.991 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:16:15.994 - 10040 - REL GCM_READ
+  10-04 10:16:16.007 - 10040 - REL GCM_WORK
+  10-04 10:17:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 10:17:00.004 - 1000 - REL *alarm*
+  10-04 10:17:35.708 - 1000 - ACQ *alarm* (partial)
+  10-04 10:17:35.723 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 10:17:35.739 - 1000 - REL *alarm*
+  10-04 10:17:35.745 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 10:17:35.753 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 10:17:36.034 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 10:18:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 10:18:00.003 - 1000 - REL *alarm*
+  10-04 10:19:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 10:19:00.007 - 1000 - REL *alarm*
+  10-04 10:20:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 10:20:00.003 - 1000 - REL *alarm*
+  10-04 10:21:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 10:21:00.008 - 1000 - REL *alarm*
+  10-04 10:21:06.497 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:21:06.502 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:21:06.507 - 10040 - REL GCM_READ
+  10-04 10:21:06.524 - 10040 - REL GCM_WORK
+  10-04 10:22:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 10:22:00.009 - 1000 - REL *alarm*
+  10-04 10:22:08.793 - 1000 - ACQ *alarm* (partial)
+  10-04 10:22:08.799 - 10040 - ACQ NetworkLocationScanner (partial)
+  10-04 10:22:08.799 - 10040 - ACQ GmsAlarm:NetworkLocationScanner (partial)
+  10-04 10:22:08.804 - 10040 - ACQ CallbackRunner (partial)
+  10-04 10:22:08.805 - 10040 - REL GmsAlarm:NetworkLocationScanner
+  10-04 10:22:08.808 - 10040 - REL CallbackRunner
+  10-04 10:22:08.813 - 1000 - REL *alarm*
+  10-04 10:22:10.308 - 10040 - REL NetworkLocationScanner
+  10-04 10:22:10.312 - 10040 - ACQ NetworkLocationLocator (partial)
+  10-04 10:22:10.341 - 10040 - ACQ PendingIntentClient (partial)
+  10-04 10:22:10.348 - 10040 - ACQ GCoreFlp (partial)
+  10-04 10:22:10.349 - 10040 - REL PendingIntentClient
+  10-04 10:22:10.364 - 10040 - REL GCoreFlp
+  10-04 10:22:10.365 - 10040 - ACQ CallbackRunner (partial)
+  10-04 10:22:10.371 - 1000 - ACQ *location* (partial)
+  10-04 10:22:10.373 - 1000 - ACQ *location* (partial)
+  10-04 10:22:10.376 - 1000 - REL *location*
+  10-04 10:22:10.377 - 1000 - REL *location*
+  10-04 10:22:10.379 - 10040 - REL NetworkLocationLocator
+  10-04 10:22:10.380 - 10040 - REL CallbackRunner
+  10-04 10:22:37.006 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:22:37.009 - 1002 - REL bluetooth_timer
+  10-04 10:22:37.014 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:22:37.016 - 1002 - REL bluetooth_timer
+  10-04 10:22:37.020 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:22:37.021 - 1002 - REL bluetooth_timer
+  10-04 10:22:37.024 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:22:37.097 - 1002 - REL bluetooth_timer
+  10-04 10:22:37.102 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:22:37.104 - 1002 - REL bluetooth_timer
+  10-04 10:22:37.106 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:22:37.107 - 1002 - REL bluetooth_timer
+  10-04 10:22:37.110 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:22:37.111 - 1002 - REL bluetooth_timer
+  10-04 10:23:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 10:23:00.003 - 1000 - REL *alarm*
+  10-04 10:24:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 10:24:00.007 - 1000 - REL *alarm*
+  10-04 10:24:32.830 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:24:32.840 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:24:32.844 - 10040 - REL GCM_READ
+  10-04 10:24:32.871 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 10:24:32.891 - 10040 - REL GCM_WORK
+  10-04 10:24:32.893 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 10:24:32.896 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:24:32.912 - 10040 - ACQ IntentOp:c.g.a.g/.c.PersistentIntentOperationService (partial)
+  10-04 10:24:32.926 - 10040 - REL GCM_WORK
+  10-04 10:24:32.927 - 10040 - REL GOOGLE_C2DM
+  10-04 10:24:32.929 - 10040 - ACQ IntentOp:.g.GcmInternalReceiverIntentOperation (partial)
+  10-04 10:24:32.929 - 10040 - REL *gms_scheduler*:internal
+  10-04 10:24:32.931 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 10:24:32.932 - 10040 - REL IntentOp:c.g.a.g/.c.PersistentIntentOperationService
+  10-04 10:24:32.935 - 10040 - REL IntentOp:.g.GcmInternalReceiverIntentOperation
+  10-04 10:24:32.940 - 10040 - REL *gms_scheduler*:internal
+  10-04 10:25:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 10:25:00.007 - 1000 - REL *alarm*
+  10-04 10:26:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 10:26:00.005 - 1000 - REL *alarm*
+  10-04 10:26:00.176 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:26:00.179 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:26:00.180 - 10040 - REL GCM_READ
+  10-04 10:26:00.211 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 10:26:00.229 - 10040 - REL GCM_WORK
+  10-04 10:26:00.252 - 10044 - ACQ androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService (partial)
+  10-04 10:26:00.256 - 10044 - REL androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService
+  10-04 10:26:00.257 - 10040 - REL GOOGLE_C2DM
+  10-04 10:27:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 10:27:00.007 - 1000 - REL *alarm*
+  10-04 10:28:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 10:28:00.009 - 1000 - REL *alarm*
+  10-04 10:29:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 10:29:00.002 - 1000 - REL *alarm*
+  10-04 10:30:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 10:30:00.008 - 1000 - REL *alarm*
+  10-04 10:30:50.481 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:30:50.483 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:30:50.486 - 10040 - REL GCM_READ
+  10-04 10:30:50.498 - 10040 - REL GCM_WORK
+  10-04 10:31:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 10:31:00.009 - 1000 - REL *alarm*
+  10-04 10:32:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 10:32:00.008 - 1000 - REL *alarm*
+  10-04 10:32:36.031 - 1000 - ACQ *alarm* (partial)
+  10-04 10:32:36.051 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 10:32:36.061 - 1000 - REL *alarm*
+  10-04 10:32:36.070 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 10:32:36.078 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 10:32:36.517 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 10:33:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 10:33:00.007 - 1000 - REL *alarm*
+  10-04 10:33:19.683 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:33:19.692 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:33:19.695 - 10040 - REL GCM_READ
+  10-04 10:33:19.720 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 10:33:19.742 - 10040 - REL GCM_WORK
+  10-04 10:33:19.764 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:33:19.776 - 10040 - REL GCM_WORK
+  10-04 10:33:19.794 - 10040 - REL GOOGLE_C2DM
+  10-04 10:34:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 10:34:00.009 - 1000 - REL *alarm*
+  10-04 10:35:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 10:35:00.004 - 1000 - REL *alarm*
+  10-04 10:35:16.825 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:35:16.827 - 1002 - REL bluetooth_timer
+  10-04 10:35:16.831 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:35:16.833 - 1002 - REL bluetooth_timer
+  10-04 10:35:16.839 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:35:16.840 - 1002 - REL bluetooth_timer
+  10-04 10:35:16.841 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:35:16.848 - 1002 - REL bluetooth_timer
+  10-04 10:35:16.851 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:35:16.852 - 1002 - REL bluetooth_timer
+  10-04 10:35:16.855 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:35:16.856 - 1002 - REL bluetooth_timer
+  10-04 10:35:16.858 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:35:16.859 - 1002 - REL bluetooth_timer
+  10-04 10:36:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 10:36:00.004 - 1000 - REL *alarm*
+  10-04 10:36:57.965 - 1000 - ACQ *alarm* (partial)
+  10-04 10:36:57.966 - 1000 - ACQ NetworkStats (partial)
+  10-04 10:36:57.985 - 1000 - ACQ *job*/c.g.a.k/a.w.i.b.s.SystemJobService (partial)
+  10-04 10:36:58.013 - 10036 - ACQ SyncManager: Scheduling in parallel (partial)
+  10-04 10:36:58.021 - 10036 - ACQ SyncManager: Syncing (partial)
+  10-04 10:36:58.030 - 10036 - REL SyncManager: Syncing
+  10-04 10:36:58.035 - 1000 - REL NetworkStats
+  10-04 10:36:58.040 - 1000 - REL *alarm*
+  10-04 10:36:58.051 - 1000 - REL *job*/c.g.a.k/a.w.i.b.s.SystemJobService
+  10-04 10:36:58.183 - 10036 - REL SyncManager: Scheduling in parallel
+  10-04 10:37:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 10:37:00.007 - 1000 - REL *alarm*
+  10-04 10:37:29.845 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:37:29.853 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:37:29.857 - 10040 - REL GCM_READ
+  10-04 10:37:29.883 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 10:37:29.904 - 10040 - REL GCM_WORK
+  10-04 10:37:29.951 - 10040 - REL GOOGLE_C2DM
+  10-04 10:38:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 10:38:00.009 - 1000 - REL *alarm*
+  10-04 10:38:01.797 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:38:01.801 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:38:01.803 - 10040 - REL GCM_READ
+  10-04 10:38:01.811 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 10:38:01.843 - 10040 - REL GCM_WORK
+  10-04 10:38:01.846 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:38:01.864 - 10040 - REL GCM_WORK
+  10-04 10:38:01.878 - 10040 - REL GOOGLE_C2DM
+  10-04 10:39:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 10:39:00.007 - 1000 - REL *alarm*
+  10-04 10:40:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 10:40:00.007 - 1000 - REL *alarm*
+  10-04 10:41:00.009 - 1000 - ACQ *alarm* (partial)
+  10-04 10:41:00.011 - 1000 - REL *alarm*
+  10-04 10:42:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 10:42:00.005 - 1000 - REL *alarm*
+  10-04 10:43:00.011 - 1000 - ACQ *alarm* (partial)
+  10-04 10:43:00.014 - 1000 - REL *alarm*
+  10-04 10:43:00.018 - 1000 - ACQ *alarm* (partial)
+  10-04 10:43:00.020 - 1000 - REL *alarm*
+  10-04 10:44:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 10:44:00.010 - 1000 - REL *alarm*
+  10-04 10:44:01.858 - 1000 - ACQ *alarm* (partial)
+  10-04 10:44:01.865 - 1000 - REL *alarm*
+  10-04 10:44:01.871 - 10040 - ACQ GCM_HB_ALARM (partial)
+  10-04 10:44:01.879 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:44:01.883 - 10040 - REL GCM_HB_ALARM
+  10-04 10:44:01.885 - 10040 - REL GCM_WORK
+  10-04 10:44:16.275 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:44:16.278 - 1002 - REL bluetooth_timer
+  10-04 10:44:16.283 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:44:16.284 - 1002 - REL bluetooth_timer
+  10-04 10:44:16.287 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:44:16.290 - 1002 - REL bluetooth_timer
+  10-04 10:44:16.294 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:44:16.349 - 1002 - REL bluetooth_timer
+  10-04 10:44:16.352 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:44:16.353 - 1002 - REL bluetooth_timer
+  10-04 10:44:16.355 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:44:16.356 - 1002 - REL bluetooth_timer
+  10-04 10:44:16.358 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:44:16.359 - 1002 - REL bluetooth_timer
+  10-04 10:45:00.000 - 1000 - ACQ *alarm* (partial)
+  10-04 10:45:00.003 - 1000 - REL *alarm*
+  10-04 10:45:01.882 - 1000 - ACQ *alarm* (partial)
+  10-04 10:45:01.889 - 1000 - REL *alarm*
+  10-04 10:45:01.899 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:45:01.904 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:45:01.907 - 10040 - REL GCM_READ
+  10-04 10:45:01.908 - 10040 - ACQ GCM_CONN_ALARM (partial)
+  10-04 10:45:01.915 - 10040 - REL GCM_WORK
+  10-04 10:45:02.019 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:45:02.025 - 10040 - REL GCM_WORK
+  10-04 10:45:02.027 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:45:02.031 - 10040 - REL GCM_WORK
+  10-04 10:45:02.149 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:45:02.153 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:45:02.156 - 10040 - REL GCM_READ
+  10-04 10:45:02.164 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:45:02.166 - 10040 - REL GCM_READ
+  10-04 10:45:02.185 - 10040 - REL GCM_CONN_ALARM
+  10-04 10:45:02.193 - 10040 - REL GCM_WORK
+  10-04 10:46:00.009 - 1000 - ACQ *alarm* (partial)
+  10-04 10:46:00.011 - 1000 - REL *alarm*
+  10-04 10:46:09.777 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:46:09.779 - 1002 - REL bluetooth_timer
+  10-04 10:46:17.339 - 1000 - ACQ *alarm* (partial)
+  10-04 10:46:17.340 - 1000 - ACQ com.android.server.stats.StatsCompanionService.PullingAlarmListener (partial)
+  10-04 10:46:17.347 - 1000 - REL *alarm*
+  10-04 10:46:17.349 - 1000 - ACQ NetworkStats (partial)
+  10-04 10:46:17.392 - 1000 - REL NetworkStats
+  10-04 10:46:17.451 - 1000 - REL com.android.server.stats.StatsCompanionService.PullingAlarmListener
+  10-04 10:47:00.009 - 1000 - ACQ *alarm* (partial)
+  10-04 10:47:00.012 - 1000 - REL *alarm*
+  10-04 10:47:36.513 - 1000 - ACQ *alarm* (partial)
+  10-04 10:47:36.549 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 10:47:36.566 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 10:47:36.567 - 1000 - REL *alarm*
+  10-04 10:47:36.574 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 10:47:36.892 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 10:48:00.010 - 1000 - ACQ *alarm* (partial)
+  10-04 10:48:00.012 - 1000 - REL *alarm*
+  10-04 10:49:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 10:49:00.006 - 1000 - REL *alarm*
+  10-04 10:49:52.358 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:49:52.361 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:49:52.363 - 10040 - REL GCM_READ
+  10-04 10:49:52.374 - 10040 - REL GCM_WORK
+  10-04 10:50:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 10:50:00.009 - 1000 - REL *alarm*
+  10-04 10:51:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 10:51:00.009 - 1000 - REL *alarm*
+  10-04 10:52:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 10:52:00.003 - 1000 - REL *alarm*
+  10-04 10:52:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 10:52:00.008 - 1000 - REL *alarm*
+  10-04 10:52:10.268 - 1000 - ACQ *alarm* (partial)
+  10-04 10:52:10.278 - 10040 - ACQ NetworkLocationScanner (partial)
+  10-04 10:52:10.279 - 10040 - ACQ GmsAlarm:NetworkLocationScanner (partial)
+  10-04 10:52:10.283 - 10040 - ACQ CallbackRunner (partial)
+  10-04 10:52:10.284 - 1000 - REL *alarm*
+  10-04 10:52:10.286 - 10040 - REL GmsAlarm:NetworkLocationScanner
+  10-04 10:52:10.293 - 10040 - REL CallbackRunner
+  10-04 10:52:11.776 - 10040 - REL NetworkLocationScanner
+  10-04 10:52:11.782 - 10040 - ACQ NetworkLocationLocator (partial)
+  10-04 10:52:11.826 - 10040 - ACQ PendingIntentClient (partial)
+  10-04 10:52:11.831 - 10040 - ACQ GCoreFlp (partial)
+  10-04 10:52:11.836 - 10040 - REL PendingIntentClient
+  10-04 10:52:11.850 - 1000 - ACQ *location* (partial)
+  10-04 10:52:11.851 - 1000 - ACQ *location* (partial)
+  10-04 10:52:11.852 - 1000 - REL *location*
+  10-04 10:52:11.853 - 1000 - REL *location*
+  10-04 10:52:11.857 - 10040 - ACQ CallbackRunner (partial)
+  10-04 10:52:11.862 - 1000 - ACQ *location* (partial)
+  10-04 10:52:11.863 - 1000 - ACQ *location* (partial)
+  10-04 10:52:11.865 - 1000 - REL *location*
+  10-04 10:52:11.865 - 1000 - REL *location*
+  10-04 10:52:11.865 - 10040 - REL GCoreFlp
+  10-04 10:52:11.868 - 10040 - REL NetworkLocationLocator
+  10-04 10:52:11.869 - 10040 - REL CallbackRunner
+  10-04 10:53:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 10:53:00.007 - 1000 - REL *alarm*
+  10-04 10:54:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 10:54:00.007 - 1000 - REL *alarm*
+  10-04 10:54:29.221 - 1000 - ACQ *alarm* (partial)
+  10-04 10:54:29.223 - 1000 - ACQ NetworkStats (partial)
+  10-04 10:54:29.241 - 1000 - ACQ *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService (partial)
+  10-04 10:54:29.243 - 1000 - REL *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService
+  10-04 10:54:29.262 - 1000 - REL NetworkStats
+  10-04 10:54:29.266 - 1000 - REL *alarm*
+  10-04 10:54:42.960 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:54:42.963 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:54:42.966 - 10040 - REL GCM_READ
+  10-04 10:54:42.979 - 10040 - REL GCM_WORK
+  10-04 10:54:42.983 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 10:54:43.011 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.g.HeartbeatAlarm$ConnectionInfoPersistService (partial)
+  10-04 10:54:43.056 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-04 10:54:43.074 - 10040 - REL *gms_scheduler*:internal
+  10-04 10:54:43.080 - 10040 - REL *gms_scheduler*/c.g.a.g/.g.HeartbeatAlarm$ConnectionInfoPersistService
+  10-04 10:54:43.084 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 10:54:43.094 - 10040 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-04 10:54:43.100 - 10040 - REL *gms_scheduler*:internal
+  10-04 10:54:43.102 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 10:54:43.121 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.k.JobService (partial)
+  10-04 10:54:43.150 - 10040 - REL *gms_scheduler*:internal
+  10-04 10:54:43.155 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 10:54:43.180 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService (partial)
+  10-04 10:54:43.221 - 10040 - REL *gms_scheduler*:internal
+  10-04 10:54:43.224 - 10040 - REL *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService
+  10-04 10:54:43.236 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 10:54:43.256 - 10040 - REL *gms_scheduler*:internal
+  10-04 10:54:43.258 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 10:54:43.291 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-04 10:54:43.316 - 10040 - REL *gms_scheduler*:internal
+  10-04 10:54:43.417 - 10040 - REL *gms_scheduler*/c.g.a.g/.k.JobService
+  10-04 10:54:43.423 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 10:54:43.448 - 10040 - REL *gms_scheduler*:internal
+  10-04 10:54:43.450 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 10:54:43.462 - 10040 - REL *gms_scheduler*:internal
+  10-04 10:54:44.386 - 10040 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-04 10:54:44.391 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 10:54:44.406 - 10040 - REL *gms_scheduler*:internal
+  10-04 10:54:44.408 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 10:54:44.414 - 10040 - REL *gms_scheduler*:internal
+  10-04 10:55:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 10:55:00.007 - 1000 - REL *alarm*
+  10-04 10:56:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 10:56:00.007 - 1000 - REL *alarm*
+  10-04 10:56:00.991 - 10040 - ACQ GCM_READ (partial)
+  10-04 10:56:00.997 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:56:01.000 - 10040 - REL GCM_READ
+  10-04 10:56:01.009 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 10:56:01.047 - 10040 - REL GCM_WORK
+  10-04 10:56:01.048 - 10040 - ACQ GCM_WORK (partial)
+  10-04 10:56:01.058 - 10040 - REL GCM_WORK
+  10-04 10:56:01.067 - 10044 - ACQ androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService (partial)
+  10-04 10:56:01.071 - 10044 - REL androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService
+  10-04 10:56:01.073 - 10040 - REL GOOGLE_C2DM
+  10-04 10:57:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 10:57:00.004 - 1000 - REL *alarm*
+  10-04 10:57:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 10:57:00.008 - 1000 - REL *alarm*
+  10-04 10:58:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 10:58:00.004 - 1000 - REL *alarm*
+  10-04 10:58:39.668 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:58:39.670 - 1002 - REL bluetooth_timer
+  10-04 10:58:39.674 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:58:39.676 - 1002 - REL bluetooth_timer
+  10-04 10:58:39.680 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:58:39.681 - 1002 - REL bluetooth_timer
+  10-04 10:58:39.683 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:58:39.726 - 1002 - REL bluetooth_timer
+  10-04 10:58:39.729 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:58:39.730 - 1002 - REL bluetooth_timer
+  10-04 10:58:39.732 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:58:39.733 - 1002 - REL bluetooth_timer
+  10-04 10:58:39.736 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 10:58:39.737 - 1002 - REL bluetooth_timer
+  10-04 10:59:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 10:59:00.009 - 1000 - REL *alarm*
+  10-04 11:00:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 11:00:00.004 - 1000 - REL *alarm*
+  10-04 11:00:00.009 - 1000 - ACQ *alarm* (partial)
+  10-04 11:00:00.010 - 1000 - REL *alarm*
+  10-04 11:00:51.401 - 10040 - ACQ GCM_READ (partial)
+  10-04 11:00:51.406 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:00:51.412 - 10040 - REL GCM_READ
+  10-04 11:00:51.431 - 10040 - REL GCM_WORK
+  10-04 11:01:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 11:01:00.007 - 1000 - REL *alarm*
+  10-04 11:02:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 11:02:00.008 - 1000 - REL *alarm*
+  10-04 11:02:36.890 - 1000 - ACQ *alarm* (partial)
+  10-04 11:02:36.913 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 11:02:36.927 - 1000 - REL *alarm*
+  10-04 11:02:36.933 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 11:02:36.939 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 11:02:37.215 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 11:03:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 11:03:00.002 - 1000 - REL *alarm*
+  10-04 11:03:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 11:03:00.008 - 1000 - REL *alarm*
+  10-04 11:04:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 11:04:00.007 - 1000 - REL *alarm*
+  10-04 11:05:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 11:05:00.008 - 1000 - REL *alarm*
+  10-04 11:05:41.912 - 10040 - ACQ GCM_READ (partial)
+  10-04 11:05:41.918 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:05:41.921 - 10040 - REL GCM_READ
+  10-04 11:05:41.933 - 10040 - REL GCM_WORK
+  10-04 11:06:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 11:06:00.007 - 1000 - REL *alarm*
+  10-04 11:07:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 11:07:00.009 - 1000 - REL *alarm*
+  10-04 11:08:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 11:08:00.003 - 1000 - REL *alarm*
+  10-04 11:08:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 11:08:00.008 - 1000 - REL *alarm*
+  10-04 11:08:27.177 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:08:27.181 - 1002 - REL bluetooth_timer
+  10-04 11:08:27.184 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:08:27.185 - 1002 - REL bluetooth_timer
+  10-04 11:08:27.189 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:08:27.191 - 1002 - REL bluetooth_timer
+  10-04 11:08:27.193 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:08:27.227 - 1002 - REL bluetooth_timer
+  10-04 11:08:27.230 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:08:27.231 - 1002 - REL bluetooth_timer
+  10-04 11:08:27.233 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:08:27.234 - 1002 - REL bluetooth_timer
+  10-04 11:08:27.236 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:08:27.237 - 1002 - REL bluetooth_timer
+  10-04 11:09:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 11:09:00.005 - 1000 - REL *alarm*
+  10-04 11:10:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 11:10:00.007 - 1000 - REL *alarm*
+  10-04 11:10:32.414 - 10040 - ACQ GCM_READ (partial)
+  10-04 11:10:32.417 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:10:32.418 - 10040 - REL GCM_READ
+  10-04 11:10:32.429 - 10040 - REL GCM_WORK
+  10-04 11:11:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 11:11:00.007 - 1000 - REL *alarm*
+  10-04 11:12:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 11:12:00.007 - 1000 - REL *alarm*
+  10-04 11:12:29.872 - 10040 - ACQ GCM_READ (partial)
+  10-04 11:12:29.879 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:12:29.881 - 10040 - REL GCM_READ
+  10-04 11:12:29.907 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 11:12:29.939 - 10040 - REL GCM_WORK
+  10-04 11:12:29.944 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:12:29.966 - 10040 - REL GCM_WORK
+  10-04 11:12:29.980 - 10040 - REL GOOGLE_C2DM
+  10-04 11:12:40.528 - 10040 - ACQ GCM_READ (partial)
+  10-04 11:12:40.536 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:12:40.540 - 10040 - REL GCM_READ
+  10-04 11:12:40.559 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 11:12:40.610 - 10040 - REL GCM_WORK
+  10-04 11:12:40.614 - 10040 - REL GOOGLE_C2DM
+  10-04 11:13:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 11:13:00.007 - 1000 - REL *alarm*
+  10-04 11:13:29.874 - 10040 - ACQ GCM_READ (partial)
+  10-04 11:13:29.877 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:13:29.878 - 10040 - REL GCM_READ
+  10-04 11:13:29.882 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 11:13:29.915 - 10040 - REL GCM_WORK
+  10-04 11:13:29.927 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:13:29.943 - 10040 - REL GCM_WORK
+  10-04 11:13:29.944 - 10040 - REL GOOGLE_C2DM
+  10-04 11:13:47.489 - 10040 - ACQ GCM_READ (partial)
+  10-04 11:13:47.493 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:13:47.495 - 10040 - REL GCM_READ
+  10-04 11:13:47.520 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 11:13:47.542 - 10040 - REL GCM_WORK
+  10-04 11:13:47.578 - 10040 - REL GOOGLE_C2DM
+  10-04 11:14:00.009 - 1000 - ACQ *alarm* (partial)
+  10-04 11:14:00.012 - 1000 - REL *alarm*
+  10-04 11:15:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 11:15:00.007 - 1000 - REL *alarm*
+  10-04 11:16:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 11:16:00.011 - 1000 - REL *alarm*
+  10-04 11:16:06.444 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:16:06.446 - 1002 - REL bluetooth_timer
+  10-04 11:16:06.450 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:16:06.452 - 1002 - REL bluetooth_timer
+  10-04 11:16:06.454 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:16:06.456 - 1002 - REL bluetooth_timer
+  10-04 11:16:06.459 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:16:06.477 - 1002 - REL bluetooth_timer
+  10-04 11:16:06.480 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:16:06.482 - 1002 - REL bluetooth_timer
+  10-04 11:16:06.484 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:16:06.486 - 1002 - REL bluetooth_timer
+  10-04 11:16:06.489 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:16:06.490 - 1002 - REL bluetooth_timer
+  10-04 11:16:09.827 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:16:09.829 - 1002 - REL bluetooth_timer
+  10-04 11:17:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 11:17:00.006 - 1000 - REL *alarm*
+  10-04 11:17:37.187 - 1000 - ACQ *alarm* (partial)
+  10-04 11:17:37.210 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 11:17:37.220 - 1000 - REL *alarm*
+  10-04 11:17:37.234 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 11:17:37.240 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 11:17:37.556 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 11:18:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 11:18:00.005 - 1000 - REL *alarm*
+  10-04 11:18:00.009 - 1000 - ACQ *alarm* (partial)
+  10-04 11:18:00.011 - 1000 - REL *alarm*
+  10-04 11:18:38.001 - 10040 - ACQ GCM_READ (partial)
+  10-04 11:18:38.007 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:18:38.011 - 10040 - REL GCM_READ
+  10-04 11:18:38.023 - 10040 - REL GCM_WORK
+  10-04 11:19:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 11:19:00.004 - 1000 - REL *alarm*
+  10-04 11:20:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 11:20:00.007 - 1000 - REL *alarm*
+  10-04 11:21:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 11:21:00.006 - 1000 - REL *alarm*
+  10-04 11:22:00.012 - 1000 - ACQ *alarm* (partial)
+  10-04 11:22:00.014 - 1000 - REL *alarm*
+  10-04 11:22:11.743 - 1000 - ACQ *alarm* (partial)
+  10-04 11:22:11.756 - 10040 - ACQ NetworkLocationScanner (partial)
+  10-04 11:22:11.758 - 10040 - ACQ GmsAlarm:NetworkLocationScanner (partial)
+  10-04 11:22:11.764 - 10040 - ACQ CallbackRunner (partial)
+  10-04 11:22:11.766 - 1000 - REL *alarm*
+  10-04 11:22:11.769 - 10040 - REL GmsAlarm:NetworkLocationScanner
+  10-04 11:22:11.772 - 10040 - REL CallbackRunner
+  10-04 11:22:13.259 - 10040 - REL NetworkLocationScanner
+  10-04 11:22:13.264 - 10040 - ACQ NetworkLocationLocator (partial)
+  10-04 11:22:13.299 - 10040 - ACQ PendingIntentClient (partial)
+  10-04 11:22:13.304 - 10040 - ACQ GCoreFlp (partial)
+  10-04 11:22:13.308 - 10040 - REL PendingIntentClient
+  10-04 11:22:13.312 - 10040 - ACQ CallbackRunner (partial)
+  10-04 11:22:13.323 - 1000 - ACQ *location* (partial)
+  10-04 11:22:13.324 - 10040 - REL NetworkLocationLocator
+  10-04 11:22:13.325 - 10040 - REL CallbackRunner
+  10-04 11:22:13.326 - 1000 - REL *location*
+  10-04 11:22:13.328 - 1000 - ACQ *location* (partial)
+  10-04 11:22:13.329 - 1000 - REL *location*
+  10-04 11:22:13.332 - 10040 - REL GCoreFlp
+  10-04 11:22:13.334 - 1000 - ACQ *location* (partial)
+  10-04 11:22:13.335 - 1000 - REL *location*
+  10-04 11:22:13.335 - 1000 - ACQ *location* (partial)
+  10-04 11:22:13.337 - 1000 - REL *location*
+  10-04 11:23:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 11:23:00.008 - 1000 - REL *alarm*
+  10-04 11:23:28.408 - 10040 - ACQ GCM_READ (partial)
+  10-04 11:23:28.414 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:23:28.418 - 10040 - REL GCM_READ
+  10-04 11:23:28.435 - 10040 - REL GCM_WORK
+  10-04 11:23:28.438 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:23:28.467 - 10040 - ACQ *gms_scheduler*/c.g.a.g/c.g.a.c.s.ContextManagerLogsUploadBoundService (partial)
+  10-04 11:23:28.470 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:23:28.471 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:23:28.479 - 10040 - ACQ CMWakeLock (partial)
+  10-04 11:23:28.480 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:23:28.483 - 10040 - REL *gms_scheduler*/c.g.a.g/c.g.a.c.s.ContextManagerLogsUploadBoundService
+  10-04 11:23:28.485 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:23:28.510 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:23:28.512 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:23:28.513 - 10040 - REL CMWakeLock
+  10-04 11:23:28.519 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:24:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 11:24:00.008 - 1000 - REL *alarm*
+  10-04 11:25:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 11:25:00.009 - 1000 - REL *alarm*
+  10-04 11:25:01.295 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:25:01.297 - 1002 - REL bluetooth_timer
+  10-04 11:25:01.301 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:25:01.304 - 1002 - REL bluetooth_timer
+  10-04 11:25:01.307 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:25:01.309 - 1002 - REL bluetooth_timer
+  10-04 11:25:01.312 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:25:01.356 - 1002 - REL bluetooth_timer
+  10-04 11:25:01.359 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:25:01.361 - 1002 - REL bluetooth_timer
+  10-04 11:25:01.364 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:25:01.366 - 1002 - REL bluetooth_timer
+  10-04 11:25:01.369 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:25:01.371 - 1002 - REL bluetooth_timer
+  10-04 11:26:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 11:26:00.003 - 1000 - REL *alarm*
+  10-04 11:26:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 11:26:00.008 - 1000 - REL *alarm*
+  10-04 11:26:01.651 - 10040 - ACQ GCM_READ (partial)
+  10-04 11:26:01.657 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:26:01.660 - 10040 - REL GCM_READ
+  10-04 11:26:01.689 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 11:26:01.718 - 10040 - REL GCM_WORK
+  10-04 11:26:01.723 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:26:01.729 - 10044 - ACQ androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService (partial)
+  10-04 11:26:01.733 - 10040 - REL GOOGLE_C2DM
+  10-04 11:26:01.735 - 10044 - REL androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService
+  10-04 11:26:01.746 - 10040 - REL GCM_WORK
+  10-04 11:27:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 11:27:00.004 - 1000 - REL *alarm*
+  10-04 11:28:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 11:28:00.005 - 1000 - REL *alarm*
+  10-04 11:28:16.820 - 1000 - ACQ *alarm* (partial)
+  10-04 11:28:16.829 - 1000 - ACQ NetworkStats (partial)
+  10-04 11:28:16.865 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain (partial)
+  10-04 11:28:16.955 - 1000 - REL NetworkStats
+  10-04 11:28:16.963 - 1000 - REL *alarm*
+  10-04 11:28:17.509 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.b.PhoneskyJobServiceBackground (partial)
+  10-04 11:28:17.695 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.b.PhoneskyJobServiceBackground
+  10-04 11:28:17.731 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.b.PhoneskyJobServiceBackground (partial)
+  10-04 11:28:18.913 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.b.PhoneskyJobServiceBackground (partial)
+  10-04 11:28:18.924 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.b.PhoneskyJobServiceBackground (partial)
+  10-04 11:28:19.534 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.b.PhoneskyJobServiceBackground
+  10-04 11:28:19.938 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain (partial)
+  10-04 11:28:20.812 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.b.PhoneskyJobServiceBackground
+  10-04 11:28:20.899 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.b.PhoneskyJobServiceBackground
+  10-04 11:28:21.248 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain (partial)
+  10-04 11:28:25.709 - 10040 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation (partial)
+  10-04 11:28:25.721 - 10040 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation
+  10-04 11:28:26.293 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain
+  10-04 11:28:30.855 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain
+  10-04 11:28:31.425 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain
+  10-04 11:28:58.496 - 1000 - ACQ *alarm* (partial)
+  10-04 11:28:58.500 - 1000 - REL *alarm*
+  10-04 11:28:58.543 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain (partial)
+  10-04 11:28:59.172 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain
+  10-04 11:29:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 11:29:00.008 - 1000 - REL *alarm*
+  10-04 11:29:40.977 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain (partial)
+  10-04 11:29:41.234 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain
+  10-04 11:30:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 11:30:00.009 - 1000 - REL *alarm*
+  10-04 11:30:51.842 - 10040 - ACQ GCM_READ (partial)
+  10-04 11:30:51.844 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:30:51.845 - 10040 - REL GCM_READ
+  10-04 11:30:51.855 - 10040 - REL GCM_WORK
+  10-04 11:31:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 11:31:00.009 - 1000 - REL *alarm*
+  10-04 11:32:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 11:32:00.008 - 1000 - REL *alarm*
+  10-04 11:32:37.551 - 1000 - ACQ *alarm* (partial)
+  10-04 11:32:37.560 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 11:32:37.573 - 1000 - REL *alarm*
+  10-04 11:32:37.578 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 11:32:37.584 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 11:32:37.876 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 11:33:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 11:33:00.004 - 1000 - REL *alarm*
+  10-04 11:34:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 11:34:00.007 - 1000 - REL *alarm*
+  10-04 11:34:32.107 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:34:32.112 - 1002 - REL bluetooth_timer
+  10-04 11:34:32.120 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:34:32.121 - 1002 - REL bluetooth_timer
+  10-04 11:34:32.123 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:34:32.124 - 1002 - REL bluetooth_timer
+  10-04 11:34:32.126 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:34:32.127 - 1002 - REL bluetooth_timer
+  10-04 11:34:32.129 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:34:32.130 - 1002 - REL bluetooth_timer
+  10-04 11:34:32.132 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:34:32.132 - 1002 - REL bluetooth_timer
+  10-04 11:34:32.135 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:34:32.136 - 1002 - REL bluetooth_timer
+  10-04 11:35:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 11:35:00.003 - 1000 - REL *alarm*
+  10-04 11:35:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 11:35:00.009 - 1000 - REL *alarm*
+  10-04 11:35:42.412 - 10040 - ACQ GCM_READ (partial)
+  10-04 11:35:42.416 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:35:42.418 - 10040 - REL GCM_READ
+  10-04 11:35:42.431 - 10040 - REL GCM_WORK
+  10-04 11:36:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 11:36:00.005 - 1000 - REL *alarm*
+  10-04 11:36:02.452 - 1000 - ACQ *alarm* (partial)
+  10-04 11:36:02.496 - 1000 - REL *alarm*
+  10-04 11:36:02.498 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain (partial)
+  10-04 11:36:02.506 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:36:02.530 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.s.PlatformStatsCollectorService (partial)
+  10-04 11:36:02.557 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:36:02.569 - 10040 - REL *gms_scheduler*/c.g.a.g/.s.PlatformStatsCollectorService
+  10-04 11:36:02.583 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:36:02.661 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:36:02.662 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:36:02.668 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:36:03.138 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain
+  10-04 11:37:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 11:37:00.008 - 1000 - REL *alarm*
+  10-04 11:38:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 11:38:00.007 - 1000 - REL *alarm*
+  10-04 11:39:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 11:39:00.005 - 1000 - REL *alarm*
+  10-04 11:40:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 11:40:00.005 - 1000 - REL *alarm*
+  10-04 11:40:00.945 - 1000 - ACQ *alarm* (partial)
+  10-04 11:40:00.949 - 1000 - REL *alarm*
+  10-04 11:40:00.989 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain (partial)
+  10-04 11:40:01.281 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain
+  10-04 11:40:32.925 - 10040 - ACQ GCM_READ (partial)
+  10-04 11:40:32.928 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:40:32.929 - 10040 - REL GCM_READ
+  10-04 11:40:32.944 - 10040 - REL GCM_WORK
+  10-04 11:41:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 11:41:00.011 - 1000 - REL *alarm*
+  10-04 11:41:00.018 - 1000 - ACQ *alarm* (partial)
+  10-04 11:41:00.019 - 1000 - REL *alarm*
+  10-04 11:42:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 11:42:00.010 - 1000 - REL *alarm*
+  10-04 11:42:00.017 - 1000 - ACQ *alarm* (partial)
+  10-04 11:42:00.018 - 1000 - REL *alarm*
+  10-04 11:43:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 11:43:00.007 - 1000 - REL *alarm*
+  10-04 11:44:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 11:44:00.009 - 1000 - REL *alarm*
+  10-04 11:45:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 11:45:00.009 - 1000 - REL *alarm*
+  10-04 11:45:23.439 - 10040 - ACQ GCM_READ (partial)
+  10-04 11:45:23.444 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:45:23.448 - 10040 - REL GCM_READ
+  10-04 11:45:23.462 - 10040 - REL GCM_WORK
+  10-04 11:46:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 11:46:00.007 - 1000 - REL *alarm*
+  10-04 11:46:09.884 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:46:09.886 - 1002 - REL bluetooth_timer
+  10-04 11:46:17.344 - 1000 - ACQ *alarm* (partial)
+  10-04 11:46:17.347 - 1000 - ACQ com.android.server.stats.StatsCompanionService.PullingAlarmListener (partial)
+  10-04 11:46:17.351 - 1000 - REL *alarm*
+  10-04 11:46:17.356 - 1000 - ACQ NetworkStats (partial)
+  10-04 11:46:17.417 - 1000 - REL NetworkStats
+  10-04 11:46:17.430 - 1000 - ACQ NetworkStats (partial)
+  10-04 11:46:17.464 - 1000 - REL NetworkStats
+  10-04 11:46:17.564 - 1000 - REL com.android.server.stats.StatsCompanionService.PullingAlarmListener
+  10-04 11:46:23.296 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:46:23.297 - 1002 - REL bluetooth_timer
+  10-04 11:46:23.301 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:46:23.302 - 1002 - REL bluetooth_timer
+  10-04 11:46:23.305 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:46:23.306 - 1002 - REL bluetooth_timer
+  10-04 11:46:23.309 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:46:23.356 - 1002 - REL bluetooth_timer
+  10-04 11:46:23.360 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:46:23.360 - 1002 - REL bluetooth_timer
+  10-04 11:46:23.363 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:46:23.364 - 1002 - REL bluetooth_timer
+  10-04 11:46:23.366 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:46:23.367 - 1002 - REL bluetooth_timer
+  10-04 11:46:43.969 - 1000 - ACQ *alarm* (partial)
+  10-04 11:46:43.973 - 1000 - REL *alarm*
+  10-04 11:47:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 11:47:00.003 - 1000 - REL *alarm*
+  10-04 11:47:37.870 - 1000 - ACQ *alarm* (partial)
+  10-04 11:47:37.896 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 11:47:37.905 - 1000 - REL *alarm*
+  10-04 11:47:37.917 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 11:47:37.925 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 11:47:38.243 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 11:48:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 11:48:00.006 - 1000 - REL *alarm*
+  10-04 11:49:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 11:49:00.003 - 1000 - REL *alarm*
+  10-04 11:50:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 11:50:00.006 - 1000 - REL *alarm*
+  10-04 11:50:13.943 - 10040 - ACQ GCM_READ (partial)
+  10-04 11:50:13.950 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:50:13.952 - 10040 - REL GCM_READ
+  10-04 11:50:13.969 - 10040 - REL GCM_WORK
+  10-04 11:51:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 11:51:00.009 - 1000 - REL *alarm*
+  10-04 11:52:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 11:52:00.007 - 1000 - REL *alarm*
+  10-04 11:52:11.986 - 1000 - ACQ *alarm* (partial)
+  10-04 11:52:11.989 - 1000 - ACQ NetworkStats (partial)
+  10-04 11:52:11.995 - 10040 - ACQ CMWakeLock (partial)
+  10-04 11:52:12.034 - 1000 - REL NetworkStats
+  10-04 11:52:12.074 - 1000 - ACQ *job*/c.g.a.k/a.w.i.b.s.SystemJobService (partial)
+  10-04 11:52:12.079 - 1000 - ACQ *job*/c.g.a.k/a.w.i.b.s.SystemJobService (partial)
+  10-04 11:52:12.082 - 1000 - ACQ *job*/c.g.a.k/a.w.i.b.s.SystemJobService (partial)
+  10-04 11:52:12.085 - 1000 - ACQ *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService (partial)
+  10-04 11:52:12.090 - 1000 - REL *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService
+  10-04 11:52:12.105 - 10040 - REL CMWakeLock
+  10-04 11:52:12.116 - 1000 - REL *alarm*
+  10-04 11:52:12.117 - 1000 - ACQ *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain (partial)
+  10-04 11:52:12.175 - 1000 - ACQ *job*/c.g.a.p/.InstalledAppJobService (partial)
+  10-04 11:52:12.262 - 1000 - REL *job*/c.g.a.p/.InstalledAppJobService
+  10-04 11:52:12.396 - 1000 - REL *job*/c.a.v/c.g.a.f.s.p.m.PhoneskyJobServiceMain
+  10-04 11:52:12.579 - 1000 - REL *job*/c.g.a.k/a.w.i.b.s.SystemJobService
+  10-04 11:52:12.589 - 1000 - REL *job*/c.g.a.k/a.w.i.b.s.SystemJobService
+  10-04 11:52:12.618 - 1000 - REL *job*/c.g.a.k/a.w.i.b.s.SystemJobService
+  10-04 11:52:13.237 - 1000 - ACQ *alarm* (partial)
+  10-04 11:52:13.244 - 10040 - ACQ GmsAlarm:NetworkLocationScanner (partial)
+  10-04 11:52:13.247 - 10040 - ACQ NetworkLocationScanner (partial)
+  10-04 11:52:13.250 - 1000 - REL *alarm*
+  10-04 11:52:13.253 - 10040 - ACQ CallbackRunner (partial)
+  10-04 11:52:13.254 - 10040 - REL GmsAlarm:NetworkLocationScanner
+  10-04 11:52:13.263 - 10040 - REL CallbackRunner
+  10-04 11:52:14.741 - 10040 - REL NetworkLocationScanner
+  10-04 11:52:14.745 - 10040 - ACQ NetworkLocationLocator (partial)
+  10-04 11:52:14.775 - 10040 - ACQ PendingIntentClient (partial)
+  10-04 11:52:14.783 - 10040 - ACQ GCoreFlp (partial)
+  10-04 11:52:14.785 - 10040 - REL PendingIntentClient
+  10-04 11:52:14.798 - 1000 - ACQ *location* (partial)
+  10-04 11:52:14.799 - 1000 - ACQ *location* (partial)
+  10-04 11:52:14.799 - 1000 - REL *location*
+  10-04 11:52:14.801 - 1000 - REL *location*
+  10-04 11:52:14.804 - 10040 - ACQ CallbackRunner (partial)
+  10-04 11:52:14.805 - 1000 - ACQ *location* (partial)
+  10-04 11:52:14.806 - 1000 - ACQ *location* (partial)
+  10-04 11:52:14.807 - 1000 - REL *location*
+  10-04 11:52:14.807 - 1000 - REL *location*
+  10-04 11:52:14.812 - 10040 - REL NetworkLocationLocator
+  10-04 11:52:14.813 - 10040 - REL CallbackRunner
+  10-04 11:52:14.815 - 10040 - REL GCoreFlp
+  10-04 11:53:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 11:53:00.006 - 1000 - REL *alarm*
+  10-04 11:54:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 11:54:00.005 - 1000 - REL *alarm*
+  10-04 11:55:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 11:55:00.005 - 1000 - REL *alarm*
+  10-04 11:55:04.349 - 10040 - ACQ GCM_READ (partial)
+  10-04 11:55:04.352 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:55:04.353 - 10040 - REL GCM_READ
+  10-04 11:55:04.362 - 10040 - REL GCM_WORK
+  10-04 11:55:04.366 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:55:04.391 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.s.PlatformStatsCollectorService (partial)
+  10-04 11:55:04.432 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-04 11:55:04.455 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:55:04.458 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:55:04.466 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:55:04.467 - 10040 - REL *gms_scheduler*/c.g.a.g/.s.PlatformStatsCollectorService
+  10-04 11:55:04.469 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:55:04.479 - 10040 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-04 11:55:04.489 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:55:04.492 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:55:04.510 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.k.JobService (partial)
+  10-04 11:55:04.541 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:55:04.542 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:55:04.566 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService (partial)
+  10-04 11:55:04.596 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:55:04.603 - 10040 - REL *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService
+  10-04 11:55:04.608 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:55:04.630 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:55:04.635 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:55:04.667 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-04 11:55:04.698 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:55:04.806 - 10040 - REL *gms_scheduler*/c.g.a.g/.k.JobService
+  10-04 11:55:04.811 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:55:04.829 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:55:04.831 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:55:04.839 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:55:05.343 - 10040 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-04 11:55:05.347 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:55:05.363 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:55:05.365 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 11:55:05.369 - 10040 - REL *gms_scheduler*:internal
+  10-04 11:56:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 11:56:00.005 - 1000 - REL *alarm*
+  10-04 11:56:02.518 - 10040 - ACQ GCM_READ (partial)
+  10-04 11:56:02.524 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:56:02.528 - 10040 - REL GCM_READ
+  10-04 11:56:02.561 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 11:56:02.616 - 10040 - REL GCM_WORK
+  10-04 11:56:02.619 - 10040 - ACQ GCM_WORK (partial)
+  10-04 11:56:02.623 - 10044 - ACQ androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService (partial)
+  10-04 11:56:02.627 - 10040 - REL GOOGLE_C2DM
+  10-04 11:56:02.637 - 10044 - REL androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService
+  10-04 11:56:02.646 - 10040 - REL GCM_WORK
+  10-04 11:57:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 11:57:00.004 - 1000 - REL *alarm*
+  10-04 11:58:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 11:58:00.007 - 1000 - REL *alarm*
+  10-04 11:59:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 11:59:00.007 - 1000 - REL *alarm*
+  10-04 11:59:40.994 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:59:40.997 - 1002 - REL bluetooth_timer
+  10-04 11:59:41.000 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:59:41.004 - 1002 - REL bluetooth_timer
+  10-04 11:59:41.009 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:59:41.011 - 1002 - REL bluetooth_timer
+  10-04 11:59:41.014 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:59:41.108 - 1002 - REL bluetooth_timer
+  10-04 11:59:41.110 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:59:41.111 - 1002 - REL bluetooth_timer
+  10-04 11:59:41.113 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:59:41.114 - 1002 - REL bluetooth_timer
+  10-04 11:59:41.116 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 11:59:41.117 - 1002 - REL bluetooth_timer
+  10-04 12:00:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 12:00:00.003 - 1000 - REL *alarm*
+  10-04 12:00:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 12:00:00.009 - 1000 - REL *alarm*
+  10-04 12:01:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 12:01:00.002 - 1000 - REL *alarm*
+  10-04 12:01:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 12:01:00.007 - 1000 - REL *alarm*
+  10-04 12:02:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 12:02:00.004 - 1000 - REL *alarm*
+  10-04 12:02:02.638 - 1000 - ACQ *alarm* (partial)
+  10-04 12:02:02.644 - 1000 - REL *alarm*
+  10-04 12:02:02.650 - 10040 - ACQ GCM_HB_ALARM (partial)
+  10-04 12:02:02.655 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:02:02.658 - 10040 - REL GCM_HB_ALARM
+  10-04 12:02:02.660 - 10040 - REL GCM_WORK
+  10-04 12:02:38.244 - 1000 - ACQ *alarm* (partial)
+  10-04 12:02:38.266 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 12:02:38.278 - 1000 - REL *alarm*
+  10-04 12:02:38.287 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 12:02:38.293 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 12:02:38.793 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 12:03:00.010 - 1000 - ACQ *alarm* (partial)
+  10-04 12:03:00.011 - 1000 - REL *alarm*
+  10-04 12:03:02.665 - 1000 - ACQ *alarm* (partial)
+  10-04 12:03:02.671 - 1000 - REL *alarm*
+  10-04 12:03:02.681 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:03:02.684 - 10040 - ACQ GCM_READ (partial)
+  10-04 12:03:02.687 - 10040 - ACQ GCM_CONN_ALARM (partial)
+  10-04 12:03:02.690 - 10040 - REL GCM_READ
+  10-04 12:03:02.692 - 10040 - REL GCM_WORK
+  10-04 12:03:02.792 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:03:02.798 - 10040 - REL GCM_WORK
+  10-04 12:03:02.800 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:03:02.804 - 10040 - REL GCM_WORK
+  10-04 12:03:02.930 - 10040 - ACQ GCM_READ (partial)
+  10-04 12:03:02.932 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:03:02.933 - 10040 - REL GCM_READ
+  10-04 12:03:02.936 - 10040 - ACQ GCM_READ (partial)
+  10-04 12:03:02.938 - 10040 - REL GCM_READ
+  10-04 12:03:02.956 - 10040 - REL GCM_CONN_ALARM
+  10-04 12:03:02.965 - 10040 - REL GCM_WORK
+  10-04 12:04:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 12:04:00.005 - 1000 - REL *alarm*
+  10-04 12:05:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 12:05:00.009 - 1000 - REL *alarm*
+  10-04 12:06:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 12:06:00.004 - 1000 - REL *alarm*
+  10-04 12:07:00.009 - 1000 - ACQ *alarm* (partial)
+  10-04 12:07:00.013 - 1000 - REL *alarm*
+  10-04 12:07:53.083 - 10040 - ACQ GCM_READ (partial)
+  10-04 12:07:53.089 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:07:53.091 - 10040 - REL GCM_READ
+  10-04 12:07:53.103 - 10040 - REL GCM_WORK
+  10-04 12:08:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 12:08:00.006 - 1000 - REL *alarm*
+  10-04 12:09:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 12:09:00.011 - 1000 - REL *alarm*
+  10-04 12:09:00.020 - 1000 - ACQ *alarm* (partial)
+  10-04 12:09:00.022 - 1000 - REL *alarm*
+  10-04 12:10:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 12:10:00.010 - 1000 - REL *alarm*
+  10-04 12:11:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 12:11:00.007 - 1000 - REL *alarm*
+  10-04 12:12:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 12:12:00.011 - 1000 - REL *alarm*
+  10-04 12:12:43.681 - 10040 - ACQ GCM_READ (partial)
+  10-04 12:12:43.688 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:12:43.691 - 10040 - REL GCM_READ
+  10-04 12:12:43.703 - 10040 - REL GCM_WORK
+  10-04 12:13:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 12:13:00.007 - 1000 - REL *alarm*
+  10-04 12:13:56.351 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:13:56.353 - 1002 - REL bluetooth_timer
+  10-04 12:13:56.356 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:13:56.361 - 1002 - REL bluetooth_timer
+  10-04 12:13:56.364 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:13:56.365 - 1002 - REL bluetooth_timer
+  10-04 12:13:56.368 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:13:56.369 - 1002 - REL bluetooth_timer
+  10-04 12:13:56.372 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:13:56.373 - 1002 - REL bluetooth_timer
+  10-04 12:13:56.375 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:13:56.377 - 1002 - REL bluetooth_timer
+  10-04 12:13:56.379 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:13:56.380 - 1002 - REL bluetooth_timer
+  10-04 12:14:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 12:14:00.008 - 1000 - REL *alarm*
+  10-04 12:15:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 12:15:00.009 - 1000 - REL *alarm*
+  10-04 12:15:00.016 - 1000 - ACQ *alarm* (partial)
+  10-04 12:15:00.017 - 1000 - REL *alarm*
+  10-04 12:16:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 12:16:00.003 - 1000 - REL *alarm*
+  10-04 12:16:09.874 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:16:09.875 - 1002 - REL bluetooth_timer
+  10-04 12:17:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 12:17:00.009 - 1000 - REL *alarm*
+  10-04 12:17:34.087 - 10040 - ACQ GCM_READ (partial)
+  10-04 12:17:34.090 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:17:34.092 - 10040 - REL GCM_READ
+  10-04 12:17:34.100 - 10040 - REL GCM_WORK
+  10-04 12:17:38.798 - 1000 - ACQ *alarm* (partial)
+  10-04 12:17:38.813 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 12:17:38.830 - 1000 - REL *alarm*
+  10-04 12:17:38.837 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 12:17:38.844 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 12:17:39.092 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 12:18:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 12:18:00.009 - 1000 - REL *alarm*
+  10-04 12:19:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 12:19:00.005 - 1000 - REL *alarm*
+  10-04 12:20:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 12:20:00.005 - 1000 - REL *alarm*
+  10-04 12:21:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 12:21:00.008 - 1000 - REL *alarm*
+  10-04 12:22:00.009 - 1000 - ACQ *alarm* (partial)
+  10-04 12:22:00.011 - 1000 - REL *alarm*
+  10-04 12:22:14.706 - 1000 - ACQ *alarm* (partial)
+  10-04 12:22:14.719 - 10040 - ACQ GmsAlarm:NetworkLocationScanner (partial)
+  10-04 12:22:14.721 - 10040 - ACQ NetworkLocationScanner (partial)
+  10-04 12:22:14.726 - 10040 - ACQ CallbackRunner (partial)
+  10-04 12:22:14.727 - 1000 - REL *alarm*
+  10-04 12:22:14.730 - 10040 - REL GmsAlarm:NetworkLocationScanner
+  10-04 12:22:14.734 - 10040 - REL CallbackRunner
+  10-04 12:22:16.222 - 10040 - REL NetworkLocationScanner
+  10-04 12:22:16.228 - 10040 - ACQ NetworkLocationLocator (partial)
+  10-04 12:22:16.266 - 10040 - ACQ PendingIntentClient (partial)
+  10-04 12:22:16.272 - 10040 - ACQ GCoreFlp (partial)
+  10-04 12:22:16.273 - 10040 - REL PendingIntentClient
+  10-04 12:22:16.289 - 1000 - ACQ *location* (partial)
+  10-04 12:22:16.290 - 1000 - ACQ *location* (partial)
+  10-04 12:22:16.292 - 1000 - REL *location*
+  10-04 12:22:16.294 - 1000 - REL *location*
+  10-04 12:22:16.296 - 10040 - REL GCoreFlp
+  10-04 12:22:16.296 - 10040 - ACQ CallbackRunner (partial)
+  10-04 12:22:16.297 - 1000 - ACQ *location* (partial)
+  10-04 12:22:16.297 - 1000 - ACQ *location* (partial)
+  10-04 12:22:16.299 - 1000 - REL *location*
+  10-04 12:22:16.299 - 1000 - REL *location*
+  10-04 12:22:16.303 - 10040 - REL NetworkLocationLocator
+  10-04 12:22:16.304 - 10040 - REL CallbackRunner
+  10-04 12:22:24.597 - 10040 - ACQ GCM_READ (partial)
+  10-04 12:22:24.600 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:22:24.603 - 10040 - REL GCM_READ
+  10-04 12:22:24.616 - 10040 - REL GCM_WORK
+  10-04 12:22:24.617 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 12:22:24.625 - 10040 - REL *gms_scheduler*:internal
+  10-04 12:23:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 12:23:00.006 - 1000 - REL *alarm*
+  10-04 12:24:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 12:24:00.008 - 1000 - REL *alarm*
+  10-04 12:25:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 12:25:00.005 - 1000 - REL *alarm*
+  10-04 12:26:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 12:26:00.006 - 1000 - REL *alarm*
+  10-04 12:26:03.329 - 10040 - ACQ GCM_READ (partial)
+  10-04 12:26:03.334 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:26:03.336 - 10040 - REL GCM_READ
+  10-04 12:26:03.343 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 12:26:03.387 - 10044 - ACQ androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService (partial)
+  10-04 12:26:03.391 - 10040 - REL GOOGLE_C2DM
+  10-04 12:26:03.395 - 10040 - REL GCM_WORK
+  10-04 12:26:03.397 - 10044 - REL androidx.core:wake:com.google.android.apps.mediashell/.ChromecastGcmListenerService
+  10-04 12:26:03.402 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:26:03.408 - 10040 - REL GCM_WORK
+  10-04 12:27:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 12:27:00.009 - 1000 - REL *alarm*
+  10-04 12:28:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 12:28:00.007 - 1000 - REL *alarm*
+  10-04 12:28:42.668 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:28:42.672 - 1002 - REL bluetooth_timer
+  10-04 12:28:42.678 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:28:42.679 - 1002 - REL bluetooth_timer
+  10-04 12:28:42.681 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:28:42.682 - 1002 - REL bluetooth_timer
+  10-04 12:28:42.684 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:28:42.736 - 1002 - REL bluetooth_timer
+  10-04 12:28:42.739 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:28:42.739 - 1002 - REL bluetooth_timer
+  10-04 12:28:42.742 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:28:42.744 - 1002 - REL bluetooth_timer
+  10-04 12:28:42.748 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:28:42.749 - 1002 - REL bluetooth_timer
+  10-04 12:29:00.005 - 1000 - ACQ *alarm* (partial)
+  10-04 12:29:00.008 - 1000 - REL *alarm*
+  10-04 12:30:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 12:30:00.010 - 1000 - REL *alarm*
+  10-04 12:30:53.633 - 10040 - ACQ GCM_READ (partial)
+  10-04 12:30:53.641 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:30:53.647 - 10040 - REL GCM_READ
+  10-04 12:30:53.663 - 10040 - REL GCM_WORK
+  10-04 12:31:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 12:31:00.006 - 1000 - REL *alarm*
+  10-04 12:32:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 12:32:00.009 - 1000 - REL *alarm*
+  10-04 12:32:39.092 - 1000 - ACQ *alarm* (partial)
+  10-04 12:32:39.112 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 12:32:39.119 - 1000 - REL *alarm*
+  10-04 12:32:39.127 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 12:32:39.132 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 12:32:39.626 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 12:33:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 12:33:00.011 - 1000 - REL *alarm*
+  10-04 12:34:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 12:34:00.010 - 1000 - REL *alarm*
+  10-04 12:35:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 12:35:00.006 - 1000 - REL *alarm*
+  10-04 12:35:44.070 - 10040 - ACQ GCM_READ (partial)
+  10-04 12:35:44.076 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:35:44.079 - 10040 - REL GCM_READ
+  10-04 12:35:44.099 - 10040 - REL GCM_WORK
+  10-04 12:36:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 12:36:00.006 - 1000 - REL *alarm*
+  10-04 12:37:00.010 - 1000 - ACQ *alarm* (partial)
+  10-04 12:37:00.012 - 1000 - REL *alarm*
+  10-04 12:38:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 12:38:00.003 - 1000 - REL *alarm*
+  10-04 12:38:57.392 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:38:57.395 - 1002 - REL bluetooth_timer
+  10-04 12:38:57.398 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:38:57.399 - 1002 - REL bluetooth_timer
+  10-04 12:38:57.402 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:38:57.403 - 1002 - REL bluetooth_timer
+  10-04 12:38:57.406 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:38:57.487 - 1002 - REL bluetooth_timer
+  10-04 12:38:57.490 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:38:57.491 - 1002 - REL bluetooth_timer
+  10-04 12:38:57.493 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:38:57.494 - 1002 - REL bluetooth_timer
+  10-04 12:38:57.497 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:38:57.497 - 1002 - REL bluetooth_timer
+  10-04 12:39:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 12:39:00.005 - 1000 - REL *alarm*
+  10-04 12:39:01.399 - 1000 - ACQ *alarm* (partial)
+  10-04 12:39:01.400 - 1000 - ACQ NetworkStats (partial)
+  10-04 12:39:01.469 - 1000 - REL NetworkStats
+  10-04 12:39:01.472 - 1000 - REL *alarm*
+  10-04 12:40:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 12:40:00.004 - 1000 - REL *alarm*
+  10-04 12:40:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 12:40:00.008 - 1000 - REL *alarm*
+  10-04 12:40:34.649 - 10040 - ACQ GCM_READ (partial)
+  10-04 12:40:34.651 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:40:34.652 - 10040 - REL GCM_READ
+  10-04 12:40:34.661 - 10040 - REL GCM_WORK
+  10-04 12:40:58.350 - 1000 - ACQ *alarm* (partial)
+  10-04 12:40:58.354 - 1000 - REL *alarm*
+  10-04 12:40:58.389 - 1000 - ACQ *job*/c.g.a.k/a.w.i.b.s.SystemJobService (partial)
+  10-04 12:40:58.419 - 10036 - ACQ SyncManager: Scheduling in parallel (partial)
+  10-04 12:40:58.425 - 10036 - ACQ SyncManager: Syncing (partial)
+  10-04 12:40:58.434 - 10036 - REL SyncManager: Syncing
+  10-04 12:40:58.460 - 1000 - REL *job*/c.g.a.k/a.w.i.b.s.SystemJobService
+  10-04 12:40:58.593 - 10036 - REL SyncManager: Scheduling in parallel
+  10-04 12:41:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 12:41:00.008 - 1000 - REL *alarm*
+  10-04 12:42:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 12:42:00.006 - 1000 - REL *alarm*
+  10-04 12:43:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 12:43:00.006 - 1000 - REL *alarm*
+  10-04 12:44:00.010 - 1000 - ACQ *alarm* (partial)
+  10-04 12:44:00.011 - 1000 - REL *alarm*
+  10-04 12:45:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 12:45:00.006 - 1000 - REL *alarm*
+  10-04 12:45:25.167 - 10040 - ACQ GCM_READ (partial)
+  10-04 12:45:25.175 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:45:25.180 - 10040 - REL GCM_READ
+  10-04 12:45:25.192 - 10040 - REL GCM_WORK
+  10-04 12:45:41.156 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:45:41.159 - 1002 - REL bluetooth_timer
+  10-04 12:45:41.169 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:45:41.170 - 1002 - REL bluetooth_timer
+  10-04 12:45:41.173 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:45:41.174 - 1002 - REL bluetooth_timer
+  10-04 12:45:41.212 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:45:41.221 - 1002 - REL bluetooth_timer
+  10-04 12:45:41.229 - 10040 - ACQ CallbackRunner (partial)
+  10-04 12:45:41.244 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:45:41.246 - 1002 - REL bluetooth_timer
+  10-04 12:45:41.391 - 10040 - REL CallbackRunner
+  10-04 12:45:41.451 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:45:41.452 - 1002 - REL bluetooth_timer
+  10-04 12:45:42.678 - 10040 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation (partial)
+  10-04 12:45:42.682 - 10040 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation
+  10-04 12:45:51.177 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:45:51.181 - 1002 - REL bluetooth_timer
+  10-04 12:46:00.008 - 1000 - ACQ *alarm* (partial)
+  10-04 12:46:00.011 - 1000 - REL *alarm*
+  10-04 12:46:02.788 - 10040 - ACQ IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation (partial)
+  10-04 12:46:02.796 - 10040 - REL IntentOp:.c.b.BackgroundBroadcastReceiverSupport$PersistentReceiverIntentOperation
+  10-04 12:46:09.927 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:46:09.928 - 1002 - REL bluetooth_timer
+  10-04 12:46:17.339 - 1000 - ACQ *alarm* (partial)
+  10-04 12:46:17.341 - 1000 - ACQ com.android.server.stats.StatsCompanionService.PullingAlarmListener (partial)
+  10-04 12:46:17.347 - 1000 - REL *alarm*
+  10-04 12:46:17.352 - 1000 - ACQ NetworkStats (partial)
+  10-04 12:46:17.396 - 1000 - REL NetworkStats
+  10-04 12:46:17.455 - 1000 - REL com.android.server.stats.StatsCompanionService.PullingAlarmListener
+  10-04 12:47:00.013 - 1000 - ACQ *alarm* (partial)
+  10-04 12:47:00.015 - 1000 - REL *alarm*
+  10-04 12:47:21.209 - 1000 - ACQ *alarm* (partial)
+  10-04 12:47:21.217 - 1000 - ACQ NetworkStats (partial)
+  10-04 12:47:21.265 - 1000 - ACQ *job*/c.g.a.i.l/c.g.a.a.i.l.d.s.SuperpacksBackgroundJobService (partial)
+  10-04 12:47:21.267 - 1000 - REL NetworkStats
+  10-04 12:47:21.268 - 1000 - ACQ *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService (partial)
+  10-04 12:47:21.273 - 1000 - REL *job*/c.g.a.k/c.g.a.a.t.s.p.UpdateFeatureIdsJobService
+  10-04 12:47:21.277 - 1000 - REL *alarm*
+  10-04 12:47:21.294 - 1000 - REL *job*/c.g.a.i.l/c.g.a.a.i.l.d.s.SuperpacksBackgroundJobService
+  10-04 12:47:39.615 - 1000 - ACQ *alarm* (partial)
+  10-04 12:47:39.643 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 12:47:39.657 - 1000 - REL *alarm*
+  10-04 12:47:39.667 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 12:47:39.678 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 12:47:39.969 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 12:48:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 12:48:00.007 - 1000 - REL *alarm*
+  10-04 12:49:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 12:49:00.009 - 1000 - REL *alarm*
+  10-04 12:49:32.563 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:49:32.565 - 1002 - REL bluetooth_timer
+  10-04 12:49:32.569 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:49:32.571 - 1002 - REL bluetooth_timer
+  10-04 12:49:32.576 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:49:32.578 - 1002 - REL bluetooth_timer
+  10-04 12:49:32.581 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:49:32.582 - 1002 - REL bluetooth_timer
+  10-04 12:49:32.584 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:49:32.585 - 1002 - REL bluetooth_timer
+  10-04 12:50:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 12:50:00.005 - 1000 - REL *alarm*
+  10-04 12:50:15.671 - 10040 - ACQ GCM_READ (partial)
+  10-04 12:50:15.675 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:50:15.677 - 10040 - REL GCM_READ
+  10-04 12:50:15.692 - 10040 - REL GCM_WORK
+  10-04 12:51:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 12:51:00.008 - 1000 - REL *alarm*
+  10-04 12:52:00.007 - 1000 - ACQ *alarm* (partial)
+  10-04 12:52:00.009 - 1000 - REL *alarm*
+  10-04 12:52:16.204 - 1000 - ACQ *alarm* (partial)
+  10-04 12:52:16.211 - 10040 - ACQ GmsAlarm:NetworkLocationScanner (partial)
+  10-04 12:52:16.213 - 10040 - ACQ NetworkLocationScanner (partial)
+  10-04 12:52:16.219 - 10040 - ACQ CallbackRunner (partial)
+  10-04 12:52:16.221 - 10040 - REL GmsAlarm:NetworkLocationScanner
+  10-04 12:52:16.227 - 1000 - REL *alarm*
+  10-04 12:52:16.230 - 10040 - REL CallbackRunner
+  10-04 12:52:17.700 - 10040 - REL NetworkLocationScanner
+  10-04 12:52:17.707 - 10040 - ACQ NetworkLocationLocator (partial)
+  10-04 12:52:17.732 - 10040 - ACQ PendingIntentClient (partial)
+  10-04 12:52:17.737 - 10040 - REL PendingIntentClient
+  10-04 12:52:17.737 - 10040 - ACQ GCoreFlp (partial)
+  10-04 12:52:17.749 - 10040 - ACQ CallbackRunner (partial)
+  10-04 12:52:17.760 - 10040 - REL GCoreFlp
+  10-04 12:52:17.761 - 10040 - REL NetworkLocationLocator
+  10-04 12:52:17.763 - 1000 - ACQ *location* (partial)
+  10-04 12:52:17.764 - 1000 - REL *location*
+  10-04 12:52:17.765 - 10040 - REL CallbackRunner
+  10-04 12:52:17.765 - 1000 - ACQ *location* (partial)
+  10-04 12:52:17.767 - 1000 - REL *location*
+  10-04 12:52:17.770 - 1000 - ACQ *location* (partial)
+  10-04 12:52:17.772 - 1000 - ACQ *location* (partial)
+  10-04 12:52:17.773 - 1000 - REL *location*
+  10-04 12:52:17.774 - 1000 - REL *location*
+  10-04 12:53:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 12:53:00.005 - 1000 - REL *alarm*
+  10-04 12:54:00.006 - 1000 - ACQ *alarm* (partial)
+  10-04 12:54:00.014 - 1000 - REL *alarm*
+  10-04 12:55:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 12:55:00.006 - 1000 - REL *alarm*
+  10-04 12:55:06.285 - 10040 - ACQ GCM_READ (partial)
+  10-04 12:55:06.293 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:55:06.296 - 10040 - REL GCM_READ
+  10-04 12:55:06.314 - 10040 - REL GCM_WORK
+  10-04 12:55:06.316 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 12:55:06.350 - 10040 - ACQ *gms_scheduler*/c.g.a.g/c.g.a.c.s.ContextManagerLogsUploadBoundService (partial)
+  10-04 12:55:06.364 - 10040 - ACQ CMWakeLock (partial)
+  10-04 12:55:06.377 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-04 12:55:06.394 - 10040 - REL CMWakeLock
+  10-04 12:55:06.401 - 10040 - REL *gms_scheduler*:internal
+  10-04 12:55:06.407 - 10040 - REL *gms_scheduler*/c.g.a.g/c.g.a.c.s.ContextManagerLogsUploadBoundService
+  10-04 12:55:06.410 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 12:55:06.423 - 10040 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-04 12:55:06.437 - 10040 - REL *gms_scheduler*:internal
+  10-04 12:55:06.439 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 12:55:06.459 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.k.JobService (partial)
+  10-04 12:55:06.501 - 10040 - REL *gms_scheduler*:internal
+  10-04 12:55:06.503 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 12:55:06.536 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService (partial)
+  10-04 12:55:06.581 - 10040 - REL *gms_scheduler*:internal
+  10-04 12:55:06.582 - 10040 - REL *gms_scheduler*/c.g.a.g/.a.a.b.a.GcmTaskService
+  10-04 12:55:06.589 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 12:55:06.626 - 10040 - REL *gms_scheduler*:internal
+  10-04 12:55:06.631 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 12:55:06.691 - 10040 - ACQ *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService (partial)
+  10-04 12:55:06.738 - 10040 - REL *gms_scheduler*:internal
+  10-04 12:55:06.829 - 10040 - REL *gms_scheduler*/c.g.a.g/.k.JobService
+  10-04 12:55:06.836 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 12:55:06.850 - 10040 - REL *gms_scheduler*:internal
+  10-04 12:55:06.853 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 12:55:06.870 - 10040 - REL *gms_scheduler*:internal
+  10-04 12:55:07.296 - 10040 - REL *gms_scheduler*/c.g.a.g/.c.u.QosUploaderService
+  10-04 12:55:07.302 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 12:55:07.341 - 10040 - REL *gms_scheduler*:internal
+  10-04 12:55:07.343 - 10040 - ACQ *gms_scheduler*:internal (partial)
+  10-04 12:55:07.349 - 10040 - REL *gms_scheduler*:internal
+  10-04 12:55:27.733 - 1041 - ACQ AudioMix (partial)
+  10-04 12:55:27.734 - 1000 - ACQ WindowManager (screen-bright,on-after-release)
+  10-04 12:55:27.737 - 1041 - REL AudioMix
+  10-04 12:55:27.737 - 1041 - ACQ AudioMix (partial)
+  10-04 12:55:54.819 - 10040 - ACQ GCM_READ (partial)
+  10-04 12:55:54.821 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:55:54.825 - 10040 - REL GCM_READ
+  10-04 12:55:54.849 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 12:55:54.872 - 10040 - REL GCM_WORK
+  10-04 12:55:54.879 - 10040 - ACQ GCM_WORK (partial)
+  10-04 12:55:54.892 - 10040 - REL GCM_WORK
+  10-04 12:55:54.946 - 10040 - REL GOOGLE_C2DM
+  10-04 12:56:00.000 - 1000 - ACQ *alarm* (partial)
+  10-04 12:56:00.000 - 1000 - REL *alarm*
+  10-04 12:56:00.003 - 1000 - ACQ *alarm* (partial)
+  10-04 12:56:00.004 - 1000 - REL *alarm*
+  10-04 12:56:46.852 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:56:46.853 - 1002 - REL bluetooth_timer
+  10-04 12:56:46.857 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:56:46.859 - 1002 - REL bluetooth_timer
+  10-04 12:56:46.863 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:56:46.865 - 1002 - REL bluetooth_timer
+  10-04 12:56:46.866 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:56:46.868 - 1002 - REL bluetooth_timer
+  10-04 12:56:46.869 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 12:56:46.871 - 1002 - REL bluetooth_timer
+  10-04 12:57:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 12:57:00.003 - 1000 - REL *alarm*
+  10-04 12:57:11.436 - 1000 - REL WindowManager
+  10-04 12:57:11.444 - 1041 - REL AudioMix
+  10-04 12:57:11.445 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:14.309 - 1041 - REL AudioMix
+  10-04 12:57:18.955 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:18.956 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:18.957 - 1041 - REL AudioMix
+  10-04 12:57:18.957 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:18.987 - 1000 - ACQ WindowManager (screen-bright,on-after-release)
+  10-04 12:57:21.963 - 1041 - REL AudioMix
+  10-04 12:57:23.351 - 1000 - REL WindowManager
+  10-04 12:57:23.516 - 1041 - REL AudioMix
+  10-04 12:57:23.516 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:26.394 - 1041 - REL AudioMix
+  10-04 12:57:26.899 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:26.920 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:26.924 - 1041 - REL AudioMix
+  10-04 12:57:26.926 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:26.972 - 1000 - ACQ WindowManager (screen-bright,on-after-release)
+  10-04 12:57:29.905 - 1041 - REL AudioMix
+  10-04 12:57:38.632 - 1000 - REL WindowManager
+  10-04 12:57:38.803 - 1041 - REL AudioMix
+  10-04 12:57:38.804 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:41.711 - 1041 - REL AudioMix
+  10-04 12:57:42.677 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:42.679 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:42.686 - 1041 - REL AudioMix
+  10-04 12:57:42.686 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:42.710 - 1000 - ACQ WindowManager (screen-bright,on-after-release)
+  10-04 12:57:42.990 - 1000 - REL WindowManager
+  10-04 12:57:43.148 - 1041 - REL AudioMix
+  10-04 12:57:43.148 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:45.684 - 1041 - REL AudioMix
+  10-04 12:57:46.045 - 1041 - REL AudioMix
+  10-04 12:57:46.480 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:46.481 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:46.483 - 1041 - REL AudioMix
+  10-04 12:57:46.483 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:46.547 - 1000 - ACQ WindowManager (screen-bright,on-after-release)
+  10-04 12:57:48.984 - 1000 - REL WindowManager
+  10-04 12:57:49.084 - 1041 - REL AudioMix
+  10-04 12:57:49.084 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:49.488 - 1041 - REL AudioMix
+  10-04 12:57:51.948 - 1041 - REL AudioMix
+  10-04 12:57:52.863 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:52.864 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:52.864 - 1041 - REL AudioMix
+  10-04 12:57:52.864 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:52.896 - 1000 - ACQ WindowManager (screen-bright,on-after-release)
+  10-04 12:57:55.860 - 1041 - REL AudioMix
+  10-04 12:57:59.499 - 1000 - REL WindowManager
+  10-04 12:57:59.596 - 1041 - REL AudioMix
+  10-04 12:57:59.597 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:59.895 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:59.910 - 1041 - REL AudioMix
+  10-04 12:57:59.910 - 1041 - ACQ AudioMix (partial)
+  10-04 12:57:59.962 - 1000 - ACQ WindowManager (screen-bright,on-after-release)
+  10-04 12:58:00.004 - 1000 - ACQ *alarm* (partial)
+  10-04 12:58:00.005 - 1000 - REL *alarm*
+  10-04 12:58:02.897 - 1041 - REL AudioMix
+  10-04 12:59:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 12:59:00.004 - 1000 - REL *alarm*
+  10-04 13:00:00.002 - 1000 - ACQ *alarm* (partial)
+  10-04 13:00:00.004 - 1000 - REL *alarm*
+  10-04 13:01:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 13:01:00.002 - 1000 - REL *alarm*
+  10-04 13:01:29.317 - 1000 - REL WindowManager
+  10-04 13:01:29.436 - 1041 - REL AudioMix
+  10-04 13:01:29.436 - 1041 - ACQ AudioMix (partial)
+  10-04 13:01:29.967 - 1041 - ACQ AudioMix (partial)
+  10-04 13:01:30.001 - 1041 - REL AudioMix
+  10-04 13:01:30.001 - 1041 - ACQ AudioMix (partial)
+  10-04 13:01:30.024 - 1000 - ACQ WindowManager (screen-bright,on-after-release)
+  10-04 13:01:32.975 - 1041 - REL AudioMix
+  10-04 13:01:36.586 - 1000 - REL WindowManager
+  10-04 13:01:36.736 - 1041 - REL AudioMix
+  10-04 13:01:36.737 - 1041 - ACQ AudioMix (partial)
+  10-04 13:01:36.995 - 1041 - ACQ AudioMix (partial)
+  10-04 13:01:37.029 - 1041 - REL AudioMix
+  10-04 13:01:37.030 - 1041 - ACQ AudioMix (partial)
+  10-04 13:01:37.056 - 1000 - ACQ WindowManager (screen-bright,on-after-release)
+  10-04 13:01:40.006 - 1041 - REL AudioMix
+  10-04 13:01:54.882 - 1000 - ACQ *alarm* (partial)
+  10-04 13:01:54.892 - 1000 - REL *alarm*
+  10-04 13:01:54.896 - 10040 - ACQ GCM_HB_ALARM (partial)
+  10-04 13:01:54.900 - 10040 - ACQ GCM_WORK (partial)
+  10-04 13:01:54.904 - 10040 - REL GCM_HB_ALARM
+  10-04 13:01:54.905 - 10040 - REL GCM_WORK
+  10-04 13:02:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 13:02:00.002 - 1000 - REL *alarm*
+  10-04 13:02:39.968 - 1000 - ACQ *alarm* (partial)
+  10-04 13:02:39.985 - 10040 - ACQ IntentOp:c.g.a.g/.c.GmsIntentOperationService (partial)
+  10-04 13:02:39.993 - 1000 - REL *alarm*
+  10-04 13:02:40.007 - 10040 - ACQ IntentOp:.u.e.InstallationIntentOperation (partial)
+  10-04 13:02:40.013 - 10040 - REL IntentOp:c.g.a.g/.c.GmsIntentOperationService
+  10-04 13:02:40.307 - 10040 - REL IntentOp:.u.e.InstallationIntentOperation
+  10-04 13:02:54.901 - 1000 - ACQ *alarm* (partial)
+  10-04 13:02:54.904 - 1000 - REL *alarm*
+  10-04 13:02:54.909 - 10040 - ACQ GCM_WORK (partial)
+  10-04 13:02:54.913 - 10040 - ACQ GCM_READ (partial)
+  10-04 13:02:54.917 - 10040 - ACQ GCM_CONN_ALARM (partial)
+  10-04 13:02:54.919 - 10040 - REL GCM_READ
+  10-04 13:02:54.922 - 10040 - REL GCM_WORK
+  10-04 13:02:55.026 - 10040 - ACQ GCM_WORK (partial)
+  10-04 13:02:55.034 - 10040 - REL GCM_WORK
+  10-04 13:02:55.036 - 10040 - ACQ GCM_WORK (partial)
+  10-04 13:02:55.039 - 10040 - REL GCM_WORK
+  10-04 13:02:55.154 - 10040 - ACQ GCM_READ (partial)
+  10-04 13:02:55.157 - 10040 - ACQ GCM_WORK (partial)
+  10-04 13:02:55.159 - 10040 - REL GCM_READ
+  10-04 13:02:55.163 - 10040 - ACQ GCM_READ (partial)
+  10-04 13:02:55.164 - 10040 - REL GCM_READ
+  10-04 13:02:55.179 - 10040 - REL GCM_CONN_ALARM
+  10-04 13:02:55.188 - 10040 - REL GCM_WORK
+  10-04 13:02:55.683 - 10040 - ACQ GCM_READ (partial)
+  10-04 13:02:55.685 - 10040 - ACQ GCM_WORK (partial)
+  10-04 13:02:55.686 - 10040 - REL GCM_READ
+  10-04 13:02:55.692 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 13:02:55.740 - 10040 - ACQ IntentOp:c.g.a.g/.c.PersistentIntentOperationService (partial)
+  10-04 13:02:55.741 - 10040 - REL GCM_WORK
+  10-04 13:02:55.755 - 10040 - REL GOOGLE_C2DM
+  10-04 13:02:55.756 - 10040 - ACQ IntentOp:.g.GcmInternalReceiverIntentOperation (partial)
+  10-04 13:02:55.758 - 10040 - REL IntentOp:c.g.a.g/.c.PersistentIntentOperationService
+  10-04 13:02:55.761 - 10040 - REL IntentOp:.g.GcmInternalReceiverIntentOperation
+  10-04 13:03:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 13:03:00.003 - 1000 - REL *alarm*
+  10-04 13:03:59.992 - 10040 - ACQ GCM_READ (partial)
+  10-04 13:03:59.996 - 10040 - ACQ GCM_WORK (partial)
+  10-04 13:03:59.997 - 10040 - REL GCM_READ
+  10-04 13:04:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 13:04:00.002 - 1000 - REL *alarm*
+  10-04 13:04:00.023 - 10040 - ACQ GOOGLE_C2DM (partial)
+  10-04 13:04:00.058 - 10040 - REL GCM_WORK
+  10-04 13:04:00.098 - 10040 - REL GOOGLE_C2DM
+  10-04 13:05:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 13:05:00.003 - 1000 - REL *alarm*
+  10-04 13:05:40.826 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 13:05:40.831 - 1002 - REL bluetooth_timer
+  10-04 13:05:40.833 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 13:05:40.835 - 1002 - REL bluetooth_timer
+  10-04 13:05:40.837 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 13:05:40.838 - 1002 - REL bluetooth_timer
+  10-04 13:05:40.840 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 13:05:40.841 - 1002 - REL bluetooth_timer
+  10-04 13:05:40.842 - 1002 - ACQ bluetooth_timer (partial)
+  10-04 13:05:40.844 - 1002 - REL bluetooth_timer
+  10-04 13:06:00.001 - 1000 - ACQ *alarm* (partial)
+  10-04 13:06:00.002 - 1000 - REL *alarm*
+  10-04 13:06:28.572 - 1000 - REL WindowManager
+  10-04 13:06:28.706 - 1041 - REL AudioMix
+  10-04 13:06:28.706 - 1041 - ACQ AudioMix (partial)
+  10-04 13:06:29.414 - 1041 - ACQ AudioMix (partial)
+  10-04 13:06:29.446 - 1041 - REL AudioMix
+  10-04 13:06:29.446 - 1041 - ACQ AudioMix (partial)
+  10-04 13:06:29.456 - 1000 - ACQ WindowManager (screen-bright,on-after-release)
+  10-04 13:06:32.414 - 1041 - REL AudioMix
+  10-04 13:06:33.518 - 1000 - ACQ *job*/c.a.p.m.m/c.a.p.m.MediaService (partial)
+  10-04 13:06:33.553 - 1000 - REL *job*/c.a.p.m.m/c.a.p.m.MediaService
+  -
+  Events: 2260, Time-Resets: 509
+  Buffer, Bytes used: 10232
+FaceDownDetector:
+  mFaceDown=false
+  mActive=true
+  mLastFlipTime=0
+  mSensorMaxLatencyMicros=2000000
+  mUserInteractionBackoffMillis=60000
+  mPreviousResultTime=0
+  mPreviousResultType=1
+  mMillisSaved=0
+  mZAccelerationThreshold=-9.5
+  mAccelerationThreshold=0.2
+  mTimeThreshold=PT1S
+AmbientDisplaySuppressionController:
+ ambientDisplaySuppressed=false
+ mSuppressionTokens={}

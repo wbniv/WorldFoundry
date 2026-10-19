@@ -1,0 +1,1657 @@
+--------- beginning of system
+10-02 06:37:35.342   655  2563 I ActivityManager: Force stop user 10. Related users will not be stopped
+10-02 06:37:35.342   655  2563 I ActivityManager: stopSingleUserLU userId=10
+10-02 06:37:35.940   655   755 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10049. pid: 9431
+10-02 06:37:38.774   655  2302 I ActivityManager: Background started FGS: Allowed [callingPackage: com.google.android.apps.tv.launcherx; callingUid: 10052; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=com.google.android.apps.tv.launcherx.coreservices.headsupalert.ACTION_SHOW_ALERT cmp=com.google.android.apps.tv.launcherx/.coreservices.headsupalert.HeadsUpAlertService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<,reasonCode:SYSTEM_ALLOW_LISTED,duration:9223372036854775807,callingUid:-1>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-02 06:37:41.026   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 06:37:45.259   655   810 D ActivityManager: sync unfroze 2111 com.google.android.apps.tv.dreamx for 6
+10-02 06:37:45.481   655   771 I ActivityManager: Start proc 9631:com.google.android.apps.tv.dreamx:smarthome/u0a43 for service {com.google.android.apps.tv.dreamx/androidx.work.multiprocess.RemoteWorkerService}
+10-02 06:37:46.153   655  2563 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10043. pid: 9631
+10-02 06:38:04.111   655   819 D ActivityManager: freezing 9631 com.google.android.apps.tv.dreamx:smarthome
+10-02 06:38:04.122   655   819 D ActivityManager: freezing 2111 com.google.android.apps.tv.dreamx
+10-02 06:38:24.950   655   819 D ActivityManager: freezing 9431 com.google.android.tungsten.setupwraith
+10-02 06:39:19.622   655   810 I ActivityManager: Killing 1684:android.process.media/u0a21 (adj 985): empty #17
+10-02 06:39:19.622   655   810 I ActivityManager: Killing 3245:com.android.settings.intelligence/u0a94 (adj 985): empty #18
+10-02 06:39:29.654   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 06:39:29.655   655   819 D ActivityManager: freezing 9125 com.android.providers.tv
+10-02 06:39:29.656   655   819 D ActivityManager: freezing 9000 com.google.android.videos
+10-02 06:39:29.657   655   819 D ActivityManager: freezing 3126 com.google.android.youtube.tv
+10-02 06:39:29.658   655   819 D ActivityManager: freezing 9206 com.google.android.youtube.tv.recommendations
+10-02 06:42:26.714   655   771 I ActivityManager: Start proc 10022:org.worldfoundry.wf_game/u0a143 for next-top-activity {org.worldfoundry.wf_game/android.app.NativeActivity}
+10-02 06:42:26.891   655   810 I ActivityManager: com.android.vending is exempt from freezer
+10-02 06:42:26.911   655   771 I ActivityManager: Start proc 10043:com.android.vending:instant_app_installer/u0a56 for service {com.android.vending/com.google.android.finsky.instantapps.metrics.LogFlushJob}
+10-02 06:42:26.922   655  2287 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10143. pid: 10022
+10-02 06:42:27.541   655  2561 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10056. pid: 10043
+10-02 06:42:27.641   655  2287 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 7
+10-02 06:42:27.902   655  2547 I ActivityManager: Killing 1188:com.google.android.ext.services/u0a77 (adj 975): empty #17
+10-02 06:42:32.626   655   771 I ActivityManager: Start proc 10105:com.google.android.ext.services/u0a77 for service {com.google.android.ext.services/android.ext.services.autofill.InlineSuggestionRenderServiceImpl}
+10-02 06:42:32.741   655   755 D ActivityManager: sync unfroze 9125 com.android.providers.tv for 7
+10-02 06:42:33.037   655   755 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10077. pid: 10105
+10-02 06:42:35.428   655   771 I ActivityManager: Start proc 10149:org.worldfoundry.wf_game.smb/u0a140 for next-top-activity {org.worldfoundry.wf_game.smb/android.app.NativeActivity}
+10-02 06:42:35.580   655  2563 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10140. pid: 10149
+10-02 06:42:37.929   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 06:42:43.318   655   819 D ActivityManager: freezing 10022 org.worldfoundry.wf_game
+10-02 06:43:06.604   655   760 I ActivityManager: Killing 1476:com.android.keychain/1000 (adj 985): empty #17
+10-02 06:43:07.969   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 06:43:07.971   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 06:43:08.020   655  2547 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 06:43:11.831   655   771 I ActivityManager: Start proc 10232:org.worldfoundry.wf_game.qbert/u0a141 for next-top-activity {org.worldfoundry.wf_game.qbert/android.app.NativeActivity}
+10-02 06:43:11.968   655   802 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10141. pid: 10232
+10-02 06:43:13.387   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 06:43:15.029   655   755 D ActivityManager: sync unfroze 1504 com.google.android.gms for 26
+10-02 06:43:17.201   655   819 D ActivityManager: freezing 10149 org.worldfoundry.wf_game.smb
+10-02 06:43:38.021   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 06:43:38.021   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 06:43:40.485   655   771 I ActivityManager: Start proc 10311:org.worldfoundry.wf_game.aquarium/u0a145 for next-top-activity {org.worldfoundry.wf_game.aquarium/android.app.NativeActivity}
+10-02 06:43:40.613   655  2543 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10145. pid: 10311
+10-02 06:43:46.963   655   819 D ActivityManager: freezing 10232 org.worldfoundry.wf_game.qbert
+10-02 06:44:17.172   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 06:46:16.599   655   755 D ActivityManager: sync unfroze 1504 com.google.android.gms for 6
+10-02 06:46:44.034   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 06:46:44.037   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 06:46:44.083   655  2286 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 06:46:54.083   655   819 D ActivityManager: freezing 9125 com.android.providers.tv
+10-02 06:46:58.061   655  1853 I ActivityManager: Enqueued broadcast Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x400000 }: 0
+10-02 06:47:14.044   655  2286 I ActivityManager: Enqueued broadcast Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x400000 }: 0
+10-02 06:47:14.100   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 06:47:14.103   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 06:47:14.105   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 06:47:17.107   655  1853 D ActivityManager: sync unfroze 1504 com.google.android.gms for 6
+10-02 06:47:19.358   655  2547 I ActivityManager: Enqueued broadcast Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x400000 }: 0
+10-02 06:47:19.881   655  1174 I ActivityManager: Process com.android.vending (pid 9030) has died: cch+45 CEM
+10-02 06:47:24.647   655  1174 I ActivityManager: Enqueued broadcast Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x400000 }: 0
+10-02 06:47:27.173   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 06:47:27.619   655   819 D ActivityManager: freezing 10311 org.worldfoundry.wf_game.aquarium
+10-02 06:47:29.831   655  1174 I ActivityManager: Enqueued broadcast Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x400000 }: 0
+10-02 06:47:37.119   655   803 D ActivityManager: sync unfroze 1504 com.google.android.gms for 6
+10-02 06:47:54.224   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 06:51:49.879   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 06:51:49.880   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 06:51:49.880   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 06:51:49.920   655  2542 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 06:52:19.938   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 06:52:19.940   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 06:52:19.941   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 06:56:58.014   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 06:56:58.016   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 06:56:58.017   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 06:56:58.058   655   755 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 06:57:28.090   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 06:57:28.093   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 06:57:28.096   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 07:03:59.267   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 07:03:59.268   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 07:03:59.269   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 07:03:59.307   655  1770 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 07:04:29.326   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:04:29.327   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:04:29.328   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 07:07:09.940   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 07:07:09.941   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 07:07:09.943   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 07:07:09.987   655   755 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 07:07:40.011   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:07:40.014   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:07:40.015   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 07:08:01.847   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 07:08:01.848   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 07:08:01.848   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 07:08:01.881   655  2542 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 07:08:31.921   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:08:31.928   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:08:31.931   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 07:09:00.117   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 07:09:00.118   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 07:09:00.119   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 07:09:00.151   655   755 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 07:09:30.198   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:09:30.201   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:09:30.204   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 07:10:50.437   655   823 D ActivityManager: sync unfroze 1504 com.google.android.gms for 6
+10-02 07:11:07.932   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:12:11.758   655   771 I ActivityManager: Start proc 12369:com.google.android.katniss:search/u0a57 for broadcast {com.google.android.katniss/com.google.firebase.iid.FirebaseInstanceIdReceiver}
+10-02 07:12:12.436   655  1770 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10057. pid: 12369
+10-02 07:12:12.485   655   755 D ActivityManager: sync unfroze 1504 com.google.android.gms for 6
+10-02 07:12:12.543   655   755 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 7
+10-02 07:12:24.600   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:12:34.598   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 07:12:37.661   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:12:51.240   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 07:13:11.339   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 07:14:44.296   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 07:14:44.297   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 07:14:44.297   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 07:14:44.338   655   803 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 07:15:14.362   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:15:14.365   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:15:14.365   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 07:20:16.494   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 07:20:16.494   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 07:20:16.495   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 07:20:16.536   655  1770 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 07:20:46.569   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:20:46.571   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 07:20:56.956   655   810 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 07:20:56.957   655   810 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 07:21:07.468   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:21:07.469   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:21:07.470   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 07:25:20.900   655   810 D ActivityManager: sync unfroze 9000 com.google.android.videos for 6
+10-02 07:25:21.035   655  2547 D ActivityManager: sync unfroze 9125 com.android.providers.tv for 7
+10-02 07:25:31.186   655   819 D ActivityManager: freezing 9000 com.google.android.videos
+10-02 07:25:31.188   655   819 D ActivityManager: freezing 9125 com.android.providers.tv
+10-02 07:25:34.220   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 07:25:34.221   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 07:25:34.222   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 07:25:34.259   655  2547 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 07:26:04.294   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:26:04.299   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:26:04.303   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 07:26:27.079   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 07:26:27.080   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 07:26:27.080   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 07:26:27.116   655  2286 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 07:26:57.153   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:26:57.155   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:26:57.156   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 07:27:20.410   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 07:27:20.411   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 07:27:20.413   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 07:27:20.446   655  2286 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 07:27:50.487   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:27:50.491   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:27:50.492   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 07:28:20.836   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 07:28:40.935   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 07:28:51.342   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 07:29:11.442   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 07:30:16.907   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 07:30:16.908   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 07:30:16.910   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 07:30:16.975   655   771 I ActivityManager: Start proc 13651:com.google.android.tv.dfuservice/u0a95 for broadcast {com.google.android.tv.dfuservice/com.google.android.tv.dfuservice.worker.ScheduleUpdateCheckReceiver}
+10-02 07:30:17.256   655   803 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10095. pid: 13651
+10-02 07:30:18.588   655   820 D ActivityManager: sync unfroze 2192 com.google.android.permissioncontroller for 6
+10-02 07:30:36.943   655   810 I ActivityManager: Killing 2817:com.google.android.packageinstaller/u0a25 (adj 985): empty #17
+10-02 07:30:47.095   655   819 D ActivityManager: freezing 13651 com.google.android.tv.dfuservice
+10-02 07:30:47.830   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:30:47.833   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:30:47.834   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 07:31:04.115   655   819 D ActivityManager: freezing 2192 com.google.android.permissioncontroller
+10-02 07:32:23.475   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 07:32:33.526   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 07:32:53.529   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 07:32:53.530   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 07:32:53.531   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 07:32:53.564   655   803 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 07:33:23.605   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:33:23.607   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:33:23.608   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 07:37:55.203   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 07:37:55.204   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 07:37:55.204   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 07:37:55.244   655   803 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 07:38:25.273   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:38:25.275   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:38:25.275   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 07:42:25.344   655   810 D ActivityManager: sync unfroze 9000 com.google.android.videos for 6
+10-02 07:42:25.424   655  1174 D ActivityManager: sync unfroze 1504 com.google.android.gms for 6
+10-02 07:42:35.978   655   819 D ActivityManager: freezing 9000 com.google.android.videos
+10-02 07:42:35.979   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:44:56.164   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 07:44:56.199   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 07:44:56.200   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 07:44:56.201   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 07:44:56.253   655  2547 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 07:45:16.381   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 07:45:26.241   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:45:26.248   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:45:26.250   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 07:48:52.212   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 07:48:52.212   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 07:48:52.213   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 07:48:52.249   655  1174 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 07:49:22.277   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:49:22.279   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:49:22.281   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 07:53:59.084   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 07:53:59.085   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 07:53:59.085   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 07:53:59.119   655  2547 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 07:54:29.162   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:54:29.164   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:54:29.165   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 07:58:33.922   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 07:58:33.923   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 07:58:33.924   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 07:58:33.965   655  1174 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 07:59:03.994   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 07:59:03.997   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 07:59:03.998   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 08:00:16.609   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 08:00:16.611   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 08:00:16.612   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 08:00:47.147   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 08:00:47.149   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 08:00:47.150   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 08:01:03.127   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 08:01:23.218   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 08:01:27.735   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 08:01:27.742   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 08:01:27.744   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 08:01:27.752   655   770 D ActivityManager: sync unfroze 13651 com.google.android.tv.dfuservice for 3
+10-02 08:01:28.932   655   920 D ActivityManager: sync unfroze 2192 com.google.android.permissioncontroller for 6
+10-02 08:01:57.778   655   819 D ActivityManager: freezing 13651 com.google.android.tv.dfuservice
+10-02 08:01:58.658   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 08:01:58.663   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 08:01:58.664   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 08:02:14.394   655   819 D ActivityManager: freezing 2192 com.google.android.permissioncontroller
+10-02 08:02:24.102   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 08:02:34.153   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 08:04:07.137   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 08:04:07.138   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 08:04:07.139   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 08:04:07.181   655  2286 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 08:04:37.202   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 08:04:37.206   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 08:04:37.208   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 08:05:17.411   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 08:05:37.510   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 08:05:56.094   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 08:06:16.196   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 08:07:45.558   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 08:07:45.559   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 08:07:45.560   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 08:07:45.597   655  2547 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 08:08:15.630   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 08:08:15.637   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 08:08:15.640   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 08:08:50.897   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 08:09:10.998   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 08:18:03.341   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 08:18:03.342   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 08:18:03.344   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 08:18:03.384   655   803 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 08:18:33.414   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 08:18:33.419   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 08:18:33.421   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 08:20:10.734   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 08:20:30.835   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 08:20:31.405   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 08:20:51.498   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 08:25:46.998   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 08:25:47.000   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 08:25:47.002   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 08:25:47.042   655   803 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 08:26:17.072   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 08:26:17.076   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 08:26:17.083   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 08:29:11.205   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 08:29:31.304   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 08:29:31.362   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 08:29:51.458   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 08:30:10.692   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 08:30:30.793   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 08:30:31.571   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 08:30:51.672   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 08:31:27.718   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 08:31:27.718   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 08:31:27.719   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 08:31:37.674   655   770 D ActivityManager: sync unfroze 13651 com.google.android.tv.dfuservice for 3
+10-02 08:31:37.783   655   810 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 6
+10-02 08:31:38.821   655   920 D ActivityManager: sync unfroze 2192 com.google.android.permissioncontroller for 6
+10-02 08:31:48.343   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 08:32:07.720   655   819 D ActivityManager: freezing 13651 com.google.android.tv.dfuservice
+10-02 08:32:08.600   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 08:32:08.601   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 08:32:08.602   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 08:32:24.274   655   819 D ActivityManager: freezing 2192 com.google.android.permissioncontroller
+10-02 08:32:24.660   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 08:32:34.707   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 08:32:44.014   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 08:33:04.114   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 08:43:40.181   655   810 D ActivityManager: sync unfroze 9206 com.google.android.youtube.tv.recommendations for 6
+10-02 08:43:50.767   655   819 D ActivityManager: freezing 9206 com.google.android.youtube.tv.recommendations
+10-02 09:01:37.635   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 09:01:37.636   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 09:01:37.637   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 09:02:08.258   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 09:02:08.260   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 09:02:08.260   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 09:02:09.611   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 09:02:09.619   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 09:02:09.619   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 09:02:09.627   655   770 D ActivityManager: sync unfroze 13651 com.google.android.tv.dfuservice for 3
+10-02 09:02:10.818   655   920 D ActivityManager: sync unfroze 2192 com.google.android.permissioncontroller for 6
+10-02 09:02:25.207   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 09:02:35.259   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 09:02:39.658   655   819 D ActivityManager: freezing 13651 com.google.android.tv.dfuservice
+10-02 09:02:40.547   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 09:02:40.551   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 09:02:40.552   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 09:02:56.247   655   819 D ActivityManager: freezing 2192 com.google.android.permissioncontroller
+10-02 09:17:40.799   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 09:18:11.652   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 09:27:20.997   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 09:28:00.550   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 09:28:11.432   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 09:28:31.531   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 09:28:31.548   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 09:28:51.645   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 09:32:09.371   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 09:32:09.373   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 09:32:09.374   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 09:32:24.465   655   770 D ActivityManager: sync unfroze 13651 com.google.android.tv.dfuservice for 3
+10-02 09:32:24.626   655   771 W ActivityManager: Slow operation: 52ms so far, now at startProcess: done updating battery stats
+10-02 09:32:24.634   655   771 W ActivityManager: Slow operation: 60ms so far, now at startProcess: building log message
+10-02 09:32:24.634   655   771 I ActivityManager: Start proc 21612:com.google.android.partnersetup/u0a47 for service {com.google.android.partnersetup/com.google.android.partnersetup.InstalledAppJobService}
+10-02 09:32:24.634   655   771 W ActivityManager: Slow operation: 61ms so far, now at startProcess: starting to update pids map
+10-02 09:32:24.637   655   771 W ActivityManager: Slow operation: 64ms so far, now at startProcess: done updating pids map
+10-02 09:32:25.147   655  1174 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10047. pid: 21612
+10-02 09:32:25.727   655   920 D ActivityManager: sync unfroze 2192 com.google.android.permissioncontroller for 6
+10-02 09:32:35.307   655   819 D ActivityManager: freezing 21612 com.google.android.partnersetup
+10-02 09:32:42.129   655   755 I ActivityManager: Killing 9205:com.google.android.configupdater/u0a54 (adj 945): empty #17
+10-02 09:32:54.505   655   819 D ActivityManager: freezing 13651 com.google.android.tv.dfuservice
+10-02 09:32:55.351   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 09:32:55.353   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 09:32:55.353   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 09:33:11.115   655   819 D ActivityManager: freezing 2192 com.google.android.permissioncontroller
+10-02 09:34:25.621   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 09:34:35.670   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 09:38:34.071   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 09:38:54.227   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 09:45:10.981   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 09:45:31.082   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 09:45:31.456   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 09:45:51.554   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 09:47:35.044   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 09:47:55.145   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 09:50:54.021   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 09:51:14.122   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 10:02:24.382   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 10:02:24.383   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 10:02:24.384   655   770 D ActivityManager: sync unfroze 9295 com.google.process.gapps for 10
+10-02 10:02:42.139   655  2542 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 10:03:12.181   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 10:03:12.185   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 10:03:12.188   655   819 D ActivityManager: freezing 9295 com.google.process.gapps
+10-02 10:03:40.917   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 10:04:11.630   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 10:04:40.901   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 10:05:11.731   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 10:07:05.670   655  2542 D ActivityManager: sync unfroze 1504 com.google.android.gms for 6
+10-02 10:07:06.092   655  2547 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 7
+10-02 10:07:24.907   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 10:11:52.612   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 10:12:12.795   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 10:13:50.897   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 10:14:04.421   655   771 I ActivityManager: Start proc 24346:com.google.android.syncadapters.calendar/u0a65 for broadcast {com.google.android.syncadapters.calendar/com.google.android.libraries.notifications.entrypoints.gcm.GcmBroadcastReceiver}
+10-02 10:14:04.769   655  1770 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10065. pid: 24346
+10-02 10:14:05.309   655   771 I ActivityManager: Start proc 24398:com.android.providers.calendar/u0a26 for content provider {com.android.providers.calendar/com.android.providers.calendar.CalendarProvider2}
+10-02 10:14:05.521   655   755 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10026. pid: 24398
+10-02 10:14:07.557   655  1770 I ActivityManager: Killing 9431:com.google.android.tungsten.setupwraith/u0a49 (adj 955): empty #17
+10-02 10:14:07.558   655  1770 I ActivityManager: Killing 9295:com.google.process.gapps/u0a58 (adj 975): empty #18
+10-02 10:14:10.916   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 10:14:11.568   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 10:14:17.582   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 10:14:24.522   655   819 D ActivityManager: freezing 24346 com.google.android.syncadapters.calendar
+10-02 10:14:31.587   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 10:16:11.241   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 10:16:31.342   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 10:16:31.760   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 10:16:51.863   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 10:17:45.700   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 10:17:45.701   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 10:17:45.739   655   755 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 10:17:55.748   655   819 D ActivityManager: freezing 24398 com.android.providers.calendar
+10-02 10:18:14.374   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 10:18:15.724   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 10:18:15.726   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 10:18:34.464   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 10:22:36.795   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 10:22:36.796   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 10:22:36.809   655   770 D ActivityManager: sync unfroze 13651 com.google.android.tv.dfuservice for 3
+10-02 10:22:37.981   655   920 D ActivityManager: sync unfroze 2192 com.google.android.permissioncontroller for 6
+10-02 10:22:51.047   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 10:22:55.559   655   770 D ActivityManager: sync unfroze 2111 com.google.android.apps.tv.dreamx for 3
+10-02 10:22:55.606   655   770 D ActivityManager: sync unfroze 24346 com.google.android.syncadapters.calendar for 3
+10-02 10:23:04.196   655  2547 W ActivityManager: stopServiceToken startId 15 is last, but have 1 remaining args
+10-02 10:23:05.859   655   819 D ActivityManager: freezing 24346 com.google.android.syncadapters.calendar
+10-02 10:23:05.899   655   819 D ActivityManager: freezing 2111 com.google.android.apps.tv.dreamx
+10-02 10:23:06.842   655   819 D ActivityManager: freezing 13651 com.google.android.tv.dfuservice
+10-02 10:23:07.691   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 10:23:11.059   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 10:23:11.955   655   770 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 3
+10-02 10:23:14.211   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 10:23:23.468   655   819 D ActivityManager: freezing 2192 com.google.android.permissioncontroller
+10-02 10:23:31.994   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 10:23:55.596   655  1174 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 7
+10-02 10:24:55.586   655   770 D ActivityManager: sync unfroze 2111 com.google.android.apps.tv.dreamx for 3
+10-02 10:24:55.587   655   770 D ActivityManager: sync unfroze 9631 com.google.android.apps.tv.dreamx:smarthome for 3
+10-02 10:25:05.636   655   819 D ActivityManager: freezing 9631 com.google.android.apps.tv.dreamx:smarthome
+10-02 10:25:05.748   655   819 D ActivityManager: freezing 2111 com.google.android.apps.tv.dreamx
+10-02 10:25:05.787   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 10:27:53.640   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 10:27:53.641   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 10:27:53.676   655  2543 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 10:28:23.700   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 10:28:23.701   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 10:32:13.076   655   810 D ActivityManager: sync unfroze 12369 com.google.android.katniss:search for 6
+10-02 10:32:23.331   655   819 D ActivityManager: freezing 12369 com.google.android.katniss:search
+10-02 10:32:55.657   655  2547 I ActivityManager: Process com.google.android.katniss:interactor (pid 8595) has died: vis BTOP
+10-02 10:32:55.672   655  2547 W ActivityManager: Scheduling restart of crashed service com.google.android.katniss/com.google.android.apps.tvsearch.statesync.service.StateSyncService in 1000ms for start-requested
+10-02 10:32:55.672   655  2547 W ActivityManager: Scheduling restart of crashed service com.google.android.katniss/com.google.android.apps.tvsearch.assistant.appintegration.AppAssistantIntegrationService in 11000ms for connection
+10-02 10:32:55.672   655  2547 W ActivityManager: Scheduling restart of crashed service com.google.android.katniss/.search.serviceapi.KatnissVoiceInteractionService in 21000ms for connection
+10-02 10:32:55.697   655  1192 I ActivityManager: Process com.google.android.katniss:search (pid 12369) has died: cch+5 CEM
+10-02 10:32:56.704   655   771 I ActivityManager: Start proc 25730:com.google.android.katniss:interactor/u0a57 for service {com.google.android.katniss/com.google.android.apps.tvsearch.statesync.service.StateSyncService}
+10-02 10:32:57.123   655  2306 D ActivityManager: sync unfroze 1504 com.google.android.gms for 6
+10-02 10:32:57.145   655  1192 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10057. pid: 25730
+10-02 10:32:57.213   655  1192 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 7
+10-02 10:34:51.218   655   771 I ActivityManager: Start proc 25946:com.google.android.katniss:search/u0a57 for broadcast {com.google.android.katniss/com.google.firebase.iid.FirebaseInstanceIdReceiver}
+10-02 10:34:51.654   655  1770 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10057. pid: 25946
+10-02 10:34:51.866   655  1192 W ActivityManager: Receiver with filter android.content.IntentFilter@779cf86 already registered for pid 25946, callerPackage is com.google.android.katniss
+10-02 10:35:04.562   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 10:35:31.814   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 10:37:20.956   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 10:37:52.098   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 10:38:12.144   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 10:38:12.306   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 10:38:32.227   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 10:40:11.026   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 10:40:31.123   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 10:40:31.519   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 10:40:51.616   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 10:41:16.984   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 10:41:37.084   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 10:43:43.116   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 10:43:43.117   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 10:43:43.153   655  2547 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 10:44:13.193   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 10:44:13.195   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 10:45:21.007   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 10:45:41.083   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 10:45:51.821   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 10:46:11.914   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 10:51:11.003   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 10:51:31.102   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 10:52:36.882   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 10:52:36.884   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 10:53:07.506   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 10:53:07.511   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 10:53:26.472   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 10:53:46.563   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 11:02:57.513   655  1770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 6
+10-02 11:03:07.610   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 11:04:58.680   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 11:05:08.731   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 11:09:41.162   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 11:10:11.702   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 11:12:12.573   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 11:12:32.675   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 11:13:29.582   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 11:13:49.682   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 11:14:05.613   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 11:14:25.713   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 11:15:29.287   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 11:15:49.378   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 11:15:54.055   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 11:16:14.156   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 11:16:25.185   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 11:16:25.186   655   770 D ActivityManager: sync unfroze 1559 com.google.process.gservices for 10
+10-02 11:16:25.195   655   770 D ActivityManager: sync unfroze 13651 com.google.android.tv.dfuservice for 3
+10-02 11:16:25.307   655   810 I ActivityManager: com.android.vending is exempt from freezer
+10-02 11:16:25.338   655   771 I ActivityManager: Start proc 28765:com.android.vending/u0a56 for service {com.android.vending/com.google.android.finsky.scheduler.process.mainimpl.PhoneskyJobServiceMain}
+10-02 11:16:26.273   655  1192 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10056. pid: 28765
+10-02 11:16:26.391   655   920 D ActivityManager: sync unfroze 2192 com.google.android.permissioncontroller for 6
+10-02 11:16:26.495   655   771 I ActivityManager: Start proc 28847:com.google.process.gapps/u0a58 for content provider {com.google.android.gsf/com.google.android.gsf.settings.GoogleSettingsProvider}
+10-02 11:16:27.075   655  2547 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10058. pid: 28847
+10-02 11:16:32.260   655  1770 I ActivityManager: Killing 3101:com.android.vending:background/u0a56 (adj 975): empty #17
+10-02 11:16:36.226   655  2547 I ActivityManager: com.android.vending is exempt from freezer
+10-02 11:16:36.251   655   771 I ActivityManager: Start proc 28920:com.android.vending:background/u0a56 for service {com.android.vending/com.google.frameworks.client.data.android.server.play.BackgroundProcessEndpointService}
+10-02 11:16:37.084   655  2306 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10056. pid: 28920
+10-02 11:16:38.220   655   754 I ActivityManager: Killing 3126:com.google.android.youtube.tv/u0a81 (adj 945): empty #17
+10-02 11:16:44.119   655  1853 I ActivityManager: Killing 10043:com.android.vending:instant_app_installer/u0a56 (adj 975): empty #17
+10-02 11:16:55.235   655   819 D ActivityManager: freezing 13651 com.google.android.tv.dfuservice
+10-02 11:16:56.110   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 11:16:56.113   655   819 D ActivityManager: freezing 28847 com.google.process.gapps
+10-02 11:16:56.114   655   819 D ActivityManager: freezing 1559 com.google.process.gservices
+10-02 11:17:03.244   655   802 D ActivityManager: sync unfroze 1504 com.google.android.gms for 5
+10-02 11:17:11.814   655   819 D ActivityManager: freezing 2192 com.google.android.permissioncontroller
+10-02 11:17:13.279   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 11:17:44.298   655  2543 I ActivityManager: Process com.google.process.gservices (pid 1559) early provider death
+10-02 11:17:44.304   655  2543 I ActivityManager: Process com.google.process.gservices (pid 1559) has died: cch+25 CEM
+10-02 11:17:44.345   655  2543 V ActivityManager: Got obituary of 1559:com.google.process.gservices
+10-02 11:23:54.931   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 11:24:15.081   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 11:24:55.760   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 11:25:15.854   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 11:26:38.062   655   770 D ActivityManager: sync unfroze 24346 com.google.android.syncadapters.calendar for 3
+10-02 11:26:38.273   655  2563 D ActivityManager: sync unfroze 24398 com.android.providers.calendar for 7
+10-02 11:26:58.106   655   819 D ActivityManager: freezing 24346 com.google.android.syncadapters.calendar
+10-02 11:34:59.207   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 11:35:09.250   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 11:44:30.612   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 11:44:50.713   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 11:46:24.812   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 11:46:24.812   655   770 D ActivityManager: sync unfroze 28847 com.google.process.gapps for 10
+10-02 11:46:34.835   655   819 D ActivityManager: freezing 24398 com.android.providers.calendar
+10-02 11:46:54.930   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 11:46:54.933   655   819 D ActivityManager: freezing 28847 com.google.process.gapps
+10-02 11:51:00.242   655   771 I ActivityManager: Start proc 31197:com.google.process.gservices/u0a58 for content provider {com.google.android.gsf/com.google.android.gsf.gservices.GservicesProvider}
+10-02 11:51:00.409   655   802 W ActivityManager: Unable to start service Intent { act=com.google.android.gms.gservices.START pkg=com.google.android.gms } U=0: not found
+10-02 11:51:00.411   655   802 W ActivityManager: Unbind failed: could not find connection for android.os.BinderProxy@9919a96
+10-02 11:51:00.521   655  2286 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10058. pid: 31197
+10-02 11:51:04.878   655  2543 D ActivityManager: sync unfroze 1504 com.google.android.gms for 6
+10-02 11:51:08.237   655   771 I ActivityManager: Start proc 31281:com.google.android.gms.unstable/u0a58 for service {com.google.android.gms/com.google.android.gms.droidguard.DroidGuardService}
+10-02 11:51:08.410   655   802 D ActivityManager: sync unfroze 28847 com.google.process.gapps for 7
+10-02 11:51:10.520   655  2286 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10058. pid: 31281
+10-02 11:51:11.362   655  2306 W ActivityManager: Unable to start service Intent { act=com.google.android.gms.securitystate.provider.api.SecurityStateUpdateInfoRegistrationApiService.START pkg=com.google.android.gms } U=0: not found
+10-02 11:51:11.373   655  2286 W ActivityManager: Unbind failed: could not find connection for android.os.BinderProxy@57356f
+10-02 11:51:12.904   655   771 I ActivityManager: Start proc 31351:com.google.android.rkpdapp/u0a108 for service {com.google.android.rkpdapp/com.android.rkpdapp.service.RemoteProvisioningService}
+10-02 11:51:13.086   655  2286 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10108. pid: 31351
+10-02 11:51:23.153   655   819 D ActivityManager: freezing 31351 com.google.android.rkpdapp
+10-02 11:51:39.138   655  2286 I ActivityManager: Killing 9125:com.android.providers.tv/u0a27 (adj 975): empty #17
+10-02 11:51:39.242   655  2286 I ActivityManager: Killing 9000:com.google.android.videos/u0a62 (adj 985): empty #17
+10-02 11:51:49.241   655   819 D ActivityManager: freezing 28847 com.google.process.gapps
+10-02 11:51:50.518   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 11:51:50.520   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 11:51:50.544   655  2563 D ActivityManager: sync unfroze 1504 com.google.android.gms for 5
+10-02 11:51:50.768   655   819 D ActivityManager: freezing 31281 com.google.android.gms.unstable
+10-02 11:52:00.590   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 11:55:21.144   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 11:55:51.890   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 11:56:17.064   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 11:56:37.138   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 11:56:52.377   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 11:57:12.470   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 12:01:08.348   655  1771 I ActivityManager: Process com.android.vending (pid 28765) has died: cch+5 CEM
+10-02 12:03:53.247   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 12:04:21.738   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 12:04:24.395   655   810 I ActivityManager: com.android.vending is exempt from freezer
+10-02 12:04:24.424   655   771 I ActivityManager: Start proc 32344:com.android.vending/u0a56 for service {com.android.vending/com.google.android.finsky.scheduler.process.mainimpl.PhoneskyJobServiceMain}
+10-02 12:04:24.811   655  1296 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10056. pid: 32344
+10-02 12:04:24.827   655  2563 D ActivityManager: sync unfroze 31197 com.google.process.gservices for 7
+10-02 12:04:25.093   655  2563 I ActivityManager: Process com.google.process.gapps (pid 28847) early provider death
+10-02 12:04:25.093   655  2563 I ActivityManager: Process com.google.process.gapps (pid 28847) has died: cch+25 CEM
+10-02 12:04:25.427   655  1182 V ActivityManager: Got obituary of 28847:com.google.process.gapps
+10-02 12:04:37.931   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 12:04:51.203   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 12:05:11.302   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 12:05:11.894   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 12:05:31.992   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 12:07:16.769   655   770 D ActivityManager: sync unfroze 31197 com.google.process.gservices for 10
+10-02 12:07:16.773   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 12:07:16.774   655   770 D ActivityManager: sync unfroze 31281 com.google.android.gms.unstable for 10
+10-02 12:07:16.792   655   770 D ActivityManager: sync unfroze 13651 com.google.android.tv.dfuservice for 3
+10-02 12:07:17.971   655   920 D ActivityManager: sync unfroze 2192 com.google.android.permissioncontroller for 6
+10-02 12:07:46.840   655   819 D ActivityManager: freezing 13651 com.google.android.tv.dfuservice
+10-02 12:07:47.596   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 12:07:47.599   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 12:07:47.600   655   819 D ActivityManager: freezing 31281 com.google.android.gms.unstable
+10-02 12:08:03.410   655   819 D ActivityManager: freezing 2192 com.google.android.permissioncontroller
+10-02 12:12:12.752   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 12:12:32.854   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 12:26:50.065   655   810 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 6
+10-02 12:26:50.084   655   771 I ActivityManager: Start proc 2267:com.google.android.tts/u0a67 for service {com.google.android.tts/androidx.work.impl.background.systemjob.SystemJobService}
+10-02 12:26:50.592   655  2563 D ActivityManager: sync unfroze 31197 com.google.process.gservices for 7
+10-02 12:26:50.603   655  2286 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10067. pid: 2267
+10-02 12:27:01.126   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 12:27:01.127   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 12:27:02.462   655   819 D ActivityManager: freezing 2267 com.google.android.tts
+10-02 12:29:51.070   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 12:30:11.170   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 12:34:21.326   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 12:34:52.035   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 12:35:31.971   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 12:35:52.074   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 12:36:36.669   655   810 D ActivityManager: sync unfroze 21612 com.google.android.partnersetup for 6
+10-02 12:36:36.682   655   810 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 6
+10-02 12:36:36.728   655  2563 D ActivityManager: sync unfroze 31197 com.google.process.gservices for 7
+10-02 12:36:46.827   655   819 D ActivityManager: freezing 21612 com.google.android.partnersetup
+10-02 12:36:46.828   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 12:36:47.013   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 12:37:05.651   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 12:37:16.853   655   770 D ActivityManager: sync unfroze 31197 com.google.process.gservices for 10
+10-02 12:37:16.862   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 12:37:16.863   655   770 D ActivityManager: sync unfroze 31281 com.google.android.gms.unstable for 10
+10-02 12:37:25.690   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 12:37:47.483   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 12:37:47.485   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 12:37:47.486   655   819 D ActivityManager: freezing 31281 com.google.android.gms.unstable
+10-02 12:42:53.126   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 12:42:53.127   655   770 D ActivityManager: sync unfroze 31197 com.google.process.gservices for 10
+10-02 12:42:53.128   655   770 D ActivityManager: sync unfroze 31281 com.google.android.gms.unstable for 10
+10-02 12:42:53.137   655   770 D ActivityManager: sync unfroze 13651 com.google.android.tv.dfuservice for 3
+10-02 12:42:54.302   655   920 D ActivityManager: sync unfroze 2192 com.google.android.permissioncontroller for 6
+10-02 12:43:23.177   655   819 D ActivityManager: freezing 13651 com.google.android.tv.dfuservice
+10-02 12:43:24.058   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 12:43:24.060   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 12:43:24.062   655   819 D ActivityManager: freezing 31281 com.google.android.gms.unstable
+10-02 12:43:39.788   655   819 D ActivityManager: freezing 2192 com.google.android.permissioncontroller
+10-02 12:49:51.116   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 12:50:11.218   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 12:50:11.988   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 12:50:32.089   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 12:53:54.645   655   810 D ActivityManager: sync unfroze 9206 com.google.android.youtube.tv.recommendations for 6
+10-02 12:54:05.458   655   819 D ActivityManager: freezing 9206 com.google.android.youtube.tv.recommendations
+10-02 12:58:13.053   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 12:58:33.137   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 13:04:21.095   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 13:04:52.042   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 13:05:41.253   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 13:06:12.011   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 13:07:32.059   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 13:07:52.162   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 13:12:52.609   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 13:12:52.610   655   770 D ActivityManager: sync unfroze 31197 com.google.process.gservices for 10
+10-02 13:12:52.612   655   770 D ActivityManager: sync unfroze 31281 com.google.android.gms.unstable for 10
+10-02 13:13:23.178   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 13:13:23.180   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 13:13:23.180   655   819 D ActivityManager: freezing 31281 com.google.android.gms.unstable
+10-02 13:17:12.163   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 13:17:32.264   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 13:19:32.040   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 13:19:52.138   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 13:21:13.392   655   770 D ActivityManager: sync unfroze 24398 com.android.providers.calendar for 3
+10-02 13:21:23.539   655   819 D ActivityManager: freezing 24398 com.android.providers.calendar
+10-02 13:21:51.197   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 13:22:11.299   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 13:22:32.177   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 13:22:52.274   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 13:35:01.063   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 13:35:11.114   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 13:43:06.088   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 13:43:06.089   655   770 D ActivityManager: sync unfroze 31197 com.google.process.gservices for 10
+10-02 13:43:06.092   655   770 D ActivityManager: sync unfroze 31281 com.google.android.gms.unstable for 10
+10-02 13:43:06.103   655   770 D ActivityManager: sync unfroze 13651 com.google.android.tv.dfuservice for 3
+10-02 13:43:07.305   655   920 D ActivityManager: sync unfroze 2192 com.google.android.permissioncontroller for 6
+10-02 13:43:36.142   655   819 D ActivityManager: freezing 13651 com.google.android.tv.dfuservice
+10-02 13:43:37.006   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 13:43:37.007   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 13:43:37.008   655   819 D ActivityManager: freezing 31281 com.google.android.gms.unstable
+10-02 13:43:52.758   655   819 D ActivityManager: freezing 2192 com.google.android.permissioncontroller
+10-02 13:45:55.141   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 13:46:31.423   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 13:46:32.213   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 13:47:12.181   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 13:50:32.134   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 13:50:52.234   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 13:51:01.116   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 13:51:32.173   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 13:52:41.481   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 13:52:42.413   655  1296 D ActivityManager: sync unfroze 1504 com.google.android.gms for 6
+10-02 13:52:59.784   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 13:53:32.287   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:01:32.102   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 14:01:52.203   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:02:32.738   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 14:03:11.345   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:03:12.159   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 14:03:32.259   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:03:52.086   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 14:04:12.186   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:07:12.081   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 14:07:32.182   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:07:51.398   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 14:08:52.066   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:12:31.258   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 14:12:51.361   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:13:06.085   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 14:13:06.086   655   770 D ActivityManager: sync unfroze 31197 com.google.process.gservices for 10
+10-02 14:13:06.087   655   770 D ActivityManager: sync unfroze 31281 com.google.android.gms.unstable for 10
+10-02 14:13:36.213   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 14:13:36.215   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 14:13:36.216   655   819 D ActivityManager: freezing 31281 com.google.android.gms.unstable
+10-02 14:18:31.414   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 14:18:51.514   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:18:52.208   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 14:19:12.306   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:19:21.166   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 14:20:11.370   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:25:52.248   655  2547 D ActivityManager: sync unfroze 1504 com.google.android.gms for 6
+10-02 14:25:55.692   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 14:26:05.850   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:26:12.950   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 14:26:25.027   655  1771 D ActivityManager: sync unfroze 31351 com.google.android.rkpdapp for 6
+10-02 14:26:35.097   655   819 D ActivityManager: freezing 31351 com.google.android.rkpdapp
+10-02 14:33:09.582   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 14:33:09.584   655   770 D ActivityManager: sync unfroze 31197 com.google.process.gservices for 10
+10-02 14:33:09.585   655   770 D ActivityManager: sync unfroze 31281 com.google.android.gms.unstable for 10
+10-02 14:33:09.654   655  2547 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 14:33:39.658   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 14:33:39.661   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 14:33:39.662   655   819 D ActivityManager: freezing 31281 com.google.android.gms.unstable
+10-02 14:35:02.007   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 14:35:12.063   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:35:34.318   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 14:35:34.319   655   770 D ActivityManager: sync unfroze 31197 com.google.process.gservices for 10
+10-02 14:35:34.320   655   770 D ActivityManager: sync unfroze 31281 com.google.android.gms.unstable for 10
+10-02 14:35:34.330   655   770 D ActivityManager: sync unfroze 13651 com.google.android.tv.dfuservice for 3
+10-02 14:35:35.508   655   920 D ActivityManager: sync unfroze 2192 com.google.android.permissioncontroller for 6
+10-02 14:36:04.368   655   819 D ActivityManager: freezing 13651 com.google.android.tv.dfuservice
+10-02 14:36:05.250   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 14:36:05.253   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 14:36:05.257   655   819 D ActivityManager: freezing 31281 com.google.android.gms.unstable
+10-02 14:36:20.954   655   819 D ActivityManager: freezing 2192 com.google.android.permissioncontroller
+10-02 14:45:51.257   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 14:46:11.359   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:46:12.239   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 14:46:32.339   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:47:16.022   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 14:47:36.124   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:51:07.077   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 14:51:07.078   655   770 D ActivityManager: sync unfroze 31197 com.google.process.gservices for 10
+10-02 14:51:07.080   655   770 D ActivityManager: sync unfroze 31281 com.google.android.gms.unstable for 10
+10-02 14:51:07.118   655  2544 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 14:51:37.147   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 14:51:37.148   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 14:51:37.149   655   819 D ActivityManager: freezing 31281 com.google.android.gms.unstable
+10-02 14:56:13.325   655   770 D ActivityManager: sync unfroze 1504 com.google.android.gms for 10
+10-02 14:56:13.325   655   770 D ActivityManager: sync unfroze 31197 com.google.process.gservices for 10
+10-02 14:56:13.326   655   770 D ActivityManager: sync unfroze 31281 com.google.android.gms.unstable for 10
+10-02 14:56:13.371   655  2563 W ActivityManager: Unable to start service Intent { act=com.google.android.c2dm.intent.RECEIVE flg=0x11000010 pkg=com.google.android.gms cmp=com.google.android.gms/.locationsharingreporter.service.GcmReceiverService (has extras) } U=0: not found
+10-02 14:56:43.402   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 14:56:43.403   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 14:56:43.404   655   819 D ActivityManager: freezing 31281 com.google.android.gms.unstable
+10-02 14:58:31.366   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 14:58:51.464   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:58:52.138   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 14:59:12.238   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 14:59:25.398   655   770 I ActivityManager: Force stopping org.worldfoundry.wf_game appid=10143 user=-1: deletePackageX
+10-02 14:59:25.415   655   770 I ActivityManager: Killing 10022:org.worldfoundry.wf_game/u0a143 (adj 920): stop org.worldfoundry.wf_game due to deletePackageX
+10-02 14:59:25.500   655  2563 V ActivityManager: Got obituary of 10022:org.worldfoundry.wf_game
+10-02 14:59:25.524   655   760 W ActivityManager: setHasOverlayUi called on unknown pid: 10022
+10-02 14:59:26.081   655   795 I ActivityManager: Force stopping org.worldfoundry.wf_game appid=10143 user=10: pkg removed
+10-02 14:59:26.095   655   795 I ActivityManager: Force stopping org.worldfoundry.wf_game appid=10143 user=0: pkg removed
+10-02 14:59:26.284   655   770 D ActivityManager: sync unfroze 2192 com.google.android.permissioncontroller for 3
+10-02 14:59:26.387   655   771 W ActivityManager: Slow operation: 108ms so far, now at startProcess: returned from zygote!
+10-02 14:59:26.421   655   771 W ActivityManager: Slow operation: 142ms so far, now at startProcess: done updating battery stats
+10-02 14:59:26.421   655   771 W ActivityManager: Slow operation: 142ms so far, now at startProcess: building log message
+10-02 14:59:26.421   655   771 I ActivityManager: Start proc 12883:com.android.providers.tv/u0a27 for broadcast {com.android.providers.tv/com.android.providers.tv.PackageRemovedReceiver}
+10-02 14:59:26.421   655   771 W ActivityManager: Slow operation: 142ms so far, now at startProcess: starting to update pids map
+10-02 14:59:26.421   655   771 W ActivityManager: Slow operation: 142ms so far, now at startProcess: done updating pids map
+10-02 14:59:26.433   655  1296 D ActivityManager: sync unfroze 1504 com.google.android.gms for 6
+10-02 14:59:26.857   655   655 W ActivityManager: Unable to start service Intent { act=android.intent.action.PACKAGE_REMOVED cmp=com.android.keychain/.KeyChainService } U=10: not found
+10-02 14:59:26.912   655   820 W ActivityManager: Unable to launch app com.google.android.permissioncontroller/1010075 for service Intent { act=android.app.role.RoleControllerService cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.role.service.RoleControllerServiceImpl }: user 10 is stopped
+10-02 14:59:27.372   655   771 W ActivityManager: Slow operation: 73ms so far, now at startProcess: returned from zygote!
+10-02 14:59:27.373   655   771 W ActivityManager: Slow operation: 73ms so far, now at startProcess: done updating battery stats
+10-02 14:59:27.374   655   771 W ActivityManager: Slow operation: 75ms so far, now at startProcess: building log message
+10-02 14:59:27.374   655   771 I ActivityManager: Start proc 12923:com.android.keychain/1000 for service {com.android.keychain/com.android.keychain.KeyChainService}
+10-02 14:59:27.374   655   771 W ActivityManager: Slow operation: 75ms so far, now at startProcess: starting to update pids map
+10-02 14:59:27.374   655   771 W ActivityManager: Slow operation: 75ms so far, now at startProcess: done updating pids map
+10-02 14:59:27.440   655   771 W ActivityManager: Slow operation: 52ms so far, now at startProcess: done updating battery stats
+10-02 14:59:27.440   655   771 W ActivityManager: Slow operation: 52ms so far, now at startProcess: building log message
+10-02 14:59:27.440   655   771 I ActivityManager: Start proc 12926:android.process.media/u0a21 for broadcast {com.android.providers.downloads/com.android.providers.downloads.DownloadReceiver}
+10-02 14:59:27.440   655   771 W ActivityManager: Slow operation: 52ms so far, now at startProcess: starting to update pids map
+10-02 14:59:27.440   655   771 W ActivityManager: Slow operation: 52ms so far, now at startProcess: done updating pids map
+10-02 14:59:28.166   655  1296 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 1000. pid: 12923
+10-02 14:59:28.248   655  2545 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10027. pid: 12883
+10-02 14:59:28.639   655  1296 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 6
+10-02 14:59:29.007   655  2545 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10021. pid: 12926
+10-02 14:59:29.769   655  1174 D ActivityManager: sync unfroze 31197 com.google.process.gservices for 7
+10-02 14:59:31.382   655  1299 I ActivityManager: Killing 9631:com.google.android.apps.tv.dreamx:smarthome/u0a43 (adj 945): empty #17
+10-02 14:59:32.912   655   770 I ActivityManager: com.google.android.packageinstaller is exempt from freezer
+10-02 14:59:32.954   655   771 I ActivityManager: Start proc 13029:com.google.android.packageinstaller/u0a25 for broadcast {com.google.android.packageinstaller/com.android.packageinstaller.PackageInstalledReceiver}
+10-02 14:59:33.005   655   920 W ActivityManager: Unable to launch app com.google.android.permissioncontroller/1010075 for service Intent { act=android.permission.PermissionControllerService cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.permission.service.PermissionControllerServiceImpl }: user 10 is stopped
+10-02 14:59:33.076   655   820 W ActivityManager: Unable to launch app com.google.android.permissioncontroller/1010075 for service Intent { act=android.app.role.RoleControllerService cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.role.service.RoleControllerServiceImpl }: user 10 is stopped
+10-02 14:59:33.872   655  2308 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10025. pid: 13029
+10-02 14:59:34.072   655  2544 I ActivityManager: Killing 2111:com.google.android.apps.tv.dreamx/u0a43 (adj 935): empty #17
+10-02 14:59:35.365   655   771 I ActivityManager: Start proc 13080:org.worldfoundry.wf_game/u0a146 for next-top-activity {org.worldfoundry.wf_game/android.app.NativeActivity}
+10-02 14:59:35.511   655  2286 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10146. pid: 13080
+10-02 14:59:36.008   655   770 I ActivityManager: Force stopping org.worldfoundry.wf_game.aquarium appid=10145 user=-1: deletePackageX
+10-02 14:59:36.010   655   770 I ActivityManager: Killing 10311:org.worldfoundry.wf_game.aquarium/u0a145 (adj 900): stop org.worldfoundry.wf_game.aquarium due to deletePackageX
+10-02 14:59:36.072   655  2374 V ActivityManager: Got obituary of 10311:org.worldfoundry.wf_game.aquarium
+10-02 14:59:36.077   655   760 W ActivityManager: setHasOverlayUi called on unknown pid: 10311
+10-02 14:59:36.432   655   795 I ActivityManager: Force stopping org.worldfoundry.wf_game.aquarium appid=10145 user=10: pkg removed
+10-02 14:59:36.445   655   795 I ActivityManager: Force stopping org.worldfoundry.wf_game.aquarium appid=10145 user=0: pkg removed
+10-02 14:59:37.329   655   655 W ActivityManager: Unable to start service Intent { act=android.intent.action.PACKAGE_REMOVED cmp=com.android.keychain/.KeyChainService } U=10: not found
+10-02 14:59:37.358   655   820 W ActivityManager: Unable to launch app com.google.android.permissioncontroller/1010075 for service Intent { act=android.app.role.RoleControllerService cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.role.service.RoleControllerServiceImpl }: user 10 is stopped
+10-02 14:59:40.246   655   920 W ActivityManager: Unable to launch app com.google.android.permissioncontroller/1010075 for service Intent { act=android.permission.PermissionControllerService cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.permission.service.PermissionControllerServiceImpl }: user 10 is stopped
+10-02 14:59:40.275   655   820 W ActivityManager: Unable to launch app com.google.android.permissioncontroller/1010075 for service Intent { act=android.app.role.RoleControllerService cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.role.service.RoleControllerServiceImpl }: user 10 is stopped
+10-02 14:59:41.361   655   771 I ActivityManager: Start proc 13172:org.worldfoundry.wf_game.aquarium/u0a147 for next-top-activity {org.worldfoundry.wf_game.aquarium/android.app.NativeActivity}
+10-02 14:59:41.526   655  1174 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10147. pid: 13172
+10-02 14:59:41.891   655   770 I ActivityManager: Force stopping org.worldfoundry.wf_game.condo appid=10144 user=-1: deletePackageX
+10-02 14:59:42.317   655   795 I ActivityManager: Force stopping org.worldfoundry.wf_game.condo appid=10144 user=10: pkg removed
+10-02 14:59:42.326   655   795 I ActivityManager: Force stopping org.worldfoundry.wf_game.condo appid=10144 user=0: pkg removed
+10-02 14:59:43.172   655   655 W ActivityManager: Unable to start service Intent { act=android.intent.action.PACKAGE_REMOVED cmp=com.android.keychain/.KeyChainService } U=10: not found
+10-02 14:59:43.372   655   820 W ActivityManager: Unable to launch app com.google.android.permissioncontroller/1010075 for service Intent { act=android.app.role.RoleControllerService cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.role.service.RoleControllerServiceImpl }: user 10 is stopped
+10-02 14:59:45.509   655   820 W ActivityManager: Unable to launch app com.google.android.permissioncontroller/1010075 for service Intent { act=android.app.role.RoleControllerService cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.role.service.RoleControllerServiceImpl }: user 10 is stopped
+10-02 14:59:45.510   655   920 W ActivityManager: Unable to launch app com.google.android.permissioncontroller/1010075 for service Intent { act=android.permission.PermissionControllerService cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.permission.service.PermissionControllerServiceImpl }: user 10 is stopped
+10-02 14:59:46.005   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 14:59:46.670   655   771 W ActivityManager: Slow operation: 78ms so far, now at startProcess: returned from zygote!
+10-02 14:59:46.672   655   771 W ActivityManager: Slow operation: 80ms so far, now at startProcess: done updating battery stats
+10-02 14:59:46.672   655   771 W ActivityManager: Slow operation: 81ms so far, now at startProcess: building log message
+10-02 14:59:46.672   655   771 I ActivityManager: Start proc 13250:org.worldfoundry.wf_game.condo/u0a148 for next-top-activity {org.worldfoundry.wf_game.condo/android.app.NativeActivity}
+10-02 14:59:46.672   655   771 W ActivityManager: Slow operation: 81ms so far, now at startProcess: starting to update pids map
+10-02 14:59:46.672   655   771 W ActivityManager: Slow operation: 81ms so far, now at startProcess: done updating pids map
+10-02 14:59:46.806   655  1853 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10148. pid: 13250
+10-02 14:59:47.165   655   770 I ActivityManager: Force stopping org.worldfoundry.wf_game.smb appid=10140 user=-1: deletePackageX
+10-02 14:59:47.167   655   770 I ActivityManager: Killing 10149:org.worldfoundry.wf_game.smb/u0a140 (adj 910): stop org.worldfoundry.wf_game.smb due to deletePackageX
+10-02 14:59:47.253   655  2542 V ActivityManager: Got obituary of 10149:org.worldfoundry.wf_game.smb
+10-02 14:59:47.254   655   760 W ActivityManager: setHasOverlayUi called on unknown pid: 10149
+10-02 14:59:47.645   655   795 I ActivityManager: Force stopping org.worldfoundry.wf_game.smb appid=10140 user=10: pkg removed
+10-02 14:59:47.658   655   795 I ActivityManager: Force stopping org.worldfoundry.wf_game.smb appid=10140 user=0: pkg removed
+10-02 14:59:48.304   655   655 W ActivityManager: Unable to start service Intent { act=android.intent.action.PACKAGE_REMOVED cmp=com.android.keychain/.KeyChainService } U=10: not found
+10-02 14:59:48.317   655   820 W ActivityManager: Unable to launch app com.google.android.permissioncontroller/1010075 for service Intent { act=android.app.role.RoleControllerService cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.role.service.RoleControllerServiceImpl }: user 10 is stopped
+10-02 14:59:51.289   655   920 W ActivityManager: Unable to launch app com.google.android.permissioncontroller/1010075 for service Intent { act=android.permission.PermissionControllerService cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.permission.service.PermissionControllerServiceImpl }: user 10 is stopped
+10-02 14:59:51.362   655   820 W ActivityManager: Unable to launch app com.google.android.permissioncontroller/1010075 for service Intent { act=android.app.role.RoleControllerService cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.role.service.RoleControllerServiceImpl }: user 10 is stopped
+10-02 14:59:52.439   655   771 I ActivityManager: Start proc 13332:org.worldfoundry.wf_game.smb/u0a149 for next-top-activity {org.worldfoundry.wf_game.smb/android.app.NativeActivity}
+10-02 14:59:52.608   655  2286 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10149. pid: 13332
+10-02 14:59:52.954   655   770 I ActivityManager: Force stopping org.worldfoundry.wf_game.qbert appid=10141 user=-1: deletePackageX
+10-02 14:59:52.955   655   770 I ActivityManager: Killing 10232:org.worldfoundry.wf_game.qbert/u0a141 (adj 910): stop org.worldfoundry.wf_game.qbert due to deletePackageX
+10-02 14:59:53.486   655   795 I ActivityManager: Force stopping org.worldfoundry.wf_game.qbert appid=10141 user=10: pkg removed
+10-02 14:59:53.498   655   795 I ActivityManager: Force stopping org.worldfoundry.wf_game.qbert appid=10141 user=0: pkg removed
+10-02 14:59:53.633   655  2009 V ActivityManager: Got obituary of 10232:org.worldfoundry.wf_game.qbert
+10-02 14:59:53.633   655   760 W ActivityManager: setHasOverlayUi called on unknown pid: 10232
+10-02 14:59:54.633   655   655 W ActivityManager: Unable to start service Intent { act=android.intent.action.PACKAGE_REMOVED cmp=com.android.keychain/.KeyChainService } U=10: not found
+10-02 14:59:54.758   655   820 W ActivityManager: Unable to launch app com.google.android.permissioncontroller/1010075 for service Intent { act=android.app.role.RoleControllerService cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.role.service.RoleControllerServiceImpl }: user 10 is stopped
+10-02 14:59:57.538   655   819 D ActivityManager: freezing 13080 org.worldfoundry.wf_game
+10-02 14:59:57.572   655   920 W ActivityManager: Unable to launch app com.google.android.permissioncontroller/1010075 for service Intent { act=android.permission.PermissionControllerService cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.permission.service.PermissionControllerServiceImpl }: user 10 is stopped
+10-02 14:59:57.600   655   820 W ActivityManager: Unable to launch app com.google.android.permissioncontroller/1010075 for service Intent { act=android.app.role.RoleControllerService cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.role.service.RoleControllerServiceImpl }: user 10 is stopped
+10-02 14:59:58.638   655   771 W ActivityManager: Slow operation: 61ms so far, now at startProcess: returned from zygote!
+10-02 14:59:58.648   655   771 W ActivityManager: Slow operation: 72ms so far, now at startProcess: done updating battery stats
+10-02 14:59:58.648   655   771 W ActivityManager: Slow operation: 72ms so far, now at startProcess: building log message
+10-02 14:59:58.648   655   771 I ActivityManager: Start proc 13423:org.worldfoundry.wf_game.qbert/u0a150 for next-top-activity {org.worldfoundry.wf_game.qbert/android.app.NativeActivity}
+10-02 14:59:58.649   655   771 W ActivityManager: Slow operation: 72ms so far, now at startProcess: starting to update pids map
+10-02 14:59:58.649   655   771 W ActivityManager: Slow operation: 73ms so far, now at startProcess: done updating pids map
+10-02 14:59:58.769   655   754 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10150. pid: 13423
+10-02 15:00:03.418   655   819 D ActivityManager: freezing 13172 org.worldfoundry.wf_game.aquarium
+10-02 15:00:04.690   655   819 D ActivityManager: freezing 12926 android.process.media
+10-02 15:00:09.826   655   819 D ActivityManager: freezing 13250 org.worldfoundry.wf_game.condo
+10-02 15:00:10.029   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 15:00:10.220   655   819 D ActivityManager: freezing 13332 org.worldfoundry.wf_game.smb
+10-02 15:00:25.360   655   819 D ActivityManager: freezing 2192 com.google.android.permissioncontroller
+10-02 15:00:30.382   655  1174 I ActivityManager: Killing 24346:com.google.android.syncadapters.calendar/u0a65 (adj 975): empty #17
+10-02 15:00:30.569   655   803 I ActivityManager: Killing 31281:com.google.android.gms.unstable/u0a58 (adj 985): empty #17
+10-02 15:00:34.795   655   819 D ActivityManager: freezing 12923 com.android.keychain
+10-02 15:00:40.402   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 15:00:40.805   655   819 D ActivityManager: freezing 12883 com.android.providers.tv
+10-02 15:00:42.597   655  1192 I ActivityManager: Force stopping com.google.android.apps.tv.launcherx appid=10052 user=0: from pid 13542
+10-02 15:00:42.600   655  1192 I ActivityManager: Killing 9064:com.google.android.apps.tv.launcherx:coreservices/u0a52 (adj 100): stop com.google.android.apps.tv.launcherx due to from pid 13542
+10-02 15:00:42.612   655  1192 I ActivityManager: Killing 9367:com.google.android.apps.tv.launcherx/u0a52 (adj 0): stop com.google.android.apps.tv.launcherx due to from pid 13542
+10-02 15:00:42.690   655  1771 V ActivityManager: Got obituary of 9064:com.google.android.apps.tv.launcherx:coreservices
+10-02 15:00:42.698   655   760 W ActivityManager: setHasOverlayUi called on unknown pid: 9064
+10-02 15:00:42.699   655   760 W ActivityManager: ProcessRecord{e73961f 0:com.google.android.apps.tv.launcherx/u0a52} is attached to a previous process 9367
+10-02 15:00:42.743   655  2308 V ActivityManager: Got obituary of 9367:com.google.android.apps.tv.launcherx
+10-02 15:00:42.772   655   771 W ActivityManager: Slow operation: 60ms so far, now at startProcess: returned from zygote!
+10-02 15:00:42.775   655   771 W ActivityManager: Slow operation: 63ms so far, now at startProcess: done updating battery stats
+10-02 15:00:42.775   655   771 W ActivityManager: Slow operation: 63ms so far, now at startProcess: building log message
+10-02 15:00:42.775   655   771 I ActivityManager: Start proc 13545:com.google.android.apps.tv.launcherx/u0a52 for top-activity {com.google.android.apps.tv.launcherx/com.google.android.apps.tv.launcherx.home.HomeActivity}
+10-02 15:00:42.775   655   771 W ActivityManager: Slow operation: 63ms so far, now at startProcess: starting to update pids map
+10-02 15:00:42.775   655   771 W ActivityManager: Slow operation: 63ms so far, now at startProcess: done updating pids map
+10-02 15:00:42.779   655   655 W ActivityManager: Unable to start service Intent { act=android.service.notification.NotificationListenerService cmp=com.google.android.apps.tv.launcherx/.coreservices.notificationlistener.TvNotificationListenerService } U=10: not found
+10-02 15:00:42.811   655   771 I ActivityManager: Start proc 13546:com.google.android.apps.tv.launcherx:coreservices/u0a52 for service {com.google.android.apps.tv.launcherx/com.google.android.apps.tv.launcherx.coreservices.notificationlistener.TvNotificationListenerService}
+10-02 15:00:43.200   655  1770 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10052. pid: 13545
+10-02 15:00:43.213   655  2304 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10052. pid: 13546
+10-02 15:00:43.301   655  1248 D ActivityManager: sync unfroze 31197 com.google.process.gservices for 7
+10-02 15:00:43.422   655  2302 D ActivityManager: sync unfroze 12883 com.android.providers.tv for 7
+10-02 15:00:43.757   655  2285 D ActivityManager: sync unfroze 1504 com.google.android.gms for 6
+10-02 15:00:44.104   655   923 I ActivityManager: Force stop user 10. Related users will not be stopped
+10-02 15:00:44.104   655   923 I ActivityManager: stopSingleUserLU userId=10
+10-02 15:00:44.248   655   760 W ActivityManager: setHasOverlayUi called on unknown pid: 9367
+10-02 15:00:44.464   655   771 W ActivityManager: Slow operation: 141ms so far, now at startProcess: returned from zygote!
+10-02 15:00:44.466   655   771 W ActivityManager: Slow operation: 144ms so far, now at startProcess: done updating battery stats
+10-02 15:00:44.466   655   771 W ActivityManager: Slow operation: 144ms so far, now at startProcess: building log message
+10-02 15:00:44.466   655   771 I ActivityManager: Start proc 13658:com.google.android.tungsten.setupwraith/u0a49 for content provider {com.google.android.tungsten.setupwraith/com.google.android.libraries.tv.setupwraith.libs.castinfo.CastInfoProvider}
+10-02 15:00:44.466   655   771 W ActivityManager: Slow operation: 144ms so far, now at startProcess: starting to update pids map
+10-02 15:00:44.466   655   771 W ActivityManager: Slow operation: 144ms so far, now at startProcess: done updating pids map
+10-02 15:00:45.631   655  2561 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10049. pid: 13658
+10-02 15:00:52.687   655   819 D ActivityManager: freezing 1149 com.android.tv.settings
+10-02 15:01:08.189   655  2561 I ActivityManager: Enqueued broadcast Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x400000 }: 0
+10-02 15:01:25.871   655   819 D ActivityManager: freezing 13658 com.google.android.tungsten.setupwraith
+10-02 15:02:21.059   655  2302 I ActivityManager: Force stopping com.google.android.apps.tv.launcherx appid=10052 user=0: clear data
+10-02 15:02:21.063   655  2302 I ActivityManager: Killing 13546:com.google.android.apps.tv.launcherx:coreservices/u0a52 (adj 100): stop com.google.android.apps.tv.launcherx due to clear data
+10-02 15:02:21.071   655  2302 I ActivityManager: Killing 13545:com.google.android.apps.tv.launcherx/u0a52 (adj 0): stop com.google.android.apps.tv.launcherx due to clear data
+--------- beginning of main
+10-02 15:02:21.141 13423 13442 I wf_game : APP_CMD_RESUME
+10-02 15:02:21.190 13423 13442 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:02:21.192 13423 13442 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-02 15:02:21.205   655  2285 V ActivityManager: Got obituary of 13546:com.google.android.apps.tv.launcherx:coreservices
+10-02 15:02:21.216   655  2374 V ActivityManager: Got obituary of 13545:com.google.android.apps.tv.launcherx
+10-02 15:02:21.220   655  2374 I ActivityManager: Killing 2267:com.google.android.tts/u0a67 (adj 925): empty #17
+10-02 15:02:21.270   655   760 E ActivityManager: Failure starting process com.google.android.apps.tv.launcherx
+10-02 15:02:21.270   655   760 E ActivityManager: java.lang.SecurityException: Package com.google.android.apps.tv.launcherx is currently frozen!
+10-02 15:02:21.270   655   760 E ActivityManager: 	at com.android.server.pm.PackageManagerService.checkPackageStartable(PackageManagerService.java:4627)
+10-02 15:02:21.270   655   760 E ActivityManager: 	at com.android.server.pm.PackageManagerService$IPackageManagerImpl.checkPackageStartable(PackageManagerService.java:4708)
+10-02 15:02:21.270   655   760 E ActivityManager: 	at com.android.server.am.ProcessList.startProcessLocked(ProcessList.java:1758)
+10-02 15:02:21.270   655   760 E ActivityManager: 	at com.android.server.am.ProcessList.startProcessLocked(ProcessList.java:2483)
+10-02 15:02:21.270   655   760 E ActivityManager: 	at com.android.server.am.ProcessList.startProcessLocked(ProcessList.java:2628)
+10-02 15:02:21.270   655   760 E ActivityManager: 	at com.android.server.am.ActivityManagerService.startProcessLocked(ActivityManagerService.java:2923)
+10-02 15:02:21.270   655   760 E ActivityManager: 	at com.android.server.am.ActivityManagerService$LocalService.startProcess(ActivityManagerService.java:18383)
+10-02 15:02:21.270   655   760 E ActivityManager: 	at com.android.server.wm.ActivityTaskManagerService$$ExternalSyntheticLambda19.accept(R8$$SyntheticClass:0)
+10-02 15:02:21.270   655   760 E ActivityManager: 	at com.android.internal.util.function.pooled.PooledLambdaImpl.doInvoke(PooledLambdaImpl.java:363)
+10-02 15:02:21.270   655   760 E ActivityManager: 	at com.android.internal.util.function.pooled.PooledLambdaImpl.invoke(PooledLambdaImpl.java:204)
+10-02 15:02:21.270   655   760 E ActivityManager: 	at com.android.internal.util.function.pooled.OmniFunction.run(OmniFunction.java:87)
+10-02 15:02:21.270   655   760 E ActivityManager: 	at android.os.Handler.handleCallback(Handler.java:958)
+10-02 15:02:21.270   655   760 E ActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:99)
+10-02 15:02:21.270   655   760 E ActivityManager: 	at android.os.Looper.loopOnce(Looper.java:205)
+10-02 15:02:21.270   655   760 E ActivityManager: 	at android.os.Looper.loop(Looper.java:294)
+10-02 15:02:21.270   655   760 E ActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-02 15:02:21.270   655   760 E ActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:46)
+10-02 15:02:21.270   655   760 I ActivityManager: Force stopping com.google.android.apps.tv.launcherx appid=10052 user=0: start failure
+10-02 15:02:21.279   655   760 W ActivityManager: Slow operation: 51ms so far, now at startProcess: done starting proc!
+10-02 15:02:21.279   655   770 I ActivityManager: Force stopping com.google.android.apps.tv.launcherx appid=10052 user=-1: clearApplicationUserData
+10-02 15:02:21.312   655   760 I ActivityManager: Exiting empty application process 0:com.google.android.apps.tv.launcherx/u0a52 (null)
+10-02 15:02:21.328 13423 13442 I wf_game : APP_CMD_PAUSE
+10-02 15:02:21.330 13423 13442 I wf_game : APP_CMD_RESUME
+10-02 15:02:21.331   655   760 E ActivityManager: Failure starting process com.google.android.apps.tv.launcherx
+10-02 15:02:21.331   655   760 E ActivityManager: java.lang.SecurityException: Package com.google.android.apps.tv.launcherx is currently frozen!
+10-02 15:02:21.331   655   760 E ActivityManager: 	at com.android.server.pm.PackageManagerService.checkPackageStartable(PackageManagerService.java:4627)
+10-02 15:02:21.331   655   760 E ActivityManager: 	at com.android.server.pm.PackageManagerService$IPackageManagerImpl.checkPackageStartable(PackageManagerService.java:4708)
+10-02 15:02:21.331   655   760 E ActivityManager: 	at com.android.server.am.ProcessList.startProcessLocked(ProcessList.java:1758)
+10-02 15:02:21.331   655   760 E ActivityManager: 	at com.android.server.am.ProcessList.startProcessLocked(ProcessList.java:2483)
+10-02 15:02:21.331   655   760 E ActivityManager: 	at com.android.server.am.ProcessList.startProcessLocked(ProcessList.java:2628)
+10-02 15:02:21.331   655   760 E ActivityManager: 	at com.android.server.am.ActivityManagerService.startProcessLocked(ActivityManagerService.java:2923)
+10-02 15:02:21.331   655   760 E ActivityManager: 	at com.android.server.am.ActivityManagerService$LocalService.startProcess(ActivityManagerService.java:18383)
+10-02 15:02:21.331   655   760 E ActivityManager: 	at com.android.server.wm.ActivityTaskManagerService$$ExternalSyntheticLambda19.accept(R8$$SyntheticClass:0)
+10-02 15:02:21.331   655   760 E ActivityManager: 	at com.android.internal.util.function.pooled.PooledLambdaImpl.doInvoke(PooledLambdaImpl.java:363)
+10-02 15:02:21.331   655   760 E ActivityManager: 	at com.android.internal.util.function.pooled.PooledLambdaImpl.invoke(PooledLambdaImpl.java:204)
+10-02 15:02:21.331   655   760 E ActivityManager: 	at com.android.internal.util.function.pooled.OmniFunction.run(OmniFunction.java:87)
+10-02 15:02:21.331   655   760 E ActivityManager: 	at android.os.Handler.handleCallback(Handler.java:958)
+10-02 15:02:21.331   655   760 E ActivityManager: 	at android.os.Handler.dispatchMessage(Handler.java:99)
+10-02 15:02:21.331   655   760 E ActivityManager: 	at android.os.Looper.loopOnce(Looper.java:205)
+10-02 15:02:21.331   655   760 E ActivityManager: 	at android.os.Looper.loop(Looper.java:294)
+10-02 15:02:21.331   655   760 E ActivityManager: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-02 15:02:21.331   655   760 E ActivityManager: 	at com.android.server.ServiceThread.run(ServiceThread.java:46)
+10-02 15:02:21.331   655   760 I ActivityManager: Force stopping com.google.android.apps.tv.launcherx appid=10052 user=0: start failure
+10-02 15:02:21.343   655   760 I ActivityManager: Exiting empty application process 0:com.google.android.apps.tv.launcherx/u0a52 (null)
+10-02 15:02:21.409 13423 13442 I wf_game : APP_CMD_PAUSE
+10-02 15:02:21.411 13423 13442 I wf_game : APP_CMD_RESUME
+10-02 15:02:21.738   655   760 W ActivityManager: setHasOverlayUi called on unknown pid: 13545
+10-02 15:02:21.801   655   655 W ActivityManager: Unable to start service Intent { act=android.service.notification.NotificationListenerService cmp=com.google.android.apps.tv.launcherx/.coreservices.notificationlistener.TvNotificationListenerService } U=10: not found
+10-02 15:02:21.811   655   770 D ActivityManager: sync unfroze 2192 com.google.android.permissioncontroller for 3
+10-02 15:02:21.828   655   771 I ActivityManager: Start proc 13982:com.google.android.apps.tv.launcherx:coreservices/u0a52 for service {com.google.android.apps.tv.launcherx/com.google.android.apps.tv.launcherx.coreservices.notificationlistener.TvNotificationListenerService}
+10-02 15:02:22.220 13423 13442 I wf_game : APP_CMD_PAUSE
+10-02 15:02:22.230   655   771 I ActivityManager: Start proc 14013:com.google.android.apps.tv.launcherx/u0a52 for top-activity {com.google.android.apps.tv.launcherx/com.google.android.apps.tv.launcherx.home.HomeActivity}
+10-02 15:02:22.361   655  1466 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10052. pid: 13982
+10-02 15:02:22.479   655  2302 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10052. pid: 14013
+10-02 15:02:23.024   655  2547 D ActivityManager: sync unfroze 13658 com.google.android.tungsten.setupwraith for 7
+10-02 15:02:23.185   655  1852 D ActivityManager: sync unfroze 9206 com.google.android.youtube.tv.recommendations for 10
+10-02 15:02:23.251   655   771 I ActivityManager: Start proc 14106:com.google.android.youtube.tv/u0a81 for broadcast {com.google.android.youtube.tv/com.google.android.libraries.youtube.tv.recommendations.RecommendationsScheduler$Receiver}
+10-02 15:02:23.579 13423 13442 I wf_game : APP_CMD_TERM_WINDOW
+10-02 15:02:23.745   655  2374 I ActivityManager: Force stop user 10. Related users will not be stopped
+10-02 15:02:23.745   655  2374 I ActivityManager: stopSingleUserLU userId=10
+10-02 15:02:24.052   655  1466 D ActivityManager: sync unfroze 1149 com.android.tv.settings for 7
+10-02 15:02:24.119   655  1466 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10081. pid: 14106
+10-02 15:02:27.483   655  2285 I ActivityManager: Background started FGS: Allowed [callingPackage: com.google.android.apps.tv.launcherx; callingUid: 10052; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=com.google.android.apps.tv.launcherx.coreservices.headsupalert.ACTION_SHOW_ALERT cmp=com.google.android.apps.tv.launcherx/.coreservices.headsupalert.HeadsUpAlertService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<,reasonCode:SYSTEM_ALLOW_LISTED,duration:9223372036854775807,callingUid:-1>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-02 15:02:32.095   655   819 D ActivityManager: freezing 2192 com.google.android.permissioncontroller
+10-02 15:02:33.699   655   771 I ActivityManager: Start proc 14247:com.google.android.apps.tv.dreamx/u0a43 for service {com.google.android.apps.tv.dreamx/androidx.work.impl.background.systemjob.SystemJobService}
+10-02 15:02:34.415   655  2285 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10043. pid: 14247
+10-02 15:02:42.681   655  2374 I ActivityManager: Broadcasting: Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x400000 }
+10-02 15:02:42.683   655  2374 I ActivityManager: Enqueued broadcast Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x400000 }: 0
+10-02 15:02:42.699   655   757 I ActivityManager: Broadcast completed: result=0
+10-02 15:02:44.862   655   819 D ActivityManager: freezing 14247 com.google.android.apps.tv.dreamx
+10-02 15:02:47.991   655  2374 D ActivityManager: quick sync unfreeze 13250 for 1
+10-02 15:02:48.013   655   760 D ActivityManager: sync unfroze 13250 org.worldfoundry.wf_game.condo for 1
+10-02 15:02:48.093 13250 14343 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.condo/files/wf.log
+10-02 15:02:48.093 13250 14343 I wf_game : android_main: enter
+10-02 15:02:48.093 13250 14343 I wf_game : android_main: assetMgr=0xee08c800
+10-02 15:02:48.100 13250 14343 I wf_game : android_main: uiMode=4 (tv=1)
+10-02 15:02:48.100 13250 14343 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-02 15:02:48.103 13250 14343 I wf_game : APP_CMD_RESUME
+10-02 15:02:48.105 13250 14343 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-02 15:02:48.105 13250 14343 I wf_game : phone controller: open http://192.168.4.43:8765/?k=861887 (PIN 861887)
+10-02 15:02:48.128 13250 14343 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:02:48.131 13250 14343 E wf_game : eglMakeCurrent failed: 0x3002
+10-02 15:02:49.235 13250 14343 I wf_game : key code=4 action=0 (Back: hides the phone panel)
+10-02 15:02:49.236 13250 14343 I wf_game : key code=4 action=1 (Back: hides the phone panel)
+10-02 15:03:02.670   655   819 D ActivityManager: freezing 13658 com.google.android.tungsten.setupwraith
+10-02 15:03:06.554 13250 14343 I wf_game : key code=4 action=0 mask=0x0 (unmapped, dropped)
+10-02 15:03:06.555 13250 14343 I wf_game : key code=4 action=1 mask=0x0 (unmapped, dropped)
+10-02 15:03:06.563 13250 14343 I wf_game : APP_CMD_PAUSE
+10-02 15:03:06.564 13250 14343 I wf_game : phonepad: stopped
+10-02 15:03:11.655   655 14373 D ActivityManager: created ANR temporary file:/data/anr/temp_anr_4405423156456517677.txt
+10-02 15:03:11.657   655 14373 I ActivityManager: Collecting stacks for pid 13250 into temporary file temp_anr_4405423156456517677.txt
+10-02 15:03:11.830   655 14374 I ActivityManager: dumpStackTraces pids={1083=true, 1149=true, 1236=true, 1329=true, 1421=true, 1504=true, 2076=true, 2192=true, 3048=true, 3329=true, 9206=true, 10105=true, 12883=true, 12923=true, 12926=true, 13029=true, 13080=true, 13172=true, 13332=true, 13423=true, 13651=true, 13658=true, 13982=true, 14013=true, 14106=true, 14247=true, 21612=true, 24398=true, 25730=true, 25946=true, 28920=true, 31197=true, 31351=true, 32344=true}
+10-02 15:03:11.832   655 14374 I ActivityManager: Dumping to /data/anr/anr_2026-10-02-15-03-11-831
+10-02 15:03:12.358   655 14374 I ActivityManager: Collecting stacks for pid 655
+10-02 15:03:12.516   655 14375 I ActivityManager: Skipping next CPU consuming process, not a java proc: 655
+10-02 15:03:12.516   655 14375 I ActivityManager: Skipping next CPU consuming process, not a java proc: 13250
+10-02 15:03:12.516   655 14375 I ActivityManager: Skipping next CPU consuming process, not a java proc: 472
+10-02 15:03:12.516   655 14375 I ActivityManager: Skipping next CPU consuming process, not a java proc: 427
+10-02 15:03:12.516   655 14375 I ActivityManager: Skipping next CPU consuming process, not a java proc: 464
+10-02 15:03:12.516   655 14375 I ActivityManager: Skipping next CPU consuming process, not a java proc: 616
+10-02 15:03:12.997   655   830 I ActivityManager: Skip duplicated ANR, pid=13250 Input dispatching timed out (Application does not have a focused window)
+10-02 15:03:13.463   655 14374 I ActivityManager: Collecting stacks for pid 1130
+10-02 15:03:13.629   655 14374 I ActivityManager: Collecting stacks for pid 1119
+10-02 15:03:13.881   655 14374 I ActivityManager: Collecting stacks for pid 1101
+10-02 15:03:14.069   655 14374 I ActivityManager: Collecting stacks for pid 1055
+10-02 15:03:14.258   655 14374 I ActivityManager: Collecting stacks for pid 935
+10-02 15:03:14.609   655   760 I ActivityManager: Killing 21612:com.google.android.partnersetup/u0a47 (adj 985): empty #17
+10-02 15:03:14.611   655   760 I ActivityManager: PendingStartActivityUids startActivity to updateOomAdj delay:8045ms, uid:10148
+10-02 15:03:15.023   655 14374 I ActivityManager: dumpStackTraces nativepids=null
+10-02 15:03:15.023   655 14374 I ActivityManager: dumpStackTraces extraPids=[2076]
+10-02 15:03:15.023   655 14374 I ActivityManager: Collecting stacks for extra pid 2076
+10-02 15:03:16.246   655 14374 I ActivityManager: Done dumping
+10-02 15:03:16.272   655 14374 E ActivityManager: ANR in org.worldfoundry.wf_game.condo (org.worldfoundry.wf_game.condo/android.app.NativeActivity)
+10-02 15:03:16.272   655 14374 E ActivityManager: PID: 13250
+10-02 15:03:16.272   655 14374 E ActivityManager: Reason: Input dispatching timed out (6488da2 org.worldfoundry.wf_game.condo/android.app.NativeActivity (server) is not responding. Waited 5001ms for FocusEvent(hasFocus=false))
+10-02 15:03:16.272   655 14374 E ActivityManager: Parent: org.worldfoundry.wf_game.condo/android.app.NativeActivity
+10-02 15:03:16.272   655 14374 E ActivityManager: ErrorId: f1d181ec-5076-4965-90d0-987ddca25ef7
+10-02 15:03:16.272   655 14374 E ActivityManager: Frozen: false
+10-02 15:03:16.272   655 14374 E ActivityManager: Load: 3.53 / 3.51 / 2.77
+10-02 15:03:16.272   655 14374 E ActivityManager: ----- Output from /proc/pressure/memory -----
+10-02 15:03:16.272   655 14374 E ActivityManager: some avg10=0.32 avg60=0.90 avg300=0.72 total=40047889
+10-02 15:03:16.272   655 14374 E ActivityManager: full avg10=0.22 avg60=0.50 avg300=0.29 total=14068815
+10-02 15:03:16.272   655 14374 E ActivityManager: ----- End output from /proc/pressure/memory -----
+10-02 15:03:16.272   655 14374 E ActivityManager: ----- Output from /proc/pressure/cpu -----
+10-02 15:03:16.272   655 14374 E ActivityManager: some avg10=6.43 avg60=13.01 avg300=12.80 total=2696334637
+10-02 15:03:16.272   655 14374 E ActivityManager: full avg10=0.00 avg60=0.00 avg300=0.00 total=0
+10-02 15:03:16.272   655 14374 E ActivityManager: ----- End output from /proc/pressure/cpu -----
+10-02 15:03:16.272   655 14374 E ActivityManager: ----- Output from /proc/pressure/io -----
+10-02 15:03:16.272   655 14374 E ActivityManager: some avg10=0.32 avg60=1.28 avg300=1.24 total=61994955
+10-02 15:03:16.272   655 14374 E ActivityManager: full avg10=0.14 avg60=0.32 avg300=0.22 total=12150358
+10-02 15:03:16.272   655 14374 E ActivityManager: ----- End output from /proc/pressure/io -----
+10-02 15:03:16.272   655 14374 E ActivityManager:
+10-02 15:03:16.272   655 14374 E ActivityManager: CPU usage from 112755ms to -2ms ago (2026-10-02 15:01:19.017 to 2026-10-02 15:03:11.774):
+10-02 15:03:16.272   655 14374 E ActivityManager:   9% 472/surfaceflinger: 5.3% user + 3.7% kernel / faults: 9910 minor 43 major
+10-02 15:03:16.272   655 14374 E ActivityManager:   6.7% 464/audioserver: 4.2% user + 2.5% kernel / faults: 1301 minor 25 major
+10-02 15:03:16.272   655 14374 E ActivityManager:   6% 427/android.hardware.audio.service-droidlogic: 2.6% user + 3.3% kernel / faults: 234 minor
+10-02 15:03:16.272   655 14374 E ActivityManager:   6% 655/system_server: 3.7% user + 2.3% kernel / faults: 35781 minor 1370 major
+10-02 15:03:16.272   655 14374 E ActivityManager:   5.8% 1321/sugov:0: 0% user + 5.8% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:   4.1% 13423/org.worldfoundry.wf_game.qbert: 2.2% user + 1.8% kernel / faults: 3152 minor 63 major
+10-02 15:03:16.272   655 14374 E ActivityManager:   3.3% 439/android.hardware.graphics.composer@3.2-service.droidlogic: 1.2% user + 2% kernel / faults: 11803 minor 2 major
+10-02 15:03:16.272   655 14374 E ActivityManager:   1.9% 1329/com.google.android.gms.persistent: 1.2% user + 0.7% kernel / faults: 19024 minor 2749 major
+10-02 15:03:16.272   655 14374 E ActivityManager:   1.5% 13250/org.worldfoundry.wf_game.condo: 0.8% user + 0.7% kernel / faults: 5414 minor 916 major
+10-02 15:03:16.272   655 14374 E ActivityManager:   1.5% 61/kswapd0: 0% user + 1.5% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager: 28% TOTAL: 13% user + 10% kernel + 0.4% iowait + 2.8% irq + 0.7% softirq
+10-02 15:03:16.272   655 14374 E ActivityManager: CPU usage from 59ms to 689ms later (2026-10-02 15:03:11.831 to 2026-10-02 15:03:12.461):
+10-02 15:03:16.272   655 14374 E ActivityManager:   85% 655/system_server: 44% user + 40% kernel / faults: 1313 minor 67 major
+10-02 15:03:16.272   655 14374 E ActivityManager:     54% 14375/AnrAuxiliaryTas: 22% user + 32% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:     20% 745/Signal Catcher: 16% user + 4% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:     2% 861/WifiHandlerThre: 2% user + 0% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:     2% 14373/AnrMainProcessD: 0% user + 2% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:     2% 14374/AnrConsumer: 2% user + 0% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:   51% 13250/org.worldfoundry.wf_game.condo: 37% user + 14% kernel / faults: 864 minor 111 major
+10-02 15:03:16.272   655 14374 E ActivityManager:     51% 13255/Signal Catcher: 37% user + 14% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:     2.8% 13283/AAudio_1: 2.8% user + 0% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:   3.9% 472/surfaceflinger: 1.9% user + 1.9% kernel / faults: 23 minor
+10-02 15:03:16.272   655 14374 E ActivityManager:     1.9% 472/surfaceflinger: 1.9% user + 0% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:     1.9% 552/binder:472_1: 0% user + 1.9% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:     1.9% 927/binder:472_4: 0% user + 1.9% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:   1.8% 427/android.hardware.audio.service-droidlogic: 0% user + 1.8% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:     1.8% 613/amlAudioMixer16: 0% user + 1.8% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:   1.9% 464/audioserver: 1.9% user + 0% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:     1.9% 10088/AAudio_4: 1.9% user + 0% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:   2% 616/irq/32-fe330000: 0% user + 2% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:   2.4% 2076/com.google.android.apps.mediashell: 2.4% user + 0% kernel / faults: 140 minor
+10-02 15:03:16.272   655 14374 E ActivityManager:     2.4% 2076/apps.mediashell: 2.4% user + 0% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:     2.4% 2697/MZ_IOThread: 0% user + 2.4% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:    +0% 14377/CrAsyncTask #91: 0% user + 0% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:    +0% 14378/CrAsyncTask #91: 0% user + 0% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager:    +0% 14379/CrAsyncTask #92: 0% user + 0% kernel
+10-02 15:03:16.272   655 14374 E ActivityManager: 48% TOTAL: 27% user + 19% kernel + 1.2% irq + 0.8% softirq
+10-02 15:03:16.294   655 14374 I ActivityManager: Killing 13250:org.worldfoundry.wf_game.condo/u0a148 (adj 200): bg anr
+10-02 15:03:16.296   655 14374 D ActivityManager: Completed ANR of org.worldfoundry.wf_game.condo in 4653ms, latency 1ms
+10-02 15:03:16.365   655   760 W ActivityManager: setHasOverlayUi called on unknown pid: 13250
+10-02 15:03:17.776   655   771 I ActivityManager: Start proc 14394:org.worldfoundry.wf_game.condo/u0a148 for next-top-activity {org.worldfoundry.wf_game.condo/android.app.NativeActivity}
+10-02 15:03:17.925   655  2009 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10148. pid: 14394
+10-02 15:03:18.007 14394 14414 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.condo/files/wf.log
+10-02 15:03:18.007 14394 14414 I wf_game : android_main: enter
+10-02 15:03:18.007 14394 14414 I wf_game : android_main: assetMgr=0xee08c600
+10-02 15:03:18.008 14394 14414 I wf_game : android_main: uiMode=4 (tv=1)
+10-02 15:03:18.008 14394 14414 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-02 15:03:18.013 14394 14414 I wf_game : APP_CMD_RESUME
+10-02 15:03:18.016 14394 14414 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-02 15:03:18.016 14394 14414 I wf_game : phone controller: open http://192.168.4.43:8765/?k=647704 (PIN 647704)
+10-02 15:03:18.045 14394 14414 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:03:18.098 14394 14414 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-02 15:03:18.098 14394 14414 I wf_game : android_main: EGL ready, entering HALStart
+10-02 15:03:18.099 14394 14414 I wf_game : android_main: wf_args.txt gave 6 argument(s)
+10-02 15:03:20.943 14394 14414 I wf_game : key code=4 action=0 (Back: hides the phone panel)
+10-02 15:03:20.962 14394 14414 I wf_game : key code=4 action=1 (Back: hides the phone panel)
+10-02 15:03:21.903 14394 14414 I wf_game : key code=19 action=0 mask=0x800
+10-02 15:03:24.255 14394 14414 I wf_game : key code=19 action=1 mask=0x800
+10-02 15:03:24.308 14394 14414 I wf_game : key code=21 action=0 mask=0x4000
+10-02 15:03:24.658   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 15:03:24.866 14394 14414 I wf_game : key code=19 action=0 mask=0x800
+10-02 15:03:25.496 14394 14414 I wf_game : key code=19 action=1 mask=0x800
+10-02 15:03:25.545 14394 14414 I wf_game : key code=21 action=1 mask=0x4000
+10-02 15:03:26.480 14394 14414 I wf_game : key code=21 action=0 mask=0x4000
+10-02 15:03:27.223 14394 14414 I wf_game : key code=19 action=0 mask=0x800
+10-02 15:03:27.541 14394 14414 I wf_game : key code=19 action=1 mask=0x800
+10-02 15:03:27.560 14394 14414 I wf_game : key code=21 action=1 mask=0x4000
+10-02 15:03:27.861 14394 14414 I wf_game : key code=21 action=0 mask=0x4000
+10-02 15:03:28.158 14394 14414 I wf_game : key code=19 action=0 mask=0x800
+10-02 15:03:28.198 14394 14414 I wf_game : key code=19 action=1 mask=0x800
+10-02 15:03:28.223 14394 14414 I wf_game : key code=21 action=1 mask=0x4000
+10-02 15:03:29.474 14394 14414 I wf_game : key code=19 action=0 mask=0x800
+10-02 15:03:29.855 14394 14414 I wf_game : key code=19 action=1 mask=0x800
+10-02 15:03:29.960 14394 14414 I wf_game : key code=21 action=0 mask=0x4000
+10-02 15:03:30.002   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 15:03:30.757 14394 14414 I wf_game : key code=21 action=1 mask=0x4000
+10-02 15:03:30.936 14394 14414 I wf_game : key code=19 action=0 mask=0x800
+10-02 15:03:31.297 14394 14414 I wf_game : key code=19 action=1 mask=0x800
+10-02 15:03:31.581 14394 14414 I wf_game : key code=22 action=0 mask=0x2000
+10-02 15:03:32.164 14394 14414 I wf_game : key code=22 action=1 mask=0x2000
+10-02 15:03:32.268 14394 14414 I wf_game : key code=20 action=0 mask=0x1000
+10-02 15:03:32.661 14394 14414 I wf_game : key code=20 action=1 mask=0x1000
+10-02 15:03:32.756 14394 14414 I wf_game : key code=22 action=0 mask=0x2000
+10-02 15:03:34.975 14394 14414 I wf_game : key code=22 action=1 mask=0x2000
+10-02 15:03:35.226 14394 14414 I wf_game : key code=19 action=0 mask=0x800
+10-02 15:03:38.026 14394 14414 I wf_game : key code=22 action=0 mask=0x2000
+10-02 15:03:38.280 14394 14414 I wf_game : key code=22 action=1 mask=0x2000
+10-02 15:03:38.300 14394 14414 I wf_game : key code=19 action=1 mask=0x800
+10-02 15:03:38.521 14394 14414 I wf_game : key code=19 action=0 mask=0x800
+10-02 15:03:40.501 14394 14414 I wf_game : key code=19 action=1 mask=0x800
+10-02 15:03:40.696 14394 14414 I wf_game : key code=22 action=0 mask=0x2000
+10-02 15:03:41.763 14394 14414 I wf_game : key code=22 action=1 mask=0x2000
+10-02 15:03:42.481 14394 14414 I wf_game : key code=23 action=0 mask=0x1
+10-02 15:03:42.672 14394 14414 I wf_game : key code=23 action=1 mask=0x1
+10-02 15:03:44.136 14394 14414 I wf_game : key code=19 action=0 mask=0x800
+10-02 15:03:44.236 14394 14414 I wf_game : key code=19 action=1 mask=0x800
+10-02 15:03:44.532 14394 14414 I wf_game : key code=23 action=0 mask=0x1
+10-02 15:03:44.652 14394 14414 I wf_game : key code=23 action=1 mask=0x1
+10-02 15:03:46.768 14394 14414 I wf_game : key code=23 action=0 mask=0x1
+10-02 15:03:46.937 14394 14414 I wf_game : key code=23 action=1 mask=0x1
+10-02 15:03:47.586 14394 14414 I wf_game : key code=23 action=0 mask=0x1
+10-02 15:03:47.713 14394 14414 I wf_game : key code=23 action=1 mask=0x1
+10-02 15:03:48.155 14394 14414 I wf_game : key code=23 action=0 mask=0x1
+10-02 15:03:48.339 14394 14414 I wf_game : key code=23 action=1 mask=0x1
+10-02 15:03:49.653 14394 14414 I wf_game : key code=23 action=0 mask=0x1
+10-02 15:03:49.818 14394 14414 I wf_game : key code=23 action=1 mask=0x1
+10-02 15:03:52.313   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 15:03:53.241 14394 14414 I wf_game : key code=23 action=0 mask=0x1
+10-02 15:03:53.375 14394 14414 I wf_game : key code=23 action=1 mask=0x1
+10-02 15:03:54.596 14394 14414 I wf_game : key code=20 action=0 mask=0x1000
+10-02 15:03:56.582 14394 14414 I wf_game : key code=20 action=1 mask=0x1000
+10-02 15:03:56.983 14394 14414 I wf_game : key code=22 action=0 mask=0x2000
+10-02 15:03:58.180 14394 14414 I wf_game : key code=22 action=1 mask=0x2000
+10-02 15:03:58.452 14394 14414 I wf_game : key code=19 action=0 mask=0x800
+10-02 15:03:59.643 14394 14414 I wf_game : key code=19 action=1 mask=0x800
+10-02 15:03:59.876 14394 14414 I wf_game : key code=23 action=0 mask=0x1
+10-02 15:04:00.061 14394 14414 I wf_game : key code=23 action=1 mask=0x1
+10-02 15:04:02.503 14394 14414 I wf_game : key code=21 action=0 mask=0x4000
+10-02 15:04:03.638 14394 14414 I wf_game : key code=21 action=1 mask=0x4000
+10-02 15:04:04.011 14394 14414 I wf_game : key code=23 action=0 mask=0x1
+10-02 15:04:04.231 14394 14414 I wf_game : key code=23 action=1 mask=0x1
+10-02 15:04:04.957 14394 14414 I wf_game : key code=21 action=0 mask=0x4000
+10-02 15:04:05.402 14394 14414 I wf_game : key code=21 action=1 mask=0x4000
+10-02 15:04:05.693 14394 14414 I wf_game : key code=19 action=0 mask=0x800
+10-02 15:04:06.816 14394 14414 I wf_game : key code=19 action=1 mask=0x800
+10-02 15:04:07.057 14394 14414 I wf_game : key code=23 action=0 mask=0x1
+10-02 15:04:07.354 14394 14414 I wf_game : key code=23 action=1 mask=0x1
+10-02 15:04:12.414   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 15:04:23.185   655   810 I ActivityManager: Killing 9206:com.google.android.youtube.tv.recommendations/u0a81 (adj 985): empty #17
+10-02 15:04:24.937   655  2009 I ActivityManager: Force stopping org.worldfoundry.wf_game.aquarium appid=10147 user=0: from pid 14525
+10-02 15:04:24.938   655  2009 I ActivityManager: Killing 13172:org.worldfoundry.wf_game.aquarium/u0a147 (adj 910): stop org.worldfoundry.wf_game.aquarium due to from pid 14525
+10-02 15:04:25.007   655  2543 V ActivityManager: Got obituary of 13172:org.worldfoundry.wf_game.aquarium
+10-02 15:04:25.008   655   760 W ActivityManager: setHasOverlayUi called on unknown pid: 13172
+10-02 15:04:25.135 14394 14414 I wf_game : APP_CMD_PAUSE
+10-02 15:04:25.135 14394 14414 I wf_game : phonepad: stopped
+10-02 15:04:25.151   655   771 I ActivityManager: Start proc 14533:org.worldfoundry.wf_game.aquarium/u0a147 for next-top-activity {org.worldfoundry.wf_game.aquarium/android.app.NativeActivity}
+10-02 15:04:25.235   655   771 I ActivityManager: Start proc 14549:com.google.android.youtube.tv.recommendations/u0a81 for service {com.google.android.youtube.tv/com.google.android.libraries.youtube.tv.recommendations.RecommendationService}
+10-02 15:04:25.265   655  2545 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10147. pid: 14533
+10-02 15:04:25.353 14533 14569 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log
+10-02 15:04:25.353 14533 14569 I wf_game : android_main: enter
+10-02 15:04:25.353 14533 14569 I wf_game : android_main: assetMgr=0xee08c600
+10-02 15:04:25.354 14533 14569 I wf_game : android_main: uiMode=4 (tv=1)
+10-02 15:04:25.354 14533 14569 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-02 15:04:25.359 14533 14569 I wf_game : APP_CMD_RESUME
+10-02 15:04:25.360 14533 14569 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-02 15:04:25.360 14533 14569 I wf_game : phone controller: open http://192.168.4.43:8765/?k=303583 (PIN 303583)
+10-02 15:04:25.395 14533 14569 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:04:25.444 14533 14569 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-02 15:04:25.444 14533 14569 I wf_game : android_main: EGL ready, entering HALStart
+10-02 15:04:25.461   655  2286 D ActivityManager: sync unfroze 31197 com.google.process.gservices for 7
+10-02 15:04:25.520   655  2545 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10081. pid: 14549
+10-02 15:04:25.837 14394 14414 I wf_game : APP_CMD_TERM_WINDOW
+10-02 15:04:26.679   655  2286 I ActivityManager: Killing 24398:com.android.providers.calendar/u0a26 (adj 975): empty #17
+10-02 15:04:28.305 14533 14569 I wf_game : key code=4 action=0 (Back: hides the phone panel)
+10-02 15:04:28.371 14533 14569 I wf_game : key code=4 action=1 (Back: hides the phone panel)
+10-02 15:04:33.197   655   819 D ActivityManager: freezing 13423 org.worldfoundry.wf_game.qbert
+10-02 15:04:33.199   655   819 D ActivityManager: freezing 12883 com.android.providers.tv
+10-02 15:04:33.200   655   819 D ActivityManager: freezing 14106 com.google.android.youtube.tv
+10-02 15:04:33.260 14533 14569 I wf_game : key code=22 action=0 mask=0x2000
+10-02 15:04:33.867 14533 14569 I wf_game : key code=22 action=1 mask=0x2000
+10-02 15:04:34.164 14533 14569 I wf_game : key code=22 action=0 mask=0x2000
+10-02 15:04:34.499 14533 14569 I wf_game : key code=22 action=1 mask=0x2000
+10-02 15:04:34.731 14533 14569 I wf_game : key code=22 action=0 mask=0x2000
+10-02 15:04:34.783 14533 14569 I wf_game : key code=4 action=0 mask=0x0 (unmapped, dropped)
+10-02 15:04:34.826 14533 14569 I wf_game : key code=4 action=1 mask=0x0 (unmapped, dropped)
+10-02 15:04:34.845 14533 14569 I wf_game : APP_CMD_PAUSE
+10-02 15:04:34.845 14533 14569 I wf_game : phonepad: stopped
+10-02 15:04:34.872 14394 14414 I wf_game : APP_CMD_RESUME
+10-02 15:04:34.874 14394 14414 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-02 15:04:34.874 14394 14414 I wf_game : phone controller: open http://192.168.4.43:8765/?k=647704 (PIN 647704)
+10-02 15:04:34.892 14394 14414 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:04:34.892 14394 14414 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-02 15:04:34.895 14533 14569 I wf_game : key code=22 action=1 mask=0x2000
+10-02 15:04:35.342 14394 14414 I wf_game : key code=22 action=1 mask=0x2000
+10-02 15:04:35.343 14533 14569 I wf_game : APP_CMD_TERM_WINDOW
+10-02 15:04:35.393 14533 14569 I wf_game : APP_CMD_DESTROY
+10-02 15:04:36.686   655   819 D ActivityManager: freezing 14549 com.google.android.youtube.tv.recommendations
+10-02 15:04:36.687   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 15:04:37.285 14394 14414 I wf_game : key code=4 action=0 mask=0x0 (unmapped, dropped)
+10-02 15:04:37.329 14394 14414 I wf_game : key code=4 action=1 mask=0x0 (unmapped, dropped)
+10-02 15:04:37.351 14394 14414 I wf_game : APP_CMD_PAUSE
+10-02 15:04:37.351 14394 14414 I wf_game : phonepad: stopped
+10-02 15:04:37.394 14394 14642 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.condo/files/wf.log
+10-02 15:04:37.394 14394 14642 I wf_game : android_main: enter
+10-02 15:04:37.394 14394 14642 I wf_game : android_main: assetMgr=0xee08c600
+10-02 15:04:37.395 14394 14642 I wf_game : android_main: uiMode=4 (tv=1)
+10-02 15:04:37.395 14394 14642 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-02 15:04:37.395 14394 14642 I wf_game : android_main: EGL ready, entering HALStart
+10-02 15:04:37.396 14394 14642 I wf_game : android_main: wf_args.txt gave 6 argument(s)
+10-02 15:04:37.652   655  2306 I ActivityManager: Process org.worldfoundry.wf_game.condo (pid 14394) has died: fg  TOP
+10-02 15:04:37.682   655   771 I ActivityManager: Start proc 14649:org.worldfoundry.wf_game.condo/u0a148 for top-activity {org.worldfoundry.wf_game.condo/android.app.NativeActivity}
+10-02 15:04:37.788   655  2306 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10148. pid: 14649
+10-02 15:04:37.842 14649 14669 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.condo/files/wf.log
+10-02 15:04:37.842 14649 14669 I wf_game : android_main: enter
+10-02 15:04:37.842 14649 14669 I wf_game : android_main: assetMgr=0xee08c600
+10-02 15:04:37.843 14649 14669 I wf_game : android_main: uiMode=4 (tv=1)
+10-02 15:04:37.843 14649 14669 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-02 15:04:37.849 14649 14669 I wf_game : APP_CMD_RESUME
+10-02 15:04:37.853 14649 14669 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-02 15:04:37.853 14649 14669 I wf_game : phone controller: open http://192.168.4.43:8765/?k=066894 (PIN 066894)
+10-02 15:04:37.887 14649 14669 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:04:37.933 14649 14669 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-02 15:04:37.933 14649 14669 I wf_game : android_main: EGL ready, entering HALStart
+10-02 15:04:37.934 14649 14669 I wf_game : android_main: wf_args.txt gave 6 argument(s)
+10-02 15:04:38.344   655   760 W ActivityManager: setHasOverlayUi called on unknown pid: 14394
+10-02 15:04:39.973 14649 14669 I wf_game : key code=4 action=0 (Back: hides the phone panel)
+10-02 15:04:40.026 14649 14669 I wf_game : key code=4 action=1 (Back: hides the phone panel)
+10-02 15:04:41.261 14649 14669 I wf_game : key code=4 action=0 mask=0x0 (unmapped, dropped)
+10-02 15:04:41.299 14649 14669 I wf_game : key code=4 action=1 mask=0x0 (unmapped, dropped)
+10-02 15:04:41.329 14649 14669 I wf_game : APP_CMD_PAUSE
+10-02 15:04:41.329 14649 14669 I wf_game : phonepad: stopped
+10-02 15:04:41.422   655  2306 D ActivityManager: sync unfroze 12883 com.android.providers.tv for 7
+10-02 15:04:41.548   655  2561 D ActivityManager: sync unfroze 1504 com.google.android.gms for 6
+10-02 15:04:41.936 14649 14669 I wf_game : APP_CMD_TERM_WINDOW
+10-02 15:04:41.988 14649 14669 I wf_game : APP_CMD_DESTROY
+10-02 15:04:44.814   655  2009 D ActivityManager: quick sync unfreeze 13332 for 1
+10-02 15:04:44.825   655   760 D ActivityManager: sync unfroze 13332 org.worldfoundry.wf_game.smb for 1
+10-02 15:04:44.925 13332 14723 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.smb/files/wf.log
+10-02 15:04:44.925 13332 14723 I wf_game : android_main: enter
+10-02 15:04:44.925 13332 14723 I wf_game : android_main: assetMgr=0xee08c400
+10-02 15:04:44.925 13332 14723 I wf_game : phone controller: off (no assets/layout.json)
+10-02 15:04:44.925 13332 14723 I wf_game : android_main: uiMode=4 (tv=1)
+10-02 15:04:44.925 13332 14723 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-02 15:04:44.929 13332 14723 I wf_game : APP_CMD_RESUME
+10-02 15:04:44.954 13332 14723 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:04:44.956 13332 14723 E wf_game : eglMakeCurrent failed: 0x3002
+10-02 15:04:45.332   655   819 D ActivityManager: freezing 14533 org.worldfoundry.wf_game.aquarium
+10-02 15:04:51.963   655   819 D ActivityManager: freezing 14649 org.worldfoundry.wf_game.condo
+10-02 15:04:52.405   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 15:04:56.576 13332 14723 I wf_game : key code=4 short Back (0 ms): leaving the app
+10-02 15:04:56.583 13332 14723 I wf_game : APP_CMD_PAUSE
+10-02 15:05:01.133   655   760 I ActivityManager: PendingStartActivityUids startActivity to updateOomAdj delay:4548ms, uid:10149
+10-02 15:05:01.618   655 14754 D ActivityManager: created ANR temporary file:/data/anr/temp_anr_7827028019887333046.txt
+10-02 15:05:01.618   655 14754 I ActivityManager: Collecting stacks for pid 13332 into temporary file temp_anr_7827028019887333046.txt
+10-02 15:05:01.741   655 14755 I ActivityManager: dumpStackTraces pids=null
+10-02 15:05:01.742   655 14755 I ActivityManager: Dumping to /data/anr/anr_2026-10-02-15-05-01-741
+10-02 15:05:02.453   655 14755 I ActivityManager: dumpStackTraces nativepids=null
+10-02 15:05:02.453   655 14755 I ActivityManager: dumpStackTraces extraPids=null
+10-02 15:05:02.453   655 14755 I ActivityManager: Done dumping
+10-02 15:05:02.462   655 14755 E ActivityManager: ANR in org.worldfoundry.wf_game.smb (org.worldfoundry.wf_game.smb/android.app.NativeActivity)
+10-02 15:05:02.462   655 14755 E ActivityManager: PID: 13332
+10-02 15:05:02.462   655 14755 E ActivityManager: Reason: Input dispatching timed out (b4ef367 org.worldfoundry.wf_game.smb/android.app.NativeActivity (server) is not responding. Waited 5000ms for FocusEvent(hasFocus=false))
+10-02 15:05:02.462   655 14755 E ActivityManager: Parent: org.worldfoundry.wf_game.smb/android.app.NativeActivity
+10-02 15:05:02.462   655 14755 E ActivityManager: ErrorId: bd917cab-01a3-4a7e-97f8-1e076ac81071
+10-02 15:05:02.462   655 14755 E ActivityManager: Frozen: false
+10-02 15:05:02.462   655 14755 E ActivityManager: Load: 0.0 / 0.0 / 0.0
+10-02 15:05:02.462   655 14755 E ActivityManager: ----- Output from /proc/pressure/memory -----
+10-02 15:05:02.462   655 14755 E ActivityManager: some avg10=0.33 avg60=0.36 avg300=0.55 total=40378649
+10-02 15:05:02.462   655 14755 E ActivityManager: full avg10=0.18 avg60=0.20 avg300=0.22 total=14299538
+10-02 15:05:02.462   655 14755 E ActivityManager: ----- End output from /proc/pressure/memory -----
+10-02 15:05:02.462   655 14755 E ActivityManager: ----- Output from /proc/pressure/cpu -----
+10-02 15:05:02.462   655 14755 E ActivityManager: some avg10=6.03 avg60=8.22 avg300=11.09 total=2705106389
+10-02 15:05:02.462   655 14755 E ActivityManager: full avg10=0.00 avg60=0.00 avg300=0.00 total=0
+10-02 15:05:02.462   655 14755 E ActivityManager: ----- End output from /proc/pressure/cpu -----
+10-02 15:05:02.462   655 14755 E ActivityManager: ----- Output from /proc/pressure/io -----
+10-02 15:05:02.462   655 14755 E ActivityManager: some avg10=0.10 avg60=0.32 avg300=0.89 total=62331993
+10-02 15:05:02.462   655 14755 E ActivityManager: full avg10=0.00 avg60=0.05 avg300=0.15 total=12314983
+10-02 15:05:02.462   655 14755 E ActivityManager: ----- End output from /proc/pressure/io -----
+10-02 15:05:02.462   655 14755 E ActivityManager:
+10-02 15:05:02.462   655 14755 E ActivityManager: CPU usage from 109938ms to -7ms ago (2026-10-02 15:03:11.774 to 2026-10-02 15:05:01.719):
+10-02 15:05:02.462   655 14755 E ActivityManager:   21% 472/surfaceflinger: 12% user + 9.6% kernel / faults: 13650 minor 23 major
+10-02 15:05:02.462   655 14755 E ActivityManager:   6.8% 655/system_server: 3.9% user + 2.9% kernel / faults: 20437 minor 2862 major
+10-02 15:05:02.462   655 14755 E ActivityManager:   6.7% 14013/com.google.android.apps.tv.launcherx: 5% user + 1.6% kernel / faults: 42563 minor 104 major
+10-02 15:05:02.462   655 14755 E ActivityManager:   6.1% 439/android.hardware.graphics.composer@3.2-service.droidlogic: 2.7% user + 3.4% kernel / faults: 13012 minor 2 major
+10-02 15:05:02.462   655 14755 E ActivityManager:   3.6% 464/audioserver: 2.6% user + 1% kernel / faults: 356 minor 84 major
+10-02 15:05:02.462   655 14755 E ActivityManager:   3.2% 427/android.hardware.audio.service-droidlogic: 1.5% user + 1.7% kernel / faults: 227 minor
+10-02 15:05:02.462   655 14755 E ActivityManager:   2.3% 1321/sugov:0: 0% user + 2.3% kernel
+10-02 15:05:02.462   655 14755 E ActivityManager:   2% 105/crtc0_commit: 0% user + 2% kernel
+10-02 15:05:02.462   655 14755 E ActivityManager:   1.5% 2076/com.google.android.apps.mediashell: 1% user + 0.4% kernel / faults: 5939 minor 186 major
+10-02 15:05:02.462   655 14755 E ActivityManager:   1.1% 13423/org.worldfoundry.wf_game.qbert: 0.4% user + 0.6% kernel / faults: 235 minor 9 major
+10-02 15:05:02.462   655 14755 E ActivityManager: 37% TOTAL: 23% user + 10% kernel + 0.1% iowait + 1.9% irq + 0.5% softirq
+10-02 15:05:02.462   655 14755 E ActivityManager: CPU usage from 31459558ms to 31459558ms ago (1970-01-01 07:00:00.000 to 1970-01-01 07:00:00.000) with 0% awake:
+10-02 15:05:02.462   655 14755 E ActivityManager: 0% TOTAL: 0% user + 0% kernel
+10-02 15:05:02.464   655 14755 I ActivityManager: Killing 13332:org.worldfoundry.wf_game.smb/u0a149 (adj 200): bg anr
+10-02 15:05:02.465   655 14755 D ActivityManager: Completed ANR of org.worldfoundry.wf_game.smb in 846ms, latency 3ms
+10-02 15:05:02.536   655   760 W ActivityManager: setHasOverlayUi called on unknown pid: 13332
+10-02 15:05:08.815   655   771 I ActivityManager: Start proc 14771:org.worldfoundry.wf_game.smb/u0a149 for next-top-activity {org.worldfoundry.wf_game.smb/android.app.NativeActivity}
+10-02 15:05:08.944   655  2561 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10149. pid: 14771
+10-02 15:05:09.023 14771 14791 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.smb/files/wf.log
+10-02 15:05:09.024 14771 14791 I wf_game : android_main: enter
+10-02 15:05:09.024 14771 14791 I wf_game : android_main: assetMgr=0xee08c600
+10-02 15:05:09.024 14771 14791 I wf_game : phone controller: off (no assets/layout.json)
+10-02 15:05:09.024 14771 14791 I wf_game : android_main: uiMode=4 (tv=1)
+10-02 15:05:09.024 14771 14791 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-02 15:05:09.029 14771 14791 I wf_game : APP_CMD_RESUME
+10-02 15:05:09.069 14771 14791 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:05:09.127 14771 14791 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-02 15:05:09.127 14771 14791 I wf_game : android_main: EGL ready, entering HALStart
+10-02 15:05:09.194 14771 14791 I wf_game : level-menu: showing 4 entries ("WF SMB"), cursor on 0
+10-02 15:05:10.324 14771 14791 I wf_game : key code=20 action=0 mask=0x1000
+10-02 15:05:10.325 14771 14791 I wf_game : level-menu: cursor on 1 (World 1-2)
+10-02 15:05:10.526 14771 14791 I wf_game : key code=20 action=1 mask=0x1000
+10-02 15:05:11.358 14771 14791 I wf_game : key code=4 short Back (3 ms): leaving the app
+10-02 15:05:11.377 14771 14791 I wf_game : APP_CMD_PAUSE
+10-02 15:05:11.407 14771 14809 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.smb/files/wf.log
+10-02 15:05:11.407 14771 14809 I wf_game : android_main: enter
+10-02 15:05:11.407 14771 14809 I wf_game : android_main: assetMgr=0xee08c600
+10-02 15:05:11.408 14771 14809 I wf_game : phone controller: off (no assets/layout.json)
+10-02 15:05:11.408 14771 14809 I wf_game : android_main: uiMode=4 (tv=1)
+10-02 15:05:11.408 14771 14809 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-02 15:05:11.408 14771 14809 I wf_game : android_main: EGL ready, entering HALStart
+10-02 15:05:11.445 14771 14809 I wf_game : level-menu: showing 4 entries ("WF SMB"), cursor on 0
+10-02 15:05:11.464 14771 14809 I wf_game : APP_CMD_RESUME
+10-02 15:05:11.490 14771 14809 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:05:11.491 14771 14809 E wf_game : eglMakeCurrent failed: 0x3002
+10-02 15:05:12.501   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 15:05:21.080   655 14829 D ActivityManager: created ANR temporary file:/data/anr/temp_anr_7944349760477907829.txt
+10-02 15:05:21.080   655 14829 I ActivityManager: Collecting stacks for pid 14771 into temporary file temp_anr_7944349760477907829.txt
+10-02 15:05:21.175   655 14830 I ActivityManager: dumpStackTraces pids={1083=true, 1149=true, 1236=true, 1329=true, 1421=true, 1504=true, 2076=true, 2192=true, 3048=true, 3329=true, 10105=true, 12883=true, 12923=true, 12926=true, 13029=true, 13080=true, 13423=true, 13651=true, 13658=true, 13982=true, 14013=true, 14106=true, 14247=true, 14533=true, 14549=true, 14649=true, 25730=true, 25946=true, 28920=true, 31197=true, 31351=true, 32344=true}
+10-02 15:05:21.177   655 14830 I ActivityManager: Dumping to /data/anr/anr_2026-10-02-15-05-21-176
+10-02 15:05:21.443   655   802 D ActivityManager: quick sync unfreeze 13423 for 1
+10-02 15:05:21.475   655   760 D ActivityManager: sync unfroze 13423 org.worldfoundry.wf_game.qbert for 1
+10-02 15:05:21.570 13423 14833 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.qbert/files/wf.log
+10-02 15:05:21.570 13423 14833 I wf_game : android_main: enter
+10-02 15:05:21.570 13423 14833 I wf_game : android_main: assetMgr=0xee08c400
+10-02 15:05:21.570 13423 14833 I wf_game : phone controller: off (no assets/layout.json)
+10-02 15:05:21.570 13423 14833 I wf_game : android_main: uiMode=4 (tv=1)
+10-02 15:05:21.571 13423 14833 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-02 15:05:21.574 13423 14833 I wf_game : APP_CMD_RESUME
+10-02 15:05:21.607 13423 14833 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:05:21.611 13423 14833 E wf_game : eglMakeCurrent failed: 0x3002
+10-02 15:05:22.073   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 15:05:22.243   655 14831 I ActivityManager: Skipping next CPU consuming process, not a java proc: 655
+10-02 15:05:22.243   655 14831 I ActivityManager: Skipping next CPU consuming process, not a java proc: 472
+10-02 15:05:22.243   655 14831 I ActivityManager: Skipping next CPU consuming process, not a java proc: 14771
+10-02 15:05:22.243   655 14831 I ActivityManager: Skipping next CPU consuming process, not a java proc: 439
+10-02 15:05:22.251   655 14830 I ActivityManager: Collecting stacks for pid 655
+10-02 15:05:23.383   655 14830 I ActivityManager: Collecting stacks for pid 1130
+10-02 15:05:23.513   655 14830 I ActivityManager: Collecting stacks for pid 1119
+10-02 15:05:23.693   655 14830 I ActivityManager: Collecting stacks for pid 1101
+10-02 15:05:23.850   655 14830 I ActivityManager: Collecting stacks for pid 1055
+10-02 15:05:24.001   655 14830 I ActivityManager: Collecting stacks for pid 935
+10-02 15:05:24.520   655 14830 I ActivityManager: dumpStackTraces nativepids=null
+10-02 15:05:24.520   655 14830 I ActivityManager: dumpStackTraces extraPids=[14013, 13423]
+10-02 15:05:24.520   655 14830 I ActivityManager: Collecting stacks for extra pid 14013
+10-02 15:05:26.058   655 14830 I ActivityManager: Collecting stacks for extra pid 13423
+10-02 15:05:26.693   655 14830 I ActivityManager: Done dumping
+10-02 15:05:26.731   655 14830 E ActivityManager: ANR in org.worldfoundry.wf_game.smb (org.worldfoundry.wf_game.smb/android.app.NativeActivity)
+10-02 15:05:26.731   655 14830 E ActivityManager: PID: 14771
+10-02 15:05:26.731   655 14830 E ActivityManager: Reason: Input dispatching timed out (6eec719 org.worldfoundry.wf_game.smb/android.app.NativeActivity (server) is not responding. Waited 5001ms for KeyEvent)
+10-02 15:05:26.731   655 14830 E ActivityManager: Parent: org.worldfoundry.wf_game.smb/android.app.NativeActivity
+10-02 15:05:26.731   655 14830 E ActivityManager: ErrorId: c63926f8-1f07-470c-8d23-def0c210677a
+10-02 15:05:26.731   655 14830 E ActivityManager: Frozen: false
+10-02 15:05:26.731   655 14830 E ActivityManager: Load: 2.27 / 3.05 / 2.7
+10-02 15:05:26.731   655 14830 E ActivityManager: ----- Output from /proc/pressure/memory -----
+10-02 15:05:26.731   655 14830 E ActivityManager: some avg10=0.04 avg60=0.26 avg300=0.51 total=40382635
+10-02 15:05:26.731   655 14830 E ActivityManager: full avg10=0.02 avg60=0.14 avg300=0.20 total=14302968
+10-02 15:05:26.731   655 14830 E ActivityManager: ----- End output from /proc/pressure/memory -----
+10-02 15:05:26.731   655 14830 E ActivityManager: ----- Output from /proc/pressure/cpu -----
+10-02 15:05:26.731   655 14830 E ActivityManager: some avg10=8.13 avg60=8.65 avg300=11.02 total=2707025549
+10-02 15:05:26.731   655 14830 E ActivityManager: full avg10=0.00 avg60=0.00 avg300=0.00 total=0
+10-02 15:05:26.731   655 14830 E ActivityManager: ----- End output from /proc/pressure/cpu -----
+10-02 15:05:26.731   655 14830 E ActivityManager: ----- Output from /proc/pressure/io -----
+10-02 15:05:26.731   655 14830 E ActivityManager: some avg10=0.01 avg60=0.22 avg300=0.83 total=62363987
+10-02 15:05:26.731   655 14830 E ActivityManager: full avg10=0.00 avg60=0.03 avg300=0.14 total=12332862
+10-02 15:05:26.731   655 14830 E ActivityManager: ----- End output from /proc/pressure/io -----
+10-02 15:05:26.731   655 14830 E ActivityManager:
+10-02 15:05:26.731   655 14830 E ActivityManager: CPU usage from 1ms to 5615ms later (2026-10-02 15:05:21.081 to 2026-10-02 15:05:26.695):
+10-02 15:05:26.731   655 14830 E ActivityManager:   46% 14013/com.google.android.apps.tv.launcherx: 38% user + 8.3% kernel / faults: 7304 minor 10 major
+10-02 15:05:26.731   655 14830 E ActivityManager:   38% 655/system_server: 23% user + 15% kernel / faults: 3586 minor 29 major
+10-02 15:05:26.731   655 14830 E ActivityManager:   3.7% 13423/org.worldfoundry.wf_game.qbert: 2.4% user + 1.2% kernel / faults: 5528 minor 719 major
+10-02 15:05:26.731   655 14830 E ActivityManager:   14% 14771/org.worldfoundry.wf_game.smb: 11% user + 2.5% kernel / faults: 1769 minor 1 major
+10-02 15:05:26.731   655 14830 E ActivityManager:   9.8% 935/com.android.systemui: 7.8% user + 1.9% kernel / faults: 2638 minor 1 major
+10-02 15:05:26.731   655 14830 E ActivityManager:   5.8% 472/surfaceflinger: 3.2% user + 2.6% kernel / faults: 344 minor
+10-02 15:05:26.731   655 14830 E ActivityManager:   3.2% 427/android.hardware.audio.service-droidlogic: 1.7% user + 1.4% kernel / faults: 10 minor
+10-02 15:05:26.731   655 14830 E ActivityManager:   3.2% 1119/com.droidlogic: 2.3% user + 0.8% kernel / faults: 1521 minor
+10-02 15:05:26.731   655 14830 E ActivityManager:   3% 464/audioserver: 3% user + 0% kernel / faults: 10 minor 1 major
+10-02 15:05:26.731   655 14830 E ActivityManager:   0.6% 1101/com.google.android.chromecast.chromecastservice: 0.5% user + 0% kernel / faults: 1337 minor
+10-02 15:05:26.731   655 14830 E ActivityManager: 41% TOTAL: 26% user + 12% kernel + 0% iowait + 1.8% irq + 0.3% softirq
+10-02 15:05:26.731   655 14830 E ActivityManager: CPU usage from 95ms to 1096ms later (2026-10-02 15:05:21.175 to 2026-10-02 15:05:22.176):
+10-02 15:05:26.731   655 14830 E ActivityManager:   75% 655/system_server: 35% user + 40% kernel / faults: 654 minor 10 major
+10-02 15:05:26.731   655 14830 E ActivityManager:     50% 14831/AnrAuxiliaryTas: 19% user + 30% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     3.6% 802/binder:655_3: 3.6% user + 0% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     2.4% 761/android.anim: 1.2% user + 1.2% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     2.4% 2561/binder:655_1F: 2.4% user + 0% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     1.2% 757/android.fg: 0% user + 1.2% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     1.2% 758/android.ui: 1.2% user + 0% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     1.2% 760/android.display: 1.2% user + 0% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     1.2% 801/PackageInstalle: 1.2% user + 0% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     1.2% 810/eduling.default: 1.2% user + 0% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     1.2% 861/WifiHandlerThre: 1.2% user + 0% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     1.2% 1296/binder:655_A: 1.2% user + 0% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     1.2% 1299/binder:655_B: 1.2% user + 0% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:   74% 14013/com.google.android.apps.tv.launcherx: 54% user + 20% kernel / faults: 209 minor
+10-02 15:05:26.731   655 14830 E ActivityManager:     31% 14024/HeapTaskDaemon: 24% user + 6.8% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     15% 14055/RenderThread: 15% user + 0% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     9% 14013/ps.tv.launcherx: 6.8% user + 2.2% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     4.5% 14025/ReferenceQueueD: 2.2% user + 2.2% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     4.5% 14087/mali-cmar-backe: 0% user + 4.5% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     2.2% 14060/Lite Thread #0: 2.2% user + 0% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     2.2% 14061/Lite Thread #1: 2.2% user + 0% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:   30% 472/surfaceflinger: 17% user + 12% kernel / faults: 305 minor
+10-02 15:05:26.731   655 14830 E ActivityManager:     16% 472/surfaceflinger: 11% user + 4.7% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     5.9% 606/surfaceflinger: 2.3% user + 3.5% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     2.3% 552/binder:472_1: 1.1% user + 1.1% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     2.3% 553/binder:472_2: 1.1% user + 1.1% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     2.3% 646/binder:472_3: 1.1% user + 1.1% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     1.1% 595/TimerDispatch: 1.1% user + 0% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     1.1% 596/app: 0% user + 1.1% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     1.1% 599/RegSampIdle: 1.1% user + 0% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:   71% 14771/org.worldfoundry.wf_game.smb: 57% user + 13% kernel / faults: 613 minor
+10-02 15:05:26.731   655 14830 E ActivityManager:     68% 14776/Signal Catcher: 52% user + 16% kernel
+10-02 15:05:26.731   655 14830 E ActivityManager:     2.7% 14809/dry.wf_game.smb: 0% user + 2.7% kernel
+10-02 15:05:26.732   655 14830 E ActivityManager:   8% 439/android.hardware.graphics.composer@3.2-service.droidlogic: 3.4% user + 4.5% kernel / faults: 179 minor
+10-02 15:05:26.732   655 14830 E ActivityManager:     9.1% 560/binder:439_1: 3.4% user + 5.7% kernel
+10-02 15:05:26.732   655 14830 E ActivityManager:   14% 13423/org.worldfoundry.wf_game.qbert: 2% user + 12% kernel / faults: 4 minor 1 major
+10-02 15:05:26.732   655 14830 E ActivityManager:     14% 13456/AAudio_1: 0% user + 14% kernel
+10-02 15:05:26.732   655 14830 E ActivityManager:   5.8% 464/audioserver: 5.8% user + 0% kernel / faults: 9 minor 1 major
+10-02 15:05:26.732   655 14830 E ActivityManager:     2.3% 10088/AAudio_4: 2.3% user + 0% kernel
+10-02 15:05:26.732   655 14830 E ActivityManager:     1.1% 617/AudioOut_D: 1.1% user + 0% kernel
+10-02 15:05:26.732   655 14830 E ActivityManager:     1.1% 13388/binder:464_7: 1.1% user + 0% kernel
+10-02 15:05:26.732   655 14830 E ActivityManager:   6.4% 935/com.android.systemui: 3.8% user + 2.5% kernel / faults: 31 minor
+10-02 15:05:26.732   655 14830 E ActivityManager:     5.1% 1010/wmshell.anim: 2.5% user + 2.5% kernel
+10-02 15:05:26.732   655 14830 E ActivityManager:     1.2% 10513/binder:935_A: 1.2% user + 0% kernel
+10-02 15:05:26.732   655 14830 E ActivityManager:   3.1% 105/crtc0_commit: 0% user + 3.1% kernel
+10-02 15:05:26.732   655 14830 E ActivityManager:   3.4% 427/android.hardware.audio.service-droidlogic: 3.4% user + 0% kernel / faults: 2 minor
+10-02 15:05:26.732   655 14830 E ActivityManager:     2.2% 613/amlAudioMixer16: 0% user + 2.2% kernel
+10-02 15:05:26.732   655 14830 E ActivityManager:     2.2% 2163/writer: 2.2% user + 0% kernel
+10-02 15:05:26.732   655 14830 E ActivityManager:   1.1% 379/statsd: 1.1% user + 0% kernel
+10-02 15:05:26.732   655 14830 E ActivityManager:     1.1% 384/binder:379_2: 1.1% user + 0% kernel
+10-02 15:05:26.732   655 14830 E ActivityManager:   1.1% 394/ksdioirqd/mmc1: 0% user + 1.1% kernel
+10-02 15:05:26.732   655 14830 E ActivityManager:   1.1% 445/android.hardware.tv.hdmi.cec-service.droidlogic: 0% user + 1.1% kernel / faults: 3 minor
+10-02 15:05:26.732   655 14830 E ActivityManager:   1.1% 535/media.metrics: 0% user + 1.1% kernel / faults: 1 minor
+10-02 15:05:26.732   655 14830 E ActivityManager:   1.2% 922/wpa_supplicant: 0% user + 1.2% kernel / faults: 11 minor
+10-02 15:05:26.732   655 14830 E ActivityManager:   1.3% 1119/com.droidlogic: 1.3% user + 0% kernel / faults: 14 minor
+10-02 15:05:26.732   655 14830 E ActivityManager:   1.8% 3907/adbd: 0% user + 1.8% kernel / faults: 5 minor
+10-02 15:05:26.732   655 14830 E ActivityManager:    +0% 14834/UsbFfs-monitor: 0% user + 0% kernel
+10-02 15:05:26.732   655 14830 E ActivityManager:   1.8% 10982/kworker/u9:1-mali_jd: 0% user + 1.8% kernel
+10-02 15:05:26.732   655 14830 E ActivityManager: 86% TOTAL: 52% user + 30% kernel + 3.3% irq + 0.5% softirq
+10-02 15:05:26.735   655 14830 D ActivityManager: Completed ANR of org.worldfoundry.wf_game.smb in 5655ms, latency 2ms
+10-02 15:05:26.741   655   758 I ActivityManager: Killing 14771:org.worldfoundry.wf_game.smb/u0a149 (adj 200): user request after error
+10-02 15:05:26.809   655   760 W ActivityManager: setHasOverlayUi called on unknown pid: 14771
+10-02 15:05:32.328   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 15:05:47.564 13423 14833 I wf_game : APP_CMD_PAUSE
+10-02 15:05:47.604   655   810 D ActivityManager: sync unfroze 14106 com.google.android.youtube.tv for 6
+10-02 15:05:47.638   655  2545 D ActivityManager: sync unfroze 1504 com.google.android.gms for 6
+10-02 15:05:48.180 13423 14833 I wf_game : APP_CMD_TERM_WINDOW
+10-02 15:05:49.227 13423 14889 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.qbert/files/wf.log
+10-02 15:05:49.227 13423 14889 I wf_game : android_main: enter
+10-02 15:05:49.227 13423 14889 I wf_game : android_main: assetMgr=0xee08c400
+10-02 15:05:49.227 13423 14889 I wf_game : phone controller: off (no assets/layout.json)
+10-02 15:05:49.227 13423 14889 I wf_game : android_main: uiMode=4 (tv=1)
+10-02 15:05:49.227 13423 14889 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-02 15:05:49.229 13423 14889 I wf_game : APP_CMD_RESUME
+10-02 15:05:49.249 13423 14889 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:05:49.250 13423 14889 E wf_game : eglMakeCurrent failed: 0x3002
+10-02 15:05:57.875   655   819 D ActivityManager: freezing 14106 com.google.android.youtube.tv
+10-02 15:06:11.246   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 15:06:12.261   655   770 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 3
+10-02 15:06:19.704   655   770 I ActivityManager: Force stopping org.worldfoundry.wf_game.aquarium appid=10147 user=-1: installPackageLI
+10-02 15:06:19.705   655   770 I ActivityManager: Killing 14533:org.worldfoundry.wf_game.aquarium/u0a147 (adj 910): stop org.worldfoundry.wf_game.aquarium due to installPackageLI
+10-02 15:06:19.787   655  2542 V ActivityManager: Got obituary of 14533:org.worldfoundry.wf_game.aquarium
+10-02 15:06:19.788   655   760 W ActivityManager: setHasOverlayUi called on unknown pid: 14533
+10-02 15:06:20.995   655   795 I ActivityManager: Force stopping org.worldfoundry.wf_game.aquarium appid=10147 user=10: pkg removed
+10-02 15:06:21.004   655   795 I ActivityManager: Force stopping org.worldfoundry.wf_game.aquarium appid=10147 user=0: pkg removed
+10-02 15:06:21.080   655   655 W ActivityManager: Unable to start service Intent { act=android.intent.action.PACKAGE_REMOVED cmp=com.android.keychain/.KeyChainService } U=10: not found
+10-02 15:06:21.127   655   655 D ActivityManager: sync unfroze 12923 com.android.keychain for 10
+10-02 15:06:21.189   655   920 D ActivityManager: sync unfroze 2192 com.google.android.permissioncontroller for 6
+10-02 15:06:21.220   655   920 W ActivityManager: Unable to launch app com.google.android.permissioncontroller/1010075 for service Intent { act=android.permission.PermissionControllerService cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.permission.service.PermissionControllerServiceImpl }: user 10 is stopped
+10-02 15:06:21.225   655   820 W ActivityManager: Unable to launch app com.google.android.permissioncontroller/1010075 for service Intent { act=android.app.role.RoleControllerService cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.role.service.RoleControllerServiceImpl }: user 10 is stopped
+10-02 15:06:26.640 13423 14889 I wf_game : key code=4 action=0 mask=0x0 (unmapped, dropped)
+10-02 15:06:26.657 13423 14889 I wf_game : key code=4 action=1 mask=0x0 (unmapped, dropped)
+10-02 15:06:26.668 13423 14889 I wf_game : APP_CMD_PAUSE
+10-02 15:06:26.680 13423 14833 I wf_game : APP_CMD_RESUME
+10-02 15:06:26.703 13423 14833 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:06:26.704 13423 14833 E wf_game : eglMakeCurrent failed: 0x3002
+10-02 15:06:26.753 13423 14833 I wf_game : key code=4 action=0 mask=0x0 (unmapped, dropped)
+10-02 15:06:26.754 13423 14833 I wf_game : key code=4 action=1 mask=0x0 (unmapped, dropped)
+10-02 15:06:26.759 13423 14833 I wf_game : APP_CMD_PAUSE
+10-02 15:06:28.644   655   819 D ActivityManager: freezing 12883 com.android.providers.tv
+10-02 15:06:31.793   655 15015 D ActivityManager: created ANR temporary file:/data/anr/temp_anr_3518221263966301632.txt
+10-02 15:06:31.794   655 15015 I ActivityManager: Collecting stacks for pid 13423 into temporary file temp_anr_3518221263966301632.txt
+10-02 15:06:31.872   655 15016 I ActivityManager: dumpStackTraces pids={1083=true, 1149=true, 1236=true, 1329=true, 1421=true, 1504=true, 2076=true, 2192=true, 3048=true, 3329=true, 10105=true, 12883=true, 12923=true, 12926=true, 13029=true, 13080=true, 13651=true, 13658=true, 13982=true, 14013=true, 14106=true, 14247=true, 14549=true, 14649=true, 25730=true, 25946=true, 28920=true, 31197=true, 31351=true, 32344=true}
+10-02 15:06:31.873   655 15016 I ActivityManager: Dumping to /data/anr/anr_2026-10-02-15-06-31-872
+10-02 15:06:32.005   655   760 I ActivityManager: PendingStartActivityUids startActivity to updateOomAdj delay:5245ms, uid:10150
+10-02 15:06:32.062   655  2285 D ActivityManager: sync unfroze 12883 com.android.providers.tv for 7
+10-02 15:06:32.276   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 15:06:32.773   655 15016 I ActivityManager: Collecting stacks for pid 655
+10-02 15:06:32.983   655 15017 I ActivityManager: Skipping next CPU consuming process, not a java proc: 655
+10-02 15:06:32.983   655 15017 I ActivityManager: Skipping next CPU consuming process, not a java proc: 472
+10-02 15:06:32.983   655 15017 I ActivityManager: Skipping next CPU consuming process, not a java proc: 13423
+10-02 15:06:32.983   655 15017 I ActivityManager: Skipping next CPU consuming process, not a java proc: 439
+10-02 15:06:32.983   655 15017 I ActivityManager: Skipping next CPU consuming process, not a java proc: 105
+10-02 15:06:32.983   655 15017 I ActivityManager: Skipping next CPU consuming process, not a java proc: 427
+10-02 15:06:32.983   655 15017 I ActivityManager: Skipping next CPU consuming process, not a java proc: 935
+10-02 15:06:32.983   655 15017 I ActivityManager: Skipping next CPU consuming process, not a java proc: 438
+10-02 15:06:32.983   655 15017 I ActivityManager: Skipping next CPU consuming process, not a java proc: 14
+10-02 15:06:32.983   655 15017 I ActivityManager: Skipping next CPU consuming process, not a java proc: 94
+10-02 15:06:32.983   655 15017 I ActivityManager: Skipping next CPU consuming process, not a java proc: 213
+10-02 15:06:32.983   655 15017 I ActivityManager: Skipping next CPU consuming process, not a java proc: 214
+10-02 15:06:32.983   655 15017 I ActivityManager: Skipping next CPU consuming process, not a java proc: 284
+10-02 15:06:32.983   655 15017 I ActivityManager: Skipping next CPU consuming process, not a java proc: 394
+10-02 15:06:32.983   655 15017 I ActivityManager: Skipping next CPU consuming process, not a java proc: 464
+10-02 15:06:33.955   655 15016 I ActivityManager: Collecting stacks for pid 1130
+10-02 15:06:34.108   655 15016 I ActivityManager: Collecting stacks for pid 1119
+10-02 15:06:34.332   655 15016 I ActivityManager: Collecting stacks for pid 1101
+10-02 15:06:34.517   655 15016 I ActivityManager: Collecting stacks for pid 1055
+10-02 15:06:34.729   655 15016 I ActivityManager: Collecting stacks for pid 935
+10-02 15:06:35.184   655  2547 D ActivityManager: quick sync unfreeze 13080 for 1
+10-02 15:06:35.197   655   760 D ActivityManager: sync unfroze 13080 org.worldfoundry.wf_game for 1
+10-02 15:06:35.331 13080 15030 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game/files/wf.log
+10-02 15:06:35.331 13080 15030 I wf_game : android_main: enter
+10-02 15:06:35.331 13080 15030 I wf_game : android_main: assetMgr=0xee08c600
+10-02 15:06:35.331 13080 15030 I wf_game : phone controller: off (no assets/layout.json)
+10-02 15:06:35.331 13080 15030 I wf_game : android_main: uiMode=4 (tv=1)
+10-02 15:06:35.331 13080 15030 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-02 15:06:35.335 13080 15030 I wf_game : APP_CMD_RESUME
+10-02 15:06:35.374 13080 15030 I wf_game : APP_CMD_INIT_WINDOW
+10-02 15:06:35.375 13080 15030 E wf_game : eglMakeCurrent failed: 0x3002
+10-02 15:06:35.428   655 15016 I ActivityManager: dumpStackTraces nativepids=null
+10-02 15:06:35.428   655 15016 I ActivityManager: dumpStackTraces extraPids=[14013, 1083]
+10-02 15:06:35.428   655 15016 I ActivityManager: Collecting stacks for extra pid 14013
+10-02 15:06:37.009   655 15016 I ActivityManager: Collecting stacks for extra pid 1083
+10-02 15:06:38.778   655 15016 I ActivityManager: Done dumping
+10-02 15:06:38.821   655 15016 E ActivityManager: ANR in org.worldfoundry.wf_game.qbert (org.worldfoundry.wf_game.qbert/android.app.NativeActivity)
+10-02 15:06:38.821   655 15016 E ActivityManager: PID: 13423
+10-02 15:06:38.821   655 15016 E ActivityManager: Reason: Input dispatching timed out (67cd975 org.worldfoundry.wf_game.qbert/android.app.NativeActivity (server) is not responding. Waited 5005ms for FocusEvent(hasFocus=false))
+10-02 15:06:38.821   655 15016 E ActivityManager: Parent: org.worldfoundry.wf_game.qbert/android.app.NativeActivity
+10-02 15:06:38.821   655 15016 E ActivityManager: ErrorId: 81a51004-cd09-4a60-84d8-73c13f3fd203
+10-02 15:06:38.821   655 15016 E ActivityManager: Frozen: false
+10-02 15:06:38.821   655 15016 E ActivityManager: Load: 2.99 / 2.98 / 2.7
+10-02 15:06:38.821   655 15016 E ActivityManager: ----- Output from /proc/pressure/memory -----
+10-02 15:06:38.821   655 15016 E ActivityManager: some avg10=1.46 avg60=0.64 avg300=0.53 total=40895020
+10-02 15:06:38.821   655 15016 E ActivityManager: full avg10=0.44 avg60=0.23 avg300=0.20 total=14519994
+10-02 15:06:38.821   655 15016 E ActivityManager: ----- End output from /proc/pressure/memory -----
+10-02 15:06:38.821   655 15016 E ActivityManager: ----- Output from /proc/pressure/cpu -----
+10-02 15:06:38.821   655 15016 E ActivityManager: some avg10=11.85 avg60=8.78 avg300=10.42 total=2713032913
+10-02 15:06:38.821   655 15016 E ActivityManager: full avg10=0.00 avg60=0.00 avg300=0.00 total=0
+10-02 15:06:38.821   655 15016 E ActivityManager: ----- End output from /proc/pressure/cpu -----
+10-02 15:06:38.821   655 15016 E ActivityManager: ----- Output from /proc/pressure/io -----
+10-02 15:06:38.821   655 15016 E ActivityManager: some avg10=2.48 avg60=0.97 avg300=0.86 total=63082750
+10-02 15:06:38.821   655 15016 E ActivityManager: full avg10=0.37 avg60=0.17 avg300=0.14 total=12501196
+10-02 15:06:38.821   655 15016 E ActivityManager: ----- End output from /proc/pressure/io -----
+10-02 15:06:38.821   655 15016 E ActivityManager:
+10-02 15:06:38.821   655 15016 E ActivityManager: CPU usage from 0ms to 6922ms later (2026-10-02 15:06:31.863 to 2026-10-02 15:06:38.785):
+10-02 15:06:38.821   655 15016 E ActivityManager:   59% 14013/com.google.android.apps.tv.launcherx: 48% user + 11% kernel / faults: 19990 minor 85 major
+10-02 15:06:38.821   655 15016 E ActivityManager:   34% 655/system_server: 21% user + 13% kernel / faults: 6281 minor 27 major
+10-02 15:06:38.821   655 15016 E ActivityManager:   24% 1083/com.google.android.bluetooth: 21% user + 3.4% kernel / faults: 6023 minor 369 major
+10-02 15:06:38.821   655 15016 E ActivityManager:   0.3% 13080/org.worldfoundry.wf_game: 0.2% user + 0% kernel / faults: 4076 minor 1156 major
+10-02 15:06:38.821   655 15016 E ActivityManager:   14% 472/surfaceflinger: 8.3% user + 5.7% kernel / faults: 1446 minor 1 major
+10-02 15:06:38.821   655 15016 E ActivityManager:   9.5% 935/com.android.systemui: 6.9% user + 2.6% kernel / faults: 3525 minor 41 major
+10-02 15:06:38.821   655 15016 E ActivityManager:   9.2% 13423/org.worldfoundry.wf_game.qbert: 9.2% user + 0% kernel / faults: 1032 minor 10 major
+10-02 15:06:38.821   655 15016 E ActivityManager:   4.3% 439/android.hardware.graphics.composer@3.2-service.droidlogic: 2.1% user + 2.1% kernel / faults: 928 minor
+10-02 15:06:38.821   655 15016 E ActivityManager:   3.3% 464/audioserver: 3% user + 0.2% kernel / faults: 262 minor 1 major
+10-02 15:06:38.821   655 15016 E ActivityManager:   3.1% 427/android.hardware.audio.service-droidlogic: 0.1% user + 3% kernel / faults: 16 minor
+10-02 15:06:38.821   655 15016 E ActivityManager: 53% TOTAL: 36% user + 14% kernel + 0.3% iowait + 1.8% irq + 0.5% softirq
+10-02 15:06:38.821   655 15016 E ActivityManager: CPU usage from 41ms to 1041ms later (2026-10-02 15:06:31.904 to 2026-10-02 15:06:32.904):
+10-02 15:06:38.821   655 15016 E ActivityManager:   97% 655/system_server: 43% user + 53% kernel / faults: 1164 minor 2 major
+10-02 15:06:38.821   655 15016 E ActivityManager:     45% 15017/AnrAuxiliaryTas: 17% user + 28% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     20% 745/Signal Catcher: 15% user + 4.7% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     14% 819/CachedAppOptimi: 1.5% user + 12% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     3.1% 1770/binder:655_D: 3.1% user + 0% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     3.1% 2287/binder:655_14: 3.1% user + 0% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     3.1% 15016/AnrConsumer: 1.5% user + 1.5% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     1.5% 801/PackageInstalle: 1.5% user + 0% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     1.5% 830/InputDispatcher: 0% user + 1.5% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:   35% 472/surfaceflinger: 20% user + 14% kernel / faults: 346 minor
+10-02 15:06:38.821   655 15016 E ActivityManager:     20% 472/surfaceflinger: 13% user + 7.2% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     5.8% 606/surfaceflinger: 2.9% user + 2.9% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     4.3% 1288/binder:472_5: 1.4% user + 2.9% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     2.9% 646/binder:472_3: 1.4% user + 1.4% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     1.4% 552/binder:472_1: 0% user + 1.4% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     1.4% 553/binder:472_2: 0% user + 1.4% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     1.4% 574/mali-mem-purge: 0% user + 1.4% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     1.4% 596/app: 0% user + 1.4% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     1.4% 600/surfaceflinger: 0% user + 1.4% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:   44% 14013/com.google.android.apps.tv.launcherx: 36% user + 7.8% kernel / faults: 66 minor
+10-02 15:06:38.821   655 15016 E ActivityManager:     26% 14055/RenderThread: 23% user + 2.6% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     7.8% 14013/ps.tv.launcherx: 5.2% user + 2.6% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     5.2% 14087/mali-cmar-backe: 2.6% user + 2.6% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     2.6% 14056/Lite Thread #0: 2.6% user + 0% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     2.6% 14079/binder:14013_4: 0% user + 2.6% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     2.6% 14125/CronetNet: 2.6% user + 0% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:   40% 13423/org.worldfoundry.wf_game.qbert: 40% user + 0% kernel / faults: 274 minor 3 major
+10-02 15:06:38.821   655 15016 E ActivityManager:     35% 13428/Signal Catcher: 27% user + 7.5% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:   9% 439/android.hardware.graphics.composer@3.2-service.droidlogic: 6.4% user + 2.5% kernel / faults: 236 minor
+10-02 15:06:38.821   655 15016 E ActivityManager:     10% 560/binder:439_1: 6.4% user + 3.8% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:   3% 105/crtc0_commit: 0% user + 3% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:   3.7% 427/android.hardware.audio.service-droidlogic: 1.2% user + 2.5% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     2.5% 613/amlAudioMixer16: 0% user + 2.5% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:   5.1% 935/com.android.systemui: 3.4% user + 1.7% kernel / faults: 26 minor
+10-02 15:06:38.821   655 15016 E ActivityManager:     3.4% 1010/wmshell.anim: 1.7% user + 1.7% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     1.7% 994/wmshell.main: 1.7% user + 0% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     1.7% 8999/binder:935_9: 0% user + 1.7% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:   2.5% 438/android.hardware.graphics.allocator-service: 0% user + 2.5% kernel / faults: 37 minor 8 major
+10-02 15:06:38.821   655 15016 E ActivityManager:   1% 14/rcu_preempt: 0% user + 1% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:   1% 94/cma_task0: 0% user + 1% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:   1% 213/logd: 0% user + 1% kernel / faults: 6 minor
+10-02 15:06:38.821   655 15016 E ActivityManager:     2.1% 223/logd.writer: 1% user + 1% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:   1% 214/lmkd: 0% user + 1% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     2.1% 214/lmkd: 1% user + 1% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:   1% 284/f2fs_ckpt-254:5: 0% user + 1% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:   1.2% 394/ksdioirqd/mmc1: 0% user + 1.2% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:   1.4% 464/audioserver: 0% user + 1.4% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:     1.4% 10088/AAudio_4: 1.4% user + 0% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:   1.7% 1083/com.google.android.bluetooth: 1.7% user + 0% kernel / faults: 1 minor
+10-02 15:06:38.821   655 15016 E ActivityManager:   1.8% 1101/com.google.android.chromecast.chromecastservice: 0% user + 1.8% kernel / faults: 71 minor 14 major
+10-02 15:06:38.821   655 15016 E ActivityManager:     1.8% 1101/romecastservice: 0% user + 1.8% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:   1.8% 1119/com.droidlogic: 1.8% user + 0% kernel / faults: 19 minor
+10-02 15:06:38.821   655 15016 E ActivityManager:   2.3% 12881/kworker/u9:0-mali_jd: 0% user + 2.3% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager:   2.5% 13860/kworker/u8:3-events_unbound: 0% user + 2.5% kernel
+10-02 15:06:38.821   655 15016 E ActivityManager: 81% TOTAL: 48% user + 29% kernel + 0.5% iowait + 2.2% irq + 0.7% softirq
+10-02 15:06:38.823   655 15016 I ActivityManager: Killing 13423:org.worldfoundry.wf_game.qbert/u0a150 (adj 200): bg anr
+10-02 15:06:38.828   655 15016 D ActivityManager: Completed ANR of org.worldfoundry.wf_game.qbert in 7036ms, latency 0ms
+10-02 15:06:38.886   655   760 W ActivityManager: setHasOverlayUi called on unknown pid: 13423
+10-02 15:06:41.298   655   819 D ActivityManager: freezing 2192 com.google.android.permissioncontroller
+10-02 15:06:44.314   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 15:07:01.162   655   819 D ActivityManager: freezing 12923 com.android.keychain
+10-02 15:07:17.286 13080 15030 I wf_game : APP_CMD_PAUSE
+10-02 15:07:17.384   655  2542 D ActivityManager: sync unfroze 1504 com.google.android.gms for 6
+10-02 15:07:17.924 13080 15030 I wf_game : APP_CMD_TERM_WINDOW
+10-02 15:07:58.005   655   819 D ActivityManager: freezing 1504 com.google.android.gms

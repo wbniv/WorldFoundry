@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<!--
+  Plan mockup — seahorses in the saltwater Planted Tank, every visible state.
+  GENERATED: edit tank-scene.tmpl, then run build_mockups.py (it inlines the
+  real Chromecast captures as data URIs and renders tank-scene.png).
+  Seahorses and hitching posts are drawn over real engine captures; their
+  shapes come from the same tail expansion as tail-rig.html. Positions are
+  illustrative; FPS figures are estimates, not measurements.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup — seahorses in the Planted Tank</title>
+<style>
+  :root { --bg:#ffffff; --fg:#1f2328; --muted:#656d76; --line:#d1d9e0; --panel:#f6f8fa; --accent:#0969da; --chip:#eaeef2; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --line:#30363d; --panel:#161b22; --accent:#4493f8; --chip:#21262d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; width:1440px; height:900px; overflow:hidden; background:var(--bg); color:var(--fg); font:14px/1.45 ui-sans-serif,system-ui,sans-serif; }
+  header { display:flex; align-items:baseline; gap:14px; height:56px; padding:14px 24px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header h1 { margin:0; font-size:16px; font-weight:600; }
+  header .sub { color:var(--muted); font-size:13px; }
+  header .tag { margin-left:auto; font:600 11px ui-monospace,monospace; letter-spacing:.04em; color:var(--muted); border:1px solid var(--line); border-radius:10px; padding:2px 8px; }
+  main { display:grid; grid-template-columns:1064px 376px; height:844px; }
+  .stage { padding:12px; border-right:1px solid var(--line); }
+  #view { display:block; width:1040px; height:585px; border-radius:6px; background:#000; }
+  .strip { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-top:12px; }
+  .strip button { padding:0; border:2px solid var(--line); border-radius:6px; background:var(--panel); color:var(--fg); cursor:pointer; text-align:left; overflow:hidden; }
+  .strip button.on { border-color:var(--accent); }
+  .strip canvas { display:block; width:100%; height:auto; }
+  .strip span { display:block; padding:4px 6px 5px; font-size:11.5px; line-height:1.3; }
+  .strip span b { display:block; font-size:12px; }
+  aside { padding:14px 18px; overflow:hidden; }
+  aside h2 { margin:0 0 4px; font-size:17px; }
+  aside .state { color:var(--muted); font-size:12.5px; margin-bottom:10px; }
+  dl { margin:0; display:grid; grid-template-columns:112px 1fr; gap:5px 10px; font-size:13px; }
+  dt { color:var(--muted); }
+  dd { margin:0; }
+  .fps { margin:14px 0 8px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--panel); }
+  .fps b { font-size:20px; }
+  .fps .k { color:var(--muted); font-size:12px; }
+  .decide { margin-top:10px; padding:10px 12px; border-left:3px solid var(--accent); background:var(--panel); font-size:13px; }
+  .foot { margin-top:12px; font-size:12px; color:var(--muted); }
+</style>
+</head>
+<body>
+<header><h1>Seahorses in the saltwater Planted Tank — states</h1><span class="sub">drawn over real Chromecast 1 captures · positions illustrative · FPS estimated</span><span class="tag">MOCKUP — NOT SHIPPED</span></header>
+<main>
+  <div class="stage">
+    <canvas id="view" width="1040" height="585"></canvas>
+    <div class="strip" id="strip"></div>
+  </div>
+  <aside id="info"></aside>
+</main>
+<img id="salt" alt="" hidden src="{{SALT_JPG}}">
+<img id="fresh" alt="" hidden src="{{FRESH_JPG}}">
+<script>
+"use strict";
+// ── Same tail model as tail-rig.html (35 joints; OURS until Phase 0) ──
+const N = 35, KN = [0, 6, 12, 18, 24, 30, 34], D2R = Math.PI / 180;
+const LEN = Array.from({length: N}, (_, i) => 3.75 * Math.pow(0.9764, i));
+const WID = Array.from({length: N + 1}, (_, i) => 9.0 + (1.4 - 9.0) * Math.pow(i / N, 0.85));
+const LIM = Array.from({length: N}, (_, i) => { const t = i / (N - 1); return { v: 12 + 28 * t, d: 4 + 8.5 * t, l: 8 + 20 * t }; });
+function interp(vals, x) {
+  let k = 0; while (k < KN.length - 2 && x > KN[k + 1]) k++;
+  const m = j => j <= 0 ? (vals[1] - vals[0]) / (KN[1] - KN[0]) : j >= KN.length - 1 ? (vals[j] - vals[j - 1]) / (KN[j] - KN[j - 1]) : (vals[j + 1] - vals[j - 1]) / (KN[j + 1] - KN[j - 1]);
+  const x0 = KN[k], h = KN[k + 1] - x0, s = (x - x0) / h, s2 = s * s, s3 = s2 * s;
+  return (2*s3 - 3*s2 + 1) * vals[k] + (s3 - 2*s2 + s) * h * m(k) + (-2*s3 + 3*s2) * vals[k + 1] + (s3 - s2) * h * m(k + 1);
+}
+function expand(st) {
+  const F = [], L = [], Lw = (N - st.start) * st.p, s = N - Lw;
+  for (let i = 0; i < N; i++) { const u = i / (N - 1); F[i] = interp(st.f, i); L[i] = (st.lat || 0) * u; }
+  if (st.mode === 'v' && st.p > 0) { const i0 = Math.max(0, Math.floor(s) - 5); let acc = -st.pitch; for (let i = 0; i < i0; i++) acc += F[i];
+    for (let i = i0; i < Math.min(N, i0 + 5); i++) { F[i] = (90 - acc) / 5; L[i] = 0; } }
+  if (st.mode !== 'off' && st.p > 0) for (let i = 0; i < N; i++) { const w = Math.max(0, Math.min(1, i + 1 - s)); if (!w) continue;
+    const kap = LEN[i] / (st.r + WID[i] / 2) / D2R; if (st.mode === 'h') { F[i] = F[i] * (1 - w) + kap * w; L[i] *= 1 - w; } else { L[i] = L[i] * (1 - w) + kap * w; F[i] *= 1 - w; } }
+  for (let i = 0; i < N; i++) { F[i] = Math.max(-LIM[i].d, Math.min(LIM[i].v, F[i])); L[i] = Math.max(-LIM[i].l, Math.min(LIM[i].l, L[i])); }
+  return { F, L };
+}
+function fk(A, pitch) {
+  const b = pitch * D2R; let d = [-Math.sin(b), 0, -Math.cos(b)], v = [Math.cos(b), 0, -Math.sin(b)], s = [0, 1, 0];
+  const rot = (a, c, g) => { const C = Math.cos(g), S = Math.sin(g); return [a.map((x, j) => x * C + c[j] * S), c.map((x, j) => x * C - a[j] * S)]; };
+  let p = [0, 0, 0]; const P = [p], V = [v], Sd = [s];
+  for (let i = 0; i < N; i++) { [d, v] = rot(d, v, A.F[i] * D2R); [d, s] = rot(d, s, A.L[i] * D2R); p = p.map((x, j) => x + d[j] * LEN[i]); P.push(p); V.push(v); Sd.push(s); }
+  return { P, V, S: Sd };
+}
+function wrapCenter(K, st) { const i = Math.min(N - 1, Math.ceil(N - (N - st.start) * st.p)), ax = st.mode === 'h' ? K.V[i] : K.S[i], rr = st.r + WID[i] / 2;
+  return K.P[i].map((x, j) => x + ax[j] * rr); }
+const BODY = [[-4.5,0],[-6.5,6],[-8,14],[-8.8,22],[-8.6,30],[-7.6,38],[-6,45],[-5,50],[-6.5,55],[-7,60],[-5.5,65],[-3,69],[-1,73],[1.5,71],[3.5,67],[6,64.5],[10,63],[18,61.5],[26,60.5],[29,60.2],[29.6,58.6],[26,57.8],[18,57.6],[11,57.2],[7,55.5],[5.5,52.5],[6.5,49],[9.5,44],[12,37],[12.5,28],[11,19],[8,10],[5,3],[4.5,0]];
+const POUCH = [[4.5,0],[9,1.5],[13,6],[13.5,11],[11.5,16]];
+const POSES = {
+  swim:  { f: [-2, 0, 2, 3, 5, 8, 12], mode: 'off', start: 18, r: 4, p: 0, pitch: -6 },
+  probe: { f: [9, 8, 6, 3, 1, 4, 12], mode: 'off', start: 18, r: 4, p: 0, pitch: -14, lat: 10 },
+  rest:  { f: [2, 3, 6, 11, 19, 28, 36], mode: 'off', start: 18, r: 4, p: 0, pitch: 4 },
+  stem:  { f: [3, 4, 4, 4, 4, 4, 4], mode: 'v', start: 16, r: 6, p: 1, pitch: -4 },
+  branch:{ f: [4, 5, 7, 8, 8, 8, 8], mode: 'h', start: 18, r: 4, p: 1, pitch: 8 },
+};
+// Draw one seahorse. anchor 'wrap' puts the coil centre on (x, y); otherwise (x, y) is the tail base.
+function seahorse(g, o, t) {
+  const st = { ...POSES[o.pose], ...(o.over || {}) }; st.pitch += 2.2 * Math.sin(t * 0.9 + (o.ph || 0));
+  if (o.pose === 'swim') st.lat = 4 * Math.sin(t * 1.6 + (o.ph || 0));
+  const A = expand(st), K = fk(A, st.pitch), m = o.mirror ? -1 : 1, k = o.k;
+  let ox = o.x, oy = o.y;
+  if (o.anchor === 'wrap' && st.mode !== 'off') { const c = wrapCenter(K, st); ox = o.x - m * c[0] * k; oy = o.y + c[2] * k; }
+  const X = p => ox + m * p[0] * k, Y = p => oy - p[2] * k;
+  const col = o.male ? ['#ec8b35', '#d97a28', '#7a3c0e'] : ['#f2c14e', '#e2ad38', '#8a5d0e'];
+  // tail ribbon
+  const pts = K.P.map(p => [X(p), Y(p)]), nx = [], ny = [];
+  for (let i = 0; i < pts.length; i++) { const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)]; let dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy);
+    if (L < 1e-6) { nx[i] = i ? nx[i - 1] : 1; ny[i] = i ? ny[i - 1] : 0; } else { nx[i] = -dy / L; ny[i] = dx / L; } }
+  for (let i = 0; i < pts.length - 1; i++) { const w0 = WID[i] * k / 2, w1 = WID[i + 1] * k / 2;
+    g.beginPath(); g.moveTo(pts[i][0] + nx[i] * w0, pts[i][1] + ny[i] * w0); g.lineTo(pts[i + 1][0] + nx[i + 1] * w1, pts[i + 1][1] + ny[i + 1] * w1);
+    g.lineTo(pts[i + 1][0] - nx[i + 1] * w1, pts[i + 1][1] - ny[i + 1] * w1); g.lineTo(pts[i][0] - nx[i] * w0, pts[i][1] - ny[i] * w0); g.closePath();
+    g.fillStyle = i % 2 ? col[0] : col[1]; g.fill(); if (k > 1.2) { g.strokeStyle = col[2]; g.lineWidth = 0.8; g.stroke(); } }
+  // body in its pitched frame
+  const b = st.pitch * D2R, C = Math.cos(b), S = Math.sin(b);
+  const BX = (x, z) => ox + m * (x * C + z * S) * k, BY = (x, z) => oy - (-x * S + z * C) * k;
+  g.beginPath(); for (let j = 0; j <= 12; j++) { const z = 13 + j * 1.4, x = -8.6 - 6.5 * Math.sin(Math.PI * j / 12) - 0.9 * Math.sin(t * 9 - j * 0.9); j ? g.lineTo(BX(x, z), BY(x, z)) : g.moveTo(BX(x, z), BY(x, z)); }
+  g.lineTo(BX(-8.4, 13), BY(-8.4, 13)); g.closePath(); g.fillStyle = 'rgba(255,236,190,.45)'; g.fill();
+  g.beginPath(); BODY.forEach(([x, z], i) => i ? g.lineTo(BX(x, z), BY(x, z)) : g.moveTo(BX(x, z), BY(x, z)));
+  if (o.male) POUCH.slice().reverse().forEach(([x, z]) => g.lineTo(BX(x, z), BY(x, z)));
+  g.closePath(); g.fillStyle = col[0]; g.fill(); g.strokeStyle = col[2]; g.lineWidth = Math.max(0.6, k * 0.45); g.stroke();
+  if (k > 1.2) { g.strokeStyle = 'rgba(110,60,10,.45)'; g.lineWidth = 1;
+    for (let z = 4.5; z < 50; z += 4.5) { g.beginPath(); g.moveTo(BX(-8.4, z), BY(-8.4, z)); g.lineTo(BX(11.5, z), BY(11.5, z)); g.stroke(); }
+    g.fillStyle = 'rgba(60,30,5,.5)'; [[-3,8],[2,12],[-5,19],[4,22],[-2,27],[6,31],[-4,35],[1,40],[5,45]].forEach(([x, z]) => { g.beginPath(); g.arc(BX(x, z), BY(x, z), 0.45 * k, 0, 7); g.fill(); }); }
+  g.beginPath(); g.arc(BX(2.4, 62.5), BY(2.4, 62.5), Math.max(1, 2.3 * k), 0, 7); g.fillStyle = '#fff6dc'; g.fill();
+  g.beginPath(); g.arc(BX(2.9, 62.5), BY(2.9, 62.5), Math.max(0.6, 1.1 * k), 0, 7); g.fillStyle = '#1b1208'; g.fill();
+}
+// Hitching post: tapered polyline (dead gorgonian / sea whip), saltwater only
+function post(g, pts, w0, w1, col) {
+  for (let i = 0; i < pts.length - 1; i++) { const u0 = i / (pts.length - 1), u1 = (i + 1) / (pts.length - 1);
+    g.strokeStyle = col; g.lineCap = 'round'; g.lineWidth = w0 + (w1 - w0) * (u0 + u1) / 2;
+    g.beginPath(); g.moveTo(...pts[i]); g.lineTo(...pts[i + 1]); g.stroke(); }
+}
+const salt = document.getElementById('salt'), fresh = document.getElementById('fresh');
+function hideHudFps(g, label) { g.fillStyle = '#05070a'; g.fillRect(952, 544, 82, 30); g.fillStyle = '#c9ced6'; g.font = '15px ui-monospace,monospace'; g.fillText(label, 960, 565); }
+function wide(g, t, pairs) {
+  g.drawImage(salt, 0, 0, 1040, 585);
+  if (!pairs) return;
+  post(g, [[418, 374], [420, 330], [416, 292], [421, 262]], 6, 3, '#6d4a5e');                 // A: sea whip, vertical
+  post(g, [[648, 372], [652, 330], [660, 296]], 7, 4, '#7c5b49'); post(g, [[655, 318], [690, 306], [714, 304]], 4.5, 3, '#7c5b49'); // B: branch with an arm
+  seahorse(g, { pose: 'stem', anchor: 'wrap', x: 420, y: 333, k: 0.62 }, t);
+  seahorse(g, { pose: 'swim', x: 548, y: 286, k: 0.62, male: true, mirror: true, ph: 1.3 }, t);
+  if (pairs > 1) {
+    seahorse(g, { pose: 'branch', anchor: 'wrap', x: 694, y: 306, k: 0.6, ph: 2.1 }, t);
+    seahorse(g, { pose: 'probe', x: 352, y: 300, k: 0.6, male: true, ph: 0.4 }, t);
+  }
+}
+function close(g, t, greet) {
+  g.save(); g.filter = 'blur(3px) brightness(.8)'; g.drawImage(salt, 330, 200, 260, 146, -40, -30, 1120, 645); g.restore();
+  g.fillStyle = 'rgba(8,28,38,.25)'; g.fillRect(0, 0, 1040, 585);
+  post(g, [[560, 600], [566, 420], [556, 250], [566, 60]], 26, 15, '#6d4a5e');
+  for (let y = 80; y < 600; y += 34) { g.fillStyle = 'rgba(255,255,255,.07)'; g.fillRect(548, y, 30, 3); }
+  if (greet) {
+    seahorse(g, { pose: 'stem', anchor: 'wrap', x: 561, y: 360, k: 2.9 }, t);
+    seahorse(g, { pose: 'stem', anchor: 'wrap', x: 561, y: 384, k: 2.9, male: true, mirror: true, ph: 1.1, over: { r: 7 } }, t);
+  } else {
+    seahorse(g, { pose: 'stem', anchor: 'wrap', x: 561, y: 360, k: 3.0 }, t);
+    seahorse(g, { pose: 'swim', x: 840, y: 330, k: 1.6, male: true, mirror: true, ph: 1.5 }, t);
+  }
+  g.fillStyle = 'rgba(12,30,26,.9)'; g.fillRect(20, 540, 440, 30); g.fillStyle = '#d9e4d3'; g.font = '15px ui-monospace,monospace';
+  g.fillText('Seed: 713 | Saltwater | Hold A: settings', 30, 561);
+}
+const STATES = [
+  { id: 'two', name: 'Saltwater · 2 pairs', tag: 'default', draw: (g, t) => { wide(g, t, 2); hideHudFps(g, 'est.'); },
+    vis: 'Four seahorses: one grips the sea whip (vertical coil), one the branch arm (horizontal coil), one swims, one probes with its tail near the sea whip. Urchin unchanged.',
+    actors: '+4 seahorses × 2 actors + 2 posts', mb: '1200–1599, visibility 1162–1163', fps: '≈ 11.6–12.2', d: '−9.8 to −14.0 %',
+    decide: 'Default (D3, decided). Phase 4 measures the real cost; a large surprise reopens D3.' },
+  { id: 'pair', name: 'Saltwater · 1 pair', tag: 'option', draw: (g, t) => { wide(g, t, 1); hideHudFps(g, 'est.'); },
+    vis: 'Female grips the sea whip (tail coiled around a vertical post); male swims toward the branch post. Urchin unchanged.',
+    actors: '+2 seahorses × 2 actors (body with tail rig, fins) + 2 posts', mb: '1200–1299 (A), 1300–1399 (B), visibility 1162',
+    fps: '≈ 12.5–12.8', d: '−5.1 to −7.5 %', decide: 'The lighter setting; also measured in Phase 4.' },
+  { id: 'close', name: 'Close view · grip', tag: 'tap A', draw: (g, t) => close(g, t, false),
+    vis: 'Close camera on a gripping seahorse: the coil follows the post; rings visible; dorsal fin drawn as a blur.',
+    actors: 'same as the default', mb: 'same', fps: '≈ 12.5–12.8 (wide) — close view costs more for plants', d: 'measure',
+    decide: 'Close camera: keep the urchin as the focus (today) or cycle A between urchin and seahorses?' },
+  { id: 'greet', name: 'Greeting · pair', tag: 'daily', draw: (g, t) => close(g, t, true),
+    vis: 'Pair greeting: both grip the same post, tails coiled around it, bodies alternating sides; colour brightens (ours).',
+    actors: 'same', mb: 'greeting state in 1240–1259', fps: 'same as 1 pair', d: '—',
+    decide: 'Greeting on by default? It is a popular-source behaviour until the primary paper is read.' },
+  { id: 'none', name: 'Saltwater · None', tag: 'today', draw: (g, t) => { wide(g, t, 0); },
+    vis: 'Exactly today\'s tank: no posts, no seahorses. The HUD shows a real but unmatched reading (25.4).',
+    actors: 'unchanged (51 actors)', mb: 'unchanged', fps: '13.5 matched (5 Oct) · 25.4 HUD (9 Oct)', d: 'baseline',
+    decide: 'Baseline is stale (static meshes landed 8 Oct): Phase 4 re-measures it before any seahorse number is trusted.' },
+  { id: 'fresh', name: 'Freshwater', tag: 'hidden', draw: (g, t) => { g.drawImage(fresh, 0, 0, 1040, 585); },
+    vis: 'Freshwater shows the rainbow goby and rocks; seahorses and posts are hidden (they and the urchin follow 1160).',
+    actors: 'seahorses hidden, behaviour skipped', mb: '1162–1163 forced to 0', fps: 'unchanged', d: '0 %',
+    decide: 'Hidden is the only freshwater behaviour proposed; no freshwater seahorse exists.' },
+];
+let cur = 0;
+const view = document.getElementById('view').getContext('2d');
+const strip = document.getElementById('strip');
+STATES.forEach((s, i) => { const b = document.createElement('button'); b.innerHTML = `<canvas width="1040" height="585"></canvas><span><b>${s.name}</b>${s.tag}</span>`;
+  b.onclick = () => { cur = i; info(); }; strip.appendChild(b); s.thumb = b.querySelector('canvas').getContext('2d'); });
+function info() {
+  const s = STATES[cur]; strip.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', i === cur));
+  document.getElementById('info').innerHTML = `<h2>${s.name}</h2><div class="state">state ${cur + 1} of ${STATES.length} · ${s.tag}</div>
+    <dl><dt>Visible</dt><dd>${s.vis}</dd><dt>Actors</dt><dd>${s.actors}</dd><dt>Mailboxes</dt><dd>${s.mb}</dd></dl>
+    <div class="fps"><div class="k">Chromecast 1 FPS (estimate unless marked)</div><b>${s.fps}</b><div class="k">vs today: ${s.d}</div></div>
+    <div class="decide"><b>Decision:</b> ${s.decide}</div>
+    <div class="foot">Estimates scale the 5 Oct matched baseline (74.0 ms/frame) by 2–3 ms per seahorse, from the urchin's measured actor, Director and render costs. Phase 4 replaces them with matched release runs.</div>`;
+}
+function loop(ts) { const t = ts / 1000; STATES[cur].draw(view, t); requestAnimationFrame(loop); }
+function start() { STATES.forEach(s => s.draw(s.thumb, 0.3)); const h = location.hash.slice(1); const i = STATES.findIndex(s => s.id === h); if (i >= 0) cur = i; info(); requestAnimationFrame(loop); }
+Promise.all([salt, fresh].map(im => im.complete ? 0 : new Promise(r => { im.onload = r; im.onerror = r; }))).then(start);
+</script>
+</body>
+</html>

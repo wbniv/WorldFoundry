@@ -1,0 +1,8 @@
+   1.5 s to    9.5 s  REST - the fish idles, the ten swarm round it
+   9.5 s to   15.9 s  SWIM RIGHT - they school behind it
+  15.9 s to   21.9 s  REST - they gather round it again
+  21.9 s to   27.6 s  DART (A) - the school scatters, then regroups
+  27.6 s to   33.0 s  SWIM LEFT
+  33.0 s to   37.0 s  REST
+  37.0 s to   41.8 s  SWIM RIGHT, climbing
+  41.8 s to   44.8 s  REST

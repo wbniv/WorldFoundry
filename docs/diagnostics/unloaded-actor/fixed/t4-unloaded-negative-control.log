@@ -1,0 +1,11 @@
+{"label": "before-script-move", "9": {"heartbeat": 24.0, "x": 0.0}, "20": {"heartbeat": 0.0, "x": 295.0}, "21": {"heartbeat": 24.0, "x": -10.0}}
+{"label": "pose-written-into-A", "9": {"heartbeat": 35.0, "x": 0.0}, "20": {"heartbeat": 0.0, "x": -5.0}, "21": {"heartbeat": 35.0, "x": -10.0}}
+{"label": "after-120-player-updates-in-A", "9": {"heartbeat": 155.0, "x": 0.0}, "20": {"heartbeat": 0.0, "x": -5.0}, "21": {"heartbeat": 155.0, "x": -10.0}}
+Traceback (most recent call last):
+  File "/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/tests/reproduce_unloaded_actor.py", line 122, in <module>
+    for warm in (False,True):run(args,warm)
+                             ~~~^^^^^^^^^^^
+  File "/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/tests/reproduce_unloaded_actor.py", line 72, in run
+    assert after['20']['heartbeat']>before['20']['heartbeat'], 'target did not promptly start updating'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: target did not promptly start updating

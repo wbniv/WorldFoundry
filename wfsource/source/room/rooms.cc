@@ -74,11 +74,14 @@ LevelRooms::InitRooms(int numRooms,	_LevelOnDisk* levelData, PRoomObjectListChec
 	_roomArray = ( int32 * )( (char * )_levelData + ( _levelData->roomsOffset ));
 	AssertMsg( numRooms > 0, "No rooms in level" );
 
-	_rooms = new (HALLmalloc) Room[numRooms];
+	// MEMORY_NEW_ARRAY, not `new (HALLmalloc) Room[numRooms]` — see memory.hp:
+	// the compiler's array cookie is 8 bytes on x86_64 and 16 on arm64, and
+	// ~LevelRooms's MEMORY_DELETE_ARRAY must free the exact allocation base.
+	_rooms = MEMORY_NEW_ARRAY(HALLmalloc, Room, numRooms);
 
 	assert( ValidPtr( _rooms ) );
 
-	for( int index = 0; index < numRooms; index++ )
+	for( int index = 0; index < numRooms; ++index)
 	{
 		_RoomOnDisk * roomData = ( _RoomOnDisk * )( (( char * )_levelData ) + _roomArray[index] );
       
@@ -86,7 +89,7 @@ LevelRooms::InitRooms(int numRooms,	_LevelOnDisk* levelData, PRoomObjectListChec
 
 		_rooms[index].Construct( roomData,_levelData->objectCount,_rooms,numRooms,index, memory,levelOad.NumberOfTemporaryObjects,listCheckFuncList,checkListEntries,masterObjectList, _roomCallbacks  );				
       _rooms[index].Validate();
-      _numRooms++;                  // kts kludge so that objects constructed inside of the room don't crash when they iterate all of the rooms to see which they are in
+      ++_numRooms;                  // kts kludge so that objects constructed inside of the room don't crash when they iterate all of the rooms to see which they are in
                                     // (only occurs when an object is not in the room it is supposed to be in)
 	}
 
@@ -101,7 +104,7 @@ Room*
 LevelRooms::FindContainingRoom(const ColSpace& object, const Vector3& objpos) const
 {
    Validate();
-	for( int index = 0; index < _numRooms; index++ )
+	for( int index = 0; index < _numRooms; ++index)
 	{
       _rooms[index].Validate();
       if(_rooms[index].CheckCollision( object, objpos))
@@ -125,21 +128,42 @@ LevelRooms::FindContainingRoom(const PhysicalObject& object) const
 // this adds an object to whatever room it is in
 
 void
+LevelRooms::UpdateMovingObjects()
+{
+	for (int room = 0; room < _numRooms; ++room)
+		_rooms[room].UpdateRoomContents(ROOM_OBJECT_LIST_UPDATE, *this, true);
+}
+
+void
 LevelRooms::AddObjectToRoom( int32 objectIndex )
 {
 	Validate();
 	assert( objectIndex >= 0 );
 	BaseObject* object = (*_masterObjectList)[objectIndex];
    assert(ValidPtr(object));
-	AssertMsg( object->kind() != BaseObject::StatPlat_KIND, "Cannot generate or move a statplat at runtime" );
+	// Statplats are static collision baked per-room, so the runtime forbids
+	// generating or moving them (it would desync the baked room collision). In
+	// the EDITOR (wf-edit drives the engine via RunEditor), though, repositioning
+	// a platform is a core authoring action — so allow a moved statplat through
+	// the normal room-add below instead of aborting the process. The mesh + Jolt
+	// body already followed the gizmo via setCurrentPos for live preview, and the
+	// authoritative per-room collision is recomputed on save+reload. Outside the
+	// editor this stays a hard assert (moving a statplat mid-game is a real bug).
+	// Without this gate, dragging any statplat in wf-edit hit AssertMsg here on
+	// the next Room::UpdateRoomContents → _sys_assert → exit(-1) → the static
+	// debug-bridge gListenerThread's joinable ~thread → std::terminate (SIGABRT).
+	// Root cause: docs/investigations/2026-05-25-wf-edit-statplat-move-abort.md.
+	extern bool gEditorMode;   // game/main.cc — set true under --editor
+	if ( !gEditorMode )
+		AssertMsg( object->kind() != BaseObject::StatPlat_KIND, "Cannot generate or move a statplat at runtime (objectIndex=" << objectIndex << ", kind=" << object->kind() << ", object=" << *object << ")" );
 
-   PhysicalObject* po = dynamic_cast<PhysicalObject*>(object);
-   assert(ValidPtr(po));
+   assert(IsPhysicalObject(object));
+   PhysicalObject* po = static_cast<PhysicalObject*>(object);
 
 	int roomnum = -1;
 	// figure out which room to add to
 	assert( ValidPtr( _rooms ) );
-	for ( int roomIndex = 0; roomIndex < _numRooms; roomIndex++ )
+	for ( int roomIndex = 0; roomIndex < _numRooms; ++roomIndex)
 	{
 		if ( _rooms[roomIndex].CheckCollision( *po ) )
 		{
@@ -156,8 +180,8 @@ LevelRooms::AddObjectToRoom( int32 objectIndex )
 	// make sure that the object is permanent or in the room corresponding
 	// to its asset
 
-   Actor* actor = dynamic_cast<Actor*>(object);
-   assert(ValidPtr(actor));
+   assert(IsActor(object));
+   Actor* actor = static_cast<Actor*>(object);
 	if ( actor->HasMesh() )
 	{
 		packedAssetID assetID = actor->GetMeshName();
@@ -187,14 +211,14 @@ LevelRooms::RemoveObjectFromRoom( int32 idxObject )
 	assert(idxObject > 0);
 	BaseObject* object = (*_masterObjectList)[idxObject];
 	assert( ValidPtr( object ) );
-   PhysicalObject* po = dynamic_cast<PhysicalObject*>(object);
-   assert(ValidPtr(po));
+   assert(IsPhysicalObject(object));
+   PhysicalObject* po = static_cast<PhysicalObject*>(object);
 	int roomnum = -1;
 
 	assert( ValidPtr( _rooms ) );
 	// figure out which room to remove from
 	int roomIndex = 0;
-	for ( roomIndex = 0; roomIndex < _numRooms; roomIndex++ )
+	for ( roomIndex = 0; roomIndex < _numRooms; ++roomIndex)
 	{
 		if ( _rooms[roomIndex].CheckCollision( *po ) )
 		{
@@ -379,7 +403,7 @@ LevelRooms::InitRoomSlotMap()
   // kts added
 #if SW_DBSTREAM
 	croomslots << "room slot list:" << std::endl;
-	for(int debugIndex=0;debugIndex<_numRooms;debugIndex++)
+	for(int debugIndex=0;debugIndex<_numRooms;++debugIndex)
 		croomslots << debugIndex << ": " << _roomSlotMap[debugIndex] << std::endl;
 #endif
 

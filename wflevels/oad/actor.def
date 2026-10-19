@@ -1,0 +1,15 @@
+;============================================================================
+; actor.def: created from OADdef.S and actor.oas DO NOT MODIFY
+;============================================================================
+;##ifndef actor_HT
+;##define actor_HT
+	( define OAD_moveblocPageOffset 0 )	; common block: offset in page data for this objects page
+	( define OAD_toolsetPageOffset 4 )	; common block: offset in page data for this objects page
+	( define OAD_commonPageOffset 8 )	; common block: offset in page data for this objects page
+	( define OAD_MeshName 12 )	;file Mesh Name: This is a packedAssetID
+	( define OAD_meshPageOffset 16 )	; common block: offset in page data for this objects page
+	( define OAD_shadowPageOffset 20 )	; common block: offset in page data for this objects page
+	( define OAD_TemplateObject 24 )	; boolean: Default: 0
+;============================================================================
+;##endif         ; actor_DEF
+;============================================================================

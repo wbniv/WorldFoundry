@@ -1,0 +1,108 @@
+forth-verification.log
+PASS equal one-second orbit at 20/60 Hz
+PASS equal one-second orbit at 20/60 Hz
+PASS sine cardinal
+PASS sine cardinal
+PASS sine cardinal
+PASS sine cardinal
+PASS stall step bounded
+PASS low authored angle safely enters manual mode
+PASS long orbit stays finite and wraps
+Checked 10082 frames with balanced data stack.
+
+
+verification.log
+PASS: orbit changes shot (1.804326, -3.002666, 24.742512)
+PASS: inspect leaves player stationary
+PASS: render camera follows shot (6.323226, -17.549068, 24.745695)
+PASS: reverse orbit
+PASS: tilt down
+PASS: tilt up
+PASS: zoom closer
+PASS: zoom farther
+PASS: controller zoom fallback
+PASS: opposing controls cancel
+PASS: azimuth wraps
+PASS: upper tilt clamp
+PASS: coupled floor clearance
+PASS: upper distance clamp
+PASS: teleport preserves manual view
+PASS: manual camera overrides window zone
+PASS: reset restores automatic view
+PASS: reset does not jump
+PASS: reset restores authored shot
+PASS: walk restored after inspect
+PASS: sustained orbit remains bounded
+PASS: cardinal orbit 0
+PASS: cardinal orbit 0.25
+PASS: cardinal orbit 0.5
+PASS: cardinal orbit 0.75
+PASS: camera stays within room height
+PASS: camera script health
+PASS: reload restores automatic walk
+PASS: camera-reload script health
+RESULT: PASS
+
+
+touch-verification.log
+PASS: touch starts in Walk
+PASS: A tap selects Look and manual camera
+PASS: Look directions orbit without walking
+PASS: Look mode visible
+PASS: Zoom mode moves closer
+PASS: Zoom mode moves farther
+PASS: Zoom ignores sideways input
+PASS: held A+B teleports once
+PASS: chord preserves mode and view
+PASS: chord does not trigger door
+PASS: staggered chord restores 639 without mode/reset leak
+PASS: long B resets to automatic Walk
+PASS: long B does not operate door
+PASS: Walk movement works
+PASS: A taps never jump
+PASS: B tap operates nearby door
+PASS: touch script health
+RESULT: PASS
+
+
+door-verification.log
+actors: player=8 panel0=37 button=40
+PASS  default open: target=0.0 closedness=0.0 panel0.x=-0.0
+PASS  far press ignored: target=0.0
+PASS  near press toggles closed: target=1.0
+PASS  continuous close: closedness=0.100258
+PASS  settles closed: closedness=1.0 panel0.x=-2.6667
+PASS  second press opens: closedness=0.0
+PASS  mid-slide reversal has no snap: before=0.229523 after=0.229462 final=0.0
+PASS  gathered one-third blocks passage: final y=-2.379985 vs door plane -2.00
+PASS  collision test door closed: closedness=1.0
+PASS  closed left third blocks passage: x=4.45 final y=-2.379985 vs door plane -2.00
+PASS  closed left/middle seam third blocks passage: x=5.13 final y=-2.269985 vs door plane -2.00
+PASS  closed middle third blocks passage: x=5.8 final y=-2.269985 vs door plane -2.00
+PASS  closed middle/right seam third blocks passage: x=6.47 final y=-2.159984 vs door plane -2.00
+PASS  closed right/fixed third blocks passage: x=7.1 final y=-2.159984 vs door plane -2.00
+RESULT: PASS
+
+
+verification.log
+PASS: 639 starts inside front doors (4.65625, -14.5, 15.75)
+PASS: unvisited 640 seeded inside front doors
+PASS: held C switches once to 640
+PASS: 640 can walk after teleport (-3.87727, -13.65106, 15.749971)
+PASS: return restores 639 position
+PASS: return restores moved 640 position
+PASS: return restores moved 639 position
+PASS: teleport stops horizontal momentum
+PASS: joined master suite counts as 639
+PASS: joined-room position remembered
+PASS: entering 640 updates active unit
+PASS: corridor preserves indoor position
+PASS: return from corridor lands indoors
+PASS: A does not teleport
+PASS: B does not teleport
+PASS: C does not toggle project doors
+PASS: switch script health
+PASS: reload resets 639 entry
+PASS: reload resets 640 entry
+PASS: reload script health
+RESULT: PASS

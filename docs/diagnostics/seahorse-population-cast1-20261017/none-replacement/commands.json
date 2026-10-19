@@ -1,0 +1,1845 @@
+[
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792202605.4386497,
+    "end": 1792202605.7654955,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792202606.1653414,
+    "end": 1792202606.637546,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~Tyd5FjTwDQ7BBxapixcsMA==/org.worldfoundry.wf_game.aquarium-DcGoZpb6XkZNibt90vnA1w==/base.apk'"
+    ],
+    "start": 1792202606.6403162,
+    "end": 1792202607.0225112,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792202606.1598818,
+    "end": 1792202607.075586,
+    "returncode": 0,
+    "session_wake": true,
+    "error": null,
+    "interrupted": false
+  },
+  {
+    "args": [
+      "install",
+      "-r",
+      "/var/lib/wf-device-coordinator/inputs/523642b9daf0a696cdc8e6923f08a6771514784855d1edeb6948bb18b61e0200.apk"
+    ],
+    "start": 1792202607.0756378,
+    "end": 1792202611.2429738,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792202611.2451353,
+    "end": 1792202611.5204089,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~8iwfaWqPP9OS8tU4Mr75Rg==/org.worldfoundry.wf_game.aquarium-IcYC-gLMnUUt2PpwNzREoQ==/base.apk'"
+    ],
+    "start": 1792202611.523089,
+    "end": 1792202612.2161856,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792202612.2501557,
+    "end": 1792202612.552239,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792202612.5545375,
+    "end": 1792202612.966559,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n org.worldfoundry.wf_game.aquarium/android.app.NativeActivity"
+    ],
+    "start": 1792202613.119697,
+    "end": 1792202614.06672,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792202616.2459786,
+    "end": 1792202616.6881459,
+    "returncode": 0,
+    "session_wake": true,
+    "error": null,
+    "interrupted": false
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792202619.0714083,
+    "end": 1792202619.4958682,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792202619.5037541,
+    "end": 1792202619.9018633,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_BACK"
+    ],
+    "start": 1792202619.905698,
+    "end": 1792202620.3275874,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792202621.481204,
+    "end": 1792202621.7507932,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792202621.7564795,
+    "end": 1792202622.1585984,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792202622.1671195,
+    "end": 1792202622.559985,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_DOWN"
+    ],
+    "start": 1792202622.5624235,
+    "end": 1792202623.0824974,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_DOWN"
+    ],
+    "start": 1792202623.2353282,
+    "end": 1792202623.8077273,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_DOWN"
+    ],
+    "start": 1792202623.96107,
+    "end": 1792202624.478533,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_DOWN"
+    ],
+    "start": 1792202624.641144,
+    "end": 1792202625.0906782,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_DOWN"
+    ],
+    "start": 1792202625.2435822,
+    "end": 1792202625.7530947,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_CENTER"
+    ],
+    "start": 1792202625.9061425,
+    "end": 1792202626.3619087,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792202626.366781,
+    "end": 1792202626.720961,
+    "returncode": 0,
+    "session_wake": true,
+    "error": null,
+    "interrupted": false
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792202628.5162873,
+    "end": 1792202628.7726488,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792202628.8542423,
+    "end": 1792202629.1072226,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "tail -c 4000000 /sdcard/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log"
+    ],
+    "start": 1792202629.1092715,
+    "end": 1792202631.579356,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "logcat",
+      "-d",
+      "-t",
+      "2000",
+      "-v",
+      "brief"
+    ],
+    "start": 1792202631.5860116,
+    "end": 1792202632.0490422,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792202636.4420662,
+    "end": 1792202636.753918,
+    "returncode": 0,
+    "session_wake": true,
+    "error": null,
+    "interrupted": false
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792202646.4573195,
+    "end": 1792202646.7749543,
+    "returncode": 0,
+    "session_wake": true,
+    "error": null,
+    "interrupted": false
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792202647.0913777,
+    "end": 1792202647.601548,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792202647.6094036,
+    "end": 1792202647.8087628,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --list"
+    ],
+    "start": 1792202647.8114655,
+    "end": 1792202648.1568267,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202648.1614895,
+    "end": 1792202648.57584,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency-clear 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202648.5797563,
+    "end": 1792202648.976206,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202648.9786847,
+    "end": 1792202649.18469,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202649.2885547,
+    "end": 1792202649.586374,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202649.6131032,
+    "end": 1792202650.0257351,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202650.1296923,
+    "end": 1792202650.4207704,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202650.5244453,
+    "end": 1792202650.8247793,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202650.9331973,
+    "end": 1792202651.2498176,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202651.3533442,
+    "end": 1792202651.6595175,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202651.7635458,
+    "end": 1792202652.0505714,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202652.1574793,
+    "end": 1792202652.4568498,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202652.564724,
+    "end": 1792202652.8898282,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202652.9939559,
+    "end": 1792202653.2851698,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202653.3896549,
+    "end": 1792202653.7215223,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202653.825396,
+    "end": 1792202654.1164668,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202654.2207353,
+    "end": 1792202654.5073583,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202654.6116033,
+    "end": 1792202654.926284,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202655.040555,
+    "end": 1792202655.3236277,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202655.4280999,
+    "end": 1792202655.733154,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202655.8375592,
+    "end": 1792202656.1739578,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202656.2795415,
+    "end": 1792202656.5704265,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202656.6751375,
+    "end": 1792202656.9977748,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792202656.5750906,
+    "end": 1792202657.0031438,
+    "returncode": 0,
+    "session_wake": true,
+    "error": null,
+    "interrupted": false
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202657.1030886,
+    "end": 1792202657.3758693,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202657.4810848,
+    "end": 1792202657.7813942,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202657.8974576,
+    "end": 1792202658.2285037,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202658.3338692,
+    "end": 1792202658.623342,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202658.72903,
+    "end": 1792202659.008991,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202659.1138132,
+    "end": 1792202659.4268982,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202659.5325458,
+    "end": 1792202659.8338497,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202659.9392233,
+    "end": 1792202660.2443001,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202660.3497386,
+    "end": 1792202660.6543949,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202660.766707,
+    "end": 1792202661.0570385,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202661.1624722,
+    "end": 1792202661.4806366,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202661.5867503,
+    "end": 1792202661.8761334,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202661.9821541,
+    "end": 1792202662.319099,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202662.4248602,
+    "end": 1792202662.7196987,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202662.825271,
+    "end": 1792202663.1080866,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202663.213678,
+    "end": 1792202663.5392256,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202663.6452353,
+    "end": 1792202663.9331667,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202664.0394244,
+    "end": 1792202664.3666217,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202664.4729736,
+    "end": 1792202664.7430139,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202664.8506804,
+    "end": 1792202665.179931,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202665.2859495,
+    "end": 1792202665.567019,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202665.6735532,
+    "end": 1792202665.9988003,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202666.1048346,
+    "end": 1792202666.4088073,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202666.5170746,
+    "end": 1792202666.765951,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202666.8750005,
+    "end": 1792202667.0866778,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792202666.7751513,
+    "end": 1792202667.0931692,
+    "returncode": 0,
+    "session_wake": true,
+    "error": null,
+    "interrupted": false
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202667.1935458,
+    "end": 1792202667.3951302,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202667.5170445,
+    "end": 1792202667.8882759,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202667.995127,
+    "end": 1792202668.1955962,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202668.3039708,
+    "end": 1792202668.6372783,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202668.7442577,
+    "end": 1792202669.0341892,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202669.1433315,
+    "end": 1792202669.3695147,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202669.4774532,
+    "end": 1792202669.7341857,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202669.84522,
+    "end": 1792202670.2857404,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202670.397272,
+    "end": 1792202670.6838565,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202670.7923734,
+    "end": 1792202671.103698,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202671.2109241,
+    "end": 1792202671.5042202,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202671.612114,
+    "end": 1792202671.9394078,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202672.0507705,
+    "end": 1792202672.287353,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202672.3951745,
+    "end": 1792202672.7926428,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202672.8998523,
+    "end": 1792202673.1776814,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202673.2906334,
+    "end": 1792202673.5571823,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202673.6650279,
+    "end": 1792202673.9617736,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202674.0697439,
+    "end": 1792202674.3689764,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202674.4766264,
+    "end": 1792202674.8551362,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202674.9631577,
+    "end": 1792202675.191972,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202675.300013,
+    "end": 1792202675.6017578,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202675.7091997,
+    "end": 1792202676.0296528,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202676.1390543,
+    "end": 1792202676.4294355,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202676.5413456,
+    "end": 1792202676.8366647,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202676.9460022,
+    "end": 1792202677.24625,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792202676.848777,
+    "end": 1792202677.3582232,
+    "returncode": 0,
+    "session_wake": true,
+    "error": null,
+    "interrupted": false
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202677.358265,
+    "end": 1792202677.6711228,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202677.7795913,
+    "end": 1792202678.1100736,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202678.221004,
+    "end": 1792202678.4675503,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202678.5761573,
+    "end": 1792202678.9023535,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202679.0113065,
+    "end": 1792202679.3043175,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202679.4142222,
+    "end": 1792202679.6979396,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202679.8173842,
+    "end": 1792202680.117671,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202680.231219,
+    "end": 1792202680.5265584,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202680.6364498,
+    "end": 1792202680.9486291,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202681.0579348,
+    "end": 1792202681.332924,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202681.441658,
+    "end": 1792202681.7457616,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202681.8650975,
+    "end": 1792202682.1828578,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202682.2920356,
+    "end": 1792202682.5727575,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202682.6821926,
+    "end": 1792202682.9797459,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202683.091897,
+    "end": 1792202683.3893254,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202683.501746,
+    "end": 1792202683.7971342,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202683.9078436,
+    "end": 1792202684.204693,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202684.3148062,
+    "end": 1792202684.633797,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202684.7434258,
+    "end": 1792202685.0234601,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202685.1344497,
+    "end": 1792202685.4424217,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202685.5522554,
+    "end": 1792202685.8628697,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202685.9766815,
+    "end": 1792202686.2716067,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202686.3821547,
+    "end": 1792202686.664403,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202686.7774076,
+    "end": 1792202687.06739,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202687.1783707,
+    "end": 1792202687.4981503,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792202687.077509,
+    "end": 1792202687.5102947,
+    "returncode": 0,
+    "session_wake": true,
+    "error": null,
+    "interrupted": false
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202687.6095185,
+    "end": 1792202687.8973634,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202688.0074265,
+    "end": 1792202688.293854,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202688.404908,
+    "end": 1792202688.722204,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202688.8329701,
+    "end": 1792202689.1247194,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202689.2359955,
+    "end": 1792202689.5505364,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202689.6621594,
+    "end": 1792202689.9398282,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202690.0515022,
+    "end": 1792202690.3486347,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202690.4601576,
+    "end": 1792202690.7731416,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202690.8896437,
+    "end": 1792202691.3829386,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202691.4946673,
+    "end": 1792202691.7823606,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202691.8940072,
+    "end": 1792202692.1936538,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202692.3071299,
+    "end": 1792202692.6104972,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202692.7214084,
+    "end": 1792202693.011068,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202693.1223683,
+    "end": 1792202693.421798,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202693.537338,
+    "end": 1792202693.8364036,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202693.9528441,
+    "end": 1792202694.2523243,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202694.3639772,
+    "end": 1792202694.6469865,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202694.760492,
+    "end": 1792202695.0817256,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202695.1977086,
+    "end": 1792202695.4907677,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202695.6032252,
+    "end": 1792202695.8882372,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202696.0210814,
+    "end": 1792202696.488088,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202696.6033509,
+    "end": 1792202696.9018273,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202697.0146246,
+    "end": 1792202697.3112025,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202697.424381,
+    "end": 1792202697.761506,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792202697.3239434,
+    "end": 1792202697.7727304,
+    "returncode": 0,
+    "session_wake": true,
+    "error": null,
+    "interrupted": false
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202697.8725588,
+    "end": 1792202698.1265056,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202698.237227,
+    "end": 1792202698.5365686,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202698.648817,
+    "end": 1792202698.9750314,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202699.0834734,
+    "end": 1792202699.3634715,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202699.4720516,
+    "end": 1792202699.7738764,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202699.8863437,
+    "end": 1792202700.2092774,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202700.3266602,
+    "end": 1792202700.5904944,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202700.6992724,
+    "end": 1792202701.0208995,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202701.1335657,
+    "end": 1792202701.4042404,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202701.5156798,
+    "end": 1792202701.823678,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202701.9377759,
+    "end": 1792202702.2289243,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202702.3515205,
+    "end": 1792202702.6374938,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202702.7519467,
+    "end": 1792202703.04685,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202703.172126,
+    "end": 1792202703.4568217,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202703.571822,
+    "end": 1792202703.8583674,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202703.9738069,
+    "end": 1792202704.276156,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202704.389202,
+    "end": 1792202704.6851537,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202704.7943544,
+    "end": 1792202705.113019,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202705.226947,
+    "end": 1792202705.497003,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202705.609871,
+    "end": 1792202705.9130604,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202706.024841,
+    "end": 1792202706.3567927,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202706.4703052,
+    "end": 1792202706.728967,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202706.8435466,
+    "end": 1792202707.1462083,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202707.2605975,
+    "end": 1792202707.5479531,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202707.6657631,
+    "end": 1792202707.993387,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792202707.5627637,
+    "end": 1792202708.0133295,
+    "returncode": 0,
+    "session_wake": true,
+    "error": null,
+    "interrupted": false
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202708.11088,
+    "end": 1792202708.3676038,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202708.479851,
+    "end": 1792202708.7749436,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202708.888523,
+    "end": 1792202709.1830122,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys SurfaceFlinger --latency 'org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#2088'"
+    ],
+    "start": 1792202709.298528,
+    "end": 1792202709.6003158,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792202709.6139462,
+    "end": 1792202709.812375,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792202709.8189695,
+    "end": 1792202710.226131,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1792202710.2288437,
+    "end": 1792202712.197431,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792202712.303923,
+    "end": 1792202712.4790235,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792202712.4861221,
+    "end": 1792202712.8761113,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1792202712.8785408,
+    "end": 1792202714.758046,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792202714.7613606,
+    "end": 1792202714.9534392,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "logcat",
+      "-d",
+      "-v",
+      "threadtime",
+      "--pid=20255"
+    ],
+    "start": 1792202714.9552555,
+    "end": 1792202715.354247,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "tail -c 4000000 /sdcard/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log"
+    ],
+    "start": 1792202715.3564708,
+    "end": 1792202716.745072,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys meminfo org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792202716.7612727,
+    "end": 1792202717.2117195,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys thermalservice"
+    ],
+    "start": 1792202717.2143424,
+    "end": 1792202717.5842814,
+    "returncode": 0
+  }
+]

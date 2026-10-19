@@ -1,0 +1,73 @@
+{
+  "package": "org.worldfoundry.wf_game.aquarium",
+  "label": "WF Aquarium",
+  "apk_sha256": "9ab68610506321d42b5a08ec2a4cbb0b3932390fb941f4e912fa6fe38794d5fd",
+  "references": [
+    {
+      "kind": "banner",
+      "resource": "res/gU.png",
+      "file": "expected-banner-0.png",
+      "sha256": "fa9e861083259d28a79cb5e9badc255ac0a39013e68db2d24071dc7804315b11"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/QZ.png",
+      "file": "expected-adaptive-1.png",
+      "sha256": "80dc7b92da305abc04401ffe7f0730f91f43469ccbef5d23e81d4606bbbcf0dc"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/zr.png",
+      "file": "expected-adaptive-2.png",
+      "sha256": "6fc7dacfef16e8b354c94cc277c534677a5310019b287cc028273a1aca45ed99"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/Em.png",
+      "file": "expected-adaptive-3.png",
+      "sha256": "6049c492986b33d4286b28d4ff8651c7bcf23f3e2541dca297e753a203e3af3f"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/Lf.png",
+      "file": "expected-adaptive-4.png",
+      "sha256": "077ecaa7165136db9e5dd9ab44f010c4a25869f87a41a88385889d13a426facd"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/as.png",
+      "file": "expected-adaptive-5.png",
+      "sha256": "538fb0403fdf39a464c73e1143cc5c9e38c67e3c4106c45dc6f550f734f26548"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/9w.png",
+      "file": "expected-icon-6.png",
+      "sha256": "0538086d211cebd7b2a4fbc92d332e45f9ac2e9d489e243fbd73982f534422a2"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/yn.png",
+      "file": "expected-icon-7.png",
+      "sha256": "160061802fc5c6214af1aa28bca4aba9b4388cf73a89c5afc09f33f2a392d5a4"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/FS.png",
+      "file": "expected-icon-8.png",
+      "sha256": "1de157e529f7030ffb87a104503e544d98abd3e577f89fa662d46384cc81da02"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/RJ.png",
+      "file": "expected-icon-9.png",
+      "sha256": "2b3a7b12190c73248eea1a8b2559ea0a52af1bed294ae3f9520523984f05b741"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/o-.png",
+      "file": "expected-icon-10.png",
+      "sha256": "571a81848588ca53823fc975e36bc033d3de4559b993c39b8d6c381cd9b8e03f"
+    }
+  ]
+}

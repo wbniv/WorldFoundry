@@ -1,0 +1,27 @@
+{
+  "controller": {
+    "buttons": [
+      "A",
+      "C",
+      "D",
+      "E",
+      "F"
+    ],
+    "delivered_masks": true,
+    "physical_phone": false
+  },
+  "restoration": {
+    "org.worldfoundry.wf_game": {
+      "before_sha256": "f0d8b357ddd2455a725c63324a98e4a4050e96604f796f4ca665ad9ee91d9f53",
+      "after_sha256": "f0d8b357ddd2455a725c63324a98e4a4050e96604f796f4ca665ad9ee91d9f53"
+    },
+    "org.worldfoundry.wf_game.smb": {
+      "before_sha256": "c11112279d35b14582dbf2605c9fa9c089a01d652828cd998ece55096878147b",
+      "after_sha256": "c11112279d35b14582dbf2605c9fa9c089a01d652828cd998ece55096878147b"
+    },
+    "org.worldfoundry.wf_game.condo": {
+      "before_sha256": "28f7064de9704a60165fd3b8732d81e511925fc702c2958f8246acdc17065f0a",
+      "after_sha256": "28f7064de9704a60165fd3b8732d81e511925fc702c2958f8246acdc17065f0a"
+    }
+  }
+}

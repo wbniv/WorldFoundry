@@ -7,3 +7,1931 @@ includes:
     flatten: true
 
 tasks:
+
+  patchwork:playthrough:
+    desc: "Play a complete browser game with two phones and TV; manage a local server and save evidence (HEADED=1 to watch, OUT/ORIGIN optional)"
+    silent: true
+    env:
+      WF_PD_OUT: '{{.OUT | default ""}}'
+      WF_PD_ORIGIN: '{{.ORIGIN | default ""}}'
+      WF_PD_HEADED: '{{.HEADED | default "0"}}'
+      WF_PD_SLOW_MS: '{{.SLOW_MS | default ""}}'
+    cmds:
+      - python3 party-games/games/patchwork/scripts/playthrough.py {{.CLI_ARGS}}
+
+  patchwork:playthrough:tv:
+    desc: "Build/freeze and play a complete game with 2–6 random players on an allocated Chromecast; save evidence and restore the ordinary app (ORIGIN overrides the development host)"
+    silent: true
+    env:
+      WF_PD_ORIGIN: '{{.ORIGIN | default "https://collections-timing-riding-computing.trycloudflare.com"}}'
+      WF_PD_OUT: '{{.OUT | default ""}}'
+      WF_PD_POOL: '{{.POOL | default "chromecast-test"}}'
+    cmds:
+      - python3 party-games/games/patchwork/scripts/playthrough-tv.py {{.CLI_ARGS}}
+
+  setup:
+    desc: "One-time: bootstrap the AWS wf-terraform profile, Codemagic API token + app id, and PagerDuty routing key. Idempotent, plan-then-confirm on every mutation. See docs/SETUP.md."
+    cmds:
+      - bash scripts/setup.sh {{.CLI_ARGS}}
+
+  setup-check:
+    desc: "Report which setup credentials are already configured. Never prompts, never mutates."
+    cmds:
+      - bash scripts/setup.sh --check
+
+  creds-dump:
+    desc: "Bundle this machine's AWS wf-terraform profile + any live setup session-caches into a tarball, for migrating to a new machine. See scripts/creds-dump.sh -h."
+    cmds:
+      - bash scripts/creds-dump.sh {{.CLI_ARGS}}
+
+  creds-commit:
+    desc: "Same as creds-dump, but GPG-encrypted to secrets/creds-bundle.tar.gpg — safe to commit to git. See scripts/creds-commit.sh -h."
+    cmds:
+      - bash scripts/creds-commit.sh {{.CLI_ARGS}}
+
+  vendor-unpack-archives:
+    desc: "Expand the gitignored vendored archives (Jolt) a fresh checkout or worktree needs to configure (idempotent, offline)"
+    cmds:
+      - test -d engine/vendor/jolt-physics-5.5.0 || tar -xzf engine/vendor/jolt-physics-5.5.0.tar.gz --one-top-level=engine/vendor/jolt-physics-5.5.0 --strip-components=1
+
+  vendor-unpack:
+    desc: "Unpack vendored source archives and init editor submodules (idempotent)"
+    deps: [vendor-unpack-archives]
+    cmds:
+      - git submodule update --init cmake/Corrosion wftools/y-crdt third_party/glfw third_party/imgui
+
+  feature-start:
+    desc: "New worktree .worktrees/<NAME> on branch <NAME> with vendored archives expanded (usage: task feature-start NAME=slug [BASE=branch])"
+    cmds:
+      - bash scripts/feature.sh start NAME={{.NAME}}{{if .BASE}} BASE={{.BASE}}{{end}}
+
+  feature-list:
+    desc: "List git worktrees with branch and last commit"
+    cmds:
+      - bash scripts/feature.sh list
+
+  build:
+    desc: "Build wf_game (Forth + Jolt; canonical config)"
+    deps: [vendor-unpack]
+    env:
+      # Lua is linked into the Linux debug build so the in-engine Lua step
+      # debugger (MobDebug) has a host to bind to. Override with
+      # WF_LUA_ENGINE=none if you need a Forth-only binary.
+      WF_ENABLE_FENNEL: "0"
+      WF_JS_ENGINE: none
+      WF_WASM_ENGINE: none
+      WF_ENABLE_WREN: "0"
+      WF_FORTH_ENGINE: zforth
+      WF_PILOT_ENGINE: builtin
+      WF_PHYSICS_ENGINE: jolt
+    cmds:
+      - bash engine/build_game.sh
+
+  test-forth-source:
+    desc: "Test shared Forth comments and script boundaries against the actual VM"
+    cmds:
+      - python3 tests/verify_forth_source.py
+
+  ensure-build:
+    desc: "Build wf_game only when the binary is missing or older than engine sources"
+    cmds:
+      - task: build
+    status:
+      - test -x engine/wf_game
+      - test engine/build_game.sh -ot engine/wf_game
+      - test -z "$(find engine wfsource/source -type f \( -name '*.c' -o -name '*.cc' -o -name '*.cpp' -o -name '*.h' -o -name '*.hp' -o -name '*.hpi' -o -name '*.inc' -o -name '*.asm' -o -name '*.s' -o -name '*.fth' -o -name '*.lua' -o -name '*.fnl' -o -name 'CMakeLists.txt' -o -name 'Makefile' -o -name '*.mk' \) -newer engine/wf_game -print -quit)"
+
+  build-cmake:
+    desc: "Build wf_game via CMake (Linux)"
+    deps: [vendor-unpack]
+    cmds:
+      - cmake -S . -B cmake-build-linux -DCMAKE_BUILD_TYPE=Debug
+      - cmake --build cmake-build-linux -j
+
+  build-asan:
+    desc: "Build wf_game with AddressSanitizer + UBSan (now the Debug default; explicit dir)"
+    deps: [vendor-unpack]
+    cmds:
+      - cmake -S . -B cmake-build-asan -DCMAKE_BUILD_TYPE=Debug -DWF_ASAN=ON
+      - cmake --build cmake-build-asan -j
+
+  build-fast:
+    desc: "Fast-debug: Debug symbols, NO sanitizer tax (-DWF_ASAN=OFF) — for chasing logic, not memory"
+    deps: [vendor-unpack]
+    cmds:
+      - cmake -S . -B cmake-build-fast -DCMAKE_BUILD_TYPE=Debug -DWF_ASAN=OFF
+      - cmake --build cmake-build-fast -j
+
+  build-editor:
+    desc: "Build wf_game with the editor / dev stack (debug bridge + REST + CRDT + mutation API). Requires Rust toolchain."
+    deps: [vendor-unpack]
+    env:
+      WF_ENABLE_EDITOR: "1"
+      WF_ENABLE_FENNEL: "0"
+      WF_JS_ENGINE: none
+      WF_WASM_ENGINE: none
+      WF_ENABLE_WREN: "0"
+      WF_FORTH_ENGINE: zforth
+      WF_PILOT_ENGINE: builtin
+      WF_PHYSICS_ENGINE: jolt
+    cmds:
+      - bash engine/build_game.sh
+      - cmake -S . -B cmake-build-editor -DWF_ENABLE_EDITOR=ON -DCMAKE_BUILD_TYPE=Release
+      - cmake --build cmake-build-editor --target wfcrdt_smoke wfcrdt_wrapper_test connect_retry_test -j
+      - ./cmake-build-editor/engine/crdt/wfcrdt_smoke
+      - ./cmake-build-editor/engine/crdt/wfcrdt_wrapper_test
+      - ./cmake-build-editor/connect_retry_test
+
+  build-pilot-runner:
+    desc: "Build the C++ PILOT bridge runner (Phase 3 — replaces Python pilot_driver.py for engine-tier scenarios)"
+    cmds:
+      - bash engine/build_bridge_runner.sh
+
+  build-wf-edit:
+    desc: "Build the wf-edit GUI editor binary (WebRTC voice/video collab). First run: task dev-setup-editor."
+    deps: [vendor-unpack]
+    cmds:
+      - cmake -S . -B build-editor -DWF_ENABLE_EDITOR=ON -DCMAKE_BUILD_TYPE=Debug
+      - cmake --build build-editor --target wf_edit -j{{.NPROC}}
+      # Stale-binary guard: a failed compile leaves the OLD binary on disk, so a
+      # missed build error silently ships stale code. cmake's non-zero already
+      # halts the task, but assert the binary out-dates every source too, and
+      # print a success marker (only reached on a real build).
+      - |
+        bin=build-editor/wf-edit
+        stale=$(find engine/wf_edit wfsource/source -name '*.cc' -o -name '*.cpp' 2>/dev/null \
+                | while read -r f; do [ "$f" -nt "$bin" ] && { echo "$f"; break; }; done)
+        if [ -n "$stale" ]; then
+          echo "BUILD STALE: $bin is older than $stale — the link did not run; FIX the compile error" >&2
+          exit 1
+        fi
+        echo "✓ wf-edit built → $bin ($(date -r "$bin" +%H:%M:%S), $(stat -c%s "$bin") bytes)"
+    vars:
+      NPROC:
+        sh: nproc
+
+  build-wf-edit-fast:
+    desc: "Build wf-edit WITHOUT AddressSanitizer (-DWF_ASAN=OFF) into build-editor-fast/. ASan ~2-3x's RSS; use this binary for real collab sessions so two editors + browser fit in RAM. Memory-debugging still uses task build-wf-edit (ASan)."
+    deps: [vendor-unpack]
+    cmds:
+      - cmake -S . -B build-editor-fast -DWF_ENABLE_EDITOR=ON -DCMAKE_BUILD_TYPE=Debug -DWF_ASAN=OFF
+      - cmake --build build-editor-fast --target wf_edit -j{{.NPROC}}
+      # Same stale-binary guard as build-wf-edit (a failed compile leaves the old
+      # binary on disk; assert it out-dates every source and print a success marker).
+      - |
+        bin=build-editor-fast/wf-edit
+        stale=$(find engine/wf_edit wfsource/source -name '*.cc' -o -name '*.cpp' 2>/dev/null \
+                | while read -r f; do [ "$f" -nt "$bin" ] && { echo "$f"; break; }; done)
+        if [ -n "$stale" ]; then
+          echo "BUILD STALE: $bin is older than $stale — the link did not run; FIX the compile error" >&2
+          exit 1
+        fi
+        echo "✓ wf-edit (no-ASan) built → $bin ($(date -r "$bin" +%H:%M:%S), $(stat -c%s "$bin") bytes)"
+    vars:
+      NPROC:
+        sh: nproc
+
+  run-wf-edit:
+    desc: "Run the wf-edit GUI editor (build first with task build-wf-edit)."
+    deps: [build-wf-edit]
+    cmds:
+      - |
+        LOG=/tmp/wfedit.log
+        echo "Logging to $LOG"
+        ./build-editor/wf-edit {{.CLI_ARGS}} 2>&1 | tee "$LOG"
+
+  turn-serve:
+    desc: "Run a network-reachable coturn for a REAL two-machine wf-edit call (config/turnserver-wfedit.conf). Ctrl-C to stop. Throwaway/static creds — not for production."
+    silent: true
+    vars:
+      TURN_USER: wfedit
+      TURN_PASS: wfeditpass
+    cmds:
+      - |
+        set -eu
+        command -v turnserver >/dev/null 2>&1 || {
+          echo "coturn not installed — run: sudo apt-get install -y coturn"; exit 1; }
+        CONF="$(git rev-parse --show-toplevel)/config/turnserver-wfedit.conf"
+        # Best-effort reachable IP for the clients (first non-loopback IPv4).
+        IP="$(ip -4 -o addr show scope global 2>/dev/null | awk '{print $4}' | cut -d/ -f1 | head -1)"
+        IP="${IP:-<this-host-ip>}"
+        echo "turn-serve: launching coturn from $CONF"
+        echo "turn-serve: clients on the SAME network use this env —"
+        echo
+        echo "    export WF_COLLAB_TURN='$IP:3478'"
+        echo "    export WF_COLLAB_TURN_USER={{.TURN_USER}}"
+        echo "    export WF_COLLAB_TURN_PASS={{.TURN_PASS}}"
+        echo "    export WF_COLLAB_FORCE_RELAY=1   # to PROVE the relay leg"
+        echo
+        echo "    NOTE: if THIS host is behind NAT (home router), $IP is private."
+        echo "    Forward UDP 3478 + 49300-49400 and set external-ip=<public-ip>"
+        echo "    in $CONF, then advertise the public IP to the remote machine."
+        echo
+        echo "turn-serve: Ctrl-C to stop. Open UDP 3478 + 49300-49400 on the firewall."
+        echo
+        exec turnserver -c "$CONF"
+
+  turn-test-relay:
+    desc: "Prove wf-edit's WebRTC TURN path: run a local coturn + force-relay connectivity test (needs `coturn`)."
+    deps: [build-wf-edit]
+    silent: true
+    vars:
+      TURN_USER: wfedit
+      TURN_PASS: wfeditpass
+      TURN_REALM: wfedit.test
+    cmds:
+      - |
+        set -eu
+        command -v turnserver >/dev/null 2>&1 || {
+          echo "coturn not installed — run: sudo apt-get install -y coturn"; exit 1; }
+
+        # Pick a free loopback UDP port for the throwaway coturn, so a system
+        # coturn daemon already on 3478 (the apt package auto-starts one) doesn't
+        # collide. ss is the source of truth for what's already bound.
+        PORT=""
+        for p in 3478 3479 3480 3481 3482 3483; do
+          ss -lun 2>/dev/null | grep -q "127.0.0.1:$p " || { PORT=$p; break; }
+        done
+        [ -n "$PORT" ] || { echo "no free UDP port in 3478-3483"; exit 1; }
+        echo "turn-test-relay: throwaway coturn on 127.0.0.1:$PORT"
+
+        # Throwaway loopback coturn with static long-term credentials. (Static
+        # creds are fine for this test ONLY; production needs ephemeral creds —
+        # see docs/plans/2026-05-27-webrtc-phase3-turn-generic-client.md.)
+        LOG="$(mktemp)"
+        turnserver -n --lt-cred-mech --user={{.TURN_USER}}:{{.TURN_PASS}} \
+          --realm={{.TURN_REALM}} --listening-ip=127.0.0.1 --relay-ip=127.0.0.1 \
+          --listening-port="$PORT" --no-tls --no-dtls --no-cli \
+          --min-port=49300 --max-port=49340 --simple-log --log-file="$LOG" >/dev/null 2>&1 &
+        # Tear down by the UNIQUE realm, not $!: go-task's shell does not return
+        # the real OS pid for a `&` job nor reliably run EXIT traps. pkill -f on
+        # the realm can't match a system coturn daemon (it reads
+        # /etc/turnserver.conf, no such realm) and pkill excludes its own pid, so
+        # it never self-matches. cleanup is called explicitly below; the trap is
+        # a best-effort backup for shells that honour it.
+        cleanup() { pkill -f "turnserver .*realm={{.TURN_REALM}}" 2>/dev/null || true; rm -f "$LOG"; }
+        trap cleanup EXIT
+
+        # Wait (≤5s) for coturn to actually bind before driving the test, and
+        # fail loudly with its log if it never does.
+        for _ in 1 2 3 4 5 6 7 8 9 10; do
+          ss -lun 2>/dev/null | grep -q "127.0.0.1:$PORT " && break
+          sleep 0.5
+        done
+        ss -lun 2>/dev/null | grep -q "127.0.0.1:$PORT " || {
+          echo "coturn failed to bind 127.0.0.1:$PORT"; cat "$LOG"; cleanup; exit 1; }
+
+        # WF_EDIT_TURN_TEST runs the force-relay leg when WF_COLLAB_TURN is set.
+        # grep -q is the arbiter (wf-edit's own exit is irrelevant); tee echoes
+        # the per-check results to the console.
+        RC=0
+        if WF_EDIT_TURN_TEST=1 WF_COLLAB_TURN="127.0.0.1:$PORT" \
+           WF_COLLAB_TURN_USER={{.TURN_USER}} WF_COLLAB_TURN_PASS={{.TURN_PASS}} \
+           ./build-editor/wf-edit 2>/dev/null | tee /dev/stderr | grep -q '\[turn\] all PASS'; then
+          RESULT=PASS
+        else
+          RESULT=FAIL; RC=1
+        fi
+        cleanup
+        echo "turn-test-relay: $RESULT"
+        exit "$RC"
+
+  fetch-cloudflared:
+    desc: "Fetch + SHA256-verify cloudflared (wf-edit quick-tunnel 'share a link' calling). Not committed."
+    silent: true
+    vars:
+      CF_VERSION: "2026.5.2"
+      CF_DEST: build-editor/tools/cloudflared
+    cmds:
+      - |
+        set -eu
+        # Pinned per-arch SHA256 — the fetched binary is rejected on mismatch and
+        # never committed (~37 MB), per the no-giant-vendor rule.
+        case "$(uname -m)" in
+          x86_64|amd64)  ARCH=amd64; SHA=5286698547f03df745adb2355f04c12dde52ef425491e81f433642d695521886 ;;
+          aarch64|arm64) ARCH=arm64; SHA=5a4e8ce2701105271412059f44b6a0bf1ae4542b4d98ff3180c0c019443a5815 ;;
+          *) echo "unsupported arch $(uname -m) for cloudflared fetch"; exit 1 ;;
+        esac
+        DEST="{{.CF_DEST}}"
+        # Idempotent: skip if the pinned binary is already present + verified.
+        if [ -f "$DEST" ] && printf '%s  %s\n' "$SHA" "$DEST" | sha256sum -c - >/dev/null 2>&1; then
+          echo "cloudflared {{.CF_VERSION}} already present + verified ($DEST)"; exit 0
+        fi
+        mkdir -p "$(dirname "$DEST")"
+        URL="https://github.com/cloudflare/cloudflared/releases/download/{{.CF_VERSION}}/cloudflared-linux-$ARCH"
+        echo "fetching cloudflared {{.CF_VERSION}} ($ARCH)…"
+        curl -fL --no-progress-meter "$URL" -o "$DEST.tmp"
+        printf '%s  %s\n' "$SHA" "$DEST.tmp" | sha256sum -c - \
+          || { echo "SHA256 mismatch — refusing $URL"; rm -f "$DEST.tmp"; exit 1; }
+        chmod +x "$DEST.tmp"
+        mv "$DEST.tmp" "$DEST"
+        echo "cloudflared {{.CF_VERSION}} verified → $DEST"
+
+  quick-tunnel:
+    desc: "Host a wf-edit call over the internet: run wf-relay + a Cloudflare quick tunnel, print a shareable link. Ctrl-C to stop."
+    silent: true
+    deps: [fetch-cloudflared]
+    vars:
+      ROOM: '{{.ROOM | default "studio-1"}}'
+      CF: build-editor/tools/cloudflared
+    cmds:
+      - |
+        set -eu
+        CF="{{.CF}}"
+        [ -x "$CF" ] || { echo "cloudflared missing — run: task fetch-cloudflared"; exit 1; }
+        RELAY=wftools/wf_collab/target/release/wf-relay
+        [ -x "$RELAY" ] || cargo build --release --bin wf-relay --manifest-path wftools/wf_collab/Cargo.toml
+
+        # Free loopback TCP port for the relay (only cloudflared dials it, over
+        # localhost — the public hop is the wss:// tunnel).
+        PORT=""
+        for p in 9900 9901 9902 9903 9904; do
+          ss -ltn 2>/dev/null | grep -q ":$p " || { PORT=$p; break; }
+        done
+        [ -n "$PORT" ] || { echo "no free TCP port in 9900-9904"; exit 1; }
+
+        RELAY_LOG="$(mktemp)"; CF_LOG="$(mktemp)"
+        # Reap both children by unique marker (go-task's shell gives neither the
+        # real `&` pid nor reliable EXIT traps, and rejects named signals other
+        # than EXIT; pkill -f excludes its own pid). The main stop path is Ctrl-C,
+        # which propagates SIGINT to the whole process group, so cloudflared +
+        # wf-relay exit directly; this trap is a best-effort log/child sweep.
+        cleanup() {
+          pkill -f "cloudflared tunnel.*localhost:$PORT" 2>/dev/null || true
+          pkill -f "wf-relay --port $PORT" 2>/dev/null || true
+          rm -f "$RELAY_LOG" "$CF_LOG"
+        }
+        trap cleanup EXIT
+
+        "$RELAY" --port "$PORT" >"$RELAY_LOG" 2>&1 &
+        # --protocol http2: edge link over TCP :7844, not QUIC (UDP). The tunnel
+        # carries signaling only, so QUIC's latency edge is moot, and many
+        # networks block/throttle UDP — leaving a QUIC quick tunnel unregistered
+        # (no DNS). http2 works on restrictive and normal networks alike.
+        "$CF" tunnel --protocol http2 --url "http://localhost:$PORT" >"$CF_LOG" 2>&1 &
+
+        # Scrape the ephemeral public URL from cloudflared's banner (≤20s).
+        URL=""
+        for _ in $(seq 1 40); do
+          URL="$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' "$CF_LOG" | head -1 || true)"
+          [ -n "$URL" ] && break
+          sleep 0.5
+        done
+        [ -n "$URL" ] || { echo "cloudflared produced no tunnel URL:"; cat "$CF_LOG"; exit 1; }
+
+        HOST="${URL#https://}"
+        echo ""
+        echo "  Quick tunnel up. Share this link to invite a collaborator:"
+        echo ""
+        echo "      wfedit+s://$HOST/r/{{.ROOM}}"
+        echo ""
+        echo "  (equivalently:  wf-edit --relay=wss://$HOST --room={{.ROOM}})"
+        echo "  Signaling is wss:// (TLS); media is DTLS-SRTP P2P/TURN, not through the tunnel."
+        echo "  Ctrl-C to stop."
+        echo ""
+        wait
+
+  named-tunnel:
+    desc: "Host a wf-edit call via named Cloudflare tunnel. Defaults: wf-host → wf.worldfoundry.org, room studio-1. Ctrl-C to stop."
+    silent: true
+    deps: [build-wf-edit-fast]
+    vars:
+      ROOM: '{{.ROOM | default "studio-1"}}'
+    env:
+      WF_COLLAB_TUNNEL_NAME: '{{.WF_COLLAB_TUNNEL_NAME | default "wf-host"}}'
+      WF_COLLAB_TUNNEL_HOSTNAME: '{{.WF_COLLAB_TUNNEL_HOSTNAME | default "wf.worldfoundry.org"}}'
+    cmds:
+      - |
+        set -euo pipefail
+        echo ""
+        echo "  Named tunnel: $WF_COLLAB_TUNNEL_NAME → wss://$WF_COLLAB_TUNNEL_HOSTNAME"
+        echo "  Room:         {{.ROOM}}"
+        echo ""
+        ./build-editor-fast/wf-edit --host-tunnel --room={{.ROOM}} {{.CLI_ARGS}} 2>&1 | tee /tmp/wf-host.log
+
+  join:
+    desc: "Join a wf-edit call. Defaults: room studio-1 on wf.worldfoundry.org. Override: ROOM=x or URL=wfedit+s://..."
+    silent: true
+    deps: [build-wf-edit-fast]
+    vars:
+      ROOM: '{{.ROOM | default "studio-1"}}'
+      HOSTNAME: '{{.WF_COLLAB_TUNNEL_HOSTNAME | default "wf.worldfoundry.org"}}'
+      URL: '{{.URL | default (print "wfedit+s://" (.WF_COLLAB_TUNNEL_HOSTNAME | default "wf.worldfoundry.org") "/r/" (.ROOM | default "studio-1"))}}'
+    cmds:
+      - |
+        set -euo pipefail
+        echo ""
+        echo "  Joining: {{.URL}}"
+        echo "  (log → /tmp/wf-join.log)"
+        echo ""
+        stdbuf -oL -eL ./build-editor-fast/wf-edit --url="{{.URL}}" {{.CLI_ARGS}} 2>&1 | tee /tmp/wf-join.log
+
+  emsdk-manager:
+    desc: "Clone the emsdk manager scripts at a pinned commit into engine/vendor/emsdk-6.0.0 (idempotent; not vendored in git)"
+    vars:
+      EMSDK_COMMIT: b44154299bdefe75ba287874bb63fc9806243771   # emscripten-core/emsdk, 2026-10-06
+    status:
+      - test -x engine/vendor/emsdk-6.0.0/emsdk
+    cmds:
+      - git clone --quiet https://github.com/emscripten-core/emsdk.git engine/vendor/emsdk-6.0.0
+      - git -C engine/vendor/emsdk-6.0.0 checkout --quiet --detach {{.EMSDK_COMMIT}}
+      - test "$(git -C engine/vendor/emsdk-6.0.0 rev-parse HEAD)" = "{{.EMSDK_COMMIT}}"
+
+  setup-emsdk:
+    desc: "Install + activate the pinned Emscripten toolchain (6.0.0) with the pinned emsdk manager (idempotent)"
+    deps: [emsdk-manager]
+    dir: engine/vendor/emsdk-6.0.0
+    status:
+      - test -x upstream/emscripten/emcc
+    cmds:
+      - ./emsdk install 6.0.0
+      - ./emsdk activate 6.0.0
+
+  build-web:
+    desc: "Build wf_game for the browser (wasm + WebGL2) into build-web/"
+    deps: [vendor-unpack, setup-emsdk]
+    cmds:
+      # emsdk_env.sh uses bashisms that Task's POSIX shell (mvdan/sh) can't
+      # source — under errexit that aborts the build before emcmake runs. Run
+      # the whole thing through the system bash so the env is set correctly.
+      - |
+        bash -c '
+          set -euo pipefail
+          . engine/vendor/emsdk-6.0.0/emsdk_env.sh >/dev/null 2>&1
+          emcmake cmake -S . -B build-web -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-web -j
+        '
+
+  serve-web:
+    desc: "Serve the web build at http://localhost:8080/wf_game.html"
+    dir: build-web
+    cmds:
+      - python3 -m http.server 8080
+
+  build-web-edit:
+    desc: "Build the collaborative editor (wf-edit) for the browser (wasm + WebGL2) into build-web-edit/. Run `task dev-setup-web-edit` once first."
+    deps: [dev-setup-web-edit]
+    cmds:
+      # emsdk_env.sh + the rustup wasm toolchain (NOT the distro rust) must be on
+      # PATH; run through system bash so the env sticks (Task's POSIX shell can't
+      # source emsdk_env.sh). Rust_CARGO_TARGET stops Corrosion's host-triple fallback.
+      - |
+        bash -c '
+          set -euo pipefail
+          export RUSTUP_HOME="${RUSTUP_HOME:-$HOME/.rustup}" CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
+          export PATH="$CARGO_HOME/bin:$PATH" RUSTUP_TOOLCHAIN=1.85.1
+          . engine/vendor/emsdk-6.0.0/emsdk_env.sh >/dev/null 2>&1
+          emcmake cmake -S . -B build-web-edit -DCMAKE_BUILD_TYPE=Release \
+            -DWF_ENABLE_WEB_EDITOR=ON -DRust_CARGO_TARGET=wasm32-unknown-emscripten
+          cmake --build build-web-edit --target wf_edit_web -j
+        '
+
+  serve-web-edit:
+    desc: "Serve the web editor at http://localhost:8081/wf-edit.html"
+    dir: build-web-edit
+    cmds:
+      - python3 -m http.server 8081
+
+  bundle-web:
+    desc: "Stage the deployable web build into dist/web/ (for Cloudflare Pages) — see web/README.md"
+    deps: [build-web]
+    cmds:
+      - rm -rf dist/web && mkdir -p dist/web
+      - cp build-web/wf_game.html build-web/wf_game.js build-web/wf_game.wasm build-web/wf_game.data dist/web/
+      - cp build-web/wf_game.html dist/web/index.html
+      - 'echo "Bundle ready: dist/web/ ($(du -sh dist/web | cut -f1)) — deploy per web/README.md"'
+
+  build-cmake-android:
+    desc: "Build libwf_game.so via CMake + NDK (arm64-v8a)"
+    deps: [vendor-unpack]
+    vars:
+      NDK: /usr/lib/android-sdk/ndk/26.2.11394342
+    cmds:
+      - |
+        cmake -S . -B cmake-build-android \
+          -DCMAKE_TOOLCHAIN_FILE={{.NDK}}/build/cmake/android.toolchain.cmake \
+          -DANDROID_ABI=arm64-v8a \
+          -DANDROID_PLATFORM=android-21 \
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+      - cmake --build cmake-build-android -j
+
+  android-sdk-install:
+    desc: "Install Android SDK platforms + build-tools + cmake (idempotent; downloads + verifies cmdline-tools on first run)"
+    vars:
+      SDK_HOME: /usr/lib/android-sdk
+      CMDTOOLS_VERSION: "11076708"
+      # SHA256 of commandlinetools-linux-{{.CMDTOOLS_VERSION}}_latest.zip.
+      # Update this when bumping CMDTOOLS_VERSION — the download is rejected
+      # if it doesn't match.
+      CMDTOOLS_SHA256: "2d2d50857e4eb553af5a6dc3ad507a17adf43d115264b1afc116f95c92e5e258"
+      PLATFORM: "platforms;android-34"
+      BUILDTOOLS: "build-tools;34.0.0"
+      CMAKEPKG: "cmake;3.22.1"
+      USER:
+        sh: id -un
+      GROUP:
+        sh: id -gn
+    cmds:
+      - |
+        set -euo pipefail
+
+        # Fast-path: everything is already installed and user-owned. This is
+        # the hot case when `task build-apk` triggers us as a dep.
+        if [ -d "{{.SDK_HOME}}/platforms/android-34" ] \
+            && [ -d "{{.SDK_HOME}}/build-tools/34.0.0" ] \
+            && [ -d "{{.SDK_HOME}}/cmake/3.22.1" ] \
+            && [ -w "{{.SDK_HOME}}" ]; then
+            exit 0
+        fi
+
+        echo "==> Ensuring cmdline-tools under {{.SDK_HOME}}/cmdline-tools/latest/"
+        if [ ! -x "{{.SDK_HOME}}/cmdline-tools/latest/bin/sdkmanager" ]; then
+            cd /tmp
+            zip="commandlinetools-linux-{{.CMDTOOLS_VERSION}}_latest.zip"
+            if [ ! -f "$zip" ]; then
+                wget -q --show-progress \
+                    "https://dl.google.com/android/repository/$zip"
+            fi
+            echo "==> Verifying $zip (SHA256)"
+            echo "{{.CMDTOOLS_SHA256}}  $zip" | sha256sum -c - \
+                || { echo "FAIL: checksum mismatch; delete /tmp/$zip and retry"; exit 1; }
+            rm -rf /tmp/cmdline-tools
+            unzip -q "$zip"
+            sudo mkdir -p "{{.SDK_HOME}}/cmdline-tools"
+            sudo rm -rf "{{.SDK_HOME}}/cmdline-tools/latest"
+            sudo mv /tmp/cmdline-tools "{{.SDK_HOME}}/cmdline-tools/latest"
+        else
+            echo "    already installed"
+        fi
+
+        export ANDROID_HOME={{.SDK_HOME}}
+        export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools"
+
+        echo "==> Accepting SDK licenses"
+        # `yes | sdkmanager --licenses` is idiomatic, but `yes` gets SIGPIPE
+        # when sdkmanager exits, which trips `set -o pipefail`. Feed a finite
+        # stream instead so stdin hits EOF naturally. Plain POSIX loop so
+        # this works under dash too.
+        ( for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25; do
+              echo y
+          done ) \
+            | sudo -E "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null
+
+        echo "==> Installing {{.PLATFORM}} + {{.BUILDTOOLS}} + {{.CMAKEPKG}}"
+        sudo -E "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            "{{.PLATFORM}}" "{{.BUILDTOOLS}}" "{{.CMAKEPKG}}"
+
+        echo "==> Chowning {{.SDK_HOME}} → {{.USER}}:{{.GROUP}} (so Gradle can cache without sudo)"
+        sudo chown -R "{{.USER}}:{{.GROUP}}" "{{.SDK_HOME}}"
+
+        echo "==> Verifying platforms + build-tools + cmake landed"
+        test -d "{{.SDK_HOME}}/platforms/android-34"  || { echo "FAIL: platforms;android-34 missing"; exit 1; }
+        test -d "{{.SDK_HOME}}/build-tools/34.0.0"   || { echo "FAIL: build-tools;34.0.0 missing"; exit 1; }
+        test -d "{{.SDK_HOME}}/cmake/3.22.1"         || { echo "FAIL: cmake;3.22.1 missing"; exit 1; }
+        echo "    OK"
+
+        echo "==> Writing android/local.properties"
+        echo "sdk.dir={{.SDK_HOME}}" > android/local.properties
+
+        echo
+        echo "Done. Run: task build-apk"
+        echo "Gradle itself is via the repo-vendored android/gradlew wrapper — no system install needed."
+
+  build-apk:
+    desc: "Assemble the Android APKs, one per app flavor (snowgoons, aquarium, condo, smb, qbert) (release: -O3 + LTO + section GC; debug-keystore signed for sideload)"
+    deps: [android-sdk-install, build-cd-iff-aquarium-menu]
+    dir: android
+    env:
+      ANDROID_HOME: /usr/lib/android-sdk
+    cmds:
+      - ./gradlew assembleRelease
+      - echo "APKs → android/app/build/outputs/apk/{snowgoons,aquarium,condo,smb,qbert}/release/worldfoundry-{snowgoons,aquarium,condo,smb,qbert}-release.apk"
+
+  build-apk-debug:
+    desc: "Assemble the Android APKs, one per app flavor (snowgoons, aquarium, condo, smb, qbert) (debug: -O0 -g, for attaching ndk-gdb / lldb)"
+    deps: [android-sdk-install, build-cd-iff-aquarium-menu]
+    dir: android
+    env:
+      ANDROID_HOME: /usr/lib/android-sdk
+    cmds:
+      - ./gradlew assembleDebug
+      - echo "APKs → android/app/build/outputs/apk/{snowgoons,aquarium,condo,smb,qbert}/debug/worldfoundry-{snowgoons,aquarium,condo,smb,qbert}-debug.apk"
+
+  build-apk-diagnostic:
+    desc: "Build the opt-in Aquarium read-only runtime diagnostic APK (release optimization)"
+    dir: android
+    env:
+      ANDROID_HOME: /usr/lib/android-sdk
+    cmds:
+      - ./gradlew assembleAquariumDiagnostic
+      - echo "APK → android/app/build/outputs/apk/aquarium/diagnostic/worldfoundry-aquarium-diagnostic.apk"
+
+  install-apk:
+    desc: "Install + start one app's release APK on a device (APP=aquarium|snowgoons|condo|smb|qbert, default aquarium; -- <ip> for network ADB), evidence → ~/tmp/android-device-run/ (scripts/android-device-run.sh)"
+    vars:
+      APP: '{{.APP | default "aquarium"}}'
+    cmds:
+      - bash scripts/android-device-run.sh --release --app {{.APP}} {{.CLI_ARGS}}
+
+  chromecast:install:
+    desc: "Compatibility alias for reviewed upgrades in the standalone coordinator project"
+    cmds:
+      - python3 scripts/coordinator-admin.py {{.CLI_ARGS}}
+
+  chromecast:devices:
+    desc: "Coordinated Chromecast devices"
+    silent: true
+    env: &chromecast_env
+      WF_CC_DEVICE: '{{.DEVICE | default ""}}'
+      WF_CC_POOL: '{{.POOL | default ""}}'
+      WF_CC_JOB: '{{.JOB | default ""}}'
+      WF_CC_BATCH: '{{.BATCH | default ""}}'
+      WF_CC_OUT: '{{.OUT | default ""}}'
+      WF_CC_TEXT: '{{.TEXT | default ""}}'
+      WF_CC_WORKFLOW: '{{.WORKFLOW | default ""}}'
+      WF_CC_APP: '{{.APP | default ""}}'
+      WF_CC_SCENE: '{{.SCENE | default ""}}'
+      WF_CC_APK: '{{.APK | default ""}}'
+      WF_CC_REQUIRE_ABI: '{{.REQUIRE_ABI | default ""}}'
+      WF_CC_WARMUP: '{{.WARMUP | default ""}}'
+      WF_CC_RUNS: '{{.RUNS | default ""}}'
+      WF_CC_DURATION: '{{.DURATION | default ""}}'
+      WF_CC_WATCH: '{{.WATCH | default ""}}'
+      WF_CC_VALIDATOR: '{{.VALIDATOR | default ""}}'
+      WF_CC_ASYNC: '{{.ASYNC | default ""}}'
+      WF_CC_RECIPE: '{{.RECIPE | default ""}}'
+      WF_CC_TRACE: '{{.TRACE | default ""}}'
+      WF_CC_CHANGE: '{{.CHANGE | default ""}}'
+      WF_CC_PAIRING_ENDPOINT: '{{.PAIRING_ENDPOINT | default ""}}'
+      WF_CC_ADDRESS: '{{.ADDRESS | default ""}}'
+      WF_CC_METHOD: '{{.METHOD | default ""}}'
+      WF_CC_REASON: '{{.REASON | default ""}}'
+      WF_CC_FREQUENCY: '{{.FREQUENCY | default ""}}'
+      WF_CC_CALLGRAPH: '{{.CALLGRAPH | default ""}}'
+    cmds:
+      - python3 scripts/chromecast.py task devices
+
+  chromecast:readd:
+    desc: "Coordinated Chromecast readd"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task readd
+
+  chromecast:queue:
+    desc: "Coordinated Chromecast queue"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task queue
+
+  chromecast:reserve:
+    desc: "Reserve a Chromecast for personal use until explicitly released"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task reserve
+
+  chromecast:release:
+    desc: "Release your personal Chromecast reservation"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task release
+
+  cast1:reserve:
+    desc: "Reserve cast1 for personal use (optional REASON)"
+    cmds:
+      - task: chromecast:reserve
+        vars: {DEVICE: chromecast-test-01}
+
+  cast1:release:
+    desc: "Release your cast1 reservation"
+    cmds:
+      - task: chromecast:release
+        vars: {DEVICE: chromecast-test-01}
+
+  cast2:reserve:
+    desc: "Reserve cast2 for personal use (optional REASON)"
+    cmds:
+      - task: chromecast:reserve
+        vars: {DEVICE: chromecast-test-02}
+
+  cast2:release:
+    desc: "Release your cast2 reservation"
+    cmds:
+      - task: chromecast:release
+        vars: {DEVICE: chromecast-test-02}
+
+  chromecast:status:
+    desc: "Coordinated Chromecast status"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task status
+
+  chromecast:configure:
+    desc: "Apply a reviewed persistent TV setting through the shared coordinator"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - PYTHONPATH=/opt/wf-device-coordinator/vendor python3 scripts/chromecast.py task configure
+
+  chromecast:submit:
+    desc: "Submit jobs: DEVICE=id,id or all; WORKFLOW=install verifies launcher artwork"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task submit
+
+  chromecast:check:
+    desc: "Coordinated Chromecast check"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task check
+
+  chromecast:profile:
+    desc: "Coordinated Chromecast profile"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task profile
+
+  chromecast:simpleperf:
+    desc: "Coordinated simpleperf CPU profile of a profileable app (FREQUENCY, CALLGRAPH=none|dwarf)"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task simpleperf
+
+  chromecast:capture:
+    desc: "Capture the current Chromecast display without launch, input or installation"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task capture
+
+  chromecast:record:
+    desc: "Coordinated Chromecast record"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task record
+
+  chromecast:watch:
+    desc: "Follow a Chromecast JOB or multi-device BATCH"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task watch
+
+  chromecast:evidence:
+    desc: "Download verified evidence for JOB or BATCH into OUT"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task evidence
+
+  chromecast:message:
+    desc: "Coordinated Chromecast message"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task message
+
+  chromecast:cancel:
+    desc: "Coordinated Chromecast cancel"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task cancel
+
+  chromecast-aquarium:
+    desc: "Compatibility alias: use task chromecast:check APP=aquarium DEVICE=..."
+    cmds:
+      - task: chromecast:check
+        vars:
+          APP: aquarium
+          DEVICE: '{{.DEVICE | default ""}}'
+          POOL: '{{.POOL | default ""}}'
+          APK: '{{.APK | default ""}}'
+
+  chromecast-condo:
+    desc: "Compatibility alias: use task chromecast:check APP=condo DEVICE=..."
+    cmds:
+      - task: chromecast:check
+        vars:
+          APP: condo
+          DEVICE: '{{.DEVICE | default ""}}'
+          POOL: '{{.POOL | default ""}}'
+          APK: '{{.APK | default ""}}'
+
+  soundfont:
+    desc: "Build wfsource/source/game/florestan-subset.sf2 (the engine's soundfont) from FluidR3_GM, keeping only the presets the MIDI files use (scripts/make-soundfont-subset.py; MIT base, see engine/vendor/README.md). The Android snowgoons flavor and desktop music need it"
+    cmds:
+      - python3 scripts/make-soundfont-subset.py {{.CLI_ARGS}}
+
+  gen-qr-logo:
+    desc: "Regenerate wfsource/source/hal/phonepad/phonepad_logo.h, the World Foundry logo grids (whole, and the planet picture without the WORLD/FOUNDRY strips) drawn in the middle of the phone-controller QR code, from ../worldfoundry.org/src/assets/wflogo.png (usage: task gen-qr-logo [-- --check])"
+    cmds:
+      - python3 scripts/gen-qr-logo.py {{.CLI_ARGS}}
+
+  find-chromecast:
+    desc: "Compatibility alias: list registered devices with task chromecast:devices"
+    cmds:
+      - task: chromecast:devices
+
+
+  run:
+    desc: "Run wf_game (cd.iff in cwd)"
+    deps: [ensure-build]
+    dir: wfsource/source/game
+    cmds:
+      - LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 ../../../engine/wf_game {{.CLI_ARGS}}
+
+  gdb:
+    desc: "Run wf_game under gdb (-batch backtrace), tee to /tmp/wfgdb.log"
+    deps: [ensure-build]
+    dir: wfsource/source/game
+    cmds:
+      - |
+        LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 \
+          gdb -batch -ex run -ex bt -ex 'thread apply all bt' --args \
+          ../../../engine/wf_game 2>&1 | tee /tmp/wfgdb.log
+
+  run-level:
+    desc: "Run wf_game with -L<path> (usage: task run-level -- wflevels/snowgoons.iff [-record_video out.mp4]). Or set WF_RECORD=1 on named run-* tasks."
+    deps: [ensure-build]
+    cmds:
+      - |
+        set -- {{.CLI_ARGS}}
+        if [ -z "${1:-}" ]; then
+          echo "Usage: task run-level -- <path/to/level.iff> [extra-flags...]" >&2
+          exit 1
+        fi
+        LEVEL="$1"; shift
+        LOG=/tmp/wfgame.log
+        echo "Logging to $LOG"
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 \
+          engine/wf_game "-L$LEVEL" "$@" 2>&1 | tee "$LOG"
+
+  run-filesys:
+    desc: "Run wf_game on wflevels/filesys-standalone.iff (FSN filesystem browser). WF_RECORD=1 records video."
+    deps: [ensure-build]
+    cmds:
+      - |
+        LOG=/tmp/wfgame_filesys.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_filesys.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/filesys-standalone.iff $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
+
+  run-filelight:
+    desc: "Run wf_game on wflevels/filelight-standalone.iff (3D Filelight sunburst). WF_RECORD=1 records video."
+    deps: [ensure-build]
+    cmds:
+      - |
+        LOG=/tmp/wfgame_filelight.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_filelight.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/filelight-standalone.iff $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
+
+  run-treemap:
+    desc: "Run wf_game on wflevels/treemap-standalone.iff (KDirStat squarified treemap). WF_RECORD=1 records video."
+    deps: [ensure-build]
+    cmds:
+      - |
+        LOG=/tmp/wfgame_treemap.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_treemap.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/treemap-standalone.iff $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
+
+  run-dome:
+    desc: "Run wf_game on wflevels/dome-standalone.iff (planetarium dome — sunburst on a hemisphere, look up + turn). WF_CULL=1 enables backface culling (dome is wound for it). WF_RECORD=1 records video."
+    deps: [ensure-build]
+    cmds:
+      - |
+        LOG=/tmp/wfgame_dome.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_dome.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/dome-standalone.iff $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
+
+  run-snowgoons:
+    desc: "Run wf_game on wflevels/snowgoons.iff directly (bypass cd.iff). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
+    deps: [ensure-build]
+    cmds:
+      - |
+        LOG=/tmp/wfgame_snowgoons.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""; FSFLAG=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_snowgoons.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/snowgoons.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
+
+  tools-build:
+    desc: "Build the Rust level tools (iffcomp-rs, levcomp-rs, textile-rs) in release mode; build_level_binary.sh needs all three"
+    cmds:
+      - cargo build --release --manifest-path wftools/iffcomp-rs/Cargo.toml
+      - cargo build --release --manifest-path wftools/levcomp-rs/Cargo.toml
+      - cargo build --release --manifest-path wftools/textile-rs/Cargo.toml
+    sources:
+      - wftools/iffcomp-rs/src/**/*.rs
+      - wftools/levcomp-rs/src/**/*.rs
+      - wftools/textile-rs/src/**/*.rs
+      - wftools/wf_iff/src/**/*.rs
+      - wftools/wf_oad/src/**/*.rs
+      - wftools/*/Cargo.toml
+    generates:
+      - wftools/iffcomp-rs/target/release/iffcomp
+      - wftools/levcomp-rs/target/release/levcomp
+      - wftools/textile-rs/target/release/textile
+
+  baseline:generate:
+    desc: "Generate a new empty-scene baseline Blender file; never overwrites baseline.blend"
+    cmds:
+      - python3 wflevels/baseline/prepare_assets.py
+      - blender --background --python-exit-code 1 --python wflevels/baseline/generate.py --
+
+  baseline:export:
+    desc: "Export the reviewed baseline.blend without regeneration"
+    cmds:
+      - python3 wflevels/baseline/build.py --export-only
+
+  baseline:build:
+    desc: "Build the reviewed World Foundry baseline using the existing tools"
+    cmds:
+      - python3 wflevels/baseline/build.py
+
+  baseline:diagnostics:
+    desc: "Build the optional baseline diagnostic fixtures in an independent generated Blender file"
+    cmds:
+      - python3 wflevels/baseline/build.py --preset diagnostics
+
+  baseline:settings-gallery:
+    desc: "Build the complete OAS/OAD coverage catalog; interactive host integration remains separately approved"
+    cmds:
+      - python3 wflevels/baseline/build.py --preset settings-gallery
+
+  baseline:verify:
+    desc: "Verify baseline geometry contract and compiled OAS/OAD coverage"
+    cmds:
+      - python3 wflevels/baseline/verify.py
+
+  baseline:check:
+    desc: "Run an owned native desktop baseline movement/collision/camera session"
+    cmds:
+      - python3 wflevels/baseline/verify.py --desktop
+
+  build-level:
+    desc: "Build a level's inner + standalone .iff (usage: task build-level -- qbert_practice)"
+    deps: [tools-build]
+    cmds:
+      - |
+        set -- {{.CLI_ARGS}}
+        if [ -z "${1:-}" ]; then
+          echo "Usage: task build-level -- <level-name>" >&2
+          echo "Example: task build-level -- qbert_practice" >&2
+          exit 1
+        fi
+        bash wftools/wf_blender/build_level_binary.sh "$1"
+
+  build-cd-iff:
+    desc: "Assemble wfsource/source/game/cd.iff from shell.fth + standalone level IFFs via cdpack-rs (SMB W1-1=0, W1-2=1, W1-3=2, W1-4=3, snowgoons=4, qbert=5, Astra Marble Madness=6, baseline=7)"
+    cmds:
+      - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
+      # Feed the *-standalone.iff (L4-rooted) files, NOT the bare LVAS *.iff:
+      # game.cc:250 seeks TOC_offset + one sector before reading each level's RAM
+      # config, so every body needs the standalone wrapper's leading ALGN sector.
+      # Order = TOC index. shell.fth boots level 0, so SMB W1-1 leads -> the bundle
+      # boots into Mario. Flagpole/axe advance ActBoxes chain the loop:
+      # W1-1 writes LEVEL_TO_RUN=1 (-> W1-2), W1-2 writes 2 (-> W1-3), W1-3 writes 3
+      # (-> W1-4), W1-4 writes 0 (-> W1-1) — an endless W1-1->W1-2->W1-3->W1-4 loop.
+      # snowgoons/qbert stay at 4/5; Astra Marble Madness stays at 6; baseline is 7.
+      # See docs/plans/2026-06-03-build-faithful-smb-w1-4.md.
+      - |
+        wftools/cdpack-rs/target/release/cdpack \
+          wfsource/source/game/shell.fth \
+          wflevels/smb_w1_1-standalone.iff \
+          wflevels/smb_w1_2-standalone.iff \
+          wflevels/smb_w1_3-standalone.iff \
+          wflevels/smb_w1_4-standalone.iff \
+          wflevels/snowgoons-standalone.iff \
+          wflevels/qbert_practice-standalone.iff \
+          wflevels/marble-madness-3d-astra-standalone.iff \
+          wflevels/baseline-standalone.iff \
+          -o wfsource/source/game/cd.iff
+
+  build-cd-iff-aquarium:
+    desc: "Assemble the aquarium-only cd.iff (shell.fth boots TOC level 0 = wflevels/aquarium-standalone.iff; no -L needed) via cdpack-rs → wflevels/aquarium-cd.iff, or CD_OUT=<path>. Direct benchmarks and the macOS/iOS aquarium apps reuse it; Android uses build-cd-iff-aquarium-menu instead (docs/plans/2026-09-30-aquarium-chromecast.md § Reuse)"
+    vars:
+      # Not OUT: run_aquarium_checks.py takes OUT= for its screenshot dir, and Task reads env vars.
+      CD_OUT: '{{.CD_OUT | default "wflevels/aquarium-cd.iff"}}'
+    cmds:
+      - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
+      # The same recipe as build-cd-iff with one level: shell.fth's first run writes LEVEL_TO_RUN = 0,
+      # the aquarium never writes it, so the game stays in the tank. Deterministic output; the tracked
+      # wflevels/aquarium-cd.iff is checked against wflevels/aquarium-standalone.iff by
+      # tests/test_aquarium_android.py, so rebuild it (task aquarium-level does) whenever the level changes.
+      - mkdir -p "$(dirname '{{.CD_OUT}}')"
+      - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell.fth wflevels/aquarium-standalone.iff -o '{{.CD_OUT}}'
+
+  build-cd-iff-aquarium-menu:
+    desc: "Package the eight Aquarium tanks with the selector for Android (standalone/Apple bundle remains aquarium-cd.iff)"
+    deps: [tools-build, aquarium-level, aquarium-blue-shrimp-level, aquarium-betta-level, aquarium-jellyfish-level, aquarium-lionfish-level, aquarium-plants-level, aquarium-arowana-level, aquarium-tiger-barbs-level]
+    cmds:
+      - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell-menu.fth --manifest wflevels/aquarium-menu.manifest -o wflevels/aquarium-menu-cd.iff
+
+  build-cd-iff-condo:
+    desc: "Assemble the condo-only cd.iff (shell.fth boots TOC level 0 = wflevels/condo_639_640-standalone.iff) via cdpack-rs → wflevels/condo-cd.iff, or CD_OUT=<path>. The Android condo app bundles it (docs/plans/2026-10-01-condo-chromecast.md)"
+    vars:
+      CD_OUT: '{{.CD_OUT | default "wflevels/condo-cd.iff"}}'
+    cmds:
+      - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
+      # Same recipe as build-cd-iff-aquarium. The tracked wflevels/condo-cd.iff is checked against
+      # wflevels/condo_639_640-standalone.iff by tests/test_condo_android.py: rebuild it whenever the level changes.
+      - mkdir -p "$(dirname '{{.CD_OUT}}')"
+      - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell.fth wflevels/condo_639_640-standalone.iff -o '{{.CD_OUT}}'
+
+  # One cd.iff per game for the Android apps (docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md); the desktop's
+  # multi-level build-cd-iff above is unchanged. Same recipe as build-cd-iff-condo. The tracked outputs are checked against
+  # today's standalone levels by tests/test_game_apps_android.py: rebuild whenever one of the levels changes.
+  build-cd-iff-smb:
+    desc: "Assemble the SMB cd.iff (TOC 0..3 = W1-1..W1-4, the same indices as the desktop bundle, so the flag/axe LEVEL_TO_RUN chain 1, 2, 3, 0 is unchanged) via cdpack-rs → wflevels/smb-cd.iff, or CD_OUT=<path>. The Android smb app bundles it"
+    vars:
+      CD_OUT: '{{.CD_OUT | default "wflevels/smb-cd.iff"}}'
+    cmds:
+      - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
+      - mkdir -p "$(dirname '{{.CD_OUT}}')"
+      - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell.fth wflevels/smb_w1_1-standalone.iff wflevels/smb_w1_2-standalone.iff wflevels/smb_w1_3-standalone.iff wflevels/smb_w1_4-standalone.iff -o '{{.CD_OUT}}'
+
+  build-cd-iff-snowgoons:
+    desc: "Assemble the snowgoons-only cd.iff (TOC 0 = wflevels/snowgoons-standalone.iff, which writes no LEVEL_TO_RUN) via cdpack-rs → wflevels/snowgoons-cd.iff, or CD_OUT=<path>. The Android snowgoons app (org.worldfoundry.wf_game) bundles it"
+    vars:
+      CD_OUT: '{{.CD_OUT | default "wflevels/snowgoons-cd.iff"}}'
+    cmds:
+      - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
+      - mkdir -p "$(dirname '{{.CD_OUT}}')"
+      - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell.fth wflevels/snowgoons-standalone.iff -o '{{.CD_OUT}}'
+
+  build-cd-iff-qbert:
+    desc: "Assemble the Q*bert-only cd.iff (TOC 0 = wflevels/qbert_practice-standalone.iff, which writes no LEVEL_TO_RUN) via cdpack-rs → wflevels/qbert-cd.iff, or CD_OUT=<path>. The Android qbert app bundles it"
+    vars:
+      CD_OUT: '{{.CD_OUT | default "wflevels/qbert-cd.iff"}}'
+    cmds:
+      - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
+      - mkdir -p "$(dirname '{{.CD_OUT}}')"
+      - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell.fth wflevels/qbert_practice-standalone.iff -o '{{.CD_OUT}}'
+
+  run-marble-3d-astra:
+    desc: "Run Astra Marble Madness from cd.iff (level 6; arrows roll, Space restarts)"
+    deps: [ensure-build]
+    dir: wfsource/source/game
+    cmds:
+      - LD_LIBRARY_PATH=../../../engine/libs DISPLAY=${DISPLAY:-:0} ../../../engine/wf_game {{.CLI_ARGS}} 6
+
+  run-qbert:
+    desc: "Run wf_game on wflevels/qbert_practice-standalone.iff directly (bypass cd.iff). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
+    deps: [ensure-build]
+    cmds:
+      - |
+        LOG=/tmp/wfgame_qbert.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""; FSFLAG=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_qbert.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/qbert_practice-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
+
+  run-smb:
+    desc: "Run wf_game on wflevels/smb_w1_1-standalone.iff directly (bypass cd.iff). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
+    deps: [ensure-build]
+    cmds:
+      - |
+        LOG=/tmp/wfgame_smb.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""; FSFLAG=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_smb.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/smb_w1_1-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
+
+  condo-osm-fetch:
+    desc: "Refresh wflevels/condo_639_640/site-osm.json from Overpass (network; the committed copy makes builds offline + byte-stable)"
+    cmds:
+      - python3 wflevels/condo_639_640/make_site_textures.py fetch
+
+  condo-textures:
+    desc: "Render the condo site skybox textures (condo_sky.tga, condo_ground.tga) from site-osm.json — offline, byte-stable"
+    cmds:
+      - python3 wflevels/condo_639_640/make_site_textures.py render
+    sources:
+      - wflevels/condo_639_640/make_site_textures.py
+      - wflevels/condo_639_640/site_constants.py
+      - wflevels/condo_639_640/site-osm.json
+    generates:
+      - wflevels/condo_639_640/condo_sky.tga
+      - wflevels/condo_639_640/condo_ground.tga
+
+  condo-level:
+    desc: "Condo 205/639+640 walkthrough: convert ~/docs/aircon/units-639-640.blend (CONDO_BLEND= to override) → wflevels/condo_639_640 → standalone .iff. Needs the wf_blender add-on installed."
+    deps: [tools-build, condo-textures]
+    vars:
+      # Task does not expand $HOME inside `sources:` globs — use the template env lookup.
+      CONDO_BLEND: '{{.CONDO_BLEND | default (printf "%s/docs/aircon/units-639-640.blend" (env "HOME"))}}'
+    cmds:
+      - |
+        set -euo pipefail
+        blender --background --python-expr "import addon_utils; raise SystemExit(0 if addon_utils.enable('wf_blender', default_set=False, persistent=False) else 1)" >/dev/null 2>&1 \
+          || { echo "wf_blender add-on not installed — 'sudo apt install worldfoundry-blender-editor-exporter' (apt.worldfoundry.org) or 'task blender-install'" >&2; exit 1; }
+        blender --background --python-exit-code 1 \
+          --python wflevels/condo_639_640/blender_create_condo.py -- "{{.CONDO_BLEND}}" \
+          2>&1 | { grep -E '^\[condo\]|^Info: Exported|Error|Traceback|Assert' || true; }
+        # pipefail above: a failing Blender step fails the task (a bare `|| true` used to mask it
+        # and let the previous .lev through to build-level).
+        test -s wflevels/condo_639_640/condo_639_640.lev
+      - bash wftools/wf_blender/build_level_binary.sh condo_639_640
+    sources:
+      - wflevels/condo_639_640/blender_create_condo.py
+      - wflevels/condo_639_640/camera_controls.fth
+      - wflevels/condo_639_640/site_constants.py
+      - wflevels/condo_639_640/condo_sky.tga
+      - wflevels/condo_639_640/condo_ground.tga
+      - wflevels/condo_639_640/textile.flags
+      - wflevels/condo_639_640/condo_639_640-standalone.iff.txt
+      - '{{.CONDO_BLEND}}'
+    generates:
+      - wflevels/condo_639_640-standalone.iff
+
+  aquarium-level:
+    desc: "Aquarium (55 gal acrylic tank, sand, rock, anemone, the canonical clownfish, camshots A + B; docs/plans/2026-09-30-aquarium-level.md): Blender build → wflevels/aquarium → standalone .iff, keyboard/gamepad profile. Needs the wf_blender add-on installed."
+    deps: [tools-build]
+    cmds:
+      - |
+        set -euo pipefail
+        blender --background --python-expr "import addon_utils; raise SystemExit(0 if addon_utils.enable('wf_blender', default_set=False, persistent=False) else 1)" >/dev/null 2>&1 \
+          || { echo "wf_blender add-on not installed — 'sudo apt install worldfoundry-blender-editor-exporter' (apt.worldfoundry.org) or 'task blender-install'" >&2; exit 1; }
+        AQUARIUM_PROFILE=keyboard blender --background --python-exit-code 1 \
+          --python wflevels/aquarium/blender_create_aquarium.py \
+          2>&1 | { grep -E '^\[aquarium\]|^Info: Exported|Error|Traceback|Assert' || true; }
+        test -s wflevels/aquarium/aquarium.lev
+      - bash wftools/wf_blender/build_level_binary.sh aquarium
+      # Keep the aquarium-only cd.iff (the Android/macOS/iOS aquarium apps' bundle) in step with the level.
+      - task: build-cd-iff-aquarium
+    sources:
+      - wflevels/aquarium/blender_create_aquarium.py
+      - wflevels/aquarium/aquarium_constants.py
+      - wflevels/aquarium/aquarium_swim.fth
+      - wflevels/aquarium/clownfish.py
+      - wflevels/aquarium/clownfish_idle.fth
+      - wflevels/aquarium/school.fth
+      - wflevels/aquarium/school_rig.fth
+      - wflevels/aquarium/barb_school_rig.fth
+      - wflevels/aquarium/tiger_barb.py
+      - wflevels/aquarium/art/tiger-barb-source.png
+      - wflevels/aquarium/aquarium-standalone.iff.txt
+      - wflevels/snowgoons-blender/snowgoons-blender.lev
+    generates:
+      - wflevels/aquarium/aquarium.lev
+      - wflevels/aquarium.iff
+      - wflevels/aquarium-standalone.iff
+      - wflevels/aquarium-cd.iff
+
+  aquarium-blue-shrimp-level:
+    desc: "Build the independent blue-shrimp Aquarium tank"
+    cmds:
+      - bash wflevels/aquarium_blue_shrimp/build.sh   # in the Blender container; builds its own tools
+    sources:
+      - wflevels/aquarium_blue_shrimp/build.sh
+      - scripts/level-build.sh
+      - wflevels/aquarium_blue_shrimp/*.py
+      - wflevels/aquarium_blue_shrimp/*.fth
+      - wflevels/aquarium_tanks/*.py
+      - wflevels/aquarium_tanks/*.fth
+    generates:
+      - wflevels/aquarium_blue_shrimp-standalone.iff
+
+  aquarium-tiger-barbs-level:
+    desc: "Build the independent 50-fish Tiger Barbs tank"
+    cmds:
+      - bash wflevels/aquarium_tiger_barbs/build.sh   # in the Blender container; builds its own tools
+    sources:
+      - wflevels/aquarium_tiger_barbs/build.sh
+      - scripts/level-build.sh
+      - wflevels/aquarium/*.py
+      - wflevels/aquarium/*.fth
+      - wflevels/aquarium/art/tiger-barb-source.png
+    generates:
+      - wflevels/aquarium_tiger_barbs-standalone.iff
+
+  aquarium-betta-level:
+    desc: "Build the independent betta Aquarium tank"
+    cmds:
+      - bash wflevels/aquarium_betta/build.sh   # in the Blender container; builds its own tools
+    sources:
+      - wflevels/aquarium_betta/build.sh
+      - scripts/level-build.sh
+      - wflevels/aquarium_betta/*.py
+      - wflevels/aquarium_betta/*.fth
+      - wflevels/aquarium_tanks/*.py
+      - wflevels/aquarium_tanks/*.fth
+    generates:
+      - wflevels/aquarium_betta-standalone.iff
+
+  aquarium-jellyfish-level:
+    desc: "Build the independent jellyfish Aquarium tank"
+    cmds:
+      - bash wflevels/aquarium_jellyfish/build.sh   # in the Blender container; builds its own tools
+    sources:
+      - wflevels/aquarium_jellyfish/build.sh
+      - scripts/level-build.sh
+      - wflevels/aquarium_jellyfish/*.py
+      - wflevels/aquarium_jellyfish/*.fth
+      - wflevels/aquarium_tanks/*.py
+      - wflevels/aquarium_tanks/*.fth
+    generates:
+      - wflevels/aquarium_jellyfish-standalone.iff
+
+  aquarium-lionfish-level:
+    desc: "Build the independent lionfish Aquarium tank"
+    cmds:
+      - bash wflevels/aquarium_lionfish/build.sh   # in the Blender container; builds its own tools
+    sources:
+      - wflevels/aquarium_lionfish/build.sh
+      - scripts/level-build.sh
+      - wflevels/aquarium_lionfish/*.py
+      - wflevels/aquarium_lionfish/*.fth
+      - wflevels/aquarium_tanks/*.py
+      - wflevels/aquarium_tanks/*.fth
+    generates:
+      - wflevels/aquarium_lionfish-standalone.iff
+
+  aquarium-plants-level:
+    desc: "Build the animal-free planted Aquarium tank"
+    cmds:
+      - bash wflevels/aquarium_plants/build.sh   # in the Blender container; builds its own tools
+    sources:
+      - wflevels/aquarium_plants/build.sh
+      - scripts/level-build.sh
+      - wflevels/aquarium_plants/*.py
+      - wflevels/aquarium_tanks/*.py
+      - wflevels/aquarium_tanks/*.fth
+    generates:
+      - wflevels/aquarium_plants-standalone.iff
+
+  aquarium-arowana-level:
+    desc: "Build Asian Arowana in a broad bare tank"
+    cmds:
+      - bash wflevels/aquarium_arowana/build.sh   # in the Blender container; builds its own tools
+    sources:
+      - wflevels/aquarium_arowana/build.sh
+      - scripts/level-build.sh
+      - wflevels/aquarium_arowana/*.py
+      - wflevels/aquarium_tanks/*.py
+      - wflevels/aquarium_tanks/arowana_motion.fth
+      - wflevels/aquarium/aquarium_swim.fth
+      - wflevels/aquarium/clownfish_idle.fth
+      - wflevels/aquarium/clownfish.py
+    generates:
+      - wflevels/aquarium_arowana-standalone.iff
+
+  aquarium-touch-level:
+    desc: "Aquarium, touch profile (phone landscape: D-pad + A/B; A cycles Swim → Depth mode, B darts) → wflevels/aquarium_touch-standalone.iff (git-ignored, regenerable). Run: LD_LIBRARY_PATH=engine/libs engine/wf_game -Lwflevels/aquarium_touch-standalone.iff"
+    deps: [tools-build]
+    cmds:
+      - |
+        set -euo pipefail
+        AQUARIUM_PROFILE=touch blender --background --python-exit-code 1 \
+          --python wflevels/aquarium/blender_create_aquarium.py \
+          2>&1 | { grep -E '^\[aquarium\]|^Info: Exported|Error|Traceback|Assert' || true; }
+        test -s wflevels/aquarium_touch/aquarium_touch.lev
+      - bash wftools/wf_blender/build_level_binary.sh aquarium_touch
+    sources:
+      - wflevels/aquarium/blender_create_aquarium.py
+      - wflevels/aquarium/aquarium_constants.py
+      - wflevels/aquarium/aquarium_swim.fth
+      - wflevels/aquarium/clownfish.py
+      - wflevels/aquarium/clownfish_idle.fth
+      - wflevels/aquarium/school.fth
+      - wflevels/aquarium/school_rig.fth
+      - wflevels/aquarium/barb_school_rig.fth
+      - wflevels/aquarium/tiger_barb.py
+      - wflevels/aquarium/art/tiger-barb-source.png
+      - wflevels/aquarium/aquarium-standalone.iff.txt
+      - wflevels/snowgoons-blender/snowgoons-blender.lev
+    generates:
+      - wflevels/aquarium_touch/aquarium_touch.lev
+      - wflevels/aquarium_touch-standalone.iff
+
+  condo-touch:
+    desc: "Build the condo with Forth two-button touch camera controls"
+    deps: [tools-build, condo-textures]
+    vars:
+      CONDO_BLEND: '{{.CONDO_BLEND | default (printf "%s/docs/aircon/units-639-640.blend" (env "HOME"))}}'
+    cmds:
+      - |
+        set -euo pipefail
+        CONDO_CAMERA_PROFILE=touch CONDO_LEVEL=condo_639_640_touch \
+          blender --background --python-exit-code 1 \
+          --python wflevels/condo_639_640/blender_create_condo.py -- "{{.CONDO_BLEND}}" \
+          2>&1 | { grep -E '^\[condo\]|^Info: Exported|Error|Traceback|Assert' || true; }
+      - bash wftools/wf_blender/build_level_binary.sh condo_639_640_touch
+
+  tour-condo-639:
+    desc: "Build the self-walking 639 tour: project room → open glass door → patio → guest bedroom → remaining blue rooms"
+    deps: [tools-build, condo-textures]
+    vars:
+      CONDO_BLEND: '{{.CONDO_BLEND | default (printf "%s/docs/aircon/units-639-640.blend" (env "HOME"))}}'
+    cmds:
+      - |
+        set -euo pipefail
+        CONDO_TOUR=wflevels/condo_639_640/tour-639.path.json CONDO_LEVEL=condo_639_640_tour \
+          blender --background --python-exit-code 1 \
+          --python wflevels/condo_639_640/blender_create_condo.py -- "{{.CONDO_BLEND}}" \
+          2>&1 | { grep -E '^\[condo\]|^Info: Exported|Error|Traceback|Assert' || true; }
+        test -s wflevels/condo_639_640_tour/condo_639_640_tour.lev
+      - bash wftools/wf_blender/build_level_binary.sh condo_639_640_tour
+    sources:
+      - wflevels/condo_639_640/blender_create_condo.py
+      - wflevels/condo_639_640/camera_controls.fth
+      - wflevels/condo_639_640/site_constants.py
+      - wflevels/condo_639_640/condo_sky.tga
+      - wflevels/condo_639_640/condo_ground.tga
+      - wflevels/condo_639_640/textile.flags
+      - wflevels/condo_639_640/tour-639.path.json
+      - wflevels/condo_639_640/condo_639_640-standalone.iff.txt
+      - '{{.CONDO_BLEND}}'
+    generates:
+      - wflevels/condo_639_640_tour-standalone.iff
+
+  video-condo-639:
+    desc: "Record the 639 tour (including opening the project-room glass door, crossing to the patio, then entering the guest bedroom) → tour-639.mp4 + .srt. TOUR_SECONDS=N (default 40; 0 = real time); TOUR_SIZE=WxH (default 640x480)."
+    deps: [ensure-build, tour-condo-639]
+    cmds:
+      - python3 tests/record_condo_639_tour.py --seconds "${TOUR_SECONDS:-40}" --size "${TOUR_SIZE:-640x480}" --timeout "${TOUR_TIMEOUT:-1800}"
+    sources:
+      - wflevels/condo_639_640_tour-standalone.iff
+      - wflevels/condo_639_640/tour-639.path.json
+      - tests/record_condo_639_tour.py
+    generates:
+      - wflevels/condo_639_640/tour-639.mp4
+      - wflevels/condo_639_640/tour-639.srt
+      - wflevels/condo_639_640/tour-639.srt
+
+  run-condo:
+    desc: "Run wf_game on wflevels/condo_639_640-standalone.iff (condo 205/639+640 doll-house walkthrough). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
+    deps: [ensure-build]
+    cmds:
+      - |
+        LOG=/tmp/wfgame_condo.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""; FSFLAG=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_condo.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
+        # Site sky/ground textures (wflevels/condo_639_640/textile.flags): a 1024² PERM atlas needs
+        # the perm page, the total VRAM box, AND the transient slot widened — material.cc's
+        # CalcVRAMuv bounds every texture's u by VRAMTransientWidth even for PERM textures.
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game \
+          --vram-width=4096 --vram-height=2048 \
+          --vram-slot-width=1024 --vram-slot-height=1024 \
+          --vram-perm-width=1024 --vram-perm-height=1024 \
+          -Lwflevels/condo_639_640-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
+
+  run-aquarium:
+    desc: "Run wf_game on wflevels/aquarium-standalone.iff (arrows swim, B/C in/out of the glass, A darts; the anemone close-up switches in by itself). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen. Checks: python3 wflevels/aquarium/run_aquarium_checks.py"
+    deps: [ensure-build, aquarium-level]
+    cmds:
+      - |
+        set -euo pipefail
+        LOG=/tmp/wfgame_aquarium.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""; FSFLAG=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_aquarium.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
+        LD_LIBRARY_PATH=engine/libs DISPLAY="${DISPLAY:-:0}" engine/wf_game \
+          -Lwflevels/aquarium-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
+        if [ -n "$RECOUT" ] && [ -f output.mp4 ]; then mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"; fi
+
+  video-aquarium:
+    desc: "Record the aquarium steer-and-swim demo in real time (640x480, injected input, CLEAN runs only) → ~/tmp/aquarium-phase4/motion-demo.mp4 + .srt + .txt segment list. AQUARIUM_VIDEO=path overrides."
+    deps: [ensure-build, aquarium-level]
+    cmds:
+      - python3 tests/record_aquarium_motion_demo.py --out "${AQUARIUM_VIDEO:-$HOME/tmp/aquarium-phase4/motion-demo.mp4}"
+
+  aquarium-idle-level:
+    desc: "Clownfish idle-animation spike: the canonical aquarium clownfish (wflevels/aquarium/clownfish.py) → wflevels/aquarium_idle-standalone.iff. Needs the wf_blender add-on."
+    deps: [tools-build]
+    cmds:
+      - |
+        set -euo pipefail
+        blender --background --python-expr "import addon_utils; raise SystemExit(0 if addon_utils.enable('wf_blender', default_set=False, persistent=False) else 1)" >/dev/null 2>&1 \
+          || { echo "wf_blender add-on not installed — 'sudo apt install worldfoundry-blender-editor-exporter' (apt.worldfoundry.org) or 'task blender-install'" >&2; exit 1; }
+        blender --background --python-exit-code 1 \
+          --python wflevels/aquarium_idle/blender_create_aquarium_idle.py \
+          2>&1 | { grep -E '^\[aquarium_idle\]|^Info: Exported|Error|Traceback|Assert' || true; }
+        test -s wflevels/aquarium_idle/aquarium_idle.lev
+      - bash wftools/wf_blender/build_level_binary.sh aquarium_idle
+    sources:
+      - wflevels/aquarium_idle/blender_create_aquarium_idle.py
+      - wflevels/aquarium_idle/aquarium_idle-standalone.iff.txt
+      - wflevels/aquarium/clownfish.py
+      - wflevels/aquarium/clownfish_idle.fth
+      - wflevels/aquarium/aquarium_constants.py
+    generates:
+      - wflevels/aquarium_idle-standalone.iff
+
+  aquarium-idle-probe-level:
+    desc: "ROTATION_* write probe for the aquarium plan (visible Physics fish, Director-rotated statplat, self-rotating anchored platform) → wflevels/aquarium_idle_probe-standalone.iff"
+    deps: [tools-build]
+    cmds:
+      - |
+        set -euo pipefail
+        IDLE_PROBE=1 blender --background --python-exit-code 1 \
+          --python wflevels/aquarium_idle/blender_create_aquarium_idle.py \
+          2>&1 | { grep -E '^\[aquarium_idle\]|^Info: Exported|Error|Traceback|Assert' || true; }
+        test -s wflevels/aquarium_idle_probe/aquarium_idle_probe.lev
+      - bash wftools/wf_blender/build_level_binary.sh aquarium_idle_probe
+    sources:
+      - wflevels/aquarium_idle/blender_create_aquarium_idle.py
+      - wflevels/aquarium_idle/aquarium_idle-standalone.iff.txt
+      - wflevels/aquarium/clownfish.py
+    generates:
+      - wflevels/aquarium_idle_probe-standalone.iff
+
+  run-aquarium-idle:
+    desc: "Run the clownfish idle spike: arrows swim, let go and it hovers. WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
+    deps: [ensure-build, aquarium-idle-level]
+    cmds:
+      - |
+        LOG=/tmp/wfgame_aquarium_idle.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""; FSFLAG=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_aquarium_idle.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
+        LD_LIBRARY_PATH=engine/libs DISPLAY=${DISPLAY:-:0} engine/wf_game \
+          -Lwflevels/aquarium_idle-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
+
+  test-aquarium-idle:
+    desc: "Regression guard for the clownfish idle rig: static .lev checks, bridge trace, captures, ROTATION_* probe (needs a display)"
+    deps: [ensure-build, aquarium-idle-level, aquarium-idle-probe-level]
+    cmds:
+      - python3 -m pytest tests/test_aquarium_idle.py -v
+
+  poster-clownfish-biomechanics:
+    desc: "Clownfish biomechanics poster, A3 (docs/plans/2026-09-30-clownfish-biomechanics-poster.md): data sheet + the aquarium constants → docs/reference/clownfish-biomechanics-poster/{data.json,poster.html,poster.pdf,poster.png}. A no-op when up to date. Needs google-chrome and pdftoppm."
+    cmds:
+      - python3 docs/reference/clownfish-biomechanics-poster/make_poster.py
+    sources:
+      - docs/reference/clownfish-biomechanics-poster/make_poster.py
+      - docs/reference/clownfish-biomechanics-poster/data.py
+      - wflevels/aquarium/aquarium_constants.py
+      - wflevels/aquarium/clownfish.py
+      - wflevels/aquarium/run_aquarium_checks.py
+    generates:
+      - docs/reference/clownfish-biomechanics-poster/data.json
+      - docs/reference/clownfish-biomechanics-poster/poster.html
+      - docs/reference/clownfish-biomechanics-poster/clownfish-biomechanics-a3.pdf
+      - docs/reference/clownfish-biomechanics-poster/poster.png
+    status:
+      # the checksum on `sources` decides staleness; this only catches a deleted or empty output
+      - test -s docs/reference/clownfish-biomechanics-poster/poster.html
+      - test -s docs/reference/clownfish-biomechanics-poster/clownfish-biomechanics-a3.pdf
+      - test -s docs/reference/clownfish-biomechanics-poster/poster.png
+
+  test-poster-clownfish-biomechanics:
+    desc: "Regression guard for the clownfish poster: chips vs the code's labels, values vs the constants, what the diagrams draw, type size, contrast, PDF page/fonts/links"
+    cmds:
+      - python3 -m pytest tests/test_poster_clownfish_biomechanics.py -v
+
+  poster-swarming:
+    desc: "Swarming poster, A3 (docs/plans/2026-10-01-swarming-poster.md): sweep.json, tank.json, measured.json, school.fth and the Couzin snapshots → docs/reference/swarming-poster/{data.json,schooling-poster.html,schooling-poster.pdf,schooling-poster.png}. Recompute the inputs with `task swarming-measure`. Needs google-chrome and pdftoppm."
+    cmds:
+      - python3 docs/reference/swarming-poster/make_swarm_poster.py
+    sources:
+      - docs/reference/swarming-poster/make_swarm_poster.py
+      - docs/reference/swarming-poster/swarm_data.py
+      - docs/reference/swarming-poster/sweep.json
+      - docs/reference/swarming-poster/tank.json
+      - docs/reference/swarming-poster/measured.json
+      - docs/reference/swarming-poster/snapshots.json
+      - wflevels/aquarium/school.fth
+    generates:
+      - docs/reference/swarming-poster/schooling-poster.html
+      - docs/reference/swarming-poster/schooling-poster.pdf
+      - docs/reference/swarming-poster/schooling-poster.png
+    status:
+      - test -s docs/reference/swarming-poster/schooling-poster.html
+      - test -s docs/reference/swarming-poster/schooling-poster.pdf
+      - test -s docs/reference/swarming-poster/schooling-poster.png
+
+  swarming-measure:
+    desc: "Recompute the swarming poster's inputs: the zone-width sweep (about 6 min), the Forth tank runs (about 5 min) and the size/error/timing of school.fth (add the Chromecast figure with docs/reference/swarming-poster/device_bench.sh then `measure.py --device-ms ...`)"
+    cmds:
+      - python3 docs/reference/swarming-poster/sweep.py
+      - python3 docs/reference/swarming-poster/tank_results.py
+      - python3 docs/reference/swarming-poster/measure.py
+      - python3 docs/reference/swarming-poster/make_swarm_poster.py --resim
+
+  test-swarming:
+    desc: "Regression guard for the swarming work: the Couzin reference model, school.fth against it in the engine's own zForth (one tick at a time), the startle, and the poster (type size, contrast, links, fit)"
+    cmds:
+      - python3 -m pytest tests/test_swarming.py -v
+
+  run-moon:
+    desc: "Run wf_game on wflevels/moon_site01-standalone.iff (PGDA Site 01 Connecting Ridge — LOLA terrain + NAC texture at 1024², lunar gravity). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
+    deps: [ensure-build]
+    cmds:
+      # 1024² NAC composite — needs the wider transient VRAM slot (Phase 1-3
+      # of docs/plans/2026-05-30-runtime-vram-cli-overrides.md) AND the
+      # int16 UV pipeline (docs/plans/2026-05-30-uv-int16-widening.md).
+      # --vram-perm-width/height: PERM atlas includes starfield.tga (512×256)
+      # + earth.tga (128×64), packing to ~640×256 by textile-rs — exceeds the
+      # 256-pixel VRAMPermanentWidth default (see docs/plans/2026-06-01-...).
+      - |
+        LOG=/tmp/wfgame_moon.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""; FSFLAG=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_moon.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game \
+          --vram-width=4096 --vram-height=2048 \
+          --vram-slot-width=1024 --vram-slot-height=1024 \
+          --vram-perm-width=1024 --vram-perm-height=512 \
+          -Lwflevels/moon_site01-standalone.iff \
+          $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
+
+  run-debug:
+    desc: "Run wf_game with debug bridge on port 7777 (usage: task run-debug -- wflevels/snowgoons.iff)"
+    deps: [ensure-build]
+    cmds:
+      - |
+        set -- {{.CLI_ARGS}}
+        if [ -z "${1:-}" ]; then
+          echo "Usage: task run-debug -- <path/to/level.iff>" >&2
+          exit 1
+        fi
+        LEVEL="$1"; shift
+        LOG=/tmp/wfgame_debug.log
+        echo "Logging to $LOG"
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 \
+          engine/wf_game "-L$LEVEL" "$@" --debug-port 7777 --debug-bind 127.0.0.1 --debug-print-actors \
+          2>&1 | tee "$LOG"
+
+  run-debug-remote:
+    desc: "Run wf_game with debug bridge open on all interfaces (remote device / CI; usage: task run-debug-remote -- wflevels/snowgoons.iff)"
+    deps: [ensure-build]
+    cmds:
+      - |
+        ARGS="{{.CLI_ARGS}}"
+        if [ -z "$ARGS" ]; then
+          echo "Usage: task run-debug-remote -- <path/to/level.iff>" >&2
+          exit 1
+        fi
+        LOG=/tmp/wfgame_debug_remote.log
+        echo "Logging to $LOG"
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 \
+          engine/wf_game "-L$ARGS" --debug-port 7777 --debug-bind 0.0.0.0 \
+          2>&1 | tee "$LOG"
+
+  dev-setup:
+    desc: "Install runtime dev dependencies (Linux build + Android toolchain)"
+    cmds:
+      - |
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          libx11-dev \
+          libgl1-mesa-dev \
+          libglu1-mesa-dev \
+          gdb \
+          xxd \
+          python3 \
+          openjdk-17-jdk \
+          adb \
+          google-android-ndk-r26c-installer
+
+  dev-setup-editor:
+    desc: "Install editor-only dev dependencies (wf-edit: TLS for wss:// signaling, WebRTC VP8/VP9 video, quick-tunnel calling)"
+    deps: [dev-setup, fetch-cloudflared]
+    cmds:
+      - sudo apt-get install -y libssl-dev libvpx-dev
+
+  dev-setup-web-edit:
+    desc: "One-time: provision the wasm Rust toolchain for the WASM editor (rustup 1.85.1 + wasm32-unknown-emscripten, isolated from your global rust) + emsdk + the yrs emscripten patch. See docs/plans/2026-06-12-wf-edit-in-the-browser.md Phase 0."
+    deps: [setup-emsdk]
+    silent: true
+    status:
+      # Skip when the wasm std AND the yrs patch are both already in place.
+      - test -d "${RUSTUP_HOME:-$HOME/.rustup}/toolchains/1.85.1-x86_64-unknown-linux-gnu/lib/rustlib/wasm32-unknown-emscripten"
+      - git -C wftools/y-crdt apply --reverse --check ../../docs/patches/yrs-0.26-undo-options-default-emscripten.patch
+    cmds:
+      - |
+        set -euo pipefail
+        # The y-crdt submodule must be present for the patch step.
+        git submodule update --init wftools/y-crdt >/dev/null 2>&1 || true
+        export RUSTUP_HOME="${RUSTUP_HOME:-$HOME/.rustup}" CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
+        RUSTUP="$CARGO_HOME/bin/rustup"
+        # Distro rust (/usr/bin/rustc) has no wasm std and isn't rustup-managed. Install rustup
+        # ISOLATED (no PATH/profile change) so the global toolchain is untouched; the web build
+        # selects this toolchain explicitly. Fully reversible via `rustup self uninstall`.
+        if [ ! -x "$RUSTUP" ] && ! command -v rustup >/dev/null 2>&1; then
+          echo "rustup not found — installing isolated (distro rust untouched)…"
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o /tmp/rustup-init.sh
+          sh /tmp/rustup-init.sh -y --no-modify-path --profile minimal --default-toolchain 1.85.1
+        fi
+        [ -x "$RUSTUP" ] || RUSTUP="$(command -v rustup)"
+        # Pin 1.85.1 — matches the distro rustc the native editor builds with (known-good against
+        # the vendored yrs 0.26). build-web-edit uses THIS toolchain, not the global default.
+        "$RUSTUP" toolchain install 1.85.1 --profile minimal
+        "$RUSTUP" target add --toolchain 1.85.1 wasm32-unknown-emscripten
+        # Apply the yrs emscripten cfg patch to the submodule (idempotent). Upstream gates
+        # Options::default() on `not(target_family="wasm")`, which over-broadly excludes
+        # emscripten; the patch narrows it to match the SystemClock gate. Without it, yffi's
+        # yundo_manager fails to cross-compile for wasm32-unknown-emscripten.
+        P=../../docs/patches/yrs-0.26-undo-options-default-emscripten.patch
+        if git -C wftools/y-crdt apply --reverse --check "$P" >/dev/null 2>&1; then
+          echo "yrs emscripten patch already applied"
+        elif git -C wftools/y-crdt apply --check "$P" >/dev/null 2>&1; then
+          git -C wftools/y-crdt apply "$P"; echo "applied yrs emscripten patch"
+        else
+          echo "WARNING: yrs patch neither applies nor is applied — y-crdt submodule may have drifted from yrs 0.26" >&2
+        fi
+        echo "✓ web-edit toolchain ready (rustup 1.85.1 + wasm32-unknown-emscripten; yrs patched; emsdk via dep)"
+
+  blender:
+    desc: "Launch Blender, print logs to terminal and capture to /tmp/blender.log"
+    cmds:
+      - blender 2>&1 | tee /tmp/blender.log
+
+  git:
+    desc: "Browse git branches as a waypoint pipeline (curses TUI)"
+    interactive: true
+    cmds:
+      - python3 scripts/git-branch-browser.py
+
+  wf-asset:
+    desc: "Run the wf-asset CLI (usage: task wf-asset -- search 'tree')"
+    cmds:
+      - python3 wftools/wf_asset.py {{.CLI_ARGS}}
+
+  blender-build:
+    desc: "Build wf_core Rust native lib for the Blender addon"
+    sources:
+      - wftools/wf_py/src/**/*.rs
+      - wftools/wf_py/Cargo.toml
+    generates:
+      - wftools/wf_py/target/wheels/wf_core*.whl
+    cmds:
+      - cd wftools/wf_py && maturin build --release
+
+  blender-install:
+    desc: "Install World Foundry level editor addon (symlinks .py, copies wf_core.so; builds if needed)"
+    deps: [blender-build]
+    cmds:
+      - bash wftools/wf_blender/install.sh
+
+  blender-validate:
+    desc: "Validate the Blender extension manifest (requires Blender 4.2+)"
+    cmds:
+      - blender --command extension validate wftools/wf_blender
+
+  asset-browser-install:
+    desc: "Install wf_asset_browser addon for development (symlinks, no build step)"
+    cmds:
+      - bash wftools/wf_asset_browser/install.sh
+
+  asset-browser-install-zip:
+    desc: "Install the built wf_asset_browser zip into Blender (REPO=user_default)"
+    summary: |
+      Installs the packaged zip into Blender's extension system and enables it.
+
+      Usage:
+        task asset-browser-install-zip                   # installs into user_default repo
+        task asset-browser-install-zip REPO=blender_org  # install into a different repo
+
+      To list available repos: blender --command extension repo-list
+    vars:
+      REPO: '{{default "user_default" .REPO}}'
+      ZIP:
+        sh: ls dist/wf_asset_browser-*.zip 2>/dev/null | sort -V | tail -1
+    cmds:
+      - blender --command extension install-file -r {{.REPO}} -e {{.ZIP}}
+
+  asset-browser-validate:
+    desc: "Validate wf_asset_browser extension manifest (requires Blender 4.2+)"
+    cmds:
+      - blender --command extension validate wftools/wf_asset_browser
+
+  asset-browser-package:
+    desc: "Build distributable wf_asset_browser zip; output in dist/"
+    deps: [asset-browser-validate]
+    cmds:
+      - mkdir -p dist
+      - blender --command extension build --source-dir wftools/wf_asset_browser --output-dir dist
+      - echo "Package written to dist/"
+
+  bump-asset-browser:
+    desc: "Bump wf_asset_browser version (default: patch)"
+    summary: |
+      Increment the wf_asset_browser version in blender_manifest.toml.
+
+      Usage:
+        task bump-asset-browser              # patch:  0.2.0 → 0.2.1
+        task bump-asset-browser BUMP=minor   # minor:  0.2.0 → 0.3.0  (resets patch)
+        task bump-asset-browser BUMP=major   # major:  0.2.0 → 1.0.0  (resets minor + patch)
+        task bump-asset-browser -- 1.5.0    # explicit version override
+    vars:
+      BUMP: '{{default "patch" .BUMP}}'
+      NEW_VERSION:
+        sh: |
+          if [ -n "{{.CLI_ARGS}}" ]; then
+            echo "{{.CLI_ARGS}}"
+          else
+            cur=$(grep '^version' wftools/wf_asset_browser/blender_manifest.toml | cut -d'"' -f2)
+            major=$(echo "$cur" | cut -d. -f1)
+            minor=$(echo "$cur" | cut -d. -f2)
+            patch=$(echo "$cur" | cut -d. -f3)
+            case "{{.BUMP}}" in
+              major) echo "$((major + 1)).0.0" ;;
+              minor) echo "$major.$((minor + 1)).0" ;;
+              *)     echo "$major.$minor.$((patch + 1))" ;;
+            esac
+          fi
+    cmds:
+      - sed -i 's/^version = .*/version = "{{.NEW_VERSION}}"/' wftools/wf_asset_browser/blender_manifest.toml
+      - grep '^version' wftools/wf_asset_browser/blender_manifest.toml
+
+  publish-asset-browser:
+    desc: "Create a GitHub release for wf_asset_browser and attach the zip"
+    deps: [asset-browser-package]
+    vars:
+      VERSION:
+        sh: grep '^version' wftools/wf_asset_browser/blender_manifest.toml | cut -d'"' -f2
+    cmds:
+      - gh release create "asset-browser-v{{.VERSION}}"
+          --title "Asset Browser v{{.VERSION}}"
+          --notes "Licence-aware asset browser — pure Python, no build step required."
+          dist/wf_asset_browser-{{.VERSION}}.zip
+
+  package-all:
+    desc: "Package both Blender addons into dist/"
+    deps: [asset-browser-package, blender-package]
+
+  blender-package:
+    desc: "Build distributable .zip (Blender extension format); output in dist/"
+    deps: [blender-build, blender-validate]
+    cmds:
+      - mkdir -p dist
+      - |
+        set -euo pipefail
+        WF_CORE_WHEEL=$(find wftools/wf_py/target/wheels -name "wf_core*.whl" | sort | tail -1)
+        python3 -c "
+        import zipfile, shutil, sys
+        with zipfile.ZipFile('$WF_CORE_WHEEL') as z:
+            sos = [n for n in z.namelist() if n.endswith('.so')]
+            if not sos:
+                print('No .so in wheel', file=sys.stderr); sys.exit(1)
+            z.extract(sos[0], '/tmp/')
+            shutil.copy('/tmp/' + sos[0], 'wftools/wf_blender/wf_core.so')
+        "
+      - blender --command extension build --source-dir wftools/wf_blender --output-dir dist
+      - echo "Package written to dist/"
+
+  test-cycle:
+    desc: "Run Load/Unload cycle stability tests (CTest, includes host-GL e2e)"
+    cmds:
+      - cmake -S . -B cmake-build-linux
+      - cmake --build cmake-build-linux -j --target wf_game wf_host_gl_e2e_test
+      - cd cmake-build-linux && ctest --output-on-failure -R "cycle"
+
+  test-cycle-headless:
+    desc: "Cycle tests, skipping GL/X11 tests (CI-safe)"
+    cmds:
+      - cmake -S . -B cmake-build-linux
+      - cmake --build cmake-build-linux -j --target wf_game
+      - cd cmake-build-linux && ctest --output-on-failure -R "cycle" -LE gl
+
+  test-wfmut:
+    desc: "Run the wfmut:: mutation-API tests (smoke + live-bridge regression; needs DISPLAY)"
+    cmds:
+      - cmake -S . -B cmake-build-linux
+      - cmake --build cmake-build-linux -j --target wf_game
+      - cd cmake-build-linux && ctest --output-on-failure -R "wfmut"
+
+  gen-oas-headers:
+    desc: "Regenerate wfsource/source/oas/*.ht + objects.{c,e,h} from .oas sources (builds prep if absent)"
+    cmds:
+      - bash wfsource/source/oas/regen-headers.sh
+
+  test-codegen:
+    desc: "Oracle test: verify all .ht + objects.{c,e,h} reproduce byte-for-byte from sources (.oad + .ht pipelines)"
+    cmds:
+      - cargo test --manifest-path wftools/oas2oad-rs/Cargo.toml
+
+  test-wfmut-asan:
+    desc: "Build wfmut under ASan + UBSan and run the smoke (pre-merge leak/UB gate; needs DISPLAY)"
+    cmds:
+      # NB: the ASan build writes engine/wf_game in place (RUNTIME_OUTPUT_DIRECTORY),
+      # overwriting the regular binary — rebuild with `task build` afterward.
+      - cmake -S . -B cmake-build-asan -DCMAKE_BUILD_TYPE=Debug -DWF_ASAN=ON
+      - cmake --build cmake-build-asan -j --target wf_game
+      - cd wfsource/source/game && DISPLAY=:0 ASAN_OPTIONS=halt_on_error=1:detect_leaks=1 UBSAN_OPTIONS=halt_on_error=1 ../../../engine/wf_game -L../../../wflevels/smb_w1_1-standalone.iff --wfmut-smoke
+
+  # ─── Level menu (docs/plans/2026-10-01-level-menu-selector.md) ──────────────
+  build-cd-iff-smb-menu:
+    desc: "Assemble the SMB world-select bundle: shell-menu.fth + the four SMB levels at smb-cd.iff's TOC indices + a MENU chunk (names from wflevels/smb-menu.manifest) via cdpack-rs → wflevels/smb-menu-cd.iff, or CD_OUT=<path>. Opt-in; build-cd-iff-smb is unchanged"
+    vars:
+      CD_OUT: '{{.CD_OUT | default "wflevels/smb-menu-cd.iff"}}'
+    cmds:
+      - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
+      - mkdir -p "$(dirname '{{.CD_OUT}}')"
+      # The manifest lists the levels (paths relative to it) and their menu names; shell-menu.fth
+      # writes LEVEL_TO_RUN = -1 so the engine shows the menu (game/level_menu.cc).
+      - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell-menu.fth --manifest wflevels/smb-menu.manifest -o '{{.CD_OUT}}'
+
+  run-smb-menu:
+    desc: "Run wf_game on the SMB world-select bundle (from build-smb-menu/, gitignored): Up/Down choose, Space starts, Backspace in a level returns to the menu"
+    deps: [ensure-build, build-cd-iff-smb-menu]
+    cmds:
+      - mkdir -p build-smb-menu
+      - cp wflevels/smb-menu-cd.iff build-smb-menu/cd.iff
+      - cd build-smb-menu && LD_LIBRARY_PATH=../engine/libs DISPLAY=${DISPLAY:-:0} ../engine/wf_game {{.CLI_ARGS}}
+
+  test-level-menu:
+    desc: "Level-menu tests: cdpack byte-identity and MENU chunk, the menu module under ASan/UBSan, scripted input, and the real engine on the desktop display (skipped without DISPLAY)"
+    cmds:
+      - python3 -m pytest tests/test_level_menu.py -v
+
+  linux-test-image:
+    desc: "Build the Linux build/test container image (toolchain, X11/GL headers, Xvfb, Mesa llvmpipe): docker/Dockerfile.linux-test. Builds and tests run in this container, not on the host."
+    cmds:
+      - docker build --network=host -f docker/Dockerfile.linux-test -t wf-linux-test:local docker
+
+  blender-image:
+    desc: "Build the Blender level-build image (docker/Dockerfile.blender: Ubuntu 26.04 with Foundry Linux's blender package, versions pinned to an Ubuntu snapshot). wflevels/aquarium_*/build.sh run in it."
+    cmds:
+      - docker build --network=host -f docker/Dockerfile.blender -t wf-blender:local docker
+
+  level-build-compare:
+    desc: "Build each aquarium tank with host Blender and in the Blender container and compare every output by sha256: task level-build-compare [-- aquarium_betta ...]"
+    cmds:
+      - scripts/compare-level-build-routes.sh {{.CLI_ARGS}}
+
+  linux-container:
+    desc: "Run a command in the Linux test container (repo at /src, build-docker/ at /build): task linux-container -- ctest --test-dir /build/listener"
+    cmds:
+      - scripts/in-linux-container.sh {{.CLI_ARGS}}
+
+  test-debug-listener:
+    desc: "Build and run debug_listener_reconnect_test in the Linux container: DebugServer_Stop must return even when the listener's accept() is not woken (the macOS behaviour)"
+    cmds:
+      - scripts/in-linux-container.sh scripts/test-debug-listener.sh
+
+  test-debug-listener-negative:
+    desc: "Prove debug_listener_reconnect_test guards the fix: against a copy of debug_server.cc without the poll it must hang and be killed by its 10 s alarm (exit 142). Runs in the Linux container; the repo is not modified."
+    cmds:
+      - scripts/in-linux-container.sh scripts/test-debug-listener.sh --negative

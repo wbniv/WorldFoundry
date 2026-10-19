@@ -66,7 +66,18 @@
 
 //============================================================================
 
-typedef struct _SNode					// base class, not usefull unless derived from
+// A List is overlaid as its own head and tail nodes (see List below), so stores through SNode
+// pointers (NodeRemove, NodeInsert, ...) change List::_head/_tail. Under strict aliasing a compiler
+// may treat those as independent and keep _head in a register across a loop; at -O3 with assertions
+// off that made `while (msgPort.GetMsgByType(...))` restart from a head it had just freed.
+// may_alias tells the compiler that accesses through SNode can alias anything.
+#if defined(__GNUC__) || defined(__clang__)
+#define WF_MAY_ALIAS __attribute__((__may_alias__))
+#else
+#define WF_MAY_ALIAS
+#endif
+
+typedef struct WF_MAY_ALIAS _SNode					// base class, not usefull unless derived from
 {
 	struct _SNode* _next;
 	struct _SNode* _prev;

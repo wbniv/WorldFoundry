@@ -1,0 +1,2363 @@
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+audio: miniaudio v0.11.25 ready
+DEBUG = 1,
+DO_ASSERTIONS = 1, NO_ASSERT_EXPR = 0, USE_INLINE_DEFS = 1, WF_BIG_ENDIAN = 0
+argc = 14, argv: /home/will/WorldFoundry-wbniv/.worktrees/blender-normal-convention/engine/wf_game --frame-step-smoke=1250 --cycles=1 -rate20 --no-fps -record_video --capture-frame=1200=/home/will/WorldFoundry-wbniv/.worktrees/blender-normal-convention/docs/diagnostics/blender-normal-convention/renders/aquarium_plants-mature.png -L/home/will/WorldFoundry-wbniv/.worktrees/blender-normal-convention/wflevels/aquarium_plants-standalone.iff --vram-width=2048 --vram-height=1024 --vram-slot-width=512 --vram-slot-height=512 --vram-perm-width=512 --vram-perm-height=512 
+cbHalLmalloc = 64000000, cbHalScratchLmalloc = 180000
+wf_game v0.4.1, Built:Oct 16 2026,10:54:38 by kts
+--frame-step-smoke=1250
+--cycles=1
+-rate20
+Fake clock delta = 0.05000000075
+--no-fps
+-record_video
+--capture-frame=1200=/home/will/WorldFoundry-wbniv/.worktrees/blender-normal-convention/docs/diagnostics/blender-normal-convention/renders/aquarium_plants-mature.png
+-L/home/will/WorldFoundry-wbniv/.worktrees/blender-normal-convention/wflevels/aquarium_plants-standalone.iff
+--vram-width=2048
+--vram-height=1024
+--vram-slot-width=512
+--vram-slot-height=512
+--vram-perm-width=512
+--vram-perm-height=512
+argc = 14, commandIndex = 14
+Level=-1
+cerror:
+cwarn:
+cstats:
+wf_game Ver 0.4.1, Built:Oct 16 2026,10:54:38 by kts
+DBSTREAMS jolt: RegisterDefaultAllocator
+jolt: Factory
+jolt: RegisterTypes
+jolt: RunSelftest
+jolt: selftest ok (sphere fell to z=5.098)
+jolt: backend init
+jolt: init complete
+LMalloc of 412 not 8-byte aligned, rounding up
+LMalloc of 7620 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+Level::Level: leveldata= 0x7735e40023b0, object count  = 52
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 524310)
+ASS closed without all data read (bytesLeft = 208)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 79980)
+ASS closed without all data read (bytesLeft = 10172)
+ASS closed without all data read (bytesLeft = 8416)
+ASS closed without all data read (bytesLeft = 1800)
+ASS closed without all data read (bytesLeft = 1460)
+ASS closed without all data read (bytesLeft = 1460)
+ASS closed without all data read (bytesLeft = 1460)
+ASS closed without all data read (bytesLeft = 1460)
+ASS closed without all data read (bytesLeft = 1460)
+ASS closed without all data read (bytesLeft = 1460)
+ASS closed without all data read (bytesLeft = 1460)
+ASS closed without all data read (bytesLeft = 1460)
+ASS closed without all data read (bytesLeft = 2908)
+ASS closed without all data read (bytesLeft = 2908)
+ASS closed without all data read (bytesLeft = 2908)
+PixelMap::Load: this = 0x7735e272a5d8
+PixelMap::Load: this = 0x7735e272a618
+LMalloc of 220 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 8428 not 8-byte aligned, rounding up
+LMalloc of 1812 not 8-byte aligned, rounding up
+LMalloc of 220 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 100 not 8-byte aligned, rounding up
+[Actor] idx=2 class=23 commonOff=21660 NumberOfLocalMailboxes=0
+[Actor] idx=3 class=13 commonOff=21660 NumberOfLocalMailboxes=0
+this = 0x7735e272db70,setting _memory to 0x7735e272d678
+DMalloc of 52 not 8-byte aligned, rounding up
+[Actor] idx=4 class=20 commonOff=22372 NumberOfLocalMailboxes=0
+[Actor] idx=6 class=11 commonOff=21660 NumberOfLocalMailboxes=0
+[Actor] idx=7 class=16 commonOff=21660 NumberOfLocalMailboxes=0
+[Actor] idx=8 class=3 commonOff=21660 NumberOfLocalMailboxes=0
+[Actor] idx=9 class=22 commonOff=23112 NumberOfLocalMailboxes=6
+[Actor] idx=10 class=7 commonOff=23420 NumberOfLocalMailboxes=0
+[Actor] idx=11 class=7 commonOff=23620 NumberOfLocalMailboxes=0
+[Actor] idx=12 class=7 commonOff=23664 NumberOfLocalMailboxes=0
+[Actor] idx=13 class=7 commonOff=23664 NumberOfLocalMailboxes=0
+[Actor] idx=14 class=7 commonOff=23708 NumberOfLocalMailboxes=0
+[Actor] idx=15 class=7 commonOff=23708 NumberOfLocalMailboxes=0
+[Actor] idx=16 class=7 commonOff=23708 NumberOfLocalMailboxes=0
+[Actor] idx=17 class=7 commonOff=23708 NumberOfLocalMailboxes=0
+[Actor] idx=18 class=7 commonOff=23708 NumberOfLocalMailboxes=0
+[Actor] idx=19 class=7 commonOff=23664 NumberOfLocalMailboxes=0
+[Actor] idx=20 class=7 commonOff=23752 NumberOfLocalMailboxes=0
+[Actor] idx=21 class=7 commonOff=23796 NumberOfLocalMailboxes=0
+[Actor] idx=22 class=7 commonOff=23840 NumberOfLocalMailboxes=0
+[Actor] idx=23 class=7 commonOff=23884 NumberOfLocalMailboxes=0
+[Actor] idx=24 class=7 commonOff=23928 NumberOfLocalMailboxes=0
+[Actor] idx=25 class=7 commonOff=23972 NumberOfLocalMailboxes=0
+[Actor] idx=26 class=7 commonOff=24016 NumberOfLocalMailboxes=0
+[Actor] idx=27 class=7 commonOff=24060 NumberOfLocalMailboxes=0
+[Actor] idx=28 class=5 commonOff=21660 NumberOfLocalMailboxes=0
+[Actor] idx=29 class=5 commonOff=21660 NumberOfLocalMailboxes=0
+[Actor] idx=30 class=5 commonOff=21660 NumberOfLocalMailboxes=0
+[Actor] idx=31 class=5 commonOff=21660 NumberOfLocalMailboxes=0
+[Actor] idx=32 class=5 commonOff=21660 NumberOfLocalMailboxes=0
+[Actor] idx=33 class=5 commonOff=21660 NumberOfLocalMailboxes=0
+[Actor] idx=34 class=7 commonOff=21660 NumberOfLocalMailboxes=0
+[Actor] idx=35 class=5 commonOff=21660 NumberOfLocalMailboxes=0
+[Actor] idx=36 class=7 commonOff=24632 NumberOfLocalMailboxes=0
+[Actor] idx=37 class=7 commonOff=24676 NumberOfLocalMailboxes=0
+[Actor] idx=38 class=7 commonOff=24720 NumberOfLocalMailboxes=0
+[Actor] idx=39 class=7 commonOff=24764 NumberOfLocalMailboxes=0
+[Actor] idx=40 class=7 commonOff=24764 NumberOfLocalMailboxes=0
+[Actor] idx=41 class=7 commonOff=24764 NumberOfLocalMailboxes=0
+[Actor] idx=42 class=7 commonOff=24764 NumberOfLocalMailboxes=0
+[Actor] idx=43 class=7 commonOff=24764 NumberOfLocalMailboxes=0
+[Actor] idx=44 class=7 commonOff=24764 NumberOfLocalMailboxes=0
+[Actor] idx=45 class=7 commonOff=24764 NumberOfLocalMailboxes=0
+[Actor] idx=46 class=7 commonOff=24764 NumberOfLocalMailboxes=0
+[Actor] idx=47 class=5 commonOff=21660 NumberOfLocalMailboxes=0
+[Actor] idx=48 class=5 commonOff=21660 NumberOfLocalMailboxes=0
+[Actor] idx=49 class=23 commonOff=21660 NumberOfLocalMailboxes=0
+[Actor] idx=50 class=3 commonOff=21660 NumberOfLocalMailboxes=0
+[Actor] idx=51 class=16 commonOff=21660 NumberOfLocalMailboxes=0
+LMalloc of 20 not 8-byte aligned, rounding up
+DMalloc of 102 not 8-byte aligned, rounding up
+DMalloc of 404 not 8-byte aligned, rounding up
+DMalloc of 484 not 8-byte aligned, rounding up
+DMalloc of 492 not 8-byte aligned, rounding up
+DMalloc of 404 not 8-byte aligned, rounding up
+Walking from 0
+0->0
+0->0
+LMalloc of 20 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 131094)
+ASS closed without all data read (bytesLeft = 64)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 4692)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 1260)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 412)
+ASS closed without all data read (bytesLeft = 412)
+ASS closed without all data read (bytesLeft = 412)
+ASS closed without all data read (bytesLeft = 412)
+ASS closed without all data read (bytesLeft = 412)
+ASS closed without all data read (bytesLeft = 412)
+ASS closed without all data read (bytesLeft = 412)
+ASS closed without all data read (bytesLeft = 412)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 588)
+PixelMap::Load: this = 0x7735e272a658
+PixelMap::Load: this = 0x7735e272a698
+LMalloc of 76 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 76 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 53556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="goby_body.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 9716 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="goby_fins.tga"  bTranslucent=0  bitdepth=15  flags_in=0xe
+LMalloc of 6596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 1396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 1396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 1396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 1396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 1396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 1396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 1396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 1396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 2436 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 2640)
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 996 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+material: texture="goby_rock.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="goby_rock.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="goby_rock.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 76 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 76 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 76 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 76 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 76 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 76 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 76 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 76 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+audio: MusicPlayer — soundfont not found: florestan-subset.sf2
+audio: sfx[0] not found: wflevels/qbert_practice/sfx/qbert_hop.wav
+audio: sfx[1] not found: wflevels/qbert_practice/sfx/qbert_land.wav
+audio: sfx[2] not found: wflevels/qbert_practice/sfx/qbert_fall.wav
+audio: sfx[3] not found: wflevels/qbert_practice/sfx/qbert_swear.wav
+audio: sfx[4] not found: wflevels/qbert_practice/sfx/qbert_round_clear.wav
+audio: sfx[5] not found: wflevels/qbert_practice/sfx/qbert_kill.wav
+audio: sfx[6] not found: wflevels/qbert_practice/sfx/qbert_disc.wav
+[debug] listening on :7777
+rest_api: listening on http://127.0.0.1:8765
+PLANTS generation=1 seed=1610979947 mode=freshwater shoots=384 vertices=78192 triangles=50608 graph_ms=5.578 mesh_ms=334.806
+PLANTS settings-source=RPRP seed=1610979947 water=freshwater age=0 speed=3 textures=1 sway=1 random_entry=1 selector_override=0
+ffmpeg version 8.0.1-3ubuntu2 Copyright (c) 2000-2025 the FFmpeg developers
+  built with gcc 15 (Ubuntu 15.2.0-13ubuntu3)
+  configuration: --prefix=/usr --extra-version=3ubuntu2 --toolchain=hardened --libdir=/usr/lib/x86_64-linux-gnu --incdir=/usr/include/x86_64-linux-gnu --arch=amd64 --enable-gpl --disable-stripping --disable-pocketsphinx --disable-libcaca --disable-libmfx --disable-omx --enable-gnutls --enable-libaom --enable-libass --enable-libbs2b --enable-libcdio --enable-libcodec2 --enable-libdav1d --enable-libflite --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libglslang --enable-libgme --enable-libgsm --enable-libharfbuzz --enable-libmp3lame --enable-libmysofa --enable-libopenjpeg --enable-libopenmpt --enable-libopus --enable-librubberband --enable-libshine --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libtheora --enable-libtwolame --enable-libvidstab --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx265 --enable-libxml2 --enable-libxvid --enable-libzimg --enable-openal --enable-opencl --enable-opengl --disable-sndio --enable-libvpl --enable-libdc1394 --enable-libdrm --enable-libiec61883 --enable-chromaprint --enable-frei0r --enable-ladspa --enable-libbluray --enable-libdvdnav --enable-libdvdread --enable-libjack --enable-libjxl --enable-libpulse --enable-librabbitmq --enable-librist --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libx264 --enable-libzmq --enable-libzvbi --enable-lv2 --enable-sdl2 --enable-libplacebo --enable-librav1e --enable-librsvg --enable-shared
+  libavutil      60.  8.100 / 60.  8.100
+  libavcodec     62. 11.100 / 62. 11.100
+  libavformat    62.  3.100 / 62.  3.100
+  libavdevice    62.  1.100 / 62.  1.100
+  libavfilter    11.  4.100 / 11.  4.100
+  libswscale      9.  1.100 /  9.  1.100
+  libswresample   6.  1.100 /  6.  1.100
+Input #0, rawvideo, from 'pipe:0':
+  Duration: N/A, start: 1792145526.200000, bitrate: 184320 kb/s
+  Stream #0:0: Video: rawvideo (BGR[24] / 0x18524742), bgr24, 640x480, 184320 kb/s, 25 tbr, 25 tbn, start 1792145526.200000
+delta too large: 0.931930542
+timeofday:1792145526:202893
+lasttimeofday: 1792145525:270949
+deltatime:0:931944
+delta: 0.931930542
+Stream mapping:
+  Stream #0:0 -> #0:0 (rawvideo (native) -> h264 (libx264))
+[libx264 @ 0x5adb854f0340] using cpu capabilities: MMX2 SSE2Fast SSSE3 SSE4.2 AVX FMA3 BMI2 AVX2 AVX512
+[libx264 @ 0x5adb854f0340] profile High, level 3.0, 4:2:0, 8-bit
+[libx264 @ 0x5adb854f0340] 264 - core 165 - H.264/MPEG-4 AVC codec - Copyleft 2003-2025 - http://www.videolan.org/x264.html - options: cabac=1 ref=3 deblock=1:0:0 analyse=0x3:0x113 me=hex subme=7 psy=1 psy_rd=1.00:0.00 mixed_ref=1 me_range=16 chroma_me=1 trellis=1 8x8dct=1 cqm=0 deadzone=21,11 fast_pskip=1 chroma_qp_offset=-2 threads=12 lookahead_threads=2 sliced_threads=0 nr=0 decimate=1 interlaced=0 bluray_compat=0 constrained_intra=0 bframes=3 b_pyramid=2 b_adapt=1 b_bias=0 direct=1 weightb=1 open_gop=0 weightp=2 keyint=250 keyint_min=25 scenecut=40 intra_refresh=0 rc_lookahead=40 rc=crf mbtree=1 crf=23.0 qcomp=0.60 qpmin=0 qpmax=69 qpstep=4 ip_ratio=1.40 aq=1:1.00
+Output #0, mp4, to 'output.mp4':
+  Metadata:
+    encoder         : Lavf62.3.100
+  Stream #0:0: Video: h264 (avc1 / 0x31637661), yuv420p(tv, progressive), 640x480, q=2-31, 30 fps, 15360 tbn
+    Metadata:
+      encoder         : Lavc62.11.100 libx264
+    Side data:
+      cpb: bitrate max/min/avg: 0/0/0 buffer size: 0 vbv_delay: N/A
+frame=    0 fps=0.0 q=0.0 size=       0KiB time=N/A bitrate=N/A dup=11 drop=0 speed=N/A elapsed=0:00:00.50    frame=    0 fps=0.0 q=0.0 size=       0KiB time=N/A bitrate=N/A dup=20 drop=0 speed=N/A elapsed=0:00:01.00    frame=    0 fps=0.0 q=0.0 size=       0KiB time=N/A bitrate=N/A dup=30 drop=0 speed=N/A elapsed=0:00:01.50    frame=    5 fps=2.5 q=29.0 size=       0KiB time=00:00:00.10 bitrate=   2.9kbits/s dup=42 drop=0 speed=0.05x elapsed=0:00:02.00    frame=   18 fps=7.2 q=29.0 size=       0KiB time=00:00:00.53 bitrate=   0.5kbits/s dup=51 drop=0 speed=0.213x elapsed=0:00:02.50    frame=   33 fps= 11 q=29.0 size=       0KiB time=00:00:01.03 bitrate=   0.3kbits/s dup=62 drop=0 speed=0.344x elapsed=0:00:03.00    frame=   51 fps= 15 q=29.0 size=       0KiB time=00:00:01.63 bitrate=   0.2kbits/s dup=75 drop=0 speed=0.467x elapsed=0:00:03.50    frame=   63 fps= 16 q=29.0 size=       0KiB time=00:00:02.03 bitrate=   0.1kbits/s dup=83 drop=0 speed=0.508x elapsed=0:00:04.00    frame=   78 fps= 17 q=29.0 size=       0KiB time=00:00:02.53 bitrate=   0.1kbits/s dup=93 drop=0 speed=0.563x elapsed=0:00:04.50    frame=   95 fps= 19 q=29.0 size=       0KiB time=00:00:03.10 bitrate=   0.1kbits/s dup=105 drop=0 speed=0.62x elapsed=0:00:05.00    frame=  110 fps= 20 q=29.0 size=       0KiB time=00:00:03.60 bitrate=   0.1kbits/s dup=116 drop=0 speed=0.654x elapsed=0:00:05.50    delta too large: 0.2003173828
+timeofday:1792145532:105847
+lasttimeofday: 1792145531:905517
+deltatime:0:200330
+delta: 0.2003173828
+frame=  123 fps= 20 q=29.0 size=       0KiB time=00:00:04.03 bitrate=   0.1kbits/s dup=126 drop=0 speed=0.672x elapsed=0:00:06.00    frame=  137 fps= 21 q=29.0 size=       0KiB time=00:00:04.50 bitrate=   0.1kbits/s dup=136 drop=0 speed=0.692x elapsed=0:00:06.50    frame=  154 fps= 22 q=29.0 size=       0KiB time=00:00:05.06 bitrate=   0.1kbits/s dup=148 drop=0 speed=0.724x elapsed=0:00:07.00    frame=  170 fps= 23 q=29.0 size=       0KiB time=00:00:05.60 bitrate=   0.1kbits/s dup=160 drop=0 speed=0.746x elapsed=0:00:07.50    frame=  182 fps= 23 q=29.0 size=       0KiB time=00:00:06.00 bitrate=   0.0kbits/s dup=169 drop=0 speed=0.75x elapsed=0:00:08.00    frame=  197 fps= 23 q=29.0 size=       0KiB time=00:00:06.50 bitrate=   0.0kbits/s dup=180 drop=0 speed=0.764x elapsed=0:00:08.50    frame=  215 fps= 24 q=29.0 size=       0KiB time=00:00:07.10 bitrate=   0.0kbits/s dup=193 drop=0 speed=0.789x elapsed=0:00:09.00    frame=  230 fps= 24 q=29.0 size=       0KiB time=00:00:07.60 bitrate=   0.0kbits/s dup=204 drop=0 speed= 0.8x elapsed=0:00:09.50    frame=  242 fps= 24 q=29.0 size=       0KiB time=00:00:08.00 bitrate=   0.0kbits/s dup=213 drop=0 speed= 0.8x elapsed=0:00:10.00    frame=  257 fps= 24 q=29.0 size=       0KiB time=00:00:08.50 bitrate=   0.0kbits/s dup=224 drop=0 speed=0.809x elapsed=0:00:10.50    delta too large: 0.2318725586
+timeofday:1792145537:118841
+lasttimeofday: 1792145536:886963
+deltatime:0:231878
+delta: 0.2318725586
+frame=  273 fps= 25 q=29.0 size=       0KiB time=00:00:09.03 bitrate=   0.0kbits/s dup=237 drop=0 speed=0.821x elapsed=0:00:11.00    frame=  290 fps= 25 q=29.0 size=       0KiB time=00:00:09.60 bitrate=   0.0kbits/s dup=250 drop=0 speed=0.835x elapsed=0:00:11.50    frame=  304 fps= 25 q=29.0 size=       0KiB time=00:00:10.06 bitrate=   0.0kbits/s dup=260 drop=0 speed=0.839x elapsed=0:00:12.00    frame=  320 fps= 26 q=29.0 size=       0KiB time=00:00:10.60 bitrate=   0.0kbits/s dup=272 drop=0 speed=0.848x elapsed=0:00:12.50    frame=  335 fps= 26 q=29.0 size=       0KiB time=00:00:11.10 bitrate=   0.0kbits/s dup=283 drop=0 speed=0.854x elapsed=0:00:13.00    frame=  350 fps= 26 q=29.0 size=       0KiB time=00:00:11.60 bitrate=   0.0kbits/s dup=294 drop=0 speed=0.859x elapsed=0:00:13.50    frame=  364 fps= 26 q=29.0 size=       0KiB time=00:00:12.06 bitrate=   0.0kbits/s dup=304 drop=0 speed=0.862x elapsed=0:00:14.00    frame=  377 fps= 26 q=29.0 size=       0KiB time=00:00:12.50 bitrate=   0.0kbits/s dup=313 drop=0 speed=0.862x elapsed=0:00:14.50    frame=  393 fps= 26 q=29.0 size=       0KiB time=00:00:13.03 bitrate=   0.0kbits/s dup=325 drop=0 speed=0.869x elapsed=0:00:15.00    frame=  407 fps= 26 q=29.0 size=       0KiB time=00:00:13.50 bitrate=   0.0kbits/s dup=335 drop=0 speed=0.871x elapsed=0:00:15.50    frame=  423 fps= 26 q=29.0 size=       0KiB time=00:00:14.03 bitrate=   0.0kbits/s dup=347 drop=0 speed=0.877x elapsed=0:00:16.00    frame=  440 fps= 27 q=29.0 size=       0KiB time=00:00:14.60 bitrate=   0.0kbits/s dup=359 drop=0 speed=0.885x elapsed=0:00:16.50    frame=  454 fps= 27 q=29.0 size=       0KiB time=00:00:15.06 bitrate=   0.0kbits/s dup=369 drop=0 speed=0.886x elapsed=0:00:17.00    frame=  468 fps= 27 q=29.0 size=       0KiB time=00:00:15.53 bitrate=   0.0kbits/s dup=379 drop=0 speed=0.887x elapsed=0:00:17.50    frame=  485 fps= 27 q=29.0 size=       0KiB time=00:00:16.10 bitrate=   0.0kbits/s dup=392 drop=0 speed=0.894x elapsed=0:00:18.00    frame=  497 fps= 27 q=29.0 size=       0KiB time=00:00:16.50 bitrate=   0.0kbits/s dup=401 drop=0 speed=0.892x elapsed=0:00:18.50    frame=  514 fps= 27 q=29.0 size=       0KiB time=00:00:17.06 bitrate=   0.0kbits/s dup=413 drop=0 speed=0.898x elapsed=0:00:19.00    frame=  528 fps= 27 q=29.0 size=       0KiB time=00:00:17.53 bitrate=   0.0kbits/s dup=423 drop=0 speed=0.899x elapsed=0:00:19.50    frame=  544 fps= 27 q=29.0 size=       0KiB time=00:00:18.06 bitrate=   0.0kbits/s dup=435 drop=0 speed=0.903x elapsed=0:00:20.00    frame=  558 fps= 27 q=29.0 size=       0KiB time=00:00:18.53 bitrate=   0.0kbits/s dup=445 drop=0 speed=0.904x elapsed=0:00:20.50    frame=  574 fps= 27 q=29.0 size=       0KiB time=00:00:19.06 bitrate=   0.0kbits/s dup=457 drop=0 speed=0.908x elapsed=0:00:21.00    frame=  588 fps= 27 q=29.0 size=       0KiB time=00:00:19.53 bitrate=   0.0kbits/s dup=467 drop=0 speed=0.908x elapsed=0:00:21.50    frame=  603 fps= 27 q=29.0 size=       0KiB time=00:00:20.03 bitrate=   0.0kbits/s dup=478 drop=0 speed=0.91x elapsed=0:00:22.00    frame=  618 fps= 27 q=29.0 size=       0KiB time=00:00:20.53 bitrate=   0.0kbits/s dup=489 drop=0 speed=0.912x elapsed=0:00:22.50    frame=  634 fps= 28 q=29.0 size=       0KiB time=00:00:21.06 bitrate=   0.0kbits/s dup=501 drop=0 speed=0.916x elapsed=0:00:23.00    frame=  650 fps= 28 q=29.0 size=       0KiB time=00:00:21.60 bitrate=   0.0kbits/s dup=513 drop=0 speed=0.919x elapsed=0:00:23.50    frame=  664 fps= 28 q=29.0 size=       0KiB time=00:00:22.06 bitrate=   0.0kbits/s dup=523 drop=0 speed=0.919x elapsed=0:00:24.00    frame=  678 fps= 28 q=29.0 size=       0KiB time=00:00:22.53 bitrate=   0.0kbits/s dup=533 drop=0 speed=0.919x elapsed=0:00:24.50    frame=  695 fps= 28 q=29.0 size=       0KiB time=00:00:23.10 bitrate=   0.0kbits/s dup=546 drop=0 speed=0.924x elapsed=0:00:25.00    frame=  707 fps= 28 q=29.0 size=       0KiB time=00:00:23.50 bitrate=   0.0kbits/s dup=555 drop=0 speed=0.921x elapsed=0:00:25.50    frame=  724 fps= 28 q=29.0 size=       0KiB time=00:00:24.06 bitrate=   0.0kbits/s dup=568 drop=0 speed=0.925x elapsed=0:00:26.00    frame=  738 fps= 28 q=29.0 size=       0KiB time=00:00:24.53 bitrate=   0.0kbits/s dup=578 drop=0 speed=0.926x elapsed=0:00:26.50    frame=  754 fps= 28 q=29.0 size=       0KiB time=00:00:25.06 bitrate=   0.0kbits/s dup=590 drop=0 speed=0.928x elapsed=0:00:27.00    frame=  771 fps= 28 q=29.0 size=       0KiB time=00:00:25.63 bitrate=   0.0kbits/s dup=603 drop=0 speed=0.932x elapsed=0:00:27.50    frame=  783 fps= 28 q=29.0 size=       0KiB time=00:00:26.03 bitrate=   0.0kbits/s dup=612 drop=0 speed=0.929x elapsed=0:00:28.00    frame=  798 fps= 28 q=29.0 size=       0KiB time=00:00:26.53 bitrate=   0.0kbits/s dup=623 drop=0 speed=0.931x elapsed=0:00:28.50    frame=  814 fps= 28 q=29.0 size=       0KiB time=00:00:27.06 bitrate=   0.0kbits/s dup=635 drop=0 speed=0.933x elapsed=0:00:29.00    frame=  830 fps= 28 q=29.0 size=       0KiB time=00:00:27.60 bitrate=   0.0kbits/s dup=647 drop=0 speed=0.935x elapsed=0:00:29.50    frame=  843 fps= 28 q=29.0 size=       0KiB time=00:00:28.03 bitrate=   0.0kbits/s dup=657 drop=0 speed=0.934x elapsed=0:00:30.00    frame=  860 fps= 28 q=29.0 size=       0KiB time=00:00:28.60 bitrate=   0.0kbits/s dup=670 drop=0 speed=0.937x elapsed=0:00:30.50    frame=  874 fps= 28 q=29.0 size=       0KiB time=00:00:29.06 bitrate=   0.0kbits/s dup=681 drop=0 speed=0.937x elapsed=0:00:31.00    frame=  884 fps= 28 q=29.0 size=       0KiB time=00:00:29.40 bitrate=   0.0kbits/s dup=689 drop=0 speed=0.933x elapsed=0:00:31.50    delta too large: 0.2441558838
+timeofday:1792145557:734078
+lasttimeofday: 1792145557:489921
+deltatime:0:244157
+delta: 0.2441558838
+delta too large: 0.2392883301
+timeofday:1792145557:973370
+lasttimeofday: 1792145557:734078
+deltatime:0:239292
+delta: 0.2392883301
+frame=  904 fps= 28 q=29.0 size=       0KiB time=00:00:30.06 bitrate=   0.0kbits/s dup=706 drop=0 speed=0.939x elapsed=0:00:32.00    frame=  917 fps= 28 q=29.0 size=       0KiB time=00:00:30.50 bitrate=   0.0kbits/s dup=716 drop=0 speed=0.938x elapsed=0:00:32.51    frame=  935 fps= 28 q=29.0 size=       0KiB time=00:00:31.10 bitrate=   0.0kbits/s dup=730 drop=0 speed=0.942x elapsed=0:00:33.01    frame=  948 fps= 28 q=29.0 size=       0KiB time=00:00:31.53 bitrate=   0.0kbits/s dup=740 drop=0 speed=0.941x elapsed=0:00:33.51    frame=  964 fps= 28 q=29.0 size=       0KiB time=00:00:32.06 bitrate=   0.0kbits/s dup=752 drop=0 speed=0.943x elapsed=0:00:34.01    frame=  980 fps= 28 q=29.0 size=       0KiB time=00:00:32.60 bitrate=   0.0kbits/s dup=764 drop=0 speed=0.945x elapsed=0:00:34.51    frame=  994 fps= 28 q=29.0 size=       0KiB time=00:00:33.06 bitrate=   0.0kbits/s dup=775 drop=0 speed=0.944x elapsed=0:00:35.01    frame= 1007 fps= 28 q=29.0 size=       0KiB time=00:00:33.50 bitrate=   0.0kbits/s dup=785 drop=0 speed=0.943x elapsed=0:00:35.51    frame= 1024 fps= 28 q=29.0 size=       0KiB time=00:00:34.06 bitrate=   0.0kbits/s dup=798 drop=0 speed=0.946x elapsed=0:00:36.01    frame= 1037 fps= 28 q=29.0 size=       0KiB time=00:00:34.50 bitrate=   0.0kbits/s dup=808 drop=0 speed=0.945x elapsed=0:00:36.51    frame= 1054 fps= 28 q=29.0 size=       0KiB time=00:00:35.06 bitrate=   0.0kbits/s dup=821 drop=0 speed=0.947x elapsed=0:00:37.01    frame= 1068 fps= 28 q=29.0 size=       0KiB time=00:00:35.53 bitrate=   0.0kbits/s dup=832 drop=0 speed=0.947x elapsed=0:00:37.51    frame= 1082 fps= 28 q=29.0 size=       0KiB time=00:00:36.00 bitrate=   0.0kbits/s dup=843 drop=0 speed=0.947x elapsed=0:00:38.01    frame= 1100 fps= 29 q=29.0 size=       0KiB time=00:00:36.60 bitrate=   0.0kbits/s dup=857 drop=0 speed=0.95x elapsed=0:00:38.51    frame= 1113 fps= 29 q=29.0 size=       0KiB time=00:00:37.03 bitrate=   0.0kbits/s dup=867 drop=0 speed=0.949x elapsed=0:00:39.01    frame= 1130 fps= 29 q=29.0 size=       0KiB time=00:00:37.60 bitrate=   0.0kbits/s dup=880 drop=0 speed=0.952x elapsed=0:00:39.51    frame= 1144 fps= 29 q=29.0 size=       0KiB time=00:00:38.06 bitrate=   0.0kbits/s dup=891 drop=0 speed=0.951x elapsed=0:00:40.01    frame= 1158 fps= 29 q=29.0 size=       0KiB time=00:00:38.53 bitrate=   0.0kbits/s dup=902 drop=0 speed=0.951x elapsed=0:00:40.51    frame= 1173 fps= 29 q=29.0 size=       0KiB time=00:00:39.03 bitrate=   0.0kbits/s dup=914 drop=0 speed=0.952x elapsed=0:00:41.01    frame= 1188 fps= 29 q=29.0 size=       0KiB time=00:00:39.53 bitrate=   0.0kbits/s dup=925 drop=0 speed=0.952x elapsed=0:00:41.51    frame= 1202 fps= 29 q=29.0 size=       0KiB time=00:00:40.00 bitrate=   0.0kbits/s dup=936 drop=0 speed=0.952x elapsed=0:00:42.01    frame= 1216 fps= 29 q=29.0 size=       0KiB time=00:00:40.46 bitrate=   0.0kbits/s dup=947 drop=0 speed=0.952x elapsed=0:00:42.51    delta too large: 0.2032928467
+timeofday:1792145568:756229
+lasttimeofday: 1792145568:552928
+deltatime:0:203301
+delta: 0.2032928467
+frame= 1232 fps= 29 q=29.0 size=       0KiB time=00:00:41.00 bitrate=   0.0kbits/s dup=960 drop=0 speed=0.953x elapsed=0:00:43.01    frame= 1247 fps= 29 q=29.0 size=       0KiB time=00:00:41.50 bitrate=   0.0kbits/s dup=972 drop=0 speed=0.954x elapsed=0:00:43.51    frame= 1264 fps= 29 q=29.0 size=       0KiB time=00:00:42.06 bitrate=   0.0kbits/s dup=985 drop=0 speed=0.956x elapsed=0:00:44.01    frame= 1277 fps= 29 q=29.0 size=       0KiB time=00:00:42.50 bitrate=   0.0kbits/s dup=995 drop=0 speed=0.955x elapsed=0:00:44.51    [vf#0:0 @ 0x5adb854f1bc0] More than 1000 frames duplicated
+frame= 1295 fps= 29 q=29.0 size=       0KiB time=00:00:43.10 bitrate=   0.0kbits/s dup=1009 drop=0 speed=0.957x elapsed=0:00:45.01    frame= 1310 fps= 29 q=29.0 size=       0KiB time=00:00:43.60 bitrate=   0.0kbits/s dup=1021 drop=0 speed=0.958x elapsed=0:00:45.51    frame= 1324 fps= 29 q=29.0 size=       0KiB time=00:00:44.06 bitrate=   0.0kbits/s dup=1032 drop=0 speed=0.958x elapsed=0:00:46.01    frame= 1337 fps= 29 q=29.0 size=       0KiB time=00:00:44.50 bitrate=   0.0kbits/s dup=1042 drop=0 speed=0.957x elapsed=0:00:46.51    frame= 1355 fps= 29 q=29.0 size=       0KiB time=00:00:45.10 bitrate=   0.0kbits/s dup=1056 drop=0 speed=0.959x elapsed=0:00:47.01    frame= 1370 fps= 29 q=29.0 size=       0KiB time=00:00:45.60 bitrate=   0.0kbits/s dup=1068 drop=0 speed=0.96x elapsed=0:00:47.51    frame= 1384 fps= 29 q=29.0 size=       0KiB time=00:00:46.06 bitrate=   0.0kbits/s dup=1079 drop=0 speed=0.959x elapsed=0:00:48.01    frame= 1400 fps= 29 q=29.0 size=       0KiB time=00:00:46.60 bitrate=   0.0kbits/s dup=1092 drop=0 speed=0.96x elapsed=0:00:48.51    frame= 1413 fps= 29 q=29.0 size=       0KiB time=00:00:47.03 bitrate=   0.0kbits/s dup=1102 drop=0 speed=0.959x elapsed=0:00:49.02    frame= 1427 fps= 29 q=29.0 size=       0KiB time=00:00:47.50 bitrate=   0.0kbits/s dup=1113 drop=0 speed=0.959x elapsed=0:00:49.52    frame= 1442 fps= 29 q=29.0 size=       0KiB time=00:00:48.00 bitrate=   0.0kbits/s dup=1125 drop=0 speed=0.96x elapsed=0:00:50.02    frame= 1456 fps= 29 q=29.0 size=       0KiB time=00:00:48.46 bitrate=   0.0kbits/s dup=1136 drop=0 speed=0.959x elapsed=0:00:50.52    frame= 1475 fps= 29 q=29.0 size=       0KiB time=00:00:49.10 bitrate=   0.0kbits/s dup=1151 drop=0 speed=0.962x elapsed=0:00:51.02    frame= 1490 fps= 29 q=26.0 size=       0KiB time=00:00:49.60 bitrate=   0.0kbits/s dup=1163 drop=0 speed=0.963x elapsed=0:00:51.52    frame= 1503 fps= 29 q=29.0 size=       0KiB time=00:00:50.03 bitrate=   0.0kbits/s dup=1173 drop=0 speed=0.962x elapsed=0:00:52.02    frame= 1518 fps= 29 q=29.0 size=       0KiB time=00:00:50.53 bitrate=   0.0kbits/s dup=1185 drop=0 speed=0.962x elapsed=0:00:52.52    frame= 1534 fps= 29 q=29.0 size=       0KiB time=00:00:51.06 bitrate=   0.0kbits/s dup=1198 drop=0 speed=0.963x elapsed=0:00:53.02    delta too large: 0.2271728516
+timeofday:1792145579:389796
+lasttimeofday: 1792145579:162621
+deltatime:0:227175
+delta: 0.2271728516
+delta too large: 0.2412719727
+timeofday:1792145579:631075
+lasttimeofday: 1792145579:389796
+deltatime:0:241279
+delta: 0.2412719727
+frame= 1548 fps= 29 q=29.0 size=       0KiB time=00:00:51.53 bitrate=   0.0kbits/s dup=1210 drop=0 speed=0.963x elapsed=0:00:53.52    delta too large: 0.2264709473
+timeofday:1792145579:857555
+lasttimeofday: 1792145579:631075
+deltatime:0:226480
+delta: 0.2264709473
+frame= 1565 fps= 29 q=29.0 size=       0KiB time=00:00:52.10 bitrate=   0.0kbits/s dup=1224 drop=0 speed=0.964x elapsed=0:00:54.02    frame= 1580 fps= 29 q=29.0 size=       0KiB time=00:00:52.60 bitrate=   0.0kbits/s dup=1236 drop=0 speed=0.965x elapsed=0:00:54.52    delta too large: 0.2304534912
+timeofday:1792145580:893565
+lasttimeofday: 1792145580:663105
+deltatime:0:230460
+delta: 0.2304534912
+frame= 1592 fps= 29 q=29.0 size=       0KiB time=00:00:53.00 bitrate=   0.0kbits/s dup=1246 drop=0 speed=0.963x elapsed=0:00:55.02    frame= 1608 fps= 29 q=29.0 size=       0KiB time=00:00:53.53 bitrate=   0.0kbits/s dup=1259 drop=0 speed=0.964x elapsed=0:00:55.52    frame= 1624 fps= 29 q=29.0 size=       0KiB time=00:00:54.06 bitrate=   0.0kbits/s dup=1272 drop=0 speed=0.965x elapsed=0:00:56.02    frame= 1638 fps= 29 q=29.0 size=       0KiB time=00:00:54.53 bitrate=   0.0kbits/s dup=1283 drop=0 speed=0.965x elapsed=0:00:56.52    delta too large: 0.2647857666
+timeofday:1792145583:85281
+lasttimeofday: 1792145582:820481
+deltatime:0:264800
+delta: 0.2647857666
+frame= 1652 fps= 29 q=29.0 size=       0KiB time=00:00:55.00 bitrate=   0.0kbits/s dup=1295 drop=0 speed=0.965x elapsed=0:00:57.02    delta too large: 0.3123779297
+timeofday:1792145583:397668
+lasttimeofday: 1792145583:85281
+deltatime:0:312387
+delta: 0.3123779297
+frame= 1661 fps= 29 q=29.0 size=       0KiB time=00:00:55.30 bitrate=   0.0kbits/s dup=1303 drop=0 speed=0.961x elapsed=0:00:57.52    delta too large: 0.3339996338
+timeofday:1792145583:731677
+lasttimeofday: 1792145583:397668
+deltatime:0:334009
+delta: 0.3339996338
+delta too large: 0.250793457
+timeofday:1792145583:982484
+lasttimeofday: 1792145583:731677
+deltatime:0:250807
+delta: 0.250793457
+delta too large: 0.2139434814
+timeofday:1792145584:196429
+lasttimeofday: 1792145583:982484
+deltatime:0:213945
+delta: 0.2139434814
+frame= 1685 fps= 29 q=29.0 size=       0KiB time=00:00:56.10 bitrate=   0.0kbits/s dup=1324 drop=0 speed=0.967x elapsed=0:00:58.02    frame= 1696 fps= 29 q=29.0 size=       0KiB time=00:00:56.46 bitrate=   0.0kbits/s dup=1333 drop=0 speed=0.965x elapsed=0:00:58.52    frame= 1712 fps= 29 q=29.0 size=       0KiB time=00:00:57.00 bitrate=   0.0kbits/s dup=1346 drop=0 speed=0.966x elapsed=0:00:59.02    delta too large: 0.2631530762
+timeofday:1792145585:519876
+lasttimeofday: 1792145585:256720
+deltatime:0:263156
+delta: 0.2631530762
+frame= 1731 fps= 29 q=29.0 size=       0KiB time=00:00:57.63 bitrate=   0.0kbits/s dup=1362 drop=0 speed=0.968x elapsed=0:00:59.52    delta too large: 0.2604370117
+timeofday:1792145585:963933
+lasttimeofday: 1792145585:703493
+deltatime:0:260440
+delta: 0.2604370117
+delta too large: 0.2161712646
+timeofday:1792145586:180116
+lasttimeofday: 1792145585:963933
+deltatime:0:216183
+delta: 0.2161712646
+frame= 1744 fps= 29 q=29.0 size=       0KiB time=00:00:58.06 bitrate=   0.0kbits/s dup=1373 drop=0 speed=0.967x elapsed=0:01:00.02    delta too large: 0.2024383545
+timeofday:1792145586:569598
+lasttimeofday: 1792145586:367152
+deltatime:0:202446
+delta: 0.2024383545
+frame= 1756 fps= 29 q=29.0 size=       0KiB time=00:00:58.46 bitrate=   0.0kbits/s dup=1383 drop=0 speed=0.966x elapsed=0:01:00.52    delta too large: 0.2310028076
+timeofday:1792145586:800610
+lasttimeofday: 1792145586:569598
+deltatime:0:231012
+delta: 0.2310028076
+delta too large: 0.2013397217
+timeofday:1792145587:1957
+lasttimeofday: 1792145586:800610
+deltatime:0:201347
+delta: 0.2013397217
+frame= 1775 fps= 29 q=29.0 size=       0KiB time=00:00:59.10 bitrate=   0.0kbits/s dup=1399 drop=0 speed=0.968x elapsed=0:01:01.02    delta too large: 0.2082977295
+timeofday:1792145587:576939
+lasttimeofday: 1792145587:368640
+deltatime:0:208299
+delta: 0.2082977295
+frame= 1786 fps= 29 q=29.0 size=       0KiB time=00:00:59.46 bitrate=   0.0kbits/s dup=1408 drop=0 speed=0.967x elapsed=0:01:01.52    delta too large: 0.3009185791
+timeofday:1792145587:877859
+lasttimeofday: 1792145587:576939
+deltatime:0:300920
+delta: 0.3009185791
+delta too large: 0.2277832031
+timeofday:1792145588:105650
+lasttimeofday: 1792145587:877859
+deltatime:0:227791
+delta: 0.2277832031
+frame= 1803 fps= 29 q=29.0 size=       0KiB time=00:01:00.03 bitrate=   0.0kbits/s dup=1423 drop=0 speed=0.968x elapsed=0:01:02.02    delta too large: 0.2224273682
+timeofday:1792145588:506064
+lasttimeofday: 1792145588:283631
+deltatime:0:222433
+delta: 0.2224273682
+delta too large: 0.2083892822
+timeofday:1792145588:714457
+lasttimeofday: 1792145588:506064
+deltatime:0:208393
+delta: 0.2083892822
+frame= 1820 fps= 29 q=29.0 size=       0KiB time=00:01:00.60 bitrate=   0.0kbits/s dup=1438 drop=0 speed=0.969x elapsed=0:01:02.52    delta too large: 0.2196044922
+timeofday:1792145588:934072
+lasttimeofday: 1792145588:714457
+deltatime:0:219615
+delta: 0.2196044922
+delta too large: 0.2172546387
+timeofday:1792145589:151336
+lasttimeofday: 1792145588:934072
+deltatime:0:217264
+delta: 0.2172546387
+frame= 1834 fps= 29 q=29.0 size=       0KiB time=00:01:01.06 bitrate=   0.0kbits/s dup=1449 drop=0 speed=0.969x elapsed=0:01:03.02    delta too large: 0.2164916992
+timeofday:1792145589:367832
+lasttimeofday: 1792145589:151336
+deltatime:0:216496
+delta: 0.2164916992
+delta too large: 0.2258758545
+timeofday:1792145589:593714
+lasttimeofday: 1792145589:367832
+deltatime:0:225882
+delta: 0.2258758545
+frame= 1847 fps= 29 q=29.0 size=       0KiB time=00:01:01.50 bitrate=   0.0kbits/s dup=1460 drop=0 speed=0.968x elapsed=0:01:03.52    frame= 1863 fps= 29 q=29.0 size=       0KiB time=00:01:02.03 bitrate=   0.0kbits/s dup=1473 drop=0 speed=0.969x elapsed=0:01:04.02    frame= 1877 fps= 29 q=29.0 size=       0KiB time=00:01:02.50 bitrate=   0.0kbits/s dup=1484 drop=0 speed=0.968x elapsed=0:01:04.53    delta too large: 0.2455749512
+timeofday:1792145590:844635
+lasttimeofday: 1792145590:599050
+deltatime:0:245585
+delta: 0.2455749512
+delta too large: 0.2217407227
+timeofday:1792145591:66386
+lasttimeofday: 1792145590:844635
+deltatime:0:221751
+delta: 0.2217407227
+frame= 1892 fps= 29 q=29.0 size=       0KiB time=00:01:03.00 bitrate=   0.0kbits/s dup=1497 drop=0 speed=0.969x elapsed=0:01:05.03    frame= 1907 fps= 29 q=29.0 size=       0KiB time=00:01:03.50 bitrate=   0.0kbits/s dup=1509 drop=0 speed=0.969x elapsed=0:01:05.53    frame= 1924 fps= 29 q=29.0 size=       0KiB time=00:01:04.06 bitrate=   0.0kbits/s dup=1523 drop=0 speed=0.97x elapsed=0:01:06.03    frame= 1940 fps= 29 q=29.0 size=       0KiB time=00:01:04.60 bitrate=   0.0kbits/s dup=1536 drop=0 speed=0.971x elapsed=0:01:06.53    delta too large: 0.2226715088
+timeofday:1792145592:885453
+lasttimeofday: 1792145592:662778
+deltatime:0:222675
+delta: 0.2226715088
+delta too large: 0.2489013672
+timeofday:1792145593:134363
+lasttimeofday: 1792145592:885453
+deltatime:0:248910
+delta: 0.2489013672
+frame= 1953 fps= 29 q=29.0 size=       0KiB time=00:01:05.03 bitrate=   0.0kbits/s dup=1547 drop=0 speed=0.97x elapsed=0:01:07.03    delta too large: 0.2008972168
+timeofday:1792145593:523793
+lasttimeofday: 1792145593:322881
+deltatime:0:200912
+delta: 0.2008972168
+delta too large: 0.2165527344
+timeofday:1792145593:740346
+lasttimeofday: 1792145593:523793
+deltatime:0:216553
+delta: 0.2165527344
+frame= 1965 fps= 29 q=29.0 size=       0KiB time=00:01:05.43 bitrate=   0.0kbits/s dup=1563 drop=0 speed=0.969x elapsed=0:01:07.53    delta too large: 0.2311401367
+timeofday:1792145593:971495
+lasttimeofday: 1792145593:740346
+deltatime:0:231149
+delta: 0.2311401367
+delta too large: 0.2348480225
+timeofday:1792145594:206358
+lasttimeofday: 1792145593:971495
+deltatime:0:234863
+delta: 0.2348480225
+frame= 1985 fps= 29 q=29.0 size=       0KiB time=00:01:06.10 bitrate=   0.0kbits/s dup=1574 drop=0 speed=0.972x elapsed=0:01:08.03    frame= 2001 fps= 29 q=29.0 size=       0KiB time=00:01:06.63 bitrate=   0.0kbits/s dup=1587 drop=0 speed=0.972x elapsed=0:01:08.53    frame= 2012 fps= 29 q=29.0 size=       0KiB time=00:01:07.00 bitrate=   0.0kbits/s dup=1596 drop=0 speed=0.97x elapsed=0:01:09.03    frame= 2028 fps= 29 q=29.0 size=       0KiB time=00:01:07.53 bitrate=   0.0kbits/s dup=1609 drop=0 speed=0.971x elapsed=0:01:09.53    delta too large: 0.2054290771
+timeofday:1792145596:41813
+lasttimeofday: 1792145595:836380
+deltatime:0:205433
+delta: 0.2054290771
+frame= 2045 fps= 29 q=29.0 size=       0KiB time=00:01:08.10 bitrate=   0.0kbits/s dup=1623 drop=0 speed=0.972x elapsed=0:01:10.03    frame= 2057 fps= 29 q=29.0 size=       0KiB time=00:01:08.50 bitrate=   0.0kbits/s dup=1633 drop=0 speed=0.971x elapsed=0:01:10.53    delta too large: 0.2000274658
+timeofday:1792145596:982319
+lasttimeofday: 1792145596:782290
+deltatime:0:200029
+delta: 0.2000274658
+delta too large: 0.2279052734
+timeofday:1792145597:210231
+lasttimeofday: 1792145596:982319
+deltatime:0:227912
+delta: 0.2279052734
+frame= 2075 fps= 29 q=29.0 size=       0KiB time=00:01:09.10 bitrate=   0.0kbits/s dup=1648 drop=0 speed=0.973x elapsed=0:01:11.03    frame= 2086 fps= 29 q=29.0 size=       0KiB time=00:01:09.46 bitrate=   0.0kbits/s dup=1657 drop=0 speed=0.971x elapsed=0:01:11.53    frame= 2102 fps= 29 q=29.0 size=       0KiB time=00:01:10.00 bitrate=   0.0kbits/s dup=1670 drop=0 speed=0.972x elapsed=0:01:12.03    delta too large: 0.2180938721
+timeofday:1792145598:678420
+lasttimeofday: 1792145598:460311
+deltatime:0:218109
+delta: 0.2180938721
+frame= 2120 fps= 29 q=29.0 size=       0KiB time=00:01:10.60 bitrate=   0.0kbits/s dup=1685 drop=0 speed=0.973x elapsed=0:01:12.53    frame= 2130 fps= 29 q=29.0 size=       0KiB time=00:01:10.93 bitrate=   0.0kbits/s dup=1693 drop=0 speed=0.971x elapsed=0:01:13.03    delta too large: 0.2668151855
+timeofday:1792145599:323854
+lasttimeofday: 1792145599:57031
+deltatime:0:266823
+delta: 0.2668151855
+delta too large: 0.2099914551
+timeofday:1792145599:533860
+lasttimeofday: 1792145599:323854
+deltatime:0:210006
+delta: 0.2099914551
+frame= 2151 fps= 29 q=29.0 size=       0KiB time=00:01:11.63 bitrate=   0.0kbits/s dup=1711 drop=0 speed=0.974x elapsed=0:01:13.53    frame= 2162 fps= 29 q=29.0 size=       0KiB time=00:01:12.00 bitrate=   0.0kbits/s dup=1720 drop=0 speed=0.972x elapsed=0:01:14.03    frame= 2177 fps= 29 q=29.0 size=       0KiB time=00:01:12.50 bitrate=   0.0kbits/s dup=1732 drop=0 speed=0.973x elapsed=0:01:14.53    frame= 2193 fps= 29 q=29.0 size=       0KiB time=00:01:13.03 bitrate=   0.0kbits/s dup=1745 drop=0 speed=0.973x elapsed=0:01:15.03    delta too large: 0.2154541016
+timeofday:1792145601:355614
+lasttimeofday: 1792145601:140156
+deltatime:0:215458
+delta: 0.2154541016
+delta too large: 0.2012023926
+timeofday:1792145601:556823
+lasttimeofday: 1792145601:355614
+deltatime:0:201209
+delta: 0.2012023926
+frame= 2206 fps= 29 q=29.0 size=       0KiB time=00:01:13.46 bitrate=   0.0kbits/s dup=1756 drop=0 speed=0.973x elapsed=0:01:15.53    delta too large: 0.2316589355
+timeofday:1792145601:788489
+lasttimeofday: 1792145601:556823
+deltatime:0:231666
+delta: 0.2316589355
+frame= 2224 fps= 29 q=29.0 size=       0KiB time=00:01:14.06 bitrate=   0.0kbits/s dup=1771 drop=0 speed=0.974x elapsed=0:01:16.03    frame= 2240 fps= 29 q=26.0 size=       0KiB time=00:01:14.60 bitrate=   0.0kbits/s dup=1784 drop=0 speed=0.975x elapsed=0:01:16.54    frame= 2252 fps= 29 q=29.0 size=       0KiB time=00:01:15.00 bitrate=   0.0kbits/s dup=1794 drop=0 speed=0.974x elapsed=0:01:17.04    delta too large: 0.2006530762
+timeofday:1792145603:269300
+lasttimeofday: 1792145603:68642
+deltatime:0:200658
+delta: 0.2006530762
+frame= 2268 fps= 29 q=29.0 size=       0KiB time=00:01:15.53 bitrate=   0.0kbits/s dup=1807 drop=0 speed=0.974x elapsed=0:01:17.54    delta too large: 0.2112731934
+timeofday:1792145604:234560
+lasttimeofday: 1792145604:23276
+deltatime:0:211284
+delta: 0.2112731934
+frame= 2286 fps= 29 q=29.0 size=       0KiB time=00:01:16.13 bitrate=   0.0kbits/s dup=1822 drop=0 speed=0.976x elapsed=0:01:18.04    delta too large: 0.2086486816
+timeofday:1792145604:637119
+lasttimeofday: 1792145604:428469
+deltatime:0:208650
+delta: 0.2086486816
+frame= 2298 fps= 29 q=29.0 size=       0KiB time=00:01:16.53 bitrate=   0.0kbits/s dup=1832 drop=0 speed=0.974x elapsed=0:01:18.54    delta too large: 0.2035217285
+timeofday:1792145604:840641
+lasttimeofday: 1792145604:637119
+deltatime:0:203522
+delta: 0.2035217285
+frame= 2315 fps= 29 q=29.0 size=       0KiB time=00:01:17.10 bitrate=   0.0kbits/s dup=1846 drop=0 speed=0.975x elapsed=0:01:19.04    frame= 2331 fps= 29 q=29.0 size=       0KiB time=00:01:17.63 bitrate=   0.0kbits/s dup=1859 drop=0 speed=0.976x elapsed=0:01:19.54    delta too large: 0.2072601318
+timeofday:1792145606:112628
+lasttimeofday: 1792145605:905362
+deltatime:0:207266
+delta: 0.2072601318
+frame= 2343 fps= 29 q=29.0 size=       0KiB time=00:01:18.03 bitrate=   0.0kbits/s dup=1869 drop=0 speed=0.975x elapsed=0:01:20.04    delta too large: 0.220123291
+timeofday:1792145606:332754
+lasttimeofday: 1792145606:112628
+deltatime:0:220126
+delta: 0.220123291
+delta too large: 0.211151123
+timeofday:1792145606:736158
+lasttimeofday: 1792145606:524993
+deltatime:0:211165
+delta: 0.211151123
+frame= 2358 fps= 29 q=29.0 size=       0KiB time=00:01:18.56 bitrate=   0.0kbits/s dup=1884 drop=0 speed=0.975x elapsed=0:01:20.54    delta too large: 0.2272796631
+timeofday:1792145606:963449
+lasttimeofday: 1792145606:736158
+deltatime:0:227291
+delta: 0.2272796631
+delta too large: 0.216293335
+timeofday:1792145607:179749
+lasttimeofday: 1792145606:963449
+deltatime:0:216300
+delta: 0.216293335
+frame= 2374 fps= 29 q=29.0 size=       0KiB time=00:01:19.06 bitrate=   0.0kbits/s dup=1895 drop=0 speed=0.976x elapsed=0:01:21.04    delta too large: 0.2232513428
+timeofday:1792145607:403004
+lasttimeofday: 1792145607:179749
+deltatime:0:223255
+delta: 0.2232513428
+delta too large: 0.2191467285
+timeofday:1792145607:622154
+lasttimeofday: 1792145607:403004
+deltatime:0:219150
+delta: 0.2191467285
+frame= 2388 fps= 29 q=29.0 size=       0KiB time=00:01:19.53 bitrate=   0.0kbits/s dup=1907 drop=0 speed=0.975x elapsed=0:01:21.54    delta too large: 0.2145233154
+timeofday:1792145607:836678
+lasttimeofday: 1792145607:622154
+deltatime:0:214524
+delta: 0.2145233154
+frame= 2405 fps= 29 q=29.0 size=       0KiB time=00:01:20.10 bitrate=   0.0kbits/s dup=1921 drop=0 speed=0.976x elapsed=0:01:22.04    delta too large: 0.2004241943
+timeofday:1792145608:603857
+lasttimeofday: 1792145608:403431
+deltatime:0:200426
+delta: 0.2004241943
+frame= 2417 fps= 29 q=29.0 size=       0KiB time=00:01:20.50 bitrate=   0.0kbits/s dup=1931 drop=0 speed=0.975x elapsed=0:01:22.54    delta too large: 0.2003326416
+timeofday:1792145608:804202
+lasttimeofday: 1792145608:603857
+deltatime:0:200345
+delta: 0.2003326416
+delta too large: 0.20652771
+timeofday:1792145609:10740
+lasttimeofday: 1792145608:804202
+deltatime:0:206538
+delta: 0.20652771
+delta too large: 0.2172393799
+timeofday:1792145609:227983
+lasttimeofday: 1792145609:10740
+deltatime:0:217243
+delta: 0.2172393799
+frame= 2436 fps= 29 q=29.0 size=       0KiB time=00:01:21.13 bitrate=   0.0kbits/s dup=1947 drop=0 speed=0.977x elapsed=0:01:23.04    delta too large: 0.254989624
+timeofday:1792145609:482976
+lasttimeofday: 1792145609:227983
+deltatime:0:254993
+delta: 0.254989624
+delta too large: 0.2316894531
+timeofday:1792145609:714671
+lasttimeofday: 1792145609:482976
+deltatime:0:231695
+delta: 0.2316894531
+frame= 2451 fps= 29 q=29.0 size=       0KiB time=00:01:21.63 bitrate=   0.0kbits/s dup=1960 drop=0 speed=0.977x elapsed=0:01:23.54    frame= 2462 fps= 29 q=29.0 size=       0KiB time=00:01:22.00 bitrate=   0.0kbits/s dup=1969 drop=0 speed=0.976x elapsed=0:01:24.04    frame= 2478 fps= 29 q=29.0 size=       0KiB time=00:01:22.53 bitrate=   0.0kbits/s dup=1982 drop=0 speed=0.976x elapsed=0:01:24.54    delta too large: 0.2216491699
+timeofday:1792145610:867098
+lasttimeofday: 1792145610:645448
+deltatime:0:221650
+delta: 0.2216491699
+delta too large: 0.2483215332
+timeofday:1792145611:115420
+lasttimeofday: 1792145610:867098
+deltatime:0:248322
+delta: 0.2483215332
+frame= 2493 fps= 29 q=29.0 size=       0KiB time=00:01:23.03 bitrate=   0.0kbits/s dup=1995 drop=0 speed=0.976x elapsed=0:01:25.04    delta too large: 0.2202606201
+timeofday:1792145611:335687
+lasttimeofday: 1792145611:115420
+deltatime:0:220267
+delta: 0.2202606201
+delta too large: 0.2035522461
+timeofday:1792145611:539241
+lasttimeofday: 1792145611:335687
+deltatime:0:203554
+delta: 0.2035522461
+frame= 2505 fps= 29 q=29.0 size=     256KiB time=00:01:23.43 bitrate=  25.1kbits/s dup=2005 drop=0 speed=0.975x elapsed=0:01:25.54    delta too large: 0.2230987549
+timeofday:1792145611:762340
+lasttimeofday: 1792145611:539241
+deltatime:0:223099
+delta: 0.2230987549
+frame= 2524 fps= 29 q=29.0 size=     256KiB time=00:01:24.06 bitrate=  24.9kbits/s dup=2021 drop=0 speed=0.977x elapsed=0:01:26.04    delta too large: 0.2151794434
+timeofday:1792145612:739003
+lasttimeofday: 1792145612:523811
+deltatime:0:215192
+delta: 0.2151794434
+frame= 2541 fps= 29 q=29.0 size=     256KiB time=00:01:24.63 bitrate=  24.8kbits/s dup=2035 drop=0 speed=0.978x elapsed=0:01:26.54    delta too large: 0.209197998
+timeofday:1792145612:948203
+lasttimeofday: 1792145612:739003
+deltatime:0:209200
+delta: 0.209197998
+frame= 2553 fps= 29 q=29.0 size=     256KiB time=00:01:25.03 bitrate=  24.7kbits/s dup=2045 drop=0 speed=0.977x elapsed=0:01:27.04    delta too large: 0.2075653076
+timeofday:1792145613:347827
+lasttimeofday: 1792145613:140254
+deltatime:0:207573
+delta: 0.2075653076
+delta too large: 0.2328186035
+timeofday:1792145613:580647
+lasttimeofday: 1792145613:347827
+deltatime:0:232820
+delta: 0.2328186035
+frame= 2567 fps= 29 q=29.0 size=     256KiB time=00:01:25.50 bitrate=  24.5kbits/s dup=2057 drop=0 speed=0.977x elapsed=0:01:27.54    delta too large: 0.2229003906
+timeofday:1792145613:803562
+lasttimeofday: 1792145613:580647
+deltatime:0:222915
+delta: 0.2229003906
+delta too large: 0.2018737793
+timeofday:1792145614:5438
+lasttimeofday: 1792145613:803562
+deltatime:0:201876
+delta: 0.2018737793
+delta too large: 0.2109527588
+timeofday:1792145614:216395
+lasttimeofday: 1792145614:5438
+deltatime:0:210957
+delta: 0.2109527588
+frame= 2585 fps= 29 q=29.0 size=     256KiB time=00:01:26.10 bitrate=  24.4kbits/s dup=2072 drop=0 speed=0.978x elapsed=0:01:28.04    delta too large: 0.2459411621
+timeofday:1792145614:462338
+lasttimeofday: 1792145614:216395
+deltatime:0:245943
+delta: 0.2459411621
+delta too large: 0.2219390869
+timeofday:1792145614:684278
+lasttimeofday: 1792145614:462338
+deltatime:0:221940
+delta: 0.2219390869
+frame= 2600 fps= 29 q=29.0 size=     256KiB time=00:01:26.60 bitrate=  24.2kbits/s dup=2085 drop=0 speed=0.978x elapsed=0:01:28.54    frame= 2612 fps= 29 q=29.0 size=     256KiB time=00:01:27.00 bitrate=  24.1kbits/s dup=2095 drop=0 speed=0.977x elapsed=0:01:29.04    frame= 2628 fps= 29 q=29.0 size=     256KiB time=00:01:27.53 bitrate=  24.0kbits/s dup=2108 drop=0 speed=0.978x elapsed=0:01:29.54    delta too large: 0.2171478271
+timeofday:1792145615:850595
+lasttimeofday: 1792145615:633434
+deltatime:0:217161
+delta: 0.2171478271
+delta too large: 0.2051849365
+timeofday:1792145616:244879
+lasttimeofday: 1792145616:39680
+deltatime:0:205199
+delta: 0.2051849365
+frame= 2642 fps= 29 q=29.0 size=     256KiB time=00:01:28.06 bitrate=  23.8kbits/s dup=2123 drop=0 speed=0.978x elapsed=0:01:30.04    delta too large: 0.2197418213
+timeofday:1792145616:464628
+lasttimeofday: 1792145616:244879
+deltatime:0:219749
+delta: 0.2197418213
+frame= 2660 fps= 29 q=29.0 size=     256KiB time=00:01:28.60 bitrate=  23.7kbits/s dup=2135 drop=0 speed=0.979x elapsed=0:01:30.54    delta too large: 0.2083740234
+timeofday:1792145616:871539
+lasttimeofday: 1792145616:663152
+deltatime:0:208387
+delta: 0.2083740234
+frame= 2672 fps= 29 q=29.0 size=     256KiB time=00:01:29.00 bitrate=  23.6kbits/s dup=2145 drop=0 speed=0.978x elapsed=0:01:31.04    delta too large: 0.2149963379
+timeofday:1792145617:665500
+lasttimeofday: 1792145617:450494
+deltatime:0:215006
+delta: 0.2149963379
+frame= 2690 fps= 29 q=29.0 size=     256KiB time=00:01:29.60 bitrate=  23.4kbits/s dup=2160 drop=0 speed=0.979x elapsed=0:01:31.54    delta too large: 0.2212371826
+timeofday:1792145617:886747
+lasttimeofday: 1792145617:665500
+deltatime:0:221247
+delta: 0.2212371826
+frame= 2702 fps= 29 q=29.0 size=     256KiB time=00:01:30.00 bitrate=  23.3kbits/s dup=2170 drop=0 speed=0.978x elapsed=0:01:32.04    delta too large: 0.2343292236
+timeofday:1792145618:503363
+lasttimeofday: 1792145618:269020
+deltatime:0:234343
+delta: 0.2343292236
+delta too large: 0.2323455811
+timeofday:1792145618:735722
+lasttimeofday: 1792145618:503363
+deltatime:0:232359
+delta: 0.2323455811
+frame= 2721 fps= 29 q=29.0 size=     256KiB time=00:01:30.63 bitrate=  23.1kbits/s dup=2186 drop=0 speed=0.979x elapsed=0:01:32.54    delta too large: 0.2563323975
+timeofday:1792145618:992055
+lasttimeofday: 1792145618:735722
+deltatime:0:256333
+delta: 0.2563323975
+delta too large: 0.2190093994
+timeofday:1792145619:211074
+lasttimeofday: 1792145618:992055
+deltatime:0:219019
+delta: 0.2190093994
+frame= 2735 fps= 29 q=29.0 size=     256KiB time=00:01:31.10 bitrate=  23.0kbits/s dup=2198 drop=0 speed=0.979x elapsed=0:01:33.04    delta too large: 0.2440490723
+timeofday:1792145619:455131
+lasttimeofday: 1792145619:211074
+deltatime:0:244057
+delta: 0.2440490723
+delta too large: 0.2298278809
+timeofday:1792145619:684973
+lasttimeofday: 1792145619:455131
+deltatime:0:229842
+delta: 0.2298278809
+frame= 2750 fps= 29 q=29.0 size=     256KiB time=00:01:31.60 bitrate=  22.9kbits/s dup=2211 drop=0 speed=0.979x elapsed=0:01:33.54    frame= 2762 fps= 29 q=29.0 size=     256KiB time=00:01:32.00 bitrate=  22.8kbits/s dup=2221 drop=0 speed=0.978x elapsed=0:01:34.04    frame= 2778 fps= 29 q=29.0 size=     256KiB time=00:01:32.53 bitrate=  22.7kbits/s dup=2234 drop=0 speed=0.979x elapsed=0:01:34.54    delta too large: 0.2845458984
+timeofday:1792145620:905088
+lasttimeofday: 1792145620:620541
+deltatime:0:284547
+delta: 0.2845458984
+delta too large: 0.2468109131
+timeofday:1792145621:151911
+lasttimeofday: 1792145620:905088
+deltatime:0:246823
+delta: 0.2468109131
+frame= 2794 fps= 29 q=29.0 size=     256KiB time=00:01:33.06 bitrate=  22.5kbits/s dup=2248 drop=0 speed=0.979x elapsed=0:01:35.04    delta too large: 0.2739715576
+timeofday:1792145621:425895
+lasttimeofday: 1792145621:151911
+deltatime:0:273984
+delta: 0.2739715576
+delta too large: 0.2199554443
+timeofday:1792145621:645856
+lasttimeofday: 1792145621:425895
+deltatime:0:219961
+delta: 0.2199554443
+frame= 2808 fps= 29 q=29.0 size=     256KiB time=00:01:33.53 bitrate=  22.4kbits/s dup=2260 drop=0 speed=0.979x elapsed=0:01:35.54    delta too large: 0.2054138184
+timeofday:1792145621:851277
+lasttimeofday: 1792145621:645856
+deltatime:0:205421
+delta: 0.2054138184
+delta too large: 0.2271728516
+timeofday:1792145622:78453
+lasttimeofday: 1792145621:851277
+deltatime:0:227176
+delta: 0.2271728516
+frame= 2822 fps= 29 q=29.0 size=     256KiB time=00:01:34.00 bitrate=  22.3kbits/s dup=2272 drop=0 speed=0.979x elapsed=0:01:36.04    delta too large: 0.2034454346
+timeofday:1792145622:672213
+lasttimeofday: 1792145622:468766
+deltatime:0:203447
+delta: 0.2034454346
+frame= 2840 fps= 29 q=29.0 size=     256KiB time=00:01:34.60 bitrate=  22.2kbits/s dup=2287 drop=0 speed=0.98x elapsed=0:01:36.54    delta too large: 0.2374572754
+timeofday:1792145622:909679
+lasttimeofday: 1792145622:672213
+deltatime:0:237466
+delta: 0.2374572754
+delta too large: 0.2248687744
+timeofday:1792145623:134560
+lasttimeofday: 1792145622:909679
+deltatime:0:224881
+delta: 0.2248687744
+frame= 2853 fps= 29 q=29.0 size=     256KiB time=00:01:35.03 bitrate=  22.1kbits/s dup=2298 drop=0 speed=0.979x elapsed=0:01:37.04    delta too large: 0.221862793
+timeofday:1792145623:356430
+lasttimeofday: 1792145623:134560
+deltatime:0:221870
+delta: 0.221862793
+delta too large: 0.2201385498
+timeofday:1792145623:576581
+lasttimeofday: 1792145623:356430
+deltatime:0:220151
+delta: 0.2201385498
+frame= 2866 fps= 29 q=29.0 size=     256KiB time=00:01:35.46 bitrate=  22.0kbits/s dup=2309 drop=0 speed=0.979x elapsed=0:01:37.54    delta too large: 0.2325592041
+timeofday:1792145623:809141
+lasttimeofday: 1792145623:576581
+deltatime:0:232560
+delta: 0.2325592041
+delta too large: 0.2346038818
+timeofday:1792145624:43753
+lasttimeofday: 1792145623:809141
+deltatime:0:234612
+delta: 0.2346038818
+frame= 2880 fps= 29 q=29.0 size=     256KiB time=00:01:35.93 bitrate=  21.9kbits/s dup=2321 drop=0 speed=0.978x elapsed=0:01:38.04    delta too large: 0.2232055664
+timeofday:1792145624:266962
+lasttimeofday: 1792145624:43753
+deltatime:0:223209
+delta: 0.2232055664
+delta too large: 0.2361450195
+timeofday:1792145624:503114
+lasttimeofday: 1792145624:266962
+deltatime:0:236152
+delta: 0.2361450195
+frame= 2895 fps= 29 q=29.0 size=     256KiB time=00:01:36.43 bitrate=  21.8kbits/s dup=2334 drop=0 speed=0.979x elapsed=0:01:38.54    delta too large: 0.2667541504
+timeofday:1792145624:769870
+lasttimeofday: 1792145624:503114
+deltatime:0:266756
+delta: 0.2667541504
+delta too large: 0.2414550781
+timeofday:1792145625:209410
+lasttimeofday: 1792145624:967953
+deltatime:0:241457
+delta: 0.2414550781
+frame= 2915 fps= 29 q=29.0 size=     256KiB time=00:01:37.10 bitrate=  21.6kbits/s dup=2351 drop=0 speed=0.98x elapsed=0:01:39.04    delta too large: 0.224395752
+timeofday:1792145625:433812
+lasttimeofday: 1792145625:209410
+deltatime:0:224402
+delta: 0.224395752
+delta too large: 0.2074890137
+timeofday:1792145625:641311
+lasttimeofday: 1792145625:433812
+deltatime:0:207499
+delta: 0.2074890137
+frame= 2928 fps= 29 q=29.0 size=     256KiB time=00:01:37.53 bitrate=  21.5kbits/s dup=2362 drop=0 speed=0.98x elapsed=0:01:39.54    delta too large: 0.2430114746
+timeofday:1792145625:884325
+lasttimeofday: 1792145625:641311
+deltatime:0:243014
+delta: 0.2430114746
+delta too large: 0.2171630859
+timeofday:1792145626:101496
+lasttimeofday: 1792145625:884325
+deltatime:0:217171
+delta: 0.2171630859
+frame= 2943 fps= 29 q=29.0 size=     256KiB time=00:01:38.03 bitrate=  21.4kbits/s dup=2375 drop=0 speed=0.98x elapsed=0:01:40.04    delta too large: 0.2449951172
+timeofday:1792145626:346506
+lasttimeofday: 1792145626:101496
+deltatime:0:245010
+delta: 0.2449951172
+delta too large: 0.2436828613
+timeofday:1792145626:590197
+lasttimeofday: 1792145626:346506
+deltatime:0:243691
+delta: 0.2436828613
+frame= 2957 fps= 29 q=29.0 size=     256KiB time=00:01:38.50 bitrate=  21.3kbits/s dup=2387 drop=0 speed=0.98x elapsed=0:01:40.54    delta too large: 0.2465057373
+timeofday:1792145626:836708
+lasttimeofday: 1792145626:590197
+deltatime:0:246511
+delta: 0.2465057373
+delta too large: 0.2197113037
+timeofday:1792145627:56423
+lasttimeofday: 1792145626:836708
+deltatime:0:219715
+delta: 0.2197113037
+frame= 2976 fps= 29 q=29.0 size=     256KiB time=00:01:39.13 bitrate=  21.2kbits/s dup=2403 drop=0 speed=0.981x elapsed=0:01:41.04    delta too large: 0.2054748535
+timeofday:1792145627:453373
+lasttimeofday: 1792145627:247892
+deltatime:0:205481
+delta: 0.2054748535
+delta too large: 0.201385498
+timeofday:1792145627:654763
+lasttimeofday: 1792145627:453373
+deltatime:0:201390
+delta: 0.201385498
+frame= 2988 fps= 29 q=29.0 size=     256KiB time=00:01:39.53 bitrate=  21.1kbits/s dup=2413 drop=0 speed=0.98x elapsed=0:01:41.54    delta too large: 0.2010498047
+timeofday:1792145627:855813
+lasttimeofday: 1792145627:654763
+deltatime:0:201050
+delta: 0.2010498047
+delta too large: 0.2139892578
+timeofday:1792145628:69809
+lasttimeofday: 1792145627:855813
+deltatime:0:213996
+delta: 0.2139892578
+frame= 3002 fps= 29 q=29.0 size=     256KiB time=00:01:40.00 bitrate=  21.0kbits/s dup=2425 drop=0 speed=0.98x elapsed=0:01:42.04    delta too large: 0.2393493652
+timeofday:1792145628:309170
+lasttimeofday: 1792145628:69809
+deltatime:0:239361
+delta: 0.2393493652
+delta too large: 0.2355957031
+timeofday:1792145628:544779
+lasttimeofday: 1792145628:309170
+deltatime:0:235609
+delta: 0.2355957031
+frame= 3016 fps= 29 q=29.0 size=     256KiB time=00:01:40.46 bitrate=  20.9kbits/s dup=2437 drop=0 speed=0.98x elapsed=0:01:42.55    delta too large: 0.226852417
+timeofday:1792145628:771638
+lasttimeofday: 1792145628:544779
+deltatime:0:226859
+delta: 0.226852417
+delta too large: 0.2217254639
+timeofday:1792145628:993367
+lasttimeofday: 1792145628:771638
+deltatime:0:221729
+delta: 0.2217254639
+delta too large: 0.2125091553
+timeofday:1792145629:205884
+lasttimeofday: 1792145628:993367
+deltatime:0:212517
+delta: 0.2125091553
+frame= 3035 fps= 29 q=29.0 size=     256KiB time=00:01:41.10 bitrate=  20.7kbits/s dup=2453 drop=0 speed=0.981x elapsed=0:01:43.05    delta too large: 0.2174835205
+timeofday:1792145629:423382
+lasttimeofday: 1792145629:205884
+deltatime:0:217498
+delta: 0.2174835205
+delta too large: 0.2630004883
+timeofday:1792145629:686385
+lasttimeofday: 1792145629:423382
+deltatime:0:263003
+delta: 0.2630004883
+frame= 3050 fps= 29 q=29.0 size=     256KiB time=00:01:41.60 bitrate=  20.6kbits/s dup=2466 drop=0 speed=0.981x elapsed=0:01:43.55    delta too large: 0.2159881592
+timeofday:1792145629:902379
+lasttimeofday: 1792145629:686385
+deltatime:0:215994
+delta: 0.2159881592
+delta too large: 0.2234344482
+timeofday:1792145630:125820
+lasttimeofday: 1792145629:902379
+deltatime:0:223441
+delta: 0.2234344482
+frame= 3063 fps= 29 q=29.0 size=     256KiB time=00:01:42.03 bitrate=  20.6kbits/s dup=2477 drop=0 speed=0.981x elapsed=0:01:44.05    delta too large: 0.2361297607
+timeofday:1792145630:361954
+lasttimeofday: 1792145630:125820
+deltatime:0:236134
+delta: 0.2361297607
+delta too large: 0.2256164551
+timeofday:1792145630:587576
+lasttimeofday: 1792145630:361954
+deltatime:0:225622
+delta: 0.2256164551
+frame= 3077 fps= 29 q=29.0 size=     256KiB time=00:01:42.50 bitrate=  20.5kbits/s dup=2489 drop=0 speed=0.98x elapsed=0:01:44.55    delta too large: 0.2277374268
+timeofday:1792145630:815314
+lasttimeofday: 1792145630:587576
+deltatime:0:227738
+delta: 0.2277374268
+delta too large: 0.260345459
+timeofday:1792145631:75666
+lasttimeofday: 1792145630:815314
+deltatime:0:260352
+delta: 0.260345459
+frame= 3092 fps= 29 q=29.0 size=     256KiB time=00:01:43.00 bitrate=  20.4kbits/s dup=2502 drop=0 speed=0.98x elapsed=0:01:45.05    delta too large: 0.2888336182
+timeofday:1792145631:364508
+lasttimeofday: 1792145631:75666
+deltatime:0:288842
+delta: 0.2888336182
+delta too large: 0.2365875244
+timeofday:1792145631:601103
+lasttimeofday: 1792145631:364508
+deltatime:0:236595
+delta: 0.2365875244
+frame= 3107 fps= 29 q=29.0 size=     256KiB time=00:01:43.50 bitrate=  20.3kbits/s dup=2515 drop=0 speed=0.981x elapsed=0:01:45.55    delta too large: 0.2509613037
+timeofday:1792145631:852072
+lasttimeofday: 1792145631:601103
+deltatime:0:250969
+delta: 0.2509613037
+delta too large: 0.260345459
+timeofday:1792145632:112421
+lasttimeofday: 1792145631:852072
+deltatime:0:260349
+delta: 0.260345459
+frame= 3123 fps= 29 q=29.0 size=     256KiB time=00:01:44.03 bitrate=  20.2kbits/s dup=2529 drop=0 speed=0.981x elapsed=0:01:46.05    delta too large: 0.2267456055
+timeofday:1792145632:339178
+lasttimeofday: 1792145632:112421
+deltatime:0:226757
+delta: 0.2267456055
+delta too large: 0.2088317871
+timeofday:1792145632:548025
+lasttimeofday: 1792145632:339178
+deltatime:0:208847
+delta: 0.2088317871
+frame= 3136 fps= 29 q=29.0 size=     256KiB time=00:01:44.46 bitrate=  20.1kbits/s dup=2540 drop=0 speed=0.98x elapsed=0:01:46.55    delta too large: 0.2103118896
+timeofday:1792145632:758350
+lasttimeofday: 1792145632:548025
+deltatime:0:210325
+delta: 0.2103118896
+delta too large: 0.3078765869
+timeofday:1792145633:66234
+lasttimeofday: 1792145632:758350
+deltatime:0:307884
+delta: 0.3078765869
+frame= 3152 fps= 29 q=29.0 size=     256KiB time=00:01:45.00 bitrate=  20.0kbits/s dup=2554 drop=0 speed=0.981x elapsed=0:01:47.05    delta too large: 0.2309112549
+timeofday:1792145633:297156
+lasttimeofday: 1792145633:66234
+deltatime:0:230922
+delta: 0.2309112549
+delta too large: 0.2275848389
+timeofday:1792145633:524747
+lasttimeofday: 1792145633:297156
+deltatime:0:227591
+delta: 0.2275848389
+frame= 3165 fps= 29 q=29.0 size=     256KiB time=00:01:45.43 bitrate=  19.9kbits/s dup=2565 drop=0 speed=0.98x elapsed=0:01:47.55    delta too large: 0.3129577637
+timeofday:1792145633:837719
+lasttimeofday: 1792145633:524747
+deltatime:0:312972
+delta: 0.3129577637
+delta too large: 0.2419891357
+timeofday:1792145634:79713
+lasttimeofday: 1792145633:837719
+deltatime:0:241994
+delta: 0.2419891357
+frame= 3182 fps= 29 q=29.0 size=     256KiB time=00:01:46.00 bitrate=  19.8kbits/s dup=2580 drop=0 speed=0.981x elapsed=0:01:48.05    delta too large: 0.2356872559
+timeofday:1792145634:315405
+lasttimeofday: 1792145634:79713
+deltatime:0:235692
+delta: 0.2356872559
+delta too large: 0.2398834229
+timeofday:1792145634:555293
+lasttimeofday: 1792145634:315405
+deltatime:0:239888
+delta: 0.2398834229
+frame= 3196 fps= 29 q=29.0 size=     256KiB time=00:01:46.46 bitrate=  19.7kbits/s dup=2592 drop=0 speed=0.981x elapsed=0:01:48.55    delta too large: 0.2093963623
+timeofday:1792145634:764701
+lasttimeofday: 1792145634:555293
+deltatime:0:209408
+delta: 0.2093963623
+delta too large: 0.2201538086
+timeofday:1792145634:984870
+lasttimeofday: 1792145634:764701
+deltatime:0:220169
+delta: 0.2201538086
+delta too large: 0.2244720459
+timeofday:1792145635:209351
+lasttimeofday: 1792145634:984870
+deltatime:0:224481
+delta: 0.2244720459
+frame= 3215 fps= 29 q=29.0 size=     256KiB time=00:01:47.10 bitrate=  19.6kbits/s dup=2608 drop=0 speed=0.982x elapsed=0:01:49.05    delta too large: 0.2010955811
+timeofday:1792145635:410454
+lasttimeofday: 1792145635:209351
+deltatime:0:201103
+delta: 0.2010955811
+delta too large: 0.2179870605
+timeofday:1792145635:628444
+lasttimeofday: 1792145635:410454
+deltatime:0:217990
+delta: 0.2179870605
+frame= 3228 fps= 29 q=29.0 size=     256KiB time=00:01:47.53 bitrate=  19.5kbits/s dup=2619 drop=0 speed=0.982x elapsed=0:01:49.55    delta too large: 0.3022155762
+timeofday:1792145635:930669
+lasttimeofday: 1792145635:628444
+deltatime:0:302225
+delta: 0.3022155762
+delta too large: 0.2817230225
+timeofday:1792145636:212403
+lasttimeofday: 1792145635:930669
+deltatime:0:281734
+delta: 0.2817230225
+frame= 3245 fps= 29 q=29.0 size=     256KiB time=00:01:48.10 bitrate=  19.4kbits/s dup=2634 drop=0 speed=0.982x elapsed=0:01:50.05    delta too large: 0.2253112793
+timeofday:1792145636:437719
+lasttimeofday: 1792145636:212403
+deltatime:0:225316
+delta: 0.2253112793
+delta too large: 0.2243347168
+timeofday:1792145636:662062
+lasttimeofday: 1792145636:437719
+deltatime:0:224343
+delta: 0.2243347168
+frame= 3260 fps= 29 q=29.0 size=     256KiB time=00:01:48.60 bitrate=  19.3kbits/s dup=2647 drop=0 speed=0.982x elapsed=0:01:50.55    delta too large: 0.2439117432
+timeofday:1792145636:905980
+lasttimeofday: 1792145636:662062
+deltatime:0:243918
+delta: 0.2439117432
+delta too large: 0.2255249023
+timeofday:1792145637:131509
+lasttimeofday: 1792145636:905980
+deltatime:0:225529
+delta: 0.2255249023
+frame= 3273 fps= 29 q=29.0 size=     256KiB time=00:01:49.03 bitrate=  19.2kbits/s dup=2658 drop=0 speed=0.982x elapsed=0:01:51.05    delta too large: 0.2012176514
+timeofday:1792145637:332732
+lasttimeofday: 1792145637:131509
+deltatime:0:201223
+delta: 0.2012176514
+delta too large: 0.2185974121
+timeofday:1792145637:551342
+lasttimeofday: 1792145637:332732
+deltatime:0:218610
+delta: 0.2185974121
+frame= 3286 fps= 29 q=29.0 size=     256KiB time=00:01:49.46 bitrate=  19.2kbits/s dup=2669 drop=0 speed=0.981x elapsed=0:01:51.55    delta too large: 0.2342529297
+timeofday:1792145637:785598
+lasttimeofday: 1792145637:551342
+deltatime:0:234256
+delta: 0.2342529297
+delta too large: 0.2375488281
+timeofday:1792145638:23149
+lasttimeofday: 1792145637:785598
+deltatime:0:237551
+delta: 0.2375488281
+delta too large: 0.2324371338
+timeofday:1792145638:255599
+lasttimeofday: 1792145638:23149
+deltatime:0:232450
+delta: 0.2324371338
+frame= 3306 fps= 30 q=29.0 size=     256KiB time=00:01:50.13 bitrate=  19.0kbits/s dup=2686 drop=0 speed=0.983x elapsed=0:01:52.05    delta too large: 0.2132873535
+timeofday:1792145638:468890
+lasttimeofday: 1792145638:255599
+deltatime:0:213291
+delta: 0.2132873535
+delta too large: 0.21144104
+timeofday:1792145638:680341
+lasttimeofday: 1792145638:468890
+deltatime:0:211451
+delta: 0.21144104
+frame= 3320 fps= 29 q=29.0 size=     256KiB time=00:01:50.60 bitrate=  19.0kbits/s dup=2698 drop=0 speed=0.983x elapsed=0:01:52.55    delta too large: 0.2245635986
+timeofday:1792145638:904916
+lasttimeofday: 1792145638:680341
+deltatime:0:224575
+delta: 0.2245635986
+delta too large: 0.23046875
+timeofday:1792145639:135388
+lasttimeofday: 1792145638:904916
+deltatime:0:230472
+delta: 0.23046875
+frame= 3333 fps= 29 q=29.0 size=     256KiB time=00:01:51.03 bitrate=  18.9kbits/s dup=2709 drop=0 speed=0.982x elapsed=0:01:53.05    delta too large: 0.2610168457
+timeofday:1792145639:396415
+lasttimeofday: 1792145639:135388
+deltatime:0:261027
+delta: 0.2610168457
+delta too large: 0.2520751953
+timeofday:1792145639:648496
+lasttimeofday: 1792145639:396415
+deltatime:0:252081
+delta: 0.2520751953
+frame= 3348 fps= 29 q=29.0 size=     256KiB time=00:01:51.53 bitrate=  18.8kbits/s dup=2722 drop=0 speed=0.982x elapsed=0:01:53.55    delta too large: 0.2600097656
+timeofday:1792145639:908511
+lasttimeofday: 1792145639:648496
+deltatime:0:260015
+delta: 0.2600097656
+delta too large: 0.2300415039
+timeofday:1792145640:138565
+lasttimeofday: 1792145639:908511
+deltatime:0:230054
+delta: 0.2300415039
+frame= 3363 fps= 29 q=29.0 size=     256KiB time=00:01:52.03 bitrate=  18.7kbits/s dup=2735 drop=0 speed=0.982x elapsed=0:01:54.05    delta too large: 0.220199585
+timeofday:1792145640:358774
+lasttimeofday: 1792145640:138565
+deltatime:0:220209
+delta: 0.220199585
+delta too large: 0.2445526123
+timeofday:1792145640:603340
+lasttimeofday: 1792145640:358774
+deltatime:0:244566
+delta: 0.2445526123
+frame= 3377 fps= 29 q=29.0 size=     256KiB time=00:01:52.50 bitrate=  18.6kbits/s dup=2747 drop=0 speed=0.982x elapsed=0:01:54.55    delta too large: 0.2530975342
+timeofday:1792145640:856444
+lasttimeofday: 1792145640:603340
+deltatime:0:253104
+delta: 0.2530975342
+delta too large: 0.2339782715
+timeofday:1792145641:90429
+lasttimeofday: 1792145640:856444
+deltatime:0:233985
+delta: 0.2339782715
+frame= 3392 fps= 29 q=29.0 size=     256KiB time=00:01:53.00 bitrate=  18.6kbits/s dup=2760 drop=0 speed=0.982x elapsed=0:01:55.05    delta too large: 0.2294464111
+timeofday:1792145641:319888
+lasttimeofday: 1792145641:90429
+deltatime:0:229459
+delta: 0.2294464111
+delta too large: 0.2539825439
+timeofday:1792145641:573885
+lasttimeofday: 1792145641:319888
+deltatime:0:253997
+delta: 0.2539825439
+frame= 3406 fps= 29 q=29.0 size=     256KiB time=00:01:53.46 bitrate=  18.5kbits/s dup=2772 drop=0 speed=0.982x elapsed=0:01:55.55    delta too large: 0.2703094482
+timeofday:1792145641:844204
+lasttimeofday: 1792145641:573885
+deltatime:0:270319
+delta: 0.2703094482
+delta too large: 0.2779083252
+timeofday:1792145642:122116
+lasttimeofday: 1792145641:844204
+deltatime:0:277912
+delta: 0.2779083252
+frame= 3423 fps= 29 q=29.0 size=     256KiB time=00:01:54.03 bitrate=  18.4kbits/s dup=2787 drop=0 speed=0.983x elapsed=0:01:56.05    delta too large: 0.2234954834
+timeofday:1792145642:345618
+lasttimeofday: 1792145642:122116
+deltatime:0:223502
+delta: 0.2234954834
+delta too large: 0.2363586426
+timeofday:1792145642:581983
+lasttimeofday: 1792145642:345618
+deltatime:0:236365
+delta: 0.2363586426
+frame= 3437 fps= 29 q=29.0 size=     256KiB time=00:01:54.50 bitrate=  18.3kbits/s dup=2799 drop=0 speed=0.982x elapsed=0:01:56.55    delta too large: 0.2298736572
+timeofday:1792145642:811858
+lasttimeofday: 1792145642:581983
+deltatime:0:229875
+delta: 0.2298736572
+delta too large: 0.2260437012
+timeofday:1792145643:37908
+lasttimeofday: 1792145642:811858
+deltatime:0:226050
+delta: 0.2260437012
+frame= 3450 fps= 29 q=29.0 size=     256KiB time=00:01:54.93 bitrate=  18.2kbits/s dup=2810 drop=0 speed=0.982x elapsed=0:01:57.05    delta too large: 0.2713928223
+timeofday:1792145643:309313
+lasttimeofday: 1792145643:37908
+deltatime:0:271405
+delta: 0.2713928223
+delta too large: 0.2371520996
+timeofday:1792145643:546468
+lasttimeofday: 1792145643:309313
+deltatime:0:237155
+delta: 0.2371520996
+delta too large: 0.2109985352
+timeofday:1792145643:757481
+lasttimeofday: 1792145643:546468
+deltatime:0:211013
+delta: 0.2109985352
+frame= 3466 fps= 29 q=29.0 size=     256KiB time=00:01:55.46 bitrate=  18.2kbits/s dup=2829 drop=0 speed=0.982x elapsed=0:01:57.55    delta too large: 0.2639312744
+timeofday:1792145644:21417
+lasttimeofday: 1792145643:757481
+deltatime:0:263936
+delta: 0.2639312744
+frame= 3480 fps= 29 q=29.0 size=     256KiB time=00:01:55.93 bitrate=  18.1kbits/s dup=2836 drop=0 speed=0.982x elapsed=0:01:58.05    delta too large: 0.2700805664
+timeofday:1792145644:291510
+lasttimeofday: 1792145644:21417
+deltatime:0:270093
+delta: 0.2700805664
+delta too large: 0.2893066406
+timeofday:1792145644:580830
+lasttimeofday: 1792145644:291510
+deltatime:0:289320
+delta: 0.2893066406
+frame= 3497 fps= 29 q=29.0 size=     256KiB time=00:01:56.50 bitrate=  18.0kbits/s dup=2851 drop=0 speed=0.983x elapsed=0:01:58.55    delta too large: 0.2196044922
+timeofday:1792145644:800449
+lasttimeofday: 1792145644:580830
+deltatime:0:219619
+delta: 0.2196044922
+delta too large: 0.210357666
+timeofday:1792145645:10811
+lasttimeofday: 1792145644:800449
+deltatime:0:210362
+delta: 0.210357666
+delta too large: 0.2259521484
+timeofday:1792145645:236774
+lasttimeofday: 1792145645:10811
+deltatime:0:225963
+delta: 0.2259521484
+frame= 3516 fps= 30 q=29.0 size=     256KiB time=00:01:57.13 bitrate=  17.9kbits/s dup=2867 drop=0 speed=0.984x elapsed=0:01:59.05    delta too large: 0.2424926758
+timeofday:1792145645:479275
+lasttimeofday: 1792145645:236774
+deltatime:0:242501
+delta: 0.2424926758
+delta too large: 0.2440032959
+timeofday:1792145645:723287
+lasttimeofday: 1792145645:479275
+deltatime:0:244012
+delta: 0.2440032959
+frame= 3531 fps= 30 q=29.0 size=     256KiB time=00:01:57.63 bitrate=  17.8kbits/s dup=2880 drop=0 speed=0.984x elapsed=0:01:59.55    delta too large: 0.2525634766
+timeofday:1792145645:975863
+lasttimeofday: 1792145645:723287
+deltatime:0:252576
+delta: 0.2525634766
+delta too large: 0.2244720459
+timeofday:1792145646:200350
+lasttimeofday: 1792145645:975863
+deltatime:0:224487
+delta: 0.2244720459
+frame= 3545 fps= 30 q=29.0 size=     256KiB time=00:01:58.10 bitrate=  17.8kbits/s dup=2892 drop=0 speed=0.984x elapsed=0:02:00.05    delta too large: 0.2663879395
+timeofday:1792145646:466738
+lasttimeofday: 1792145646:200350
+deltatime:0:266388
+delta: 0.2663879395
+delta too large: 0.2288665771
+timeofday:1792145646:695618
+lasttimeofday: 1792145646:466738
+deltatime:0:228880
+delta: 0.2288665771
+frame= 3560 fps= 30 q=29.0 size=     256KiB time=00:01:58.60 bitrate=  17.7kbits/s dup=2905 drop=0 speed=0.984x elapsed=0:02:00.55    delta too large: 0.2239990234
+timeofday:1792145646:919619
+lasttimeofday: 1792145646:695618
+deltatime:0:224001
+delta: 0.2239990234
+delta too large: 0.2346496582
+timeofday:1792145647:154276
+lasttimeofday: 1792145646:919619
+deltatime:0:234657
+delta: 0.2346496582
+frame= 3574 fps= 30 q=29.0 size=     256KiB time=00:01:59.06 bitrate=  17.6kbits/s dup=2917 drop=0 speed=0.984x elapsed=0:02:01.05    delta too large: 0.2346191406
+timeofday:1792145647:388896
+lasttimeofday: 1792145647:154276
+deltatime:0:234620
+delta: 0.2346191406
+delta too large: 0.2415618896
+timeofday:1792145647:630471
+lasttimeofday: 1792145647:388896
+deltatime:0:241575
+delta: 0.2415618896
+frame= 3588 fps= 30 q=29.0 size=     256KiB time=00:01:59.53 bitrate=  17.5kbits/s dup=2929 drop=0 speed=0.983x elapsed=0:02:01.55    delta too large: 0.2229766846
+timeofday:1792145647:853454
+lasttimeofday: 1792145647:630471
+deltatime:0:222983
+delta: 0.2229766846
+delta too large: 0.2053222656
+timeofday:1792145648:58790
+lasttimeofday: 1792145647:853454
+deltatime:0:205336
+delta: 0.2053222656
+frame= 3600 fps= 29 q=29.0 size=     256KiB time=00:01:59.93 bitrate=  17.5kbits/s dup=2939 drop=0 speed=0.983x elapsed=0:02:02.05    delta too large: 0.2122650146
+timeofday:1792145648:271069
+lasttimeofday: 1792145648:58790
+deltatime:0:212279
+delta: 0.2122650146
+delta too large: 0.2206573486
+timeofday:1792145648:491734
+lasttimeofday: 1792145648:271069
+deltatime:0:220665
+delta: 0.2206573486
+delta too large: 0.2168731689
+timeofday:1792145648:708622
+lasttimeofday: 1792145648:491734
+deltatime:0:216888
+delta: 0.2168731689
+frame= 3621 fps= 30 q=29.0 size=     256KiB time=00:02:00.63 bitrate=  17.4kbits/s dup=2957 drop=0 speed=0.984x elapsed=0:02:02.55    delta too large: 0.2615509033
+timeofday:1792145648:970180
+lasttimeofday: 1792145648:708622
+deltatime:0:261558
+delta: 0.2615509033
+delta too large: 0.2580871582
+timeofday:1792145649:228275
+lasttimeofday: 1792145648:970180
+deltatime:0:258095
+delta: 0.2580871582
+frame= 3636 fps= 30 q=29.0 size=     256KiB time=00:02:01.13 bitrate=  17.3kbits/s dup=2970 drop=0 speed=0.984x elapsed=0:02:03.05    delta too large: 0.2586975098
+timeofday:1792145649:486980
+lasttimeofday: 1792145649:228275
+deltatime:0:258705
+delta: 0.2586975098
+delta too large: 0.2246246338
+timeofday:1792145649:711617
+lasttimeofday: 1792145649:486980
+deltatime:0:224637
+delta: 0.2246246338
+frame= 3651 fps= 30 q=29.0 size=     256KiB time=00:02:01.63 bitrate=  17.2kbits/s dup=2983 drop=0 speed=0.984x elapsed=0:02:03.55    delta too large: 0.2139434814
+timeofday:1792145649:925570
+lasttimeofday: 1792145649:711617
+deltatime:0:213953
+delta: 0.2139434814
+delta too large: 0.2222595215
+timeofday:1792145650:147832
+lasttimeofday: 1792145649:925570
+deltatime:0:222262
+delta: 0.2222595215
+frame= 3664 fps= 30 q=29.0 size=     256KiB time=00:02:02.06 bitrate=  17.2kbits/s dup=2994 drop=0 speed=0.984x elapsed=0:02:04.05    delta too large: 0.2150421143
+timeofday:1792145650:362882
+lasttimeofday: 1792145650:147832
+deltatime:0:215050
+delta: 0.2150421143
+frame= 3676 fps= 30 q=29.0 size=     256KiB time=00:02:02.46 bitrate=  17.1kbits/s dup=3004 drop=0 speed=0.983x elapsed=0:02:04.55    delta too large: 0.20652771
+timeofday:1792145650:768334
+lasttimeofday: 1792145650:561796
+deltatime:0:206538
+delta: 0.20652771
+delta too large: 0.2595672607
+timeofday:1792145651:27903
+lasttimeofday: 1792145650:768334
+deltatime:0:259569
+delta: 0.2595672607
+frame= 3690 fps= 30 q=29.0 size=     256KiB time=00:02:02.93 bitrate=  17.1kbits/s dup=3016 drop=0 speed=0.983x elapsed=0:02:05.05    delta too large: 0.2604522705
+timeofday:1792145651:288370
+lasttimeofday: 1792145651:27903
+deltatime:0:260467
+delta: 0.2604522705
+delta too large: 0.2414398193
+timeofday:1792145651:529822
+lasttimeofday: 1792145651:288370
+deltatime:0:241452
+delta: 0.2414398193
+frame= 3705 fps= 30 q=29.0 size=     256KiB time=00:02:03.43 bitrate=  17.0kbits/s dup=3029 drop=0 speed=0.983x elapsed=0:02:05.55    delta too large: 0.2601623535
+timeofday:1792145651:789994
+lasttimeofday: 1792145651:529822
+deltatime:0:260172
+delta: 0.2601623535
+delta too large: 0.2796783447
+timeofday:1792145652:69673
+lasttimeofday: 1792145651:789994
+deltatime:0:279679
+delta: 0.2796783447
+frame= 3720 fps= 30 q=29.0 size=     256KiB time=00:02:03.93 bitrate=  16.9kbits/s dup=3042 drop=0 speed=0.983x elapsed=0:02:06.05    delta too large: 0.2098236084
+timeofday:1792145652:279502
+lasttimeofday: 1792145652:69673
+deltatime:0:209829
+delta: 0.2098236084
+delta too large: 0.2100219727
+timeofday:1792145652:489539
+lasttimeofday: 1792145652:279502
+deltatime:0:210037
+delta: 0.2100219727
+delta too large: 0.2290649414
+timeofday:1792145652:718605
+lasttimeofday: 1792145652:489539
+deltatime:0:229066
+delta: 0.2290649414
+frame= 3741 fps= 30 q=29.0 size=     256KiB time=00:02:04.63 bitrate=  16.8kbits/s dup=3060 drop=0 speed=0.985x elapsed=0:02:06.55    delta too large: 0.2104034424
+timeofday:1792145652:929013
+lasttimeofday: 1792145652:718605
+deltatime:0:210408
+delta: 0.2104034424
+delta too large: 0.205291748
+timeofday:1792145653:134320
+lasttimeofday: 1792145652:929013
+deltatime:0:205307
+delta: 0.205291748
+frame= 3753 fps= 30 q=29.0 size=     256KiB time=00:02:05.03 bitrate=  16.8kbits/s dup=3070 drop=0 speed=0.984x elapsed=0:02:07.05    delta too large: 0.2337036133
+timeofday:1792145653:368035
+lasttimeofday: 1792145653:134320
+deltatime:0:233715
+delta: 0.2337036133
+delta too large: 0.2499237061
+timeofday:1792145653:617959
+lasttimeofday: 1792145653:368035
+deltatime:0:249924
+delta: 0.2499237061
+frame= 3767 fps= 30 q=29.0 size=     256KiB time=00:02:05.50 bitrate=  16.7kbits/s dup=3082 drop=0 speed=0.984x elapsed=0:02:07.55    delta too large: 0.3002624512
+timeofday:1792145653:918226
+lasttimeofday: 1792145653:617959
+deltatime:0:300267
+delta: 0.3002624512
+delta too large: 0.2637939453
+timeofday:1792145654:182035
+lasttimeofday: 1792145653:918226
+deltatime:0:263809
+delta: 0.2637939453
+frame= 3785 fps= 30 q=29.0 size=     256KiB time=00:02:06.10 bitrate=  16.6kbits/s dup=3098 drop=0 speed=0.985x elapsed=0:02:08.05    delta too large: 0.2461242676
+timeofday:1792145654:428165
+lasttimeofday: 1792145654:182035
+deltatime:0:246130
+delta: 0.2461242676
+delta too large: 0.2552947998
+timeofday:1792145654:683462
+lasttimeofday: 1792145654:428165
+deltatime:0:255297
+delta: 0.2552947998
+frame= 3800 fps= 30 q=29.0 size=     256KiB time=00:02:06.60 bitrate=  16.6kbits/s dup=3111 drop=0 speed=0.985x elapsed=0:02:08.55    delta too large: 0.2486724854
+timeofday:1792145654:932139
+lasttimeofday: 1792145654:683462
+deltatime:0:248677
+delta: 0.2486724854
+delta too large: 0.2463378906
+timeofday:1792145655:178491
+lasttimeofday: 1792145654:932139
+deltatime:0:246352
+delta: 0.2463378906
+frame= 3814 fps= 30 q=29.0 size=     256KiB time=00:02:07.06 bitrate=  16.5kbits/s dup=3123 drop=0 speed=0.985x elapsed=0:02:09.05    delta too large: 0.2177276611
+timeofday:1792145655:396223
+lasttimeofday: 1792145655:178491
+deltatime:0:217732
+delta: 0.2177276611
+delta too large: 0.2101287842
+timeofday:1792145655:606366
+lasttimeofday: 1792145655:396223
+deltatime:0:210143
+delta: 0.2101287842
+frame= 3827 fps= 30 q=29.0 size=     256KiB time=00:02:07.50 bitrate=  16.5kbits/s dup=3134 drop=0 speed=0.984x elapsed=0:02:09.55    delta too large: 0.2359008789
+timeofday:1792145655:842271
+lasttimeofday: 1792145655:606366
+deltatime:0:235905
+delta: 0.2359008789
+delta too large: 0.2342071533
+timeofday:1792145656:76487
+lasttimeofday: 1792145655:842271
+deltatime:0:234216
+delta: 0.2342071533
+frame= 3842 fps= 30 q=29.0 size=     256KiB time=00:02:08.00 bitrate=  16.4kbits/s dup=3147 drop=0 speed=0.984x elapsed=0:02:10.05    delta too large: 0.2416534424
+timeofday:1792145656:318155
+lasttimeofday: 1792145656:76487
+deltatime:0:241668
+delta: 0.2416534424
+delta too large: 0.2731628418
+timeofday:1792145656:591324
+lasttimeofday: 1792145656:318155
+deltatime:0:273169
+delta: 0.2731628418
+frame= 3857 fps= 30 q=29.0 size=     256KiB time=00:02:08.50 bitrate=  16.3kbits/s dup=3160 drop=0 speed=0.984x elapsed=0:02:10.55    delta too large: 0.2749938965
+timeofday:1792145656:866325
+lasttimeofday: 1792145656:591324
+deltatime:0:275001
+delta: 0.2749938965
+delta too large: 0.3081970215
+timeofday:1792145657:174537
+lasttimeofday: 1792145656:866325
+deltatime:0:308212
+delta: 0.3081970215
+frame= 3874 fps= 30 q=29.0 size=     256KiB time=00:02:09.06 bitrate=  16.3kbits/s dup=3175 drop=0 speed=0.985x elapsed=0:02:11.05    delta too large: 0.2508850098
+timeofday:1792145657:425427
+lasttimeofday: 1792145657:174537
+deltatime:0:250890
+delta: 0.2508850098
+delta too large: 0.260269165
+timeofday:1792145657:685699
+lasttimeofday: 1792145657:425427
+deltatime:0:260272
+delta: 0.260269165
+frame= 3890 fps= 30 q=29.0 size=     256KiB time=00:02:09.60 bitrate=  16.2kbits/s dup=3189 drop=0 speed=0.985x elapsed=0:02:11.55    delta too large: 0.3000640869
+timeofday:1792145657:985764
+lasttimeofday: 1792145657:685699
+deltatime:0:300065
+delta: 0.3000640869
+delta too large: 0.243850708
+timeofday:1792145658:229621
+lasttimeofday: 1792145657:985764
+deltatime:0:243857
+delta: 0.243850708
+frame= 3906 fps= 30 q=29.0 size=     256KiB time=00:02:10.13 bitrate=  16.1kbits/s dup=3203 drop=0 speed=0.985x elapsed=0:02:12.05    delta too large: 0.3057250977
+timeofday:1792145658:535354
+lasttimeofday: 1792145658:229621
+deltatime:0:305733
+delta: 0.3057250977
+frame= 3915 fps= 30 q=29.0 size=     256KiB time=00:02:10.43 bitrate=  16.1kbits/s dup=3211 drop=0 speed=0.984x elapsed=0:02:12.56    delta too large: 0.2924346924
+timeofday:1792145658:827796
+lasttimeofday: 1792145658:535354
+deltatime:0:292442
+delta: 0.2924346924
+delta too large: 0.351852417
+timeofday:1792145659:179652
+lasttimeofday: 1792145658:827796
+deltatime:0:351856
+delta: 0.351852417
+frame= 3934 fps= 30 q=29.0 size=     256KiB time=00:02:11.06 bitrate=  16.0kbits/s dup=3228 drop=0 speed=0.985x elapsed=0:02:13.06    delta too large: 0.3161468506
+timeofday:1792145659:495814
+lasttimeofday: 1792145659:179652
+deltatime:0:316162
+delta: 0.3161468506
+frame= 3944 fps= 30 q=29.0 size=     256KiB time=00:02:11.40 bitrate=  16.0kbits/s dup=3237 drop=0 speed=0.984x elapsed=0:02:13.56    delta too large: 0.2966003418
+timeofday:1792145659:792428
+lasttimeofday: 1792145659:495814
+deltatime:0:296614
+delta: 0.2966003418
+delta too large: 0.2535095215
+timeofday:1792145660:45950
+lasttimeofday: 1792145659:792428
+deltatime:0:253522
+delta: 0.2535095215
+frame= 3960 fps= 30 q=29.0 size=     256KiB time=00:02:11.93 bitrate=  15.9kbits/s dup=3251 drop=0 speed=0.984x elapsed=0:02:14.06    delta too large: 0.2393341064
+timeofday:1792145660:285289
+lasttimeofday: 1792145660:45950
+deltatime:0:239339
+delta: 0.2393341064
+delta too large: 0.2337646484
+timeofday:1792145660:519060
+lasttimeofday: 1792145660:285289
+deltatime:0:233771
+delta: 0.2337646484
+delta too large: 0.231628418
+timeofday:1792145660:750690
+lasttimeofday: 1792145660:519060
+deltatime:0:231630
+delta: 0.231628418
+frame= 3980 fps= 30 q=29.0 size=     256KiB time=00:02:12.60 bitrate=  15.8kbits/s dup=3270 drop=0 speed=0.985x elapsed=0:02:14.56    delta too large: 0.260345459
+timeofday:1792145661:11038
+lasttimeofday: 1792145660:750690
+deltatime:0:260348
+delta: 0.260345459
+frame= 3989 fps= 30 q=29.0 size=     256KiB time=00:02:12.90 bitrate=  15.8kbits/s dup=3276 drop=0 speed=0.984x elapsed=0:02:15.06    delta too large: 0.3127593994
+timeofday:1792145661:323800
+lasttimeofday: 1792145661:11038
+deltatime:0:312762
+delta: 0.3127593994
+delta too large: 0.2950134277
+timeofday:1792145661:618818
+lasttimeofday: 1792145661:323800
+deltatime:0:295018
+delta: 0.2950134277
+frame= 4007 fps= 30 q=29.0 size=     512KiB time=00:02:13.50 bitrate=  31.4kbits/s dup=3292 drop=0 speed=0.985x elapsed=0:02:15.56    delta too large: 0.2754669189
+timeofday:1792145661:894292
+lasttimeofday: 1792145661:618818
+deltatime:0:275474
+delta: 0.2754669189
+delta too large: 0.265335083
+timeofday:1792145662:159635
+lasttimeofday: 1792145661:894292
+deltatime:0:265343
+delta: 0.265335083
+frame= 4024 fps= 30 q=29.0 size=     512KiB time=00:02:14.06 bitrate=  31.3kbits/s dup=3307 drop=0 speed=0.985x elapsed=0:02:16.06    delta too large: 0.2757568359
+timeofday:1792145662:435392
+lasttimeofday: 1792145662:159635
+deltatime:0:275757
+delta: 0.2757568359
+delta too large: 0.2677001953
+timeofday:1792145662:703097
+lasttimeofday: 1792145662:435392
+deltatime:0:267705
+delta: 0.2677001953
+frame= 4041 fps= 30 q=29.0 size=     512KiB time=00:02:14.63 bitrate=  31.2kbits/s dup=3322 drop=0 speed=0.986x elapsed=0:02:16.56    delta too large: 0.2355804443
+timeofday:1792145662:938685
+lasttimeofday: 1792145662:703097
+deltatime:0:235588
+delta: 0.2355804443
+delta too large: 0.295791626
+timeofday:1792145663:234483
+lasttimeofday: 1792145662:938685
+deltatime:0:295798
+delta: 0.295791626
+frame= 4056 fps= 30 q=29.0 size=     512KiB time=00:02:15.13 bitrate=  31.0kbits/s dup=3335 drop=0 speed=0.986x elapsed=0:02:17.06    delta too large: 0.2451477051
+timeofday:1792145663:479631
+lasttimeofday: 1792145663:234483
+deltatime:0:245148
+delta: 0.2451477051
+delta too large: 0.2558135986
+timeofday:1792145663:735455
+lasttimeofday: 1792145663:479631
+deltatime:0:255824
+delta: 0.2558135986
+frame= 4071 fps= 30 q=29.0 size=     512KiB time=00:02:15.63 bitrate=  30.9kbits/s dup=3348 drop=0 speed=0.986x elapsed=0:02:17.56    delta too large: 0.3301086426
+timeofday:1792145664:65568
+lasttimeofday: 1792145663:735455
+deltatime:0:330113
+delta: 0.3301086426
+frame= 4082 fps= 30 q=29.0 size=     512KiB time=00:02:16.00 bitrate=  30.8kbits/s dup=3358 drop=0 speed=0.985x elapsed=0:02:18.06    delta too large: 0.2811126709
+timeofday:1792145664:346689
+lasttimeofday: 1792145664:65568
+deltatime:0:281121
+delta: 0.2811126709
+delta too large: 0.278427124
+timeofday:1792145664:625121
+lasttimeofday: 1792145664:346689
+deltatime:0:278432
+delta: 0.278427124
+frame= 4098 fps= 30 q=29.0 size=     512KiB time=00:02:16.53 bitrate=  30.7kbits/s dup=3372 drop=0 speed=0.985x elapsed=0:02:18.56    delta too large: 0.2454528809
+timeofday:1792145664:870579
+lasttimeofday: 1792145664:625121
+deltatime:0:245458
+delta: 0.2454528809
+delta too large: 0.2437438965
+timeofday:1792145665:114333
+lasttimeofday: 1792145664:870579
+deltatime:0:243754
+delta: 0.2437438965
+frame= 4113 fps= 30 q=29.0 size=     512KiB time=00:02:17.03 bitrate=  30.6kbits/s dup=3385 drop=0 speed=0.985x elapsed=0:02:19.06    delta too large: 0.2534942627
+timeofday:1792145665:367839
+lasttimeofday: 1792145665:114333
+deltatime:0:253506
+delta: 0.2534942627
+delta too large: 0.2648010254
+timeofday:1792145665:632644
+lasttimeofday: 1792145665:367839
+deltatime:0:264805
+delta: 0.2648010254
+frame= 4128 fps= 30 q=29.0 size=     512KiB time=00:02:17.53 bitrate=  30.5kbits/s dup=3398 drop=0 speed=0.985x elapsed=0:02:19.56    delta too large: 0.2857666016
+timeofday:1792145665:918412
+lasttimeofday: 1792145665:632644
+deltatime:0:285768
+delta: 0.2857666016
+delta too large: 0.2713317871
+timeofday:1792145666:189747
+lasttimeofday: 1792145665:918412
+deltatime:0:271335
+delta: 0.2713317871
+frame= 4145 fps= 30 q=29.0 size=     512KiB time=00:02:18.10 bitrate=  30.4kbits/s dup=3413 drop=0 speed=0.986x elapsed=0:02:20.06    delta too large: 0.2552642822
+timeofday:1792145666:445024
+lasttimeofday: 1792145666:189747
+deltatime:0:255277
+delta: 0.2552642822
+delta too large: 0.2978820801
+timeofday:1792145666:742914
+lasttimeofday: 1792145666:445024
+deltatime:0:297890
+delta: 0.2978820801
+frame= 4162 fps= 30 q=29.0 size=     512KiB time=00:02:18.66 bitrate=  30.2kbits/s dup=3428 drop=0 speed=0.987x elapsed=0:02:20.56    delta too large: 0.3382873535
+timeofday:1792145667:81204
+lasttimeofday: 1792145666:742914
+deltatime:0:338290
+delta: 0.3382873535
+frame= 4172 fps= 30 q=29.0 size=     512KiB time=00:02:19.00 bitrate=  30.2kbits/s dup=3437 drop=0 speed=0.985x elapsed=0:02:21.06    delta too large: 0.2469482422
+timeofday:1792145667:328162
+lasttimeofday: 1792145667:81204
+deltatime:0:246958
+delta: 0.2469482422
+delta too large: 0.2638702393
+timeofday:1792145667:592037
+lasttimeofday: 1792145667:328162
+deltatime:0:263875
+delta: 0.2638702393
+frame= 4187 fps= 30 q=29.0 size=     512KiB time=00:02:19.50 bitrate=  30.1kbits/s dup=3450 drop=0 speed=0.985x elapsed=0:02:21.56    delta too large: 0.2827148438
+timeofday:1792145667:874763
+lasttimeofday: 1792145667:592037
+deltatime:0:282726
+delta: 0.2827148438
+delta too large: 0.2835998535
+timeofday:1792145668:158370
+lasttimeofday: 1792145667:874763
+deltatime:0:283607
+delta: 0.2835998535
+frame= 4204 fps= 30 q=29.0 size=     512KiB time=00:02:20.06 bitrate=  29.9kbits/s dup=3465 drop=0 speed=0.986x elapsed=0:02:22.06    delta too large: 0.2668457031
+timeofday:1792145668:425226
+lasttimeofday: 1792145668:158370
+deltatime:0:266856
+delta: 0.2668457031
+delta too large: 0.2666168213
+timeofday:1792145668:691857
+lasttimeofday: 1792145668:425226
+deltatime:0:266631
+delta: 0.2666168213
+frame= 4220 fps= 30 q=29.0 size=     512KiB time=00:02:20.60 bitrate=  29.8kbits/s dup=3479 drop=0 speed=0.986x elapsed=0:02:22.56    delta too large: 0.3803405762
+timeofday:1792145669:72211
+lasttimeofday: 1792145668:691857
+deltatime:0:380354
+delta: 0.3803405762
+frame= 4232 fps= 30 q=29.0 size=     512KiB time=00:02:21.00 bitrate=  29.7kbits/s dup=3490 drop=0 speed=0.986x elapsed=0:02:23.06    delta too large: 0.3193664551
+timeofday:1792145669:391578
+lasttimeofday: 1792145669:72211
+deltatime:0:319367
+delta: 0.3193664551
+delta too large: 0.2958068848
+timeofday:1792145669:687400
+lasttimeofday: 1792145669:391578
+deltatime:0:295822
+delta: 0.2958068848
+frame= 4250 fps= 30 q=29.0 size=     512KiB time=00:02:21.60 bitrate=  29.6kbits/s dup=3506 drop=0 speed=0.986x elapsed=0:02:23.56    delta too large: 0.2828674316
+timeofday:1792145669:970281
+lasttimeofday: 1792145669:687400
+deltatime:0:282881
+delta: 0.2828674316
+frame= 4258 fps= 30 q=29.0 size=     512KiB time=00:02:21.86 bitrate=  29.6kbits/s dup=3513 drop=0 speed=0.985x elapsed=0:02:24.06    delta too large: 0.3052368164
+timeofday:1792145670:275520
+lasttimeofday: 1792145669:970281
+deltatime:0:305239
+delta: 0.3052368164
+delta too large: 0.2819519043
+timeofday:1792145670:557476
+lasttimeofday: 1792145670:275520
+deltatime:0:281956
+delta: 0.2819519043
+frame= 4276 fps= 30 q=29.0 size=     512KiB time=00:02:22.46 bitrate=  29.4kbits/s dup=3529 drop=0 speed=0.985x elapsed=0:02:24.56    delta too large: 0.2774353027
+timeofday:1792145670:834923
+lasttimeofday: 1792145670:557476
+deltatime:0:277447
+delta: 0.2774353027
+delta too large: 0.3456726074
+timeofday:1792145671:180602
+lasttimeofday: 1792145670:834923
+deltatime:0:345679
+delta: 0.3456726074
+frame= 4295 fps= 30 q=29.0 size=     512KiB time=00:02:23.10 bitrate=  29.3kbits/s dup=3546 drop=0 speed=0.986x elapsed=0:02:25.06    delta too large: 0.302154541
+timeofday:1792145671:482757
+lasttimeofday: 1792145671:180602
+deltatime:0:302155
+delta: 0.302154541
+delta too large: 0.2821044922
+timeofday:1792145671:764873
+lasttimeofday: 1792145671:482757
+deltatime:0:282116
+delta: 0.2821044922
+frame= 4308 fps= 30 q=29.0 size=     512KiB time=00:02:23.53 bitrate=  29.2kbits/s dup=3561 drop=0 speed=0.986x elapsed=0:02:25.56    delta too large: 0.2613525391
+timeofday:1792145672:26238
+lasttimeofday: 1792145671:764873
+deltatime:0:261365
+delta: 0.2613525391
+delta too large: 0.2433624268
+timeofday:1792145672:269615
+lasttimeofday: 1792145672:26238
+deltatime:0:243377
+delta: 0.2433624268
+frame= 4320 fps= 30 q=29.0 size=     512KiB time=00:02:23.93 bitrate=  29.1kbits/s dup=3568 drop=0 speed=0.985x elapsed=0:02:26.06    delta too large: 0.2578125
+timeofday:1792145672:527429
+lasttimeofday: 1792145672:269615
+deltatime:0:257814
+delta: 0.2578125
+frame= 4335 fps= 30 q=29.0 size=     512KiB time=00:02:24.43 bitrate=  29.0kbits/s dup=3581 drop=0 speed=0.985x elapsed=0:02:26.56    delta too large: 0.2695617676
+timeofday:1792145672:797005
+lasttimeofday: 1792145672:527429
+deltatime:0:269576
+delta: 0.2695617676
+delta too large: 0.2506561279
+timeofday:1792145673:47676
+lasttimeofday: 1792145672:797005
+deltatime:0:250671
+delta: 0.2506561279
+frame= 4350 fps= 30 q=29.0 size=     512KiB time=00:02:24.93 bitrate=  28.9kbits/s dup=3594 drop=0 speed=0.985x elapsed=0:02:27.06    delta too large: 0.2540893555
+timeofday:1792145673:301768
+lasttimeofday: 1792145673:47676
+deltatime:0:254092
+delta: 0.2540893555
+delta too large: 0.272354126
+timeofday:1792145673:574134
+lasttimeofday: 1792145673:301768
+deltatime:0:272366
+delta: 0.272354126
+frame= 4366 fps= 30 q=29.0 size=     512KiB time=00:02:25.46 bitrate=  28.8kbits/s dup=3608 drop=0 speed=0.986x elapsed=0:02:27.56    delta too large: 0.2654418945
+timeofday:1792145673:839586
+lasttimeofday: 1792145673:574134
+deltatime:0:265452
+delta: 0.2654418945
+delta too large: 0.2700042725
+timeofday:1792145674:109593
+lasttimeofday: 1792145673:839586
+deltatime:0:270007
+delta: 0.2700042725
+frame= 4383 fps= 30 q=29.0 size=     512KiB time=00:02:26.03 bitrate=  28.7kbits/s dup=3623 drop=0 speed=0.986x elapsed=0:02:28.06    delta too large: 0.3019866943
+timeofday:1792145674:411592
+lasttimeofday: 1792145674:109593
+deltatime:0:301999
+delta: 0.3019866943
+delta too large: 0.2721099854
+timeofday:1792145674:683709
+lasttimeofday: 1792145674:411592
+deltatime:0:272117
+delta: 0.2721099854
+frame= 4400 fps= 30 q=29.0 size=     512KiB time=00:02:26.60 bitrate=  28.6kbits/s dup=3638 drop=0 speed=0.987x elapsed=0:02:28.56    delta too large: 0.2550201416
+timeofday:1792145674:938743
+lasttimeofday: 1792145674:683709
+deltatime:0:255034
+delta: 0.2550201416
+delta too large: 0.2781219482
+timeofday:1792145675:216872
+lasttimeofday: 1792145674:938743
+deltatime:0:278129
+delta: 0.2781219482
+frame= 4415 fps= 30 q=29.0 size=     512KiB time=00:02:27.10 bitrate=  28.5kbits/s dup=3651 drop=0 speed=0.987x elapsed=0:02:29.06    delta too large: 0.2503509521
+timeofday:1792145675:467225
+lasttimeofday: 1792145675:216872
+deltatime:0:250353
+delta: 0.2503509521
+delta too large: 0.2734527588
+timeofday:1792145675:740690
+lasttimeofday: 1792145675:467225
+deltatime:0:273465
+delta: 0.2734527588
+frame= 4432 fps= 30 q=29.0 size=     512KiB time=00:02:27.66 bitrate=  28.4kbits/s dup=3666 drop=0 speed=0.987x elapsed=0:02:29.56    delta too large: 0.3466644287
+timeofday:1792145676:87356
+lasttimeofday: 1792145675:740690
+deltatime:0:346666
+delta: 0.3466644287
+frame= 4442 fps= 30 q=29.0 size=     512KiB time=00:02:28.00 bitrate=  28.3kbits/s dup=3675 drop=0 speed=0.986x elapsed=0:02:30.06    delta too large: 0.3465423584
+timeofday:1792145676:433900
+lasttimeofday: 1792145676:87356
+deltatime:0:346544
+delta: 0.3465423584
+frame= 4452 fps= 30 q=29.0 size=     512KiB time=00:02:28.33 bitrate=  28.3kbits/s dup=3684 drop=0 speed=0.985x elapsed=0:02:30.56    delta too large: 0.3604125977
+timeofday:1792145676:794318
+lasttimeofday: 1792145676:433900
+deltatime:0:360418
+delta: 0.3604125977
+delta too large: 0.3131866455
+timeofday:1792145677:107508
+lasttimeofday: 1792145676:794318
+deltatime:0:313190
+delta: 0.3131866455
+frame= 4473 fps= 30 q=29.0 size=     512KiB time=00:02:29.03 bitrate=  28.1kbits/s dup=3703 drop=0 speed=0.987x elapsed=0:02:31.06    delta too large: 0.2906188965
+timeofday:1792145677:398135
+lasttimeofday: 1792145677:107508
+deltatime:0:290627
+delta: 0.2906188965
+delta too large: 0.2523956299
+timeofday:1792145677:650534
+lasttimeofday: 1792145677:398135
+deltatime:0:252399
+delta: 0.2523956299
+frame= 4488 fps= 30 q=29.0 size=     512KiB time=00:02:29.53 bitrate=  28.1kbits/s dup=3716 drop=0 speed=0.987x elapsed=0:02:31.56    delta too large: 0.262588501
+timeofday:1792145677:913127
+lasttimeofday: 1792145677:650534
+deltatime:0:262593
+delta: 0.262588501
+delta too large: 0.2808990479
+timeofday:1792145678:194038
+lasttimeofday: 1792145677:913127
+deltatime:0:280911
+delta: 0.2808990479
+frame= 4505 fps= 30 q=29.0 size=     512KiB time=00:02:30.10 bitrate=  27.9kbits/s dup=3731 drop=0 speed=0.987x elapsed=0:02:32.06    delta too large: 0.2895355225
+timeofday:1792145678:483575
+lasttimeofday: 1792145678:194038
+deltatime:0:289537
+delta: 0.2895355225
+delta too large: 0.2713928223
+timeofday:1792145678:754981
+lasttimeofday: 1792145678:483575
+deltatime:0:271406
+delta: 0.2713928223
+frame= 4522 fps= 30 q=29.0 size=     512KiB time=00:02:30.66 bitrate=  27.8kbits/s dup=3746 drop=0 speed=0.988x elapsed=0:02:32.56    delta too large: 0.3473052979
+timeofday:1792145679:102290
+lasttimeofday: 1792145678:754981
+deltatime:0:347309
+delta: 0.3473052979
+frame= 4533 fps= 30 q=29.0 size=     512KiB time=00:02:31.03 bitrate=  27.8kbits/s dup=3756 drop=0 speed=0.987x elapsed=0:02:33.06    delta too large: 0.3344421387
+timeofday:1792145679:436741
+lasttimeofday: 1792145679:102290
+deltatime:0:334451
+delta: 0.3344421387
+delta too large: 0.29296875
+timeofday:1792145679:729721
+lasttimeofday: 1792145679:436741
+deltatime:0:292980
+delta: 0.29296875
+frame= 4551 fps= 30 q=29.0 size=     512KiB time=00:02:31.63 bitrate=  27.7kbits/s dup=3772 drop=0 speed=0.987x elapsed=0:02:33.56    delta too large: 0.2747802734
+timeofday:1792145680:4508
+lasttimeofday: 1792145679:729721
+deltatime:0:274787
+delta: 0.2747802734
+delta too large: 0.2537384033
+timeofday:1792145680:258254
+lasttimeofday: 1792145680:4508
+deltatime:0:253746
+delta: 0.2537384033
+frame= 4566 fps= 30 q=29.0 size=     512KiB time=00:02:32.13 bitrate=  27.6kbits/s dup=3785 drop=0 speed=0.987x elapsed=0:02:34.06    delta too large: 0.2603302002
+timeofday:1792145680:518590
+lasttimeofday: 1792145680:258254
+deltatime:0:260336
+delta: 0.2603302002
+frame= 4575 fps= 30 q=29.0 size=     512KiB time=00:02:32.43 bitrate=  27.5kbits/s dup=3793 drop=0 speed=0.986x elapsed=0:02:34.56    delta too large: 0.2590942383
+timeofday:1792145680:777686
+lasttimeofday: 1792145680:518590
+deltatime:0:259096
+delta: 0.2590942383
+delta too large: 0.2791290283
+timeofday:1792145681:56830
+lasttimeofday: 1792145680:777686
+deltatime:0:279144
+delta: 0.2791290283
+frame= 4590 fps= 30 q=29.0 size=     512KiB time=00:02:32.93 bitrate=  27.4kbits/s dup=3806 drop=0 speed=0.986x elapsed=0:02:35.06    delta too large: 0.295791626
+timeofday:1792145681:352627
+lasttimeofday: 1792145681:56830
+deltatime:0:295797
+delta: 0.295791626
+delta too large: 0.318145752
+timeofday:1792145681:670774
+lasttimeofday: 1792145681:352627
+deltatime:0:318147
+delta: 0.318145752
+frame= 4610 fps= 30 q=29.0 size=     512KiB time=00:02:33.60 bitrate=  27.3kbits/s dup=3824 drop=0 speed=0.987x elapsed=0:02:35.56    delta too large: 0.3305511475
+timeofday:1792145682:1339
+lasttimeofday: 1792145681:670774
+deltatime:0:330565
+delta: 0.3305511475
+frame= 4619 fps= 30 q=29.0 size=     512KiB time=00:02:33.90 bitrate=  27.3kbits/s dup=3832 drop=0 speed=0.986x elapsed=0:02:36.06    delta too large: 0.2800750732
+timeofday:1792145682:281424
+lasttimeofday: 1792145682:1339
+deltatime:0:280085
+delta: 0.2800750732
+delta too large: 0.2698669434
+timeofday:1792145682:551304
+lasttimeofday: 1792145682:281424
+deltatime:0:269880
+delta: 0.2698669434
+frame= 4636 fps= 30 q=29.0 size=     512KiB time=00:02:34.46 bitrate=  27.2kbits/s dup=3847 drop=0 speed=0.987x elapsed=0:02:36.57    delta too large: 0.2631225586
+timeofday:1792145682:814432
+lasttimeofday: 1792145682:551304
+deltatime:0:263128
+delta: 0.2631225586
+delta too large: 0.2611999512
+timeofday:1792145683:75645
+lasttimeofday: 1792145682:814432
+deltatime:0:261213
+delta: 0.2611999512
+frame= 4652 fps= 30 q=29.0 size=     512KiB time=00:02:35.00 bitrate=  27.1kbits/s dup=3861 drop=0 speed=0.987x elapsed=0:02:37.07    delta too large: 0.2658843994
+timeofday:1792145683:341542
+lasttimeofday: 1792145683:75645
+deltatime:0:265897
+delta: 0.2658843994
+delta too large: 0.2609863281
+timeofday:1792145683:602537
+lasttimeofday: 1792145683:341542
+deltatime:0:260995
+delta: 0.2609863281
+frame= 4667 fps= 30 q=29.0 size=     512KiB time=00:02:35.50 bitrate=  27.0kbits/s dup=3874 drop=0 speed=0.987x elapsed=0:02:37.57    delta too large: 0.3274383545
+timeofday:1792145683:929990
+lasttimeofday: 1792145683:602537
+deltatime:0:327453
+delta: 0.3274383545
+frame= 4677 fps= 30 q=29.0 size=     512KiB time=00:02:35.83 bitrate=  26.9kbits/s dup=3883 drop=0 speed=0.986x elapsed=0:02:38.07    delta too large: 0.3495025635
+timeofday:1792145684:279502
+lasttimeofday: 1792145683:929990
+deltatime:0:349512
+delta: 0.3495025635
+delta too large: 0.2995147705
+timeofday:1792145684:579028
+lasttimeofday: 1792145684:279502
+deltatime:0:299526
+delta: 0.2995147705
+frame= 4696 fps= 30 q=29.0 size=     512KiB time=00:02:36.46 bitrate=  26.8kbits/s dup=3900 drop=0 speed=0.987x elapsed=0:02:38.57    delta too large: 0.2430419922
+timeofday:1792145684:822075
+lasttimeofday: 1792145684:579028
+deltatime:0:243047
+delta: 0.2430419922
+delta too large: 0.2900390625
+timeofday:1792145685:112124
+lasttimeofday: 1792145684:822075
+deltatime:0:290049
+delta: 0.2900390625
+frame= 4713 fps= 30 q=29.0 size=     512KiB time=00:02:37.03 bitrate=  26.7kbits/s dup=3915 drop=0 speed=0.987x elapsed=0:02:39.07    delta too large: 0.2577362061
+timeofday:1792145685:369866
+lasttimeofday: 1792145685:112124
+deltatime:0:257742
+delta: 0.2577362061
+delta too large: 0.2441864014
+timeofday:1792145685:614061
+lasttimeofday: 1792145685:369866
+deltatime:0:244195
+delta: 0.2441864014
+frame= 4727 fps= 30 q=29.0 size=     512KiB time=00:02:37.50 bitrate=  26.6kbits/s dup=3927 drop=0 speed=0.987x elapsed=0:02:39.57    delta too large: 0.3197479248
+timeofday:1792145685:933813
+lasttimeofday: 1792145685:614061
+deltatime:0:319752
+delta: 0.3197479248
+delta too large: 0.2824859619
+timeofday:1792145686:216303
+lasttimeofday: 1792145685:933813
+deltatime:0:282490
+delta: 0.2824859619
+frame= 4745 fps= 30 q=29.0 size=     512KiB time=00:02:38.10 bitrate=  26.5kbits/s dup=3943 drop=0 speed=0.988x elapsed=0:02:40.07    delta too large: 0.2549743652
+timeofday:1792145686:471292
+lasttimeofday: 1792145686:216303
+deltatime:0:254989
+delta: 0.2549743652
+delta too large: 0.2838287354
+timeofday:1792145686:755129
+lasttimeofday: 1792145686:471292
+deltatime:0:283837
+delta: 0.2838287354
+frame= 4762 fps= 30 q=29.0 size=     512KiB time=00:02:38.66 bitrate=  26.4kbits/s dup=3958 drop=0 speed=0.988x elapsed=0:02:40.57    delta too large: 0.3288116455
+timeofday:1792145687:83946
+lasttimeofday: 1792145686:755129
+deltatime:0:328817
+delta: 0.3288116455
+frame= 4772 fps= 30 q=29.0 size=     512KiB time=00:02:39.00 bitrate=  26.4kbits/s dup=3967 drop=0 speed=0.987x elapsed=0:02:41.07    delta too large: 0.2888183594
+timeofday:1792145687:372772
+lasttimeofday: 1792145687:83946
+deltatime:0:288826
+delta: 0.2888183594
+delta too large: 0.2652893066
+timeofday:1792145687:638074
+lasttimeofday: 1792145687:372772
+deltatime:0:265302
+delta: 0.2652893066
+frame= 4788 fps= 30 q=29.0 size=     512KiB time=00:02:39.53 bitrate=  26.3kbits/s dup=3981 drop=0 speed=0.987x elapsed=0:02:41.57    delta too large: 0.3230438232
+timeofday:1792145687:961125
+lasttimeofday: 1792145687:638074
+deltatime:0:323051
+delta: 0.3230438232
+delta too large: 0.2810668945
+timeofday:1792145688:242192
+lasttimeofday: 1792145687:961125
+deltatime:0:281067
+delta: 0.2810668945
+frame= 4806 fps= 30 q=29.0 size=     512KiB time=00:02:40.13 bitrate=  26.2kbits/s dup=3997 drop=0 speed=0.988x elapsed=0:02:42.07    delta too large: 0.3392944336
+timeofday:1792145688:581489
+lasttimeofday: 1792145688:242192
+deltatime:0:339297
+delta: 0.3392944336
+frame= 4817 fps= 30 q=29.0 size=     512KiB time=00:02:40.50 bitrate=  26.1kbits/s dup=4007 drop=0 speed=0.987x elapsed=0:02:42.57    delta too large: 0.3478240967
+timeofday:1792145688:929317
+lasttimeofday: 1792145688:581489
+deltatime:0:347828
+delta: 0.3478240967
+delta too large: 0.2690887451
+timeofday:1792145689:198406
+lasttimeofday: 1792145688:929317
+deltatime:0:269089
+delta: 0.2690887451
+frame= 4835 fps= 30 q=29.0 size=     512KiB time=00:02:41.10 bitrate=  26.0kbits/s dup=4023 drop=0 speed=0.988x elapsed=0:02:43.07    delta too large: 0.2781982422
+timeofday:1792145689:476608
+lasttimeofday: 1792145689:198406
+deltatime:0:278202
+delta: 0.2781982422
+delta too large: 0.2989807129
+timeofday:1792145689:775602
+lasttimeofday: 1792145689:476608
+deltatime:0:298994
+delta: 0.2989807129
+frame= 4848 fps= 30 q=29.0 size=     512KiB time=00:02:41.53 bitrate=  26.0kbits/s dup=4038 drop=0 speed=0.988x elapsed=0:02:43.57    delta too large: 0.2780303955
+timeofday:1792145690:53638
+lasttimeofday: 1792145689:775602
+deltatime:0:278036
+delta: 0.2780303955
+frame= 4860 fps= 30 q=29.0 size=     512KiB time=00:02:41.93 bitrate=  25.9kbits/s dup=4045 drop=0 speed=0.987x elapsed=0:02:44.07    delta too large: 0.253112793
+timeofday:1792145690:306752
+lasttimeofday: 1792145690:53638
+deltatime:0:253114
+delta: 0.253112793
+delta too large: 0.2685852051
+timeofday:1792145690:575350
+lasttimeofday: 1792145690:306752
+deltatime:0:268598
+delta: 0.2685852051
+frame= 4876 fps= 30 q=29.0 size=     512KiB time=00:02:42.46 bitrate=  25.8kbits/s dup=4059 drop=0 speed=0.987x elapsed=0:02:44.57    delta too large: 0.3228149414
+timeofday:1792145690:898170
+lasttimeofday: 1792145690:575350
+deltatime:0:322820
+delta: 0.3228149414
+delta too large: 0.3192901611
+timeofday:1792145691:217464
+lasttimeofday: 1792145690:898170
+deltatime:0:319294
+delta: 0.3192901611
+frame= 4895 fps= 30 q=29.0 size=     512KiB time=00:02:43.10 bitrate=  25.7kbits/s dup=4076 drop=0 speed=0.988x elapsed=0:02:45.07    delta too large: 0.3022460938
+timeofday:1792145691:519722
+lasttimeofday: 1792145691:217464
+deltatime:0:302258
+delta: 0.3022460938
+frame= 4905 fps= 30 q=29.0 size=     512KiB time=00:02:43.43 bitrate=  25.7kbits/s dup=4085 drop=0 speed=0.987x elapsed=0:02:45.57    delta too large: 0.2752990723
+timeofday:1792145691:795026
+lasttimeofday: 1792145691:519722
+deltatime:0:275304
+delta: 0.2752990723
+delta too large: 0.2986602783
+timeofday:1792145692:93691
+lasttimeofday: 1792145691:795026
+deltatime:0:298665
+delta: 0.2986602783
+frame= 4922 fps= 30 q=29.0 size=     512KiB time=00:02:44.00 bitrate=  25.6kbits/s dup=4100 drop=0 speed=0.987x elapsed=0:02:46.07    delta too large: 0.2366638184
+timeofday:1792145692:330369
+lasttimeofday: 1792145692:93691
+deltatime:0:236678
+delta: 0.2366638184
+delta too large: 0.2538299561
+timeofday:1792145692:584213
+lasttimeofday: 1792145692:330369
+deltatime:0:253844
+delta: 0.2538299561
+frame= 4937 fps= 30 q=29.0 size=     512KiB time=00:02:44.50 bitrate=  25.5kbits/s dup=4113 drop=0 speed=0.988x elapsed=0:02:46.57    delta too large: 0.2828674316
+timeofday:1792145692:867086
+lasttimeofday: 1792145692:584213
+deltatime:0:282873
+delta: 0.2828674316
+delta too large: 0.2934112549
+timeofday:1792145693:160500
+lasttimeofday: 1792145692:867086
+deltatime:0:293414
+delta: 0.2934112549
+frame= 4954 fps= 30 q=29.0 size=     512KiB time=00:02:45.06 bitrate=  25.4kbits/s dup=4128 drop=0 speed=0.988x elapsed=0:02:47.07    delta too large: 0.3345489502
+timeofday:1792145693:495049
+lasttimeofday: 1792145693:160500
+deltatime:0:334549
+delta: 0.3345489502
+frame= 4964 fps= 30 q=29.0 size=     512KiB time=00:02:45.40 bitrate=  25.4kbits/s dup=4137 drop=0 speed=0.987x elapsed=0:02:47.57    delta too large: 0.3149871826
+timeofday:1792145693:810048
+lasttimeofday: 1792145693:495049
+deltatime:0:314999
+delta: 0.3149871826
+delta too large: 0.2775726318
+timeofday:1792145694:87634
+lasttimeofday: 1792145693:810048
+deltatime:0:277586
+delta: 0.2775726318
+frame= 4982 fps= 30 q=29.0 size=     512KiB time=00:02:46.00 bitrate=  25.3kbits/s dup=4153 drop=0 speed=0.988x elapsed=0:02:48.07    delta too large: 0.4504699707
+timeofday:1792145694:538114
+lasttimeofday: 1792145694:87634
+deltatime:0:450480
+delta: 0.4504699707
+frame= 4995 fps= 30 q=29.0 size=     512KiB time=00:02:46.43 bitrate=  25.2kbits/s dup=4165 drop=0 speed=0.987x elapsed=0:02:48.57    delta too large: 0.3293914795
+timeofday:1792145694:867513
+lasttimeofday: 1792145694:538114
+deltatime:0:329399
+delta: 0.3293914795
+delta too large: 0.3007659912
+timeofday:1792145695:168290
+lasttimeofday: 1792145694:867513
+deltatime:0:300777
+delta: 0.3007659912
+frame= 5014 fps= 30 q=29.0 size=     512KiB time=00:02:47.06 bitrate=  25.1kbits/s dup=4182 drop=0 speed=0.988x elapsed=0:02:49.07    delta too large: 0.2959594727
+timeofday:1792145695:464251
+lasttimeofday: 1792145695:168290
+deltatime:0:295961
+delta: 0.2959594727
+frame= 5024 fps= 30 q=29.0 size=     512KiB time=00:02:47.40 bitrate=  25.1kbits/s dup=4191 drop=0 speed=0.987x elapsed=0:02:49.57    delta too large: 0.3573150635
+timeofday:1792145695:821572
+lasttimeofday: 1792145695:464251
+deltatime:0:357321
+delta: 0.3573150635
+delta too large: 0.3671112061
+timeofday:1792145696:188695
+lasttimeofday: 1792145695:821572
+deltatime:0:367123
+delta: 0.3671112061
+frame= 5045 fps= 30 q=29.0 size=     512KiB time=00:02:48.10 bitrate=  25.0kbits/s dup=4210 drop=0 speed=0.988x elapsed=0:02:50.07    delta too large: 0.3274688721
+timeofday:1792145696:516178
+lasttimeofday: 1792145696:188695
+deltatime:0:327483
+delta: 0.3274688721
+frame= 5055 fps= 30 q=29.0 size=     512KiB time=00:02:48.43 bitrate=  24.9kbits/s dup=4219 drop=0 speed=0.987x elapsed=0:02:50.57    delta too large: 0.3130493164
+timeofday:1792145696:829233
+lasttimeofday: 1792145696:516178
+deltatime:0:313055
+delta: 0.3130493164
+delta too large: 0.3144226074
+timeofday:1792145697:143666
+lasttimeofday: 1792145696:829233
+deltatime:0:314433
+delta: 0.3144226074
+frame= 5074 fps= 30 q=29.0 size=     512KiB time=00:02:49.06 bitrate=  24.8kbits/s dup=4236 drop=0 speed=0.988x elapsed=0:02:51.07    delta too large: 0.2886657715
+timeofday:1792145697:432339
+lasttimeofday: 1792145697:143666
+deltatime:0:288673
+delta: 0.2886657715
+delta too large: 0.2570037842
+timeofday:1792145697:689357
+lasttimeofday: 1792145697:432339
+deltatime:0:257018
+delta: 0.2570037842
+frame= 5090 fps= 30 q=29.0 size=     512KiB time=00:02:49.60 bitrate=  24.7kbits/s dup=4250 drop=0 speed=0.988x elapsed=0:02:51.57    delta too large: 0.2961883545
+timeofday:1792145697:985548
+lasttimeofday: 1792145697:689357
+deltatime:0:296191
+delta: 0.2961883545
+delta too large: 0.2685852051
+timeofday:1792145698:254140
+lasttimeofday: 1792145697:985548
+deltatime:0:268592
+delta: 0.2685852051
+frame= 5106 fps= 30 q=29.0 size=     512KiB time=00:02:50.13 bitrate=  24.7kbits/s dup=4264 drop=0 speed=0.989x elapsed=0:02:52.07    delta too large: 0.2987670898
+timeofday:1792145698:552919
+lasttimeofday: 1792145698:254140
+deltatime:0:298779
+delta: 0.2987670898
+frame= 5116 fps= 30 q=29.0 size=     512KiB time=00:02:50.46 bitrate=  24.6kbits/s dup=4273 drop=0 speed=0.988x elapsed=0:02:52.57    delta too large: 0.3368530273
+timeofday:1792145698:889773
+lasttimeofday: 1792145698:552919
+deltatime:0:336854
+delta: 0.3368530273
+delta too large: 0.3159484863
+timeofday:1792145699:205729
+lasttimeofday: 1792145698:889773
+deltatime:0:315956
+delta: 0.3159484863
+frame= 5135 fps= 30 q=29.0 size=     512KiB time=00:02:51.10 bitrate=  24.5kbits/s dup=4290 drop=0 speed=0.989x elapsed=0:02:53.07    delta too large: 0.3333892822
+timeofday:1792145699:539120
+lasttimeofday: 1792145699:205729
+deltatime:0:333391
+delta: 0.3333892822
+frame= 5145 fps= 30 q=29.0 size=     512KiB time=00:02:51.43 bitrate=  24.5kbits/s dup=4299 drop=0 speed=0.988x elapsed=0:02:53.58    delta too large: 0.2810821533
+timeofday:1792145699:820214
+lasttimeofday: 1792145699:539120
+deltatime:0:281094
+delta: 0.2810821533
+delta too large: 0.2708435059
+timeofday:1792145700:91060
+lasttimeofday: 1792145699:820214
+deltatime:0:270846
+delta: 0.2708435059
+frame= 5162 fps= 30 q=29.0 size=     512KiB time=00:02:52.00 bitrate=  24.4kbits/s dup=4314 drop=0 speed=0.988x elapsed=0:02:54.08    delta too large: 0.2912445068
+timeofday:1792145700:382313
+lasttimeofday: 1792145700:91060
+deltatime:0:291253
+delta: 0.2912445068
+delta too large: 0.325012207
+timeofday:1792145700:707330
+lasttimeofday: 1792145700:382313
+deltatime:0:325017
+delta: 0.325012207
+frame= 5181 fps= 30 q=29.0 size=     512KiB time=00:02:52.63 bitrate=  24.3kbits/s dup=4331 drop=0 speed=0.989x elapsed=0:02:54.58    delta too large: 0.3485870361
+timeofday:1792145701:55928
+lasttimeofday: 1792145700:707330
+deltatime:0:348598
+delta: 0.3485870361
+frame= 5190 fps= 30 q=29.0 size=     512KiB time=00:02:52.93 bitrate=  24.3kbits/s dup=4339 drop=0 speed=0.988x elapsed=0:02:55.08    delta too large: 0.2723999023
+timeofday:1792145701:328336
+lasttimeofday: 1792145701:55928
+deltatime:0:272408
+delta: 0.2723999023
+delta too large: 0.2640838623
+timeofday:1792145701:592425
+lasttimeofday: 1792145701:328336
+deltatime:0:264089
+delta: 0.2640838623
+frame= 5207 fps= 30 q=29.0 size=     512KiB time=00:02:53.50 bitrate=  24.2kbits/s dup=4354 drop=0 speed=0.988x elapsed=0:02:55.58    delta too large: 0.3116912842
+timeofday:1792145701:904122
+lasttimeofday: 1792145701:592425
+deltatime:0:311697
+delta: 0.3116912842
+delta too large: 0.2925262451
+timeofday:1792145702:196657
+lasttimeofday: 1792145701:904122
+deltatime:0:292535
+delta: 0.2925262451
+frame= 5225 fps= 30 q=29.0 size=     512KiB time=00:02:54.10 bitrate=  24.1kbits/s dup=4370 drop=0 speed=0.989x elapsed=0:02:56.08    delta too large: 0.2938537598
+timeofday:1792145702:490525
+lasttimeofday: 1792145702:196657
+deltatime:0:293868
+delta: 0.2938537598
+frame= 5234 fps= 30 q=29.0 size=     512KiB time=00:02:54.40 bitrate=  24.1kbits/s dup=4378 drop=0 speed=0.988x elapsed=0:02:56.58    delta too large: 0.3903656006
+timeofday:1792145702:880902
+lasttimeofday: 1792145702:490525
+deltatime:0:390377
+delta: 0.3903656006
+delta too large: 0.3819732666
+timeofday:1792145703:262888
+lasttimeofday: 1792145702:880902
+deltatime:0:381986
+delta: 0.3819732666
+frame= 5252 fps= 30 q=29.0 size=     768KiB time=00:02:55.00 bitrate=  36.0kbits/s dup=4400 drop=0 speed=0.988x elapsed=0:02:57.08    delta too large: 0.3789672852
+timeofday:1792145703:641860
+lasttimeofday: 1792145703:262888
+deltatime:0:378972
+delta: 0.3789672852
+frame= 5268 fps= 30 q=29.0 size=     768KiB time=00:02:55.53 bitrate=  35.8kbits/s dup=4409 drop=0 speed=0.988x elapsed=0:02:57.58    delta too large: 0.3178710938
+timeofday:1792145703:959732
+lasttimeofday: 1792145703:641860
+deltatime:0:317872
+delta: 0.3178710938
+delta too large: 0.2995910645
+timeofday:1792145704:259334
+lasttimeofday: 1792145703:959732
+deltatime:0:299602
+delta: 0.2995910645
+frame= 5286 fps= 30 q=29.0 size=     768KiB time=00:02:56.13 bitrate=  35.7kbits/s dup=4425 drop=0 speed=0.989x elapsed=0:02:58.08    delta too large: 0.2994995117
+timeofday:1792145704:558844
+lasttimeofday: 1792145704:259334
+deltatime:0:299510
+delta: 0.2994995117
+frame= 5296 fps= 30 q=29.0 size=     768KiB time=00:02:56.46 bitrate=  35.7kbits/s dup=4434 drop=0 speed=0.988x elapsed=0:02:58.58    delta too large: 0.2545013428
+timeofday:1792145704:813360
+lasttimeofday: 1792145704:558844
+deltatime:0:254516
+delta: 0.2545013428
+[out#0/mp4 @ 0x5adb854ef7c0] video:769KiB audio:0KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 5.942897%
+frame= 5366 fps= 30 q=-1.0 Lsize=     815KiB time=00:02:58.80 bitrate=  37.3kbits/s dup=4447 drop=0 speed=0.999x elapsed=0:02:59.04    
+[libx264 @ 0x5adb854f0340] frame I:22    Avg QP:13.77  size: 10928
+[libx264 @ 0x5adb854f0340] frame P:1352  Avg QP:15.24  size:   313
+[libx264 @ 0x5adb854f0340] frame B:3992  Avg QP:13.68  size:    31
+[libx264 @ 0x5adb854f0340] consecutive B-frames:  0.8%  0.0%  0.1% 99.1%
+[libx264 @ 0x5adb854f0340] mb I  I16..4: 57.7% 29.4% 12.9%
+[libx264 @ 0x5adb854f0340] mb P  I16..4:  0.1%  0.0%  0.0%  P16..4:  1.6%  0.2%  0.3%  0.0%  0.0%    skip:97.8%
+[libx264 @ 0x5adb854f0340] mb B  I16..4:  0.0%  0.0%  0.0%  B16..8:  0.8%  0.0%  0.0%  direct: 0.0%  skip:99.2%  L0:22.8% L1:77.1% BI: 0.1%
+[libx264 @ 0x5adb854f0340] 8x8 transform intra:28.9% inter:12.3%
+[libx264 @ 0x5adb854f0340] coded y,uvDC,uvAC intra: 8.9% 16.9% 11.8% inter: 0.2% 0.2% 0.1%
+[libx264 @ 0x5adb854f0340] i16 v,h,dc,p: 50% 44%  6%  0%
+[libx264 @ 0x5adb854f0340] i8 v,h,dc,ddl,ddr,vr,hd,vl,hu: 16%  5% 78%  0%  0%  0%  0%  0%  0%
+[libx264 @ 0x5adb854f0340] i4 v,h,dc,ddl,ddr,vr,hd,vl,hu: 33% 30% 14%  3%  3%  4%  4%  4%  4%
+[libx264 @ 0x5adb854f0340] i8c dc,h,v,p: 62% 32%  5%  1%
+[libx264 @ 0x5adb854f0340] Weighted P-Frames: Y:0.0% UV:0.0%
+[libx264 @ 0x5adb854f0340] ref P L0: 96.0%  1.4%  2.1%  0.6%
+[libx264 @ 0x5adb854f0340] ref B L0: 68.2% 31.6%  0.2%
+[libx264 @ 0x5adb854f0340] ref B L1: 99.5%  0.5%
+[libx264 @ 0x5adb854f0340] kb/s:35.19

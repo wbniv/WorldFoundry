@@ -1,0 +1,48 @@
+// jolt/physical.hpi — Jolt-specific inline implementations for PhysicalAttributes.
+// Included at the bottom of physical.hpi when PHYSICS_ENGINE_JOLT is defined.
+// Replaces wf/physical.hpi for the Jolt build.
+
+#include <physics/jolt/jolt_backend.hp>
+
+// Update() is called at end of each physics frame by the movement system.
+// Commits the predicted position to the position cache and pushes state back
+// into the Jolt body so the next JoltWorldStep() sees the correct initial pose.
+INLINE void
+PhysicalAttributes::Update()
+{
+    SetOldLinVelocity(LinVelocity());
+    SetPosition(PredictedPosition());
+    // Push committed state back into Jolt so the next frame starts from a
+    // synchronised pose. Authority model:
+    //   * during predictPosition: Jolt is authoritative (WF hands velocity,
+    //     Jolt computes new position, WF reads back via JoltSyncFromCharacter).
+    //   * between frames (here, after SetPosition(PredictedPosition)): WF is
+    //     authoritative. Any WF-side mutation (warps, scripts, cutscenes,
+    //     collision response from non-Jolt paths) gets pushed into Jolt.
+    if (_joltBodyID != kJoltInvalidBodyID)
+    {
+        JoltBodySetPosition(_joltBodyID, _position);
+        // Zero velocity so kinematic body doesn't drift during JoltWorldStep.
+        // WF fully controls kinematic positions; Jolt only maintains the
+        // broadphase collision structure.
+        JoltBodySetLinVelocity(_joltBodyID, Vector3::zero);
+    }
+    else if (_joltCharID != kJoltInvalidBodyID)
+    {
+        JoltCharacterSetPosition(_joltCharID, _position);
+        JoltCharacterSetLinVelocity(_joltCharID, LinVelocity());
+    }
+}
+
+INLINE void
+PhysicalAttributes::JoltSyncFromCharacter(const Vector3& newPos)
+{
+    // Jolt's CharacterVirtual has already resolved collisions; WF's
+    // swept-AABB expansion machinery (SetPredictedPosition → ColSpace::Expand
+    // → Validate) is the wrong tool here. Commit the Jolt-authored position
+    // directly and reset the colspace expansion so any stale state from
+    // previous frames doesn't leak into the WF collision path.
+    SetPosition(newPos);
+    _predictedPosition = newPos;
+    _colSpace.Expand(Vector3::zero);   // reset _coarseExpandedColBox = _coarseColBox
+}

@@ -1,0 +1,131 @@
+# Chromecast coordinator client for World Foundry
+
+The shared service now belongs to the independent private repository
+[wbniv/chromecast-coordinator](https://github.com/wbniv/chromecast-coordinator),
+checked out at `/home/will/chromecast-coordinator`. It owns service code,
+reviewed validators, capture helper, deployment, host policy and shared tests.
+World Foundry owns APK builds, level/variant preparation and thin producer shims.
+
+The existing installation was upgraded in place. Operational paths remain
+`/opt/wf-device-coordinator`, `/etc/wf-device-coordinator`,
+`/var/lib/wf-device-coordinator` and `/run/wf-device-coordinator`. Database,
+client credentials, enrollment, ADB keys, queue, reservations and evidence are
+retained. No second scheduler or device identity is introduced.
+
+## Device sessions
+
+Build/freeze the APK locally, then use the familiar Task commands:
+
+```sh
+task chromecast:devices
+task chromecast:queue
+task chromecast:check DEVICE=chromecast-test-01 APP=aquarium APK=/path/frozen.apk
+task chromecast:submit DEVICE=chromecast-test-02 APP=bomberman WORKFLOW=install APK=/path/frozen.apk ASYNC=true
+task chromecast:watch JOB=J-example
+task chromecast:evidence JOB=J-example OUT=docs/diagnostics/example
+task chromecast:message JOB=J-example TEXT='Please finish when convenient'
+```
+
+DEVICE may select multiple IDs or `all`, or use POOL instead. Multi-device
+submissions create batches; watch/status/evidence/cancel accept BATCH. Closing
+a watcher does not cancel a job. Cancel only your own submitted jobs.
+Use `ASYNC=true` to submit without waiting. Check/profile/record/capture/readd
+retain their existing Task names, variables, evidence locations and literal
+message handling. Pairing codes belong only in secure interactive prompts.
+
+APK defaults remain here: Aquarium/other game flavor release outputs and verified
+Bomberman/Prime Numbers build receipts. Explicit APKs or recipes override them.
+The standalone client requires explicit artifacts and does not infer game paths.
+App installers check advertised protocol/workflow/validator capabilities before
+submitting; they never copy adapters or run sudo to upgrade the shared service.
+Legacy profile and Android routing scripts use the installed client API through
+`scripts/wf_device`, retaining only World Foundry producer helpers there.
+
+## Aquarium screensaver
+
+The separate `android/screensaver` APK runs a live aquarium level Dream and a
+fullscreen launcher activity. It selects one of eight tanks at Dream startup,
+using the tank choice exposed by the selected Dream to the coordinator tray.
+It has no phone-controller prompt, QR code, or phone server. Build and freeze
+its APK locally, then use the
+reviewed coordinator workflow to check natural idle activation on each TV:
+
+As of 2026‑10‑18, the live screensaver APK with SHA-256
+`99fdfce1cde44b45f6037aa4048dfb348b18929847feb4bf567acf9490317a94`
+is installed and its Dream selected on both test Chromecasts. The
+[implementation plan](plans/2026-10-18-aquarium-screensaver-player-and-tray-settings.md)
+records the tank, tray and motion checks. The earlier
+[investigation](investigations/2026-10-17-chromecast-screensaver-from-a-level.md)
+records the video predecessor's deployment.
+
+To test cast1 by eye, press Home on its remote and leave the TV idle. Its
+recorded `screen_off_timeout` is 600,000 ms (10 minutes), Dreams are enabled,
+and the aquarium Dream is selected. The aquarium should appear during that idle
+period. Press a remote key to wake it. Opening **World Foundry Aquarium Screensaver** from
+the Apps row tests its fullscreen launcher, not automatic Dream activation.
+For a repeatable Dream capture through the coordinator, run:
+
+```sh
+task chromecast:queue
+task chromecast:submit DEVICE=chromecast-test-01 APP=screensaver WORKFLOW=dream-check APK=/path/frozen-screensaver.apk ASYNC=true
+task chromecast:watch JOB=J-example
+task chromecast:evidence JOB=J-example OUT=docs/diagnostics/screensaver-cast1-check
+```
+
+Replace `J-example` with the submitted job ID. Review `dream.png` and the
+receipt in the evidence directory. The workflow uses a temporary six minute
+idle timeout and restores the prior settings and foreground when it finishes.
+It does not remove cast1's persistent aquarium Dream selection.
+
+```sh
+task chromecast:submit DEVICE=chromecast-test-01,chromecast-test-02 APP=screensaver WORKFLOW=dream-check APK=/path/frozen-screensaver.apk ASYNC=true
+task chromecast:watch BATCH=B-example
+task chromecast:evidence BATCH=B-example OUT=docs/diagnostics/screensaver-dream
+```
+
+`dream-check` temporarily selects the Dream and restores each device's original
+screensaver settings afterward. After reviewing its screenshot and the device's
+original component, persistent selection uses
+`task chromecast:configure DEVICE=chromecast-test-01 CHANGE=aquarium-screensaver`.
+For a device whose recorded original was Google Backdrop, use
+`CHANGE=google-tv-ambient` to undo that selection. Device 01 also required
+`CHANGE=allow-standby` because its previous powered setting kept the display
+awake; `CHANGE=stay-awake-while-powered` reverses that specific change.
+See [the investigation](investigations/2026-10-17-chromecast-screensaver-from-a-level.md)
+for build isolation, evidence and distribution limits.
+
+## Reservations and recovery
+
+Will's terminal owns personal reservations. Use `task cast1:reserve` /
+`task cast1:release`, or cast2, with optional REASON. Agents must never create or
+release these on his behalf. Interactive workflows wait behind reservations.
+`WORKFLOW=install` alone may install in the background: retain the reservation,
+reject updates to the foreground app, never launch or send input.
+
+Use `task chromecast:readd DEVICE=id` for recovery. Verified discovery hints may
+be supplied with ADDRESS when needed. Device 01 uses native wireless debugging;
+device 02 uses USB debugging with verified TCP/IP ADB. Respect ownership and
+recovery gates. No raw Chromecast ADB, parallel locks, copied harnesses or direct
+phone control outside coordinator ownership; downtime grants no fallback.
+Factory reset, account changes, unrelated deletion and security disabling require
+separate authorization.
+
+## Service administration
+
+Prepare and review releases in the standalone project. Its deployment runner
+saves a transcript and uses the root-owned upgrade helper, draining complete
+sessions, taking SQLite/configuration backups, verifying readiness and retaining
+safe rollback/maintenance state on failure. See the standalone
+[deployment guide](https://github.com/wbniv/chromecast-coordinator/blob/main/docs/deployment.md)
+and [operations guide](https://github.com/wbniv/chromecast-coordinator/blob/main/docs/operations.md).
+
+`task chromecast:install` is a compatibility alias for that project's reviewed
+upgrade runner; pass `--source RELEASE --review REVIEW` via CLI arguments after
+preparing the review. Fresh provisioning is separate and belongs to the new repo.
+Historical Bomberman deployment paths/reviews in older plans are archival.
+
+See [migration plan](plans/2026-10-06-standalone-chromecast-coordinator.md) and
+[extraction evidence](diagnostics/coordinator-extraction-20261006/receipt.json).
+Host bypass verification remains pending; do not claim enforcement until those
+checks pass. The GitHub repository stays private through the full acceptance and
+publication review.

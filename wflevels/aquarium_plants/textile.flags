@@ -1,0 +1,6 @@
+# Five distinct 256-square animal/rock textures share the permanent page (urchin,
+# goby body, fins and rock, seahorse atlas), so it grows to 1024 square: the
+# aquarium app reserves a 1024-square permanent slot (wf_args.txt; plan D5,
+# docs/plans/2026-10-16-saltwater-seahorses.md).
+PERMPAGEX=1024
+PERMPAGEY=1024

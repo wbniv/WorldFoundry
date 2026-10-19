@@ -1,3 +1,15 @@
+#include "../../../engine/runtime_options.hpp"
+#include "../../../engine/runtime_property_host.hpp"
+#include "../../../engine/room_render_settings.hpp"
+#include "../../../engine/runtime_diagnostics.hpp"
+#include "runtime_profile.hp"
+#include "bitmap_presenter.hp"
+#include <algorithm>
+#include <cstdio>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 //==============================================================================
 // level.cc:
 // Copyright ( c ) 1994,1995,1996,1997,1998,1999,2000,2001,2002,2003 World Foundry Group.  
@@ -27,9 +39,15 @@
 #define _LEVEL_CC
 
 #include <anim/path.hp>
+#include "sim_constants.hp"   // kMaxSimDeltaSeconds
 #include <movement/movement.hp>
 #include <room/room.hp>
+#include <gfx/static_mesh.hp>
+#include <gfx/renderer_backend.hp>
 #include <physics/collision.hp>
+#ifdef PHYSICS_ENGINE_JOLT
+#include <physics/jolt/jolt_backend.hp>
+#endif
 #include <room/rooms.hp>
 #include <room/actrooms.hp>
 #include <room/actroit.hp>
@@ -45,25 +63,10 @@
 #include <cpplib/libstrm.hp>
 #include <cpplib/algo.hp>
 #include <math/vector3.hp>
-#if defined PHYSICS_ENGINE_ODE
-#include <physics/ode/ode.hp>
-#endif
-
-#if defined( __PSX__ )
-#	include <sys/types.h>
-#	include <r3000.h>
-#	include <asm.h>
-#	include <kernel.h>
-#	include <libgte.h>
-#	include <libgpu.h>
-#	include <libcd.h>
-#	if defined( SOUND )
-#		include <libsnd.h>
-#	endif
-#endif
-
 #include <oas/levelobj.ht>
+#include "levelobj_fields.hp"
 #include <oas/matte.ht>
+#include <audio/device.hp>
 
 //-----------------------------------------------------------------------------
 
@@ -73,6 +76,8 @@
 #include "levelobj.hp"
 #include "game.hp"
 #include "gamestrm.hp"
+
+#include "debug_server.hp"
 
 //==============================================================================
 // objects.inc contains a list of includes to include all .hp files for game objects
@@ -126,8 +131,8 @@ Level::_print( std::ostream& s ) const
 	{
 		if ( _actors[ i ] )
 		{
-         Actor* actor = dynamic_cast<Actor*>(_actors[i]);
-         assert(ValidPtr(actor));
+         assert(IsActor(_actors[i]));
+         Actor* actor = static_cast<Actor*>(_actors[i]);
 			actor->printDetailed( s );
 			s << std::endl;
 		}
@@ -142,20 +147,6 @@ Level::_print( std::ostream& s ) const
 // class Level
 //==============================================================================
 
-#if 0
-void*
-Level::findOADData( int idxActor ) const
-{
-	assert( idxActor > 0 );
-	assert( idxActor <= _actors.Size() );
-	int32 * objArray = ( int32 * )( (char * )_levelData + ( _levelData->objectsOffset ));
-	_ObjectOnDisk * ood = ( _ObjectOnDisk * )( (( char * )_levelData ) + objArray[ idxActor ] );
-	ValidatePtr( ood );
-	++ood;	// oad data immediately follows the ood data
-	return ood;
-}
-#endif
-
 //==============================================================================
 // Level constructor, this initializes a level
 // we are going to rename this to World soon
@@ -165,19 +156,41 @@ Level::initLevelOad()
 {
 	// Find "LevelObj" object
 	_levelOad = NULL;
+	_levelOadSize = 0;
 	assert( ValidPtr( _levelData ) );
 	assert( _levelData->objectCount);
-	for ( int index = 0; index < _levelData->objectCount; index++ )
+	for ( int index = 0; index < _levelData->objectCount; ++index )
 	{
 		int32 * objArray = ( int32 * )( (char * )_levelData + ( _levelData->objectsOffset ));
 		_ObjectOnDisk * objdata = ( _ObjectOnDisk * )( (( char * )_levelData ) + objArray[index] );
 		if ( objdata->type == Actor::LevelObj_KIND )
 		{
-			AssertMsg( !_levelOad, "Multiple LevelObj objects in level" );
-			_levelOad = ( _LevelObj * )( objdata + 1 );
+			if ( _levelOad )
+				DBSTREAM1( cwarn << "Warning: Multiple LevelObj objects in level, using first" << std::endl; )
+			else
+			{
+				_levelOad = ( _LevelObj * )( objdata + 1 );
+				// Payload length bounds reads of fields appended to the
+				// Level Object later (game/levelobj_fields.hp).
+				_levelOadSize = objdata->OADSize;
+			}
 		}
 	}
-	AssertMsg( _levelOad, "No LevelObject object in level" );
+	if ( !_levelOad )
+		DBSTREAM1( cwarn << "Warning: No LevelObject object in level (using defaults)" << std::endl; )
+	// One-time load report under --frame-profile: which Level Object layout
+	// this level carries and the level-owned renderer setting it selects.
+	if ( wf_profile::enabled() )
+		fprintf( stderr, "level-object: payload-bytes=%d prewarm-no-palette-program=%d\n",
+		         int(_levelOadSize), PrewarmNoPaletteProgram() ? 1 : 0 );
+}
+
+//==============================================================================
+
+bool
+Level::PrewarmNoPaletteProgram() const
+{
+	return LevelObjPrewarmNoPaletteProgram( _levelOad, _levelOadSize );
 }
 
 //==============================================================================
@@ -223,6 +236,14 @@ Level::constructObject( SObjectStartupData& startupData, int index )
 			setMainCharacter( pCreatedActor );
 			updateMainCharacter();
 		}
+		else if ( pCreatedActor->kind() == Actor::CamShot_KIND )
+		{
+			// Bootstrap camera when scripting is disabled: write the first CamShot's
+			// object index to EMAILBOX_CAMSHOT so DelayCameraHandler transitions
+			// instead of asserting after 5 frames.
+			if ( GetMailboxes().ReadMailbox( EMAILBOX_CAMSHOT ) == Scalar(0,0) )
+				GetMailboxes().WriteMailbox( EMAILBOX_CAMSHOT, Scalar( index, 0 ) );
+		}
 		else if ( pCreatedActor->kind() == Actor::Camera_KIND )
 		{
 			// only allow one camera for the level
@@ -245,12 +266,6 @@ Level::constructObject( SObjectStartupData& startupData, int index )
 	else if ( objdata->type == Actor::LevelObj_KIND )
 	{
 		DBSTREAM2( cdebug << " constructing level object" << std::endl; )
-		#if defined( MIDI_MUSIC )
-			if ( _levelOad->MidiMusicVabHeader && * ( _levelOad->MidiMusicVabHeader ))
-				_theSound->addVabHeader( _levelOad->MidiMusicVabHeader, _levelOad->MidiMusicVabBody );
-			if ( _levelOad->SoundEffectsVabHeader && * ( _levelOad->SoundEffectsVabHeader ))
-				_theSound->addSfxHeader( _levelOad->SoundEffectsVabHeader, _levelOad->SoundEffectsVabBody );
-		#endif
 	}
 	else
 	{
@@ -285,7 +300,7 @@ Level::ConstructStartupData( SObjectStartupData& startupData, _ObjectOnDisk* obj
 	startupData.roomNum = ObjectIsInWhichRoom( index, _levelData );
 	startupData.memory = _memory;
     startupData.currentTime = LevelClock();
-    startupData.messagePortMemPool = theGame->MessagePortMemPool();
+    startupData.messagePortMemPool = _game.MessagePortMemPool();
     startupData.mailboxes = &_mailboxes;
 
     //assert(ValidPtr(((char*)_levelData)  + _levelData->channelsOffset ));
@@ -300,10 +315,10 @@ Level::ConstructStartupData( SObjectStartupData& startupData, _ObjectOnDisk* obj
 //==============================================================================
 
 Scalar
-Level::EvalScript( const void* script, int objectIndex )
+Level::EvalScript( const void* script, int objectIndex, int language )
 {
 	ValidatePtr(script);
-   Scalar data = _interpreter->RunScript(script,objectIndex);
+   Scalar data = _interpreter->RunScript(script,objectIndex,language);
 	return data;
 }
 
@@ -337,7 +352,7 @@ WorldFoundryMailboxesManager::~WorldFoundryMailboxesManager()
 Mailboxes& 
 WorldFoundryMailboxesManager::LookupMailboxes(int objectIndex)
 {
-    DBSTREAM1(cmailbox << "wfmbm: index = " << objectIndex << std::endl; )
+    DBSTREAM5(cmailbox << "wfmbm: index = " << objectIndex << std::endl; )
     if(objectIndex)
     {
         BaseObject* obj = _objects[objectIndex];
@@ -348,15 +363,153 @@ WorldFoundryMailboxesManager::LookupMailboxes(int objectIndex)
 }
 
 //==============================================================================
+// E3 phase 0 measurement: one-time static report of what the level draws and how
+// its objects are spread over the Rooms. Printed to stderr once, at the end of
+// loading, and only under --frame-profile; nothing runs per frame. Mesh data
+// exists only for objects whose room is active at that moment (the asset slots
+// of other rooms are not loaded), so the mesh-stats cover the rooms bound at
+// load; room-stats list every room regardless.
+
+namespace {
+
+struct MeshAssetStats
+{
+	int vertices, faces, instances, firstActor;
+};
+
+void
+ReportLevelLoadStats(const LevelRooms& levelRooms)
+{
+	if(!wf_profile::enabled())
+		return;
+
+	const int kBytesPerBakedVertex = 76;		// ModernRendererBackend::Vert, 19 floats
+	std::set<const Actor*> seen;
+	std::map<int32,MeshAssetStats> meshes;		// keyed by mesh asset id
+	long instances = 0, procedural = 0, proceduralFaces = 0, unbound = 0;
+	long totalFaces = 0, totalVertices = 0;
+
+	for(int roomIndex = 0; roomIndex < levelRooms.NumberOfRooms(); ++roomIndex)
+	{
+		BaseObjectIteratorWrapper iter = levelRooms.GetRoom(roomIndex).ListIter(ROOM_OBJECT_LIST_RENDER);
+		while(!iter.Empty())
+		{
+			const Actor* actor = static_cast<const Actor*>(&(*iter));
+			++iter;
+			if(!seen.insert(actor).second)
+				continue;						// an actor can be listed in several rooms
+			const RenderActor* renderActor = actor->PeekRenderActor();
+			if(!renderActor)
+			{
+				++unbound;
+				continue;
+			}
+			const RenderObject3D* object = renderActor->GetRenderObject();
+			if(!object)
+				continue;
+			const int faces = object->GetFaceCount(), vertices = object->GetVertexCount();
+			++instances;
+			totalFaces += faces;
+			totalVertices += vertices;
+			const int modelType = actor->GetMeshBlockPtr()->ModelType;
+			if(modelType == MODEL_TYPE_MESH || modelType == MODEL_TYPE_SCARECROW)
+			{
+				MeshAssetStats& m = meshes[actor->GetMeshName()];
+				if(m.instances == 0)
+				{
+					m.vertices = vertices;
+					m.faces = faces;
+					m.firstActor = actor->GetActorIndex();
+				}
+				++m.instances;
+			}
+			else
+			{
+				++procedural;						// box: its vertices are built per instance
+				proceduralFaces += faces;
+			}
+		}
+	}
+
+	long uniqueFaces = 0, uniqueVertices = 0;
+	std::vector<std::pair<int32,MeshAssetStats> > bySize(meshes.begin(), meshes.end());
+	for(size_t i = 0; i < bySize.size(); ++i)
+	{
+		uniqueFaces += bySize[i].second.faces;
+		uniqueVertices += bySize[i].second.vertices;
+	}
+	std::stable_sort(bySize.begin(), bySize.end(),
+		[](const std::pair<int32,MeshAssetStats>& a, const std::pair<int32,MeshAssetStats>& b) { return a.second.faces > b.second.faces; });
+
+	fprintf(stderr,"mesh-stats: render-objects=%ld asset-mesh-objects=%ld procedural-objects=%ld unbound-render-actors=%ld rooms=%d\n",
+		instances, instances - procedural, procedural, unbound, levelRooms.NumberOfRooms());
+	fprintf(stderr,"mesh-stats: unique-meshes=%zu (by mesh asset id; every object loads its own copy of the data)\n", meshes.size());
+	fprintf(stderr,"mesh-stats: total-faces=%ld total-vertices=%ld (all render objects, procedural included: %ld faces)\n",
+		totalFaces, totalVertices, proceduralFaces);
+	fprintf(stderr,"mesh-stats: unique-faces=%ld unique-vertices=%ld (asset meshes counted once)\n", uniqueFaces, uniqueVertices);
+	fprintf(stderr,"mesh-stats: baked-bytes-all-objects=%ld baked-bytes-unique-meshes=%ld (faces x 3 unshared vertices x %d B)\n",
+		totalFaces * 3 * kBytesPerBakedVertex, uniqueFaces * 3 * kBytesPerBakedVertex, kBytesPerBakedVertex);
+	for(size_t i = 0; i < bySize.size() && i < 10; ++i)
+		fprintf(stderr,"mesh-stats: top%zu mesh-id=0x%08x faces=%d vertices=%d instances=%d first-object=%d\n",
+			i + 1, unsigned(bySize[i].first), bySize[i].second.faces, bySize[i].second.vertices,
+			bySize[i].second.instances, bySize[i].second.firstActor);
+
+	// objects per room: one line per Room. total = distinct objects in any list;
+	// bound-meshes / bound-faces = the render objects loaded for it right now.
+	for(int roomIndex = 0; roomIndex < levelRooms.NumberOfRooms(); ++roomIndex)
+	{
+		const Room& room = levelRooms.GetRoom(roomIndex);
+		static const char* const listNames[] = {"collide","render","update","light","activation"};
+		static const int listIds[] = {ROOM_OBJECT_LIST_COLLIDE, ROOM_OBJECT_LIST_RENDER, ROOM_OBJECT_LIST_UPDATE, ROOM_OBJECT_LIST_LIGHT, ROOM_OBJECT_LIST_ACTIVATION_BOX};
+		std::set<const BaseObject*> distinct;
+		int counts[5] = {0,0,0,0,0};
+		int boundMeshes = 0;
+		long boundFaces = 0;
+		for(int list = 0; list < 5; ++list)
+		{
+			BaseObjectIteratorWrapper iter = room.ListIter(listIds[list]);
+			while(!iter.Empty())
+			{
+				++counts[list];
+				distinct.insert(&(*iter));
+				if(listIds[list] == ROOM_OBJECT_LIST_RENDER)
+				{
+					const RenderActor* renderActor = static_cast<const Actor*>(&(*iter))->PeekRenderActor();
+					const RenderObject3D* object = renderActor ? renderActor->GetRenderObject() : NULL;
+					if(object)
+					{
+						++boundMeshes;
+						boundFaces += object->GetFaceCount();
+					}
+				}
+				++iter;
+			}
+		}
+		std::string adjacent;
+		for(int a = 1; a < MAX_ACTIVE_ROOMS; ++a)		// [0] is the room itself
+			if(const Room* adj = room.GetAdjacentRoom(a))
+				adjacent += (adjacent.empty() ? "" : ",") + std::to_string(adj->GetRoomIndex());
+		fprintf(stderr,"room-stats: room=%d total=%zu", room.GetRoomIndex(), distinct.size());
+		for(int list = 0; list < 5; ++list)
+			fprintf(stderr," %s=%d", listNames[list], counts[list]);
+		fprintf(stderr," bound-meshes=%d bound-faces=%ld adjacent=%s\n", boundMeshes, boundFaces, adjacent.empty() ? "-" : adjacent.c_str());
+	}
+}
+
+}	// namespace
+
+//==============================================================================
 
 Level::Level
 (
-	_DiskFile* diskFile
+	WFGame& game
+	,_DiskFile* diskFile
 	,ViewPort& viewPort
     ,VideoMemory& videoMemory
     ,Mailboxes* parentMailboxes
 )
   :
+	_game( game ),
 	_viewPort( viewPort ),
 	_theLevelRooms( NULL ),
 	_theActiveRooms( NULL ),
@@ -381,6 +534,13 @@ Level::Level
     _mailboxesManager(this->_actors,_mailboxes)
 {
 	DBSTREAM1( cflow << "Level::Level:" << std::endl; )
+
+#if SW_DBSTREAM
+	// Update Actor::Print's cached level number for its levels.txt lookup.
+	// Replaces the prior theGame->GetLevelNum() lookup (theGame removed in
+	// Phase 0b WFGame de-globaling, 2026-05-18).
+	Actor::SetPrintLevelNum( _game.GetLevelNum() );
+#endif
 
 #if 0                   // kts used to check levelcon.h sizes
     std::cout << "sizeof(_CollisionRectOnDisk) = " << sizeof(_CollisionRectOnDisk) << std::endl;
@@ -420,9 +580,6 @@ Level::Level
 
 	assert( ValidPtr( diskFile ) );
 	theLevel = this;
-#if defined PHYSICS_ENGINE_ODE
-   odeWorld.SetSpace(ode::dHashSpaceCreate(0));
-#endif
 
 #if defined(JOYSTICK_RECORDER)
 	_joystickOutputFile = new (HALLmalloc) std::ofstream("joystick.out");
@@ -436,7 +593,47 @@ Level::Level
 	assert( ValidPtr( _levelFile ) );
 	// kts assumes diskFile is seeked to begining of the level iff chunk on disk
 	// so this seek is done in game
+    const int32 propertyRamStart = _levelFile->FilePos();
 	_levelFile->ReadBytes( memoryConfigurationBytes, DiskFileCD::_SECTOR_SIZE );
+    // Optional catalog locator in RAM padding; fixed actor/LVL layouts stay intact.
+    const uint32 ramSize = plmc->cbRamChunk;
+    // FLAG-only levels have 36 RAM bytes plus the 12-byte locator; SLOT is optional.
+    if(ramSize>=48 && ramSize+8<=DiskFileCD::_SECTOR_SIZE) {
+        uint32 locator[3];std::memcpy(locator,memoryConfigurationBytes+ramSize-4,sizeof(locator));
+        if(locator[0]==IFFTAG('R','P','R','P') && locator[1]>=2048 && locator[1]%2048==0 && locator[1]<=uint32(INT32_MAX-propertyRamStart)-locator[2] && locator[2]>=8 && locator[2]<=4*1024*1024 && locator[2]%2048==0) {
+            const int32 resume=_levelFile->FilePos();
+            std::vector<uint8_t> catalog(locator[2]);
+            _levelFile->SeekRandom(propertyRamStart+locator[1]);
+            _levelFile->ReadBytes(catalog.data(),locator[2]);
+            _levelFile->SeekRandom(resume);
+            uint32 payload=0;std::memcpy(&payload,catalog.data()+4,4);
+            std::string error;
+            if(std::memcmp(catalog.data(),"RPRP",4)||payload>catalog.size()-8||!_runtimeProperties.load(catalog.data()+8,payload,error))
+                std::fprintf(stderr,"PROPERTIES load failed: %s\n",error.c_str());
+        }
+    }
+    wfprops::activeRegistry()=&_runtimeProperties;
+    std::string renderSettingError;
+    _renderCurrentRoomOnly = wfprops::currentRoomOnly(_runtimeProperties, renderSettingError);
+    if (!renderSettingError.empty())
+        std::fprintf(stderr, "ROOM-RENDER setting invalid: %s; using all-active\n", renderSettingError.c_str());
+    std::fprintf(stderr, "ROOM-RENDER scope=%s source=%s\n",
+                 _renderCurrentRoomOnly ? "current-only" : "all-active",
+                 _runtimeProperties.schema("LevelRenderSettings") ? "RPRP" : "default");
+    wfprops::host().bind(&_runtimeProperties);
+    // Pick in 3D: where the chooser's objects are, read only while it is open.
+    wfprops::host().world.camera=[](wfpick::Camera& camera){return RendererBackendGet().CameraMatrices(camera.view,camera.proj);};
+    wfprops::host().world.locate=[this](uint32_t actor,wfpick::Candidate& candidate){
+        if(actor==0||int(actor)>=GetMaxObjectIndex())return false;
+        BaseObject* object=GetObject(int(actor));if(!object||!IsActor(object))return false;
+        const Actor* a=static_cast<const Actor*>(object);const PhysicalAttributes& physical=a->GetPhysicalAttributes();
+        const Vector3& p=physical.Position();candidate.position={p.X().AsFloat(),p.Y().AsFloat(),p.Z().AsFloat()};
+        // Meshless objects (settings holders) show a gear at their position.
+        candidate.bounded=a->GetMeshName()!=0;
+        if(candidate.bounded){const Vector3 lo=physical.Min(),hi=physical.Max();
+            candidate.lo={lo.X().AsFloat(),lo.Y().AsFloat(),lo.Z().AsFloat()};candidate.hi={hi.X().AsFloat(),hi.Y().AsFloat(),hi.Z().AsFloat()};}
+        return true;};
+    wfoptions::registerBaseline(_runtimeProperties);
 	assert( plmc->tagRam == IFFTAG('R','A','M','\0') );
 	assert( plmc->tagObjects == IFFTAG('O','B','J','D') );
 	assert( plmc->tagPerm == IFFTAG('P','E','R','M') );
@@ -446,24 +643,39 @@ Level::Level
 	gDoomStick = plmc->doomStickFlag;
 	gBungeeCam = plmc->bungeeCamFlag;
 
+	// Optional 'SLOT' RAM field: how many active room-asset slots to allocate.
+	// Absent → DEFAULT_ACTIVE_ROOM_SLOTS (3, "normal streaming"). Levels needing
+	// more declare it (moon 'SLOT' 9 for its chunk ring; filesys 'SLOT' 1).
+	int numActiveRoomSlots = (plmc->tagSlots == IFFTAG('S','L','O','T'))
+	                         ? (int)plmc->numActiveRoomSlots : DEFAULT_ACTIVE_ROOM_SLOTS;
+	if (numActiveRoomSlots < 1)                  numActiveRoomSlots = 1;
+	if (numActiveRoomSlots > MAX_ACTIVE_ROOMS)   numActiveRoomSlots = MAX_ACTIVE_ROOMS;
+
 //	_memory = new (HALLmalloc) DMalloc(HALLmalloc,340000,MEMORY_NAMED("Level DMalloc"));
 	Memory* newMemory = new (HALLmalloc) DMalloc(HALLmalloc,plmc->cbObjectsDRam,MEMORY_NAMED("Level DMalloc"));
 	assert( ValidPtr( newMemory ) );
 	_memory.Set(newMemory,&HALLmalloc);
+    // Optional pre-rendered glyph catalog in RAM padding. The locator is not
+    // part of actor/LVL structures and leaves the RPRP tail locator intact.
+    for(unsigned off=44;off+12<=ramSize+8&&off+12<=2048;off+=4){
+        uint32 locator[3];std::memcpy(locator,memoryConfigurationBytes+off,12);
+        if(locator[0]!=IFFTAG('D','L','O','G'))continue;
+        if(_bitmapPresenter||locator[1]<2048||locator[1]%2048||locator[2]<8||locator[2]>16*1024*1024||locator[2]%2048||locator[1]>uint32(INT32_MAX-propertyRamStart)-locator[2]){
+            std::fprintf(stderr,"BITMAP_TEXT invalid DLOG locator\n");std::abort();
+        }
+        _bitmapBundle=_memory->Allocate(locator[2] ASSERTIONS(COMMA __FILE__ COMMA __LINE__));
+        const int32 resume=_levelFile->FilePos();_levelFile->SeekRandom(propertyRamStart+locator[1]);
+        _levelFile->ReadBytes(_bitmapBundle,locator[2]);_levelFile->SeekRandom(resume);
+        uint32 payload=0;std::memcpy(&payload,(char*)_bitmapBundle+4,4);
+        if(std::memcmp(_bitmapBundle,"DLOG",4)||payload>locator[2]-8){std::fprintf(stderr,"BITMAP_TEXT invalid DLOG payload\n");std::abort();}
+        _bitmapPresenter=new (*_memory) bitmaptext::Presenter;
+        const char* error=NULL;
+        if(!_bitmapPresenter->Load((char*)_bitmapBundle+8,payload,error)){std::fprintf(stderr,"BITMAP_TEXT load failed: %s\n",error);std::abort();}
+    }
+
 
 	int index;
 
-#if 0	//msvc
-#if defined( TASKER )
-	// set up the game's message port
-	_port = MessagePortNewTask( "GAME" );
-	VALIDATEITEM( _port );
-#endif	// TASKER
-#endif
-
-	DBSTREAM1( cflow << "Level::Level: setting up sound device " << std::endl; )
-	_theSoundDevice = new (HALLmalloc) SoundDevice;
-	assert( _theSoundDevice );
 
 	// loading screen
 
@@ -496,7 +708,7 @@ Level::Level
    _assetCallbackRoom = new AssetCallbackRoom(GetLevelRooms());
    assert(ValidPtr(_assetCallbackRoom));
 
-	_theAssetManager = new (HALLmalloc) AssetManager( plmc->cbPerm, plmc->cbRoom,  videoMemory, *_levelFile, *_memory, *_assetCallbackRoom );
+	_theAssetManager = new (HALLmalloc) AssetManager( plmc->cbPerm, plmc->cbRoom, numActiveRoomSlots, videoMemory, *_levelFile, *_memory, *_assetCallbackRoom );
 	ValidatePtr(_theAssetManager);
 	LoadLevelData( );
 	assert( ValidPtr( _levelData ) );
@@ -525,10 +737,11 @@ Level::Level
 	DBSTREAM1( cprogress << "Reading objects" << std::endl; )
 	int32* objArray = ( int32* )( (char* )_levelData + ( _levelData->objectsOffset ));
 
-	DBSTREAM3( cnull << "Number of temp objects = " << _levelOad->NumberOfTemporaryObjects << std::endl; )
-   _actors.SetMax(_levelData->objectCount + _levelOad->NumberOfTemporaryObjects);
+	int32 numTempObjects = _levelOad ? _levelOad->NumberOfTemporaryObjects : 0;
+	DBSTREAM3( cnull << "Number of temp objects = " << numTempObjects << std::endl; )
+   _actors.SetMax(_levelData->objectCount + numTempObjects);
 	// kts clear array
-	for( int actIndex=0; actIndex<_levelData->objectCount + _levelOad->NumberOfTemporaryObjects; ++actIndex )
+	for( int actIndex=0; actIndex<_levelData->objectCount + numTempObjects; ++actIndex )
 		_actors[actIndex] = NULL;
 
 	_templateObjects = new (HALLmalloc)( SObjectStartupData * [_levelData->objectCount] );            // array of template object pointers, in levelcon order
@@ -588,9 +801,8 @@ Level::Level
 		DBSTREAM2( cdebug << "Level::Level: Done" << std::endl; )
 	}
 
-	// make sure that we have a camera
-	// fail if no Camera object in level data
-	AssertMsg( ValidPtr( _camera ), "No camera in level" );
+	if ( !_camera )
+		DBSTREAM1( cwarn << "Warning: No camera in level" << std::endl; )
 
 	_theLevelRooms->InitRooms(_levelData->roomCount,_levelData,checkList, _actors, _roomCallbacks,GetMemory(),GetLevelOAD());
 	_theActiveRooms = new (HALLmalloc) ActiveRooms(HALLmalloc,*_theAssetManager,*_theLevelRooms);
@@ -598,53 +810,34 @@ Level::Level
 	_theActiveRooms->Construct(_levelData->roomCount);
 //	DBSTREAM1( cstats << "midi header = " << _levelOad->MidiMusicVabHeader << std::endl; )
 
-	{ // load sound effects
-	assert( ValidPtr( _theSoundDevice ) );
-	assert( ValidPtr( _levelOad ) );
-	(void)_levelOad->sfx127;		// causes compiler error if number of entries shrinks
+	DBSTREAM1( cprogress << "Done loading level data" << std::endl; )
+	if ( !mainCharacter() )
+		DBSTREAM1( cwarn << "Warning: No player (main character) in level" << std::endl; )
 
-	int32* pSoundEffectsBank = &( _levelOad->sfx0 );
-	for ( int idxSoundEffect=0; idxSoundEffect<128; ++idxSoundEffect )
-	{
-		assert( ValidPtr( pSoundEffectsBank ) );
-		if ( pSoundEffectsBank[ idxSoundEffect ] )
-		{
-			binistream binis = GetAssetManager().GetAssetStream( pSoundEffectsBank[ idxSoundEffect ]);
-			assert( binis.good() );
-			_sfx[ idxSoundEffect ] = _theSoundDevice->CreateSoundBuffer( binis );
-			assert( ValidPtr( _sfx[ idxSoundEffect ] ) );
-		}
-		else
-			_sfx[ idxSoundEffect ] = NULL;
-	}
-	}
+	DBSTREAM1( cprogress << "Doing reset" << std::endl; )
+	reset();
 
-   // now call reset on all actors in all rooms
-   for(int roomIndex=0;roomIndex<_theLevelRooms->NumberOfRooms();roomIndex++)     // kts: there should be a Room iterator
+   // call reset on all actors after Level::reset() so that temp objects (tools, shadows)
+   // are created AFTER reset() clears the temp-object slots and sets up the active rooms
+   for(int roomIndex=0;roomIndex<_theLevelRooms->NumberOfRooms();++roomIndex)     // kts: there should be a Room iterator
    {
       const Room& room = _theLevelRooms->GetRoom( roomIndex );
       BaseObjectIteratorWrapper iter = room.ListIter(ROOM_OBJECT_LIST_UPDATE);
-   
+
       while(!iter.Empty())
       {
-         Actor* actor = dynamic_cast<Actor*>(&(*iter));
-         assert(ValidPtr(actor));   
+         assert(IsActor(&(*iter)));
+         Actor* actor = static_cast<Actor*>(&(*iter));
          actor->reset();
          ++iter;
       }
    }
 
-	DBSTREAM1( cprogress << "Done loading level data" << std::endl; )
-	assert( ValidPtr( mainCharacter() ) );
-
-	DBSTREAM1( cprogress << "Doing reset" << std::endl; )
-	reset();
-
 	DBSTREAM1( cprogress << "common block stuff" << std::endl; )
 	DBSTREAM1( cflow << "Level::level: common block stuff" << std::endl; )
+	if ( _levelOad )
 	{
 		_LevelObj* pActorData = _levelOad;
-		assert( ValidPtr( pActorData ) );
 
 		int commonDataOffset = pActorData->commonPageOffset;
 		assert( (commonDataOffset & 3) == 0 );
@@ -654,7 +847,11 @@ Level::Level
 		if ( commonPage->Script != -1 )
 		{	// Run the script for the level object [if any] after all objects are constructed and only once
 			const void* pScript = _commonBlock->GetBlockPtr(commonPage->Script);
-         EvalScript(pScript,0);
+         // commonPage->Script is the per-level startup script (not the
+         // game-wide SHEL shell). Keep language=0 (Lua) — works on desktop;
+         // on Android the ScriptRouter silently no-ops missing engines so
+         // the level boots without it.
+         EvalScript(pScript,0,0);
 		}
 	}
 
@@ -663,6 +860,12 @@ Level::Level
 
 	DBSTREAM1( cprogress << "Done Loading Level" << std::endl; )
 	DBSTREAM1( casset << *_theAssetManager << std::endl; )
+#ifdef PHYSICS_ENGINE_JOLT
+	// All StatPlat static bodies are now registered. Build the broadphase tree
+	// so CharacterVirtual queries can find them.
+	JoltOptimizeBroadPhase();
+#endif
+	ReportLevelLoadStats(*_theLevelRooms);
 }
 
 //==============================================================================
@@ -670,28 +873,61 @@ Level::Level
 
 Level::~Level()
 {
+    if(_bitmapPresenter){_bitmapPresenter->~Presenter();_memory->Free(_bitmapPresenter);_bitmapPresenter=NULL;}
+    if(_bitmapBundle){_memory->Free(_bitmapBundle);_bitmapBundle=NULL;}
+
+    if(wfprops::host().registry()==&_runtimeProperties){wfprops::host().bind(nullptr);wfprops::host().world={};}
+    if(wfprops::activeRegistry()==&_runtimeProperties)wfprops::activeRegistry()=nullptr;
+	// HALLmalloc is a stack/bump allocator — Free must happen in strict
+	// reverse-allocation order or lmalloc.cc:308 asserts. The construction
+	// order in Level::Level (and its callees) is, on HALLmalloc:
+	//
+	//   1. _hardwareInput1, _hardwareInput2                  (level.cc:451–459)
+	//   2. _theLevelRooms (outer LevelRooms object)          (level.cc:465)
+	//   3. _theAssetManager                                  (level.cc:474)
+	//   4. _levelOnDiskMemory                                (LoadLevelData,
+	//                                                         level.cc:1334,
+	//                                                         called from :476)
+	//   5. _commonBlock                                      (level.cc:484)
+	//   6. _templateObjects array                            (level.cc:510)
+	//   7. per-template-object SObjectStartupData + objectData
+	//      (loop, level.cc:533, 540; for each templated actor)
+	//   8. _roomSlotMap, _rooms                              (InitRooms,
+	//                                                         rooms.cc:69, 77,
+	//                                                         called from :570)
+	//   9. _theActiveRooms                                   (level.cc:571)
+	//
+	// So Free order must be 9 → 1 (with the per-actor loop iterating in
+	// reverse). Also note: ~LevelRooms() frees both rooms.cc:69 and :77
+	// (#8 above), so we must call ~LevelRooms's body BEFORE freeing #6 and
+	// #7, but defer the outer Free of _theLevelRooms itself (the #2 alloc)
+	// until just before #1 — that means splitting MEMORY_DELETE into the
+	// destructor call and the matching Free.
 #if defined( DESIGNER_CHEATS ) && defined( WRITER )
 	saveTextureBuffer( "textures.tga" );
-#endif
-
-	for ( int idxSoundEffect=0; idxSoundEffect<128; ++idxSoundEffect )
-		delete _sfx[ idxSoundEffect ];
-
-#if defined( MIDI_MUSIC )
-	DELETE_CLASS( _theSound );
 #endif
 
 #if defined(JOYSTICK_RECORDER)
 	MEMORY_DELETE(HALLmalloc, _joystickOutputFile, std::ofstream );
 #endif
+
+	// #9 — _theActiveRooms (last HAL allocation, first Free).
 	ValidatePtr(_theActiveRooms);
 	MEMORY_DELETE(HALLmalloc,_theActiveRooms,ActiveRooms);
 
+	// #8 — ~LevelRooms()'s body frees _rooms then _roomSlotMap. Call it
+	// manually so the outer LevelRooms object (#2) can stay live until
+	// after #6, #7 and #5 are freed.
 	ValidatePtr(_theLevelRooms);
-	MEMORY_DELETE(HALLmalloc,_theLevelRooms,LevelRooms);
+	_theLevelRooms->~LevelRooms();
 
+	// #7 — per-template-object data, iterated in REVERSE alloc order. The
+	// alloc loop ran index = 1 … _levelData->objectCount-1 and allocated
+	// SObjectStartupData (#7a) before objectData (#7b) within each index,
+	// so within an index Free objectData first (most recent) then
+	// SObjectStartupData.
 	DBSTREAM1( cprogress << "~Level:: deleting template objects" << std::endl; )
-	for ( int idxActor = 0; idxActor < _numTemplateObjects; ++idxActor )
+	for ( int idxActor = _numTemplateObjects - 1; idxActor >= 0; --idxActor )
 	{
 		if ( _templateObjects[idxActor] != 0 )
 		{
@@ -699,11 +935,18 @@ Level::~Level()
 			HALLmalloc.Free(_templateObjects[idxActor]);
 		}
 	}
+
+	// #6 — _templateObjects array itself.
 	assert( ValidPtr( _templateObjects ) );
 	HALLmalloc.Free(_templateObjects, sizeof(SObjectStartupData*) * _levelData->objectCount);
 
+	// Actors are allocated from the per-level _memory pool (DMalloc child),
+	// not HALLmalloc, so their teardown is HAL-neutral. Doing it here
+	// (after #6, before #5) preserves the historical order — actor dtors
+	// expect the active/level rooms internals to have been torn down first
+	// and the per-template HAL data to be gone. It does NOT touch HALLmalloc.
 	DBSTREAM1( cprogress << "~Level:: deleting actors" << std::endl; )
-	for ( int actorIndex = 0; actorIndex < _actors.Size(); actorIndex++ )
+	for ( int actorIndex = 0; actorIndex < _actors.Size(); ++actorIndex )
 	{
 		if ( _actors[actorIndex] != NULL )
 		{
@@ -711,6 +954,20 @@ Level::~Level()
 			MEMORY_DELETE((*_memory),_actors[actorIndex],Actor);
 		}
 	}
+
+	// Shut down the scripting VMs while their mailboxes and script data are
+	// still alive, before releasing the per-level allocator that owns them.
+	MEMORY_DELETE((*_memory), _interpreter, ScriptInterpreter);
+
+	// #5 — _actors._items was allocated from HALLmalloc at level.cc:505,
+	// BETWEEN _commonBlock (alloc'd before) and _templateObjects array
+	// (alloc'd after). Free it here so HALLmalloc stays LIFO-disciplined.
+	// The dangling _actors[i] pointers were just MEMORY_DELETEd above, but
+	// Clear() only calls Free on the _items array storage (BaseObject* has
+	// no destructor), so the dangling pointers are not dereferenced.
+	// The implicit ~Array() at end of ~Level becomes a no-op (Clear() nulls
+	// _items).
+	_actors.Clear();
 
 	DBSTREAM1( cprogress << "~Level:: deleting mailboxes" << std::endl; )
 	//assert( ValidPtr( _scratchMailboxes ) );
@@ -720,14 +977,41 @@ Level::~Level()
    // HALLmalloc.Free(((char*)(_scratchMailboxes)+sizeof(Scalar)*(_numScratchMailboxes+EMAILBOX_SCRATCH_SYSTEM_MAX-EMAILBOX_SCRATCH_SYSTEM_START)));
 	//HALLmalloc.Free(_scratchMailboxes,sizeof(Scalar)*(_numScratchMailboxes+EMAILBOX_SCRATCH_SYSTEM_MAX-EMAILBOX_SCRATCH_SYSTEM_START));
 
+	// #5 — _commonBlock.
+	MEMORY_DELETE(HALLmalloc,_commonBlock,CommonBlock);
+
+	// #4 — _levelOnDiskMemory (allocated inside LoadLevelData, BEFORE
+	// _commonBlock — see line 1334 invoked from line 476).
 	DBSTREAM1( cprogress << "~Level:: deleting leveldata" << std::endl; )
 	HALLmalloc.Free(_levelOnDiskMemory);
 
-	MEMORY_DELETE(HALLmalloc,_commonBlock,CommonBlock);
+	// #3 — _theAssetManager.
 	MEMORY_DELETE(HALLmalloc,_theAssetManager,AssetManager);
 
+	// #2 — _theLevelRooms outer object. Dtor body already ran above; just
+	// Free the storage now that everything allocated after it has been
+	// freed.
+	HALLmalloc.Free(_theLevelRooms);
+
+	// #1 — _hardwareInput2 then _hardwareInput1 (alloc'd in that order at
+	// level.cc:455/459, so reverse-Free).
 	MEMORY_DELETE(HALLmalloc,_hardwareInput2,QInputDigital);
 	MEMORY_DELETE(HALLmalloc,_hardwareInput1,QInputDigital);
+
+	// Member-init-time HAL allocs (these happen BEFORE the body):
+	//   K+3: _scratchMailboxes._localMailboxes._items   (Level member init)
+	//   K+4: _mailboxes._localMailboxes._items          (Level member init)
+	//   K+5/6: _memory's DMalloc outer + inner          (body, line 436)
+	// must be Freed in reverse: _memory's DMalloc first (most recent), then
+	// _mailboxes, then _scratchMailboxes. Implicit member-dtor order is wrong
+	// (reverse declaration: _mailboxes first, then _scratchMailboxes, then
+	// _memory) — that frees _items before DMalloc, violating LIFO. So
+	// explicitly tear down _memory here while the body still has control.
+	// ~PointerContainer<Memory> is NULL-guarded so the implicit dtor that
+	// fires after this body returns is a no-op. Then _mailboxes' implicit
+	// ~Array frees its _items (LIFO-correct now), then _scratchMailboxes'
+	// implicit ~Array frees its _items.
+	_memory.Delete();
 #if defined(JOYSTICK_RECORDER)
 	if (bJoyPlayback)
 		MEMORY_DELETE(HALLmalloc,_joystickPlaybackInput,InputScript);
@@ -748,8 +1032,8 @@ class ActorStartFrame
 public:
 	inline void operator() (BaseObject& bo)
 	{
-      Actor* actor = dynamic_cast<Actor*>(&bo);
-		assert(ValidPtr(actor));
+      assert(IsActor(&bo));
+      Actor* actor = static_cast<Actor*>(&bo);
 		actor->StartFrame();
 	}
 };
@@ -761,6 +1045,9 @@ public:
 void
 Level::update(Scalar deltaTime)
 {
+    wf_profile::begin_frame();
+    wf_profile::count(0,_levelData->objectCount-1);
+    wf_profile::Scope updateProfile(wf_profile::Update);
 	Validate();
 	DBSTREAM2( cflow <<"Level::update:" << std::endl; )
 
@@ -768,8 +1055,8 @@ Level::update(Scalar deltaTime)
 	// Fake clock updates, make game think the frame rate is a fixed value
 
 //	deltaTime = _MAX( deltaTime, SCALAR_CONSTANT(0.1) );
-	if ( deltaTime > SCALAR_CONSTANT(0.1) )  // never drop logical frame rate below 10 hz
-		deltaTime = SCALAR_CONSTANT(0.1);
+	if ( deltaTime > kMaxSimDeltaSeconds )  // never drop logical frame rate below 10 hz
+		deltaTime = kMaxSimDeltaSeconds;
 
 #pragma message( __FILE__ ": replace with bool( FakeFrameRate ):: need bool() operator in Scalar" )
 	Scalar newtime = levelClock() + ( FakeFrameRate.AsBool() ? FakeFrameRate : deltaTime );
@@ -778,7 +1065,7 @@ Level::update(Scalar deltaTime)
 	static int counter=0;
 	if(!(counter % 100))
 		std::cout << "delta time = " << (Scalar::one / deltaTime).WholePart() << std::endl;
-	counter++;
+	++counter;
 #endif
 
 #if defined(JOYSTICK_RECORDER)
@@ -841,6 +1128,7 @@ Level::update(Scalar deltaTime)
 		_hardwareInput3->update();
 	if(_hardwareInput4)
 		_hardwareInput4->update();
+	wfdiag::Route("game", "hardware-sampled-at-level-update");
 
 #if defined(JOYSTICK_RECORDER)
 	DBSTREAM2( cflow << "dumping joystick recorder data" << std::endl; )
@@ -884,11 +1172,6 @@ Level::update(Scalar deltaTime)
 
 #endif
 
-#if defined( __PSX__)
-	extern void ViewVideoMemory();
- 	if ( _hardwareInput1->justPressed( EJ_BUTTONF_E | EJ_BUTTONF_F | EJ_BUTTONF_G | EJ_BUTTONF_H) == ( EJ_BUTTONF_E | EJ_BUTTONF_F | EJ_BUTTONF_G | EJ_BUTTONF_H) )
-		ViewVideoMemory();
-#endif
 
 #if DO_DEBUGGING_INFO
 	// If WALL_CLOCK_BREAKPOINT_VALUE is set using the debugger, break here
@@ -904,20 +1187,27 @@ Level::update(Scalar deltaTime)
 	// make sure any pending room request gets fulfilled
 	assert( ValidPtr( _theActiveRooms ) );
 	_theActiveRooms->WaitRoomLoad( false );
+	finishPositionWrites();
+	finishWatchTeleport();
 
 	DBSTREAM2( cflow << "Level::update: updating current room selection" << std::endl; )
-	assert(ValidPtr(_camera));
-	assert(ValidPtr(_camera->GetWatchObject()));
-	_theActiveRooms->UpdateRoom(_camera->GetWatchObject());
+	if ( _camera && _camera->GetWatchObject() )
+		_theActiveRooms->UpdateRoom(_camera->GetWatchObject());
 
 	DBSTREAM1( ccollision << std::endl << "*** FRAME BOUNDARY ***	Wall clock = " << levelClock() << std::dec << std::endl << std::endl; )
 
 	DBSTREAM2( cflow << "Level::StartFrame:" << std::endl; )
 	Validate();
+	{ wf_profile::Scope actorsProfile(wf_profile::Actors);
 	for_each(GetActiveRooms().GetObjectIter(ROOM_OBJECT_LIST_UPDATE),ActorStartFrame());
 	DBSTREAM2( cflow << "Level::StartFrame: done" << std::endl; )
 
 	Validate();
+#ifdef PHYSICS_ENGINE_JOLT
+	// Advance the Jolt simulation before WF movement prediction so that Jolt
+	// gravity and collision response are folded into the starting pose each frame.
+	JoltWorldStep(LevelClock().Delta().AsFloat());
+#endif
     PredictPosition(GetActiveRooms().GetObjectIter(ROOM_OBJECT_LIST_UPDATE), LevelClock());
 	DBSTREAM2( cflow << "Level::update: detecting collisions" << std::endl; )
 	Validate();
@@ -926,18 +1216,24 @@ Level::update(Scalar deltaTime)
 	Validate();
 	DBSTREAM3 (cflow << "Level::UpdateActors:" << std::endl; )
     UpdatePhysics(GetActiveRooms().GetObjectIter(ROOM_OBJECT_LIST_UPDATE), LevelClock());
+    }
 
 	DBSTREAM2( cflow << "Level::update: room contents" << std::endl; )
 	Validate();
+	finishPositionWrites();
+	finishWatchTeleport();
 	updateRoomContents();
 	// FIX - manually update director until we get priorities working in updates
 	// right now it is not a renderAndUpdate object
 	if ( _director )
 	{
 		DBSTREAM2( cflow << "Level::update: update director" << std::endl; )
+		wf_profile::Scope directorProfile(wf_profile::Director);
 		_director->predictPosition(LevelClock());
 		_director->update();
 	}
+	finishPositionWrites();
+	finishWatchTeleport();
 
 	DBSTREAM2( cflow << "Level::update: remove pending objects" << std::endl; )
 	// execute pending deletetions
@@ -955,10 +1251,17 @@ Level::update(Scalar deltaTime)
 void
 Level::updateSound()
 {
-#if defined( MIDI_MUSIC )
-	_theSound->updateSound();
-	SetMailbox( EMAILBOX_MIDI, 0 );
-#endif
+	if (!gSoundDevice || !_camera) return;
+
+	const Vector3& pos = _camera->cameraPos.position;
+	const Vector3& fwd = _camera->cameraPos.direction;
+	const Vector3& up  = _camera->cameraPos.up;
+
+	gSoundDevice->tick(
+		pos.X().AsFloat(), pos.Y().AsFloat(), pos.Z().AsFloat(),
+		fwd.X().AsFloat(), fwd.Y().AsFloat(), fwd.Z().AsFloat(),
+		up.X().AsFloat(),  up.Y().AsFloat(),  up.Z().AsFloat()
+	);
 }
 
 //==============================================================================
@@ -1003,8 +1306,8 @@ Level::removePendingObjects()
 
       BaseObject* bo = GetObject(idxActor);
       assert(ValidPtr(bo));
-      Actor* actor = dynamic_cast<Actor*>(bo);
-      assert(ValidPtr(actor));
+      assert(IsActor(bo));
+      Actor* actor = static_cast<Actor*>(bo);
 		actor->spawnPoof();
 		DBSTREAM2( clevel << " removeactor " << idxActor << " from room" << std::endl; )
 		ValidatePtr(_theLevelRooms);
@@ -1022,6 +1325,7 @@ Level::removePendingObjects()
 		assert( idxActor > 0 );
 		assert( ValidPtr( _actors[ idxActor ] ) );
 		_actors[ idxActor ] = NULL;
+        _runtimeProperties.remove(idxActor);
 
 		// remove from remove list
 		DBSTREAM2( clevel << " nulling entry " << actor << std::endl; )
@@ -1081,6 +1385,8 @@ AdjustCameraParameters(Vector3& position,Euler& rotation)
 void
 Level::RenderScene()
 {
+    wf_profile::begin(wf_profile::Render);
+    if(_bitmapPresenter)_bitmapPresenter->BeginLabels();
 	DBSTREAM1( cdebug << "Level::RenderScene" << std::endl; )
 	Validate();
 	_theActiveRooms->Validate();
@@ -1108,8 +1414,13 @@ Level::RenderScene()
 
 	_theActiveRooms->Validate();
 	ActiveRoomsIterConst roomIter(_theActiveRooms->GetIter());
+	const Room* currentRenderRoom = _theActiveRooms->GetActiveRoom(0);
 	while(!roomIter.Empty())
 	{
+		if (_renderCurrentRoomOnly && &(*roomIter) != currentRenderRoom) {
+			++roomIter;
+			continue;
+		}
 		DBSTREAM3( cdebug << "----- room " << *roomIter << " -----" << std::endl; )
 				// in case there are none in this room
 		_camera->GetRenderCamera().SetAmbientColor( Color::black );
@@ -1131,23 +1442,30 @@ Level::RenderScene()
 		while(!lightIter.Empty())
 		{
          BaseObject& bo = *lightIter;
-	  		const Actor* actor = dynamic_cast<Actor*>(&bo);
-			assert(ValidPtr(actor));
+			assert(IsActor(&bo));
+	  		const Actor* actor = static_cast<Actor*>(&bo);
 			assert(actor->kind() == Actor::Light_KIND);
 			const Light* light = (const Light*)actor;
 
+			DBSTREAM3( cdebug << "light actor " << actor->GetActorIndex()
+				<< " type " << light->Type()
+				<< " (DIRECTIONAL=" << int(DIRECTIONAL_LIGHT)
+				<< " AMBIENT=" << int(AMBIENT_LIGHT) << ")" << std::endl; )
+
 			if(light->Type() == DIRECTIONAL_LIGHT)
 			{
+				// RenderCamera::MAX_LIGHTS — a level may author up to 3
+				// Directional Lights per room plus 1 Ambient.
 				assert(directionalLightIndex < 3);
 				light->Set(*_camera,directionalLightIndex);
-				directionalLightIndex++;
+				++directionalLightIndex;
 			}
 			else
 			{
 				assert(light->Type() == AMBIENT_LIGHT);
 				assert(ambientLightIndex < 1);
 				light->Set(*_camera,-1);
-				ambientLightIndex++;
+				++ambientLightIndex;
 			}
 			++lightIter;
 		}
@@ -1161,15 +1479,23 @@ Level::RenderScene()
 		BaseObjectIteratorWrapper poIter = cur_room->ListIter(ROOM_OBJECT_LIST_RENDER);
 		while( !poIter.Empty() )
 		{
-	  		Actor* const actor = dynamic_cast<Actor*>(&(*poIter));
-			assert(ValidPtr(actor));
+			assert(IsActor(&(*poIter)));
+	  		Actor* const actor = static_cast<Actor*>(&(*poIter));
 
 			if ( actor && actor->isVisible() )
 			{
+                wf_profile::count(1);
+                bool bitmapLabel=false;
+                if(_bitmapPresenter){
+                    int width=0,height=0;Display::GetActive()->GetSurfaceSize(width,height);
+                    const Vector3& p=actor->GetPhysicalAttributes().Position();
+                    bitmapLabel=_bitmapPresenter->CaptureLabel(actor->GetActorIndex(),p.X().AsFloat(),p.Y().AsFloat(),p.Z().AsFloat()+0.2f,width,height);
+                }
+
 #if defined(USE_TEST_CAMERA)
-				actor->GetRenderActor().Render(testCamera,*actor);
+				if(!bitmapLabel) actor->GetRenderActor().Render(testCamera,*actor);
 #else
-				_camera->Render(*actor,LevelClock());
+				if(!bitmapLabel) _camera->Render(*actor,LevelClock());
 #endif
 			}
 			++poIter;
@@ -1178,11 +1504,66 @@ Level::RenderScene()
 		++roomIter;
 	}
 	_viewPort.Render();
+	StaticMeshSampleGauges();		// E3 byte gauges, inside the profiled frame
+	wf_profile::end(wf_profile::Render);
+	wf_profile::end_frame();
 	Validate();
 }
 
 //==============================================================================
 // this is supposed to reset the level to its initial state
+
+void Level::RenderBitmapText(int width,int height)
+{
+    Validate();if(_bitmapPresenter)_bitmapPresenter->Draw(GetMailboxes(),width,height);Validate();
+}
+
+void
+Level::NotifyPositionWrite(const PhysicalObject& object)
+{
+	if (object.GetMovementBlockPtr()->MovesBetweenRooms)
+		_movingPositionWritten = true;
+	if (_camera && _camera->GetWatchObject() == &object)
+		_positionWrittenWatch = &object;
+}
+
+void
+Level::finishPositionWrites()
+{
+	if (!_movingPositionWritten || !_theActiveRooms)
+		return;
+	_movingPositionWritten = false;
+	// Defer until outside actor iteration and after all script axis writes.
+	// Inactive source rooms must participate in membership repair, but their
+	// actors must not otherwise start running scripts or physics.
+	_theLevelRooms->UpdateMovingObjects();
+	_theActiveRooms->BindUnboundMovingObjects();
+}
+
+void
+Level::finishWatchTeleport()
+{
+	if (!_positionWrittenWatch || !_camera || !_theActiveRooms)
+		return;
+	const PhysicalObject* watch = _camera->GetWatchObject();
+	const PhysicalObject* written = _positionWrittenWatch;
+	_positionWrittenWatch = NULL;
+	if (!watch || watch != written || _theActiveRooms->GetActiveRoom(0)->CheckCollision(*watch))
+		return;
+	// Match UpdateRoom's all-room search; leave outside-room policy unchanged.
+	for (int room = 0; room < _theLevelRooms->NumberOfRooms(); ++room)
+	{
+		if (_theLevelRooms->GetRoom(room).CheckCollision(*watch))
+		{
+			_camera->SnapToShot();
+			// Migrate both actors while the departing rooms still have assets
+			// and are still visited. Only then replace the active room set.
+			updateRoomContents();
+			_theActiveRooms->UpdateRoom(watch);
+			return;
+		}
+	}
+}
 
 void
 Level::reset( )
@@ -1198,11 +1579,12 @@ Level::reset( )
 
 	DBSTREAM1( cflow << "Level::reset(): temp objects" << std::endl; )
    // temp objects go immediatly after the level objects in the array, so to iterate the temp objects start at objectCount
-	for ( i = _levelData->objectCount; i < _actors.Size(); i++ )
+	for ( i = _levelData->objectCount; i < _actors.Size(); ++i )
 	{
 		if ( _actors[i] != NULL )
 			MEMORY_DELETE( *_memory, _actors[i], Actor );
 		_actors[i] =NULL;
+        _runtimeProperties.remove(i);
 	}
 
 	DBSTREAM1( cflow << "Level::reset(): initActiveRoom" << std::endl; )
@@ -1213,10 +1595,6 @@ Level::reset( )
    int32 roomIndex = ObjectIsInWhichRoom( GetObjectIndex(main_char),  _levelData );
 	_theActiveRooms->InitActiveRoom( roomIndex, GetLevelRooms() );
 
-#if defined( MIDI_MUSIC )
-	DBSTREAM1( cflow << "Level::reset(): sound" << std::endl; )
-	_theSound->reset();
-#endif
 
 	// Comented this out, because the clock code needs to be able to deal with the discontinuity in wall clock values at startup
 	levelClock.reset();
@@ -1233,7 +1611,7 @@ int
 Level::GetObjectIndex( const BaseObject* object )
 {
 	assert( ValidPtr( object ) );
-	for( int objectIndex=1;objectIndex<_actors.Size();objectIndex++ )
+	for( int objectIndex=1;objectIndex<_actors.Size();++objectIndex )
 	{
 		if( object == GetObject( objectIndex ))
 			return objectIndex;
@@ -1258,7 +1636,8 @@ Level::AddObject( BaseObject* object, const Vector3& posStartAt )
 		if ( !_actors[idxTempObject] )
 		{
 			_actors[idxTempObject] = object;
-         Actor* actor = dynamic_cast<Actor*>(object);
+         assert(IsActor(object));
+         Actor* actor = static_cast<Actor*>(object);
 			actor->SetActorIndex( idxTempObject );
 			added = true;
          assert(idxTempObject == GetObjectIndex( object ));
@@ -1269,6 +1648,17 @@ Level::AddObject( BaseObject* object, const Vector3& posStartAt )
          actor->setCurrentPos( posStartAt );
          PhysicalAttributes& physAttrib = actor->GetWritablePhysicalAttributes();
          physAttrib.SetPredictedPosition( posStartAt );
+
+         // Object spawned mid-frame: PredictPosition + Update passes for
+         // this frame have already started (or completed) for pre-existing
+         // actors. If the UpdatePhysics for_each iterator picks up the
+         // newly-added object, Actor::update would assert
+         // HasRunPredictPosition() == true (actor.cc:869). Mark both
+         // per-frame flags so the new actor is skipped this frame;
+         // DoneWithPhysics clears them for the next frame, when normal
+         // pipeline kicks in.
+         physAttrib.HasRunPredictPosition(true);
+         physAttrib.HasRunUpdate(true);
 
          ValidatePtr(_theLevelRooms);
          _theLevelRooms->AddObjectToRoom( idxTempObject );
@@ -1286,7 +1676,13 @@ void
 Level::SetPendingRemove( const BaseObject* object )
 {
 	assert( ValidPtr( object ) );
-	AssertMsg( object->kind() != BaseObject::StatPlat_KIND, "Cannot remove a statplat" );
+	// As in LevelRooms::AddObjectToRoom: statplats can't be removed mid-game, but
+	// in the EDITOR a statplat dragged out of every room reaches here via the
+	// room-reassignment path. Allow it (it just vanishes from the live preview;
+	// the Doc still holds it, so save+reload restores it) rather than aborting.
+	extern bool gEditorMode;   // game/main.cc — set true under --editor
+	if ( !gEditorMode )
+		AssertMsg( object->kind() != BaseObject::StatPlat_KIND, "Cannot remove a statplat" );
 
    if ( object == (PhysicalObject*)camera() )
    {
@@ -1294,8 +1690,8 @@ Level::SetPendingRemove( const BaseObject* object )
       return;
    }
 
-   const Actor* actor = dynamic_cast<const Actor*>(object);
-	assert( ValidPtr( actor ) );
+   assert(IsActor(object));
+   const Actor* actor = static_cast<const Actor*>(object);
 
 	int32 idxActor = actor->GetActorIndex();
 	assert(idxActor > 0);
@@ -1303,10 +1699,12 @@ Level::SetPendingRemove( const BaseObject* object )
 
 	DBSTREAM2( clevel << "SetPendingRemove: actor = " << *actor << std::endl; )
 	bool found = false;
-	assert( _numToBeRemovedObjects < 99 );
+	// Bound derived from the array itself (never a hardcoded literal): the add is
+	// `arr[count] = x; count++`, so `count < N` safely fills 0..N-1 then asserts.
+	assert( _numToBeRemovedObjects < ARRAY_COUNT(_toBeRemovedObjects) );
 
 	// check if already set to be removed
-	for ( int i = 0; i < _numToBeRemovedObjects; i++ )
+	for ( int i = 0; i < _numToBeRemovedObjects; ++i )
 	{
 		if ( _toBeRemovedObjects[i] == idxActor )
 		{
@@ -1319,7 +1717,7 @@ Level::SetPendingRemove( const BaseObject* object )
 	{
 		DBSTREAM2( clevel << " Placing Actor " << GetObjectIndex( actor ) << " into _toBeRemovedObjects[" << _numToBeRemovedObjects << "]" << std::endl; )
 		_toBeRemovedObjects[_numToBeRemovedObjects] = idxActor;
-		_numToBeRemovedObjects++;
+		++_numToBeRemovedObjects;
 	}
 }
 
@@ -1342,7 +1740,7 @@ Level::LoadLevelData()
    DBSTREAM2(clevel << "asmaptoc: seek to " << asmaptocEntry._offsetInDiskFile << std::endl; )
 	// now read asset map into memory
 
-	const int MAX_ASMP_SIZE = DiskFileCD::_SECTOR_SIZE * 4;  // kts abritrary
+	const int MAX_ASMP_SIZE = DiskFileCD::_SECTOR_SIZE * 16;  // 16 sectors = 32 KB; was bumped to 64 on 2026-05-10 for the qbert 1344-actor pyramid, reverted 2026-05-10 after Phase 1 cube consolidation dropped ASS chunk count to 18
 	char* mapMem = new ( HALScratchLmalloc ) char[MAX_ASMP_SIZE];
 	assert(ValidPtr(mapMem));
 	DBSTREAM2( cflow <<"Level::loadLevelData:reading map" << std::endl; )
@@ -1352,8 +1750,9 @@ Level::LoadLevelData()
 //		binistream mapStream((void*)mapMem,DiskFileCD::_SECTOR_SIZE);
 
 //		IFFChunkIter mapChunkIter(mapStream);
-		mapStreamSize = *((long*) (mapMem+4));
+		mapStreamSize = *((int32*) (mapMem+4));   // IFF chunk-size is 32-bit; was `long*` which is 8 bytes on 64-bit Linux
 		mapStreamSize += DiskFileCD::_SECTOR_SIZE - (mapStreamSize % DiskFileCD::_SECTOR_SIZE);
+		AssertMsg( mapStreamSize <= MAX_ASMP_SIZE, "ASMP chunk exceeds MAX_ASMP_SIZE; bump cap at level.cc:1296 or shrink chunk" );
 		if(mapStreamSize > DiskFileCD::_SECTOR_SIZE)
 		{			                        // need to read more sectors
 			_levelFile->SeekForward((asmaptocEntry._offsetInDiskFile)+DiskFileCD::_SECTOR_SIZE);
@@ -1422,20 +1821,6 @@ Level::WriteSystemMailbox( int boxnum, Scalar value )
             _camRollMailBox = value.WholePart();
             break;
 
-        case EMAILBOX_MIDI:
-        {
-            // TODO: Actually means something once we have .sep files
-#if defined( SOUND ) && defined( __PSX__ )
-            int nSong = value.WholePart();
-            extern short seq;	// midi music
-            if ( nSong )
-                SsSeqPlay( seq, SSPLAY_PLAY, SSPLAY_INFINITY );
-            else
-                SsSeqStop( seq );
-#endif
-            break;
-        }
-
         default:
             AssertMsg( 0, "Attempted to write to mailbox " << boxnum );			// invalid system mailbox
             break;
@@ -1452,6 +1837,9 @@ Level::ReadSystemMailbox( int boxnum ) const
 
     switch(boxnum)
     {
+        case EMAILBOX_END_OF_LEVEL:
+            return Scalar( _done ? 1 : 0, 0 );
+
         case EMAILBOX_CAMSHOT:
             return Scalar( _camShotMailBox, 0 );
 
@@ -1467,53 +1855,53 @@ Level::ReadSystemMailbox( int boxnum ) const
         case EMAILBOX_DELTA_TIME:
             return LevelClock().Delta();
 
+        case EMAILBOX_FRAMERATE:
+            return _game.DiagnosticFrameRate();
+
     case EMAILBOX_HARDWARE_JOYSTICK1:
-        assert( ValidPtr( _hardwareInput1 ) );
-        return Scalar( _hardwareInput1->arePressed(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK1_RAW:
-        assert( ValidPtr( _hardwareInput1 ) );
-        return Scalar( _hardwareInput1->arePressedRaw(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED:
-        assert( ValidPtr( _hardwareInput1 ) );
-        return Scalar( _hardwareInput1->justPressedRaw(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK2:
-        assert( ValidPtr( _hardwareInput2 ) );
-        return Scalar( _hardwareInput2->arePressed(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK2_RAW:
-        assert( ValidPtr( _hardwareInput2 ) );
-        return Scalar( _hardwareInput2->arePressedRaw(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK2_RAW_JUSTPRESSED:
-        assert( ValidPtr( _hardwareInput2 ) );
-        return Scalar( _hardwareInput2->justPressedRaw(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK3:
-        assert( ValidPtr( _hardwareInput3 ) );
-        return Scalar( _hardwareInput3->arePressed(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK3_RAW:
-        assert( ValidPtr( _hardwareInput3 ) );
-        return Scalar( _hardwareInput3->arePressedRaw(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK3_RAW_JUSTPRESSED:
-        assert( ValidPtr( _hardwareInput3 ) );
-        return Scalar( _hardwareInput3->justPressedRaw(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK4:
-        assert( ValidPtr( _hardwareInput4 ) );
-        return Scalar( _hardwareInput4->arePressed(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK4_RAW:
-        assert( ValidPtr( _hardwareInput4 ) );
-        return Scalar( _hardwareInput4->arePressedRaw(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK4_RAW_JUSTPRESSED:
-        assert( ValidPtr( _hardwareInput4 ) );
-        return Scalar( _hardwareInput4->justPressedRaw(), 0 );
+    {
+        int32_t _ov;
+        if (DebugServer_GetInputOverride(boxnum, &_ov))
+            return Scalar(_ov, 0);
+        QInputDigital* hi = nullptr;
+        switch (boxnum) {
+            case EMAILBOX_HARDWARE_JOYSTICK1:
+            case EMAILBOX_HARDWARE_JOYSTICK1_RAW:
+            case EMAILBOX_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED: hi = _hardwareInput1; break;
+            case EMAILBOX_HARDWARE_JOYSTICK2:
+            case EMAILBOX_HARDWARE_JOYSTICK2_RAW:
+            case EMAILBOX_HARDWARE_JOYSTICK2_RAW_JUSTPRESSED: hi = _hardwareInput2; break;
+            case EMAILBOX_HARDWARE_JOYSTICK3:
+            case EMAILBOX_HARDWARE_JOYSTICK3_RAW:
+            case EMAILBOX_HARDWARE_JOYSTICK3_RAW_JUSTPRESSED: hi = _hardwareInput3; break;
+            case EMAILBOX_HARDWARE_JOYSTICK4:
+            case EMAILBOX_HARDWARE_JOYSTICK4_RAW:
+            case EMAILBOX_HARDWARE_JOYSTICK4_RAW_JUSTPRESSED: hi = _hardwareInput4; break;
+        }
+        assert( ValidPtr( hi ) );
+        switch (boxnum) {
+            case EMAILBOX_HARDWARE_JOYSTICK1:
+            case EMAILBOX_HARDWARE_JOYSTICK2:
+            case EMAILBOX_HARDWARE_JOYSTICK3:
+            case EMAILBOX_HARDWARE_JOYSTICK4:                 return Scalar( hi->arePressed(), 0 );
+            case EMAILBOX_HARDWARE_JOYSTICK1_RAW:
+            case EMAILBOX_HARDWARE_JOYSTICK2_RAW:
+            case EMAILBOX_HARDWARE_JOYSTICK3_RAW:
+            case EMAILBOX_HARDWARE_JOYSTICK4_RAW:             return Scalar( hi->arePressedRaw(), 0 );
+            default:                                          return Scalar( hi->justPressedRaw(), 0 );
+        }
+    }
 
     default:
         if ( boxnum < EMAILBOX_GLOBAL_SYSTEM_MAX )
@@ -1615,8 +2003,8 @@ SafelyConstructTemplateObject(int32 objectToGenerate,
 
          while ( !colIter.Empty() )
          {
-            PhysicalObject* colObject = dynamic_cast<PhysicalObject*>(&(*colIter));
-            assert(ValidPtr(colObject));
+            assert(IsPhysicalObject(&(*colIter)));
+            PhysicalObject* colObject = static_cast<PhysicalObject*>(&(*colIter));
 
             if ( collisionInteractionTable[startupData->objectData->type][colObject->kind()] )
             {
@@ -1651,11 +2039,22 @@ SafelyConstructTemplateObject(int32 objectToGenerate,
 
 	}
 	startupData->idxCreator = parentObjectIndex;
+	startupData->currentTime = theLevel->LevelClock();   // stamp actual spawn time so actor constructors see current clock
 	Actor* retVal = ConstructTemplateObject( startupData->objectData->type, startupData );
 	assert(ValidPtr(retVal));
 	startupData->idxCreator = 0;				// kts insure no one else uses it
 	DBSTREAM1( cflow << "Level::SafelyConstructTemplateObject():done" << std::endl; )
 	return retVal;
+}
+
+//-----------------------------------------------------------------------------
+
+bool
+Level::HasTemplate(int idx) const
+{
+    if (idx <= 0) return false;
+    if (idx >= _numTemplateObjects) return false;
+    return _templateObjects[idx] != nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -1671,6 +2070,7 @@ Level::ConstructTemplateObject(int32 templateObjectIndex, int32 parentObjectInde
 
 		createdObject->setCurrentPos(position);
 		createdObject->setSpeed(velocity);
+        _runtimeProperties.clone(templateObjectIndex,createdObject->GetActorIndex());
 
 		// kts now bind geometry
 #pragma message ("KTS " __FILE__ ": need to make a dynamic memory allocator for temporary objects")
@@ -1688,7 +2088,7 @@ Level::GetObject( int idxObject ) const
 
    if(_actors[idxObject])
    {
-      BaseObject* po = dynamic_cast<BaseObject*>(_actors[idxObject]);
+      BaseObject* po = _actors[idxObject];
       assert(ValidPtr(po));
       return po;
    }
@@ -1754,7 +2154,7 @@ ObjectIsInWhichRoom( int32 idxObject, const _LevelOnDisk* _levelData )
 	int32 * roomArray = ( int32 * )( (char * )_levelData + ( _levelData->roomsOffset ));
 	assert( ValidPtr( roomArray ) );
 
-	for( int roomnum = 0; roomnum < _levelData->roomCount; roomnum++ )
+	for( int roomnum = 0; roomnum < _levelData->roomCount; ++roomnum )
 		{
 		_RoomOnDisk * roomData = ( _RoomOnDisk * )( (( char * )_levelData ) + roomArray[roomnum] );
 		assert( ValidPtr( roomData ) );
@@ -1762,7 +2162,7 @@ ObjectIsInWhichRoom( int32 idxObject, const _LevelOnDisk* _levelData )
 		// check objects in the room
 		_RoomOnDiskEntry * entryArray = ( _RoomOnDiskEntry * )( (char * )roomData + sizeof( _RoomOnDisk ));
 		assert( ValidPtr( entryArray ) );
-		for( int entry = 0; entry < roomData->count; entry++ )
+		for( int entry = 0; entry < roomData->count; ++entry )
 			{
 			if ( entryArray[entry].object == idxObject )
 				{
@@ -1776,3 +2176,4 @@ ObjectIsInWhichRoom( int32 idxObject, const _LevelOnDisk* _levelData )
 
 //==============================================================================
 
+void Level::RefreshHardwareInput(){if(_hardwareInput1)_hardwareInput1->update();if(_hardwareInput2)_hardwareInput2->update();if(_hardwareInput3)_hardwareInput3->update();if(_hardwareInput4)_hardwareInput4->update();}

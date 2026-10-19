@@ -1,0 +1,38 @@
+[
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792117536.019058,
+    "end": 1792117536.217867,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1792117536.2186568,
+    "end": 1792117536.5722728,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792117536.5730398,
+    "end": 1792117536.721004,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792117536.7221386,
+    "end": 1792117536.884883,
+    "returncode": 0
+  }
+]

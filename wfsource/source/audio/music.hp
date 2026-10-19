@@ -1,0 +1,29 @@
+#pragma once
+// MusicPlayer — streams a MIDI file through TinySoundFont via miniaudio.
+// One instance per process; controlled via play/stop.
+// No tsf/tml types in this header.
+
+class MusicPlayer
+{
+public:
+	MusicPlayer();
+	~MusicPlayer();
+
+	// Load and start looping a MIDI file from disk.
+	// Stops any currently playing track first.
+	bool play(const char* midiPath);
+
+	// Fade-to-silence and stop.
+	void stop();
+
+	bool isPlaying() const { return _playing; }
+
+	// Volume in [0, 1].
+	void setVolume(float v);
+
+	bool  _playing;
+	struct Impl;
+	Impl* _impl;  // complete type only in audio/linux/music.cc
+};
+
+extern MusicPlayer* gMusicPlayer;

@@ -71,7 +71,7 @@ Enemy::update()
 
 	while ( _nonStatPlat->_msgPort.GetMsgByType( MsgPort::SPECIAL_COLLISION, &msgData, msgDataSize ) )
 	{
-		Actor* colActor = (Actor*)msgData;
+		Actor* colActor = reinterpret_cast<Actor*>(*(uintptr_t*)msgData);
 		assert(ValidPtr(colActor));
 //		colActor->sendMsg(MsgPort::DELTA_HEALTH, getOad()->NumberOfGold);
 		DBSTREAM1( cerror << "guard doing damage" << std::endl; )

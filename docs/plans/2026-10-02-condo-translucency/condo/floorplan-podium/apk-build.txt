@@ -1,0 +1,61 @@
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preCondoReleaseBuild UP-TO-DATE
+> Task :app:javaPreCompileCondoRelease UP-TO-DATE
+> Task :app:checkCondoReleaseAarMetadata UP-TO-DATE
+> Task :app:generateCondoReleaseResValues UP-TO-DATE
+> Task :app:mapCondoReleaseSourceSetPaths UP-TO-DATE
+> Task :app:generateCondoReleaseResources UP-TO-DATE
+> Task :app:mergeCondoReleaseResources UP-TO-DATE
+> Task :app:packageCondoReleaseResources UP-TO-DATE
+> Task :app:parseCondoReleaseLocalResources UP-TO-DATE
+> Task :app:createCondoReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksCondoRelease UP-TO-DATE
+> Task :app:processCondoReleaseMainManifest UP-TO-DATE
+> Task :app:processCondoReleaseManifest UP-TO-DATE
+> Task :app:processCondoReleaseManifestForPackage UP-TO-DATE
+> Task :app:processCondoReleaseResources UP-TO-DATE
+> Task :app:compileCondoReleaseJavaWithJavac UP-TO-DATE
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :app:generateCondoReleaseLintVitalReportModel
+> Task :app:preQbertReleaseBuild UP-TO-DATE
+> Task :app:configureCMakeRelease[arm64-v8a]
+> Task :app:buildCMakeRelease[arm64-v8a]
+> Task :app:configureCMakeRelease[armeabi-v7a]
+> Task :app:buildCMakeRelease[armeabi-v7a]
+> Task :app:mergeCondoReleaseJniLibFolders UP-TO-DATE
+> Task :app:mergeCondoReleaseNativeLibs UP-TO-DATE
+> Task :app:stripCondoReleaseDebugSymbols UP-TO-DATE
+> Task :app:extractCondoReleaseNativeSymbolTables UP-TO-DATE
+> Task :app:mergeCondoReleaseNativeDebugMetadata UP-TO-DATE
+> Task :app:mergeCondoReleaseArtProfile UP-TO-DATE
+> Task :app:desugarCondoReleaseFileDependencies UP-TO-DATE
+> Task :app:dexBuilderCondoRelease UP-TO-DATE
+> Task :app:mergeCondoReleaseGlobalSynthetics UP-TO-DATE
+> Task :app:checkCondoReleaseDuplicateClasses UP-TO-DATE
+> Task :app:mergeCondoReleaseStartupProfile UP-TO-DATE
+> Task :app:mergeExtDexCondoRelease UP-TO-DATE
+> Task :app:mergeDexCondoRelease UP-TO-DATE
+> Task :app:compileCondoReleaseArtProfile UP-TO-DATE
+> Task :app:mergeCondoReleaseShaders UP-TO-DATE
+> Task :app:compileCondoReleaseShaders NO-SOURCE
+> Task :app:generateCondoReleaseAssets UP-TO-DATE
+> Task :app:mergeCondoReleaseAssets
+> Task :app:extractCondoReleaseVersionControlInfo UP-TO-DATE
+> Task :app:processCondoReleaseJavaRes NO-SOURCE
+> Task :app:mergeCondoReleaseJavaResource UP-TO-DATE
+> Task :app:optimizeCondoReleaseResources UP-TO-DATE
+> Task :app:collectCondoReleaseDependencies UP-TO-DATE
+> Task :app:sdkCondoReleaseDependencyData UP-TO-DATE
+> Task :app:validateSigningCondoRelease UP-TO-DATE
+> Task :app:writeCondoReleaseAppMetadata UP-TO-DATE
+> Task :app:writeCondoReleaseSigningConfigVersions UP-TO-DATE
+> Task :app:compressCondoReleaseAssets
+> Task :app:lintVitalAnalyzeCondoRelease
+> Task :app:lintVitalReportCondoRelease UP-TO-DATE
+> Task :app:lintVitalCondoRelease
+> Task :app:packageCondoRelease
+> Task :app:createCondoReleaseApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleCondoRelease
+
+BUILD SUCCESSFUL in 5s
+51 actionable tasks: 10 executed, 41 up-to-date

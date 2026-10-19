@@ -26,6 +26,7 @@
 //=============================================================================
 
 #include <pigsys/pigsys.hp>
+#include <gfx/display.hp>   // Display::VRAMWidth/Height for inline UV range checks
 
 //=============================================================================
 

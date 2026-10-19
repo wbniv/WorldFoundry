@@ -1,0 +1,22 @@
+--------- beginning of main
+10-03 17:33:56.316 10765 10788 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log
+10-03 17:33:56.316 10765 10788 I wf_game : android_main: enter
+10-03 17:33:56.316 10765 10788 I wf_game : android_main: assetMgr=0xee08c800
+10-03 17:33:56.317 10765 10788 I wf_game : android_main: uiMode=4 (tv=1)
+10-03 17:33:56.317 10765 10788 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-03 17:33:56.323 10765 10788 I wf_game : APP_CMD_RESUME
+10-03 17:33:56.324 10765 10788 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-03 17:33:56.324 10765 10788 I wf_game : phone controller: open http://192.168.4.43:8765/?k=516796 (PIN 516796)
+10-03 17:33:56.388 10765 10788 I wf_game : APP_CMD_INIT_WINDOW
+10-03 17:33:56.484 10765 10788 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-03 17:33:56.484 10765 10788 I wf_game : android_main: EGL ready, entering HALStart
+10-03 17:33:56.585 10765 10788 I wf_game : level-menu: showing 8 entries ("WF Aquarium"), cursor on 0
+10-03 17:38:01.395 10765 10788 I wf_game : key code=4 action=0 (Back: hides the phone panel)
+10-03 17:38:01.413 10765 10788 I wf_game : key code=4 action=1 (Back: hides the phone panel)
+10-03 17:38:01.562 10765 10788 I wf_game : key code=20 action=0 mask=0x1000
+10-03 17:38:01.564 10765 10788 I wf_game : level-menu: cursor on 1 (Blue Shrimp)
+10-03 17:38:01.597 10765 10788 I wf_game : key code=20 action=1 mask=0x1000
+10-03 17:38:01.745 10765 10788 I wf_game : key code=23 action=0 mask=0x1
+10-03 17:38:01.780 10765 10788 I wf_game : key code=23 action=1 mask=0x1
+10-03 17:38:01.782 10765 10788 I wf_game : level-menu: LEVEL_TO_RUN=1 (Blue Shrimp)
+10-03 17:38:01.782 10765 10788 I wf_game : level-menu: level 1 starts

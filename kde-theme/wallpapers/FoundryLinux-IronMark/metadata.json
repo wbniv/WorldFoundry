@@ -1,0 +1,13 @@
+{
+  "KPlugin": {
+    "Authors": [
+      {
+        "Name": "World Foundry"
+      }
+    ],
+    "Description": "WF logo as a dark iron stamp in the lower-right, with a faint red heat glow.",
+    "Id": "FoundryLinux-IronMark",
+    "License": "CC-BY-SA-4.0",
+    "Name": "Iron Mark"
+  }
+}

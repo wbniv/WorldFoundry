@@ -1,0 +1,9 @@
+;============================================================================
+; Alias.def: created from OADdef.S and Alias.oas DO NOT MODIFY
+;============================================================================
+;##ifndef Alias_HT
+;##define Alias_HT
+	( define OAD_BaseObject 0 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+;============================================================================
+;##endif         ; Alias_DEF
+;============================================================================

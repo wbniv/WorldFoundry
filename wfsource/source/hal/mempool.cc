@@ -15,10 +15,26 @@
 
 #include <hal/hal.h>
 #include <hal/_mempool.h>
+#include <cpplib/align.hp>
+#include <cstdint>
 
 #define MEMPOOL_REALTRACKING 1
 #define MEMPOOL_TRASHMEMORY DO_ASSERTIONS
 #define MEMPOOL_FILLVALUE 0xa5
+
+// AddressSanitizer: poison freed entries so a read of a freed message is reported at the reading
+// instruction with a stack trace. Pool entries come from a bump allocator, so ASan cannot see them
+// freed on its own. The first word of an entry is the free-list link and stays addressable; the rest
+// is poisoned on free and when the pool is created, and unpoisoned on allocate and destruct. Needs
+// _maxEntries, so it is only built with assertions on.
+#if defined(__SANITIZE_ADDRESS__) && DO_ASSERTIONS
+#include <sanitizer/asan_interface.h>
+#define MEMPOOL_ASAN_POISON(p, n)   ASAN_POISON_MEMORY_REGION((p), (n))
+#define MEMPOOL_ASAN_UNPOISON(p, n) ASAN_UNPOISON_MEMORY_REGION((p), (n))
+#else
+#define MEMPOOL_ASAN_POISON(p, n)   ((void)0)
+#define MEMPOOL_ASAN_UNPOISON(p, n) ((void)0)
+#endif
 
 //==============================================================================
 // create an entirly new memory pool
@@ -27,7 +43,13 @@ SMemPool*
 MemPoolConstruct(size_t size,int entries,Memory& memory)
 {
 	assert(size);
-	AssertMsg((size % 4) == 0,"MemPool size must be long-word alligned, size was " << size);								// must be long-word aligned
+	// Every entry must be able to hold (and be aligned for) a free-list node, so the stride is a multiple of a pointer's
+	// alignment: 4 on 32-bit ARM, 8 on 64-bit hosts. Callers pass sizeof(T), and sizeof(SMsg) is 20 on 32-bit ARM, which the
+	// old "must be a multiple of WF_POINTER_ALIGN (8 there)" assertion rejected and aborted the Android armeabi-v7a build on
+	// the Chromecast HD. WF_POINTER_ALIGN is 8 on 32-bit ARM for heap allocators that may hand out int64/double, but a pool only
+	// stores what its callers put in it: each call site static_asserts alignof(T) <= alignof(void*), so 4 is enough there.
+	// Round the entry size up (a no-op on 64-bit, where every size was already a multiple of 8): _size is the rounded size.
+	size = ALIGN_POW2(size, alignof(_MemPoolFreeEntry));
 	assert(entries);
 	assert(size >= sizeof(_MemPoolFreeEntry));				// make sure our free entry struct will fit
 
@@ -35,9 +57,9 @@ MemPoolConstruct(size_t size,int entries,Memory& memory)
 	memPool = new (memory) SMemPool;
 	assert(memPool);
 	AssertMemoryAllocation(memPool);
-	assert(((long)memPool % 4) == 0);
+	assert(((uintptr_t)memPool & WF_POINTER_ALIGN_MASK) == 0);
+	memPool->_size = size;				// not only for assertions: MemPoolFree's trash fill and the ASan poisoning use it
 #if DO_ASSERTIONS
-	memPool->_size = size;
 	memPool->_maxEntries = entries;
 	memPool->_currentEntries = 0;
 #endif
@@ -51,13 +73,16 @@ MemPoolConstruct(size_t size,int entries,Memory& memory)
 
 	_MemPoolFreeEntry* freeEntry = &memPool->_firstFree;
 	char* nextFree = memPool->_buffer;
-	for(int entry=0;entry<entries;entry++)
+	for(int entry=0;entry<entries;++entry)
 	 {
 		freeEntry->_next = (_MemPoolFreeEntry*)nextFree;
 		freeEntry = freeEntry->_next;
 		nextFree += size;
 	 }
 	freeEntry->_next = NULL;
+
+	for(int entry=0;entry<entries;++entry)
+		MEMPOOL_ASAN_POISON(memPool->_buffer+entry*size+sizeof(_MemPoolFreeEntry), size-sizeof(_MemPoolFreeEntry));
 
 	VALIDATEMEMPOOL(memPool);
 	DBSTREAM2( cprogress << "Creating a memory pool at address " << memPool << " with " << entries << " entries, " << size << " bytes each\n");
@@ -73,6 +98,7 @@ MemPoolDestruct(SMemPool* memPool)
 	VALIDATEMEMPOOL(memPool);
 	DBSTREAM2(cprogress <<  "Destroying a memory pool at address " << memPool ASSERTIONS( << " with " << memPool->_maxEntries << " entries" ) << ", " << memPool->_size << " bytes each\n");
 	assert(memPool->_currentEntries == 0);		// if allocations remain, there must be a problem
+	MEMPOOL_ASAN_UNPOISON(memPool->_buffer, memPool->_size*memPool->_maxEntries);
 	memPool->_parentMemory->Free(memPool->_buffer);
 	memPool->_parentMemory->Free(memPool);
 	return(NULL);
@@ -87,7 +113,7 @@ MemPoolAllocate(SMemPool* memPool, size_t size)
 	(void)size;
 //	printf("mempool = %x\n",memPool);
 	VALIDATEMEMPOOL(memPool);			// input validation
-	assert(size == memPool->_size);
+	assert(ALIGN_POW2(size, alignof(_MemPoolFreeEntry)) == memPool->_size);	// _size is the rounded entry size
 	AssertMsg( memPool->_currentEntries < memPool->_maxEntries,"memPool->_currentEntries=" << memPool->_currentEntries << " memPool->_maxEntries=" << memPool->_maxEntries );
 
 #if MEMPOOL_REALTRACKING
@@ -95,10 +121,11 @@ MemPoolAllocate(SMemPool* memPool, size_t size)
 	if(memPool->_firstFree._next)
 	 {
 #if  DO_ASSERTIONS
-		memPool->_currentEntries++;
+		++memPool->_currentEntries;
 #endif
 		void* mem = (void*)memPool->_firstFree._next;
 		memPool->_firstFree._next = memPool->_firstFree._next->_next;
+		MEMPOOL_ASAN_UNPOISON(mem, memPool->_size);
 		DBSTREAM5(cprogress <<  "Allocating an entry from Memory Pool " << memPool << " at address " << mem ASSERTIONS( << " for a total of " <<  memPool->_currentEntries << " entries") << endl;)
 		return(mem);
 	 }
@@ -106,7 +133,7 @@ MemPoolAllocate(SMemPool* memPool, size_t size)
 		return(0);					// out of entries
 #else
 #if  DO_ASSERTIONS
-	memPool->_currentEntries++;
+	++memPool->_currentEntries;
 #endif
 	assert(0);
 	void* mem = malloc(memPool->_size);
@@ -126,7 +153,7 @@ MemPoolFree(SMemPool* memPool, void* mem)
 	VALIDATEMEMPOOL(memPool);
 	assert(ValidPtr(mem));
 #if  DO_ASSERTIONS
-	memPool->_currentEntries--;
+	--memPool->_currentEntries;
 #endif
 	DBSTREAM5(cprogress <<  "Freeing an entry from Memory Pool " << memPool << " at address " << mem ASSERTIONS( << " leaving " << memPool->_currentEntries << " entries") << endl; )
 	assert(memPool->_currentEntries >= 0);
@@ -154,6 +181,7 @@ MemPoolFree(SMemPool* memPool, void* mem)
 	_MemPoolFreeEntry* fe = (_MemPoolFreeEntry*)mem;
 	fe->_next = memPool->_firstFree._next;
 	memPool->_firstFree._next = fe;
+	MEMPOOL_ASAN_POISON((char*)mem+sizeof(_MemPoolFreeEntry), memPool->_size-sizeof(_MemPoolFreeEntry));
 	VALIDATEMEMPOOL(memPool);
 #else
 	free(mem);

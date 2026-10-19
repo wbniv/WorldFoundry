@@ -1,0 +1,926 @@
+{
+  "job": {
+    "id": "J-342b1f1daa37",
+    "owner": "50834354a173f73472469f04",
+    "accepted": 1791160592.858956,
+    "state": "running",
+    "phase": "restoring",
+    "request": {
+      "device": "chromecast-test-02",
+      "app": "bomberman",
+      "warmup": 2.0,
+      "trace": "school",
+      "workflow": "record",
+      "apk": "30a24630e7e8332aad2602ffc30e92f67471d1c6f7885ebc3a045e89bbc230e3.apk"
+    },
+    "device": "chromecast-test-02",
+    "generation": 30,
+    "cancel": 0,
+    "error": null,
+    "started": 1791160592.9180808,
+    "finished": null,
+    "worker_pid": 558996,
+    "recovery_resolved": 0,
+    "installation": null
+  },
+  "device": {
+    "id": "chromecast-test-02",
+    "serial": "26031HFDD67QH7",
+    "name": "Project Room",
+    "model": "Chromecast",
+    "device": "sabrina",
+    "android": "12",
+    "sdk": "31",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "legacy-tcp",
+    "endpoint": "192.168.4.54:5555",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:40cf:bedc:33cd:967f",
+      "fd5d:59ce:7438:1:2555:eb86:7321:678",
+      "fe80::7156:9529:ebee:236b"
+    ],
+    "cast_udn": "5e305387-266b-84a6-639e-50805d1f06c2",
+    "generation": 30,
+    "last_seen": 1791160593.3798418,
+    "boot_id": "4b85df3a-e993-4a81-95b8-23f6c021d844",
+    "reservation": null
+  },
+  "result": "completed",
+  "error": null,
+  "cleanup_verified": true,
+  "restoration": "home-fallback: previous app launcher unavailable",
+  "commands": [
+    {
+      "args": [
+        "connect",
+        "192.168.4.54:5555"
+      ],
+      "start": 1791160593.318287,
+      "end": 1791160593.3257396,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.serialno"
+      ],
+      "start": 1791160593.3268816,
+      "end": 1791160593.379814,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/sys/kernel/random/boot_id"
+      ],
+      "start": 1791160593.3814104,
+      "end": 1791160593.4381258,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.model"
+      ],
+      "start": 1791160593.4401357,
+      "end": 1791160593.484145,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.release"
+      ],
+      "start": 1791160593.4859586,
+      "end": 1791160593.5346532,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.sdk"
+      ],
+      "start": 1791160593.535737,
+      "end": 1791160593.578342,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.device"
+      ],
+      "start": 1791160593.5799055,
+      "end": 1791160593.638369,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.cpu.abilist"
+      ],
+      "start": 1791160593.6433852,
+      "end": 1791160593.694694,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "ip -6 addr show wlan0"
+      ],
+      "start": 1791160593.6965234,
+      "end": 1791160593.741722,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160593.7509785,
+      "end": 1791160593.8347669,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "install",
+        "-r",
+        "/var/lib/wf-device-coordinator/inputs/30a24630e7e8332aad2602ffc30e92f67471d1c6f7885ebc3a045e89bbc230e3.apk"
+      ],
+      "start": 1791160593.8604052,
+      "end": 1791160596.1688302,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pm path org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160596.17029,
+      "end": 1791160596.2645774,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "sha256sum '/data/app/~~7hDPaXhmZ0qsuu1CPnjmNQ==/org.worldfoundry.wf_game.bomberman-zBKpNYia92EpDx_u8FQX9A==/base.apk'"
+      ],
+      "start": 1791160596.2660072,
+      "end": 1791160596.3394163,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am force-stop org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160596.347459,
+      "end": 1791160596.46001,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_WAKEUP"
+      ],
+      "start": 1791160596.4611626,
+      "end": 1791160596.5639129,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -n org.worldfoundry.wf_game.bomberman/.TvActivity"
+      ],
+      "start": 1791160596.7156076,
+      "end": 1791160598.2300382,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160603.2327392,
+      "end": 1791160603.41944,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160603.421326,
+      "end": 1791160603.5133739,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160605.5165284,
+      "end": 1791160605.6678014,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160605.669622,
+      "end": 1791160605.752913,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "screenrecord --time-limit 50 --size 960x540 --bit-rate 6000000 /data/local/tmp/wf-J-342b1f1daa37.mp4 >/dev/null 2>&1 & echo $!"
+      ],
+      "start": 1791160605.7543356,
+      "end": 1791160605.7942386,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160613.810889,
+      "end": 1791160614.1208382,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160614.1225083,
+      "end": 1791160614.238053,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791160614.239503,
+      "end": 1791160614.8072023,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791160614.8085392,
+      "end": 1791160615.3760326,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791160615.377633,
+      "end": 1791160616.0356138,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791160616.037183,
+      "end": 1791160616.7337463,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791160616.7351503,
+      "end": 1791160617.2568655,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791160617.258312,
+      "end": 1791160617.8144407,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791160617.8158934,
+      "end": 1791160618.491691,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791160618.493134,
+      "end": 1791160619.313884,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791160619.315413,
+      "end": 1791160619.9281542,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791160619.9296465,
+      "end": 1791160620.5416603,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160620.543949,
+      "end": 1791160620.6557431,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160620.6580088,
+      "end": 1791160620.7651625,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160626.7677262,
+      "end": 1791160627.002673,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160627.0043218,
+      "end": 1791160627.0934162,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_CENTER"
+      ],
+      "start": 1791160627.0948205,
+      "end": 1791160627.6892555,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160633.0960894,
+      "end": 1791160633.3649242,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160633.3662937,
+      "end": 1791160633.454513,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_LEFT"
+      ],
+      "start": 1791160633.4555564,
+      "end": 1791160634.0582237,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_LEFT"
+      ],
+      "start": 1791160634.0593877,
+      "end": 1791160634.8781786,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_LEFT"
+      ],
+      "start": 1791160634.8797472,
+      "end": 1791160635.4425797,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_LEFT"
+      ],
+      "start": 1791160635.444036,
+      "end": 1791160636.2084694,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_LEFT"
+      ],
+      "start": 1791160636.2098773,
+      "end": 1791160636.8260167,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_LEFT"
+      ],
+      "start": 1791160636.8271952,
+      "end": 1791160637.5396824,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_LEFT"
+      ],
+      "start": 1791160637.5408297,
+      "end": 1791160638.35861,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_LEFT"
+      ],
+      "start": 1791160638.3599381,
+      "end": 1791160639.0943656,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160639.0960815,
+      "end": 1791160639.2500553,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160639.2520099,
+      "end": 1791160639.3409903,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160643.343918,
+      "end": 1791160643.599183,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160643.6005504,
+      "end": 1791160643.6740935,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791160643.6752818,
+      "end": 1791160644.2373068,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791160644.2387269,
+      "end": 1791160644.8121657,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791160644.8132663,
+      "end": 1791160645.4237697,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791160645.424865,
+      "end": 1791160646.141131,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791160646.1426535,
+      "end": 1791160646.9619164,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791160646.9631712,
+      "end": 1791160647.5620792,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent --longpress KEYCODE_DPAD_RIGHT"
+      ],
+      "start": 1791160647.5645354,
+      "end": 1791160648.1897569,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160648.191606,
+      "end": 1791160648.3654144,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160648.3673975,
+      "end": 1791160648.4583337,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160651.4610004,
+      "end": 1791160651.7850523,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160651.786878,
+      "end": 1791160651.8788424,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160651.881433,
+      "end": 1791160652.006452,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160652.0082693,
+      "end": 1791160652.0998843,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/14897/cmdline"
+      ],
+      "start": 1791160652.1015682,
+      "end": 1791160652.1736155,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160652.676024,
+      "end": 1791160652.8163438,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160652.8179643,
+      "end": 1791160652.9176853,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/14897/cmdline"
+      ],
+      "start": 1791160652.918995,
+      "end": 1791160652.9955044,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160653.4982975,
+      "end": 1791160653.8517807,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160653.8535964,
+      "end": 1791160653.9463031,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/14897/cmdline"
+      ],
+      "start": 1791160653.9481611,
+      "end": 1791160654.0279016,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160654.5302708,
+      "end": 1791160654.847687,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160654.8493087,
+      "end": 1791160654.9276743,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/14897/cmdline"
+      ],
+      "start": 1791160654.9289331,
+      "end": 1791160655.0083218,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160655.5109975,
+      "end": 1791160655.6698687,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160655.671499,
+      "end": 1791160655.75773,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/14897/cmdline"
+      ],
+      "start": 1791160655.7591567,
+      "end": 1791160655.8276443,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160656.3305674,
+      "end": 1791160656.4579268,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160656.4597194,
+      "end": 1791160656.537773,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/14897/cmdline"
+      ],
+      "start": 1791160656.5391722,
+      "end": 1791160656.6069694,
+      "returncode": 1
+    },
+    {
+      "args": [
+        "exec-out",
+        "cat",
+        "/data/local/tmp/wf-J-342b1f1daa37.mp4"
+      ],
+      "start": 1791160656.6084101,
+      "end": 1791160657.5708232,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "rm -f /data/local/tmp/wf-J-342b1f1daa37.mp4"
+      ],
+      "start": 1791160657.5778565,
+      "end": 1791160657.6524036,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791160657.6546412,
+      "end": 1791160657.7684743,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160657.7702577,
+      "end": 1791160657.841323,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "start": 1791160657.8427768,
+      "end": 1791160659.557537,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160659.5592988,
+      "end": 1791160659.628883,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "logcat",
+        "-d",
+        "-v",
+        "threadtime",
+        "--pid=14791"
+      ],
+      "start": 1791160659.6302905,
+      "end": 1791160659.8033082,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "tail -c 4000000 /sdcard/Android/data/org.worldfoundry.wf_game.bomberman/files/wf.log"
+      ],
+      "start": 1791160659.8050518,
+      "end": 1791160659.8797517,
+      "returncode": 1
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys meminfo org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160659.8815124,
+      "end": 1791160660.4522064,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys thermalservice"
+      ],
+      "start": 1791160660.453923,
+      "end": 1791160660.5489185,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am force-stop org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160660.564596,
+      "end": 1791160660.7194767,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "am start -W -a android.intent.action.MAIN -c android.intent.category.LEANBACK_LAUNCHER -p org.worldfoundry.wf_game.aquarium"
+      ],
+      "start": 1791160660.7209136,
+      "end": 1791160660.836002,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "input keyevent KEYCODE_HOME"
+      ],
+      "start": 1791160660.837896,
+      "end": 1791160660.9289687,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "pidof org.worldfoundry.wf_game.bomberman"
+      ],
+      "start": 1791160661.080735,
+      "end": 1791160661.2622414,
+      "returncode": 1
+    }
+  ],
+  "finished": 1791160661.2632368,
+  "launcher": null,
+  "concurrent_jobs": []
+}

@@ -98,8 +98,8 @@ public:
     }
 	inline void operator()( BaseObject& bo )
 	{
-      MovementObject* object = dynamic_cast<MovementObject*>(&bo);
-		assert(ValidPtr(object));
+      assert(IsMovementObject(&bo));
+      MovementObject* object = static_cast<MovementObject*>(&bo);
 		object->predictPosition(_clock);
 	}
 private:
@@ -126,8 +126,8 @@ public:
 
 	inline void operator() (BaseObject& bo)
 	{
-      MovementObject* object = dynamic_cast<MovementObject*>(&bo);
-		assert(ValidPtr(object));
+      assert(IsMovementObject(&bo));
+      MovementObject* object = static_cast<MovementObject*>(&bo);
 		if ((!object->GetPhysicalAttributes().HasRunUpdate()))
 		{
 			DBSTREAM1( cmovement << "UpdatePhysics: updating object " << *object << std::endl; )
@@ -143,8 +143,8 @@ class ObjectDoneWithPhysics
 public:
 	inline void operator() (BaseObject& bo)
 	{
-      MovementObject* object = dynamic_cast<MovementObject*>(&bo);
-		assert(ValidPtr(object));
+      assert(IsMovementObject(&bo));
+      MovementObject* object = static_cast<MovementObject*>(&bo);
 		object->DoneWithPhysics();
 	}
 };

@@ -1,0 +1,53 @@
+Test project /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/build-teleport
+      Start  1: texture_atlas_address
+ 1/22 Test  #1: texture_atlas_address ............   Passed    0.01 sec
+      Start  2: debug_listener_reconnect
+ 2/22 Test  #2: debug_listener_reconnect .........   Passed    0.22 sec
+      Start  3: frame_rate_sampler
+ 3/22 Test  #3: frame_rate_sampler ...............   Passed    0.00 sec
+      Start  4: fps_overlay_layout
+ 4/22 Test  #4: fps_overlay_layout ...............   Passed    0.00 sec
+      Start  5: frame_rate_mailbox
+ 5/22 Test  #5: frame_rate_mailbox ...............   Passed    1.08 sec
+      Start  6: frame_rate_mailbox_fixed_sim
+ 6/22 Test  #6: frame_rate_mailbox_fixed_sim .....   Passed    1.17 sec
+      Start  7: debug_listener_smb_transitions
+ 7/22 Test  #7: debug_listener_smb_transitions ...   Passed   38.84 sec
+      Start  8: cross_room_teleports
+ 8/22 Test  #8: cross_room_teleports .............   Passed    6.66 sec
+      Start  9: memory_pool_arrays
+ 9/22 Test  #9: memory_pool_arrays ...............   Passed    0.08 sec
+      Start 10: wf_game_smoke_cycle1
+10/22 Test #10: wf_game_smoke_cycle1 .............   Passed    0.88 sec
+      Start 11: wf_game_smoke_cycle2
+11/22 Test #11: wf_game_smoke_cycle2 .............   Passed    1.43 sec
+      Start 12: wf_game_smoke_snow_cycle1
+12/22 Test #12: wf_game_smoke_snow_cycle1 ........   Passed    1.04 sec
+      Start 13: wf_game_smoke_snow_cycle2
+13/22 Test #13: wf_game_smoke_snow_cycle2 ........   Passed    1.42 sec
+      Start 14: wf_host_gl_e2e_cycle1
+14/22 Test #14: wf_host_gl_e2e_cycle1 ............   Passed    0.87 sec
+      Start 15: wf_host_gl_e2e_cycle2
+15/22 Test #15: wf_host_gl_e2e_cycle2 ............   Passed    1.48 sec
+      Start 16: frame_rate_host_no_swap
+16/22 Test #16: frame_rate_host_no_swap ..........   Passed    3.41 sec
+      Start 17: wf_host_gl_e2e_snow_cycle1
+17/22 Test #17: wf_host_gl_e2e_snow_cycle1 .......   Passed    0.84 sec
+      Start 18: wf_host_gl_e2e_snow_cycle2
+18/22 Test #18: wf_host_gl_e2e_snow_cycle2 .......   Passed    1.45 sec
+      Start 19: wfmut_smoke
+19/22 Test #19: wfmut_smoke ......................   Passed    0.38 sec
+      Start 20: wfmut_bridge
+20/22 Test #20: wfmut_bridge .....................   Passed    3.45 sec
+      Start 21: wfmut_thread_guard
+21/22 Test #21: wfmut_thread_guard ...............   Passed    0.28 sec
+      Start 22: neural_forth_unit
+22/22 Test #22: neural_forth_unit ................   Passed    0.03 sec
+
+100% tests passed, 0 tests failed out of 22
+
+Label Time Summary:
+gl          =  59.90 sec*proc (12 tests)
+teleport    =   6.66 sec*proc (1 test)
+
+Total Test time (real) =  65.04 sec

@@ -1,0 +1,175 @@
+{
+  "ref": "95a065d",
+  "date": "2026-04-16T11:07:01",
+  "root": "wfsource/source",
+  "subsystems": {
+    "_root": {
+      "blank": 2,
+      "comment": 16,
+      "code": 11,
+      "total": 29,
+      "files": 1
+    },
+    "anim": {
+      "blank": 488,
+      "comment": 846,
+      "code": 1366,
+      "total": 2700,
+      "files": 18
+    },
+    "asset": {
+      "blank": 184,
+      "comment": 300,
+      "code": 547,
+      "total": 1031,
+      "files": 8
+    },
+    "baseobject": {
+      "blank": 171,
+      "comment": 351,
+      "code": 438,
+      "total": 960,
+      "files": 10
+    },
+    "cpplib": {
+      "blank": 581,
+      "comment": 974,
+      "code": 1780,
+      "total": 3335,
+      "files": 24
+    },
+    "game": {
+      "blank": 2198,
+      "comment": 4331,
+      "code": 6073,
+      "total": 12602,
+      "files": 82
+    },
+    "gfx": {
+      "blank": 1790,
+      "comment": 3737,
+      "code": 5749,
+      "total": 11276,
+      "files": 72
+    },
+    "hal": {
+      "blank": 767,
+      "comment": 1356,
+      "code": 1732,
+      "total": 3855,
+      "files": 31
+    },
+    "iff": {
+      "blank": 102,
+      "comment": 277,
+      "code": 326,
+      "total": 705,
+      "files": 7
+    },
+    "input": {
+      "blank": 83,
+      "comment": 39,
+      "code": 267,
+      "total": 389,
+      "files": 2
+    },
+    "mailbox": {
+      "blank": 72,
+      "comment": 99,
+      "code": 225,
+      "total": 396,
+      "files": 4
+    },
+    "math": {
+      "blank": 1316,
+      "comment": 2129,
+      "code": 6469,
+      "total": 9914,
+      "files": 33
+    },
+    "memory": {
+      "blank": 376,
+      "comment": 859,
+      "code": 1143,
+      "total": 2378,
+      "files": 17
+    },
+    "movement": {
+      "blank": 440,
+      "comment": 805,
+      "code": 1226,
+      "total": 2471,
+      "files": 16
+    },
+    "oas": {
+      "blank": 378,
+      "comment": 732,
+      "code": 1310,
+      "total": 2420,
+      "files": 53
+    },
+    "particle": {
+      "blank": 253,
+      "comment": 504,
+      "code": 807,
+      "total": 1564,
+      "files": 7
+    },
+    "physics": {
+      "blank": 772,
+      "comment": 1334,
+      "code": 2686,
+      "total": 4792,
+      "files": 24
+    },
+    "pigsys": {
+      "blank": 551,
+      "comment": 1350,
+      "code": 1338,
+      "total": 3239,
+      "files": 21
+    },
+    "renderassets": {
+      "blank": 190,
+      "comment": 275,
+      "code": 560,
+      "total": 1025,
+      "files": 3
+    },
+    "room": {
+      "blank": 387,
+      "comment": 657,
+      "code": 1421,
+      "total": 2465,
+      "files": 13
+    },
+    "scripting": {
+      "blank": 24,
+      "comment": 50,
+      "code": 28,
+      "total": 102,
+      "files": 3
+    },
+    "streams": {
+      "blank": 375,
+      "comment": 482,
+      "code": 1241,
+      "total": 2098,
+      "files": 8
+    },
+    "timer": {
+      "blank": 29,
+      "comment": 13,
+      "code": 70,
+      "total": 112,
+      "files": 4
+    }
+  },
+  "total": {
+    "blank": 11529,
+    "comment": 21516,
+    "code": 36813,
+    "total": 69858,
+    "files": 461
+  }
+}

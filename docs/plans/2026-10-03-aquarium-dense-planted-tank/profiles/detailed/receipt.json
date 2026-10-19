@@ -1,0 +1,9 @@
+{
+  "apk": "/tmp/planted-tank-variants/detailed.apk",
+  "apk_sha256": "bacf2208323a77487411b92b1e3df4e6ccbdd96c6b52c2f8c8b9a3d159713170",
+  "protocol": "30.0 s warmup; 36 s planted-tank trace (wide idle, close idle, close crawl; 12 s each); 3 run(s); SurfaceFlinger sampled every 0.75 s",
+  "serial": "",
+  "menu_index": 5,
+  "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+  "revision": "16a77ebc7d19b792bddbb0eaca2b1f420cd6c858"
+}

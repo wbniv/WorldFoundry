@@ -1,0 +1,10 @@
+PASS: unloaded room D actor caches scale 0.25
+Engine evidence: /tmp/t4-scale-baseline-flushed/engine.log
+Traceback (most recent call last):
+  File "/tmp/t4_test_teleports.py", line 93, in <module>
+    args=parser.parse_args();run(args)
+                             ~~~^^^^^^
+  File "/tmp/t4_test_teleports.py", line 72, in run
+    assert not re.search(r'ASSERTION FAILED|runtime error:|zforth error|SIGSEGV|ValidPtr\( \(nil\) \) failed',text), 'engine diagnostics failed'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: engine diagnostics failed

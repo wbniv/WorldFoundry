@@ -1,0 +1,48 @@
+[
+  {
+    "game": "aquarium",
+    "cold_pid": "16046",
+    "cold_colors": 970,
+    "resume0_colors": 1048,
+    "resume1_colors": 969,
+    "reopen_pid": "16231",
+    "reopen_colors": 1023
+  },
+  {
+    "game": "snowgoons",
+    "cold_pid": "16333",
+    "cold_colors": 60282,
+    "resume0_colors": 60267,
+    "resume1_colors": 60267,
+    "reopen_pid": "16535",
+    "reopen_colors": 46805
+  },
+  {
+    "game": "condo",
+    "cold_pid": "16627",
+    "cold_colors": 9797,
+    "resume0_colors": 9785,
+    "resume1_colors": 9785,
+    "reopen_pid": "16814",
+    "reopen_colors": 9797
+  },
+  {
+    "game": "smb",
+    "cold_pid": "17136",
+    "cold_colors": 7,
+    "level_colors": 1299,
+    "resume0_colors": 1299,
+    "resume1_colors": 1299,
+    "reopen_pid": "17342",
+    "reopen_colors": 7
+  },
+  {
+    "game": "qbert",
+    "cold_pid": "17431",
+    "cold_colors": 20,
+    "resume0_colors": 20,
+    "resume1_colors": 19,
+    "reopen_pid": "17618",
+    "reopen_colors": 20
+  }
+]

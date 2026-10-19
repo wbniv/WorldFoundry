@@ -1,0 +1,10 @@
+{
+  "apk": "/tmp/wf-colour-value.apk",
+  "sha256": "ae04e3f7514db529b69bb38a5a3bd29f632662fca0c801ec6b643e61ab91d0da",
+  "batch": "B-53a4f42194d7",
+  "jobs": {
+    "chromecast-test-01": "J-803b9fb870c9",
+    "chromecast-test-02": "J-564db629decd"
+  },
+  "change": "Custom hue/saturation square with Value brightness slider"
+}

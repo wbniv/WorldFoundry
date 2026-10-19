@@ -23,17 +23,14 @@
 //#include "anmswtch.hp"
 #define _SCALAR_CC
 #include <math/scalar.hp>
+#include <cstring>
 //#include <visual/brstrm.hp>
 #include <math/angle.hp>
 
 // ------------------------------------------------------------------------
 
 #if defined(SCALAR_TYPE_FIXED)
-#if defined ( __PSX__ )
-#include <math/psx/scalar.cc>
-#elif defined ( __WIN__ )
-#include <math/win/scalar.cc>
-#elif defined ( __LINUX__ )
+#if   defined ( __LINUX__ )
 #include <math/linux/scalar.cc>
 #else
 #error no scalar asm code!
@@ -79,7 +76,7 @@ Scalar::AsText(char* buffer, int length)
       if(length > 0)
       {
          *buffer++ = '-';
-         length--;
+         --length;
       }
 	}
 	else
@@ -100,7 +97,7 @@ Scalar::AsText(char* buffer, int length)
       if(length > 0)
       {
          *buffer++ = '.';
-         length--;
+         --length;
       }
 
 		assert(frac.WholePart() == 0);
@@ -114,7 +111,7 @@ Scalar::AsText(char* buffer, int length)
          if(length > 0)
          {
             *buffer++ = '0'+digit;
-            length--;
+            --length;
          }
 
 			frac = Scalar((long)frac.AsUnsignedFraction());
@@ -132,7 +129,7 @@ Scalar::AsText(char* buffer, int length)
    while(pos > 0 && (buffer[pos] == '0'))
    {
       buffer[pos] = 0;        
-      pos--;
+      --pos;
    }
    if(buffer[pos] == '.')
       buffer[pos] = 0;        
@@ -216,7 +213,14 @@ binistream& operator >> ( binistream& binis, Scalar& scalar )
 	}
 #elif defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
 	if( binis.scalartype() == binios::float32 )
-		return binis >> (uint32&)scalar._value;
+	{
+		// Read the bits into a uint32 and copy them in: storing through (uint32&)scalar._value is a
+		// strict-aliasing violation that ThinLTO (Android Release) may reorder against later float reads.
+		uint32 bits;
+		binis >> bits;
+		memcpy( &scalar._value, &bits, sizeof( bits ) );
+		return binis;
+	}
 	else // need to convert fixed16_16 -> float32
 	{
       assert(0);
@@ -990,7 +994,7 @@ Sqrt64(long __a1,long __a0)
 	__t1 = __a0;
 	__t2 = __a1;
 
- 	for(__i=0; __i<16; __i++) 			// 16 bit pairs from high dword
+ 	for(__i=0; __i<16; ++__i) 			// 16 bit pairs from high dword
 	{
 		ShiftLeft64(__Error,__t2,2); // 2 bits into error
 
@@ -1006,7 +1010,7 @@ Sqrt64(long __a1,long __a0)
 		}
 	}
 
-	for(__i=0; __i<16; __i++) 				// 16 bit pairs from low dword
+	for(__i=0; __i<16; ++__i) 				// 16 bit pairs from low dword
 	{
 
 		ShiftLeft64(__Error,__t1,2); 		// 2 bits into error
@@ -1173,14 +1177,16 @@ Scalar
 Scalar::Random()
 {
    long temp;
-#if defined(__LINUX__)
+#if defined(__LINUX__) || defined(__ANDROID__)
 #if !(RAND_MAX == INT_MAX)
 #error update rand code
 #endif
-	temp = rand() >> 16;
-#elif defined(__WIN__)
-	temp = rand() << 1;
-#else 
+	// >>15 (not >>16): RAND_MAX is INT_MAX, so rand()>>15 spans [0, 65535],
+	// which normalises (÷65536 / raw 16.16) to a full [0, 1) fraction. The old
+	// >>16 only reached 32767 → [0, 0.5), so Random()/displacement covered half
+	// their intended range.
+	temp = rand() >> 15;
+#else
 #error rand not implemented for this platform
 #endif
 
@@ -1196,7 +1202,7 @@ Scalar::Random()
 #error SCALAR TYPE not defined
 #endif
 
-	RangeCheck( Scalar::zero, random_value, Scalar::one );
+	RangeCheckScalar( Scalar::zero, random_value, Scalar::one );   // not RangeCheck: that casts Scalar→ptrdiff_t→bool (BUGS.md)
 	return random_value;
 }
 
@@ -1209,7 +1215,7 @@ Scalar::Random( Scalar lower, Scalar upper )
 	Scalar random_value = Scalar::Random();
 	random_value *= ( upper - lower );
 	random_value += lower;
-	RangeCheck( lower, random_value, upper );
+	RangeCheckScalar( lower, random_value, upper );
 
 	return random_value;
 }

@@ -1,0 +1,19 @@
+;============================================================================
+; Gold.def: created from OADdef.S and Gold.oas DO NOT MODIFY
+;============================================================================
+;##ifndef Gold_HT
+;##define Gold_HT
+	( define OAD_moveblocPageOffset 0 )	; common block: offset in page data for this objects page
+	( define OAD_toolsetPageOffset 4 )	; common block: offset in page data for this objects page
+	( define OAD_commonPageOffset 8 )	; common block: offset in page data for this objects page
+	( define OAD_MeshName 12 )	;file Mesh Name: This is a packedAssetID
+	( define OAD_meshPageOffset 16 )	; common block: offset in page data for this objects page
+	( define OAD_shadowPageOffset 20 )	; common block: offset in page data for this objects page
+	( define OAD_TemplateObject 24 )	; boolean: Default: 0
+	( define OAD_NumberofGold 28 )	; int32: Minumum: 1 Maximum: 100 Default: 1
+	( define OAD_AllActors 32 )	; boolean: Default: 1
+	( define OAD_SingleActor 36 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+	( define OAD_AIPageOffset 40 )	; common block: offset in page data for this objects page
+;============================================================================
+;##endif         ; Gold_DEF
+;============================================================================

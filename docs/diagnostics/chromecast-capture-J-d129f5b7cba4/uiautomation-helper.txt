@@ -1,0 +1,2 @@
+[197491.053461] (RenderThread) Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+[197491.070924] (RenderThread) Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.

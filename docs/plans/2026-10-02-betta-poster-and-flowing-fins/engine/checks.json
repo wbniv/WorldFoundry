@@ -1,0 +1,3869 @@
+{
+  "status": "PASS",
+  "actors": 32,
+  "groups": [
+    "body",
+    "tail",
+    "dorsal",
+    "anal",
+    "near_pectoral",
+    "far_pectoral",
+    "near_pelvic",
+    "far_pelvic"
+  ],
+  "triangles": {
+    "body": 1180,
+    "tail": 896,
+    "dorsal": 540,
+    "anal": 604,
+    "near_pectoral": 212,
+    "far_pectoral": 212,
+    "near_pelvic": 216,
+    "far_pelvic": 216
+  },
+  "frames": 240,
+  "simulated_seconds": 24.0,
+  "trace": [
+    {
+      "frame": 0,
+      "seconds": 0.0,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.201667,
+      "pectoral_phase": 0.66,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 1,
+      "seconds": 0.1,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.275,
+      "pectoral_phase": 0.9,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 2,
+      "seconds": 0.2,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.33,
+      "pectoral_phase": 0.08,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 3,
+      "seconds": 0.3,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.385,
+      "pectoral_phase": 0.26,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 4,
+      "seconds": 0.4,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.44,
+      "pectoral_phase": 0.44,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 5,
+      "seconds": 0.5,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.495,
+      "pectoral_phase": 0.620001,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 6,
+      "seconds": 0.6,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.55,
+      "pectoral_phase": 0.800001,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 7,
+      "seconds": 0.7,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.605,
+      "pectoral_phase": 0.980001,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 8,
+      "seconds": 0.8,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.66,
+      "pectoral_phase": 0.160001,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 9,
+      "seconds": 0.9,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.715,
+      "pectoral_phase": 0.34,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 10,
+      "seconds": 1.0,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.77,
+      "pectoral_phase": 0.52,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 11,
+      "seconds": 1.1,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.825,
+      "pectoral_phase": 0.7,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 12,
+      "seconds": 1.2,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.88,
+      "pectoral_phase": 0.88,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 13,
+      "seconds": 1.3,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.935,
+      "pectoral_phase": 0.06,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 14,
+      "seconds": 1.4,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.99,
+      "pectoral_phase": 0.24,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 15,
+      "seconds": 1.5,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.045,
+      "pectoral_phase": 0.419999,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 16,
+      "seconds": 1.6,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.1,
+      "pectoral_phase": 0.599999,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 17,
+      "seconds": 1.7,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.155,
+      "pectoral_phase": 0.779999,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 18,
+      "seconds": 1.8,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.21,
+      "pectoral_phase": 0.959999,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 19,
+      "seconds": 1.9,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.265,
+      "pectoral_phase": 0.139999,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 20,
+      "seconds": 2.0,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.32,
+      "pectoral_phase": 0.319999,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 21,
+      "seconds": 2.1,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.375,
+      "pectoral_phase": 0.499999,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 22,
+      "seconds": 2.2,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.43,
+      "pectoral_phase": 0.679998,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 23,
+      "seconds": 2.3,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.484999,
+      "pectoral_phase": 0.859998,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 24,
+      "seconds": 2.4,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.539999,
+      "pectoral_phase": 0.039998,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 25,
+      "seconds": 2.5,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.594999,
+      "pectoral_phase": 0.219998,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 26,
+      "seconds": 2.6,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.649999,
+      "pectoral_phase": 0.399998,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 27,
+      "seconds": 2.7,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.704999,
+      "pectoral_phase": 0.579998,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 28,
+      "seconds": 2.8,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.759999,
+      "pectoral_phase": 0.759997,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 29,
+      "seconds": 2.9,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.814999,
+      "pectoral_phase": 0.939997,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 30,
+      "seconds": 3.0,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.869999,
+      "pectoral_phase": 0.119997,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 31,
+      "seconds": 3.1,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.924999,
+      "pectoral_phase": 0.299997,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 32,
+      "seconds": 3.2,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.979999,
+      "pectoral_phase": 0.479997,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 33,
+      "seconds": 3.3,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.034999,
+      "pectoral_phase": 0.659997,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 34,
+      "seconds": 3.4,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.089999,
+      "pectoral_phase": 0.839996,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 35,
+      "seconds": 3.5,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.144999,
+      "pectoral_phase": 0.019996,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 36,
+      "seconds": 3.6,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.199999,
+      "pectoral_phase": 0.199996,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 37,
+      "seconds": 3.7,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.254999,
+      "pectoral_phase": 0.379996,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 38,
+      "seconds": 3.8,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.309999,
+      "pectoral_phase": 0.559996,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 39,
+      "seconds": 3.9,
+      "state": "hover",
+      "position": [
+        0.0,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.0,
+      "turn": 0.0,
+      "phase": 0.364999,
+      "pectoral_phase": 0.739995,
+      "sweep": 0.0,
+      "spread": 0.72
+    },
+    {
+      "frame": 40,
+      "seconds": 4.0,
+      "state": "swim",
+      "position": [
+        0.01338,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.108173,
+      "turn": 0.0,
+      "phase": 0.428884,
+      "pectoral_phase": 0.925072,
+      "sweep": 0.001351,
+      "spread": 0.71717
+    },
+    {
+      "frame": 41,
+      "seconds": 4.1,
+      "state": "swim",
+      "position": [
+        0.056933,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.280064,
+      "turn": 0.0,
+      "phase": 0.514855,
+      "pectoral_phase": 0.12277,
+      "sweep": 0.005565,
+      "spread": 0.708658
+    },
+    {
+      "frame": 42,
+      "seconds": 4.2,
+      "state": "swim",
+      "position": [
+        0.117947,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.450683,
+      "turn": 0.0,
+      "phase": 0.625179,
+      "pectoral_phase": 0.334384,
+      "sweep": 0.012168,
+      "spread": 0.695843
+    },
+    {
+      "frame": 43,
+      "seconds": 4.3,
+      "state": "swim",
+      "position": [
+        0.189066,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.595734,
+      "turn": 0.0,
+      "phase": 0.757128,
+      "pectoral_phase": 0.558355,
+      "sweep": 0.020109,
+      "spread": 0.681068
+    },
+    {
+      "frame": 44,
+      "seconds": 4.4,
+      "state": "swim",
+      "position": [
+        0.266034,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.709823,
+      "turn": 0.0,
+      "phase": 0.906496,
+      "pectoral_phase": 0.792279,
+      "sweep": 0.028411,
+      "spread": 0.66628
+    },
+    {
+      "frame": 45,
+      "seconds": 4.5,
+      "state": "swim",
+      "position": [
+        0.346385,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.795472,
+      "turn": 0.0,
+      "phase": 0.069135,
+      "pectoral_phase": 0.033787,
+      "sweep": 0.036377,
+      "spread": 0.652719
+    },
+    {
+      "frame": 46,
+      "seconds": 4.6,
+      "state": "swim",
+      "position": [
+        0.428695,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.857813,
+      "turn": 0.0,
+      "phase": 0.241533,
+      "pectoral_phase": 0.280871,
+      "sweep": 0.043591,
+      "spread": 0.641002
+    },
+    {
+      "frame": 47,
+      "seconds": 4.7,
+      "state": "swim",
+      "position": [
+        0.512138,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.902206,
+      "turn": 0.0,
+      "phase": 0.42093,
+      "pectoral_phase": 0.531955,
+      "sweep": 0.049857,
+      "spread": 0.631304
+    },
+    {
+      "frame": 48,
+      "seconds": 4.8,
+      "state": "swim",
+      "position": [
+        0.596237,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.93331,
+      "turn": 0.0,
+      "phase": 0.605258,
+      "pectoral_phase": 0.785857,
+      "sweep": 0.055135,
+      "spread": 0.623531
+    },
+    {
+      "frame": 49,
+      "seconds": 4.9,
+      "state": "swim",
+      "position": [
+        0.680715,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.954834,
+      "turn": 0.0,
+      "phase": 0.793013,
+      "pectoral_phase": 0.041717,
+      "sweep": 0.059477,
+      "spread": 0.617459
+    },
+    {
+      "frame": 50,
+      "seconds": 5.0,
+      "state": "swim",
+      "position": [
+        0.765414,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.969584,
+      "turn": 0.0,
+      "phase": 0.983125,
+      "pectoral_phase": 0.298923,
+      "sweep": 0.06298,
+      "spread": 0.612809
+    },
+    {
+      "frame": 51,
+      "seconds": 5.1,
+      "state": "swim",
+      "position": [
+        0.850239,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.979613,
+      "turn": 0.0,
+      "phase": 0.174843,
+      "pectoral_phase": 0.557048,
+      "sweep": 0.065766,
+      "spread": 0.609308
+    },
+    {
+      "frame": 52,
+      "seconds": 5.2,
+      "state": "swim",
+      "position": [
+        0.935138,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.986389,
+      "turn": 0.0,
+      "phase": 0.367649,
+      "pectoral_phase": 0.815794,
+      "sweep": 0.067953,
+      "spread": 0.606707
+    },
+    {
+      "frame": 53,
+      "seconds": 5.3,
+      "state": "swim",
+      "position": [
+        1.020079,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.990943,
+      "turn": 0.0,
+      "phase": 0.561187,
+      "pectoral_phase": 0.074958,
+      "sweep": 0.069652,
+      "spread": 0.604798
+    },
+    {
+      "frame": 54,
+      "seconds": 5.4,
+      "state": "swim",
+      "position": [
+        1.105045,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.99399,
+      "turn": 0.0,
+      "phase": 0.755216,
+      "pectoral_phase": 0.334403,
+      "sweep": 0.070962,
+      "spread": 0.60341
+    },
+    {
+      "frame": 55,
+      "seconds": 5.5,
+      "state": "swim",
+      "position": [
+        1.190026,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.996022,
+      "turn": 0.0,
+      "phase": 0.949572,
+      "pectoral_phase": 0.594035,
+      "sweep": 0.071964,
+      "spread": 0.60241
+    },
+    {
+      "frame": 56,
+      "seconds": 5.6,
+      "state": "swim",
+      "position": [
+        1.275014,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.997372,
+      "turn": 0.0,
+      "phase": 0.144147,
+      "pectoral_phase": 0.853792,
+      "sweep": 0.072725,
+      "spread": 0.601694
+    },
+    {
+      "frame": 57,
+      "seconds": 5.7,
+      "state": "swim",
+      "position": [
+        1.360008,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.998267,
+      "turn": 0.0,
+      "phase": 0.338866,
+      "pectoral_phase": 0.113632,
+      "sweep": 0.073302,
+      "spread": 0.601186
+    },
+    {
+      "frame": 58,
+      "seconds": 5.8,
+      "state": "swim",
+      "position": [
+        1.445004,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.998859,
+      "turn": 0.0,
+      "phase": 0.533681,
+      "pectoral_phase": 0.373526,
+      "sweep": 0.073735,
+      "spread": 0.600826
+    },
+    {
+      "frame": 59,
+      "seconds": 5.9,
+      "state": "swim",
+      "position": [
+        1.530001,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.99925,
+      "turn": 0.0,
+      "phase": 0.72856,
+      "pectoral_phase": 0.633456,
+      "sweep": 0.074061,
+      "spread": 0.600574
+    },
+    {
+      "frame": 60,
+      "seconds": 6.0,
+      "state": "swim",
+      "position": [
+        1.615,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999508,
+      "turn": 0.0,
+      "phase": 0.92348,
+      "pectoral_phase": 0.89341,
+      "sweep": 0.074304,
+      "spread": 0.600397
+    },
+    {
+      "frame": 61,
+      "seconds": 6.1,
+      "state": "swim",
+      "position": [
+        1.699999,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999677,
+      "turn": 0.0,
+      "phase": 0.118427,
+      "pectoral_phase": 0.15338,
+      "sweep": 0.074485,
+      "spread": 0.600274
+    },
+    {
+      "frame": 62,
+      "seconds": 6.2,
+      "state": "swim",
+      "position": [
+        1.784999,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999788,
+      "turn": 0.0,
+      "phase": 0.313393,
+      "pectoral_phase": 0.41336,
+      "sweep": 0.074619,
+      "spread": 0.600188
+    },
+    {
+      "frame": 63,
+      "seconds": 6.3,
+      "state": "swim",
+      "position": [
+        1.869998,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999861,
+      "turn": 0.0,
+      "phase": 0.50837,
+      "pectoral_phase": 0.673347,
+      "sweep": 0.074719,
+      "spread": 0.600129
+    },
+    {
+      "frame": 64,
+      "seconds": 6.4,
+      "state": "swim",
+      "position": [
+        1.954998,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999909,
+      "turn": 0.0,
+      "phase": 0.703355,
+      "pectoral_phase": 0.933338,
+      "sweep": 0.074793,
+      "spread": 0.600089
+    },
+    {
+      "frame": 65,
+      "seconds": 6.5,
+      "state": "swim",
+      "position": [
+        2.039998,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999941,
+      "turn": 0.0,
+      "phase": 0.898345,
+      "pectoral_phase": 0.193332,
+      "sweep": 0.074848,
+      "spread": 0.600061
+    },
+    {
+      "frame": 66,
+      "seconds": 6.6,
+      "state": "swim",
+      "position": [
+        2.124997,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999961,
+      "turn": 0.0,
+      "phase": 0.093338,
+      "pectoral_phase": 0.453328,
+      "sweep": 0.074888,
+      "spread": 0.600041
+    },
+    {
+      "frame": 67,
+      "seconds": 6.7,
+      "state": "swim",
+      "position": [
+        2.209997,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999975,
+      "turn": 0.0,
+      "phase": 0.288334,
+      "pectoral_phase": 0.713326,
+      "sweep": 0.074918,
+      "spread": 0.600028
+    },
+    {
+      "frame": 68,
+      "seconds": 6.8,
+      "state": "swim",
+      "position": [
+        2.294997,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999983,
+      "turn": 0.0,
+      "phase": 0.483331,
+      "pectoral_phase": 0.973324,
+      "sweep": 0.07494,
+      "spread": 0.600019
+    },
+    {
+      "frame": 69,
+      "seconds": 6.9,
+      "state": "swim",
+      "position": [
+        2.379996,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999989,
+      "turn": 0.0,
+      "phase": 0.678329,
+      "pectoral_phase": 0.233323,
+      "sweep": 0.074956,
+      "spread": 0.600013
+    },
+    {
+      "frame": 70,
+      "seconds": 7.0,
+      "state": "swim",
+      "position": [
+        2.464996,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999993,
+      "turn": 0.0,
+      "phase": 0.873328,
+      "pectoral_phase": 0.493322,
+      "sweep": 0.074968,
+      "spread": 0.600009
+    },
+    {
+      "frame": 71,
+      "seconds": 7.1,
+      "state": "swim",
+      "position": [
+        2.549995,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999995,
+      "turn": 0.0,
+      "phase": 0.068327,
+      "pectoral_phase": 0.753321,
+      "sweep": 0.074976,
+      "spread": 0.600006
+    },
+    {
+      "frame": 72,
+      "seconds": 7.2,
+      "state": "swim",
+      "position": [
+        2.634995,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999997,
+      "turn": 0.0,
+      "phase": 0.263326,
+      "pectoral_phase": 0.013321,
+      "sweep": 0.074983,
+      "spread": 0.600004
+    },
+    {
+      "frame": 73,
+      "seconds": 7.3,
+      "state": "swim",
+      "position": [
+        2.719994,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999998,
+      "turn": 0.0,
+      "phase": 0.458326,
+      "pectoral_phase": 0.27332,
+      "sweep": 0.074987,
+      "spread": 0.600003
+    },
+    {
+      "frame": 74,
+      "seconds": 7.4,
+      "state": "swim",
+      "position": [
+        2.804994,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999999,
+      "turn": 0.0,
+      "phase": 0.653325,
+      "pectoral_phase": 0.53332,
+      "sweep": 0.074991,
+      "spread": 0.600002
+    },
+    {
+      "frame": 75,
+      "seconds": 7.5,
+      "state": "swim",
+      "position": [
+        2.889993,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999999,
+      "turn": 0.0,
+      "phase": 0.848325,
+      "pectoral_phase": 0.793319,
+      "sweep": 0.074993,
+      "spread": 0.600001
+    },
+    {
+      "frame": 76,
+      "seconds": 7.6,
+      "state": "swim",
+      "position": [
+        2.974993,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999999,
+      "turn": 0.0,
+      "phase": 0.043325,
+      "pectoral_phase": 0.053319,
+      "sweep": 0.074995,
+      "spread": 0.600001
+    },
+    {
+      "frame": 77,
+      "seconds": 7.7,
+      "state": "swim",
+      "position": [
+        3.059993,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999999,
+      "turn": 0.0,
+      "phase": 0.238324,
+      "pectoral_phase": 0.313319,
+      "sweep": 0.074996,
+      "spread": 0.600001
+    },
+    {
+      "frame": 78,
+      "seconds": 7.8,
+      "state": "swim",
+      "position": [
+        3.144994,
+        -0.199997,
+        2.5
+      ],
+      "drive": 1.0,
+      "turn": 0.0,
+      "phase": 0.433327,
+      "pectoral_phase": 0.573322,
+      "sweep": 0.074997,
+      "spread": 0.6
+    },
+    {
+      "frame": 79,
+      "seconds": 7.9,
+      "state": "swim",
+      "position": [
+        3.229995,
+        -0.199997,
+        2.5
+      ],
+      "drive": 1.0,
+      "turn": 0.0,
+      "phase": 0.628329,
+      "pectoral_phase": 0.833326,
+      "sweep": 0.074998,
+      "spread": 0.6
+    },
+    {
+      "frame": 80,
+      "seconds": 8.0,
+      "state": "swim",
+      "position": [
+        3.314996,
+        -0.199997,
+        2.5
+      ],
+      "drive": 1.0,
+      "turn": 0.0,
+      "phase": 0.823332,
+      "pectoral_phase": 0.093329,
+      "sweep": 0.074999,
+      "spread": 0.6
+    },
+    {
+      "frame": 81,
+      "seconds": 8.1,
+      "state": "swim",
+      "position": [
+        3.399997,
+        -0.199997,
+        2.5
+      ],
+      "drive": 1.0,
+      "turn": 0.0,
+      "phase": 0.018334,
+      "pectoral_phase": 0.353333,
+      "sweep": 0.074999,
+      "spread": 0.6
+    },
+    {
+      "frame": 82,
+      "seconds": 8.2,
+      "state": "swim",
+      "position": [
+        3.484998,
+        -0.199997,
+        2.5
+      ],
+      "drive": 1.0,
+      "turn": 0.0,
+      "phase": 0.213337,
+      "pectoral_phase": 0.613336,
+      "sweep": 0.074999,
+      "spread": 0.6
+    },
+    {
+      "frame": 83,
+      "seconds": 8.3,
+      "state": "swim",
+      "position": [
+        3.569999,
+        -0.199997,
+        2.5
+      ],
+      "drive": 1.0,
+      "turn": 0.0,
+      "phase": 0.40834,
+      "pectoral_phase": 0.87334,
+      "sweep": 0.074999,
+      "spread": 0.6
+    },
+    {
+      "frame": 84,
+      "seconds": 8.4,
+      "state": "swim",
+      "position": [
+        3.654999,
+        -0.199997,
+        2.5
+      ],
+      "drive": 1.0,
+      "turn": 0.0,
+      "phase": 0.603342,
+      "pectoral_phase": 0.133343,
+      "sweep": 0.075,
+      "spread": 0.6
+    },
+    {
+      "frame": 85,
+      "seconds": 8.5,
+      "state": "turn",
+      "position": [
+        3.713241,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.783649,
+      "turn": 0.317203,
+      "phase": 0.780574,
+      "pectoral_phase": 0.383192,
+      "sweep": 0.072297,
+      "spread": 0.630366
+    },
+    {
+      "frame": 86,
+      "seconds": 8.6,
+      "state": "turn",
+      "position": [
+        3.711134,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.580387,
+      "turn": 0.47961,
+      "phase": 0.923456,
+      "pectoral_phase": 0.613412,
+      "sweep": 0.065389,
+      "spread": 0.68143
+    },
+    {
+      "frame": 87,
+      "seconds": 8.7,
+      "state": "turn",
+      "position": [
+        3.674103,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.565521,
+      "turn": 0.562761,
+      "phase": 0.057126,
+      "pectoral_phase": 0.838368,
+      "sweep": 0.059092,
+      "spread": 0.728046
+    },
+    {
+      "frame": 88,
+      "seconds": 8.8,
+      "state": "turn",
+      "position": [
+        3.616863,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.623811,
+      "turn": 0.605334,
+      "phase": 0.196345,
+      "pectoral_phase": 0.066495,
+      "sweep": 0.055336,
+      "spread": 0.762199
+    },
+    {
+      "frame": 89,
+      "seconds": 8.9,
+      "state": "turn",
+      "position": [
+        3.547927,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.701089,
+      "turn": 0.627131,
+      "phase": 0.345856,
+      "pectoral_phase": 0.300504,
+      "sweep": 0.054098,
+      "spread": 0.784175
+    },
+    {
+      "frame": 90,
+      "seconds": 9.0,
+      "state": "turn",
+      "position": [
+        3.472222,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.774156,
+      "turn": 0.638291,
+      "phase": 0.505935,
+      "pectoral_phase": 0.540551,
+      "sweep": 0.054726,
+      "spread": 0.796781
+    },
+    {
+      "frame": 91,
+      "seconds": 9.1,
+      "state": "turn",
+      "position": [
+        3.392601,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.834891,
+      "turn": 0.644005,
+      "phase": 0.67513,
+      "pectoral_phase": 0.785807,
+      "sweep": 0.056501,
+      "spread": 0.803022
+    },
+    {
+      "frame": 92,
+      "seconds": 9.2,
+      "state": "turn",
+      "position": [
+        3.310714,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.88205,
+      "turn": 0.526889,
+      "phase": 0.851555,
+      "pectoral_phase": 0.035195,
+      "sweep": 0.058839,
+      "spread": 0.800519
+    },
+    {
+      "frame": 93,
+      "seconds": 9.3,
+      "state": "turn",
+      "position": [
+        3.227514,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.91716,
+      "turn": 0.269765,
+      "phase": 0.033434,
+      "pectoral_phase": 0.287699,
+      "sweep": 0.061329,
+      "spread": 0.769556
+    },
+    {
+      "frame": 94,
+      "seconds": 9.4,
+      "state": "turn",
+      "position": [
+        3.143556,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.942568,
+      "turn": 0.138118,
+      "phase": 0.219299,
+      "pectoral_phase": 0.542481,
+      "sweep": 0.063719,
+      "spread": 0.73107
+    },
+    {
+      "frame": 95,
+      "seconds": 9.5,
+      "state": "turn",
+      "position": [
+        3.059158,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.960585,
+      "turn": 0.070716,
+      "phase": 0.408008,
+      "pectoral_phase": 0.798888,
+      "sweep": 0.06587,
+      "spread": 0.696395
+    },
+    {
+      "frame": 96,
+      "seconds": 9.6,
+      "state": "turn",
+      "position": [
+        2.974506,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.973168,
+      "turn": 0.036206,
+      "phase": 0.598715,
+      "pectoral_phase": 0.056437,
+      "sweep": 0.067726,
+      "spread": 0.668736
+    },
+    {
+      "frame": 97,
+      "seconds": 9.7,
+      "state": "turn",
+      "position": [
+        2.889707,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.981854,
+      "turn": 0.018537,
+      "phase": 0.790805,
+      "pectoral_phase": 0.314776,
+      "sweep": 0.069279,
+      "spread": 0.648019
+    },
+    {
+      "frame": 98,
+      "seconds": 9.8,
+      "state": "turn",
+      "position": [
+        2.804823,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.987794,
+      "turn": 0.009491,
+      "phase": 0.983845,
+      "pectoral_phase": 0.573658,
+      "sweep": 0.070547,
+      "spread": 0.633075
+    },
+    {
+      "frame": 99,
+      "seconds": 9.9,
+      "state": "turn",
+      "position": [
+        2.719889,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.991827,
+      "turn": 0.004859,
+      "phase": 0.177532,
+      "pectoral_phase": 0.83291,
+      "sweep": 0.071564,
+      "spread": 0.622552
+    },
+    {
+      "frame": 100,
+      "seconds": 10.0,
+      "state": "turn",
+      "position": [
+        2.634927,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.994548,
+      "turn": 0.002488,
+      "phase": 0.371655,
+      "pectoral_phase": 0.092411,
+      "sweep": 0.072369,
+      "spread": 0.615264
+    },
+    {
+      "frame": 101,
+      "seconds": 10.1,
+      "state": "turn",
+      "position": [
+        2.549949,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.996375,
+      "turn": 0.001274,
+      "phase": 0.566073,
+      "pectoral_phase": 0.35208,
+      "sweep": 0.072998,
+      "spread": 0.610275
+    },
+    {
+      "frame": 102,
+      "seconds": 10.2,
+      "state": "turn",
+      "position": [
+        2.464961,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.997596,
+      "turn": 0.000652,
+      "phase": 0.760687,
+      "pectoral_phase": 0.611861,
+      "sweep": 0.073485,
+      "spread": 0.606888
+    },
+    {
+      "frame": 103,
+      "seconds": 10.3,
+      "state": "turn",
+      "position": [
+        2.379967,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.99841,
+      "turn": 0.000334,
+      "phase": 0.955432,
+      "pectoral_phase": 0.871718,
+      "sweep": 0.073858,
+      "spread": 0.604604
+    },
+    {
+      "frame": 104,
+      "seconds": 10.4,
+      "state": "turn",
+      "position": [
+        2.294971,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.99895,
+      "turn": 0.000171,
+      "phase": 0.150265,
+      "pectoral_phase": 0.131624,
+      "sweep": 0.074143,
+      "spread": 0.603069
+    },
+    {
+      "frame": 105,
+      "seconds": 10.5,
+      "state": "turn",
+      "position": [
+        2.209972,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999308,
+      "turn": 8.8e-05,
+      "phase": 0.345156,
+      "pectoral_phase": 0.391564,
+      "sweep": 0.074359,
+      "spread": 0.602042
+    },
+    {
+      "frame": 106,
+      "seconds": 10.6,
+      "state": "turn",
+      "position": [
+        2.124972,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999545,
+      "turn": 4.5e-05,
+      "phase": 0.540084,
+      "pectoral_phase": 0.651525,
+      "sweep": 0.074522,
+      "spread": 0.601357
+    },
+    {
+      "frame": 107,
+      "seconds": 10.7,
+      "state": "turn",
+      "position": [
+        2.039972,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999701,
+      "turn": 2.3e-05,
+      "phase": 0.735038,
+      "pectoral_phase": 0.911501,
+      "sweep": 0.074645,
+      "spread": 0.600901
+    },
+    {
+      "frame": 108,
+      "seconds": 10.8,
+      "state": "turn",
+      "position": [
+        1.954971,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999803,
+      "turn": 1.2e-05,
+      "phase": 0.930009,
+      "pectoral_phase": 0.171486,
+      "sweep": 0.074736,
+      "spread": 0.600597
+    },
+    {
+      "frame": 109,
+      "seconds": 10.9,
+      "state": "turn",
+      "position": [
+        1.86997,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999871,
+      "turn": 6e-06,
+      "phase": 0.124991,
+      "pectoral_phase": 0.431477,
+      "sweep": 0.074805,
+      "spread": 0.600396
+    },
+    {
+      "frame": 110,
+      "seconds": 11.0,
+      "state": "turn",
+      "position": [
+        1.784969,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999916,
+      "turn": 3e-06,
+      "phase": 0.31998,
+      "pectoral_phase": 0.691473,
+      "sweep": 0.074856,
+      "spread": 0.600262
+    },
+    {
+      "frame": 111,
+      "seconds": 11.1,
+      "state": "turn",
+      "position": [
+        1.699968,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999945,
+      "turn": 2e-06,
+      "phase": 0.514973,
+      "pectoral_phase": 0.951471,
+      "sweep": 0.074894,
+      "spread": 0.600173
+    },
+    {
+      "frame": 112,
+      "seconds": 11.2,
+      "state": "turn",
+      "position": [
+        1.614967,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999964,
+      "turn": 1e-06,
+      "phase": 0.70997,
+      "pectoral_phase": 0.211472,
+      "sweep": 0.074922,
+      "spread": 0.600115
+    },
+    {
+      "frame": 113,
+      "seconds": 11.3,
+      "state": "turn",
+      "position": [
+        1.529966,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999976,
+      "turn": 0.0,
+      "phase": 0.904969,
+      "pectoral_phase": 0.471473,
+      "sweep": 0.074942,
+      "spread": 0.600076
+    },
+    {
+      "frame": 114,
+      "seconds": 11.4,
+      "state": "turn",
+      "position": [
+        1.444965,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999985,
+      "turn": 0.0,
+      "phase": 0.099969,
+      "pectoral_phase": 0.731475,
+      "sweep": 0.074958,
+      "spread": 0.60005
+    },
+    {
+      "frame": 115,
+      "seconds": 11.5,
+      "state": "turn",
+      "position": [
+        1.359964,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.99999,
+      "turn": 0.0,
+      "phase": 0.29497,
+      "pectoral_phase": 0.991477,
+      "sweep": 0.074969,
+      "spread": 0.600033
+    },
+    {
+      "frame": 116,
+      "seconds": 11.6,
+      "state": "turn",
+      "position": [
+        1.274963,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999993,
+      "turn": 0.0,
+      "phase": 0.489972,
+      "pectoral_phase": 0.25148,
+      "sweep": 0.074977,
+      "spread": 0.600022
+    },
+    {
+      "frame": 117,
+      "seconds": 11.7,
+      "state": "turn",
+      "position": [
+        1.189963,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999996,
+      "turn": 0.0,
+      "phase": 0.684973,
+      "pectoral_phase": 0.511483,
+      "sweep": 0.074983,
+      "spread": 0.600015
+    },
+    {
+      "frame": 118,
+      "seconds": 11.8,
+      "state": "turn",
+      "position": [
+        1.104962,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999997,
+      "turn": 0.0,
+      "phase": 0.879976,
+      "pectoral_phase": 0.771487,
+      "sweep": 0.074988,
+      "spread": 0.60001
+    },
+    {
+      "frame": 119,
+      "seconds": 11.9,
+      "state": "turn",
+      "position": [
+        1.019961,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999998,
+      "turn": 0.0,
+      "phase": 0.074978,
+      "pectoral_phase": 0.03149,
+      "sweep": 0.074991,
+      "spread": 0.600006
+    },
+    {
+      "frame": 120,
+      "seconds": 12.0,
+      "state": "turn",
+      "position": [
+        0.934959,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999999,
+      "turn": 0.0,
+      "phase": 0.26998,
+      "pectoral_phase": 0.291493,
+      "sweep": 0.074993,
+      "spread": 0.600004
+    },
+    {
+      "frame": 121,
+      "seconds": 12.1,
+      "state": "turn",
+      "position": [
+        0.849958,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999999,
+      "turn": 0.0,
+      "phase": 0.464983,
+      "pectoral_phase": 0.551497,
+      "sweep": 0.074995,
+      "spread": 0.600003
+    },
+    {
+      "frame": 122,
+      "seconds": 12.2,
+      "state": "turn",
+      "position": [
+        0.764957,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.999999,
+      "turn": 0.0,
+      "phase": 0.659985,
+      "pectoral_phase": 0.8115,
+      "sweep": 0.074996,
+      "spread": 0.600002
+    },
+    {
+      "frame": 123,
+      "seconds": 12.3,
+      "state": "turn",
+      "position": [
+        0.679956,
+        -0.199997,
+        2.5
+      ],
+      "drive": 1.0,
+      "turn": 0.0,
+      "phase": 0.854988,
+      "pectoral_phase": 0.071503,
+      "sweep": 0.074997,
+      "spread": 0.600001
+    },
+    {
+      "frame": 124,
+      "seconds": 12.4,
+      "state": "turn",
+      "position": [
+        0.594955,
+        -0.199997,
+        2.5
+      ],
+      "drive": 1.0,
+      "turn": 0.0,
+      "phase": 0.04999,
+      "pectoral_phase": 0.331507,
+      "sweep": 0.074998,
+      "spread": 0.600001
+    },
+    {
+      "frame": 125,
+      "seconds": 12.5,
+      "state": "settle",
+      "position": [
+        0.523333,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.891824,
+      "turn": 0.0,
+      "phase": 0.236107,
+      "pectoral_phase": 0.586433,
+      "sweep": 0.073647,
+      "spread": 0.602831
+    },
+    {
+      "frame": 126,
+      "seconds": 12.6,
+      "state": "settle",
+      "position": [
+        0.481886,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.71993,
+      "turn": 0.0,
+      "phase": 0.400137,
+      "pectoral_phase": 0.828738,
+      "sweep": 0.069434,
+      "spread": 0.611342
+    },
+    {
+      "frame": 127,
+      "seconds": 12.7,
+      "state": "settle",
+      "position": [
+        0.457901,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.549309,
+      "turn": 0.0,
+      "phase": 0.539814,
+      "pectoral_phase": 0.057126,
+      "sweep": 0.06283,
+      "spread": 0.624158
+    },
+    {
+      "frame": 128,
+      "seconds": 12.8,
+      "state": "settle",
+      "position": [
+        0.444021,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.404258,
+      "turn": 0.0,
+      "phase": 0.657865,
+      "pectoral_phase": 0.273157,
+      "sweep": 0.05489,
+      "spread": 0.638934
+    },
+    {
+      "frame": 129,
+      "seconds": 12.9,
+      "state": "settle",
+      "position": [
+        0.435988,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.290169,
+      "turn": 0.0,
+      "phase": 0.758498,
+      "pectoral_phase": 0.479235,
+      "sweep": 0.046588,
+      "spread": 0.653722
+    },
+    {
+      "frame": 130,
+      "seconds": 13.0,
+      "state": "settle",
+      "position": [
+        0.43134,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.204521,
+      "turn": 0.0,
+      "phase": 0.845858,
+      "pectoral_phase": 0.677729,
+      "sweep": 0.038622,
+      "spread": 0.667282
+    },
+    {
+      "frame": 131,
+      "seconds": 13.1,
+      "state": "settle",
+      "position": [
+        0.42865,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.142182,
+      "turn": 0.0,
+      "phase": 0.923461,
+      "pectoral_phase": 0.870647,
+      "sweep": 0.031409,
+      "spread": 0.678999
+    },
+    {
+      "frame": 132,
+      "seconds": 13.2,
+      "state": "settle",
+      "position": [
+        0.427093,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.09779,
+      "turn": 0.0,
+      "phase": 0.994064,
+      "pectoral_phase": 0.059565,
+      "sweep": 0.025142,
+      "spread": 0.688698
+    },
+    {
+      "frame": 133,
+      "seconds": 13.3,
+      "state": "settle",
+      "position": [
+        0.426192,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.066687,
+      "turn": 0.0,
+      "phase": 0.059736,
+      "pectoral_phase": 0.245665,
+      "sweep": 0.019864,
+      "spread": 0.69647
+    },
+    {
+      "frame": 134,
+      "seconds": 13.4,
+      "state": "settle",
+      "position": [
+        0.425671,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.045164,
+      "turn": 0.0,
+      "phase": 0.121981,
+      "pectoral_phase": 0.429807,
+      "sweep": 0.015523,
+      "spread": 0.702542
+    },
+    {
+      "frame": 135,
+      "seconds": 13.5,
+      "state": "settle",
+      "position": [
+        0.425369,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.030414,
+      "turn": 0.0,
+      "phase": 0.181869,
+      "pectoral_phase": 0.612602,
+      "sweep": 0.012019,
+      "spread": 0.707192
+    },
+    {
+      "frame": 136,
+      "seconds": 13.6,
+      "state": "settle",
+      "position": [
+        0.425195,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.020386,
+      "turn": 0.0,
+      "phase": 0.240152,
+      "pectoral_phase": 0.79448,
+      "sweep": 0.009234,
+      "spread": 0.710693
+    },
+    {
+      "frame": 137,
+      "seconds": 13.7,
+      "state": "settle",
+      "position": [
+        0.425093,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.01361,
+      "turn": 0.0,
+      "phase": 0.297346,
+      "pectoral_phase": 0.975736,
+      "sweep": 0.007047,
+      "spread": 0.713293
+    },
+    {
+      "frame": 138,
+      "seconds": 13.8,
+      "state": "settle",
+      "position": [
+        0.425035,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.009056,
+      "turn": 0.0,
+      "phase": 0.353809,
+      "pectoral_phase": 0.156574,
+      "sweep": 0.005347,
+      "spread": 0.715203
+    },
+    {
+      "frame": 139,
+      "seconds": 13.9,
+      "state": "settle",
+      "position": [
+        0.425001,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.006009,
+      "turn": 0.0,
+      "phase": 0.40978,
+      "pectoral_phase": 0.337131,
+      "sweep": 0.004038,
+      "spread": 0.716591
+    },
+    {
+      "frame": 140,
+      "seconds": 14.0,
+      "state": "settle",
+      "position": [
+        0.424982,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.003977,
+      "turn": 0.0,
+      "phase": 0.465424,
+      "pectoral_phase": 0.517501,
+      "sweep": 0.003036,
+      "spread": 0.717591
+    },
+    {
+      "frame": 141,
+      "seconds": 14.1,
+      "state": "settle",
+      "position": [
+        0.42497,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.002627,
+      "turn": 0.0,
+      "phase": 0.52085,
+      "pectoral_phase": 0.697746,
+      "sweep": 0.002274,
+      "spread": 0.718306
+    },
+    {
+      "frame": 142,
+      "seconds": 14.2,
+      "state": "settle",
+      "position": [
+        0.424964,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.001732,
+      "turn": 0.0,
+      "phase": 0.576131,
+      "pectoral_phase": 0.877909,
+      "sweep": 0.001698,
+      "spread": 0.718815
+    },
+    {
+      "frame": 143,
+      "seconds": 14.3,
+      "state": "settle",
+      "position": [
+        0.42496,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.00114,
+      "turn": 0.0,
+      "phase": 0.631317,
+      "pectoral_phase": 0.058017,
+      "sweep": 0.001265,
+      "spread": 0.719174
+    },
+    {
+      "frame": 144,
+      "seconds": 14.4,
+      "state": "settle",
+      "position": [
+        0.424958,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.00075,
+      "turn": 0.0,
+      "phase": 0.686439,
+      "pectoral_phase": 0.238088,
+      "sweep": 0.000939,
+      "spread": 0.719426
+    },
+    {
+      "frame": 145,
+      "seconds": 14.5,
+      "state": "settle",
+      "position": [
+        0.424956,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.000492,
+      "turn": 0.0,
+      "phase": 0.741519,
+      "pectoral_phase": 0.418136,
+      "sweep": 0.000696,
+      "spread": 0.719603
+    },
+    {
+      "frame": 146,
+      "seconds": 14.6,
+      "state": "settle",
+      "position": [
+        0.424956,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.000323,
+      "turn": 0.0,
+      "phase": 0.796572,
+      "pectoral_phase": 0.598169,
+      "sweep": 0.000515,
+      "spread": 0.719726
+    },
+    {
+      "frame": 147,
+      "seconds": 14.7,
+      "state": "settle",
+      "position": [
+        0.424955,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.000212,
+      "turn": 0.0,
+      "phase": 0.851608,
+      "pectoral_phase": 0.778191,
+      "sweep": 0.00038,
+      "spread": 0.719812
+    },
+    {
+      "frame": 148,
+      "seconds": 14.8,
+      "state": "settle",
+      "position": [
+        0.424955,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.000139,
+      "turn": 0.0,
+      "phase": 0.906631,
+      "pectoral_phase": 0.958206,
+      "sweep": 0.000281,
+      "spread": 0.719871
+    },
+    {
+      "frame": 149,
+      "seconds": 14.9,
+      "state": "settle",
+      "position": [
+        0.424955,
+        -0.199997,
+        2.5
+      ],
+      "drive": 9.1e-05,
+      "turn": 0.0,
+      "phase": 0.961646,
+      "pectoral_phase": 0.138217,
+      "sweep": 0.000207,
+      "spread": 0.719911
+    },
+    {
+      "frame": 150,
+      "seconds": 15.0,
+      "state": "settle",
+      "position": [
+        0.424955,
+        -0.199997,
+        2.5
+      ],
+      "drive": 5.9e-05,
+      "turn": 0.0,
+      "phase": 0.016657,
+      "pectoral_phase": 0.318225,
+      "sweep": 0.000152,
+      "spread": 0.71994
+    },
+    {
+      "frame": 151,
+      "seconds": 15.1,
+      "state": "settle",
+      "position": [
+        0.424955,
+        -0.199997,
+        2.5
+      ],
+      "drive": 3.9e-05,
+      "turn": 0.0,
+      "phase": 0.071664,
+      "pectoral_phase": 0.498231,
+      "sweep": 0.000112,
+      "spread": 0.719959
+    },
+    {
+      "frame": 152,
+      "seconds": 15.2,
+      "state": "settle",
+      "position": [
+        0.424955,
+        -0.199997,
+        2.5
+      ],
+      "drive": 2.5e-05,
+      "turn": 0.0,
+      "phase": 0.126668,
+      "pectoral_phase": 0.678235,
+      "sweep": 8.2e-05,
+      "spread": 0.719972
+    },
+    {
+      "frame": 153,
+      "seconds": 15.3,
+      "state": "settle",
+      "position": [
+        0.424955,
+        -0.199997,
+        2.5
+      ],
+      "drive": 1.7e-05,
+      "turn": 0.0,
+      "phase": 0.181672,
+      "pectoral_phase": 0.858239,
+      "sweep": 6e-05,
+      "spread": 0.719981
+    },
+    {
+      "frame": 154,
+      "seconds": 15.4,
+      "state": "settle",
+      "position": [
+        0.424955,
+        -0.199997,
+        2.5
+      ],
+      "drive": 1.1e-05,
+      "turn": 0.0,
+      "phase": 0.236674,
+      "pectoral_phase": 0.038243,
+      "sweep": 4.4e-05,
+      "spread": 0.719987
+    },
+    {
+      "frame": 155,
+      "seconds": 15.5,
+      "state": "settle",
+      "position": [
+        0.424955,
+        -0.199997,
+        2.5
+      ],
+      "drive": 7e-06,
+      "turn": 0.0,
+      "phase": 0.291676,
+      "pectoral_phase": 0.218246,
+      "sweep": 3.2e-05,
+      "spread": 0.719991
+    },
+    {
+      "frame": 156,
+      "seconds": 15.6,
+      "state": "settle",
+      "position": [
+        0.424955,
+        -0.199997,
+        2.5
+      ],
+      "drive": 5e-06,
+      "turn": 0.0,
+      "phase": 0.346678,
+      "pectoral_phase": 0.398249,
+      "sweep": 2.4e-05,
+      "spread": 0.719994
+    },
+    {
+      "frame": 157,
+      "seconds": 15.7,
+      "state": "settle",
+      "position": [
+        0.424955,
+        -0.199997,
+        2.5
+      ],
+      "drive": 3e-06,
+      "turn": 0.0,
+      "phase": 0.401678,
+      "pectoral_phase": 0.578248,
+      "sweep": 1.7e-05,
+      "spread": 0.719996
+    },
+    {
+      "frame": 158,
+      "seconds": 15.8,
+      "state": "settle",
+      "position": [
+        0.424955,
+        -0.199997,
+        2.5
+      ],
+      "drive": 2e-06,
+      "turn": 0.0,
+      "phase": 0.456677,
+      "pectoral_phase": 0.758245,
+      "sweep": 1.3e-05,
+      "spread": 0.719997
+    },
+    {
+      "frame": 159,
+      "seconds": 15.9,
+      "state": "settle",
+      "position": [
+        0.424955,
+        -0.199997,
+        2.5
+      ],
+      "drive": 1e-06,
+      "turn": 0.0,
+      "phase": 0.511677,
+      "pectoral_phase": 0.938243,
+      "sweep": 9e-06,
+      "spread": 0.719998
+    },
+    {
+      "frame": 160,
+      "seconds": 16.0,
+      "state": "action",
+      "position": [
+        0.407741,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.132175,
+      "turn": 0.0,
+      "phase": 0.57784,
+      "pectoral_phase": 0.12462,
+      "sweep": 0.0017,
+      "spread": 0.828199
+    },
+    {
+      "frame": 161,
+      "seconds": 16.1,
+      "state": "action",
+      "position": [
+        0.360257,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.301619,
+      "turn": 0.0,
+      "phase": 0.667321,
+      "pectoral_phase": 0.324321,
+      "sweep": 0.006325,
+      "spread": 0.898634
+    },
+    {
+      "frame": 162,
+      "seconds": 16.2,
+      "state": "action",
+      "position": [
+        0.302635,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.439853,
+      "turn": 0.0,
+      "phase": 0.777864,
+      "pectoral_phase": 0.536057,
+      "sweep": 0.012737,
+      "spread": 0.944485
+    },
+    {
+      "frame": 163,
+      "seconds": 16.3,
+      "state": "recover",
+      "position": [
+        0.251768,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.457402,
+      "turn": 0.0,
+      "phase": 0.897358,
+      "pectoral_phase": 0.752909,
+      "sweep": 0.018647,
+      "spread": 0.846843
+    },
+    {
+      "frame": 164,
+      "seconds": 16.4,
+      "state": "recover",
+      "position": [
+        0.22233,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.396755,
+      "turn": 0.0,
+      "phase": 0.011158,
+      "pectoral_phase": 0.966507,
+      "sweep": 0.022098,
+      "spread": 0.785069
+    },
+    {
+      "frame": 165,
+      "seconds": 16.5,
+      "state": "recover",
+      "position": [
+        0.205295,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.315567,
+      "turn": 0.0,
+      "phase": 0.114167,
+      "pectoral_phase": 0.173938,
+      "sweep": 0.02304,
+      "spread": 0.748104
+    },
+    {
+      "frame": 166,
+      "seconds": 16.6,
+      "state": "recover",
+      "position": [
+        0.195436,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.23858,
+      "turn": 0.0,
+      "phase": 0.206051,
+      "pectoral_phase": 0.375012,
+      "sweep": 0.022116,
+      "spread": 0.72736
+    },
+    {
+      "frame": 167,
+      "seconds": 16.7,
+      "state": "recover",
+      "position": [
+        0.18973,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.174495,
+      "turn": 0.0,
+      "phase": 0.28832,
+      "pectoral_phase": 0.570592,
+      "sweep": 0.020052,
+      "spread": 0.716714
+    },
+    {
+      "frame": 168,
+      "seconds": 16.8,
+      "state": "recover",
+      "position": [
+        0.186429,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.124695,
+      "turn": 0.0,
+      "phase": 0.362957,
+      "pectoral_phase": 0.761811,
+      "sweep": 0.017447,
+      "spread": 0.712049
+    },
+    {
+      "frame": 169,
+      "seconds": 16.9,
+      "state": "recover",
+      "position": [
+        0.184518,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.087598,
+      "turn": 0.0,
+      "phase": 0.431831,
+      "pectoral_phase": 0.949737,
+      "sweep": 0.014716,
+      "spread": 0.71072
+    },
+    {
+      "frame": 170,
+      "seconds": 17.0,
+      "state": "recover",
+      "position": [
+        0.183412,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.060742,
+      "turn": 0.0,
+      "phase": 0.496494,
+      "pectoral_phase": 0.135256,
+      "sweep": 0.012119,
+      "spread": 0.711101
+    },
+    {
+      "frame": 171,
+      "seconds": 17.1,
+      "state": "recover",
+      "position": [
+        0.182772,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.041693,
+      "turn": 0.0,
+      "phase": 0.55815,
+      "pectoral_phase": 0.319057,
+      "sweep": 0.009793,
+      "spread": 0.712239
+    },
+    {
+      "frame": 172,
+      "seconds": 17.2,
+      "state": "recover",
+      "position": [
+        0.182402,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.028386,
+      "turn": 0.0,
+      "phase": 0.617694,
+      "pectoral_phase": 0.501651,
+      "sweep": 0.007793,
+      "spread": 0.713605
+    },
+    {
+      "frame": 173,
+      "seconds": 17.3,
+      "state": "recover",
+      "position": [
+        0.182188,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.019199,
+      "turn": 0.0,
+      "phase": 0.675774,
+      "pectoral_phase": 0.683409,
+      "sweep": 0.006124,
+      "spread": 0.714927
+    },
+    {
+      "frame": 174,
+      "seconds": 17.4,
+      "state": "recover",
+      "position": [
+        0.182064,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.012915,
+      "turn": 0.0,
+      "phase": 0.732849,
+      "pectoral_phase": 0.864593,
+      "sweep": 0.004763,
+      "spread": 0.716084
+    },
+    {
+      "frame": 175,
+      "seconds": 17.5,
+      "state": "recover",
+      "position": [
+        0.181992,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.008649,
+      "turn": 0.0,
+      "phase": 0.789241,
+      "pectoral_phase": 0.045386,
+      "sweep": 0.003673,
+      "spread": 0.717039
+    },
+    {
+      "frame": 176,
+      "seconds": 17.6,
+      "state": "recover",
+      "position": [
+        0.18195,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.00577,
+      "turn": 0.0,
+      "phase": 0.845171,
+      "pectoral_phase": 0.225915,
+      "sweep": 0.002811,
+      "spread": 0.717798
+    },
+    {
+      "frame": 177,
+      "seconds": 17.7,
+      "state": "recover",
+      "position": [
+        0.181926,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.003837,
+      "turn": 0.0,
+      "phase": 0.900789,
+      "pectoral_phase": 0.406266,
+      "sweep": 0.002138,
+      "spread": 0.718384
+    },
+    {
+      "frame": 178,
+      "seconds": 17.8,
+      "state": "recover",
+      "position": [
+        0.181912,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.002544,
+      "turn": 0.0,
+      "phase": 0.9562,
+      "pectoral_phase": 0.586498,
+      "sweep": 0.001618,
+      "spread": 0.718826
+    },
+    {
+      "frame": 179,
+      "seconds": 17.9,
+      "state": "recover",
+      "position": [
+        0.181904,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.001683,
+      "turn": 0.0,
+      "phase": 0.011471,
+      "pectoral_phase": 0.766651,
+      "sweep": 0.001219,
+      "spread": 0.719156
+    },
+    {
+      "frame": 180,
+      "seconds": 18.0,
+      "state": "recover",
+      "position": [
+        0.1819,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.001112,
+      "turn": 0.0,
+      "phase": 0.06665,
+      "pectoral_phase": 0.946751,
+      "sweep": 0.000914,
+      "spread": 0.719397
+    },
+    {
+      "frame": 181,
+      "seconds": 18.1,
+      "state": "recover",
+      "position": [
+        0.181897,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.000733,
+      "turn": 0.0,
+      "phase": 0.121768,
+      "pectoral_phase": 0.126816,
+      "sweep": 0.000684,
+      "spread": 0.719573
+    },
+    {
+      "frame": 182,
+      "seconds": 18.2,
+      "state": "recover",
+      "position": [
+        0.181895,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.000482,
+      "turn": 0.0,
+      "phase": 0.176845,
+      "pectoral_phase": 0.306858,
+      "sweep": 0.00051,
+      "spread": 0.719699
+    },
+    {
+      "frame": 183,
+      "seconds": 18.3,
+      "state": "recover",
+      "position": [
+        0.181894,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.000317,
+      "turn": 0.0,
+      "phase": 0.231896,
+      "pectoral_phase": 0.486885,
+      "sweep": 0.000379,
+      "spread": 0.719789
+    },
+    {
+      "frame": 184,
+      "seconds": 18.4,
+      "state": "recover",
+      "position": [
+        0.181894,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.000208,
+      "turn": 0.0,
+      "phase": 0.286929,
+      "pectoral_phase": 0.666901,
+      "sweep": 0.000281,
+      "spread": 0.719853
+    },
+    {
+      "frame": 185,
+      "seconds": 18.5,
+      "state": "recover",
+      "position": [
+        0.181894,
+        -0.199997,
+        2.5
+      ],
+      "drive": 0.000136,
+      "turn": 0.0,
+      "phase": 0.34195,
+      "pectoral_phase": 0.846911,
+      "sweep": 0.000208,
+      "spread": 0.719897
+    },
+    {
+      "frame": 186,
+      "seconds": 18.6,
+      "state": "recover",
+      "position": [
+        0.181893,
+        -0.199997,
+        2.5
+      ],
+      "drive": 8.9e-05,
+      "turn": 0.0,
+      "phase": 0.396963,
+      "pectoral_phase": 0.026917,
+      "sweep": 0.000154,
+      "spread": 0.719929
+    },
+    {
+      "frame": 187,
+      "seconds": 18.7,
+      "state": "recover",
+      "position": [
+        0.181893,
+        -0.199997,
+        2.5
+      ],
+      "drive": 5.9e-05,
+      "turn": 0.0,
+      "phase": 0.451972,
+      "pectoral_phase": 0.206919,
+      "sweep": 0.000113,
+      "spread": 0.719951
+    },
+    {
+      "frame": 188,
+      "seconds": 18.8,
+      "state": "recover",
+      "position": [
+        0.181893,
+        -0.199997,
+        2.5
+      ],
+      "drive": 3.8e-05,
+      "turn": 0.0,
+      "phase": 0.506978,
+      "pectoral_phase": 0.38692,
+      "sweep": 8.4e-05,
+      "spread": 0.719966
+    },
+    {
+      "frame": 189,
+      "seconds": 18.9,
+      "state": "recover",
+      "position": [
+        0.181893,
+        -0.199997,
+        2.5
+      ],
+      "drive": 2.5e-05,
+      "turn": 0.0,
+      "phase": 0.561981,
+      "pectoral_phase": 0.56692,
+      "sweep": 6.2e-05,
+      "spread": 0.719977
+    },
+    {
+      "frame": 190,
+      "seconds": 19.0,
+      "state": "recover",
+      "position": [
+        0.181893,
+        -0.199997,
+        2.5
+      ],
+      "drive": 1.6e-05,
+      "turn": 0.0,
+      "phase": 0.616983,
+      "pectoral_phase": 0.746918,
+      "sweep": 4.5e-05,
+      "spread": 0.719984
+    },
+    {
+      "frame": 191,
+      "seconds": 19.1,
+      "state": "recover",
+      "position": [
+        0.181893,
+        -0.199997,
+        2.5
+      ],
+      "drive": 1.1e-05,
+      "turn": 0.0,
+      "phase": 0.671983,
+      "pectoral_phase": 0.926917,
+      "sweep": 3.3e-05,
+      "spread": 0.719989
+    },
+    {
+      "frame": 192,
+      "seconds": 19.2,
+      "state": "recover",
+      "position": [
+        0.181893,
+        -0.199997,
+        2.5
+      ],
+      "drive": 7e-06,
+      "turn": 0.0,
+      "phase": 0.726984,
+      "pectoral_phase": 0.106915,
+      "sweep": 2.4e-05,
+      "spread": 0.719993
+    },
+    {
+      "frame": 193,
+      "seconds": 19.3,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        2.513379
+      ],
+      "drive": 0.108174,
+      "turn": 0.0,
+      "phase": 0.790868,
+      "pectoral_phase": 0.291989,
+      "sweep": 0.001369,
+      "spread": 0.717165
+    },
+    {
+      "frame": 194,
+      "seconds": 19.4,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        2.556931
+      ],
+      "drive": 0.280061,
+      "turn": 0.0,
+      "phase": 0.876838,
+      "pectoral_phase": 0.489684,
+      "sweep": 0.005578,
+      "spread": 0.708655
+    },
+    {
+      "frame": 195,
+      "seconds": 19.5,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        2.617944
+      ],
+      "drive": 0.450677,
+      "turn": 0.0,
+      "phase": 0.98716,
+      "pectoral_phase": 0.701294,
+      "sweep": 0.012178,
+      "spread": 0.695841
+    },
+    {
+      "frame": 196,
+      "seconds": 19.6,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        2.689062
+      ],
+      "drive": 0.595727,
+      "turn": 0.0,
+      "phase": 0.119107,
+      "pectoral_phase": 0.925261,
+      "sweep": 0.020115,
+      "spread": 0.681067
+    },
+    {
+      "frame": 197,
+      "seconds": 19.7,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        2.766028
+      ],
+      "drive": 0.709816,
+      "turn": 0.0,
+      "phase": 0.268471,
+      "pectoral_phase": 0.159182,
+      "sweep": 0.028416,
+      "spread": 0.66628
+    },
+    {
+      "frame": 198,
+      "seconds": 19.8,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        2.846378
+      ],
+      "drive": 0.795466,
+      "turn": 0.0,
+      "phase": 0.431107,
+      "pectoral_phase": 0.400686,
+      "sweep": 0.03638,
+      "spread": 0.65272
+    },
+    {
+      "frame": 199,
+      "seconds": 19.9,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        2.928686
+      ],
+      "drive": 0.857807,
+      "turn": 0.0,
+      "phase": 0.603501,
+      "pectoral_phase": 0.647766,
+      "sweep": 0.043593,
+      "spread": 0.641003
+    },
+    {
+      "frame": 200,
+      "seconds": 20.0,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        3.012128
+      ],
+      "drive": 0.902201,
+      "turn": 0.0,
+      "phase": 0.782895,
+      "pectoral_phase": 0.898846,
+      "sweep": 0.049858,
+      "spread": 0.631304
+    },
+    {
+      "frame": 201,
+      "seconds": 20.1,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        3.096226
+      ],
+      "drive": 0.933306,
+      "turn": 0.0,
+      "phase": 0.96722,
+      "pectoral_phase": 0.152743,
+      "sweep": 0.055136,
+      "spread": 0.623532
+    },
+    {
+      "frame": 202,
+      "seconds": 20.2,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        3.180704
+      ],
+      "drive": 0.954831,
+      "turn": 0.0,
+      "phase": 0.154973,
+      "pectoral_phase": 0.408599,
+      "sweep": 0.059477,
+      "spread": 0.617459
+    },
+    {
+      "frame": 203,
+      "seconds": 20.3,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        3.265401
+      ],
+      "drive": 0.969582,
+      "turn": 0.0,
+      "phase": 0.345081,
+      "pectoral_phase": 0.665802,
+      "sweep": 0.062981,
+      "spread": 0.61281
+    },
+    {
+      "frame": 204,
+      "seconds": 20.4,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        3.350225
+      ],
+      "drive": 0.979611,
+      "turn": 0.0,
+      "phase": 0.536796,
+      "pectoral_phase": 0.923923,
+      "sweep": 0.065766,
+      "spread": 0.609308
+    },
+    {
+      "frame": 205,
+      "seconds": 20.5,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        3.435122
+      ],
+      "drive": 0.986388,
+      "turn": 0.0,
+      "phase": 0.729599,
+      "pectoral_phase": 0.182665,
+      "sweep": 0.067953,
+      "spread": 0.606707
+    },
+    {
+      "frame": 206,
+      "seconds": 20.6,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        3.520062
+      ],
+      "drive": 0.990942,
+      "turn": 0.0,
+      "phase": 0.923134,
+      "pectoral_phase": 0.441826,
+      "sweep": 0.069652,
+      "spread": 0.604798
+    },
+    {
+      "frame": 207,
+      "seconds": 20.7,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        3.605027
+      ],
+      "drive": 0.99399,
+      "turn": 0.0,
+      "phase": 0.11716,
+      "pectoral_phase": 0.701267,
+      "sweep": 0.070962,
+      "spread": 0.60341
+    },
+    {
+      "frame": 208,
+      "seconds": 20.8,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        3.690006
+      ],
+      "drive": 0.996022,
+      "turn": 0.0,
+      "phase": 0.311514,
+      "pectoral_phase": 0.960895,
+      "sweep": 0.071964,
+      "spread": 0.60241
+    },
+    {
+      "frame": 209,
+      "seconds": 20.9,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        3.774994
+      ],
+      "drive": 0.997372,
+      "turn": 0.0,
+      "phase": 0.506086,
+      "pectoral_phase": 0.220648,
+      "sweep": 0.072725,
+      "spread": 0.601694
+    },
+    {
+      "frame": 210,
+      "seconds": 21.0,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        3.859986
+      ],
+      "drive": 0.998267,
+      "turn": 0.0,
+      "phase": 0.700802,
+      "pectoral_phase": 0.480484,
+      "sweep": 0.073301,
+      "spread": 0.601186
+    },
+    {
+      "frame": 211,
+      "seconds": 21.1,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        3.944981
+      ],
+      "drive": 0.998859,
+      "turn": 0.0,
+      "phase": 0.895614,
+      "pectoral_phase": 0.740375,
+      "sweep": 0.073735,
+      "spread": 0.600826
+    },
+    {
+      "frame": 212,
+      "seconds": 21.2,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        4.029977
+      ],
+      "drive": 0.99925,
+      "turn": 0.0,
+      "phase": 0.09049,
+      "pectoral_phase": 0.000301,
+      "sweep": 0.07406,
+      "spread": 0.600574
+    },
+    {
+      "frame": 213,
+      "seconds": 21.3,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        4.08
+      ],
+      "drive": 0.750625,
+      "turn": 0.0,
+      "phase": 0.267571,
+      "pectoral_phase": 0.250059,
+      "sweep": 0.071537,
+      "spread": 0.606228
+    },
+    {
+      "frame": 214,
+      "seconds": 21.4,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        4.08
+      ],
+      "drive": 0.488632,
+      "turn": 0.0,
+      "phase": 0.402041,
+      "pectoral_phase": 0.475469,
+      "sweep": 0.063573,
+      "spread": 0.622484
+    },
+    {
+      "frame": 215,
+      "seconds": 21.5,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        4.08
+      ],
+      "drive": 0.318084,
+      "turn": 0.0,
+      "phase": 0.508774,
+      "pectoral_phase": 0.685028,
+      "sweep": 0.053781,
+      "spread": 0.641253
+    },
+    {
+      "frame": 216,
+      "seconds": 21.6,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        4.08
+      ],
+      "drive": 0.207062,
+      "turn": 0.0,
+      "phase": 0.597449,
+      "pectoral_phase": 0.884269,
+      "sweep": 0.044047,
+      "spread": 0.658799
+    },
+    {
+      "frame": 217,
+      "seconds": 21.7,
+      "state": "climb",
+      "position": [
+        0.181893,
+        -0.199997,
+        4.08
+      ],
+      "drive": 0.134791,
+      "turn": 0.0,
+      "phase": 0.674371,
+      "pectoral_phase": 0.076793,
+      "sweep": 0.035261,
+      "spread": 0.67369
+    },
+    {
+      "frame": 218,
+      "seconds": 21.8,
+      "state": "depth",
+      "position": [
+        0.195272,
+        -0.186618,
+        4.08
+      ],
+      "drive": 0.304084,
+      "turn": -0.317196,
+      "phase": 0.76141,
+      "pectoral_phase": 0.275099,
+      "sweep": 0.030459,
+      "spread": 0.704688
+    },
+    {
+      "frame": 219,
+      "seconds": 21.9,
+      "state": "depth",
+      "position": [
+        0.238824,
+        -0.143066,
+        4.08
+      ],
+      "drive": 0.546981,
+      "turn": -0.479602,
+      "phase": 0.882728,
+      "pectoral_phase": 0.492993,
+      "sweep": 0.03194,
+      "spread": 0.735756
+    },
+    {
+      "frame": 220,
+      "seconds": 22.0,
+      "state": "depth",
+      "position": [
+        0.299837,
+        -0.082053,
+        4.08
+      ],
+      "drive": 0.7051,
+      "turn": -0.562755,
+      "phase": 0.029763,
+      "pectoral_phase": 0.725582,
+      "sweep": 0.036715,
+      "spread": 0.759223
+    },
+    {
+      "frame": 221,
+      "seconds": 22.1,
+      "state": "depth",
+      "position": [
+        0.370955,
+        -0.010935,
+        4.08
+      ],
+      "drive": 0.808029,
+      "turn": -0.60533,
+      "phase": 0.193538,
+      "pectoral_phase": 0.967737,
+      "sweep": 0.042603,
+      "spread": 0.775105
+    },
+    {
+      "frame": 222,
+      "seconds": 22.2,
+      "state": "depth",
+      "position": [
+        0.447921,
+        0.066031,
+        4.08
+      ],
+      "drive": 0.875033,
+      "turn": -0.627129,
+      "phase": 0.36821,
+      "pectoral_phase": 0.216119,
+      "sweep": 0.048461,
+      "spread": 0.785068
+    },
+    {
+      "frame": 223,
+      "seconds": 22.3,
+      "state": "depth",
+      "position": [
+        0.528271,
+        0.146381,
+        4.08
+      ],
+      "drive": 0.918651,
+      "turn": -0.548325,
+      "phase": 0.549977,
+      "pectoral_phase": 0.468554,
+      "sweep": 0.053751,
+      "spread": 0.787315
+    },
+    {
+      "frame": 224,
+      "seconds": 22.4,
+      "state": "depth",
+      "position": [
+        0.61058,
+        0.228689,
+        4.08
+      ],
+      "drive": 0.947044,
+      "turn": -0.280746,
+      "phase": 0.736361,
+      "pectoral_phase": 0.723629,
+      "sweep": 0.058272,
+      "spread": 0.761052
+    },
+    {
+      "frame": 225,
+      "seconds": 22.5,
+      "state": "depth",
+      "position": [
+        0.694021,
+        0.27,
+        4.08
+      ],
+      "drive": 0.962106,
+      "turn": -0.143743,
+      "phase": 0.925498,
+      "pectoral_phase": 0.980276,
+      "sweep": 0.06196,
+      "spread": 0.725303
+    },
+    {
+      "frame": 226,
+      "seconds": 22.6,
+      "state": "depth",
+      "position": [
+        0.778119,
+        0.27,
+        4.08
+      ],
+      "drive": 0.972302,
+      "turn": -0.073597,
+      "phase": 0.116165,
+      "pectoral_phase": 0.237798,
+      "sweep": 0.06487,
+      "spread": 0.692439
+    },
+    {
+      "frame": 227,
+      "seconds": 22.7,
+      "state": "depth",
+      "position": [
+        0.862596,
+        0.27,
+        4.08
+      ],
+      "drive": 0.980216,
+      "turn": -0.037682,
+      "phase": 0.308046,
+      "pectoral_phase": 0.496013,
+      "sweep": 0.067166,
+      "spread": 0.666006
+    },
+    {
+      "frame": 228,
+      "seconds": 22.8,
+      "state": "depth",
+      "position": [
+        0.947293,
+        0.27,
+        4.08
+      ],
+      "drive": 0.986106,
+      "turn": -0.019294,
+      "phase": 0.500842,
+      "pectoral_phase": 0.754752,
+      "sweep": 0.068972,
+      "spread": 0.646132
+    },
+    {
+      "frame": 229,
+      "seconds": 22.9,
+      "state": "depth",
+      "position": [
+        1.032117,
+        0.27,
+        4.08
+      ],
+      "drive": 0.990369,
+      "turn": -0.009878,
+      "phase": 0.694307,
+      "pectoral_phase": 0.013872,
+      "sweep": 0.070385,
+      "spread": 0.631771
+    },
+    {
+      "frame": 230,
+      "seconds": 23.0,
+      "state": "depth",
+      "position": [
+        1.117015,
+        0.27,
+        4.08
+      ],
+      "drive": 0.99339,
+      "turn": -0.005058,
+      "phase": 0.888248,
+      "pectoral_phase": 0.273265,
+      "sweep": 0.071484,
+      "spread": 0.621653
+    },
+    {
+      "frame": 231,
+      "seconds": 23.1,
+      "state": "depth",
+      "position": [
+        1.201955,
+        0.27,
+        4.08
+      ],
+      "drive": 0.995501,
+      "turn": -0.00259,
+      "phase": 0.082525,
+      "pectoral_phase": 0.532849,
+      "sweep": 0.072333,
+      "spread": 0.614645
+    },
+    {
+      "frame": 232,
+      "seconds": 23.2,
+      "state": "depth",
+      "position": [
+        1.28692,
+        0.27,
+        4.08
+      ],
+      "drive": 0.996957,
+      "turn": -0.001326,
+      "phase": 0.277034,
+      "pectoral_phase": 0.792566,
+      "sweep": 0.072986,
+      "spread": 0.609851
+    },
+    {
+      "frame": 233,
+      "seconds": 23.3,
+      "state": "depth",
+      "position": [
+        1.371899,
+        0.27,
+        4.08
+      ],
+      "drive": 0.997953,
+      "turn": -0.000679,
+      "phase": 0.471702,
+      "pectoral_phase": 0.052374,
+      "sweep": 0.073484,
+      "spread": 0.606598
+    },
+    {
+      "frame": 234,
+      "seconds": 23.4,
+      "state": "depth",
+      "position": [
+        1.456887,
+        0.27,
+        4.08
+      ],
+      "drive": 0.99863,
+      "turn": -0.000348,
+      "phase": 0.666478,
+      "pectoral_phase": 0.312244,
+      "sweep": 0.073863,
+      "spread": 0.604406
+    },
+    {
+      "frame": 235,
+      "seconds": 23.5,
+      "state": "depth",
+      "position": [
+        1.541879,
+        0.27,
+        4.08
+      ],
+      "drive": 0.999086,
+      "turn": -0.000178,
+      "phase": 0.861328,
+      "pectoral_phase": 0.572156,
+      "sweep": 0.07415,
+      "spread": 0.602935
+    },
+    {
+      "frame": 236,
+      "seconds": 23.6,
+      "state": "depth",
+      "position": [
+        1.626873,
+        0.27,
+        4.08
+      ],
+      "drive": 0.999392,
+      "turn": -9.1e-05,
+      "phase": 0.056227,
+      "pectoral_phase": 0.832096,
+      "sweep": 0.074366,
+      "spread": 0.601951
+    },
+    {
+      "frame": 237,
+      "seconds": 23.7,
+      "state": "depth",
+      "position": [
+        1.71187,
+        0.27,
+        4.08
+      ],
+      "drive": 0.999597,
+      "turn": -4.7e-05,
+      "phase": 0.251159,
+      "pectoral_phase": 0.092055,
+      "sweep": 0.074529,
+      "spread": 0.601296
+    },
+    {
+      "frame": 238,
+      "seconds": 23.8,
+      "state": "depth",
+      "position": [
+        1.796867,
+        0.27,
+        4.08
+      ],
+      "drive": 0.999733,
+      "turn": -2.4e-05,
+      "phase": 0.446112,
+      "pectoral_phase": 0.352026,
+      "sweep": 0.07465,
+      "spread": 0.600859
+    },
+    {
+      "frame": 239,
+      "seconds": 23.9,
+      "state": "depth",
+      "position": [
+        1.881866,
+        0.27,
+        4.08
+      ],
+      "drive": 0.999824,
+      "turn": -1.2e-05,
+      "phase": 0.641081,
+      "pectoral_phase": 0.612006,
+      "sweep": 0.074741,
+      "spread": 0.600569
+    }
+  ],
+  "note": "Actual GL engine, 30 Hz simulation; controller masks, no actor teleports. Fin deformation consumes cached UV weights before the shared renderer path."
+}

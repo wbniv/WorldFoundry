@@ -147,8 +147,8 @@ AnimationManagerActual::UpdateAnimation( RenderActor* renderActor, const QInputD
 				PhysicalObject* colObject;
 				while ( !objectIter.Empty() )
 				{
-					colObject = dynamic_cast<PhysicalObject*>(&(*objectIter));
-					assert( ValidPtr( colObject ) );
+					assert(IsPhysicalObject(&(*objectIter)));
+					colObject = static_cast<PhysicalObject*>(&(*objectIter));
 					if ( colObject->kind() == BaseObject::Enemy_KIND )
 					{
 						const PhysicalAttributes& pa = colObject->GetPhysicalAttributes();

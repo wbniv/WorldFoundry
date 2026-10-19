@@ -1,0 +1,9 @@
+{
+  "remote_regular_keypad_grid": "PASS",
+  "back_closes_keypad_first": "PASS",
+  "back_applies_and_closes_form": "PASS",
+  "selector_seed_applied_to_level": "PASS",
+  "hold_A_opens_level_settings": "PASS",
+  "phone_receives_oas_fields": "PASS",
+  "phone_seed_and_water_applied": "PASS"
+}

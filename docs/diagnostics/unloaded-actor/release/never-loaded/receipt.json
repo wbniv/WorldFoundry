@@ -1,0 +1,98 @@
+{
+  "command": [
+    "stdbuf",
+    "-oL",
+    "-eL",
+    "/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/engine/wf_game",
+    "-L/tmp/t4-unloaded-fixture/teleport_regression-standalone.iff",
+    "--windowed",
+    "--debug-print-actors",
+    "--debug-port",
+    "34663",
+    "--debug-bind",
+    "127.0.0.1"
+  ],
+  "warm_source": false,
+  "binary_sha256": "fb5141010e1537f464a7eefb1d1412d612ae775e11006f59f852b53a83d2dd91",
+  "fixture_sha256": "00f10e9b88c3189ad6735720929eb2e79d25814cd74e1605beea5e6689d443c4",
+  "observations": [
+    {
+      "label": "before-script-move",
+      "9": {
+        "heartbeat": 16.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 0.0,
+        "x": 295.0
+      },
+      "21": {
+        "heartbeat": 16.0,
+        "x": -10.0
+      }
+    },
+    {
+      "label": "pose-written-into-A",
+      "9": {
+        "heartbeat": 27.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 0.0,
+        "x": -5.0
+      },
+      "21": {
+        "heartbeat": 27.0,
+        "x": -10.0
+      }
+    },
+    {
+      "label": "after-120-player-updates-in-A",
+      "9": {
+        "heartbeat": 147.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 0.0,
+        "x": -5.0
+      },
+      "21": {
+        "heartbeat": 147.0,
+        "x": -10.0
+      }
+    },
+    {
+      "label": "source-D-reactivated",
+      "9": {
+        "heartbeat": 168.0,
+        "x": 300.0
+      },
+      "20": {
+        "heartbeat": 0.0,
+        "x": -5.0
+      },
+      "21": {
+        "heartbeat": 151.0,
+        "x": -10.0
+      }
+    },
+    {
+      "label": "returned-to-A",
+      "9": {
+        "heartbeat": 206.0,
+        "x": 0.0
+      },
+      "20": {
+        "heartbeat": 37.0,
+        "x": -5.0
+      },
+      "21": {
+        "heartbeat": 188.0,
+        "x": -10.0
+      }
+    }
+  ],
+  "failure": null,
+  "exit_before_cleanup": null,
+  "cleanup_exit": -15
+}

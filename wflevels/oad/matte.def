@@ -1,0 +1,23 @@
+;============================================================================
+; Matte.def: created from OADdef.S and Matte.oas DO NOT MODIFY
+;============================================================================
+;##ifndef Matte_HT
+;##define Matte_HT
+	( define OAD_moveblocPageOffset 0 )	; common block: offset in page data for this objects page
+	( define OAD_toolsetPageOffset 4 )	; common block: offset in page data for this objects page
+	( define OAD_commonPageOffset 8 )	; common block: offset in page data for this objects page
+	( define OAD_MeshName 12 )	;file Mesh Name: This is a packedAssetID
+	( define OAD_meshPageOffset 16 )	; common block: offset in page data for this objects page
+	( define OAD_shadowPageOffset 20 )	; common block: offset in page data for this objects page
+	( define OAD_TemplateObject 24 )	; boolean: Default: 0
+	( define OAD_MatteType 28 )	; int32: Minumum: 0 Maximum: 2 Default: 1
+	( define OAD_BackgroundColor 32 )	; Color
+	( define OAD_DebugBackgroundColor 36 )	; Color
+	( define OAD_Distance 40 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 8000 * 65536.0))
+	( define OAD_Tiles 44 )	;file Tiles: This is a packedAssetID
+	( define OAD_Map 48 )	;file Map: This is a packedAssetID
+	( define OAD_XRotationScale 52 )	; fixed32: Minumum: ( ((long) -320 * 65536.0)) Maximum: ( ((long) 320 * 65536.0))
+	( define OAD_YRotationScale 56 )	; fixed32: Minumum: ( ((long) -240 * 65536.0)) Maximum: ( ((long) 240 * 65536.0))
+;============================================================================
+;##endif         ; Matte_DEF
+;============================================================================

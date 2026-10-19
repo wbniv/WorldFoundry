@@ -1,0 +1,84 @@
+Objects.lc: this file is automaticaly generated from objects.lcs DO NOT MODIFY
+This file must be in the same directory as all of the .oad files
+
+
+
+
+
+
+
+
+
+
+{ 
+	NullObject
+        ActBox
+        Generato
+        Target
+        Room
+        StatPlat
+        Gold
+        Enemy
+        Platform
+        Missile
+        Explode
+	Spike
+        Matte
+        Destroy
+        Camera
+        Shadow
+        LevelObj
+        CamShot
+        ActBoxOR
+        Warp
+        Tool
+        Director
+        Shield
+        Player
+	Light
+	Disabled
+	Alias
+
+}
+
+
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+	
+	
+	
+
+
+
+

@@ -1,0 +1,184 @@
+{
+  "date": "2026-10-06",
+  "clownfish_tests": "35 passed",
+  "schooling_fit": "ok",
+  "schooling_overflow_px": -2.7,
+  "posters": [
+    {
+      "file": "asian-arowana-a3.pdf",
+      "pages": 1,
+      "width": 841.91998,
+      "height": 1191.12,
+      "sha256": "98c58abaa5dd552dbc2c3316ab74dfd728ecb4c760104c755a34ad26f1992fd6",
+      "links": [
+        "https://commons.wikimedia.org/wiki/File:Honglongyu3.jpg",
+        "https://commons.wikimedia.org/wiki/File:Asiatische_Gabelbart_(Scleropages_formosus).jpg",
+        "https://www.fws.gov/sites/default/files/documents/Ecological-Risk-Screening-Summary-Asian-Bonytongue.pdf",
+        "https://horizon.documentation.ird.fr/exl-doc/pleins_textes/divers19-11/010033034.pdf",
+        "https://doi.org/10.2305/IUCN.UK.2019-3.RLTS.T152320185A89797267.en",
+        "https://lkcnhm.nus.edu.sg/app/uploads/2017/04/sbr2013-021.pdf",
+        "https://lkcnhm.nus.edu.sg/app/uploads/2017/04/sbr2013-021.pdf",
+        "https://creativecommons.org/licenses/by-sa/3.0/"
+      ],
+      "pending_references": 0,
+      "print_copy_present": false
+    },
+    {
+      "file": "betta-history-and-biomechanics-a3.pdf",
+      "pages": 1,
+      "width": 841.91998,
+      "height": 1191.12,
+      "sha256": "693a46857be55470f9b518512c8432f4d3c804d1656caa21c4322a03c5784699",
+      "links": [
+        "https://doi.org/10.1126/sciadv.abm4950",
+        "https://repository.seafdec.org/bitstream/handle/20.500.12066/5516/Siamese-fighting-fish.pdf",
+        "https://journal.nsm.or.th/sites/default/files/2023-10/THNHMJ01-2017.compressed.pdf",
+        "https://pubmed.ncbi.nlm.nih.gov/23720195/"
+      ],
+      "pending_references": 0,
+      "print_copy_present": false
+    },
+    {
+      "file": "blue-shrimp-a3.pdf",
+      "pages": 1,
+      "width": 841.91998,
+      "height": 1191.12,
+      "sha256": "7864167a6f96ce8486deaca20461f84d5c755b67ba347ea85ef3f09d865d4d07",
+      "links": [
+        "https://ask.ifas.ufl.edu/publication/IN1301",
+        "https://www.garnelenhaus.de/wiki/blue-jelly-oder-blue-dream"
+      ],
+      "pending_references": 0,
+      "print_copy_present": false
+    },
+    {
+      "file": "clownfish-biomechanics-a3.pdf",
+      "pages": 1,
+      "width": 841.91998,
+      "height": 1191.12,
+      "sha256": "865852cdf438ffc371257a6941f1d52019fb7e9aab1bf0bfc5bf1242c350fd77",
+      "links": [
+        "https://journals.biologists.com/jeb/article/217/13/2224/12210/Swimming-fish-stick-to-same-Strouhal-number",
+        "https://journals.biologists.com/jeb/article/217/13/2244/12227/Rainbow-trout-provide-the-first-experimental",
+        "https://journals.biologists.com/jeb/article/210/12/2181/16867/Kinematics-hydrodynamics-and-energetic-advantages",
+        "https://journals.biologists.com/jeb/article/222/4/jeb191791/20856/Energetics-and-behavior-of-coral-reef-fishes",
+        "https://journals.biologists.com/jeb/article/209/19/3708/16341/Pectoral-fin-coordination-and-gait-transitions-in",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7809443/",
+        "https://biomimetic.pbworks.com/f/The%2Bkinematics%2Band%2Bperformance%2BofDomenici.pdf",
+        "https://web.cs.ucla.edu/~dt/papers/siggraph94/siggraph94.pdf"
+      ],
+      "pending_references": 0,
+      "print_copy_present": true
+    },
+    {
+      "file": "jellyfish-biomechanics-a3.pdf",
+      "pages": 1,
+      "width": 841.91998,
+      "height": 1191.12,
+      "sha256": "03ef959be33fa17714e6a568b84b2a73b7892b1670aebdd34bca31d8233a07f1",
+      "links": [
+        "https://doi.org/10.1073/pnas.1306983110",
+        "https://doi.org/10.1371/journal.pone.0098310",
+        "https://doi.org/10.1088/1748-3190/ad1db8",
+        "https://doi.org/10.1126/sciadv.aaz3194"
+      ],
+      "pending_references": 0,
+      "print_copy_present": false
+    },
+    {
+      "file": "lionfish-biomechanics-a3.pdf",
+      "pages": 1,
+      "width": 841.91998,
+      "height": 1191.12,
+      "sha256": "82686e8c5b51399efe5ab7162636b520a07a43ff5caffb683f0991f7b49d72af",
+      "links": [
+        "https://www.floridamuseum.ufl.edu/discover-fish/species-profiles/red-lionfish/",
+        "https://doi.org/10.1242/jeb.197905",
+        "https://peerj.com/articles/18474/",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC5192426/",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC5192426/",
+        "https://academic.oup.com/beheco/article/37/5/arag087/8741288"
+      ],
+      "pending_references": 0,
+      "print_copy_present": false
+    },
+    {
+      "file": "rainbow-goby-biomechanics-a3.pdf",
+      "pages": 1,
+      "width": 841.91998,
+      "height": 1191.12,
+      "sha256": "eeeb7495a496e209478712b0ac25c17a491545e4dc082716539ab3f19f31ca5b",
+      "links": [
+        "file:///home/will/WorldFoundry-wbniv/docs/reference/rainbow-goby-research.md",
+        "https://www.science.nus.edu.sg/wp-content/uploads/sites/11/2024/07/61rbz749-761.pdf",
+        "https://www.seriouslyfish.com/species/stiphodon-ornatus/",
+        "https://greenaqua.hu/en/stiphodon-sp.html"
+      ],
+      "pending_references": 0,
+      "print_copy_present": false
+    },
+    {
+      "file": "sea-anemone-biomechanics-a3.pdf",
+      "pages": 1,
+      "width": 841.91998,
+      "height": 1191.12,
+      "sha256": "181b3335f951fc1770e4ce14b26f64ae15637977307c24e4f9f335166f268b08",
+      "links": [
+        "file:///home/will/WorldFoundry-wbniv/docs/reference/sea-anemone-research.md",
+        "https://publication.plazi.org/GgServer/xhtml/038187876444FFCC1BD2F8B1FB9475D8",
+        "https://onlinelibrary.wiley.com/doi/10.1111/are.15786",
+        "https://sicb.org/abstracts/sea-anemone-tentacles-flutter-and-flap-in-water-flow-in-the-field/",
+        "https://link.springer.com/article/10.1186/s40850-020-00054-6",
+        "https://link.springer.com/article/10.1186/s40850-020-00054-6",
+        "https://doi.org/10.1242/jeb.38.2.343",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC5253434/"
+      ],
+      "pending_references": 0,
+      "print_copy_present": false
+    },
+    {
+      "file": "sea-urchin-biomechanics-a3.pdf",
+      "pages": 1,
+      "width": 841.91998,
+      "height": 1191.12,
+      "sha256": "ef689df3f1e1537433ece4f269af933274f27bac10f6479428f936954756948f",
+      "links": [
+        "file:///home/will/WorldFoundry-wbniv/docs/reference/sea-urchin-research.md",
+        "https://www.montereybayaquarium.org/animals-the-ocean/animals-a-to-z/purple-sea-urchin",
+        "https://doi.org/10.3390/ijms21030946",
+        "https://doi.org/10.2307/3593098",
+        "https://doi.org/10.1242/jeb.115972",
+        "https://doi.org/10.1242/jeb.115972",
+        "https://academic.oup.com/icb/article/64/2/257/7623019",
+        "https://www.dfw.state.or.us/mrp/shellfish/commercial/urchin/life_history.asp"
+      ],
+      "pending_references": 0,
+      "print_copy_present": false
+    },
+    {
+      "file": "aquatic-plants-a3.pdf",
+      "pages": 1,
+      "width": 841.91998,
+      "height": 1191.12,
+      "sha256": "601bf3a1a34f81def9b7ceca9ad265574a9d5e1760a213042b0306fe7a30412d",
+      "links": [],
+      "pending_references": 0,
+      "print_copy_present": false
+    },
+    {
+      "file": "schooling-poster.pdf",
+      "pages": 1,
+      "width": 841.91998,
+      "height": 1191.12,
+      "sha256": "24e9f183c60b12e87b27b18ae543dc9e7da0cb996c389e5e461a82de76ffd068",
+      "links": [
+        "https://jmvidal.cse.sc.edu/library/couzin02a.pdf",
+        "https://slevin.princeton.edu/publications/effective-leadership-and-decision-making-animal-groups-move",
+        "https://www.researchgate.net/publication/299389540_Shoaling_and_Schooling_in_Fishes",
+        "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0090648"
+      ],
+      "pending_references": 0,
+      "print_copy_present": true
+    }
+  ]
+}

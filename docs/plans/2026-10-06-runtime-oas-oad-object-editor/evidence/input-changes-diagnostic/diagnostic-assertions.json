@@ -1,0 +1,9 @@
+{
+  "selector_snapshot": true,
+  "selector_routes_directions": true,
+  "selector_input_acknowledged": true,
+  "level_generation_changes": true,
+  "game_press_22": true,
+  "actor_consumer_22": true,
+  "received_release_22": false
+}

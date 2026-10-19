@@ -1,0 +1,17 @@
+To: [Your library's ILL / document delivery department]
+Subject: Interlibrary Loan Request
+
+Dear ILL Librarian,
+
+I am requesting a copy of the following article via interlibrary loan:
+
+  Title:   An experiment in linguistic synthesis with a fuzzy logic controller
+  Author:  Mamdani, E.H.; Assilian, S.
+  Year:    1975
+  Journal: International Journal of Man-Machine Studies
+  DOI:     10.1016/S0020-7373(75)80002-2
+
+Please send as PDF to: wbnorris@gmail.com
+
+Thank you,
+Will Norris

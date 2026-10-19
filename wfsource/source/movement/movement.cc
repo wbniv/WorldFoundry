@@ -38,6 +38,9 @@
 #include "movementmanager.hp"
 #include <input/inputdig.hp>
 #include <physics/physical.hp>
+#ifdef PHYSICS_ENGINE_JOLT
+#include <physics/jolt/jolt_backend.hp>
+#endif
 #include <cpplib/libstrm.hp>
 #include <oas/movement.h>
 
@@ -56,6 +59,7 @@ extern bool gDoomStick;
 // Instances of movement handlers
 GroundHandler  theGroundHandler;
 AirHandler     theAirHandler;
+MarbleHandler  theMarbleHandler;
 ClimbHandler   theClimbHandler;
 NullHandler    theNullHandler;
 //
@@ -294,13 +298,27 @@ GroundHandler::predictPosition(MovementManager& movementManager, MovementObject&
 		if (buttons & EJ_BUTTONF_DOWN)	// Move backwards at Walk speed
 			wheelVelocity -= (currentDir * runningAccel * deltaT);
 
-		if (buttons & EJ_BUTTONF_LEFT)	// Rotate counterclockwise at turnRate
-			//actorAttr.SetRotationC( Angle::Revolution( actorAttr.Rotation().GetC().AsRevolution() + turnRate ) );
-         actorAttr.AddRotation( Euler(Angle::zero,Angle::zero,Angle::Revolution(turnRate)));
+		if (buttons & EJ_BUTTONF_LEFT)
+		{
+			if (turnRate != Scalar::zero)
+				actorAttr.AddRotation( Euler(Angle::zero,Angle::zero,Angle::Revolution(turnRate)));
+			else
+			{	// TurnRate==0: no rotation desired; treat LEFT as strafe-left
+				Vector3 stepVector = currentDir * runningAccel * deltaT;
+				wheelVelocity += Vector3(-stepVector.Y(), stepVector.X(), Scalar::zero);
+			}
+		}
 
-		if (buttons & EJ_BUTTONF_RIGHT)	// Rotate clockwise at turnRate
-         actorAttr.AddRotation( Euler(Angle::zero,Angle::zero,Angle::Revolution(-turnRate)));
-			//actorAttr.SetRotationC( Angle::Revolution( actorAttr.Rotation().GetC().AsRevolution() - turnRate ) );
+		if (buttons & EJ_BUTTONF_RIGHT)
+		{
+			if (turnRate != Scalar::zero)
+				actorAttr.AddRotation( Euler(Angle::zero,Angle::zero,Angle::Revolution(-turnRate)));
+			else
+			{	// TurnRate==0: no rotation desired; treat RIGHT as strafe-right
+				Vector3 stepVector = currentDir * runningAccel * deltaT;
+				wheelVelocity += Vector3(stepVector.Y(), -stepVector.X(), Scalar::zero);
+			}
+		}
 
 		if (buttons & kBtnStepLeft)		// Sidestep left
 		{
@@ -411,6 +429,33 @@ GroundHandler::predictPosition(MovementManager& movementManager, MovementObject&
 	newVelocity += Vector3(Scalar::zero, Scalar::zero, -(movementObject.GetMovementBlockPtr()->GetFallingAcceleration() * deltaT));
 
 	// Apply new velocity to velocity and predicted position
+#ifdef PHYSICS_ENGINE_JOLT
+	{
+		uint32_t charID = actorAttr.JoltCharacterID();
+		if (charID != kJoltInvalidBodyID)
+		{
+			// With Jolt, supportingObject is never set, so planeFriction is zero and
+			// wheelVelocity never reaches newVelocity. Apply wheelVelocity directly to
+			// the XY components so OAD fields (RunningAcceleration, MaxGroundSpeed,
+			// RunningDeceleration) govern ground movement as intended.
+			newVelocity = Vector3(wheelVelocity.X(), wheelVelocity.Y(), newVelocity.Z());
+			JoltCharacterSetLinVelocity(charID, newVelocity);
+			JoltCharacterUpdate(charID, deltaT.AsFloat());
+			actorAttr.JoltSyncFromCharacter(JoltCharacterGetPosition(charID));
+			actorAttr.SetLinVelocity(JoltCharacterGetLinVelocity(charID));
+			// Sync wheelVelocity.Y from actual Jolt character movement.
+			// On a slope Jolt constrains our Z-axis gravity input to the surface,
+			// producing real Y displacement.  Feeding that back here lets the ball
+			// carry slope momentum onto flat terrain.
+			wheelVelocity.SetY(JoltCharacterGetLinVelocity(charID).Y());
+			handlerData->wheelVelocity = wheelVelocity;
+			if (newMovementHandler)
+				movementManager.SetMovementHandler(newMovementHandler, movementObject);
+			handlerData->supportingObject = NULL;
+			return;
+		}
+	}
+#endif // PHYSICS_ENGINE_JOLT
 	actorAttr.SetPredictedPosition(actorAttr.Position() +
 			((newVelocity + actorAttr.OldLinVelocity()) * Scalar::half * deltaT));
 
@@ -455,6 +500,19 @@ bool GroundHandler::update(MovementManager& movementManager, MovementObject& mov
 	//if (handlerData->stunnedUntil > theTime)
 	//	handlerData->stunnedUntil = theTime + thisActor->_animManager->GetCycleDuration();
 
+#ifdef PHYSICS_ENGINE_JOLT
+	{
+		const PhysicalAttributes& actorAttr = movementObject.GetPhysicalAttributes();
+		uint32_t charID = actorAttr.JoltCharacterID();
+		if (charID != kJoltInvalidBodyID)
+		{
+			// Use Jolt ground detection instead of WF's supportingObject pointer.
+			if (!JoltCharacterIsOnGround(charID))
+				movementManager.SetMovementHandler(&theAirHandler, movementObject);
+			return true;
+		}
+	}
+#endif // PHYSICS_ENGINE_JOLT
 	if (handlerData->supportingObject == NULL)
 		movementManager.SetMovementHandler(&theAirHandler,movementObject);
 
@@ -463,7 +521,7 @@ bool GroundHandler::update(MovementManager& movementManager, MovementObject& mov
 
 //============================================================================
 
-void 
+void
 GroundHandler::SetStunTime(MovementManager& movementManager,Scalar newTime)
 {
 	MovementHandlerData* handlerData = movementManager.GetMovementHandlerData();
@@ -505,6 +563,29 @@ AirHandler::update(MovementManager& movementManager,  MovementObject& movementOb
 	MovementHandlerData* handlerData = movementManager.GetMovementHandlerData();
 	assert(ValidPtr(handlerData));
 
+#ifdef PHYSICS_ENGINE_JOLT
+	{
+		uint32_t charID = actorAttr.JoltCharacterID();
+		if (charID != kJoltInvalidBodyID)
+		{
+			// Use Jolt's ground contact result from the most recent JoltCharacterUpdate.
+			if (JoltCharacterIsOnGround(charID) && handlerData->jumpDuration <= Scalar::zero)
+			{
+				handlerData->stunnedUntil = Scalar::zero;
+				// TurnRate==0 actors use MarbleHandler; others use GroundHandler.
+				MovementHandler* landHandler =
+				    (movementManager.MovementBlock()->GetTurnRate() == Scalar::zero)
+				    ? (MovementHandler*)&theMarbleHandler
+				    : (MovementHandler*)&theGroundHandler;
+				Vector3 newWheelVelocity = actorAttr.LinVelocity();
+				newWheelVelocity.SetZ(Scalar::zero);
+				handlerData->wheelVelocity = newWheelVelocity;
+				movementManager.SetMovementHandler(landHandler, movementObject);
+			}
+			return true;
+		}
+	}
+#endif // PHYSICS_ENGINE_JOLT
 	if(handlerData->supportingObject)
 	{
 		handlerData->stunnedUntil = Scalar::zero;
@@ -521,6 +602,135 @@ AirHandler::update(MovementManager& movementManager,  MovementObject& movementOb
 	}
 
 	return true;
+}
+
+//============================================================================
+// MarbleHandler — physics-based rolling for sphere actors (TurnRate == 0).
+// Unlike GroundHandler the full 3D velocity carries over each frame so
+// gravity-driven slope momentum accumulates without button presses.
+
+void
+MarbleHandler::init(MovementManager& movementManager, MovementObject& movementObject)
+{
+	AssertMsg(movementManager.MovementBlock()->Mobility == MOBILITY_PHYSICS, movementObject);
+	MovementHandlerData* handlerData = movementManager.GetMovementHandlerData();
+	assert(ValidPtr(handlerData));
+	handlerData->supportingObject = NULL;
+	movementObject.MovementStateChanged(MovementObject::Ground_state);
+}
+
+bool MarbleHandler::check() { assert(0); return false; }
+
+bool
+MarbleHandler::update(MovementManager& movementManager, MovementObject& movementObject,
+                      const BaseObjectList& /*baseObjectList*/)
+{
+#ifdef PHYSICS_ENGINE_JOLT
+	{
+		const PhysicalAttributes& actorAttr = movementObject.GetPhysicalAttributes();
+		uint32_t charID = actorAttr.JoltCharacterID();
+		if (charID != kJoltInvalidBodyID)
+		{
+			if (!JoltCharacterIsOnGround(charID))
+				movementManager.SetMovementHandler(&theAirHandler, movementObject);
+			return true;
+		}
+	}
+#endif
+	return true;
+}
+
+void
+MarbleHandler::SetStunTime(MovementManager& movementManager, Scalar newTime)
+{
+	MovementHandlerData* handlerData = movementManager.GetMovementHandlerData();
+	handlerData->stunnedUntil = newTime;
+}
+
+void
+MarbleHandler::predictPosition(MovementManager& movementManager, MovementObject& movementObject,
+                                const Clock& clock, const BaseObjectList& baseObjectList)
+{
+	PhysicalAttributes& actorAttr = movementObject.GetWritablePhysicalAttributes();
+	assert(ValidPtr(movementManager.MovementBlock()));
+	Scalar dt = clock.Delta();
+
+	// Jump: mirror GroundHandler::predictPosition's branch. Doomstick actors
+	// (TurnRate==0) run through MarbleHandler when grounded, so without this
+	// they have no path into AirHandler and kBtnJump is silently ignored.
+	if (movementObject.GetInputDevice()->justPressed(kBtnJump))
+	{
+		MovementHandlerData* handlerData = movementManager.GetMovementHandlerData();
+		assert(ValidPtr(handlerData));
+		handlerData->jumpDuration = SCALAR_CONSTANT(0.2);
+		movementManager.SetMovementHandler(&theAirHandler, movementObject);
+		theAirHandler.predictPosition(movementManager, movementObject, clock, baseObjectList);
+		return;
+	}
+
+#ifdef PHYSICS_ENGINE_JOLT
+	{
+		uint32_t charID = actorAttr.JoltCharacterID();
+		if (charID == kJoltInvalidBodyID) return;
+
+		const QInputDigital* inputDevice = movementObject.GetInputDevice();
+		joystickButtonsF buttons = inputDevice->arePressed();
+
+		Scalar accel   = movementManager.MovementBlock()->GetRunningAcceleration();
+		Scalar decel   = movementManager.MovementBlock()->GetRunningDeceleration();
+		Scalar maxSpd  = movementManager.MovementBlock()->GetMaxGroundSpeed();
+		Scalar gravity = movementManager.MovementBlock()->GetFallingAcceleration();
+
+		// Carry the full 3D velocity from the last frame.  velCache.Y was corrected
+		// from the position delta in JoltCharacterUpdate so slope momentum is real.
+		Vector3 vel = actorAttr.LinVelocity();
+
+		// Surface friction on XY only; gravity accumulates freely on Z.
+		Scalar friction = decel * dt * SCALAR_CONSTANT(30);
+		if (friction > Scalar::one) friction = Scalar::one;
+		vel.SetX(vel.X() * (Scalar::one - friction));
+		vel.SetY(vel.Y() * (Scalar::one - friction));
+
+		// Gravity — projected onto the floor surface so the marble rolls downhill
+		// on slopes instead of pressing straight into the floor (which Jolt blocks).
+		// On flat ground the normal is (0,0,1) and this reduces to plain -Z gravity.
+		{
+			Vector3 N    = JoltCharacterGetGroundNormal(charID); // floor surface normal
+			float   gF   = gravity.AsFloat() * dt.AsFloat();    // gravity impulse this frame
+			// slope component: G_slope = G - (G·N)N  where G = (0,0,-gF)
+			float   GdotN = -gF * N.Z().AsFloat();              // (0,0,-gF)·N = -gF*Nz
+			float   slopeX = -GdotN * N.X().AsFloat();          // -(-gF*Nz)*Nx
+			float   slopeY = -GdotN * N.Y().AsFloat();
+			float   slopeZ = -gF - GdotN * N.Z().AsFloat();     // -gF - (-gF*Nz)*Nz
+			vel.SetX(vel.X() + Scalar(slopeX));
+			vel.SetY(vel.Y() + Scalar(slopeY));
+			vel.SetZ(vel.Z() + Scalar(slopeZ));
+		}
+
+		// Player input: impulse in world-XY directions relative to actor facing.
+		Vector3 fwd = movementObject.currentDir();          // (sin C, cos C, 0)
+		Vector3 right(fwd.Y(), -fwd.X(), Scalar::zero);    // 90° CW in XY
+
+		if (buttons & EJ_BUTTONF_UP)    vel += fwd   * accel * dt;
+		if (buttons & EJ_BUTTONF_DOWN)  vel -= fwd   * accel * dt;
+		if (buttons & EJ_BUTTONF_LEFT)  vel -= right * accel * dt;
+		if (buttons & EJ_BUTTONF_RIGHT) vel += right * accel * dt;
+
+		// Cap XY speed.
+		Scalar xySpd = Vector3(vel.X(), vel.Y(), Scalar::zero).Length();
+		if (xySpd > maxSpd)
+		{
+			Scalar scale = maxSpd / xySpd;
+			vel.SetX(vel.X() * scale);
+			vel.SetY(vel.Y() * scale);
+		}
+
+		JoltCharacterSetLinVelocity(charID, vel);
+		JoltCharacterUpdate(charID, dt.AsFloat());
+		actorAttr.JoltSyncFromCharacter(JoltCharacterGetPosition(charID));
+		actorAttr.SetLinVelocity(JoltCharacterGetLinVelocity(charID));
+	}
+#endif // PHYSICS_ENGINE_JOLT
 }
 
 //============================================================================
@@ -630,6 +840,11 @@ AirHandler::predictPosition(MovementManager& movementManager, MovementObject& mo
 	}
 //#endif	// __DOOMSTICK__
 
+	// SMB-style variable jump height: releasing kBtnJump mid-jump truncates
+	// remaining upward impulse so a tap is short and a hold reaches full apex.
+	if (!(buttons & kBtnJump))
+		handlerData->jumpDuration = Scalar::zero;
+
 	if (handlerData->jumpDuration > Scalar::zero)
 	{
 		Scalar jumpDurToApply( handlerData->jumpDuration.Min(deltaT) );
@@ -654,8 +869,21 @@ AirHandler::predictPosition(MovementManager& movementManager, MovementObject& mo
 		newVelocity *= (maxSpeed / newSpeed);
 
 
+	// "Sustain" mode: when AirAcceleration=0 (joystick has no in-air authority
+	// to add velocity), holding a Step direction that matches current X motion
+	// suppresses horizontal drag for the frame, so takeoff momentum persists
+	// while held but decays when released. SMB-style "hold forward to keep
+	// sprint speed mid-jump." Currently X-only — sufficient for sideview play;
+	// generalize via currentDir() projection if Y-axis sustain becomes needed.
+	bool sustainHoriz =
+	    airAccel == Scalar::zero &&
+	    (((buttons & kBtnStepRight) && newVelocity.X() > Scalar::zero) ||
+	     ((buttons & kBtnStepLeft)  && newVelocity.X() < Scalar::zero));
+
 	// Make air drag happen
-	Scalar hDrag = Scalar::one - (movementObject.GetMovementBlockPtr()->GetHorizAirDrag() * deltaT );
+	Scalar hDrag = sustainHoriz
+	                 ? Scalar::one
+	                 : Scalar::one - (movementObject.GetMovementBlockPtr()->GetHorizAirDrag() * deltaT );
 	Scalar vDrag = Scalar::one - (movementObject.GetMovementBlockPtr()->GetVertAirDrag() * deltaT );
 	if ( hDrag < Scalar::zero )
 		hDrag = Scalar::zero;
@@ -667,6 +895,20 @@ AirHandler::predictPosition(MovementManager& movementManager, MovementObject& mo
 	newVelocity.SetZ( newVelocity.Z() * vDrag );
 
 	// Apply new velocity to velocity and predicted position
+#ifdef PHYSICS_ENGINE_JOLT
+	{
+		uint32_t charID = actorAttr.JoltCharacterID();
+		if (charID != kJoltInvalidBodyID)
+		{
+			JoltCharacterSetLinVelocity(charID, newVelocity);
+			JoltCharacterUpdate(charID, deltaT.AsFloat());
+			actorAttr.JoltSyncFromCharacter(JoltCharacterGetPosition(charID));
+			actorAttr.SetLinVelocity(JoltCharacterGetLinVelocity(charID));
+			handlerData->supportingObject = NULL;
+			return;
+		}
+	}
+#endif // PHYSICS_ENGINE_JOLT
 	actorAttr.SetPredictedPosition(actorAttr.Position() +
 			((newVelocity + actorAttr.OldLinVelocity()) * Scalar::half * deltaT));
 

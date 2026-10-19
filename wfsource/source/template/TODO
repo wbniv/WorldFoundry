@@ -1,2 +1,0 @@
-19 Mar 99
-* make Symbol -> _Symbol into an abstract class [reconcile with eval?] pigs2/symbol

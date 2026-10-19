@@ -1,0 +1,27 @@
+{
+  "image": "docs/diagnostics/chromecast-capture-J-a8a71f0fab0a/screenshot.png",
+  "size": [
+    1920,
+    1080
+  ],
+  "mode": "RGBA",
+  "extrema": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ]
+  ],
+  "unique_colors": 1
+}

@@ -1,0 +1,2 @@
+chromecast: Coordinator unavailable at /run/wf-device-coordinator/coordinator.sock; no direct ADB fallback
+task: Failed to run task "chromecast:queue": exit status 1

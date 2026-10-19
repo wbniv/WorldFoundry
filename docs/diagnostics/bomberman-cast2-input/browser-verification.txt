@@ -1,0 +1,6 @@
+PASS chromium 960x540: chooser/start/hold/release/bomb/pause/resume/layout
+PASS chromium 1920x1080: chooser/start/hold/release/bomb/pause/resume/layout
+PASS chromium 960x540 without Array.at: chooser/start/hold/release/bomb/pause/resume/layout
+PASS webkit 960x540: chooser/start/hold/release/bomb/pause/resume/layout
+PASS webkit 1920x1080: chooser/start/hold/release/bomb/pause/resume/layout
+PASS webkit 960x540 without Array.at: chooser/start/hold/release/bomb/pause/resume/layout

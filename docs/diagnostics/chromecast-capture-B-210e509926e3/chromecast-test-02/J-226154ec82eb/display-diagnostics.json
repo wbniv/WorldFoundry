@@ -1,0 +1,32 @@
+{
+  "power": {
+    "started": 1791193586.4936914,
+    "finished": 1791193586.789005,
+    "result": "saved"
+  },
+  "display": {
+    "started": 1791193586.7890096,
+    "finished": 1791193586.861139,
+    "result": "saved"
+  },
+  "window": {
+    "started": 1791193586.8611422,
+    "finished": 1791193586.9587262,
+    "result": "saved"
+  },
+  "activity": {
+    "started": 1791193586.9587293,
+    "finished": 1791193587.0405638,
+    "result": "saved"
+  },
+  "dreams": {
+    "started": 1791193587.0405674,
+    "finished": 1791193587.0963147,
+    "result": "saved"
+  },
+  "surfaceflinger": {
+    "started": 1791193587.0963178,
+    "finished": 1791193587.2145462,
+    "result": "saved"
+  }
+}

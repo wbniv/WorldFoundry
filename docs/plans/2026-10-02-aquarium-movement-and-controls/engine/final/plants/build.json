@@ -1,0 +1,7 @@
+{
+  "standalone_sha256": "b569b06569e446cb98089c3b437b0908e2a787aea6bc1dc160d3e4fc4d9d91d8",
+  "engine_sha256": "748f3109394087f06b113ddeeec948569a14ba46c51f333add627248b9fd0c57",
+  "fixed_dt": 0.05,
+  "video_fps": 10,
+  "quick": true
+}

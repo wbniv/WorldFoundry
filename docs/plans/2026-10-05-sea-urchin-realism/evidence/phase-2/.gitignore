@@ -1,0 +1,8 @@
+*.log
+*.txt
+*.apk
+native/frames/
+chromecast/**/samples.json
+chromecast/**/presents-ns.json
+chromecast/logcat*
+native/motion.mp4

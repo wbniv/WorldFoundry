@@ -1,0 +1,74 @@
+[
+  {
+    "key": "TURN_RESULTS-1-1-none-0-6",
+    "phase": "TURN_RESULTS",
+    "round": "1",
+    "turn": "1",
+    "ready": "none",
+    "ceremony": "0",
+    "players": "6",
+    "issues": [],
+    "snapshot": null,
+    "skin": "linen"
+  },
+  {
+    "key": "TURN_RESULTS-1-1-none-0-6",
+    "phase": "TURN_RESULTS",
+    "round": "1",
+    "turn": "1",
+    "ready": "none",
+    "ceremony": "0",
+    "players": "6",
+    "issues": [],
+    "snapshot": null,
+    "skin": "linen"
+  },
+  {
+    "key": "TURN_RESULTS-1-1-none-0-6",
+    "phase": "TURN_RESULTS",
+    "round": "1",
+    "turn": "1",
+    "ready": "none",
+    "ceremony": "0",
+    "players": "6",
+    "issues": [],
+    "snapshot": null,
+    "skin": "night"
+  },
+  {
+    "key": "TURN_RESULTS-1-1-none-0-6",
+    "phase": "TURN_RESULTS",
+    "round": "1",
+    "turn": "1",
+    "ready": "none",
+    "ceremony": "0",
+    "players": "6",
+    "issues": [],
+    "snapshot": null,
+    "skin": "night"
+  },
+  {
+    "key": "TURN_RESULTS-1-1-none-0-6",
+    "phase": "TURN_RESULTS",
+    "round": "1",
+    "turn": "1",
+    "ready": "none",
+    "ceremony": "0",
+    "players": "6",
+    "issues": [],
+    "snapshot": null,
+    "skin": "paper"
+  },
+  {
+    "key": "TURN_RESULTS-1-1-none-0-6",
+    "phase": "TURN_RESULTS",
+    "round": "1",
+    "turn": "1",
+    "ready": "none",
+    "ceremony": "0",
+    "players": "6",
+    "issues": [],
+    "snapshot": null,
+    "skin": "paper"
+  }
+]

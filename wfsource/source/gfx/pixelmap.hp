@@ -33,13 +33,12 @@
 #include <pigsys/pigsys.hp>
 #include <gfx/color.hp>
 #include <gfx/renderer.hp>
+#include <gfx/renderer_backend.hp>
     
 //==============================================================================
 
-#if defined(RENDERER_GL)
 #define SIXTEEN_BIT_VRAM 0
 // 0 = 32 bit, seperated RGB, 1 = packed 5 bits per pixel
-#endif
             
 //============================================================================
 
@@ -67,13 +66,13 @@ public:
 	void Clear(const Color& color);
 
     // kts temp
-#if defined(RENDERER_GL)
     void SetGLTexture() const;                 // make this pixelmap the current GL texture
-#endif          // RENDERER_GL
 
-#if defined(RENDERER_XWINDOWS)
-    void SetGLTexture() const;                 // make this pixelmap the current GL texture
-#endif          // RENDERER_XWINDOWS
+    // The backend-owned texture, or NULL. Follows _parent, so a sub-pixelmap
+    // reports the texture it actually samples from. Used by the Metal backend
+    // to bind at draw time; the GL backend binds via SetGLTexture above.
+    RBTextureHandle GetTextureHandle() const;
+
 
 	void Validate() const;
 	enum
@@ -96,26 +95,20 @@ private:
 
     PixelMap* _parent;
 
-#if defined(RENDERER_GL)
-    GLuint _glTextureName;              // index of this pixelmaps texture
+    // Opaque GPU texture owned by the RendererBackend (GL name / MTLTexture).
+    // NULL until something actually uploads pixels, and NULL forever for
+    // CPU-only maps and sub-maps that delegate to a parent. Zero-init matters:
+    // ~PixelMap used to hand an UNINITIALISED GLuint to glDeleteTextures for
+    // every sub-pixelmap, which could delete an unrelated live texture.
+    RBTextureHandle _textureHandle;
 
 #if SIXTEEN_BIT_VRAM
      uint16* _pixelBuffer;
 #else
     GLubyte* _pixelBuffer;
 #endif		                            // sixteen_bit
-#endif          // RENDERER_GL
 
 
-#if defined(RENDERER_XWINDOWS)
-    int _glListIndex;                // index of the display list created to set this pixelmap as the current gl texture
-
-#if SIXTEEN_BIT_VRAM
-     uint16* _pixelBuffer;
-#else
-    GLubyte* _pixelBuffer;
-#endif		                            // sixteen_bit
-#endif          // RENDERER_XWINDOWS
 
 
 #if DO_IOSTREAMS

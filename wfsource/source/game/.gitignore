@@ -1,0 +1,8 @@
+# Runtime audio assets (see engine/vendor/README.md for how to obtain)
+*.sf2
+TimGM6mb.sf2
+florestan-subset.sf2
+# Downloaded packages
+*.deb
+# Build artifacts / backups
+*.bak

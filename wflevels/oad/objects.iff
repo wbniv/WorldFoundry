@@ -1,0 +1,97 @@
+//============================================================================
+// objects.iff:
+// created from  object.ifs,DO NOT MODIFY
+//============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+{ 'OADL'
+        [ "ActBox.iff" ]
+        [ "Generato.iff" ]
+        [ "Target.iff" ]
+        [ "Room.iff" ]
+        [ "StatPlat.iff" ]
+        [ "Gold.iff" ]
+        [ "Enemy.iff" ]
+        [ "Platform.iff" ]
+        [ "Missile.iff" ]
+        [ "Explode.iff" ]
+	[ "Spike.iff" ]
+        [ "Matte.iff" ]
+        [ "Destroy.iff" ]
+        [ "Camera.iff" ]
+        [ "Shadow.iff" ]
+        [ "LevelObj.iff" ]
+        [ "CamShot.iff" ]
+        [ "ActBoxOR.iff" ]
+        [ "Warp.iff" ]
+        [ "Tool.iff" ]
+        [ "Director.iff" ]
+        [ "Shield.iff" ]
+        [ "Player.iff" ]
+	[ "Light.iff" ]
+	[ "Disabled.iff" ]
+	[ "Alias.iff" ]
+
+}
+
+
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+	
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+//============================================================================
+

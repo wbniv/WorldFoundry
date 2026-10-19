@@ -1,0 +1,8 @@
+{
+  "apk": "/tmp/aquarium-barb-baselines/P1-tight-profile.apk",
+  "apk_sha256": "0982735f547ba0e6c6e061407d67815e4d963a25cc96755eb5046e36a26bb81c",
+  "protocol": "30 s warmup; 60 s fixed trace (five 12 s segments); 3 runs by default; SurfaceFlinger sampled every 0.75 s",
+  "serial": "adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp",
+  "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+  "revision": "77377cb60a5d2ab73e4cad63145d929ab734a12a"
+}

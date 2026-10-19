@@ -1,0 +1,331 @@
+game plugin: patchwork
+party-games platform ready on http://localhost:8096
+  receiver:   http://localhost:8096/receiver
+  controller: http://localhost:8096/controller?name=Alice
+[ws] room DAYK created
+[ws] receiver attached to room=DAYK
+[ws] room CHWJ created
+[ws] receiver attached to room=CHWJ
+[ws] room MWVR created
+[ws] receiver attached to room=MWVR
+[ws] room CTAK created
+[ws] receiver attached to room=CTAK
+[ws] room CFZF created
+[ws] receiver attached to room=CFZF
+[ws] room XTSC created
+[ws] receiver attached to room=XTSC
+[ws] player joined room=DAYK id=1 name=Device check A
+[ws] player joined room=CHWJ id=1 name=Device check A
+[ws] player joined room=MWVR id=1 name=Device check A
+[ws] player joined room=CTAK id=1 name=Device check A
+[ws] player joined room=XTSC id=1 name=Device check A
+[ws] player joined room=DAYK id=2 name=Device check B
+[ws] player joined room=CHWJ id=2 name=Device check B
+[ws] player joined room=CHWJ id=3 name=Device check C
+[ws] player joined room=MWVR id=2 name=Device check B
+[ws] player joined room=MWVR id=3 name=Device check C
+[ws] player joined room=CFZF id=1 name=Device check A
+[ws] player joined room=MWVR id=4 name=Device check D
+[ws] player joined room=CTAK id=2 name=Device check B
+[ws] player joined room=CTAK id=3 name=Device check C
+[ws] player joined room=CTAK id=4 name=Device check D
+[ws] player joined room=MWVR id=5 name=Device check E
+[ws] player joined room=XTSC id=2 name=Device check B
+[ws] player joined room=XTSC id=3 name=Device check C
+[ws] player joined room=XTSC id=4 name=Device check D
+[ws] player joined room=CFZF id=2 name=Device check B
+[ws] player joined room=CFZF id=3 name=Device check C
+[ws] player joined room=CTAK id=5 name=Device check E
+[ws] player joined room=CFZF id=4 name=Device check D
+[ws] player joined room=XTSC id=5 name=Device check E
+[ws] player joined room=MWVR id=6 name=Device check F
+[ws] player dropped room=DAYK id=1 — grace 300000ms
+[ws] player dropped room=DAYK id=2 — grace 300000ms
+[ws] receiver detached room=DAYK
+[ws] player dropped room=CHWJ id=2 — grace 300000ms
+[ws] player dropped room=CHWJ id=3 — grace 300000ms
+[ws] receiver detached room=CHWJ
+[ws] player dropped room=CHWJ id=1 — grace 300000ms
+[ws] player dropped room=CFZF id=3 — grace 300000ms
+[ws] player dropped room=CFZF id=4 — grace 300000ms
+[ws] player dropped room=CFZF id=2 — grace 300000ms
+[ws] player dropped room=CFZF id=1 — grace 300000ms
+[ws] receiver detached room=CFZF
+[ws] player dropped room=CTAK id=3 — grace 300000ms
+[ws] player dropped room=CTAK id=5 — grace 300000ms
+[ws] player dropped room=CTAK id=2 — grace 300000ms
+[ws] player dropped room=CTAK id=1 — grace 300000ms
+[ws] player dropped room=CTAK id=4 — grace 300000ms
+[ws] receiver detached room=CTAK
+[ws] player dropped room=XTSC id=1 — grace 300000ms
+[ws] player dropped room=XTSC id=2 — grace 300000ms
+[ws] player dropped room=XTSC id=5 — grace 300000ms
+[ws] player dropped room=XTSC id=4 — grace 300000ms
+[ws] player dropped room=XTSC id=3 — grace 300000ms
+[ws] receiver detached room=XTSC
+[ws] player dropped room=MWVR id=2 — grace 300000ms
+[ws] player dropped room=MWVR id=4 — grace 300000ms
+[ws] player dropped room=MWVR id=1 — grace 300000ms
+[ws] player dropped room=MWVR id=6 — grace 300000ms
+[ws] receiver detached room=MWVR
+[ws] player dropped room=MWVR id=3 — grace 300000ms
+[ws] player dropped room=MWVR id=5 — grace 300000ms
+[ws] room DUPM created
+[ws] receiver attached to room=DUPM
+[ws] player joined room=DUPM id=1 name=Device check A
+[ws] player joined room=DUPM id=2 name=Device check B
+[ws] player dropped room=DUPM id=2 — grace 300000ms
+[ws] player dropped room=DUPM id=1 — grace 300000ms
+[ws] receiver detached room=DUPM
+[ws] player left room=DAYK id=1 (final)
+[ws] player left room=DAYK id=2 (final)
+[ws] room DAYK destroyed (empty)
+[ws] player left room=CHWJ id=2 (final)
+[ws] player left room=CHWJ id=3 (final)
+[ws] player left room=CHWJ id=1 (final)
+[ws] room CHWJ destroyed (empty)
+[ws] player left room=CFZF id=3 (final)
+[ws] player left room=CFZF id=4 (final)
+[ws] player left room=CFZF id=2 (final)
+[ws] player left room=CFZF id=1 (final)
+[ws] room CFZF destroyed (empty)
+[ws] player left room=CTAK id=3 (final)
+[ws] player left room=CTAK id=5 (final)
+[ws] player left room=CTAK id=2 (final)
+[ws] player left room=CTAK id=1 (final)
+[ws] player left room=CTAK id=4 (final)
+[ws] room CTAK destroyed (empty)
+[ws] player left room=XTSC id=1 (final)
+[ws] player left room=XTSC id=2 (final)
+[ws] player left room=XTSC id=5 (final)
+[ws] player left room=XTSC id=4 (final)
+[ws] player left room=XTSC id=3 (final)
+[ws] room XTSC destroyed (empty)
+[ws] player left room=MWVR id=2 (final)
+[ws] player left room=MWVR id=4 (final)
+[ws] player left room=MWVR id=1 (final)
+[ws] player left room=MWVR id=6 (final)
+[ws] player left room=MWVR id=3 (final)
+[ws] player left room=MWVR id=5 (final)
+[ws] room MWVR destroyed (empty)
+[ws] player left room=DUPM id=2 (final)
+[ws] player left room=DUPM id=1 (final)
+[ws] room DUPM destroyed (empty)
+[ws] room BRDN created
+[ws] receiver attached to room=BRDN
+[ws] player joined room=BRDN id=1 name=Device check A
+[ws] player joined room=BRDN id=2 name=Device check B
+[ws] player joined room=BRDN id=3 name=Device check C
+[ws] player joined room=BRDN id=4 name=Device check D
+[ws] player joined room=BRDN id=5 name=Device check E
+[ws] player joined room=BRDN id=6 name=Device check F
+[ws] player dropped room=BRDN id=2 — grace 300000ms
+[ws] player dropped room=BRDN id=6 — grace 300000ms
+[ws] player dropped room=BRDN id=5 — grace 300000ms
+[ws] player dropped room=BRDN id=4 — grace 300000ms
+[ws] player dropped room=BRDN id=3 — grace 300000ms
+[ws] player dropped room=BRDN id=1 — grace 300000ms
+[ws] receiver detached room=BRDN
+[ws] room HWVT created
+[ws] receiver attached to room=HWVT
+[ws] player joined room=HWVT id=1 name=Alexandria Montgomery Longname
+[ws] player joined room=HWVT id=2 name=Christopher Wellington Longname
+[ws] player joined room=HWVT id=3 name=Madeleine Summerfield Longname
+[ws] player joined room=HWVT id=4 name=Sebastian Winterbottom Longname
+[ws] player joined room=HWVT id=5 name=Genevieve Featherstone Longname
+[ws] player joined room=HWVT id=6 name=Maximilian Butterworth Longname
+[ws] player dropped room=HWVT id=4 — grace 300000ms
+[ws] receiver detached room=HWVT
+[ws] player dropped room=HWVT id=2 — grace 300000ms
+[ws] player dropped room=HWVT id=6 — grace 300000ms
+[ws] player dropped room=HWVT id=5 — grace 300000ms
+[ws] player dropped room=HWVT id=3 — grace 300000ms
+[ws] player dropped room=HWVT id=1 — grace 300000ms
+[ws] room TULG created
+[ws] receiver attached to room=TULG
+[ws] receiver detached room=TULG
+[ws] room TULG destroyed (empty)
+[ws] player left room=BRDN id=2 (final)
+[ws] player left room=BRDN id=6 (final)
+[ws] player left room=BRDN id=5 (final)
+[ws] player left room=BRDN id=4 (final)
+[ws] player left room=BRDN id=3 (final)
+[ws] player left room=BRDN id=1 (final)
+[ws] room BRDN destroyed (empty)
+[ws] player left room=HWVT id=4 (final)
+[ws] player left room=HWVT id=2 (final)
+[ws] player left room=HWVT id=6 (final)
+[ws] player left room=HWVT id=5 (final)
+[ws] player left room=HWVT id=3 (final)
+[ws] player left room=HWVT id=1 (final)
+[ws] room HWVT destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] room HWJT created
+[ws] receiver attached to room=HWJT
+[ws] player joined room=HWJT id=1 name=Alexandria Montgomery Longname
+[ws] player joined room=HWJT id=2 name=Christopher Wellington Longname
+[ws] player joined room=HWJT id=3 name=Madeleine Summerfield Longname
+[ws] player joined room=HWJT id=4 name=Sebastian Winterbottom Longname
+[ws] player joined room=HWJT id=5 name=Genevieve Featherstone Longname
+[ws] player joined room=HWJT id=6 name=Maximilian Butterworth Longname
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] player dropped room=HWJT id=3 — grace 300000ms
+[ws] receiver detached room=HWJT
+[ws] player dropped room=HWJT id=6 — grace 300000ms
+[ws] player dropped room=HWJT id=5 — grace 300000ms
+[ws] player dropped room=HWJT id=4 — grace 300000ms
+[ws] player dropped room=HWJT id=2 — grace 300000ms
+[ws] player dropped room=HWJT id=1 — grace 300000ms
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] player left room=HWJT id=3 (final)
+[ws] player left room=HWJT id=6 (final)
+[ws] player left room=HWJT id=5 (final)
+[ws] player left room=HWJT id=4 (final)
+[ws] player left room=HWJT id=2 (final)
+[ws] player left room=HWJT id=1 (final)
+[ws] room HWJT destroyed (empty)
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)
+[ws] room ERYS created
+[ws] receiver attached to room=ERYS
+[ws] receiver detached room=ERYS
+[ws] room ERYS destroyed (empty)

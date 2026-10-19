@@ -1,0 +1,172 @@
+{
+  "job": {
+    "id": "J-ad277fb46a9d",
+    "owner": "91e7a66d81613eb5397d20c6",
+    "accepted": 1791230310.9889774,
+    "state": "running",
+    "phase": "connecting",
+    "request": {
+      "device": "chromecast-test-01",
+      "app": "primes",
+      "apk": "32c0237d6bbad591edce019fb4cfe0d22f0e67bf5da8e22e9412c8d8c1483d26.apk",
+      "workflow": "install"
+    },
+    "device": "chromecast-test-01",
+    "generation": 135,
+    "cancel": 0,
+    "error": null,
+    "started": 1791230311.091619,
+    "finished": null,
+    "worker_pid": 906804,
+    "recovery_resolved": 0,
+    "installation": null
+  },
+  "device": {
+    "id": "chromecast-test-01",
+    "serial": "2628105GN0GT7C",
+    "model": "Chromecast HD",
+    "device": "boreal",
+    "android": "14",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "tls",
+    "endpoint": "192.168.4.43:41277",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:5817:ea6d:792c:d2e5",
+      "fd5d:59ce:7438:1:7104:7f7e:6f75:edbe",
+      "fd5d:59ce:7438:1:581b:d19a:27a5:c4db",
+      "fd5d:59ce:7438:1:3b82:772d:8d07:d5f6",
+      "fd5d:59ce:7438:1:401f:2bff:fe13:98df",
+      "fe80::401f:2bff:fe13:98df"
+    ],
+    "generation": 135,
+    "last_seen": 1791230312.366818,
+    "boot_id": "9ec069a1-861f-449a-a777-29554a2f1ed4",
+    "sdk": "34",
+    "reservation": null
+  },
+  "result": "failed",
+  "error": "Cannot update the foreground app without interrupting it",
+  "cleanup_verified": true,
+  "restoration": "unchanged: background install without launch or input",
+  "commands": [
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791230311.5812178,
+      "end": 1791230311.584803,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791230312.0859947,
+      "end": 1791230312.0907207,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "connect",
+        "192.168.4.43:41277"
+      ],
+      "start": 1791230312.0917869,
+      "end": 1791230312.1963108,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.serialno"
+      ],
+      "start": 1791230312.1976311,
+      "end": 1791230312.366789,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "cat /proc/sys/kernel/random/boot_id"
+      ],
+      "start": 1791230312.3685877,
+      "end": 1791230312.4789584,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.model"
+      ],
+      "start": 1791230312.480185,
+      "end": 1791230312.592412,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.release"
+      ],
+      "start": 1791230312.5935597,
+      "end": 1791230312.6604738,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.build.version.sdk"
+      ],
+      "start": 1791230312.6615725,
+      "end": 1791230312.7546542,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.device"
+      ],
+      "start": 1791230312.7557878,
+      "end": 1791230312.8239396,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "getprop ro.product.cpu.abilist"
+      ],
+      "start": 1791230312.8254972,
+      "end": 1791230312.8902767,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "ip -6 addr show wlan0"
+      ],
+      "start": 1791230312.8914156,
+      "end": 1791230312.9779105,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "shell",
+        "dumpsys activity activities"
+      ],
+      "start": 1791230312.99928,
+      "end": 1791230313.118621,
+      "returncode": 0
+    }
+  ],
+  "finished": 1791230313.120172,
+  "launcher": null,
+  "concurrent_jobs": []
+}

@@ -63,12 +63,21 @@ class Scalar
 public:
 	// Constructors
 	inline Scalar();
-#if defined(SCALAR_TYPE_FIXED) 
+#if defined(SCALAR_TYPE_FIXED)
    explicit inline Scalar( long value );         // can't have this with float
+#if defined(__LP64__)
+   // On LP64, int32 is `int`, distinct from `long` — without this overload an
+   // int32 argument has no unambiguous conversion to Scalar(long). On non-LP64
+   // int32 IS long, so this overload would duplicate the one above.
+   explicit inline Scalar( int32 value );
 #endif
-#if defined(SCALAR_TYPE_FLOAT) 
+#endif
+#if defined(SCALAR_TYPE_FLOAT)
    explicit inline Scalar( float value );
    explicit inline Scalar( double value );
+   // int32 converts equally well to float or double, making Scalar(int32_value)
+   // ambiguous between the two constructors above without this overload.
+   explicit inline Scalar( int32 value );
 #endif
 #if defined(SCALAR_TYPE_DOUBLE)
    explicit inline Scalar( double value );

@@ -1,0 +1,237 @@
+{
+  "command": [
+    "stdbuf",
+    "-oL",
+    "-eL",
+    "/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/engine/wf_game",
+    "-L/home/will/finding-your-way-rooms/game/parmenides-slice/build-rooms/scene9/diag/g1v1-loop/parmenides_slice-standalone.iff",
+    "--windowed",
+    "--debug-port",
+    "48661",
+    "--debug-bind",
+    "127.0.0.1",
+    "--vram-width=5120",
+    "--vram-height=2048",
+    "--vram-slot-width=1024",
+    "--vram-slot-height=2048",
+    "--vram-perm-width=2048",
+    "--vram-perm-height=2048"
+  ],
+  "fixture": "/home/will/finding-your-way-rooms/game/parmenides-slice/build-rooms/scene9/diag/g1v1-loop",
+  "level_sha256": "adff347bc53d02e1b6ee5e4731a4affcc7faa32d2ebcc9ec0ead639fb538d41b",
+  "binary_sha256": "223edefe044454f2813d73d6c62e4f70076ec3640d6450d532825a950556490d",
+  "arrivals": [
+    {
+      "lap": 1,
+      "realm": 3,
+      "player": [
+        294.0,
+        -2.0,
+        0.15
+      ],
+      "camera": [
+        294.0,
+        -1.4,
+        1.7
+      ]
+    },
+    {
+      "lap": 1,
+      "realm": 4,
+      "player": [
+        400.0,
+        -1.014987,
+        0.64129
+      ],
+      "camera": [
+        400.0,
+        -0.413254,
+        2.191652
+      ]
+    },
+    {
+      "lap": 1,
+      "realm": 5,
+      "player": [
+        500.0,
+        -0.000862,
+        0.059982
+      ],
+      "camera": [
+        500.0,
+        0.599139,
+        1.609999
+      ]
+    },
+    {
+      "lap": 2,
+      "realm": 3,
+      "player": [
+        294.0,
+        -2.0,
+        0.15
+      ],
+      "camera": [
+        294.0,
+        -1.4,
+        1.7
+      ]
+    },
+    {
+      "lap": 2,
+      "realm": 4,
+      "player": [
+        400.0,
+        -1.017354,
+        0.640911
+      ],
+      "camera": [
+        400.0,
+        -0.416033,
+        2.19113
+      ]
+    },
+    {
+      "lap": 2,
+      "realm": 5,
+      "player": [
+        500.0,
+        -0.000416,
+        0.059982
+      ],
+      "camera": [
+        500.0,
+        0.599584,
+        1.610075
+      ]
+    },
+    {
+      "lap": 3,
+      "realm": 3,
+      "player": [
+        294.0,
+        -2.0,
+        0.15
+      ],
+      "camera": [
+        294.0,
+        -1.4,
+        1.7
+      ]
+    },
+    {
+      "lap": 3,
+      "realm": 4,
+      "player": [
+        400.0,
+        -1.010832,
+        0.641923
+      ],
+      "camera": [
+        400.0,
+        -0.409524,
+        2.192207
+      ]
+    },
+    {
+      "lap": 3,
+      "realm": 5,
+      "player": [
+        500.0,
+        -0.000428,
+        0.059982
+      ],
+      "camera": [
+        500.0,
+        0.599572,
+        1.61
+      ]
+    },
+    {
+      "lap": 4,
+      "realm": 3,
+      "player": [
+        294.0,
+        -2.0,
+        0.15
+      ],
+      "camera": [
+        294.0,
+        -1.4,
+        1.7
+      ]
+    },
+    {
+      "lap": 4,
+      "realm": 4,
+      "player": [
+        399.997772,
+        -1.010221,
+        0.642017
+      ],
+      "camera": [
+        399.997803,
+        -0.408908,
+        2.192295
+      ]
+    },
+    {
+      "lap": 4,
+      "realm": 5,
+      "player": [
+        500.0,
+        -0.000431,
+        0.059982
+      ],
+      "camera": [
+        500.0,
+        0.599569,
+        1.61
+      ]
+    },
+    {
+      "lap": 5,
+      "realm": 3,
+      "player": [
+        294.0,
+        -2.0,
+        0.15
+      ],
+      "camera": [
+        294.0,
+        -1.4,
+        1.7
+      ]
+    },
+    {
+      "lap": 5,
+      "realm": 4,
+      "player": [
+        399.997803,
+        -1.009765,
+        0.642091
+      ],
+      "camera": [
+        399.997803,
+        -0.40846,
+        2.192368
+      ]
+    },
+    {
+      "lap": 5,
+      "realm": 5,
+      "player": [
+        500.0,
+        -0.000418,
+        0.060032
+      ],
+      "camera": [
+        500.0,
+        0.599583,
+        1.610079
+      ]
+    }
+  ],
+  "alive_before_cleanup": true,
+  "cleanup_exit": -15
+}

@@ -1,0 +1,25 @@
+{
+  "rooms": {
+    "A": [
+      "B",
+      "C"
+    ],
+    "B": [
+      "A"
+    ],
+    "C": [
+      "A"
+    ],
+    "D": []
+  },
+  "files": {
+    "teleport_regression-standalone.iff": "52b678f09725fed62652462b21b02b95412d9342d9fe69ff9efc3f60593eae7d",
+    "teleport_regression-standalone.iff.txt": "d8faa509f3ac454a8a692735cce6882bba103fdc3980b2ac6a88c0c0c8af8fc1",
+    "teleport_regression.iff": "503ba34f21917482d251ed22f060556449d41e157eae5694a7d89ad9ab50822d",
+    "teleport_regression.ini": "97e0f7c8c07aba4736ddc2c55f69b2a555086057c8a98e727b44bc8c868a0072",
+    "teleport_regression.iff.txt": "16c76cf085f5321ad1c3f2528f3916fafa762f6e554843db5e5e40a16c0062d3",
+    "teleport_regression.lvl": "7b62e4c9e7c4519f115cbf16bcaef3ee82982196243ea931d6a3e93b7e33c527",
+    "teleport_regression.lev.bin": "3e43fbe267182be8f2e11910200db3203bf5400b56e8b39e70013b318fd90a4d",
+    "teleport_regression.lev": "656104ae7a93fdeaebce8334ca41d547cacca3e58c82a4342044f6877c6b612a"
+  }
+}

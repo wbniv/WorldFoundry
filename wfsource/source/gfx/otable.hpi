@@ -52,9 +52,6 @@ OrderTable::Render()
 //	cout << "rendering otable:" << std::endl;
 //	cout << (*this) << std::endl;
 	DrawOTag( (
-#if defined(__PSX__)
-	(uint32*)
-#endif
 	_orderTable) + _depth - 1);
 }
 
@@ -116,9 +113,6 @@ OrderTable::Clear()
 //	cout << "Clearing otable :" << _orderTable << std::endl;
 	ClearOTagR((
 //	AltClearOTagR((
-#if defined(__PSX__)
-	(ulong*)
-#endif
 	_orderTable), _depth);
 //	cout << *this << std::endl;
 }

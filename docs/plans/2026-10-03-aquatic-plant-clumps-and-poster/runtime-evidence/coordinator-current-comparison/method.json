@@ -1,0 +1,8 @@
+{
+  "normal_apk_sha256": "79433b3c5e80625b13b4bf566e8fd941185affd62f779488ad30bab775f7c1d5",
+  "native": {
+    "lib/arm64-v8a/libwf_game.so": "565c5eed2c66c5b115decf322bc0cf9aa628e693e851110736ea1406f6766dc3",
+    "lib/armeabi-v7a/libwf_game.so": "6ab5579c342b8cc4c69fe76a28af35710ce50fe3f00d267f7cd0dd04fc354043"
+  },
+  "method": "Current normal native libraries in every variant; current selector and other seven levels. Only planted-level asset is archived in old-static. No phone connected, coordinator plants trace, 30 s warmup, 12 s per scenario; release 3 repeats, CPU 1 repeat. Supersedes cancelled older-native run; do not pool its results."
+}

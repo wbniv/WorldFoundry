@@ -1,0 +1,36 @@
+$ ['/home/will/WorldFoundry-wbniv/wftools/iffcomp-rs/target/release/iffcomp', '-binary', '-o=teleport_regression.lev.bin', 'teleport_regression.lev']
+
+Exit status: 0
+$ ['/home/will/WorldFoundry-wbniv/wftools/levcomp-rs/target/release/levcomp', 'teleport_regression.lev.bin', '/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/oas/objects.lc', 'teleport_regression.lvl', '/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/oas', '--mesh-dir', '.', '--iff-txt', 'teleport_regression.iff.txt', '--textile-ini', 'teleport_regression.ini']
+levcomp v0.1.0
+  input : teleport_regression.lev.bin
+  .lc   : /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/oas/objects.lc
+  output: teleport_regression.lvl
+  oad   : /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/wfsource/source/oas
+  meshes: .
+  parsed 21 objects
+  loaded 29 classes
+  loaded OAD schemas
+levcomp-rs: WARNING: level has 4 Light actor(s) but none are lightType=Ambient — Camera::SetAmbientColor defaults to black, so any curved-geometry actor (sphere, terrain, lander hull) will render pure black on its shadowed side. Add an Ambient Light (wf_lightType='Ambient', RGB ~0.4 grey). See docs/level-design-troubleshooting.md "Actor renders pure black despite light".
+  mesh bbox for player.iff: [-40513, -42598, -57933, 69583, 42598, 51118]
+  mesh bbox for redball.iff: [-32768, -32768, -32768, 32768, 32768, 32768]
+  mesh bbox for redball.iff: [-32768, -32768, -32768, 32768, 32768, 32768]
+  mesh bbox for redball.iff: [-32768, -32768, -32768, 32768, 32768, 32768]
+  mesh bbox for redball.iff: [-32768, -32768, -32768, 32768, 32768, 32768]
+  mesh bbox for redball.iff: [-32768, -32768, -32768, 32768, 32768, 32768]
+  mesh bbox for redball.iff: [-32768, -32768, -32768, 32768, 32768, 32768]
+  wrote 6984 bytes
+  wrote asset.inc
+  wrote teleport_regression.iff.txt
+  wrote teleport_regression.ini
+
+Exit status: 0
+$ ['/home/will/WorldFoundry-wbniv/wftools/textile-rs/target/release/textile', '-ini=teleport_regression.ini', '-Tlinux', '-transparent=0,0,0', '-pagex=1024', '-pagey=1024', '-permpagex=1024', '-permpagey=1024', '-palx=256', '-paly=8', '-alignx=w', '-aligny=h', '-flipyout']
+
+Exit status: 0
+$ ['/home/will/WorldFoundry-wbniv/wftools/iffcomp-rs/target/release/iffcomp', '-binary', '-o=teleport_regression.iff', 'teleport_regression.iff.txt']
+
+Exit status: 0
+$ ['/home/will/WorldFoundry-wbniv/wftools/iffcomp-rs/target/release/iffcomp', '-binary', '-o=teleport_regression-standalone.iff', 'teleport_regression-standalone.iff.txt']
+
+Exit status: 0

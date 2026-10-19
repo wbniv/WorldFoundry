@@ -1,0 +1,40 @@
+{
+  "projection": "equirectangular",
+  "bbox": [
+    92,
+    -12,
+    122,
+    23
+  ],
+  "kind": "Approximate centres of regions reported in USFWS 2019; not occurrence coordinates or complete/current range",
+  "points": [
+    {
+      "name": "Trat / Chanthaburi",
+      "lon": 102.25,
+      "lat": 12.4,
+      "label_x": 267,
+      "label_y": 126
+    },
+    {
+      "name": "Cardamom region",
+      "lon": 103.3,
+      "lat": 11.7,
+      "label_x": 288,
+      "label_y": 156
+    },
+    {
+      "name": "Danau Sentarum",
+      "lon": 112.1,
+      "lat": 0.8,
+      "label_x": 284,
+      "label_y": 318
+    },
+    {
+      "name": "Rajang basin",
+      "lon": 113,
+      "lat": 2.3,
+      "label_x": 316,
+      "label_y": 275
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+[INFO] cheat enabled
+[INFO] entering ADVANCE
+[INFO] L4R1 reached at frame=4609 ram=0x12 — cheat OFF
+[snap state0] idx=0000 frame=4819 ram=0x12
+[snap state1] idx=0001 frame=4880 ram=0x13
+[done]

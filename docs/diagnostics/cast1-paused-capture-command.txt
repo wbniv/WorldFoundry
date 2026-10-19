@@ -1,0 +1,10 @@
+Accepted J-6ceb581d5470: queued; capture
+Follow: task chromecast:watch JOB=J-6ceb581d5470
+J-6ceb581d5470: accepted {"device": "chromecast-test-01", "workflow": "capture"}
+J-6ceb581d5470: granted {"device": "chromecast-test-01", "generation": 9}
+J-6ceb581d5470: phase {"phase": "connecting"}
+J-6ceb581d5470: phase {"phase": "capturing"}
+J-6ceb581d5470: completed {"error": null, "health": "ready"}
+J-6ceb581d5470: completed
+J-6ceb581d5470: completed; verified 9 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/chromecast-capture-J-6ceb581d5470
+Screenshot: /home/will/WorldFoundry-wbniv/docs/diagnostics/chromecast-capture-J-6ceb581d5470/screenshot.png

@@ -1,0 +1,9 @@
+{
+  "before": [
+    "    mResumedActivity: ActivityRecord{d23d5d4 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t44}"
+  ],
+  "after": [
+    "    mResumedActivity: ActivityRecord{d23d5d4 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t44}"
+  ],
+  "foreground_unchanged": true
+}

@@ -1,0 +1,84 @@
+// pilot_core.hp — PILOT parser + frame-resumable VM. Pure C++ (std + pilot_host).
+//
+// Spec: docs/pilot-language.md. The Python reference is tests/pilot/pilot_driver.py;
+// this is the canonical interpreter both the in-engine engine and (Phase 3) the
+// external C++ BridgeHost share.
+
+#ifndef WF_PILOT_CORE_HP
+#define WF_PILOT_CORE_HP
+
+#include <string>
+#include <vector>
+#include <unordered_map>
+
+#include "pilot_host.hp"
+
+namespace pilot {
+
+// Name -> integer value (mailbox indices, joystick buttons). Built by the engine
+// plug from AddConstantArray; empty for the pure-language conformance tier.
+typedef std::unordered_map<std::string, long> ConstTable;
+
+struct Stmt
+{
+    std::string verb;      // T, TH, C, M, J, U, E, EX, PA, WM, IN, SM, ...
+    char        cond = 0;  // 'Y' / 'N' conditioner, or 0
+    bool        hasGuard = false;
+    std::string guard;     // (expr) text without parens
+    std::string operand;
+    int         lineno = 0;
+};
+
+struct Directive { std::string key, val; };
+
+struct Program
+{
+    std::vector<Stmt>                    stmts;
+    std::unordered_map<std::string, int> labels;   // label -> stmt index
+    std::vector<Directive>               directives;
+    bool                                 ok = true;
+    std::string                          error;
+};
+
+Program parse(const char* src);
+
+// Mutable per-execution state. In-engine there is one VMState per actor index,
+// persisting across frames (the program counter IS the actor's state machine).
+struct VMState
+{
+    int  pc = 0;
+    bool halted = false;
+    bool exited = false;
+    int  exitCode = 0;
+    bool match = false;
+    std::string accept;
+    std::unordered_map<std::string, double>      num;   // keyed WITH leading '#'
+    std::unordered_map<std::string, std::string> strv;  // keyed WITH leading '$'
+    std::vector<int> callstack;
+    double lastval = 0.0;
+
+    // frame-resumable await
+    bool                 pendingAwait = false;
+    PilotHost::AwaitReq  awaitReq;
+    std::string          awaitBind;   // numeric var to bind the awaited value into
+
+    VMState() { num["#last"] = 0.0; }
+    void bind(const std::string& name, double v)
+    {
+        num[name.size() && name[0] == '#' ? name : "#" + name] = v;
+    }
+};
+
+// Run/resume `prog` against `host` for actor `selfActor`. Executes up to
+// `budget` statements then yields (resume next frame); suspends on a blocking
+// verb until its await is satisfied. Returns the last value; sets *done when the
+// program has halted/exited (so the caller can stop re-entering it).
+double run(const Program& prog, VMState& st, PilotHost& host, int selfActor,
+           const ConstTable& consts, int budget = 256, bool* done = nullptr);
+
+// Format a number the way T:/$#var interpolation does ("%g": 7, 2.5, 2).
+std::string fmtnum(double v);
+
+} // namespace pilot
+
+#endif // WF_PILOT_CORE_HP

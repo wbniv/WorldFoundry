@@ -1,0 +1,101 @@
+--- actor.cc CVS 1.21
++++ actor.cc CVS 1.22
+@@ -373,7 +373,7 @@
+ 				Vector3 min(_physicalAttributes.GetColSpace().Min());
+ 				Vector3 max(_physicalAttributes.GetColSpace().Max());
+ 				_renderActor = new (memory) RenderActor3DBox(memory,min,max);
+-				_physicalAttributes.Rotation(Euler::zero);
++				_physicalAttributes.SetRotation(Euler::zero);
+ 			}
+ 			else
+ #endif	                                // SHOW_COLLISION_AS_BOXES
+@@ -385,7 +385,7 @@
+ 			Vector3 min(_physicalAttributes.GetColSpace().Min());
+ 			Vector3 max(_physicalAttributes.GetColSpace().Max());
+ 			_renderActor = new (memory) RenderActor3DBox(memory,min,max);
+-			_physicalAttributes.Rotation(Euler::zero);
++			_physicalAttributes.SetRotation(Euler::zero);
+ 			break;
+ 		}
+ 
+@@ -397,7 +397,7 @@
+ 				Vector3 min(_physicalAttributes.GetColSpace().Min());
+ 				Vector3 max(_physicalAttributes.GetColSpace().Max());
+ 				_renderActor = new (memory) RenderActor3DBox(memory,min,max);
+-				_physicalAttributes.Rotation(Euler::zero);
++				_physicalAttributes.SetRotation(Euler::zero);
+ 			}
+ 			else
+ 				_renderActor = &NULLRenderActor;
+@@ -551,11 +551,11 @@
+ 	_physicalAttributes.SetLinVelocity( Vector3::zero );
+ 	_physicalAttributes.SetPredictedPosition( _physicalAttributes.Position() );
+ 
+-   _physicalAttributes.Rotation(euler);
++   _physicalAttributes.SetRotation(euler);
+ //    _physicalAttributes.SetRotationA(Angle::Revolution(Scalar(0,objdata->rotation.a)));
+ //    _physicalAttributes.SetRotationB(Angle::Revolution(Scalar(0,objdata->rotation.b)));
+ //    _physicalAttributes.SetRotationC(Angle::Revolution(Scalar(0,objdata->rotation.c)));
+-	_physicalAttributes.ValidateCollisionSpace();
++	_physicalAttributes.Validate();
+ 
+ 	_hasRunPredictPosition = false;
+ 	_hasRunUpdate = false;
+@@ -1086,7 +1086,7 @@
+ 
+ //		theLevel->AddActor( createdObject, currentPos() );
+ 		theLevel->AddActor( createdObject, GetPredictedPosition() );
+-		createdObject->GetWritablePhysicalAttributes().Rotation(_physicalAttributes.Rotation());
++		createdObject->GetWritablePhysicalAttributes().SetRotation(_physicalAttributes.Rotation());
+ 	}
+ }
+ 
+@@ -1425,7 +1425,7 @@
+ 					Angle rot( Angle::Revolution( value ) );
+ 					DBSTREAM4( cstats << "actor got rotation c of " << rot << std::endl; )
+                rotationEuler.SetC(rot);
+-					_physicalAttributes.Rotation( rotationEuler );
++					_physicalAttributes.SetRotation( rotationEuler );
+ 					//_physicalAttributes.SetRotationC( rot );
+ 					break;
+ 				}
+@@ -1484,16 +1484,29 @@
+ 					break;
+ 				}
+ 
+-				case EMAILBOX_XSPEED:
+-					_physicalAttributes.SetLinVelocityX( value );
+-					break;
+-
+-				case EMAILBOX_YSPEED:
+-					_physicalAttributes.SetLinVelocityY( value );
+-					break;
+-
+-				case EMAILBOX_ZSPEED:
+-					_physicalAttributes.SetLinVelocityZ( value );
++            case EMAILBOX_XSPEED:
++               {
++                  Vector3 linVelocity = _physicalAttributes.LinVelocity();
++                  linVelocity.SetX(value);
++                  _physicalAttributes.SetLinVelocity( linVelocity );
++               }
++					break;
++
++            case EMAILBOX_YSPEED:
++               {
++                  Vector3 linVelocity = _physicalAttributes.LinVelocity();
++                  linVelocity.SetY(value);
++                  _physicalAttributes.SetLinVelocity( linVelocity );
++
++               }
++					break;
++
++            case EMAILBOX_ZSPEED:
++               {
++                  Vector3 linVelocity = _physicalAttributes.LinVelocity();
++                  linVelocity.SetZ(value);
++                  _physicalAttributes.SetLinVelocity( linVelocity );
++               }
+ 					break;
+ 
+ 				case EMAILBOX_INPUT :

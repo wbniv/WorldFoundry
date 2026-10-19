@@ -1,0 +1,12 @@
+# Per-level textile-rs page-size overrides for condo_639_640 (and the _tour build, which
+# shares this dir's textures). Sourced by wftools/wf_blender/build_level_binary.sh.
+#
+# The site skybox routes condo_sky.tga (1024×512) + condo_ground.tga (512×512) to the PERM
+# atlas (Moves Between Rooms, like moon_site01's skydome): 786 432 texels need one 1024²
+# page instead of the 256² default. Needs the matching runtime flags (Taskfile run-condo,
+# tests/record_condo_639_tour.py): --vram-perm-width/height=1024 for the page, --vram-width=4096
+# --vram-height=2048 so the box holds it, and --vram-slot-width/height=1024 because material.cc
+# CalcVRAMuv bounds every texture's u/v by the *transient* slot size, PERM textures included.
+# Plan: docs/plans/2026-09-19-condo-site-skybox.md
+PERMPAGEX=1024
+PERMPAGEY=1024

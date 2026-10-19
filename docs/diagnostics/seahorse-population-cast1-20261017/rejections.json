@@ -1,0 +1,20 @@
+[
+  {
+    "job": "J-37d37d7bc854",
+    "path": "round-2/none/run-1",
+    "reason": "Screenshot shows lionfish scene; latest level load lacks required planted-tank settings marker. Excluded regardless of valid timestamp coverage.",
+    "replacement_job": "J-03e1af5ca7bf"
+  },
+  {
+    "job": "J-4399ea64b1f4",
+    "path": "round-3-failed",
+    "reason": "Coordinator plugin-error before first measurement; foreground-failure evidence retained, restoration marked safe. Automatic readd J-a389ab2b3184 completed.",
+    "replacement_job": "J-b17ce50c0065"
+  },
+  {
+    "job": "J-a85e8414f1d4",
+    "path": "cpu-failed",
+    "reason": "Partial session ended with coordinator plugin-error and foreground failure. Its completed None run passed timing, fixture and CPU-window validation and is retained; missing populations are retried. Automatic readd J-0f2dd1805c36 completed.",
+    "replacement_job": "J-5319448dd00e"
+  }
+]

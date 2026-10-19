@@ -1,0 +1,126 @@
+--------- beginning of main
+10-06 14:51:15.275 26743 26743 W f_game.aquariu: Using default instruction set features for ARM CPU variant (cortex-a9) using conservative defaults
+10-06 14:51:15.288 26743 26743 E f_game.aquariu: Not starting debugger since process cannot load the jdwp agent.
+10-06 14:51:15.291 26743 26743 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+10-06 14:51:15.311 26743 26743 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10101; state: ENABLED
+10-06 14:51:15.325 26743 26743 D nativeloader: Configuring classloader-namespace for other apk /data/app/~~Fbfr7hbQDqzRyrBwuUIw3A==/org.worldfoundry.wf_game.aquarium-SiW_kA_psLVj1iJZNIjgww==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~Fbfr7hbQDqzRyrBwuUIw3A==/org.worldfoundry.wf_game.aquarium-SiW_kA_psLVj1iJZNIjgww==/lib/arm:/data/app/~~Fbfr7hbQDqzRyrBwuUIw3A==/org.worldfoundry.wf_game.aquarium-SiW_kA_psLVj1iJZNIjgww==/base.apk!/lib/armeabi-v7a, permitted_path=/data:/mnt/expand:/data/user/0/org.worldfoundry.wf_game.aquarium
+10-06 14:51:15.333 26743 26743 V GraphicsEnvironment: ANGLE Developer option for 'org.worldfoundry.wf_game.aquarium' set to: 'default'
+10-06 14:51:15.333 26743 26743 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-06 14:51:15.335 26743 26743 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-06 14:51:15.336 26743 26743 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-06 14:51:15.423 26743 26762 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log
+10-06 14:51:15.423 26743 26762 I wf_game : android_main: enter
+10-06 14:51:15.423 26743 26762 I wf_game : android_main: assetMgr=0xeb3d5c00
+10-06 14:51:15.424 26743 26762 I wf_game : android_main: uiMode=4 (tv=1)
+10-06 14:51:15.424 26743 26762 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-06 14:51:15.431 26743 26762 I wf_game : APP_CMD_RESUME
+10-06 14:51:15.448 26743 26762 I wf_game : phonepad: listening on 192.168.4.56:8765
+10-06 14:51:15.448 26743 26762 I wf_game : phone controller: open http://192.168.4.56:8765/?k=948656 (PIN 948656)
+10-06 14:51:15.484 26743 26762 I wf_game : APP_CMD_INIT_WINDOW
+10-06 14:51:15.485 26743 26762 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-06 14:51:15.485 26743 26762 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-06 14:51:15.486 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_unnamed"
+10-06 14:51:15.486 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_default_heap"
+10-06 14:51:15.487 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_base_internal"
+10-06 14:51:15.487 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_framepool"
+10-06 14:51:15.487 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_tiler"
+10-06 14:51:15.487 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_program"
+10-06 14:51:15.487 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane"
+10-06 14:51:15.487 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane_imported"
+10-06 14:51:15.487 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vao"
+10-06 14:51:15.487 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_img"
+10-06 14:51:15.487 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_internal_surface"
+10-06 14:51:15.487 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_buf"
+10-06 14:51:15.487 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_crc"
+10-06 14:51:15.488 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_hmem"
+10-06 14:51:15.488 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_rsd"
+10-06 14:51:15.488 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_mbs2"
+10-06 14:51:15.488 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_static"
+10-06 14:51:15.488 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_hmem"
+10-06 14:51:15.488 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_sample_pos"
+10-06 14:51:15.488 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_discard"
+10-06 14:51:15.488 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_tess_geom"
+10-06 14:51:15.488 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cobj_hmem"
+10-06 14:51:15.488 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_hmem"
+10-06 14:51:15.488 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_prof_dump"
+10-06 14:51:15.488 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cblend_hmem"
+10-06 14:51:15.489 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_hmem"
+10-06 14:51:15.489 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query"
+10-06 14:51:15.489 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query_host"
+10-06 14:51:15.489 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_multiview"
+10-06 14:51:15.489 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cdeps_hmem"
+10-06 14:51:15.489 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_suballoc"
+10-06 14:51:15.489 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_hoard"
+10-06 14:51:15.489 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_registry"
+10-06 14:51:15.489 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_payload"
+10-06 14:51:15.489 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_wlm_tls"
+10-06 14:51:15.489 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_hmem"
+10-06 14:51:15.489 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_svm"
+10-06 14:51:15.490 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_protected"
+10-06 14:51:15.490 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cinstr"
+10-06 14:51:15.490 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_uncached"
+10-06 14:51:15.490 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_cached"
+10-06 14:51:15.490 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_transient"
+10-06 14:51:15.490 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_protected"
+10-06 14:51:15.490 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external"
+10-06 14:51:15.490 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external_swapchain"
+10-06 14:51:15.490 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal"
+10-06 14:51:15.490 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_host"
+10-06 14:51:15.490 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_protected"
+10-06 14:51:15.491 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_transient"
+10-06 14:51:15.491 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_descriptor_pool"
+10-06 14:51:15.491 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator"
+10-06 14:51:15.491 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_host"
+10-06 14:51:15.491 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_protected"
+10-06 14:51:15.491 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_buffer"
+10-06 14:51:15.491 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_image"
+10-06 14:51:15.491 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_signal"
+10-06 14:51:15.491 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_flush_chain"
+10-06 14:51:15.491 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_metadata_list"
+10-06 14:51:15.491 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_jit"
+10-06 14:51:15.491 26743 26762 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_mmu"
+10-06 14:51:15.492 26743 26762 W libc    : Access denied finding property "vendor.mali.osu_protected_memory_heap_name"
+10-06 14:51:15.492 26743 26762 W libc    : Access denied finding property "vendor.mali.osu_ion_protected_memory_heap_name"
+10-06 14:51:15.492 26743 26762 W libc    : Access denied finding property "vendor.mali.platform_agt_frequency_khz"
+10-06 14:51:15.492 26743 26762 W libc    : Access denied finding property "vendor.mali.hal_dump_dir"
+10-06 14:51:15.492 26743 26762 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-06 14:51:15.492 26743 26762 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-06 14:51:15.501 26743 26762 D hw-ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+10-06 14:51:15.509 26743 26762 W libc    : Access denied finding property "ro.vendor.arm.gralloc.no_afbc_usage_mask"
+10-06 14:51:15.509 26743 26762 W libc    : Access denied finding property "ro.vendor.arm.gralloc.no_afbc_usage_flags"
+10-06 14:51:15.509 26743 26762 W libc    : Access denied finding property "ro.vendor.arm.gralloc.shared_access_usage_mask"
+10-06 14:51:15.509 26743 26762 W libc    : Access denied finding property "ro.vendor.arm.gralloc.shared_access_usage_flags"
+10-06 14:51:15.509 26743 26762 W libc    : Access denied finding property "ro.vendor.arm.gralloc.force_back_buffer_usage_mask"
+10-06 14:51:15.509 26743 26762 W libc    : Access denied finding property "ro.vendor.arm.gralloc.force_back_buffer_usage_flags"
+10-06 14:51:15.509 26743 26762 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_rgba_usage_mask"
+10-06 14:51:15.509 26743 26762 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_rgba_usage_flags"
+10-06 14:51:15.509 26743 26762 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_luma_usage_mask"
+10-06 14:51:15.509 26743 26762 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_chroma_usage_mask"
+10-06 14:51:15.509 26743 26762 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_luma_usage_flags"
+10-06 14:51:15.510 26743 26762 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_chroma_usage_flags"
+10-06 14:51:15.513 26743 26762 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-06 14:51:15.513 26743 26762 I wf_game : android_main: EGL ready, entering HALStart
+10-06 14:51:15.513 26743 26762 I wf_game : android_main: wf_args.txt gave 6 argument(s)
+10-06 14:51:15.515 26743 26762 I AAudio  : AAudioStreamBuilder_openStream() called ----------------------------------------
+10-06 14:51:15.515 26743 26762 I AudioStreamBuilder: rate   =      0, channels  = 0, format   = 5, sharing = SH, dir = OUTPUT
+10-06 14:51:15.515 26743 26762 I AudioStreamBuilder: device =      0, sessionId = -1, perfMode = 12, callback: ON with frames = 0
+10-06 14:51:15.515 26743 26762 I AudioStreamBuilder: usage  =      0, contentType = 0, inputPreset = 0, allowedCapturePolicy = 0
+10-06 14:51:15.515 26743 26762 I AudioStreamBuilder: privacy sensitive = false
+10-06 14:51:15.515 26743 26762 I AudioStreamBuilder: opPackageName = (null)
+10-06 14:51:15.515 26743 26762 I AudioStreamBuilder: attributionTag = (null)
+10-06 14:51:15.515 26743 26762 D f_game.aquariu: PlayerBase::PlayerBase()
+10-06 14:51:15.523 26743 26762 D AudioStreamInternal_Client: open() original HW burst = 384, minMicros = 1000 => SW burst = 384
+10-06 14:51:15.523 26743 26762 D AAudioStream: setState(s#1) from 0 to 2
+10-06 14:51:15.523 26743 26762 I AAudioFlowGraph: configure() source format = 0x00000005, channels = 2, sink format = 0x00000005, channels = 2
+10-06 14:51:15.525 26743 26762 I AAudio  : AAudioStreamBuilder_openStream() returns 0 = AAUDIO_OK for s#1 ----------------
+10-06 14:51:15.526 26743 26762 D AAudio  : AAudioStream_requestStart(s#1) called --------------
+10-06 14:51:15.526 26743 26762 D AAudioStream: setState(s#1) from 2 to 3
+10-06 14:51:15.545 26743 26762 D AAudio  : AAudioStream_requestStart(s#1) returned 0 ---------
+10-06 14:51:15.547 26743 26774 D AudioStreamInternalPlay_Client: callbackLoop() entering >>>>>>>>>>>>>>>
+10-06 14:51:15.547 26743 26774 D AudioStreamInternal_Client: onEventFromServer - got AAUDIO_SERVICE_EVENT_STARTED
+10-06 14:51:15.547 26743 26774 D AAudioStream: setState(s#1) from 3 to 4
+10-06 14:51:15.667 26743 26762 I wf_game : level-menu: showing 8 entries ("WF Aquarium"), cursor on 0
+10-06 14:51:15.677 26743 26762 E ion     : ioctl c0044901 failed with code -1: Invalid argument
+10-06 14:51:15.677 26743 26762 D hw-ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+10-06 14:51:21.027 26743 26762 I wf_game : key code=4 action=0 (Back: hides the phone panel)
+10-06 14:51:21.060 26743 26762 I wf_game : key code=4 action=1 (Back: hides the phone panel)

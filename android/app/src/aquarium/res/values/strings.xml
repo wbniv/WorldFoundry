@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The aquarium app's labels; override src/main/res/values/strings.xml.
+     See docs/plans/2026-09-30-aquarium-chromecast.md. -->
+<resources>
+    <string name="app_name">WF Aquarium</string>
+    <string name="log_viewer_label">Aquarium Log</string>
+</resources>

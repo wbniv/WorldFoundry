@@ -12,6 +12,7 @@ GroupStop     → closes the GroupStart box.
 import os
 import bpy
 import wf_core
+from . import debug_bridge as _db_mod
 from .operators import (
     SCHEMA_PATH_KEY, SECTION_OPEN_PREFIX,
     _prop_key, _section_key, _get_schema, _seed_defaults,
@@ -221,6 +222,13 @@ class WF_PT_attributes(bpy.types.Panel):
                     )
                     op.field_key  = field.key
                     op.item_label = item
+                # ScriptLanguage gets an autodetect hint button below the grid
+                if field.key == "ScriptLanguage":
+                    layout.operator(
+                        "wf.detect_script_language",
+                        text="Detect from script text",
+                        icon='SHADERFX',
+                    )
 
             else:
                 # ≤4 items or unlisted show_as: horizontal button row
@@ -251,11 +259,110 @@ class WF_PT_level(bpy.types.Panel):
         layout = self.layout
         layout.operator("wf.import_level", icon='IMPORT')
         layout.operator("wf.export_level", icon='EXPORT')
+        layout.separator()
+        scene = context.scene
+        layout.prop(scene, "wf_level_name", text="Level Name")
+        layout.operator("wf.run_level", icon='PLAY')
+
+
+# ── WF_PT_live_bridge ─────────────────────────────────────────────────────────
+
+class WF_PT_live_bridge(bpy.types.Panel):
+    """Live debug bridge — connects Blender to a running wf_game instance."""
+    bl_label       = "WF Live Bridge"
+    bl_idname      = "WF_PT_live_bridge"
+    bl_space_type  = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context     = 'scene'
+
+    def draw(self, context):
+        layout = self.layout
+        prefs = context.preferences.addons.get(__package__)
+        prefs = prefs.preferences if prefs else None
+
+        bridge = _db_mod.get_bridge()
+
+        if bridge.connected:
+            # Status row
+            row = layout.row(align=True)
+            icon = 'PAUSE' if bridge.is_paused else 'RADIOBUT_ON'
+            label = "⏸ PAUSED" if bridge.is_paused else "Connected"
+            row.label(text=label, icon=icon)
+            host = getattr(prefs, 'debug_host', 'localhost') if prefs else 'localhost'
+            port = getattr(prefs, 'debug_port', 7777)        if prefs else 7777
+            row.label(text=f"{host}:{port}")
+            row.operator("wf.bridge_disconnect", text="", icon='X')
+
+            if bridge.frame_n:
+                layout.label(text=f"Frame {bridge.frame_n}  |  {bridge.frame_dt_ms:.1f} ms")
+            if bridge.perf_frame_ms > 0:
+                layout.label(text=f"CPU {bridge.perf_frame_ms:.1f} ms  |  Actors: {bridge.perf_actors}")
+
+            # Pause / step / resume controls
+            row2 = layout.row(align=True)
+            if bridge.is_paused:
+                row2.operator("wf.bridge_step",   text="Step",   icon='FRAME_NEXT')
+                row2.operator("wf.bridge_resume",  text="Resume", icon='PLAY')
+            else:
+                row2.operator("wf.bridge_pause",   text="Pause",  icon='PAUSE')
+
+            # Object picker
+            row3 = layout.row(align=True)
+            row3.operator("wf.bridge_pick", text="Pick Object", icon='RESTRICT_SELECT_OFF')
+            if bridge.last_picked_idx >= 0:
+                name = bridge.idx_to_name.get(bridge.last_picked_idx, f"idx {bridge.last_picked_idx}")
+                row3.label(text=name)
+
+            # Undo / revert (Phase 3)
+            n = len(bridge.change_log)
+            if n > 0:
+                layout.separator()
+                row4 = layout.row(align=True)
+                row4.label(text=f"Changes: {n}", icon='TRACKING_BACKWARDS')
+                row4.operator("wf.bridge_undo",       text="↩ Undo",      icon='LOOP_BACK')
+                row4.operator("wf.bridge_revert_all", text="✕ Revert all", icon='X')
+
+            # Mailbox watchpoints
+            layout.separator()
+            layout.label(text="Mailbox Watches", icon='DRIVER')
+            for (w_idx, w_mbx) in sorted(bridge.watches):
+                val = bridge.mailbox_values.get((w_idx, w_mbx))
+                actor_name = bridge.idx_to_name.get(w_idx, f"idx {w_idx}")
+                val_str = f"{val:.4g}" if val is not None else "…"
+                row_w = layout.row(align=True)
+                row_w.label(text=f"{actor_name}  mbx {w_mbx}: {val_str}")
+                op_x = row_w.operator("wf.bridge_unwatch_mailbox", text="", icon='X')
+                op_x.actor_idx   = w_idx
+                op_x.mailbox_idx = w_mbx
+
+            # Add-watch row: uses last picked actor + scene-stored mailbox index
+            picked = bridge.last_picked_idx
+            row_add = layout.row(align=True)
+            if picked >= 0:
+                row_add.prop(context.scene, "wf_watch_mailbox_idx", text="mbx")
+                op_add = row_add.operator("wf.bridge_watch_mailbox", text="", icon='ADD')
+                op_add.actor_idx   = picked
+                op_add.mailbox_idx = context.scene.wf_watch_mailbox_idx
+            else:
+                row_add.label(text="Pick an object first", icon='INFO')
+        else:
+            row = layout.row(align=True)
+            row.label(text="Not connected", icon='RADIOBUT_OFF')
+            if bridge.error:
+                layout.label(text=bridge.error, icon='ERROR')
+            if prefs:
+                layout.prop(prefs, "debug_host", text="Host")
+                layout.prop(prefs, "debug_port", text="Port")
+            row2 = layout.row()
+            row2.operator("wf.bridge_connect", text="Connect", icon='LINKED')
+
+        layout.separator()
+        layout.prop(context.scene, "wf_bridge_sync_transforms", text="Sync transforms (10 Hz)")
 
 
 # ── registration ──────────────────────────────────────────────────────────────
 
-_CLASSES = [WF_PT_attributes, WF_PT_level]
+_CLASSES = [WF_PT_attributes, WF_PT_level, WF_PT_live_bridge]
 
 
 def register():

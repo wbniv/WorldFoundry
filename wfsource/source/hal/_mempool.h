@@ -56,7 +56,7 @@ VALIDATEMEMPOOL(SMemPool* memPool)
 		assert(((char*)fe->_next) < (memPool->_buffer+(memPool->_maxEntries*memPool->_size)));
 		fe = fe->_next;
 		AssertMsg(count < memPool->_maxEntries, "mempool list must be looped");
-		count++;
+		++count;
 	 }
  }
 #else

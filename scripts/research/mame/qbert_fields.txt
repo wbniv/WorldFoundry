@@ -1,0 +1,24 @@
+=== ALL INPUT FIELDS ===
+PORT::DSW                            FIELD:Demo Sounds
+PORT::DSW                            FIELD:Unused
+PORT::DSW                            FIELD:Demo Mode (Unlim Lives, Start=Adv (Cheat)
+PORT::DSW                            FIELD:Free Play
+PORT::DSW                            FIELD:Cabinet
+PORT::DSW                            FIELD:Kicker
+PORT::IN1                            FIELD:Select in Service Mode
+PORT::IN1                            FIELD:Coin 1
+PORT::IN1                            FIELD:1 Player Start
+PORT::IN1                            FIELD:2 Players Start
+PORT::IN1                            FIELD:Service Mode
+PORT::IN1                            FIELD:Coin 2
+PORT::IN4                            FIELD:P1 Up (Up-Right)
+PORT::IN4                            FIELD:P2 Down (Down-Left)
+PORT::IN4                            FIELD:P2 Left (Up-Left)
+PORT::IN4                            FIELD:P2 Up (Up-Right)
+PORT::IN4                            FIELD:P1 Right (Down-Right)
+PORT::IN4                            FIELD:P1 Left (Up-Left)
+PORT::IN4                            FIELD:P2 Right (Down-Right)
+PORT::IN4                            FIELD:P1 Down (Down-Left)
+PORT::r1sound:SB1                    FIELD:Unknown
+PORT::r1sound:SB1                    FIELD:Sound Test
+=== END ===

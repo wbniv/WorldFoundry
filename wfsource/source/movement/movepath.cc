@@ -99,8 +99,8 @@ PathHandler::predictPosition( MovementManager& movementManager, MovementObject& 
 			// force object to predict it's position
 			BaseObject* targetBase = baseObjectList[_movementData->ObjectToFollow];
 			AssertMsg(ValidPtr(targetBase),"object to follow (index " << _movementData->ObjectToFollow << ") not found in object " << movementObject);
-         MovementObject* target = dynamic_cast<MovementObject*>(targetBase);
-         assert(ValidPtr(target));
+         assert(IsMovementObject(targetBase));
+         MovementObject* target = static_cast<MovementObject*>(targetBase);
 
 			if(!target->GetPhysicalAttributes().HasRunPredictPosition())
 				target->predictPosition(clock);
@@ -195,8 +195,8 @@ PathHandler::update(MovementManager& /*movementManager*/,  MovementObject& movem
 
       BaseObject* targetBase = baseObjectList[_movementData->ObjectToFollow];
       AssertMsg(ValidPtr(targetBase),"object to follow (index " << _movementData->ObjectToFollow << ") not found in object " << movementObject);
-      MovementObject* target = dynamic_cast<MovementObject*>(targetBase);
-      assert(ValidPtr(target));
+      assert(IsMovementObject(targetBase));
+      MovementObject* target = static_cast<MovementObject*>(targetBase);
 
 		if(!target->hasRunUpdate())
 			target->update();

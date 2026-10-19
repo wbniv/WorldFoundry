@@ -77,9 +77,9 @@ Activation::Activated( const PhysicalAttributes& myPa, BaseObjectIteratorWrapper
 			while ( !objectIter.Empty() )
 			{
             PhysicalObject* po;
-				po = dynamic_cast<PhysicalObject*>(&(*objectIter));
+				assert(IsPhysicalObject(&(*objectIter)));
+				po = static_cast<PhysicalObject*>(&(*objectIter));
 				//DBSTREAM1( ccollision << std::endl << "checking against actor #" << theLevel->GetActorIndex( po ); )
-				assert( ValidPtr( po ) );
 				const PhysicalAttributes& pa = po->GetPhysicalAttributes();
 
 				if ( pa.CheckCollision( myPa ) )
@@ -99,7 +99,8 @@ Activation::Activated( const PhysicalAttributes& myPa, BaseObjectIteratorWrapper
 			if ( colObject )
 			{
 				//AssertMsg( colObject, *this << " activated by actor " << *colObject << " activated non-existant actor" << std::endl );
-            PhysicalObject* po = dynamic_cast<PhysicalObject*>(colObject);
+            assert(IsPhysicalObject(colObject));
+            PhysicalObject* po = static_cast<PhysicalObject*>(colObject);
 				const PhysicalAttributes& pa = po->GetPhysicalAttributes();
 				if ( pa.CheckCollision( myPa ) )
             {
@@ -115,8 +116,8 @@ Activation::Activated( const PhysicalAttributes& myPa, BaseObjectIteratorWrapper
 
 			while ( !objectIter.Empty() )
 			{
-				PhysicalObject* po = dynamic_cast<PhysicalObject*>(&(*objectIter));
-				assert( ValidPtr( po ) );
+				assert(IsPhysicalObject(&(*objectIter)));
+				PhysicalObject* po = static_cast<PhysicalObject*>(&(*objectIter));
 				if ( activation.ActivatedByClass == po->kind() )
 				{
 					//DBSTREAM3( ccollision << std::endl << "checking against actor #" << theLevel->GetActorIndex( po ); )

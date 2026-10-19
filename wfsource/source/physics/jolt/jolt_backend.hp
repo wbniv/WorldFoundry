@@ -1,0 +1,156 @@
+// jolt_backend.hp — Jolt Physics world singleton public API.
+//
+// Uses only WF types in all signatures so this header is safe to include
+// from any translation unit that defines PHYSICS_ENGINE_JOLT — no Jolt
+// headers bleed through.
+//
+// All implementations live in jolt_backend.cc.
+
+#pragma once
+#ifdef PHYSICS_ENGINE_JOLT
+
+#include <cstdint>
+#include <math/vector3.hp>
+#include <math/euler.hp>
+
+static constexpr uint32_t kJoltInvalidBodyID = 0xffffffff;
+
+// ---------------------------------------------------------------------------
+// Body lifecycle
+// Create a dynamic (gravity-affected) body with box shape [minPt, maxPt].
+// Returns a handle usable in all other functions.  kJoltInvalidBodyID on error.
+uint32_t JoltBodyCreate(const Vector3& pos, const Euler& rot,
+                        const Vector3& minPt, const Vector3& maxPt);
+
+// Create an immovable body (world geometry, platforms).
+uint32_t JoltBodyCreateStatic(const Vector3& pos, const Euler& rot,
+                               const Vector3& minPt, const Vector3& maxPt);
+
+// Triangle mesh vertex/face types — plain POD, no Jolt headers needed here.
+struct JoltMeshVertex { float x, y, z; };
+struct JoltMeshFace   { uint32_t v0, v1, v2; };
+
+// Create an immovable triangle-mesh body (sloped ramps, arbitrary surfaces).
+// Vertices are in the actor's local coordinate space; pos is the world offset.
+uint32_t JoltBodyCreateStaticMesh(const Vector3& pos,
+                                   const JoltMeshVertex* verts, int vertCount,
+                                   const JoltMeshFace*   faces, int faceCount);
+
+// Release body; safe to call with kJoltInvalidBodyID (no-op).
+void JoltBodyDestroy(uint32_t handle);
+
+// Upgrade a (default STATIC) body to DYNAMIC so Jolt applies gravity to it.
+// Call from GroundHandler::init for MOBILITY_PHYSICS actors.
+void JoltBodySetDynamic(uint32_t handle);
+
+// ---------------------------------------------------------------------------
+// Cached-read accessors (updated once per JoltWorldStep; no Jolt lock taken).
+const Vector3& JoltBodyGetPosition(uint32_t handle);
+Euler          JoltBodyGetRotation(uint32_t handle);
+const Vector3& JoltBodyGetLinVelocity(uint32_t handle);
+
+// ---------------------------------------------------------------------------
+// Write — immediately applies to Jolt body (teleport / velocity override).
+void JoltBodySetPosition(uint32_t handle, const Vector3& pos);
+void JoltBodySetRotation(uint32_t handle, const Euler& rot);
+void JoltBodySetLinVelocity(uint32_t handle, const Vector3& vel);
+void JoltBodyAddLinVelocity(uint32_t handle, const Vector3& delta);
+
+// ---------------------------------------------------------------------------
+// Call once after all level actors have been constructed (end of Level::Level).
+// Builds Jolt's static broadphase tree so CharacterVirtual queries can find static bodies.
+void JoltOptimizeBroadPhase();
+
+// ---------------------------------------------------------------------------
+// Per-frame step.  Call once per game frame BEFORE movement prediction.
+// dt is the game's variable delta time in seconds; internally subdivides
+// into fixed 1/60 s substeps (max 4) to protect against spiral-of-death.
+void JoltWorldStep(float dt);
+
+// ---------------------------------------------------------------------------
+// CharacterVirtual — one per MOBILITY_PHYSICS actor (player, physics NPCs).
+// The character casts its box shape against STATIC world geometry each frame
+// and resolves movement without fighting WF's own position control.
+//
+// Workflow per frame:
+//   1. WF movement code computes desired velocity (gravity, input, jump).
+//   2. JoltCharacterSetLinVelocity — hand velocity to the character.
+//   3. JoltCharacterUpdate(dt)    — move and resolve collisions.
+//   4. JoltCharacterGetPosition   — read resolved position → SetPredictedPosition.
+//   5. JoltCharacterIsOnGround    — replaces supportingObject for handler transitions.
+
+uint32_t JoltCharacterCreate(const Vector3& pos, const Euler& rot,
+                              const Vector3& minPt, const Vector3& maxPt);
+void JoltCharacterDestroy(uint32_t handle);
+
+// ---------------------------------------------------------------------------
+// Contact dispatch — populates f4071a3's per-actor collision mailboxes for
+// Jolt-managed characters. WF's legacy collision.cc:513-520 skips the event-
+// list path for Jolt-managed bodies to avoid double-resolving physics, so
+// Actor::Collision() never fires through the legacy route. To restore that
+// signal, the engine registers a callback here; the Jolt CharacterVirtual
+// contact listener invokes it with (character_actor, other_actor, normal).
+//
+// `void*` is used in the signature so this header stays free of game-side
+// types; the engine wires the callback to a small dispatch function that
+// downcasts to Actor* (or PhysicalObject*) and calls Actor::Collision.
+//
+// Normal convention: `normal` passed to the callback is in the WF convention
+// — "direction the character is pushing against the other body" — i.e. the
+// Jolt-supplied "body2 → character" normal negated. A bump from below thus
+// gives normal.Z > 0, matching the SMB W1-1 ?-block script's expectation.
+typedef void (*JoltContactCallback)(void* characterActor, void* otherActor,
+                                     const Vector3& normal);
+void JoltSetContactCallback(JoltContactCallback cb);
+
+// Register the WF Actor that owns a given character / body handle so the
+// contact callback can identify them. `actor` is opaque to jolt_backend.
+void JoltCharacterSetActor(uint32_t handle, void* actor);
+void JoltBodySetActor(uint32_t handle, void* actor);
+
+const Vector3& JoltCharacterGetPosition(uint32_t handle);
+const Vector3& JoltCharacterGetLinVelocity(uint32_t handle);
+void           JoltCharacterSetLinVelocity(uint32_t handle, const Vector3& vel);
+void           JoltCharacterSetPosition(uint32_t handle, const Vector3& pos);
+void           JoltCharacterUpdate(uint32_t handle, float dt);
+bool           JoltCharacterIsOnGround(uint32_t handle);
+Vector3        JoltCharacterGetGroundNormal(uint32_t handle);
+
+// ---------------------------------------------------------------------------
+// WheeledVehicleController — one per MOBILITY_VEHICLE actor (Lunar Cruiser etc.).
+// Wheel positions are in vehicle-local coordinates (WF axes: X=forward, Y=left,
+// Z=up). Suspension rest length is set so wheel centre sits at wheel_z above
+// the chassis origin.
+//
+// Workflow per frame:
+//   1. Read INPUT mailbox bits for forward/steer/brake.
+//   2. JoltVehicleSetInput(handle, forward, rightward, brake).
+//   3. JoltWorldStep already called — constraint is updated inside it.
+//   4. JoltVehicleGetPosition / GetRotation — push to actor PhysicalAttributes.
+
+struct JoltVehicleWheelCfg {
+    float x, y;     // vehicle-local position (Z derived from suspension)
+    bool  steer;    // true = steerable (front wheels)
+};
+
+struct JoltVehicleConfig {
+    float chassis_hx, chassis_hy, chassis_hz; // box half-extents (metres)
+    float mass_kg;
+    float gravity_z;            // negative falling accel (e.g. -1.62 for moon)
+    float wheel_radius;
+    float wheel_half_width;
+    float max_steer_angle_rad;  // for steerable wheels
+    float max_torque_nm;
+    int   num_wheels;
+    const JoltVehicleWheelCfg* wheels;
+};
+
+uint32_t JoltVehicleCreate(const Vector3& pos, const Euler& rot,
+                            const JoltVehicleConfig& cfg);
+void     JoltVehicleDestroy(uint32_t handle);
+// forward ∈ [-1,+1], rightward ∈ [-1,+1], brake ∈ [0,1]
+void     JoltVehicleSetInput(uint32_t handle, float forward, float rightward, float brake);
+const Vector3& JoltVehicleGetPosition(uint32_t handle);
+Euler          JoltVehicleGetRotation(uint32_t handle);
+
+#endif // PHYSICS_ENGINE_JOLT

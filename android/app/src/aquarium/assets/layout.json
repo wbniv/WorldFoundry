@@ -1,0 +1,11 @@
+{
+  "app": "aquarium",
+  "title": "WF Aquarium",
+  "threshold": 0.5,
+  "stick": {"up": 2048, "down": 4096, "right": 8192, "left": 16384},
+  "buttons": [
+    {"id": "A", "bit": 1, "label": "A", "x": 0.86, "y": 0.58, "size": 1.0},
+    {"id": "B", "bit": 2, "label": "B", "x": 0.70, "y": 0.72, "size": 1.0}
+  ],
+  "hint": "Stick steers the clownfish, like the remote's D-pad."
+}

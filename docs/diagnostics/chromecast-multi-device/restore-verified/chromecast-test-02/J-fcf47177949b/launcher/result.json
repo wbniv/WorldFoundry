@@ -1,0 +1,74 @@
+{
+  "status": "verified",
+  "home": "com.google.android.apps.tv.launcherx/.home.HomeActivity",
+  "apk": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40.apk",
+  "attempts": [
+    {
+      "bounds": [
+        500,
+        906,
+        652,
+        1058
+      ],
+      "reference": "expected-icon-1.png",
+      "resource": "res/drawable-nodpi-v4/cat_boom_icon.png",
+      "kind": "icon",
+      "mean_absolute_error": 58.81816182937555,
+      "rms_error": 73.82278686771869,
+      "worst_region_error": 71.83639143730888,
+      "brightness_gain": 1.3703801938756233,
+      "verified": false,
+      "screenshot": "attempt-1-view-1.png",
+      "hierarchy": "attempt-1-view-1.xml",
+      "attempt": 1
+    },
+    {
+      "bounds": [
+        500,
+        906,
+        652,
+        1058
+      ],
+      "reference": "expected-icon-1.png",
+      "resource": "res/drawable-nodpi-v4/cat_boom_icon.png",
+      "kind": "icon",
+      "mean_absolute_error": 58.8183817062445,
+      "rms_error": 73.82290365711258,
+      "worst_region_error": 71.83639143730888,
+      "brightness_gain": 1.3703765605243654,
+      "verified": false,
+      "screenshot": "attempt-2-view-1.png",
+      "hierarchy": "attempt-2-view-1.xml",
+      "attempt": 2
+    },
+    {
+      "bounds": [
+        500,
+        655,
+        652,
+        807
+      ],
+      "reference": "expected-icon-1.png",
+      "resource": "res/drawable-nodpi-v4/cat_boom_icon.png",
+      "kind": "icon",
+      "mean_absolute_error": 11.291116974494285,
+      "rms_error": 13.1885458491371,
+      "worst_region_error": 15.6015625,
+      "brightness_gain": 0.8222673565189589,
+      "verified": true,
+      "screenshot": "attempt-3-view-2.png",
+      "hierarchy": "attempt-3-view-2.xml",
+      "attempt": 3
+    }
+  ],
+  "refreshes": [
+    {
+      "operation": "launcher-force-stop-and-home",
+      "package": "com.google.android.apps.tv.launcherx"
+    },
+    {
+      "operation": "launcher-data-reset-and-home",
+      "package": "com.google.android.apps.tv.launcherx"
+    }
+  ]
+}

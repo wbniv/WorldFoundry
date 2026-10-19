@@ -1,0 +1,3 @@
+# Raw stepped frames and runtime logs are regenerable; keep the compact evidence.
+frames/
+*.log

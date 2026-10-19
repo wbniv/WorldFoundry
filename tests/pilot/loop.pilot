@@ -1,0 +1,11 @@
+R:pilot
+R:@tier vm
+R:@desc J:*label loop terminates via a guarded jump (guard false => fall through)
+R:@expect-exit 0
+R:@expect-out done-at-5
+C:#i = 0
+*top
+C:#i = #i + 1
+J(#i<5):*top
+T:done-at-$#i
+E:

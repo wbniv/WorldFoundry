@@ -1,0 +1,19 @@
+CAMERA_ACTORS 5 29
+inside {(1, 3009): 4.350002, (29, 3011): 17.450001, (29, 3010): 0.0, (29, 3009): 0.0, (5, 3011): 17.450001, (5, 3010): -2.8, (5, 3009): 0.0, (1, 3011): 17.390015, (1, 3010): -4.100022}
+/home/will/WorldFoundry-wbniv/docs/plans/2026-10-02-condo-translucency/condo/after/inside-raised-open.png
+/home/will/WorldFoundry-wbniv/docs/plans/2026-10-02-condo-translucency/condo/after/inside-half-open.png
+/home/will/WorldFoundry-wbniv/docs/plans/2026-10-02-condo-translucency/condo/after/inside-closed-open.png
+/home/will/WorldFoundry-wbniv/docs/plans/2026-10-02-condo-translucency/condo/after/inside-closed-partial.png
+/home/will/WorldFoundry-wbniv/docs/plans/2026-10-02-condo-translucency/condo/after/inside-closed-closed.png
+outside {(1, 3009): 4.350001, (29, 3011): 17.450001, (29, 3010): 0.0, (29, 3009): 0.0, (5, 3011): 17.450001, (5, 3010): 3.8, (5, 3009): 0.0, (1, 3011): 17.390011, (1, 3010): 2.499982}
+/home/will/WorldFoundry-wbniv/docs/plans/2026-10-02-condo-translucency/condo/after/outside-raised-open.png
+/home/will/WorldFoundry-wbniv/docs/plans/2026-10-02-condo-translucency/condo/after/outside-half-open.png
+/home/will/WorldFoundry-wbniv/docs/plans/2026-10-02-condo-translucency/condo/after/outside-closed-open.png
+/home/will/WorldFoundry-wbniv/docs/plans/2026-10-02-condo-translucency/condo/after/outside-closed-partial.png
+/home/will/WorldFoundry-wbniv/docs/plans/2026-10-02-condo-translucency/condo/after/outside-closed-closed.png
+oblique {(1, 3009): 2.550005, (29, 3011): 17.450001, (29, 3010): 0.0, (29, 3009): 0.0, (5, 3011): 17.450001, (5, 3010): -2.8, (5, 3009): -1.8, (1, 3011): 17.39002, (1, 3010): -4.099983}
+/home/will/WorldFoundry-wbniv/docs/plans/2026-10-02-condo-translucency/condo/after/oblique-raised-open.png
+/home/will/WorldFoundry-wbniv/docs/plans/2026-10-02-condo-translucency/condo/after/oblique-half-open.png
+/home/will/WorldFoundry-wbniv/docs/plans/2026-10-02-condo-translucency/condo/after/oblique-closed-open.png
+/home/will/WorldFoundry-wbniv/docs/plans/2026-10-02-condo-translucency/condo/after/oblique-closed-partial.png
+/home/will/WorldFoundry-wbniv/docs/plans/2026-10-02-condo-translucency/condo/after/oblique-closed-closed.png

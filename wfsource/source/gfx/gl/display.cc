@@ -1,3 +1,6 @@
+#include <game/plant_ui.h>
+#include <game/runtime_property_ui.h>
+#include <game/level_menu.h>
 //=============================================================================
 // gfx/gl/display.cc: display hardware abstraction class, windows openGL specific code
 // Copyright ( c ) 1997,1998,1999,2000,2001,2002 World Foundry Group  
@@ -25,11 +28,557 @@
 //============================================================================
 
 #include <hal/hal.h>
-#include <GL/gl.h>
+#include <hal/lifecycle.h>
+#if defined(WF_ENABLE_STEAM)
+#  include <hal/linux/steam.h>
+#endif
+#if defined(__ANDROID__) || defined(__EMSCRIPTEN__)
+#  include <GLES3/gl3.h>
+#else
+#  define GL_GLEXT_PROTOTYPES 1
+#  include <GL/gl.h>
+#  include <GL/glext.h>
+#endif
 
 #include <memory/memory.hp>
 #include <gfx/pixelmap.hp>
 #include <gfx/rendobj3.hp>
+#include <gfx/renderer_backend.hp>
+
+#if DESIGNER_CHEATS && defined(__LINUX__)
+#include <game/ui_font.hp>
+
+extern int wf_hud_score;
+extern int wf_hud_timer;
+extern int wf_hud_lives;
+extern int wf_hud_marble_state;
+extern int wf_hud_marble_falls;
+extern int wf_hud_game_over;
+extern int wf_hud_entering_initials;
+extern char wf_hud_initials[4];
+extern int  wf_hud_initials_pos;
+// PILOT T:/TH: text (Phase 4).
+extern char wf_hud_pilot[4][128];
+extern int  wf_hud_pilot_count;
+
+// Moon Site 01 position-display HUD overlay — see docs/plans/2026-05-31-position-display-hud-overlay-on-the-moon-level-tex.md
+extern int   wf_moon_overlay_enabled;
+extern float wf_moon_player_x_m;
+extern float wf_moon_player_y_m;
+extern float wf_moon_player_z_m;
+extern float wf_moon_player_heading_rev;
+// Moon lander launch sequence — see docs/plans/2026-06-02-moon-lander-launch-sequence.md
+extern int   wf_moon_launch_phase;
+extern float wf_moon_launch_t_minus;
+
+#include "hscore.h"
+
+// Forward declarations for the offscreen capture FBO — definitions live in
+// the second DESIGNER_CHEATS block below (with CaptureFrame). RenderBegin
+// (much earlier in the file) needs to bind the FBO whenever a capture of any
+// kind (video recording or a single --capture-frame PNG) is in play.
+extern bool bRecordVideo;
+extern GLuint gCaptureFBO;
+static void EnsureCaptureFBO(int w, int h);
+static void CaptureFrame(int xSize, int ySize, int liveW, int liveH);
+
+// PNG encoder for --capture-frame below. The implementation is instantiated
+// once, unconditionally, in engine/stubs/stb_image_write_impl.cc.
+#include "../../../../engine/vendor/stb/stb_image_write.h"
+
+// --capture-frame=N=<path.png> (game/main.cc). The macOS Metal display has the
+// same flag; both count frames that reached the BACKEND, so asking each
+// platform for frame N yields the same simulation instant and the captures are
+// comparable. That matched pair is what plan steps 9 and 10 of
+// docs/plans/2026-09-20-macos-metal-renderer.md need — the Phase 2 attempt
+// failed precisely because the old WF_GAME_SCREENSHOT_PPM path hardcoded its
+// own trigger and counted presents instead.
+extern int         gCaptureFrame;
+extern const char* gCapturePath;
+
+// Set by RenderEnd on the frame that matches, consumed by CaptureFrame during
+// the following PageFlip, where the capture FBO is still readable.
+static bool gCapturePending = false;
+
+// True whenever rendering should go through the offscreen capture FBO: either
+// -record_video is on, or a single-shot --capture-frame is pending. The FBO
+// path (not a raw front-buffer read) is what makes a capture immune to X11
+// window occlusion on a non-composited desktop, so both consumers need it —
+// -record_video must not be a prerequisite for --capture-frame to work.
+static bool WfCaptureActive()
+{
+    return bRecordVideo || (gCaptureFrame > 0 && gCapturePath);
+}
+
+// HUD text in the UI font (game/ui_font.hp; docs/plans/2026-10-17-settings-editor-font.md).
+// DrawHud's layout is in ortho units (surface / hud_scale) and was drawn for
+// the old stroke font: a text's y is the top of its capitals and `scale` is ortho units per
+// font pixel (capitals 7 font pixels tall). Each text keeps that box: its middle goes
+// where the old capitals' middle was, in the variant whose capitals are nearest the old
+// height on the 1080p canvas (small, body, title or display). The glyphs collect here
+// and are drawn after the HUD's shapes, in its colour at the time of the call.
+static std::vector<bitmaptext::Quad> gHudGlyphs;
+static float gHudOrtho = 1.0f;     // ortho units -> surface pixels (hud_scale)
+static float gHudCanvas = 1.0f;    // 1080p canvas pixels -> surface pixels
+static uint32_t gHudColour = 0xFFFF00FFu;
+
+static void HudColor3f(float r, float g, float b)
+{
+    glColor3f(r, g, b);
+    auto byte = [](float c) { return uint32_t(c <= 0 ? 0 : c >= 1 ? 255 : int(c * 255.0f + 0.5f)); };
+    gHudColour = byte(r) << 24 | byte(g) << 16 | byte(b) << 8 | 0xFFu;
+}
+
+static wfui::Variant HudVariant(float scale)
+{
+    // The old capitals on the 1080p canvas, against Atkinson's (0.7 of the pixel size).
+    const float caps = 7.0f * scale * gHudOrtho / gHudCanvas;
+    return caps < 22.4f ? wfui::Small : caps < 28.7f ? wfui::Body : caps < 44.0f ? wfui::Title : wfui::Display;
+}
+
+static void HudText(float x, float y, float scale, const char* text, wfui::Align align = wfui::Left)
+{
+    // Text smaller than the smallest variant (the high-score table, at scale 1) is the
+    // small variant scaled down, so its rows keep their old spacing.
+    const float caps = 7.0f * scale * gHudOrtho / gHudCanvas, smallCaps = 0.7f * 28.0f;
+    wfui::Transform t;
+    t.s = gHudCanvas * (caps < smallCaps ? caps / smallCaps : 1.0f);
+    t.ox = x * gHudOrtho;
+    t.oy = (y + 3.5f * scale) * gHudOrtho;
+    wfui::TextBytes(gHudGlyphs, 0, 0, HudVariant(scale), gHudColour, text, std::strlen(text), wfui::Middle, align, t);
+}
+
+// Moon Site 01 minimap. Samples the resident ground atlas live (terrain_texture.tga
+// fills RM0's texture — Room0.ruv has a single 0,0,1024,1024 entry) instead of a
+// baked minimap.tga: no loose-file I/O, no extra GL texture, automatically correct
+// under chunk streaming (it's the texture the player is standing on). The atlas
+// PixelMap + its normalized UV rect come from the game layer (it needs theLevel /
+// AssetManager). Mirrors the wf_moon_* game->display global pattern.
+// See docs/plans/2026-06-04-moon-overhead-map-and-chunk-texture-streaming.md.
+extern const PixelMap* wf_moon_ground_atlas();
+
+static void DrawHud(int xSize, int ySize)
+{
+    // The 3D viewport is square (mesa.cc ConfigureNotify clips top/bottom),
+    // so force the HUD to render over the full window surface. This ensures
+    // text at small y values (e.g. y=8 for the score bar) is actually visible.
+    GLint saved_vp[4];
+    glGetIntegerv(GL_VIEWPORT, saved_vp);
+    glViewport(0, 0, xSize, ySize);
+
+    glUseProgram(0);   // ensure fixed-function pipeline; Flush() may have left a program bound
+
+    // HUD ortho units inflate proportionally to the surface's short axis
+    // (clamped to ≥ 1.0): at 640×480 / 512×384 capture FBO it's 1.0 (existing
+    // sizes preserved); at 1920×1080 it's 1.8×; at 4K it's 3.6×. Every
+    // existing pixel constant in this function (margins, text scale, minimap
+    // size, marker sizes, tick lengths) is in ortho units, so they all scale
+    // together. See docs/plans/2026-05-31-hud-scale-with-window.md.
+    const float hud_scale = std::max(1.0f,
+        std::min((float)xSize, (float)ySize) / 600.0f);
+    const int surfaceW = xSize, surfaceH = ySize;
+    gHudGlyphs.clear();
+    gHudOrtho = hud_scale;
+    gHudCanvas = std::min((float)xSize / 1920.0f, (float)ySize / 1080.0f);
+    const float ortho_w = (float)xSize / hud_scale;
+    const float ortho_h = (float)ySize / hud_scale;
+    // After this point, treat xSize / ySize aliases as the *ortho* size so
+    // anchoring math reads from the inflated coordinate system.
+    xSize = (int)ortho_w;
+    ySize = (int)ortho_h;
+
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, ortho_w, ortho_h, 0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    HudColor3f(1.0f, 1.0f, 0.0f);
+
+    char buf[64];
+    const float kScale = 2.0f;
+
+    snprintf(buf, sizeof(buf), "SCORE %d", wf_hud_score);
+    HudText(8, 8, kScale, buf);
+
+    int t = wf_hud_timer > 0 ? wf_hud_timer : 0;
+    if (wf_moon_launch_phase >= 3) {
+        snprintf(buf, sizeof(buf), "TIME %d", (int)wf_moon_launch_t_minus);
+    } else {
+        snprintf(buf, sizeof(buf), "TIME %d", t);
+    }
+    HudText((float)xSize * 0.5f, 8, kScale, buf, wfui::Centre);
+
+    if (wf_hud_marble_state)
+        snprintf(buf, sizeof(buf), "FALLS %d", wf_hud_marble_falls);
+    else
+        snprintf(buf, sizeof(buf), "LIVES %d", wf_hud_lives);
+    HudText((float)xSize - 8, 8, kScale, buf, wfui::Right);
+
+    if (wf_hud_marble_state) {
+        const char* title = wf_hud_marble_state == 2 ? "FINISHED!" :
+                            wf_hud_marble_state == 3 ? "TIME UP" : "PRACTICE RACE";
+        HudText(xSize * 0.5f, ySize - 52, kScale, title, wfui::Centre);
+        const char* help = "ARROWS: ROLL    SPACE: RESTART";
+        HudText(xSize * 0.5f, ySize - 22, 1.0f, help, wfui::Centre);
+    }
+
+    // ── Moon Site 01 position-display HUD overlay ──────────────────────────
+    // Text block (top-left, under SCORE) + minimap inset (top-right).
+    // Gated on MOON_OVERLAY_ENABLED (mb 1875) so SMB / qbert stay untouched.
+    // See docs/plans/2026-05-31-position-display-hud-overlay-on-the-moon-level-tex.md
+    if (wf_moon_overlay_enabled)
+    {
+        // South polar stereographic linearisation at the play-area centre.
+        // PGDA crop centre = PS (-11000, -12000) m, lunar R = 1737.4 km.
+        // rho = sqrt(11000^2 + 12000^2) ≈ 16278.8 m → c ≈ 0.009370 rad
+        // → lat0 = -90 + c·180/π = -89.4632°. Lon0 from README is 227.0381° E.
+        // For a 1 km × 1 km patch the per-metre slopes are constant.
+        const double LAT0       = -89.4632;
+        const double LON0       =  227.0381;
+        const double RAD_PER_M  =  180.0 / (3.14159265358979 * 1737400.0);   // ≈ 3.30e-5 °/m
+        // d_lat/dY = RAD_PER_M · (Y_ps/rho); d_lon/dX scales by 1/sin(|lat0|)
+        const double D_LAT_PER_M = RAD_PER_M * (12000.0 / 16278.8);          // ≈ +2.43e-5 °/m (Y+ ⇒ less negative lat)
+        const double D_LON_PER_M = RAD_PER_M / 0.009378;                     // sin(0.5368°), ≈ +3.52e-3 °/m
+        // ELEV: player Z is metres above play-area centre; centre is +1944.77 m above lunar reference radius.
+        const double ELEV_BASE_M = 1944.77;
+
+        double lat  = LAT0 + (double)wf_moon_player_y_m * D_LAT_PER_M;
+        double lon  = LON0 + (double)wf_moon_player_x_m * D_LON_PER_M;
+        double elev = ELEV_BASE_M + (double)wf_moon_player_z_m;
+
+        HudColor3f(1.0f, 1.0f, 0.0f);
+        const float kTxt = 1.5f;
+        char  l[80];
+        auto draw_line = [&](float y, const char* s) { HudText(8.0f, y, kTxt, s); };
+        draw_line(36.0f, "SITE 01 -- CONNECTING RIDGE");
+        snprintf(l, sizeof(l), "LAT %.4f S  LON %.4f E", -lat, lon);
+        draw_line(50.0f, l);
+        snprintf(l, sizeof(l), "ELEV %+.0f m  (delta %+.1f m)", elev, (double)wf_moon_player_z_m);
+        draw_line(64.0f, l);
+        snprintf(l, sizeof(l), "POS X%+.0f  Y%+.0f  (m from spawn)",
+                 (double)wf_moon_player_x_m, (double)wf_moon_player_y_m);
+        draw_line(78.0f, l);
+
+        // Minimap inset, 128×128 px, top-right corner with 8 px margin.
+        const float MM = 128.0f;
+        const float mm_x = (float)xSize - 8.0f - MM;
+        const float mm_y = 8.0f;
+
+        // Sample the resident ground atlas (the terrain the player is on),
+        // not a baked image. terrain_texture.tga fills RM0's atlas, so UV 0..1
+        // is the whole chunk. v=0 at the inset top: the engine uploads the atlas
+        // top-row-first (row 0 = terrain north), so v ascends downward — which
+        // matches world_to_screen's v-flip below (world +Y → inset top).
+        // Confirmed by ncc vs the old baked minimap.tga (0.91 at this mapping).
+        const PixelMap* atlas = wf_moon_ground_atlas();
+        if (atlas)
+        {
+            glEnable(GL_TEXTURE_2D);
+            atlas->SetGLTexture();
+            HudColor3f(1.0f, 1.0f, 1.0f);
+            glBegin(GL_QUADS);
+                glTexCoord2f(0.0f, 0.0f); glVertex2f(mm_x,      mm_y);
+                glTexCoord2f(1.0f, 0.0f); glVertex2f(mm_x + MM, mm_y);
+                glTexCoord2f(1.0f, 1.0f); glVertex2f(mm_x + MM, mm_y + MM);
+                glTexCoord2f(0.0f, 1.0f); glVertex2f(mm_x,      mm_y + MM);
+            glEnd();
+            glDisable(GL_TEXTURE_2D);
+        }
+
+        // 1-px white border.
+        HudColor3f(1.0f, 1.0f, 1.0f);
+        glBegin(GL_LINE_LOOP);
+            glVertex2f(mm_x,      mm_y);
+            glVertex2f(mm_x + MM, mm_y);
+            glVertex2f(mm_x + MM, mm_y + MM);
+            glVertex2f(mm_x,      mm_y + MM);
+        glEnd();
+
+        // Game-world (X, Y) ∈ [-500, +500] m → minimap (sx, sy). v is flipped so
+        // world +Y (north-ish) maps to up on the minimap; texture is loaded
+        // top-down so this matches the visible image orientation.
+        const float HALF_M = 500.0f;
+        const float SIDE_M = 1000.0f;
+        auto world_to_screen = [&](float wx, float wy, float& sx, float& sy) {
+            float u = (wx + HALF_M) / SIDE_M;
+            float v = (wy + HALF_M) / SIDE_M;
+            sx = mm_x + u * MM;
+            sy = mm_y + (1.0f - v) * MM;
+        };
+
+        // Lat/lon edge ticks — auto-pick a "nice" angular subdivision per axis
+        // targeting ≤10 ticks across the play-area span (PGDA Site 01 at 89.46°S
+        // gives 10″ lat / 30′ lon). See docs/plans/2026-05-31-moon-minimap-latlon-ticks.md.
+        static const double kNiceUnitsDeg[] = {
+            1.0/3600.0, 3.0/3600.0, 5.0/3600.0, 10.0/3600.0, 30.0/3600.0,
+            1.0/60.0,   3.0/60.0,   5.0/60.0,   10.0/60.0,   30.0/60.0,
+            1.0,        3.0,        5.0,        10.0,        30.0,
+        };
+        auto pick_unit = [](double span_deg) {
+            for (double u : kNiceUnitsDeg) if (span_deg / u <= 10.0) return u;
+            return 30.0;
+        };
+        auto pick_major = [](double minor) {
+            for (double u : kNiceUnitsDeg) if (u > minor + 1e-12) return u;
+            return minor * 6.0;
+        };
+
+        const double lat_min = LAT0 + (double)(-HALF_M) * D_LAT_PER_M;
+        const double lat_max = LAT0 + (double)(+HALF_M) * D_LAT_PER_M;
+        const double lon_min = LON0 + (double)(-HALF_M) * D_LON_PER_M;
+        const double lon_max = LON0 + (double)(+HALF_M) * D_LON_PER_M;
+
+        const double lat_unit  = pick_unit(fabs(lat_max - lat_min));
+        const double lon_unit  = pick_unit(fabs(lon_max - lon_min));
+        const double lat_major = pick_major(lat_unit);
+        const double lon_major = pick_major(lon_unit);
+
+        HudColor3f(0.6f, 0.6f, 0.6f);
+        glBegin(GL_LINES);
+        // Lat → vertical edges (left + right).
+        for (double lat = ceil(lat_min/lat_unit)*lat_unit; lat <= lat_max + 1e-9; lat += lat_unit) {
+            double y_world = (lat - LAT0) / D_LAT_PER_M;
+            float tx_ignored, sy;
+            world_to_screen(-HALF_M, (float)y_world, tx_ignored, sy);
+            const bool major = fabs(remainder(lat, lat_major)) < lat_unit * 0.01;
+            const float len = major ? 4.0f : 3.0f;
+            glVertex2f(mm_x,            sy); glVertex2f(mm_x + len,        sy);
+            glVertex2f(mm_x + MM,       sy); glVertex2f(mm_x + MM - len,   sy);
+        }
+        // Lon → horizontal edges (top + bottom).
+        for (double lon = ceil(lon_min/lon_unit)*lon_unit; lon <= lon_max + 1e-9; lon += lon_unit) {
+            double x_world = (lon - LON0) / D_LON_PER_M;
+            float sx, ty_ignored;
+            world_to_screen((float)x_world, -HALF_M, sx, ty_ignored);
+            const bool major = fabs(remainder(lon, lon_major)) < lon_unit * 0.01;
+            const float len = major ? 4.0f : 3.0f;
+            glVertex2f(sx, mm_y);           glVertex2f(sx, mm_y + len);
+            glVertex2f(sx, mm_y + MM);      glVertex2f(sx, mm_y + MM - len);
+        }
+        glEnd();
+
+        float sx, sy;
+
+        // Spawn square — hollow yellow 4-px outline at world (0, 0).
+        HudColor3f(1.0f, 1.0f, 0.0f);
+        world_to_screen(0.0f, 0.0f, sx, sy);
+        glBegin(GL_LINE_LOOP);
+            glVertex2f(sx - 2.0f, sy - 2.0f);
+            glVertex2f(sx + 2.0f, sy - 2.0f);
+            glVertex2f(sx + 2.0f, sy + 2.0f);
+            glVertex2f(sx - 2.0f, sy + 2.0f);
+        glEnd();
+
+        // Lander X — yellow 6-px cross at world (+30, +25) per blender_create_moon.py.
+        world_to_screen(30.0f, 25.0f, sx, sy);
+        glBegin(GL_LINES);
+            glVertex2f(sx - 3.0f, sy - 3.0f); glVertex2f(sx + 3.0f, sy + 3.0f);
+            glVertex2f(sx - 3.0f, sy + 3.0f); glVertex2f(sx + 3.0f, sy - 3.0f);
+        glEnd();
+
+        // Player dot — filled 3×3 yellow square at live position.
+        world_to_screen(wf_moon_player_x_m, wf_moon_player_y_m, sx, sy);
+        glBegin(GL_QUADS);
+            glVertex2f(sx - 1.0f, sy - 1.0f);
+            glVertex2f(sx + 2.0f, sy - 1.0f);
+            glVertex2f(sx + 2.0f, sy + 2.0f);
+            glVertex2f(sx - 1.0f, sy + 2.0f);
+        glEnd();
+
+        // Compass chevron — cyan triangle pointing in heading direction. WF
+        // currentDir = (cos C, sin C, 0); heading_rev is C / (2π) in revolutions.
+        // Screen Y is flipped (v=1-y), so world +Y heading → screen up.
+        float theta = wf_moon_player_heading_rev * 6.28318530718f;
+        float cs    = cosf(theta);
+        float sn    = sinf(theta);
+        auto rot_pt = [&](float fwd, float side, float& ox, float& oy) {
+            ox = sx + fwd * cs + side * sn;
+            oy = sy - fwd * sn + side * cs;     // -sn because world Y → screen -Y
+        };
+        float tx, ty, bxL, byL, bxR, byR;
+        rot_pt(6.0f,  0.0f, tx,  ty);
+        rot_pt(-1.5f, +2.5f, bxL, byL);
+        rot_pt(-1.5f, -2.5f, bxR, byR);
+        HudColor3f(0.0f, 1.0f, 1.0f);   // cyan
+        glBegin(GL_TRIANGLES);
+            glVertex2f(tx,  ty);
+            glVertex2f(bxL, byL);
+            glVertex2f(bxR, byR);
+        glEnd();
+
+        // Cardinal-direction labels (N/S/E/W) at minimap edges. Game-world
+        // axes don't align with lunar cardinals at 89.46°S — meridian
+        // convergence means "north" at the play-area centre is rotated
+        // significantly from game +Y. Compute the cardinals from the PS
+        // centre offset and place orange letters along the matching radii.
+        // See docs/plans/2026-05-31-moon-minimap-cardinal-directions.md.
+        {
+            const double PS_CX = -11000.0, PS_CY = -12000.0;
+            const double rho_c = sqrt(PS_CX*PS_CX + PS_CY*PS_CY);
+            // North = away from pole = +(PS_CX, PS_CY)/rho_c in game coords.
+            const double N_gx = PS_CX / rho_c;
+            const double N_gy = PS_CY / rho_c;
+            // East = 90° CCW from N in PS plane: (a,b) → (-b,a).
+            const double E_gx = -N_gy;
+            const double E_gy =  N_gx;
+
+            struct CardinalDir { double dx, dy; const char* letter; };
+            const CardinalDir dirs[4] = {
+                {  N_gx,  N_gy, "N" },
+                { -N_gx, -N_gy, "S" },
+                {  E_gx,  E_gy, "E" },
+                { -E_gx, -E_gy, "W" },
+            };
+            const float ccx = mm_x + MM*0.5f;
+            const float ccy = mm_y + MM*0.5f;
+            const float crad = MM*0.5f - 10.0f;     // 54 px from centre
+            HudColor3f(1.0f, 0.6f, 0.0f);            // orange
+            for (const CardinalDir& d : dirs) {
+                // Game (dx, dy) → screen offset: world Y → screen -Y.
+                const float lx = ccx + (float)d.dx * crad;
+                const float ly = ccy + (float)(-d.dy) * crad;
+                // Centre the letter on the radius point.
+                HudText(lx, ly - 3.5f, 1.0f, d.letter, wfui::Centre);
+            }
+        }
+
+        // Launch countdown banner — bright orange, centred high in the frame,
+        // visible only during pre-ascent phases (1 = countdown, 2 = ignition).
+        // Phase 3 (ascent) repurposes the top-bar TIME counter as seconds since
+        // ignition instead of carrying its own banner.
+        // See docs/plans/2026-06-02-moon-lander-launch-sequence.md.
+        if (wf_moon_launch_phase == 1 || wf_moon_launch_phase == 2) {
+            char banner[64];
+            float bscale = 3.0f;
+            if (wf_moon_launch_phase == 1) {
+                int t_sec = (int)(wf_moon_launch_t_minus + 0.999f);
+                if (t_sec < 1) t_sec = 1;
+                snprintf(banner, sizeof(banner), "LAUNCH IN: T-%d", t_sec);
+            } else {
+                snprintf(banner, sizeof(banner), "IGNITION");
+            }
+            // Centred horizontally, ~y=110 (below the 4-line text block, above
+            // the lander silhouette).
+            HudColor3f(1.0f, 0.6f, 0.1f);   // Raptor-flame orange
+            HudText((float)xSize * 0.5f, 110.0f, bscale, banner, wfui::Centre);
+            HudColor3f(1.0f, 1.0f, 0.0f);   // restore yellow for any HUD below
+        }
+    }
+
+    // Game-over overlay — driven by mb 420 via wf_hud_game_over (game.cc HUD glue).
+    // Two centred lines, scaled up over the live pyramid view; red to match the
+    // arcade GAME OVER colour (see docs/plans/screenshots/qbert-arcade-game-over-reference.png).
+    if (wf_hud_game_over != 0)
+    {
+        HudColor3f(1.0f, 0.0f, 0.0f);
+        const float cx = (float)xSize * 0.5f;
+        const float cy = (float)ySize * 0.5f;
+
+        // Line 1: "GAME OVER" — large prominence (3x scale).
+        char line1[] = "GAME OVER";
+        const float scale1 = 3.0f;
+        HudText(cx, cy - 24.0f * scale1, scale1, line1, wfui::Centre);
+
+        // Line 2: restart prompt — smaller (1.5x), below.
+        char line2[] = "PRESS ANY BUTTON TO RESTART";
+        const float scale2 = 1.5f;
+        HudText(cx, cy + 12.0f, scale2, line2, wfui::Centre);
+
+        // HIGH SCORES table — matches arcade layout:
+        //   Entry #1 centered at top; entries 2-23 in two-column pairs.
+        HScore_Load();
+        const float tscale = 1.0f;
+        const float trow = 9.0f * tscale;
+
+        // Header: "HIGH SCORES" in red, centered just below GAME OVER block.
+        HudColor3f(1.0f, 0.1f, 0.1f);
+        {
+            char hdr[] = "HIGH SCORES";
+            HudText(cx, cy + 28.0f, tscale, hdr, wfui::Centre);
+        }
+
+        // Entry #1 — centered, yellow.
+        HudColor3f(1.0f, 1.0f, 0.0f);
+        float ty = cy + 38.0f;
+        {
+            snprintf(buf, sizeof(buf), "1) %s %d", g_hiscores[0].name, g_hiscores[0].score);
+            HudText(cx, ty, tscale, buf, wfui::Centre);
+        }
+        ty += trow;
+
+        // Entries 2-23: two columns.  Left col = even rank, right col = odd rank.
+        // Each column is 90px wide, centred on cx +/- 55.
+        const float colL = cx - 100.0f;
+        const float colR = cx + 10.0f;
+        int i = 1;  // already rendered index 0
+        while (i < HS_COUNT)
+        {
+            // Left entry
+            snprintf(buf, sizeof(buf), "%2d) %s %d", i + 1,
+                     g_hiscores[i].name, g_hiscores[i].score);
+            HudText(colL, ty, tscale, buf);
+            ++i;
+            // Right entry (may be absent if count is odd)
+            if (i < HS_COUNT)
+            {
+                snprintf(buf, sizeof(buf), "%2d) %s %d", i + 1,
+                         g_hiscores[i].name, g_hiscores[i].score);
+                HudText(colR, ty, tscale, buf);
+                ++i;
+            }
+            ty += trow;
+        }
+
+        // AAA initials picker — white, centered below the table.
+        if (wf_hud_entering_initials)
+        {
+            HudColor3f(1.0f, 1.0f, 1.0f);
+            char picker[32];
+            // Show current position bracketed: e.g.  [A] B C
+            snprintf(picker, sizeof(picker), "%c%c%c  %c%c%c  %c%c%c",
+                     wf_hud_initials_pos == 0 ? '[' : ' ', wf_hud_initials[0], wf_hud_initials_pos == 0 ? ']' : ' ',
+                     wf_hud_initials_pos == 1 ? '[' : ' ', wf_hud_initials[1], wf_hud_initials_pos == 1 ? ']' : ' ',
+                     wf_hud_initials_pos == 2 ? '[' : ' ', wf_hud_initials[2], wf_hud_initials_pos == 2 ? ']' : ' ');
+            const float scale2 = 2.0f;
+            HudText(cx, ty + 4.0f, scale2, picker, wfui::Centre);
+        }
+
+        HudColor3f(1.0f, 1.0f, 0.0f);  // restore HUD yellow for any later draws
+    }
+
+    // PILOT T:/TH: text — cyan, stacked from the bottom of the HUD.
+    // Ring of 4 lines; start slot = wf_hud_pilot_count % 4 (oldest visible).
+    if (wf_hud_pilot_count > 0) {
+        HudColor3f(0.0f, 1.0f, 1.0f);
+        int nlines = wf_hud_pilot_count < 4 ? wf_hud_pilot_count : 4;
+        int start  = wf_hud_pilot_count % 4;   // oldest slot in the ring
+        float lh   = 11.0f * kScale;           // line height at kScale
+        float y0   = (float)ySize - 8.0f - (float)nlines * lh;
+        for (int i = 0; i < nlines; ++i) {
+            int slot = (start + i) % 4;
+            HudText(8.0f, y0 + (float)i * lh, kScale, wf_hud_pilot[slot]);
+        }
+        HudColor3f(1.0f, 1.0f, 0.0f);   // restore HUD yellow
+    }
+
+    glEnable(GL_DEPTH_TEST);
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+
+    glViewport(saved_vp[0], saved_vp[1], saved_vp[2], saved_vp[3]);
+    // The text, over the HUD's shapes.
+    wfui::Draw(gHudGlyphs, surfaceW, surfaceH);
+}
+#endif // DESIGNER_CHEATS && __LINUX__
+
 extern bool bFullScreen;
 extern int _halWindowWidth;
 extern int _halWindowHeight;
@@ -46,264 +595,168 @@ GLfloat windowXPos;
 GLfloat windowYPos;
 GLfloat windowWidth;
 GLfloat windowHeight;
-int wfWindowWidth = 640;
-int wfWindowHeight = 480;
+// Initial X window dimensions for XCreateWindow only. After the window is
+// created the live surface size is owned by Display (set via
+// Display::SetLiveWindowSize from the platform layer, read via GetSurfaceSize).
+// See docs/plans/2026-05-31-display-getsurfacesize-refactor.md.
+int wfInitialWindowWidth  = 640;
+int wfInitialWindowHeight = 480;
 
 
-#if defined(__WIN__)
-#include <Mmsystem.h>
-#include <time.h>
-#include "wgl.cc"
+#if defined(__ANDROID__)
+#  include "android_window.cc"
+#elif defined(__EMSCRIPTEN__)
+// Must precede the __LINUX__ branch: the web build defines __LINUX__ (cf_linux.h
+// reuse, plan D1) but must never ingest the X11/GLX code in mesa.cc.
+#  include "emscripten_window.cc"
+#elif defined(__LINUX__)
+#  include "mesa.cc"
 #endif
-#if defined(__LINUX__)
-#include "mesa.cc" 
-#include <sys/time.h>
-#include <unistd.h>
+#if defined(__LINUX__) || defined(__ANDROID__)
+#  include <sys/time.h>
+#  include <unistd.h>
+#endif
+#if DESIGNER_CHEATS && defined(__LINUX__)
+#  include <cstdio>
+#  include <cstdlib>
+#  include <csignal>
 #endif
 
 //==============================================================================
 
-#if 0
-#include <GL/glut.h>
-
-void
-TestGL2(void)
-{
-   glDisable( GL_TEXTURE_2D );
-   GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-   GLfloat mat_shininess[] = { 50.0 };
-   GLfloat light_position[] = { 1.0,1.0,1.0,1.0 };
-   GLfloat white_light[] = { 1.0,1.0,1.0,1.0 };
-   GLfloat black_light[] = { 0.0,0.0,0.0,1.0 };
-   GLfloat mat_ambient_color[] = { 0.8,0.8,0.2,1.0 };
-   GLfloat mat_diffuse[] = { 0.1,0.5, 0.8, 1.0 };
-   glClearColor(0.0,0.0,0.0,0.0);
-   glShadeModel(GL_SMOOTH);
-   glMaterialfv(GL_FRONT, GL_AMBIENT, mat_diffuse);
-   glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
-   glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-   glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-   glLightModelfv(GL_LIGHT_MODEL_AMBIENT,white_light);
-   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-   glLightfv(GL_LIGHT0, GL_AMBIENT, white_light);
-   glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
-   glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
-   glEnable(GL_LIGHTING);
-   glDisable(GL_LIGHT0);
-   glDisable(GL_LIGHT1);
-   glDisable(GL_LIGHT2);
-   glDisable(GL_LIGHT3);
-   glDisable(GL_LIGHT4);
-   glDisable(GL_LIGHT5);
-   glDisable(GL_LIGHT6);
-   glDisable(GL_LIGHT7);
-   glEnable(GL_DEPTH_TEST);
-   int w = 320;
-   int h = 200;
-   glViewport(0, 0, (GLsizei) w, (GLsizei)h);
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   if(w<=h)
-      glOrtho(-1.5,1.5,-1.5*(GLfloat)h/(GLfloat)w,1.5*(GLfloat)h/(GLfloat)w, -10.0, 10.0);
-   else
-      glOrtho(-1.5*(GLfloat)w/(GLfloat)h,1.5*(GLfloat)w/(GLfloat)h, -1.5, 1.5, -10.0, 10.0);
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
-
-   while(1)
-   {
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      glutSolidSphere(1.0,20,16);
-
-      float zOffset = 15.0;
-   #if 1
-      glBegin(GL_TRIANGLES);
-      glVertex3f( 0.9, -0.9, -10.0 + zOffset);
-      glVertex3f( 0.9,  0.9, -10.0 + zOffset);
-      glVertex3f(-0.9,  0.0, -10.0 + zOffset);
-      glVertex3f(-0.9, -0.9, -20.0 + zOffset);
-      glVertex3f(-0.9,  0.9, -20.0 + zOffset);
-      glVertex3f( 0.9,  0.0, -5.0 + zOffset);
-      glEnd();
-   #endif
-      glFlush();
-
-      glXSwapBuffers(halDisplay.mainDisplay, halDisplay.win);
-      AssertGLOK();
-   }
-}
-
-
-void
-display(void)
-{
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-   glColor3f(0.0, 1.0, 0.0);
-   glutSolidSphere(1.0,20,16);
-
-   float zOffset = 15.0;
-#if 1
-   glBegin(GL_TRIANGLES);
-   glColor3f(1.0, 1.0, 1.0);
-   glVertex3f( 0.9, -0.9, -10.0 + zOffset);
-   glVertex3f( 0.9,  0.9, -10.0 + zOffset);
-   glVertex3f(-0.9,  0.0, -10.0 + zOffset);
-   glColor3f(0.0, 1.0, 0.0);
-   glVertex3f(-0.9, -0.9, -20.0 + zOffset);
-   glVertex3f(-0.9,  0.9, -20.0 + zOffset);
-   glVertex3f( 0.9,  0.0, -5.0 + zOffset);
-   glEnd();
-#endif
-   glFlush();
-}
-
-//==============================================================================
-
-void
-reshape(int w, int h)
-{
-   glViewport(0, 0, (GLsizei) w, (GLsizei)h);
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   if(w<=h)
-      glOrtho(-1.5,1.5,-1.5*(GLfloat)h/(GLfloat)w,1.5*(GLfloat)h/(GLfloat)w, -10.0, 10.0);
-   else
-      glOrtho(-1.5*(GLfloat)w/(GLfloat)h,1.5*(GLfloat)w/(GLfloat)h, -1.5, 1.5, -10.0, 10.0);
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
-}
-
-//==============================================================================
-
-void
-TestGL(void)
-{
-
-   int argc=1;
-   char* argv[] = {"program"};
-   glutInit(&argc, argv);
-   glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
-   glutInitWindowSize(500,500);
-   glutInitWindowPosition(100,100);
-   glutCreateWindow("testGL");
-   GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-   GLfloat mat_shininess[] = { 50.0 };
-   GLfloat light_position[] = { 1.0,1.0,1.0,1.0 };
-   GLfloat white_light[] = { 1.0,1.0,1.0,1.0 };
-   GLfloat mat_ambient_color[] = { 0.8,0.8,0.2,1.0 };
-   GLfloat mat_diffuse[] = { 0.1,0.5, 0.8, 1.0 };
-   glClearColor(0.0,0.0,0.0,0.0);
-   glShadeModel(GL_SMOOTH);
-   glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
-   glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-   glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-   glLightfv(GL_LIGHT0, GL_DIFFUSE, white_light);
-   glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
-   glEnable(GL_LIGHTING);
-   glEnable(GL_LIGHT0);
-   glEnable(GL_DEPTH_TEST);
-   glutDisplayFunc(display);
-   glutReshapeFunc(reshape);
-   glutMainLoop();
-}
-#endif
 
 //==============================================================================
 
 void
 WFInitGL()
 {
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	AssertGLOK();
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	AssertGLOK();
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	AssertGLOK();
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	AssertGLOK();
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	AssertGLOK();
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    //glShadeModel( GL_FLAT );
-    glShadeModel( GL_SMOOTH ); 
-    AssertGLOK();
-    glClearColor( 0.5, 0.5, 0.5, 1.0 );
-    AssertGLOK();
-
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     AssertGLOK();
 
+#if !defined(__EMSCRIPTEN__)
+    // Default wrap/filter applied to the texture-0 object (nothing is bound
+    // here). Desktop GL and the Android GLES driver tolerate glTexParameter
+    // with no texture bound — it pokes the default texture — but WebGL 2
+    // rejects it as INVALID_OPERATION ("no texture bound to target"). These
+    // are redundant anyway: every real texture binds and sets its own
+    // wrap/filter in gfx/pixelmap.cc:197-224, so the web build skips them.
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    AssertGLOK();
+#endif
+
     glEnable(GL_BLEND);
-    AssertGLOK();
-#if !defined( RENDERER_PIPELINE_GL )
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    AssertGLOK();
-#endif
-
-    glClearColor( 0.0, 0.0, 0.0, 0.0 );
-    AssertGLOK();
-//    glClearIndex( Black );
-
-    glMatrixMode( GL_MODELVIEW );
-    AssertGLOK();
-    glLoadIdentity();
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     AssertGLOK();
 
-    //glCullFace( GL_BACK );
-    //glEnable( GL_CULL_FACE );
+    RendererBackendGet().ResetModelView();
 
-    // Prevent a divide by zero, when window is too short
-    // (you cant make a window of zero width).
-    //if(h == 0)
-    //	h = 1;
-
-    // Set the viewport to be the entire window
-    glViewport(0, 0, wfWindowWidth, wfWindowHeight);
+    // Viewport + projection aspect both sized off the current draw surface
+    // (FBO when capturing, OS window otherwise). See
+    // Display::GetSurfaceSize / docs/plans/2026-05-31-display-getsurfacesize-refactor.md.
+    int suw = wfInitialWindowWidth, suh = wfInitialWindowHeight;
+    if (auto* d = Display::GetActive()) d->GetSurfaceSize(suw, suh);
+    glViewport(0, 0, suw, suh);
     AssertGLOK();
 
-    // Keep the square square, this time, save calculated
-    // width and height for later use
-//     if (w <= h)
-//     {
-//         windowHeight = 250.0f*h/w;
-//         windowWidth = 250.0f;
-//     }
-//     else
-//     {
-//         windowWidth = 250.0f*w/h;
-//         windowHeight = 250.0f;
-//     }
-    // Set the clipping volume
-
-    
-    glMatrixMode( GL_PROJECTION );
-    AssertGLOK();
-    glLoadIdentity();
-    
-    AssertGLOK();
-#if defined( RENDERER_PIPELINE_GL )
-    //float fAspect = float(wfWindowWidth)/float(wfWindowHeight);
-    float fAspect = 1.0;                           // kts I am correcting for this elsewhere, eventually in the case of PIPELINE_GL this will need to be changed
-    gluPerspective(60.0f,fAspect,1.0,1000.0f);
-#else
-#if defined ( GFX_ZBUFFER )
-    glOrtho(-1.0, 1.0, -1.0, 1.0, -0.5f, 1000.0f);
-#else /* GFX_ZBUFFER */
-    glOrtho(-320.0f/2, 320/2, -320.0f/2, 320/2, 1.0f, -1.0f); 
-#endif /* GFX_ZBUFFER */
-#endif
-    AssertGLOK();
-
-    glMatrixMode( GL_MODELVIEW );
-    AssertGLOK();
-
+    const float fAspect = float(suw) / float(suh);
+    RendererBackendGet().SetProjection(60.0f, fAspect, 1.0f, 1000.0f);
 }
+
+#if defined(__EMSCRIPTEN__)
 //==============================================================================
+// Re-apply the GL viewport + projection for a new draw-surface size. The web
+// window layer (emscripten_window.cc) calls this when the canvas's displayed
+// (CSS) size changes — window resize, fullscreen enter/exit, iframe reflow — so
+// the engine renders at the canvas's actual resolution/aspect and fills the
+// viewport, instead of staying at the fixed size WFInitGL set at boot.
+void WFResizeSurface(int w, int h)
+{
+    if (w <= 0 || h <= 0) return;
+    if (auto* d = Display::GetActive()) d->SetLiveWindowSize(w, h);
+    glViewport(0, 0, w, h);
+    const float fAspect = float(w) / float(h);
+    RendererBackendGet().SetProjection(60.0f, fAspect, 1.0f, 1000.0f);
+}
+#endif
+//==============================================================================
+
+// Process-wide single active Display. Set in the ctor, cleared in the dtor.
+// Backs Display::GetActive() for callers (platform layers, free functions)
+// that don't carry a Display* through their call chain.
+static Display* gActiveDisplay = nullptr;
+
+Display* Display::GetActive() { return gActiveDisplay; }
+
+#if defined(__ANDROID__)
+#include <game/level_menu.h>
+extern "C" void WFAndroidDrawLevelMenu(const PhonepadRect* rects, int count, int w, int h);
+#endif
+#if defined(__LINUX__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
+// The level menu's drawer on the Linux desktop (game/level_menu.h): solid
+// rectangles in pixels, origin top-left, colour 0xRRGGBBAA, over the frame
+// RenderBegin just cleared. Same fixed-function GL as DrawHud. Registered in
+// the Display ctor; other platforms register their own or get no menu.
+// Plan: docs/plans/2026-10-01-level-menu-selector.md
+#include <game/level_menu.h>
+
+static void DrawLevelMenuRects(const PhonepadRect* rects, int count, int w, int h)
+{
+    glViewport(0, 0, w, h);
+    glUseProgram(0);
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, w, h, 0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_FOG);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBegin(GL_QUADS);
+    for (int i = 0; i < count; ++i)
+    {
+        const PhonepadRect& r = rects[i];
+        glColor4ub(GLubyte(r.rgba >> 24), GLubyte(r.rgba >> 16), GLubyte(r.rgba >> 8), GLubyte(r.rgba));
+        glVertex2f(r.x0, r.y0);
+        glVertex2f(r.x1, r.y0);
+        glVertex2f(r.x1, r.y1);
+        glVertex2f(r.x0, r.y1);
+    }
+    glEnd();
+    glPopAttrib();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    AssertGLOK();
+}
+#endif
+
+void Display::SetLiveWindowSize(int w, int h)
+{
+    if (w <= 0 || h <= 0) return;
+    _liveWidth  = w;
+    _liveHeight = h;
+}
+
+void Display::GetSurfaceSize(int& w, int& h) const
+{
+#if DESIGNER_CHEATS && defined(__LINUX__)
+    if (WfCaptureActive()) { w = _xSize; h = _ySize; return; }
+#endif
+    w = _liveWidth;
+    h = _liveHeight;
+}
 
 Display::Display(int orderTableSize, int xPos, int yPos, int xSize, int ySize, Memory& memory,bool /*interlace*/) :
 _drawPage(0),
@@ -315,8 +768,11 @@ _xPos(xPos),
 _yPos(yPos),
 _xSize(xSize),
 _ySize(ySize),
+_liveWidth(xSize),
+_liveHeight(ySize),
 _memory(memory)
 {
+    gActiveDisplay = this;
 
     _memory.Validate();
     if(!InitWindow(xPos, yPos, _halWindowWidth, _halWindowHeight ))
@@ -327,10 +783,15 @@ _memory(memory)
     AssertGLOK();
 
 	WFInitGL();
+#if defined(__LINUX__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
+    levelmenu::SetDrawer(&DrawLevelMenuRects);
+#elif defined(__ANDROID__)
+    levelmenu::SetDrawer(&WFAndroidDrawLevelMenu);   // gfx/gl/android_window.cc (GLES, the phone panel's path)
+#endif
 
     assert(orderTableSize > 0);
 #if defined(USE_ORDER_TABLES)
-    for(int index=0;index<ORDER_TABLES;index++)
+    for(int index=0;index<ORDER_TABLES;++index)
     {
         _orderTable[index] = new (_memory) OrderTable(orderTableSize,_memory);
         assert(ValidPtr(_orderTable[index]));
@@ -344,23 +805,6 @@ _memory(memory)
     _drawPage = 0;
     ResetTime();
 
-#if 0
-#pragma message ("KTS " __FILE__ ": temp test code")
-    for(int y=0; y<VRAM_HEIGHT; ++y)
-    {
-        for(int x=0; x<VRAM_WIDTH; ++x)
-        {
-#if SIXTEEN_BIT_VRAM
-            vram[ y ][ x ] = 0x7fff;
-#else
-            vram[ y ][ x ][0] = 128;
-            vram[ y ][ x ][1] = 128;
-            vram[ y ][ x ][2] = 255;
-            vram[ y ][ x ][3] = 255;
-#endif
-        }
-    }
-#endif
 
 #if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
     _videoMemory = new (HALLmalloc) PixelMap( PixelMap::MEMORY_VIDEO, VRAMWidth, VRAMHeight );
@@ -375,14 +819,18 @@ _memory(memory)
 
 Display::~Display()
 {
+    if (gActiveDisplay == this) gActiveDisplay = nullptr;
     Validate();
-    if(_drawPage == 0)
-        PageFlip();
+    // Skip final PageFlips if the X window was already destroyed by HALCloseWindow().
+    if (!HALWindowCloseRequested()) {
+        if(_drawPage == 0)
+            PageFlip();
 
-    PageFlip();
+        PageFlip();
+    }
 
 #if defined(USE_ORDER_TABLES)
-    for(int index=ORDER_TABLES-1;index>= 0;index--)
+    for(int index=ORDER_TABLES-1;index>= 0;--index)
         _memory.Free(_orderTable[index],sizeof(OrderTable));
 #endif
 
@@ -396,7 +844,7 @@ Display::~Display()
 
 //============================================================================
 
-#if defined(__LINUX__)
+#if defined(__LINUX__) || defined(__ANDROID__)
 inline Scalar
 ConvertTimeToScalar(const struct timeval&  tv)
 {
@@ -417,9 +865,7 @@ Display::ResetTime()                    // used to reset delta timer for PageFli
 {
     //_clockLastTime = timeGetTime();  	//clock();
 
-#if defined(__WIN__)
-    _clockLastTime = timeGetTime();                 //clock();
-#elif defined(__LINUX__)
+#if   defined(__LINUX__) || defined(__ANDROID__)
     struct timeval tv;
     gettimeofday(&tv,NULL);
     _clockLastTime = tv;                
@@ -436,38 +882,27 @@ Display::RenderBegin()
    Validate();
    AssertGLOK();
    AssertMsg( _drawPage == 0 || _drawPage == 1, "_drawPage = " << _drawPage );
+#if DESIGNER_CHEATS && defined(__LINUX__)
+   if (WfCaptureActive())
+   {
+       EnsureCaptureFBO(_xSize, _ySize);
+       glBindFramebuffer(GL_FRAMEBUFFER, gCaptureFBO);
+   }
+#endif
+   // Recompute viewport + projection every frame so resize/maximize stays correct.
+   {
+       int suw, suh;
+       GetSurfaceSize(suw, suh);
+       glViewport(0, 0, suw, suh);
+       RendererBackendGet().SetProjection(60.0f, float(suw) / float(suh), 1.0f, 1000.0f);
+       AssertGLOK();
+   }
    glClearColor( _backgroundColorRed, _backgroundColorGreen, _backgroundColorBlue, 1.0 );
    AssertGLOK();
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);     // Clear the window with current clearing color
    AssertGLOK();
-#if defined(RENDERER_PIPELINE_GL)
-   glEnable(GL_LIGHTING);
-   glEnable(GL_LIGHT0);
-   glEnable(GL_LIGHT1);
-   glEnable(GL_LIGHT2);
-   glEnable(GL_NORMALIZE);
-   glEnable(GL_FOG);
-
-   GLfloat lightWhite[] = {
-       1.0, 1.0, 1.0, 1.0
-   };
-
-
-   GLfloat lightBlack[] = {
-       0.0, 0.0, 0.0, 0.0
-   };
-   glMaterialfv(GL_FRONT,GL_AMBIENT,lightWhite);
-   glMaterialfv(GL_FRONT,GL_DIFFUSE,lightWhite);
-   glMaterialfv(GL_FRONT,GL_SPECULAR,lightBlack);
-   AssertGLOK();
-#else
-   glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-   glDisable(GL_LIGHTING);
-#endif
-
-   AssertGLOK();
-   glEnable( GL_TEXTURE_2D );
-   AssertGLOK();
+   RendererBackendGet().SetLightingEnabled(true);
+   // Fog enable/disable is driven by camera.cc's SetFog each frame.
 
 #if 0
    static GLfloat cameraZ = -5.0;
@@ -512,7 +947,7 @@ Display::RenderBegin()
     glVertex3f( 0.9,  0.0, -5.0 + zOffset);
     glEnd();
 #endif
-    glLoadIdentity ();
+    RendererBackendGet().ResetModelView();
 }
 
 //==============================================================================
@@ -520,12 +955,221 @@ Display::RenderBegin()
 void
 Display::RenderEnd()
 {
+#if DESIGNER_CHEATS && defined(__LINUX__)
+    // Count BACKEND frames, not presents. RenderEnd runs inside WFGame::
+    // StepFrame's `camera()->ValidView()` gate (game.cc:584), which is the
+    // same gate the macOS display counts behind — so frame N here and frame N
+    // there are the same simulation instant. Counting presents instead is what
+    // made the Phase 2 Linux reference incomparable.
+    if (gCaptureFrame > 0 && gCapturePath)
+    {
+        static unsigned long s_backendFrames = 0;
+        if ((int)++s_backendFrames == gCaptureFrame)
+            gCapturePending = true;
+    }
+#endif
 }
 
 //==============================================================================
 
 extern bool	windowActive;		// Window windowActive Flag Set To TRUE By Default
 
+#if DESIGNER_CHEATS && defined(__LINUX__)
+
+extern bool bRecordVideo;
+
+static FILE* gCapturePipe  = nullptr;
+// Offscreen capture target — see docs/plans/2026-05-11-record-video-fbo-capture.md.
+// Rendering goes here when bRecordVideo is set, so the captured frame is
+// immune to X11 window occlusion (the back buffer's occluded regions on
+// non-composited X11 contain whatever the obscuring window painted).
+// File-scope (not static) so the forward decl at the top of the file can
+// refer to them.
+GLuint gCaptureFBO   = 0;
+static GLuint gCaptureColor = 0;
+static GLuint gCaptureDepth = 0;
+
+static void
+CaptureCleanup(int sig)
+{
+    if (gCapturePipe)
+    {
+        pclose(gCapturePipe);
+        gCapturePipe = nullptr;
+    }
+    signal(sig, SIG_DFL);
+    raise(sig);
+}
+
+static void
+EnsureCaptureFBO(int w, int h)
+{
+    if (gCaptureFBO) return;
+    glGenFramebuffers(1, &gCaptureFBO);
+    glGenRenderbuffers(1, &gCaptureColor);
+    glGenRenderbuffers(1, &gCaptureDepth);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, gCaptureColor);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB8, w, h);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, gCaptureDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, gCaptureFBO);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                              GL_RENDERBUFFER, gCaptureColor);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                              GL_RENDERBUFFER, gCaptureDepth);
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    AssertMsg(status == GL_FRAMEBUFFER_COMPLETE,
+              "capture FBO incomplete: 0x" << std::hex << status);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+static void
+CaptureFrame(int xSize, int ySize, int liveW, int liveH)
+{
+    // -record_video and --capture-frame are independent consumers of this
+    // function — a single-shot PNG capture must not require the ffmpeg pipe.
+    const bool wantsPngThisFrame = gCapturePending && gCapturePath;
+
+    if (bRecordVideo && !gCapturePipe)
+    {
+        // Frames are stamped with the wall clock as ffmpeg reads them (the pipe is
+        // effectively synchronous: one 900 KB frame vs a 64 KB pipe buffer) and
+        // resampled to a constant 30 fps, so video time == wall time == the level
+        // clock whatever the render rate. With a plain "-framerate 30" a scene that
+        // renders at 23 fps played 1.3x too fast and anything timed off the level
+        // clock (the condo tour's captions) drifted seconds behind.
+        char cmd[320];
+        snprintf(cmd, sizeof(cmd),
+            "ffmpeg -y -f rawvideo -pixel_format bgr24 "
+            "-video_size %dx%d -use_wallclock_as_timestamps 1 "
+            "-i pipe:0 -vf vflip -fps_mode cfr -r 30 -c:v libx264 -pix_fmt yuv420p "
+            "-movflags frag_keyframe+empty_moov output.mp4",
+            xSize, ySize);
+        gCapturePipe = popen(cmd, "w");
+        signal(SIGABRT, CaptureCleanup);
+        signal(SIGSEGV, CaptureCleanup);
+        signal(SIGTERM, CaptureCleanup);
+        signal(SIGINT,  CaptureCleanup);
+    }
+
+
+    // When rendering to the offscreen capture FBO, blit it onto the back
+    // buffer (so the user still sees the game) and then read from the FBO
+    // (still bound as READ) so the captured pixels are immune to X11
+    // window occlusion.
+    if (gCaptureFBO)
+    {
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, gCaptureFBO);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        glBlitFramebuffer(0, 0, xSize, ySize, 0, 0, liveW, liveH,
+                          GL_COLOR_BUFFER_BIT, GL_LINEAR);
+        // FBO remains bound as the READ framebuffer for glReadPixels below.
+    }
+
+    // Presentation is required on EVERY offscreen frame, including frames
+    // before and after a one-shot PNG. Returning before the blit swaps stale
+    // back buffers and makes the entire live window flash.
+    if (!bRecordVideo && !wantsPngThisFrame)
+    {
+        if (gCaptureFBO)
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        return;
+    }
+
+    const int pixelBytes = xSize * ySize * 3;
+    glFinish();
+    uint8_t* pixels = (uint8_t*)malloc(pixelBytes);
+    glReadPixels(0, 0, xSize, ySize, GL_BGR, GL_UNSIGNED_BYTE, pixels);
+    if (bRecordVideo && gCapturePipe)
+        fwrite(pixels, 1, pixelBytes, gCapturePipe);
+
+    // Optional one-shot PPM dump (env WF_GAME_SCREENSHOT_PPM=path). The
+    // ffmpeg pipe occasionally buffers indefinitely under fragmented mp4 +
+    // SIGTERM, leaving a 36-byte header file — PPM bypasses libx264 and
+    // mp4 entirely. Wait a few frames so the first textured frame is
+    // ready (the FBO blits are immediate, but the level-load cascade can
+    // present a partial frame on frame 0).
+    // --capture-frame=N=<path.png>: the matched-frame sibling of the macOS
+    // capture in hal/macos/display_macos.cc. Reads from the capture FBO, which
+    // is still bound as READ here — that FBO is the whole reason this is
+    // trustworthy on a non-composited X11 desktop, where the back buffer
+    // contains whatever window is occluding us.
+    if (wantsPngThisFrame)
+    {
+        gCapturePending = false;
+        // glReadPixels gave BGR bottom-up; stb wants RGB(A) top-down.
+        const size_t rowRGB = (size_t)xSize * 3;
+        uint8_t* rgb = (uint8_t*)malloc(rowRGB * (size_t)ySize);
+        unsigned long lit = 0;
+        for (int y = 0; y < ySize; ++y)
+        {
+            const uint8_t* src = pixels + (size_t)(ySize - 1 - y) * rowRGB;
+            uint8_t*       dst = rgb    + (size_t)y * rowRGB;
+            for (int x = 0; x < xSize; ++x)
+            {
+                dst[x*3+0] = src[x*3+2];
+                dst[x*3+1] = src[x*3+1];
+                dst[x*3+2] = src[x*3+0];
+                if (dst[x*3+0] | dst[x*3+1] | dst[x*3+2]) ++lit;
+            }
+        }
+        const int ok = stbi_write_png(gCapturePath, xSize, ySize, 3,
+                                      rgb, (int)rowRGB);
+        free(rgb);
+        // Same non-black report the macOS side prints, for the same reason: a
+        // PNG that exists but is uniformly the clear colour is how a blank
+        // capture gets mistaken for a pass.
+        std::printf("linux: capture frame %d -> %s (%dx%d) %s, "
+                    "non-black pixels %lu/%lu\n",
+                    gCaptureFrame, gCapturePath, xSize, ySize,
+                    ok ? "written" : "stbi_write_png FAILED",
+                    lit, (unsigned long)((size_t)xSize * (size_t)ySize));
+        std::fflush(stdout);
+    }
+
+    static int  gPpmFrame    = 0;
+    static bool gPpmDone     = false;
+    if (!gPpmDone)
+    {
+        const char* ppm_path = getenv("WF_GAME_SCREENSHOT_PPM");
+        if (ppm_path && ++gPpmFrame >= 30)
+        {
+            FILE* fp = fopen(ppm_path, "wb");
+            if (fp)
+            {
+                fprintf(fp, "P6\n%d %d\n255\n", xSize, ySize);
+                // glReadPixels gives BGR bottom-up; PPM wants RGB top-down.
+                uint8_t* row = (uint8_t*)malloc(xSize * 3);
+                for (int y = ySize - 1; y >= 0; --y)
+                {
+                    const uint8_t* src = pixels + y * xSize * 3;
+                    for (int x = 0; x < xSize; ++x)
+                    {
+                        row[x*3+0] = src[x*3+2];   // R = B-channel
+                        row[x*3+1] = src[x*3+1];   // G
+                        row[x*3+2] = src[x*3+0];   // B = R-channel
+                    }
+                    fwrite(row, 1, xSize * 3, fp);
+                }
+                free(row);
+                fclose(fp);
+                gPpmDone = true;
+                std::fprintf(stderr, "wf_game: wrote screenshot %s (%dx%d)\n",
+                             ppm_path, xSize, ySize);
+            }
+        }
+    }
+
+    free(pixels);
+
+    if (gCaptureFBO)
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+#endif // DESIGNER_CHEATS && __LINUX__
 
 Scalar
 Display::PageFlip()
@@ -552,48 +1196,11 @@ Display::PageFlip()
     }
 #endif
 
-#if defined(__WIN__)
-	MSG		msg;									// Windows Message Structure
-		  
-	while (PeekMessage(&msg,NULL,0,0,PM_REMOVE))	// Is There A Message Waiting?
-	{
-		if (msg.message==WM_QUIT)				// Have We Received A Quit Message?
-		{
-            printf("Display::PageFlip: gl\\display.cc calling sys_exit\n");
-			KillGLWindow();									// Kill The Window
-			sys_exit(1);
-		}
-		else									// If Not, Deal With Window Messages
-		{
-			TranslateMessage(&msg);				// Translate The Message
-			DispatchMessage(&msg);				// Dispatch The Message
-		}
-	}
-	{
-		// Watch For ESC Key 
-		if (keys[VK_ESCAPE])	// Active?  Was There A Quit Received?
-		{
-            printf("Display::PageFlip: gl\\display.cc calling sys_exit\n");
-			KillGLWindow();									// Kill The Window
-			sys_exit(1);
-		}
-
-		if (keys[VK_F1])						// Is F1 Being Pressed?
-		{
-			keys[VK_F1]=FALSE;					// If So Make Key FALSE
-			KillGLWindow();						// Kill Our Current Window
-			fullscreen=!fullscreen;				// Toggle Fullscreen / Windowed Mode
-			// Recreate Our OpenGL Window
-			if (!CreateGLWindow("WorldFoundry",_xPos, _yPos, _halWindowWidth, _halWindowHeight,16,fullscreen))
-			{
-				return 0;						// Quit If Window Was Not Created
-			}
-			WFInitGL();
-		}
-	}
+#if defined(__LINUX__) || defined(__ANDROID__)
+    XEventLoop();
 #endif
-#if defined(__LINUX__)
-    XEventLoop(); 
+#if defined(WF_ENABLE_STEAM)
+    _SteamRunCallbacks();
 #endif
 
     Validate();
@@ -624,19 +1231,6 @@ Display::PageFlip()
         // end test code
 #endif
 
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-#if defined(USE_ORDER_TABLES)
-    SetConstructionOrderTableIndex(_drawPage);
-    SetRenderOrderTableIndex(1-_drawPage);
-
-    _orderTable[GetRenderOrderTableIndex()]->Render();
-    _drawPage ^= 1;
-    _orderTable[GetConstructionOrderTableIndex()]->Clear();
-#else // USE_ORDER_TABLES
-#error now what?
-    assert(0);
-#endif
-#elif defined(RENDERER_PIPELINE_GL) // defined(RENDERER_PIPELINE_SOFTWARE)
 
 #if 0
     static float xRot;
@@ -682,20 +1276,46 @@ Display::PageFlip()
 #endif // 0
 
 
-#else
-#error renderer pipeline not defined!
+    RendererBackendGet().EndFrame();
+    if((planted::state().active||wfprops::host().modal) && levelmenu::Drawer()){int w=0,h=0;GetSurfaceSize(w,h);std::vector<PhonepadRect> rects;std::vector<bitmaptext::Quad> glyphs;planted::buildUI(w,h,rects,&glyphs);levelmenu::Drawer()(rects.data(),int(rects.size()),w,h);wfui::Draw(glyphs,w,h);}
+
+
+#if DESIGNER_CHEATS && defined(__LINUX__)
+    // Skip the arcade HUD on levels that don't write the score/timer/lives/
+    // game-over mailboxes (game.cc:558-561 refreshes these globals each
+    // frame from mb 70/71/72/420). qbert and SMB write LIVES=3 from their
+    // Forth startup script so the HUD appears immediately; snowgoons /
+    // mm_practice / moon_site01 never touch the mailboxes and stay HUD-less.
+    // See docs/plans/2026-05-31-hud-gate-on-level-opt-in.md.
+    if (wf_hud_score | wf_hud_timer | wf_hud_lives | wf_hud_game_over
+        | wf_hud_entering_initials | wf_moon_overlay_enabled | wf_hud_marble_state)
+    {
+        // Surface-size policy (capture FBO vs live window) lives in
+        // Display::GetSurfaceSize — see refactor plan.
+        int huw, huh;
+        GetSurfaceSize(huw, huh);
+        DrawHud(huw, huh);
+    }
 #endif
 
     glFlush();
     AssertGLOK();
 
-#if defined(__WIN__)
-    // Call function to swap the buffers
-	SwapBuffers(hDC);					// Swap Buffers (Double Buffering)
+#if DESIGNER_CHEATS && defined(__LINUX__)
+    if (WfCaptureActive())
+        CaptureFrame(_xSize, _ySize, _liveWidth, _liveHeight);
+#endif
+
+#if defined(__ANDROID__)
+    AndroidSwapBuffers();
+    AssertGLOK();
+#elif defined(__EMSCRIPTEN__)
+    // No explicit swap on WebGL: the browser composites the canvas when the
+    // frame yields to the event loop (ASYNCIFY emscripten_sleep in StepFrame /
+    // the v2 main-loop callback return). glFlush() above is sufficient.
 #elif defined(__LINUX__)
     glXSwapBuffers(halDisplay.mainDisplay, halDisplay.win);
     AssertGLOK();
-
          // glFinish();
 #else
 #error platform not defined
@@ -709,32 +1329,38 @@ Display::PageFlip()
 //	wglDeleteContext(hRC);
 //	hRC = 0;
 
-    // now calc how long it has been since last frame
-#if defined(__WIN__)
-    unsigned long now = timeGetTime();                  //clock();
-    unsigned long delta = now - _clockLastTime;
-    _clockLastTime = now;
+    return MeasureDelta();
 
-    AssertMsg(delta/CLOCKS_PER_SEC < 65536, 
-              "delta/CLOCKS_PER_SEC = " << delta/CLOCKS_PER_SEC << ", delta = " << delta << ", CLOCKS_PER_SEC = " << CLOCKS_PER_SEC);
-    Scalar whole(short(delta/CLOCKS_PER_SEC),0);
-    Scalar frac(short(delta%CLOCKS_PER_SEC),0);
-    frac /= SCALAR_CONSTANT(CLOCKS_PER_SEC);
-    return(whole+frac);
-#elif defined(__LINUX__)
+}
+
+//============================================================================
+
+Scalar
+Display::MeasureDelta()
+{
+#if defined(__LINUX__) || defined(__ANDROID__)
     struct timeval tv;
     gettimeofday(&tv,NULL);
 
     struct timeval deltatime;
     deltatime.tv_usec = tv.tv_usec - _clockLastTime.tv_usec;
     deltatime.tv_sec = tv.tv_sec - _clockLastTime.tv_sec;
-    assert(deltatime.tv_sec < 5);               // if more than 5 seconds something is really wrong
+    // Clamp large wall-clock stalls (alt-tab, debugger pause, ASan hitch,
+    // Android backgrounding, editor Doc-apply) so a legitimate frame gap
+    // doesn't abort the session. Post-clamp the 1/5-s ceiling below still
+    // caps the simulation step.
+    if (deltatime.tv_sec >= 5) {
+        std::cout << "large frame stall (" << deltatime.tv_sec
+                  << " s), clamping" << std::endl;
+        deltatime.tv_sec  = 4;
+        deltatime.tv_usec = 999999;
+    }
     int tempCounter = 0;
     while(deltatime.tv_usec < 0)
     {
         deltatime.tv_usec += 1000000;
-        deltatime.tv_sec--;
-        tempCounter++;
+        --deltatime.tv_sec;
+        ++tempCounter;
     }
 
     assert(tempCounter < 5);
@@ -763,7 +1389,6 @@ Display::PageFlip()
 #else
 #error platform not defined
 #endif
-
 }
 
 //============================================================================
@@ -1024,36 +1649,6 @@ DrawOTag( ORDER_TABLE_ENTRY* __orderTable )
 
 #endif									// defined(USE_ORDER_TABLES)
 
-
-//==============================================================================
-
-void
-LoadGLMatrixFromMatrix34(const Matrix34& matrix)
-{
-
-    GLfloat mat[16];
-    mat[(0*4)+0] = matrix[0][0].AsFloat();
-    mat[(0*4)+1] = matrix[0][1].AsFloat();
-    mat[(0*4)+2] = matrix[0][2].AsFloat();
-    mat[(0*4)+3] = 0;
-
-    mat[(1*4)+0] = matrix[1][0].AsFloat();
-    mat[(1*4)+1] = matrix[1][1].AsFloat();
-    mat[(1*4)+2] = matrix[1][2].AsFloat();
-    mat[(1*4)+3] = 0;
-
-    mat[(2*4)+0] = matrix[2][0].AsFloat();
-    mat[(2*4)+1] = matrix[2][1].AsFloat();
-    mat[(2*4)+2] = matrix[2][2].AsFloat();
-    mat[(2*4)+3] = 0;
-
-    mat[(3*4)+0] = matrix[3][0].AsFloat();
-    mat[(3*4)+1] = matrix[3][1].AsFloat();
-    mat[(3*4)+2] = matrix[3][2].AsFloat();
-    mat[(3*4)+3] = 1.0;
-
-    glLoadMatrixf(mat);
-}
 
 //==============================================================================
 

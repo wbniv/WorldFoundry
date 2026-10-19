@@ -57,7 +57,7 @@ Explode::update()
 
 	while ( _nonStatPlat->_msgPort.GetMsgByType( MsgPort::SPECIAL_COLLISION, &msgData, msgDataSize ) )
 	{
-		Actor* colActor = (Actor*)msgData;
+		Actor* colActor = reinterpret_cast<Actor*>(*(uintptr_t*)msgData);
 		AssertMsg( ValidPtr( colActor ), *this << " got an invalid collision message with an invalid pointer: " << std::hex << colActor );
 
 		if ( getOad()->HealthModifier )
@@ -90,13 +90,6 @@ Explode::update()
 			}
 		}
 	 }
-
-#if defined(RENDERER_BRENDER)
-	_vactor.PostScale( Vector3::one );
-#endif
-#if defined(RENDERER_BRENDER)
-	assert(0);
-#endif
 
 	if ( theLevel->LevelClock().Current() > _timeDone )
 	{	// done exploding,  remove from world

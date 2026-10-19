@@ -1,0 +1,292 @@
+/* Worst Take Wins — controller (phone) UI, scoped via #game-root. */
+
+#game-root.wtw {
+  /* Override shell's center-column layout so hand strip can bleed edge-to-edge. */
+  padding: 0;
+  gap: 1.5vh;
+}
+
+/* ───── scores strip at the top ─────────────────────────────────────── */
+#game-root .wtw-scores {
+  list-style: none;
+  display: flex;
+  gap: 0.8rem;
+  overflow-x: auto;
+  padding: 0.6rem 0.8rem;
+  margin: 0;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 0.9rem;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+#game-root .wtw-scores::-webkit-scrollbar { display: none; }
+#game-root .wtw-scores li {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: baseline;
+  opacity: 0.75;
+}
+#game-root .wtw-scores li.me {
+  opacity: 1;
+  color: #fde047;
+}
+#game-root .wtw-scores .pts {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 700;
+}
+
+/* ───── lobby ───────────────────────────────────────────────────────── */
+#game-root .wtw-lobby {
+  padding: 3vh 6vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2vh;
+  text-align: center;
+}
+#game-root .wtw-lobby h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+#game-root .wtw-lobby p { opacity: 0.7; }
+
+/* ───── large action buttons ─────────────────────────────────────────── */
+#game-root .wtw-start-btn,
+#game-root .wtw-submit-btn,
+#game-root .wtw-advance-btn {
+  border: none;
+  border-radius: 0.6rem;
+  padding: 1.1rem 1.3rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #111;
+  background: radial-gradient(circle at 30% 30%, #facc15, #eab308);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+#game-root .wtw-start-btn[disabled],
+#game-root .wtw-submit-btn[disabled],
+#game-root .wtw-advance-btn[disabled] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+#game-root .wtw-start-btn { width: 100%; max-width: 320px; }
+#game-root .wtw-submit-btn {
+  width: 90%;
+  max-width: 380px;
+  margin: 1vh auto 2vh;
+  display: block;
+}
+
+/* ───── prompt / response cards ─────────────────────────────────────── */
+#game-root .wtw-prompt {
+  background: #111418;
+  color: #f4f4f5;
+  padding: 1.4rem 1.2rem;
+  border-radius: 0.7rem;
+  box-shadow: 0 0.4vh 1.2vh rgba(0,0,0,0.5);
+  margin: 1vh 3vw;
+  font-weight: 600;
+  line-height: 1.4;
+  font-size: 1.1rem;
+  white-space: pre-wrap;
+  min-height: 12vh;
+}
+
+#game-root .wtw-submission {
+  background: #f8f4eb;
+  color: #111418;
+  padding: 1rem 1.1rem;
+  border-radius: 0.6rem;
+  margin: 1vh 3vw;
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+#game-root .wtw-submission.tile {
+  margin: 0;
+  text-align: left;
+  font-size: 0.95rem;
+  min-height: 7rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* ───── role + counter strings ──────────────────────────────────────── */
+#game-root .wtw-role {
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 600;
+  opacity: 0.85;
+  padding: 0.6rem 1rem;
+}
+#game-root .wtw-counter {
+  text-align: center;
+  font-size: 0.9rem;
+  opacity: 0.55;
+  margin: 0.4rem 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ───── hand strip ──────────────────────────────────────────────────── */
+#game-root .wtw-hand {
+  display: flex;
+  gap: 0.7rem;
+  overflow-x: auto;
+  padding: 1vh 3vw 2vh;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+#game-root .wtw-hand::-webkit-scrollbar { display: none; }
+
+#game-root .wtw-card {
+  flex: 0 0 70%;
+  max-width: 280px;
+  scroll-snap-align: center;
+  background: #f8f4eb;
+  color: #111418;
+  border: 2px solid transparent;
+  border-radius: 0.8rem;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.35;
+  min-height: 28vh;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 100ms ease-out, border-color 100ms ease-out;
+  position: relative;
+  user-select: none;
+}
+#game-root .wtw-card:active { transform: scale(0.97); }
+#game-root .wtw-card.selected {
+  border-color: #facc15;
+  transform: translateY(-0.8vh) scale(1.02);
+  box-shadow: 0 0.6vh 1.6vh rgba(250, 204, 21, 0.35);
+}
+#game-root .wtw-card[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+#game-root .wtw-card .pick-order {
+  position: absolute;
+  top: 0.5rem; right: 0.5rem;
+  width: 1.5rem; height: 1.5rem;
+  line-height: 1.5rem;
+  border-radius: 50%;
+  background: #facc15;
+  color: #111;
+  font-weight: 800;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+/* ───── judge reveal / pick grid ────────────────────────────────────── */
+#game-root .wtw-reveal-one .wtw-reveal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1vh 3vw 2vh;
+  gap: 1rem;
+}
+
+#game-root .wtw-pick-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.8rem;
+  padding: 1vh 3vw 2vh;
+}
+#game-root .wtw-pick-btn {
+  background: transparent;
+  border: 2px solid rgba(255,255,255,0.08);
+  border-radius: 0.7rem;
+  padding: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 100ms ease-out, border-color 100ms ease-out;
+}
+#game-root .wtw-pick-btn:active {
+  transform: scale(0.98);
+  border-color: #facc15;
+}
+#game-root .wtw-pick-btn .wtw-submission {
+  margin: 0;
+  border-radius: 0.55rem;
+}
+
+/* ───── score splash ────────────────────────────────────────────────── */
+#game-root .wtw-score-splash {
+  padding: 3vh 6vw;
+  text-align: center;
+  animation: wtw-splash-in 0.4s ease-out;
+}
+@keyframes wtw-splash-in {
+  from { opacity: 0; transform: translateY(2vh); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+#game-root .wtw-headline {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 1.5vh;
+  letter-spacing: 0.04em;
+}
+#game-root .wtw-score-splash.mine .wtw-headline {
+  color: #86efac;
+}
+
+/* ───── game over ────────────────────────────────────────────────────── */
+#game-root .wtw-game-over {
+  padding: 4vh 6vw;
+  text-align: center;
+}
+#game-root .wtw-game-over.mine .wtw-headline {
+  font-size: 3rem;
+  background: linear-gradient(90deg, #fde047, #facc15, #86efac);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: wtw-win-pulse 0.6s ease-in-out infinite alternate;
+}
+@keyframes wtw-win-pulse {
+  from { transform: scale(1); }
+  to   { transform: scale(1.05); }
+}
+#game-root .wtw-final-scoreboard {
+  list-style: none;
+  margin: 2vh auto 3vh;
+  padding: 0;
+  max-width: 320px;
+  text-align: left;
+}
+#game-root .wtw-final-scoreboard li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 1rem;
+  border-radius: 0.5rem;
+}
+#game-root .wtw-final-scoreboard li.me   { background: rgba(255,255,255,0.08); }
+#game-root .wtw-final-scoreboard li.winner { color: #facc15; font-weight: 700; }
+
+/* ───── non-intrusive flash (error messages) ─────────────────────────── */
+#game-root .wtw-flash {
+  background: #7f1d1d;
+  color: #fee2e2;
+  padding: 0.8rem 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  animation: wtw-flash-in 0.25s ease-out;
+}
+@keyframes wtw-flash-in {
+  from { opacity: 0; transform: translateY(-1vh); }
+  to   { opacity: 1; transform: translateY(0); }
+}

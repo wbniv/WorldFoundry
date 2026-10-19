@@ -1,0 +1,264 @@
+//=============================================================================
+// gfx/renderer_backend.hp: Renderer backend seam
+// Copyright ( c ) 2026 World Foundry Group
+// Part of the World Foundry 3D video game engine/production environment
+// for more information about World Foundry, see www.worldfoundry.org
+//==============================================================================
+// Thin per-triangle submission interface. Renderer TUs call
+// RendererBackendGet().DrawTriangle(...) — the modern backend
+// (gfx/glpipeline/backend_modern.cc) batches them into a VBO + shader path
+// that targets both GLES 3.0 and desktop GL 3.3 core. Static meshes (E3) add
+// a second, optional way in: CreateStaticMesh / DrawStaticTriangles below.
+//============================================================================
+
+#ifndef _RENDERER_BACKEND_HP
+#define _RENDERER_BACKEND_HP
+
+#include <string>
+
+class Matrix34;
+class PixelMap;
+struct PhonepadRect;
+namespace bitmaptext { struct Quad; }
+
+struct RBVertex
+{
+    float x, y, z;
+    float r, g, b;
+    float u, v;
+};
+
+// Opaque, backend-owned GPU texture. The GL backend keeps a texture name in
+// here; the Metal backend keeps an id<MTLTexture>. NULL means "no texture".
+//
+// void* rather than an integer typedef so it is pointer-sized by definition,
+// with no <cstdint> in a runtime header (coding-conventions §4). The one cast
+// either direction lives inside the backend that owns the representation.
+typedef void* RBTextureHandle;
+
+// ---- static meshes (E3 phase 1) --------------------------------------------
+// One triangle exactly as the streaming path would have handed it to
+// DrawTriangle, plus the per-vertex state the backend packs beside it (the
+// opacity and palette current at that call). A bake is an array of these in
+// face order; the backend packs and uploads them once and the CPU copy is
+// freed. Deliberately flat and free of pointers, so an exporter can emit the
+// same records later.
+struct RBStaticTriangle
+{
+    RBVertex v[3];
+    float nx, ny, nz;
+    float opacity;
+    unsigned paletteDark, paletteLight;
+    unsigned paletteEnabled;    // 0 or 1; unsigned so the record has no padding
+};
+
+// Opaque, backend-owned static mesh (vertex buffer plus whatever the backend
+// needs to draw subsets of it). NULL means "none".
+typedef void* RBStaticMeshHandle;
+
+// Pixel layout of the data handed to CreateTexture. Matches what PixelMap
+// actually stores, which is chosen by the SIXTEEN_BIT_VRAM build switch.
+enum RBTextureFormat
+{
+    RB_TEX_RGBA8,       // 4 bytes/texel, tightly packed
+    RB_TEX_COVERAGE8,   // 1 byte/texel; native-pixel bitmap glyph coverage
+    RB_TEX_RGB5         // GL_RGB5 internal, RGB bytes in (SIXTEEN_BIT_VRAM builds)
+};
+
+class RendererBackend
+{
+public:
+    virtual ~RendererBackend() = default;
+
+    // Projection: perspective with vertical fov in degrees. Called once at
+    // startup, and again on window resize.
+    virtual void SetProjection(float fovDegY, float aspect,
+                               float nearZ, float farZ) = 0;
+
+    // Modelview replace. Callers pass the object's world transform already
+    // combined with the camera's view matrix (or the raw view matrix for
+    // camera/light setup).
+    virtual void SetModelView(const Matrix34& m) = 0;
+
+    // Modelview identity.
+    virtual void ResetModelView() = 0;
+
+    // Scene ambient light color (RGB, 0..1).
+    virtual void SetAmbient(float r, float g, float b) = 0;
+
+    // Directional light. `dirX/Y/Z` points from the surface toward the light
+    // source, in world space; the backend transforms it by the current
+    // modelview so the shader can use it in eye space. `r/g/b` is the
+    // diffuse color (ambient + specular are black by convention). `index` in
+    // [0 .. RB_MAX_LIGHTS).
+    virtual void SetDirLight(int index,
+                             float dirX, float dirY, float dirZ,
+                             float r, float g, float b) = 0;
+
+    // Global lighting on/off (for matte / unlit passes).
+    virtual void SetLightingEnabled(bool enabled) = 0;
+
+    // Linear fog parameters. `start`/`end` are eye-space distances (positive).
+    // Color is RGB 0..1. Does not toggle fog — use SetFogEnabled.
+    virtual void SetFog(float r, float g, float b,
+                        float start, float end) = 0;
+
+    // Fog on/off. Params preserved across toggles (so matte can disable +
+    // re-enable without re-specifying the camera's fog setup).
+    virtual void SetFogEnabled(bool enabled) = 0;
+
+    // Opt-in texture alpha testing; existing materials remain opaque.
+    virtual void SetAlphaCutout(bool /*enabled*/) {}
+
+    // Opt-in albedo modulation; legacy materials retain replace-if-white.
+    virtual void SetTextureModulation(bool /*enabled*/) {}
+
+    // Opt-in shared grayscale texture palette; disabled materials keep old rendering.
+    virtual void SetTexturePalette(bool /*enabled*/, unsigned /*dark*/, unsigned /*light*/) {}
+
+    // Explicit opt-in material opacity. Legacy materials remain opaque.
+    virtual void SetOpacity(float /*opacity*/) {}
+
+    // Finish the current camera's world pass before overlays or another view.
+    virtual void FlushTranslucency() {}
+
+    // Triangle submission (see top of file). `nx/ny/nz` is the object-space
+    // face normal — the modern backend replicates it into all three verts.
+    // `cullExempt` skips backface culling for this triangle (DOUBLE_SIDED
+    // materials, the matte/HUD background) — see the cull in backend_modern.cc.
+    //
+    // `prelit` is Material::LIGHTING_PRELIT reaching the draw: the triangle's
+    // color is taken as final and the diffuse/ambient term is NOT applied to
+    // it. Without this the flag selected a renderer (rend*p.cc) that was a
+    // byte-for-byte copy of the lit one, so every "prelit" face was still
+    // shaded by `dot(N, L)` in the vertex shader — which made its color a
+    // function of its winding, because the face normal is derived from winding
+    // at load (rendobj3.cc's CalculateNormal). Backends honour it by breaking
+    // the batch and clearing the lighting uniform, exactly as they already do
+    // for a texture change. See docs/plans/2026-06-13-planetarium-dome-view-
+    // engine-wide-backface-culling.md "Effort 1c".
+    virtual void DrawTriangle(const RBVertex& v0,
+                              const RBVertex& v1,
+                              const RBVertex& v2,
+                              float nx, float ny, float nz,
+                              const PixelMap* texture,
+                              bool cullExempt = false,
+                              bool prelit = false) = 0;
+
+    // Flush any pending batched draws. Called once per frame, right before
+    // the swap-buffers. Legacy fixed-function backend is a no-op; modern
+    // VBO backend uses this to drain its accumulated vertex buffer.
+    virtual void EndFrame() = 0;
+
+    // Surface-pixel rectangles over the scene, before frame finalization.
+    // Headless backends have nothing to draw. GPU backends preserve scene state.
+    virtual void DrawOverlay(const PhonepadRect* /*rects*/, int /*count*/,
+                             int /*width*/, int /*height*/) {}
+    // Pre-rendered glyphs only. Coordinates are presented-output pixels.
+    virtual bool BitmapTextSupported() const { return false; }
+    virtual unsigned TextureGeneration() const { return 0; }
+    virtual void CaptureTextView() {}
+    virtual bool ProjectTextAnchor(float, float, float, int, int, float&, float&, float&) const { return false; }
+    // The active camera's view (captured with CaptureTextView) and projection,
+    // column-major. Read only by the 3D object picker while it is open
+    // (engine/object_picker.hpp); false when the backend has no camera.
+    virtual bool CameraMatrices(float* /*view16*/, float* /*proj16*/) const { return false; }
+    virtual void DrawGlyphs(const bitmaptext::Quad*, int, int, int, RBTextureHandle,
+                            bool, float = 0, float = 0, float = 0) {}
+
+    // ---- textures (D4/O3 of docs/plans/2026-09-20-macos-metal-renderer.md) --
+    //
+    // PixelMap used to own a GLuint and call glGenTextures/glTexImage2D
+    // directly, which welded shared code to GL and uploaded into the no-op GL
+    // stubs on macOS. Ownership now sits behind this seam: PixelMap holds an
+    // opaque handle and the backend decides what it is and how it is filled.
+    //
+    // Sampler policy (wrap, filtering) is deliberately the BACKEND's business,
+    // not the caller's — it used to be inlined in pixelmap.cc next to the
+    // upload, which is why GFX_ZBUFFER leaked into a pixel container.
+    //
+    // Creation is by design all-at-once rather than create-then-upload: the
+    // pixels are needed to build an MTLTexture anyway, and it makes the handle
+    // lazy, so PixelMaps that never become textures (CPU-only maps, and
+    // sub-maps that delegate to a parent) never allocate a GPU object at all.
+    // Returns NULL on failure, which callers must tolerate.
+    virtual RBTextureHandle CreateTexture(int width, int height,
+                                          RBTextureFormat format,
+                                          const void* pixels) = 0;
+
+    // Releases a handle from CreateTexture. NULL is a no-op, so callers do not
+    // need to guard — which is what makes the zero-initialised handle safe in
+    // ~PixelMap, where the old code passed an uninitialised GLuint to
+    // glDeleteTextures for every sub-pixelmap.
+    virtual void DestroyTexture(RBTextureHandle handle) = 0;
+
+    // Debug-bridge hot reload: recompile the backend's shader program from
+    // the given GLSL sources. Returns true on success; on failure leaves the
+    // current program live and writes the GL info-log into log_out.
+    // Default no-op base impl: backends without a shader program return
+    // false with an explanatory log.
+    virtual bool ReloadProgram(const char* /*vert*/, const char* /*frag*/,
+                               std::string& log_out)
+    {
+        log_out = "backend has no shader program to reload";
+        return false;
+    }
+
+    // Level-load prewarm (a level's Level Object "Prewarm No Palette
+    // Program"): create now the program the GL backend otherwise links on the
+    // first wholly ordinary opaque textured batch, so its cold compile lands
+    // in the level transition instead of in play. Once per GL context; a
+    // context created later relinks it lazily. Backends without that program
+    // do nothing.
+    virtual void PrepareNoPaletteProgram() {}
+
+    // ---- static meshes (E3 phase 1, gfx/glpipeline/static_mesh.cc) --------
+    //
+    // A RenderObject3D whose geometry does not change is recorded once (the
+    // exact DrawTriangle calls the eight renderers make), uploaded once, and
+    // then drawn each frame by naming which of its faces survived the cull.
+    // Backends that do not implement this return false from
+    // StaticMeshSupported (the default), and the caller keeps using
+    // DrawTriangle, so Metal and the headless stub need no change.
+    virtual bool StaticMeshSupported() const { return false; }
+
+    // Packs and uploads `count` triangles. Returns NULL on failure or when
+    // unsupported; the caller then streams the mesh as before.
+    virtual RBStaticMeshHandle CreateStaticMesh(const RBStaticTriangle* /*triangles*/, int /*count*/)
+    { return NULL; }
+
+    // Releases a handle (NULL is a no-op). Safe after a lost context: the
+    // backend frees its bookkeeping without touching the dead GL objects.
+    virtual void DestroyStaticMesh(RBStaticMeshHandle /*mesh*/) {}
+
+    // False once the GPU objects behind a handle are gone (Android surface
+    // loss); the caller destroys it and bakes again.
+    virtual bool StaticMeshLive(RBStaticMeshHandle /*mesh*/) const { return false; }
+
+    // Draw the listed triangles (indices into the array given to
+    // CreateStaticMesh, in submission order) exactly as if each had been passed
+    // to DrawTriangle under the current state with this texture and prelit
+    // flag, and had survived the cull: same batching, same flushes, same
+    // uniforms. The caller has already culled; `count` may be 0, in which case
+    // nothing is queued but the call still has DrawTriangle's state side
+    // effects on an opaque triangle (the compositing layer's opacity reset).
+    virtual void DrawStaticTriangles(RBStaticMeshHandle /*mesh*/, const unsigned* /*triangles*/, int /*count*/,
+                                     const PixelMap* /*texture*/, bool /*prelit*/) {}
+
+    // Bytes the backend holds for static meshes: GPU buffers, and main-RAM
+    // staging (the per-draw index list). For the frame counters.
+    virtual void StaticMeshBytes(size_t& gpu, size_t& cpu) const { gpu = 0; cpu = 0; }
+};
+
+// While a recorder is installed, RendererBackendGet() returns it instead of
+// the real backend. Used only to bake a static mesh: the renderers then run
+// their normal code and the recorder keeps what they submit. NULL restores the
+// real backend.
+void RendererBackendSetRecorder(RendererBackend* recorder);
+
+// Must match camera.cc's MAX_LIGHTS.
+constexpr int RB_MAX_LIGHTS = 3;
+
+RendererBackend& RendererBackendGet();
+
+#endif

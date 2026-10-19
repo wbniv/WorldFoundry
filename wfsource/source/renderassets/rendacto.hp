@@ -34,6 +34,10 @@
 
 //============================================================================
 
+#include <memory>
+#include <vector>
+#include <game/plant_growth.h>
+#include <renderassets/mesh_deformer.h>
 #include <pigsys/pigsys.hp>
 #include <iff/iffread.hp>
 #include <memory/memory.hp>
@@ -49,6 +53,8 @@
 
 //============================================================================
 
+class Color;
+
 class RenderActor
 {
 public:
@@ -57,6 +63,35 @@ public:
 	virtual void Render(RenderCamera& renderCamera, const PhysicalObject& physicalObject, const Clock& currentTime) = 0;
 	virtual void SetAnimationCycle(int cycle) = 0;
 	virtual bool GetHandle(const HandleID thisHandle, Vector3& position) const = 0;
+	// The mesh this actor draws, or NULL when it has none. Measurement only
+	// (E3 phase 0 mesh-stats report); nothing in the render path calls it.
+	virtual const RenderObject3D* GetRenderObject() const { return NULL; }
+	// Per-face material color override; default no-op for actors without a 3D mesh.
+	// RenderActor3D overrides to delegate into RenderObject3D::SetMaterialColor.
+	// (qbert cube consolidation, 2026-05-10.)
+	virtual void SetMaterialColor(int /*materialIdx*/, const Color& /*color*/) {}
+	// Per-actor non-uniform render scale; default no-op. RenderActor3D stores
+	// it and applies as a column-scale on the world matrix in Render().
+	// (qbert stretch-and-squash, 2026-05-10.)
+	virtual void SetActorScale(const Vector3& /*scale*/) {}
+	virtual void SetPlantGeometry(const plantgrowth::Chunk&, float, float, unsigned, bool, bool, bool) {}
+	// One generic deformer slot (docs/plans/2026-10-16-saltwater-seahorses.md, E0).
+	// time is level seconds, used by DFRM clip playback. Actors without a mesh
+	// have nothing to deform.
+	virtual DeformStatus Deform(DeformKind /*kind*/, const float* /*channels*/, int /*n*/, double /*time*/ = 0, const float* /*worldRotation*/ = nullptr) { return DeformStatus::NoMetadata; }
+	// Values the bound deformer publishes (DFRM: wrap centre, tail tip); returns the count.
+	virtual int DeformOutputs(float* /*out*/, int /*max*/) const { return 0; }
+	// The per-species entry points: adapters that pack their arguments as channels.
+	void SetJellyDeformation(float contraction, float phase, float pitchLag, float rollLag)
+		{ const float c[] = {contraction, phase, pitchLag, rollLag}; Deform(DeformKind::Jelly, c, 4); }
+	void SetFishDeformation(float phase, float amplitude)
+		{ const float c[] = {phase, amplitude}; Deform(DeformKind::Fish, c, 2); }
+	void SetSwimDeformation(float phase, float amplitude, float bend, float finPhase, float finAmplitude, float minX, float maxX)
+		{ const float c[] = {phase, amplitude, bend, finPhase, finAmplitude, minX, maxX}; Deform(DeformKind::Swim, c, 7); }
+	void SetFinDeformation(float phase, float amplitude, float sweep, float spread)
+		{ const float c[] = {phase, amplitude, sweep, spread}; Deform(DeformKind::Fin, c, 4); }
+	void SetLionPose(float phase, float drive, float turn, float gape, unsigned dark, unsigned light)
+		{ const float c[] = {phase, drive, turn, gape, float(dark), float(light)}; Deform(DeformKind::Lion, c, 6); }
 	void Validate() const;
 #if DO_VALIDATION
 	virtual void _Validate() const = 0;
@@ -94,12 +129,24 @@ public:
 	virtual void Render(RenderCamera& renderCamera, const PhysicalObject& physicalObject, const Clock& currentTime);
 	virtual void SetAnimationCycle(int cycle);
 	virtual bool GetHandle(const HandleID thisHandle, Vector3& position) const;
+	virtual const RenderObject3D* GetRenderObject() const { return &_object; }
+	virtual void SetMaterialColor(int materialIdx, const Color& color) { _object.SetMaterialColor(materialIdx, color); }
+	virtual void SetActorScale(const Vector3& scale) { _scale = scale; }
+	virtual void SetPlantGeometry(const plantgrowth::Chunk& chunk, float age, float phase, unsigned generation, bool sway, bool publish, bool textured);
+	virtual DeformStatus Deform(DeformKind kind, const float* channels, int n, double time = 0, const float* worldRotation = nullptr);
+	virtual int DeformOutputs(float* out, int max) const { return _deformer ? _deformer->Outputs(out, max) : 0; }
 #if DO_VALIDATION
 	virtual void _Validate() const;
 #endif
 protected:
 	RenderActor3D(Memory& memory, int vertexCount,Vertex3D* vertexList,int faceCount, TriFace* faceList, Material*  materials);
 	RenderObject3D _object;
+	Vector3 _scale = Vector3::one;
+	std::vector<Vertex3D> _plantVertices;
+	std::vector<TriFace> _plantFaces;
+	unsigned _plantGeneration=0;
+	int _plantBucket=-1;float _plantMaxBirth=0,_plantLastAge=-1,_plantLastPhase=-1;int _plantVisibleVertices=1;
+	std::unique_ptr<MeshDeformer> _deformer;	// the one slot; empty until a kind binds
 private:
 };
 
@@ -209,8 +256,6 @@ private:
 	Emitter _emitter;
 };
 
-//============================================================================
-#include "rendacto.hpi"
 //============================================================================
 #endif
 //============================================================================

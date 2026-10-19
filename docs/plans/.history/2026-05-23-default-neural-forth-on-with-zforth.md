@@ -1,0 +1,4 @@
+| Date | Change |
+|------|--------|
+| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/84418c7c) | docs(plans): Waves B–E of status sweep — stamp/accurate-ize the rest |
+| [2026-05-23](https://github.com/wbniv/WorldFoundry/commit/d074c098) | build(neural-forth): auto-ON when WF_FORTH_ENGINE=zforth (engine + editor) |

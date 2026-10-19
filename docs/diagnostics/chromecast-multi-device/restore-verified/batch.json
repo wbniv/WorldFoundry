@@ -1,0 +1,58 @@
+{
+  "id": "B-6b2f26d99587",
+  "owner": "50834354a173f73472469f04",
+  "targets": [
+    "chromecast-test-01",
+    "chromecast-test-02"
+  ],
+  "created": 1791158879.6784225,
+  "jobs": [
+    {
+      "id": "J-c0967ed1190e",
+      "owner": "50834354a173f73472469f04",
+      "accepted": 1791158879.6787636,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "app": "bomberman",
+        "workflow": "install",
+        "apk": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40.apk",
+        "device": "chromecast-test-01"
+      },
+      "device": "chromecast-test-01",
+      "generation": 75,
+      "cancel": 0,
+      "error": null,
+      "started": 1791158886.2883239,
+      "finished": 1791158901.936551,
+      "worker_pid": 549173,
+      "recovery_resolved": 0,
+      "installation": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40.apk",
+      "target": "chromecast-test-01"
+    },
+    {
+      "id": "J-fcf47177949b",
+      "owner": "50834354a173f73472469f04",
+      "accepted": 1791158879.6790295,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "app": "bomberman",
+        "workflow": "install",
+        "apk": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40.apk",
+        "device": "chromecast-test-02"
+      },
+      "device": "chromecast-test-02",
+      "generation": 25,
+      "cancel": 0,
+      "error": null,
+      "started": 1791158884.2401555,
+      "finished": 1791158925.8203173,
+      "worker_pid": 549131,
+      "recovery_resolved": 0,
+      "installation": "71d079d9c146a20cbdf4529df84bd61f87432915e687fa47f6d665e8c1cafd40.apk",
+      "target": "chromecast-test-02"
+    }
+  ],
+  "state": "completed"
+}

@@ -1,0 +1,168 @@
+{
+  "job": {
+    "id": "J-dec31a3f31b5",
+    "owner": "50834354a173f73472469f04",
+    "accepted": 1791265552.9106407,
+    "state": "running",
+    "phase": "connecting",
+    "request": {
+      "app": "aquarium",
+      "apk": "53423d846f8aa03edff9918de3d082bf869a892e67f3ecfc7cf4b2320aed6825.apk",
+      "duration": 3.0,
+      "validator": "plant-settings",
+      "workflow": "check",
+      "device": "chromecast-test-01"
+    },
+    "device": "chromecast-test-01",
+    "generation": 194,
+    "cancel": 0,
+    "error": null,
+    "started": 1791265552.9805272,
+    "finished": null,
+    "worker_pid": 1280782,
+    "recovery_resolved": 0,
+    "installation": null
+  },
+  "device": {
+    "id": "chromecast-test-01",
+    "serial": "2628105GN0GT7C",
+    "model": "Chromecast HD",
+    "device": "boreal",
+    "android": "14",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "tls",
+    "endpoint": "192.168.4.43:41277",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:57e3:5f71:591b:6993",
+      "fd5d:59ce:7438:1:5817:ea6d:792c:d2e5",
+      "fd5d:59ce:7438:1:7104:7f7e:6f75:edbe",
+      "fd5d:59ce:7438:1:581b:d19a:27a5:c4db",
+      "fd5d:59ce:7438:1:3b82:772d:8d07:d5f6",
+      "fd5d:59ce:7438:1:401f:2bff:fe13:98df",
+      "fe80::401f:2bff:fe13:98df"
+    ],
+    "generation": 194,
+    "last_seen": 1791265232.2769332,
+    "boot_id": "9ec069a1-861f-449a-a777-29554a2f1ed4",
+    "sdk": "34",
+    "reservation": null
+  },
+  "result": "needs-local-setup",
+  "error": "No unique advertised connection for expected serial; enable Wireless debugging on the TV",
+  "cleanup_verified": false,
+  "restoration": null,
+  "commands": [
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791265553.7546263,
+      "end": 1791265553.7579744,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791265554.2591972,
+      "end": 1791265554.262371,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791265554.7636614,
+      "end": 1791265554.7672877,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791265555.268411,
+      "end": 1791265555.2714071,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791265555.773076,
+      "end": 1791265555.7786636,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791265556.2808611,
+      "end": 1791265556.292147,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791265556.793742,
+      "end": 1791265556.7978702,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791265557.299169,
+      "end": 1791265557.3033142,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791265557.8044305,
+      "end": 1791265557.8076046,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791265558.308822,
+      "end": 1791265558.312429,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791265558.8137343,
+      "end": 1791265558.8170655,
+      "returncode": 0
+    }
+  ],
+  "finished": 1791265558.8177469,
+  "launcher": null,
+  "concurrent_jobs": [
+    "J-0079ed755a7a"
+  ]
+}

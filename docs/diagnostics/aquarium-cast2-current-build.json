@@ -1,0 +1,13 @@
+{
+  "apk": "/tmp/wf-cast2-current/aquarium.apk",
+  "apk_sha256": "79433b3c5e80625b13b4bf566e8fd941185affd62f779488ad30bab775f7c1d5",
+  "previous_apk_sha256": "eabc18940d8ab8ba7d62b71a05ab9607d8533d599d1153b4e64d291d5c751e2c",
+  "cd_sha256": "742adb3fcfd27f4444ae995760307f64cecc554e8e91c5aa96379af4f8f14ea8",
+  "native": {
+    "lib/arm64-v8a/libwf_game.so": "565c5eed2c66c5b115decf322bc0cf9aa628e693e851110736ea1406f6766dc3",
+    "lib/armeabi-v7a/libwf_game.so": "6ab5579c342b8cc4c69fe76a28af35710ce50fe3f00d267f7cd0dd04fc354043"
+  },
+  "build_log": "aquarium-cast2-gradle-build.txt",
+  "fps_default_enabled": true,
+  "scene": "planted-tank"
+}

@@ -1,0 +1,52 @@
+# Linux build-and-test image for World Foundry: the toolchain, the X11/GL headers
+# the Linux engine needs, and a private virtual display (Xvfb + Mesa llvmpipe), so
+# builds, ctest and the off-screen parity captures run in one reproducible place
+# instead of on a developer's host. Build it with `task linux-test-image`.
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      build-essential cmake ninja-build pkg-config xxd git rsync ca-certificates \
+      python3 python3-numpy python3-pil python3-xlib \
+      libx11-dev libgl1-mesa-dev libglu1-mesa-dev \
+      xvfb x11-xkb-utils mesa-utils libgl1-mesa-dri libglx-mesa0 \
+ && rm -rf /var/lib/apt/lists/*
+
+# Rust builds libwf_attr_edit.a (the runtime property core; offline, no crates).
+# Ubuntu 24.04's packaged cargo (1.75) cannot read this repo's Cargo.lock, so use a
+# pinned rustup toolchain (1.85.1, the version the wasm editor build already pins).
+# Its own layer, so changing it does not redo the apt layer above. The toolchain
+# lives in /opt (readable by any user); CARGO_HOME is per-run scratch.
+ENV RUSTUP_HOME=/opt/rustup
+RUN python3 -c "import urllib.request as u; u.urlretrieve('https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init', '/tmp/rustup-init')" \
+ && chmod +x /tmp/rustup-init \
+ && CARGO_HOME=/opt/cargo /tmp/rustup-init -y --profile minimal --default-toolchain 1.85.1 --no-modify-path \
+ && rm /tmp/rustup-init \
+ && chmod -R a+rX /opt/rustup /opt/cargo
+ENV PATH=/opt/cargo/bin:$PATH \
+    CARGO_HOME=/tmp/cargo
+
+# pytest for the Python tests (tests/test_*.py), and Node for the ones that run a
+# mockup's own JavaScript (tests/test_dfrm_export.py). Its own layer, like Rust.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3-pytest nodejs \
+ && rm -rf /var/lib/apt/lists/*
+
+# Debuggers, for backtraces and heap checks of a crash reproduced in this container
+# (no host installs). Its own layer, so adding it does not redo the layers above.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends gdb valgrind \
+ && rm -rf /var/lib/apt/lists/*
+
+# fontTools + Brotli: pyftsubset writes the phone page's WOFF2 subset of the UI font
+# (scripts/subset-phone-font.py, docs/plans/2026-10-17-settings-editor-font.md Phase 4).
+# Pinned so the subset is reproducible. Its own layer, like the ones above.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3-fonttools=4.46.0-1build2 python3-brotli=1.1.0-2build2 \
+ && rm -rf /var/lib/apt/lists/*
+
+# Software GL, so every run renders with the same rasteriser whatever the host GPU is.
+ENV LIBGL_ALWAYS_SOFTWARE=1 \
+    HOME=/tmp
+WORKDIR /src

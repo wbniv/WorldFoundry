@@ -1,0 +1,17 @@
+{
+  "level": "aquarium_jellyfish",
+  "animals": 6,
+  "actors": 35,
+  "profile": "remote",
+  "native_contraction_range": [
+    0.0,
+    1.0
+  ],
+  "opacity_materials": {
+    "bell": 0.22,
+    "margin_and_arms": 0.32,
+    "fringe": 0.12,
+    "internal_motifs": 0.72
+  },
+  "status": "PASS"
+}

@@ -1,0 +1,35 @@
+--- a/engine/stubs/runtime_diagnostics_adapter.cc
++++ b/engine/stubs/runtime_diagnostics_adapter.cc
+@@ -37,16 +37,14 @@
+         if(wfdiag::ActorGeneration(selected)!=request.actorGeneration){result.error="stale-actor";return result;}
+     }
+     result.selected=actorState(level,selected);
+-    auto* registry=wfprops::activeRegistry();
+-    // The selector's authored settings form has its own existing registry.
+-    if(!registry&&planted::state().selector)registry=&planted::previewProperties();
+-    auto& edit=planted::form().edit;
++    auto* registry=wfprops::host().registry();
++    auto& edit=wfprops::host().form.edit;
+     const wfprops::Object* object=nullptr;
+     if(registry) {
+         if(request.actor)object=registry->object(uint32_t(request.actor));
+         else if(edit.open&&edit.registry==registry)object=registry->object(edit.actor);
+         else if(selected)object=registry->object(uint32_t(selected->GetActorIndex()));
+-        if(!object&&!request.actor)object=registry->schema("PlantedTankSettings");
++        if(!object&&!request.actor){auto owners=registry->editableObjects();if(!owners.empty())object=registry->object(owners.front());}
+     }
+     if(object) {
+         auto& p=result.properties;p.available=true;p.actor=object->actor;p.generation=object->generation;
+@@ -85,9 +83,9 @@
+ }
+ void DebugServer_DiagnosticSimulation(){++state.step;wfdiag::Boundary(state);wfdiag::Route("game","awaiting-level-update");}
+ void DebugServer_DiagnosticPump(Level* level,bool suspended){
+-    const auto& ps=planted::state();state.suspended=suspended;state.paused=suspended||ps.modal||state.mode=="selector";
+-    state.modal=ps.modal?(ps.phone?"phone-form":planted::form().drawer?"keypad":"form"):"none";
+-    state.session=ps.modal?planted::form().edit.session:0;
++    const auto& settings=wfprops::host();state.suspended=suspended;state.paused=suspended||settings.modal||settings.waitingForRelease()||state.mode=="selector";
++    state.modal=settings.modal?(settings.picker?"object-picker":settings.phone?"phone-form":settings.form.drawer?"keypad":"form"):"none";
++    state.session=settings.modal?settings.session():0;
+     wfdiag::Pump(state,[&](const wfdiag::Request& request){return capture(level,request);});
+ }
+ #endif

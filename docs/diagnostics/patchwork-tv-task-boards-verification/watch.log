@@ -1,0 +1,9 @@
+J-6fe48e975a56: accepted {"pool": "chromecast-test", "app": "patchwork", "apk": "71d8872ea5886494da534dd1ced094c58b95b5106b180098a75fbf7af5bbc495.apk", "duration": 150.0, "workflow": "check"}
+J-6fe48e975a56: granted {"device": "chromecast-test-01", "generation": 23}
+J-6fe48e975a56: phase {"phase": "connecting"}
+J-6fe48e975a56: phase {"phase": "installing"}
+J-6fe48e975a56: phase {"phase": "installing"}
+J-6fe48e975a56: phase {"phase": "launching"}
+J-6fe48e975a56: phase {"phase": "restoring"}
+J-6fe48e975a56: completed {"error": null, "health": "ready"}
+J-6fe48e975a56: completed

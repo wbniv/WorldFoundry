@@ -1,0 +1,17 @@
+Test project /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/build-teleport
+    Start  8: cross_room_teleports
+1/4 Test  #8: cross_room_teleports .............   Passed    5.79 sec
+    Start  9: cross_room_teleports_mutation
+2/4 Test  #9: cross_room_teleports_mutation ....   Passed    5.88 sec
+    Start 20: wfmut_smoke
+3/4 Test #20: wfmut_smoke ......................   Passed    0.25 sec
+    Start 21: wfmut_bridge
+4/4 Test #21: wfmut_bridge .....................   Passed    3.13 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Label Time Summary:
+gl          =  15.04 sec*proc (4 tests)
+teleport    =  11.67 sec*proc (2 tests)
+
+Total Test time (real) =  15.05 sec

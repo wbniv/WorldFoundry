@@ -1,0 +1,52 @@
+{
+  "runs": [
+    {
+      "run": 1,
+      "frames": 698,
+      "interval_count": 698,
+      "fps": 59.939954820502926,
+      "refresh_ms": 16.683333,
+      "p50_ms": 16.683417,
+      "p90_ms": 16.696541,
+      "p95_ms": 16.702125,
+      "p99_ms": 16.717917,
+      "worst_ms": 16.805583,
+      "missed_refresh_percent": 0.0,
+      "duration_seconds": 12,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+    },
+    {
+      "run": 2,
+      "frames": 685,
+      "interval_count": 685,
+      "fps": 59.93980159622385,
+      "refresh_ms": 16.683333,
+      "p50_ms": 16.683417,
+      "p90_ms": 16.695792,
+      "p95_ms": 16.700625,
+      "p99_ms": 16.713084,
+      "worst_ms": 16.909334,
+      "missed_refresh_percent": 0.0,
+      "duration_seconds": 12,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+    },
+    {
+      "run": 3,
+      "frames": 674,
+      "interval_count": 674,
+      "fps": 59.93998195200207,
+      "refresh_ms": 16.683333,
+      "p50_ms": 16.683292,
+      "p90_ms": 16.696,
+      "p95_ms": 16.703875,
+      "p99_ms": 16.715292,
+      "worst_ms": 16.768084,
+      "missed_refresh_percent": 0.0,
+      "duration_seconds": 12,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#0"
+    }
+  ],
+  "median": {
+    "fps": 59.939954820502926
+  }
+}

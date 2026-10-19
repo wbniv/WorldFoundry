@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Adaptive-icon background behind the condo's full-bleed foreground
+         (scripts/gen-condo-android-art.py): unit 640's wall blue. -->
+    <color name="ic_launcher_background">#2C62A0</color>
+</resources>

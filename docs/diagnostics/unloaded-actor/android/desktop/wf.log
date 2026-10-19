@@ -1,0 +1,434 @@
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+audio: miniaudio v0.11.25 ready
+wf_game v0.4.1, Built:Oct  9 2026,00:40:31 by kts
+-L/tmp/t4-unloaded-autonomous/teleport_regression-standalone.iff
+--windowed
+argc = 3, commandIndex = 3
+Level=-1
+cerror:
+cwarn:
+cstats:
+wf_game Ver 0.4.1, Built:Oct  9 2026,00:40:31 by kts
+DBSTREAMS jolt: RegisterDefaultAllocator
+jolt: Factory
+jolt: RegisterTypes
+jolt: RunSelftest
+jolt: selftest ok (sphere fell to z=5.098)
+jolt: backend init
+jolt: backend ready (gravity -Z)
+jolt: init complete
+LMalloc of 412 not 8-byte aligned, rounding up
+LMalloc of 7620 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+Level::Level: leveldata= 0x74ea30534148, object count  = 22
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 150)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 12100)
+ASS closed without all data read (bytesLeft = 1948)
+PixelMap::Load: this = 0x74ea2d927de8
+PixelMap::Load: this = 0x74ea2d927e28
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+[Actor] idx=6 class=13 commonOff=2184 NumberOfLocalMailboxes=0
+this = 0x74ea2d92b1a0,setting _memory to 0x74ea2d92ae78
+DMalloc of 52 not 8-byte aligned, rounding up
+[Actor] idx=7 class=20 commonOff=2740 NumberOfLocalMailboxes=0
+[Actor] idx=8 class=16 commonOff=2184 NumberOfLocalMailboxes=0
+[Actor] idx=9 class=22 commonOff=3000 NumberOfLocalMailboxes=6
+[Actor] idx=10 class=3 commonOff=2184 NumberOfLocalMailboxes=0
+[Actor] idx=11 class=3 commonOff=2184 NumberOfLocalMailboxes=0
+[Actor] idx=12 class=6 commonOff=2184 NumberOfLocalMailboxes=0
+[Actor] idx=13 class=23 commonOff=2184 NumberOfLocalMailboxes=0
+[Actor] idx=14 class=6 commonOff=2184 NumberOfLocalMailboxes=0
+[Actor] idx=15 class=23 commonOff=2184 NumberOfLocalMailboxes=0
+[Actor] idx=16 class=6 commonOff=2184 NumberOfLocalMailboxes=0
+[Actor] idx=17 class=23 commonOff=2184 NumberOfLocalMailboxes=0
+[Actor] idx=18 class=6 commonOff=2184 NumberOfLocalMailboxes=0
+[Actor] idx=19 class=23 commonOff=2184 NumberOfLocalMailboxes=0
+[Actor] idx=20 class=6 commonOff=3788 NumberOfLocalMailboxes=0
+[Actor] idx=21 class=6 commonOff=3832 NumberOfLocalMailboxes=0
+DMalloc of 22 not 8-byte aligned, rounding up
+DMalloc of 402 not 8-byte aligned, rounding up
+DMalloc of 412 not 8-byte aligned, rounding up
+DMalloc of 402 not 8-byte aligned, rounding up
+DMalloc of 4 not 8-byte aligned, rounding up
+DMalloc of 404 not 8-byte aligned, rounding up
+DMalloc of 404 not 8-byte aligned, rounding up
+DMalloc of 402 not 8-byte aligned, rounding up
+DMalloc of 4 not 8-byte aligned, rounding up
+DMalloc of 404 not 8-byte aligned, rounding up
+DMalloc of 404 not 8-byte aligned, rounding up
+DMalloc of 402 not 8-byte aligned, rounding up
+DMalloc of 6 not 8-byte aligned, rounding up
+DMalloc of 406 not 8-byte aligned, rounding up
+DMalloc of 406 not 8-byte aligned, rounding up
+DMalloc of 402 not 8-byte aligned, rounding up
+Walking from 0
+0->0
+forward
+2->1
+backward
+1->2
+Walking from 3
+3->0
+0->0, 1->2, 2->1
+1->2, 0->0
+2->1, 0->0
+3->0
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 150)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 1948)
+PixelMap::Load: this = 0x74ea2d927e68
+PixelMap::Load: this = 0x74ea2d927ea8
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 7396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 1636 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 1636 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 150)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 1948)
+PixelMap::Load: this = 0x74ea2d927f68
+PixelMap::Load: this = 0x74ea2d927fa8
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 1636 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 150)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 1948)
+PixelMap::Load: this = 0x74ea2d927ee8
+PixelMap::Load: this = 0x74ea2d927f28
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 1636 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+jolt: OptimizeBroadPhase done (0 static bodies)
+audio: MusicPlayer — soundfont not found: florestan-subset.sf2
+audio: sfx[0] not found: wflevels/qbert_practice/sfx/qbert_hop.wav
+audio: sfx[1] not found: wflevels/qbert_practice/sfx/qbert_land.wav
+audio: sfx[2] not found: wflevels/qbert_practice/sfx/qbert_fall.wav
+audio: sfx[3] not found: wflevels/qbert_practice/sfx/qbert_swear.wav
+audio: sfx[4] not found: wflevels/qbert_practice/sfx/qbert_round_clear.wav
+audio: sfx[5] not found: wflevels/qbert_practice/sfx/qbert_kill.wav
+audio: sfx[6] not found: wflevels/qbert_practice/sfx/qbert_disc.wav
+rest_api: listening on http://127.0.0.1:0
+[debug] listening on :7777
+Room::UpdateRoomContents: object 20 kind=6 pos=(-5,0,7) fell out of room 3 roompos=(0,0,0) roombox=(280,-30,-20)-(320,30,40); re-adding
+LMalloc of 1636 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+T4_ACTOR 1 7 0 0 -5 35 36 
+Room::UpdateRoomContents: object 20 kind=6 pos=(295,0,7) fell out of room 0 roompos=(0,0,0) roombox=(-20,-30,-20)-(20,30,40); re-adding
+T4_ACTOR 2 8 0 0 295 1 36 
+Room::UpdateRoomContents: object 20 kind=6 pos=(-5,0,7) fell out of room 3 roompos=(0,0,0) roombox=(280,-30,-20)-(320,30,40); re-adding
+T4_ACTOR 3 9 0 0 -5 35 36 
+Room::UpdateRoomContents: object 20 kind=6 pos=(295,0,7) fell out of room 0 roompos=(0,0,0) roombox=(-20,-30,-20)-(20,30,40); re-adding
+T4_ACTOR 4 8 0 0 295 1 36 
+Room::UpdateRoomContents: object 9 kind=22 pos=(300,0,7) fell out of room 0 roompos=(0,0,0) roombox=(-20,-30,-20)-(20,30,40); re-adding
+Room::UpdateRoomContents: object 6 kind=13 pos=(300,-15,5) fell out of room 0 roompos=(0,0,0) roombox=(-20,-30,-20)-(20,30,40); re-adding
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 150)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 1948)
+PixelMap::Load: this = 0x74ea2d927e68
+PixelMap::Load: this = 0x74ea2d927ea8
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 1636 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+Asset manager
+Perm
+LMalloc Dump: [named Room #4095]
+_flags = 0
+_memory = 0x74ea2dd340e0
+_endMemory = 0x74ea2ed340e0
+_currentFree = 0x74ea2dd4ed48
+_parentMemory = 0
+109672/16777216 free=16667544
+
+
+Room 0
+LMalloc Dump: [named Room #3]
+_flags = 0
+_memory = 0x74ea2ed340e0
+_endMemory = 0x74ea2f5340e0
+_currentFree = 0x74ea2ed38198
+_parentMemory = 0
+16568/8388608 free=8372040
+
+Room 1
+Room 2
+Room 3
+Room 4
+Room 5
+Room 6
+Room 7
+Room 8
+
+T4_ACTOR 5 1 300 300 295 36 36 
+Room::UpdateRoomContents: object 9 kind=22 pos=(0,0,7) fell out of room 3 roompos=(0,0,0) roombox=(280,-30,-20)-(320,30,40); re-adding
+Room::UpdateRoomContents: object 6 kind=13 pos=(0,-15,5) fell out of room 3 roompos=(0,0,0) roombox=(280,-30,-20)-(320,30,40); re-adding
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 150)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 1948)
+PixelMap::Load: this = 0x74ea2d927e68
+PixelMap::Load: this = 0x74ea2d927ea8
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 1636 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 150)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 1948)
+PixelMap::Load: this = 0x74ea2d927f68
+PixelMap::Load: this = 0x74ea2d927fa8
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 1636 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 150)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 1948)
+PixelMap::Load: this = 0x74ea2d927ee8
+PixelMap::Load: this = 0x74ea2d927f28
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 1636 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+Asset manager
+Perm
+LMalloc Dump: [named Room #4095]
+_flags = 0
+_memory = 0x74ea2dd340e0
+_endMemory = 0x74ea2ed340e0
+_currentFree = 0x74ea2dd4ed48
+_parentMemory = 0
+109672/16777216 free=16667544
+
+
+Room 0
+LMalloc Dump: [named Room #0]
+_flags = 0
+_memory = 0x74ea2ed340e0
+_endMemory = 0x74ea2f5340e0
+_currentFree = 0x74ea2ed38198
+_parentMemory = 0
+16568/8388608 free=8372040
+
+Room 1
+LMalloc Dump: [named Room #2]
+_flags = 0
+_memory = 0x74ea2f5340e0
+_endMemory = 0x74ea2fd340e0
+_currentFree = 0x74ea2f538198
+_parentMemory = 0
+16568/8388608 free=8372040
+
+Room 2
+LMalloc Dump: [named Room #1]
+_flags = 0
+_memory = 0x74ea2fd340e0
+_endMemory = 0x74ea305340e0
+_currentFree = 0x74ea2fd38198
+_parentMemory = 0
+16568/8388608 free=8372040
+
+Room 3
+Room 4
+Room 5
+Room 6
+Room 7
+Room 8
+
+T4_ACTOR 6 4 0 0 295 0 37 
+Room::UpdateRoomContents: object 20 kind=6 pos=(-5,0,7) fell out of room 3 roompos=(0,0,0) roombox=(280,-30,-20)-(320,30,40); re-adding
+T4_ACTOR 7 7 0 0 -5 35 36 
+Room::UpdateRoomContents: object 20 kind=6 pos=(295,0,7) fell out of room 0 roompos=(0,0,0) roombox=(-20,-30,-20)-(20,30,40); re-adding
+T4_ACTOR 8 8 0 0 295 1 36 
+Room::UpdateRoomContents: object 20 kind=6 pos=(-5,0,7) fell out of room 3 roompos=(0,0,0) roombox=(280,-30,-20)-(320,30,40); re-adding
+T4_ACTOR 9 7 0 0 -5 36 37 
+Room::UpdateRoomContents: object 20 kind=6 pos=(295,0,7) fell out of room 0 roompos=(0,0,0) roombox=(-20,-30,-20)-(20,30,40); re-adding
+T4_ACTOR 10 8 0 0 295 1 37 
+Room::UpdateRoomContents: object 20 kind=6 pos=(-5,0,7) fell out of room 3 roompos=(0,0,0) roombox=(280,-30,-20)-(320,30,40); re-adding
+T4_ACTOR 11 9 0 0 -5 36 37 
+Room::UpdateRoomContents: object 20 kind=6 pos=(295,0,7) fell out of room 0 roompos=(0,0,0) roombox=(-20,-30,-20)-(20,30,40); re-adding
+T4_ACTOR 12 8 0 0 295 1 36 
+Room::UpdateRoomContents: object 20 kind=6 pos=(-5,0,7) fell out of room 3 roompos=(0,0,0) roombox=(280,-30,-20)-(320,30,40); re-adding
+T4_ACTOR 13 7 0 0 -5 35 36 
+Room::UpdateRoomContents: object 20 kind=6 pos=(295,0,7) fell out of room 0 roompos=(0,0,0) roombox=(-20,-30,-20)-(20,30,40); re-adding
+T4_ACTOR 14 8 0 0 295 1 36 
+Room::UpdateRoomContents: object 20 kind=6 pos=(-5,0,7) fell out of room 3 roompos=(0,0,0) roombox=(280,-30,-20)-(320,30,40); re-adding
+T4_ACTOR 15 9 0 0 -5 35 36 
+Room::UpdateRoomContents: object 20 kind=6 pos=(295,0,7) fell out of room 0 roompos=(0,0,0) roombox=(-20,-30,-20)-(20,30,40); re-adding
+T4_ACTOR 16 8 0 0 295 1 36 
+Room::UpdateRoomContents: object 9 kind=22 pos=(300,0,7) fell out of room 0 roompos=(0,0,0) roombox=(-20,-30,-20)-(20,30,40); re-adding
+Room::UpdateRoomContents: object 6 kind=13 pos=(300,-15,5) fell out of room 0 roompos=(0,0,0) roombox=(-20,-30,-20)-(20,30,40); re-adding
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 150)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 1948)
+PixelMap::Load: this = 0x74ea2d927e68
+PixelMap::Load: this = 0x74ea2d927ea8
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 1636 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+Asset manager
+Perm
+LMalloc Dump: [named Room #4095]
+_flags = 0
+_memory = 0x74ea2dd340e0
+_endMemory = 0x74ea2ed340e0
+_currentFree = 0x74ea2dd4ed48
+_parentMemory = 0
+109672/16777216 free=16667544
+
+
+Room 0
+LMalloc Dump: [named Room #3]
+_flags = 0
+_memory = 0x74ea2ed340e0
+_endMemory = 0x74ea2f5340e0
+_currentFree = 0x74ea2ed38198
+_parentMemory = 0
+16568/8388608 free=8372040
+
+Room 1
+Room 2
+Room 3
+Room 4
+Room 5
+Room 6
+Room 7
+Room 8
+
+T4_ACTOR 17 1 300 300 295 37 37 
+Room::UpdateRoomContents: object 9 kind=22 pos=(0,0,7) fell out of room 3 roompos=(0,0,0) roombox=(280,-30,-20)-(320,30,40); re-adding
+Room::UpdateRoomContents: object 6 kind=13 pos=(0,-15,5) fell out of room 3 roompos=(0,0,0) roombox=(280,-30,-20)-(320,30,40); re-adding
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 150)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 1948)
+PixelMap::Load: this = 0x74ea2d927e68
+PixelMap::Load: this = 0x74ea2d927ea8
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 1636 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 150)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 1948)
+PixelMap::Load: this = 0x74ea2d927f68
+PixelMap::Load: this = 0x74ea2d927fa8
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 1636 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 150)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 1948)
+PixelMap::Load: this = 0x74ea2d927ee8
+PixelMap::Load: this = 0x74ea2d927f28
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 1636 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+Asset manager
+Perm
+LMalloc Dump: [named Room #4095]
+_flags = 0
+_memory = 0x74ea2dd340e0
+_endMemory = 0x74ea2ed340e0
+_currentFree = 0x74ea2dd4ed48
+_parentMemory = 0
+109672/16777216 free=16667544
+
+
+Room 0
+LMalloc Dump: [named Room #0]
+_flags = 0
+_memory = 0x74ea2ed340e0
+_endMemory = 0x74ea2f5340e0
+_currentFree = 0x74ea2ed38198
+_parentMemory = 0
+16568/8388608 free=8372040
+
+Room 1
+LMalloc Dump: [named Room #2]
+_flags = 0
+_memory = 0x74ea2f5340e0
+_endMemory = 0x74ea2fd340e0
+_currentFree = 0x74ea2f538198
+_parentMemory = 0
+16568/8388608 free=8372040
+
+Room 2
+LMalloc Dump: [named Room #1]
+_flags = 0
+_memory = 0x74ea2fd340e0
+_endMemory = 0x74ea305340e0
+_currentFree = 0x74ea2fd38198
+_parentMemory = 0
+16568/8388608 free=8372040
+
+Room 3
+Room 4
+Room 5
+Room 6
+Room 7
+Room 8
+
+T4_ACTOR 18 4 0 0 295 0 36 
+Room::UpdateRoomContents: object 20 kind=6 pos=(-5,0,7) fell out of room 3 roompos=(0,0,0) roombox=(280,-30,-20)-(320,30,40); re-adding

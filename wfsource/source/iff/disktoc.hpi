@@ -62,7 +62,7 @@ operator<<(std::ostream& s, const DiskTOC& diskTOC)
 {
 	diskTOC.Validate();
 	s << "DiskTOC: Entries = " << diskTOC._tocEntries << std::endl;
-	for(int index=0;index<diskTOC._tocEntries;index++)
+	for(int index=0;index<diskTOC._tocEntries;++index)
 		s << "  Offset: " << diskTOC._toc[index]._offsetInDiskFile << ", size = " << diskTOC._toc[index]._size << std::endl;
 	return s;
 }

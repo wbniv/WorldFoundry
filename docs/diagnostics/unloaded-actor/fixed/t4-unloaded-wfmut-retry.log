@@ -1,0 +1,10 @@
+Test project /home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/build-teleport
+    Start 22: wfmut_bridge
+1/1 Test #22: wfmut_bridge .....................   Passed    3.18 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+gl    =   3.18 sec*proc (1 test)
+
+Total Test time (real) =   3.18 sec

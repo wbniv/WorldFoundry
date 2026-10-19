@@ -1,0 +1,93 @@
+{
+  "revision": "9f97f5dd5b2e1c437344743128ebfd77b5221ea2",
+  "variants": [
+    {
+      "kind": "release",
+      "population": "none",
+      "apk_sha256": "523642b9daf0a696cdc8e6923f08a6771514784855d1edeb6948bb18b61e0200",
+      "native_sha256": {
+        "lib/arm64-v8a/libwf_game.so": "e1abd73085c4e1e06c6c2c006c81f7c2f55f7ddaebf7fbacab66f70578d8bb46",
+        "lib/armeabi-v7a/libwf_game.so": "0d49a2b1197cc2f30be1db18bb522932f9f3605d0800a77555f7e0c23b7b0458"
+      },
+      "args": "--vram-width=2048\n--vram-height=1024\n--vram-slot-width=512\n--vram-slot-height=512\n--vram-perm-width=1024\n--vram-perm-height=1024\n",
+      "cd_sha256": "5f13cd901faf607d1abb3a6ec6980b88c3a026dc33e620d8f7bd4391c9a8c18c"
+    },
+    {
+      "kind": "release",
+      "population": "pair1",
+      "apk_sha256": "417b449ac6b700fff1889f091da8e8efc5fecaf770a7e5ed2723351c87cc3fdf",
+      "native_sha256": {
+        "lib/arm64-v8a/libwf_game.so": "e1abd73085c4e1e06c6c2c006c81f7c2f55f7ddaebf7fbacab66f70578d8bb46",
+        "lib/armeabi-v7a/libwf_game.so": "0d49a2b1197cc2f30be1db18bb522932f9f3605d0800a77555f7e0c23b7b0458"
+      },
+      "args": "--vram-width=2048\n--vram-height=1024\n--vram-slot-width=512\n--vram-slot-height=512\n--vram-perm-width=1024\n--vram-perm-height=1024\n",
+      "cd_sha256": "d5f62ee6fa715913eba8122b3f2283bcc385922e8f27a197a4a65fde1e6f0a14"
+    },
+    {
+      "kind": "release",
+      "population": "pair2",
+      "apk_sha256": "0847562d6645ba05fc37b9606c244e0127fad890baf3ef03b6f07a6213ed5708",
+      "native_sha256": {
+        "lib/arm64-v8a/libwf_game.so": "e1abd73085c4e1e06c6c2c006c81f7c2f55f7ddaebf7fbacab66f70578d8bb46",
+        "lib/armeabi-v7a/libwf_game.so": "0d49a2b1197cc2f30be1db18bb522932f9f3605d0800a77555f7e0c23b7b0458"
+      },
+      "args": "--vram-width=2048\n--vram-height=1024\n--vram-slot-width=512\n--vram-slot-height=512\n--vram-perm-width=1024\n--vram-perm-height=1024\n",
+      "cd_sha256": "bcfa73458ae70a132cc0474a92588be94cd5f804ade53a497e7a53bf1d868013"
+    },
+    {
+      "kind": "release",
+      "population": "pair6",
+      "apk_sha256": "9e41849e15842689dd8aab7ce1f1fba639661befdca304b5807347933e404d8b",
+      "native_sha256": {
+        "lib/arm64-v8a/libwf_game.so": "e1abd73085c4e1e06c6c2c006c81f7c2f55f7ddaebf7fbacab66f70578d8bb46",
+        "lib/armeabi-v7a/libwf_game.so": "0d49a2b1197cc2f30be1db18bb522932f9f3605d0800a77555f7e0c23b7b0458"
+      },
+      "args": "--vram-width=2048\n--vram-height=1024\n--vram-slot-width=512\n--vram-slot-height=512\n--vram-perm-width=1024\n--vram-perm-height=1024\n",
+      "cd_sha256": "430695e25a52386758f51d11d46f3d1ffedcf5155a5982cc936aee3942b76f1a"
+    },
+    {
+      "kind": "cpu",
+      "population": "none",
+      "apk_sha256": "ea267b0a32e78a4697c52406d42ef6f1d08fdc26c95e368cbff504dd182048f1",
+      "native_sha256": {
+        "lib/arm64-v8a/libwf_game.so": "e1abd73085c4e1e06c6c2c006c81f7c2f55f7ddaebf7fbacab66f70578d8bb46",
+        "lib/armeabi-v7a/libwf_game.so": "0d49a2b1197cc2f30be1db18bb522932f9f3605d0800a77555f7e0c23b7b0458"
+      },
+      "args": "--vram-width=2048\n--vram-height=1024\n--vram-slot-width=512\n--vram-slot-height=512\n--vram-perm-width=1024\n--vram-perm-height=1024\n--frame-profile\n",
+      "cd_sha256": "5f13cd901faf607d1abb3a6ec6980b88c3a026dc33e620d8f7bd4391c9a8c18c"
+    },
+    {
+      "kind": "cpu",
+      "population": "pair1",
+      "apk_sha256": "2856c99b08b0791b698d8c7da086f23030bf3afb0a5519aabe37297d2dbd5d77",
+      "native_sha256": {
+        "lib/arm64-v8a/libwf_game.so": "e1abd73085c4e1e06c6c2c006c81f7c2f55f7ddaebf7fbacab66f70578d8bb46",
+        "lib/armeabi-v7a/libwf_game.so": "0d49a2b1197cc2f30be1db18bb522932f9f3605d0800a77555f7e0c23b7b0458"
+      },
+      "args": "--vram-width=2048\n--vram-height=1024\n--vram-slot-width=512\n--vram-slot-height=512\n--vram-perm-width=1024\n--vram-perm-height=1024\n--frame-profile\n",
+      "cd_sha256": "d5f62ee6fa715913eba8122b3f2283bcc385922e8f27a197a4a65fde1e6f0a14"
+    },
+    {
+      "kind": "cpu",
+      "population": "pair2",
+      "apk_sha256": "eda2300c58a839a8a0db52a35b2d088f61ec13859faaab874e7a83e62f64aacb",
+      "native_sha256": {
+        "lib/arm64-v8a/libwf_game.so": "e1abd73085c4e1e06c6c2c006c81f7c2f55f7ddaebf7fbacab66f70578d8bb46",
+        "lib/armeabi-v7a/libwf_game.so": "0d49a2b1197cc2f30be1db18bb522932f9f3605d0800a77555f7e0c23b7b0458"
+      },
+      "args": "--vram-width=2048\n--vram-height=1024\n--vram-slot-width=512\n--vram-slot-height=512\n--vram-perm-width=1024\n--vram-perm-height=1024\n--frame-profile\n",
+      "cd_sha256": "bcfa73458ae70a132cc0474a92588be94cd5f804ade53a497e7a53bf1d868013"
+    },
+    {
+      "kind": "cpu",
+      "population": "pair6",
+      "apk_sha256": "3a603d804f169784354b389549c10b439ff2c02bfa9f8fce36d204e15e7bb0d6",
+      "native_sha256": {
+        "lib/arm64-v8a/libwf_game.so": "e1abd73085c4e1e06c6c2c006c81f7c2f55f7ddaebf7fbacab66f70578d8bb46",
+        "lib/armeabi-v7a/libwf_game.so": "0d49a2b1197cc2f30be1db18bb522932f9f3605d0800a77555f7e0c23b7b0458"
+      },
+      "args": "--vram-width=2048\n--vram-height=1024\n--vram-slot-width=512\n--vram-slot-height=512\n--vram-perm-width=1024\n--vram-perm-height=1024\n--frame-profile\n",
+      "cd_sha256": "430695e25a52386758f51d11d46f3d1ffedcf5155a5982cc936aee3942b76f1a"
+    }
+  ]
+}

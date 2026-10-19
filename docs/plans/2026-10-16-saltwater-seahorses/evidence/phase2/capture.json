@@ -1,0 +1,591 @@
+{
+  "level": "aquarium_plants",
+  "settings": {
+    "seed": 713,
+    "water": "saltwater",
+    "age": 150,
+    "speed": 0,
+    "textures": true,
+    "sway": true,
+    "random_entry": false
+  },
+  "vram": [
+    "--vram-width=2048",
+    "--vram-height=1024",
+    "--vram-slot-width=512",
+    "--vram-slot-height=512",
+    "--vram-perm-width=1024",
+    "--vram-perm-height=1024"
+  ],
+  "shots": [
+    {
+      "shot": "wide-0",
+      "time": 2.1,
+      "seahorses": [
+        {
+          "seahorse": 0,
+          "status": 0.0,
+          "tip": [
+            0.2854,
+            -0.0509,
+            -0.3843
+          ]
+        },
+        {
+          "seahorse": 1,
+          "status": 0.0,
+          "tip": [
+            0.1881,
+            0.0047,
+            -0.7195
+          ]
+        },
+        {
+          "seahorse": 2,
+          "status": 0.0,
+          "tip": [
+            0.2951,
+            0.0452,
+            -0.3579
+          ]
+        },
+        {
+          "seahorse": 3,
+          "status": 0.0,
+          "tip": [
+            0.1034,
+            -0.1842,
+            -0.783
+          ]
+        }
+      ]
+    },
+    {
+      "shot": "wide-1",
+      "time": 2.5,
+      "seahorses": [
+        {
+          "seahorse": 0,
+          "status": 0.0,
+          "tip": [
+            0.2853,
+            -0.0346,
+            -0.3897
+          ]
+        },
+        {
+          "seahorse": 1,
+          "status": 0.0,
+          "tip": [
+            0.0782,
+            -0.208,
+            -0.78
+          ]
+        },
+        {
+          "seahorse": 2,
+          "status": 0.0,
+          "tip": [
+            0.2969,
+            0.0449,
+            -0.3468
+          ]
+        },
+        {
+          "seahorse": 3,
+          "status": 0.0,
+          "tip": [
+            0.2735,
+            0.1138,
+            -0.6567
+          ]
+        }
+      ]
+    },
+    {
+      "shot": "wide-2",
+      "time": 2.9,
+      "seahorses": [
+        {
+          "seahorse": 0,
+          "status": 0.0,
+          "tip": [
+            0.2912,
+            0.0053,
+            -0.3805
+          ]
+        },
+        {
+          "seahorse": 1,
+          "status": 0.0,
+          "tip": [
+            0.26,
+            0.0361,
+            -0.7133
+          ]
+        },
+        {
+          "seahorse": 2,
+          "status": 0.0,
+          "tip": [
+            0.2993,
+            0.0153,
+            -0.3497
+          ]
+        },
+        {
+          "seahorse": 3,
+          "status": 0.0,
+          "tip": [
+            0.2098,
+            0.1397,
+            -0.6266
+          ]
+        }
+      ]
+    },
+    {
+      "shot": "wide-3",
+      "time": 3.3,
+      "seahorses": [
+        {
+          "seahorse": 0,
+          "status": 0.0,
+          "tip": [
+            0.2946,
+            0.0405,
+            -0.3624
+          ]
+        },
+        {
+          "seahorse": 1,
+          "status": 0.0,
+          "tip": [
+            0.2184,
+            0.1729,
+            -0.5968
+          ]
+        },
+        {
+          "seahorse": 2,
+          "status": 0.0,
+          "tip": [
+            0.2959,
+            -0.0252,
+            -0.3639
+          ]
+        },
+        {
+          "seahorse": 3,
+          "status": 0.0,
+          "tip": [
+            0.1173,
+            -0.1552,
+            -0.7736
+          ]
+        }
+      ]
+    },
+    {
+      "shot": "close-pair0-0",
+      "time": 7.7,
+      "seahorses": [
+        {
+          "seahorse": 0,
+          "status": 0.0,
+          "tip": [
+            0.2938,
+            -0.0337,
+            -0.3685
+          ]
+        },
+        {
+          "seahorse": 1,
+          "status": 0.0,
+          "tip": [
+            0.2367,
+            0.1815,
+            -0.5899
+          ]
+        },
+        {
+          "seahorse": 2,
+          "status": 0.0,
+          "tip": [
+            0.2923,
+            0.0157,
+            -0.3763
+          ]
+        },
+        {
+          "seahorse": 3,
+          "status": 0.0,
+          "tip": [
+            0.1574,
+            -0.0816,
+            -0.7557
+          ]
+        }
+      ]
+    },
+    {
+      "shot": "close-pair0-1",
+      "time": 8.1,
+      "seahorses": [
+        {
+          "seahorse": 0,
+          "status": 0.0,
+          "tip": [
+            0.2854,
+            -0.0509,
+            -0.3843
+          ]
+        },
+        {
+          "seahorse": 1,
+          "status": 0.0,
+          "tip": [
+            0.1881,
+            0.0047,
+            -0.7195
+          ]
+        },
+        {
+          "seahorse": 2,
+          "status": 0.0,
+          "tip": [
+            0.2951,
+            0.0452,
+            -0.3579
+          ]
+        },
+        {
+          "seahorse": 3,
+          "status": 0.0,
+          "tip": [
+            0.1034,
+            -0.1842,
+            -0.783
+          ]
+        }
+      ]
+    },
+    {
+      "shot": "close-pair0-2",
+      "time": 8.5,
+      "seahorses": [
+        {
+          "seahorse": 0,
+          "status": 0.0,
+          "tip": [
+            0.2853,
+            -0.0346,
+            -0.3897
+          ]
+        },
+        {
+          "seahorse": 1,
+          "status": 0.0,
+          "tip": [
+            0.0782,
+            -0.208,
+            -0.78
+          ]
+        },
+        {
+          "seahorse": 2,
+          "status": 0.0,
+          "tip": [
+            0.2969,
+            0.0449,
+            -0.3468
+          ]
+        },
+        {
+          "seahorse": 3,
+          "status": 0.0,
+          "tip": [
+            0.2735,
+            0.1138,
+            -0.6567
+          ]
+        }
+      ]
+    },
+    {
+      "shot": "close-pair0-3",
+      "time": 8.9,
+      "seahorses": [
+        {
+          "seahorse": 0,
+          "status": 0.0,
+          "tip": [
+            0.2912,
+            0.0053,
+            -0.3805
+          ]
+        },
+        {
+          "seahorse": 1,
+          "status": 0.0,
+          "tip": [
+            0.26,
+            0.0362,
+            -0.7133
+          ]
+        },
+        {
+          "seahorse": 2,
+          "status": 0.0,
+          "tip": [
+            0.2993,
+            0.0153,
+            -0.3497
+          ]
+        },
+        {
+          "seahorse": 3,
+          "status": 0.0,
+          "tip": [
+            0.2098,
+            0.1397,
+            -0.6266
+          ]
+        }
+      ]
+    },
+    {
+      "shot": "close-pair1-0",
+      "time": 13.3,
+      "seahorses": [
+        {
+          "seahorse": 0,
+          "status": 0.0,
+          "tip": [
+            0.2992,
+            0.0052,
+            -0.3525
+          ]
+        },
+        {
+          "seahorse": 1,
+          "status": 0.0,
+          "tip": [
+            0.2156,
+            -0.0523,
+            -0.7581
+          ]
+        },
+        {
+          "seahorse": 2,
+          "status": 0.0,
+          "tip": [
+            0.2867,
+            -0.0257,
+            -0.3887
+          ]
+        },
+        {
+          "seahorse": 3,
+          "status": 0.0,
+          "tip": [
+            0.2184,
+            0.1729,
+            -0.5968
+          ]
+        }
+      ]
+    },
+    {
+      "shot": "close-pair1-1",
+      "time": 13.7,
+      "seahorses": [
+        {
+          "seahorse": 0,
+          "status": 0.0,
+          "tip": [
+            0.2938,
+            -0.0337,
+            -0.3685
+          ]
+        },
+        {
+          "seahorse": 1,
+          "status": 0.0,
+          "tip": [
+            0.2367,
+            0.1815,
+            -0.5899
+          ]
+        },
+        {
+          "seahorse": 2,
+          "status": 0.0,
+          "tip": [
+            0.2923,
+            0.0157,
+            -0.3763
+          ]
+        },
+        {
+          "seahorse": 3,
+          "status": 0.0,
+          "tip": [
+            0.1574,
+            -0.0817,
+            -0.7558
+          ]
+        }
+      ]
+    },
+    {
+      "shot": "close-pair1-2",
+      "time": 14.1,
+      "seahorses": [
+        {
+          "seahorse": 0,
+          "status": 0.0,
+          "tip": [
+            0.2854,
+            -0.0509,
+            -0.3843
+          ]
+        },
+        {
+          "seahorse": 1,
+          "status": 0.0,
+          "tip": [
+            0.188,
+            0.0047,
+            -0.7195
+          ]
+        },
+        {
+          "seahorse": 2,
+          "status": 0.0,
+          "tip": [
+            0.2951,
+            0.0452,
+            -0.3579
+          ]
+        },
+        {
+          "seahorse": 3,
+          "status": 0.0,
+          "tip": [
+            0.1034,
+            -0.1842,
+            -0.783
+          ]
+        }
+      ]
+    },
+    {
+      "shot": "close-pair1-3",
+      "time": 14.5,
+      "seahorses": [
+        {
+          "seahorse": 0,
+          "status": 0.0,
+          "tip": [
+            0.2853,
+            -0.0346,
+            -0.3897
+          ]
+        },
+        {
+          "seahorse": 1,
+          "status": 0.0,
+          "tip": [
+            0.0782,
+            -0.208,
+            -0.78
+          ]
+        },
+        {
+          "seahorse": 2,
+          "status": 0.0,
+          "tip": [
+            0.2969,
+            0.0449,
+            -0.3468
+          ]
+        },
+        {
+          "seahorse": 3,
+          "status": 0.0,
+          "tip": [
+            0.2735,
+            0.1138,
+            -0.6567
+          ]
+        }
+      ]
+    }
+  ],
+  "seahorses": [
+    {
+      "seahorse": 0,
+      "sex": "f",
+      "body": 28,
+      "fins": 29,
+      "block": 1200,
+      "position": [
+        -3.58,
+        -0.95,
+        3.85
+      ],
+      "yaw": 0.0,
+      "clip": "rest_coil",
+      "clip_start": 0.0
+    },
+    {
+      "seahorse": 1,
+      "sex": "m",
+      "body": 30,
+      "fins": 31,
+      "block": 1300,
+      "position": [
+        -2.55,
+        -1.0,
+        3.55
+      ],
+      "yaw": 3.141592653589793,
+      "clip": "swim",
+      "clip_start": -0.4
+    },
+    {
+      "seahorse": 2,
+      "sex": "f",
+      "body": 32,
+      "fins": 33,
+      "block": 1400,
+      "position": [
+        4.25,
+        -0.95,
+        3.25
+      ],
+      "yaw": 3.141592653589793,
+      "clip": "rest_coil",
+      "clip_start": -1.3
+    },
+    {
+      "seahorse": 3,
+      "sex": "m",
+      "body": 34,
+      "fins": 35,
+      "block": 1500,
+      "position": [
+        2.42,
+        -1.0,
+        3.8
+      ],
+      "yaw": 0.0,
+      "clip": "swim",
+      "clip_start": -0.9
+    }
+  ],
+  "status": "captured",
+  "forth_errors": 0,
+  "dfrm_load_failures": 0
+}

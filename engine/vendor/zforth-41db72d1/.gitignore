@@ -1,0 +1,10 @@
+go
+*.d
+*.o
+*.swp
+*.swo
+# Root-anchored: match only the build-artifact binary named "zforth" at the
+# project root, not the src/zforth/ source directory.
+/zforth
+zforth.save
+.zforth.hist

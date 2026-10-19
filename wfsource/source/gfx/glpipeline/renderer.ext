@@ -1,0 +1,20 @@
+
+
+
+
+
+	
+	&RenderObject3D::RenderPoly3DFlatColorLit,
+	&RenderObject3D::RenderPoly3DGouraudColorLit,
+	&RenderObject3D::RenderPoly3DFlatTextureLit,
+	&RenderObject3D::RenderPoly3DGouraudTextureLit,
+
+	&RenderObject3D::RenderPoly3DFlatColorPreLit,
+	&RenderObject3D::RenderPoly3DGouraudColorPreLit,
+	&RenderObject3D::RenderPoly3DFlatTexturePreLit,
+	&RenderObject3D::RenderPoly3DGouraudTexturePreLit,
+
+
+
+
+

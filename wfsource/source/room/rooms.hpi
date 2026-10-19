@@ -38,7 +38,7 @@ LevelRooms::Validate() const
 	assert(ValidPtr(_rooms));
 	assert(_numRooms > 0);
    assert(ValidPtr(_roomSlotMap));
-   for(int index=0;index<_numRooms;index++)
+   for(int index=0;index<_numRooms;++index)
    {
       _rooms[index].Validate();
       if(_roomSlotMap[index] != ADJACENT_ROOM_NULL)

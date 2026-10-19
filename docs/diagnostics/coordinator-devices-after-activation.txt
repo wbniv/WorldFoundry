@@ -1,0 +1,2 @@
+chromecast-test-01: offline; Chromecast_HD; serial 2628105GN0GT7C; Android 14; ABI armeabi-v7a,armeabi; endpoint 192.168.4.43:41277; pools chromecast-test
+chromecast-test-02: offline; Chromecast; serial 26031HFDD67QH7; Android 12; ABI armeabi-v7a,armeabi; endpoint 192.168.4.46:5555; pools chromecast-test

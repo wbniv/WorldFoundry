@@ -33,8 +33,8 @@ class LevelMailboxes : public MailboxesWithStorage
 {
 public:
     LevelMailboxes(Level& level, Mailboxes* parent);
-   virtual Scalar ReadMailbox(long mailbox) const;
-   virtual void WriteMailbox(long mailbox, Scalar value); 
+   virtual Scalar ReadMailbox(int32 mailbox) const;
+   virtual void WriteMailbox(int32 mailbox, Scalar value); 
 private:
    Level& _level;
 };
@@ -43,8 +43,8 @@ class GameMailboxes : public MailboxesWithStorage
 {
 public:
     GameMailboxes(WFGame& game);
-   virtual Scalar ReadMailbox(long mailbox) const;
-   virtual void WriteMailbox(long mailbox, Scalar value); 
+   virtual Scalar ReadMailbox(int32 mailbox) const;
+   virtual void WriteMailbox(int32 mailbox, Scalar value); 
 private:
    WFGame& _game;
 };

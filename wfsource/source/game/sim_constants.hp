@@ -1,0 +1,15 @@
+#pragma once
+//============================================================================
+// sim_constants.hp — shared simulation tuning constants.
+//============================================================================
+
+#include <math/scalar.hp>
+
+// Maximum per-frame simulation delta-time. Clamp dt to <=100ms (a 10 Hz logical
+// frame-rate floor) so a host stall / pause-resume / GL hiccup can't hand the
+// simulation a multi-second step that flings actors. Applied at WFGame::StepFrame
+// (for the deltaTime handed back to hosts) and, authoritatively, inside
+// Level::update (which covers EVERY caller). One constant keeps the two sites in
+// sync. (Display::MeasureDelta's looser 200ms wall-clock cap is a separate layer.)
+// See docs/plans/2026-05-18-engine-frame-step-api.md.
+#define kMaxSimDeltaSeconds SCALAR_CONSTANT(0.1)

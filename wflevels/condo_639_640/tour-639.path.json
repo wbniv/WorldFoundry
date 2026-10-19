@@ -1,0 +1,192 @@
+{
+ "_comment": "Guided tour of every 639-owned (blue) room. Straight axis-aligned legs between waypoints; a waypoint with a `room` label is a hold there. The tour build starts the project-room glass door closed; `action: open-project-door` stops beside the glass panels and waits for the two-second opening before the route crosses the clear middle bay to the patio, then enters the guest bedroom. Each move leg is a servo compiled into the player's Forth by blender_create_condo.py (CONDO_TOUR=…). Pace: ground speed ≈ accel/(30·decel). docs/plans/2026-09-19-condo-639-tour-video.md A waypoint's `hold` overrides hold_seconds: the main patio holds 5 s for its stationary skyline pan, the recessed patio holds 1 s, and the master-bedroom window holds 5 s for its pan.",
+ "spawn": [
+  4.66,
+  -14.5,
+  0.3
+ ],
+ "accel": 260,
+ "hold_seconds": 0.5,
+ "waypoints": [
+  {
+   "at": [
+    4.66,
+    -12.0
+   ],
+   "room": "639-kitchen"
+  },
+  {
+   "at": [
+    4.66,
+    -13.9
+   ]
+  },
+  {
+   "at": [
+    2.6,
+    -13.9
+   ]
+  },
+  {
+   "at": [
+    1.0,
+    -13.9
+   ],
+   "room": "639-bath-S"
+  },
+  {
+   "at": [
+    2.6,
+    -13.9
+   ]
+  },
+  {
+   "at": [
+    4.35,
+    -13.9
+   ]
+  },
+  {
+   "at": [
+    4.35,
+    -5.0
+   ],
+   "room": "639-project-rm"
+  },
+  {
+   "at": [
+    7.25,
+    -5.0
+   ]
+  },
+  {
+   "at": [
+    7.25,
+    -2.55
+   ],
+   "action": "open-project-door"
+  },
+  {
+   "at": [
+    5.8,
+    -2.55
+   ]
+  },
+  {
+   "at": [
+    5.8,
+    -1.0
+   ]
+  },
+  {
+   "at": [
+    6.6,
+    -1.0
+   ],
+   "room": "639-patio",
+   "hold": 5.0
+  },
+  {
+   "at": [
+    3.25,
+    -1.0
+   ],
+   "room": "639-patio-recessed",
+   "hold": 1.0
+  },
+  {
+   "at": [
+    3.25,
+    -5.0
+   ],
+   "room": "639-guest-bed"
+  },
+  {
+   "at": [
+    0.7,
+    -5.0
+   ]
+  },
+  {
+   "at": [
+    0.7,
+    -1.0
+   ],
+   "room": "639-bath-N"
+  },
+  {
+   "at": [
+    0.7,
+    -5.0
+   ]
+  },
+  {
+   "at": [
+    3.25,
+    -5.0
+   ]
+  },
+  {
+   "at": [
+    3.25,
+    -9.1
+   ]
+  },
+  {
+   "at": [
+    -1.5,
+    -9.1
+   ],
+   "room": "640-room-2.9x3.3"
+  },
+  {
+   "at": [
+    -1.5,
+    -5.0
+   ]
+  },
+  {
+   "at": [
+    -7.0,
+    -5.0
+   ],
+   "room": "640-master-bed",
+   "hold": 5.0
+  },
+  {
+   "at": [
+    -4.3,
+    -5.0
+   ]
+  },
+  {
+   "at": [
+    -4.3,
+    -1.0
+   ],
+   "room": "640-closet"
+  },
+  {
+   "at": [
+    -4.3,
+    -5.0
+   ]
+  },
+  {
+   "at": [
+    -0.75,
+    -5.0
+   ]
+  },
+  {
+   "at": [
+    -0.75,
+    -1.0
+   ],
+   "room": "640-bath"
+  }
+ ],
+ "decel": 3.0,
+ "tol_m": 0.22,
+ "stop_speed": 0.4
+}

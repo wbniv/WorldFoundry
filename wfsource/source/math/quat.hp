@@ -21,9 +21,6 @@ class Scalar;
 class Euler;
 class Quaternion;
 class Matrix34;
-#if defined( __PSX__ )
-class Matrix3t;
-#endif
 
 class binistream;
 #if defined( WRITER )
@@ -40,9 +37,6 @@ public:
 	INLINE Quaternion( const Scalar x, const Scalar y, const Scalar z, const Scalar w );
 	INLINE Quaternion( const Euler& euler );
 	INLINE Quaternion( const Matrix34& matrix34 );
-#if defined( __PSX__ )
-	INLINE Quaternion( const Matrix3t& matrix3t );
-#endif
 	// default copy constructor, assignment, and destructor are fine
 
 	// initialization methods
@@ -50,9 +44,6 @@ public:
 	void ConstructIdentity();
 	void ConstructEuler( const Euler& euler );
 	void ConstructMatrix34( const Matrix34& matrix34 );
-#if defined( __PSX__ )
-	void ConstructMatrix3t( const Matrix3t& matrix3t );
-#endif
 
 	// access/manipulate data members
 	INLINE void SetX( Scalar x );

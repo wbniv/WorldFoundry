@@ -173,6 +173,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7264e107f553ccae879d21fbea1d6724ac785e8c3bfc762137959b5802826ef3"
 
 [[package]]
+name = "wf_attr_edit"
+version = "0.1.0"
+dependencies = [
+ "wf_attr_schema",
+ "wf_attr_validate",
+ "wf_oad",
+]
+
+[[package]]
 name = "wf_attr_schema"
 version = "0.1.0"
 dependencies = [
@@ -207,6 +216,7 @@ name = "wf_py"
 version = "0.1.0"
 dependencies = [
  "pyo3",
+ "wf_attr_edit",
  "wf_attr_schema",
  "wf_attr_serialize",
  "wf_attr_validate",

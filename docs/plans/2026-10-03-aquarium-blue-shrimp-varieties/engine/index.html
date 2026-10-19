@@ -1,0 +1,72 @@
+<!doctype html><html lang="en"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Blue Shrimp — engine captures</title>
+<style>body{background:#09151f;color:#e2edf3;font:18px/1.6 system-ui;max-width:1100px;margin:auto;padding:32px}
+img,video{display:block;width:100%;height:auto;border-radius:12px;margin:16px 0 44px}a{color:#7acfff}p{color:#a4c1d0}
+pre{overflow:auto;background:#112333;padding:24px;border-radius:12px;font-size:15px}</style>
+<h1>Blue Shrimp · actual engine captures</h1><p>The independent second Aquarium level: 24 animated shrimp,
+plants, wood, moss and rocks. These images and the clip come from the running World Foundry engine.</p>
+<h2>Motion · 7 seconds</h2><p>Grazing colony, player movement and a backward tail flick. Fixed simulation steps encoded at 20 fps.</p>
+<video controls loop muted playsinline poster="grazing-close-up.png" src="shrimp-motion.mp4"></video>
+<h2>Whole tank</h2><img src="whole-tank.png" alt="Wide engine view of the planted blue shrimp aquarium">
+<h2>Grazing close-up</h2><img src="grazing-close-up.png" alt="Actual engine close-up of the articulated blue shrimp">
+<h2>Verification</h2><pre>{
+  "actor_count": 159,
+  "shrimp_count": 24,
+  "residents_moving_over_2s": [
+    1,
+    2,
+    3,
+    4,
+    7,
+    8,
+    9,
+    10,
+    13,
+    14,
+    18,
+    19,
+    22,
+    23
+  ],
+  "close_up_player_position": [
+    2.0,
+    -0.4,
+    0.965
+  ],
+  "right_move_m": 0.6000209999999999,
+  "wall_right": [
+    5.08,
+    0.0,
+    1.838034
+  ],
+  "wall_left": [
+    -5.034907,
+    -0.0,
+    1.550927
+  ],
+  "wall_up": [
+    1.132383,
+    -0.0,
+    4.314082
+  ],
+  "wall_down": [
+    0.5,
+    0.0,
+    1.011925
+  ],
+  "wall_away": [
+    0.545862,
+    0.73,
+    3.27051
+  ],
+  "wall_toward": [
+    0.5,
+    -0.73,
+    3.224011
+  ],
+  "dart_velocity_x": -1.708707,
+  "status": "PASS",
+  "desktop_debug_ms_per_frame_estimate": 108.80159437976545,
+  "cost_note": "Two frame counts with vsync disabled; desktop debug build, not a device benchmark."
+}</pre>
+<p><a href="../mockups.html">Earlier design mockups</a> · <a href="checks.json">Raw check results</a></p></html>

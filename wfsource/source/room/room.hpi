@@ -36,7 +36,7 @@ Room::Validate() const
 //	_physicalAttributes.Validate();
 
 #if DO_VALIDATION > 1
-	for(int index=0;index< MAX_ACTIVE_ROOMS; index++)
+	for(int index=0;index< MAX_ACTIVE_ROOMS; ++index)
 	{
 		if(adjacentRooms[index])
 		{
@@ -47,7 +47,7 @@ Room::Validate() const
 		}
 	}
 #endif
-   for(int listIndex=0;listIndex<_checkListEntries;listIndex++)
+   for(int listIndex=0;listIndex<_checkListEntries;++listIndex)
    {
       _objectLists[listIndex].Validate();
    }
@@ -66,7 +66,7 @@ INLINE std::ostream& operator << ( std::ostream& s, const Room& r )
 {
 	r.Validate();
 	s << "Room #: " << r._roomIndex << std::endl;
-   for(int listIndex=0;listIndex<r._checkListEntries;listIndex++)
+   for(int listIndex=0;listIndex<r._checkListEntries;++listIndex)
    {
       s << "	objectList[" << listIndex << "]: " << r._objectLists[listIndex] << std::endl;
    }

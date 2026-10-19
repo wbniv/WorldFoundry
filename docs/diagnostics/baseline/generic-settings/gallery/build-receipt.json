@@ -1,0 +1,30 @@
+{
+  "preset": "settings-gallery",
+  "blend": "/home/will/WorldFoundry-wbniv/wflevels/baseline/build/settings-gallery.blend",
+  "blendSha256": "fb5c27aff1e42063c14456dc9f6681ae62d1f85720f194c24b25db88dfb9a508",
+  "configSha256": "9c8a7cb20aa26fef6851e56ecef22e6d4339889fa53877e36f3072da7bf360ee",
+  "standalone": "/home/will/WorldFoundry-wbniv/wflevels/baseline/build/settings-gallery-standalone.iff",
+  "levelSha256": "9c9e948c7811dd266736f99c9a8fb8c7829e762d49653ccf248f18355375ebf6",
+  "cdSha256": "4dd09476d18445bc6df194a054b07036bc5b7d9772d9f1574815d31f56bf5b93",
+  "levelBuildChangesEngine": false,
+  "desktopExecutableSha256": "b44b1e0bd63d6ead039da6e57dec153afd8c038d8b3473d3acb69e2d9319e43d",
+  "toolHashes": {
+    "wftools/iffcomp-rs/target/release/iffcomp": "c822b0a76412378ccbb20b282a0d0eb25daa7351975e019832b03dc1218e8e61",
+    "wftools/levcomp-rs/target/release/levcomp": "270c027f071064d8ede761da20f595015840e3a6b392ad7700dcc1882e364070",
+    "wftools/textile-rs/target/release/textile": "8ea399fd40da55d0626858dacc7e228cc70db05dd1f512c72762c52147266c6c",
+    "wftools/oas2oad-rs/target/release/oas2oad": "b9e99d0625f53579fd2a296fb99914b14b9720f59644cab8ed56727a42cfb38b",
+    "wftools/wf_attr_edit/target/release/catalog": "9c1c6f49bf287aa7e182672f3c577aa7b1009735f4bbbf1e55d724baa14cf9cc"
+  },
+  "apk": "/home/will/WorldFoundry-wbniv/wflevels/baseline/build/baseline-0ec319be2e08c3ad.apk",
+  "apkSha256": "0ec319be2e08c3ad14ca6bfd0821324eabf17175b69d6e4f607816315dca4bc4",
+  "package": "org.worldfoundry.wf_game.baseline",
+  "runtimeApkSha256": "801cebf080a6a3f8561be5eb416a7b174968b0d04d981fb93fae79cac47d81e9",
+  "runtimeFiles": {
+    "classes.dex": "929ab981144ce8ee56ca1c4430ad55a038bad303a0b98c567333bec68809c2d5",
+    "classes2.dex": "d34f08e7298622db64bba9563816a7a2b95f15396b81891a30af370e080e592d",
+    "lib/arm64-v8a/libwf_game.so": "06592e49c51c7b42e490887b8cacb6311fb7e4af07f7bbdaaa4f84ce28166cd8",
+    "lib/armeabi-v7a/libwf_game.so": "931ca14f7640e962e1cec5647c8f2ebdadde340755d77f245cb5017181ea6f90"
+  },
+  "diagnostic": true,
+  "javaTextHost": true
+}

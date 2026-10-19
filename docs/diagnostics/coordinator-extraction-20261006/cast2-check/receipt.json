@@ -1,0 +1,65 @@
+{
+  "job": {
+    "id": "J-318f0efd36d9",
+    "owner": "c8a11cf5242d54a539d885fa",
+    "accepted": 1791263718.186847,
+    "state": "running",
+    "phase": "connecting",
+    "request": {
+      "device": "chromecast-test-02",
+      "app": "primes",
+      "apk": "32c0237d6bbad591edce019fb4cfe0d22f0e67bf5da8e22e9412c8d8c1483d26.apk",
+      "validator": "prime-study",
+      "workflow": "check"
+    },
+    "device": "chromecast-test-02",
+    "generation": 57,
+    "cancel": 0,
+    "error": null,
+    "started": 1791263718.2449713,
+    "finished": null,
+    "worker_pid": 1258550,
+    "recovery_resolved": 0,
+    "installation": null
+  },
+  "device": {
+    "id": "chromecast-test-02",
+    "serial": "26031HFDD67QH7",
+    "name": "Project Room",
+    "model": "Chromecast",
+    "device": "sabrina",
+    "android": "12",
+    "sdk": "31",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "legacy-tcp",
+    "endpoint": "192.168.4.56:5555",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "ready",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:5067:dd88:3e0c:6a5c",
+      "fd5d:59ce:7438:1:2555:eb86:7321:678",
+      "fe80::7156:9529:ebee:236b"
+    ],
+    "cast_udn": "5e305387-266b-84a6-639e-50805d1f06c2",
+    "generation": 57,
+    "last_seen": 1791263656.866152,
+    "boot_id": "7e3574a7-c2fa-4d99-b99f-09ff64981e94",
+    "reservation": null
+  },
+  "result": "needs-local-setup",
+  "error": "Registered Cast identity not found near last address; supply a verified new discovery hint",
+  "cleanup_verified": false,
+  "restoration": null,
+  "commands": [],
+  "finished": 1791263735.384982,
+  "launcher": null,
+  "concurrent_jobs": [
+    "J-77cad3b00e9f"
+  ]
+}

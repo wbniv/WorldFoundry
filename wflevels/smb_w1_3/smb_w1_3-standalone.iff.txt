@@ -1,0 +1,24 @@
+// smb_w1_3-standalone.iff.txt — L4-wrapped form of smb_w1_3 for wf_game -L.
+//
+// Build:
+//   bash wftools/wf_blender/build_level_binary.sh smb_w1_3
+//
+// NOTE: the W1-2 -> W1-3 -> W1-1 flag transition only works from a cd.iff bundle
+// (the meta-loop), NOT from -L (single-level, returns after one level). This
+// standalone wrapper is for eyeballing W1-3 in isolation; the transition is
+// exercised via `task build-cd-iff` + `task run`.
+//
+// Athletic tree-top level: ~70 actors (player, 2 ground strips, pit sensor, 14 tree-tops,
+// 3 koopas, 3 goombas, 2 paratroopas, 23 coins, ? block, movers, staircase, flagpole +
+// celebration, camera/director/matte/light/room). Pools mirror W1-1/W1-2 (generous).
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 200000l                  // actors + margin
+        'PERM' 500000l                  // player.iff + shared templates
+        'ROOM' 1000000l                 // tree-tops + flagpole + ground
+        'FLAG' 1l 1l                    // doomstick, bungeecam
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../smb_w1_3.iff" ]
+}

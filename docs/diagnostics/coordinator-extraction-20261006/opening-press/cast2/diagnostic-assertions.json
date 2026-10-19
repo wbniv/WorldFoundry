@@ -1,0 +1,6 @@
+{
+  "selector_snapshot": true,
+  "selector_routes_directions": true,
+  "selector_input_acknowledged": true,
+  "level_generation_changes": true
+}

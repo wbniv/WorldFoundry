@@ -1,0 +1,751 @@
+#include "../../../../engine/runtime_diagnostics.hpp"
+#include <game/plant_settings.h>
+//=============================================================================
+// hal/android/native_app_entry.cc: android_main + NativeActivity glue
+// Copyright ( c ) 2026 World Foundry Group
+// Part of the World Foundry 3D video game engine/production environment
+// for more information about World Foundry, see www.worldfoundry.org
+//==============================================================================
+// Phase 3 step 2. android_main() is the entry point called by
+// android_native_app_glue on the game thread. It:
+//
+//   1. Registers command / input handlers.
+//   2. Blocks until APP_CMD_INIT_WINDOW delivers an ANativeWindow,
+//      then creates the EGL context (gfx/gl/android_window.cc).
+//   3. Calls HALStart → PIGSMain, which runs the game loop.
+//   4. On every frame, Display::PageFlip → XEventLoop →
+//      WFAndroidPumpEvents (below) drains pending commands + input
+//      events with a zero-timeout ALooper_pollOnce so the game loop
+//      stays responsive without blocking.
+//
+// Lifecycle: APP_CMD_PAUSE / RESUME → HALNotifySuspend / Resume; the main
+// loop in game.cc already checks HALIsSuspended and skips render + PageFlip.
+// Input wiring beyond the stub (touch / gamepad → EJ_BUTTONF_*) lands in
+// Phase 3 step 4.
+//=============================================================================
+
+#include <dlfcn.h>
+#include <ucontext.h>
+#include <android/asset_manager.h>
+#include <android/configuration.h>
+#include <android/input.h>
+#include <android/keycodes.h>
+#include <android/log.h>
+#include <android/native_activity.h>
+#include <android/window.h>
+#include <android_native_app_glue.h>
+#include "property_text_input.h"
+
+#include <fcntl.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <sys/syscall.h>
+#include <sys/uio.h>
+#include <unistd.h>
+
+#include <time.h>
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <string>
+#include <vector>
+
+#include <hal/hal.h>
+#include <hal/lifecycle.h>
+#include <pigsys/pigsys.hp>
+#include <hal/android/wf_android_export.hp>
+#include <game/level_menu.h>   // Back: selected level -> selector -> exit
+#include <hal/phonepad/phonepad.h>
+#include <hal/phonepad/phonepad_overlay.h>
+#include <hal/android/touch_controls.h>
+
+extern "C" void _HALSetJoystickButtons(joystickButtonsF joystickButtons);
+
+extern int _halWindowWidth;
+extern int _halWindowHeight;
+
+extern "C" bool WFAndroidEglInit(struct ANativeWindow* window);
+extern "C" void WFAndroidEglTerm();
+extern "C" void WFAndroidSetHudEnabled(int enabled);
+
+#define WF_LOG_TAG "wf_game"
+#define WFLOG(fmt, ...) __android_log_print(ANDROID_LOG_INFO,  WF_LOG_TAG, fmt, ##__VA_ARGS__)
+#define WFLOGE(fmt, ...) __android_log_print(ANDROID_LOG_ERROR, WF_LOG_TAG, fmt, ##__VA_ARGS__)
+
+namespace
+{
+
+struct android_app* gApp         = nullptr;
+AAssetManager*      gAssetMgr    = nullptr;
+bool                gEglReady    = false;
+bool                gExitLoop    = false;
+
+// ---- diagnostic log -------------------------------------------------------
+// Redirect stdout/stderr into a file in the app's external-files dir
+// (/storage/emulated/0/Android/data/org.worldfoundry.wf_game/files/wf.log) so
+// crashes on a sideloaded device leave a trail the user can open with any
+// Files app. Also catches SIGSEGV / SIGABRT / SIGBUS to log where we died
+// before the OS tombstones us.
+
+static const char* kWfLogName = "wf.log";
+
+// Print one code address as "module+offset", the form addr2line wants against
+// the unstripped library (the APK's copy is stripped). Not async-signal-safe
+// (dladdr, stdio); this runs once, on the way to a tombstone.
+void PrintCodeAddress(const char* label, void* pc)
+{
+    Dl_info di;
+    if (pc && dladdr(pc, &di) && di.dli_fname && di.dli_fbase)
+        std::fprintf(stderr, "  %s %p %s+0x%lx\n", label, pc, di.dli_fname,
+                     (unsigned long)((uintptr_t)pc - (uintptr_t)di.dli_fbase));
+    else
+        std::fprintf(stderr, "  %s %p\n", label, pc);
+}
+
+// Hex-dump 48 bytes behind a register value when that memory is readable. process_vm_readv on our
+// own pid returns EFAULT for an unmapped address instead of faulting again inside the handler.
+void DumpMemoryAt(const char* label, uintptr_t value)
+{
+    if (value < 0x10000)
+        return;
+    unsigned char bytes[48];
+    struct iovec local  = { bytes, sizeof(bytes) };
+    struct iovec remote = { reinterpret_cast<void*>(value), sizeof(bytes) };
+    if (syscall(__NR_process_vm_readv, getpid(), &local, 1, &remote, 1, 0) != (long)sizeof(bytes))
+        return;
+    std::fprintf(stderr, "  [%s]=%p:", label, reinterpret_cast<void*>(value));
+    for (unsigned i = 0; i < sizeof(bytes); ++i)
+        std::fprintf(stderr, "%s%02x", (i % 16 == 0) ? "\n    " : " ", bytes[i]);
+    std::fprintf(stderr, "\n");
+}
+
+void CrashSigHandler(int sig, siginfo_t* info, void* ucontext)
+{
+    std::fprintf(stderr,
+                 "\n!!! wf_game crashed: signal=%d si_code=%d si_addr=%p !!!\n",
+                 sig, info ? info->si_code : 0, info ? info->si_addr : nullptr);
+    if (ucontext)
+    {
+        const ucontext_t* uc = static_cast<const ucontext_t*>(ucontext);
+#if defined(__arm__)
+        PrintCodeAddress("fault pc", reinterpret_cast<void*>(uc->uc_mcontext.arm_pc));
+        PrintCodeAddress("lr      ", reinterpret_cast<void*>(uc->uc_mcontext.arm_lr));
+        const unsigned long regs[] = { uc->uc_mcontext.arm_r0, uc->uc_mcontext.arm_r1, uc->uc_mcontext.arm_r2,
+            uc->uc_mcontext.arm_r3, uc->uc_mcontext.arm_r4, uc->uc_mcontext.arm_r5, uc->uc_mcontext.arm_r6,
+            uc->uc_mcontext.arm_r7, uc->uc_mcontext.arm_r8, uc->uc_mcontext.arm_r9, uc->uc_mcontext.arm_r10,
+            uc->uc_mcontext.arm_fp, uc->uc_mcontext.arm_ip, uc->uc_mcontext.arm_sp };
+        static const char* const names[] = { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "fp", "ip", "sp" };
+        std::fprintf(stderr, "registers:");
+        for (unsigned i = 0; i < sizeof(regs) / sizeof(regs[0]); ++i)
+            std::fprintf(stderr, " %s=%08lx", names[i], regs[i]);
+        std::fprintf(stderr, "\n");
+        for (unsigned i = 0; i + 1 < sizeof(regs) / sizeof(regs[0]); ++i)   // every register but sp
+            DumpMemoryAt(names[i], static_cast<uintptr_t>(regs[i]));
+#elif defined(__aarch64__)
+        PrintCodeAddress("fault pc", reinterpret_cast<void*>(uc->uc_mcontext.pc));
+        PrintCodeAddress("lr      ", reinterpret_cast<void*>(uc->uc_mcontext.regs[30]));
+#endif
+    }
+    std::fflush(stderr);
+    // Let the OS finish the job with a tombstone.
+    signal(sig, SIG_DFL);
+    raise(sig);
+}
+
+void InstallCrashHandlers()
+{
+    struct sigaction sa;
+    std::memset(&sa, 0, sizeof(sa));
+    sa.sa_flags     = SA_SIGINFO;
+    sa.sa_sigaction = CrashSigHandler;
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGSEGV, &sa, nullptr);
+    sigaction(SIGBUS,  &sa, nullptr);
+    sigaction(SIGABRT, &sa, nullptr);
+    sigaction(SIGILL,  &sa, nullptr);
+    sigaction(SIGFPE,  &sa, nullptr);
+}
+
+void OpenDiagnosticLog(struct android_app* app)
+{
+    if (!app->activity || !app->activity->externalDataPath) return;
+    mkdir(app->activity->externalDataPath, 0755);  // usually already exists
+    char logpath[512];
+    std::snprintf(logpath, sizeof(logpath), "%s/%s",
+                  app->activity->externalDataPath, kWfLogName);
+    int fd = open(logpath, O_WRONLY | O_CREAT | O_APPEND, 0644);
+    if (fd < 0) return;
+    dup2(fd, STDOUT_FILENO);
+    dup2(fd, STDERR_FILENO);
+    close(fd);
+    std::setvbuf(stdout, nullptr, _IOLBF, 0);
+    std::setvbuf(stderr, nullptr, _IOLBF, 0);
+    std::fprintf(stderr, "\n=== wf_game android_main (log → %s) ===\n", logpath);
+    __android_log_print(ANDROID_LOG_INFO, WF_LOG_TAG,
+                        "diagnostic log: %s", logpath);
+}
+
+// Bitmask of WF buttons currently held — combined gamepad + touch + phone
+// states are merged here and flushed to _HALSetJoystickButtons.
+joystickButtonsF    gGamepadButtons = 0;
+joystickButtonsF    gTouchButtons   = 0;
+androidtouch::State gTouchState;
+joystickButtonsF    gPhoneButtons   = 0;   // the phone controller (hal/phonepad), below
+
+// True when running on Google TV / Android TV (leanback). On TV there's no
+// touchscreen worth hit-testing and the on-screen d-pad is suppressed.
+bool                gIsTvMode       = false;
+
+constexpr uint32_t kDPadBits   = EJ_BUTTONF_LEFT | EJ_BUTTONF_RIGHT
+                               | EJ_BUTTONF_UP   | EJ_BUTTONF_DOWN;
+constexpr uint32_t kActionBits = EJ_BUTTONF_A | EJ_BUTTONF_B;
+
+void Emit()
+{
+    wfdiag::Receive("hardware", gGamepadButtons);
+    wfdiag::Receive("touch", gTouchButtons);
+    wfdiag::Receive("phone", gPhoneButtons);
+    _HALSetJoystickButtons(gGamepadButtons | gTouchButtons | gPhoneButtons);
+}
+
+// ---- The phone as a gamepad (docs/plans/2026-09-30-aquarium-chromecast.md, Phase E) ----
+// An app that ships assets/layout.json (aquarium, condo; not snowgoons) serves
+// assets/controller.html on its Wi-Fi address while resumed. The phone's mask is
+// a third input source OR-ed in Emit(); the server releases it on every kind of
+// disconnect. Polled once per frame from WFAndroidPumpEvents on this thread.
+
+phonepad::Server    gPhone;
+phonepad::Overlay   gPhoneOverlay;
+bool                gPhoneEnabled   = false;   // assets/layout.json present
+bool                gPhoneResumed   = false;   // between APP_CMD_RESUME and APP_CMD_PAUSE
+std::string         gPhonePage, gPhoneLayout, gPhonePin;
+int64_t             gPhoneRetryMs   = 0;       // next attempt to find a LAN address
+std::vector<PhonepadRect> gPhoneRects;
+std::vector<bitmaptext::Quad> gPhoneGlyphs;   // the overlay's text (game/ui_font.hp)
+
+int64_t NowMs()
+{
+    timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return int64_t(ts.tv_sec) * 1000 + ts.tv_nsec / 1000000;
+}
+
+void PhoneLog(const char* line) { WFLOG("%s", line); }
+
+bool ReadAsset(const char* name, std::string* out)
+{
+    if (!gAssetMgr) return false;
+    AAsset* a = AAssetManager_open(gAssetMgr, name, AASSET_MODE_BUFFER);
+    if (!a) return false;
+    const off_t len = AAsset_getLength(a);
+    const void* buf = AAsset_getBuffer(a);
+    if (buf && len > 0) out->assign(static_cast<const char*>(buf), size_t(len));
+    AAsset_close(a);
+    return buf && len > 0;
+}
+
+void PhoneInit()
+{
+    if (!gIsTvMode) { gPhoneEnabled=false; WFLOG("phone controller: off (local touchscreen)"); return; }
+    gPhoneEnabled = ReadAsset("layout.json", &gPhoneLayout) && ReadAsset("controller.html", &gPhonePage);
+    if (!gPhoneEnabled) { WFLOG("phone controller: off (no assets/layout.json)"); return; }
+    gPhonePin = phonepad::MakePin();          // one PIN per launch, kept across pause/resume
+    if (gPhonePin.empty()) { gPhoneEnabled = false; WFLOGE("phone controller: off (no random source)"); return; }
+    gPhone.SetLog(PhoneLog);
+    gPhone.SetCommandHandler([](const std::string& text){
+        uint64_t receipt=wfdiag::Receive("phone-command",0,0,0,1);
+        wfdiag::Route("phone-form","property-command-dispatched",receipt);
+        wfprops::host().command(text);
+        wfdiag::Consume("phone-form","property-command-dispatched",0,receipt);
+    });
+}
+
+// Listen on the Wi-Fi address (never 0.0.0.0, never a public address).
+void PhoneStart()
+{
+    if (!gIsTvMode || !gPhoneEnabled || gPhone.Running()) return;
+    gPhoneRetryMs = NowMs() + 3000;
+    uint32_t addr = 0;
+    if (!phonepad::DiscoverLanAddress(&addr))
+    {
+        WFLOG("phone controller: no network yet; retrying every 3 s");
+        return;
+    }
+    if (!phonepad::IsPrivateIPv4(addr) || (addr >> 24) == 127)
+    {
+        WFLOG("phone controller: %s is not a private LAN address; not listening",
+              phonepad::FormatIPv4(addr).c_str());
+        return;
+    }
+    phonepad::Config cfg;
+    cfg.bindAddr   = addr;
+    cfg.port       = phonepad::kDefaultPort;
+    cfg.pin        = gPhonePin;
+    cfg.pageHtml   = gPhonePage;
+    cfg.layoutJson = gPhoneLayout;
+    if (!gPhone.Start(cfg)) return;
+    const std::string url = phonepad::ControllerUrl(addr, gPhone.Port(), gPhonePin);
+    char hostPort[32];
+    std::snprintf(hostPort, sizeof(hostPort), "%s:%u", phonepad::FormatIPv4(addr).c_str(), unsigned(gPhone.Port()));
+    gPhoneOverlay.SetEndpoint(url, hostPort, gPhonePin);
+    WFLOG("phone controller: open %s (PIN %s)", url.c_str(), gPhonePin.c_str());
+}
+
+void PhoneStop()
+{
+    wfprops::host().phone=false;
+    if (!gPhoneEnabled) return;
+    gPhone.Stop();
+    gPhone.TakeEvents();
+    gPhoneOverlay.ClearEndpoint();
+    if (gPhoneButtons)
+    {
+        WFLOG("phone mask=0x0 (paused: every phone button released)");
+        gPhoneButtons = 0;
+        Emit();
+    }
+}
+
+void PhonePoll()
+{
+    if (!gPhoneEnabled) return;
+    const int64_t now = NowMs();
+    if (!gPhone.Running())
+    {
+        if (gPhoneResumed && now >= gPhoneRetryMs) PhoneStart();
+        return;
+    }
+    const joystickButtonsF m = gPhone.Poll(now);
+    wfprops::host().phone=gPhone.PhoneConnected();
+    static int64_t plantSent=0;
+    if(now-plantSent>=150){gPhone.SendText(wfprops::host().message());plantSent=now;}
+    const uint32_t ev = gPhone.TakeEvents();
+    if (ev) gPhoneOverlay.OnEvents(ev, now);
+    if (m != gPhoneButtons)
+    {
+        // One line per change, like the key-edge line below, so logcat shows what the phone held.
+        WFLOG("phone mask=0x%x", unsigned(m));
+        gPhoneButtons = m;
+        Emit();
+    }
+}
+
+// Joystick axes trigger LEFT/RIGHT/UP/DOWN when past this threshold — matches
+// Android's AGAMEPAD guideline. Separate from D-pad key events which fire as
+// discrete AKEYCODE_DPAD_* presses.
+constexpr float kJoystickThreshold = 0.5f;
+
+// ---- Touch hit-test ---------------------------------------------------------
+// Use the same density-aware, inset-safe geometry as the rendered HUD.
+// Motion coordinates are surface pixels with origin at the top left.
+
+androidtouch::Layout TouchLayout(int w,int h)
+{
+    float density=1;
+    if(gApp&&gApp->config) {
+        const int dpi=AConfiguration_getDensity(gApp->config);
+        if(dpi>0&&dpi<1000)density=float(dpi)/160;
+    }
+    float inset=0;
+    if(gApp&&gApp->contentRect.bottom>0&&gApp->contentRect.bottom<=_halWindowHeight)
+        inset=float(_halWindowHeight-gApp->contentRect.bottom);
+    return androidtouch::layout(w,h,density,inset);
+}
+
+void RecomputeTouchState(AInputEvent* event, bool clearOnUp)
+{
+    if(clearOnUp) {gTouchState.clear();gTouchButtons=0;return;}
+    const size_t n=AMotionEvent_getPointerCount(event);
+    const int raw=AMotionEvent_getAction(event),action=raw&AMOTION_EVENT_ACTION_MASK;
+    const int changed=(raw&AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)>>AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+    std::vector<androidtouch::Point> points;
+    for(size_t i=0;i<n;++i)points.push_back({AMotionEvent_getX(event,i),AMotionEvent_getY(event,i),AMotionEvent_getPointerId(event,i)});
+    const auto phase=(action==AMOTION_EVENT_ACTION_DOWN||action==AMOTION_EVENT_ACTION_POINTER_DOWN)
+        ? androidtouch::Action::Down : action==AMOTION_EVENT_ACTION_POINTER_UP
+        ? androidtouch::Action::Up : androidtouch::Action::Move;
+    gTouchButtons=gTouchState.update(TouchLayout(_halWindowWidth,_halWindowHeight),points.data(),points.size(),phase,changed);
+}
+
+uint32_t MapKeyCode(int32_t code)
+{
+    switch (code)
+    {
+        case AKEYCODE_DPAD_LEFT:       return EJ_BUTTONF_LEFT;
+        case AKEYCODE_DPAD_RIGHT:      return EJ_BUTTONF_RIGHT;
+        case AKEYCODE_DPAD_UP:         return EJ_BUTTONF_UP;
+        case AKEYCODE_DPAD_DOWN:       return EJ_BUTTONF_DOWN;
+        case AKEYCODE_BUTTON_A:        return EJ_BUTTONF_A;
+        case AKEYCODE_DPAD_CENTER:     return EJ_BUTTONF_A;   // Chromecast / Google TV remote's OK
+        case AKEYCODE_BUTTON_B:        return EJ_BUTTONF_B;
+        case AKEYCODE_BUTTON_X:        return EJ_BUTTONF_C;
+        case AKEYCODE_BUTTON_Y:        return EJ_BUTTONF_D;
+        case AKEYCODE_BUTTON_L1:       return EJ_BUTTONF_E;
+        case AKEYCODE_BUTTON_R1:       return EJ_BUTTONF_F;
+        case AKEYCODE_BUTTON_START:    return EJ_BUTTONF_G;
+        case AKEYCODE_BUTTON_SELECT:   return EJ_BUTTONF_H;
+        default:                       return 0;
+    }
+}
+
+void HandleAppCmd(struct android_app* app, int32_t cmd)
+{
+    switch (cmd)
+    {
+        case APP_CMD_INIT_WINDOW:
+            WFLOG("APP_CMD_INIT_WINDOW");
+            if (app->window)
+                gEglReady = WFAndroidEglInit(app->window);
+            break;
+
+        case APP_CMD_TERM_WINDOW:
+            WFLOG("APP_CMD_TERM_WINDOW");
+            WFAndroidEglTerm();
+            gEglReady = false;
+            break;
+
+        case APP_CMD_PAUSE:
+            WFLOG("APP_CMD_PAUSE");
+            gGamepadButtons=gTouchButtons=gPhoneButtons=0;gTouchState.clear();Emit();
+            wfprops::host().suspend();
+            HALNotifySuspend();
+            wfdiag::Focus(false);
+            wfdiag::Receive("lifecycle", 0, 0, 0, cmd);
+            wfdiag::Consume("android", "focus-loss", 0);
+            gPhoneResumed = false;
+            PhoneStop();            // listen only while resumed
+            break;
+
+        case APP_CMD_LOST_FOCUS:
+        case APP_CMD_GAINED_FOCUS:
+            // A native text dialog/IME can consume the release of the opening
+            // key. Never carry that held game input across the UI transition.
+            gGamepadButtons = gTouchButtons = gPhoneButtons = 0;
+            gTouchState.clear();
+            Emit();
+            break;
+
+        case APP_CMD_RESUME:
+            WFLOG("APP_CMD_RESUME");
+            HALNotifyResume();
+            wfdiag::Focus(true);
+            wfdiag::Receive("lifecycle", 0, 0, 0, cmd);
+            wfdiag::Consume("android", "focus-resume", 0);
+            gPhoneResumed = true;
+            PhoneStart();
+            break;
+
+        case APP_CMD_CONFIG_CHANGED:
+            if (app->config)
+            {
+                const int32_t uiMode = AConfiguration_getUiModeType(app->config);
+                gIsTvMode = (uiMode == ACONFIGURATION_UI_MODE_TYPE_TELEVISION);
+                if(!gIsTvMode) { PhoneStop(); gPhoneEnabled=false; }
+                else if(!gPhoneEnabled) { PhoneInit(); if(gPhoneResumed)PhoneStart(); }
+                WFAndroidSetHudEnabled(gIsTvMode ? 0 : 1);
+                WFLOG("APP_CMD_CONFIG_CHANGED: uiMode=%d (tv=%d)",
+                      uiMode, gIsTvMode ? 1 : 0);
+            }
+            break;
+
+        case APP_CMD_DESTROY:
+            WFLOG("APP_CMD_DESTROY");
+            gExitLoop = true;
+            break;
+
+        default:
+            break;
+    }
+}
+
+int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
+{
+    const int32_t type = AInputEvent_getType(event);
+
+    if (type == AINPUT_EVENT_TYPE_KEY)
+    {
+        const int32_t keyCode = AKeyEvent_getKeyCode(event);
+        const int32_t action  = AKeyEvent_getAction(event);
+        const uint32_t mask   = MapKeyCode(keyCode);
+        const uint32_t held = action == AKEY_EVENT_ACTION_DOWN ? (gGamepadButtons | mask)
+                            : action == AKEY_EVENT_ACTION_UP ? (gGamepadButtons & ~mask) : gGamepadButtons;
+        const uint64_t receipt = wfdiag::Receive("hardware", held,
+            action == AKEY_EVENT_ACTION_DOWN ? mask : 0,
+            action == AKEY_EVENT_ACTION_UP ? mask : 0, keyCode);
+        // One line per key edge (not per auto-repeat), so logcat shows whether a remote key
+        // arrived and what it mapped to: "key code=23 action=0 mask=0x...".
+        // Back dismisses the visible phone panel before navigating the game.
+        // Consume the entire press, including repeats, and hide once on release.
+        if(keyCode==AKEYCODE_BACK&&wfprops::host().modal){wfdiag::Consume(wfprops::host().form.drawer?"keypad":"form","back-intercepted",held,receipt);if(action==AKEY_EVENT_ACTION_UP)wfprops::host().back();return 1;}
+        if (keyCode == AKEYCODE_BACK && gPhoneOverlay.PanelVisible(NowMs()))
+        {
+            wfdiag::Consume("phone-panel", "back-intercepted", held, receipt);
+            if (action == AKEY_EVENT_ACTION_UP) gPhoneOverlay.OnBack(NowMs());
+            if (AKeyEvent_getRepeatCount(event) == 0)
+                WFLOG("key code=%d action=%d (Back: hides the phone panel)", keyCode, action);
+            return 1;
+        }
+        // With no panel, Back returns from a level; on its selector Back exits.
+        if (keyCode == AKEYCODE_BACK && levelmenu::MenuRunning())
+        {
+            wfdiag::Consume(levelmenu::SelectorVisible()?"selector":"game", "back-navigation", held, receipt);
+            if (action == AKEY_EVENT_ACTION_UP)
+            {
+                if (levelmenu::SelectorVisible())
+                {
+                    WFLOG("Back on selector: leaving the app");
+                    ANativeActivity_finish(gApp->activity);
+                }
+                else
+                {
+                    WFLOG("Back in level: returning to selector");
+                    levelmenu::RequestReturn();
+                }
+            }
+            return 1;
+        }
+        // Standalone apps keep Back's system meaning once the panel is hidden.
+        if (AKeyEvent_getRepeatCount(event) == 0)
+            WFLOG("key code=%d action=%d mask=0x%x%s", keyCode, action, mask,
+                  mask ? "" : " (unmapped, dropped)");
+        if (mask == 0) {wfdiag::Consume("android", "unmapped", held, receipt);return 0;}
+
+        if (action == AKEY_EVENT_ACTION_DOWN)      gGamepadButtons |=  mask;
+        else if (action == AKEY_EVENT_ACTION_UP)   gGamepadButtons &= ~mask;
+        Emit();
+        return 1;
+    }
+
+    if (type == AINPUT_EVENT_TYPE_MOTION)
+    {
+        const int32_t source = AInputEvent_getSource(event);
+
+        // Gamepad analog sticks. Android reports the left stick on AXIS_X /
+        // AXIS_Y and the D-pad hat on AXIS_HAT_X / AXIS_HAT_Y.
+        if (source & AINPUT_SOURCE_JOYSTICK)
+        {
+            float x = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_X,     0);
+            float y = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_Y,     0);
+            float hx = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HAT_X, 0);
+            float hy = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HAT_Y, 0);
+
+            if (hx != 0.0f) x = hx;
+            if (hy != 0.0f) y = hy;
+
+            joystickButtonsF axes = 0;
+            if (x < -kJoystickThreshold)  axes |= EJ_BUTTONF_LEFT;
+            if (x >  kJoystickThreshold)  axes |= EJ_BUTTONF_RIGHT;
+            if (y < -kJoystickThreshold)  axes |= EJ_BUTTONF_UP;
+            if (y >  kJoystickThreshold)  axes |= EJ_BUTTONF_DOWN;
+
+            gGamepadButtons = (gGamepadButtons & ~kDPadBits) | axes;
+            Emit();
+            return 1;
+        }
+
+        // Touch — suppressed on TV.
+        if ((source & AINPUT_SOURCE_TOUCHSCREEN) && !gIsTvMode)
+        {
+            const int32_t raw    = AMotionEvent_getAction(event);
+            const int32_t action = raw & AMOTION_EVENT_ACTION_MASK;
+            const bool    clear  = (action == AMOTION_EVENT_ACTION_UP
+                                 || action == AMOTION_EVENT_ACTION_CANCEL);
+            const joystickButtonsF previous=gTouchButtons;
+            RecomputeTouchState(event, clear);
+            if(previous!=gTouchButtons||action!=AMOTION_EVENT_ACTION_MOVE)
+                WFLOG("local touch mask=0x%x action=%d",unsigned(gTouchButtons),action);
+            Emit();
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+}  // namespace
+
+extern "C" WF_ANDROID_EXPORT void
+WFAndroidTouchLayout(int w,int h,androidtouch::Layout* layout,uint32_t* held,float* stickX,float* stickY)
+{
+    *layout=TouchLayout(w,h);
+    *held=gTouchButtons;
+    *stickX=gTouchState.position.x;*stickY=gTouchState.position.y;
+}
+
+// Read by hal/android/asset_accessor_aasset.cc when creating the accessor
+// during _PlatformSpecificInit.
+extern "C" WF_ANDROID_EXPORT AAssetManager*
+WFAndroidGetAssetManager()
+{
+    return gAssetMgr;
+}
+
+// True while an EGL surface exists (between APP_CMD_INIT_WINDOW and APP_CMD_TERM_WINDOW). HALIsSuspended
+// also waits on this: after Home and reopen, APP_CMD_RESUME arrives ~100 ms BEFORE the new window, and drawing
+// in that gap raised GL error 1286 and aborted (display.cc AssertGLOK, seen on the Chromecast HD).
+extern "C" WF_ANDROID_EXPORT int
+WFAndroidHasWindow()
+{
+    return gEglReady ? 1 : 0;
+}
+
+// The shared level and menu loops must finish when NativeActivity is destroyed.
+// Otherwise its old game thread survives and competes with a reopened activity
+// for the process-global engine and EGL context (EGL_BAD_ACCESS).
+extern "C" WF_ANDROID_EXPORT int
+WFAndroidCloseRequested()
+{
+    return gExitLoop ? 1 : 0;
+}
+
+extern "C" WF_ANDROID_EXPORT void
+WFAndroidRequestClose()
+{
+    gExitLoop = true;
+}
+
+// Called from XEventLoop (display.cc PageFlip) once per frame. Non-blocking
+// drain of any queued commands + input events.
+extern "C" WF_ANDROID_EXPORT void
+WFAndroidPumpEvents()
+{
+    if (!gApp) return;
+    for (;;)
+    {
+        int events = 0;
+        struct android_poll_source* source = nullptr;
+        int ident = ALooper_pollOnce(0, nullptr, &events, (void**)&source);
+        if (ident < 0) break;
+        if (source) source->process(gApp, source);
+        if (gApp->destroyRequested) { gExitLoop = true; break; }
+    }
+    PhonePoll();
+    androidtext::poll();
+}
+
+// The phone overlay's rectangles for a w x h surface, drawn by gfx/gl/android_window.cc after
+// the touch HUD, and its text's glyph quads (*glyphs, *glyphCount; wfui::Draw after the
+// rectangles). Returns the rectangle count; *changed is 1 when they differ from the last call's.
+extern "C" WF_ANDROID_EXPORT int
+WFAndroidPhoneOverlayRects(int w, int h, const PhonepadRect** rects, int* changed,
+                           const bitmaptext::Quad** glyphs, int* glyphCount)
+{
+    // The panel says "Use your phone as the controller": meaningless on the phone itself, so it is
+    // drawn only on a TV with the controller running, whatever else set an endpoint.
+    if (!gIsTvMode || !gPhoneEnabled)
+    {
+        gPhoneRects.clear(); gPhoneGlyphs.clear();
+        *changed = 0; *rects = gPhoneRects.data(); *glyphs = gPhoneGlyphs.data(); *glyphCount = 0;
+        return 0;
+    }
+    *changed    = gPhoneOverlay.Build(w, h, NowMs(), &gPhoneRects, &gPhoneGlyphs) ? 1 : 0;
+    *rects      = gPhoneRects.data();
+    *glyphs     = gPhoneGlyphs.data();
+    *glyphCount = int(gPhoneGlyphs.size());
+    return int(gPhoneRects.size());
+}
+
+// Entry point — android_native_app_glue calls this on a dedicated thread
+// after ANativeActivity_onCreate returns to the UI thread.
+extern "C" WF_ANDROID_EXPORT void
+android_main(struct android_app* app)
+{
+    gApp = app;
+    // Keep a visible game session awake without changing device lock policy.
+    // Android releases this window-scoped hold when the activity is hidden.
+    ANativeActivity_setWindowFlags(app->activity, AWINDOW_FLAG_KEEP_SCREEN_ON, 0);
+    androidtext::install(app->activity);
+    OpenDiagnosticLog(app);
+    InstallCrashHandlers();
+    WFLOG("android_main: enter");
+
+    app->onAppCmd     = HandleAppCmd;
+    app->onInputEvent = HandleInputEvent;
+
+    // AAssetManager is live as soon as the NativeActivity is created;
+    // asset_accessor_aasset.cc grabs it during _PlatformSpecificInit.
+    if (app->activity && app->activity->assetManager)
+        gAssetMgr = app->activity->assetManager;
+    WFLOG("android_main: assetMgr=%p", (void*)gAssetMgr);
+
+    if (app->config)
+    {
+        const int32_t uiMode = AConfiguration_getUiModeType(app->config);
+        gIsTvMode = (uiMode == ACONFIGURATION_UI_MODE_TYPE_TELEVISION);
+        WFAndroidSetHudEnabled(gIsTvMode ? 0 : 1);
+        WFLOG("android_main: uiMode=%d (tv=%d)", uiMode, gIsTvMode ? 1 : 0);
+    }
+
+    PhoneInit();
+
+    // Block until the first surface arrives so EGL is live before the
+    // engine tries to draw.
+    WFLOG("android_main: waiting for APP_CMD_INIT_WINDOW");
+    while (!gEglReady && !app->destroyRequested)
+    {
+        int events = 0;
+        struct android_poll_source* source = nullptr;
+        if (ALooper_pollOnce(-1, nullptr, &events, (void**)&source) >= 0)
+        {
+            if (source) source->process(app, source);
+        }
+    }
+    if (app->destroyRequested)
+    {
+        WFLOG("android_main: destroyRequested before EGL ready");
+        WFAndroidEglTerm();
+        return;
+    }
+    WFLOG("android_main: EGL ready, entering HALStart");
+
+    // Per-app command line: an app flavor may ship assets/wf_args.txt, whitespace-
+    // separated arguments appended after argv[0] (the condo app's VRAM overrides,
+    // the same flags `task run-condo` passes on the desktop). Absent → argv[0] only,
+    // as before. docs/plans/2026-10-01-condo-chromecast.md.
+    static char argBuf[1024];
+    char arg0[] = "wf_game";
+    char* argv[33] = { arg0 };
+    int argc = 1;
+    if (gAssetMgr)
+    {
+        if (AAsset* a = AAssetManager_open(gAssetMgr, "wf_args.txt", AASSET_MODE_BUFFER))
+        {
+            const int n = AAsset_read(a, argBuf, sizeof(argBuf) - 1);
+            AAsset_close(a);
+            argBuf[n > 0 ? n : 0] = '\0';
+            for (char* tok = strtok(argBuf, " \t\r\n"); tok && argc < 32; tok = strtok(nullptr, " \t\r\n"))
+            {
+                // "qr_logo=planet|full|none": what sits in the middle of the phone-controller QR code
+                // (default planet). Read here and not passed on: the engine never sees it.
+                if (std::strncmp(tok, "qr_logo=", 8) == 0)
+                {
+                    const int mode = phonepad::ParseLogoMode(tok + 8);
+                    if (mode >= 0) gPhoneOverlay.SetLogo(mode);
+                    WFLOG("android_main: %s%s", tok, mode >= 0 ? "" : " (unknown: use planet, full or none)");
+                    continue;
+                }
+                argv[argc++] = tok;
+            }
+            WFLOG("android_main: wf_args.txt gave %d argument(s)", argc - 1);
+        }
+    }
+    argv[argc] = nullptr;
+    // HALStart hands PIGSMain the pigsys globals, not its own argc/argv; on the
+    // desktop sys_init() fills them, Android never called it, so PIGSMain saw
+    // argc = 0 and every argument was dropped. Set them here.
+    __argc = argc;
+    __argv = argv;
+    HALStart(argc, argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
+
+    // HALStart returns when the game exits (PIGSMain's loop terminates).
+    WFLOG("android_main: HALStart returned, tearing down EGL");
+    PhoneStop();
+    WFAndroidEglTerm();
+    WFLOG("android_main: exit");
+    // The legacy engine and renderer have process-lifetime globals. Home keeps
+    // this activity alive (singleTask); Back finishes it. Start the next game
+    // activity in a fresh process rather than running HALStart a second time
+    // against the previous engine's globals and preserved EGL context.
+    std::fflush(nullptr);
+    _exit(EXIT_SUCCESS);
+}

@@ -1,0 +1,521 @@
+{
+  "desktop_requested": false,
+  "checks": [
+    {
+      "check": "configured floor and collision bounds",
+      "passed": true
+    },
+    {
+      "check": "explicit player bounds",
+      "passed": true
+    },
+    {
+      "check": "no imported adventure/scaffold content",
+      "passed": true
+    },
+    {
+      "check": "default excludes diagnostics",
+      "passed": true
+    },
+    {
+      "check": "two independently addressed settings owners",
+      "passed": true
+    },
+    {
+      "check": "default explicit runtime camera/room objects",
+      "passed": true
+    },
+    {
+      "check": "every declared descriptor type accounted for",
+      "passed": true
+    },
+    {
+      "check": "all presentation codes accounted for",
+      "passed": true
+    },
+    {
+      "check": "complete OAD framing",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Signed_INT8_N_A_1",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Signed_INT8_NUMBER_2",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Signed_INT8_SLIDER_3",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Signed_INT8_HIDDEN_4",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT8_N_A_5",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT8_NUMBER_6",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT8_SLIDER_7",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT8_TOGGLE_8",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT8_DROPMENU_9",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT8_RADIOBUTTONS_10",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT8_COMBOBOX_11",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT8_HIDDEN_12",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Boolean_INT8_CHECKBOX_13",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Boolean_INT8_TOGGLE_14",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Boolean_INT8_HIDDEN_15",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor BooleanLabels_INT8_CHECKBOX_16",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor BooleanLabels_INT8_TOGGLE_17",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor BooleanLabels_INT8_RADIOBUTTONS_18",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor BooleanLabels_INT8_HIDDEN_19",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Signed_INT16_N_A_20",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Signed_INT16_NUMBER_21",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Signed_INT16_SLIDER_22",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Signed_INT16_HIDDEN_23",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT16_N_A_24",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT16_NUMBER_25",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT16_SLIDER_26",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT16_TOGGLE_27",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT16_DROPMENU_28",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT16_RADIOBUTTONS_29",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT16_COMBOBOX_30",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT16_HIDDEN_31",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Boolean_INT16_CHECKBOX_32",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Boolean_INT16_TOGGLE_33",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Boolean_INT16_HIDDEN_34",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor BooleanLabels_INT16_CHECKBOX_35",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor BooleanLabels_INT16_TOGGLE_36",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor BooleanLabels_INT16_RADIOBUTTONS_37",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor BooleanLabels_INT16_HIDDEN_38",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Signed_INT32_N_A_39",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Signed_INT32_NUMBER_40",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Signed_INT32_SLIDER_41",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Signed_INT32_HIDDEN_42",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT32_N_A_43",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT32_NUMBER_44",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT32_SLIDER_45",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT32_TOGGLE_46",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT32_DROPMENU_47",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT32_RADIOBUTTONS_48",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT32_COMBOBOX_49",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Enum_INT32_HIDDEN_50",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Boolean_INT32_CHECKBOX_51",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Boolean_INT32_TOGGLE_52",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Boolean_INT32_HIDDEN_53",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor BooleanLabels_INT32_CHECKBOX_54",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor BooleanLabels_INT32_TOGGLE_55",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor BooleanLabels_INT32_RADIOBUTTONS_56",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor BooleanLabels_INT32_HIDDEN_57",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Fraction_FIXED16_N_A_58",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Fraction_FIXED16_NUMBER_59",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Fraction_FIXED16_SLIDER_60",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Fraction_FIXED16_HIDDEN_61",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Fraction_FIXED32_N_A_62",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Fraction_FIXED32_NUMBER_63",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Fraction_FIXED32_SLIDER_64",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Fraction_FIXED32_HIDDEN_65",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Mailbox_INT32_MAILBOX_66",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Mailbox_INT32_HIDDEN_67",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Colour_INT32_COLOR_68",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Colour_INT32_HIDDEN_69",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Text_STRING_N_A_70",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Text_STRING_NUMBER_71",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Text_STRING_HIDDEN_72",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Multiline_STRING_TEXTEDITOR_73",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor TextSuggestions_STRING_COMBOBOX_74",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor PathText_STRING_FILENAME_75",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Asset_FILENAME_N_A_76",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Asset_FILENAME_FILENAME_77",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Asset_FILENAME_HIDDEN_78",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Asset_MESHNAME_N_A_79",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Asset_MESHNAME_FILENAME_80",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Asset_MESHNAME_HIDDEN_81",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Reference_OBJECT_REFERENCE_N_A_82",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Reference_OBJECT_REFERENCE_COMBOBOX_83",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Reference_OBJECT_REFERENCE_HIDDEN_84",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Reference_CAMERA_REFERENCE_N_A_85",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Reference_CAMERA_REFERENCE_COMBOBOX_86",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Reference_CAMERA_REFERENCE_HIDDEN_87",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Reference_LIGHT_REFERENCE_N_A_88",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Reference_LIGHT_REFERENCE_COMBOBOX_89",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Reference_LIGHT_REFERENCE_HIDDEN_90",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Reference_CLASS_REFERENCE_N_A_91",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Reference_CLASS_REFERENCE_COMBOBOX_92",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Reference_CLASS_REFERENCE_HIDDEN_93",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Annotation_XDATA_N_A_94",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Annotation_XDATA_TEXTEDITOR_95",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Annotation_XDATA_DROPMENU_96",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Annotation_XDATA_COMBOBOX_97",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Annotation_XDATA_HIDDEN_98",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor VectorReference_OBJECT_REFERENCE_VECTOR_N_A_99",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor VectorReference_OBJECT_REFERENCE_HIDDEN_100",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor DirectionX_FIXED32_VECTOR_N_A_101",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor DirectionY_FIXED32_VECTOR_N_A_102",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor DirectionZ_FIXED32_VECTOR_N_A_103",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor DirectionX_FIXED32_VECTOR_NUMBER_104",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor DirectionY_FIXED32_VECTOR_NUMBER_105",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor DirectionZ_FIXED32_VECTOR_NUMBER_106",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor DirectionX_FIXED32_VECTOR_SLIDER_107",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor DirectionY_FIXED32_VECTOR_SLIDER_108",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor DirectionZ_FIXED32_VECTOR_SLIDER_109",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor DirectionX_FIXED32_HIDDEN_110",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor DirectionY_FIXED32_HIDDEN_111",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor DirectionZ_FIXED32_HIDDEN_112",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor NegativeEnum_INT32_RADIOBUTTONS_113",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor ManyChoices_INT32_RADIOBUTTONS_114",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor ReadOnly_INT32_NUMBER_115",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor ReadOnlyText_STRING_N_A_116",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor EnableDependent_INT32_CHECKBOX_117",
+      "passed": true
+    },
+    {
+      "check": "compiled descriptor Conditional_FIXED32_NUMBER_118",
+      "passed": true
+    },
+    {
+      "check": "catalog contains two object instances",
+      "passed": true
+    },
+    {
+      "check": "standalone L4 and sector-aligned asset",
+      "passed": true
+    }
+  ]
+}

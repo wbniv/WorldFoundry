@@ -1,0 +1,29 @@
+Processing /home/will/chromecast-coordinator
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: chromecast-coordinator
+  Building wheel for chromecast-coordinator (pyproject.toml): started
+  Building wheel for chromecast-coordinator (pyproject.toml): finished with status 'done'
+  Created wheel for chromecast-coordinator: filename=chromecast_coordinator-0.1.0-py3-none-any.whl size=64734 sha256=061f8eb51b3152d5eb1762c838c1c3ba7e5c234f51553c5ec1a744ef45a12429
+  Stored in directory: /home/will/.cache/pip/wheels/de/27/16/76f98ddc1af6388e55f73b3d2eb7d9843e8dc3e83a5ac25df0
+Successfully built chromecast-coordinator
+Processing ./wheels/chromecast_coordinator-0.1.0-py3-none-any.whl
+Installing collected packages: chromecast-coordinator
+Successfully installed chromecast-coordinator-0.1.0
+usage: python3 -m wf_device [-h] [--config CONFIG] [--job JOB] [--setup-stdin]
+                            {serve,worker,task,hook} [operation]
+
+Task client and protected Chromecast service entry point.
+
+positional arguments:
+  {serve,worker,task,hook}
+  operation
+
+options:
+  -h, --help            show this help message and exit
+  --config CONFIG
+  --job JOB
+  --setup-stdin
+........................................................................ [ 58%]
+....................................................                     [100%]
+124 passed in 28.64s

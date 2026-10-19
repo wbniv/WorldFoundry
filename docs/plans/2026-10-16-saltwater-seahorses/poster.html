@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<!--
+  Plan mockup — layout of the A3 portrait seahorse biomechanics poster.
+  Self-contained; 1440x900. The page preview is 297 x 420 mm drawn at
+  1.953 px/mm. Sketches reuse the tail model from tail-rig.html; text is
+  draft wording, and every claim carries the status chip it would print with.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup — A3 seahorse poster</title>
+<style>
+  :root { --bg:#ffffff; --fg:#1f2328; --muted:#656d76; --line:#d1d9e0; --panel:#f6f8fa; --accent:#0969da; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --line:#30363d; --panel:#161b22; --accent:#4493f8; } }
+  * { box-sizing:border-box; }
+  body { margin:0; width:1440px; height:900px; overflow:hidden; background:var(--bg); color:var(--fg); font:14px/1.45 ui-sans-serif,system-ui,sans-serif; }
+  header { display:flex; align-items:baseline; gap:14px; height:56px; padding:14px 24px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header h1 { margin:0; font-size:16px; font-weight:600; }
+  header .sub { color:var(--muted); font-size:13px; }
+  header .tag { margin-left:auto; font:600 11px ui-monospace,monospace; letter-spacing:.04em; color:var(--muted); border:1px solid var(--line); border-radius:10px; padding:2px 8px; }
+  main { display:grid; grid-template-columns:640px 1fr; height:844px; }
+  .pagewrap { display:flex; justify-content:center; align-items:center; background:#3b4048; border-right:1px solid var(--line); }
+  canvas { box-shadow:0 6px 24px rgba(0,0,0,.45); }
+  aside { padding:16px 24px; overflow:hidden; }
+  aside h2 { margin:10px 0 6px; font-size:12px; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); }
+  ol { margin:0; padding-left:22px; } li { margin:2px 0; font-size:13px; }
+  li i { color:var(--muted); font-style:normal; }
+  .chips { display:flex; gap:8px; flex-wrap:wrap; }
+  .chip { font:600 11.5px ui-monospace,monospace; padding:2px 9px; border-radius:10px; border:1.5px solid; }
+  .c-v { color:#2f9e44; border-color:#2f9e44; } .c-o { color:#1971c2; border-color:#1971c2; } .c-u { color:#e8590c; border-color:#e8590c; } .c-w { color:#9c36b5; border-color:#9c36b5; }
+  table { border-collapse:collapse; width:100%; font-size:12.5px; }
+  td { padding:3px 8px 3px 0; border-bottom:1px solid var(--line); vertical-align:top; }
+  td:first-child { font-family:ui-monospace,monospace; font-size:12px; white-space:nowrap; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  p.m { margin:4px 0; font-size:12.5px; color:var(--muted); }
+</style>
+</head>
+<body>
+<header><h1>A3 portrait poster — “Longsnout seahorse: a tail that holds on”</h1><span class="sub">docs/reference/seahorse-biomechanics-poster/ · same pipeline as the goby and urchin posters</span><span class="tag">MOCKUP — NOT SHIPPED</span></header>
+<main>
+  <div class="pagewrap"><canvas id="page" width="580" height="820"></canvas></div>
+  <aside>
+    <div class="two">
+      <div>
+        <h2>Panels (draft titles)</h2>
+        <ol>
+          <li><b>Thirty-five rings</b> <i>— 11 trunk + 33–37 tail rings; four plates per ring</i></li>
+          <li><b>Square bends without crushing</b> <i>— Porter 2015, printed models</i></li>
+          <li><b>Grip starts at the tip</b> <i>— whole tail, more motion distally, lateral bending</i></li>
+          <li><b>A fin too fast to draw</b> <i>— 30–42 Hz vs a 60 Hz screen</i></li>
+          <li><b>A five-millisecond strike</b> <i>— pivot feeding is one frame</i></li>
+          <li><b>Pairs greet</b> <i>— tails around one holdfast (primary source pending)</i></li>
+          <li><b>From rings to joints</b> <i>— 35 joints × 3, 25-value control block</i></li>
+          <li><b>What a pair costs</b> <i>— Chromecast 1 frame budget, measured in Phase 4</i></li>
+        </ol>
+        <h2>Claim chips (print legend)</h2>
+        <div class="chips"><span class="chip c-v">verified</span><span class="chip c-o">other species</span><span class="chip c-u">unverified</span><span class="chip c-w">ours</span></div>
+        <p class="m">The printed copy carries no “unverified”, “not opened” or “link missing” claim: each one is checked or relabelled <b>ours</b> before print (the 2026‑10‑06 poster audit rule).</p>
+      </div>
+      <div>
+        <h2>Files</h2>
+        <table>
+          <tr><td>seahorse-research.md</td><td>research first, in docs/reference/; sources + access limits</td></tr>
+          <tr><td>make_poster.py</td><td>writes poster.html + SVG panels from data</td></tr>
+          <tr><td>export_poster.py</td><td>Playwright Chromium → PDF + 300 DPI PNG</td></tr>
+          <tr><td>poster.html / .png</td><td>open / preview</td></tr>
+          <tr><td>seahorse-biomechanics-a3.pdf</td><td>one 297 × 420 mm page</td></tr>
+          <tr><td>layout-review.json</td><td>page size, overflow and edge checks</td></tr>
+          <tr><td>*.svg</td><td>editable panel drawings</td></tr>
+        </table>
+        <h2>Checks before print</h2>
+        <table>
+          <tr><td>pdfinfo</td><td>1 page, 841.9 × 1190.6 pt</td></tr>
+          <tr><td>pdffonts</td><td>every font embedded</td></tr>
+          <tr><td>type size</td><td>no text below the existing posters' minimum</td></tr>
+          <tr><td>edges</td><td>blank margins (no off-page slivers)</td></tr>
+          <tr><td>links</td><td>every source URL resolves</td></tr>
+          <tr><td>wording</td><td>no pending-verification text</td></tr>
+        </table>
+        <h2>Print</h2>
+        <p class="m">A3 <b>matte or uncoated</b> stock (the 2026‑10‑06 print was too glossy). Copy the PDF to <code>~/Documents/TO PRINT/</code>.</p>
+      </div>
+    </div>
+  </aside>
+</main>
+<script>
+"use strict";
+const N = 35, KN = [0, 6, 12, 18, 24, 30, 34], D2R = Math.PI / 180;
+const LEN = Array.from({length: N}, (_, i) => 3.75 * Math.pow(0.9764, i));
+const WID = Array.from({length: N + 1}, (_, i) => 9.0 + (1.4 - 9.0) * Math.pow(i / N, 0.85));
+const LIM = Array.from({length: N}, (_, i) => { const t = i / (N - 1); return { v: 12 + 28 * t, d: 4 + 8.5 * t, l: 8 + 20 * t }; });
+function interp(vals, x) { let k = 0; while (k < KN.length - 2 && x > KN[k + 1]) k++;
+  const m = j => j <= 0 ? (vals[1] - vals[0]) / (KN[1] - KN[0]) : j >= KN.length - 1 ? (vals[j] - vals[j - 1]) / (KN[j] - KN[j - 1]) : (vals[j + 1] - vals[j - 1]) / (KN[j + 1] - KN[j - 1]);
+  const x0 = KN[k], h = KN[k + 1] - x0, s = (x - x0) / h, s2 = s * s, s3 = s2 * s;
+  return (2*s3 - 3*s2 + 1) * vals[k] + (s3 - 2*s2 + s) * h * m(k) + (-2*s3 + 3*s2) * vals[k + 1] + (s3 - s2) * h * m(k + 1); }
+function expand(st) { const F = [], L = [], s = N - (N - st.start) * st.p;
+  for (let i = 0; i < N; i++) { F[i] = interp(st.f, i); L[i] = 0; }
+  if (st.mode === 'v' && st.p > 0) { const i0 = Math.max(0, Math.floor(s) - 5); let acc = -st.pitch; for (let i = 0; i < i0; i++) acc += F[i]; for (let i = i0; i < i0 + 5; i++) F[i] = (90 - acc) / 5; }
+  if (st.mode !== 'off' && st.p > 0) for (let i = 0; i < N; i++) { const w = Math.max(0, Math.min(1, i + 1 - s)); if (!w) continue; const kap = LEN[i] / (st.r + WID[i] / 2) / D2R;
+    if (st.mode === 'h') F[i] = F[i] * (1 - w) + kap * w; else { L[i] = kap * w; F[i] *= 1 - w; } }
+  for (let i = 0; i < N; i++) { F[i] = Math.max(-LIM[i].d, Math.min(LIM[i].v, F[i])); L[i] = Math.min(LIM[i].l, L[i]); } return { F, L }; }
+function fk(A, pitch) { const b = pitch * D2R; let d = [-Math.sin(b), 0, -Math.cos(b)], v = [Math.cos(b), 0, -Math.sin(b)], s = [0, 1, 0];
+  const rot = (a, c, g) => { const C = Math.cos(g), S = Math.sin(g); return [a.map((x, j) => x * C + c[j] * S), c.map((x, j) => x * C - a[j] * S)]; };
+  let p = [0, 0, 0]; const P = [p], V = [v], Sd = [s];
+  for (let i = 0; i < N; i++) { [d, v] = rot(d, v, A.F[i] * D2R); [d, s] = rot(d, s, A.L[i] * D2R); p = p.map((x, j) => x + d[j] * LEN[i]); P.push(p); V.push(v); Sd.push(s); } return { P, V, S: Sd }; }
+function wrapCenter(K, st) { const i = Math.min(N - 1, Math.ceil(N - (N - st.start) * st.p)), ax = st.mode === 'h' ? K.V[i] : K.S[i], rr = st.r + WID[i] / 2; return K.P[i].map((x, j) => x + ax[j] * rr); }
+const BODY = [[-4.5,0],[-6.5,6],[-8,14],[-8.8,22],[-8.6,30],[-7.6,38],[-6,45],[-5,50],[-6.5,55],[-7,60],[-5.5,65],[-3,69],[-1,73],[1.5,71],[3.5,67],[6,64.5],[10,63],[18,61.5],[26,60.5],[29,60.2],[29.6,58.6],[26,57.8],[18,57.6],[11,57.2],[7,55.5],[5.5,52.5],[6.5,49],[9.5,44],[12,37],[12.5,28],[11,19],[8,10],[5,3],[4.5,0]];
+const POUCH = [[4.5,0],[9,1.5],[13,6],[13.5,11],[11.5,16]];
+function horse(g, o) {
+  const st = { f: [2, 3, 6, 11, 19, 28, 36], mode: 'off', start: 18, r: 4, p: 0, pitch: 0, ...o.pose };
+  const K = fk(expand(st), st.pitch), m = o.mirror ? -1 : 1, k = o.k; let ox = o.x, oy = o.y;
+  if (o.anchor && st.mode !== 'off') { const c = wrapCenter(K, st); ox = o.x - m * c[0] * k; oy = o.y + c[2] * k; }
+  const col = o.male ? '#ec8b35' : '#f2c14e', dk = o.male ? '#7a3c0e' : '#8a5d0e';
+  g.lineCap = 'round';
+  for (let i = 0; i < N; i++) { const a = K.P[i], b = K.P[i + 1]; g.strokeStyle = i % 2 ? col : '#d9a43a'; g.lineWidth = WID[i] * k;
+    g.beginPath(); g.moveTo(ox + m * a[0] * k, oy - a[2] * k); g.lineTo(ox + m * b[0] * k, oy - b[2] * k); g.stroke(); }
+  if (o.dots) { g.fillStyle = '#1f2328'; for (let i = 1; i < N; i++) { const p = K.P[i]; g.beginPath(); g.arc(ox + m * p[0] * k, oy - p[2] * k, KN.includes(i) ? 2.2 : 1.1, 0, 7); g.fill(); } }
+  const b = st.pitch * D2R, C = Math.cos(b), S = Math.sin(b), BX = (x, z) => ox + m * (x * C + z * S) * k, BY = (x, z) => oy - (-x * S + z * C) * k;
+  g.beginPath(); BODY.forEach(([x, z], i) => i ? g.lineTo(BX(x, z), BY(x, z)) : g.moveTo(BX(x, z), BY(x, z)));
+  if (o.male) POUCH.slice().reverse().forEach(([x, z]) => g.lineTo(BX(x, z), BY(x, z)));
+  g.closePath(); g.fillStyle = col; g.fill(); g.strokeStyle = dk; g.lineWidth = 0.8; g.stroke();
+  if (o.rings) { g.strokeStyle = 'rgba(120,70,10,.6)'; for (let z = 4.5; z < 50; z += 4.5) { g.beginPath(); g.moveTo(BX(-8.4, z), BY(-8.4, z)); g.lineTo(BX(11.5, z), BY(11.5, z)); g.stroke(); } }
+  g.fillStyle = '#1b1208'; g.beginPath(); g.arc(BX(2.6, 62.5), BY(2.6, 62.5), 1.1 * k, 0, 7); g.fill();
+  return { ox, oy };
+}
+// ── page ──
+const cv = document.getElementById('page'), g = cv.getContext('2d');
+const INK = '#1f2328', MUTE = '#59636e', SEA = '#0b3a4a';
+const CHIP = { v: ['verified', '#2f9e44'], o: ['other species', '#1971c2'], u: ['unverified', '#e8590c'], w: ['ours', '#9c36b5'] };
+function text(s, x, y, size, col, weight, maxW, lh) {
+  g.font = `${weight || 400} ${size}px Georgia, "DejaVu Serif", serif`; g.fillStyle = col || INK;
+  if (!maxW) { g.fillText(s, x, y); return y; }
+  let line = ''; for (const w of s.split(' ')) { const t = line ? line + ' ' + w : w; if (g.measureText(t).width > maxW && line) { g.fillText(line, x, y); line = w; y += lh; } else line = t; }
+  g.fillText(line, x, y); return y;
+}
+function chip(kind, x, y) { const [label, col] = CHIP[kind]; g.font = '600 7px ui-monospace,monospace'; const w = g.measureText(label).width + 8;
+  g.strokeStyle = col; g.lineWidth = 0.8; g.beginPath(); g.roundRect(x, y - 7, w, 9.5, 4.5); g.stroke(); g.fillStyle = col; g.fillText(label, x + 4, y); return x + w + 3; }
+function panel(i, x, y, w, h, title, body, chips, art) {
+  g.fillStyle = '#f4f1ea'; g.fillRect(x, y, w, h);
+  text(String(i).padStart(2, '0') + ' · ' + title, x + 9, y + 17, 11.5, SEA, 700);
+  let cx = x + 9; for (const c of chips) cx = chip(c, cx, y + 30);
+  const yy = text(body, x + 9, y + 44, 8, INK, 400, w - 18, 10.5);
+  g.save(); g.beginPath(); g.rect(x, yy + 4, w, y + h - yy - 6); g.clip(); art(x, yy + 4, w, y + h - yy - 6); g.restore();
+}
+g.fillStyle = '#fbf8f1'; g.fillRect(0, 0, 580, 820);
+g.fillStyle = SEA; g.fillRect(0, 0, 580, 92);
+text('Longsnout seahorse', 22, 42, 30, '#fbf8f1', 700);
+text('A tail that holds on — biomechanics for the Planted Tank', 22, 64, 12.5, '#cfe3ea', 400);
+text('Hippocampus reidi · adult ≈ 16 cm · World Foundry aquarium series', 22, 82, 9.5, '#9cc3cf', 400);
+horse(g, { x: 515, y: 64, k: 0.62, pose: { f: [2, 3, 6, 11, 19, 28, 36], pitch: 4 } });
+const PX = 14, PW = 270, GAP = 12, PH = 150, Y0 = 102;
+const P = (c, r) => [PX + c * (PW + GAP), Y0 + r * (PH + 10)];
+panel(1, ...P(0, 0), PW, PH, 'Thirty-five rings', 'Bony plates form rings: 11 on the trunk and 33–37 on the tail in H. reidi. Four L-shaped plates surround each tail vertebra.', ['v'],
+  (x, y, w, h) => { horse(g, { x: x + 70, y: y + h - 34, k: 0.62, rings: true, dots: true, pose: { f: [2, 3, 6, 11, 19, 28, 36], pitch: 2 } });
+    text('11 trunk rings', x + 130, y + 14, 8, MUTE); text('35 tail rings (33–37)', x + 130, y + 44, 8, MUTE); text('one joint per tail ring', x + 130, y + 56, 8, MUTE); });
+panel(2, ...P(1, 0), PW, PH, 'Square bends without crushing', 'Printed square and round tail models: square plates only slide when crushed, absorb more energy and keep joints aligned when bent and twisted. Mechanical evidence, not live tails.', ['v'],
+  (x, y, w, h) => { const cy = y + h / 2 - 6;
+    for (const [cx, sq] of [[x + 80, 1], [x + 190, 0]]) { g.strokeStyle = SEA; g.lineWidth = 3; g.beginPath();
+      if (sq) { const r = 20; [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([a, b]) => { g.moveTo(cx + a * r, cy + b * 6); g.lineTo(cx + a * r, cy + b * r); g.lineTo(cx + a * 6, cy + b * r); }); }
+      else { for (let q = 0; q < 4; q++) { g.moveTo(cx + 20 * Math.cos(q * Math.PI / 2 + 0.25), cy + 20 * Math.sin(q * Math.PI / 2 + 0.25)); g.arc(cx, cy, 20, q * Math.PI / 2 + 0.25, q * Math.PI / 2 + 1.32); } }
+      g.stroke(); g.fillStyle = SEA; g.beginPath(); g.arc(cx, cy, 5, 0, 7); g.fill(); }
+    text('square: slide only', x + 46, y + h - 6, 8, MUTE); text('round: slide + rotate', x + 150, y + h - 6, 8, MUTE); });
+panel(3, ...P(0, 1), PW, PH, 'Grip starts at the tip', 'In H. reidi the whole tail grasps, with more range of motion toward the tip; tails also bend sideways while curling.', ['v'],
+  (x, y, w, h) => { [0.3, 0.65, 1].forEach((p, j) => { const cx = x + 70 + j * 82, cy = y + h - 22;
+      g.fillStyle = '#6d4a5e'; g.beginPath(); g.arc(cx, cy, 4 * 0.62, 0, 7); g.fill();
+      horse(g, { x: cx, y: cy, k: 0.62, anchor: true, pose: { f: [4, 5, 7, 8, 8, 8, 8], mode: 'h', start: 18, r: 4, p, pitch: 8 } });
+      text(['tip touches', 'coil spreads', 'held'][j], cx - 22, y + h - 4, 8, MUTE); }); });
+panel(4, ...P(1, 1), PW, PH, 'A fin too fast to draw', 'The dorsal fin beats at 30–42 Hz. A 60 Hz screen samples it below twice per beat, so it aliases: the game draws a blurred, slowed wave instead.', ['v', 'w'],
+  (x, y, w, h) => { const y0 = y + h / 2; g.strokeStyle = '#9cc3cf'; g.lineWidth = 1.2; g.beginPath();
+    for (let i = 0; i <= 240; i++) { const t = i / 240 * 0.1, X = x + 14 + i; const Y = y0 - 22 * Math.sin(2 * Math.PI * 36 * t); i ? g.lineTo(X, Y) : g.moveTo(X, Y); } g.stroke();
+    g.fillStyle = '#e8590c'; for (let n = 0; n <= 6; n++) { const t = n / 60; g.beginPath(); g.arc(x + 14 + t / 0.1 * 240, y0 - 22 * Math.sin(2 * Math.PI * 36 * t), 3, 0, 7); g.fill(); }
+    text('36 Hz fin, sampled at 60 Hz (dots)', x + 14, y + h - 6, 8, MUTE); });
+panel(5, ...P(0, 2), PW, PH, 'A five-millisecond strike', 'Pivot feeding: the head swings up and the snout reaches prey in under 5 ms — shorter than one frame at 60 Hz. The game snaps in one frame and recovers slowly.', ['v', 'w'],
+  (x, y, w, h) => { horse(g, { x: x + 70, y: y + h - 22, k: 0.6, pose: { f: [2, 3, 6, 11, 19, 28, 36], pitch: 0 } });
+    horse(g, { x: x + 180, y: y + h - 22, k: 0.6, pose: { f: [2, 3, 6, 11, 19, 28, 36], pitch: -14 } });
+    text('frame n', x + 100, y + 30, 8, MUTE); text('frame n + 1', x + 210, y + 30, 8, MUTE); });
+panel(6, ...P(1, 2), PW, PH, 'Pairs greet', 'Bonded pairs meet each morning and may swirl their tails around a shared holdfast. Popular accounts so far: the primary paper is read before print.', ['u'],
+  (x, y, w, h) => { g.fillStyle = '#6d4a5e'; g.fillRect(x + w / 2 - 3, y, 6, h);
+    horse(g, { x: x + w / 2, y: y + h - 22, k: 0.62, anchor: true, pose: { f: [3, 4, 4, 4, 4, 4, 4], mode: 'v', start: 16, r: 6, p: 1, pitch: -4 } });
+    horse(g, { x: x + w / 2, y: y + h - 16, k: 0.62, anchor: true, mirror: true, male: true, pose: { f: [3, 4, 4, 4, 4, 4, 4], mode: 'v', start: 16, r: 7, p: 1, pitch: -4 } }); });
+panel(7, ...P(0, 3), PW, PH, 'From rings to joints', 'One joint per tail ring, each with ventral flex, sideways bend and twist: 105 angles. The script writes 25 values — seven knots and a wrap — and the engine expands them.', ['w'],
+  (x, y, w, h) => { const y0 = y + h / 2 - 4; g.strokeStyle = SEA; g.lineWidth = 1; g.beginPath(); g.moveTo(x + 14, y0); g.lineTo(x + w - 14, y0); g.stroke();
+    for (let i = 0; i < N; i++) { const X = x + 14 + i * (w - 28) / (N - 1); const kn = KN.includes(i); g.fillStyle = kn ? '#e8590c' : SEA; g.beginPath(); g.arc(X, y0, kn ? 4 : 2, 0, 7); g.fill(); }
+    text('● knot (7 × 3 values)   + wrap: mode, start, radius, progress', x + 14, y0 + 22, 8, MUTE); text('→ 35 joints × 3 = 105 angles, clamped per joint', x + 14, y0 + 34, 8, MUTE); });
+panel(8, ...P(1, 3), PW, PH, 'What a pair costs', 'Chromecast 1 frame time. Bars are estimates today; Phase 4 prints the matched release measurements instead.', ['w'],
+  (x, y, w, h) => { const rows = [['today', 74.0], ['1 pair', 78.6], ['2 pairs', 83.2]];
+    rows.forEach(([lab, ms], j) => { const Y = y + 6 + j * 20; g.fillStyle = j ? '#e8590c' : SEA; g.fillRect(x + 64, Y, (ms - 40) * 3.6, 14);
+      text(lab, x + 12, Y + 11, 8.5, INK); text(ms.toFixed(1) + ' ms', x + 70 + (ms - 40) * 3.6, Y + 11, 8, MUTE); });
+    text('axis starts at 40 ms', x + 12, y + h - 6, 7.5, MUTE); });
+const FY = Y0 + 4 * (PH + 10) + 2;
+g.fillStyle = '#e9e4d8'; g.fillRect(0, FY, 580, 820 - FY);
+text('Sources', 14, FY + 15, 9.5, SEA, 700);
+['S1 Porter et al. 2015, Science — square tail plates (printed models)', 'S2 Maia, Couto & Adriaens — tail grasping, H. reidi vs H. abdominalis (SICB)',
+ 'S3 Ashley-Ross 2002 — seahorse dorsal fin 30–42 Hz', 'S4 Van Wassenbergh et al. 2009, Biol. Lett. — pivot feeding < 5 ms',
+ 'S5 Vincent & Sadler 1995 — pair greeting (primary, to read)', 'S6 Lourie et al. — ring counts (identification guide)'].forEach((s, j) =>
+  text(s, 14 + (j % 2) * 286, FY + 30 + Math.floor(j / 2) * 11, 7, INK));
+text('Game choices are labelled ours. Scale: tail 90 mm, 35 rings, limits per joint — see the plan.', 14, 812, 7, MUTE);
+</script>
+</body>
+</html>

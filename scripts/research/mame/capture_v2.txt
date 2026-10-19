@@ -1,0 +1,91 @@
+[INFO] cheat enabled at boot
+[init] frame=1100 ram=0x04
+[round 1] ram=0x05 (was 0x04) frame=1281
+[snap s0] round=1 frame=1341 0x81=0x05
+[snap hop1] round=1 frame=1372 0x81=0x05
+[snap hop2] round=1 frame=1433 0x81=0x05
+[round 2] ram=0x06 (was 0x05) frame=1537
+[snap s0] round=2 frame=1597 0x81=0x06
+[snap hop1] round=2 frame=1628 0x81=0x06
+[snap hop2] round=2 frame=1689 0x81=0x06
+[round 3] ram=0x07 (was 0x06) frame=1793
+[snap s0] round=3 frame=1853 0x81=0x07
+[snap hop1] round=3 frame=1884 0x81=0x07
+[snap hop2] round=3 frame=1945 0x81=0x07
+[round 4] ram=0x08 (was 0x07) frame=2049
+[snap s0] round=4 frame=2109 0x81=0x08
+[snap hop1] round=4 frame=2140 0x81=0x08
+[snap hop2] round=4 frame=2201 0x81=0x08
+[round 5] ram=0x09 (was 0x08) frame=2305
+[snap s0] round=5 frame=2365 0x81=0x09
+[snap hop1] round=5 frame=2396 0x81=0x09
+[snap hop2] round=5 frame=2457 0x81=0x09
+[round 6] ram=0x0A (was 0x09) frame=2561
+[snap s0] round=6 frame=2621 0x81=0x0A
+[snap hop1] round=6 frame=2652 0x81=0x0A
+[snap hop2] round=6 frame=2713 0x81=0x0A
+[round 7] ram=0x0B (was 0x0A) frame=2817
+[snap s0] round=7 frame=2877 0x81=0x0B
+[snap hop1] round=7 frame=2908 0x81=0x0B
+[snap hop2] round=7 frame=2969 0x81=0x0B
+[round 8] ram=0x0C (was 0x0B) frame=3073
+[snap s0] round=8 frame=3133 0x81=0x0C
+[snap hop1] round=8 frame=3164 0x81=0x0C
+[snap hop2] round=8 frame=3225 0x81=0x0C
+[round 9] ram=0x0D (was 0x0C) frame=3329
+[snap s0] round=9 frame=3389 0x81=0x0D
+[snap hop1] round=9 frame=3420 0x81=0x0D
+[snap hop2] round=9 frame=3481 0x81=0x0D
+[round 10] ram=0x0E (was 0x0D) frame=3585
+[snap s0] round=10 frame=3645 0x81=0x0E
+[snap hop1] round=10 frame=3676 0x81=0x0E
+[snap hop2] round=10 frame=3737 0x81=0x0E
+[round 11] ram=0x0F (was 0x0E) frame=3841
+[snap s0] round=11 frame=3901 0x81=0x0F
+[snap hop1] round=11 frame=3932 0x81=0x0F
+[snap hop2] round=11 frame=3993 0x81=0x0F
+[round 12] ram=0x10 (was 0x0F) frame=4097
+[snap s0] round=12 frame=4157 0x81=0x10
+[snap hop1] round=12 frame=4188 0x81=0x10
+[snap hop2] round=12 frame=4249 0x81=0x10
+[round 13] ram=0x11 (was 0x10) frame=4353
+[snap s0] round=13 frame=4413 0x81=0x11
+[snap hop1] round=13 frame=4444 0x81=0x11
+[snap hop2] round=13 frame=4505 0x81=0x11
+[round 14] ram=0x12 (was 0x11) frame=4609
+[snap s0] round=14 frame=4669 0x81=0x12
+[snap hop1] round=14 frame=4700 0x81=0x12
+[snap hop2] round=14 frame=4761 0x81=0x12
+[round 15] ram=0x13 (was 0x12) frame=4865
+[snap s0] round=15 frame=4925 0x81=0x13
+[snap hop1] round=15 frame=4956 0x81=0x13
+[snap hop2] round=15 frame=5017 0x81=0x13
+[round 16] ram=0x14 (was 0x13) frame=5121
+[snap s0] round=16 frame=5181 0x81=0x14
+[snap hop1] round=16 frame=5212 0x81=0x14
+[snap hop2] round=16 frame=5273 0x81=0x14
+[round 17] ram=0x15 (was 0x14) frame=5377
+[snap s0] round=17 frame=5437 0x81=0x15
+[snap hop1] round=17 frame=5468 0x81=0x15
+[snap hop2] round=17 frame=5529 0x81=0x15
+[round 18] ram=0x16 (was 0x15) frame=5633
+[snap s0] round=18 frame=5693 0x81=0x16
+[snap hop1] round=18 frame=5724 0x81=0x16
+[snap hop2] round=18 frame=5785 0x81=0x16
+[round 19] ram=0x17 (was 0x16) frame=5889
+[snap s0] round=19 frame=5949 0x81=0x17
+[snap hop1] round=19 frame=5980 0x81=0x17
+[snap hop2] round=19 frame=6041 0x81=0x17
+[round 20] ram=0x18 (was 0x17) frame=6145
+[snap s0] round=20 frame=6205 0x81=0x18
+[snap hop1] round=20 frame=6236 0x81=0x18
+[snap hop2] round=20 frame=6297 0x81=0x18
+[round 21] ram=0x19 (was 0x18) frame=6401
+[snap s0] round=21 frame=6461 0x81=0x19
+[snap hop1] round=21 frame=6492 0x81=0x19
+[snap hop2] round=21 frame=6553 0x81=0x19
+[round 22] ram=0x1A (was 0x19) frame=6657
+[snap s0] round=22 frame=6717 0x81=0x1A
+[snap hop1] round=22 frame=6748 0x81=0x1A
+[snap hop2] round=22 frame=6809 0x81=0x1A
+[done]

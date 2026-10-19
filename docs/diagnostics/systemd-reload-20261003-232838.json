@@ -1,0 +1,346 @@
+{
+  "read_only": true,
+  "captured_at": "2026-10-03T23:28:29+0700",
+  "pid1_status": "Name:\tsystemd\nUmask:\t0000\nState:\tS (sleeping)\nTgid:\t1\nNgid:\t0\nPid:\t1\nPPid:\t0\nTracerPid:\t0\nUid:\t0\t0\t0\t0\nGid:\t0\t0\t0\t0\nFDSize:\t262144\nGroups:\t \nNStgid:\t1\nNSpid:\t1\nNSpgid:\t1\nNSsid:\t1\nKthread:\t0\nVmPeak:\t 1613328 kB\nVmSize:\t 1613292 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t 1577504 kB\nVmRSS:\t 1577444 kB\nRssAnon:\t 1572084 kB\nRssFile:\t    5360 kB\nRssShmem:\t       0 kB\nVmData:\t 1592260 kB\nVmStk:\t     132 kB\nVmExe:\t      64 kB\nVmLib:\t   12656 kB\nVmPTE:\t    3164 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t1/115485\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t7fefc1fe28014a03\nSigIgn:\t0000000000001000\nSigCgt:\t00000000000004ec\nCapInh:\t0000000000000000\nCapPrm:\t000001ffffffffff\nCapEff:\t000001ffffffffff\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tff\nCpus_allowed_list:\t0-7\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t559821\nnonvoluntary_ctxt_switches:\t4485096\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+  "pid1_limits": "Limit                     Soft Limit           Hard Limit           Units     \nMax cpu time              unlimited            unlimited            seconds   \nMax file size             unlimited            unlimited            bytes     \nMax data size             unlimited            unlimited            bytes     \nMax stack size            8388608              unlimited            bytes     \nMax core file size        unlimited            unlimited            bytes     \nMax resident set          unlimited            unlimited            bytes     \nMax processes             115485               115485               processes \nMax open files            2147483584           2147483584           files     \nMax locked memory         4170633216           4170633216           bytes     \nMax address space         unlimited            unlimited            bytes     \nMax file locks            unlimited            unlimited            locks     \nMax pending signals       115485               115485               signals   \nMax msgqueue size         819200               819200               bytes     \nMax nice priority         0                    0                    \nMax realtime priority     0                    0                    \nMax realtime timeout      unlimited            unlimited            us        \n",
+  "fd_count": 97990,
+  "fd_types": {
+    "other files (paths omitted)": 21,
+    "anon_inode:[eventpoll]": 2,
+    "anon_inode:[signalfd]": 1,
+    "cgroup files": 2,
+    "anon_inode:inotify": 6,
+    "anon_inode:[pidfd]": 66,
+    "pipe:": 5,
+    "proc files": 2,
+    "socket:": 134,
+    "anon_inode:[timerfd]": 3,
+    "anon_inode:bpf-prog": 97748
+  },
+  "fd_entries_examined": 97990,
+  "pidfd_samples": [
+    "Pid:\t44978\nNSpid:\t44978",
+    "Pid:\t42851\nNSpid:\t42851",
+    "Pid:\t775\nNSpid:\t775",
+    "Pid:\t782\nNSpid:\t782",
+    "Pid:\t3629706\nNSpid:\t3629706",
+    "Pid:\t299\nNSpid:\t299",
+    "Pid:\t335\nNSpid:\t335",
+    "Pid:\t43317\nNSpid:\t43317",
+    "Pid:\t334\nNSpid:\t334",
+    "Pid:\t860\nNSpid:\t860",
+    "Pid:\t791\nNSpid:\t791",
+    "Pid:\t999\nNSpid:\t999",
+    "Pid:\t1050\nNSpid:\t1050",
+    "Pid:\t760\nNSpid:\t760",
+    "Pid:\t3629709\nNSpid:\t3629709",
+    "Pid:\t1029\nNSpid:\t1029",
+    "Pid:\t1955\nNSpid:\t1955",
+    "Pid:\t780\nNSpid:\t780",
+    "Pid:\t2403\nNSpid:\t2403",
+    "Pid:\t762\nNSpid:\t762",
+    "Pid:\t985\nNSpid:\t985",
+    "Pid:\t746\nNSpid:\t746",
+    "Pid:\t797\nNSpid:\t797",
+    "Pid:\t893\nNSpid:\t893",
+    "Pid:\t1343\nNSpid:\t1343",
+    "Pid:\t761\nNSpid:\t761",
+    "Pid:\t773\nNSpid:\t773",
+    "Pid:\t914\nNSpid:\t914",
+    "Pid:\t5827\nNSpid:\t5827",
+    "Pid:\t43317\nNSpid:\t43317",
+    "Pid:\t42851\nNSpid:\t42851",
+    "Pid:\t35492\nNSpid:\t35492"
+  ],
+  "bpf_fdinfo_samples": [
+    {
+      "fd": "60",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t476392\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "99551",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t352431\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "101103",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t453206\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "102654",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t429363\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "104207",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t6389\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "105758",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t380862\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "107310",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t463148\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "108863",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t381595\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "110416",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t302701\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "111968",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t84999\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "113525",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t459155\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "115079",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t373981\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "116631",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t228838\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "118183",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t464109\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "119735",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t191754\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "121288",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t427598\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "122840",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t100813\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "124392",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t72488\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "125944",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t148956\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "127497",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t280876\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "129048",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t159769\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "130600",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t119026\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "132174",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t102204\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "133726",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t235647\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "135277",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t56786\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "136835",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t95074\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "138387",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t131008\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "139939",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t448421\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "141492",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t120693\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "143044",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t237736\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "144596",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t65637\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "146147",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t404922\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "147703",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t413361\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "149261",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t295687\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "150813",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t197806\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "152364",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t466757\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "153916",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t8461\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "155467",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t9570\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "157019",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t73661\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "158572",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t360382\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "160123",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t218676\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "161678",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t107718\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "163229",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t295732\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "164783",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t57488\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "166337",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t397961\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "167891",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t226122\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "169443",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t280144\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "170995",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t122293\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "172547",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t304128\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "174099",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t4696\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "175650",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t310618\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "177204",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t223744\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "178757",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t264997\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "180398",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t97959\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "181951",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t397979\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "183502",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t441792\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "185056",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t358687\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "186613",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t266979\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "188166",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t431210\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "189718",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t172954\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "191270",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t430521\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "192822",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t257770\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "194374",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t338145\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    },
+    {
+      "fd": "195926",
+      "info": "pos:\t0\nflags:\t02000002\nmnt_id:\t19\nino:\t76\nprog_type:\t8\nprog_jited:\t1\nprog_tag:\t772db7720b2728e9\nmemlock:\t4096\nprog_id:\t31846\nrun_time_ns:\t0\nrun_cnt:\t0\nrecursion_misses:\t0\nverified_insns:\t8\n"
+    }
+  ],
+  "samples": [
+    {
+      "cpu_ticks_user": "526654",
+      "cpu_ticks_kernel": "1791532",
+      "syscall": "232 0x4 0x5e942749c8f0 0x2ee 0xffffffffffffffff 0x0 0x0 0x7fff4c6e4e00 0x7a7bde4a03e6\n",
+      "kernel_stack": "[<0>] ep_poll+0x496/0x4c0\n[<0>] do_epoll_wait+0x58/0xd0\n[<0>] __x64_sys_epoll_wait+0x6c/0x130\n[<0>] x64_sys_call+0x1bf5/0x2390\n[<0>] do_syscall_64+0x105/0x5a0\n[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e\n"
+    },
+    {
+      "cpu_ticks_user": "526654",
+      "cpu_ticks_kernel": "1791532",
+      "syscall": "232 0x4 0x5e942749c8f0 0x2ee 0xffffffffffffffff 0x0 0x0 0x7fff4c6e4e00 0x7a7bde4a03e6\n",
+      "kernel_stack": "[<0>] ep_poll+0x496/0x4c0\n[<0>] do_epoll_wait+0x58/0xd0\n[<0>] __x64_sys_epoll_wait+0x6c/0x130\n[<0>] x64_sys_call+0x1bf5/0x2390\n[<0>] do_syscall_64+0x105/0x5a0\n[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e\n"
+    },
+    {
+      "cpu_ticks_user": "526654",
+      "cpu_ticks_kernel": "1791532",
+      "syscall": "232 0x4 0x5e942749c8f0 0x2ee 0xffffffffffffffff 0x0 0x0 0x7fff4c6e4e00 0x7a7bde4a03e6\n",
+      "kernel_stack": "[<0>] ep_poll+0x496/0x4c0\n[<0>] do_epoll_wait+0x58/0xd0\n[<0>] __x64_sys_epoll_wait+0x6c/0x130\n[<0>] x64_sys_call+0x1bf5/0x2390\n[<0>] do_syscall_64+0x105/0x5a0\n[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e\n"
+    },
+    {
+      "cpu_ticks_user": "526654",
+      "cpu_ticks_kernel": "1791532",
+      "syscall": "232 0x4 0x5e942749c8f0 0x2ee 0xffffffffffffffff 0x0 0x0 0x7fff4c6e4e00 0x7a7bde4a03e6\n",
+      "kernel_stack": "[<0>] ep_poll+0x496/0x4c0\n[<0>] do_epoll_wait+0x58/0xd0\n[<0>] __x64_sys_epoll_wait+0x6c/0x130\n[<0>] x64_sys_call+0x1bf5/0x2390\n[<0>] do_syscall_64+0x105/0x5a0\n[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e\n"
+    },
+    {
+      "cpu_ticks_user": "526654",
+      "cpu_ticks_kernel": "1791532",
+      "syscall": "232 0x4 0x5e942749c8f0 0x2ee 0xffffffffffffffff 0x0 0x0 0x7fff4c6e4e00 0x7a7bde4a03e6\n",
+      "kernel_stack": "[<0>] ep_poll+0x496/0x4c0\n[<0>] do_epoll_wait+0x58/0xd0\n[<0>] __x64_sys_epoll_wait+0x6c/0x130\n[<0>] x64_sys_call+0x1bf5/0x2390\n[<0>] do_syscall_64+0x105/0x5a0\n[<0>] entry_SYSCALL_64_after_hwframe+0x76/0x7e\n"
+    }
+  ],
+  "reload_journal": "Oct 03 23:15:28 will-latitude5320 systemd[1]: Reloading finished in 612270 ms.\nOct 03 23:05:16 will-latitude5320 systemd[1]: Reloading...\nOct 03 23:05:16 will-latitude5320 systemd[1]: Reload requested from client PID 29968 ('systemctl') (unit user@1000.service)...\nOct 03 23:05:13 will-latitude5320 systemd[1]: Reloading finished in 597663 ms.\nOct 03 22:55:16 will-latitude5320 systemd[1]: Reloading...\nOct 03 22:55:16 will-latitude5320 systemd[1]: Reload requested from client PID 25573 ('systemctl') (unit user@1000.service)...\nOct 03 22:26:52 will-latitude5320 systemd[1]: Reloading finished in 594585 ms.\nOct 03 22:16:57 will-latitude5320 systemd[1]: Reloading...\nOct 03 22:16:57 will-latitude5320 systemd[1]: Reload requested from client PID 4192983 ('systemctl') (unit user@1000.service)...\n"
+}

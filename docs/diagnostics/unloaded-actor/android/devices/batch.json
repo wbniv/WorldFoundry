@@ -1,0 +1,60 @@
+{
+  "id": "B-da4fa007e9ab",
+  "owner": "3806194e6c401f5be6d452fc",
+  "targets": [
+    "chromecast-test-01",
+    "chromecast-test-02"
+  ],
+  "created": 1791483010.8464177,
+  "jobs": [
+    {
+      "id": "J-dc0208160ed7",
+      "owner": "3806194e6c401f5be6d452fc",
+      "accepted": 1791483010.8466399,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "app": "parmenides",
+        "apk": "aab35eb38ad006b2a187f39fb96af6b77bf805484d88f81efb17364963c1d694.apk",
+        "duration": 45.0,
+        "workflow": "record",
+        "device": "chromecast-test-01"
+      },
+      "device": "chromecast-test-01",
+      "generation": 492,
+      "cancel": 0,
+      "error": null,
+      "started": 1791483010.9419122,
+      "finished": 1791483093.8037724,
+      "worker_pid": 2340465,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-01"
+    },
+    {
+      "id": "J-459777d97f8a",
+      "owner": "3806194e6c401f5be6d452fc",
+      "accepted": 1791483010.8468728,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "app": "parmenides",
+        "apk": "aab35eb38ad006b2a187f39fb96af6b77bf805484d88f81efb17364963c1d694.apk",
+        "duration": 45.0,
+        "workflow": "record",
+        "device": "chromecast-test-02"
+      },
+      "device": "chromecast-test-02",
+      "generation": 106,
+      "cancel": 0,
+      "error": null,
+      "started": 1791483010.9422562,
+      "finished": 1791483089.8691344,
+      "worker_pid": 2340466,
+      "recovery_resolved": 0,
+      "installation": null,
+      "target": "chromecast-test-02"
+    }
+  ],
+  "state": "completed"
+}

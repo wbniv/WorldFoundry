@@ -48,8 +48,9 @@ static Material scarecrowMaterialList[] =
 
 static TriFace scarecrowFaceList[] =
 {
-	TriFace( 0, 1, 2, 0, scarecrowVertexList ),
-	TriFace( 1, 3, 2, 0, scarecrowVertexList )
+	// The sheet faces -Y, toward the viewer in front of the scarecrow.
+	TriFace( 0, 2, 1, 0, scarecrowVertexList ),
+	TriFace( 1, 2, 3, 0, scarecrowVertexList )
 };
 
 Vertex3D*
@@ -152,7 +153,11 @@ RenderActorScarecrow::RenderActorScarecrow(Memory& memory, binistream& input,int
 //				std::cout << " bitmapList = [" << bitmapList << ']' << std::endl;
 
 #if defined( USE_ASSET_ID )
-				_nTextures = chunkIter->Size() / sizeof( long );
+				// BMPL holds a packed array of on-disk asset IDs; the count is
+				// (chunk bytes / one ID). Divide by the *source* element type,
+				// not sizeof(_texture[0]) — that's a Texture* (8 bytes on LP64),
+				// which would halve the count. (sizeof(packedAssetID) == 4.)
+				_nTextures = chunkIter->Size() / sizeof( packedAssetID );
 				_texture = new( memory )( Texture*[ _nTextures ] );
 				assert( ValidPtr( _texture ) );
 #else
@@ -230,7 +235,7 @@ RenderActorScarecrow::_Validate() const
 	RangeCheck(0,_nTextures,100);			// kts arbitrary
 	ValidatePtr(_texture);
 #if DO_VALIDATION > 1
-	for(int textureIndex=0;textureIndex<_nTextures;textureIndex++)
+	for(int textureIndex=0;textureIndex<_nTextures;++textureIndex)
 	{
 		ValidatePtr(_texture[textureIndex]);
 //?		_texture[textureIndex]->Validate();

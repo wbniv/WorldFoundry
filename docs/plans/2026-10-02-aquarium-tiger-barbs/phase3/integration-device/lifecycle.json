@@ -1,0 +1,14 @@
+{
+  "apk_sha256": "02c841541d9bf44ab652d606d559b274cce2ddd81cd40f398cb36bb43830390f",
+  "apk_bytes": 3629328,
+  "install": "Performing Streamed Install\nSuccess\n",
+  "foreground_tank": [
+    "topResumedActivity=ActivityRecord{afed0ee u0 org.worldfoundry.wf_game.aquarium/android.app.NativeActivity t474}"
+  ],
+  "pid_before_home": "24748",
+  "pid_after_resume": "24748",
+  "pid_after_relaunch": "24899",
+  "installed_apk_sha256": "02c841541d9bf44ab652d606d559b274cce2ddd81cd40f398cb36bb43830390f",
+  "result": "PASS: exact installed APK, seven-tank selector, tank return, stable Home/resume PID, new relaunch PID; screenshots require visual review",
+  "visual_review": "PASS: phase 3 barbs visible; returned seven-tank selector correct"
+}

@@ -1,0 +1,3 @@
+PASS: both game shells reference icon assets; all three PNG assets return 200 image/png.
+Platform regression suite: 36 passed.
+APK build and signing verification: passed.

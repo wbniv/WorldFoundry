@@ -46,34 +46,47 @@
 // DBSTREAM4: all sub-systems including loops
 // DBSTREAM5: everything
 
+// A disabled DBSTREAMn( x ) stands in for one statement. Expanding to nothing is
+// fine while some levels are on, but at SW_DBSTREAM == 0 it let an unbraced
+//     if ( !_camera ) DBSTREAM1( cwarn << "..." << std::endl; )
+//     _theLevelRooms->InitRooms( ... );
+// swallow the next statement as the if's body (level.cc, silently), and it
+// broke `if ( x ) DBSTREAM1( ... ) else` outright. At level 0 a disabled call
+// is therefore a null statement. Other levels keep expanding to nothing.
+#if ( SW_DBSTREAM == 0 )
+#define WF_DBSTREAM_DISABLED ;
+#else
+#define WF_DBSTREAM_DISABLED
+#endif
+
 #if ( SW_DBSTREAM >= 1 )
 #define DBSTREAM1( x ) x
 #else
-#define DBSTREAM1( x )
+#define DBSTREAM1( x ) WF_DBSTREAM_DISABLED
 #endif
 
 #if ( SW_DBSTREAM >= 2 )
 #define DBSTREAM2( x ) x
 #else
-#define DBSTREAM2( x )
+#define DBSTREAM2( x ) WF_DBSTREAM_DISABLED
 #endif
 
 #if ( SW_DBSTREAM >= 3 )
 #define DBSTREAM3( x ) x
 #else
-#define DBSTREAM3( x )
+#define DBSTREAM3( x ) WF_DBSTREAM_DISABLED
 #endif
 
 #if ( SW_DBSTREAM >= 4 )
 #define DBSTREAM4( x ) x
 #else
-#define DBSTREAM4( x )
+#define DBSTREAM4( x ) WF_DBSTREAM_DISABLED
 #endif
 
 #if ( SW_DBSTREAM >= 5 )
 #define DBSTREAM5( x ) x
 #else
-#define DBSTREAM5( x )
+#define DBSTREAM5( x ) WF_DBSTREAM_DISABLED
 #endif
 
 //=============================================================================

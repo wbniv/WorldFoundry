@@ -1,0 +1,26 @@
+{
+  "command": [
+    "stdbuf",
+    "-oL",
+    "-eL",
+    "/tmp/t4-final-wf-game-asserts",
+    "-L/tmp/t4-final-follow-level/teleport_regression-standalone.iff",
+    "--windowed",
+    "--debug-print-actors",
+    "--debug-port",
+    "50347",
+    "--debug-bind",
+    "127.0.0.1"
+  ],
+  "arrivals": [
+    {
+      "lap": 1,
+      "command": 2,
+      "x": 100.0,
+      "camera_x": 23.556259,
+      "fps": 60.396599
+    }
+  ],
+  "exit_before_cleanup": null,
+  "cleanup_exit": -15
+}

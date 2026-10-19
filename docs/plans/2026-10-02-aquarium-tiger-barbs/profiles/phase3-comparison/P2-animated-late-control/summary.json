@@ -1,0 +1,37 @@
+{
+  "receipt": {
+    "apk": "/tmp/aquarium-phase3-variants/P2-animated.apk",
+    "apk_sha256": "251e175e01d7277523cde10ad5b8c399574486c7981c5239acc463a34dd4345b",
+    "protocol": "30 s warmup; 60 s fixed trace (five 12 s segments); 1 run(s); SurfaceFlinger sampled every 0.75 s",
+    "serial": "adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp",
+    "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+    "revision": "10310efe14afdb1acbee687988ee76fcd62ca14f"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "layer": "org.worldfoundry.wf_game.aquarium/android.app.NativeActivity#4221",
+      "frames": 2509,
+      "refresh_ms": 16.683333,
+      "p50_ms": 33.366568,
+      "p90_ms": 33.366916,
+      "p95_ms": 50.050062,
+      "p99_ms": 50.050212,
+      "worst_ms": 100.100118,
+      "fps": 36.680343396189045,
+      "missed_refresh_percent": 54.40414507772021
+    }
+  ],
+  "median": {
+    "run": 1,
+    "frames": 2509,
+    "refresh_ms": 16.683333,
+    "p50_ms": 33.366568,
+    "p90_ms": 33.366916,
+    "p95_ms": 50.050062,
+    "p99_ms": 50.050212,
+    "worst_ms": 100.100118,
+    "fps": 36.680343396189045,
+    "missed_refresh_percent": 54.40414507772021
+  }
+}

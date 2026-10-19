@@ -1,3 +1,4 @@
+#include <game/plant_settings.h>
 //==============================================================================
 // main.cc:
 // Copyright (c) 1994,1995,1996,1997,1999,2000,2001,2002,2003 World Foundry Group  
@@ -28,54 +29,98 @@
 #include <pigsys/pigsys.hp>
 #include "game.hp"
 #include "version.hp"
+#include <hal/lifecycle.h>
+#include <gfx/display.hp>
+#include <gfx/vmem.hp>
+#include <gfx/static_mesh.hp>
 
-#if defined( __WIN__ ) || defined(__LINUX__)
+#if defined(__LINUX__) || defined(__ANDROID__)
 	char szOadDir[ _MAX_PATH ];
 #endif
 
-#if defined ( __PSX__ )
-#include <libgte.h>
-#include <libgpu.h>
-#if DBSTREAM < 1
-bool enableScreenStream = false;        // kts remove in final game, used
-#endif
-#endif
 
 #include "level.hp"
+#include "runtime_profile.hp"
+#include <cstdlib>
 
-#if defined( __WIN__ )
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <mmsystem.h>
-int streamFrom = 0;
-extern "C" BOOL WINAPI IsDebuggerPresent(void);
-#endif
 
 #include <pigsys/pigsys.hp>
 #include <cpplib/libstrm.hp>
 
 #include "gamestrm.hp"
+#include "level_menu.h"
+#include "ui_font.hp"
 
 //==============================================================================
 
-#if defined(__PSX__)
-BeforeMain wfBeforeMain;
+int  gDebugPort = 7777;                 // default-on; --debug-port N overrides, --debug-port 0 disables
+char gDebugBind[256] = "127.0.0.1";    // bind address; set by --debug-bind ADDR
+extern "C" void WFScriptProfileEnable() __attribute__((weak));   // engine/stubs/scripting_zforth.cc; absent (null) in builds with another Forth or none
+int  gFrameStepSmokeCount = 0;          // >0 = run --frame-step-smoke=N path
+bool gFrameRateChecks = false;         // runtime mailbox probes, diagnostics only
+bool gFrameStepNoSwap = false;         // exercise externally presented frame steps
+bool gWfmutSmoke          = false;      // true = run --wfmut-smoke path
+bool gMemoryTest          = false;      // true = run --memory-test and exit (no level, no window)
+// --capture-frame=N=<path.png>: write backend frame N to a PNG. macOS/Metal
+// only today (hal/macos/display_macos.cc renders offscreen); a no-op elsewhere.
+// N counts frames that actually reached the backend, not engine steps — the two
+// differ whenever the camera has no valid view. See the macOS Metal plan Phase 2.
+int         gCaptureFrame = 0;
+const char* gCapturePath  = nullptr;
+// --windowed: open a real window (macOS Phase 4). Opt-in rather than default so
+// the existing headless CI smoke keeps running exactly as it did in Phases 2-3,
+// and so a machine with no window-server session is never asked for a window it
+// cannot provide. Ignored on platforms whose HAL already owns a window.
+bool        gWindowed     = false;
+bool gWfmutThreadTest     = false;      // true = run --wfmut-thread-test (X5 death-test)
+int  gFrameStepCycles = 1;              // --cycles=N: how many Load/Unload cycles to run
+// Always defined: rooms.cc/level.cc reference it unconditionally as a runtime
+// guard. Only ever set true under --editor, which is itself WF_ENABLE_EDITOR-gated,
+// so in the game build it stays false (guards behave exactly as before the editor work).
+bool gEditorMode = false;               // --editor: wf-edit drives the engine via RunEditor
+#if DO_TEST_CODE
+int  gDebugPrintActors = 0;             // 1 = print idx/mesh/mobility/pos per actor at construction (debug builds only)
 #endif
-bool gSoundEnabled = false;
-bool gCDEnabled = false;
 
-WFGame* theGame = NULL;
+// theGame global removed 2026-05-18 (Phase 0b WFGame de-globaling). WFGame
+// is now instantiated in PIGSMain (see below) and passed by reference to Level;
+// other engine code that needs WFGame state goes through Level's parent ref.
+//
+// gSoundEnabled / gCDEnabled also removed 2026-05-18 — write-only globals
+// (set by -sound / -cd CLI flags, never read anywhere). The corresponding
+// CLI flag handlers below were also dropped. Audio is governed by gMusicPlayer
+// (audio/linux/music.cc) and gSoundDevice (audio/linux/device.cc) instead.
 
 #if defined(DESIGNER_CHEATS)
-bool bRecordTGA = false;
+bool bRecordVideo = false;
+int  wf_hud_score = 0;
+int  wf_hud_timer = 0;
+int  wf_hud_lives = 0;
+int  wf_hud_marble_state = 0;
+int  wf_hud_marble_falls = 0;
+int  wf_hud_game_over = 0;
+int  wf_hud_entering_initials = 0;
+char wf_hud_initials[4] = {'A','A','A','\0'};
+int  wf_hud_initials_pos = 0;
+// PILOT T:/TH: HUD text. Written by InEngineMailboxHost::Type() in scripting_pilot.cc;
+// rendered in DrawHud() (display.cc). Ring of 4 lines; wf_hud_pilot_pending accumulates
+// TH: (no-newline) fragments until T: flushes them as a complete line.
+char wf_hud_pilot[4][128]  = {};
+int  wf_hud_pilot_count    = 0;   // monotonically increasing; slot = count % 4
+char wf_hud_pilot_pending[128] = {};
+// Moon Site 01 position-display HUD overlay — see docs/plans/2026-05-31-position-display-hud-overlay-on-the-moon-level-tex.md
+int   wf_moon_overlay_enabled    = 0;
+float wf_moon_player_x_m         = 0.0f;
+float wf_moon_player_y_m         = 0.0f;
+float wf_moon_player_z_m         = 0.0f;
+float wf_moon_player_heading_rev = 0.0f;
+// Moon lander launch sequence — see docs/plans/2026-06-02-moon-lander-launch-sequence.md
+int   wf_moon_launch_phase       = 0;        // 0=idle, 1=countdown, 2=ignition, 3=ascent
+float wf_moon_launch_t_minus     = 0.0f;     // seconds until launch (phase 1) or since ignition (phase ≥ 2)
 #endif
 
-#if defined( __PSX__ )
-bool bRenderZs = true;
-#else
 bool bPerspectiveCorrection = false;
 bool bRenderZs = false;
-#endif
 bool bRenderZb = !bRenderZs;
 
 bool bLinearMalloc = false;
@@ -101,7 +146,7 @@ std::ifstream* joystickInputFile;	// istream for joystick data
 
 const char szRate[] = "rate";
 
-#if ( !defined( __PSX__ ) && SW_DBSTREAM > 0)
+#if SW_DBSTREAM > 0
 
 void
 usage( int argc, char* argv[] )
@@ -110,6 +155,11 @@ usage( int argc, char* argv[] )
    (void) argv;
 	std::cout << "Usage : " << __GAME__ << " {switches} <level #>" << std::endl;
 	std::cout << "Switches:" << std::endl;
+	std::cout << "\t--no-fps\tHide the default bottom-right frame-rate counter" << std::endl;
+	std::cout << "\t--static-mesh=0|1\tDraw meshes from static GPU buffers (default 1; env WF_STATIC_MESH)" << std::endl;
+	std::cout << "\t--static-mesh-cull=exact|fast\tStatic-mesh back-face test (default exact)" << std::endl;
+	std::cout << "\t--static-mesh-shared-index=0|1\tShare one static-mesh index buffer (default 1)" << std::endl;
+	std::cout << "\t--static-mesh-bake-budget=N\tFaces baked per frame at most (default 4000, 0 = no limit)" << std::endl;
 	std::cout << "\t-p<stream initial><stream output>, where:" << std::endl;
 	std::cout << "\t\t<stream initial> can be any of:" << std::endl;
 	std::cout << "\t\t\tw=warnings (defaults to standard err)" << std::endl;
@@ -122,10 +172,6 @@ usage( int argc, char* argv[] )
 	std::cout << "\t\t\tn=null, no output is produced" << std::endl;
 	std::cout << "\t\t\ts=standard out" << std::endl;
 	std::cout << "\t\t\te=standard err" << std::endl;
-#if defined (__PSX__)
-	std::cout << "\t\t\tc=screen, display on psx screen" << std::endl;
-	std::cout << "\t\t\tu=screenflush, display on psx screen during startup" << std::endl;
-#endif
 	std::cout << "\t\t\tm#=monochrome dispay, # = which window" << std::endl;
 	std::cout << "\t\t\tf<filename>=output to filename" << std::endl;
 	std::cout << "\t-s<stream initial><stream output>, where:" << std::endl;
@@ -147,23 +193,24 @@ usage( int argc, char* argv[] )
 	std::cout << "\t\t<stream output> (same as above)" << std::endl;
 
     std::cout << "\t-paranoid\tPerform insanely slow error checks" << std::endl;
-    std::cout << "\t-record_tga\tSave every frame as frame#.tga in cwd" << std::endl;
-#if !defined( __PSX__ )
+    std::cout << "\t-record_video\tRecord gameplay to output.mp4 via ffmpeg" << std::endl;
+    std::cout << "\t--vram-width N\t\tTotal VRAM box width  (default " << Display::VRAMWidth  << ")" << std::endl;
+    std::cout << "\t--vram-height N\t\tTotal VRAM box height (default " << Display::VRAMHeight << ")" << std::endl;
+    std::cout << "\t--vram-slot-width N\tTransient texture slot width  (default " << VideoMemory::VRAMTransientWidth  << ")" << std::endl;
+    std::cout << "\t--vram-slot-height N\tTransient texture slot height (default " << VideoMemory::VRAMTransientHeight << ")" << std::endl;
+    std::cout << "\t--vram-perm-width N\tPermanent texture slot width  (default " << VideoMemory::VRAMPermanentWidth  << ")" << std::endl;
+    std::cout << "\t--vram-perm-height N\tPermanent texture slot height (default " << VideoMemory::VRAMPermanentHeight << ")" << std::endl;
     std::cout << "\t-zs\t\tZ-Sorted" << std::endl;
     std::cout << "\t-zb\t\tZ-Buffered" << std::endl;
-#endif
-#if defined( __WIN__ )
-	std::cout << "\t-window\t\tDisplay game in a window" << std::endl;
-#endif
 	std::cout << "\t-nologo\t\tDon't display company logos" << std::endl;
 //			std::cout << "\t-framerate\tPrint framerate" << std::endl;
-#if defined (__WIN)
-	std::cout << "\t-perspective\tEnable texture perspective correction" << std::endl;
-#endif
 	std::cout << "\t-" << szRate << "N\t\tSimulate a frame rate of N Hz" << std::endl;
 	std::cout << "\t-profmemload\tProfile memory usage during load" << std::endl;
 	std::cout << "\t-profmainloop\tProfile cpu usage during main game loop" << std::endl;
 	std::cout << "\t-lmalloc\tUse linear malloc() instead of C runtime malloc()" << std::endl;
+	std::cout << "\t-width=N -height=N\tWindow / recording size in pixels (default 640x480)" << std::endl;
+	std::cout << "\t-xpos=N -ypos=N\tWindow position" << std::endl;
+	std::cout << "\t-fullscreen\tFullscreen at the screen's size; -window for a window" << std::endl;
 	std::cout << "\t-sound\t\tEnable Sound" << std::endl;
 	std::cout << "\t-cd\t\tenable CD" << std::endl;
 #if defined(JOYSTICK_RECORDER)
@@ -186,34 +233,188 @@ int
 ParseCommandLine(int argc, char** argv)
 {
 	int index;
-	for( index=1; index < argc && argv[index] && ((*argv[index] == '-') || (*argv[index] == '/')); index++)
+	for( index=1; index < argc && argv[index] && ((*argv[index] == '-') || (*argv[index] == '/')); ++index)
 	{
 #if 0
-#if defined( __WIN__ )
-		const char szHeight[] = "height";
-#endif
 #endif
 
 		DBSTREAM1( std::cout << argv[index] << std::endl; )
 
 		if ( 0 )
 			;
+		else if ( argv[index][1] == 'L' && argv[index][2] != 0 )
+		{
+			extern const char* gLevelOverridePath;
+			gLevelOverridePath = argv[index] + 2;
+			DBSTREAM1( cprogress << "Level override path: " << gLevelOverridePath << std::endl; )
+		}
+		// Window switches are consumed by the platform layer (ParseWindowSwitches in
+		// hal/<platform>/platform_init.cc) before we get here. They must be recognised
+		// explicitly, because the single-letter fallbacks below match by first character:
+		// "-height=960" used to hit the 'h' (help) branch and exit 1 (2026-09-19).
+		else if ( strncmp( argv[index]+1, "width=", 6 ) == 0 || strncmp( argv[index]+1, "height=", 7 ) == 0 ||
+		          strncmp( argv[index]+1, "xpos=", 5 ) == 0  || strncmp( argv[index]+1, "ypos=", 5 ) == 0 ||
+		          strcmp( argv[index]+1, "window" ) == 0     || strcmp( argv[index]+1, "fullscreen" ) == 0 )
+			;
+		else if ( strncmp( argv[index]+1, "-debug-port", 11 ) == 0 && argv[index+1] )
+		{
+			gDebugPort = atoi( argv[index+1] );
+			++index;
+			DBSTREAM1( cprogress << "Debug bridge port: " << gDebugPort << std::endl; )
+		}
+		else if ( strncmp( argv[index]+1, "-debug-bind", 11 ) == 0 && argv[index+1] )
+		{
+			strncpy( gDebugBind, argv[index+1], sizeof(gDebugBind) - 1 );
+			gDebugBind[sizeof(gDebugBind)-1] = '\0';
+			++index;
+			DBSTREAM1( cprogress << "Debug bridge bind: " << gDebugBind << std::endl; )
+		}
+        else if ( strncmp(argv[index], "--plant-",8)==0 ) {
+            std::fprintf(stderr,"wf_game: removed plant CLI override: %s; cook plant settings into the level RPRP catalog\n",argv[index]);
+            std::exit(2);
+        }
+		else if ( strcmp( argv[index]+1, "-no-fps" ) == 0 )
+		{
+			fpscounter::enabled = false;
+		}
+		else if ( strcmp( argv[index]+1, "-frame-profile" ) == 0 )
+		{
+			wf_profile::enable();
+		}
+		// E3 static mesh buffers (gfx/static_mesh.hp): on by default; =0 streams
+		// every mesh through DrawTriangle as before. Wins over WF_STATIC_MESH.
+		else if ( strcmp( argv[index], "--static-mesh=0" ) == 0 || strcmp( argv[index], "--static-mesh=1" ) == 0 )
+			StaticMeshSetSwitch( argv[index][14] == '1' );
+		else if ( strcmp( argv[index], "--static-mesh-cull=exact" ) == 0 || strcmp( argv[index], "--static-mesh-cull=fast" ) == 0 )
+			StaticMeshSetFastCull( strcmp( argv[index] + 19, "fast" ) == 0 );
+		else if ( strcmp( argv[index], "--static-mesh-shared-index=0" ) == 0 || strcmp( argv[index], "--static-mesh-shared-index=1" ) == 0 )
+			StaticMeshSetSharedIndex( strcmp( argv[index], "--static-mesh-shared-index=1" ) == 0 );
+		else if ( strncmp( argv[index], "--static-mesh-bake-budget=", 26 ) == 0 )
+			StaticMeshSetBakeBudget( atoi( argv[index] + 26 ) );
+		else if ( strcmp( argv[index]+1, "-script-profile" ) == 0 )
+		{
+			if ( WFScriptProfileEnable ) WFScriptProfileEnable();
+			DBSTREAM1( cprogress << "Script profiler on" << std::endl; )
+		}
+		else if ( strcmp( argv[index]+1, "-frame-rate-checks" ) == 0 )
+			gFrameRateChecks = true;
+		else if ( strcmp( argv[index]+1, "-frame-step-no-swap" ) == 0 )
+			gFrameStepNoSwap = true;
+		else if ( strncmp( argv[index]+1, "-frame-step-smoke=", 18 ) == 0 )
+		{
+			gFrameStepSmokeCount = atoi( argv[index] + 1 + 18 );
+			DBSTREAM1( cprogress << "Frame-step API smoke: " << gFrameStepSmokeCount << " frames" << std::endl; )
+		}
+		else if ( strncmp( argv[index]+1, "-capture-frame=", 15 ) == 0 )
+		{
+			// --capture-frame=N=<path.png>
+			const char* spec = argv[index] + 1 + 15;
+			const char* eq   = strchr( spec, '=' );
+			if ( eq && eq[1] )
+			{
+				if ( gCaptureFrame > 0 )
+				{
+					// gCaptureFrame is a scalar — only one capture per run is
+					// supported, so a second flag silently overwrote the first.
+					std::cerr << "wf_game: WARNING: --capture-frame given more "
+					             "than once; only the last (" << (eq + 1)
+					          << ") wins" << std::endl;
+				}
+				gCaptureFrame = atoi( spec );
+				gCapturePath  = eq + 1;
+			}
+			AssertMsg( gCaptureFrame > 0 && gCapturePath,
+			           "--capture-frame wants N=<path.png>, got: " << spec );
+			DBSTREAM1( cprogress << "Capture frame " << gCaptureFrame
+			                     << " -> " << gCapturePath << std::endl; )
+		}
+		else if ( strncmp( argv[index]+1, "-menu-input=", 12 ) == 0 )
+		{
+			// --menu-input=down,down,a,wait:90,back,quit: scripted input for the level
+			// menu and back/quit requests in levels (game/level_menu.h, the tests).
+			std::string err;
+			if ( !levelmenu::Script().Parse( argv[index] + 1 + 12, &err ) )
+			{
+				std::cerr << "wf_game: " << err << std::endl;
+				exit( 1 );
+			}
+		}
+		else if ( strcmp( argv[index]+1, "-windowed" ) == 0 )
+		{
+			gWindowed = true;
+			DBSTREAM1( cprogress << "Windowed mode requested" << std::endl; )
+		}
+		else if ( strcmp( argv[index]+1, "-memory-test" ) == 0 )
+		{
+			gMemoryTest = true;
+			DBSTREAM1( cprogress << "memory pool-array test enabled" << std::endl; )
+		}
+		else if ( strcmp( argv[index]+1, "-wfmut-smoke" ) == 0 )
+		{
+			gWfmutSmoke = true;
+			DBSTREAM1( cprogress << "wfmut smoke enabled" << std::endl; )
+		}
+		else if ( strcmp( argv[index]+1, "-wfmut-thread-test" ) == 0 )
+		{
+			gWfmutThreadTest = true;
+			DBSTREAM1( cprogress << "wfmut cross-thread death-test enabled" << std::endl; )
+		}
+		else if ( strncmp( argv[index]+1, "-cycles=", 8 ) == 0 )
+		{
+			gFrameStepCycles = atoi( argv[index] + 1 + 8 );
+			AssertMsg(gFrameStepCycles >= 1, "--cycles=N requires N>=1");
+			DBSTREAM1( cprogress << "Frame-step API cycles: " << gFrameStepCycles << std::endl; )
+		}
+#if defined(WF_ENABLE_EDITOR)
+		else if ( strcmp( argv[index]+1, "-editor" ) == 0 )
+		{
+			gEditorMode = true;
+			DBSTREAM1( cprogress << "Editor mode (wf-edit drives RunEditor)" << std::endl; )
+		}
+#endif
+#if DO_TEST_CODE
+		else if ( strcmp( argv[index]+1, "-debug-print-actors" ) == 0 )
+		{
+			gDebugPrintActors = 1;
+			DBSTREAM1( cprogress << "Debug print actors enabled" << std::endl; )
+		}
+#endif
 		else if ( strncmp( argv[index]+1, (char*)szRate, strlen( szRate ) ) == 0)
 		{
 		    int value = atoi( argv[index] + strlen( szRate ) + 1 );
-          FakeFrameRate = Scalar::one / Scalar(value,0);
-			FakeFrameRate = SCALAR_CONSTANT(0.05);
+			// `-rateN` means "simulate a fixed N Hz clock" (see
+			// docs/command-line-switches.md), and it is the only lever that makes
+			// a run reproducible: level.cc:821 advances the level clock by
+			// FakeFrameRate instead of the wall-clock delta. Until 2026-09-21 the
+			// computed rate was immediately overwritten by a hardcoded 0.05, so
+			// every -rateN silently meant 20 Hz and `value` was a dead store.
+			// Found while building the macOS/Linux matched-frame capture, which
+			// depends on this flag doing what it says.
+			if ( value > 0 )
+				FakeFrameRate = Scalar::one / Scalar(value,0);
+			else
+				FakeFrameRate = SCALAR_CONSTANT(0.05);   // bare -rate: 20 Hz
 			DBSTREAM1( cerror << "Fake clock delta = " << FakeFrameRate << std::endl; )
 		}
-#if defined( __WIN__ )
-		else if ( strcmp( argv[index]+1, "perspective" ) == 0 )
-			bPerspectiveCorrection = true;
-#endif
 #if defined(DESIGNER_CHEATS)
-        else if ( strcmp( argv[index]+1, "record_tga" ) == 0 )
-            bRecordTGA = true;
+        else if ( strcmp( argv[index]+1, "record_video" ) == 0 )
+            bRecordVideo = true;
 #endif
-#if !defined( __PSX__ )
+        // Runtime VRAM overrides — must be applied before Display/VideoMemory
+        // is constructed below. See
+        // docs/plans/2026-05-30-runtime-vram-cli-overrides.md.
+        else if ( strncmp( argv[index]+1, "-vram-width=", 12 ) == 0 )
+            Display::VRAMWidth  = atoi( argv[index] + 13 );
+        else if ( strncmp( argv[index]+1, "-vram-height=", 13 ) == 0 )
+            Display::VRAMHeight = atoi( argv[index] + 14 );
+        else if ( strncmp( argv[index]+1, "-vram-slot-width=", 17 ) == 0 )
+            VideoMemory::VRAMTransientWidth  = atoi( argv[index] + 18 );
+        else if ( strncmp( argv[index]+1, "-vram-slot-height=", 18 ) == 0 )
+            VideoMemory::VRAMTransientHeight = atoi( argv[index] + 19 );
+        else if ( strncmp( argv[index]+1, "-vram-perm-width=", 17 ) == 0 )
+            VideoMemory::VRAMPermanentWidth  = atoi( argv[index] + 18 );
+        else if ( strncmp( argv[index]+1, "-vram-perm-height=", 18 ) == 0 )
+            VideoMemory::VRAMPermanentHeight = atoi( argv[index] + 19 );
 		else if ( strcmp( argv[index]+1, "zb" ) == 0 )
 		{
 			bRenderZb = true;
@@ -224,13 +425,6 @@ ParseCommandLine(int argc, char** argv)
 			bRenderZs = true;
 			bRenderZb = false;
 		}
-#endif
-#if defined( __WIN__ )
-		else if ( strcmp( argv[ index ] + 1, "hd" ) == 0 )
-			streamFrom = 1;
-		else if ( strcmp( argv[ index ] + 1, "cd" ) == 0 )
-			streamFrom = 2;
-#endif
 #if defined(JOYSTICK_RECORDER)
 		else if ( memcmp( argv[index]+1, "joy", 3 ) == 0 )
 		{
@@ -252,7 +446,7 @@ ParseCommandLine(int argc, char** argv)
 			AssertMsg( strlen(argv[index]+1) > 10, "The -breaktime= option requires a time" );
 			extern Scalar WALL_CLOCK_BREAKPOINT_VALUE;
 #if defined(SCALAR_TYPE_FIXED)
-         long value = atoi( argv[index] + 1 + 10 );
+         int32 value = atoi( argv[index] + 1 + 10 );
         WALL_CLOCK_BREAKPOINT_VALUE = Scalar::FromFixed32(value);
 #elif defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
          double value;
@@ -267,17 +461,9 @@ ParseCommandLine(int argc, char** argv)
 #if DEBUG > 0
         else if ( strcmp( argv[index]+1, "lmalloc" ) == 0 )
             bLinearMalloc = true;
-		else if ( strcmp( argv[index]+1, "sound" ) == 0 )
-		{
-			gSoundEnabled = true;
-            gCDEnabled = true;
-			//std::cout << "Sound is OFF" << end1;
-		}
-        else if ( strcmp( argv[index]+1, "cd" ) == 0 )
-		{
-            gCDEnabled = true;
-            //std::cout << "CD is OFF" << end1;
-		}
+        // -sound and -cd CLI flags removed 2026-05-18 — they set gSoundEnabled
+        // / gCDEnabled which had no readers. Use the audio-specific globals in
+        // audio/linux/{music,device}.cc to control audio behaviour instead.
 #endif
 #if SW_DBSTREAM > 0
 		else if ( tolower( *( argv[index]+1 ) ) == 'p' )
@@ -290,19 +476,19 @@ ParseCommandLine(int argc, char** argv)
 
 // kts: printframerate should be removed from release
 #if defined(DESIGNER_CHEATS)
-		else if ( tolower( *( argv[index]+1 ) ) == 'f' )
+		else if ( strcmp( argv[index]+1, "f" ) == 0 )
 		{
 			  printFrameRate = true;
 			  DBSTREAM1( std::cout << "PrintFrameRate on" << std::endl; )
 	 	}
 #endif
-#if (!defined( __PSX__ ) && SW_DBSTREAM > 0)
-		else if ( *( argv[index]+1 ) == 'h' )
+#if SW_DBSTREAM > 0
+		else if ( strcmp( argv[index]+1, "h" ) == 0 || strcmp( argv[index]+1, "help" ) == 0 || strcmp( argv[index]+1, "-help" ) == 0 )
 	  	{
 			usage( argc, argv );
          sys_exit(1);
   		}
-#endif		// !defined( __PSX__ ) )
+#endif		// SW_DBSTREAM > 0
 #if DO_ASSERTIONS
 		else
 			DBSTREAM1( cerror << "game Error: Unrecognized command line switch \"" <<
@@ -315,86 +501,34 @@ ParseCommandLine(int argc, char** argv)
 
 
 
-#if defined( __PSX__ )
-extern int   _ramsize;
-extern int _stacksize;
-extern int __heapsize;
-extern void* __heapbase;
-#endif
 
-#if defined( __WIN__ )
-bool
-GetLocalMachineStringRegistryEntry( const char* path, const char* valueName, char* contents, int sizeOfContents )
-{
-	HKEY resultKey = NULL;
-    PHKEY phkResult = &resultKey; 	// address of handle of open key
-
-//	                              KEY_ENUMERATE_SUB_KEYS |
-//                              KEY_EXECUTE |
-
-	long retVal = RegOpenKeyEx( HKEY_LOCAL_MACHINE,	path, 0,
-		KEY_ENUMERATE_SUB_KEYS | KEY_QUERY_VALUE, phkResult );
-	//std::cout << "Registry read, retVal = " << retVal << ", key = " << resultKey << std::endl;
-	if ( retVal != ERROR_SUCCESS )
-		return false;
-	assert( retVal == ERROR_SUCCESS );
-	assert( phkResult );
-	assert( resultKey );
-
-	DWORD type;
-	DWORD cbData = sizeOfContents;
-
-	retVal = RegQueryValueEx( resultKey, valueName, NULL, &type, (BYTE*)contents, &cbData );
-	//std::cout << "retVal = " << retVal << std::endl;
-	//std::cout << "type = " << type << std::endl;
-	if ( retVal != ERROR_SUCCESS )
-		return false;
-	assert( type == REG_SZ );
-	assert( retVal == ERROR_SUCCESS );
-	return true;
-}
-#endif
 
 
 void
 PIGSMain( int argc, char* * argv )
 {
-#if 0	//msvc defined( TASKER )
-	assert( TaskGetPriority(GetCurrentTask()) == 0);
-	if( TaskGetPriority(GetCurrentTask()) != 0)
-		printf("Incorrect task priority, game will probably fail\n");
-#endif
 
 //	ERR_SET_LOG(3);
 
-//	std::cout << "Heap Base =" << __heapbase << ", heapsize = " << __heapsize << std::endl;
-//#if DO_ASSERTIONS && defined( __PSX__ )
-//	void* test = malloc(10000000);		// allocate 10 million bytes (this should fail)
-//	AssertMsg(test == 0,"Wrong malloc in use, should have returned 0, returned " << test);
-//#endif
-
 	AssertMsg( true & 1, "True must have low bit set [required for bitfield memory optimization]" );
 
-#if defined( __WIN__ )
-	bool bSuccess = GetLocalMachineStringRegistryEntry( "SOFTWARE\\World Foundry\\GDK", "OAD_DIR", szOadDir, sizeof( szOadDir ) );
-#pragma message( __FILE__ ": check to see what happens if szOadDir not gotten from registry" )
-	//AssertMsg( bSuccess, "\"OAD_DIR\" not set in registry (SOFTWARE\\World Foundry\\GDK\\OAD_DIR)" );
-#endif
 
 	DBSTREAM1( std::cout << __GAME__ << " v" << (char*)szVersion; )
 
 	DBSTREAM1( std::cout << ", Built:" << (char*)szDate << "," << (char*)szTime << " by " << szBuildUser << std::endl; )
+	const char* fpsChecks = std::getenv("WF_FRAME_RATE_CHECKS");
+	gFrameRateChecks = fpsChecks && std::strcmp(fpsChecks, "1") == 0;
 	int commandIndex = ParseCommandLine(argc,argv);
 
-#if defined( __WIN__ )
-	// default to 20fps if in debugger
-	if ( IsDebuggerPresent()
-#if defined(JOYSTICK_RECORDER)
-	&& !bJoyPlayback
-#endif
-	)
-			FakeFrameRate = Scalar::one / Scalar(20,0);
-#endif
+	// --memory-test: pure allocator self-check (memory/pooltest.cc). Runs before
+	// any Display/Level/asset work so it stays usable on a headless CI box, and
+	// exits with the failure count so ctest sees a red on regression.
+	if (gMemoryTest)
+	{
+		extern int TestPoolArrays();
+		std::_Exit( TestPoolArrays() );
+	}
+
 
 #if defined(JOYSTICK_RECORDER)
 	// check for conflicting time-related options
@@ -412,18 +546,6 @@ PIGSMain( int argc, char* * argv )
 	DBSTREAM1( cver << "Level=" << nStartingLevel << std::endl; )
 
 #if 0
-#if defined( __WIN__ )
-	{
-		int error;
-		for ( int i=0; i<10; ++i )
-		{
-			JOYINFO ji;
-			if ( ( error = joyGetPos( 0, &ji ) ) != JOYERR_NOERROR )
-				break;
-		}
-		AssertMsg( error == JOYERR_NOERROR, "Joystick driver not installed or joystick not plugged in" );
-	}
-#endif
 #endif
 
 #pragma message( "System streams should be in HAL [framework]" )
@@ -443,9 +565,6 @@ PIGSMain( int argc, char* * argv )
 	cmem << "cmem:" << std::endl;
 #endif
 #if SW_DBSTREAM > 0
-#	ifdef __PSX__
-	DBSTREAM1( cver = std::cout; )
-#	endif
 	DBSTREAM1( cver << __GAME__ " Ver " << (char*)szVersion << ", Built:" << (char*)szDate << "," << (char*)szTime << " by " << szBuildUser << std::endl; )
 	DBSTREAM1( cver << "DBSTREAMS "; )
 #	ifdef DO_PROFILE
@@ -453,17 +572,71 @@ PIGSMain( int argc, char* * argv )
 #	endif
 #endif
 
+	// The UI font (game/ui_font.hp) before anything can draw a menu or a HUD:
+	// a missing or invalid atlas stops here with one "UI_FONT unavailable" line
+	// (docs/plans/2026-10-17-settings-editor-font.md, F6). Every platform and
+	// host (wf-edit's --editor mode too) comes through PIGSMain.
+	extern const char* gLevelOverridePath;
+	wfui::LoadOrDie(gLevelOverridePath != nullptr);
 	DBSTREAM1( cprogress << "main::constructing the game" << std::endl; )
    WFGame* game = new (HALLmalloc) WFGame( nStartingLevel );
 	assert( ValidPtr( game ) );
-   theGame = game;
-	DBSTREAM1( cprogress << "main::running game script" << std::endl; )
 
-	game->RunGameScript( );
+	int wfmutFailures = 0;
+	if (gFrameStepSmokeCount > 0)
+	{
+		DBSTREAM1( cprogress << "main::frame-step API smoke (" << gFrameStepSmokeCount
+		                     << " frames × " << gFrameStepCycles << " cycles)" << std::endl; )
+		game->SmokeRunFrameStep( gFrameStepSmokeCount, gFrameStepCycles );
+	}
+#if (defined(WF_DEBUG_BRIDGE) && !defined(WF_RUNTIME_DIAGNOSTICS)) || defined(WF_ENABLE_EDITOR)
+	else if (gWfmutSmoke)
+	{
+		DBSTREAM1( cprogress << "main::wfmut smoke" << std::endl; )
+		wfmutFailures = game->RunWfmutSmoke( );
+	}
+	else if (gWfmutThreadTest)
+	{
+		DBSTREAM1( cprogress << "main::wfmut cross-thread death-test" << std::endl; )
+		game->RunWfmutThreadTest( );   // expected to abort inside the guard
+	}
+#endif
+#if defined(WF_ENABLE_EDITOR)
+	else if (gEditorMode)
+	{
+#if defined(__EMSCRIPTEN__)
+		// Browser: invert the editor loop onto the frame scheduler (does not
+		// return; the browser drives WebTickEditor). Mirrors RunLevelWeb above.
+		DBSTREAM1( cprogress << "main::editor mode (RunEditorWeb)" << std::endl; )
+		game->RunEditorWeb( );
+		// unreachable
+#else
+		DBSTREAM1( cprogress << "main::editor mode (RunEditor)" << std::endl; )
+		game->RunEditor( );
+#endif
+	}
+#endif
+	else
+	{
+		if (gWfmutSmoke)
+		{
+			std::fprintf(stderr,
+			    "wf_game: --wfmut-smoke requires WF_DEBUG_BRIDGE or WF_ENABLE_EDITOR build\n");
+			std::_Exit(2);
+		}
+		DBSTREAM1( cprogress << "main::running game script" << std::endl; )
+		game->RunGameScript( );
+	}
 
 	DBSTREAM1( cprogress << "Game over: shutting down the game" << std::endl; )
 
+	// WFGame destruction needs the GL context + X window alive — Display's
+	// destructor calls into mesa's window-close path (XSetInputFocus, etc.)
+	// which segfaults if HALCloseWindow ran first. Tear down WFGame, then
+	// close the window.
 	MEMORY_DELETE(HALLmalloc,game,WFGame);
+
+	HALCloseWindow();
 
 #if defined(JOYSTICK_RECORDER)
 	if (bJoyPlayback)
@@ -471,6 +644,14 @@ PIGSMain( int argc, char* * argv )
 #endif
 
 	DBSTREAM1( cprogress << "Calling PIGSExit()" << std::endl; )
+	if (gWfmutSmoke && wfmutFailures != 0)
+	{
+		// Smoke wants a non-zero exit code so CI / scripts can detect failure.
+		// Skip PIGSExit's normal cleanup-and-return path; std::_Exit avoids
+		// running global destructors that the engine isn't designed to tolerate
+		// after HALCloseWindow.
+		std::_Exit(wfmutFailures);
+	}
 	PIGSExit();
 }
 

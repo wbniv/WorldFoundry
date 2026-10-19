@@ -1,0 +1,96 @@
+// host_bridge.hp — BridgeHost: external PilotHost that drives wf_game over TCP.
+//
+// Connects to the debug bridge (debug_server.cc) on any host:port.
+// CheckAwait BLOCKS the calling thread (busy-poll with 20ms sleep).
+// T: output goes to stdout. Effect verbs send JSON ops; mailbox broadcasts
+// from the server update the in-memory table used by ReadMailbox / CheckAwait.
+//
+// Route rule (mirrors Python BridgeHost.route):
+//   mailbox < LOCAL_START (2000) → idx=1 (global/system mailboxes)
+//   mailbox >= LOCAL_START       → per-actor index
+
+#ifndef WF_PILOT_HOST_BRIDGE_HP
+#define WF_PILOT_HOST_BRIDGE_HP
+
+#include "pilot_host.hp"
+
+#include <atomic>
+#include <mutex>
+#include <set>
+#include <string>
+#include <thread>
+#include <unordered_map>
+#include <vector>
+
+namespace pilot {
+
+class BridgeHost : public PilotHost
+{
+public:
+    static constexpr int LOCAL_START = 2000;   // global mailbox boundary
+    static constexpr int TIME_MBX    = 1906;   // EMAILBOX_TIME
+
+    BridgeHost() = default;
+    ~BridgeHost() override;
+
+    // Connect with retry; returns true on success.
+    bool connect(const char* host, int port, double timeoutSecs = 15.0);
+
+    // Optional: directory prefix for screenshot filenames. If set, Screenshot()
+    // prepends this to the name before sending to the engine and tracks the bare
+    // name in screenshots() for assertion checking.
+    void setScreenshotsDir(const std::string& dir) { _screenshotsDir = dir; }
+    const std::vector<std::string>& screenshots() const { return _screenshots; }
+
+    // PilotHost interface.
+    void       Type(const std::string& text, bool newline) override;
+    double     ReadMailbox(int actor, int mbx) override;
+    void       SetMailbox(int actor, int mbx, double val) override;
+    AwaitState CheckAwait(const AwaitReq& req, double& out) override;
+    double     ClockSeconds() override;
+    void       SetTransform(int actor, double x, double y, double z) override;
+    void       SetProp(int actor, const std::string& key, double val) override;
+    void       InjectInput(const std::string& slot, int bits, int held) override;
+    void       Pause() override;
+    void       Resume() override;
+    void       Step(int frames) override;
+    bool       Screenshot(const std::string& name) override;
+    void       Watch(int actor, int mbx, bool off) override;
+
+    // Release sticky inputs + unwatch all; call before disconnect.
+    void teardown();
+
+private:
+    int  route(int actor, int mbx) const { return mbx < LOCAL_START ? 1 : actor; }
+    static bool rel(RelOp o, double a, double b);
+
+    void send(const std::string& json);
+    // Block until a message with "op"==opName arrives (or timeout). Returns true on match.
+    bool waitFor(const char* opName, double timeoutSecs = 5.0);
+
+    void readerThread();
+    void dispatchLine(const std::string& line);
+
+    long long mbKey(int idx, int mbx) const { return (long long)idx * 200000LL + mbx; }
+
+    int  _fd = -1;
+    std::atomic<bool> _running{false};
+    std::thread       _reader;
+
+    std::mutex  _lock;
+    std::string _readBuf;                              // reader-thread only
+    std::vector<std::string>             _inbox;       // all lines received
+    std::unordered_map<long long,double> _mbValues;    // broadcast mailbox table
+
+    // For teardown.
+    std::set<std::pair<int,int>> _watched;
+    std::set<std::string>        _injected;
+    bool _timeWatched = false;
+
+    // Screenshots tracking.
+    std::string              _screenshotsDir;
+    std::vector<std::string> _screenshots;
+};
+
+} // namespace pilot
+#endif // WF_PILOT_HOST_BRIDGE_HP

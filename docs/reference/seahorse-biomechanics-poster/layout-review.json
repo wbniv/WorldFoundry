@@ -1,0 +1,70 @@
+{
+  "page_mm": {
+    "width": 297,
+    "height": 420
+  },
+  "page_px": {
+    "width": 1122.515625,
+    "height": 1587.390625
+  },
+  "content_bottom_limit_px": 1549.595325,
+  "footer_last_bottom_px": 1531.78125,
+  "footer_overflowing": false,
+  "document_overflowing": false,
+  "header_overflowing": false,
+  "orphaned_header_refs": [],
+  "panels": [
+    {
+      "id": "panel-rings",
+      "clientHeight": 286,
+      "scrollHeight": 286,
+      "overflowing": false
+    },
+    {
+      "id": "panel-square",
+      "clientHeight": 286,
+      "scrollHeight": 286,
+      "overflowing": false
+    },
+    {
+      "id": "panel-grip",
+      "clientHeight": 286,
+      "scrollHeight": 286,
+      "overflowing": false
+    },
+    {
+      "id": "panel-fin",
+      "clientHeight": 286,
+      "scrollHeight": 286,
+      "overflowing": false
+    },
+    {
+      "id": "panel-strike",
+      "clientHeight": 286,
+      "scrollHeight": 286,
+      "overflowing": false
+    },
+    {
+      "id": "panel-pairs",
+      "clientHeight": 286,
+      "scrollHeight": 286,
+      "overflowing": false
+    },
+    {
+      "id": "panel-joints",
+      "clientHeight": 286,
+      "scrollHeight": 286,
+      "overflowing": false
+    },
+    {
+      "id": "panel-cost",
+      "clientHeight": 286,
+      "scrollHeight": 286,
+      "overflowing": false
+    }
+  ],
+  "min_font_px": 11,
+  "min_font_pt": 8.25,
+  "fit": "ok",
+  "overflowing": false
+}

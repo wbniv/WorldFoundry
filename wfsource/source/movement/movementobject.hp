@@ -92,16 +92,6 @@ private:
 inline MovementObject&
 UpcastToMovementObject(BaseObject* base);
 
-// kts figure out/learn how to do this in a template (make new functions where the function name contains the template type)
-// template<class T> T&
-// UpcastTo<T>(BaseObject* base)
-// {
-//    assert(ValidPtr(base));
-//    T* result = dynamic_cast<T*>(base);
-//    assert(ValidPtr(result));
-//    return *result;
-// }
-
 //==============================================================================
 
 class MovementObjectIterator 

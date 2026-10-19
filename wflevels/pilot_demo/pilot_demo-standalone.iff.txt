@@ -1,0 +1,24 @@
+// pilot_demo-standalone.iff.txt — L4-wrapped form of pilot_demo for wf_game -L.
+//
+// pilot_demo is a minimal level (snowgoons infrastructure + one player whose
+// {Script} is a PILOT program) demonstrating the in-engine PILOT engine.
+//
+// Build (the standard pipeline emits both inner and standalone):
+//   bash wftools/wf_blender/build_level_binary.sh pilot_demo
+//
+// Run:
+//   task run-level -- wflevels/pilot_demo-standalone.iff
+//
+// Pools are snowgoons-class (generous) — this level is tiny (10 objects, one
+// player mesh), so these are far more than enough.
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 200000l
+        'PERM' 1000000l
+        'ROOM' 1000000l
+        'FLAG' 1l 1l                    // doomstick, bungeecam (snowgoons defaults)
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../pilot_demo.iff" ]
+}

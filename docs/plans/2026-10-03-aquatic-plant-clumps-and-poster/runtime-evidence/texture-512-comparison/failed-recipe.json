@@ -1,0 +1,61 @@
+{
+  "device": "chromecast-test-01",
+  "workflow": "variant-benchmark",
+  "app": "aquarium",
+  "scene": "planted-tank",
+  "trace": "plants",
+  "duration": 12,
+  "warmup": 30,
+  "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-texture-512/normal.apk",
+  "restore_apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-texture-512/normal.apk",
+  "variants": [
+    {
+      "label": "freshwater-256",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-texture-512/freshwater-256.apk",
+      "runs": 3,
+      "warmup": 30
+    },
+    {
+      "label": "freshwater-512",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-texture-512/freshwater-512.apk",
+      "runs": 3,
+      "warmup": 30
+    },
+    {
+      "label": "saltwater-256",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-texture-512/saltwater-256.apk",
+      "runs": 3,
+      "warmup": 30
+    },
+    {
+      "label": "saltwater-512",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-texture-512/saltwater-512.apk",
+      "runs": 3,
+      "warmup": 30
+    },
+    {
+      "label": "freshwater-256-cpu",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-texture-512/freshwater-256-cpu.apk",
+      "runs": 1,
+      "warmup": 30
+    },
+    {
+      "label": "freshwater-512-cpu",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-texture-512/freshwater-512-cpu.apk",
+      "runs": 1,
+      "warmup": 30
+    },
+    {
+      "label": "saltwater-256-cpu",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-texture-512/saltwater-256-cpu.apk",
+      "runs": 1,
+      "warmup": 30
+    },
+    {
+      "label": "saltwater-512-cpu",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-texture-512/saltwater-512-cpu.apk",
+      "runs": 1,
+      "warmup": 30
+    }
+  ]
+}

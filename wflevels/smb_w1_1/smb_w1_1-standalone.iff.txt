@@ -1,0 +1,20 @@
+// smb_w1_1-standalone.iff.txt — L4-wrapped form of smb_w1_1 for wf_game -L.
+//
+// Build:
+//   bash wftools/wf_blender/build_level_binary.sh smb_w1_1
+//
+// Run:
+//   task run-level -- wflevels/smb_w1_1-standalone.iff
+//
+// W1-1 validation build: 19 actors, Physics-mobility Mario, fixed side-view camera.
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 200000l                  // 19 actors + margin
+        'PERM' 500000l                  // player.iff
+        'ROOM' 1000000l                 // ground + blocks + enemies + flagpole
+        'FLAG' 1l 1l                    // doomstick, bungeecam
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../smb_w1_1.iff" ]
+}

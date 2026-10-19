@@ -1,0 +1,67 @@
+// jolt_math.hp — inline converters between WF types and Jolt Physics types.
+//
+// Include ONLY from PHYSICS_ENGINE_JOLT translation units (adds Jolt headers
+// to the including TU's compilation — never include this from a public header).
+//
+// Euler convention (from matrix34.cc ConstructEuler):
+//   GetA() = bank  (roll,  X axis)
+//   GetB() = attitude (pitch, Y axis)
+//   GetC() = heading  (yaw,   Z axis)
+// Applied row-major as Rx(a)*Ry(b)*Rz(c) = JPH intrinsic XYZ.
+// WF angles are stored as revolutions (0..1 = 0..2π); convert to radians.
+//
+// World orientation: Z-up (gravity = -Z in Jolt).  WF and Jolt agree.
+
+#pragma once
+#ifdef PHYSICS_ENGINE_JOLT
+
+#include <math/vector3.hp>
+#include <math/euler.hp>
+#include <math/angle.hp>
+#include <math/scalar.hp>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#include <Jolt/Jolt.h>
+#include <Jolt/Math/Vec3.h>
+#include <Jolt/Math/Quat.h>
+#pragma GCC diagnostic pop
+
+// ---------------------------------------------------------------------------
+// Vector3 <-> JPH::Vec3
+
+inline JPH::Vec3 ToJph(const Vector3& v)
+{
+    return JPH::Vec3(v.X().AsFloat(), v.Y().AsFloat(), v.Z().AsFloat());
+}
+
+inline Vector3 FromJph(const JPH::Vec3& v)
+{
+    return Vector3(Scalar(v.GetX()), Scalar(v.GetY()), Scalar(v.GetZ()));
+}
+
+// ---------------------------------------------------------------------------
+// Euler <-> JPH::Quat  (intrinsic XYZ = extrinsic ZYX)
+
+inline JPH::Quat ToJph(const Euler& e)
+{
+    float a = e.GetA().AsRadian().AsFloat(); // roll  (X)
+    float b = e.GetB().AsRadian().AsFloat(); // pitch (Y)
+    float c = e.GetC().AsRadian().AsFloat(); // yaw   (Z)
+    return JPH::Quat::sEulerAngles(JPH::Vec3(a, b, c));
+}
+
+inline Euler FromJph(const JPH::Quat& q)
+{
+    // GetEulerAngles() returns Vec3 of XYZ intrinsic angles in radians.
+    JPH::Vec3 rad = q.GetEulerAngles();
+    static constexpr float kRevPerRad = 1.0f / (2.0f * 3.14159265358979323846f);
+    return Euler(
+        Angle::Revolution(Scalar(rad.GetX() * kRevPerRad)),
+        Angle::Revolution(Scalar(rad.GetY() * kRevPerRad)),
+        Angle::Revolution(Scalar(rad.GetZ() * kRevPerRad))
+    );
+}
+
+#endif // PHYSICS_ENGINE_JOLT

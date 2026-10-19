@@ -1,0 +1,1009 @@
+# Plan: Planetarium dome view + engine-wide backface culling
+
+> **Winding note (2026-10-16):** Measurements and face-order examples below
+> record the former reversed-normal engine. The
+> [current convention](2026-10-16-blender-normal-convention-engine-wide.md)
+> uses Blender's face order directly; software culling remains enabled.
+
+## Context
+
+Continuing the **filesystem-visualization family** in World Foundry (FSN node-link · Filelight
+flat sunburst · KDirStat treemap already shipped). This turn adds the **4th view — a planetarium
+dome** (sunburst wrapped onto a hemisphere; player stands at centre and looks up). While scoping
+the dome's mesh facing, the user raised that the renderer's **lack of backface culling causes
+display artifacts** — confirmed: nothing enables `GL_CULL_FACE`, so both sides of every polygon
+draw (z-fighting on coincident faces, back-face bleed-through, doubled fill). The user chose to
+**fix culling engine-wide**, via the **software normal-based** mechanism (winding-independent).
+
+Two separable efforts result. They are independent, but because software culling keys off
+**face normals** (already correct everywhere — proven by correct lighting), the dome's facing
+becomes irrelevant to visibility. **Recommended order: land culling first** (engine-only, no asset
+rebuilds, gives the dome a free regression check), **then build the dome against the culling-on
+binary** so its framing screenshots reflect final behavior.
+
+---
+
+## Effort 1 — Engine-wide backface culling (software, normal-based)
+
+**Goal:** cull every back-facing triangle engine-wide, **on by default**, with `WF_CULL=0` to
+disable for instant A/B. Winding-independent — **zero mesh edits, no winding audit** — by reusing
+the per-face normals the engine already computes (`CalculateNormal`, `face.hpi:27-48`) and that
+one-sided lighting already proves directionally correct (outward on props, inward on interiors).
+
+**Why software, not hardware `GL_CULL_FACE`:** winding is globally inconsistent
+(`rendacto.cc:147` cube is CW-from-inside; Blender boxes CCW-from-outside; `rendmatt.cc:221` matte
+ad-hoc) — a single `glFrontFace`+cull would erase a large, hard-to-enumerate set of surfaces and
+require flipping every interior mesh (rooms, dome, skydome) inward. The software dot-product test
+sidesteps all of it.
+
+**The test (one chokepoint).** All triangles from all 8 `RenderPoly3D*` renderers *and* the matte
+flow through `ModernRendererBackend::DrawTriangle` (`wfsource/source/gfx/glpipeline/backend_modern.cc:347-364`).
+Do the cull there, in **eye space** (camera at origin, looking −Z) using the already-maintained
+`_mv[16]`:
+- `Ne = MV_upper3x3 * face.normal` (same transform used for light dirs at `backend_modern.cc:311-313`)
+- `Pe = MV * faceCenter` where `faceCenter = (v0+v1+v2)/3`
+- **cull when `dot(Ne, Pe) > 0`** (normal points away from the camera)
+
+**DOUBLE_SIDED exception (already-dormant flag).** `material.hp:117` defines `DOUBLE_SIDED = 8`,
+never used. Add inline `IsDoubleSided() const { return _materialFlags & DOUBLE_SIDED; }` to
+`material.hp`. Extend `DrawTriangle`'s signature (`renderer_backend.hp:72-76` + the
+`backend_modern.cc` override) with a `cullExempt` bool. The 8 `RenderPoly3D*` TUs (representative:
+`rendftl.cc:75`) pass `currentRenderMaterial->IsDoubleSided()`; the matte's two `DrawTriangle`
+calls (`rendmatt.cc:221-222`) pass `true` so the background is never culled.
+
+**Global toggle.** In the backend, cache `static bool gCull = !(getenv("WF_CULL") && atoi(...)==0)`
+(default ON), mirroring the `getenv("WF_GAME_SCREENSHOT_PPM")` precedent at `display.cc:983`. Gate
+the whole cull block on it.
+
+**Critical files:**
+- `wfsource/source/gfx/glpipeline/backend_modern.cc` — cull test in `DrawTriangle`; `WF_CULL` read; eye-space `Ne`/`Pe` from `_mv`.
+- `wfsource/source/gfx/renderer_backend.hp` — `DrawTriangle` signature `+ cullExempt`.
+- `wfsource/source/gfx/material.hp` — `IsDoubleSided()` accessor.
+- the 8 `wfsource/source/gfx/glpipeline/rend{f,g}{t,c}{l,p}.cc` — pass material's flag through.
+- `wfsource/source/gfx/rendmatt.cc` — pass `cullExempt=true` at the two matte draws.
+
+**Verification — A/B, headless, deterministic.** Use the built-in PPM hook
+(`WF_GAME_SCREENSHOT_PPM=<path>` → `display.cc:981-1010` writes a frame-30 PPM; reproducible, no
+X11 grab). For each shipped level, capture **before** (`WF_CULL=0`, current binary) and **after**
+(default cull, patched binary); pixel-diff (`compare -metric AE`). Levels: SMB W1-1..1-4 (matte
+background must survive), snowgoons, qbert, filesys, filelight, treemap (densest two-sided-prism
+stress), **moon_site01 (interior-viewed skydome — the key must-not-vanish case)**. Gates: (1) no
+foreground/interior/skydome/matte surface vanished; (2) prior back-face artifacts (z-fight
+speckle, see-through) gone; (3) patched binary with `WF_CULL=0` reproduces baseline pixel-for-pixel
+(toggle is the only behavioral change). Any regressor gets a `DOUBLE_SIDED` tag on the offending
+mesh rather than disabling the global cull. Record a level×{before,after,AE,verdict} table.
+
+**Plan doc to create on implementation:** `docs/plans/2026-06-13-engine-backface-culling.md` + TODO entry.
+
+---
+
+## Effort 2 — Planetarium dome view (`wflevels/dome/`)
+
+Full design already written to **`docs/plans/2026-06-13-planetarium-dome-view.md`** (created this
+turn). Summary:
+
+- **Reuses Filelight's `fl-scan` table verbatim** — depth→**elevation band**, a0/a1→azimuth (rev),
+  branch→hue; `seg-size` unused (size lives in the arc). **No `scripting_zforth.cc` change, no
+  engine rebuild** — the strongest proof yet of "a new view = new `.fth` + meshes."
+- **NEW `wflevels/dome/blender_dome.py`** (cloned from `blender_filelight.py`): astronaut, lights,
+  floor, room, Director, ActBoxOR + **player-controlled look-around camera** (see below) +
+  per-depth **`spherical_band_geo` patch templates** (idx 12/13/14) + a **zenith cap** (idx 15).
+  Elevation bands: cwd cap φ∈[72,90]°, depth1 [50,72]°, depth2 [28,50]°, depth3 [8,28]°;
+  hemisphere R≈35. Patch normals point **inward** (toward the player) — which, under software
+  culling, is exactly what keeps them visible (normal faces camera ⇒ not culled).
+- **Camera — player turns to look around (not Fixed).** Unlike Filelight's `Rotation = Fixed`
+  position-tracking camshot, the dome camera follows the **player's heading**: it sits at the
+  player (centre of the dome) with a **fixed upward pitch** at the bands, and its **azimuth =
+  the player's facing**, so turning the joystick swings the upward view around the dome (the
+  natural "stand under the planetarium and look around" feel — no automated spin). Exact CamShot
+  config (heading-follow mode + up-pitch + FOV≈80) is an M2 tuning step against a screenshot.
+- **Director `.fth` render policy:** `depth→band-tmpl`, per-branch `hsv>rgb` hue (identical to
+  Filelight), `spawn0`+`set-rotation` (Z-heading rev) per arc wedge, zenith cap spawned once. No
+  height curve (size is angular). Static dome geometry — no `fl-navigate`/`fl-flydown`.
+- **NEW `task run-dome`** (mirror of `run-filelight`); build via the generic `task build-level -- dome`.
+- **Verification:** M1 static dome renders (N segments, bands + cap, no asserts/out-of-room/terminate,
+  <500 pool); M2 per-branch hue + camera framing + screenshot to `wflevels/dome/screenshots/`;
+  M3 hot-reload proof (edit Director `.fth` only, rebuild level only, engine untouched).
+- **Out of scope:** walk-/aim-to-re-root navigation, size→radial relief, tiered monument
+  (#2, the last remaining sunburst variant).
+
+**Dome ↔ culling dependency:** none under software culling — the dome's inward normals are correct
+for both lighting and the normal-based cull. Build the dome after culling lands so M2 screenshots
+already reflect culling-on.
+
+---
+
+## Sequencing & deliverables
+
+1. **Culling** (engine): implement → `task build` → A/B verify across the level set → commit +
+   `docs/plans/2026-06-13-engine-backface-culling.md` + flip `docs/level-design-troubleshooting.md:721`
+   note ("culling is now ON by default; mark interior/special meshes `DOUBLE_SIDED`") + TODO.
+2. **Dome** (level): `blender_dome.py` → `task build-level -- dome` → `task run-dome` against the
+   culling-on binary → M1/M2/M3 verify + screenshot → commit + mark the dome done in TODO
+   (filesystem-viz family open-items), link the commit.
+
+Both commits stage **only** their own files (the tree has unrelated `moon_site01`, `.history`,
+`y-crdt`, wf-edit changes — leave them).
+
+---
+
+## Outcome — Effort 1 (culling), 2026-06-13
+
+**Shipped the cull mechanism but DEFAULT-OFF (`WF_CULL=1` opt-in)** — not on-by-default as planned.
+
+A/B across 7 shipped levels (frame-30 PPM, `WF_CULL=0` vs on) found:
+- **Mechanism correct.** qbert, snowgoons (standalone iff), filesys, moon_site01 (run with its
+  `--vram-*` params) are pixel-clean; the matte background is correctly cull-exempt.
+- **But the "normals are already correct" premise is false.** Several procedural generators are
+  wound **inward** — `add_solid_box` / `make_box_mesh` / `disk_geo`. Derived from
+  `CalculateNormal=(v2-v0)×(v1-v0)` (`face.hpi:35`): the box `top` face `(4,5,6,7)` normal is −Z
+  (down). So culling removed visible tops — SMB ground top **vanished**, treemap cell tops +
+  filelight centre disk **darkened**. These faces were already rendering ambient-only (latent
+  under-lighting); culling just exposed it.
+- **Reversing winding is not a clean fix.** Tried it on filelight (`disk_geo` + `add_solid_box`)
+  and treemap (`add_solid_box`): the disk came out *dimmer* than its intended bright look, and the
+  treemap cells were **not** restored — because appearance is entangled with one-sided lighting +
+  the `set-color`/`FACE_COLOR` override, not winding alone. (Those edits were **reverted**; the
+  levels are byte-identical to before.)
+
+**Decision (user-approved):** ship the mechanism `WF_CULL`-gated, **off by default**; keep all 7
+levels pixel-identical; treat "rewind every shipped mesh to consistent normals + flip the default
+on" as a **separate scoped effort** (TODO). The planetarium dome — authored with correct normals
+from scratch — is the first `WF_CULL=1` consumer.
+
+**Landed (engine, default-off):** the cull in `backend_modern.cc` + `backend_metal.mm`,
+`DrawTriangle` `cullExempt` param (`renderer_backend.hp`, stub), `Material::IsDoubleSided()`
+(`material.hp`), the 8 `rend*.cc` pass the flag, `rendmatt.cc` cull-exempt. Docs updated
+(`level-design-troubleshooting.md`, `level-building.md`) with the winding rule + `WF_CULL` toggle.
+
+> Capture caveat: a fresh post-flip confirmation screenshot wasn't grabbed (display/process
+> contention late in the session); default-off is guaranteed by the code (`WF_CULL` unset → cull
+> skipped) and the cull path was exercised by the 12-PPM A/B sweep on the same binary.
+
+---
+
+## Effort 1b — rewind + default-on, 2026‑09‑21
+
+**Outcome: the default was NOT flipped. One genuine inward‑wound level was found and fixed
+(the dome); two levels hit the (c) colour‑entanglement case the 06‑13 attempt reverted; one
+level is not byte‑reproducible frame‑to‑frame, so the A/B method cannot rule on it.** The flip
+is blocked on a design call — see **Blockers** below.
+
+### Method
+
+`task build` (green) → for every one of the 20 `wflevels/*-standalone.iff` levels, capture
+backend frame 20 twice, once with `WF_CULL=0` and once with `WF_CULL=1`:
+
+```
+engine/wf_game --frame-step-smoke=30 --cycles=1 -rate20 -record_video \
+  -L<abs>/wflevels/<level>-standalone.iff --capture-frame=20=<out.png>
+```
+
+run from `wfsource/source/game`, with `run-condo`/`run-moon`'s `--vram-*` flags for
+`condo_639_640*` and `moon_site01`. Two notes the 06‑13 sweep did not have:
+
+- **`-record_video` is required on Linux.** `--capture-frame`'s PNG write lives inside the
+  recorder path (`gfx/gl/display.cc:1223`, `if (bRecordVideo) CaptureFrame(...)`), so without
+  it the run exits 0 and silently writes nothing. `output.mp4` is gitignored.
+- **A determinism control was run first** — the same sweep with `WF_CULL=0` on *both* legs.
+  Every level came back byte‑identical except `treemap`, which is not reproducible run‑to‑run
+  at all (21653 px differ between two identical runs). Without that control, `treemap`'s
+  culling "difference" would have been a phantom.
+
+### 1. Baseline A/B, all 20 shipped levels, frame 20
+
+Raw output (`lit` = non‑black pixels of 307200; `IoU` = lit‑coverage intersection‑over‑union;
+`pxdiff` = pixels differing in any channel):
+
+```
+level                      frame  lit WF_CULL=0  lit WF_CULL=1    delta    IoU%   only0   only1   pxdiff verdict
+condo_639_640                 20         307200         307200        0  100.00       0       0      143 colour-only
+condo_639_640_tour            20         307200         307200        0  100.00       0       0      167 colour-only
+dome                          20          67522              0   -67522    0.00   67522       0    67522 (b) EVERYTHING LOST
+filelight                     20         121396         121396        0  100.00       0       0        0 IDENTICAL
+filesys                       20          64574          64574        0  100.00       0       0        0 IDENTICAL
+marble-madness                20          29619          29619        0  100.00       0       0    29071 colour-only
+marble-madness-2              20          19268          19268        0  100.00       0       0     7436 colour-only
+mm_practice                   20          94094          94094        0  100.00       0       0        0 IDENTICAL
+mm_practice_blender           20         122851              0  -122851    0.00  122851       0   122851 (b) GROUND LOST
+mm_practice_blender_rt        20         122851              0  -122851    0.00  122851       0   122851 (b) GROUND LOST
+moon_site01                   20         175321         175321        0  100.00       0       0        0 IDENTICAL
+pilot_demo                    20          94731          94731        0  100.00       0       0        0 IDENTICAL
+qbert_practice                20           6043           6042       -1   99.98       1       0     5100 (b) CUBE TOPS LOST
+smb_w1_1                      20          14041          14041        0  100.00       0       0        0 IDENTICAL
+smb_w1_2                      20          25772          25772        0  100.00       0       0        0 IDENTICAL
+smb_w1_3                      20          10794          10794        0  100.00       0       0        0 IDENTICAL
+smb_w1_4                      20          83492          83492        0  100.00       0       0        0 IDENTICAL
+snowgoons                     20         100849         100849        0  100.00       0       0       98 colour-only
+snowgoons-blender             20         100849         100849        0  100.00       0       0       97 colour-only
+treemap                       20         163850         163850        0  100.00       0       0    21684 NON-DETERMINISTIC
+```
+
+Determinism control (`WF_CULL=0` on both legs) — everything `IDENTICAL` except:
+
+```
+treemap                       20         163850         163850        0  100.00       0       0    21653 (c) COLOR-ONLY changed=21653 maxdiff=245
+```
+
+**PASS** (sweep executed; 9 of 20 levels are already culling‑clean pixel‑for‑pixel:
+`filelight`, `filesys`, `mm_practice`, `moon_site01`, `pilot_demo`, `smb_w1_1..4`).
+
+**The 06‑13 premise about the box generators no longer holds.** `add_solid_box` /
+`make_box_mesh`'s face list `[(0,3,2,1),(4,5,6,7),…]` is *Blender*‑outward, and since the
+2026‑09‑19 exporter face‑hand flip
+([plan](2026-09-19-exporter-face-hand.md)) the exporter reverses each loop, so those boxes now
+land WF‑outward. `filelight`, `filesys` and the SMB levels — the ones the 06‑13 outcome named
+as losing their tops — are now pixel‑identical under culling. No generator needed rewinding.
+
+### 2. Classify each difference
+
+Breakdown of the changed pixels (mean RGB over the changed set, cull‑off → cull‑on):
+
+```
+condo_639_640          n=   143  bbox=(152,65)-(161,88)    cull0=[24 52 90]      cull1=[46 101 160]    darker=0     brighter=143
+condo_639_640_tour     n=   167  bbox=(146,144)-(157,169)  cull0=[24 52 90]      cull1=[46 101 160]    darker=0     brighter=167
+marble-madness         n= 29071  bbox=(0,164)-(423,423)    cull0=[72.4 116.4 57] cull1=[59 76 47.5]    darker=29006 brighter=63
+marble-madness-2       n=  7436  bbox=(224,188)-(383,281)  cull0=[137.4 …]       cull1=[128.2 …]       darker=7435  brighter=0
+snowgoons              n=    98  bbox=(99,298)-(173,469)   cull0=[65 63.2 63.2]  cull1=[135.6 … 145.5] darker=13    brighter=85
+snowgoons-blender      n=    97  bbox=(99,298)-(173,469)   cull0=[65.5 …]        cull1=[136.7 … 146.6] darker=13    brighter=84
+```
+
+- **(a) legitimately hidden faces removed** — `condo_639_640`, `condo_639_640_tour`,
+  `snowgoons`, `snowgoons-blender`. Tiny (≈100–170 px), confined to one small box, and
+  *brighter* after: a back‑facing polygon was bleeding over a brighter front face and culling
+  removed it. Silhouette unchanged. Good.
+- **(b) a visible face vanished** — `dome`, `mm_practice_blender`, `mm_practice_blender_rt`,
+  `qbert_practice`. Note that only the `dome` shows up as lost *coverage*; the other three keep
+  100 %/99.98 % IoU because the vanished face is backed by another lit surface. **Lit‑pixel
+  count and IoU alone are not sufficient to classify — every changed level had to be looked at.**
+- **(c) colour changes, coverage unchanged** — `marble-madness`, `marble-madness-2`. See
+  **Blockers**.
+- **unclassifiable** — `treemap`, which is not deterministic run‑to‑run (control above), so
+  neither IoU nor pxdiff can be attributed to culling.
+
+`qbert_practice` (case b) is the clearest picture of what inward winding looks like — the
+cubes' blue top faces and dark front faces are culled, leaving only the teal sides:
+
+| `WF_CULL=0` | `WF_CULL=1` |
+|---|---|
+| <img src="2026-06-13-planetarium-dome-view-engine-wide-backface-culling/qbert-cull-off.png" width="330"> | <img src="2026-06-13-planetarium-dome-view-engine-wide-backface-culling/qbert-cull-on.png" width="330"> |
+
+### 3. Fix (b) at the source — the dome
+
+**`wflevels/dome/blender_dome.py` was the one generator that genuinely needed rewinding, and
+the 2026‑09‑19 exporter flip is what broke it.** `spherical_band_geo` and `cap_geo` were hand
+wound against the *engine's* `(v2−v0)×(v1−v0)` formula ("verified") back when the exporter
+wrote loop order unchanged. The exporter now reverses every loop, so those patches were
+exported WF‑**outward** and culled from the centre: the dome — the level whose whole point is
+being the first correct `WF_CULL=1` consumer — has been rendering **completely black** under
+`WF_CULL=1` since `9c36ba82`, which rebuilt it. Nobody re‑checked it against the rebuilt `.iff`.
+
+Fix: reverse both face lists so they are inward **in Blender**, which the exporter's reversal
+then carries through to WF‑inward — the "author for Blender" rule the 09‑19 plan established.
+Docstrings and the module header rewritten to state the rule rather than the engine formula.
+
+| `WF_CULL=1` before | `WF_CULL=1` after |
+|---|---|
+| <img src="2026-06-13-planetarium-dome-view-engine-wide-backface-culling/dome-before-cull1.png" width="330"> | <img src="2026-06-13-planetarium-dome-view-engine-wide-backface-culling/dome-after-cull1.png" width="330"> |
+
+Re‑captured after `blender --background --python blender_dome.py` + `task build-level -- dome`:
+
+```
+level                      frame  lit WF_CULL=0  lit WF_CULL=1    delta    IoU%   only0   only1   pxdiff verdict
+dome                          20          67522          67522        0  100.00       0       0        0 IDENTICAL
+```
+
+and against the *pre‑fix* `WF_CULL=0` baseline (i.e. the look is unchanged with culling off):
+
+```
+baseline(cull off, pre-fix) vs after-fix(cull ON): maxdiff 34 | lit 67522 67522
+```
+
+**PASS** — coverage IoU 100 %, lit‑pixel count identical, residual `maxdiff 34` is the
+one‑sided lighting now hitting the patches' other face (expected when a normal is reversed).
+
+> **Side finding — the dome no longer reproduces from its script, for an unrelated reason.**
+> Re‑running `blender_dome.py` drops `lightRed/lightGreen/lightBlue/lightType` from **both**
+> `Light01` and `AmbientLight` in the emitted `dome.lev` (the script sets them as
+> `wf_*` props; `_emit_lev_fields`'s schema walk emits nothing for them and prints no error).
+> The regenerated level renders **black with culling off too** (0 lit px). So the committed
+> `wflevels/dome/dome.lev` was kept at HEAD and only the four rewound template meshes
+> (`band{1,2,3}template.iff`, `captemplate.iff`) were taken from the re‑export. Consequence:
+> `dome.lev`'s `slopeA–D` still carry the pre‑rewind sign. It has no visible effect (the
+> captures above are the evidence), but the level is now in the same
+> "does not rebuild from its script" bucket as `qbert_practice` and `mm_practice_blender_rt`.
+> This is a separate defect in `wftools/wf_blender/export_level.py`, adjacent to
+> [2026-09-20-export-level-light-field-duplication.md](2026-09-20-export-level-light-field-duplication.md).
+
+### Blockers — why the default was not flipped
+
+1. **(c) colour entanglement, `marble-madness` + `marble-madness-2`.** Culling leaves coverage
+   at 100 % IoU but darkens a large surface (the green floor slab, 29006 px darker; the grey
+   ledge, 7435 px darker). The bright appearance depends on a **back‑facing** polygon being
+   drawn — remove it and the front‑facing one underneath is lit from the wrong side by the
+   one‑sided lighting. That is exactly the "appearance is entangled with one‑sided lighting +
+   the `set-color`/`FACE_COLOR` override, not winding alone" finding the 06‑13 attempt hit and
+   reverted. These are **native, text‑authored `.iff`** levels — they do not go through the
+   Blender exporter, so there is no generator to rewind; the fix is a decision about
+   `FACE_COLOR`/one‑sided‑lighting semantics, not a winding edit.
+
+   | `WF_CULL=0` | `WF_CULL=1` |
+   |---|---|
+   | <img src="2026-06-13-planetarium-dome-view-engine-wide-backface-culling/marble-madness-cull-off.png" width="330"> | <img src="2026-06-13-planetarium-dome-view-engine-wide-backface-culling/marble-madness-cull-on.png" width="330"> |
+
+2. **`treemap` is not byte‑reproducible**, so no A/B verdict is possible for it by this method.
+
+3. **Three (b) levels cannot be rebuilt from their scripts.** `mm_practice_blender` and
+   `mm_practice_blender_rt` ship `-standalone.iff` files from `628d24af` / `b2df9c90`, i.e.
+   pre‑exporter‑flip, in the old hand — they were never rebuilt in the 09‑19 sweep and lose
+   their whole ground plane under culling. `qbert_practice` loses its cube tops and is the
+   documented "restored from HEAD, still in the old hand" case. Rebuilding all three runs into
+   the same class of exporter reproducibility bug the dome just hit.
+
+**FAIL / DEFERRED** for step 5 (flip the default) and step 6 (regression‑guard the flip).
+`WF_CULL` remains opt‑in in both `backend_modern.cc` and `backend_metal.mm`; the docs
+(`level-design-troubleshooting.md`, `level-building.md`) still describe it correctly as
+off‑by‑default and are unchanged.
+
+---
+
+## Effort 1c — prelit is unlit, 2026‑09‑21
+
+Unblocks Effort 1b blocker (c) and the `qbert_practice` half of blocker 3: both were
+stalled on the same measured fact — **reversing the winding of a `LIGHTING_PRELIT` face
+changed its colour with culling off**, so a rewind could never be "visibility only".
+
+### The trace — where the normal entered a prelit face's colour
+
+1. `wfsource/source/gfx/material.cc:67` — `Get3DRenderObjectPtr()` indexes
+   `_rendererList[_materialFlags & RENDERER_SELECTION_MASK]`, and
+   `RENDERER_SELECTION_MASK` (`gfx/material.hp:126`) includes `LIGHTING_PRELIT`. So the
+   flag **did** pick a different renderer: `rendfcp.cc` instead of `rendfcl.cc`
+   (`gfx/glpipeline/renderer.ext:7-15`).
+2. `wfsource/source/gfx/glpipeline/rendfcp.cc:33-63` vs `rendfcl.cc:33-63` — the two
+   functions were **byte‑for‑byte identical**. The "prelit" renderer differed from the lit
+   one in name only. Same for `rendgcp`/`rendgcl`, `rendftp`/`rendftl`, `rendgtp`/`rendgtl`.
+3. `wfsource/source/gfx/rendobj3.cc:119-136` (`ApplyMaterials`) and
+   `material.cc:258-438` (`InitPrimitive`) — the bake writes **only** the material/vertex
+   colour and UVs into the `Primitive`. No lighting term, no normal. The two previous
+   agents' hypothesis that the normal was folded in during the `RenderObject3D` bake is
+   **wrong**: nothing normal‑dependent happens there.
+4. `wfsource/source/gfx/glpipeline/backend_modern.cc:83-91` — the normal enters in the
+   **GL vertex shader**, which every renderer feeds:
+
+   ```glsl
+   if (u_lighting != 0) {
+       vec3 N = normalize((u_mv * vec4(a_normal, 0.0)).xyz);
+       vec3 lit = u_ambient;
+       for (int i = 0; i < 3; ++i)
+           lit += u_light_color[i] * max(0.0, dot(N, u_light_dir[i]));
+       v_lit = lit;
+   } else { v_lit = vec3(1.0); }
+   ```
+
+   and the fragment shader (`backend_modern.cc:114-118`) outputs `v_color * v_lit`.
+   `a_normal` is the per‑face normal replicated into all three verts by
+   `backend_modern.cc:398-400`. `u_lighting` was a **global** uniform, set once per frame
+   from `SetLightingEnabled` (`gfx/rendmatt.cc:146,261`, `gfx/gl/display.cc:838`) — the
+   material's prelit flag never reached it.
+5. `wfsource/source/gfx/rendobj3.cc:239` — that per‑face normal is
+   `CalculateNormal(v0, v1, v2)` at load time, i.e. **derived from winding**. Reverse the
+   triangle, negate `N`, change `dot(N, L)`, change the colour. `gfx/metal/backend_metal.mm:143-152`
+   is the same term in MSL.
+
+So `LIGHTING_PRELIT` was honoured by the *dispatch* and dropped by the *draw*.
+
+### The fix
+
+`prelit` is now a per‑triangle argument on the backend seam
+(`gfx/renderer_backend.hp:86-107`), passed `true` by the four prelit renderers
+(`rendfcp.cc:68`, `rendgcp.cc:62`, `rendftp.cc:81`, `rendgtp.cc:106`). Each backend makes
+it part of the **batch key** alongside the texture and clears the lighting uniform for a
+prelit batch: `backend_modern.cc:398-405` (break), `:558` (`_curPrelit`), `:641` (uniform);
+`backend_metal.mm:400-406`, `:534`, `:656`. Faces are already material‑sorted by
+`RenderObject3D::Render`, so this costs at most one extra draw call per material run.
+
+*Rejected:* a per‑vertex `a_unlit` attribute, which would avoid the batch break but
+changes the vertex layout **and** the shader in both backends — more surface in the Metal
+path, which cannot be run or tested on this host. The flush‑and‑toggle reuses machinery
+both backends already have for texture changes and needs no shader edit at all.
+
+The Metal change is a deliberate line‑for‑line mirror of the GL one and is **unverified** —
+there is no macOS host here.
+
+### Verification
+
+All captures: `wf_game --frame-step-smoke=30 --cycles=1 -rate20 -record_video
+--capture-frame=20=<png> -L<level>` from `wfsource/source/game`, with `WF_CULL=0`.
+`-record_video` is required on Linux or the PNG is silently not written.
+
+**1. Which materials are actually prelit.** Scan every `MATL` chunk under `wflevels/`
+and `assets/` for flag bit 4.
+
+```
+$ python3 scan_prelit.py wflevels assets | grep -v "prelit=  0"
+wflevels/qbert_practice/cube.iff                materials=  3 prelit=  3  flagset=['0x4']
+$ python3 scan_prelit.py wflevels assets | wc -l
+319
+```
+
+One file out of 319 with materials. **PASS** — the blast radius is the `qbert_practice`
+cubes and nothing else.
+
+**2. Before the fix: a prelit face's colour depends on its winding.** Reverse every cube
+triangle `(v1, v2, v3) → (v1, v3, v2)` in `gen_cube.py`, regenerate `cube.iff`, rebuild
+the level, capture frame 20 both ways against a binary with the fix backed out.
+
+```
+orig -> f1663c8b3a3788f3be27cea719567395
+flip -> 02e5a873ff45b41d69574a31aa41fdaa
+bytes_identical=False  pixels_differing=5009/307200  max_channel_delta=111
+```
+
+**PASS (bug reproduced)** — 5009 px, exactly the count the 09‑21 backface audit reported.
+
+| shipped winding | reversed winding |
+|---|---|
+| <img src="2026-06-13-planetarium-dome-view-engine-wide-backface-culling/prelit-before-shipped-winding.png" width="330"> | <img src="2026-06-13-planetarium-dome-view-engine-wide-backface-culling/prelit-before-reversed-winding.png" width="330"> |
+
+**3. After the fix: the two windings are byte‑identical.**
+
+```
+a=caps/after/qbert_practice.png md5=90e1c1d0806f9e984dd57ef7cba1b349
+b=caps/after_flipped/qbert_practice.png md5=90e1c1d0806f9e984dd57ef7cba1b349
+bytes_identical=True  pixels_differing=0/307200  max_channel_delta=0
+```
+
+**PASS.** <img src="2026-06-13-planetarium-dome-view-engine-wide-backface-culling/prelit-after-both-windings.png" width="330">
+
+The cube tops are back to the director's per‑round `ROUND_TOP_COLORS[0][0] = 0x5646EF`
+under *both* windings — the `FACE_COLOR` override now reaches the screen unmodulated,
+which is what "prelit" was always supposed to mean. `qbert_practice` frame 20 therefore
+**does** change against HEAD (`f1663c8b…` → `90e1c1d0…`); that is the fix, not a regression.
+
+**4. Non‑prelit levels are untouched.** Frame 20, `WF_CULL=0`, before vs after the fix.
+
+```
+                     before                            after
+snowgoons-blender    933c23b00026a073c447003a209ea9fe  933c23b00026a073c447003a209ea9fe
+smb_w1_1             99d59e94d14ddc1f910922533ddeec3d  99d59e94d14ddc1f910922533ddeec3d
+pilot_demo           1f92c5d2cb4d9d3dcc7b2c95a26fb620  1f92c5d2cb4d9d3dcc7b2c95a26fb620
+condo_639_640        8fa09b261aa8091f2fd5a86fa464193e  8fa09b261aa8091f2fd5a86fa464193e
+```
+
+**PASS** — all four byte‑identical. (Each was also captured twice pre‑fix to confirm the
+capture itself is deterministic; identical both times.)
+
+**5. `condo_639_640` sky‑dome banding — unchanged, and why.** `wflevels/condo_639_640/skydome.iff`
+carries material flags **`0x2`** = `TEXTURE_MAPPED | LIGHTING_LIT`. It is **not** prelit, so
+this engine fix cannot affect it, and step 4 confirms the frame is byte‑identical. The
+banding on `condo_sky.tga` is per‑face `dot(N, L)` on a lit dome and stays until the
+material is actually marked prelit — i.e. until `export_level.py` learns to set
+`LIGHTING_PRELIT` from a Blender `wf_prelit` property. **PASS (predicted result observed);
+the sky half of the TODO item is now a pure exporter task, no longer blocked on the engine.**
+
+```
+wflevels/condo_639_640/skydome.iff        materials=  1 prelit=  0  flagset=['0x2']
+wflevels/condo_639_640_tour/skydome.iff   materials=  1 prelit=  0  flagset=['0x2']
+wflevels/moon_site01/skydome.iff          materials=  1 prelit=  0  flagset=['0x2']
+```
+
+**6. Regression guard.** `tests/test_prelit_winding_invariant.py` renders `qbert_practice`
+frame 20 twice — shipped level, and the same bundle with the cube MODL spliced out for a
+reversed‑winding one — and requires byte‑identical PNGs. The flipped mesh is generated at
+test time rather than committed: reversing a triangle permutes shorts inside the FACE chunk
+without changing its length, and `cube.iff` is embedded verbatim exactly once in
+`qbert_practice-standalone.iff`, so the splice is safe and cannot go stale. Proof that the
+splice equals a real `task build-level` run with the flipped `gen_cube.py`:
+
+```
+spliced md5 : 8d583bcff61517505d433d6f94c7d62c
+rebuilt md5 : 8d583bcff61517505d433d6f94c7d62c
+identical   : True
+```
+
+```
+$ python3 -m pytest tests/test_prelit_winding_invariant.py -q
+.                                                                        [100%]
+1 passed in 3.73s
+```
+
+**PASS.** Since the spliced level *is* the rebuilt level, and step 2 shows that level
+rendered `02e5a873…` against the pre‑fix binary while the shipped one rendered `f1663c8b…`,
+this test would have failed on the old code.
+
+### What this unblocks
+
+- **Effort 1b blocker (c), marble‑madness.** The "bright look depends on a back‑facing
+  polygon being drawn" entanglement is one‑sided lighting on a **lit** material, not a
+  prelit one — `marble-madness*.iff` has no prelit materials (step 1). So this fix does not
+  by itself unblock it; the decision there is still `FACE_COLOR`/one‑sided‑lighting
+  semantics. Recorded here so the next attempt does not re‑test the same hypothesis.
+- **The `qbert_practice` cube rewind** (TODO `[T1]`) is now genuinely visibility‑only: flip
+  `FACES` in `gen_cube.py`, regenerate `cube.iff`, `task build-level -- qbert_practice`,
+  `task build-cd-iff`. Frame 20 with `WF_CULL=0` is byte‑identical either way, as step 3
+  proves; only the `WF_CULL=1` coverage changes.
+- **The sky‑dome banding** is now an exporter task (step 5).
+
+---
+
+## Effort 1d — marble-madness winding, confirmed not fixable by winding alone, 2026‑09‑21
+
+Dispatched as a T2 "purely geometric" fix on the premise that Effort 1c's prelit finding
+left only a mechanical winding bug. **Result: the premise doesn't hold — this is exactly
+the (c) blocker Effort 1c already flagged (line 512 above), now confirmed with numbers
+instead of a hypothesis.** No source change made; working tree is clean.
+
+### 1. Reproduce the A/B, both levels, frame 20
+
+`WF_CULL=<0|1> engine/wf_game --frame-step-smoke=30 --cycles=1 -rate20 -record_video
+--capture-frame=20=<png> -L<level>-standalone.iff` from `wfsource/source/game`.
+
+```
+marble-madness:   n=29071 bbox=(0,164)-(423,423)   cull0=[72.4 116.4 57.0] cull1=[59.0 76.0 47.5] darker=29006 brighter=63
+marble-madness-2: n=7436  bbox=(224,188)-(383,281) cull0=[137.4 137.4 137.3] cull1=[128.2 128.2 128.2] darker=7435 brighter=0
+```
+
+**PASS** — matches Effort 1b's Step 1/2 numbers exactly (29 006 / 7 435 darker).
+
+### 2. Found the duplicate-wound faces
+
+`wflevels/marble-madness/floor.iff` (raw `MODL/VRTX/MATL/FACE` binary, 4 verts, 4 faces —
+no `.iff.txt`/generator, hand-authored or lost its source) carries the floor quad as
+**both windings**: `FACE` = `(0,1,2),(0,2,3),(0,2,1),(0,3,2)` — the second pair is
+`both_sides()`-style reversed duplicates of the first, byte-for-byte the case‑(b) pattern
+("two-sided floor built as two polygons") this task was dispatched to fix. Per the
+engine's `(v2−v0)×(v1−v0)` convention (`gfx/rendobj3.cc:239`): faces 0‑1 → normal
+`(0,0,−800)` (down), faces 2‑3 → normal `(0,0,+800)` (up, camera‑facing — confirmed by
+which pair survives `WF_CULL=1`).
+
+`wflevels/marble-madness-2/gen_level1.py:57‑103` (`both_sides()`, `flat_with_walls()`,
+`slope_with_walls()`) generates all 7 `mm1_*.iff` course pieces with the **identical**
+pattern: floor triangles `(0,1,2),(0,2,3)` (down, wrong) doubled by `both_sides()` into
+`(2,1,0),(3,2,0)` (up, correct); side-wall triangles are single-direction-correct already
+(outward-facing) and don't need touching.
+
+### 3. Tried the mechanical fix — keep only the camera-facing winding, drop the duplicate
+
+**marble-madness** (`floor.iff` FACE chunk rewritten to the 2 up-normal faces only,
+`task build-level -- marble-madness`):
+
+```
+new cull0 vs new cull1:        IDENTICAL (0 px) — winding fix does make culling a no-op ✓
+new cull0 vs OLD cull0:        n=25071 bbox=(0,308)-(254,423) darker=25071 brighter=0
+                                mean 62.3/121.5/62.3 → 51.3/77.1/51.3  (luma 97.1 → 66.4)
+```
+
+Culling stability is achieved, but the new cull‑OFF render is **~30 % darker** than the
+shipped cull‑OFF look — it fails "equal‑or‑brighter" outright. Tried the opposite
+(keep only the original down-normal faces instead): cull0 reproduces the shipped
+baseline exactly (0 px diff), but that face is the one culling removes, so cull1 goes
+to near‑black (mean 14.8/9.5/3.3) — full visible-face loss, case (b) on the nose.
+There is no third winding choice for a single quad; one of these two is unavoidable.
+
+**marble-madness-2** (all 7 `mm1_*.iff`: floor → up-normal only, walls → their existing
+outward-facing single copy, dropping the inward duplicate — the analytically "obviously
+correct" single-sided mesh; `task build-level -- marble-madness-2`):
+
+```
+new cull0 vs new cull1:  n=900 bbox=(166,153)-(384,243) darker=899   ← NOT fully stable:
+                          a different wall piece still flips under culling even after
+                          this "correct by inspection" pass, luma 135.3 → 17.3
+new cull0 vs OLD cull0:  n=7323 bbox=(224,188)-(383,281) darker=7323 brighter=0
+                          mean 137.4 → 128.2 (identical numbers to the *old* cull0→cull1
+                          delta) — i.e. the "corrected" unculled render now looks exactly
+                          like the shipped buggy level already did *with* culling on.
+```
+
+So for `marble-madness-2`, even after fixing every mesh's winding by inspection, (a) the
+result is still darker than today's shipped look (same "equal-or-brighter" failure as
+`marble-madness`), and (b) a residual culling-dependent flicker survives on at least one
+more piece, meaning the "walls are already correct, only the floor needs reversing"
+read isn't uniformly true across all 7 course sections either.
+
+### Conclusion
+
+Confirms Effort 1c's line 512 prediction directly: `marble-madness`/`-2` are **`LIGHTING_LIT`**
+materials (not prelit), so the one-sided `dot(N,L)` term is genuinely part of the visible
+result, and the shipped bright look is an artifact of two coincident, oppositely-wound
+polygons z-fighting (draw-order-dependent — the first-listed face wins ties, not the
+"more correct" one). Making the mesh winding-consistent is necessary for `WF_CULL=1`
+stability but is **not sufficient** to preserve the current appearance, because the
+correct-for-culling winding is also the one lit from the "wrong" side by the current
+light placement. **This is a lighting/`FACE_COLOR` semantics decision, not a winding bug**
+— exactly the fork the TODO item already names: two-sided lighting for
+`DOUBLE_SIDED`/`FACE_COLOR` materials, hand-flip and accept the darker look, or re-light
+(reposition/re-add a light) so the correct winding is also the bright one. All three are
+design calls outside a T2 remit. No files changed; `floor.iff` and `mm1_*.iff` were
+restored to HEAD (`git status --short` clean) after each experiment.
+
+**ESCALATE → T4** (design call on lighting/material semantics, not implementation).
+
+## Effort 1e — marble-madness / -2 fixed: dedupe + re-aim the light + right the ball, 2026‑09‑21
+
+Will's call on the Effort 1d fork: **re-light** ("so why don't you move the light???").
+Done inline (T5) after the T3 agent was stopped mid-way; its `gen_level1.py` rewrite was
+kept and finished. Acceptance was the TODO item's: cull-on byte-identical to cull-off,
+cull-off equal-or-brighter than the shipped look, nothing else changed.
+
+### 1. What actually had to change (three things, not one)
+
+| Cause | Where | Fix |
+|---|---|---|
+| Floor/path quads carried both windings (z-fight, down-facing twin wins) | `floor.iff` 4→2 faces, `beginner_path.iff` 112→104, `intermediate_path.iff` 40→36, `practice_path.iff` 176→144, `ramp.iff` 4→2; mm-2's 7 `mm1_*.iff` via `gen_level1.py` | keep the +Z twin, drop the −Z one (VRTX record is `u,v,rgb,x,y,z` — position at byte 12) |
+| Key light below the floor (`Omni01` B=−52°) | `marble-madness.lev`; `marble-madness-2.lev` inherits via the generator | `relight_level.py --alt -52 --az 235` → B=+52°, 52° above the horizon |
+| **The ball was inside-out** — all 960 faces of `sphere.iff` wound inward (normal·(centroid→face) < 0 for every face) | `marble-madness/sphere.iff`, `marble-madness-2/sphere.iff` | swap v1/v2 on every face. With cull-off its *lower* half lit up through the front (inner faces facing the light); with cull-on it went flat — the 241 px residual after the floor/path dedupe |
+
+Two things that would have been wrong to do:
+
+- **Single-sided channel walls in mm-2.** The stopped agent wound the walls outward-only;
+  from the course camera the far wall's *inner* face is the visible one, so cull-on
+  deleted the far-wall lips (787 px of thin slivers). A zero-thickness wall seen from
+  both sides needs both polygons — `two_sided()` in `gen_level1.py` keeps the pair, and
+  cull-on draws exactly the camera-facing one. Floors stay single-sided (+Z).
+- **Deduping the shared `ramp.iff`.** `marble-madness/ramp.iff` was a symlink →
+  `mm_practice_blender/ramp.iff` → `mm_practice/ramp.iff`, and `mm_practice` looks at
+  that ramp from **underneath** (its whole first frame is the ramp's underside): the
+  up-only ramp vanished there under culling (93 146 px). Unshared: `marble-madness/ramp.iff`
+  is now a real file with the deduped quad; `mm_practice/ramp.iff` is untouched and
+  `mm_practice` renders byte-identical to HEAD with cull off *and* on.
+
+Also fixed in `gen_level1.py`'s light carry (the agent's prefix-cut fix, which dropped
+`AmbientLight` from `marble-madness-2.lev`): the object name is the bare
+`{ 'NAME' "Omni01" }` line (`split('"')[1]`, not `[3]`), and only the *unindented*
+file-level `}` is trimmed — `strip()=="}"` also ate the object's own `\t}` and left a
+brace imbalance that failed `levcomp`.
+
+### 2. Verification, frame 20, `--frame-step-smoke=30 --cycles=1 -rate20`
+
+```
+marble-madness    cull0 vs cull1:   0 px (byte-identical)   floor luma 86.0  (shipped cull-off baseline 84.8)
+                  vs shipped cull-off: 4042 px differ — the relit shading + correctly top-lit ball
+marble-madness-2  cull0 vs cull1:   0 px (byte-identical)   mean luma 8.51 (HEAD cull-off 8.51, HEAD cull-on 8.3)
+                  HEAD cull0 vs cull1 was 7436 px; vs HEAD cull-off now 1118 px (light + ball)
+mm_practice       cull0/cull1 vs HEAD: 0 px / 0 px  (ramp unshared, level untouched)
+```
+
+**PASS** on all three acceptance criteria. Captures (bundle dir):
+[![marble-madness after, cull on](2026-06-13-planetarium-dome-view-engine-wide-backface-culling/marble-madness-after-cull-on.png)](2026-06-13-planetarium-dome-view-engine-wide-backface-culling/marble-madness-after-cull-on.png)
+[![marble-madness-2 after, cull on](2026-06-13-planetarium-dome-view-engine-wide-backface-culling/marble-madness-2-after-cull-on.png)](2026-06-13-planetarium-dome-view-engine-wide-backface-culling/marble-madness-2-after-cull-on.png)
+
+Neither level is packed into `cd.iff` (no `marble`/`mm_practice` entry in the bundle
+list), so the rebuilt `wflevels/marble-madness{,-2}{,-standalone}.iff` are the shipped
+artifacts. The last blocker before flipping the `WF_CULL` default is cleared.
+
+---
+
+## Effort 1f — `mm_practice_blender{,_rt}` fixed: a pure winding fix after all, 2026‑09‑21
+
+The last (b) level. **It really was the dome case, not the marble‑madness case** — frame 20
+comes out byte‑identical with culling off *and* on, and byte‑identical to HEAD's cull‑off
+baseline. No lighting or material change was needed, and none was made.
+
+### What was wrong
+
+The "ground plane" in both levels is one quad: `ramp.iff`, 4 verts, **2 faces**,
+`G_SnowyGrass1.tga`, material flags `0x2` (`TEXTURE_MAPPED`, **not** `LIGHTING_PRELIT` —
+Effort 1c's step‑1 scan already said no level but `qbert_practice` is prelit). Faces were
+`(0,1,2),(0,3,1)`, which under the engine's `(v2−v0)×(v1−v0)` convention
+(`gfx/rendobj3.cc:239`) give normal **`(0,−40,−200)`** — pointing down and toward −Y, away
+from the only side the camera ever sees. Culling removed both triangles and the frame went
+to 0 lit px. Unlike `marble-madness`, there was **no second, oppositely‑wound copy**, so
+nothing was z‑fighting and nothing depended on the back face being drawn.
+
+The level's own data already disagreed with the mesh: the `Ramp` object in
+`mm_practice_blender.lev` carries `slopeB = +0.196116`, `slopeC = +0.980581` — the same
+plane, normal **up**. The mesh was inward‑wound relative to its own level file.
+
+**The mesh source was also mis‑symlinked.** `wflevels/mm_practice_blender/ramp.iff` was a
+symlink to `../mm_practice/ramp.iff`, which is a *different* mesh (10×8×8, untextured,
+`color=0xff8000`, 4 faces both windings) belonging to `mm_practice` — not the mesh either
+blender level ships. That is why the crashed session's `task build-level` produced a flat
+orange shape in the wrong place: it was building with `mm_practice`'s ramp. It is now a
+real file holding the shipped mesh, with the winding corrected;
+`wflevels/mm_practice_blender_rt/ramp.iff` symlinks to it, so both levels stay in step.
+`wflevels/marble-madness-2/ramp.iff` pointed through the old symlink and was repointed at
+`../mm_practice/ramp.iff` so it resolves to the same bytes as before.
+
+### 1. Reproduce the A/B on HEAD
+
+`WF_CULL=<0|1> engine/wf_game --frame-step-smoke=30 --cycles=1 -rate20 -record_video
+-L<abs>/wflevels/<level>-standalone.iff --capture-frame=20=<png>` from
+`wfsource/source/game`.
+
+```
+mm_practice_blender    cull 0 lit 122851 of 307200 bbox (0,200)-(639,479) md5 29a84651bbbcff16c1c71a326fe99e80
+mm_practice_blender    cull 1 lit      0 of 307200 bbox None              md5 d20726fa6f42608a5a80f52f695059fc
+mm_practice_blender_rt cull 0 lit 122851 of 307200 bbox (0,200)-(639,479) md5 29a84651bbbcff16c1c71a326fe99e80
+mm_practice_blender_rt cull 1 lit      0 of 307200 bbox None              md5 d20726fa6f42608a5a80f52f695059fc
+```
+
+**PASS** — matches Effort 1b's table exactly (122851 → 0), and the two levels are already
+byte‑identical to each other. All four runs exit 0; no segfault on HEAD.
+
+### 2. Prove the recovered `ramp.iff` is the genuine source
+
+`wflevels/mm_practice_blender/ramp.iff` was reconstructed from the `MODL` embedded at
+offset 26804 of `mm_practice_blender-standalone.iff` (672 bytes; the `_rt` bundle carries
+the identical blob). Run `levcomp-rs` against it plus the **era‑correct** `.lev`
+(`628d24af`, the commit that built the shipped `.iff`):
+
+```
+  mesh bbox for ramp.iff: [-327680, -655360, -131072, 327680, 655360, 131072]
+  wrote 4956 bytes
+LVL IDENTICAL to HEAD
+```
+
+**PASS** — bbox `±5, ±10, ±2` matches the `Ramp` object's `Global Bounding Box` in the
+`.lev`, and the compiled `.lvl` is byte‑for‑byte HEAD's. The old symlinked mesh gives
+`±5, ±4, ±4` and a 5084‑byte `.lvl`.
+
+### 3. Rebuild through the real pipeline with the winding reversed
+
+`(0,1,2),(0,3,1) → (0,2,1),(0,1,3)`, then `iffcomp → levcomp → textile → iffcomp` (the
+`build_level_binary.sh` chain), run in a scratch tree against the era‑correct `.lev`:
+
+```
+--- pipeline output vs splice ---
+standalone IDENTICAL to splice
+inner differs from HEAD (expected: FACE bytes)
+inner lens 24576 24576 ndiff 4 offsets [23366, 23368, 23374, 23376]
+```
+
+**PASS** — the pipeline build and a direct FACE‑chunk splice of HEAD's bundle are the same
+bytes (the Effort 1c splice argument again: reversing a triangle permutes shorts inside
+`FACE` without changing its length), and the whole change against HEAD is **4 bytes**. The
+`_rt` pair was produced by the splice, which step 3 has just shown equals a pipeline build.
+
+```
+wflevels/mm_practice_blender.iff               len 24576 24576 ndiff 4 offsets [23366, 23368, 23374, 23376]
+wflevels/mm_practice_blender-standalone.iff    len 28672 28672 ndiff 4 offsets [27462, 27464, 27470, 27472]
+wflevels/mm_practice_blender_rt.iff            len 24576 24576 ndiff 4 offsets [23366, 23368, 23374, 23376]
+wflevels/mm_practice_blender_rt-standalone.iff len 28672 28672 ndiff 4 offsets [27462, 27464, 27470, 27472]
+```
+
+### 4. Acceptance — the three Effort 1e criteria
+
+```
+HEAD  mm_practice_blender    cull0: lit 122851 md5 29a84651bbbcff16c1c71a326fe99e80
+FIXED mm_practice_blender    cull0: lit=122851 md5=29a84651bbbcff16c1c71a326fe99e80 vs HEADcull0 diff=0 maxdelta=0
+FIXED mm_practice_blender    cull1: lit=122851 md5=29a84651bbbcff16c1c71a326fe99e80 vs HEADcull0 diff=0 maxdelta=0
+FIXED mm_practice_blender_rt cull0: lit=122851 md5=29a84651bbbcff16c1c71a326fe99e80 vs HEADcull0 diff=0 maxdelta=0
+FIXED mm_practice_blender_rt cull1: lit=122851 md5=29a84651bbbcff16c1c71a326fe99e80 vs HEADcull0 diff=0 maxdelta=0
+```
+
+**PASS on all three** — (1) cull‑on ≡ cull‑off, (2) cull‑off ≡ HEAD's cull‑off *exactly*
+(`maxdelta=0`; no shading change at all, so this was never a lighting question), (3) the
+two levels are identical to each other. All eight runs exit 0 — no `actor.hpi:184`
+segfault, no "fell out of room 0".
+
+| `WF_CULL=1` before | `WF_CULL=1` after |
+|---|---|
+| <img src="2026-06-13-planetarium-dome-view-engine-wide-backface-culling/mm-practice-blender-before-cull-on.png" width="330"> | <img src="2026-06-13-planetarium-dome-view-engine-wide-backface-culling/mm-practice-blender-after-cull-on.png" width="330"> |
+
+### 5. Neighbours that share the ramp are unaffected
+
+```
+mm_practice:      cull0 lit=94094 md5=3de3a72d8ad4f1f508fd8544ee736812 | cull1 identical: True
+marble-madness:   cull0 lit=29619 md5=5fb02eca38bb3517f6d09a6d8cdc100e | cull1 identical: True
+marble-madness-2: cull0 lit=19268 md5=c28be7674f4ba9decbd6b9de8db3d37b | cull1 identical: True
+```
+
+**PASS** — Effort 1e's warning (the shared `ramp.iff` chain) was the reason to check; no
+shipped bytes of those three levels changed.
+
+### 6. `treemap`'s non‑determinism gate is cleared
+
+Two `WF_CULL=0` runs plus one `WF_CULL=1` run, all with `WF_TM_ROOT` pointed at a fixed
+fixture directory (the override added in `0bd4c25c`):
+
+```
+6bafe813005f63aa1bee5a184e62f790  treemap/cull0-r1.png
+6bafe813005f63aa1bee5a184e62f790  treemap/cull0-r2.png
+6bafe813005f63aa1bee5a184e62f790  treemap/cull1.png
+```
+
+**PASS** — `treemap` is now byte‑reproducible run‑to‑run *and* culling‑stable. Effort 1b's
+blocker 2 is gone; the 21653‑px "difference" was the harness perturbing the scanned
+directory, exactly as `0bd4c25c` predicted.
+
+### Known‑stale, deliberately not touched
+
+`wflevels/mm_practice/mm_practice_blender.lev` moved on at `33d0d730`
+("correct inverted light-type enum, position leak, altitude axis") and
+`mm_practice_blender_rt.lev` at the same commit, without either level's artifacts being
+rebuilt. A plain `task build-level -- mm_practice_blender` today therefore produces a
+**different level** — brightly lit (mean RGB 180 vs 7) and differently framed (lit bbox
+starts at y=104 vs y=200) — because the light fix has never been baked in. That is a
+separate defect from the winding bug and would change the shipped look for reasons that
+have nothing to do with culling, so the winding fix was landed against the era‑correct
+`.lev` instead. These two levels remain in the "does not rebuild from HEAD's source"
+bucket alongside the dome.
+
+---
+
+## Effort 2 — the flip: `WF_CULL` ON by default, 2026‑09‑21
+
+Plan steps 5 (flip the default) and 6 (regression‑guard it), both `FAIL / DEFERRED` since
+Effort 1b. **Both now PASS.** `WF_CULL` defaults to ON in `backend_modern.cc` and
+`backend_metal.mm`; `WF_CULL=0` opts out.
+
+**Why this was re‑verified rather than just landed.** An *uncommitted* flip was already
+sitting in the working tree, carrying a comment that claimed "every shipped level renders
+frame 20 byte‑identical … see the plan's Effort 2 table". There was no Effort 2 section —
+the session that wrote it died (laptop battery) four minutes after its own
+`mm_practice_blender` attempt, which a later agent found broken. The claim had no
+evidence behind it. This section is that evidence, measured fresh.
+
+No mockups: the change has no new visible surface — it is a rendering default, and the
+before/after captures live in Efforts 1b–1f above.
+
+### 1. Build green with the flip in the tree
+
+```
+$ task build
+=== Linking ===
+
+Built: /home/will/WorldFoundry-wbniv/engine/wf_game
+EXIT=0
+```
+
+**PASS.**
+
+### 2. Determinism control + cull A/B, all 20 shipped levels, frame 20
+
+Three legs per level — `WF_CULL=0` **twice** (the determinism control Effort 1b's method
+notes require) and `WF_CULL=1` once — 60 runs, all `rc=0` with a PNG written:
+
+```
+WF_TM_ROOT=<fixed fixture> WF_CULL=<0|1> engine/wf_game --frame-step-smoke=30 --cycles=1 \
+  -rate20 -record_video [--vram-*] -L<abs>/wflevels/<level>-standalone.iff \
+  --capture-frame=20=<out.png>
+```
+
+from `wfsource/source/game`, with `run-condo`/`run-moon`'s `--vram-*` flags for
+`condo_639_640{,_tour}` and `moon_site01`. `ctrl_px` = pixels differing between the two
+`WF_CULL=0` runs; `ab_px` / `ab_max` = pixels differing and max channel delta between
+`WF_CULL=0` and `WF_CULL=1`.
+
+```
+level                       lit0    lit1   delta  ctrl_px   ab_px  ab_max  verdict
+condo_639_640             307200  307200       0        0     143      70  DIFFERS n=143
+    bbox=(152,65)-(161,88) cull0mean=[24. 52. 90.] cull1mean=[ 46. 101. 160.] darker=0 brighter=143
+condo_639_640_tour        307200  307200       0        0     167      70  DIFFERS n=167
+    bbox=(146,144)-(157,169) cull0mean=[24. 52. 90.] cull1mean=[ 46. 101. 160.] darker=0 brighter=167
+dome                       67522   67522       0        0       0       0  IDENTICAL
+filelight                 121396  121396       0        0       0       0  IDENTICAL
+filesys                    64574   64574       0        0       0       0  IDENTICAL
+marble-madness             29619   29619       0        0       0       0  IDENTICAL
+marble-madness-2           19268   19268       0        0       0       0  IDENTICAL
+mm_practice                94094   94094       0        0       0       0  IDENTICAL
+mm_practice_blender       122851  122851       0        0       0       0  IDENTICAL
+mm_practice_blender_rt    122851  122851       0        0       0       0  IDENTICAL
+moon_site01               175321  175321       0        0       0       0  IDENTICAL
+pilot_demo                 94731   94731       0        0       0       0  IDENTICAL
+qbert_practice              6043    6042      -1        0      93     238  DIFFERS n=93
+    bbox=(304,198)-(354,418) cull0mean=[116.2  57.4 139.3] cull1mean=[71.4 35.7 88. ] darker=89 brighter=4
+smb_w1_1                   14041   14041       0        0       0       0  IDENTICAL
+smb_w1_2                   25772   25772       0        0       0       0  IDENTICAL
+smb_w1_3                   10794   10794       0        0       0       0  IDENTICAL
+smb_w1_4                   83492   83492       0        0       0       0  IDENTICAL
+snowgoons                 100849  100849       0   103974      98     217  NON-DETERMINISTIC
+    bbox=(99,298)-(173,469) cull0mean=[65.  63.2 63.2] cull1mean=[135.6 134.6 145.5] darker=13 brighter=85
+snowgoons-blender          96831  100849    4018   102610  102610     255  NON-DETERMINISTIC
+    bbox=(0,268)-(639,479) cull0mean=[146.2 144.5 149.5] cull1mean=[148.3 146.3 151. ] darker=52317 brighter=49758
+treemap                   163850  163850       0        0       0       0  IDENTICAL
+```
+
+**PASS with two levels deferred to step 3.** 14 levels byte‑identical (including every
+level Efforts 1b–1f fixed, and `treemap`, whose `WF_TM_ROOT` determinism gate stays
+clear). Three levels differ by 93–167 px; `snowgoons{,-blender}` failed the control and
+are resolved below.
+
+Every `lit` count and every residual reproduces Effort 1b's 06‑13 baseline **exactly** —
+143, 167, 93 — so nothing has drifted in the 12 levels nobody had re‑checked since.
+
+### 3. The `snowgoons{,-blender}` control failure — concrete cause, not culling
+
+Each capture run's log names the culprit, and it correlates perfectly with which frame
+came out odd (`fellout` = count of `Room::UpdateRoomContents: … fell out of room 0;
+re-adding`):
+
+```
+snowgoons.cull0-r1         fellout=1   md5 4b694ca0…   <- modal
+snowgoons.cull0-r2         fellout=2   md5 71621ba4…   <- outlier
+snowgoons.cull1            fellout=1   md5 a515eee3…   <- modal
+snowgoons-blender.cull0-r1 fellout=2   md5 7894f27c…   <- outlier
+snowgoons-blender.cull0-r2 fellout=1   md5 933c23b0…   <- modal
+snowgoons-blender.cull1    fellout=1   md5 84a8396a…   <- modal
+```
+
+`WFGame::StepFrame` advances the simulation by a **measured wall‑clock** delta —
+`_deltaTime = do_swap ? _display->PageFlip() : _display->MeasureDelta()`
+(`wfsource/source/game/game.cc:691`, clamped at `kMaxSimDeltaSeconds`). The smoke harness
+is therefore *not* a fixed‑step simulation: frame‑pacing jitter changes how far an actor
+travels per frame. Both snowgoons levels have an actor sitting on a room boundary, and an
+extra `fell out of room 0 … re-adding` event repositions it, moving ~100 k px of ground.
+The outlier landed on a `WF_CULL=0` leg in one level and (in the repeats below) on a
+`WF_CULL=1` leg in the other, so it is **independent of the cull**.
+
+Six repeats per leg, back to back:
+
+```
+snowgoons         WF_CULL=0  4b694ca0ebc39848ee54cc17ce465ce3  x6/6
+snowgoons         WF_CULL=1  a515eee3bd8f2ac6fba655bf987675bd  x5/6  (1x ba99e592…)
+snowgoons-blender WF_CULL=0  933c23b00026a073c447003a209ea9fe  x6/6
+snowgoons-blender WF_CULL=1  84a8396a5b1f1b7bac7ff6bab8bdbb61  x6/6
+```
+
+`933c23b00026a073c447003a209ea9fe` is also the `snowgoons-blender` md5 Effort 1c step 4
+recorded, so the modal frame is stable across sessions and across the prelit fix.
+
+**PASS** — the anomaly has a named mechanism (wall‑clock sim delta + a room‑boundary
+actor), it is reproducible, and it is orthogonal to `WF_CULL`.
+
+### 4. Modal A/B for `snowgoons{,-blender}`
+
+```
+snowgoons            lit0=100849 lit1=100849 n=98 maxdiff=217 bbox=(99,298)-(173,469)
+                     cull0mean=[65.0 63.2 63.2] cull1mean=[135.6 134.6 145.5] darker=13 brighter=85
+snowgoons-blender    lit0=100849 lit1=100849 n=97 maxdiff=217 bbox=(99,298)-(173,469)
+                     cull0mean=[65.5 63.7 63.7] cull1mean=[136.7 135.7 146.6] darker=13 brighter=84
+```
+
+**PASS** — 98 and 97 px, identical to Effort 1b's numbers, same bounding box, same
+"mostly brighter" signature.
+
+### 5. Acceptance — every residual is a previously‑classified one
+
+| level | Δpx | class | why it is accepted |
+|---|---|---|---|
+| 15 levels | 0 | — | byte‑identical cull‑on vs cull‑off |
+| `condo_639_640` | 143 | 1b (a) | 10×23 px box, **all 143 brighter**, silhouette unchanged — a back‑facing polygon was bleeding over a brighter front face |
+| `condo_639_640_tour` | 167 | 1b (a) | same box, same signature |
+| `snowgoons` | 98 | 1b (a) | 85 of 98 brighter, one small prop |
+| `snowgoons-blender` | 97 | 1b (a) | same prop, same signature |
+| `qbert_practice` | 93 | 1c | z‑fight tie on the convex props; the documented residual of the `72b1471b` rewind |
+
+No level loses geometry (`lit` counts match on all 20), none is newly non‑deterministic
+under the cull, and no residual grew. **PASS — the flip is safe to land.**
+
+`marble-madness` and `marble-madness-2` came back byte‑identical on both legs, so Effort
+1e's fix holds and nothing further was needed. (Will's standing note, recorded here so it
+is not rediscovered: if either level ever needs more than a trivial culling fix, **archive
+them rather than invest further** — the maps were never accurate arcade conversions. Not
+acted on here; no new problem was found.)
+
+### 6. The flip and its docs
+
+- `wfsource/source/gfx/glpipeline/backend_modern.cc` — `cullEnabled` reads
+  `!e || atoi(e) != 0`; the comment now carries this section's actual numbers instead of
+  promising a table that did not exist.
+- `wfsource/source/gfx/metal/backend_metal.mm` — mirrored, and explicitly marked
+  unverified (no macOS host here; the sweep is GL‑only).
+- `docs/level-design-troubleshooting.md` — "Mesh face normals & backface culling" now
+  reads ON‑by‑default, including the "Diagnosing" and "Enable / disable" paragraphs.
+- `docs/level-building.md` — "Mesh face winding" likewise.
+
+### 7. Regression guard (plan step 6)
+
+`tests/test_backface_cull_invariant.py`, two invariants:
+
+- **`test_cull_is_on_by_default`** — renders a *deliberately inside‑out* level (every
+  `qbert_practice` cube triangle reversed, spliced into a copy of the standalone bundle in
+  a tmp dir, the Effort 1c/1f technique) three times: `WF_CULL` unset, `=1`, `=0`. Unset
+  must equal `=1`, and `=0` must differ. Shipped content cannot test this — it is
+  culling‑clean, so it renders the same under either default; only backwards‑wound
+  geometry can tell the two apart.
+- **`test_cull_is_a_noop_on_shipped_levels`** — parametrized over all 19 named levels,
+  `WF_CULL=0` vs `WF_CULL=1` within that level's accepted residual (the step 5 table,
+  encoded as `ACCEPTED`). `snowgoons{,-blender}` skip with step 3's reason, so the guard
+  is not flaky.
+
+```
+$ DISPLAY=:0 python3 -m pytest tests/test_backface_cull_invariant.py -q
+..................ss                                                     [100%]
+18 passed, 2 skipped in 78.43s (0:01:18)
+```
+
+**PASS.**

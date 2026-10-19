@@ -1,0 +1,11 @@
+{
+  "apk": "/home/will/WorldFoundry-wbniv/.worktrees/growing-plants/.plant-profile-apks/old-static.apk",
+  "apk_sha256": "a9b5fb63367e900bfcaacc124d939f1743b43568b4226949016b84475b8eb03c",
+  "protocol": "30.0 s warmup; 36 s planted-tank trace (wide idle, close idle, close crawl; 12 s each); 3 run(s); SurfaceFlinger sampled every 0.75 s",
+  "serial": "adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp",
+  "menu_index": 5,
+  "with_phone": true,
+  "growth_speed": null,
+  "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+  "revision": "7df9600a633b76a76fc1653b2dfff76092ebe30f"
+}

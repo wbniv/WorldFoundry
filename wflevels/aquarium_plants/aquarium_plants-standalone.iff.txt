@@ -1,0 +1,10 @@
+// Independent tank; leaves the current Aquarium app bundle alone.
+// Detailed static foliage needs room memory for expanded runtime primitives.
+// PERM holds the seahorses too (two DFRM rigs of about 190 KB each and four
+// deforming actors' writable copies), so it grows from 1 MB to 3 MB.
+{ 'L4'
+ { 'ALGN' .align( 2048 ) }
+ { 'RAM' 'OBJD' 1000000l 'PERM' 6000000l 'ROOM' 24000000l 'FLAG' 1l 1l 'SLOT' 1l }
+ { 'ALGN' .align( 2048 ) }
+ [ "../aquarium_plants.iff" ]
+}

@@ -1,0 +1,227 @@
+[
+ {
+  "id": "n",
+  "quantity": "Fish in Fig. 3",
+  "value": "N = 100",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "rr",
+  "quantity": "Repulsion zone r_r",
+  "value": "1 body length",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "alpha",
+  "quantity": "Field of perception \u03b1",
+  "value": "270\u00b0 (blind 90\u00b0 behind)",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "theta",
+  "quantity": "Turn rate \u03b8",
+  "value": "40\u00b0/s",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "s",
+  "quantity": "Speed s",
+  "value": "3 BL/s",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "sigma",
+  "quantity": "Error \u03c3",
+  "value": "0.05 rad",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "reps",
+  "quantity": "Replicates in the paper",
+  "value": "30 per cell",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "reps_us",
+  "quantity": "Replicates here",
+  "value": "3 per cell, 700 steps",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "states",
+  "quantity": "Collective states",
+  "value": "swarm, torus, dynamic parallel, highly parallel",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "hyst",
+  "quantity": "Hysteresis (collective memory)",
+  "value": "reported by the paper",
+  "status": "verified",
+  "sources": [
+   "S1"
+  ]
+ },
+ {
+  "id": "hyst_us",
+  "quantity": "Hysteresis in our sweep",
+  "value": "not reproduced (too coarse)",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "lead",
+  "quantity": "Informed minority steers a group",
+  "value": "small fraction in a model",
+  "status": "verified",
+  "sources": [
+   "S2"
+  ]
+ },
+ {
+  "id": "cont",
+  "quantity": "Schooling within a shoal",
+  "value": "coordinated swimming",
+  "status": "verified",
+  "sources": [
+   "S3"
+  ]
+ },
+ {
+  "id": "clown",
+  "quantity": "Real ocellaris clownfish",
+  "value": "anemone-associated groups",
+  "status": "verified",
+  "sources": [
+   "S4"
+  ]
+ },
+ {
+  "id": "wl",
+  "quantity": "Leader weight w",
+  "value": "3 in the game; 1, 3, 6 tried in the tank runs; not tuned",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "s_us",
+  "quantity": "Our speed and turn rate",
+  "value": "2 BL/s and 120\u00b0/s",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "turn_paper",
+  "quantity": "A 90\u00b0 turn at the paper\u2019s s, \u03b8",
+  "value": "6.75 BL ahead, radius 4.3 BL",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "turn_us",
+  "quantity": "A 90\u00b0 turn at ours",
+  "value": "1.50 BL ahead, radius 0.95 BL",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "bytes",
+  "quantity": "school.fth in the dictionary",
+  "value": "3324 B of 65536",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "lines",
+  "quantity": "school.fth source",
+  "value": "210 code lines, 262 with comments",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "err",
+  "quantity": "Forth vs numpy, one tick",
+  "value": "position 3e-04, heading 1e-03",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "eng_before",
+  "quantity": "Director script per tick, in the engine, as found",
+  "value": "39 to 43 ms, 4.2 \u00b5s a mailbox call, 20 fps",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "eng_after",
+  "quantity": "The same after the engine fix",
+  "value": "11.3 ms, 0.28 \u00b5s a mailbox call, 59.9 fps",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "eng_level",
+  "quantity": "The aquarium level with ten followers, on the Chromecast",
+  "value": "59.9 fps, p90 33.4 ms; Director 6.4 ms a tick",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ },
+ {
+  "id": "dev",
+  "quantity": "One tick, 11 fish, on the Chromecast HD",
+  "value": "7.3 ms",
+  "status": "ours",
+  "sources": [
+   "S5"
+  ]
+ }
+]

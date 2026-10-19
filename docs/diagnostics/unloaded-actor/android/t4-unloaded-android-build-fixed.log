@@ -1,0 +1,34 @@
+[0/2] Re-checking globbed directories...
+[1/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/room/actrooms.cc.o
+[2/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/room/actroit.cc.o
+[3/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/room/room.cc.o
+[4/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/room/rooms.cc.o
+[5/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/actbox.cc.o
+[6/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/actboxor.cc.o
+[7/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/actor.cc.o
+[8/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/camera.cc.o
+[9/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/camshot.cc.o
+[10/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/destroyer.cc.o
+[11/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/explode.cc.o
+[12/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/generator.cc.o
+[13/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/gold.cc.o
+[14/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/game.cc.o
+[15/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/light.cc.o
+[16/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/level.cc.o
+[17/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/mailbox.cc.o
+[18/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/main.cc.o
+[19/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/missile.cc.o
+[20/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/matte.cc.o
+[21/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/movecam.cc.o
+[22/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/platform.cc.o
+[23/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/player.cc.o
+[24/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/shadow.cc.o
+[25/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/shield.cc.o
+[26/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/spike.cc.o
+[27/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/tool.cc.o
+[28/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/toolshld.cc.o
+[29/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/toolngun.cc.o
+[30/34] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/warp.cc.o
+[31/34] Building CXX object CMakeFiles/wfengine.dir/engine/stubs/scripting_zforth.cc.o
+[32/34] Linking CXX static library libwfengine.a
+[33/34] Linking CXX shared library libwf_game.so

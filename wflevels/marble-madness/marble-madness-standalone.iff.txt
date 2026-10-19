@@ -1,0 +1,13 @@
+// marble-madness-standalone.iff.txt
+// Build: iffcomp -binary -o=../marble-madness-standalone.iff marble-madness-standalone.iff.txt
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 100000l
+        'PERM' 300000l
+        'ROOM' 300000l
+        'FLAG' 1l 1l
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../marble-madness.iff" ]
+}

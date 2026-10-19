@@ -1,0 +1,28 @@
+{
+  "workflow": "variant-benchmark",
+  "app": "aquarium",
+  "apk": "/home/will/WorldFoundry-wbniv/.worktrees/seahorse-close-baselines/engine/objs_game/.tmp/seahorse-close/restore/pair6.apk",
+  "restore_apk": "/home/will/WorldFoundry-wbniv/.worktrees/seahorse-close-baselines/engine/objs_game/.tmp/seahorse-close/restore/pair6.apk",
+  "trace": "idle",
+  "duration": 60,
+  "warmup": 15,
+  "runs": 1,
+  "variants": [
+    {
+      "label": "pair6",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/seahorse-close-baselines/engine/objs_game/.tmp/seahorse-close/fixtures/close-idle-pair6-cpu.apk"
+    },
+    {
+      "label": "pair2",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/seahorse-close-baselines/engine/objs_game/.tmp/seahorse-close/fixtures/close-idle-pair2-cpu.apk"
+    },
+    {
+      "label": "pair1",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/seahorse-close-baselines/engine/objs_game/.tmp/seahorse-close/fixtures/close-idle-pair1-cpu.apk"
+    },
+    {
+      "label": "none",
+      "apk": "/home/will/WorldFoundry-wbniv/.worktrees/seahorse-close-baselines/engine/objs_game/.tmp/seahorse-close/fixtures/close-idle-none-cpu.apk"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+[
+  {
+    "world": 1,
+    "trigger": [
+      315.0,
+      0.0,
+      3.0
+    ],
+    "celebrated": true,
+    "requested_next": true,
+    "baseline_resets": 2,
+    "fps_before": 59.949574,
+    "fps_after": 60.187107
+  },
+  {
+    "world": 2,
+    "trigger": [
+      372.0,
+      0.0,
+      3.0
+    ],
+    "celebrated": true,
+    "requested_next": true,
+    "baseline_resets": 2,
+    "fps_before": 60.566174,
+    "fps_after": 60.983208
+  },
+  {
+    "world": 3,
+    "trigger": [
+      232.5,
+      0.0,
+      3.0
+    ],
+    "celebrated": true,
+    "requested_next": true,
+    "baseline_resets": 2,
+    "fps_before": 59.58717,
+    "fps_after": 58.532288
+  },
+  {
+    "world": 4,
+    "trigger": [
+      228.0,
+      0.0,
+      1.5
+    ],
+    "celebrated": true,
+    "requested_next": true,
+    "baseline_resets": 2,
+    "fps_before": 61.92934,
+    "fps_after": 60.899525
+  }
+]

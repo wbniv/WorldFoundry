@@ -165,6 +165,15 @@ TYPEHEADER(Level Object,LevelObj)
 	TYPEENTRYFILENAME(MusicSeq,SEQ,"MIDI Sequence File (*.seq)\0*.seq\0" )
 	PROPERTY_SHEET_FOOTER
 
+	PROPERTY_SHEET_HEADER(Rendering,0)
+@*	----------------------------------
+@*	Appended after the original layout: levels compiled before this field
+@*	existed have a shorter Level Object payload, and the engine reads the
+@*	field only when the payload holds it (Level::PrewarmNoPaletteProgram).
+@*	Add later Level Object fields after this one, never before it.
+	TYPEENTRYBOOLEAN(Prewarm No Palette Program,,0,SHOW_AS_CHECKBOX,"Link the no-palette opaque shader while the level loads: longer level entry and no first-draw pause")
+	PROPERTY_SHEET_FOOTER
+
 TYPEFOOTER
 
 @*============================================================================

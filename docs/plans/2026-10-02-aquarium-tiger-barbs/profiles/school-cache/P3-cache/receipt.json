@@ -1,0 +1,8 @@
+{
+  "apk": "/tmp/aquarium-school-cache/P3-cache.apk",
+  "apk_sha256": "e33e3c228220a9d7d327c0f5f623a0d43106d7e946669fa260471d696d8f1f1e",
+  "protocol": "30 s warmup; 60 s fixed trace (five 12 s segments); 3 run(s); SurfaceFlinger sampled every 0.75 s",
+  "serial": "adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp",
+  "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+  "revision": "09f0eb6b502a4143b38d1d67cc418839b1036fbb"
+}

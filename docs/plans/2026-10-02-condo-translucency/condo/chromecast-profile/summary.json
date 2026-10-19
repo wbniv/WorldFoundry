@@ -1,0 +1,22 @@
+{
+  "runs": [
+    {
+      "run": 1,
+      "frames": 363,
+      "interval_count": 363,
+      "fps": 29.96998978602933,
+      "refresh_ms": 16.683333,
+      "p50_ms": 33.366713,
+      "p90_ms": 33.366819,
+      "p95_ms": 33.366864,
+      "p99_ms": 33.367007,
+      "worst_ms": 33.367182,
+      "missed_refresh_percent": 100.0,
+      "duration_seconds": 12.0,
+      "layer": "org.worldfoundry.wf_game.condo/android.app.NativeActivity#8274"
+    }
+  ],
+  "median": {
+    "fps": 29.96998978602933
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "job": {
+    "id": "J-86536e599a69",
+    "owner": "5c3060b287de0099d24b3975",
+    "accepted": 1791067256.993228,
+    "state": "running",
+    "phase": "connecting",
+    "request": {
+      "device": "chromecast-test-01",
+      "workflow": "readd"
+    },
+    "device": "chromecast-test-01",
+    "generation": 4,
+    "cancel": 0,
+    "error": null,
+    "started": 1791067257.0937386,
+    "finished": null,
+    "worker_pid": 144759,
+    "recovery_resolved": 0
+  },
+  "device": {
+    "id": "chromecast-test-01",
+    "serial": "2628105GN0GT7C",
+    "model": "Chromecast_HD",
+    "device": "boreal",
+    "android": "14",
+    "abis": [
+      "armeabi-v7a",
+      "armeabi"
+    ],
+    "transport": "tls",
+    "endpoint": "192.168.4.43:41277",
+    "pools": [
+      "chromecast-test"
+    ],
+    "health": "recovery-required",
+    "enrolled": true,
+    "ipv6_addresses": [
+      "fd5d:59ce:7438:1:581b:d19a:27a5:c4db",
+      "fd5d:59ce:7438:1:3b82:772d:8d07:d5f6",
+      "fd5d:59ce:7438:1:401f:2bff:fe13:98df",
+      "fe80::401f:2bff:fe13:98df"
+    ],
+    "generation": 4
+  },
+  "result": "needs-local-setup",
+  "error": "Connect failed; enable debugging and authorize this service host on the TV",
+  "cleanup_verified": false,
+  "restoration": null,
+  "commands": [
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791067257.5592587,
+      "end": 1791067257.5630834,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "mdns",
+        "services"
+      ],
+      "start": 1791067258.0647833,
+      "end": 1791067258.0689614,
+      "returncode": 0
+    },
+    {
+      "args": [
+        "connect",
+        "192.168.4.43:41277"
+      ],
+      "start": 1791067258.0699472,
+      "end": 1791067258.7986703,
+      "returncode": 0
+    }
+  ],
+  "finished": 1791067258.7996376,
+  "concurrent_jobs": []
+}

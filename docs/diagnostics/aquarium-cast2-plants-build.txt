@@ -1,0 +1,70 @@
+/home/will/WorldFoundry-wbniv/wflevels/aquarium_tanks/generate.py:60: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  mt.use_nodes = True
+BlenderMCP addon registered
+BlenderMCP addon unregistered
+Info: Imported 38 objects (0 skipped)
+[aquarium_plants] 1 animals; 38 actors; profile=remote
+Info: Exported 38 objects to /home/will/WorldFoundry-wbniv/wflevels/aquarium_plants/aquarium_plants.lev
+Blender 5.0.1
+
+Blender quit
+[1/5] iffcomp-rs  aquarium_plants.lev  →  aquarium_plants.lev.bin
+[2/5] levcomp-rs  aquarium_plants.lev.bin  →  aquarium_plants.lvl + asset.inc + aquarium_plants.iff.txt + aquarium_plants.ini
+levcomp v0.1.0
+  input : aquarium_plants.lev.bin
+  .lc   : /home/will/WorldFoundry-wbniv/wfsource/source/oas/objects.lc
+  output: aquarium_plants.lvl
+  oad   : /home/will/WorldFoundry-wbniv/wfsource/source/oas
+  meshes: .
+  parsed 38 objects
+  loaded 29 classes
+  loaded OAD schemas
+  mesh bbox for sea_urchin.iff: [-38997, -39647, -15073, 38228, 36929, 32650]
+  mesh bbox for urchin_tube_foot.iff: [-2293, -1589, -14893, 2293, 1589, -9830]
+  mesh bbox for urchin_tube_foot.iff: [-2293, -1589, -14893, 2293, 1589, -9830]
+  mesh bbox for urchin_tube_foot.iff: [-2293, -1589, -14893, 2293, 1589, -9830]
+  mesh bbox for urchin_tube_foot.iff: [-2293, -1589, -14893, 2293, 1589, -9830]
+  mesh bbox for urchin_tube_foot.iff: [-2293, -1589, -14893, 2293, 1589, -9830]
+  mesh bbox for urchin_tube_foot.iff: [-2293, -1589, -14893, 2293, 1589, -9830]
+  mesh bbox for urchin_tube_foot.iff: [-2293, -1589, -14893, 2293, 1589, -9830]
+  mesh bbox for urchin_tube_foot.iff: [-2293, -1589, -14893, 2293, 1589, -9830]
+  mesh bbox for tank_base.iff: [-399507, -108199, 0, 399507, 108199, 8323]
+  mesh bbox for water_back.iff: [-391184, 99876, 41615, 391184, 108199, 316276]
+  mesh bbox for back_air.iff: [-399507, 99876, 316276, 399507, 108199, 349569]
+  mesh bbox for tank_end__1.iff: [-399507, -108199, 0, -391184, 108199, 349569]
+  mesh bbox for tank_end_1.iff: [391184, -108199, 0, 399507, 108199, 349569]
+  mesh bbox for front_collider.iff: [-399507, -116523, 0, 399507, -108199, 349569]
+  mesh bbox for rim.iff: [-399507, -108199, 349569, 399507, 108199, 356122]
+  mesh bbox for floor.iff: [-391184, -99876, 8323, 391184, 99876, 41615]
+  mesh bbox for plant_chunk_00.iff: [-386662, -91750, 41615, 386662, 91750, 315883]
+  mesh bbox for plant_chunk_01.iff: [-386662, -91750, 41615, 386662, 91750, 315883]
+  mesh bbox for plant_chunk_02.iff: [-386662, -91750, 41615, 386662, 91750, 315883]
+  mesh bbox for plant_chunk_03.iff: [-386662, -91750, 41615, 386662, 91750, 315883]
+  mesh bbox for plant_chunk_04.iff: [-386662, -91750, 41615, 386662, 91750, 315883]
+  mesh bbox for plant_chunk_05.iff: [-386662, -91750, 41615, 386662, 91750, 315883]
+  mesh bbox for plant_chunk_06.iff: [-386662, -91750, 41615, 386662, 91750, 315883]
+  mesh bbox for plant_chunk_07.iff: [-386662, -91750, 41615, 386662, 91750, 315883]
+  mesh bbox for stand.iff: [-409337, -118030, -163840, 409337, 118030, -1638]
+  mesh bbox for room_backdrop.iff: [-1966080, 196608, -327680, 1966080, 203161, 1310720]
+  wrote 16676 bytes
+  wrote asset.inc
+  wrote aquarium_plants.iff.txt
+  wrote aquarium_plants.ini
+[3/5] textile-rs  -ini=aquarium_plants.ini  →  palN.tga / RoomN.{tga,ruv,cyc} / Perm.{tga,ruv,cyc}
+[4/5] iffcomp-rs  aquarium_plants.iff.txt  →  ../aquarium_plants.iff
+
+✓ built /home/will/WorldFoundry-wbniv/wflevels/aquarium_plants.iff (192512 bytes)
+
+[5/5] iffcomp-rs  aquarium_plants-standalone.iff.txt  →  ../aquarium_plants-standalone.iff
+✓ built /home/will/WorldFoundry-wbniv/wflevels/aquarium_plants-standalone.iff (196608 bytes)
+cdpack: wrote 1769472 bytes to wflevels/aquarium-menu-cd.iff
+  SHEL: 431 bytes (sector 1)
+  L0: 184320 bytes at sector 2 (aquarium-standalone.iff)
+  L1: 317440 bytes at sector 92 (aquarium_blue_shrimp-standalone.iff)
+  L2: 221184 bytes at sector 247 (aquarium_betta-standalone.iff)
+  L3: 94208 bytes at sector 355 (aquarium_jellyfish-standalone.iff)
+  L4: 114688 bytes at sector 401 (aquarium_lionfish-standalone.iff)
+  L5: 196608 bytes at sector 457 (aquarium_plants-standalone.iff)
+  L6: 344064 bytes at sector 553 (aquarium_arowana-standalone.iff)
+  L7: 290816 bytes at sector 721 (aquarium_tiger_barbs-standalone.iff)
+  MENU: 193 bytes at sector 863 ("WF Aquarium", 8 entries)

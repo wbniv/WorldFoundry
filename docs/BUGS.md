@@ -1,0 +1,732 @@
+# BUGS
+
+Genuine bugs that have laid dormant for years before something surfaced them. Not TODOs, not feature gaps — bugs that *worked anyway* due to luck, dead code paths, or the bug never being exercised in practice.
+
+**Eligibility:** Only bugs whose buggy code was **authored before 2026-01-01** belong here. If the code was written in 2026 or later, it is fresh-author error, not a dormant bug, and does not qualify regardless of how interesting the failure mode is. Verify with `git log --follow --diff-filter=A -- <file>` (or `git blame` on the specific lines) before adding an entry.
+
+**Ordering:** Entries are sorted **reverse-chronologically by the date the bug was finally surfaced/fixed** (the date in each entry's title — newest first, oldest last, ending at the `## Template` section). When adding a new entry, insert it at the position its surface-date dictates; do not append blindly. If two entries share a date, group them together (insertion order within the date is fine).
+
+Format per entry:
+- **Title** with the date it was finally surfaced (`YYYY-MM-DD`, used for sorting)
+- **Status:** FIXED `<sha>` | OPEN | INVESTIGATING
+- **Symptom**, **Root cause**, **Why dormant**, **Fix**, **Diff** (the actual patch), **Investigation** (link)
+
+---
+
+## Texture-fits-slot check only in assertion builds: a Release build wrote a 512² texture past its 256² VRAM slot and died at exit in `~VideoMemory` — 2026‑10‑16
+
+**Status:** FIXED on branch `fix-exit-free-abort` (from `2026-new-level`; `gfx/texture.cc`), with ctests `wf_game_smoke_aquarium_{lionfish,plants}[_default_vram]`.
+
+**Symptom:** A Release, no‑ASan `wf_game --frame-step-smoke=240 --cycles=1 -L…/aquarium_lionfish-standalone.iff` (or `aquarium_plants`) ran all 240 frames, printed `rest_api: server stopped`, then aborted with exit 134: `free(): invalid pointer` (lionfish) or `free(): invalid size` (plants). The other aquarium tanks exited 0. `gdb`: `#8 free`, `#9 PixelMap::~PixelMap`, `#10 VideoMemory::~VideoMemory`, `#11 WFGame::~WFGame`, `#12 PIGSMain`. Valgrind found the write that corrupted the heap, long before exit: `Invalid write of size 1 at PixelMap::Load` ← `LoadTexture(IFFChunkIter&, PixelMap&)` ← `AssetSlot::AssetSlot` ← `AssetManager::LoadPermanents` ← `Level::Level`, `0 bytes after a block of size 262,144` (one 256 × 256 × 4 slot buffer) allocated in `PixelMap::PixelMap` ← `VideoMemory::AllocateTextureSlots`.
+
+**Root cause:** `LoadTexture` (`gfx/texture.cc`) read the TGA's width and height from level data and guarded them against the destination slot with `RangeCheckExclusive(0,width,map.GetXSize()+1)`, which is an assertion: a build with `DO_ASSERTIONS=0` compiles it to nothing. `PixelMap::Load` then wrote `width × height` RGBA pixels at a stride of the slot's own width, so a texture bigger than its slot wrote past the slot's `new[]` buffer (its own bounds checks are assertions too). The two failing tanks are the only aquarium tanks whose textures exceed the default 256² slot: lionfish `Perm.tga` 512 × 256 and `Room0.tga` 512 × 272, plants `Perm.tga` 512 × 512. They are meant to run with 512² slots (`android/app/src/aquarium/assets/wf_args.txt`, `aquarium_lionfish/run.sh`); the repro command passed none, so the slots were 256². The overrun landed in the glibc chunk headers after the slot buffers, which glibc only checks when those chunks are freed, at exit.
+
+**Why dormant:** the check and the write are in git's first commit `a2784f6e` (2010‑05‑01; the 2026‑04‑18 `078bd9fa` change was whitespace). Every build ran with assertions until `191c4c90` "Build Release without the debug-mode engine defines" (2026‑10‑07). Any build with assertions stops at the check with `AssertMsg:width = 512, map.GetXSize()+1 = 257` (exit 255) before writing anything. That includes the default host Debug build, where ASan is on, so ASan never saw the overrun. A run with the 512² slot flags never overruns, in any build. Both were reproduced in the container: Debug + ASan without the flags asserts, and Release with the flags exits 0. Exactly which launch Will's clean ASan runs used is not recorded; they cannot have been the bare command.
+
+**Fix:** make the check unconditional. A texture larger than its slot (or a negative size) now prints `LoadTexture: WxH texture does not fit its XxY VRAM slot; launch with larger --vram-slot-width/height or --vram-perm-width/height`, then `AssertMsg`s (assertion builds) or calls `FatalError` (exit 1, the same pattern as `LMalloc` running out of memory). Nothing is written out of bounds. `aquarium_plants/run.sh` now passes the aquarium app's 512² slot flags, as `aquarium_lionfish/run.sh` already did. Before the fix, Release: `wf_game_smoke_aquarium_{lionfish,plants}_default_vram` fail with `Subprocess aborted` (`free(): invalid pointer` / `free(): invalid size`). After it, all four pass in both Release and Debug + ASan.
+
+**Diff** (`wfsource/source/gfx/texture.cc`, `LoadTexture`):
+```diff
++	if(width < 0 || height < 0 || width > map.GetXSize() || height > map.GetYSize())
++	{
++		char error[256];
++		snprintf(error, sizeof(error),
++			"LoadTexture: %dx%d texture does not fit its %dx%d VRAM slot; "
++			"launch with larger --vram-slot-width/height or --vram-perm-width/height\n",
++			width, height, map.GetXSize(), map.GetYSize());
++		AssertMsg(0, error);
++		FatalError(error);
++	}
++
+ 	const void* buffer = texturestream.GetMemoryPtr(width * height * 2);
+-	RangeCheckExclusive(0,width,map.GetXSize()+1);
+-	RangeCheckExclusive(0,height,map.GetYSize()+1);
+```
+
+**Investigation:** reproduced on `2026-new-level`, so it predates the seahorse Phase 1 deformer work. The slot-size flags: [level-design-troubleshooting.md](level-design-troubleshooting.md), "texture bigger than the transient VRAM slot".
+
+---
+
+## Room loading assumed no teleports: `ChangeActiveRoom` binds Moves Between Rooms objects into room memory — the Player's render data overwritten after a teleport (a design gap) — 2026‑10‑08
+
+**Status:** FIXED [`2b893d48`](https://github.com/wbniv/WorldFoundry/commit/2b893d48) (merged into `2026-new-level` 2026‑10‑08; `room/actrooms.cc`, `baseobject/baseobject.{hp,cc}`, `game/actor.hp`).
+
+**Kind:** a design-type bug, not a coding slip (Will, 2026‑10‑08). The room system was designed for walking between adjacent rooms, where a room loads *ahead* of the player; teleporting was never explicitly supported or intended. `ChangeActiveRoom`'s load loop is consistent with that design. It breaks when a teleport loads a room with a Moves Between Rooms object already inside it. One caveat, from the code: even without teleports, a Moves Between Rooms object other than the Player that walks out of a freshly loaded room into a neighbour, and stays there while the first room unloads and its slot is reused, would take the same path. Whether any original level did that is unknown.
+
+**Symptom:** Splitting the Parmenides slice into one engine Room per scene, the chapter crashed on its first return from Reason. A desktop fixture that walks temple → reason → temple exits with `SIGSEGV` around frame 826, at the reason → temple return; `gdb`: `#0 AnimationManagerActual::UpdateAnimation`, `#1 Actor::update`, `#2 UpdatePhysics`, `#3 Level::update`. The same path on today's two-room level runs clean.
+
+**Root cause:** `ActiveRooms::InitActiveRoom` (level start) binds every render object of an active room into that room's asset slot, **except** objects whose movement block has `MovesBetweenRooms`, which it binds into `VideoMemory::PERMANENT_SLOT`. `ActiveRooms::ChangeActiveRoom` (a room loaded mid-play) had no such check: it bound every render object of the newly loaded room, Moves Between Rooms objects included, into the new room's slot, and its unload loop unbound them again. In the split level the Player (flagged Moves Between Rooms) walked temple → reason: reason loaded with the Player inside, so the Player's render actor was allocated in reason's slot (slot 2). On the way back reason → temple, the temple was already loaded (reason lists it), so the Player was not rebound. Reason was then unloaded and god loaded into the same slot 2, overwriting the Player's render actor.
+
+**Why dormant (partly unknown):** the inconsistency is in the first CVS revision, `game/actrooms.cc` 1.1 (2000‑02‑12, `kts`, "Initial revision": `InitActiveRoom` checks `MovesBetweenRooms`, `ChangeActiveRoom` does not), unchanged through `game/actrooms.cc` 1.17, the 2003 move to `room/actrooms.cc` (1.1 to 1.4, 2010), and git's first commit `a2784f6e`; the code before the CVS import is not available, so it cannot be dated more precisely. The levels in this repository never load a room mid-play (each multi-room level has two mutually adjacent rooms, all loaded at level start), so they never run `ChangeActiveRoom`'s load loop. The 1990s levels built with this engine did load rooms as the player moved, and they are **not** in this repository, so whether and how often they hit this cannot be checked here. Will (2026‑10‑08): "we never explicitly supported teleporting (nor intended to)", which explains it: the original levels moved the player by walking between adjacent rooms. The mechanism, from the code: the bad path needs a Moves Between Rooms object to be **inside a room at the moment that room loads**, and then to move to a room that stays loaded while the first is unloaded and its slot is reused. Walking between adjacent rooms does not do that, because the room the player walks into is already loaded (it was a neighbour). The Parmenides split hit it through a **teleport** into a room that was not active, a path the engine never supported; with a room split, every realm change in that chapter is such a teleport.
+
+**Fix:** in `ChangeActiveRoom`'s load loop, bind a Moves Between Rooms object into the permanent slot, and only if it is not already bound (new `BaseObject::AssetsBound()`, which `Actor` overrides as `_renderActor != NULL`); in the unload loop, leave such objects bound. Binding into the permanent slot on every room load would leak, because the permanent pool is never freed. Verified with the crash fixture: the pre-fix build `SIGSEGV`s, the fixed Release build runs 2,200 frames (`rc 0`), as do the split level's g0 and g1 loops; today's level is `rc 0` with both binaries. No ctest: no shipped level loads a room mid-play, so there is no practical harness; the fixture is the regression check.
+
+**Diff** (`wfsource/source/room/actrooms.cc`, load loop):
+```diff
+-		   				(*rendIter).BindAssets(_assetManager.GetAssetSlot(_levelRooms.GetSlotIndex(newRoomIndex)).GetSlotMemory());
++							assert(IsPhysicalObject(&(*rendIter)));
++							PhysicalObject& po = static_cast<PhysicalObject&>(*rendIter);
++							if(po.GetMovementBlockPtr()->MovesBetweenRooms)
++							{
++								if(!po.AssetsBound())
++									po.BindAssets(_assetManager.GetAssetSlot(VideoMemory::PERMANENT_SLOT).GetSlotMemory());
++							}
++							else
++								po.BindAssets(_assetManager.GetAssetSlot(_levelRooms.GetSlotIndex(newRoomIndex)).GetSlotMemory());
+```
+(unload loop: `UnBindAssets()` is skipped for Moves Between Rooms objects.)
+
+**Investigation:** [rooms split evaluation plan](https://github.com/wbniv/finding-your-way/blob/main/docs/plans/2026-10-08-rooms-split-eval.md), constraint 7 and the crash evidence.
+
+The subsequent [cross-room teleport audit](teleport-audit.md) adds standalone
+CTest regressions and Chromecast verification for the supported teleport paths.
+
+---
+
+## Departing room unbind uses the destination pointer — 2026-10-08
+
+**Status:** FIXED [`c92ca353`](https://github.com/wbniv/WorldFoundry/commit/c92ca353) (`teleport-audit`).
+
+**Symptom:** A cross-room teleport from a room with two neighbours to a disconnected room triggers UBSan: member call on null pointer of type `Room`.
+
+**Root cause:** `ActiveRooms::ChangeActiveRoom` clears `_fromActiveRooms[idxActiveRoom]`, then calls `UnBindAssets` through `_activeRooms[idxActiveRoom]`. The latter is already the destination table, whose entry can be a different room or null. Baseline `git blame` attributes both statements to imported commit `a2784f6e` (2010-05-01), before this catalogue's cutoff.
+
+**Why dormant:** Walking typically replaces one overlapping neighbourhood with another. In addition, `Room::UnBindAssets` is empty, so a null member call can survive without an obvious native crash despite being undefined behavior.
+
+**Fix:** Unbind the departing room before clearing its pointer.
+
+**Diff** (`wfsource/source/room/actrooms.cc`):
+```diff
+- _fromActiveRooms[idxActiveRoom] = NULL;
+- _activeRooms[idxActiveRoom]->UnBindAssets();
++ _fromActiveRooms[idxActiveRoom]->UnBindAssets();
++ _fromActiveRooms[idxActiveRoom] = NULL;
+```
+
+**Investigation:** [Cross-room teleport audit](teleport-audit.md), including the real-engine UBSan baseline and standalone regression.
+
+---
+
+## `List`/`SNode` overlay breaks strict aliasing — the camera's collision loop reprocessed a freed message — 2026-10-08
+
+**Status:** FIXED [`20a2e10a`](https://github.com/wbniv/WorldFoundry/commit/20a2e10a) (`wfsource/source/hal/_list.h` — `SNode` is `may_alias`).
+
+**Symptom:** `tour-g4-v0` on the Chromecast HD (Android armeabi-v7a, `-O3`, `DO_ASSERTIONS=0`) died with a null write in `NodeRemove` (`hal/_list.cc:128`) during the tour; asserts on, and v0.7, passed.
+
+**Root cause:** A `List` is `{ _head, _zero, _tail }` and the list code also treats the same words as two `SNode`s (`{ _next, _prev, _priority }`): the head node sits at the list's own address, so its `_next` *is* `List::_head`. `NodeRemove(node)` unlinks with `node->_prev->_next = node->_next`; for the first node `_prev` is the list itself, so that store writes `List::_head`. Strict aliasing says a store through `SNode*` cannot change a `List::_head` member read through `List*`, and the code breaks that rule on purpose. At `-O3` the compiler used it. In `BungeeCameraHandler::predictPosition` (`game/movecam.cc:960`), `while (msgPort.GetMsgByType(SPECIAL_COLLISION, ...))`, each call is `ListRemoveHeadByType` (reads `self->_head`) then `NodeRemove` then `MemPoolFree`, all inlined. The compiler concluded `NodeRemove`'s stores leave `_head` alone, so it loaded it once before the loop (`ldr.w r8,[r0]` at `0x8967e`, every iteration restarting from `mov r3, r8`) and never re-tested emptiness. Pass 1 removes and frees the real head; pass 2 starts from the stale register copy, the node just freed (`_next` = free-list pointer, `_prev == 0`, stale `_type == 0x13`), takes it for a live collision message and `NodeRemove` writes through its null `_prev`.
+
+**Why dormant:** The list code is from the 2000-02-12 CVS import (rev 1.1, `kts`), written for toolchains that, as far as I know, did not exploit the aliasing violation (not checked). The bug needs the compiler to inline the whole chain and hoist the load, which `-O3` did on the Chromecast. Android Release builds before v0.8 compiled with assertions on, and `VALIDATELIST` (`hal/_list.h:135`, only when `DO_ASSERTIONS`) reads `_head`/`_tail` through `VALIDATEPTR` at the top of every list operation, which looks like a barrier that forces a reload; the asserts-on build was **not** disassembled, so that is the likely explanation, not a confirmed one. The desktop asserts-off build ran the same level without crashing: whether the load is hoisted depends on inlining and register pressure, which differ by compiler and target, so the failure looked layout-sensitive (the trash-fill and message-tracker experiments "fixed" it only by changing the generated code). The v0.8 release defines (E1) first built that configuration for Android.
+
+**Fix:** Mark `SNode` `may_alias` (`WF_MAY_ALIAS`), so accesses through it alias any object. The rebuilt library reloads `_next`/`_head` every iteration (`ldr r6,[r0,#8]; cmp r6,r0` at `0x896e2`), and `tour-g4-v0` completes on cast1 (`J‑4d803a23df20`, 1,779 frames, no crash; one run).
+
+**Diff** (`wfsource/source/hal/_list.h`):
+```diff
+-typedef struct _SNode					// base class, not usefull unless derived from
++#if defined(__GNUC__) || defined(__clang__)
++#define WF_MAY_ALIAS __attribute__((__may_alias__))
++#else
++#define WF_MAY_ALIAS
++#endif
++
++typedef struct WF_MAY_ALIAS _SNode					// base class, not usefull unless derived from
+```
+
+**Investigation:** [v0.8 optimization plan, g4 section](https://github.com/wbniv/finding-your-way/blob/main/docs/plans/2026-10-07-v0.8-optimization.md); a first reading (a freed pool entry still reachable) was not supported by an ASan run.
+
+---
+
+## Parameterised `PhysicalAttributes` constructor leaves `_hasRunPredictPosition`/`_hasRunUpdate` uninitialised — 2026-10-08
+
+**Status:** FIXED [`3ca1c555`](https://github.com/wbniv/WorldFoundry/commit/3ca1c555) (`wfsource/source/physics/physical.hpi`).
+
+**Symptom:** None observed. Found while investigating g4: every `Actor` is built through this constructor, so its two flags start as whatever its arena memory held. They did not cause g4 (fixing them alone left it crashing).
+
+**Root cause:** `Actor::Actor` builds its attributes through the parameterised constructor, but only the default constructor cleared the two per-frame flags. CVS `physical.hpi` 1.18 (2003-06-12) moved the clearing out of `Actor::Actor` and gave it to the default constructor alone.
+
+**Why dormant:** No symptom was ever tied to it; the effect of a stale flag was not measured.
+
+**Fix:** Set both flags false in the parameterised constructor. It did not affect g4.
+
+**Diff** (`wfsource/source/physics/physical.hpi`):
+```diff
++	_hasRunPredictPosition = false;
++	_hasRunUpdate = false;
+    Construct(position,euler,minPoint,maxPoint,slopeA,slopeB,slopeC,slopeD);
+```
+
+---
+
+## Rotation mailboxes share Euler state across actors and commit only on yaw — 2026-10-06
+
+**Status:** OPEN. Root cause confirmed in the pinned production source; scoped runtime fix proposed, awaiting authorization.
+
+**Symptom:** Independent wing/limb pitch writes do not immediately update their actor's orientation. A later yaw write can apply another actor's pitch/roll to its recipient; yaw-only updates can also erase an actor's authored other axes. Surfaced during Finding Your Way iteration A's independently animated rigid parts. Actual repaired-runtime regression and device acceptance remain pending.
+
+**Root cause:** `Actor::WriteSystemMailbox` (`wfsource/source/game/actor.cc`) declares one function-wide `static Euler rotationEuler`. `EMAILBOX_ROTATION_A` and `EMAILBOX_ROTATION_B` modify the shared scratch value but never call `SetRotation`; `EMAILBOX_ROTATION_C` commits all three shared axes to the receiving actor. Reads use the target actor's physical orientation, so a pitch-only write need not agree with readback.
+
+**Origin:** SourceForge CVS establishes the introduction in `actor.cc` revision **1.19, 2002-12-03 21:08:40 UTC, by `kts`**, during the ODE-oriented physics refactor. Revision 1.18 still used immediate `SetRotationA/B/C` calls; 1.19 added the shared static Euler scratch, deferred A/B writes, and committed only on C using the then-named `Rotation(const Euler&)` setter. Revision 1.22 (2002-12-09) renamed that call to `SetRotation` without repairing the behavior. All 72 trunk revisions from 1.19 through 1.90 retain the defect; the last CVS text exactly matches the [2010 Git root import](https://github.com/wbniv/WorldFoundry/commit/a2784f6eff294ee8da27052230216a8d28ddc364). The defect is **23 years and 10 months old** as of this entry. See the [CVS investigation, introducing diff and saved archive evidence](investigations/2026-10-06-rotation-mailbox-cvs.md).
+
+**Why dormant:** Contiguous A/B/C writes to the same actor can make the final orientation appear correct. The new proof separately updates rigid-part pitch and player yaw, exposing both uncommitted axes and shared state. Historical use frequency and why earlier content did not report it are not established.
+
+**Fix:** Proposed: for each axis write, copy the receiving actor's current `PhysicalAttributes::Rotation()`, replace only that axis, and call `SetRotation` immediately. Preserve the other axes, mailbox IDs and revolution units; remove the shared static. A temporary level-side all-axis sequence can demonstrate art motion while the engine proposal is reviewed. Long-session animation phase wrapping is a separate level-script issue.
+
+**Diff:** No engine patch applied yet. The proposed implementation and old-code negative control are in the investigation plan; replace this note with the actual approved fix diff and commit when implemented.
+
+**Investigation:** [Finding Your Way rotation-mailbox runtime proposal](../../finding-your-way/docs/plans/2026-10-06-rotation-mailbox-runtime-fix.md). Required regression covers individual axes, all six write orders, authored nonzero orientations and interleaved actors, followed by desktop/both Android ABIs and actual Pixel/Chromecast captures.
+
+---
+
+## `MEMORY_DELETE_ARRAY` hardcodes an 8‑byte array cookie — arm64's is 16 — 2026-09-20
+
+**Status:** FIXED [`18188fd1`](https://github.com/wbniv/WorldFoundry/commit/18188fd1) (`wfsource/source/memory/memory.hp` — new cookie-free `MEMORY_NEW_ARRAY`; `room.cc`, `rooms.cc` call sites).
+
+**Symptom:** The first-ever macOS (arm64) headless run dies in its own heap guard on level teardown, after loading the whole level and running all 30 frames: `_cookie == ALLOCATED_COOKIE` at `memory/dmalloc.hpi`. Not reproducible on Linux/x86_64 — same level, same flags, ASan on or off, clean every time.
+
+**Root cause:** `Room::~Room` frees `_objectLists` via `MEMORY_DELETE_ARRAY` (`memory/memory.hp:96`), which computed the allocation base as `long* count = ((long*)classptr)-1` — hardcoding an **8‑byte array cookie**. `Room::Construct` (`room/room.cc:123`) allocated that array with `new (memory) Int16List[n]`, and because `Int16List` has a non-trivial destructor the compiler reserves a hidden array cookie in front of the block whose size is **ABI-defined**: 8 bytes under the generic Itanium C++ ABI (x86_64) — one `size_t` count — but **16** under the ARM C++ ABI (IHI0041), used by *every* AArch64 target (Apple arm64, Android arm64‑v8a, aarch64 Linux), which stores **two** words, `{ element size, element count }`. Not cited from the spec — **measured**, by the regression test below, from the same source on both hosts: `8 bytes` on x86_64/GCC, `16 bytes` on arm64/AppleClang. So on arm64 the macro handed `DMalloc::Free` a pointer 8 bytes past the real base; `Free` read the middle of the cookie as an allocation header and the guard fired. The dump from the failing machine is that ARM cookie verbatim — `24` (`sizeof(Int16List)`), then `5` (`_checkListEntries`), then the array — and the arithmetic closes exactly against the free list:
+
+```
+real chunk header   0x458037620   _size = 16 + 5*24 = 136
+user pointer        0x458037628   ← 16-byte ARM cookie starts here
+_objectLists        0x458037638
+chunk end           0x4580376b0   == free[00] start ✓
+MEMORY_DELETE_ARRAY passed 0x458037630  (8 bytes too high)
+```
+
+**Why dormant:** The line is from the 2010 first commit (`a2784f6e`); `memory.hp` carries a 1998–2003 copyright, and that import even ships *two* variants of the macro — the live `((long*)classptr)-1` and an `#if`-disabled `((long*)classptr)-2` — so the original authors were already guessing at cookie layout rather than deriving it. It survived ~16 years because the assumption it encodes, *cookie size == `sizeof(long)`*, happens to hold on every target WF had ever built for: 4 and 4 on 32‑bit (PSX MIPS, Win32 x86), 8 and 8 on x86_64. It only breaks where the two diverge, which is the ARM C++ ABI — so it became *reachable* only with the arm64 ports (Android arm64‑v8a / iOS, 2026‑04) and was first actually *hit* by macOS desktop five months later. Why the mobile arm64 ports didn't surface it in between is **not established**; the plausible reading is that mobile is killed by the OS rather than running `Level` teardown, and the `--frame-step-smoke` path that forces `UnloadLevel` is desktop-only. (Sibling bug, same family, opposite direction: `Array<T>::SetMax` assumed a cookie that a *trivially* destructible `T` never gets — fixed earlier, see `cpplib/array.hpi`'s comment.)
+
+**Fix:** Stop guessing — take the compiler out of the arithmetic. New `MEMORY_NEW_ARRAY` allocates raw from the pool and placement-constructs each element, so the pointer handed out **is** the allocation base on every ABI and `MEMORY_DELETE_ARRAY` frees exactly what it was given. Rejected: teaching the macro per-ABI cookie sizes — that bakes an ABI table into a macro and is still wrong for 32‑bit ARM (two 4‑byte words) and for any `T` with `alignof(T) > 8` under Itanium, where the cookie grows to `alignof(T)`.
+
+**Diff** (`wfsource/source/memory/memory.hp` + `room/room.cc`, `room/rooms.cc`):
+```diff
++template <class T> T*
++_MemoryNewArray(Memory& memory, int entries ASSERTIONS( COMMA const char* file COMMA int line))
++{
++	T* items = (T*)memory.Allocate(sizeof(T) * entries ASSERTIONS( COMMA file COMMA line));
++	for(int index = 0; index < entries; ++index)
++		new (&items[index]) T();
++	return items;
++}
++#define MEMORY_NEW_ARRAY( memory, classname, entries ) \
++	_MemoryNewArray<classname>( (memory), (entries) ASSERTIONS( COMMA __FILE__ COMMA __LINE__ ) )
++
+ #define MEMORY_DELETE_ARRAY( memory, classptr, classname, entries) \
+ {	\
+-	long* count = ((long*)classptr)-1; \
+ 	for(int index=0;index<entries;index++) \
+ 		classptr [index].~classname (); \
+-	(memory).Free(count); \
++	(memory).Free( classptr ); \
+ }
+
+-   _objectLists = new (memory) Int16List[_checkListEntries];
++   _objectLists = MEMORY_NEW_ARRAY(memory, Int16List, _checkListEntries);
+
+-	_rooms = new (HALLmalloc) Room[numRooms];
++	_rooms = MEMORY_NEW_ARRAY(HALLmalloc, Room, numRooms);
+```
+
+**Regression guard:** `wf_game --memory-test` (`memory/pooltest.cc`, ctest `memory_pool_arrays`, and the first command of the macOS CI smoke step). It pins the invariant that makes the pair ABI-independent — *the pointer `MEMORY_NEW_ARRAY` returns is the pool allocation base* — by spying on the pool's `Allocate()`, so it **fails on x86_64 too** if anyone reintroduces `new (pool) T[n]`; it does not need an arm64 box to bite. It also *measures* this ABI's cookie on the way past — `new (pool) CookieProbe[n]` against the same spy — and prints it, so every CI log carries the number (8 on x86_64, 16 on arm64) as observed data rather than as a claim in a comment. The four surviving `new (pool) T[n]` sites (`gfx/rendobj3.cc`, `anim/anim.cc`, `iff/disktoc.cc`, `cpplib/int16li.hpi`) are safe **only** because those element types are trivially destructible and so carry no cookie at all — adding a destructor to any of them reintroduces this bug (TODO `## Watch → Monitor`).
+
+**Diagnosis aid, kept:** `_sys_assert` now prints a `backtrace_symbols_fd()` dump before exiting, and `DMalloc::Free` names the pool, the bad chunk's offset within it and the whole free list ([`a5694c38`](https://github.com/wbniv/WorldFoundry/commit/a5694c38)). Failure-path only. This turned an un-debuggable CI assert into a one-run diagnosis and is the reason this entry exists.
+
+**Investigation:** [`docs/plans/2026-09-20-macos-phase0-green-baseline.md`](plans/2026-09-20-macos-phase0-green-baseline.md) fix 6.
+
+---
+
+## `_HALScratchLmalloc` dangles after the emscripten stack unwind — 2026-06-13
+
+**Status:** FIXED [`59dc44d3`](https://github.com/wbniv/WorldFoundry/commit/59dc44d3) (`wfsource/source/hal/hal.cc` — `static` scratch allocator on web).
+
+**Symptom:** The browser/WASM editor (`wf_edit_web`) renders a blank canvas; the console shows `Uncaught RuntimeError: null function` every frame, immediately after `[bridge] InitBridgeMap: 0 actors`. A maddening *layout-sensitive heisenbug* — adding debug `fprintf`s anywhere in `editor_build` made it render (the prints perturbed the stack enough to hide the fault), so printf-bisection chased phantoms. ASan finally pinned it: **`stack-use-after-scope` at `game.cc:553`** (the `assert(HALScratchLmalloc.Empty())` access).
+
+**Root cause:** `HALStart` declares the per-frame scratch allocator as a **stack local** — `LMalloc __scratchLMalloc(...)` — points the global `_HALScratchLmalloc` at it, then calls `PIGSMain` *inside that scope*. On native, `PIGSMain → RunEditor/RunLevel` is a blocking loop that runs **nested inside `HALStart`'s frame**, so the local lives for the whole session. On web, `PIGSMain → RunLevelWeb/RunEditorWeb` hands control to `emscripten_set_main_loop(…, simulate_infinite_loop=1)`, which **unwinds the C stack** (the Emscripten "unwind") so the browser event loop can run — destroying `__scratchLMalloc` while `_HALScratchLmalloc` still points at the dead slot. Every later `StepFrame` access to `HALScratchLmalloc` reads a destroyed `LMalloc` → garbage state/vtable → the virtual call surfaces as `null function`. (It also made the scratch-empty assert "fire" on garbage, which `_sys_assert`'s `exit(-1)` then turned into a *different* opaque trap — a red herring that cost extra rounds.)
+
+**Why dormant:** The stack-local pattern is from the 2010 first commit (`a2784f6e`). For ~16 years every platform ran the game loop *inside* `HALStart`'s frame, so the global-pointer-to-stack-local — fragile, but valid as long as nothing unwinds between the pointer set and its uses — was never violated. Only the 2026 main-loop inversion for web (`emscripten_set_main_loop`, which unwinds the C stack instead of looping in place) broke the 16-year assumption. `wf_game` web carries the *same* latent UB but survives by luck: its shallower post-unwind stack doesn't clobber the dead slot, so `.Empty()` reads stale-but-intact bytes; the editor's deeper stack (ImGui + CRDT bridge) reuses the slot → crash. ASan poisons the out-of-scope frame, making it deterministic and catchable.
+
+**Fix:** Make `__scratchLMalloc` `static` on web so it outlives the unwind. Native keeps the scoped local (nothing unwinds there). Also fixes `wf_game` web's latent UB.
+
+**Diff** (`wfsource/source/hal/hal.cc`):
+```diff
++#if defined(__EMSCRIPTEN__)
++		static LMalloc __scratchLMalloc(*_HALLmalloc,cbHalScratchLmalloc MEMORY_NAMED( COMMA "HalScratchLMalloc" ) );
++#else
+ 		LMalloc __scratchLMalloc(*_HALLmalloc,cbHalScratchLmalloc MEMORY_NAMED( COMMA "HalScratchLMalloc" ) );
++#endif
+ 		_HALScratchLmalloc = &__scratchLMalloc;
+```
+
+**Investigation:** [`docs/plans/2026-06-12-wf-edit-in-the-browser.md`](plans/2026-06-12-wf-edit-in-the-browser.md) Phase 1 finding (d) — the full heisenbug hunt (printf-masking → ASan → `emsymbolizer` → `game.cc:553` → `hal.cc:65`).
+
+---
+
+## `RangeCheck(Scalar)` casts to `bool` — `Scalar::Random()` aborts on every call — 2026-06-12
+
+**Status:** FIXED [`2fe49ef4`](https://github.com/wbniv/WorldFoundry/commit/2fe49ef4) (`wfsource/source/pigsys/assert.hp` — new cast-free `RangeCheckScalar`; `wfsource/source/math/scalar.cc`).
+
+**Symptom:** Every call to `Scalar::Random()` aborts on the first iteration in an assertion build (`AssertMsg: random_value = 0.42…, Scalar::one = 1` → `terminate`). The `Generator` actor's Random Displacement is therefore unusable, and gameplay worked around it (the SMB breakable-brick debris fan is a *deterministic* actor-index pattern precisely because `Scalar::Random` is broken).
+
+**Root cause:** `RangeCheck` / `RangeCheckInclusive` / `RangeCheckExclusive` (`assert.hp:200-216`) cast every argument to `(ptrdiff_t)`. `Scalar`'s *only* conversion operator is `operator bool()` (`scalar.hpi:388`; its constructors are all `explicit`), so `(ptrdiff_t)(anyScalar)` resolves through `operator bool()` and collapses to **0 or 1**. In `Random()`, both `value` (∈[0,1)) and `max` (`Scalar::one`) become `1`, so the upper check `value < max` is `1 < 1` → always false → abort.
+
+**Why dormant:** The line is from the 2010 first commit (`a2784f6e`). It survived because (1) `Random()` is essentially never called — its one realistic caller, `Generator` Random Displacement, was always left at zero or replaced by deterministic workarounds; and (2) only the *exclusive* `RangeCheck` aborts (`1<1`) — the *inclusive* form passes (`1<=1`), so the sibling `Scalar` sites (viewport size, particle alpha) silently degrade to a no-op check instead of aborting. Original PSX shipping builds also disabled assertions; the modern revival enables `DO_ASSERTIONS=1` in every build (incl. the Release web build) but never wired up a `Random` caller. (Secondary bug: `rand()>>16 ÷ 65536` only spanned `[0, 0.5)`, not `[0, 1)`.)
+
+**Fix:** Add cast-free `RangeCheckScalar` / `RangeCheckScalarInclusive` macros that compare via the value's own `operator>=/</<=` (no `ptrdiff_t` cast); switch all 11 `RangeCheck*`-with-`Scalar` sites to them (integer sites left as-is). `rand()>>16` → `>>15` for a full `[0,1)`. Regression assert added in `math/mathtest.cc`.
+
+**Diff** (`wfsource/source/pigsys/assert.hp` + `scalar.cc`):
+```diff
++#  define RangeCheckScalar( min, value, max ) \
++   { AssertMsg( (value) >= (min), … ); AssertMsg( (value) <  (max), … ); }   // no (ptrdiff_t) cast
+-	temp = rand() >> 16;
++	temp = rand() >> 15;                          // full [0,1), not [0,0.5)
+-	RangeCheck( Scalar::zero, random_value, Scalar::one );
++	RangeCheckScalar( Scalar::zero, random_value, Scalar::one );
+```
+
+**Investigation:** [`docs/investigations/2026-06-12-scalar-random-rangecheck.md`](investigations/2026-06-12-scalar-random-rangecheck.md).
+
+---
+
+## `Scalar::AsUnsignedFraction` negative-fraction UB — right-turn dead on WebAssembly — 2026-06-12
+
+**Status:** FIXED [`944cc31b`](https://github.com/wbniv/WorldFoundry/commit/944cc31b) (`wfsource/source/math/scalar.hpi` — float/double path of `AsUnsignedFraction`).
+
+**Symptom:** On the web build (`/v2/play/`), the **RIGHT** arrow key did nothing in any level with a non-zero `turnRate` (snowgoons, moon). LEFT, UP, DOWN worked; native builds turned right fine. The keyboard layer was proven blameless first — instrumentation showed `ArrowRight` delivers `0x2000` (`EJ_BUTTONF_RIGHT`) into `QInputDigital::_current` identically to LEFT's `0x4000`. The asymmetry was downstream: holding RIGHT left the player's heading (`currentDir`) frozen frame-to-frame while LEFT rotated it normally.
+
+**Root cause:** `movement.cc` builds the right-turn as `Angle::Revolution(-turnRate)` — a **negative** `Scalar` into `Angle` (a `uint16` binary angular measure). The float/double path of `Scalar::AsUnsignedFraction()` does:
+
+```cpp
+FLOAT_TYPE temp = _value;
+temp -= int(_value);              // -0.0125  (range (-1,1), can be negative)
+return uint16(temp*SCALAR_ONE_LS);   // uint16(-819.2) — negative → unsigned, UB
+```
+
+Converting a negative float to unsigned is UB. clang-for-wasm emits the **saturating** `i32.trunc_sat_f64_u`, which clamps negatives to **0**, so `Revolution(-turnRate)` yields a zero-rotation angle and the right-turn is dead.
+
+**Why dormant:** The buggy expression dates to 2010-05-01 and "worked" on every prior target by luck. (1) The `SCALAR_TYPE_FIXED` PSX path is `return uint16(_value)` — two's-complement truncation wraps a negative fixed-point value to the correct BAM angle for free. (2) Native x86 desktop float builds use `fptoui`, which *wraps* a small negative to the correct "turn the other way" `uint16` — UB, but benign. Only WebAssembly's saturating conversion (clamp-to-0) bites. And a negative angle has to *reach* the conversion: the only two call sites passing a negative revolution are the RIGHT-turn branches in `movement.cc` (:315, :777), exercised only on a level with `turnRate != 0`. The 2026 web demos are the first such combination run on wasm.
+
+**Fix:** Wrap the negative fraction into `[0,1)` before the unsigned convert — modular BAM semantics, matching what the fixed-point path gets for free. Regression assert added in `math/mathtest.cc` (`-0.25 rev == 0.75 rev == 49152`).
+
+**Diff** (`wfsource/source/math/scalar.hpi`):
+```diff
+    temp -= int(_value);                // remove whole part → (-1,1)
++   if (temp < 0)
++      temp += 1;                       // wrap into [0,1)  (BAM is modular)
+    return uint16(temp*SCALAR_ONE_LS);
+```
+
+**Investigation:** [`docs/investigations/2026-06-12-web-right-turn-negative-angle.md`](investigations/2026-06-12-web-right-turn-negative-angle.md).
+
+---
+
+## `SObjectStartupData::currentTime` stale-clock — spawned actors see level-load time, not spawn time — 2026-05-22
+
+**Status:** FIXED `948c3fbc` (`wfsource/source/game/level.cc` — `SafelyConstructTemplateObject`).
+
+**Symptom:** Any actor that stores a TTL deadline from `startupData->currentTime.Current()` in its constructor despawns instantly when spawned after t > TTL into the session. For the SMB ?-block coin: `_despawnTime = 0 + 3 = 3.0 s`; a coin spawned at t = 5 s fires `LevelClock().Current() >= _despawnTime` on its very first `update()` call and is removed in one frame.
+
+**Root cause:** `SObjectStartupData::currentTime` is initialised once at level-load time (`level.cc:267 startupData.currentTime = LevelClock()`). `Clock::Current()` returns the stored `_nWallClock` scalar — it is **not** a live reference. Every actor spawned via `SafelyConstructTemplateObject` receives a `currentTime` frozen at t ≈ 0, so any deadline computed as `currentTime.Current() + kTTL` is effectively `0 + kTTL` regardless of when the spawn occurs.
+
+**Why dormant:** The original WorldFoundry levels had no runtime-spawned actors with TTL deadlines. All objects were placed at level-load and never spawned mid-session via `SafelyConstructTemplateObject`. The stale `currentTime` was harmless as long as actor constructors didn't use it for timing — they used it only for one-time initialization (position, velocity) where the stale value was irrelevant or not used at all.
+
+**Fix:** Stamp `startupData->currentTime = theLevel->LevelClock()` immediately before `ConstructTemplateObject` inside `SafelyConstructTemplateObject`. The struct is already transiently mutated there (for `idxCreator`); the clock stamp follows the same pattern. No teardown needed — the next spawn overwrites it.
+
+**Diff** (`wfsource/source/game/level.cc`):
+```diff
++    startupData->currentTime = theLevel->LevelClock();   // stamp actual spawn time so actor constructors see current clock
+     Actor* retVal = ConstructTemplateObject( startupData->objectData->type, startupData );
+```
+
+**Investigation:** [`docs/level-design-troubleshooting.md`](level-design-troubleshooting.md) — "Spawned actor despawns instantly if it uses `startupData->currentTime` for TTL" section.
+
+---
+
+## `Array<T>::operator[]` `_num` high-water off-by-one — odd-sized arrays under-report `Size()` — 2026-05-20
+
+**Status:** FIXED commit (one char: `>` → `>=` in [`cpplib/array.hpi`](../wfsource/source/cpplib/array.hpi):195).
+
+**Symptom:** `wf_game -L wflevels/smb_w1_1-standalone.iff` crashed immediately on the first script tick with `terminate called without an active exception` / `SIGABRT`. Misleading top-of-stack: `std::thread::~thread` destroying the joinable `gListenerThread`. Actual cause three frames down: `_sys_assert(0)` in [`mailbox/mailbox.cc`](../wfsource/source/mailbox/mailbox.cc):90, called when `MailboxesWithStorage::ReadMailbox(2012)` found mailbox 2012 outside the actor's local range — `2012 < 2012` is false — and delegated all the way to `GameMailboxes`, which has no parent and asserts. `assert(0)` → `exit(-1)` → atexit destroys the static joinable thread → `std::terminate()`.
+
+**Root cause:** Non-const `Array<T>::operator[]` ([`cpplib/array.hpi`](../wfsource/source/cpplib/array.hpi):189) tracks the highest-written index in `_num` (the high-water mark used by `Size()` and the `const operator[]` read guard):
+
+```cpp
+if(index > _num)   // BUG: should be >=
+    _num = index+1;
+```
+
+`index > _num` fails when writing to element `[N]` after `_num` has been set to exactly `N` by the previous write (i.e., sequential init). `_num` stays at `N` instead of advancing to `N+1`. For a sequential `[0..N−1]` init:
+
+| N (slots) | `_num` after full init | `Size()` | last slot reachable |
+|---|---|---|---|
+| even | N (correct) | N | ✓ |
+| **odd** | **N−1 (off by one)** | **N−1** | **last slot missed** |
+
+The SMB `?`-block (`Generator`) uses `NumberOfLocalMailboxes = 13` (odd). Init loop writes `[0..12]`; `_num` ends at 12. `Size()` = 12 → range is `[2000, 2012)`. `SMB_QBLOCK_DIE = 2012` (local index 12) is just outside → not found locally → assert.
+
+**Why dormant:** `Array::Size()` returns `_num`, which is wrong for odd-N sequential inits. However, every actor in every pre-SMB level (snowgoons, Q✱bert, MM) had `NumberOfLocalMailboxes = 0`. An empty array never exercises the init loop, so `_num` is always 0, and `Size()` is correctly 0 — every mailbox delegated up the chain. **Local mailbox storage was allocated but never meaningfully accessed**, so the wrong `Size()` could never trigger the range miss. The SMB `?`-block is the first actor in the repo with a non-zero odd `NumberOfLocalMailboxes` whose last slot was actually read.
+
+**Fix:** `>` → `>=` at `array.hpi`:195. `_num` now correctly tracks the first-unwritten high-water mark for all sequential and in-order initializations. In-range writes (index < _num) still leave `_num` unchanged.
+
+**Diff** (`wfsource/source/cpplib/array.hpi`):
+```diff
+-   if(index > _num)
++   if(index >= _num)
+        _num = index+1;
+```
+
+**Origin:** CVS `wfsource/source/cpplib/Attic/array.hpi,v` rev **1.3, 2003-05-23** — log: *"added an operator[] which is non-const and allows writting to objects in the Array"*. The bug was born with the feature. Rev 1.7 carried it into the 2010-05-01 git import (`a2784f6`). 23 years dormant.
+
+**Investigation:** [`docs/investigations/2026-05-20-array-subscript-num-off-by-one.md`](investigations/2026-05-20-array-subscript-num-off-by-one.md).
+
+---
+
+## `Generato` was the only Actor subclass that skipped its `wf_Script` while idle — script-contract inconsistency — 2026-05-20
+
+**Status:** FIXED commit `4d4dff8`.
+
+**Symptom:** A generator's in-level `wf_Script` (the `{ Script }` STR field) silently did **not** run on any tick its activation mailbox read zero. Every other Actor subclass runs its script every tick. No runtime symptom for the engine's entire history — surfaced only when the SMB `?`-block-IS-generator design needed the block's own collision-detect script to run *while* the activation mailbox was still idle (so it could raise the mailbox on a bump); the script never executed and the block could not self-detect.
+
+**Root cause:** A *design* bug, not a coding error — and a hack in the bad sense. `Generato::update()` ([`game/generator.cc`](../wfsource/source/game/generator.cc):67-128) short-circuited its idle branch (activation mailbox `== Scalar::zero`) with `return;` after resetting `_timeToGenerate`. The timer reset is the load-bearing 1996 `kts` anti-over-generation behavior; the `return` was an incidental idle exit whose *side effect* was skipping the trailing `Actor::update()` ([`game/actor.cc`](../wfsource/source/game/actor.cc):882) — the universal per-tick hook through which every actor's script runs. So generators silently violated the "every Actor runs its script every tick" contract that holds for every other subclass. The hack is the construction itself: a bare `return` doing control-flow duty where an `else` belonged, smuggling a consequential class-wide decision (this entire subclass forgoes its script while idle) into what reads as a trivial "bail out early when there's nothing to spawn" shortcut. Nothing at the call site or in the function signature hints that idleness silences the script — the cost is invisible to anyone reading the function, which is exactly why it survived undetected.
+
+**Why dormant:** The idle `return` produced correct *generation* behavior for its entire life (present in first commit `a2784f6`, 2010-05-01; the surrounding logic is `kts` 1996-vintage). The inconsistency was invisible because the one capability it broke — a generator with a meaningful per-tick script — was never exercised: no `.lev` in the repo ever attached a script to a Generator actor (the only Generator instance is the SMB block added 2026-05). The bug "worked anyway" because nothing ever asked a generator to think while idle.
+
+**Fix:** Drop the `return`; wrap the spawn body in an `else`; call `Actor::update()` unconditionally at the end of `Generato::update()`. The 1996 timer-reset (anti-over-generation) is preserved verbatim — only the incidental script-skip is removed, restoring parity with every other Actor subclass. Frame ordering then makes the one-tick activation pulse work: spawn-check reads the mailbox at the top, the script runs (and can set/clear it) at the bottom.
+
+**Diff** (`wfsource/source/game/generator.cc`):
+```diff
+     if( GetMailboxes().ReadMailbox(_generateMailBox) == Scalar::zero )
+     {
+         _timeToGenerate = theLevel->LevelClock().Current();
+-        return;
+     }
++    else
++    {
++    }
+ 
+     Actor::update();
+```
+
+**Investigation:** Engine change #2 of plan [plans/2026-05-19-smb-block-generator-coin.md](plans/2026-05-19-smb-block-generator-coin.md).
+
+---
+
+## C++ RTTI (`dynamic_cast`) crept in via the 2003 `BaseObject*` generalization — 22-year dormant constraint breach — 2026-05-19
+
+**Status:** FIXED commits `8d5ef7b`..`3fdb124` (casts → `kind()`/`static_cast`) + `fbf9f7d` (`-fno-rtti` enabled).
+
+**Symptom:** None at runtime — that is the point. WF carries a load-bearing "no C++ RTTI" constraint (costly on the era's fixed-point MCU targets: `type_info` in flash, `dynamic_cast` tree-walks in hot loops, uneven toolchain RTTI support). The PSX/2000-era codebase had zero `dynamic_cast`; by 2026 there were 68 across 25 files, and `-fno-rtti` could not be turned on.
+
+**Root cause:** In 2003 (kts, CVS revs Jan–May 2003), when `Actor*` containers were generalized to `BaseObject*` / `PhysicalObject*` iterators, the refactor reached for `dynamic_cast` to recover the concrete type instead of restoring the existing `kind()` / `EActorKind`-guarded dispatch. Present in the first git commit (`a2784f6`, 2010-05-01) and traceable to the 2003 CVS history.
+
+**Why dormant:** Every site was a *guaranteed* downcast — each followed the cast with `assert(ValidPtr(result))`, and every concrete `BaseObject` is in fact an `Actor` (`PhysicalObject`/`MovementObject` are abstract). So `dynamic_cast` always succeeded and behaved correctly on dev hosts, where RTTI is cheap. The breach stayed invisible for ~22 years because it never misbehaved functionally *and* `-fno-rtti` was never enabled in CI, so nothing flagged the constraint violation. It would have cost flash + cycles on a real fixed-point target build.
+
+**Fix:** Replace each `dynamic_cast<T*>(bo)` with `assert(IsActor/IsPhysicalObject/IsMovementObject(bo))` + `static_cast<T*>`; push `GetWatchObject()` up into `MovementHandler` to kill the lone `CameraHandler*` cast; then enable `-fno-rtti` on every TU (`wfengine`, `wf_game`, `Jolt`, the e2e harness, `build_game.sh`). Correctness rests on the closed single-inheritance hierarchy — the abstract intermediates make every instantiable `BaseObject` an `Actor` — and the `IsXxx()` helpers are the single documented update point if a non-`Actor` `BaseObject` is ever added. Verified: from-scratch `-fno-rtti` build links clean, the binary carries no `typeinfo for Actor/Camera/...` symbols, and snowgoons + qbert run.
+
+**Diff** (representative — `wfsource/source/game/actor.cc`, repeated across 68 sites):
+```diff
+-    if (Actor* otherActor = dynamic_cast<Actor*>(&other))
+-        _lastColliderIdx = otherActor->GetActorIndex();
++    if (IsActor(&other))
++        _lastColliderIdx = static_cast<Actor&>(other).GetActorIndex();
+```
+
+**Investigation:** [investigations/2026-04-29-rtti-audit.md](investigations/2026-04-29-rtti-audit.md); plan [plans/2026-04-29-eliminate-rtti.md](plans/2026-04-29-eliminate-rtti.md).
+
+---
+
+## IFF chunk-size read via `long*` — misaligned 8-byte load + truncation-by-luck — 2026-05-19
+
+**Status:** FIXED commit `ba3bbcb`.
+
+**Symptom:** UBSan reports `load of misaligned address 0x... for type 'long int', which requires 8 byte alignment` inside `Level::LoadLevelData` at [`game/level.cc`](../wfsource/source/game/level.cc):1394 every time a level is loaded. Hex bytes at the cited address: `41 53 4d 50 7c 00 00 00 ...` — an IFF chunk header (`"ASMP"` + size 0x7c = 124).
+
+**Root cause:** The line was:
+```cpp
+mapStreamSize = *((long*) (mapMem+4));
+```
+`mapMem` is HAL-allocated and therefore 8-byte aligned (post-`f10cec5`); `mapMem + 4` is 4-aligned. Reading a `long` (8 bytes on 64-bit Linux x86_64 and AArch64) from a 4-aligned address is UB. The actual IFF chunk-size field is 32-bit (4 bytes on disk; see [`iff/iffread.hp`](../wfsource/source/iff/iffread.hp):128 `int32 _chunkSize`) — the `long*` cast was correct on PS1 and Win32 (where `long` was 4 bytes) but became wrong silently when the engine grew a 64-bit Linux port.
+
+**Why dormant:** The destination variable `mapStreamSize` is declared `int` (4 bytes). On little-endian x86_64, reading 8 bytes and assigning to a 4-byte destination truncates to the low 4 bytes — which is exactly the chunk-size field bytes. So the wrong-type read happened to produce the right value every single time. Misalignment was technically UB but never observed as a crash. AArch64 is more pedantic; on iOS the misaligned `LDR` of an `int64` could in principle fault.
+
+**Fix:** Change `long*` to `int32*` (the canonical IFF chunk-size type used everywhere else in [`wfsource/source/iff/`](../wfsource/source/iff/)). One char of edit, plus a short comment explaining the trap for future readers.
+
+**Diff** (`wfsource/source/game/level.cc`):
+```diff
+-        mapStreamSize = *((long*) (mapMem+4));
++        mapStreamSize = *((int32*) (mapMem+4));   // IFF chunk-size is 32-bit; was `long*` which is 8 bytes on 64-bit Linux
+```
+
+**Investigation:** Surfaced as the single remaining UBSan warning after the HAL-pool alignment fix (this BUGS.md entry above). Bytes-on-disk verification: the `7c 00 00 00 01 f0 ff 03` 8-byte read on little-endian reduces to `0x0000007c = 124` when truncated to int, matching the on-disk 32-bit size correctly.
+
+---
+
+## HAL pool allocators rounded size to 4 bytes — UB on x86_64 / SIGBUS-prone on AArch64 — 2026-05-19
+
+**Status:** FIXED commit `f10cec5`.
+
+**Symptom:** UBSan run 2026-05-19 (`-DWF_ASAN=ON` + `-fsanitize=address,undefined`) flagged ~3,500 misaligned-access warnings per snowgoons cycle (~2,800 per qbert) across `WFGame`, `Actor`, `Room`, `FreeChunk`, `_MemPoolFreeEntry`, and `FileLine` constructors and field accesses — every one cited a member with 8-byte alignment requirement (pointer, `int64_t`, `std::atomic<T*>`, `double`) sitting on a 4-aligned-but-not-8-aligned address. Benign on x86_64 (1-cycle penalty per misaligned load), but `LDXR`/`STXR` (what `std::atomic` compiles to) and `LDP`/`STP` (load/store pair) on AArch64 fault with SIGBUS on misaligned operands — i.e., this is a latent runtime crash on the iOS / modern-Android port.
+
+**Root cause:** Both [`memory/lmalloc.cc`](../wfsource/source/memory/lmalloc.cc):223 and [`memory/dmalloc.cc`](../wfsource/source/memory/dmalloc.cc):174 rounded allocation sizes up to **4-byte** boundaries via `size += (4-(size&0x3))&3;`. Correct for the PS1 32-bit-pointer convention these allocators date from — `long` was 4 bytes, pointers were 4 bytes, all natural alignments fit in 4. One bit short on every 64-bit host (x86_64 Linux, AArch64 iOS, AArch64 Android), where the C++ ABI wants 8-byte natural alignment for any type containing a pointer, `int64_t`, or `double`.
+
+**Why dormant:** Engine's been on 64-bit hosts for years (Linux Android-NDK, iOS) but the unaligned accesses are silently tolerated by every consumer on x86_64 and on AArch64-with-unaligned-tolerance. The bug only fires when the misaligned address is the operand of a strict-alignment-required instruction — `std::atomic` operations and compiler-emitted `LDP`/`STP` pairs. We didn't have a `std::atomic` field backed by HAL memory until the audio-thread-safe `sDoneHead` lock-free list landed earlier in 2026 (which itself surfaced today's separate rendobj3 cascade); pre-2026 no consumer triggered the strict-alignment path on Linux. iOS Phase 4-5 would have surfaced this as a load-time SIGBUS.
+
+**Fix:** Two single-line edits, switching both allocator rounds from `(4-(size&0x3))&3` → `ALIGN_POW2(size, 8)` (existing macro at [`cpplib/align.hp`](../wfsource/source/cpplib/align.hp):30). Added a base-pointer 8-byte-alignment assertion to LMalloc's placement constructor and DMalloc's ctor so any future code path handing in misaligned backing memory fails loudly instead of silently. Post-fix UBSan sweep: 3,500 → 1 on snowgoons, 2,800 → 1 on qbert; the single residual is a misaligned `long*` read on an IFF chunk header inside `Level::LoadLevelData` at [`game/level.cc`](../wfsource/source/game/level.cc):1394 — IFF file-format data, separate scope from allocator alignment.
+
+**Diff** (`wfsource/source/memory/lmalloc.cc` and `dmalloc.cc`, same change each):
+```diff
+-    size += (4-(size&0x3))&3;
++    size = ALIGN_POW2(size, 8);
+```
+
+**Investigation:** [`docs/investigations/2026-05-19-snowgoons-rendobj3-overread.md`](investigations/2026-05-19-snowgoons-rendobj3-overread.md) "Follow-ups" section (which tracked the alignment issue before the fix); [`TODO.md`](../TODO.md):97 (entry now resolved).
+
+---
+
+## `BaseObjectIterator` missing virtual destructor — `delete` through base slices off 24-byte subclass members — 2026-05-19
+
+**Status:** FIXED commit `04b91de`.
+
+**Symptom:** ASan reports `new-delete-type-mismatch` on every `LoadLevel` cycle: a 32-byte `BaseObjectIteratorFromInt16List` allocated by `BaseObjectIteratorFromInt16List::Copy()` (called from `Room::ListIter`) gets freed through the parent `BaseObjectIterator*` pointer stored in `IteratorWrapper<BaseObject, BaseObjectIterator>::_iter` (at [`cpplib/iterwrapper.hp`](../wfsource/source/cpplib/iterwrapper.hp):69 `delete _iter;`). ASan diagnostic: "size of the allocated type: 32 bytes; size of the deallocated type: 8 bytes."
+
+**Root cause:** [`baseobject/baseobject.hp`](../wfsource/source/baseobject/baseobject.hp):92 declares `BaseObjectIterator` as an abstract base with five pure-virtual methods (`operator*`, `operator++`, `Empty`, `Copy`, `_Validate`) but **no virtual destructor**. C++ rule: deleting through a base pointer requires the base to have a virtual destructor; otherwise the static-type destructor is called and the dynamic-type fields' destructors don't fire, with the deallocator using the static type's size. The subclass `BaseObjectIteratorFromInt16List` ([`baseobject.hp`](../wfsource/source/baseobject/baseobject.hp):116) DOES declare `virtual ~BaseObjectIteratorFromInt16List()` — the polymorphic-destructor pattern was understood; the base just missed marking.
+
+**Why dormant:** Predates the 2010 git import; the class is in CVS [`baseobject.hp,v`](sourceforge-cvs-snapshot.md) rev 1.1 dated **2003-05-15** with the missing-virtual-dtor pattern already present. The subclass's added members (`Int16ListIter _listIter`, `Array<BaseObject*>& _objects`) are POD-ish — the missed-destructor call doesn't *crash* on undefined behaviour, it just under-counts the destroyed bytes. On glibc's `malloc`, calling `operator delete(void*, 8)` on a 32-byte allocation reclaims the full chunk anyway (the deallocator reads the chunk header, not the size argument). So no crash, no leak, just silently-wrong-by-the-standard behaviour. ASan is the first tool strict enough to catch it. ~22 years dormant.
+
+**Fix:** Add `virtual ~BaseObjectIterator() {}` to the base class. One line, no behaviour change in practice — only the size argument in the `operator delete(void*, size)` call changes (and the destructor chain becomes well-defined).
+
+**Diff** (`wfsource/source/baseobject/baseobject.hp`):
+```diff
+-class BaseObjectIterator 
++class BaseObjectIterator
++    virtual ~BaseObjectIterator() {}
+```
+
+**Investigation:** Caught by ASan during the snowgoons-rendobj3 chase ([investigation](investigations/2026-05-19-snowgoons-rendobj3-overread.md)); fix landed separately.
+
+---
+
+## `RenderObject3D::Render` `&&` short-circuit reads + side-effect-assert writes past end of `_faceList` — 2026-05-19
+
+**Status:** FIXED commit `29d3613`.
+
+**Symptom:** `wf_host_gl_e2e_test --cycles=2 --level=...snowgoons-standalone.iff` SIGSEGVs at frame ~2 inside `DrainDoneSounds()` (audio/linux/buffer.cc) with `sDoneHead = 0xffff000000000000` (non-canonical pointer). The `wf_game` makefile build (asserts ON) exited 0 on the same input — the bug only surfaces under specific static-data layouts.
+
+**Root cause:** Two long-standing bugs in [`gfx/glpipeline/rendobj3.cc`](../wfsource/source/gfx/glpipeline/rendobj3.cc):
+
+1. **Past-end READ at line 83.** `while(currentMaterial == ...currentRenderFace->materialIndex && faceIndex<_faceCount)` — C++'s `&&` evaluates the LEFT operand first. After the last inner iteration `currentRenderFace++` points one past the end of `_faceList`; the next loop-condition check reads `_faceList[_faceCount].materialIndex` (past end) BEFORE the bounds check has a chance to short-circuit. ASan caught it as a 2-byte READ at offset +246 of the 240-byte `static TriFace cubeFaceList[12]` in [`renderassets/rendacto.cc`](../wfsource/source/renderassets/rendacto.cc):147.
+
+2. **Past-end WRITE at line 101.** `assert(_faceList[_faceCount].materialIndex = -1);` — single `=` (assignment, not comparison). With asserts enabled, this writes -1 to past-end memory each frame. Pure typo from the original author.
+
+**Why dormant:** Both bugs predate the 2010 git import. CVS history in the [SourceForge `wf-gdk` snapshot](sourceforge-cvs-snapshot.md) shows `glpipeline/rendobj3.cc` rev 1.1 dated **2001-11-24** with both patterns already present in identical form; the sibling `softwarepipeline/rendobj3.cc` carries the same `assert(_faceList[_faceCount].materialIndex = -1)` line, and the parent `gfx/rendobj3.cc` (rev 1.1 dated **2000-02-12**) holds an inline author comment `// kts 3/27/98 9:45AM` on a related materialIndex-sentinel line — putting the bug pattern at **at least 1998-03-27**, about 28 years dormant. The past-end read returns garbage, which is used as a `materialIndex` for comparison — the comparison outcome is moot because the outer `faceIndex<_faceCount` check exits the loop the next iteration regardless. The past-end write lands on whatever's adjacent in `.data` — for the makefile build's static layout, that was benign padding. The cmake build (with NDEBUG-disabled asserts, additional translation units from quickjs/wamr/fennel/wren, and a different `.data` order) happened to place `static std::atomic<PlayInstance*> sDoneHead` (audio buffer.cc) close enough that the past-end-read's downstream consumers eventually wrote a non-canonical pointer there; `DrainDoneSounds` crashed dereferencing it. Yesterday's [host-gl plan](plans/2026-05-18-host-gl-e2e-harness-and-unload-fix.md) noted "multi-cycle snowgoons crashes" — that report was actually a frame-2 single-cycle crash in the cmake-built harness, mis-bucketed as multi-cycle.
+
+**Fix:** Swap `&&` operand order at line 83 so `faceIndex<_faceCount` short-circuits BEFORE the past-end materialIndex read; delete the broken assert at line 101 (the line was either a typo for `==` sentinel-check or stale debug code — no other code reads or writes that sentinel value).
+
+**Diff** (`wfsource/source/gfx/glpipeline/rendobj3.cc`):
+```diff
+-        while(currentMaterial == globalRendererVariables.currentRenderFace->materialIndex && faceIndex<_faceCount)
++        while(faceIndex<_faceCount && currentMaterial == globalRendererVariables.currentRenderFace->materialIndex)
+ 
+-    assert(_faceList[_faceCount].materialIndex = -1);
+```
+
+**Investigation:** [`docs/investigations/2026-05-19-snowgoons-rendobj3-overread.md`](investigations/2026-05-19-snowgoons-rendobj3-overread.md).
+
+---
+
+## Texture UV repeat broken: atlas-coord truncated through PS1-legacy `unsigned char` — 2026-05-18
+
+**Status:** OPEN — workaround in use for SMB (mesh UVs kept in `[0, ~5]`, or pre-tiled into a single wide texture); proper fix is to replumb the GL path so mesh `Scalar` UVs flow straight to GL `Vert.u/.v` floats without the uint8 atlas-coord intermediate. TODO entry under `RENDERER` once that's filed.
+
+**Symptom:** A statplat with an image-textured material and **mesh UVs larger than ~5–8** does not tile its texture. Instead of `GL_REPEAT` producing visible repeating tiles, the entire textured face samples one apparently-random atlas region — typically a single solid colour. Concrete: SMB W1-1 ground (73.5 m × 3 m) top-textured with a 32×32 `grid_tile.tga` and mesh UVs `0..73.5` rendered as uniform brown — no grid lines. A two-colour diagnostic texture with UVs `[0, 1]` vs `[0, 73.5]` rendered *identically*, proving GL_REPEAT was a no-op.
+
+**Root cause:** The renderer's PS1-legacy intermediate format ([`gfx/rendmatt.cc:69-79`](../wfsource/source/gfx/rendmatt.cc) `CalcVRAMuv`, [`rendmatt.cc:81-95`](../wfsource/source/gfx/rendmatt.cc) `CalcUV`, all 2010-vintage) converts mesh UVs into **atlas pixel coordinates** stored in `POLY_GT3` fields whose declared types are `unsigned char` — domain `[0, 255]`. `CalcVRAMuv` computes `vramU = u * (texW - 1) + atlasOriginU`; for `u = 73.5, texW = 32`, that's `2278.5 + atlasOriginU`, which truncates to `(2278 + origin) mod 256` when stored. The GL backend ([`gfx/glpipeline/rendgtp.cc:82`](../wfsource/source/gfx/glpipeline/rendgtp.cc), 2026 file) divides this truncated uint8 by the atlas-page width to produce the float UV it hands to GL. The texture object *does* set `GL_TEXTURE_WRAP_S/T = GL_REPEAT` ([`pixelmap.cc:208/210`](../wfsource/source/gfx/pixelmap.cc)), but by the time GL sees the UV it's already been hammered into `[0, 1]` of the atlas page by the uint8 round-trip — wrap mode has nothing to do. Safe UV range: `u < (255 - atlasOriginU) / (texW - 1)` — roughly `[0, 8]` for a 32-px texture with `atlasOriginU = 0`.
+
+**Why dormant:** The PS1 GPU's GS register natively wrapped uint8 atlas coords modulo `texW` — `u, v` named PS1-page atlas coords directly, and the hardware handled tiling. The C++ `POLY_GT3` representation with `unsigned char u, v` was correct on PS1 because the wrap was a hardware native. The OpenGL port (Linux/Android/iOS, well predating 2026 for Linux, post-2026 for Android/iOS) inherited the same data path but lost the wrap semantics — `230 / pageWidth ≈ 0.45` is not the same as `(73.5 mod 1.0) = 0.5`, and the two diverge wildly the moment `atlasOriginU > 0`. The bug has been latent in every non-PS1 build for ~20 years. Surfaced now because SMB W1-1 is the first WF level to deliberately rely on large-UV tiling — every legacy WF level (snowgoons, MM, qbert) used per-quad textures with UV ∈ [0, 1] or coarse texturing that fit inside the safe range.
+
+**Fix:** Two paths in order of preference: (a) preserve float UVs all the way through the GL path — `vertexList[i].u, .v` are already full-precision `Scalar`s; replumb `gfx/glpipeline/rend*tp.cc` and the GL backend so they flow directly into `Vert.u, .v` floats with the atlas offset applied as a separate scale-and-bias on the final float UV; that preserves both atlas indirection AND `GL_REPEAT` semantics for large UVs. (b) cheap local widening of `poly.u/.v` to `int16`/`int32` — doesn't fix the wrap-doesn't-compose-with-atlas-indirection issue but unblocks large UVs. Either fix needs a regression test drawing a statplat with UV ≥ 10 and verifying tiling.
+
+**Investigation:** [`docs/investigations/2026-05-18-texture-uv-uint8-overflow.md`](investigations/2026-05-18-texture-uv-uint8-overflow.md).
+
+---
+
+## `~Level::~Level` violated `HALLmalloc` LIFO across three sites — 2026-05-18
+
+**Status:** FIXED Phase B of [host-gl-e2e plan](plans/2026-05-18-host-gl-e2e-harness-and-unload-fix.md) (commit pending).
+
+**Symptom:** `wf_game --frame-step-smoke=N -L<level>` asserts at [`memory/lmalloc.cc`](../wfsource/source/memory/lmalloc.cc):308 (`(_currentFree - fl->_size) == mem`) inside `~Level::deleting template objects` after the run completes and unload starts.
+
+**Root cause:** Three independent caller-side LIFO violations in `~Level::~Level` and its dependencies:
+1. `_theLevelRooms` outer object freed in [`level.cc`](../wfsource/source/game/level.cc):649 second, despite being allocated at :465 — *before* `_theAssetManager`, `_commonBlock`, `_templateObjects` array, per-template entries.
+2. Per-template-object loop iterated forward (`for idxActor = 0; idxActor < _numTemplateObjects; ++idxActor`) instead of reverse.
+3. `Animate::_channels` ([`anim/anim.cc`](../wfsource/source/anim/anim.cc):120) and `ActorMailboxes::_localMailboxes` (via [`mailbox/mailbox.cc`](../wfsource/source/mailbox/mailbox.cc):54) defaulted `Array<T>::SetMax`'s memory pool to `HALLmalloc` — per-actor data ended up on the HAL stack interleaved with per-template-object data; actor-iteration-order destruction freed them out of HAL-allocation order.
+
+**Why dormant:** Standalone `wf_game` never ran the full in-process `LoadLevel → UnloadLevel` cycle until the `--frame-step-smoke=N` CLI added 2026-05-18 (editor Phase 0b sub-task 1). In every prior run, window-close / SIGTERM / fatal-error `exit()` killed the process mid-loop, never reaching `~Level::~Level`. The bug had been latent across multiple unload paths since the original 1999-era LevelCon-era code.
+
+**Fix:** Reorder `~Level::~Level` body to reverse-LIFO; split `MEMORY_DELETE(_theLevelRooms)` into manual `~LevelRooms()` (early) + late `HALLmalloc.Free` of the outer; reverse the per-template-object loop; route `Animate::_channels` and `ActorMailboxes::_localMailboxes` through the per-level DMalloc pool; add `Array<T>::Clear()` so `_actors._items` can be freed at its LIFO position in `~Level` body instead of by the implicit `~Array()` afterward.
+
+**Diff** (`wfsource/source/game/level.cc`, key change — full reorder in commit `254c1d4e`):
+```diff
+-    for ( int idxActor = 0; idxActor < _numTemplateObjects; ++idxActor )
++    for ( int idxActor = _numTemplateObjects - 1; idxActor >= 0; --idxActor )
+```
+
+**Investigation:** [`docs/investigations/2026-05-18-unloadlevel-lifo-bug.md`](investigations/2026-05-18-unloadlevel-lifo-bug.md).
+
+---
+
+## `_PlatformSpecificUnInit` asserted on a never-initialised `stacks` allocator — 2026-05-16
+
+**Status:** FIXED commit `c3f89a7`.
+
+**Symptom:** Clean engine shutdown (`exit(0)` from `main`) asserted on `assert(stacks)` in `hal/linux/platform.cc` (now `platform_init.cc`).
+
+**Root cause:** `stacks` is a vestigial PIGS-era tasker allocator that was never wired up on Linux. The assert `assert(stacks)` in `_PlatformSpecificUnInit` would have caught a legit double-init / out-of-order shutdown on other platforms, but on Linux `stacks` is always `NULL`.
+
+**Why dormant:** Same as the LMalloc one — `_PlatformSpecificUnInit` was rarely reached in practice. Surfaced by the same Phase 0b work that surfaced the LMalloc bug.
+
+**Fix:** `if (stacks) { delete stacks; stacks = NULL; }` — guard instead of assert. Investigation at [`docs/investigations/2026-05-16-stacks-assert-on-clean-exit.md`](investigations/2026-05-16-stacks-assert-on-clean-exit.md).
+
+**Diff** (`wfsource/source/hal/linux/platform_init.cc`):
+```diff
+-    assert(stacks);
+-    delete stacks;
+-    stacks = NULL;
++    if (stacks) { delete stacks; stacks = NULL; }
+```
+
+---
+
+## `PhysicalAttributes::Validate()` used strict float-equality on a round-tripped delta — 2026-05-11
+
+**Status:** FIXED `a56cd51` — `fix(physics): tolerate float-precision drift in PhysicalAttributes::Validate`.
+
+**Symptom:** `wf_game` aborted intermittently during the qbert cam intro pan with `FATAL ERROR: PhysicalAttributes::Validate() failed.` X and Z components matched exactly; Y differed at the 7th decimal (~5e-7 drift) — e.g. `predictedMotionVector.Y = 7.949417114` vs `expansionVector.Y = 7.949417591`.
+
+**Root cause:** [`wfsource/source/physics/physical.hpi`](../wfsource/source/physics/physical.hpi):37-82 asserts that the colSpace expansion delta (`max - unExpMax` or `min - unExpMin`) equals `PredictedPosition() - Position()`. The two quantities are the same delta in algebra, but computed by different float subtractions: `predictedMotionVector` is a fresh `PredictedPosition() - Position()`, while `expansionVector` is the round-trip `(origMax + delta) - origMax`. With `Scalar == SCALAR_TYPE_FLOAT` (the PC dev configuration), `A + B - A != B` exactly for `B` of small magnitude relative to `A`; with A ≈ 8 and B ≈ -5, the last ULP shifts ~5e-7 between the two computations. `Vector3::operator==` is strict bit-equality, so the assert fires.
+
+**Why dormant:** On a **fixed-point** `Scalar` target (the real-target build per [[project_mailboxes_fixed_point]]) the two computations are bit-identical and the assert never fires — the strict-equality check is correct there. The bug is float-mode-only. PC dev (where Scalar is float) has always had this drift, but `Validate()` is only called in certain tick paths and the false positive requires the specific magnitude ratio that produces a >0-ULP-difference subtraction; gameplay rarely hit it. Surfaced reliably only when the qbert cam intro pan generated the exact coordinate magnitudes the round-trip drifts on. The 2010-vintage strict-equality check has been shipping ULP false-positive risk for the entire history of the float-mode PC dev build.
+
+**Fix:** [`physical.hpi`](../wfsource/source/physics/physical.hpi):69 — replace `expansionVector == predictedMotionVector` with a per-axis `(a - b).Abs() < Scalar::FromDouble(1e-3)` tolerance check. Threshold is well above float drift (a few ULPs of the largest operand ≈ 1e-3 worst case at game-world coordinates) and well below any physically meaningful inaccuracy. No-op for fixed-point Scalar targets where the original strict comparison was always exact. `Vector3::operator==` deliberately untouched — lots of code uses exact equality for legitimate reasons (`v == Vector3::zero`).
+
+**Diff** (`wfsource/source/physics/physical.hpi`):
+```diff
+-    if ( !(expansionVector == predictedMotionVector) )
++    const Scalar tol = Scalar::FromDouble(1e-3);
++    const Vector3 diff = expansionVector - predictedMotionVector;
++    if ( diff.X().Abs() >= tol || diff.Y().Abs() >= tol || diff.Z().Abs() >= tol )
+```
+
+**Investigation:** [`docs/plans/2026-05-11-physical-validate-float-tolerance.md`](plans/2026-05-11-physical-validate-float-tolerance.md).
+
+---
+
+## `iffcomp` top-level `+`/`-` arithmetic over `.offsetof`/`.sizeof`/`INTEGER` items emits twice and discards the sum — 2026-04-19
+
+**Status:** OPEN in `wftools/iffcomp/` (oracle-only, frozen); `iffcomp-rs` implements proper arithmetic (item reductions build a `Term`, `expr` rules combine, writer emits one int32 via compound backpatch) plus a 2nd-arg-expression extension to `.offsetof`. Decision on porting the fix back to the C++ grammar was deliberately parked — see Postscript 3 of the investigation.
+
+**Symptom:** During `wflevels/snowgoons.iff.txt` reconstruction, the natural TOC expression `'ASMP' .offsetof(::'LVAS'::'ASMP') - .offsetof(::'LVAS') .sizeof(::'LVAS'::'ASMP')` cannot reproduce the oracle's 72-byte TOC. The C++ grammar would emit `6 entries × (FOURCC + 2 × int32) + extra int32 per arithmetic expression`, i.e. > 72 bytes. The oracle has exactly 72. Initial reading was "the current grammar regressed and the original emitted correct bytes"; SourceForge CVS recovery (`wf-gdk.zip`, HEAD = 1.7, state `dead` 2010) proved the historical grammar is byte-identical to current — the bug has been there forever.
+
+**Root cause:** [`wftools/iffcomp/lang.y`](../wftools/iffcomp/lang.y) — CVS history in the [SourceForge `wf-gdk` snapshot](sourceforge-cvs-snapshot.md) puts rev 1.1 at **2000-02-14** (`kts`), and the broken-arithmetic + immediate-emit pattern is present from that very first revision through rev 1.6 (2004-04-07) and the `state dead` 2010-05-21 GitHub-migration commit. Bug has been latent for ~26 years:
+- Line 269: `item : INTEGER { g._iff->out_int32($1.val); }` — `INTEGER` item reduction **emits bytes immediately**.
+- Line 306, 325, 344: `.offsetof` / `.sizeof` item reductions all call `out_int32()` (or queue a `Backpatch` that resolves to `out_int32`) at reduction time.
+- Line 362-363: `expr : expr PLUS expr { $$ = $1 + $3; } | expr MINUS expr { $$ = $1 - $3; }` — composes the `$$` value but **emits nothing**. The computed `$$` is dead — nobody reads it.
+
+Net effect: `.offsetof(A) - .offsetof(B)` emits A's offset (4 bytes) AND B's offset (4 bytes) AND computes the difference into a `$$` value that's silently discarded. The byte stream has 8 bytes where the author intended 4; the value the author wanted to emit is computed-but-thrown-away. Symmetric for `+`. Same bug for any composition of `INTEGER` / `.offsetof` / `.sizeof` via `+` or `-`.
+
+**Why dormant:** No shipped `.iff.prp` template ever used the broken syntax. The historical `iff.prp` (recovered from SourceForge CVS) compiled the TOC via `.offsetof(X, -2048)` — the **2nd-parameter integer-addend form**, which was a workaround for top-level `+`/`-` never working. That worked correctly for the pre-L4 layout where LVAS sat at file offset `0x800`, and only worked at all because the addend was a literal `INTEGER` (grammar restricts 2nd-arg to `INTEGER` token, line 300 of lang.y, also identical in CVS). Levels were authored against this convention; nobody ever wrote `.offsetof(A) - .offsetof(B)` in a template that actually compiled, so the `+`/`-` no-op never bit anyone. (The `expr` rule's `printf("%ld + %ld = %ld\n", ...)` trace in the historical CVS lang.y is the only thing that ever observed those computed values — pure developer self-debug, never wired to the output stream.) The bug has been latent for the entire 20+ year life of C++ iffcomp.
+
+**Fix:** `iffcomp-rs` (`wftools/iffcomp-rs/src/`) parses each `item` into a `Term` (immediate value or symbolic reference) without emitting, `expr` rules combine terms into an expression, and the writer emits the final expression as exactly one int32 — resolving immediately when all referenced chunks are closed, or queuing a compound `Backpatch` carrying the full term list when any term refers to a not-yet-closed chunk. The `5l + 3l - 2l` test fixture in `all_features.iff.txt` was updated to expect a single `6` int32 instead of three separate values, and the oracle TOC is reproduced byte-identically via the top-level `-` arithmetic form. Porting the fix back to C++ iffcomp is deferred — the level pipeline (`snowgoons.iff.txt`) was restructured to make LVAS the root of its own compile unit, which lets the TOC use the dirt-simple single-arg `.offsetof(::'LVAS'::X)` form (cd.iff carries the L4 wrap), so the arithmetic path is no longer load-bearing for the oracle match. Kept in iffcomp-rs as belt-and-suspenders.
+
+**Investigation:** [`docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md`](investigations/2026-04-19-iffcomp-offsetof-arithmetic.md) — includes the SourceForge CVS recovery (Postscript 3) that settled the "regression vs always-broken" question in favor of the latter.
+
+---
+
+## `iff2lvl` wrote uninitialized `Euler` into `_PathOnDisk.base.rot` — 2026-04-19
+
+**Status:** OPEN in `wftools/iff2lvl/` (oracle-only, frozen); mirrored as a literal-byte constant in `levcomp-rs` pending the round-trip verification step that flips to zeros — see [`docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md`](investigations/2026-04-19-path-base-rot-oracle-mystery.md) §Verification plan.
+
+**Symptom:** Snowgoons' compiled `.lvl` contains 8 bytes (`b1 02 85 c6 00 00 20 4f`) in the single `_PathOnDisk` record's `base.rot` field that no straight reading of `QPath::Save` accounts for. The bytes are deterministic across re-runs of the oracle pipeline but don't match what the code appears to write (zeros).
+
+**Root cause:** `QPath::Save` in [`wftools/iff2lvl/path.cc`](../wftools/iff2lvl/path.cc):268 declares `Euler rotEuler;` as a local — where `Euler` resolves to the constructor-less POD `typedef struct { float a,b,c; } Euler;` from [`wftools/iff2lvl/global.hp`](../wftools/iff2lvl/global.hp):68, **not** the proper class-Euler with a zero-initializing `ConstructIdentity()` default ctor in [`wftools/iff2lvl/euler.hp`](../wftools/iff2lvl/euler.hp). The class-Euler header is tombstoned by an unconditional `#error !!` at [`euler.hp`](../wftools/iff2lvl/euler.hp):8 — but that tripwire sits *inside* the `#ifndef _EULER_HPP / #define _EULER_HPP` guard and only fires if some TU `#include`s the header. `path.cc` never does: it includes `global.hp`, picks up the typedef silently, and the `#error` guarding the wrong file does nothing. Default-initialization of the POD leaves the three floats *indeterminate*; `WF_FLOAT_TO_SCALAR(rotEuler.a)` then runs `(int32)(garbage_float * 65536.0f)` and narrows the result into a `u16` for each axis. The surrounding `_PathOnDisk` was itself allocated via `new char[SizeOfOnDisk()]`, which leaves `.order` and `.pad` as raw heap bytes. All 8 bytes of `base.rot` are uninitialized memory; the class's own `QPath::baseRotation` (a `Quat` correctly defaulted to identity) is never consulted because the Quat→Euler conversion in `QPath::AddRotationKey` was stubbed `assert(0)` and never written. (Tangential preprocessor red flag in the same family: `wftools/iff2lvl/euler.hp` guards on `_EULER_HPP` while [`wfsource/source/math/euler.hp`](../wfsource/source/math/euler.hp):23 guards on `_EULER_HP` — one P apart; close enough to invite manual collision, distinct enough that the macros don't actually clash.)
+
+**Why dormant:** For relative/hierarchical paths the runtime overwrites `_baseRot` every frame from the parent object's live rotation ([`wfsource/source/movement/movepath.cc`](../wfsource/source/movement/movepath.cc):109), so the saved garbage is clobbered before first use. For absolute paths (snowgoons' single `snowman01`) `_baseRot` *is* added to every sampled rotation, but the per-channel rotation channels authored for snowman01 produce visually correct motion regardless of the small offset — short path, low-res visuals, no second reference to compare against. The bug shipped undetected from 1995–2010 because nothing in the WF pipeline ever read these bytes meaningfully. Surfaced now only because `levcomp-rs` was diffing the oracle byte-for-byte.
+
+**Fix:** `levcomp-rs` currently emits the 8-byte oracle constant verbatim (mirror-first); the planned flip to zeros plus a soak diff drops the literal once the round-trip is fully working. The iff2lvl side isn't being patched — the tool is oracle-only — but a correct rewrite would (a) make `Euler` a real class with a zero-initializing default ctor and a `Validate()`, (b) route `Save` through `baseRotation` with a real Quat→Euler conversion, and (c) zero-init the `_PathOnDisk` allocation. Investigation also notes this is exactly the bug class WF's `codingstandards.txt` was written to prevent (no public data, canonical form, `Validate()` on ctor exit) — all three skipped on the tools side.
+
+**Investigation:** [`docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md`](investigations/2026-04-19-path-base-rot-oracle-mystery.md).
+
+---
+
+## `iff2lvl` left `_RoomOnDisk` pad bytes uninitialized — 2026-04-19
+
+**Status:** OPEN in `wftools/iff2lvl/` (oracle-only, frozen); `levcomp-rs` zero-fills and accepts the constant-width drift per the explicit "indeterminate heap bytes" carve-out of [[feedback_oracle_mirror_first]].
+
+**Symptom:** Three bytes in snowgoons' compiled `.lvl` `_RoomOnDisk` records refused to match between the oracle and `levcomp-rs` zero-fill output, with no source-level explanation: Room 0 trailing-entries pad = `01 00` (Rust emits `00 00`); Room 1 struct-header pad = `0B 08` (Rust emits `00 00`). Witnessed in `wftools/levcomp-rs/.../rooms.rs:61-65`.
+
+**Root cause:** `iff2lvl` allocates each room via `new char[size]`, writes 34 bytes of fields into the `__attribute__((aligned(4)))` 36-byte `_RoomOnDisk` footprint, and never zeroes either (a) the 2-byte struct-header pad that the aligned attribute inserts, or (b) the trailing-entries pad that brings `36 + 2×count` up to the next 4-byte boundary. C++'s `new char[size]` is default-init for `char` → indeterminate; the C allocator hands back whatever bytes happened to be in the bucket. Same class of bug as the `_PathOnDisk.base.rot` Euler garbage — uninitialized heap, deterministic within one run because the short-lived plugin's allocator state is reproducible.
+
+**Why dormant:** The runtime doesn't read these pad bytes — they exist purely because of the `aligned(4)` struct attribute and the per-room trailing alignment. The bytes have been shipping in every compiled WF level since 1995 with zero functional impact. Surfaced only when `levcomp-rs` started byte-diffing against the oracle, because Rust's `Vec::extend_from_slice` zero-fills where C's `new char[]` doesn't.
+
+**Fix:** `levcomp-rs` zero-fills (the explicit "indeterminate heap bytes" exception to `mirror-oracle-first`); the constant-width 3-byte drift is documented and accepted because mirroring the iff2lvl allocator state exactly is infeasible. The iff2lvl side isn't being patched. Investigation also flags `_ObjectOnDisk`'s post-type-field pad as a third candidate site already mirrored "luckily" because iff2lvl always pulls the same allocator bin for object zero — worth auditing if future byte-identity work turns up unexplained diffs in other on-disk structs.
+
+**Investigation:** [`docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md`](investigations/2026-04-19-path-base-rot-oracle-mystery.md) §"Not the only uninit-heap site: the `_RoomOnDisk` pad bytes are the same pattern".
+
+---
+
+## COLLISION/SPECIAL_COLLISION message truncated colliding-object pointer to `int32` — 2026-04-17
+
+**Status:** FIXED `06373f5` — `fix(baseobject): COLLISION msg carries full pointer, not truncated int32`.
+
+**Symptom:** Surfaced as a 64-bit Android (arm64) build crash in collision handlers: `SPECIAL_COLLISION` receivers in `enemy.cc` / `explode.cc` / `missile.cc` read 4 bytes out of a buffer holding a truncated pointer, cast to `Actor*`, and dereferenced garbage. 32-bit builds (Linux x86, the historical primary target) worked fine.
+
+**Root cause:** [`wfsource/source/baseobject/msgport.hp`](../wfsource/source/baseobject/msgport.hp)'s `SMsg::_data` union was sized for a 4-byte payload (`int32 _message` / `char binary[sizeof(Scalar)] = 4`). [`wfsource/source/physics/collision.cc`](../wfsource/source/physics/collision.cc):222's `DispatchCollisionMessages` passes the colliding object's address as message data via `object1.sendMsg( msg1, int32(&object2) )`. On 32-bit the `int32` cast is a no-op identity; on 64-bit it silently truncates the high 32 bits of the pointer. Receivers then read 4 bytes back, cast to `Actor*` — on 32-bit, a valid object pointer; on 64-bit, a half-pointer that overflows the receive buffer and points into nonsense. COLLISION receivers that discard the data (`movement.cc`, `movepath.cc`, `movefoll.cc`, `movecam.cc`) silently swallowed the broken payload either way.
+
+**Why dormant:** WF shipped 32-bit on every released target — original-target hardware was 32-bit, PSX/PS2 were 32-bit, Linux/Windows dev was 32-bit. `int32`-as-pointer-handle was a correctness-by-coincidence pattern that "worked anyway" because `sizeof(int32) == sizeof(void*)` held on every platform the engine had ever been built for. The 2010-vintage code has carried this latent UB for 15+ years. Adding a 64-bit target (Android arm64, 2026) was the first build where the platform invariant broke — and it broke immediately and loudly in collision dispatch.
+
+**Fix:** Widen `SMsg::_data._message` from `int32` to `uintptr_t` and resize the `binary[]` companion to `sizeof(uintptr_t)`; propagate the type change through `PutMsg` / `sendMsg` signatures in [`msgport.hp`](../wfsource/source/baseobject/msgport.hp) + [`msgport.cc`](../wfsource/source/baseobject/msgport.cc) + [`baseobject.hp`](../wfsource/source/baseobject/baseobject.hp) + [`baseobject.cc`](../wfsource/source/baseobject/baseobject.cc); replace the truncating `int32(&object)` cast in collision.cc with `reinterpret_cast<uintptr_t>(&object)`; update receivers in `enemy.cc` / `explode.cc` / `missile.cc` to read `*(uintptr_t*)msgData`. Small-integer senders (`DELTA_HEALTH`, etc.) still work — they implicitly widen on send, and `*(int32*)msgData` on receive reads the low 4 bytes (little-endian) which equal the original value.
+
+**Diff** (`wfsource/source/baseobject/msgport.hp` + `physics/collision.cc`):
+```diff
+-      int32 _message;
+-      char binary[sizeof(Scalar)];
++      uintptr_t _message;
++      char binary[sizeof(uintptr_t)];
+ 
+-    object1.sendMsg( msg1, static_cast<int32>(reinterpret_cast<intptr_t>(&object2)) );
++    object1.sendMsg( msg1, reinterpret_cast<uintptr_t>(&object2) );
+```
+
+**Investigation:** [`docs/plans/2026-04-17-collision-message-pointer-fix.md`](plans/2026-04-17-collision-message-pointer-fix.md).
+
+---
+
+## `BungeeCameraHandler` / `SPECIAL_COLLISION` reinterpret_cast type confusion — 2026-04-14
+
+**Status:** OPEN — bypassed by the in-progress physics-engine replacement (Jolt, [`project_jolt_physics_functional`]).
+
+**Symptom:** Lua spike (multi-script-engine development) immediately hit a segfault in `movecam.cc:1007`; bisection showed a `reinterpret_cast` from `BungeeCameraHandler*` to `Actor*` (or similar) where the underlying object layout doesn't match.
+
+**Root cause:** Hand-rolled vtable-style dispatch in old physics code uses `reinterpret_cast` between unrelated class hierarchies. Worked in practice because the receiving function only read fields that happened to be at compatible offsets in the original layouts; new code that added members to one side broke the assumption.
+
+**Why dormant:** The crash only fires when SPECIAL_COLLISION dispatch hits a code path that touches the post-misaligned fields. Snowgoons' geometry happened to avoid that combination.
+
+**Fix:** Wholesale replace the physics layer ([`project_followup_replace_physics`]) — Jolt is the chosen replacement, currently parity-tested on snowgoons ([`project_jolt_physics_functional`]).
+
+---
+
+## Template
+
+```
+## <Title with what failed> — YYYY-MM-DD
+
+**Status:** FIXED `<sha>` | OPEN | INVESTIGATING
+
+**Symptom:** What the user (or a test) sees.
+**Root cause:** What's actually wrong, with file:line citations.
+**Why dormant:** Which exercise path was missing, or what masked it.
+**Fix:** Minimal description; link the commit / plan.
+**Diff** (`path/to/file.cc`):
+```diff
+- buggy line
++ fixed line
+```
+**Investigation:** Link to docs/investigations/<date>-<slug>.md if there was one.
+```

@@ -1,0 +1,56 @@
+[
+  {
+    "args": [
+      "shell",
+      "ps -A -o PID,ARGS"
+    ],
+    "start": 1792117677.3835013,
+    "end": 1792117677.8600469,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-7c72bdda4ccd.mp4"
+    ],
+    "start": 1792117677.861931,
+    "end": 1792117678.1342003,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792117678.143803,
+    "end": 1792117678.4245982,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1792117678.42633,
+    "end": 1792117678.7519398,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792117678.75426,
+    "end": 1792117678.9567225,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792117678.9588351,
+    "end": 1792117679.1720724,
+    "returncode": 0
+  }
+]

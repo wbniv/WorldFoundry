@@ -1,0 +1,35 @@
+{
+  "species": "Betta splendens",
+  "evidence": "Kwon et al. 2022 Figure 1A/B",
+  "projection": "equirectangular",
+  "basemap": "Natural Earth 1:110m, public domain",
+  "coordinates": "Manually placed approximate municipality/district centres, rounded to 0.1 degree, checked against regional positions in Figure 1; NOT sample coordinates",
+  "precision": "Regional representative only",
+  "status": "Published wild-population labels, not a claim of extant populations in 2026",
+  "localities": [
+    {
+      "number": 1,
+      "name": "Chiang Mai",
+      "longitude": 99.0,
+      "latitude": 18.8
+    },
+    {
+      "number": 2,
+      "name": "Kanchanaburi",
+      "longitude": 99.5,
+      "latitude": 14.0
+    },
+    {
+      "number": 3,
+      "name": "Bang Phlat",
+      "longitude": 100.5,
+      "latitude": 13.8
+    },
+    {
+      "number": 4,
+      "name": "Phetchaburi",
+      "longitude": 99.9,
+      "latitude": 13.1
+    }
+  ]
+}

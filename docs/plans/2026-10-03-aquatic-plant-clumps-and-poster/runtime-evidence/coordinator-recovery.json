@@ -1,0 +1,8 @@
+{
+  "job": "J-696d074fd253",
+  "state": "recovery-required",
+  "error": "Previous worker still holds device kernel lock",
+  "matrix_complete": false,
+  "normal_apk_restored_after_interruption": false,
+  "device": "chromecast-test-01"
+}

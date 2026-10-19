@@ -42,6 +42,10 @@ public:
 
 	DiskTOC();
 	~DiskTOC();
+	// Free the HAL-backed _toc storage now (instead of in ~DiskTOC). Needed
+	// when the owning class has a different HAL alloc to Free in strict LIFO
+	// order — see AssetManager::~AssetManager.
+	void Clear();
 
 	inline void Validate() const;
 #if DO_ASSERTIONS

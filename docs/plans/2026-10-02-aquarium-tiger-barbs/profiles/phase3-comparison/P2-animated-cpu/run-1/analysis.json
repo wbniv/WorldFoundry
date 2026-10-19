@@ -1,0 +1,78 @@
+{
+  "combined": {
+    "frames": 2243,
+    "fps": 36.563876273008844,
+    "p50_ms": 33.366581,
+    "p90_ms": 33.366944,
+    "p95_ms": 50.050055,
+    "p99_ms": 50.050153,
+    "missed_refresh_percent": 55.19393669193045
+  },
+  "scenarios": {
+    "swarm": {
+      "frames": 452,
+      "fps": 37.7338033697088,
+      "p50_ms": 16.6837,
+      "p90_ms": 33.367044,
+      "p95_ms": 50.050063,
+      "p99_ms": 50.050153,
+      "missed_refresh_percent": 49.336283185840706
+    },
+    "school-right": {
+      "frames": 453,
+      "fps": 35.96398742736917,
+      "p50_ms": 33.366623,
+      "p90_ms": 33.366951,
+      "p95_ms": 50.050048,
+      "p99_ms": 50.050087,
+      "missed_refresh_percent": 58.498896247240616
+    },
+    "dart": {
+      "frames": 451,
+      "fps": 37.6503211392448,
+      "p50_ms": 33.366486,
+      "p90_ms": 33.366861,
+      "p95_ms": 50.050052,
+      "p99_ms": 50.050127,
+      "missed_refresh_percent": 51.44124168514412
+    },
+    "turn-left": {
+      "frames": 439,
+      "fps": 35.46314153623888,
+      "p50_ms": 33.36663,
+      "p90_ms": 33.367053,
+      "p95_ms": 50.05007,
+      "p99_ms": 50.050164,
+      "missed_refresh_percent": 59.22551252847381
+    },
+    "close-up-right": {
+      "frames": 448,
+      "fps": 36.092889973224935,
+      "p50_ms": 33.366604,
+      "p90_ms": 33.366924,
+      "p95_ms": 50.050043,
+      "p99_ms": 50.050114,
+      "missed_refresh_percent": 57.589285714285715
+    }
+  },
+  "clock_offset_seconds": 98321.45691117202,
+  "clock_alignment_note": "Median latest-present timestamp minus poll start; boundaries approximate within one poll round trip plus a frame.",
+  "PSS_MiB": 31.240234375,
+  "CPU_window_count": 9,
+  "CPU_and_counter_means": {
+    "update": 15.615393970767357,
+    "actors": 2.0204655298416565,
+    "director": 13.528808343483556,
+    "render": 7.1860793544457975,
+    "school": 10.247568514007307,
+    "pose": 2.723465347137637,
+    "animation": 0.1264413520097442,
+    "total": 22.801484409257004,
+    "level-objects": 61.0,
+    "render-actors": 47.0,
+    "draws": 46.0,
+    "triangles": 3285.9236796589526,
+    "actor-mailbox-writes": 225.0,
+    "fish-deformations": 29.0
+  }
+}

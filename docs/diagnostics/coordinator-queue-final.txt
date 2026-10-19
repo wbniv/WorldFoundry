@@ -1,0 +1,5 @@
+Snapshot 2026-10-04 06:05:15 +0700; revision 60; connected
+chromecast-test-01: ready; unowned; Chromecast HD; ABI armeabi-v7a,armeabi
+chromecast-test-02: ready; unowned; Chromecast; ABI armeabi-v7a,armeabi
+Waiting:
+Pool positions depend on eligibility and release order.

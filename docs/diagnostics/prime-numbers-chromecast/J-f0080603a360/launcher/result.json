@@ -1,0 +1,51 @@
+{
+  "status": "verified",
+  "home": "com.google.android.apps.tv.launcherx/.home.HomeActivity",
+  "apk": "485c4b8d6f7fe248317cefc99f9a634a7d43ddcc922f00a978e45a36a44e18d2.apk",
+  "attempts": [
+    {
+      "bounds": [
+        1852,
+        914,
+        1912,
+        974
+      ],
+      "reference": "expected-icon-1.png",
+      "resource": "res/drawable-nodpi-v4/icon.png",
+      "kind": "icon",
+      "mean_absolute_error": 40.79551451187335,
+      "rms_error": 55.36149454554635,
+      "worst_region_error": 73.56701030927836,
+      "brightness_gain": 0.5504743054856382,
+      "verified": false,
+      "screenshot": "attempt-1-view-1.png",
+      "hierarchy": "attempt-1-view-1.xml",
+      "attempt": 1
+    },
+    {
+      "bounds": [
+        1754,
+        906,
+        1906,
+        1058
+      ],
+      "reference": "expected-icon-1.png",
+      "resource": "res/drawable-nodpi-v4/icon.png",
+      "kind": "icon",
+      "mean_absolute_error": 9.299692172383464,
+      "rms_error": 10.435776462794637,
+      "worst_region_error": 13.216494845360826,
+      "brightness_gain": 0.7493265426899492,
+      "verified": true,
+      "screenshot": "attempt-2-view-1.png",
+      "hierarchy": "attempt-2-view-1.xml",
+      "attempt": 2
+    }
+  ],
+  "refreshes": [
+    {
+      "operation": "launcher-force-stop-and-home",
+      "package": "com.google.android.apps.tv.launcherx"
+    }
+  ]
+}

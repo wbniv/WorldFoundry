@@ -1,0 +1,9 @@
+{
+  "initial_pid": "28452",
+  "relaunch_pid": "28558",
+  "resume_pid": "28558",
+  "apk": "/tmp/aquarium-barb-baselines/Aquarium-final.apk",
+  "profiling": false,
+  "package": "org.worldfoundry.wf_game.aquarium",
+  "serial": "adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp"
+}

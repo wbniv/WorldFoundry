@@ -1,0 +1,719 @@
+--------- beginning of main
+10-04 18:43:21.930 16437 16437 I _game.patchwork: Using CollectorTypeCMC GC.
+10-04 18:43:21.972 16437 16437 E _game.patchwork: Not starting debugger since process cannot load the jdwp agent.
+10-04 18:43:22.049 16437 16437 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10152; state: ENABLED
+10-04 18:43:22.049 16437 16437 D CompatibilityChangeReporter: Compat change id reported: 242716250; UID 10152; state: ENABLED
+10-04 18:43:22.104 16437 16437 I _game.patchwork: Failed to add image file: Failed to find OatDexFile for DexFile /data/app/~~3_QcYYrL2IwMylwdFvqtiA==/org.worldfoundry.wf_game.patchwork-vUyXsXlCeGm4zoPjTdTMYg==/base.apk (canonical path /data/app/~~3_QcYYrL2IwMylwdFvqtiA==/org.worldfoundry.wf_game.patchwork-vUyXsXlCeGm4zoPjTdTMYg==/base.apk) in OatFile /data/app/~~eBwHIIoAeyrHbxFq-roDvQ==/org.worldfoundry.wf_game.patchwork-nD1KcTgmLWJQs8thla6V7g==/oat/arm/base.odex
+10-04 18:43:22.108 16437 16437 D nativeloader: Configuring clns-4 for other apk /data/app/~~eBwHIIoAeyrHbxFq-roDvQ==/org.worldfoundry.wf_game.patchwork-nD1KcTgmLWJQs8thla6V7g==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~eBwHIIoAeyrHbxFq-roDvQ==/org.worldfoundry.wf_game.patchwork-nD1KcTgmLWJQs8thla6V7g==/lib/arm, permitted_path=/data:/mnt/expand:/data/user/0/org.worldfoundry.wf_game.patchwork
+10-04 18:43:22.163 16437 16437 V GraphicsEnvironment: Currently set values for:
+10-04 18:43:22.165 16437 16437 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+10-04 18:43:22.165 16437 16437 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+10-04 18:43:22.166 16437 16437 V GraphicsEnvironment: ANGLE GameManagerService for org.worldfoundry.wf_game.patchwork: false
+10-04 18:43:22.166 16437 16437 V GraphicsEnvironment: org.worldfoundry.wf_game.patchwork is not listed in per-application setting
+10-04 18:43:22.166 16437 16437 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-04 18:43:22.289 16437 16437 I WebViewFactory: Loading com.google.android.webview version 153.0.8010.36 (code 801003600)
+10-04 18:43:22.299 16437 16437 D ApplicationLoaders: Returning zygote-cached class loader: /system/framework/android.test.base.jar
+10-04 18:43:22.322 16437 16437 D nativeloader: Configuring clns-5 for other apk /data/app/~~71H4z0ABnw9ItCpCpx9G-w==/com.google.android.webview-SkD2_zXivUw8fXZOciFNxQ==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~71H4z0ABnw9ItCpCpx9G-w==/com.google.android.webview-SkD2_zXivUw8fXZOciFNxQ==/lib/arm:/data/app/~~71H4z0ABnw9ItCpCpx9G-w==/com.google.android.webview-SkD2_zXivUw8fXZOciFNxQ==/base.apk!/lib/armeabi-v7a, permitted_path=/data:/mnt/expand
+10-04 18:43:22.479 16437 16437 I cr_WVCFactoryProvider: version=153.0.8010.36 (801003600) minSdkVersion=29 multiprocess=true packageId=127 splits=<none>
+10-04 18:43:22.530 16437 16463 I chromium: [1004/184322.509613:INFO:android_webview/browser/variations/variations_seed_loader.cc:67] Failed to open file for reading.: No such file or directory (2)
+10-04 18:43:22.581 16437 16437 I cr_LibraryLoader: Successfully loaded native library
+10-04 18:43:22.595 16437 16437 I cr_CachingUmaRecorder: Flushed 46 samples from 21 histograms, 0 samples were dropped.
+10-04 18:43:22.597 16437 16437 I cr_ChildProcLH: ScopedServiceBindingBatch.tryActivate: false
+10-04 18:43:22.605 16437 16437 I cr_CombinedPProvider: #registerProvider() provider:WV.hj@f2a4c1 isPolicyCacheEnabled:false policyProvidersSize:0
+10-04 18:43:22.606 16437 16437 I cr_PolicyProvider: #setManagerAndSource() 0
+10-04 18:43:22.608 16437 16463 I cr_policy: registerReceiver succeeded after 2ms
+10-04 18:43:22.624 16437 16437 I cr_DisplayManager: Is Display Topology available: false
+10-04 18:43:22.699 16437 16437 I cr_CombinedPProvider: #linkNativeInternal() 1
+10-04 18:43:22.699 16437 16437 D CompatibilityChangeReporter: Compat change id reported: 183155436; UID 10152; state: ENABLED
+10-04 18:43:22.702 16437 16437 I cr_AppResProvider: #getApplicationRestrictionsFromUserManager() Bundle[EMPTY_PARCEL]
+10-04 18:43:22.702 16437 16437 I cr_PolicyProvider: #notifySettingsAvailable() 0
+10-04 18:43:22.702 16437 16437 I cr_CombinedPProvider: #onSettingsAvailable() 0
+10-04 18:43:22.702 16437 16437 I cr_CombinedPProvider: #flushPolicies()
+10-04 18:43:22.885 16437 16493 W chromium: [WARNING:net/dns/dns_config_service_android.cc:69] Failed to read DnsConfig.
+10-04 18:43:22.909 16437 16437 D CompatibilityChangeReporter: Compat change id reported: 214741472; UID 10152; state: ENABLED
+10-04 18:43:22.971 16437 16437 D CompatibilityChangeReporter: Compat change id reported: 171228096; UID 10152; state: ENABLED
+10-04 18:43:23.016 16437 16437 D CompatibilityChangeReporter: Compat change id reported: 193247900; UID 10152; state: ENABLED
+10-04 18:43:23.139 16437 16496 W cr_media: BLUETOOTH_CONNECT permission is missing.
+10-04 18:43:23.147 16437 16496 W cr_media: getBluetoothAdapter() requires BLUETOOTH permission
+10-04 18:43:23.147 16437 16496 W cr_media: registerBluetoothIntentsIfNeeded: Requires BLUETOOTH permission
+10-04 18:43:23.191 16437 16437 I QuiltNightTV: TV_LAUNCH https://collections-timing-riding-computing.trycloudflare.com/receiver?display=android-tv&deviceCheck=1&visualCheck=1
+10-04 18:43:23.206 16437 16437 D CompatibilityChangeReporter: Compat change id reported: 237531167; UID 10152; state: DISABLED
+10-04 18:43:23.218 16437 16437 W OpenGLRenderer: Unknown dataspace 0
+10-04 18:43:23.244 16437 16509 D TrafficStats: tagSocket(142) with statsTag=0xffffffff, statsUid=-1
+10-04 18:43:23.256 16437 16505 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-04 18:43:23.274 16437 16505 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-04 18:43:23.274 16437 16505 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-04 18:43:23.275 16437 16505 W libc    : Access denied finding property "vendor.mali.base_max_nr_instances"
+10-04 18:43:23.288 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_unnamed"
+10-04 18:43:23.288 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_default_heap"
+10-04 18:43:23.288 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_base_internal"
+10-04 18:43:23.288 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_framepool"
+10-04 18:43:23.288 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_tiler"
+10-04 18:43:23.288 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_program"
+10-04 18:43:23.289 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane"
+10-04 18:43:23.289 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane_imported"
+10-04 18:43:23.289 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vao"
+10-04 18:43:23.289 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_img"
+10-04 18:43:23.289 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_internal_surface"
+10-04 18:43:23.289 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_buf"
+10-04 18:43:23.289 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_crc"
+10-04 18:43:23.289 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_hmem"
+10-04 18:43:23.289 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_rsd"
+10-04 18:43:23.289 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_mbs2"
+10-04 18:43:23.289 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_static"
+10-04 18:43:23.289 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_hmem"
+10-04 18:43:23.289 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_sample_pos"
+10-04 18:43:23.290 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_discard"
+10-04 18:43:23.290 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_tess_geom"
+10-04 18:43:23.290 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cobj_hmem"
+10-04 18:43:23.290 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_hmem"
+10-04 18:43:23.290 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_prof_dump"
+10-04 18:43:23.290 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cblend_hmem"
+10-04 18:43:23.290 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_hmem"
+10-04 18:43:23.290 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query"
+10-04 18:43:23.290 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query_host"
+10-04 18:43:23.290 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_multiview"
+10-04 18:43:23.290 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cdeps_hmem"
+10-04 18:43:23.291 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_suballoc"
+10-04 18:43:23.291 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_hoard"
+10-04 18:43:23.291 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_registry"
+10-04 18:43:23.291 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_payload"
+10-04 18:43:23.291 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_wlm_tls"
+10-04 18:43:23.291 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_hmem"
+10-04 18:43:23.291 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_svm"
+10-04 18:43:23.291 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_protected"
+10-04 18:43:23.291 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cinstr"
+10-04 18:43:23.291 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_uncached"
+10-04 18:43:23.291 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_cached"
+10-04 18:43:23.291 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_transient"
+10-04 18:43:23.291 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_protected"
+10-04 18:43:23.292 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external"
+10-04 18:43:23.292 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external_swapchain"
+10-04 18:43:23.292 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal"
+10-04 18:43:23.292 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_tls"
+10-04 18:43:23.292 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_host"
+10-04 18:43:23.292 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_protected"
+10-04 18:43:23.292 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_transient"
+10-04 18:43:23.292 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_descriptor_pool"
+10-04 18:43:23.292 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator"
+10-04 18:43:23.292 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_host"
+10-04 18:43:23.292 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_protected"
+10-04 18:43:23.292 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_host"
+10-04 18:43:23.293 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device"
+10-04 18:43:23.293 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device_transient"
+10-04 18:43:23.293 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_buffer"
+10-04 18:43:23.293 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_image"
+10-04 18:43:23.293 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_signal"
+10-04 18:43:23.293 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_flush_chain"
+10-04 18:43:23.293 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_metadata_list"
+10-04 18:43:23.293 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_jit"
+10-04 18:43:23.293 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_mmu"
+10-04 18:43:23.299 16437 16505 W libc    : Access denied finding property "vendor.mali.osu_protected_memory_heap_name"
+10-04 18:43:23.299 16437 16505 W libc    : Access denied finding property "vendor.mali.osu_ion_protected_memory_heap_name"
+10-04 18:43:23.299 16437 16505 W libc    : Access denied finding property "vendor.mali.platform_agt_frequency_khz"
+10-04 18:43:23.300 16437 16505 W libc    : Access denied finding property "vendor.mali.hal_dump_dir"
+10-04 18:43:23.303 16437 16523 I CameraManagerGlobal: Connecting to camera service
+10-04 18:43:23.681 16437 16505 W libc    : Access denied finding property "vendor.mali.base_max_nr_instances"
+10-04 18:43:23.682 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_unnamed"
+10-04 18:43:23.682 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_default_heap"
+10-04 18:43:23.682 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_base_internal"
+10-04 18:43:23.683 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_framepool"
+10-04 18:43:23.683 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_tiler"
+10-04 18:43:23.683 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_program"
+10-04 18:43:23.683 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane"
+10-04 18:43:23.683 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane_imported"
+10-04 18:43:23.683 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vao"
+10-04 18:43:23.683 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_img"
+10-04 18:43:23.683 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_internal_surface"
+10-04 18:43:23.683 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_buf"
+10-04 18:43:23.683 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_crc"
+10-04 18:43:23.684 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_hmem"
+10-04 18:43:23.684 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_rsd"
+10-04 18:43:23.684 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_mbs2"
+10-04 18:43:23.684 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_static"
+10-04 18:43:23.684 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_hmem"
+10-04 18:43:23.684 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_sample_pos"
+10-04 18:43:23.684 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_discard"
+10-04 18:43:23.684 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_tess_geom"
+10-04 18:43:23.684 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cobj_hmem"
+10-04 18:43:23.684 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_hmem"
+10-04 18:43:23.684 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_prof_dump"
+10-04 18:43:23.685 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cblend_hmem"
+10-04 18:43:23.685 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_hmem"
+10-04 18:43:23.685 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query"
+10-04 18:43:23.685 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query_host"
+10-04 18:43:23.685 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_multiview"
+10-04 18:43:23.685 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cdeps_hmem"
+10-04 18:43:23.685 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_suballoc"
+10-04 18:43:23.685 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_hoard"
+10-04 18:43:23.685 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_registry"
+10-04 18:43:23.685 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_payload"
+10-04 18:43:23.685 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_wlm_tls"
+10-04 18:43:23.686 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_hmem"
+10-04 18:43:23.686 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_svm"
+10-04 18:43:23.686 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_protected"
+10-04 18:43:23.686 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cinstr"
+10-04 18:43:23.686 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_uncached"
+10-04 18:43:23.686 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_cached"
+10-04 18:43:23.686 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_transient"
+10-04 18:43:23.686 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_protected"
+10-04 18:43:23.686 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external"
+10-04 18:43:23.687 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external_swapchain"
+10-04 18:43:23.687 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal"
+10-04 18:43:23.687 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_tls"
+10-04 18:43:23.687 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_host"
+10-04 18:43:23.687 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_protected"
+10-04 18:43:23.687 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_transient"
+10-04 18:43:23.687 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_descriptor_pool"
+10-04 18:43:23.687 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator"
+10-04 18:43:23.687 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_host"
+10-04 18:43:23.687 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_protected"
+10-04 18:43:23.687 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_host"
+10-04 18:43:23.687 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device"
+10-04 18:43:23.688 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device_transient"
+10-04 18:43:23.688 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_buffer"
+10-04 18:43:23.688 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_image"
+10-04 18:43:23.688 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_signal"
+10-04 18:43:23.688 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_flush_chain"
+10-04 18:43:23.688 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_metadata_list"
+10-04 18:43:23.688 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_jit"
+10-04 18:43:23.688 16437 16505 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_mmu"
+10-04 18:43:23.688 16437 16505 W libc    : Access denied finding property "vendor.mali.osu_protected_memory_heap_name"
+10-04 18:43:23.689 16437 16505 W libc    : Access denied finding property "vendor.mali.osu_ion_protected_memory_heap_name"
+10-04 18:43:23.689 16437 16505 W libc    : Access denied finding property "vendor.mali.platform_agt_frequency_khz"
+10-04 18:43:23.689 16437 16505 W libc    : Access denied finding property "vendor.mali.hal_dump_dir"
+10-04 18:43:23.689 16437 16505 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-04 18:43:23.693 16437 16437 I cr_AppResProvider: #getApplicationRestrictionsFromUserManager() Bundle[EMPTY_PARCEL]
+10-04 18:43:23.693 16437 16437 I cr_PolicyProvider: #notifySettingsAvailable() 0
+10-04 18:43:23.693 16437 16437 I cr_CombinedPProvider: #onSettingsAvailable() 0
+10-04 18:43:23.693 16437 16437 I cr_CombinedPProvider: #flushPolicies()
+10-04 18:43:23.695 16437 16505 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-04 18:43:23.696 16437 16505 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-04 18:43:23.703 16437 16437 I Choreographer: Skipped 33 frames!  The application may be doing too much work on its main thread.
+10-04 18:43:23.737 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.hal_format"
+10-04 18:43:23.737 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.recordable"
+10-04 18:43:23.737 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.dataspaces_to_exclude"
+10-04 18:43:23.737 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.hal_format"
+10-04 18:43:23.737 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.recordable"
+10-04 18:43:23.738 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.dataspaces_to_exclude"
+10-04 18:43:23.738 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.hal_format"
+10-04 18:43:23.738 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.recordable"
+10-04 18:43:23.738 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.dataspaces_to_exclude"
+10-04 18:43:23.738 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.hal_format"
+10-04 18:43:23.738 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.recordable"
+10-04 18:43:23.739 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.dataspaces_to_exclude"
+10-04 18:43:23.739 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.hal_format"
+10-04 18:43:23.739 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.recordable"
+10-04 18:43:23.739 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.dataspaces_to_exclude"
+10-04 18:43:23.739 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.hal_format"
+10-04 18:43:23.739 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.recordable"
+10-04 18:43:23.739 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.dataspaces_to_exclude"
+10-04 18:43:23.739 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.hal_format"
+10-04 18:43:23.739 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.recordable"
+10-04 18:43:23.739 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.dataspaces_to_exclude"
+10-04 18:43:23.740 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.hal_format"
+10-04 18:43:23.740 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.recordable"
+10-04 18:43:23.740 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.dataspaces_to_exclude"
+10-04 18:43:23.740 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.hal_format"
+10-04 18:43:23.741 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.recordable"
+10-04 18:43:23.741 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.dataspaces_to_exclude"
+10-04 18:43:23.742 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.hal_format"
+10-04 18:43:23.742 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.recordable"
+10-04 18:43:23.742 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.dataspaces_to_exclude"
+10-04 18:43:23.742 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.hal_format"
+10-04 18:43:23.742 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.recordable"
+10-04 18:43:23.742 16437 16505 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.dataspaces_to_exclude"
+10-04 18:43:23.948 16437 16456 E OpenGLRenderer: Unable to match the desired swap behavior.
+10-04 18:43:24.124 16437 16504 W chromium: [WARNING:android_webview/browser/gfx/display_webview.cc:33] WebView overlays are enabled!
+10-04 18:43:24.137 16437 16452 I OpenGLRenderer: Davey! duration=983ms; Flags=1, FrameTimelineVsyncId=36633251, IntendedVsync=217360992210861, Vsync=217361542760850, InputEventId=0, HandleInputStart=217361549804103, AnimationStart=217361549806478, PerformTraversalsStart=217361551647519, DrawStart=217361794581478, FrameDeadline=217361008894194, FrameInterval=217361549141811, FrameStartTime=16683333, SyncQueued=217361797878436, SyncStart=217361798035394, IssueDrawCommandsStart=217361799488103, SwapBuffers=217361971172478, FrameCompleted=217361975864269, DequeueBufferDuration=87043833, QueueBufferDuration=684541, GpuCompleted=217361975864269, SwapBuffersCompleted=217361973589269, DisplayPresentTime=0, CommandSubmissionCompleted=217361971172478, 
+10-04 18:43:24.343 16437 16502 W VideoCapabilities: Unrecognized profile/level 0/4 for video/mpeg2
+10-04 18:43:24.343 16437 16502 I VideoCapabilities: Unsupported profile 3 for video/mpeg2
+10-04 18:43:24.343 16437 16502 I VideoCapabilities: Unsupported profile 4 for video/mpeg2
+10-04 18:43:24.343 16437 16502 I VideoCapabilities: Unsupported profile 5 for video/mpeg2
+10-04 18:43:24.348 16437 16502 I VideoCapabilities: Unsupported profile 2 for video/mp4v-es
+10-04 18:43:24.348 16437 16502 I VideoCapabilities: Unsupported profile 8 for video/mp4v-es
+10-04 18:43:24.348 16437 16502 I VideoCapabilities: Unsupported profile 16 for video/mp4v-es
+10-04 18:43:24.348 16437 16502 I VideoCapabilities: Unsupported profile 1024 for video/mp4v-es
+10-04 18:43:24.386 16437 16502 W cr_VAUtil: Unknown profile: 32768 for codec video/x-vnd.on2.vp9
+10-04 18:43:24.386 16437 16502 W cr_VAUtil: Unknown profile: 32768 for codec video/x-vnd.on2.vp9
+10-04 18:43:24.412 16437 16509 I QuiltNightTV: TV_NETWORK_CHECK HTTP 200
+10-04 18:43:24.922 16437 16437 I QuiltNightTV: TV_PAGE_STARTED https://collections-timing-riding-computing.trycloudflare.com/receiver?display=android-tv&deviceCheck=1&visualCheck=1
+10-04 18:43:25.908 16437 16437 I QuiltNightTV: TV_PAGE_LOADED https://collections-timing-riding-computing.trycloudflare.com/receiver?display=android-tv&deviceCheck=1&visualCheck=1
+10-04 18:43:27.756 16437 16437 I QuiltNightTV: PD_RECEIVER_MOUNTED
+10-04 18:43:27.951 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:43:27.964 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114207955,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:27.971 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:43:27.977 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114207975,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:28.162 16437 16437 I QuiltNightTV: PD_AUTOPLAY_PLAYERS 6
+10-04 18:43:28.804 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114208803,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:28.806 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:43:28.808 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114208807,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:28.810 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:43:28.812 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114208812,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:28.981 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114208980,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:28.983 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:43:28.985 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114208984,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:29.107 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:43:29.110 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114209109,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:29.115 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114209114,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:29.117 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:43:29.121 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114209120,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:29.213 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:43:29.216 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114209215,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:29.244 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114209242,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:29.263 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:43:29.265 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114209264,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:29.314 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:43:29.317 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114209316,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:29.436 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114209435,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:29.438 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:43:29.440 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114209439,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:29.513 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:43:29.517 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114209516,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:29.632 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114209632,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:29.633 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:43:29.636 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114209635,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:29.792 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE LOBBY 0:0
+10-04 18:43:29.797 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114209793,"phase":"LOBBY","round":0,"turn":0,"ready":"all","ceremony":0,"players":0}
+10-04 18:43:38.011 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE STARTING 1:1
+10-04 18:43:38.024 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114218022,"phase":"STARTING","round":0,"turn":0,"ready":"none","ceremony":0,"players":6}
+10-04 18:43:38.960 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE STARTING 1:1
+10-04 18:43:38.976 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114218972,"phase":"STARTING","round":0,"turn":0,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:39.024 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE STARTING 1:1
+10-04 18:43:39.032 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114219030,"phase":"STARTING","round":0,"turn":0,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:39.071 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE STARTING 1:1
+10-04 18:43:39.076 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114219075,"phase":"STARTING","round":0,"turn":0,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:39.139 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE STARTING 1:1
+10-04 18:43:39.147 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114219145,"phase":"STARTING","round":0,"turn":0,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:39.191 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE STARTING 1:1
+10-04 18:43:39.199 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114219197,"phase":"STARTING","round":0,"turn":0,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:39.405 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE STARTING 1:1
+10-04 18:43:39.411 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114219410,"phase":"STARTING","round":0,"turn":0,"ready":"all","ceremony":0,"players":6}
+10-04 18:43:40.046 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:2
+10-04 18:43:40.052 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114220052,"phase":"PLACING","round":1,"turn":1,"ready":"none","ceremony":0,"players":6}
+10-04 18:43:40.888 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:2
+10-04 18:43:40.899 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114220898,"phase":"PLACING","round":1,"turn":1,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:40.966 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:2
+10-04 18:43:40.972 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114220971,"phase":"PLACING","round":1,"turn":1,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:41.044 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:2
+10-04 18:43:41.053 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114221052,"phase":"PLACING","round":1,"turn":1,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:41.108 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:2
+10-04 18:43:41.117 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114221116,"phase":"PLACING","round":1,"turn":1,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:41.223 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:2
+10-04 18:43:41.230 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114221229,"phase":"PLACING","round":1,"turn":1,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:41.272 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:2
+10-04 18:43:41.278 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114221277,"phase":"PLACING","round":1,"turn":1,"ready":"all","ceremony":0,"players":6}
+10-04 18:43:41.752 16437 16447 W System  : A resource failed to call end. 
+10-04 18:43:41.913 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:3
+10-04 18:43:41.930 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114221929,"phase":"TURN_RESULTS","round":1,"turn":1,"ready":"none","ceremony":0,"players":6}
+10-04 18:43:41.931 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:1
+10-04 18:43:46.012 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:4
+10-04 18:43:46.029 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114226028,"phase":"PLACING","round":1,"turn":2,"ready":"none","ceremony":0,"players":6}
+10-04 18:43:46.817 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:4
+10-04 18:43:46.827 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114226822,"phase":"PLACING","round":1,"turn":2,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:46.900 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:4
+10-04 18:43:46.912 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114226910,"phase":"PLACING","round":1,"turn":2,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:46.986 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:4
+10-04 18:43:46.999 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114226998,"phase":"PLACING","round":1,"turn":2,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:47.086 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:4
+10-04 18:43:47.097 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114227095,"phase":"PLACING","round":1,"turn":2,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:47.161 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:4
+10-04 18:43:47.169 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114227168,"phase":"PLACING","round":1,"turn":2,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:47.342 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:4
+10-04 18:43:47.350 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114227349,"phase":"PLACING","round":1,"turn":2,"ready":"all","ceremony":0,"players":6}
+10-04 18:43:47.947 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:5
+10-04 18:43:47.953 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114227952,"phase":"TURN_RESULTS","round":1,"turn":2,"ready":"none","ceremony":0,"players":6}
+10-04 18:43:47.953 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:2
+10-04 18:43:52.126 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:6
+10-04 18:43:52.137 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114232136,"phase":"PLACING","round":1,"turn":3,"ready":"none","ceremony":0,"players":6}
+10-04 18:43:53.000 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:6
+10-04 18:43:53.008 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114233007,"phase":"PLACING","round":1,"turn":3,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:53.038 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:6
+10-04 18:43:53.045 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114233043,"phase":"PLACING","round":1,"turn":3,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:53.144 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:6
+10-04 18:43:53.153 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114233151,"phase":"PLACING","round":1,"turn":3,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:53.215 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:6
+10-04 18:43:53.223 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114233222,"phase":"PLACING","round":1,"turn":3,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:53.275 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:6
+10-04 18:43:53.285 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114233281,"phase":"PLACING","round":1,"turn":3,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:53.342 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:6
+10-04 18:43:53.350 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114233349,"phase":"PLACING","round":1,"turn":3,"ready":"all","ceremony":0,"players":6}
+10-04 18:43:53.959 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:7
+10-04 18:43:53.972 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114233971,"phase":"TURN_RESULTS","round":1,"turn":3,"ready":"none","ceremony":0,"players":6}
+10-04 18:43:53.972 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:3
+10-04 18:43:58.064 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:8
+10-04 18:43:58.072 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114238071,"phase":"PLACING","round":1,"turn":4,"ready":"none","ceremony":0,"players":6}
+10-04 18:43:58.881 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:8
+10-04 18:43:58.885 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114238885,"phase":"PLACING","round":1,"turn":4,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:58.947 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:8
+10-04 18:43:58.950 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114238948,"phase":"PLACING","round":1,"turn":4,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:59.029 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:8
+10-04 18:43:59.034 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114239033,"phase":"PLACING","round":1,"turn":4,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:59.102 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:8
+10-04 18:43:59.106 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114239105,"phase":"PLACING","round":1,"turn":4,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:59.217 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:8
+10-04 18:43:59.222 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114239221,"phase":"PLACING","round":1,"turn":4,"ready":"some","ceremony":0,"players":6}
+10-04 18:43:59.280 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:8
+10-04 18:43:59.286 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114239285,"phase":"PLACING","round":1,"turn":4,"ready":"all","ceremony":0,"players":6}
+10-04 18:43:59.903 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:9
+10-04 18:43:59.913 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114239913,"phase":"TURN_RESULTS","round":1,"turn":4,"ready":"none","ceremony":0,"players":6}
+10-04 18:43:59.914 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:4
+10-04 18:44:03.997 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:10
+10-04 18:44:04.006 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114244004,"phase":"PLACING","round":1,"turn":5,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:04.822 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:10
+10-04 18:44:04.828 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114244827,"phase":"PLACING","round":1,"turn":5,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:04.898 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:10
+10-04 18:44:04.902 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114244902,"phase":"PLACING","round":1,"turn":5,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:04.978 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:10
+10-04 18:44:04.983 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114244982,"phase":"PLACING","round":1,"turn":5,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:05.056 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:10
+10-04 18:44:05.060 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114245059,"phase":"PLACING","round":1,"turn":5,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:05.127 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:10
+10-04 18:44:05.132 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114245131,"phase":"PLACING","round":1,"turn":5,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:05.211 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:10
+10-04 18:44:05.215 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114245215,"phase":"PLACING","round":1,"turn":5,"ready":"all","ceremony":0,"players":6}
+10-04 18:44:05.838 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:11
+10-04 18:44:05.848 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114245846,"phase":"TURN_RESULTS","round":1,"turn":5,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:05.848 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:5
+10-04 18:44:09.935 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:12
+10-04 18:44:09.941 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114249940,"phase":"PLACING","round":1,"turn":6,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:10.764 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:12
+10-04 18:44:10.766 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114250765,"phase":"PLACING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:10.817 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:12
+10-04 18:44:10.822 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114250821,"phase":"PLACING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:10.932 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:12
+10-04 18:44:10.936 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114250936,"phase":"PLACING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:10.983 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:12
+10-04 18:44:10.989 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114250989,"phase":"PLACING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:11.080 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:12
+10-04 18:44:11.081 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114251080,"phase":"PLACING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:11.140 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:12
+10-04 18:44:11.143 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114251142,"phase":"PLACING","round":1,"turn":6,"ready":"all","ceremony":0,"players":6}
+10-04 18:44:11.721 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:13
+10-04 18:44:11.733 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114251732,"phase":"TURN_RESULTS","round":1,"turn":6,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:11.734 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 1:6
+10-04 18:44:15.811 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:14
+10-04 18:44:15.817 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114255816,"phase":"SCORING","round":1,"turn":6,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:16.654 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:14
+10-04 18:44:16.658 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114256655,"phase":"SCORING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:16.703 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:14
+10-04 18:44:16.706 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114256705,"phase":"SCORING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:16.777 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:14
+10-04 18:44:16.780 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114256779,"phase":"SCORING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:16.876 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:14
+10-04 18:44:16.880 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114256879,"phase":"SCORING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:16.993 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:14
+10-04 18:44:16.995 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114256995,"phase":"SCORING","round":1,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:17.019 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:14
+10-04 18:44:17.022 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114257021,"phase":"SCORING","round":1,"turn":6,"ready":"all","ceremony":0,"players":6}
+10-04 18:44:17.603 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE ROUND_RESULTS 1:15
+10-04 18:44:17.628 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114257627,"phase":"ROUND_RESULTS","round":1,"turn":6,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:20.211 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:16
+10-04 18:44:20.220 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114260218,"phase":"PLACING","round":2,"turn":1,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:21.050 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:16
+10-04 18:44:21.055 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114261055,"phase":"PLACING","round":2,"turn":1,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:21.129 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:16
+10-04 18:44:21.136 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114261135,"phase":"PLACING","round":2,"turn":1,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:21.219 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:16
+10-04 18:44:21.233 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114261232,"phase":"PLACING","round":2,"turn":1,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:21.286 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:16
+10-04 18:44:21.294 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114261293,"phase":"PLACING","round":2,"turn":1,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:21.595 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:16
+10-04 18:44:21.598 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114261597,"phase":"PLACING","round":2,"turn":1,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:21.603 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:16
+10-04 18:44:21.608 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114261607,"phase":"PLACING","round":2,"turn":1,"ready":"all","ceremony":0,"players":6}
+10-04 18:44:22.207 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:17
+10-04 18:44:22.221 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114262220,"phase":"TURN_RESULTS","round":2,"turn":1,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:22.223 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:1
+10-04 18:44:26.322 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:18
+10-04 18:44:26.333 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114266332,"phase":"PLACING","round":2,"turn":2,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:27.173 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:18
+10-04 18:44:27.182 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114267181,"phase":"PLACING","round":2,"turn":2,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:27.271 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:18
+10-04 18:44:27.276 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114267275,"phase":"PLACING","round":2,"turn":2,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:27.334 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:18
+10-04 18:44:27.343 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114267342,"phase":"PLACING","round":2,"turn":2,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:27.432 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:18
+10-04 18:44:27.442 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114267440,"phase":"PLACING","round":2,"turn":2,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:27.550 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:18
+10-04 18:44:27.556 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114267555,"phase":"PLACING","round":2,"turn":2,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:27.567 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:18
+10-04 18:44:27.572 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114267571,"phase":"PLACING","round":2,"turn":2,"ready":"all","ceremony":0,"players":6}
+10-04 18:44:28.176 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:19
+10-04 18:44:28.191 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114268190,"phase":"TURN_RESULTS","round":2,"turn":2,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:28.191 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:2
+10-04 18:44:32.463 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:20
+10-04 18:44:32.471 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114272469,"phase":"PLACING","round":2,"turn":3,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:33.352 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:20
+10-04 18:44:33.362 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114273360,"phase":"PLACING","round":2,"turn":3,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:33.368 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:20
+10-04 18:44:33.371 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114273370,"phase":"PLACING","round":2,"turn":3,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:33.441 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:20
+10-04 18:44:33.445 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114273444,"phase":"PLACING","round":2,"turn":3,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:33.509 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:20
+10-04 18:44:33.514 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114273513,"phase":"PLACING","round":2,"turn":3,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:33.657 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:20
+10-04 18:44:33.662 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114273661,"phase":"PLACING","round":2,"turn":3,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:33.713 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:20
+10-04 18:44:33.720 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114273719,"phase":"PLACING","round":2,"turn":3,"ready":"all","ceremony":0,"players":6}
+10-04 18:44:34.373 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:21
+10-04 18:44:34.387 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114274386,"phase":"TURN_RESULTS","round":2,"turn":3,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:34.387 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:3
+10-04 18:44:38.467 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:22
+10-04 18:44:38.474 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114278473,"phase":"PLACING","round":2,"turn":4,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:39.329 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:22
+10-04 18:44:39.334 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114279333,"phase":"PLACING","round":2,"turn":4,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:39.421 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:22
+10-04 18:44:39.432 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114279426,"phase":"PLACING","round":2,"turn":4,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:39.502 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:22
+10-04 18:44:39.506 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114279505,"phase":"PLACING","round":2,"turn":4,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:39.584 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:22
+10-04 18:44:39.591 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114279588,"phase":"PLACING","round":2,"turn":4,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:39.644 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:22
+10-04 18:44:39.649 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114279647,"phase":"PLACING","round":2,"turn":4,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:39.729 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:22
+10-04 18:44:39.733 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114279733,"phase":"PLACING","round":2,"turn":4,"ready":"all","ceremony":0,"players":6}
+10-04 18:44:40.312 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:23
+10-04 18:44:40.333 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114280332,"phase":"TURN_RESULTS","round":2,"turn":4,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:40.334 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:4
+10-04 18:44:44.418 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:24
+10-04 18:44:44.424 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114284423,"phase":"PLACING","round":2,"turn":5,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:45.260 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:24
+10-04 18:44:45.265 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114285264,"phase":"PLACING","round":2,"turn":5,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:45.331 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:24
+10-04 18:44:45.336 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114285335,"phase":"PLACING","round":2,"turn":5,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:45.423 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:24
+10-04 18:44:45.425 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114285424,"phase":"PLACING","round":2,"turn":5,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:45.504 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:24
+10-04 18:44:45.508 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114285508,"phase":"PLACING","round":2,"turn":5,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:45.597 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:24
+10-04 18:44:45.603 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114285603,"phase":"PLACING","round":2,"turn":5,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:45.672 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:24
+10-04 18:44:45.675 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114285675,"phase":"PLACING","round":2,"turn":5,"ready":"all","ceremony":0,"players":6}
+10-04 18:44:46.258 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:25
+10-04 18:44:46.271 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114286271,"phase":"TURN_RESULTS","round":2,"turn":5,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:46.272 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:5
+10-04 18:44:50.364 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:26
+10-04 18:44:50.371 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114290371,"phase":"PLACING","round":2,"turn":6,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:51.184 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:26
+10-04 18:44:51.187 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114291187,"phase":"PLACING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:51.259 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:26
+10-04 18:44:51.263 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114291262,"phase":"PLACING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:51.345 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:26
+10-04 18:44:51.349 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114291348,"phase":"PLACING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:51.425 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:26
+10-04 18:44:51.428 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114291427,"phase":"PLACING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:51.513 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:26
+10-04 18:44:51.516 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114291515,"phase":"PLACING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:51.611 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:26
+10-04 18:44:51.614 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114291614,"phase":"PLACING","round":2,"turn":6,"ready":"all","ceremony":0,"players":6}
+10-04 18:44:52.203 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:27
+10-04 18:44:52.224 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114292223,"phase":"TURN_RESULTS","round":2,"turn":6,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:52.225 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 2:6
+10-04 18:44:56.341 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:28
+10-04 18:44:56.346 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114296345,"phase":"SCORING","round":2,"turn":6,"ready":"none","ceremony":0,"players":6}
+10-04 18:44:57.139 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:28
+10-04 18:44:57.149 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114297145,"phase":"SCORING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:57.222 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:28
+10-04 18:44:57.226 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114297225,"phase":"SCORING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:57.296 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:28
+10-04 18:44:57.298 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114297297,"phase":"SCORING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:57.388 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:28
+10-04 18:44:57.391 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114297390,"phase":"SCORING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:57.451 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:28
+10-04 18:44:57.451 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114297449,"phase":"SCORING","round":2,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:44:57.529 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:28
+10-04 18:44:57.537 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114297533,"phase":"SCORING","round":2,"turn":6,"ready":"all","ceremony":0,"players":6}
+10-04 18:44:58.168 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE ROUND_RESULTS 1:29
+10-04 18:44:58.189 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114298188,"phase":"ROUND_RESULTS","round":2,"turn":6,"ready":"none","ceremony":0,"players":6}
+10-04 18:45:00.770 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:30
+10-04 18:45:00.780 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114300779,"phase":"PLACING","round":3,"turn":1,"ready":"none","ceremony":0,"players":6}
+10-04 18:45:01.619 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:30
+10-04 18:45:01.625 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114301624,"phase":"PLACING","round":3,"turn":1,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:01.703 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:30
+10-04 18:45:01.708 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114301707,"phase":"PLACING","round":3,"turn":1,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:01.770 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:30
+10-04 18:45:01.775 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114301775,"phase":"PLACING","round":3,"turn":1,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:01.838 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:30
+10-04 18:45:01.840 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114301840,"phase":"PLACING","round":3,"turn":1,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:01.952 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:30
+10-04 18:45:01.957 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114301956,"phase":"PLACING","round":3,"turn":1,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:02.022 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:30
+10-04 18:45:02.030 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114302028,"phase":"PLACING","round":3,"turn":1,"ready":"all","ceremony":0,"players":6}
+10-04 18:45:02.680 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:31
+10-04 18:45:02.690 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114302689,"phase":"TURN_RESULTS","round":3,"turn":1,"ready":"none","ceremony":0,"players":6}
+10-04 18:45:02.690 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:1
+10-04 18:45:06.800 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:32
+10-04 18:45:06.808 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114306806,"phase":"PLACING","round":3,"turn":2,"ready":"none","ceremony":0,"players":6}
+10-04 18:45:07.728 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:32
+10-04 18:45:07.745 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114307743,"phase":"PLACING","round":3,"turn":2,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:07.828 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:32
+10-04 18:45:07.833 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114307832,"phase":"PLACING","round":3,"turn":2,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:07.838 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:32
+10-04 18:45:07.852 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114307851,"phase":"PLACING","round":3,"turn":2,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:07.888 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:32
+10-04 18:45:07.891 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114307891,"phase":"PLACING","round":3,"turn":2,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:07.962 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:32
+10-04 18:45:07.971 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114307970,"phase":"PLACING","round":3,"turn":2,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:08.046 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:32
+10-04 18:45:08.052 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114308051,"phase":"PLACING","round":3,"turn":2,"ready":"all","ceremony":0,"players":6}
+10-04 18:45:08.817 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:33
+10-04 18:45:08.833 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114308831,"phase":"TURN_RESULTS","round":3,"turn":2,"ready":"none","ceremony":0,"players":6}
+10-04 18:45:08.833 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:2
+10-04 18:45:12.913 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:34
+10-04 18:45:12.933 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114312932,"phase":"PLACING","round":3,"turn":3,"ready":"none","ceremony":0,"players":6}
+10-04 18:45:13.777 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:34
+10-04 18:45:13.788 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114313787,"phase":"PLACING","round":3,"turn":3,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:13.855 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:34
+10-04 18:45:13.863 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114313862,"phase":"PLACING","round":3,"turn":3,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:13.948 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:34
+10-04 18:45:13.958 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114313956,"phase":"PLACING","round":3,"turn":3,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:14.006 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:34
+10-04 18:45:14.012 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114314011,"phase":"PLACING","round":3,"turn":3,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:14.090 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:34
+10-04 18:45:14.102 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114314100,"phase":"PLACING","round":3,"turn":3,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:14.170 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:34
+10-04 18:45:14.183 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114314182,"phase":"PLACING","round":3,"turn":3,"ready":"all","ceremony":0,"players":6}
+10-04 18:45:14.764 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:35
+10-04 18:45:14.772 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114314771,"phase":"TURN_RESULTS","round":3,"turn":3,"ready":"none","ceremony":0,"players":6}
+10-04 18:45:14.772 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:3
+10-04 18:45:18.856 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:36
+10-04 18:45:18.865 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114318864,"phase":"PLACING","round":3,"turn":4,"ready":"none","ceremony":0,"players":6}
+10-04 18:45:19.715 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:36
+10-04 18:45:19.723 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114319721,"phase":"PLACING","round":3,"turn":4,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:19.769 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:36
+10-04 18:45:19.774 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114319773,"phase":"PLACING","round":3,"turn":4,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:19.850 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:36
+10-04 18:45:19.859 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114319857,"phase":"PLACING","round":3,"turn":4,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:19.948 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:36
+10-04 18:45:19.953 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114319951,"phase":"PLACING","round":3,"turn":4,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:20.027 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:36
+10-04 18:45:20.037 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114320036,"phase":"PLACING","round":3,"turn":4,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:20.086 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:36
+10-04 18:45:20.091 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114320090,"phase":"PLACING","round":3,"turn":4,"ready":"all","ceremony":0,"players":6}
+10-04 18:45:20.669 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:37
+10-04 18:45:20.679 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114320678,"phase":"TURN_RESULTS","round":3,"turn":4,"ready":"none","ceremony":0,"players":6}
+10-04 18:45:20.679 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:4
+10-04 18:45:24.795 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:38
+10-04 18:45:24.808 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114324807,"phase":"PLACING","round":3,"turn":5,"ready":"none","ceremony":0,"players":6}
+10-04 18:45:25.614 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:38
+10-04 18:45:25.623 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114325622,"phase":"PLACING","round":3,"turn":5,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:25.708 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:38
+10-04 18:45:25.715 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114325713,"phase":"PLACING","round":3,"turn":5,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:25.763 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:38
+10-04 18:45:25.767 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114325767,"phase":"PLACING","round":3,"turn":5,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:25.871 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:38
+10-04 18:45:25.881 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114325878,"phase":"PLACING","round":3,"turn":5,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:25.933 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:38
+10-04 18:45:25.940 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114325939,"phase":"PLACING","round":3,"turn":5,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:26.012 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:38
+10-04 18:45:26.017 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114326016,"phase":"PLACING","round":3,"turn":5,"ready":"all","ceremony":0,"players":6}
+10-04 18:45:26.633 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:39
+10-04 18:45:26.644 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114326643,"phase":"TURN_RESULTS","round":3,"turn":5,"ready":"none","ceremony":0,"players":6}
+10-04 18:45:26.645 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:5
+10-04 18:45:30.747 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:40
+10-04 18:45:30.755 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114330753,"phase":"PLACING","round":3,"turn":6,"ready":"none","ceremony":0,"players":6}
+10-04 18:45:31.825 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:40
+10-04 18:45:31.831 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114331830,"phase":"PLACING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:31.904 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:40
+10-04 18:45:31.911 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114331910,"phase":"PLACING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:31.933 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:40
+10-04 18:45:31.940 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114331939,"phase":"PLACING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:32.013 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:40
+10-04 18:45:32.014 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114332012,"phase":"PLACING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:32.100 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:40
+10-04 18:45:32.104 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114332102,"phase":"PLACING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:32.171 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE PLACING 1:40
+10-04 18:45:32.174 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114332173,"phase":"PLACING","round":3,"turn":6,"ready":"all","ceremony":0,"players":6}
+10-04 18:45:32.826 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE TURN_RESULTS 1:41
+10-04 18:45:32.839 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114332839,"phase":"TURN_RESULTS","round":3,"turn":6,"ready":"none","ceremony":0,"players":6}
+10-04 18:45:32.840 16437 16437 I QuiltNightTV: PD_AUTOPLAY_BOARDS 3:6
+10-04 18:45:37.090 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:42
+10-04 18:45:37.101 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114337100,"phase":"SCORING","round":3,"turn":6,"ready":"none","ceremony":0,"players":6}
+10-04 18:45:37.913 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:42
+10-04 18:45:37.915 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114337914,"phase":"SCORING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:37.994 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:42
+10-04 18:45:37.996 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114337996,"phase":"SCORING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:38.065 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:42
+10-04 18:45:38.069 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114338068,"phase":"SCORING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:38.155 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:42
+10-04 18:45:38.165 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114338163,"phase":"SCORING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:38.222 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:42
+10-04 18:45:38.223 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114338223,"phase":"SCORING","round":3,"turn":6,"ready":"some","ceremony":0,"players":6}
+10-04 18:45:38.345 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE SCORING 1:42
+10-04 18:45:38.348 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114338347,"phase":"SCORING","round":3,"turn":6,"ready":"all","ceremony":0,"players":6}
+10-04 18:45:38.930 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:38.937 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114338935,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":0,"players":6}
+10-04 18:45:39.781 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:39.784 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114339783,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":1,"players":6}
+10-04 18:45:40.591 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:40.594 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114340594,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":2,"players":6}
+10-04 18:45:41.386 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:41.390 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114341389,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":3,"players":6}
+10-04 18:45:42.246 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:42.251 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114342250,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":4,"players":6}
+10-04 18:45:42.811 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:42.814 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114342813,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":5,"players":6}
+10-04 18:45:43.517 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:43.525 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114343524,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":6,"players":6}
+10-04 18:45:44.265 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:44.268 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114344267,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":7,"players":6}
+10-04 18:45:45.023 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:45.023 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114345020,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":8,"players":6}
+10-04 18:45:45.766 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:45.770 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114345769,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":9,"players":6}
+10-04 18:45:46.527 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:46.531 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114346530,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":10,"players":6}
+10-04 18:45:47.323 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:47.327 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114347326,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":11,"players":6}
+10-04 18:45:48.141 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:48.149 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114348148,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":12,"players":6}
+10-04 18:45:48.803 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:48.812 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114348811,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":13,"players":6}
+10-04 18:45:49.540 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:49.550 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114349549,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":14,"players":6}
+10-04 18:45:50.277 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:50.281 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114350281,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":15,"players":6}
+10-04 18:45:51.019 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:51.024 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114351023,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":16,"players":6}
+10-04 18:45:51.766 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:51.771 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114351770,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":17,"players":6}
+10-04 18:45:52.520 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:52.524 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114352523,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":18,"players":6}
+10-04 18:45:53.284 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:53.291 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114353289,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":19,"players":6}
+10-04 18:45:54.130 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:54.135 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114354134,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":20,"players":6}
+10-04 18:45:54.900 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:54.906 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114354904,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":21,"players":6}
+10-04 18:45:55.534 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:55.537 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114355536,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":22,"players":6}
+10-04 18:45:56.956 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:56.961 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114356960,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":23,"players":6}
+10-04 18:45:57.020 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:57.024 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114357023,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":24,"players":6}
+10-04 18:45:57.776 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:57.780 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114357779,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":25,"players":6}
+10-04 18:45:58.605 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:58.608 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114358607,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":26,"players":6}
+10-04 18:45:59.463 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:45:59.469 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114359468,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":27,"players":6}
+10-04 18:46:00.050 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:46:00.056 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114360056,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":28,"players":6}
+10-04 18:46:00.869 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:46:00.872 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114360872,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":29,"players":6}
+10-04 18:46:01.519 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:46:01.523 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114361522,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":30,"players":6}
+10-04 18:46:02.292 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:46:02.308 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114362299,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":31,"players":6}
+10-04 18:46:03.028 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:46:03.031 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114363030,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":32,"players":6}
+10-04 18:46:03.918 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:46:03.923 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114363922,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":33,"players":6}
+10-04 18:46:04.727 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:46:04.736 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114364733,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":34,"players":6}
+10-04 18:46:05.372 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:46:05.380 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114365375,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":35,"players":6}
+10-04 18:46:06.163 16437 16437 I QuiltNightTV: PD_DISPLAY_STATE FINISHED 1:43
+10-04 18:46:06.167 16437 16437 I QuiltNightTV: PD_VISUAL_FRAME {"time":1791114366166,"phase":"FINISHED","round":3,"turn":6,"ready":"none","ceremony":36,"players":6}
+10-04 18:46:06.201 16437 16437 I QuiltNightTV: PD_DEVICE_CHECK_COMPLETE

@@ -1,0 +1,6 @@
+{
+  "apk": "/tmp/wf-numeric-up-fixed-20261006/diagnostic.apk",
+  "apk_sha256": "f8d2ab74534c962b9cb1519a7f350816607d2cfdf41ccaceea88b196bd002f04",
+  "activity_sha256": "8666875f3b2a643e500a226a1956bd5009936d0a12c84194081a25711880f262",
+  "fix": "static System.loadLibrary(\"wf_game\")"
+}

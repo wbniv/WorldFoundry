@@ -1,0 +1,10 @@
+{
+  "aquarium": {
+    "apk_sha256": "d7e7ba2f7888d10f1ead9ee5e9eda7bfca243c0c8486e985c735c692afa485a8",
+    "installed_matches_release": true
+  },
+  "smb": {
+    "apk_sha256": "84c1f7f9ee4c85c01f7993f389379f75937386af2fc080fc3611b08975203f03",
+    "installed_matches_release": true
+  }
+}

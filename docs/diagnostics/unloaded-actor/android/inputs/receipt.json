@@ -1,0 +1,44 @@
+{
+  "rooms": {
+    "A": [
+      "B",
+      "C"
+    ],
+    "B": [
+      "A"
+    ],
+    "C": [
+      "A"
+    ],
+    "D": []
+  },
+  "camera": "follow",
+  "autonomous": false,
+  "unloaded_actor": true,
+  "unloaded_autonomous": true,
+  "inactive_target_index": 20,
+  "active_control_index": 21,
+  "player_index": 9,
+  "camera_shot_index": 8,
+  "unloaded_marker_index": 18,
+  "inputs": {
+    "wflevels/qbert_practice/qbert_practice.lev": "098803b04cd7f0f845de7612a6c3418889e2b048b8c678a71901740d7faca0ab",
+    "wflevels/qbert_practice/player.iff": "3a8d3a9476be255fdfb5d9b1313a6ce647f6a4cbfa833a26399ba88b87356fd6",
+    "wflevels/qbert_practice/redball.iff": "ad2a167430fc8e253f61312fcdb3db87a2b8d0e7f27033e9b15a817c94f8724b"
+  },
+  "tools": {
+    "iffcomp": "c822b0a76412378ccbb20b282a0d0eb25daa7351975e019832b03dc1218e8e61",
+    "levcomp": "270c027f071064d8ede761da20f595015840e3a6b392ad7700dcc1882e364070",
+    "textile": "8ea399fd40da55d0626858dacc7e228cc70db05dd1f512c72762c52147266c6c"
+  },
+  "files": {
+    "teleport_regression-standalone.iff": "811c3fe7150d6b53b6b346d719ef0c9b11acf2753305d71a618f0cb5db2d4992",
+    "teleport_regression-standalone.iff.txt": "d8faa509f3ac454a8a692735cce6882bba103fdc3980b2ac6a88c0c0c8af8fc1",
+    "teleport_regression.iff": "8fe3b0d581cd476eb1cda5c7a219e41125b2468d71cb06ee35eea2b113eec2fe",
+    "teleport_regression.ini": "5c9fd2ee80c0a57ac2749f0b981bec62dbfe8ee7d651c7ebc3e165ac6b6ac038",
+    "teleport_regression.iff.txt": "936e7ab097fa6a30d715bc66a924180e2596fb10095cb1e12ae0d88d13289fc4",
+    "teleport_regression.lvl": "b6e2bce7d84e3debc7977a0eea6b3b599579b4c84a16e92e0c76e01da8581859",
+    "teleport_regression.lev.bin": "67f000a95680da5da1d8271ecbac3df6101a571e0578054091dcb148ac82a549",
+    "teleport_regression.lev": "553938f6995954d70d3a6ca69e2425312ca9ffb1ee3d67784205cb2edb769236"
+  }
+}

@@ -37,7 +37,7 @@ Int16List::Validate() const
       assert(_num >= 0);
       assert(_num <= _max);
    #if DO_VALIDATION > 1
-      for(int index=0;index<_num;index++)
+      for(int index=0;index<_num;++index)
       {
          if(_data[index] != NULL_ENTRY)
             RangeCheckExclusive(0,_data[index],MAX_ACTOR_INDEX);
@@ -116,7 +116,7 @@ Int16List::Add(int32 value)
 	Validate();
    assert(_max > 0);
 	bool added = false;
-	for (int listIndex = 0; listIndex < _num; listIndex++)
+	for (int listIndex = 0; listIndex < _num; ++listIndex)
 	{
 		if (_data[listIndex] == NULL_ENTRY)
 		{
@@ -129,7 +129,7 @@ Int16List::Add(int32 value)
 	{
 		assert(_num < _max);
 		_data[_num] = value;
-		_num++;
+		++_num;
 	}
 	assert(_num <= _max);
 }
@@ -150,7 +150,7 @@ Int16List::Remove(int32 value)
 			_data[listIndex] = NULL_ENTRY;
 			return;
 		}
-		listIndex++;
+		++listIndex;
 	}
 	AssertMsg(0,"Didn't find actor index " << value << "  in actor list");					// actor not found in this actor list
 }
@@ -170,7 +170,7 @@ Int16List::RemoveIfInList( int32 value )
 			_data[listIndex] = NULL_ENTRY;
 			return;
 		}
-		listIndex++;
+		++listIndex;
 	}
 	//AssertMsg(0,"Didn't find actor index " << value << "  in actor list");					// actor not found in this actor list
 }
@@ -188,7 +188,7 @@ Int16List::IsInList( int32 value )
 	{
 		if(_data[listIndex] == value)
 			return true;
-		listIndex++;
+		++listIndex;
 	}
 	return false;
 }
@@ -217,7 +217,7 @@ std::ostream& operator << ( std::ostream& s, const Int16List& al )
 	while(listIndex < al._num)
 	{
 		s << "  " << listIndex << ": " << al._data[listIndex] << std::endl;
-		listIndex++;
+		++listIndex;
 	}
 	return s;
 }

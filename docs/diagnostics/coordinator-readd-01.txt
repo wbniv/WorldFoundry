@@ -1,0 +1,8 @@
+Accepted J-7f3dedbd40ee: queued; readd
+Follow: task chromecast:watch JOB=J-7f3dedbd40ee
+J-7f3dedbd40ee: accepted {"device": "chromecast-test-01", "workflow": "readd"}
+J-7f3dedbd40ee: granted {"device": "chromecast-test-01", "generation": 1}
+J-7f3dedbd40ee: phase {"phase": "connecting"}
+J-7f3dedbd40ee: needs-local-setup {"error": "No unique advertised connection for expected serial; enable Wireless debugging on the TV", "health": "needs-local-setup"}
+J-7f3dedbd40ee: needs-local-setup: No unique advertised connection for expected serial; enable Wireless debugging on the TV
+task: Failed to run task "chromecast:readd": exit status 1

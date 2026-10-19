@@ -1,0 +1,1164 @@
+{
+  "release_limit_held_edge": "PASS",
+  "player_mouth_capture_and_out_of_range": "PASS",
+  "whole_gulp_held_input": "PASS",
+  "slot_reuse": "PASS",
+  "release_not_instantly_noticed": "PASS",
+  "resident_chase_auto_capture": "PASS",
+  "chase_trace": [
+    {
+      "tick": 0,
+      "resident": [
+        3.680085,
+        0.12,
+        2.516583
+      ],
+      "active": 1.0,
+      "target": -1.0,
+      "state": 1.0,
+      "awareness": 0.307692,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 2,
+      "resident": [
+        3.669854,
+        0.12,
+        2.576583
+      ],
+      "active": 1.0,
+      "target": -1.0,
+      "state": 1.0,
+      "awareness": 0.461538,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 4,
+      "resident": [
+        3.658987,
+        0.12,
+        2.636583
+      ],
+      "active": 1.0,
+      "target": -1.0,
+      "state": 1.0,
+      "awareness": 0.615384,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 6,
+      "resident": [
+        3.647712,
+        0.12,
+        2.696583
+      ],
+      "active": 1.0,
+      "target": -1.0,
+      "state": 1.0,
+      "awareness": 0.76923,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 8,
+      "resident": [
+        3.636175,
+        0.12,
+        2.756583
+      ],
+      "active": 1.0,
+      "target": -1.0,
+      "state": 1.0,
+      "awareness": 0.923076,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 10,
+      "resident": [
+        3.608232,
+        0.12,
+        2.816583
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 12,
+      "resident": [
+        3.565149,
+        0.12,
+        2.875143
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 14,
+      "resident": [
+        3.512375,
+        0.12,
+        2.927361
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 16,
+      "resident": [
+        3.4534,
+        0.12,
+        2.973719
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 18,
+      "resident": [
+        3.390456,
+        0.12,
+        3.015051
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 20,
+      "resident": [
+        3.324972,
+        0.12,
+        3.052172
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 22,
+      "resident": [
+        3.257863,
+        0.12,
+        3.085475
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 24,
+      "resident": [
+        3.189713,
+        0.12,
+        3.115317
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 26,
+      "resident": [
+        3.120896,
+        0.12,
+        3.142254
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 28,
+      "resident": [
+        3.051654,
+        0.12,
+        3.166559
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 30,
+      "resident": [
+        2.982139,
+        0.12,
+        3.188354
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 32,
+      "resident": [
+        2.912449,
+        0.12,
+        3.208036
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 34,
+      "resident": [
+        2.842648,
+        0.12,
+        3.225874
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 36,
+      "resident": [
+        2.772775,
+        0.12,
+        3.241874
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 38,
+      "resident": [
+        2.702856,
+        0.12,
+        3.256284
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 40,
+      "resident": [
+        2.632907,
+        0.12,
+        3.269392
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 42,
+      "resident": [
+        2.56294,
+        0.12,
+        3.281173
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 44,
+      "resident": [
+        2.492961,
+        0.12,
+        3.291729
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 46,
+      "resident": [
+        2.422975,
+        0.12,
+        3.301353
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 48,
+      "resident": [
+        2.352983,
+        0.12,
+        3.310047
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 50,
+      "resident": [
+        2.282989,
+        0.12,
+        3.317789
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 52,
+      "resident": [
+        2.212992,
+        0.12,
+        3.324837
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 54,
+      "resident": [
+        2.142994,
+        0.12,
+        3.331261
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 56,
+      "resident": [
+        2.072995,
+        0.12,
+        3.336954
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 58,
+      "resident": [
+        2.002996,
+        0.12,
+        3.3421
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 60,
+      "resident": [
+        1.932996,
+        0.12,
+        3.346843
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 62,
+      "resident": [
+        1.862996,
+        0.12,
+        3.351048
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 64,
+      "resident": [
+        1.792996,
+        0.12,
+        3.354795
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 66,
+      "resident": [
+        1.722996,
+        0.12,
+        3.358285
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 68,
+      "resident": [
+        1.652996,
+        0.12,
+        3.36141
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 70,
+      "resident": [
+        1.582996,
+        0.12,
+        3.364138
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 72,
+      "resident": [
+        1.512995,
+        0.12,
+        3.366688
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 74,
+      "resident": [
+        1.442995,
+        0.12,
+        3.36902
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 76,
+      "resident": [
+        1.372995,
+        0.12,
+        3.371018
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 1.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 78,
+      "resident": [
+        1.302995,
+        0.12,
+        3.372797
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 1.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 80,
+      "resident": [
+        1.232995,
+        0.12,
+        3.374446
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 1.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 82,
+      "resident": [
+        1.162995,
+        0.12,
+        3.376018
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.96,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 84,
+      "resident": [
+        1.092994,
+        0.12,
+        3.377547
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.88,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 86,
+      "resident": [
+        1.022994,
+        0.12,
+        3.379058
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.799999,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 88,
+      "resident": [
+        0.952994,
+        0.12,
+        3.380571
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.719999,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 90,
+      "resident": [
+        0.882994,
+        0.12,
+        3.382103
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.639999,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 92,
+      "resident": [
+        0.812993,
+        0.12,
+        3.383669
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.559998,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 94,
+      "resident": [
+        0.742993,
+        0.12,
+        3.385283
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.479998,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 96,
+      "resident": [
+        0.672993,
+        0.12,
+        3.38696
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.399998,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 98,
+      "resident": [
+        0.602993,
+        0.12,
+        3.388711
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.319998,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 100,
+      "resident": [
+        0.532992,
+        0.12,
+        3.390553
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.239997,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 102,
+      "resident": [
+        0.462992,
+        0.12,
+        3.392498
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.159997,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 104,
+      "resident": [
+        0.392992,
+        0.12,
+        3.394567
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.079997,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 106,
+      "resident": [
+        0.322992,
+        0.12,
+        3.396796
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 108,
+      "resident": [
+        0.252991,
+        0.12,
+        3.398993
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 110,
+      "resident": [
+        0.182991,
+        0.12,
+        3.400979
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 112,
+      "resident": [
+        0.112991,
+        0.12,
+        3.402898
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 114,
+      "resident": [
+        0.042991,
+        0.12,
+        3.404742
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 116,
+      "resident": [
+        -0.02701,
+        0.12,
+        3.406332
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 118,
+      "resident": [
+        -0.09701,
+        0.12,
+        3.407786
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 120,
+      "resident": [
+        -0.16701,
+        0.12,
+        3.409212
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 122,
+      "resident": [
+        -0.23701,
+        0.12,
+        3.410437
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 124,
+      "resident": [
+        -0.307011,
+        0.12,
+        3.411492
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 126,
+      "resident": [
+        -0.377011,
+        0.12,
+        3.412555
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 128,
+      "resident": [
+        -0.447011,
+        0.12,
+        3.413498
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 130,
+      "resident": [
+        -0.517011,
+        0.12,
+        3.414255
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 132,
+      "resident": [
+        -0.587012,
+        0.12,
+        3.415022
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 134,
+      "resident": [
+        -0.657012,
+        0.12,
+        3.415753
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 136,
+      "resident": [
+        -0.727012,
+        0.12,
+        3.416305
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 138,
+      "resident": [
+        -0.797013,
+        0.12,
+        3.416837
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 140,
+      "resident": [
+        -0.867013,
+        0.12,
+        3.417403
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 142,
+      "resident": [
+        -0.937013,
+        0.12,
+        3.417822
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.0
+    },
+    {
+      "tick": 144,
+      "resident": [
+        -1.007013,
+        0.12,
+        3.418177
+      ],
+      "active": 1.0,
+      "target": 0.0,
+      "state": 2.0,
+      "awareness": 1.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.625002
+    },
+    {
+      "tick": 146,
+      "resident": [
+        -1.059654,
+        0.12,
+        3.358177
+      ],
+      "active": 0.0,
+      "target": -1.0,
+      "state": 3.0,
+      "awareness": 0.0,
+      "alarm": 0.0,
+      "burst": 0.0,
+      "gape": 0.611108
+    }
+  ],
+  "detected_after_seconds": 0.6000000000000001,
+  "escape_burst_seen": false,
+  "resident_max_two_tick_step": 0.07981901328004515,
+  "actual_moving_threat_escape": "PASS",
+  "escape_trace": [
+    {
+      "tick": 0,
+      "player_x": -1.4,
+      "prey_x": -0.035434,
+      "alarm": 1.0,
+      "burst": 0.0
+    },
+    {
+      "tick": 1,
+      "player_x": -1.389375,
+      "prey_x": -0.055252,
+      "alarm": 1.0,
+      "burst": 0.0
+    },
+    {
+      "tick": 2,
+      "player_x": -1.370781,
+      "prey_x": -0.075548,
+      "alarm": 1.0,
+      "burst": 0.0
+    },
+    {
+      "tick": 3,
+      "player_x": -1.34621,
+      "prey_x": -0.100961,
+      "alarm": 1.0,
+      "burst": 0.22
+    }
+  ],
+  "status": "PASS",
+  "actors": 41,
+  "goldfish_actors": [
+    22,
+    23,
+    24
+  ],
+  "player_consumed": 1.0,
+  "resident_consumed": 1.0,
+  "simulation_Hz": 20
+}

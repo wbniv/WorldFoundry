@@ -1,0 +1,17 @@
+game plugin: patchwork
+party-games platform ready on http://localhost:33021
+  receiver:   http://localhost:33021/receiver
+  controller: http://localhost:33021/controller?name=Alice
+[ws] room GLNE created
+[ws] player joined room=GLNE id=1 name=Alice
+[ws] receiver attached to room=GLNE
+[ws] player joined room=GLNE id=2 name=Bob
+[ws] player dropped room=GLNE id=2 — grace 300000ms
+[ws] player resumed room=GLNE id=2 name=Bob
+[ws] receiver detached room=GLNE
+[ws] receiver attached to room=GLNE
+[ws] receiver detached room=GLNE
+[ws] player dropped room=GLNE id=1 — grace 300000ms
+[ws] player dropped room=GLNE id=2 — grace 300000ms
+
+received SIGTERM, shutting down

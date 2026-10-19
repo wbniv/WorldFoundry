@@ -1,0 +1,150 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Aquarium screensaver plan</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font:16px/1.6 system-ui,sans-serif;max-width:980px;margin:40px auto;padding:0 24px;color:#dfe9f5;background:#111723}a{color:#91cfff}h1,h2,h3{line-height:1.25;color:#fff}h2{border-top:1px solid #40506a;padding-top:26px;margin-top:40px}pre{overflow:auto;background:#202b3b;border:1px solid #40506a;border-radius:9px;padding:16px;font:13px/1.4 ui-monospace,monospace}code{background:#253247;padding:2px 4px;border-radius:4px}pre code{background:transparent;padding:0}table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:8px;border:1px solid #50617a;text-align:left}blockquote{border-left:3px solid #8ec6ff;padding-left:15px}li{margin:5px 0}figure{margin:22px 0;padding:14px;background:#1b2738;border:1px solid #40506a;border-radius:9px}figure img{display:block;max-width:100%;height:auto;margin:auto}figcaption{text-align:center;color:#aac4de;font-size:13px;margin-top:8px}</style><h1 id="aquarium-screensaver-live-tank-players-and-tray-settings">Aquarium screensaver: live tank players and tray settings</h1>
+<p>Date: 2026-10-18. Status: implemented; live startup, all eight level renders, and sustained motion on cast1 verified.</p>
+<h2 id="outcome">Outcome</h2>
+<p>The Dream runs the World Foundry level renderer with an autonomous Player script for each of the eight aquarium tanks. The selected tank is fixed for one Dream session. <strong>Random</strong> chooses one of the eight when the Dream starts. The KDE system tray offers the settings actually supported by the selected Dream, including the aquarium tank choice, through coordinator-owned device jobs.</p>
+<p>The old video Dream has been replaced by the live host and ordered tank bundle. The launcher and Dream use the same renderer. No World Foundry engine code was changed; any future engine change still requires Will's explicit permission.</p>
+<h2 id="current-state">Current state</h2>
+<ul>
+<li>The video Dream was replaced by a native World Foundry Dream host. The final debug APK was installed on cast1 and cast2 with SHA-256 <code>99fdfce1cde44b45f6037aa4048dfb348b18929847feb4bf567acf9490317a94</code>.</li>
+<li>The original gameplay <code>.lev</code> files remain the source of truth. <code>scripts/build-aquarium-screensaver-levels.py</code> creates isolated <code>_screensaver</code> variants; each replaces only its Player script and compiles into <code>aquarium-screensaver-cd.iff</code> in a fixed eight-level order.</li>
+<li><code>../chromecast-coordinator/scripts/wf_device/tray_qt.py</code> now renders the tank combo from the validated <code>content_settings</code> block. The dedicated <code>screensaver-setting-set</code> workflow saves a selected tank and verifies readback.</li>
+<li>The app's shell-only <code>TankSettingsProvider</code> publishes a versioned <code>getCapabilities</code> response and accepts <code>setSetting</code>.</li>
+<li>Cast2 Dream activation and screenshots succeeded for Jellyfish (J‑3e70e8bc5cb0), Lionfish (J‑28a1a4a0f5bb), and Planted Urchin (J‑2b7f3b696245). Clownfish, Blue Shrimp, and Betta passed cast2 launcher renderer checks; Arowana and Tiger Barbs passed on cast1. Arowana natural activation on cast2 timed out twice without a new Dream start, while its renderer passed on cast1.</li>
+<li>Cast1 recorded a fixed Clownfish run in J‑db4eacea69b0: the 41.7-second captured clip shows the fish beside the anemone at 1 second, crossing the open tank at 20 seconds, and turning near the left wall at 39 seconds. The job requested a 45-second recording; Android's resulting media duration is 41.7 seconds. The recording workflow launches the fullscreen activity; the Dream activation checks above are separate. Cast1's saved tank choice was restored to <strong>Random</strong> and verified by J‑05aea5825263. A separate Random run, J‑7b4df2e93c9e, selected Arowana and recorded its live render for 42.4 seconds.</li>
+</ul>
+<h2 id="tank-bundle-and-player">Tank bundle and player</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Bundle index</th>
+<th>Stable tank ID</th>
+<th>Tray label</th>
+<th>Player source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">0</td>
+<td><code>aquarium</code></td>
+<td>Clownfish</td>
+<td><code>wflevels/aquarium/aquarium_screensaver.fth</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">1</td>
+<td><code>aquarium_blue_shrimp</code></td>
+<td>Blue Shrimp</td>
+<td><code>wflevels/aquarium_blue_shrimp/screensaver_player.fth</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td><code>aquarium_betta</code></td>
+<td>Betta</td>
+<td><code>wflevels/aquarium_betta/screensaver_player.fth</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td><code>aquarium_jellyfish</code></td>
+<td>Jellyfish</td>
+<td><code>wflevels/aquarium_jellyfish/screensaver_player.fth</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td><code>aquarium_lionfish</code></td>
+<td>Lionfish</td>
+<td><code>wflevels/aquarium_lionfish/screensaver_player.fth</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td><code>aquarium_plants</code></td>
+<td>Planted Urchin</td>
+<td><code>wflevels/aquarium_plants/screensaver_player.fth</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">6</td>
+<td><code>aquarium_arowana</code></td>
+<td>Arowana</td>
+<td><code>wflevels/aquarium_arowana/screensaver_player.fth</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">7</td>
+<td><code>aquarium_tiger_barbs</code></td>
+<td>Tiger Barbs</td>
+<td><code>wflevels/aquarium/tiger_barbs_screensaver.fth</code></td>
+</tr>
+</tbody>
+</table>
+<p>The build checks that each canonical Player entry and joystick source matches the expected form before replacement. Each script drives the existing steering logic with held and released directional masks or the tank's direct movement mailboxes. It pauses and turns at tank-specific bounds. Its controller should not call the video renderer or depend on prerecorded frames. Build order is the contract between tank ID and native level index; verify this mapping in a test before packaging.</p>
+<figure><img src="2026-10-18-aquarium-screensaver-player-and-tray-settings/bundle-flow.svg" alt="Build and Dream selection flow"><figcaption>Build and Dream selection flow</figcaption></figure>
+<h2 id="how-the-tray-discovers-settings">How the tray discovers settings</h2>
+<p>The tray has no hardcoded tank list. The coordinator has a reviewed mapping for the installed World Foundry Dream package to its settings provider, queries that provider under its device lease, and returns a validated <code>content_settings</code> block in <code>screensaver-list</code> and the authenticated device snapshot. The tray renders the setting ID, label, selected value, and options from that block. Other Dream packages show no aquarium control. The app also declares its settings authority in DreamService manifest metadata; this first coordinator implementation uses the reviewed package/authority mapping rather than parsing that metadata from Android's package dump.</p>
+<p><strong>Discovery and validation</strong></p>
+<ol>
+<li><code>screensaver-list</code> enumerates installed DreamServices and reads the currently selected component. If it is not installed, the tray shows the error and no content controls.</li>
+<li>For that selected service, require the installed <code>org.worldfoundry.screensaver</code> package and use only the reviewed <code>org.worldfoundry.screensaver.settings</code> authority. This is a package-specific adapter, not unrestricted provider discovery. Its DreamService manifest carries the same authority as documentation for the app contract.</li>
+<li>In the same owned session, call <code>content://org.worldfoundry.screensaver.settings</code> method <code>getCapabilities</code>. The provider checks <code>Binder.getCallingUid()</code> for <code>SHELL_UID</code> or its own UID. It returns one ASCII-safe base64-encoded UTF-8 JSON document, <code>settings_b64</code>, so Android's <code>content call</code> text formatting cannot corrupt commas, spaces, or arrays. Limit its encoded size and reject invalid base64/JSON.</li>
+<li>Validate schema version, setting IDs, types, labels, selected values, and uniqueness. For version 1, accept one <code>choice</code> control with ID <code>tank</code>, options from the app, and selected value. Unknown types or versions are shown as “Settings unavailable” with a reason. The coordinator does not guess a default or turn missing data into Random.</li>
+<li>Include the normalized block in the timestamped <code>screensaver-list</code> observation and device snapshot. Each Refresh runs a new owned read job. When another provider is selected, discard the old aquarium settings immediately; do not show them under the new provider.</li>
+</ol>
+<p>Example capability document after decoding <code>settings_b64</code> (abbreviated here; all eight tanks appear in the real response):</p>
+<pre><code class="language-json">{
+  &quot;schema&quot;: 1,
+  &quot;settings&quot;: [
+    {
+      &quot;id&quot;: &quot;tank&quot;,
+      &quot;type&quot;: &quot;choice&quot;,
+      &quot;label&quot;: &quot;Tank&quot;,
+      &quot;value&quot;: &quot;random&quot;,
+      &quot;options&quot;: [
+        {&quot;id&quot;: &quot;random&quot;, &quot;label&quot;: &quot;Random&quot;},
+        {&quot;id&quot;: &quot;aquarium&quot;, &quot;label&quot;: &quot;Clownfish&quot;},
+        {&quot;id&quot;: &quot;aquarium_betta&quot;, &quot;label&quot;: &quot;Betta&quot;}
+      ]
+    }
+  ]
+}
+</code></pre>
+<p><code>Random</code> is a saved preference, while the Dream resolves it to a specific tank once in <code>onDreamingStarted()</code>. The tray displays <strong>Random</strong> as the preference; a running-state detail can display the resolved tank only if the app exposes a separate read-only session observation. It must not replace the saved preference with the resolved value.</p>
+<figure><img src="2026-10-18-aquarium-screensaver-player-and-tray-settings/settings-sequence.svg" alt="Screensaver settings discovery and save sequence"><figcaption>Screensaver settings discovery and save sequence</figcaption></figure>
+<p><strong>Save workflow:</strong> Add a dedicated <code>screensaver-setting-set</code> schema with <code>setting_id</code> and <code>value</code>, not an arbitrary <code>content</code> command. Require a fresh selected Dream, matching package/authority, and membership in the freshly queried options. Call the provider's <code>setSetting</code>; read capabilities again and require the requested value. Record old/new values and the selected component in the job receipt. A setting change affects the next Dream start; it does not silently restart a running Dream. A reservation, maintenance state, stale selection, failed read, or changed provider disables Save.</p>
+<p><strong>Other Dreams:</strong> A provider without the metadata contract continues to show the existing system settings only. The UI states “This screensaver does not expose content settings.” An unreadable or incompatible contract shows “Content settings unavailable” and a refresh action, without a writable control. This keeps the tray generic while allowing reviewed app-specific controls.</p>
+<h2 id="gui-mockups">GUI mockups</h2>
+<p>These are layout targets, not screenshots. The <a href="2026-10-18-aquarium-screensaver-player-and-tray-settings/mockups.html">browser mockup</a> shows the same states at desktop width.</p>
+<pre><code class="language-text">┌ Screensaver · chromecast-test-02 ─────────────────────────────────────────┐
+│ Selected: World Foundry Aquarium     Running: Aquarium [observed 19:42] │
+│ Provider: [World Foundry Aquarium                         ▾] [Select]    │
+│ System settings                                                        │
+│   ☑ Enable screensaver       ☑ Activate on sleep                        │
+│   Idle timeout [ 6 min ▾]                           [Save system]        │
+│ Aquarium settings · from installed app · observed 19:42                 │
+│   Tank         [Random ▾]      Chooses one tank at each start            │
+│                              [Save tank]                                │
+│ [Refresh status] [Install…] [Trigger…]  Job: J‑0692359b671d            │
+└──────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<pre><code class="language-text">┌ Screensaver · chromecast-test-02 ─────────────────────────────────────────┐
+│ Selected: Google TV Ambient          Running: Unknown · stale           │
+│ System settings: Enabled · on sleep · 6 min                               │
+│ Content settings: This screensaver does not expose content settings.    │
+│ [Refresh status] [Select provider] [Trigger… disabled]                  │
+└──────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<p>The provider combo continues to come from registered DreamServices. Tank options come only from the validated capability response. Keep system Save and app setting Save distinct so one failed operation cannot misreport the other as saved. Show the selected value, observation time, job progress, and a clear next-start note. Accepted coordinator job IDs render with nonbreaking hyphens in prose and GUI labels; executable identifiers remain ASCII.</p>
+<h2 id="implementation-sequence">Implementation sequence</h2>
+<ol>
+<li>Finish the eight Player scripts and the ordered <code>cd.iff</code> packaging. Check mailbox ranges, stack balance, direction sign, and held/released input in a Forth harness. Verify game levels were not modified.</li>
+<li>Finish the Dream native host and launcher integration. The Dream owns a Surface and render thread, picks the tank once, loads the bundled level by index, and stops cleanly when detached. Keep a separate Dream process if engine globals cannot be reinitialized safely. Remove the video asset and playback classes after live rendering is verified.</li>
+<li>Replace the draft provider methods with the versioned <code>getCapabilities</code>/<code>setSetting</code> contract, manifest metadata, UID check, and size limit. Verify random selection distribution and that saved choices survive process restarts.</li>
+<li>Extend coordinator schema, workflow routing, CLI/Taskfile command, authenticated snapshot, and tests. All device reads and writes stay inside the coordinator lease. Do not add tray-side ADB or direct app calls.</li>
+<li>Extend <code>ScreensaverDialog</code> with a dynamic content section driven by normalized capabilities, plus disabled, stale, unsupported, and save-in-progress states. Add offscreen Qt tests for two providers and option changes; keep HTML/JSON dashboard representations aligned if they show this block.</li>
+<li>Build/freeze the APK, check <code>task chromecast:queue</code>, and use coordinator-owned install, inspect, setting and Dream jobs on cast2 when free. Capture screenshots and job evidence for every tank, Random across several Dream starts, and held/released motion. Confirm a DreamService is active in <code>dumpsys dreams</code>; a launcher view alone is insufficient.</li>
+</ol>
+<h2 id="acceptance-checks">Acceptance checks</h2>
+<ul>
+<li>Every tank renders live for longer than the former 33.87-second loop, continues moving, and respects level bounds. Its Player generates input without a prerecorded movie.</li>
+<li>A fixed tank setting always starts that tank. Random selects one of all eight at each Dream start and does not switch while that Dream runs.</li>
+<li>The tray obtains IDs, labels, and current selection from the selected app's capabilities. Changing providers removes the old controls. Unsupported, stale, and unreadable states remain explicit.</li>
+<li>A Save produces an owned coordinator receipt and verified readback; the next Dream uses the saved choice. Reservations and maintenance block interaction.</li>
+<li>APK and device evidence cover cast2 WebView/Chromium 91 constraints where web code is involved, plus held/released directional input on the actual Chromecast. No direct ADB is used.</li>
+</ul>
+<h2 id="permission-boundary">Permission boundary</h2>
+<p>No World Foundry engine code or shared engine build definitions were edited. The native host uses an app-specific CMake hook and existing engine launch switches. Coordinator deployment was approved explicitly and completed through the reviewed maintenance helper. The final coordinator release preserved its recovery journal and resumed the queue.</p></html>

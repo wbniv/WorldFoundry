@@ -1,0 +1,46 @@
+{
+  "command": [
+    "/home/will/WorldFoundry-wbniv/.worktrees/teleport-audit/engine/wf_game",
+    "-L/tmp/t4-regression-level/teleport_regression-standalone.iff",
+    "--windowed",
+    "--debug-print-actors",
+    "--debug-port",
+    "53119",
+    "--debug-bind",
+    "127.0.0.1"
+  ],
+  "arrivals": [
+    {
+      "lap": 1,
+      "command": 1,
+      "x": 300.0,
+      "fps": 60.034451
+    },
+    {
+      "lap": 1,
+      "command": 2,
+      "x": 100.0,
+      "fps": 59.95694
+    },
+    {
+      "lap": 1,
+      "command": 3,
+      "x": 200.0,
+      "fps": 59.54842
+    },
+    {
+      "lap": 1,
+      "command": 1,
+      "x": 300.0,
+      "fps": 60.270363
+    },
+    {
+      "lap": 1,
+      "command": 4,
+      "x": 0.0,
+      "fps": 59.978687
+    }
+  ],
+  "exit_before_cleanup": null,
+  "cleanup_exit": -15
+}

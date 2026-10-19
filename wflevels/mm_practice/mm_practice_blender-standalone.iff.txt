@@ -1,0 +1,19 @@
+// mm_practice_blender-standalone.iff.txt — L4-wrapped form of mm_practice_blender for wf_game -L.
+//
+// Build:
+//   ../../wftools/iffcomp-rs/target/release/iffcomp -binary \
+//     -o=mm_practice_blender-standalone.iff mm_practice_blender-standalone.iff.txt
+//
+// Run:
+//   cd wfsource/source/game && wf_game -L<repo>/wflevels/mm_practice/mm_practice_blender-standalone.iff
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 100000l
+        'PERM' 300000l
+        'ROOM' 300000l
+        'FLAG' 1l 1l                    // doomstick, bungeecam
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../mm_practice_blender.iff" ]
+}

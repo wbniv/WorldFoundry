@@ -1,0 +1,7 @@
+Accepted J-fc5d94869a34: queued; readd
+Follow: task chromecast:watch JOB=J-fc5d94869a34
+J-fc5d94869a34: accepted {"device": "chromecast-test-01", "workflow": "readd"}
+J-fc5d94869a34: granted {"device": "chromecast-test-01", "generation": 2}
+J-fc5d94869a34: recovery-required {"error": "Previous worker still holds device kernel lock", "health": "recovery-required"}
+J-fc5d94869a34: recovery-required: Previous worker still holds device kernel lock
+task: Failed to run task "chromecast:readd": exit status 1

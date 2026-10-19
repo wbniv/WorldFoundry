@@ -1,0 +1,16 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.worldfoundry.wf_game.patchwork" android:versionCode="2" android:versionName="0.2-dev">
+  <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="34"/>
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-feature android:name="android.software.leanback" android:required="true"/>
+  <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
+  <application android:label="Quilt Night" android:banner="@drawable/banner" android:icon="@drawable/launcher_icon_v2" android:roundIcon="@drawable/launcher_icon_v2" android:theme="@android:style/Theme.Material.Light.NoActionBar" android:hardwareAccelerated="true" android:usesCleartextTraffic="true" android:allowBackup="false">
+    <activity android:name=".TvActivity" android:exported="true" android:screenOrientation="landscape" android:configChanges="orientation|keyboardHidden|screenSize" android:launchMode="singleTask">
+    </activity>
+    <activity-alias android:name=".QuiltNightLauncher" android:targetActivity=".TvActivity" android:exported="true" android:icon="@drawable/launcher_icon_v2" android:label="Quilt Night">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
+      </intent-filter>
+    </activity-alias>
+  </application>
+</manifest>

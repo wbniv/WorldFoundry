@@ -1,0 +1,74 @@
+{
+  "runs": [
+    {
+      "combined": {
+        "frames": 518,
+        "fps": 14.757086087973676,
+        "p50_ms": 66.733426,
+        "p90_ms": 66.733763,
+        "p95_ms": 83.416746,
+        "p99_ms": 83.417164,
+        "missed_refresh_percent": 99.42084942084942
+      },
+      "scenarios": {
+        "wide-idle": {
+          "frames": 182,
+          "fps": 15.005606924590069,
+          "p50_ms": 66.733424,
+          "p90_ms": 66.733571,
+          "p95_ms": 66.734031,
+          "p99_ms": 83.416803,
+          "missed_refresh_percent": 100.0
+        },
+        "close-idle": {
+          "frames": 176,
+          "fps": 14.65199467080214,
+          "p50_ms": 66.733432,
+          "p90_ms": 66.733763,
+          "p95_ms": 83.416778,
+          "p99_ms": 83.417088,
+          "missed_refresh_percent": 99.43181818181819
+        },
+        "crawl-close": {
+          "frames": 160,
+          "fps": 14.597255301167632,
+          "p50_ms": 66.733424,
+          "p90_ms": 66.73404,
+          "p95_ms": 83.416748,
+          "p99_ms": 100.100184,
+          "missed_refresh_percent": 98.75
+        }
+      },
+      "clock_offset_seconds": 216808.159156437,
+      "clock_alignment_note": "Median latest-present timestamp minus poll start; boundaries approximate within one poll round trip plus a frame.",
+      "PSS_MiB": 78.802734375,
+      "CPU_window_count": 4,
+      "CPU_and_counter_means": {
+        "update": 1.5587839464882942,
+        "actors": 1.3296816053511704,
+        "director": 0.16204749163879598,
+        "render": 60.39333177257526,
+        "school": 0.0,
+        "pose": 0.0,
+        "animation": 0.01774581939799331,
+        "total": 61.952140802675586,
+        "level-objects": 38.0,
+        "render-actors": 26.0,
+        "draws": 25.0,
+        "triangles": 27055.230605351167,
+        "actor-mailbox-writes": 29.0,
+        "fish-deformations": 0.0
+      }
+    }
+  ],
+  "median": {
+    "frames": 518,
+    "fps": 14.757086087973676,
+    "p50_ms": 66.733426,
+    "p90_ms": 66.733763,
+    "p95_ms": 83.416746,
+    "p99_ms": 83.417164,
+    "missed_refresh_percent": 99.42084942084942
+  },
+  "PSS_MiB_median": 78.802734375
+}

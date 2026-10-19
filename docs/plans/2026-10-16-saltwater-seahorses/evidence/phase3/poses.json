@@ -1,0 +1,104 @@
+{
+  "rig": "wflevels/aquarium_plants/seahorse_f_body.iff",
+  "rate_hz": 20.0,
+  "poses": {
+    "rest": {
+      "max_limit_use": 0.9,
+      "frame_flips": 0,
+      "clamped_frames": 0,
+      "status": 0,
+      "pitch_deg": 4,
+      "wrap": {
+        "mode": 0,
+        "start": 18,
+        "radius_mm": 4.0,
+        "progress": 0
+      }
+    },
+    "grip-branch": {
+      "max_limit_use": 0.822,
+      "frame_flips": 0,
+      "clamped_frames": 0,
+      "status": 0,
+      "pitch_deg": 8,
+      "wrap": {
+        "mode": 1,
+        "start": 18,
+        "radius_mm": 4.0,
+        "progress": 1
+      },
+      "wrap_centre_error_mm": 0.1403
+    },
+    "grip-stem": {
+      "max_limit_use": 0.9423,
+      "frame_flips": 0,
+      "clamped_frames": 0,
+      "status": 0,
+      "pitch_deg": -4,
+      "wrap": {
+        "mode": 2,
+        "start": 17,
+        "radius_mm": 6.0,
+        "progress": 1
+      },
+      "wrap_centre_error_mm": 0.2441
+    },
+    "swim": {
+      "max_limit_use": 0.5,
+      "frame_flips": 0,
+      "clamped_frames": 0,
+      "status": 0,
+      "pitch_deg": -6,
+      "wrap": {
+        "mode": 0,
+        "start": 18,
+        "radius_mm": 4.0,
+        "progress": 0
+      }
+    },
+    "probe": {
+      "max_limit_use": 0.75,
+      "frame_flips": 0,
+      "clamped_frames": 0,
+      "status": 0,
+      "pitch_deg": -14,
+      "wrap": {
+        "mode": 0,
+        "start": 18,
+        "radius_mm": 4.0,
+        "progress": 0
+      }
+    },
+    "twine": {
+      "max_limit_use": 0.9591,
+      "frame_flips": 0,
+      "clamped_frames": 0,
+      "status": 0,
+      "pitch_deg": -2,
+      "wrap": {
+        "mode": 2,
+        "start": 18,
+        "radius_mm": 5.5,
+        "progress": 1
+      },
+      "wrap_centre_error_mm": 0.2574
+    },
+    "startle": {
+      "max_limit_use": 0.75,
+      "frame_flips": 0,
+      "clamped_frames": 0,
+      "status": 0,
+      "pitch_deg": 0,
+      "wrap": {
+        "mode": 0,
+        "start": 18,
+        "radius_mm": 4.0,
+        "progress": 0
+      }
+    }
+  },
+  "max_limit_use": 0.9591,
+  "frame_flips": 0,
+  "wrap_centre_error_mm": 0.2574,
+  "pass": true
+}

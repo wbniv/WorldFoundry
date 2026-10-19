@@ -1,0 +1,224 @@
+--------- beginning of main
+10-06 16:27:07.891 24762 24762 I f_game.aquarium: Using CollectorTypeCMC GC.
+10-06 16:27:07.917 24762 24762 E f_game.aquarium: Not starting debugger since process cannot load the jdwp agent.
+10-06 16:27:08.004 24762 24762 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10147; state: ENABLED
+10-06 16:27:08.004 24762 24762 D CompatibilityChangeReporter: Compat change id reported: 242716250; UID 10147; state: ENABLED
+10-06 16:27:08.068 24762 24762 I f_game.aquarium: Failed to add image file: Failed to find OatDexFile for DexFile /data/app/~~ji5Rx3JkQYK-t4dzZUxCMw==/org.worldfoundry.wf_game.aquarium-mfbd1QhmvJjLIOmZhsMpSQ==/base.apk (canonical path /data/app/~~ji5Rx3JkQYK-t4dzZUxCMw==/org.worldfoundry.wf_game.aquarium-mfbd1QhmvJjLIOmZhsMpSQ==/base.apk) in OatFile /data/app/~~Nn_qRsnW1ShBViVy9gpP9w==/org.worldfoundry.wf_game.aquarium-QgqJNYMy9S6-6YjNHPaANQ==/oat/arm/base.odex
+10-06 16:27:08.074 24762 24762 D nativeloader: Configuring clns-4 for other apk /data/app/~~Nn_qRsnW1ShBViVy9gpP9w==/org.worldfoundry.wf_game.aquarium-QgqJNYMy9S6-6YjNHPaANQ==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~Nn_qRsnW1ShBViVy9gpP9w==/org.worldfoundry.wf_game.aquarium-QgqJNYMy9S6-6YjNHPaANQ==/lib/arm:/data/app/~~Nn_qRsnW1ShBViVy9gpP9w==/org.worldfoundry.wf_game.aquarium-QgqJNYMy9S6-6YjNHPaANQ==/base.apk!/lib/armeabi-v7a, permitted_path=/data:/mnt/expand:/data/user/0/org.worldfoundry.wf_game.aquarium
+10-06 16:27:08.101 24762 24762 V GraphicsEnvironment: Currently set values for:
+10-06 16:27:08.101 24762 24762 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+10-06 16:27:08.101 24762 24762 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+10-06 16:27:08.102 24762 24762 V GraphicsEnvironment: ANGLE GameManagerService for org.worldfoundry.wf_game.aquarium: false
+10-06 16:27:08.103 24762 24762 V GraphicsEnvironment: org.worldfoundry.wf_game.aquarium is not listed in per-application setting
+10-06 16:27:08.103 24762 24762 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-06 16:27:08.289 24762 24786 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log
+10-06 16:27:08.289 24762 24786 I wf_game : android_main: enter
+10-06 16:27:08.289 24762 24786 I wf_game : android_main: assetMgr=0xee08c600
+10-06 16:27:08.291 24762 24786 I wf_game : android_main: uiMode=4 (tv=1)
+10-06 16:27:08.291 24762 24786 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-06 16:27:08.294 24762 24762 D CompatibilityChangeReporter: Compat change id reported: 210923482; UID 10147; state: ENABLED
+10-06 16:27:08.296 24762 24786 I wf_game : APP_CMD_RESUME
+10-06 16:27:08.298 24762 24786 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-06 16:27:08.298 24762 24786 I wf_game : phone controller: open http://192.168.4.43:8765/?k=548759 (PIN 548759)
+10-06 16:27:08.301 24762 24762 D CompatibilityChangeReporter: Compat change id reported: 237531167; UID 10147; state: DISABLED
+10-06 16:27:08.372 24762 24786 I wf_game : APP_CMD_INIT_WINDOW
+10-06 16:27:08.374 24762 24786 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-06 16:27:08.378 24762 24786 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-06 16:27:08.378 24762 24786 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-06 16:27:08.383 24762 24786 W libc    : Access denied finding property "vendor.mali.base_max_nr_instances"
+10-06 16:27:08.398 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_unnamed"
+10-06 16:27:08.398 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_default_heap"
+10-06 16:27:08.398 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_base_internal"
+10-06 16:27:08.398 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_framepool"
+10-06 16:27:08.398 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_tiler"
+10-06 16:27:08.398 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_program"
+10-06 16:27:08.398 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane"
+10-06 16:27:08.399 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane_imported"
+10-06 16:27:08.400 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vao"
+10-06 16:27:08.400 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_img"
+10-06 16:27:08.400 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_internal_surface"
+10-06 16:27:08.400 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_buf"
+10-06 16:27:08.401 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_crc"
+10-06 16:27:08.401 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_hmem"
+10-06 16:27:08.401 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_rsd"
+10-06 16:27:08.401 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_mbs2"
+10-06 16:27:08.402 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_static"
+10-06 16:27:08.405 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_hmem"
+10-06 16:27:08.406 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_sample_pos"
+10-06 16:27:08.406 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_discard"
+10-06 16:27:08.406 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_tess_geom"
+10-06 16:27:08.406 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cobj_hmem"
+10-06 16:27:08.406 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_hmem"
+10-06 16:27:08.406 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_prof_dump"
+10-06 16:27:08.406 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cblend_hmem"
+10-06 16:27:08.406 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_hmem"
+10-06 16:27:08.407 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query"
+10-06 16:27:08.407 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query_host"
+10-06 16:27:08.407 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_multiview"
+10-06 16:27:08.407 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cdeps_hmem"
+10-06 16:27:08.407 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_suballoc"
+10-06 16:27:08.407 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_hoard"
+10-06 16:27:08.407 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_registry"
+10-06 16:27:08.407 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_payload"
+10-06 16:27:08.407 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_wlm_tls"
+10-06 16:27:08.407 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_hmem"
+10-06 16:27:08.407 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_svm"
+10-06 16:27:08.408 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_protected"
+10-06 16:27:08.408 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cinstr"
+10-06 16:27:08.408 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_uncached"
+10-06 16:27:08.408 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_cached"
+10-06 16:27:08.408 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_transient"
+10-06 16:27:08.408 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_protected"
+10-06 16:27:08.408 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external"
+10-06 16:27:08.408 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external_swapchain"
+10-06 16:27:08.408 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal"
+10-06 16:27:08.408 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_tls"
+10-06 16:27:08.408 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_host"
+10-06 16:27:08.408 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_protected"
+10-06 16:27:08.408 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_transient"
+10-06 16:27:08.409 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_descriptor_pool"
+10-06 16:27:08.409 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator"
+10-06 16:27:08.409 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_host"
+10-06 16:27:08.409 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_protected"
+10-06 16:27:08.409 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_host"
+10-06 16:27:08.409 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device"
+10-06 16:27:08.409 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device_transient"
+10-06 16:27:08.409 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_buffer"
+10-06 16:27:08.409 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_image"
+10-06 16:27:08.409 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_signal"
+10-06 16:27:08.409 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_flush_chain"
+10-06 16:27:08.410 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_metadata_list"
+10-06 16:27:08.410 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_jit"
+10-06 16:27:08.410 24762 24786 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_mmu"
+10-06 16:27:08.410 24762 24786 W libc    : Access denied finding property "vendor.mali.osu_protected_memory_heap_name"
+10-06 16:27:08.410 24762 24786 W libc    : Access denied finding property "vendor.mali.osu_ion_protected_memory_heap_name"
+10-06 16:27:08.411 24762 24786 W libc    : Access denied finding property "vendor.mali.platform_agt_frequency_khz"
+10-06 16:27:08.411 24762 24786 W libc    : Access denied finding property "vendor.mali.hal_dump_dir"
+10-06 16:27:08.411 24762 24786 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-06 16:27:08.411 24762 24786 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-06 16:27:08.412 24762 24786 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-06 16:27:08.425 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.hal_format"
+10-06 16:27:08.425 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.recordable"
+10-06 16:27:08.426 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.dataspaces_to_exclude"
+10-06 16:27:08.426 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.hal_format"
+10-06 16:27:08.426 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.recordable"
+10-06 16:27:08.426 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.dataspaces_to_exclude"
+10-06 16:27:08.426 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.hal_format"
+10-06 16:27:08.426 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.recordable"
+10-06 16:27:08.426 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.dataspaces_to_exclude"
+10-06 16:27:08.426 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.hal_format"
+10-06 16:27:08.426 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.recordable"
+10-06 16:27:08.426 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.dataspaces_to_exclude"
+10-06 16:27:08.427 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.hal_format"
+10-06 16:27:08.427 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.recordable"
+10-06 16:27:08.427 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.dataspaces_to_exclude"
+10-06 16:27:08.427 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.hal_format"
+10-06 16:27:08.427 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.recordable"
+10-06 16:27:08.427 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.dataspaces_to_exclude"
+10-06 16:27:08.427 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.hal_format"
+10-06 16:27:08.427 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.recordable"
+10-06 16:27:08.427 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.dataspaces_to_exclude"
+10-06 16:27:08.428 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.hal_format"
+10-06 16:27:08.428 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.recordable"
+10-06 16:27:08.428 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.dataspaces_to_exclude"
+10-06 16:27:08.428 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.hal_format"
+10-06 16:27:08.428 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.recordable"
+10-06 16:27:08.428 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.dataspaces_to_exclude"
+10-06 16:27:08.428 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.hal_format"
+10-06 16:27:08.428 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.recordable"
+10-06 16:27:08.428 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.dataspaces_to_exclude"
+10-06 16:27:08.428 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.hal_format"
+10-06 16:27:08.428 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.recordable"
+10-06 16:27:08.428 24762 24786 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.dataspaces_to_exclude"
+10-06 16:27:08.451 24762 24786 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-06 16:27:08.451 24762 24786 I wf_game : android_main: EGL ready, entering HALStart
+10-06 16:27:08.452 24762 24786 I wf_game : android_main: wf_args.txt gave 6 argument(s)
+10-06 16:27:08.456 24762 24786 I AAudio  : AAudioStreamBuilder_openStream() called ----------------------------------------
+10-06 16:27:08.456 24762 24786 I AudioStreamBuilder: rate   =      0, channels  = 0, channelMask = 0, format   = 5, sharing = SH, dir = OUTPUT
+10-06 16:27:08.456 24762 24786 I AudioStreamBuilder: device =      0, sessionId = -1, perfMode = 12, callback: ON with frames = 0
+10-06 16:27:08.456 24762 24786 I AudioStreamBuilder: usage  =      0, contentType = 0, inputPreset = 0, allowedCapturePolicy = 0
+10-06 16:27:08.456 24762 24786 I AudioStreamBuilder: privacy sensitive = false, opPackageName = (null), attributionTag = (null)
+10-06 16:27:08.472 24762 24786 D f_game.aquarium: PlayerBase::PlayerBase()
+10-06 16:27:08.544 24762 24786 D AudioStreamInternal_Client: configureDataInformation() original HW burst = 384, minMicros = 1000 => SW burst = 384
+10-06 16:27:08.544 24762 24786 D IsochronousClockModel: setFramesPerBurst() - mFramesPerBurst = 384 - mBurstPeriodNanos = 8000000
+10-06 16:27:08.544 24762 24786 D AAudioStream: setState(s#1) from 0 to 2
+10-06 16:27:08.544 24762 24786 I AAudioFlowGraph: configure() source format = 0x00000005, channels = 2, sink format = 0x00000005, channels = 2, useMonoBlend = 0, audioBalance = 0.000000, isExclusive 0
+10-06 16:27:08.547 24762 24786 I AAudio  : AAudioStreamBuilder_openStream() returns 0 = AAUDIO_OK for s#1 ----------------
+10-06 16:27:08.549 24762 24786 D AAudio  : AAudioStream_requestStart(s#1) called --------------
+10-06 16:27:08.549 24762 24786 D AAudioStream: setState(s#1) from 2 to 3
+10-06 16:27:08.581 24762 24786 D AAudio  : AAudioStream_requestStart(s#1) returned 0 ---------
+10-06 16:27:08.585 24762 24802 D AudioStreamInternalPlay_Client: callbackLoop() entering >>>>>>>>>>>>>>>
+10-06 16:27:08.585 24762 24802 D AudioStreamInternal_Client: onEventFromServer - got AAUDIO_SERVICE_EVENT_STARTED
+10-06 16:27:08.585 24762 24802 D AAudioStream: setState(s#1) from 3 to 4
+10-06 16:27:08.655 24762 24786 I wf_game : level-menu: showing 8 entries ("WF Aquarium"), cursor on 0
+10-06 16:27:13.828 24762 24786 I wf_game : key code=4 action=0 (Back: hides the phone panel)
+10-06 16:27:13.861 24762 24786 I wf_game : key code=4 action=1 (Back: hides the phone panel)
+10-06 16:27:22.511 24762 24778 I f_game.aquarium: Explicit concurrent mark compact GC freed 3014(985KB) AllocSpace objects, 3(60KB) LOS objects, 49% free, 2159KB/4318KB, paused 333us,1.639ms total 30.414ms
+10-06 16:27:23.136 24762 24786 I wf_game : key code=20 action=0 mask=0x1000
+10-06 16:27:23.139 24762 24786 I wf_game : level-menu: cursor on 1 (Blue Shrimp)
+10-06 16:27:23.154 24762 24786 I wf_game : key code=20 action=1 mask=0x1000
+10-06 16:27:23.754 24762 24786 I wf_game : key code=20 action=0 mask=0x1000
+10-06 16:27:23.756 24762 24786 I wf_game : level-menu: cursor on 2 (Calm Betta)
+10-06 16:27:23.772 24762 24786 I wf_game : key code=20 action=1 mask=0x1000
+10-06 16:27:24.221 24762 24786 I wf_game : key code=20 action=0 mask=0x1000
+10-06 16:27:24.222 24762 24786 I wf_game : level-menu: cursor on 3 (Jellyfish)
+10-06 16:27:24.254 24762 24786 I wf_game : key code=20 action=1 mask=0x1000
+10-06 16:27:24.806 24762 24786 I wf_game : key code=20 action=0 mask=0x1000
+10-06 16:27:24.808 24762 24786 I wf_game : level-menu: cursor on 4 (Lionfish)
+10-06 16:27:24.838 24762 24786 I wf_game : key code=20 action=1 mask=0x1000
+10-06 16:27:25.423 24762 24786 I wf_game : key code=20 action=0 mask=0x1000
+10-06 16:27:25.425 24762 24786 I wf_game : level-menu: cursor on 5 (Planted Tank)
+10-06 16:27:25.457 24762 24786 I wf_game : key code=20 action=1 mask=0x1000
+10-06 16:27:26.023 24762 24786 I wf_game : key code=22 action=0 mask=0x2000
+10-06 16:27:26.059 24762 24786 I wf_game : key code=22 action=1 mask=0x2000
+10-06 16:27:30.472 24762 24778 I f_game.aquarium: Explicit concurrent mark compact GC freed 3179(172KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2147KB/4294KB, paused 224us,1.260ms total 18.738ms
+10-06 16:27:31.056 24762 24786 I wf_game : key code=23 action=0 mask=0x1
+10-06 16:27:31.285 24762 24762 D CompatibilityChangeReporter: Compat change id reported: 171228096; UID 10147; state: ENABLED
+10-06 16:27:31.301 24762 24762 W OpenGLRenderer: Unknown dataspace 0
+10-06 16:27:31.412 24762 24781 E OpenGLRenderer: Unable to match the desired swap behavior.
+10-06 16:27:31.414 24762 24786 I wf_game : key code=23 action=1 mask=0x1
+10-06 16:27:31.642 24762 24762 I ImeTracker: org.worldfoundry.wf_game.aquarium:a1910560: onRequestShow at ORIGIN_CLIENT_SHOW_SOFT_INPUT reason SHOW_SOFT_INPUT
+10-06 16:27:31.648 24762 24762 I ImeTracker: org.worldfoundry.wf_game.aquarium:a1910560: onFailed at PHASE_CLIENT_VIEW_SERVED
+10-06 16:27:31.648 24762 24762 W InputMethodManager: Ignoring showSoftInput() as view=android.widget.EditText{8b4c455 VFED..CL. .F...... 0,0-992,97 aid=1073741824} is not served.
+10-06 16:27:32.031 24762 24762 D CompatibilityChangeReporter: Compat change id reported: 163400105; UID 10147; state: ENABLED
+10-06 16:27:32.278 24762 24762 D InsetsController: show(ime(), fromIme=true)
+10-06 16:27:32.509 24762 24762 I ImeTracker: org.worldfoundry.wf_game.aquarium:17f52393: onShown
+10-06 16:27:36.832 24762 24778 I f_game.aquarium: Explicit concurrent mark compact GC freed 8127(553KB) AllocSpace objects, 4(80KB) LOS objects, 49% free, 2322KB/4645KB, paused 511us,2.528ms total 35.837ms
+10-06 16:27:37.845 24762 24762 I ImeTracker: org.worldfoundry.wf_game.aquarium:851d058d: onRequestHide at ORIGIN_CLIENT_HIDE_SOFT_INPUT reason HIDE_SOFT_INPUT
+10-06 16:27:37.854 24762 24762 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=ImeCallback=ImeOnBackInvokedCallback@108580508 Callback=android.window.IOnBackInvokedCallback$Stub$Proxy@b2c6f7d
+10-06 16:27:37.855 24762 24762 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda11@6a3c962
+--------- beginning of system
+10-06 16:27:38.178 24762 24762 W VRI[NativeActivity]: Dropping event due to root view being removed: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_ENTER, scanCode=0, metaState=0, flags=0x16, repeatCount=0, eventTime=382013680000000, downTime=382013680000000, deviceId=-1, source=0x0, displayId=-1 }
+10-06 16:27:38.179 24762 24762 I ImeTracker: org.worldfoundry.wf_game.aquarium:851d058d: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+10-06 16:27:42.122 24762 24777 I f_game.aquarium: Explicit concurrent mark compact GC freed 4274(236KB) AllocSpace objects, 2(40KB) LOS objects, 49% free, 2310KB/4621KB, paused 420us,1.683ms total 28.835ms
+10-06 16:27:42.862 24762 24786 I wf_game : phonepad: connection from 192.168.4.21:60114
+10-06 16:27:42.862 24762 24786 I wf_game : phonepad: phone connected from 192.168.4.21:60114
+10-06 16:27:43.950 24762 24786 I wf_game : phonepad: closed 192.168.4.21:60114: read error
+10-06 16:27:44.657 24762 24762 W InputEventSender: Failed to send key event on channel 'ClientState{72bcf98 mUid=10147 mPid=24762 mSelfReportedDisplayId=0} (server)'.  status=-32
+10-06 16:27:44.657 24762 24762 D InputMethodManager: Dropping event because IME is evicted: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_DPAD_CENTER, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=382020467000000, downTime=382020467000000, deviceId=-1, source=0x0, displayId=-1 }
+10-06 16:27:44.657 24762 24786 I wf_game : key code=23 action=0 mask=0x1
+10-06 16:27:45.043 24762 24781 E OpenGLRenderer: Unable to match the desired swap behavior.
+10-06 16:27:45.061 24762 24762 W InputEventSender: Failed to send key event on channel 'ClientState{72bcf98 mUid=10147 mPid=24762 mSelfReportedDisplayId=0} (server)'.  status=-32
+10-06 16:27:45.061 24762 24762 D InputMethodManager: Dropping event because IME is evicted: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_DPAD_CENTER, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=382020467000000, downTime=382020467000000, deviceId=-1, source=0x0, displayId=-1 }
+10-06 16:27:45.062 24762 24762 I ImeTracker: org.worldfoundry.wf_game.aquarium:c34052c5: onRequestShow at ORIGIN_CLIENT_SHOW_SOFT_INPUT reason SHOW_SOFT_INPUT
+10-06 16:27:45.063 24762 24762 I ImeTracker: org.worldfoundry.wf_game.aquarium:c34052c5: onFailed at PHASE_CLIENT_VIEW_SERVED
+10-06 16:27:45.063 24762 24762 W InputMethodManager: Ignoring showSoftInput() as view=android.widget.EditText{53f84eb VFED..CL. .F...... 0,0-992,97 aid=1073741825} is not served.
+10-06 16:27:45.560 24762 24786 I wf_game : key code=23 action=1 mask=0x1
+10-06 16:27:45.782 24762 24778 I OpenGLRenderer: Davey! duration=728ms; Flags=1, FrameTimelineVsyncId=64186389, IntendedVsync=382020857171406, Vsync=382020857171406, InputEventId=0, HandleInputStart=382020857792201, AnimationStart=382020857793951, PerformTraversalsStart=382020857795492, DrawStart=382020886251784, FrameDeadline=382020873854739, FrameInterval=382020857784659, FrameStartTime=16683333, SyncQueued=382020889744659, SyncStart=382020890028701, IssueDrawCommandsStart=382020890286659, SwapBuffers=382020894599576, FrameCompleted=382021586430451, DequeueBufferDuration=38541, QueueBufferDuration=1432125, GpuCompleted=382021586430451, SwapBuffersCompleted=382020898461034, DisplayPresentTime=38654705664, CommandSubmissionCompleted=382020894599576, 
+10-06 16:27:45.921 24762 24762 D InsetsController: show(ime(), fromIme=true)
+10-06 16:27:46.139 24762 24762 I ImeTracker: org.worldfoundry.wf_game.aquarium:a673950e: onShown
+10-06 16:27:47.857 24762 25044 I OpenGLRenderer: Davey! duration=962ms; Flags=0, FrameTimelineVsyncId=64187127, IntendedVsync=382022508835629, Vsync=382022825819583, InputEventId=0, HandleInputStart=382022839879285, AnimationStart=382022839884202, PerformTraversalsStart=382022839889702, DrawStart=382022840293910, FrameDeadline=382023276270432, FrameInterval=382022838994702, FrameStartTime=16683366, SyncQueued=382022840737743, SyncStart=382023045344493, IssueDrawCommandsStart=382023045482952, SwapBuffers=382023076561077, FrameCompleted=382023675682202, DequeueBufferDuration=29433666, QueueBufferDuration=178737125, GpuCompleted=382023675682202, SwapBuffersCompleted=382023256108952, DisplayPresentTime=0, CommandSubmissionCompleted=382023076561077, 
+10-06 16:27:50.033 24762 25044 I OpenGLRenderer: Davey! duration=796ms; Flags=0, FrameTimelineVsyncId=64187372, IntendedVsync=382025061376427, Vsync=382025061376427, InputEventId=0, HandleInputStart=382025061957994, AnimationStart=382025061960244, PerformTraversalsStart=382025061961911, DrawStart=382025062189411, FrameDeadline=382025078059760, FrameInterval=382025061947369, FrameStartTime=16683355, SyncQueued=382025062463369, SyncStart=382025062621328, IssueDrawCommandsStart=382025062729828, SwapBuffers=382025065043661, FrameCompleted=382025857600495, DequeueBufferDuration=54583, QueueBufferDuration=603125, GpuCompleted=382025857600495, SwapBuffersCompleted=382025066642203, DisplayPresentTime=0, CommandSubmissionCompleted=382025065043661, 
+10-06 16:27:50.504 24762 25044 I OpenGLRenderer: Davey! duration=752ms; Flags=0, FrameTimelineVsyncId=64187408, IntendedVsync=382025561876945, Vsync=382025561876945, InputEventId=0, HandleInputStart=382025562374203, AnimationStart=382025562376120, PerformTraversalsStart=382025562377828, DrawStart=382025562550120, FrameDeadline=382025878860800, FrameInterval=382025562362411, FrameStartTime=16683354, SyncQueued=382025562757995, SyncStart=382025562857286, IssueDrawCommandsStart=382025562942411, SwapBuffers=382025564904245, FrameCompleted=382026314698620, DequeueBufferDuration=32541, QueueBufferDuration=292156042, GpuCompleted=382026314698620, SwapBuffersCompleted=382025857892953, DisplayPresentTime=0, CommandSubmissionCompleted=382025564904245, 
+10-06 16:27:50.951 24762 25044 I OpenGLRenderer: Davey! duration=713ms; Flags=0, FrameTimelineVsyncId=64187444, IntendedVsync=382026062377590, Vsync=382026062377590, InputEventId=0, HandleInputStart=382026063319912, AnimationStart=382026063325037, PerformTraversalsStart=382026063330537, DrawStart=382026063873620, FrameDeadline=382026345994562, FrameInterval=382026063284787, FrameStartTime=16683354, SyncQueued=382026064470245, SyncStart=382026064671537, IssueDrawCommandsStart=382026064886037, SwapBuffers=382026070552537, FrameCompleted=382026776417245, DequeueBufferDuration=72417, QueueBufferDuration=243518125, GpuCompleted=382026776417245, SwapBuffersCompleted=382026315380870, DisplayPresentTime=0, CommandSubmissionCompleted=382026070552537, 
+10-06 16:27:52.041 24762 25044 I f_game.aquarium: Explicit concurrent mark compact GC freed 9056(677KB) AllocSpace objects, 4(80KB) LOS objects, 49% free, 2334KB/4669KB, paused 339us,1.436ms total 25.494ms
+10-06 16:27:53.825 24762 25044 I OpenGLRenderer: Davey! duration=874ms; Flags=0, FrameTimelineVsyncId=64187648, IntendedVsync=382028765081385, Vsync=382028765081385, InputEventId=0, HandleInputStart=382028765645621, AnimationStart=382028765648288, PerformTraversalsStart=382028765651079, DrawStart=382028765842996, FrameDeadline=382028781764718, FrameInterval=382028765632413, FrameStartTime=16683355, SyncQueued=382028766160163, SyncStart=382028766273163, IssueDrawCommandsStart=382028766380121, SwapBuffers=382028768224871, FrameCompleted=382029639292622, DequeueBufferDuration=46708, QueueBufferDuration=530583, GpuCompleted=382029639292622, SwapBuffersCompleted=382028769716163, DisplayPresentTime=0, CommandSubmissionCompleted=382028768224871, 
+10-06 16:27:53.943 24762 25044 I OpenGLRenderer: Davey! duration=865ms; Flags=0, FrameTimelineVsyncId=64187661, IntendedVsync=382028881864846, Vsync=382028881864846, InputEventId=-959604198, HandleInputStart=382028882251371, AnimationStart=382028882253496, PerformTraversalsStart=382028882255163, DrawStart=382028882699996, FrameDeadline=382029665982533, FrameInterval=382028882241788, FrameStartTime=16683355, SyncQueued=382028883136955, SyncStart=382028883214621, IssueDrawCommandsStart=382028883299371, SwapBuffers=382028886336580, FrameCompleted=382029746957497, DequeueBufferDuration=31875, QueueBufferDuration=752353500, GpuCompleted=382029746957497, SwapBuffersCompleted=382029641121288, DisplayPresentTime=0, CommandSubmissionCompleted=382028886336580, 
+10-06 16:27:54.915 24762 24762 I ImeTracker: org.worldfoundry.wf_game.aquarium:6432d00d: onRequestHide at ORIGIN_CLIENT_HIDE_SOFT_INPUT reason HIDE_SOFT_INPUT
+10-06 16:27:54.930 24762 24762 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=ImeCallback=ImeOnBackInvokedCallback@78002699 Callback=android.window.IOnBackInvokedCallback$Stub$Proxy@e42148c
+10-06 16:27:54.931 24762 24762 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda11@6f6f7d7
+10-06 16:27:54.939 24762 25044 I OpenGLRenderer: Davey! duration=1001ms; Flags=0, FrameTimelineVsyncId=64187719, IntendedVsync=382029649298174, Vsync=382029649298174, InputEventId=-97663812, HandleInputStart=382029649680997, AnimationStart=382029649682997, PerformTraversalsStart=382029649684580, DrawStart=382029650144622, FrameDeadline=382030266583289, FrameInterval=382029649671330, FrameStartTime=16683333, SyncQueued=382029650673163, SyncStart=382029747320955, IssueDrawCommandsStart=382029747435538, SwapBuffers=382029780420788, FrameCompleted=382030747633455, DequeueBufferDuration=27938125, QueueBufferDuration=464678001, GpuCompleted=382030747633455, SwapBuffersCompleted=382030246135747, DisplayPresentTime=0, CommandSubmissionCompleted=382029780420788, 
+10-06 16:27:55.548 24762 24777 I OpenGLRenderer: Davey! duration=1101ms; Flags=0, FrameTimelineVsyncId=64187733, IntendedVsync=382029766081090, Vsync=382029766081090, InputEventId=-584542427, HandleInputStart=382029766580913, AnimationStart=382029766583247, PerformTraversalsStart=382029766585580, DrawStart=382029767124913, FrameDeadline=382030767081485, FrameInterval=382029766568955, FrameStartTime=16683142, SyncQueued=382029767753997, SyncStart=382030246253247, IssueDrawCommandsStart=382030246381705, SwapBuffers=382030278635247, FrameCompleted=382031346032789, DequeueBufferDuration=30169000, QueueBufferDuration=468605250, GpuCompleted=382031346032789, SwapBuffersCompleted=382030747854330, DisplayPresentTime=0, CommandSubmissionCompleted=382030278635247, 
+10-06 16:27:56.027 24762 24762 W InputEventReceiver: Attempted to finish an input event but the input event receiver has already been disposed.
+10-06 16:27:56.029 24762 24762 I ImeTracker: org.worldfoundry.wf_game.aquarium:6432d00d: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+10-06 16:27:56.029 24762 24762 I Choreographer: Skipped 64 frames!  The application may be doing too much work on its main thread.

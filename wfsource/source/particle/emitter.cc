@@ -77,8 +77,8 @@ Emitter::Emitter( Memory& memory, const _Mesh& meshOAD, const EmitterParameters&
 	_yArc = ep.yArc;
 	_zArc = ep.zArc;
 
-	RangeCheckInclusive( Scalar::zero, _particleParameters.initialAlpha, Scalar::one );
-	RangeCheckInclusive( Scalar::zero, _particleParameters.alphaDecrement, Scalar::one );
+	RangeCheckScalarInclusive( Scalar::zero, _particleParameters.initialAlpha, Scalar::one );
+	RangeCheckScalarInclusive( Scalar::zero, _particleParameters.alphaDecrement, Scalar::one );
 	assert( _particleParameters.templateObject );
 
 #pragma message( __FILE__ ": could set time to generate to _timeStart & not construct here" )

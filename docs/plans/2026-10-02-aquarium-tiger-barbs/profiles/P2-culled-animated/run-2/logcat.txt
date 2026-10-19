@@ -1,0 +1,1615 @@
+--------- beginning of main
+10-02 18:03:54.177  1119  1119 I ThermalService: CPU temperatures: [52.600002]
+--------- beginning of system
+10-02 18:03:54.307   655  2304 I ActivityManager: Force stopping org.worldfoundry.wf_game.aquarium appid=10147 user=0: from pid 20771
+10-02 18:03:54.309   655  2304 I ActivityManager: Killing 19900:org.worldfoundry.wf_game.aquarium/u0a147 (adj 0): stop org.worldfoundry.wf_game.aquarium due to from pid 20771
+10-02 18:03:54.309   655   758 D DisplayManagerService: Drop pending events for gone uid 10147
+10-02 18:03:54.311   655  2304 W ActivityTaskManager: Force removing ActivityRecord{643c542 u0 org.worldfoundry.wf_game.aquarium/android.app.NativeActivity t269 f}}: app died, no saved state
+10-02 18:03:54.319   935   994 V WindowManagerShell: Transition requested: android.os.BinderProxy@6a5c6b6 TransitionRequestInfo { type = CLOSE, triggerTask = TaskInfo{userId=0 taskId=269 displayId=0 isRunning=false baseIntent=Intent { flg=0x10000000 cmp=org.worldfoundry.wf_game.aquarium/android.app.NativeActivity } baseActivity=null topActivity=null origActivity=null realActivity=ComponentInfo{org.worldfoundry.wf_game.aquarium/android.app.NativeActivity} numActivities=0 lastActiveTime=42082892 supportsMultiWindow=false resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@de53fb7} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=null launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-02 18:03:54.321   655  2304 W ProcessStats: Tracking association SourceState{11a1335 com.google.android.apps.tv.launcherx/10052 BTop #22116} whose proc state 2 is better than process ProcessState{1fb5e70 com.google.android.gms.persistent/10058 pkg=com.google.android.gms} proc state 3 (966 skipped)
+10-02 18:03:54.325  1119  3123 D NetflixService: onForegroundActivitiesChanged pid:14013,uid:10052,fg:true
+10-02 18:03:54.329   472   472 I BpBinder: onLastStrongRef automatically unlinking death recipients: 
+10-02 18:03:54.348 14013 14013 W AdultGuideFragmentPeer: onStart, enableFixTabRefresh: false
+10-02 18:03:54.349 14013 14013 W AccountSelectorDataServ: Single user condition 1 [true]
+10-02 18:03:54.350 14013 14013 W AccountSelectorDataServ: Single user condition 2 [true]
+10-02 18:03:54.350 14013 14013 W AccountSelectorDataServ: Single user condition 3 [true]
+10-02 18:03:54.351 14013 14013 W AccountSelectorDataServ: Single user condition 4 [true]
+10-02 18:03:54.354 14013 14013 W KatnissIntegrationServi: Attempting to connect
+10-02 18:03:54.365 14013 14013 W KatnissIntegrationServi: Connect count 1
+10-02 18:03:54.369 14013 14013 W WindowOnBackDispatcher: OnBackInvokedCallback is not enabled for the application.
+10-02 18:03:54.369 14013 14013 W WindowOnBackDispatcher: Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+10-02 18:03:54.370   464   567 W AAudioClientTracker: binderDied() close abandoned stream 0x00000063
+10-02 18:03:54.371   655   803 I ImeTracker: org.worldfoundry.wf_game.aquarium:ff89ef5d: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_REMOVE_CLIENT
+10-02 18:03:54.371   655  2285 I WindowManager: WIN DEATH: Window{b8d307c u0 org.worldfoundry.wf_game.aquarium/android.app.NativeActivity}
+10-02 18:03:54.371   655   803 I ImeTracker: org.worldfoundry.wf_game.aquarium:ff89ef5d: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-02 18:03:54.371   655  2285 W InputManager-JNI: Input channel object 'b8d307c org.worldfoundry.wf_game.aquarium/android.app.NativeActivity (client)' was disposed without first being removed with the input manager!
+10-02 18:03:54.372   464 19932 D audioserver: FGS Logger Transaction failed
+10-02 18:03:54.372   464 19932 D audioserver: -129
+10-02 18:03:54.372   655  1182 V ActivityManager: Got obituary of 19900:org.worldfoundry.wf_game.aquarium
+10-02 18:03:54.374   427   427 I aml_mmap_audio: [outMmapStop:452] stream:0xe8944400
+10-02 18:03:54.376 14013 14013 W KatnissIntegrationServi: Connect count 2
+10-02 18:03:54.376   382   382 I Zygote  : Process 19900 exited due to signal 9 (Killed)
+10-02 18:03:54.379 14013 14013 W KatnissIntegrationServi: Connect count 3
+10-02 18:03:54.381 14013 14013 W KatnissIntegrationServi: Connect count 4
+10-02 18:03:54.383   427   427 I aml_mmap_audio: [outMmapStop:471] --stream:0xe8944400
+10-02 18:03:54.383   464 19932 D audioserver: FGS Logger Transaction failed
+10-02 18:03:54.384   464 19932 D audioserver: -129
+10-02 18:03:54.386   464 19935 D AAudioServiceEndpointPlay: callbackLoop() exiting, enabled = 0, state = 4, result = 384 <<<<<<<<<<<<< MIXER
+10-02 18:03:54.391   464 19933 D AAudioStream: joinThread_l() pthread_join succeeded
+10-02 18:03:54.391   464 19933 D AudioStreamInternal_Service: stopCallback_l() skipped, isDataCallbackSet() = 0, isActive() = 1, getState()  = 4
+10-02 18:03:54.391   464 19933 D IsochronousClockModel: stop(nanos = 42192237573409) max lateness = 626 micros, DSP stalled 0 times
+10-02 18:03:54.391   464 19933 D AAudioStream: setState(s#34) from 4 to 9
+10-02 18:03:54.395   464 19933 D AAudioStream: joinThread() - but has no thread or already join()ed
+10-02 18:03:54.395   464 19933 D AudioStreamInternal_Service: release_l(): mServiceStreamHandle = 0x00000062
+10-02 18:03:54.395   464 19933 D AAudioStream: setState(s#34) from 9 to 11
+10-02 18:03:54.398 14013 14013 W Settings: Setting development_settings_enabled has moved from android.provider.Settings.Secure to android.provider.Settings.Global.
+10-02 18:03:54.399   427  1263 I audio_hw_primary: [adev_release_audio_patch:7796] Patch 36: MIX->DEVICE patch_src:INVAL
+10-02 18:03:54.399   427  1263 I audio_hw_primary: [adev_release_audio_patch:7818] Patch 36: mix(io:365) -> dev_0[OUT_HDMI(id:14)]
+10-02 18:03:54.399   427  1263 I audio_hw_primary: [unregister_audio_patch:7455] delete the Patch: 36
+10-02 18:03:54.406  1119  1322 D UEventObserver: change@/devices/platform/auge_sound/sound/card0/controlC0��ACTION=change��DEVPATH=/devices/platform/auge_sound/sound/card0/controlC0��SUBSYSTEM=sound��AUDIO_FORMAT=0��MAJOR=116��MINOR=10��DEVNAME=snd/controlC0��SEQNUM=4041��
+10-02 18:03:54.407  1119  1322 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.sendBroadcast:1220 android.content.ContextWrapper.sendBroadcast:504 com.droidlogic.audioservice.services.AudioSystemCmdService$1.onUEvent:175 com.droidlogic.UEventObserver$UEventThread.sendEvent:213 com.droidlogic.UEventObserver$UEventThread.run:190 
+10-02 18:03:54.407   427  1263 D audio_hw_primary: [out_set_parameters:909] out:0xe8944400 kvpairs:closing=true out->out_device:0x400, adev->out_device:0x80002
+10-02 18:03:54.407   427  1263 E audio_hw_primary: out_set_parameters, ret:-2, hw_sync_mode:is false
+10-02 18:03:54.409 14013 14013 W BootModeAppToForeground: LauncherX to foreground.
+10-02 18:03:54.412 14013 14047 W BootModeAppToForeground: Checking if this is the first launch after boot
+10-02 18:03:54.412   464   583 D AudioFlinger: closing mmapThread 0xf747c000
+10-02 18:03:54.412   464   583 D AudioFlinger: mmapThread exit()
+10-02 18:03:54.412 14013 14047 W BootModeAppToForeground: LauncherX to foreground. The context is com.google.android.apps.tv.launcherx.home.HomeActivity.
+10-02 18:03:54.413   427  1263 D sub_mixing_factory: [out_standby_subMixingPCM:1609] io 365: out:0xe8944400 usecase:PCM_MMAP
+10-02 18:03:54.413 14013 14047 W BootModeAppToForeground: Update active account last used time.
+10-02 18:03:54.413   427  1263 I audio_hw_primary: [adev_close_output_stream_new:7352] io handle 365: out:0xe8944400
+10-02 18:03:54.413   427  1263 I sub_mixing_factory: [deleteSubMixingInputPcm:981] cnt_stream_using_mixer 0
+10-02 18:03:54.413   427  1263 I audio_hw_primary: [adev_close_output_stream:3525] io 365: out:0xe8944400 dev:OUT_HDMI(0x400) flags:0x4001, usecase:PCM_MMAP
+10-02 18:03:54.413   427  1263 D sub_mixing_factory: [out_standby_subMixingPCM:1609] io 365: out:0xe8944400 usecase:PCM_MMAP
+10-02 18:03:54.414   427  1263 I aml_mmap_audio: [outMmapDeInit:731] stream:0xe8944400
+10-02 18:03:54.414   427  1263 I aml_mmap_audio: [mmap_audio_unregister_client:941] OK ! stream 0xe8944400, client id 0
+10-02 18:03:54.414   427  1263 I audio_hw_primary: [adev_close_output_stream:3660] io 365: out:0xe8944400 exit ------
+10-02 18:03:54.420 14013 20778 E ActivityThread: Failed to find provider info for com.google.android.apps.youtube.tvunplugged.client.provider
+10-02 18:03:54.425  1119  1320 I AudioSystemCmdService: onAudioPatchListUpdate
+10-02 18:03:54.428  1119  1320 I AudioSystemCmdService: mAudioSink:[{{mHandle: 14, mRole: SINK}, mType: hdmi, mAddress: }], previousSink:[{{mHandle: 14, mRole: SINK}, mType: hdmi, mAddress: }]
+10-02 18:03:54.428  1119  1320 I AudioSystemCmdService: updateAudioPatch cur sink does not change.
+10-02 18:03:54.441  1119  1320 I AudioSystemCmdService: onAudioPortListUpdate
+10-02 18:03:54.441  1119  1320 I AudioSystemCmdService: mAudioSink:[{{mHandle: 14, mRole: SINK}, mType: hdmi, mAddress: }], previousSink:[{{mHandle: 14, mRole: SINK}, mType: hdmi, mAddress: }]
+10-02 18:03:54.442  1119  1320 I AudioSystemCmdService: updateAudioPatch cur sink does not change.
+10-02 18:03:54.456 14013 14052 W BootModeNotificationMan: Mark criteria LauncherX in foreground: tif_in_foreground_on_screen_off = [false], dispatch_to_amati_home = [true], launcherx_in_foreground = [true].
+10-02 18:03:54.462 14013 14055 E OpenGLRenderer: Unable to match the desired swap behavior.
+10-02 18:03:54.482 14013 14061 W DeviceCustomizationsImp: Cached DeviceCustomizations found.
+10-02 18:03:54.484 14013 14054 W CustomizationsConversio: Setting power on mode to HOME.
+10-02 18:03:54.486 14013 14054 W LastUsedInputProtoDataS: Mark Home as last input
+10-02 18:03:54.497   464 19932 D AAudioServiceEndpoint: ~AAudioServiceEndpoint() called
+10-02 18:03:54.498   464 19932 D AAudioServiceStreamBase: run() MMAP exiting after 3091 loops <<<<<<<<<<<<<< COMMANDS
+10-02 18:03:54.499 14013 14060 W BootModeAppToForeground: Background timeout condition 1 [false]
+10-02 18:03:54.499   464 19933 D AAudioServiceStreamBase: ~AAudioServiceStreamBase() called
+10-02 18:03:54.499   464 19933 D AAudioStream: setState(s#34) from 11 to 11
+10-02 18:03:54.499   464 19933 D AAudioStream: setState(s#34) from 11 to 12
+10-02 18:03:54.499 14013 14060 W BootModeAppToForeground: Background timeout condition 2 [true]
+10-02 18:03:54.499   464 19933 D AudioStreamInternal_Service: ~AudioStreamInternal() 0xf785c800 called
+10-02 18:03:54.499   464 19933 D AAudioStream: ~AudioStream(s#34) mPlayerBase strongCount = 1
+10-02 18:03:54.499   464 19933 D audioserver: PlayerBase::~PlayerBase()
+10-02 18:03:54.500   464 19933 D AAudioServiceEndpoint: ~AAudioServiceEndpoint() called
+10-02 18:03:54.500 14013 14060 W BootModeAppToForeground: Background timeout condition 3 [true]
+10-02 18:03:54.500   464 19933 D AAudioServiceStreamBase: run() Shared exiting after 373 loops <<<<<<<<<<<<<< COMMANDS
+10-02 18:03:54.500 14013 14060 W BootModeAppToForeground: Background timeout condition 4 [true]
+10-02 18:03:54.500   464   567 D AAudioServiceStreamBase: ~AAudioServiceStreamBase() called
+10-02 18:03:54.515 14013 20777 E ActivityThread: Failed to find provider info for com.google.android.apps.youtube.tvunplugged.client.provider
+10-02 18:03:54.537 14013 14013 W KatnissIntegrationServi: Katniss service connected
+10-02 18:03:54.538 25730 25730 I katniss_interactor_AppAssistantIntegrationServicePeer: #handleMessage message.what: 1
+10-02 18:03:54.538   935   994 V WindowManagerShell: onTransitionReady android.os.BinderProxy@6a5c6b6: {id=199 t=CLOSE f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@d842053} m=CLOSE f=NONE leash=Surface(name=Task=269)/@0x2901324 sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0},{WCT{android.window.IWindowContainerToken$Stub$Proxy@64d3d90} m=TO_FRONT f=NONE leash=Surface(name=Task=220)/@0xf054e8d sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0}]}
+10-02 18:03:54.538   935   994 V WindowManagerShell: Playing animation for (#199)android.os.BinderProxy@6a5c6b6@0
+10-02 18:03:54.538   935   994 V WindowManagerShell:  try handler com.android.wm.shell.keyguard.KeyguardTransitionHandler@e46053b
+10-02 18:03:54.538   935   994 V WindowManagerShell:  try handler com.android.wm.shell.activityembedding.ActivityEmbeddingController@a6458
+10-02 18:03:54.539   935   994 V WindowManagerShell:  try handler com.android.wm.shell.pip.tv.TvPipTransition@30fb9b1
+10-02 18:03:54.539   655   757 V WindowManager: Sent Transition #199 createdAt=10-02 18:03:54.311 via request=TransitionRequestInfo { type = CLOSE, triggerTask = TaskInfo{userId=0 taskId=269 displayId=0 isRunning=false baseIntent=Intent { flg=0x10000000 cmp=org.worldfoundry.wf_game.aquarium/android.app.NativeActivity } baseActivity=null topActivity=null origActivity=null realActivity=ComponentInfo{org.worldfoundry.wf_game.aquarium/android.app.NativeActivity} numActivities=0 lastActiveTime=42082892 supportsMultiWindow=false resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{87d6926 Task{ca8ba9a #269 type=standard A=10147:org.worldfoundry.wf_game.aquarium}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=null launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-02 18:03:54.539   655   757 V WindowManager:     startWCT=WindowContainerTransaction { changes = {} hops = [] errorCallbackToken=null taskFragmentOrganizer=null }
+10-02 18:03:54.539   935   994 V WindowManagerShell:  try handler com.android.wm.shell.transition.RemoteTransitionHandler@82c2e96
+10-02 18:03:54.539   655   757 V WindowManager:     info={id=199 t=CLOSE f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{RemoteToken{87d6926 Task{ca8ba9a #269 type=standard A=10147:org.worldfoundry.wf_game.aquarium}}} m=CLOSE f=NONE leash=Surface(name=Task=269)/@0xdfe7f8b sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0},{WCT{RemoteToken{4416ec7 Task{c8300d4 #220 type=home}}} m=TO_FRONT f=NONE leash=Surface(name=Task=220)/@0x94d012e sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0}]}
+10-02 18:03:54.539   935   994 V WindowManagerShell: Transition doesn't have explicit remote, search filters for match for {id=199 t=CLOSE f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@d842053} m=CLOSE f=NONE leash=Surface(name=Task=269)/@0x2901324 sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0},{WCT{android.window.IWindowContainerToken$Stub$Proxy@64d3d90} m=TO_FRONT f=NONE leash=Surface(name=Task=220)/@0xf054e8d sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0}]}
+10-02 18:03:54.539   935   994 V WindowManagerShell:  Delegate animation for #199 to null
+10-02 18:03:54.539   935   994 V WindowManagerShell:  try handler com.android.wm.shell.transition.DefaultTransitionHandler@f05ba17
+10-02 18:03:54.539   935   994 V WindowManagerShell: start default transition animation, info = {id=199 t=CLOSE f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@d842053} m=CLOSE f=NONE leash=Surface(name=Task=269)/@0x2901324 sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0},{WCT{android.window.IWindowContainerToken$Stub$Proxy@64d3d90} m=TO_FRONT f=NONE leash=Surface(name=Task=220)/@0xf054e8d sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0}]}
+10-02 18:03:54.540 25730 25730 I katniss_interactor_AppAssistantIntegrationServicePeer: #handleMessage message.what: 2
+10-02 18:03:54.540   935   994 V WindowManagerShell: loadAnimation: anim=android.view.animation.AlphaAnimation@4266eaf animAttr=0xa type=CLOSE isEntrance=true
+10-02 18:03:54.541   935   994 V WindowManagerShell: loadAnimation: anim=android.view.animation.AlphaAnimation@ef2c245 animAttr=0xb type=CLOSE isEntrance=false
+10-02 18:03:54.545   935   994 V WindowManagerShell:  animated by com.android.wm.shell.transition.DefaultTransitionHandler@f05ba17
+10-02 18:03:54.555 14013 14055 E FrameEvents: updateAcquireFence: Did not find frame.
+10-02 18:03:54.582   655  2285 D CompatibilityChangeReporter: Compat change id reported: 161252188; UID 10147; state: DISABLED
+10-02 18:03:54.583   655  2285 W ActivityTaskManager: callingPackage for (uid=2000, pid=20783) has no WPC
+10-02 18:03:54.585   655  2285 D CompatibilityChangeReporter: Compat change id reported: 265464455; UID 10147; state: DISABLED
+10-02 18:03:54.590   655  2285 D CompatibilityChangeReporter: Compat change id reported: 265452344; UID 10147; state: DISABLED
+10-02 18:03:54.590   655  2285 D CompatibilityChangeReporter: Compat change id reported: 266124927; UID 10147; state: DISABLED
+10-02 18:03:54.591   655  2285 D CompatibilityChangeReporter: Compat change id reported: 265451093; UID 10147; state: DISABLED
+10-02 18:03:54.591   655  2285 D CompatibilityChangeReporter: Compat change id reported: 265456536; UID 10147; state: DISABLED
+10-02 18:03:54.591   655  2285 D CompatibilityChangeReporter: Compat change id reported: 255940284; UID 10147; state: DISABLED
+10-02 18:03:54.592   655  2285 D CompatibilityChangeReporter: Compat change id reported: 236283604; UID 10147; state: DISABLED
+10-02 18:03:54.592   655  2285 D CompatibilityChangeReporter: Compat change id reported: 263959004; UID 10147; state: DISABLED
+10-02 18:03:54.593   655  2285 D CompatibilityChangeReporter: Compat change id reported: 264304459; UID 10147; state: DISABLED
+10-02 18:03:54.593   655  2285 D CompatibilityChangeReporter: Compat change id reported: 264301586; UID 10147; state: DISABLED
+10-02 18:03:54.593   655  2285 D CompatibilityChangeReporter: Compat change id reported: 254631730; UID 10147; state: DISABLED
+10-02 18:03:54.594   655  2285 D CompatibilityChangeReporter: Compat change id reported: 273509367; UID 10147; state: DISABLED
+10-02 18:03:54.594   655  2285 D CompatibilityChangeReporter: Compat change id reported: 263259275; UID 10147; state: DISABLED
+10-02 18:03:54.595   655  2285 D CompatibilityChangeReporter: Compat change id reported: 174042980; UID 10147; state: DISABLED
+10-02 18:03:54.595   655  2285 D CompatibilityChangeReporter: Compat change id reported: 174042936; UID 10147; state: DISABLED
+10-02 18:03:54.596   655  2285 D CompatibilityChangeReporter: Compat change id reported: 181136395; UID 10147; state: DISABLED
+10-02 18:03:54.597   655  2285 D CompatibilityChangeReporter: Compat change id reported: 194480991; UID 10147; state: ENABLED
+10-02 18:03:54.600   655  2285 E CellBroadcastUtils: getDefaultCellBroadcastReceiverPackageName: no package found
+10-02 18:03:54.608   655  2285 D CompatibilityChangeReporter: Compat change id reported: 184838306; UID 10147; state: DISABLED
+10-02 18:03:54.608   655  2285 D CompatibilityChangeReporter: Compat change id reported: 185004937; UID 10147; state: DISABLED
+10-02 18:03:54.612   655  2285 D CompatibilityChangeReporter: Compat change id reported: 205907456; UID 10147; state: ENABLED
+10-02 18:03:54.616   655  2285 I ActivityTaskManager: Add Task{ca8ba9a #269 type=standard A=10147:org.worldfoundry.wf_game.aquarium} to hidden list because adding Task{ea41d12 #270 type=standard A=10147:org.worldfoundry.wf_game.aquarium}
+10-02 18:03:54.617   655  2285 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=org.worldfoundry.wf_game.aquarium/android.app.NativeActivity} with LAUNCH_SINGLE_TASK from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-02 18:03:54.618   935   994 V WindowManagerShell: Transition requested: android.os.BinderProxy@88b4966 TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=270 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=org.worldfoundry.wf_game.aquarium/android.app.NativeActivity } baseActivity=ComponentInfo{org.worldfoundry.wf_game.aquarium/android.app.NativeActivity} topActivity=ComponentInfo{org.worldfoundry.wf_game.aquarium/android.app.NativeActivity} origActivity=null realActivity=ComponentInfo{org.worldfoundry.wf_game.aquarium/android.app.NativeActivity} numActivities=1 lastActiveTime=42192462 supportsMultiWindow=false resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@e8f84a7} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=true launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{db08d54 android.app.NativeActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-02 18:03:54.620   655  2542 I ImeTracker: com.google.android.apps.tv.launcherx:bf130a47: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-02 18:03:54.621   655   760 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10147; state: DISABLED
+10-02 18:03:54.621   655  2542 I ImeTracker: com.google.android.apps.tv.launcherx:bf130a47: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-02 18:03:54.622   655   771 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10147; state: ENABLED
+10-02 18:03:54.628   438   438 E DMABUFHEAPS: Unable to allocate from DMA-BUF heap: heap-gfx: Out of memory
+10-02 18:03:54.629   438   438 E DMABUFHEAPS: No ion heap of name heap-gfx exists
+10-02 18:03:54.629   438   438 E DMABUFHEAPS: No ion heap of name heap-gfx exists
+10-02 18:03:54.629   438   438 W mali_gralloc: libdmabufheap allocation failed for heap-gfx heap, falling back to system heap
+10-02 18:03:54.642   382   382 D Zygote  : Forked child process 20786
+10-02 18:03:54.643   655   771 I ActivityManager: Start proc 20786:org.worldfoundry.wf_game.aquarium/u0a147 for next-top-activity {org.worldfoundry.wf_game.aquarium/android.app.NativeActivity}
+10-02 18:03:54.656   655   810 D CompatibilityChangeReporter: Compat change id reported: 265195908; UID 10147; state: ENABLED
+10-02 18:03:54.671 20786 20786 I f_game.aquarium: Using CollectorTypeCMC GC.
+10-02 18:03:54.679 20786 20786 E f_game.aquarium: Not starting debugger since process cannot load the jdwp agent.
+10-02 18:03:54.693   655  2542 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 10147; state: DISABLED
+10-02 18:03:54.693   655  2542 D CompatibilityChangeReporter: Compat change id reported: 273564678; UID 10147; state: DISABLED
+10-02 18:03:54.706  1119  8998 D NetflixService: onForegroundActivitiesChanged pid:20786,uid:10147,fg:true
+10-02 18:03:54.716 20786 20786 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10147; state: ENABLED
+10-02 18:03:54.716 20786 20786 D CompatibilityChangeReporter: Compat change id reported: 242716250; UID 10147; state: ENABLED
+10-02 18:03:54.722   655  2542 D CompatibilityChangeReporter: Compat change id reported: 170503758; UID 10147; state: ENABLED
+10-02 18:03:54.732 20786 20786 D nativeloader: Configuring clns-4 for other apk /data/app/~~dBFZk_1A9HY3gjDjioylbw==/org.worldfoundry.wf_game.aquarium-27wzfaxMcI9PgXrn-H9JaQ==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~dBFZk_1A9HY3gjDjioylbw==/org.worldfoundry.wf_game.aquarium-27wzfaxMcI9PgXrn-H9JaQ==/lib/arm:/data/app/~~dBFZk_1A9HY3gjDjioylbw==/org.worldfoundry.wf_game.aquarium-27wzfaxMcI9PgXrn-H9JaQ==/base.apk!/lib/armeabi-v7a, permitted_path=/data:/mnt/expand:/data/user/0/org.worldfoundry.wf_game.aquarium
+10-02 18:03:54.747 20786 20786 V GraphicsEnvironment: Currently set values for:
+10-02 18:03:54.747 20786 20786 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+10-02 18:03:54.747 20786 20786 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+10-02 18:03:54.748 20786 20786 V GraphicsEnvironment: ANGLE GameManagerService for org.worldfoundry.wf_game.aquarium: false
+10-02 18:03:54.748 20786 20786 V GraphicsEnvironment: org.worldfoundry.wf_game.aquarium is not listed in per-application setting
+10-02 18:03:54.749 20786 20786 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-02 18:03:54.752  1119  8998 I NetflixService: onTaskStackChanged
+10-02 18:03:54.752   935   994 D WindowManagerShell: TvPipController: onTaskStackChanged()
+10-02 18:03:54.755   655  2304 I ActivityManager: Flag disabled. Ignoring finishAttachApplication from uid: 10147. pid: 20786
+10-02 18:03:54.815 20786 20806 I wf_game : diagnostic log: /storage/emulated/0/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log
+10-02 18:03:54.815 20786 20806 I wf_game : android_main: enter
+10-02 18:03:54.815 20786 20806 I wf_game : android_main: assetMgr=0xee08c600
+10-02 18:03:54.816 20786 20806 I wf_game : android_main: uiMode=4 (tv=1)
+10-02 18:03:54.816 20786 20806 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+10-02 18:03:54.821 20786 20786 D CompatibilityChangeReporter: Compat change id reported: 210923482; UID 10147; state: ENABLED
+10-02 18:03:54.823 20786 20806 I wf_game : APP_CMD_RESUME
+10-02 18:03:54.825 20786 20806 I wf_game : phonepad: listening on 192.168.4.43:8765
+10-02 18:03:54.825 20786 20806 I wf_game : phone controller: open http://192.168.4.43:8765/?k=612878 (PIN 612878)
+10-02 18:03:54.827 20786 20786 D CompatibilityChangeReporter: Compat change id reported: 237531167; UID 10147; state: DISABLED
+10-02 18:03:54.838   655  2304 D CoreBackPreview: Window{4e0ef0d u0 org.worldfoundry.wf_game.aquarium/android.app.NativeActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@425f4d3, mPriority=0, mIsAnimationCallback=false}
+10-02 18:03:54.857 20786 20806 I wf_game : APP_CMD_INIT_WINDOW
+10-02 18:03:54.857 20786 20806 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-02 18:03:54.858 20786 20806 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-02 18:03:54.858 20786 20806 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-02 18:03:54.859 20786 20806 W libc    : Access denied finding property "vendor.mali.base_max_nr_instances"
+10-02 18:03:54.860 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_unnamed"
+10-02 18:03:54.860 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_default_heap"
+10-02 18:03:54.860 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_base_internal"
+10-02 18:03:54.860 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_framepool"
+10-02 18:03:54.860 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_tiler"
+10-02 18:03:54.861 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_program"
+10-02 18:03:54.861 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane"
+10-02 18:03:54.861 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane_imported"
+10-02 18:03:54.861 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vao"
+10-02 18:03:54.861 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_img"
+10-02 18:03:54.861 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_internal_surface"
+10-02 18:03:54.861 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_buf"
+10-02 18:03:54.861 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_crc"
+10-02 18:03:54.861 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_hmem"
+10-02 18:03:54.861 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_rsd"
+10-02 18:03:54.861 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_mbs2"
+10-02 18:03:54.861 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_static"
+10-02 18:03:54.862 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_hmem"
+10-02 18:03:54.862 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_sample_pos"
+10-02 18:03:54.862 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_discard"
+10-02 18:03:54.862 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_tess_geom"
+10-02 18:03:54.863 14013 14125 I cn_CronetUrlRequestContext: destroyNativeStreamLocked org.chromium.net.impl.CronetBidirectionalStream@e513ebd
+10-02 18:03:54.866 14013 14125 I cn_CronetUrlRequestContext: destroyNativeStreamLocked org.chromium.net.impl.CronetBidirectionalStream@ce37cb2
+10-02 18:03:54.867 14013 14052 W RpcFailureHelper: rpc failed: zih
+10-02 18:03:54.867 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cobj_hmem"
+10-02 18:03:54.867 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_hmem"
+10-02 18:03:54.868 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_prof_dump"
+10-02 18:03:54.868 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cblend_hmem"
+10-02 18:03:54.868 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_hmem"
+10-02 18:03:54.868 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query"
+10-02 18:03:54.868 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query_host"
+10-02 18:03:54.868 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_multiview"
+10-02 18:03:54.868 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cdeps_hmem"
+10-02 18:03:54.868 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_suballoc"
+10-02 18:03:54.868 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_hoard"
+10-02 18:03:54.868 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_registry"
+10-02 18:03:54.868 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_payload"
+10-02 18:03:54.868 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_wlm_tls"
+10-02 18:03:54.868 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_hmem"
+10-02 18:03:54.869 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_svm"
+10-02 18:03:54.872 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_protected"
+10-02 18:03:54.872 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cinstr"
+10-02 18:03:54.872 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_uncached"
+10-02 18:03:54.872 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_cached"
+10-02 18:03:54.872 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_transient"
+10-02 18:03:54.872 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_protected"
+10-02 18:03:54.872 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external"
+10-02 18:03:54.873 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external_swapchain"
+10-02 18:03:54.873 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal"
+10-02 18:03:54.873 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_tls"
+10-02 18:03:54.873 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_host"
+10-02 18:03:54.873 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_protected"
+10-02 18:03:54.873 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_transient"
+10-02 18:03:54.873 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_descriptor_pool"
+10-02 18:03:54.873 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator"
+10-02 18:03:54.873 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_host"
+10-02 18:03:54.873 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_protected"
+10-02 18:03:54.873 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_host"
+10-02 18:03:54.873 14013 14060 W StreamStore: Failed to refresh stream swo@e5efb54e
+10-02 18:03:54.873 14013 14060 W StreamStore: abtn: RESOURCE_EXHAUSTED: Resource has been exhausted (e.g. check quota).
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at acfh.b(PG:17)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wwn.run(PG:717)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at abtq.run(PG:31)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wwn.run(PG:163)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wwu.run(PG:7)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wum.run(PG:357)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wsy.execute(PG:1)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at xch.execute(PG:3)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wun.execute(PG:35)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at uoi.execute(PG:43)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wrp.f(PG:1)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wrp.k(PG:95)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wrp.p(PG:14)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wsa.run(PG:61)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wsy.execute(PG:1)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wrp.f(PG:1)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wrp.k(PG:95)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wrp.q(PG:29)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wts.run(PG:5)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wsy.execute(PG:1)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wrp.f(PG:1)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wrp.k(PG:95)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wrp.q(PG:29)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wut.e(PG:5)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wua.run(PG:73)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wuv.run(PG:5)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wtf.run(PG:17)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at phw.run(PG:7)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at wjd.run(PG:44)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at ftb.run(PG:440)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at java.lang.Thread.run(Thread.java:1012)
+10-02 18:03:54.873 14013 14060 W StreamStore: 	at pit.run(PG:62)
+10-02 18:03:54.873 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device"
+10-02 18:03:54.874 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device_transient"
+10-02 18:03:54.874 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_buffer"
+10-02 18:03:54.874 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_image"
+10-02 18:03:54.874 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_signal"
+10-02 18:03:54.874 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_flush_chain"
+10-02 18:03:54.874 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_metadata_list"
+10-02 18:03:54.874 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_jit"
+10-02 18:03:54.874 20786 20806 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_mmu"
+10-02 18:03:54.876 20786 20806 W libc    : Access denied finding property "vendor.mali.osu_protected_memory_heap_name"
+10-02 18:03:54.876 20786 20806 W libc    : Access denied finding property "vendor.mali.osu_ion_protected_memory_heap_name"
+10-02 18:03:54.876 20786 20806 W libc    : Access denied finding property "vendor.mali.platform_agt_frequency_khz"
+10-02 18:03:54.876 20786 20806 W libc    : Access denied finding property "vendor.mali.hal_dump_dir"
+10-02 18:03:54.877 20786 20806 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-02 18:03:54.877 20786 20806 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+10-02 18:03:54.877 20786 20806 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-02 18:03:54.883   935   994 V WindowManagerShell: onTransitionReady android.os.BinderProxy@88b4966: {id=200 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@d332ac0} m=OPEN f=NONE leash=Surface(name=Task=270)/@0x233f4fd sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0},{WCT{android.window.IWindowContainerToken$Stub$Proxy@64fe3f9} m=TO_BACK f=NONE leash=Surface(name=Task=220)/@0xd7295f2 sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0}]}
+10-02 18:03:54.884   935   994 V WindowManagerShell: Transition (#200)android.os.BinderProxy@88b4966@0 ready while (#199)android.os.BinderProxy@6a5c6b6@0 is still animating. Notify the animating transition in case they can be merged
+10-02 18:03:54.890   935   994 V WindowManagerShell: Transition animation finished (aborted=false), notifying core (#199)android.os.BinderProxy@6a5c6b6@0
+10-02 18:03:54.894   655  1771 W WindowManager: Exception thrown during dispatchAppVisibility Window{b8d307c u0 org.worldfoundry.wf_game.aquarium/android.app.NativeActivity EXITING}
+10-02 18:03:54.894   655  1771 W WindowManager: android.os.DeadObjectException
+10-02 18:03:54.894   655  1771 W WindowManager: 	at android.os.BinderProxy.transactNative(Native Method)
+10-02 18:03:54.894   655  1771 W WindowManager: 	at android.os.BinderProxy.transact(BinderProxy.java:584)
+10-02 18:03:54.894   655  1771 W WindowManager: 	at android.view.IWindow$Stub$Proxy.dispatchAppVisibility(IWindow.java:546)
+10-02 18:03:54.894   655  1771 W WindowManager: 	at com.android.server.wm.WindowState.sendAppVisibilityToClients(WindowState.java:3293)
+10-02 18:03:54.894   655  1771 W WindowManager: 	at com.android.server.wm.WindowContainer.sendAppVisibilityToClients(WindowContainer.java:1221)
+10-02 18:03:54.894   655  1771 W WindowManager: 	at com.android.server.wm.WindowToken.setClientVisible(WindowToken.java:409)
+10-02 18:03:54.894   655  1771 W WindowManager: 	at com.android.server.wm.ActivityRecord.setClientVisible(ActivityRecord.java:6995)
+10-02 18:03:54.894   655  1771 W WindowManager: 	at com.android.server.wm.ActivityRecord.postApplyAnimation(ActivityRecord.java:5686)
+10-02 18:03:54.894   655  1771 W WindowManager: 	at com.android.server.wm.ActivityRecord.commitVisibility(ActivityRecord.java:5629)
+10-02 18:03:54.894   655  1771 W WindowManager: 	at com.android.server.wm.Transition.finishTransition(Transition.java:1153)
+10-02 18:03:54.894   655  1771 W WindowManager: 	at com.android.server.wm.TransitionController.finishTransition(TransitionController.java:868)
+10-02 18:03:54.894   655  1771 W WindowManager: 	at com.android.server.wm.WindowOrganizerController.finishTransition(WindowOrganizerController.java:396)
+10-02 18:03:54.894   655  1771 W WindowManager: 	at android.window.IWindowOrganizerController$Stub.onTransact(IWindowOrganizerController.java:286)
+10-02 18:03:54.894   655  1771 W WindowManager: 	at com.android.server.wm.WindowOrganizerController.onTransact(WindowOrganizerController.java:181)
+10-02 18:03:54.894   655  1771 W WindowManager: 	at android.os.Binder.execTransactInternal(Binder.java:1339)
+10-02 18:03:54.894   655  1771 W WindowManager: 	at android.os.Binder.execTransact(Binder.java:1275)
+10-02 18:03:54.894   655  1771 I Process : Sending signal. PID: 19900 SIG: 9
+10-02 18:03:54.904   655   757 I ActivityTaskManager: Displayed org.worldfoundry.wf_game.aquarium/android.app.NativeActivity for user 0: +291ms
+10-02 18:03:54.905   655   757 V WindowManager: Sent Transition #200 createdAt=10-02 18:03:54.598 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=270 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=org.worldfoundry.wf_game.aquarium/android.app.NativeActivity } baseActivity=ComponentInfo{org.worldfoundry.wf_game.aquarium/android.app.NativeActivity} topActivity=ComponentInfo{org.worldfoundry.wf_game.aquarium/android.app.NativeActivity} origActivity=null realActivity=ComponentInfo{org.worldfoundry.wf_game.aquarium/android.app.NativeActivity} numActivities=1 lastActiveTime=42192462 supportsMultiWindow=false resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{49dd7e6 Task{ea41d12 #270 type=standard A=10147:org.worldfoundry.wf_game.aquarium}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=true launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{e13127 android.app.NativeActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-02 18:03:54.905   655   757 V WindowManager:     startWCT=WindowContainerTransaction { changes = {} hops = [] errorCallbackToken=null taskFragmentOrganizer=null }
+10-02 18:03:54.905   655   757 V WindowManager:     info={id=200 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{RemoteToken{49dd7e6 Task{ea41d12 #270 type=standard A=10147:org.worldfoundry.wf_game.aquarium}}} m=OPEN f=NONE leash=Surface(name=Task=270)/@0x2f3b810 sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0},{WCT{RemoteToken{4416ec7 Task{c8300d4 #220 type=home}}} m=TO_BACK f=NONE leash=Surface(name=Task=220)/@0x94d012e sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0}]}
+10-02 18:03:54.905   655   760 W ActivityManager: setHasOverlayUi called on unknown pid: 19900
+10-02 18:03:54.906   655   757 V WindowManager: Finish Transition #199: created at 10-02 18:03:54.311 collect-started=0.104ms request-sent=0.229ms started=9.196ms ready=9.125ms sent=222.842ms finished=581.046ms
+10-02 18:03:54.910   935   994 V WindowManagerShell: Playing animation for (#200)android.os.BinderProxy@88b4966@0
+10-02 18:03:54.911   935   994 V WindowManagerShell:  try handler com.android.wm.shell.keyguard.KeyguardTransitionHandler@e46053b
+10-02 18:03:54.911   935   994 V WindowManagerShell:  try handler com.android.wm.shell.activityembedding.ActivityEmbeddingController@a6458
+10-02 18:03:54.911   935   994 V WindowManagerShell:  try handler com.android.wm.shell.pip.tv.TvPipTransition@30fb9b1
+10-02 18:03:54.911   935   994 V WindowManagerShell:  try handler com.android.wm.shell.transition.RemoteTransitionHandler@82c2e96
+10-02 18:03:54.911   935   994 V WindowManagerShell: Transition doesn't have explicit remote, search filters for match for {id=200 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@d332ac0} m=OPEN f=NONE leash=Surface(name=Task=270)/@0x233f4fd sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0},{WCT{android.window.IWindowContainerToken$Stub$Proxy@64fe3f9} m=TO_BACK f=NONE leash=Surface(name=Task=220)/@0xd7295f2 sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0}]}
+10-02 18:03:54.911   935   994 V WindowManagerShell:  Delegate animation for #200 to null
+10-02 18:03:54.911   935   994 V WindowManagerShell:  try handler com.android.wm.shell.transition.DefaultTransitionHandler@f05ba17
+10-02 18:03:54.911   935   994 V WindowManagerShell: start default transition animation, info = {id=200 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{android.window.IWindowContainerToken$Stub$Proxy@d332ac0} m=OPEN f=NONE leash=Surface(name=Task=270)/@0x233f4fd sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0},{WCT{android.window.IWindowContainerToken$Stub$Proxy@64fe3f9} m=TO_BACK f=NONE leash=Surface(name=Task=220)/@0xd7295f2 sb=Rect(0, 0 - 1920, 1080) eb=Rect(0, 0 - 1920, 1080) d=0}]}
+10-02 18:03:54.913   935   994 V WindowManagerShell: loadAnimation: anim=android.view.animation.AlphaAnimation@9a1c6b5 animAttr=0x9 type=OPEN isEntrance=false
+10-02 18:03:54.913   935   994 V WindowManagerShell: loadAnimation: anim=android.view.animation.AlphaAnimation@14978bb animAttr=0x8 type=OPEN isEntrance=true
+10-02 18:03:54.917   935   994 V WindowManagerShell:  animated by com.android.wm.shell.transition.DefaultTransitionHandler@f05ba17
+10-02 18:03:54.918 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.hal_format"
+10-02 18:03:54.920 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.recordable"
+10-02 18:03:54.920 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.dataspaces_to_exclude"
+10-02 18:03:54.920 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.hal_format"
+10-02 18:03:54.921 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.recordable"
+10-02 18:03:54.921 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.dataspaces_to_exclude"
+10-02 18:03:54.921 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.hal_format"
+10-02 18:03:54.921 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.recordable"
+10-02 18:03:54.921 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.dataspaces_to_exclude"
+10-02 18:03:54.921 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.hal_format"
+10-02 18:03:54.921 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.recordable"
+10-02 18:03:54.921 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.dataspaces_to_exclude"
+10-02 18:03:54.921 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.hal_format"
+10-02 18:03:54.921 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.recordable"
+10-02 18:03:54.921 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.dataspaces_to_exclude"
+10-02 18:03:54.921 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.hal_format"
+10-02 18:03:54.921 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.recordable"
+10-02 18:03:54.921 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.dataspaces_to_exclude"
+10-02 18:03:54.922 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.hal_format"
+10-02 18:03:54.922 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.recordable"
+10-02 18:03:54.922 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.dataspaces_to_exclude"
+10-02 18:03:54.922 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.hal_format"
+10-02 18:03:54.922 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.recordable"
+10-02 18:03:54.922 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.dataspaces_to_exclude"
+10-02 18:03:54.922 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.hal_format"
+10-02 18:03:54.922 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.recordable"
+10-02 18:03:54.922 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.dataspaces_to_exclude"
+10-02 18:03:54.922 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.hal_format"
+10-02 18:03:54.922 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.recordable"
+10-02 18:03:54.923 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.dataspaces_to_exclude"
+10-02 18:03:54.923 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.hal_format"
+10-02 18:03:54.923 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.recordable"
+10-02 18:03:54.923 20786 20806 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.dataspaces_to_exclude"
+10-02 18:03:54.925   216   216 I hwservicemanager: getTransport: Cannot find entry android.hardware.configstore@1.0::ISurfaceFlingerConfigs/default in either framework or device VINTF manifest.
+10-02 18:03:54.930   472   472 E BpTransactionCompletedListener: Failed to transact (-32)
+10-02 18:03:54.937   655  2542 D CompatibilityChangeReporter: Compat change id reported: 214016041; UID 10147; state: ENABLED
+10-02 18:03:54.937   655  2542 I ImeTracker: org.worldfoundry.wf_game.aquarium:ca45b6df: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-02 18:03:54.937   655  2542 I ImeTracker: org.worldfoundry.wf_game.aquarium:ca45b6df: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-02 18:03:54.944 20786 20806 I wf_game : EGL surface ready: 1920x1080 (context reused)
+10-02 18:03:54.944 20786 20806 I wf_game : android_main: EGL ready, entering HALStart
+10-02 18:03:54.946 20786 20806 I AAudio  : AAudioStreamBuilder_openStream() called ----------------------------------------
+10-02 18:03:54.946 20786 20806 I AudioStreamBuilder: rate   =      0, channels  = 0, channelMask = 0, format   = 5, sharing = SH, dir = OUTPUT
+10-02 18:03:54.946 20786 20806 I AudioStreamBuilder: device =      0, sessionId = -1, perfMode = 12, callback: ON with frames = 0
+10-02 18:03:54.946 20786 20806 I AudioStreamBuilder: usage  =      0, contentType = 0, inputPreset = 0, allowedCapturePolicy = 0
+10-02 18:03:54.946 20786 20806 I AudioStreamBuilder: privacy sensitive = false, opPackageName = (null), attributionTag = (null)
+10-02 18:03:54.948   427  2163 I audio_hw_primary: [audiohal_get_latency:1251] io 13: out:0xe8943e00 frames:3072 rate:48000 whole_latency:64 alsa_latency:64
+10-02 18:03:54.949 20786 20806 D f_game.aquarium: PlayerBase::PlayerBase()
+10-02 18:03:54.953   464   567 D audioserver: PlayerBase::PlayerBase()
+10-02 18:03:54.954   464   567 D AAudioServiceEndpointMMAP: openWithFormat trying to open MMAP stream with format=0x5, sample_rate=48000, channel_mask=0x3, device=0
+10-02 18:03:54.955   464   567 W ServiceUtilities: doIsAllowed: Playback capture for uid 1041 is denied as no package name could be retrieved from the package manager.
+10-02 18:03:54.956   464   567 D AAudioServiceEndpointMMAP: openWithFormat() mMapClient.attributionSource = AttributionSourceState{pid: 464, uid: 1041, packageName: (null), attributionTag: (null), token: binder:0xf783df78, renouncedPermissions: (null), next: []} => portHandle = 0
+10-02 18:03:54.956   464   567 D AAudioServiceEndpointMMAP: openWithFormat() - openMmapStream() returned status=-38, suggested format=0x1, sample_rate=48000, channel_mask=0x3
+10-02 18:03:54.956   464   567 D AAudioServiceEndpointMMAP: open() 0x5 failed, perhaps due to format. Try again with 0x1
+10-02 18:03:54.956   464   567 D AAudioServiceEndpointMMAP: openWithFormat trying to open MMAP stream with format=0x1, sample_rate=48000, channel_mask=0x3, device=0
+10-02 18:03:54.957   464   567 W ServiceUtilities: doIsAllowed: Playback capture for uid 1041 is denied as no package name could be retrieved from the package manager.
+10-02 18:03:54.959   464   567 I AudioFlinger: openOutput() this 0xf79ed000, module 10 Device AUDIO_DEVICE_OUT_HDMI, @:, SamplingRate 48000, Format 0x000001, Channels 0x3, flags 0x4001
+10-02 18:03:54.959   427   427 I audio_hw_primary: [adev_open_output_stream:3129] io 373: out:0xe8944400 dev:OUT_HDMI(0x400) addr:
+10-02 18:03:54.959   427   427 I audio_hw_primary: [adev_open_output_stream:3131] ch_mask:0x3 rate:48000 format:PCM_16_BIT(0x1) flags:0x4001
+10-02 18:03:54.959   427   427 I aml_mmap_audio: [outMmapInit:668] stream:0xe8944400
+10-02 18:03:54.959   427   427 I aml_mmap_audio: [dma_buffer_allocate:627] enter
+10-02 18:03:54.959   427   427 I DMABUFHEAPS: Using DMA-BUF heap named: system-uncached
+10-02 18:03:54.960   427   427 I aml_mmap_audio: [dma_buffer_allocate:661] s32DmaFd:24, pu8MmapAddr:0xe82ce000
+10-02 18:03:54.960   427   427 I aml_mmap_audio: [mmap_audio_register_client:914] OK ! stream 0xe8944400, client id 0
+10-02 18:03:54.960   427   427 I audio_hw_primary: [adev_open_output_stream:3377] vendor.media.llp 0
+10-02 18:03:54.960   427   427 I audio_hw_primary: [adev_open_output_stream:3445] result profile ch_mask:0x3 rate:48000 format:PCM_16_BIT(0x1) usecase:PCM_MMAP
+10-02 18:03:54.960   427   427 I sub_mixing_factory: [initSubMixingInputPcm:949] ++ io 373: out 0xe8944400, flags 0x4001, hwsync lpcm 0
+10-02 18:03:54.960   427   427 I audio_hw_utils: aml_get_stream_dump_file_name line 2607 file_name /data/vendor/audiohal/stream_pid427_tid427.pcm
+10-02 18:03:54.960   427   427 I audio_hw_primary: [adev_open_output_stream_new:7337] io 373: out: 0xe8944400 card:0 alsa devices:0 exit ------
+10-02 18:03:54.966   427   427 I audio_hw_primary: [out_get_buffer_size:527] out:0xe8944400 config.rate=48000, format:PCM_16_BIT(0x1), stream format:PCM_16_BIT(0x1)
+10-02 18:03:54.967   464 20826 I AudioFlinger: AudioFlinger's thread 0xf747c000 tid=20826 ready to run
+10-02 18:03:54.972   427   427 I audio_hw_primary: [out_set_volume:1325] out:0xe8944400 left:1.000000 continuous:0 internal_format:PCM_16_BIT dolby:0 direct pcm:1 mmap_pcm:1
+10-02 18:03:54.986   464   567 I UsecaseValidator: verifyAudioAttributes update usage: 1 to AUDIO_USAGE_GAME for output: 373 pid: 464 package: 
+10-02 18:03:54.986   464   567 D AAudioServiceEndpointMMAP: openWithFormat() mMapClient.attributionSource = AttributionSourceState{pid: 464, uid: 1041, packageName: (null), attributionTag: (null), token: binder:0xf783df78, renouncedPermissions: (null), next: []} => portHandle = 197
+10-02 18:03:54.986   464   567 D AAudioServiceEndpointMMAP: openWithFormat(format = 0x1) deviceId = 14, sessionId = -1
+10-02 18:03:54.987   427   427 I aml_mmap_audio: [outMmapCreateBuffer:479] stream:0xe8944400, min_size_frames:384
+10-02 18:03:54.987   427   427 I aml_mmap_audio: [outMmapCreateBuffer:501] mmap_fd:24, mmap address:0xe82ce000
+10-02 18:03:54.987   464   567 D AAudioServiceEndpointMMAP: createMmapBuffer() createMmapBuffer() buffer_size = 1536 fr, burst_size 384 fr, Sharable FD: Yes
+10-02 18:03:54.987   427   427 W aml_mmap_audio: [outMmapGetPosition:524] status:0 not start done or position:0 is 0
+10-02 18:03:54.987   427   427 I aml_mmap_audio: [outMmapGetPosition:531]   is first_fetch_position and return -ENOSYS
+10-02 18:03:54.987   427   427 W StreamHAL: Error from HAL stream in function get_mmap_position: Function not implemented
+10-02 18:03:54.987   464   567 D AAudioServiceEndpointMMAP: openWithFormat() got rate = 48000, channels = 2 channelMask = 0x3, deviceId = 14, capacity = 1536
+10-02 18:03:54.987   464   567 D AAudioServiceEndpointMMAP: openWithFormat() got format = 0x1 = AUDIO_FORMAT_PCM_16_BIT, frame size = 4, burst size = 384
+10-02 18:03:54.987   464   567 I AAudioServiceEndpointMMAP: Opened format=0x1 with result=0
+10-02 18:03:54.988   464 20827 D AAudioServiceStreamBase: run() MMAP entering >>>>>>>>>>>>>> COMMANDS
+10-02 18:03:54.989   464 20827 D SharedMemoryWrapper: fillParcelable counterFdIndex=2 readCounterSize=0, writeCounterSize=8
+10-02 18:03:54.989   464   567 D AudioStreamInternal_Service: configureDataInformation() original HW burst = 384, minMicros = 1000 => SW burst = 384
+10-02 18:03:54.989   464   567 D IsochronousClockModel: setFramesPerBurst() - mFramesPerBurst = 384 - mBurstPeriodNanos = 8000000
+10-02 18:03:54.989   464   567 D AAudioStream: setState(s#35) from 0 to 2
+10-02 18:03:54.991   464   567 I AAudioFlowGraph: configure() source format = 0x00000005, channels = 2, sink format = 0x00000001, channels = 2, useMonoBlend = 0, audioBalance = 0.000000, isExclusive 1
+10-02 18:03:54.992   464 20828 D AAudioServiceStreamBase: run() Shared entering >>>>>>>>>>>>>> COMMANDS
+10-02 18:03:54.993  1119  1320 I AudioSystemCmdService: onAudioPortListUpdate
+10-02 18:03:54.994  1119  1320 I AudioSystemCmdService: mAudioSink:[{{mHandle: 14, mRole: SINK}, mType: hdmi, mAddress: }], previousSink:[{{mHandle: 14, mRole: SINK}, mType: hdmi, mAddress: }]
+10-02 18:03:54.995  1119  1320 I AudioSystemCmdService: updateAudioPatch cur sink does not change.
+10-02 18:03:54.995 20786 20806 D AudioStreamInternal_Client: configureDataInformation() original HW burst = 384, minMicros = 1000 => SW burst = 384
+10-02 18:03:54.995 20786 20806 D IsochronousClockModel: setFramesPerBurst() - mFramesPerBurst = 384 - mBurstPeriodNanos = 8000000
+10-02 18:03:54.995 20786 20806 D AAudioStream: setState(s#1) from 0 to 2
+10-02 18:03:54.995 20786 20806 I AAudioFlowGraph: configure() source format = 0x00000005, channels = 2, sink format = 0x00000005, channels = 2, useMonoBlend = 0, audioBalance = 0.000000, isExclusive 0
+10-02 18:03:54.997 20786 20806 I AAudio  : AAudioStreamBuilder_openStream() returns 0 = AAUDIO_OK for s#1 ----------------
+10-02 18:03:54.999 20786 20806 D AAudio  : AAudioStream_requestStart(s#1) called --------------
+10-02 18:03:54.999 20786 20806 D AAudioStream: setState(s#1) from 2 to 3
+10-02 18:03:55.000   464 20828 D AAudioStream: setState(s#35) from 2 to 3
+10-02 18:03:55.002  3907 20761 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:03:55.002  3907 20761 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:03:55.002  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:03:55.002  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:03:55.002  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:03:55.007   464 20831 D AAudioServiceEndpointShared: aaudio_endpoint_thread_proc() called
+10-02 18:03:55.007   464 20831 D AAudioServiceEndpointPlay: callbackLoop() entering >>>>>>>>>>>>>>> MIXER
+10-02 18:03:55.007   464 20831 D AudioStreamInternal_Service: onEventFromServer - got AAUDIO_SERVICE_EVENT_STARTED
+10-02 18:03:55.007   464 20831 D AAudioStream: setState(s#35) from 3 to 4
+10-02 18:03:55.010 14013 20778 E ActivityThread: Failed to find provider info for com.google.android.apps.youtube.tvunplugged.client.provider
+10-02 18:03:55.017   427   427 I audio_hw_primary: [aml_audio_output_routing:3761] cur_devices:0x400 unmute_devices:0, mute_devices:0
+10-02 18:03:55.017   427   427 I audio_hw_primary: [adev_create_audio_patch:7600] Patch 37: MIX->DEVICE, num_src:1 num_sink:1 patch_src:INVAL
+10-02 18:03:55.017   427   427 I audio_hw_primary: [adev_create_audio_patch:7604] sink[0]: OUT_HDMI(id:14)
+10-02 18:03:55.017   427   427 I audio_hw_primary: [adev_create_audio_patch:7661] Patch 37: mix(io:373) -> dev[OUT_HDMI(id:14)]
+10-02 18:03:55.017  1119  1322 D UEventObserver: change@/devices/platform/auge_sound/sound/card0/controlC0��ACTION=change��DEVPATH=/devices/platform/auge_sound/sound/card0/controlC0��SUBSYSTEM=sound��AUDIO_FORMAT=0��MAJOR=116��MINOR=10��DEVNAME=snd/controlC0��SEQNUM=4042��
+10-02 18:03:55.018  1119  1322 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.sendBroadcast:1220 android.content.ContextWrapper.sendBroadcast:504 com.droidlogic.audioservice.services.AudioSystemCmdService$1.onUEvent:175 com.droidlogic.UEventObserver$UEventThread.sendEvent:213 com.droidlogic.UEventObserver$UEventThread.run:190 
+10-02 18:03:55.026  1119  1119 D NetflixService: handleMessage
+10-02 18:03:55.029   464 20827 D audioserver: FGS Logger Transaction failed
+10-02 18:03:55.029   464 20827 D audioserver: -129
+10-02 18:03:55.031   427   427 I aml_mmap_audio: [outMmapStart:428] stream:0xe8944400
+10-02 18:03:55.031   427   427 I aml_mmap_audio: [outMmapStart:445] --stream:0xe8944400
+10-02 18:03:55.032   427   427 I audio_hw_primary: [out_set_volume:1325] out:0xe8944400 left:1.000000 continuous:0 internal_format:PCM_16_BIT dolby:0 direct pcm:1 mmap_pcm:1
+10-02 18:03:55.034   427   613 I aml_mmap_audio: [mmap_audio_process_client_data:1085] client 0 ====> start
+10-02 18:03:55.034 20786 20806 D AAudio  : AAudioStream_requestStart(s#1) returned 0 ---------
+10-02 18:03:55.035  1119  1119 D NetflixService: org.worldfoundry.wf_game.aquarium is visible.
+10-02 18:03:55.035  1119  1119 D NetflixService: com.netflix.ninja is not top activity.
+10-02 18:03:55.035  1119  1119 I NetflixService: fg: false  mIsNetflixFg: false
+10-02 18:03:55.037  1119  1320 I AudioSystemCmdService: onAudioPatchListUpdate
+10-02 18:03:55.038 20786 20832 D AudioStreamInternalPlay_Client: callbackLoop() entering >>>>>>>>>>>>>>>
+10-02 18:03:55.038 20786 20832 D AudioStreamInternal_Client: onEventFromServer - got AAUDIO_SERVICE_EVENT_STARTED
+10-02 18:03:55.038 20786 20832 D AAudioStream: setState(s#1) from 3 to 4
+10-02 18:03:55.038  1119  1119 D NetflixService: org.worldfoundry.wf_game.aquarium is visible.
+10-02 18:03:55.038  1119  1119 D NetflixService: com.google.android.youtube.tv is not top activity.
+10-02 18:03:55.039  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:03:55.040  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:03:55.041  1119  1320 I AudioSystemCmdService: mAudioSink:[{{mHandle: 14, mRole: SINK}, mType: hdmi, mAddress: }], previousSink:[{{mHandle: 14, mRole: SINK}, mType: hdmi, mAddress: }]
+10-02 18:03:55.041  1119  1320 I AudioSystemCmdService: updateAudioPatch cur sink does not change.
+10-02 18:03:55.041  3907 20833 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:03:55.170   464 20827 W AAudioServiceEndpointMMAP: getExternalPosition too many frozen external position from HAL.
+10-02 18:03:55.269 14013 14125 I cn_CronetUrlRequestContext: destroyNativeStreamLocked org.chromium.net.impl.CronetBidirectionalStream@6bf667a
+10-02 18:03:55.272 14013 14061 W ComponentManagerImpl: Component type COMPONENT_TYPE_UNSPECIFIED is not supported.
+10-02 18:03:55.334   935   994 V WindowManagerShell: Transition animation finished (aborted=false), notifying core (#200)android.os.BinderProxy@88b4966@0
+10-02 18:03:55.337   655   757 V WindowManager: Finish Transition #200: created at 10-02 18:03:54.598 collect-started=0.271ms request-sent=18.843ms started=20.977ms ready=104.476ms sent=279.58ms finished=737.789ms
+10-02 18:03:55.340   935   994 V WindowManagerShell: Track 0 became idle
+10-02 18:03:55.340   935   994 V WindowManagerShell: All active transition animations finished
+10-02 18:03:55.383 14013 20778 E ActivityThread: Failed to find provider info for com.google.android.apps.youtube.tvunplugged.client.provider
+10-02 18:03:55.395 14013 14013 W BackgroundControllerHea: Memory trim level 20, clearing 1 preloads
+10-02 18:03:55.407  1119  1119 D NetflixService: handleMessage
+10-02 18:03:55.406 14013 14013 W BootModeAppToBackground: LauncherX to background
+10-02 18:03:55.410  1119  1119 D NetflixService: org.worldfoundry.wf_game.aquarium is visible.
+10-02 18:03:55.410  1119  1119 D NetflixService: com.netflix.ninja is not top activity.
+10-02 18:03:55.410  1119  1119 I NetflixService: fg: false  mIsNetflixFg: false
+10-02 18:03:55.413 14013 14061 W TifLauncherHelper: Allow remove LastInput? org.worldfoundry.wf_game.aquarium in foreground
+10-02 18:03:55.414  1119  1119 D NetflixService: org.worldfoundry.wf_game.aquarium is visible.
+10-02 18:03:55.414  1119  1119 D NetflixService: com.google.android.youtube.tv is not top activity.
+10-02 18:03:55.418 14013 14061 W LastUsedInputProtoDataS: Sending last used input update broadcast
+10-02 18:03:55.430 14013 14013 W KatnissIntegrationServi: disconnect Katniss service
+10-02 18:03:55.452  1119  1119 D NetflixService: handleMessage
+10-02 18:03:55.455 14013 14013 W LastUsedInputUpdateRece: Notify last used input data change
+10-02 18:03:55.455  1119  1119 D NetflixService: org.worldfoundry.wf_game.aquarium is visible.
+10-02 18:03:55.455  1119  1119 D NetflixService: com.netflix.ninja is not top activity.
+10-02 18:03:55.455  1119  1119 I NetflixService: fg: false  mIsNetflixFg: false
+10-02 18:03:55.461  1119  8998 D NetflixService: onForegroundActivitiesChanged pid:14013,uid:10052,fg:false
+10-02 18:03:55.463  1119  1119 D NetflixService: org.worldfoundry.wf_game.aquarium is visible.
+10-02 18:03:55.463  1119  1119 D NetflixService: com.google.android.youtube.tv is not top activity.
+10-02 18:03:55.887 14013 14125 I cn_CronetUrlRequestContext: destroyNativeStreamLocked org.chromium.net.impl.CronetBidirectionalStream@cf8a852
+10-02 18:03:55.897 14013 14060 W ComponentManagerImpl: Component type COMPONENT_TYPE_UNSPECIFIED is not supported.
+10-02 18:03:56.042  3907 20833 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:03:56.042  3907 20833 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:03:56.042  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:03:56.042  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:03:56.042  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:03:56.106  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:03:56.107  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:03:56.108  3907 20842 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:03:56.162  1119  1119 D NetflixService: handleMessage
+10-02 18:03:56.165  1119  1119 D NetflixService: org.worldfoundry.wf_game.aquarium is visible.
+10-02 18:03:56.165  1119  1119 D NetflixService: com.netflix.ninja is not top activity.
+10-02 18:03:56.165  1119  1119 I NetflixService: fg: false  mIsNetflixFg: false
+10-02 18:03:56.167  1119  1119 D NetflixService: org.worldfoundry.wf_game.aquarium is visible.
+10-02 18:03:56.167  1119  1119 D NetflixService: com.google.android.youtube.tv is not top activity.
+10-02 18:03:56.179  1119  1119 I ThermalService: CPU temperatures: [51.800003]
+10-02 18:03:57.109  3907 20842 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:03:57.109  3907 20842 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:03:57.109  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:03:57.109  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:03:57.110  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:03:57.166  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:03:57.167  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:03:57.167  3907 20843 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:03:58.168  3907 20843 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:03:58.169  3907 20843 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:03:58.169  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:03:58.169  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:03:58.169  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:03:58.183  1119  1119 I ThermalService: CPU temperatures: [51.600002]
+10-02 18:03:58.202  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:03:58.203  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:03:58.203  3907 20844 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:03:58.623   655  1431 E TaskPersister: File error accessing recents directory (directory doesn't exist?).
+10-02 18:03:59.205  3907 20844 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:03:59.205  3907 20844 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:03:59.205  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:03:59.205  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:03:59.205  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:03:59.261  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:03:59.262  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:03:59.262  3907 20845 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:00.190  1119  1119 I ThermalService: CPU temperatures: [51.4]
+10-02 18:04:00.264  3907 20845 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:00.264  3907 20845 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:00.264  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:00.264  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:00.264  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:00.314  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:00.315  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:00.315  3907 20846 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:01.316  3907 20846 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:01.317  3907 20846 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:01.317  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:01.317  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:01.317  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:01.362  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:01.363  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:01.364  3907 20847 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:02.193  1119  1119 I ThermalService: CPU temperatures: [51.300003]
+10-02 18:04:02.365  3907 20847 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:02.365  3907 20847 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:02.366  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:02.366  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:02.366  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:02.394  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:02.395  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:02.396  3907 20848 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:02.838   655   819 D ActivityManager: freezing 25946 com.google.android.katniss:search
+10-02 18:04:02.839   655   819 D ActivityManager: freezing 31464 com.google.android.tv.dfuservice
+10-02 18:04:02.840   655   819 D ActivityManager: freezing 14106 com.google.android.youtube.tv
+10-02 18:04:02.841   655   819 D ActivityManager: freezing 14549 com.google.android.youtube.tv.recommendations
+10-02 18:04:02.842   655   819 D ActivityManager: freezing 14247 com.google.android.apps.tv.dreamx
+10-02 18:04:02.844   655   819 D ActivityManager: freezing 13658 com.google.android.tungsten.setupwraith
+10-02 18:04:02.969   655   819 D ActivityManager: freezing 31197 com.google.process.gservices
+10-02 18:04:02.970   655   819 D ActivityManager: freezing 18967 com.google.android.partnersetup
+10-02 18:04:02.972   655   819 D ActivityManager: freezing 18713 com.google.android.syncadapters.calendar
+10-02 18:04:02.973   655   819 D ActivityManager: freezing 18765 com.android.providers.calendar
+10-02 18:04:02.973   655   819 D ActivityManager: freezing 12923 com.android.keychain
+10-02 18:04:02.974   655   819 D ActivityManager: freezing 2192 com.google.android.permissioncontroller
+10-02 18:04:03.397  3907 20848 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:03.397  3907 20848 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:03.397  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:03.397  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:03.398  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:03.434  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:03.436  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:03.437  3907 20849 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:03.800 20786 20806 I wf_game : key code=4 action=0 (Back: hides the phone panel)
+10-02 18:04:03.867 20786 20806 I wf_game : key code=4 action=1 (Back: hides the phone panel)
+10-02 18:04:04.197  1119  1119 I ThermalService: CPU temperatures: [51.9]
+10-02 18:04:04.438  3907 20849 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:04.438  3907 20849 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:04.438  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:04.438  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:04.438  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:04.478  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:04.479  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:04.480  3907 20855 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:05.481  3907 20855 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:05.481  3907 20855 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:05.481  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:05.481  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:05.481  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:05.506  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:05.507  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:05.508  3907 20856 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:06.200  1119  1119 I ThermalService: CPU temperatures: [52.100002]
+10-02 18:04:06.509  3907 20856 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:06.509  3907 20856 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:06.509  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:06.509  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:06.509  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:06.542  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:06.543  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:06.543  3907 20857 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:07.544  3907 20857 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:07.545  3907 20857 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:07.545  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:07.545  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:07.545  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:07.594  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:07.595  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:07.598  3907 20858 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:08.203  1119  1119 I ThermalService: CPU temperatures: [52.000004]
+10-02 18:04:08.600  3907 20858 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:08.600  3907 20858 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:08.600  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:08.600  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:08.600  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:08.659  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:08.665  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:08.666  3907 20859 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:09.666  3907 20859 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:09.666  3907 20859 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:09.666  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:09.666  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:09.666  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:09.708  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:09.709  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:09.709  3907 20860 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:10.207  1119  1119 I ThermalService: CPU temperatures: [52.000004]
+10-02 18:04:10.711  3907 20860 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:10.711  3907 20860 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:10.711  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:10.711  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:10.711  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:10.762  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:10.766  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:10.767  3907 20861 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:11.768  3907 20861 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:11.769  3907 20861 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:11.769  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:11.769  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:11.769  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:11.810  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:11.811  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:11.812  3907 20862 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:12.210  1119  1119 I ThermalService: CPU temperatures: [51.800003]
+10-02 18:04:12.813  3907 20862 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:12.818  3907 20862 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:12.819  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:12.819  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:12.819  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:12.866  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:12.868  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:12.869  3907 20863 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:13.870  3907 20863 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:13.870  3907 20863 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:13.870  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:13.870  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:13.871  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:13.902  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:13.903  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:13.904  3907 20864 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:14.214  1119  1119 I ThermalService: CPU temperatures: [51.600002]
+10-02 18:04:14.905  3907 20864 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:14.905  3907 20864 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:14.906  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:14.906  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:14.906  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:14.946  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:14.947  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:14.948  3907 20865 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:15.949  3907 20865 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:15.949  3907 20865 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:15.949  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:15.949  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:15.949  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:16.000  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:16.001  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:16.002  3907 20866 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:16.217  1119  1119 I ThermalService: CPU temperatures: [52.000004]
+10-02 18:04:17.002  3907 20866 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:17.002  3907 20866 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:17.002  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:17.002  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:17.003  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:17.028  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:17.029  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:17.029  3907 20867 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:18.031  3907 20867 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:18.031  3907 20867 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:18.031  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:18.031  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:18.031  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:18.058  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:18.059  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:18.060  3907 20868 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:18.219  1119  1119 I ThermalService: CPU temperatures: [52.000004]
+10-02 18:04:19.061  3907 20868 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:19.061  3907 20868 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:19.061  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:19.061  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:19.061  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:19.114  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:19.115  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:19.116  3907 20869 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:19.450   655   655 V HotPlugDetectionAction: Poll all devices.
+10-02 18:04:20.117  3907 20869 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:20.117  3907 20869 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:20.117  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:20.118  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:20.118  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:20.178  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:20.179  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:20.179  3907 20870 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:20.223  1119  1119 I ThermalService: CPU temperatures: [52.000004]
+10-02 18:04:21.181  3907 20870 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:21.181  3907 20870 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:21.181  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:21.181  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:21.181  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:21.234  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:21.235  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:21.236  3907 20871 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:22.227  1119  1119 I ThermalService: CPU temperatures: [51.9]
+10-02 18:04:22.237  3907 20871 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:22.237  3907 20871 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:22.237  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:22.237  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:22.237  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:22.290  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:22.293  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:22.294  3907 20872 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:23.296  3907 20872 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:23.296  3907 20872 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:23.296  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:23.296  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:23.296  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:23.327  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:23.329  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:23.329  3907 20873 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:24.231  1119  1119 I ThermalService: CPU temperatures: [51.9]
+10-02 18:04:24.330  3907 20873 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:24.330  3907 20873 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:24.331  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:24.331  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:24.331  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:24.374  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:24.375  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:24.377  3907 20874 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:25.378  3907 20874 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:25.378  3907 20874 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:25.378  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:25.378  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:25.378  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:25.418  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:25.419  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:25.420  3907 20875 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:26.234  1119  1119 I ThermalService: CPU temperatures: [51.9]
+10-02 18:04:26.421  3907 20875 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:26.421  3907 20875 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:26.421  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:26.421  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:26.421  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:26.466  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:26.467  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:26.468  3907 20876 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:26.767   655   655 V HotPlugDetectionAction: Finish poll all devices.
+10-02 18:04:27.469  3907 20876 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:27.469  3907 20876 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:27.469  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:27.469  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:27.469  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:27.518  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:27.519  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:27.520  3907 20877 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:28.235  1119  1119 I ThermalService: CPU temperatures: [52.000004]
+10-02 18:04:28.521  3907 20877 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:28.521  3907 20877 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:28.521  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:28.521  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:28.521  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:28.542  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:28.543  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:28.544  3907 20878 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:29.545  3907 20878 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:29.545  3907 20878 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:29.545  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:29.545  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:29.545  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:29.578  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:29.579  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:29.580  3907 20879 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:30.239  1119  1119 I ThermalService: CPU temperatures: [52.000004]
+10-02 18:04:30.401  2076  2076 I cast_shell: [1002/180430.400957:INFO:service_base.h(78)] Size of the map for type AuthTokenResponse is 0
+10-02 18:04:30.581  3907 20879 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:30.587  3907 20879 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:30.587  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:30.587  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:30.587  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:30.618  2076  2076 I cast_shell: [1002/180430.618735:INFO:service_base.h(246)] Container sizes for type CloudSetting are (session_info_map: 0), (topic_info_map: 21), (pending_events: 0).
+10-02 18:04:30.634  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:30.635  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:30.636  3907 20882 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:31.637  3907 20882 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:31.637  3907 20882 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:31.637  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:31.637  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:31.637  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:31.666  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:31.667  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:31.668  3907 20883 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:31.942  2076  2076 I cast_shell: [1002/180431.942681:INFO:metrics_stat_logger.cc(38)] Metrics stat for the past 60 secs : total=2
+10-02 18:04:31.942  2076  2076 I cast_shell: [metrics_stat_logger] Cast.Discovery.Mdns.Request.In=2
+10-02 18:04:31.942  2076  2076 I cast_shell: [metrics_stat_logger] Cast.Discovery.Mdns.Response.Out=2
+10-02 18:04:32.243  1119  1119 I ThermalService: CPU temperatures: [52.000004]
+10-02 18:04:32.669  3907 20883 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:32.669  3907 20883 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:32.669  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:32.669  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:32.669  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:32.714  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:32.715  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:32.716  3907 20884 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:33.075 32344 12983 I PlayCommon: [145] Preparing logs for uploading
+10-02 18:04:33.076 32344 12983 W PlayCommon: [145] No account for auth token provided
+10-02 18:04:33.076 32344 12983 I PlayCommon: [145] Connecting to server: https://play.googleapis.com/play/log?format=raw&proto_v2=true
+10-02 18:04:33.090 32344 12983 D TrafficStats: tagSocket(137) with statsTag=0x6900, statsUid=-1
+10-02 18:04:33.304 32344 12983 I PlayCommon: [145] Successfully uploaded logs.
+10-02 18:04:33.642  2076  2686 I cast_shell: [1002/180433.642653:INFO:mdns_app_filter.cc(3550)] Mdns cast queries recently sent: queries=1
+10-02 18:04:33.717  3907 20884 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:33.717  3907 20884 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:33.717  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:33.717  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:33.717  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:33.762  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:33.763  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:33.764  3907 20887 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:34.247  1119  1119 I ThermalService: CPU temperatures: [52.600002]
+10-02 18:04:34.765  3907 20887 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:34.765  3907 20887 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:34.766  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:34.766  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:34.766  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:34.798  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:34.799  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:34.799  3907 20899 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:35.350   655   819 D ActivityManager: freezing 1504 com.google.android.gms
+10-02 18:04:35.801  3907 20899 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:35.801  3907 20899 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:35.801  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:35.801  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:35.801  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:35.834  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:35.835  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:35.836  3907 20904 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:36.248  1119  1119 I ThermalService: CPU temperatures: [52.000004]
+10-02 18:04:36.837  3907 20904 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:36.837  3907 20904 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:36.837  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:36.837  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:36.837  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:36.898  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:36.900  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:36.900  3907 20913 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:37.901  3907 20913 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:37.901  3907 20913 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:37.902  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:37.902  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:37.902  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:37.938  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:37.940  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:37.940  3907 20918 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:38.251  1119  1119 I ThermalService: CPU temperatures: [52.000004]
+10-02 18:04:38.942  3907 20918 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:38.942  3907 20918 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:38.943  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:38.943  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:38.943  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:38.974  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:38.975  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:38.976  3907 20923 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:39.977  3907 20923 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:39.977  3907 20923 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:39.977  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:39.977  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:39.978  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:40.023  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:40.025  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:40.028  3907 20932 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:40.255  1119  1119 I ThermalService: CPU temperatures: [51.800003]
+10-02 18:04:41.028  3907 20932 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:41.028  3907 20932 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:41.029  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:41.029  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:41.029  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:41.063  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:41.064  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:41.066  3907 20937 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:42.067  3907 20937 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:42.067  3907 20937 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:42.070  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:42.070  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:42.070  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:42.118  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:42.119  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:42.120  3907 20945 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:42.258  1119  1119 I ThermalService: CPU temperatures: [52.2]
+10-02 18:04:43.121  3907 20945 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:43.121  3907 20945 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:43.121  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:43.121  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:43.121  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:43.154  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:43.156  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:43.156  3907 20951 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:44.158  3907 20951 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:44.158  3907 20951 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:44.158  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:44.158  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:44.158  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:44.214  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:44.219  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:44.220  3907 20958 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:44.262  1119  1119 I ThermalService: CPU temperatures: [52.2]
+10-02 18:04:45.222  3907 20958 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:45.222  3907 20958 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:45.222  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:45.222  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:45.222  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:45.266  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:45.267  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:45.268  3907 20965 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:46.268  1119  1119 I ThermalService: CPU temperatures: [52.100002]
+10-02 18:04:46.269  3907 20965 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:46.269  3907 20965 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:46.270  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:46.270  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:46.270  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:46.302  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:46.303  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:46.303  3907 20970 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:46.832 20976 20976 W BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+10-02 18:04:46.834 20976 20976 W ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+10-02 18:04:46.870 20976 20976 I DMABUFHEAPS: Using : Non-legacy ION heaps
+10-02 18:04:46.870 20976 20976 E DMABUFHEAPS: No ion heap of name ion-dev exists
+10-02 18:04:46.871 20976 20976 E DMABUFHEAPS: No ion heap of name ion-fb exists
+10-02 18:04:46.871 20976 20976 E DMABUFHEAPS: No ion heap of name ion_secure exists
+10-02 18:04:46.870 20976 20976 W screencap: type=1400 audit(0.0:1318): avc:  denied  { read } for  name="heap-gfx" dev="tmpfs" ino=538 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:04:46.870 20976 20976 W screencap: type=1400 audit(0.0:1319): avc:  denied  { read } for  name="heap-fb" dev="tmpfs" ino=546 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:04:46.870 20976 20976 W screencap: type=1400 audit(0.0:1320): avc:  denied  { read } for  name="heap-cached-codecmm" dev="tmpfs" ino=537 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:04:46.870 20976 20976 W screencap: type=1400 audit(0.0:1321): avc:  denied  { read } for  name="heap-codecmm" dev="tmpfs" ino=535 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:04:47.305  3907 20970 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:47.305  3907 20970 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:47.305  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:47.305  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:47.305  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:47.346  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:47.347  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:47.348  3907 20983 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:47.808 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:48.245 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:48.272  1119  1119 I ThermalService: CPU temperatures: [52.300003]
+10-02 18:04:48.349  3907 20983 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:48.350  3907 20983 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:48.350  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:48.350  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:48.350  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:48.384  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:48.385  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:48.386  3907 20998 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:48.399 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:48.867 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:48.980 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:49.387  3907 20998 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:49.387  3907 20998 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:49.387  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:49.387  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:49.387  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:49.418  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:49.419  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:49.420  3907 21011 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:49.513 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:49.647 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:50.182 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:50.276  1119  1119 I ThermalService: CPU temperatures: [52.4]
+10-02 18:04:50.347 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:50.421  3907 21011 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:50.421  3907 21011 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:50.421  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:50.421  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:50.421  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:50.450  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:50.452  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:50.452  3907 21030 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:50.841 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:51.000 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:51.453  3907 21030 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:51.454  3907 21030 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:51.454  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:51.454  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:51.454  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:51.454 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:51.494  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:51.495  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:51.495  3907 21040 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:51.609 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:52.083 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:52.234 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:52.279  1119  1119 I ThermalService: CPU temperatures: [52.300003]
+10-02 18:04:52.497  3907 21040 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:52.497  3907 21040 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:52.497  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:52.497  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:52.497  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:52.542  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:52.543  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:52.544  3907 21059 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:52.672 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:52.947 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:53.397 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:53.526 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:53.545  3907 21059 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:53.545  3907 21059 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:53.545  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:53.545  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:53.545  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:53.594  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:53.595  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:53.596  3907 21074 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:54.003 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:54.158 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:54.283  1119  1119 I ThermalService: CPU temperatures: [51.9]
+10-02 18:04:54.597  3907 21074 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:54.597  3907 21074 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:54.597  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:54.597  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:54.597  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:54.627 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:54.634  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:54.636  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:54.636  3907 21085 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:54.785 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:55.042   655   770 D ActivityManager: sync unfroze 12923 com.android.keychain for 10
+10-02 18:04:55.235 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:55.417 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:55.475  2076  1774 I cast_shell: [1002/180455.475872:INFO:ssdp_device.c(101)] SSDP packets sent for 120 seconds = 4
+10-02 18:04:55.637  3907 21085 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:55.637  3907 21085 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:55.638  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:55.638  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:55.638  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:55.695  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:55.697  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:55.697  3907 21104 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:55.910 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:56.068 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:56.286  1119  1119 I ThermalService: CPU temperatures: [52.2]
+10-02 18:04:56.533 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:56.686 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:56.698  3907 21104 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:56.698  3907 21104 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:56.699  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:56.699  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:56.699  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:56.742  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:56.743  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:56.744  3907 21119 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:57.160 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:57.312 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:57.745  3907 21119 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:57.745  3907 21119 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:57.745  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:57.745  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:57.746  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:57.775 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:57.778  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:57.780  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:57.780  3907 21129 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:57.907 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:58.289  1119  1119 I ThermalService: CPU temperatures: [51.9]
+10-02 18:04:58.371 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:58.525 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:58.781  3907 21129 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:58.781  3907 21129 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:58.781  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:58.782  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:58.782  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:58.830  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:58.831  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:58.832  3907 21148 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:04:58.999 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:59.135 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:59.611 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:04:59.720 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:04:59.833  3907 21148 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:04:59.834  3907 21148 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:04:59.834  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:04:59.834  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:04:59.834  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:04:59.874  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:04:59.876  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:04:59.877  3907 21163 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:00.214 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:00.292  1119  1119 I ThermalService: CPU temperatures: [52.600002]
+10-02 18:05:00.604 21170 21170 W BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+10-02 18:05:00.605 21170 21170 W ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+10-02 18:05:00.636 21170 21170 I DMABUFHEAPS: Using : Non-legacy ION heaps
+10-02 18:05:00.636 21170 21170 E DMABUFHEAPS: No ion heap of name ion-dev exists
+10-02 18:05:00.636 21170 21170 E DMABUFHEAPS: No ion heap of name ion-fb exists
+10-02 18:05:00.636 21170 21170 E DMABUFHEAPS: No ion heap of name ion_secure exists
+10-02 18:05:00.634 21170 21170 W screencap: type=1400 audit(0.0:1322): avc:  denied  { read } for  name="heap-gfx" dev="tmpfs" ino=538 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:05:00.634 21170 21170 W screencap: type=1400 audit(0.0:1323): avc:  denied  { read } for  name="heap-fb" dev="tmpfs" ino=546 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:05:00.634 21170 21170 W screencap: type=1400 audit(0.0:1324): avc:  denied  { read } for  name="heap-cached-codecmm" dev="tmpfs" ino=537 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:05:00.634 21170 21170 W screencap: type=1400 audit(0.0:1325): avc:  denied  { read } for  name="heap-codecmm" dev="tmpfs" ino=535 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:05:00.878  3907 21163 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:00.878  3907 21163 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:00.878  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:00.878  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:00.878  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:00.925  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:00.927  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:00.927  3907 21176 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:01.657 20786 20806 I wf_game : key code=23 action=0 mask=0x1
+10-02 18:05:01.929  3907 21176 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:01.929  3907 21176 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:01.929  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:01.929  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:01.929  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:01.966  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:01.967  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:01.968  3907 21186 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:02.111 20786 20806 I wf_game : key code=23 action=1 mask=0x1
+10-02 18:05:02.296  1119  1119 I ThermalService: CPU temperatures: [52.300003]
+10-02 18:05:02.969  3907 21186 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:02.969  3907 21186 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:02.969  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:02.969  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:02.970  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:03.014  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:03.015  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:03.016  3907 21191 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:04.017  3907 21191 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:04.017  3907 21191 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:04.017  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:04.018  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:04.018  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:04.067  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:04.071  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:04.071  3907 21200 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:04.299  1119  1119 I ThermalService: CPU temperatures: [52.100002]
+10-02 18:05:04.624 32344 32385 I Finsky  : [66] AIM: AppInfoManager-Perf > Destroying AppInfoManager ...
+10-02 18:05:05.073  3907 21200 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:05.073  3907 21200 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:05.073  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:05.073  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:05.073  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:05.088   655   819 D ActivityManager: freezing 12883 com.android.providers.tv
+10-02 18:05:05.130  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:05.131  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:05.132  3907 21205 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:06.133  3907 21205 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:06.133  3907 21205 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:06.133  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:06.133  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:06.133  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:06.182  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:06.183  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:06.183  3907 21214 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:06.304  1119  1119 I ThermalService: CPU temperatures: [51.800003]
+10-02 18:05:07.186  3907 21214 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:07.187  3907 21214 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:07.187  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:07.187  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:07.187  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:07.226  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:07.227  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:07.228  3907 21219 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:08.229  3907 21219 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:08.229  3907 21219 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:08.229  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:08.229  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:08.229  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:08.270  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:08.271  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:08.271  3907 21228 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:08.307  1119  1119 I ThermalService: CPU temperatures: [52.2]
+10-02 18:05:09.273  3907 21228 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:09.273  3907 21228 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:09.274  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:09.274  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:09.274  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:09.319  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:09.326  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:09.327  3907 21233 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:10.312  1119  1119 I ThermalService: CPU temperatures: [51.800003]
+10-02 18:05:10.328  3907 21233 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:10.328  3907 21233 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:10.328  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:10.328  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:10.328  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:10.366  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:10.367  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:10.368  3907 21238 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:11.369  3907 21238 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:11.369  3907 21238 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:11.369  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:11.369  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:11.369  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:11.398  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:11.399  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:11.399  3907 21247 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:12.315  1119  1119 I ThermalService: CPU temperatures: [52.2]
+10-02 18:05:12.401  3907 21247 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:12.401  3907 21247 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:12.401  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:12.401  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:12.401  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:12.455  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:12.456  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:12.457  3907 21252 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:13.458  3907 21252 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:13.458  3907 21252 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:13.458  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:13.458  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:13.459  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:13.494  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:13.495  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:13.495  3907 21257 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:13.883 21263 21263 W BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+10-02 18:05:13.883 21263 21263 W ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+10-02 18:05:13.918 21263 21263 I DMABUFHEAPS: Using : Non-legacy ION heaps
+10-02 18:05:13.918 21263 21263 E DMABUFHEAPS: No ion heap of name ion-dev exists
+10-02 18:05:13.918 21263 21263 E DMABUFHEAPS: No ion heap of name ion-fb exists
+10-02 18:05:13.918 21263 21263 W screencap: type=1400 audit(0.0:1326): avc:  denied  { read } for  name="heap-gfx" dev="tmpfs" ino=538 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:05:13.918 21263 21263 E DMABUFHEAPS: No ion heap of name ion_secure exists
+10-02 18:05:13.918 21263 21263 W screencap: type=1400 audit(0.0:1327): avc:  denied  { read } for  name="heap-fb" dev="tmpfs" ino=546 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:05:13.918 21263 21263 W screencap: type=1400 audit(0.0:1328): avc:  denied  { read } for  name="heap-cached-codecmm" dev="tmpfs" ino=537 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:05:13.918 21263 21263 W screencap: type=1400 audit(0.0:1329): avc:  denied  { read } for  name="heap-codecmm" dev="tmpfs" ino=535 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:05:14.319  1119  1119 I ThermalService: CPU temperatures: [53.2]
+10-02 18:05:14.497  3907 21257 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:14.497  3907 21257 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:14.497  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:14.497  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:14.497  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:14.546  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:14.548  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:14.548  3907 21270 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:14.915 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:15.096   655   819 D ActivityManager: freezing 12923 com.android.keychain
+10-02 18:05:15.365 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:15.471 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:15.550  3907 21270 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:15.550  3907 21270 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:15.550  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:15.550  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:15.550  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:15.571  2076  2686 I cast_shell: [1002/180515.571412:INFO:mdns_app_filter.cc(3358)] MdnsAppFilter: responses sent in 96 seconds: 9
+10-02 18:05:15.582  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:15.583  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:15.584  3907 21285 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:15.594   655  2542 D WifiNl80211Manager: Scan result ready event
+10-02 18:05:15.595   655  2542 D WifiNative: Scan result ready event
+10-02 18:05:15.596  1055  1276 D IpClient/wlan0: interfaceLinkStateChanged: ifindex 15 up
+10-02 18:05:15.902 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:16.056 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:16.323  1119  1119 I ThermalService: CPU temperatures: [51.800003]
+10-02 18:05:16.585  3907 21285 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:16.585  3907 21285 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:16.585  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:16.585  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:16.585  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:16.590 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:16.614  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:16.615  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:16.616  3907 21299 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:16.757 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:17.292 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:17.425 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:17.617  3907 21299 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:17.617  3907 21299 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:17.617  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:17.617  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:17.617  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:17.666  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:17.667  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:17.668  3907 21314 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:17.910 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:18.070 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:18.326  1119  1119 I ThermalService: CPU temperatures: [52.100002]
+10-02 18:05:18.505 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:18.669  3907 21314 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:18.669  3907 21314 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:18.669  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:18.669  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:18.669  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:18.684 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:18.702  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:18.704  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:18.705  3907 21333 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:19.126 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:19.258 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:19.450   655   655 V HotPlugDetectionAction: Poll all devices.
+10-02 18:05:19.688 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:19.706  3907 21333 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:19.706  3907 21333 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:19.706  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:19.706  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:19.706  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:19.758  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:19.763  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:19.766  3907 21345 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:19.851 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:20.314 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:20.330  1119  1119 I ThermalService: CPU temperatures: [52.7]
+10-02 18:05:20.467 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:20.770  3907 21345 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:20.770  3907 21345 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:20.770  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:20.770  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:20.771  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:20.825  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:20.826  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:20.827  3907 21358 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:20.950 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:21.100 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:21.576 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:21.724 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:21.828  3907 21358 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:21.828  3907 21358 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:21.828  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:21.828  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:21.828  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:21.870  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:21.871  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:21.872  3907 21377 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:22.235 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:22.333  1119  1119 I ThermalService: CPU temperatures: [52.4]
+10-02 18:05:22.431 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:22.873  3907 21377 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:22.873  3907 21377 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:22.873  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:22.873  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:22.873  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:22.919 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:22.919  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:22.921  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:22.922  3907 21387 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:23.079 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:23.561 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:23.857 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:23.922  3907 21387 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:23.922  3907 21387 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:23.923  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:23.923  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:23.923  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:23.962  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:23.964  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:23.965  3907 21406 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:24.335  1119  1119 I ThermalService: CPU temperatures: [52.100002]
+10-02 18:05:24.348 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:24.477 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:24.953 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:24.967  3907 21406 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:24.967  3907 21406 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:24.967  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:24.967  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:24.967  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:24.998  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:24.999  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:24.999  3907 21416 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:25.051 32344 32364 I Finsky  : [47] Stats for Executor: LightweightExecutor noy@8d21494[Running, pool size = 3, active threads = 0, queued tasks = 0, completed tasks = 1666]
+10-02 18:05:25.051 32344 32364 I Finsky  : [47] Stats for Executor: BlockingExecutor noy@2300b3d[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 424]
+10-02 18:05:25.052 32344 32364 I Finsky  : [47] Stats for Executor: bgExecutor noy@f8f32[Running, pool size = 4, active threads = 0, queued tasks = 0, completed tasks = 4841]
+10-02 18:05:25.171 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:25.660 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:25.838 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:26.000  3907 21416 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:26.001  3907 21416 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:26.001  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:26.001  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:26.001  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:26.034  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:26.035  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:26.035  3907 21431 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:26.271 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:26.340  1119  1119 I ThermalService: CPU temperatures: [52.7]
+10-02 18:05:26.424 20786 20806 I wf_game : key code=21 action=0 mask=0x4000
+10-02 18:05:26.745   655   655 V HotPlugDetectionAction: Finish poll all devices.
+10-02 18:05:26.919 20786 20806 I wf_game : key code=21 action=1 mask=0x4000
+10-02 18:05:27.037  3907 21431 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:27.037  3907 21431 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:27.037  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:27.037  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:27.037  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:27.070  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:27.072  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:27.073  3907 21448 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:27.310 21446 21446 W BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+10-02 18:05:27.310 21446 21446 W ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+10-02 18:05:27.344 21446 21446 I DMABUFHEAPS: Using : Non-legacy ION heaps
+10-02 18:05:27.344 21446 21446 E DMABUFHEAPS: No ion heap of name ion-dev exists
+10-02 18:05:27.344 21446 21446 E DMABUFHEAPS: No ion heap of name ion-fb exists
+10-02 18:05:27.344 21446 21446 E DMABUFHEAPS: No ion heap of name ion_secure exists
+10-02 18:05:27.342 21446 21446 W screencap: type=1400 audit(0.0:1330): avc:  denied  { read } for  name="heap-gfx" dev="tmpfs" ino=538 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:05:27.342 21446 21446 W screencap: type=1400 audit(0.0:1331): avc:  denied  { read } for  name="heap-fb" dev="tmpfs" ino=546 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:05:27.342 21446 21446 W screencap: type=1400 audit(0.0:1332): avc:  denied  { read } for  name="heap-cached-codecmm" dev="tmpfs" ino=537 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:05:27.342 21446 21446 W screencap: type=1400 audit(0.0:1333): avc:  denied  { read } for  name="heap-codecmm" dev="tmpfs" ino=535 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:05:28.075  3907 21448 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:28.075  3907 21448 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:28.075  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:28.075  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:28.075  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:28.117  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:28.118  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:28.119  3907 21454 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:28.339 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:28.345  1119  1119 I ThermalService: CPU temperatures: [52.7]
+10-02 18:05:28.828 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:28.976 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:29.120  3907 21454 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:29.120  3907 21454 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:29.121  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:29.121  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:29.121  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:29.158  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:29.163  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:29.164  3907 21472 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:29.472 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:29.574 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:30.082 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:30.166  3907 21472 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:30.166  3907 21472 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:30.167  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:30.167  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:30.167  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:30.223  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:30.225  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:30.226  3907 21488 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:30.240 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:30.348  1119  1119 I ThermalService: CPU temperatures: [52.300003]
+10-02 18:05:30.401  2076  2076 I cast_shell: [1002/180530.401411:INFO:service_base.h(78)] Size of the map for type AuthTokenResponse is 0
+10-02 18:05:30.619  2076  2076 I cast_shell: [1002/180530.619030:INFO:service_base.h(246)] Container sizes for type CloudSetting are (session_info_map: 0), (topic_info_map: 21), (pending_events: 0).
+10-02 18:05:30.736 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:30.871 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:31.226  3907 21488 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:31.226  3907 21488 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:31.227  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:31.227  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:31.227  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:31.258  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:31.260  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:31.261  3907 21498 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:31.333 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:31.456 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:31.942  2076  2076 I cast_shell: [1002/180531.942792:INFO:metrics_stat_logger.cc(38)] Metrics stat for the past 60 secs : total=3
+10-02 18:05:31.942  2076  2076 I cast_shell: [metrics_stat_logger] Cast.Discovery.Mdns.Query.Cast.Count=1
+10-02 18:05:31.942  2076  2076 I cast_shell: [metrics_stat_logger] Cast.Discovery.Mdns.Request.In=2
+10-02 18:05:31.942  2076  2076 I cast_shell: [metrics_stat_logger] Cast.Discovery.Mdns.Response.Out=2
+10-02 18:05:31.956 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:32.122 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:32.262  3907 21498 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:32.262  3907 21498 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:32.262  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:32.262  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:32.262  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:32.314  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:32.315  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:32.316  3907 21513 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:32.352  1119  1119 I ThermalService: CPU temperatures: [51.9]
+10-02 18:05:32.656 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:32.823 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:33.265 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:33.317  3907 21513 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:33.317  3907 21513 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:33.318  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:33.318  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:33.318  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:33.371  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:33.372  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:33.373  3907 21532 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:33.421 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:33.643  2076  2686 I cast_shell: [1002/180533.643459:INFO:mdns_app_filter.cc(3550)] Mdns cast queries recently sent: queries=1
+10-02 18:05:33.892 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:34.060 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:34.355  1119  1119 I ThermalService: CPU temperatures: [52.300003]
+10-02 18:05:34.374  3907 21532 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:34.374  3907 21532 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:34.374  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:34.374  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:34.375  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:34.422  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:34.424  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:34.427  3907 21544 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:34.533 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:34.658 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:35.151 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:35.285 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:35.428  3907 21544 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:35.428  3907 21544 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:35.429  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:35.429  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:35.429  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:35.475  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:35.477  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:35.478  3907 21561 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:35.796 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:35.971 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:36.359  1119  1119 I ThermalService: CPU temperatures: [52.300003]
+10-02 18:05:36.417 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:36.479  3907 21561 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:36.479  3907 21561 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:36.480  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:36.480  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:36.480  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:36.510  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:36.511  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:36.512  3907 21575 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:36.543 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:37.012 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:37.139 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:37.513  3907 21575 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:37.513  3907 21575 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:37.513  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:37.513  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:37.514  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:37.550  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:37.551  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:37.551  3907 21588 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:37.624 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:37.767 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:38.231 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:38.362  1119  1119 I ThermalService: CPU temperatures: [52.800003]
+10-02 18:05:38.364 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:38.552  3907 21588 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:38.552  3907 21588 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:38.553  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:38.553  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:38.553  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:38.602  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:38.605  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:38.606  3907 21607 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:38.797 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:38.933 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:39.403 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:39.558 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:39.607  3907 21607 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:39.608  3907 21607 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:39.608  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:39.608  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:39.608  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:39.642  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:39.643  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:39.644  3907 21624 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:40.023 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:40.233 20786 20806 I wf_game : key code=22 action=0 mask=0x2000
+10-02 18:05:40.366  1119  1119 I ThermalService: CPU temperatures: [52.2]
+10-02 18:05:40.645  3907 21624 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:40.645  3907 21624 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:40.645  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:40.645  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:40.645  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:40.682  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:40.685  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:40.686  3907 21639 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:40.734 20786 20806 I wf_game : key code=22 action=1 mask=0x2000
+10-02 18:05:41.122 21642 21642 W BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+10-02 18:05:41.123 21642 21642 W ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+10-02 18:05:41.163 21642 21642 I DMABUFHEAPS: Using : Non-legacy ION heaps
+10-02 18:05:41.163 21642 21642 E DMABUFHEAPS: No ion heap of name ion-dev exists
+10-02 18:05:41.162 21642 21642 W screencap: type=1400 audit(0.0:1334): avc:  denied  { read } for  name="heap-gfx" dev="tmpfs" ino=538 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:05:41.163 21642 21642 E DMABUFHEAPS: No ion heap of name ion-fb exists
+10-02 18:05:41.163 21642 21642 E DMABUFHEAPS: No ion heap of name ion_secure exists
+10-02 18:05:41.162 21642 21642 W screencap: type=1400 audit(0.0:1335): avc:  denied  { read } for  name="heap-fb" dev="tmpfs" ino=546 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:05:41.162 21642 21642 W screencap: type=1400 audit(0.0:1336): avc:  denied  { read } for  name="heap-cached-codecmm" dev="tmpfs" ino=537 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:05:41.162 21642 21642 W screencap: type=1400 audit(0.0:1337): avc:  denied  { read } for  name="heap-codecmm" dev="tmpfs" ino=535 scontext=u:r:shell:s0 tcontext=u:object_r:dmabuf_heap_device:s0 tclass=chr_file permissive=0
+10-02 18:05:41.687  3907 21639 W adbd    : timed out while waiting for FUNCTIONFS_BIND, trying again
+10-02 18:05:41.687  3907 21639 I adbd    : UsbFfs: connection terminated: monitor thread finished
+10-02 18:05:41.688  3907  3907 I adbd    : UsbFfs: already offline
+10-02 18:05:41.690  3907  3907 I adbd    : destroying transport UsbFfs
+10-02 18:05:41.691  3907  3907 I adbd    : UsbFfsConnection being destroyed
+10-02 18:05:41.739  3907  3911 I adbd    : opening control endpoint /dev/usb-ffs/adb/ep0
+10-02 18:05:41.742  3907  3911 I adbd    : UsbFfsConnection constructed
+10-02 18:05:41.743  3907 21649 I adbd    : UsbFfs-monitor thread spawned
+10-02 18:05:42.162   655  1771 D ActivityManager: freezer override set to true
+10-02 18:05:42.163   655  1771 D ActivityManager: sync unfroze 13658 com.google.android.tungsten.setupwraith for 19
+10-02 18:05:42.164   655  1771 D ActivityManager: sync unfroze 14247 com.google.android.apps.tv.dreamx for 19
+10-02 18:05:42.164   655  1771 D ActivityManager: sync unfroze 31197 com.google.process.gservices for 19
+10-02 18:05:42.165   655  1771 D ActivityManager: sync unfroze 18967 com.google.android.partnersetup for 19
+10-02 18:05:42.166   655  1771 D ActivityManager: sync unfroze 18713 com.google.android.syncadapters.calendar for 19
+10-02 18:05:42.167   655  1771 D ActivityManager: sync unfroze 18765 com.android.providers.calendar for 19
+10-02 18:05:42.168   655  1771 D ActivityManager: sync unfroze 14549 com.google.android.youtube.tv.recommendations for 19
+10-02 18:05:42.169   655  1771 D ActivityManager: sync unfroze 14106 com.google.android.youtube.tv for 19
+10-02 18:05:42.169   655  1771 D ActivityManager: sync unfroze 31464 com.google.android.tv.dfuservice for 19
+10-02 18:05:42.170   655  1771 D ActivityManager: sync unfroze 12923 com.android.keychain for 19
+10-02 18:05:42.171   655  1771 D ActivityManager: sync unfroze 2192 com.google.android.permissioncontroller for 19
+10-02 18:05:42.172   655  1771 D ActivityManager: sync unfroze 25946 com.google.android.katniss:search for 19
+10-02 18:05:42.173   655  1771 D ActivityManager: sync unfroze 12883 com.android.providers.tv for 19
+10-02 18:05:42.174   655  1771 D ActivityManager: sync unfroze 1504 com.google.android.gms for 19
+10-02 18:05:42.313 20786 21082 I f_game.aquarium: Explicit concurrent mark compact GC freed 737(100KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2143KB/4286KB, paused 260us,1.182ms total 20.476ms
+10-02 18:05:42.370  1119  1119 I ThermalService: CPU temperatures: [53.2]
+10-02 18:05:42.401   655  1771 D ActivityManager: freezer override set to false
+10-02 18:05:42.413 25946 25946 I katniss_search_TvSearchApp: onTrimMemory level=40

@@ -234,22 +234,6 @@ CCCARGS += -DSYS_TOOL
 endif
 
 #-----------------------------------------------------------------------------
-# max = debug, windows, multi-threaded, streaming off
-
-ifeq ($(BUILDMODE),max)
-ifeq ($(LIB_NAME),game)
-error cannot build game for max
-endif
-
-CCCARGS=
-BUILDMODE=tool
-include $(WF_DIR)/GNUMakefile.bld             # derived from tool
-BUILDMODE=max
-CCCARGS += -DNO_CONSOLE -DASSERT_GUI
-MULTITHREADED=m
-endif
-
-#-----------------------------------------------------------------------------
 # kts =whatever kts wants today
 
 ifeq ($(BUILDMODE),kts)

@@ -1,0 +1,2058 @@
+[
+  {
+    "label": "selector",
+    "snapshot": {
+      "frame": 637,
+      "game": {
+        "cursor": 0,
+        "focus": true,
+        "level": -1,
+        "modal": "none",
+        "mode": "selector",
+        "paused": true,
+        "session": 0,
+        "suspended": false
+      },
+      "input": {
+        "consumed": 3,
+        "gap": false,
+        "held": 0,
+        "history": [
+          {
+            "code": 11,
+            "consumed": true,
+            "consumers": [],
+            "frame": 0,
+            "held": 0,
+            "monotonic_us": 366728898370,
+            "pressed": 0,
+            "reason": "focus-resume",
+            "received": 1,
+            "released": 0,
+            "route": "android",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "lifecycle"
+          },
+          {
+            "code": 4,
+            "consumed": true,
+            "consumers": [],
+            "frame": 148,
+            "held": 0,
+            "monotonic_us": 366734555868,
+            "pressed": 0,
+            "reason": "back-intercepted",
+            "received": 2,
+            "released": 0,
+            "route": "phone-panel",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 4,
+            "consumed": true,
+            "consumers": [],
+            "frame": 150,
+            "held": 0,
+            "monotonic_us": 366734622073,
+            "pressed": 0,
+            "reason": "back-intercepted",
+            "received": 3,
+            "released": 0,
+            "route": "phone-panel",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          }
+        ],
+        "last_press": 0,
+        "last_release": 0,
+        "oldest_receipt": 1,
+        "reason": "menu-update",
+        "received": 3,
+        "route": "selector",
+        "routed": 3,
+        "sources": {
+          "hardware": 0,
+          "lifecycle": 0
+        }
+      },
+      "level_generation": 1,
+      "monotonic_us": 366742833953,
+      "op": "snapshot",
+      "player": null,
+      "properties": null,
+      "request": 1,
+      "run": "15594-366728855295",
+      "selected": null,
+      "simulation_step": 0,
+      "v": 1
+    }
+  },
+  {
+    "label": "selected-planted-tank",
+    "snapshot": {
+      "frame": 768,
+      "game": {
+        "cursor": 5,
+        "focus": true,
+        "level": -1,
+        "modal": "none",
+        "mode": "selector",
+        "paused": true,
+        "session": 0,
+        "suspended": false
+      },
+      "input": {
+        "consumed": 13,
+        "gap": false,
+        "held": 0,
+        "history": [
+          {
+            "code": 11,
+            "consumed": true,
+            "consumers": [],
+            "frame": 0,
+            "held": 0,
+            "monotonic_us": 366728898370,
+            "pressed": 0,
+            "reason": "focus-resume",
+            "received": 1,
+            "released": 0,
+            "route": "android",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "lifecycle"
+          },
+          {
+            "code": 4,
+            "consumed": true,
+            "consumers": [],
+            "frame": 148,
+            "held": 0,
+            "monotonic_us": 366734555868,
+            "pressed": 0,
+            "reason": "back-intercepted",
+            "received": 2,
+            "released": 0,
+            "route": "phone-panel",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 4,
+            "consumed": true,
+            "consumers": [],
+            "frame": 150,
+            "held": 0,
+            "monotonic_us": 366734622073,
+            "pressed": 0,
+            "reason": "back-intercepted",
+            "received": 3,
+            "released": 0,
+            "route": "phone-panel",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 649,
+            "held": 4096,
+            "monotonic_us": 366743031008,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 4,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 651,
+            "held": 0,
+            "monotonic_us": 366743065895,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 5,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 678,
+            "held": 4096,
+            "monotonic_us": 366743515128,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 6,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 680,
+            "held": 0,
+            "monotonic_us": 366743547954,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 7,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 702,
+            "held": 4096,
+            "monotonic_us": 366743916735,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 8,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 704,
+            "held": 0,
+            "monotonic_us": 366743950011,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 9,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 726,
+            "held": 4096,
+            "monotonic_us": 366744315635,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 10,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 728,
+            "held": 0,
+            "monotonic_us": 366744348588,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 11,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 751,
+            "held": 4096,
+            "monotonic_us": 366744733160,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 12,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 753,
+            "held": 0,
+            "monotonic_us": 366744765545,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 13,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          }
+        ],
+        "last_press": 12,
+        "last_release": 13,
+        "oldest_receipt": 1,
+        "reason": "menu-update",
+        "received": 13,
+        "route": "selector",
+        "routed": 13,
+        "sources": {
+          "hardware": 0,
+          "lifecycle": 0,
+          "phone": 0,
+          "touch": 0
+        }
+      },
+      "level_generation": 1,
+      "monotonic_us": 366745019013,
+      "op": "snapshot",
+      "player": null,
+      "properties": {
+        "actor": 4,
+        "fields": [
+          {
+            "committed": "0",
+            "field": 1,
+            "id": "PlantedTankSettings:1",
+            "key": "Seed"
+          },
+          {
+            "committed": "0",
+            "field": 2,
+            "id": "PlantedTankSettings:2",
+            "key": "Water type"
+          },
+          {
+            "committed": "3",
+            "field": 3,
+            "id": "PlantedTankSettings:3",
+            "key": "Growth speed"
+          }
+        ],
+        "generation": 1,
+        "revision": 0,
+        "schema": "PlantedTankSettings",
+        "truncated": false
+      },
+      "request": 2,
+      "run": "15594-366728855295",
+      "selected": null,
+      "simulation_step": 0,
+      "v": 1
+    }
+  },
+  {
+    "label": "game-ready",
+    "snapshot": {
+      "frame": 781,
+      "game": {
+        "cursor": -1,
+        "focus": true,
+        "level": 5,
+        "modal": "none",
+        "mode": "game",
+        "paused": false,
+        "session": 0,
+        "suspended": false
+      },
+      "input": {
+        "consumed": 15,
+        "gap": false,
+        "held": 0,
+        "history": [
+          {
+            "code": 11,
+            "consumed": true,
+            "consumers": [],
+            "frame": 0,
+            "held": 0,
+            "monotonic_us": 366728898370,
+            "pressed": 0,
+            "reason": "focus-resume",
+            "received": 1,
+            "released": 0,
+            "route": "android",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "lifecycle"
+          },
+          {
+            "code": 4,
+            "consumed": true,
+            "consumers": [],
+            "frame": 148,
+            "held": 0,
+            "monotonic_us": 366734555868,
+            "pressed": 0,
+            "reason": "back-intercepted",
+            "received": 2,
+            "released": 0,
+            "route": "phone-panel",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 4,
+            "consumed": true,
+            "consumers": [],
+            "frame": 150,
+            "held": 0,
+            "monotonic_us": 366734622073,
+            "pressed": 0,
+            "reason": "back-intercepted",
+            "received": 3,
+            "released": 0,
+            "route": "phone-panel",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 649,
+            "held": 4096,
+            "monotonic_us": 366743031008,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 4,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 651,
+            "held": 0,
+            "monotonic_us": 366743065895,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 5,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 678,
+            "held": 4096,
+            "monotonic_us": 366743515128,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 6,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 680,
+            "held": 0,
+            "monotonic_us": 366743547954,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 7,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 702,
+            "held": 4096,
+            "monotonic_us": 366743916735,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 8,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 704,
+            "held": 0,
+            "monotonic_us": 366743950011,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 9,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 726,
+            "held": 4096,
+            "monotonic_us": 366744315635,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 10,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 728,
+            "held": 0,
+            "monotonic_us": 366744348588,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 11,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 751,
+            "held": 4096,
+            "monotonic_us": 366744733160,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 12,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 753,
+            "held": 0,
+            "monotonic_us": 366744765545,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 13,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 23,
+            "consumed": true,
+            "consumers": [],
+            "frame": 778,
+            "held": 1,
+            "monotonic_us": 366745183779,
+            "pressed": 1,
+            "reason": "waiting-for-release",
+            "received": 14,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 23,
+            "consumed": true,
+            "consumers": [],
+            "frame": 780,
+            "held": 0,
+            "monotonic_us": 366745217833,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 15,
+            "released": 1,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          }
+        ],
+        "last_press": 14,
+        "last_release": 15,
+        "oldest_receipt": 1,
+        "reason": "hardware-sampled-at-level-update",
+        "received": 15,
+        "route": "game",
+        "routed": 15,
+        "sources": {
+          "hardware": 0,
+          "lifecycle": 0,
+          "phone": 0,
+          "touch": 0
+        }
+      },
+      "level_generation": 2,
+      "monotonic_us": 366745652604,
+      "op": "snapshot",
+      "player": {
+        "active": true,
+        "actor": 9,
+        "generation": 7,
+        "position": [
+          0.0,
+          -0.8499908447265625,
+          1.3650000095367432
+        ],
+        "velocity": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "visible": false
+      },
+      "properties": {
+        "actor": 4,
+        "fields": [
+          {
+            "committed": "896846555",
+            "field": 1,
+            "id": "PlantedTankSettings:1",
+            "key": "Seed"
+          },
+          {
+            "committed": "0",
+            "field": 2,
+            "id": "PlantedTankSettings:2",
+            "key": "Water type"
+          },
+          {
+            "committed": "3",
+            "field": 3,
+            "id": "PlantedTankSettings:3",
+            "key": "Growth speed"
+          }
+        ],
+        "generation": 1,
+        "revision": 1,
+        "schema": "PlantedTankSettings",
+        "truncated": false
+      },
+      "request": 3,
+      "run": "15594-366728855295",
+      "selected": {
+        "active": true,
+        "actor": 9,
+        "generation": 7,
+        "position": [
+          0.0,
+          -0.8499908447265625,
+          1.3650000095367432
+        ],
+        "velocity": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "visible": false
+      },
+      "simulation_step": 1,
+      "v": 1
+    }
+  },
+  {
+    "label": "old-selector-rejected",
+    "snapshot": {
+      "error": "stale-level",
+      "frame": 782,
+      "level_generation": 2,
+      "monotonic_us": 366745671487,
+      "op": "error",
+      "request": 4,
+      "run": "15594-366728855295",
+      "simulation_step": 2,
+      "v": 1
+    }
+  },
+  {
+    "label": "before-22",
+    "snapshot": {
+      "frame": 803,
+      "game": {
+        "cursor": -1,
+        "focus": true,
+        "level": 5,
+        "modal": "none",
+        "mode": "game",
+        "paused": false,
+        "session": 0,
+        "suspended": false
+      },
+      "input": {
+        "consumed": 17,
+        "gap": false,
+        "held": 0,
+        "history": [
+          {
+            "code": 11,
+            "consumed": true,
+            "consumers": [],
+            "frame": 0,
+            "held": 0,
+            "monotonic_us": 366728898370,
+            "pressed": 0,
+            "reason": "focus-resume",
+            "received": 1,
+            "released": 0,
+            "route": "android",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "lifecycle"
+          },
+          {
+            "code": 4,
+            "consumed": true,
+            "consumers": [],
+            "frame": 148,
+            "held": 0,
+            "monotonic_us": 366734555868,
+            "pressed": 0,
+            "reason": "back-intercepted",
+            "received": 2,
+            "released": 0,
+            "route": "phone-panel",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 4,
+            "consumed": true,
+            "consumers": [],
+            "frame": 150,
+            "held": 0,
+            "monotonic_us": 366734622073,
+            "pressed": 0,
+            "reason": "back-intercepted",
+            "received": 3,
+            "released": 0,
+            "route": "phone-panel",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 649,
+            "held": 4096,
+            "monotonic_us": 366743031008,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 4,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 651,
+            "held": 0,
+            "monotonic_us": 366743065895,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 5,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 678,
+            "held": 4096,
+            "monotonic_us": 366743515128,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 6,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 680,
+            "held": 0,
+            "monotonic_us": 366743547954,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 7,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 702,
+            "held": 4096,
+            "monotonic_us": 366743916735,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 8,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 704,
+            "held": 0,
+            "monotonic_us": 366743950011,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 9,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 726,
+            "held": 4096,
+            "monotonic_us": 366744315635,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 10,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 728,
+            "held": 0,
+            "monotonic_us": 366744348588,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 11,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 751,
+            "held": 4096,
+            "monotonic_us": 366744733160,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 12,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 753,
+            "held": 0,
+            "monotonic_us": 366744765545,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 13,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 23,
+            "consumed": true,
+            "consumers": [],
+            "frame": 778,
+            "held": 1,
+            "monotonic_us": 366745183779,
+            "pressed": 1,
+            "reason": "waiting-for-release",
+            "received": 14,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 23,
+            "consumed": true,
+            "consumers": [],
+            "frame": 780,
+            "held": 0,
+            "monotonic_us": 366745217833,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 15,
+            "released": 1,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 23,
+            "consumed": true,
+            "consumers": [
+              {
+                "actor": 9,
+                "generation": 7,
+                "mailbox": 1909
+              }
+            ],
+            "frame": 793,
+            "held": 1,
+            "monotonic_us": 366745850000,
+            "pressed": 1,
+            "reason": "actor-input-read",
+            "received": 16,
+            "released": 0,
+            "route": "game",
+            "routed": true,
+            "simulation_step": 13,
+            "source": "hardware"
+          },
+          {
+            "code": 23,
+            "consumed": true,
+            "consumers": [
+              {
+                "actor": 9,
+                "generation": 7,
+                "mailbox": 1909
+              }
+            ],
+            "frame": 794,
+            "held": 0,
+            "monotonic_us": 366745868809,
+            "pressed": 0,
+            "reason": "actor-input-read",
+            "received": 17,
+            "released": 1,
+            "route": "game",
+            "routed": true,
+            "simulation_step": 14,
+            "source": "hardware"
+          }
+        ],
+        "last_press": 16,
+        "last_release": 17,
+        "oldest_receipt": 1,
+        "reason": "hardware-sampled-at-level-update",
+        "received": 17,
+        "route": "game",
+        "routed": 17,
+        "sources": {
+          "hardware": 0,
+          "lifecycle": 0,
+          "phone": 0,
+          "touch": 0
+        }
+      },
+      "level_generation": 2,
+      "monotonic_us": 366746039396,
+      "op": "snapshot",
+      "player": {
+        "active": true,
+        "actor": 9,
+        "generation": 7,
+        "position": [
+          0.0,
+          -0.8499908447265625,
+          1.3650000095367432
+        ],
+        "velocity": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "visible": false
+      },
+      "properties": {
+        "actor": 4,
+        "fields": [
+          {
+            "committed": "896846555",
+            "field": 1,
+            "id": "PlantedTankSettings:1",
+            "key": "Seed"
+          },
+          {
+            "committed": "0",
+            "field": 2,
+            "id": "PlantedTankSettings:2",
+            "key": "Water type"
+          },
+          {
+            "committed": "3",
+            "field": 3,
+            "id": "PlantedTankSettings:3",
+            "key": "Growth speed"
+          }
+        ],
+        "generation": 1,
+        "revision": 1,
+        "schema": "PlantedTankSettings",
+        "truncated": false
+      },
+      "request": 5,
+      "run": "15594-366728855295",
+      "selected": {
+        "active": true,
+        "actor": 9,
+        "generation": 7,
+        "position": [
+          0.0,
+          -0.8499908447265625,
+          1.3650000095367432
+        ],
+        "velocity": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "visible": false
+      },
+      "simulation_step": 23,
+      "v": 1
+    }
+  },
+  {
+    "label": "after-22",
+    "snapshot": {
+      "frame": 841,
+      "game": {
+        "cursor": -1,
+        "focus": true,
+        "level": 5,
+        "modal": "none",
+        "mode": "game",
+        "paused": false,
+        "session": 0,
+        "suspended": false
+      },
+      "input": {
+        "consumed": 20,
+        "gap": false,
+        "held": 0,
+        "history": [
+          {
+            "code": 22,
+            "consumed": true,
+            "consumers": [
+              {
+                "actor": 9,
+                "generation": 7,
+                "mailbox": 1909
+              }
+            ],
+            "frame": 811,
+            "held": 8192,
+            "monotonic_us": 366746191629,
+            "pressed": 8192,
+            "reason": "actor-input-read",
+            "received": 18,
+            "released": 0,
+            "route": "game",
+            "routed": true,
+            "simulation_step": 31,
+            "source": "hardware"
+          },
+          {
+            "code": 59,
+            "consumed": true,
+            "consumers": [],
+            "frame": 812,
+            "held": 8192,
+            "monotonic_us": 366746255029,
+            "pressed": 0,
+            "reason": "unmapped",
+            "received": 19,
+            "released": 0,
+            "route": "android",
+            "routed": true,
+            "simulation_step": 32,
+            "source": "hardware"
+          },
+          {
+            "code": 22,
+            "consumed": true,
+            "consumers": [
+              {
+                "actor": 9,
+                "generation": 7,
+                "mailbox": 1909
+              }
+            ],
+            "frame": 841,
+            "held": 0,
+            "monotonic_us": 366747194456,
+            "pressed": 0,
+            "reason": "actor-input-read",
+            "received": 20,
+            "released": 8192,
+            "route": "game",
+            "routed": true,
+            "simulation_step": 61,
+            "source": "hardware"
+          }
+        ],
+        "last_press": 18,
+        "last_release": 20,
+        "oldest_receipt": 1,
+        "reason": "actor-input-read",
+        "received": 20,
+        "route": "game",
+        "routed": 20,
+        "sources": {
+          "hardware": 0,
+          "lifecycle": 0,
+          "phone": 0,
+          "touch": 0
+        }
+      },
+      "level_generation": 2,
+      "monotonic_us": 366747222966,
+      "op": "snapshot",
+      "player": {
+        "active": true,
+        "actor": 9,
+        "generation": 7,
+        "position": [
+          0.4933520257472992,
+          -0.8499908447265625,
+          1.39845609664917
+        ],
+        "velocity": [
+          0.4061115086078644,
+          0.0,
+          -0.10087154060602188
+        ],
+        "visible": false
+      },
+      "properties": {
+        "actor": 4,
+        "fields": [
+          {
+            "committed": "896846555",
+            "field": 1,
+            "id": "PlantedTankSettings:1",
+            "key": "Seed"
+          },
+          {
+            "committed": "0",
+            "field": 2,
+            "id": "PlantedTankSettings:2",
+            "key": "Water type"
+          },
+          {
+            "committed": "3",
+            "field": 3,
+            "id": "PlantedTankSettings:3",
+            "key": "Growth speed"
+          }
+        ],
+        "generation": 1,
+        "revision": 1,
+        "schema": "PlantedTankSettings",
+        "truncated": false
+      },
+      "request": 6,
+      "run": "15594-366728855295",
+      "selected": {
+        "active": true,
+        "actor": 9,
+        "generation": 7,
+        "position": [
+          0.4933520257472992,
+          -0.8499908447265625,
+          1.39845609664917
+        ],
+        "velocity": [
+          0.4061115086078644,
+          0.0,
+          -0.10087154060602188
+        ],
+        "visible": false
+      },
+      "simulation_step": 61,
+      "v": 1
+    }
+  },
+  {
+    "label": "release-ack-22",
+    "snapshot": {
+      "frame": 842,
+      "game": {
+        "cursor": -1,
+        "focus": true,
+        "level": 5,
+        "modal": "none",
+        "mode": "game",
+        "paused": false,
+        "session": 0,
+        "suspended": false
+      },
+      "input": {
+        "consumed": 21,
+        "gap": false,
+        "held": 0,
+        "history": [
+          {
+            "code": 22,
+            "consumed": true,
+            "consumers": [
+              {
+                "actor": 9,
+                "generation": 7,
+                "mailbox": 1909
+              }
+            ],
+            "frame": 811,
+            "held": 8192,
+            "monotonic_us": 366746191629,
+            "pressed": 8192,
+            "reason": "actor-input-read",
+            "received": 18,
+            "released": 0,
+            "route": "game",
+            "routed": true,
+            "simulation_step": 31,
+            "source": "hardware"
+          },
+          {
+            "code": 59,
+            "consumed": true,
+            "consumers": [],
+            "frame": 812,
+            "held": 8192,
+            "monotonic_us": 366746255029,
+            "pressed": 0,
+            "reason": "unmapped",
+            "received": 19,
+            "released": 0,
+            "route": "android",
+            "routed": true,
+            "simulation_step": 32,
+            "source": "hardware"
+          },
+          {
+            "code": 22,
+            "consumed": true,
+            "consumers": [
+              {
+                "actor": 9,
+                "generation": 7,
+                "mailbox": 1909
+              }
+            ],
+            "frame": 841,
+            "held": 0,
+            "monotonic_us": 366747194456,
+            "pressed": 0,
+            "reason": "actor-input-read",
+            "received": 20,
+            "released": 8192,
+            "route": "game",
+            "routed": true,
+            "simulation_step": 61,
+            "source": "hardware"
+          },
+          {
+            "code": 59,
+            "consumed": true,
+            "consumers": [],
+            "frame": 841,
+            "held": 0,
+            "monotonic_us": 366747224252,
+            "pressed": 0,
+            "reason": "unmapped",
+            "received": 21,
+            "released": 0,
+            "route": "android",
+            "routed": true,
+            "simulation_step": 61,
+            "source": "hardware"
+          }
+        ],
+        "last_press": 18,
+        "last_release": 20,
+        "oldest_receipt": 1,
+        "reason": "hardware-sampled-at-level-update",
+        "received": 21,
+        "route": "game",
+        "routed": 21,
+        "sources": {
+          "hardware": 0,
+          "lifecycle": 0,
+          "phone": 0,
+          "touch": 0
+        }
+      },
+      "level_generation": 2,
+      "monotonic_us": 366747255523,
+      "op": "snapshot",
+      "player": {
+        "active": true,
+        "actor": 9,
+        "generation": 7,
+        "position": [
+          0.5049895644187927,
+          -0.8499908447265625,
+          1.3955655097961426
+        ],
+        "velocity": [
+          0.32464876770973206,
+          0.0,
+          -0.11273223906755447
+        ],
+        "visible": false
+      },
+      "properties": {
+        "actor": 4,
+        "fields": [
+          {
+            "committed": "896846555",
+            "field": 1,
+            "id": "PlantedTankSettings:1",
+            "key": "Seed"
+          },
+          {
+            "committed": "0",
+            "field": 2,
+            "id": "PlantedTankSettings:2",
+            "key": "Water type"
+          },
+          {
+            "committed": "3",
+            "field": 3,
+            "id": "PlantedTankSettings:3",
+            "key": "Growth speed"
+          }
+        ],
+        "generation": 1,
+        "revision": 1,
+        "schema": "PlantedTankSettings",
+        "truncated": false
+      },
+      "request": 7,
+      "run": "15594-366728855295",
+      "selected": {
+        "active": true,
+        "actor": 9,
+        "generation": 7,
+        "position": [
+          0.5049895644187927,
+          -0.8499908447265625,
+          1.3955655097961426
+        ],
+        "velocity": [
+          0.32464876770973206,
+          0.0,
+          -0.11273223906755447
+        ],
+        "visible": false
+      },
+      "simulation_step": 62,
+      "v": 1
+    }
+  },
+  {
+    "label": "before-21",
+    "snapshot": {
+      "frame": 843,
+      "game": {
+        "cursor": -1,
+        "focus": true,
+        "level": 5,
+        "modal": "none",
+        "mode": "game",
+        "paused": false,
+        "session": 0,
+        "suspended": false
+      },
+      "input": {
+        "consumed": 21,
+        "gap": false,
+        "held": 0,
+        "history": [
+          {
+            "code": 11,
+            "consumed": true,
+            "consumers": [],
+            "frame": 0,
+            "held": 0,
+            "monotonic_us": 366728898370,
+            "pressed": 0,
+            "reason": "focus-resume",
+            "received": 1,
+            "released": 0,
+            "route": "android",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "lifecycle"
+          },
+          {
+            "code": 4,
+            "consumed": true,
+            "consumers": [],
+            "frame": 148,
+            "held": 0,
+            "monotonic_us": 366734555868,
+            "pressed": 0,
+            "reason": "back-intercepted",
+            "received": 2,
+            "released": 0,
+            "route": "phone-panel",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 4,
+            "consumed": true,
+            "consumers": [],
+            "frame": 150,
+            "held": 0,
+            "monotonic_us": 366734622073,
+            "pressed": 0,
+            "reason": "back-intercepted",
+            "received": 3,
+            "released": 0,
+            "route": "phone-panel",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 649,
+            "held": 4096,
+            "monotonic_us": 366743031008,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 4,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 651,
+            "held": 0,
+            "monotonic_us": 366743065895,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 5,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 678,
+            "held": 4096,
+            "monotonic_us": 366743515128,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 6,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 680,
+            "held": 0,
+            "monotonic_us": 366743547954,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 7,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 702,
+            "held": 4096,
+            "monotonic_us": 366743916735,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 8,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 704,
+            "held": 0,
+            "monotonic_us": 366743950011,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 9,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 726,
+            "held": 4096,
+            "monotonic_us": 366744315635,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 10,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 728,
+            "held": 0,
+            "monotonic_us": 366744348588,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 11,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 751,
+            "held": 4096,
+            "monotonic_us": 366744733160,
+            "pressed": 4096,
+            "reason": "menu-update",
+            "received": 12,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 20,
+            "consumed": true,
+            "consumers": [],
+            "frame": 753,
+            "held": 0,
+            "monotonic_us": 366744765545,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 13,
+            "released": 4096,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 23,
+            "consumed": true,
+            "consumers": [],
+            "frame": 778,
+            "held": 1,
+            "monotonic_us": 366745183779,
+            "pressed": 1,
+            "reason": "waiting-for-release",
+            "received": 14,
+            "released": 0,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 23,
+            "consumed": true,
+            "consumers": [],
+            "frame": 780,
+            "held": 0,
+            "monotonic_us": 366745217833,
+            "pressed": 0,
+            "reason": "menu-update",
+            "received": 15,
+            "released": 1,
+            "route": "selector",
+            "routed": true,
+            "simulation_step": 0,
+            "source": "hardware"
+          },
+          {
+            "code": 23,
+            "consumed": true,
+            "consumers": [
+              {
+                "actor": 9,
+                "generation": 7,
+                "mailbox": 1909
+              }
+            ],
+            "frame": 793,
+            "held": 1,
+            "monotonic_us": 366745850000,
+            "pressed": 1,
+            "reason": "actor-input-read",
+            "received": 16,
+            "released": 0,
+            "route": "game",
+            "routed": true,
+            "simulation_step": 13,
+            "source": "hardware"
+          },
+          {
+            "code": 23,
+            "consumed": true,
+            "consumers": [
+              {
+                "actor": 9,
+                "generation": 7,
+                "mailbox": 1909
+              }
+            ],
+            "frame": 794,
+            "held": 0,
+            "monotonic_us": 366745868809,
+            "pressed": 0,
+            "reason": "actor-input-read",
+            "received": 17,
+            "released": 1,
+            "route": "game",
+            "routed": true,
+            "simulation_step": 14,
+            "source": "hardware"
+          },
+          {
+            "code": 22,
+            "consumed": true,
+            "consumers": [
+              {
+                "actor": 9,
+                "generation": 7,
+                "mailbox": 1909
+              }
+            ],
+            "frame": 811,
+            "held": 8192,
+            "monotonic_us": 366746191629,
+            "pressed": 8192,
+            "reason": "actor-input-read",
+            "received": 18,
+            "released": 0,
+            "route": "game",
+            "routed": true,
+            "simulation_step": 31,
+            "source": "hardware"
+          },
+          {
+            "code": 59,
+            "consumed": true,
+            "consumers": [],
+            "frame": 812,
+            "held": 8192,
+            "monotonic_us": 366746255029,
+            "pressed": 0,
+            "reason": "unmapped",
+            "received": 19,
+            "released": 0,
+            "route": "android",
+            "routed": true,
+            "simulation_step": 32,
+            "source": "hardware"
+          },
+          {
+            "code": 22,
+            "consumed": true,
+            "consumers": [
+              {
+                "actor": 9,
+                "generation": 7,
+                "mailbox": 1909
+              }
+            ],
+            "frame": 841,
+            "held": 0,
+            "monotonic_us": 366747194456,
+            "pressed": 0,
+            "reason": "actor-input-read",
+            "received": 20,
+            "released": 8192,
+            "route": "game",
+            "routed": true,
+            "simulation_step": 61,
+            "source": "hardware"
+          },
+          {
+            "code": 59,
+            "consumed": true,
+            "consumers": [],
+            "frame": 841,
+            "held": 0,
+            "monotonic_us": 366747224252,
+            "pressed": 0,
+            "reason": "unmapped",
+            "received": 21,
+            "released": 0,
+            "route": "android",
+            "routed": true,
+            "simulation_step": 61,
+            "source": "hardware"
+          }
+        ],
+        "last_press": 18,
+        "last_release": 20,
+        "oldest_receipt": 1,
+        "reason": "hardware-sampled-at-level-update",
+        "received": 21,
+        "route": "game",
+        "routed": 21,
+        "sources": {
+          "hardware": 0,
+          "lifecycle": 0,
+          "phone": 0,
+          "touch": 0
+        }
+      },
+      "level_generation": 2,
+      "monotonic_us": 366747291513,
+      "op": "snapshot",
+      "player": {
+        "active": true,
+        "actor": 9,
+        "generation": 7,
+        "position": [
+          0.5149614810943604,
+          -0.8499908447265625,
+          1.392102837562561
+        ],
+        "velocity": [
+          0.2548454999923706,
+          0.0,
+          -0.12289535254240036
+        ],
+        "visible": false
+      },
+      "properties": {
+        "actor": 4,
+        "fields": [
+          {
+            "committed": "896846555",
+            "field": 1,
+            "id": "PlantedTankSettings:1",
+            "key": "Seed"
+          },
+          {
+            "committed": "0",
+            "field": 2,
+            "id": "PlantedTankSettings:2",
+            "key": "Water type"
+          },
+          {
+            "committed": "3",
+            "field": 3,
+            "id": "PlantedTankSettings:3",
+            "key": "Growth speed"
+          }
+        ],
+        "generation": 1,
+        "revision": 1,
+        "schema": "PlantedTankSettings",
+        "truncated": false
+      },
+      "request": 8,
+      "run": "15594-366728855295",
+      "selected": {
+        "active": true,
+        "actor": 9,
+        "generation": 7,
+        "position": [
+          0.5149614810943604,
+          -0.8499908447265625,
+          1.392102837562561
+        ],
+        "velocity": [
+          0.2548454999923706,
+          0.0,
+          -0.12289535254240036
+        ],
+        "visible": false
+      },
+      "simulation_step": 63,
+      "v": 1
+    }
+  },
+  {
+    "label": "after-21",
+    "snapshot": {
+      "frame": 879,
+      "game": {
+        "cursor": -1,
+        "focus": true,
+        "level": 5,
+        "modal": "none",
+        "mode": "game",
+        "paused": false,
+        "session": 0,
+        "suspended": false
+      },
+      "input": {
+        "consumed": 23,
+        "gap": false,
+        "held": 16384,
+        "history": [
+          {
+            "code": 21,
+            "consumed": true,
+            "consumers": [
+              {
+                "actor": 9,
+                "generation": 7,
+                "mailbox": 1909
+              }
+            ],
+            "frame": 851,
+            "held": 16384,
+            "monotonic_us": 366747525578,
+            "pressed": 16384,
+            "reason": "actor-input-read",
+            "received": 22,
+            "released": 0,
+            "route": "game",
+            "routed": true,
+            "simulation_step": 71,
+            "source": "hardware"
+          },
+          {
+            "code": 59,
+            "consumed": true,
+            "consumers": [],
+            "frame": 852,
+            "held": 16384,
+            "monotonic_us": 366747591157,
+            "pressed": 0,
+            "reason": "unmapped",
+            "received": 23,
+            "released": 0,
+            "route": "android",
+            "routed": true,
+            "simulation_step": 72,
+            "source": "hardware"
+          }
+        ],
+        "last_press": 22,
+        "last_release": 20,
+        "oldest_receipt": 1,
+        "reason": "hardware-sampled-at-level-update",
+        "received": 23,
+        "route": "game",
+        "routed": 23,
+        "sources": {
+          "hardware": 16384,
+          "lifecycle": 0,
+          "phone": 0,
+          "touch": 0
+        }
+      },
+      "level_generation": 2,
+      "monotonic_us": 366748492429,
+      "op": "snapshot",
+      "player": {
+        "active": true,
+        "actor": 9,
+        "generation": 7,
+        "position": [
+          0.09130509197711945,
+          -0.8499908447265625,
+          1.4035545587539673
+        ],
+        "velocity": [
+          -0.5497521758079529,
+          0.0,
+          -0.053731583058834076
+        ],
+        "visible": false
+      },
+      "properties": {
+        "actor": 4,
+        "fields": [
+          {
+            "committed": "896846555",
+            "field": 1,
+            "id": "PlantedTankSettings:1",
+            "key": "Seed"
+          },
+          {
+            "committed": "0",
+            "field": 2,
+            "id": "PlantedTankSettings:2",
+            "key": "Water type"
+          },
+          {
+            "committed": "3",
+            "field": 3,
+            "id": "PlantedTankSettings:3",
+            "key": "Growth speed"
+          }
+        ],
+        "generation": 1,
+        "revision": 1,
+        "schema": "PlantedTankSettings",
+        "truncated": false
+      },
+      "request": 9,
+      "run": "15594-366728855295",
+      "selected": {
+        "active": true,
+        "actor": 9,
+        "generation": 7,
+        "position": [
+          0.09130509197711945,
+          -0.8499908447265625,
+          1.4035545587539673
+        ],
+        "velocity": [
+          -0.5497521758079529,
+          0.0,
+          -0.053731583058834076
+        ],
+        "visible": false
+      },
+      "simulation_step": 99,
+      "v": 1
+    }
+  }
+]

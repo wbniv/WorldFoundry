@@ -1,0 +1,968 @@
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+audio: miniaudio v0.11.25 ready
+DEBUG = 1,
+DO_ASSERTIONS = 1, NO_ASSERT_EXPR = 0, USE_INLINE_DEFS = 1, WF_BIG_ENDIAN = 0
+argc = 9, argv: /home/will/WorldFoundry-wbniv/engine/wf_game -L/home/will/WorldFoundry-wbniv/wflevels/aquarium_betta-standalone.iff -rate20 -width=960 -height=540 --debug-port 17921 --debug-bind 127.0.0.1 
+cbHalLmalloc = 64000000, cbHalScratchLmalloc = 180000
+wf_game v0.4.1, Built:Jul 31 2026,10:21:50 by kts
+-L/home/will/WorldFoundry-wbniv/wflevels/aquarium_betta-standalone.iff
+-rate20
+Fake clock delta = 0.05000000075
+-width=960
+-height=540
+--debug-port
+--debug-bind
+argc = 9, commandIndex = 9
+Level=-1
+cerror:
+cwarn:
+cstats:
+wf_game Ver 0.4.1, Built:Jul 31 2026,10:21:50 by kts
+DBSTREAMS jolt: RegisterDefaultAllocator
+jolt: Factory
+jolt: RegisterTypes
+jolt: RunSelftest
+jolt: selftest ok (sphere fell to z=5.098)
+jolt: backend init
+jolt: backend ready (gravity -Z)
+jolt: init complete
+LMalloc of 412 not 8-byte aligned, rounding up
+LMalloc of 7620 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+Level::Level: leveldata= 0x75dc60446b80, object count  = 33
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 150)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 8028)
+PixelMap::Load: this = 0x75dc5f127b80
+PixelMap::Load: this = 0x75dc5f127bc0
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 100 not 8-byte aligned, rounding up
+[Actor] idx=2 class=23 commonOff=18520 NumberOfLocalMailboxes=0
+[Actor] idx=3 class=13 commonOff=18520 NumberOfLocalMailboxes=0
+this = 0x75dc5f12b0c0,setting _memory to 0x75dc5f12abc8
+DMalloc of 52 not 8-byte aligned, rounding up
+[Actor] idx=4 class=20 commonOff=19232 NumberOfLocalMailboxes=0
+[Actor] idx=6 class=11 commonOff=18520 NumberOfLocalMailboxes=0
+[Actor] idx=7 class=16 commonOff=18520 NumberOfLocalMailboxes=0
+[Actor] idx=8 class=3 commonOff=18520 NumberOfLocalMailboxes=0
+[Actor] idx=9 class=22 commonOff=19972 NumberOfLocalMailboxes=6
+jolt: character 0 created at (0.00, -0.20, 2.50) ctr=(0.00,0.00,0.00)
+[Actor] idx=10 class=7 commonOff=20280 NumberOfLocalMailboxes=0
+[Actor] idx=11 class=7 commonOff=20480 NumberOfLocalMailboxes=0
+[Actor] idx=12 class=7 commonOff=20524 NumberOfLocalMailboxes=0
+[Actor] idx=13 class=7 commonOff=20568 NumberOfLocalMailboxes=0
+[Actor] idx=14 class=7 commonOff=20612 NumberOfLocalMailboxes=0
+[Actor] idx=15 class=7 commonOff=20656 NumberOfLocalMailboxes=0
+[Actor] idx=16 class=7 commonOff=20700 NumberOfLocalMailboxes=0
+[Actor] idx=17 class=7 commonOff=20744 NumberOfLocalMailboxes=0
+[Actor] idx=18 class=5 commonOff=18520 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,0.00,0.00) half=(6.10,1.65,0.12) id=8388608
+[Actor] idx=19 class=5 commonOff=18520 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,1.53,2.73) half=(5.97,0.12,2.10) id=8388609
+[Actor] idx=20 class=5 commonOff=18520 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,1.53,5.08) half=(6.10,0.12,0.25) id=8388610
+[Actor] idx=21 class=5 commonOff=18520 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(-6.09,0.00,2.67) half=(0.12,1.65,2.67) id=8388611
+[Actor] idx=22 class=5 commonOff=18520 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(5.97,0.00,2.67) half=(0.12,1.65,2.67) id=8388612
+[Actor] idx=23 class=5 commonOff=18520 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,-1.78,2.67) half=(6.10,0.12,2.67) id=8388613
+[Actor] idx=24 class=7 commonOff=18520 NumberOfLocalMailboxes=0
+[Actor] idx=25 class=5 commonOff=18520 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,0.00,0.38) half=(5.97,1.52,0.25) id=8388614
+[Actor] idx=26 class=7 commonOff=18520 NumberOfLocalMailboxes=0
+[Actor] idx=27 class=7 commonOff=18520 NumberOfLocalMailboxes=0
+[Actor] idx=28 class=5 commonOff=18520 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,0.00,-1.26) half=(6.25,1.80,1.24) id=8388615
+[Actor] idx=29 class=5 commonOff=18520 NumberOfLocalMailboxes=0
+jolt: body STATIC pos=(0.00,2.97,7.50) half=(30.00,0.12,12.50) id=8388616
+[Actor] idx=30 class=23 commonOff=18520 NumberOfLocalMailboxes=0
+[Actor] idx=31 class=3 commonOff=18520 NumberOfLocalMailboxes=0
+[Actor] idx=32 class=16 commonOff=18520 NumberOfLocalMailboxes=0
+LMalloc of 20 not 8-byte aligned, rounding up
+DMalloc of 404 not 8-byte aligned, rounding up
+DMalloc of 446 not 8-byte aligned, rounding up
+DMalloc of 454 not 8-byte aligned, rounding up
+DMalloc of 404 not 8-byte aligned, rounding up
+Walking from 0
+0->0
+0->0
+LMalloc of 20 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 150)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 31244)
+ASS closed without all data read (bytesLeft = 21964)
+ASS closed without all data read (bytesLeft = 14316)
+ASS closed without all data read (bytesLeft = 15596)
+ASS closed without all data read (bytesLeft = 6700)
+ASS closed without all data read (bytesLeft = 6700)
+ASS closed without all data read (bytesLeft = 8364)
+ASS closed without all data read (bytesLeft = 8364)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 4692)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 1260)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 18828)
+ASS closed without all data read (bytesLeft = 23940)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 588)
+PixelMap::Load: this = 0x75dc5f127c00
+PixelMap::Load: this = 0x75dc5f127c40
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 6276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 23636 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 17956 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 10836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 12116 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 4276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 4276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 4356 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 4356 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-6.096,-1.651,0.000) world=(-6.096,-1.651,0.000)
+jolt: mesh v1 local=(-6.096,-1.651,0.127) world=(-6.096,-1.651,0.127)
+jolt: mesh v2 local=(-6.096,1.651,0.000) world=(-6.096,1.651,0.000)
+jolt: mesh v3 local=(-6.096,1.651,0.127) world=(-6.096,1.651,0.127)
+jolt: mesh v4 local=(6.096,-1.651,0.000) world=(6.096,-1.651,0.000)
+jolt: mesh v5 local=(6.096,-1.651,0.127) world=(6.096,-1.651,0.127)
+jolt: mesh v6 local=(6.096,1.651,0.000) world=(6.096,1.651,0.000)
+jolt: mesh v7 local=(6.096,1.651,0.127) world=(6.096,1.651,0.127)
+jolt: body MESH_STATIC verts=8 faces=12 id=16777216
+LMalloc of 2436 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 2640)
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-5.969,1.524,0.635) world=(-5.969,1.524,0.635)
+jolt: mesh v1 local=(-5.969,1.524,1.054) world=(-5.969,1.524,1.054)
+jolt: mesh v2 local=(-5.969,1.524,1.473) world=(-5.969,1.524,1.473)
+jolt: mesh v3 local=(-5.969,1.524,1.892) world=(-5.969,1.524,1.892)
+jolt: mesh v4 local=(-5.969,1.524,2.311) world=(-5.969,1.524,2.311)
+jolt: mesh v5 local=(-5.969,1.524,2.730) world=(-5.969,1.524,2.730)
+jolt: mesh v6 local=(-5.969,1.524,3.150) world=(-5.969,1.524,3.150)
+jolt: mesh v7 local=(-5.969,1.524,3.569) world=(-5.969,1.524,3.569)
+jolt: mesh v8 local=(-5.969,1.524,3.988) world=(-5.969,1.524,3.988)
+jolt: mesh v9 local=(-5.969,1.524,4.407) world=(-5.969,1.524,4.407)
+jolt: mesh v10 local=(-5.969,1.524,4.826) world=(-5.969,1.524,4.826)
+jolt: mesh v11 local=(-5.969,1.651,0.635) world=(-5.969,1.651,0.635)
+jolt: mesh v12 local=(-5.969,1.651,1.054) world=(-5.969,1.651,1.054)
+jolt: mesh v13 local=(-5.969,1.651,1.473) world=(-5.969,1.651,1.473)
+jolt: mesh v14 local=(-5.969,1.651,1.892) world=(-5.969,1.651,1.892)
+jolt: mesh v15 local=(-5.969,1.651,2.311) world=(-5.969,1.651,2.311)
+jolt: mesh v16 local=(-5.969,1.651,2.730) world=(-5.969,1.651,2.730)
+jolt: mesh v17 local=(-5.969,1.651,3.150) world=(-5.969,1.651,3.150)
+jolt: mesh v18 local=(-5.969,1.651,3.569) world=(-5.969,1.651,3.569)
+jolt: mesh v19 local=(-5.969,1.651,3.988) world=(-5.969,1.651,3.988)
+jolt: mesh v20 local=(-5.969,1.651,4.407) world=(-5.969,1.651,4.407)
+jolt: mesh v21 local=(-5.969,1.651,4.826) world=(-5.969,1.651,4.826)
+jolt: mesh v22 local=(5.969,1.524,0.635) world=(5.969,1.524,0.635)
+jolt: mesh v23 local=(5.969,1.524,1.054) world=(5.969,1.524,1.054)
+jolt: mesh v24 local=(5.969,1.524,1.473) world=(5.969,1.524,1.473)
+jolt: mesh v25 local=(5.969,1.524,1.892) world=(5.969,1.524,1.892)
+jolt: mesh v26 local=(5.969,1.524,2.311) world=(5.969,1.524,2.311)
+jolt: mesh v27 local=(5.969,1.524,2.730) world=(5.969,1.524,2.730)
+jolt: mesh v28 local=(5.969,1.524,3.150) world=(5.969,1.524,3.150)
+jolt: mesh v29 local=(5.969,1.524,3.569) world=(5.969,1.524,3.569)
+jolt: mesh v30 local=(5.969,1.524,3.988) world=(5.969,1.524,3.988)
+jolt: mesh v31 local=(5.969,1.524,4.407) world=(5.969,1.524,4.407)
+jolt: mesh v32 local=(5.969,1.524,4.826) world=(5.969,1.524,4.826)
+jolt: mesh v33 local=(5.969,1.651,0.635) world=(5.969,1.651,0.635)
+jolt: mesh v34 local=(5.969,1.651,1.054) world=(5.969,1.651,1.054)
+jolt: mesh v35 local=(5.969,1.651,1.473) world=(5.969,1.651,1.473)
+jolt: mesh v36 local=(5.969,1.651,1.892) world=(5.969,1.651,1.892)
+jolt: mesh v37 local=(5.969,1.651,2.311) world=(5.969,1.651,2.311)
+jolt: mesh v38 local=(5.969,1.651,2.730) world=(5.969,1.651,2.730)
+jolt: mesh v39 local=(5.969,1.651,3.150) world=(5.969,1.651,3.150)
+jolt: mesh v40 local=(5.969,1.651,3.569) world=(5.969,1.651,3.569)
+jolt: mesh v41 local=(5.969,1.651,3.988) world=(5.969,1.651,3.988)
+jolt: mesh v42 local=(5.969,1.651,4.407) world=(5.969,1.651,4.407)
+jolt: mesh v43 local=(5.969,1.651,4.826) world=(5.969,1.651,4.826)
+jolt: body MESH_STATIC verts=44 faces=120 id=16777217
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-6.096,1.524,4.826) world=(-6.096,1.524,4.826)
+jolt: mesh v1 local=(-6.096,1.524,5.334) world=(-6.096,1.524,5.334)
+jolt: mesh v2 local=(-6.096,1.651,4.826) world=(-6.096,1.651,4.826)
+jolt: mesh v3 local=(-6.096,1.651,5.334) world=(-6.096,1.651,5.334)
+jolt: mesh v4 local=(6.096,1.524,4.826) world=(6.096,1.524,4.826)
+jolt: mesh v5 local=(6.096,1.524,5.334) world=(6.096,1.524,5.334)
+jolt: mesh v6 local=(6.096,1.651,4.826) world=(6.096,1.651,4.826)
+jolt: mesh v7 local=(6.096,1.651,5.334) world=(6.096,1.651,5.334)
+jolt: body MESH_STATIC verts=8 faces=12 id=16777218
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-6.096,-1.651,0.000) world=(-6.096,-1.651,0.000)
+jolt: mesh v1 local=(-6.096,-1.651,5.334) world=(-6.096,-1.651,5.334)
+jolt: mesh v2 local=(-6.096,1.651,0.000) world=(-6.096,1.651,0.000)
+jolt: mesh v3 local=(-6.096,1.651,5.334) world=(-6.096,1.651,5.334)
+jolt: mesh v4 local=(-5.969,-1.651,0.000) world=(-5.969,-1.651,0.000)
+jolt: mesh v5 local=(-5.969,-1.651,5.334) world=(-5.969,-1.651,5.334)
+jolt: mesh v6 local=(-5.969,1.651,0.000) world=(-5.969,1.651,0.000)
+jolt: mesh v7 local=(-5.969,1.651,5.334) world=(-5.969,1.651,5.334)
+jolt: body MESH_STATIC verts=8 faces=12 id=16777219
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(5.969,-1.651,0.000) world=(5.969,-1.651,0.000)
+jolt: mesh v1 local=(5.969,-1.651,5.334) world=(5.969,-1.651,5.334)
+jolt: mesh v2 local=(5.969,1.651,0.000) world=(5.969,1.651,0.000)
+jolt: mesh v3 local=(5.969,1.651,5.334) world=(5.969,1.651,5.334)
+jolt: mesh v4 local=(6.096,-1.651,0.000) world=(6.096,-1.651,0.000)
+jolt: mesh v5 local=(6.096,-1.651,5.334) world=(6.096,-1.651,5.334)
+jolt: mesh v6 local=(6.096,1.651,0.000) world=(6.096,1.651,0.000)
+jolt: mesh v7 local=(6.096,1.651,5.334) world=(6.096,1.651,5.334)
+jolt: body MESH_STATIC verts=8 faces=12 id=16777220
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-6.096,-1.778,0.000) world=(-6.096,-1.778,0.000)
+jolt: mesh v1 local=(-6.096,-1.778,5.334) world=(-6.096,-1.778,5.334)
+jolt: mesh v2 local=(-6.096,-1.651,0.000) world=(-6.096,-1.651,0.000)
+jolt: mesh v3 local=(-6.096,-1.651,5.334) world=(-6.096,-1.651,5.334)
+jolt: mesh v4 local=(6.096,-1.778,0.000) world=(6.096,-1.778,0.000)
+jolt: mesh v5 local=(6.096,-1.778,5.334) world=(6.096,-1.778,5.334)
+jolt: mesh v6 local=(6.096,-1.651,0.000) world=(6.096,-1.651,0.000)
+jolt: mesh v7 local=(6.096,-1.651,5.334) world=(6.096,-1.651,5.334)
+jolt: body MESH_STATIC verts=8 faces=12 id=16777221
+LMalloc of 996 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-5.969,-1.524,0.127) world=(-5.969,-1.524,0.127)
+jolt: mesh v1 local=(-5.969,-1.524,0.635) world=(-5.969,-1.524,0.635)
+jolt: mesh v2 local=(-5.969,1.524,0.127) world=(-5.969,1.524,0.127)
+jolt: mesh v3 local=(-5.969,1.524,0.635) world=(-5.969,1.524,0.635)
+jolt: mesh v4 local=(5.969,-1.524,0.127) world=(5.969,-1.524,0.127)
+jolt: mesh v5 local=(5.969,-1.524,0.635) world=(5.969,-1.524,0.635)
+jolt: mesh v6 local=(5.969,1.524,0.127) world=(5.969,1.524,0.127)
+jolt: mesh v7 local=(5.969,1.524,0.635) world=(5.969,1.524,0.635)
+jolt: body MESH_STATIC verts=8 faces=12 id=16777222
+LMalloc of 14436 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 19356 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-6.246,-1.801,-2.500) world=(-6.246,-1.801,-2.500)
+jolt: mesh v1 local=(-6.246,-1.801,-0.025) world=(-6.246,-1.801,-0.025)
+jolt: mesh v2 local=(-6.246,1.801,-2.500) world=(-6.246,1.801,-2.500)
+jolt: mesh v3 local=(-6.246,1.801,-0.025) world=(-6.246,1.801,-0.025)
+jolt: mesh v4 local=(6.246,-1.801,-2.500) world=(6.246,-1.801,-2.500)
+jolt: mesh v5 local=(6.246,-1.801,-0.025) world=(6.246,-1.801,-0.025)
+jolt: mesh v6 local=(6.246,1.801,-2.500) world=(6.246,1.801,-2.500)
+jolt: mesh v7 local=(6.246,1.801,-0.025) world=(6.246,1.801,-0.025)
+jolt: body MESH_STATIC verts=8 faces=12 id=16777223
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+jolt: mesh actor_pos=(0.000,0.000,0.000)
+jolt: mesh v0 local=(-30.000,3.000,-5.000) world=(-30.000,3.000,-5.000)
+jolt: mesh v1 local=(-30.000,3.000,20.000) world=(-30.000,3.000,20.000)
+jolt: mesh v2 local=(-30.000,3.100,-5.000) world=(-30.000,3.100,-5.000)
+jolt: mesh v3 local=(-30.000,3.100,20.000) world=(-30.000,3.100,20.000)
+jolt: mesh v4 local=(30.000,3.000,-5.000) world=(30.000,3.000,-5.000)
+jolt: mesh v5 local=(30.000,3.000,20.000) world=(30.000,3.000,20.000)
+jolt: mesh v6 local=(30.000,3.100,-5.000) world=(30.000,3.100,-5.000)
+jolt: mesh v7 local=(30.000,3.100,20.000) world=(30.000,3.100,20.000)
+jolt: body MESH_STATIC verts=8 faces=12 id=16777224
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+jolt: OptimizeBroadPhase done (9 static bodies)
+audio: MusicPlayer — soundfont not found: florestan-subset.sf2
+audio: sfx[0] not found: wflevels/qbert_practice/sfx/qbert_hop.wav
+audio: sfx[1] not found: wflevels/qbert_practice/sfx/qbert_land.wav
+audio: sfx[2] not found: wflevels/qbert_practice/sfx/qbert_fall.wav
+audio: sfx[3] not found: wflevels/qbert_practice/sfx/qbert_swear.wav
+audio: sfx[4] not found: wflevels/qbert_practice/sfx/qbert_round_clear.wav
+audio: sfx[5] not found: wflevels/qbert_practice/sfx/qbert_kill.wav
+audio: sfx[6] not found: wflevels/qbert_practice/sfx/qbert_disc.wav
+rest_api: listening on http://127.0.0.1:8765
+[debug] listening on :17921
+[debug] client connected fd=19 from 127.0.0.1
+delta too large: 0.2600097656
+timeofday:1790994503:478507
+lasttimeofday: 1790994503:218487
+deltatime:0:260020
+delta: 0.2600097656
+delta too large: 0.4985809326
+timeofday:1790994504:363025
+lasttimeofday: 1790994503:864443
+deltatime:0:498582
+delta: 0.4985809326
+delta too large: 0.4561157227
+timeofday:1790994504:910283
+lasttimeofday: 1790994504:454154
+deltatime:0:456129
+delta: 0.4561157227
+delta too large: 0.4257354736
+timeofday:1790994505:419097
+lasttimeofday: 1790994504:993360
+deltatime:0:425737
+delta: 0.4257354736
+delta too large: 0.5298309326
+timeofday:1790994506:26355
+lasttimeofday: 1790994505:496512
+deltatime:0:529843
+delta: 0.5298309326
+delta too large: 0.4884033203
+timeofday:1790994506:603432
+lasttimeofday: 1790994506:115022
+deltatime:0:488410
+delta: 0.4884033203
+delta too large: 0.4307098389
+timeofday:1790994507:127611
+lasttimeofday: 1790994506:696897
+deltatime:0:430714
+delta: 0.4307098389
+delta too large: 0.4497375488
+timeofday:1790994507:673458
+lasttimeofday: 1790994507:223719
+deltatime:0:449739
+delta: 0.4497375488
+delta too large: 0.4408874512
+timeofday:1790994508:211371
+lasttimeofday: 1790994507:770478
+deltatime:0:440893
+delta: 0.4408874512
+delta too large: 0.4176635742
+timeofday:1790994508:723837
+lasttimeofday: 1790994508:306168
+deltatime:0:417669
+delta: 0.4176635742
+delta too large: 0.4229278564
+timeofday:1790994509:240773
+lasttimeofday: 1790994508:817830
+deltatime:0:422943
+delta: 0.4229278564
+delta too large: 0.4134063721
+timeofday:1790994509:654188
+lasttimeofday: 1790994509:240773
+deltatime:0:413415
+delta: 0.4134063721
+delta too large: 0.4270019531
+timeofday:1790994510:191287
+lasttimeofday: 1790994509:764276
+deltatime:0:427011
+delta: 0.4270019531
+delta too large: 0.4139556885
+timeofday:1790994510:701159
+lasttimeofday: 1790994510:287201
+deltatime:0:413958
+delta: 0.4139556885
+delta too large: 0.4178466797
+timeofday:1790994511:197124
+lasttimeofday: 1790994510:779263
+deltatime:0:417861
+delta: 0.4178466797
+ball pos: (0.150, -0.200, 2.500)
+delta too large: 0.4157562256
+timeofday:1790994511:689616
+lasttimeofday: 1790994511:273854
+deltatime:0:415762
+delta: 0.4157562256
+delta too large: 0.4139404297
+timeofday:1790994512:198591
+lasttimeofday: 1790994511:784636
+deltatime:0:413955
+delta: 0.4139404297
+delta too large: 0.430267334
+timeofday:1790994512:706754
+lasttimeofday: 1790994512:276483
+deltatime:0:430271
+delta: 0.430267334
+delta too large: 0.4427185059
+timeofday:1790994513:243541
+lasttimeofday: 1790994512:800808
+deltatime:0:442733
+delta: 0.4427185059
+delta too large: 0.4454650879
+timeofday:1790994513:783056
+lasttimeofday: 1790994513:337584
+deltatime:0:445472
+delta: 0.4454650879
+delta too large: 0.4115600586
+timeofday:1790994514:288747
+lasttimeofday: 1790994513:877179
+deltatime:0:411568
+delta: 0.4115600586
+delta too large: 0.4157714844
+timeofday:1790994514:799681
+lasttimeofday: 1790994514:383906
+deltatime:0:415775
+delta: 0.4157714844
+delta too large: 0.4382171631
+timeofday:1790994515:331504
+lasttimeofday: 1790994514:893278
+deltatime:0:438226
+delta: 0.4382171631
+delta too large: 0.4188690186
+timeofday:1790994515:845755
+lasttimeofday: 1790994515:426873
+deltatime:0:418882
+delta: 0.4188690186
+delta too large: 0.421875
+timeofday:1790994516:361024
+lasttimeofday: 1790994515:939145
+deltatime:0:421879
+delta: 0.421875
+delta too large: 0.4441223145
+timeofday:1790994516:894474
+lasttimeofday: 1790994516:450351
+deltatime:0:444123
+delta: 0.4441223145
+delta too large: 0.427444458
+timeofday:1790994517:417410
+lasttimeofday: 1790994516:989962
+deltatime:0:427448
+delta: 0.427444458
+delta too large: 0.413269043
+timeofday:1790994517:925991
+lasttimeofday: 1790994517:512717
+deltatime:0:413274
+delta: 0.413269043
+delta too large: 0.4337768555
+timeofday:1790994518:455553
+lasttimeofday: 1790994518:21772
+deltatime:0:433781
+delta: 0.4337768555
+delta too large: 0.4202270508
+timeofday:1790994518:971533
+lasttimeofday: 1790994518:551293
+deltatime:0:420240
+delta: 0.4202270508
+ball pos: (1.403, -0.200, 2.500)
+delta too large: 0.4264373779
+timeofday:1790994519:478654
+lasttimeofday: 1790994519:52212
+deltatime:0:426442
+delta: 0.4264373779
+delta too large: 0.4273834229
+timeofday:1790994519:985394
+lasttimeofday: 1790994519:558000
+deltatime:0:427394
+delta: 0.4273834229
+delta too large: 0.4170684814
+timeofday:1790994520:402468
+lasttimeofday: 1790994519:985394
+deltatime:0:417074
+delta: 0.4170684814
+delta too large: 0.4145050049
+timeofday:1790994520:898053
+lasttimeofday: 1790994520:483535
+deltatime:0:414518
+delta: 0.4145050049
+delta too large: 0.4242095947
+timeofday:1790994521:417791
+lasttimeofday: 1790994520:993574
+deltatime:0:424217
+delta: 0.4242095947
+delta too large: 0.4225769043
+timeofday:1790994521:920124
+lasttimeofday: 1790994521:497535
+deltatime:0:422589
+delta: 0.4225769043
+delta too large: 0.4637451172
+timeofday:1790994522:442418
+lasttimeofday: 1790994521:978660
+deltatime:0:463758
+delta: 0.4637451172
+delta too large: 0.4303741455
+timeofday:1790994522:966248
+lasttimeofday: 1790994522:535861
+deltatime:0:430387
+delta: 0.4303741455
+delta too large: 0.4359436035
+timeofday:1790994523:481980
+lasttimeofday: 1790994523:46032
+deltatime:0:435948
+delta: 0.4359436035
+delta too large: 0.4091033936
+timeofday:1790994523:971452
+lasttimeofday: 1790994523:562335
+deltatime:0:409117
+delta: 0.4091033936
+delta too large: 0.4153594971
+timeofday:1790994524:485174
+lasttimeofday: 1790994524:69814
+deltatime:0:415360
+delta: 0.4153594971
+delta too large: 0.4129180908
+timeofday:1790994524:994481
+lasttimeofday: 1790994524:581548
+deltatime:0:412933
+delta: 0.4129180908
+delta too large: 0.4561920166
+timeofday:1790994525:544285
+lasttimeofday: 1790994525:88086
+deltatime:0:456199
+delta: 0.4561920166
+delta too large: 0.4144897461
+timeofday:1790994526:37880
+lasttimeofday: 1790994525:623377
+deltatime:0:414503
+delta: 0.4144897461
+delta too large: 0.4209594727
+timeofday:1790994526:555850
+lasttimeofday: 1790994526:134882
+deltatime:0:420968
+delta: 0.4209594727
+delta too large: 0.428527832
+timeofday:1790994527:80300
+lasttimeofday: 1790994526:651772
+deltatime:0:428528
+delta: 0.428527832
+ball pos: (1.424, -0.269, 2.500)
+delta too large: 0.4318084717
+timeofday:1790994527:606976
+lasttimeofday: 1790994527:175164
+deltatime:0:431812
+delta: 0.4318084717
+delta too large: 0.4221954346
+timeofday:1790994528:122860
+lasttimeofday: 1790994527:700660
+deltatime:0:422200
+delta: 0.4221954346
+delta too large: 0.4122772217
+timeofday:1790994528:628778
+lasttimeofday: 1790994528:216489
+deltatime:0:412289
+delta: 0.4122772217
+delta too large: 0.4167938232
+timeofday:1790994529:139805
+lasttimeofday: 1790994528:723005
+deltatime:0:416800
+delta: 0.4167938232
+delta too large: 0.4116210938
+timeofday:1790994529:648048
+lasttimeofday: 1790994529:236420
+deltatime:0:411628
+delta: 0.4116210938
+delta too large: 0.412612915
+timeofday:1790994530:154107
+lasttimeofday: 1790994529:741482
+deltatime:0:412625
+delta: 0.412612915
+delta too large: 0.4227294922
+timeofday:1790994530:671383
+lasttimeofday: 1790994530:248642
+deltatime:0:422741
+delta: 0.4227294922
+delta too large: 0.4264373779
+timeofday:1790994531:97826
+lasttimeofday: 1790994530:671383
+deltatime:0:426443
+delta: 0.4264373779
+delta too large: 0.4414520264
+timeofday:1790994531:619611
+lasttimeofday: 1790994531:178148
+deltatime:0:441463
+delta: 0.4414520264
+delta too large: 0.427947998
+timeofday:1790994532:142738
+lasttimeofday: 1790994531:714775
+deltatime:0:427963
+delta: 0.427947998
+delta too large: 0.4392852783
+timeofday:1790994532:664464
+lasttimeofday: 1790994532:225176
+deltatime:0:439288
+delta: 0.4392852783
+delta too large: 0.4321594238
+timeofday:1790994533:191903
+lasttimeofday: 1790994532:759738
+deltatime:0:432165
+delta: 0.4321594238
+delta too large: 0.4269104004
+timeofday:1790994533:714063
+lasttimeofday: 1790994533:287149
+deltatime:0:426914
+delta: 0.4269104004
+delta too large: 0.422454834
+timeofday:1790994534:232259
+lasttimeofday: 1790994533:809798
+deltatime:0:422461
+delta: 0.422454834
+delta too large: 0.4649353027
+timeofday:1790994534:795286
+lasttimeofday: 1790994534:330347
+deltatime:0:464939
+delta: 0.4649353027
+delta too large: 0.4571075439
+timeofday:1790994535:295450
+lasttimeofday: 1790994534:838333
+deltatime:0:457117
+delta: 0.4571075439
+ball pos: (0.219, -0.269, 2.755)
+delta too large: 0.4218902588
+timeofday:1790994535:794942
+lasttimeofday: 1790994535:373048
+deltatime:0:421894
+delta: 0.4218902588
+delta too large: 0.4433441162
+timeofday:1790994536:334320
+lasttimeofday: 1790994535:890975
+deltatime:0:443345
+delta: 0.4433441162
+delta too large: 0.4233703613
+timeofday:1790994536:836003
+lasttimeofday: 1790994536:412632
+deltatime:0:423371
+delta: 0.4233703613
+delta too large: 0.4502410889
+timeofday:1790994537:380139
+lasttimeofday: 1790994536:929893
+deltatime:0:450246
+delta: 0.4502410889
+delta too large: 0.4107971191
+timeofday:1790994537:885461
+lasttimeofday: 1790994537:474663
+deltatime:0:410798
+delta: 0.4107971191
+delta too large: 0.4206848145
+timeofday:1790994538:400202
+lasttimeofday: 1790994537:979509
+deltatime:0:420693
+delta: 0.4206848145
+delta too large: 0.4179992676
+timeofday:1790994538:897956
+lasttimeofday: 1790994538:479955
+deltatime:0:418001
+delta: 0.4179992676
+delta too large: 0.4199829102
+timeofday:1790994539:413721
+lasttimeofday: 1790994538:993725
+deltatime:0:419996
+delta: 0.4199829102
+delta too large: 0.4277801514
+timeofday:1790994539:936255
+lasttimeofday: 1790994539:508462
+deltatime:0:427793
+delta: 0.4277801514
+delta too large: 0.4545288086
+timeofday:1790994540:488415
+lasttimeofday: 1790994540:33878
+deltatime:0:454537
+delta: 0.4545288086
+delta too large: 0.4225616455
+timeofday:1790994541:6674
+lasttimeofday: 1790994540:584111
+deltatime:0:422563
+delta: 0.4225616455
+delta too large: 0.4114532471
+timeofday:1790994541:514672
+lasttimeofday: 1790994541:103210
+deltatime:0:411462
+delta: 0.4114532471
+delta too large: 0.4039916992
+timeofday:1790994541:918667
+lasttimeofday: 1790994541:514672
+deltatime:0:403995
+delta: 0.4039916992
+delta too large: 0.4093017578
+timeofday:1790994542:458214
+lasttimeofday: 1790994542:48904
+deltatime:0:409310
+delta: 0.4093017578
+delta too large: 0.4229431152
+timeofday:1790994542:967468
+lasttimeofday: 1790994542:544513
+deltatime:0:422955
+delta: 0.4229431152
+delta too large: 0.4117889404
+timeofday:1790994543:477321
+lasttimeofday: 1790994543:65521
+deltatime:0:411800
+delta: 0.4117889404
+ball pos: (-0.760, -0.269, 3.303)
+delta too large: 0.4084777832
+timeofday:1790994543:981045
+lasttimeofday: 1790994543:572555
+deltatime:0:408490
+delta: 0.4084777832
+delta too large: 0.4277191162
+timeofday:1790994544:486545
+lasttimeofday: 1790994544:58811
+deltatime:0:427734
+delta: 0.4277191162
+delta too large: 0.4206085205
+timeofday:1790994545:4560
+lasttimeofday: 1790994544:583941
+deltatime:0:420619
+delta: 0.4206085205
+delta too large: 0.4077301025
+timeofday:1790994545:510110
+lasttimeofday: 1790994545:102377
+deltatime:0:407733
+delta: 0.4077301025
+delta too large: 0.4135894775
+timeofday:1790994546:17027
+lasttimeofday: 1790994545:603431
+deltatime:0:413596
+delta: 0.4135894775
+delta too large: 0.4253082275
+timeofday:1790994546:523420
+lasttimeofday: 1790994546:98098
+deltatime:0:425322
+delta: 0.4253082275
+delta too large: 0.4069824219
+timeofday:1790994547:26555
+lasttimeofday: 1790994546:619571
+deltatime:0:406984
+delta: 0.4069824219
+delta too large: 0.4091644287
+timeofday:1790994547:534263
+lasttimeofday: 1790994547:125089
+deltatime:0:409174
+delta: 0.4091644287
+delta too large: 0.4083404541
+timeofday:1790994548:35482
+lasttimeofday: 1790994547:627127
+deltatime:0:408355
+delta: 0.4083404541
+delta too large: 0.4010620117
+timeofday:1790994548:531309
+lasttimeofday: 1790994548:130236
+deltatime:0:401073
+delta: 0.4010620117
+delta too large: 0.4262237549
+timeofday:1790994549:52291
+lasttimeofday: 1790994548:626059
+deltatime:0:426232
+delta: 0.4262237549
+delta too large: 0.4096679688
+timeofday:1790994549:553152
+lasttimeofday: 1790994549:143478
+deltatime:0:409674
+delta: 0.4096679688
+delta too large: 0.4143371582
+timeofday:1790994550:29752
+lasttimeofday: 1790994549:615409
+deltatime:0:414343
+delta: 0.4143371582
+delta too large: 0.4085235596
+timeofday:1790994550:535571
+lasttimeofday: 1790994550:127047
+deltatime:0:408524
+delta: 0.4085235596
+delta too large: 0.4162597656
+timeofday:1790994551:33592
+lasttimeofday: 1790994550:617331
+deltatime:0:416261
+delta: 0.4162597656
+ball pos: (-0.783, -0.269, 3.304)
+delta too large: 0.4404907227
+timeofday:1790994551:555305
+lasttimeofday: 1790994551:114810
+deltatime:0:440495
+delta: 0.4404907227
+delta too large: 0.4045715332
+timeofday:1790994552:53915
+lasttimeofday: 1790994551:649333
+deltatime:0:404582
+delta: 0.4045715332
+delta too large: 0.4064178467
+timeofday:1790994552:460338
+lasttimeofday: 1790994552:53915
+deltatime:0:406423
+delta: 0.4064178467
+delta too large: 0.4010009766
+timeofday:1790994552:938195
+lasttimeofday: 1790994552:537183
+deltatime:0:401012
+delta: 0.4010009766
+delta too large: 0.4175720215
+timeofday:1790994553:452893
+lasttimeofday: 1790994553:35317
+deltatime:0:417576
+delta: 0.4175720215
+delta too large: 0.3984069824
+timeofday:1790994553:945355
+lasttimeofday: 1790994553:546938
+deltatime:0:398417
+delta: 0.3984069824
+delta too large: 0.4171295166
+timeofday:1790994554:456459
+lasttimeofday: 1790994554:39320
+deltatime:0:417139
+delta: 0.4171295166
+delta too large: 0.4342498779
+timeofday:1790994554:968106
+lasttimeofday: 1790994554:533850
+deltatime:0:434256
+delta: 0.4342498779
+delta too large: 0.4039611816
+timeofday:1790994555:428628
+lasttimeofday: 1790994555:24652
+deltatime:0:403976
+delta: 0.4039611816
+delta too large: 0.4038696289
+timeofday:1790994555:926704
+lasttimeofday: 1790994555:522834
+deltatime:0:403870
+delta: 0.4038696289
+delta too large: 0.4370574951
+timeofday:1790994556:458652
+lasttimeofday: 1790994556:21582
+deltatime:0:437070
+delta: 0.4370574951
+delta too large: 0.4420471191
+timeofday:1790994556:988191
+lasttimeofday: 1790994556:546139
+deltatime:0:442052
+delta: 0.4420471191
+delta too large: 0.4313964844
+timeofday:1790994557:520507
+lasttimeofday: 1790994557:89104
+deltatime:0:431403
+delta: 0.4313964844
+delta too large: 0.438583374
+timeofday:1790994557:959098
+lasttimeofday: 1790994557:520507
+deltatime:0:438591
+delta: 0.438583374
+delta too large: 0.4028167725
+timeofday:1790994558:461208
+lasttimeofday: 1790994558:58385
+deltatime:0:402823
+delta: 0.4028167725
+delta too large: 0.4005737305
+timeofday:1790994558:960249
+lasttimeofday: 1790994558:559661
+deltatime:0:400588
+delta: 0.4005737305
+delta too large: 0.411605835
+timeofday:1790994559:467461
+lasttimeofday: 1790994559:55849
+deltatime:0:411612
+delta: 0.411605835
+ball pos: (-1.126, -0.269, 3.304)
+delta too large: 0.4278411865
+timeofday:1790994559:989912
+lasttimeofday: 1790994559:562070
+deltatime:0:427842
+delta: 0.4278411865
+delta too large: 0.4238891602
+timeofday:1790994560:512170
+lasttimeofday: 1790994560:88274
+deltatime:0:423896
+delta: 0.4238891602
+delta too large: 0.4021759033
+timeofday:1790994561:8839
+lasttimeofday: 1790994560:606658
+deltatime:0:402181
+delta: 0.4021759033
+delta too large: 0.3987121582
+timeofday:1790994561:502175
+lasttimeofday: 1790994561:103451
+deltatime:0:398724
+delta: 0.3987121582
+delta too large: 0.4030609131
+timeofday:1790994562:1635
+lasttimeofday: 1790994561:598574
+deltatime:0:403061
+delta: 0.4030609131
+delta too large: 0.5030517578
+timeofday:1790994562:591851
+lasttimeofday: 1790994562:88788
+deltatime:0:503063
+delta: 0.5030517578
+delta too large: 0.4061889648
+timeofday:1790994563:79321
+lasttimeofday: 1790994562:673119
+deltatime:0:406202
+delta: 0.4061889648
+delta too large: 0.4044342041
+timeofday:1790994563:578229
+lasttimeofday: 1790994563:173782
+deltatime:0:404447
+delta: 0.4044342041
+delta too large: 0.4012145996
+timeofday:1790994564:72595
+lasttimeofday: 1790994563:671369
+deltatime:0:401226
+delta: 0.4012145996
+delta too large: 0.406463623
+timeofday:1790994564:574755
+lasttimeofday: 1790994564:168277
+deltatime:0:406478
+delta: 0.406463623
+delta too large: 0.4349822998
+timeofday:1790994565:105168
+lasttimeofday: 1790994564:670173
+deltatime:0:434995
+delta: 0.4349822998
+delta too large: 0.4030914307
+timeofday:1790994565:602238
+lasttimeofday: 1790994565:199137
+deltatime:0:403101
+delta: 0.4030914307
+delta too large: 0.4121704102
+timeofday:1790994566:108613
+lasttimeofday: 1790994565:696428
+deltatime:0:412185
+delta: 0.4121704102
+delta too large: 0.4251708984
+timeofday:1790994566:628077
+lasttimeofday: 1790994566:202900
+deltatime:0:425177
+delta: 0.4251708984
+delta too large: 0.4064331055
+timeofday:1790994567:130853
+lasttimeofday: 1790994566:724410
+deltatime:0:406443
+delta: 0.4064331055
+ball pos: (-1.127, -0.269, 3.304)
+delta too large: 0.4116821289
+timeofday:1790994567:637572
+lasttimeofday: 1790994567:225882
+deltatime:0:411690
+delta: 0.4116821289
+delta too large: 0.418258667
+timeofday:1790994568:112043
+lasttimeofday: 1790994567:693770
+deltatime:0:418273
+delta: 0.418258667
+delta too large: 0.3978881836
+timeofday:1790994568:509937
+lasttimeofday: 1790994568:112043
+deltatime:0:397894
+delta: 0.3978881836
+[debug] client disconnected fd=19

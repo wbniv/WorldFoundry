@@ -59,7 +59,7 @@ private:
 
 	Scalar _delayBetweenGeneration;	// delay, in seconds, between object generation
 	Scalar _timeToGenerate;			// temp variable, contains time at which next object should be generated
-	long _generateMailBox;						// mailbox which activates generation
+	int32 _generateMailBox;						// mailbox index which activates generation (was long)
 	Vector3 _vect;						// initial vector of created object
 };
 

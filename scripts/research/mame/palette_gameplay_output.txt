@@ -1,0 +1,44 @@
+[INFO] tap=true mem=true
+[INFO] Game started at frame 210
+
+=== PALETTE R1 (frame=1980) ===
+  pixel apex_top     (118, 57): #56A999
+  pixel lit_side     ( 91, 89): #314646
+  pixel shadow_side  (111, 89): #56A999
+  (no palette writes captured)
+
+=== PALETTE R2 (frame=3280) ===
+  pixel apex_top     (118, 57): #312177
+  pixel lit_side     ( 91, 89): #00B900
+  pixel shadow_side  (111, 89): #312177
+  (no palette writes captured)
+
+=== PALETTE R3 (frame=4580) ===
+  pixel apex_top     (118, 57): #56A999
+  pixel lit_side     ( 91, 89): #314646
+  pixel shadow_side  (111, 89): #56A999
+  (no palette writes captured)
+
+=== PALETTE R4 (frame=5880) ===
+  pixel apex_top     (118, 57): #000000
+  pixel lit_side     ( 91, 89): #000000
+  pixel shadow_side  (111, 89): #000000
+  (no palette writes captured)
+
+=== PALETTE R5 (frame=7180) ===
+  pixel apex_top     (118, 57): #312177
+  pixel lit_side     ( 91, 89): #00B900
+  pixel shadow_side  (111, 89): #312177
+  (no palette writes captured)
+
+=== PALETTE R6 (frame=8480) ===
+  pixel apex_top     (118, 57): #56A999
+  pixel lit_side     ( 91, 89): #314646
+  pixel shadow_side  (111, 89): #56A999
+  (no palette writes captured)
+
+=== PALETTE R7 (frame=9780) ===
+  pixel apex_top     (118, 57): #312177
+  pixel lit_side     ( 91, 89): #312177
+  pixel shadow_side  (111, 89): #312177
+  (no palette writes captured)

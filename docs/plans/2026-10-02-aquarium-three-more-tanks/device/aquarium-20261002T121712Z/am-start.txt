@@ -1,0 +1,7 @@
+Starting: Intent { cmp=org.worldfoundry.wf_game.aquarium/android.app.NativeActivity }
+Status: ok
+LaunchState: COLD
+Activity: org.worldfoundry.wf_game.aquarium/android.app.NativeActivity
+TotalTime: 287
+WaitTime: 301
+Complete

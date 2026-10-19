@@ -30,8 +30,6 @@
 // dependencies
 
 #include <hal/halbase.h>
-#include <hal/tasker.h>
-#include <hal/item.h>
 
 //=============================================================================
 // controls message port behavior, whether to signal a task or not when message arrives
@@ -57,12 +55,6 @@ MessagePortNew(char* name);
 
 IMessagePort
 MessagePortDelete(IMessagePort iSelf);
-
-void
-MessagePortAttachTask(IMessagePort iSelf, ITask task);	// must do this to allow waiting on a port
-
-ITask
-MessagePortGetTask(IMessagePort iSelf);					// get the ITask for a message port.	Beware, a message port may not have its own task
 
 const char*
 MessagePortGetName(IMessagePort iSelf);					// get const ptr to message port name

@@ -65,9 +65,14 @@ fn write_entry(
     w.write_all(&(tex.width as i16).to_le_bytes())?;
     w.write_all(&(tex.height as i16).to_le_bytes())?;
 
-    // palx, paly — palette grid coordinates
-    let palx = if tex.xpal >= 0 { tex.xpal / pal_x_align } else { 0 };
-    let paly = if tex.ypal >= 0 { tex.ypal / pal_y_align } else { 0 };
+    // palx, paly — palette grid coordinates. For 16-bit textures (no
+    // palette), C++ textile leaves xPal/yPal as -1 and still divides
+    // (texture.cc:777-778), producing palx = -1/16 = 0 (truncates to
+    // zero) and paly = -1/1 = -1 (stored as int16 = 0xFFFF). Match
+    // exactly rather than gating on >= 0 — the -1→0xFFFF sentinel is
+    // visible in oracle bytes for every 16-bit entry.
+    let palx = tex.xpal / pal_x_align;
+    let paly = tex.ypal / pal_y_align;
     w.write_all(&(palx as i16).to_le_bytes())?;
     w.write_all(&(paly as i16).to_le_bytes())?;
 

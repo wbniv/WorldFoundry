@@ -1,0 +1,21 @@
+game plugin: patchwork
+party-games platform ready on http://localhost:33251
+  receiver:   http://localhost:33251/receiver
+  controller: http://localhost:33251/controller?name=Alice
+[ws] room TRFB created
+[ws] player joined room=TRFB id=1 name=Alice
+[ws] receiver attached to room=TRFB
+[ws] player joined room=TRFB id=2 name=Bob
+[ws] player dropped room=TRFB id=2 — grace 300000ms
+[ws] player resumed room=TRFB id=2 name=Bob
+[ws] receiver detached room=TRFB
+[ws] receiver attached to room=TRFB
+[ws] player dropped room=TRFB id=2 — grace 300000ms
+[ws] player resumed room=TRFB id=2 name=Bob
+[ws] receiver detached room=TRFB
+[ws] receiver attached to room=TRFB
+[ws] receiver detached room=TRFB
+[ws] player dropped room=TRFB id=1 — grace 300000ms
+[ws] player dropped room=TRFB id=2 — grace 300000ms
+
+received SIGTERM, shutting down

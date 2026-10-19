@@ -1,0 +1,14 @@
+{
+  "source": "Will pasted root diagnostic output in conversation",
+  "captured_at": "2026-10-03T23:15:43+0700",
+  "fd_count": 97977,
+  "bpf_program_descriptors": 97748,
+  "pid1_rss_kb": 1577908,
+  "reload_durations_ms": [
+    594585,
+    597663,
+    612270
+  ],
+  "finding": "BPF descriptor accumulation is a strong lead; exact producer and mechanism not established",
+  "current_status": "latest reported reload completed 23:15:28"
+}

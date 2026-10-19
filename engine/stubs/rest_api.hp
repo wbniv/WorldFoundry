@@ -1,0 +1,41 @@
+// rest_api.hp — compile-time-optional REST HTTP server for WF game engine.
+//
+// Only active when WF_REST_API is defined. Provides four operations via HTTP:
+//   POST   /boxes              — create a debug box, returns opaque id
+//   PATCH  /boxes/:id/color   — change color
+//   PATCH  /boxes/:id/size    — change any/all of l,w,h
+//   DELETE /boxes/:id         — destroy
+//
+// The HTTP server runs on a background thread. Mutations are queued and
+// drained by the game thread once per frame via RestApi_DrainQueue().
+// Boxes are rendered as GL wireframes by RestApi_RenderBoxes(), called
+// after RenderScene() and before RenderEnd().
+
+#ifndef WF_REST_API_HP
+#define WF_REST_API_HP
+
+#ifdef WF_REST_API
+
+// Start the HTTP server on a background thread. Call once before the game loop.
+void RestApi_Start();
+
+// Drain pending create/recolor/resize/destroy commands. Call once per frame
+// from the game thread (after update, before render).
+void RestApi_DrainQueue();
+
+// Draw all live boxes as GL wireframes. Call after RenderScene(), before RenderEnd().
+void RestApi_RenderBoxes();
+
+// Stop the HTTP server and join the background thread. Call after the game loop.
+void RestApi_Stop();
+
+#else
+
+// No-op stubs when REST API is disabled — zero overhead, no link dependency.
+inline void RestApi_Start()       {}
+inline void RestApi_DrainQueue()  {}
+inline void RestApi_RenderBoxes() {}
+inline void RestApi_Stop()        {}
+
+#endif // WF_REST_API
+#endif // WF_REST_API_HP

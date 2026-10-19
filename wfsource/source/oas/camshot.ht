@@ -1,0 +1,43 @@
+/*============================================================================*/
+/* camshot.ht: created from OADTYPES.S and camshot.oas DO NOT MODIFY */
+/*============================================================================*/
+#include <pigsys/pigsys.hp>
+#include <math/scalar.hp>
+/*      maximum value of a long int     */
+/* minimum value of a long int  */
+#ifndef camshot_HT
+#define camshot_HT
+ struct _CamShot {
+	int32 moveblocPageOffset;                 /* offset in page data for this objects page */
+	int32 toolsetPageOffset;                 /* offset in page data for this objects page */
+	int32 commonPageOffset;                 /* offset in page data for this objects page */
+			int32 MeshName;	/* This is a packedAssetID */
+	int32 meshPageOffset;                 /* offset in page data for this objects page */
+	int32 shadowPageOffset;                 /* offset in page data for this objects page */
+	int32 TemplateObject;        /* Default: 0 */
+	int32 Target;                               /* index into master object list, = OBJECT_NULL if no reference */
+	int32 Follow;                               /* index into master object list, = OBJECT_NULL if no reference */
+	fixed32 ClimbRate;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0)) */
+    Scalar GetClimbRate() const { return Scalar::FromFixed32(ClimbRate); }
+	fixed32 Elasticity;         /* Minumum: ( ((long) 1 * 65536.0)) Maximum: ( ((long) 100 * 65536.0)) */
+    Scalar GetElasticity() const { return Scalar::FromFixed32(Elasticity); }
+	int32 TrackObjectMailbox;               /* Minumum: 0 Maximum: 3999 Default: 0 */
+	int32 TrackObject;                               /* index into master object list, = OBJECT_NULL if no reference */
+	int32 Rotation;     /* Default: 0 */
+	int32 PositionX;     /* Default: 1 */	// absolute or relative position switches, for each axis
+	int32 PositionY;     /* Default: 1 */
+	int32 PositionZ;     /* Default: 1 */
+	fixed32 FOV;         /* Minumum: ( ((long) 1 * 65536.0)) Maximum: ( ((long) 180 * 65536.0)) */
+    Scalar GetFOV() const { return Scalar::FromFixed32(FOV); }
+	fixed32 Roll;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 32000 * 65536.0)) */
+    Scalar GetRoll() const { return Scalar::FromFixed32(Roll); }
+	fixed32 PanTimeInSeconds;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 10 * 65536.0)) */
+    Scalar GetPanTimeInSeconds() const { return Scalar::FromFixed32(PanTimeInSeconds); }
+	fixed32 Hither;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0)) */
+    Scalar GetHither() const { return Scalar::FromFixed32(Hither); }
+	fixed32 Yon;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0)) */
+    Scalar GetYon() const { return Scalar::FromFixed32(Yon); }
+};
+/*============================================================================*/
+#endif         /* camshot_HT */
+/*============================================================================*/

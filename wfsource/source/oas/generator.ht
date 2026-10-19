@@ -1,0 +1,37 @@
+/*============================================================================*/
+/* generator.ht: created from OADTYPES.S and generator.oas DO NOT MODIFY */
+/*============================================================================*/
+#include <pigsys/pigsys.hp>
+#include <math/scalar.hp>
+/*      maximum value of a long int     */
+/* minimum value of a long int  */
+#ifndef generator_HT
+#define generator_HT
+ struct _Generator {
+	int32 moveblocPageOffset;                 /* offset in page data for this objects page */
+	int32 toolsetPageOffset;                 /* offset in page data for this objects page */
+	int32 commonPageOffset;                 /* offset in page data for this objects page */
+			int32 MeshName;	/* This is a packedAssetID */
+	int32 meshPageOffset;                 /* offset in page data for this objects page */
+	int32 shadowPageOffset;                 /* offset in page data for this objects page */
+	int32 TemplateObject;        /* Default: 0 */
+        int32 ActivationMailBox;               /* Minumum: 0 Maximum: 3999 Default: 1 */               // mailbox to activate this
+        int32 ObjectToThrow;                               /* index into master object list, = OBJECT_NULL if no reference */
+        fixed32 GenerationRate;         /* Minumum: ( ((long) 0.001 * 65536.0)) Maximum: ( ((long) 10.0 * 65536.0)) */
+    Scalar GetGenerationRate() const { return Scalar::FromFixed32(GenerationRate); }             // how long to wait between generating objects, in seconds */
+        fixed32 ObjectXVelocity;         /* Minumum: ( ((long) -100.0 * 65536.0)) Maximum: ( ((long) 100.0 * 65536.0)) */
+    Scalar GetObjectXVelocity() const { return Scalar::FromFixed32(ObjectXVelocity); }
+        fixed32 ObjectYVelocity;         /* Minumum: ( ((long) -100.0 * 65536.0)) Maximum: ( ((long) 100.0 * 65536.0)) */
+    Scalar GetObjectYVelocity() const { return Scalar::FromFixed32(ObjectYVelocity); }
+        fixed32 ObjectZVelocity;         /* Minumum: ( ((long) -100.0 * 65536.0)) Maximum: ( ((long) 100.0 * 65536.0)) */
+    Scalar GetObjectZVelocity() const { return Scalar::FromFixed32(ObjectZVelocity); }
+        fixed32 RandomXRange;         /* Minumum: ( ((long) -100.0 * 65536.0)) Maximum: ( ((long) 100.0 * 65536.0)) */
+    Scalar GetRandomXRange() const { return Scalar::FromFixed32(RandomXRange); }
+        fixed32 RandomYRange;         /* Minumum: ( ((long) -100.0 * 65536.0)) Maximum: ( ((long) 100.0 * 65536.0)) */
+    Scalar GetRandomYRange() const { return Scalar::FromFixed32(RandomYRange); }
+        fixed32 RandomZRange;         /* Minumum: ( ((long) -100.0 * 65536.0)) Maximum: ( ((long) 100.0 * 65536.0)) */
+    Scalar GetRandomZRange() const { return Scalar::FromFixed32(RandomZRange); }
+};
+/*============================================================================*/
+#endif         /* generator_HT */
+/*============================================================================*/

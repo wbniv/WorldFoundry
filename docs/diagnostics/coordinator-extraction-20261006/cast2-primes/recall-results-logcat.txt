@@ -1,0 +1,118 @@
+--------- beginning of main
+10-06 12:20:14.393 13337 13337 W .wf_game.prime: Using default instruction set features for ARM CPU variant (cortex-a9) using conservative defaults
+10-06 12:20:14.399 13337 13337 E .wf_game.prime: Not starting debugger since process cannot load the jdwp agent.
+10-06 12:20:14.403 13337 13337 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+10-06 12:20:14.420 13337 13337 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10039; state: ENABLED
+10-06 12:20:14.433 13337 13337 D nativeloader: Configuring classloader-namespace for other apk /data/app/~~GqPp34D9pS-_3n0ip4TYwQ==/org.worldfoundry.wf_game.primes-54-wjbQANfV3KK7ms7GVeA==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~GqPp34D9pS-_3n0ip4TYwQ==/org.worldfoundry.wf_game.primes-54-wjbQANfV3KK7ms7GVeA==/lib/arm, permitted_path=/data:/mnt/expand:/data/user/0/org.worldfoundry.wf_game.primes
+10-06 12:20:14.440 13337 13337 V GraphicsEnvironment: ANGLE Developer option for 'org.worldfoundry.wf_game.primes' set to: 'default'
+10-06 12:20:14.440 13337 13337 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-06 12:20:14.442 13337 13337 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-06 12:20:14.442 13337 13337 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-06 12:20:14.467 13337 13337 I WebViewFactory: Loading com.google.android.webview version 91.0.4472.114 (code 447211480)
+10-06 12:20:14.477 13337 13337 D nativeloader: Configuring classloader-namespace for other apk /data/app/~~xAQOqumK3u1FhJaQ23lvnQ==/com.google.android.trichromelibrary_447211480-yXmZsUEVlCjYV20LnveUNQ==/TrichromeLibrary.apk. target_sdk_version=31, uses_libraries=ALL, library_path=/data/app/~~JpSMs4C9qX6d7YhJqzd5HA==/com.google.android.webview-DHpBh1WzeV0QsLv_lHziXw==/lib/arm:/data/app/~~JpSMs4C9qX6d7YhJqzd5HA==/com.google.android.webview-DHpBh1WzeV0QsLv_lHziXw==/WebViewGoogle.apk!/lib/armeabi-v7a:/data/app/~~xAQOqumK3u1FhJaQ23lvnQ==/com.google.android.trichromelibrary_447211480-yXmZsUEVlCjYV20LnveUNQ==/TrichromeLibrary.apk!/lib/armeabi-v7a, permitted_path=/data:/mnt/expand
+10-06 12:20:14.477 13337 13337 D nativeloader: Extending system_exposed_libraries: libaudio_proxy.google.so
+10-06 12:20:14.483 13337 13337 D nativeloader: Configuring classloader-namespace for other apk /data/app/~~JpSMs4C9qX6d7YhJqzd5HA==/com.google.android.webview-DHpBh1WzeV0QsLv_lHziXw==/WebViewGoogle.apk. target_sdk_version=31, uses_libraries=, library_path=/data/app/~~JpSMs4C9qX6d7YhJqzd5HA==/com.google.android.webview-DHpBh1WzeV0QsLv_lHziXw==/lib/arm:/data/app/~~JpSMs4C9qX6d7YhJqzd5HA==/com.google.android.webview-DHpBh1WzeV0QsLv_lHziXw==/WebViewGoogle.apk!/lib/armeabi-v7a:/data/app/~~xAQOqumK3u1FhJaQ23lvnQ==/com.google.android.trichromelibrary_447211480-yXmZsUEVlCjYV20LnveUNQ==/TrichromeLibrary.apk!/lib/armeabi-v7a, permitted_path=/data:/mnt/expand
+10-06 12:20:14.668 13337 13337 I cr_LibraryLoader: Loaded native library version number "91.0.4472.114"
+10-06 12:20:14.669 13337 13337 I cr_CachingUmaRecorder: Flushed 6 samples from 6 histograms.
+10-06 12:20:14.786 13337 13373 W chromium: [WARNING:dns_config_service_android.cc(153)] Failed to read DnsConfig.
+10-06 12:20:14.873 13337 13337 D CompatibilityChangeReporter: Compat change id reported: 171228096; UID 10039; state: ENABLED
+10-06 12:20:15.016 13337 13403 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-06 12:20:15.017 13337 13403 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-06 12:20:15.017 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_unnamed"
+10-06 12:20:15.018 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_default_heap"
+10-06 12:20:15.018 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_base_internal"
+10-06 12:20:15.018 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_framepool"
+10-06 12:20:15.018 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_tiler"
+10-06 12:20:15.018 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_program"
+10-06 12:20:15.018 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane"
+10-06 12:20:15.018 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane_imported"
+10-06 12:20:15.019 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vao"
+10-06 12:20:15.019 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_img"
+10-06 12:20:15.019 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_internal_surface"
+10-06 12:20:15.019 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_buf"
+10-06 12:20:15.019 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_crc"
+10-06 12:20:15.019 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_hmem"
+10-06 12:20:15.019 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_rsd"
+10-06 12:20:15.019 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_mbs2"
+10-06 12:20:15.020 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_static"
+10-06 12:20:15.020 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_hmem"
+10-06 12:20:15.020 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_sample_pos"
+10-06 12:20:15.020 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_discard"
+10-06 12:20:15.020 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_tess_geom"
+10-06 12:20:15.020 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cobj_hmem"
+10-06 12:20:15.020 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_hmem"
+10-06 12:20:15.021 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_prof_dump"
+10-06 12:20:15.023 13337 13382 W cr_media: Requires BLUETOOTH permission
+10-06 12:20:15.024 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cblend_hmem"
+10-06 12:20:15.025 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_hmem"
+10-06 12:20:15.026 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query"
+10-06 12:20:15.026 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query_host"
+10-06 12:20:15.026 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_multiview"
+10-06 12:20:15.026 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cdeps_hmem"
+10-06 12:20:15.026 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_suballoc"
+10-06 12:20:15.027 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_hoard"
+10-06 12:20:15.027 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_registry"
+10-06 12:20:15.027 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_payload"
+10-06 12:20:15.027 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_wlm_tls"
+10-06 12:20:15.027 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_hmem"
+10-06 12:20:15.027 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_svm"
+10-06 12:20:15.027 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_protected"
+10-06 12:20:15.027 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cinstr"
+10-06 12:20:15.027 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_uncached"
+10-06 12:20:15.027 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_cached"
+10-06 12:20:15.027 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_transient"
+10-06 12:20:15.027 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_protected"
+10-06 12:20:15.028 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external"
+10-06 12:20:15.028 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external_swapchain"
+10-06 12:20:15.028 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal"
+10-06 12:20:15.028 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_host"
+10-06 12:20:15.028 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_protected"
+10-06 12:20:15.028 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_transient"
+10-06 12:20:15.028 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_descriptor_pool"
+10-06 12:20:15.028 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator"
+10-06 12:20:15.028 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_host"
+10-06 12:20:15.028 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_protected"
+10-06 12:20:15.028 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_buffer"
+10-06 12:20:15.028 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_image"
+10-06 12:20:15.029 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_signal"
+10-06 12:20:15.029 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_flush_chain"
+10-06 12:20:15.029 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_metadata_list"
+10-06 12:20:15.029 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_jit"
+10-06 12:20:15.029 13337 13403 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_mmu"
+10-06 12:20:15.029 13337 13403 W libc    : Access denied finding property "vendor.mali.osu_protected_memory_heap_name"
+10-06 12:20:15.029 13337 13403 W libc    : Access denied finding property "vendor.mali.osu_ion_protected_memory_heap_name"
+10-06 12:20:15.038 13337 13403 W libc    : Access denied finding property "vendor.mali.platform_agt_frequency_khz"
+10-06 12:20:15.039 13337 13403 W libc    : Access denied finding property "vendor.mali.hal_dump_dir"
+10-06 12:20:15.039 13337 13403 W libc    : Access denied finding property "vendor.mali.platform.config"
+10-06 12:20:15.039 13337 13403 W libc    : Access denied finding property "vendor.mali.debug.config"
+10-06 12:20:15.053 13337 13403 D hw-ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+10-06 12:20:15.123 13337 13352 W libc    : Access denied finding property "ro.vendor.arm.gralloc.no_afbc_usage_mask"
+10-06 12:20:15.123 13337 13352 W libc    : Access denied finding property "ro.vendor.arm.gralloc.no_afbc_usage_flags"
+10-06 12:20:15.123 13337 13352 W libc    : Access denied finding property "ro.vendor.arm.gralloc.shared_access_usage_mask"
+10-06 12:20:15.123 13337 13352 W libc    : Access denied finding property "ro.vendor.arm.gralloc.shared_access_usage_flags"
+10-06 12:20:15.123 13337 13352 W libc    : Access denied finding property "ro.vendor.arm.gralloc.force_back_buffer_usage_mask"
+10-06 12:20:15.123 13337 13352 W libc    : Access denied finding property "ro.vendor.arm.gralloc.force_back_buffer_usage_flags"
+10-06 12:20:15.123 13337 13352 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_rgba_usage_mask"
+10-06 12:20:15.123 13337 13352 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_rgba_usage_flags"
+10-06 12:20:15.123 13337 13352 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_luma_usage_mask"
+10-06 12:20:15.123 13337 13352 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_chroma_usage_mask"
+10-06 12:20:15.124 13337 13352 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_luma_usage_flags"
+10-06 12:20:15.124 13337 13352 W libc    : Access denied finding property "ro.vendor.arm.gralloc.afrc_chroma_usage_flags"
+10-06 12:20:15.142 13337 13418 E ion     : ioctl c0044901 failed with code -1: Invalid argument
+10-06 12:20:15.143 13337 13352 D hw-ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+10-06 12:20:15.615 13337 13337 I PrimeNumbersTV: PRIME_READY 100 numbers 25 primes
+10-06 12:20:20.639 13337 13337 I PrimeNumbersTV: PRIME_FOCUS 1 tabs
+10-06 12:20:21.069 13337 13337 I PrimeNumbersTV: PRIME_FOCUS 1 tabs
+10-06 12:20:21.544 13337 13337 I PrimeNumbersTV: PRIME_MODE recall
+10-06 12:20:23.670 13337 13449 I .wf_game.prime: Explicit concurrent copying GC freed 425(61KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2469KB/4939KB, paused 98us total 16.516ms
+10-06 12:20:23.903 13337 13337 I PrimeNumbersTV: PRIME_MARK 1 on
+10-06 12:20:24.134 13337 13337 I PrimeNumbersTV: PRIME_MARK 1 off
+10-06 12:20:26.357 13337 13449 I .wf_game.prime: Explicit concurrent copying GC freed 4043(207KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2470KB/4940KB, paused 92us total 15.981ms
+10-06 12:20:26.591 13337 13337 I PrimeNumbersTV: PRIME_FOCUS 2 grid
+10-06 12:20:27.047 13337 13337 I PrimeNumbersTV: PRIME_MARK 2 on
+10-06 12:20:27.450 13337 13337 I PrimeNumbersTV: PRIME_FOCUS 3 grid
+10-06 12:20:27.877 13337 13337 I PrimeNumbersTV: PRIME_MARK 3 on
+10-06 12:20:30.046 13337 13349 I .wf_game.prime: Explicit concurrent copying GC freed 4094(176KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2470KB/4940KB, paused 98us total 15.946ms
+10-06 12:20:30.275 13337 13337 I PrimeNumbersTV: PRIME_FOCUS 3 tabs
+10-06 12:20:30.734 13337 13337 I PrimeNumbersTV: PRIME_FOCUS 3 tabs
+10-06 12:20:31.169 13337 13337 I PrimeNumbersTV: PRIME_CHECK 2 correct 0 wrong 23 missing

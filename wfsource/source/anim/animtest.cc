@@ -21,13 +21,6 @@
 #include <gfx/vertex.hp>
 #include <anim/anim.hp>
 
-#if defined ( __PSX__)
-#	include <sys/types.h>
-#	include <libetc.h>
-#	include <libgte.h>
-#	include <libgpu.h>
-#else
-#endif
 
 //=============================================================================
 
@@ -138,51 +131,11 @@ SetDelta3D(Vector3& position, Vector3& delta)
 void
 AdjustCameraParameters(Vector3& position,Euler& rotation)
 {
-#if defined( __PSX__ )
-	u_long  padd = PadRead(1);
-
-//      if (padd & PADselect)   ret = -1;
-
-#define ADJUST_ANGLE 1
-#define ADJUST_DELTA 0.25
-
-	// change the rotation angles for the cube and the light source
-	if (padd & PADRup)
-		rotation.SetA(rotation.GetA() + Angle(Angle::Degree(SCALAR_CONSTANT(ADJUST_ANGLE))));
-	if (padd & PADRdown)
-		rotation.SetA(rotation.GetA() - Angle(Angle::Degree(SCALAR_CONSTANT(ADJUST_ANGLE))));
-	if (padd & PADRleft)
-		rotation.SetB(rotation.GetB() - Angle(Angle::Degree(SCALAR_CONSTANT(ADJUST_ANGLE))));
-	if (padd & PADRright)
-		rotation.SetB(rotation.GetB() + Angle(Angle::Degree(SCALAR_CONSTANT(ADJUST_ANGLE))));
-	if (padd & PADR1)
-		rotation.SetC(rotation.GetC() - Angle(Angle::Degree(SCALAR_CONSTANT(ADJUST_ANGLE))));
-	if (padd & PADR2)
-		rotation.SetC(rotation.GetC() + Angle(Angle::Degree(SCALAR_CONSTANT(ADJUST_ANGLE))));
-
-	if (padd & PADLup)
-		position.SetY(position.Y() + SCALAR_CONSTANT(ADJUST_DELTA));
-	if (padd & PADLdown)
-		position.SetY(position.Y() - SCALAR_CONSTANT(ADJUST_DELTA));
-	if (padd & PADLleft)
-		position.SetX(position.X() - SCALAR_CONSTANT(ADJUST_DELTA));
-	if (padd & PADLright)
-		position.SetX(position.X() + SCALAR_CONSTANT(ADJUST_DELTA));
-
-	if (padd & PADL1)
-		position.SetZ(position.Z() - SCALAR_CONSTANT(ADJUST_DELTA));
-	if (padd & PADL2)
-		position.SetZ(position.Z() + SCALAR_CONSTANT(ADJUST_DELTA));
-#endif
 
 	// distance from screen
 //      if (padd & PADR1)       vec.vz += 8;
 //      if (padd & PADR2)       vec.vz -= 8;
 
-#if defined( __PSX__ )
-	DBSTREAM1(cscreen << "camera position:" << endl << position << endl;)
-	DBSTREAM1(cscreen << "camera rotation:" << endl << rotation << endl;)
-#endif
 }
 
 //=============================================================================
@@ -194,52 +147,6 @@ delay()
 
 //=============================================================================
 
-#if defined(__PSX__)
-
-#include <libsn.h>
-
-void
-ReadFile(char* name,char* buffer, int size)
-{
-	int fp = PCopen(name, 0, 0);
-	AssertMsg(fp != -1,"cannot open file " << name);
-	int fileSize = 0;
-	if(fp != -1)
-	{
-		fileSize = PClseek(fp, 0, 2);
-		assert(fileSize > 0);
-		AssertMsg(fileSize < size, "fileSize = " << fileSize << "  buffer size = " << size );
-		PClseek(fp, 0, 0);
-		int actual = PCread(fp, (char*)buffer, fileSize);
-		assert(actual == fileSize);
-		PCclose(fp);
-	}
-	else
-		printf("File %s not found\n",name);
-}
-
-const int BUFFER_SIZE = 100*101;
-long unsigned int * buffer[BUFFER_SIZE];
-
-void
-LoadTextures()
-{
-	// kts texture load test
-    RECT rect1;
-    rect1.x=320;
-    rect1.y = 0;
-    rect1.w=64;
-    rect1.h=64;
-
-	PCinit();
-	// read raw image from disk
-	ReadFile("test.raw",(char*)buffer,BUFFER_SIZE);
-
-    // Load texture to VRAM
-//    LoadImage(&rect1,rawData);
-    LoadImage(&rect1,(long unsigned int *)buffer);
-}
-#endif
 
 //=============================================================================
 
@@ -322,18 +229,18 @@ TestGFX()
 
 	TriFace cubeFaceList[12] =
 	{
-		TriFace(0,1,2,0,cubeVertexList),                       // front(top)
-		TriFace(1,3,2,0,cubeVertexList),
-		TriFace(4,0,2,1,cubeVertexList),                       // left side
-		TriFace(2,7,4,1,cubeVertexList),
-		TriFace(1,5,6,2,cubeVertexList),                       // right side
-		TriFace(3,1,6,2,cubeVertexList),
-		TriFace(4,5,1,3,cubeVertexList),                       // top(back)
-		TriFace(4,1,0,3,cubeVertexList),
-		TriFace(2,3,6,4,cubeVertexList),                       // bottom(front)
-		TriFace(6,7,2,4,cubeVertexList),
-		TriFace(5,4,7,5,cubeVertexList),                       // back(bottom)
-		TriFace(5,7,6,5,cubeVertexList)
+		TriFace(0,2,1,0,cubeVertexList),                       // front(top)
+		TriFace(1,2,3,0,cubeVertexList),
+		TriFace(4,2,0,1,cubeVertexList),                       // left side
+		TriFace(2,4,7,1,cubeVertexList),
+		TriFace(1,6,5,2,cubeVertexList),                       // right side
+		TriFace(3,6,1,2,cubeVertexList),
+		TriFace(4,1,5,3,cubeVertexList),                       // top(back)
+		TriFace(4,0,1,3,cubeVertexList),
+		TriFace(2,6,3,4,cubeVertexList),                       // bottom(front)
+		TriFace(6,2,7,4,cubeVertexList),
+		TriFace(5,7,4,5,cubeVertexList),                       // back(bottom)
+		TriFace(5,6,7,5,cubeVertexList)
 	};
 #endif
 
@@ -379,10 +286,6 @@ TestGFX()
 //      Euler cameraRotation = Euler(Angle(Angle::Degree(SCALAR_CONSTANT(7.998046))),Angle(Angle::Degree(SCALAR_CONSTANT(187.998046))),Angle(Angle::Degree(SCALAR_CONSTANT(0))));
 #endif
 
-#if defined( __PSX__ )
-	PadInit(0);
-	LoadTextures();
-#endif
 
 // kts load a model from disk
 #if TEST_MODEL_LOAD
@@ -391,7 +294,7 @@ TestGFX()
 #if ANIMATE_OBJECT
 	AnimateRenderObject3D* animArray[MODEL_COUNT];
 #endif
-	for(int index=0;index<MODEL_COUNT;index++)
+	for(int index=0;index<MODEL_COUNT;++index)
 	{
 		binistream binis( "torus.iff" );
 
@@ -417,12 +320,8 @@ TestGFX()
 #endif
 
 //      int frameCount = 0;
-#if defined( __PSX__ )
-	for (;;)
-#else
 //      for ( long i=0; i<10000000; ++i )
 	for ( long i=0; i<400; ++i )
-#endif
 	{
 #if TEST_2D
 #if ANIMATE_MATERIAL
@@ -461,7 +360,7 @@ TestGFX()
 
 
 #if ANIMATE_OBJECT
-	for(int index=0;index<MODEL_COUNT;index++)
+	for(int index=0;index<MODEL_COUNT;++index)
 	{
 		animArray[index]->Animate(time,*(objectArray[index]));
 	}
@@ -497,7 +396,7 @@ TestGFX()
 #endif
 
 #if TEST_MODEL_LOAD
-		for(index=0;index<MODEL_COUNT;index++)
+		for(index=0;index<MODEL_COUNT;++index)
 		{
 			Vector3 position(position3D3);
 			position += Vector3(SCALAR_CONSTANT(2)*Scalar(index%3,0),SCALAR_CONSTANT(2)*Scalar(index/3,0),0);
@@ -521,29 +420,6 @@ TestGFX()
 
 		display.PageFlip();
 
-#if defined( __PSX__ )
-//              while (((PadRead(1)) & PADR1) != 0)                     // debounce triangle
-//                      ;
-
-#if DO_TEST_CODE
-		if((PadRead(1) & (PADstart|PADselect)) == (PADstart|PADselect) )
-		{
-			cout << "Viewing Video memory:" << endl;
-			ViewVideoMemory();
-		}
-#endif
-		while (((PadRead(1)) & PADstart) != 0)                  // freeze on select
-		{
-//                      if(((PadRead(1)) & PADR1) != 0)                 // debounce down
-//                              break;
-		}
-		if (((PadRead(1)) & PADselect) != 0)                    // freeze on select
-		{
-			for(int i=0;i<1000;i++)
-				for(int j=0;j<10;j++)
-					PadRead(1);
-		}
-#endif
 	}
 }
 
@@ -557,7 +433,7 @@ ParseCommandLine(int argc, char** argv)
 	int index;
 	const char szDebugger[] = "debugger";
 
-	for( index=1; index < argc && argv[index] && ((*argv[index] == '-') || (*argv[index] == '/')); index++)
+	for( index=1; index < argc && argv[index] && ((*argv[index] == '-') || (*argv[index] == '/')); ++index)
 	{
         if ( strncmp( argv[index]+1, (char*)szDebugger,strlen( szDebugger) ) == 0 )
 		{

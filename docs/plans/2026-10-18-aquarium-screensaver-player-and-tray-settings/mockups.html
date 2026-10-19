@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aquarium screensaver tray mockups</title>
+<style>
+  :root{font-family:system-ui,sans-serif;color:#e9eef8;background:#111723}
+  body{max-width:1100px;margin:40px auto;padding:0 20px}h1{font-size:26px;margin:0 0 6px}
+  p{color:#b7c3d6;line-height:1.5}a{color:#a7d9ff}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(410px,1fr));gap:22px;margin-top:25px}
+  .card{background:#202b3b;border:1px solid #41506a;border-radius:15px;padding:22px;box-shadow:0 12px 30px #0004}
+  .card h2{font-size:17px;margin:0 0 7px}.status{font-size:13px;color:#bdd1e5;margin-bottom:18px}
+  .section{border-top:1px solid #45546c;padding-top:15px;margin-top:17px}.section h3{font-size:13px;text-transform:uppercase;letter-spacing:.09em;color:#9fbbda;margin:0 0 12px}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:10px 0}.row label{font-size:14px}
+  select{background:#111b2a;color:#fff;border:1px solid #7186a2;border-radius:7px;padding:8px;min-width:190px}
+  button{background:#3e76ab;color:white;border:0;border-radius:7px;padding:9px 12px;font:inherit;font-size:13px}button.secondary{background:#35445b}button:disabled{background:#344052;color:#9caaba}
+  .buttons{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}.note{font-size:12px;color:#afc5dc;margin:9px 0 0}.muted{color:#9caaba}.pill{background:#173f39;color:#9ce3be;padding:4px 8px;border-radius:20px;font-size:12px}
+  .warning{background:#3d3429;color:#f0ce98;border-radius:7px;padding:12px;font-size:13px}
+</style>
+<h1>Aquarium screensaver tray settings</h1>
+<p>Visual mockups for the <a href="../2026-10-18-aquarium-screensaver-player-and-tray-settings.md">implementation plan</a>. Controls shown here are static.</p>
+<div class="grid">
+ <div class="card">
+  <h2>Screensaver · chromecast-test-02 <span class="pill">Fresh</span></h2>
+  <div class="status">Selected: World Foundry Aquarium<br>Running: Aquarium · observed 19:42</div>
+  <div class="row"><label>Installed DreamService</label><select><option>World Foundry Aquarium</option><option>Google TV Ambient</option></select></div>
+  <div class="section"><h3>System settings</h3>
+   <div class="row"><label><input type="checkbox" checked> Enable screensaver</label><label><input type="checkbox" checked> Activate on sleep</label></div>
+   <div class="row"><label>Idle timeout</label><select><option>6 minutes</option></select></div>
+   <div class="buttons"><button class="secondary">Save system settings</button></div>
+  </div>
+  <div class="section"><h3>Aquarium settings · from installed app</h3>
+   <div class="row"><label>Tank</label><select><option>Random</option><option>Clownfish</option><option>Blue Shrimp</option><option>Betta</option><option>Jellyfish</option><option>Lionfish</option><option>Planted Urchin</option><option>Arowana</option><option>Tiger Barbs</option></select></div>
+   <div class="note">Random chooses one tank when the screensaver starts. Changes take effect next start.</div>
+   <div class="buttons"><button>Save tank</button></div>
+  </div>
+  <div class="buttons"><button class="secondary">Refresh status</button><button class="secondary">Install…</button><button class="secondary">Trigger…</button></div>
+  <div class="note">Accepted job J‑0692359b671d · view progress on Jobs</div>
+ </div>
+ <div class="card">
+  <h2>Screensaver · chromecast-test-02 <span class="muted">Stale</span></h2>
+  <div class="status">Selected: Google TV Ambient<br>Running: Unknown · refresh to inspect</div>
+  <div class="row"><label>Installed DreamService</label><select><option>Google TV Ambient</option><option>World Foundry Aquarium</option></select></div>
+  <div class="section"><h3>System settings</h3><div class="row"><label>Enabled · on sleep · 6 minute timeout</label></div></div>
+  <div class="section"><h3>Content settings</h3><div class="warning">This screensaver does not expose content settings. The previous Aquarium tank choice is hidden for this provider.</div></div>
+  <div class="buttons"><button>Refresh status</button><button class="secondary">Select provider</button><button disabled>Trigger…</button></div>
+ </div>
+</div>
+</html>

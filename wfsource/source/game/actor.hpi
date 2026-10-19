@@ -89,6 +89,24 @@ Actor::setCurrentPos( const Vector3& pos )
 			cerror << "Actor::setCurrentPosition: " << *this << " doesn't have mobility set!" << std::endl;
 	)
 	_physicalAttributes.SetPosition(pos);
+	_physicalAttributes.SetPredictedPosition(pos);
+#ifdef PHYSICS_ENGINE_JOLT
+	// Mirror the X/Y/Z_POS mailbox-write handlers in actor.cc:1415-1465 —
+	// "actor is now at pos" must include the Jolt body, or the renderer
+	// draws here while physics simulates from the old position. The trap
+	// surfaced when Generator-spawned template instances had their Jolt
+	// CharacterVirtual created at the template's parked authoring location
+	// and never teleported to the spawn position. See
+	// docs/plans/2026-05-19-template-object-jolt-body-sync.md.
+	{
+		uint32_t charID = _physicalAttributes.JoltCharacterID();
+		if (charID != kJoltInvalidBodyID)
+			JoltCharacterSetPosition(charID, pos);
+		uint32_t bodyID = _physicalAttributes.JoltBodyID();
+		if (bodyID != kJoltInvalidBodyID)
+			JoltBodySetPosition(bodyID, pos);
+	}
+#endif
 }
 
 //============================================================================

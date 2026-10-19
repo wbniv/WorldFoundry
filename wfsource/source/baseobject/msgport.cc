@@ -41,7 +41,7 @@ MsgPort::MsgPort(SMemPool* msgPortMemPool)
    //msgPortMemPool->Validate();
    if(msgPortMemPool && _msgPortMemPool)
       AssertMsg(msgPortMemPool == _msgPortMemPool, "msgPortMemPool = " << msgPortMemPool << ", _msgPortMemPool = " << _msgPortMemPool);     // if this fires then more than one mempool was passed in
-   _portCount++;
+   ++_portCount;
    _msgPortMemPool = msgPortMemPool;
 	ListConstruct(&_messages);		// Initialize list header
 }
@@ -53,7 +53,7 @@ MsgPort::~MsgPort()
 	while ( ListRemoveTail( &_messages ) )
 		;		// Make sure message queue is empty
 	ListDestruct( &_messages );				// Null out the list header
-   _portCount--;
+   --_portCount;
    if(_portCount == 0)
       _msgPortMemPool = NULL;
 
@@ -62,7 +62,7 @@ MsgPort::~MsgPort()
 //============================================================================
 // Returns true if successful, false if error.
 
-bool MsgPort::PutMsg(int16 msgType, int32 msgData)
+bool MsgPort::PutMsg(int16 msgType, uintptr_t msgData)
 {
 
 #pragma message ("KTS " __FILE__ ": this needs to occur somewhere which knows about actors")
@@ -89,7 +89,7 @@ bool MsgPort::PutMsg(int16 msgType, int32 msgData)
 bool MsgPort::PutMsg(int16 msgType, const void* data, uint32 size)		// Send a message
 {
 
-#pragma message ("KTS " __FILE__ ": this needs to occur somewhere which knows about actors"
+#pragma message ("KTS " __FILE__ ": this needs to occur somewhere which knows about actors")
    // this assert was to make sure no messages were sent to a statplat (since they can't do anything about collisions anyway)
 	//assert( this != &( Actor::_statPlatData._msgPort ) );
 

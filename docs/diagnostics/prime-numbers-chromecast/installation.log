@@ -1,0 +1,781 @@
++ sudo /usr/bin/python3 /home/will/WorldFoundry-wbniv/android/bomberman/deploy-coordinator.py --review /home/will/WorldFoundry-wbniv/android/prime-numbers/deploy-review.json
+Verified multi-device commands and launcher verification; queue resumed; reservations retained.
++ task chromecast:devices
+chromecast-test-01: ready; Chromecast HD; serial 2628105GN0GT7C; Android 14; ABI armeabi-v7a,armeabi; endpoint 192.168.4.43:41277; pools chromecast-test
+chromecast-test-02: needs-local-setup; Chromecast; serial 26031HFDD67QH7; Android 12; ABI armeabi-v7a,armeabi; endpoint 192.168.4.54:5555; pools chromecast-test
++ task chromecast:queue
+Snapshot 2026-10-06 02:23:36 +0700; revision 1586; connected
+
+Devices
+╔════════════════════╦═══════════════════╦═══════════════╦═════════════════════╦═════════════╦══════════════════════╗
+║ Device             ║ Health            ║ Model         ║ Owner / reservation ║ Job / phase ║ ABI                  ║
+╠════════════════════╬═══════════════════╬═══════════════╬═════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-01 ║ ready             ║ Chromecast HD ║ unowned             ║ —           ║ armeabi-v7a, armeabi ║
+╠════════════════════╬═══════════════════╬═══════════════╬═════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-02 ║ needs-local-setup ║ Chromecast    ║ unowned             ║ —           ║ armeabi-v7a, armeabi ║
+╚════════════════════╩═══════════════════╩═══════════════╩═════════════════════╩═════════════╩══════════════════════╝
+
+Waiting jobs
+╔══════╦═══════╦════════╦══════════════════╗
+║ Job  ║ Owner ║ Target ║ Eligible devices ║
+╠══════╬═══════╬════════╬══════════════════╣
+║ None ║ —     ║ —      ║ —                ║
+╚══════╩═══════╩════════╩══════════════════╝
+Pool positions depend on eligibility and release order.
++ task chromecast:submit DEVICE=chromecast-test-01 APP=primes WORKFLOW=install APK=/home/will/WorldFoundry-wbniv/android/prime-numbers/build/primes-485c4b8d6f7fe248.apk
+Accepted J-2b15bfea824d: queued; install
+Follow: task chromecast:watch JOB=J-2b15bfea824d
++ task chromecast:watch JOB=J-2b15bfea824d
+J-2b15bfea824d: accepted {"device": "chromecast-test-01", "app": "primes", "apk": "485c4b8d6f7fe248317cefc99f9a634a7d43ddcc922f00a978e45a36a44e18d2.apk", "workflow": "install"}
+J-2b15bfea824d: granted {"device": "chromecast-test-01", "generation": 119}
+J-2b15bfea824d: phase {"phase": "connecting"}
+J-2b15bfea824d: needs-local-setup {"error": "No unique advertised connection for expected serial; enable Wireless debugging on the TV", "health": "needs-local-setup"}
+J-2b15bfea824d: needs-local-setup: No unique advertised connection for expected serial; enable Wireless debugging on the TV
+task: Failed to run task "chromecast:watch": exit status 1
++ task chromecast:evidence JOB=J-2b15bfea824d OUT=/home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-2b15bfea824d
+J-2b15bfea824d: needs-local-setup; verified 1 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-2b15bfea824d
+
+Agent continuation: coordinator readd J-78e5aae6f319 completed; replacement install J-f0080603a360 completed with verified launcher icon and cleanup; hardware check J-ab52213d2357 submitted. See jobs.json and per-job evidence.
++ task chromecast:devices
+chromecast-test-01: ready; Chromecast HD; serial 2628105GN0GT7C; Android 14; ABI armeabi-v7a,armeabi; endpoint 192.168.4.43:41277; pools chromecast-test
+chromecast-test-02: needs-local-setup; Chromecast; serial 26031HFDD67QH7; Android 12; ABI armeabi-v7a,armeabi; endpoint 192.168.4.54:5555; pools chromecast-test
++ task chromecast:queue
+Snapshot 2026-10-06 02:29:23 +0700; revision 1615; connected
+
+Devices
+╔════════════════════╦═══════════════════╦═══════════════╦═════════════════════╦═════════════╦══════════════════════╗
+║ Device             ║ Health            ║ Model         ║ Owner / reservation ║ Job / phase ║ ABI                  ║
+╠════════════════════╬═══════════════════╬═══════════════╬═════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-01 ║ ready             ║ Chromecast HD ║ unowned             ║ —           ║ armeabi-v7a, armeabi ║
+╠════════════════════╬═══════════════════╬═══════════════╬═════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-02 ║ needs-local-setup ║ Chromecast    ║ unowned             ║ —           ║ armeabi-v7a, armeabi ║
+╚════════════════════╩═══════════════════╩═══════════════╩═════════════════════╩═════════════╩══════════════════════╝
+
+Waiting jobs
+╔══════╦═══════╦════════╦══════════════════╗
+║ Job  ║ Owner ║ Target ║ Eligible devices ║
+╠══════╬═══════╬════════╬══════════════════╣
+║ None ║ —     ║ —      ║ —                ║
+╚══════╩═══════╩════════╩══════════════════╝
+Pool positions depend on eligibility and release order.
++ task chromecast:watch JOB=J-f0080603a360
+J-f0080603a360: accepted {"device": "chromecast-test-01", "app": "primes", "apk": "485c4b8d6f7fe248317cefc99f9a634a7d43ddcc922f00a978e45a36a44e18d2.apk", "workflow": "install"}
+J-f0080603a360: granted {"device": "chromecast-test-01", "generation": 121}
+J-f0080603a360: phase {"phase": "connecting"}
+J-f0080603a360: phase {"phase": "installing"}
+J-f0080603a360: apk-installed {"apk": "485c4b8d6f7fe248317cefc99f9a634a7d43ddcc922f00a978e45a36a44e18d2.apk", "launcher": "pending"}
+J-f0080603a360: launcher-verification-pending {"device": "chromecast-test-01", "apk": "485c4b8d6f7fe248317cefc99f9a634a7d43ddcc922f00a978e45a36a44e18d2.apk"}
+J-f0080603a360: granted {"device": "chromecast-test-01", "generation": 122}
+J-f0080603a360: phase {"phase": "connecting"}
+J-f0080603a360: phase {"phase": "verifying-launcher"}
+J-f0080603a360: phase {"phase": "refreshing-launcher"}
+J-f0080603a360: phase {"phase": "restoring"}
+J-f0080603a360: completed {"error": null, "health": "ready"}
+J-f0080603a360: completed
++ task chromecast:evidence JOB=J-f0080603a360 OUT=/home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-f0080603a360
+J-f0080603a360: completed; verified 12 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-f0080603a360
++ task chromecast:status JOB=J-f0080603a360
+{
+  "id": "J-f0080603a360",
+  "owner": "5150aba570753af3cbce336d",
+  "accepted": 1791228272.356335,
+  "state": "completed",
+  "phase": "completed",
+  "request": {
+    "device": "chromecast-test-01",
+    "app": "primes",
+    "apk": "485c4b8d6f7fe248317cefc99f9a634a7d43ddcc922f00a978e45a36a44e18d2.apk",
+    "workflow": "install"
+  },
+  "device": "chromecast-test-01",
+  "generation": 122,
+  "cancel": 0,
+  "error": null,
+  "started": 1791228276.7579207,
+  "finished": 1791228304.2720408,
+  "worker_pid": 881185,
+  "recovery_resolved": 0,
+  "installation": "485c4b8d6f7fe248317cefc99f9a634a7d43ddcc922f00a978e45a36a44e18d2.apk"
+}
++ task chromecast:watch JOB=J-ab52213d2357
+J-ab52213d2357: accepted {"device": "chromecast-test-01", "app": "primes", "apk": "485c4b8d6f7fe248317cefc99f9a634a7d43ddcc922f00a978e45a36a44e18d2.apk", "validator": "prime-study", "workflow": "check"}
+J-ab52213d2357: granted {"device": "chromecast-test-01", "generation": 123}
+J-ab52213d2357: phase {"phase": "connecting"}
+J-ab52213d2357: phase {"phase": "installing"}
+J-ab52213d2357: phase {"phase": "installing"}
+J-ab52213d2357: phase {"phase": "launching"}
+J-ab52213d2357: phase {"phase": "restoring"}
+J-ab52213d2357: completed {"error": null, "health": "ready"}
+J-ab52213d2357: completed
++ task chromecast:evidence JOB=J-ab52213d2357 OUT=/home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-ab52213d2357
+J-ab52213d2357: completed; verified 72 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-ab52213d2357
++ task chromecast:status JOB=J-ab52213d2357
+{
+  "id": "J-ab52213d2357",
+  "owner": "5150aba570753af3cbce336d",
+  "accepted": 1791228312.2392373,
+  "state": "completed",
+  "phase": "completed",
+  "request": {
+    "device": "chromecast-test-01",
+    "app": "primes",
+    "apk": "485c4b8d6f7fe248317cefc99f9a634a7d43ddcc922f00a978e45a36a44e18d2.apk",
+    "validator": "prime-study",
+    "workflow": "check"
+  },
+  "device": "chromecast-test-01",
+  "generation": 123,
+  "cancel": 0,
+  "error": null,
+  "started": 1791228312.274704,
+  "finished": 1791228408.78829,
+  "worker_pid": 881665,
+  "recovery_resolved": 0,
+  "installation": null
+}
++ sudo /usr/bin/python3 /home/will/WorldFoundry-wbniv/android/bomberman/deploy-coordinator.py --review /home/will/WorldFoundry-wbniv/android/prime-numbers/deploy-review.json
+Verified multi-device commands and launcher verification; queue resumed; reservations retained.
++ task chromecast:devices
+chromecast-test-01: ready; Chromecast HD; serial 2628105GN0GT7C; Android 14; ABI armeabi-v7a,armeabi; endpoint 192.168.4.43:41277; pools chromecast-test
+chromecast-test-02: needs-local-setup; Chromecast; serial 26031HFDD67QH7; Android 12; ABI armeabi-v7a,armeabi; endpoint 192.168.4.54:5555; pools chromecast-test
++ task chromecast:queue
+Snapshot 2026-10-06 02:40:44 +0700; revision 1626; connected
+
+Devices
+╔════════════════════╦═══════════════════╦═══════════════╦═════════════════════╦═════════════╦══════════════════════╗
+║ Device             ║ Health            ║ Model         ║ Owner / reservation ║ Job / phase ║ ABI                  ║
+╠════════════════════╬═══════════════════╬═══════════════╬═════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-01 ║ ready             ║ Chromecast HD ║ unowned             ║ —           ║ armeabi-v7a, armeabi ║
+╠════════════════════╬═══════════════════╬═══════════════╬═════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-02 ║ needs-local-setup ║ Chromecast    ║ unowned             ║ —           ║ armeabi-v7a, armeabi ║
+╚════════════════════╩═══════════════════╩═══════════════╩═════════════════════╩═════════════╩══════════════════════╝
+
+Waiting jobs
+╔══════╦═══════╦════════╦══════════════════╗
+║ Job  ║ Owner ║ Target ║ Eligible devices ║
+╠══════╬═══════╬════════╬══════════════════╣
+║ None ║ —     ║ —      ║ —                ║
+╚══════╩═══════╩════════╩══════════════════╝
+Pool positions depend on eligibility and release order.
++ task chromecast:submit DEVICE=chromecast-test-01 APP=primes WORKFLOW=install APK=/home/will/WorldFoundry-wbniv/android/prime-numbers/build/primes-74c457236f3cef62.apk
+Accepted J-f2760efa0a11: queued; install
+Follow: task chromecast:watch JOB=J-f2760efa0a11
++ task chromecast:watch JOB=J-f2760efa0a11
+J-f2760efa0a11: accepted {"device": "chromecast-test-01", "app": "primes", "apk": "74c457236f3cef623efba1dec794f119ac783a50ec53b394fff111c1cec528ad.apk", "workflow": "install"}
+J-f2760efa0a11: granted {"device": "chromecast-test-01", "generation": 126}
+J-f2760efa0a11: phase {"phase": "connecting"}
+J-f2760efa0a11: needs-local-setup {"error": "No unique advertised connection for expected serial; enable Wireless debugging on the TV", "health": "needs-local-setup"}
+J-f2760efa0a11: needs-local-setup: No unique advertised connection for expected serial; enable Wireless debugging on the TV
+task: Failed to run task "chromecast:watch": exit status 1
++ task chromecast:evidence JOB=J-f2760efa0a11 OUT=/home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-f2760efa0a11
+J-f2760efa0a11: needs-local-setup; verified 1 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-f2760efa0a11
++ task chromecast:status JOB=J-f2760efa0a11
+{
+  "id": "J-f2760efa0a11",
+  "owner": "91e7a66d81613eb5397d20c6",
+  "accepted": 1791229245.184954,
+  "state": "needs-local-setup",
+  "phase": "needs-local-setup",
+  "request": {
+    "device": "chromecast-test-01",
+    "app": "primes",
+    "apk": "74c457236f3cef623efba1dec794f119ac783a50ec53b394fff111c1cec528ad.apk",
+    "workflow": "install"
+  },
+  "device": "chromecast-test-01",
+  "generation": 126,
+  "cancel": 0,
+  "error": "No unique advertised connection for expected serial; enable Wireless debugging on the TV",
+  "started": 1791229245.2295146,
+  "finished": 1791229250.8550732,
+  "worker_pid": 887543,
+  "recovery_resolved": 0,
+  "installation": null
+}
++ task chromecast:readd DEVICE=chromecast-test-01 ASYNC=true
+Accepted J-3b183dc2038a: queued; readd
+Follow: task chromecast:watch JOB=J-3b183dc2038a
++ task chromecast:watch JOB=J-3b183dc2038a
+J-3b183dc2038a: accepted {"device": "chromecast-test-01", "workflow": "readd"}
+J-3b183dc2038a: granted {"device": "chromecast-test-01", "generation": 127}
+J-3b183dc2038a: phase {"phase": "connecting"}
+J-3b183dc2038a: needs-local-setup {"error": "No unique advertised connection for expected serial; enable Wireless debugging on the TV", "health": "needs-local-setup"}
+J-3b183dc2038a: needs-local-setup: No unique advertised connection for expected serial; enable Wireless debugging on the TV
+task: Failed to run task "chromecast:watch": exit status 1
++ task chromecast:evidence JOB=J-3b183dc2038a OUT=/home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-3b183dc2038a
+J-3b183dc2038a: needs-local-setup; verified 1 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-3b183dc2038a
++ task chromecast:status JOB=J-3b183dc2038a
+{
+  "id": "J-3b183dc2038a",
+  "owner": "91e7a66d81613eb5397d20c6",
+  "accepted": 1791229251.8173368,
+  "state": "needs-local-setup",
+  "phase": "needs-local-setup",
+  "request": {
+    "device": "chromecast-test-01",
+    "workflow": "readd"
+  },
+  "device": "chromecast-test-01",
+  "generation": 127,
+  "cancel": 0,
+  "error": "No unique advertised connection for expected serial; enable Wireless debugging on the TV",
+  "started": 1791229251.8672948,
+  "finished": 1791229257.1254137,
+  "worker_pid": 887672,
+  "recovery_resolved": 0,
+  "installation": null
+}
++ task chromecast:devices
+chromecast-test-01: needs-local-setup; Chromecast HD; serial 2628105GN0GT7C; Android 14; ABI armeabi-v7a,armeabi; endpoint 192.168.4.43:41277; pools chromecast-test
+chromecast-test-02: needs-local-setup; Chromecast; serial 26031HFDD67QH7; Android 12; ABI armeabi-v7a,armeabi; endpoint 192.168.4.54:5555; pools chromecast-test
++ task chromecast:queue
+Snapshot 2026-10-06 02:43:09 +0700; revision 1636; connected
+
+Devices
+╔════════════════════╦═══════════════════╦═══════════════╦═════════════════════╦═════════════╦══════════════════════╗
+║ Device             ║ Health            ║ Model         ║ Owner / reservation ║ Job / phase ║ ABI                  ║
+╠════════════════════╬═══════════════════╬═══════════════╬═════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-01 ║ needs-local-setup ║ Chromecast HD ║ unowned             ║ —           ║ armeabi-v7a, armeabi ║
+╠════════════════════╬═══════════════════╬═══════════════╬═════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-02 ║ needs-local-setup ║ Chromecast    ║ unowned             ║ —           ║ armeabi-v7a, armeabi ║
+╚════════════════════╩═══════════════════╩═══════════════╩═════════════════════╩═════════════╩══════════════════════╝
+
+Waiting jobs
+╔══════╦═══════╦════════╦══════════════════╗
+║ Job  ║ Owner ║ Target ║ Eligible devices ║
+╠══════╬═══════╬════════╬══════════════════╣
+║ None ║ —     ║ —      ║ —                ║
+╚══════╩═══════╩════════╩══════════════════╝
+Pool positions depend on eligibility and release order.
++ task chromecast:watch JOB=J-f2760efa0a11
+J-f2760efa0a11: accepted {"device": "chromecast-test-01", "app": "primes", "apk": "74c457236f3cef623efba1dec794f119ac783a50ec53b394fff111c1cec528ad.apk", "workflow": "install"}
+J-f2760efa0a11: granted {"device": "chromecast-test-01", "generation": 126}
+J-f2760efa0a11: phase {"phase": "connecting"}
+J-f2760efa0a11: needs-local-setup {"error": "No unique advertised connection for expected serial; enable Wireless debugging on the TV", "health": "needs-local-setup"}
+J-f2760efa0a11: needs-local-setup: No unique advertised connection for expected serial; enable Wireless debugging on the TV
+task: Failed to run task "chromecast:watch": exit status 1
++ task chromecast:evidence JOB=J-f2760efa0a11 OUT=/home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-f2760efa0a11
+J-f2760efa0a11: needs-local-setup; verified 1 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-f2760efa0a11
++ task chromecast:status JOB=J-f2760efa0a11
+{
+  "id": "J-f2760efa0a11",
+  "owner": "91e7a66d81613eb5397d20c6",
+  "accepted": 1791229245.184954,
+  "state": "needs-local-setup",
+  "phase": "needs-local-setup",
+  "request": {
+    "device": "chromecast-test-01",
+    "app": "primes",
+    "apk": "74c457236f3cef623efba1dec794f119ac783a50ec53b394fff111c1cec528ad.apk",
+    "workflow": "install"
+  },
+  "device": "chromecast-test-01",
+  "generation": 126,
+  "cancel": 0,
+  "error": "No unique advertised connection for expected serial; enable Wireless debugging on the TV",
+  "started": 1791229245.2295146,
+  "finished": 1791229250.8550732,
+  "worker_pid": 887543,
+  "recovery_resolved": 0,
+  "installation": null
+}
++ task chromecast:readd DEVICE=chromecast-test-01 ASYNC=true
+Accepted J-942b32fd9178: queued; readd
+Follow: task chromecast:watch JOB=J-942b32fd9178
++ task chromecast:watch JOB=J-942b32fd9178
+J-942b32fd9178: accepted {"device": "chromecast-test-01", "workflow": "readd"}
+J-942b32fd9178: granted {"device": "chromecast-test-01", "generation": 128}
+J-942b32fd9178: phase {"phase": "connecting"}
+J-942b32fd9178: phase {"phase": "restoring"}
+J-942b32fd9178: completed {"error": null, "health": "ready"}
+J-942b32fd9178: completed
++ task chromecast:evidence JOB=J-942b32fd9178 OUT=/home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-942b32fd9178
+J-942b32fd9178: completed; verified 1 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-942b32fd9178
++ task chromecast:status JOB=J-942b32fd9178
+{
+  "id": "J-942b32fd9178",
+  "owner": "5150aba570753af3cbce336d",
+  "accepted": 1791229390.8413,
+  "state": "completed",
+  "phase": "completed",
+  "request": {
+    "device": "chromecast-test-01",
+    "workflow": "readd"
+  },
+  "device": "chromecast-test-01",
+  "generation": 128,
+  "cancel": 0,
+  "error": null,
+  "started": 1791229390.8839107,
+  "finished": 1791229392.0551505,
+  "worker_pid": 889379,
+  "recovery_resolved": 0,
+  "installation": null
+}
++ task chromecast:submit DEVICE=chromecast-test-01 APP=primes WORKFLOW=install APK=/home/will/WorldFoundry-wbniv/android/prime-numbers/build/primes-74c457236f3cef62.apk
+Accepted J-93cd28bd7cab: queued; install
+Follow: task chromecast:watch JOB=J-93cd28bd7cab
++ task chromecast:watch JOB=J-93cd28bd7cab
+J-93cd28bd7cab: accepted {"device": "chromecast-test-01", "app": "primes", "apk": "74c457236f3cef623efba1dec794f119ac783a50ec53b394fff111c1cec528ad.apk", "workflow": "install"}
+J-93cd28bd7cab: granted {"device": "chromecast-test-01", "generation": 129}
+J-93cd28bd7cab: phase {"phase": "connecting"}
+J-93cd28bd7cab: failed {"error": "Cannot update the foreground app without interrupting it", "health": "ready"}
+J-93cd28bd7cab: failed: Cannot update the foreground app without interrupting it
+task: Failed to run task "chromecast:watch": exit status 1
++ task chromecast:evidence JOB=J-93cd28bd7cab OUT=/home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-93cd28bd7cab
+J-93cd28bd7cab: failed; verified 1 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-93cd28bd7cab
++ task chromecast:status JOB=J-93cd28bd7cab
+{
+  "id": "J-93cd28bd7cab",
+  "owner": "5150aba570753af3cbce336d",
+  "accepted": 1791229392.877613,
+  "state": "failed",
+  "phase": "failed",
+  "request": {
+    "device": "chromecast-test-01",
+    "app": "primes",
+    "apk": "74c457236f3cef623efba1dec794f119ac783a50ec53b394fff111c1cec528ad.apk",
+    "workflow": "install"
+  },
+  "device": "chromecast-test-01",
+  "generation": 129,
+  "cancel": 0,
+  "error": "Cannot update the foreground app without interrupting it",
+  "started": 1791229392.965013,
+  "finished": 1791229394.1979182,
+  "worker_pid": 889492,
+  "recovery_resolved": 0,
+  "installation": null
+}
++ task chromecast:devices
+chromecast-test-01: ready; Chromecast HD; serial 2628105GN0GT7C; Android 14; ABI armeabi-v7a,armeabi; endpoint 192.168.4.43:41277; pools chromecast-test
+chromecast-test-02: needs-local-setup; Chromecast; serial 26031HFDD67QH7; Android 12; ABI armeabi-v7a,armeabi; endpoint 192.168.4.54:5555; pools chromecast-test
++ task chromecast:queue
+Snapshot 2026-10-06 02:44:40 +0700; revision 1645; connected
+
+Devices
+╔════════════════════╦═══════════════════╦═══════════════╦═════════════════════╦═════════════╦══════════════════════╗
+║ Device             ║ Health            ║ Model         ║ Owner / reservation ║ Job / phase ║ ABI                  ║
+╠════════════════════╬═══════════════════╬═══════════════╬═════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-01 ║ ready             ║ Chromecast HD ║ unowned             ║ —           ║ armeabi-v7a, armeabi ║
+╠════════════════════╬═══════════════════╬═══════════════╬═════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-02 ║ needs-local-setup ║ Chromecast    ║ unowned             ║ —           ║ armeabi-v7a, armeabi ║
+╚════════════════════╩═══════════════════╩═══════════════╩═════════════════════╩═════════════╩══════════════════════╝
+
+Waiting jobs
+╔══════╦═══════╦════════╦══════════════════╗
+║ Job  ║ Owner ║ Target ║ Eligible devices ║
+╠══════╬═══════╬════════╬══════════════════╣
+║ None ║ —     ║ —      ║ —                ║
+╚══════╩═══════╩════════╩══════════════════╝
+Pool positions depend on eligibility and release order.
++ task chromecast:watch JOB=J-93cd28bd7cab
+J-93cd28bd7cab: accepted {"device": "chromecast-test-01", "app": "primes", "apk": "74c457236f3cef623efba1dec794f119ac783a50ec53b394fff111c1cec528ad.apk", "workflow": "install"}
+J-93cd28bd7cab: granted {"device": "chromecast-test-01", "generation": 129}
+J-93cd28bd7cab: phase {"phase": "connecting"}
+J-93cd28bd7cab: failed {"error": "Cannot update the foreground app without interrupting it", "health": "ready"}
+J-93cd28bd7cab: failed: Cannot update the foreground app without interrupting it
+task: Failed to run task "chromecast:watch": exit status 1
++ task chromecast:evidence JOB=J-93cd28bd7cab OUT=/home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-93cd28bd7cab
+J-93cd28bd7cab: failed; verified 1 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-93cd28bd7cab
++ task chromecast:status JOB=J-93cd28bd7cab
+{
+  "id": "J-93cd28bd7cab",
+  "owner": "5150aba570753af3cbce336d",
+  "accepted": 1791229392.877613,
+  "state": "failed",
+  "phase": "failed",
+  "request": {
+    "device": "chromecast-test-01",
+    "app": "primes",
+    "apk": "74c457236f3cef623efba1dec794f119ac783a50ec53b394fff111c1cec528ad.apk",
+    "workflow": "install"
+  },
+  "device": "chromecast-test-01",
+  "generation": 129,
+  "cancel": 0,
+  "error": "Cannot update the foreground app without interrupting it",
+  "started": 1791229392.965013,
+  "finished": 1791229394.1979182,
+  "worker_pid": 889492,
+  "recovery_resolved": 0,
+  "installation": null
+}
++ task chromecast:submit DEVICE=chromecast-test-01 APP=primes WORKFLOW=check APK=/home/will/WorldFoundry-wbniv/android/prime-numbers/build/primes-74c457236f3cef62.apk VALIDATOR=prime-study
+Accepted J-7ac7b36a1b25: queued; check
+Follow: task chromecast:watch JOB=J-7ac7b36a1b25
++ task chromecast:watch JOB=J-7ac7b36a1b25
+J-7ac7b36a1b25: accepted {"device": "chromecast-test-01", "app": "primes", "apk": "74c457236f3cef623efba1dec794f119ac783a50ec53b394fff111c1cec528ad.apk", "validator": "prime-study", "workflow": "check"}
+J-7ac7b36a1b25: granted {"device": "chromecast-test-01", "generation": 130}
+J-7ac7b36a1b25: phase {"phase": "connecting"}
+J-7ac7b36a1b25: phase {"phase": "installing"}
+J-7ac7b36a1b25: phase {"phase": "installing"}
+J-7ac7b36a1b25: phase {"phase": "launching"}
+J-7ac7b36a1b25: phase {"phase": "restoring"}
+J-7ac7b36a1b25: completed {"error": null, "health": "ready"}
+J-7ac7b36a1b25: completed
++ task chromecast:evidence JOB=J-7ac7b36a1b25 OUT=/home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-7ac7b36a1b25
+J-7ac7b36a1b25: completed; verified 77 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-7ac7b36a1b25
++ task chromecast:status JOB=J-7ac7b36a1b25
+{
+  "id": "J-7ac7b36a1b25",
+  "owner": "5150aba570753af3cbce336d",
+  "accepted": 1791229481.6728973,
+  "state": "completed",
+  "phase": "completed",
+  "request": {
+    "device": "chromecast-test-01",
+    "app": "primes",
+    "apk": "74c457236f3cef623efba1dec794f119ac783a50ec53b394fff111c1cec528ad.apk",
+    "validator": "prime-study",
+    "workflow": "check"
+  },
+  "device": "chromecast-test-01",
+  "generation": 130,
+  "cancel": 0,
+  "error": null,
+  "started": 1791229481.7087324,
+  "finished": 1791229583.7928317,
+  "worker_pid": 890016,
+  "recovery_resolved": 0,
+  "installation": null
+}
++ task chromecast:devices
+chromecast-test-01: ready; Chromecast HD; serial 2628105GN0GT7C; Android 14; ABI armeabi-v7a,armeabi; endpoint 192.168.4.43:41277; pools chromecast-test
+chromecast-test-02: needs-local-setup; Chromecast; serial 26031HFDD67QH7; Android 12; ABI armeabi-v7a,armeabi; endpoint 192.168.4.54:5555; pools chromecast-test
++ task chromecast:queue
+Snapshot 2026-10-06 02:47:50 +0700; revision 1653; connected
+
+Devices
+╔════════════════════╦═══════════════════╦═══════════════╦═════════════════════╦═════════════╦══════════════════════╗
+║ Device             ║ Health            ║ Model         ║ Owner / reservation ║ Job / phase ║ ABI                  ║
+╠════════════════════╬═══════════════════╬═══════════════╬═════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-01 ║ ready             ║ Chromecast HD ║ unowned             ║ —           ║ armeabi-v7a, armeabi ║
+╠════════════════════╬═══════════════════╬═══════════════╬═════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-02 ║ needs-local-setup ║ Chromecast    ║ unowned             ║ —           ║ armeabi-v7a, armeabi ║
+╚════════════════════╩═══════════════════╩═══════════════╩═════════════════════╩═════════════╩══════════════════════╝
+
+Waiting jobs
+╔══════╦═══════╦════════╦══════════════════╗
+║ Job  ║ Owner ║ Target ║ Eligible devices ║
+╠══════╬═══════╬════════╬══════════════════╣
+║ None ║ —     ║ —      ║ —                ║
+╚══════╩═══════╩════════╩══════════════════╝
+Pool positions depend on eligibility and release order.
++ task chromecast:submit DEVICE=chromecast-test-01 APP=primes WORKFLOW=install APK=/home/will/WorldFoundry-wbniv/android/prime-numbers/build/primes-bb98c637cfeef2c8.apk
+Accepted J-0e41cb99ea40: queued; install
+Follow: task chromecast:watch JOB=J-0e41cb99ea40
++ task chromecast:watch JOB=J-0e41cb99ea40
+J-0e41cb99ea40: accepted {"device": "chromecast-test-01", "app": "primes", "apk": "bb98c637cfeef2c824251af4f1b0ad71eab89fde347c3e3d3d6fc1798ab1c4b8.apk", "workflow": "install"}
+J-0e41cb99ea40: granted {"device": "chromecast-test-01", "generation": 131}
+J-0e41cb99ea40: phase {"phase": "connecting"}
+J-0e41cb99ea40: phase {"phase": "installing"}
+J-0e41cb99ea40: apk-installed {"apk": "bb98c637cfeef2c824251af4f1b0ad71eab89fde347c3e3d3d6fc1798ab1c4b8.apk", "launcher": "pending"}
+J-0e41cb99ea40: launcher-verification-pending {"device": "chromecast-test-01", "apk": "bb98c637cfeef2c824251af4f1b0ad71eab89fde347c3e3d3d6fc1798ab1c4b8.apk"}
+J-0e41cb99ea40: granted {"device": "chromecast-test-01", "generation": 132}
+J-0e41cb99ea40: phase {"phase": "connecting"}
+J-0e41cb99ea40: phase {"phase": "verifying-launcher"}
+J-0e41cb99ea40: phase {"phase": "restoring"}
+J-0e41cb99ea40: completed {"error": null, "health": "ready"}
+J-0e41cb99ea40: completed
++ task chromecast:evidence JOB=J-0e41cb99ea40 OUT=/home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-0e41cb99ea40
+J-0e41cb99ea40: completed; verified 10 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-0e41cb99ea40
++ task chromecast:status JOB=J-0e41cb99ea40
+{
+  "id": "J-0e41cb99ea40",
+  "owner": "5150aba570753af3cbce336d",
+  "accepted": 1791229671.304261,
+  "state": "completed",
+  "phase": "completed",
+  "request": {
+    "device": "chromecast-test-01",
+    "app": "primes",
+    "apk": "bb98c637cfeef2c824251af4f1b0ad71eab89fde347c3e3d3d6fc1798ab1c4b8.apk",
+    "workflow": "install"
+  },
+  "device": "chromecast-test-01",
+  "generation": 132,
+  "cancel": 0,
+  "error": null,
+  "started": 1791229676.4891915,
+  "finished": 1791229691.331632,
+  "worker_pid": 893747,
+  "recovery_resolved": 0,
+  "installation": "bb98c637cfeef2c824251af4f1b0ad71eab89fde347c3e3d3d6fc1798ab1c4b8.apk"
+}
++ task chromecast:submit DEVICE=chromecast-test-01 APP=primes WORKFLOW=check APK=/home/will/WorldFoundry-wbniv/android/prime-numbers/build/primes-bb98c637cfeef2c8.apk VALIDATOR=prime-study
+Accepted J-032a6e4bf3aa: queued; check
+Follow: task chromecast:watch JOB=J-032a6e4bf3aa
++ task chromecast:watch JOB=J-032a6e4bf3aa
+J-032a6e4bf3aa: accepted {"device": "chromecast-test-01", "app": "primes", "apk": "bb98c637cfeef2c824251af4f1b0ad71eab89fde347c3e3d3d6fc1798ab1c4b8.apk", "validator": "prime-study", "workflow": "check"}
+J-032a6e4bf3aa: granted {"device": "chromecast-test-01", "generation": 133}
+J-032a6e4bf3aa: phase {"phase": "connecting"}
+J-032a6e4bf3aa: phase {"phase": "installing"}
+J-032a6e4bf3aa: phase {"phase": "installing"}
+J-032a6e4bf3aa: phase {"phase": "launching"}
+J-032a6e4bf3aa: phase {"phase": "restoring"}
+J-032a6e4bf3aa: failed {"error": "Held DOWN did not move correctly", "health": "ready"}
+J-032a6e4bf3aa: failed: Held DOWN did not move correctly
+task: Failed to run task "chromecast:watch": exit status 1
++ task chromecast:evidence JOB=J-032a6e4bf3aa OUT=/home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-032a6e4bf3aa
+J-032a6e4bf3aa: failed; verified 31 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-032a6e4bf3aa
++ task chromecast:status JOB=J-032a6e4bf3aa
+{
+  "id": "J-032a6e4bf3aa",
+  "owner": "5150aba570753af3cbce336d",
+  "accepted": 1791229692.4951506,
+  "state": "failed",
+  "phase": "failed",
+  "request": {
+    "device": "chromecast-test-01",
+    "app": "primes",
+    "apk": "bb98c637cfeef2c824251af4f1b0ad71eab89fde347c3e3d3d6fc1798ab1c4b8.apk",
+    "validator": "prime-study",
+    "workflow": "check"
+  },
+  "device": "chromecast-test-01",
+  "generation": 133,
+  "cancel": 0,
+  "error": "Held DOWN did not move correctly",
+  "started": 1791229692.5269558,
+  "finished": 1791229736.6651864,
+  "worker_pid": 893977,
+  "recovery_resolved": 0,
+  "installation": null
+}
++ task chromecast:devices
+chromecast-test-01: ready; Chromecast HD; serial 2628105GN0GT7C; Android 14; ABI armeabi-v7a,armeabi; endpoint 192.168.4.43:41277; pools chromecast-test
+chromecast-test-02: needs-local-setup; Chromecast; serial 26031HFDD67QH7; Android 12; ABI armeabi-v7a,armeabi; endpoint 192.168.4.54:5555; pools chromecast-test
++ task chromecast:queue
+Snapshot 2026-10-06 02:51:21 +0700; revision 1672; connected
+
+Devices
+╔════════════════════╦═══════════════════╦═══════════════╦═════════════════════╦═════════════╦══════════════════════╗
+║ Device             ║ Health            ║ Model         ║ Owner / reservation ║ Job / phase ║ ABI                  ║
+╠════════════════════╬═══════════════════╬═══════════════╬═════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-01 ║ ready             ║ Chromecast HD ║ unowned             ║ —           ║ armeabi-v7a, armeabi ║
+╠════════════════════╬═══════════════════╬═══════════════╬═════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-02 ║ needs-local-setup ║ Chromecast    ║ unowned             ║ —           ║ armeabi-v7a, armeabi ║
+╚════════════════════╩═══════════════════╩═══════════════╩═════════════════════╩═════════════╩══════════════════════╝
+
+Waiting jobs
+╔══════╦═══════╦════════╦══════════════════╗
+║ Job  ║ Owner ║ Target ║ Eligible devices ║
+╠══════╬═══════╬════════╬══════════════════╣
+║ None ║ —     ║ —      ║ —                ║
+╚══════╩═══════╩════════╩══════════════════╝
+Pool positions depend on eligibility and release order.
++ task chromecast:watch JOB=J-0e41cb99ea40
+J-0e41cb99ea40: accepted {"device": "chromecast-test-01", "app": "primes", "apk": "bb98c637cfeef2c824251af4f1b0ad71eab89fde347c3e3d3d6fc1798ab1c4b8.apk", "workflow": "install"}
+J-0e41cb99ea40: granted {"device": "chromecast-test-01", "generation": 131}
+J-0e41cb99ea40: phase {"phase": "connecting"}
+J-0e41cb99ea40: phase {"phase": "installing"}
+J-0e41cb99ea40: apk-installed {"apk": "bb98c637cfeef2c824251af4f1b0ad71eab89fde347c3e3d3d6fc1798ab1c4b8.apk", "launcher": "pending"}
+J-0e41cb99ea40: launcher-verification-pending {"device": "chromecast-test-01", "apk": "bb98c637cfeef2c824251af4f1b0ad71eab89fde347c3e3d3d6fc1798ab1c4b8.apk"}
+J-0e41cb99ea40: granted {"device": "chromecast-test-01", "generation": 132}
+J-0e41cb99ea40: phase {"phase": "connecting"}
+J-0e41cb99ea40: phase {"phase": "verifying-launcher"}
+J-0e41cb99ea40: phase {"phase": "restoring"}
+J-0e41cb99ea40: completed {"error": null, "health": "ready"}
+J-0e41cb99ea40: completed
++ task chromecast:evidence JOB=J-0e41cb99ea40 OUT=/home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-0e41cb99ea40
+J-0e41cb99ea40: completed; verified 10 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-0e41cb99ea40
++ task chromecast:status JOB=J-0e41cb99ea40
+{
+  "id": "J-0e41cb99ea40",
+  "owner": "5150aba570753af3cbce336d",
+  "accepted": 1791229671.304261,
+  "state": "completed",
+  "phase": "completed",
+  "request": {
+    "device": "chromecast-test-01",
+    "app": "primes",
+    "apk": "bb98c637cfeef2c824251af4f1b0ad71eab89fde347c3e3d3d6fc1798ab1c4b8.apk",
+    "workflow": "install"
+  },
+  "device": "chromecast-test-01",
+  "generation": 132,
+  "cancel": 0,
+  "error": null,
+  "started": 1791229676.4891915,
+  "finished": 1791229691.331632,
+  "worker_pid": 893747,
+  "recovery_resolved": 0,
+  "installation": "bb98c637cfeef2c824251af4f1b0ad71eab89fde347c3e3d3d6fc1798ab1c4b8.apk"
+}
++ task chromecast:watch JOB=J-032a6e4bf3aa
+J-032a6e4bf3aa: accepted {"device": "chromecast-test-01", "app": "primes", "apk": "bb98c637cfeef2c824251af4f1b0ad71eab89fde347c3e3d3d6fc1798ab1c4b8.apk", "validator": "prime-study", "workflow": "check"}
+J-032a6e4bf3aa: granted {"device": "chromecast-test-01", "generation": 133}
+J-032a6e4bf3aa: phase {"phase": "connecting"}
+J-032a6e4bf3aa: phase {"phase": "installing"}
+J-032a6e4bf3aa: phase {"phase": "installing"}
+J-032a6e4bf3aa: phase {"phase": "launching"}
+J-032a6e4bf3aa: phase {"phase": "restoring"}
+J-032a6e4bf3aa: failed {"error": "Held DOWN did not move correctly", "health": "ready"}
+J-032a6e4bf3aa: failed: Held DOWN did not move correctly
+task: Failed to run task "chromecast:watch": exit status 1
++ task chromecast:evidence JOB=J-032a6e4bf3aa OUT=/home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-032a6e4bf3aa
+J-032a6e4bf3aa: failed; verified 31 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-032a6e4bf3aa
++ task chromecast:status JOB=J-032a6e4bf3aa
+{
+  "id": "J-032a6e4bf3aa",
+  "owner": "5150aba570753af3cbce336d",
+  "accepted": 1791229692.4951506,
+  "state": "failed",
+  "phase": "failed",
+  "request": {
+    "device": "chromecast-test-01",
+    "app": "primes",
+    "apk": "bb98c637cfeef2c824251af4f1b0ad71eab89fde347c3e3d3d6fc1798ab1c4b8.apk",
+    "validator": "prime-study",
+    "workflow": "check"
+  },
+  "device": "chromecast-test-01",
+  "generation": 133,
+  "cancel": 0,
+  "error": "Held DOWN did not move correctly",
+  "started": 1791229692.5269558,
+  "finished": 1791229736.6651864,
+  "worker_pid": 893977,
+  "recovery_resolved": 0,
+  "installation": null
+}
++ task chromecast:submit DEVICE=chromecast-test-01 APP=primes WORKFLOW=check APK=/home/will/WorldFoundry-wbniv/android/prime-numbers/build/primes-bb98c637cfeef2c8.apk VALIDATOR=prime-study
+Accepted J-85e61d088d7b: queued; check
+Follow: task chromecast:watch JOB=J-85e61d088d7b
++ task chromecast:watch JOB=J-85e61d088d7b
+J-85e61d088d7b: accepted {"device": "chromecast-test-01", "app": "primes", "apk": "bb98c637cfeef2c824251af4f1b0ad71eab89fde347c3e3d3d6fc1798ab1c4b8.apk", "validator": "prime-study", "workflow": "check"}
+J-85e61d088d7b: granted {"device": "chromecast-test-01", "generation": 134}
+J-85e61d088d7b: phase {"phase": "connecting"}
+J-85e61d088d7b: phase {"phase": "installing"}
+J-85e61d088d7b: phase {"phase": "installing"}
+J-85e61d088d7b: phase {"phase": "launching"}
+J-85e61d088d7b: phase {"phase": "restoring"}
+J-85e61d088d7b: failed {"error": "Chart navigation did not reach 45", "health": "ready"}
+J-85e61d088d7b: failed: Chart navigation did not reach 45
+task: Failed to run task "chromecast:watch": exit status 1
++ task chromecast:evidence JOB=J-85e61d088d7b OUT=/home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-85e61d088d7b
+J-85e61d088d7b: failed; verified 26 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-85e61d088d7b
++ task chromecast:status JOB=J-85e61d088d7b
+{
+  "id": "J-85e61d088d7b",
+  "owner": "5150aba570753af3cbce336d",
+  "accepted": 1791229883.0938816,
+  "state": "failed",
+  "phase": "failed",
+  "request": {
+    "device": "chromecast-test-01",
+    "app": "primes",
+    "apk": "bb98c637cfeef2c824251af4f1b0ad71eab89fde347c3e3d3d6fc1798ab1c4b8.apk",
+    "validator": "prime-study",
+    "workflow": "check"
+  },
+  "device": "chromecast-test-01",
+  "generation": 134,
+  "cancel": 0,
+  "error": "Chart navigation did not reach 45",
+  "started": 1791229883.1269822,
+  "finished": 1791229922.604295,
+  "worker_pid": 902496,
+  "recovery_resolved": 0,
+  "installation": null
+}
++ sudo /usr/bin/python3 /home/will/WorldFoundry-wbniv/android/bomberman/deploy-coordinator.py --review /home/will/WorldFoundry-wbniv/android/prime-numbers/deploy-review.json
++ sudo /usr/bin/python3 /home/will/WorldFoundry-wbniv/android/bomberman/deploy-coordinator.py --review /home/will/WorldFoundry-wbniv/android/prime-numbers/deploy-review.json
+Verified multi-device commands and launcher verification; queue resumed; reservations retained.
++ task chromecast:devices
+chromecast-test-01: ready; Chromecast HD; serial 2628105GN0GT7C; Android 14; ABI armeabi-v7a,armeabi; endpoint 192.168.4.43:41277; pools chromecast-test
+chromecast-test-02: needs-local-setup; Chromecast; serial 26031HFDD67QH7; Android 12; ABI armeabi-v7a,armeabi; endpoint 192.168.4.54:5555; pools chromecast-test
++ task chromecast:queue
+Snapshot 2026-10-06 02:58:30 +0700; revision 1680; connected
+
+Devices
+╔════════════════════╦═══════════════════╦═══════════════╦═════════════════════╦═════════════╦══════════════════════╗
+║ Device             ║ Health            ║ Model         ║ Owner / reservation ║ Job / phase ║ ABI                  ║
+╠════════════════════╬═══════════════════╬═══════════════╬═════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-01 ║ ready             ║ Chromecast HD ║ unowned             ║ —           ║ armeabi-v7a, armeabi ║
+╠════════════════════╬═══════════════════╬═══════════════╬═════════════════════╬═════════════╬══════════════════════╣
+║ chromecast-test-02 ║ needs-local-setup ║ Chromecast    ║ unowned             ║ —           ║ armeabi-v7a, armeabi ║
+╚════════════════════╩═══════════════════╩═══════════════╩═════════════════════╩═════════════╩══════════════════════╝
+
+Waiting jobs
+╔══════╦═══════╦════════╦══════════════════╗
+║ Job  ║ Owner ║ Target ║ Eligible devices ║
+╠══════╬═══════╬════════╬══════════════════╣
+║ None ║ —     ║ —      ║ —                ║
+╚══════╩═══════╩════════╩══════════════════╝
+Pool positions depend on eligibility and release order.
++ task chromecast:submit DEVICE=chromecast-test-01 APP=primes WORKFLOW=install APK=/home/will/WorldFoundry-wbniv/android/prime-numbers/build/primes-32c0237d6bbad591.apk
+Accepted J-ad277fb46a9d: queued; install
+Follow: task chromecast:watch JOB=J-ad277fb46a9d
++ task chromecast:watch JOB=J-ad277fb46a9d
+J-ad277fb46a9d: accepted {"device": "chromecast-test-01", "app": "primes", "apk": "32c0237d6bbad591edce019fb4cfe0d22f0e67bf5da8e22e9412c8d8c1483d26.apk", "workflow": "install"}
+J-ad277fb46a9d: granted {"device": "chromecast-test-01", "generation": 135}
+J-ad277fb46a9d: phase {"phase": "connecting"}
+J-ad277fb46a9d: failed {"error": "Cannot update the foreground app without interrupting it", "health": "ready"}
+J-ad277fb46a9d: failed: Cannot update the foreground app without interrupting it
+task: Failed to run task "chromecast:watch": exit status 1
++ task chromecast:evidence JOB=J-ad277fb46a9d OUT=/home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-ad277fb46a9d
+J-ad277fb46a9d: failed; verified 1 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-ad277fb46a9d
++ task chromecast:status JOB=J-ad277fb46a9d
+{
+  "id": "J-ad277fb46a9d",
+  "owner": "91e7a66d81613eb5397d20c6",
+  "accepted": 1791230310.9889774,
+  "state": "failed",
+  "phase": "failed",
+  "request": {
+    "device": "chromecast-test-01",
+    "app": "primes",
+    "apk": "32c0237d6bbad591edce019fb4cfe0d22f0e67bf5da8e22e9412c8d8c1483d26.apk",
+    "workflow": "install"
+  },
+  "device": "chromecast-test-01",
+  "generation": 135,
+  "cancel": 0,
+  "error": "Cannot update the foreground app without interrupting it",
+  "started": 1791230311.091619,
+  "finished": 1791230313.1230173,
+  "worker_pid": 906804,
+  "recovery_resolved": 0,
+  "installation": null
+}
++ task chromecast:submit DEVICE=chromecast-test-01 APP=primes WORKFLOW=check APK=/home/will/WorldFoundry-wbniv/android/prime-numbers/build/primes-32c0237d6bbad591.apk VALIDATOR=prime-study
+Accepted J-9638f51a96ce: queued; check
+Follow: task chromecast:watch JOB=J-9638f51a96ce
++ task chromecast:watch JOB=J-9638f51a96ce
+J-9638f51a96ce: accepted {"device": "chromecast-test-01", "app": "primes", "apk": "32c0237d6bbad591edce019fb4cfe0d22f0e67bf5da8e22e9412c8d8c1483d26.apk", "validator": "prime-study", "workflow": "check"}
+J-9638f51a96ce: granted {"device": "chromecast-test-01", "generation": 136}
+J-9638f51a96ce: phase {"phase": "connecting"}
+J-9638f51a96ce: phase {"phase": "installing"}
+J-9638f51a96ce: phase {"phase": "installing"}
+J-9638f51a96ce: phase {"phase": "launching"}
+J-9638f51a96ce: phase {"phase": "restoring"}
+J-9638f51a96ce: completed {"error": null, "health": "ready"}
+J-9638f51a96ce: completed
++ task chromecast:evidence JOB=J-9638f51a96ce OUT=/home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-9638f51a96ce
+J-9638f51a96ce: completed; verified 68 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/prime-numbers-chromecast/J-9638f51a96ce
++ task chromecast:status JOB=J-9638f51a96ce
+{
+  "id": "J-9638f51a96ce",
+  "owner": "91e7a66d81613eb5397d20c6",
+  "accepted": 1791230314.2073312,
+  "state": "completed",
+  "phase": "completed",
+  "request": {
+    "device": "chromecast-test-01",
+    "app": "primes",
+    "apk": "32c0237d6bbad591edce019fb4cfe0d22f0e67bf5da8e22e9412c8d8c1483d26.apk",
+    "validator": "prime-study",
+    "workflow": "check"
+  },
+  "device": "chromecast-test-01",
+  "generation": 136,
+  "cancel": 0,
+  "error": null,
+  "started": 1791230314.2619128,
+  "finished": 1791230404.1354914,
+  "worker_pid": 906959,
+  "recovery_resolved": 0,
+  "installation": null
+}

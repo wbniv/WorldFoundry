@@ -1,0 +1,8 @@
+{
+  "apk": "/tmp/aquarium-barb-baselines/P1-two-updates-profile.apk",
+  "apk_sha256": "abd893f7d8f016909849d4e486bcdd4d92f3a619ca5f8671e2d3074419818cbf",
+  "protocol": "30 s warmup; 12 s swarm-only diagnostic; 1 run(s); SurfaceFlinger sampled every 0.75 s",
+  "serial": "adb-2628105GN0GT7C-wwfiSB._adb-tls-connect._tcp",
+  "device": "Chromecast HD\n14\nPhysical size: 1920x1080\n",
+  "revision": "77377cb60a5d2ab73e4cad63145d929ab734a12a"
+}

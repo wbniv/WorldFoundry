@@ -1,0 +1,12 @@
+{
+  "job": "J-767e9ce236c4",
+  "scope": "Latest level-load Forth initialization through the end of the cumulative app log",
+  "full_log_sha256": "ec04eda499c1aaf66cfe87d76dd755d6883041db0b406bbebed8db9ae3a9946b",
+  "counts": {
+    "zforth compile error": 0,
+    "zforth eval error": 0,
+    "Unknown word": 0,
+    "DFRM load failed": 0,
+    "out of memory": 0
+  }
+}

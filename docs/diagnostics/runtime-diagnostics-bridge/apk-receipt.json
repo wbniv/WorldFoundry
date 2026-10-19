@@ -1,0 +1,46 @@
+{
+  "ordinary": {
+    "path": "/tmp/wf-runtime-diagnostics-20261006/ordinary.apk",
+    "bytes": 5027411,
+    "sha256": "d82effba1e31696601185982a39c97461a89a84229ac073e8e00c33189f19cd5",
+    "assets": {
+      "assets/cd.iff": "662877b69e785e716b782e42299d041489a2fc2c7326066a826534125653d6bd",
+      "assets/controller.html": "ddb483ea55ee72c0b0616eb070f74d5da4262551d9fd517f6a8ec5af853a6719",
+      "assets/layout.json": "2710c5629c2cb6ea8e47f70580e929f7311eb33e9aa2675563eb57eeb9e6ffab",
+      "assets/wf_args.txt": "00837122192c99d57a477b3ffa3122a0106850036ede0d2963671f20f14694b8"
+    },
+    "libraries": {
+      "lib/arm64-v8a/libwf_game.so": {
+        "bytes": 3542224,
+        "diagnostic_code_present": false
+      },
+      "lib/armeabi-v7a/libwf_game.so": {
+        "bytes": 2868720,
+        "diagnostic_code_present": false
+      }
+    }
+  },
+  "diagnostic": {
+    "path": "/tmp/wf-runtime-diagnostics-20261006/diagnostic.apk",
+    "bytes": 5433431,
+    "sha256": "a6050a98143364723665b9cf095a18ae2064a9e79b1dc5905012984b81be257d",
+    "assets": {
+      "assets/cd.iff": "662877b69e785e716b782e42299d041489a2fc2c7326066a826534125653d6bd",
+      "assets/controller.html": "ddb483ea55ee72c0b0616eb070f74d5da4262551d9fd517f6a8ec5af853a6719",
+      "assets/layout.json": "2710c5629c2cb6ea8e47f70580e929f7311eb33e9aa2675563eb57eeb9e6ffab",
+      "assets/runtime-diagnostics.json": "42697c1c2581e0865466448e70c0431e9dc0d02d923d0331b0db19f7befb6632",
+      "assets/wf_args.txt": "00837122192c99d57a477b3ffa3122a0106850036ede0d2963671f20f14694b8"
+    },
+    "libraries": {
+      "lib/arm64-v8a/libwf_game.so": {
+        "bytes": 3666888,
+        "diagnostic_code_present": true
+      },
+      "lib/armeabi-v7a/libwf_game.so": {
+        "bytes": 2965412,
+        "diagnostic_code_present": true
+      }
+    }
+  },
+  "same_game_assets": true
+}
