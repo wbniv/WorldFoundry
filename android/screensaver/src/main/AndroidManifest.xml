@@ -17,6 +17,11 @@
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ScreensaverPreviewActivity"
+            android:process=":preview"
+            android:exported="true"
+            android:excludeFromRecents="true" />
         <service
             android:name=".AquariumDreamService"
             android:process=":dream"
@@ -29,6 +34,18 @@
             <meta-data android:name="android.service.dream" android:resource="@xml/dream" />
             <meta-data android:name="org.worldfoundry.screensaver.SETTINGS_AUTHORITY"
                 android:value="org.worldfoundry.screensaver.settings" />
+        </service>
+        <service
+            android:name=".SeahorseGridDreamService"
+            android:label="@string/seahorse_grid_name"
+            android:process=":seahorse_dream"
+            android:exported="true"
+            android:permission="android.permission.BIND_DREAM_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data android:name="android.service.dream" android:resource="@xml/dream" />
         </service>
         <provider
             android:name=".TankSettingsProvider"

@@ -1,0 +1,5 @@
+# Keep the authored generated level; ignore compiled files and asset links.
+*
+!.gitignore
+!seahorse_grid.lev
+!seahorse_grid-standalone.iff.txt

@@ -99,11 +99,13 @@ def main() -> None:
         print(f"Screensaver level: {tank}", flush=True)
         print(build(tank), flush=True)
     if not args.tanks:
+        subprocess.run(["python3", "scripts/build-seahorse-grid-level.py"], cwd=ROOT, check=True)
         bundle = LEVELS / "aquarium-screensaver-cd.iff"
         subprocess.run([
             str(ROOT / "wftools/cdpack-rs/target/release/cdpack"),
             str(ROOT / "wfsource/source/game/shell.fth"),
             *(str(LEVELS / (tank + "_screensaver-standalone.iff")) for tank in TANKS),
+            str(LEVELS / "seahorse_grid-standalone.iff"),
             "-o", str(bundle),
         ], cwd=ROOT, check=True)
         if b"UIFT" not in bundle.read_bytes()[:2048]:

@@ -44,6 +44,7 @@ android {
         }
         create("aquarium") {
             dimension = "game"
+            versionCode = 70  // cast1 has a versionCode 69 profiling APK; ship a normal upgrade.
             applicationIdSuffix = ".aquarium"   // org.worldfoundry.wf_game.aquarium
             versionNameSuffix   = "-aquarium"
         }

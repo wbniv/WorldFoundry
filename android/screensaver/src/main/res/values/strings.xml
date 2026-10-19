@@ -1,3 +1,5 @@
 <resources>
+    <string name="wf_logo_description">World Foundry logo</string>
+    <string name="seahorse_grid_name">Seahorse Grid</string>
     <string name="app_name">World Foundry Aquarium Screensaver</string>
 </resources>

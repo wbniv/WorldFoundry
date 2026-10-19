@@ -98,7 +98,7 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeStop(JNIEnv*, jclass) {
 extern "C" JNIEXPORT void JNICALL
 Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         JNIEnv* env, jclass, jobject manager, jobject surface, jint level, jstring logPath) {
-    if (level < 0 || level > 7) return;
+    if (level < 0 || level > 8) return;
     if (logPath) {
         const char* path = env->GetStringUTFChars(logPath, nullptr);
         if (path) {
