@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-18](https://github.com/wbniv/WorldFoundry/commit/52fdc9ad) | Index aquarium screensaver plans |
 | [2026-10-17](https://github.com/wbniv/WorldFoundry/commit/be86bbb9) | Index nine plans that had no row in docs/plans/README.md |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/32821533) | Expand the saltwater tank to six seahorse pairs |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/6a6cbf0d) | TODO and plan index: Blender level builds in a container done |
@@ -63,6 +64,10 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+52fdc9ad	author	Will Norris
+52fdc9ad	added	2
+52fdc9ad	deleted	0
+52fdc9ad	files	1
 be86bbb9	author	Will Norris
 be86bbb9	added	10
 be86bbb9	deleted	0

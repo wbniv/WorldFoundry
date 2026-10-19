@@ -10,7 +10,7 @@ ROOT=Path(__file__).resolve().parents[1]
 
 
 def prepare_task_defaults(operation):
-    if operation not in {'submit','check','profile','record'}:
+    if operation not in {'submit','check','profile','record'} or os.environ.get('WF_CC_APK_ARGS'):
         return
     workflow=os.environ.get('WF_CC_WORKFLOW') or ('check' if operation=='submit' else operation)
     request={'workflow':workflow,'app':os.environ.get('WF_CC_APP') or 'aquarium',
@@ -19,6 +19,7 @@ def prepare_task_defaults(operation):
     if recipe:
         data=json.loads(Path(recipe).read_text())
         if not isinstance(data,dict):raise ValueError('Recipe must be a JSON request object')
+        if 'items' in data: return
         request.update(data)
     if request['workflow'] in {'readd','capture'} or request.get('apk'):
         return
@@ -40,7 +41,12 @@ def main(argv=None):
     if len(args)!=2 or args[0]!='task':
         raise ValueError('Use task chromecast:*; service administration now belongs to /home/will/chromecast-coordinator')
     prepare_task_defaults(args[1])
-    from wf_device.client import task_command
+    from wf_device.client import Client, task_command
+    recipe=os.environ.get('WF_CC_RECIPE')
+    multiple=bool(os.environ.get('WF_CC_APK_ARGS')) or bool(
+        recipe and 'items' in json.loads(Path(recipe).read_text()))
+    if multiple and not hasattr(Client,'submit_apks'):
+        raise RuntimeError('Coordinator client upgrade required for multiple APKs; no jobs submitted')
     return task_command(args[1])
 
 
