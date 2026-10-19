@@ -148,7 +148,10 @@ def build(out):
     icon_art.save(out / "icon-art.png", optimize=True)
     banner_art.save(out / "banner-art.png", optimize=True)
 
-    icon = addlogo.add_logo(icon_art.resize((256, 256), Image.LANCZOS), scale=0.26, margin=0.05).convert("RGB")
+    # Baseline packages one drawable icon. Google TV displays that square through
+    # a round mask, so place the badge inside the visible circle.
+    icon = addlogo.add_logo(icon_art.resize((256, 256), Image.LANCZOS),
+                            scale=0.24, margin=0.05, safe_circle=1.0).convert("RGB")
     icon.save(out / "icon.png", optimize=True)
 
     banner = banner_art.resize((640, 360), Image.LANCZOS).convert("RGBA")
@@ -167,7 +170,9 @@ def build(out):
 
     sheet = Image.new("RGB", (640 + 256 + 3 * 24, 360 + 2 * 24), (40, 40, 40))
     sheet.paste(banner, (24, 24))
-    sheet.paste(icon, (640 + 2 * 24, 24))
+    round_mask = Image.new("L", icon.size, 0)
+    ImageDraw.Draw(round_mask).ellipse((0, 0, 255, 255), fill=255)
+    sheet.paste(icon, (640 + 2 * 24, 24), round_mask)
     sheet.save(out / "preview.png", optimize=True)
     print(f"gen-baseline-icon: wrote icon.png, tv_banner.png, the clean art and preview.png under {out}")
 
