@@ -13,6 +13,7 @@
 
 #include <hal/hal.h>
 #include <hal/android/touch_controls.h>
+#include <game/level_menu.h>
 #include <hal/phonepad/phonepad_overlay.h>
 #include <pigsys/pigsys.hp>
 
@@ -68,7 +69,13 @@ extern "C" AAssetManager* WFAndroidGetAssetManager() { return assets; }
 extern "C" int WFAndroidHasWindow() { return windowReady.load() ? 1 : 0; }
 extern "C" int WFAndroidCloseRequested() { return closing.load() ? 1 : 0; }
 extern "C" void WFAndroidRequestClose() { closing.store(true); }
-extern "C" void WFAndroidPumpEvents() { }
+// Runs on the game thread once per frame. A Dream is passive: the engine's overlay (the planted
+// tank's seed strip, its settings panel, the level menu) must never draw. The engine draws all of
+// it through levelmenu::Drawer(), which Display installs once at start-up, so clear it every frame
+// rather than editing the engine. Without a drawer the level menu starts level 0 (game.cc).
+extern "C" void WFAndroidPumpEvents() {
+    if (levelmenu::Drawer()) levelmenu::SetDrawer(nullptr);
+}
 extern "C" void WFAndroidTouchLayout(int, int, androidtouch::Layout* layout,
                                        uint32_t* held, float* x, float* y) {
     *layout = androidtouch::Layout{};
