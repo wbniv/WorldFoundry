@@ -1,0 +1,10 @@
+// Planted Tank screensaver: plants only, one level per bundle.
+// Detailed static foliage needs room memory for expanded runtime primitives (24 MB),
+// as in aquarium_plants. PERM held the seahorse rigs there (6 MB); with no animals it
+// returns to 1 MB (Spike S4; measured on a device in Phase 5).
+{ 'L4'
+ { 'ALGN' .align( 2048 ) }
+ { 'RAM' 'OBJD' 1000000l 'PERM' 1000000l 'ROOM' 24000000l 'FLAG' 1l 1l 'SLOT' 1l }
+ { 'ALGN' .align( 2048 ) }
+ [ "../planted_tank_screensaver.iff" ]
+}

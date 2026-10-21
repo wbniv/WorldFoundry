@@ -22,11 +22,15 @@ import seahorse
 from planting import COLORS as PLANT_COLORS, planting
 from temple import COLORS as TEMPLE_COLORS, pavilion
 LEVEL=sys.argv[sys.argv.index('--')+1]
-assert LEVEL in ('aquarium_betta','aquarium_jellyfish','aquarium_lionfish','aquarium_plants','aquarium_arowana')
+assert LEVEL in ('aquarium_betta','aquarium_jellyfish','aquarium_lionfish','aquarium_plants','aquarium_arowana','planted_tank_screensaver')
 HERE=REPO/'wflevels'/LEVEL
 spec=importlib.util.spec_from_file_location('tank_config',HERE/'config.py')
 C=importlib.util.module_from_spec(spec); spec.loader.exec_module(C)
-if C.KIND=='plants':
+# Plants-only variants (the Planted Tank screensaver) set ANIMALS=False: no urchin, goby,
+# seahorses, posts or grazing rocks, an invisible Player hull and the Forth grow/hold cycle.
+ANIMALS=getattr(C,'ANIMALS',True)
+assert ANIMALS or C.KIND=='plants'
+if C.KIND=='plants' and ANIMALS:
     write_urchin_texture(HERE)
     goby.write_textures(HERE)
     seahorse.write_texture(HERE)
@@ -206,16 +210,21 @@ if LION_RIG:
     meshes,offsets=[lionfish_model.geometry()],[(0,0,0)]
 data=[blender_mesh(m) for m in meshes]
 player=bpy.data.objects['Player']
-if C.KIND=='plants':
+if C.KIND=='plants' and ANIMALS:
     player.data=blender_mesh(urchin())
+elif C.KIND=='plants':
+    # Level::reset() needs a Player: a tiny untextured hull, never shown.
+    hull=Mesh('player_hull')
+    cube(hull,(-.05,-.05,-.05),(.05,.05,.05),'frame')
+    player.data=blender_mesh(hull)
 else:
     player.data=blender_mesh(models('betta')[0][0]) if BETTA_FINS else data[0].copy()
 player.location=C.SPAWN
 player['wf_Model Type']='Mesh'
-player['wf_Mesh Name']='sea_urchin.iff' if C.KIND=='plants' else 'player_hull.iff'
+player['wf_Mesh Name']='sea_urchin.iff' if C.KIND=='plants' and ANIMALS else 'player_hull.iff'
 player['wf_original_mesh_name']=player['wf_Mesh Name']
 player['wf_Mobility']='Physics'
-player['wf_Visibility Mailbox']=1160 if C.KIND=='plants' else 0
+player['wf_Visibility Mailbox']=1160 if C.KIND=='plants' and ANIMALS else 0
 player['wf_Script Controls Input']='True'
 box_fields(player,(-.20,-.15,-.15,.20,.15,.15))
 for key,value in {'Mass':1,'Falling Acceleration':0,'Running Acceleration':0,
@@ -239,7 +248,8 @@ goby_parts=[]
 urchin_feet=[]
 seahorse_parts=[]
 urchin_spines=[]
-if C.KIND=='plants':
+sh_placements=[]
+if C.KIND=='plants' and ANIMALS:
     for m in (goby.body(),goby.fins()):
         obj=actor(m.name,m,C.SPAWN,mesh_name=m.name)
         obj['wf_Visibility Mailbox']=1161
@@ -313,7 +323,7 @@ for lo,hi in [((-HX,-HY,HEIGHT),(HX,-HY+.08,HEIGHT+.1)),((-HX,HY-.08,HEIGHT),(HX
 actor('rim',rim)
 static_box('floor',(-HX+WALL,-HY+WALL,WALL),(HX-WALL,HY-WALL,SAND),'backdrop' if C.KIND in ('jellyfish','arowana') else 'sand')
 if C.KIND=='plants':
-    for k,(x,y,rx,ry,h) in enumerate(C.ROCKS):
+    for k,(x,y,rx,ry,h) in enumerate(C.ROCKS if ANIMALS else []):
         obj=actor(f'goby-grazing-rock-{k}',goby.grazing_rock(rx,ry,h),(x,y,SAND))
         obj['wf_Visibility Mailbox']=1161
         obj['wf_Moves Between Rooms']=True
@@ -365,7 +375,7 @@ amb=sun.copy();amb.name='AmbientLight';bpy.context.scene.collection.objects.link
 amb['wf_lightType']='Ambient'
 for ch,v in zip(('Red','Green','Blue'),(.43,.48,.56)):amb['wf_light'+ch]=v
 look=bpy.data.objects['LookAt'];look.location=C.CLOSE_LOOK if C.KIND=='arowana' else (0,0,2.5)
-wide=bpy.data.objects['cs_wide'];wide.location=C.WIDE_CAMERA if C.KIND=='arowana' else (0,-12,2.5)
+wide=bpy.data.objects['cs_wide'];wide.location=C.WIDE_CAMERA if hasattr(C,'WIDE_CAMERA') else (0,-12,2.5)
 for axis in 'XYZ':wide['wf_Position '+axis]='Absolute'
 wide['wf_Rotation']='Fixed'
 for key in ('Follow','Target','Track Object'):wide['wf_'+key]='LookAt'
@@ -375,7 +385,8 @@ close=wide.copy();close.name='cs_close';close.location=C.CLOSE_CAMERA
 for key in ('Follow','Target','Track Object'):close['wf_'+key]='LookClose'
 bpy.context.scene.collection.objects.link(close)
 cam=bpy.data.objects['Camera'];cam.location=wide.location;cam['wf_Mass']=1
-cam['wf_FoggingColor']=0x102b40;cam['wf_FoggingStartDistance']=9;cam['wf_FoggingCompleteDistance']=45
+fog_start,fog_complete=getattr(C,'FOG',(9,45))
+cam['wf_FoggingColor']=0x102b40;cam['wf_FoggingStartDistance']=fog_start;cam['wf_FoggingCompleteDistance']=fog_complete
 bpy.data.objects['Matte']['wf_Matte Type']='Color';bpy.data.objects['Matte']['wf_Background Color']=0x09141e
 room=bpy.data.objects['Room'];room.location=(0,0,0);box_fields(room,(-60,-70,-6,60,30,40) if C.KIND=='arowana' else (-25,-30,-6,25,10,18))
 
@@ -492,38 +503,58 @@ if C.KIND=='plants':
         core=core.replace("  JOYSTICK_BUTTON_A tk-edge tk-neutral tk@ not & if 1 tk-camera tk@ - tk-camera tk! then", "  \\ Camera taps and settings holds are handled by the native plant settings.")
     core=core.replace(': tk-player-tick',': tk-urchin-player-tick')
     header+=f': pg-salt {indices["Director"]} 2 property@ if else drop 0 then ;\n'
-    header+=': gb-ceiling 4.35 ; : gb-limit tk-limit-x ;\n'
-    core+=': gb@ read-mailbox ;\n'+goby.perch_forth(C.ROCKS,SAND,C.BOTTOM)
-    core+=(COMMON/'goby_controller.fth').read_text()
-    core+=': tk-player-tick pg-salt if tk-urchin-player-tick else JOYSTICK_BUTTON_LEFT tk-held gb-left gb! JOYSTICK_BUTTON_RIGHT tk-held gb-right gb! JOYSTICK_BUTTON_UP tk-held gb-up gb! JOYSTICK_BUTTON_DOWN tk-held gb-down gb! 0 gb-blocked gb! gb-player-tick then ;\n'
+    if ANIMALS:
+        header+=': gb-ceiling 4.35 ; : gb-limit tk-limit-x ;\n'
+        core+=': gb@ read-mailbox ;\n'+goby.perch_forth(C.ROCKS,SAND,C.BOTTOM)
+        core+=(COMMON/'goby_controller.fth').read_text()
+        core+=': tk-player-tick pg-salt if tk-urchin-player-tick else JOYSTICK_BUTTON_LEFT tk-held gb-left gb! JOYSTICK_BUTTON_RIGHT tk-held gb-right gb! JOYSTICK_BUTTON_UP tk-held gb-up gb! JOYSTICK_BUTTON_DOWN tk-held gb-down gb! 0 gb-blocked gb! gb-player-tick then ;\n'
+    else:
+        # The invisible hull only claims the input mailbox; nothing reads the joystick.
+        core+=': tk-player-tick 0 INDEXOF_INPUT tk! ;\n'
     # Player input does not need the Director's feet/spine pose definitions.
     plant_player_core = core
     pose=setup=''
-    sh_every,sh_salt=seahorse.director_tick(indices)
-    tick=": tk-director-tick\n pg-salt dup 1160 tk! not 1161 tk! tk-camera-tick\n"+sh_every+" pg-salt if INDEXOF_X_POS tk-player read-actor-mailbox INDEXOF_Y_POS tk-player read-actor-mailbox INDEXOF_Z_POS tk-player read-actor-mailbox uf-begin\n"
-    for k,(obj,offset) in enumerate(urchin_feet):
-        tick+=f' {num(offset[0])} {num(offset[1])} {num(.017+.0014*k)} {k} {indices[obj.name]} uf-foot\n'
-    core+=(COMMON/'urchin_motion.fth').read_text()
-    core+=(COMMON/'urchin_spines.fth').read_text()
-    posts_forth=seahorse.posts_forth()
-    (HERE/'seahorse_posts.fth').write_text(posts_forth)
-    core+=posts_forth+seahorse.clips_forth()+seahorse.behaviour_source(indices['Director'],COMMON)
-    for k,(obj,index,offset,rest_b,rest_c) in enumerate(urchin_spines):
-        tick+=f' {num(offset[0])} {num(offset[1])} {num(offset[2])} {num(rest_b)} {num(rest_c)} {num(4.1+k*.41)} {1 if k%2==0 else -1} {k} {indices[obj.name]} us-spine\n'
-    tick+=sh_salt
-    tick+=' else\n'
-    for obj in goby_parts:
-        index=indices[obj.name]
-        for axis in ('X','Y','Z'):
-            tick+=f' INDEXOF_{axis}_POS tk-player read-actor-mailbox INDEXOF_{axis}_POS {index} write-actor-mailbox\n'
-        tick+=f' 0 INDEXOF_ROTATION_A {index} write-actor-mailbox 0 INDEXOF_ROTATION_B {index} write-actor-mailbox gb-heading gb@ INDEXOF_ROTATION_C {index} write-actor-mailbox\n'
-        tick+=f' pg-water tk@ .8 * gb-vx gb@ abs .035 * .004 + 0 pg-water tk@ .8 * .008 {goby.SPAN[0]} {goby.SPAN[1]} {index} swim-deform\n'
-    tick+=' then\n'
+    if ANIMALS:
+        sh_every,sh_salt=seahorse.director_tick(indices)
+        tick=": tk-director-tick\n pg-salt dup 1160 tk! not 1161 tk! tk-camera-tick\n"+sh_every+" pg-salt if INDEXOF_X_POS tk-player read-actor-mailbox INDEXOF_Y_POS tk-player read-actor-mailbox INDEXOF_Z_POS tk-player read-actor-mailbox uf-begin\n"
+        for k,(obj,offset) in enumerate(urchin_feet):
+            tick+=f' {num(offset[0])} {num(offset[1])} {num(.017+.0014*k)} {k} {indices[obj.name]} uf-foot\n'
+        core+=(COMMON/'urchin_motion.fth').read_text()
+        core+=(COMMON/'urchin_spines.fth').read_text()
+        posts_forth=seahorse.posts_forth()
+        (HERE/'seahorse_posts.fth').write_text(posts_forth)
+        core+=posts_forth+seahorse.clips_forth()+seahorse.behaviour_source(indices['Director'],COMMON)
+        for k,(obj,index,offset,rest_b,rest_c) in enumerate(urchin_spines):
+            tick+=f' {num(offset[0])} {num(offset[1])} {num(offset[2])} {num(rest_b)} {num(rest_c)} {num(4.1+k*.41)} {1 if k%2==0 else -1} {k} {indices[obj.name]} us-spine\n'
+        tick+=sh_salt
+        tick+=' else\n'
+        for obj in goby_parts:
+            index=indices[obj.name]
+            for axis in ('X','Y','Z'):
+                tick+=f' INDEXOF_{axis}_POS tk-player read-actor-mailbox INDEXOF_{axis}_POS {index} write-actor-mailbox\n'
+            tick+=f' 0 INDEXOF_ROTATION_A {index} write-actor-mailbox 0 INDEXOF_ROTATION_B {index} write-actor-mailbox gb-heading gb@ INDEXOF_ROTATION_C {index} write-actor-mailbox\n'
+            tick+=f' pg-water tk@ .8 * gb-vx gb@ abs .035 * .004 + 0 pg-water tk@ .8 * .008 {goby.SPAN[0]} {goby.SPAN[1]} {index} swim-deform\n'
+        tick+=' then\n'
+    else:
+        # The screensaver stays on the wide shot: the Dream takes no input.
+        tick=": tk-director-tick\n tk-cam-wide INDEXOF_CAMSHOT tk!\n"
+        assert os.environ.get('PLANTED_TANK_DETAIL','runtime')=='runtime','the grow/hold cycle needs runtime plants'
+        # Grow/hold/end cycle (planted_cycle.fth); field ids come from this level's bindings.
+        fields=json.loads((HERE/'settings-bindings.json').read_text())['fields']
+        cycle={'pt-director':indices['Director'],'pt-speed-field':fields['Growth speed']['id'],
+               'pt-age-field':fields['Initial age']['id'],'pt-hold-field':fields['Hold seconds']['id'],
+               'pt-bound':C.MATURITY_BOUND,'pt-max-age':240,'pt-stall':.2,
+               'pt-hold-default':C.HOLD_SECONDS,'pt-hold-max':86400,'pt-level-to-run':5000,
+               'pt-clock':730,'pt-holding':731,'pt-hold':732,'pt-hold-begin':733,'pt-ended':734}
+        header+=''.join(f': {n} {num(v)} ;\n' for n,v in cycle.items())
+        mailboxes.update({n:v for n,v in cycle.items() if n in ('pt-clock','pt-holding','pt-hold','pt-hold-begin','pt-ended')})
+        core+=(COMMON/'planted_cycle.fth').read_text()
     if os.environ.get('PLANTED_TANK_DETAIL','runtime')=='runtime':
         header+=': pg-init 747 ; : pg-water 748 ;\n'
         bindings=' '.join(f'{k} {indices[f"plant_chunk_{k:02d}"]} plant-register' for k in range(8))
-        tick+=f' pg-init tk@ 0 = if {bindings} 1 pg-init tk! then\n'
+        tick+=f' pg-init tk@ 0 = if {bindings}{"" if ANIMALS else " pt-start"} 1 pg-init tk! then\n'
         tick+=' pg-water tk@ tk-dt@ + pg-water tk! INDEXOF_DELTA_TIME tk@ pg-water tk@ plant-step\n'
+        if not ANIMALS:tick+=' pt-cycle-tick\n'
     tick+=' ;\n'
 
 player_core=plant_player_core if C.KIND=='plants' else core
@@ -534,8 +565,8 @@ if C.KIND=='arowana':
     mailboxes={n:v for n,v in ar_values.items() if 700<=v<800}
 (HERE/'actor-map.json').write_text(json.dumps(dict(level=LEVEL,title=C.TITLE,kind=C.KIND,count=COUNT,
     profile=PROFILE,indices=indices,mailboxes=mailboxes,parts=[m.name for m in meshes],offsets=offsets,
-    urchin_contacts=(dict(phase=3,scratch=[800,839],slots=[840,967],stride=16,distance_scale=1024,feet=[dict(actor=indices[obj.name],slot=k,offset=list(offset),support_limit=.017+.0014*k) for k,(obj,offset) in enumerate(urchin_feet)]) if C.KIND=='plants' else None),
-    urchin_spines=(dict(slots=[1000,1095],stride=12,scratch=[1100,1111],spines=[dict(actor=indices[obj.name],slot=k,source_index=index,root=list(offset),rest=[rest_b,rest_c],wait=4.1+k*.41,sign=1 if k%2==0 else -1,length=spine_specs()[index]['length']) for k,(obj,index,offset,rest_b,rest_c) in enumerate(urchin_spines)]) if C.KIND=='plants' else None),
+    urchin_contacts=(dict(phase=3,scratch=[800,839],slots=[840,967],stride=16,distance_scale=1024,feet=[dict(actor=indices[obj.name],slot=k,offset=list(offset),support_limit=.017+.0014*k) for k,(obj,offset) in enumerate(urchin_feet)]) if C.KIND=='plants' and ANIMALS else None),
+    urchin_spines=(dict(slots=[1000,1095],stride=12,scratch=[1100,1111],spines=[dict(actor=indices[obj.name],slot=k,source_index=index,root=list(offset),rest=[rest_b,rest_c],wait=4.1+k*.41,sign=1 if k%2==0 else -1,length=spine_specs()[index]['length']) for k,(obj,index,offset,rest_b,rest_c) in enumerate(urchin_spines)]) if C.KIND=='plants' and ANIMALS else None),
     movement=({'states':species.STATES,'kind':'pulse-and-drift' if C.KIND=='jellyfish' else 'steer-and-swim', 'jelly_states':species.JELLY if C.KIND=='jellyfish' else None} if C.KIND in ('betta','lionfish','jellyfish') else None),
     lionfish_rig=({'parts':1,'regions':lionfish_model.REGIONS,'triangles':sum(len(f)-2 for f in meshes[0].faces),
                   'palette_seed':0,'palettes':[lionfish_model.palette_for(0,k) for k in range(COUNT)],
@@ -555,8 +586,8 @@ if C.KIND=='arowana':
                             for s,(sex,pos,yaw,clip,start) in enumerate(sh_placements)],
                     posts=[dict(name=name,actor=indices[name],base=list(base),mesh=name.replace('-','_')+'.iff') for name,base,_segs in seahorse.POSTS],
                     grip_segments=[dict(mode=m,start=list(a),end=list(b),radius=[r0,r1]) for m,a,b,r0,r1 in seahorse.post_segments()],
-                    forth_include='seahorse_posts.fth') if C.KIND=='plants' else None),
-    animal=('sea_urchin' if C.KIND=='plants' else C.KIND),spawn=C.SPAWN,bottom=C.BOTTOM,top=C.TOP,limits=[LIMIT_X,LIMIT_Y],rows=ROWS,
+                    forth_include='seahorse_posts.fth') if C.KIND=='plants' and ANIMALS else None),
+    animal=(('sea_urchin' if ANIMALS else None) if C.KIND=='plants' else C.KIND),spawn=C.SPAWN,bottom=C.BOTTOM,top=C.TOP,limits=[LIMIT_X,LIMIT_Y],rows=ROWS,
     betta_fins=({'groups':8,'actor_lookup':[650,657],'motion_mailboxes':[660,666],
                  'weights':'solid UV.x across fin; UV.y root-to-tip','physics_bodies_added':0,
                  'triangles':{m.name:sum(len(f)-2 for f in m.faces) for m in meshes}} if BETTA_FINS else None),

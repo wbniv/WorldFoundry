@@ -87,10 +87,118 @@ def build(tank: str) -> Path:
     return LEVELS / (target_name + "-standalone.iff")
 
 
+PLANTED = "planted_tank_screensaver"
+PLANTED_BUNDLE = LEVELS / "planted-screensaver-cd.iff"
+ANIMAL_NAMES = ("urchin", "goby", "seahorse", "rainbow")
+ANIMAL_MESHES = ("sea_urchin", "urchin_", "goby", "seahorse_", "_rock_")
+ANIMAL_WORDS = ("uf-foot", "us-spine", "sh-tick", "swim-deform", "1160", "1161")
+
+
+def script_of(level_text: str, name: str) -> str:
+    """The Script field of the one OBJ block named `name`."""
+    blocks = [block for block in level_text.split("\t{ 'OBJ'")
+              if re.search(r"\{ 'NAME' \"" + re.escape(name) + r"\" \}", block)]
+    if len(blocks) != 1:
+        raise ValueError(f"{PLANTED}: expected one {name} block, got {len(blocks)}")
+    found = SCRIPT_FIELD.search(blocks[0])
+    if not found:
+        raise ValueError(f"{PLANTED}: {name} script missing")
+    return json.loads(found.group(2))
+
+
+def check_planted(level_text: str, actor_map: dict, asset_inc: str) -> None:
+    """Spike S4's asserts: plants only, an invisible Player, the plants registered by index."""
+    indices = actor_map["indices"]
+    animals = [name for name in indices if any(word in name.lower() for word in ANIMAL_NAMES)]
+    if animals:
+        raise ValueError(f"{PLANTED}: animal actors in the level: {animals}")
+    if indices.get("Director") != 4:
+        raise ValueError(f"{PLANTED}: Director is {indices.get('Director')}, expected 4")
+    player = [block for block in level_text.split("\t{ 'OBJ'") if re.search(r"\{ 'NAME' \"Player\" \}", block)]
+    if len(player) != 1 or not re.search(r"\"Visibility Mailbox\" \} \{ 'DATA' 0l \}", player[0]):
+        raise ValueError(f"{PLANTED}: expected one Player block with Visibility Mailbox 0")
+    meshes = re.findall(r"\"([\w.-]+\.iff)\"", level_text + asset_inc)
+    stray = sorted({m for m in meshes if any(word in m for word in ANIMAL_MESHES)})
+    if stray:
+        raise ValueError(f"{PLANTED}: animal meshes referenced: {stray}")
+    director = script_of(level_text, "Director")
+    registered = [(int(k), int(a)) for k, a in re.findall(r"(\d+) (\d+) plant-register", director)]
+    expected = [(k, indices[f"plant_chunk_{k:02d}"]) for k in range(8)]
+    if registered != expected:
+        raise ValueError(f"{PLANTED}: plant-register pairs {registered}, expected {expected}")
+    words = [word for word in ANIMAL_WORDS if word in director]
+    if words:
+        raise ValueError(f"{PLANTED}: animal words in the Director script: {words}")
+    writes = re.findall(r"(\S+) (?:INDEXOF_END_OF_LEVEL|1905) (?:tk!|write-mailbox)", director)
+    if not writes or set(writes) != {"1"}:
+        raise ValueError(f"{PLANTED}: END_OF_LEVEL must only be written with 1, found {writes}")
+
+
+def check_catalog(level: bytes) -> None:
+    """One RPRP catalog: PlantedTankSettings with Hold seconds and no seahorse fields."""
+    # Two RPRP tags make one catalog: the RAM chunk's reference and the chunk itself
+    # (build-object-properties.py attach()), as in aquarium_plants-standalone.iff.
+    if level.count(b"RPRP") != 2 or level.count(b"PlantedTankSettings") != 1:
+        raise ValueError(f"{PLANTED}: expected one PlantedTankSettings RPRP catalog")
+    for key in (b"Seed", b"Water type", b"Growth speed", b"Initial age", b"Textures", b"Sway",
+                b"Random seed on entry", b"Hold seconds"):
+        if key not in level:
+            raise ValueError(f"{PLANTED}: catalog field {key.decode()} missing")
+    for key in (b"Seahorses", b"Greeting"):
+        if key in level:
+            raise ValueError(f"{PLANTED}: catalog has the {key.decode()} field")
+
+
+def build_planted() -> Path:
+    """The Planted Tank screensaver: its own plants-only level, no driver swap, its catalog."""
+    source = LEVELS / PLANTED
+    lev = source / (PLANTED + ".lev")
+    if not lev.is_file():
+        raise FileNotFoundError(f"{lev}: run bash wflevels/{PLANTED}/build.sh (Blender) first")
+    subprocess.run(["bash", "wftools/wf_blender/build_level_binary.sh", PLANTED], cwd=ROOT, check=True)
+    check_planted(lev.read_text(), json.loads((source / "actor-map.json").read_text()),
+                  (source / "asset.inc").read_text() if (source / "asset.inc").is_file() else "")
+    oad = source / "settings.oad"
+    subprocess.run([str(ROOT / "wftools/oas2oad-rs/target/release/oas2oad"),
+                    f"--types={ROOT / 'wfsource/source/oas/types3ds.s'}",
+                    f"--prep={ROOT / 'wftools/prep/prep'}",
+                    "-o", str(oad), str(source / "settings.oas")], cwd=ROOT, check=True)
+    standalone = LEVELS / (PLANTED + "-standalone.iff")
+    subprocess.run(["python3", "scripts/build-object-properties.py",
+                    "--oad", str(oad), "--bindings", str(source / "settings-bindings.json"),
+                    "--actor-map", str(source / "actor-map.json"),
+                    "--out", str(source / "settings.rprp"),
+                    "--include", str(source / "settings-catalog.inc"),
+                    "--level", str(standalone)], cwd=ROOT, check=True)
+    check_catalog(standalone.read_bytes())
+    subprocess.run([str(ROOT / "wftools/cdpack-rs/target/release/cdpack"),
+                    str(ROOT / "wfsource/source/game/shell.fth"), str(standalone),
+                    "-o", str(PLANTED_BUNDLE)], cwd=ROOT, check=True)
+    if b"UIFT" not in PLANTED_BUNDLE.read_bytes()[:2048]:
+        raise RuntimeError("cdpack is stale: rebuild wftools/cdpack-rs to include the UI font")
+    # Link the flavor's asset only where the Android flavor already exists (Phase 2a adds it).
+    assets = ROOT / "android/screensaver/src/planted/assets"
+    if assets.is_dir():
+        link = assets / "cd.iff"
+        if link.is_symlink() or link.exists():
+            link.unlink()
+        link.symlink_to(Path(os.path.relpath(PLANTED_BUNDLE, assets)))
+        print(f"planted screensaver asset: {link}", flush=True)
+    else:
+        print(f"planted screensaver asset: {assets} does not exist; no link made", flush=True)
+    return PLANTED_BUNDLE
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("tanks", nargs="*", choices=TANKS, help="Default: all eight tanks")
+    parser.add_argument("tanks", nargs="*", choices=(*TANKS, "planted"),
+                        help="Default: all eight tanks. 'planted' builds only the Planted Tank screensaver bundle")
     args = parser.parse_args()
+    if "planted" in args.tanks:
+        if len(args.tanks) != 1:
+            parser.error("'planted' builds on its own")
+        print(f"planted screensaver bundle: {build_planted()}", flush=True)
+        return
     java_choice = (ROOT / "android/screensaver/src/main/java/org/worldfoundry/screensaver/TankChoice.java").read_text()
     ids_match = re.search(r"static final String\[\] IDS = \{(.*?)\};", java_choice, re.S)
     if not ids_match or tuple(re.findall(r'"([a-z_]+)"', ids_match.group(1))) != TANKS:

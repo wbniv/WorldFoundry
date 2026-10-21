@@ -103,3 +103,6 @@ wflevels/*_screensaver/
 wflevels/*_screensaver.iff
 wflevels/*_screensaver-standalone.iff
 wflevels/aquarium-screensaver-cd.iff
+# The Planted Tank screensaver is a source level (its own .gitignore keeps the sources).
+!wflevels/planted_tank_screensaver/
+wflevels/planted-screensaver-cd.iff

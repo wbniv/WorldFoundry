@@ -1,0 +1,12 @@
+# Keep the level's sources and the authored generated level; ignore compiled files.
+*
+!.gitignore
+!README.md
+!config.py
+!build.sh
+!settings.oas
+!settings-bindings.json
+!leaf_surfaces.tga
+!actor-map.json
+!planted_tank_screensaver.lev
+!planted_tank_screensaver-standalone.iff.txt
