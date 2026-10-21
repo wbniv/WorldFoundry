@@ -28,9 +28,9 @@ code,pre{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
  <div id="h" style="background:#33507a;display:flex;align-items:center;padding-left:10px;font-weight:600">Hold</div>
  <div id="head" style="position:absolute;top:-4px;bottom:-4px;width:3px;background:var(--warn)"></div></div>
  <p id="sum" class="muted" style="margin:10px 0 0"></p></div>
-<p class="muted" style="margin-top:14px">Growth time ≈ the slowest seed's finish time ÷ speed (illustrative 144 s here; Phase 0 measures the real per-seed bound). Hold is wall-clock level time and does not scale with speed.</p>
+<p class="muted" style="margin-top:14px">Growth time ≈ the slowest seed's finish time ÷ speed (measured worst case 195 s here; Phase 0 measures the real per-seed bound). Hold is wall-clock level time and does not scale with speed.</p>
 </main><script>
-const G=144,$=id=>document.getElementById(id),mmss=s=>Math.floor(s/60)+':'+String(Math.round(s%60)).padStart(2,'0');
+const G=195,$=id=>document.getElementById(id),mmss=s=>Math.floor(s/60)+':'+String(Math.round(s%60)).padStart(2,'0');
 function draw(){const sp=+$('speed').value,h=+$('hold').value||0,grow=G/sp,total=grow+h,p=+$('t').value/100,t=p*total;
  $('g').style.flex=grow;$('h').style.flex=Math.max(h,1);$('head').style.left=(p*100)+'%';
  const marks=[0,grow*.3,grow,grow+h];for(let i=0;i<4;i++)$('c'+i).textContent=mmss(marks[i]);

@@ -61,11 +61,11 @@ def lifecycle(art: Path) -> str:
  <div id="h" style="background:#33507a;display:flex;align-items:center;padding-left:10px;font-weight:600">Hold</div>
  <div id="head" style="position:absolute;top:-4px;bottom:-4px;width:3px;background:var(--warn)"></div></div>
  <p id="sum" class="muted" style="margin:10px 0 0"></p></div>
-<p class="muted" style="margin-top:14px">Growth time ≈ the slowest seed's finish time ÷ speed (illustrative 144 s here; Phase 0 measures the real per-seed bound). Hold is wall-clock level time and does not scale with speed.</p>
+<p class="muted" style="margin-top:14px">Growth time ≈ the slowest seed's finish time ÷ speed (measured worst case 195 s here; Phase 0 measures the real per-seed bound). Hold is wall-clock level time and does not scale with speed.</p>
 </main>"""
     css = ".f{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}.f img{display:block;width:100%}.f figcaption{padding:10px 12px;display:grid;gap:2px}.f figcaption span{color:var(--accent);font:600 13px ui-monospace,monospace}.f small{color:var(--muted)}.f.on{outline:3px solid var(--warn)}select,input{font:inherit;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:3px 6px}"
     js = """
-const G=144,$=id=>document.getElementById(id),mmss=s=>Math.floor(s/60)+':'+String(Math.round(s%60)).padStart(2,'0');
+const G=195,$=id=>document.getElementById(id),mmss=s=>Math.floor(s/60)+':'+String(Math.round(s%60)).padStart(2,'0');
 function draw(){const sp=+$('speed').value,h=+$('hold').value||0,grow=G/sp,total=grow+h,p=+$('t').value/100,t=p*total;
  $('g').style.flex=grow;$('h').style.flex=Math.max(h,1);$('head').style.left=(p*100)+'%';
  const marks=[0,grow*.3,grow,grow+h];for(let i=0;i<4;i++)$('c'+i).textContent=mmss(marks[i]);
@@ -120,7 +120,7 @@ def params() -> str:
  <div class="row"><label for="speed">speed</label><select id="speed"><option>0.25</option><option>0.5</option><option selected>1</option><option>2</option><option>4</option><option>8</option></select><small>growth clock; 1× is the default</small></div>
  <div class="row"><label for="hold">hold</label><input id="hold" value="120"><small>seconds on screen once grown</small></div>
  <div class="row"><label for="sea">seahorses</label><input id="sea" value="6"><small id="seaN">0 – 6, saltwater only</small></div>
- <div class="row"><label for="label">label</label><label class="chk"><input id="label" type="checkbox"> show “Seed … | Water” strip</label></div>
+ <div class="row"><label for="label">label</label><label class="chk"><input id="label" type="checkbox" disabled> show “Seed … | Water” strip</label><small>not in v1: the strip is engine-drawn (needs an engine edit)</small></div>
  <p id="err" style="margin:12px 0 0;min-height:44px"></p></div>
 <div style="display:grid;gap:16px;align-content:start">
  <div class="card"><h2>Preview launch (activity extras)</h2><pre id="am"></pre></div>

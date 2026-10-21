@@ -8,7 +8,7 @@ Two screensaver apps ship from `android/screensaver`: **Aquarium** (eight tanks,
 
 What is true today:
 
-- The planted tank is already a growing ecosystem. `planted::enter()` draws a fresh seed on every level entry, plants grow from founders, and growth finishes on its own: "tested seeds fully develop after about 117–144 growth seconds" ([clumps plan](2026-10-03-aquatic-plant-clumps-and-poster.md)). The engine clamps the growth age at 240 s (`wfsource/source/game/plant_settings.h`, `tick`).
+- The planted tank is already a growing ecosystem. `planted::enter()` draws a fresh seed on every level entry, plants grow from founders, and growth finishes on its own. The older clumps plan said "about 117–144 growth seconds", from a few seeds; the Phase 0 sweep of 200 seeds measured **103 s to 193 s** ([results](2026-10-21-planted-tank-screensaver/spikes/maturity-sweep.md)). The engine clamps the growth age at 240 s (`wfsource/source/game/plant_settings.h`, `tick`).
 - "Fully grown" has an exact definition per seed: each `plantgrowth::Vertex` carries `birth` and `duration`, and a vertex is full size at `age ≥ birth + duration` (`plant_growth.h`, `deformedWave`). A tank is complete at the maximum of that over all its vertices.
 - A Dream has **no command line**. The old `--plant-seed`, `--plant-water` and `--plant-speed` switches were deliberately **removed** ([command-line-switches.md](../command-line-switches.md#baseline-runtime-options)); plant values now come from the level's cooked `PlantedTankSettings` catalog, and "no replacement launch aliases" are provided. Parameters therefore have to arrive another way (see **Parameters**).
 - **The level can end itself and name what loads next.** A level writing mailbox `END_OF_LEVEL` (1905) = 1 ends; `LEVEL_TO_RUN` (5000) = *n* chooses the next TOC entry. The `cd.iff` meta-loop in `game.cc` reloads it, and the value persists across the reload ([level-design-troubleshooting.md](../level-design-troubleshooting.md#flag--next-level-transition-and-verifying-it-headlessly)). Will pointed this out, and it is the spine of this plan. The planted level calls `plant-register`, which calls `planted::enter()`, on every load, so a reload **is** a new tank.
@@ -97,7 +97,7 @@ The "command line" of an Android Dream is `adb`: **activity extras** for an imme
 | `speed` | 0.25, 0.5, 1, 2, 4, 8 (paused is rejected: the tank could never finish) | `1` | staged `state().speed` index; mirrored by the Forth clock | yes |
 | `hold` | 0 to 86400 s | `120` | Forth hold timer | cooked default in v1; runtime if Spike S2 finds a read path |
 | `seahorses` | 0 to 6 (saltwater only) | `6` | catalog field 8 | cooked default in v1; runtime if S2 allows |
-| `label` | true or false | `false` | whether the level draws the seed strip | cooked default in v1 |
+| `label` | true or false | `false` | the seed strip is engine-drawn, so this needs an engine edit (see **Spike results**) | **not in v1** unless Will approves the edit |
 | `cycles` | 0 (unlimited) or *n* | `0` | Forth cycle counter | cooked default in v1 |
 | `age`, `textures`, `sway` | developer keys; `age` 0 to 240 s | `0`, `true`, `true` | staged `state().initialAge`, `textures`, `sway` | yes, hidden from the tray |
 
@@ -118,7 +118,7 @@ The page opens on the defaults; the thumbnail shows the **rejected** state, wher
 
 [![One tank's life at 1×](2026-10-21-planted-tank-screensaver/dream-lifecycle.png)](2026-10-21-planted-tank-screensaver/dream-lifecycle.html)
 
-At 1× a cycle is the maturity bound (illustratively 144 s) plus the 120 s hold, about 4 min 24 s per tank. At 0.25× growth takes four times as long; at 8× about 18 s; the hold stays 120 s. [Open the interactive timeline](2026-10-21-planted-tank-screensaver/dream-lifecycle.html) and change the speed.
+At 1× a cycle is the maturity bound (**195 s**, measured) plus the 120 s hold, about 5 min 15 s per tank. A median tank (about 135 to 141 s) is fully grown 55 to 60 s before the bound, so it shows for roughly three minutes. A per-seed bound would remove that slack; see Spike S2. At 0.25× growth takes four times as long; at 8× about 18 s; the hold stays 120 s. [Open the interactive timeline](2026-10-21-planted-tank-screensaver/dream-lifecycle.html) and change the speed.
 
 **Frames and performance.** Growth ignores frames longer than 0.2 s, so it needs more than 5 FPS to run at 1×. The retained cast1 numbers are 21 FPS (no seahorses) and 14 FPS (six pairs) for the wide view ([seahorse plan](2026-10-16-saltwater-seahorses.md)), which is fine for this. The default of six pairs costs about a third of the frame rate; it stays the default until Phase 5 measures the screensaver build.
 
@@ -139,8 +139,8 @@ Tiers are dispatch inputs (ranking is done inline, never delegated). Torn calls 
 | 0a | Re-cook the planted levels for the actor‑30 fix (existing TODO item) | T3 | settled plan, multi-step build |
 | 0b | **Spike S1:** can the host stage `planted::state()` safely between `leave()` and the next `enter()`? Check where `WFAndroidPumpEvents` runs during a reload and whether `explicitSeed` survives it | T4 | unknown root cause territory; a wrong answer changes the design |
 | 0c | **Spike S2:** can Forth read the staged speed, hold, seahorses and cycles (the generic instance-property read in `scripting_zforth.cc`), or must they be cooked? | T4 | same |
-| 0d | **Spike S3:** where is the seed/settings strip drawn, and can the variant drop it? Which camera gives the 85% framing? | T3 | bounded search plus a level edit |
-| 0e | Maturity sweep: `max(birth + duration)` over 200 seeds in both waters → the bound (must be below the 240 s clamp) | T2 | one harness, known formula |
+| ~~0d~~ | ~~**Spike S3:** where is the seed/settings strip drawn, and can the variant drop it? Which camera gives the 85% framing?~~ **Done** | T3 | bounded search plus a level edit |
+| ~~0e~~ | ~~Maturity sweep over 200 seeds in both waters~~ **Done** (`f793c3d1`): bound 195 s | T2 | one harness, known formula |
 | 1 | Level variant: build `planted_tank_screensaver` from `aquarium_plants`, Director cycle script (growth clock, hold, mailboxes), framing, no strip | T3 | multi-file against this plan |
 | 2a | Java: `PlantedSettings`, activity, Dream, provider, manifest, strings, Gradle flavor | T2 | one module, clear spec |
 | 2b | Native: `nativeConfigure` and the staging adapter in one file (`planted_bridge.cc`) | T4 | touches engine state from the game thread; one file so the later OAS/OAD migration, which retires `planted::State`, changes one place |
@@ -148,7 +148,19 @@ Tiers are dispatch inputs (ranking is done inline, never delegated). Torn calls 
 | 4 | `task` entries, bundle builder mode, README, device-coordinator doc, TODO | T1 | recipes |
 | 5 | Device verification, soak, natural-idle check through the coordinator | T3 | procedure with judgment about results |
 
-Spikes S1 to S3 run first and may change Phases 1, 2a and 2b. If S1 shows staging cannot be made safe, **stop and ask Will** for permission to add a small engine seam (a `planted::Launch` struct consumed in `enter()`, about ten lines in `plant_settings.h`). Engine edits need his explicit say-so; the plan does not assume it.
+Spikes S1 to S3 run first and may change Phases 1, 2a and 2b. If S1 shows staging cannot be made safe, **stop and ask Will** for permission to add an engine seam. **The seam must be generic, not plant-specific** (Will, 2026‑10‑21: "i'd want it to be more generic than just plant settings"): a launch-override layer in the `wfprops` runtime property registry that lets a host set any owner's field before level entry, so any settings owner can use it. A `planted::Launch` struct is rejected. Engine edits still need his explicit say-so; the plan does not assume it.
+
+## Spike results
+
+**0e, maturity sweep (done, `f793c3d1`, [write-up](2026-10-21-planted-tank-screensaver/spikes/maturity-sweep.md)).** `task test-plant-maturity` runs seeds 0 to 199 in both waters inside `wf-linux-test:local`. Freshwater finishes between 103.5 and 187.8 s (median 135.3), saltwater between 107.5 and 193.3 s (median 141.2); worst seed is 48 in both. Nothing nears the 240 s clamp, and seed 713 repeats identically. **Bound: 195 s.** It covers 200 seeds, not all 2³², so the level never compares against the clamp itself.
+
+**S3, strip and framing (done, [write-up](2026-10-21-planted-tank-screensaver/spikes/S3.md)).** Two of its findings change the plan; I re-checked both against the source.
+
+- **The seed strip cannot be removed without an engine edit.** The engine draws it every frame while a tank is active (`wfsource/source/game/plant_ui.cc:12`). No catalog field, object flag, Director script or mailbox controls it, and growth needs the same `active` flag. The screensaver's own HUD switch does not reach it: `WFAndroidSetHudEnabled(0)` removes only the touch controls and the FPS counter, because the Android overlay drawer ignores that flag (`android_window.cc:502`, per the spike). **The shipped Aquarium Dream already shows this strip** on its Planted choice, with "Hold A: settings" text on a Dream that takes no input. S3's smallest fix is a plant-specific `label` flag in `plant_settings.h` and `plant_ui.cc` (three lines). Following Will's "more generic" direction, my proposal is instead to make the Android overlay drawer **respect the existing `gHudEnabled` switch**, which the screensaver host already sets to 0: one generic change that fixes both apps and adds no plant-specific state. It needs Will's approval; until then the plan has no `label` parameter and the strip stays on.
+- **Framing is a text substitution, as hoped.** The wide camera sits at `y = -12`. Moving it to `y = -8.25` (same x, z and look-at) makes the tank 90.0% of the frame width and 71.3% of its height at 16:9, with a 5% margin each side and nothing cropped; the 85% limit is `y = -8.638`. The model reproduces the device capture (predicted 57.4% × 45.5%, measured 57.4% × 45.4%). The builder replaces `-12.0000000000000000(1.15.16)` in the `cs_wide` and `Camera` blocks (`aquarium_plants.lev` lines 130 and 655, the only hits) and asserts one hit per block; leaving `Camera` unchanged would add a one-second pan on start. Moving in removes some fog (start distance 9), so scale both fog distances by about 0.64 to keep today's look. The camera field of view is ignored by the engine (fixed 60° vertical), so position is the only lever. TV overscan above about 5% would clip the walls, so Phase 1 takes a device capture to confirm.
+- **Smaller facts.** The screensaver stays on the wide camera, since only a native tap switches cameras and the Dreams take no input; `PlantedTankActivity` must not add an input path. In freshwater the goby also follows `ss-drive`, so Phase 5 checks it. The level has no QR code or pairing prompt.
+
+**S1 and S2 (staging and Forth reads)** are still running; results go here when the agent reports.
 
 ## Out of scope
 
@@ -187,6 +199,6 @@ Results: _pending._
 
 ## Open decisions for Will
 
-1. **Engine seam, only if S1 fails.** Permission for the small `planted::Launch` change described above. Not needed otherwise.
+1. **Engine edits, both generic.** (a) The overlay drawer respects `gHudEnabled`, so the screensaver can hide the seed strip (and the shipped Aquarium stops showing it); about three lines in the Android window layer. (b) Only if S1 fails: a launch-override layer in the `wfprops` registry (design in `spikes/S1‑S2.md`). Will has asked that seams be generic; no edit is approved yet.
 2. **Seahorse default.** Six pairs costs about a third of the frame rate. Keep six, or default to fewer for the Dream?
 3. **Urchin.** The planted level has the sea urchin on an autonomous route (`screensaver_player.fth`). This plan keeps it. Say so if the screensaver should be plants and seahorses only.
