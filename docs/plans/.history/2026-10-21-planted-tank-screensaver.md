@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/81969d57) | Planted Tank plan: record Phase 2b done; coordinator registration and two-ABI build needed |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/bdce4dd0) | Planted Tank: builder links the flavor asset; plan records Phase 1 done |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/52a74afe) | Planted Tank plan: record Phase 2c as done, with step 13 output |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/bab64a7d) | Planted Tank plan: record Phase 2a and 3 as done |
@@ -12,6 +13,11 @@
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4266a44c) | Plan the Planted Tank screensaver |
 
 <!--history-meta v1
+81969d57	author	Will Norris
+81969d57	added	4
+81969d57	deleted	3
+81969d57	files	1
+81969d57	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01LmFZJSGwibDCpz7J9wzY9X
 bdce4dd0	author	Will Norris
 bdce4dd0	added	2
 bdce4dd0	deleted	2
