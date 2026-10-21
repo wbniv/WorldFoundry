@@ -4,6 +4,8 @@
 
 ### Platform / Display
 
+- [T4] **Planted Tank screensaver (third Dream).** New `planted` flavor: one tank grows at 1× to its maturity bound, stays 2 min, then the level ends (`END_OF_LEVEL`/`LEVEL_TO_RUN`) and reloads as a new seeded tank. Water, seed, speed etc. via `am start` extras and the settings provider; WF badge on icon and banner. Spikes S1–S3 first (staging window, Forth reads, HUD/framing); needs the actor‑30 re-cook; engine seam only with Will's permission. Rank T4: unknown staging seam from the game thread, a wrong turn changes the design. [plan](docs/plans/2026-10-21-planted-tank-screensaver.md)
+
 - [T3] **Multiple APKs per Chromecast command.** Extend coordinator batches from one request across devices to one job per app/device, then accept APK lists for install, check, profile, simpleperf and non-interactive record. Preserve reservations, cleanup and separate installed/launcher-verified results. Implemented and live; finish physical acceptance after coordinator recovery. [plan](docs/plans/2026-10-19-chromecast-multiple-apk-commands.md)
 
 - [T4] **Runtime object editing on OAS/OAD (replaces RP02).** Any object whose type declares a `SHOW_AS_LIVE` field becomes editable on the TV/phone: export lists them in `LevelObj` (no runtime scans), labels are automatic with an optional Editor Label override, the form comes from the type's shipped `.oad`, edits go to a per-object writable overlay. Settings holders become standard OAS types (`PlantedTankSettings` inherits `Settings` via `@include`); retires RP01, `settings-bindings.json`, the engine-compiled catalog and `planted::State`. Rank T4: format, engine overlay and tools; a wrong turn breaks every level's settings. Needs engine-scope confirmation (O4). [plan](docs/plans/2026-10-16-runtime-object-editing.md)
@@ -515,6 +517,13 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** Scripts other than Latin. The atlas covers ASCII, Latin‑1 and common punctuation; widening it is a bake-list change. — _from [2026-10-17-settings-editor-font.md](docs/plans/2026-10-17-settings-editor-font.md)_  <!-- fp:d2a0c19e09b6f8f2 -->
 - [ ] **(triage)** Dialogue text. It keeps its own per-level `DLOG` bundles, which already use the same `WFGA` path. — _from [2026-10-17-settings-editor-font.md](docs/plans/2026-10-17-settings-editor-font.md)_  <!-- fp:ed065dcbb9a78a9e -->
 - [verify] **2026-10-18-aquarium-screensaver-input-verification** — Verification section present but no PASS recorded — run + record the steps. _from [2026-10-18-aquarium-screensaver-input-verification.md](docs/plans/2026-10-18-aquarium-screensaver-input-verification.md)_  <!-- fp:19d50bf4bf01c6bd -->
+- [ ] **(triage)** A desktop (Linux or macOS) screen saver; this is the Android TV Dream. — _from [2026-10-21-planted-tank-screensaver.md](docs/plans/2026-10-21-planted-tank-screensaver.md)_  <!-- fp:62657f4b48224474 -->
+- [ ] **(triage)** Seed entry in the coordinator tray: schema 1 carries choices only today; the seed stays on the command line. — _from [2026-10-21-planted-tank-screensaver.md](docs/plans/2026-10-21-planted-tank-screensaver.md)_  <!-- fp:fc7055bd97d5085b -->
+- [ ] **(triage)** A cross-fade between tanks. The reload shows the engine's normal load gap; Phase 5 measures it and an overlay fade (Java-side, no engine edit) is a follow-up if it looks rough. — _from [2026-10-21-planted-tank-screensaver.md](docs/plans/2026-10-21-planted-tank-screensaver.md)_  <!-- fp:92a2b7974a54f83d -->
+- [ ] **(triage)** An exact "plant is mature" engine word. The Forth clock plus a measured bound is enough; an exact word would need an engine edit. — _from [2026-10-21-planted-tank-screensaver.md](docs/plans/2026-10-21-planted-tank-screensaver.md)_  <!-- fp:b41973f61740c445 -->
+- [ ] **(triage)** Audio, as for Seahorse Grid. — _from [2026-10-21-planted-tank-screensaver.md](docs/plans/2026-10-21-planted-tank-screensaver.md)_  <!-- fp:d8b62c0c5d9da78f -->
+- [ ] **(triage)** Public distribution and signing, unchanged from the [aquarium plan](2026-10-17-aquarium-screensaver.md). — _from [2026-10-21-planted-tank-screensaver.md](docs/plans/2026-10-21-planted-tank-screensaver.md)_  <!-- fp:8c05a5267f24cfb6 -->
+- [verify] **2026-10-21-planted-tank-screensaver** — Verification section present but no PASS recorded — run + record the steps. _from [2026-10-21-planted-tank-screensaver.md](docs/plans/2026-10-21-planted-tank-screensaver.md)_  <!-- fp:49d8738ec028084f -->
 <!-- END auto-captured-deferrals -->
 
 
