@@ -22,3 +22,26 @@ The output is `android/screensaver/build/outputs/apk/debug/screensaver-debug.apk
 The selected Dream advertises `org.worldfoundry.screensaver.settings`. Its shell-only provider answers `getCapabilities` with a base64-encoded schema-1 JSON choice list and accepts `setSetting` with `tank:<id>`. The coordinator uses a reviewed mapping for this Dream package and authority, validates the response, and offers those choices in the KDE tray. A changed preference takes effect at the next Dream start.
 
 Install, settings, and idle activation checks use the shared coordinator through `task chromecast:*`. See [the implementation plan](../../docs/plans/2026-10-18-aquarium-screensaver-player-and-tray-settings.md). The former video prototype and its evidence are documented in [the investigation](../../docs/investigations/2026-10-17-chromecast-screensaver-from-a-level.md).
+
+## Planted Tank
+
+**Planted Tank** (`org.worldfoundry.plantedtank`, flavor `planted`) is a third app: the planted tank on its own, plants only, growing from seedlings to a full canopy, shown for a while, then replaced by a new tank. See [the plan](../../docs/plans/2026-10-21-planted-tank-screensaver.md). Parameters are validated once in `PlantedConfig` and saved in the `planted` preferences by `PlantedSettings`:
+
+| Key | Values | Default |
+|---|---|---|
+| `water` | `freshwater`, `saltwater`, `random` (aliases `fresh`, `salt`) | `random` |
+| `seed` | whole number 0 to 4294967295 | random per tank |
+| `speed` | 0.25, 0.5, 1, 2, 4, 8 (0 is rejected) | `1` |
+| `hold` | seconds, 0 to 86400 | `120` |
+| `age`, `textures`, `sway` | developer keys: 0 to 240 s, true or false, true or false | `0`, `true`, `true` |
+
+Run now with activity extras (used for this run only, never saved), or save values for the Dream through the shell-only settings provider; a bad value is rejected with a message and changes nothing:
+
+```sh
+adb shell am start -n org.worldfoundry.plantedtank/.PlantedTankActivity \
+    --es water saltwater --el seed 713 --ef speed 2
+adb shell content call --uri content://org.worldfoundry.plantedtank.settings \
+    --method setSetting --arg water:saltwater
+```
+
+The provider also answers `getCapabilities` (Water, Speed and Hold choices; the seed is command-line only), `getSettings` and `resetSettings`. Check the validator with plain `javac` (see `src/test/java/.../PlantedConfigTest.java`).

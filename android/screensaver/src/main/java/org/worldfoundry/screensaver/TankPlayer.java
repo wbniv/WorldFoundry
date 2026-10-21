@@ -22,9 +22,11 @@ final class TankPlayer implements SurfaceHolder.Callback {
     private Thread thread;
     private volatile boolean started;
     private int level;
+    private String configureLine;
 
     private static native void nativeRun(android.content.res.AssetManager assets, Surface surface,
                                          int level, String logPath);
+    private static native void nativeConfigure(String line);
     private static native void nativePrepare();
     private static native void nativeStop();
 
@@ -55,6 +57,9 @@ final class TankPlayer implements SurfaceHolder.Callback {
         startIfReady();
     }
 
+    /** Hands the engine a launch-parameter line on the next start; unset leaves other flavors untouched. */
+    void configure(String line) { configureLine = line; }
+
     void stop() {
         started = false;
         nativeStop();
@@ -64,10 +69,12 @@ final class TankPlayer implements SurfaceHolder.Callback {
         if (!started || thread != null || !view.getHolder().getSurface().isValid()) return;
         final Surface surface = view.getHolder().getSurface();
         final int selected = level;
+        final String configure = configureLine;
         File logDirectory = view.getContext().getExternalFilesDir(null);
         final String logPath = logDirectory == null ? null : new File(logDirectory, "wf.log").getAbsolutePath();
         nativePrepare();
         thread = new Thread(() -> {
+            if (started && configure != null) nativeConfigure(configure);
             if (started) nativeRun(view.getContext().getAssets(), surface, selected, logPath);
             // The renderer has process-lifetime globals. Both callers run in a
             // dedicated process, so ending a stopped player resets them safely.
