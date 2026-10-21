@@ -1,9 +1,12 @@
 // Generic OAD-derived instance properties. No editor/debug dependencies.
 #pragma once
+#include <atomic>
 #include <cstdint>
 #include <functional>
 #include <map>
+#include <mutex>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace wfprops {
@@ -32,6 +35,7 @@ public:
     bool set(uint32_t actor,uint32_t field,const std::string& value,std::string& error);
     void clear();
 private:
+    friend class LaunchOverrides;
     std::map<uint32_t,Object> objects_;
     uint64_t serial_=0;
 };
@@ -54,4 +58,28 @@ std::string snapshot(const Edit& edit,bool available,bool phone);
 bool decode(const std::string& value,std::string& result);
 Registry*& activeRegistry();
 uint64_t nextSession();
+
+// Values a host sets before a level activates (docs/plans/2026-10-21-planted-tank-screensaver.md,
+// Phase 2c). Applied to every object whose schema matches, each time a level registry loads,
+// before activeRegistry() is set and before any script runs. Keys are field keys (RP01
+// Field::key, the OAS field name), never numeric ids. An override whose schema is absent from
+// the level is skipped silently (most levels lack most schemas); a key the matching schema
+// lacks, or a value that fails wfprops::validate, is reported and leaves the old value.
+class LaunchOverrides {
+public:
+    void set(std::string schema,std::string key,std::string value);
+    void erase(const std::string& schema,const std::string& key);
+    void clear();
+    // Writes each valid override into the matching objects, read-only fields included, and
+    // bumps the revision of each object it changes. Returns "schema.key=value: reason" for
+    // each override it rejects. Counts one application per call.
+    std::vector<std::string> apply(Registry& registry) const;
+    // Number of apply() calls so far: a host compares it to detect that a new level loaded.
+    uint64_t applications() const {return applications_.load();}
+private:
+    mutable std::mutex mutex_;   // the host may write from a JNI/UI thread
+    std::map<std::pair<std::string,std::string>,std::string> values_;
+    mutable std::atomic<uint64_t> applications_{0};
+};
+LaunchOverrides& launchOverrides();
 }

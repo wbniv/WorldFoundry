@@ -50,6 +50,26 @@ void Registry::remove(uint32_t actor){objects_.erase(actor);}
 bool Registry::clone(uint32_t source,uint32_t actor){auto* initial=object(source);if(!initial||!actor)return false;Object copy=*initial;copy.actor=actor;copy.generation=++serial_;copy.revision=0;objects_[actor]=std::move(copy);return true;}
 void Registry::clear(){objects_.clear();++serial_;}
 bool Registry::set(uint32_t actor,uint32_t id,const std::string& v,std::string& error){auto* o=object(actor);const Field* f=o?o->field(id):nullptr;if(!f||f->readonly){error="Property is not editable";return false;}int s=validate(*f,v);if(s){error=validationMessage(s);return false;}if(o->values[id]!=v){o->values[id]=v;++o->revision;}error.clear();return true;}
+void LaunchOverrides::set(std::string schema,std::string key,std::string value){std::lock_guard<std::mutex> lock(mutex_);values_[{std::move(schema),std::move(key)}]=std::move(value);}
+void LaunchOverrides::erase(const std::string& schema,const std::string& key){std::lock_guard<std::mutex> lock(mutex_);values_.erase({schema,key});}
+void LaunchOverrides::clear(){std::lock_guard<std::mutex> lock(mutex_);values_.clear();}
+std::vector<std::string> LaunchOverrides::apply(Registry& registry) const {
+    std::lock_guard<std::mutex> lock(mutex_);std::vector<std::string> rejected;
+    for(const auto& entry:values_){
+        const std::string& schema=entry.first.first;const std::string& key=entry.first.second;const std::string& value=entry.second;
+        std::string reason;
+        for(auto& pair:registry.objects_){
+            Object& o=pair.second;if(o.schema!=schema)continue;
+            const Field* f=nullptr;for(const auto& candidate:o.fields)if(candidate.key==key&&candidate.stored()){f=&candidate;break;}
+            if(!f){if(reason.empty())reason="no such field";continue;}
+            if(int status=validate(*f,value)){if(reason.empty())reason=validationMessage(status);continue;}
+            std::string& current=o.values[f->id];if(current!=value){current=value;++o.revision;}
+        }
+        if(!reason.empty())rejected.push_back(schema+"."+key+"="+value+": "+reason);
+    }
+    ++applications_;return rejected;
+}
+LaunchOverrides& launchOverrides(){static LaunchOverrides overrides;return overrides;}
 uint64_t nextSession(){static uint64_t next=0;return ++next;}
 bool Edit::begin(Registry& r,uint32_t a){cancel();Object* o=r.object(a);if(!o)return false;session=nextSession();registry=&r;actor=a;generation=o->generation;revision=o->revision;draft=o->values;open=true;return true;}
 Object* Edit::object() const {Object* o=registry?registry->object(actor):nullptr;return o&&o->generation==generation?o:nullptr;}

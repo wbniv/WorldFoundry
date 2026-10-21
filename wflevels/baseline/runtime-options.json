@@ -1171,7 +1171,8 @@
     "--plant-speed=": "Removed engine CLI; value retained in authored plant RPRP settings, never a baseline CLI row",
     "--plant-texture=": "Removed engine CLI; value retained in authored plant RPRP settings, never a baseline CLI row",
     "--plant-sway=": "Removed engine CLI; value retained in authored plant RPRP settings, never a baseline CLI row",
-    "--plant-water=": "Removed engine CLI; value retained in authored plant RPRP settings, never a baseline CLI row"
+    "--plant-water=": "Removed engine CLI; value retained in authored plant RPRP settings, never a baseline CLI row",
+    "--property=": "Launch override (Schema.Key=Value) applied to every level RPRP registry at load; sets catalog values, never a baseline CLI row"
   },
   "status": "Consumer snapshots effective values and activates supported fields at open"
 }

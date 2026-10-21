@@ -114,5 +114,5 @@ def sheet(fields):
 def write_manifest(here):
     fields=inventory()
     (here/'runtime-options.json').write_text(json.dumps(dict(version=1, id_range=[1000,1199],
-        runtime_input='RPRP', fields=fields, exclusions={f'--plant-{key}=':'Removed engine CLI; value retained in authored plant RPRP settings, never a baseline CLI row' for key in ['seed','age','speed','texture','sway','water']}, status='Consumer snapshots effective values and activates supported fields at open'),indent=2)+'\n')
+        runtime_input='RPRP', fields=fields, exclusions={f'--plant-{key}=':'Removed engine CLI; value retained in authored plant RPRP settings, never a baseline CLI row' for key in ['seed','age','speed','texture','sway','water']}|{'--property=':'Launch override (Schema.Key=Value) applied to every level RPRP registry at load; sets catalog values, never a baseline CLI row'}, status='Consumer snapshots effective values and activates supported fields at open'),indent=2)+'\n')
     return fields

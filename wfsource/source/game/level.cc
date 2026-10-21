@@ -612,6 +612,9 @@ Level::Level
                 std::fprintf(stderr,"PROPERTIES load failed: %s\n",error.c_str());
         }
     }
+    // Host/CLI launch overrides (runtime_properties.hpp): before any reader sees the registry.
+    for(const std::string& rejected:wfprops::launchOverrides().apply(_runtimeProperties))
+        std::fprintf(stderr,"PROPERTIES launch-override rejected: %s\n",rejected.c_str());
     wfprops::activeRegistry()=&_runtimeProperties;
     std::string renderSettingError;
     _renderCurrentRoomOnly = wfprops::currentRoomOnly(_runtimeProperties, renderSettingError);

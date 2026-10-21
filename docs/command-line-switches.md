@@ -154,6 +154,16 @@ The six `--plant-seed`, `--plant-age`, `--plant-speed`, `--plant-texture`,
 arguments fail with an explicit migration error. No replacement launch aliases
 or plant environment overrides are provided.
 
+`--property=Schema.Key=Value` (repeatable) is the generic launch override. It
+sets a field of every object whose RPRP schema is `Schema` each time a level
+loads, before any script runs, including read-only fields; `Key` is the field
+key (the OAS field name), for example
+`--property="PlantedTankSettings.Growth speed=6"`. A schema the level lacks is
+skipped; an unknown key or an invalid value logs
+`PROPERTIES launch-override rejected: …` and keeps the cooked value. Hosts such
+as the screensaver fill the same table through `wfprops::launchOverrides()`
+([plan](plans/2026-10-21-planted-tank-screensaver.md), Phase 2c).
+
 Plant values now come from the level's cooked `PlantedTankSettings` RPRP catalog:
 Seed (ID 1, uint32), Water type (2), Growth speed (3, indices 0–6), Initial age
 (4, 0–240 seconds), Textures (5), Sway (6), and Random seed on entry (7).

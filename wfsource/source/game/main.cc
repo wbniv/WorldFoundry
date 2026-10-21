@@ -273,6 +273,16 @@ ParseCommandLine(int argc, char** argv)
             std::fprintf(stderr,"wf_game: removed plant CLI override: %s; cook plant settings into the level RPRP catalog\n",argv[index]);
             std::exit(2);
         }
+        // --property=Schema.Key=Value (repeatable): a launch override, applied each time a level
+        // registry loads (wfprops::launchOverrides, engine/runtime_properties.hpp).
+        else if ( strncmp(argv[index], "--property=",11)==0 ) {
+            const char* spec=argv[index]+11;const char* dot=strchr(spec,'.');const char* eq=dot?strchr(dot+1,'='):nullptr;
+            if(!dot||dot==spec||!eq||eq==dot+1) {
+                std::fprintf(stderr,"wf_game: malformed %s; expected --property=Schema.Key=Value\n",argv[index]);
+                std::exit(2);
+            }
+            wfprops::launchOverrides().set(std::string(spec,dot),std::string(dot+1,eq),std::string(eq+1));
+        }
 		else if ( strcmp( argv[index]+1, "-no-fps" ) == 0 )
 		{
 			fpscounter::enabled = false;
