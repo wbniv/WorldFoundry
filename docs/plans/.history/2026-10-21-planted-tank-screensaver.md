@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/7c218a95) | Planted Tank plan: fold in S1/S2 spike results |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/5b330d11) | Screensaver host hides the engine overlay (seed strip, settings, menu) |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/c2b0f95d) | Planted Tank plan: record maturity sweep and S3 spike results |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4266a44c) | Plan the Planted Tank screensaver |
 
 <!--history-meta v1
+7c218a95	author	Will Norris
+7c218a95	added	23
+7c218a95	deleted	16
+7c218a95	files	1
+7c218a95	body	v1 needs no engine edit: the host stages the first tank before HALStart and\nlater tanks from the pump while planted::state() is inactive. Hold gets a new\nlevel-data field, cycles are counted by the host. Also corrects the\ntroubleshooting doc: a level's mailboxes 6000+ do not survive a reload.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01LmFZJSGwibDCpz7J9wzY9X
 5b330d11	author	Will Norris
 5b330d11	added	3
 5b330d11	deleted	3
