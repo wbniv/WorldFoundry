@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/8876f6cd) | Planted Tank screensaver: Java side (PlantedConfig, settings, provider, activity, Dream) |
 | [2026-10-19](https://github.com/wbniv/WorldFoundry/commit/0df0c0ad) | Add branded aquarium and seahorse screensavers |
 | [2026-10-18](https://github.com/wbniv/WorldFoundry/commit/54f44b51) | Add live aquarium screensaver with per-tank players |
 
 <!--history-meta v1
+8876f6cd	author	Will Norris
+8876f6cd	added	23
+8876f6cd	deleted	0
+8876f6cd	files	1
+8876f6cd	body	Phase 2a of docs/plans/2026-10-21-planted-tank-screensaver.md. PlantedConfig is a\npure-Java validator for water, seed, speed, hold and the developer keys, with a\nplain-javac test. PlantedSettings, PlantedSettingsProvider, PlantedTankActivity and\nPlantedTankDreamService wrap it; TankPlayer gains an additive configure(line) that\ncalls nativeConfigure only when set. The planted flavor manifest and strings are in\nsrc/planted; the Gradle flavor itself is not in this commit.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01LmFZJSGwibDCpz7J9wzY9X
 0df0c0ad	author	Will Norris
 0df0c0ad	added	5
 0df0c0ad	deleted	1

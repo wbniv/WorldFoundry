@@ -1545,6 +1545,29 @@ tasks:
       - |
         docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O1 -Wall -Wextra -Werror -I/src/android/screensaver/src/main/cpp /src/tests/planted_bridge_test.cpp /src/android/screensaver/src/main/cpp/planted_bridge.cc -o /tmp/planted_bridge && /tmp/planted_bridge'
 
+  build-planted-level:
+    desc: "Build the Planted Tank screensaver level and bundle (wflevels/planted-screensaver-cd.iff, linked into the planted flavor) via wflevels/planted_tank_screensaver/build.sh, which runs Blender in its container (docs/plans/2026-10-21-planted-tank-screensaver.md)."
+    cmds:
+      - bash wflevels/planted_tank_screensaver/build.sh
+
+  build-planted-apk:
+    desc: "Planted Tank screensaver debug APK for arm64-v8a and armeabi-v7a (the Chromecasts need armeabi-v7a), offline Gradle per android/screensaver/README.md. Lands at android/screensaver/build/outputs/apk/planted/debug/screensaver-planted-debug.apk; freeze a copy before submitting coordinator jobs."
+    deps: [build-planted-level]
+    dir: android
+    cmds:
+      - ./gradlew :screensaver:assemblePlantedDebug --offline
+
+  test-planted-screensaver:
+    desc: "Planted Tank screensaver checks, in order: plant maturity sweep, launch overrides, host bridge, python tests (level cycle, icons, overlay; wf-linux-test:local has cc, pytest, pillow) and the plain-Java PlantedConfigTest (wf-tv-media-phase0-jdk:local). Repo mounted read-only."
+    cmds:
+      - task: test-plant-maturity
+      - task: test-launch-overrides
+      - task: test-planted-bridge
+      - |
+        docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; cd /src && python3 -m pytest -q -p no:cacheprovider tests/test_planted_screensaver.py tests/test_planted_icons.py tests/test_screensaver_overlay.py'
+      - |
+        docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-tv-media-phase0-jdk:local bash -c 'set -euo pipefail; d=/src/android/screensaver/src; javac -d /tmp/out "$d"/main/java/org/worldfoundry/screensaver/PlantedConfig.java "$d"/test/java/org/worldfoundry/screensaver/PlantedConfigTest.java && java -cp /tmp/out org.worldfoundry.screensaver.PlantedConfigTest'
+
   poster-clownfish-biomechanics:
     desc: "Clownfish biomechanics poster, A3 (docs/plans/2026-09-30-clownfish-biomechanics-poster.md): data sheet + the aquarium constants → docs/reference/clownfish-biomechanics-poster/{data.json,poster.html,poster.pdf,poster.png}. A no-op when up to date. Needs google-chrome and pdftoppm."
     cmds:

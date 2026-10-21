@@ -96,6 +96,37 @@ awake; `CHANGE=stay-awake-while-powered` reverses that specific change.
 See [the investigation](investigations/2026-10-17-chromecast-screensaver-from-a-level.md)
 for build isolation, evidence and distribution limits.
 
+## Planted Tank screensaver
+
+A third `android/screensaver` app (`org.worldfoundry.plantedtank`, flavor
+`planted`): the planted tank alone, growing from seedlings to a full canopy,
+then replaced by a new tank. See the
+[plan](plans/2026-10-21-planted-tank-screensaver.md) and the
+[app README](../android/screensaver/README.md#planted-tank).
+
+```sh
+task build-planted-level   # level + bundle, linked into the flavor
+task build-planted-apk     # build-planted-level, then both ABIs
+task test-planted-screensaver
+```
+
+The APK lands at
+`android/screensaver/build/outputs/apk/planted/debug/screensaver-planted-debug.apk`.
+The Chromecasts need its armeabi-v7a library; the build includes it.
+
+Parameters (`water`, `seed`, `speed`, `hold`) take two command shapes. Activity
+extras apply to that run only; the settings provider saves values for the Dream:
+
+```sh
+adb shell am start -n org.worldfoundry.plantedtank/.PlantedTankActivity --es water saltwater --el seed 713 --ef speed 2
+adb shell content call --uri content://org.worldfoundry.plantedtank.settings --method setSetting --arg water:saltwater
+```
+
+Current limitation: the coordinator does not yet register the package
+`org.worldfoundry.plantedtank` or its settings authority
+`org.worldfoundry.plantedtank.settings`. Until it does, `task chromecast:*`
+cannot install, configure or capture it; use the `adb` commands above.
+
 ## Reservations and recovery
 
 Will's terminal owns personal reservations. Use `task cast1:reserve` /

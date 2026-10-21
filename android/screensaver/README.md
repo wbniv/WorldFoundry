@@ -45,3 +45,5 @@ adb shell content call --uri content://org.worldfoundry.plantedtank.settings \
 ```
 
 The provider also answers `getCapabilities` (Water, Speed and Hold choices; the seed is command-line only), `getSettings` and `resetSettings`. Check the validator with plain `javac` (see `src/test/java/.../PlantedConfigTest.java`).
+
+Build and test with tasks, from the repo root: `task build-planted-level` (Blender container, then the bundle `wflevels/planted-screensaver-cd.iff` linked into the flavor), `task build-planted-apk` (runs the level build first, then `./gradlew :screensaver:assemblePlantedDebug --offline` for arm64-v8a and armeabi-v7a; the Chromecasts need armeabi-v7a) and `task test-planted-screensaver` (the C++ container tests, the python tests and `PlantedConfigTest`). The APK is `android/screensaver/build/outputs/apk/planted/debug/screensaver-planted-debug.apk`. The coordinator does not yet register this package; see [the device coordinator guide](../../docs/device-coordinator.md#planted-tank-screensaver).
