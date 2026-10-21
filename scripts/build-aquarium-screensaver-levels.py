@@ -176,16 +176,14 @@ def build_planted() -> Path:
                     "-o", str(PLANTED_BUNDLE)], cwd=ROOT, check=True)
     if b"UIFT" not in PLANTED_BUNDLE.read_bytes()[:2048]:
         raise RuntimeError("cdpack is stale: rebuild wftools/cdpack-rs to include the UI font")
-    # Link the flavor's asset only where the Android flavor already exists (Phase 2a adds it).
+    # The flavor's asset, linked the way the Aquarium and Seahorse flavors are.
     assets = ROOT / "android/screensaver/src/planted/assets"
-    if assets.is_dir():
-        link = assets / "cd.iff"
-        if link.is_symlink() or link.exists():
-            link.unlink()
-        link.symlink_to(Path(os.path.relpath(PLANTED_BUNDLE, assets)))
-        print(f"planted screensaver asset: {link}", flush=True)
-    else:
-        print(f"planted screensaver asset: {assets} does not exist; no link made", flush=True)
+    assets.mkdir(parents=True, exist_ok=True)
+    link = assets / "cd.iff"
+    if link.is_symlink() or link.exists():
+        link.unlink()
+    link.symlink_to(Path(os.path.relpath(PLANTED_BUNDLE, assets)))
+    print(f"planted screensaver asset: {link}", flush=True)
     return PLANTED_BUNDLE
 
 
