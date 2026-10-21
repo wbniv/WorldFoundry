@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/848fd337) | Planted Tank plan: record Phase 5 device verification (blocked on coordinator registration) |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/b2064b67) | Planted Tank plan: APK settings come from the OAD (settings-class objects, all fields) |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/45d2dc5b) | Planted Tank plan: record the final icon art (plants-only capture) |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/a305858d) | Planted Tank plan: record desktop cycle results (steps 4 and 5) and Phase 4a done |
@@ -17,6 +18,11 @@
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4266a44c) | Plan the Planted Tank screensaver |
 
 <!--history-meta v1
+848fd337	author	Will Norris
+848fd337	added	53
+848fd337	deleted	0
+848fd337	files	1
+848fd337	body	Steps 6, 10 (pixel test), 12 and 14 (actor map) recorded with raw output.\nThe two-ABI build passes; the coordinator rejects org.worldfoundry.plantedtank\n("APK package is not registered"), so steps 7-9, 11 and the device halves of\n10 and 14 are NOT RUN. Aquarium and Seahorse Grid still start on cast2.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01LmFZJSGwibDCpz7J9wzY9X
 b2064b67	author	Will Norris
 b2064b67	added	1
 b2064b67	deleted	1
