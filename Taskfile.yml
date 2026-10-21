@@ -1527,6 +1527,12 @@ tasks:
     cmds:
       - python3 -m pytest tests/test_aquarium_idle.py -v
 
+  test-plant-maturity:
+    desc: "Planted Tank maturity sweep: max(birth+duration) over seeds 0..199 x both waters must stay under the 240 s growth clamp (docs/plans/2026-10-21-planted-tank-screensaver.md). Runs in wf-linux-test:local, repo mounted read-only."
+    cmds:
+      - |
+        docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O2 -Wall -I/src/wfsource/source /src/tests/plant_maturity_sweep.cpp -o /tmp/sweep && /tmp/sweep'
+
   poster-clownfish-biomechanics:
     desc: "Clownfish biomechanics poster, A3 (docs/plans/2026-09-30-clownfish-biomechanics-poster.md): data sheet + the aquarium constants → docs/reference/clownfish-biomechanics-poster/{data.json,poster.html,poster.pdf,poster.png}. A no-op when up to date. Needs google-chrome and pdftoppm."
     cmds:
