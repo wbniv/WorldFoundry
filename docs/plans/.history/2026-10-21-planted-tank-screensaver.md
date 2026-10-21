@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/3153e8cd) | Planted Tank plan: repair two Approach rows overwritten by status edits |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/81969d57) | Planted Tank plan: record Phase 2b done; coordinator registration and two-ABI build needed |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/bdce4dd0) | Planted Tank: builder links the flavor asset; plan records Phase 1 done |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/52a74afe) | Planted Tank plan: record Phase 2c as done, with step 13 output |
@@ -13,6 +14,11 @@
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4266a44c) | Plan the Planted Tank screensaver |
 
 <!--history-meta v1
+3153e8cd	author	Will Norris
+3153e8cd	added	5
+3153e8cd	deleted	5
+3153e8cd	files	1
+3153e8cd	body	My row matching hit the Approach table instead of the phase table: rows 3\nand 4 (Grown, Keep onscreen 2 minutes) are restored and the status lines go\non the phase table rows they belong to. Adds Phase 4b (coordinator registration).\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01LmFZJSGwibDCpz7J9wzY9X
 81969d57	author	Will Norris
 81969d57	added	4
 81969d57	deleted	3

@@ -143,7 +143,7 @@ Tiers are dispatch inputs (ranking is done inline, never delegated). Torn calls 
 | ~~2c~~ | ~~Engine: the launch-override table~~ **Done** (`f3c3ff16`, approved by Will 2026‑10‑21): `wfprops::LaunchOverrides` with the `applications()` counter, one hook line in `level.cc`, the `--property=` desktop flag, `task test-launch-overrides`. Verified end to end on a real level in the container | T3 | design settled in S1‑S2 |
 | ~~2b~~ | ~~Native host~~ **Done** (`eea849fe`): `planted_bridge.cc/.h` (parsing, defaults, `mix32`, the tank sequencer and the counter watcher, free of Android and engine includes), the JNI `nativeConfigure`, first-tank overrides before `HALStart`, per-tank overrides from the pump. 113 unit checks pass (`task test-planted-bridge`); `assemblePlantedDebug` for **arm64-v8a only** builds and links, which also compiled the engine hook natively. **Not yet run on a device** | T3 | uses the new table; no engine state touched |
 | ~~3~~ | ~~Icon and banner with the badge~~ **Done** (`d79cabcf`), art **provisional** (retained frame with the urchin); final art waits on a capture of the plants-only level. `gen-screensaver-android-icons.py` is Will's untracked file and carries the edit uncommitted | T2 | follows the existing Seahorse recipe |
-| 4a | `task` entries (level, APK, aggregate test), device-coordinator guide section, README | T1 | recipes |
+| ~~4a~~ | ~~`task` entries, coordinator guide section, README~~ **Done** (`3d56263d`): `build-planted-level`, `build-planted-apk` (both ABIs), `test-planted-screensaver`; dry-run only | T1 | recipes |
 | 4b | **Coordinator registration** of `org.worldfoundry.plantedtank` and its settings authority `org.worldfoundry.plantedtank.settings`. The coordinator is a shared installed service and "package names must match the coordinator's registered applications" ([guide](../device-coordinator.md)); this is not in this repository. **Needs Will** | T5 | a change to shared infrastructure; blocks device runs through `task chromecast:*` |
 | 5 | Device verification **with a two-ABI build** (the Chromecasts report `armeabi-v7a`; the 2b check built `arm64-v8a` only), soak, natural-idle check through the coordinator | T3 | procedure with judgment about results |
 
@@ -200,7 +200,35 @@ Build, level and test steps run in the project's containers (`wf-blender:local` 
 2. **Maturity bound.** `task test-plant-maturity` prints the maximum `birth + duration` over 200 seeds × both waters, and it is below 240 s; the bound used in the level is at least that.
 3. **Bundle and level.** `python3 scripts/build-aquarium-screensaver-levels.py planted` writes `wflevels/planted-screensaver-cd.iff` with exactly one level whose settings catalog is present (`PlantedTankSettings`, `Hold seconds`, no Seahorses or Greeting); `python3 -m pytest tests/test_planted_screensaver.py` checks the bundle order, that the other two bundles are unchanged (compare their hashes before and after), that the Director writes `END_OF_LEVEL` = 1 and never 0, and that **generating `aquarium_plants` with HEAD's generator and with the new one gives identical output** (the committed `aquarium_plants.lev` itself is stale, so a diff against it cannot pass: it lacks the whitespace stripping and the seahorse comment block from `6da2c013`).
 4. **Cycle on the desktop engine.** Run the bundle at speed 8 with hold 5, and stop it after three tanks (`task build-cd-iff`, `task run`, in the container). The log shows three `PLANTS settings-source=… seed=` lines with three different seeds, and the gaps between them match grow plus hold within 3 s. The desktop run has no positional level argument, so it reads its parameters from cooked defaults (`configure_cd`) unless the optional `--property=` flag exists.
+
+    ```
+    $ scripts/planted-cycle-desktop-run.sh   # in wf-linux-test:local; the bundle runs through the cd.iff meta-loop, not -L
+      --property='PlantedTankSettings.Growth speed=6' --property='PlantedTankSettings.Hold seconds=5'   (300 s)
+        0.94 PLANTS settings-source=RPRP seed=1439368646 water=freshwater age=0 speed=6 ... random_entry=1
+       52.51 PLANTS ... seed=496670864  ...
+      104.37 PLANTS ... seed=1747303074 ...
+      142.75 PLANTS ... seed=3772828327 ...     (8 Level Loaded lines, 8 different seeds, 7 reloads)
+    tank 0->1  wall 51.57 s  level time 31.0 s
+    tank 3->4  wall 36.26 s  level time 30.1 s    (expected 24.4 + 5 = 29.4 s)
+    no crash, assert or rejected override; ENGINE-EXIT rc=124 (the timeout)
+    ```
+
+    **PASS** — the Director ends the level, the meta-loop reloads index 0, and every reload draws a new seed. Level time per tank is 29.7 to 31.0 s against 29.4 s expected, inside the 3 s tolerance. **Wall time is longer** (34 to 52 s) because the engine caps a simulated frame at 0.1 s and this container renders 2 to 12 FPS in software GL; level time is what the growth clock and hold use, so on a device above 10 FPS the two agree. Run with `-ppe` and `--frame-profile`; logs are in `/home/will/tmp/planted-verify/`.
+    Without overrides the level starts on the cooked defaults (speed 1×), stays up for 20 s with one load, and with `Initial age=194` a tank lasts 120.7 to 120.9 s of level time: the default hold is 120 s.
+    Wrong keys (`Growth speedd=6`, `Growth speed=9`) log `PROPERTIES launch-override rejected: ...` and keep the cooked values.
+    Reload cost: `level-load` takes 0.15 to 0.20 s; RSS rises from 166.8 to 174.4 MB over six reloads and flattens (short runs cannot show a leak; the device soak is step 9).
 5. **Fixed-seed replay.** Repeat step 4 with `--el seed 713`: the same three seeds and waters both times, and tank 0 is seed 713.
+
+    ```
+    $ ... --property='PlantedTankSettings.Seed=713' --property='PlantedTankSettings.Random seed on entry=0' ...  (170 s)
+        0.68 PLANTS settings-source=RPRP seed=713 water=freshwater ... random_entry=0
+       35.31 PLANTS ... seed=713 ...
+       69.26 PLANTS ... seed=713 ...
+      103.60 PLANTS ... seed=713 ...
+      138.12 PLANTS ... seed=713 ...     (PLANTS generation=1..5: identical, vertices=82888 triangles=53024)
+    ```
+
+    **PASS** — every tank reports seed 713 with identical geometry. On the desktop the same seed repeats on each reload, as expected; the per-tank derived seeds (`mix32`) are the Android host's job (step 7). Note the step's `--el seed 713` is Android `am start` syntax; the desktop equivalent is the `--property=` pair above.
 6. **APK build.** `cd android && ./gradlew :screensaver:assemblePlantedDebug :screensaver:assembleAquariumDebug :screensaver:assembleSeahorseDebug --offline` succeeds, and the Aquarium and Seahorse APKs are byte-identical in their level bundles to before.
 7. **Parameters on a device.** Through the coordinator: `am start` with `water=saltwater seed=713` logs `seed=713 water=saltwater`; an invalid seed (`4294967296`) is rejected with a message and changes nothing; `content call … setSetting water:saltwater` then `getCapabilities` returns the new value, base64-decoded.
 8. **Default timing at 1×.** One uninterrupted cycle on a device: reload-to-reload equals the bound plus 120 s within 5 s.
