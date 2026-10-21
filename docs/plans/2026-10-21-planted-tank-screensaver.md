@@ -230,12 +230,63 @@ Build, level and test steps run in the project's containers (`wf-blender:local` 
 
     **PASS** — every tank reports seed 713 with identical geometry. On the desktop the same seed repeats on each reload, as expected; the per-tank derived seeds (`mix32`) are the Android host's job (step 7). Note the step's `--el seed 713` is Android `am start` syntax; the desktop equivalent is the `--property=` pair above.
 6. **APK build.** `cd android && ./gradlew :screensaver:assemblePlantedDebug :screensaver:assembleAquariumDebug :screensaver:assembleSeahorseDebug --offline` succeeds, and the Aquarium and Seahorse APKs are byte-identical in their level bundles to before.
+
+    ```
+    $ ./gradlew :screensaver:assemblePlantedDebug :screensaver:assembleAquariumDebug :screensaver:assembleSeahorseDebug --offline
+    > Task :screensaver:buildCMakeDebug[arm64-v8a][wf_dream]
+    > Task :screensaver:buildCMakeDebug[armeabi-v7a][wf_dream]
+    BUILD SUCCESSFUL in 1m 31s                      (no compiler warning in planted_bridge.* or dream_host.cc)
+    planted:  lib/arm64-v8a/libwf_dream.so 8397056, lib/armeabi-v7a/libwf_dream.so 5762480 (ELF 32-bit ARM EABI5, NDK r26c),
+              assets/cd.iff bf22945a…afcba (= wflevels/planted-screensaver-cd.iff), assets/planted-settings.json e86e73fe…
+    assets/cd.iff sha256           before (APKs of 2026-10-19 21:18)   now
+      seahorse                     a27017c3…fb94b                     a27017c3…fb94b   identical
+      aquarium                     1928ecac…bcdd7                     9c813b9f…b6c6    differs, = wflevels/aquarium-screensaver-cd.iff (rebuilt 2026-10-21 19:12, +2048 bytes)
+    frozen: planted-tank-debug.apk 1515224f…28ff, aquarium-debug.apk 3c54d01f…f853, seahorse-debug.apk 4755c65f…bc18
+    ```
+
+    **PASS** for the build: all three flavors build for both ABIs, and the 32-bit `libwf_dream.so` with `planted_bridge.cc` compiles and links with no change. The Seahorse bundle is byte-identical. The Aquarium bundle **is not** identical to the 2026‑10‑19 APK, by design: it is the bundle rebuilt today with the Planted settings catalog (TODO "Aquarium screensaver's Planted choice has no settings catalog"), and the APK carries exactly that rebuilt file. Build log and frozen APKs: `/home/will/tmp/planted-verify/phase5/`.
 7. **Parameters on a device.** Through the coordinator: `am start` with `water=saltwater seed=713` logs `seed=713 water=saltwater`; an invalid seed (`4294967296`) is rejected with a message and changes nothing; `content call … setSetting water:saltwater` then `getCapabilities` returns the new value, base64-decoded.
+
+    ```
+    $ task chromecast:submit WORKFLOW=install DEVICE=chromecast-test-01 -- /home/will/tmp/planted-verify/phase5/frozen/planted-tank-debug.apk
+    chromecast: APK package is not registered: org.worldfoundry.plantedtank
+    task: Failed to run task "chromecast:submit": exit status 1
+    ```
+
+    **NOT RUN — blocked on Phase 4b.** The coordinator rejects the package before upload ([transcript](2026-10-21-planted-tank-screensaver/phase5/install-cast1-rejected.txt)). The coordinator **does** keep its own package list, `scripts/wf_device/plugins/android/applications.json`, which `batching.py:61` and `client.py:617` read. It also has no workflow that passes activity extras or calls a third-party settings authority, and the guide forbids raw Chromecast `adb` ("downtime grants no fallback"), so the `adb` lines in **Parameters** cannot be used on these TVs today.
 8. **Default timing at 1×.** One uninterrupted cycle on a device: reload-to-reload equals the bound plus 120 s within 5 s.
+
+    **NOT RUN** — same block as step 7. The device frame rate during a planted tank is not measured either, so whether level time equals wall time on the TV (it does only above 10 FPS) is still open.
 9. **Soak.** 50 tanks at 8× with hold 5 on a device: the same process id throughout, no crash, and PSS spread under 4 MiB after warm-up.
+
+    **NOT RUN** — same block as step 7; the coordinator also has no way to set `speed` or `hold` for an unregistered app. `PERM` 1 MB is not checked on a device.
 10. **Icon and banner.** `python3 scripts/gen-screensaver-android-icons.py` writes the planted resources; the pixel test finds the badge lower-right in the banner and inside the safe circle of the foreground; the Apps row capture shows the banner.
+
+    ```
+    $ docker run --rm --ulimit core=0 --memory 4g -v "$PWD":/src:ro wf-linux-test:local … python3 -m pytest -q tests/test_seahorse_grid_level.py \
+        tests/test_aquarium_screensaver_catalog.py tests/test_aquarium_screensaver_input.py tests/test_planted_screensaver.py \
+        tests/test_planted_icons.py tests/test_screensaver_overlay.py tests/test_planted_capabilities.py
+    97 passed in 14.36s
+    ```
+
+    **PASS** for the pixel test (`tests/test_planted_icons.py`, on the committed resources; the generator was not re-run). **NOT RUN** for the Apps row capture: the APK cannot be installed (step 7).
 11. **Natural idle.** `task chromecast:submit … APP=plantedtank WORKFLOW=dream-check` captures a growing tank in the real Dream.
+
+    **NOT RUN.** Besides the missing `applications.json` entry, `dream-check` admits only the apps in its fixed table (`plugins/android/dream_check.py:12-15`: `screensaver` and `seahorse-screensaver`; any other app raises `dream-check-requires-screensaver-app`), and the Dream settings it writes come from `conditions.py` (`DREAM_SETTINGS`, `SEAHORSE_DREAM_SETTINGS`, `apply_dream_settings`).
 12. **No regression.** The existing screensaver tests (`tests/test_seahorse_grid_level.py`, the aquarium bundle-order check) still pass.
+
+    ```
+    pytest (step 10 command): 97 passed, including test_seahorse_grid_level.py and the bundle-order check in test_aquarium_screensaver_input.py
+    $ task chromecast:check DEVICE=chromecast-test-02 ASYNC=true -- …/frozen/aquarium-debug.apk …/frozen/seahorse-debug.apk
+    B-a9549752e4e6
+    ║ 1 ║ screensaver          ║ chromecast-test-02 ║ J‑6c0a59d33db1 ║ 3c54d01fb97c ║ recovery-required ║ plugin-error ║
+    ║ 2 ║ seahorse-screensaver ║ chromecast-test-02 ║ J‑05b73654e06d ║ 4755c65f0269 ║ completed         ║              ║
+    J-6c0a59d33db1 cleanup: restored (automatic recovery J-eedb6378e165 completed); cast2 back to ready
+    wf.log of J-6c0a59d33db1: ASSERTION FAILED blocks dated 2026-10-18T01:52Z..01:54Z ("512x256 texture does not fit its 256x256 VRAM slot");
+                              0 asserts after this run's "Opening cd.iff" (2026-10-21T14:46:59Z; job started 14:46:35Z)
+    ```
+
+    **PASS for the tests. On the device, Seahorse PASS; Aquarium launches and renders, but its check is recorded as FAIL.** Both apps start and draw on cast2: [Aquarium](2026-10-21-planted-tank-screensaver/phase5/cast2-aquarium-check.png) shows the clownfish tank with no seed strip, and [Seahorse](2026-10-21-planted-tank-screensaver/phase5/cast2-seahorse-check.png) shows the 6 × 4 grid. The Aquarium `plugin-error` comes from the check's log scan (`operations.py` `capture()`). It reads the last 4 MB of `wf.log` after the last `=== wf_game android_main` marker. The screensaver host never writes that marker, so the scan covers three days of earlier runs and trips on asserts from 2026‑10‑18. This run logged none. The installs replaced cast2's Aquarium (`3d09d225…` → `3c54d01f…`) and Seahorse Grid (`b1d3f5ae…` → `4755c65f…`) with these builds. `tests/test_aquarium_android.py` was not run: `wf-linux-test:local` has no `yaml` module. Evidence: `/home/will/tmp/planted-verify/phase5/regress-evidence/`.
 13. **Launch-override table.** `task test-launch-overrides` (new, in the container) passes the unit tests; with the table empty, the existing runtime-property and level tests still pass unchanged.
 
     ```
@@ -253,6 +304,8 @@ Build, level and test steps run in the project's containers (`wf-blender:local` 
     **PASS** — the table changes a real level at load, on both loads, and bad values are rejected and logged without a crash. With the table empty, the existing runtime-property tests give the same result before and after: one failure, `test_removed_engine_switches_fail_explicitly`, that was already failing because the host-built `wf_game` needs a newer glibc than the container has. Thread safety was only smoke-tested (ThreadSanitizer cannot run in this container).
     Source: the Phase 2c report; the overrides were applied through the desktop flag in `wf_game` rebuilt in `wf-linux-test:local`.
 14. **Plants only.** The built level's actor map contains no urchin, goby or seahorse object, and a device capture shows plants and the tank only.
+
+    **PASS for the actor map** (`tests/test_planted_screensaver.py`, in the 97 passed of step 10: no `urchin|goby|seahorse|rainbow|rock` actor; the only `.lev` hits are the generated Forth constants). **NOT RUN for the device capture and the overscan check**: the APK cannot be installed (step 7).
 
 Results: _pending._
 

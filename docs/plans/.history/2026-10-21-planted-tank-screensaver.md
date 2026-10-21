@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/b2064b67) | Planted Tank plan: APK settings come from the OAD (settings-class objects, all fields) |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/45d2dc5b) | Planted Tank plan: record the final icon art (plants-only capture) |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/a305858d) | Planted Tank plan: record desktop cycle results (steps 4 and 5) and Phase 4a done |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/3153e8cd) | Planted Tank plan: repair two Approach rows overwritten by status edits |
@@ -16,6 +17,11 @@
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4266a44c) | Plan the Planted Tank screensaver |
 
 <!--history-meta v1
+b2064b67	author	Will Norris
+b2064b67	added	1
+b2064b67	deleted	1
+b2064b67	files	1
+b2064b67	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01LmFZJSGwibDCpz7J9wzY9X
 45d2dc5b	author	Will Norris
 45d2dc5b	added	2
 45d2dc5b	deleted	2

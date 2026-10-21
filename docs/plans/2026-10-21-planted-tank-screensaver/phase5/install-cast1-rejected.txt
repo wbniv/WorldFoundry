@@ -1,0 +1,9 @@
+$ task chromecast:submit WORKFLOW=install DEVICE=chromecast-test-01 -- /home/will/tmp/planted-verify/phase5/frozen/planted-tank-debug.apk
+chromecast: APK package is not registered: org.worldfoundry.plantedtank
+task: Failed to run task "chromecast:submit": exit status 1
+(exit 201; 2026-10-21 14:45Z; frozen APK sha256 1515224f434685a4efd5a99458817e14802cecb6350a18d25ca953082fcb28ff)
+
+Raised client-side before upload by /opt/wf-device-coordinator/scripts/wf_device/batching.py:61
+(`if not app: raise ValueError('APK package is not registered: '+package)`), which maps the
+manifest package to an app through plugins/android/applications.json. The screensaver-install
+path (client.py:617) applies the same table: 'APK package is not a registered screensaver'.
