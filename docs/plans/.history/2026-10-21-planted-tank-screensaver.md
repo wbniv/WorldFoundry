@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/bdce4dd0) | Planted Tank: builder links the flavor asset; plan records Phase 1 done |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/52a74afe) | Planted Tank plan: record Phase 2c as done, with step 13 output |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/bab64a7d) | Planted Tank plan: record Phase 2a and 3 as done |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/8671b5c7) | Planted Tank plan: fold in S4 (plants-only variant) and log the Aquarium catalog bug |
@@ -11,6 +12,11 @@
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4266a44c) | Plan the Planted Tank screensaver |
 
 <!--history-meta v1
+bdce4dd0	author	Will Norris
+bdce4dd0	added	2
+bdce4dd0	deleted	2
+bdce4dd0	files	1
+bdce4dd0	body	The planted bundle link is created like the Aquarium and Seahorse links\n(assets/ is made if missing). Plan: Phase 1 done; verification step 3 compares\ngenerator output, since the committed aquarium_plants.lev is already stale.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01LmFZJSGwibDCpz7J9wzY9X
 52a74afe	author	Will Norris
 52a74afe	added	16
 52a74afe	deleted	1
