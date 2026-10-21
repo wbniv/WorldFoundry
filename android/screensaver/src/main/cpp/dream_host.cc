@@ -16,6 +16,9 @@
 #include <game/level_menu.h>
 #include <hal/phonepad/phonepad_overlay.h>
 #include <pigsys/pigsys.hp>
+#include <runtime_properties.hpp>
+
+#include "planted_bridge.h"
 
 extern "C" bool WFAndroidEglInit(ANativeWindow* window);
 extern "C" void WFAndroidEglTerm();
@@ -25,6 +28,22 @@ namespace {
 std::atomic<bool> closing{false};
 std::atomic<bool> windowReady{false};
 AAssetManager* assets = nullptr;
+
+// Planted Tank parameters (planted_bridge.h). Unconfigured, and so inert, for the Aquarium and
+// Seahorse flavors, which never call nativeConfigure.
+planted_bridge::Bridge plantedBridge;
+
+// The engine's launch-override table, as the bridge sees it.
+struct LaunchOverrideSink final : planted_bridge::OverrideSink {
+    void set(const std::string& schema, const std::string& key, const std::string& value) override {
+        wfprops::launchOverrides().set(schema, key, value);
+    }
+    void erase(const std::string& schema, const std::string& key) override {
+        wfprops::launchOverrides().erase(schema, key);
+    }
+    uint64_t applications() const override { return wfprops::launchOverrides().applications(); }
+};
+LaunchOverrideSink launchOverrideSink;
 
 void logLine(FILE* file, const std::string& line) {
     if (file) {
@@ -75,6 +94,7 @@ extern "C" void WFAndroidRequestClose() { closing.store(true); }
 // rather than editing the engine. Without a drawer the level menu starts level 0 (game.cc).
 extern "C" void WFAndroidPumpEvents() {
     if (levelmenu::Drawer()) levelmenu::SetDrawer(nullptr);
+    plantedBridge.pump(launchOverrideSink);
 }
 extern "C" void WFAndroidTouchLayout(int, int, androidtouch::Layout* layout,
                                        uint32_t* held, float* x, float* y) {
@@ -95,6 +115,21 @@ extern "C" int WFAndroidPhoneOverlayRects(int, int, const PhonepadRect** rects,
 extern "C" JNIEXPORT void JNICALL
 Java_org_worldfoundry_screensaver_TankPlayer_nativePrepare(JNIEnv*, jclass) {
     closing.store(false);
+    plantedBridge.reset();
+}
+
+// Called on the player thread before nativeRun, Planted flavor only, with PlantedConfig.toLine().
+extern "C" JNIEXPORT void JNICALL
+Java_org_worldfoundry_screensaver_TankPlayer_nativeConfigure(JNIEnv* env, jclass, jstring line) {
+    std::string text;
+    if (line) {
+        const char* chars = env->GetStringUTFChars(line, nullptr);
+        if (chars) {
+            text = chars;
+            env->ReleaseStringUTFChars(line, chars);
+        }
+    }
+    plantedBridge.configure(text);
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -134,6 +169,8 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         char* argv[] = {arg0, slotWidth, slotHeight, permWidth, permHeight, vramHeight, noFps, arg1, nullptr};
         __argc = 8;
         __argv = argv;
+        // Tank 0's overrides: the engine applies them when the level registry loads.
+        plantedBridge.startFirstTank(launchOverrideSink);
         HALStart(8, argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
         std::fprintf(stderr, "wf_dream: HALStart returned\n");
         windowReady.store(false);

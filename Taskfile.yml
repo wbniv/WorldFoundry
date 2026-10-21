@@ -1539,6 +1539,12 @@ tasks:
       - |
         docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O1 -Wall -pthread -I/src/engine /src/tests/launch_overrides_test.cpp /src/engine/runtime_properties.cpp /src/wftools/wf_attr_edit/target/release/libwf_attr_edit.a -ldl -lpthread -lm -o /tmp/launch_overrides && /tmp/launch_overrides'
 
+  test-planted-bridge:
+    desc: "Planted Tank host bridge pure logic (android/screensaver/src/main/cpp/planted_bridge.*, Phase 2b of docs/plans/2026-10-21-planted-tank-screensaver.md): line parsing, defaults, seed mix vectors, per-tank sequencing, inert when unconfigured. Runs in wf-linux-test:local, repo mounted read-only."
+    cmds:
+      - |
+        docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O1 -Wall -Wextra -Werror -I/src/android/screensaver/src/main/cpp /src/tests/planted_bridge_test.cpp /src/android/screensaver/src/main/cpp/planted_bridge.cc -o /tmp/planted_bridge && /tmp/planted_bridge'
+
   poster-clownfish-biomechanics:
     desc: "Clownfish biomechanics poster, A3 (docs/plans/2026-09-30-clownfish-biomechanics-poster.md): data sheet + the aquarium constants → docs/reference/clownfish-biomechanics-poster/{data.json,poster.html,poster.pdf,poster.png}. A no-op when up to date. Needs google-chrome and pdftoppm."
     cmds:
