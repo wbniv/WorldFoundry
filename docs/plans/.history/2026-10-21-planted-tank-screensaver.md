@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/bab64a7d) | Planted Tank plan: record Phase 2a and 3 as done |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/8671b5c7) | Planted Tank plan: fold in S4 (plants-only variant) and log the Aquarium catalog bug |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/c78fdf31) | Planted Tank plan: plants only, generic seam approved, hold stays a parameter |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4e8c5333) | Planted Tank plan: drop the cycles parameter |
@@ -9,6 +10,11 @@
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4266a44c) | Plan the Planted Tank screensaver |
 
 <!--history-meta v1
+bab64a7d	author	Will Norris
+bab64a7d	added	3
+bab64a7d	deleted	3
+bab64a7d	files	1
+bab64a7d	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01LmFZJSGwibDCpz7J9wzY9X
 8671b5c7	author	Will Norris
 8671b5c7	added	11
 8671b5c7	deleted	3

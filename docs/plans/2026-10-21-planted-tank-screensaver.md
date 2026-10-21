@@ -140,7 +140,7 @@ Tiers are dispatch inputs (ranking is done inline, never delegated). Torn calls 
 | ~~0f~~ | ~~**Spike S4:** plants-only variant~~ **Done:** a generator flag, not a text strip ([S4](2026-10-21-planted-tank-screensaver/spikes/S4.md)) | T3 | bounded investigation |
 | 1 | Level variant, per S4: (a) an `ANIMALS` flag in `generate.py` (default on, so `aquarium_plants.lev` stays byte-identical) and a new level directory `wflevels/planted_tank_screensaver/` with its own `config.py` (`ANIMALS=False`, wide camera `(0, -8.25, 2.5)`, fog scaled), `settings.oas` and `settings-bindings.json` (no Seahorses or Greeting, plus `Hold seconds`); (b) a `planted` source in the variant builder: no driver swap, `PERM` cut to about 1 MB, `ROOM` kept at 24 MB, **the settings catalog attached**; (c) the Director cycle script (growth clock, hold, `END_OF_LEVEL`); (d) tests | T3 | multi-file against this plan; S4 lists the exact `generate.py` lines |
 | ~~2a~~ | ~~Java: `PlantedConfig`, `PlantedSettings`, provider, activity, Dream, manifest, strings, `TankPlayer.configure`~~ **Done** (`8876f6cd`): 116 checks pass; the three-flavor Java compile passes. The `planted` block in `build.gradle.kts` is in the working tree but **uncommitted** because it overlaps Will's uncommitted flavor block | T2 | one module, clear spec |
-| 2c | **Engine: the launch-override table** in `engine/runtime_properties.*` (about 60 lines), one line at `level.cc:613`, the `applications()` counter, an optional desktop `--property=Schema.Key=Value` flag, and unit tests | T3 | design settled in S1‑S2; approved by Will 2026‑10‑21; touches engine code, so it is tested and reviewed before use |
+| ~~2c~~ | ~~Engine: the launch-override table~~ **Done** (`f3c3ff16`, approved by Will 2026‑10‑21): `wfprops::LaunchOverrides` with the `applications()` counter, one hook line in `level.cc`, the `--property=` desktop flag, `task test-launch-overrides`. Verified end to end on a real level in the container | T3 | design settled in S1‑S2 |
 | 2b | Native host: `nativeConfigure`, first-tank overrides before `HALStart`, per-tank overrides from the pump using the `applications()` counter, in one file (`planted_bridge.cc`) | T3 | uses the new table; no engine state touched, so no game-thread hazards |
 | 3 | Capture script, art, `gen-screensaver-android-icons.py` third source, tests for badge and files | T2 | follows the existing Seahorse recipe |
 | 4 | `task` entries, bundle builder mode, README, device-coordinator doc, TODO | T1 | recipes |
@@ -208,6 +208,21 @@ Build, level and test steps run in the project's containers (`wf-blender:local` 
 11. **Natural idle.** `task chromecast:submit … APP=plantedtank WORKFLOW=dream-check` captures a growing tank in the real Dream.
 12. **No regression.** The existing screensaver tests (`tests/test_seahorse_grid_level.py`, the aquarium bundle-order check) still pass.
 13. **Launch-override table.** `task test-launch-overrides` (new, in the container) passes the unit tests; with the table empty, the existing runtime-property and level tests still pass unchanged.
+
+    ```
+    $ task test-launch-overrides
+    rejected: PlantedTankSettings.Growth speed=9: Value is outside the field range
+    launch_overrides_test: PASS
+
+    $ wf_game aquarium_plants-standalone.iff --frame-step-smoke=3 --cycles=2 --property=PlantedTankSettings.Seed=777 \
+        --property="PlantedTankSettings.Random seed on entry=0" --property="PlantedTankSettings.Growth speed=6" \
+        --property="PlantedTankSettings.Water type=1"
+    PLANTS settings-source=RPRP seed=777 water=saltwater age=0 speed=6 textures=1 sway=1 random_entry=0 selector_override=0
+    PLANTS settings-source=RPRP seed=777 water=saltwater age=0 speed=6 textures=1 sway=1 random_entry=0 selector_override=0
+    ```
+
+    **PASS** — the table changes a real level at load, on both loads, and bad values are rejected and logged without a crash. With the table empty, the existing runtime-property tests give the same result before and after: one failure, `test_removed_engine_switches_fail_explicitly`, that was already failing because the host-built `wf_game` needs a newer glibc than the container has. Thread safety was only smoke-tested (ThreadSanitizer cannot run in this container).
+    Source: the Phase 2c report; the overrides were applied through the desktop flag in `wf_game` rebuilt in `wf-linux-test:local`.
 14. **Plants only.** The built level's actor map contains no urchin, goby or seahorse object, and a device capture shows plants and the tank only.
 
 Results: _pending._
