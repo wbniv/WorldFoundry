@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/c78fdf31) | Planted Tank plan: plants only, generic seam approved, hold stays a parameter |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4e8c5333) | Planted Tank plan: drop the cycles parameter |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/7c218a95) | Planted Tank plan: fold in S1/S2 spike results |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/5b330d11) | Screensaver host hides the engine overlay (seed strip, settings, menu) |
@@ -7,6 +8,11 @@
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4266a44c) | Plan the Planted Tank screensaver |
 
 <!--history-meta v1
+c78fdf31	author	Will Norris
+c78fdf31	added	44
+c78fdf31	deleted	37
+c78fdf31	files	1
+c78fdf31	body	Will's decisions: no urchin, goby or seahorses (drops the seahorses parameter\nand the actor-30 dependency); the generic launch-override table replaces host\nstaging; hold remains a parameter. Adds Spike S4 and Phase 2c. Mockups updated.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01LmFZJSGwibDCpz7J9wzY9X
 4e8c5333	author	Will Norris
 4e8c5333	added	6
 4e8c5333	deleted	9
