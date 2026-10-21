@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4e8c5333) | Planted Tank plan: drop the cycles parameter |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/7c218a95) | Planted Tank plan: fold in S1/S2 spike results |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/5b330d11) | Screensaver host hides the engine overlay (seed strip, settings, menu) |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/c2b0f95d) | Planted Tank plan: record maturity sweep and S3 spike results |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4266a44c) | Plan the Planted Tank screensaver |
 
 <!--history-meta v1
+4e8c5333	author	Will Norris
+4e8c5333	added	6
+4e8c5333	deleted	9
+4e8c5333	files	1
+4e8c5333	body	The loop runs until the TV wakes; nothing needs a tank count. Tests count tanks\nfrom the log. Removes the host counter, the end-after-hold flag and the Settled\nstate.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01LmFZJSGwibDCpz7J9wzY9X
 7c218a95	author	Will Norris
 7c218a95	added	23
 7c218a95	deleted	16

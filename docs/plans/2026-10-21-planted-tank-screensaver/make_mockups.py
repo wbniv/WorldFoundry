@@ -53,7 +53,7 @@ def lifecycle(art: Path) -> str:
  <figure class="f"><img src="{img['initial-seedlings']}"><figcaption><b>Founders</b><span id="c0"></span><small>Seed and water drawn on entry. Plants are seedlings.</small></figcaption></figure>
  <figure class="f"><img src="{img['freshwater-spreading']}"><figcaption><b>Spreading</b><span id="c1"></span><small>Runners, daughter shoots, leaves unfurl.</small></figcaption></figure>
  <figure class="f"><img src="{img['freshwater-mature']}"><figcaption><b>Fully grown</b><span id="c2"></span><small>Growth clock reaches the maturity bound; hold starts.</small></figcaption></figure>
- <figure class="f"><img src="{img['saltwater-mature']}"><figcaption><b>Still on screen</b><span id="c3"></span><small>Sway, urchin and seahorses keep moving. Then the level ends and reloads: a new tank.</small></figcaption></figure>
+ <figure class="f"><img src="{img['saltwater-mature']}"><figcaption><b>Still on screen</b><span id="c3"></span><small>The plants keep swaying. Then the level ends and reloads: a new tank.</small></figcaption></figure>
 </div>
 <h2>Timeline (not to scale between speeds)</h2>
 <div class="card"><div id="bar" style="display:flex;height:38px;border-radius:6px;overflow:hidden;border:1px solid var(--line);position:relative">
@@ -99,7 +99,7 @@ def icons(art: Path) -> str:
   <div class="ic"><img src="{leg}" style="width:96px;height:96px;border-radius:6px"><small>Legacy square (API&nbsp;20)</small></div></div>
 </div>
 <div class="card"><h2>What changes</h2>
- <ul style="padding-left:18px;margin:0 0 12px"><li>Third flavor <code>planted</code>, own app id and label.</li><li>Art: a real capture of the new level (this mockup uses retained 2026‑10 device frames).</li><li>Badge: <code>add_logo(scale=.17, safe_circle=72/108)</code> on the foreground; <code>.26</code> legacy; same as the other two.</li><li>Banner: <code>gen-android-icons.banner()</code> with the name “Planted Tank”.</li></ul>
+ <ul style="padding-left:18px;margin:0 0 12px"><li>Third flavor <code>planted</code>, own app id and label.</li><li>Art: a real capture of the plants-only level (this mockup uses retained 2026‑10 device frames, which still show the urchin).</li><li>Badge: <code>add_logo(scale=.17, safe_circle=72/108)</code> on the foreground; <code>.26</code> legacy; same as the other two.</li><li>Banner: <code>gen-android-icons.banner()</code> with the name “Planted Tank”.</li></ul>
  <h2>States</h2><p class="muted" style="margin:0">Unfocused tile at 100 %; focused tile scales to 110 % with an outline. Dark and light launcher backgrounds both keep the badge on its white tile, so it never disappears.</p></div>
 </main>"""
     css = """.tile{all:unset;cursor:pointer;position:relative;display:grid;gap:6px;width:320px;text-align:center;color:var(--fg);transition:transform .12s}.tile img{width:320px;height:180px;border-radius:8px;display:block;border:2px solid transparent}
@@ -119,8 +119,6 @@ def params() -> str:
  <div class="row"><label for="seed">seed</label><input id="seed" placeholder="blank = random each tank" inputmode="numeric"><small>0 – 4294967295</small></div>
  <div class="row"><label for="speed">speed</label><select id="speed"><option>0.25</option><option>0.5</option><option selected>1</option><option>2</option><option>4</option><option>8</option></select><small>growth clock; 1× is the default</small></div>
  <div class="row"><label for="hold">hold</label><input id="hold" value="120"><small>seconds on screen once grown</small></div>
- <div class="row"><label for="sea">seahorses</label><input id="sea" value="6"><small id="seaN">0 – 6, saltwater only</small></div>
- <div class="row"><label for="label">label</label><label class="chk"><input id="label" type="checkbox" disabled> show “Seed … | Water” strip</label><small>not in v1: the strip is engine-drawn (needs an engine edit)</small></div>
  <p id="err" style="margin:12px 0 0;min-height:44px"></p></div>
 <div style="display:grid;gap:16px;align-content:start">
  <div class="card"><h2>Preview launch (activity extras)</h2><pre id="am"></pre></div>
@@ -134,18 +132,16 @@ pre{margin:0;white-space:pre-wrap;word-break:break-all}button{font:inherit;backg
     js = """
 const $=i=>document.getElementById(i);const PKG='org.worldfoundry.plantedtank';
 function intOk(v,lo,hi){return /^\\d{1,10}$/.test(v)&&+v>=lo&&+v<=hi}
-function draw(){const e=[],w=$('water').value,seed=$('seed').value.trim(),hold=$('hold').value.trim(),sea=$('sea').value.trim();
- ['seed','hold','sea'].forEach(i=>$(i).classList.remove('bad'));
+function draw(){const e=[],w=$('water').value,seed=$('seed').value.trim(),hold=$('hold').value.trim();
+ ['seed','hold'].forEach(i=>$(i).classList.remove('bad'));
  if(seed&&!intOk(seed,0,4294967295)){e.push('seed must be a whole number from 0 to 4294967295');$('seed').classList.add('bad')}
  if(!intOk(hold,0,86400)){e.push('hold must be 0 to 86400 seconds');$('hold').classList.add('bad')}
- if(!intOk(sea,0,6)){e.push('seahorses must be 0 to 6');$('sea').classList.add('bad')}
- $('sea').disabled=w==='freshwater';$('seaN').textContent=w==='freshwater'?'ignored in freshwater':'0 – 6, saltwater only';
- const t=[['Water',w==='random'?'Random':w[0].toUpperCase()+w.slice(1)],['Speed',$('speed').value+'×'],['Seahorses',w==='freshwater'?'n/a':sea],['Seed',seed||'Random (CLI only)']];
+ const t=[['Water',w==='random'?'Random':w[0].toUpperCase()+w.slice(1)],['Speed',$('speed').value+'×'],['Seed',seed||'Random (CLI only)']];
  $('tray').innerHTML=t.map(r=>'<div class="tr"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('');
  if(e.length){$('err').innerHTML='<span class="bad">✗ '+e.join('<br>✗ ')+'</span><br><span class="muted">Nothing sent. Previous settings stay in force.</span>';$('am').textContent='(no command: fix the highlighted field)';$('cc').textContent='(no command)';return}
  $('err').innerHTML='<span class="ok">✓ valid</span> <span class="muted">· same checks run on the device, which rejects the call with the same message</span>';
- const kv=[['water',w],['speed',$('speed').value],['hold',hold],['seahorses',sea],['label',$('label').checked]];if(seed)kv.push(['seed',seed]);
- const flag=([k,v])=>k==='seed'?'--el seed '+v:k==='speed'?'--ef speed '+v:k==='label'?'--ez label '+v:k==='water'?'--es water '+v:'--ei '+k+' '+v;
+ const kv=[['water',w],['speed',$('speed').value],['hold',hold]];if(seed)kv.push(['seed',seed]);
+ const flag=([k,v])=>k==='seed'?'--el seed '+v:k==='speed'?'--ef speed '+v:k==='water'?'--es water '+v:'--ei '+k+' '+v;
  $('am').textContent='adb shell am start -n '+PKG+'/.PlantedTankActivity \\\\\\n  '+kv.map(flag).join(' \\\\\\n  ');
  $('cc').textContent=kv.map(([k,v])=>'adb shell content call --uri content://'+PKG+'.settings \\\\\\n  --method setSetting --arg '+k+':'+v).join('\\n');}
 document.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',draw));

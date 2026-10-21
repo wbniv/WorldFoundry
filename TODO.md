@@ -4,7 +4,7 @@
 
 ### Platform / Display
 
-- [T4] **Planted Tank screensaver (third Dream).** New `planted` flavor: one tank grows at 1× to its maturity bound, stays 2 min, then the level ends (`END_OF_LEVEL`/`LEVEL_TO_RUN`) and reloads as a new seeded tank. Water, seed, speed etc. via `am start` extras and the settings provider; WF badge on icon and banner. Spikes S1–S3 first (staging window, Forth reads, HUD/framing); needs the actor‑30 re-cook; engine seam only with Will's permission. Rank T4: unknown staging seam from the game thread, a wrong turn changes the design. [plan](docs/plans/2026-10-21-planted-tank-screensaver.md)
+- [T4] **Planted Tank screensaver (third Dream).** New `planted` flavor, **plants only (no animals)**: one tank grows at 1× to its maturity bound (195 s), stays 2 min, then the level ends (`END_OF_LEVEL`) and reloads as a new seeded tank. Water, seed, speed and hold via `am start` extras and the settings provider; WF badge on icon and banner. Phase 0 done. Next: S4 (plants-only variant) and 2c, the approved generic launch-override table in `wfprops`. Rank T4: new engine seam plus a level variant and a native host. [plan](docs/plans/2026-10-21-planted-tank-screensaver.md)
 
 - [T3] **Multiple APKs per Chromecast command.** Extend coordinator batches from one request across devices to one job per app/device, then accept APK lists for install, check, profile, simpleperf and non-interactive record. Preserve reservations, cleanup and separate installed/launcher-verified results. Implemented and live; finish physical acceptance after coordinator recovery. [plan](docs/plans/2026-10-19-chromecast-multiple-apk-commands.md)
 

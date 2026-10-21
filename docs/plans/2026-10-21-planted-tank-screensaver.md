@@ -1,10 +1,10 @@
 # Planted Tank screensaver
 
-Date: 2026‑10‑21. Status: **plan, not started.** Nothing is built; every claim about existing code below was read from the tree today, and the unknowns are named as spikes in Phase 0.
+Date: 2026‑10‑21. Status: **Phase 0 done; build phases not started.** Decisions made with Will on 2026‑10‑21: a generic launch-override seam (approved), `hold` as a parameter, and **plants only: no urchin, no goby, no seahorses.** Claims about existing code were read from the tree; nothing is built or run yet.
 
 ## Context
 
-Two screensaver apps ship from `android/screensaver`: **Aquarium** (eight tanks, one drawn per Dream start) and **Seahorse Grid** (its own flavor, own icon, own one-level bundle). Will wants a third: **the planted tank on its own**, growing from seedlings to a full canopy, staying up for two minutes, then starting a different tank. The icon and the TV banner both carry the World Foundry badge, like the other two.
+Two screensaver apps ship from `android/screensaver`: **Aquarium** (eight tanks, one drawn per Dream start) and **Seahorse Grid** (its own flavor, own icon, own one-level bundle). Will wants a third: **the planted tank on its own, with plants only and no animals**, growing from seedlings to a full canopy, staying up for two minutes, then starting a different tank. The icon and the TV banner both carry the World Foundry badge, like the other two.
 
 What is true today:
 
@@ -14,21 +14,22 @@ What is true today:
 - **The level can end itself.** A level writing mailbox `END_OF_LEVEL` (1905) = 1 ends it, and the `cd.iff` meta-loop in `game.cc` reloads. On the Dream the next level is forced to the app's own index (`_overrideLevelNum`, `game.cc:300`), so `LEVEL_TO_RUN` (5000) is not even consulted; it matters only for the desktop `task run`. Only `_desiredLevelNum` survives a reload: **a level's own mailboxes, including 6000 and up, are new each time** (S1/S2 corrected the troubleshooting doc on this). Never write 0 to `END_OF_LEVEL`. The planted level calls `plant-register`, which calls `planted::enter()`, on every load, so a reload **is** a new tank.
 - The engine-side growth age and speed are native state. Forth cannot read them; it only passes the frame `dt` to `plant-tick`. So the level needs **its own clock**, which Will also suggested.
 - The screensaver host (`android/screensaver/src/main/cpp/dream_host.cc`) owns `WFAndroidPumpEvents()`, which the engine calls on the game thread once per frame. Today it is empty. That is a per-frame, race-free place for host code to run, with no engine edit.
-- A pending TODO item says the cooked planted levels still carry the **seahorse actor‑30 crash** (6–8 s after launch) until they are re-cooked. This plan depends on that fix.
+- A pending TODO item says the cooked planted levels carry the **seahorse actor‑30 crash**. This plan is not affected, because the screensaver level has no animals; the item stays open for the Aquarium app.
 
 ## Approach
 
-**One sentence:** a third flavor, `planted`, that plays the existing planted-tank level through a Forth Director that ends and reloads the level when the tank is grown and has been shown for two minutes, with parameters validated in Java and staged into the engine's existing `explicitSeed` entry path.
+**One sentence:** a third flavor, `planted`, that plays a plants-only variant of the planted-tank level through a Forth Director that ends and reloads the level when the tank is grown and has been shown for two minutes, with parameters validated in Java and handed to the engine through a new generic **launch-override table**.
 
 | # | Decision | Choice | Why / what was rejected |
 |---|---|---|---|
 | 1 | App shape | Flavor `planted` in `android/screensaver`, id `org.worldfoundry.plantedtank`, label "World Foundry Planted Tank Screensaver", sharing `TankPlayer` and the `wf_dream` library | Same pattern as Seahorse Grid; shared engine code and CMake stay unchanged. Rejected: a ninth Aquarium choice (no growth cycle, no own icon, shares one preference). |
 | 2 | Who runs the cycle | **The level**, in Forth, writing `END_OF_LEVEL` = 1 | Needs no native or Java timer and no engine edit; reload already re-runs `enter()`. Rejected: native `planted::regenerate()` from the host (needs the same staging plus a mid-level mesh swap; reload is the path the engine already tests). |
 | 3 | "Grown" | Level-side **growth clock** ≥ a measured **maturity bound** | Forth cannot see native age. The clock mirrors `tick`: add `dt × speed`, with `dt > 0.2 s` counted as 0. A conservative bound only lengthens the hold; it never cuts a tank short. |
-| 4 | "Keep onscreen 2 minutes" | Level time (`TIME`), starting at the moment the growth clock reaches the bound; default **120 s**, independent of speed | Wall-clock by construction; sway, urchin and seahorses keep moving. |
-| 5 | Parameters | Java validates once; the host stages the first tank in `nativeRun` **before `HALStart`**, and the next tank from `WFAndroidPumpEvents` while `state().active` is false | S1: the pump runs twice after `leave()` and never during `LoadLevel`, on the one game thread, so staging is race-free and needs no engine edit. |
+| 4 | "Keep onscreen 2 minutes" | Level time (`TIME`), starting at the moment the growth clock reaches the bound; default **120 s**, independent of speed | Wall-clock by construction; the plants keep swaying. |
+| 5 | Parameters | Java validates once; the host sets the values in a new, generic **launch-override table** in the `wfprops` registry (engine edit **approved 2026‑10‑21**). The engine applies it whenever a level's registry loads, before any script runs | S1/S2 found host staging into `planted::state()` workable but fragile: two conditions, a frame-1 gap, and it dies with the OAS migration. The table is keyed by schema and field name, so any settings owner can use it. |
 | 6 | Default growth speed | **1×** | As asked. |
 | 7 | Next tank | Reload only; the Dream forces its own index, and `LEVEL_TO_RUN` = 0 is written only for the desktop run | One level in the bundle; S1 traced the reload at `game.cc:421-444` and `300-301`. |
+| 8 | Animals | **None.** The variant has no urchin, goby or seahorses | Will's call. Removes the seahorse parameter, the actor‑30 dependency and the animal cost; how to remove them is Spike S4. |
 
 ### The cycle, as a state machine
 
@@ -53,9 +54,9 @@ sequenceDiagram
     participant E as Engine (planted + game.cc)
     J->>J: PlantedSettings validates extras or saved values
     J->>H: nativeConfigure(validated key=value line)
-    H->>E: stage planted::state() seed, water, speed (explicitSeed)
-    E->>L: level loads, plant-register(0)
-    L->>E: planted::enter() uses the staged values
+    H->>E: launchOverrides().set(water, seed, speed, hold)
+    E->>E: level registry loads, overrides applied before any script
+    E->>L: plant-register(0): planted::enter() reads the overridden values
     loop every frame
         L->>E: plant-tick(dt, phase)
         L->>L: growth clock += dt x speed
@@ -64,7 +65,7 @@ sequenceDiagram
     L->>L: 120 s of level time elapsed
     L->>E: write END_OF_LEVEL = 1
     E->>E: unload, reload index 0
-    H->>E: stage next entry (derived seed, water)
+    H->>E: sees a new load (applications counter), sets the next tank's values
     E->>L: plant-register(0) again: a new tank
 ```
 
@@ -78,8 +79,8 @@ flowchart LR
     D["Dream start<br/>(idle on the TV)"] --> P
     V["PlantedSettings<br/>validate once, defaults"] -->|"invalid: reject,<br/>keep old values"| X["error to caller"]
     V --> N["TankPlayer.nativeConfigure"]
-    N --> S["host stages planted::state()<br/>seed, water, speed, textures, sway"]
-    S --> R["level entry: planted::enter()"]
+    N --> S["host sets launch overrides<br/>Water type, Seed, Growth speed, Hold seconds"]
+    S --> R["registry loads: overrides applied,<br/>then planted::enter()"]
     R --> C["Forth cycle: grow, hold, end, reload"]
     C --> S
 ```
@@ -90,15 +91,13 @@ The "command line" of an Android Dream is `adb`: **activity extras** for an imme
 
 | Key | Values | Default | Reaches the engine through | Runtime in v1 |
 |---|---|---|---|---|
-| `water` | `freshwater`, `saltwater`, `random` (aliases `fresh`, `salt`) | `random` | staged `planted::state().salt` | yes |
-| `seed` | whole number 0 to 4294967295 | random per tank | staged `state().seed`, `explicitSeed` | yes |
-| `speed` | 0.25, 0.5, 1, 2, 4, 8 (paused is rejected: the tank could never finish) | `1` | staged `state().speed` index; mirrored by the Forth clock | yes |
-| `hold` | 0 to 86400 s | `120` | a new field in the variant's own `settings.oas`; the host writes the registry from frame 2 of each tank | **yes** (hold starts minutes in, so frame 2 is in time) |
-| `seahorses` | 0 to 6 (saltwater only) | `6` | catalog field 8, read by Forth every frame; host writes from frame 2 (the variant hides the pairs for frame 1) | **yes** |
-| `label` | dropped | none | the host hides the engine overlay entirely (see **Spike results**) | no parameter |
-| `age`, `textures`, `sway` | developer keys; `age` 0 to 240 s | `0`, `true`, `true` | staged `state().initialAge`, `textures`, `sway` | yes, hidden from the tray |
+| `water` | `freshwater`, `saltwater`, `random` (aliases `fresh`, `salt`) | `random` | override of `Water type` (field 2) | yes |
+| `seed` | whole number 0 to 4294967295 | random per tank | overrides of `Seed` (1) and `Random seed on entry` (7) = off | yes |
+| `speed` | 0.25, 0.5, 1, 2, 4, 8 (paused is rejected: the tank could never finish) | `1` | override of `Growth speed` (3); the Forth clock reads it back with `property@` | yes |
+| `hold` | 0 to 86400 s | `120` | override of a new `Hold seconds` field in the variant's own `settings.oas` | yes |
+| `age`, `textures`, `sway` | developer keys; `age` 0 to 240 s | `0`, `true`, `true` | overrides of fields 4, 5 and 6 (the table may override read-only fields) | yes, hidden from the tray |
 
-**Sequences are reproducible.** With a fixed `seed`, tank 0 uses it exactly and tank *k* uses a documented 32-bit mix of `(seed, k)`; with `water=random` the water of each tank comes from the same mix. Replaying a command replays the whole run. With no seed, the engine's own `freshSeed()` runs per tank. Java and the native host share one test vector for the mix.
+**Sequences are reproducible.** With a fixed `seed`, tank 0 uses it exactly and tank *k* uses a documented 32-bit mix of `(seed, k)`; with `water=random` the water of each tank comes from the same mix. Replaying a command replays the whole run (a fixed seed that repeated the identical tank every cycle would be dull, so later tanks derive from it). With no seed, the engine's own `freshSeed()` runs per tank and the host sets nothing per tank. To set the next tank's values in time, the table keeps an **`applications()` counter** that rises each time a registry load applies it; the host watches it from `WFAndroidPumpEvents`. Java and the host share one test vector for the mix.
 
 ```text
 adb shell am start -n org.worldfoundry.plantedtank/.PlantedTankActivity \
@@ -117,7 +116,7 @@ The page opens on the defaults; the thumbnail shows the **rejected** state, wher
 
 At 1× a cycle is the maturity bound (**195 s**, measured) plus the 120 s hold, about 5 min 15 s per tank. A median tank (about 135 to 141 s) is fully grown 55 to 60 s before the bound, so it shows for roughly three minutes. A per-seed bound would remove that slack; see Spike S2. At 0.25× growth takes four times as long; at 8× about 18 s; the hold stays 120 s. [Open the interactive timeline](2026-10-21-planted-tank-screensaver/dream-lifecycle.html) and change the speed.
 
-**Frames and performance.** Growth ignores frames longer than 0.2 s, so it needs more than 5 FPS to run at 1×. The retained cast1 numbers are 21 FPS (no seahorses) and 14 FPS (six pairs) for the wide view ([seahorse plan](2026-10-16-saltwater-seahorses.md)), which is fine for this. The default of six pairs costs about a third of the frame rate; it stays the default until Phase 5 measures the screensaver build.
+**Frames and performance.** Growth ignores frames longer than 0.2 s, so it needs more than 5 FPS to run at 1×. The retained cast1 wide-view figure with plants, urchin and no seahorses is 21 FPS ([seahorse plan](2026-10-16-saltwater-seahorses.md)); a plants-only level has less to draw, so it should do at least as well, and Phase 5 measures it.
 
 **Framing.** In the retained captures the tank fills about 57% of the frame width and 45% of its height, with the rest dark. A screensaver should fill the TV, so Phase 1 moves the variant's camera in (target: tank at least 85% of the width, nothing cropped). This is a level-only change in the variant builder.
 
@@ -125,7 +124,7 @@ At 1× a cycle is the maturity bound (**195 s**, measured) plus the 120 s hold
 
 [![Proposed icon and TV banner next to the existing two apps](2026-10-21-planted-tank-screensaver/icon-and-banner.png)](2026-10-21-planted-tank-screensaver/icon-and-banner.html)
 
-Both use the badge pipeline that Aquarium and Seahorse Grid already use: `gen-screensaver-android-icons.py` calls `add_logo()` (scale 0.17 on the adaptive foreground, inside the 72/108 safe zone; 0.26 on the legacy square; 0.24 on the round icon) and `gen-android-icons.banner()` for the 640 × 360 banner with the name lower-left and the badge lower-right. The mockup above was built by running those functions on retained device frames, so the badge position and size are the real ones. Production art is a fresh capture of the new level (no HUD, saltwater with seahorses or a grown freshwater tank, to be chosen in Phase 3), committed as `android/screensaver/art-src/planted-tank-frame.png` the way `seahorse-grid-frame.png` is. The generator gains a third art source and writes `src/planted/res/`.
+Both use the badge pipeline that Aquarium and Seahorse Grid already use: `gen-screensaver-android-icons.py` calls `add_logo()` (scale 0.17 on the adaptive foreground, inside the 72/108 safe zone; 0.26 on the legacy square; 0.24 on the round icon) and `gen-android-icons.banner()` for the 640 × 360 banner with the name lower-left and the badge lower-right. The mockup above was built by running those functions on retained device frames, so the badge position and size are the real ones. Production art is a fresh capture of the new level (plants only, no HUD, either water type, to be chosen in Phase 3; the mockup frames still show the urchin), committed as `android/screensaver/art-src/planted-tank-frame.png` the way `seahorse-grid-frame.png` is. The generator gains a third art source and writes `src/planted/res/`.
 
 ## Work phases
 
@@ -133,19 +132,21 @@ Tiers are dispatch inputs (ranking is done inline, never delegated). Torn calls 
 
 | Phase | Work | Tier | Reason |
 |---|---|---|---|
-| 0a | Re-cook the planted levels for the actor‑30 fix (existing TODO item) | T3 | settled plan, multi-step build |
+| ~~0a~~ | ~~Re-cook the planted levels for the actor‑30 fix~~ **Not needed:** no seahorses in this level (the TODO item stays open for the Aquarium) | T3 | n/a |
 | ~~0b~~ | ~~**Spike S1:** staging window~~ **Done:** safe with conditions, no engine edit ([S1‑S2](2026-10-21-planted-tank-screensaver/spikes/S1‑S2.md)) | T4 | unknown territory, now resolved |
-| ~~0c~~ | ~~**Spike S2:** what Forth can read~~ **Done:** speed and seahorses yes; hold needs a new field and host help | T4 | same |
+| ~~0c~~ | ~~**Spike S2:** what Forth can read~~ **Done:** speed is readable; hold needs a new field and a host write | T4 | same |
 | ~~0d~~ | ~~**Spike S3:** where is the seed/settings strip drawn, and can the variant drop it? Which camera gives the 85% framing?~~ **Done** | T3 | bounded search plus a level edit |
 | ~~0e~~ | ~~Maturity sweep over 200 seeds in both waters~~ **Done** (`f793c3d1`): bound 195 s | T2 | one harness, known formula |
-| 1 | Level variant: build `planted_tank_screensaver` from `aquarium_plants`, Director cycle script (growth clock, hold, mailboxes), framing, the new `Hold seconds` field, `plant-register` moved before the first `pg-salt` read, pairs hidden for frame 1 | T3 | multi-file against this plan |
+| 0f | **Spike S4:** how to build a plants-only variant: remove the urchin, goby and seahorse actors (a generator flag in `generate.py`/`config.py`, or a text strip in the variant builder), and what the Director, Player and cameras still need | T3 | bounded investigation; the answer shapes Phase 1 |
+| 1 | Level variant: build `planted_tank_screensaver` as a plants-only variant (per S4), Director cycle script (growth clock, hold, mailboxes), framing, fog, the new `Hold seconds` field | T3 | multi-file against this plan |
 | 2a | Java: `PlantedSettings`, activity, Dream, provider, manifest, strings, Gradle flavor | T2 | one module, clear spec |
-| 2b | Native: `nativeConfigure`, first-tank staging before `HALStart`, the pump's next-tank staging, the per-tank registry writes, in one file (`planted_bridge.cc`) | T4 | touches engine state from the game thread; one file so the later OAS/OAD migration, which retires `planted::State`, changes one place |
+| 2c | **Engine: the launch-override table** in `engine/runtime_properties.*` (about 60 lines), one line at `level.cc:613`, the `applications()` counter, an optional desktop `--property=Schema.Key=Value` flag, and unit tests | T3 | design settled in S1‑S2; approved by Will 2026‑10‑21; touches engine code, so it is tested and reviewed before use |
+| 2b | Native host: `nativeConfigure`, first-tank overrides before `HALStart`, per-tank overrides from the pump using the `applications()` counter, in one file (`planted_bridge.cc`) | T3 | uses the new table; no engine state touched, so no game-thread hazards |
 | 3 | Capture script, art, `gen-screensaver-android-icons.py` third source, tests for badge and files | T2 | follows the existing Seahorse recipe |
 | 4 | `task` entries, bundle builder mode, README, device-coordinator doc, TODO | T1 | recipes |
 | 5 | Device verification, soak, natural-idle check through the coordinator | T3 | procedure with judgment about results |
 
-Spikes S1 to S3 run first and may change Phases 1, 2a and 2b. If S1 shows staging cannot be made safe, **stop and ask Will** for permission to add an engine seam. **The seam must be generic, not plant-specific** (Will, 2026‑10‑21: "i'd want it to be more generic than just plant settings"): a launch-override layer in the `wfprops` runtime property registry that lets a host set any owner's field before level entry, so any settings owner can use it. A `planted::Launch` struct is rejected. Engine edits still need his explicit say-so; the plan does not assume it.
+Phase 2c comes before 2b. **Will approved the generic seam on 2026‑10‑21** (earlier: "i'd want it to be more generic than just plant settings"; answer to the build-it question: "generic"). I took "generic" to mean the data table, not the 5-line host callback. S4 may change Phase 1.
 
 ## Spike results
 
@@ -155,16 +156,16 @@ Spikes S1 to S3 run first and may change Phases 1, 2a and 2b. If S1 shows stagin
 
 - **The seed strip cannot be removed without an engine edit.** The engine draws it every frame while a tank is active (`wfsource/source/game/plant_ui.cc:12`). No catalog field, object flag, Director script or mailbox controls it, and growth needs the same `active` flag. The screensaver's own HUD switch does not reach it: `WFAndroidSetHudEnabled(0)` removes only the touch controls and the FPS counter, because the Android overlay drawer ignores that flag (`android_window.cc:502`, per the spike). **The shipped Aquarium Dream already shows this strip** on its Planted choice, with "Hold A: settings" text on a Dream that takes no input. S3's smallest fix is a plant-specific `label` flag in `plant_settings.h` and `plant_ui.cc` (three lines). Following Will's "more generic" direction, my proposal is instead to make the Android overlay drawer **respect the existing `gHudEnabled` switch**, which the screensaver host already sets to 0: one generic change that fixes both apps and adds no plant-specific state. It needs Will's approval; until then the plan has no `label` parameter and the strip stays on. **Resolved 2026‑10‑21, with no engine edit.** Will approved the `gHudEnabled` change, but tracing it showed that `native_app_entry.cc` already sets that flag to 0 on every TV build, so honouring it in the drawer would also hide the TV level selector and settings panels. Instead the strip is drawn only while `levelmenu::Drawer()` is set (`display.cc:1280`), and the Dream host owns `WFAndroidPumpEvents()`, so `dream_host.cc` now clears the drawer every frame. This hides the engine overlay in every passive host, fixes the shipped Aquarium and Seahorse Dreams too, and a null drawer already falls back to starting level 0 (`game.cc`). Guard: `tests/test_screensaver_overlay.py` (3 tests pass). **Not yet compiled or seen on a device**; the next APK build and Phase 1 capture confirm it.
 - **Framing is a text substitution, as hoped.** The wide camera sits at `y = -12`. Moving it to `y = -8.25` (same x, z and look-at) makes the tank 90.0% of the frame width and 71.3% of its height at 16:9, with a 5% margin each side and nothing cropped; the 85% limit is `y = -8.638`. The model reproduces the device capture (predicted 57.4% × 45.5%, measured 57.4% × 45.4%). The builder replaces `-12.0000000000000000(1.15.16)` in the `cs_wide` and `Camera` blocks (`aquarium_plants.lev` lines 130 and 655, the only hits) and asserts one hit per block; leaving `Camera` unchanged would add a one-second pan on start. Moving in removes some fog (start distance 9), so scale both fog distances by about 0.64 to keep today's look. The camera field of view is ignored by the engine (fixed 60° vertical), so position is the only lever. TV overscan above about 5% would clip the walls, so Phase 1 takes a device capture to confirm.
-- **Smaller facts.** The screensaver stays on the wide camera, since only a native tap switches cameras and the Dreams take no input; `PlantedTankActivity` must not add an input path. In freshwater the goby also follows `ss-drive`, so Phase 5 checks it. The level has no QR code or pairing prompt.
+- **Smaller facts.** The screensaver stays on the wide camera, since only a native tap switches cameras and the Dreams take no input; `PlantedTankActivity` must not add an input path. The level has no QR code or pairing prompt.
 
 **S1 and S2, staging and Forth reads (done, [write-up](2026-10-21-planted-tank-screensaver/spikes/S1‑S2.md), read from source, nothing run).**
 
-- **S1: SAFE-WITH-CONDITIONS, no engine edit.** On reload the engine calls `planted::leave()` (`game.cc:421`), then `PageFlip` twice (`game.cc:429-430`), then destroys the level. `PageFlip` runs `WFAndroidPumpEvents`, so the host's pump fires twice with `active` false and before the next `enter()`, never during `LoadLevel`, all on the one game thread. Conditions: stage only while `!active && !explicitSeed`, and stage the **first** tank in `nativeRun` before `HALStart`, because the first pump comes after frame 1 has already run `enter()`.
-- **S2:** speed and seahorses are readable from Forth with `property@`. Hold has no catalog field, so it gets a new field in the variant's own `settings.oas` (level data, not engine), written by the host from frame 2 of each tank. **No host code can run between the registry load and the Director's first tick**, so anything Forth needs on frame 1 is cooked or staged through `state()`; the variant therefore moves `plant-register` before its first `pg-salt` read. There is no tank count and no `cycles` parameter: the loop runs until the TV wakes, and tests count tanks from the log.
+- **S1: SAFE-WITH-CONDITIONS, no engine edit.** (Kept as the fallback; the approved seam below supersedes it.) On reload the engine calls `planted::leave()` (`game.cc:421`), then `PageFlip` twice (`game.cc:429-430`), then destroys the level. `PageFlip` runs `WFAndroidPumpEvents`, so the host's pump fires twice with `active` false and before the next `enter()`, never during `LoadLevel`, all on the one game thread. Conditions: stage only while `!active && !explicitSeed`, and stage the **first** tank in `nativeRun` before `HALStart`, because the first pump comes after frame 1 has already run `enter()`.
+- **S2:** speed is readable from Forth with `property@`. Hold has no catalog field, so it gets a new field in the variant's own `settings.oas` (level data, not engine), written by the host from frame 2 of each tank. **No host code can run between the registry load and the Director's first tick**, so anything Forth needs on frame 1 is cooked or staged through `state()`; the launch-override table closes that gap, because it applies before any script runs. There is no tank count and no `cycles` parameter: the loop runs until the TV wakes, and tests count tanks from the log.
 - **`TIME` (1906) is the level clock** and `DELTA_TIME` (1907) the frame delta; both restart at 0 on each reload, so they time a tank but cannot count tanks.
 - **The Dream always reloads its own TOC index,** so only `END_OF_LEVEL = 1` is needed on device.
-- **Residual risks:** (1) the host and the engine must share one `planted::state()`; it should, as one `.so`, but only the device log line `PLANTS settings-source=… selector_override=1` for each tank confirms it. (2) Staging depends on the current `UnloadLevel` order, so a desktop test of the pump order guards it. (3) This v1 mechanism ends when the OAS migration retires `planted::State`; the bridge file is the only place to change.
-- **Generic seam, designed but not needed for v1.** S1/S2 designed a launch-override table in the `wfprops` registry (about 60 engine lines, plus an optional desktop `--property=` flag) that removes both S1 conditions and the frame-1 gap, survives the OAS migration, and lets any settings owner use it. A 5-line host callback is the smaller alternative. Both need Will's permission; see the open decisions.
+- **Residual risks of host staging (all removed by the table):** the host and engine sharing one `planted::state()`, dependence on the current `UnloadLevel` order, and the loss of the mechanism when the OAS migration retires `planted::State`.
+- **Generic seam: approved and now Phase 2c.** A launch-override table in the `wfprops` registry (about 60 engine lines plus tests, an optional desktop `--property=` flag, and an `applications()` counter added to S1/S2's design), applied at `level.cc:613-615` before `activeRegistry()` is set. It removes S1's conditions and the frame-1 gap, survives the OAS migration (keyed by name, not RP01 id), and lets any settings owner use it.
 
 ## Out of scope
 
@@ -179,7 +180,7 @@ Spikes S1 to S3 run first and may change Phases 1, 2a and 2b. If S1 shows stagin
 
 - **The growth clock drifts from the native age** if `tick`'s rules change. Mitigation: the Forth clock copies `dt` clamping and speed values from `plant_settings.h`, and a test fails when `speedValue` or the 0.2 s clamp changes.
 - **Reload cost and leaks.** Each reload rebuilds the plant meshes. The clumps plan measured repeated entries steady in one process (PSS spread under 4 MiB); the soak in Phase 5 repeats that for this build.
-- **OAS/OAD migration** ([runtime object editing](2026-10-16-runtime-object-editing.md)) retires `planted::State`. The bridge is one file for that reason.
+- **The engine edit affects every level's load path.** Mitigation: the table is empty unless a host sets it, so other apps are unchanged; it is one line in `level.cc`; unit tests cover apply, validation reject, read-only override, unknown key and repeated loads. It is keyed by name, so it moves to OAS unchanged ([runtime object editing](2026-10-16-runtime-object-editing.md)).
 - **Device availability.** Cast1 is `recovery-required` and cast2 `needs-local-setup` as of 2026‑10‑19; Phase 5 waits for the coordinator, and the frozen APK is submitted through `task chromecast:*`, never raw `adb` against a held device.
 
 ## Verification
@@ -198,11 +199,17 @@ Build, level and test steps run in the project's containers (`wf-blender:local` 
 10. **Icon and banner.** `python3 scripts/gen-screensaver-android-icons.py` writes the planted resources; the pixel test finds the badge lower-right in the banner and inside the safe circle of the foreground; the Apps row capture shows the banner.
 11. **Natural idle.** `task chromecast:submit … APP=plantedtank WORKFLOW=dream-check` captures a growing tank in the real Dream.
 12. **No regression.** The existing screensaver tests (`tests/test_seahorse_grid_level.py`, the aquarium bundle-order check) still pass.
+13. **Launch-override table.** `task test-launch-overrides` (new, in the container) passes the unit tests; with the table empty, the existing runtime-property and level tests still pass unchanged.
+14. **Plants only.** The built level's actor map contains no urchin, goby or seahorse object, and a device capture shows plants and the tank only.
 
 Results: _pending._
 
-## Open decisions for Will
+## Decisions
 
-1. **Generic launch-override seam: build it or not?** v1 works without it. It would remove S1's two conditions and the frame-1 gap, survive the OAS migration, and add `--property=` to the desktop run. Options: the **data table** (about 60 engine lines, recommended if you want it) or the **host callback** (about 5 lines, simpler, per-host logic). No engine edit is approved yet; the strip fix needed none.
-2. **Seahorse default.** Six pairs costs about a third of the frame rate. Keep six, or default to fewer for the Dream?
-3. **Urchin.** The planted level has the sea urchin on an autonomous route (`screensaver_player.fth`). This plan keeps it. Say so if the screensaver should be plants and seahorses only.
+Made with Will on 2026‑10‑21:
+
+1. **Seam:** generic launch-override table, approved (Phase 2c).
+2. **Hold:** a parameter, default 120 s.
+3. **Animals:** none; plants only.
+
+Still open: nothing blocking. If a fixed `seed` should repeat the identical tank every cycle instead of deriving later tanks from it, say so; the plan derives them.
