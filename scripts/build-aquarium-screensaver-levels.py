@@ -214,6 +214,10 @@ def build_planted() -> Path:
                     f"--types={ROOT / 'wfsource/source/oas/types3ds.s'}",
                     f"--prep={ROOT / 'wftools/prep/prep'}",
                     "-o", str(oad), str(source / "settings.oas")], cwd=ROOT, check=True)
+    # The APK's coordinator settings come from this OAD (plan: Decision, Will 2026-10-21).
+    subprocess.run(["python3", "scripts/gen-planted-capabilities.py", "--oad", str(oad), "--out",
+                    str(ROOT / "android/screensaver/src/planted/assets/planted-settings.json")],
+                   cwd=ROOT, check=True)
     standalone = LEVELS / (PLANTED + "-standalone.iff")
     subprocess.run(["python3", "scripts/build-object-properties.py",
                     "--oad", str(oad), "--bindings", str(source / "settings-bindings.json"),

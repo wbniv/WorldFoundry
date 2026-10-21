@@ -1,9 +1,24 @@
 package org.worldfoundry.screensaver;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Plain-Java checks of PlantedConfig (JUnit is not in the offline Gradle cache). Run with:
  * javac -d out src/main/java/.../PlantedConfig.java src/test/java/.../PlantedConfigTest.java
- * java -cp out org.worldfoundry.screensaver.PlantedConfigTest
+ * java -cp out org.worldfoundry.screensaver.PlantedConfigTest [planted-settings.json]
+ *
+ * <p>With the capabilities JSON generated from the OAD (scripts/gen-planted-capabilities.py),
+ * it also checks that PlantedConfig and the OAD agree: every offered option is accepted, and
+ * every accepted water and speed value is offered (task test-planted-screensaver passes it).
  */
 public final class PlantedConfigTest {
     private static int checks;
@@ -167,7 +182,49 @@ public final class PlantedConfigTest {
         try { base.withSeed("x"); } catch (IllegalArgumentException expected) { }
         check("water=saltwater".equals(base.toLine()), "rejection leaves the base config unchanged");
 
+        if (args.length > 0) capabilitiesAgree(args[0]);
+
         System.out.println(checks + " checks, " + failures + " failures");
         if (failures != 0) System.exit(1);
+    }
+
+    // The generator writes compact JSON with a fixed key order, so a pattern reads it without
+    // a JSON library (org.json is Android-only).
+    private static final Pattern SETTING = Pattern.compile(
+            "\\{\"id\":\"([^\"]+)\",\"type\":\"choice\",\"label\":\"[^\"]*\",\"value\":\"([^\"]*)\",\"options\":\\[([^\\]]*)\\]\\}");
+    private static final Pattern OPTION = Pattern.compile("\\{\"id\":\"([^\"]+)\",\"label\":\"[^\"]*\"\\}");
+
+    private static void capabilitiesAgree(String path) {
+        String json;
+        try {
+            json = new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
+        } catch (java.io.IOException error) {
+            check(false, "read " + path + ": " + error);
+            return;
+        }
+        Map<String, List<String>> offered = new LinkedHashMap<>();
+        Matcher setting = SETTING.matcher(json);
+        while (setting.find()) {
+            List<String> ids = new ArrayList<>();
+            Matcher option = OPTION.matcher(setting.group(3));
+            while (option.find()) ids.add(option.group(1));
+            offered.put(setting.group(1), ids);
+            String key = setting.group(1);
+            check(PlantedConfig.isKey(key), "capability " + key + " is a PlantedConfig key");
+            if (!PlantedConfig.isKey(key)) continue;
+            accepts(key, setting.group(2), key + "=" + setting.group(2));
+            for (String id : ids) accepts(key, id, key + "=" + id);
+        }
+        check(json.startsWith("{\"schema\":1,\"settings\":["), "capabilities are schema 1");
+        check(offered.keySet().equals(new java.util.LinkedHashSet<>(Arrays.asList("water", "speed", "hold"))),
+                "capabilities offer water, speed, hold: " + offered.keySet());
+        List<String> water = offered.getOrDefault("water", new ArrayList<>());
+        List<String> speed = offered.getOrDefault("speed", new ArrayList<>());
+        check(water.equals(Arrays.asList(PlantedConfig.waterValues())),
+                "water options " + water + " are exactly " + Arrays.toString(PlantedConfig.waterValues()));
+        check(speed.equals(Arrays.asList(PlantedConfig.speedValues())),
+                "speed options " + speed + " are exactly " + Arrays.toString(PlantedConfig.speedValues()));
+        check(!speed.contains("0") && !speed.contains("paused"), "paused is not offered");
+        rejects("speed", "0", "paused");
     }
 }

@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/3d56263d) | Planted Tank Phase 4a: Taskfile build and test entries, coordinator and README docs |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/8876f6cd) | Planted Tank screensaver: Java side (PlantedConfig, settings, provider, activity, Dream) |
 | [2026-10-19](https://github.com/wbniv/WorldFoundry/commit/0df0c0ad) | Add branded aquarium and seahorse screensavers |
 | [2026-10-18](https://github.com/wbniv/WorldFoundry/commit/54f44b51) | Add live aquarium screensaver with per-tank players |
 
 <!--history-meta v1
+3d56263d	author	Will Norris
+3d56263d	added	2
+3d56263d	deleted	0
+3d56263d	files	1
+3d56263d	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01LmFZJSGwibDCpz7J9wzY9X
 8876f6cd	author	Will Norris
 8876f6cd	added	23
 8876f6cd	deleted	0

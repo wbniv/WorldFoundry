@@ -17,9 +17,14 @@ def string(value):
     b=str(value).encode('utf8')
     return struct.pack('<I',len(b))+b
 
-def catalog(oad,bindings,actor):
+def oad_schema(oad):
+    """The Rust normalizer's view of a compiled OAD: name plus fields (key, label, kind, show,
+    choices, min, max, default, scale). Shared with scripts/gen-planted-capabilities.py."""
     tool=ROOT/'wftools/wf_attr_edit/target/release/catalog'
-    schema=json.loads(subprocess.check_output([tool,str(oad)],text=True))
+    return json.loads(subprocess.check_output([tool,str(oad)],text=True))
+
+def catalog(oad,bindings,actor):
+    schema=oad_schema(oad)
     out=bytearray(b'RP01'+struct.pack('<II',1,actor))
     out+=string(schema['name'])+string(bindings.get('title',schema['name']))
     fields=[];used=set();seen=set()

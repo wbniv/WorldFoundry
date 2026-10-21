@@ -97,6 +97,16 @@ final class PlantedConfig {
         return -1;
     }
 
+    /** Every water value {@link #withWater} accepts in canonical form. */
+    static String[] waterValues() { return new String[] { RANDOM, FRESHWATER, SALTWATER }; }
+
+    /** Every speed {@link #withSpeed} accepts, in canonical text (paused is not one). */
+    static String[] speedValues() {
+        String[] values = new String[ENGINE_SPEEDS.length - 1];
+        for (int i = 1; i < ENGINE_SPEEDS.length; i++) values[i - 1] = number(ENGINE_SPEEDS[i]);
+        return values;
+    }
+
     // ---- validation ----
 
     /**

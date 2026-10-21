@@ -11,15 +11,19 @@ import android.util.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 /**
  * Shell-only settings contract for the Planted Tank, same shape as TankSettingsProvider.
  * Methods: getCapabilities, getSettings, setSetting (arg {@code key:value}), resetSettings.
+ * getCapabilities serves the OAD-generated asset {@value #CAPABILITIES_ASSET} with the saved values.
  */
 public final class PlantedSettingsProvider extends ContentProvider {
-    private static final long[] HOLD_PRESETS = { 60, 120, 300, 600 };
-    private static final String[] SPEED_IDS = { "0.25", "0.5", "1", "2", "4", "8" };
+    /** Generated from the settings OAD; see scripts/gen-planted-capabilities.py. */
+    static final String CAPABILITIES_ASSET = "planted-settings.json";
 
     @Override
     public boolean onCreate() { return true; }
@@ -34,11 +38,7 @@ public final class PlantedSettingsProvider extends ContentProvider {
         if ("getCapabilities".equals(method)) {
             try {
                 PlantedConfig config = PlantedSettings.load(getContext());
-                JSONObject document = new JSONObject().put("schema", 1).put("settings",
-                        new JSONArray()
-                                .put(waterSetting(config))
-                                .put(speedSetting(config))
-                                .put(holdSetting(config)));
+                JSONObject document = capabilities(config);
                 result.putString("settings_b64", Base64.encodeToString(
                         document.toString().getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP));
             } catch (JSONException error) {
@@ -69,56 +69,62 @@ public final class PlantedSettingsProvider extends ContentProvider {
         for (String key : PlantedConfig.KEYS) bundle.putString(key, config.valueOf(key));
     }
 
-    private static JSONObject choice(String id, String label, String value, JSONArray options)
+    /**
+     * The capabilities asset, generated at build time from the settings OAD by
+     * scripts/gen-planted-capabilities.py, with each setting's {@code value} replaced by the
+     * saved one. A numeric field shown as presets (Hold) also lists a custom current value.
+     */
+    private JSONObject capabilities(PlantedConfig config) throws JSONException {
+        JSONObject document = new JSONObject(readAsset(CAPABILITIES_ASSET));
+        JSONArray settings = document.getJSONArray("settings");
+        for (int i = 0; i < settings.length(); i++) {
+            JSONObject setting = settings.getJSONObject(i);
+            String value = config.valueOf(setting.getString("id"));
+            setting.put("value", value);
+            if (PlantedConfig.HOLD.equals(setting.getString("id"))) {
+                setting.put("options", withCustomSeconds(setting.getJSONArray("options"), value));
+            }
+        }
+        return document;
+    }
+
+    private String readAsset(String name) {
+        try (InputStream in = getContext().getAssets().open(name)) {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            byte[] buffer = new byte[4096];
+            for (int n; (n = in.read(buffer)) > 0; ) bytes.write(buffer, 0, n);
+            return new String(bytes.toByteArray(), StandardCharsets.UTF_8);
+        } catch (IOException missing) {
+            throw new IllegalStateException("assets/" + name + " is missing: the APK must be built "
+                    + "after scripts/gen-planted-capabilities.py (task build-planted-level)", missing);
+        }
+    }
+
+    /** The presets in order, with {@code current} inserted before the first larger one. */
+    private static JSONArray withCustomSeconds(JSONArray presets, String current)
             throws JSONException {
-        return new JSONObject().put("id", id).put("type", "choice").put("label", label)
-                .put("value", value).put("options", options);
-    }
-
-    private static JSONObject option(String id, String label) throws JSONException {
-        return new JSONObject().put("id", id).put("label", label);
-    }
-
-    private static JSONObject waterSetting(PlantedConfig config) throws JSONException {
-        JSONArray options = new JSONArray()
-                .put(option(PlantedConfig.RANDOM, "Random"))
-                .put(option(PlantedConfig.FRESHWATER, "Freshwater"))
-                .put(option(PlantedConfig.SALTWATER, "Saltwater"));
-        return choice(PlantedConfig.WATER, "Water", config.water(), options);
-    }
-
-    private static JSONObject speedSetting(PlantedConfig config) throws JSONException {
-        JSONArray options = new JSONArray();
-        for (String id : SPEED_IDS) options.put(option(id, id + "x"));
-        return choice(PlantedConfig.SPEED, "Speed", config.valueOf(PlantedConfig.SPEED), options);
-    }
-
-    /** The four presets, plus the current value when it is a custom number of seconds. */
-    private static JSONObject holdSetting(PlantedConfig config) throws JSONException {
-        long current = config.hold();
+        long seconds = Long.parseLong(current);
         JSONArray options = new JSONArray();
         boolean placed = false;
-        for (long preset : HOLD_PRESETS) {
-            if (!placed && current < preset && !isPreset(current)) {
-                options.put(option(Long.toString(current), holdLabel(current)));
+        for (int i = 0; i < presets.length(); i++) {
+            if (presets.getJSONObject(i).getString("id").equals(current)) return presets;
+        }
+        for (int i = 0; i < presets.length(); i++) {
+            JSONObject preset = presets.getJSONObject(i);
+            if (!placed && seconds < Long.parseLong(preset.getString("id"))) {
+                options.put(new JSONObject().put("id", current).put("label", secondsLabel(seconds)));
                 placed = true;
             }
-            options.put(option(Long.toString(preset), holdLabel(preset)));
+            options.put(preset);
         }
-        if (!placed && !isPreset(current)) {
-            options.put(option(Long.toString(current), holdLabel(current)));
+        if (!placed) {
+            options.put(new JSONObject().put("id", current).put("label", secondsLabel(seconds)));
         }
-        return choice(PlantedConfig.HOLD, "Hold", Long.toString(current), options);
+        return options;
     }
 
-    private static boolean isPreset(long seconds) {
-        for (long preset : HOLD_PRESETS) {
-            if (preset == seconds) return true;
-        }
-        return false;
-    }
-
-    private static String holdLabel(long seconds) {
+    /** Same labels as the generator's presets: whole minutes as "N min", else "N s". */
+    private static String secondsLabel(long seconds) {
         return seconds >= 60 && seconds % 60 == 0 ? (seconds / 60) + " min" : seconds + " s";
     }
 

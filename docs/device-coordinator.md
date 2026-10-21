@@ -122,10 +122,15 @@ adb shell am start -n org.worldfoundry.plantedtank/.PlantedTankActivity --es wat
 adb shell content call --uri content://org.worldfoundry.plantedtank.settings --method setSetting --arg water:saltwater
 ```
 
-Current limitation: the coordinator does not yet register the package
-`org.worldfoundry.plantedtank` or its settings authority
-`org.worldfoundry.plantedtank.settings`. Until it does, `task chromecast:*`
-cannot install, configure or capture it; use the `adb` commands above.
+The APK declares what the coordinator needs: its package
+`org.worldfoundry.plantedtank`, its Dream service, its settings authority
+`org.worldfoundry.plantedtank.settings` (manifest meta-data
+`org.worldfoundry.screensaver.SETTINGS_AUTHORITY`) and its settings schema,
+which `getCapabilities` serves from an asset generated from the level's OAD
+(`scripts/gen-planted-capabilities.py`). Whether the coordinator service keeps
+a package list of its own is unconfirmed (see
+[the plan](plans/2026-10-21-planted-tank-screensaver.md)). The `adb` commands
+above always work.
 
 ## Reservations and recovery
 

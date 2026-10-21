@@ -106,3 +106,5 @@ wflevels/aquarium-screensaver-cd.iff
 # The Planted Tank screensaver is a source level (its own .gitignore keeps the sources).
 !wflevels/planted_tank_screensaver/
 wflevels/planted-screensaver-cd.iff
+# The Planted Tank APK's coordinator settings, generated from settings.oad by build_planted().
+android/screensaver/src/planted/assets/planted-settings.json
