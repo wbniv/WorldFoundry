@@ -822,6 +822,14 @@ only an interior (dome) gets `reverse_faces`. Hand-written `.iff` files use the
 same Blender order. Checked-in meshes were reviewed and migrated; external old-hand
 IFFs need offline conversion. Guard: `tests/test_blender_addon_export.py::test_exported_faces_are_wf_outward`.
 
+**Hardware culling scope.** The built-in `rendacto.cc` cube already follows the engine's normal
+rule. The tiled image matte was reordered to follow it on 2026‑10‑16 and remains exempt as a
+two-sided surface. These checks do not certify every asset for GPU hardware culling. A GPU-skinned
+mesh needs its own audit of cooked triangles, material sides, animated poses and transforms;
+ordinary meshes still use software culling. Replacing software culling engine-wide would require
+an audit of every distinct shipped mesh, procedural draw path and transform variant. See the
+[GPU skinning experiment](plans/2026-10-16-gpu-skinning-chromecast-experiment.md).
+
 **Diagnosing.** A face that **disappears** from the intended view is wound
 backwards (toggle `WF_CULL` off and on — if the surface reappears with `WF_CULL=0`, it's a
 winding bug, not a missing mesh). With culling off, a wrong-way prop is not invisible but **lit
@@ -2291,8 +2299,14 @@ The flagpole composition: the visual `statplat` + an invisible `actbox` writing
 `END_OF_LEVEL`(1905)=1 + a **second** invisible `actbox` at the same volume writing
 `LEVEL_TO_RUN`(5000)=`<next TOC index>`. A level-side write of 5000 routes
 `LevelMailboxes → GameMailboxes → WFGame::WriteSystemMailbox → _desiredLevelNum`
-(`mailbox.cc:59-104`, `game.cc:705`); `shell.fth` only seeds it on first boot (gated on persistent
-mailbox 6000) so it **persists** across the reload. Death sets only `END_OF_LEVEL`, so dying
+(`mailbox.cc:59-104`, `game.cc:705`); `shell.fth` only seeds it on first boot (gated on mailbox
+6000 in the **shell's** `GameMailboxes`), so `_desiredLevelNum` **persists** across the reload.
+**A level's own writes to 6000+ do not persist:** each level gets a fresh `GameMailboxes`
+(`game.cc:361`), deleted in `UnloadLevel` (`game.cc:443`), so only 5000 survives; the shell's
+instance is the one `shell.fth` sees. (Corrected 2026-10-21 by the Planted Tank spike,
+[S1/S2](plans/2026-10-21-planted-tank-screensaver/spikes/S1-S2.md).) **Never write 0 to
+`END_OF_LEVEL`:** in `Level::WriteSystemMailbox` that case falls through to `CAMSHOT` when the value
+is false (`level.cc:1807-1817`); write only 1. Death sets only `END_OF_LEVEL`, so dying
 restarts the same level — only the flag advances. The last level loops back (index 0) so the meta-
 loop never indexes past the TOC (`GetTOCEntry` asserts). (2026-05-31 —
 [plan](plans/2026-05-31-smb-flag-next-level-transition-and-w1-2-scaffold.md).)
