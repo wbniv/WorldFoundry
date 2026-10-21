@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/8671b5c7) | Planted Tank plan: fold in S4 (plants-only variant) and log the Aquarium catalog bug |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/c78fdf31) | Planted Tank plan: plants only, generic seam approved, hold stays a parameter |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4e8c5333) | Planted Tank plan: drop the cycles parameter |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/7c218a95) | Planted Tank plan: fold in S1/S2 spike results |
@@ -8,6 +9,11 @@
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4266a44c) | Plan the Planted Tank screensaver |
 
 <!--history-meta v1
+8671b5c7	author	Will Norris
+8671b5c7	added	11
+8671b5c7	deleted	3
+8671b5c7	files	1
+8671b5c7	body	S4: use a generator flag; the screensaver variant has no settings catalog\n(Aquarium's Planted choice is always freshwater).\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01LmFZJSGwibDCpz7J9wzY9X
 c78fdf31	author	Will Norris
 c78fdf31	added	44
 c78fdf31	deleted	37
