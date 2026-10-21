@@ -59,6 +59,56 @@ def player_script(level_text: str, tank: str, driver: str) -> str:
     return "\t{ 'OBJ'".join(blocks)
 
 
+def check_tank_catalog(level: bytes, tank: str) -> None:
+    """One RPRP catalog on a tank variant: PlantedTankSettings, the Aquarium's fields, no Hold seconds."""
+    # Two RPRP tags make one catalog: the RAM chunk's reference and the chunk itself
+    # (build-object-properties.py attach()), as in aquarium_plants-standalone.iff.
+    if level.count(b"RPRP") != 2 or level.count(b"PlantedTankSettings") != 1:
+        raise ValueError(f"{tank}: expected one PlantedTankSettings RPRP catalog")
+    for key in (b"Seed", b"Water type", b"Growth speed", b"Initial age", b"Textures", b"Sway",
+                b"Random seed on entry", b"Seahorses", b"Greeting"):
+        if key not in level:
+            raise ValueError(f"{tank}: catalog field {key.decode()} missing")
+    # The Planted Tank flavor's hold-then-reload cycle does not exist in the Aquarium.
+    if b"Hold seconds" in level:
+        raise ValueError(f"{tank}: catalog has the Hold seconds field")
+
+
+def attach_catalog(tank: str) -> bool:
+    """Attach the canonical tank's settings catalog (RPRP) to its screensaver variant.
+
+    The variant swaps only the Player's script, so the canonical's OAS, bindings and actor map
+    apply as they are; the actor indices are checked against the variant's own .lev. Tanks
+    without a settings-bindings.json have no catalog and are left alone. Rebuilding replaces
+    the catalog already in the standalone (build-object-properties.py attach()), so this must
+    run on the variant's -standalone.iff before cdpack packs the bundle.
+    """
+    source = LEVELS / tank
+    bindings_path = source / "settings-bindings.json"
+    if not bindings_path.is_file():
+        return False
+    target_name = tank + "_screensaver"
+    target = LEVELS / target_name
+    standalone = LEVELS / (target_name + "-standalone.iff")
+    indices = json.loads((source / "actor-map.json").read_text())["indices"]
+    blocks = (target / (target_name + ".lev")).read_text().split("\t{ 'OBJ'")
+    for name, index in indices.items():
+        if index >= len(blocks) or not re.search(r"\{ 'NAME' \"" + re.escape(name) + r"\" \}", blocks[index]):
+            raise ValueError(f"{target_name}: actor {name} is not object {index}; the canonical actor map does not fit")
+    oad = target / "settings.oad"
+    subprocess.run([str(ROOT / "wftools/oas2oad-rs/target/release/oas2oad"),
+                    f"--types={ROOT / 'wfsource/source/oas/types3ds.s'}",
+                    f"--prep={ROOT / 'wftools/prep/prep'}",
+                    "-o", str(oad), str(source / "settings.oas")], cwd=ROOT, check=True)
+    subprocess.run(["python3", "scripts/build-object-properties.py",
+                    "--oad", str(oad), "--bindings", str(bindings_path),
+                    "--actor-map", str(source / "actor-map.json"),
+                    "--out", str(target / "settings.rprp"),
+                    "--level", str(standalone)], cwd=ROOT, check=True)
+    check_tank_catalog(standalone.read_bytes(), target_name)
+    return True
+
+
 def build(tank: str) -> Path:
     source = LEVELS / tank
     target_name = tank + "_screensaver"
@@ -84,6 +134,7 @@ def build(tank: str) -> Path:
     (target / ".gitignore").write_text("# Generated screensaver level and linked assets\n*\n")
     subprocess.run(["bash", "wftools/wf_blender/build_level_binary.sh", target_name],
                    cwd=ROOT, check=True)
+    attach_catalog(tank)
     return LEVELS / (target_name + "-standalone.iff")
 
 
