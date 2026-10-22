@@ -2,6 +2,7 @@
 import runpy
 from pathlib import Path
 import re
+import sys
 
 import pytest
 
@@ -9,6 +10,7 @@ from test_urchin_motion import binaries, zf  # noqa: F401
 
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
 generator = runpy.run_path(str(ROOT / "scripts/build-seahorse-grid-level.py"))
 
 

@@ -11,6 +11,8 @@ from pathlib import Path
 import re
 import subprocess
 
+from level_asset_links import link_source_assets
+
 
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / "wflevels/aquarium_plants"
@@ -176,11 +178,7 @@ def generate() -> Path:
         "{ 'L4'\n { 'ALGN' .align( 2048 ) }\n"
         " { 'RAM' 'OBJD' 1000000l 'PERM' 12000000l 'ROOM' 24000000l 'FLAG' 1l 1l 'SLOT' 1l }\n"
         " { 'ALGN' .align( 2048 ) }\n [ \"../seahorse_grid.iff\" ]\n}\n")
-    for pattern in ("*.iff", "*.tga", "*.flags"):
-        for asset in SOURCE.glob(pattern):
-            link = TARGET / asset.name
-            if not link.exists():
-                link.symlink_to(asset.resolve())
+    link_source_assets(SOURCE, TARGET)
     (TARGET / ".gitignore").write_text(
         "# Keep the authored generated level; ignore compiled files and asset links.\n"
         "*\n!.gitignore\n!seahorse_grid.lev\n!seahorse_grid-standalone.iff.txt\n")

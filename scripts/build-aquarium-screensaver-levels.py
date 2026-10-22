@@ -14,6 +14,8 @@ from pathlib import Path
 import re
 import subprocess
 
+from level_asset_links import link_source_assets
+
 ROOT = Path(__file__).resolve().parent.parent
 LEVELS = ROOT / "wflevels"
 TANKS = (
@@ -126,11 +128,7 @@ def build(tank: str) -> Path:
     if old_ref not in wrapper:
         raise ValueError(f"{tank}: wrapper does not reference the canonical level")
     (target / (target_name + "-standalone.iff.txt")).write_text(wrapper.replace(old_ref, new_ref))
-    for pattern in ("*.iff", "*.tga", "*.flags"):
-        for asset in source.glob(pattern):
-            link = target / asset.name
-            if not link.exists():
-                link.symlink_to(asset.resolve())
+    link_source_assets(source, target)
     (target / ".gitignore").write_text("# Generated screensaver level and linked assets\n*\n")
     subprocess.run(["bash", "wftools/wf_blender/build_level_binary.sh", target_name],
                    cwd=ROOT, check=True)
