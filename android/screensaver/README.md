@@ -6,7 +6,7 @@
 
 The player has no phone-controller prompt, QR code, or controller server, and requests no `INTERNET` permission. The native host hides the engine FPS counter and links the existing `wfengine` target through an app-specific CMake project hook. The Planted Tank uses the shared engine launch-override table to apply its Settings catalog before each level load.
 
-All three Dreams and their live previews retain the cropped World Foundry graphic in the lower-right corner. Each app also has its own launcher icon with the approved badge; their TV banners include it. Regenerate icon resources with `python3 scripts/gen-screensaver-android-icons.py`.
+All three Dreams and their live previews show only the level render. Each app has its own launcher icon with the approved lower-right World Foundry badge; their TV banners also include it. Regenerate icon resources with `python3 scripts/gen-screensaver-android-icons.py`.
 
 Build the Aquarium and Seahorse level bundles and debug APKs with:
 

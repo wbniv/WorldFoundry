@@ -1,17 +1,13 @@
 package org.worldfoundry.screensaver;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Process;
-import android.view.Gravity;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import java.io.File;
 
 /** Surface and render thread shared by the Dream and the TV launcher preview. */
@@ -60,16 +56,6 @@ final class TankPlayer implements SurfaceHolder.Callback {
         contentView.addView(view, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
 
-        ImageView logo = new ImageView(context);
-        Bitmap sourceLogo = BitmapFactory.decodeResource(context.getResources(), R.drawable.wf_logo);
-        logo.setImageBitmap(Bitmap.createBitmap(sourceLogo, 4, 25, 78, 104));
-        logo.setContentDescription(context.getString(R.string.wf_logo_description));
-        int size = Math.round(72 * context.getResources().getDisplayMetrics().density);
-        int margin = Math.round(24 * context.getResources().getDisplayMetrics().density);
-        FrameLayout.LayoutParams logoLayout = new FrameLayout.LayoutParams(size, size * 4 / 3,
-                Gravity.END | Gravity.BOTTOM);
-        logoLayout.setMargins(margin, margin, margin, margin);
-        contentView.addView(logo, logoLayout);
     }
 
     View view() { return contentView; }
