@@ -22,12 +22,16 @@
 
 extern "C" bool WFAndroidEglInit(ANativeWindow* window);
 extern "C" void WFAndroidEglTerm();
+extern "C" void WFAndroidSetSurfaceSize(int width, int height);
 extern "C" void WFAndroidSetHudEnabled(int enabled);
 
 namespace {
 std::atomic<bool> closing{false};
 std::atomic<bool> windowReady{false};
 AAssetManager* assets = nullptr;
+ANativeWindow* activeWindow = nullptr;
+int surfaceWidth = 0;
+int surfaceHeight = 0;
 
 // Planted Tank parameters (planted_bridge.h). Unconfigured, and so inert, for the Aquarium and
 // Seahorse flavors, which never call nativeConfigure.
@@ -93,6 +97,16 @@ extern "C" void WFAndroidRequestClose() { closing.store(true); }
 // it through levelmenu::Drawer(), which Display installs once at start-up, so clear it every frame
 // rather than editing the engine. Without a drawer the level menu starts level 0 (game.cc).
 extern "C" void WFAndroidPumpEvents() {
+    if (activeWindow) {
+        const int width = ANativeWindow_getWidth(activeWindow);
+        const int height = ANativeWindow_getHeight(activeWindow);
+        if (width > 0 && height > 0 && (width != surfaceWidth || height != surfaceHeight)) {
+            WFAndroidSetSurfaceSize(width, height);
+            __android_log_print(ANDROID_LOG_INFO, "wf_dream", "surface resized: %dx%d", width, height);
+            surfaceWidth = width;
+            surfaceHeight = height;
+        }
+    }
     if (levelmenu::Drawer()) levelmenu::SetDrawer(nullptr);
     plantedBridge.pump(launchOverrideSink);
 }
@@ -155,6 +169,9 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
     assets = AAssetManager_fromJava(env, manager);
     WFAndroidSetHudEnabled(0);
     if (WFAndroidEglInit(window)) {
+        activeWindow = window;
+        surfaceWidth = ANativeWindow_getWidth(window);
+        surfaceHeight = ANativeWindow_getHeight(window);
         windowReady.store(true);
         // The positional argument selects the same TOC index as TankChoice.IDS.
         char arg0[] = "wf_dream";
@@ -174,6 +191,7 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         HALStart(8, argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
         std::fprintf(stderr, "wf_dream: HALStart returned\n");
         windowReady.store(false);
+        activeWindow = nullptr;
         WFAndroidEglTerm();
     }
     assets = nullptr;

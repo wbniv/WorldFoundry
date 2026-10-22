@@ -32,6 +32,8 @@ public final class PlantedTankActivity extends Activity {
         }
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        // A passive preview has no touch input to reset the phone's screen timeout.
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         player = new TankPlayer(this);
         setContentView(player.view());
     }

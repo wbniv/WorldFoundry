@@ -3,6 +3,7 @@ package org.worldfoundry.screensaver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Process;
 import android.view.Gravity;
 import android.view.Surface;
@@ -33,7 +34,29 @@ final class TankPlayer implements SurfaceHolder.Callback {
     TankPlayer(Context context) {
         view = new SurfaceView(context);
         view.getHolder().addCallback(this);
-        contentView = new FrameLayout(context);
+        contentView = new FrameLayout(context) {
+            private int surfaceHeight;
+
+            @Override protected void onMeasure(int widthSpec, int heightSpec) {
+                super.onMeasure(widthSpec, heightSpec);
+                int width = MeasureSpec.getSize(widthSpec);
+                int height = MeasureSpec.getSize(heightSpec);
+                // The tank is composed for a landscape display. Keep its full width visible
+                // on a portrait phone instead of applying a narrow portrait projection.
+                surfaceHeight = width < height ? Math.min(height, width * 9 / 16) : height;
+                view.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(surfaceHeight, MeasureSpec.EXACTLY));
+            }
+
+            @Override protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+                super.onLayout(changed, left, top, right, bottom);
+                int width = right - left;
+                int height = bottom - top;
+                int surfaceTop = (height - surfaceHeight) / 2;
+                view.layout(0, surfaceTop, width, surfaceTop + surfaceHeight);
+            }
+        };
+        contentView.setBackgroundColor(Color.BLACK);
         contentView.addView(view, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
 
