@@ -18,7 +18,7 @@ public final class SeahorseGridDreamService extends DreamService {
     @Override
     public void onDreamingStarted() {
         super.onDreamingStarted();
-        player.start(8);
+        player.start(0);
     }
 
     @Override

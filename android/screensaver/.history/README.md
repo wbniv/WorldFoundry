@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-22](https://github.com/wbniv/WorldFoundry/commit/749e3bbf) | docs: refresh planted tank verification status |
 | [2026-10-22](https://github.com/wbniv/WorldFoundry/commit/80f43e98) | Use generic Settings catalogs for screensaver controls |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/d1676c33) | Planted Tank: generate the APK's coordinator settings from the OAD |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/3d56263d) | Planted Tank Phase 4a: Taskfile build and test entries, coordinator and README docs |
@@ -8,6 +9,10 @@
 | [2026-10-18](https://github.com/wbniv/WorldFoundry/commit/54f44b51) | Add live aquarium screensaver with per-tank players |
 
 <!--history-meta v1
+749e3bbf	author	Will Norris
+749e3bbf	added	3
+749e3bbf	deleted	5
+749e3bbf	files	1
 80f43e98	author	Will Norris
 80f43e98	added	2
 80f43e98	deleted	2

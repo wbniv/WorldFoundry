@@ -261,23 +261,26 @@ def main() -> None:
         print(build(tank), flush=True)
     if not args.tanks:
         subprocess.run(["python3", "scripts/build-seahorse-grid-level.py"], cwd=ROOT, check=True)
-        bundle = LEVELS / "aquarium-screensaver-cd.iff"
-        subprocess.run([
-            str(ROOT / "wftools/cdpack-rs/target/release/cdpack"),
-            str(ROOT / "wfsource/source/game/shell.fth"),
-            *(str(LEVELS / (tank + "_screensaver-standalone.iff")) for tank in TANKS),
-            str(LEVELS / "seahorse_grid-standalone.iff"),
-            "-o", str(bundle),
-        ], cwd=ROOT, check=True)
-        if b"UIFT" not in bundle.read_bytes()[:2048]:
-            raise RuntimeError("cdpack is stale: rebuild wftools/cdpack-rs to include the UI font")
-        assets = ROOT / "android/screensaver/src/main/assets"
-        assets.mkdir(parents=True, exist_ok=True)
-        link = assets / "cd.iff"
-        if link.is_symlink() or link.exists():
-            link.unlink()
-        link.symlink_to(Path(os.path.relpath(bundle, assets)))
-        print(f"Screensaver bundle: {bundle}", flush=True)
+        for flavor, levels in (
+            ("aquarium", [LEVELS / (tank + "_screensaver-standalone.iff") for tank in TANKS]),
+            ("seahorse", [LEVELS / "seahorse_grid-standalone.iff"]),
+        ):
+            bundle = LEVELS / f"{flavor}-screensaver-cd.iff"
+            subprocess.run([
+                str(ROOT / "wftools/cdpack-rs/target/release/cdpack"),
+                str(ROOT / "wfsource/source/game/shell.fth"),
+                *(str(level) for level in levels),
+                "-o", str(bundle),
+            ], cwd=ROOT, check=True)
+            if b"UIFT" not in bundle.read_bytes()[:2048]:
+                raise RuntimeError("cdpack is stale: rebuild wftools/cdpack-rs to include the UI font")
+            assets = ROOT / f"android/screensaver/src/{flavor}/assets"
+            assets.mkdir(parents=True, exist_ok=True)
+            link = assets / "cd.iff"
+            if link.is_symlink() or link.exists():
+                link.unlink()
+            link.symlink_to(Path(os.path.relpath(bundle, assets)))
+            print(f"{flavor} screensaver bundle: {bundle}", flush=True)
 
 
 if __name__ == "__main__":

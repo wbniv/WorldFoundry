@@ -1,23 +1,23 @@
-# Aquarium screensaver APK
+# Android TV screensaver APKs
 
-`android/screensaver` is a separate Android TV application (`org.worldfoundry.screensaver`). Its Aquarium DreamService and launcher preview render the eight aquarium level variants live. Each tank has an autonomous Player script built from its canonical gameplay export. The app chooses one tank when the Aquarium Dream starts; the saved `random` preference draws from the eight tank IDs.
+`android/screensaver` builds three Android TV applications. Aquarium (`org.worldfoundry.screensaver`) renders eight aquarium level variants live. Each tank has an autonomous Player script built from its canonical gameplay export. The app chooses one tank when the Aquarium Dream starts; the default saved `random` preference draws from the eight tank IDs.
 
-The app also offers a separate **Seahorse Grid** DreamService. Its own World Foundry level has only 24 visible seahorses in six columns and four rows against a dark background, alternating the existing female and male models. Its Director starts each pair at a staggered phase of the three-second `rest_coil` idle clip, then gives each pair hovering, probing and greeting motions with gentle crossfades and quiet rests. Fins keep moving continuously. Build it with `python3 scripts/build-seahorse-grid-level.py`; the complete aquarium bundle build includes it as TOC index 8. This Dream has no tank setting. Audio is not yet configured for it.
+**Seahorse Grid** (`org.worldfoundry.seahorsegrid`) has its own DreamService, launcher icon and level bundle. Its World Foundry level has 24 visible seahorses in six columns and four rows against a dark background, alternating the existing female and male models. The level places the actors; each seahorse runs the same autonomous animation script. Build the level with `python3 scripts/build-seahorse-grid-level.py`. This Dream has no tank setting. Audio is not yet configured for it.
 
-The player has no phone-controller prompt, QR code, or controller server, and requests no `INTERNET` permission. The native host hides the engine FPS counter and links the existing `wfengine` target through an app-specific CMake project hook; shared engine code and its CMake file are unchanged. The planted tank currently retains its level-supplied seed/settings strip.
+The player has no phone-controller prompt, QR code, or controller server, and requests no `INTERNET` permission. The native host hides the engine FPS counter and links the existing `wfengine` target through an app-specific CMake project hook. The Planted Tank uses the shared engine launch-override table to apply its Settings catalog before each level load.
 
-Both Dreams and their live previews show the cropped World Foundry graphic in the lower-right corner. The overlay is part of the screensaver app view, above the level render surface.
+All three Dreams and their live previews retain the cropped World Foundry graphic in the lower-right corner. Each app also has its own launcher icon with the approved badge; their TV banners include it. Regenerate icon resources with `python3 scripts/gen-screensaver-android-icons.py`.
 
-Build the level bundle and debug APK with:
+Build the Aquarium and Seahorse level bundles and debug APKs with:
 
 ```sh
 cargo build --release --offline --manifest-path wftools/cdpack-rs/Cargo.toml
 python3 scripts/build-aquarium-screensaver-levels.py
 cd android
-./gradlew :screensaver:assembleDebug --offline
+./gradlew :screensaver:assembleAquariumDebug :screensaver:assembleSeahorseDebug --offline
 ```
 
-The output is `android/screensaver/build/outputs/apk/debug/screensaver-debug.apk`. Freeze a copy before submitting coordinator jobs. The native bundle order in `scripts/build-aquarium-screensaver-levels.py` must match `TankChoice.IDS`.
+The outputs are `android/screensaver/build/outputs/apk/aquarium/debug/screensaver-aquarium-debug.apk` and `android/screensaver/build/outputs/apk/seahorse/debug/screensaver-seahorse-debug.apk`. Freeze copies before submitting coordinator jobs. The Aquarium bundle order in `scripts/build-aquarium-screensaver-levels.py` must match `TankChoice.IDS`; the Seahorse bundle has its sole level at index zero.
 
 The selected Dream advertises `org.worldfoundry.screensaver.settings`. Its shell-only provider answers `getCapabilities` with a base64-encoded schema-1 JSON choice list and accepts `setSetting` with `tank:<id>`. The coordinator uses a reviewed mapping for this Dream package and authority, validates the response, and offers those choices in the KDE tray. A changed preference takes effect at the next Dream start.
 
