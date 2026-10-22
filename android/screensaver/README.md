@@ -35,13 +35,11 @@ Install, settings, and idle activation checks use the shared coordinator through
 | `hold` | seconds, 0 to 86400 | `120` |
 | `age`, `textures`, `sway` | developer keys: 0 to 240 s, true or false, true or false | `0`, `true`, `true` |
 
-Run now with activity extras (used for this run only, never saved), or save values for the Dream through the shell-only settings provider; a bad value is rejected with a message and changes nothing:
+On the shared TVs, use the coordinator for a launch-only override or to save a value for the Dream. The IDs come from the installed app's Settings catalog; here `4.2` is the Director's Water type, `4.1` its Seed and `4.3` its Growth speed (`4` means 2×). A rejected value changes nothing:
 
 ```sh
-adb shell am start -n org.worldfoundry.plantedtank/.PlantedTankActivity \
-    --es water saltwater --el seed 713 --ef speed 2
-adb shell content call --uri content://org.worldfoundry.plantedtank.settings \
-    --method setSetting --arg water:saltwater
+task chromecast:screensaver-show DEVICE=chromecast-test-01 OVERRIDES='{"4.2":"1","4.1":"713","4.3":"4"}'
+task chromecast:screensaver-setting DEVICE=chromecast-test-01 SETTING_ID=4.2 VALUE=1
 ```
 
 The provider also answers `getCapabilities`, `getSettings` and `resetSettings`. `getCapabilities` serves `assets/planted-settings.json` with the saved values filled in. `scripts/gen-settings-capabilities.py` generates that schema-2 file from the level's OAD-derived `settings.rprp` during `build_planted()`. It preserves the catalog owner and includes all eight fields; its show-as modifiers choose the UI type. The app adapter adds its `random` water policy, removes the unsupported Paused speed choice, and marks the derived Random seed on entry field read-only. Seed uses `random` as its unset value. The generated asset is gitignored, and the provider throws if it is missing. `task test-planted-screensaver` checks the catalog and runs `PlantedConfigTest` against a freshly generated asset.

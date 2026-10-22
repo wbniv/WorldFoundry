@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-22](https://github.com/wbniv/WorldFoundry/commit/80f43e98) | Use generic Settings catalogs for screensaver controls |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/d1676c33) | Planted Tank: generate the APK's coordinator settings from the OAD |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/3d56263d) | Planted Tank Phase 4a: Taskfile build and test entries, coordinator and README docs |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/8876f6cd) | Planted Tank screensaver: Java side (PlantedConfig, settings, provider, activity, Dream) |
@@ -7,6 +8,10 @@
 | [2026-10-18](https://github.com/wbniv/WorldFoundry/commit/54f44b51) | Add live aquarium screensaver with per-tank players |
 
 <!--history-meta v1
+80f43e98	author	Will Norris
+80f43e98	added	2
+80f43e98	deleted	2
+80f43e98	files	1
 d1676c33	author	Will Norris
 d1676c33	added	2
 d1676c33	deleted	2

@@ -12,32 +12,34 @@ code,pre{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
 .row{display:grid;grid-template-columns:90px 1fr;gap:4px 12px;align-items:center;margin-bottom:10px}.row small{grid-column:2;color:var(--muted);margin-top:-2px}
 input:not([type=checkbox]),select{font:inherit;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:5px 8px;width:100%}input.bad{border-color:var(--bad)}
 pre{margin:0;white-space:pre-wrap;word-break:break-all}button{font:inherit;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:3px 10px;cursor:pointer}.chk{display:flex;gap:8px;align-items:center}.ok{color:var(--ok)}.bad{color:var(--bad)}
-.tr{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line)}.tr b{color:var(--fg)}</style></head><body><header><h1>Planted Tank screensaver — parameters</h1><span class="tag">MOCKUP — NOT SHIPPED</span></header><main style="display:grid;grid-template-columns:520px 1fr;gap:24px">
+.tr{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line)}.tr b{color:var(--fg)}</style></head><body><header><h1>Planted Tank screensaver — parameters</h1><span class="tag">COORDINATOR COMMAND EXAMPLE</span></header><main style="display:grid;grid-template-columns:520px 1fr;gap:24px">
 <div class="card"><h2>Parameters</h2><div style="display:flex;gap:8px;margin:-4px 0 12px"><button id="tv" type="button">Try: valid</button><button id="ti" type="button">Try: invalid seed</button></div>
- <div class="row"><label for="water">water</label><select id="water"><option>random</option><option>freshwater</option><option>saltwater</option></select><small>default random; each tank draws its own</small></div>
- <div class="row"><label for="seed">seed</label><input id="seed" placeholder="blank = random each tank" inputmode="numeric"><small>0 – 4294967295</small></div>
- <div class="row"><label for="speed">speed</label><select id="speed"><option>0.25</option><option>0.5</option><option selected>1</option><option>2</option><option>4</option><option>8</option></select><small>growth clock; 1× is the default</small></div>
- <div class="row"><label for="hold">hold</label><input id="hold" value="120"><small>seconds on screen once grown</small></div>
+ <div class="row"><label for="water">Water type</label><select id="water"><option>random</option><option>freshwater</option><option>saltwater</option></select><small>owner 4, field 2; random chooses water for each tank</small></div>
+ <div class="row"><label for="seed">Seed</label><input id="seed" placeholder="blank = random each tank" inputmode="numeric"><small>owner 4, field 1; 0 – 4294967295</small></div>
+ <div class="row"><label for="speed">Growth speed</label><select id="speed"><option>0.25</option><option>0.5</option><option selected>1</option><option>2</option><option>4</option><option>8</option></select><small>owner 4, field 3; 1× is the default</small></div>
+ <div class="row"><label for="hold">Hold seconds</label><input id="hold" value="120"><small>owner 4, field 10; seconds after growth completes</small></div>
  <p id="err" style="margin:12px 0 0;min-height:44px"></p></div>
 <div style="display:grid;gap:16px;align-content:start">
- <div class="card"><h2>Preview launch (activity extras)</h2><pre id="am"></pre></div>
- <div class="card"><h2>Persist for the Dream (settings provider, one call per key)</h2><pre id="cc"></pre></div>
- <div class="card"><h2>Coordinator tray choices</h2><div id="tray" class="muted"></div></div>
+ <div class="card"><h2>Show now (launch-only overrides)</h2><pre id="am"></pre></div>
+ <div class="card"><h2>Save for the Dream (one coordinator job per field)</h2><pre id="cc"></pre></div>
+ <div class="card"><h2>Advertised Settings values</h2><div id="tray" class="muted"></div><p class="muted" style="margin-bottom:0">The actual tray reads owners and fields from the installed app; this example uses the Planted Tank Director's IDs.</p></div>
 </div></main><script>
-const $=i=>document.getElementById(i);const PKG='org.worldfoundry.plantedtank';
+const $=i=>document.getElementById(i);const DEVICE='chromecast-test-01';
+const waterIds={random:'random',freshwater:'0',saltwater:'1'};
+const speedIds={'0.25':'1','0.5':'2','1':'3','2':'4','4':'5','8':'6'};
 function intOk(v,lo,hi){return /^\d{1,10}$/.test(v)&&+v>=lo&&+v<=hi}
 function draw(){const e=[],w=$('water').value,seed=$('seed').value.trim(),hold=$('hold').value.trim();
  ['seed','hold'].forEach(i=>$(i).classList.remove('bad'));
  if(seed&&!intOk(seed,0,4294967295)){e.push('seed must be a whole number from 0 to 4294967295');$('seed').classList.add('bad')}
  if(!intOk(hold,0,86400)){e.push('hold must be 0 to 86400 seconds');$('hold').classList.add('bad')}
- const t=[['Water',w==='random'?'Random':w[0].toUpperCase()+w.slice(1)],['Speed',$('speed').value+'×'],['Seed',seed||'Random (CLI only)']];
- $('tray').innerHTML=t.map(r=>'<div class="tr"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('');
- if(e.length){$('err').innerHTML='<span class="bad">✗ '+e.join('<br>✗ ')+'</span><br><span class="muted">Nothing sent. Previous settings stay in force.</span>';$('am').textContent='(no command: fix the highlighted field)';$('cc').textContent='(no command)';return}
- $('err').innerHTML='<span class="ok">✓ valid</span> <span class="muted">· same checks run on the device, which rejects the call with the same message</span>';
- const kv=[['water',w],['speed',$('speed').value],['hold',hold]];if(seed)kv.push(['seed',seed]);
- const flag=([k,v])=>k==='seed'?'--el seed '+v:k==='speed'?'--ef speed '+v:k==='water'?'--es water '+v:'--ei '+k+' '+v;
- $('am').textContent='adb shell am start -n '+PKG+'/.PlantedTankActivity \\\n  '+kv.map(flag).join(' \\\n  ');
- $('cc').textContent=kv.map(([k,v])=>'adb shell content call --uri content://'+PKG+'.settings \\\n  --method setSetting --arg '+k+':'+v).join('\n');}
+ if(e.length){$('err').innerHTML='<span class="bad">✗ '+e.join('<br>✗ ')+'</span><br><span class="muted">Nothing sent. Previous settings stay in force.</span>';$('tray').textContent='Invalid values';$('am').textContent='(no command: fix the highlighted field)';$('cc').textContent='(no command)';return}
+ const values=[['Water type',w==='random'?'Random':w[0].toUpperCase()+w.slice(1)],['Growth speed',$('speed').value+'×'],['Seed',seed||'Random'],['Hold seconds',hold]];
+ $('tray').textContent='';values.forEach(([label,value])=>{const row=document.createElement('div'),name=document.createElement('span'),shown=document.createElement('b');row.className='tr';name.textContent=label;shown.textContent=value;row.appendChild(name);row.appendChild(shown);$('tray').appendChild(row)});
+ $('err').innerHTML='<span class="ok">✓ valid</span> <span class="muted">· coordinator and app validate these bounds before applying values</span>';
+ const wire=[['4.2',waterIds[w]],['4.1',seed||'random'],['4.3',speedIds[$('speed').value]],['4.10',hold]],overrides={};
+ wire.forEach(([id,value])=>{overrides[id]=value});
+ $('am').textContent='task chromecast:screensaver-show DEVICE='+DEVICE+' OVERRIDES=\''+JSON.stringify(overrides)+'\'';
+ $('cc').textContent=wire.map(([id,value])=>'task chromecast:screensaver-setting DEVICE='+DEVICE+' SETTING_ID='+id+' VALUE='+value).join('\n');}
 document.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',draw));
 $('tv').onclick=()=>{$('water').value='saltwater';$('seed').value='713';$('speed').value='2';draw()};
 $('ti').onclick=()=>{$('water').value='freshwater';$('seed').value='4294967296';$('hold').value='-5';draw()};draw();</script></body></html>
