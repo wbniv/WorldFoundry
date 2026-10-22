@@ -127,7 +127,7 @@
 	}
 	{ 'OBJ'
 		{ 'NAME' "Camera" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.00000000(1.15.16) -9.00000000(1.15.16) 4.18750000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.00000000(1.15.16) -11.00000000(1.15.16) 4.18750000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
@@ -273,7 +273,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ Seahorse Grid placement setup; each body runs the shared sg-tick.\n: sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-play ( clip fade -- )\n  100 27 + sg@ 0 <> if 100 27 + sg@ 100 25 + sg!\n    100 28 + sg@ 100 26 + sg! then\n  100 29 + sg! 100 27 + sg! sg-now 100 28 + sg! ;\n: sg-step\n  sg-now 131 sg@ < if exit then\n  130 sg@ 0 = if\n    132 sg@ 0 = if 8 1.3 sg-play 1 130 sg! sg-now 5 + 131 sg!\n    else 132 sg@ 1 = if 4 1.3 sg-play 2 130 sg! sg-now 2.7 + 131 sg!\n    else 83 sg@ 1.5 sg-play 3 130 sg! sg-now 6.3 + 131 sg! then then\n  else 6 1.5 sg-play 0 130 sg! sg-now 7.5 + 131 sg!\n    132 sg@ 1 + 3 mod 132 sg! then ;\n: sg-init-fish 135 sg@ 0 = if\n  6 125 sg! 0 126 sg! 0 127 sg! 0 128 sg! 0 130 sg!\n  sg-now 84 sg@ + 131 sg! sg-now 82 sg@ 1.3 * - 126 sg!\n  1 135 sg! then ;\n: sg-tick sg-init-fish sg-step\n  100 80 sg@ dfrm-pose drop\n  sg-now 2.2 * 82 sg@ .071 * + .022 0 1 81 sg@ fin-deform ;\n\n: sg-base 11 ;\n: sg-config dup 2 * sg-base + >r\n  r@ 80 r@ write-actor-mailbox\n  r@ 1+ 81 r@ write-actor-mailbox\n  dup 2 / dup 82 r@ write-actor-mailbox\n  dup 1 & 1+ 83 r@ write-actor-mailbox\n  2 / 2.6 * 8 + 84 r@ write-actor-mailbox\n  r> drop ;\n: sg-setup 24 0 do i sg-config loop\n  1 90 sg! ;\n90 sg@ 0 = if sg-setup then\n  7 INDEXOF_CAMSHOT sg!\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "7 INDEXOF_CAMSHOT write-mailbox\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
@@ -652,7 +652,7 @@
 	}
 	{ 'OBJ'
 		{ 'NAME' "cs_wide" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.00000000(1.15.16) -9.00000000(1.15.16) 4.18750000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.00000000(1.15.16) -11.00000000(1.15.16) 4.18750000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
@@ -907,7 +907,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg-player 0 INDEXOF_INPUT write-mailbox ; sg-player\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "0 INDEXOF_INPUT write-mailbox\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sea_urchin.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
@@ -1081,7 +1081,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031748460691(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0170889388058938(1.15.16) } { 'STR' "-0.017089" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0655635011991267(1.15.16) } { 'STR' "-0.065564" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-0-fins" }
@@ -1126,7 +1126,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031747843240(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0140222837049926(1.15.16) } { 'STR' "-0.014022" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0440891606270104(1.15.16) } { 'STR' "-0.044089" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-1-fins" }
@@ -1171,7 +1171,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031748460691(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0170889388058938(1.15.16) } { 'STR' "-0.017089" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0655635011991267(1.15.16) } { 'STR' "-0.065564" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-2-fins" }
@@ -1216,7 +1216,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031747843240(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0140222837049926(1.15.16) } { 'STR' "-0.014022" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0440891606270104(1.15.16) } { 'STR' "-0.044089" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-3-fins" }
@@ -1261,7 +1261,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031748460691(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0170889388058938(1.15.16) } { 'STR' "-0.017089" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0655635011991267(1.15.16) } { 'STR' "-0.065564" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-4-fins" }
@@ -1306,7 +1306,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031747843240(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0140222837049926(1.15.16) } { 'STR' "-0.014022" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0440891606270104(1.15.16) } { 'STR' "-0.044089" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-5-fins" }
@@ -1351,7 +1351,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031748460691(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0170889388058938(1.15.16) } { 'STR' "-0.017089" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0655635011991267(1.15.16) } { 'STR' "-0.065564" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-6-fins" }
@@ -1396,7 +1396,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031747843240(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0140222837049926(1.15.16) } { 'STR' "-0.014022" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0440891606270104(1.15.16) } { 'STR' "-0.044089" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-7-fins" }
@@ -1441,7 +1441,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031748460691(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0170889388058938(1.15.16) } { 'STR' "-0.017089" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0655635011991267(1.15.16) } { 'STR' "-0.065564" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-8-fins" }
@@ -1486,7 +1486,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031747843240(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0140222837049926(1.15.16) } { 'STR' "-0.014022" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0440891606270104(1.15.16) } { 'STR' "-0.044089" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-9-fins" }
@@ -1531,7 +1531,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031748460691(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0170889388058938(1.15.16) } { 'STR' "-0.017089" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0655635011991267(1.15.16) } { 'STR' "-0.065564" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-10-fins" }
@@ -1576,7 +1576,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031747843240(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0140222837049926(1.15.16) } { 'STR' "-0.014022" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0440891606270104(1.15.16) } { 'STR' "-0.044089" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-11-fins" }
@@ -1621,7 +1621,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031748460691(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0170889388058938(1.15.16) } { 'STR' "-0.017089" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0655635011991267(1.15.16) } { 'STR' "-0.065564" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-12-fins" }
@@ -1666,7 +1666,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031747843240(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0140222837049926(1.15.16) } { 'STR' "-0.014022" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0440891606270104(1.15.16) } { 'STR' "-0.044089" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-13-fins" }
@@ -1711,7 +1711,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031748460691(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0170889388058938(1.15.16) } { 'STR' "-0.017089" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0655635011991267(1.15.16) } { 'STR' "-0.065564" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-14-fins" }
@@ -1756,7 +1756,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031747843240(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0140222837049926(1.15.16) } { 'STR' "-0.014022" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0440891606270104(1.15.16) } { 'STR' "-0.044089" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-15-fins" }
@@ -1801,7 +1801,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031748460691(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0170889388058938(1.15.16) } { 'STR' "-0.017089" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0655635011991267(1.15.16) } { 'STR' "-0.065564" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-16-fins" }
@@ -1846,7 +1846,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031747843240(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0140222837049926(1.15.16) } { 'STR' "-0.014022" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0440891606270104(1.15.16) } { 'STR' "-0.044089" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-17-fins" }
@@ -1891,7 +1891,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031748460691(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0170889388058938(1.15.16) } { 'STR' "-0.017089" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0655635011991267(1.15.16) } { 'STR' "-0.065564" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-18-fins" }
@@ -1936,7 +1936,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031747843240(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0140222837049926(1.15.16) } { 'STR' "-0.014022" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0440891606270104(1.15.16) } { 'STR' "-0.044089" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-19-fins" }
@@ -1981,7 +1981,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031748460691(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0170889388058938(1.15.16) } { 'STR' "-0.017089" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0655635011991267(1.15.16) } { 'STR' "-0.065564" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-20-fins" }
@@ -2026,7 +2026,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031747843240(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0140222837049926(1.15.16) } { 'STR' "-0.014022" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0440891606270104(1.15.16) } { 'STR' "-0.044089" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-21-fins" }
@@ -2071,7 +2071,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031748460691(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0170889388058938(1.15.16) } { 'STR' "-0.017089" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0655635011991267(1.15.16) } { 'STR' "-0.065564" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-22-fins" }
@@ -2116,7 +2116,7 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000031747843240(1.15.16) } { 'STR' "-0.000003" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0140222837049926(1.15.16) } { 'STR' "-0.014022" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0440891606270104(1.15.16) } { 'STR' "-0.044089" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "sg-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": sg@ read-mailbox ; : sg! write-mailbox ;\n: sg-now INDEXOF_TIME sg@ ;\n: sg-first-body 11 ;\n: sg-actor INDEXOF_ACTOR_INDEX sg@ ;\n: sg-n sg-actor sg-first-body - 2 / ;\n: sg-block sg-n 40 * 100 + ;\n: sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;\n: sg-meta sg-n 4 * 1200 + ;\n: sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;\n: sg-play ( clip fade -- )\n  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!\n    28 sg-b@ 26 sg-b! then\n  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;\n: sg-step\n  sg-now 1 sg-m@ < if exit then\n  0 sg-m@ 0 = if\n    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!\n    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!\n    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then\n  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!\n    2 sg-m@ 1 + 3 mod 2 sg-m! then ;\n: sg-init-fish 3 sg-m@ 0 = if\n  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!\n  0 0 sg-m! 0 2 sg-m!\n  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!\n  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!\n  1 3 sg-m! then ;\n: sg-tick sg-init-fish sg-step\n  sg-block sg-actor dfrm-pose drop\n  sg-now 2.2 * sg-n .071 * + .022 0 1\n  sg-actor 1 + fin-deform ;\nsg-tick\n" } }
 	}
 	{ 'OBJ'
 		{ 'NAME' "seahorse-23-fins" }

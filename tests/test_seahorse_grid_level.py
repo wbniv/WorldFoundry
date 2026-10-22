@@ -1,4 +1,5 @@
-"""Check the generated seahorse level's Forth startup and clip phases."""
+"""Check the generated seahorse level's actor scripts and clip phases."""
+import json
 import runpy
 from pathlib import Path
 import re
@@ -50,21 +51,34 @@ def test_abstract_level_keeps_one_seahorse_in_the_room_asset_table():
     assert "$3000001l { 'STR' \"seahorse_f_body.iff\" }" in asset_map
 
 
+def test_every_body_owns_the_same_animation_script():
+    level = (ROOT / "wflevels/seahorse_grid/seahorse_grid.lev").read_text()
+    blocks = level.split("\t{ 'OBJ'")
+    scripts = []
+    for n in range(24):
+        block = next(b for b in blocks if f'{{ \'NAME\' "seahorse-{n}-body" }}' in b)
+        source = generator["SCRIPT_FIELD"].search(block)
+        assert source is not None
+        scripts.append(json.loads(source.group(2)))
+    assert len(set(scripts)) == 1
+    assert scripts[0].endswith("sg-tick\n")
+    assert "INDEXOF_ACTOR_INDEX" in scripts[0]
+    player = next(b for b in blocks if "{ 'NAME' \"Player\" }" in b)
+    assert "sg-tick" not in player
+
+
 def actor_host(binaries, mode, actor):
-    """Run the shared body script in one actor's mailbox context."""
+    """Run one body script in the same mailbox context as its game actor."""
     zf.BIN = binaries[mode]
     host = zf.Host()
-    for line in (": INDEXOF_TIME 1906 ;", ": dfrm-pose 2drop 0 ;",
+    for line in (": INDEXOF_TIME 1906 ;", ": INDEXOF_ACTOR_INDEX 3005 ;",
+                 ": dfrm-pose 2drop 0 ;",
                  ": fin-deform 2drop 2drop drop ;"):
         assert host.eval(line) == "ok"
-    for line in generator["shared_animation_definitions"]().splitlines():
+    for line in generator["shared_animation_definitions"](11).splitlines():
         if line.strip():
             assert host.eval(line) == "ok"
-    host.write(80, 11 + 2 * actor)
-    host.write(81, 12 + 2 * actor)
-    host.write(82, actor // 2)
-    host.write(83, actor % 2 + 1)
-    host.write(84, 8 + actor // 2 * 2.6)
+    host.write(3005, 11 + 2 * actor)
     host.write(1906, .051)
     assert host.eval("sg-tick") == "ok"
     return host
@@ -76,9 +90,11 @@ def test_all_24_seahorses_start_at_staggered_rest_phases(binaries, mode):
     for actor in range(24):
         host = actor_host(binaries, mode, actor)
         try:
-            assert host.read(125) == 6
-            assert host.read(135) == 1
-            phases.append(host.read(1906) - host.read(126))
+            block = 100 + 40 * actor
+            meta = 1200 + 4 * actor
+            assert host.read(block + 25) == 6
+            assert host.read(meta + 3) == 1
+            phases.append(host.read(1906) - host.read(block + 26))
         finally:
             host.close()
     assert len({round(phase, 3) for phase in phases}) == 12
@@ -89,7 +105,7 @@ def test_all_24_seahorses_start_at_staggered_rest_phases(binaries, mode):
 def test_pair_moves_through_hover_probe_and_greeting_with_rests(binaries, mode):
     hosts = [actor_host(binaries, mode, actor) for actor in (0, 1)]
     try:
-        assert hosts[0].read(131) == pytest.approx(hosts[1].read(131))
+        assert hosts[0].read(1201) == pytest.approx(hosts[1].read(1205))
         for now, expected_state, expected_clips, expected_cycle in (
                 (8.1, 1, (8, 8), 0),
                 (13.2, 0, (6, 6), 1),
@@ -97,16 +113,21 @@ def test_pair_moves_through_hover_probe_and_greeting_with_rests(binaries, mode):
                 (23.6, 0, (6, 6), 2),
                 (31.2, 3, (1, 2), 2),
                 (37.6, 0, (6, 6), 0)):
-            for host in hosts:
+            for actor, host in enumerate(hosts):
+                block = 100 + 40 * actor
+                meta = 1200 + 4 * actor
                 host.write(1906, now)
                 assert host.eval("sg-tick") == "ok"
-                assert host.read(130) == expected_state
-                assert host.read(132) == expected_cycle
-                assert host.read(129) == pytest.approx(
+                assert host.read(meta) == expected_state
+                assert host.read(meta + 2) == expected_cycle
+                assert host.read(meta + 3) == 1
+                assert host.read(block + 29) == pytest.approx(
                     1.5 if expected_state in (0, 3) else 1.3, abs=.001)
-            assert tuple(host.read(127) for host in hosts) == expected_clips
-            assert hosts[0].read(131) == pytest.approx(hosts[1].read(131))
-        assert tuple(host.read(125) for host in hosts) == (1, 2)
+            assert tuple(host.read(100 + 40 * actor + 27)
+                         for actor, host in enumerate(hosts)) == expected_clips
+            assert hosts[0].read(1201) == pytest.approx(hosts[1].read(1205))
+        assert tuple(host.read(100 + 40 * actor + 25)
+                     for actor, host in enumerate(hosts)) == (1, 2)
     finally:
         for host in hosts:
             host.close()

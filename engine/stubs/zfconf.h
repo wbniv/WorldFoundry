@@ -29,12 +29,11 @@ typedef int zf_int;
 typedef unsigned int zf_addr;
 #define ZF_ADDR_FMT "%04x"
 
-/* Dictionary: 64 KB — bumped 2026-05-03 from 16 KB after Q*bert MVP's
- * director + player scripts overran the limit (8 word definitions across
- * the two scripts plus the ~150 INDEXOF/JOYSTICK constants pushed past
- * 16 KB and triggered ZF_ABORT_OUTSIDE_MEM at compile time).
+/* Dictionary: 128 KB — bumped 2026-10-19 after the Seahorse Grid level's
+ * shared animation definitions exceeded the remaining global dictionary
+ * space once the engine and its INDEXOF constants were initialized.
  * Stack sizes enlarged from the Linux default (8 each) to handle nesting. */
-#define ZF_DICT_SIZE   65536
+#define ZF_DICT_SIZE   131072
 #define ZF_DSTACK_SIZE 64
 #define ZF_RSTACK_SIZE 64
 

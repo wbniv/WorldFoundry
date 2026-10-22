@@ -87,56 +87,51 @@ def grid_position(n: int) -> tuple[float, float, float]:
             -.15, BOTTOM_ROW_Z + row * ROW_SPACING)
 
 
-def animation_script() -> str:
-    """All seahorses invoke the same already-compiled actor-local behavior."""
-    return "sg-tick\n"
-
-
-def shared_animation_definitions() -> str:
-    """Compile the small shared state machine once; actors invoke it independently."""
+def shared_animation_definitions(first_body: int) -> str:
+    """Use the current actor ID and separate mailbox blocks for pose and state."""
     return "\n".join([
         ": sg@ read-mailbox ; : sg! write-mailbox ;",
         ": sg-now INDEXOF_TIME sg@ ;",
+        f": sg-first-body {first_body} ;",
+        ": sg-actor INDEXOF_ACTOR_INDEX sg@ ;",
+        ": sg-n sg-actor sg-first-body - 2 / ;",
+        ": sg-block sg-n 40 * 100 + ;",
+        ": sg-b@ sg-block + sg@ ; : sg-b! sg-block + sg! ;",
+        ": sg-meta sg-n 4 * 1200 + ;",
+        ": sg-m@ sg-meta + sg@ ; : sg-m! sg-meta + sg! ;",
         ": sg-play ( clip fade -- )",
-        "  100 27 + sg@ 0 <> if 100 27 + sg@ 100 25 + sg!",
-        "    100 28 + sg@ 100 26 + sg! then",
-        "  100 29 + sg! 100 27 + sg! sg-now 100 28 + sg! ;",
+        "  27 sg-b@ 0 <> if 27 sg-b@ 25 sg-b!",
+        "    28 sg-b@ 26 sg-b! then",
+        "  29 sg-b! 27 sg-b! sg-now 28 sg-b! ;",
         ": sg-step",
-        "  sg-now 131 sg@ < if exit then",
-        "  130 sg@ 0 = if",
-        "    132 sg@ 0 = if 8 1.3 sg-play 1 130 sg! sg-now 5 + 131 sg!",
-        "    else 132 sg@ 1 = if 4 1.3 sg-play 2 130 sg! sg-now 2.7 + 131 sg!",
-        "    else 83 sg@ 1.5 sg-play 3 130 sg! sg-now 6.3 + 131 sg! then then",
-        "  else 6 1.5 sg-play 0 130 sg! sg-now 7.5 + 131 sg!",
-        "    132 sg@ 1 + 3 mod 132 sg! then ;",
-        ": sg-init-fish 135 sg@ 0 = if",
-        "  6 125 sg! 0 126 sg! 0 127 sg! 0 128 sg! 0 130 sg!",
-        "  sg-now 84 sg@ + 131 sg! sg-now 82 sg@ 1.3 * - 126 sg!",
-        "  1 135 sg! then ;",
+        "  sg-now 1 sg-m@ < if exit then",
+        "  0 sg-m@ 0 = if",
+        "    2 sg-m@ 0 = if 8 1.3 sg-play 1 0 sg-m! sg-now 5 + 1 sg-m!",
+        "    else 2 sg-m@ 1 = if 4 1.3 sg-play 2 0 sg-m! sg-now 2.7 + 1 sg-m!",
+        "    else sg-n 2 mod 1 + 1.5 sg-play 3 0 sg-m! sg-now 6.3 + 1 sg-m! then then",
+        "  else 6 1.5 sg-play 0 0 sg-m! sg-now 7.5 + 1 sg-m!",
+        "    2 sg-m@ 1 + 3 mod 2 sg-m! then ;",
+        ": sg-init-fish 3 sg-m@ 0 = if",
+        "  6 25 sg-b! 0 27 sg-b! 0 28 sg-b! 0 29 sg-b!",
+        "  0 0 sg-m! 0 2 sg-m!",
+        "  sg-now sg-n dup 2 mod - 2 / 1.3 * - 26 sg-b!",
+        "  sg-now 8 sg-n dup 2 mod - 2 / 2.6 * + + 1 sg-m!",
+        "  1 3 sg-m! then ;",
         ": sg-tick sg-init-fish sg-step",
-        "  100 80 sg@ dfrm-pose drop",
-        "  sg-now 2.2 * 82 sg@ .071 * + .022 0 1 81 sg@ fin-deform ;",
+        "  sg-block sg-actor dfrm-pose drop",
+        "  sg-now 2.2 * sg-n .071 * + .022 0 1",
+        "  sg-actor 1 + fin-deform ;",
     ]) + "\n"
 
 
 def director_script(indices: dict[str, int]) -> str:
-    """Install actor identity data once and set the fixed wide camera."""
-    script = [
-        "\\ Seahorse Grid placement setup; each body runs the shared sg-tick.",
-        shared_animation_definitions(),
-        f": sg-base {indices['seahorse-0-body']} ;",
-        ": sg-config dup 2 * sg-base + >r",
-        "  r@ 80 r@ write-actor-mailbox",
-        "  r@ 1+ 81 r@ write-actor-mailbox",
-        "  dup 2 / dup 82 r@ write-actor-mailbox",
-        "  dup 1 & 1+ 83 r@ write-actor-mailbox",
-        "  2 / 2.6 * 8 + 84 r@ write-actor-mailbox",
-        "  r> drop ;",
-        ": sg-setup 24 0 do i sg-config loop",
-    ]
-    script += ["  1 90 sg! ;", "90 sg@ 0 = if sg-setup then",
-               f"  {indices['cs_wide']} INDEXOF_CAMSHOT sg!"]
-    return "\n".join(script) + "\n"
+    """Keep the authored Director's camera selection."""
+    return f"{indices['cs_wide']} INDEXOF_CAMSHOT write-mailbox\n"
+
+
+def animation_script(first_body: int) -> str:
+    """Every seahorse body runs identical code in its own actor context."""
+    return shared_animation_definitions(first_body) + "sg-tick\n"
 
 
 def generate() -> Path:
@@ -152,7 +147,7 @@ def generate() -> Path:
     output = [blocks[name] for name in ordered]
     for name in ("Camera", "cs_wide"):
         output[ordered.index(name)] = set_position(
-            output[ordered.index(name)], 0, -9, GRID_CENTER_Z)
+            output[ordered.index(name)], 0, -11, GRID_CENTER_Z)
     output[ordered.index("LookAt")] = set_position(
         output[ordered.index("LookAt")], 0, 0, GRID_CENTER_Z)
     for n in range(COUNT):
@@ -162,14 +157,16 @@ def generate() -> Path:
             name = f"seahorse-{n}-{part}"
             output.append(place(blocks[f"seahorse-{sex}-{part}"], name, x, y, z,
                                 room_local=n == 0 and part == "body"))
-            if part == "body":
-                output[-1] = replace_script(output[-1], animation_script())
             ordered.append(name)
     indices = {name: index + 1 for index, name in enumerate(ordered)}
     output[ordered.index("Director")] = replace_script(
         output[ordered.index("Director")], director_script(indices))
     output[ordered.index("Player")] = replace_script(
-        output[ordered.index("Player")], ": sg-player 0 INDEXOF_INPUT write-mailbox ; sg-player\n")
+        output[ordered.index("Player")], "0 INDEXOF_INPUT write-mailbox\n")
+    body_script = animation_script(indices["seahorse-0-body"])
+    for n in range(COUNT):
+        body_index = ordered.index(f"seahorse-{n}-body")
+        output[body_index] = replace_script(output[body_index], body_script)
 
     TARGET.mkdir(exist_ok=True)
     (TARGET / "seahorse_grid.lev").write_text(head + "\t{ 'OBJ'" + "\t{ 'OBJ'".join(output) + source[end:])
