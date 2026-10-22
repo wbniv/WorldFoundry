@@ -636,7 +636,7 @@ Level::Level
         if(candidate.bounded){const Vector3 lo=physical.Min(),hi=physical.Max();
             candidate.lo={lo.X().AsFloat(),lo.Y().AsFloat(),lo.Z().AsFloat()};candidate.hi={hi.X().AsFloat(),hi.Y().AsFloat(),hi.Z().AsFloat()};}
         return true;};
-    wfoptions::registerBaseline(_runtimeProperties);
+    wfoptions::registerRuntimeOptions(_runtimeProperties);
 	assert( plmc->tagRam == IFFTAG('R','A','M','\0') );
 	assert( plmc->tagObjects == IFFTAG('O','B','J','D') );
 	assert( plmc->tagPerm == IFFTAG('P','E','R','M') );

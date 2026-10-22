@@ -16,9 +16,8 @@ import java.util.regex.Pattern;
  * javac -d out src/main/java/.../PlantedConfig.java src/test/java/.../PlantedConfigTest.java
  * java -cp out org.worldfoundry.screensaver.PlantedConfigTest [planted-settings.json]
  *
- * <p>With the capabilities JSON generated from the OAD (scripts/gen-planted-capabilities.py),
- * it also checks that PlantedConfig and the OAD agree: every offered option is accepted, and
- * every accepted water and speed value is offered (task test-planted-screensaver passes it).
+ * <p>With the owner-aware capabilities JSON generated from RP01, it also checks that
+ * PlantedConfig accepts the advertised water, speed and numeric bounds.
  */
 public final class PlantedConfigTest {
     private static int checks;
@@ -92,6 +91,7 @@ public final class PlantedConfigTest {
         rejects("seed", "0x10", seedMessage);
         PlantedConfig seeded = none.withSeed(4294967295L);
         check(seeded.hasSeed() && seeded.seed() == 4294967295L, "seed stored as a long");
+        check(!seeded.withoutSeed().hasSeed(), "one-run random seed clears the explicit seed");
 
         // speed
         String[] speeds = {"0.25", "0.5", "1", "2", "4", "8"};
@@ -188,11 +188,40 @@ public final class PlantedConfigTest {
         if (failures != 0) System.exit(1);
     }
 
-    // The generator writes compact JSON with a fixed key order, so a pattern reads it without
-    // a JSON library (org.json is Android-only).
-    private static final Pattern SETTING = Pattern.compile(
-            "\\{\"id\":\"([^\"]+)\",\"type\":\"choice\",\"label\":\"[^\"]*\",\"value\":\"([^\"]*)\",\"options\":\\[([^\\]]*)\\]\\}");
     private static final Pattern OPTION = Pattern.compile("\\{\"id\":\"([^\"]+)\",\"label\":\"[^\"]*\"\\}");
+
+    private static String field(String json, String key) {
+        String token = "\"key\":\"" + key + "\"";
+        int at = json.indexOf(token);
+        check(at >= 0, "catalog has " + key);
+        if (at < 0) return "{}";
+        int start = json.lastIndexOf("{\"id\":", at);
+        int depth = 0;
+        boolean quoted = false, escaped = false;
+        for (int i = start; i < json.length(); i++) {
+            char ch = json.charAt(i);
+            if (escaped) { escaped = false; continue; }
+            if (ch == '\\' && quoted) { escaped = true; continue; }
+            if (ch == '"') { quoted = !quoted; continue; }
+            if (!quoted && ch == '{') depth++;
+            if (!quoted && ch == '}' && --depth == 0) return json.substring(start, i + 1);
+        }
+        throw new IllegalArgumentException("Unclosed capability for " + key);
+    }
+
+    private static String property(String json, String name) {
+        Matcher match = Pattern.compile("\\\"" + name + "\\\":\\\"([^\\\"]*)\\\"").matcher(json);
+        return match.find() ? match.group(1) : "";
+    }
+
+    private static List<String> options(String fragment) {
+        List<String> ids = new ArrayList<>();
+        int start = fragment.indexOf("\"options\":[");
+        if (start < 0) return ids;
+        Matcher option = OPTION.matcher(fragment.substring(start, fragment.indexOf(']', start) + 1));
+        while (option.find()) ids.add(option.group(1));
+        return ids;
+    }
 
     private static void capabilitiesAgree(String path) {
         String json;
@@ -202,29 +231,21 @@ public final class PlantedConfigTest {
             check(false, "read " + path + ": " + error);
             return;
         }
-        Map<String, List<String>> offered = new LinkedHashMap<>();
-        Matcher setting = SETTING.matcher(json);
-        while (setting.find()) {
-            List<String> ids = new ArrayList<>();
-            Matcher option = OPTION.matcher(setting.group(3));
-            while (option.find()) ids.add(option.group(1));
-            offered.put(setting.group(1), ids);
-            String key = setting.group(1);
-            check(PlantedConfig.isKey(key), "capability " + key + " is a PlantedConfig key");
-            if (!PlantedConfig.isKey(key)) continue;
-            accepts(key, setting.group(2), key + "=" + setting.group(2));
-            for (String id : ids) accepts(key, id, key + "=" + id);
-        }
-        check(json.startsWith("{\"schema\":1,\"settings\":["), "capabilities are schema 1");
-        check(offered.keySet().equals(new java.util.LinkedHashSet<>(Arrays.asList("water", "speed", "hold"))),
-                "capabilities offer water, speed, hold: " + offered.keySet());
-        List<String> water = offered.getOrDefault("water", new ArrayList<>());
-        List<String> speed = offered.getOrDefault("speed", new ArrayList<>());
-        check(water.equals(Arrays.asList(PlantedConfig.waterValues())),
-                "water options " + water + " are exactly " + Arrays.toString(PlantedConfig.waterValues()));
-        check(speed.equals(Arrays.asList(PlantedConfig.speedValues())),
-                "speed options " + speed + " are exactly " + Arrays.toString(PlantedConfig.speedValues()));
-        check(!speed.contains("0") && !speed.contains("paused"), "paused is not offered");
+        check(json.startsWith("{\"schema\":2,\"objects\":["), "capabilities are owner-aware schema 2");
+        check(json.contains("\"type\":\"PlantedTankSettings\""), "catalog names the Settings type");
+        for (String key : Arrays.asList("Seed", "Water type", "Growth speed", "Initial age",
+                "Textures", "Sway", "Random seed on entry", "Hold seconds")) field(json, key);
+        List<String> water = options(field(json, "Water type"));
+        check(water.equals(Arrays.asList("0", "1")), "OAD water options are freshwater and saltwater");
+        for (String value : PlantedConfig.waterValues()) accepts("water", value, "water=" + value);
+        List<String> speed = options(field(json, "Growth speed"));
+        check(speed.equals(Arrays.asList("0", "1", "2", "3", "4", "5", "6")),
+                "OAD speed indices are 0 through 6");
+        for (String value : PlantedConfig.speedValues()) accepts("speed", value, "speed=" + value);
+        check("4294967295".equals(property(field(json, "Seed"), "maximum")), "Seed maximum matches validator");
+        check("86400".equals(property(field(json, "Hold seconds"), "maximum")), "Hold maximum matches validator");
+        accepts("seed", "4294967295", "seed=4294967295");
+        accepts("hold", "86400", "hold=86400");
         rejects("speed", "0", "paused");
     }
 }

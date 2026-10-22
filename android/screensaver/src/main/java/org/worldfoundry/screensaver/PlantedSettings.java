@@ -35,6 +35,13 @@ final class PlantedSettings {
                 .edit().putString(key, canonical).commit();
     }
 
+    /** Restore one field's default without clearing unrelated saved settings. */
+    static boolean clear(Context context, String key) {
+        if (!PlantedConfig.isKey(key)) throw new IllegalArgumentException("Unknown setting: " + key);
+        return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .edit().remove(key).commit();
+    }
+
     /** Forgets every saved value so all keys return to their defaults. */
     static boolean reset(Context context) {
         return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().clear().commit();

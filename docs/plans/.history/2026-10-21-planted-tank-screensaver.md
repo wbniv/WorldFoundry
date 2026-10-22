@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/91990750) | Planted Tank plan: Phase 4b now lists the coordinator registration entries |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/848fd337) | Planted Tank plan: record Phase 5 device verification (blocked on coordinator registration) |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/b2064b67) | Planted Tank plan: APK settings come from the OAD (settings-class objects, all fields) |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/45d2dc5b) | Planted Tank plan: record the final icon art (plants-only capture) |
@@ -18,6 +19,11 @@
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4266a44c) | Plan the Planted Tank screensaver |
 
 <!--history-meta v1
+91990750	author	Will Norris
+91990750	added	1
+91990750	deleted	1
+91990750	files	1
+91990750	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01LmFZJSGwibDCpz7J9wzY9X
 848fd337	author	Will Norris
 848fd337	added	53
 848fd337	deleted	0

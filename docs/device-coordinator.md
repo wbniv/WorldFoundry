@@ -115,22 +115,21 @@ The APK lands at
 The Chromecasts need its armeabi-v7a library; the build includes it.
 
 Parameters (`water`, `seed`, `speed`, `hold`) take two command shapes. Activity
-extras apply to that run only; the settings provider saves values for the Dream:
+extras apply to that run only; the settings provider saves values for the Dream. On the dedicated TVs, use the coordinator's owned Settings workflows:
 
 ```sh
-adb shell am start -n org.worldfoundry.plantedtank/.PlantedTankActivity --es water saltwater --el seed 713 --ef speed 2
-adb shell content call --uri content://org.worldfoundry.plantedtank.settings --method setSetting --arg water:saltwater
+task chromecast:screensaver-setting DEVICE=chromecast-test-01 SETTING_ID=4.2 VALUE=1
+task chromecast:screensaver-show DEVICE=chromecast-test-01 OVERRIDES='{"4.2":"1"}'
 ```
 
-The APK declares what the coordinator needs: its package
-`org.worldfoundry.plantedtank`, its Dream service, its settings authority
-`org.worldfoundry.plantedtank.settings` (manifest meta-data
-`org.worldfoundry.screensaver.SETTINGS_AUTHORITY`) and its settings schema,
-which `getCapabilities` serves from an asset generated from the level's OAD
-(`scripts/gen-planted-capabilities.py`). Whether the coordinator service keeps
-a package list of its own is unconfirmed (see
-[the plan](plans/2026-10-21-planted-tank-screensaver.md)). The `adb` commands
-above always work.
+Here `4.2` identifies owner 4 (Director), field 2 (Water type), and `1` is
+Saltwater. The owner/field IDs and labels come from the app's `getCapabilities`
+document, generated from the OAD-derived `RP01` catalog by
+`scripts/gen-settings-capabilities.py`. The provider authority is declared in
+the APK manifest. The coordinator has a separate package allowlist for APK
+admission; Settings fields are discovered from the provider rather than copied
+into that list. The `screensaver-show` override applies to one launch and does
+not change the saved Dream setting.
 
 ## Reservations and recovery
 

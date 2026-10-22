@@ -214,10 +214,6 @@ def build_planted() -> Path:
                     f"--types={ROOT / 'wfsource/source/oas/types3ds.s'}",
                     f"--prep={ROOT / 'wftools/prep/prep'}",
                     "-o", str(oad), str(source / "settings.oas")], cwd=ROOT, check=True)
-    # The APK's coordinator settings come from this OAD (plan: Decision, Will 2026-10-21).
-    subprocess.run(["python3", "scripts/gen-planted-capabilities.py", "--oad", str(oad), "--out",
-                    str(ROOT / "android/screensaver/src/planted/assets/planted-settings.json")],
-                   cwd=ROOT, check=True)
     standalone = LEVELS / (PLANTED + "-standalone.iff")
     subprocess.run(["python3", "scripts/build-object-properties.py",
                     "--oad", str(oad), "--bindings", str(source / "settings-bindings.json"),
@@ -226,6 +222,12 @@ def build_planted() -> Path:
                     "--include", str(source / "settings-catalog.inc"),
                     "--level", str(standalone)], cwd=ROOT, check=True)
     check_catalog(standalone.read_bytes())
+    # RP01 carries each Settings owner and its OAD-derived fields. Generate the
+    # provider asset from that exact catalog rather than a second field list.
+    subprocess.run(["python3", "scripts/gen-settings-capabilities.py",
+                    "--rprp", str(source / "settings.rprp"), "--out",
+                    str(ROOT / "android/screensaver/src/planted/assets/planted-settings.json")],
+                   cwd=ROOT, check=True)
     subprocess.run([str(ROOT / "wftools/cdpack-rs/target/release/cdpack"),
                     str(ROOT / "wfsource/source/game/shell.fth"), str(standalone),
                     "-o", str(PLANTED_BUNDLE)], cwd=ROOT, check=True)

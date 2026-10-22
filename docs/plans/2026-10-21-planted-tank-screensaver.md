@@ -1,6 +1,6 @@
 # Planted Tank screensaver
 
-Date: 2026‑10‑21. Status: **Phase 0 done; build phases not started.** Decisions made with Will on 2026‑10‑21: a generic launch-override seam (approved), `hold` as a parameter, and **plants only: no urchin, no goby, no seahorses.** Claims about existing code were read from the tree; nothing is built or run yet.
+Date: 2026‑10‑21. Status (2026‑10‑22): **Phases 0–4b implemented; offline checks pass; coordinator deployed; Phase 5 awaits device availability.** Decisions made with Will on 2026‑10‑21: a generic launch-override seam (approved), `hold` as a parameter, and **plants only: no urchin, no goby, no seahorses.**
 
 ## Context
 
@@ -73,8 +73,8 @@ sequenceDiagram
 
 ```mermaid
 flowchart LR
-    A["adb shell am start<br/>--es water saltwater --el seed 713"] --> V
-    B["adb shell content call<br/>setSetting water:saltwater"] --> P[("SharedPreferences")]
+    A["coordinator screensaver-show<br/>launch-only Settings overrides"] --> V
+    B["coordinator screensaver-setting<br/>owner.field and value"] --> P[("SharedPreferences")]
     P --> V
     D["Dream start<br/>(idle on the TV)"] --> P
     V["PlantedSettings<br/>validate once, defaults"] -->|"invalid: reject,<br/>keep old values"| X["error to caller"]
@@ -87,7 +87,9 @@ flowchart LR
 
 ## Parameters
 
-The "command line" of an Android Dream is `adb`: **activity extras** for an immediate run, and the **settings provider** (the same shell-only `content call` contract `TankSettingsProvider` uses today) for what the idle Dream will use. Both feed one validator, `PlantedSettings`, so a bad value gets the same rejection everywhere. The coordinator tray gets its settings through `getCapabilities` (schema 1, as today). **Decision (Will, 2026‑10‑21):** the APK's settings come from the OAD, not from a second copy in Java. A build step reads the compiled `settings.oad` of every object of the settings class (`Settings`; until the base class from the [runtime object editing plan](2026-10-16-runtime-object-editing.md) lands, the type name ending in `Settings`) and bakes the capabilities JSON into the APK's `assets/`. All fields of such an object are exposed, with no separate exposed-fields list; the OAD's show-as modifiers (radio buttons, labelled slider, checkbox, number) say how each field presents. `PlantedSettingsProvider.getCapabilities` serves that asset, and a test fails if `PlantedConfig`'s accepted values disagree with it. Open: whether the coordinator's schema 1 renders more than `choice` (checkbox, number, text), and what the screensaver does with `Growth speed` = Paused, which `PlantedConfig` rejects. The package registration is the APK's own manifest and settings asset; whether the coordinator keeps a package list of its own is unconfirmed.
+An Android Dream receives parameters through **activity extras** for an immediate run and a shell-only **settings provider** for what the idle Dream will use. The shared coordinator owns both routes on the test TVs. Both feed the app's validator, so a bad value gets the same rejection everywhere. **Decision (Will, 2026‑10‑21, clarified 2026‑10‑22):** handle the level's existing Settings objects generically. The planted screensaver has one `PlantedTankSettings` catalog owner (Director). Baseline's original two placed Settings objects (`SampleSettings` and `SampleSettings2`) were joined by `SampleSettings3` for the 3D picker; all three now use the OAS type `Settings`, rather than a name tied to the Baseline level. The APK must enumerate owners and their compiled OAD-derived catalog schemas, retaining owner identity so multiple objects of the same type do not collapse into one form. It generates and serves a bounded capabilities document with owner/type/field identity, presentation, allowed values and current values. The coordinator discovers that document through the app's declared provider, validates its generic schema, renders each supported field according to the OAD show-as modifier, submits a field/value update, and checks the readback. No coordinator branch or tray widget is keyed to Planted Tank, `water`, `speed`, `hold`, or the Aquarium `tank` field. Package admission remains a separate allowlist decision; it does not define the settings fields.
+
+Phase 4b uses `gen-settings-capabilities.py` to enumerate every catalog Settings owner and its fields from the compiled OAD data. Its schema 2 document keeps owner identity and supports choices, checkboxes, bounded numbers and text. The provider maps this metadata to the app's current values and validates writes. At the APK boundary it removes Paused from `Growth speed` because a paused tank cannot finish, and adds the app's `water=random` policy. The coordinator reads the declared provider, validates this bounded document, renders generic controls in the tray and verifies each write by reading it back. Baseline's three current owners are covered by a catalog test. The two-ABI APK build, Planted offline tests and full coordinator suite pass; the shared coordinator was deployed under maintenance, and device verification remains pending. This contract uses the existing catalogs and has no dependency on the object editing migration.
 
 | Key | Values | Default | Reaches the engine through | Runtime in v1 |
 |---|---|---|---|---|
@@ -100,10 +102,8 @@ The "command line" of an Android Dream is `adb`: **activity extras** for an imme
 **Sequences are reproducible.** With a fixed `seed`, tank 0 uses it exactly and tank *k* uses a documented 32-bit mix of `(seed, k)`; with `water=random` the water of each tank comes from the same mix. Replaying a command replays the whole run (a fixed seed that repeated the identical tank every cycle would be dull, so later tanks derive from it). With no seed, the engine's own `freshSeed()` runs per tank and the host sets nothing per tank. To set the next tank's values in time, the table keeps an **`applications()` counter** that rises each time a registry load applies it; the host watches it from `WFAndroidPumpEvents`. Java and the host share one test vector for the mix.
 
 ```text
-adb shell am start -n org.worldfoundry.plantedtank/.PlantedTankActivity \
-    --es water saltwater --el seed 713 --ef speed 2
-adb shell content call --uri content://org.worldfoundry.plantedtank.settings \
-    --method setSetting --arg water:saltwater
+task chromecast:screensaver-show DEVICE=chromecast-test-01 OVERRIDES='{"4.2":"1","4.1":"713","4.3":"4"}'
+task chromecast:screensaver-setting DEVICE=chromecast-test-01 SETTING_ID=4.2 VALUE=1
 ```
 
 [![Command builder: rejected-input state](2026-10-21-planted-tank-screensaver/parameters.png)](2026-10-21-planted-tank-screensaver/parameters.html)
@@ -144,7 +144,7 @@ Tiers are dispatch inputs (ranking is done inline, never delegated). Torn calls 
 | ~~2b~~ | ~~Native host~~ **Done** (`eea849fe`): `planted_bridge.cc/.h` (parsing, defaults, `mix32`, the tank sequencer and the counter watcher, free of Android and engine includes), the JNI `nativeConfigure`, first-tank overrides before `HALStart`, per-tank overrides from the pump. 113 unit checks pass (`task test-planted-bridge`); `assemblePlantedDebug` for **arm64-v8a only** builds and links, which also compiled the engine hook natively. **Not yet run on a device** | T3 | uses the new table; no engine state touched |
 | ~~3~~ | ~~Icon and banner with the badge~~ **Done** (`d79cabcf`, then final art in `c181ce6a`): a real capture of the plants-only level (saltwater, seed 713, `Initial age` 194, 1920×1080 under Xvfb, seed strip and FPS counter masked, resized to 1280×720), the icon crop `(430, 200, 790, 560)`, 13 icon tests pass. Desktop software-GL render, not a device capture. `gen-screensaver-android-icons.py` is Will's untracked file and carries the edit uncommitted | T2 | follows the existing Seahorse recipe |
 | ~~4a~~ | ~~`task` entries, coordinator guide section, README~~ **Done** (`3d56263d`): `build-planted-level`, `build-planted-apk` (both ABIs), `test-planted-screensaver`; dry-run only | T1 | recipes |
-| 4b | **Coordinator registration** of `org.worldfoundry.plantedtank` and its settings authority. **Confirmed needed (Phase 5, 2026‑10‑21):** `task chromecast:submit WORKFLOW=install …` answers `APK package is not registered: org.worldfoundry.plantedtank` ([raw](2026-10-21-planted-tank-screensaver/phase5/install-cast1-rejected.txt)). In `~/chromecast-coordinator/scripts/wf_device/plugins/android/`: (1) `applications.json` entry like `seahorse-screensaver` (unblocks install and check); (2) `dream_check.py` `COMPONENTS`; (3) `conditions.py` dream settings; (4) `screensaver.py` `run_show` and `_capabilities` (second authority); (5) `platform_facts.py`, `tray_qt.py`; (6) a workflow that passes `am start` extras (none exists, so steps 7–9 need it). The coordinator's `capture()` also false-fails screensaver apps (the scan covers `wf.log` history because the host writes no `wf_game android_main` marker). **Needs Will** | T5 | a change to shared infrastructure; blocks device runs through `task chromecast:*` |
+| 4b | **Generic `Settings` class support in the coordinator and APK contract.** Implemented and offline verified: the coordinator discovers the selected app's declared settings provider, validates bounded OAD-derived owner/field metadata, renders supported show-as types, writes any advertised field and verifies readback without app-specific settings branches. Declarative package admission for `org.worldfoundry.plantedtank`, generic Dream preview and launch parameters, and the screensaver `capture()` log boundary are included. The APK catalog/provider supports the generic field contract. **Shared coordinator deployed; device verification pending.** | T5 | cross-repository contract and shared infrastructure; device runs use `task chromecast:*` |
 | 5 | Device verification **with a two-ABI build** (the Chromecasts report `armeabi-v7a`; the 2b check built `arm64-v8a` only), soak, natural-idle check through the coordinator | T3 | procedure with judgment about results |
 
 Phase 2c comes before 2b. **Will approved the generic seam on 2026‑10‑21** (earlier: "i'd want it to be more generic than just plant settings"; answer to the build-it question: "generic"). I took "generic" to mean the data table, not the 5-line host callback. S4 may change Phase 1.

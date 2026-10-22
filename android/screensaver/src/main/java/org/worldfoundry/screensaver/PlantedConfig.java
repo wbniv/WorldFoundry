@@ -149,6 +149,10 @@ final class PlantedConfig {
         return new PlantedConfig(water, parsed, speed, hold, age, textures, sway);
     }
 
+    PlantedConfig withoutSeed() {
+        return new PlantedConfig(water, null, speed, hold, age, textures, sway);
+    }
+
     PlantedConfig withSpeed(Object value) {
         double parsed = decimal(value, Double.NaN);
         if (parsed == 0.0) {

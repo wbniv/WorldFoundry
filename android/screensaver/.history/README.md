@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/d1676c33) | Planted Tank: generate the APK's coordinator settings from the OAD |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/3d56263d) | Planted Tank Phase 4a: Taskfile build and test entries, coordinator and README docs |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/8876f6cd) | Planted Tank screensaver: Java side (PlantedConfig, settings, provider, activity, Dream) |
 | [2026-10-19](https://github.com/wbniv/WorldFoundry/commit/0df0c0ad) | Add branded aquarium and seahorse screensavers |
 | [2026-10-18](https://github.com/wbniv/WorldFoundry/commit/54f44b51) | Add live aquarium screensaver with per-tank players |
 
 <!--history-meta v1
+d1676c33	author	Will Norris
+d1676c33	added	2
+d1676c33	deleted	2
+d1676c33	files	1
+d1676c33	body	Will's decision (docs/plans/2026-10-21-planted-tank-screensaver.md): the APK's\nsettings come from the OAD, not a second copy in Java.\n\n- scripts/gen-planted-capabilities.py reads the compiled settings-class OAD\n  (type name ending in Settings) through build-object-properties.py's\n  normalizer (new oad_schema()) and writes the schema-1 capabilities JSON.\n  Labelled choices (radio, labelled slider) become choice; Hold's number\n  keeps the 1/2/5/10 min presets, validated against the OAD range; Paused\n  is dropped; checkbox/text/bare-number fields are skipped with a warning.\n- build_planted() writes it to the planted flavor's assets (gitignored).\n- PlantedSettingsProvider.getCapabilities serves the asset with the saved\n  values overlaid (same document as before) and throws if it is missing.\n- PlantedConfigTest takes the generated JSON and fails when PlantedConfig\n  and the OAD disagree; tests/test_planted_capabilities.py pins the\n  document; task test-planted-screensaver runs both.\n- Docs: replace the unconfirmed "coordinator does not register the\n  package" claim with what the APK declares.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01LmFZJSGwibDCpz7J9wzY9X
 3d56263d	author	Will Norris
 3d56263d	added	2
 3d56263d	deleted	0

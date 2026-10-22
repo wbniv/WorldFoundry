@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Launches the Planted Tank on demand. Intent extras ({@code --es water}, {@code --el seed},
@@ -13,6 +15,7 @@ import android.widget.Toast;
  */
 public final class PlantedTankActivity extends Activity {
     private static final String TAG = "planted";
+    static final String SETTINGS_OVERRIDES_EXTRA = "org.worldfoundry.settings.OVERRIDES";
 
     private TankPlayer player;
     private String line;
@@ -21,7 +24,7 @@ public final class PlantedTankActivity extends Activity {
         super.onCreate(state);
         try {
             line = overlay(PlantedSettings.load(this), getIntent().getExtras()).toLine();
-        } catch (IllegalArgumentException rejected) {
+        } catch (IllegalArgumentException | JSONException rejected) {
             Log.e(TAG, rejected.getMessage());
             Toast.makeText(this, rejected.getMessage(), Toast.LENGTH_LONG).show();
             finish();
@@ -34,11 +37,18 @@ public final class PlantedTankActivity extends Activity {
     }
 
     @SuppressWarnings("deprecation")
-    private static PlantedConfig overlay(PlantedConfig base, Bundle extras) {
+    private PlantedConfig overlay(PlantedConfig base, Bundle extras) throws JSONException {
         if (extras == null) return base;
         PlantedConfig config = base;
         for (String key : PlantedConfig.KEYS) {
             if (extras.containsKey(key)) config = config.with(key, extras.get(key));
+        }
+        if (extras.containsKey(SETTINGS_OVERRIDES_EXTRA)) {
+            String json = extras.getString(SETTINGS_OVERRIDES_EXTRA);
+            if (json == null || json.length() > 8192) {
+                throw new IllegalArgumentException("Invalid Settings launch overrides");
+            }
+            config = PlantedSettingsProvider.overlay(this, config, new JSONObject(json));
         }
         return config;
     }
