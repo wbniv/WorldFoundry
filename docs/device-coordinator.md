@@ -103,6 +103,11 @@ installed and launcher-verified totals; default watching waits for complete
 workflows. A failed child does not cancel unrelated children. Recovery and
 cleanup gates still apply, and there is no cross-app rollback.
 
+Launcher verification wakes the device and gives a showing Dream a bounded time
+to leave before it starts HOME. If verification still fails, the job ends
+`failed` with `launcher-home-occluded` or `launcher-unverified`, keeps its
+installation, and does not fence the device.
+
 Use `BATCH` with status/watch/evidence/cancel. Evidence is stored under
 `item-NN/device/job`, with a batch manifest. Cancellation affects only your
 unfinished jobs and preserves completed installs. Closing a watcher never
@@ -270,6 +275,12 @@ Wireless debugging or another specific connection condition remains. Read
 reconciles the earlier job's pending foreground cleanup before new tests run.
 
 ## Service administration
+
+A queued job left by another owner cannot be cancelled by the operator or by
+another session. `task coordinator:cancel-queued:window -- JOB` (from the
+coordinator checkout, dry run unless `--confirm`) cancels named queued jobs with
+a recorded reason; it never changes recovery obligations. See the
+[administrator cancel plan](https://github.com/wbniv/chromecast-coordinator/blob/main/docs/plans/2026-10-23-administrator-cancel.md).
 
 Prepare and review releases in the standalone project. Its deployment runner
 saves a transcript and uses the root-owned upgrade helper, draining complete

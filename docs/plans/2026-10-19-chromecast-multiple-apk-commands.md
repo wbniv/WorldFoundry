@@ -241,9 +241,32 @@ and the queue was empty beforehand. Evidence: [`multi-apk-2026-10-23`](../diagno
 - **Confirmed:** one command produced four independently attributed children with per-child hashes and results;
   a failed child did not cancel the others; evidence downloaded as `item-NN/device/job`. The 19 October failure
   (`needs-local-setup` on every child) did not recur.
-- **Open:** why the post-install step ended in `recovery-required` on both casts, with different reasons. Both
-  devices reported `ready` / `recovered` afterwards. Not investigated; no direct ADB or bypass was used.
-- **Bug:** `task chromecast:watch BATCH=… STAGE=install` exits with "STAGE=install requires an installation
-  batch" on this install batch.
-- **Next:** use the current Baseline build (version code 4 or later), then repeat. Launcher and artwork,
-  Cast2 directional-input gameplay, heterogeneous check recipe, profile/record and simpleperf remain pending.
+- **Root cause of the Aquarium `recovery-required` results:** both casts were already showing the Seahorse Grid
+  screensaver. The install stage passed, but launcher verification started HOME with `am start -W` and no wake, so
+  HOME never reached the foreground: cast2 ended `home-left-foreground` three times (`plugin-error`), and
+  cast1's Android 14 `am start -W` blocked until the command deadline (`transport-unavailable`) although the
+  connection was healthy. Not a batching race. A single-APK install failed the same way on 2026‑10‑20. Full
+  analysis: [post-install-recovery-analysis](../diagnostics/multi-apk-2026-10-23/post-install-recovery-analysis.md).
+  A scalar re-run on cast2 (`J‑74e032b3434a`) passed because the launcher was already on top, so it did not exercise
+  the screensaver case; a `screensaver-trigger` attempt to create it ended `dream-not-observed`.
+- **Bug (fixed):** `watch BATCH=… STAGE=install` raised once any child finished installing, because the
+  continuation rewrites `request.workflow` to `verify-launch`; the same rewrite zeroed the installed totals. Fixed
+  with `store.install_stage()` (coordinator commit `e37dd6f`, issue
+  [#1](https://github.com/wbniv/chromecast-coordinator/issues/1)).
+- **Fixes (coordinator `main`, pushed):** `4b23847` wakes the device and waits for the screensaver before HOME and
+  drops `-W`; `a356186` ends a failed launcher verification as `failed` (`launcher-home-occluded` or
+  `launcher-unverified`) instead of `plugin-error`; `8bc97ab` reports a command timeout on a device that still
+  answers a liveness probe as `device-command-timeout`, not `transport-unavailable`. No hardware has exercised the
+  wake or the probe yet.
+- **Deploy status:** the fixes are not yet on the live service. Two deploys were refused because recovery was
+  outstanding (cast2 after a reboot request that this work did not make, then cast1 after another session's
+  `record` job), and each retained maintenance. The third uses a `--preserve-recovery` review of the fixes only,
+  without the other session's tray commits.
+- **Administrator cancel (new):** a stuck queued automatic readd on cast1 could not be removed because `cancel`
+  is owner-only, and it deadlocked the deploy. `deploy/cancel-queued.py` (coordinator `2f7385b`,
+  [plan](https://github.com/wbniv/chromecast-coordinator/blob/main/docs/plans/2026-10-23-administrator-cancel.md))
+  cancels explicitly named queued jobs from a sudo terminal with a recorded reason and leaves every recovery
+  obligation in place. Used once, on `J‑a42017178205`.
+- **Next:** finish the deploy, repeat the batch with the current Baseline build (version code 4 or later), and
+  confirm the wake on hardware when a cast is dreaming. Launcher and artwork, Cast2 directional-input gameplay,
+  heterogeneous check recipe, profile/record and simpleperf remain pending.
