@@ -29,7 +29,7 @@ RUN apt-get update \
  && apt-get update --snapshot "${UBUNTU_SNAPSHOT}" \
  && apt-get install -y --no-install-recommends --snapshot "${UBUNTU_SNAPSHOT}" \
       "blender=${BLENDER_DEB}" "python3-numpy=${NUMPY_DEB}" "python3-pil=${PIL_DEB}" \
-      python3 build-essential pkg-config git \
+      build-essential git pkg-config python3 \
  && rm -rf /var/lib/apt/lists/*
 
 # The Rust level tools (iffcomp, levcomp, textile, oas2oad, wf_core) build from the
