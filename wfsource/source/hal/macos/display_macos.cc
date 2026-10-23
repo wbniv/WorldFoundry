@@ -92,6 +92,7 @@ Display::Display(int /*orderTableSize*/,
     , _memory(memory)
 {
     _memory.Validate();
+    gActiveDisplay = this;
 
     const int w = (_halWindowWidth  > 0) ? _halWindowWidth  : xSize;
     const int h = (_halWindowHeight > 0) ? _halWindowHeight : ySize;
@@ -127,6 +128,7 @@ Display::Display(int /*orderTableSize*/,
 
 Display::~Display()
 {
+    if (gActiveDisplay == this) gActiveDisplay = nullptr;
     Validate();
 }
 

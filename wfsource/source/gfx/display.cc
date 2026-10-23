@@ -32,6 +32,13 @@
 int Display::VRAMWidth  = 1024;
 int Display::VRAMHeight = 512;
 
+#if defined(WF_TARGET_IOS) || defined(WF_TARGET_MACOS)
+// The GL Display defines this in gfx/gl/display.cc. Metal targets include
+// their Display implementation below and need the same active-instance API.
+static Display* gActiveDisplay = nullptr;
+Display* Display::GetActive() { return gActiveDisplay; }
+#endif
+
 #if defined(WF_TARGET_IOS)
 // iOS uses the Metal backend; windowing/drawable acquisition live in
 // hal/ios/metal_view.mm rather than gfx/gl/mesa.cc. Display on iOS is a
