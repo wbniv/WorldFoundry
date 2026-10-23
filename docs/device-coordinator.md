@@ -41,6 +41,75 @@ submitting; they never copy adapters or run sudo to upgrade the shared service.
 Legacy profile and Android routing scripts use the installed client API through
 `scripts/wf_device`, retaining only World Foundry producer helpers there.
 
+### Multiple APKs in one command
+
+`submit WORKFLOW=install`, `check`, `profile`, `simpleperf` and non-interactive
+`record` accept complete APK paths after `--`. Each distinct app and selected
+device gets an ordinary owned job within one durable batch. Package names come
+from APK manifests and must match the coordinator's registered applications.
+This requires client and service capability `multi_apk_batches: 1`; older
+services reject the request before uploading inputs or creating jobs.
+
+```sh
+task chromecast:submit WORKFLOW=install DEVICE=chromecast-test-01,chromecast-test-02 -- /build/aquarium.apk '/build/baseline release.apk'
+task chromecast:watch BATCH=B-example STAGE=install
+task chromecast:watch BATCH=B-example
+task chromecast:evidence BATCH=B-example OUT=docs/diagnostics/app-batch
+
+task chromecast:check DEVICE=chromecast-test-01 VALIDATOR=poke-resume -- /build/condo.apk /build/qbert.apk
+task chromecast:profile DEVICE=chromecast-test-01 RUNS=3 -- /build/condo.apk /build/qbert.apk
+task chromecast:simpleperf DEVICE=chromecast-test-01 DURATION=10 -- /build/condo-profileable.apk /build/qbert-profileable.apk
+task chromecast:record DEVICE=chromecast-test-01 DURATION=10 -- /build/condo.apk /build/qbert.apk
+```
+
+Use an explicit `DEVICE` or device list. `DEVICE=all` resolves once and prints
+the enrolled targets, including phones; `POOL` is unsupported for APK lists.
+Do not combine positional paths with scalar `APK`, `RECIPE`, or a global `APP`
+for several apps. Existing `APP=... APK=...` commands retain their behavior.
+In World Foundry, `chromecast:install` remains the host-coordinator deployment
+alias; app installation uses `chromecast:submit WORKFLOW=install`.
+
+For different per-app options, save a recipe and use
+`task chromecast:check DEVICE=chromecast-test-01 RECIPE=/path/checks.json`:
+
+```json
+{
+  "workflow": "check",
+  "items": [
+    {"app": "aquarium", "apk": "/build/aquarium.apk", "validator": "menu-back"},
+    {"app": "baseline", "apk": "/build/baseline.apk", "validator": "baseline-settings"}
+  ]
+}
+```
+
+Items inherit the workflow and common options. Allowed item fields are `app`,
+`apk`, `validator`, `scene`, `duration`, `warmup`, `runs`, `trace`, `frequency`,
+`callgraph`, `record`, `reinstall`, `require_abi` and `input_script`; each workflow
+still enforces its schema. Item targets/workflows and unknown fields are rejected.
+`menu-back` requires Aquarium; Baseline diagnostic checks require a diagnostic
+APK, and simpleperf requires a profileable or debuggable APK.
+
+The bounds are 32 items, 128 app/device jobs, 32 MiB per APK and 256 MiB of unique
+APK bytes. All files are frozen and validated before admission; no child is
+accepted if any item fails. Split APKs and duplicate packages are rejected.
+Use `variant-benchmark` for labelled builds of one app plus its restoration APK.
+Interactive recording/input, capture, reconnect and configuration do not accept
+APK lists.
+
+Installation and launcher verification have separate results. A reservation can
+hold launcher verification while later background installs continue.
+`STAGE=install` returns when all installations succeed or fail and prints the
+installed and launcher-verified totals; default watching waits for complete
+workflows. A failed child does not cancel unrelated children. Recovery and
+cleanup gates still apply, and there is no cross-app rollback.
+
+Use `BATCH` with status/watch/evidence/cancel. Evidence is stored under
+`item-NN/device/job`, with a batch manifest. Cancellation affects only your
+unfinished jobs and preserves completed installs. Closing a watcher never
+cancels work; messages still require an explicit `JOB`.
+
+See the [implementation plan](plans/2026-10-19-chromecast-multiple-apk-commands.md) for rollout status.
+
 ## Aquarium screensaver
 
 The separate `android/screensaver` APK runs a live aquarium level Dream and a
@@ -147,6 +216,59 @@ phone control outside coordinator ownership; downtime grants no fallback.
 Factory reset, account changes, unrelated deletion and security disabling require
 separate authorization.
 
+### Cast1 recovery when Wireless debugging stops advertising
+
+An Aquarium Dream can still be visible on the TV while cast1 loses its debugging
+connection. A black screenshot taken at Dream startup does not establish that the
+TV is black. If a job ends `recovery-required` and an owned readd reports
+`device-not-found-on-network`, use the coordinator's **Next** diagnosis; do not
+repeat readd without changing the TV condition.
+
+**KDE tray:** Open the tray → **Devices** → **chromecast-test-01** → **Diagnose**.
+The device card and dialog show the coordinator's connection diagnosis and next
+action. On the TV, go to **Settings → System → Developer options → Wireless
+debugging** and turn it on if off. If it is already on but no debugging service is
+advertised, first confirm **Settings → Network & Internet** shows Wi-Fi connected,
+then turn Wireless debugging off and back on. Use **Readd…** once after that
+change and wait for the result.
+The device should become **ready** with no pending cleanup. If readd says pairing
+is required after the fence has cleared, an authorized operator can use
+**Pair…**: leave the TV's **Pair device with pairing code** screen open, enter
+its temporary address and port and six-digit code in the masked dialog, then
+press **Readd now**. The pairing port is different from the normal connection
+port. **Pair currently refuses submission while a recovery fence remains**;
+if it reports `pairing-not-grantable`, stop and ask the coordinator
+administrator to resolve that recovery state. This is a coordinator workflow
+gap, not a bad pairing code. The Pair dialog clears the code before submission;
+if its fields become active again with no accepted job ID, read the message below
+the fields. That means submission failed before the TV could check the code.
+If **Pair…** is unavailable, the operator may lack
+pairing authorization. Do not put the code in chat, a command argument, or a
+file. If readd fails, refresh **Devices** and use **Diagnose** again: the next
+action may have changed. Check the TV's network connection if the new diagnosis
+says Cast is unreachable.
+
+**Command line:** From this repository, inspect the diagnosis and recovery
+obligation, change the TV setting as above, then make one owned recovery attempt:
+
+```sh
+task chromecast:devices
+task chromecast:queue
+task chromecast:readd DEVICE=chromecast-test-01
+task chromecast:queue
+```
+
+The final queue should show cast1 **ready** and no pending cleanup. If the readd
+reports `pairing-required` after the fence clears, follow the administrator's secure
+[pairing procedure](https://github.com/wbniv/chromecast-coordinator/blob/main/docs/operations.md#capture-and-reconnect)
+from the coordinator checkout; it uses a hidden prompt and a temporary pairing
+target. Pairing is only needed when readd reports it. Pairing admission currently
+rejects a device with an unresolved recovery fence. A repeated
+`device-not-found-on-network` result means the TV still is not advertising
+Wireless debugging or another specific connection condition remains. Read
+`task chromecast:devices` and stop unchanged retries. A successful readd
+reconciles the earlier job's pending foreground cleanup before new tests run.
+
 ## Service administration
 
 Prepare and review releases in the standalone project. Its deployment runner
@@ -166,72 +288,3 @@ See [migration plan](plans/2026-10-06-standalone-chromecast-coordinator.md) and
 Host bypass verification remains pending; do not claim enforcement until those
 checks pass. The GitHub repository stays private through the full acceptance and
 publication review.
-### Multiple APKs in one command
-
-`submit WORKFLOW=install`, `check`, `profile`, `simpleperf` and non-interactive
-`record` accept complete APK paths after `--`. Each distinct app and selected
-device gets an ordinary owned job within one durable batch. Package names come
-from APK manifests and must match the coordinator's registered applications.
-This requires client and service capability `multi_apk_batches: 1`; older
-services reject the request before uploading inputs or creating jobs.
-
-```sh
-task chromecast:submit WORKFLOW=install DEVICE=chromecast-test-01,chromecast-test-02 -- /build/aquarium.apk '/build/baseline release.apk'
-task chromecast:watch BATCH=B-example STAGE=install
-task chromecast:watch BATCH=B-example
-task chromecast:evidence BATCH=B-example OUT=docs/diagnostics/app-batch
-
-task chromecast:check DEVICE=chromecast-test-01 VALIDATOR=poke-resume -- /build/condo.apk /build/qbert.apk
-task chromecast:profile DEVICE=chromecast-test-01 RUNS=3 -- /build/condo.apk /build/qbert.apk
-task chromecast:simpleperf DEVICE=chromecast-test-01 DURATION=10 -- /build/condo-profileable.apk /build/qbert-profileable.apk
-task chromecast:record DEVICE=chromecast-test-01 DURATION=10 -- /build/condo.apk /build/qbert.apk
-```
-
-Use an explicit `DEVICE` or device list. `DEVICE=all` resolves once and prints
-the enrolled targets, including phones; `POOL` is unsupported for APK lists.
-Do not combine positional paths with scalar `APK`, `RECIPE`, or a global `APP`
-for several apps. Existing `APP=... APK=...` commands retain their behavior.
-In World Foundry, `chromecast:install` remains the host-coordinator deployment
-alias; app installation uses `chromecast:submit WORKFLOW=install`.
-
-For different per-app options, save a recipe and use
-`task chromecast:check DEVICE=chromecast-test-01 RECIPE=/path/checks.json`:
-
-```json
-{
-  "workflow": "check",
-  "items": [
-    {"app": "aquarium", "apk": "/build/aquarium.apk", "validator": "menu-back"},
-    {"app": "baseline", "apk": "/build/baseline.apk", "validator": "baseline-settings"}
-  ]
-}
-```
-
-Items inherit the workflow and common options. Allowed item fields are `app`,
-`apk`, `validator`, `scene`, `duration`, `warmup`, `runs`, `trace`, `frequency`,
-`callgraph`, `record`, `reinstall`, `require_abi` and `input_script`; each workflow
-still enforces its schema. Item targets/workflows and unknown fields are rejected.
-`menu-back` requires Aquarium; Baseline diagnostic checks require a diagnostic
-APK, and simpleperf requires a profileable or debuggable APK.
-
-The bounds are 32 items, 128 app/device jobs, 32 MiB per APK and 256 MiB of unique
-APK bytes. All files are frozen and validated before admission; no child is
-accepted if any item fails. Split APKs and duplicate packages are rejected.
-Use `variant-benchmark` for labelled builds of one app plus its restoration APK.
-Interactive recording/input, capture, reconnect and configuration do not accept
-APK lists.
-
-Installation and launcher verification have separate results. A reservation can
-hold launcher verification while later background installs continue.
-`STAGE=install` returns when all installations succeed or fail and prints the
-installed and launcher-verified totals; default watching waits for complete
-workflows. A failed child does not cancel unrelated children. Recovery and
-cleanup gates still apply, and there is no cross-app rollback.
-
-Use `BATCH` with status/watch/evidence/cancel. Evidence is stored under
-`item-NN/device/job`, with a batch manifest. Cancellation affects only your
-unfinished jobs and preserves completed installs. Closing a watcher never
-cancels work; messages still require an explicit `JOB`.
-
-See the [implementation plan](plans/2026-10-19-chromecast-multiple-apk-commands.md) for rollout status.
-
