@@ -29,6 +29,7 @@
 #endif
 
 #include <gfx/renderer_backend.hp>
+#include <gfx/glpipeline/compact_vertex.hp>
 #include <game/bitmap_text.hp>
 #include <hal/halbase.h>
 #include <gfx/static_mesh.hp>
@@ -67,7 +68,7 @@ static const char* kShaderHeader = "#version 330 core\n";
 
 static const char* kVS =
     "layout(location=0) in vec3 a_pos;\n"
-    "layout(location=1) in vec3 a_color;\n"
+    "layout(location=1) in vec4 a_color;\n"
     "layout(location=2) in vec2 a_uv;\n"
     "layout(location=3) in vec3 a_normal;\n"
     "layout(location=4) in float a_opacity;\n"
@@ -83,6 +84,7 @@ static const char* kVS =
     "uniform mat4 u_mvp;\n"
     "uniform mat4 u_mv;\n"
     "uniform int  u_lighting;\n"
+    "uniform int  u_static_compact;\n"
     "uniform vec3 u_ambient;\n"
     "uniform vec3 u_light_dir[3];\n"
     "uniform vec3 u_light_color[3];\n"
@@ -92,13 +94,20 @@ static const char* kVS =
     "void main()\n"
     "{\n"
     "    gl_Position = u_mvp * vec4(a_pos, 1.0);\n"
-    "    v_color = a_color;\n"
+    "    v_color = u_static_compact != 0 ? a_color.rgb * (a_color.a < 0.5 ? (255.0 / 256.0) : 1.0) : a_color.rgb;\n"
     "    v_uv = a_uv;\n"
     "    v_opacity = a_opacity;\n"
     "    v_palette_dark = a_palette_dark;\n"
     "    v_palette_light = a_palette_light;\n"
     "    if (u_lighting != 0) {\n"
-    "        vec3 N = normalize((u_mv * vec4(a_normal, 0.0)).xyz);\n"
+    "        vec3 sourceNormal = a_normal;\n"
+    "        if (u_static_compact != 0) {\n"
+    "            vec2 e = a_normal.xy;\n"
+    "            vec3 decoded = vec3(e, 1.0 - abs(e.x) - abs(e.y));\n"
+    "            if (decoded.z < 0.0) decoded.xy = (1.0 - abs(decoded.yx)) * sign(decoded.xy);\n"
+    "            sourceNormal = normalize(decoded);\n"
+    "        }\n"
+    "        vec3 N = normalize((u_mv * vec4(sourceNormal, 0.0)).xyz);\n"
     "        vec3 lit = u_ambient;\n"
     "        for (int i = 0; i < 3; ++i) {\n"
     "            lit += u_light_color[i] * max(0.0, dot(N, u_light_dir[i]));\n"
@@ -167,6 +176,7 @@ struct Vert
     float paletteDark[4]; // RGB endpoints plus enabled flag.
     float paletteLight[3];
 };
+static_assert(sizeof(Vert) == 76, "legacy streaming vertex must remain 76 bytes");
 
 // ---- matrix helpers (all column-major, GL convention) -----------------------
 
@@ -203,9 +213,8 @@ static void Mat4Multiply(const float a[16], const float b[16], float out[16])
 // gfx/backface_cull.hp, shared with the static-mesh cull so both see the same
 // bits.
 
-// One vertex as the shader sees it. Used by the streaming path (per triangle,
-// from the backend's current state) and by CreateStaticMesh (from the state
-// recorded with each triangle), so the two paths produce identical bytes.
+// The unchanged streaming vertex. Baked meshes use this layout only when a
+// source color or normal cannot be represented by the compact layout.
 static void PackVert(Vert& dst, const RBVertex& v, float nx, float ny, float nz,
                      float opacity, bool paletteEnabled, unsigned paletteDark, unsigned paletteLight)
 {
@@ -222,8 +231,23 @@ static void PackVert(Vert& dst, const RBVertex& v, float nx, float ny, float nz,
     dst.paletteDark[3]=paletteEnabled ? 1.f : 0.f;
 }
 
-// Vertex attribute layout for the currently bound VAO + GL_ARRAY_BUFFER.
-// Shared by the streaming VAO and every static-mesh VAO.
+static void SetupStaticVertexAttribs()
+{
+    const GLsizei stride=sizeof(wf_compact_vertex::Vertex);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,stride,(void*)offsetof(wf_compact_vertex::Vertex,x));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1,4,GL_UNSIGNED_BYTE,GL_TRUE,stride,(void*)offsetof(wf_compact_vertex::Vertex,r));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2,2,GL_FLOAT,GL_FALSE,stride,(void*)offsetof(wf_compact_vertex::Vertex,u));
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3,2,GL_SHORT,GL_TRUE,stride,(void*)offsetof(wf_compact_vertex::Vertex,ox));
+    glDisableVertexAttribArray(4);
+    glDisableVertexAttribArray(5);
+    glDisableVertexAttribArray(6);
+}
+
+// Vertex attribute layout for the streaming VAO and legacy baked meshes.
 static void SetupVertexAttribs()
 {
     const GLsizei stride = sizeof(Vert);
@@ -251,7 +275,7 @@ static void SetupVertexAttribs()
                           (void*)offsetof(Vert, paletteLight));
 }
 
-// A static mesh (E3 phase 1): one VBO of packed Verts (3 per triangle, in the
+// A static mesh (E3 phase 1): one VBO of packed vertices (3 per triangle, in the
 // order given to CreateStaticMesh), and a VAO that binds it and an index buffer
 // re-filled per draw with the surviving triangles. Normally all mesh VAOs
 // share the backend's index buffer; the measurement switch restores per-mesh
@@ -265,6 +289,7 @@ struct StaticMeshGL
     int triangles = 0;
     bool index32 = false;       // more than 65536 vertices
     bool sharedIndex = false;  // backend owns ibo; mesh only holds a reference
+    bool compact = false;      // unsupported source colors keep the legacy layout
     size_t vboBytes = 0;
     size_t iboBytes = 0;        // largest index upload so far
 };
@@ -427,8 +452,8 @@ public:
 
     void SetTexturePalette(bool e,unsigned dark,unsigned light) override
     {
-        // Palette belongs to each vertex, so sorted translucent fish can share
-        // a draw call even when their palettes alternate in depth order.
+        // Streaming palette belongs to each vertex, so sorted translucent fish
+        // can share a draw call even when palettes alternate in depth order.
         _paletteEnabled=e;_paletteDark=dark;_paletteLight=light;
     }
     void SetOpacity(float opacity) override
@@ -844,7 +869,9 @@ public:
         mesh->generation = _contextGeneration;
         mesh->triangles  = count;
         mesh->index32    = size_t(count) * 3 > 65536;
-        mesh->vboBytes   = size_t(count) * 3 * sizeof(Vert);
+        mesh->compact   = wf_compact_vertex::CanPack(triangles, count);
+        mesh->vboBytes   = size_t(count) * 3 *
+            (mesh->compact ? sizeof(wf_compact_vertex::Vertex) : sizeof(Vert));
         mesh->sharedIndex = StaticMeshSharedIndex();
         glGenVertexArrays(1, &mesh->vao);
         glGenBuffers(1, &mesh->vbo);
@@ -874,26 +901,49 @@ public:
         glBindVertexArray(mesh->vao);
         glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
         glBufferData(GL_ARRAY_BUFFER, GLsizeiptr(mesh->vboBytes), NULL, GL_STATIC_DRAW);
-        // Pack exactly as Pack would have, in chunks: the transient stays
-        // small (kChunk x 228 B = 58 KB) instead of a whole mesh (1.1 MB for
-        // the largest), so the allocator does not keep a large freed block
-        // around (cast1 native heap rose 1.2 MB with a whole-mesh vector).
+        // Upload in chunks so the transient stays small instead of retaining
+        // one whole-mesh vector. Unsupported color/normal inputs use the old
+        // 76-byte layout, preserving their exact attributes without crashing.
         enum { kChunk = 256 };
-        std::vector<Vert> chunk(size_t(kChunk) * 3);
-        for (int first = 0; first < count; first += kChunk)
+        if (mesh->compact)
         {
-            const int n = (count - first < kChunk) ? count - first : kChunk;
-            for (int t = 0; t < n; ++t)
+            std::vector<wf_compact_vertex::Vertex> chunk(size_t(kChunk) * 3);
+            for (int first = 0; first < count; first += kChunk)
             {
-                const RBStaticTriangle& tri = triangles[first + t];
-                for (int k = 0; k < 3; ++k)
-                    PackVert(chunk[size_t(t) * 3 + k], tri.v[k], tri.nx, tri.ny, tri.nz,
-                             tri.opacity, tri.paletteEnabled != 0, tri.paletteDark, tri.paletteLight);
+                const int n = (count - first < kChunk) ? count - first : kChunk;
+                for (int t = 0; t < n; ++t)
+                {
+                    const RBStaticTriangle& tri = triangles[first + t];
+                    for (int k = 0; k < 3; ++k)
+                        wf_compact_vertex::Pack(chunk[size_t(t) * 3 + k], tri.v[k],
+                                                tri.nx, tri.ny, tri.nz);
+                }
+                glBufferSubData(GL_ARRAY_BUFFER,
+                                GLintptr(size_t(first) * 3 * sizeof(wf_compact_vertex::Vertex)),
+                                GLsizeiptr(size_t(n) * 3 * sizeof(wf_compact_vertex::Vertex)),
+                                chunk.data());
             }
-            glBufferSubData(GL_ARRAY_BUFFER, GLintptr(size_t(first) * 3 * sizeof(Vert)),
-                            GLsizeiptr(size_t(n) * 3 * sizeof(Vert)), chunk.data());
+            SetupStaticVertexAttribs();
         }
-        SetupVertexAttribs();
+        else
+        {
+            std::vector<Vert> chunk(size_t(kChunk) * 3);
+            for (int first = 0; first < count; first += kChunk)
+            {
+                const int n = (count - first < kChunk) ? count - first : kChunk;
+                for (int t = 0; t < n; ++t)
+                {
+                    const RBStaticTriangle& tri = triangles[first + t];
+                    for (int k = 0; k < 3; ++k)
+                        PackVert(chunk[size_t(t) * 3 + k], tri.v[k], tri.nx, tri.ny, tri.nz,
+                                 tri.opacity, tri.paletteEnabled != 0,
+                                 tri.paletteDark, tri.paletteLight);
+                }
+                glBufferSubData(GL_ARRAY_BUFFER, GLintptr(size_t(first) * 3 * sizeof(Vert)),
+                                GLsizeiptr(size_t(n) * 3 * sizeof(Vert)), chunk.data());
+            }
+            SetupVertexAttribs();
+        }
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);   // recorded in the VAO
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -952,15 +1002,25 @@ public:
         if (count <= 0) return;             // all culled: DrawTriangle would queue nothing
         StaticMeshGL* mesh = static_cast<StaticMeshGL*>(handle);
         // Same batch key as DrawTriangle, with the mesh as part of it.
-        if ((texture != _curTexture || prelit != _curPrelit || mesh != _curMesh) && !BatchEmpty())
+        const bool changedConstants = _curMesh && _curMesh->compact &&
+            (_batchOpacity != _opacity || _batchPaletteEnabled != _paletteEnabled ||
+             _batchPaletteDark != _paletteDark || _batchPaletteLight != _paletteLight);
+        if ((texture != _curTexture || prelit != _curPrelit || mesh != _curMesh || changedConstants) && !BatchEmpty())
             Flush();
         _curTexture = texture;
         _curPrelit  = prelit;
         _curMesh    = mesh;
         // A static run is one material's faces with one palette flag, baked
         // from the same SetTexturePalette state RenderStatic sets before it
-        // (material palette flags are fixed after load).
+        // (material palette flags are fixed after load). A compact mesh reads
+        // that same state at draw time as the batch constants below; a change
+        // flushed above, so the batch holds one palette kind and the kind
+        // matches what the compact draw supplies.
         NoteBatchPalette();
+        _batchOpacity = _opacity;
+        _batchPaletteEnabled = _paletteEnabled;
+        _batchPaletteDark = _paletteDark;
+        _batchPaletteLight = _paletteLight;
         if (mesh->index32)
         {
             for (int i = 0; i < count; ++i)
@@ -991,7 +1051,7 @@ private:
     struct ProgramUniforms
     {
         GLint mvp=-1, mv=-1, tex=-1, useTex=-1, alphaCutout=-1;
-        GLint lighting=-1, ambient=-1, lightDir=-1, lightColor=-1;
+        GLint lighting=-1, compact=-1, ambient=-1, lightDir=-1, lightColor=-1;
         GLint fog=-1, fogColor=-1, fogStart=-1, fogEnd=-1;
     };
     ProgramUniforms _uniforms, _opaqueUniforms, _opaqueTexUniforms, _noPaletteUniforms;
@@ -1010,6 +1070,9 @@ private:
     bool _customProgram = false;
     bool _paletteEnabled=false; unsigned _paletteDark=0,_paletteLight=0xffffff;
     float _opacity = 1.0f;
+    float _batchOpacity = 1.0f;
+    bool _batchPaletteEnabled = false;
+    unsigned _batchPaletteDark = 0, _batchPaletteLight = 0xffffff;
 
     float _proj[16];
     float _mv[16];
@@ -1067,6 +1130,7 @@ private:
         uniforms.useTex     = glGetUniformLocation(program, "u_use_tex");
         uniforms.alphaCutout = glGetUniformLocation(program, "u_alpha_cutout");
         uniforms.lighting   = glGetUniformLocation(program, "u_lighting");
+        uniforms.compact    = glGetUniformLocation(program, "u_static_compact");
         uniforms.ambient    = glGetUniformLocation(program, "u_ambient");
         uniforms.lightDir   = glGetUniformLocation(program, "u_light_dir");
         uniforms.lightColor = glGetUniformLocation(program, "u_light_color");
@@ -1185,7 +1249,13 @@ private:
         LazyInit();
         UpdateMvp();
 
-        const bool opaque = !_customProgram && _opacity >= 1.0f && !_alphaCutout;
+        // A compact static mesh carries no per-vertex opacity or palette; its
+        // batch constants (captured at submission) stand in for them. Every
+        // built-in program below links kVS, which decodes the compact layout
+        // when u_static_compact is set.
+        const bool compactDraw = _curMesh && _curMesh->compact;
+        const float drawOpacity = compactDraw ? _batchOpacity : _opacity;
+        const bool opaque = !_customProgram && drawOpacity >= 1.0f && !_alphaCutout;
         const bool opaqueTex = opaque && _curTexture && !_modulateTexture;
         // Wholly ordinary eligible batches take the no-palette program;
         // palette-only and mixed ones keep the palette-capable program, so a
@@ -1208,7 +1278,7 @@ private:
         const ProgramUniforms& uniforms = noPalette ? _noPaletteUniforms
                                         : opaqueTex ? _opaqueTexUniforms
                                         : opaque ? _opaqueUniforms : _uniforms;
-        if (_opacity < 1.0f) {
+        if (drawOpacity < 1.0f) {
             glEnable(GL_BLEND);
             glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
             glDepthMask(GL_FALSE);
@@ -1220,6 +1290,7 @@ private:
         glUniformMatrix4fv(uniforms.mv,  1, GL_FALSE, _mv);
         // A prelit batch is unlit by definition: its vertex colors are final.
         glUniform1i(uniforms.lighting, (_lightingEnabled && !_curPrelit) ? 1 : 0);
+        glUniform1i(uniforms.compact, compactDraw ? 1 : 0);
         glUniform3fv(uniforms.ambient, 1, _ambient);
         glUniform3fv(uniforms.lightDir,   RB_MAX_LIGHTS, &_lightDir[0][0]);
         glUniform3fv(uniforms.lightColor, RB_MAX_LIGHTS, &_lightColor[0][0]);
@@ -1250,6 +1321,19 @@ private:
             const size_t count = mesh.index32 ? _idx32.size() : _idx16.size();
             const size_t bytes = mesh.index32 ? count * sizeof(uint32_t) : count * sizeof(uint16_t);
             glBindVertexArray(mesh.vao);
+            if (mesh.compact)
+            {
+                glVertexAttrib1f(4, _batchOpacity);
+                glVertexAttrib4f(5,
+                    float((_batchPaletteDark >> 16) & 255) / 255.f,
+                    float((_batchPaletteDark >> 8) & 255) / 255.f,
+                    float(_batchPaletteDark & 255) / 255.f,
+                    _batchPaletteEnabled ? 1.f : 0.f);
+                glVertexAttrib3f(6,
+                    float((_batchPaletteLight >> 16) & 255) / 255.f,
+                    float((_batchPaletteLight >> 8) & 255) / 255.f,
+                    float(_batchPaletteLight & 255) / 255.f);
+            }
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, GLsizeiptr(bytes),
                          mesh.index32 ? static_cast<const void*>(_idx32.data())
                                       : static_cast<const void*>(_idx16.data()),

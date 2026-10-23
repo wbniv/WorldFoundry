@@ -7,6 +7,7 @@
 #include <X11/Xlib.h>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <vector>
 
 extern RendererBackend* ModernBackendInstance();
@@ -32,6 +33,14 @@ static void Pixel(int x, int y, unsigned char r, unsigned char g, unsigned char 
     unsigned char p[4] = {};
     glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, p);
     Require(p[0] == r && p[1] == g && p[2] == b, "wrong pixel after indexed draw");
+}
+
+static void PixelRedNear(int x, int y, int expected)
+{
+    unsigned char p[4] = {};
+    glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, p);
+    Require(std::abs(int(p[0]) - expected) <= 1 && p[1] == 0 && p[2] == 0,
+            "wrong opacity from compact per-draw constant");
 }
 
 static size_t Gpu(RendererBackend* backend)
@@ -86,6 +95,45 @@ int main(int argc, char** argv)
     Pixel(16, 24, 255, 0, 0);
     backend->DestroyStaticMesh(big);
     Require(Gpu(backend) == 0, "last-owner cleanup retained GPU bytes");
+
+    // Two runs from one compact mesh have different opacity constants. They
+    // must split at the state change even though texture and mesh are equal.
+    RBStaticTriangle pair[2] = {Triangle(-.9f, 1, 0, 0), Triangle(.1f, 1, 0, 0)};
+    pair[0].opacity = .25f; pair[1].opacity = .75f;
+    RBStaticMeshHandle compact = backend->CreateStaticMesh(pair, 2);
+    Require(compact && Gpu(backend) == 2 * 3 * 28, "compact stride is not 28 bytes");
+    const unsigned second = 1;
+    glClear(GL_COLOR_BUFFER_BIT);
+    backend->SetOpacity(.25f);
+    backend->DrawStaticTriangles(compact, &first, 1, nullptr, true);
+    backend->SetOpacity(.75f);
+    backend->DrawStaticTriangles(compact, &second, 1, nullptr, true);
+    backend->EndFrame();
+    PixelRedNear(16, 24, 64); PixelRedNear(48, 24, 191);
+    backend->SetOpacity(1.f);
+    backend->DestroyStaticMesh(compact);
+    Require(Gpu(backend) == 0, "compact cleanup retained GPU bytes");
+
+    // An arbitrary float color cannot be byte-exact. Bake it with the old
+    // layout and compare its pixel to the unchanged streaming path.
+    RBStaticTriangle unusual = Triangle(-.9f, .12345f, 0, 0);
+    RBStaticMeshHandle legacy = backend->CreateStaticMesh(&unusual, 1);
+    Require(legacy && Gpu(backend) == 3 * 76, "unsupported color did not use legacy stride");
+    glClear(GL_COLOR_BUFFER_BIT);
+    backend->DrawStaticTriangles(legacy, &first, 1, nullptr, true);
+    backend->EndFrame();
+    unsigned char baked[4] = {};
+    glReadPixels(16, 24, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, baked);
+    glClear(GL_COLOR_BUFFER_BIT);
+    backend->DrawTriangle(unusual.v[0], unusual.v[1], unusual.v[2],
+                          unusual.nx, unusual.ny, unusual.nz, nullptr, true, true);
+    backend->EndFrame();
+    unsigned char streamed[4] = {};
+    glReadPixels(16, 24, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, streamed);
+    Require(std::memcmp(baked, streamed, sizeof(baked)) == 0,
+            "legacy baked color differs from streaming");
+    backend->DestroyStaticMesh(legacy);
+    Require(Gpu(backend) == 0, "legacy cleanup retained GPU bytes");
 
     // Drop the real context as Android does. Destroy stale handles after a
     // new generation has acquired a new shared buffer, guarding the refcount.

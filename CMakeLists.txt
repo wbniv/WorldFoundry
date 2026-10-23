@@ -1428,6 +1428,10 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     add_test(NAME opaque_material_programs COMMAND wf_opaque_material_gl_test)
     set_tests_properties(opaque_material_programs PROPERTIES LABELS "gl")
 
+    add_executable(wf_compact_vertex_layout_test tests/compact_vertex_layout.cc)
+    target_include_directories(wf_compact_vertex_layout_test PRIVATE ${SRC})
+    add_test(NAME mesh_vertex_layout COMMAND wf_compact_vertex_layout_test)
+
     # E3 index ownership: mixed index widths and deletion across context loss.
     add_executable(wf_static_mesh_index_gl_test tests/static_mesh_index_gl.cc)
     target_link_libraries(wf_static_mesh_index_gl_test PRIVATE wfengine)
