@@ -1,0 +1,66 @@
+[
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792740601.7471926,
+    "end": 1792740602.1496558,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792740602.1532202,
+    "end": 1792740602.554421,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.baseline"
+    ],
+    "start": 1792740602.6352952,
+    "end": 1792740602.9996583,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~z-Xz28nVaFcS9FcxrgqMBA==/org.worldfoundry.wf_game.baseline-Ab_frbUICPPkdZNjJfM40Q==/base.apk'"
+    ],
+    "start": 1792740603.0008621,
+    "end": 1792740603.4142704,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "install",
+      "-r",
+      "/var/lib/wf-device-coordinator/inputs/aee5cd2f6f4e082bc60282f752ae88171a27009ed949d6a4bdc92fd21bee78cc.apk"
+    ],
+    "start": 1792740603.4563186,
+    "end": 1792740605.5482614,
+    "returncode": 1
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.baseline"
+    ],
+    "start": 1792740605.5494883,
+    "end": 1792740605.844789,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~z-Xz28nVaFcS9FcxrgqMBA==/org.worldfoundry.wf_game.baseline-Ab_frbUICPPkdZNjJfM40Q==/base.apk'"
+    ],
+    "start": 1792740605.8462512,
+    "end": 1792740606.2509696,
+    "returncode": 0
+  }
+]

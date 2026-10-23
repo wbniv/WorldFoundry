@@ -1,0 +1,10 @@
+{
+  "args": [
+    "install",
+    "-r",
+    "/var/lib/wf-device-coordinator/inputs/aee5cd2f6f4e082bc60282f752ae88171a27009ed949d6a4bdc92fd21bee78cc.apk"
+  ],
+  "returncode": 1,
+  "stdout": "Performing Streamed Install\n",
+  "stderr": "adb: failed to install /var/lib/wf-device-coordinator/inputs/aee5cd2f6f4e082bc60282f752ae88171a27009ed949d6a4bdc92fd21bee78cc.apk: Failure [INSTALL_FAILED_VERSION_DOWNGRADE: Downgrade detected: Update version code 3 is older than current 4]\n\n"
+}

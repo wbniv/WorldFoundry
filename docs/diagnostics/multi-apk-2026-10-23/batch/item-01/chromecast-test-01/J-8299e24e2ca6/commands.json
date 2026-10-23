@@ -1,0 +1,56 @@
+[
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792740548.7824814,
+    "end": 1792740549.2045133,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792740549.3253975,
+    "end": 1792740549.8324616,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792740549.8356788,
+    "end": 1792740550.2491617,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~ED9jQ_zasupeocL1NSNYAQ==/org.worldfoundry.wf_game.aquarium-JtV-O_8kvCd6zQwaGwTduw==/base.apk'"
+    ],
+    "start": 1792740550.2504814,
+    "end": 1792740550.6691568,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME"
+    ],
+    "start": 1792740551.9484372,
+    "end": 1792740552.286741,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1792740552.3353238,
+    "end": 1792740582.4691968,
+    "returncode": null
+  }
+]

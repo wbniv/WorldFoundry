@@ -1,0 +1,36 @@
+{
+  "status": "failed",
+  "home": "com.google.android.apps.tv.launcherx/.home.HomeActivity",
+  "apk": "b88535fe5fc780f568a503304546729e92ef0ce3cee72c906e1bbd0f3c0cd7bd.apk",
+  "attempts": [
+    {
+      "attempt": 1,
+      "step": 1,
+      "verified": false,
+      "reason": "home-left-foreground"
+    },
+    {
+      "attempt": 2,
+      "step": 1,
+      "verified": false,
+      "reason": "home-left-foreground"
+    },
+    {
+      "attempt": 3,
+      "step": 1,
+      "verified": false,
+      "reason": "home-left-foreground"
+    }
+  ],
+  "refreshes": [
+    {
+      "operation": "return-to-home",
+      "package": "com.google.android.apps.tv.launcherx"
+    },
+    {
+      "operation": "return-to-home",
+      "package": "com.google.android.apps.tv.launcherx"
+    }
+  ],
+  "error": "APK installed, but launcher artwork is stale or unverified after bounded recovery; inspect launcher evidence."
+}

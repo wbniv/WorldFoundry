@@ -1,0 +1,13 @@
+{
+  "before": [
+    "      topResumedActivity=ActivityRecord{143e7ca u0 org.worldfoundry.seahorsegrid/android.service.dreams.DreamActivity t2467}",
+    "    Resumed: ActivityRecord{143e7ca u0 org.worldfoundry.seahorsegrid/android.service.dreams.DreamActivity t2467}",
+    "  ResumedActivity: ActivityRecord{143e7ca u0 org.worldfoundry.seahorsegrid/android.service.dreams.DreamActivity t2467}"
+  ],
+  "after": [
+    "      topResumedActivity=ActivityRecord{143e7ca u0 org.worldfoundry.seahorsegrid/android.service.dreams.DreamActivity t2467}",
+    "    Resumed: ActivityRecord{143e7ca u0 org.worldfoundry.seahorsegrid/android.service.dreams.DreamActivity t2467}",
+    "  ResumedActivity: ActivityRecord{143e7ca u0 org.worldfoundry.seahorsegrid/android.service.dreams.DreamActivity t2467}"
+  ],
+  "foreground_unchanged": true
+}

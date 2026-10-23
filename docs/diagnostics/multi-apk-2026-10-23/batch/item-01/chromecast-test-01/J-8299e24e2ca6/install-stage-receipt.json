@@ -1,0 +1,239 @@
+{
+  "budgets": {
+    "cleanup": 180,
+    "cleanup_consumed": 0.07996317200013436,
+    "execution": 900,
+    "execution_consumed": 12.227972446999047,
+    "execution_deadline": 95876.225372623,
+    "forced": 1081,
+    "forced_consumed": 14.880642357995384,
+    "forced_deadline": 96057.225372623,
+    "granted": 94976.225372623
+  },
+  "cleanup_attempts": 1,
+  "connected": true,
+  "device": "chromecast-test-01",
+  "diagnostics": {
+    "mdns-endpoint": {
+      "endpoint": "192.168.4.30:42841",
+      "observed_at": 1792740530.8871424
+    }
+  },
+  "flags": {},
+  "health": "ready",
+  "job": "J-8299e24e2ca6",
+  "journal": [
+    {
+      "job": "J-8299e24e2ca6",
+      "key": "install:1",
+      "format": 1,
+      "original": {
+        "before_hash": "b88535fe5fc780f568a503304546729e92ef0ce3cee72c906e1bbd0f3c0cd7bd",
+        "boot_id": "2fe3d469-0d0b-40f1-82e5-1918c336b795",
+        "input": "b88535fe5fc780f568a503304546729e92ef0ce3cee72c906e1bbd0f3c0cd7bd.apk",
+        "kind": "install",
+        "package": "org.worldfoundry.wf_game.aquarium"
+      },
+      "restored": 1,
+      "verification": {
+        "installed_sha256": "b88535fe5fc780f568a503304546729e92ef0ce3cee72c906e1bbd0f3c0cd7bd"
+      },
+      "device": "chromecast-test-01",
+      "backend": "android",
+      "scopes": [
+        "device:chromecast-test-01",
+        "transport:android"
+      ]
+    }
+  ],
+  "observations": {},
+  "plugin": {
+    "cleanup": {
+      "observations": {},
+      "reason": "restored",
+      "recovery_state": null,
+      "restoration": "safe"
+    },
+    "run": {
+      "details": {
+        "apk_installations": [
+          {
+            "action": "install",
+            "before_sha256": "b88535fe5fc780f568a503304546729e92ef0ce3cee72c906e1bbd0f3c0cd7bd",
+            "end": 1792740542.5117416,
+            "input": "b88535fe5fc780f568a503304546729e92ef0ce3cee72c906e1bbd0f3c0cd7bd.apk",
+            "installed_sha256": "b88535fe5fc780f568a503304546729e92ef0ce3cee72c906e1bbd0f3c0cd7bd",
+            "journal_key": "install:1",
+            "package": "org.worldfoundry.wf_game.aquarium",
+            "reason": "explicit-install",
+            "start": 1792740536.1606379,
+            "status": "verified",
+            "variant": null
+          }
+        ],
+        "next_workflow": "verify-launch",
+        "profile": "tv",
+        "workflow": "install"
+      },
+      "reason": "completed",
+      "recovery_state": null,
+      "status": "succeeded"
+    }
+  },
+  "reaped": [],
+  "reason": "completed",
+  "status": "succeeded",
+  "survivors": [],
+  "tool_diagnostics": [
+    {
+      "healthy": true,
+      "operation": "host-version-probe",
+      "reason": "ready",
+      "seconds": 0.0841590600030031,
+      "timed_out": false
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "aapt"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    }
+  ],
+  "transport_failure_phases": [],
+  "transport_recovery": [],
+  "version": 1,
+  "work_started": true
+}

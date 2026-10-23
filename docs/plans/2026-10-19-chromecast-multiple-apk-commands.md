@@ -1,6 +1,6 @@
 # Chromecast commands accepting multiple APKs
 
-Status: implemented and live; physical acceptance pending, 2026-10-19. Will requested this plan after the six-app font
+Status: implemented and live; physical acceptance partial (install batch ran 2026-10-23; see Acceptance attempt), 2026-10-19. Will requested this plan after the six-app font
 update required separate install commands. Implementation belongs in
 `wbniv/chromecast-coordinator`, with Task and producer-shim integration here.
 
@@ -224,3 +224,26 @@ grant because the TVs have existing recovery holds. The owned cast1 readd,
 J‑904183154623, failed `recovery-preparation-failed`; no bypass was attempted.
 Physical install, launcher, gameplay and profiling acceptance remains pending
 until device recovery succeeds. See the [validation record](../diagnostics/multi-apk-2026-10-19/README.md).
+
+## Acceptance attempt 2026-10-23
+
+Batch `B-94c7f0f5366e` (Aquarium and Baseline on `chromecast-test-01` and `chromecast-test-02`, one
+`task chromecast:submit WORKFLOW=install` command) created four app/device children. Both casts were `ready`
+and the queue was empty beforehand. Evidence: [`multi-apk-2026-10-23`](../diagnostics/multi-apk-2026-10-23/README.md).
+
+| App / device | Result | Cause |
+|---|---|---|
+| Aquarium / cast1 | installed, hash verified; job `recovery-required` | `transport-unavailable` |
+| Aquarium / cast2 | installed, hash verified; job `recovery-required` | `plugin-error` |
+| Baseline / cast1 | `failed`, `install-refused` | `INSTALL_FAILED_VERSION_DOWNGRADE`: version code 3 is older than installed 4 |
+| Baseline / cast2 | `failed`, `install-refused` | not inspected; presumed the same downgrade |
+
+- **Confirmed:** one command produced four independently attributed children with per-child hashes and results;
+  a failed child did not cancel the others; evidence downloaded as `item-NN/device/job`. The 19 October failure
+  (`needs-local-setup` on every child) did not recur.
+- **Open:** why the post-install step ended in `recovery-required` on both casts, with different reasons. Both
+  devices reported `ready` / `recovered` afterwards. Not investigated; no direct ADB or bypass was used.
+- **Bug:** `task chromecast:watch BATCH=… STAGE=install` exits with "STAGE=install requires an installation
+  batch" on this install batch.
+- **Next:** use the current Baseline build (version code 4 or later), then repeat. Launcher and artwork,
+  Cast2 directional-input gameplay, heterogeneous check recipe, profile/record and simpleperf remain pending.
