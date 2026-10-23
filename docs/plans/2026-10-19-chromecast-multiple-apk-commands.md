@@ -258,10 +258,10 @@ and the queue was empty beforehand. Evidence: [`multi-apk-2026-10-23`](../diagno
   `launcher-unverified`) instead of `plugin-error`; `8bc97ab` reports a command timeout on a device that still
   answers a liveness probe as `device-command-timeout`, not `transport-unavailable`. No hardware has exercised the
   wake or the probe yet.
-- **Deploy status:** the fixes are not yet on the live service. Two deploys were refused because recovery was
-  outstanding (cast2 after a reboot request that this work did not make, then cast1 after another session's
-  `record` job), and each retained maintenance. The third uses a `--preserve-recovery` review of the fixes only,
-  without the other session's tray commits.
+- **Deploy status:** deployed 2026‑10‑23. Two deploys were refused because recovery was outstanding (cast2 after
+  a reboot request that this work did not make, then cast1 after another session's `record` job), and each
+  retained maintenance. A third failed on a sudo timeout; the fourth, a `--preserve-recovery` review of the fixes
+  only (without the other session's tray commits), succeeded.
 - **Administrator cancel (new):** a stuck queued automatic readd on cast1 could not be removed because `cancel`
   is owner-only, and it deadlocked the deploy. `deploy/cancel-queued.py` (coordinator `2f7385b`,
   [plan](https://github.com/wbniv/chromecast-coordinator/blob/main/docs/plans/2026-10-23-administrator-cancel.md))
@@ -270,3 +270,16 @@ and the queue was empty beforehand. Evidence: [`multi-apk-2026-10-23`](../diagno
 - **Next:** finish the deploy, repeat the batch with the current Baseline build (version code 4 or later), and
   confirm the wake on hardware when a cast is dreaming. Launcher and artwork, Cast2 directional-input gameplay,
   heterogeneous check recipe, profile/record and simpleperf remain pending.
+
+## Re-run on cast1 2026-10-24
+
+After the deploy and a successful cast1 readd, batch `B-8b28ca1044b8` (Aquarium and Baseline version code 4,
+`chromecast-test-01` only; cast2 was `needs-local-setup`) installed both APKs and ended both children
+`completed` with the launcher verified against the APK artwork. `STAGE=install` followed it without error.
+Evidence: [`multi-apk-2026-10-24-cast1`](../diagnostics/multi-apk-2026-10-24-cast1/README.md).
+
+- **Not yet exercised:** the launcher was already on top, so the screensaver wake (`4b23847`) and the
+  `device-command-timeout` probe (`8bc97ab`) have still not run on hardware. Cast2 needs Wireless debugging
+  re-enabled before a two-device batch can run.
+- **Remaining:** two-device batch, a dreaming-cast run, cast2 held-input gameplay, heterogeneous check recipe,
+  profile/record and simpleperf.
