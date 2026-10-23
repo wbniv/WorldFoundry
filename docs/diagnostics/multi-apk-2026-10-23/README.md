@@ -12,3 +12,14 @@ Results and analysis are in the plan's
 Aquarium installed and hash-verified on both casts, then both jobs ended `recovery-required`
 (`transport-unavailable` on cast1, `plugin-error` on cast2). Baseline was refused on both with
 `INSTALL_FAILED_VERSION_DOWNGRADE` (cast1 receipt: `batch/item-02/chromecast-test-01/J-6cd31246d60b/adb-failure-5.json`).
+
+## Follow-up evidence
+
+- [`post-install-recovery-analysis.md`](post-install-recovery-analysis.md): root-cause analysis of the two
+  Aquarium `recovery-required` results. Both casts were showing the Seahorse Grid screensaver, and the
+  launcher-verification step sends HOME without waking the device first. Written by a read-only investigation
+  agent; the conclusions were not independently re-run.
+- [`scalar-cast2/`](scalar-cast2/): a single-APK Aquarium install on chromecast-test-02 (`J‑74e032b3434a`,
+  14:49 +07). It completed and launcher verification passed, but the launcher was already on top
+  (`background-install.json`), so it did **not** exercise the screensaver condition. It neither confirms nor
+  refutes the analysis.

@@ -1,0 +1,93 @@
+[
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792741764.6526234,
+    "end": 1792741764.7963445,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792741764.8743088,
+    "end": 1792741765.0377057,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792741765.0393047,
+    "end": 1792741765.210714,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~j3NeZhLmVESfQT6W8CKKfA==/org.worldfoundry.wf_game.aquarium-k2M_9B_4DBLaFqeoiDSGnQ==/base.apk'"
+    ],
+    "start": 1792741765.2116678,
+    "end": 1792741765.3706152,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME"
+    ],
+    "start": 1792741765.796556,
+    "end": 1792741766.1308055,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1792741766.156184,
+    "end": 1792741766.3505588,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792741769.3523676,
+    "end": 1792741769.613423,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "uiautomator dump --compressed /data/local/tmp/wf-J-74e032b3434a-launcher.xml"
+    ],
+    "start": 1792741769.6300597,
+    "end": 1792741773.2162936,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /data/local/tmp/wf-J-74e032b3434a-launcher.xml"
+    ],
+    "start": 1792741773.2177913,
+    "end": 1792741773.3868718,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1792741773.3880112,
+    "end": 1792741776.4630752,
+    "returncode": 0
+  }
+]
