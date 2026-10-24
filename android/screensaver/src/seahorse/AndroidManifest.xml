@@ -23,6 +23,11 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="android.service.dream" android:resource="@xml/dream" />
+            <meta-data android:name="org.worldfoundry.screensaver.SETTINGS_AUTHORITY"
+                android:value="org.worldfoundry.seahorsegrid.settings" />
         </service>
+        <provider android:name=".SeahorseSettingsProvider"
+            android:authorities="org.worldfoundry.seahorsegrid.settings"
+            android:exported="true" />
     </application>
 </manifest>
