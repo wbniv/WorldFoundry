@@ -21,11 +21,15 @@ import java.util.Iterator;
 /**
  * Shell-only settings contract for the Planted Tank, same shape as TankSettingsProvider.
  * Methods: getCapabilities, getSettings, setSetting (arg {@code key:value}), resetSettings.
- * getCapabilities serves the owner-aware RP01/OAD-generated asset with saved values.
+ * getCapabilities serves the owner-aware RP01/OAD-generated asset with saved values, plus the
+ * app-level orientation, which is not a level property: it is appended to the first owner as
+ * field {@code orientation} (wire ID {@code <owner>.orientation}) and never enters the catalog.
  */
 public final class PlantedSettingsProvider extends ContentProvider {
     /** Generated from the level's OAD-derived RP01 catalog. */
     static final String CAPABILITIES_ASSET = "planted-settings.json";
+    /** The adapter-added field's OAD-style name; no OAD field carries it. */
+    static final String ORIENTATION_KEY = "Orientation";
 
     @Override
     public boolean onCreate() { return true; }
@@ -48,6 +52,7 @@ public final class PlantedSettingsProvider extends ContentProvider {
             }
         } else if ("getSettings".equals(method)) {
             putValues(result, PlantedSettings.load(getContext()));
+            result.putString(TankSettingsProvider.ORIENTATION, OrientationSettings.load(getContext()));
         } else if ("setSetting".equals(method)) {
             int colon = arg == null ? -1 : arg.indexOf(':');
             if (colon < 0) {
@@ -60,6 +65,12 @@ public final class PlantedSettingsProvider extends ContentProvider {
                 String fieldName = field.getString("key");
                 String requested = arg.substring(colon + 1);
                 validateChoice(field, requested);
+                if (ORIENTATION_KEY.equals(fieldName)) {
+                    result.putBoolean("saved", OrientationSettings.set(getContext(), requested));
+                    result.putString("key", key);
+                    result.putString("value", OrientationSettings.load(getContext()));
+                    return result;
+                }
                 String appKey = appKey(fieldName);
                 boolean saved = "Seed".equals(fieldName) && "random".equals(requested)
                         ? PlantedSettings.clear(getContext(), appKey)
@@ -71,8 +82,10 @@ public final class PlantedSettingsProvider extends ContentProvider {
                 throw new IllegalStateException(error);
             }
         } else if ("resetSettings".equals(method)) {
-            result.putBoolean("saved", PlantedSettings.reset(getContext()));
+            boolean saved = PlantedSettings.reset(getContext());
+            result.putBoolean("saved", OrientationSettings.clear(getContext()) && saved);
             putValues(result, PlantedSettings.load(getContext()));
+            result.putString(TankSettingsProvider.ORIENTATION, OrientationSettings.load(getContext()));
         } else {
             throw new IllegalArgumentException("Unknown settings method");
         }
@@ -115,6 +128,11 @@ public final class PlantedSettingsProvider extends ContentProvider {
                 }
             }
         }
+        // App-level, like the random water policy above: added here, never in the OAD catalog.
+        JSONObject orientation = TankSettingsProvider.orientationSetting(OrientationSettings.load(context))
+                .put("key", ORIENTATION_KEY).put("show", 5).put("readonly", false)
+                .put("group", "Screensaver");
+        objects.getJSONObject(0).getJSONArray("settings").put(orientation);
         return document;
     }
 
@@ -153,10 +171,26 @@ public final class PlantedSettingsProvider extends ContentProvider {
             String requested = updates.getString(wireId);
             validateChoice(field, requested);
             String key = field.getString("key");
+            if (ORIENTATION_KEY.equals(key)) continue; // Not a level value; see launchOrientation.
             config = "Seed".equals(key) && "random".equals(requested)
                     ? config.withoutSeed() : config.with(appKey(key), appValue(key, requested));
         }
         return config;
+    }
+
+    /** A validated one-run orientation from the launch overrides, or null when none is given. */
+    static String launchOrientation(Context context, PlantedConfig base, JSONObject updates)
+            throws JSONException {
+        Iterator<String> keys = updates.keys();
+        while (keys.hasNext()) {
+            String wireId = keys.next();
+            JSONObject field = findField(capabilities(context, base), wireId);
+            if (!ORIENTATION_KEY.equals(field.getString("key"))) continue;
+            String requested = updates.getString(wireId);
+            validateChoice(field, requested);
+            return OrientationChoice.parse(requested);
+        }
+        return null;
     }
 
     private static String appKey(String field) {
