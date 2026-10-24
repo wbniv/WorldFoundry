@@ -1036,10 +1036,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "ar_anal.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0065335263626291(1.15.16) } { 'STR' "0.006534" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0065329576577615(1.15.16) } { 'STR' "-0.006533" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000001850341438(1.15.16) } { 'STR' "-0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0108689593668918(1.15.16) } { 'STR' "0.010869" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0652137562013509(1.15.16) } { 'STR' "0.065214" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0108690400245533(1.15.16) } { 'STR' "-0.010869" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0652142401473200(1.15.16) } { 'STR' "-0.065214" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "animal-00-ar_pec_near" }
