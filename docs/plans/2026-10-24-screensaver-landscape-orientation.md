@@ -215,9 +215,11 @@ Pixel 8 Pro, auto-rotate off, held in portrait, charging; Dream started by the i
 Seahorse Grid, no saved orientation (merged build, APK 71b5a1e54e41): Will saw the Dream in landscape.
 Spike build (SCREEN_ORIENTATION_LANDSCAPE on the DreamActivity, 2026-10-24): Will saw the Dream in landscape.
 Spike 1 (window attribute only): Will saw portrait.
+Aquarium, sensor-landscape, merged build (APK 75ee120db339): Will saw the Dream in landscape.
+Planted Tank, 4.orientation=landscape (APK c89aae44b962): trigger ended recovery-required (cleanup-unverified); no observation recorded.
 ```
 
-**PARTIAL PASS**: Seahorse Grid verified landscape on a real Dream. Aquarium and Planted Tank were not run as real Dreams. The coordinator's trigger screenshot showed another app, not the Dream, so this is observed by eye only.
+**PARTIAL PASS**: Seahorse Grid and Aquarium verified landscape on a real Dream. Planted Tank has no recorded observation yet. The coordinator's trigger screenshot showed another app, not the Dream, so all of this is observed by eye only.
 
 4. For each screensaver, set `follow-device` through the settings provider and repeat step 3; confirm the portrait
    letterbox returns.
@@ -232,6 +234,13 @@ Seahorse Grid preview, nothing saved: png (2244, 1008)   landscape (bundled defa
 **PARTIAL PASS**: the preview confirms the setting is read and applied, and `follow-device` returns portrait. It is the activity path, not a real Dream, and only Aquarium was switched.
 
 5. Set `sensor-landscape`, turn the phone 180° during the Dream, and confirm it flips.
+
+```
+Aquarium, sensor-landscape, Pixel 8 Pro: Will, "when i flip it over, it flips".
+```
+
+**PASS** for Aquarium, observed by eye (not machine-confirmed). Seahorse Grid and Planted Tank use the same `DreamOrientation.apply` and were not flipped.
+
 6. On a Chromecast HD and a Chromecast with Google TV (both Android 14; they take the activity branch): run
    `screensaver-trigger` and confirm the Dream starts and looks as before.
 7. Android 10 or earlier (the window-attribute branch): needs a device on that version, which this workspace
@@ -257,6 +266,6 @@ $ task chromecast:screensaver-setting DEVICE=phone-pixel-8-pro SETTING_ID=orient
 (job completed; the next preview was 2244 x 1008)
 ```
 
-**PARTIAL PASS**: the Aquarium value saved and read back through the coordinator. Seahorse and Planted Tank were not exercised, and the coordinator change that registers the Seahorse authority is not deployed yet. The tray display was not checked.
+**PARTIAL PASS**: the value saved and read back through the coordinator for all three screensavers (Aquarium `orientation`, Seahorse `orientation` after the coordinator deploy of `0a77350`, Planted Tank `4.orientation`). The tray display was not checked.
 
-**Not run yet:** step 5 (`sensor-landscape` flip), step 6 (Chromecasts), step 7 (Android version of each enrolled device), and the real-Dream runs for Aquarium and Planted Tank in steps 3 and 4. Until they are, the TODO item stays open.
+**Not run yet:** step 6 (Chromecast Dream unchanged), the Planted Tank real Dream in steps 3 and 4, and `follow-device` on a real Dream for Seahorse and Planted Tank. Until they are, the TODO item stays open.
