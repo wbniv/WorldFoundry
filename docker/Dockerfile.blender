@@ -15,21 +15,26 @@
 # pins together, to what `apt-cache policy blender python3-numpy python3-pil` shows on
 # an up-to-date host. scripts/in-linux-container.sh builds it on first use
 # (WF_CONTAINER_IMAGE=blender), or run `task blender-image`.
-FROM ubuntu:26.04
+#
+# It starts from the lab's Ubuntu 26.04 build stack (home-lab stack-build-ubuntu, which
+# carries build-essential, ca-certificates, git, pkg-config and python3), not from bare
+# ubuntu:26.04: the base stays Ubuntu 26.04 for host parity. That registry is reachable
+# only inside the lab, so this image builds only there; elsewhere, restore
+# `FROM ubuntu:26.04` plus those five packages (see git history).
+FROM registry.lab.home.arpa:5000/stacks/stack-build-ubuntu@sha256:a1965142d6f3edec29bb12ea456e26c62a3dab12ca0d36e4411acb16d6718e65
 
 ENV DEBIAN_FRONTEND=noninteractive
+# The stack ends as user dev; this image ran as root, and the Rust install below writes
+# to /opt, so it stays root as before (in-linux-container.sh runs it with --user anyway).
+USER root
 ARG UBUNTU_SNAPSHOT=20261016T000000Z
 ARG BLENDER_DEB=5.0.1+dfsg-1ubuntu1
 ARG NUMPY_DEB=1:2.3.5+ds-3ubuntu1
 ARG PIL_DEB=12.1.1-2ubuntu1.3
-# snapshot.ubuntu.com is HTTPS-only and the base image has no CA bundle, so
-# ca-certificates comes from the live archive first; nothing it holds affects the build.
-RUN apt-get update \
- && apt-get install -y --no-install-recommends ca-certificates \
- && apt-get update --snapshot "${UBUNTU_SNAPSHOT}" \
+# snapshot.ubuntu.com is HTTPS-only; the stack already carries ca-certificates.
+RUN apt-get update --snapshot "${UBUNTU_SNAPSHOT}" \
  && apt-get install -y --no-install-recommends --snapshot "${UBUNTU_SNAPSHOT}" \
       "blender=${BLENDER_DEB}" "python3-numpy=${NUMPY_DEB}" "python3-pil=${PIL_DEB}" \
-      build-essential git pkg-config python3 \
  && rm -rf /var/lib/apt/lists/*
 
 # The Rust level tools (iffcomp, levcomp, textile, oas2oad, wf_core) build from the
