@@ -59,7 +59,7 @@ holds the value list, parsing and the mapping to `ActivityInfo` constants, plus
 
 `apply` does `setRequestedOrientation` when the host is an `Activity`, and sets the window attribute otherwise.
 On Android 11 and later the window attribute is ignored (spike 1), so it is only set in the non-activity branch.
-Chromecasts on Android 12 take the activity branch; their displays are already landscape, so it changes nothing there.
+The enrolled devices (read 2026‑10‑24 from the coordinator's inspect evidence: both Chromecasts Android 14, the Pixel 8 Pro Android 17) all take the activity branch. The TVs are already landscape, so it changes nothing there.
 
 **Where it applies.**
 
@@ -232,12 +232,21 @@ Seahorse Grid preview, nothing saved: png (2244, 1008)   landscape (bundled defa
 **PARTIAL PASS**: the preview confirms the setting is read and applied, and `follow-device` returns portrait. It is the activity path, not a real Dream, and only Aquarium was switched.
 
 5. Set `sensor-landscape`, turn the phone 180° during the Dream, and confirm it flips.
-6. On a Chromecast HD and a Chromecast with Google TV (both Android 12; they take the activity branch): run
+6. On a Chromecast HD and a Chromecast with Google TV (both Android 14; they take the activity branch): run
    `screensaver-trigger` and confirm the Dream starts and looks as before.
 7. Android 10 or earlier (the window-attribute branch): needs a device on that version, which this workspace
    may not have. Read the Android version of each enrolled device first (`getprop ro.build.version.release`
    through the coordinator's device facts). If none is on 10 or earlier, record that this branch is
    source-checked only; do not claim it works.
+```
+$ grep ro.build.version.release docs/diagnostics/chromecast-inspect-J-*/receipt.json   (coordinator inspect jobs, 2026-10-24)
+chromecast-test-01   14
+chromecast-test-02   14
+phone-pixel-8-pro    17
+```
+
+**PASS** (as a recorded finding): no enrolled device runs Android 10 or earlier, so the window-attribute branch is source-checked only and not run on any device. All three enrolled devices take the activity branch.
+
 8. `task chromecast:screensaver-setting` for each of the three: the value is saved, echoed back, and visible in
    the tray.
 

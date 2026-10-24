@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/62f964aa) | docs: record orientation verification so far (Seahorse Dream landscape on the Pixel) |
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/dd460816) | docs: orientation plan records the default resource and the rejected OAD route |
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/41c8e7d6) | docs: plan for screensaver landscape orientation, configurable per screensaver |
 
 <!--history-meta v1
+62f964aa	author	Will Norris
+62f964aa	added	48
+62f964aa	deleted	0
+62f964aa	files	1
+62f964aa	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01PkFSbo6jcue9Gfyb6U9HVs
 dd460816	author	Will Norris
 dd460816	added	26
 dd460816	deleted	3
