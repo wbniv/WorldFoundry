@@ -87,8 +87,28 @@ Chromecasts on Android 12 take the activity branch; their displays are already l
 
 A changed value takes effect the next time the Dream starts, like the other settings.
 
-**Rejected:** rotating the picture inside a portrait screen. It costs a custom transform and touch handling
-for no benefit now that the system itself can rotate the Dream.
+**What ships in the APK and what stays on the device.** The option list (`landscape`, `sensor-landscape`,
+`follow-device`) is a constant in `DreamOrientation`. The default is an Android string resource,
+`default_orientation`, set once to `landscape` in `android/screensaver/src/main/res/values/orientation.xml`.
+A screensaver that needs a different default adds its own `src/<flavor>/res/values/orientation.xml`, which Android
+merges over the shared one; none does today, so each APK carries just the one shared default. The chosen value is
+not in the APK: it is the app's saved preference `orientation`, written by the settings provider, and it survives APK
+updates. When nothing is saved, or the saved value is invalid, the Dream and the provider both use the resource default.
+
+**Rejected:**
+
+- Rotating the picture inside a portrait screen. It costs a custom transform and touch handling for no benefit now
+  that the system itself can rotate the Dream.
+- Declaring `Orientation` as an OAD field in the level's Settings object, so it flows through the RP01 catalog and
+  the generic provider like Planted Tank's other fields (Will asked, 2026‑10‑24, and noted that every level should
+  have Settings). It would mean a new OAD type, such as `ScreensaverSettings`, with one instance in every screensaver
+  level (Seahorse, the eight Aquarium tanks, Planted Tank), and rebuilt level bundles for all three apps. The
+  provider would need an `Orientation` case, because `PlantedSettingsProvider` throws
+  `No app adapter for OAD field` for a field it does not know, and `toLine()` must keep the field away from the
+  engine's launch overrides. The deciding problem is scope. The plan keeps one form per owner, so eight Aquarium
+  levels would show eight Orientation fields. The Aquarium also picks a random tank each start, so a per-level
+  value would change from one start to the next. The Dream window exists before and after every level, and Java needs
+  the value before any level loads. The OAD route is still open as a follow-up (see Out of scope).
 
 ### Mechanism
 
@@ -158,12 +178,15 @@ The Dream on a portrait-held phone: today's letterbox (`follow-device`), the new
   that ignores the request). Revisit if the verification below fails on a device.
 - Android 10 and earlier hardware testing, unless an enrolled device runs that version (verification step 7).
 - Per-tank or per-level orientation. The setting belongs to the screensaver app.
+- Declaring `Orientation` in the levels' OAD Settings instead of in the provider (see **Rejected**). Revisit it with
+  a rule that merges the per-level owners into one app-level field, and with the engine's launch-override table
+  checked against a field no level script uses.
 - The Chromecast TVs, which are landscape already.
 
 ## Verification
 
 1. Unit test for `DreamOrientation`: parse each value and reject an unknown one; map each value to its
-   `ActivityInfo` constant; `apply` does nothing for a non-activity host. Run as a plain-Java test, as
+   `ActivityInfo` constant; an unset or invalid saved value falls back to the default passed in from `default_orientation`; `apply` does not call `setRequestedOrientation` for a non-activity host. Run as a plain-Java test, as
    `PlantedConfigTest` does (`task test-planted-screensaver` pattern).
 2. Build all three flavors: `./gradlew :screensaver:assembleSeahorseDebug :screensaver:assembleAquariumDebug :screensaver:assemblePlantedDebug --offline` from `android/`.
 3. On the Pixel 8 Pro with auto-rotate off, held in portrait and charging: select each screensaver in turn with
