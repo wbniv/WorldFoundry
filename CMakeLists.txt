@@ -1458,6 +1458,12 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
                 --binary $<TARGET_FILE:wf_game> --check cull --frames 120
                 --level ${WF_TEST_LEVEL} --level ${WF_TEST_SNOW_LEVEL}
             WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+        # Which back-face form RenderStatic runs: exact by default, fast only
+        # when asked (the per-path frame-profile counters).
+        add_test(NAME static_cull_path
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/static_cull_path.py
+                --binary $<TARGET_FILE:wf_game> --level ${WF_TEST_LEVEL}
+            WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
     endif()
 
     add_test(NAME wf_host_gl_e2e_cycle1

@@ -772,11 +772,13 @@ RenderObject3D::RenderStatic(const Matrix34& position)
 		unsigned triangle = unsigned(g.firstTriangle);
 		if(!cull || g.cullExempt)
 		{
+			wf_profile::count(wf_profile::StaticCullOffFaces, (unsigned long)(g.endFace - g.firstFace));
 			for(int32 f = g.firstFace; f < g.endFace; ++f)
 				surviving[count++] = triangle++;
 		}
 		else if(fast)
 		{
+			wf_profile::count(wf_profile::StaticCullFastFaces, (unsigned long)(g.endFace - g.firstFace));
 			const float* planeD = bake.planeD;
 			for(int32 f = g.firstFace; f < g.endFace; ++f, ++face, ++triangle)
 			{
@@ -789,6 +791,7 @@ RenderObject3D::RenderStatic(const Matrix34& position)
 		}
 		else
 		{
+			wf_profile::count(wf_profile::StaticCullExactFaces, (unsigned long)(g.endFace - g.firstFace));
 			for(int32 f = g.firstFace; f < g.endFace; ++f, ++face, ++triangle)
 			{
 				const Vector3& p0 = _vertexList[face->v1Index].position;
