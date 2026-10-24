@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-19](https://github.com/wbniv/WorldFoundry/commit/d28d16c3) | Index screensaver plans |
 | [2026-10-19](https://github.com/wbniv/WorldFoundry/commit/aef1ef29) | Add multi-APK Chromecast commands |
 | [2026-10-18](https://github.com/wbniv/WorldFoundry/commit/52fdc9ad) | Index aquarium screensaver plans |
 | [2026-10-17](https://github.com/wbniv/WorldFoundry/commit/be86bbb9) | Index nine plans that had no row in docs/plans/README.md |
@@ -65,6 +66,10 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+d28d16c3	author	Will Norris
+d28d16c3	added	2
+d28d16c3	deleted	0
+d28d16c3	files	1
 aef1ef29	author	Will Norris
 aef1ef29	added	1
 aef1ef29	deleted	0
