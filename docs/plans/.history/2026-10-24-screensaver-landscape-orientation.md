@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/dd460816) | docs: orientation plan records the default resource and the rejected OAD route |
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/41c8e7d6) | docs: plan for screensaver landscape orientation, configurable per screensaver |
 
 <!--history-meta v1
+dd460816	author	Will Norris
+dd460816	added	26
+dd460816	deleted	3
+dd460816	files	1
+dd460816	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01PkFSbo6jcue9Gfyb6U9HVs
 41c8e7d6	author	Will Norris
 41c8e7d6	added	182
 41c8e7d6	deleted	0

@@ -188,12 +188,49 @@ The Dream on a portrait-held phone: today's letterbox (`follow-device`), the new
 1. Unit test for `DreamOrientation`: parse each value and reject an unknown one; map each value to its
    `ActivityInfo` constant; an unset or invalid saved value falls back to the default passed in from `default_orientation`; `apply` does not call `setRequestedOrientation` for a non-activity host. Run as a plain-Java test, as
    `PlantedConfigTest` does (`task test-planted-screensaver` pattern).
+
+```
+$ task test-screensaver-orientation
+31 checks, 0 failures
+```
+
+**PASS** for parsing, mapping and the saved/default fallback (`OrientationChoiceTest`). `DreamOrientation.apply` has no unit test because it needs a real `Window`; its two branches are covered by steps 3 and 4 (activity branch) and step 7 (window-attribute branch).
+
 2. Build all three flavors: `./gradlew :screensaver:assembleSeahorseDebug :screensaver:assembleAquariumDebug :screensaver:assemblePlantedDebug --offline` from `android/`.
+
+```
+$ cd android && ./gradlew :screensaver:assembleSeahorseDebug :screensaver:assembleAquariumDebug --offline
+BUILD SUCCESSFUL
+```
+
+**PARTIAL PASS**: Seahorse and Aquarium build, and `aapt2` shows `string/default_orientation "landscape"` in both; Seahorse declares the `org.worldfoundry.seahorsegrid.settings` authority. `assemblePlantedDebug` was not run (it needs the level bundle and `planted-settings.json`); the Planted sources compile (`compilePlantedDebugJavaWithJavac`, run by the implementing agent).
+
 3. On the Pixel 8 Pro with auto-rotate off, held in portrait and charging: select each screensaver in turn with
    `screensaver-select`, run `task chromecast:screensaver-trigger DEVICE=phone-pixel-8-pro`, and confirm by eye that
    the Dream is landscape. Record which of the three were seen.
+
+Pixel 8 Pro, auto-rotate off, held in portrait, charging; Dream started by the idle timeout (not the preview).
+
+```
+Seahorse Grid, no saved orientation (merged build, APK 71b5a1e54e41): Will saw the Dream in landscape.
+Spike build (SCREEN_ORIENTATION_LANDSCAPE on the DreamActivity, 2026-10-24): Will saw the Dream in landscape.
+Spike 1 (window attribute only): Will saw portrait.
+```
+
+**PARTIAL PASS**: Seahorse Grid verified landscape on a real Dream. Aquarium and Planted Tank were not run as real Dreams. The coordinator's trigger screenshot showed another app, not the Dream, so this is observed by eye only.
+
 4. For each screensaver, set `follow-device` through the settings provider and repeat step 3; confirm the portrait
    letterbox returns.
+
+```
+Aquarium launcher preview (same DreamOrientation.apply on the activity path), screenshot size:
+  follow-device: png (1008, 2244)   portrait
+  landscape:     png (2244, 1008)   landscape
+Seahorse Grid preview, nothing saved: png (2244, 1008)   landscape (bundled default)
+```
+
+**PARTIAL PASS**: the preview confirms the setting is read and applied, and `follow-device` returns portrait. It is the activity path, not a real Dream, and only Aquarium was switched.
+
 5. Set `sensor-landscape`, turn the phone 180° during the Dream, and confirm it flips.
 6. On a Chromecast HD and a Chromecast with Google TV (both Android 12; they take the activity branch): run
    `screensaver-trigger` and confirm the Dream starts and looks as before.
@@ -203,3 +240,14 @@ The Dream on a portrait-held phone: today's letterbox (`follow-device`), the new
    source-checked only; do not claim it works.
 8. `task chromecast:screensaver-setting` for each of the three: the value is saved, echoed back, and visible in
    the tray.
+
+```
+$ task chromecast:screensaver-setting DEVICE=phone-pixel-8-pro SETTING_ID=orientation VALUE=follow-device
+(job completed; readback verified by the coordinator)
+$ task chromecast:screensaver-setting DEVICE=phone-pixel-8-pro SETTING_ID=orientation VALUE=landscape
+(job completed; the next preview was 2244 x 1008)
+```
+
+**PARTIAL PASS**: the Aquarium value saved and read back through the coordinator. Seahorse and Planted Tank were not exercised, and the coordinator change that registers the Seahorse authority is not deployed yet. The tray display was not checked.
+
+**Not run yet:** step 5 (`sensor-landscape` flip), step 6 (Chromecasts), step 7 (Android version of each enrolled device), and the real-Dream runs for Aquarium and Planted Tank in steps 3 and 4. Until they are, the TODO item stays open.
