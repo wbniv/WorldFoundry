@@ -231,7 +231,10 @@ wf_level_build "$0" "$@"`, which re-runs the script in `wf-blender:local`
 ([`docker/Dockerfile.blender`](../docker/Dockerfile.blender): Ubuntu 26.04 with Foundry Linux's
 `blender` package, so the host's Blender, Python, numpy and Pillow, pinned to one Ubuntu archive snapshot),
 through `scripts/in-linux-container.sh` with
-`WF_CONTAINER_IMAGE=blender`. Inside the container:
+`WF_CONTAINER_IMAGE=blender`. Outside the maintainers' lab, build the image with
+`task blender-image-public` ([`docker/Dockerfile.blender.public`](../docker/Dockerfile.blender.public),
+the same image from bare `ubuntu:26.04`) or set `WF_BLENDER_DOCKERFILE=Dockerfile.blender.public`.
+Inside the container:
 
 - the `wf_blender` add-on comes from the mounted checkout (`/src/wftools/wf_blender`, on
   `BLENDER_SYSTEM_SCRIPTS`), so an add-on edit needs no image rebuild;

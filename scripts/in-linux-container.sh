@@ -46,7 +46,7 @@ case "${WF_CONTAINER_IMAGE:-linux-test}" in
         ensure_image "$image" Dockerfile.linux-test ;;
     blender)
         image="wf-blender:local"
-        ensure_image "$image" Dockerfile.blender ;;
+        ensure_image "$image" "${WF_BLENDER_DOCKERFILE:-Dockerfile.blender}" ;;
     *)
         echo "in-linux-container.sh: unknown WF_CONTAINER_IMAGE '${WF_CONTAINER_IMAGE}' (linux-test|blender)" >&2
         exit 2 ;;

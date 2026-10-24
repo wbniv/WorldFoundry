@@ -1994,6 +1994,11 @@ tasks:
     cmds:
       - docker build --network=host -f docker/Dockerfile.blender -t wf-blender:local docker
 
+  blender-image-public:
+    desc: "Build the same Blender level-build image from bare ubuntu:26.04 (docker/Dockerfile.blender.public), for machines that cannot reach the maintainers' lab registry"
+    cmds:
+      - docker build --network=host -f docker/Dockerfile.blender.public -t wf-blender:local docker
+
   level-build-compare:
     desc: "Build each aquarium tank with host Blender and in the Blender container and compare every output by sha256: task level-build-compare [-- aquarium_betta ...]"
     cmds:

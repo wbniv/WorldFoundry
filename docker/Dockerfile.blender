@@ -19,8 +19,9 @@
 # It starts from the lab's Ubuntu 26.04 build stack (home-lab stack-build-ubuntu, which
 # carries build-essential, ca-certificates, git, pkg-config and python3), not from bare
 # ubuntu:26.04: the base stays Ubuntu 26.04 for host parity. That registry is reachable
-# only inside the lab, so this image builds only there; elsewhere, restore
-# `FROM ubuntu:26.04` plus those five packages (see git history).
+# only inside the lab, so this image builds only there; elsewhere use
+# docker/Dockerfile.blender.public (`task blender-image-public`), which gives the same image
+# from `FROM ubuntu:26.04`. Keep the pins in both files identical.
 FROM registry.lab.home.arpa:5000/stacks/stack-build-ubuntu@sha256:a1965142d6f3edec29bb12ea456e26c62a3dab12ca0d36e4411acb16d6718e65
 
 ENV DEBIAN_FRONTEND=noninteractive
