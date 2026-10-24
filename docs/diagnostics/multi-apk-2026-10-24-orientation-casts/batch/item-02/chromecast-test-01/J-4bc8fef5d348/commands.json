@@ -1,0 +1,341 @@
+[
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792803910.7309725,
+    "end": 1792803911.0406344,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.screensaver"
+    ],
+    "start": 1792803911.126181,
+    "end": 1792803911.4700131,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.screensaver"
+    ],
+    "start": 1792803911.4708385,
+    "end": 1792803911.6314251,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~svoo-fPBc6hAC8QxHgrX6Q==/org.worldfoundry.screensaver-S6WGEqUAyMAMrhENENIulA==/base.apk'"
+    ],
+    "start": 1792803911.6322644,
+    "end": 1792803911.8106415,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME"
+    ],
+    "start": 1792803912.1146579,
+    "end": 1792803912.5112345,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792803912.5456223,
+    "end": 1792803912.9028986,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792803913.0544617,
+    "end": 1792803913.3097107,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1792803913.3113384,
+    "end": 1792803913.5989852,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792803916.6001196,
+    "end": 1792803916.7735329,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "uiautomator dump --compressed /data/local/tmp/wf-J-4bc8fef5d348-launcher.xml"
+    ],
+    "start": 1792803916.8024073,
+    "end": 1792803920.2181618,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /data/local/tmp/wf-J-4bc8fef5d348-launcher.xml"
+    ],
+    "start": 1792803920.2190485,
+    "end": 1792803920.497242,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1792803920.4983342,
+    "end": 1792803925.7278452,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_DOWN"
+    ],
+    "start": 1792803927.576166,
+    "end": 1792803927.935714,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792803929.0871842,
+    "end": 1792803929.3965337,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "uiautomator dump --compressed /data/local/tmp/wf-J-4bc8fef5d348-launcher.xml"
+    ],
+    "start": 1792803929.3992054,
+    "end": 1792803932.438061,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /data/local/tmp/wf-J-4bc8fef5d348-launcher.xml"
+    ],
+    "start": 1792803932.439008,
+    "end": 1792803932.7302082,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1792803932.7313159,
+    "end": 1792803937.2688317,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_DOWN"
+    ],
+    "start": 1792803938.8898623,
+    "end": 1792803939.231473,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792803940.383158,
+    "end": 1792803940.8146746,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "uiautomator dump --compressed /data/local/tmp/wf-J-4bc8fef5d348-launcher.xml"
+    ],
+    "start": 1792803940.8197122,
+    "end": 1792803944.2240558,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /data/local/tmp/wf-J-4bc8fef5d348-launcher.xml"
+    ],
+    "start": 1792803944.225535,
+    "end": 1792803944.6273272,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1792803944.628433,
+    "end": 1792803948.6480534,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_DOWN"
+    ],
+    "start": 1792803949.4915128,
+    "end": 1792803949.853683,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792803951.0051026,
+    "end": 1792803951.2269344,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "uiautomator dump --compressed /data/local/tmp/wf-J-4bc8fef5d348-launcher.xml"
+    ],
+    "start": 1792803951.2304153,
+    "end": 1792803955.8685338,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /data/local/tmp/wf-J-4bc8fef5d348-launcher.xml"
+    ],
+    "start": 1792803955.8698485,
+    "end": 1792803956.1007478,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1792803956.1019378,
+    "end": 1792803960.4412494,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_RIGHT"
+    ],
+    "start": 1792803961.811793,
+    "end": 1792803962.1691988,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792803963.321662,
+    "end": 1792803963.7141814,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "uiautomator dump --compressed /data/local/tmp/wf-J-4bc8fef5d348-launcher.xml"
+    ],
+    "start": 1792803963.7188132,
+    "end": 1792803967.9813688,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /data/local/tmp/wf-J-4bc8fef5d348-launcher.xml"
+    ],
+    "start": 1792803967.982164,
+    "end": 1792803968.1770208,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1792803968.178025,
+    "end": 1792803972.7190192,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_DPAD_RIGHT"
+    ],
+    "start": 1792803973.9804564,
+    "end": 1792803974.399031,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792803975.5508516,
+    "end": 1792803975.7891865,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "uiautomator dump --compressed /data/local/tmp/wf-J-4bc8fef5d348-launcher.xml"
+    ],
+    "start": 1792803975.8026452,
+    "end": 1792803980.8325238,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /data/local/tmp/wf-J-4bc8fef5d348-launcher.xml"
+    ],
+    "start": 1792803980.8334246,
+    "end": 1792803981.390782,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1792803981.392351,
+    "end": 1792803985.3913472,
+    "returncode": 0
+  }
+]

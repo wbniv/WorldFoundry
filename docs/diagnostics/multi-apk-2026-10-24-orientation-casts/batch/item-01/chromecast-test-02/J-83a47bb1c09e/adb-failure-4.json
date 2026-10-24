@@ -1,0 +1,9 @@
+{
+  "args": [
+    "shell",
+    "am start -W -n com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity"
+  ],
+  "returncode": 255,
+  "stdout": "Starting: Intent { cmp=com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity }\n",
+  "stderr": "\nException occurred while executing 'start':\njava.lang.SecurityException: Permission Denial: starting Intent { flg=0x10000000 cmp=com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity } from null (pid=16654, uid=2000) not exported from uid 10092\n\tat com.android.server.wm.ActivityTaskSupervisor.checkStartAnyActivityPermission(ActivityTaskSupervisor.java:1136)\n\tat com.android.server.wm.ActivityStarter.executeRequest(ActivityStarter.java:1074)\n\tat com.android.server.wm.ActivityStarter.execute(ActivityStarter.java:742)\n\tat com.android.server.wm.ActivityTaskManagerService.startActivityAndWait(ActivityTaskManagerService.java:1536)\n\tat com.android.server.am.ActivityManagerService.startActivityAndWait(ActivityManagerService.java:3257)\n\tat com.android.server.am.ActivityManagerShellCommand.runStartActivity(ActivityManagerShellCommand.java:719)\n\tat com.android.server.am.ActivityManagerShellCommand.onCommand(ActivityManagerShellCommand.java:233)\n\tat com.android.modules.utils.BasicShellCommandHandler.exec(BasicShellCommandHandler.java:97)\n\tat android.os.ShellCommand.exec(ShellCommand.java:38)\n\tat com.android.server.am.ActivityManagerService.onShellCommand(ActivityManagerService.java:9717)\n\tat android.os.Binder.shellCommand(Binder.java:1068)\n\tat android.os.Binder.onTransact(Binder.java:888)\n\tat android.app.IActivityManager$Stub.onTransact(IActivityManager.java:5267)\n\tat com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2720)\n\tat android.os.Binder.execTransactInternal(Binder.java:1344)\n\tat android.os.Binder.execTransact(Binder.java:1275)\n"
+}

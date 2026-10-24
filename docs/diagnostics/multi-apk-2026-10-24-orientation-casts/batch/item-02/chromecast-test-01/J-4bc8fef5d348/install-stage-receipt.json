@@ -1,0 +1,245 @@
+{
+  "budgets": {
+    "cleanup": 180,
+    "cleanup_consumed": 0.038144165999256074,
+    "execution": 900,
+    "execution_consumed": 9.663804736977909,
+    "execution_deadline": 147734.660800416,
+    "forced": 1081,
+    "forced_consumed": 10.886823662993265,
+    "forced_deadline": 147915.660800416,
+    "granted": 146834.660800416
+  },
+  "cleanup_attempts": 1,
+  "connected": true,
+  "device": "chromecast-test-01",
+  "diagnostics": {
+    "mdns-endpoint": {
+      "endpoint": "192.168.4.61:42249",
+      "observed_at": 1792803897.79626
+    }
+  },
+  "flags": {},
+  "health": "ready",
+  "job": "J-4bc8fef5d348",
+  "journal": [
+    {
+      "job": "J-4bc8fef5d348",
+      "key": "install:1",
+      "format": 1,
+      "original": {
+        "before_hash": "3d09d225fdb1aee85d56b3237875158205acda1c431699fc833d3a9839a8ca76",
+        "boot_id": "f1d4d069-1ac3-4ba6-a8fb-56df10bdc301",
+        "input": "75ee120db3398e06e3c5acf0503400626546411a38ad631a8954456b5c30dcd5.apk",
+        "kind": "install",
+        "package": "org.worldfoundry.screensaver"
+      },
+      "restored": 1,
+      "verification": {
+        "installed_sha256": "75ee120db3398e06e3c5acf0503400626546411a38ad631a8954456b5c30dcd5"
+      },
+      "device": "chromecast-test-01",
+      "backend": "android",
+      "scopes": [
+        "device:chromecast-test-01",
+        "transport:android"
+      ]
+    }
+  ],
+  "observations": {},
+  "plugin": {
+    "cleanup": {
+      "observations": {},
+      "reason": "restored",
+      "recovery_state": null,
+      "restoration": "safe"
+    },
+    "run": {
+      "details": {
+        "apk_installations": [
+          {
+            "action": "install",
+            "before_sha256": "3d09d225fdb1aee85d56b3237875158205acda1c431699fc833d3a9839a8ca76",
+            "end": 1792803907.139342,
+            "input": "75ee120db3398e06e3c5acf0503400626546411a38ad631a8954456b5c30dcd5.apk",
+            "installed_sha256": "75ee120db3398e06e3c5acf0503400626546411a38ad631a8954456b5c30dcd5",
+            "journal_key": "install:1",
+            "package": "org.worldfoundry.screensaver",
+            "reason": "explicit-install",
+            "start": 1792803901.0585096,
+            "status": "verified",
+            "variant": null
+          }
+        ],
+        "next_workflow": "verify-launch",
+        "profile": "tv",
+        "workflow": "install"
+      },
+      "reason": "completed",
+      "recovery_state": null,
+      "status": "succeeded"
+    }
+  },
+  "reaped": [],
+  "reason": "completed",
+  "status": "succeeded",
+  "survivors": [],
+  "tool_diagnostics": [
+    {
+      "healthy": true,
+      "operation": "host-version-probe",
+      "reason": "ready",
+      "seconds": 0.04816338501404971,
+      "timed_out": false
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "aapt"
+    },
+    {
+      "phase": "job",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "aapt"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    }
+  ],
+  "transport_failure_phases": [],
+  "transport_recovery": [],
+  "version": 1,
+  "work_started": true
+}

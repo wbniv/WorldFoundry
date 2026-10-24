@@ -1,0 +1,15 @@
+[
+  {
+    "input": "75ee120db3398e06e3c5acf0503400626546411a38ad631a8954456b5c30dcd5.apk",
+    "package": "org.worldfoundry.screensaver",
+    "before_sha256": "3d09d225fdb1aee85d56b3237875158205acda1c431699fc833d3a9839a8ca76",
+    "action": "install",
+    "reason": "explicit-install",
+    "variant": null,
+    "status": "verified",
+    "start": 1792803901.0585096,
+    "journal_key": "install:1",
+    "installed_sha256": "75ee120db3398e06e3c5acf0503400626546411a38ad631a8954456b5c30dcd5",
+    "end": 1792803907.139342
+  }
+]

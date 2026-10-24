@@ -1,0 +1,73 @@
+{
+  "package": "org.worldfoundry.seahorsegrid",
+  "label": "World Foundry Seahorse Grid Screensaver",
+  "apk_sha256": "71b5a1e54e419a9c5d724f950866bb66394ad49a87d0983b564854cf513ccf21",
+  "references": [
+    {
+      "kind": "banner",
+      "resource": "res/drawable/tv_banner.png",
+      "file": "expected-banner-0.png",
+      "sha256": "b9d52c6e3b423c0ff0e8fbf618f186809674f7b83524923d15ab169f6d221c5d"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/mipmap-mdpi-v4/ic_launcher_foreground.png",
+      "file": "expected-adaptive-1.png",
+      "sha256": "3d7274b18e0768041aa326cef1abd70530a3aa9555599b46d6030c32434561af"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/mipmap-hdpi-v4/ic_launcher_foreground.png",
+      "file": "expected-adaptive-2.png",
+      "sha256": "8cc9168d3d7b1410f4143dc3c0ddfb555360736260b02b230b7c99d30af05f8a"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/mipmap-xhdpi-v4/ic_launcher_foreground.png",
+      "file": "expected-adaptive-3.png",
+      "sha256": "77d42872cbead003bcf1b94851ccb75683ea188d99a3faf5699876e8f5cb7391"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/mipmap-xxhdpi-v4/ic_launcher_foreground.png",
+      "file": "expected-adaptive-4.png",
+      "sha256": "108a6e43a7096d14bfde02ffbb275c2b17591258843f3539a1aa9f5fbd9519e8"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/mipmap-xxxhdpi-v4/ic_launcher_foreground.png",
+      "file": "expected-adaptive-5.png",
+      "sha256": "d7e7b318eaf9dd863bdf5972f98165ec4dd39d5fe19f877063198e27e0e6a6cc"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/mipmap-mdpi-v4/ic_launcher.png",
+      "file": "expected-icon-6.png",
+      "sha256": "079eb261c1ad4771b2db063f4d312bbcecf70d14e30401cd82c4dd446f9f1fea"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/mipmap-hdpi-v4/ic_launcher.png",
+      "file": "expected-icon-7.png",
+      "sha256": "2af9b67df42404b187f13b887a27e176f36a33eb43c2449cfccd840ef79c9e85"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/mipmap-xhdpi-v4/ic_launcher.png",
+      "file": "expected-icon-8.png",
+      "sha256": "6ee44681ad0060de5a73c23727eb7d052787f6f1327ea3eb3907010371d4d37c"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/mipmap-xxhdpi-v4/ic_launcher.png",
+      "file": "expected-icon-9.png",
+      "sha256": "4c87a72f0ba79565856e54e88703ee21ad0680cbb2b6d814b0a061dc43738651"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/mipmap-xxxhdpi-v4/ic_launcher.png",
+      "file": "expected-icon-10.png",
+      "sha256": "15063eb8e8936955d54ebd10d3113cfbea7c66c02eb0914be235675b86f1d083"
+    }
+  ]
+}

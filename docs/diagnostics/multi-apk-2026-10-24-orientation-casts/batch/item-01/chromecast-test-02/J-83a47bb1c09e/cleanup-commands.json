@@ -1,0 +1,74 @@
+[
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-83a47bb1c09e-launcher.xml"
+    ],
+    "start": 1792803832.6755326,
+    "end": 1792803833.0052273,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test ! -e /data/local/tmp/wf-J-83a47bb1c09e-launcher.xml; echo wf-status=$?"
+    ],
+    "start": 1792803833.0066028,
+    "end": 1792803833.1232898,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.seahorsegrid"
+    ],
+    "start": 1792803833.1421826,
+    "end": 1792803833.31635,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity"
+    ],
+    "start": 1792803833.3175552,
+    "end": 1792803833.497427,
+    "returncode": 255
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.LEANBACK_LAUNCHER -p com.google.android.youtube.tv"
+    ],
+    "start": 1792803833.4988368,
+    "end": 1792803833.6694965,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.ShellActivity"
+    ],
+    "start": 1792803833.6712177,
+    "end": 1792803833.9979227,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792803833.998888,
+    "end": 1792803834.2297568,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792803834.2310877,
+    "end": 1792803834.375205,
+    "returncode": 0
+  }
+]

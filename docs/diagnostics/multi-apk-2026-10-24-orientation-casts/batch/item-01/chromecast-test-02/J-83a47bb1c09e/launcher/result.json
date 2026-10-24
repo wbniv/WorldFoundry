@@ -1,0 +1,52 @@
+{
+  "status": "failed",
+  "home": "com.google.android.apps.tv.launcherx/.home.HomeActivity",
+  "apk": "71b5a1e54e419a9c5d724f950866bb66394ad49a87d0983b564854cf513ccf21.apk",
+  "attempts": [
+    {
+      "bounds": [
+        662,
+        906,
+        814,
+        1058
+      ],
+      "reference": "expected-adaptive-3.png",
+      "resource": "res/mipmap-xhdpi-v4/ic_launcher_foreground.png",
+      "kind": "icon",
+      "mean_absolute_error": 20.244942832014072,
+      "rms_error": 31.29475810315489,
+      "worst_region_error": 38.96907216494845,
+      "brightness_gain": 1.3252947805959838,
+      "verified": false,
+      "screenshot": "attempt-1-view-1.png",
+      "hierarchy": "attempt-1-view-1.xml",
+      "attempt": 1
+    },
+    {
+      "bounds": [
+        662,
+        906,
+        814,
+        1058
+      ],
+      "reference": "expected-adaptive-3.png",
+      "resource": "res/mipmap-xhdpi-v4/ic_launcher_foreground.png",
+      "kind": "icon",
+      "mean_absolute_error": 20.244942832014072,
+      "rms_error": 31.29475810315489,
+      "worst_region_error": 38.96907216494845,
+      "brightness_gain": 1.3252947805959838,
+      "verified": false,
+      "screenshot": "attempt-2-view-1.png",
+      "hierarchy": "attempt-2-view-1.xml",
+      "attempt": 2
+    }
+  ],
+  "refreshes": [
+    {
+      "operation": "launcher-force-stop-and-home",
+      "package": "com.google.android.apps.tv.launcherx"
+    }
+  ],
+  "error": "APK installed, but launcher artwork is stale or unverified after bounded recovery; inspect launcher evidence."
+}
