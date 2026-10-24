@@ -36,6 +36,9 @@ bool StaticMeshEnabled();
 bool StaticMeshFastCullEnabled();
 int StaticMeshBakeBudget();
 void StaticMeshSetFastCull(bool fast);	// --static-mesh-cull=fast|exact
+// --static-mesh-check: the WF_STATIC_MESH_CHECK self-check, for targets with no
+// environment (Android). Debug only: it re-records every object at every draw.
+void StaticMeshSetCheck(bool on);
 // Memory experiment: share one index buffer across mesh VAOs (default on).
 // =0 restores the phase-1 per-mesh buffers for same-binary measurements.
 void StaticMeshSetSharedIndex(bool on);

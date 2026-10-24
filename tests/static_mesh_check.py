@@ -21,7 +21,10 @@ make from the recorded triangle. wf_game prints one line at exit:
                 matrix: soa-input-mismatches, soa-mismatches,
                 soa-random-mismatches and soa-edge-mismatches must be 0, and
                 soa-faces and soa-edge-near-zero must be > 0 (the edge-on case
-                was really reached)
+                was really reached); the four-lane kernel (NEON on 32-bit ARM,
+                its scalar lanes model elsewhere) must agree too:
+                kernel-mismatches, kernel-run-mismatches and every
+                selftest-*-mismatches must be 0
 All require object-draws > 0, so a run that never used the static path fails
 instead of passing vacuously.
 
@@ -50,10 +53,13 @@ def run(binary: str, level: str, frames: int, cwd: str, extra: list[str]) -> dic
     text = proc.stdout + proc.stderr
     if proc.returncode != 0:
         sys.exit(f"FAIL {level}: wf_game exited {proc.returncode}\n{text[-2000:]}")
-    m = LINE_RE.search(text)
+    # Check mode also prints running totals every 2048 object draws (for
+    # Android, which is killed rather than exiting); the last line is the total.
+    found = LINE_RE.findall(text)
+    m = re.match(r"(.*)", found[-1]) if found else None
     if not m:
         sys.exit(f"FAIL {level}: no static-mesh-check line (static path never ran?)")
-    return {k: int(v) for k, v in (kv.split("=") for kv in m.group(1).split())}
+    return {k: int(v) if v.lstrip("-").isdigit() else v for k, v in (kv.split("=") for kv in m.group(1).split())}
 
 
 def main() -> int:
@@ -71,7 +77,9 @@ def main() -> int:
         c = run(a.binary, level, a.frames, a.cwd, a.extra)
         keys = {"bake": ["triangle-mismatches"], "cull": ["cull-exact-mismatches"],
                 "soa": ["soa-input-mismatches", "soa-mismatches", "soa-random-mismatches",
-                        "soa-edge-mismatches"]}[a.check]
+                        "soa-edge-mismatches", "kernel-mismatches", "kernel-run-mismatches",
+                        "selftest-mismatches", "selftest-edge-mismatches", "selftest-nan-mismatches",
+                        "selftest-denormal-mismatches"]}[a.check]
         if a.check == "cull" and a.fast:
             keys.append("fast-mismatches")
         bad = [k for k in keys if c.get(k, -1) != 0]

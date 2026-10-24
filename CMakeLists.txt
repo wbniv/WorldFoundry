@@ -1428,6 +1428,13 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     add_test(NAME opaque_material_programs COMMAND wf_opaque_material_gl_test)
     set_tests_properties(opaque_material_programs PROPERTIES LABELS "gl")
 
+    # The four-lane static cull kernel against the scalar test (lanes model;
+    # NEON itself runs only on 32-bit ARM under --static-mesh-check).
+    add_executable(wf_backface_cull_kernel_test tests/backface_cull_kernel.cc)
+    target_link_libraries(wf_backface_cull_kernel_test PRIVATE wfengine)
+    target_compile_options(wf_backface_cull_kernel_test PRIVATE -fpermissive -w)
+    add_test(NAME backface_cull_kernel COMMAND wf_backface_cull_kernel_test)
+
     add_executable(wf_compact_vertex_layout_test tests/compact_vertex_layout.cc)
     target_include_directories(wf_compact_vertex_layout_test PRIVATE ${SRC})
     add_test(NAME mesh_vertex_layout COMMAND wf_compact_vertex_layout_test)

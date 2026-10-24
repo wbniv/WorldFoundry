@@ -53,6 +53,7 @@
 #include <gfx/material.hp>
 #include <gfx/renderer_backend.hp>
 #include <gfx/backface_cull.hp>
+#include <gfx/backface_cull_neon.hp>
 #include <game/runtime_profile.hp>
 #include <hal/halbase.h>
 #include <memory/lmalloc.hp>
@@ -69,6 +70,7 @@ namespace
 {
 	int sSwitchOverride = -1;			// -1 = not given on the command line
 	int sFastCullOverride = -1;
+	int sCheckOverride = -1;			// --static-mesh-check (Android has no environment)
 	int sSharedIndexOverride = -1;
 	int sBakeBudgetOverride = -1;
 	int32 sBakedFacesThisFrame = 0;
@@ -112,7 +114,7 @@ namespace
 	bool
 	CheckMode()
 	{
-		static const bool check = EnvFlag("WF_STATIC_MESH_CHECK", false);
+		static const bool check = sCheckOverride >= 0 ? sCheckOverride != 0 : EnvFlag("WF_STATIC_MESH_CHECK", false);
 		return check;
 	}
 
@@ -162,6 +164,12 @@ namespace
 		unsigned long soaFaces, soaInputMismatches, soaMismatches;
 		unsigned long soaRandomFaces, soaRandomMismatches;
 		unsigned long soaEdgeFaces, soaEdgeMismatches, soaEdgeNearZero;
+		// The four-lane kernel (gfx/backface_cull_neon.hp; NEON on 32-bit ARM,
+		// the scalar lanes model elsewhere) against the scalar test: each face
+		// in all four lanes under the same matrices as above, every run's
+		// survivor list under the frame's matrix, and the synthetic self-test.
+		unsigned long kernelFaces, kernelMismatches, kernelRuns, kernelRunMismatches;
+		WfCullSelfTest selfTest;
 	};
 	long sLiveBakes = 0;
 	CheckTotals sCheck = {};
@@ -175,14 +183,23 @@ namespace
 		        "simulated-losses=%lu live-bakes=%ld cpu-bytes=%zu "
 		        "soa-faces=%lu soa-input-mismatches=%lu soa-mismatches=%lu "
 		        "soa-random-faces=%lu soa-random-mismatches=%lu "
-		        "soa-edge-faces=%lu soa-edge-mismatches=%lu soa-edge-near-zero=%lu\n",
+		        "soa-edge-faces=%lu soa-edge-mismatches=%lu soa-edge-near-zero=%lu "
+		        "kernel=%s kernel-faces=%lu kernel-mismatches=%lu kernel-runs=%lu kernel-run-mismatches=%lu "
+		        "selftest-runs=%lu selftest-faces=%lu selftest-mismatches=%lu selftest-edge-runs=%lu selftest-edge-mismatches=%lu "
+		        "selftest-nan-runs=%lu selftest-nan-mismatches=%lu selftest-denormal-runs=%lu selftest-denormal-mismatches=%lu\n",
 		        sCheck.objectDraws, sCheck.triangles, sCheck.triangleMismatches,
 		        sCheck.cullFaces, sCheck.cullExactMismatches, sCheck.fastFaces, sCheck.fastMismatches,
 		        sCheck.nonSimilarDraws, sCheck.atlasChanges, sCheck.atlasRebakes, sCheck.atlasRebakeChangedTriangles,
 		        sCheck.simulatedLosses, sLiveBakes, sCpuBytes,
 		        sCheck.soaFaces, sCheck.soaInputMismatches, sCheck.soaMismatches,
 		        sCheck.soaRandomFaces, sCheck.soaRandomMismatches,
-		        sCheck.soaEdgeFaces, sCheck.soaEdgeMismatches, sCheck.soaEdgeNearZero);
+		        sCheck.soaEdgeFaces, sCheck.soaEdgeMismatches, sCheck.soaEdgeNearZero,
+		        WF_CULL_NEON ? "neon" : "model", sCheck.kernelFaces, sCheck.kernelMismatches,
+		        sCheck.kernelRuns, sCheck.kernelRunMismatches,
+		        sCheck.selfTest.runs, sCheck.selfTest.faces, sCheck.selfTest.mismatches,
+		        sCheck.selfTest.edgeRuns, sCheck.selfTest.edgeMismatches,
+		        sCheck.selfTest.nanRuns, sCheck.selfTest.nanMismatches,
+		        sCheck.selfTest.denormalRuns, sCheck.selfTest.denormalMismatches);
 	}
 
 	bool
@@ -234,6 +251,12 @@ void
 StaticMeshSetFastCull(bool fast)
 {
 	sFastCullOverride = fast ? 1 : 0;
+}
+
+void
+StaticMeshSetCheck(bool on)
+{
+	sCheckOverride = on ? 1 : 0;
 }
 
 void
@@ -424,6 +447,29 @@ namespace
 	// Check mode only. Deterministic, so a mismatch reproduces.
 	uint32 sCheckRandom = 0x9e3779b9u;
 
+	// The lanes the target's kernel uses (NEON on 32-bit ARM), or the scalar
+	// lanes model where the target runs the scalar loop.
+#if WF_CULL_NEON
+	typedef WfLanes4Neon CheckLanes;
+#else
+	typedef WfLanes4Model CheckLanes;
+#endif
+
+	// One face in all four lanes: every lane must give the scalar answer.
+	bool
+	KernelLanesDiffer(const float m[16], float nx, float ny, float nz, float cx, float cy, float cz)
+	{
+		const float a[6][4] = {{nx, nx, nx, nx}, {ny, ny, ny, ny}, {nz, nz, nz, nz},
+		                       {cx, cx, cx, cx}, {cy, cy, cy, cy}, {cz, cz, cz, cz}};
+		unsigned recheck;
+		unsigned mask = WfCullBaked4<CheckLanes>(m, a[0], a[1], a[2], a[3], a[4], a[5], recheck);
+		if(recheck)					// as WfCullBakedRun does: the scalar test decides those lanes
+			mask = (mask & ~recheck) | (WfFaceIsBackfacingAt(m, nx, ny, nz, cx, cy, cz) ? recheck : 0u);
+		const unsigned want = WfFaceIsBackfacingAt(m, nx, ny, nz, cx, cy, cz) ? 0xfu : 0u;
+		++sCheck.kernelFaces;
+		return mask != want;
+	}
+
 	float
 	CheckRandom(float lo, float hi)
 	{
@@ -454,6 +500,8 @@ namespace
 		   || !SameBits(bcx, cx) || !SameBits(bcy, cy) || !SameBits(bcz, cz))
 			++sCheck.soaInputMismatches;
 		auto differ = [&](const float m[16]) {
+			if(KernelLanesDiffer(m, bnx, bny, bnz, bcx, bcy, bcz))
+				++sCheck.kernelMismatches;
 			return WfFaceIsBackfacing(m, nx, ny, nz, x0, y0, z0, x1, y1, z1, x2, y2, z2)
 				!= WfFaceIsBackfacingAt(m, bnx, bny, bnz, bcx, bcy, bcz);
 		};
@@ -841,6 +889,39 @@ RenderObject3D::RenderStatic(const Matrix34& position)
 		static const bool registered = (atexit(PrintCheckTotals) == 0);
 		(void)registered;
 		++sCheck.objectDraws;
+		// Android is killed rather than exiting, so atexit never prints there.
+		if(sCheck.objectDraws % 2048 == 0)
+			PrintCheckTotals();
+		static bool selfTested = false;
+		if(!selfTested)
+		{
+			selfTested = true;
+			WfCullKernelSelfTest<CheckLanes>(sCheck.selfTest);
+		}
+		if(bake.cull && cull)
+		{
+			// Every run's survivor list: the kernel run against the scalar run.
+			unsigned* a = static_cast<unsigned*>(TransientAllocate(size_t(bake.largestGroup) * 2 * sizeof(unsigned)));
+			unsigned* b = a + bake.largestGroup;
+			const int32 n = bake.triangleCount;
+			for(int32 i = 0; i < bake.groupCount; ++i)
+			{
+				const StaticMeshGroup& g = bake.groups[i];
+				if(g.firstTriangle < 0 || g.cullExempt)
+					continue;
+				const float* gnx = bake.cull + g.firstTriangle;
+				int32 ca = 0, cb = 0;
+				const int32 faces = g.endFace - g.firstFace;
+				const int32 na = WfCullBakedRun<CheckLanes, int32>(mv, gnx, gnx + n, gnx + 2*n, gnx + 3*n, gnx + 4*n, gnx + 5*n,
+				                                            faces, unsigned(g.firstTriangle), a, ca);
+				const int32 nb = WfCullBakedRunScalar<int32>(mv, gnx, gnx + n, gnx + 2*n, gnx + 3*n, gnx + 4*n, gnx + 5*n,
+				                                      faces, unsigned(g.firstTriangle), b, cb);
+				++sCheck.kernelRuns;
+				if(na != nb || ca != cb || memcmp(a, b, size_t(na) * sizeof(unsigned)) != 0)
+					++sCheck.kernelRunMismatches;
+			}
+			TransientFree(a);
+		}
 		if(!frame.similarity)
 			++sCheck.nonSimilarDraws;
 		for(int32 i = 0; i < bake.groupCount; ++i)
@@ -942,13 +1023,13 @@ RenderObject3D::RenderStatic(const Matrix34& position)
 			const float* cy = cx + n;
 			const float* cz = cy + n;
 			const int32 faces = g.endFace - g.firstFace;
-			for(int32 k = 0; k < faces; ++k, ++triangle)
-			{
-				if(WfFaceIsBackfacingAt(mv, nx[k], ny[k], nz[k], cx[k], cy[k], cz[k]))
-					++culled;
-				else
-					surviving[count++] = triangle;
-			}
+			// Four faces at a time in NEON on 32-bit ARM; the scalar test
+			// elsewhere (gfx/backface_cull_neon.hp says why arm64 is scalar).
+#if WF_CULL_NEON
+			count = WfCullBakedRun<WfLanes4Neon, int32>(mv, nx, ny, nz, cx, cy, cz, faces, triangle, surviving, culled);
+#else
+			count = WfCullBakedRunScalar<int32>(mv, nx, ny, nz, cx, cy, cz, faces, triangle, surviving, culled);
+#endif
 		}
 		wf_profile::count(wf_profile::FacesSubmitted, (unsigned long)(g.endFace - g.firstFace));
 		wf_profile::count(wf_profile::FacesCulled, (unsigned long)culled);

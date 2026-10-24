@@ -1,0 +1,302 @@
+//=============================================================================
+// gfx/backface_cull_neon.hp: four faces at a time for the static back-face cull
+// Copyright ( c ) 2026 World Foundry Group
+// Part of the World Foundry 3D video game engine/production environment
+// for more information about World Foundry, see www.worldfoundry.org
+//==============================================================================
+// WfCullBakedRun evaluates WfFaceIsBackfacingAt (gfx/backface_cull.hp) over a
+// run of baked faces (structure of arrays: normal x/y/z, centre x/y/z) and
+// writes the surviving triangle numbers in face order, exactly as the scalar
+// loop in RenderObject3D::RenderStatic does.
+//
+// Bit-identical decisions are the contract (NEON-cull plan, finding-your-way
+// docs/plans/2026-10-24-neon-static-cull.md). Every lane computes the scalar
+// test's expressions in the scalar test's association order, with separate
+// multiplies and adds: no fused multiply-add, no vmla/vfma intrinsic.
+//
+// Where it runs:
+//  * 32-bit ARM with NEON (armeabi-v7a; the Chromecasts): four lanes in NEON.
+//    That target has no FMA, so the scalar test it replaces is unfused too.
+//  * arm64: NOT used. The compiler contracts the scalar test there into fused
+//    multiply-adds (-ffp-contract=on, FMA available), so an unfused vector
+//    kernel would not match the arm64 scalar path; arm64 keeps the scalar loop.
+//  * everywhere else (x86 desktop, WebAssembly): the scalar loop.
+// The same kernel body also compiles over WfLanes4Model, a four-lane scalar
+// model of the same operations, so desktop tests exercise the kernel's lane
+// and compaction logic (tests/backface_cull_kernel.cc). The model computes the
+// same per-lane arithmetic in scalar code; it does not reproduce NEON's
+// flush-to-zero of denormals (ARMv7 Advanced SIMD always flushes; VFP scalar
+// does not by default), which only the on-device check (--static-mesh-check)
+// can test.
+//==============================================================================
+
+#ifndef _BACKFACE_CULL_NEON_HP
+#define _BACKFACE_CULL_NEON_HP
+
+#include <gfx/backface_cull.hp>
+#include <cstdint>
+
+#if defined(__ARM_NEON) && !defined(__aarch64__) && !defined(WF_CULL_NO_NEON)
+#define WF_CULL_NEON 1
+#include <arm_neon.h>
+#else
+#define WF_CULL_NEON 0
+#endif
+
+// Four lanes in NEON.
+#if WF_CULL_NEON
+struct WfLanes4Neon
+{
+	typedef float32x4_t V;
+	static V splat(float x) { return vdupq_n_f32(x); }
+	static V load(const float* p) { return vld1q_f32(p); }
+	static V mul(V a, V b) { return vmulq_f32(a, b); }
+	static V add(V a, V b) { return vaddq_f32(a, b); }
+	// Bit i set when lane i's value is > 0 (false for NaN, as in scalar).
+	static unsigned positive(V a)
+	{
+		const uint32x4_t gt = vcgtq_f32(a, vdupq_n_f32(0.0f));
+		uint32_t m[4];
+		vst1q_u32(m, gt);
+		return (m[0] & 1u) | (m[1] & 2u) | (m[2] & 4u) | (m[3] & 8u);
+	}
+	// Bit i set when |lane i| < t (false for NaN).
+	static unsigned below(V a, float t)
+	{
+		const uint32x4_t lt = vcltq_f32(vabsq_f32(a), vdupq_n_f32(t));
+		uint32_t m[4];
+		vst1q_u32(m, lt);
+		return (m[0] & 1u) | (m[1] & 2u) | (m[2] & 4u) | (m[3] & 8u);
+	}
+};
+#endif
+
+// The same operations, one lane at a time, in scalar float.
+struct WfLanes4Model
+{
+	struct V { float l[4]; };
+	static V splat(float x) { V r = {{x, x, x, x}}; return r; }
+	static V load(const float* p) { V r = {{p[0], p[1], p[2], p[3]}}; return r; }
+	static V mul(V a, V b) { V r; for(int i = 0; i < 4; ++i) r.l[i] = WfMul(a.l[i], b.l[i]); return r; }
+	static V add(V a, V b) { V r; for(int i = 0; i < 4; ++i) r.l[i] = WfAdd(a.l[i], b.l[i]); return r; }
+	static unsigned positive(V a)
+	{
+		unsigned m = 0;
+		for(int i = 0; i < 4; ++i)
+			if(a.l[i] > 0.0f)
+				m |= 1u << i;
+		return m;
+	}
+	static unsigned below(V a, float t)
+	{
+		unsigned m = 0;
+		for(int i = 0; i < 4; ++i)
+			if(std::fabs(a.l[i]) < t)
+				m |= 1u << i;
+		return m;
+	}
+private:
+	// Separate functions keep each product and sum a rounded float statement,
+	// so no target can contract a model multiply into the following add.
+	static float WfMul(float a, float b) { const float r = a * b; return r; }
+	static float WfAdd(float a, float b) { const float r = a + b; return r; }
+};
+
+// Denormals. ARMv7 Advanced SIMD always flushes denormal inputs and results to
+// zero; the scalar VFP test does not. Where no value is denormal the two are bit
+// identical. A flushed value is below FLT_MIN (1.18e-38) in magnitude, so it can
+// move the dot product only by about FLT_MIN times the magnitudes it is later
+// multiplied by. Any lane whose vector dot product is below kWfCullRecheck in
+// magnitude is therefore decided again by the scalar test: for every matrix and
+// coordinate below about 1e18 in magnitude (world coordinates are many orders
+// smaller), flushing cannot change the sign of a larger dot product. Real
+// geometry is far from both limits: the check found no difference on cast1
+// even without this guard; synthetic denormal inputs and products did differ.
+const float kWfCullRecheck = 1e-20f;
+
+// Bitmask of back-facing faces among faces k..k+3 of the arrays, and in
+// `recheck` the lanes the scalar test must decide (see kWfCullRecheck). Same
+// expressions and association order as WfFaceIsBackfacingAt:
+//   ne = (m0*n.x + m4*n.y) + m8*n.z           (likewise y, z)
+//   pe = ((m0*c.x + m4*c.y) + m8*c.z) + m12   (likewise y, z)
+//   back = (ne.x*pe.x + ne.y*pe.y) + ne.z*pe.z > 0
+template<class L>
+inline unsigned
+WfCullBaked4(const float mv[16], const float* nx, const float* ny, const float* nz,
+             const float* cx, const float* cy, const float* cz, unsigned& recheck)
+{
+	typedef typename L::V V;
+	const V vnx = L::load(nx), vny = L::load(ny), vnz = L::load(nz);
+	const V vcx = L::load(cx), vcy = L::load(cy), vcz = L::load(cz);
+	const V m0 = L::splat(mv[0]), m1 = L::splat(mv[1]), m2 = L::splat(mv[2]);
+	const V m4 = L::splat(mv[4]), m5 = L::splat(mv[5]), m6 = L::splat(mv[6]);
+	const V m8 = L::splat(mv[8]), m9 = L::splat(mv[9]), m10 = L::splat(mv[10]);
+	const V m12 = L::splat(mv[12]), m13 = L::splat(mv[13]), m14 = L::splat(mv[14]);
+	const V nex = L::add(L::add(L::mul(m0, vnx), L::mul(m4, vny)), L::mul(m8, vnz));
+	const V ney = L::add(L::add(L::mul(m1, vnx), L::mul(m5, vny)), L::mul(m9, vnz));
+	const V nez = L::add(L::add(L::mul(m2, vnx), L::mul(m6, vny)), L::mul(m10, vnz));
+	const V pex = L::add(L::add(L::add(L::mul(m0, vcx), L::mul(m4, vcy)), L::mul(m8, vcz)), m12);
+	const V pey = L::add(L::add(L::add(L::mul(m1, vcx), L::mul(m5, vcy)), L::mul(m9, vcz)), m13);
+	const V pez = L::add(L::add(L::add(L::mul(m2, vcx), L::mul(m6, vcy)), L::mul(m10, vcz)), m14);
+	const V dot = L::add(L::add(L::mul(nex, pex), L::mul(ney, pey)), L::mul(nez, pez));
+	recheck = L::below(dot, kWfCullRecheck);
+	return L::positive(dot);
+}
+
+// A run of `faces` baked faces whose first triangle is `triangle`. Writes the
+// surviving triangle numbers to `surviving` in face order and returns their
+// count; `culled` gets the rest. Groups of four go through lanes L, the tail
+// (0-3 faces) through the scalar WfFaceIsBackfacingAt. I is the caller's count
+// type (the engine's int32 is long on 32-bit ARM).
+template<class L, class I>
+inline I
+WfCullBakedRun(const float mv[16], const float* nx, const float* ny, const float* nz,
+               const float* cx, const float* cy, const float* cz,
+               I faces, unsigned triangle, unsigned* surviving, I& culled)
+{
+	I count = 0, k = 0;
+	for(; k + 4 <= faces; k += 4)
+	{
+		unsigned recheck;
+		unsigned back = WfCullBaked4<L>(mv, nx + k, ny + k, nz + k, cx + k, cy + k, cz + k, recheck);
+		for(int i = 0; recheck != 0 && i < 4; ++i)
+			if(recheck & (1u << i))
+			{
+				const int j = k + i;
+				const bool scalar = WfFaceIsBackfacingAt(mv, nx[j], ny[j], nz[j], cx[j], cy[j], cz[j]);
+				back = scalar ? (back | (1u << i)) : (back & ~(1u << i));
+			}
+		// Branch-free compaction: always write, advance only for survivors.
+		for(int i = 0; i < 4; ++i)
+		{
+			surviving[count] = triangle + unsigned(k + i);
+			count += I(((back >> i) & 1u) ^ 1u);
+		}
+	}
+	for(; k < faces; ++k)
+	{
+		if(!WfFaceIsBackfacingAt(mv, nx[k], ny[k], nz[k], cx[k], cy[k], cz[k]))
+			surviving[count++] = triangle + unsigned(k);
+	}
+	culled = faces - count;
+	return count;
+}
+
+// The scalar loop, for comparison and for targets without the kernel.
+template<class I>
+inline I
+WfCullBakedRunScalar(const float mv[16], const float* nx, const float* ny, const float* nz,
+                     const float* cx, const float* cy, const float* cz,
+                     I faces, unsigned triangle, unsigned* surviving, I& culled)
+{
+	I count = 0;
+	for(I k = 0; k < faces; ++k)
+		if(!WfFaceIsBackfacingAt(mv, nx[k], ny[k], nz[k], cx[k], cy[k], cz[k]))
+			surviving[count++] = triangle + unsigned(k);
+	culled = faces - count;
+	return count;
+}
+
+// Self-test of the kernel against the scalar loop on synthetic runs: tail
+// lengths 0-7 and longer runs, random matrices, faces moved edge-on, NaN
+// inputs, and denormal inputs and products. Denormal and NaN cases are counted
+// apart, so a difference that comes from NEON's flush-to-zero is reported as
+// such rather than mixed with ordinary cases. Used by tests/backface_cull_kernel.cc
+// (lanes model, desktop) and by static-mesh check mode (the target's lanes).
+struct WfCullSelfTest
+{
+	unsigned long runs, faces, mismatches;					// ordinary inputs
+	unsigned long edgeRuns, edgeMismatches;
+	unsigned long nanRuns, nanMismatches;
+	unsigned long denormalRuns, denormalMismatches;
+};
+
+template<class L>
+inline void
+WfCullKernelSelfTest(WfCullSelfTest& r)
+{
+	uint32_t seed = 0x2545f491u;
+	auto next = [&seed]() { seed = seed * 1664525u + 1013904223u; return seed; };
+	auto uniform = [&next](float lo, float hi) { return lo + (hi - lo) * (float(next() >> 8) * (1.0f / 16777216.0f)); };
+	enum { kMax = 24 };
+	float a[6][kMax];				// nx ny nz cx cy cz
+	float mv[16];
+	unsigned sk[kMax], ss[kMax];
+	auto randomMatrix = [&](float scale) {
+		for(int i = 0; i < 16; ++i) mv[i] = uniform(-2.0f, 2.0f) * scale;
+		mv[3] = mv[7] = mv[11] = 0.0f; mv[15] = 1.0f;
+		mv[12] = uniform(-50.0f, 50.0f) * scale; mv[13] = uniform(-50.0f, 50.0f) * scale; mv[14] = uniform(-50.0f, 50.0f) * scale;
+	};
+	auto randomFaces = [&](int n, float scale) {
+		for(int k = 0; k < n; ++k)
+		{
+			for(int j = 0; j < 3; ++j) a[j][k] = uniform(-1.0f, 1.0f) * scale;
+			for(int j = 3; j < 6; ++j) a[j][k] = uniform(-20.0f, 20.0f) * scale;
+		}
+	};
+	// Compare one run; returns true when kernel and scalar disagree.
+	auto differ = [&](int n) {
+		int32_t ck = 0, cs = 0;
+		const int32_t nk = WfCullBakedRun<L, int32_t>(mv, a[0], a[1], a[2], a[3], a[4], a[5], int32_t(n), 100u, sk, ck);
+		const int32_t ns = WfCullBakedRunScalar<int32_t>(mv, a[0], a[1], a[2], a[3], a[4], a[5], int32_t(n), 100u, ss, cs);
+		if(nk != ns || ck != cs) return true;
+		for(int32_t i = 0; i < nk; ++i) if(sk[i] != ss[i]) return true;
+		return false;
+	};
+	// Ordinary: every length 0..kMax, many matrices.
+	for(int n = 0; n <= kMax; ++n)
+		for(int rep = 0; rep < 200; ++rep)
+		{
+			randomMatrix(1.0f); randomFaces(n, 1.0f);
+			++r.runs; r.faces += unsigned(n);
+			if(differ(n)) ++r.mismatches;
+		}
+	// Edge-on: move the translation so face 0 (copied to every lane, slightly
+	// jittered) has dot(Ne, Pe) ~ 0; rounding then decides the answer.
+	for(int rep = 0; rep < 4000; ++rep)
+	{
+		const int n = 1 + int(next() % 8u);
+		randomMatrix(1.0f); randomFaces(n, 1.0f);
+		const float nex = mv[0]*a[0][0] + mv[4]*a[1][0] + mv[8]*a[2][0];
+		const float ney = mv[1]*a[0][0] + mv[5]*a[1][0] + mv[9]*a[2][0];
+		const float nez = mv[2]*a[0][0] + mv[6]*a[1][0] + mv[10]*a[2][0];
+		const float nn = nex*nex + ney*ney + nez*nez;
+		if(!(nn > 0.0f)) continue;
+		const float pex = mv[0]*a[3][0] + mv[4]*a[4][0] + mv[8]*a[5][0] + mv[12];
+		const float pey = mv[1]*a[3][0] + mv[5]*a[4][0] + mv[9]*a[5][0] + mv[13];
+		const float pez = mv[2]*a[3][0] + mv[6]*a[4][0] + mv[10]*a[5][0] + mv[14];
+		const float along = (nex*pex + ney*pey + nez*pez) / nn;
+		mv[12] -= along * nex; mv[13] -= along * ney; mv[14] -= along * nez;
+		for(int k = 1; k < n; ++k)
+			for(int j = 0; j < 6; ++j)
+				a[j][k] = a[j][0] * (1.0f + uniform(-1e-6f, 1e-6f));
+		++r.edgeRuns;
+		if(differ(n)) ++r.edgeMismatches;
+	}
+	// NaN in inputs or in the matrix.
+	for(int rep = 0; rep < 2000; ++rep)
+	{
+		const int n = 1 + int(next() % 11u);
+		randomMatrix(1.0f); randomFaces(n, 1.0f);
+		if(rep & 1) a[next() % 6u][next() % unsigned(n)] = NAN;
+		else mv[next() % 16u] = NAN;
+		++r.nanRuns;
+		if(differ(n)) ++r.nanMismatches;
+	}
+	// Denormals: inputs that are denormal, and normal inputs whose products
+	// and sums fall below FLT_MIN (1e-20 * 1e-20 = 1e-40).
+	for(int rep = 0; rep < 4000; ++rep)
+	{
+		const int n = 1 + int(next() % 11u);
+		const int kind = rep % 3;
+		randomMatrix(kind == 1 ? 1e-20f : 1.0f);
+		randomFaces(n, kind == 0 ? 1e-39f : kind == 1 ? 1e-20f : 1.0f);
+		if(kind == 2)
+			for(int k = 0; k < n; ++k)
+				a[next() % 6u][k] = uniform(-1.0f, 1.0f) * 1e-40f;
+		++r.denormalRuns;
+		if(differ(n)) ++r.denormalMismatches;
+	}
+}
+
+#endif
