@@ -249,6 +249,29 @@ runs the old host route. `task level-build-compare` builds each tank both ways a
 every output by sha256. See [the plan](plans/2026-10-16-blender-in-container.md). New level
 build scripts should use the same two-line preamble.
 
+### Committed Aquarium outputs stay fresh
+
+The built Aquarium files are committed (`.lev`, `.lvl`, mesh `.iff`, `actor-map.json`, the
+level `.iff` files and the `aquarium-cd.iff` / `aquarium-menu-cd.iff` bundles), so a change to
+any input — the exporter, an `.oas` schema, a generator, a Forth script — leaves them stale until
+someone rebuilds them. `task aquarium-regenerate` rebuilds all eight tanks of
+`wflevels/aquarium-menu.manifest` and both bundles in the Blender container; commit what it
+changes together with the input change. `task aquarium-check` proves the commit is fresh: it
+`git archive`s HEAD's inputs into `build-docker/level-check/`, runs the same regenerate there,
+and compares every tracked file (`scripts/level-outputs-compare.py`). The build is
+byte-reproducible, so any difference means a stale file. On failure it lists them:
+
+```text
+level outputs STALE: 2 of 1943 tracked files do not rebuild identically from 0123456789ab:
+  changed  wflevels/aquarium_betta/actor-map.json
+  changed  wflevels/aquarium-menu-cd.iff
+Regenerate them with `task aquarium-regenerate`, then commit the changed files.
+```
+
+CI runs the check on every push that touches a level input
+([`.github/workflows/level-outputs.yml`](../.github/workflows/level-outputs.yml)), with the image
+from `docker/Dockerfile.blender.public`, because GitHub cannot reach the lab registry.
+
 For runtime use Taskfile entries: `task run-level -- wflevels/<level>.iff` (no bridge),
 `task run-debug -- wflevels/<level>.iff` (debug bridge on `:7777`).
 
