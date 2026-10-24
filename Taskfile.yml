@@ -1574,6 +1574,12 @@ tasks:
     cmds:
       - ./gradlew :screensaver:assemblePlantedDebug --offline
 
+  test-screensaver-orientation:
+    desc: "Plain-Java OrientationChoiceTest for the screensavers' orientation setting (docs/plans/2026-10-24-screensaver-landscape-orientation.md): values, parsing, saved-value fallback and the ActivityInfo mapping. Repo mounted read-only."
+    cmds:
+      - |
+        docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-tv-media-phase0-jdk:local bash -c 'set -euo pipefail; d=/src/android/screensaver/src; javac -d /tmp/out "$d"/main/java/org/worldfoundry/screensaver/OrientationChoice.java "$d"/test/java/org/worldfoundry/screensaver/OrientationChoiceTest.java && java -cp /tmp/out org.worldfoundry.screensaver.OrientationChoiceTest'
+
   test-planted-screensaver:
     desc: "Planted Tank screensaver checks, including owner-aware Settings capabilities from the RP01 catalog and the plain-Java PlantedConfigTest. Repo mounted read-only; build the level first."
     cmds:

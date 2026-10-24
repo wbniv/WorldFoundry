@@ -12,6 +12,7 @@ public final class SeahorseGridActivity extends Activity {
         super.onCreate(state);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        DreamOrientation.apply(this, OrientationSettings.load(this));
         player = new TankPlayer(this);
         setContentView(player.view());
     }

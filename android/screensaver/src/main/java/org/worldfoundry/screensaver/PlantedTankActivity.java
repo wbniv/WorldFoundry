@@ -12,6 +12,7 @@ import org.json.JSONObject;
  * Launches the Planted Tank on demand. Intent extras ({@code --es water}, {@code --el seed},
  * {@code --ef speed}, {@code --ei hold}, {@code --ef age}, {@code --ez textures},
  * {@code --ez sway}) overlay the saved settings for this run only and are never saved.
+ * The Settings launch overrides may also carry the app-level orientation for this run.
  */
 public final class PlantedTankActivity extends Activity {
     private static final String TAG = "planted";
@@ -19,9 +20,11 @@ public final class PlantedTankActivity extends Activity {
 
     private TankPlayer player;
     private String line;
+    private String orientation;
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
+        orientation = OrientationSettings.load(this);
         try {
             line = overlay(PlantedSettings.load(this), getIntent().getExtras()).toLine();
         } catch (IllegalArgumentException | JSONException rejected) {
@@ -32,6 +35,7 @@ public final class PlantedTankActivity extends Activity {
         }
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        DreamOrientation.apply(this, orientation);
         // A passive preview has no touch input to reset the phone's screen timeout.
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         player = new TankPlayer(this);
@@ -50,7 +54,12 @@ public final class PlantedTankActivity extends Activity {
             if (json == null || json.length() > 8192) {
                 throw new IllegalArgumentException("Invalid Settings launch overrides");
             }
-            config = PlantedSettingsProvider.overlay(this, config, new JSONObject(json));
+            JSONObject updates = new JSONObject(json);
+            // overlay validates every override (and their count) first.
+            PlantedConfig overlaid = PlantedSettingsProvider.overlay(this, config, updates);
+            String launched = PlantedSettingsProvider.launchOrientation(this, config, updates);
+            if (launched != null) orientation = launched;
+            config = overlaid;
         }
         return config;
     }

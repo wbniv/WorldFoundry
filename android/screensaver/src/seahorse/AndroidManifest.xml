@@ -5,7 +5,9 @@
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:banner="@drawable/tv_banner">
-        <activity android:name=".SeahorseGridActivity" android:exported="true">
+        <activity android:name=".SeahorseGridActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
@@ -21,6 +23,11 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="android.service.dream" android:resource="@xml/dream" />
+            <meta-data android:name="org.worldfoundry.screensaver.SETTINGS_AUTHORITY"
+                android:value="org.worldfoundry.seahorsegrid.settings" />
         </service>
+        <provider android:name=".SeahorseSettingsProvider"
+            android:authorities="org.worldfoundry.seahorsegrid.settings"
+            android:exported="true" />
     </application>
 </manifest>
