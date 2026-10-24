@@ -15,11 +15,18 @@ make from the recorded triangle. wf_game prints one line at exit:
                 and equals what the renderers submit)
   --check cull  cull-exact-mismatches must be 0 (plan step 2, exact form);
                 with --fast also fast-mismatches must be 0
-Both require object-draws > 0, so a run that never used the static path fails
+  --check soa   the baked cull inputs (NEON-cull plan, Phase 1) equal the
+                resident face bit for bit and give the exact test's decision
+                under the real matrix, seeded random matrices and an edge-on
+                matrix: soa-input-mismatches, soa-mismatches,
+                soa-random-mismatches and soa-edge-mismatches must be 0, and
+                soa-faces and soa-edge-near-zero must be > 0 (the edge-on case
+                was really reached)
+All require object-draws > 0, so a run that never used the static path fails
 instead of passing vacuously.
 
 Usage: static_mesh_check.py --binary wf_game --level L.iff [--level ...]
-           --check bake|cull [--frames 120] [--fast] [--cwd DIR] [--extra ARG]
+           --check bake|cull|soa [--frames 120] [--fast] [--cwd DIR] [--extra ARG]
 """
 
 from __future__ import annotations
@@ -53,7 +60,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--binary", required=True)
     ap.add_argument("--level", action="append", required=True)
-    ap.add_argument("--check", choices=["bake", "cull"], required=True)
+    ap.add_argument("--check", choices=["bake", "cull", "soa"], required=True)
     ap.add_argument("--frames", type=int, default=120)
     ap.add_argument("--fast", action="store_true", help="also require zero fast-form mismatches")
     ap.add_argument("--cwd", default=str(Path(__file__).resolve().parent.parent / "wfsource/source/game"))
@@ -62,11 +69,15 @@ def main() -> int:
     failed = False
     for level in a.level:
         c = run(a.binary, level, a.frames, a.cwd, a.extra)
-        keys = ["triangle-mismatches"] if a.check == "bake" else ["cull-exact-mismatches"]
+        keys = {"bake": ["triangle-mismatches"], "cull": ["cull-exact-mismatches"],
+                "soa": ["soa-input-mismatches", "soa-mismatches", "soa-random-mismatches",
+                        "soa-edge-mismatches"]}[a.check]
         if a.check == "cull" and a.fast:
             keys.append("fast-mismatches")
         bad = [k for k in keys if c.get(k, -1) != 0]
         vacuous = c.get("object-draws", 0) == 0 or c.get("triangles", 0) == 0
+        if a.check == "soa":
+            vacuous = vacuous or c.get("soa-faces", 0) == 0 or c.get("soa-edge-near-zero", 0) == 0
         status = "FAIL" if bad or vacuous else "PASS"
         failed |= status == "FAIL"
         print(f"{status} {Path(level).name}: " + " ".join(f"{k}={v}" for k, v in c.items()))

@@ -1458,6 +1458,14 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
                 --binary $<TARGET_FILE:wf_game> --check cull --frames 120
                 --level ${WF_TEST_LEVEL} --level ${WF_TEST_SNOW_LEVEL}
             WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+        # The baked cull inputs (NEON-cull Phase 1) against the exact test:
+        # bit-identical inputs and zero differing decisions under real, random
+        # and edge-on matrices.
+        add_test(NAME static_cull_soa
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/static_mesh_check.py
+                --binary $<TARGET_FILE:wf_game> --check soa --frames 120
+                --level ${WF_TEST_LEVEL} --level ${WF_TEST_SNOW_LEVEL}
+            WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
         # Which back-face form RenderStatic runs: exact by default, fast only
         # when asked (the per-path frame-profile counters).
         add_test(NAME static_cull_path

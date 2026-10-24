@@ -68,25 +68,48 @@ WfMatrix34ToGL(const Matrix34& matrix, float out[16])
 	out[15] = 1.0f;
 }
 
-// The exact test. Eye space: the camera sits at the origin looking down -Z.
-// Transform the object-space normal by mv's upper 3x3 and the face centre by
-// the full mv; the face points away from the camera when dot(Ne, Pe) > 0.
+// The exact test, in two parts so that a caller can compute the face centre
+// once (the static path bakes it) and still evaluate exactly the expressions,
+// in exactly the order, that WfFaceIsBackfacing does. Every expression below is
+// one statement rounded to float, so splitting the function changes no bit: a
+// baked centre is the same float this function would compute.
+//
+// Eye space: the camera sits at the origin looking down -Z. Transform the
+// object-space normal by mv's upper 3x3 and the face centre by the full mv;
+// the face points away from the camera when dot(Ne, Pe) > 0.
+inline void
+WfFaceCentroid(float x0, float y0, float z0,
+               float x1, float y1, float z1,
+               float x2, float y2, float z2,
+               float& cx, float& cy, float& cz)
+{
+	cx = (x0 + x1 + x2) * (1.0f / 3.0f);
+	cy = (y0 + y1 + y2) * (1.0f / 3.0f);
+	cz = (z0 + z1 + z2) * (1.0f / 3.0f);
+}
+
+inline bool
+WfFaceIsBackfacingAt(const float mv[16], float nx, float ny, float nz,
+                     float cx, float cy, float cz)
+{
+	const float nex = mv[0]*nx + mv[4]*ny + mv[8]*nz;
+	const float ney = mv[1]*nx + mv[5]*ny + mv[9]*nz;
+	const float nez = mv[2]*nx + mv[6]*ny + mv[10]*nz;
+	const float pex = mv[0]*cx + mv[4]*cy + mv[8]*cz  + mv[12];
+	const float pey = mv[1]*cx + mv[5]*cy + mv[9]*cz  + mv[13];
+	const float pez = mv[2]*cx + mv[6]*cy + mv[10]*cz + mv[14];
+	return nex*pex + ney*pey + nez*pez > 0.0f;
+}
+
 inline bool
 WfFaceIsBackfacing(const float mv[16], float nx, float ny, float nz,
                    float x0, float y0, float z0,
                    float x1, float y1, float z1,
                    float x2, float y2, float z2)
 {
-	const float nex = mv[0]*nx + mv[4]*ny + mv[8]*nz;
-	const float ney = mv[1]*nx + mv[5]*ny + mv[9]*nz;
-	const float nez = mv[2]*nx + mv[6]*ny + mv[10]*nz;
-	const float cx = (x0 + x1 + x2) * (1.0f / 3.0f);
-	const float cy = (y0 + y1 + y2) * (1.0f / 3.0f);
-	const float cz = (z0 + z1 + z2) * (1.0f / 3.0f);
-	const float pex = mv[0]*cx + mv[4]*cy + mv[8]*cz  + mv[12];
-	const float pey = mv[1]*cx + mv[5]*cy + mv[9]*cz  + mv[13];
-	const float pez = mv[2]*cx + mv[6]*cy + mv[10]*cz + mv[14];
-	return nex*pex + ney*pey + nez*pez > 0.0f;
+	float cx, cy, cz;
+	WfFaceCentroid(x0, y0, z0, x1, y1, z1, x2, y2, z2, cx, cy, cz);
+	return WfFaceIsBackfacingAt(mv, nx, ny, nz, cx, cy, cz);
 }
 
 // The precomputed form (E3 plan, "One cull formula, evaluated cheaply").
