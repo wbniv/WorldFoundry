@@ -216,10 +216,10 @@ Seahorse Grid, no saved orientation (merged build, APK 71b5a1e54e41): Will saw t
 Spike build (SCREEN_ORIENTATION_LANDSCAPE on the DreamActivity, 2026-10-24): Will saw the Dream in landscape.
 Spike 1 (window attribute only): Will saw portrait.
 Aquarium, sensor-landscape, merged build (APK 75ee120db339): Will saw the Dream in landscape.
-Planted Tank, 4.orientation=landscape (APK c89aae44b962): trigger ended recovery-required (cleanup-unverified); no observation recorded.
+Planted Tank, 4.orientation=landscape (APK c89aae44b962): Will saw the scene appear on its own, in landscape (the trigger itself ended recovery-required, cleanup-unverified).
 ```
 
-**PARTIAL PASS**: Seahorse Grid and Aquarium verified landscape on a real Dream. Planted Tank has no recorded observation yet. The coordinator's trigger screenshot showed another app, not the Dream, so all of this is observed by eye only.
+**PASS** for the landscape default on all three real Dreams (Seahorse Grid, Aquarium, Planted Tank), observed by eye only: the coordinator's trigger screenshot showed another app, not the Dream. The real-Dream trigger leaves the Pixel recovery-required (cleanup-unverified); filed in the coordinator `TODO.md`.
 
 4. For each screensaver, set `follow-device` through the settings provider and repeat step 3; confirm the portrait
    letterbox returns.
@@ -268,4 +268,4 @@ $ task chromecast:screensaver-setting DEVICE=phone-pixel-8-pro SETTING_ID=orient
 
 **PARTIAL PASS**: the value saved and read back through the coordinator for all three screensavers (Aquarium `orientation`, Seahorse `orientation` after the coordinator deploy of `0a77350`, Planted Tank `4.orientation`). The tray display was not checked.
 
-**Not run yet:** step 6 (Chromecast Dream unchanged), the Planted Tank real Dream in steps 3 and 4, and `follow-device` on a real Dream for Seahorse and Planted Tank. Until they are, the TODO item stays open.
+**Not run yet:** step 6 (Chromecast Dream unchanged; both casts are powered off), and `follow-device` on a real Dream (step 4 covered only the Aquarium preview). Until they are, the TODO item stays open.

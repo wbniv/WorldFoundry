@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/66a2d6fe) | docs: orientation plan records Aquarium sensor-landscape flip and settings round-trips |
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/4d45685e) | docs: orientation plan records the enrolled devices' Android versions |
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/62f964aa) | docs: record orientation verification so far (Seahorse Dream landscape on the Pixel) |
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/dd460816) | docs: orientation plan records the default resource and the rejected OAD route |
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/41c8e7d6) | docs: plan for screensaver landscape orientation, configurable per screensaver |
 
 <!--history-meta v1
+66a2d6fe	author	Will Norris
+66a2d6fe	added	12
+66a2d6fe	deleted	3
+66a2d6fe	files	1
+66a2d6fe	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01PkFSbo6jcue9Gfyb6U9HVs
 4d45685e	author	Will Norris
 4d45685e	added	11
 4d45685e	deleted	2
