@@ -1,0 +1,245 @@
+{
+  "budgets": {
+    "cleanup": 180,
+    "cleanup_consumed": 0.03355906400247477,
+    "execution": 900,
+    "execution_consumed": 8.619879912992474,
+    "execution_deadline": 196989.612580163,
+    "forced": 1081,
+    "forced_consumed": 9.93867858601152,
+    "forced_deadline": 197170.612580163,
+    "granted": 196089.612580163
+  },
+  "cleanup_attempts": 1,
+  "connected": true,
+  "device": "chromecast-test-02",
+  "diagnostics": {
+    "mdns-endpoint": {
+      "endpoint": "192.168.4.29:41157",
+      "observed_at": 1792880583.052752
+    }
+  },
+  "flags": {},
+  "health": "ready",
+  "job": "J-82f54c20a561",
+  "journal": [
+    {
+      "job": "J-82f54c20a561",
+      "key": "install:1",
+      "format": 1,
+      "original": {
+        "before_hash": "71b5a1e54e419a9c5d724f950866bb66394ad49a87d0983b564854cf513ccf21",
+        "boot_id": "26db08d7-3468-49e3-a37f-07fa3d114791",
+        "input": "71b5a1e54e419a9c5d724f950866bb66394ad49a87d0983b564854cf513ccf21.apk",
+        "kind": "install",
+        "package": "org.worldfoundry.seahorsegrid"
+      },
+      "restored": 1,
+      "verification": {
+        "installed_sha256": "71b5a1e54e419a9c5d724f950866bb66394ad49a87d0983b564854cf513ccf21"
+      },
+      "device": "chromecast-test-02",
+      "backend": "android",
+      "scopes": [
+        "device:chromecast-test-02",
+        "transport:android"
+      ]
+    }
+  ],
+  "observations": {},
+  "plugin": {
+    "cleanup": {
+      "observations": {},
+      "reason": "restored",
+      "recovery_state": null,
+      "restoration": "safe"
+    },
+    "run": {
+      "details": {
+        "apk_installations": [
+          {
+            "action": "install",
+            "before_sha256": "71b5a1e54e419a9c5d724f950866bb66394ad49a87d0983b564854cf513ccf21",
+            "end": 1792880591.3729653,
+            "input": "71b5a1e54e419a9c5d724f950866bb66394ad49a87d0983b564854cf513ccf21.apk",
+            "installed_sha256": "71b5a1e54e419a9c5d724f950866bb66394ad49a87d0983b564854cf513ccf21",
+            "journal_key": "install:1",
+            "package": "org.worldfoundry.seahorsegrid",
+            "reason": "explicit-install",
+            "start": 1792880585.6372974,
+            "status": "verified",
+            "variant": null
+          }
+        ],
+        "next_workflow": "verify-launch",
+        "profile": "tv",
+        "workflow": "install"
+      },
+      "reason": "completed",
+      "recovery_state": null,
+      "status": "succeeded"
+    }
+  },
+  "reaped": [],
+  "reason": "completed",
+  "status": "succeeded",
+  "survivors": [],
+  "tool_diagnostics": [
+    {
+      "healthy": true,
+      "operation": "host-version-probe",
+      "reason": "ready",
+      "seconds": 0.05827217298792675,
+      "timed_out": false
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "aapt"
+    },
+    {
+      "phase": "job",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "aapt"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    }
+  ],
+  "transport_failure_phases": [],
+  "transport_recovery": [],
+  "version": 1,
+  "work_started": true
+}
