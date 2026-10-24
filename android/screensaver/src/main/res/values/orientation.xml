@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Default screensaver orientation: landscape, sensor-landscape or follow-device.
+         A flavor overrides it only with its own src/<flavor>/res/values/orientation.xml. -->
+    <string name="default_orientation" translatable="false">landscape</string>
+</resources>

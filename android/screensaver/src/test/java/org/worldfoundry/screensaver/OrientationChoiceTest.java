@@ -36,14 +36,16 @@ public final class OrientationChoiceTest {
     }
 
     public static void main(String[] args) {
-        check(OrientationChoice.DEFAULT.equals("landscape"), "default is landscape");
+        check(OrientationChoice.FALLBACK.equals("landscape"), "fallback is landscape");
         check(OrientationChoice.IDS.length == 3 && OrientationChoice.LABELS.length == 3,
                 "three values, each with a label");
 
         for (String id : OrientationChoice.IDS) {
             check(OrientationChoice.valid(id), id + " is valid");
             check(id.equals(OrientationChoice.parse(id)), "parse(" + id + ") is canonical");
-            check(id.equals(OrientationChoice.savedOrDefault(id)), "saved " + id + " is kept");
+            check(id.equals(OrientationChoice.savedOrDefault(id, "follow-device")),
+                    "saved " + id + " is kept");
+            check(id.equals(OrientationChoice.savedOrDefault(null, id)), "nothing saved -> app default " + id);
         }
 
         // The values must equal android.content.pm.ActivityInfo.SCREEN_ORIENTATION_*.
@@ -59,8 +61,14 @@ public final class OrientationChoiceTest {
         rejects("");
         rejects(null);
 
-        check(OrientationChoice.savedOrDefault(null).equals("landscape"), "nothing saved -> default");
-        check(OrientationChoice.savedOrDefault("portrait").equals("landscape"), "stale saved -> default");
+        check(OrientationChoice.savedOrDefault(null, "landscape").equals("landscape"),
+                "nothing saved -> the shipped default");
+        check(OrientationChoice.savedOrDefault("portrait", "sensor-landscape").equals("sensor-landscape"),
+                "stale saved -> app default");
+        check(OrientationChoice.savedOrDefault(null, "portrait").equals("landscape"),
+                "invalid app default -> landscape");
+        check(OrientationChoice.savedOrDefault("portrait", null).equals("landscape"),
+                "stale saved, missing app default -> landscape");
 
         System.out.println(checks + " checks, " + failures + " failures");
         if (failures > 0) System.exit(1);

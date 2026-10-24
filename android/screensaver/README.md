@@ -25,7 +25,7 @@ Install, settings, and idle activation checks use the shared coordinator through
 
 ## Orientation
 
-All three scenes are wide, so each screensaver starts in landscape by default, also on a portrait phone or tablet. Each app saves its own `orientation` choice (`OrientationSettings`, key `orientation` in the `screensaver` preferences of that app's package); see [the plan](../../docs/plans/2026-10-24-screensaver-landscape-orientation.md):
+All three scenes are wide, so each screensaver starts in landscape by default, also on a portrait phone or tablet. The default is the `default_orientation` string resource in `src/main/res/values/orientation.xml`, shared by all three flavors; a flavor could override it with its own `src/<flavor>/res/values/orientation.xml`, though none does. An invalid resource value falls back to `landscape`. Each app saves its own `orientation` choice (`OrientationSettings`, key `orientation` in the `screensaver` preferences of that app's package); see [the plan](../../docs/plans/2026-10-24-screensaver-landscape-orientation.md):
 
 | Value | Requests | Use |
 |---|---|---|

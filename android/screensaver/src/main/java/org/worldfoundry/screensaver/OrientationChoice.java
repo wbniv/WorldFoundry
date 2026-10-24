@@ -8,7 +8,8 @@ final class OrientationChoice {
     static final String LANDSCAPE = "landscape";
     static final String SENSOR_LANDSCAPE = "sensor-landscape";
     static final String FOLLOW_DEVICE = "follow-device";
-    static final String DEFAULT = LANDSCAPE;
+    /** Used when the R.string.default_orientation resource itself is not a valid value. */
+    static final String FALLBACK = LANDSCAPE;
 
     static final String[] IDS = { LANDSCAPE, SENSOR_LANDSCAPE, FOLLOW_DEVICE };
     static final String[] LABELS = { "Landscape", "Sensor landscape", "Follow device" };
@@ -33,9 +34,13 @@ final class OrientationChoice {
         return id;
     }
 
-    /** A saved value that is missing or unreadable must never stop the Dream; use the default. */
-    static String savedOrDefault(String saved) {
-        return valid(saved) ? saved : DEFAULT;
+    /**
+     * A saved value that is missing or unreadable must never stop the Dream; use the app's
+     * default (the R.string.default_orientation resource), or landscape if that is invalid too.
+     */
+    static String savedOrDefault(String saved, String appDefault) {
+        if (valid(saved)) return saved;
+        return valid(appDefault) ? appDefault : FALLBACK;
     }
 
     /** The ActivityInfo.SCREEN_ORIENTATION_* value an orientation requests. */
