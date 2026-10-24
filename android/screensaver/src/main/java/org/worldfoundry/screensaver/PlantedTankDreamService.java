@@ -11,6 +11,7 @@ public final class PlantedTankDreamService extends DreamService {
         super.onAttachedToWindow();
         setInteractive(false);
         setFullscreen(true);
+        DreamOrientation.apply(this, OrientationSettings.load(this));
         player = new TankPlayer(this);
         setContentView(player.view());
     }

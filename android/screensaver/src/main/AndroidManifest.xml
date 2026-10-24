@@ -10,6 +10,7 @@
             android:name=".ScreensaverPreviewActivity"
             android:process=":preview"
             android:exported="true"
-            android:excludeFromRecents="true" />
+            android:excludeFromRecents="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize" />
     </application>
 </manifest>

@@ -5,7 +5,9 @@
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:banner="@drawable/tv_banner">
-        <activity android:name=".SeahorseGridActivity" android:exported="true">
+        <activity android:name=".SeahorseGridActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
