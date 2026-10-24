@@ -135,6 +135,46 @@ int main(int argc, char** argv)
     backend->DestroyStaticMesh(legacy);
     Require(Gpu(backend) == 0, "legacy cleanup retained GPU bytes");
 
+    // A custom reload that reads the 76-byte layout must never draw a compact
+    // mesh: the mesh goes stale, frees its names, and rebakes legacy. A custom
+    // shader that uses u_static_compact keeps the compact layout.
+    {
+        const RBStaticTriangle plain = Triangle(-.9f, 1, 0, 0);
+        RBStaticMeshHandle baked = backend->CreateStaticMesh(&plain, 1);
+        Require(baked && Gpu(backend) == 3 * 28 && backend->StaticMeshLive(baked),
+                "plain mesh did not bake compact");
+        const char* legacyVS =
+            "layout(location=0) in vec3 a_pos;\nlayout(location=1) in vec3 a_color;\n"
+            "out vec3 v_color;\nvoid main(){gl_Position=vec4(a_pos,1.0);v_color=a_color;}\n";
+        const char* compactVS =
+            "layout(location=0) in vec3 a_pos;\nlayout(location=1) in vec4 a_color;\n"
+            "uniform int u_static_compact;\nout vec3 v_color;\n"
+            "void main(){gl_Position=vec4(a_pos,1.0);"
+            "v_color=u_static_compact!=0?a_color.rgb:vec3(0.0,0.0,1.0);}\n";
+        const char* colorFS = "in vec3 v_color;\nout vec4 frag;\nvoid main(){frag=vec4(v_color,1.0);}\n";
+        std::string log;
+        Require(backend->ReloadProgram(legacyVS, colorFS, log), "legacy custom reload failed");
+        Require(!backend->StaticMeshLive(baked), "compact mesh stayed live under a legacy custom shader");
+        backend->DestroyStaticMesh(baked);
+        Require(Gpu(backend) == 0, "stale compact mesh retained GPU bytes");
+        baked = backend->CreateStaticMesh(&plain, 1);
+        Require(baked && Gpu(backend) == 3 * 76 && backend->StaticMeshLive(baked),
+                "legacy custom shader did not get a 76-byte rebake");
+        glClear(GL_COLOR_BUFFER_BIT);
+        backend->DrawStaticTriangles(baked, &first, 1, nullptr, true);
+        backend->EndFrame(); Pixel(16, 24, 255, 0, 0);
+        backend->DestroyStaticMesh(baked);
+        Require(backend->ReloadProgram(compactVS, colorFS, log), "compact custom reload failed");
+        baked = backend->CreateStaticMesh(&plain, 1);
+        Require(baked && Gpu(backend) == 3 * 28 && backend->StaticMeshLive(baked),
+                "compact-aware custom shader lost the compact layout");
+        glClear(GL_COLOR_BUFFER_BIT);
+        backend->DrawStaticTriangles(baked, &first, 1, nullptr, true);
+        backend->EndFrame(); Pixel(16, 24, 255, 0, 0);
+        backend->DestroyStaticMesh(baked);
+        Require(Gpu(backend) == 0, "custom reload cleanup retained GPU bytes");
+    }
+
     // Drop the real context as Android does. Destroy stale handles after a
     // new generation has acquired a new shared buffer, guarding the refcount.
     small = backend->CreateStaticMesh(&red, 1);

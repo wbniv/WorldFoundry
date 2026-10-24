@@ -869,7 +869,7 @@ public:
         mesh->generation = _contextGeneration;
         mesh->triangles  = count;
         mesh->index32    = size_t(count) * 3 > 65536;
-        mesh->compact   = wf_compact_vertex::CanPack(triangles, count);
+        mesh->compact   = CompactDecodable() && wf_compact_vertex::CanPack(triangles, count);
         mesh->vboBytes   = size_t(count) * 3 *
             (mesh->compact ? sizeof(wf_compact_vertex::Vertex) : sizeof(Vert));
         mesh->sharedIndex = StaticMeshSharedIndex();
@@ -993,7 +993,11 @@ public:
     bool StaticMeshLive(RBStaticMeshHandle handle) const override
     {
         const StaticMeshGL* mesh = static_cast<const StaticMeshGL*>(handle);
-        return mesh && mesh->generation == _contextGeneration;
+        // A compact mesh is also stale once a custom reload cannot decode it:
+        // its owner discards it (freeing the GL names) and rebakes with the
+        // 76-byte layout the custom vertex shader reads.
+        return mesh && mesh->generation == _contextGeneration &&
+               (!mesh->compact || CompactDecodable());
     }
 
     void DrawStaticTriangles(RBStaticMeshHandle handle, const unsigned* triangles, int count,
@@ -1113,6 +1117,11 @@ private:
     unsigned _sharedMeshCount = 0;
 
     bool BatchEmpty() const { return _cpu.empty() && _idx16.empty() && _idx32.empty(); }
+    // Every built-in program links kVS, which decodes compact static meshes
+    // under u_static_compact. A custom reload (debug bridge set_shader) does
+    // only if its vertex shader declares and uses that uniform; otherwise it
+    // reads the 76-byte layout, so no compact mesh may be drawn with it.
+    bool CompactDecodable() const { return !_customProgram || _uniforms.compact >= 0; }
     void NoteBatchPalette() { _batchPaletteKinds |= _paletteEnabled ? kBatchPalette : kBatchOrdinary; }
 
     void Pack(Vert& dst, const RBVertex& v,
