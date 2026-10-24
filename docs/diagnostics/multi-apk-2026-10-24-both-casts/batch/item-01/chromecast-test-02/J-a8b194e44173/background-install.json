@@ -1,0 +1,13 @@
+{
+  "before": [
+    "    topResumedActivity=ActivityRecord{e94e82b u0 com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity t1015}",
+    "    Resumed: ActivityRecord{e94e82b u0 com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity t1015}",
+    "  ResumedActivity: ActivityRecord{e94e82b u0 com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity t1015}"
+  ],
+  "after": [
+    "    topResumedActivity=ActivityRecord{e94e82b u0 com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity t1015}",
+    "    Resumed: ActivityRecord{e94e82b u0 com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity t1015}",
+    "  ResumedActivity: ActivityRecord{e94e82b u0 com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity t1015}"
+  ],
+  "foreground_unchanged": true
+}

@@ -1,0 +1,111 @@
+[
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792802569.7307136,
+    "end": 1792802569.9995596,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792802570.072035,
+    "end": 1792802570.2459111,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792802570.2471583,
+    "end": 1792802570.5042646,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~m8n1JlD-ePJpc6qRV6cfHA==/org.worldfoundry.wf_game.aquarium-wn25uBjz0bzdHJ-fVOrL7w==/base.apk'"
+    ],
+    "start": 1792802570.50626,
+    "end": 1792802570.8422487,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME"
+    ],
+    "start": 1792802571.4232461,
+    "end": 1792802571.640549,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792802571.6676714,
+    "end": 1792802571.9670215,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792802572.1187935,
+    "end": 1792802572.3528824,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1792802572.3544066,
+    "end": 1792802572.6340055,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792802575.6357486,
+    "end": 1792802575.8455925,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "uiautomator dump --compressed /data/local/tmp/wf-J-6cdd3d5c1b8d-launcher.xml"
+    ],
+    "start": 1792802575.8745093,
+    "end": 1792802579.413187,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /data/local/tmp/wf-J-6cdd3d5c1b8d-launcher.xml"
+    ],
+    "start": 1792802579.4147344,
+    "end": 1792802579.7288778,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1792802579.7299452,
+    "end": 1792802584.8379285,
+    "returncode": 0
+  }
+]

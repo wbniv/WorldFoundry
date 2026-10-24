@@ -283,3 +283,17 @@ Evidence: [`multi-apk-2026-10-24-cast1`](../diagnostics/multi-apk-2026-10-24-cas
   re-enabled before a two-device batch can run.
 - **Remaining:** two-device batch, a dreaming-cast run, cast2 held-input gameplay, heterogeneous check recipe,
   profile/record and simpleperf.
+
+## Two-device batch 2026-10-24
+
+Batch `B-a29c022860da` (Aquarium and Baseline version code 4 on `chromecast-test-01` and `chromecast-test-02`, one
+command) created four children and all ended `completed` with the install hash matched and the launcher `verified`.
+Cast1's children waited behind another session's recording; cast2's ran in the background under Will's personal-use
+reservation with its foreground (YouTube) unchanged, then verified the launcher after it ended. Evidence:
+[`multi-apk-2026-10-24-both-casts`](../diagnostics/multi-apk-2026-10-24-both-casts/README.md).
+
+- **Finding:** on cast2 the step that returns YouTube to the foreground failed with `SecurityException … not exported`
+  (`adb-failure-4.json`); the jobs still succeeded.
+- **Remaining:** a run on a dreaming cast (the wake and the `device-command-timeout` probe have still not run on hardware),
+  Cast2 held-input gameplay, heterogeneous check recipe, profile/record and simpleperf.
+

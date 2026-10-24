@@ -1,0 +1,26 @@
+{
+  "status": "verified",
+  "home": "com.google.android.apps.tv.launcherx/.home.HomeActivity",
+  "apk": "86e195b804408271633f966be7b093ce84d5fac3099350a9ea22ab14c3078828.apk",
+  "attempts": [
+    {
+      "bounds": [
+        1754,
+        240,
+        1906,
+        392
+      ],
+      "reference": "expected-icon-1.png",
+      "resource": "res/drawable/icon.png",
+      "kind": "icon",
+      "mean_absolute_error": 0.3221196130167106,
+      "rms_error": 1.0226170472574154,
+      "worst_region_error": 1.1168384879725086,
+      "brightness_gain": 1.0009992239529706,
+      "verified": true,
+      "screenshot": "attempt-1-view-5.png",
+      "hierarchy": "attempt-1-view-5.xml",
+      "attempt": 1
+    }
+  ]
+}

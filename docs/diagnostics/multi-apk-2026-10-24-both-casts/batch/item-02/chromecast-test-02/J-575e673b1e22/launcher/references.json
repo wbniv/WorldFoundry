@@ -1,0 +1,19 @@
+{
+  "package": "org.worldfoundry.wf_game.baseline",
+  "label": "WF baseline",
+  "apk_sha256": "86e195b804408271633f966be7b093ce84d5fac3099350a9ea22ab14c3078828",
+  "references": [
+    {
+      "kind": "banner",
+      "resource": "res/drawable/tv_banner.png",
+      "file": "expected-banner-0.png",
+      "sha256": "33bc88010d37fa908e054d7333db12c16b5cba71e71a804f2b44100f01423131"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/drawable/icon.png",
+      "file": "expected-icon-1.png",
+      "sha256": "47ae674c6792a251f08bdad09e3091a59265fa8fdc000de98004cceddab8094b"
+    }
+  ]
+}

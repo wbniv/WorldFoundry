@@ -1,0 +1,74 @@
+[
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-a8b194e44173-launcher.xml"
+    ],
+    "start": 1792803248.5771933,
+    "end": 1792803248.7303202,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test ! -e /data/local/tmp/wf-J-a8b194e44173-launcher.xml; echo wf-status=$?"
+    ],
+    "start": 1792803248.731317,
+    "end": 1792803248.8454344,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1792803248.8609054,
+    "end": 1792803249.0313227,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity"
+    ],
+    "start": 1792803249.0321045,
+    "end": 1792803249.2014587,
+    "returncode": 255
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.LEANBACK_LAUNCHER -p com.google.android.youtube.tv"
+    ],
+    "start": 1792803249.202847,
+    "end": 1792803249.3516037,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.ShellActivity"
+    ],
+    "start": 1792803249.3527017,
+    "end": 1792803249.697847,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792803249.6987116,
+    "end": 1792803249.85666,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792803249.8579977,
+    "end": 1792803250.035564,
+    "returncode": 0
+  }
+]
