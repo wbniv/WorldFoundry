@@ -297,3 +297,9 @@ reservation with its foreground (YouTube) unchanged, then verified the launcher 
 - **Remaining:** a run on a dreaming cast (the wake and the `device-command-timeout` probe have still not run on hardware),
   Cast2 held-input gameplay, heterogeneous check recipe, profile/record and simpleperf.
 
+## Orientation builds and a foreground app 2026‑10‑25
+
+- **Launcher scrim fix (`2f3c94b`, deployed 2026‑10‑25).** The 2026‑10‑24 batch `B-7a3a13ee715a` (Seahorse and Aquarium orientation builds on both casts) installed 4 of 4 and verified the launcher on 3 of 4; cast2 draws unfocused tiles under a grey scrim, which the old gain correction could not model. After the fix cast2 Seahorse verified (J‑82f54c20a561: `normalisation: scrim`, mean error 0.78). Evidence: [`multi-apk-2026-10-24-orientation-casts`](../diagnostics/multi-apk-2026-10-24-orientation-casts/README.md).
+- **Two APKs, one of them already in front.** Batch `B‑acba8e8aa329` (Aquarium and Planted Tank on `chromecast-test-01`) while the Planted Tank preview was in the foreground from an earlier `screensaver-show`: Aquarium installed and its launcher verified; Planted Tank (J‑673c973e1a29) failed with the plain reason `install-over-foreground` (not `plugin-error`), as intended. After showing a different app, a single-APK install of Planted Tank (B‑14d6b77bd803) completed with the launcher verified 1 of 1. Installed 1 of 2 and the other refused is the expected mixed result.
+- **A cast dreaming the same app** ended `plugin-error` on 2026‑10‑25 (J‑d2b5478d6fa1, J‑4ed799902b09) before another session's fix `0c706d6` (wake first, then fail plainly); I have not rerun it since.
+- **Remaining:** a run on a cast dreaming a different app (cast1 was awake when tried), Cast2 held-input gameplay, heterogeneous check recipe, profile/record and simpleperf.

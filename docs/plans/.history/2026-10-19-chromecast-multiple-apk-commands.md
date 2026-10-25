@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/6e33b90c) | docs: record the two-device multi-APK install on both casts |
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/7483f978) | docs: record multi-APK install re-run on cast1 and mark coordinator fixes deployed |
 | [2026-10-23](https://github.com/wbniv/WorldFoundry/commit/2e29b5c8) | docs: record multi-APK root cause, fixes, administrator cancel and deploy status |
 | [2026-10-23](https://github.com/wbniv/WorldFoundry/commit/ab5e4bda) | docs: record 2026-10-23 multi-APK install acceptance attempt |
 | [2026-10-19](https://github.com/wbniv/WorldFoundry/commit/aef1ef29) | Add multi-APK Chromecast commands |
 
 <!--history-meta v1
+6e33b90c	author	Will Norris
+6e33b90c	added	14
+6e33b90c	deleted	0
+6e33b90c	files	1
+6e33b90c	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01CtPKuEJjKGtwDW7b2NH3Hh
 7483f978	author	Will Norris
 7483f978	added	17
 7483f978	deleted	4
