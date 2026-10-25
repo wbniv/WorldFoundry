@@ -1,0 +1,75 @@
+{
+  "id": "B-69b264553651",
+  "owner": "91e7a66d81613eb5397d20c6",
+  "targets": [
+    "chromecast-test-02"
+  ],
+  "created": 1792900614.9461718,
+  "jobs": [
+    {
+      "id": "J-67bbc74bdaf9",
+      "owner": "91e7a66d81613eb5397d20c6",
+      "accepted": 1792900614.9474127,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "workflow": "check",
+        "apk": "b88535fe5fc780f568a503304546729e92ef0ce3cee72c906e1bbd0f3c0cd7bd.apk",
+        "app": "aquarium",
+        "device": "chromecast-test-02"
+      },
+      "device": "chromecast-test-02",
+      "generation": 1642,
+      "cancel": 0,
+      "error": null,
+      "started": 1792900615.1258235,
+      "finished": 1792900645.4243276,
+      "worker_pid": 3914929,
+      "recovery_resolved": 0,
+      "installation": null,
+      "owner_label": "interactive",
+      "target": "chromecast-test-02",
+      "item": 0,
+      "retry_of": null,
+      "retried_by": null,
+      "automatic_recovery": null,
+      "device_wait": null
+    },
+    {
+      "id": "J-e6e7f40de38b",
+      "owner": "91e7a66d81613eb5397d20c6",
+      "accepted": 1792900614.950546,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "workflow": "check",
+        "apk": "86e195b804408271633f966be7b093ce84d5fac3099350a9ea22ab14c3078828.apk",
+        "app": "baseline",
+        "device": "chromecast-test-02"
+      },
+      "device": "chromecast-test-02",
+      "generation": 1643,
+      "cancel": 0,
+      "error": null,
+      "started": 1792900645.6482806,
+      "finished": 1792900681.7422667,
+      "worker_pid": 3916574,
+      "recovery_resolved": 0,
+      "installation": null,
+      "owner_label": "interactive",
+      "target": "chromecast-test-02",
+      "item": 1,
+      "retry_of": null,
+      "retried_by": null,
+      "automatic_recovery": null,
+      "device_wait": null
+    }
+  ],
+  "progress": {
+    "installed": 0,
+    "launcher_verified": 0,
+    "install_total": 0
+  },
+  "multi_apk": true,
+  "state": "completed"
+}

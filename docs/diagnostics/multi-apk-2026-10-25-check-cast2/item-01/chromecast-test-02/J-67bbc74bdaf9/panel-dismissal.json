@@ -1,0 +1,78 @@
+{
+  "schema": 2,
+  "source": "frozen-apk+current-process-log",
+  "controller_advertised": true,
+  "process": "16156",
+  "controller_state": "open",
+  "policy": "best-effort",
+  "variant": null,
+  "panel_visibility": "verified-hidden",
+  "reason": "hide-acknowledged-and-panel-not-detected",
+  "back_sent": true,
+  "back_keys_sent": 1,
+  "back_outcome": "hidden",
+  "before": {
+    "qr_white": 0.637,
+    "qr_black": 0.355,
+    "panel_fill": 1.0,
+    "size": [
+      1920,
+      1080
+    ],
+    "state": "present"
+  },
+  "after": {
+    "qr_white": 0.011,
+    "qr_black": 0.0,
+    "panel_fill": 1.0,
+    "size": [
+      1920,
+      1080
+    ],
+    "state": "absent"
+  },
+  "last_wake_at": "2026-10-25T03:57:00.314Z",
+  "wake_in_flight_at_back": false,
+  "back_sent_at": "2026-10-25T03:57:10.633Z",
+  "elapsed_seconds": 8.098,
+  "history": [
+    {
+      "schema": 2,
+      "source": "frozen-apk+current-process-log",
+      "controller_advertised": true,
+      "process": "16156",
+      "controller_state": "open",
+      "policy": "best-effort",
+      "variant": null,
+      "panel_visibility": "verified-hidden",
+      "reason": "hide-acknowledged-and-panel-not-detected",
+      "back_sent": true,
+      "back_keys_sent": 1,
+      "back_outcome": "hidden",
+      "before": {
+        "qr_white": 0.637,
+        "qr_black": 0.355,
+        "panel_fill": 1.0,
+        "size": [
+          1920,
+          1080
+        ],
+        "state": "present"
+      },
+      "after": {
+        "qr_white": 0.011,
+        "qr_black": 0.0,
+        "panel_fill": 1.0,
+        "size": [
+          1920,
+          1080
+        ],
+        "state": "absent"
+      },
+      "last_wake_at": "2026-10-25T03:57:00.314Z",
+      "wake_in_flight_at_back": false,
+      "back_sent_at": "2026-10-25T03:57:10.633Z",
+      "elapsed_seconds": 8.098
+    }
+  ]
+}

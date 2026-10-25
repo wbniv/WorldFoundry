@@ -1,0 +1,29 @@
+IsStatusOverride: false
+ThermalEventListeners:
+	callbacks: 2
+	killed: false
+	broadcasts count: -1
+ThermalStatusListeners:
+	callbacks: 5
+	killed: false
+	broadcasts count: -1
+Thermal Status: 0
+Cached temperatures:
+	Temperature{mValue=39.963, mType=3, mName=board_soc_thermal, mStatus=0}
+	Temperature{mValue=39.006, mType=3, mName=board_ddr_thermal, mStatus=0}
+	Temperature{mValue=43.800003, mType=0, mName=soc_ddr_thermal, mStatus=0}
+	Temperature{mValue=43.500004, mType=0, mName=soc_pll_thermal, mStatus=0}
+HAL Ready: true
+HAL connection:
+	ThermalHAL AIDL 1  connected: yes
+Current temperatures from HAL:
+	Temperature{mValue=48.95, mType=3, mName=board_ddr_thermal, mStatus=0}
+	Temperature{mValue=50.663002, mType=3, mName=board_soc_thermal, mStatus=0}
+	Temperature{mValue=54.100002, mType=0, mName=soc_ddr_thermal, mStatus=0}
+	Temperature{mValue=53.500004, mType=0, mName=soc_pll_thermal, mStatus=0}
+Current cooling devices from HAL:
+Temperature static thresholds from HAL:
+	TemperatureThreshold{mType=3, mName=board_ddr_thermal, mHotThrottlingThresholds=[NaN, 78.0, 80.0, 83.0, 84.0, 86.0, 90.0], mColdThrottlingThresholds=[NaN, NaN, NaN, NaN, NaN, NaN, NaN]}
+	TemperatureThreshold{mType=3, mName=board_soc_thermal, mHotThrottlingThresholds=[NaN, 78.0, 80.0, 83.0, 84.0, 86.0, 90.0], mColdThrottlingThresholds=[NaN, NaN, NaN, NaN, NaN, NaN, NaN]}
+	TemperatureThreshold{mType=0, mName=soc_ddr_thermal, mHotThrottlingThresholds=[NaN, 88.0, 91.0, 94.0, 97.0, 100.0, 115.0], mColdThrottlingThresholds=[NaN, NaN, NaN, NaN, NaN, NaN, NaN]}
+	TemperatureThreshold{mType=0, mName=soc_pll_thermal, mHotThrottlingThresholds=[NaN, 88.0, 91.0, 94.0, 97.0, 100.0, 115.0], mColdThrottlingThresholds=[NaN, NaN, NaN, NaN, NaN, NaN, NaN]}
