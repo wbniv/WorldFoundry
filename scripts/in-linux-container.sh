@@ -23,6 +23,9 @@ Environment:
   WF_CONTAINER_ENV      space-separated docker -e entries, NAME or NAME=VALUE (no
                         spaces inside an entry); NAME alone forwards the caller's value
   WF_CONTAINER_NETWORK  docker --network value (default: Docker's default bridge)
+  WF_BLENDER_DOCKERFILE the Dockerfile for blender's first build (default Dockerfile.blender;
+                        Dockerfile.blender.public where the lab registry is unreachable)
+  WF_BLENDER_IMAGE      the blender image tag (default wf-blender:local)
 EOF2
 }
 case "${1:-}" in
@@ -45,7 +48,7 @@ case "${WF_CONTAINER_IMAGE:-linux-test}" in
         image="wf-linux-test:local"
         ensure_image "$image" Dockerfile.linux-test ;;
     blender)
-        image="wf-blender:local"
+        image="${WF_BLENDER_IMAGE:-wf-blender:local}"
         ensure_image "$image" "${WF_BLENDER_DOCKERFILE:-Dockerfile.blender}" ;;
     *)
         echo "in-linux-container.sh: unknown WF_CONTAINER_IMAGE '${WF_CONTAINER_IMAGE}' (linux-test|blender)" >&2

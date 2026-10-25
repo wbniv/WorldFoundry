@@ -2004,6 +2004,16 @@ tasks:
     cmds:
       - scripts/compare-level-build-routes.sh {{.CLI_ARGS}}
 
+  aquarium-regenerate:
+    desc: "Rebuild the eight Aquarium tanks and both aquarium bundles (aquarium-cd.iff, aquarium-menu-cd.iff) in the Blender container, writing the tracked wflevels/ outputs; commit what changes. task aquarium-check verifies them"
+    cmds:
+      - bash scripts/aquarium-levels.sh regenerate
+
+  aquarium-check:
+    desc: "Check the committed Aquarium outputs are fresh: rebuild HEAD's inputs in a scratch copy (build-docker/level-check/) and compare every tracked file; fails listing the stale files. CI runs it (.github/workflows/level-outputs.yml): task aquarium-check [-- --ref REF --keep]"
+    cmds:
+      - bash scripts/aquarium-levels.sh check {{.CLI_ARGS}}
+
   linux-container:
     desc: "Run a command in the Linux test container (repo at /src, build-docker/ at /build): task linux-container -- ctest --test-dir /build/listener"
     cmds:

@@ -1017,10 +1017,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goldfish.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1000l } { 'STR' "1000" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0012239616650801(1.15.16) } { 'STR' "0.001224" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0059991355125721(1.15.16) } { 'STR' "-0.005999" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0065595172365793(1.15.16) } { 'STR' "0.006560" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0239422385390788(1.15.16) } { 'STR' "0.023942" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0115144990404734(1.15.16) } { 'STR' "0.011514" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0420279225958359(1.15.16) } { 'STR' "0.042028" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "goldfish-1" }
@@ -1038,10 +1038,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goldfish.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1016l } { 'STR' "1016" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0012239616650801(1.15.16) } { 'STR' "0.001224" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0059991355125721(1.15.16) } { 'STR' "-0.005999" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0065595172365793(1.15.16) } { 'STR' "0.006560" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0239422385390788(1.15.16) } { 'STR' "0.023942" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0115144990404734(1.15.16) } { 'STR' "0.011514" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0420279225958359(1.15.16) } { 'STR' "0.042028" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "goldfish-2" }
@@ -1059,10 +1059,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goldfish.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1032l } { 'STR' "1032" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0012239616650801(1.15.16) } { 'STR' "0.001224" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0059991355125721(1.15.16) } { 'STR' "-0.005999" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0065595172365793(1.15.16) } { 'STR' "0.006560" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0239422385390788(1.15.16) } { 'STR' "0.023942" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0115144990404734(1.15.16) } { 'STR' "0.011514" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0420279225958359(1.15.16) } { 'STR' "0.042028" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "tank-base" }
