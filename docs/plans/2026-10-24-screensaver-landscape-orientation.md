@@ -243,6 +243,14 @@ Aquarium, sensor-landscape, Pixel 8 Pro: Will, "when i flip it over, it flips".
 
 6. On a Chromecast HD and a Chromecast with Google TV (both Android 14; they take the activity branch): run
    `screensaver-trigger` and confirm the Dream starts and looks as before.
+
+```
+$ task chromecast:screensaver-show DEVICE=chromecast-test-02      (J‑73506f90e0a0, Seahorse Grid selected, orientation build 71b5a1e54e41)
+status succeeded, reason completed, health ready
+screensaver.png: 1920x1080, the 6x4 Seahorse Grid on black
+```
+
+**PARTIAL PASS**: the Dream starts on cast2 and the coordinator's capture shows the Seahorse Grid, landscape, as on the TV before. It was started with `screensaver-show` rather than the idle timeout, and Will was not asked to compare it by eye. The Chromecast HD (cast1) was in use by another session and was not run.
 7. Android 10 or earlier (the window-attribute branch): needs a device on that version, which this workspace
    may not have. Read the Android version of each enrolled device first (`getprop ro.build.version.release`
    through the coordinator's device facts). If none is on 10 or earlier, record that this branch is
@@ -268,4 +276,4 @@ $ task chromecast:screensaver-setting DEVICE=phone-pixel-8-pro SETTING_ID=orient
 
 **PARTIAL PASS**: the value saved and read back through the coordinator for all three screensavers (Aquarium `orientation`, Seahorse `orientation` after the coordinator deploy of `0a77350`, Planted Tank `4.orientation`). The tray display was not checked.
 
-**Not run yet:** step 6 (Chromecast Dream unchanged; both casts are powered off), and `follow-device` on a real Dream (step 4 covered only the Aquarium preview). Until they are, the TODO item stays open.
+**Not run yet:** step 6 on cast1 (busy with another session), and `follow-device` on a real Dream (step 4 covered only the Aquarium preview). Until they are, the TODO item stays open.
