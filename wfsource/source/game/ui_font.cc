@@ -10,6 +10,7 @@
 //==============================================================================
 #include "ui_font.hp"
 
+#include <algorithm>
 #include <assert.h>
 #include <math.h>
 #include <string.h>
@@ -22,6 +23,7 @@ bitmaptext::Catalog gCatalog;
 bool gLoaded = false;
 bitmaptext::Variant gVariant[VariantCount];
 bitmaptext::Glyph gQuestion[VariantCount];
+int gCell[VariantCount];   // the Fixed pitch cell, 26.6
 
 // The bake's variant table (scripts/bake-ui-font.py VARIANTS): face, pixels.
 constexpr int kFace[VariantCount]   = {0, 0, 1, 1, 0, 1, 1};
@@ -59,6 +61,13 @@ bool Load(const void* bytes, size_t size, const char*& error)
             error = "the atlas has no '?' glyph";
             return false;
         }
+        // The widest digit; a digit the atlas lacks is drawn as '?', so measure that.
+        gCell[v] = 0;
+        for (int cp = '0'; cp <= '9'; ++cp)
+        {
+            bitmaptext::Glyph g;
+            gCell[v] = std::max(gCell[v], gCatalog.FindGlyph(v, cp, g) ? g.advance : gQuestion[v].advance);
+        }
     }
     gLoaded = true;
     return true;
@@ -71,8 +80,9 @@ const bitmaptext::Catalog& Catalog() { assert(gLoaded); return gCatalog; }
 float Ascent(Variant v)     { assert(gLoaded && v >= 0 && v < VariantCount); return float(gVariant[v].ascent); }
 float Descent(Variant v)    { assert(gLoaded && v >= 0 && v < VariantCount); return float(gVariant[v].descent); }
 float LineHeight(Variant v) { assert(gLoaded && v >= 0 && v < VariantCount); return float(gVariant[v].lineStep); }
+float CellWidth(Variant v)  { assert(gLoaded && v >= 0 && v < VariantCount); return float(gCell[v]) / 64.0f; }
 
-float Width(Variant v, const char* s, size_t bytes)
+float Width(Variant v, const char* s, size_t bytes, Pitch pitch)
 {
     assert(gLoaded && v >= 0 && v < VariantCount);
     int offset = 0, cp = 0, previous = 0, sum = 0;
@@ -80,6 +90,7 @@ float Width(Variant v, const char* s, size_t bytes)
     while (offset < int(bytes))
     {
         const bitmaptext::Glyph& g = Next(v, s, int(bytes), offset, cp, scratch);
+        if (pitch == Pitch::Fixed) { sum += gCell[v]; continue; }
         if (previous) sum += gCatalog.Kerning(v, previous, cp);
         sum += g.advance;
         previous = cp;
@@ -88,10 +99,10 @@ float Width(Variant v, const char* s, size_t bytes)
 }
 
 float TextBytes(std::vector<bitmaptext::Quad>& out, float x, float y, Variant v, uint32_t rgba,
-                const char* s, size_t bytes, Anchor anchor, Align align, const Transform& t)
+                const char* s, size_t bytes, Anchor anchor, Align align, const Transform& t, Pitch pitch)
 {
     assert(gLoaded && v >= 0 && v < VariantCount);
-    const float width = Width(v, s, bytes);
+    const float width = Width(v, s, bytes, pitch);
     if (align == Centre) x -= width * 0.5f;
     else if (align == Right) x -= width;
     const bitmaptext::Variant& var = gVariant[v];
@@ -108,16 +119,19 @@ float TextBytes(std::vector<bitmaptext::Quad>& out, float x, float y, Variant v,
     while (offset < int(bytes))
     {
         const bitmaptext::Glyph& g = Next(v, s, int(bytes), offset, cp, scratch);
-        if (previous) pen += float(gCatalog.Kerning(v, previous, cp)) / 64.0f;
+        // Fixed: the glyph's advance box centred in its cell, no kerning.
+        float origin = pen;
+        if (pitch == Pitch::Fixed) origin = pen + float(gCell[v] - g.advance) / 128.0f;
+        else if (previous) origin = pen += float(gCatalog.Kerning(v, previous, cp)) / 64.0f;
         if (g.width > 0 && g.height > 0)
         {
-            const float left = floorf(t.ox + (pen + float(g.bearingX)) * t.s + 0.5f);
+            const float left = floorf(t.ox + (origin + float(g.bearingX)) * t.s + 0.5f);
             const float top = by + floorf(float(g.bearingY) * t.s + 0.5f);
             out.push_back({left, top, left + float(g.width) * t.s, top + float(g.height) * t.s,
                            float(g.x) / aw, float(g.y) / ah, float(g.x + g.width) / aw, float(g.y + g.height) / ah,
                            0.0f, rgba});
         }
-        pen += float(g.advance) / 64.0f;
+        pen += float(pitch == Pitch::Fixed ? gCell[v] : g.advance) / 64.0f;
         previous = cp;
     }
     return width;

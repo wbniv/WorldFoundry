@@ -37,6 +37,12 @@ enum Align { Left = 0, Centre, Right };
 // ascender and descender (Pillow's "m"; for this font that is also the middle
 // of the capitals) or the baseline.
 enum Anchor { Top = 0, Middle, Baseline };
+// Proportional: the font's own advances plus kerning. Fixed: every code point
+// takes one cell of CellWidth(v), unkerned, with its advance box centred in
+// the cell, so digits line up and a changing number does not jitter (the FPS
+// counter, and any classic game's HUD text). Scoped, so Width's pitch can
+// never pass for its byte count.
+enum class Pitch { Proportional = 0, Fixed };
 
 // Canvas units to surface pixels: surface = (ox, oy) + canvas * s.
 struct Transform { float s = 1, ox = 0, oy = 0; };
@@ -57,24 +63,26 @@ const bitmaptext::Catalog& Catalog();
 float Ascent(Variant v);
 float Descent(Variant v);
 float LineHeight(Variant v);
+// The Fixed pitch cell: the widest advance of '0'..'9' in the variant.
+float CellWidth(Variant v);
 
 // The advance width of a UTF-8 string: the sum of the glyph advances plus the
-// kerning between neighbours, in canvas pixels. A code point the atlas lacks
-// measures (and draws) as '?'.
-float Width(Variant v, const char* utf8, size_t bytes);
-inline float Width(Variant v, const std::string& utf8) { return Width(v, utf8.data(), utf8.size()); }
+// kerning between neighbours (Fixed: one cell per code point), in canvas
+// pixels. A code point the atlas lacks measures (and draws) as '?'.
+float Width(Variant v, const char* utf8, size_t bytes, Pitch pitch = Pitch::Proportional);
+inline float Width(Variant v, const std::string& utf8, Pitch pitch = Pitch::Proportional) { return Width(v, utf8.data(), utf8.size(), pitch); }
 
 // Appends one textured quad per visible glyph to `out`, positioned in surface
 // pixels. Returns the advance width in canvas pixels. (TextBytes takes a pointer
 // and a length; it has its own name so an Anchor can never pass for a length.)
 float TextBytes(std::vector<bitmaptext::Quad>& out, float x, float y, Variant v, uint32_t rgba,
                 const char* utf8, size_t bytes, Anchor anchor = Top, Align align = Left,
-                const Transform& t = Transform());
+                const Transform& t = Transform(), Pitch pitch = Pitch::Proportional);
 inline float Text(std::vector<bitmaptext::Quad>& out, float x, float y, Variant v, uint32_t rgba,
                   const std::string& utf8, Anchor anchor = Top, Align align = Left,
-                  const Transform& t = Transform())
+                  const Transform& t = Transform(), Pitch pitch = Pitch::Proportional)
 {
-    return TextBytes(out, x, y, v, rgba, utf8.data(), utf8.size(), anchor, align, t);
+    return TextBytes(out, x, y, v, rgba, utf8.data(), utf8.size(), anchor, align, t, pitch);
 }
 
 // The longest prefix of `utf8` (cut at a code point) whose width plus
