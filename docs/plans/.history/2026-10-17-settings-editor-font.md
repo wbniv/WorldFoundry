@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/c3eed575) | docs: fixed-width decisions for the FPS counter and classic-game HUD text |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/31af9c8b) | docs: scope the fixed-width HUD requirement (display.cc HUD is designer-build only) |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/347cc277) | docs: classic games keep a fixed-width HUD font (open requirement for the UI font work) |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/a8f4f9b1) | docs: UI font step 8 on both casts with the refreshed builds (14 of 16 checks) |
@@ -12,6 +13,11 @@
 | [2026-10-17](https://github.com/wbniv/WorldFoundry/commit/6bc62d46) | Plan: the settings editor in Atkinson Hyperlegible Next, as finding-your-way |
 
 <!--history-meta v1
+c3eed575	author	Will Norris
+c3eed575	added	2
+c3eed575	deleted	1
+c3eed575	files	1
+c3eed575	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01PkFSbo6jcue9Gfyb6U9HVs
 31af9c8b	author	Will Norris
 31af9c8b	added	8
 31af9c8b	deleted	0
