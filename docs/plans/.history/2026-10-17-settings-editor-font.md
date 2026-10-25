@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/a8f4f9b1) | docs: UI font step 8 on both casts with the refreshed builds (14 of 16 checks) |
 | [2026-10-17](https://github.com/wbniv/WorldFoundry/commit/80acb882) | UI font step 8: second round stopped before installs; device inspections |
 | [2026-10-17](https://github.com/wbniv/WorldFoundry/commit/61e4504a) | UI font plan: step 8 is not complete until Cast2 and every app run |
 | [2026-10-17](https://github.com/wbniv/WorldFoundry/commit/228b9cd4) | UI font Phase 3: Chromecast 1 verification; settings row counter moved |
@@ -9,6 +10,11 @@
 | [2026-10-17](https://github.com/wbniv/WorldFoundry/commit/6bc62d46) | Plan: the settings editor in Atkinson Hyperlegible Next, as finding-your-way |
 
 <!--history-meta v1
+a8f4f9b1	author	Will Norris
+a8f4f9b1	added	15
+a8f4f9b1	deleted	0
+a8f4f9b1	files	1
+a8f4f9b1	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01PkFSbo6jcue9Gfyb6U9HVs
 80acb882	author	Will Norris
 80acb882	added	24
 80acb882	deleted	0
