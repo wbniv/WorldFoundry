@@ -1,3 +1,4 @@
+#include "../../../engine/gpu_profile.hpp"
 #include <game/plant_settings.h>
 //==============================================================================
 // main.cc:
@@ -195,6 +196,7 @@ usage( int argc, char* argv[] )
     std::cout << "\t-paranoid\tPerform insanely slow error checks" << std::endl;
     std::cout << "\t-record_video\tRecord gameplay to output.mp4 via ffmpeg" << std::endl;
     std::cout << "\t--vram-width N\t\tTotal VRAM box width  (default " << Display::VRAMWidth  << ")" << std::endl;
+    std::cout << "\t--gpu-profile\t\tMeasure Android whole-frame GPU, CPU and swap timing" << std::endl;
     std::cout << "\t--vram-height N\t\tTotal VRAM box height (default " << Display::VRAMHeight << ")" << std::endl;
     std::cout << "\t--vram-slot-width N\tTransient texture slot width  (default " << VideoMemory::VRAMTransientWidth  << ")" << std::endl;
     std::cout << "\t--vram-slot-height N\tTransient texture slot height (default " << VideoMemory::VRAMTransientHeight << ")" << std::endl;
@@ -413,6 +415,8 @@ ParseCommandLine(int argc, char** argv)
         // Runtime VRAM overrides — must be applied before Display/VideoMemory
         // is constructed below. See
         // docs/plans/2026-05-30-runtime-vram-cli-overrides.md.
+        else if ( strcmp( argv[index], "--gpu-profile" ) == 0 )
+            wf_gpu::enable();
         else if ( strncmp( argv[index]+1, "-vram-width=", 12 ) == 0 )
             Display::VRAMWidth  = atoi( argv[index] + 13 );
         else if ( strncmp( argv[index]+1, "-vram-height=", 13 ) == 0 )
