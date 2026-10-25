@@ -34,8 +34,8 @@ namespace fpscounter
 extern bool enabled;
 
 // Cached geometry in surface pixels, independent of the game HUD: one backing
-// plate (Rects) and the number in the UI font's small variant (Glyphs, for
-// wfui::Draw). The UI font must be loaded.
+// plate (Rects) and the number in the UI font's small variant at fixed pitch
+// (Glyphs, for wfui::Draw). The UI font must be loaded.
 class Overlay
 {
 public:

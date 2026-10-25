@@ -5,6 +5,7 @@
 //   ui_font_test <ui-font.wfga>
 #include <game/ui_font.hp>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -113,6 +114,96 @@ int main(int argc, char** argv)
     const float pen = expected - float(m.advance) / 64.0f;
     Check(quads.size() == std::strlen(title) - 1 && std::fabs(quads.back().x0 - (pen + float(m.bearingX))) <= 0.5f,
           "the glyph quads follow the same advances (one quad per visible glyph)");
+
+    // The proportional path, by default and by name, is the layout from before Pitch
+    // existed: the same quads, bit for bit, as this restatement of it.
+    struct Case { wfui::Variant v; const char* s; wfui::Anchor anchor; wfui::Align align; wfui::Transform t; };
+    const wfui::Transform scaled = {0.5f, 13.25f, 7.75f}, big = {2.0f, 1914.0f, 1068.0f};
+    for (const Case& c : {Case{wfui::Display, title, wfui::Top, wfui::Left, wfui::Transform()},
+                          Case{wfui::Small, "59.8", wfui::Baseline, wfui::Right, scaled},
+                          Case{wfui::Body, "Planted Tank \xE2\x80\x94 1 / 7", wfui::Middle, wfui::Centre, big},
+                          Case{wfui::MenuBold, "AVAWAY 10.01", wfui::Top, wfui::Right, scaled}})
+    {
+        std::vector<bitmaptext::Quad> want, byDefault, byName;
+        const float width = wfui::Width(c.v, c.s);
+        float x = 3.0f;
+        if (c.align == wfui::Centre) x -= width * 0.5f;
+        else if (c.align == wfui::Right) x -= width;
+        const bitmaptext::Variant var = catalog.GetVariant(c.v);
+        const float baseline = c.anchor == wfui::Top ? 5.0f + float(var.ascent)
+                             : c.anchor == wfui::Middle ? 5.0f + float(var.ascent - var.descent) * 0.5f : 5.0f;
+        const float by = std::floor(c.t.oy + baseline * c.t.s + 0.5f);
+        float pen = x;
+        previous = 0;
+        for (const char* p = c.s; *p; )
+        {
+            int offset = int(p - c.s), cp = 0;
+            bitmaptext::Decode(c.s, int(std::strlen(c.s)), offset, cp);
+            p = c.s + offset;
+            bitmaptext::Glyph g;
+            catalog.FindGlyph(c.v, cp, g);
+            if (previous) pen += float(catalog.Kerning(c.v, previous, cp)) / 64.0f;
+            if (g.width > 0 && g.height > 0)
+            {
+                const float left = std::floor(c.t.ox + (pen + float(g.bearingX)) * c.t.s + 0.5f);
+                const float top = by + std::floor(float(g.bearingY) * c.t.s + 0.5f);
+                const float aw = float(catalog.Width()), ah = float(catalog.Height());
+                want.push_back({left, top, left + float(g.width) * c.t.s, top + float(g.height) * c.t.s,
+                                float(g.x) / aw, float(g.y) / ah, float(g.x + g.width) / aw, float(g.y + g.height) / ah,
+                                0.0f, 0xFFFFFFFFu});
+            }
+            pen += float(g.advance) / 64.0f;
+            previous = cp;
+        }
+        wfui::Text(byDefault, 3.0f, 5.0f, c.v, 0xFFFFFFFFu, c.s, c.anchor, c.align, c.t);
+        wfui::Text(byName, 3.0f, 5.0f, c.v, 0xFFFFFFFFu, c.s, c.anchor, c.align, c.t, wfui::Pitch::Proportional);
+        const bool same = !want.empty() && want.size() == byDefault.size() && want.size() == byName.size()
+                          && !std::memcmp(want.data(), byDefault.data(), want.size() * sizeof(want[0]))
+                          && !std::memcmp(want.data(), byName.data(), want.size() * sizeof(want[0]));
+        Check(same && wfui::Width(c.v, c.s, wfui::Pitch::Proportional) == width,
+              std::string("proportional \"") + c.s + "\" in " + names[c.v] + ": " + std::to_string(want.size()) + " quads, unchanged");
+    }
+
+    // Fixed pitch: the cell is the widest digit, every code point takes one cell, and
+    // each glyph's advance box is centred in its cell.
+    const char* digits[] = {"0000", "1111", "1234", "5678", "9090", "59.8", "60.3", "1.11", "8.88"};
+    for (int v = 0; v < wfui::VariantCount; ++v)
+    {
+        int widest = 0;
+        for (int cp = '0'; cp <= '9'; ++cp)
+        {
+            bitmaptext::Glyph g;
+            catalog.FindGlyph(v, cp, g);
+            widest = std::max(widest, g.advance);
+        }
+        bool equal = wfui::CellWidth(wfui::Variant(v)) == float(widest) / 64.0f, centred = true;
+        for (const char* s : digits)
+        {
+            std::vector<bitmaptext::Quad> quads;
+            const float advance = wfui::Text(quads, 0, 0, wfui::Variant(v), 0xFFFFFFFFu, s, wfui::Baseline, wfui::Left,
+                                             wfui::Transform(), wfui::Pitch::Fixed);
+            equal = equal && advance == 4 * float(widest) / 64.0f && wfui::Width(wfui::Variant(v), s, wfui::Pitch::Fixed) == advance;
+            size_t q = 0;
+            for (int i = 0; s[i]; ++i)
+            {
+                bitmaptext::Glyph g;
+                catalog.FindGlyph(v, s[i], g);
+                if (g.width <= 0 || g.height <= 0) continue;
+                const float origin = float(i * widest) / 64.0f + float(widest - g.advance) / 128.0f;
+                centred = centred && q < quads.size() && quads[q++].x0 == std::floor(origin + float(g.bearingX) + 0.5f);
+            }
+            centred = centred && q == quads.size();
+        }
+        char what[160];
+        std::snprintf(what, sizeof(what), "fixed pitch in %s: cell %.3f px (widest digit), every 4-character number %.3f px, glyphs centred in their cells",
+                      names[v], wfui::CellWidth(wfui::Variant(v)), 4 * wfui::CellWidth(wfui::Variant(v)));
+        Check(equal && centred, what);
+    }
+    std::vector<bitmaptext::Quad> one, two;
+    wfui::Text(one, 0, 0, wfui::Small, 0xFFFFFFFFu, "AV", wfui::Top, wfui::Left, wfui::Transform(), wfui::Pitch::Fixed);
+    wfui::Text(two, 0, 0, wfui::Small, 0xFFFFFFFFu, "A", wfui::Top, wfui::Left, wfui::Transform(), wfui::Pitch::Fixed);
+    Check(catalog.Kerning(wfui::Small, 'A', 'V') != 0 && wfui::Width(wfui::Small, "AV", wfui::Pitch::Fixed) == 2 * wfui::CellWidth(wfui::Small)
+          && one.size() == 2 && !std::memcmp(&one[0], &two[0], sizeof(one[0])), "fixed pitch does not kern (\"AV\" is two cells)");
 
     std::printf("%s: %d failure(s)\n", failures ? "FAIL" : "PASS", failures);
     return failures ? 1 : 0;

@@ -59,16 +59,19 @@ int Overlay::Build(Scalar fps, int width, int height)
 	t.ox = right - pad;
 	t.oy = bottom - pad;
 	_glyphs.clear();
-	wfui::TextBytes(_glyphs, 0, 0, wfui::Small, 0xFFFFFFFFu, text, std::strlen(text), wfui::Baseline, wfui::Right, t);
+	// Fixed pitch, so the digits keep their places as the number changes.
+	const float advance = wfui::TextBytes(_glyphs, 0, 0, wfui::Small, 0xFFFFFFFFu, text, std::strlen(text),
+	                                      wfui::Baseline, wfui::Right, t, wfui::Pitch::Fixed);
 	assert(!_glyphs.empty());
-	// The plate fits the glyphs actually drawn, padded equally on every side.
-	float left = _glyphs[0].x0, top = _glyphs[0].y0, glyphRight = _glyphs[0].x1, glyphBottom = _glyphs[0].y1;
+	// The plate spans the cells across and the ink down, padded equally on every
+	// side: its width depends only on the number of characters.
+	float left = t.ox - advance * t.s, top = _glyphs[0].y0, glyphRight = t.ox, glyphBottom = _glyphs[0].y1;
 	for (const auto& g : _glyphs)
 	{
-		left = std::min(left, g.x0); top = std::min(top, g.y0);
-		glyphRight = std::max(glyphRight, g.x1); glyphBottom = std::max(glyphBottom, g.y1);
+		top = std::min(top, g.y0);
+		glyphBottom = std::max(glyphBottom, g.y1);
 	}
-	// Shift the text by whole pixels so its ink, not its advance box, sits pad inside the corner.
+	// Shift the text by whole pixels so its cells and its ink sit pad inside the corner.
 	const float dx = std::floor(right - pad - glyphRight + 0.5f), dy = std::floor(bottom - pad - glyphBottom + 0.5f);
 	for (auto& g : _glyphs) { g.x0 += dx; g.x1 += dx; g.y0 += dy; g.y1 += dy; }
 	_rects[_count++] = {left + dx - pad, top + dy - pad, glyphRight + dx + pad, glyphBottom + dy + pad, 0x101820B0u};

@@ -179,6 +179,96 @@ Scoping, read from the code on 2026‑10‑25 (not run on a device):
 - **Answered by Will (2026‑10‑25):** the concern is HUD text drawn by the classic games' own levels, and the FPS counter stays fixed-width too. ("Desktop designer HUD" was my shorthand for the `display.cc` overlay above; it is not a name from the code.)
 - **Decision:** (1) the FPS counter is drawn fixed-width: `wfui::Text` gets a fixed-pitch layout mode (each glyph centred in an equal cell, the cell being the widest digit's advance in that variant) and `fps_overlay.cc` uses it. (2) HUD text drawn by a classic game's own level: today there is none through the engine's font code (SMB keeps its score in the `INDEXOF_SMB_SCORE` mailbox from Forth scripts and draws no score text through `wfui::Text`; a search of `wfsource/source` finds no text drawing outside the eight files above), so nothing changes for those games now. Any HUD text added to a classic game later uses the same fixed-pitch mode. (3) A monospaced face in the atlas is not needed for this. Left open: whether a classic game's HUD, once it exists, wants a true mono face; revisit then.
 
+### Fixed-pitch FPS counter: built (2026‑10‑25, branch `feat/fps-fixed-width`)
+
+- **API (`game/ui_font.hp`).** A scoped `enum class wfui::Pitch { Proportional, Fixed }` is a new last parameter of `TextBytes`, `Text` and both `Width` overloads, defaulting to `Pitch::Proportional`, so no existing call changes. It is scoped so that `Width(v, "59.8", Pitch::Fixed)` cannot bind `Fixed` to the pointer overload's byte count; an unscoped enum made that call ambiguous under GCC. `wfui::CellWidth(v)` returns the cell.
+- **Layout (`game/ui_font.cc`).** `Load` records each variant's cell as the widest advance of `0`…`9` (in 26.6). At `Pitch::Fixed` every code point takes one cell with no kerning, and the glyph's advance box is centred in the cell, so `.` takes a full digit cell as well. The proportional path does the same arithmetic as before.
+- **FPS counter (`game/fps_overlay.cc`).** The number is laid out at `Pitch::Fixed`. Size (Small, Regular 28 on the 1080p canvas), padding and the bottom‑right corner are unchanged. One deliberate difference: across, the plate now pads the cells instead of the ink, because ink-fitted edges would still move by a pixel or two as the first and last digits change. Down, it still pads the ink. The plate's right edge stays at 97 % of the surface width.
+- **Cost.** Ten glyph lookups per variant at load time, and nothing in the atlas.
+
+Verification of this change:
+
+1. Every digit string of equal length has the same fixed-pitch advance, in all seven variants, and each glyph sits centred in its cell (`ui_font_test`). The proportional path, by default and by name, produces the same quads bit for bit as a restatement of the old layout (`ui_font_test`). `"59.8"` and `"60.3"` give the FPS overlay the same plate and the same cells at three surface sizes (`fps_overlay_test`).
+
+    ```
+    $ scripts/in-linux-container.sh ctest --test-dir /build/fps -R "ui_font|fps_overlay" --output-on-failure -V
+    6:   320x240: "59.8" plate 295.31-310.40 (15.09 px), "60.3" plate 295.31-310.40 (15.09 px)
+    6:   1920x1080: "59.8" plate 1780.84-1862.40 (81.56 px), "60.3" plate 1780.84-1862.40 (81.56 px)
+    6:   3840x2160: "59.8" plate 3561.68-3724.80 (163.12 px), "60.3" plate 3561.68-3724.80 (163.12 px)
+    6: PASS: number formatting, fractional stalls, reset, surface bounds, glyph plate, cached geometry, fixed pitch
+    1/2 Test #6: fps_overlay_layout ...............   Passed    0.07 sec
+    7: ok    "WF Aquarium" in display: Width 494.203 px, advances plus kerning 494.203 px
+    7: ok    at least one pair of "WF Aquarium" is kerned (3)
+    7: ok    the glyph quads follow the same advances (one quad per visible glyph)
+    7: ok    proportional "WF Aquarium" in display: 10 quads, unchanged
+    7: ok    proportional "59.8" in small: 4 quads, unchanged
+    7: ok    proportional "Planted Tank — 1 / 7" in body: 15 quads, unchanged
+    7: ok    proportional "AVAWAY 10.01" in menu-bold: 11 quads, unchanged
+    7: ok    fixed pitch in small: cell 18.141 px (widest digit), every 4-character number 72.562 px, glyphs centred in their cells
+    7: ok    fixed pitch in body: cell 23.328 px (widest digit), every 4-character number 93.312 px, glyphs centred in their cells
+    7: ok    fixed pitch in body-bold: cell 23.609 px (widest digit), every 4-character number 94.438 px, glyphs centred in their cells
+    7: ok    fixed pitch in title: cell 30.172 px (widest digit), every 4-character number 120.688 px, glyphs centred in their cells
+    7: ok    fixed pitch in menu: cell 36.281 px (widest digit), every 4-character number 145.125 px, glyphs centred in their cells
+    7: ok    fixed pitch in menu-bold: cell 36.734 px (widest digit), every 4-character number 146.938 px, glyphs centred in their cells
+    7: ok    fixed pitch in display: cell 52.484 px (widest digit), every 4-character number 209.938 px, glyphs centred in their cells
+    7: ok    fixed pitch does not kern ("AV" is two cells)
+    7: PASS: 0 failure(s)
+    2/2 Test #7: ui_font ..........................   Passed    0.07 sec
+    100% tests passed, 0 tests failed out of 2
+    ```
+
+    (The 14 unchanged lines of step 3, from `Catalog::Load` to `U+2190`, are left out above; all of them print `ok`.)
+
+    **PASS**
+
+2. The proportional path is unchanged against the real old code, not only the restatement in the test. A one-off program hashed the quads and widths of eight strings (including `59.8`, `60.3`, an em dash and the unmapped `←`) in all seven variants, three anchors, three alignments and three transforms. It was built once against the `2026-new-level` `ui_font.cc` at `c3eed575` and once against this branch's. It is not committed.
+
+    ```
+    $ scripts/in-linux-container.sh bash /build/cmp/run.sh
+    fatal: not a git repository: /home/will/WorldFoundry-wbniv/.git/worktrees/WorldFoundry-wbniv-fpsfixed
+    before (2026-new-level ): 13041 quads, fnv1a 73da403a5af886f1
+    after  (working tree):                     13041 quads, fnv1a 73da403a5af886f1
+    ```
+
+    (The `fatal` line is the script's label lookup, `git rev-parse`, which cannot see a worktree's `.git` from inside the container. The old source came from `git show c3eed575:wfsource/source/game/ui_font.cc` on the host.)
+
+    **PASS**
+
+3. The full Release suite still passes, in the container under Xvfb on `:0`, because the GL tests set `DISPLAY=:0`.
+
+    ```
+    $ scripts/in-linux-container.sh bash -c 'Xvfb :0 -screen 0 1920x1080x24 & export DISPLAY=:0; sleep 3; ctest --test-dir /build/fps --output-on-failure'
+    12/36 Test #12: cross_room_teleports ...........................***Failed   10.61 sec
+    97% tests passed, 1 tests failed out of 36
+      File "/src/tests/verify_cross_room_teleports.py", line 85, in run
+        assert client.wait_for(lambda m:m.get('op')=='paused',timeout=5)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    AssertionError
+    $ … ctest --test-dir /build/fps -R "^cross_room_teleports$"   (three runs)
+    1/1 Test #12: cross_room_teleports .............   Passed    8.14 sec
+    1/1 Test #12: cross_room_teleports .............   Passed    6.71 sec
+    1/1 Test #12: cross_room_teleports .............   Passed    6.86 sec
+    ```
+
+    **PASS with one unexplained flake.** In the full run, `cross_room_teleports` timed out waiting for the debug bridge's `paused` reply, then passed three times out of three when run alone. It neither draws text nor runs the FPS overlay's layout. Its cause is not established: the full run's engine log was overwritten by the next teleport test, which shares `teleport-regression/`.
+
+4. Desktop capture: the planted tank, Release `wf_game` at 1920×1080 under Xvfb (the step 7 tool, `--only planted`). "Before" is the same build with `fps_overlay.cc` reverted to `c3eed575`. The rate differs between the two runs because it is the software renderer's live rate.
+
+    ```
+    $ scripts/in-linux-container.sh bash -c 'Xvfb :99 -screen 0 1920x1080x24 & export DISPLAY=:99; sleep 1; python3 tests/ui_font_screenshots.py --only planted --out /build/shots-after'
+    captured /build/shots-after/planted-hud.png
+    $ (fps_overlay.cc from c3eed575, rebuilt) … --out /build/shots-before
+    captured /build/shots-before/planted-hud.png
+    ```
+
+    Before (proportional), then after (fixed pitch), with the bottom-right corner enlarged 3×:
+    <img src="../diagnostics/ui-font/desktop/fps-fixed/fps-corner-before.png" width="440">
+    <img src="../diagnostics/ui-font/desktop/fps-fixed/fps-corner-after.png" width="440">
+
+    Full frames: [before](../diagnostics/ui-font/desktop/fps-fixed/planted-hud-before.png), [after](../diagnostics/ui-font/desktop/fps-fixed/planted-hud-after.png).
+
+    **PASS** on the desktop: the digits and the `.` sit in equal cells (Atkinson's slashed zero shows in `20.4`). Not yet checked on a cast.
+
 ## Verification
 
 1. The fonts are the pinned files: `sha256sum wfsource/fonts/atkinson-hyperlegible-next/*.ttf` prints `88ed5c31a71584c7772963b02d04bef1eb7e3d2e9c8b9cb204339b1f82cf432c` (Regular) and `8e2fff779f35ac25239656bb0f3b2bd35959a2009e3dd21a12141c3b9030362b` (SemiBold).

@@ -28,7 +28,7 @@ int main()
 
     fpscounter::Overlay overlay;
     struct Sample { float fps; const char* text; };
-    for (const auto& sample : {Sample{0, "0.0"}, Sample{59.75f, "59.8"},
+    for (const auto& sample : {Sample{0, "0.0"}, Sample{59.75f, "59.8"}, Sample{60.3f, "60.3"},
                               Sample{2, "2.0"}, Sample{0.5f, "0.5"}, Sample{0.04f, "0.0"}})
     {
         for (const auto& size : {std::pair<int, int>{320, 240}, {1920, 1080}, {3840, 2160}})
@@ -50,9 +50,13 @@ int main()
                 right = std::max(right, g.x1); bottom = std::max(bottom, g.y1);
             }
             const float pad = 1.5f * std::max(1.0f, std::min(float(size.first), float(size.second)) / 360.0f);
-            Check(std::fabs(left - r.x0 - pad) < 0.001f && std::fabs(top - r.y0 - pad) < 0.001f &&
-                  std::fabs(r.x1 - right - pad) < 0.001f && std::fabs(r.y1 - bottom - pad) < 0.001f,
-                  "plate has tight equal padding around actual glyph bounds");
+            // Across, the plate pads the fixed-pitch cells; down, the ink. The ink stays in
+            // the cells to within the half pixel a glyph's whole-pixel left edge can move.
+            const float s = std::min(size.first / 1920.0f, size.second / 1080.0f);
+            const float cells = wfui::Width(wfui::Small, sample.text, wfui::Pitch::Fixed) * s;
+            Check(std::fabs(r.x1 - r.x0 - cells - 2 * pad) < 0.001f && left >= r.x0 + pad - 0.5f && right <= r.x1 - pad + 0.5f &&
+                  std::fabs(r.x1 - size.first * 0.97f) < 0.001f && std::fabs(top - r.y0 - pad) < 0.001f &&
+                  std::fabs(r.y1 - bottom - pad) < 0.001f, "plate pads the cells across and the glyph bounds down equally");
             Check(left == std::floor(left) && top == std::floor(top), "glyphs start on whole pixels");
             const auto* cached = rects;
             const auto* cachedGlyphs = glyphs.data();
@@ -60,6 +64,27 @@ int main()
                   && overlay.Glyphs().data() == cachedGlyphs, "unchanged display reuses cached geometry");
         }
     }
+    // Fixed pitch: "59.8" and "60.3" take the same plate and the same cells, so the
+    // counter does not jitter as the number changes.
+    for (const auto& size : {std::pair<int, int>{320, 240}, {1920, 1080}, {3840, 2160}})
+    {
+        overlay.Build(Scalar::FromFloat(59.75f), size.first, size.second);
+        const PhonepadRect a = overlay.Rects()[0];
+        const std::vector<bitmaptext::Quad> ga = overlay.Glyphs();
+        overlay.Build(Scalar::FromFloat(60.3f), size.first, size.second);
+        const PhonepadRect b = overlay.Rects()[0];
+        const std::vector<bitmaptext::Quad> gb = overlay.Glyphs();
+        const float cell = wfui::CellWidth(wfui::Small) * std::min(size.first / 1920.0f, size.second / 1080.0f);
+        // Glyph i of either number has its centre in cell i, counted from the plate's left pad.
+        const float pad = 1.5f * std::max(1.0f, std::min(float(size.first), float(size.second)) / 360.0f);
+        bool centred = ga.size() == 4 && gb.size() == 4;
+        for (size_t i = 0; centred && i < 4; ++i)
+            centred = std::floor(((ga[i].x0 + ga[i].x1) * 0.5f - a.x0 - pad) / cell) == float(i)
+                      && std::floor(((gb[i].x0 + gb[i].x1) * 0.5f - b.x0 - pad) / cell) == float(i);
+        std::printf("  %dx%d: \"59.8\" plate %.2f-%.2f (%.2f px), \"60.3\" plate %.2f-%.2f (%.2f px)\n", size.first, size.second,
+                    a.x0, a.x1, a.x1 - a.x0, b.x0, b.x1, b.x1 - b.x0);
+        Check(a.x0 == b.x0 && a.x1 == b.x1 && centred, "59.8 and 60.3 have the same width and the same cells");
+    }
     Check(overlay.Build(Scalar(1, 0), 0, 0) == 0 && overlay.Glyphs().empty(), "no geometry without a drawable surface");
-    std::puts("PASS: number formatting, fractional stalls, reset, surface bounds, glyph plate, cached geometry");
+    std::puts("PASS: number formatting, fractional stalls, reset, surface bounds, glyph plate, cached geometry, fixed pitch");
 }
