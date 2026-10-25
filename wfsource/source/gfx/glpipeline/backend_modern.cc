@@ -853,6 +853,7 @@ public:
         _idx32.clear();
         _curMesh = nullptr;
         _staticGpuBytes = 0;
+        _staticVertexBytes = 0;
         _sharedIbo = 0;
         _sharedIboBytes = 0;
         _sharedMeshCount = 0;
@@ -949,6 +950,7 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         _staticGpuBytes += mesh->vboBytes;
+        _staticVertexBytes += mesh->vboBytes;
         if (mesh->sharedIndex) ++_sharedMeshCount;
         return mesh;
     }
@@ -963,6 +965,7 @@ public:
             glDeleteVertexArrays(1, &mesh->vao);
             glDeleteBuffers(1, &mesh->vbo);
             _staticGpuBytes -= mesh->vboBytes;
+            _staticVertexBytes -= mesh->vboBytes;
             if (mesh->sharedIndex)
             {
                 // Other live mesh VAOs still refer to this buffer. Release it
@@ -988,6 +991,15 @@ public:
     {
         gpu = _staticGpuBytes;
         cpu = _idx16.capacity() * sizeof(uint16_t) + _idx32.capacity() * sizeof(uint32_t);
+    }
+
+    // The GPU bytes above split into vertex buffers (sum of the live meshes'
+    // VBOs, whose size follows each mesh's layout) and index buffers (the
+    // shared buffer's largest upload, or each mesh's own).
+    void StaticMeshGpuSplit(size_t& vertex, size_t& index) const override
+    {
+        vertex = _staticVertexBytes;
+        index = _staticGpuBytes - _staticVertexBytes;
     }
 
     bool StaticMeshLive(RBStaticMeshHandle handle) const override
@@ -1112,6 +1124,7 @@ private:
     float _textProj[16] = {};
     bool _textCaptured = false;
     size_t _staticGpuBytes = 0;
+    size_t _staticVertexBytes = 0;   // the VBO part of _staticGpuBytes
     GLuint _sharedIbo = 0;
     size_t _sharedIboBytes = 0;  // largest upload, counted once across all VAOs
     unsigned _sharedMeshCount = 0;

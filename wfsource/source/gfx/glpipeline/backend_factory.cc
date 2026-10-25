@@ -217,6 +217,7 @@ public:
     void DestroyStaticMesh(RBStaticMeshHandle m) override { _backend.DestroyStaticMesh(m); }
     bool StaticMeshLive(RBStaticMeshHandle m) const override { return _backend.StaticMeshLive(m); }
     void StaticMeshBytes(size_t& gpu, size_t& cpu) const override { _backend.StaticMeshBytes(gpu, cpu); }
+    void StaticMeshGpuSplit(size_t& vertex, size_t& index) const override { _backend.StaticMeshGpuSplit(vertex, index); }
     void DrawStaticTriangles(RBStaticMeshHandle m, const unsigned* t, int n,
                              const PixelMap* texture, bool prelit) override
     {

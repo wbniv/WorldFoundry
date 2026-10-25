@@ -299,6 +299,10 @@ StaticMeshSampleGauges()
 	RendererBackendGet().StaticMeshBytes(gpu, staging);
 	wf_profile::count(wf_profile::StaticGpuBytes, gpu);
 	wf_profile::count(wf_profile::StaticCpuBytes, sCpuBytes + staging);
+	size_t vertex = 0, index = 0;
+	RendererBackendGet().StaticMeshGpuSplit(vertex, index);
+	wf_profile::count(wf_profile::StaticGpuVertexBytes, vertex);
+	wf_profile::count(wf_profile::StaticGpuIndexBytes, index);
 }
 
 bool

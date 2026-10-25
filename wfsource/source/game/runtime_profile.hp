@@ -37,13 +37,15 @@ enum Section { Update, Actors, Director, Render, School, Pose, Animation, Total,
 // (WfFaceIsBackfacing), with the fast form (WfFaceIsBackfacingFast, only under
 // --static-mesh-cull=fast and a similarity model-view), and passed untested
 // (culling off or a cull-exempt run). Their sum is the static share of
-// faces-submitted.
+// faces-submitted. static-gpu-vertex-bytes and static-gpu-index-bytes split
+// static-gpu-bytes into vertex buffers and index buffers (sampled per frame).
 enum Counter { LevelObjects, RenderActors, Draws, Triangles, ActorMailboxWrites, FishDeformations,
     Uploads, UploadBytes, FacesSubmitted, FacesCulled,
     StaticObjects, StaticDraws, StaticFacesCulled, StaticIndexBytes, StaticBakes, StaticBakeUs,
     StaticGpuBytes, StaticCpuBytes, StaticExcludedObjects, StaticDeferredObjects,
     NoPalettePrograms, NoPaletteDraws, MixedPaletteDraws,
-    StaticCullExactFaces, StaticCullFastFaces, StaticCullOffFaces, CounterCount };
+    StaticCullExactFaces, StaticCullFastFaces, StaticCullOffFaces,
+    StaticGpuVertexBytes, StaticGpuIndexBytes, CounterCount };
 struct State {
     bool enabled = false;
     std::array<double,Count> frame{};
@@ -93,7 +95,8 @@ inline void end_frame() {
         "static-objects","static-draws","static-faces-culled","static-index-bytes","static-bakes","static-bake-us",
         "static-gpu-bytes","static-cpu-bytes","static-excluded-objects","static-deferred-objects",
         "no-palette-programs","no-palette-draws","mixed-palette-draws",
-        "static-cull-exact-faces","static-cull-fast-faces","static-cull-off-faces"};
+        "static-cull-exact-faces","static-cull-fast-faces","static-cull-off-faces",
+        "static-gpu-vertex-bytes","static-gpu-index-bytes"};
     // max= is the largest single-frame value in the window (appended after
     // mean=, so existing `frames=N mean=X` parsers are unaffected).
     for(int k=0;k<CounterCount;k++) fprintf(stderr,"frame-count: %s frames=%zu mean=%.3f max=%lu\n",counterNames[k],s.frames.size(),double(s.totals[k])/s.frames.size(),s.maxima[k]);

@@ -48,6 +48,13 @@ static size_t Gpu(RendererBackend* backend)
     size_t gpu, cpu; backend->StaticMeshBytes(gpu, cpu); return gpu;
 }
 
+// static-gpu-bytes split into vertex buffers and index buffers.
+static void Split(RendererBackend* backend, size_t& vertex, size_t& index)
+{
+    backend->StaticMeshGpuSplit(vertex, index);
+    Require(vertex + index == Gpu(backend), "vertex + index bytes differ from static GPU bytes");
+}
+
 int main(int argc, char** argv)
 {
     StaticMeshSetSharedIndex(argc < 2 || std::atoi(argv[1]) != 0);
@@ -178,12 +185,33 @@ int main(int argc, char** argv)
     // Drop the real context as Android does. Destroy stale handles after a
     // new generation has acquired a new shared buffer, guarding the refcount.
     small = backend->CreateStaticMesh(&red, 1);
+    // The split before the loss: the compact mesh's vertex buffer, and the
+    // shared index buffer's upload once it is drawn.
+    size_t vBefore = 0, iBefore = 0, v = 0, i = 0;
+    Split(backend, vBefore, iBefore);
+    Require(vBefore == 3 * 28 && iBefore == 0, "compact mesh split before draw");
+    backend->DrawStaticTriangles(small, &first, 1, nullptr, true);
+    backend->EndFrame();
+    Split(backend, vBefore, iBefore);
+    Require(vBefore == 3 * 28 && iBefore == 3 * sizeof(uint16_t), "compact mesh split after draw");
     ModernBackendSimulateSurfaceLoss();
     Require(!backend->StaticMeshLive(small) && Gpu(backend) == 0, "loss did not invalidate mesh");
+    Split(backend, v, i);
+    Require(v == 0 && i == 0, "loss left vertex or index bytes");
     glXMakeCurrent(dpy, None, nullptr); glXDestroyContext(dpy, context);
     context = glXCreateContext(dpy, visual, nullptr, GL_TRUE);
     Require(context && glXMakeCurrent(dpy, win, context), "replacement context setup failed");
     glViewport(0, 0, 64, 64); glDisable(GL_DITHER);
+    // Rebuilt after the loss, the same mesh has the same vertex bytes (the
+    // same layout) and, once drawn, the same index bytes.
+    RBStaticMeshHandle rebuilt = backend->CreateStaticMesh(&red, 1);
+    Split(backend, v, i);
+    Require(v == vBefore && i == 0, "mesh rebuilt after loss changed its vertex bytes");
+    backend->DrawStaticTriangles(rebuilt, &first, 1, nullptr, true);
+    backend->EndFrame(); Pixel(16, 24, 255, 0, 0);
+    Split(backend, v, i);
+    Require(v == vBefore && i == iBefore, "mesh rebuilt after loss: split differs from before the loss");
+    backend->DestroyStaticMesh(rebuilt);
     big = backend->CreateStaticMesh(large.data(), int(large.size()));
     Require(big, "mesh creation after loss failed");
     backend->DestroyStaticMesh(small);
