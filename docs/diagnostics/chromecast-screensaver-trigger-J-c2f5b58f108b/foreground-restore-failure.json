@@ -1,0 +1,17 @@
+{
+  "origin": "J-c2f5b58f108b",
+  "component": "com.google.android.apps.nexuslauncher/.NexusLauncherActivity",
+  "error": "Private ADB command exceeded its deadline",
+  "attempts": [],
+  "commands": [
+    {
+      "args": [
+        "shell",
+        "am start -W -n com.google.android.apps.nexuslauncher/.NexusLauncherActivity"
+      ],
+      "start": 1792897380.9492445,
+      "end": 1792897411.0953112,
+      "returncode": null
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+[
+  {
+    "args": [
+      "shell",
+      "cmd package query-services --brief --components -a android.service.dreams.DreamService"
+    ],
+    "start": 1792895144.8435557,
+    "end": 1792895145.286111,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1792895145.289524,
+    "end": 1792895145.7367895,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings put secure screensaver_components org.worldfoundry.screensaver/org.worldfoundry.screensaver.AquariumDreamService"
+    ],
+    "start": 1792895146.0075994,
+    "end": 1792895146.582456,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1792895146.5893316,
+    "end": 1792895146.9461315,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1792895147.1197271,
+    "end": 1792895147.570512,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_enabled"
+    ],
+    "start": 1792895147.572871,
+    "end": 1792895147.9257684,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_activate_on_sleep"
+    ],
+    "start": 1792895147.9276779,
+    "end": 1792895148.2982156,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get system screen_off_timeout"
+    ],
+    "start": 1792895148.3073854,
+    "end": 1792895148.7040546,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792895148.708597,
+    "end": 1792895149.0955026,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792895149.0985165,
+    "end": 1792895149.5677679,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "content call --uri content://org.worldfoundry.screensaver.settings --method getCapabilities"
+    ],
+    "start": 1792895149.5744069,
+    "end": 1792895151.7513235,
+    "returncode": 0
+  }
+]

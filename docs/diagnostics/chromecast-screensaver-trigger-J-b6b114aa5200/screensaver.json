@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "device": "phone-pixel-8-pro",
+  "collected_at": "2026-10-25T02:24:11.810077+00:00",
+  "screensaver": {
+    "selected_component": "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService",
+    "enabled": "1",
+    "activate_on_sleep": "1",
+    "idle_timeout_ms": 300000,
+    "active_component": "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService",
+    "running_state": "running",
+    "preview_running": false,
+    "show_eligible": true,
+    "providers": [
+      "com.android.dreams.basic/com.android.dreams.basic.Colors",
+      "com.android.systemui/com.android.systemui.dreams.homecontrols.HomeControlsDreamService",
+      "com.android.systemui/com.android.systemui.lowlightclock.LowLightClockDreamService",
+      "com.google.android.apps.photos/com.google.android.apps.photos.daydream.PhotosDreamService",
+      "com.google.android.deskclock/com.android.deskclock.Screensaver",
+      "org.worldfoundry.plantedtank/org.worldfoundry.screensaver.PlantedTankDreamService",
+      "org.worldfoundry.screensaver/org.worldfoundry.screensaver.AquariumDreamService",
+      "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService"
+    ],
+    "selected_installed": true,
+    "content_settings": {
+      "state": "ready",
+      "schema": 1,
+      "objects": [
+        {
+          "owner": null,
+          "type": null,
+          "title": null,
+          "settings": [
+            {
+              "id": "orientation",
+              "type": "choice",
+              "label": "Orientation",
+              "value": "follow-device",
+              "options": [
+                {
+                  "id": "landscape",
+                  "label": "Landscape"
+                },
+                {
+                  "id": "sensor-landscape",
+                  "label": "Sensor landscape"
+                },
+                {
+                  "id": "follow-device",
+                  "label": "Follow device"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "settings": [
+        {
+          "id": "orientation",
+          "type": "choice",
+          "label": "Orientation",
+          "value": "follow-device",
+          "options": [
+            {
+              "id": "landscape",
+              "label": "Landscape"
+            },
+            {
+              "id": "sensor-landscape",
+              "label": "Sensor landscape"
+            },
+            {
+              "id": "follow-device",
+              "label": "Follow device"
+            }
+          ],
+          "wire_id": "orientation",
+          "owner": null,
+          "object_title": null
+        }
+      ]
+    },
+    "field_states": {
+      "selected_component": "set",
+      "enabled": "set",
+      "activate_on_sleep": "set",
+      "idle_timeout_ms": "set",
+      "running": "readable"
+    }
+  },
+  "job": "J-b6b114aa5200",
+  "action": "trigger",
+  "observed_component": "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService",
+  "charging": false,
+  "temporary_timeout_ms": 300000,
+  "wait_limit_minutes": 12,
+  "screenshot": "screensaver.png",
+  "charging_final": true,
+  "charging_samples": 44,
+  "charging_transitions": 1,
+  "charging_observed_off": true,
+  "charging_sample_interval_seconds": 15,
+  "temporary_settings_restored": true
+}

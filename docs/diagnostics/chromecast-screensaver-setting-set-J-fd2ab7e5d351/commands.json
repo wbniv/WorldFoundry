@@ -1,0 +1,146 @@
+[
+  {
+    "args": [
+      "shell",
+      "cmd package query-services --brief --components -a android.service.dreams.DreamService"
+    ],
+    "start": 1792895162.0790658,
+    "end": 1792895162.5042138,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1792895162.5093932,
+    "end": 1792895163.1622496,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_enabled"
+    ],
+    "start": 1792895163.1644807,
+    "end": 1792895163.5076408,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_activate_on_sleep"
+    ],
+    "start": 1792895163.5097528,
+    "end": 1792895163.8552113,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get system screen_off_timeout"
+    ],
+    "start": 1792895163.9126172,
+    "end": 1792895164.3315496,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792895164.3335218,
+    "end": 1792895164.7010512,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792895164.7086468,
+    "end": 1792895165.2021153,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "content call --uri content://org.worldfoundry.screensaver.settings --method getCapabilities"
+    ],
+    "start": 1792895165.2120686,
+    "end": 1792895167.0856283,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "content call --uri content://org.worldfoundry.screensaver.settings --method setSetting --arg orientation:follow-device"
+    ],
+    "start": 1792895167.0919867,
+    "end": 1792895168.9440634,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1792895168.9473412,
+    "end": 1792895169.2665076,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_enabled"
+    ],
+    "start": 1792895169.268468,
+    "end": 1792895169.6428938,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_activate_on_sleep"
+    ],
+    "start": 1792895169.6457472,
+    "end": 1792895170.0019567,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get system screen_off_timeout"
+    ],
+    "start": 1792895170.0133848,
+    "end": 1792895170.3806934,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792895170.3866978,
+    "end": 1792895170.6781855,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792895170.6802351,
+    "end": 1792895171.1370604,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "content call --uri content://org.worldfoundry.screensaver.settings --method getCapabilities"
+    ],
+    "start": 1792895171.1438923,
+    "end": 1792895172.8429866,
+    "returncode": 0
+  }
+]

@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/a5564e40) | docs: follow-device on a real Seahorse Dream was inconclusive; restore the Pixel's settings |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/4b357191) | docs: orientation plan records the Seahorse Dream on cast1 |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/48b943cf) | docs: orientation plan records the Seahorse Dream on cast2 |
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/343679c6) | docs: orientation plan records Planted Tank landscape on a real Dream |
@@ -10,6 +11,11 @@
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/41c8e7d6) | docs: plan for screensaver landscape orientation, configurable per screensaver |
 
 <!--history-meta v1
+a5564e40	author	Will Norris
+a5564e40	added	11
+a5564e40	deleted	1
+a5564e40	files	1
+a5564e40	body	The capture showed another app and nobody recorded what the phone displayed,\nso the run is recorded as inconclusive. The screenshot is not kept.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01PkFSbo6jcue9Gfyb6U9HVs
 4b357191	author	Will Norris
 4b357191	added	11
 4b357191	deleted	2

@@ -1,0 +1,188 @@
+{
+  "schema": 1,
+  "device": "phone-pixel-8-pro",
+  "collected_at": "2026-10-25T02:56:29.215536+00:00",
+  "screensaver": {
+    "selected_component": "org.worldfoundry.screensaver/org.worldfoundry.screensaver.AquariumDreamService",
+    "enabled": "1",
+    "activate_on_sleep": "1",
+    "idle_timeout_ms": 300000,
+    "active_component": null,
+    "running_state": "not-running",
+    "preview_running": false,
+    "show_eligible": true,
+    "providers": [
+      "com.android.dreams.basic/com.android.dreams.basic.Colors",
+      "com.android.systemui/com.android.systemui.dreams.homecontrols.HomeControlsDreamService",
+      "com.android.systemui/com.android.systemui.lowlightclock.LowLightClockDreamService",
+      "com.google.android.apps.photos/com.google.android.apps.photos.daydream.PhotosDreamService",
+      "com.google.android.deskclock/com.android.deskclock.Screensaver",
+      "org.worldfoundry.plantedtank/org.worldfoundry.screensaver.PlantedTankDreamService",
+      "org.worldfoundry.screensaver/org.worldfoundry.screensaver.AquariumDreamService",
+      "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService"
+    ],
+    "selected_installed": true,
+    "content_settings": {
+      "state": "ready",
+      "schema": 1,
+      "objects": [
+        {
+          "owner": null,
+          "type": null,
+          "title": null,
+          "settings": [
+            {
+              "id": "tank",
+              "type": "choice",
+              "label": "Tank",
+              "value": "random",
+              "options": [
+                {
+                  "id": "random",
+                  "label": "Random"
+                },
+                {
+                  "id": "aquarium",
+                  "label": "Clownfish"
+                },
+                {
+                  "id": "aquarium_blue_shrimp",
+                  "label": "Blue Shrimp"
+                },
+                {
+                  "id": "aquarium_betta",
+                  "label": "Betta"
+                },
+                {
+                  "id": "aquarium_jellyfish",
+                  "label": "Jellyfish"
+                },
+                {
+                  "id": "aquarium_lionfish",
+                  "label": "Lionfish"
+                },
+                {
+                  "id": "aquarium_plants",
+                  "label": "Planted Urchin"
+                },
+                {
+                  "id": "aquarium_arowana",
+                  "label": "Arowana"
+                },
+                {
+                  "id": "aquarium_tiger_barbs",
+                  "label": "Tiger Barbs"
+                }
+              ]
+            },
+            {
+              "id": "orientation",
+              "type": "choice",
+              "label": "Orientation",
+              "value": "landscape",
+              "options": [
+                {
+                  "id": "landscape",
+                  "label": "Landscape"
+                },
+                {
+                  "id": "sensor-landscape",
+                  "label": "Sensor landscape"
+                },
+                {
+                  "id": "follow-device",
+                  "label": "Follow device"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "settings": [
+        {
+          "id": "tank",
+          "type": "choice",
+          "label": "Tank",
+          "value": "random",
+          "options": [
+            {
+              "id": "random",
+              "label": "Random"
+            },
+            {
+              "id": "aquarium",
+              "label": "Clownfish"
+            },
+            {
+              "id": "aquarium_blue_shrimp",
+              "label": "Blue Shrimp"
+            },
+            {
+              "id": "aquarium_betta",
+              "label": "Betta"
+            },
+            {
+              "id": "aquarium_jellyfish",
+              "label": "Jellyfish"
+            },
+            {
+              "id": "aquarium_lionfish",
+              "label": "Lionfish"
+            },
+            {
+              "id": "aquarium_plants",
+              "label": "Planted Urchin"
+            },
+            {
+              "id": "aquarium_arowana",
+              "label": "Arowana"
+            },
+            {
+              "id": "aquarium_tiger_barbs",
+              "label": "Tiger Barbs"
+            }
+          ],
+          "wire_id": "tank",
+          "owner": null,
+          "object_title": null
+        },
+        {
+          "id": "orientation",
+          "type": "choice",
+          "label": "Orientation",
+          "value": "landscape",
+          "options": [
+            {
+              "id": "landscape",
+              "label": "Landscape"
+            },
+            {
+              "id": "sensor-landscape",
+              "label": "Sensor landscape"
+            },
+            {
+              "id": "follow-device",
+              "label": "Follow device"
+            }
+          ],
+          "wire_id": "orientation",
+          "owner": null,
+          "object_title": null
+        }
+      ]
+    },
+    "field_states": {
+      "selected_component": "set",
+      "enabled": "set",
+      "activate_on_sleep": "set",
+      "idle_timeout_ms": "set",
+      "running": "readable"
+    }
+  },
+  "job": null,
+  "action": "setting-set",
+  "setting_id": "orientation",
+  "previous_value": "follow-device",
+  "value": "landscape",
+  "persistent_settings_changed": true
+}
