@@ -1,0 +1,101 @@
+[
+  {
+    "args": [
+      "shell",
+      "cmd package query-services --brief --components -a android.service.dreams.DreamService"
+    ],
+    "start": 1792891916.7017565,
+    "end": 1792891916.9008737,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1792891916.9034507,
+    "end": 1792891917.134504,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings put secure screensaver_components org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService"
+    ],
+    "start": 1792891917.161481,
+    "end": 1792891917.412701,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1792891917.4140286,
+    "end": 1792891917.6520793,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1792891917.6755018,
+    "end": 1792891917.8971689,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_enabled"
+    ],
+    "start": 1792891917.898666,
+    "end": 1792891918.1337225,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_activate_on_sleep"
+    ],
+    "start": 1792891918.1347094,
+    "end": 1792891918.3564785,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get system screen_off_timeout"
+    ],
+    "start": 1792891918.3580697,
+    "end": 1792891918.5570574,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792891918.558167,
+    "end": 1792891918.7455573,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792891918.7476654,
+    "end": 1792891918.9702463,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "content call --uri content://org.worldfoundry.seahorsegrid.settings --method getCapabilities"
+    ],
+    "start": 1792891918.9753923,
+    "end": 1792891921.8346865,
+    "returncode": 0
+  }
+]

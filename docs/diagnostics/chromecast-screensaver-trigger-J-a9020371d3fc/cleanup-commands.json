@@ -1,0 +1,20 @@
+[
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.GoogleCamera/com.android.camera.CameraLauncher"
+    ],
+    "start": 1792892252.7548938,
+    "end": 1792892253.0593503,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792892253.0602973,
+    "end": 1792892253.3822644,
+    "returncode": 0
+  }
+]

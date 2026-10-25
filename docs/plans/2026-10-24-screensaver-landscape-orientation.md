@@ -233,6 +233,16 @@ Seahorse Grid preview, nothing saved: png (2244, 1008)   landscape (bundled defa
 
 **PARTIAL PASS**: the preview confirms the setting is read and applied, and `follow-device` returns portrait. It is the activity path, not a real Dream, and only Aquarium was switched.
 
+Real Dream with `follow-device`, Seahorse Grid, Pixel 8 Pro held in portrait (2026‑10‑25, J‑a9020371d3fc):
+
+```
+status succeeded, completed; observed_component = SeahorseGridDreamService
+screensaver.png: 1008 x 2244 (display is portrait), mean luminance 108, 0.2% dark pixels: an ordinary app, not a Dream on black
+Will, asked what the phone showed: "i don't remember"
+```
+
+**INCONCLUSIVE** for the real Dream: nobody recorded what was on screen, and the capture shows another app, so it is neither machine nor eye evidence. Seahorse's saved orientation was set back to `landscape` and Planted Tank re-selected afterwards. Aquarium and Planted Tank were not run with `follow-device` on a real Dream. The preview result above is the only evidence that `follow-device` returns portrait.
+
 5. Set `sensor-landscape`, turn the phone 180° during the Dream, and confirm it flips.
 
 ```
@@ -285,4 +295,4 @@ $ task chromecast:screensaver-setting DEVICE=phone-pixel-8-pro SETTING_ID=orient
 
 **PARTIAL PASS**: the value saved and read back through the coordinator for all three screensavers (Aquarium `orientation`, Seahorse `orientation` after the coordinator deploy of `0a77350`, Planted Tank `4.orientation`). The tray display was not checked.
 
-**Not run yet:** `follow-device` on a real Dream (step 4 covered only the Aquarium preview). Until it is run, the TODO item stays open.
+**Not run yet:** `follow-device` on a real Dream with someone watching (the 2026‑10‑25 Seahorse run was inconclusive; step 4 otherwise covered only the Aquarium preview). Until it is run, the TODO item stays open.
