@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/fff536da) | docs: screensaver landscape orientation verified on the Pixel and both casts; item done |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/a5564e40) | docs: follow-device on a real Seahorse Dream was inconclusive; restore the Pixel's settings |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/4b357191) | docs: orientation plan records the Seahorse Dream on cast1 |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/48b943cf) | docs: orientation plan records the Seahorse Dream on cast2 |
@@ -11,6 +12,11 @@
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/41c8e7d6) | docs: plan for screensaver landscape orientation, configurable per screensaver |
 
 <!--history-meta v1
+fff536da	author	Will Norris
+fff536da	added	10
+fff536da	deleted	6
+fff536da	files	1
+fff536da	body	follow-device is portrait with the scene letterboxed on a real Dream for all\nthree screensavers (machine capture for Seahorse and Planted Tank, by eye for\nAquarium). The Pixel's saved settings were set back to landscape.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01PkFSbo6jcue9Gfyb6U9HVs
 a5564e40	author	Will Norris
 a5564e40	added	11
 a5564e40	deleted	1

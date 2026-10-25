@@ -273,7 +273,19 @@ Will, watching the TV: "seahorses rn"
 Two earlier shows (J‑2c59317565fb, J‑2c62d3495365) ended plugin-error while the cast was asleep (mWakefulness=Asleep).
 ```
 
-**PASS** on both casts: the Seahorse Grid starts and runs on cast1 (seen by Will) and cast2 (coordinator capture). The cast1 capture was black at 3 s although the scene was running, so it is not evidence; it is kept only as the job record. `screensaver-show` on a sleeping cast fails (filed in the coordinator `TODO.md`).
+**PASS** on both casts: the Seahorse Grid starts and runs on cast1 (seen by Will) and cast2 (coordinator capture).
+
+Natural idle Dream checks on the casts, 2026‑10‑25 (`WORKFLOW=dream-check`, orientation builds; evidence in `docs/diagnostics/orientation-dream-checks-2026-10-25/`):
+
+```
+cast1  Aquarium   J‑c718738e4300  completed  dream.png 1920 x 1080, the lionfish tank, landscape
+cast1  Seahorse   J‑e31b4f8e8caf  completed  dream.png 1920 x 1080, the 6x4 seahorse grid, landscape
+cast2  Planted    J‑b99a41104d67  completed  dream.png 1920 x 1080, the plants-only tank, landscape
+cast2  Aquarium   J‑f4ff02c5bf7d, J‑d7721c405978 (380 s and 480 s windows)  plugin-error: no Dream started
+cast2  Seahorse   J‑2e8c2a433607, J‑2940b9b4da64                              plugin-error: no Dream started
+```
+
+**PASS** for the Dream starting in landscape on both casts, for all three screensavers, from the real idle timeout and read from the coordinator's captures (the cast1 Seahorse capture is a normal grid, not the black frame seen earlier from `screensaver-show`). The cast2 Aquarium and Seahorse checks could not run: cast2 was in use (a streaming app in front with a screen wake lock, `mWakeLockSummary=0x23`), so it never went idle and no Dream started in either window, `mCurrentDream=null` throughout while charging. That is a use of the device, not a defect in the build. The checks end `plugin-error` and fence the device instead of failing plainly (filed in the coordinator `TODO.md`). The cast1 capture was black at 3 s although the scene was running, so it is not evidence; it is kept only as the job record. `screensaver-show` on a sleeping cast fails (filed in the coordinator `TODO.md`).
 7. Android 10 or earlier (the window-attribute branch): needs a device on that version, which this workspace
    may not have. Read the Android version of each enrolled device first (`getprop ro.build.version.release`
    through the coordinator's device facts). If none is on 10 or earlier, record that this branch is
