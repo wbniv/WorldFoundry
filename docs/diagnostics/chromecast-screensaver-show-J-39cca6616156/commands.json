@@ -1,0 +1,202 @@
+[
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792899117.165944,
+    "end": 1792899117.3911874,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package query-services --brief --components -a android.service.dreams.DreamService"
+    ],
+    "start": 1792899117.4012153,
+    "end": 1792899117.822954,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1792899117.824994,
+    "end": 1792899118.0008416,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_enabled"
+    ],
+    "start": 1792899118.0021596,
+    "end": 1792899118.18257,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_activate_on_sleep"
+    ],
+    "start": 1792899118.1833746,
+    "end": 1792899118.3433063,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get system screen_off_timeout"
+    ],
+    "start": 1792899118.3442523,
+    "end": 1792899118.6306045,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899118.6322386,
+    "end": 1792899119.0127025,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792899119.013994,
+    "end": 1792899119.2650683,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "content call --uri content://org.worldfoundry.plantedtank.settings --method getCapabilities"
+    ],
+    "start": 1792899119.2665749,
+    "end": 1792899121.2821898,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1792899121.305647,
+    "end": 1792899121.4992592,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792899121.6507144,
+    "end": 1792899121.8927739,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -S -W -n org.worldfoundry.plantedtank/org.worldfoundry.screensaver.PlantedTankActivity --es org.worldfoundry.settings.OVERRIDES '{\"4.2\":\"1\",\"4.1\":\"713\"}'"
+    ],
+    "start": 1792899121.8942533,
+    "end": 1792899123.5252938,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792899123.5268486,
+    "end": 1792899123.777677,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1792899123.780289,
+    "end": 1792899125.3938818,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1792899126.4860375,
+    "end": 1792899127.779172,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1792899127.8610163,
+    "end": 1792899128.0447373,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_enabled"
+    ],
+    "start": 1792899128.0455637,
+    "end": 1792899128.2514672,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_activate_on_sleep"
+    ],
+    "start": 1792899128.2529943,
+    "end": 1792899128.4261954,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get system screen_off_timeout"
+    ],
+    "start": 1792899128.4270475,
+    "end": 1792899128.588952,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899128.5899255,
+    "end": 1792899128.7321236,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792899128.7333848,
+    "end": 1792899128.9029784,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "content call --uri content://org.worldfoundry.plantedtank.settings --method getCapabilities"
+    ],
+    "start": 1792899128.904709,
+    "end": 1792899130.9878535,
+    "returncode": 0
+  }
+]

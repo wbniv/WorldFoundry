@@ -1,0 +1,25 @@
+DREAM MANAGER (dumpsys dreams)
+
+mCurrentDream=DreamRecord{token=android.os.Binder@545200b, name=ComponentInfo{org.worldfoundry.plantedtank/org.worldfoundry.screensaver.PlantedTankDreamService}, userId=0, isPreview=false, canDoze=false, isDozing=false, isWaking=false, dozeScreenState=0, dozeScreenBrightness=-1}
+mForceAmbientDisplayEnabled=false
+mDreamsOnlyEnabledForDockUser=false
+mDreamsEnabledSetting=true
+mDreamsActivatedOnDockByDefault=true
+mDreamsActivatedOnChargeByDefault=true
+mIsDocked=false
+mIsCharging=true
+mWhenToDream=3
+mKeepDreamingWhenUnpluggingDefault=false
+getDozeComponent()=null
+
+Dreamland:
+  mCurrentDream:
+    mToken=android.os.Binder@545200b
+    mName=ComponentInfo{org.worldfoundry.plantedtank/org.worldfoundry.screensaver.PlantedTankDreamService}
+    mIsPreviewMode=false
+    mCanDoze=false
+    mUserId=0
+    mBound=true
+    mService=android.service.dreams.IDreamService$Stub$Proxy@1b42ee8
+    mWakingGently=false
+  mSentStartBroadcast=true

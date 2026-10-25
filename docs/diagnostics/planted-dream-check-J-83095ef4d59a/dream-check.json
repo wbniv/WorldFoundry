@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "device": "chromecast-test-01",
+  "collected_at": "2026-10-25T03:40:08.408781+00:00",
+  "selected": "org.worldfoundry.plantedtank/org.worldfoundry.screensaver.PlantedTankDreamService",
+  "observed": "DreamRecord{token=android.os.Binder@545200b, name=ComponentInfo{org.worldfoundry.plantedtank/org.worldfoundry.screensaver.PlantedTankDreamService}, userId=0, isPreview=false, canDoze=false, isDozing=false, isWaking=false, dozeScreenState=0, dozeScreenBrightness=-1}",
+  "screenshot": "dream.png",
+  "condition": "planted-screensaver-dream",
+  "restoration": "journaled settings and foreground"
+}

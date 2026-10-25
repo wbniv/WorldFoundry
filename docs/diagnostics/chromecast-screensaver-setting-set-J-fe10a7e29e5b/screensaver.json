@@ -1,0 +1,396 @@
+{
+  "schema": 1,
+  "device": "chromecast-test-01",
+  "collected_at": "2026-10-25T03:33:05.027163+00:00",
+  "screensaver": {
+    "selected_component": "org.worldfoundry.plantedtank/org.worldfoundry.screensaver.PlantedTankDreamService",
+    "enabled": "1",
+    "activate_on_sleep": "1",
+    "idle_timeout_ms": 60000,
+    "active_component": null,
+    "running_state": "not-running",
+    "preview_running": true,
+    "show_eligible": true,
+    "providers": [
+      "com.android.dreams.basic/com.android.dreams.basic.Colors",
+      "com.google.android.apps.tv.dreamx/com.google.android.apps.tv.dreamx.service.Backdrop",
+      "org.worldfoundry.plantedtank/org.worldfoundry.screensaver.PlantedTankDreamService",
+      "org.worldfoundry.screensaver/org.worldfoundry.screensaver.AquariumDreamService",
+      "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService"
+    ],
+    "selected_installed": true,
+    "content_settings": {
+      "state": "ready",
+      "schema": 2,
+      "objects": [
+        {
+          "owner": 4,
+          "type": "PlantedTankSettings",
+          "title": "Planted Tank Screensaver / Director",
+          "settings": [
+            {
+              "id": "1",
+              "key": "Seed",
+              "label": "Seed",
+              "show": 1,
+              "value": "random",
+              "readonly": false,
+              "group": "Plant growth",
+              "help": "Random number seed from 0 to 4294967295",
+              "type": "integer",
+              "minimum": "0",
+              "maximum": "4294967295",
+              "unset_value": "random"
+            },
+            {
+              "id": "2",
+              "key": "Water type",
+              "label": "Water type",
+              "show": 5,
+              "value": "0",
+              "readonly": false,
+              "group": "Plant growth",
+              "help": "Choose the aquatic plant habitat",
+              "type": "choice",
+              "options": [
+                {
+                  "id": "random",
+                  "label": "Random"
+                },
+                {
+                  "id": "0",
+                  "label": "Freshwater"
+                },
+                {
+                  "id": "1",
+                  "label": "Saltwater"
+                }
+              ]
+            },
+            {
+              "id": "3",
+              "key": "Growth speed",
+              "label": "Growth speed",
+              "show": 2,
+              "value": "3",
+              "readonly": false,
+              "group": "Plant growth",
+              "help": "Changes growth rate without restarting the plants",
+              "type": "choice",
+              "options": [
+                {
+                  "id": "1",
+                  "label": "0.25x"
+                },
+                {
+                  "id": "2",
+                  "label": "0.5x"
+                },
+                {
+                  "id": "3",
+                  "label": "1x"
+                },
+                {
+                  "id": "4",
+                  "label": "2x"
+                },
+                {
+                  "id": "5",
+                  "label": "4x"
+                },
+                {
+                  "id": "6",
+                  "label": "8x"
+                }
+              ]
+            },
+            {
+              "id": "4",
+              "key": "Initial age",
+              "label": "Initial age",
+              "show": 2,
+              "value": "0",
+              "readonly": true,
+              "group": "Plant growth",
+              "help": "Authored starting age in seconds; applied on level entry only",
+              "type": "decimal",
+              "minimum": "0",
+              "maximum": "240"
+            },
+            {
+              "id": "5",
+              "key": "Textures",
+              "label": "Textures",
+              "show": 8,
+              "value": "true",
+              "readonly": false,
+              "group": "Plant growth",
+              "help": "Enable textured plant meshes on Apply",
+              "type": "boolean"
+            },
+            {
+              "id": "6",
+              "key": "Sway",
+              "label": "Sway",
+              "show": 8,
+              "value": "true",
+              "readonly": false,
+              "group": "Plant growth",
+              "help": "Enable plant sway on Apply",
+              "type": "boolean"
+            },
+            {
+              "id": "7",
+              "key": "Random seed on entry",
+              "label": "Random seed on entry",
+              "show": 8,
+              "value": "true",
+              "readonly": true,
+              "group": "Plant growth",
+              "help": "Choose a Seed, or set Seed to random.",
+              "type": "boolean"
+            },
+            {
+              "id": "10",
+              "key": "Hold seconds",
+              "label": "Hold seconds",
+              "show": 1,
+              "value": "120",
+              "readonly": false,
+              "group": "Screensaver",
+              "help": "Seconds a fully grown tank stays on screen before the next tank",
+              "type": "integer",
+              "minimum": "0",
+              "maximum": "86400"
+            },
+            {
+              "id": "orientation",
+              "type": "choice",
+              "label": "Orientation",
+              "value": "landscape",
+              "options": [
+                {
+                  "id": "landscape",
+                  "label": "Landscape"
+                },
+                {
+                  "id": "sensor-landscape",
+                  "label": "Sensor landscape"
+                },
+                {
+                  "id": "follow-device",
+                  "label": "Follow device"
+                }
+              ],
+              "key": "Orientation",
+              "show": 5,
+              "readonly": false,
+              "group": "Screensaver"
+            }
+          ]
+        }
+      ],
+      "settings": [
+        {
+          "id": "1",
+          "key": "Seed",
+          "label": "Seed",
+          "show": 1,
+          "value": "random",
+          "readonly": false,
+          "group": "Plant growth",
+          "help": "Random number seed from 0 to 4294967295",
+          "type": "integer",
+          "minimum": "0",
+          "maximum": "4294967295",
+          "unset_value": "random",
+          "wire_id": "4.1",
+          "owner": 4,
+          "object_title": "Planted Tank Screensaver / Director"
+        },
+        {
+          "id": "2",
+          "key": "Water type",
+          "label": "Water type",
+          "show": 5,
+          "value": "0",
+          "readonly": false,
+          "group": "Plant growth",
+          "help": "Choose the aquatic plant habitat",
+          "type": "choice",
+          "options": [
+            {
+              "id": "random",
+              "label": "Random"
+            },
+            {
+              "id": "0",
+              "label": "Freshwater"
+            },
+            {
+              "id": "1",
+              "label": "Saltwater"
+            }
+          ],
+          "wire_id": "4.2",
+          "owner": 4,
+          "object_title": "Planted Tank Screensaver / Director"
+        },
+        {
+          "id": "3",
+          "key": "Growth speed",
+          "label": "Growth speed",
+          "show": 2,
+          "value": "3",
+          "readonly": false,
+          "group": "Plant growth",
+          "help": "Changes growth rate without restarting the plants",
+          "type": "choice",
+          "options": [
+            {
+              "id": "1",
+              "label": "0.25x"
+            },
+            {
+              "id": "2",
+              "label": "0.5x"
+            },
+            {
+              "id": "3",
+              "label": "1x"
+            },
+            {
+              "id": "4",
+              "label": "2x"
+            },
+            {
+              "id": "5",
+              "label": "4x"
+            },
+            {
+              "id": "6",
+              "label": "8x"
+            }
+          ],
+          "wire_id": "4.3",
+          "owner": 4,
+          "object_title": "Planted Tank Screensaver / Director"
+        },
+        {
+          "id": "4",
+          "key": "Initial age",
+          "label": "Initial age",
+          "show": 2,
+          "value": "0",
+          "readonly": true,
+          "group": "Plant growth",
+          "help": "Authored starting age in seconds; applied on level entry only",
+          "type": "decimal",
+          "minimum": "0",
+          "maximum": "240",
+          "wire_id": "4.4",
+          "owner": 4,
+          "object_title": "Planted Tank Screensaver / Director"
+        },
+        {
+          "id": "5",
+          "key": "Textures",
+          "label": "Textures",
+          "show": 8,
+          "value": "true",
+          "readonly": false,
+          "group": "Plant growth",
+          "help": "Enable textured plant meshes on Apply",
+          "type": "boolean",
+          "wire_id": "4.5",
+          "owner": 4,
+          "object_title": "Planted Tank Screensaver / Director"
+        },
+        {
+          "id": "6",
+          "key": "Sway",
+          "label": "Sway",
+          "show": 8,
+          "value": "true",
+          "readonly": false,
+          "group": "Plant growth",
+          "help": "Enable plant sway on Apply",
+          "type": "boolean",
+          "wire_id": "4.6",
+          "owner": 4,
+          "object_title": "Planted Tank Screensaver / Director"
+        },
+        {
+          "id": "7",
+          "key": "Random seed on entry",
+          "label": "Random seed on entry",
+          "show": 8,
+          "value": "true",
+          "readonly": true,
+          "group": "Plant growth",
+          "help": "Choose a Seed, or set Seed to random.",
+          "type": "boolean",
+          "wire_id": "4.7",
+          "owner": 4,
+          "object_title": "Planted Tank Screensaver / Director"
+        },
+        {
+          "id": "10",
+          "key": "Hold seconds",
+          "label": "Hold seconds",
+          "show": 1,
+          "value": "120",
+          "readonly": false,
+          "group": "Screensaver",
+          "help": "Seconds a fully grown tank stays on screen before the next tank",
+          "type": "integer",
+          "minimum": "0",
+          "maximum": "86400",
+          "wire_id": "4.10",
+          "owner": 4,
+          "object_title": "Planted Tank Screensaver / Director"
+        },
+        {
+          "id": "orientation",
+          "type": "choice",
+          "label": "Orientation",
+          "value": "landscape",
+          "options": [
+            {
+              "id": "landscape",
+              "label": "Landscape"
+            },
+            {
+              "id": "sensor-landscape",
+              "label": "Sensor landscape"
+            },
+            {
+              "id": "follow-device",
+              "label": "Follow device"
+            }
+          ],
+          "key": "Orientation",
+          "show": 5,
+          "readonly": false,
+          "group": "Screensaver",
+          "wire_id": "4.orientation",
+          "owner": 4,
+          "object_title": "Planted Tank Screensaver / Director"
+        }
+      ]
+    },
+    "field_states": {
+      "selected_component": "set",
+      "enabled": "set",
+      "activate_on_sleep": "set",
+      "idle_timeout_ms": "set",
+      "running": "readable"
+    }
+  },
+  "job": null,
+  "action": "setting-set",
+  "setting_id": "4.2",
+  "previous_value": "1",
+  "value": "0",
+  "persistent_settings_changed": true
+}

@@ -253,7 +253,22 @@ Build, level and test steps run in the project's containers (`wf-blender:local` 
     task: Failed to run task "chromecast:submit": exit status 1
     ```
 
-    **NOT RUN on the deployed release — device unavailable.** The rejection above is historical evidence from before Phase 4b ([transcript](2026-10-21-planted-tank-screensaver/phase5/install-cast1-rejected.txt)). The deployed coordinator now admits `org.worldfoundry.plantedtank`, reads its declared Settings provider, accepts owner/field writes and launch-only overrides, and handles its Dream. Use the coordinator workflows shown under **Parameters** when a test TV is available.
+    Rerun 2026‑10‑25 on `chromecast-test-01` with the frozen orientation build `c89aae44b962` (a newer candidate than the one named above; it adds the `4.orientation` field):
+
+    ```
+    $ task chromecast:submit WORKFLOW=install DEVICE=chromecast-test-01 -- planted-orientation.apk
+    B‑7eecbf955fe8  Installed 1/1; launcher verified 1/1                      (J‑5b14da3318b8)
+    $ task chromecast:screensaver-show DEVICE=chromecast-test-01 OVERRIDES='{"4.2":"1","4.1":"713"}'
+    J‑39cca6616156  succeeded; observed PlantedTankActivity; screensaver.png 1920 x 1080, a tank (mean luminance 52.9, no black)
+    saved afterwards: 4.1 Seed = random, 4.2 Water type = random, 4.orientation = landscape      (launch-only: nothing saved)
+    $ task chromecast:screensaver-show DEVICE=chromecast-test-01 OVERRIDES='{"4.1":"4294967296"}'
+    J‑89d0caeedf38  rejected, but ended recovery-required: plugin-error (automatic readd J‑101bce3011de); saved values unchanged
+    $ task chromecast:screensaver-setting DEVICE=chromecast-test-01 SETTING_ID=4.2 VALUE=1
+    J‑6a7b870fe578  read back: 4.2 Water type = 1 (Saltwater); 4.1 and 4.orientation unchanged
+    then VALUE=0 (J‑fe10a7e29e5b) and VALUE=random (J‑8a0e80992ad6): 4.2 = random again
+    ```
+
+    **PASS** for the install, the launch-only overrides (the preview runs, the saved settings do not change), the saltwater save and its read-back. **PARTIAL** for the invalid seed: it is rejected and nothing is saved, but the job ends `plugin-error` and fences the device (filed in the coordinator `TODO.md`). The saltwater tank itself was not looked at by eye or captured: the one-run preview capture shows a tank at the start of growth, and the water type was not read from the picture.
 8. **Default timing at 1×.** One uninterrupted cycle on a device: reload-to-reload equals the bound plus 120 s within 5 s.
 
     **NOT RUN — device unavailable.** The device frame rate during a planted tank is not measured either, so whether level time equals wall time on the TV (it does only above 10 FPS) is still open.
@@ -269,8 +284,15 @@ Build, level and test steps run in the project's containers (`wf-blender:local` 
     97 passed in 14.36s
     ```
 
-    **PASS** for the pixel test (`tests/test_planted_icons.py`, on the committed resources; the generator was not re-run). **NOT RUN** for the Apps row capture: no device was available after Phase 4b deployment.
+    **PASS** for the pixel test (`tests/test_planted_icons.py`, on the committed resources; the generator was not re-run). **PASS** for the Apps row: the coordinator's launcher verification found the Planted Tank tile on `chromecast-test-01` (Installed 1/1, launcher verified 1/1, 2026‑10‑25, batch B‑7eecbf955fe8).
 11. **Natural idle.** `task chromecast:submit … APP=plantedtank WORKFLOW=dream-check` captures a growing tank in the real Dream.
+
+    ```
+    $ task chromecast:submit DEVICE=chromecast-test-01 APP=planted-screensaver WORKFLOW=dream-check APK=planted-orientation.apk DURATION=380 ASYNC=1
+    J‑83095ef4d59a  succeeded; selected = observed = PlantedTankDreamService; condition planted-screensaver-dream; dream.png 1920 x 1080
+    ```
+
+    **PASS** (screenshot read: a freshly started tank with the first sprouts on the gravel, in the real Dream, framed in landscape). The capture is of the first seconds of a tank, so it shows growth starting, not the full cycle. Evidence: `docs/diagnostics/planted-dream-check-J‑83095ef4d59a/`. Steps 8 (default timing at 1×) and 9 (the 50-tank soak) were not run: they need a device kept for about 25 minutes.
 
     **NOT RUN — device unavailable.** The deployed coordinator now registers the Planted Dream and `dream-check` uses the registered Dream component and generic Dream condition handling. Its natural idle behavior still needs device evidence.
 12. **No regression.** The existing screensaver tests (`tests/test_seahorse_grid_level.py`, the aquarium bundle-order check) still pass.

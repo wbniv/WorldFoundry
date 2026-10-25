@@ -1,6 +1,6 @@
 | Date | Change |
 |------|--------|
-| [2026-10-22](https://github.com/wbniv/WorldFoundry/commit/167fa4ac) | docs: refresh planted tank verification status |
+| [2026-10-22](https://github.com/wbniv/WorldFoundry/commit/749e3bbf) | docs: refresh planted tank verification status |
 | [2026-10-22](https://github.com/wbniv/WorldFoundry/commit/80f43e98) | Use generic Settings catalogs for screensaver controls |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/91990750) | Planted Tank plan: Phase 4b now lists the coordinator registration entries |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/848fd337) | Planted Tank plan: record Phase 5 device verification (blocked on coordinator registration) |
@@ -21,10 +21,10 @@
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4266a44c) | Plan the Planted Tank screensaver |
 
 <!--history-meta v1
-167fa4ac	author	Will Norris
-167fa4ac	added	17
-167fa4ac	deleted	17
-167fa4ac	files	1
+749e3bbf	author	Will Norris
+749e3bbf	added	20
+749e3bbf	deleted	20
+749e3bbf	files	1
 80f43e98	author	Will Norris
 80f43e98	added	9
 80f43e98	deleted	9

@@ -1,0 +1,534 @@
+[
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792899240.5052114,
+    "end": 1792899240.6540923,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792899240.6807802,
+    "end": 1792899240.9752696,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.plantedtank"
+    ],
+    "start": 1792899241.0661902,
+    "end": 1792899241.4004862,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~VPXUKFg7NM6ye65iicSIJA==/org.worldfoundry.plantedtank-N1JwHyP8563ujkFlGrNsWg==/base.apk'"
+    ],
+    "start": 1792899241.4019253,
+    "end": 1792899241.59828,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1792899241.6318507,
+    "end": 1792899241.8104298,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings put secure screensaver_components org.worldfoundry.plantedtank/org.worldfoundry.screensaver.PlantedTankDreamService"
+    ],
+    "start": 1792899241.8431551,
+    "end": 1792899242.2187285,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1792899242.2196958,
+    "end": 1792899242.4253502,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_enabled"
+    ],
+    "start": 1792899242.427453,
+    "end": 1792899242.626452,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings put secure screensaver_enabled 1"
+    ],
+    "start": 1792899242.6494586,
+    "end": 1792899242.828854,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_enabled"
+    ],
+    "start": 1792899242.8298295,
+    "end": 1792899242.9947262,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get system screen_off_timeout"
+    ],
+    "start": 1792899242.9967017,
+    "end": 1792899243.1640782,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings put system screen_off_timeout 360000"
+    ],
+    "start": 1792899243.1860733,
+    "end": 1792899243.4738042,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get system screen_off_timeout"
+    ],
+    "start": 1792899243.4748561,
+    "end": 1792899243.6496348,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_HOME"
+    ],
+    "start": 1792899243.6507132,
+    "end": 1792899243.8199894,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899244.0018394,
+    "end": 1792899244.267867,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899254.270685,
+    "end": 1792899254.5066485,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899264.5090892,
+    "end": 1792899264.745266,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899274.747717,
+    "end": 1792899275.0647295,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899285.0695927,
+    "end": 1792899285.3148217,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899296.510385,
+    "end": 1792899297.92707,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899307.9557934,
+    "end": 1792899308.1490996,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899318.1515179,
+    "end": 1792899318.3945503,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899328.3978257,
+    "end": 1792899328.6649992,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899338.668285,
+    "end": 1792899338.874027,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899348.8767102,
+    "end": 1792899349.1321058,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899359.1346989,
+    "end": 1792899359.350642,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899369.3532903,
+    "end": 1792899369.582643,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899379.58527,
+    "end": 1792899379.8535905,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899389.8559892,
+    "end": 1792899390.0595362,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899400.0626962,
+    "end": 1792899400.306335,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899410.309333,
+    "end": 1792899410.5409434,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899420.543345,
+    "end": 1792899420.8024228,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899430.8053691,
+    "end": 1792899430.9599206,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899440.9636774,
+    "end": 1792899441.164979,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899451.1685677,
+    "end": 1792899451.4127944,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899461.6574087,
+    "end": 1792899462.7569346,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899472.7657108,
+    "end": 1792899473.1666014,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899483.1786525,
+    "end": 1792899483.3683114,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899493.3711703,
+    "end": 1792899493.5997772,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899503.6027489,
+    "end": 1792899503.853698,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899513.8571453,
+    "end": 1792899514.085612,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899524.0906088,
+    "end": 1792899524.3471384,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899534.3539915,
+    "end": 1792899534.592121,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899544.5956662,
+    "end": 1792899544.8162367,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899554.8195698,
+    "end": 1792899555.1762352,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899565.185898,
+    "end": 1792899565.5078182,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899575.514155,
+    "end": 1792899575.7473984,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899585.7510958,
+    "end": 1792899585.9970078,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899596.0004559,
+    "end": 1792899596.2276912,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792899606.231912,
+    "end": 1792899606.4394016,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792899606.4416761,
+    "end": 1792899606.7006657,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1792899606.7044606,
+    "end": 1792899608.408493,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_HOME"
+    ],
+    "start": 1792899608.4105198,
+    "end": 1792899608.879526,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings put system screen_off_timeout 60000"
+    ],
+    "start": 1792899609.0311537,
+    "end": 1792899609.3552082,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get system screen_off_timeout"
+    ],
+    "start": 1792899609.356455,
+    "end": 1792899609.6041396,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings put secure screensaver_enabled 1"
+    ],
+    "start": 1792899609.6677942,
+    "end": 1792899610.08136,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_enabled"
+    ],
+    "start": 1792899610.0827682,
+    "end": 1792899610.3235514,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings put secure screensaver_components org.worldfoundry.plantedtank/org.worldfoundry.screensaver.PlantedTankDreamService"
+    ],
+    "start": 1792899610.3893054,
+    "end": 1792899610.6845343,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1792899610.6858706,
+    "end": 1792899610.8845243,
+    "returncode": 0
+  }
+]

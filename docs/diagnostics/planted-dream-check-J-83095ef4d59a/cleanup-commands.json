@@ -1,0 +1,29 @@
+[
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.plantedtank"
+    ],
+    "start": 1792899610.9619832,
+    "end": 1792899611.203605,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n org.worldfoundry.plantedtank/org.worldfoundry.screensaver.PlantedTankActivity"
+    ],
+    "start": 1792899611.266627,
+    "end": 1792899612.4122849,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792899612.413604,
+    "end": 1792899612.7360952,
+    "returncode": 0
+  }
+]
