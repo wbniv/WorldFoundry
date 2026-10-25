@@ -250,7 +250,16 @@ status succeeded, reason completed, health ready
 screensaver.png: 1920x1080, the 6x4 Seahorse Grid on black
 ```
 
-**PARTIAL PASS**: the Dream starts on cast2 and the coordinator's capture shows the Seahorse Grid, landscape, as on the TV before. It was started with `screensaver-show` rather than the idle timeout, and Will was not asked to compare it by eye. The Chromecast HD (cast1) was in use by another session and was not run.
+
+```
+$ task chromecast:screensaver-show DEVICE=chromecast-test-01      (J‑7af29584d49c, Chromecast HD, Seahorse Grid selected)
+status succeeded, reason completed, health ready
+screensaver.png: 1920x1080, entirely black (captured 3 s after the preview started)
+Will, watching the TV: "seahorses rn"
+Two earlier shows (J‑2c59317565fb, J‑2c62d3495365) ended plugin-error while the cast was asleep (mWakefulness=Asleep).
+```
+
+**PASS** on both casts: the Seahorse Grid starts and runs on cast1 (seen by Will) and cast2 (coordinator capture). The cast1 capture was black at 3 s although the scene was running, so it is not evidence; it is kept only as the job record. `screensaver-show` on a sleeping cast fails (filed in the coordinator `TODO.md`).
 7. Android 10 or earlier (the window-attribute branch): needs a device on that version, which this workspace
    may not have. Read the Android version of each enrolled device first (`getprop ro.build.version.release`
    through the coordinator's device facts). If none is on 10 or earlier, record that this branch is
@@ -276,4 +285,4 @@ $ task chromecast:screensaver-setting DEVICE=phone-pixel-8-pro SETTING_ID=orient
 
 **PARTIAL PASS**: the value saved and read back through the coordinator for all three screensavers (Aquarium `orientation`, Seahorse `orientation` after the coordinator deploy of `0a77350`, Planted Tank `4.orientation`). The tray display was not checked.
 
-**Not run yet:** step 6 on cast1 (busy with another session), and `follow-device` on a real Dream (step 4 covered only the Aquarium preview). Until they are, the TODO item stays open.
+**Not run yet:** `follow-device` on a real Dream (step 4 covered only the Aquarium preview). Until it is run, the TODO item stays open.

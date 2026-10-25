@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/48b943cf) | docs: orientation plan records the Seahorse Dream on cast2 |
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/343679c6) | docs: orientation plan records Planted Tank landscape on a real Dream |
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/66a2d6fe) | docs: orientation plan records Aquarium sensor-landscape flip and settings round-trips |
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/4d45685e) | docs: orientation plan records the enrolled devices' Android versions |
@@ -8,6 +9,11 @@
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/41c8e7d6) | docs: plan for screensaver landscape orientation, configurable per screensaver |
 
 <!--history-meta v1
+48b943cf	author	Will Norris
+48b943cf	added	9
+48b943cf	deleted	1
+48b943cf	files	1
+48b943cf	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01PkFSbo6jcue9Gfyb6U9HVs
 343679c6	author	Will Norris
 343679c6	added	3
 343679c6	deleted	3

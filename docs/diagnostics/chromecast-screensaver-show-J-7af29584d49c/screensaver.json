@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "device": "chromecast-test-01",
+  "collected_at": "2026-10-25T01:27:11.723586+00:00",
+  "screensaver": {
+    "selected_component": "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService",
+    "enabled": "1",
+    "activate_on_sleep": "1",
+    "idle_timeout_ms": 60000,
+    "active_component": null,
+    "running_state": "not-running",
+    "preview_running": true,
+    "show_eligible": true,
+    "providers": [
+      "com.android.dreams.basic/com.android.dreams.basic.Colors",
+      "com.google.android.apps.tv.dreamx/com.google.android.apps.tv.dreamx.service.Backdrop",
+      "org.worldfoundry.screensaver/org.worldfoundry.screensaver.AquariumDreamService",
+      "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService"
+    ],
+    "selected_installed": true,
+    "content_settings": {
+      "state": "ready",
+      "schema": 1,
+      "objects": [
+        {
+          "owner": null,
+          "type": null,
+          "title": null,
+          "settings": [
+            {
+              "id": "orientation",
+              "type": "choice",
+              "label": "Orientation",
+              "value": "landscape",
+              "options": [
+                {
+                  "id": "landscape",
+                  "label": "Landscape"
+                },
+                {
+                  "id": "sensor-landscape",
+                  "label": "Sensor landscape"
+                },
+                {
+                  "id": "follow-device",
+                  "label": "Follow device"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "settings": [
+        {
+          "id": "orientation",
+          "type": "choice",
+          "label": "Orientation",
+          "value": "landscape",
+          "options": [
+            {
+              "id": "landscape",
+              "label": "Landscape"
+            },
+            {
+              "id": "sensor-landscape",
+              "label": "Sensor landscape"
+            },
+            {
+              "id": "follow-device",
+              "label": "Follow device"
+            }
+          ],
+          "wire_id": "orientation",
+          "owner": null,
+          "object_title": null
+        }
+      ]
+    },
+    "field_states": {
+      "selected_component": "set",
+      "enabled": "set",
+      "activate_on_sleep": "set",
+      "idle_timeout_ms": "set",
+      "running": "readable"
+    }
+  },
+  "job": "J-7af29584d49c",
+  "action": "show",
+  "display_mode": "live-app-preview",
+  "observed_component": "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.ScreensaverPreviewActivity",
+  "screenshot": "screensaver.png"
+}

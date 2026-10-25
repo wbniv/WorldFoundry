@@ -1,0 +1,174 @@
+[
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792891615.4447708,
+    "end": 1792891615.806293,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package query-services --brief --components -a android.service.dreams.DreamService"
+    ],
+    "start": 1792891615.8125415,
+    "end": 1792891616.132471,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1792891616.1354191,
+    "end": 1792891616.5625107,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_enabled"
+    ],
+    "start": 1792891616.5639243,
+    "end": 1792891616.948378,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_activate_on_sleep"
+    ],
+    "start": 1792891616.9497066,
+    "end": 1792891617.3899543,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get system screen_off_timeout"
+    ],
+    "start": 1792891617.3913834,
+    "end": 1792891617.8033261,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792891617.8046856,
+    "end": 1792891618.1800737,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792891618.1852446,
+    "end": 1792891618.5938332,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "content call --uri content://org.worldfoundry.seahorsegrid.settings --method getCapabilities"
+    ],
+    "start": 1792891618.5963461,
+    "end": 1792891621.4338741,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -S -W -n org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.ScreensaverPreviewActivity --es org.worldfoundry.screensaver.DREAM seahorse_grid"
+    ],
+    "start": 1792891621.4688725,
+    "end": 1792891622.699157,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792891625.703213,
+    "end": 1792891625.9620981,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1792891625.964385,
+    "end": 1792891627.3053765,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1792891627.3072088,
+    "end": 1792891627.5963547,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_enabled"
+    ],
+    "start": 1792891627.598002,
+    "end": 1792891627.9973567,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_activate_on_sleep"
+    ],
+    "start": 1792891627.9990244,
+    "end": 1792891628.228972,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get system screen_off_timeout"
+    ],
+    "start": 1792891628.2306592,
+    "end": 1792891628.6382382,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1792891628.6396477,
+    "end": 1792891629.0322587,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1792891629.0337503,
+    "end": 1792891629.2295792,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "content call --uri content://org.worldfoundry.seahorsegrid.settings --method getCapabilities"
+    ],
+    "start": 1792891629.2321293,
+    "end": 1792891631.7233918,
+    "returncode": 0
+  }
+]
