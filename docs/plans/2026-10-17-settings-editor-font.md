@@ -373,6 +373,21 @@ Phases 0, 1, 2 and 4 landed on branch `ui-font`; Phase 3 (Chromecast 1) ran on `
     - Cast2's baseline is versionCode 1 (Cast1's is 2), and neither device's installed hashes are known before an install: the coordinator records them only in an install's own journal. A deliberately refused install would reveal them without a change, but that was denied as interfering with the shared devices.
     - The condo APK for this round is built: `condo-uifont-release-9447f73a.apk` (`9447f73a569b1c30…`, versionCode 7). Cast2's aquarium and baseline jobs could run with `f38fa046` and a versionCode 1 baseline (`baseline-6635071caaa60614.apk`), but only once the restore targets' hashes are known.
 
+    **Third round (2026‑10‑25): the refreshed builds on both casts, through the coordinator.** Will decided the new builds stay installed (by "restore" he means the screen and what he was doing, not app versions), so the versionCode block above no longer applies. The 2026‑10‑19 font-refresh APKs (aquarium `b88535fe5fc7` versionCode 70, baseline `86e195b80440` versionCode 4, condo, smb, snowgoons and qbert versionCode 7; `build/apk-font-refresh-2026-10-19/` and `wflevels/baseline/build/`) replace the phase-3 candidates (versionCode 7, which the cast's code-70 aquarium now refuses as `INSTALL_FAILED_VERSION_DOWNGRADE`, J‑533bee5e05b9). `menu-back` exists only for aquarium, so condo, smb, snowgoons and qbert ran `poke-resume`, as the second round proposed.
+
+    ```
+    cast2  aquarium menu-back J‑e6669f5fc9ce completed     aquarium-seahorses J‑e849761ced4e completed
+           baseline-settings J‑c5cb806dad86 completed      baseline-picker J‑b1f93ea36c5e recovery-required: transport-unavailable
+           condo J‑caf042873204 completed   smb J‑f6e052a8b31e completed   snowgoons J‑af350d1fe156 completed
+           qbert J‑6b314461ab13 recovery-required: plugin-error
+    cast1  aquarium menu-back J‑28780387c762 completed     aquarium-seahorses J‑bb03f6c066a9 completed
+           baseline-settings J‑749d4b54fa8c completed      baseline-picker J‑79ef0b63a7ca completed
+           condo J‑813a1e5c0097 completed   smb J‑623ddd6609b7 completed   snowgoons J‑a3d83e2e9756 completed
+           qbert J‑d595eeef313e recovery-required: plugin-error
+    ```
+
+    **PARTIAL PASS**: 14 of 16 checks completed, including every aquarium and baseline check on cast1 and all four apps' checks except qbert. Left: cast2 `baseline-picker` (the transport dropped mid-job; cast2 was then readded and is `ready`) and `qbert` `poke-resume` on both casts. Qbert itself runs: the job's screenshot is the pyramid at 60.3 FPS, drawn with the new font, `wf.log` has `UI_FONT 1024x2048 atlas, 2770432 bytes` and no fatal, assertion or abort line. The `plugin-error` comes after the captures, so it is the validator or the coordinator with this app, not the build (filed in the coordinator `TODO.md`). The new builds stay installed on both casts; cast2 now also carries smb, snowgoons and qbert.
+
 9. Cost recorded: `cd.iff` and APK size before and after, and Cast1 frame time on the fishtank menu and the planted tank before and after (three runs each).
 
     ```
