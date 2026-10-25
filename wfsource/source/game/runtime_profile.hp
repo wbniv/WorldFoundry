@@ -55,6 +55,12 @@ struct State {
     std::array<unsigned long,CounterCount> totals{};
     std::array<unsigned long,CounterCount> maxima{};
     std::chrono::steady_clock::time_point last;
+    // end_frame closes a frame's timing, but the backend draws its last batch
+    // later (EndFrame's flush at PageFlip), so the frame's counters stay open
+    // until the next begin_frame (or end_frame) folds them: `closed` holds the
+    // closed frame's sections until then.
+    bool pending = false;
+    std::array<double,Count> closed{};
 };
 inline State& state() { static State s; return s; }
 inline double cpu_ms() {
@@ -67,16 +73,28 @@ inline double cpu_ms() {
 }
 inline bool enabled() { return state().enabled; }
 inline void enable() { state().enabled=true; state().last=std::chrono::steady_clock::now(); }
-inline void enableFresh() { auto& s=state(); s.frame.fill(0); s.started.fill(0); s.frames.clear(); s.counters.fill(0); s.totals.fill(0); s.maxima.fill(0); enable(); }
-inline void begin_frame() { if(state().enabled) { state().frame.fill(0); state().counters.fill(0); } }
+inline void enableFresh() { auto& s=state(); s.frame.fill(0); s.started.fill(0); s.frames.clear(); s.counters.fill(0); s.totals.fill(0); s.maxima.fill(0); s.pending=false; enable(); }
+inline void fold_frame();
+inline void begin_frame() { if(state().enabled) { fold_frame(); state().frame.fill(0); state().counters.fill(0); } }
 inline void count(int k,unsigned long n=1) { if(state().enabled && k>=0 && k<CounterCount) state().counters[k]+=n; }
 inline void begin(int k) { if(state().enabled && k>=0 && k<Count) state().started[k]=cpu_ms(); }
 inline void end(int k) { if(state().enabled && k>=0 && k<Count) state().frame[k]+=cpu_ms()-state().started[k]; }
 struct Scope { int k; explicit Scope(int section):k(section){begin(k);} ~Scope(){end(k);} };
+// Closes the frame's sections. Its counters are folded later, by fold_frame,
+// so a count that arrives before the next frame begins (the backend's final
+// flush) belongs to this frame. When no begin_frame came between (the level is
+// paused and only renders), the previous frame is folded here first.
 inline void end_frame() {
     State& s=state(); if(!s.enabled) return;
+    fold_frame();
     s.frame[Total]=s.frame[Update]+s.frame[Render];
-    s.frames.push_back(s.frame);
+    s.closed=s.frame; s.pending=true;
+}
+// Adds the closed frame to the window and prints the window every 5 s.
+inline void fold_frame() {
+    State& s=state(); if(!s.enabled || !s.pending) return;
+    s.pending=false;
+    s.frames.push_back(s.closed);
     for(int k=0;k<CounterCount;k++) { s.totals[k]+=s.counters[k]; s.maxima[k]=std::max(s.maxima[k],s.counters[k]); }
     auto now=std::chrono::steady_clock::now();
     if(std::chrono::duration<double>(now-s.last).count()<5) return;
