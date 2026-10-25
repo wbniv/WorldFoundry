@@ -170,6 +170,14 @@ Phases 0, 1, 2 and 4 landed on branch `ui-font`; Phase 3 (Chromecast 1) ran on `
 
 Not designed yet. Questions to settle in a plan update before any code: (1) whether the atlas needs a fixed-width variant (a monospaced face, or the old stroke font kept for these games) and what it costs in atlas size; (2) where the choice lives (a per-game flag in the level's settings object or the app flavour, read by `wfui::Text`, never a runtime type scan, per the resolve-at-export rule); (3) whether the FPS counter follows the game or stays proportional; (4) the captures that prove it (Q*bert, SMB, Snow Goons HUD before and after, on desktop and on a cast). Until then verification step 8's PASS for those apps means only "runs, resumes, no fatal lines", not "HUD looks right".
 
+Scoping, read from the code on 2026‑10‑25 (not run on a device):
+
+- `gfx/gl/display.cc`'s HUD text (launch banner, position block, minimap letters, `GAME OVER`, the high-score table) sits inside `#if DESIGNER_CHEATS && defined(__LINUX__)` and no CMake build defines `DESIGNER_CHEATS`. So in the Android builds on the casts that HUD does not exist, and the classic games' score and lives are not drawn by the engine's font code there.
+- What the engine does draw on the casts for Q*bert, SMB and Snow Goons is the level menu, the settings editor and the FPS counter (`game/fps_overlay.cc`). The refreshed Q*bert screenshot shows only the FPS counter, in the proportional font.
+- So the requirement bites on the desktop designer builds (the `display.cc` HUD) and wherever a game's own HUD is drawn through `wfui::Text`; I have not found such a call outside the eight files in the table above.
+- The old stroke font advanced a constant cell per character, so replacing it with a proportional face is what changes the HUD's fixed-width look. A fixed-width option would be either a monospaced face baked into the atlas (Atkinson publishes a mono companion; its licence and availability are unchecked here) or a fixed-advance layout mode in `wfui::Text` that places the proportional glyphs in equal cells.
+- Question for Will: is the concern the desktop designer HUD, the FPS counter, or HUD text inside the classic games' own levels (drawn by game assets, outside this font code)? The answer decides whether the fix is one flag in `display.cc` or something in the games.
+
 ## Verification
 
 1. The fonts are the pinned files: `sha256sum wfsource/fonts/atkinson-hyperlegible-next/*.ttf` prints `88ed5c31a71584c7772963b02d04bef1eb7e3d2e9c8b9cb204339b1f82cf432c` (Regular) and `8e2fff779f35ac25239656bb0f3b2bd35959a2009e3dd21a12141c3b9030362b` (SemiBold).
