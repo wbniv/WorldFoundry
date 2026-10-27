@@ -1434,7 +1434,7 @@ def redball_script(k, variant='red'):
         )
 
     return (
-        f"\\\\ wf {variant}ball {k}\n"
+        f"\\ wf {variant}ball {k}\n"
         # Frozen by a recent green-ball touch → all enemies skip the tick.
         f"{GB_MB_FREEZE_TIMER} read-mailbox 0 > if exit then\n"
         # ── Phase 0: idle (off-screen). Director writes our initial state to wake us.
@@ -2005,7 +2005,7 @@ def coily_egg_script():
     mb_from_col = _CE_MB_FROM_COL
 
     return (
-        f"\\\\ wf coily egg (Phase A)\n"
+        f"\\ wf coily egg (Phase A)\n"
         # Frozen by a recent green-ball touch → skip the tick.
         f"{GB_MB_FREEZE_TIMER} read-mailbox 0 > if exit then\n"
         # Phase 0: idle. Director writes initial state to wake.
@@ -2101,7 +2101,7 @@ def coily_egg2_script():
     mb_from_col = _CE2_MB_FROM_COL
 
     return (
-        f"\\\\ wf coily egg 2 (L4)\n"
+        f"\\ wf coily egg 2 (L4)\n"
         f"{GB_MB_FREEZE_TIMER} read-mailbox 0 > if exit then\n"
         f"{mb_phase} read-mailbox 0 = if exit then\n"
         f"{_CE2_MB_FLASH_TICK} read-mailbox 1 + {COILY_EGG_FLASH_PERIOD} % "
@@ -2428,7 +2428,7 @@ def coily_snake_script():
     mb_from_col = _CS_MB_FROM_COL
 
     return (
-        f"\\\\ wf coily snake (Phase C — chase)\n"
+        f"\\ wf coily snake (Phase C — chase)\n"
         # Frozen by a recent green-ball touch → skip the tick.
         f"{GB_MB_FREEZE_TIMER} read-mailbox 0 > if exit then\n"
         f"{mb_phase} read-mailbox 0 = if exit then\n"
