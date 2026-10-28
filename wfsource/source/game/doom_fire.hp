@@ -97,7 +97,10 @@ private:
         const unsigned f = scaled - i * 255;
         for (int c = 0; c < 3; ++c)
             rgba[c] = (unsigned char)((stops[i][c] * (255 - f) + stops[i + 1][c] * f + 127) / 255);
-        rgba[3] = 255;
+        // Empty and cooling cells must leave the authored flame silhouette
+        // transparent; otherwise the atlas rectangle covers it with a dark
+        // opaque block. Hot cells fade in with their heat value.
+        rgba[3] = heat;
     }
     void Paint()
     {
