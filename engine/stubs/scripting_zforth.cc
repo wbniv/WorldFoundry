@@ -1493,6 +1493,7 @@ zf_cell zf_host_parse_num(zf_ctx* ctx, const char* buf)
     if (end && *end == '\0') return (zf_cell)v;
 
     // Not a number — abort
+    fprintf(stderr, "zforth unknown token: %s\n", buf);
     zf_abort(ctx, ZF_ABORT_NOT_A_WORD);
     return (zf_cell)0;
 }
