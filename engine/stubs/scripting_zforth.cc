@@ -60,6 +60,7 @@ extern "C" {
 #include <game/runtime_profile.hp>
 #include <renderassets/rendacto.hp>
 #include "level.hp"   // theLevel global (extern Level* theLevel); pulls in Actor/PhysicalAttributes
+#include <game/doom_fire.hp>
 #include <math/euler.hp>     // Euler — connector orientation
 #include <math/angle.hp>
 
@@ -1416,6 +1417,15 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                     }
                 }
                 zf_push(ctx,(zf_cell)float(int(status)));
+            } else if (custom == 55) {
+                // doom-fire-frame ( actor x y width height clock reduced modal -- )
+                const bool modal = zf_pop(ctx) != 0;
+                const bool reduced = zf_pop(ctx) != 0;
+                const double clock = (double)(float)zf_pop(ctx);
+                const int height = (int)zf_pop(ctx), width = (int)zf_pop(ctx);
+                const int y = (int)zf_pop(ctx), x = (int)zf_pop(ctx);
+                const int actor = (int)zf_pop(ctx);
+                WFUpdateDoomFire(actor, x, y, width, height, clock, reduced, modal);
             } else if (custom == 72) {
                 /* Neural-forth dispatch gate: syscall 200 = ZF_SYSCALL_USER + 72.
                  * Pops word-id from stack and routes to nf_dispatch().
@@ -1584,6 +1594,9 @@ void Init(MailboxesManager& mgr)
     r = zf_eval(&g_ctx, ": read-actor-mailbox 152 sys ;");   // custom 24 (3-23 taken)
     if (r != ZF_OK)
         fprintf(stderr, "zforth: init failed (read-actor-mailbox): %d\n", r);
+    r = zf_eval(&g_ctx, ": doom-fire-frame 183 sys ;");
+    if (r != ZF_OK)
+        fprintf(stderr, "zforth: init failed (doom-fire-frame): %d\n", r);
 
     r = zf_eval(&g_ctx, ": profile-begin 169 sys ; : profile-end 170 sys ; : fish-deform 171 sys ; : fin-deform 172 sys ; : swim-deform 173 sys ; : jelly-deform 174 sys ; : plant-register 175 sys ; : plant-step 176 sys ; : lion-pose 177 sys ; : property@ 178 sys ; : property-int-bytes@ 179 sys ; : property-text-byte@ 180 sys ; : deform 181 sys ; : deform-block 182 sys ; : dfrm-pose >r 33 6 r> deform-block ;");
     if (r != ZF_OK) fprintf(stderr, "zforth: profiling/fish bridge init failed: %d\n", r);

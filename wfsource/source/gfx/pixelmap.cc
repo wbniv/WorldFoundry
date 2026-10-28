@@ -25,6 +25,8 @@
 #include <pigsys/pigsys.hp>
 #include <gfx/pixelmap.hp>
 #include <gfx/renderer.hp>
+#include <cstring>
+#include <cstddef>
 
 
 #pragma pack( 1 )
@@ -221,6 +223,30 @@ PixelMap::Load(const void* memory, int xOffset, int yOffset, int xSize, int ySiz
         // absent texture.
     }
 
+}
+
+//==============================================================================
+
+bool
+PixelMap::UpdateRGBA8(int x, int y, int width, int height, const unsigned char* pixels)
+{
+    Validate();
+    if (!pixels || width <= 0 || height <= 0 || x < 0 || y < 0 ||
+        x + width > _xSize || y + height > _ySize)
+        return false;
+    if (_parent)
+        return _parent->UpdateRGBA8(_xPos + x, _yPos + y, width, height, pixels);
+    if (_flags != MEMORY_VIDEO || !_pixelBuffer)
+        return false;
+
+    // PixelMap's resident buffer is RGBA8 in this build. Keep the CPU image in
+    // step with the GPU so a lost GL context can recreate the newest fire frame.
+    for (int row = 0; row < height; ++row)
+        std::memcpy(_pixelBuffer + ((y + row) * _xSize + x) * 4,
+                    pixels + row * width * 4, (size_t)width * 4);
+    if (!_textureHandle)
+        return false;
+    return RendererBackendGet().UpdateTextureRGBA8(_textureHandle, x, y, width, height, pixels);
 }
 
 //==============================================================================

@@ -1247,6 +1247,10 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     # external-host path stays clean and are labelled `gl` so headless CI
     # can exclude them via `ctest -LE gl`.
     enable_testing()
+    add_executable(doom_fire_test tests/doom_fire_test.cc)
+    target_link_libraries(doom_fire_test PRIVATE wfengine)
+    target_compile_options(doom_fire_test PRIVATE -fno-rtti -fpermissive)
+    add_test(NAME doom_fire COMMAND doom_fire_test)
     add_executable(texture_atlas_address_test tests/texture_atlas_address_test.cc)
     target_link_libraries(texture_atlas_address_test PRIVATE wfengine)
     target_compile_options(texture_atlas_address_test PRIVATE -fno-rtti -fpermissive)

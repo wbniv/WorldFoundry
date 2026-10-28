@@ -81,6 +81,22 @@ int main(int argc, char** argv)
     Pixel(16,24,0,0,0); // transparent texture texel remains opaque without cutout
     clear(); draw(1,true,&transparent,1,1,1); backend->EndFrame();
     Pixel(16,24,0,0,255); // cutout leaves background and depth untouched
+
+    // Runtime atlas update keeps the PixelMap/GPU handle stable and changes
+    // sampled pixels on the next draw rather than recreating the texture.
+    PixelMap animated(PixelMap::MEMORY_VIDEO, 1, 1);
+    const unsigned short redInitial = 0xf800;
+    animated.Load(&redInitial, 1, 1);
+    const RBTextureHandle stableHandle = animated.GetTextureHandle();
+    const unsigned char greenUpdate[4] = {0, 255, 0, 255};
+    Require(animated.UpdateRGBA8(0, 0, 1, 1, greenUpdate), "in-place texture update failed");
+    Require(animated.GetTextureHandle() == stableHandle, "in-place update replaced the texture handle");
+    Require(!animated.UpdateRGBA8(1, 0, 1, 1, greenUpdate), "out-of-range texture update accepted");
+    clear(); backend->SetOpacity(1); backend->SetAlphaCutout(false); backend->SetTextureModulation(false);
+    const RBStaticTriangle animatedTriangle = Triangle(-.9f,1,1,1);
+    backend->DrawTriangle(animatedTriangle.v[0],animatedTriangle.v[1],animatedTriangle.v[2],0,0,1,&animated,true,false);
+    backend->EndFrame(); Pixel(16,24,0,255,0);
+
     draw(1,false,nullptr,0,1,0); backend->EndFrame(); Pixel(16,24,0,255,0);
     clear(); draw(.5f,false,nullptr,1,0,0); backend->EndFrame();
     unsigned char blend[4]; glReadPixels(16,24,1,1,GL_RGBA,GL_UNSIGNED_BYTE,blend);
