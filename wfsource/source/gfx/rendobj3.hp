@@ -76,6 +76,8 @@ public:
 	// Updates _materialList[idx]._color in place and re-bakes primitives so the
 	// next Render() picks up the new color. No-op if idx is out of range.
 	void SetMaterialColor(int idx, const Color& color);
+	bool UpdateMaterialTextureRGBA8(int idx, int x, int y, int width, int height,
+	                                const unsigned char* pixels);
     void SetLionPalette(unsigned dark, unsigned light);
     const std::vector<wf_render::LionRig>& GetLionRig() const { return _lionRig; }
 	// Optional DFRM v1 rig (renderassets/dfrm_deform.h); NULL when absent or invalid.

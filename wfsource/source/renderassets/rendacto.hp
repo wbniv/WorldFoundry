@@ -70,6 +70,9 @@ public:
 	// RenderActor3D overrides to delegate into RenderObject3D::SetMaterialColor.
 	// (qbert cube consolidation, 2026-05-10.)
 	virtual void SetMaterialColor(int /*materialIdx*/, const Color& /*color*/) {}
+	virtual bool UpdateMaterialTextureRGBA8(int /*materialIdx*/, int /*x*/, int /*y*/,
+	                                        int /*width*/, int /*height*/,
+	                                        const unsigned char* /*pixels*/) { return false; }
 	// Per-actor non-uniform render scale; default no-op. RenderActor3D stores
 	// it and applies as a column-scale on the world matrix in Render().
 	// (qbert stretch-and-squash, 2026-05-10.)
@@ -131,6 +134,9 @@ public:
 	virtual bool GetHandle(const HandleID thisHandle, Vector3& position) const;
 	virtual const RenderObject3D* GetRenderObject() const { return &_object; }
 	virtual void SetMaterialColor(int materialIdx, const Color& color) { _object.SetMaterialColor(materialIdx, color); }
+	virtual bool UpdateMaterialTextureRGBA8(int materialIdx, int x, int y, int width, int height,
+	                                        const unsigned char* pixels)
+	{ return _object.UpdateMaterialTextureRGBA8(materialIdx, x, y, width, height, pixels); }
 	virtual void SetActorScale(const Vector3& scale) { _scale = scale; }
 	virtual void SetPlantGeometry(const plantgrowth::Chunk& chunk, float age, float phase, unsigned generation, bool sway, bool publish, bool textured);
 	virtual DeformStatus Deform(DeformKind kind, const float* channels, int n, double time = 0, const float* worldRotation = nullptr);

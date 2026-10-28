@@ -99,6 +99,7 @@ public:
     void SetTexturePalette(unsigned dark,unsigned light) { _paletteDark=dark; _paletteLight=light; }
     unsigned PaletteDark() const { return _paletteDark; }
     unsigned PaletteLight() const { return _paletteLight; }
+    bool UpdateTextureRGBA8(int x, int y, int width, int height, const unsigned char* pixels) const;
 
 	inline int32 GetMaterialFlags() const;
 	int32 SetMaterialFlags(int32 materialType);

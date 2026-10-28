@@ -770,6 +770,24 @@ public:
         glDeleteTextures(1, &name);
     }
 
+    bool UpdateTextureRGBA8(RBTextureHandle handle, int x, int y, int width, int height,
+                            const unsigned char* pixels) override
+    {
+        if (!handle || !pixels || x < 0 || y < 0 || width <= 0 || height <= 0)
+            return false;
+        GLint binding = 0, alignment = 4;
+        glGetIntegerv(GL_TEXTURE_BINDING_2D, &binding);
+        glGetIntegerv(GL_UNPACK_ALIGNMENT, &alignment);
+        glBindTexture(GL_TEXTURE_2D, (GLuint)(uintptr_t)handle);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height,
+                        GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+        const GLenum error = glGetError();
+        glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
+        glBindTexture(GL_TEXTURE_2D, (GLuint)binding);
+        return error == GL_NO_ERROR;
+    }
+
     // Hot-reload the program from new GLSL. Called from the game thread
     // (which is also the GL thread); safe to call any time DrainQueue runs
     // because it Flush()es first and then atomically swaps _prog. On failure
