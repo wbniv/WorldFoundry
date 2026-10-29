@@ -15,11 +15,15 @@ int main()
     Check(a.Width() == 24 && a.Height() == 27, "field dimensions");
     Check(std::memcmp(a.Pixels(), b.Pixels(), 24 * 27 * 4) == 0, "same seed must be repeatable");
     Check(std::memcmp(a.Pixels(), c.Pixels(), 24 * 27 * 4) != 0, "different seeds must differ");
-    for (int i = 0; i < 24 * 27; ++i) Check(a.Pixels()[i * 4 + 3] == 255, "palette alpha stays opaque");
+    for (int i = 0; i < 24 * 27; ++i) {
+        Check(a.Pixels()[i * 4 + 3] == 255, "palette alpha stays opaque");
+        Check(a.Pixels()[i * 4] >= 220 && a.Pixels()[i * 4 + 1] >= 65,
+              "cold cells must stay luminous orange, never near-black");
+    }
     int warm = 0;
     for (int y = 3; y < 24; ++y)
         for (int x = 6; x < 18; ++x)
-            if (a.Pixels()[(y * 24 + x) * 4] > 95) ++warm;
+            if (a.Pixels()[(y * 24 + x) * 4 + 1] > 90) ++warm;
     Check(warm > 180, "heat must fill the flame body instead of dying in scatter holes");
 
     const std::vector<unsigned char> still(a.Pixels(), a.Pixels() + 24 * 27 * 4);

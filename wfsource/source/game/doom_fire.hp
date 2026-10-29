@@ -89,8 +89,8 @@ private:
     static void Colour(uint8_t heat, unsigned char* rgba)
     {
         static const unsigned char stops[6][3] = {
-            {12, 7, 15}, {95, 18, 12}, {190, 43, 12},
-            {245, 105, 20}, {255, 190, 55}, {255, 239, 165}
+            {220, 65, 8}, {240, 90, 12}, {255, 120, 18},
+            {255, 160, 30}, {255, 205, 70}, {255, 245, 175}
         };
         const unsigned scaled = (unsigned)heat * 5;
         const unsigned i = std::min(4u, scaled / 255);
