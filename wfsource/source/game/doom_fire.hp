@@ -100,7 +100,7 @@ private:
         // Empty and cooling cells must leave the authored flame silhouette
         // transparent; otherwise the atlas rectangle covers it with a dark
         // opaque block. Hot cells fade in with their heat value.
-        rgba[3] = heat;
+        rgba[3] = 255;
     }
     void Paint()
     {

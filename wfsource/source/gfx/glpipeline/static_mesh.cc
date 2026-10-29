@@ -325,9 +325,9 @@ namespace
 		void EndFrame() override {}
 		RBTextureHandle CreateTexture(int w, int h, RBTextureFormat f, const void* p) override
 		{ return _real.CreateTexture(w, h, f, p); }
-		bool UpdateTextureRGBA8(RBTextureHandle handle, int x, int y, int w, int h,
+		bool UpdateTextureRGBA8(RBTextureHandle handle, int textureHeight, int x, int y, int w, int h,
 		                        const unsigned char* pixels) override
-		{ return _real.UpdateTextureRGBA8(handle, x, y, w, h, pixels); }
+		{ return _real.UpdateTextureRGBA8(handle, textureHeight, x, y, w, h, pixels); }
 		void DestroyTexture(RBTextureHandle handle) override { _real.DestroyTexture(handle); }
 
 		void DrawTriangle(const RBVertex& v0, const RBVertex& v1, const RBVertex& v2,

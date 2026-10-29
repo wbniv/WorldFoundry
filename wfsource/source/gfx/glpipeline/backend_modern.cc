@@ -745,18 +745,26 @@ public:
         glDeleteTextures(1, &name);
     }
 
-    bool UpdateTextureRGBA8(RBTextureHandle handle, int x, int y, int width, int height,
+    bool UpdateTextureRGBA8(RBTextureHandle handle, int textureHeight, int x, int y, int width, int height,
                             const unsigned char* pixels) override
     {
-        if (!handle || !pixels || x < 0 || y < 0 || width <= 0 || height <= 0)
+        if (!handle || !pixels || textureHeight <= 0 || x < 0 || y < 0 || width <= 0 || height <= 0 || y + height > textureHeight)
             return false;
         GLint binding = 0, alignment = 4;
         glGetIntegerv(GL_TEXTURE_BINDING_2D, &binding);
         glGetIntegerv(GL_UNPACK_ALIGNMENT, &alignment);
         glBindTexture(GL_TEXTURE_2D, (GLuint)(uintptr_t)handle);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height,
-                        GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+        // GL's first uploaded row maps to the lower edge. Convert the public
+        // top-left image rectangle and reverse its rows to preserve the
+        // renderer backend's top-to-bottom pixel contract.
+        _rgbaUploadScratch.resize((size_t)width * height * 4);
+        for (int row = 0; row < height; ++row)
+            std::memcpy(_rgbaUploadScratch.data() + (size_t)row * width * 4,
+                        pixels + (size_t)(height - 1 - row) * width * 4,
+                        (size_t)width * 4);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, x, textureHeight - y - height, width, height,
+                        GL_RGBA, GL_UNSIGNED_BYTE, _rgbaUploadScratch.data());
         const GLenum error = glGetError();
         glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
         glBindTexture(GL_TEXTURE_2D, (GLuint)binding);
@@ -1051,6 +1059,7 @@ private:
     // LIGHTING_PRELIT material. Part of the batch key alongside _curTexture.
     bool  _curPrelit = false;
     std::vector<Vert> _cpu;
+    std::vector<unsigned char> _rgbaUploadScratch;
     // Static-mesh batch (E3): when _curMesh is set the pending triangles are
     // indices into its VBO (16-bit, or 32-bit for a mesh over 65536 vertices)
     // instead of packed vertices in _cpu. Only one of the two is non-empty.

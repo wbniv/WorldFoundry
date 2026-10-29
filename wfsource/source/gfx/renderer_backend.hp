@@ -187,10 +187,12 @@ public:
                                           const void* pixels) = 0;
 
     // Replace a tightly packed RGBA8 rectangle in an existing texture without
-    // changing its handle. x/y are texture-space coordinates; pixels contains
-    // width*height*4 bytes in top-to-bottom row order. Backends without mutable
+    // changing its handle. x/y use top-left image coordinates and textureHeight
+    // is the full texture height; pixels contains width*height*4 bytes in
+    // top-to-bottom row order. Backends without mutable
     // textures return false. Callers retain their CPU copy for context restore.
-    virtual bool UpdateTextureRGBA8(RBTextureHandle /*handle*/, int /*x*/, int /*y*/,
+    virtual bool UpdateTextureRGBA8(RBTextureHandle /*handle*/, int /*textureHeight*/,
+                                    int /*x*/, int /*y*/,
                                     int /*width*/, int /*height*/,
                                     const unsigned char* /*pixels*/) { return false; }
 

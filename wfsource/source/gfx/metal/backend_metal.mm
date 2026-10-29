@@ -596,7 +596,7 @@ public:
         ReleaseTexHandle(handle);
     }
 
-    bool UpdateTextureRGBA8(RBTextureHandle handle, int x, int y, int width, int height,
+    bool UpdateTextureRGBA8(RBTextureHandle handle, int /*textureHeight*/, int x, int y, int width, int height,
                             const unsigned char* pixels) override
     {
         if (!handle || !pixels || x < 0 || y < 0 || width <= 0 || height <= 0)

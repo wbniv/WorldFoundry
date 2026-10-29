@@ -246,7 +246,7 @@ PixelMap::UpdateRGBA8(int x, int y, int width, int height, const unsigned char* 
                     pixels + row * width * 4, (size_t)width * 4);
     if (!_textureHandle)
         return false;
-    return RendererBackendGet().UpdateTextureRGBA8(_textureHandle, x, y, width, height, pixels);
+    return RendererBackendGet().UpdateTextureRGBA8(_textureHandle, _ySize, x, y, width, height, pixels);
 }
 
 //==============================================================================
