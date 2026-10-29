@@ -68,14 +68,14 @@ private:
     void Step()
     {
         for (int y = 0; y < _height - 1; ++y) {
-            std::fill(_heat.begin() + (size_t)y * _width,
-                      _heat.begin() + (size_t)(y + 1) * _width, (uint8_t)0);
             for (int x = 0; x < _width; ++x) {
-                const unsigned source = _heat[(size_t)(y + 1) * _width + x];
                 const int drift = (int)(Random() % 3) - 1;
-                const unsigned cooling = Random() % 4;
-                const int destination = std::max(0, std::min(_width - 1, x + drift));
-                _heat[(size_t)y * _width + destination] =
+                const int sourceX = std::max(0, std::min(_width - 1, x + drift));
+                const unsigned source = _heat[(size_t)(y + 1) * _width + sourceX];
+                const unsigned cooling = 3 + Random() % 9;
+                // Gather once per destination. Scattering into a cleared row
+                // leaves holes and lets cold pixels overwrite hot neighbours.
+                _heat[(size_t)y * _width + x] =
                     (uint8_t)(source > cooling ? source - cooling : 0);
             }
         }
@@ -97,9 +97,7 @@ private:
         const unsigned f = scaled - i * 255;
         for (int c = 0; c < 3; ++c)
             rgba[c] = (unsigned char)((stops[i][c] * (255 - f) + stops[i + 1][c] * f + 127) / 255);
-        // Empty and cooling cells must leave the authored flame silhouette
-        // transparent; otherwise the atlas rectangle covers it with a dark
-        // opaque block. Hot cells fade in with their heat value.
+        // The authored opaque cards supply the flame silhouette.
         rgba[3] = 255;
     }
     void Paint()

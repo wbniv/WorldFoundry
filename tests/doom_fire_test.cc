@@ -16,6 +16,11 @@ int main()
     Check(std::memcmp(a.Pixels(), b.Pixels(), 24 * 27 * 4) == 0, "same seed must be repeatable");
     Check(std::memcmp(a.Pixels(), c.Pixels(), 24 * 27 * 4) != 0, "different seeds must differ");
     for (int i = 0; i < 24 * 27; ++i) Check(a.Pixels()[i * 4 + 3] == 255, "palette alpha stays opaque");
+    int warm = 0;
+    for (int y = 3; y < 24; ++y)
+        for (int x = 6; x < 18; ++x)
+            if (a.Pixels()[(y * 24 + x) * 4] > 95) ++warm;
+    Check(warm > 180, "heat must fill the flame body instead of dying in scatter holes");
 
     const std::vector<unsigned char> still(a.Pixels(), a.Pixels() + 24 * 27 * 4);
     Check(a.Advance(10.0, true, false), "initial image is pending upload");
