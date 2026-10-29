@@ -97,6 +97,24 @@ int main(int argc, char** argv)
     backend->DrawTriangle(animatedTriangle.v[0],animatedTriangle.v[1],animatedTriangle.v[2],0,0,1,&animated,true,false);
     backend->EndFrame(); Pixel(16,24,0,255,0);
 
+    // Non-square, off-centre updates must use the same row order as Load.
+    // A 1x1 test cannot detect a flipped destination or reversed input rows.
+    PixelMap atlas(PixelMap::MEMORY_VIDEO, 2, 4);
+    const unsigned short atlasInitial[8] = {0x7c00,0x7c00,0x7c00,0x7c00,
+                                           0x7c00,0x7c00,0x7c00,0x7c00};
+    atlas.Load(atlasInitial, 2, 4);
+    const unsigned char patch[8] = {0,255,0,255, 0,0,255,255};
+    Require(atlas.UpdateRGBA8(1,0,1,2,patch), "atlas update failed");
+    unsigned char atlasPixels[32];
+    glBindTexture(GL_TEXTURE_2D, (GLuint)(uintptr_t)atlas.GetTextureHandle());
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, atlasPixels);
+    for (int cell=0; cell<8; ++cell) {
+        const unsigned char red[4] = {248,0,0,255};
+        const unsigned char* expected = cell==1 ? patch : cell==3 ? patch+4 : red;
+        Require(std::memcmp(atlasPixels+cell*4, expected, 4)==0,
+                "partial update differs from initial atlas row convention");
+    }
+
     draw(1,false,nullptr,0,1,0); backend->EndFrame(); Pixel(16,24,0,255,0);
     clear(); draw(.5f,false,nullptr,1,0,0); backend->EndFrame();
     unsigned char blend[4]; glReadPixels(16,24,1,1,GL_RGBA,GL_UNSIGNED_BYTE,blend);

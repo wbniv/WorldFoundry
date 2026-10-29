@@ -755,16 +755,11 @@ public:
         glGetIntegerv(GL_UNPACK_ALIGNMENT, &alignment);
         glBindTexture(GL_TEXTURE_2D, (GLuint)(uintptr_t)handle);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-        // GL's first uploaded row maps to the lower edge. Convert the public
-        // top-left image rectangle and reverse its rows to preserve the
-        // renderer backend's top-to-bottom pixel contract.
-        _rgbaUploadScratch.resize((size_t)width * height * 4);
-        for (int row = 0; row < height; ++row)
-            std::memcpy(_rgbaUploadScratch.data() + (size_t)row * width * 4,
-                        pixels + (size_t)(height - 1 - row) * width * 4,
-                        (size_t)width * 4);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, x, textureHeight - y - height, width, height,
-                        GL_RGBA, GL_UNSIGNED_BYTE, _rgbaUploadScratch.data());
+        // Match CreateTexture and PixelMap's resident buffer: row y in the
+        // CPU atlas is row y in GL. Atlas/export UV conventions are already
+        // resolved before upload; flipping only updates moves the fire field.
+        glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height,
+                        GL_RGBA, GL_UNSIGNED_BYTE, pixels);
         const GLenum error = glGetError();
         glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
         glBindTexture(GL_TEXTURE_2D, (GLuint)binding);
