@@ -25,6 +25,8 @@
 #include <hal/phonepad/phonepad_overlay.h>
 #include <hal/android/touch_controls.h>
 #include <game/ui_font.hp>
+#include <game/runtime_property_touch.h>
+#include <algorithm>
 
 extern "C" void WFAndroidTouchLayout(int,int,androidtouch::Layout*,uint32_t*,float*,float*);
 
@@ -72,6 +74,8 @@ int gMenuW = 0, gMenuH = 0;
 // Feeds _halWindow{Width,Height} in hal/android/platform.cc once the surface
 // dimensions are known.
 extern "C" void WFAndroidSetSurfaceSize(int w, int h);
+extern int _halWindowWidth;
+extern int _halWindowHeight;
 
 // Driven by native_app_entry.cc on APP_CMD_INIT_WINDOW / TERM_WINDOW.
 // Returns true when GL context is live and current.
@@ -187,6 +191,18 @@ WFAndroidEglInit(ANativeWindow* window)
     WFLOG("EGL surface ready: %dx%d (context %s)",
           w, h, gEglContext == EGL_NO_CONTEXT ? "NEW" : "reused");
     return true;
+}
+
+extern "C" void WFAndroidEglRefreshSize()
+{
+    if (gEglDisplay == EGL_NO_DISPLAY || gEglSurface == EGL_NO_SURFACE) return;
+    EGLint w = 0, h = 0;
+    if (!eglQuerySurface(gEglDisplay, gEglSurface, EGL_WIDTH, &w) ||
+        !eglQuerySurface(gEglDisplay, gEglSurface, EGL_HEIGHT, &h) || w <= 0 || h <= 0) return;
+    if (w != _halWindowWidth || h != _halWindowHeight) {
+        WFAndroidSetSurfaceSize(w, h);
+        WFLOG("EGL surface resized: %dx%d", w, h);
+    }
 }
 
 // Defined in gfx/glpipeline/backend_modern.cc — safety-net for the rare
@@ -357,6 +373,7 @@ extern "C" void
 WFAndroidDrawHUD()
 {
     if (!gHudEnabled) return;
+    if (wfprops::host().modal) return;
     const int w = _halWindowWidth;
     const int h = _halWindowHeight;
     if (w <= 0 || h <= 0) return;
@@ -393,6 +410,15 @@ WFAndroidDrawHUD()
         t.s=7.0f*(r.x1-r.x0)/16.0f/(0.7f*36.0f);
         t.ox=(r.x0+r.x1)*0.5f;t.oy=(r.y0+r.y1)*0.5f;
         wfui::TextBytes(glyphs,0,0,wfui::BodyBold,0xFFFFFFF2u,control.label,std::strlen(control.label),wfui::Middle,wfui::Centre,t);
+    }
+    if(propertyui::touchEnabled()&&wfprops::host().available()) {
+        auto r=propertyui::touchEntryRect(w,h);
+        PushHudRect(verts,r.x0,r.y0,r.x1,r.y1,fw,fh,.15f,.32f,.22f,.9f);
+        wfui::Transform t;
+        const float labelWidth=wfui::Width(wfui::BodyBold,"Settings");
+        t.s=std::min((r.y1-r.y0)/58.f,(r.x1-r.x0-20.f)/std::max(1.f,labelWidth));
+        t.ox=(r.x0+r.x1)*.5f;t.oy=(r.y0+r.y1)*.5f;
+        wfui::Text(glyphs,0,0,wfui::BodyBold,0xffffffffu,"Settings",wfui::Middle,wfui::Centre,t);
     }
 
     // Save minimal GL state we'll touch.
@@ -561,6 +587,7 @@ void AndroidSwapBuffers()
 {
     if (gEglDisplay != EGL_NO_DISPLAY && gEglSurface != EGL_NO_SURFACE)
     {
+        WFAndroidEglRefreshSize();
         WFAndroidDrawHUD();
         WFAndroidDrawPhoneOverlay();
         eglSwapBuffers(gEglDisplay, gEglSurface);

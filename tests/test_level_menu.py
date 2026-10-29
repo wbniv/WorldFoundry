@@ -136,6 +136,21 @@ def test_host_moves_and_clamps(host):
     assert not any(x["chosen"] for x in s)
 
 
+def test_phone_tap_selects_visible_row_then_starts_it(host):
+    # The phone portrait transform is the same one Build uses for its row rectangles.
+    out = run_host(host, ["synthetic 8", "menu 0", "tap 504 1283 1008 2244",
+                          "tap 504 1283 1008 2244"])
+    assert [line for line in out if line.startswith("TOUCH ")] == ["TOUCH row=5"] * 2
+    assert [(row["cursor"], row["done"]) for row in states(out)] == [(0, 0), (5, 0), (5, 1)]
+
+
+def test_phone_tap_rejects_gap_and_outside_list(host):
+    out = run_host(host, ["synthetic 8", "menu 0", "tap 504 1046 1008 2244",
+                          "tap 10 1283 1008 2244"])
+    assert [line for line in out if line.startswith("TOUCH ")] == ["TOUCH row=-1"] * 2
+    assert all(row["cursor"] == 0 and not row["done"] for row in states(out))
+
+
 def test_host_held_at_entry_is_ignored(host):
     """The A still down as the menu appears (the press that ended the last level) must not pick World 1-1."""
     s = states(run_host(host, [f"bundle {SMB_MENU_BUNDLE}", "menu 0", f"input {A:x} 0", f"input {A:x} 16",

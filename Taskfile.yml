@@ -674,6 +674,14 @@ tasks:
       WF_CC_SETTING_ID: '{{.SETTING_ID | default ""}}'
       WF_CC_VALUE: '{{.VALUE | default ""}}'
       WF_CC_OVERRIDES: '{{.OVERRIDES | default ""}}'
+      WF_CC_ACTION: '{{.ACTION | default ""}}'
+      WF_CC_FRAME_WIDTH: '{{.FRAME_WIDTH | default ""}}'
+      WF_CC_FRAME_HEIGHT: '{{.FRAME_HEIGHT | default ""}}'
+      WF_CC_X: '{{.X | default ""}}'
+      WF_CC_Y: '{{.Y | default ""}}'
+      WF_CC_X2: '{{.X2 | default ""}}'
+      WF_CC_Y2: '{{.Y2 | default ""}}'
+      WF_CC_DURATION_MS: '{{.DURATION_MS | default ""}}'
     cmds:
       - python3 scripts/chromecast.py task devices
 
@@ -798,6 +806,13 @@ tasks:
     env: *chromecast_env
     cmds:
       - python3 scripts/chromecast.py task capture
+
+  chromecast:phone-input:
+    desc: "Coordinator-owned tap, swipe or Back on an enrolled phone; tap/swipe require captured FRAME_WIDTH and FRAME_HEIGHT"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task phone-input
 
   chromecast:record:
     desc: "Coordinated Chromecast record"

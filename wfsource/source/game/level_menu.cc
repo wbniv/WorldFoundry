@@ -11,6 +11,7 @@
 
 #include "level_menu.h"
 
+#include <algorithm>
 #include <atomic>
 #include <cstdarg>
 #include <cstdio>
@@ -228,6 +229,15 @@ void Menu::Move(int delta)
     if (cursor_ >= first_ + kVisibleRows) first_ = cursor_ - kVisibleRows + 1;
 }
 
+void Menu::TouchRow(int visibleRow)
+{
+    if (phase_ != Phase::Choosing || visibleRow < 0 || visibleRow >= kVisibleRows) return;
+    const int target = first_ + visibleRow;
+    if (target >= int(bundle_.entries.size())) return;
+    if (target == cursor_) phase_ = Phase::Done;
+    else cursor_ = target;
+}
+
 void Menu::Update(uint32_t buttons, int64_t nowMs)
 {
     if (!primed_)
@@ -398,11 +408,24 @@ const char* PlatformHint()
 void RequestReturn() { gReturnRequested.store(true); }
 bool ConsumeReturnRequest() { return gReturnRequested.exchange(false); }
 
-namespace { std::atomic<bool> gMenuRunning{false},gSelectorVisible{false}; }
+namespace { std::atomic<bool> gMenuRunning{false},gSelectorVisible{false}; std::atomic<int> gTouchRow{-1}; }
 void SetMenuRunning(bool running) { gMenuRunning.store(running); }
 bool MenuRunning() { return gMenuRunning.load(); }
-void SetSelectorVisible(bool visible) { gSelectorVisible.store(visible); }
+void SetSelectorVisible(bool visible) { gSelectorVisible.store(visible);if(!visible)gTouchRow.store(-1); }
 bool SelectorVisible() { return gSelectorVisible.load(); }
+int TouchRowAt(float x,float y,int w,int h)
+{
+    if(w<=0||h<=0)return -1;
+    const float s=std::min(float(w)/1920.f,float(h)/1080.f);
+    const float cx=(x-(float(w)-1920.f*s)*.5f)/s;
+    const float cy=(y-(float(h)-1080.f*s)*.5f)/s;
+    if(cx<kListX0||cx>kListX1||cy<kListY)return -1;
+    const int slot=int((cy-kListY)/(kRowH+kRowGap));
+    if(slot<0||slot>=kVisibleRows||cy>kListY+slot*(kRowH+kRowGap)+kRowH)return -1;
+    return slot;
+}
+void QueueTouchRow(int row){gTouchRow.store(row);}
+int ConsumeTouchRow(){return gTouchRow.exchange(-1);}
 
 void Log(const char* fmt, ...)
 {

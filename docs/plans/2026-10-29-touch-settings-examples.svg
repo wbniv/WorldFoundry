@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1170 1700" role="img" aria-labelledby="title desc">
+<title id="title">All sensible touch settings examples</title>
+<desc id="desc">Gallery of field presentations and edge cases from the table in the plan.</desc>
+<style>text{font-family:Arial,sans-serif}.title{font-size:23px;font-weight:bold;fill:#243f2e}.id{font-size:16px;font-weight:bold;fill:#f1f5ec}.meta{font-size:13px;fill:#b8cebd}.value{font-size:17px;fill:#f4f6ee}.selectedtext{font-size:17px;fill:#173222}.muted{font-size:16px;fill:#b8cebd}.card{fill:#142c20;stroke:#588168;stroke-width:2}.new{fill:#f4d990}.old{fill:#aad7af}</style>
+<text x="20" y="37" class="title">Field gallery · proposed phone touch treatment</text>
+<g data-example="int-number"><rect class="card" x="20" y="58" width="355" height="158" rx="12"/>
+<text class="id" x="36" y="86">int-number</text>
+<text class="meta" x="36" y="109">Int · NUMBER (1)</text>
+<text class="meta" x="36" y="133">Hold seconds · 120</text>
+<rect x="38" y="144" width="290" height="39" rx="7" fill="#335b3e"/><text x="51" y="170" class="value">120  ✎</text>
+<text class="meta" x="36" y="202">Numeric editor · current presentation</text></g>
+<g data-example="int-slider"><rect class="card" x="400" y="58" width="355" height="158" rx="12"/>
+<text class="id" x="416" y="86">int-slider</text>
+<text class="meta" x="416" y="109">Int · SLIDER (2)</text>
+<text class="meta" x="416" y="133">Opacity · 65 / 100</text>
+<line x1="418" y1="162" x2="708" y2="162" stroke="#8fb99b" stroke-width="5"/><circle cx="588" cy="162" r="12" fill="#f1d487"/>
+<text class="meta" x="416" y="202">Drag or tap track · current presentation</text></g>
+<g data-example="int-color"><rect class="card" x="780" y="58" width="355" height="158" rx="12"/>
+<text class="id" x="796" y="86">int-color</text>
+<text class="meta" x="796" y="109">Int · COLOR (7)</text>
+<text class="meta" x="796" y="133">Tint · #6EB6C6</text>
+<rect x="798" y="144" width="60" height="37" rx="5" fill="#6eb6c6"/><text x="870" y="170" class="value">#6EB6C6  ▾</text>
+<text class="meta" x="796" y="202">Colour picker · current presentation</text></g>
+<g data-example="int-mailbox"><rect class="card" x="20" y="238" width="355" height="158" rx="12"/>
+<text class="id" x="36" y="266">int-mailbox</text>
+<text class="meta" x="36" y="289">Int · MAILBOX (9)</text>
+<text class="meta" x="36" y="313">Trigger mailbox · 100</text>
+<rect x="38" y="324" width="290" height="39" rx="7" fill="#335b3e"/><text x="51" y="350" class="value">100  ✎</text>
+<text class="meta" x="36" y="382">Numeric editor with bounds · new presentation</text></g>
+<g data-example="int-default"><rect class="card" x="400" y="238" width="355" height="158" rx="12"/>
+<text class="id" x="416" y="266">int-default</text>
+<text class="meta" x="416" y="289">Int · N_A (0)</text>
+<text class="meta" x="416" y="313">Count · 7</text>
+<rect x="418" y="324" width="290" height="39" rx="7" fill="#335b3e"/><text x="431" y="350" class="value">7  ✎</text>
+<text class="meta" x="416" y="382">Numeric editor · current presentation</text></g>
+<g data-example="float-number"><rect class="card" x="780" y="238" width="355" height="158" rx="12"/>
+<text class="id" x="796" y="266">float-number</text>
+<text class="meta" x="796" y="289">Float · NUMBER (1)</text>
+<text class="meta" x="796" y="313">Initial age · 12.5 s</text>
+<rect x="798" y="324" width="290" height="39" rx="7" fill="#335b3e"/><text x="811" y="350" class="value">12.5 s  ✎</text>
+<text class="meta" x="796" y="382">Decimal editor · current presentation</text></g>
+<g data-example="float-slider"><rect class="card" x="20" y="418" width="355" height="158" rx="12"/>
+<text class="id" x="36" y="446">float-slider</text>
+<text class="meta" x="36" y="469">Float · SLIDER (2)</text>
+<text class="meta" x="36" y="493">Sway · 0.65</text>
+<line x1="38" y1="522" x2="328" y2="522" stroke="#8fb99b" stroke-width="5"/><circle cx="208" cy="522" r="12" fill="#f1d487"/>
+<text class="meta" x="36" y="562">Drag or tap track · current presentation</text></g>
+<g data-example="enum-default"><rect class="card" x="400" y="418" width="355" height="158" rx="12"/>
+<text class="id" x="416" y="446">enum-default</text>
+<text class="meta" x="416" y="469">Enum · N_A (0)</text>
+<text class="meta" x="416" y="493">Mode · Calm</text>
+<rect x="418" y="504" width="290" height="39" rx="7" fill="#335b3e"/><text x="431" y="530" class="value">Calm  ▾</text>
+<text class="meta" x="416" y="562">Open choice list · new presentation</text></g>
+<g data-example="enum-number"><rect class="card" x="780" y="418" width="355" height="158" rx="12"/>
+<text class="id" x="796" y="446">enum-number</text>
+<text class="meta" x="796" y="469">Enum · NUMBER (1)</text>
+<text class="meta" x="796" y="493">Powerup · 2 (Flying)</text>
+<rect x="798" y="504" width="290" height="39" rx="7" fill="#335b3e"/><text x="811" y="530" class="value">2 (Flying)  ▾</text>
+<text class="meta" x="796" y="562">Choice list with numeric ID · new presentation</text></g>
+<g data-example="enum-dropdown"><rect class="card" x="20" y="598" width="355" height="158" rx="12"/>
+<text class="id" x="36" y="626">enum-dropdown</text>
+<text class="meta" x="36" y="649">Enum · DROPMENU (4)</text>
+<text class="meta" x="36" y="673">Water type · Freshwater</text>
+<rect x="38" y="684" width="290" height="39" rx="7" fill="#335b3e"/><text x="51" y="710" class="value">Freshwater  ▾</text>
+<text class="meta" x="36" y="742">Open choice list · new presentation</text></g>
+<g data-example="enum-radio"><rect class="card" x="400" y="598" width="355" height="158" rx="12"/>
+<text class="id" x="416" y="626">enum-radio</text>
+<text class="meta" x="416" y="649">Enum · RADIOBUTTONS (5)</text>
+<text class="meta" x="416" y="673">Habitat · Freshwater / Saltwater</text>
+<rect x="418" y="684" width="140" height="38" rx="7" fill="#e2efe1"/><rect x="566" y="684" width="140" height="38" rx="7" fill="#335b3e"/><text x="431" y="710" class="selectedtext">First</text><text x="582" y="710" class="value">Second</text>
+<text class="meta" x="416" y="742">Tap visible option · current presentation</text></g>
+<g data-example="enum-slider"><rect class="card" x="780" y="598" width="355" height="158" rx="12"/>
+<text class="id" x="796" y="626">enum-slider</text>
+<text class="meta" x="796" y="649">Enum · SLIDER (2)</text>
+<text class="meta" x="796" y="673">Growth · Paused / 1× / 2× / 4×</text>
+<line x1="798" y1="702" x2="1088" y2="702" stroke="#8fb99b" stroke-width="5"/><circle cx="968" cy="702" r="12" fill="#f1d487"/>
+<text class="meta" x="796" y="742">Drag or tap stop · current presentation</text></g>
+<g data-example="enum-toggle"><rect class="card" x="20" y="778" width="355" height="158" rx="12"/>
+<text class="id" x="36" y="806">enum-toggle</text>
+<text class="meta" x="36" y="829">Enum · TOGGLE (3)</text>
+<text class="meta" x="36" y="853">Direction · Forward / Reverse</text>
+<rect x="38" y="864" width="140" height="38" rx="7" fill="#e2efe1"/><rect x="186" y="864" width="140" height="38" rx="7" fill="#335b3e"/><text x="51" y="890" class="selectedtext">First</text><text x="202" y="890" class="value">Second</text>
+<text class="meta" x="36" y="922">Tap either segment · new presentation</text></g>
+<g data-example="enum-combo"><rect class="card" x="400" y="778" width="355" height="158" rx="12"/>
+<text class="id" x="416" y="806">enum-combo</text>
+<text class="meta" x="416" y="829">Enum · COMBOBOX (10)</text>
+<text class="meta" x="416" y="853">Tool · Staff</text>
+<rect x="418" y="864" width="290" height="39" rx="7" fill="#335b3e"/><text x="431" y="890" class="value">Staff  ▾</text>
+<text class="meta" x="416" y="922">Open choice list · new presentation</text></g>
+<g data-example="bool-checkbox"><rect class="card" x="780" y="778" width="355" height="158" rx="12"/>
+<text class="id" x="796" y="806">bool-checkbox</text>
+<text class="meta" x="796" y="829">Bool · CHECKBOX (8)</text>
+<text class="meta" x="796" y="853">Textures · On</text>
+<rect x="798" y="864" width="65" height="37" rx="18" fill="#68aa72"/><circle cx="844" cy="882" r="14" fill="#f4f6ee"/><text x="875" y="890" class="value">On</text>
+<text class="meta" x="796" y="922">Tap checkbox or row · current presentation</text></g>
+<g data-example="bool-toggle"><rect class="card" x="20" y="958" width="355" height="158" rx="12"/>
+<text class="id" x="36" y="986">bool-toggle</text>
+<text class="meta" x="36" y="1009">Bool · TOGGLE (3)</text>
+<text class="meta" x="36" y="1033">Sway · On</text>
+<rect x="38" y="1044" width="65" height="37" rx="18" fill="#68aa72"/><circle cx="84" cy="1062" r="14" fill="#f4f6ee"/><text x="115" y="1070" class="value">On</text>
+<text class="meta" x="36" y="1102">Tap switch · new presentation</text></g>
+<g data-example="str-plain"><rect class="card" x="400" y="958" width="355" height="158" rx="12"/>
+<text class="id" x="416" y="986">str-plain</text>
+<text class="meta" x="416" y="1009">Str · N_A (0)</text>
+<text class="meta" x="416" y="1033">Caption · Garden</text>
+<rect x="418" y="1044" width="290" height="39" rx="7" fill="#335b3e"/><text x="431" y="1070" class="value">Garden  ✎</text>
+<text class="meta" x="416" y="1102">Single-line native editor · current presentation</text></g>
+<g data-example="str-uint32"><rect class="card" x="780" y="958" width="355" height="158" rx="12"/>
+<text class="id" x="796" y="986">str-uint32</text>
+<text class="meta" x="796" y="1009">Str + uint32 rule · NUMBER (1)</text>
+<text class="meta" x="796" y="1033">Seed · 4294967295</text>
+<rect x="798" y="1044" width="290" height="39" rx="7" fill="#335b3e"/><text x="811" y="1070" class="value">4294967295  ✎</text>
+<text class="meta" x="796" y="1102">Digits-only native editor · current presentation</text></g>
+<g data-example="str-multiline"><rect class="card" x="20" y="1138" width="355" height="158" rx="12"/>
+<text class="id" x="36" y="1166">str-multiline</text>
+<text class="meta" x="36" y="1189">Str / Annotation · TEXTEDITOR (11)</text>
+<text class="meta" x="36" y="1213">Notes · Two-line description…</text>
+<rect x="38" y="1224" width="290" height="39" rx="7" fill="#335b3e"/><text x="51" y="1250" class="value">Two-line description…  ✎</text>
+<text class="meta" x="36" y="1282">Multiline native editor · current presentation</text></g>
+<g data-example="str-filename"><rect class="card" x="400" y="1138" width="355" height="158" rx="12"/>
+<text class="id" x="416" y="1166">str-filename</text>
+<text class="meta" x="416" y="1189">Str · FILENAME (12)</text>
+<text class="meta" x="416" y="1213">Asset path · plants/leaf.png</text>
+<rect x="418" y="1224" width="290" height="39" rx="7" fill="#335b3e"/><text x="431" y="1250" class="value">plants/leaf.png  ✎</text>
+<text class="meta" x="416" y="1282">Native text editor; validate path · new presentation</text></g>
+<g data-example="ref-readonly"><rect class="card" x="780" y="1138" width="355" height="158" rx="12"/>
+<text class="id" x="796" y="1166">ref-readonly</text>
+<text class="meta" x="796" y="1189">FileRef / ObjRef · N_A (0) / VECTOR (128)</text>
+<text class="meta" x="796" y="1213">Target · Player01</text>
+<rect x="798" y="1224" width="290" height="39" rx="7" fill="#30453a"/><text x="811" y="1250" class="muted">Read only · Player01</text>
+<text class="meta" x="796" y="1282">Read-only value · current presentation</text></g>
+<g data-example="int-readonly"><rect class="card" x="20" y="1318" width="355" height="158" rx="12"/>
+<text class="id" x="36" y="1346">int-readonly</text>
+<text class="meta" x="36" y="1369">Int + readonly · NUMBER (1)</text>
+<text class="meta" x="36" y="1393">Current count · 7</text>
+<rect x="38" y="1404" width="290" height="39" rx="7" fill="#30453a"/><text x="51" y="1430" class="muted">Read only · 7</text>
+<text class="meta" x="36" y="1462">Read-only value · current presentation</text></g>
+<g data-example="enum-many"><rect class="card" x="400" y="1318" width="355" height="158" rx="12"/>
+<text class="id" x="416" y="1346">enum-many</text>
+<text class="meta" x="416" y="1369">Enum + 12 options · RADIOBUTTONS (5)</text>
+<text class="meta" x="416" y="1393">Species · 12 choices</text>
+<rect x="418" y="1404" width="290" height="39" rx="7" fill="#335b3e"/><text x="430" y="1430" class="value">Species A · Species B · +10 more</text>
+<text class="meta" x="416" y="1462">Scrollable choice sheet · new presentation</text></g>
+<g data-example="enum-long"><rect class="card" x="780" y="1318" width="355" height="158" rx="12"/>
+<text class="id" x="796" y="1346">enum-long</text>
+<text class="meta" x="796" y="1369">Enum + long labels · DROPMENU (4)</text>
+<text class="meta" x="796" y="1393">Placement · Along the northern wall…</text>
+<rect x="798" y="1404" width="290" height="39" rx="7" fill="#335b3e"/><text x="810" y="1429" class="value">Along the northern wall… ▾</text>
+<text class="meta" x="796" y="1462">Wrapping choice sheet · new presentation</text></g>
+<g data-example="int-help"><rect class="card" x="20" y="1498" width="355" height="158" rx="12"/>
+<text class="id" x="36" y="1526">int-help</text>
+<text class="meta" x="36" y="1549">Int + help / group · NUMBER (1)</text>
+<text class="meta" x="36" y="1573">Lighting / Intensity · 75</text>
+<text x="38" y="1597" class="meta">Lighting · controls scene brightness</text><rect x="38" y="1600" width="290" height="27" rx="5" fill="#335b3e"/><text x="50" y="1620" class="value">Intensity: 75</text>
+<text class="meta" x="36" y="1642">Group heading and help below row · new presentation</text></g>
+<g data-example="action"><rect class="card" x="400" y="1498" width="355" height="158" rx="12"/>
+<text class="id" x="416" y="1526">action</text>
+<text class="meta" x="416" y="1549">Action · N_A (0)</text>
+<text class="meta" x="416" y="1573">Regenerate tank</text>
+<rect x="418" y="1584" width="290" height="39" rx="7" fill="#447a51"/><text x="434" y="1611" class="value">Regenerate tank  →</text>
+<text class="meta" x="416" y="1642">Run action after tap · current presentation</text></g>
+<g data-example="spacer"><rect class="card" x="780" y="1498" width="355" height="158" rx="12"/>
+<text class="id" x="796" y="1526">spacer</text>
+<text class="meta" x="796" y="1549">Spacer · N_A (0)</text>
+<text class="meta" x="796" y="1573">Section gap</text>
+<line x1="798" y1="1602" x2="1088" y2="1602" stroke="#72917b" stroke-dasharray="5 5"/>
+<text class="meta" x="796" y="1642">No hit target · current presentation</text></g>
+</svg>

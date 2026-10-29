@@ -46,6 +46,8 @@
 #include <time.h>
 
 #include <cstdio>
+#include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <cstring>
 #include <string>
@@ -56,6 +58,7 @@
 #include <pigsys/pigsys.hp>
 #include <hal/android/wf_android_export.hp>
 #include <game/level_menu.h>   // Back: selected level -> selector -> exit
+#include <game/runtime_property_touch.h>
 #include <hal/phonepad/phonepad.h>
 #include <hal/phonepad/phonepad_overlay.h>
 #include <hal/android/touch_controls.h>
@@ -66,6 +69,7 @@ extern int _halWindowWidth;
 extern int _halWindowHeight;
 
 extern "C" bool WFAndroidEglInit(struct ANativeWindow* window);
+extern "C" void WFAndroidEglRefreshSize();
 extern "C" void WFAndroidEglTerm();
 extern "C" void WFAndroidSetHudEnabled(int enabled);
 
@@ -191,6 +195,8 @@ void OpenDiagnosticLog(struct android_app* app)
 joystickButtonsF    gGamepadButtons = 0;
 joystickButtonsF    gTouchButtons   = 0;
 androidtouch::State gTouchState;
+int                 gMenuTouchPointer = -1;
+float               gMenuTouchX = 0, gMenuTouchY = 0;
 joystickButtonsF    gPhoneButtons   = 0;   // the phone controller (hal/phonepad), below
 
 // True when running on Google TV / Android TV (leanback). On TV there's no
@@ -353,6 +359,21 @@ androidtouch::Layout TouchLayout(int w,int h)
     return androidtouch::layout(w,h,density,inset);
 }
 
+float TouchDensity()
+{
+    if(gApp&&gApp->config){int dpi=AConfiguration_getDensity(gApp->config);if(dpi>0&&dpi<1000)return float(dpi)/160;}
+    return 1;
+}
+
+void UpdateTouchInsets()
+{
+    if(!gApp)return;
+    int top=std::max(0,gApp->contentRect.top);
+    int bottom=gApp->contentRect.bottom>0&&gApp->contentRect.bottom<=_halWindowHeight
+        ?std::max(0,_halWindowHeight-gApp->contentRect.bottom):0;
+    propertyui::touchInsets(top,bottom);
+}
+
 void RecomputeTouchState(AInputEvent* event, bool clearOnUp)
 {
     if(clearOnUp) {gTouchState.clear();gTouchButtons=0;return;}
@@ -396,6 +417,20 @@ void HandleAppCmd(struct android_app* app, int32_t cmd)
             WFLOG("APP_CMD_INIT_WINDOW");
             if (app->window)
                 gEglReady = WFAndroidEglInit(app->window);
+            UpdateTouchInsets();
+            break;
+
+        case APP_CMD_CONTENT_RECT_CHANGED:
+            WFAndroidEglRefreshSize();
+            UpdateTouchInsets();
+            break;
+
+        case APP_CMD_WINDOW_RESIZED:
+            gMenuTouchPointer=-1;
+            propertyui::touchReset();
+            gTouchState.clear();gTouchButtons=0;Emit();
+            WFAndroidEglRefreshSize();
+            UpdateTouchInsets();
             break;
 
         case APP_CMD_TERM_WINDOW:
@@ -407,6 +442,8 @@ void HandleAppCmd(struct android_app* app, int32_t cmd)
         case APP_CMD_PAUSE:
             WFLOG("APP_CMD_PAUSE");
             gGamepadButtons=gTouchButtons=gPhoneButtons=0;gTouchState.clear();Emit();
+            propertyui::touchReset();
+            gMenuTouchPointer=-1;
             wfprops::host().suspend();
             HALNotifySuspend();
             wfdiag::Focus(false);
@@ -422,6 +459,8 @@ void HandleAppCmd(struct android_app* app, int32_t cmd)
             // key. Never carry that held game input across the UI transition.
             gGamepadButtons = gTouchButtons = gPhoneButtons = 0;
             gTouchState.clear();
+            propertyui::touchReset();
+            gMenuTouchPointer=-1;
             Emit();
             break;
 
@@ -436,6 +475,7 @@ void HandleAppCmd(struct android_app* app, int32_t cmd)
             break;
 
         case APP_CMD_CONFIG_CHANGED:
+            WFAndroidEglRefreshSize();
             if (app->config)
             {
                 const int32_t uiMode = AConfiguration_getUiModeType(app->config);
@@ -443,6 +483,8 @@ void HandleAppCmd(struct android_app* app, int32_t cmd)
                 if(!gIsTvMode) { PhoneStop(); gPhoneEnabled=false; }
                 else if(!gPhoneEnabled) { PhoneInit(); if(gPhoneResumed)PhoneStart(); }
                 WFAndroidSetHudEnabled(gIsTvMode ? 0 : 1);
+                propertyui::touchConfigure(!gIsTvMode,TouchDensity());
+                UpdateTouchInsets();
                 WFLOG("APP_CMD_CONFIG_CHANGED: uiMode=%d (tv=%d)",
                       uiMode, gIsTvMode ? 1 : 0);
             }
@@ -546,8 +588,45 @@ int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
         // Touch — suppressed on TV.
         if ((source & AINPUT_SOURCE_TOUCHSCREEN) && !gIsTvMode)
         {
+            UpdateTouchInsets();
             const int32_t raw    = AMotionEvent_getAction(event);
             const int32_t action = raw & AMOTION_EVENT_ACTION_MASK;
+            const int changed=(raw&AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)>>AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+            bool settingsTouch=false;
+            if(action==AMOTION_EVENT_ACTION_CANCEL)
+                settingsTouch=propertyui::touchEvent(propertyui::TouchPhase::Cancel,-1,0,0,_halWindowWidth,_halWindowHeight);
+            else if(action==AMOTION_EVENT_ACTION_MOVE){
+                for(size_t i=0;i<AMotionEvent_getPointerCount(event);++i)
+                    settingsTouch=propertyui::touchEvent(propertyui::TouchPhase::Move,AMotionEvent_getPointerId(event,i),
+                        AMotionEvent_getX(event,i),AMotionEvent_getY(event,i),_halWindowWidth,_halWindowHeight)||settingsTouch;
+            }else if(changed>=0&&size_t(changed)<AMotionEvent_getPointerCount(event)){
+                const auto phase=(action==AMOTION_EVENT_ACTION_DOWN||action==AMOTION_EVENT_ACTION_POINTER_DOWN)
+                    ?propertyui::TouchPhase::Down:propertyui::TouchPhase::Up;
+                settingsTouch=propertyui::touchEvent(phase,AMotionEvent_getPointerId(event,changed),
+                    AMotionEvent_getX(event,changed),AMotionEvent_getY(event,changed),_halWindowWidth,_halWindowHeight);
+            }
+            if(settingsTouch){gTouchState.clear();gTouchButtons=0;Emit();return 1;}
+            if(levelmenu::SelectorVisible()&&!wfprops::host().modal){
+                bool menuTouch=false;
+                if(action==AMOTION_EVENT_ACTION_CANCEL){menuTouch=gMenuTouchPointer>=0;gMenuTouchPointer=-1;}
+                else if(action==AMOTION_EVENT_ACTION_MOVE)menuTouch=gMenuTouchPointer>=0;
+                else if(changed>=0&&size_t(changed)<AMotionEvent_getPointerCount(event)){
+                    const int pointer=AMotionEvent_getPointerId(event,changed);
+                    const float x=AMotionEvent_getX(event,changed),y=AMotionEvent_getY(event,changed);
+                    if(action==AMOTION_EVENT_ACTION_DOWN||action==AMOTION_EVENT_ACTION_POINTER_DOWN){
+                        if(gMenuTouchPointer<0&&levelmenu::TouchRowAt(x,y,_halWindowWidth,_halWindowHeight)>=0){
+                            gMenuTouchPointer=pointer;gMenuTouchX=x;gMenuTouchY=y;menuTouch=true;
+                        }
+                    }else if(pointer==gMenuTouchPointer){
+                        menuTouch=true;gMenuTouchPointer=-1;
+                        if(std::abs(x-gMenuTouchX)<24&&std::abs(y-gMenuTouchY)<24){
+                            const int row=levelmenu::TouchRowAt(x,y,_halWindowWidth,_halWindowHeight);
+                            if(row>=0)levelmenu::QueueTouchRow(row);
+                        }
+                    }
+                }
+                if(menuTouch){gTouchState.clear();gTouchButtons=0;Emit();return 1;}
+            }
             const bool    clear  = (action == AMOTION_EVENT_ACTION_UP
                                  || action == AMOTION_EVENT_ACTION_CANCEL);
             const joystickButtonsF previous=gTouchButtons;
@@ -673,6 +752,8 @@ android_main(struct android_app* app)
         const int32_t uiMode = AConfiguration_getUiModeType(app->config);
         gIsTvMode = (uiMode == ACONFIGURATION_UI_MODE_TYPE_TELEVISION);
         WFAndroidSetHudEnabled(gIsTvMode ? 0 : 1);
+        propertyui::touchConfigure(!gIsTvMode,TouchDensity());
+        UpdateTouchInsets();
         WFLOG("android_main: uiMode=%d (tv=%d)", uiMode, gIsTvMode ? 1 : 0);
     }
 

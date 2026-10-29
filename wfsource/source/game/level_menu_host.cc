@@ -130,6 +130,15 @@ int main()
             menu->Update(uint32_t(std::stoul(hex, nullptr, 16)), ms);
             State(*menu);
         }
+        else if (cmd == "tap" && menu)
+        {
+            float x = 0, y = 0; int w = 0, h = 0;
+            in >> x >> y >> w >> h;
+            const int row = TouchRowAt(x, y, w, h);
+            menu->TouchRow(row);
+            std::printf("TOUCH row=%d\n", row);
+            State(*menu);
+        }
         else if (cmd == "rects" && menu)
         {
             int w = 0, h = 0;

@@ -17,6 +17,8 @@ android {
         targetSdk     = 34
         versionCode   = 7   // above 6: the Chromecast already holds an aquarium build with code 6 (2026-10-10)
         versionName   = "0.5"
+        // Each game flavor can choose an orientation; the default follows the device.
+        manifestPlaceholders["gameOrientation"] = "unspecified"
 
         ndk {
             // arm64 for phones and the Chromecast 4K, armeabi-v7a for the Chromecast HD: its SoC
@@ -44,6 +46,7 @@ android {
         }
         create("aquarium") {
             dimension = "game"
+            manifestPlaceholders["gameOrientation"] = "landscape"
             versionCode = 70  // cast1 has a versionCode 69 profiling APK; ship a normal upgrade.
             applicationIdSuffix = ".aquarium"   // org.worldfoundry.wf_game.aquarium
             versionNameSuffix   = "-aquarium"
@@ -156,4 +159,18 @@ android {
     //   smb: cd.iff → wflevels/smb-cd.iff (task build-cd-iff-smb). No MIDI or soundfont.
     //   qbert: cd.iff → wflevels/qbert-cd.iff (task build-cd-iff-qbert). Silent: the
     //     engine loads Q*bert's SFX from desktop paths (game.cc), absent on Android.
+}
+
+// Every assembled APK must pass the same native-library check before Gradle
+// reports success. A failed verifier fails the assemble invocation, including
+// aggregate assembleDebug/assembleRelease builds that include this variant.
+android.applicationVariants.all {
+    val variant = this
+    val name = variant.name.replaceFirstChar { it.uppercase() }
+    val apk = layout.buildDirectory.file(
+        "outputs/apk/${variant.flavorName}/${variant.buildType.name}/worldfoundry-${variant.flavorName}-${variant.buildType.name}.apk")
+    val verify = tasks.register<Exec>("verify${name}ApkPageAlignment") {
+        commandLine("python3", rootProject.file("../scripts/check-apk-page-alignment.py"), apk.get().asFile)
+    }
+    tasks.matching { it.name == "assemble$name" }.configureEach { finalizedBy(verify) }
 }

@@ -1,4 +1,5 @@
 #include "runtime_property_ui.h"
+#include "runtime_property_touch.h"
 #include <algorithm>
 #include <cmath>
 #ifdef WF_RUNTIME_DIAGNOSTICS
@@ -83,6 +84,7 @@ void buildPick(wfprops::Host& host,Painter& p){
 void buildHost(int w,int h,std::vector<PhonepadRect>& out,std::vector<bitmaptext::Quad>* glyphs){
  auto& host=wfprops::host();host.checkOwner();
  if(!host.modal)return;
+ if(touchEnabled()&&buildTouchHost(w,h,out,glyphs))return;
  if(!host.picker){build(host.form,host.phone,w,h,out,glyphs);return;}
  Painter p{out,w/1920.f,h/1080.f,glyphs};
  if(host.pick!=wfprops::PickMode::Off){buildPick(host,p);return;}

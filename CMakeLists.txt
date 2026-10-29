@@ -1024,6 +1024,11 @@ if(ANDROID)
     # ANativeActivity_onCreate lives in android_native_app_glue.c and is the
     # Android loader's entry point. Without -u the linker garbage-collects it.
     target_link_options(wf_game PRIVATE -u ANativeActivity_onCreate)
+    # Android 15+ devices may use 16 KiB pages. Match the screensaver host's
+    # alignment so the native game library loads without a compatibility dialog.
+    target_link_options(wf_game PRIVATE
+        "-Wl,-z,max-page-size=16384"
+        "-Wl,-z,common-page-size=16384")
     # -fvisibility=hidden only covers code we compile with it. The archives
     # linked in whole-sale still export every symbol: the static C++ runtime
     # (libc++_static/libc++abi/libunwind, ~1,500 std:: symbols), the compiler

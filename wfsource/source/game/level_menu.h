@@ -90,6 +90,8 @@ public:
     // One frame: the joystick bits held now, and the time. Buttons already held on the
     // first call are ignored until released (so a held key cannot pick a level).
     void Update(uint32_t buttons, int64_t nowMs);
+    // A touch on a visible row selects it; touching the selected row starts it.
+    void TouchRow(int visibleRow);
 
     bool WaitingForRelease() const { return phase_ == Phase::WaitRelease; }
     bool Chosen() const { return phase_ != Phase::Choosing; }   // A pressed
@@ -176,6 +178,10 @@ void SetMenuRunning(bool running);
 bool MenuRunning();
 void SetSelectorVisible(bool visible);
 bool SelectorVisible();
+// Hit-test uses the same 1920x1080 row geometry and surface transform as Build.
+int TouchRowAt(float x, float y, int width, int height);
+void QueueTouchRow(int visibleRow);
+int ConsumeTouchRow();
 
 // One line to the platform's log: stderr on the desktop, logcat (tag wf_game) on Android.
 void Log(const char* fmt, ...)

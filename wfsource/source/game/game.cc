@@ -975,6 +975,8 @@ WFGame::RunLevelMenu()
 		}
 		else
 			buttons = uint32_t(JoystickGetButtonsF(stick));
+		const int touchRow=levelmenu::ConsumeTouchRow();
+		if(touchRow>=0)menu.TouchRow(touchRow);
 #ifdef WF_RUNTIME_DIAGNOSTICS
         DebugServer_DiagnosticBegin(false, "selector", menu.Cursor());
 #endif

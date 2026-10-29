@@ -533,6 +533,7 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** The Chromecast TVs, which are landscape already. — _from [2026-10-24-screensaver-landscape-orientation.md](docs/plans/2026-10-24-screensaver-landscape-orientation.md)_  <!-- fp:48e8462093839025 -->
 - [verify] **2026-10-24-screensaver-landscape-orientation** — Verification section present but no PASS recorded — run + record the steps. _from [2026-10-24-screensaver-landscape-orientation.md](docs/plans/2026-10-24-screensaver-landscape-orientation.md)_  <!-- fp:9d88b31f8cf3926e -->
 - [ ] **(triage)** Declaring `Orientation` in the levels' OAD Settings instead of in the provider (see **Rejected**). Revisit it with a rule that merges the per-level owners into one app-level field, and with the engine's launch-override table checked against a field no level script uses. — _from [2026-10-24-screensaver-landscape-orientation.md](docs/plans/2026-10-24-screensaver-landscape-orientation.md)_  <!-- fp:3affd273f070e08d -->
+- [verify] **2026-10-29-touch-settings-phone-tablet** — Verification section present but no PASS recorded — run + record the steps. _from [2026-10-29-touch-settings-phone-tablet.md](docs/plans/2026-10-29-touch-settings-phone-tablet.md)_  <!-- fp:2b7032af6db1c510 -->
 <!-- END auto-captured-deferrals -->
 
 

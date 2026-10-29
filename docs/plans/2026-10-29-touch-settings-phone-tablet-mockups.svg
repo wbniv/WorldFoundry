@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 850" role="img" aria-labelledby="title desc">
+  <title id="title">Proposed touch settings layouts on a phone and tablet</title>
+  <desc id="desc">Phone uses one column with large rows and persistent Apply and Cancel buttons. Tablet uses a section rail and field grid.</desc>
+  <style>
+    text{font-family:Arial,sans-serif;fill:#ecf3e8} .caption{font-size:22px;font-weight:bold;fill:#263d31}.small{font-size:14px}.body{font-size:18px}.head{font-size:23px;font-weight:bold}.muted{fill:#b8cebd}.device{fill:#07120e;stroke:#2b4d38;stroke-width:5}.screen{fill:#10251b}.card{fill:#244232}.selected{fill:#487e52}.accent{fill:#e1c67c}.button{fill:#447a51}.outline{fill:none;stroke:#93b39a;stroke-width:2}
+  </style>
+  <text class="caption" x="45" y="38">Phone · portrait · single column</text>
+  <rect class="device" x="42" y="55" width="335" height="750" rx="28"/>
+  <rect class="screen" x="55" y="70" width="309" height="720" rx="15"/>
+  <text class="head" x="75" y="115">Settings</text><text class="small muted" x="75" y="143">Director properties</text>
+  <rect class="selected" x="69" y="164" width="280" height="54" rx="9"/><text class="body" x="84" y="198">Section: Water and growth  ▾</text>
+  <text class="small muted" x="75" y="254">WATER</text>
+  <rect class="card" x="69" y="270" width="280" height="74" rx="9"/><text class="body" x="84" y="299">Water type</text><text class="body muted" x="84" y="326">Freshwater  ▾</text>
+  <rect class="card" x="69" y="356" width="280" height="74" rx="9"/><text class="body" x="84" y="385">Seed</text><text class="body muted" x="84" y="412">713  ✎</text>
+  <rect class="card" x="69" y="442" width="280" height="113" rx="9"/><text class="body" x="84" y="471">Growth speed</text><text class="body muted" x="84" y="498">2×</text><line x1="88" y1="526" x2="327" y2="526" stroke="#9abd99" stroke-width="5"/><circle cx="218" cy="526" r="12" fill="#e1c67c"/>
+  <rect class="card" x="69" y="568" width="280" height="62" rx="9"/><text class="body" x="84" y="606">Regenerate  →</text>
+  <text class="small muted" x="75" y="662">Scroll for more fields</text>
+  <rect fill="#10251b" x="55" y="679" width="309" height="111" rx="9"/><line x1="55" y1="679" x2="364" y2="679" stroke="#5c8068"/>
+  <rect class="outline" x="69" y="702" width="132" height="58" rx="9"/><text class="body" x="104" y="738">Cancel</text>
+  <rect class="button" x="214" y="702" width="135" height="58" rx="9"/><text class="body" x="256" y="738">Apply</text>
+
+  <text class="caption" x="420" y="38">Tablet · landscape · section rail</text>
+  <rect class="device" x="415" y="105" width="745" height="580" rx="24"/>
+  <rect class="screen" x="429" y="119" width="717" height="552" rx="10"/>
+  <text class="head" x="455" y="166">Settings · Director properties</text>
+  <rect class="selected" x="450" y="197" width="191" height="60" rx="8"/><text class="body" x="468" y="234">Water &amp; growth</text>
+  <rect class="card" x="450" y="267" width="191" height="60" rx="8"/><text class="body" x="468" y="304">Appearance</text>
+  <rect class="card" x="450" y="337" width="191" height="60" rx="8"/><text class="body" x="468" y="374">Lighting</text>
+  <rect class="card" x="660" y="197" width="462" height="75" rx="8"/><text class="body" x="678" y="226">Water type</text><text class="body muted" x="678" y="252">Freshwater  ▾</text>
+  <rect class="card" x="660" y="285" width="462" height="75" rx="8"/><text class="body" x="678" y="314">Seed</text><text class="body muted" x="678" y="340">713  ✎</text>
+  <rect class="card" x="660" y="373" width="462" height="108" rx="8"/><text class="body" x="678" y="402">Growth speed · 2×</text><line x1="684" y1="447" x2="1090" y2="447" stroke="#9abd99" stroke-width="5"/><circle cx="906" cy="447" r="12" fill="#e1c67c"/>
+  <rect class="card" x="660" y="493" width="462" height="60" rx="8"/><text class="body" x="678" y="530">Regenerate  →</text>
+  <line x1="429" y1="576" x2="1146" y2="576" stroke="#5c8068"/>
+  <rect class="outline" x="817" y="594" width="140" height="55" rx="8"/><text class="body" x="854" y="628">Cancel</text>
+  <rect class="button" x="970" y="594" width="152" height="55" rx="8"/><text class="body" x="1016" y="628">Apply</text>
+  <text class="caption" x="420" y="745">Schematic layouts · final sizes checked on devices</text>
+  <text x="420" y="775" font-size="17" fill="#425b49">Phone field text targets 16–18 sp equivalent; every touch target at least 48 dp.</text>
+</svg>
