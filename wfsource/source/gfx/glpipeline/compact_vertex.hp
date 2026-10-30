@@ -1,0 +1,91 @@
+// Compact vertex for baked GL meshes. Streaming vertices remain floats.
+#pragma once
+
+#include <gfx/renderer_backend.hp>
+
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+
+namespace wf_compact_vertex
+{
+
+struct Vertex
+{
+    float x, y, z;
+    uint8_t r, g, b, divisor255;
+    float u, v;
+    int16_t ox, oy;
+};
+
+static_assert(sizeof(Vertex) == 28, "compact baked vertex must be 28 bytes");
+static_assert(offsetof(Vertex, r) == 12, "compact color offset");
+static_assert(offsetof(Vertex, u) == 16, "compact UV offset");
+static_assert(offsetof(Vertex, ox) == 24, "compact normal offset");
+
+inline bool ColorBytes(const RBVertex& source, int divisor, uint8_t out[3])
+{
+    const float values[3] = {source.r, source.g, source.b};
+    for (int i = 0; i < 3; ++i)
+    {
+        const float value = values[i];
+        if (!std::isfinite(value) || value < 0.f || value > 1.f ||
+            (value == 0.f && std::signbit(value))) return false;
+        const long n = std::lround(value * divisor);
+        if (n < 0 || n > 255 || value != float(n) / float(divisor)) return false;
+        out[i] = uint8_t(n);
+    }
+    return true;
+}
+
+inline bool EncodeColor(const RBVertex& source, uint8_t out[4])
+{
+    if (ColorBytes(source, 256, out)) out[3] = 0;
+    else if (ColorBytes(source, 255, out)) out[3] = 255;
+    else return false;
+    return true;
+}
+
+inline bool CanPack(const RBStaticTriangle* triangles, int count)
+{
+    uint8_t color[4];
+    for (int t = 0; t < count; ++t)
+    {
+        if (!std::isfinite(triangles[t].nx) || !std::isfinite(triangles[t].ny) ||
+            !std::isfinite(triangles[t].nz) ||
+            (triangles[t].nx == 0.f && triangles[t].ny == 0.f && triangles[t].nz == 0.f))
+            return false;
+        for (int k = 0; k < 3; ++k)
+            if (!EncodeColor(triangles[t].v[k], color)) return false;
+    }
+    return true;
+}
+
+inline int16_t Snorm16(float value)
+{
+    const float clipped = value < -1.f ? -1.f : value > 1.f ? 1.f : value;
+    return int16_t(std::lround(clipped * 32767.f));
+}
+
+inline bool Pack(Vertex& dst, const RBVertex& source, float nx, float ny, float nz)
+{
+    uint8_t color[4];
+    if (!EncodeColor(source, color)) return false;
+    dst.x = source.x; dst.y = source.y; dst.z = source.z;
+    dst.r = color[0]; dst.g = color[1]; dst.b = color[2]; dst.divisor255 = color[3];
+    dst.u = source.u; dst.v = source.v;
+    const float sum = std::abs(nx) + std::abs(ny) + std::abs(nz);
+    float x = sum ? nx / sum : 0.f;
+    float y = sum ? ny / sum : 0.f;
+    if (nz < 0.f)
+    {
+        const float oldX = x, oldY = y;
+        x = (1.f - std::abs(oldY)) * (oldX >= 0.f ? 1.f : -1.f);
+        y = (1.f - std::abs(oldX)) * (oldY >= 0.f ? 1.f : -1.f);
+    }
+    dst.ox = Snorm16(x);
+    dst.oy = Snorm16(y);
+    return true;
+}
+
+} // namespace wf_compact_vertex

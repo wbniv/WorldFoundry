@@ -116,8 +116,19 @@ int main(int argc, char** argv)
     // Left: ordinary. Right: palette-enabled, same texture.
     RBStaticTriangle pair[2] = {Triangle(-.9f,1,1,1), Triangle(.1f,1,1,1)};
     pair[1].paletteEnabled = 1; pair[1].paletteDark = 0x0000ff; pair[1].paletteLight = 0xffff00;
-    RBStaticMeshHandle mesh = backend->CreateStaticMesh(pair, 2);
-    Require(mesh, "static mesh creation failed");
+    // Byte-exact colors bake the 28-byte compact layout, whose palette is a
+    // per-draw constant. .995 is not byte-exact, so `legacyPair` bakes the
+    // 76-byte layout with per-vertex palette; it still reads as white
+    // (is_white), so both meshes render the same pixels as `pair` streamed.
+    RBStaticTriangle legacyPair[2] = {pair[0], pair[1]};
+    for (RBStaticTriangle& t : legacyPair)
+        for (RBVertex& v : t.v) v.r = v.g = v.b = .995f;
+    auto staticBytes = [&]() { size_t gpu, cpu; backend->StaticMeshBytes(gpu, cpu); return gpu; };
+    RBStaticMeshHandle compactMesh = backend->CreateStaticMesh(pair, 2);
+    Require(compactMesh && staticBytes() == 2*3*28, "byte-exact static mesh did not bake compact");
+    RBStaticMeshHandle legacyMesh = backend->CreateStaticMesh(legacyPair, 2);
+    Require(legacyMesh && staticBytes() == 2*3*28 + 2*3*76, "inexact static mesh did not bake legacy");
+    RBStaticMeshHandle mesh = compactMesh;
     auto eligible = [&]() {
         clear();
         wf_profile::enableFresh();
@@ -136,17 +147,30 @@ int main(int argc, char** argv)
         backend->EndFrame();
         return frame();
     };
-    std::vector<unsigned char> mixedFrames[2], ordinaryStreaming;
-    for (bool indexed : {false, true}) {
+    // source: 0 = streaming, 1 = compact static mesh, 2 = legacy static mesh.
+    std::vector<unsigned char> mixedFrames[3], ordinaryStreaming;
+    for (int source = 0; source < 3; ++source) {
+        const bool indexed = source != 0;
+        // Only a compact batch splits at a palette change: its palette is one
+        // constant per draw, so each half is chosen alone (ordinary half on
+        // the no-palette program, palette half on the palette-capable one).
+        const bool compact = source == 1;
+        mesh = source == 2 ? legacyMesh : compactMesh;
         const auto paletteOnly = scene(indexed, 2, &colored);
         Require(counter(wf_profile::Draws) == 1 && counter(wf_profile::NoPaletteDraws) == 0
                 && counter(wf_profile::MixedPaletteDraws) == 0, "palette-only batch left the palette program");
         Require(counter(wf_profile::NoPalettePrograms) == 0, "palette-only batch created the no-palette program");
         const auto mixed = scene(indexed, 3, &colored);
-        Require(counter(wf_profile::Draws) == 1, indexed ? "static palette transition split a batch"
-                                                         : "streaming palette transition split a batch");
-        Require(counter(wf_profile::MixedPaletteDraws) == 1 && counter(wf_profile::NoPaletteDraws) == 0,
-                "mixed batch left the palette-capable program");
+        if (compact) {
+            Require(counter(wf_profile::Draws) == 2, "compact palette transition did not split the batch");
+            Require(counter(wf_profile::NoPaletteDraws) == 1 && counter(wf_profile::MixedPaletteDraws) == 0,
+                    "compact halves did not each choose their own program");
+        } else {
+            Require(counter(wf_profile::Draws) == 1, indexed ? "static palette transition split a batch"
+                                                             : "streaming palette transition split a batch");
+            Require(counter(wf_profile::MixedPaletteDraws) == 1 && counter(wf_profile::NoPaletteDraws) == 0,
+                    "mixed batch left the palette-capable program");
+        }
         Require(counter(wf_profile::NoPalettePrograms) == 0, "mixed batch created the no-palette program");
         const auto ordinary = scene(indexed, 1, &colored);
         Require(counter(wf_profile::Draws) == 1 && counter(wf_profile::NoPaletteDraws) == 1,
@@ -159,10 +183,13 @@ int main(int argc, char** argv)
         Require(sameHalf(mixed, paletteOnly, false), "mixed batch changed palette pixels");
         Require(std::memcmp(&mixed[(24*64+16)*4], &mixed[(24*64+48)*4], 3) != 0,
                 "palette did not visibly change the palette-enabled face");
-        mixedFrames[indexed] = mixed;
+        mixedFrames[source] = mixed;
         if (!indexed) ordinaryStreaming = ordinary;
     }
-    Require(mixedFrames[0] == mixedFrames[1], "streaming and static mixed batches differ");
+    // Every program that draws a static mesh decodes both layouts exactly.
+    Require(mixedFrames[0] == mixedFrames[1], "streaming and compact static mixed batches differ");
+    Require(mixedFrames[0] == mixedFrames[2], "streaming and legacy static mixed batches differ");
+    mesh = compactMesh;
 
     // A texture change splits batches as before; each half is chosen alone.
     scene(false, 3, &other);
@@ -199,7 +226,8 @@ int main(int argc, char** argv)
                 "modulated, cutout or blended batch used the no-palette program");
     }
     backend->SetOpacity(1); backend->SetAlphaCutout(false); backend->SetTextureModulation(true);
-    backend->DestroyStaticMesh(mesh);
+    backend->DestroyStaticMesh(compactMesh);
+    backend->DestroyStaticMesh(legacyMesh);
     wf_profile::state().enabled = false;
 
     // Reload must flush old geometry and affect opaque and cutout draws alike.

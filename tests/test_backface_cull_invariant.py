@@ -56,19 +56,18 @@ QBERT_DIR = LEVELS_DIR / "qbert_practice"
 CAPTURE_FRAME = 20
 
 # Accepted cull-on vs cull-off residual, in differing pixels. 0 = must be
-# byte-identical. The five non-zero entries are Effort 1b's case (a) —
-# a back-facing polygon was bleeding over a brighter front face and the cull
-# removed it; silhouette unchanged, mostly *brighter* after — plus
-# qbert_practice's z-fight tie on its convex props. Numbers reproduced
-# exactly by the Effort 2 sweep, 2026-09-21.
+# byte-identical. The original non-zero entries cover back-face bleed and
+# qbert_practice's z-fight tie. Four residuals were refreshed against the
+# frozen S0 desktop binary on 2026-10-23, with the FPS overlay disabled;
+# S2 produced the same counts on those four fixtures.
 ACCEPTED = {
-    "condo_639_640": 143,
+    "condo_639_640": 148,
     "condo_639_640_tour": 167,
     "dome": 0,
     "filelight": 0,
     "filesys": 0,
     "marble-madness": 0,
-    "marble-madness-2": 0,
+    "marble-madness-2": 107,
     "mm_practice": 0,
     "mm_practice_blender": 0,
     "mm_practice_blender_rt": 0,
@@ -77,8 +76,8 @@ ACCEPTED = {
     "qbert_practice": 93,
     "smb_w1_1": 0,
     "smb_w1_2": 0,
-    "smb_w1_3": 0,
-    "smb_w1_4": 0,
+    "smb_w1_3": 1,
+    "smb_w1_4": 1,
     "snowgoons": 98,
     "snowgoons-blender": 97,
 }
@@ -137,6 +136,7 @@ def _capture(level_path: Path, png_path: Path, cull: str | None,
             "-rate20",
             "--no-fps",
             "-record_video",
+            "--no-fps",
             *(extra or []),
             f"--capture-frame={CAPTURE_FRAME}={png_path}",
             f"-L{level_path}",

@@ -1433,6 +1433,17 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     add_test(NAME opaque_material_programs COMMAND wf_opaque_material_gl_test)
     set_tests_properties(opaque_material_programs PROPERTIES LABELS "gl")
 
+    # The four-lane static cull kernel against the scalar test (lanes model;
+    # NEON itself runs only on 32-bit ARM under --static-mesh-check).
+    add_executable(wf_backface_cull_kernel_test tests/backface_cull_kernel.cc)
+    target_link_libraries(wf_backface_cull_kernel_test PRIVATE wfengine)
+    target_compile_options(wf_backface_cull_kernel_test PRIVATE -fpermissive -w)
+    add_test(NAME backface_cull_kernel COMMAND wf_backface_cull_kernel_test)
+
+    add_executable(wf_compact_vertex_layout_test tests/compact_vertex_layout.cc)
+    target_include_directories(wf_compact_vertex_layout_test PRIVATE ${SRC})
+    add_test(NAME mesh_vertex_layout COMMAND wf_compact_vertex_layout_test)
+
     # E3 index ownership: mixed index widths and deletion across context loss.
     add_executable(wf_static_mesh_index_gl_test tests/static_mesh_index_gl.cc)
     target_link_libraries(wf_static_mesh_index_gl_test PRIVATE wfengine)
@@ -1458,6 +1469,20 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/static_mesh_check.py
                 --binary $<TARGET_FILE:wf_game> --check cull --frames 120
                 --level ${WF_TEST_LEVEL} --level ${WF_TEST_SNOW_LEVEL}
+            WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+        # The baked cull inputs (NEON-cull Phase 1) against the exact test:
+        # bit-identical inputs and zero differing decisions under real, random
+        # and edge-on matrices.
+        add_test(NAME static_cull_soa
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/static_mesh_check.py
+                --binary $<TARGET_FILE:wf_game> --check soa --frames 120
+                --level ${WF_TEST_LEVEL} --level ${WF_TEST_SNOW_LEVEL}
+            WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+        # Which back-face form RenderStatic runs: exact by default, fast only
+        # when asked (the per-path frame-profile counters).
+        add_test(NAME static_cull_path
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/static_cull_path.py
+                --binary $<TARGET_FILE:wf_game> --level ${WF_TEST_LEVEL}
             WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
     endif()
 

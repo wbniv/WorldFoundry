@@ -14,6 +14,8 @@
 //   : write-mailbox 129 sys ;   \ ZF_SYSCALL_USER+1: ( val idx -- )
 //   : write-actor-mailbox 130 sys ;   \ ZF_SYSCALL_USER+2: ( val idx actor_idx -- )
 //   : read-actor-mailbox 152 sys ;    \ custom 24 (3-23 taken): ( idx actor_idx -- val )
+//   : random            153 sys ;    \ custom 25: ( -- nonnegative 24-bit integer )
+//   : seed-random       154 sys ;    \ custom 26: ( seed -- )
 //
 // Control flow (zForth uses `fi` not `then`):
 //   if ... fi        ( flag -- )
@@ -56,6 +58,7 @@ extern "C" {
 #include <cmath>      // atan2/cos/sin/sqrt for the FSN connector orientation
 #include <ctime>      // time() for FSN file color-by-age
 #include <chrono>     // the opt-in script profiler (--script-profile)
+#include <cstdint>    // uint32_t for the small script random generator
 
 #include <game/runtime_profile.hp>
 #include <renderassets/rendacto.hp>
@@ -69,6 +72,24 @@ extern "C" {
 static zf_ctx              g_ctx;
 static MailboxesManager*   g_mgr     = nullptr;
 static int                 g_curObj  = 0;
+static uint32_t            g_randomState = 1;
+
+// zForth cells are floats. Limit the result to 24 bits so every integer,
+// including the low bits used by `random 3 &`, survives the round trip exactly.
+static uint32_t ScriptRandom()
+{
+    uint32_t x = g_randomState;
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    g_randomState = x;
+    return x >> 8;
+}
+
+static void SeedScriptRandom(uint32_t seed)
+{
+    g_randomState = seed ? seed : 1;
+}
 
 // ---- Opt-in script profiler -------------------------------------------------
 // `--script-profile` (or WF_SCRIPT_PROFILE=1) times every RunScript call per actor and prints, every
@@ -1023,6 +1044,13 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                     v = mb.ReadMailbox(idx).AsFloat();
                 }
                 zf_push(ctx, (zf_cell)v);
+            } else if (custom == 25) {
+                // random ( -- n ); clock-seeded on Init, deterministic after
+                // an explicit seed-random call for reproducible level tests.
+                zf_push(ctx, (zf_cell)ScriptRandom());
+            } else if (custom == 26) {
+                // seed-random ( seed -- )
+                SeedScriptRandom((uint32_t)zf_pop(ctx));
             } else if (custom == 3) {
                 // cwd-scan ( -- n )
                 // Scan CWD, populate g_cwd_entries (skipping . and ..), push count.
@@ -1560,6 +1588,9 @@ void Init(MailboxesManager& mgr)
 {
     g_mgr    = &mgr;
     g_curObj = 0;
+    const uint64_t wall = (uint64_t)std::chrono::system_clock::now().time_since_epoch().count();
+    const uint64_t ticks = (uint64_t)std::chrono::steady_clock::now().time_since_epoch().count();
+    SeedScriptRandom((uint32_t)(wall ^ (wall >> 32) ^ ticks ^ (ticks >> 32)));
     if (getenv("WF_SCRIPT_PROFILE")) WFScriptProfileEnable();
 
     zf_init(&g_ctx, 0 /* no trace */);
@@ -1584,6 +1615,9 @@ void Init(MailboxesManager& mgr)
     r = zf_eval(&g_ctx, ": read-actor-mailbox 152 sys ;");   // custom 24 (3-23 taken)
     if (r != ZF_OK)
         fprintf(stderr, "zforth: init failed (read-actor-mailbox): %d\n", r);
+    r = zf_eval(&g_ctx, ": random 153 sys ; : seed-random 154 sys ;");
+    if (r != ZF_OK)
+        fprintf(stderr, "zforth: init failed (random): %d\n", r);
 
     r = zf_eval(&g_ctx, ": profile-begin 169 sys ; : profile-end 170 sys ; : fish-deform 171 sys ; : fin-deform 172 sys ; : swim-deform 173 sys ; : jelly-deform 174 sys ; : plant-register 175 sys ; : plant-step 176 sys ; : lion-pose 177 sys ; : property@ 178 sys ; : property-int-bytes@ 179 sys ; : property-text-byte@ 180 sys ; : deform 181 sys ; : deform-block 182 sys ; : dfrm-pose >r 33 6 r> deform-block ;");
     if (r != ZF_OK) fprintf(stderr, "zforth: profiling/fish bridge init failed: %d\n", r);

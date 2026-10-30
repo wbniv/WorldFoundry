@@ -248,6 +248,9 @@ public:
     // Bytes the backend holds for static meshes: GPU buffers, and main-RAM
     // staging (the per-draw index list). For the frame counters.
     virtual void StaticMeshBytes(size_t& gpu, size_t& cpu) const { gpu = 0; cpu = 0; }
+    // The GPU bytes split into vertex buffers and index buffers (frame
+    // counters static-gpu-vertex-bytes / static-gpu-index-bytes).
+    virtual void StaticMeshGpuSplit(size_t& vertex, size_t& index) const { vertex = 0; index = 0; }
 };
 
 // While a recorder is installed, RendererBackendGet() returns it instead of

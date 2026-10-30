@@ -15,11 +15,21 @@ make from the recorded triangle. wf_game prints one line at exit:
                 and equals what the renderers submit)
   --check cull  cull-exact-mismatches must be 0 (plan step 2, exact form);
                 with --fast also fast-mismatches must be 0
-Both require object-draws > 0, so a run that never used the static path fails
+  --check soa   the baked cull inputs (NEON-cull plan, Phase 1) equal the
+                resident face bit for bit and give the exact test's decision
+                under the real matrix, seeded random matrices and an edge-on
+                matrix: soa-input-mismatches, soa-mismatches,
+                soa-random-mismatches and soa-edge-mismatches must be 0, and
+                soa-faces and soa-edge-near-zero must be > 0 (the edge-on case
+                was really reached); the four-lane kernel (NEON on 32-bit ARM,
+                its scalar lanes model elsewhere) must agree too:
+                kernel-mismatches, kernel-run-mismatches and every
+                selftest-*-mismatches must be 0
+All require object-draws > 0, so a run that never used the static path fails
 instead of passing vacuously.
 
 Usage: static_mesh_check.py --binary wf_game --level L.iff [--level ...]
-           --check bake|cull [--frames 120] [--fast] [--cwd DIR] [--extra ARG]
+           --check bake|cull|soa [--frames 120] [--fast] [--cwd DIR] [--extra ARG]
 """
 
 from __future__ import annotations
@@ -43,17 +53,20 @@ def run(binary: str, level: str, frames: int, cwd: str, extra: list[str]) -> dic
     text = proc.stdout + proc.stderr
     if proc.returncode != 0:
         sys.exit(f"FAIL {level}: wf_game exited {proc.returncode}\n{text[-2000:]}")
-    m = LINE_RE.search(text)
+    # Check mode also prints running totals every 2048 object draws (for
+    # Android, which is killed rather than exiting); the last line is the total.
+    found = LINE_RE.findall(text)
+    m = re.match(r"(.*)", found[-1]) if found else None
     if not m:
         sys.exit(f"FAIL {level}: no static-mesh-check line (static path never ran?)")
-    return {k: int(v) for k, v in (kv.split("=") for kv in m.group(1).split())}
+    return {k: int(v) if v.lstrip("-").isdigit() else v for k, v in (kv.split("=") for kv in m.group(1).split())}
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--binary", required=True)
     ap.add_argument("--level", action="append", required=True)
-    ap.add_argument("--check", choices=["bake", "cull"], required=True)
+    ap.add_argument("--check", choices=["bake", "cull", "soa"], required=True)
     ap.add_argument("--frames", type=int, default=120)
     ap.add_argument("--fast", action="store_true", help="also require zero fast-form mismatches")
     ap.add_argument("--cwd", default=str(Path(__file__).resolve().parent.parent / "wfsource/source/game"))
@@ -62,11 +75,17 @@ def main() -> int:
     failed = False
     for level in a.level:
         c = run(a.binary, level, a.frames, a.cwd, a.extra)
-        keys = ["triangle-mismatches"] if a.check == "bake" else ["cull-exact-mismatches"]
+        keys = {"bake": ["triangle-mismatches"], "cull": ["cull-exact-mismatches"],
+                "soa": ["soa-input-mismatches", "soa-mismatches", "soa-random-mismatches",
+                        "soa-edge-mismatches", "kernel-mismatches", "kernel-run-mismatches",
+                        "selftest-mismatches", "selftest-edge-mismatches", "selftest-nan-mismatches",
+                        "selftest-denormal-mismatches"]}[a.check]
         if a.check == "cull" and a.fast:
             keys.append("fast-mismatches")
         bad = [k for k in keys if c.get(k, -1) != 0]
         vacuous = c.get("object-draws", 0) == 0 or c.get("triangles", 0) == 0
+        if a.check == "soa":
+            vacuous = vacuous or c.get("soa-faces", 0) == 0 or c.get("soa-edge-near-zero", 0) == 0
         status = "FAIL" if bad or vacuous else "PASS"
         failed |= status == "FAIL"
         print(f"{status} {Path(level).name}: " + " ".join(f"{k}={v}" for k, v in c.items()))

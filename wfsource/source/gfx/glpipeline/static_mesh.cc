@@ -53,6 +53,7 @@
 #include <gfx/material.hp>
 #include <gfx/renderer_backend.hp>
 #include <gfx/backface_cull.hp>
+#include <gfx/backface_cull_neon.hp>
 #include <game/runtime_profile.hp>
 #include <hal/halbase.h>
 #include <memory/lmalloc.hp>
@@ -69,6 +70,7 @@ namespace
 {
 	int sSwitchOverride = -1;			// -1 = not given on the command line
 	int sFastCullOverride = -1;
+	int sCheckOverride = -1;			// --static-mesh-check (Android has no environment)
 	int sSharedIndexOverride = -1;
 	int sBakeBudgetOverride = -1;
 	int32 sBakedFacesThisFrame = 0;
@@ -112,7 +114,7 @@ namespace
 	bool
 	CheckMode()
 	{
-		static const bool check = EnvFlag("WF_STATIC_MESH_CHECK", false);
+		static const bool check = sCheckOverride >= 0 ? sCheckOverride != 0 : EnvFlag("WF_STATIC_MESH_CHECK", false);
 		return check;
 	}
 
@@ -155,6 +157,19 @@ namespace
 		unsigned long fastFaces, fastMismatches, nonSimilarDraws;
 		unsigned long atlasChanges, atlasRebakes, atlasRebakeChangedTriangles;
 	unsigned long simulatedLosses, liveBakesAtExit;
+		// Baked cull inputs (StaticMeshBake::cull) against today's exact test
+		// on the resident face and vertices: the inputs bit for bit, then the
+		// decision under this frame's matrix, under seeded random matrices, and
+		// under this frame's matrix moved so the face is (nearly) edge-on.
+		unsigned long soaFaces, soaInputMismatches, soaMismatches;
+		unsigned long soaRandomFaces, soaRandomMismatches;
+		unsigned long soaEdgeFaces, soaEdgeMismatches, soaEdgeNearZero;
+		// The four-lane kernel (gfx/backface_cull_neon.hp; NEON on 32-bit ARM,
+		// the scalar lanes model elsewhere) against the scalar test: each face
+		// in all four lanes under the same matrices as above, every run's
+		// survivor list under the frame's matrix, and the synthetic self-test.
+		unsigned long kernelFaces, kernelMismatches, kernelRuns, kernelRunMismatches;
+		WfCullSelfTest selfTest;
 	};
 	long sLiveBakes = 0;
 	CheckTotals sCheck = {};
@@ -165,11 +180,26 @@ namespace
 		fprintf(stderr, "static-mesh-check: object-draws=%lu triangles=%lu triangle-mismatches=%lu "
 		        "cull-faces=%lu cull-exact-mismatches=%lu fast-faces=%lu fast-mismatches=%lu "
 		        "non-similar-draws=%lu atlas-changes=%lu atlas-rebakes=%lu atlas-rebake-changed-triangles=%lu "
-		        "simulated-losses=%lu live-bakes=%ld cpu-bytes=%zu\n",
+		        "simulated-losses=%lu live-bakes=%ld cpu-bytes=%zu "
+		        "soa-faces=%lu soa-input-mismatches=%lu soa-mismatches=%lu "
+		        "soa-random-faces=%lu soa-random-mismatches=%lu "
+		        "soa-edge-faces=%lu soa-edge-mismatches=%lu soa-edge-near-zero=%lu "
+		        "kernel=%s kernel-faces=%lu kernel-mismatches=%lu kernel-runs=%lu kernel-run-mismatches=%lu "
+		        "selftest-runs=%lu selftest-faces=%lu selftest-mismatches=%lu selftest-edge-runs=%lu selftest-edge-mismatches=%lu "
+		        "selftest-nan-runs=%lu selftest-nan-mismatches=%lu selftest-denormal-runs=%lu selftest-denormal-mismatches=%lu\n",
 		        sCheck.objectDraws, sCheck.triangles, sCheck.triangleMismatches,
 		        sCheck.cullFaces, sCheck.cullExactMismatches, sCheck.fastFaces, sCheck.fastMismatches,
 		        sCheck.nonSimilarDraws, sCheck.atlasChanges, sCheck.atlasRebakes, sCheck.atlasRebakeChangedTriangles,
-		        sCheck.simulatedLosses, sLiveBakes, sCpuBytes);
+		        sCheck.simulatedLosses, sLiveBakes, sCpuBytes,
+		        sCheck.soaFaces, sCheck.soaInputMismatches, sCheck.soaMismatches,
+		        sCheck.soaRandomFaces, sCheck.soaRandomMismatches,
+		        sCheck.soaEdgeFaces, sCheck.soaEdgeMismatches, sCheck.soaEdgeNearZero,
+		        WF_CULL_NEON ? "neon" : "model", sCheck.kernelFaces, sCheck.kernelMismatches,
+		        sCheck.kernelRuns, sCheck.kernelRunMismatches,
+		        sCheck.selfTest.runs, sCheck.selfTest.faces, sCheck.selfTest.mismatches,
+		        sCheck.selfTest.edgeRuns, sCheck.selfTest.edgeMismatches,
+		        sCheck.selfTest.nanRuns, sCheck.selfTest.nanMismatches,
+		        sCheck.selfTest.denormalRuns, sCheck.selfTest.denormalMismatches);
 	}
 
 	bool
@@ -224,6 +254,12 @@ StaticMeshSetFastCull(bool fast)
 }
 
 void
+StaticMeshSetCheck(bool on)
+{
+	sCheckOverride = on ? 1 : 0;
+}
+
+void
 StaticMeshSetSharedIndex(bool on)
 {
 	sSharedIndexOverride = on ? 1 : 0;
@@ -263,6 +299,10 @@ StaticMeshSampleGauges()
 	RendererBackendGet().StaticMeshBytes(gpu, staging);
 	wf_profile::count(wf_profile::StaticGpuBytes, gpu);
 	wf_profile::count(wf_profile::StaticCpuBytes, sCpuBytes + staging);
+	size_t vertex = 0, index = 0;
+	RendererBackendGet().StaticMeshGpuSplit(vertex, index);
+	wf_profile::count(wf_profile::StaticGpuVertexBytes, vertex);
+	wf_profile::count(wf_profile::StaticGpuIndexBytes, index);
 }
 
 bool
@@ -397,12 +437,118 @@ struct StaticMeshBake
 	uint16 version;
 	StaticMeshGroup* groups;			// same allocation, after this struct
 	float* planeD;						// per baked triangle; fast cull or check mode only
+	// The exact cull's inputs per baked triangle, structure of arrays: six
+	// runs of triangleCount floats (normal x, y, z, then centre x, y, z), from
+	// the resident face and vertices with WfFaceCentroid. NULL when culling is
+	// off (WF_CULL=0). 24 bytes per triangle.
+	float* cull;
 	RBStaticTriangle* check;			// check mode only: the recording, kept
 	size_t bytes;						// main RAM held (all of the above)
 };
 
 namespace
 {
+	// Check mode only. Deterministic, so a mismatch reproduces.
+	uint32 sCheckRandom = 0x9e3779b9u;
+
+	// The lanes the target's kernel uses (NEON on 32-bit ARM), or the scalar
+	// lanes model where the target runs the scalar loop.
+#if WF_CULL_NEON
+	typedef WfLanes4Neon CheckLanes;
+#else
+	typedef WfLanes4Model CheckLanes;
+#endif
+
+	// One face in all four lanes: every lane must give the scalar answer.
+	bool
+	KernelLanesDiffer(const float m[16], float nx, float ny, float nz, float cx, float cy, float cz)
+	{
+		const float a[6][4] = {{nx, nx, nx, nx}, {ny, ny, ny, ny}, {nz, nz, nz, nz},
+		                       {cx, cx, cx, cx}, {cy, cy, cy, cy}, {cz, cz, cz, cz}};
+		unsigned recheck;
+		unsigned mask = WfCullBaked4<CheckLanes>(m, a[0], a[1], a[2], a[3], a[4], a[5], recheck);
+		if(recheck)					// as WfCullBakedRun does: the scalar test decides those lanes
+			mask = (mask & ~recheck) | (WfFaceIsBackfacingAt(m, nx, ny, nz, cx, cy, cz) ? recheck : 0u);
+		const unsigned want = WfFaceIsBackfacingAt(m, nx, ny, nz, cx, cy, cz) ? 0xfu : 0u;
+		++sCheck.kernelFaces;
+		return mask != want;
+	}
+
+	float
+	CheckRandom(float lo, float hi)
+	{
+		sCheckRandom = sCheckRandom * 1664525u + 1013904223u;
+		return lo + (hi - lo) * (float(sCheckRandom >> 8) * (1.0f / 16777216.0f));
+	}
+
+	// Check mode: baked triangle t against the resident face it came from
+	// (normal n, vertices p0..p2, as RenderStatic reads them). The inputs must
+	// match bit for bit, and the baked test (WfFaceIsBackfacingAt) must give
+	// WfFaceIsBackfacing's answer under this frame's matrix, four seeded random
+	// matrices, and this frame's matrix with its translation moved so that the
+	// face is edge-on to the camera (dot(Ne, Pe) near zero, where rounding
+	// decides the answer).
+	void
+	CheckBakedCull(const float mv[16], const StaticMeshBake& bake, int32 t,
+	               float nx, float ny, float nz,
+	               float x0, float y0, float z0, float x1, float y1, float z1, float x2, float y2, float z2)
+	{
+		const int32 n = bake.triangleCount;
+		const float* c = bake.cull;
+		const float bnx = c[t], bny = c[n + t], bnz = c[2*n + t];
+		const float bcx = c[3*n + t], bcy = c[4*n + t], bcz = c[5*n + t];
+		float cx, cy, cz;
+		WfFaceCentroid(x0, y0, z0, x1, y1, z1, x2, y2, z2, cx, cy, cz);
+		++sCheck.soaFaces;
+		if(!SameBits(bnx, nx) || !SameBits(bny, ny) || !SameBits(bnz, nz)
+		   || !SameBits(bcx, cx) || !SameBits(bcy, cy) || !SameBits(bcz, cz))
+			++sCheck.soaInputMismatches;
+		auto differ = [&](const float m[16]) {
+			if(KernelLanesDiffer(m, bnx, bny, bnz, bcx, bcy, bcz))
+				++sCheck.kernelMismatches;
+			return WfFaceIsBackfacing(m, nx, ny, nz, x0, y0, z0, x1, y1, z1, x2, y2, z2)
+				!= WfFaceIsBackfacingAt(m, bnx, bny, bnz, bcx, bcy, bcz);
+		};
+		if(differ(mv))
+			++sCheck.soaMismatches;
+		float r[16];
+		for(int k = 0; k < 4; ++k)
+		{
+			for(int i = 0; i < 16; ++i)
+				r[i] = CheckRandom(-2.0f, 2.0f);
+			r[3] = r[7] = r[11] = 0.0f;
+			r[12] = CheckRandom(-50.0f, 50.0f);
+			r[13] = CheckRandom(-50.0f, 50.0f);
+			r[14] = CheckRandom(-50.0f, 50.0f);
+			r[15] = 1.0f;
+			++sCheck.soaRandomFaces;
+			if(differ(r))
+				++sCheck.soaRandomMismatches;
+		}
+		const float nex = mv[0]*nx + mv[4]*ny + mv[8]*nz;
+		const float ney = mv[1]*nx + mv[5]*ny + mv[9]*nz;
+		const float nez = mv[2]*nx + mv[6]*ny + mv[10]*nz;
+		const float nn = nex*nex + ney*ney + nez*nez;
+		if(!(nn > 0.0f))
+			return;
+		const float pex = mv[0]*cx + mv[4]*cy + mv[8]*cz  + mv[12];
+		const float pey = mv[1]*cx + mv[5]*cy + mv[9]*cz  + mv[13];
+		const float pez = mv[2]*cx + mv[6]*cy + mv[10]*cz + mv[14];
+		const float along = (nex*pex + ney*pey + nez*pez) / nn;
+		float e[16];
+		memcpy(e, mv, sizeof(e));
+		e[12] -= along * nex;
+		e[13] -= along * ney;
+		e[14] -= along * nez;
+		++sCheck.soaEdgeFaces;
+		if(differ(e))
+			++sCheck.soaEdgeMismatches;
+		const float qx = pex - along * nex, qy = pey - along * ney, qz = pez - along * nez;
+		const float dot = nex*qx + ney*qy + nez*qz;
+		if(std::fabs(dot) <= 1e-4f * std::sqrt(nn * (qx*qx + qy*qy + qz*qz)))
+			++sCheck.soaEdgeNearZero;
+	}
+
 	enum { STALE_NONE = 0, STALE_CONTENT, STALE_ENVIRONMENT };
 
 	bool
@@ -561,10 +707,49 @@ RenderObject3D::BakeFromRecording(RBStaticTriangle* triangles, RecordedFace* fac
 		bake->bytes += size_t(out) * sizeof(float);
 	}
 
+	if(WfBackfaceCullEnabled())
+	{
+		// The exact test's per-face inputs, read from the same resident face
+		// and vertices (and the same AsFloat) that RenderStatic used to read
+		// every frame, and the centre from the same expression. The per-frame
+		// test then evaluates identical arithmetic on identical floats.
+		bake->cull = static_cast<float*>(malloc(size_t(out) * 6 * sizeof(float)));
+		assert(ValidPtr(bake->cull));
+		float* const nx = bake->cull;
+		float* const ny = nx + out;
+		float* const nz = ny + out;
+		float* const cx = nz + out;
+		float* const cy = cx + out;
+		float* const cz = cy + out;
+		for(int32 i = 0; i < groupCount; ++i)
+		{
+			const StaticMeshGroup& g = bake->groups[i];
+			if(g.firstTriangle < 0)
+				continue;
+			for(int32 f = g.firstFace; f < g.endFace; ++f)
+			{
+				const int32 t = g.firstTriangle + (f - g.firstFace);
+				const TriFace& face = _faceList[f];
+				const Vector3& p0 = _vertexList[face.v1Index].position;
+				const Vector3& p1 = _vertexList[face.v2Index].position;
+				const Vector3& p2 = _vertexList[face.v3Index].position;
+				nx[t] = face.normal.X().AsFloat();
+				ny[t] = face.normal.Y().AsFloat();
+				nz[t] = face.normal.Z().AsFloat();
+				WfFaceCentroid(p0.X().AsFloat(), p0.Y().AsFloat(), p0.Z().AsFloat(),
+				               p1.X().AsFloat(), p1.Y().AsFloat(), p1.Z().AsFloat(),
+				               p2.X().AsFloat(), p2.Y().AsFloat(), p2.Z().AsFloat(),
+				               cx[t], cy[t], cz[t]);
+			}
+		}
+		bake->bytes += size_t(out) * 6 * sizeof(float);
+	}
+
 	bake->mesh = RendererBackendGet().CreateStaticMesh(triangles, out);
 	if(!bake->mesh)
 	{
 		free(bake->planeD);
+		free(bake->cull);
 		free(bake);
 		_staticState = STATIC_UNBAKEABLE;
 		return NULL;
@@ -594,6 +779,7 @@ RenderObject3D::StaticMeshDiscard()
 	sCpuBytes -= bake->bytes;
 	--sLiveBakes;
 	free(bake->planeD);
+	free(bake->cull);
 	free(bake->check);
 	free(bake);
 }
@@ -707,6 +893,39 @@ RenderObject3D::RenderStatic(const Matrix34& position)
 		static const bool registered = (atexit(PrintCheckTotals) == 0);
 		(void)registered;
 		++sCheck.objectDraws;
+		// Android is killed rather than exiting, so atexit never prints there.
+		if(sCheck.objectDraws % 2048 == 0)
+			PrintCheckTotals();
+		static bool selfTested = false;
+		if(!selfTested)
+		{
+			selfTested = true;
+			WfCullKernelSelfTest<CheckLanes>(sCheck.selfTest);
+		}
+		if(bake.cull && cull)
+		{
+			// Every run's survivor list: the kernel run against the scalar run.
+			unsigned* a = static_cast<unsigned*>(TransientAllocate(size_t(bake.largestGroup) * 2 * sizeof(unsigned)));
+			unsigned* b = a + bake.largestGroup;
+			const int32 n = bake.triangleCount;
+			for(int32 i = 0; i < bake.groupCount; ++i)
+			{
+				const StaticMeshGroup& g = bake.groups[i];
+				if(g.firstTriangle < 0 || g.cullExempt)
+					continue;
+				const float* gnx = bake.cull + g.firstTriangle;
+				int32 ca = 0, cb = 0;
+				const int32 faces = g.endFace - g.firstFace;
+				const int32 na = WfCullBakedRun<CheckLanes, int32>(mv, gnx, gnx + n, gnx + 2*n, gnx + 3*n, gnx + 4*n, gnx + 5*n,
+				                                            faces, unsigned(g.firstTriangle), a, ca);
+				const int32 nb = WfCullBakedRunScalar<int32>(mv, gnx, gnx + n, gnx + 2*n, gnx + 3*n, gnx + 4*n, gnx + 5*n,
+				                                      faces, unsigned(g.firstTriangle), b, cb);
+				++sCheck.kernelRuns;
+				if(na != nb || ca != cb || memcmp(a, b, size_t(na) * sizeof(unsigned)) != 0)
+					++sCheck.kernelRunMismatches;
+			}
+			TransientFree(a);
+		}
 		if(!frame.similarity)
 			++sCheck.nonSimilarDraws;
 		for(int32 i = 0; i < bake.groupCount; ++i)
@@ -735,6 +954,10 @@ RenderObject3D::RenderStatic(const Matrix34& position)
 				++sCheck.cullFaces;
 				if(mine != streaming)
 					++sCheck.cullExactMismatches;
+				if(bake.cull)
+					CheckBakedCull(mv, bake, t, face.normal.X().AsFloat(), face.normal.Y().AsFloat(), face.normal.Z().AsFloat(),
+						p0.X().AsFloat(), p0.Y().AsFloat(), p0.Z().AsFloat(), p1.X().AsFloat(), p1.Y().AsFloat(), p1.Z().AsFloat(),
+						p2.X().AsFloat(), p2.Y().AsFloat(), p2.Z().AsFloat());
 				if(frame.similarity)
 				{
 					++sCheck.fastFaces;
@@ -772,11 +995,13 @@ RenderObject3D::RenderStatic(const Matrix34& position)
 		unsigned triangle = unsigned(g.firstTriangle);
 		if(!cull || g.cullExempt)
 		{
+			wf_profile::count(wf_profile::StaticCullOffFaces, (unsigned long)(g.endFace - g.firstFace));
 			for(int32 f = g.firstFace; f < g.endFace; ++f)
 				surviving[count++] = triangle++;
 		}
 		else if(fast)
 		{
+			wf_profile::count(wf_profile::StaticCullFastFaces, (unsigned long)(g.endFace - g.firstFace));
 			const float* planeD = bake.planeD;
 			for(int32 f = g.firstFace; f < g.endFace; ++f, ++face, ++triangle)
 			{
@@ -789,19 +1014,26 @@ RenderObject3D::RenderStatic(const Matrix34& position)
 		}
 		else
 		{
-			for(int32 f = g.firstFace; f < g.endFace; ++f, ++face, ++triangle)
-			{
-				const Vector3& p0 = _vertexList[face->v1Index].position;
-				const Vector3& p1 = _vertexList[face->v2Index].position;
-				const Vector3& p2 = _vertexList[face->v3Index].position;
-				if(WfFaceIsBackfacing(mv, face->normal.X().AsFloat(), face->normal.Y().AsFloat(), face->normal.Z().AsFloat(),
-				                      p0.X().AsFloat(), p0.Y().AsFloat(), p0.Z().AsFloat(),
-				                      p1.X().AsFloat(), p1.Y().AsFloat(), p1.Z().AsFloat(),
-				                      p2.X().AsFloat(), p2.Y().AsFloat(), p2.Z().AsFloat()))
-					++culled;
-				else
-					surviving[count++] = triangle;
-			}
+			// The exact test on the baked inputs (BakeFromRecording): the same
+			// arithmetic on the same floats as WfFaceIsBackfacing on the
+			// resident face, read sequentially instead of through three vertex
+			// indices per face.
+			wf_profile::count(wf_profile::StaticCullExactFaces, (unsigned long)(g.endFace - g.firstFace));
+			const int32 n = bake.triangleCount;
+			const float* nx = bake.cull + g.firstTriangle;
+			const float* ny = nx + n;
+			const float* nz = ny + n;
+			const float* cx = nz + n;
+			const float* cy = cx + n;
+			const float* cz = cy + n;
+			const int32 faces = g.endFace - g.firstFace;
+			// Four faces at a time in NEON on 32-bit ARM; the scalar test
+			// elsewhere (gfx/backface_cull_neon.hp says why arm64 is scalar).
+#if WF_CULL_NEON
+			count = WfCullBakedRun<WfLanes4Neon, int32>(mv, nx, ny, nz, cx, cy, cz, faces, triangle, surviving, culled);
+#else
+			count = WfCullBakedRunScalar<int32>(mv, nx, ny, nz, cx, cy, cz, faces, triangle, surviving, culled);
+#endif
 		}
 		wf_profile::count(wf_profile::FacesSubmitted, (unsigned long)(g.endFace - g.firstFace));
 		wf_profile::count(wf_profile::FacesCulled, (unsigned long)culled);
