@@ -313,6 +313,10 @@ workflows:
             local err="$CM_BUILD_DIR/ios-$label-stderr.tmp"
             local install=no launch=no alive=no colours=0 dominant=100 pid="" launch_out=""
             local marker="$CM_BUILD_DIR/.ios-$label-start"
+            local launch_args=()
+            if [[ "$label" == fyw-* ]]; then
+              launch_args=(--vram-slot-width=1024 --vram-slot-height=2048 --vram-perm-width=2048 --vram-perm-height=2048)
+            fi
             touch "$marker"
             echo "=== $label: $name ($udid) ==="
             # "Unable to boot device in current state: Booted" is not an error.
@@ -327,7 +331,7 @@ workflows:
             if [ "$install" = yes ]; then
               echo "--- launch ---"
               if launch_out=$(SIMCTL_CHILD_WF_FRAME_RATE_CHECKS=1 xcrun simctl launch --terminate-running-process \
-                    --stdout="$out" --stderr="$err" "$udid" "$BUNDLE_ID"); then
+                    --stdout="$out" --stderr="$err" "$udid" "$BUNDLE_ID" "${launch_args[@]}"); then
                 launch=yes
                 pid=$(echo "$launch_out" | awk '{print $NF}')
                 echo "$launch_out (pid $pid)"
@@ -794,6 +798,7 @@ workflows:
           LEVEL="$CM_BUILD_DIR/ci-fixtures/finding-your-way/level.iff"
           cd "$CM_BUILD_DIR/wfsource/source/game"
           "$WF_GAME" --windowed --frame-step-smoke=60 --cycles=1 -L"$LEVEL" -rate20 \
+            --vram-slot-width=1024 --vram-slot-height=2048 --vram-perm-width=2048 --vram-perm-height=2048 \
             --no-fps --capture-frame=40="$CM_BUILD_DIR/macos-fyw.png" \
             > "$CM_BUILD_DIR/macos-fyw.log" 2>&1
           test -s "$CM_BUILD_DIR/macos-fyw.png"
