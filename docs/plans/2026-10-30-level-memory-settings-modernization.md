@@ -3,11 +3,11 @@
 [Open the visual plan and Settings mockup](2026-10-30-level-memory-settings-modernization.html).
 
 **Implementation status:** the shared build tooling and baseline integration
-are implemented. The baseline build, level verification and 15 memory-setting
-tests pass; existing settings host and runtime-option tests also pass. The
-desktop runtime check could not open the host display, and cast1 check
-J‑1c913fdddae6 is queued behind another session. The mockup illustrates the
-intended layout; it is not a device capture.
+are implemented. The baseline build, level verification and 20 focused tests
+pass. The desktop runtime check could not open the host display. Cast1 check
+J‑36131a45c778 loaded the level and showed the read-only memory page; see the
+[device evidence](../diagnostics/level-memory-settings-2026-10-30/README.md).
+The mockup illustrates the intended layout; it is not a device capture.
 
 ```mermaid
 flowchart LR

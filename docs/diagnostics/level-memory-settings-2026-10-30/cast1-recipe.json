@@ -1,0 +1,20 @@
+{
+  "app": "baseline",
+  "panel": "require-hidden",
+  "duration": 18,
+  "input_script": [
+    {"at": 1, "capture": "baseline"},
+    {"at": 2, "key": "DPAD_CENTER", "action": "hold", "ms": 1300},
+    {"at": 4, "capture": "picker"},
+    {"at": 5, "key": "DPAD_DOWN", "action": "hold", "ms": 100},
+    {"at": 5.7, "key": "DPAD_CENTER", "action": "hold", "ms": 100},
+    {"at": 7.2, "capture": "settings"},
+    {"at": 8.8, "key": "DPAD_LEFT", "action": "hold", "ms": 100},
+    {"at": 9.4, "key": "DPAD_DOWN", "action": "hold", "ms": 100},
+    {"at": 10, "key": "DPAD_DOWN", "action": "hold", "ms": 100},
+    {"at": 10.6, "key": "DPAD_RIGHT", "action": "hold", "ms": 100},
+    {"at": 12.5, "capture": "level-memory"},
+    {"at": 14, "key": "BACK", "action": "hold", "ms": 100},
+    {"at": 16, "capture": "resumed"}
+  ]
+}
