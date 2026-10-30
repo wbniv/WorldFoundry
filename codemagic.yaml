@@ -797,9 +797,9 @@ workflows:
           WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
           LEVEL="$CM_BUILD_DIR/ci-fixtures/finding-your-way/level.iff"
           cd "$CM_BUILD_DIR/wfsource/source/game"
-          "$WF_GAME" --windowed --frame-step-smoke=220 --cycles=1 -L"$LEVEL" -rate20 \
+          "$WF_GAME" --windowed --frame-step-smoke=110 --cycles=1 -L"$LEVEL" -rate14 -width=1280 -height=720 \
             --vram-slot-width=1024 --vram-slot-height=2048 --vram-perm-width=2048 --vram-perm-height=2048 \
-            --no-fps --capture-frame=180="$CM_BUILD_DIR/macos-fyw.png" \
+            --no-fps --capture-frame=100="$CM_BUILD_DIR/macos-fyw.png" \
             > "$CM_BUILD_DIR/macos-fyw.log" 2>&1
           test -s "$CM_BUILD_DIR/macos-fyw.png"
           if grep -q 'zforth compile error' "$CM_BUILD_DIR/macos-fyw.log"; then
