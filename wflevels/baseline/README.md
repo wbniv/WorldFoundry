@@ -23,7 +23,7 @@ task baseline:check
 ```
 
 Build exports the reviewed Blender file, compiles the level and both OAS
-fixtures, attaches two independent property catalogs and creates an isolated
+fixtures, attaches three independent property catalogs and creates an isolated
 `build/cd.iff`. Logs, receipts and native screenshots are under `build/`.
 `baseline:check` starts and closes its own desktop runtime, uses port 7785,
 and verifies native movement, release, grounding, collision, camera switching,
@@ -42,6 +42,15 @@ Generate creates `build/baseline-generated.blend` and refuses to overwrite it.
 It never regenerates `baseline.blend`. To replace a generated file deliberately,
 use `generate.py --output <file> --overwrite`; export accepts `--export <file>`
 independently. `build.py --blend <file>` builds manual edits without regeneration.
+
+Load-time configuration lives in [memory-settings.json](memory-settings.json).
+The build validates it, generates read-only **Level Memory** and **Level
+Behavior** settings, and writes the same values into the legacy RAM chunk.
+Edit the source and rebuild to change the next level load; the running form
+cannot resize allocators. The RAM chunk remains authoritative: a launch override
+can change a read-only catalog value shown in the form without changing RAM.
+Other levels can reuse [level_memory_settings.py](../../scripts/level_memory_settings.py)
+and opt in through their own build pipeline.
 
 Diagnostic presets use separate generated Blender files. Disabled diagnostic
 actors have an explicit `wf_baseline_excluded` flag: viewport hiding alone is

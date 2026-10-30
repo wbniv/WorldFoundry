@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "object_heap_bytes": 400000,
+  "permanent_asset_bytes": 2000000,
+  "room_asset_bytes": 4000000,
+  "active_room_slots": 3,
+  "doom_stick": 1,
+  "bungee_camera": 1
+}

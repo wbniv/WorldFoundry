@@ -11,10 +11,12 @@ TYPES=['FIXED16','FIXED32','INT8','INT16','INT32','STRING','OBJECT_REFERENCE','F
 SHOW=['N_A','NUMBER','SLIDER','TOGGLE','DROPMENU','RADIOBUTTONS','HIDDEN','COLOR','CHECKBOX','MAILBOX','COMBOBOX','TEXTEDITOR','FILENAME']
 WIDTH={'INT8':1,'INT16':2,'INT32':4,'FIXED16':2,'FIXED32':4,'STRING':32,'OBJECT_REFERENCE':4,'CAMERA_REFERENCE':4,'LIGHT_REFERENCE':4,'CLASS_REFERENCE':4}
 
-def create():
+def create(memory=None):
     from runtime_options_fixture import write_manifest, sheet
     runtime_fields=write_manifest(HERE)
     runtime_lines,runtime_bindings=sheet(runtime_fields)
+    from memory_settings_fixture import sheet as memory_sheet
+    memory_lines,memory_bindings=memory_sheet(memory)
     fields=[]
     def field(t,show,semantic,lo=0,hi=10,default=0,choices='',initial=None,**metadata):
         id=len(fields)+1;key=f'{semantic}_{t}_{show}_{id}'
@@ -79,7 +81,7 @@ def create():
         lines+=['PROPERTY_SHEET_HEADER('+('Coverage' if gallery else 'Sample Settings')+',1)','GROUP_START(Values)']
         lines += [descriptor(f) for f in selected]
         lines += ['GROUP_STOP()','PROPERTY_SHEET_FOOTER','PROPERTY_SHEET_HEADER(Empty section,0)','GROUP_START(Empty group)','GROUP_STOP()','PROPERTY_SHEET_FOOTER']
-        lines += runtime_lines + ['TYPEFOOTER']
+        lines += runtime_lines + memory_lines + ['TYPEFOOTER']
         (HERE/(name+'.oas')).write_text('\n'.join(lines)+'\n')
         bindings={}
         for f in selected:
@@ -91,6 +93,8 @@ def create():
             bindings[f['key']]=b
         assert not ({b['id'] for b in bindings.values()} & {b['id'] for b in runtime_bindings.values()})
         bindings.update(runtime_bindings)
+        assert not ({b['id'] for b in bindings.values()} & {b['id'] for b in memory_bindings.values()})
+        bindings.update(memory_bindings)
         (HERE/(name+'-bindings.json')).write_text(json.dumps(dict(version=1,owner='SampleSettings',title='Baseline settings',fields=bindings),indent=2)+'\n')
     write('settings-gallery',fields,True)
     sample=[next(f for f in fields if f['semantic']==sem and f['type']==t and f['show']==show) for sem,t,show in [('Signed','INT32','NUMBER'),('Fraction','FIXED32','SLIDER'),('Enum','INT32','RADIOBUTTONS'),('Boolean','INT32','CHECKBOX'),('Text','STRING','N_A')]]
