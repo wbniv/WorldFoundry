@@ -1043,3 +1043,54 @@ workflows:
       cancel_previous_builds: true
     scripts: *macos_desktop_scripts
     artifacts: *macos_desktop_artifacts
+
+  ios-device-release-unsigned:
+    name: iOS Device (Release, unsigned)
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    cache:
+      cache_paths:
+        - build-ios-device
+        - engine/vendor/jolt-physics-5.5.0
+        - ~/.rustup
+        - ~/.cargo
+    environment:
+      xcode: latest
+    triggering:
+      events: []
+    scripts:
+      - name: Prepare toolchain and Jolt
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/device-build.log") 2>&1
+          if ! command -v cargo >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/cargo" ]; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --no-modify-path
+          fi
+          export PATH="$HOME/.cargo/bin:$PATH"
+          rustup target add aarch64-apple-ios
+          echo "PATH=$PATH" >> "$CM_ENV"
+          cd engine/vendor
+          if [ ! -d jolt-physics-5.5.0 ]; then
+            tar -xzf jolt-physics-5.5.0.tar.gz
+            extracted=$(tar -tzf jolt-physics-5.5.0.tar.gz | head -1 | cut -d/ -f1)
+            mv "$extracted" jolt-physics-5.5.0
+          fi
+      - name: Configure and build unsigned iOS device app
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/device-build.log") 2>&1
+          mkdir -p build-ios-device
+          rm -rf build-ios-device/CMakeCache.txt build-ios-device/CMakeFiles
+          cd build-ios-device
+          cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphoneos \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
+            -DCMAKE_BUILD_TYPE=Release -DCMAKE_XCODE_GENERATE_SCHEME=ON ..
+          xcodebuild -project wf_game.xcodeproj -scheme wf_game -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build \
+            > "$CM_BUILD_DIR/device-xcodebuild.log" 2>&1 || {
+              tail -100 "$CM_BUILD_DIR/device-xcodebuild.log"; exit 1; }
+          tail -20 "$CM_BUILD_DIR/device-xcodebuild.log"
+    artifacts:
+      - device-build.log
+      - device-xcodebuild.log
+      - engine/**/*.app
