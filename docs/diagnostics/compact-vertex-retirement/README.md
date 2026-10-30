@@ -23,4 +23,5 @@ at `68198511`, with the v0.10 port on `2026-new-level` at `d5a686a2`.
   modification. Both copies have SHA-256
   `7d2178a9c1f5ca1060efc027bb0aa2da2157e5b1a6750ec184deb0961f333e0c`.
 
-The original checkout and its branch have not been removed.
+The original checkout was retired after the comparison; the local and remote
+`perf/compact-vertex` branch refs remain at `68198511`.
