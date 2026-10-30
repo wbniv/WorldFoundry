@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/d5119573) | docs: index the screensaver landscape orientation plan |
 | [2026-10-19](https://github.com/wbniv/WorldFoundry/commit/d28d16c3) | Index screensaver plans |
 | [2026-10-19](https://github.com/wbniv/WorldFoundry/commit/aef1ef29) | Add multi-APK Chromecast commands |
 | [2026-10-18](https://github.com/wbniv/WorldFoundry/commit/52fdc9ad) | Index aquarium screensaver plans |
@@ -66,6 +67,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+d5119573	author	Will Norris
+d5119573	added	1
+d5119573	deleted	0
+d5119573	files	1
+d5119573	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01PkFSbo6jcue9Gfyb6U9HVs
 d28d16c3	author	Will Norris
 d28d16c3	added	2
 d28d16c3	deleted	0
