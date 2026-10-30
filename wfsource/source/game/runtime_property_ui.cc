@@ -56,7 +56,7 @@ void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect
      auto labels=field.kind==2?options(field):std::vector<std::string>{};if(labels.size()>1&&labels.size()<=9){for(size_t k=0;k<labels.size();++k){float x=left+width*k/(labels.size()-1);rect(x-1,cy-6,2,12,0xe4efd9ffu);float labelWidth=labels[k].size()*15.f;text(std::max(left,std::min(left+width-labelWidth,x-labelWidth/2)),y+91,2.5f,labels[k]);}}
      else {const std::string lowLabel=field.kind==1?std::to_string(low):std::to_string(field.minimum);
       const std::string highLabel=field.kind==1?std::to_string(high):std::to_string(field.maximum);
-      text(left,y+91,2.5f,lowLabel);text(left+width-120,y+91,2.5f,highLabel);}
+      text(left,y+91,2.5f,lowLabel);text(left+width-textWidth(2.5f,highLabel),y+91,2.5f,highLabel);}
      rect(left+width*fraction-7,cy-12,14,24,field.readonly?0x8aab8affu:0xefce83ffu);
     }
     y+=rowHeight;
