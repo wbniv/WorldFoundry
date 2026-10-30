@@ -74,7 +74,7 @@ def fish(kind):
     return [body,tail,top,bottom],offsets
 
 
-def jelly():
+def jelly(combined=False):
     bell=Mesh('bell')
     rings=[]
     for j in range(5):
@@ -98,6 +98,12 @@ def jelly():
     for i in range(12):
         a=math.tau*i/12
         bell.swept_tube([(.43*math.cos(a),.43*math.sin(a),0),(.46*math.cos(a),.46*math.sin(a),-.16),(.40*math.cos(a),.40*math.sin(a),-.28)],.012,'trail',3)
+    if combined:
+        whole=Mesh('jelly_full')
+        for part in (bell,arms):
+            for face,color in zip(part.faces,part.colors):
+                whole.face([part.vertices[index] for index in face],color)
+        return [whole],[(0,0,0)]
     return [bell,arms],[(0,0,0)]*2
 
 

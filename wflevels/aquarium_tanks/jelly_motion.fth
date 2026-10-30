@@ -1,11 +1,17 @@
 \ Jelly: the stroke drives propulsion and bell deformation, never a fish gait.
+: j-setting ( field fallback -- value ) swap j-settings-owner swap property@ if nip else drop then ;
+: j-tempo 1 2 j-setting dup 0 = if drop .5 else dup 1 = if drop .75 else
+  dup 3 = if drop 1.25 else 4 = if 1.5 else 1 then then then then ;
+: j-strength 2 1 j-setting dup 0 = if drop .7 else 2 = if 1.3 else 1 then then ;
+: j-companions 3 5 j-setting ;
+: j-size 4 1 j-setting dup 0 = if drop .75 else 2 = if 1.25 else 1 then then ;
 : j-ease dup dup * swap 2 * 3 swap - * ;
 : j-contract dup .20 < if .20 / j-ease else dup .50 < if
   .20 - .30 / j-ease 1 swap - else drop 0 then then ;
 : j-span INDEXOF_DELTA_TIME tk@ dup .2 > if drop 0 else 0 max then ;
 : j-v >r r@ tk@ - j-span 4 * 1 min * r@ tk@ + r> tk! ;
 : j-advance
-  j-phase tk@ j-dt tk@ j-period tk@ / + 1 min j-phase tk! ;
+  j-phase tk@ j-dt tk@ j-tempo * j-period tk@ / + 1 min j-phase tk! ;
 : j-contact ( velocity lo hi position -- velocity )
   tk-cap-pos tk! tk-cap-hi tk! tk-cap-lo tk!
   dup 0 > if tk-cap-hi tk@ tk-cap-pos tk@ - INDEXOF_DELTA_TIME tk@ .0001 max / 0 max min
@@ -16,7 +22,7 @@
   \ A small bounded current sampled at this animal's position; water-relative drag.
   tk-x tk@ .03 * tk-y tk@ .2 * + tk-sin .045 * j-current-x tk!
   tk-x tk@ .04 * tk-cos .008 * j-current-y tk!
-  j-phase tk@ .20 < if 1.10 else 0 then j-thrust tk!
+  j-phase tk@ .20 < if 1.10 j-strength * else 0 then j-thrust tk!
   tk-pose-pitch tk@ tk-sin negate j-thrust tk@ *
     j-current-x tk@ tk-vx tk@ - 1.1 * + j-dt tk@ * tk-vx tk@ + tk-vx tk!
   tk-pose-roll tk@ tk-sin negate tk-pose-pitch tk@ tk-cos * j-thrust tk@ *
@@ -66,7 +72,7 @@
   tk-z tk@ tk-vz tk@ j-span * + dup tk-z tk! 2 j-store
   j-phase tk@ 3 j-store
   tk-vx tk@ 5 j-store tk-vy tk@ 6 j-store tk-vz tk@ 7 j-store
-  8 j-cell tk-scale tk! 0 tk-yaw tk!
+  8 j-cell j-size * tk-scale tk! 0 tk-yaw tk!
   9 j-cell j-lag-pitch tk! 10 j-cell j-lag-roll tk! ;
 : j-trail
   tk-pose-pitch tk@ tk-vx tk@ .06 * + j-lag-pitch tk@ - tk-dt@ 2 * * j-lag-pitch tk@ + j-lag-pitch tk!
@@ -75,5 +81,6 @@
   j-trail j-phase tk@ j-contract j-contraction tk!
   j-contraction tk@ j-phase tk@ j-lag-pitch tk@ tk-pose-pitch tk@ -
   j-lag-roll tk@ tk-pose-roll tk@ - 650 tk@ jelly-deform
-  j-contraction tk@ j-phase tk@ j-lag-pitch tk@ tk-pose-pitch tk@ -
-  j-lag-roll tk@ tk-pose-roll tk@ - 651 tk@ jelly-deform ;
+  650 tk@ 651 tk@ <> if
+    j-contraction tk@ j-phase tk@ j-lag-pitch tk@ tk-pose-pitch tk@ -
+    j-lag-roll tk@ tk-pose-roll tk@ - 651 tk@ jelly-deform then ;

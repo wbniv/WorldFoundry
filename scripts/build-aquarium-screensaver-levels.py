@@ -62,13 +62,19 @@ def player_script(level_text: str, tank: str, driver: str) -> str:
 
 
 def check_tank_catalog(level: bytes, tank: str) -> None:
-    """One RPRP catalog on a tank variant: PlantedTankSettings, the Aquarium's fields, no Hold seconds."""
+    """Verify the tank variant carries its canonical settings catalog."""
     # Two RPRP tags make one catalog: the RAM chunk's reference and the chunk itself
     # (build-object-properties.py attach()), as in aquarium_plants-standalone.iff.
-    if level.count(b"RPRP") != 2 or level.count(b"PlantedTankSettings") != 1:
-        raise ValueError(f"{tank}: expected one PlantedTankSettings RPRP catalog")
-    for key in (b"Seed", b"Water type", b"Growth speed", b"Initial age", b"Textures", b"Sway",
-                b"Random seed on entry", b"Seahorses", b"Greeting"):
+    if tank == "aquarium_jellyfish_screensaver":
+        schema = b"JellyfishSettings"
+        keys = (b"Pulse tempo", b"Stroke strength", b"Companions", b"Jellyfish size")
+    else:
+        schema = b"PlantedTankSettings"
+        keys = (b"Seed", b"Water type", b"Growth speed", b"Initial age", b"Textures", b"Sway",
+                b"Random seed on entry", b"Seahorses", b"Greeting")
+    if level.count(b"RPRP") != 2 or level.count(schema) != 1:
+        raise ValueError(f"{tank}: expected one {schema.decode()} RPRP catalog")
+    for key in keys:
         if key not in level:
             raise ValueError(f"{tank}: catalog field {key.decode()} missing")
     # The Planted Tank flavor's hold-then-reload cycle does not exist in the Aquarium.

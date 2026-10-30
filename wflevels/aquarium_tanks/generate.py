@@ -15,7 +15,7 @@ REPO=COMMON.parent.parent
 sys.path.insert(0,str(COMMON))
 from mesh import Mesh
 import species
-from models import COLORS as ANIMAL_COLORS, JELLY_OPACITY, models
+from models import COLORS as ANIMAL_COLORS, JELLY_OPACITY, jelly, models
 from urchin import COLORS as URCHIN_COLORS, TEXTURE as URCHIN_TEXTURE, urchin, tube_foot, spine_specs, spine_mesh, PIVOT_SPINES, write_texture as write_urchin_texture
 import goby
 import seahorse
@@ -209,6 +209,9 @@ if LION_RIG:
     COLORS.update(body=(1,1,1),fin=(1,1,1),eye=(.009,.015,.017),mouth=(.009,.015,.017))
     meshes,offsets=[lionfish_model.geometry()],[(0,0,0)]
 data=[blender_mesh(m) for m in meshes]
+if C.KIND=='jellyfish':
+    combined_meshes,_=jelly(combined=True)
+    combined_data=[blender_mesh(m) for m in combined_meshes]
 player=bpy.data.objects['Player']
 if C.KIND=='plants' and ANIMALS:
     player.data=blender_mesh(urchin())
@@ -237,9 +240,12 @@ for k in range(0 if C.KIND=='plants' else COUNT):
     pos=C.SPAWN if not k else ROWS[k-1][:3]
     scale=1 if not k else ROWS[k-1][8]
     group=[]
-    for m,d,offset in zip(meshes,data,offsets):
+    actor_meshes,actor_data=(combined_meshes,combined_data) if C.KIND=='jellyfish' and k>=6 else (meshes,data)
+    for m,d,offset in zip(actor_meshes,actor_data,offsets):
         obj=actor(f'animal-{k:02d}-{m.name}',d,tuple(pos[i]+offset[i]*scale for i in range(3)),mesh_name=m.name)
         obj.scale=(scale,)*3
+        if C.KIND=='jellyfish' and k:
+            obj['wf_Visibility Mailbox']=1800+k-1
         if LION_RIG:obj['wf_lion_rig']=True
         group.append(obj)
     parts.append(group)
@@ -403,6 +409,7 @@ for n,v in {'player':indices['Player'],'touch':int(PROFILE=='touch'),'jelly':int
             'limit-x':LIMIT_X,'limit-y':LIMIT_Y,'bottom':C.BOTTOM,'top':C.TOP,'speed':C.SPEED,
             'focus-z':C.CLOSE_LOOK[2],'cam-close':indices['cs_close'],'cam-wide':indices['cs_wide']}.items():header+=word(n,v)
 if C.KIND!='plants':header+=species.header(C.KIND)
+if C.KIND=='jellyfish':header+=f': j-settings-owner {indices["Director"]} ; : j-visible-count 1790 ;\n'
 core=(COMMON/'controller.fth').read_text().replace('\\ SPECIES_CONTROLLER',species.controller(C.KIND))
 if BETTA_FINS:
     header+=': bf-drive 660 ; : bf-turn 661 ; : bf-last-yaw 662 ; : bf-swim-phase 663 ; : bf-pect-phase 664 ; : bf-sweep 665 ; : bf-spread 666 ;\n'
@@ -465,32 +472,48 @@ if BETTA_FINS:
     pose=pose.replace(': tk-pose\n',fin_motion+'\n: tk-pose\n bf-motion\n')
     pose=pose[:-2]+' bf-fins\n;\n'
 setup=': tk-setup\n'
-for k,row in enumerate(ROWS):
-    for j,v in enumerate(row):setup+=f' {num(v)} {800+k*12+j} tk!\n'
+if C.KIND!='jellyfish':
+    for k,row in enumerate(ROWS):
+        for j,v in enumerate(row):setup+=f' {num(v)} {800+k*12+j} tk!\n'
 if C.KIND=='jellyfish':
     for k,row in enumerate(ROWS):
         values=(*row[:2],min(row[2],C.TOP),row[7],4+k*.35,0,0,0,row[8],0,0)
-        for j,v in enumerate(values):setup+=f' {num(v)} {1200+k*16+j} tk!\n'
+        for j,v in enumerate(values):setup+=f' {num(v)} {1200+k*11+j} tk!\n'
 setup+=';\n'
-tick=': tk-director-tick\n tk-init tk@ 0 = if tk-setup '+('gf-setup ' if FEEDING else '')+'1 tk-init tk! then\n'
+tick=''
+if C.KIND=='jellyfish':
+    first=indices[parts[0][0].name]
+    assert all(len(p)==2 and indices[p[0].name]==first+2*k and
+               indices[p[1].name]==first+2*k+1 for k,p in enumerate(parts[:6]))
+    combined_first=indices[parts[6][0].name] if COUNT>6 else 0
+    assert all(len(p)==1 and indices[p[0].name]==combined_first+k-6
+               for k,p in enumerate(parts[6:],6))
+    tick=(f': j-resident-tick 1791 tk!\n'
+          f' j-visible-count tk@ 1791 tk@ > if 1 else 0 then 1800 1791 tk@ + tk!\n'
+          f' j-visible-count tk@ 1791 tk@ > if\n'
+          f' 1200 1791 tk@ 11 * + j-base tk! j-resident\n'
+          f' 1791 tk@ 5 < if {first+2} 1791 tk@ 2 * + dup 650 tk! 1 + 651 tk!\n'
+          f' else {combined_first} 1791 tk@ 5 - + dup 650 tk! 651 tk! then\n'
+          f' tk-pose j-lag-pitch tk@ 9 j-store j-lag-roll tk@ 10 j-store\n'
+          f' then ;\n')
+tick+=': tk-director-tick\n tk-init tk@ 0 = if tk-setup '+('gf-setup ' if FEEDING else '')+'1 tk-init tk! then\n'
+if C.KIND=='jellyfish':tick+=f' j-companions j-visible-count tk! {COUNT-1} 0 do i j-resident-tick loop\n'
 # Bounded route phases, no growing clock or per-frame wrap loops over elapsed hours.
 for k,row in enumerate(ROWS):
     base=800+k*12
+    if C.KIND=='jellyfish':continue
     if FEEDING:
         for j,obj in enumerate(parts[k+1]):tick+=f' {indices[obj.name]} {650+j} tk!\n'
         continue
-    if C.KIND=='jellyfish':
-        tick+=f' {1200+k*16} j-base tk! j-resident\n'
-    else:
-        tick+=f' {base+7} tk@ tk-dt@ {base+6} tk@ / + tk-frac dup {base+7} tk! tk-phase tk!\n'
-        tick+=f' {base} tk@ {base+3} tk@ tk-phase tk@ tk-sin * + tk-x tk!\n {base+1} tk@ tk-y tk!\n {base+2} tk@ tk-phase tk@ tk-sin .10 * + tk-z tk!\n'
+    tick+=f' {base+7} tk@ tk-dt@ {base+6} tk@ / + tk-frac dup {base+7} tk! tk-phase tk!\n'
+    tick+=f' {base} tk@ {base+3} tk@ tk-phase tk@ tk-sin * + tk-x tk!\n {base+1} tk@ tk-y tk!\n {base+2} tk@ tk-phase tk@ tk-sin .10 * + tk-z tk!\n'
     if C.KIND!='jellyfish':tick+=f' {base+8} tk@ tk-scale tk! {base+9} tk@ tk-yaw tk!\n'
     for j,obj in enumerate(parts[k+1]):tick+=f' {indices[obj.name]} {650+j} tk!\n'
     tick+=' tk-pose\n'
-    if C.KIND=='jellyfish':tick+=' j-lag-pitch tk@ 9 j-store j-lag-roll tk@ 10 j-store\n'
 if FEEDING:tick+=' gf-tick gf-bite-player tk@ gf-bite tk!\n'
 tick+=' INDEXOF_X_POS tk-player read-actor-mailbox tk-x tk!\n INDEXOF_Y_POS tk-player read-actor-mailbox tk-y tk!\n INDEXOF_Z_POS tk-player read-actor-mailbox tk-z tk!\n tk-heading tk@ tk-yaw tk! tk-pitch tk@ tk-pose-pitch tk! tk-roll tk@ tk-pose-roll tk! tk-drive tk@ tk-speed / 1 min tk-pose-drive tk! 1 tk-scale tk!\n'
 tick+=' tk-pulse tk@ tk-dt@ '+('.65' if C.KIND=='jellyfish' else 'tk-drive tk@ tk-speed / 1.2 * .35 +')+' * + tk-frac dup tk-pulse tk! tk-phase tk!\n'
+if C.KIND=='jellyfish':tick+=' j-size tk-scale tk!\n'
 if C.KIND=='jellyfish':
     tick+=' j-player-phase tk@ j-phase tk! j-player-vx tk@ tk-vx tk! j-player-vy tk@ tk-vy tk! j-player-vz tk@ tk-vz tk! j-player-lag-pitch tk@ j-lag-pitch tk! j-player-lag-roll tk@ j-lag-roll tk!\n'
 for j,obj in enumerate(parts[0] if parts else []):tick+=f' {indices[obj.name]} {650+j} tk!\n'

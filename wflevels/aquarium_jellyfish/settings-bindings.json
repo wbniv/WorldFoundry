@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "owner": "Director",
+  "title": "Jellyfish / Director",
+  "fields": {
+    "Pulse tempo": {"id": 1},
+    "Stroke strength": {"id": 2},
+    "Companions": {"id": 3},
+    "Jellyfish size": {"id": 4}
+  }
+}

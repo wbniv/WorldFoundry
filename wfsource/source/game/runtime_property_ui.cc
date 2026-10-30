@@ -54,7 +54,9 @@ void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect
     if(field.show==2&&field.kind<=2){double scale=field.kind==1&&field.scale?field.scale:1;double low=field.minimum/scale,high=field.maximum/scale;double current=std::strtod(v==f.edit.draft.end()?"0":v->second.c_str(),nullptr);float fraction=high>low?float(std::max(0.0,std::min(1.0,(current-low)/(high-low)))):0;
      const float left=630,width=1000,cy=y+62;rect(left,cy-2,width,4,0x8aab8affu);rect(left,cy-2,width*fraction,4,0xe4efd9ffu);
      auto labels=field.kind==2?options(field):std::vector<std::string>{};if(labels.size()>1&&labels.size()<=9){for(size_t k=0;k<labels.size();++k){float x=left+width*k/(labels.size()-1);rect(x-1,cy-6,2,12,0xe4efd9ffu);float labelWidth=labels[k].size()*15.f;text(std::max(left,std::min(left+width-labelWidth,x-labelWidth/2)),y+91,2.5f,labels[k]);}}
-     else {text(left,y+91,2.5f,std::to_string(low));text(left+width-120,y+91,2.5f,std::to_string(high));}
+     else {const std::string lowLabel=field.kind==1?std::to_string(low):std::to_string(field.minimum);
+      const std::string highLabel=field.kind==1?std::to_string(high):std::to_string(field.maximum);
+      text(left,y+91,2.5f,lowLabel);text(left+width-120,y+91,2.5f,highLabel);}
      rect(left+width*fraction-7,cy-12,14,24,field.readonly?0x8aab8affu:0xefce83ffu);
     }
     y+=rowHeight;

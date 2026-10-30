@@ -26,17 +26,18 @@
 		$3fff001l { 'STR' "player_hull.iff" }  // IFF PERM fff:001
 		$3000001l { 'STR' "bell.iff" }  // IFF RM0 000:001
 		$3000002l { 'STR' "arms.iff" }  // IFF RM0 000:002
-		$3000003l { 'STR' "tank_base.iff" }  // IFF RM0 000:003
-		$3000004l { 'STR' "water_back.iff" }  // IFF RM0 000:004
-		$3000005l { 'STR' "back_air.iff" }  // IFF RM0 000:005
-		$3000006l { 'STR' "tank_end__1.iff" }  // IFF RM0 000:006
-		$3000007l { 'STR' "tank_end_1.iff" }  // IFF RM0 000:007
-		$3000008l { 'STR' "front_collider.iff" }  // IFF RM0 000:008
-		$3000009l { 'STR' "rim.iff" }  // IFF RM0 000:009
-		$300000al { 'STR' "floor.iff" }  // IFF RM0 000:00a
-		$300000bl { 'STR' "rounded_display.iff" }  // IFF RM0 000:00b
-		$300000cl { 'STR' "stand.iff" }  // IFF RM0 000:00c
-		$300000dl { 'STR' "room_backdrop.iff" }  // IFF RM0 000:00d
+		$3000003l { 'STR' "jelly_full.iff" }  // IFF RM0 000:003
+		$3000004l { 'STR' "tank_base.iff" }  // IFF RM0 000:004
+		$3000005l { 'STR' "water_back.iff" }  // IFF RM0 000:005
+		$3000006l { 'STR' "back_air.iff" }  // IFF RM0 000:006
+		$3000007l { 'STR' "tank_end__1.iff" }  // IFF RM0 000:007
+		$3000008l { 'STR' "tank_end_1.iff" }  // IFF RM0 000:008
+		$3000009l { 'STR' "front_collider.iff" }  // IFF RM0 000:009
+		$300000al { 'STR' "rim.iff" }  // IFF RM0 000:00a
+		$300000bl { 'STR' "floor.iff" }  // IFF RM0 000:00b
+		$300000cl { 'STR' "rounded_display.iff" }  // IFF RM0 000:00c
+		$300000dl { 'STR' "stand.iff" }  // IFF RM0 000:00d
+		$300000el { 'STR' "room_backdrop.iff" }  // IFF RM0 000:00e
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "aquarium_jellyfish.lvl" ] }
@@ -56,17 +57,18 @@
 		{ 'ASS' $7000fffl [ "Room0.cyc" ] }    // CYC RM0 000:fff
 		{ 'ASS' $3000001l [ "bell.iff" ] }  // IFF RM0 000:001
 		{ 'ASS' $3000002l [ "arms.iff" ] }  // IFF RM0 000:002
-		{ 'ASS' $3000003l [ "tank_base.iff" ] }  // IFF RM0 000:003
-		{ 'ASS' $3000004l [ "water_back.iff" ] }  // IFF RM0 000:004
-		{ 'ASS' $3000005l [ "back_air.iff" ] }  // IFF RM0 000:005
-		{ 'ASS' $3000006l [ "tank_end__1.iff" ] }  // IFF RM0 000:006
-		{ 'ASS' $3000007l [ "tank_end_1.iff" ] }  // IFF RM0 000:007
-		{ 'ASS' $3000008l [ "front_collider.iff" ] }  // IFF RM0 000:008
-		{ 'ASS' $3000009l [ "rim.iff" ] }  // IFF RM0 000:009
-		{ 'ASS' $300000al [ "floor.iff" ] }  // IFF RM0 000:00a
-		{ 'ASS' $300000bl [ "rounded_display.iff" ] }  // IFF RM0 000:00b
-		{ 'ASS' $300000cl [ "stand.iff" ] }  // IFF RM0 000:00c
-		{ 'ASS' $300000dl [ "room_backdrop.iff" ] }  // IFF RM0 000:00d
+		{ 'ASS' $3000003l [ "jelly_full.iff" ] }  // IFF RM0 000:003
+		{ 'ASS' $3000004l [ "tank_base.iff" ] }  // IFF RM0 000:004
+		{ 'ASS' $3000005l [ "water_back.iff" ] }  // IFF RM0 000:005
+		{ 'ASS' $3000006l [ "back_air.iff" ] }  // IFF RM0 000:006
+		{ 'ASS' $3000007l [ "tank_end__1.iff" ] }  // IFF RM0 000:007
+		{ 'ASS' $3000008l [ "tank_end_1.iff" ] }  // IFF RM0 000:008
+		{ 'ASS' $3000009l [ "front_collider.iff" ] }  // IFF RM0 000:009
+		{ 'ASS' $300000al [ "rim.iff" ] }  // IFF RM0 000:00a
+		{ 'ASS' $300000bl [ "floor.iff" ] }  // IFF RM0 000:00b
+		{ 'ASS' $300000cl [ "rounded_display.iff" ] }  // IFF RM0 000:00c
+		{ 'ASS' $300000dl [ "stand.iff" ] }  // IFF RM0 000:00d
+		{ 'ASS' $300000el [ "room_backdrop.iff" ] }  // IFF RM0 000:00e
 	}
 	{ 'ALGN' .align(2048) }
 }
