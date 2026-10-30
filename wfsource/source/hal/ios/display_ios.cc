@@ -91,7 +91,6 @@ Display::Display(int /*orderTableSize*/,
     , _memory(memory)
 {
     _memory.Validate();
-    gActiveDisplay = this;
 
     // Window size comes from hal/ios/platform.mm's WFIosSetSurfaceSize,
     // fed from the UIView's bounds * contentScaleFactor on layout.
@@ -107,7 +106,6 @@ Display::Display(int /*orderTableSize*/,
 
 Display::~Display()
 {
-    if (gActiveDisplay == this) gActiveDisplay = nullptr;
     Validate();
     if (gActiveDisplay == this) gActiveDisplay = nullptr;
 }
