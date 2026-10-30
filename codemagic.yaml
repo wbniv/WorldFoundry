@@ -342,11 +342,13 @@ workflows:
               sleep 2
               xcrun simctl launch "$udid" "$BUNDLE_ID"
               sleep 3
-              python3 "$CM_BUILD_DIR/tests/check_frame_rate_log.py" "$out" --resume || {
-                grep 'FPS CHECK' "$out" || true
-                tail -50 "$out"
-                return 1
-              }
+              if [[ "$label" != fyw-* ]]; then
+                python3 "$CM_BUILD_DIR/tests/check_frame_rate_log.py" "$out" --resume || {
+                  grep 'FPS CHECK' "$out" || true
+                  tail -50 "$out"
+                  return 1
+                }
+              fi
               # Simulator apps are host processes, so ps sees the launched pid.
               if ps -p "$pid" > /dev/null 2>&1; then alive=yes; fi
               echo "--- screenshot ---"
@@ -429,6 +431,18 @@ workflows:
             echo "aquarium: skipped (WF_IOS_AQUARIUM=${WF_IOS_AQUARIUM:-1}, $AQ_IFF present: $([ -f "$AQ_IFF" ] && echo yes || echo no))"
           fi
 
+          # Run a separate copy with the Finding Your Way review chapter.
+          FYW_APP="$CM_BUILD_DIR/fyw-app/wf_game.app"
+          mkdir -p "$CM_BUILD_DIR/fyw-app"
+          cp -R "$APP" "$FYW_APP"
+          find "$FYW_APP" -name cd.iff > "$CM_BUILD_DIR/fyw-cdiff.txt"
+          test -s "$CM_BUILD_DIR/fyw-cdiff.txt"
+          while IFS= read -r f; do cp "$CM_BUILD_DIR/ci-fixtures/finding-your-way/cd.iff" "$f"; done < "$CM_BUILD_DIR/fyw-cdiff.txt"
+          DEFAULT_APP="$APP"; APP="$FYW_APP"
+          if [ -n "${IPHONE_ID:-}" ]; then run_device fyw-iphone "$IPHONE_ID" "$IPHONE_NAME"; fi
+          if [ -n "${IPAD_ID:-}" ]; then run_device fyw-ipad "$IPAD_ID" "$IPAD_NAME"; fi
+          APP="$DEFAULT_APP"
+
           echo "=== iOS simulator verdict (runtime ${RUNTIME:-none}) ==="
           rc=0
           for label in iphone ipad; do
@@ -480,6 +494,8 @@ workflows:
       - ios-*-stderr.tmp
       - ios-crash-*
       - ios-verdict.txt
+      - ios-fyw-*-screenshot.png
+      - ios-fyw-*-launch.log
       # RUNTIME_OUTPUT_DIRECTORY is ${CMAKE_SOURCE_DIR}/engine, so the .app
       # (+ dSYM, if generated) lands under engine/<config>/.
       - engine/**/*.app
@@ -771,6 +787,17 @@ workflows:
             --no-fps --capture-frame=20="$CM_BUILD_DIR/macos-frame20.png" \
             2>&1 | tee -a "$CM_BUILD_DIR/macos-smoke.log"
 
+      - name: Capture Finding Your Way
+        script: |
+          set -euo pipefail
+          WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
+          LEVEL="$CM_BUILD_DIR/ci-fixtures/finding-your-way/level.iff"
+          cd "$CM_BUILD_DIR/wfsource/source/game"
+          "$WF_GAME" --windowed --frame-step-smoke=60 --cycles=1 -L"$LEVEL" -rate20 \
+            --no-fps --capture-frame=40="$CM_BUILD_DIR/macos-fyw.png" \
+            > "$CM_BUILD_DIR/macos-fyw.log" 2>&1
+          test -s "$CM_BUILD_DIR/macos-fyw.png"
+
       - name: Verify raw FPS through script mailboxes and unswapped frame steps
         script: |
           set -euo pipefail
@@ -972,6 +999,8 @@ workflows:
       - macos-screen-*.txt
       - macos-fullscreen-windows.txt
       - macos-fullscreen.png
+      - macos-fyw.png
+      - macos-fyw.log
       - cm-build.log
       # The runnable product on macOS is the .app bundle, not a bare binary:
       # `engine/wf_game` matches nothing here (the Mach-O lives at
