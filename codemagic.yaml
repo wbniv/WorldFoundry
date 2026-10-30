@@ -449,7 +449,7 @@ workflows:
 
           echo "=== iOS simulator verdict (runtime ${RUNTIME:-none}) ==="
           rc=0
-          for label in iphone ipad; do
+          for label in iphone ipad fyw-iphone fyw-ipad; do
             line=$(grep "^$label|" "$VERDICT" || true)
             upper=$(echo "$label" | tr '[:lower:]' '[:upper:]')
             if [ -z "$line" ]; then

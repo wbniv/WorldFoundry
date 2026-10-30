@@ -26,6 +26,7 @@
 #include <hal/hal.h>
 
 #include <pthread.h>
+#include <vector>
 
 // Defined in hal/ios/platform.mm. C++ linkage (matches the Linux/Android HAL;
 // extern "C" here would mismatch the definition's mangling and fail at link).
@@ -52,10 +53,12 @@ static bool      sEngineThreadStarted = false;
 static void* WFEngineThreadMain(void* /*arg*/)
 {
     NSLog(@"wf_game: engine thread enter");
-    static int   argc    = 1;
-    static char  arg0[]  = "wf_game";
-    static char* argv[2] = { arg0, nullptr };
-    HALStart(argc, argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
+    NSArray<NSString *> *arguments = [[NSProcessInfo processInfo] arguments];
+    std::vector<char *> argv;
+    for (NSString *argument in arguments)
+        argv.push_back(const_cast<char *>([argument UTF8String]));
+    argv.push_back(nullptr);
+    HALStart((int)argv.size() - 1, argv.data(), HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
     NSLog(@"wf_game: engine thread exit (HALStart returned)");
     return nullptr;
 }
