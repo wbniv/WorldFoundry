@@ -13,10 +13,12 @@ appear in separated positions across the tank as the count increases.
 Every jellyfish retains the full 341-face bell and arms geometry. The extras
 combine those two meshes into one actor without dropping polygons.
 On Chromecast HD, full-detail builds measured 59.8 fps with 0 companions,
-50.2 fps with 5, and 39.2 fps with 12. Initial counts of 15, 26, and 50
-caused the app to leave the foreground before measurement.
-The 0–50 range is intended for testing on other devices, not a guarantee that
-every count runs on Chromecast HD. Earlier low-detail measurements of about
+50.2 fps with 5, and 39.2 fps with 12. A later live slider test reached 15,
+30, and 50 companions without leaving the app; screenshots showed instantaneous
+rates of 32.7, 17.0, and 10.5 fps respectively. Earlier profile jobs starting
+at 15, 26, and 50 reported that the app left the foreground; their cause is
+unresolved and those failures do not establish a companion-count limit.
+Earlier low-detail measurements of about
 58 fps at 5 and 35 fps at 26 are preserved in the diagnostics history.
 The size setting changes the visible meshes; the player's collision hull keeps
 its original dimensions.

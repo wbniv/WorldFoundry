@@ -1,0 +1,28 @@
+{
+  "app": "aquarium",
+  "scene": "jellyfish",
+  "panel": "require-hidden",
+  "duration": 20,
+  "input_script": [
+    {"at": 1, "capture": "initial"},
+    {"at": 2, "key": "DPAD_CENTER", "action": "hold", "ms": 1300},
+    {"at": 4, "capture": "settings"},
+    {"at": 5, "key": "DPAD_DOWN", "action": "hold", "ms": 100},
+    {"at": 5.6, "key": "DPAD_DOWN", "action": "hold", "ms": 100},
+    {"at": 6.3, "capture": "companions-5"},
+    {"at": 7, "key": "DPAD_RIGHT", "action": "hold", "ms": 100},
+    {"at": 7.5, "key": "DPAD_RIGHT", "action": "hold", "ms": 100},
+    {"at": 8, "key": "DPAD_RIGHT", "action": "hold", "ms": 100},
+    {"at": 8.5, "key": "DPAD_RIGHT", "action": "hold", "ms": 100},
+    {"at": 9, "key": "DPAD_RIGHT", "action": "hold", "ms": 100},
+    {"at": 9.5, "key": "DPAD_RIGHT", "action": "hold", "ms": 100},
+    {"at": 10, "key": "DPAD_RIGHT", "action": "hold", "ms": 100},
+    {"at": 10.5, "key": "DPAD_RIGHT", "action": "hold", "ms": 100},
+    {"at": 11, "key": "DPAD_RIGHT", "action": "hold", "ms": 100},
+    {"at": 11.5, "key": "DPAD_RIGHT", "action": "hold", "ms": 100},
+    {"at": 12.3, "capture": "companions-15"},
+    {"at": 13, "key": "BACK", "action": "hold", "ms": 100},
+    {"at": 15, "capture": "tank-15"},
+    {"at": 19, "capture": "tank-15-later"}
+  ]
+}

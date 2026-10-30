@@ -1,0 +1,322 @@
+{
+  "app": "aquarium",
+  "scene": "jellyfish",
+  "panel": "require-hidden",
+  "duration": 44,
+  "input_script": [
+    {
+      "at": 1,
+      "capture": "initial"
+    },
+    {
+      "at": 2,
+      "key": "DPAD_CENTER",
+      "action": "hold",
+      "ms": 1300
+    },
+    {
+      "at": 5,
+      "key": "DPAD_DOWN",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 5.6,
+      "key": "DPAD_DOWN",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 6.3,
+      "capture": "companions-5"
+    },
+    {
+      "at": 7.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 7.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 8.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 8.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 9.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 9.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 10.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 10.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 11.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 11.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 12.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 12.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 13.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 13.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 14.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 14.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 15.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 15.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 16.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 16.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 17.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 17.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 18.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 18.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 19.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 19.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 20.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 20.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 21.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 21.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 22.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 22.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 23.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 23.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 24.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 24.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 25.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 25.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 26.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 26.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 27.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 27.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 28.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 28.5,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 29.0,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 30.5,
+      "capture": "companions-50"
+    },
+    {
+      "at": 32,
+      "key": "BACK",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 36,
+      "capture": "tank-50"
+    },
+    {
+      "at": 42,
+      "capture": "tank-50-later"
+    }
+  ]
+}
