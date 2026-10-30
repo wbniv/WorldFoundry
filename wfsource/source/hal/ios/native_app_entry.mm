@@ -27,6 +27,7 @@
 
 #include <pthread.h>
 #include <vector>
+#include <pigsys/pigsys.hp>
 
 // Defined in hal/ios/platform.mm. C++ linkage (matches the Linux/Android HAL;
 // extern "C" here would mismatch the definition's mangling and fail at link).
@@ -58,7 +59,9 @@ static void* WFEngineThreadMain(void* /*arg*/)
     for (NSString *argument in arguments)
         argv.push_back(const_cast<char *>([argument UTF8String]));
     argv.push_back(nullptr);
-    HALStart((int)argv.size() - 1, argv.data(), HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
+    __argc = (int)argv.size() - 1;
+    __argv = argv.data();
+    HALStart(__argc, __argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
     NSLog(@"wf_game: engine thread exit (HALStart returned)");
     return nullptr;
 }

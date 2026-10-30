@@ -331,7 +331,7 @@ workflows:
             if [ "$install" = yes ]; then
               echo "--- launch ---"
               if launch_out=$(SIMCTL_CHILD_WF_FRAME_RATE_CHECKS=1 xcrun simctl launch --terminate-running-process \
-                    --stdout="$out" --stderr="$err" "$udid" "$BUNDLE_ID" "${launch_args[@]}"); then
+                    --stdout="$out" --stderr="$err" "$udid" "$BUNDLE_ID" ${launch_args[@]+"${launch_args[@]}"}); then
                 launch=yes
                 pid=$(echo "$launch_out" | awk '{print $NF}')
                 echo "$launch_out (pid $pid)"
