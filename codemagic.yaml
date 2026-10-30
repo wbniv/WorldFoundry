@@ -802,6 +802,9 @@ workflows:
             --no-fps --capture-frame=40="$CM_BUILD_DIR/macos-fyw.png" \
             > "$CM_BUILD_DIR/macos-fyw.log" 2>&1
           test -s "$CM_BUILD_DIR/macos-fyw.png"
+          if grep -q 'zforth compile error' "$CM_BUILD_DIR/macos-fyw.log"; then
+            echo "Finding Your Way script compilation failed"; tail -100 "$CM_BUILD_DIR/macos-fyw.log"; exit 1
+          fi
 
       - name: Verify raw FPS through script mailboxes and unswapped frame steps
         script: |
