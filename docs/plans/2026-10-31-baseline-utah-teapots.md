@@ -1,6 +1,6 @@
 # Baseline: a ladder of Utah teapots with rising face counts
 
-**Status:** Implemented 2026‑10‑31; verification steps 1–7 pass on the desktop. Device install (step 8): the Pixel and cast1 are installed and cast1 is profiled (about 53 fps, 13 % of refreshes missed); cast2 is unreachable. Rank **T3**. Land it **before** [the settings cleanup](2026-10-31-baseline-settings-cleanup.md): both change actor indices, and this one only appends.
+**Status:** Implemented 2026‑10‑31; verification steps 1–7 pass on the desktop. Device install (step 8): the Pixel and cast1 are installed and profiled (cast1 about 53 fps with 13 % of refreshes missed; the Pixel a steady 120 fps); cast2 is unreachable and was replaced by cast1 at Will's direction. Rank **T3**. Land it **before** [the settings cleanup](2026-10-31-baseline-settings-cleanup.md): both change actor indices, and this one only appends.
 
 ## Context
 
@@ -112,7 +112,7 @@ The change adds no screen text beyond the label boards. The empty, error and nar
 
 | Risk | Why it matters | Gate |
 |---|---|---|
-| **Frame cost.** +33 500 faces in a level of under 1 000 | The baseline is every new level's template. The Chromecast HD is the weak device | **Measured on cast1** (step 8): about 53 fps with 13 % of refreshes missed, against a clean 60 for the fishtank menu. The Pixel is not yet measured. If the top rungs do not hold frame rate, the config drops them (a one-line change); the ladder is data, not code |
+| **Frame cost.** +33 500 faces in a level of under 1 000 | The baseline is every new level's template. The Chromecast HD is the weak device | **Measured on cast1** (step 8): about 53 fps with 13 % of refreshes missed, against a clean 60 for the fishtank menu. The Pixel holds 120 fps with 0.0 % missed. If the top rungs do not hold frame rate, the config drops them (a one-line change); the ladder is data, not code |
 | **Memory budget** | `memory-settings.json` authored 4 000 000 B per room slot | **Hit and resolved**: needed about 6.7 MB, now 8 000 000 (approach item 8). A device `check` still has to confirm the Chromecast loads it |
 | **cast2 is unreachable** | `chromecast-test-02`: "Coordinator control unavailable", configured `192.168.4.29:33803` (2026‑10‑31 16:23 and 16:41 +07). Several older install jobs from other sessions have waited on it for more than 110 h | Job `J‑842a6d03570a` is submitted and reports `needs-local-setup`. **I need the "IP address & Port" line from cast2's Wireless debugging screen** before it can run. I did not touch the other sessions' jobs |
 | **Coordinator maintenance** | An update started at 16:35 and new jobs waited for it, then a shared-transport recovery held cast1 and the Pixel for roughly an hour | Cleared on its own; the Pixel install (`J‑7431f689137f`) ran and cast1's jobs ran after it. I did not bypass either hold. My cast2 `readd` attempts may have contributed to the second one; that is unproven |
@@ -245,9 +245,9 @@ phone-pixel-8-pro: J-7431f689137f — waiting: maintenance: grants paused
 chromecast-test-02: J-842a6d03570a — needs-local-setup: Coordinator control unavailable for chromecast-test-02; check the connection before retrying
 ```
 
-**PARTIAL.** Installed and measured on cast1 and the Pixel; cast2 is still unreachable.
+**PASS on cast1 and the Pixel; cast2 not done.** cast2 stayed unreachable, and Will chose cast1 in its place, so step 8's two-device requirement is met by cast1 and the Pixel.
 
-- **Pixel 8 Pro:** installed (`J‑7431f689137f`, APK `baseline-0b4a87b65dd7…`, the teapot build). Its launcher check and frame rate have not been run.
+- **Pixel 8 Pro:** installed (`J‑7431f689137f`, teapot build `baseline-0b4a87b65dd7…`). Frame rate from the `profile` workflow, `J‑07d2f696611d`, on the newest APK, same settings as cast1, with the phone unlocked: see below.
 - **cast2:** `J‑842a6d03570a` is still `needs-local-setup`. Its Wireless debugging port did not accept connections from this PC (`33803`, `46339`; nothing in the whole `/22` had either open), and the coordinator will not take an address hint for it.
 - **cast1 (Chromecast HD), added at Will's suggestion while cast2 was down:** install `J‑0443e6b02948` completed. The `baseline-settings` validator check `J‑b40d5debccea` ended `recovery-required: plugin-error`: the validator is stale against the level schema, so that is not a teapot result. Frame rate came from the `profile` workflow, `J‑bfd832c214e3`, on the newest APK (`baseline-eebab09d…`, teapots plus the settings cleanup), `WARMUP=15 RUNS=3`, SurfaceFlinger presents, 12 s per run:
 
@@ -266,3 +266,16 @@ Reference, same device and method, 2026-10-17 (docs/plans/2026-10-17-settings-ed
 [![cast1 view from the spawn: eight teapots with face-count labels](2026-10-31-baseline-utah-teapots/cast1-device-view.png)](2026-10-31-baseline-utah-teapots/cast1-device-view.png)
 
 The capture is from the device (1920 × 1080; its on-screen FPS counter reads 61.3 at that instant, while the profile above is what the display presented over 12 s). **Reading:** the full ladder costs the Chromecast HD roughly 7 fps, from a clean 60 to about 53 with about 13 % of refreshes missed, and every frame time is either one or two refreshes. That is well above the Planted Tank scene. **Caveat:** this is one scene measured once. The baseline without teapots was not profiled on the same runtime, so the exact cost of the teapots is not isolated, and the settings cleanup rides in this APK too (it adds no rendering). If the top rungs are too costly for a template level, the ladder is data in `baseline.json`: dropping the 16 256-face rung is a one-line change.
+
+```
+Pixel 8 Pro baseline, eight teapots, 33 500 faces (J-07d2f696611d)   display refresh 8.33 ms = 120 Hz
+  run 1  119.90 fps  p50 8.34 ms  p95 8.51 ms  worst 16.57 ms  missed 0.1 %
+  run 2  119.98 fps  p50 8.34 ms  p95 8.50 ms  worst  8.79 ms  missed 0.0 %
+  run 3  119.98 fps  p50 8.34 ms  p95 8.54 ms  worst  8.87 ms  missed 0.0 %
+  mean   120.0 fps                                              missed 0.0 %
+```
+
+[![Pixel 8 Pro view from the spawn in landscape: eight teapots with face-count labels and the touch controls](2026-10-31-baseline-utah-teapots/pixel-device-view.png)](2026-10-31-baseline-utah-teapots/pixel-device-view.png)
+
+The Pixel holds its full 120 Hz with the whole ladder in view, so the cost shows up only on the weakest device. Its capture is 2244 × 1008, in landscape, with the stick and A to D buttons; the on-screen counter reads 114.2 at that instant.
+

@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/a9d4c224) | Teapot plan: record the cast1 frame rate and the device installs |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/2905d27f) | Main cd.iff: one manifest lists its levels; rebuild the stale bundle |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/e7ba498a) | Teapot plan: correct the preset note and record the captured follow-ups |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/e6fe62eb) | Baseline: add a ladder of eight Utah teapots (52 to 16 256 faces) |
 
 <!--history-meta v1
+a9d4c224	author	Will Norris
+a9d4c224	added	24
+a9d4c224	deleted	4
+a9d4c224	files	1
+a9d4c224	body	Step 8 was still pending. cast1 (the Chromecast HD) was offered once its\nrecovery cleared, so the baseline is installed there and profiled with the\nprofile workflow (SurfaceFlinger presents, 15 s warm-up, three 12 s runs):\n54.57 / 51.99 / 52.12 fps, p50 16.68 ms, p95 33.37 ms, 9.8 / 15.3 / 15.0 %\nof refreshes missed, against 59.6 fps for the fishtank menu on the same\ndevice and method and about 35 fps for the Planted Tank scene. The device\ncapture shows all eight teapots and their labels. The Pixel is installed but\nnot measured, and cast2 is still unreachable.\n\nCaveat recorded in the plan: the baseline without teapots was not profiled on\nthe same runtime, so the teapots' exact cost is not isolated, and the APK\nmeasured also carries the settings cleanup (no rendering change). The\nbaseline-settings validator check on cast1 ended in a plugin error because\nthe validator is stale against the level schema; that is not a teapot result.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
 2905d27f	author	Will Norris
 2905d27f	added	21
 2905d27f	deleted	4
