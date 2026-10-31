@@ -136,6 +136,7 @@ PixelMap::GetTextureHandle() const
     // sub-pixelmap has no texture of its own, it samples the parent's.
     if(_parent)
         return _parent->GetTextureHandle();
+    RestoreTextureAfterContextLoss();
     return _textureHandle;
 }
 
@@ -151,12 +152,16 @@ PixelMap::SetGLTexture() const                 // make this pixelmap the current
     if(_parent)
         _parent->SetGLTexture();
     else
+    {
+        // After a context loss the stored name is dead: re-create it first.
+        RestoreTextureAfterContextLoss();
         // The handle IS the GL texture name under the GL backend — the cast is
         // the inverse of the one backend_modern.cc makes in CreateTexture, and
         // is the only place outside that backend which assumes the
         // representation. Harmless elsewhere: this method is GL-only and is
         // never called on the Metal path.
         glBindTexture(GL_TEXTURE_2D,(GLuint)(uintptr_t)_textureHandle);
+    }
     AssertGLOK();
 }
 

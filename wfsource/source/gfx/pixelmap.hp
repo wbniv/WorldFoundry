@@ -52,7 +52,8 @@ public:
 
 	void Load(const void* memory, int xSize, int ySize);		
 	void Load(const void* memory, int xOffset, int yOffset, int xSize, int ySize);		
-	// Update RGBA8 pixels in-place. The GPU texture handle remains stable.
+	// Update RGBA8 pixels in-place. The GPU texture handle remains stable
+	// (until a context loss, when the texture is re-created from the buffer).
 	bool UpdateRGBA8(int x, int y, int width, int height, const unsigned char* pixels);
 
 	int GetFlags() const;
@@ -102,7 +103,19 @@ private:
     // CPU-only maps and sub-maps that delegate to a parent. Zero-init matters:
     // ~PixelMap used to hand an UNINITIALISED GLuint to glDeleteTextures for
     // every sub-pixelmap, which could delete an unrelated live texture.
-    RBTextureHandle _textureHandle;
+    // `mutable` because a context loss is repaired lazily from the const bind
+    // paths (SetGLTexture / GetTextureHandle), as static meshes rebake on draw.
+    mutable RBTextureHandle _textureHandle;
+    // RendererBackend::TextureGeneration() when _textureHandle was created. A
+    // different current generation means the GL context was lost (Android
+    // EGL_CONTEXT_LOST, or WF_STATIC_MESH_TEST=loss:N on desktop): the handle
+    // names nothing (or, after a real loss, possibly another object), so it is
+    // re-created from _pixelBuffer and never passed to DestroyTexture.
+    mutable unsigned _textureGeneration;
+    // Re-creates a root map's texture from _pixelBuffer after a context loss.
+    void RestoreTextureAfterContextLoss() const;
+    // DestroyTexture(_textureHandle) only while it belongs to the live context.
+    void DestroyLiveTexture();
 
 #if SIXTEEN_BIT_VRAM
      uint16* _pixelBuffer;

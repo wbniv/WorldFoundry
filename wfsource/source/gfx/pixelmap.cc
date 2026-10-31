@@ -64,6 +64,7 @@ PixelMap::PixelMap(int flags, int xSize, int ySize)
     // unconditionally, so every PixelMap burned a texture name whether or not
     // it ever became a texture.
     _textureHandle = NULL;
+    _textureGeneration = 0;
 
 
 
@@ -100,6 +101,7 @@ PixelMap::PixelMap(PixelMap& parent,int xPos, int yPos, int xSize, int ySize)
     // to glDeleteTextures — which silently deletes an unrelated texture if the
     // value happens to name a live one.
     _textureHandle = NULL;
+    _textureGeneration = 0;
 	Validate();
     std::cout << "PixelMap::PixelMap: subpixelmap = " << this << std::endl;
 }
@@ -112,8 +114,64 @@ PixelMap::~PixelMap()
     if(_pixelBuffer)
         delete [] _pixelBuffer;
     // NULL-safe by contract, so sub-pixelmaps and CPU-only maps cost nothing.
-    RendererBackendGet().DestroyTexture(_textureHandle);
+    DestroyLiveTexture();
+}
+
+//==============================================================================
+
+static RBTextureFormat
+PixelMapTextureFormat()
+{
+#if SIXTEEN_BIT_VRAM
+    return RB_TEX_RGB5;
+#else
+    return RB_TEX_RGBA8;
+#endif
+}
+
+void
+PixelMap::DestroyLiveTexture()
+{
+    // A handle from before a context loss may now be the name of an unrelated
+    // texture in the new context (names restart): deleting it would destroy
+    // that one. The old object died with its context (or, under the desktop
+    // test hook, is deliberately leaked like every other GL name).
+    if (_textureHandle && _textureGeneration == RendererBackendGet().TextureGeneration())
+        RendererBackendGet().DestroyTexture(_textureHandle);
     _textureHandle = NULL;
+}
+
+void
+PixelMap::RestoreTextureAfterContextLoss() const
+{
+    // Only a root video map that has been uploaded owns a texture. Generation 0
+    // is a backend that never loses textures (Metal, the headless stub, and the
+    // static-mesh recorder, which is the current backend only while baking).
+    if (_parent || !_textureHandle || !_pixelBuffer || _flags != MEMORY_VIDEO)
+        return;
+    RendererBackend& backend = RendererBackendGet();
+    const unsigned generation = backend.TextureGeneration();
+    if (generation == 0 || generation == _textureGeneration)
+        return;
+    // _pixelBuffer is the resident image this map has always kept (allocated
+    // in the constructor, freed only in the destructor, and kept in step by
+    // Load and UpdateRGBA8), so the restore costs no extra memory.
+#if !defined(WF_TARGET_IOS) && !defined(WF_TARGET_MACOS)
+    // The GL backend's CreateTexture enables GL_DEPTH_TEST and GL_BLEND and
+    // leaves the new texture bound (harmless at level load, where it has always
+    // run). Here it runs mid-frame, inside a draw that has already set blend
+    // and depth for its batch, so that state is put back as it was.
+    const GLboolean depth = glIsEnabled(GL_DEPTH_TEST), blend = glIsEnabled(GL_BLEND);
+    GLint binding = 0;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &binding);
+#endif
+    _textureHandle = backend.CreateTexture(_xSize, _ySize, PixelMapTextureFormat(), _pixelBuffer);
+    _textureGeneration = generation;
+#if !defined(WF_TARGET_IOS) && !defined(WF_TARGET_MACOS)
+    if (depth) glEnable(GL_DEPTH_TEST); else glDisable(GL_DEPTH_TEST);
+    if (blend) glEnable(GL_BLEND); else glDisable(GL_BLEND);
+    glBindTexture(GL_TEXTURE_2D, (GLuint)binding);
+#endif
 }
 
 //==============================================================================
@@ -211,13 +269,9 @@ PixelMap::Load(const void* memory, int xOffset, int yOffset, int xSize, int ySiz
         // size can change with it, and CreateTexture needs the pixels anyway.
         // DestroyTexture(NULL) is a no-op, so the first call is fine.
         RendererBackend& backend = RendererBackendGet();
-        backend.DestroyTexture(_textureHandle);
-#if SIXTEEN_BIT_VRAM
-        const RBTextureFormat fmt = RB_TEX_RGB5;
-#else
-        const RBTextureFormat fmt = RB_TEX_RGBA8;
-#endif
-        _textureHandle = backend.CreateTexture(_xSize, _ySize, fmt, pPB);
+        DestroyLiveTexture();
+        _textureHandle = backend.CreateTexture(_xSize, _ySize, PixelMapTextureFormat(), pPB);
+        _textureGeneration = backend.TextureGeneration();
         // NULL is tolerated, not asserted: a backend with no GPU (the headless
         // stub) legitimately returns it, and the draw path already handles an
         // absent texture.
@@ -246,6 +300,9 @@ PixelMap::UpdateRGBA8(int x, int y, int width, int height, const unsigned char* 
                     pixels + row * width * 4, (size_t)width * 4);
     if (!_textureHandle)
         return false;
+    // After a context loss the old name is dead; re-creating from the buffer
+    // (which already holds these rows) also uploads this update.
+    RestoreTextureAfterContextLoss();
     return RendererBackendGet().UpdateTextureRGBA8(_textureHandle, _ySize, x, y, width, height, pixels);
 }
 

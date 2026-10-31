@@ -1456,6 +1456,14 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     add_test(NAME mesh_index_per_mesh COMMAND wf_static_mesh_index_gl_test 0)
     set_tests_properties(mesh_index_shared mesh_index_per_mesh PROPERTIES LABELS "gl")
 
+    # Level textures across a real context loss: re-created from the resident
+    # pixel buffer on the next bind or update; stale names are never deleted.
+    add_executable(wf_pixelmap_context_loss_gl_test tests/pixelmap_context_loss_gl.cc)
+    target_link_libraries(wf_pixelmap_context_loss_gl_test PRIVATE wfengine)
+    target_compile_options(wf_pixelmap_context_loss_gl_test PRIVATE -fpermissive -w -fno-rtti)
+    add_test(NAME pixelmap_context_loss COMMAND wf_pixelmap_context_loss_gl_test)
+    set_tests_properties(pixelmap_context_loss PROPERTIES LABELS "gl")
+
     # Frame profile: the batch EndFrame flushes after Level::RenderScene closes
     # the profile frame still counts in that frame (game/runtime_profile.hp).
     add_executable(wf_frame_profile_flush_gl_test tests/frame_profile_flush_gl.cc)

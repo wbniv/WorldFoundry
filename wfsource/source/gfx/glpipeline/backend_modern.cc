@@ -845,8 +845,10 @@ public:
     // Called from the Android lifecycle hook (WFAndroidEglTerm) when the
     // EGL surface is destroyed. Reset all GL-object handles; the next draw
     // call's LazyInit will recompile the program + recreate VAO/VBO in the
-    // new context. Textures are re-uploaded lazily by PixelMap::SetGLTexture
-    // the first time each one is bound after resume.
+    // new context. Textures follow _contextGeneration (TextureGeneration):
+    // PixelMap re-creates its texture from its resident pixel buffer the
+    // first time it is bound after the loss, and the UI font and bitmap
+    // presenter re-create theirs from their catalogs.
     void OnSurfaceLost()
     {
         _inited      = false;
