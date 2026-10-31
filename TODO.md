@@ -2,7 +2,7 @@
 
 ## Open
 
-- [verify T4] **Baseline settings cleanup: two owners.** Built: Field types (the 27 type × showAs cases) and Runtime settings, both at (2, −4, 1); sample owners, empty section and gallery preset removed from the level. Host tests, desktop and bundle checks pass. Not done: device acceptance needs the validator patch (`validator-patch.diff`) deployed, and one authored-editable runtime row needs your OK. [plan](docs/plans/2026-10-31-baseline-settings-cleanup.md)
+- [verify T4] **Baseline settings cleanup: two owners.** Built: Field types (the 27 type × showAs cases) and Runtime settings, both at (2, −4, 1); sample owners, empty section and gallery preset removed from the level. Host tests, desktop and bundle checks pass. The editable Show FPS row is accepted ("we totally want this option"). Not done: device acceptance needs the validator patch (`validator-patch.diff`) deployed. [plan](docs/plans/2026-10-31-baseline-settings-cleanup.md)
 ### Platform / Display
 
 - [verify T3] **Planted Tank screensaver (third Dream).** The plants-only `planted` flavor, level cycle, badge art, generic Settings provider and coordinator support are implemented; the two-ABI APK and offline tests pass. The shared coordinator is deployed. 2026‑10‑25 on cast1: install and launcher tile, launch overrides, saltwater save and read-back, a natural Dream capture and the Pixel Dream all pass. Left: step 8 (default timing at 1×) and step 9 (the 50-tank soak), which need a device for about 25 minutes, and a rejected seed ends `plugin-error` (coordinator `TODO.md`). Do not use raw ADB on the shared TVs. [plan](docs/plans/2026-10-21-planted-tank-screensaver.md)
