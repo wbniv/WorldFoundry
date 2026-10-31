@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/c95d44bf) | Settings plan: the validator change is committed in the coordinator repo |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/d460aba6) | Settings cleanup: the editable Show FPS row is accepted |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/df676a00) | Baseline settings: two owners, Field types and Runtime settings |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/e6fe62eb) | Baseline: add a ladder of eight Utah teapots (52 to 16 256 faces) |
 
 <!--history-meta v1
+c95d44bf	author	Will Norris
+c95d44bf	added	2
+c95d44bf	deleted	2
+c95d44bf	files	1
+c95d44bf	body	The validator patch for the two-owner layout is now a real commit in the\ncoordinator project, 77920cc on the local branch baseline-two-owners-validators\n(based on 57a1ecf, one commit ahead, not pushed, nothing deployed). It covers all\nthree baseline validators, including baseline-runtime-options, which was also\nstale. The full containerised suite passes on the branch (2833 passed, 35\nskipped). validator-patch.diff is regenerated from that commit with\nformat-patch, and the plan's status line and risk row now say so.\n\nRecorded in the plan: the runtime-options validator can no longer show process-\nwide values syncing between two owners on a device (the level has one runtime\nowner now); that coverage stays in tests/test_runtime_options.py. The device\nrun is still the first real test of the validators' new key paths.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
 d460aba6	author	Will Norris
 d460aba6	added	2
 d460aba6	deleted	2
