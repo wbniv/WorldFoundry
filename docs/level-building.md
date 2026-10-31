@@ -249,6 +249,28 @@ runs the old host route. `task level-build-compare` builds each tank both ways a
 every output by sha256. See [the plan](plans/2026-10-16-blender-in-container.md). New level
 build scripts should use the same two-line preamble.
 
+### Adding a level to the main cd.iff
+
+The main bundle, `wfsource/source/game/cd.iff`, is packed from one list:
+[`wflevels/main-cd.manifest`](../wflevels/main-cd.manifest). A level's position in that file is its
+TOC index, and `task build-cd-iff` (`scripts/build-main-cd.py`), `wflevels/baseline/verify.py` and
+`tests/level_menu_harness.py` all read it, so there is no second list to keep in step.
+
+1. Build the level's standalone bundle, `wflevels/<name>-standalone.iff`. It must be the L4-rooted
+   file, not the bare `<name>.iff`: `game.cc` seeks one sector before reading each level's RAM chunk.
+2. **Append** `level <name>-standalone.iff | <Name>` to the manifest. Never reorder or insert:
+   `shell.fth` boots level 0, the SMB flag and axe chain levels by index (0 to 3), and scripts and
+   device checks name an index (the baseline is 7).
+3. `task build-cd-iff`, then commit the manifest, the standalone `.iff` and `cd.iff` together.
+4. `python3 -m pytest tests/test_main_cd_manifest.py tests/test_level_menu.py -q` and, for the
+   baseline, `python3 wflevels/baseline/verify.py --bundle wfsource/source/game/cd.iff`.
+
+`tests/test_main_cd_manifest.py` fails if the committed `cd.iff` is stale against any level in the
+manifest (`<level> is stale ...: run task build-cd-iff`), if the build script no longer reproduces
+the committed bytes, or if a hand-written copy of the list reappears in the Taskfile or `verify.py`.
+The per-app bundles (`build-cd-iff-aquarium`, `-condo`, the menu bundles) are separate and keep
+their own recipes.
+
 ### Committed Aquarium outputs stay fresh
 
 The built Aquarium files are committed (`.lev`, `.lvl`, mesh `.iff`, `actor-map.json`, the

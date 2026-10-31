@@ -98,7 +98,8 @@ reviewed `baseline-settings` validator. Default and gallery passed all 20 checks
 on both cast1 and cast2, including TV/phone ownership, Apply/Cancel, reconnect,
 Home/resume and held/released directional input. Baseline is now appended to the
 main `cd.iff` at index 7; existing indices and boot level 0 are preserved.
-`task build-cd-iff` rebuilds it. Verify bundle loading and gameplay with:
+The level list is [wflevels/main-cd.manifest](../main-cd.manifest) (see
+[Adding a level to the main cd.iff](../../docs/level-building.md)); `task build-cd-iff` rebuilds it. Verify bundle loading and gameplay with:
 
 ```sh
 python3 wflevels/baseline/verify.py --desktop --bundle wfsource/source/game/cd.iff

@@ -60,18 +60,31 @@ def structural():
     check('catalog contains three object instances',data[:4]==b'RP01' and struct.unpack_from('<I',data,4)[0]==3)
     check('standalone L4 and sector-aligned asset', (ROOT/'wflevels/baseline-standalone.iff').read_bytes()[:2]==b'L4' and (ROOT/'wflevels/baseline-standalone.iff').stat().st_size%2048==0)
 
+def main_cd_levels():
+    """The main cd.iff's levels in TOC order: wflevels/main-cd.manifest is the one list."""
+    import importlib.util
+    spec=importlib.util.spec_from_file_location('cd_manifest',ROOT/'scripts/cd_manifest.py')
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    return module.load()
+
 def bundle_checks(path):
     data=path.read_bytes()
+    levels=main_cd_levels()
     check('main CD GAME and TOC framing',data[:4]==b'GAME' and data[8:12]==b'TOC\0')
     toc_size=struct.unpack_from('<I',data,12)[0]
-    check('main CD has shell and eight levels',toc_size==9*12)
-    entries=[struct.unpack_from('<4sII',data,16+i*12) for i in range(9)]
-    names=['smb_w1_1','smb_w1_2','smb_w1_3','smb_w1_4','snowgoons','qbert_practice','marble-madness-3d-astra','baseline']
+    # Shell, the manifest's levels, then the UI font cdpack appends (UIFT).
+    check('main CD has the shell, every manifest level and the UI font',toc_size==(len(levels)+2)*12)
+    entries=[struct.unpack_from('<4sII',data,16+i*12) for i in range(len(levels)+2)]
     check('main CD preserves shell entry',entries[0][0]==b'SHEL' and entries[0][1]==2048)
-    for index,name in enumerate(names):
-        tag,offset,size=entries[index+1]
-        expected=(ROOT/'wflevels'/(name+'-standalone.iff')).read_bytes()
-        check('main CD level '+str(index)+' is '+name,offset%2048==0 and size==len(expected) and data[offset:offset+size]==expected)
+    for level in levels:
+        tag,offset,size=entries[level.index+1]
+        expected=level.path.read_bytes()
+        check('main CD level %d is %s'%(level.index,level.slug),offset%2048==0 and size==len(expected) and data[offset:offset+size]==expected)
+    tag,offset,size=entries[len(levels)+1]
+    font=(ROOT/'wfsource/source/game/ui-font.wfga').read_bytes()
+    # The entry is a UIFT chunk: tag, u32 length, then the font file itself.
+    body=data[offset:offset+size]
+    check('main CD ends with the UI font',tag==b'UIFT' and offset%2048==0 and body[:4]==b'UIFT' and struct.unpack_from('<I',body,4)[0]==len(font) and body[8:]==font)
 
 def desktop(bundle=None):
     sys.path.insert(0,str(ROOT/'tests'))
@@ -84,7 +97,7 @@ def desktop(bundle=None):
     args=[str(ROOT/'engine/wf_game'),'-L'+str(ROOT/'wflevels/baseline-standalone.iff'),'--debug-port',str(port),'--debug-bind','127.0.0.1','--debug-print-actors','-width=1280','-height=720','--vram-width=5120','--vram-height=2048','--vram-slot-width=1024','--vram-slot-height=1024','--vram-perm-width=1024','--vram-perm-height=1024']
     if bundle:
         shutil.copyfile(bundle,capture/'cd.iff')
-        args.pop(1);args.append('7')
+        args.pop(1);args.append(str(next(l.index for l in main_cd_levels() if l.slug=='baseline')))
     proc=subprocess.Popen(args,cwd=capture,env=env,stdout=log,stderr=subprocess.STDOUT)
     bridge=None
     try:

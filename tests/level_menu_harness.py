@@ -8,6 +8,7 @@ layout. No device, no display, no third-party Python packages (PIL only to rende
 
 from __future__ import annotations
 
+import importlib.util
 import os
 import shutil
 import struct
@@ -26,10 +27,18 @@ SMB_MENU_BUNDLE = LEVELS / "smb-menu-cd.iff"
 SMB_LEVELS = [f"smb_w1_{n}-standalone.iff" for n in (1, 2, 3, 4)]
 UI_FONT = GAME / "ui-font.wfga"
 
-# Every tracked bundle built without a manifest, with its recipe (Taskfile.yml build-cd-iff*): shell.fth + these levels.
+
+def _main_cd_levels():
+    """The main cd.iff's levels from wflevels/main-cd.manifest, the one list `task build-cd-iff` also reads."""
+    spec = importlib.util.spec_from_file_location("cd_manifest", REPO / "scripts" / "cd_manifest.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return [level.path.name for level in module.load()]
+
+
+# Every tracked bundle built without a manifest, with its recipe (Taskfile.yml build-cd-iff*; the main one is wflevels/main-cd.manifest): shell.fth + these levels.
 PLAIN_BUNDLES = {
-    "wfsource/source/game/cd.iff": SMB_LEVELS + ["snowgoons-standalone.iff", "qbert_practice-standalone.iff",
-                                                  "marble-madness-3d-astra-standalone.iff", "baseline-standalone.iff"],
+    "wfsource/source/game/cd.iff": _main_cd_levels(),
     "wflevels/smb-cd.iff": SMB_LEVELS,
     "wflevels/snowgoons-cd.iff": ["snowgoons-standalone.iff"],
     "wflevels/qbert-cd.iff": ["qbert_practice-standalone.iff"],

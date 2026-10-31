@@ -1,6 +1,6 @@
 # Baseline: a ladder of Utah teapots with rising face counts
 
-**Status:** Implemented 2026‑10‑31; verification steps 1–6 pass on the desktop. The device install (step 8) is queued behind a coordinator maintenance window and cast2 is unreachable; step 7 is blocked by drift that predates this work. Rank **T3**. Land it **before** [the settings cleanup](2026-10-31-baseline-settings-cleanup.md): both change actor indices, and this one only appends.
+**Status:** Implemented 2026‑10‑31; verification steps 1–7 pass on the desktop. The device install (step 8): the Pixel is installed, cast2 is unreachable. Rank **T3**. Land it **before** [the settings cleanup](2026-10-31-baseline-settings-cleanup.md): both change actor indices, and this one only appends.
 
 ## Context
 
@@ -116,13 +116,12 @@ The change adds no screen text beyond the label boards. The empty, error and nar
 | **Memory budget** | `memory-settings.json` authored 4 000 000 B per room slot | **Hit and resolved**: needed about 6.7 MB, now 8 000 000 (approach item 8). A device `check` still has to confirm the Chromecast loads it |
 | **cast2 is unreachable** | `chromecast-test-02`: "Coordinator control unavailable", configured `192.168.4.29:33803` (2026‑10‑31 16:23 and 16:41 +07). Several older install jobs from other sessions have waited on it for more than 110 h | Job `J‑842a6d03570a` is submitted and reports `needs-local-setup`. **I need the "IP address & Port" line from cast2's Wireless debugging screen** before it can run. I did not touch the other sessions' jobs |
 | **Coordinator maintenance** | An update started at 16:35 and new jobs wait for it | Pixel job `J‑7431f689137f` is queued (batch `B-c1387a030d36`) and starts by itself when grants resume; I did not bypass the pause |
-| **Main `cd.iff` is stale** | Index 7 still holds the old baseline. A rebuild also changes the qbert entry (its level was committed 2026‑10‑27, `cd.iff` on 2026‑10‑17), and `verify.py --bundle` expects 9 TOC entries while the bundle now has 10 (the `UIFT` font entry) | Not rebuilt or committed here, so an unrelated change does not ride along. Follow-up below |
+| **Main `cd.iff` was stale** | Index 7 held the old baseline, the qbert entry had drifted, and `verify.py --bundle` expected 9 TOC entries against the bundle's 10 | **Resolved** by formalizing the bundle: `wflevels/main-cd.manifest` is now the one level list, and the build, the checker and the tests read it (see step 7) |
 | **Backface culling** | Mixed patch orientation would show holes | **Not a problem**: the raw winding is already consistent and outward; inside-spout and inside-handle faces stay single-sided, as expected |
 | **Actor indices** | The settings cleanup removes `SampleSettings3` and shifts these ids | Land this first; ids come from `actor-map.json`, never hard-coded |
 
 ## Out of scope
 
-- **Refresh the main `cd.iff`** (index 7, the drifted qbert entry) and update `verify.py --bundle` for the 10-entry TOC. Pre-existing drift; needs its owner's call.
 - **Run the baseline build in the Blender container**, like the `aquarium_*` levels (`scripts/level-build.sh`). `build.py` is host-only today, so this work ran on the host as the Taskfile defines.
 - Distance-based level of detail at runtime. The ladder is for measuring, not for swapping meshes.
 - Collision for teapots, and textures or UV mapping beyond a flat colour.
@@ -218,7 +217,25 @@ compiled descriptor checks passed: 118
 
 7. `task build-cd-iff` then `python3 wflevels/baseline/verify.py --desktop --bundle wfsource/source/game/cd.iff`.
 
-**NOT RUN, blocked by drift that predates this work.** `task build-cd-iff` succeeds and changes the baseline entry (546 816 → 1 335 296 bytes) but also the qbert entry (same size, different bytes: its level was committed 2026‑10‑27, `cd.iff` on 2026‑10‑17). `verify.py --bundle` expects 9 TOC entries; the bundle has 10 since the `UIFT` font entry. The rebuilt `cd.iff` was discarded so an unrelated change does not ride along; see Out of scope.
+```
+main cd.iff: 8 levels from wflevels/main-cd.manifest
+  L7: 1335296 bytes at sector 676 (baseline-standalone.iff)
+  UIFT: 2770440 bytes at sector 1328 (…/wfsource/source/game/ui-font.wfga)
+main CD GAME and TOC framing True
+main CD has the shell, every manifest level and the UI font True
+main CD preserves shell entry True
+main CD level 0 is smb_w1_1 True
+…
+main CD level 6 is marble-madness-3d-astra True
+main CD level 7 is baseline True
+main CD ends with the UI font True
+native script compilation succeeds True
+native player grounded at spawn True
+runtime still running True
+162 passed of 162 (desktop session loaded the baseline from the bundle as level 7)
+```
+
+**PASS**: the baseline loads and plays from the main bundle. This step was first blocked by drift that predates this work: the qbert entry was stale (its level was committed 2026‑10‑27, `cd.iff` on 2026‑10‑17) and the checker expected 9 TOC entries against the bundle's 10 (the `UIFT` font). Fixing it meant formalizing how a level joins the bundle: `wflevels/main-cd.manifest` is the single, ordered level list (position = TOC index); `scripts/build-main-cd.py` packs it for `task build-cd-iff`; `verify.py` and `tests/level_menu_harness.py` read it instead of carrying copies; `tests/test_main_cd_manifest.py` fails on a stale bundle or a hand-written list; the procedure is in `docs/level-building.md`. The rebuilt bundle is byte-identical to the one the old hand-written command produced (SHA‑256 `797a5bf12b43…`); the refactor changed no bytes.
 
 8. `task chromecast:submit WORKFLOW=install DEVICE=phone-pixel-8-pro,chromecast-test-02 APP=baseline APK=<frozen baseline apk> ASYNC=true`, then `task chromecast:watch BATCH=<id> STAGE=install`: both installed and launcher-verified, then a `check` on each device with a screenshot and the frame rate with all eight teapots in view.
 

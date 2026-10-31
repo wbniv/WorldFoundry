@@ -1062,30 +1062,15 @@ tasks:
         bash wftools/wf_blender/build_level_binary.sh "$1"
 
   build-cd-iff:
-    desc: "Assemble wfsource/source/game/cd.iff from shell.fth + standalone level IFFs via cdpack-rs (SMB W1-1=0, W1-2=1, W1-3=2, W1-4=3, snowgoons=4, qbert=5, Astra Marble Madness=6, baseline=7)"
+    desc: "Assemble wfsource/source/game/cd.iff from shell.fth + the levels of wflevels/main-cd.manifest, in manifest order = TOC index (SMB W1-1=0 … baseline=7). To add a level, append a line to that manifest (docs/level-building.md)"
     cmds:
       - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
-      # Feed the *-standalone.iff (L4-rooted) files, NOT the bare LVAS *.iff:
-      # game.cc:250 seeks TOC_offset + one sector before reading each level's RAM
-      # config, so every body needs the standalone wrapper's leading ALGN sector.
-      # Order = TOC index. shell.fth boots level 0, so SMB W1-1 leads -> the bundle
-      # boots into Mario. Flagpole/axe advance ActBoxes chain the loop:
-      # W1-1 writes LEVEL_TO_RUN=1 (-> W1-2), W1-2 writes 2 (-> W1-3), W1-3 writes 3
-      # (-> W1-4), W1-4 writes 0 (-> W1-1) — an endless W1-1->W1-2->W1-3->W1-4 loop.
-      # snowgoons/qbert stay at 4/5; Astra Marble Madness stays at 6; baseline is 7.
-      # See docs/plans/2026-06-03-build-faithful-smb-w1-4.md.
-      - |
-        wftools/cdpack-rs/target/release/cdpack \
-          wfsource/source/game/shell.fth \
-          wflevels/smb_w1_1-standalone.iff \
-          wflevels/smb_w1_2-standalone.iff \
-          wflevels/smb_w1_3-standalone.iff \
-          wflevels/smb_w1_4-standalone.iff \
-          wflevels/snowgoons-standalone.iff \
-          wflevels/qbert_practice-standalone.iff \
-          wflevels/marble-madness-3d-astra-standalone.iff \
-          wflevels/baseline-standalone.iff \
-          -o wfsource/source/game/cd.iff
+      # The level list, its order and the rules for changing it live in wflevels/main-cd.manifest;
+      # scripts/build-main-cd.py (via scripts/cd_manifest.py) packs it, and wflevels/baseline/verify.py
+      # and tests/level_menu_harness.py read the same file. Order = TOC index: shell.fth boots level 0
+      # (SMB W1-1), and the flagpole/axe ActBoxes chain W1-1 -> W1-2 -> W1-3 -> W1-4 -> W1-1 by index
+      # (docs/plans/2026-06-03-build-faithful-smb-w1-4.md).
+      - python3 scripts/build-main-cd.py
 
   build-cd-iff-aquarium:
     desc: "Assemble the aquarium-only cd.iff (shell.fth boots TOC level 0 = wflevels/aquarium-standalone.iff; no -L needed) via cdpack-rs → wflevels/aquarium-cd.iff, or CD_OUT=<path>. Direct benchmarks and the macOS/iOS aquarium apps reuse it; Android uses build-cd-iff-aquarium-menu instead (docs/plans/2026-09-30-aquarium-chromecast.md § Reuse)"

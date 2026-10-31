@@ -175,6 +175,7 @@
 
 
 ## Done
+- ✅ 2026-10-31 — [main-cd-manifest] The main cd.iff's level list is one manifest (wflevels/main-cd.manifest) read by build, verify and tests; bundle refreshed. See [plan](docs/plans/2026-10-31-baseline-utah-teapots.md).
 
 - ✅ 2026‑10‑25 — [screensaver-landscape] Seahorse, Aquarium, Planted Dreams start landscape, per-app setting; verified on Pixel and casts. See [plan](docs/plans/2026-10-24-screensaver-landscape-orientation.md).
 - ✅ 2026-10-17 — [seahorses-phase3] Behaviour, Seahorses sheet, cooker header-id fix; Cast1 applies None..6 pairs (13/13). See [plan](docs/plans/2026-10-16-saltwater-seahorses.md).
@@ -542,7 +543,6 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** A new engine API for level scripts to open a chosen owner. — _from [2026-10-31-baseline-settings-cleanup.md](docs/plans/2026-10-31-baseline-settings-cleanup.md)_  <!-- fp:071668ff33f36aa0 -->
 - [ ] **(triage)** Settings on the diagnostics preset. — _from [2026-10-31-baseline-settings-cleanup.md](docs/plans/2026-10-31-baseline-settings-cleanup.md)_  <!-- fp:e6671e60e4836f80 -->
 - [verify] **2026-10-31-baseline-settings-cleanup** — Verification section present but no PASS recorded — run + record the steps. _from [2026-10-31-baseline-settings-cleanup.md](docs/plans/2026-10-31-baseline-settings-cleanup.md)_  <!-- fp:729aa0fe071cee18 -->
-- [ ] **(triage)** **Refresh the main `cd.iff`** (index 7, the drifted qbert entry) and update `verify.py --bundle` for the 10-entry TOC. Pre-existing drift; needs its owner's call. — _from [2026-10-31-baseline-utah-teapots.md](docs/plans/2026-10-31-baseline-utah-teapots.md)_  <!-- fp:aabe41e997fd92ac -->
 - [ ] **(triage)** **Run the baseline build in the Blender container**, like the `aquarium_*` levels (`scripts/level-build.sh`). `build.py` is host-only today, so this work ran on the host as the Taskfile defines. — _from [2026-10-31-baseline-utah-teapots.md](docs/plans/2026-10-31-baseline-utah-teapots.md)_  <!-- fp:415744963d904bee -->
 - [ ] **(triage)** Distance-based level of detail at runtime. The ladder is for measuring, not for swapping meshes. — _from [2026-10-31-baseline-utah-teapots.md](docs/plans/2026-10-31-baseline-utah-teapots.md)_  <!-- fp:25c024aa840bac5a -->
 - [ ] **(triage)** Collision for teapots, and textures or UV mapping beyond a flat colour. — _from [2026-10-31-baseline-utah-teapots.md](docs/plans/2026-10-31-baseline-utah-teapots.md)_  <!-- fp:b940e905846bee92 -->

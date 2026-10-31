@@ -1,0 +1,28 @@
+# The levels of the main cd.iff (wfsource/source/game/cd.iff), in TOC order.
+#
+# The order IS the level index. `task build-cd-iff` packs these levels, in this order, behind
+# wfsource/source/game/shell.fth; wflevels/baseline/verify.py and tests/level_menu_harness.py
+# read the same list, so adding a level is one line here and nothing else to keep in step.
+#
+# To add a level:
+#   1. Build its standalone bundle: wflevels/<name>-standalone.iff (an L4-rooted file, not the
+#      bare LVAS <name>.iff: game.cc seeks one sector before reading each level's RAM chunk).
+#   2. APPEND a `level` line below. Never reorder or insert: shell.fth boots level 0, and levels
+#      chain by index (SMB W1-1 .. W1-4 write LEVEL_TO_RUN = 1, 2, 3, 0), as do launch scripts
+#      and device checks that name an index (the baseline is `7`).
+#   3. `task build-cd-iff`, then commit this file, the standalone .iff and wfsource/source/game/cd.iff.
+#   4. `python3 -m pytest tests/test_main_cd_manifest.py tests/test_level_menu.py -q`
+#
+# Format: `level <path> | <name>`; paths are relative to this file; names are printable ASCII,
+# 1 to 60 characters. This bundle has no level menu, so `title` and `prompt` are not allowed
+# here (the menu bundles, wflevels/*-menu.manifest, take them and are packed by cdpack --manifest).
+# This file is not passed to cdpack: build-main-cd.py hands it the paths, so the bundle stays a
+# plain pack with no MENU chunk. See docs/level-building.md, "Adding a level to the main cd.iff".
+level smb_w1_1-standalone.iff | World 1-1
+level smb_w1_2-standalone.iff | World 1-2
+level smb_w1_3-standalone.iff | World 1-3
+level smb_w1_4-standalone.iff | World 1-4
+level snowgoons-standalone.iff | Snowgoons
+level qbert_practice-standalone.iff | Q*bert practice
+level marble-madness-3d-astra-standalone.iff | Marble Madness 3D (Astra)
+level baseline-standalone.iff | World Foundry baseline

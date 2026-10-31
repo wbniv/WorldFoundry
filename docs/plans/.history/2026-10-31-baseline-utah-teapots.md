@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/e7ba498a) | Teapot plan: correct the preset note and record the captured follow-ups |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/e6fe62eb) | Baseline: add a ladder of eight Utah teapots (52 to 16 256 faces) |
 
 <!--history-meta v1
+e7ba498a	author	Will Norris
+e7ba498a	added	1
+e7ba498a	deleted	1
+e7ba498a	files	1
+e7ba498a	body	Every preset includes the teapots (they are part of the shared scene), so the\n"default scene only" out-of-scope line was wrong; it now says optional-per-\npreset is the deferred item. The commit hook captured this plan's out-of-scope\nitems into the TODO Inbox (main cd.iff refresh, running the baseline build in\nthe Blender container, teapot follow-ups); this records them.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
 e6fe62eb	author	Will Norris
 e6fe62eb	added	231
 e6fe62eb	deleted	0
