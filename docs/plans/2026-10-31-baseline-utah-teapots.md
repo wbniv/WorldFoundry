@@ -128,7 +128,7 @@ The change adds no screen text beyond the label boards. The empty, error and nar
 - Collision for teapots, and textures or UV mapping beyond a flat colour.
 - The rest of the Newell tea set (teacup, teaspoon), which ships in the same dataset and is a natural follow-up.
 - The 2026 curvature-continuous revision by Yuksel, Blinn and Newell, and the 1992 and 2006 solid variants.
-- Extending the `settings-gallery` and `diagnostics` presets; teapots live in the default scene only.
+- Making the teapots optional per preset. Every preset (default, diagnostics, settings-gallery) includes them today.
 
 ## Verification
 
