@@ -56,8 +56,10 @@ static void* WFEngineThreadMain(void* /*arg*/)
     NSLog(@"wf_game: engine thread enter");
     NSArray<NSString *> *arguments = [[NSProcessInfo processInfo] arguments];
     std::vector<char *> argv;
-    for (NSString *argument in arguments)
+    for (NSString *argument in arguments) {
+        if ([argument hasPrefix:@"--review-orientation="]) continue;
         argv.push_back(const_cast<char *>([argument UTF8String]));
+    }
     argv.push_back(nullptr);
     __argc = (int)argv.size() - 1;
     __argv = argv.data();
@@ -103,6 +105,15 @@ static void WFResume(UIView* root, const char* why)
 
 @implementation WFRootViewController
 
+// Diagnostic-only switch on this isolated test branch. The shipped app stays landscape-only.
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    NSArray<NSString *> *args = NSProcessInfo.processInfo.arguments;
+    if ([args containsObject:@"--review-orientation=portrait"]) return UIInterfaceOrientationMaskPortrait;
+    if ([args containsObject:@"--review-orientation=landscape"]) return UIInterfaceOrientationMaskLandscapeLeft;
+    return UIInterfaceOrientationMaskLandscape;
+}
+
 - (void)loadView
 {
     // Phase 2A: root view is a CAMetalLayer-backed WFMetalView (see
@@ -146,6 +157,24 @@ static void WFResume(UIView* root, const char* why)
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
+    NSArray<NSString *> *args = NSProcessInfo.processInfo.arguments;
+    BOOL testPortrait = [args containsObject:@"--review-orientation=portrait"];
+    BOOL testLandscape = [args containsObject:@"--review-orientation=landscape"];
+    if (testPortrait || testLandscape) {
+      if (@available(iOS 16.0, *)) {
+        UIWindowScene *scene = self.view.window.windowScene;
+        UIInterfaceOrientationMask mask = testPortrait ? UIInterfaceOrientationMaskPortrait : UIInterfaceOrientationMaskLandscapeLeft;
+        [self setNeedsUpdateOfSupportedInterfaceOrientations];
+        UIWindowSceneGeometryPreferencesIOS *prefs = [[UIWindowSceneGeometryPreferencesIOS alloc] initWithInterfaceOrientations:mask];
+        [scene requestGeometryUpdateWithPreferences:prefs errorHandler:^(NSError *error) {
+            NSLog(@"FY_ORIENTATION error=%@", error);
+        }];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            CGRect bounds = self.view.window.bounds;
+            NSLog(@"FY_ORIENTATION requested=%@ actual=%ld width=%.0f height=%.0f", testPortrait ? @"portrait" : @"landscape", (long)scene.interfaceOrientation, bounds.size.width, bounds.size.height);
+        });
+      }
+    }
     WFResume(self.view, "viewDidAppear");
 }
 

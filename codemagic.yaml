@@ -316,6 +316,10 @@ workflows:
             local launch_args=()
             if [[ "$label" == fyw-* ]]; then
               launch_args=(--vram-slot-width=1024 --vram-slot-height=2048 --vram-perm-width=2048 --vram-perm-height=2048)
+              case "$label" in
+                fyw-ipad-landscape) launch_args+=(--review-orientation=landscape) ;;
+                fyw-ipad-portrait) launch_args+=(--review-orientation=portrait) ;;
+              esac
             fi
             touch "$marker"
             echo "=== $label: $name ($udid) ==="
@@ -326,10 +330,6 @@ workflows:
               echo "$label|$name|$install|$launch|$alive|$colours|$dominant" >> "$VERDICT"
               return 0
             fi
-            case "$label" in
-              fyw-ipad-landscape) xcrun devicectl device orientation set -d "$udid" landscapeLeft || echo "Simulator orientation command unavailable; app orientation still constrained by Info.plist" ;;
-              fyw-ipad-portrait) xcrun devicectl device orientation set -d "$udid" portrait || echo "Simulator orientation command unavailable; app orientation still constrained by Info.plist" ;;
-            esac
             echo "--- install ---"
             xcrun simctl install "$udid" "$APP" && install=yes
             if [ "$install" = yes ]; then
@@ -344,7 +344,13 @@ workflows:
             if [ "$launch" = yes ]; then
               # 20 s: HALStart, cd.iff load, steady-state frames, and well past
               # the ~11 s at which the simulator CoreAudio RPC used to abort.
-              sleep 20
+              if [[ "$label" == fyw-ipad-* ]]; then
+                sleep 10
+                xcrun simctl io "$udid" screenshot "$CM_BUILD_DIR/ios-$label-early.png" || true
+                sleep 10
+              else
+                sleep 20
+              fi
               # Exercise real UIKit background/resume, retaining this process.
               xcrun simctl launch "$udid" com.apple.Preferences
               sleep 2
@@ -450,8 +456,6 @@ workflows:
           if [ -n "${IPHONE_ID:-}" ]; then run_device fyw-iphone "$IPHONE_ID" "$IPHONE_NAME"; fi
           if [ -n "${IPAD_ID:-}" ]; then
             run_device fyw-ipad-landscape "$IPAD_ID" "$IPAD_NAME"
-            # Test-only portrait app: production currently declares landscape only.
-            python3 -c 'import plistlib,sys; p=sys.argv[1]; d=plistlib.load(open(p,"rb")); d["UISupportedInterfaceOrientations~ipad"]=["UIInterfaceOrientationPortrait"]; d["UIRequiresFullScreen"]=True; plistlib.dump(d,open(p,"wb"))' "$FYW_APP/Info.plist"
             run_device fyw-ipad-portrait "$IPAD_ID" "$IPAD_NAME"
           fi
           APP="$DEFAULT_APP"
@@ -508,6 +512,7 @@ workflows:
       - ios-crash-*
       - ios-verdict.txt
       - ios-fyw-*-screenshot.png
+      - ios-fyw-*-early.png
       - ios-fyw-*-launch.log
       # RUNTIME_OUTPUT_DIRECTORY is ${CMAKE_SOURCE_DIR}/engine, so the .app
       # (+ dSYM, if generated) lands under engine/<config>/.
