@@ -1033,13 +1033,8 @@ tasks:
     cmds:
       - python3 wflevels/baseline/build.py --preset diagnostics
 
-  baseline:settings-gallery:
-    desc: "Build the complete OAS/OAD coverage catalog; interactive host integration remains separately approved"
-    cmds:
-      - python3 wflevels/baseline/build.py --preset settings-gallery
-
   baseline:verify:
-    desc: "Verify baseline geometry contract and compiled OAS/OAD coverage"
+    desc: "Verify baseline geometry contract, its two settings owners, and the compiled OAS/OAD coverage fixture"
     cmds:
       - python3 wflevels/baseline/verify.py
 

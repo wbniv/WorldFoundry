@@ -128,10 +128,10 @@ The `wf-edit` editor has its own switches, distinct from the engine's above: `--
 
 ## Baseline Runtime Options
 
-The default and settings-gallery baseline catalogs include one Runtime Options
-sheet for each sample owner. The engine reads the cooked RPRP catalog and
-snapshots process state when the editor opens. Both owners share runtime values;
-ordinary sample values remain per instance. Apply changes supported values,
+The baseline's **Runtime settings** owner carries the Runtime Options sheet, once.
+The engine reads the cooked RPRP catalog and snapshots process state when the
+editor opens. Runtime values are process-wide: every owner that carries the sheet
+shows the same values (the descriptor-gallery test fixture checks this with two). Apply changes supported values,
 Cancel discards them, and stale process snapshots are rejected.
 
 Show FPS and the fixed simulation clock are live controls. The rate is bounded

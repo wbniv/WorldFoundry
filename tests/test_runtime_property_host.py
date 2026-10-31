@@ -12,8 +12,9 @@ def builds(tmp_path_factory):
     out=tmp_path_factory.mktemp('generic-settings')
     spec=importlib.util.spec_from_file_location('catalog',ROOT/'scripts/build-object-properties.py')
     cooker=importlib.util.module_from_spec(spec);spec.loader.exec_module(cooker)
-    bindings=json.loads((ROOT/'wflevels/baseline/settings-bindings.json').read_text())
-    catalogs=[cooker.catalog(ROOT/'wflevels/baseline/settings.oad',bindings,actor) for actor in [11,22]]
+    # Two same-schema owners from the descriptor coverage fixture (not a level owner).
+    bindings=json.loads((ROOT/'wflevels/baseline/settings-gallery-bindings.json').read_text())
+    catalogs=[cooker.catalog(ROOT/'wflevels/baseline/settings-gallery.oad',bindings,actor) for actor in [11,22]]
     catalog=out/'baseline.rprp';catalog.write_bytes(b'RP01'+struct.pack('<I',2)+b''.join(c[8:] for c in catalogs))
     core=[str(ROOT/'engine'/name) for name in ['runtime_properties.cpp','runtime_property_form.cpp','runtime_property_host.cpp']]
     libraries=[str(ROOT/'wftools/wf_attr_edit/target/release/libwf_attr_edit.a'),'-ldl','-lpthread','-lm']

@@ -1,0 +1,257 @@
+Baseline validators for the two-owner baseline (World Foundry docs/plans/2026-10-31-baseline-settings-cleanup.md).
+Against chromecast-coordinator 27ffa9f. Apply from that repo root with: git apply validator-patch.diff
+
+diff -ruN a/scripts/wf_device/plugins/android/validators/baseline_checks.py b/scripts/wf_device/plugins/android/validators/baseline_checks.py
+--- a/scripts/wf_device/plugins/android/validators/baseline_checks.py	2026-10-31 18:40:02.162240715 +0700
++++ b/scripts/wf_device/plugins/android/validators/baseline_checks.py	2026-10-31 18:40:45.725037203 +0700
+@@ -1,4 +1,11 @@
+-"""Fixed baseline catalog, remote input and lifecycle acceptance in one lease."""
++"""Fixed baseline catalog, remote input and lifecycle acceptance in one lease.
++
++The baseline has two settings owners (World Foundry
++docs/plans/2026-10-31-baseline-settings-cleanup.md): "Field types" (schema FieldTypes)
++and "Runtime settings" (schema Settings). Field ids used here are Field types rows from
++wflevels/baseline/field_types.py: 1 int-number (120, 0..86400), 7 float-slider (0.65),
++17 str-plain ("Garden").
++"""
+ import json
+ import time
+ from .diagnostics import Bridge
+@@ -28,7 +35,7 @@
+     try:
+         bridge=Bridge(a)
+         initial=wait('ready',lambda s:s['player'] and s['game']['mode']=='game' and not s['game']['paused'])
+-        check(initial['properties']['schema']=='BaselineSettings','baseline_catalog_attached')
++        check(initial['properties']['schema']=='FieldTypes','baseline_catalog_attached')
+         pos=initial['player']['position'];check(abs(pos[0])<.1 and abs(pos[1]+5)<.1 and .85<pos[2]<1.05,'grounded_spawn')
+         hold('19',2200)
+         moved=snap('held-up-released',since_input=initial['input']['received'])
+@@ -45,41 +52,46 @@
+         picker=wait('tv-picker',lambda s:s['game']['modal']=='object-picker')
+         check(picker['game']['paused'],'picker_pauses_simulation')
+         a.capture('tv-picker-')
+-        # Row 0 is Pick in 3D; rows 1..3 are the owners, so the second owner is two rows down.
++        # Row 0 is Pick in 3D; rows 1..2 are the owners, so the second owner is two rows down.
+         tap('DPAD_DOWN');tap('DPAD_DOWN');tap('DPAD_CENTER')
+         form=wait('tv-owner-form',lambda s:s['game']['modal']=='form',draft=True)
+         check(form['properties']['edit']['open'] and form['properties']['actor']!=initial['properties']['actor'],'tv_selects_second_owner')
+         a.capture('tv-form-');tap('BACK');wait('tv-closed',lambda s:s['game']['modal']=='none')
+         phone=Phone(a);model();phone.send('r:open');picker_model=model(lambda m:m.get('picker'))
+-        owners=picker_model['objects'];check(len(owners)==3 and owners[0]['actor']<owners[1]['actor']<owners[2]['actor'],'stable_three_owner_picker')
++        owners=picker_model['objects']
++        check([o['title'] for o in owners]==['Field types','Runtime settings'] and owners[0]['actor']<owners[1]['actor'],'stable_two_owner_picker')
+         check(picker_model.get('pick')=='off','chooser_offers_pick_in_3d')
+-        first,second=[str(o['actor']) for o in owners[:2]]
+-        phone.command(picker_model,'select',second);edited=model(lambda m:m['open'] and not m.get('picker'))
+-        stale=picker_model['session'];phone.send('r:'+str(stale)+':set:40:9');a.wait(.3)
+-        check(values(model(lambda m:not m.get('picker')))['40']=='-3','stale_picker_session_ignored')
+-        phone.command(edited,'set','40:8');phone.command(edited,'set','64:0.5');phone.command(edited,'set','70:Device%20baseline')
+-        edited=model(lambda m:values(m).get('40')=='8' and values(m).get('64')=='0.5' and values(m).get('70')=='Device baseline')
++        types,runtime=[str(o['actor']) for o in owners]
++        phone.command(picker_model,'select',types);edited=model(lambda m:m['open'] and not m.get('picker'))
++        stale=picker_model['session'];phone.send('r:'+str(stale)+':set:1:9');a.wait(.3)
++        check(values(model(lambda m:not m.get('picker')))['1']=='120','stale_picker_session_ignored')
++        phone.command(edited,'set','1:8');phone.command(edited,'set','7:0.5');phone.command(edited,'set','17:Device%20baseline')
++        edited=model(lambda m:values(m).get('1')=='8' and values(m).get('7')=='0.5' and values(m).get('17')=='Device baseline')
+         a.capture('phone-draft-');phone.command(edited,'apply');model(lambda m:not m['open'])
+-        phone.send('r:open');picker_model=model(lambda m:m.get('picker'));phone.command(picker_model,'select',first)
++        # The other owner is a separate catalog: runtime and memory rows, none of Field types'.
++        phone.send('r:open');picker_model=model(lambda m:m.get('picker'));phone.command(picker_model,'select',runtime)
++        other=model(lambda m:m['open'] and not m.get('picker'))
++        check('1' not in values(other) and '1000' in values(other) and '2000' in values(other),'other_owner_separate')
++        phone.command(other,'cancel');model(lambda m:not m['open'])
++        phone.send('r:open');picker_model=model(lambda m:m.get('picker'));phone.command(picker_model,'select',types)
+         original=model(lambda m:m['open'] and not m.get('picker'))
+-        check(values(original)['40']=='-3' and values(original)['70']=='Baseline','other_instance_unchanged')
+-        phone.command(original,'set','40:13');invalid=model(lambda m:values(m).get('40')=='13');phone.command(invalid,'apply')
++        phone.command(original,'set','1:90000');invalid=model(lambda m:values(m).get('1')=='90000');phone.command(invalid,'apply')
+         invalid=model(lambda m:m['open'] and bool(m['error']));session=invalid['session']
+         phone.close();phone=None;a.wait(.8);a.capture('disconnected-draft-')
+         phone=Phone(a);reconnected=model(lambda m:m['open'] and m['session']==session)
+-        check(values(reconnected)['40']=='13' and bool(reconnected['error']),'reconnect_preserves_invalid_draft')
++        check(values(reconnected)['1']=='90000' and bool(reconnected['error']),'reconnect_preserves_invalid_draft')
+         phone.command(reconnected,'cancel');model(lambda m:not m['open']);phone.send('r:open');picker_model=model(lambda m:m.get('picker'))
+-        phone.command(picker_model,'select',second);saved=model(lambda m:m['open'] and not m.get('picker'))
+-        check(values(saved)['40']=='8' and values(saved)['64']=='0.5','apply_readback')
+-        phone.command(saved,'set','40:7');model(lambda m:values(m).get('40')=='7');phone.close();phone=None
++        phone.command(picker_model,'select',types);saved=model(lambda m:m['open'] and not m.get('picker'))
++        check(values(saved)['1']=='8' and values(saved)['7']=='0.5' and values(saved)['17']=='Device baseline','apply_readback')
++        phone.command(saved,'set','1:7');model(lambda m:values(m).get('1')=='7');phone.close();phone=None
+         process=a.shell('pidof',a.package).strip();a.key('KEYCODE_HOME');a.wait(1)
+         a.shell('am','start','-W','-n',a.activity());a.wait(2);bridge.connect()
+         resumed=wait('resumed',lambda s:not s['game']['suspended'] and s['game']['modal']=='none')
+         check(a.shell('pidof',a.package).strip()==process,'home_resume_same_process')
+         check(not resumed['input']['held'],'home_resume_releases_input')
+-        phone=Phone(a);model();phone.send('r:open');picker_model=model(lambda m:m.get('picker'));phone.command(picker_model,'select',second)
++        phone=Phone(a);model();phone.send('r:open');picker_model=model(lambda m:m.get('picker'));phone.command(picker_model,'select',types)
+         saved=model(lambda m:m['open'] and not m.get('picker'))
+-        check(values(saved)['40']=='8','home_cancels_uncommitted_draft')
++        check(values(saved)['1']=='8','home_cancels_uncommitted_draft')
+         phone.command(saved,'cancel');model(lambda m:not m['open']);phone.send('b:801');a.wait(.25);phone.send('b:0');a.wait(.6)
+         reset=snap('remote-reset-chord');pos=reset['player']['position']
+         check(abs(pos[0])<.1 and abs(pos[1]+5)<.1 and .85<pos[2]<1.05,'reset_chord_without_settings_or_jump')
+diff -ruN a/scripts/wf_device/plugins/android/validators/picker_checks.py b/scripts/wf_device/plugins/android/validators/picker_checks.py
+--- a/scripts/wf_device/plugins/android/validators/picker_checks.py	2026-10-31 18:40:02.141614461 +0700
++++ b/scripts/wf_device/plugins/android/validators/picker_checks.py	2026-10-31 18:40:45.724802768 +0700
+@@ -1,9 +1,10 @@
+ """Pick in 3D on the baseline level: chooser, pick mode, a phone arrow, the same-spot
+ group, the owner's form and the remote's Back chain, in one lease.
+ 
+-World Foundry docs/plans/2026-10-16-runtime-object-editing.md, verification step 11.
+-The baseline fixture has three owners: "Baseline settings 2" alone nearest the
+-screen centre, and two sharing one spot to its right ("2 objects here").
++World Foundry docs/plans/2026-10-16-runtime-object-editing.md, verification step 11,
++and docs/plans/2026-10-31-baseline-settings-cleanup.md. The baseline has two owners,
++"Field types" and "Runtime settings", standing on one spot: Pick in 3D shows a single
++bracket ("2 objects here"), and OK on it lists both.
+ """
+ import json
+ import time
+@@ -11,8 +12,8 @@
+ from ..key_input import hold as held_key
+ from .plant_checks import Phone
+ 
+-FIRST_HIGHLIGHT = 'Baseline settings 2'
+ SHARED_SPOT = '2 objects here'
++OWNERS = ['Field types', 'Runtime settings']
+ 
+ 
+ def check_picker(a):
+@@ -48,7 +49,7 @@
+     try:
+         bridge = Bridge(a)
+         initial = wait('ready', lambda s: s['player'] and s['game']['mode'] == 'game' and not s['game']['paused'])
+-        check(initial['properties']['schema'] == 'BaselineSettings', 'baseline_catalog_attached')
++        check(initial['properties']['schema'] == 'FieldTypes', 'baseline_catalog_attached')
+ 
+         # 1. Hold OK: the chooser, with Pick in 3D as row 0.
+         held_key(a, '23', 1500)
+@@ -62,21 +63,23 @@
+         a.capture('picker-scene-')
+         phone = Phone(a)
+         scene = model(lambda m: m.get('picker') and m.get('pick') == 'scene')
+-        check(len(scene['objects']) == 3, 'three_candidates')
+-        check(scene.get('inView') == 2, 'two_brackets_in_view')
+-        check(scene.get('highlight') == FIRST_HIGHLIGHT, 'first_highlight_nearest_centre')
+-
+-        # 3. The phone's D-pad Right moves the TV highlight.
+-        phone.command(scene, 'move', 'right')
+-        moved = model(lambda m: m.get('pick') == 'scene' and m.get('highlight') == SHARED_SPOT)
+-        check(moved['session'] == scene['session'], 'phone_right_moves_highlight')
+-        a.wait(.4); a.capture('picker-after-right-')
++        check([o['title'] for o in scene['objects']] == OWNERS, 'two_candidates')
++        check(scene.get('inView') == 1, 'one_bracket_in_view')
++        check(scene.get('highlight') == SHARED_SPOT, 'first_highlight_is_shared_spot')
++
++        # 3. The phone's D-pad Right has nowhere to go: the highlight stays on the one bracket.
++        phone.command(scene, 'move', 'right'); a.wait(.4)
++        moved = model(lambda m: m.get('pick') == 'scene')
++        check(moved['session'] == scene['session'] and moved.get('highlight') == SHARED_SPOT,
++              'phone_right_keeps_single_highlight')
++        a.capture('picker-after-right-')
+ 
+         # 4. OK: the short list of the two on that spot, then OK opens the first one's form.
+         phone.command(moved, 'ok')
+         group = model(lambda m: m.get('pick') == 'group')
+         owners = [o['actor'] for o in group['group']]
+-        check(len(owners) == 2 and owners[0] < owners[1], 'same_spot_short_list')
++        check(len(owners) == 2 and owners[0] < owners[1] and [o['title'] for o in group['group']] == OWNERS,
++              'same_spot_short_list')
+         a.wait(.4); a.capture('picker-group-')
+         phone.command(group, 'ok')
+         form = model(lambda m: m['open'] and not m.get('picker'))
+diff -ruN a/tests/device_coordinator/test_baseline_picker.py b/tests/device_coordinator/test_baseline_picker.py
+--- a/tests/device_coordinator/test_baseline_picker.py	2026-10-31 18:40:02.182076717 +0700
++++ b/tests/device_coordinator/test_baseline_picker.py	2026-10-31 18:40:45.725250077 +0700
+@@ -7,8 +7,9 @@
+ from wf_device.plugins.android.applications import validate_request
+ import wf_device.plugins.android.validators.picker_checks as picker
+ 
+-OWNERS = [{'actor': 19, 'title': 'Baseline settings'}, {'actor': 20, 'title': 'Baseline settings 2'},
+-          {'actor': 21, 'title': 'Baseline settings 3'}]
++OWNERS = [{'actor': 19, 'title': 'Field types'}, {'actor': 20, 'title': 'Runtime settings'}]
++SPOT = '2 objects here'
++
+ 
+ 
+ def test_picker_validator_admission():
+@@ -20,24 +21,24 @@
+ 
+ 
+ class Host:
+-    """Mirrors World Foundry's host: chooser -> scene -> group -> form, Back walks it back."""
++    """Mirrors World Foundry's host: chooser -> scene -> group -> form, Back walks it back.
++    Both owners share one spot, so the scene has one bracket; Right has nowhere to go.
++    `broken` stands the owners apart (two brackets), as the old three-owner level did."""
+     def __init__(self, broken=False):
+-        self.mode = 'none'; self.highlight = FIRST = 'Baseline settings 2'; self.actor = None
++        self.mode = 'none'; self.highlight = SPOT; self.actor = None
+         self.broken = broken; self.captures = []
+ 
+     def key(self, code):
+         code = code.replace('KEYCODE_', '')
+         if code == 'DPAD_CENTER':
+             self.ok()
+-        elif code == 'DPAD_RIGHT' and self.mode == 'scene' and not self.broken:
+-            self.highlight = '2 objects here'
+         elif code == 'BACK':
+             self.mode = {'group': 'scene', 'scene': 'list', 'list': 'none', 'form': 'none'}.get(self.mode, self.mode)
+ 
+     def ok(self):
+         if self.mode == 'list':
+-            self.mode = 'scene'; self.highlight = 'Baseline settings 2'
+-        elif self.mode == 'scene' and self.highlight == '2 objects here':
++            self.mode = 'scene'; self.highlight = 'Field types' if self.broken else SPOT
++        elif self.mode == 'scene' and self.highlight == SPOT:
+             self.mode = 'group'
+         elif self.mode == 'group':
+             self.mode = 'form'; self.actor = 19
+@@ -46,18 +47,18 @@
+         modal = {'none': 'none', 'form': 'phone-form'}.get(self.mode, 'object-picker')
+         return {'player': {'position': [0, -5, .92]}, 'input': {'held': 0},
+                 'game': {'mode': 'game', 'modal': modal, 'paused': modal != 'none'},
+-                'properties': {'schema': 'BaselineSettings', 'actor': self.actor or 19,
++                'properties': {'schema': 'FieldTypes', 'actor': self.actor or 19,
+                                'edit': {'open': self.mode == 'form'}}}
+ 
+     def model(self):
+         if self.mode == 'form':
+-            return {'session': 2, 'open': True, 'title': 'Baseline settings', 'fields': []}
++            return {'session': 2, 'open': True, 'title': 'Field types', 'fields': []}
+         if self.mode == 'none':
+             return {'session': 2, 'open': False, 'fields': []}
+         pick = {'list': 'off'}.get(self.mode, self.mode)
+         return {'session': 1, 'open': True, 'picker': True, 'pick': pick, 'objects': OWNERS,
+-                'highlight': self.highlight, 'inView': 2, 'groupSelected': 0,
+-                'group': OWNERS[0:1] + OWNERS[2:3] if self.mode == 'group' else [], 'fields': []}
++                'highlight': self.highlight, 'inView': 2 if self.broken else 1, 'groupSelected': 0,
++                'group': OWNERS if self.mode == 'group' else [], 'fields': []}
+ 
+ 
+ def run(host, tmp_path, monkeypatch):
+@@ -76,9 +77,7 @@
+                 raise RuntimeError('Timed out waiting for expected property snapshot')
+             return m
+         def command(self, model, verb, tail=None):
+-            if verb == 'move' and tail == 'right' and host.mode == 'scene' and not host.broken:
+-                host.highlight = '2 objects here'
+-            elif verb == 'ok':
++            if verb == 'ok':
+                 host.ok()
+             elif verb == 'cancel':
+                 host.mode = 'none'
+@@ -101,9 +100,10 @@
+                              'picker-closed-']
+ 
+ 
+-def test_arrow_that_does_not_move_fails_and_saves_report(tmp_path, monkeypatch):
+-    with pytest.raises(RuntimeError, match='Timed out'):
++def test_owners_apart_fail_and_save_report(tmp_path, monkeypatch):
++    with pytest.raises(RuntimeError, match='one_bracket_in_view'):
+         run(Host(broken=True), tmp_path, monkeypatch)
+     report = json.loads((tmp_path / 'picker-checks.json').read_text())
+-    assert report['assertions']['first_highlight_nearest_centre'] is True
+-    assert 'phone_right_moves_highlight' not in report['assertions']
++    assert report['assertions']['two_candidates'] is True
++    assert report['assertions']['one_bracket_in_view'] is False
++    assert 'same_spot_short_list' not in report['assertions']

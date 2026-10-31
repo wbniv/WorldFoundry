@@ -16,6 +16,8 @@ ROOT=HERE.parents[1]
 OUT=HERE/'build'
 ICON_ART=ROOT/'android/app/art-src/baseline-icon-2026-10-11'  # scripts/gen-baseline-icon.py; the logo is stamped per docs/reference/android-brand-badge.md
 
+OWNER_SHEETS=['field-types','runtime-settings']  # settings_fixture.py; owners in actor-map order
+
 def digest(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def run(*args, **kwargs):
     OUT.mkdir(exist_ok=True)
@@ -43,14 +45,16 @@ def build(preset,blend=None):
     run('bash',ROOT/'wftools/wf_blender/build_level_binary.sh','baseline',cwd=ROOT)
     spec=importlib.util.spec_from_file_location('baseline_catalog',ROOT/'scripts/build-object-properties.py')
     cooker=importlib.util.module_from_spec(spec);spec.loader.exec_module(cooker)
-    for name in ['settings','settings-gallery']:
+    # settings-gallery is the descriptor coverage fixture: compiled for verify.py and the
+    # host tests, never attached to the level.
+    for name in OWNER_SHEETS+['settings-gallery']:
         run(ROOT/'wftools/oas2oad-rs/target/release/oas2oad','--types='+str(ROOT/'wfsource/source/oas/types3ds.s'),'--prep='+str(ROOT/'wftools/prep/prep'),'-o',HERE/(name+'.oad'),HERE/(name+'.oas'))
-    name='settings-gallery' if preset=='settings-gallery' else 'settings'
-    bindings=json.loads((HERE/(name+'-bindings.json')).read_text())
     ids=json.loads((HERE/'actor-map.json').read_text())['indices']
-    owners=['SampleSettings','SampleSettings2','SampleSettings3']
-    # Distinct chooser labels: the type's title plus an ordinal after the first.
-    catalogs=[cooker.catalog(HERE/(name+'.oad'),dict(bindings,owner=owner,title=bindings.get('title','Settings')+('' if i==0 else ' '+str(i+1))),ids[owner]) for i,owner in enumerate(owners)]
+    # Two owners, each with its own sheet: Field types, then Runtime settings.
+    catalogs=[]
+    for name in OWNER_SHEETS:
+        bindings=json.loads((HERE/(name+'-bindings.json')).read_text())
+        catalogs.append(cooker.catalog(HERE/(name+'.oad'),bindings,ids[bindings['owner']]))
     payload=b'RP01'+struct.pack('<I',len(catalogs))+b''.join(c[8:] for c in catalogs)
     level=ROOT/'wflevels/baseline-standalone.iff'
     level.write_bytes(cooker.attach(project_legacy(level.read_bytes(),memory),payload))
@@ -59,7 +63,7 @@ def build(preset,blend=None):
     run(ROOT/'wftools/cdpack-rs/target/release/cdpack',ROOT/'wfsource/source/game/shell.fth',snapshot,'-o',OUT/'cd.iff')
     receipt=dict(preset=preset,blend=str(blend),blendSha256=digest(blend),configSha256=digest(HERE/'baseline.json'),standalone=str(snapshot),levelSha256=digest(snapshot),cdSha256=digest(OUT/'cd.iff'),levelBuildChangesEngine=False,desktopExecutableSha256=digest(ROOT/'engine/wf_game'),toolHashes={str(p.relative_to(ROOT)):digest(p) for p in [ROOT/'wftools/iffcomp-rs/target/release/iffcomp',ROOT/'wftools/levcomp-rs/target/release/levcomp',ROOT/'wftools/textile-rs/target/release/textile',ROOT/'wftools/oas2oad-rs/target/release/oas2oad',ROOT/'wftools/wf_attr_edit/target/release/catalog']})
     receipt['levelMemory']=dict(authored=memory,sourceSha256=digest(HERE/'memory-settings.json'),application='RAM fields at level load; read-only while running')
-    receipt['runtimeOptions']={str(p.relative_to(ROOT)):digest(p) for p in [HERE/'runtime_options_fixture.py',HERE/'runtime-options.json',HERE/(name+'.oas'),HERE/(name+'.oad'),HERE/(name+'-bindings.json'),OUT/'settings.rprp']}
+    receipt['settingsOwners']={str(p.relative_to(ROOT)):digest(p) for p in [HERE/'field_types.py',HERE/'runtime_options_fixture.py',HERE/'runtime-options.json']+[HERE/(n+e) for n in OWNER_SHEETS for e in ('.oas','.oad','-bindings.json')]+[OUT/'settings.rprp']}
     (OUT/'build-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
     print('Built:',snapshot,'sha256',receipt['levelSha256'])
     return receipt
@@ -119,7 +123,7 @@ __ALIAS__<intent-filter><action android:name="android.intent.action.MAIN"/><cate
     print('Frozen APK:',result)
 
 if __name__=='__main__':
-    ap=argparse.ArgumentParser();ap.add_argument('--preset',choices=['default','diagnostics','settings-gallery'],default='default');ap.add_argument('--blend',type=Path);ap.add_argument('--export-only',action='store_true');ap.add_argument('--package-only',action='store_true');ap.add_argument('--runtime',type=Path);ap.add_argument('--refresh-runtime',action='store_true')
+    ap=argparse.ArgumentParser();ap.add_argument('--preset',choices=['default','diagnostics'],default='default');ap.add_argument('--blend',type=Path);ap.add_argument('--export-only',action='store_true');ap.add_argument('--package-only',action='store_true');ap.add_argument('--runtime',type=Path);ap.add_argument('--refresh-runtime',action='store_true')
     args=ap.parse_args()
     if args.export_only:export(args.blend or HERE/'baseline.blend')
     elif not args.package_only:build(args.preset,args.blend)

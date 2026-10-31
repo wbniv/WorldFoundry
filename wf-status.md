@@ -3,7 +3,11 @@
 Start new levels with the [World Foundry baseline](wflevels/baseline/README.md):
 editable Blender scene, explicit actor defaults, isolated build and native
 verification. [Desktop evidence](docs/diagnostics/baseline/default/README.md)
-is available; shared settings integration and Chromecast acceptance are pending.
+is available. Its settings are two owners on one spot (2026‑10‑31): **Field types**,
+one field per touch-settings example, and **Runtime settings**; device acceptance of
+that change waits on the
+[validator patch](docs/plans/2026-10-31-baseline-settings-cleanup/validator-patch.diff)
+([plan](docs/plans/2026-10-31-baseline-settings-cleanup.md)).
 
 **As of:** 2026-06-04  
 **Branch:** `2026-new-level`

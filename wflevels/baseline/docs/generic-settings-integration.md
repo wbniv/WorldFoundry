@@ -6,6 +6,16 @@ Engine changes explicitly authorized by Will on 6 October 2026 under
 [AGENTS.md](../../../AGENTS.md). The shared host and plant consumer migration are implemented. Baseline device acceptance and the main-CD addition are complete. Plant
 device acceptance is also complete on both Chromecasts.
 
+> **Current baseline owners (2026‑10‑31).** The level exports two owners, both at
+> (2, −4, 1): **Field types** (schema `FieldTypes`, one field per touch-settings
+> example, from `field_types.py`) and **Runtime settings** (schema `Settings`: Runtime
+> Options, Level Memory, Level Behavior). The five-field sample sheet, the empty
+> section, the three `SampleSettings` owners and the `settings-gallery` preset are gone;
+> the 118-field gallery remains only as a build-time test fixture. Sections below that
+> mention sample owners or the gallery preset are dated records of what was accepted
+> then. See the
+> [cleanup plan](../../../docs/plans/2026-10-31-baseline-settings-cleanup.md).
+
 The baseline already exports two independently addressed OAD catalog owners.
 Planted Tank already exports Seed, Water type and Growth speed through that
 catalog, but game/modal/phone routing is still owned by `planted::State` and
@@ -64,7 +74,8 @@ input release, Apply/Cancel, owner generation checks and lifecycle cancellation.
 Plant simulation registers callbacks for its schema; seed/water changes and
 explicit regeneration rebuild plants, while speed-only Apply preserves growth.
 The aquarium selector uses the same host with its authored preview catalog.
-Baseline retains its small default form and full descriptor gallery preset.
+Baseline retained its small default form and full descriptor gallery preset until
+2026‑10‑31; it now has the Field types and Runtime settings owners (note above).
 
 The catalog loader and attachment tool also accept the 48-byte FLAG-only RAM
 header used by baseline; the optional SLOT header is no longer assumed.

@@ -29,16 +29,19 @@ def test_planted_catalog_has_all_fields_and_presentations():
     assert fields["Hold seconds"]["maximum"] == "86400"
 
 
-def test_baseline_level_keeps_same_type_owners_distinct():
+def test_baseline_level_has_its_two_owners():
     level = (ROOT / "wflevels/baseline-standalone.iff").read_bytes()
     offset = level.rfind(b"RPRP")
     assert offset > 0
     size, = struct.unpack_from("<I", level, offset + 4)
     payload = level[offset + 8:offset + 8 + size]
     objects = GEN.capabilities(payload)["objects"]
-    assert [(obj["owner"], obj["type"]) for obj in objects] == [
-        (19, "Settings"), (20, "Settings"), (21, "Settings")]
-    assert objects[0]["settings"] == objects[1]["settings"] == objects[2]["settings"]
+    ids = json.loads((ROOT / "wflevels/baseline/actor-map.json").read_text())["indices"]
+    assert [(obj["owner"], obj["type"], obj["title"]) for obj in objects] == [
+        (ids["FieldTypes"], "FieldTypes", "Field types"),
+        (ids["RuntimeSettings"], "Settings", "Runtime settings")]
+    # Capabilities carry settings only: Field types' action and spacer rows are not settings.
+    assert [len(obj["settings"]) for obj in objects] == [25, 85]
 
 
 def test_truncated_catalog_is_rejected():

@@ -46,7 +46,7 @@ def test_sheet_stable_readonly_controls():
     assert lines.count('PROPERTY_SHEET_HEADER(Level Behavior,0)') == 1
 
 
-def test_built_level_ram_matches_all_three_catalogs():
+def test_built_level_ram_matches_the_runtime_settings_catalog():
     data = (ENGINE/'wflevels/baseline-standalone.iff').read_bytes()
     size = struct.unpack_from('<I', data, 2052)[0]
     tag, offset, length = struct.unpack_from('<4sII', data, 2056 + size - 12)
@@ -56,7 +56,7 @@ def test_built_level_ram_matches_all_three_catalogs():
     payload = chunk[8:8 + struct.unpack_from('<I', chunk, 4)[0]]
     assert payload[:4] == b'RP01'
     count = struct.unpack_from('<I', payload, 4)[0]
-    assert count == 3
+    assert count == 2  # Field types, then Runtime settings (the only owner of Level Memory)
     pos = 8
     def string():
         nonlocal pos
@@ -70,12 +70,13 @@ def test_built_level_ram_matches_all_three_catalogs():
     assert data[2092:2096] == b'SLOT'
     assert ram == [config[key] for _, key, _, _, _ in FIELDS]
     actors = set()
+    memory = {}
     for _ in range(count):
         actor = struct.unpack_from('<I', payload, pos)[0]
         pos += 4
         actors.add(actor)
         string()  # schema
-        string()  # title
+        title = string()
         fields = struct.unpack_from('<I', payload, pos)[0]
         pos += 4
         found = {}
@@ -85,9 +86,11 @@ def test_built_level_ram_matches_all_three_catalogs():
             key, label, help_text, group, choices, initial = [string() for _ in range(6)]
             if 2000 <= field_id <= 2005:
                 found[field_id] = (key, readonly, initial)
-        assert found == {field_id: ('memory_'+key, 1, str(config[key]))
-                         for field_id, key, _, _, _ in FIELDS}
-    assert len(actors) == 3 and pos == len(payload)
+        memory[title] = found
+    assert memory['Field types'] == {}
+    assert memory['Runtime settings'] == {field_id: ('memory_'+key, 1, str(config[key]))
+                                          for field_id, key, _, _, _ in FIELDS}
+    assert len(actors) == 2 and pos == len(payload)
 
 
 def test_nondefault_configuration_cooks_same_values_into_oad_and_ram(tmp_path):
@@ -123,7 +126,7 @@ def test_compiled_oad_and_cooked_catalog():
     import json, subprocess
     spec=importlib.util.spec_from_file_location('cooker',ENGINE/'scripts/build-object-properties.py')
     cooker=importlib.util.module_from_spec(spec);spec.loader.exec_module(cooker)
-    for name in ['settings','settings-gallery']:
+    for name in ['runtime-settings','settings-gallery']:
         schema=json.loads(subprocess.check_output([ENGINE/'wftools/wf_attr_edit/target/release/catalog',ROOT/'wflevels/baseline'/f'{name}.oad'],text=True))
         fields={f['key']:f for f in schema['fields']}
         bindings=json.loads((ROOT/'wflevels/baseline'/f'{name}-bindings.json').read_text())

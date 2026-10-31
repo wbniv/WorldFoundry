@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "owner": "SampleSettings",
-  "title": "Baseline settings",
+  "owner": "SettingsGallery",
+  "title": "Settings gallery",
   "fields": {
     "Signed_INT8_N_A_1": {
       "id": 1

@@ -19,26 +19,30 @@ RENDER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(RENDER)
 
 
+# The sensible type x showAs pairs; tests/test_baseline_field_types.py checks the baseline too.
+REQUIRED_PAIRS = {
+    ("Int", "N_A (0)"), ("Int", "NUMBER (1)"),
+    ("Int", "SLIDER (2)"), ("Int", "COLOR (7)"),
+    ("Int", "MAILBOX (9)"),
+    ("Float", "NUMBER (1)"), ("Float", "SLIDER (2)"),
+    ("Enum", "N_A (0)"), ("Enum", "NUMBER (1)"),
+    ("Enum", "SLIDER (2)"), ("Enum", "TOGGLE (3)"),
+    ("Enum", "DROPMENU (4)"), ("Enum", "RADIOBUTTONS (5)"),
+    ("Enum", "COMBOBOX (10)"),
+    ("Bool", "TOGGLE (3)"), ("Bool", "CHECKBOX (8)"),
+    ("Str", "N_A (0)"), ("Str + uint32 rule", "NUMBER (1)"),
+    ("Str / Annotation", "TEXTEDITOR (11)"),
+    ("Str", "FILENAME (12)"),
+    ("FileRef / ObjRef", "N_A (0) / VECTOR (128)"),
+    ("Action", "N_A (0)"), ("Spacer", "N_A (0)"),
+}
+
+
 def test_sensible_type_showas_pairs_and_modifiers_are_covered():
     ids = [case["id"] for case in CASES]
     assert len(ids) == len(set(ids))
     pairs = {(case["type"], case["showAs"]) for case in CASES}
-    assert {
-        ("Int", "N_A (0)"), ("Int", "NUMBER (1)"),
-        ("Int", "SLIDER (2)"), ("Int", "COLOR (7)"),
-        ("Int", "MAILBOX (9)"),
-        ("Float", "NUMBER (1)"), ("Float", "SLIDER (2)"),
-        ("Enum", "N_A (0)"), ("Enum", "NUMBER (1)"),
-        ("Enum", "SLIDER (2)"), ("Enum", "TOGGLE (3)"),
-        ("Enum", "DROPMENU (4)"), ("Enum", "RADIOBUTTONS (5)"),
-        ("Enum", "COMBOBOX (10)"),
-        ("Bool", "TOGGLE (3)"), ("Bool", "CHECKBOX (8)"),
-        ("Str", "N_A (0)"), ("Str + uint32 rule", "NUMBER (1)"),
-        ("Str / Annotation", "TEXTEDITOR (11)"),
-        ("Str", "FILENAME (12)"),
-        ("FileRef / ObjRef", "N_A (0) / VECTOR (128)"),
-        ("Action", "N_A (0)"), ("Spacer", "N_A (0)"),
-    } <= pairs
+    assert REQUIRED_PAIRS <= pairs
     assert {"int-readonly", "enum-many", "enum-long", "int-help"} <= set(ids)
     assert all(case["status"] in ("existing", "proposed") for case in CASES)
 

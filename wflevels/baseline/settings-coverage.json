@@ -2138,7 +2138,232 @@
   "implementation_gaps": [
     "Generic in-game opening/selection of non-plant property objects requires a reviewed engine API; catalog is attached but not interactively reachable yet.",
     "Enable expressions, asset filters, typed-reference tags and vector grouping are not fully retained by current catalog cooker.",
-    "String combo/dropdown hints and grouped vectors are not implemented runtime controls."
+    "String combo/dropdown hints and grouped vectors are not implemented runtime controls.",
+    "Field types action row \"action\" has no consumer: Host::apply returns false for an unregistered action (engine/runtime_property_host.cpp), so it is inert by design here.",
+    "bool-toggle (INT32 0..1, SHOW_AS_TOGGLE, no choices) compiles to kind Int, not Bool: the normalizer only classifies SHOW_AS_CHECKBOX as Bool (wftools/wf_attr_schema).",
+    "str-multiline is an XDATA TEXTEDITOR descriptor (kind Annotation, cooked as Str rule 2)."
   ],
-  "status": "Sources and compiled/cooked coverage are verifiable separately; interactive acceptance remains pending"
+  "status": "Sources and compiled/cooked coverage are verifiable separately; interactive acceptance remains pending",
+  "field_types": {
+    "owner": "FieldTypes",
+    "examples": "docs/plans/2026-10-29-touch-settings-examples.json",
+    "fields": [
+      {
+        "id": 1,
+        "key": "int-number",
+        "section": "Numbers",
+        "kind": "Int",
+        "status": "existing",
+        "expected": "verify actual TV/phone presentation and typed readback; not yet accepted"
+      },
+      {
+        "id": 2,
+        "key": "int-slider",
+        "section": "Numbers",
+        "kind": "Int",
+        "status": "existing",
+        "expected": "verify actual TV/phone presentation and typed readback; not yet accepted"
+      },
+      {
+        "id": 3,
+        "key": "int-color",
+        "section": "Numbers",
+        "kind": "Int",
+        "status": "existing",
+        "expected": "verify actual TV/phone presentation and typed readback; not yet accepted"
+      },
+      {
+        "id": 4,
+        "key": "int-mailbox",
+        "section": "Numbers",
+        "kind": "Int",
+        "status": "proposed",
+        "expected": "draws as the nearest existing control; record the observed presentation"
+      },
+      {
+        "id": 5,
+        "key": "int-default",
+        "section": "Numbers",
+        "kind": "Int",
+        "status": "existing",
+        "expected": "verify actual TV/phone presentation and typed readback; not yet accepted"
+      },
+      {
+        "id": 6,
+        "key": "float-number",
+        "section": "Numbers",
+        "kind": "Float",
+        "status": "existing",
+        "expected": "verify actual TV/phone presentation and typed readback; not yet accepted"
+      },
+      {
+        "id": 7,
+        "key": "float-slider",
+        "section": "Numbers",
+        "kind": "Float",
+        "status": "existing",
+        "expected": "verify actual TV/phone presentation and typed readback; not yet accepted"
+      },
+      {
+        "id": 22,
+        "key": "int-readonly",
+        "section": "Numbers",
+        "kind": "Int",
+        "status": "existing",
+        "expected": "verify actual TV/phone presentation and typed readback; not yet accepted"
+      },
+      {
+        "id": 25,
+        "key": "int-help",
+        "section": "Numbers",
+        "kind": "Int",
+        "status": "proposed",
+        "expected": "draws as the nearest existing control; record the observed presentation"
+      },
+      {
+        "id": 8,
+        "key": "enum-default",
+        "section": "Choices",
+        "kind": "Enum",
+        "status": "proposed",
+        "expected": "draws as the nearest existing control; record the observed presentation"
+      },
+      {
+        "id": 9,
+        "key": "enum-number",
+        "section": "Choices",
+        "kind": "Enum",
+        "status": "proposed",
+        "expected": "draws as the nearest existing control; record the observed presentation"
+      },
+      {
+        "id": 10,
+        "key": "enum-dropdown",
+        "section": "Choices",
+        "kind": "Enum",
+        "status": "proposed",
+        "expected": "draws as the nearest existing control; record the observed presentation"
+      },
+      {
+        "id": 11,
+        "key": "enum-radio",
+        "section": "Choices",
+        "kind": "Enum",
+        "status": "existing",
+        "expected": "verify actual TV/phone presentation and typed readback; not yet accepted"
+      },
+      {
+        "id": 12,
+        "key": "enum-slider",
+        "section": "Choices",
+        "kind": "Enum",
+        "status": "existing",
+        "expected": "verify actual TV/phone presentation and typed readback; not yet accepted"
+      },
+      {
+        "id": 13,
+        "key": "enum-toggle",
+        "section": "Choices",
+        "kind": "Enum",
+        "status": "proposed",
+        "expected": "draws as the nearest existing control; record the observed presentation"
+      },
+      {
+        "id": 14,
+        "key": "enum-combo",
+        "section": "Choices",
+        "kind": "Enum",
+        "status": "proposed",
+        "expected": "draws as the nearest existing control; record the observed presentation"
+      },
+      {
+        "id": 23,
+        "key": "enum-many",
+        "section": "Choices",
+        "kind": "Enum",
+        "status": "proposed",
+        "expected": "draws as the nearest existing control; record the observed presentation"
+      },
+      {
+        "id": 24,
+        "key": "enum-long",
+        "section": "Choices",
+        "kind": "Enum",
+        "status": "proposed",
+        "expected": "draws as the nearest existing control; record the observed presentation"
+      },
+      {
+        "id": 15,
+        "key": "bool-checkbox",
+        "section": "Switches",
+        "kind": "Int",
+        "status": "existing",
+        "expected": "verify actual TV/phone presentation and typed readback; not yet accepted"
+      },
+      {
+        "id": 16,
+        "key": "bool-toggle",
+        "section": "Switches",
+        "kind": "Int",
+        "status": "proposed",
+        "expected": "draws as the nearest existing control; record the observed presentation"
+      },
+      {
+        "id": 17,
+        "key": "str-plain",
+        "section": "Text",
+        "kind": "Str",
+        "status": "existing",
+        "expected": "verify actual TV/phone presentation and typed readback; not yet accepted"
+      },
+      {
+        "id": 18,
+        "key": "str-uint32",
+        "section": "Text",
+        "kind": "Str",
+        "status": "existing",
+        "expected": "verify actual TV/phone presentation and typed readback; not yet accepted"
+      },
+      {
+        "id": 19,
+        "key": "str-multiline",
+        "section": "Text",
+        "kind": "Annotation",
+        "status": "existing",
+        "expected": "verify actual TV/phone presentation and typed readback; not yet accepted"
+      },
+      {
+        "id": 20,
+        "key": "str-filename",
+        "section": "Text",
+        "kind": "Str",
+        "status": "proposed",
+        "expected": "draws as the nearest existing control; record the observed presentation"
+      },
+      {
+        "id": 21,
+        "key": "ref-readonly",
+        "section": "References",
+        "kind": "ObjRef",
+        "status": "existing",
+        "expected": "verify actual TV/phone presentation and typed readback; not yet accepted"
+      },
+      {
+        "id": 26,
+        "key": "action",
+        "section": "Actions",
+        "kind": "action",
+        "status": "existing",
+        "expected": "inert: no consumer"
+      },
+      {
+        "id": 27,
+        "key": "spacer",
+        "section": "Actions",
+        "kind": "action",
+        "status": "existing",
+        "expected": "no hit target"
+      }
+    ]
+  }
 }

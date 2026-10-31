@@ -2,6 +2,9 @@
 
 Blender: --python generate.py -- --output <new.blend> --preset default
 Export a reviewed file: --python generate.py -- --export <reviewed.blend>
+Edit a reviewed file in place, keeping manual edits:
+  --add-teapots <reviewed.blend>     append the TEAPOTS collection
+  --settings-owners <reviewed.blend> swap the SampleSettings owners for FieldTypes and RuntimeSettings
 """
 import argparse
 import json
@@ -162,6 +165,29 @@ def add_teapots():
                     [(u, v + .5), (u + .25, v + .5), (u + .25, v), (u, v)])
     actor('TeapotLabels', 'platform', 'TEAPOTS', labels.mesh(), fields={'Mass': 0.0})
 
+SETTINGS_OWNERS = ('FieldTypes', 'RuntimeSettings')
+RETIRED_OWNERS = ('SampleSettings', 'SampleSettings2', 'SampleSettings3')
+
+def settings_owners():
+    """The two settings owners, both on one spot so Pick in 3D shows "Objects here".
+
+    FieldTypes carries one field per touch-settings example and RuntimeSettings carries
+    the runtime and load-time sheets (settings_fixture.py); both are plain target actors
+    in CONFIG. On a reviewed file this also removes the three retired SampleSettings
+    owners. Refuses if either owner is already there, so it never runs twice.
+    """
+    from field_types import POSITION
+    present = [n for n in SETTINGS_OWNERS if n in bpy.data.objects]
+    if present:
+        raise RuntimeError('%s already exists; refusing to add the settings owners twice' % ', '.join(present))
+    for name in RETIRED_OWNERS:
+        if name in bpy.data.objects:
+            bpy.data.objects.remove(bpy.data.objects[name], do_unlink=True)
+    if 'CONFIG' in bpy.data.collections:  # a reviewed file: reuse its collection, never CONFIG.001
+        COLLECTIONS.setdefault('CONFIG', bpy.data.collections['CONFIG'])
+    for name in SETTINGS_OWNERS:
+        actor(name, 'target', 'CONFIG', pos=POSITION)
+
 def relativize():
     """Make schema and texture references portable relative to the saved file."""
     for obj in bpy.context.scene.objects:
@@ -253,10 +279,7 @@ def build(preset):
     from fixtures import add_fixtures
     add_fixtures(preset, actor, Geometry, material, label)
     # Stable schema instances can be catalogued without native actor-class changes.
-    # Three owners exercise Pick in 3D: SampleSettings2 alone on the left, and
-    # SampleSettings3 on SampleSettings' spot for the "2 objects here" bracket.
-    for name,pos in [('SampleSettings',(2,-4,1)),('SampleSettings2',(-1.5,-3,1)),('SampleSettings3',(2,-4,1))]:
-        actor(name,'target','CONFIG',pos=pos)
+    settings_owners()
     add_teapots()
     objects=[o for o in bpy.context.scene.objects if o.get('wf_schema_path')]
     ids={o.name:i+1 for i,o in enumerate(objects)}
@@ -298,8 +321,14 @@ def export(path):
 if __name__=='__main__':
     ap=argparse.ArgumentParser();ap.add_argument('--output',type=Path);ap.add_argument('--export',type=Path);ap.add_argument('--overwrite',action='store_true');ap.add_argument('--preset',choices=C['presets'],default='default')
     ap.add_argument('--add-teapots',type=Path,metavar='BLEND',help='append the TEAPOTS collection to a reviewed Blender file, keeping its manual edits; refuses if it is already there')
+    ap.add_argument('--settings-owners',type=Path,metavar='BLEND',help='replace the three SampleSettings owners of a reviewed Blender file with FieldTypes and RuntimeSettings, keeping its manual edits; refuses if they are already there')
     args=ap.parse_args(sys.argv[sys.argv.index('--')+1:])
-    if args.add_teapots:
+    if args.settings_owners:
+        wf_blender.register();bpy.ops.wm.open_mainfile(filepath=str(args.settings_owners.resolve()))
+        settings_owners();relativize()
+        bpy.ops.wm.save_mainfile()
+        print('Settings owners in',args.settings_owners,':',', '.join(o.name for o in bpy.data.collections['CONFIG'].objects))
+    elif args.add_teapots:
         from prepare_assets import prepare
         prepare()
         wf_blender.register();bpy.ops.wm.open_mainfile(filepath=str(args.add_teapots.resolve()))

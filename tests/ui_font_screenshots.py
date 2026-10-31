@@ -32,7 +32,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tests'))
 from debug_bridge_client import BridgeClient  # noqa: E402
 
-OK, DOWN, RIGHT = 1, 1 << 12, 1 << 13
+OK, DOWN, RIGHT, LEFT = 1, 1 << 12, 1 << 13, 1 << 14
 SIZE = ['-width=1920', '-height=1080']
 AQUARIUM_VRAM = (ROOT / 'android/app/src/aquarium/assets/wf_args.txt').read_text().split()
 BASELINE_VRAM = ['--vram-width=5120', '--vram-height=2048', '--vram-slot-width=1024', '--vram-slot-height=1024',
@@ -159,13 +159,13 @@ def baseline(args, cwd):
                     [*BASELINE_VRAM, '-L' + str(ROOT / 'wflevels/baseline-standalone.iff')], cwd)
         try:
             s.hold(OK, 1.4)
-            s.tap(DOWN)
-            s.tap(DOWN)               # Baseline settings 2
+            s.tap(DOWN)               # Field types (row 0 is Pick in 3D)
             s.tap(OK)
             s.shot('form')
-            s.tap(RIGHT)              # into the values
-            for _ in range(4):
-                s.tap(DOWN)           # Text_STRING_N_A_70, the text field
+            s.tap(LEFT)               # the section rail
+            for _ in range(3):
+                s.tap(DOWN)           # Numbers, Choices, Switches, Text
+            s.tap(RIGHT)              # into the values: Caption, a text field
             s.tap(OK)                 # no browser on the desktop: the form says so
             s.shot('form-error')
         finally:

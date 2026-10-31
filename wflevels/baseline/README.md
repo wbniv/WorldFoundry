@@ -22,8 +22,8 @@ task baseline:verify
 task baseline:check
 ```
 
-Build exports the reviewed Blender file, compiles the level and both OAS
-fixtures, attaches three independent property catalogs and creates an isolated
+Build exports the reviewed Blender file, compiles the level and its OAS sources,
+attaches the two settings owners' property catalogs and creates an isolated
 `build/cd.iff`. Logs, receipts and native screenshots are under `build/`.
 `baseline:check` starts and closes its own desktop runtime, uses port 7785,
 and verifies native movement, release, grounding, collision, camera switching,
@@ -35,7 +35,6 @@ input-driven movement it tests.
 task baseline:generate
 task baseline:export
 task baseline:diagnostics
-task baseline:settings-gallery
 ```
 
 Generate creates `build/baseline-generated.blend` and refuses to overwrite it.
@@ -73,7 +72,9 @@ more room memory than a bare baseline, so `room_asset_bytes` is 8 000 000. See t
 Native controls: Up/Down moves forward/backward; Left/Right turns; A jumps,
 B resets, C changes camera. A Chromecast remote uses Up+OK to reset and
 Down+OK to switch camera. Hold A/OK alone for one second to open the shared
-settings object picker; choose either sample owner with Up/Down and OK. Back
+settings object picker; choose **Field types** or **Runtime settings** with Up/Down
+and OK, or use Pick in 3D: both owners stand on one spot, so pointing at it lists the
+two of them under "Objects here". Back
 applies a valid form and closes it; Cancel discards the draft. The first-person shot is an inspection camera with
 no separate player-controller implementation. Camera obstruction behavior is
 the existing engine's behavior.
@@ -94,9 +95,12 @@ under ignored `build/`. SDK discovery uses `ANDROID_HOME`, `ANDROID_SDK_ROOT`,
 then `~/android-sdk-local`. No signing keys or machine paths are portable config.
 
 Chromecast sessions use the shared coordinator with `APP=baseline` and the
-reviewed `baseline-settings` validator. Default and gallery passed all 20 checks
+reviewed `baseline-settings` validator. The three-owner level passed all 20 checks
 on both cast1 and cast2, including TV/phone ownership, Apply/Cancel, reconnect,
-Home/resume and held/released directional input. Baseline is now appended to the
+Home/resume and held/released directional input. The two-owner level needs the
+validator change in
+[validator-patch.diff](../../docs/plans/2026-10-31-baseline-settings-cleanup/validator-patch.diff)
+deployed first. Baseline is now appended to the
 main `cd.iff` at index 7; existing indices and boot level 0 are preserved.
 The level list is [wflevels/main-cd.manifest](../main-cd.manifest) (see
 [Adding a level to the main cd.iff](../../docs/level-building.md)); `task build-cd-iff` rebuilds it. Verify bundle loading and gameplay with:
@@ -105,12 +109,25 @@ The level list is [wflevels/main-cd.manifest](../main-cd.manifest) (see
 python3 wflevels/baseline/verify.py --desktop --bundle wfsource/source/game/cd.iff
 ```
 
-The rebuilt bundle passed all 156 checks; the previous shell and seven level
+The rebuilt bundle passed all 167 checks on 2026‑10‑31; the previous shell and seven level
 entries and bodies also match byte-for-byte. See the
 [final acceptance evidence](../../docs/diagnostics/baseline/generic-settings/README.md).
 
-The five-field default and 118-field gallery come from level-owned OAS/OAD.
-[settings-coverage.json](settings-coverage.json) accounts for every declared
+The level has two settings owners, both `target` actors in `CONFIG` at (2, −4, 1):
+
+| Owner | Source | Carries |
+|---|---|---|
+| **Field types** (`FieldTypes`, schema `FieldTypes`) | [field_types.py](field_types.py) → `field-types.oas` | One field per case in the [touch settings examples](../../docs/plans/2026-10-29-touch-settings-examples.json): 27 rows in six sections (Numbers 9, Choices 9, Switches 2, Text 4, References 1, Actions 2). Labels and values come from that JSON. The action row has no consumer and does nothing |
+| **Runtime settings** (`RuntimeSettings`, schema `Settings`) | [settings_fixture.py](settings_fixture.py) → `runtime-settings.oas` | Runtime Options (79 rows in 8 groups), Level Memory (4), Level Behavior (2): 85 rows |
+
+`Show FPS` is authored editable on purpose: the engine lists an owner, and installs the
+runtime-options consumer on it, only when it has an editable field at load. After that,
+the backend decides which runtime rows are editable. See the
+[cleanup plan](../../docs/plans/2026-10-31-baseline-settings-cleanup.md).
+
+The 118-field descriptor gallery (`settings-gallery.oas`) is a build-time test fixture,
+not an owner in any level. `verify.py` checks its compiled OAD, and the host tests cook it
+into same-schema owners. [settings-coverage.json](settings-coverage.json) accounts for every declared
 descriptor type and presentation code, preserves original metadata, and records
 unsupported and excluded cases. Hidden cases are omission tests. Narrow fields
 are supplemental catalog examples, not changes to native actor packing.
@@ -118,7 +135,7 @@ Source/compiled coverage is distinct from interactive acceptance.
 [Saved verification receipts and captures](../../docs/diagnostics/baseline/README.md)
 record the tested build hashes.
 
-Both catalogs now open through the generic host used by Planted Tank. Plant
+Both owners open through the generic host used by Planted Tank. Plant
 simulation consumes committed values through schema callbacks, and its selector
 preview uses that same host. See the [shared integration and acceptance status](docs/generic-settings-integration.md).
 See the [baseline plan](../../docs/plans/2026-10-05-world-foundry-baseline.md)

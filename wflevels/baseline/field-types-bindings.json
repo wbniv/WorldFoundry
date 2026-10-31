@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "owner": "FieldTypes",
+  "title": "Field types",
+  "fields": {
+    "int-number": {
+      "id": 1
+    },
+    "int-slider": {
+      "id": 2
+    },
+    "int-color": {
+      "id": 3
+    },
+    "int-mailbox": {
+      "id": 4
+    },
+    "int-default": {
+      "id": 5
+    },
+    "float-number": {
+      "id": 6,
+      "initial": "12.5"
+    },
+    "float-slider": {
+      "id": 7,
+      "initial": "0.65"
+    },
+    "int-readonly": {
+      "id": 22,
+      "readonly": true
+    },
+    "int-help": {
+      "id": 25
+    },
+    "enum-default": {
+      "id": 8
+    },
+    "enum-number": {
+      "id": 9
+    },
+    "enum-dropdown": {
+      "id": 10
+    },
+    "enum-radio": {
+      "id": 11
+    },
+    "enum-slider": {
+      "id": 12
+    },
+    "enum-toggle": {
+      "id": 13
+    },
+    "enum-combo": {
+      "id": 14
+    },
+    "enum-many": {
+      "id": 23
+    },
+    "enum-long": {
+      "id": 24
+    },
+    "bool-checkbox": {
+      "id": 15
+    },
+    "bool-toggle": {
+      "id": 16
+    },
+    "str-plain": {
+      "id": 17,
+      "initial": "Garden",
+      "max_length": 31
+    },
+    "str-uint32": {
+      "id": 18,
+      "initial": "4294967295",
+      "rule": "uint32-decimal",
+      "max_length": 10
+    },
+    "str-multiline": {
+      "id": 19,
+      "initial": "Two-line description\nSecond line",
+      "multiline": true,
+      "max_length": 80
+    },
+    "str-filename": {
+      "id": 20,
+      "initial": "plants/leaf.png",
+      "max_length": 31
+    },
+    "ref-readonly": {
+      "id": 21,
+      "initial": "Player01",
+      "readonly": true
+    }
+  },
+  "actions": [
+    {
+      "id": 26,
+      "label": "Regenerate tank",
+      "action": "action"
+    },
+    {
+      "id": 27,
+      "label": "",
+      "action": "spacer"
+    }
+  ]
+}

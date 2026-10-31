@@ -52,8 +52,7 @@
   },
   "presets": [
     "default",
-    "diagnostics",
-    "settings-gallery"
+    "diagnostics"
   ],
   "controls": {
     "directions": "native movement",
