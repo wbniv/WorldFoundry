@@ -1,9 +1,51 @@
-Baseline validators for the two-owner baseline (World Foundry docs/plans/2026-10-31-baseline-settings-cleanup.md).
-Against chromecast-coordinator 27ffa9f. Apply from that repo root with: git apply validator-patch.diff
+From 77920cc491d1e5e75e5df80af8a715ca4666af87 Mon Sep 17 00:00:00 2001
+From: Will Norris <will@biohack.net>
+Date: Sat, 31 Oct 2026 20:48:41 +0700
+Subject: [PATCH] Baseline validators: two settings owners, Field types and
+ Runtime settings
 
-diff -ruN a/scripts/wf_device/plugins/android/validators/baseline_checks.py b/scripts/wf_device/plugins/android/validators/baseline_checks.py
---- a/scripts/wf_device/plugins/android/validators/baseline_checks.py	2026-10-31 18:40:02.162240715 +0700
-+++ b/scripts/wf_device/plugins/android/validators/baseline_checks.py	2026-10-31 18:40:45.725037203 +0700
+World Foundry's baseline level now has two settings owners at one spot
+(docs/plans/2026-10-31-baseline-settings-cleanup.md there): "Field types"
+(schema FieldTypes, the first editable owner, one field per touch-settings
+example) and "Runtime settings" (schema Settings, the only owner of Runtime
+Options, with Show FPS authored editable). All three baseline validators
+assumed the old three identical owners, and all three checked a schema
+name, BaselineSettings, that the level stopped using on 2026-10-22.
+
+baseline-picker: two candidates and one bracket ("2 objects here") as the
+first highlight; the phone's Right keeps that highlight; the short list
+holds both owners in actor order.
+
+baseline-settings: a two-owner chooser by title; edits, stale-session,
+invalid-draft reconnect, Apply readback and Home cancellation now use
+Field types rows 1 (int-number), 7 (float-slider) and 17 (str-plain); the
+other owner is checked as a separate catalog instead of a second copy.
+
+baseline-runtime-options: the TV opens Runtime settings (row 2, after Pick
+in 3D and Field types) and turns Show FPS off as the first row of the first
+section. The idle snapshot reports Field types, so Runtime Options values
+are read with the Runtime settings form open, and the clock waits key on
+the game being idle (the actual clock still proves each rate). The
+cross-owner check becomes field_types_unaffected and the reopen check
+reopened_owner_reads_process_globals; two-owner synchronisation of process
+globals stays covered by World Foundry's host test, since the level now
+has one Runtime Options owner. A scripted two-owner host covers the full
+sequence and a failing layout.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
+---
+ .../android/validators/baseline_checks.py     |  50 +++---
+ .../android/validators/picker_checks.py       |  31 ++--
+ .../validators/runtime_options_checks.py      |  64 +++++---
+ .../test_baseline_picker.py                   |  38 ++---
+ .../test_runtime_options.py                   | 148 +++++++++++++++++-
+ 5 files changed, 257 insertions(+), 74 deletions(-)
+
+diff --git a/scripts/wf_device/plugins/android/validators/baseline_checks.py b/scripts/wf_device/plugins/android/validators/baseline_checks.py
+index a459fc0..696b625 100644
+--- a/scripts/wf_device/plugins/android/validators/baseline_checks.py
++++ b/scripts/wf_device/plugins/android/validators/baseline_checks.py
 @@ -1,4 +1,11 @@
 -"""Fixed baseline catalog, remote input and lifecycle acceptance in one lease."""
 +"""Fixed baseline catalog, remote input and lifecycle acceptance in one lease.
@@ -17,7 +59,7 @@ diff -ruN a/scripts/wf_device/plugins/android/validators/baseline_checks.py b/sc
  import json
  import time
  from .diagnostics import Bridge
-@@ -28,7 +35,7 @@
+@@ -28,7 +35,7 @@ def check_baseline(a):
      try:
          bridge=Bridge(a)
          initial=wait('ready',lambda s:s['player'] and s['game']['mode']=='game' and not s['game']['paused'])
@@ -26,7 +68,7 @@ diff -ruN a/scripts/wf_device/plugins/android/validators/baseline_checks.py b/sc
          pos=initial['player']['position'];check(abs(pos[0])<.1 and abs(pos[1]+5)<.1 and .85<pos[2]<1.05,'grounded_spawn')
          hold('19',2200)
          moved=snap('held-up-released',since_input=initial['input']['received'])
-@@ -45,41 +52,46 @@
+@@ -45,41 +52,46 @@ def check_baseline(a):
          picker=wait('tv-picker',lambda s:s['game']['modal']=='object-picker')
          check(picker['game']['paused'],'picker_pauses_simulation')
          a.capture('tv-picker-')
@@ -90,9 +132,10 @@ diff -ruN a/scripts/wf_device/plugins/android/validators/baseline_checks.py b/sc
          phone.command(saved,'cancel');model(lambda m:not m['open']);phone.send('b:801');a.wait(.25);phone.send('b:0');a.wait(.6)
          reset=snap('remote-reset-chord');pos=reset['player']['position']
          check(abs(pos[0])<.1 and abs(pos[1]+5)<.1 and .85<pos[2]<1.05,'reset_chord_without_settings_or_jump')
-diff -ruN a/scripts/wf_device/plugins/android/validators/picker_checks.py b/scripts/wf_device/plugins/android/validators/picker_checks.py
---- a/scripts/wf_device/plugins/android/validators/picker_checks.py	2026-10-31 18:40:02.141614461 +0700
-+++ b/scripts/wf_device/plugins/android/validators/picker_checks.py	2026-10-31 18:40:45.724802768 +0700
+diff --git a/scripts/wf_device/plugins/android/validators/picker_checks.py b/scripts/wf_device/plugins/android/validators/picker_checks.py
+index 9f06bbd..35f8f2d 100644
+--- a/scripts/wf_device/plugins/android/validators/picker_checks.py
++++ b/scripts/wf_device/plugins/android/validators/picker_checks.py
 @@ -1,9 +1,10 @@
  """Pick in 3D on the baseline level: chooser, pick mode, a phone arrow, the same-spot
  group, the owner's form and the remote's Back chain, in one lease.
@@ -107,7 +150,7 @@ diff -ruN a/scripts/wf_device/plugins/android/validators/picker_checks.py b/scri
  """
  import json
  import time
-@@ -11,8 +12,8 @@
+@@ -11,8 +12,8 @@ from .diagnostics import Bridge
  from ..key_input import hold as held_key
  from .plant_checks import Phone
  
@@ -117,7 +160,7 @@ diff -ruN a/scripts/wf_device/plugins/android/validators/picker_checks.py b/scri
  
  
  def check_picker(a):
-@@ -48,7 +49,7 @@
+@@ -48,7 +49,7 @@ def check_picker(a):
      try:
          bridge = Bridge(a)
          initial = wait('ready', lambda s: s['player'] and s['game']['mode'] == 'game' and not s['game']['paused'])
@@ -126,23 +169,22 @@ diff -ruN a/scripts/wf_device/plugins/android/validators/picker_checks.py b/scri
  
          # 1. Hold OK: the chooser, with Pick in 3D as row 0.
          held_key(a, '23', 1500)
-@@ -62,21 +63,23 @@
+@@ -62,21 +63,23 @@ def check_picker(a):
          a.capture('picker-scene-')
          phone = Phone(a)
          scene = model(lambda m: m.get('picker') and m.get('pick') == 'scene')
 -        check(len(scene['objects']) == 3, 'three_candidates')
 -        check(scene.get('inView') == 2, 'two_brackets_in_view')
 -        check(scene.get('highlight') == FIRST_HIGHLIGHT, 'first_highlight_nearest_centre')
--
++        check([o['title'] for o in scene['objects']] == OWNERS, 'two_candidates')
++        check(scene.get('inView') == 1, 'one_bracket_in_view')
++        check(scene.get('highlight') == SHARED_SPOT, 'first_highlight_is_shared_spot')
+ 
 -        # 3. The phone's D-pad Right moves the TV highlight.
 -        phone.command(scene, 'move', 'right')
 -        moved = model(lambda m: m.get('pick') == 'scene' and m.get('highlight') == SHARED_SPOT)
 -        check(moved['session'] == scene['session'], 'phone_right_moves_highlight')
 -        a.wait(.4); a.capture('picker-after-right-')
-+        check([o['title'] for o in scene['objects']] == OWNERS, 'two_candidates')
-+        check(scene.get('inView') == 1, 'one_bracket_in_view')
-+        check(scene.get('highlight') == SHARED_SPOT, 'first_highlight_is_shared_spot')
-+
 +        # 3. The phone's D-pad Right has nowhere to go: the highlight stays on the one bracket.
 +        phone.command(scene, 'move', 'right'); a.wait(.4)
 +        moved = model(lambda m: m.get('pick') == 'scene')
@@ -160,10 +202,130 @@ diff -ruN a/scripts/wf_device/plugins/android/validators/picker_checks.py b/scri
          a.wait(.4); a.capture('picker-group-')
          phone.command(group, 'ok')
          form = model(lambda m: m['open'] and not m.get('picker'))
-diff -ruN a/tests/device_coordinator/test_baseline_picker.py b/tests/device_coordinator/test_baseline_picker.py
---- a/tests/device_coordinator/test_baseline_picker.py	2026-10-31 18:40:02.182076717 +0700
-+++ b/tests/device_coordinator/test_baseline_picker.py	2026-10-31 18:40:45.725250077 +0700
-@@ -7,8 +7,9 @@
+diff --git a/scripts/wf_device/plugins/android/validators/runtime_options_checks.py b/scripts/wf_device/plugins/android/validators/runtime_options_checks.py
+index b49e4b6..6bae654 100644
+--- a/scripts/wf_device/plugins/android/validators/runtime_options_checks.py
++++ b/scripts/wf_device/plugins/android/validators/runtime_options_checks.py
+@@ -2,6 +2,13 @@
+ 
+ Uses existing phone settings commands and read-only diagnostics. No caller
+ endpoints, scripts, commands or arbitrary operations are accepted.
++
++The baseline has two settings owners (World Foundry
++docs/plans/2026-10-31-baseline-settings-cleanup.md): "Field types" (schema FieldTypes,
++the first editable owner) and "Runtime settings" (schema Settings), which alone carries
++Runtime Options. Actor ids are read from the chooser by title. An idle diagnostic
++snapshot reports the first editable owner, so Runtime Options values are read while the
++Runtime settings form is open (TV or phone); the actual clock proves applied rates.
+ """
+ import json
+ import math
+@@ -56,6 +63,16 @@ def check_runtime_options(a):
+         models.append(result)
+         return result
+ 
++    def runtime_values():
++        """Committed Runtime settings values: open its phone form, read, cancel."""
++        opened = owner(runtime)
++        result = values(opened)
++        phone.command(opened, 'cancel'); model(lambda m: not m['open'])
++        return result
++
++    def idle(s):
++        return not s['game']['paused'] and s['game']['modal'] == 'none'
++
+     def owner(actor):
+         phone.send('r:open')
+         picker = model(lambda m: m.get('picker'))
+@@ -74,57 +91,62 @@ def check_runtime_options(a):
+     try:
+         bridge = Bridge(a)
+         initial = wait('ready', lambda s: s['player'] and s['game']['mode'] == 'game' and not s['game']['paused'])
+-        check(initial['properties']['schema'] == 'BaselineSettings', 'baseline_catalog')
+-        initial_values = committed(initial)
+-        check(initial_values['1000'] == '1' and initial_values['1001'] == '0', 'default_fps_and_realtime')
++        check(initial['properties']['schema'] == 'FieldTypes', 'baseline_catalog')
+         check(type(initial['game'].get('simulation_time')) in (int, float), 'actual_clock_readback')
+         a.capture('fps-on-initial-')
+-        # Exercise the production TV section rail and Back-to-Apply path.
++        # The production TV chooser and Back-to-Apply path. Row 0 is Pick in 3D, then
++        # Field types, then Runtime settings.
+         hold(a, '23', 1500)
+         wait('tv-picker', lambda s: s['game']['modal'] == 'object-picker')
+-        tap('DPAD_CENTER')
+-        wait('tv-form', lambda s: s['game']['modal'] == 'form', draft=True)
+-        tap('DPAD_LEFT'); tap('DPAD_DOWN'); tap('DPAD_RIGHT'); tap('DPAD_LEFT')
++        tap('DPAD_DOWN'); tap('DPAD_DOWN'); tap('DPAD_CENTER')
++        form = wait('tv-form', lambda s: s['game']['modal'] == 'form', draft=True)
++        check(form['properties']['schema'] == 'Settings', 'tv_opens_runtime_settings')
++        check(committed(form)['1000'] == '1' and committed(form)['1001'] == '0', 'default_fps_and_realtime')
++        # Runtime Options is the first section and Show FPS its first row: Left turns it off.
++        tap('DPAD_LEFT')
+         drafted = snap('tv-fps-draft', draft=True)
+         fields = {str(f['field']): f for f in drafted['properties']['fields']}
+         check(fields['1000']['draft'] == '0' and fields['1000']['committed'] == '1', 'tv_draft_has_no_effect')
+         a.capture('tv-runtime-options-')
+         tap('BACK')
+-        applied = wait('tv-applied', lambda s: s['game']['modal'] == 'none')
+-        check(committed(applied)['1000'] == '0', 'tv_back_applies_fps')
++        wait('tv-applied', idle)
+         a.wait(.5); a.capture('fps-off-')
+         phone = Phone(a)
+         model(); phone.send('r:open')
+         picker = model(lambda m: m.get('picker'))
+-        check(len(picker['objects']) == 2, 'two_owners')
+-        first, second = [str(o['actor']) for o in picker['objects']]
+-        phone.command(picker, 'select', first)
++        titles = {o['title']: str(o['actor']) for o in picker['objects']}
++        check([o['title'] for o in picker['objects']] == ['Field types', 'Runtime settings'], 'two_owners')
++        types, runtime = titles['Field types'], titles['Runtime settings']
++        phone.command(picker, 'select', runtime)
+         opened = model(lambda m: m['open'] and not m.get('picker'))
+-        ordinary = values(opened)['40']
++        check(values(opened)['1000'] == '0', 'tv_back_applies_fps')
+         cancelled = edit(opened, {1000: '1', 1001: '1', 1002: '37'})
+         check(committed(snap('phone-draft'))['1001'] == '0', 'phone_draft_has_no_effect')
+         phone.command(cancelled, 'cancel'); model(lambda m: not m['open'])
+-        check(committed(snap('cancelled'))['1001'] == '0', 'cancel_keeps_realtime')
++        check(runtime_values()['1001'] == '0', 'cancel_keeps_realtime')
+         for hz in (20, 37):
+-            changed = edit(owner(first), {1001: '1', 1002: str(hz)})
++            changed = edit(owner(runtime), {1001: '1', 1002: str(hz)})
+             phone.command(changed, 'apply'); model(lambda m: not m['open'])
+-            start = wait('fixed-' + str(hz), lambda s: not s['game']['paused'] and committed(s)['1002'] == str(hz))
++            start = wait('fixed-' + str(hz), idle)
+             a.wait(.75)
+             end = snap('fixed-advanced-' + str(hz), level_generation=start['level_generation'], after_simulation_step=start['simulation_step'])
+             clocks.append(clock_progress(start, end, hz)); check(True, 'actual_fixed_clock_' + str(hz))
+-        shared = owner(second)
+-        check(values(shared)['1001'] == '1' and values(shared)['1002'] == '37', 'second_owner_reads_process_globals')
+-        check(values(shared)['40'] == ordinary, 'sample_fields_unchanged')
++        # Field types is a separate catalog: no runtime rows, and its own values untouched.
++        other = owner(types)
++        check('1000' not in values(other) and values(other).get('1') == '120', 'field_types_unaffected')
++        phone.command(other, 'cancel'); model(lambda m: not m['open'])
++        shared = owner(runtime)
++        check(values(shared)['1001'] == '1' and values(shared)['1002'] == '37', 'reopened_owner_reads_process_globals')
+         changed = edit(shared, {1000: '1', 1001: '0', 1003: '1', 1004: '1'})
+         phone.command(changed, 'apply'); model(lambda m: not m['open'])
+-        realtime = wait('realtime', lambda s: not s['game']['paused'] and committed(s)['1001'] == '0')
++        realtime = wait('realtime', idle)
+         a.wait(.75)
+         advanced = snap('realtime-advanced', level_generation=realtime['level_generation'], after_simulation_step=realtime['simulation_step'])
+         elapsed = advanced['game']['simulation_time'] - realtime['game']['simulation_time']
+         wall = (advanced['monotonic_us'] - realtime['monotonic_us']) / 1000000
+         check(wall > .5 and .5 < elapsed / wall < 1.5, 'actual_realtime_clock')
+         a.capture('fps-on-restored-'); a.wait(7); a.capture('profilers-running-')
+-        reopened = owner(first)
++        reopened = owner(runtime)
+         fields = {str(f['id']): f for f in reopened['fields']}
+         check(all(fields[i]['readonly'] and fields[i]['value'] == '1' for i in ('1003', '1004')), 'active_profilers_readonly')
+         check(fields['1005']['readonly'], 'renderer_ghost_readonly')
+diff --git a/tests/device_coordinator/test_baseline_picker.py b/tests/device_coordinator/test_baseline_picker.py
+index 46e21ff..7f39367 100644
+--- a/tests/device_coordinator/test_baseline_picker.py
++++ b/tests/device_coordinator/test_baseline_picker.py
+@@ -7,8 +7,9 @@ import pytest
  from wf_device.plugins.android.applications import validate_request
  import wf_device.plugins.android.validators.picker_checks as picker
  
@@ -175,7 +337,7 @@ diff -ruN a/tests/device_coordinator/test_baseline_picker.py b/tests/device_coor
  
  
  def test_picker_validator_admission():
-@@ -20,24 +21,24 @@
+@@ -20,24 +21,24 @@ def test_picker_validator_admission():
  
  
  class Host:
@@ -206,7 +368,7 @@ diff -ruN a/tests/device_coordinator/test_baseline_picker.py b/tests/device_coor
              self.mode = 'group'
          elif self.mode == 'group':
              self.mode = 'form'; self.actor = 19
-@@ -46,18 +47,18 @@
+@@ -46,18 +47,18 @@ class Host:
          modal = {'none': 'none', 'form': 'phone-form'}.get(self.mode, 'object-picker')
          return {'player': {'position': [0, -5, .92]}, 'input': {'held': 0},
                  'game': {'mode': 'game', 'modal': modal, 'paused': modal != 'none'},
@@ -229,7 +391,7 @@ diff -ruN a/tests/device_coordinator/test_baseline_picker.py b/tests/device_coor
  
  
  def run(host, tmp_path, monkeypatch):
-@@ -76,9 +77,7 @@
+@@ -76,9 +77,7 @@ def run(host, tmp_path, monkeypatch):
                  raise RuntimeError('Timed out waiting for expected property snapshot')
              return m
          def command(self, model, verb, tail=None):
@@ -240,7 +402,7 @@ diff -ruN a/tests/device_coordinator/test_baseline_picker.py b/tests/device_coor
                  host.ok()
              elif verb == 'cancel':
                  host.mode = 'none'
-@@ -101,9 +100,10 @@
+@@ -101,9 +100,10 @@ def test_full_sequence(tmp_path, monkeypatch):
                               'picker-closed-']
  
  
@@ -255,3 +417,169 @@ diff -ruN a/tests/device_coordinator/test_baseline_picker.py b/tests/device_coor
 +    assert report['assertions']['two_candidates'] is True
 +    assert report['assertions']['one_bracket_in_view'] is False
 +    assert 'same_spot_short_list' not in report['assertions']
+diff --git a/tests/device_coordinator/test_runtime_options.py b/tests/device_coordinator/test_runtime_options.py
+index 26a8200..03b515f 100644
+--- a/tests/device_coordinator/test_runtime_options.py
++++ b/tests/device_coordinator/test_runtime_options.py
+@@ -60,7 +60,7 @@ def test_failure_saves_assertions_and_closes_owned_bridge(tmp_path, monkeypatch)
+     # Fail before any UI input when the independent clock accessor is absent.
+     def missing_clock(self, **kwargs):
+         return {'player': {'actor': 1}, 'game': {'mode': 'game', 'paused': False},
+-                'properties': {'schema': 'BaselineSettings', 'fields': [
++                'properties': {'schema': 'FieldTypes', 'fields': [
+                     {'field': 1000, 'committed': '1'}, {'field': 1001, 'committed': '0'}]}}
+     FixtureBridge.snapshot = missing_clock
+     monkeypatch.setattr('wf_device.plugins.android.validators.runtime_options_checks.Bridge', FixtureBridge)
+@@ -69,3 +69,149 @@ def test_failure_saves_assertions_and_closes_owned_bridge(tmp_path, monkeypatch)
+     import json
+     report = json.loads((tmp_path/'runtime-options-checks.json').read_text())
+     assert closed == [True] and report['assertions']['actual_clock_readback'] is False
++
++
++class Device:
++    """Scripted World Foundry host for the two-owner baseline: Field types (19) and
++    Runtime settings (20, the only Runtime Options owner). One chooser and form serve the
++    TV and the phone; the idle snapshot reports the first editable owner, as on device.
++    `shared_sheet` gives Field types the runtime rows too, as the old owners all had."""
++    OWNERS = [{'actor': 19, 'title': 'Field types'}, {'actor': 20, 'title': 'Runtime settings'}]
++
++    def __init__(self, shared_sheet=False):
++        runtime = {'1000': '1', '1001': '0', '1002': '20', '1003': '0', '1004': '0', '1005': 'On'}
++        self.values = {19: {'1': '120', **(runtime if shared_sheet else {})}, 20: runtime}
++        self.schemas = {19: 'FieldTypes', 20: 'Settings'}
++        self.modal, self.row, self.actor, self.draft = 'none', 0, None, {}
++        self.step, self.time, self.us, self.session = 0, 0.0, 0, 0
++        self.out = None
++
++    def readonly(self, actor, field):
++        return actor == 20 and (field == '1005' or (field in ('1003', '1004') and self.values[20][field] == '1'))
++
++    def open(self, actor):
++        self.actor, self.draft, self.modal = actor, dict(self.values[actor]), 'form'
++        self.session += 1
++
++    def close(self):
++        self.modal, self.actor, self.draft = 'none', None, {}
++
++    def commit(self):
++        self.values[self.actor].update(self.draft)
++        self.close()
++
++    # TV remote
++    def hold(self, adapter, code, ms):
++        if self.modal == 'none':
++            self.modal, self.row = 'object-picker', 0
++            self.session += 1
++
++    def key(self, code):
++        code = code.replace('KEYCODE_', '')
++        if self.modal == 'object-picker':
++            if code == 'DPAD_DOWN':
++                self.row += 1
++            elif code == 'DPAD_CENTER' and self.row >= 1:
++                self.open(self.OWNERS[self.row - 1]['actor'])
++        elif self.modal == 'form':
++            if code == 'DPAD_LEFT' and self.actor == 20:
++                self.draft['1000'] = '0'  # Show FPS has focus: first row of the first section
++            elif code == 'BACK':
++                self.commit()
++
++    # Diagnostics bridge
++    def snapshot(self, **kwargs):
++        paused = self.modal != 'none'
++        if not paused:
++            r = self.values[20]
++            delta = 1 / int(r['1002']) if r['1001'] == '1' else .6
++            self.step += 1; self.time += delta; self.us += 600000
++        else:
++            delta = None
++        actor = self.actor or 19
++        fields = [{'field': int(k), 'committed': v, 'draft': self.draft.get(k, v)} for k, v in self.values[actor].items()]
++        return {'run': 'process', 'level_generation': 1, 'simulation_step': self.step, 'monotonic_us': self.us,
++                'player': {'actor': 4},
++                'game': {'mode': 'game', 'paused': paused, 'modal': self.modal, 'simulation_time': self.time,
++                         'simulation_delta': delta if delta is not None else 0},
++                'properties': {'schema': self.schemas[actor], 'actor': actor, 'fields': fields}}
++
++    # Phone
++    def model(self):
++        if self.modal == 'object-picker':
++            return {'session': self.session, 'open': True, 'picker': True, 'objects': self.OWNERS, 'fields': []}
++        if self.modal == 'form':
++            return {'session': self.session, 'open': True, 'error': '', 'fields': [
++                {'id': int(k), 'kind': 0, 'value': v, 'readonly': self.readonly(self.actor, k)} for k, v in self.draft.items()]}
++        return {'session': self.session, 'open': False, 'fields': []}
++
++    def command(self, model, verb, tail=None):
++        if verb == 'select':
++            self.open(int(tail))
++        elif verb == 'set':
++            field, value = tail.split(':', 1)
++            if not self.readonly(self.actor, field):
++                self.draft[field] = value
++        elif verb == 'apply':
++            self.commit()
++        elif verb == 'cancel':
++            self.close()
++
++    def capture(self, name):
++        if name == 'profilers-running-':
++            (self.out / 'profilers-running-logcat.txt').write_text('frame-profile: total 3 ms\n')
++            (self.out / 'profilers-running-wf.log').write_text('old run\n=== wf_game android_main\nscript-profile: actor 20\n')
++
++
++def run_device(device, tmp_path, monkeypatch):
++    from types import SimpleNamespace
++    import wf_device.plugins.android.validators.runtime_options_checks as checks
++    class Bridge:
++        def __init__(self, adapter): pass
++        snapshot = staticmethod(device.snapshot)
++        def close(self): pass
++    class Phone:
++        def __init__(self, adapter): pass
++        def model(self, predicate=lambda m: True):
++            m = device.model()
++            if not predicate(m):
++                raise RuntimeError('Timed out waiting for expected property snapshot')
++            return m
++        def send(self, text):
++            if text == 'r:open':
++                device.hold(None, '23', 0)
++        command = staticmethod(device.command)
++        def close(self): pass
++    monkeypatch.setattr(checks, 'Bridge', Bridge)
++    monkeypatch.setattr(checks, 'Phone', Phone)
++    monkeypatch.setattr(checks, 'hold', device.hold)
++    device.out = tmp_path
++    adapter = SimpleNamespace(out=tmp_path, key=device.key, wait=lambda s: None, capture=device.capture,
++                              require_foreground=lambda: None)
++    checks.check_runtime_options(adapter)
++
++
++def test_two_owner_full_sequence(tmp_path, monkeypatch):
++    import json
++    device = Device()
++    run_device(device, tmp_path, monkeypatch)
++    report = json.loads((tmp_path / 'runtime-options-checks.json').read_text())
++    assert all(report['assertions'].values())
++    assert list(report['assertions']) == [
++        'baseline_catalog', 'actual_clock_readback', 'tv_opens_runtime_settings', 'default_fps_and_realtime',
++        'tv_draft_has_no_effect', 'two_owners', 'tv_back_applies_fps', 'phone_draft_has_no_effect',
++        'cancel_keeps_realtime', 'actual_fixed_clock_20', 'actual_fixed_clock_37', 'field_types_unaffected',
++        'reopened_owner_reads_process_globals', 'actual_realtime_clock', 'active_profilers_readonly',
++        'renderer_ghost_readonly', 'actual_frame_profile_output', 'actual_script_profile_output']
++    assert [c['hz'] for c in report['clock_measurements']] == [20, 37]
++    assert device.values[19] == {'1': '120'}
++
++
++def test_runtime_rows_on_field_types_fail_and_save_report(tmp_path, monkeypatch):
++    import json
++    with pytest.raises(RuntimeError, match='field_types_unaffected'):
++        run_device(Device(shared_sheet=True), tmp_path, monkeypatch)
++    report = json.loads((tmp_path / 'runtime-options-checks.json').read_text())
++    assert report['assertions']['two_owners'] is True
++    assert report['assertions']['field_types_unaffected'] is False
++    assert 'reopened_owner_reads_process_globals' not in report['assertions']
+-- 
+2.53.0
+

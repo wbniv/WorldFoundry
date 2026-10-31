@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/d460aba6) | Settings cleanup: the editable Show FPS row is accepted |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/df676a00) | Baseline settings: two owners, Field types and Runtime settings |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/e6fe62eb) | Baseline: add a ladder of eight Utah teapots (52 to 16 256 faces) |
 
 <!--history-meta v1
+d460aba6	author	Will Norris
+d460aba6	added	2
+d460aba6	deleted	2
+d460aba6	files	1
+d460aba6	body	The agent that built the cleanup authored one runtime row, runtime_show_fps,\nas editable, because the engine lists only owners with an editable field and\nRuntime settings would otherwise never appear in the picker. Will accepted it\nand wants the option ("The editable Show FPS row: accept it. we totally want\nthis option"). The plan and the TODO item record that, so neither still lists\nit as awaiting approval. The validator patch is the one decision left, and it\nis now being applied in the coordinator repo as a local commit.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
 df676a00	author	Will Norris
 df676a00	added	234
 df676a00	deleted	5
