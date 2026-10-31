@@ -1,6 +1,6 @@
 # Baseline: a ladder of Utah teapots with rising face counts
 
-**Status:** Implemented 2026‑10‑31; verification steps 1–7 pass on the desktop. The device install (step 8): the Pixel is installed, cast2 is unreachable. Rank **T3**. Land it **before** [the settings cleanup](2026-10-31-baseline-settings-cleanup.md): both change actor indices, and this one only appends.
+**Status:** Implemented 2026‑10‑31; verification steps 1–7 pass on the desktop. Device install (step 8): the Pixel and cast1 are installed and cast1 is profiled (about 53 fps, 13 % of refreshes missed); cast2 is unreachable. Rank **T3**. Land it **before** [the settings cleanup](2026-10-31-baseline-settings-cleanup.md): both change actor indices, and this one only appends.
 
 ## Context
 
@@ -112,10 +112,10 @@ The change adds no screen text beyond the label boards. The empty, error and nar
 
 | Risk | Why it matters | Gate |
 |---|---|---|
-| **Frame cost.** +33 500 faces in a level of under 1 000 | The baseline is every new level's template. The Chromecast HD is the weak device | Measured on both devices in step 8 before this is called done. If the top rungs do not hold frame rate, the config drops them (a one-line change); the ladder is data, not code |
+| **Frame cost.** +33 500 faces in a level of under 1 000 | The baseline is every new level's template. The Chromecast HD is the weak device | **Measured on cast1** (step 8): about 53 fps with 13 % of refreshes missed, against a clean 60 for the fishtank menu. The Pixel is not yet measured. If the top rungs do not hold frame rate, the config drops them (a one-line change); the ladder is data, not code |
 | **Memory budget** | `memory-settings.json` authored 4 000 000 B per room slot | **Hit and resolved**: needed about 6.7 MB, now 8 000 000 (approach item 8). A device `check` still has to confirm the Chromecast loads it |
 | **cast2 is unreachable** | `chromecast-test-02`: "Coordinator control unavailable", configured `192.168.4.29:33803` (2026‑10‑31 16:23 and 16:41 +07). Several older install jobs from other sessions have waited on it for more than 110 h | Job `J‑842a6d03570a` is submitted and reports `needs-local-setup`. **I need the "IP address & Port" line from cast2's Wireless debugging screen** before it can run. I did not touch the other sessions' jobs |
-| **Coordinator maintenance** | An update started at 16:35 and new jobs wait for it | Pixel job `J‑7431f689137f` is queued (batch `B-c1387a030d36`) and starts by itself when grants resume; I did not bypass the pause |
+| **Coordinator maintenance** | An update started at 16:35 and new jobs waited for it, then a shared-transport recovery held cast1 and the Pixel for roughly an hour | Cleared on its own; the Pixel install (`J‑7431f689137f`) ran and cast1's jobs ran after it. I did not bypass either hold. My cast2 `readd` attempts may have contributed to the second one; that is unproven |
 | **Main `cd.iff` was stale** | Index 7 held the old baseline, the qbert entry had drifted, and `verify.py --bundle` expected 9 TOC entries against the bundle's 10 | **Resolved** by formalizing the bundle: `wflevels/main-cd.manifest` is now the one level list, and the build, the checker and the tests read it (see step 7) |
 | **Backface culling** | Mixed patch orientation would show holes | **Not a problem**: the raw winding is already consistent and outward; inside-spout and inside-handle faces stay single-sided, as expected |
 | **Actor indices** | The settings cleanup removes `SampleSettings3` and shifts these ids | Land this first; ids come from `actor-map.json`, never hard-coded |
@@ -245,4 +245,24 @@ phone-pixel-8-pro: J-7431f689137f — waiting: maintenance: grants paused
 chromecast-test-02: J-842a6d03570a — needs-local-setup: Coordinator control unavailable for chromecast-test-02; check the connection before retrying
 ```
 
-**PENDING** — APK `baseline-0b4a87b65dd71e08.apk` (SHA‑256 `0b4a87b65dd7…`, signed with the baseline dev key, arm64-v8a and armeabi-v7a; its `assets/cd.iff` matches the receipt and contains the teapot meshes). The Pixel job runs when the coordinator update finishes; cast2 needs its Wireless debugging address. Frame rate on the devices is still unmeasured.
+**PARTIAL.** Installed and measured on cast1 and the Pixel; cast2 is still unreachable.
+
+- **Pixel 8 Pro:** installed (`J‑7431f689137f`, APK `baseline-0b4a87b65dd7…`, the teapot build). Its launcher check and frame rate have not been run.
+- **cast2:** `J‑842a6d03570a` is still `needs-local-setup`. Its Wireless debugging port did not accept connections from this PC (`33803`, `46339`; nothing in the whole `/22` had either open), and the coordinator will not take an address hint for it.
+- **cast1 (Chromecast HD), added at Will's suggestion while cast2 was down:** install `J‑0443e6b02948` completed. The `baseline-settings` validator check `J‑b40d5debccea` ended `recovery-required: plugin-error`: the validator is stale against the level schema, so that is not a teapot result. Frame rate came from the `profile` workflow, `J‑bfd832c214e3`, on the newest APK (`baseline-eebab09d…`, teapots plus the settings cleanup), `WARMUP=15 RUNS=3`, SurfaceFlinger presents, 12 s per run:
+
+```
+cast1 baseline, eight teapots, 33 500 faces (J-bfd832c214e3)
+  run 1  54.57 fps  p50 16.68 ms  p95 33.37 ms  missed 9.8 %
+  run 2  51.99 fps  p50 16.68 ms  p95 33.37 ms  missed 15.3 %
+  run 3  52.12 fps  p50 16.68 ms  p95 33.37 ms  missed 15.0 %
+  mean   52.9 fps                                missed 13.4 %      (refresh 16.68 ms = 59.9 Hz)
+
+Reference, same device and method, 2026-10-17 (docs/plans/2026-10-17-settings-editor-font.md):
+  fishtank menu   59.6 fps  missed about 0.5 %
+  planted tank    about 35 fps  missed 60 to 87 %
+```
+
+[![cast1 view from the spawn: eight teapots with face-count labels](2026-10-31-baseline-utah-teapots/cast1-device-view.png)](2026-10-31-baseline-utah-teapots/cast1-device-view.png)
+
+The capture is from the device (1920 × 1080; its on-screen FPS counter reads 61.3 at that instant, while the profile above is what the display presented over 12 s). **Reading:** the full ladder costs the Chromecast HD roughly 7 fps, from a clean 60 to about 53 with about 13 % of refreshes missed, and every frame time is either one or two refreshes. That is well above the Planted Tank scene. **Caveat:** this is one scene measured once. The baseline without teapots was not profiled on the same runtime, so the exact cost of the teapots is not isolated, and the settings cleanup rides in this APK too (it adds no rendering). If the top rungs are too costly for a template level, the ladder is data in `baseline.json`: dropping the 16 256-face rung is a one-line change.

@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/2905d27f) | Main cd.iff: one manifest lists its levels; rebuild the stale bundle |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/e7ba498a) | Teapot plan: correct the preset note and record the captured follow-ups |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/e6fe62eb) | Baseline: add a ladder of eight Utah teapots (52 to 16 256 faces) |
 
 <!--history-meta v1
+2905d27f	author	Will Norris
+2905d27f	added	21
+2905d27f	deleted	4
+2905d27f	files	1
+2905d27f	body	Adding a level to wfsource/source/game/cd.iff meant editing a hand-written\nlist in the Taskfile, a second copy in tests/level_menu_harness.py, and\nhard-coded names and indices in wflevels/baseline/verify.py. The copies had\ndrifted: the committed bundle held an old baseline and a stale qbert entry\n(its level was committed 2026-10-27, cd.iff on 2026-10-17), the checker\nexpected 9 TOC entries against the bundle's 10 (the UIFT font), and\ntest_identical_without_manifest[cd.iff] was failing.\n\nwflevels/main-cd.manifest is now the one list, in TOC order (position = level\nindex), with the rules for changing it: append only, because shell.fth boots\nlevel 0, the SMB flag and axe chain levels by index, and scripts and device\nchecks name an index (the baseline is 7). It reuses the level-menu manifest\ngrammar without title or prompt (this bundle has no menu).\n\n- scripts/cd_manifest.py reads and validates it (standalone files only, no\n  duplicates, printable names, files must exist).\n- scripts/build-main-cd.py packs it; `task build-cd-iff` calls it instead of\n  a hand-written cdpack command. The rebuilt bundle is byte-identical to what\n  the old command produced (SHA-256 797a5bf12b43...): the refactor changes no\n  bytes.\n- verify.py and level_menu_harness.py read the manifest; the baseline's level\n  index comes from it, not a literal 7, and verify.py now checks the UIFT\n  entry (a chunk header plus the font file).\n- tests/test_main_cd_manifest.py: the manifest is valid and ordered, the\n  loader rejects each kind of bad manifest, the committed bundle matches it,\n  the build script reproduces the committed bytes, and no hand-written copy\n  of the list reappears.\n- docs/level-building.md: "Adding a level to the main cd.iff".\n\nThe bundle is rebuilt: the baseline entry grows by 788480 bytes (the teapots)\nand the qbert entry is refreshed to its committed level.\n\nVerified: test_main_cd_manifest.py and test_level_menu.py, 44 passed; the\ndesktop session loads the baseline from the bundle as level 7, 162 of 162\nchecks. test_engine_smb_menu_chain_and_return still fails at its screenshot\nstep (the menu chain itself passes); it runs smb-menu-cd.iff and the engine,\nnot this bundle, and fails the same way twice, so it is left for its owner.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
 e7ba498a	author	Will Norris
 e7ba498a	added	1
 e7ba498a	deleted	1
