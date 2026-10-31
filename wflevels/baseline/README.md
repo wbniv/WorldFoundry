@@ -31,6 +31,10 @@ quadrant support and reset. It needs a working display and local socket access.
 Debug-assisted position/heading setup is explicitly distinguished from the
 input-driven movement it tests.
 
+`task baseline:fresh` proves the committed outputs rebuild identically from their inputs;
+`task test-baseline` runs the baseline and settings suites with their build outputs declared as
+dependencies (see [docs/level-building.md](../../docs/level-building.md)).
+
 ```sh
 task baseline:generate
 task baseline:export

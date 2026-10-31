@@ -73,3 +73,40 @@ def bridge():
             except subprocess.TimeoutExpired:
                 proc.kill()
                 proc.wait(timeout=2.0)
+
+
+# ---------------------------------------------------------------------------
+# Build-output prerequisites.
+#
+# Several suites compile or run things that no checkout contains: the Rust tools' cargo
+# outputs and the cooked Planted Tank level. A fresh checkout or worktree used to fail
+# those suites with a bare linker error or CalledProcessError. A suite that names one of
+# these outputs is now skipped, with the command that produces it, when it is missing.
+# Suites that build their own tools with cargo are left alone.
+# ---------------------------------------------------------------------------
+BUILD_OUTPUTS = {
+    "wf_attr_edit/target/release/libwf_attr_edit.a": "task build-test-tools",
+    "wf_attr_edit/target/release/catalog": "task build-test-tools",
+    "oas2oad-rs/target/release/oas2oad": "task build-test-tools",
+    "cdpack-rs/target/release/cdpack": "task build-test-tools",
+    "planted_tank_screensaver/settings.rprp": "task build-planted-level",
+}
+_module_needs: dict = {}
+
+
+def _needs(path: Path) -> list:
+    if path not in _module_needs:
+        source = path.read_text()
+        built_by_the_test = "'cargo'" in source or '"cargo"' in source
+        _module_needs[path] = [] if built_by_the_test else [
+            (fragment, command) for fragment, command in BUILD_OUTPUTS.items() if fragment in source]
+    return _module_needs[path]
+
+
+def pytest_collection_modifyitems(config, items):
+    for item in items:
+        for fragment, command in _needs(Path(str(item.fspath))):
+            located = [p for p in (REPO_ROOT / "wftools", REPO_ROOT / "wflevels") if (p / fragment).exists()]
+            if not located:
+                item.add_marker(pytest.mark.skip(reason=f"missing build output {fragment}: run `{command}`"))
+                break

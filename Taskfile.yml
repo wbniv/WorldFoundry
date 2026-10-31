@@ -1043,6 +1043,32 @@ tasks:
     cmds:
       - python3 wflevels/baseline/verify.py --desktop
 
+  baseline:fresh:
+    desc: "Prove the committed baseline outputs (level bundles, settings catalogs, actor map, main cd.iff) rebuild identically from their inputs. Exits 1 and leaves them rebuilt when stale, so commit them with the input change (scripts/baseline-fresh.py)"
+    cmds:
+      - python3 scripts/baseline-fresh.py
+
+  build-test-tools:
+    desc: "Build the Rust tools the baseline and settings tests link against or run (wf_attr_edit library and catalog, oas2oad, cdpack); a no-op when up to date. tests/conftest.py skips a suite with this command in its reason when one is missing"
+    cmds:
+      - cargo build --release --manifest-path wftools/wf_attr_edit/Cargo.toml
+      - cargo build --release --manifest-path wftools/oas2oad-rs/Cargo.toml
+      - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
+
+  prereq-planted-settings:
+    internal: true
+    desc: "The cooked Planted Tank catalog the touch-settings tests read; built once, then skipped while it exists"
+    status:
+      - test -f wflevels/planted_tank_screensaver/settings.rprp
+    cmds:
+      - task: build-planted-level
+
+  test-baseline:
+    desc: "Baseline and settings suites (teapots, field types, main cd.iff manifest, runtime options, host, touch examples, level memory, capabilities), with the build outputs they need declared as deps"
+    deps: [build-test-tools, prereq-planted-settings]
+    cmds:
+      - python3 -m pytest tests/test_baseline_teapots.py tests/test_baseline_field_types.py tests/test_main_cd_manifest.py tests/test_touch_settings_plan_examples.py tests/test_runtime_options.py tests/test_runtime_property_host.py tests/test_level_memory_settings.py tests/test_settings_capabilities_catalog.py -q
+
   build-level:
     desc: "Build a level's inner + standalone .iff (usage: task build-level -- qbert_practice)"
     deps: [tools-build]

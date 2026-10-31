@@ -271,6 +271,25 @@ the committed bytes, or if a hand-written copy of the list reappears in the Task
 The per-app bundles (`build-cd-iff-aquarium`, `-condo`, the menu bundles) are separate and keep
 their own recipes.
 
+### Committed baseline outputs stay fresh, and its tests declare what they need
+
+The baseline's built files are committed too (the level bundles, `actor-map.json`, the compiled
+settings catalogs and bindings, and the main `cd.iff`). `task baseline:fresh`
+(`scripts/baseline-fresh.py`) rebuilds them from their inputs and compares the SHA-256 of every
+one before and after: it exits 0 when all rebuild identically, and 1 with the list of stale files
+(left rebuilt, so commit them with the input change). Unlike `aquarium-check` it rebuilds in place,
+because the baseline's build is host-only and needs tools built in the tree; it only judges the
+files it owns, so other people's uncommitted edits do not matter.
+
+The baseline and settings suites compile against, or run, build outputs that no checkout contains:
+the Rust tools (`wf_attr_edit` library and `catalog`, `oas2oad`, `cdpack`) and the cooked Planted
+Tank catalog. `task test-baseline` declares them as dependencies (`build-test-tools`, and
+`build-planted-level` once) and then runs the suites. Run `pytest` directly in a fresh checkout and a
+suite that needs a missing output is skipped with the command that produces it, so a missing build
+shows as a named skip, not a linker error. `tests/conftest.py` finds the outputs a suite needs by
+scanning it for the paths in `BUILD_OUTPUTS`; add a path there when a new suite depends on a new
+build output.
+
 ### Committed Aquarium outputs stay fresh
 
 The built Aquarium files are committed (`.lev`, `.lvl`, mesh `.iff`, `actor-map.json`, the
