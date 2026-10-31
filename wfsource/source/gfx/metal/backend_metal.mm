@@ -28,10 +28,8 @@
 //       - vertices went through setVertexBytes, which is capped at 4 KB.
 //       - no depth state at all.
 //
-// Textures are still not supported — DrawTriangle ignores the PixelMap* and
-// draws flat-lit. That is Phase 3, and per the resolved D4/O3 it lands by
-// widening the RendererBackend seam (CreateTexture/DestroyTexture + an opaque
-// handle on PixelMap), not by a Metal-side sidecar.
+// Textured triangles are sampled by the MSL fragment function below. Mutable
+// atlas regions use the same opaque PixelMap handle as the GL backend.
 //=============================================================================
 
 #import <Metal/Metal.h>
@@ -596,6 +594,23 @@ public:
     void DestroyTexture(RBTextureHandle handle) override
     {
         ReleaseTexHandle(handle);
+    }
+
+    bool UpdateTextureRGBA8(RBTextureHandle handle, int /*textureHeight*/, int x, int y, int width, int height,
+                            const unsigned char* pixels) override
+    {
+        if (!handle || !pixels || x < 0 || y < 0 || width <= 0 || height <= 0)
+            return false;
+        id<MTLTexture> texture = HandleToTex(handle);
+        if (!texture || texture.pixelFormat != MTLPixelFormatRGBA8Unorm ||
+            x + width > (int)texture.width || y + height > (int)texture.height)
+            return false;
+        [texture replaceRegion:MTLRegionMake2D((NSUInteger)x, (NSUInteger)y,
+                                               (NSUInteger)width, (NSUInteger)height)
+                   mipmapLevel:0
+                      withBytes:pixels
+                    bytesPerRow:(NSUInteger)width * 4];
+        return true;
     }
 
     // ---- offscreen support (Phase 2) ---------------------------------------

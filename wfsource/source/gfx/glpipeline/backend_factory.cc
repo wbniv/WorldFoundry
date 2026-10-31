@@ -201,6 +201,8 @@ public:
     static void SimulateSurfaceLoss();
     RBTextureHandle CreateTexture(int w,int h,RBTextureFormat f,const void* p) override
     { return _backend.CreateTexture(w,h,f,p); }
+    bool UpdateTextureRGBA8(RBTextureHandle h,int th,int x,int y,int w,int he,const unsigned char* p) override
+    { Drain(); return _backend.UpdateTextureRGBA8(h,th,x,y,w,he,p); }
     void DestroyTexture(RBTextureHandle h) override { Drain(); _backend.DestroyTexture(h); }
     bool ReloadProgram(const char* v,const char* f,std::string& log) override
     { Drain(); return _backend.ReloadProgram(v,f,log); }

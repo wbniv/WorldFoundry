@@ -1,0 +1,114 @@
+#ifndef WF_GAME_DOOM_FIRE_HP
+#define WF_GAME_DOOM_FIRE_HP
+
+#include <algorithm>
+#include <cstdint>
+#include <vector>
+
+// Small deterministic fixed-step Doom-fire field. Storage is allocated once;
+// Advance and Pixels do not allocate.
+class DoomFireField
+{
+public:
+    DoomFireField(int width, int height, uint32_t seed)
+        : _width(width), _height(height), _rng(seed ? seed : 1),
+          _heat((size_t)width * height), _stable(_heat.size()),
+          _rgba(_heat.size() * 4)
+    {
+        if (width < 2 || height < 2) { _width = _height = 0; return; }
+        for (int i = 0; i < 80; ++i) Step();
+        _stable = _heat;
+        Paint();
+        _dirty = true;
+    }
+
+    bool Advance(double clockSeconds, bool reducedMotion, bool modal)
+    {
+        if (!_width || !_height) return false;
+        if (!_haveClock) { _lastClock = clockSeconds; _haveClock = true; }
+        double elapsed = clockSeconds - _lastClock;
+        _lastClock = clockSeconds;
+        if (elapsed < 0 || elapsed > 0.25) elapsed = 0;
+        if (modal) { _accumulator = 0; return false; }
+        if (reducedMotion) {
+            _accumulator = 0;
+            if (_heat != _stable) { _heat = _stable; Paint(); _dirty = true; }
+            return ConsumeDirty();
+        }
+        _accumulator += elapsed;
+        int steps = 0;
+        while (_accumulator >= kStepSeconds && steps < kMaxCatchup) {
+            Step(); _accumulator -= kStepSeconds; ++steps;
+        }
+        if (steps == kMaxCatchup && _accumulator >= kStepSeconds) _accumulator = 0;
+        if (steps) { Paint(); _dirty = true; }
+        return ConsumeDirty();
+    }
+
+    bool ConsumeDirty() { bool was = _dirty; _dirty = false; return was; }
+    const unsigned char* Pixels() const { return _rgba.empty() ? 0 : _rgba.data(); }
+    int Width() const { return _width; }
+    int Height() const { return _height; }
+
+private:
+    static constexpr double kStepSeconds = 0.045;
+    static constexpr int kMaxCatchup = 3;
+    int _width, _height;
+    uint32_t _rng;
+    std::vector<uint8_t> _heat, _stable;
+    std::vector<unsigned char> _rgba;
+    double _lastClock = 0, _accumulator = 0;
+    bool _haveClock = false, _dirty = false;
+
+    uint32_t Random()
+    {
+        _rng ^= _rng << 13; _rng ^= _rng >> 17; _rng ^= _rng << 5;
+        return _rng;
+    }
+    void Step()
+    {
+        for (int y = 0; y < _height - 1; ++y) {
+            for (int x = 0; x < _width; ++x) {
+                const int drift = (int)(Random() % 3) - 1;
+                const int sourceX = std::max(0, std::min(_width - 1, x + drift));
+                const unsigned source = _heat[(size_t)(y + 1) * _width + sourceX];
+                const unsigned cooling = 3 + Random() % 9;
+                // Gather once per destination. Scattering into a cleared row
+                // leaves holes and lets cold pixels overwrite hot neighbours.
+                _heat[(size_t)y * _width + x] =
+                    (uint8_t)(source > cooling ? source - cooling : 0);
+            }
+        }
+        const int sourceWidth = std::max(2, _width * 3 / 4);
+        const int start = (_width - sourceWidth) / 2;
+        for (int x = 0; x < _width; ++x)
+            _heat[(size_t)(_height - 1) * _width + x] =
+                (x >= start && x < start + sourceWidth)
+                    ? (uint8_t)(205 + Random() % 51) : 0;
+    }
+    static void Colour(uint8_t heat, unsigned char* rgba)
+    {
+        static const unsigned char stops[6][3] = {
+            {220, 65, 8}, {240, 90, 12}, {255, 120, 18},
+            {255, 160, 30}, {255, 205, 70}, {255, 245, 175}
+        };
+        const unsigned scaled = (unsigned)heat * 5;
+        const unsigned i = std::min(4u, scaled / 255);
+        const unsigned f = scaled - i * 255;
+        for (int c = 0; c < 3; ++c)
+            rgba[c] = (unsigned char)((stops[i][c] * (255 - f) + stops[i + 1][c] * f + 127) / 255);
+        // The authored opaque cards supply the flame silhouette.
+        rgba[3] = 255;
+    }
+    void Paint()
+    {
+        for (size_t i = 0; i < _heat.size(); ++i) Colour(_heat[i], &_rgba[i * 4]);
+    }
+};
+
+// Per-actor update entry point used by the optional zForth bridge. x/y/w/h
+// address the flame's inner UV rectangle in the room texture atlas.
+bool WFUpdateDoomFire(int actorIndex, int x, int y, int width, int height,
+                      double clockSeconds, bool reducedMotion, bool modal);
+
+#endif

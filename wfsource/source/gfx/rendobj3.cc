@@ -385,6 +385,15 @@ RenderObject3D::SetMaterialColor(int idx, const Color& color)
 	ApplyMaterials(_materialList);
 }
 
+bool
+RenderObject3D::UpdateMaterialTextureRGBA8(int idx, int x, int y, int width, int height,
+                                           const unsigned char* pixels)
+{
+    if (idx < 0 || idx >= _materialCount)
+        return false;
+    return _materialList[idx].UpdateTextureRGBA8(x, y, width, height, pixels);
+}
+
 //============================================================================
 
 // Level-owned runtime buffers; publication happens between scene renders.

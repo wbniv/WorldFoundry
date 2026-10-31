@@ -624,6 +624,18 @@ Level::Level
                  _renderCurrentRoomOnly ? "current-only" : "all-active",
                  _runtimeProperties.schema("LevelRenderSettings") ? "RPRP" : "default");
     wfprops::host().bind(&_runtimeProperties);
+    // Keep the Temple's optional stained-glass shaft in a script-visible mailbox.
+    // The OAS field is editable; its value changes only after the form commits.
+    auto applyStainedGlassLight=[this](const wfprops::Object& settings){
+        const std::string* value=settings.get(2);
+        _mailboxes.WriteMailbox(621,Scalar(value&&*value=="1"?1:0,0));
+    };
+    if(const wfprops::Object* settings=_runtimeProperties.schema("LevelRenderSettings"))
+        applyStainedGlassLight(*settings);
+    wfprops::host().consumer("LevelRenderSettings",
+        wfprops::Consumer{ {}, {}, [applyStainedGlassLight](const wfprops::Object& settings,const std::string&){
+            applyStainedGlassLight(settings);
+        }});
     // Pick in 3D: where the chooser's objects are, read only while it is open.
     wfprops::host().world.camera=[](wfpick::Camera& camera){return RendererBackendGet().CameraMatrices(camera.view,camera.proj);};
     wfprops::host().world.locate=[this](uint32_t actor,wfpick::Candidate& candidate){
@@ -879,7 +891,8 @@ Level::~Level()
     if(_bitmapPresenter){_bitmapPresenter->~Presenter();_memory->Free(_bitmapPresenter);_bitmapPresenter=NULL;}
     if(_bitmapBundle){_memory->Free(_bitmapBundle);_bitmapBundle=NULL;}
 
-    if(wfprops::host().registry()==&_runtimeProperties){wfprops::host().bind(nullptr);wfprops::host().world={};}
+    if(wfprops::host().registry()==&_runtimeProperties){wfprops::host().bind(nullptr);wfprops::host().world={};
+        wfprops::host().consumer("LevelRenderSettings",{});}
     if(wfprops::activeRegistry()==&_runtimeProperties)wfprops::activeRegistry()=nullptr;
 	// HALLmalloc is a stack/bump allocator — Free must happen in strict
 	// reverse-allocation order or lmalloc.cc:308 asserts. The construction

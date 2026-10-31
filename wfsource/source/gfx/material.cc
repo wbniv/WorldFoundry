@@ -25,9 +25,19 @@
 //============================================================================
 
 #include <gfx/material.hp>
+#include <gfx/pixelmap.hp>
 #include <gfx/rendobj2.hp>
 #include <gfx/rendobj3.hp>
 #include <gfx/vmem.hp>      // VideoMemory::VRAMTransient{Width,Height} for the UV page bound
+
+bool Material::UpdateTextureRGBA8(int x, int y, int width, int height,
+                                  const unsigned char* pixels) const
+{
+    // Texture pixels are mutable runtime content while the material-to-map
+    // binding remains immutable. PixelMap owns the CPU copy and GPU handle.
+    return _texturePixelMap &&
+           const_cast<PixelMap*>(_texturePixelMap)->UpdateRGBA8(x, y, width, height, pixels);
+}
 
 //============================================================================
 

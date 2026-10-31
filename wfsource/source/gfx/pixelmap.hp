@@ -52,6 +52,8 @@ public:
 
 	void Load(const void* memory, int xSize, int ySize);		
 	void Load(const void* memory, int xOffset, int yOffset, int xSize, int ySize);		
+	// Update RGBA8 pixels in-place. The GPU texture handle remains stable.
+	bool UpdateRGBA8(int x, int y, int width, int height, const unsigned char* pixels);
 
 	int GetFlags() const;
 	int GetXSize() const;
