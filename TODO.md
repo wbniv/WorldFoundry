@@ -2,7 +2,6 @@
 
 ## Open
 
-- [verify T3] **Baseline: Utah teapot ladder.** Eight teapots (52…16 256 faces) from the vendored Newell 32-patch data, appended after existing actors; steps 1–6 pass on the desktop. Pixel install queued behind a coordinator update, cast2 needs its Wireless debugging address, step 7 blocked by main `cd.iff` drift. [plan](docs/plans/2026-10-31-baseline-utah-teapots.md)
 - [verify T4] **Baseline settings cleanup: two owners.** Built: Field types (the 27 type × showAs cases) and Runtime settings, both at (2, −4, 1); sample owners, empty section and gallery preset removed from the level. Host tests, desktop and bundle checks pass. Not done: device acceptance needs the validator patch (`validator-patch.diff`) deployed, and one authored-editable runtime row needs your OK. [plan](docs/plans/2026-10-31-baseline-settings-cleanup.md)
 ### Platform / Display
 
@@ -175,6 +174,7 @@
 
 
 ## Done
+- ✅ 2026-10-31 — [baseline-utah-teapots] Eight Utah teapots (52…16 256 faces) in the baseline; cast1 about 53 fps, Pixel 120. See [plan](docs/plans/2026-10-31-baseline-utah-teapots.md).
 - ✅ 2026-10-31 — [main-cd-manifest] The main cd.iff's level list is one manifest (wflevels/main-cd.manifest) read by build, verify and tests; bundle refreshed. See [plan](docs/plans/2026-10-31-baseline-utah-teapots.md).
 
 - ✅ 2026‑10‑25 — [screensaver-landscape] Seahorse, Aquarium, Planted Dreams start landscape, per-app setting; verified on Pixel and casts. See [plan](docs/plans/2026-10-24-screensaver-landscape-orientation.md).
