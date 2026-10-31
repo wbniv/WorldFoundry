@@ -25,6 +25,12 @@ property catalogs. Director is unique by engine contract; these owners do not
 introduce extra Directors. Default catalogs have five representative fields.
 The `settings-gallery` preset includes the complete fixture.
 
+`TEAPOTS` contains eight Utah teapots (52, 240, 552, 992, 2 256, 4 032, 9 120 and 16 256
+faces, from tessellation levels 1, 2, 3, 4, 6, 8, 12 and 16) and one `TeapotLabels` mesh of
+standing face-count boards. All are anchored `Platform` actors with `Mass 0`, so they are
+visual only. The collection is created last: existing actor indices 1–21 are unchanged and
+the new actors take 22–30. Every preset includes them.
+
 `DIAGNOSTICS` contains box/wall, camera wall, three steps, three wedges and an
 asymmetric UV swatch. All have an explicit export exclusion flag outside the
 diagnostics preset. `AUTHORING_ONLY` contains the Blender inspection camera.

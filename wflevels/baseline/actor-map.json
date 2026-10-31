@@ -20,7 +20,16 @@
     "CoordinateLabels": 18,
     "SampleSettings": 19,
     "SampleSettings2": 20,
-    "SampleSettings3": 21
+    "SampleSettings3": 21,
+    "Teapot_52": 22,
+    "Teapot_240": 23,
+    "Teapot_552": 24,
+    "Teapot_992": 25,
+    "Teapot_2256": 26,
+    "Teapot_4032": 27,
+    "Teapot_9120": 28,
+    "Teapot_16256": 29,
+    "TeapotLabels": 30
   },
   "preset": "default"
 }

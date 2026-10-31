@@ -793,7 +793,7 @@
     "memory_room_asset_bytes": {
       "id": 2002,
       "readonly": true,
-      "initial": "4000000"
+      "initial": "8000000"
     },
     "memory_active_room_slots": {
       "id": 2003,

@@ -23,6 +23,15 @@ def prepare():
         x, y = (i % 4) * 128, (i // 4) * 32
         draw.text((x + 64, y + 16), label, font=font, anchor='mm', fill='#f0f3f4')
     atlas.save(HERE / 'labels.tga')
+    # Teapot ladder labels: their own small atlas, so labels.tga and every existing label UV stay put.
+    from teapot import label_texts
+    texts = label_texts()
+    teapot_atlas = Image.new('RGB', (512, 64), '#172028')
+    draw = ImageDraw.Draw(teapot_atlas)
+    for i, text in enumerate(texts):
+        x, y = (i % 4) * 128, (i // 4) * 32
+        draw.text((x + 64, y + 16), text, font=font, anchor='mm', fill='#f0f3f4')
+    teapot_atlas.save(HERE / 'teapot-labels.tga')
     swatch = Image.new('RGB', (128, 128), '#152c40')
     draw = ImageDraw.Draw(swatch)
     for y in range(8):

@@ -35,6 +35,14 @@ def structural():
     check('three independently addressed settings owners',all(objs[n]['schema']=='target.oad' for n in ['SampleSettings','SampleSettings2','SampleSettings3']))
     check('Pick in 3D fixture: one owner apart, two sharing a spot',objs['SampleSettings']['position']==objs['SampleSettings3']['position']!=objs['SampleSettings2']['position'])
     check('default explicit runtime camera/room objects',all(n in objs for n in ['Level','Room','Camera','CameraOrigin','TargetFollow','TargetFirst','Follow','FirstPerson','Directional','Ambient','Background']))
+    from teapot import face_count
+    cfg=c['teapots'];faces=[face_count(n) for n in cfg['segments']]
+    ladder=[objs.get('Teapot_%d'%f) for f in faces]
+    check('teapot ladder: one teapot per rung with the formula face count',all(ladder) and [o['properties'].get('teapot_faces') for o in ladder]==faces and faces==sorted(set(faces)),faces=faces)
+    check('teapots are visual-only platform actors in TEAPOTS',all(o['collection']=='TEAPOTS' and o['schema']=='platform.oad' and o['properties'].get('Mass')==0 for o in ladder+[objs['TeapotLabels']]))
+    check('teapots stand in one row at the configured spacing',all(abs(a-b)<1e-4 for o,i in zip(ladder,range(len(ladder))) for a,b in zip(o['position'],[cfg['first_x']+i*cfg['spacing'],cfg['row_y'],0])))
+    ids=json.loads((HERE/'actor-map.json').read_text())['indices']
+    check('teapot actor ids are appended after every existing actor',min(v for k,v in ids.items() if k.startswith('Teapot'))>max(v for k,v in ids.items() if not k.startswith('Teapot')))
     spec=json.loads((HERE/'settings-coverage.json').read_text())
     from settings_fixture import TYPES,SHOW
     check('every declared descriptor type accounted for',set(TYPES)=={f['type'] for f in spec['fields']}|set(spec['exclusions'])|set(spec['structural_types']))

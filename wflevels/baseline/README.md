@@ -59,6 +59,17 @@ them afterward. The sparse default retains no diagnostic actors or textures.
 Optional motion/room-transition fixtures remain pending; wedges exercise static triangle-mesh collision; slope traversal acceptance
 remains pending.
 
+Eight Utah teapots stand in a row at `y = 10`, from 52 to 16 256 faces (33 500 in all), each
+with a face-count label board in front. They are tessellated from Martin Newell's 32-patch
+Bézier data, vendored verbatim in [data/teapotCGA.bpt](data/README.md) (source, hash and
+cross-check recorded there), by [teapot.py](teapot.py); the ladder, scale and placement are
+the `teapots` block of [baseline.json](baseline.json). They are visual-only platform actors
+with no collision. To add them to an already reviewed Blender file without regenerating it,
+run `blender --background --python wflevels/baseline/generate.py -- --add-teapots
+wflevels/baseline/baseline.blend`; it refuses if they are already there. The ladder needs
+more room memory than a bare baseline, so `room_asset_bytes` is 8 000 000. See the
+[teapot plan](../../docs/plans/2026-10-31-baseline-utah-teapots.md).
+
 Native controls: Up/Down moves forward/backward; Left/Right turns; A jumps,
 B resets, C changes camera. A Chromecast remote uses Up+OK to reset and
 Down+OK to switch camera. Hold A/OK alone for one second to open the shared

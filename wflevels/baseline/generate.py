@@ -79,6 +79,14 @@ class Geometry:
         self.faces.append(tuple(range(start, start + len(vertices))))
         self.mats.append(mat)
         self.uvs.append(uv or [(0,0)] * len(vertices))
+    def indexed(self, vertices, triangles, mat):
+        """Append a welded triangle mesh, keeping its shared vertices."""
+        start = len(self.vertices)
+        self.vertices.extend(vertices)
+        for t in triangles:
+            self.faces.append(tuple(start + i for i in t))
+            self.mats.append(mat)
+            self.uvs.append([(0,0)] * 3)
     def box(self, lo, hi, mat):
         a,b,c=lo; x,y,z=hi
         v=[(a,b,c),(x,b,c),(x,y,c),(a,y,c),(a,b,z),(x,b,z),(x,y,z),(a,y,z)]
@@ -121,6 +129,45 @@ def arrow(g, axis, mat):
         g.face(v,mat)
     lo=[-.015]*3;hi=[.015]*3;lo[axis]=-.25;hi[axis]=-.05
     g.box(lo,hi,mat)
+
+def add_teapots():
+    """A row of Utah teapots, one per tessellation level in baseline.json.
+
+    Visual-only platform actors (no collision), in their own TEAPOTS collection. Called
+    last so the existing actor indices do not move. Refuses to run twice on one scene.
+    """
+    import teapot
+    if 'TEAPOTS' in bpy.data.collections:
+        raise RuntimeError('TEAPOTS already exists; refusing to add the teapots twice')
+    cfg = C['teapots']
+    ceramic = material('teapot', tuple(cfg['colour']))
+    for i, n in enumerate(cfg['segments']):
+        vertices, triangles = teapot.tessellate(n, cfg['scale'])
+        g = Geometry('teapot_%d' % len(triangles))
+        g.indexed(vertices, triangles, ceramic)
+        obj = actor('Teapot_%d' % len(triangles), 'platform', 'TEAPOTS', g.mesh(),
+                    pos=(cfg['first_x'] + i * cfg['spacing'], cfg['row_y'], 0), fields={'Mass': 0.0})
+        obj['wf_teapot_segments'] = n
+        obj['wf_teapot_faces'] = len(triangles)
+    # One mesh of standing label boards facing the spawn, from a small atlas of its own
+    # (4 columns x 2 rows of 128 x 32 px, so a board is 4:1). Floor decals are unreadable
+    # from the spawn at this distance and angle.
+    atlas = material('teapot-labels', (1, 1, 1), 'teapot-labels.tga')
+    labels = Geometry('teapot_labels')
+    width, height = cfg['label_width'], cfg['label_width'] / 4
+    for i in range(len(cfg['segments'])):
+        u, v = (i % 4) / 4, (i // 4) / 2  # v runs down the atlas, as in label()
+        x, y = cfg['first_x'] + i * cfg['spacing'] - width / 2, cfg['label_y']
+        labels.face([(x, y, 0), (x + width, y, 0), (x + width, y, height), (x, y, height)], atlas,
+                    [(u, v + .5), (u + .25, v + .5), (u + .25, v), (u, v)])
+    actor('TeapotLabels', 'platform', 'TEAPOTS', labels.mesh(), fields={'Mass': 0.0})
+
+def relativize():
+    """Make schema and texture references portable relative to the saved file."""
+    for obj in bpy.context.scene.objects:
+        if obj.get('wf_schema_path'):obj['wf_schema_path']=bpy.path.relpath(obj['wf_schema_path'])
+    for image in bpy.data.images:
+        if image.filepath:image.filepath=bpy.path.relpath(image.filepath)
 
 def build(preset):
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -210,6 +257,7 @@ def build(preset):
     # SampleSettings3 on SampleSettings' spot for the "2 objects here" bracket.
     for name,pos in [('SampleSettings',(2,-4,1)),('SampleSettings2',(-1.5,-3,1)),('SampleSettings3',(2,-4,1))]:
         actor(name,'target','CONFIG',pos=pos)
+    add_teapots()
     objects=[o for o in bpy.context.scene.objects if o.get('wf_schema_path')]
     ids={o.name:i+1 for i,o in enumerate(objects)}
     header='\\ Explicit generated baseline actor constants\n'+''.join(f': base-{n.lower()} {ids[n]} ;\n' for n in ['Player','Follow','FirstPerson'])
@@ -249,18 +297,22 @@ def export(path):
 
 if __name__=='__main__':
     ap=argparse.ArgumentParser();ap.add_argument('--output',type=Path);ap.add_argument('--export',type=Path);ap.add_argument('--overwrite',action='store_true');ap.add_argument('--preset',choices=C['presets'],default='default')
+    ap.add_argument('--add-teapots',type=Path,metavar='BLEND',help='append the TEAPOTS collection to a reviewed Blender file, keeping its manual edits; refuses if it is already there')
     args=ap.parse_args(sys.argv[sys.argv.index('--')+1:])
-    if args.export:
+    if args.add_teapots:
+        from prepare_assets import prepare
+        prepare()
+        wf_blender.register();bpy.ops.wm.open_mainfile(filepath=str(args.add_teapots.resolve()))
+        add_teapots();relativize()
+        bpy.ops.wm.save_mainfile()
+        print('Added TEAPOTS to',args.add_teapots)
+    elif args.export:
         wf_blender.register();bpy.ops.wm.open_mainfile(filepath=str(args.export.resolve()));export(args.export)
     else:
         out=(args.output or HERE/'build/baseline-generated.blend').resolve()
         if out.exists() and not args.overwrite:raise RuntimeError('Refusing to overwrite an existing Blender file; use --overwrite explicitly')
         out.parent.mkdir(parents=True,exist_ok=True);build(args.preset)
         bpy.ops.wm.save_as_mainfile(filepath=str(out))
-        # Make schema/texture references portable relative to the saved file.
-        for obj in bpy.context.scene.objects:
-            if obj.get('wf_schema_path'):obj['wf_schema_path']=bpy.path.relpath(obj['wf_schema_path'])
-        for image in bpy.data.images:
-            if image.filepath:image.filepath=bpy.path.relpath(image.filepath)
+        relativize()
         bpy.ops.wm.save_as_mainfile(filepath=str(out))
         print('Generated editable scene:',out)
