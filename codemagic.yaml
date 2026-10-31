@@ -326,6 +326,10 @@ workflows:
               echo "$label|$name|$install|$launch|$alive|$colours|$dominant" >> "$VERDICT"
               return 0
             fi
+            case "$label" in
+              fyw-ipad-landscape) xcrun devicectl device orientation set -d "$udid" landscapeLeft || echo "Simulator orientation command unavailable; app orientation still constrained by Info.plist" ;;
+              fyw-ipad-portrait) xcrun devicectl device orientation set -d "$udid" portrait || echo "Simulator orientation command unavailable; app orientation still constrained by Info.plist" ;;
+            esac
             echo "--- install ---"
             xcrun simctl install "$udid" "$APP" && install=yes
             if [ "$install" = yes ]; then
@@ -444,12 +448,17 @@ workflows:
           while IFS= read -r f; do cp "$CM_BUILD_DIR/ci-fixtures/finding-your-way/cd.iff" "$f"; done < "$CM_BUILD_DIR/fyw-cdiff.txt"
           DEFAULT_APP="$APP"; APP="$FYW_APP"
           if [ -n "${IPHONE_ID:-}" ]; then run_device fyw-iphone "$IPHONE_ID" "$IPHONE_NAME"; fi
-          if [ -n "${IPAD_ID:-}" ]; then run_device fyw-ipad "$IPAD_ID" "$IPAD_NAME"; fi
+          if [ -n "${IPAD_ID:-}" ]; then
+            run_device fyw-ipad-landscape "$IPAD_ID" "$IPAD_NAME"
+            # Test-only portrait app: production currently declares landscape only.
+            python3 -c 'import plistlib,sys; p=sys.argv[1]; d=plistlib.load(open(p,"rb")); d["UISupportedInterfaceOrientations~ipad"]=["UIInterfaceOrientationPortrait"]; d["UIRequiresFullScreen"]=True; plistlib.dump(d,open(p,"wb"))' "$FYW_APP/Info.plist"
+            run_device fyw-ipad-portrait "$IPAD_ID" "$IPAD_NAME"
+          fi
           APP="$DEFAULT_APP"
 
           echo "=== iOS simulator verdict (runtime ${RUNTIME:-none}) ==="
           rc=0
-          for label in iphone ipad fyw-iphone fyw-ipad; do
+          for label in iphone ipad fyw-iphone fyw-ipad-landscape fyw-ipad-portrait; do
             line=$(grep "^$label|" "$VERDICT" || true)
             upper=$(echo "$label" | tr '[:lower:]' '[:upper:]')
             if [ -z "$line" ]; then
