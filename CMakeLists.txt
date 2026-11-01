@@ -1476,6 +1476,15 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     add_test(NAME pixelmap_context_loss COMMAND wf_pixelmap_context_loss_gl_test)
     set_tests_properties(pixelmap_context_loss PROPERTIES LABELS "gl")
 
+    # Depth testing in a context created after a loss (Android's in-place EGL
+    # rebuild): a new context starts with it off and the scene must not draw
+    # in submission order.
+    add_executable(wf_egl_rebuild_depth_gl_test tests/egl_rebuild_depth_gl.cc)
+    target_link_libraries(wf_egl_rebuild_depth_gl_test PRIVATE wfengine)
+    target_compile_options(wf_egl_rebuild_depth_gl_test PRIVATE -fpermissive -w -fno-rtti)
+    add_test(NAME egl_rebuild_depth COMMAND wf_egl_rebuild_depth_gl_test)
+    set_tests_properties(egl_rebuild_depth PROPERTIES LABELS "gl")
+
     # Frame profile: the batch EndFrame flushes after Level::RenderScene closes
     # the profile frame still counts in that frame (game/runtime_profile.hp).
     add_executable(wf_frame_profile_flush_gl_test tests/frame_profile_flush_gl.cc)

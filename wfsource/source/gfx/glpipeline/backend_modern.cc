@@ -561,6 +561,7 @@ public:
     {
         if (width <= 0 || height <= 0 || count <= 0) return;
         Flush();
+        LazyInit();     // the context's own state first, so the save below sees it
         float projection[16], modelview[16];
         std::memcpy(projection, _proj, sizeof(_proj));
         std::memcpy(modelview, _mv, sizeof(_mv));
@@ -1208,6 +1209,17 @@ private:
 
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+#if defined ( GFX_ZBUFFER )
+        // Every draw assumes depth testing, but nothing per frame enables it:
+        // at level load it comes from CreateTexture's side effect. A context
+        // created after a loss (Android RebuildEglContext) starts with depth
+        // testing off, and no level texture is created again before the
+        // scene draws, so it rendered in submission order: later geometry
+        // painted over nearer objects (the Cast2 drop-context runs). LazyInit
+        // runs once per context, before its first draw, so set it here too.
+        glEnable(GL_DEPTH_TEST);
+#endif
 
         _inited = true;
     }
