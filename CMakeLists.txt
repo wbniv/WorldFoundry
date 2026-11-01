@@ -1315,6 +1315,11 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     target_include_directories(android_touch_controls_test PRIVATE ${SRC})
     target_compile_options(android_touch_controls_test PRIVATE -UNDEBUG)
     add_test(NAME android_touch_controls COMMAND android_touch_controls_test)
+    # Android EGL context-loss recovery decisions (gfx/gl/egl_recovery.hp, used by
+    # gl/android_window.cc): swap result, error and debug-drop flag in, action out.
+    add_executable(egl_rebuild_test tests/egl_rebuild_test.cc)
+    target_include_directories(egl_rebuild_test PRIVATE ${SRC})
+    add_test(NAME egl_rebuild COMMAND egl_rebuild_test)
     if(NOT WF_FORTH_ENGINE STREQUAL "none" AND NOT WF_FORTH_ENGINE STREQUAL "zforth")
         add_executable(frame_rate_forth_probe tests/frame_rate_forth_probe.cc
             ${STUB_SRC}/scripting_${WF_FORTH_ENGINE}.cc)

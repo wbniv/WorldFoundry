@@ -1,0 +1,98 @@
+//==============================================================================
+// gfx/gl/egl_recovery.hp
+// Copyright ( c ) 2026 World Foundry Group
+// Part of the World Foundry 3D video game engine/production environment
+// for more information about World Foundry, see www.worldfoundry.org
+//==============================================================================
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// Version 2 as published by the Free Software Foundation
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// or see www.fsf.org
+
+//==============================================================================
+// Description: When the Android EGL glue (gl/android_window.cc) rebuilds its
+// context in place. No EGL calls, so the decisions run in a host CTest
+// (tests/egl_rebuild_test.cc); the EGL calls themselves are device-only.
+//==============================================================================
+
+#ifndef _EGL_RECOVERY_HP
+#define _EGL_RECOVERY_HP
+
+#include <pigsys/pigtypes.h>
+
+// EGL_CONTEXT_LOST, spelled out so this header needs no <EGL/egl.h>;
+// android_window.cc static_asserts that the two agree.
+const int32 EGL_RECOVERY_CONTEXT_LOST = 0x300E;
+
+// What the frame boundary (right after eglSwapBuffers) does.
+enum EEglRecovery
+{
+	EGL_RECOVERY_NONE,
+	EGL_RECOVERY_REBUILD_DRIVER,		// the swap reported EGL_CONTEXT_LOST
+	EGL_RECOVERY_REBUILD_DEBUG_DROP,	// a diagnostic build was asked to drop the context
+};
+
+// What WFAndroidEglInit does when eglMakeCurrent fails on a new surface.
+enum EEglInitStep
+{
+	EGL_INIT_GIVE_UP,					// return false: wait for the next window, as before
+	EGL_INIT_REBUILD_AND_RETRY,			// rebuild on this surface and make current once more
+};
+
+// A debug drop wins: it is a loss the build was asked for, whatever the
+// swap said. Otherwise only a failed swap whose error is EGL_CONTEXT_LOST
+// rebuilds; other swap errors (a surface going away) are the window
+// lifecycle's business, not a lost context.
+inline EEglRecovery
+EglRecoveryAfterSwap(bool swapped, int32 error, bool dropRequested)
+{
+	if (dropRequested)
+		return EGL_RECOVERY_REBUILD_DEBUG_DROP;
+	if (!swapped && error == EGL_RECOVERY_CONTEXT_LOST)
+		return EGL_RECOVERY_REBUILD_DRIVER;
+	return EGL_RECOVERY_NONE;
+}
+
+// Called once per failed eglMakeCurrent. RebuildEglContext makes the new
+// context current itself, so a failure after the rebuild is final: the
+// retry happens at most once.
+inline EEglInitStep
+EglRecoveryAfterMakeCurrent(int32 error)
+{
+	return error == EGL_RECOVERY_CONTEXT_LOST ? EGL_INIT_REBUILD_AND_RETRY : EGL_INIT_GIVE_UP;
+}
+
+// The reason logged as "EGL_CONTEXT_LOST (<reason>) — rebuilding". The
+// chromecast coordinator's STRESS=drop-context reads "debug drop" as a
+// simulated loss; keep the spelling.
+inline const char*
+EglRecoveryReason(EEglRecovery action)
+{
+	return action == EGL_RECOVERY_REBUILD_DEBUG_DROP ? "debug drop" : "driver";
+}
+
+// One request from another thread (the diagnostic APK's broadcast receiver
+// runs on the Java main thread) is taken exactly once on the GL thread.
+// Several requests before the next frame boundary are one drop. Compiler
+// atomics rather than <atomic>: pigtypes.h redefines bool, which breaks the
+// standard header when it is included afterwards.
+class EglDropRequest
+{
+public:
+	void Request()	{ __atomic_store_n(&_requested, int32(1), __ATOMIC_RELEASE); }
+	bool Take()		{ return __atomic_exchange_n(&_requested, int32(0), __ATOMIC_ACQ_REL) != 0; }
+
+private:
+	int32 _requested = 0;
+};
+
+#endif // _EGL_RECOVERY_HP

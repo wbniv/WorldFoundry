@@ -22,6 +22,7 @@
 #include <android/native_window.h>
 
 #include <hal/android/wf_android_export.hp>
+#include <gfx/gl/egl_recovery.hp>
 #include <hal/phonepad/phonepad_overlay.h>
 #include <hal/android/touch_controls.h>
 #include <game/ui_font.hp>
@@ -33,7 +34,13 @@ extern "C" void WFAndroidTouchLayout(int,int,androidtouch::Layout*,uint32_t*,flo
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <unistd.h>
 #include <vector>
+#if defined(WF_RUNTIME_DIAGNOSTICS)
+#include <jni.h>
+#endif
+
+static_assert(EGL_RECOVERY_CONTEXT_LOST == EGL_CONTEXT_LOST, "egl_recovery.hp spells EGL_CONTEXT_LOST");
 
 namespace
 {
@@ -46,7 +53,8 @@ ANativeWindow* gNativeWindow = nullptr;
 
 // Touch-control HUD overlay — self-contained GL objects live alongside the
 // game's modern backend in the shared EGL context. On EGL_CONTEXT_LOST
-// (rare, below) these are reset to 0 so HudInit lazy-recompiles.
+// (rare, RebuildEglContext below) these are reset to 0 so HudInit
+// lazy-recompiles.
 GLuint gHudProg    = 0;
 GLuint gHudVao     = 0;
 GLuint gHudVbo     = 0;
@@ -65,9 +73,83 @@ GLsizei gMenuVerts = 0;
 std::vector<PhonepadRect> gMenuLast;
 int gMenuW = 0, gMenuH = 0;
 
+#if defined(WF_RUNTIME_DIAGNOSTICS)
+// Raised by DropGlContextReceiver (diagnostic APKs only) on the Java main
+// thread, taken by AndroidSwapBuffers on the GL thread.
+EglDropRequest gDropRequested;
+#endif
+
 #define WF_LOG_TAG "wf_game"
 #define WFLOG(fmt, ...) __android_log_print(ANDROID_LOG_INFO, WF_LOG_TAG, fmt, ##__VA_ARGS__)
 #define WFLOGE(fmt, ...) __android_log_print(ANDROID_LOG_ERROR, WF_LOG_TAG, fmt, ##__VA_ARGS__)
+
+}  // namespace
+
+// Defined in gfx/glpipeline/backend_modern.cc — safety-net for the rare
+// EGL_CONTEXT_LOST path (low-memory driver reset). Clears the modern
+// backend's GL-object handles and bumps its texture generation, so the next
+// draw recompiles and PixelMap, the UI font and the bitmap presenter
+// re-create their textures.
+extern "C" void WFAndroidNotifySurfaceLost();
+
+namespace
+{
+
+bool CreateEglContext()
+{
+    const EGLint contextAttribs[] = {
+        EGL_CONTEXT_CLIENT_VERSION, 3,
+        EGL_NONE
+    };
+    gEglContext = eglCreateContext(gEglDisplay, gEglConfig,
+                                   EGL_NO_CONTEXT, contextAttribs);
+    if (gEglContext == EGL_NO_CONTEXT)
+    {
+        WFLOGE("eglCreateContext failed: 0x%x", eglGetError());
+        return false;
+    }
+    return true;
+}
+
+// The one in-place rebuild, for a driver loss (a swap or eglMakeCurrent
+// reporting EGL_CONTEXT_LOST) and a diagnostic build's debug drop alike.
+// Called at a frame boundary (AndroidSwapBuffers, right after the swap) or
+// from WFAndroidEglInit, never mid-frame. Drops what is left of the
+// context, tells the backend every GL name is dead, forgets the overlays'
+// names, then creates a new context and makes it current on the surface
+// that already exists: no new window is needed. False leaves no context.
+bool RebuildEglContext(const char* reason)
+{
+    WFLOG("EGL_CONTEXT_LOST (%s) — rebuilding", reason);
+    eglMakeCurrent(gEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    if (gEglContext != EGL_NO_CONTEXT)
+    {
+        eglDestroyContext(gEglDisplay, gEglContext);
+        gEglContext = EGL_NO_CONTEXT;
+    }
+    WFAndroidNotifySurfaceLost();
+    gHudInited = false;
+    gHudProg   = 0;
+    gHudVao    = 0;
+    gHudVbo    = 0;
+    gPhoneVao   = 0;
+    gPhoneVbo   = 0;
+    gPhoneVerts = 0;
+    gMenuVao    = 0;
+    gMenuVbo    = 0;
+    gMenuLast.clear();
+    if (!CreateEglContext())
+        return false;
+    if (!eglMakeCurrent(gEglDisplay, gEglSurface, gEglSurface, gEglContext))
+    {
+        WFLOGE("EGL context rebuild: eglMakeCurrent failed: 0x%x", eglGetError());
+        eglDestroyContext(gEglDisplay, gEglContext);
+        gEglContext = EGL_NO_CONTEXT;
+        return false;
+    }
+    WFLOG("EGL context rebuilt in place");
+    return true;
+}
 
 }  // namespace
 
@@ -127,20 +209,8 @@ WFAndroidEglInit(ANativeWindow* window)
         }
     }
 
-    if (gEglContext == EGL_NO_CONTEXT)
-    {
-        const EGLint contextAttribs[] = {
-            EGL_CONTEXT_CLIENT_VERSION, 3,
-            EGL_NONE
-        };
-        gEglContext = eglCreateContext(gEglDisplay, gEglConfig,
-                                       EGL_NO_CONTEXT, contextAttribs);
-        if (gEglContext == EGL_NO_CONTEXT)
-        {
-            WFLOGE("eglCreateContext failed: 0x%x", eglGetError());
-            return false;
-        }
-    }
+    if (gEglContext == EGL_NO_CONTEXT && !CreateEglContext())
+        return false;
 
     // Per-surface setup: happens every pause/resume cycle.
     EGLint format = 0;
@@ -156,32 +226,15 @@ WFAndroidEglInit(ANativeWindow* window)
 
     if (!eglMakeCurrent(gEglDisplay, gEglSurface, gEglSurface, gEglContext))
     {
-        EGLint err = eglGetError();
+        const EGLint err = eglGetError();
         WFLOGE("eglMakeCurrent failed: 0x%x", err);
         // EGL_CONTEXT_LOST (0x300E): the driver killed our GL objects on
-        // the way back in — rare, but must be recovered from. Drop the
-        // context, tell the backend to rebuild, and try once more with a
-        // fresh context.
-        if (err == EGL_CONTEXT_LOST)
-        {
-            WFLOG("EGL_CONTEXT_LOST — rebuilding");
-            extern void WFAndroidNotifySurfaceLost();
-            WFAndroidNotifySurfaceLost();
-            gHudInited = false;
-            gHudProg   = 0;
-            gHudVao    = 0;
-            gHudVbo    = 0;
-            gPhoneVao   = 0;
-            gPhoneVbo   = 0;
-            gPhoneVerts = 0;
-            gMenuVao    = 0;
-            gMenuVbo    = 0;
-            gMenuLast.clear();
-            eglDestroyContext(gEglDisplay, gEglContext);
-            gEglContext = EGL_NO_CONTEXT;
-            // Fall through to normal retry on next INIT_WINDOW.
-        }
-        return false;
+        // the way back in — rare, but must be recovered from. Rebuild on
+        // this surface and make the new context current, once, instead of
+        // waiting for another APP_CMD_INIT_WINDOW that may never come.
+        if (EglRecoveryAfterMakeCurrent(err) != EGL_INIT_REBUILD_AND_RETRY
+            || !RebuildEglContext(EglRecoveryReason(EGL_RECOVERY_REBUILD_DRIVER)))
+            return false;
     }
 
     EGLint w = 0, h = 0;
@@ -204,11 +257,6 @@ extern "C" void WFAndroidEglRefreshSize()
         WFLOG("EGL surface resized: %dx%d", w, h);
     }
 }
-
-// Defined in gfx/glpipeline/backend_modern.cc — safety-net for the rare
-// EGL_CONTEXT_LOST path (low-memory driver reset). Clears the modern
-// backend's GL-object handles so the next draw recompiles.
-extern "C" void WFAndroidNotifySurfaceLost();
 
 extern "C" WF_ANDROID_EXPORT void
 WFAndroidEglTerm()
@@ -589,14 +637,61 @@ WFAndroidDrawLevelMenu(const PhonepadRect* rects, int n, int w, int h)
     if ( prevCull)  glEnable(GL_CULL_FACE);
 }
 
+#if defined(WF_RUNTIME_DIAGNOSTICS)
+// org.worldfoundry.wf_game.DropGlContextReceiver, which finding-your-way's
+// make_diagnostic_variant.py adds to diagnostic APKs, calls this on the Java
+// main thread for the broadcast org.worldfoundry.debug.DROP_GL_CONTEXT (the
+// chromecast coordinator's STRESS=drop-context). It only raises the flag:
+// the drop and the rebuild run on the GL thread at the next frame boundary.
+extern "C" JNIEXPORT void JNICALL
+Java_org_worldfoundry_wf_1game_DropGlContextReceiver_nativeDropGlContext(JNIEnv*, jclass)
+{
+    WFLOG("DROP_GL_CONTEXT received; dropping the context at the next frame boundary");
+    gDropRequested.Request();
+}
+#endif
+
+// The frame boundary: the only place during play where the context is
+// checked and rebuilt, so no frame ever draws half into a dead context.
 void AndroidSwapBuffers()
 {
-    if (gEglDisplay != EGL_NO_DISPLAY && gEglSurface != EGL_NO_SURFACE)
+    if (gEglDisplay == EGL_NO_DISPLAY || gEglSurface == EGL_NO_SURFACE)
+        return;
+    WFAndroidEglRefreshSize();
+    WFAndroidDrawHUD();
+    WFAndroidDrawPhoneOverlay();
+    const bool swapped = eglSwapBuffers(gEglDisplay, gEglSurface) == EGL_TRUE;
+    const EGLint error = swapped ? EGL_SUCCESS : eglGetError();
+    bool dropRequested = false;
+#if defined(WF_RUNTIME_DIAGNOSTICS)
+    dropRequested = gDropRequested.Take();
+#endif
+    const EEglRecovery action = EglRecoveryAfterSwap(swapped, error, dropRequested);
+    if (action == EGL_RECOVERY_NONE)
     {
-        WFAndroidEglRefreshSize();
-        WFAndroidDrawHUD();
-        WFAndroidDrawPhoneOverlay();
-        eglSwapBuffers(gEglDisplay, gEglSurface);
+        // Once per distinct error: a surface going away can fail every
+        // swap until APP_CMD_TERM_WINDOW arrives.
+        static EGLint lastError = EGL_SUCCESS;
+        if (error != lastError && !swapped)
+            WFLOGE("eglSwapBuffers failed: 0x%x", error);
+        lastError = error;
+        return;
+    }
+    if (action == EGL_RECOVERY_REBUILD_DEBUG_DROP)
+    {
+        // Destroy the context for real, as a driver loss would leave it,
+        // then recover through the same rebuild the driver path uses.
+        eglMakeCurrent(gEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        eglDestroyContext(gEglDisplay, gEglContext);
+        gEglContext = EGL_NO_CONTEXT;
+    }
+    if (!RebuildEglContext(EglRecoveryReason(action)))
+    {
+        // Nothing can draw without a context, and no window event will
+        // bring one back: end the process rather than run on blind.
+        WFLOGE("EGL context rebuild failed; exiting");
+        std::fflush(nullptr);
+        _exit(EXIT_FAILURE);
     }
 }
 

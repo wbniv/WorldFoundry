@@ -842,8 +842,8 @@ public:
         InitNoPaletteProgram("prewarm");
     }
 
-    // Called from the Android lifecycle hook (WFAndroidEglTerm) when the
-    // EGL surface is destroyed. Reset all GL-object handles; the next draw
+    // Called from the Android EGL glue (RebuildEglContext) when the EGL
+    // context is lost. Reset all GL-object handles; the next draw
     // call's LazyInit will recompile the program + recreate VAO/VBO in the
     // new context. Textures follow _contextGeneration (TextureGeneration):
     // PixelMap re-creates its texture from its resident pixel buffer the
@@ -1446,10 +1446,11 @@ void ModernBackendSimulateSurfaceLoss()
 }
 
 #if defined(__ANDROID__)
-// Called from gfx/gl/android_window.cc's WFAndroidEglTerm when the EGL
-// surface is torn down on pause/backgrounding. Resets all GL-object IDs so
-// the first draw after resume (into the new context) triggers LazyInit
-// again instead of trying to use stale handles.
+// Called from gfx/gl/android_window.cc's RebuildEglContext when the EGL
+// context is lost (a swap or eglMakeCurrent reports EGL_CONTEXT_LOST, or a
+// diagnostic build drops it). Resets all GL-object IDs so the first draw
+// into the new context triggers LazyInit again instead of trying to use
+// stale handles.
 extern "C" void
 WFAndroidNotifySurfaceLost()
 {
