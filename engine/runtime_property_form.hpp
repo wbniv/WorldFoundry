@@ -1,5 +1,5 @@
 #pragma once
-#include "runtime_properties.hpp"
+#include "runtime_property_presentation.hpp"
 namespace wfprops {
 // Focus uses authored sections and rows, never screen-coordinate proximity.
 struct Form {
@@ -7,6 +7,9 @@ struct Form {
     std::vector<std::vector<size_t>> sections;
     std::vector<std::string> titles;
     size_t section=0,row=0;bool rail=false,adjust=false,drawer=false,replaceText=false;
+    // An open choice list (presentation ChoiceList / NumberedChoiceList): the highlighted
+    // option, counted from the field's minimum. Selecting writes the draft only.
+    bool list=false;size_t listIndex=0;
     int key=0;uint32_t previous=0;
     std::function<void(const std::string&)> action;
     bool begin(Registry& registry,uint32_t actor,uint32_t openingButtons=0);

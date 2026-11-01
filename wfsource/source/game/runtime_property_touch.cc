@@ -76,14 +76,28 @@ void renderChooser(Canvas& c,wfprops::Host& host){
  if(count>shown){c.button(c.w-120,17,48,48,"^",Kind::ScrollUp);c.button(c.w-64,17,48,48,"v",Kind::ScrollDown);}
  footer(c,true);
 }
+float measure(float size,const std::string& text){return wfui::Loaded()?wfui::Width(wfui::Body,text)*size/36.f:float(text.size())*size*.5f;}
+// The choice sheet: one button per option; a numbered list shows each option's id, and an
+// option wider than the sheet wraps to two lines instead of ending in "...".
 void renderChoice(Canvas& c,wfprops::Form& form){
  const auto* field=form.field();if(!field){state.choiceMenu=false;return;}
  c.label(18,55,24,field->label,ink,true,c.w-36);
- int count=choices(*field),shown=visible(88,c.h-95,62);
- state.firstChoice=std::max(0,std::min(state.firstChoice,std::max(0,count-shown)));
- for(int i=state.firstChoice;i<count&&i<state.firstChoice+shown;++i)
-  c.button(16,88+(i-state.firstChoice)*62,c.w-32,54,choiceLabel(*field,i),Kind::Choice,i==std::atoi(form.value().c_str())-field->minimum?selected:card,i);
- if(count>shown){c.button(c.w-120,17,48,48,"^",Kind::ScrollUp);c.button(c.w-64,17,48,48,"v",Kind::ScrollDown);}
+ const bool numbered=wfprops::presentation(*field)==wfprops::Control::NumberedChoiceList;
+ const int count=choices(*field),current=std::atoi(form.value().c_str())-field->minimum;
+ state.firstChoice=std::max(0,std::min(state.firstChoice,count-1));
+ float y=88;const float bottom=c.h-95;int last=state.firstChoice-1;
+ for(int i=state.firstChoice;i<count;++i){
+  const float idw=numbered?42.f:0.f,textMax=c.w-32-28-idw;
+  auto lines=wrapTwo(choiceLabel(*field,i),textMax,[](const std::string& t){return measure(18,t);});
+  const float bh=lines.size()>1?78.f:54.f;if(y+bh>bottom)break;
+  c.box(16,y,c.w-32,bh,i==current?selected:card);float tx=30;
+  if(numbered){c.box(tx,y+bh*.5f-14,32,28,0xe4efd9ffu);c.label(tx+8,y+bh*.5f,15,std::to_string(field->minimum+i),panel,true);tx+=idw;}
+  for(size_t line=0;line<lines.size();++line)c.label(tx,y+bh*.5f+(float(line)-(lines.size()-1)*.5f)*22,18,lines[line],ink,false,textMax+4);
+  c.hit(16,y,c.w-32,bh,Kind::Choice,i);
+  drawnRows().push_back({field->id,numbered?"sheet-option-numbered":"sheet-option",16,y,c.w-16,y+bh,int(lines.size())});
+  y+=bh+8;last=i;
+ }
+ if(state.firstChoice>0||last<count-1){c.button(c.w-120,17,48,48,"^",Kind::ScrollUp);c.button(c.w-64,17,48,48,"v",Kind::ScrollDown);}
  c.button(16,c.h-75,c.w-32,55,"Back to fields",Kind::Back);
 }
 void renderColour(Canvas& c,wfprops::Form& form){
@@ -133,27 +147,43 @@ void renderForm(Canvas& c,wfprops::Form& form){
  state.firstRow=std::max(0,std::min(state.firstRow,std::max(0,int(rows.size())-shown)));
  for(int i=state.firstRow;i<int(rows.size())&&i<state.firstRow+shown;++i){
   const auto& field=object->fields[rows[size_t(i)]];float y=top+(i-state.firstRow)*82;
-  if(field.kind==10){c.box(listX,y+32,listW,2,muted);continue;}
+  if(field.kind==10){c.box(listX,y+32,listW,2,muted);drawnRows().push_back({field.id,"spacer",listX,y,listX+listW,y+74,0});continue;}
   c.box(listX,y,listW,74,field.readonly?0x1c302affu:field.kind==9?selected:card);
+  // The row's own target goes first: targets are matched newest first, so segment taps
+  // (added below) win over the row and choose that option instead of opening the sheet.
+  c.hit(listX,y,listW,74,field.show==2&&field.kind<=2&&!field.readonly?Kind::Slider:Kind::Row,i);
   std::string group;
   for(size_t j=0;j<rows[size_t(i)];++j){const auto& marker=object->fields[j];if(marker.kind==6)group=marker.label;else if(marker.kind==5||marker.kind==7)group.clear();}
   if(!group.empty())c.label(listX+13,y+12,12,group,accent,false,listW-28);
   float labelY=y+(group.empty()?24:32),valueY=y+(group.empty()?52:59);
   c.label(listX+13,labelY,17,field.label,field.readonly?muted:ink,true,listW-28);
-  bool segments=field.kind==2&&(field.show==3||field.show==5)&&choices(field)==2&&!field.readonly;
-  if(field.kind!=9&&!segments)c.label(listX+13,valueY,17,valueLabel(form,field)+(field.kind==2&&field.show!=2?"  v":""),muted,false,listW-70);
+  const auto control=wfprops::presentation(field);
+  // Segments: a TOGGLE enum with up to four options, and a two-option radio (unchanged).
+  const int optionCount=choices(field);
+  bool segments=!field.readonly&&((control==wfprops::Control::Segments&&optionCount>=2&&optionCount<=4)||(control==wfprops::Control::Chips&&optionCount==2));
+  const bool numbered=control==wfprops::Control::NumberedChoiceList;
+  DrawnRow drawn{field.id,segments?"segments":wfprops::controlName(control),listX,y,listX+listW,y+74,1};
+  float valueX=listX+13;
+  if(numbered&&!segments){auto v=form.edit.draft.find(field.id);const std::string id=v==form.edit.draft.end()?field.initial:v->second;
+   c.box(valueX,valueY-13,measure(15,id)+14,26,0xe4efd9ffu);c.label(valueX+7,valueY,15,id,panel,true);valueX+=measure(15,id)+24;}
+  if(control==wfprops::Control::Path){c.box(valueX,valueY-12,14,22,muted);c.box(valueX+9,valueY-12,5,6,field.readonly?0x1c302affu:card);valueX+=24;
+   const std::string value=valueLabel(form,field);const auto slash=value.rfind('/');const std::string folder=slash==std::string::npos?"":value.substr(0,slash+1);
+   c.label(valueX,valueY,17,folder,muted,false,listW-70);c.label(valueX+measure(17,folder),valueY,17,value.substr(folder.size()),ink,false,listW-70-measure(17,folder));}
+  else if(field.kind!=9&&!segments)c.label(valueX,valueY,17,valueLabel(form,field)+(field.kind==2&&field.show!=2?"  v":""),muted,false,listX+listW-70-valueX);
+  if(control==wfprops::Control::NumberWithBounds){const std::string bounds=std::to_string(field.minimum)+" \xe2\x80\x93 "+std::to_string(field.maximum);c.label(listX+listW-16-measure(15,bounds),valueY,15,bounds,muted);}
   if(segments){
-   float cw=(listW-34)/2;
-   for(int option=0;option<2;++option){float ox=listX+12+option*(cw+10);
+   const int n=optionCount;float cw=(listW-24-10*(n-1))/n;
+   for(int option=0;option<n;++option){float ox=listX+12+option*(cw+10);
     auto v=form.edit.draft.find(field.id);bool active=(v!=form.edit.draft.end()?std::atoi(v->second.c_str()):std::atoi(field.initial.c_str()))==field.minimum+option;
     c.box(ox,y+41,cw,27,active?0xe4efd9ffu:0x19382dffu);
     c.label(ox+8,y+54,14,choiceLabel(field,option),active?panel:ink,false,cw-14);
     c.hit(ox,y+37,cw,35,Kind::Choice,option,i);
    }
   }
-  if(field.kind==4){c.box(listX+listW-63,y+35,48,27,valueLabel(form,field)=="On"?selected:muted);}
+  if(control==wfprops::Control::Checkbox){const bool on=valueLabel(form,field)=="On";c.box(listX+listW-52,y+35,27,27,ink);c.box(listX+listW-50,y+37,23,23,card);if(on)c.box(listX+listW-45,y+42,13,13,ink);}
+  if(control==wfprops::Control::Switch){const bool on=valueLabel(form,field)=="On";c.box(listX+listW-66,y+35,52,27,on?0x68aa72ffu:0x5d6b63ffu);c.box(on?listX+listW-39:listX+listW-63,y+38,21,21,0xf4f6eeffu);}
+  drawnRows().push_back(drawn);
   if(colour(&field)){auto v=form.edit.draft.find(field.id);c.box(listX+listW-60,y+34,38,29,(rgb(v==form.edit.draft.end()?field.initial:v->second)<<8)|255u);}
-  c.hit(listX,y,listW,74,field.show==2&&field.kind<=2&&!field.readonly?Kind::Slider:Kind::Row,i);
   if(field.show==2&&field.kind<=2){c.box(listX+listW*.55f,y+57,listW*.39f,4,muted);}
  }
  if(int(rows.size())>shown){c.button(listX+listW-110,top-55,48,48,"^",Kind::ScrollUp);c.button(listX+listW-54,top-55,48,48,"v",Kind::ScrollDown);}
@@ -163,7 +193,7 @@ void renderForm(Canvas& c,wfprops::Form& form){
  footer(c,false);
 }
 bool paint(int width,int height,std::vector<PhonepadRect>* rects,std::vector<bitmaptext::Quad>* glyphs){
- auto& host=wfprops::host();host.checkOwner();syncSession(host);state.targets.clear();
+ auto& host=wfprops::host();host.checkOwner();syncSession(host);state.targets.clear();drawnRows().clear();
  if(!state.enabled||!host.modal||width<=0||height<=0)return false;
  if(host.picker&&host.pick==wfprops::PickMode::Scene)return false;
  float d=density(),top=state.top/d;

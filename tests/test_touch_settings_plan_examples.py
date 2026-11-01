@@ -90,6 +90,10 @@ def touch_harness(tmp_path_factory):
 def test_each_example_accepts_the_intended_touch_action(touch_harness, case):
     show = re.search(r"\((\d+)\)", case["showAs"])
     assert show
+    # The touch form draws a two-option radio and a TOGGLE enum as tappable segments;
+    # every other case draws the control its showAs resolves to (the JSON "control").
+    drawn = "segments" if case["id"] in ("enum-radio", "enum-toggle") else case["control"]
     subprocess.run([
         str(touch_harness), str(ROOT / "wflevels/planted_tank_screensaver/settings.rprp"),
-        case["id"], case["type"], show.group(1)], check=True)
+        case["id"], case["type"], show.group(1), drawn,
+        str(ROOT / "wfsource/source/game/ui-font.wfga")], check=True)

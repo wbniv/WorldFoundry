@@ -17,7 +17,7 @@ void drawText(std::vector<bitmaptext::Quad>* glyphs,float sx,float sy,float x,fl
  wfui::Text(*glyphs,0,0,variant==wfui::VariantCount?variantFor(scale):variant,color,text,wfui::Middle,wfui::Left,t);
 }
 void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect>& out,std::vector<bitmaptext::Quad>* glyphs){
- float sx=w/1920.f,sy=h/1080.f;
+ float sx=w/1920.f,sy=h/1080.f;drawnRows().clear();
  auto rect=[&](float x,float y,float width,float height,uint32_t color){out.push_back({x*sx,y*sy,(x+width)*sx,(y+height)*sy,color});};
  auto text=[&](float x,float y,float scale,const std::string& str,uint32_t color=0xf1f2e4ffu){drawText(glyphs,sx,sy,x,y,scale,str,color);};
  rect(0,0,1920,1080,0x061014ffu);rect(180,110,1560,820,0x142d25ffu);
@@ -35,23 +35,68 @@ void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect
    auto columns=[&](const wfprops::Field& field){size_t longest=0;auto labels=options(field);for(const auto& label:labels)longest=std::max(longest,label.size());return std::max(1,std::min(int(labels.size()),int(1040/std::max(140.f,float(longest)*16+44))));};
    auto category=[&](size_t i){std::string group;for(size_t k=0;k<rows[i];++k){const auto& marker=object->fields[k];if(marker.kind==6)group=marker.label;else if(marker.kind==5||marker.kind==7)group.clear();}return group;};
    auto groupHeight=[&](size_t i){return !category(i).empty()&&(i==0||category(i)!=category(i-1))?30.f:0.f;};
-   auto height=[&](size_t i){const auto& field=object->fields[rows[i]];float base=85.f;if(field.show==2&&field.kind<=2)base=128.f;else if(field.kind==2&&field.show==5)base=62.f+48.f*std::min(3,int((options(field).size()+columns(field)-1)/columns(field)));return base+groupHeight(i);};
+   auto choiceText=[&](const wfprops::Field& field,const std::string& raw){auto labels=options(field);int index=std::atoi(raw.c_str())-field.minimum;return index>=0&&size_t(index)<labels.size()?labels[size_t(index)]:std::string();};
+   // A choice box is 560 wide; its value wraps onto a second line when it is wider.
+   const float boxX=1100,boxW=560;
+   auto boxLines=[&](const wfprops::Field& field){auto v=f.edit.draft.find(field.id);return wrapTwo(choiceText(field,v==f.edit.draft.end()?"":v->second),boxW-90,[&](const std::string& t){return textWidth(3,t);});};
+   auto height=[&](size_t i){const auto& field=object->fields[rows[i]];const auto control=wfprops::presentation(field);float base=85.f;
+    if(control==wfprops::Control::Slider||control==wfprops::Control::SteppedSlider)base=128.f;
+    else if(control==wfprops::Control::Chips)base=62.f+48.f*std::min(3,int((options(field).size()+columns(field)-1)/columns(field)));
+    else if(wfprops::choiceList(control)&&boxLines(field).size()>1)base=118.f;
+    return base+groupHeight(i);};
    size_t first=std::min(f.row,rows.empty()?size_t(0):rows.size()-1);float used=rows.empty()?0:height(first);while(first>0&&used+height(first-1)<=515){used+=height(--first);}
    float y=240;
-   for(size_t i=first;i<rows.size();++i){const auto& field=object->fields[rows[i]];float rowHeight=height(i);if(y+rowHeight>765)break;if(field.kind==10){y+=rowHeight;continue;}
+   for(size_t i=first;i<rows.size();++i){const auto& field=object->fields[rows[i]];float rowHeight=height(i);if(y+rowHeight>765)break;if(field.kind==10){drawnRows().push_back({field.id,"spacer",600,y,1680,y+rowHeight-12,0});y+=rowHeight;continue;}
     float heading=groupHeight(i);if(heading>0){text(605,y+2,2.5f,category(i),0xcbd4baffu);y+=heading;rowHeight-=heading;}
-    auto v=f.edit.draft.find(field.id);std::string value=v==f.edit.draft.end()?"":v->second;
-    if(field.kind==2){int index=std::atoi(value.c_str())-field.minimum;size_t from=0;for(int k=0;k<index;++k){size_t next=field.choices.find('|',from);if(next==std::string::npos)break;from=next+1;}size_t to=field.choices.find('|',from);value=field.choices.substr(from,to==std::string::npos?to:to-from);}
+    auto v=f.edit.draft.find(field.id);std::string value=v==f.edit.draft.end()?"":v->second;const std::string raw=value;
+    const auto control=wfprops::presentation(field);const bool focusedRow=!f.rail&&i==f.row;
+    if(field.kind==2)value=choiceText(field,raw);
     if(field.kind==4)value=value=="1"?"On":"Off";
     std::replace(value.begin(),value.end(),'\n',' ');std::replace(value.begin(),value.end(),'\r',' ');
     if(colour(&field))value=hex(rgb(value));
-    bool radio=field.kind==2&&field.show==5;
-    item(!f.rail&&i==f.row,600,y,1080,rowHeight-12,field.kind==9?field.label:radio?field.label:field.label+": "+value+(field.readonly?" (read only)":""),field.readonly);
-    if(colour(&field))rect(1570,y+16,70,40,(rgb(v==f.edit.draft.end()?"0":v->second)<<8)|255u);
-    if(radio){auto labels=options(field);int cols=columns(field);int selected=std::atoi(v==f.edit.draft.end()?"0":v->second.c_str())-field.minimum;int firstOptionRow=std::max(0,selected/cols-2);float cell=1040.f/cols;
+    bool radio=control==wfprops::Control::Chips;
+    // New controls draw their value themselves; the row carries the label only.
+    const bool own=wfprops::choiceList(control)||control==wfprops::Control::Segments||control==wfprops::Control::Switch||control==wfprops::Control::Path;
+    // Glyphs draw after every rectangle, so the open list cannot cover row text: while it is
+    // open, rows show only their label, short enough to end left of the list.
+    const bool underList=f.list;
+    std::string rowText=field.kind==9||radio||own?field.label:field.label+": "+value+(field.readonly?" (read only)":"");
+    if(underList)rowText=rowText.substr(0,20);
+    item(focusedRow,600,y,1080,rowHeight-12,rowText,field.readonly);
+    DrawnRow drawn{field.id,wfprops::controlName(control),600,y,1680,y+rowHeight-12,1};
+    const uint32_t ink=field.readonly?0x9eb1a7ffu:0xf1f2e4ffu,boxFill=0x102621ffu,edge=0x5d7d66ffu;
+    auto frame=[&](float x,float yy,float width,float h){rect(x,yy,width,h,edge);rect(x+2,yy+2,width-4,h-4,boxFill);};
+    if(underList){}
+    else if(wfprops::choiceList(control)){
+     auto lines=boxLines(field);const float top=y+10,h=rowHeight-32;frame(boxX,top,boxW,h);float tx=boxX+16;
+     if(control==wfprops::Control::NumberedChoiceList){const std::string id=std::to_string(std::atoi(raw.c_str()));const float iw=textWidth(2.5f,id)+18;
+      rect(tx,top+h*.5f-17,iw,34,0xe4efd9ffu);text(tx+9,top+h*.5f-3.5f*2.5f,2.5f,id,0x132b26ffu);tx+=iw+12;}
+     for(size_t k=0;k<lines.size();++k)text(tx,top+h*.5f-3.5f*3+(float(k)-(lines.size()-1)*.5f)*38,3,lines[k],ink);
+     // The down-arrow: a small triangle of rectangles.
+     for(int k=0;k<7;++k)rect(boxX+boxW-40+k*1.5f,top+h*.5f-5+k*1.5f,20-k*3.f,1.6f,0xe4efd9ffu);
+     drawn.lines=int(lines.size());
+    }else if(control==wfprops::Control::Segments){
+     auto labels=options(field);int selected=std::atoi(raw.c_str())-field.minimum;float x=1660;
+     for(size_t k=labels.size();k-->0;){const float w=textWidth(2.5f,labels[k])+44;x-=w;rect(x,y+14,w,rowHeight-40,int(k)==selected?0xe4efd9ffu:0x19382dffu);
+      text(x+22,y+14+(rowHeight-40)*.5f-3.5f*2.5f,2.5f,labels[k],int(k)==selected?0x132b26ffu:ink);x-=10;}
+    }else if(control==wfprops::Control::Switch){
+     const bool on=raw=="1";const float tx=1520,ty=y+(rowHeight-12)*.5f-17;
+     rect(tx,ty,76,34,on?0x68aa72ffu:0x5d6b63ffu);rect(on?tx+46:tx+4,ty+4,26,26,0xf4f6eeffu);text(tx+92,ty+17-3.5f*3,3,on?"On":"Off",ink);
+    }else if(control==wfprops::Control::Path){
+     const float top=y+10,h=rowHeight-32,bx=1040,bw=620;frame(bx,top,bw,h);
+     // A file mark: a page with a folded corner.
+     rect(bx+16,top+h*.5f-14,18,28,0xcbd4baffu);rect(bx+28,top+h*.5f-14,6,7,boxFill);
+     const auto slash=value.rfind('/');const std::string folder=slash==std::string::npos?"":value.substr(0,slash+1),name=value.substr(folder.size());
+     text(bx+48,top+h*.5f-3.5f*3,3,folder,0x9eb1a7ffu);text(bx+48+textWidth(3,folder),top+h*.5f-3.5f*3,3,name,ink);
+    }else if(control==wfprops::Control::NumberWithBounds){
+     const std::string bounds=std::to_string(field.minimum)+" \xe2\x80\x93 "+std::to_string(field.maximum);text(1660-textWidth(2.5f,bounds),y+(rowHeight-12)*.5f-3.5f*2.5f,2.5f,bounds,0xcbd4baffu);
+    }
+    drawnRows().push_back(drawn);
+    if(colour(&field)&&!underList)rect(1570,y+16,70,40,(rgb(v==f.edit.draft.end()?"0":v->second)<<8)|255u);
+    if(radio&&!underList){auto labels=options(field);int cols=columns(field);int selected=std::atoi(v==f.edit.draft.end()?"0":v->second.c_str())-field.minimum;int firstOptionRow=std::max(0,selected/cols-2);float cell=1040.f/cols;
      for(size_t k=size_t(firstOptionRow*cols);k<labels.size()&&k<size_t((firstOptionRow+3)*cols);++k){float x=620+(k%cols)*cell,oy=y+62+(int(k)/cols-firstOptionRow)*48;rect(x,oy-17,cell-12,36,int(k)==selected?0xe4efd9ffu:0x19382dffu);text(x+12,oy-11,2.5f,labels[k].substr(0,size_t((cell-35)/16)),int(k)==selected?0x132b26ffu:0xe4efd9ffu);}
     }
-    if(field.show==2&&field.kind<=2){double scale=field.kind==1&&field.scale?field.scale:1;double low=field.minimum/scale,high=field.maximum/scale;double current=std::strtod(v==f.edit.draft.end()?"0":v->second.c_str(),nullptr);float fraction=high>low?float(std::max(0.0,std::min(1.0,(current-low)/(high-low)))):0;
+    if(field.show==2&&field.kind<=2&&!underList){double scale=field.kind==1&&field.scale?field.scale:1;double low=field.minimum/scale,high=field.maximum/scale;double current=std::strtod(v==f.edit.draft.end()?"0":v->second.c_str(),nullptr);float fraction=high>low?float(std::max(0.0,std::min(1.0,(current-low)/(high-low)))):0;
      const float left=630,width=1000,cy=y+62;rect(left,cy-2,width,4,0x8aab8affu);rect(left,cy-2,width*fraction,4,0xe4efd9ffu);
      auto labels=field.kind==2?options(field):std::vector<std::string>{};if(labels.size()>1&&labels.size()<=9){for(size_t k=0;k<labels.size();++k){float x=left+width*k/(labels.size()-1);rect(x-1,cy-6,2,12,0xe4efd9ffu);float labelWidth=labels[k].size()*15.f;text(std::max(left,std::min(left+width-labelWidth,x-labelWidth/2)),y+91,2.5f,labels[k]);}}
      else {const std::string lowLabel=field.kind==1?std::to_string(low):std::to_string(field.minimum);
@@ -63,6 +108,32 @@ void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect
    }
    // The row counter sits right-aligned above the rows: at 775 it overlapped the help line's
    // Regular 28 on Cast1 (docs/diagnostics/ui-font/cast1/director-counter-overlap.png).
+   // An open choice list sits over the rows: up to six options around the highlight, each
+   // wrapped to two lines when wider than the list, with its id for a numbered list.
+   if(f.list){const auto* field=f.field();
+    if(field&&wfprops::choiceList(wfprops::presentation(*field))){
+     auto labels=options(*field);const bool numbered=wfprops::presentation(*field)==wfprops::Control::NumberedChoiceList;
+     const float lx=1000,lw=660;auto selectedRaw=f.edit.draft.find(field->id);const int selected=std::atoi(selectedRaw==f.edit.draft.end()?"0":selectedRaw->second.c_str())-field->minimum;
+     size_t firstOption=f.listIndex>2?f.listIndex-2:0;if(labels.size()>6)firstOption=std::min(firstOption,labels.size()-6);else firstOption=0;
+     std::vector<std::vector<std::string>> wrapped;float total=70;
+     // Up to six options, and never past the footer at 830: the window stops early when
+     // options wrap, and starts later when the highlight would fall below it.
+     auto window=[&](size_t start){wrapped.clear();total=70;
+      for(size_t k=start;k<labels.size()&&k<start+6;++k){auto lines=wrapTwo(labels[k],lw-(numbered?150:90),[&](const std::string& t){return textWidth(3,t);});
+       const float add=lines.size()>1?92:58;if(!wrapped.empty()&&total+add>580)break;wrapped.push_back(lines);total+=add;}};
+     window(firstOption);
+     while(f.listIndex>=firstOption+wrapped.size()&&firstOption<f.listIndex)window(++firstOption);
+     const float ly=240;rect(lx-3,ly-3,lw+6,total+6,0xe4efd9ffu);rect(lx,ly,lw,total,0x0d1f1affu);
+     text(lx+20,ly+30-3.5f*2.7f,2.7f,field->label,0xcbd4baffu);float oy=ly+58;
+     for(size_t k=0;k<wrapped.size();++k){const size_t index=firstOption+k;const float oh=wrapped[k].size()>1?84:50;
+      rect(lx+12,oy,lw-24,oh,index==f.listIndex?0x497b51ffu:0x19382dffu);float tx=lx+28;
+      if(numbered){const std::string id=std::to_string(field->minimum+int(index));const float iw=textWidth(2.5f,id)+18;rect(tx,oy+oh*.5f-17,iw,34,0xe4efd9ffu);text(tx+9,oy+oh*.5f-3.5f*2.5f,2.5f,id,0x132b26ffu);tx+=iw+14;}
+      for(size_t line=0;line<wrapped[k].size();++line)text(tx,oy+oh*.5f-3.5f*3+(float(line)-(wrapped[k].size()-1)*.5f)*36,3,wrapped[k][line]);
+      if(int(index)==selected)rect(lx+lw-46,oy+oh*.5f-7,14,14,0xefce83ffu);
+      drawnRows().push_back({field->id,numbered?"list-option-numbered":"list-option",lx+12,oy,lx+lw-12,oy+oh,int(wrapped[k].size())});
+      oy+=oh+8;}
+    }
+   }
    if(rows.size()>6){const std::string count=std::to_string(f.row+1)+" / "+std::to_string(rows.size());text(1680-textWidth(2.5f,count),215-3.5f*2.5f,2.5f,count,0xcbd4baffu);}
   }
   if(f.drawer){const auto* field=f.field();auto& ui=controls(f);
@@ -96,8 +167,11 @@ void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect
    // Wrap at words; reserve two lines above the persistent Apply/Cancel footer.
    for(int line=0;line<2&&!help.empty();++line){size_t length=std::min(size_t(84),help.size());if(length<help.size()){auto split=help.rfind(' ',length);if(split!=std::string::npos&&split>0)length=split;}text(600,791+line*22,2,help.substr(0,length),0xb6c7baffu);help.erase(0,length);while(!help.empty()&&help[0]==' ')help.erase(0,1);}
  }
- bool direct=!f.rail&&focused&&!focused->readonly&&(focused->kind==2||focused->kind==4||focused->show==2);
- text(225,840,2.7f,f.edit.error.empty()?(f.drawer?(colour(focused)?(controls(f).planeAdjust?"Arrows: hue / saturation   A: finish":controls(f).page==1?"Up / down: select   Left / right: value":"Arrows: select   A: choose"):"Use the system text editor"):direct?"Up / down: select   Left / right: change":focused&&focused->readonly?"Read only: arrows select   Left: sections":"Arrows: select   A: edit"):f.edit.error,0xffdd99ffu);
- remoteui::BackArrowMiddle(painter,1260,840+3.5f*2.7f,variantFor(2.7f),0xf1f2e4ffu);text(1310,840,2.7f,f.drawer?(colour(focused)?(controls(f).planeAdjust?"Finish adjustment":"Cancel colour"):"Close editor"):"Apply / close");
+ const auto focusedControl=focused?wfprops::presentation(*focused):wfprops::Control::Structure;
+ const auto rule=focused?wfprops::keys(*focused):wfprops::Keys{};
+ bool direct=!f.rail&&focused&&!focused->readonly&&rule.leftRightChange;
+ const bool listRow=!f.rail&&focused&&!focused->readonly&&rule.aOpensList;
+ text(225,840,2.7f,f.edit.error.empty()?(f.list?"Up / down: choose   A: select   Back: close":listRow?(rule.leftRightChange?"Left / right: change   A: open list":"Arrows: select   A: open list   Left: sections"):f.drawer?(colour(focused)?(controls(f).planeAdjust?"Arrows: hue / saturation   A: finish":controls(f).page==1?"Up / down: select   Left / right: value":"Arrows: select   A: choose"):"Use the system text editor"):direct?"Up / down: select   Left / right: change":focused&&focused->readonly?"Read only: arrows select   Left: sections":"Arrows: select   A: edit"):f.edit.error,0xffdd99ffu);
+ remoteui::BackArrowMiddle(painter,1260,840+3.5f*2.7f,variantFor(2.7f),0xf1f2e4ffu);text(1310,840,2.7f,f.list?"Close list":f.drawer?(colour(focused)?(controls(f).planeAdjust?"Finish adjustment":"Cancel colour"):"Close editor"):"Apply / close");
 }
 }

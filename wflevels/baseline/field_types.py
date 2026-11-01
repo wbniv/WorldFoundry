@@ -71,8 +71,6 @@ ROWS = [
 GAPS = [
     'Field types action row "action" has no consumer: Host::apply returns false for an '
     'unregistered action (engine/runtime_property_host.cpp), so it is inert by design here.',
-    'bool-toggle (INT32 0..1, SHOW_AS_TOGGLE, no choices) compiles to kind Int, not Bool: '
-    'the normalizer only classifies SHOW_AS_CHECKBOX as Bool (wftools/wf_attr_schema).',
     'str-multiline is an XDATA TEXTEDITOR descriptor (kind Annotation, cooked as Str rule 2).',
 ]
 
@@ -123,7 +121,9 @@ def rows():
             else:
                 value = int(_number(sample))
             hi = d['hi'] if 'hi' in d else int(sample.split(' / ')[1])  # "65 / 100"
-            row.update(kind='Int', lo=d['lo'], hi=hi, default=value, initial=str(value), display=sample)
+            # CHECKBOX and TOGGLE integers without choices compile to Bool (wf_attr_schema).
+            kind = 'Bool' if d['show'] in ('CHECKBOX', 'TOGGLE') else 'Int'
+            row.update(kind=kind, lo=d['lo'], hi=hi, default=value, initial=str(value), display=sample)
         elif d['t'] == 'FIXED32':
             value = _number(sample)
             row.update(kind='Float', lo=d['lo'] * FIXED, hi=d['hi'] * FIXED, default=round(float(value) * FIXED),

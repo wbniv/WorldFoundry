@@ -4,7 +4,7 @@
 namespace wfprops {
 bool Form::begin(Registry& registry,uint32_t actor,uint32_t openingButtons){
     if(!edit.begin(registry,actor))return false;
-    sections.clear();titles.clear();section=row=0;rail=adjust=drawer=false;previous=openingButtons;key=0;
+    sections.clear();titles.clear();section=row=0;rail=adjust=drawer=list=false;listIndex=0;previous=openingButtons;key=0;
     auto* object=edit.object();
     for(size_t i=0;i<object->fields.size();++i){const auto& f=object->fields[i];
         if(f.kind==5){sections.emplace_back();titles.push_back(f.label);}
@@ -21,21 +21,35 @@ void Form::change(int direction){const auto* f=field();if(!f||f->readonly)return
     if(f->kind==2||f->kind==0){long long n=std::strtoll(value().c_str(),nullptr,10);n=std::max<long long>(f->minimum,std::min<long long>(f->maximum,n+direction));edit.set(f->id,std::to_string(n));}
     else if(f->kind==1){double scale=f->scale?f->scale:1;double n=std::strtod(value().c_str(),nullptr)+direction/scale;n=std::max(f->minimum/scale,std::min(f->maximum/scale,n));edit.set(f->id,std::to_string(n));}
 }
-bool Form::back(){if(drawer){drawer=false;adjust=false;return false;}return true;}
+bool Form::back(){if(list){list=false;return false;}if(drawer){drawer=false;adjust=false;return false;}return true;}
 void Form::input(uint32_t buttons){uint32_t edge=buttons&~previous;previous=buttons;if(!edit.open||sections.empty())return;
     const uint32_t up=1u<<11,down=1u<<12,right=1u<<13,left=1u<<14;
     if(drawer){int x=key%3,y=key/3;if(edge&left)x=std::max(0,x-1);if(edge&right)x=std::min(2,x+1);if(edge&up)y=std::max(0,y-1);if(edge&down)y=std::min(4,y+1);key=y*3+x;
         if(edge&1){const auto* f=field();if(!f)return;std::string text=value();if(key<9||key==10||key==12||key==13){if(replaceText){text.clear();replaceText=false;}char c=key<9?'1'+key:key==10?'0':key==12?'-':'.';if(text.size()<f->maxLength)text+=c;edit.set(f->id,text);}else if(key==9){if(!text.empty())text.pop_back();replaceText=false;edit.set(f->id,text);}else if(key==11){replaceText=false;edit.set(f->id,"");}else drawer=false;}
         return;
     }
+    if(list){const auto* f=field();
+        if(!f||f->readonly||!keys(*f).aOpensList){list=false;return;}
+        const size_t count=size_t(std::max(1,f->maximum-f->minimum+1));
+        if(edge&up)listIndex=listIndex?listIndex-1:0;
+        if(edge&down)listIndex=std::min(count-1,listIndex+1);
+        if(edge&1){edit.set(f->id,std::to_string(f->minimum+int(listIndex)));list=false;}
+        else if(edge&left)list=false;
+        return;
+    }
     const auto* focused=field();
-    if(!rail&&focused&&!focused->readonly&&(adjust||focused->kind==2||focused->kind==4||focused->show==2)&&(edge&(left|right))){change(edge&right?1:-1);return;}
+    const Keys rule=focused?keys(*focused):Keys{};
+    if(!rail&&focused&&!focused->readonly&&(adjust||rule.leftRightChange)&&(edge&(left|right))){
+        const bool first=std::strtol(value().c_str(),nullptr,10)<=focused->minimum;
+        if(!adjust&&rule.leftOnFirstToRail&&(edge&left)&&first){rail=true;return;}
+        change(edge&right?1:-1);return;}
     if(edge&(up|down)){adjust=false;int delta=edge&down?1:-1;if(rail){section=size_t(std::max(0,std::min(int(sections.size())-1,int(section)+delta)));row=0;}else if(section<sections.size()){int next=int(row)+delta;while(next>=0&&next<int(sections[section].size())){auto* o=edit.object();if(o&&o->fields[sections[section][next]].kind!=10)break;next+=delta;}row=size_t(std::max(0,std::min(int(sections[section].size())-1,next)));}}
     if(edge&left)rail=true;if(edge&right)rail=false;
     if(!(edge&1))return;if(rail){rail=false;return;}const auto* f=field();if(!f||f->readonly)return;
     if(f->kind==9){if(action)action(f->key);return;}
     if(f->kind==10)return;
     if(f->kind==4)edit.set(f->id,value()=="1"?"0":"1");
+    else if(keys(*f).aOpensList){list=true;listIndex=size_t(std::max(0,std::min(f->maximum-f->minimum,int(std::strtol(value().c_str(),nullptr,10))-f->minimum)));}
     else if(f->kind==2||f->show==2)return;
     else {drawer=true;replaceText=true;key=0;}
 }

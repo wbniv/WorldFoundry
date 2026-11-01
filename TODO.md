@@ -2,6 +2,7 @@
 
 ## Open
 
+- [wip T4] **Field presentations: a distinct control for every case.** The eleven `proposed` Field types cases get their own control on the TV and the phone touch form: choice lists (option 6: 2 to 4 options cycle and leave from the first, 5 or more open a list; A always opens it), numbered list, wrapping list, segments, switch (TOGGLE becomes Bool at export), bounds on the mailbox editor, and path mark plus engine path validation. Then refresh the baseline runtime. Rank T4: engine form, both renderers, normalizer, frozen runtime. [plan](docs/plans/2026-11-01-field-presentations.md) <!-- agent:00d752ca-b918-4456-8ef9-cea2f53627cb -->
 - [verify T4] **Baseline settings cleanup: two owners.** Built: Field types (the 27 type × showAs cases) and Runtime settings, both at (2, −4, 1); sample owners, empty section and gallery preset removed from the level. Host tests, desktop and bundle checks pass. The editable Show FPS row is accepted ("we totally want this option"). Device acceptance (2026‑11‑01, coordinator 0.1.26): `baseline-settings` and `baseline-picker` pass on cast1 and cast2; `baseline-runtime-options` fails because the Runtime rows are read-only on the phone, a known gap kept whole until runtime editing exists (Will, 2026‑11‑01: "yes"). The 27 Field types rows were captured on cast1 (2026‑11‑01) with five observations in the plan. The Pixel launches the level (2026‑11‑01); its picker and forms cannot be driven, as the coordinator has no phone input workflow. Not done: that validator, and the Pixel's picker and forms. [plan](docs/plans/2026-10-31-baseline-settings-cleanup.md)
 ### Platform / Display
 
@@ -549,6 +550,9 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** The rest of the Newell tea set (teacup, teaspoon), which ships in the same dataset and is a natural follow-up. — _from [2026-10-31-baseline-utah-teapots.md](docs/plans/2026-10-31-baseline-utah-teapots.md)_  <!-- fp:a60552780edac015 -->
 - [ ] **(triage)** The 2026 curvature-continuous revision by Yuksel, Blinn and Newell, and the 1992 and 2006 solid variants. — _from [2026-10-31-baseline-utah-teapots.md](docs/plans/2026-10-31-baseline-utah-teapots.md)_  <!-- fp:8e4214ab6fd19ec8 -->
 - [ ] **(triage)** Making the teapots optional per preset. Every preset (default, diagnostics, settings-gallery) includes them today. — _from [2026-10-31-baseline-utah-teapots.md](docs/plans/2026-10-31-baseline-utah-teapots.md)_  <!-- fp:8b211ced4095a0b6 -->
+- [ ] **(triage)** The other observations from cast1, unless a control built here fixes them as a side effect: the "(read only)" label without a padlock, six-decimal slider end labels, and the flattened multi-line Notes. — _from [2026-11-01-field-presentations.md](docs/plans/2026-11-01-field-presentations.md)_  <!-- fp:cadeeb3810eceee2 -->
+- [ ] **(triage)** Making runtime options editable. — _from [2026-11-01-field-presentations.md](docs/plans/2026-11-01-field-presentations.md)_  <!-- fp:9accc37a706abee4 -->
+- [ ] **(triage)** The connected-phone browser form (`controller.html`), apart from path validation, which it gets from the engine. — _from [2026-11-01-field-presentations.md](docs/plans/2026-11-01-field-presentations.md)_  <!-- fp:6493cbe44aeb14fa -->
 <!-- END auto-captured-deferrals -->
 
 

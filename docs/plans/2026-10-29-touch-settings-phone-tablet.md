@@ -47,28 +47,28 @@ The gallery shows every sensible field type and `showAs` pairing in the current 
 | `int-number` | Int | NUMBER (1) | Numeric editor | Current visual pattern |
 | `int-slider` | Int | SLIDER (2) | Drag or tap track | Current visual pattern |
 | `int-color` | Int | COLOR (7) | Colour picker | Current visual pattern |
-| `int-mailbox` | Int | MAILBOX (9) | Numeric editor with bounds | New visual pattern |
+| `int-mailbox` | Int | MAILBOX (9) | Numeric editor with bounds | Current visual pattern |
 | `int-default` | Int | N_A (0) | Numeric editor | Current visual pattern |
 | `float-number` | Float | NUMBER (1) | Decimal editor | Current visual pattern |
 | `float-slider` | Float | SLIDER (2) | Drag or tap track | Current visual pattern |
-| `enum-default` | Enum | N_A (0) | Open choice list | New visual pattern |
-| `enum-number` | Enum | NUMBER (1) | Choice list with numeric ID | New visual pattern |
-| `enum-dropdown` | Enum | DROPMENU (4) | Open choice list | New visual pattern |
+| `enum-default` | Enum | N_A (0) | Open choice list | Current visual pattern |
+| `enum-number` | Enum | NUMBER (1) | Choice list with numeric ID | Current visual pattern |
+| `enum-dropdown` | Enum | DROPMENU (4) | Open choice list | Current visual pattern |
 | `enum-radio` | Enum | RADIOBUTTONS (5) | Tap visible option | Current visual pattern |
 | `enum-slider` | Enum | SLIDER (2) | Drag or tap stop | Current visual pattern |
-| `enum-toggle` | Enum | TOGGLE (3) | Tap either segment | New visual pattern |
-| `enum-combo` | Enum | COMBOBOX (10) | Open choice list | New visual pattern |
+| `enum-toggle` | Enum | TOGGLE (3) | Tap either segment | Current visual pattern |
+| `enum-combo` | Enum | COMBOBOX (10) | Open choice list | Current visual pattern |
 | `bool-checkbox` | Bool | CHECKBOX (8) | Tap checkbox or row | Current visual pattern |
-| `bool-toggle` | Bool | TOGGLE (3) | Tap switch | New visual pattern |
+| `bool-toggle` | Bool | TOGGLE (3) | Tap switch | Current visual pattern |
 | `str-plain` | Str | N_A (0) | Single-line native editor | Current visual pattern |
 | `str-uint32` | Str + uint32 rule | NUMBER (1) | Digits-only native editor | Current visual pattern |
 | `str-multiline` | Str / Annotation | TEXTEDITOR (11) | Multiline native editor | Current visual pattern |
-| `str-filename` | Str | FILENAME (12) | Native text editor; validate path | New visual pattern |
+| `str-filename` | Str | FILENAME (12) | Native text editor; validate path | Current visual pattern |
 | `ref-readonly` | FileRef / ObjRef | N_A (0) / VECTOR (128) | Read-only value | Current visual pattern |
 | `int-readonly` | Int + readonly | NUMBER (1) | Read-only value | Current visual pattern |
-| `enum-many` | Enum + 12 options | RADIOBUTTONS (5) | Scrollable choice sheet | New visual pattern |
-| `enum-long` | Enum + long labels | DROPMENU (4) | Wrapping choice sheet | New visual pattern |
-| `int-help` | Int + help / group | NUMBER (1) | Group heading and help below row | New visual pattern |
+| `enum-many` | Enum + 12 options | RADIOBUTTONS (5) | Scrollable choice sheet | Current visual pattern |
+| `enum-long` | Enum + long labels | DROPMENU (4) | Wrapping choice sheet | Current visual pattern |
+| `int-help` | Int + help / group | NUMBER (1) | Group heading and help below row | Current visual pattern |
 | `action` | Action | N_A (0) | Run action after tap | Current visual pattern |
 | `spacer` | Spacer | N_A (0) | No hit target | Current visual pattern |
 <!-- examples-table:end -->
@@ -95,6 +95,14 @@ These areas are World Foundry engine code, including files under `wfsource/sourc
 - The World Foundry native library now links with 16 KiB LOAD segment alignment. `scripts/check-apk-page-alignment.py` inspects every packaged `.so` in an APK, and each Android app `assemble<Variant>` task fails if a library has a LOAD segment below 16 KiB alignment or an incompatible file/virtual-address offset.
 - The warning screenshot came from **Finding Your Way**, which packages a World Foundry runtime through its own scripts. Its main native APK packager and phone touch review packager now run the same 16 KiB check before freezing an APK. An archived Finding Your Way phone review APK fails it on three arm64 LOAD segments; a newly linked World Foundry Aquarium APK passes. The existing Finding Your Way runtime must be rebuilt from an engine source that includes the link fix before its next APK can pass.
 - On the Pixel 8 Pro, the rebuilt Aquarium APK launched without the Android compatibility dialog in coordinator jobs J‑eb2a80a72f33 and J‑e8d03cf63aa0. Those checks verify the World Foundry base layer; they do not claim that the existing Finding Your Way APK has been repaired.
+
+- **All 27 cases draw their own control (2026‑11‑01).** The eleven that were "New visual pattern" now have one on the TV and in this touch form. `engine/runtime_property_presentation.hpp` maps a field's kind and `showAs` to its control; the JSON's `control` key names it, and the touch fixture asserts it for each case. On touch:
+    - The choice sheet shows ids for a NUMBER enum and wraps long options.
+    - Rows show mailbox bounds and a path mark.
+    - Checkbox and switch differ.
+    - Segments take a direct tap. Before this, the row's own tap target covered them and opened the sheet.
+
+  See [field presentations](2026-11-01-field-presentations.md).
 
 ## Verification recorded so far
 

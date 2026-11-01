@@ -1,4 +1,5 @@
 #include "runtime_properties.hpp"
+#include "runtime_property_presentation.hpp"
 #include <algorithm>
 #include <cstring>
 #include <limits>
@@ -16,8 +17,8 @@ struct Reader {
 const Field* Object::field(uint32_t id) const {for(const auto& f:fields)if(f.id==id&&f.stored())return &f;return nullptr;}
 const std::string* Object::get(uint32_t id) const {auto i=values.find(id);return i==values.end()?nullptr:&i->second;}
 Registry*& activeRegistry(){static Registry* registry=nullptr;return registry;}
-int validate(const Field& f,const std::string& v){if(f.kind==8)return v==f.initial?0:1;return wf_attr_check(f.kind,f.minimum,f.maximum,f.scale,f.width,f.maxLength,f.rule,reinterpret_cast<const uint8_t*>(f.choices.data()),f.choices.size(),reinterpret_cast<const uint8_t*>(v.data()),v.size());}
-const char* validationMessage(int s){switch(s){case 1:return "Enter a valid value for this field";case 2:return "Value is outside the field range";case 3:return "Choose one of the listed values";case 4:return "Text is too long";case 5:return "Enter a seed from 0 to 4294967295";default:return "Invalid property value";}}
+int validate(const Field& f,const std::string& v){if(f.kind==8)return v==f.initial?0:1;if(presentation(f)==Control::Path&&!relativePath(v))return 6;return wf_attr_check(f.kind,f.minimum,f.maximum,f.scale,f.width,f.maxLength,f.rule,reinterpret_cast<const uint8_t*>(f.choices.data()),f.choices.size(),reinterpret_cast<const uint8_t*>(v.data()),v.size());}
+const char* validationMessage(int s){switch(s){case 1:return "Enter a valid value for this field";case 2:return "Value is outside the field range";case 3:return "Choose one of the listed values";case 4:return "Text is too long";case 5:return "Enter a seed from 0 to 4294967295";case 6:return "Enter a relative path: names separated by /";default:return "Invalid property value";}}
 bool Registry::load(const uint8_t* data,size_t size,std::string& error){
     if(size<8||std::memcmp(data,"RP01",4)){error="Unsupported property catalog";return false;}
     Reader r{data+4,size-4};uint32_t count=r.number();if(count>4096){error="Too many property objects";return false;}

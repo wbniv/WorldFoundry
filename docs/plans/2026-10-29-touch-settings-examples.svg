@@ -26,7 +26,7 @@
 <text class="meta" x="36" y="289">Int · MAILBOX (9)</text>
 <text class="meta" x="36" y="313">Trigger mailbox · 100</text>
 <rect x="38" y="324" width="290" height="39" rx="7" fill="#335b3e"/><text x="51" y="350" class="value">100  ✎</text>
-<text class="meta" x="36" y="382">Numeric editor with bounds · new presentation</text></g>
+<text class="meta" x="36" y="382">Numeric editor with bounds · current presentation</text></g>
 <g data-example="int-default"><rect class="card" x="400" y="238" width="355" height="158" rx="12"/>
 <text class="id" x="416" y="266">int-default</text>
 <text class="meta" x="416" y="289">Int · N_A (0)</text>
@@ -50,19 +50,19 @@
 <text class="meta" x="416" y="469">Enum · N_A (0)</text>
 <text class="meta" x="416" y="493">Mode · Calm</text>
 <rect x="418" y="504" width="290" height="39" rx="7" fill="#335b3e"/><text x="431" y="530" class="value">Calm  ▾</text>
-<text class="meta" x="416" y="562">Open choice list · new presentation</text></g>
+<text class="meta" x="416" y="562">Open choice list · current presentation</text></g>
 <g data-example="enum-number"><rect class="card" x="780" y="418" width="355" height="158" rx="12"/>
 <text class="id" x="796" y="446">enum-number</text>
 <text class="meta" x="796" y="469">Enum · NUMBER (1)</text>
 <text class="meta" x="796" y="493">Powerup · 2 (Flying)</text>
 <rect x="798" y="504" width="290" height="39" rx="7" fill="#335b3e"/><text x="811" y="530" class="value">2 (Flying)  ▾</text>
-<text class="meta" x="796" y="562">Choice list with numeric ID · new presentation</text></g>
+<text class="meta" x="796" y="562">Choice list with numeric ID · current presentation</text></g>
 <g data-example="enum-dropdown"><rect class="card" x="20" y="598" width="355" height="158" rx="12"/>
 <text class="id" x="36" y="626">enum-dropdown</text>
 <text class="meta" x="36" y="649">Enum · DROPMENU (4)</text>
 <text class="meta" x="36" y="673">Water type · Freshwater</text>
 <rect x="38" y="684" width="290" height="39" rx="7" fill="#335b3e"/><text x="51" y="710" class="value">Freshwater  ▾</text>
-<text class="meta" x="36" y="742">Open choice list · new presentation</text></g>
+<text class="meta" x="36" y="742">Open choice list · current presentation</text></g>
 <g data-example="enum-radio"><rect class="card" x="400" y="598" width="355" height="158" rx="12"/>
 <text class="id" x="416" y="626">enum-radio</text>
 <text class="meta" x="416" y="649">Enum · RADIOBUTTONS (5)</text>
@@ -80,13 +80,13 @@
 <text class="meta" x="36" y="829">Enum · TOGGLE (3)</text>
 <text class="meta" x="36" y="853">Direction · Forward / Reverse</text>
 <rect x="38" y="864" width="140" height="38" rx="7" fill="#e2efe1"/><rect x="186" y="864" width="140" height="38" rx="7" fill="#335b3e"/><text x="51" y="890" class="selectedtext">First</text><text x="202" y="890" class="value">Second</text>
-<text class="meta" x="36" y="922">Tap either segment · new presentation</text></g>
+<text class="meta" x="36" y="922">Tap either segment · current presentation</text></g>
 <g data-example="enum-combo"><rect class="card" x="400" y="778" width="355" height="158" rx="12"/>
 <text class="id" x="416" y="806">enum-combo</text>
 <text class="meta" x="416" y="829">Enum · COMBOBOX (10)</text>
 <text class="meta" x="416" y="853">Tool · Staff</text>
 <rect x="418" y="864" width="290" height="39" rx="7" fill="#335b3e"/><text x="431" y="890" class="value">Staff  ▾</text>
-<text class="meta" x="416" y="922">Open choice list · new presentation</text></g>
+<text class="meta" x="416" y="922">Open choice list · current presentation</text></g>
 <g data-example="bool-checkbox"><rect class="card" x="780" y="778" width="355" height="158" rx="12"/>
 <text class="id" x="796" y="806">bool-checkbox</text>
 <text class="meta" x="796" y="829">Bool · CHECKBOX (8)</text>
@@ -98,7 +98,7 @@
 <text class="meta" x="36" y="1009">Bool · TOGGLE (3)</text>
 <text class="meta" x="36" y="1033">Sway · On</text>
 <rect x="38" y="1044" width="65" height="37" rx="18" fill="#68aa72"/><circle cx="84" cy="1062" r="14" fill="#f4f6ee"/><text x="115" y="1070" class="value">On</text>
-<text class="meta" x="36" y="1102">Tap switch · new presentation</text></g>
+<text class="meta" x="36" y="1102">Tap switch · current presentation</text></g>
 <g data-example="str-plain"><rect class="card" x="400" y="958" width="355" height="158" rx="12"/>
 <text class="id" x="416" y="986">str-plain</text>
 <text class="meta" x="416" y="1009">Str · N_A (0)</text>
@@ -122,7 +122,7 @@
 <text class="meta" x="416" y="1189">Str · FILENAME (12)</text>
 <text class="meta" x="416" y="1213">Asset path · plants/leaf.png</text>
 <rect x="418" y="1224" width="290" height="39" rx="7" fill="#335b3e"/><text x="431" y="1250" class="value">plants/leaf.png  ✎</text>
-<text class="meta" x="416" y="1282">Native text editor; validate path · new presentation</text></g>
+<text class="meta" x="416" y="1282">Native text editor; validate path · current presentation</text></g>
 <g data-example="ref-readonly"><rect class="card" x="780" y="1138" width="355" height="158" rx="12"/>
 <text class="id" x="796" y="1166">ref-readonly</text>
 <text class="meta" x="796" y="1189">FileRef / ObjRef · N_A (0) / VECTOR (128)</text>
@@ -140,19 +140,19 @@
 <text class="meta" x="416" y="1369">Enum + 12 options · RADIOBUTTONS (5)</text>
 <text class="meta" x="416" y="1393">Species · 12 choices</text>
 <rect x="418" y="1404" width="290" height="39" rx="7" fill="#335b3e"/><text x="430" y="1430" class="value">Species A · Species B · +10 more</text>
-<text class="meta" x="416" y="1462">Scrollable choice sheet · new presentation</text></g>
+<text class="meta" x="416" y="1462">Scrollable choice sheet · current presentation</text></g>
 <g data-example="enum-long"><rect class="card" x="780" y="1318" width="355" height="158" rx="12"/>
 <text class="id" x="796" y="1346">enum-long</text>
 <text class="meta" x="796" y="1369">Enum + long labels · DROPMENU (4)</text>
 <text class="meta" x="796" y="1393">Placement · Along the northern wall…</text>
 <rect x="798" y="1404" width="290" height="39" rx="7" fill="#335b3e"/><text x="810" y="1429" class="value">Along the northern wall… ▾</text>
-<text class="meta" x="796" y="1462">Wrapping choice sheet · new presentation</text></g>
+<text class="meta" x="796" y="1462">Wrapping choice sheet · current presentation</text></g>
 <g data-example="int-help"><rect class="card" x="20" y="1498" width="355" height="158" rx="12"/>
 <text class="id" x="36" y="1526">int-help</text>
 <text class="meta" x="36" y="1549">Int + help / group · NUMBER (1)</text>
 <text class="meta" x="36" y="1573">Lighting / Intensity · 75</text>
 <text x="38" y="1597" class="meta">Lighting · controls scene brightness</text><rect x="38" y="1600" width="290" height="27" rx="5" fill="#335b3e"/><text x="50" y="1620" class="value">Intensity: 75</text>
-<text class="meta" x="36" y="1642">Group heading and help below row · new presentation</text></g>
+<text class="meta" x="36" y="1642">Group heading and help below row · current presentation</text></g>
 <g data-example="action"><rect class="card" x="400" y="1498" width="355" height="158" rx="12"/>
 <text class="id" x="416" y="1526">action</text>
 <text class="meta" x="416" y="1549">Action · N_A (0)</text>

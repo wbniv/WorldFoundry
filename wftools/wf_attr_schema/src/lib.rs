@@ -13,7 +13,7 @@
 //! | `Group`         | PropertySheet / GroupStart                | section header, no stored value    |
 //! | `Str`           | String                                    | UTF-8 string value                 |
 //! | `FileRef`       | Filename / MeshName                       | File path string with browse filter|
-//! | `Bool`          | NoInstances / NoMesh / SingleInstance / … | 0/1 flag; serialized as 4 bytes    |
+//! | `Bool`          | NoInstances / NoMesh / SingleInstance / …; Int + CHECKBOX or TOGGLE, no items | 0/1 flag; serialized as 4 bytes |
 //!
 //! Everything else (XData, GroupStop, EndCommon, etc.)
 //! is emitted as [`FieldKind::Skip`] and should be hidden from the editor UI.
@@ -304,11 +304,12 @@ fn parse_filter(raw: &[u8]) -> String {
 fn classify(bt: ButtonType, string_field: &str, lpstr_filter: &[u8], show_as: u8, xdata_conversion_action: u8) -> FieldKind {
     match bt {
         // Numeric integer fields — check for pipe-separated enum items first.
-        // show_as == 8 (checkbox) with no items → Bool (TYPEENTRYBOOLEAN).
+        // show_as == 8 (checkbox) or 3 (toggle) with no items → Bool (TYPEENTRYBOOLEAN
+        // and an on/off switch). A toggle with items stays an Enum (segments).
         ButtonType::Int8 | ButtonType::Int16 | ButtonType::Int32 => {
             let items = parse_pipe_items(string_field);
             if items.is_empty() {
-                if show_as == 8 { FieldKind::Bool } else { FieldKind::Int }
+                if show_as == 8 || show_as == 3 { FieldKind::Bool } else { FieldKind::Int }
             } else {
                 FieldKind::Enum { items }
             }
@@ -565,6 +566,20 @@ mod tests {
             0,
         );
         assert!(matches!(kind, FieldKind::Bool), "expected Bool, got {kind:?}");
+    }
+
+    #[test]
+    fn int_toggle_without_items_maps_to_bool() {
+        // SHOW_AS_TOGGLE (3) with no pipe items is an on/off switch: Bool, like a checkbox.
+        let kind = super::classify(wf_oad::ButtonType::Int32, "", &[0u8; 512], 3, 0);
+        assert!(matches!(kind, FieldKind::Bool), "expected Bool, got {kind:?}");
+    }
+
+    #[test]
+    fn int_toggle_with_items_stays_enum() {
+        // test.oas "Number of powerups toggle": SHOW_AS_TOGGLE with five items.
+        let kind = super::classify(wf_oad::ButtonType::Int32, "Hand|Staff|Crossbow|Plasma|Stun Hands", &[0u8; 512], 3, 0);
+        assert!(matches!(kind, FieldKind::Enum { .. }), "expected Enum, got {kind:?}");
     }
 
     #[test]

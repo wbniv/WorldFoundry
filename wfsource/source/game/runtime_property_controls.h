@@ -22,13 +22,32 @@ struct Controls {
  uint32_t repeatButtons=0;std::chrono::steady_clock::time_point holdStart{},lastRepeat{};
 };
 inline Controls& activeControls(){static Controls state;return state;}
+// What the last build drew, row by row: the control's name and its box on the canvas (1920 x
+// 1080 for the TV form, dp for touch), plus the number of text lines a wrapped value or
+// option took. Filled on every build; read by host layout tests. Cheap: a few rows.
+struct DrawnRow { uint32_t field=0; std::string control; float x0=0,y0=0,x1=0,y1=0; int lines=1; };
+inline std::vector<DrawnRow>& drawnRows(){static std::vector<DrawnRow> rows;return rows;}
+// Up to two lines that fit maxWidth (measured by width()); the second is cut with "...".
+template<class Width> std::vector<std::string> wrapTwo(const std::string& text,float maxWidth,Width width){
+ if(width(text)<=maxWidth)return {text};
+ size_t cut=0;for(size_t i=0;i<=text.size();++i)if(i==text.size()||text[i]==' '){if(width(text.substr(0,i))<=maxWidth)cut=i;else break;}
+ if(!cut){while(cut<text.size()&&width(text.substr(0,cut+1))<=maxWidth)++cut;}
+ std::string first=text.substr(0,cut),rest=text.substr(cut);while(!rest.empty()&&rest[0]==' ')rest.erase(0,1);
+ if(width(rest)>maxWidth){while(!rest.empty()&&width(rest+"...")>maxWidth)rest.pop_back();rest+="...";}
+ return {first,rest};
+}
+// The native editor's title: a field shown with bounds carries them (mailbox numbers).
+inline std::string editorTitle(const wfprops::Field& field){
+ if(wfprops::presentation(field)!=wfprops::Control::NumberWithBounds)return field.label;
+ return field.label+" ("+std::to_string(field.minimum)+" \xe2\x80\x93 "+std::to_string(field.maximum)+")";
+}
 inline void dismissText(){auto& ui=activeControls();if(ui.nativeOpen&&textHost().hide)textHost().hide(ui.session);ui.nativeOpen=false;}
 inline Controls& controls(wfprops::Form& form){auto& state=activeControls();
  const auto* field=form.field();uint32_t id=field?field->id:0;
  if(state.owner!=&form||state.session!=form.edit.session||state.field!=id){dismissText();state=Controls{};state.owner=&form;state.session=form.edit.session;state.field=id;}
  return state;
 }
-inline bool colour(const wfprops::Field* field){return field&&field->kind==0&&field->show==7;}
+inline bool colour(const wfprops::Field* field){return field&&wfprops::presentation(*field)==wfprops::Control::Colour;}
 inline bool keyboard(const wfprops::Field* field){return field&&field->kind==3&&field->rule!=1;}
 inline uint32_t rgb(const std::string& value){return uint32_t(std::strtoul(value.c_str(),nullptr,10))&0xffffffu;}
 inline std::string hex(uint32_t value){char text[8];std::snprintf(text,sizeof(text),"#%06X",value&0xffffffu);return text;}
@@ -65,7 +84,7 @@ inline void syncText(wfprops::Form& form,bool phone=false){auto& ui=controls(for
  if(ui.nativeOpen&&(!form.edit.open||!form.drawer||phone)){dismissText();form.drawer=false;}
  if(!form.edit.open||!form.drawer||phone||!field||colour(field)||ui.nativeOpen)return;
  int mode=field->kind==3?(field->rule==1?1:field->rule==2?2:0):field->kind==1?4:3;
- TextRequest request{form.edit.session,field->id,field->label,form.value(),mode,field->kind==3?field->maxLength:128};
+ TextRequest request{form.edit.session,field->id,editorTitle(*field),form.value(),mode,field->kind==3?field->maxLength:128};
  ui.nativeOpen=true;
  if(!textHost().show||!textHost().show(request)){ui.nativeOpen=false;form.drawer=false;form.edit.error="Enter text using a connected browser";}
 }

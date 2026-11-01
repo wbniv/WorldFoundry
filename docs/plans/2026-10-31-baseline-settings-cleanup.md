@@ -148,7 +148,7 @@ What was built (2026‑10‑31), and where it differs from the Approach above:
 - **One runtime row is authored editable** (`runtime_show_fps`). This is the only data change to the moved sheets; the reason is in **Risks**. Rejected alternative: change the engine so that the chooser and `registerRuntimeOptions` also consider read-only owners. That is an engine change, and a fully read-only owner staying out of the chooser is deliberate, tested behaviour (`tests/runtime_property_host_test.cpp`). **Accepted by Will (2026‑10‑31):** "The editable Show FPS row: accept it. we totally want this option." So the editable Show FPS row is wanted, not just tolerated.
 - The reviewed `baseline.blend` was edited in place by `generate.py --settings-owners <blend>`. It removes the three SampleSettings actors and adds the two owners to the existing `CONFIG` collection, and it refuses to run twice. `build()` creates the same two owners in fresh generations.
 - The 118-field gallery is generated and compiled as before, as a fixture. `verify.py` checks it, and the generic host tests (`test_runtime_options.py`, `test_runtime_property_host.py`) now cook it in place of the deleted sample sheet, keeping the same field ids (40, 64, 1000…).
-- `bool-toggle` (INT32 0…1, `SHOW_AS_TOGGLE`) compiles to kind Int: the normalizer only makes `SHOW_AS_CHECKBOX` a Bool. This is recorded as a gap, and the engine has no distinct toggle yet ("proposed").
+- ~~`bool-toggle` (INT32 0…1, `SHOW_AS_TOGGLE`) compiles to kind Int: the normalizer only makes `SHOW_AS_CHECKBOX` a Bool. This is recorded as a gap, and the engine has no distinct toggle yet ("proposed").~~ Fixed 2026‑11‑01: the normalizer makes a TOGGLE integer without choices a Bool, and it draws as a switch ([field presentations](2026-11-01-field-presentations.md)).
 
 ## Out of scope
 
@@ -424,28 +424,28 @@ Run 2026‑10‑31 on the host, in the shared tree. Raw output under each step. 
     | References (1) | `Target: Player01 (read only)` dimmed; hint reads "Read only: arrows select, Left: sections" | [references](2026-10-31-baseline-settings-cleanup/device-references.png) |
     | Actions (2) | `Regenerate tank`; the second row is the invisible spacer | [actions](2026-10-31-baseline-settings-cleanup/device-actions.png) |
 
-    **The eleven `proposed` cases, as drawn on the TV** (case numbers are the rows of the touch plan's table; frames as above):
+    **The eleven `proposed` cases, as drawn on the TV** (case numbers are the rows of the touch plan's table; frames as above). **Updated 2026‑11‑01**: each now draws its own control, on the TV and in the phone touch form ([field presentations plan](2026-11-01-field-presentations.md), desktop frames there). Device capture of the new controls waits on the refreshed APK:
 
     | # | Case | Proposed in the touch plan | Drawn on cast1 | Result |
     | --- | --- | --- | --- | --- |
-    | 4 | `int-mailbox` | Numeric editor with bounds | `Trigger mailbox: 100`, a plain number row; no bounds shown | Nearest control |
-    | 8 | `enum-default` | Open choice list | `Mode: Calm`, a text row; Left and Right change the value | Nearest control |
-    | 9 | `enum-number` | Choice list with numeric ID | `Powerup: Flying`; the name only, no ID | Nearest control |
-    | 10 | `enum-dropdown` | Open choice list | `Water type: Freshwater`, the same row as case 8 | Nearest control |
-    | 13 | `enum-toggle` | Tap either segment | `Direction: Forward`, a text row; no two-segment control | Nearest control |
-    | 14 | `enum-combo` | Open choice list | `Tool: Staff`, the same row as case 8 | Nearest control |
-    | 16 | `bool-toggle` | Tap switch | `Sway: 1`, a number row (it compiles to an integer, a gap recorded above) | Nearest control |
-    | 20 | `str-filename` | Native text editor; validate path | `Asset path: plants/leaf.png`, a text row; no path check visible | Nearest control |
-    | 23 | `enum-many` | Scrollable choice sheet | `Species` as a grid of twelve chips, all visible | Already a distinct control |
-    | 24 | `enum-long` | Wrapping choice sheet | `Placement: Along the northern wall, facing the glass` on one line | Nearest control |
-    | 25 | `int-help` | Group heading and help below row | Group heading "Lighting" above `Intensity: 75`, help line below | Already a distinct control |
+    | 4 | `int-mailbox` | Numeric editor with bounds | `Trigger mailbox: 100`, a plain number row; no bounds shown | ~~Nearest control~~ **Own control (desktop, 2026‑11‑01)**: bounds `0 – 159` beside the value; the editor is titled `Trigger mailbox (0 – 159)`; touch shows the bounds too |
+    | 8 | `enum-default` | Open choice list | `Mode: Calm`, a text row; Left and Right change the value | ~~Nearest control~~ **Own control (desktop, 2026‑11‑01)**: choice box. With 2 to 4 options Left / Right cycle and Left on the first goes to the sections (Will's option 6); A opens the list. Touch opens the sheet |
+    | 9 | `enum-number` | Choice list with numeric ID | `Powerup: Flying`; the name only, no ID | ~~Nearest control~~ **Own control (desktop, 2026‑11‑01)**: id chip `2` beside `Flying`; the list and the touch sheet show each option's id |
+    | 10 | `enum-dropdown` | Open choice list | `Water type: Freshwater`, the same row as case 8 | ~~Nearest control~~ **Own control (desktop, 2026‑11‑01)**: as case 8 |
+    | 13 | `enum-toggle` | Tap either segment | `Direction: Forward`, a text row; no two-segment control | ~~Nearest control~~ **Own control (desktop, 2026‑11‑01)**: two segments; Left / Right choose, Left on Forward goes to the sections; touch taps a segment directly |
+    | 14 | `enum-combo` | Open choice list | `Tool: Staff`, the same row as case 8 | ~~Nearest control~~ **Own control (desktop, 2026‑11‑01)**: as case 8 |
+    | 16 | `bool-toggle` | Tap switch | `Sway: 1`, a number row (it compiles to an integer, a gap recorded above) | ~~Nearest control~~ **Own control (desktop, 2026‑11‑01)**: compiles to Bool now; a pill switch with `On`; touch draws a switch, the checkbox a ticked square |
+    | 20 | `str-filename` | Native text editor; validate path | `Asset path: plants/leaf.png`, a text row; no path check visible | ~~Nearest control~~ **Own control (desktop, 2026‑11‑01)**: file mark, folder dimmed; Apply refuses a path that is not relative ("Enter a relative path: names separated by /") |
+    | 23 | `enum-many` | Scrollable choice sheet | `Species` as a grid of twelve chips, all visible | Already a distinct control; confirmed unchanged on both (TV chips, touch scrollable sheet) |
+    | 24 | `enum-long` | Wrapping choice sheet | `Placement: Along the northern wall, facing the glass` on one line | ~~Nearest control~~ **Own control (desktop, 2026‑11‑01)**: the value wraps to two lines in its box, and so does each list option; the touch sheet wraps an option wider than the screen |
+    | 25 | `int-help` | Group heading and help below row | Group heading "Lighting" above `Intensity: 75`, help line below | Already a distinct control; confirmed unchanged on both (touch: group label in the card, help above the footer) |
 
     **PASS** for what the plan set out to show: 26 visible rows plus the spacer, in the six sections, in form order, with each type × showAs case drawn by its own control (number, slider, swatch, drop-down, segments, chips, stepped slider, checkbox, toggle, text, reference, action).
 
     **Observations for Will, against the mockup and the house rules (none changes this item's result):**
     - **Read-only rows say "(read only)" in the label** (`Current count`, `Target`) and carry no padlock; the house rule is dimmed plus a padlock with no status words.
     - **Slider end labels print six decimals** (`0.000000`, `100.000000`, `1.000000`).
-    - **The toggle row shows `Sway: 1`**, where the checkbox row shows `Textures: On`; the same label "Sway" also names the Numbers slider.
+    - ~~**The toggle row shows `Sway: 1`**, where the checkbox row shows `Textures: On`~~ (fixed 2026‑11‑01: a switch); the same label "Sway" also names the Numbers slider.
     - **The multi-line Notes value is flattened** onto one line (`Two-line description Second line`).
-    - **No key returns from a Choices row to the section list**: Left changes the value there, so the only way out is Back, which closes the form (reached via Numbers it works: Left, then Down).
+    - **No key returns from a Choices row to the section list**: Left changes the value there, so the only way out is Back, which closes the form (reached via Numbers it works: Left, then Down). **Partly fixed 2026‑11‑01** (Will's option 6): Left on the first option now reaches the sections from the choice boxes (Mode, Powerup, Water type, Tool, Placement; a box with 5 or more options leaves from any option) and from Direction on its first segment. Habitat, Growth and Species keep their keys unchanged, so moving to Mode at its first option, then Left, is always a way out.
     - **The Actions row is inert**, as recorded earlier.

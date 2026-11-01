@@ -20,7 +20,7 @@ int main(int argc,char** argv){
   std::cout<<"object "<<actor<<" "<<o->schema<<" fields="<<o->fields.size()<<" title="<<o->title<<"\n";
   for(const auto& f:o->fields)
    std::cout<<"field "<<actor<<" "<<f.id<<" kind="<<int(f.kind)<<" show="<<int(f.show)<<" readonly="<<int(f.readonly)
-            <<" key="<<f.key<<" value="<<wfprops::json(o->get(f.id)?*o->get(f.id):"")<<"\n";
+            <<" key="<<f.key<<" control="<<wfprops::controlName(wfprops::presentation(f))<<" value="<<wfprops::json(o->get(f.id)?*o->get(f.id):"")<<"\n";
  }
  // Both owners reach the chooser: each has an editable field at load.
  assert((r.editableObjects()==std::vector<uint32_t>{types,runtime}));

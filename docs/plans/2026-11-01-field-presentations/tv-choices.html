@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=1440"><title>tv-choices</title><style>*{box-sizing:border-box;margin:0;padding:0}body{width:1440px;height:900px;background:#061014;
+font-family:'DejaVu Sans',Arial,sans-serif;color:#f1f2e4;overflow:hidden;position:relative}
+.cap{position:absolute;left:24px;right:24px;bottom:10px;font-size:15px;color:#9eb1a7}
+.tv{position:absolute;left:48px;top:40px;width:1344px;height:756px;background:#061014;border:2px solid #24352d}
+.panel{position:absolute;left:126px;top:77px;width:1092px;height:574px;background:#142d25}
+.title{position:absolute;left:158px;top:93px;font-size:32px;font-weight:600}
+.rail{position:absolute;left:158px;width:231px;height:48px;background:#233e31;font-size:24px;padding:10px 13px}
+.rail.on{background:#497b51}
+.row{position:absolute;left:420px;width:756px;background:#233e31;font-size:24px;padding:0 13px;display:flex;align-items:center;gap:12px}
+.row.focus{background:#497b51}.row .lab{flex:0 0 auto}.row .val{color:#f1f2e4}
+.box{background:#102621;border:1px solid #5d7d66;padding:4px 10px;font-size:22px;display:flex;align-items:center;gap:10px;margin-left:auto;min-width:330px}
+.chev{width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #e4efd9;margin-left:auto}
+.id{background:#e4efd9;color:#132b26;font-size:19px;padding:1px 8px;font-weight:700}
+.seg{display:flex;gap:8px;margin-left:auto}.seg span{background:#19382d;padding:4px 18px;font-size:21px}.seg span.on{background:#e4efd9;color:#132b26}
+.pill{width:64px;height:30px;border-radius:15px;background:#68aa72;position:relative;margin-left:auto}.pill i{position:absolute;right:3px;top:3px;width:24px;height:24px;border-radius:12px;background:#f4f6ee}
+.pill.off{background:#5d6b63}.pill.off i{right:auto;left:3px}
+.bounds{margin-left:auto;color:#cbd4ba;font-size:19px}
+.file{width:18px;height:22px;background:#cbd4ba;clip-path:polygon(0 0,70% 0,100% 30%,100% 100%,0 100%)}
+.dim{color:#9eb1a7}
+.hint{position:absolute;left:158px;top:612px;font-size:19px;color:#ffdd99}
+.help{position:absolute;left:420px;top:553px;font-size:15px;color:#b6c7ba}
+.group{position:absolute;left:424px;font-size:18px;color:#cbd4ba}
+.list{position:absolute;left:640px;top:150px;width:520px;background:#0d1f1a;border:2px solid #e4efd9;padding:10px}
+.opt{font-size:22px;padding:8px 12px;margin:4px 0;background:#19382d;display:flex;gap:12px;align-items:flex-start;line-height:1.25}
+.opt.focus{background:#497b51}.opt.sel::after{content:'';margin-left:auto;width:12px;height:12px;background:#efce83;flex:0 0 12px;margin-top:6px}
+.chips{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:6px}.chips span{background:#19382d;font-size:17px;padding:3px 6px}.chips span.on{background:#e4efd9;color:#132b26}
+.err{color:#ffdd99}
+.phone{position:absolute;top:30px;width:400px;height:820px;background:#061014;border:10px solid #2a2f2c;border-radius:34px;overflow:hidden}
+.ph-title{position:absolute;left:18px;top:24px;font-size:22px;font-weight:700}
+.ph-sec{position:absolute;left:16px;right:16px;top:64px;height:52px;background:#497b51;font-size:17px;padding:14px}
+.card{position:absolute;left:16px;right:16px;height:72px;background:#233e31;padding:8px 13px}
+.card .l{font-size:16px;font-weight:700}.card .v{font-size:15px;color:#b6c7ba;margin-top:6px;display:flex;align-items:center;gap:8px}
+.card .grp{font-size:11px;color:#efce83}
+.foot{position:absolute;left:0;right:0;bottom:0;height:86px;background:#142d25;display:flex;gap:10px;padding:14px 16px}
+.foot span{flex:1;background:#233e31;font-size:17px;padding:16px 14px}.foot span.ap{background:#497b51}
+.sheet{position:absolute;left:16px;right:16px;font-size:16px;background:#233e31;padding:10px 14px;line-height:1.3}
+.sheet.on{background:#497b51}
+.tick{width:26px;height:26px;border:2px solid #e4efd9;margin-left:auto;display:flex;align-items:center;justify-content:center;font-size:18px}
+.lbl{position:absolute;top:2px;font-size:14px;color:#9eb1a7}
+</style></head><body><div class="tv"></div><div class="panel"></div><div class="title">Field types</div><div class="rail" style="top:168px">Numbers</div><div class="rail on" style="top:228px">Choices</div><div class="rail" style="top:288px">Switches</div><div class="rail" style="top:348px">Text</div><div class="rail" style="top:408px">References</div><div class="rail" style="top:468px">Actions</div><div class="row " style="top:168px;height:51px"><span class="lab">Mode</span><span class="box"><span>Calm</span><span class="chev"></span></span></div><div class="row focus" style="top:228px;height:51px"><span class="lab">Powerup</span><span class="box"><span class="id">2</span><span>Flying</span><span class="chev"></span></span></div><div class="row " style="top:288px;height:51px"><span class="lab">Water type</span><span class="box"><span>Freshwater</span><span class="chev"></span></span></div><div class="row " style="top:348px;height:51px"><span class="lab">Habitat</span><span class="seg"><span class="on">Freshwater</span><span>Saltwater</span></span></div><div class="row " style="top:408px;height:51px"><span class="lab">Direction</span><span class="seg"><span class="on">Forward</span><span>Reverse</span></span></div><div class="row " style="top:468px;height:51px"><span class="lab">Tool</span><span class="box"><span>Staff</span><span class="chev"></span></span></div><div class="row " style="top:528px;height:70px"><span class="lab">Placement</span><span class="box" style="white-space:normal;line-height:1.2;max-width:420px"><span>Along the northern wall, facing the glass</span><span class="chev"></span></span></div><div class="hint">Left / right: change   A: open list</div><div class="help">(Growth, the stepped slider, and Species, the twelve chips, sit below; unchanged.)</div><div class="cap">TV, Choices, list closed. Mode, Powerup, Water type, Tool and Placement are choice boxes. With 2 to 4 options (all of these) Left / Right cycle and Left on the first option goes to the sections; with 5 or more only A opens the list. A opens it either way. Powerup shows its id; Placement wraps to two lines; Direction and Habitat are two segments.</div></body></html>

@@ -93,7 +93,7 @@ def test_every_required_type_showas_pair_is_in_the_level():
         [ROOT / 'wftools/wf_attr_edit/target/release/catalog', BASE / 'field-types.oad'], text=True))
     compiled = {f['key']: f for f in schema['fields']}
     # Normalizer kind per JSON type (its first word, or the whole type when it names two).
-    kinds = {'Int': {'Int'}, 'Float': {'Float'}, 'Enum': {'Enum'}, 'Bool': {'Bool', 'Int'}, 'Str': {'Str'},
+    kinds = {'Int': {'Int'}, 'Float': {'Float'}, 'Enum': {'Enum'}, 'Bool': {'Bool'}, 'Str': {'Str'},
              'Str / Annotation': {'Annotation'}, 'FileRef / ObjRef': {'ObjRef'}}
     for row in field_types.rows():
         if row['kind'] == 'action':
@@ -104,8 +104,9 @@ def test_every_required_type_showas_pair_is_in_the_level():
         assert f['label'] == row['label'], row['key']
         family = row['case']['type'] if row['case']['type'] in kinds else row['case']['type'].split()[0]
         assert f['kind'] in kinds[family], (row['key'], f['kind'])
-    # Bool + CHECKBOX is a Bool; Bool + TOGGLE compiles to Int (recorded gap in field_types.GAPS).
-    assert compiled['bool-checkbox']['kind'] == 'Bool' and compiled['bool-toggle']['kind'] == 'Int'
+    # Both Bool cases compile to Bool: the normalizer reads an integer TOGGLE without choices
+    # as on/off, like CHECKBOX (docs/plans/2026-11-01-field-presentations.md).
+    assert compiled['bool-checkbox']['kind'] == 'Bool' and compiled['bool-toggle']['kind'] == 'Bool'
 
 
 def test_labels_and_values_come_from_the_examples_json():
@@ -161,11 +162,14 @@ def test_engine_registry_loads_both_owners_syncs_runtime_and_ignores_the_action(
     out = subprocess.run([exe, payload, str(IDS['FieldTypes']), str(IDS['RuntimeSettings'])],
                          capture_output=True, text=True)
     assert out.returncode == 0, out.stdout + out.stderr
-    values = {}
+    values, controls = {}, {}
     for line in out.stdout.splitlines():
         if line.startswith('field %d ' % IDS['FieldTypes']):
             key = re.search(r' key=(\S+) ', line).group(1)
             values[key] = json.loads(line.split(' value=', 1)[1])
+            controls[key] = re.search(r' control=(\S+) ', line).group(1)
+    # Each of the 27 cases resolves, in the engine, to the control the examples JSON names.
+    assert {k: v for k, v in controls.items() if k in field_types.EXAMPLES} == {c['id']: c['control'] for c in CASES}
     for row in field_types.rows():
         if row['kind'] != 'action':
             assert values[row['key']] == row['initial'], row['key']
