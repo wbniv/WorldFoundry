@@ -1,0 +1,5188 @@
+[
+  {
+    "seq": 1,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793531804.4156709,
+    "expires": 1793531834.4156709,
+    "result": {
+      "captured": 1793531804.5493064,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 113289,
+      "meminfo": "input-sample-001-meminfo.txt",
+      "logcat": "input-sample-001-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.112,
+        "run_seconds": 1.663,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 2,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793531843.984267,
+    "expires": 1793531873.984267,
+    "result": {
+      "captured": 1793531844.103,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122775,
+      "meminfo": "input-sample-002-meminfo.txt",
+      "logcat": "input-sample-002-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.119,
+        "run_seconds": 1.802,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 3,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793531868.2494085,
+    "expires": 1793531898.2494085,
+    "result": {
+      "captured": 1793531868.3598554,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122741,
+      "meminfo": "input-sample-003-meminfo.txt",
+      "logcat": "input-sample-003-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.11,
+        "run_seconds": 1.711,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 4,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793531891.761986,
+    "expires": 1793531921.761986,
+    "result": {
+      "captured": 1793531891.8390014,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122771,
+      "meminfo": "input-sample-004-meminfo.txt",
+      "logcat": "input-sample-004-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.077,
+        "run_seconds": 2.033,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 5,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793531915.4866683,
+    "expires": 1793531945.4866683,
+    "result": {
+      "captured": 1793531915.5730343,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 121769,
+      "meminfo": "input-sample-005-meminfo.txt",
+      "logcat": "input-sample-005-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.086,
+        "run_seconds": 1.403,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 6,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793531938.6113274,
+    "expires": 1793531968.6113274,
+    "result": {
+      "captured": 1793531938.7757928,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122921,
+      "meminfo": "input-sample-006-meminfo.txt",
+      "logcat": "input-sample-006-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.164,
+        "run_seconds": 2.061,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 7,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793531962.3909523,
+    "expires": 1793531992.3909523,
+    "result": {
+      "captured": 1793531962.4426017,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 123125,
+      "meminfo": "input-sample-007-meminfo.txt",
+      "logcat": "input-sample-007-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.052,
+        "run_seconds": 1.547,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 8,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793531985.5023746,
+    "expires": 1793532015.5023746,
+    "result": {
+      "captured": 1793531985.541266,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 120313,
+      "meminfo": "input-sample-008-meminfo.txt",
+      "logcat": "input-sample-008-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.039,
+        "run_seconds": 1.426,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 9,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532008.6662579,
+    "expires": 1793532038.6662579,
+    "result": {
+      "captured": 1793532008.7566628,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 120337,
+      "meminfo": "input-sample-009-meminfo.txt",
+      "logcat": "input-sample-009-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.09,
+        "run_seconds": 1.75,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 10,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532033.0450015,
+    "expires": 1793532063.0450015,
+    "result": {
+      "captured": 1793532033.1465364,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122813,
+      "meminfo": "input-sample-010-meminfo.txt",
+      "logcat": "input-sample-010-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.102,
+        "run_seconds": 1.926,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 11,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532058.5887427,
+    "expires": 1793532088.5887427,
+    "result": {
+      "captured": 1793532058.8284595,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 123037,
+      "meminfo": "input-sample-011-meminfo.txt",
+      "logcat": "input-sample-011-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.24,
+        "run_seconds": 1.887,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 12,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532084.2441268,
+    "expires": 1793532114.2441268,
+    "result": {
+      "captured": 1793532084.3454137,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 123069,
+      "meminfo": "input-sample-012-meminfo.txt",
+      "logcat": "input-sample-012-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.101,
+        "run_seconds": 2.096,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 13,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532109.6868796,
+    "expires": 1793532139.6868796,
+    "result": {
+      "captured": 1793532109.863579,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122179,
+      "meminfo": "input-sample-013-meminfo.txt",
+      "logcat": "input-sample-013-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.177,
+        "run_seconds": 1.586,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 14,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532135.624193,
+    "expires": 1793532165.624193,
+    "result": {
+      "captured": 1793532135.7384658,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 124757,
+      "meminfo": "input-sample-014-meminfo.txt",
+      "logcat": "input-sample-014-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.114,
+        "run_seconds": 1.868,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 15,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532161.8305292,
+    "expires": 1793532191.8305292,
+    "result": {
+      "captured": 1793532161.9178662,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 124997,
+      "meminfo": "input-sample-015-meminfo.txt",
+      "logcat": "input-sample-015-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.087,
+        "run_seconds": 1.878,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 16,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532187.5152047,
+    "expires": 1793532217.5152047,
+    "result": {
+      "captured": 1793532187.6045706,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125004,
+      "meminfo": "input-sample-016-meminfo.txt",
+      "logcat": "input-sample-016-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.089,
+        "run_seconds": 1.763,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 17,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532212.2662911,
+    "expires": 1793532242.2662911,
+    "result": {
+      "captured": 1793532212.3114636,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122596,
+      "meminfo": "input-sample-017-meminfo.txt",
+      "logcat": "input-sample-017-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.045,
+        "run_seconds": 1.852,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 18,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532236.7923124,
+    "expires": 1793532266.7923124,
+    "result": {
+      "captured": 1793532236.874499,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125073,
+      "meminfo": "input-sample-018-meminfo.txt",
+      "logcat": "input-sample-018-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.082,
+        "run_seconds": 1.506,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 19,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532261.6830192,
+    "expires": 1793532291.6830192,
+    "result": {
+      "captured": 1793532261.8275323,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125160,
+      "meminfo": "input-sample-019-meminfo.txt",
+      "logcat": "input-sample-019-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.144,
+        "run_seconds": 2.001,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 20,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532287.591293,
+    "expires": 1793532317.591293,
+    "result": {
+      "captured": 1793532287.6524575,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125158,
+      "meminfo": "input-sample-020-meminfo.txt",
+      "logcat": "input-sample-020-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.061,
+        "run_seconds": 2.003,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 21,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532313.4464288,
+    "expires": 1793532343.4464288,
+    "result": {
+      "captured": 1793532313.6466997,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122481,
+      "meminfo": "input-sample-021-meminfo.txt",
+      "logcat": "input-sample-021-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.2,
+        "run_seconds": 1.371,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 22,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532338.9881399,
+    "expires": 1793532368.9881399,
+    "result": {
+      "captured": 1793532339.0825317,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125161,
+      "meminfo": "input-sample-022-meminfo.txt",
+      "logcat": "input-sample-022-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.094,
+        "run_seconds": 1.845,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 23,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532365.0123806,
+    "expires": 1793532395.0123806,
+    "result": {
+      "captured": 1793532365.1213229,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125213,
+      "meminfo": "input-sample-023-meminfo.txt",
+      "logcat": "input-sample-023-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.109,
+        "run_seconds": 2.05,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 24,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532390.449623,
+    "expires": 1793532420.449623,
+    "result": {
+      "captured": 1793532390.5083876,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125217,
+      "meminfo": "input-sample-024-meminfo.txt",
+      "logcat": "input-sample-024-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.059,
+        "run_seconds": 1.961,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 25,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532415.4887962,
+    "expires": 1793532445.4887962,
+    "result": {
+      "captured": 1793532415.6312337,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 121929,
+      "meminfo": "input-sample-025-meminfo.txt",
+      "logcat": "input-sample-025-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.142,
+        "run_seconds": 1.995,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 26,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532441.9012187,
+    "expires": 1793532471.9012187,
+    "result": {
+      "captured": 1793532442.0404756,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 126028,
+      "meminfo": "input-sample-026-meminfo.txt",
+      "logcat": "input-sample-026-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.139,
+        "run_seconds": 1.589,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 27,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532465.8574877,
+    "expires": 1793532495.8574877,
+    "result": {
+      "captured": 1793532465.9808607,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 126352,
+      "meminfo": "input-sample-027-meminfo.txt",
+      "logcat": "input-sample-027-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.123,
+        "run_seconds": 1.841,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 28,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532491.487123,
+    "expires": 1793532521.487123,
+    "result": {
+      "captured": 1793532491.6158352,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 126348,
+      "meminfo": "input-sample-028-meminfo.txt",
+      "logcat": "input-sample-028-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.129,
+        "run_seconds": 1.781,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 29,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532516.5014384,
+    "expires": 1793532546.5014384,
+    "result": {
+      "captured": 1793532516.5386338,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 126347,
+      "meminfo": "input-sample-029-meminfo.txt",
+      "logcat": "input-sample-029-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.037,
+        "run_seconds": 1.485,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 30,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532540.5858326,
+    "expires": 1793532570.5858326,
+    "result": {
+      "captured": 1793532540.6641598,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 123989,
+      "meminfo": "input-sample-030-meminfo.txt",
+      "logcat": "input-sample-030-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.078,
+        "run_seconds": 1.907,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 31,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532564.6137743,
+    "expires": 1793532594.6137743,
+    "result": {
+      "captured": 1793532564.6671598,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125716,
+      "meminfo": "input-sample-031-meminfo.txt",
+      "logcat": "input-sample-031-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.053,
+        "run_seconds": 1.336,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 32,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532589.774329,
+    "expires": 1793532619.774329,
+    "result": {
+      "captured": 1793532589.8474545,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125952,
+      "meminfo": "input-sample-032-meminfo.txt",
+      "logcat": "input-sample-032-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.073,
+        "run_seconds": 1.819,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 33,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532614.1823626,
+    "expires": 1793532644.1823626,
+    "result": {
+      "captured": 1793532614.234451,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125956,
+      "meminfo": "input-sample-033-meminfo.txt",
+      "logcat": "input-sample-033-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.052,
+        "run_seconds": 1.767,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 34,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532638.8478663,
+    "expires": 1793532668.8478663,
+    "result": {
+      "captured": 1793532638.9256694,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125957,
+      "meminfo": "input-sample-034-meminfo.txt",
+      "logcat": "input-sample-034-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.078,
+        "run_seconds": 1.439,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 35,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532663.06889,
+    "expires": 1793532693.06889,
+    "result": {
+      "captured": 1793532663.2996569,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 126223,
+      "meminfo": "input-sample-035-meminfo.txt",
+      "logcat": "input-sample-035-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.231,
+        "run_seconds": 1.849,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 36,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532688.8256044,
+    "expires": 1793532718.8256044,
+    "result": {
+      "captured": 1793532688.881512,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 126512,
+      "meminfo": "input-sample-036-meminfo.txt",
+      "logcat": "input-sample-036-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.056,
+        "run_seconds": 1.778,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 37,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532713.9896033,
+    "expires": 1793532743.9896033,
+    "result": {
+      "captured": 1793532714.0804174,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 126513,
+      "meminfo": "input-sample-037-meminfo.txt",
+      "logcat": "input-sample-037-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.091,
+        "run_seconds": 1.836,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 38,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532739.881491,
+    "expires": 1793532769.881491,
+    "result": {
+      "captured": 1793532739.955932,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 126507,
+      "meminfo": "input-sample-038-meminfo.txt",
+      "logcat": "input-sample-038-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.074,
+        "run_seconds": 1.605,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 39,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532765.3637185,
+    "expires": 1793532795.3637185,
+    "result": {
+      "captured": 1793532765.445502,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 123443,
+      "meminfo": "input-sample-039-meminfo.txt",
+      "logcat": "input-sample-039-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.082,
+        "run_seconds": 1.909,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 40,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532790.8690627,
+    "expires": 1793532820.8690627,
+    "result": {
+      "captured": 1793532790.9828286,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125476,
+      "meminfo": "input-sample-040-meminfo.txt",
+      "logcat": "input-sample-040-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.114,
+        "run_seconds": 1.669,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 41,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532817.2349706,
+    "expires": 1793532847.2349706,
+    "result": {
+      "captured": 1793532817.3991013,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125620,
+      "meminfo": "input-sample-041-meminfo.txt",
+      "logcat": "input-sample-041-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.164,
+        "run_seconds": 1.858,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 42,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532841.8491673,
+    "expires": 1793532871.8491673,
+    "result": {
+      "captured": 1793532841.9575872,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125621,
+      "meminfo": "input-sample-042-meminfo.txt",
+      "logcat": "input-sample-042-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.108,
+        "run_seconds": 1.863,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 43,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532865.8302221,
+    "expires": 1793532895.8302221,
+    "result": {
+      "captured": 1793532865.9362884,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122963,
+      "meminfo": "input-sample-043-meminfo.txt",
+      "logcat": "input-sample-043-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.106,
+        "run_seconds": 1.859,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 44,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532890.4271116,
+    "expires": 1793532920.4271116,
+    "result": {
+      "captured": 1793532890.51805,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125595,
+      "meminfo": "input-sample-044-meminfo.txt",
+      "logcat": "input-sample-044-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.091,
+        "run_seconds": 1.874,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 45,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532914.942806,
+    "expires": 1793532944.942806,
+    "result": {
+      "captured": 1793532915.091611,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125795,
+      "meminfo": "input-sample-045-meminfo.txt",
+      "logcat": "input-sample-045-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.149,
+        "run_seconds": 1.881,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 46,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532938.850367,
+    "expires": 1793532968.850367,
+    "result": {
+      "captured": 1793532938.9948251,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125791,
+      "meminfo": "input-sample-046-meminfo.txt",
+      "logcat": "input-sample-046-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.144,
+        "run_seconds": 1.903,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 47,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532962.614518,
+    "expires": 1793532992.614518,
+    "result": {
+      "captured": 1793532962.6863964,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 125791,
+      "meminfo": "input-sample-047-meminfo.txt",
+      "logcat": "input-sample-047-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.072,
+        "run_seconds": 1.548,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 48,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793532986.0100234,
+    "expires": 1793533016.0100234,
+    "result": {
+      "captured": 1793532986.1328914,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 124772,
+      "meminfo": "input-sample-048-meminfo.txt",
+      "logcat": "input-sample-048-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.123,
+        "run_seconds": 1.655,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 49,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533010.3073733,
+    "expires": 1793533040.3073733,
+    "result": {
+      "captured": 1793533010.39922,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 124597,
+      "meminfo": "input-sample-049-meminfo.txt",
+      "logcat": "input-sample-049-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.092,
+        "run_seconds": 1.658,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 50,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533033.6224387,
+    "expires": 1793533063.6224387,
+    "result": {
+      "captured": 1793533033.675356,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 124609,
+      "meminfo": "input-sample-050-meminfo.txt",
+      "logcat": "input-sample-050-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.053,
+        "run_seconds": 1.938,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 51,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533057.4086113,
+    "expires": 1793533087.4086113,
+    "result": {
+      "captured": 1793533057.545261,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 124510,
+      "meminfo": "input-sample-051-meminfo.txt",
+      "logcat": "input-sample-051-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.137,
+        "run_seconds": 1.802,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 52,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533080.725792,
+    "expires": 1793533110.725792,
+    "result": {
+      "captured": 1793533080.8472831,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 123226,
+      "meminfo": "input-sample-052-meminfo.txt",
+      "logcat": "input-sample-052-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.121,
+        "run_seconds": 1.882,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 53,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533104.3396428,
+    "expires": 1793533134.3396428,
+    "result": {
+      "captured": 1793533104.448045,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 124888,
+      "meminfo": "input-sample-053-meminfo.txt",
+      "logcat": "input-sample-053-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.108,
+        "run_seconds": 1.42,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 54,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533127.1814914,
+    "expires": 1793533157.1814914,
+    "result": {
+      "captured": 1793533127.2398572,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 124736,
+      "meminfo": "input-sample-054-meminfo.txt",
+      "logcat": "input-sample-054-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.058,
+        "run_seconds": 1.299,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 55,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533150.0184004,
+    "expires": 1793533180.0184004,
+    "result": {
+      "captured": 1793533150.1033864,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 124722,
+      "meminfo": "input-sample-055-meminfo.txt",
+      "logcat": "input-sample-055-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.085,
+        "run_seconds": 1.215,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 56,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533172.7493038,
+    "expires": 1793533202.7493038,
+    "result": {
+      "captured": 1793533172.8775847,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 120630,
+      "meminfo": "input-sample-056-meminfo.txt",
+      "logcat": "input-sample-056-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.128,
+        "run_seconds": 1.372,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 57,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533195.6226666,
+    "expires": 1793533225.6226666,
+    "result": {
+      "captured": 1793533195.7377324,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122482,
+      "meminfo": "input-sample-057-meminfo.txt",
+      "logcat": "input-sample-057-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.115,
+        "run_seconds": 1.457,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 58,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533218.690891,
+    "expires": 1793533248.690891,
+    "result": {
+      "captured": 1793533218.7484338,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 119622,
+      "meminfo": "input-sample-058-meminfo.txt",
+      "logcat": "input-sample-058-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.058,
+        "run_seconds": 1.373,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 59,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533241.5477748,
+    "expires": 1793533271.5477748,
+    "result": {
+      "captured": 1793533241.6659422,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 117159,
+      "meminfo": "input-sample-059-meminfo.txt",
+      "logcat": "input-sample-059-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.118,
+        "run_seconds": 1.762,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 60,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533264.7120667,
+    "expires": 1793533294.7120667,
+    "result": {
+      "captured": 1793533264.7562907,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 119507,
+      "meminfo": "input-sample-060-meminfo.txt",
+      "logcat": "input-sample-060-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.044,
+        "run_seconds": 1.345,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 61,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533287.490892,
+    "expires": 1793533317.490892,
+    "result": {
+      "captured": 1793533287.5252209,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 117638,
+      "meminfo": "input-sample-061-meminfo.txt",
+      "logcat": "input-sample-061-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.034,
+        "run_seconds": 1.599,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 62,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533310.5040746,
+    "expires": 1793533340.5040746,
+    "result": {
+      "captured": 1793533310.5675397,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 120524,
+      "meminfo": "input-sample-062-meminfo.txt",
+      "logcat": "input-sample-062-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.063,
+        "run_seconds": 1.404,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 63,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533333.582318,
+    "expires": 1793533363.582318,
+    "result": {
+      "captured": 1793533333.669459,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 121021,
+      "meminfo": "input-sample-063-meminfo.txt",
+      "logcat": "input-sample-063-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.087,
+        "run_seconds": 1.43,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 64,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533356.4654555,
+    "expires": 1793533386.4654555,
+    "result": {
+      "captured": 1793533356.582568,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 121017,
+      "meminfo": "input-sample-064-meminfo.txt",
+      "logcat": "input-sample-064-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.117,
+        "run_seconds": 1.285,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 65,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533379.1326926,
+    "expires": 1793533409.1326926,
+    "result": {
+      "captured": 1793533379.2028167,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 121000,
+      "meminfo": "input-sample-065-meminfo.txt",
+      "logcat": "input-sample-065-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.07,
+        "run_seconds": 1.589,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 66,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533402.1265144,
+    "expires": 1793533432.1265144,
+    "result": {
+      "captured": 1793533402.2594666,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 120908,
+      "meminfo": "input-sample-066-meminfo.txt",
+      "logcat": "input-sample-066-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.133,
+        "run_seconds": 1.703,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 67,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533425.3665721,
+    "expires": 1793533455.3665721,
+    "result": {
+      "captured": 1793533425.446333,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 121580,
+      "meminfo": "input-sample-067-meminfo.txt",
+      "logcat": "input-sample-067-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.08,
+        "run_seconds": 1.424,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 68,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533448.3202536,
+    "expires": 1793533478.3202536,
+    "result": {
+      "captured": 1793533448.399223,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 121395,
+      "meminfo": "input-sample-068-meminfo.txt",
+      "logcat": "input-sample-068-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.079,
+        "run_seconds": 1.636,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 69,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533471.3478901,
+    "expires": 1793533501.3478901,
+    "result": {
+      "captured": 1793533471.4704325,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 121401,
+      "meminfo": "input-sample-069-meminfo.txt",
+      "logcat": "input-sample-069-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.123,
+        "run_seconds": 1.479,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 70,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533494.3123436,
+    "expires": 1793533524.3123436,
+    "result": {
+      "captured": 1793533494.4042382,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 120223,
+      "meminfo": "input-sample-070-meminfo.txt",
+      "logcat": "input-sample-070-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.092,
+        "run_seconds": 1.153,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 71,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533517.1021032,
+    "expires": 1793533547.1021032,
+    "result": {
+      "captured": 1793533517.1807644,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122323,
+      "meminfo": "input-sample-071-meminfo.txt",
+      "logcat": "input-sample-071-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.079,
+        "run_seconds": 2.24,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 72,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533540.8282602,
+    "expires": 1793533570.8282602,
+    "result": {
+      "captured": 1793533540.9385858,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122617,
+      "meminfo": "input-sample-072-meminfo.txt",
+      "logcat": "input-sample-072-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.11,
+        "run_seconds": 1.561,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 73,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533563.9402647,
+    "expires": 1793533593.9402647,
+    "result": {
+      "captured": 1793533563.996022,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122627,
+      "meminfo": "input-sample-073-meminfo.txt",
+      "logcat": "input-sample-073-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.056,
+        "run_seconds": 1.415,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 74,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533586.8345306,
+    "expires": 1793533616.8345306,
+    "result": {
+      "captured": 1793533586.9449458,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122615,
+      "meminfo": "input-sample-074-meminfo.txt",
+      "logcat": "input-sample-074-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.11,
+        "run_seconds": 1.449,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 75,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533609.7036653,
+    "expires": 1793533639.7036653,
+    "result": {
+      "captured": 1793533609.770638,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 120475,
+      "meminfo": "input-sample-075-meminfo.txt",
+      "logcat": "input-sample-075-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.067,
+        "run_seconds": 1.068,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 76,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533632.5000622,
+    "expires": 1793533662.5000622,
+    "result": {
+      "captured": 1793533632.5783088,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 121297,
+      "meminfo": "input-sample-076-meminfo.txt",
+      "logcat": "input-sample-076-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.078,
+        "run_seconds": 1.207,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 77,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533655.242651,
+    "expires": 1793533685.242651,
+    "result": {
+      "captured": 1793533655.3196545,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 121334,
+      "meminfo": "input-sample-077-meminfo.txt",
+      "logcat": "input-sample-077-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.077,
+        "run_seconds": 1.686,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 78,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533678.7509713,
+    "expires": 1793533708.7509713,
+    "result": {
+      "captured": 1793533678.8370962,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 121334,
+      "meminfo": "input-sample-078-meminfo.txt",
+      "logcat": "input-sample-078-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.086,
+        "run_seconds": 1.791,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 79,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533702.0657332,
+    "expires": 1793533732.0657332,
+    "result": {
+      "captured": 1793533702.1327505,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 118782,
+      "meminfo": "input-sample-079-meminfo.txt",
+      "logcat": "input-sample-079-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.067,
+        "run_seconds": 1.387,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 80,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533724.9289649,
+    "expires": 1793533754.9289649,
+    "result": {
+      "captured": 1793533725.0512135,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122055,
+      "meminfo": "input-sample-080-meminfo.txt",
+      "logcat": "input-sample-080-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.122,
+        "run_seconds": 1.285,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 81,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533747.959983,
+    "expires": 1793533777.959983,
+    "result": {
+      "captured": 1793533748.0216856,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122449,
+      "meminfo": "input-sample-081-meminfo.txt",
+      "logcat": "input-sample-081-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.062,
+        "run_seconds": 1.404,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 82,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533770.6788852,
+    "expires": 1793533800.6788852,
+    "result": {
+      "captured": 1793533770.7483828,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122453,
+      "meminfo": "input-sample-082-meminfo.txt",
+      "logcat": "input-sample-082-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.069,
+        "run_seconds": 1.232,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 83,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533793.776625,
+    "expires": 1793533823.776625,
+    "result": {
+      "captured": 1793533793.837305,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 122451,
+      "meminfo": "input-sample-083-meminfo.txt",
+      "logcat": "input-sample-083-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.061,
+        "run_seconds": 1.466,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 84,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533816.6540406,
+    "expires": 1793533846.6540406,
+    "result": {
+      "captured": 1793533816.705794,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 107585,
+      "meminfo": "input-sample-084-meminfo.txt",
+      "logcat": "input-sample-084-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.052,
+        "run_seconds": 1.547,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 85,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533839.9101145,
+    "expires": 1793533869.9101145,
+    "result": {
+      "captured": 1793533839.962721,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 111712,
+      "meminfo": "input-sample-085-meminfo.txt",
+      "logcat": "input-sample-085-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.053,
+        "run_seconds": 1.332,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 86,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533863.0964894,
+    "expires": 1793533893.0964894,
+    "result": {
+      "captured": 1793533863.1599956,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 112320,
+      "meminfo": "input-sample-086-meminfo.txt",
+      "logcat": "input-sample-086-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.063,
+        "run_seconds": 1.396,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 87,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533885.8997529,
+    "expires": 1793533915.8997529,
+    "result": {
+      "captured": 1793533886.0268981,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 112368,
+      "meminfo": "input-sample-087-meminfo.txt",
+      "logcat": "input-sample-087-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.127,
+        "run_seconds": 1.449,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 88,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533909.073451,
+    "expires": 1793533939.073451,
+    "result": {
+      "captured": 1793533909.1740773,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 99200,
+      "meminfo": "input-sample-088-meminfo.txt",
+      "logcat": "input-sample-088-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.101,
+        "run_seconds": 1.564,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 89,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533932.807111,
+    "expires": 1793533962.807111,
+    "result": {
+      "captured": 1793533932.8892584,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 100976,
+      "meminfo": "input-sample-089-meminfo.txt",
+      "logcat": "input-sample-089-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.082,
+        "run_seconds": 2.001,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 90,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533956.4155052,
+    "expires": 1793533986.4155052,
+    "result": {
+      "captured": 1793533956.4859822,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 102761,
+      "meminfo": "input-sample-090-meminfo.txt",
+      "logcat": "input-sample-090-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.07,
+        "run_seconds": 1.544,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 91,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793533979.6550918,
+    "expires": 1793534009.6550918,
+    "result": {
+      "captured": 1793533979.7494876,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 102929,
+      "meminfo": "input-sample-091-meminfo.txt",
+      "logcat": "input-sample-091-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.094,
+        "run_seconds": 1.471,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 92,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534002.874775,
+    "expires": 1793534032.874775,
+    "result": {
+      "captured": 1793534003.009737,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 103071,
+      "meminfo": "input-sample-092-meminfo.txt",
+      "logcat": "input-sample-092-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.135,
+        "run_seconds": 1.315,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 93,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534026.201011,
+    "expires": 1793534056.201011,
+    "result": {
+      "captured": 1793534026.2824972,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 103067,
+      "meminfo": "input-sample-093-meminfo.txt",
+      "logcat": "input-sample-093-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.081,
+        "run_seconds": 2.577,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 94,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534053.5951476,
+    "expires": 1793534083.5951476,
+    "result": {
+      "captured": 1793534053.691979,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 102031,
+      "meminfo": "input-sample-094-meminfo.txt",
+      "logcat": "input-sample-094-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.097,
+        "run_seconds": 3.049,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 95,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534080.0139694,
+    "expires": 1793534110.0139694,
+    "result": {
+      "captured": 1793534080.1455207,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 102815,
+      "meminfo": "input-sample-095-meminfo.txt",
+      "logcat": "input-sample-095-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.132,
+        "run_seconds": 1.429,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 96,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534103.5596855,
+    "expires": 1793534133.5596855,
+    "result": {
+      "captured": 1793534103.6704273,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 102791,
+      "meminfo": "input-sample-096-meminfo.txt",
+      "logcat": "input-sample-096-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.111,
+        "run_seconds": 1.737,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 97,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534126.7323477,
+    "expires": 1793534156.7323477,
+    "result": {
+      "captured": 1793534126.8077314,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 102790,
+      "meminfo": "input-sample-097-meminfo.txt",
+      "logcat": "input-sample-097-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.075,
+        "run_seconds": 1.35,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 98,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534149.5432136,
+    "expires": 1793534179.5432136,
+    "result": {
+      "captured": 1793534149.5810459,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 99718,
+      "meminfo": "input-sample-098-meminfo.txt",
+      "logcat": "input-sample-098-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.038,
+        "run_seconds": 1.292,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 99,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534172.2016203,
+    "expires": 1793534202.2016203,
+    "result": {
+      "captured": 1793534172.3094742,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 102782,
+      "meminfo": "input-sample-099-meminfo.txt",
+      "logcat": "input-sample-099-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.108,
+        "run_seconds": 1.437,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 100,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534195.002091,
+    "expires": 1793534225.002091,
+    "result": {
+      "captured": 1793534195.0734107,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 103166,
+      "meminfo": "input-sample-100-meminfo.txt",
+      "logcat": "input-sample-100-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.071,
+        "run_seconds": 1.304,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 101,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534217.9695714,
+    "expires": 1793534247.9695714,
+    "result": {
+      "captured": 1793534218.0250952,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 103170,
+      "meminfo": "input-sample-101-meminfo.txt",
+      "logcat": "input-sample-101-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.056,
+        "run_seconds": 1.393,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 102,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534240.6732569,
+    "expires": 1793534270.6732569,
+    "result": {
+      "captured": 1793534240.7265644,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 103168,
+      "meminfo": "input-sample-102-meminfo.txt",
+      "logcat": "input-sample-102-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.053,
+        "run_seconds": 1.977,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 103,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534264.171755,
+    "expires": 1793534294.171755,
+    "result": {
+      "captured": 1793534264.30501,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 102401,
+      "meminfo": "input-sample-103-meminfo.txt",
+      "logcat": "input-sample-103-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.133,
+        "run_seconds": 1.297,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 104,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534287.0880692,
+    "expires": 1793534317.0880692,
+    "result": {
+      "captured": 1793534287.1554873,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 104077,
+      "meminfo": "input-sample-104-meminfo.txt",
+      "logcat": "input-sample-104-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.067,
+        "run_seconds": 1.596,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 105,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534310.034631,
+    "expires": 1793534340.034631,
+    "result": {
+      "captured": 1793534310.1631951,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 103880,
+      "meminfo": "input-sample-105-meminfo.txt",
+      "logcat": "input-sample-105-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.129,
+        "run_seconds": 1.868,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 106,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534333.5439677,
+    "expires": 1793534363.5439677,
+    "result": {
+      "captured": 1793534333.609751,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 103896,
+      "meminfo": "input-sample-106-meminfo.txt",
+      "logcat": "input-sample-106-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.066,
+        "run_seconds": 1.268,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 107,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534356.2177844,
+    "expires": 1793534386.2177844,
+    "result": {
+      "captured": 1793534356.2674303,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 101086,
+      "meminfo": "input-sample-107-meminfo.txt",
+      "logcat": "input-sample-107-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.05,
+        "run_seconds": 1.351,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 108,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534379.2208788,
+    "expires": 1793534409.2208788,
+    "result": {
+      "captured": 1793534379.2732432,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 104386,
+      "meminfo": "input-sample-108-meminfo.txt",
+      "logcat": "input-sample-108-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.052,
+        "run_seconds": 1.58,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 109,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534402.710775,
+    "expires": 1793534432.710775,
+    "result": {
+      "captured": 1793534402.7663078,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 104718,
+      "meminfo": "input-sample-109-meminfo.txt",
+      "logcat": "input-sample-109-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.056,
+        "run_seconds": 1.616,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 110,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534425.6840339,
+    "expires": 1793534455.6840339,
+    "result": {
+      "captured": 1793534425.7236679,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 104718,
+      "meminfo": "input-sample-110-meminfo.txt",
+      "logcat": "input-sample-110-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.04,
+        "run_seconds": 1.394,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 111,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534449.0870008,
+    "expires": 1793534479.0870008,
+    "result": {
+      "captured": 1793534449.1884737,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 104671,
+      "meminfo": "input-sample-111-meminfo.txt",
+      "logcat": "input-sample-111-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.101,
+        "run_seconds": 1.615,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 112,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534472.8441746,
+    "expires": 1793534502.8441746,
+    "result": {
+      "captured": 1793534472.9707975,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 102139,
+      "meminfo": "input-sample-112-meminfo.txt",
+      "logcat": "input-sample-112-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.127,
+        "run_seconds": 1.166,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 113,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534496.0129273,
+    "expires": 1793534526.0129273,
+    "result": {
+      "captured": 1793534496.150522,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 103851,
+      "meminfo": "input-sample-113-meminfo.txt",
+      "logcat": "input-sample-113-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.138,
+        "run_seconds": 1.761,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 114,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534519.6711373,
+    "expires": 1793534549.6711373,
+    "result": {
+      "captured": 1793534519.710332,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 103995,
+      "meminfo": "input-sample-114-meminfo.txt",
+      "logcat": "input-sample-114-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.039,
+        "run_seconds": 1.701,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 115,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534542.8830738,
+    "expires": 1793534572.8830738,
+    "result": {
+      "captured": 1793534542.984181,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 103999,
+      "meminfo": "input-sample-115-meminfo.txt",
+      "logcat": "input-sample-115-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.101,
+        "run_seconds": 1.554,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 116,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534566.0727296,
+    "expires": 1793534596.0727296,
+    "result": {
+      "captured": 1793534566.1970372,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 92909,
+      "meminfo": "input-sample-116-meminfo.txt",
+      "logcat": "input-sample-116-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.124,
+        "run_seconds": 1.803,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 117,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534589.5401456,
+    "expires": 1793534619.5401456,
+    "result": {
+      "captured": 1793534589.584546,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 95765,
+      "meminfo": "input-sample-117-meminfo.txt",
+      "logcat": "input-sample-117-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.044,
+        "run_seconds": 1.184,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 118,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534612.354099,
+    "expires": 1793534642.354099,
+    "result": {
+      "captured": 1793534612.4432812,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 96165,
+      "meminfo": "input-sample-118-meminfo.txt",
+      "logcat": "input-sample-118-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.089,
+        "run_seconds": 1.703,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 119,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534635.5373225,
+    "expires": 1793534665.5373225,
+    "result": {
+      "captured": 1793534635.5930083,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 96121,
+      "meminfo": "input-sample-119-meminfo.txt",
+      "logcat": "input-sample-119-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.056,
+        "run_seconds": 1.746,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 120,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534658.6846807,
+    "expires": 1793534688.6846807,
+    "result": {
+      "captured": 1793534658.7870414,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 95026,
+      "meminfo": "input-sample-120-meminfo.txt",
+      "logcat": "input-sample-120-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.102,
+        "run_seconds": 1.312,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 121,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534681.323457,
+    "expires": 1793534711.323457,
+    "result": {
+      "captured": 1793534681.4428084,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 93292,
+      "meminfo": "input-sample-121-meminfo.txt",
+      "logcat": "input-sample-121-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.119,
+        "run_seconds": 1.691,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 122,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534704.7593863,
+    "expires": 1793534734.7593863,
+    "result": {
+      "captured": 1793534704.8382692,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 95128,
+      "meminfo": "input-sample-122-meminfo.txt",
+      "logcat": "input-sample-122-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.079,
+        "run_seconds": 1.513,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 123,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534727.8778732,
+    "expires": 1793534757.8778732,
+    "result": {
+      "captured": 1793534727.9273977,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 95296,
+      "meminfo": "input-sample-123-meminfo.txt",
+      "logcat": "input-sample-123-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.049,
+        "run_seconds": 1.227,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 124,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534750.5042868,
+    "expires": 1793534780.5042868,
+    "result": {
+      "captured": 1793534750.6480927,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 95316,
+      "meminfo": "input-sample-124-meminfo.txt",
+      "logcat": "input-sample-124-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.144,
+        "run_seconds": 1.43,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 125,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534773.4227257,
+    "expires": 1793534803.4227257,
+    "result": {
+      "captured": 1793534773.522282,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 95312,
+      "meminfo": "input-sample-125-meminfo.txt",
+      "logcat": "input-sample-125-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.1,
+        "run_seconds": 1.662,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 126,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534796.4745672,
+    "expires": 1793534826.4745672,
+    "result": {
+      "captured": 1793534796.5294518,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 96603,
+      "meminfo": "input-sample-126-meminfo.txt",
+      "logcat": "input-sample-126-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.055,
+        "run_seconds": 1.39,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 127,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534819.4195223,
+    "expires": 1793534849.4195223,
+    "result": {
+      "captured": 1793534819.4578207,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 96919,
+      "meminfo": "input-sample-127-meminfo.txt",
+      "logcat": "input-sample-127-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.038,
+        "run_seconds": 1.401,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 128,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534842.407301,
+    "expires": 1793534872.407301,
+    "result": {
+      "captured": 1793534842.5337913,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 96939,
+      "meminfo": "input-sample-128-meminfo.txt",
+      "logcat": "input-sample-128-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.126,
+        "run_seconds": 1.963,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 129,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534865.875113,
+    "expires": 1793534895.875113,
+    "result": {
+      "captured": 1793534865.9712846,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 96943,
+      "meminfo": "input-sample-129-meminfo.txt",
+      "logcat": "input-sample-129-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.096,
+        "run_seconds": 1.609,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 130,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534888.8900506,
+    "expires": 1793534918.8900506,
+    "result": {
+      "captured": 1793534889.039533,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 96943,
+      "meminfo": "input-sample-130-meminfo.txt",
+      "logcat": "input-sample-130-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.149,
+        "run_seconds": 1.642,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 131,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534912.1187806,
+    "expires": 1793534942.1187806,
+    "result": {
+      "captured": 1793534912.1818252,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 94883,
+      "meminfo": "input-sample-131-meminfo.txt",
+      "logcat": "input-sample-131-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.063,
+        "run_seconds": 1.684,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 132,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534936.234026,
+    "expires": 1793534966.234026,
+    "result": {
+      "captured": 1793534936.375593,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 95970,
+      "meminfo": "input-sample-132-meminfo.txt",
+      "logcat": "input-sample-132-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.142,
+        "run_seconds": 1.471,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 133,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534959.5774195,
+    "expires": 1793534989.5774195,
+    "result": {
+      "captured": 1793534959.6474175,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 95973,
+      "meminfo": "input-sample-133-meminfo.txt",
+      "logcat": "input-sample-133-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.07,
+        "run_seconds": 1.432,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 134,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793534982.8454945,
+    "expires": 1793535012.8454945,
+    "result": {
+      "captured": 1793534982.9571793,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 95989,
+      "meminfo": "input-sample-134-meminfo.txt",
+      "logcat": "input-sample-134-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.112,
+        "run_seconds": 2.272,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 135,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535007.6336222,
+    "expires": 1793535037.6336222,
+    "result": {
+      "captured": 1793535007.758304,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 95989,
+      "meminfo": "input-sample-135-meminfo.txt",
+      "logcat": "input-sample-135-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.125,
+        "run_seconds": 1.901,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 136,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535031.074515,
+    "expires": 1793535061.074515,
+    "result": {
+      "captured": 1793535031.1340902,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 96840,
+      "meminfo": "input-sample-136-meminfo.txt",
+      "logcat": "input-sample-136-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.06,
+        "run_seconds": 1.4,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 137,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535054.3342812,
+    "expires": 1793535084.3342812,
+    "result": {
+      "captured": 1793535054.4275208,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 97874,
+      "meminfo": "input-sample-137-meminfo.txt",
+      "logcat": "input-sample-137-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.093,
+        "run_seconds": 1.866,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 138,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535077.8324704,
+    "expires": 1793535107.8324704,
+    "result": {
+      "captured": 1793535077.9013171,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 98039,
+      "meminfo": "input-sample-138-meminfo.txt",
+      "logcat": "input-sample-138-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.069,
+        "run_seconds": 1.763,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 139,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535101.7361333,
+    "expires": 1793535131.7361333,
+    "result": {
+      "captured": 1793535101.8493218,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 95731,
+      "meminfo": "input-sample-139-meminfo.txt",
+      "logcat": "input-sample-139-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.113,
+        "run_seconds": 2.224,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 140,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535125.8896701,
+    "expires": 1793535155.8896701,
+    "result": {
+      "captured": 1793535125.9511042,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 95734,
+      "meminfo": "input-sample-140-meminfo.txt",
+      "logcat": "input-sample-140-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.061,
+        "run_seconds": 1.382,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 141,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535148.7168133,
+    "expires": 1793535178.7168133,
+    "result": {
+      "captured": 1793535148.9053085,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 97198,
+      "meminfo": "input-sample-141-meminfo.txt",
+      "logcat": "input-sample-141-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.188,
+        "run_seconds": 1.367,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 142,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535171.618217,
+    "expires": 1793535201.618217,
+    "result": {
+      "captured": 1793535171.7547069,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 90451,
+      "meminfo": "input-sample-142-meminfo.txt",
+      "logcat": "input-sample-142-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.136,
+        "run_seconds": 1.892,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 143,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535194.9895427,
+    "expires": 1793535224.9895427,
+    "result": {
+      "captured": 1793535195.2078888,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 90443,
+      "meminfo": "input-sample-143-meminfo.txt",
+      "logcat": "input-sample-143-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.218,
+        "run_seconds": 1.264,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 144,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535217.9485803,
+    "expires": 1793535247.9485803,
+    "result": {
+      "captured": 1793535218.0657203,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 90443,
+      "meminfo": "input-sample-144-meminfo.txt",
+      "logcat": "input-sample-144-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.117,
+        "run_seconds": 1.56,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 145,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535241.155077,
+    "expires": 1793535271.155077,
+    "result": {
+      "captured": 1793535241.2679367,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 90444,
+      "meminfo": "input-sample-145-meminfo.txt",
+      "logcat": "input-sample-145-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.113,
+        "run_seconds": 1.594,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 146,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535264.3549008,
+    "expires": 1793535294.3549008,
+    "result": {
+      "captured": 1793535264.4482,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 90271,
+      "meminfo": "input-sample-146-meminfo.txt",
+      "logcat": "input-sample-146-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.093,
+        "run_seconds": 1.423,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 147,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535287.322701,
+    "expires": 1793535317.322701,
+    "result": {
+      "captured": 1793535287.3986545,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 90975,
+      "meminfo": "input-sample-147-meminfo.txt",
+      "logcat": "input-sample-147-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.076,
+        "run_seconds": 1.854,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 148,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535310.7672217,
+    "expires": 1793535340.7672217,
+    "result": {
+      "captured": 1793535311.2011957,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 90979,
+      "meminfo": "input-sample-148-meminfo.txt",
+      "logcat": "input-sample-148-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.434,
+        "run_seconds": 2.289,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 149,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535335.0143058,
+    "expires": 1793535365.0143058,
+    "result": {
+      "captured": 1793535335.1132996,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 91035,
+      "meminfo": "input-sample-149-meminfo.txt",
+      "logcat": "input-sample-149-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.099,
+        "run_seconds": 1.419,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 150,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535358.135983,
+    "expires": 1793535388.135983,
+    "result": {
+      "captured": 1793535358.2282357,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 85997,
+      "meminfo": "input-sample-150-meminfo.txt",
+      "logcat": "input-sample-150-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.092,
+        "run_seconds": 1.753,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 151,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535381.4395728,
+    "expires": 1793535411.4395728,
+    "result": {
+      "captured": 1793535381.5343933,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 89661,
+      "meminfo": "input-sample-151-meminfo.txt",
+      "logcat": "input-sample-151-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.095,
+        "run_seconds": 1.83,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 152,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535404.7302036,
+    "expires": 1793535434.7302036,
+    "result": {
+      "captured": 1793535404.851843,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 84024,
+      "meminfo": "input-sample-152-meminfo.txt",
+      "logcat": "input-sample-152-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.122,
+        "run_seconds": 1.689,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 153,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535427.9083962,
+    "expires": 1793535457.9083962,
+    "result": {
+      "captured": 1793535427.9716985,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 84019,
+      "meminfo": "input-sample-153-meminfo.txt",
+      "logcat": "input-sample-153-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.063,
+        "run_seconds": 1.465,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 154,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535450.6986094,
+    "expires": 1793535480.6986094,
+    "result": {
+      "captured": 1793535450.7369971,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 84019,
+      "meminfo": "input-sample-154-meminfo.txt",
+      "logcat": "input-sample-154-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.038,
+        "run_seconds": 1.461,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 155,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535473.592978,
+    "expires": 1793535503.592978,
+    "result": {
+      "captured": 1793535473.6910489,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 86987,
+      "meminfo": "input-sample-155-meminfo.txt",
+      "logcat": "input-sample-155-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.098,
+        "run_seconds": 1.097,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 156,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535496.021101,
+    "expires": 1793535526.021101,
+    "result": {
+      "captured": 1793535496.0750833,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 88320,
+      "meminfo": "input-sample-156-meminfo.txt",
+      "logcat": "input-sample-156-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.054,
+        "run_seconds": 1.106,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 157,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535518.3696892,
+    "expires": 1793535548.3696892,
+    "result": {
+      "captured": 1793535518.4372623,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 88557,
+      "meminfo": "input-sample-157-meminfo.txt",
+      "logcat": "input-sample-157-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.068,
+        "run_seconds": 1.255,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 158,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535540.9415987,
+    "expires": 1793535570.9415987,
+    "result": {
+      "captured": 1793535541.0460303,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 88553,
+      "meminfo": "input-sample-158-meminfo.txt",
+      "logcat": "input-sample-158-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.104,
+        "run_seconds": 1.451,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 159,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535563.712149,
+    "expires": 1793535593.712149,
+    "result": {
+      "captured": 1793535563.83565,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 88558,
+      "meminfo": "input-sample-159-meminfo.txt",
+      "logcat": "input-sample-159-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.123,
+        "run_seconds": 1.476,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 160,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535586.6010725,
+    "expires": 1793535616.6010725,
+    "result": {
+      "captured": 1793535586.7318022,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 87741,
+      "meminfo": "input-sample-160-meminfo.txt",
+      "logcat": "input-sample-160-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.131,
+        "run_seconds": 1.546,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 161,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535609.601728,
+    "expires": 1793535639.601728,
+    "result": {
+      "captured": 1793535609.7537634,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 89701,
+      "meminfo": "input-sample-161-meminfo.txt",
+      "logcat": "input-sample-161-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.152,
+        "run_seconds": 1.25,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 162,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535632.3471198,
+    "expires": 1793535662.3471198,
+    "result": {
+      "captured": 1793535632.3963008,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 89973,
+      "meminfo": "input-sample-162-meminfo.txt",
+      "logcat": "input-sample-162-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.049,
+        "run_seconds": 1.315,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 163,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535655.0565248,
+    "expires": 1793535685.0565248,
+    "result": {
+      "captured": 1793535655.1187708,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 89957,
+      "meminfo": "input-sample-163-meminfo.txt",
+      "logcat": "input-sample-163-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.062,
+        "run_seconds": 1.147,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 164,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535677.5625486,
+    "expires": 1793535707.5625486,
+    "result": {
+      "captured": 1793535677.6130183,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 89961,
+      "meminfo": "input-sample-164-meminfo.txt",
+      "logcat": "input-sample-164-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.05,
+        "run_seconds": 1.556,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 165,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535700.4531405,
+    "expires": 1793535730.4531405,
+    "result": {
+      "captured": 1793535700.535628,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 88277,
+      "meminfo": "input-sample-165-meminfo.txt",
+      "logcat": "input-sample-165-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.082,
+        "run_seconds": 1.149,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 166,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535723.1660838,
+    "expires": 1793535753.1660838,
+    "result": {
+      "captured": 1793535723.2601824,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 90849,
+      "meminfo": "input-sample-166-meminfo.txt",
+      "logcat": "input-sample-166-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.094,
+        "run_seconds": 1.799,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 167,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535746.3856223,
+    "expires": 1793535776.3856223,
+    "result": {
+      "captured": 1793535746.4562025,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 91117,
+      "meminfo": "input-sample-167-meminfo.txt",
+      "logcat": "input-sample-167-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.071,
+        "run_seconds": 1.345,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 168,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535769.2087696,
+    "expires": 1793535799.2087696,
+    "result": {
+      "captured": 1793535769.3202055,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 91153,
+      "meminfo": "input-sample-168-meminfo.txt",
+      "logcat": "input-sample-168-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.111,
+        "run_seconds": 1.207,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 169,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535792.3642316,
+    "expires": 1793535822.3642316,
+    "result": {
+      "captured": 1793535792.493278,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 85653,
+      "meminfo": "input-sample-169-meminfo.txt",
+      "logcat": "input-sample-169-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.129,
+        "run_seconds": 1.626,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 170,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535816.4524598,
+    "expires": 1793535846.4524598,
+    "result": {
+      "captured": 1793535816.5464427,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 85649,
+      "meminfo": "input-sample-170-meminfo.txt",
+      "logcat": "input-sample-170-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.094,
+        "run_seconds": 1.902,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 171,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535840.2035673,
+    "expires": 1793535870.2035673,
+    "result": {
+      "captured": 1793535840.2995305,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 87621,
+      "meminfo": "input-sample-171-meminfo.txt",
+      "logcat": "input-sample-171-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.096,
+        "run_seconds": 1.606,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 172,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535864.4699764,
+    "expires": 1793535894.4699764,
+    "result": {
+      "captured": 1793535864.5605123,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 88353,
+      "meminfo": "input-sample-172-meminfo.txt",
+      "logcat": "input-sample-172-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.091,
+        "run_seconds": 1.711,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 173,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535887.8321664,
+    "expires": 1793535917.8321664,
+    "result": {
+      "captured": 1793535887.9037619,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 88366,
+      "meminfo": "input-sample-173-meminfo.txt",
+      "logcat": "input-sample-173-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.072,
+        "run_seconds": 1.537,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 174,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535911.0427394,
+    "expires": 1793535941.0427394,
+    "result": {
+      "captured": 1793535911.0865197,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 88369,
+      "meminfo": "input-sample-174-meminfo.txt",
+      "logcat": "input-sample-174-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.044,
+        "run_seconds": 1.237,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 175,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535933.8475711,
+    "expires": 1793535963.8475711,
+    "result": {
+      "captured": 1793535933.9452984,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 88365,
+      "meminfo": "input-sample-175-meminfo.txt",
+      "logcat": "input-sample-175-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.098,
+        "run_seconds": 1.544,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 176,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535957.5515811,
+    "expires": 1793535987.5515811,
+    "result": {
+      "captured": 1793535957.7026992,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 84879,
+      "meminfo": "input-sample-176-meminfo.txt",
+      "logcat": "input-sample-176-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.151,
+        "run_seconds": 1.748,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 177,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793535980.8906546,
+    "expires": 1793536010.8906546,
+    "result": {
+      "captured": 1793535980.964172,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 87063,
+      "meminfo": "input-sample-177-meminfo.txt",
+      "logcat": "input-sample-177-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.073,
+        "run_seconds": 1.662,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 178,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536004.1686218,
+    "expires": 1793536034.1686218,
+    "result": {
+      "captured": 1793536004.1981218,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 87075,
+      "meminfo": "input-sample-178-meminfo.txt",
+      "logcat": "input-sample-178-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.029,
+        "run_seconds": 1.354,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 179,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536027.143161,
+    "expires": 1793536057.143161,
+    "result": {
+      "captured": 1793536027.3056502,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 87059,
+      "meminfo": "input-sample-179-meminfo.txt",
+      "logcat": "input-sample-179-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.162,
+        "run_seconds": 1.811,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 180,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536050.8763988,
+    "expires": 1793536080.8763988,
+    "result": {
+      "captured": 1793536050.9395702,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 87063,
+      "meminfo": "input-sample-180-meminfo.txt",
+      "logcat": "input-sample-180-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.063,
+        "run_seconds": 1.387,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 181,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536073.766875,
+    "expires": 1793536103.766875,
+    "result": {
+      "captured": 1793536073.8206844,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 86127,
+      "meminfo": "input-sample-181-meminfo.txt",
+      "logcat": "input-sample-181-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.054,
+        "run_seconds": 1.435,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 182,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536096.9939837,
+    "expires": 1793536126.9939837,
+    "result": {
+      "captured": 1793536097.11243,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 86552,
+      "meminfo": "input-sample-182-meminfo.txt",
+      "logcat": "input-sample-182-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.118,
+        "run_seconds": 1.968,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 183,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536120.6320095,
+    "expires": 1793536150.6320095,
+    "result": {
+      "captured": 1793536120.6816924,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 86548,
+      "meminfo": "input-sample-183-meminfo.txt",
+      "logcat": "input-sample-183-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.05,
+        "run_seconds": 1.514,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 184,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536143.5128694,
+    "expires": 1793536173.5128694,
+    "result": {
+      "captured": 1793536143.6105347,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 86564,
+      "meminfo": "input-sample-184-meminfo.txt",
+      "logcat": "input-sample-184-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.098,
+        "run_seconds": 1.029,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 185,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536166.168704,
+    "expires": 1793536196.168704,
+    "result": {
+      "captured": 1793536166.2385316,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 86023,
+      "meminfo": "input-sample-185-meminfo.txt",
+      "logcat": "input-sample-185-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.07,
+        "run_seconds": 1.152,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 186,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536188.6636775,
+    "expires": 1793536218.6636775,
+    "result": {
+      "captured": 1793536188.7082074,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 88135,
+      "meminfo": "input-sample-186-meminfo.txt",
+      "logcat": "input-sample-186-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.045,
+        "run_seconds": 1.465,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 187,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536211.7542691,
+    "expires": 1793536241.7542691,
+    "result": {
+      "captured": 1793536211.8373435,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 88407,
+      "meminfo": "input-sample-187-meminfo.txt",
+      "logcat": "input-sample-187-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.083,
+        "run_seconds": 1.261,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 188,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536234.5152867,
+    "expires": 1793536264.5152867,
+    "result": {
+      "captured": 1793536234.5897067,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 88419,
+      "meminfo": "input-sample-188-meminfo.txt",
+      "logcat": "input-sample-188-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.074,
+        "run_seconds": 1.237,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 189,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536257.3860497,
+    "expires": 1793536287.3860497,
+    "result": {
+      "captured": 1793536257.463421,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 88431,
+      "meminfo": "input-sample-189-meminfo.txt",
+      "logcat": "input-sample-189-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.077,
+        "run_seconds": 1.104,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 190,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536280.0556047,
+    "expires": 1793536310.0556047,
+    "result": {
+      "captured": 1793536280.1114721,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 87759,
+      "meminfo": "input-sample-190-meminfo.txt",
+      "logcat": "input-sample-190-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.056,
+        "run_seconds": 1.178,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 191,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536302.5977063,
+    "expires": 1793536332.5977063,
+    "result": {
+      "captured": 1793536302.6515808,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 86547,
+      "meminfo": "input-sample-191-meminfo.txt",
+      "logcat": "input-sample-191-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.054,
+        "run_seconds": 1.362,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 192,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536325.2478104,
+    "expires": 1793536355.2478104,
+    "result": {
+      "captured": 1793536325.3229191,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 86655,
+      "meminfo": "input-sample-192-meminfo.txt",
+      "logcat": "input-sample-192-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.075,
+        "run_seconds": 1.165,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 193,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536347.9870772,
+    "expires": 1793536377.9870772,
+    "result": {
+      "captured": 1793536348.0318313,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 86652,
+      "meminfo": "input-sample-193-meminfo.txt",
+      "logcat": "input-sample-193-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.045,
+        "run_seconds": 1.785,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 194,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536371.0963576,
+    "expires": 1793536401.0963576,
+    "result": {
+      "captured": 1793536371.1465354,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 86647,
+      "meminfo": "input-sample-194-meminfo.txt",
+      "logcat": "input-sample-194-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.05,
+        "run_seconds": 1.366,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 195,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536394.2716982,
+    "expires": 1793536424.2716982,
+    "result": {
+      "captured": 1793536394.6477609,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 88130,
+      "meminfo": "input-sample-195-meminfo.txt",
+      "logcat": "input-sample-195-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.376,
+        "run_seconds": 1.956,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 196,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536419.204491,
+    "expires": 1793536449.204491,
+    "result": {
+      "captured": 1793536419.3294501,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 89613,
+      "meminfo": "input-sample-196-meminfo.txt",
+      "logcat": "input-sample-196-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.125,
+        "run_seconds": 1.824,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 197,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536443.6231797,
+    "expires": 1793536473.6231797,
+    "result": {
+      "captured": 1793536443.9736464,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 89649,
+      "meminfo": "input-sample-197-meminfo.txt",
+      "logcat": "input-sample-197-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.35,
+        "run_seconds": 1.928,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 198,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536468.0857258,
+    "expires": 1793536498.0857258,
+    "result": {
+      "captured": 1793536468.2141588,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 89645,
+      "meminfo": "input-sample-198-meminfo.txt",
+      "logcat": "input-sample-198-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.128,
+        "run_seconds": 1.336,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 199,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536491.5730443,
+    "expires": 1793536521.5730443,
+    "result": {
+      "captured": 1793536491.7251627,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 89649,
+      "meminfo": "input-sample-199-meminfo.txt",
+      "logcat": "input-sample-199-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.152,
+        "run_seconds": 1.751,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 200,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536515.22368,
+    "expires": 1793536545.22368,
+    "result": {
+      "captured": 1793536515.338858,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 87633,
+      "meminfo": "input-sample-200-meminfo.txt",
+      "logcat": "input-sample-200-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.115,
+        "run_seconds": 1.779,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 201,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536538.669443,
+    "expires": 1793536568.669443,
+    "result": {
+      "captured": 1793536538.7760618,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 88157,
+      "meminfo": "input-sample-201-meminfo.txt",
+      "logcat": "input-sample-201-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.107,
+        "run_seconds": 1.649,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 202,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536562.475831,
+    "expires": 1793536592.475831,
+    "result": {
+      "captured": 1793536562.5963004,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 88233,
+      "meminfo": "input-sample-202-meminfo.txt",
+      "logcat": "input-sample-202-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.12,
+        "run_seconds": 1.637,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 203,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536585.7982404,
+    "expires": 1793536615.7982404,
+    "result": {
+      "captured": 1793536585.939492,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 88246,
+      "meminfo": "input-sample-203-meminfo.txt",
+      "logcat": "input-sample-203-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.141,
+        "run_seconds": 1.153,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 204,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536608.835935,
+    "expires": 1793536638.835935,
+    "result": {
+      "captured": 1793536608.9558692,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 81315,
+      "meminfo": "input-sample-204-meminfo.txt",
+      "logcat": "input-sample-204-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.12,
+        "run_seconds": 1.503,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 205,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536632.1950195,
+    "expires": 1793536662.1950195,
+    "result": {
+      "captured": 1793536632.2510293,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 84615,
+      "meminfo": "input-sample-205-meminfo.txt",
+      "logcat": "input-sample-205-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.056,
+        "run_seconds": 1.361,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 206,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536655.661967,
+    "expires": 1793536685.661967,
+    "result": {
+      "captured": 1793536655.7135918,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 85263,
+      "meminfo": "input-sample-206-meminfo.txt",
+      "logcat": "input-sample-206-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.052,
+        "run_seconds": 1.858,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 207,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536680.4325125,
+    "expires": 1793536710.4325125,
+    "result": {
+      "captured": 1793536680.5472732,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 85263,
+      "meminfo": "input-sample-207-meminfo.txt",
+      "logcat": "input-sample-207-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.115,
+        "run_seconds": 1.609,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 208,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536704.5858188,
+    "expires": 1793536734.5858188,
+    "result": {
+      "captured": 1793536704.6653507,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 85181,
+      "meminfo": "input-sample-208-meminfo.txt",
+      "logcat": "input-sample-208-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.08,
+        "run_seconds": 1.367,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 209,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536727.8183365,
+    "expires": 1793536757.8183365,
+    "result": {
+      "captured": 1793536728.0294652,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 84300,
+      "meminfo": "input-sample-209-meminfo.txt",
+      "logcat": "input-sample-209-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.211,
+        "run_seconds": 2.119,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 210,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536752.5207565,
+    "expires": 1793536782.5207565,
+    "result": {
+      "captured": 1793536752.6004157,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 85276,
+      "meminfo": "input-sample-210-meminfo.txt",
+      "logcat": "input-sample-210-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.08,
+        "run_seconds": 1.699,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 211,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536775.8709385,
+    "expires": 1793536805.8709385,
+    "result": {
+      "captured": 1793536775.994662,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 85316,
+      "meminfo": "input-sample-211-meminfo.txt",
+      "logcat": "input-sample-211-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.124,
+        "run_seconds": 1.443,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 212,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536799.5350282,
+    "expires": 1793536829.5350282,
+    "result": {
+      "captured": 1793536799.6588426,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 85320,
+      "meminfo": "input-sample-212-meminfo.txt",
+      "logcat": "input-sample-212-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.124,
+        "run_seconds": 1.546,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 213,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536823.1155612,
+    "expires": 1793536853.1155612,
+    "result": {
+      "captured": 1793536823.1853426,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 82760,
+      "meminfo": "input-sample-213-meminfo.txt",
+      "logcat": "input-sample-213-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.07,
+        "run_seconds": 1.366,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 214,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536846.4336796,
+    "expires": 1793536876.4336796,
+    "result": {
+      "captured": 1793536846.5678356,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 85568,
+      "meminfo": "input-sample-214-meminfo.txt",
+      "logcat": "input-sample-214-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.134,
+        "run_seconds": 1.817,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 215,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536870.466468,
+    "expires": 1793536900.466468,
+    "result": {
+      "captured": 1793536870.5902185,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 85648,
+      "meminfo": "input-sample-215-meminfo.txt",
+      "logcat": "input-sample-215-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.124,
+        "run_seconds": 1.752,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 216,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536894.117685,
+    "expires": 1793536924.117685,
+    "result": {
+      "captured": 1793536894.1752274,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 85628,
+      "meminfo": "input-sample-216-meminfo.txt",
+      "logcat": "input-sample-216-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.058,
+        "run_seconds": 1.683,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 217,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536917.682894,
+    "expires": 1793536947.682894,
+    "result": {
+      "captured": 1793536917.8042624,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 85633,
+      "meminfo": "input-sample-217-meminfo.txt",
+      "logcat": "input-sample-217-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.121,
+        "run_seconds": 1.565,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 218,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536940.9495595,
+    "expires": 1793536970.9495595,
+    "result": {
+      "captured": 1793536941.0952353,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 86484,
+      "meminfo": "input-sample-218-meminfo.txt",
+      "logcat": "input-sample-218-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.146,
+        "run_seconds": 1.627,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 219,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536964.4322476,
+    "expires": 1793536994.4322476,
+    "result": {
+      "captured": 1793536964.4874644,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 87180,
+      "meminfo": "input-sample-219-meminfo.txt",
+      "logcat": "input-sample-219-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.055,
+        "run_seconds": 1.291,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 220,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793536987.8275433,
+    "expires": 1793537017.8275433,
+    "result": {
+      "captured": 1793536987.8958871,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 83764,
+      "meminfo": "input-sample-220-meminfo.txt",
+      "logcat": "input-sample-220-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.068,
+        "run_seconds": 1.811,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 221,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793537012.3425386,
+    "expires": 1793537042.3425386,
+    "result": {
+      "captured": 1793537012.4295838,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 83760,
+      "meminfo": "input-sample-221-meminfo.txt",
+      "logcat": "input-sample-221-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.087,
+        "run_seconds": 2.126,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 222,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793537036.0970907,
+    "expires": 1793537066.0970907,
+    "result": {
+      "captured": 1793537036.2209837,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 83764,
+      "meminfo": "input-sample-222-meminfo.txt",
+      "logcat": "input-sample-222-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.124,
+        "run_seconds": 1.62,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 223,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793537059.770919,
+    "expires": 1793537089.770919,
+    "result": {
+      "captured": 1793537059.856891,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 85872,
+      "meminfo": "input-sample-223-meminfo.txt",
+      "logcat": "input-sample-223-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.086,
+        "run_seconds": 1.33,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 224,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793537082.8407805,
+    "expires": 1793537112.8407805,
+    "result": {
+      "captured": 1793537082.948552,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 86627,
+      "meminfo": "input-sample-224-meminfo.txt",
+      "logcat": "input-sample-224-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.108,
+        "run_seconds": 1.467,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 225,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793537105.9578025,
+    "expires": 1793537135.9578025,
+    "result": {
+      "captured": 1793537106.025815,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 86667,
+      "meminfo": "input-sample-225-meminfo.txt",
+      "logcat": "input-sample-225-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.068,
+        "run_seconds": 1.447,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 226,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793537128.7992501,
+    "expires": 1793537158.7992501,
+    "result": {
+      "captured": 1793537128.9021387,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 86651,
+      "meminfo": "input-sample-226-meminfo.txt",
+      "logcat": "input-sample-226-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.103,
+        "run_seconds": 1.545,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 227,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793537151.916365,
+    "expires": 1793537181.916365,
+    "result": {
+      "captured": 1793537151.9962463,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 82200,
+      "meminfo": "input-sample-227-meminfo.txt",
+      "logcat": "input-sample-227-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.08,
+        "run_seconds": 1.49,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 228,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793537174.90869,
+    "expires": 1793537204.90869,
+    "result": {
+      "captured": 1793537174.9802015,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 85796,
+      "meminfo": "input-sample-228-meminfo.txt",
+      "logcat": "input-sample-228-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.071,
+        "run_seconds": 1.415,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 229,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793537198.1637177,
+    "expires": 1793537228.1637177,
+    "result": {
+      "captured": 1793537198.2292132,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 86007,
+      "meminfo": "input-sample-229-meminfo.txt",
+      "logcat": "input-sample-229-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.065,
+        "run_seconds": 1.4,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 230,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793537220.8832078,
+    "expires": 1793537250.8832078,
+    "result": {
+      "captured": 1793537220.9478557,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 86011,
+      "meminfo": "input-sample-230-meminfo.txt",
+      "logcat": "input-sample-230-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.065,
+        "run_seconds": 1.12,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 231,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793537243.423352,
+    "expires": 1793537273.423352,
+    "result": {
+      "captured": 1793537243.5367877,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 86027,
+      "meminfo": "input-sample-231-meminfo.txt",
+      "logcat": "input-sample-231-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.113,
+        "run_seconds": 1.246,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 232,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793537266.2187462,
+    "expires": 1793537296.2187462,
+    "result": {
+      "captured": 1793537266.3234494,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 85659,
+      "meminfo": "input-sample-232-meminfo.txt",
+      "logcat": "input-sample-232-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.105,
+        "run_seconds": 2.014,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 233,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793537289.5064816,
+    "expires": 1793537319.5064816,
+    "result": {
+      "captured": 1793537289.619734,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 87579,
+      "meminfo": "input-sample-233-meminfo.txt",
+      "logcat": "input-sample-233-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.113,
+        "run_seconds": 1.152,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 234,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793537312.0340502,
+    "expires": 1793537342.0340502,
+    "result": {
+      "captured": 1793537312.088339,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 87671,
+      "meminfo": "input-sample-234-meminfo.txt",
+      "logcat": "input-sample-234-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.054,
+        "run_seconds": 1.218,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 235,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793537334.6143456,
+    "expires": 1793537364.6143456,
+    "result": {
+      "captured": 1793537334.6546907,
+      "pid_before": 1324,
+      "pid_after": 1324,
+      "stable": true,
+      "total_pss_kb": 87672,
+      "meminfo": "input-sample-235-meminfo.txt",
+      "logcat": "input-sample-235-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.04,
+        "run_seconds": 1.487,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 236,
+    "kind": "finish",
+    "state": "applied",
+    "created": 1793537342.5702221,
+    "expires": 1793537372.5702221,
+    "result": {
+      "finish": "requested",
+      "latency": {
+        "queued_to_picked_up": 0.121,
+        "run_seconds": 0.0,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  }
+]

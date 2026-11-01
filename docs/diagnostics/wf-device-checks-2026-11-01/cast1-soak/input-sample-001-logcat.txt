@@ -1,0 +1,697 @@
+--------- beginning of main
+11-01 18:16:23.610  1324  1324 I dry.plantedtank: Late-enabling -Xcheck:jni
+11-01 18:16:23.789  1324  1324 I dry.plantedtank: Using CollectorTypeCMC GC.
+11-01 18:16:23.948  1324  1324 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10039; state: ENABLED
+11-01 18:16:23.950  1324  1324 D CompatibilityChangeReporter: Compat change id reported: 242716250; UID 10039; state: ENABLED
+11-01 18:16:24.029  1324  1324 D nativeloader: Configuring clns-4 for other apk /data/app/~~lHqVLk3Ih7kTkKqGKoMK2w==/org.worldfoundry.plantedtank-F1GZF_3hOLU37C6vrPIOoQ==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~lHqVLk3Ih7kTkKqGKoMK2w==/org.worldfoundry.plantedtank-F1GZF_3hOLU37C6vrPIOoQ==/lib/arm:/data/app/~~lHqVLk3Ih7kTkKqGKoMK2w==/org.worldfoundry.plantedtank-F1GZF_3hOLU37C6vrPIOoQ==/base.apk!/lib/armeabi-v7a, permitted_path=/data:/mnt/expand:/data/user/0/org.worldfoundry.plantedtank
+11-01 18:16:24.077  1324  1324 V GraphicsEnvironment: Currently set values for:
+11-01 18:16:24.078  1324  1324 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+11-01 18:16:24.078  1324  1324 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+11-01 18:16:24.080  1324  1324 V GraphicsEnvironment: ANGLE GameManagerService for org.worldfoundry.plantedtank: false
+11-01 18:16:24.080  1324  1324 V GraphicsEnvironment: org.worldfoundry.plantedtank is not listed in per-application setting
+11-01 18:16:24.081  1324  1324 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+11-01 18:16:24.388  1324  1324 D CompatibilityChangeReporter: Compat change id reported: 237531167; UID 10039; state: DISABLED
+11-01 18:16:24.396  1324  1324 W OpenGLRenderer: Unknown dataspace 0
+11-01 18:16:24.467  1324  1355 W libc    : Access denied finding property "vendor.mali.platform.config"
+11-01 18:16:24.477  1324  1355 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+11-01 18:16:24.478  1324  1355 W libc    : Access denied finding property "vendor.mali.debug.config"
+11-01 18:16:24.478  1324  1355 W libc    : Access denied finding property "vendor.mali.base_max_nr_instances"
+11-01 18:16:24.479  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_unnamed"
+11-01 18:16:24.479  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_default_heap"
+11-01 18:16:24.479  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_base_internal"
+11-01 18:16:24.479  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_framepool"
+11-01 18:16:24.480  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_tiler"
+11-01 18:16:24.480  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_program"
+11-01 18:16:24.480  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane"
+11-01 18:16:24.480  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane_imported"
+11-01 18:16:24.480  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vao"
+11-01 18:16:24.480  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_img"
+11-01 18:16:24.480  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_internal_surface"
+11-01 18:16:24.480  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_buf"
+11-01 18:16:24.480  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_crc"
+11-01 18:16:24.480  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_hmem"
+11-01 18:16:24.480  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_rsd"
+11-01 18:16:24.481  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_mbs2"
+11-01 18:16:24.481  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_static"
+11-01 18:16:24.481  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_hmem"
+11-01 18:16:24.481  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_sample_pos"
+11-01 18:16:24.481  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_discard"
+11-01 18:16:24.481  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_tess_geom"
+11-01 18:16:24.481  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cobj_hmem"
+11-01 18:16:24.481  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_hmem"
+11-01 18:16:24.481  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_prof_dump"
+11-01 18:16:24.481  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cblend_hmem"
+11-01 18:16:24.481  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_hmem"
+11-01 18:16:24.481  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query"
+11-01 18:16:24.482  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query_host"
+11-01 18:16:24.482  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_multiview"
+11-01 18:16:24.482  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cdeps_hmem"
+11-01 18:16:24.482  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_suballoc"
+11-01 18:16:24.482  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_hoard"
+11-01 18:16:24.482  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_registry"
+11-01 18:16:24.482  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_payload"
+11-01 18:16:24.482  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_wlm_tls"
+11-01 18:16:24.482  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_hmem"
+11-01 18:16:24.482  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_svm"
+11-01 18:16:24.482  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_protected"
+11-01 18:16:24.482  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cinstr"
+11-01 18:16:24.483  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_uncached"
+11-01 18:16:24.483  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_cached"
+11-01 18:16:24.483  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_transient"
+11-01 18:16:24.483  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_protected"
+11-01 18:16:24.483  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external"
+11-01 18:16:24.483  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external_swapchain"
+11-01 18:16:24.483  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal"
+11-01 18:16:24.483  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_tls"
+11-01 18:16:24.483  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_host"
+11-01 18:16:24.483  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_protected"
+11-01 18:16:24.483  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_transient"
+11-01 18:16:24.484  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_descriptor_pool"
+11-01 18:16:24.484  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator"
+11-01 18:16:24.484  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_host"
+11-01 18:16:24.484  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_protected"
+11-01 18:16:24.484  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_host"
+11-01 18:16:24.484  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device"
+11-01 18:16:24.484  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device_transient"
+11-01 18:16:24.484  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_buffer"
+11-01 18:16:24.485  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_image"
+11-01 18:16:24.485  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_signal"
+11-01 18:16:24.485  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_flush_chain"
+11-01 18:16:24.485  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_metadata_list"
+11-01 18:16:24.485  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_jit"
+11-01 18:16:24.485  1324  1355 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_mmu"
+11-01 18:16:24.486  1324  1355 W libc    : Access denied finding property "vendor.mali.osu_protected_memory_heap_name"
+11-01 18:16:24.486  1324  1355 W libc    : Access denied finding property "vendor.mali.osu_ion_protected_memory_heap_name"
+11-01 18:16:24.486  1324  1355 W libc    : Access denied finding property "vendor.mali.platform_agt_frequency_khz"
+11-01 18:16:24.486  1324  1355 W libc    : Access denied finding property "vendor.mali.hal_dump_dir"
+11-01 18:16:24.486  1324  1355 W libc    : Access denied finding property "vendor.mali.platform.config"
+11-01 18:16:24.487  1324  1355 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+11-01 18:16:24.487  1324  1355 W libc    : Access denied finding property "vendor.mali.debug.config"
+11-01 18:16:24.492  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.hal_format"
+11-01 18:16:24.492  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.recordable"
+11-01 18:16:24.493  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.dataspaces_to_exclude"
+11-01 18:16:24.493  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.hal_format"
+11-01 18:16:24.493  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.recordable"
+11-01 18:16:24.493  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.dataspaces_to_exclude"
+11-01 18:16:24.493  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.hal_format"
+11-01 18:16:24.493  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.recordable"
+11-01 18:16:24.493  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.dataspaces_to_exclude"
+11-01 18:16:24.493  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.hal_format"
+11-01 18:16:24.493  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.recordable"
+11-01 18:16:24.493  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.dataspaces_to_exclude"
+11-01 18:16:24.493  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.hal_format"
+11-01 18:16:24.493  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.recordable"
+11-01 18:16:24.494  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.dataspaces_to_exclude"
+11-01 18:16:24.494  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.hal_format"
+11-01 18:16:24.494  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.recordable"
+11-01 18:16:24.494  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.dataspaces_to_exclude"
+11-01 18:16:24.494  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.hal_format"
+11-01 18:16:24.494  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.recordable"
+11-01 18:16:24.494  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.dataspaces_to_exclude"
+11-01 18:16:24.494  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.hal_format"
+11-01 18:16:24.494  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.recordable"
+11-01 18:16:24.494  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.dataspaces_to_exclude"
+11-01 18:16:24.494  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.hal_format"
+11-01 18:16:24.494  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.recordable"
+11-01 18:16:24.494  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.dataspaces_to_exclude"
+11-01 18:16:24.495  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.hal_format"
+11-01 18:16:24.495  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.recordable"
+11-01 18:16:24.495  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.dataspaces_to_exclude"
+11-01 18:16:24.495  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.hal_format"
+11-01 18:16:24.495  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.recordable"
+11-01 18:16:24.495  1324  1355 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.dataspaces_to_exclude"
+11-01 18:16:24.503  1324  1375 I wf_dream: start level 0
+11-01 18:16:24.504  1324  1377 I wf_dream: 
+11-01 18:16:24.504  1324  1377 I wf_dream: === wf_dream start level 0 ===
+11-01 18:16:24.515  1324  1375 I wf_game : EGL surface ready: 1920x1080 (context reused)
+11-01 18:16:24.517  1324  1377 I wf_dream: planted_bridge: configured "water=random;speed=8;hold=5"
+11-01 18:16:24.517  1324  1377 I wf_dream: planted_bridge: tank 0 water=freshwater seed=random speed=8 hold=5
+11-01 18:16:24.524  1324  1375 I AAudio  : AAudioStreamBuilder_openStream() called ----------------------------------------
+11-01 18:16:24.524  1324  1375 I AudioStreamBuilder: rate   =      0, channels  = 0, channelMask = 0, format   = 5, sharing = SH, dir = OUTPUT
+11-01 18:16:24.524  1324  1375 I AudioStreamBuilder: device =      0, sessionId = -1, perfMode = 12, callback: ON with frames = 0
+11-01 18:16:24.524  1324  1375 I AudioStreamBuilder: usage  =      0, contentType = 0, inputPreset = 0, allowedCapturePolicy = 0
+11-01 18:16:24.524  1324  1375 I AudioStreamBuilder: privacy sensitive = false, opPackageName = (null), attributionTag = (null)
+11-01 18:16:24.527  1324  1355 E OpenGLRenderer: Unable to match the desired swap behavior.
+11-01 18:16:24.528  1324  1375 D dry.plantedtank: PlayerBase::PlayerBase()
+11-01 18:16:24.611  1324  1375 D AudioStreamInternal_Client: configureDataInformation() original HW burst = 384, minMicros = 1000 => SW burst = 384
+11-01 18:16:24.611  1324  1375 D IsochronousClockModel: setFramesPerBurst() - mFramesPerBurst = 384 - mBurstPeriodNanos = 8000000
+11-01 18:16:24.611  1324  1375 D AAudioStream: setState(s#1) from 0 to 2
+11-01 18:16:24.611  1324  1375 I AAudioFlowGraph: configure() source format = 0x00000005, channels = 2, sink format = 0x00000005, channels = 2, useMonoBlend = 0, audioBalance = 0.000000, isExclusive 0
+11-01 18:16:24.613  1324  1375 I AAudio  : AAudioStreamBuilder_openStream() returns 0 = AAUDIO_OK for s#1 ----------------
+11-01 18:16:24.614  1324  1375 D AAudio  : AAudioStream_requestStart(s#1) called --------------
+11-01 18:16:24.614  1324  1375 D AAudioStream: setState(s#1) from 2 to 3
+11-01 18:16:24.643  1324  1375 D AAudio  : AAudioStream_requestStart(s#1) returned 0 ---------
+11-01 18:16:24.647  1324  1397 D AudioStreamInternalPlay_Client: callbackLoop() entering >>>>>>>>>>>>>>>
+11-01 18:16:24.649  1324  1397 D AudioStreamInternal_Client: onEventFromServer - got AAUDIO_SERVICE_EVENT_STARTED
+11-01 18:16:24.649  1324  1397 D AAudioStream: setState(s#1) from 3 to 4
+11-01 18:16:24.650  1324  1377 I wf_dream: audio: miniaudio v0.11.25 ready
+11-01 18:16:24.650  1324  1377 I wf_dream: wf_game v0.4.1, Built:Oct 19 2026,02:05:00 by kts
+11-01 18:16:24.650  1324  1377 I wf_dream: --vram-slot-width=1024
+11-01 18:16:24.650  1324  1377 I wf_dream: --vram-slot-height=1024
+11-01 18:16:24.650  1324  1377 I wf_dream: --vram-perm-width=1024
+11-01 18:16:24.650  1324  1377 I wf_dream: --vram-perm-height=1024
+11-01 18:16:24.650  1324  1377 I wf_dream: --vram-height=1024
+11-01 18:16:24.650  1324  1377 I wf_dream: --no-fps
+11-01 18:16:24.650  1324  1377 I wf_dream: argc = 8, commandIndex = 7
+11-01 18:16:24.650  1324  1377 I wf_dream: Level=0
+11-01 18:16:24.650  1324  1377 I wf_dream: cerror:
+11-01 18:16:24.650  1324  1377 I wf_dream: cwarn:
+11-01 18:16:24.650  1324  1377 I wf_dream: cstats:
+11-01 18:16:24.650  1324  1377 I wf_dream: wf_game Ver 0.4.1, Built:Oct 19 2026,02:05:00 by kts
+11-01 18:16:25.334  1324  1377 I wf_dream: DBSTREAMS UI_FONT 1024x2048 atlas, 2770432 bytes
+11-01 18:16:25.334  1324  1377 I wf_dream: jolt: RegisterDefaultAllocator
+11-01 18:16:25.334  1324  1377 I wf_dream: jolt: Factory
+11-01 18:16:25.334  1324  1377 I wf_dream: jolt: RegisterTypes
+11-01 18:16:25.344  1324  1377 I wf_dream: jolt: RunSelftest
+11-01 18:16:25.346  1324  1377 I wf_dream: jolt: selftest ok (sphere fell to z=5.098)
+11-01 18:16:25.346  1324  1377 I wf_dream: jolt: backend init
+11-01 18:16:25.347  1324  1377 I wf_dream: jolt: init complete
+11-01 18:16:25.347  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:16:25.348  1324  1377 I wf_dream: Opening cd.iff
+11-01 18:16:25.349  1324  1377 I wf_dream: LMalloc of 114 not 8-byte aligned, rounding up
+11-01 18:16:25.358  1324  1377 I wf_dream: zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+11-01 18:16:25.358  1324  1377 I wf_dream: zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+11-01 18:16:25.359  1324  1377 I wf_dream: LMalloc of 412 not 8-byte aligned, rounding up
+11-01 18:16:25.359  1324  1377 I wf_dream: LMalloc of 7620 not 8-byte aligned, rounding up
+11-01 18:16:25.370  1324  1377 I wf_dream: ROOM-RENDER scope=all-active source=default
+11-01 18:16:25.370  1324  1377 I wf_dream: LMalloc of 20 not 8-byte aligned, rounding up
+11-01 18:16:25.370  1324  1377 I wf_dream: LMalloc of 20 not 8-byte aligned, rounding up
+11-01 18:16:25.370  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.371  1324  1377 I wf_dream: Level::Level: leveldata= 0xe0d43968, object count  = 31
+11-01 18:16:25.372  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 4118)
+11-01 18:16:25.372  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 150)
+11-01 18:16:25.372  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 16)
+11-01 18:16:25.373  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 16)
+11-01 18:16:25.373  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:16:25.373  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.373  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:16:25.373  1324  1377 I wf_dream: PixelMap::Load: this = 0xdf46bc28
+11-01 18:16:25.373  1324  1377 I wf_dream: PixelMap::Load: this = 0xdf46bc58
+11-01 18:16:25.396  1324  1377 I wf_dream: LMalloc of 28 not 8-byte aligned, rounding up
+11-01 18:16:25.396  1324  1377 I wf_dream: LMalloc of 28 not 8-byte aligned, rounding up
+11-01 18:16:25.396  1324  1377 I wf_dream: LMalloc of 28 not 8-byte aligned, rounding up
+11-01 18:16:25.396  1324  1377 I wf_dream: LMalloc of 28 not 8-byte aligned, rounding up
+11-01 18:16:25.396  1324  1377 I wf_dream: LMalloc of 940 not 8-byte aligned, rounding up
+11-01 18:16:25.396  1324  1377 I wf_dream: LMalloc of 140 not 8-byte aligned, rounding up
+11-01 18:16:25.396  1324  1377 I wf_dream: LMalloc of 68 not 8-byte aligned, rounding up
+11-01 18:16:25.396  1324  1377 I wf_dream: LMalloc of 100 not 8-byte aligned, rounding up
+11-01 18:16:25.397  1324  1377 I wf_dream: DMalloc of 228 not 8-byte aligned, rounding up
+11-01 18:16:25.397  1324  1377 I wf_dream: [Actor] idx=2 class=23 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.397  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.397  1324  1377 I wf_dream: [Actor] idx=3 class=13 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.397  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.397  1324  1377 I wf_dream: this = 0xdf46f0b8,setting _memory to 0xdf46ecd8
+11-01 18:16:25.397  1324  1377 I wf_dream: DMalloc of 52 not 8-byte aligned, rounding up
+11-01 18:16:25.397  1324  1377 I wf_dream: DMalloc of 252 not 8-byte aligned, rounding up
+11-01 18:16:25.397  1324  1377 I wf_dream: [Actor] idx=4 class=20 commonOff=10340 NumberOfLocalMailboxes=0
+11-01 18:16:25.397  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.397  1324  1377 I wf_dream: DMalloc of 228 not 8-byte aligned, rounding up
+11-01 18:16:25.397  1324  1377 I wf_dream: [Actor] idx=6 class=11 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.397  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.397  1324  1377 I wf_dream: [Actor] idx=7 class=16 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.397  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.397  1324  1377 I wf_dream: [Actor] idx=8 class=3 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.397  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.397  1324  1377 I wf_dream: [Actor] idx=9 class=22 commonOff=11080 NumberOfLocalMailboxes=6
+11-01 18:16:25.397  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.398  1324  1377 I wf_dream: [Actor] idx=10 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.398  1324  1377 I wf_dream: [Actor] idx=11 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.398  1324  1377 I wf_dream: [Actor] idx=12 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.398  1324  1377 I wf_dream: [Actor] idx=13 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.398  1324  1377 I wf_dream: [Actor] idx=14 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.398  1324  1377 I wf_dream: [Actor] idx=15 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.398  1324  1377 I wf_dream: [Actor] idx=16 class=7 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.398  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.398  1324  1377 I wf_dream: [Actor] idx=17 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.398  1324  1377 I wf_dream: [Actor] idx=18 class=7 commonOff=11652 NumberOfLocalMailboxes=0
+11-01 18:16:25.398  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.399  1324  1377 I wf_dream: [Actor] idx=19 class=7 commonOff=11652 NumberOfLocalMailboxes=0
+11-01 18:16:25.399  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.399  1324  1377 I wf_dream: [Actor] idx=20 class=7 commonOff=11652 NumberOfLocalMailboxes=0
+11-01 18:16:25.399  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.399  1324  1377 I wf_dream: [Actor] idx=21 class=7 commonOff=11652 NumberOfLocalMailboxes=0
+11-01 18:16:25.399  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.399  1324  1377 I wf_dream: [Actor] idx=22 class=7 commonOff=11652 NumberOfLocalMailboxes=0
+11-01 18:16:25.399  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.399  1324  1377 I wf_dream: [Actor] idx=23 class=7 commonOff=11652 NumberOfLocalMailboxes=0
+11-01 18:16:25.399  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.399  1324  1377 I wf_dream: [Actor] idx=24 class=7 commonOff=11652 NumberOfLocalMailboxes=0
+11-01 18:16:25.399  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.399  1324  1377 I wf_dream: [Actor] idx=25 class=7 commonOff=11652 NumberOfLocalMailboxes=0
+11-01 18:16:25.399  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.399  1324  1377 I wf_dream: [Actor] idx=26 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.399  1324  1377 I wf_dream: [Actor] idx=27 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.399  1324  1377 I wf_dream: DMalloc of 228 not 8-byte aligned, rounding up
+11-01 18:16:25.399  1324  1377 I wf_dream: [Actor] idx=28 class=23 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.399  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.399  1324  1377 I wf_dream: [Actor] idx=29 class=3 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.399  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.400  1324  1377 I wf_dream: [Actor] idx=30 class=16 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:16:25.400  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.400  1324  1377 I wf_dream: LMalloc of 20 not 8-byte aligned, rounding up
+11-01 18:16:25.400  1324  1377 I wf_dream: LMalloc of 212 not 8-byte aligned, rounding up
+11-01 18:16:25.400  1324  1377 I wf_dream: DMalloc of 60 not 8-byte aligned, rounding up
+11-01 18:16:25.400  1324  1377 I wf_dream: DMalloc of 404 not 8-byte aligned, rounding up
+11-01 18:16:25.400  1324  1377 I wf_dream: DMalloc of 442 not 8-byte aligned, rounding up
+11-01 18:16:25.400  1324  1377 I wf_dream: DMalloc of 450 not 8-byte aligned, rounding up
+11-01 18:16:25.400  1324  1377 I wf_dream: DMalloc of 404 not 8-byte aligned, rounding up
+11-01 18:16:25.401  1324  1377 I wf_dream: Walking from 0
+11-01 18:16:25.401  1324  1377 I wf_dream: 0->0
+11-01 18:16:25.401  1324  1377 I wf_dream: 0->0
+11-01 18:16:25.401  1324  1377 I wf_dream: LMalloc of 20 not 8-byte aligned, rounding up
+11-01 18:16:25.401  1324  1377 I wf_dream: LMalloc of 20 not 8-byte aligned, rounding up
+11-01 18:16:25.403  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 4118)
+11-01 18:16:25.404  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 131094)
+11-01 18:16:25.427  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 64)
+11-01 18:16:25.427  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 16)
+11-01 18:16:25.427  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:16:25.427  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 4692)
+11-01 18:16:25.428  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:16:25.428  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:16:25.428  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:16:25.428  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:16:25.429  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 1260)
+11-01 18:16:25.429  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:16:25.429  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 412)
+11-01 18:16:25.429  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 412)
+11-01 18:16:25.429  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 412)
+11-01 18:16:25.429  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 412)
+11-01 18:16:25.429  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 412)
+11-01 18:16:25.429  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 412)
+11-01 18:16:25.429  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 412)
+11-01 18:16:25.430  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 412)
+11-01 18:16:25.430  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:16:25.430  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:16:25.430  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:16:25.430  1324  1377 I wf_dream: PixelMap::Load: this = 0xdf46bc88
+11-01 18:16:25.431  1324  1377 I wf_dream: PixelMap::Load: this = 0xdf46bcb8
+11-01 18:16:25.440  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:16:25.440  1324  1377 I wf_dream: LMalloc of 28 not 8-byte aligned, rounding up
+11-01 18:16:25.443  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:16:25.444  1324  1377 I wf_dream: LMalloc of 28 not 8-byte aligned, rounding up
+11-01 18:16:25.444  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.444  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.444  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.444  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.444  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:16:25.444  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.444  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.444  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.444  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.445  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.445  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:16:25.445  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.445  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.445  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.445  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 264)
+11-01 18:16:25.445  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.445  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.446  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.446  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.446  1324  1377 I wf_dream: LMalloc of 2436 not 8-byte aligned, rounding up
+11-01 18:16:25.448  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.448  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.448  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.448  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 2640)
+11-01 18:16:25.449  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.451  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.451  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.451  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.451  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.451  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:16:25.451  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.451  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.451  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.451  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 264)
+11-01 18:16:25.451  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.452  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.452  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.452  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.452  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.452  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:16:25.452  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.452  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.453  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.453  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 264)
+11-01 18:16:25.453  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.453  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.453  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.453  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.453  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.453  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:16:25.453  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.453  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.453  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.453  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 264)
+11-01 18:16:25.453  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.454  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.454  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.454  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.454  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.454  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:16:25.454  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.454  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.455  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.455  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 264)
+11-01 18:16:25.455  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.455  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.455  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.455  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.455  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.455  1324  1377 I wf_dream: LMalloc of 996 not 8-byte aligned, rounding up
+11-01 18:16:25.456  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.456  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.456  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.456  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.456  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.456  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:16:25.457  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.457  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.457  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.457  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 264)
+11-01 18:16:25.457  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.457  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.457  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.457  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.458  1324  1377 I wf_dream: material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+11-01 18:16:25.458  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.458  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:16:25.458  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.458  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.458  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.458  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.458  1324  1377 I wf_dream: material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+11-01 18:16:25.458  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.458  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:16:25.458  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.458  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.458  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.458  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.458  1324  1377 I wf_dream: material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+11-01 18:16:25.459  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.459  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:16:25.459  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.459  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.459  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.459  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.459  1324  1377 I wf_dream: material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+11-01 18:16:25.459  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.459  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:16:25.459  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.459  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.459  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.459  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.459  1324  1377 I wf_dream: material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+11-01 18:16:25.459  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.459  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:16:25.460  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.460  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.460  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.460  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.460  1324  1377 I wf_dream: material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+11-01 18:16:25.460  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.460  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:16:25.460  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.460  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.460  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.460  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.461  1324  1377 I wf_dream: material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+11-01 18:16:25.461  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.461  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:16:25.461  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.461  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.461  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.461  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.461  1324  1377 I wf_dream: material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+11-01 18:16:25.461  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.461  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:16:25.461  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.461  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.461  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.461  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.461  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.461  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:16:25.461  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.461  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.462  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.462  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 264)
+11-01 18:16:25.462  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.462  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.462  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.462  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:16:25.462  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.462  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:16:25.463  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:16:25.463  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.463  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.463  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 264)
+11-01 18:16:25.463  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:16:25.472  1324  1377 I wf_dream: zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+11-01 18:16:25.473  1324  1377 I wf_dream: zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+11-01 18:16:25.473  1324  1377 I wf_dream: audio: MusicPlayer — soundfont not found: florestan-subset.sf2
+11-01 18:16:25.473  1324  1377 I wf_dream: audio: sfx[0] not found: wflevels/qbert_practice/sfx/qbert_hop.wav
+11-01 18:16:25.473  1324  1377 I wf_dream: audio: sfx[1] not found: wflevels/qbert_practice/sfx/qbert_land.wav
+11-01 18:16:25.473  1324  1377 I wf_dream: audio: sfx[2] not found: wflevels/qbert_practice/sfx/qbert_fall.wav
+11-01 18:16:25.473  1324  1377 I wf_dream: audio: sfx[3] not found: wflevels/qbert_practice/sfx/qbert_swear.wav
+11-01 18:16:25.473  1324  1377 I wf_dream: audio: sfx[4] not found: wflevels/qbert_practice/sfx/qbert_round_clear.wav
+11-01 18:16:25.473  1324  1377 I wf_dream: audio: sfx[5] not found: wflevels/qbert_practice/sfx/qbert_kill.wav
+11-01 18:16:25.474  1324  1377 I wf_dream: audio: sfx[6] not found: wflevels/qbert_practice/sfx/qbert_disc.wav
+11-01 18:16:25.474  1324  1377 I wf_dream: DMalloc of 36 not 8-byte aligned, rounding up
+11-01 18:16:25.745  1324  1377 I wf_dream: PLANTS generation=1 seed=3868010715 mode=freshwater shoots=384 vertices=81236 triangles=51372 graph_ms=11.618 mesh_ms=240.953
+11-01 18:16:25.745  1324  1377 I wf_dream: PLANTS settings-source=RPRP seed=3868010715 water=freshwater age=0 speed=6 textures=1 sway=1 random_entry=1 selector_override=0
+11-01 18:16:25.932  1324  1377 I wf_dream: planted_bridge: tank 1 water=saltwater seed=random speed=8 hold=5
+11-01 18:16:25.941  1324  1377 I wf_dream: delta too large: 0.5944061279
+11-01 18:16:25.941  1324  1377 I wf_dream: timeofday:1793531785:941697
+11-01 18:16:25.942  1324  1377 I wf_dream: lasttimeofday: 1793531785:347276
+11-01 18:16:25.942  1324  1377 I wf_dream: deltatime:0:594421
+11-01 18:16:25.942  1324  1377 I wf_dream: delta: 0.5944061279
+11-01 18:16:30.310  1324  1377 I wf_dream: delta too large: 0.2407226562
+11-01 18:16:30.310  1324  1377 I wf_dream: timeofday:1793531790:310063
+11-01 18:16:30.310  1324  1377 I wf_dream: lasttimeofday: 1793531790:69331
+11-01 18:16:30.310  1324  1377 I wf_dream: deltatime:0:240732
+11-01 18:16:30.310  1324  1377 I wf_dream: delta: 0.2407226562
+11-01 18:16:30.532  1324  1377 I wf_dream: delta too large: 0.2217712402
+11-01 18:16:30.532  1324  1377 I wf_dream: timeofday:1793531790:531843
+11-01 18:16:30.532  1324  1377 I wf_dream: lasttimeofday: 1793531790:310063
+11-01 18:16:30.532  1324  1377 I wf_dream: deltatime:0:221780
+11-01 18:16:30.532  1324  1377 I wf_dream: delta: 0.2217712402
+11-01 18:16:30.766  1324  1377 I wf_dream: delta too large: 0.2341918945
+11-01 18:16:30.766  1324  1377 I wf_dream: timeofday:1793531790:766039
+11-01 18:16:30.766  1324  1377 I wf_dream: lasttimeofday: 1793531790:531843
+11-01 18:16:30.766  1324  1377 I wf_dream: deltatime:0:234196
+11-01 18:16:30.766  1324  1377 I wf_dream: delta: 0.2341918945
+11-01 18:16:31.009  1324  1377 I wf_dream: delta too large: 0.2434387207
+11-01 18:16:31.009  1324  1377 I wf_dream: timeofday:1793531791:9482
+11-01 18:16:31.009  1324  1377 I wf_dream: lasttimeofday: 1793531790:766039
+11-01 18:16:31.009  1324  1377 I wf_dream: deltatime:0:243443
+11-01 18:16:31.009  1324  1377 I wf_dream: delta: 0.2434387207
+11-01 18:16:31.241  1324  1377 I wf_dream: delta too large: 0.2321624756
+11-01 18:16:31.241  1324  1377 I wf_dream: timeofday:1793531791:241658
+11-01 18:16:31.242  1324  1377 I wf_dream: lasttimeofday: 1793531791:9482
+11-01 18:16:31.242  1324  1377 I wf_dream: deltatime:0:232176
+11-01 18:16:31.242  1324  1377 I wf_dream: delta: 0.2321624756
+11-01 18:16:31.461  1324  1377 I wf_dream: delta too large: 0.219833374
+11-01 18:16:31.461  1324  1377 I wf_dream: timeofday:1793531791:461503
+11-01 18:16:31.461  1324  1377 I wf_dream: lasttimeofday: 1793531791:241658
+11-01 18:16:31.461  1324  1377 I wf_dream: deltatime:0:219845
+11-01 18:16:31.461  1324  1377 I wf_dream: delta: 0.219833374
+11-01 18:16:31.709  1324  1377 I wf_dream: delta too large: 0.2471618652
+11-01 18:16:31.709  1324  1377 I wf_dream: timeofday:1793531791:708672
+11-01 18:16:31.709  1324  1377 I wf_dream: lasttimeofday: 1793531791:461503
+11-01 18:16:31.709  1324  1377 I wf_dream: deltatime:0:247169
+11-01 18:16:31.709  1324  1377 I wf_dream: delta: 0.2471618652
+11-01 18:16:31.951  1324  1377 I wf_dream: delta too large: 0.2421722412
+11-01 18:16:31.951  1324  1377 I wf_dream: timeofday:1793531791:950851
+11-01 18:16:31.951  1324  1377 I wf_dream: lasttimeofday: 1793531791:708672
+11-01 18:16:31.951  1324  1377 I wf_dream: deltatime:0:242179
+11-01 18:16:31.951  1324  1377 I wf_dream: delta: 0.2421722412
+11-01 18:16:32.234  1324  1377 I wf_dream: delta too large: 0.2830657959
+11-01 18:16:32.234  1324  1377 I wf_dream: timeofday:1793531792:233931
+11-01 18:16:32.234  1324  1377 I wf_dream: lasttimeofday: 1793531791:950851
+11-01 18:16:32.234  1324  1377 I wf_dream: deltatime:0:283080
+11-01 18:16:32.234  1324  1377 I wf_dream: delta: 0.2830657959
+11-01 18:16:32.508  1324  1377 I wf_dream: delta too large: 0.2741546631
+11-01 18:16:32.508  1324  1377 I wf_dream: timeofday:1793531792:508087
+11-01 18:16:32.508  1324  1377 I wf_dream: lasttimeofday: 1793531792:233931
+11-01 18:16:32.508  1324  1377 I wf_dream: deltatime:0:274156
+11-01 18:16:32.508  1324  1377 I wf_dream: delta: 0.2741546631
+11-01 18:16:32.795  1324  1377 I wf_dream: delta too large: 0.2869110107
+11-01 18:16:32.795  1324  1377 I wf_dream: timeofday:1793531792:795008
+11-01 18:16:32.795  1324  1377 I wf_dream: lasttimeofday: 1793531792:508087
+11-01 18:16:32.795  1324  1377 I wf_dream: deltatime:0:286921
+11-01 18:16:32.795  1324  1377 I wf_dream: delta: 0.2869110107
+11-01 18:16:33.091  1324  1377 I wf_dream: delta too large: 0.2961120605
+11-01 18:16:33.091  1324  1377 I wf_dream: timeofday:1793531793:91128
+11-01 18:16:33.091  1324  1377 I wf_dream: lasttimeofday: 1793531792:795008
+11-01 18:16:33.091  1324  1377 I wf_dream: deltatime:0:296120
+11-01 18:16:33.091  1324  1377 I wf_dream: delta: 0.2961120605
+11-01 18:16:33.372  1324  1377 I wf_dream: delta too large: 0.2807006836
+11-01 18:16:33.372  1324  1377 I wf_dream: timeofday:1793531793:371840
+11-01 18:16:33.372  1324  1377 I wf_dream: lasttimeofday: 1793531793:91128
+11-01 18:16:33.372  1324  1377 I wf_dream: deltatime:0:280712
+11-01 18:16:33.372  1324  1377 I wf_dream: delta: 0.2807006836
+11-01 18:16:33.639  1324  1377 I wf_dream: delta too large: 0.2677307129
+11-01 18:16:33.639  1324  1377 I wf_dream: timeofday:1793531793:639573
+11-01 18:16:33.639  1324  1377 I wf_dream: lasttimeofday: 1793531793:371840
+11-01 18:16:33.639  1324  1377 I wf_dream: deltatime:0:267733
+11-01 18:16:33.639  1324  1377 I wf_dream: delta: 0.2677307129
+11-01 18:16:33.934  1324  1377 I wf_dream: delta too large: 0.2950592041
+11-01 18:16:33.935  1324  1377 I wf_dream: timeofday:1793531793:934645
+11-01 18:16:33.935  1324  1377 I wf_dream: lasttimeofday: 1793531793:639573
+11-01 18:16:33.935  1324  1377 I wf_dream: deltatime:0:295072
+11-01 18:16:33.935  1324  1377 I wf_dream: delta: 0.2950592041
+11-01 18:16:34.231  1324  1377 I wf_dream: delta too large: 0.2965393066
+11-01 18:16:34.231  1324  1377 I wf_dream: timeofday:1793531794:231193
+11-01 18:16:34.231  1324  1377 I wf_dream: lasttimeofday: 1793531793:934645
+11-01 18:16:34.231  1324  1377 I wf_dream: deltatime:0:296548
+11-01 18:16:34.231  1324  1377 I wf_dream: delta: 0.2965393066
+11-01 18:16:34.553  1324  1377 I wf_dream: delta too large: 0.3221893311
+11-01 18:16:34.553  1324  1377 I wf_dream: timeofday:1793531794:553389
+11-01 18:16:34.553  1324  1377 I wf_dream: lasttimeofday: 1793531794:231193
+11-01 18:16:34.553  1324  1377 I wf_dream: deltatime:0:322196
+11-01 18:16:34.553  1324  1377 I wf_dream: delta: 0.3221893311
+11-01 18:16:34.859  1324  1377 I wf_dream: delta too large: 0.3063812256
+11-01 18:16:34.860  1324  1377 I wf_dream: timeofday:1793531794:859776
+11-01 18:16:34.860  1324  1377 I wf_dream: lasttimeofday: 1793531794:553389
+11-01 18:16:34.860  1324  1377 I wf_dream: deltatime:0:306387
+11-01 18:16:34.860  1324  1377 I wf_dream: delta: 0.3063812256
+11-01 18:16:35.179  1324  1377 I wf_dream: delta too large: 0.3193206787
+11-01 18:16:35.179  1324  1377 I wf_dream: timeofday:1793531795:179100
+11-01 18:16:35.179  1324  1377 I wf_dream: lasttimeofday: 1793531794:859776
+11-01 18:16:35.179  1324  1377 I wf_dream: deltatime:0:319324
+11-01 18:16:35.179  1324  1377 I wf_dream: delta: 0.3193206787
+11-01 18:16:35.524  1324  1377 I wf_dream: delta too large: 0.3446502686
+11-01 18:16:35.524  1324  1377 I wf_dream: timeofday:1793531795:523764
+11-01 18:16:35.524  1324  1377 I wf_dream: lasttimeofday: 1793531795:179100
+11-01 18:16:35.524  1324  1377 I wf_dream: deltatime:0:344664
+11-01 18:16:35.524  1324  1377 I wf_dream: delta: 0.3446502686
+11-01 18:16:35.852  1324  1377 I wf_dream: delta too large: 0.3282623291
+11-01 18:16:35.852  1324  1377 I wf_dream: timeofday:1793531795:852027
+11-01 18:16:35.852  1324  1377 I wf_dream: lasttimeofday: 1793531795:523764
+11-01 18:16:35.852  1324  1377 I wf_dream: deltatime:0:328263
+11-01 18:16:35.852  1324  1377 I wf_dream: delta: 0.3282623291
+11-01 18:16:36.171  1324  1377 I wf_dream: delta too large: 0.3191680908
+11-01 18:16:36.171  1324  1377 I wf_dream: timeofday:1793531796:171206
+11-01 18:16:36.171  1324  1377 I wf_dream: lasttimeofday: 1793531795:852027
+11-01 18:16:36.171  1324  1377 I wf_dream: deltatime:0:319179
+11-01 18:16:36.171  1324  1377 I wf_dream: delta: 0.3191680908
+11-01 18:16:36.499  1324  1377 I wf_dream: delta too large: 0.32762146
+11-01 18:16:36.499  1324  1377 I wf_dream: timeofday:1793531796:498828
+11-01 18:16:36.499  1324  1377 I wf_dream: lasttimeofday: 1793531796:171206
+11-01 18:16:36.499  1324  1377 I wf_dream: deltatime:0:327622
+11-01 18:16:36.499  1324  1377 I wf_dream: delta: 0.32762146
+11-01 18:16:36.835  1324  1377 I wf_dream: delta too large: 0.33644104
+11-01 18:16:36.835  1324  1377 I wf_dream: timeofday:1793531796:835274
+11-01 18:16:36.835  1324  1377 I wf_dream: lasttimeofday: 1793531796:498828
+11-01 18:16:36.835  1324  1377 I wf_dream: deltatime:0:336446
+11-01 18:16:36.835  1324  1377 I wf_dream: delta: 0.33644104
+11-01 18:16:37.201  1324  1377 I wf_dream: delta too large: 0.3659973145
+11-01 18:16:37.201  1324  1377 I wf_dream: timeofday:1793531797:201283
+11-01 18:16:37.201  1324  1377 I wf_dream: lasttimeofday: 1793531796:835274
+11-01 18:16:37.201  1324  1377 I wf_dream: deltatime:0:366009
+11-01 18:16:37.201  1324  1377 I wf_dream: delta: 0.3659973145
+11-01 18:16:37.552  1324  1377 I wf_dream: delta too large: 0.3507385254
+11-01 18:16:37.552  1324  1377 I wf_dream: timeofday:1793531797:552023
+11-01 18:16:37.552  1324  1377 I wf_dream: lasttimeofday: 1793531797:201283
+11-01 18:16:37.552  1324  1377 I wf_dream: deltatime:0:350740
+11-01 18:16:37.552  1324  1377 I wf_dream: delta: 0.3507385254
+11-01 18:16:37.916  1324  1377 I wf_dream: delta too large: 0.3641967773
+11-01 18:16:37.916  1324  1377 I wf_dream: timeofday:1793531797:916220
+11-01 18:16:37.916  1324  1377 I wf_dream: lasttimeofday: 1793531797:552023
+11-01 18:16:37.916  1324  1377 I wf_dream: deltatime:0:364197
+11-01 18:16:37.916  1324  1377 I wf_dream: delta: 0.3641967773
+11-01 18:16:38.292  1324  1377 I wf_dream: delta too large: 0.3758239746
+11-01 18:16:38.292  1324  1377 I wf_dream: timeofday:1793531798:292047
+11-01 18:16:38.292  1324  1377 I wf_dream: lasttimeofday: 1793531797:916220
+11-01 18:16:38.292  1324  1377 I wf_dream: deltatime:0:375827
+11-01 18:16:38.292  1324  1377 I wf_dream: delta: 0.3758239746
+11-01 18:16:38.655  1324  1377 I wf_dream: delta too large: 0.3635559082
+11-01 18:16:38.655  1324  1377 I wf_dream: timeofday:1793531798:655604
+11-01 18:16:38.655  1324  1377 I wf_dream: lasttimeofday: 1793531798:292047
+11-01 18:16:38.655  1324  1377 I wf_dream: deltatime:0:363557
+11-01 18:16:38.656  1324  1377 I wf_dream: delta: 0.3635559082
+11-01 18:16:38.999  1324  1377 I wf_dream: delta too large: 0.3433227539
+11-01 18:16:38.999  1324  1377 I wf_dream: timeofday:1793531798:998932
+11-01 18:16:38.999  1324  1377 I wf_dream: lasttimeofday: 1793531798:655604
+11-01 18:16:38.999  1324  1377 I wf_dream: deltatime:0:343328
+11-01 18:16:38.999  1324  1377 I wf_dream: delta: 0.3433227539
+11-01 18:16:39.366  1324  1377 I wf_dream: delta too large: 0.3671569824
+11-01 18:16:39.366  1324  1377 I wf_dream: timeofday:1793531799:366103
+11-01 18:16:39.366  1324  1377 I wf_dream: lasttimeofday: 1793531798:998932
+11-01 18:16:39.366  1324  1377 I wf_dream: deltatime:0:367171
+11-01 18:16:39.366  1324  1377 I wf_dream: delta: 0.3671569824
+11-01 18:16:39.756  1324  1377 I wf_dream: delta too large: 0.3902587891
+11-01 18:16:39.756  1324  1377 I wf_dream: timeofday:1793531799:756372
+11-01 18:16:39.757  1324  1377 I wf_dream: lasttimeofday: 1793531799:366103
+11-01 18:16:39.757  1324  1377 I wf_dream: deltatime:0:390269
+11-01 18:16:39.757  1324  1377 I wf_dream: delta: 0.3902587891
+11-01 18:16:40.161  1324  1377 I wf_dream: delta too large: 0.4050750732
+11-01 18:16:40.161  1324  1377 I wf_dream: timeofday:1793531800:161452
+11-01 18:16:40.161  1324  1377 I wf_dream: lasttimeofday: 1793531799:756372
+11-01 18:16:40.161  1324  1377 I wf_dream: deltatime:0:405080
+11-01 18:16:40.161  1324  1377 I wf_dream: delta: 0.4050750732
+11-01 18:16:40.545  1324  1377 I wf_dream: delta too large: 0.3840484619
+11-01 18:16:40.545  1324  1377 I wf_dream: timeofday:1793531800:545502
+11-01 18:16:40.545  1324  1377 I wf_dream: lasttimeofday: 1793531800:161452
+11-01 18:16:40.545  1324  1377 I wf_dream: deltatime:0:384050
+11-01 18:16:40.545  1324  1377 I wf_dream: delta: 0.3840484619
+11-01 18:16:40.943  1324  1377 I wf_dream: delta too large: 0.3976287842
+11-01 18:16:40.943  1324  1377 I wf_dream: timeofday:1793531800:943132
+11-01 18:16:40.943  1324  1377 I wf_dream: lasttimeofday: 1793531800:545502
+11-01 18:16:40.943  1324  1377 I wf_dream: deltatime:0:397630
+11-01 18:16:40.943  1324  1377 I wf_dream: delta: 0.3976287842
+11-01 18:16:41.361  1324  1377 I wf_dream: delta too large: 0.4179382324
+11-01 18:16:41.361  1324  1377 I wf_dream: timeofday:1793531801:361075
+11-01 18:16:41.361  1324  1377 I wf_dream: lasttimeofday: 1793531800:943132
+11-01 18:16:41.361  1324  1377 I wf_dream: deltatime:0:417943
+11-01 18:16:41.361  1324  1377 I wf_dream: delta: 0.4179382324
+11-01 18:16:41.768  1324  1377 I wf_dream: delta too large: 0.4075622559
+11-01 18:16:41.768  1324  1377 I wf_dream: timeofday:1793531801:768640
+11-01 18:16:41.768  1324  1377 I wf_dream: lasttimeofday: 1793531801:361075
+11-01 18:16:41.769  1324  1377 I wf_dream: deltatime:0:407565
+11-01 18:16:41.769  1324  1377 I wf_dream: delta: 0.4075622559
+11-01 18:16:42.147  1324  1377 I wf_dream: delta too large: 0.3785247803
+11-01 18:16:42.147  1324  1377 I wf_dream: timeofday:1793531802:147176
+11-01 18:16:42.147  1324  1377 I wf_dream: lasttimeofday: 1793531801:768640
+11-01 18:16:42.147  1324  1377 I wf_dream: deltatime:0:378536
+11-01 18:16:42.147  1324  1377 I wf_dream: delta: 0.3785247803
+11-01 18:16:42.545  1324  1377 I wf_dream: delta too large: 0.3984527588
+11-01 18:16:42.545  1324  1377 I wf_dream: timeofday:1793531802:545638
+11-01 18:16:42.545  1324  1377 I wf_dream: lasttimeofday: 1793531802:147176
+11-01 18:16:42.545  1324  1377 I wf_dream: deltatime:0:398462
+11-01 18:16:42.546  1324  1377 I wf_dream: delta: 0.3984527588
+11-01 18:16:42.974  1324  1377 I wf_dream: delta too large: 0.4287719727
+11-01 18:16:42.974  1324  1377 I wf_dream: timeofday:1793531802:974418
+11-01 18:16:42.974  1324  1377 I wf_dream: lasttimeofday: 1793531802:545638
+11-01 18:16:42.974  1324  1377 I wf_dream: deltatime:0:428780
+11-01 18:16:42.974  1324  1377 I wf_dream: delta: 0.4287719727
+11-01 18:16:43.306  1324  1350 I dry.plantedtank: Explicit concurrent mark compact GC freed 3763(1388KB) AllocSpace objects, 2(40KB) LOS objects, 49% free, 2152KB/4304KB, paused 602us,4.607ms total 30.114ms
+11-01 18:16:43.408  1324  1377 I wf_dream: delta too large: 0.4342193604
+11-01 18:16:43.409  1324  1377 I wf_dream: timeofday:1793531803:408645
+11-01 18:16:43.409  1324  1377 I wf_dream: lasttimeofday: 1793531802:974418
+11-01 18:16:43.409  1324  1377 I wf_dream: deltatime:0:434227
+11-01 18:16:43.409  1324  1377 I wf_dream: delta: 0.4342193604
+11-01 18:16:43.816  1324  1377 I wf_dream: delta too large: 0.4073638916
+11-01 18:16:43.816  1324  1377 I wf_dream: timeofday:1793531803:816017
+11-01 18:16:43.816  1324  1377 I wf_dream: lasttimeofday: 1793531803:408645
+11-01 18:16:43.816  1324  1377 I wf_dream: deltatime:0:407372
+11-01 18:16:43.816  1324  1377 I wf_dream: delta: 0.4073638916

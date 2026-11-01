@@ -1,0 +1,1001 @@
+--------- beginning of main
+11-01 18:17:36.183  1324  1377 I wf_dream: deltatime:0:411048
+11-01 18:17:36.183  1324  1377 I wf_dream: delta: 0.4110412598
+11-01 18:17:36.595  1324  1377 I wf_dream: delta too large: 0.4118499756
+11-01 18:17:36.595  1324  1377 I wf_dream: timeofday:1793531856:595148
+11-01 18:17:36.595  1324  1377 I wf_dream: lasttimeofday: 1793531856:183292
+11-01 18:17:36.595  1324  1377 I wf_dream: deltatime:0:411856
+11-01 18:17:36.595  1324  1377 I wf_dream: delta: 0.4118499756
+11-01 18:17:37.007  1324  1377 I wf_dream: delta too large: 0.4116973877
+11-01 18:17:37.007  1324  1377 I wf_dream: timeofday:1793531857:6852
+11-01 18:17:37.007  1324  1377 I wf_dream: lasttimeofday: 1793531856:595148
+11-01 18:17:37.007  1324  1377 I wf_dream: deltatime:0:411704
+11-01 18:17:37.007  1324  1377 I wf_dream: delta: 0.4116973877
+11-01 18:17:37.424  1324  1377 I wf_dream: delta too large: 0.4172058105
+11-01 18:17:37.424  1324  1377 I wf_dream: timeofday:1793531857:424069
+11-01 18:17:37.424  1324  1377 I wf_dream: lasttimeofday: 1793531857:6852
+11-01 18:17:37.424  1324  1377 I wf_dream: deltatime:0:417217
+11-01 18:17:37.424  1324  1377 I wf_dream: delta: 0.4172058105
+11-01 18:17:37.851  1324  1377 I wf_dream: delta too large: 0.4267730713
+11-01 18:17:37.851  1324  1377 I wf_dream: timeofday:1793531857:850857
+11-01 18:17:37.851  1324  1377 I wf_dream: lasttimeofday: 1793531857:424069
+11-01 18:17:37.851  1324  1377 I wf_dream: deltatime:0:426788
+11-01 18:17:37.851  1324  1377 I wf_dream: delta: 0.4267730713
+11-01 18:17:38.278  1324  1377 I wf_dream: delta too large: 0.4273223877
+11-01 18:17:38.278  1324  1377 I wf_dream: timeofday:1793531858:278187
+11-01 18:17:38.278  1324  1377 I wf_dream: lasttimeofday: 1793531857:850857
+11-01 18:17:38.278  1324  1377 I wf_dream: deltatime:0:427330
+11-01 18:17:38.278  1324  1377 I wf_dream: delta: 0.4273223877
+11-01 18:17:38.705  1324  1377 I wf_dream: delta too large: 0.4273223877
+11-01 18:17:38.705  1324  1377 I wf_dream: timeofday:1793531858:705523
+11-01 18:17:38.705  1324  1377 I wf_dream: lasttimeofday: 1793531858:278187
+11-01 18:17:38.705  1324  1377 I wf_dream: deltatime:0:427336
+11-01 18:17:38.705  1324  1377 I wf_dream: delta: 0.4273223877
+11-01 18:17:39.133  1324  1377 I wf_dream: delta too large: 0.4279785156
+11-01 18:17:39.133  1324  1377 I wf_dream: timeofday:1793531859:133508
+11-01 18:17:39.133  1324  1377 I wf_dream: lasttimeofday: 1793531858:705523
+11-01 18:17:39.133  1324  1377 I wf_dream: deltatime:0:427985
+11-01 18:17:39.133  1324  1377 I wf_dream: delta: 0.4279785156
+11-01 18:17:39.560  1324  1377 I wf_dream: delta too large: 0.4268493652
+11-01 18:17:39.560  1324  1377 I wf_dream: timeofday:1793531859:560365
+11-01 18:17:39.560  1324  1377 I wf_dream: lasttimeofday: 1793531859:133508
+11-01 18:17:39.560  1324  1377 I wf_dream: deltatime:0:426857
+11-01 18:17:39.560  1324  1377 I wf_dream: delta: 0.4268493652
+11-01 18:17:39.987  1324  1377 I wf_dream: delta too large: 0.4271697998
+11-01 18:17:39.987  1324  1377 I wf_dream: timeofday:1793531859:987542
+11-01 18:17:39.987  1324  1377 I wf_dream: lasttimeofday: 1793531859:560365
+11-01 18:17:39.987  1324  1377 I wf_dream: deltatime:0:427177
+11-01 18:17:39.987  1324  1377 I wf_dream: delta: 0.4271697998
+11-01 18:17:40.415  1324  1377 I wf_dream: delta too large: 0.4277801514
+11-01 18:17:40.415  1324  1377 I wf_dream: timeofday:1793531860:415331
+11-01 18:17:40.415  1324  1377 I wf_dream: lasttimeofday: 1793531859:987542
+11-01 18:17:40.415  1324  1377 I wf_dream: deltatime:0:427789
+11-01 18:17:40.415  1324  1377 I wf_dream: delta: 0.4277801514
+11-01 18:17:40.842  1324  1377 I wf_dream: delta too large: 0.4270935059
+11-01 18:17:40.842  1324  1377 I wf_dream: timeofday:1793531860:842435
+11-01 18:17:40.842  1324  1377 I wf_dream: lasttimeofday: 1793531860:415331
+11-01 18:17:40.842  1324  1377 I wf_dream: deltatime:0:427104
+11-01 18:17:40.842  1324  1377 I wf_dream: delta: 0.4270935059
+11-01 18:17:41.271  1324  1377 I wf_dream: delta too large: 0.4284362793
+11-01 18:17:41.271  1324  1377 I wf_dream: timeofday:1793531861:270872
+11-01 18:17:41.271  1324  1377 I wf_dream: lasttimeofday: 1793531860:842435
+11-01 18:17:41.271  1324  1377 I wf_dream: deltatime:0:428437
+11-01 18:17:41.271  1324  1377 I wf_dream: delta: 0.4284362793
+11-01 18:17:41.701  1324  1377 I wf_dream: delta too large: 0.4298095703
+11-01 18:17:41.701  1324  1377 I wf_dream: timeofday:1793531861:700682
+11-01 18:17:41.701  1324  1377 I wf_dream: lasttimeofday: 1793531861:270872
+11-01 18:17:41.701  1324  1377 I wf_dream: deltatime:0:429810
+11-01 18:17:41.701  1324  1377 I wf_dream: delta: 0.4298095703
+11-01 18:17:42.140  1324  1377 I wf_dream: delta too large: 0.4392547607
+11-01 18:17:42.140  1324  1377 I wf_dream: timeofday:1793531862:139948
+11-01 18:17:42.140  1324  1377 I wf_dream: lasttimeofday: 1793531861:700682
+11-01 18:17:42.140  1324  1377 I wf_dream: deltatime:0:439266
+11-01 18:17:42.140  1324  1377 I wf_dream: delta: 0.4392547607
+11-01 18:17:42.567  1324  1377 I wf_dream: delta too large: 0.4275512695
+11-01 18:17:42.567  1324  1377 I wf_dream: timeofday:1793531862:567503
+11-01 18:17:42.567  1324  1377 I wf_dream: lasttimeofday: 1793531862:139948
+11-01 18:17:42.567  1324  1377 I wf_dream: deltatime:0:427555
+11-01 18:17:42.567  1324  1377 I wf_dream: delta: 0.4275512695
+11-01 18:17:42.994  1324  1377 I wf_dream: delta too large: 0.4265289307
+11-01 18:17:42.994  1324  1377 I wf_dream: timeofday:1793531862:994040
+11-01 18:17:42.994  1324  1377 I wf_dream: lasttimeofday: 1793531862:567503
+11-01 18:17:42.994  1324  1377 I wf_dream: deltatime:0:426537
+11-01 18:17:42.994  1324  1377 I wf_dream: delta: 0.4265289307
+11-01 18:17:43.421  1324  1377 I wf_dream: delta too large: 0.427444458
+11-01 18:17:43.421  1324  1377 I wf_dream: timeofday:1793531863:421495
+11-01 18:17:43.421  1324  1377 I wf_dream: lasttimeofday: 1793531862:994040
+11-01 18:17:43.421  1324  1377 I wf_dream: deltatime:0:427455
+11-01 18:17:43.421  1324  1377 I wf_dream: delta: 0.427444458
+11-01 18:17:43.848  1324  1377 I wf_dream: delta too large: 0.4269104004
+11-01 18:17:43.848  1324  1377 I wf_dream: timeofday:1793531863:848408
+11-01 18:17:43.848  1324  1377 I wf_dream: lasttimeofday: 1793531863:421495
+11-01 18:17:43.848  1324  1377 I wf_dream: deltatime:0:426913
+11-01 18:17:43.848  1324  1377 I wf_dream: delta: 0.4269104004
+11-01 18:17:44.276  1324  1377 I wf_dream: delta too large: 0.4276123047
+11-01 18:17:44.276  1324  1377 I wf_dream: timeofday:1793531864:276034
+11-01 18:17:44.276  1324  1377 I wf_dream: lasttimeofday: 1793531863:848408
+11-01 18:17:44.276  1324  1377 I wf_dream: deltatime:0:427626
+11-01 18:17:44.276  1324  1377 I wf_dream: delta: 0.4276123047
+11-01 18:17:44.704  1324  1377 I wf_dream: delta too large: 0.4284973145
+11-01 18:17:44.704  1324  1377 I wf_dream: timeofday:1793531864:704543
+11-01 18:17:44.704  1324  1377 I wf_dream: lasttimeofday: 1793531864:276034
+11-01 18:17:44.704  1324  1377 I wf_dream: deltatime:0:428509
+11-01 18:17:44.704  1324  1377 I wf_dream: delta: 0.4284973145
+11-01 18:17:45.132  1324  1377 I wf_dream: delta too large: 0.4276885986
+11-01 18:17:45.132  1324  1377 I wf_dream: timeofday:1793531865:132245
+11-01 18:17:45.132  1324  1377 I wf_dream: lasttimeofday: 1793531864:704543
+11-01 18:17:45.132  1324  1377 I wf_dream: deltatime:0:427702
+11-01 18:17:45.132  1324  1377 I wf_dream: delta: 0.4276885986
+11-01 18:17:45.560  1324  1377 I wf_dream: delta too large: 0.427734375
+11-01 18:17:45.560  1324  1377 I wf_dream: timeofday:1793531865:559980
+11-01 18:17:45.560  1324  1377 I wf_dream: lasttimeofday: 1793531865:132245
+11-01 18:17:45.560  1324  1377 I wf_dream: deltatime:0:427735
+11-01 18:17:45.560  1324  1377 I wf_dream: delta: 0.427734375
+11-01 18:17:45.986  1324  1377 I wf_dream: delta too large: 0.4265289307
+11-01 18:17:45.986  1324  1377 I wf_dream: timeofday:1793531865:986518
+11-01 18:17:45.986  1324  1377 I wf_dream: lasttimeofday: 1793531865:559980
+11-01 18:17:45.986  1324  1377 I wf_dream: deltatime:0:426538
+11-01 18:17:45.986  1324  1377 I wf_dream: delta: 0.4265289307
+11-01 18:17:46.414  1324  1377 I wf_dream: delta too large: 0.4276580811
+11-01 18:17:46.414  1324  1377 I wf_dream: timeofday:1793531866:414184
+11-01 18:17:46.414  1324  1377 I wf_dream: lasttimeofday: 1793531865:986518
+11-01 18:17:46.414  1324  1377 I wf_dream: deltatime:0:427666
+11-01 18:17:46.414  1324  1377 I wf_dream: delta: 0.4276580811
+11-01 18:17:46.845  1324  1377 I wf_dream: delta too large: 0.4315338135
+11-01 18:17:46.846  1324  1377 I wf_dream: timeofday:1793531866:845721
+11-01 18:17:46.846  1324  1377 I wf_dream: lasttimeofday: 1793531866:414184
+11-01 18:17:46.846  1324  1377 I wf_dream: deltatime:0:431537
+11-01 18:17:46.846  1324  1377 I wf_dream: delta: 0.4315338135
+11-01 18:17:47.163  1324  1350 I dry.plantedtank: Explicit concurrent mark compact GC freed 2835(128KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2148KB/4296KB, paused 203us,4.880ms total 24.043ms
+11-01 18:17:47.279  1324  1377 I wf_dream: delta too large: 0.4335784912
+11-01 18:17:47.279  1324  1377 I wf_dream: timeofday:1793531867:279305
+11-01 18:17:47.279  1324  1377 I wf_dream: lasttimeofday: 1793531866:845721
+11-01 18:17:47.279  1324  1377 I wf_dream: deltatime:0:433584
+11-01 18:17:47.279  1324  1377 I wf_dream: delta: 0.4335784912
+11-01 18:17:47.711  1324  1377 I wf_dream: delta too large: 0.4315948486
+11-01 18:17:47.711  1324  1377 I wf_dream: timeofday:1793531867:710904
+11-01 18:17:47.711  1324  1377 I wf_dream: lasttimeofday: 1793531867:279305
+11-01 18:17:47.711  1324  1377 I wf_dream: deltatime:0:431599
+11-01 18:17:47.711  1324  1377 I wf_dream: delta: 0.4315948486
+11-01 18:17:48.142  1324  1377 I wf_dream: delta too large: 0.4317169189
+11-01 18:17:48.142  1324  1377 I wf_dream: timeofday:1793531868:142626
+11-01 18:17:48.143  1324  1377 I wf_dream: lasttimeofday: 1793531867:710904
+11-01 18:17:48.143  1324  1377 I wf_dream: deltatime:0:431722
+11-01 18:17:48.143  1324  1377 I wf_dream: delta: 0.4317169189
+11-01 18:17:48.561  1324  1377 I wf_dream: delta too large: 0.4186248779
+11-01 18:17:48.561  1324  1377 I wf_dream: timeofday:1793531868:561260
+11-01 18:17:48.561  1324  1377 I wf_dream: lasttimeofday: 1793531868:142626
+11-01 18:17:48.561  1324  1377 I wf_dream: deltatime:0:418634
+11-01 18:17:48.561  1324  1377 I wf_dream: delta: 0.4186248779
+11-01 18:17:48.980  1324  1377 I wf_dream: delta too large: 0.4189605713
+11-01 18:17:48.980  1324  1377 I wf_dream: timeofday:1793531868:980232
+11-01 18:17:48.980  1324  1377 I wf_dream: lasttimeofday: 1793531868:561260
+11-01 18:17:48.980  1324  1377 I wf_dream: deltatime:0:418972
+11-01 18:17:48.980  1324  1377 I wf_dream: delta: 0.4189605713
+11-01 18:17:49.395  1324  1377 I wf_dream: delta too large: 0.415435791
+11-01 18:17:49.395  1324  1377 I wf_dream: timeofday:1793531869:395672
+11-01 18:17:49.396  1324  1377 I wf_dream: lasttimeofday: 1793531868:980232
+11-01 18:17:49.396  1324  1377 I wf_dream: deltatime:0:415440
+11-01 18:17:49.396  1324  1377 I wf_dream: delta: 0.415435791
+11-01 18:17:49.815  1324  1377 I wf_dream: delta too large: 0.4190826416
+11-01 18:17:49.815  1324  1377 I wf_dream: timeofday:1793531869:814760
+11-01 18:17:49.815  1324  1377 I wf_dream: lasttimeofday: 1793531869:395672
+11-01 18:17:49.815  1324  1377 I wf_dream: deltatime:0:419088
+11-01 18:17:49.815  1324  1377 I wf_dream: delta: 0.4190826416
+11-01 18:17:50.233  1324  1377 I wf_dream: delta too large: 0.418258667
+11-01 18:17:50.233  1324  1377 I wf_dream: timeofday:1793531870:233025
+11-01 18:17:50.233  1324  1377 I wf_dream: lasttimeofday: 1793531869:814760
+11-01 18:17:50.233  1324  1377 I wf_dream: deltatime:0:418265
+11-01 18:17:50.233  1324  1377 I wf_dream: delta: 0.418258667
+11-01 18:17:50.652  1324  1377 I wf_dream: delta too large: 0.418838501
+11-01 18:17:50.652  1324  1377 I wf_dream: timeofday:1793531870:651871
+11-01 18:17:50.652  1324  1377 I wf_dream: lasttimeofday: 1793531870:233025
+11-01 18:17:50.652  1324  1377 I wf_dream: deltatime:0:418846
+11-01 18:17:50.652  1324  1377 I wf_dream: delta: 0.418838501
+11-01 18:17:51.070  1324  1377 I wf_dream: delta too large: 0.4182434082
+11-01 18:17:51.070  1324  1377 I wf_dream: timeofday:1793531871:70116
+11-01 18:17:51.070  1324  1377 I wf_dream: lasttimeofday: 1793531870:651871
+11-01 18:17:51.070  1324  1377 I wf_dream: deltatime:0:418245
+11-01 18:17:51.070  1324  1377 I wf_dream: delta: 0.4182434082
+11-01 18:17:51.487  1324  1377 I wf_dream: delta too large: 0.4173278809
+11-01 18:17:51.488  1324  1377 I wf_dream: timeofday:1793531871:487444
+11-01 18:17:51.488  1324  1377 I wf_dream: lasttimeofday: 1793531871:70116
+11-01 18:17:51.488  1324  1377 I wf_dream: deltatime:0:417328
+11-01 18:17:51.488  1324  1377 I wf_dream: delta: 0.4173278809
+11-01 18:17:51.915  1324  1377 I wf_dream: delta too large: 0.4273529053
+11-01 18:17:51.915  1324  1377 I wf_dream: timeofday:1793531871:914805
+11-01 18:17:51.915  1324  1377 I wf_dream: lasttimeofday: 1793531871:487444
+11-01 18:17:51.915  1324  1377 I wf_dream: deltatime:0:427361
+11-01 18:17:51.915  1324  1377 I wf_dream: delta: 0.4273529053
+11-01 18:17:52.343  1324  1377 I wf_dream: delta too large: 0.4284667969
+11-01 18:17:52.343  1324  1377 I wf_dream: timeofday:1793531872:343284
+11-01 18:17:52.343  1324  1377 I wf_dream: lasttimeofday: 1793531871:914805
+11-01 18:17:52.343  1324  1377 I wf_dream: deltatime:0:428479
+11-01 18:17:52.343  1324  1377 I wf_dream: delta: 0.4284667969
+11-01 18:17:52.771  1324  1377 I wf_dream: delta too large: 0.4278717041
+11-01 18:17:52.771  1324  1377 I wf_dream: timeofday:1793531872:771164
+11-01 18:17:52.771  1324  1377 I wf_dream: lasttimeofday: 1793531872:343284
+11-01 18:17:52.771  1324  1377 I wf_dream: deltatime:0:427880
+11-01 18:17:52.771  1324  1377 I wf_dream: delta: 0.4278717041
+11-01 18:17:53.199  1324  1377 I wf_dream: delta too large: 0.4281311035
+11-01 18:17:53.199  1324  1377 I wf_dream: timeofday:1793531873:199306
+11-01 18:17:53.199  1324  1377 I wf_dream: lasttimeofday: 1793531872:771164
+11-01 18:17:53.199  1324  1377 I wf_dream: deltatime:0:428142
+11-01 18:17:53.199  1324  1377 I wf_dream: delta: 0.4281311035
+11-01 18:17:53.627  1324  1377 I wf_dream: delta too large: 0.4284057617
+11-01 18:17:53.628  1324  1377 I wf_dream: timeofday:1793531873:627714
+11-01 18:17:53.628  1324  1377 I wf_dream: lasttimeofday: 1793531873:199306
+11-01 18:17:53.628  1324  1377 I wf_dream: deltatime:0:428408
+11-01 18:17:53.628  1324  1377 I wf_dream: delta: 0.4284057617
+11-01 18:17:54.054  1324  1377 I wf_dream: delta too large: 0.4264068604
+11-01 18:17:54.054  1324  1377 I wf_dream: timeofday:1793531874:54132
+11-01 18:17:54.054  1324  1377 I wf_dream: lasttimeofday: 1793531873:627714
+11-01 18:17:54.054  1324  1377 I wf_dream: deltatime:0:426418
+11-01 18:17:54.054  1324  1377 I wf_dream: delta: 0.4264068604
+11-01 18:17:54.491  1324  1377 I wf_dream: delta too large: 0.4371337891
+11-01 18:17:54.491  1324  1377 I wf_dream: timeofday:1793531874:491276
+11-01 18:17:54.491  1324  1377 I wf_dream: lasttimeofday: 1793531874:54132
+11-01 18:17:54.492  1324  1377 I wf_dream: deltatime:0:437144
+11-01 18:17:54.492  1324  1377 I wf_dream: delta: 0.4371337891
+11-01 18:17:54.917  1324  1377 I wf_dream: delta too large: 0.4264068604
+11-01 18:17:54.918  1324  1377 I wf_dream: timeofday:1793531874:917684
+11-01 18:17:54.918  1324  1377 I wf_dream: lasttimeofday: 1793531874:491276
+11-01 18:17:54.918  1324  1377 I wf_dream: deltatime:0:426408
+11-01 18:17:54.918  1324  1377 I wf_dream: delta: 0.4264068604
+11-01 18:17:55.351  1324  1377 I wf_dream: delta too large: 0.4337005615
+11-01 18:17:55.351  1324  1377 I wf_dream: timeofday:1793531875:351393
+11-01 18:17:55.351  1324  1377 I wf_dream: lasttimeofday: 1793531874:917684
+11-01 18:17:55.351  1324  1377 I wf_dream: deltatime:0:433709
+11-01 18:17:55.351  1324  1377 I wf_dream: delta: 0.4337005615
+11-01 18:17:55.776  1324  1377 I wf_dream: delta too large: 0.4245758057
+11-01 18:17:55.776  1324  1377 I wf_dream: timeofday:1793531875:775979
+11-01 18:17:55.776  1324  1377 I wf_dream: lasttimeofday: 1793531875:351393
+11-01 18:17:55.776  1324  1377 I wf_dream: deltatime:0:424586
+11-01 18:17:55.776  1324  1377 I wf_dream: delta: 0.4245758057
+11-01 18:17:56.201  1324  1377 I wf_dream: delta too large: 0.4251098633
+11-01 18:17:56.201  1324  1377 I wf_dream: timeofday:1793531876:201100
+11-01 18:17:56.201  1324  1377 I wf_dream: lasttimeofday: 1793531875:775979
+11-01 18:17:56.201  1324  1377 I wf_dream: deltatime:0:425121
+11-01 18:17:56.201  1324  1377 I wf_dream: delta: 0.4251098633
+11-01 18:17:56.623  1324  1377 I wf_dream: delta too large: 0.4222412109
+11-01 18:17:56.623  1324  1377 I wf_dream: timeofday:1793531876:623350
+11-01 18:17:56.623  1324  1377 I wf_dream: lasttimeofday: 1793531876:201100
+11-01 18:17:56.623  1324  1377 I wf_dream: deltatime:0:422250
+11-01 18:17:56.623  1324  1377 I wf_dream: delta: 0.4222412109
+11-01 18:17:57.045  1324  1377 I wf_dream: delta too large: 0.4223937988
+11-01 18:17:57.046  1324  1377 I wf_dream: timeofday:1793531877:45746
+11-01 18:17:57.046  1324  1377 I wf_dream: lasttimeofday: 1793531876:623350
+11-01 18:17:57.046  1324  1377 I wf_dream: deltatime:0:422396
+11-01 18:17:57.046  1324  1377 I wf_dream: delta: 0.4223937988
+11-01 18:17:57.471  1324  1377 I wf_dream: delta too large: 0.4259185791
+11-01 18:17:57.471  1324  1377 I wf_dream: timeofday:1793531877:471669
+11-01 18:17:57.472  1324  1377 I wf_dream: lasttimeofday: 1793531877:45746
+11-01 18:17:57.472  1324  1377 I wf_dream: deltatime:0:425923
+11-01 18:17:57.472  1324  1377 I wf_dream: delta: 0.4259185791
+11-01 18:17:57.896  1324  1377 I wf_dream: delta too large: 0.4243164062
+11-01 18:17:57.896  1324  1377 I wf_dream: timeofday:1793531877:896000
+11-01 18:17:57.896  1324  1377 I wf_dream: lasttimeofday: 1793531877:471669
+11-01 18:17:57.896  1324  1377 I wf_dream: deltatime:0:424331
+11-01 18:17:57.896  1324  1377 I wf_dream: delta: 0.4243164062
+11-01 18:17:58.318  1324  1377 I wf_dream: delta too large: 0.4224700928
+11-01 18:17:58.318  1324  1377 I wf_dream: timeofday:1793531878:318480
+11-01 18:17:58.318  1324  1377 I wf_dream: lasttimeofday: 1793531877:896000
+11-01 18:17:58.318  1324  1377 I wf_dream: deltatime:0:422480
+11-01 18:17:58.318  1324  1377 I wf_dream: delta: 0.4224700928
+11-01 18:17:58.740  1324  1377 I wf_dream: delta too large: 0.4216766357
+11-01 18:17:58.740  1324  1377 I wf_dream: timeofday:1793531878:740163
+11-01 18:17:58.740  1324  1377 I wf_dream: lasttimeofday: 1793531878:318480
+11-01 18:17:58.740  1324  1377 I wf_dream: deltatime:0:421683
+11-01 18:17:58.740  1324  1377 I wf_dream: delta: 0.4216766357
+11-01 18:17:59.162  1324  1377 I wf_dream: delta too large: 0.4224243164
+11-01 18:17:59.162  1324  1377 I wf_dream: timeofday:1793531879:162601
+11-01 18:17:59.162  1324  1377 I wf_dream: lasttimeofday: 1793531878:740163
+11-01 18:17:59.162  1324  1377 I wf_dream: deltatime:0:422438
+11-01 18:17:59.163  1324  1377 I wf_dream: delta: 0.4224243164
+11-01 18:17:59.598  1324  1377 I wf_dream: delta too large: 0.4357299805
+11-01 18:17:59.598  1324  1377 I wf_dream: timeofday:1793531879:598337
+11-01 18:17:59.598  1324  1377 I wf_dream: lasttimeofday: 1793531879:162601
+11-01 18:17:59.598  1324  1377 I wf_dream: deltatime:0:435736
+11-01 18:17:59.598  1324  1377 I wf_dream: delta: 0.4357299805
+11-01 18:18:00.027  1324  1377 I wf_dream: delta too large: 0.428527832
+11-01 18:18:00.027  1324  1377 I wf_dream: timeofday:1793531880:26879
+11-01 18:18:00.027  1324  1377 I wf_dream: lasttimeofday: 1793531879:598337
+11-01 18:18:00.027  1324  1377 I wf_dream: deltatime:0:428542
+11-01 18:18:00.027  1324  1377 I wf_dream: delta: 0.428527832
+11-01 18:18:00.456  1324  1377 I wf_dream: delta too large: 0.429107666
+11-01 18:18:00.456  1324  1377 I wf_dream: timeofday:1793531880:455992
+11-01 18:18:00.456  1324  1377 I wf_dream: lasttimeofday: 1793531880:26879
+11-01 18:18:00.456  1324  1377 I wf_dream: deltatime:0:429113
+11-01 18:18:00.456  1324  1377 I wf_dream: delta: 0.429107666
+11-01 18:18:00.885  1324  1377 I wf_dream: delta too large: 0.4291534424
+11-01 18:18:00.885  1324  1377 I wf_dream: timeofday:1793531880:885155
+11-01 18:18:00.885  1324  1377 I wf_dream: lasttimeofday: 1793531880:455992
+11-01 18:18:00.885  1324  1377 I wf_dream: deltatime:0:429163
+11-01 18:18:00.885  1324  1377 I wf_dream: delta: 0.4291534424
+11-01 18:18:01.314  1324  1377 I wf_dream: delta too large: 0.429107666
+11-01 18:18:01.314  1324  1377 I wf_dream: timeofday:1793531881:314268
+11-01 18:18:01.314  1324  1377 I wf_dream: lasttimeofday: 1793531880:885155
+11-01 18:18:01.314  1324  1377 I wf_dream: deltatime:0:429113
+11-01 18:18:01.314  1324  1377 I wf_dream: delta: 0.429107666
+11-01 18:18:01.736  1324  1377 I wf_dream: delta too large: 0.4225006104
+11-01 18:18:01.737  1324  1377 I wf_dream: timeofday:1793531881:736778
+11-01 18:18:01.737  1324  1377 I wf_dream: lasttimeofday: 1793531881:314268
+11-01 18:18:01.737  1324  1377 I wf_dream: deltatime:0:422510
+11-01 18:18:01.737  1324  1377 I wf_dream: delta: 0.4225006104
+11-01 18:18:02.159  1324  1377 I wf_dream: delta too large: 0.4222412109
+11-01 18:18:02.159  1324  1377 I wf_dream: timeofday:1793531882:159021
+11-01 18:18:02.159  1324  1377 I wf_dream: lasttimeofday: 1793531881:736778
+11-01 18:18:02.159  1324  1377 I wf_dream: deltatime:0:422243
+11-01 18:18:02.159  1324  1377 I wf_dream: delta: 0.4222412109
+11-01 18:18:02.586  1324  1377 I wf_dream: delta too large: 0.4273986816
+11-01 18:18:02.586  1324  1377 I wf_dream: timeofday:1793531882:586422
+11-01 18:18:02.586  1324  1377 I wf_dream: lasttimeofday: 1793531882:159021
+11-01 18:18:02.586  1324  1377 I wf_dream: deltatime:0:427401
+11-01 18:18:02.586  1324  1377 I wf_dream: delta: 0.4273986816
+11-01 18:18:03.017  1324  1377 I wf_dream: delta too large: 0.4310150146
+11-01 18:18:03.017  1324  1377 I wf_dream: timeofday:1793531883:17441
+11-01 18:18:03.017  1324  1377 I wf_dream: lasttimeofday: 1793531882:586422
+11-01 18:18:03.017  1324  1377 I wf_dream: deltatime:0:431019
+11-01 18:18:03.017  1324  1377 I wf_dream: delta: 0.4310150146
+11-01 18:18:03.446  1324  1377 I wf_dream: delta too large: 0.42918396
+11-01 18:18:03.446  1324  1377 I wf_dream: timeofday:1793531883:446635
+11-01 18:18:03.446  1324  1377 I wf_dream: lasttimeofday: 1793531883:17441
+11-01 18:18:03.446  1324  1377 I wf_dream: deltatime:0:429194
+11-01 18:18:03.446  1324  1377 I wf_dream: delta: 0.42918396
+11-01 18:18:03.862  1324  1377 I wf_dream: delta too large: 0.4158477783
+11-01 18:18:03.862  1324  1377 I wf_dream: timeofday:1793531883:862493
+11-01 18:18:03.862  1324  1377 I wf_dream: lasttimeofday: 1793531883:446635
+11-01 18:18:03.862  1324  1377 I wf_dream: deltatime:0:415858
+11-01 18:18:03.862  1324  1377 I wf_dream: delta: 0.4158477783
+11-01 18:18:04.277  1324  1377 I wf_dream: delta too large: 0.4147186279
+11-01 18:18:04.277  1324  1377 I wf_dream: timeofday:1793531884:277222
+11-01 18:18:04.277  1324  1377 I wf_dream: lasttimeofday: 1793531883:862493
+11-01 18:18:04.277  1324  1377 I wf_dream: deltatime:0:414729
+11-01 18:18:04.277  1324  1377 I wf_dream: delta: 0.4147186279
+11-01 18:18:04.700  1324  1377 I wf_dream: delta too large: 0.4230499268
+11-01 18:18:04.700  1324  1377 I wf_dream: timeofday:1793531884:700276
+11-01 18:18:04.700  1324  1377 I wf_dream: lasttimeofday: 1793531884:277222
+11-01 18:18:04.700  1324  1377 I wf_dream: deltatime:0:423054
+11-01 18:18:04.701  1324  1377 I wf_dream: delta: 0.4230499268
+11-01 18:18:05.112  1324  1377 I wf_dream: delta too large: 0.4124145508
+11-01 18:18:05.112  1324  1377 I wf_dream: timeofday:1793531885:112703
+11-01 18:18:05.113  1324  1377 I wf_dream: lasttimeofday: 1793531884:700276
+11-01 18:18:05.113  1324  1377 I wf_dream: deltatime:0:412427
+11-01 18:18:05.113  1324  1377 I wf_dream: delta: 0.4124145508
+11-01 18:18:05.525  1324  1377 I wf_dream: delta too large: 0.4122009277
+11-01 18:18:05.525  1324  1377 I wf_dream: timeofday:1793531885:524906
+11-01 18:18:05.525  1324  1377 I wf_dream: lasttimeofday: 1793531885:112703
+11-01 18:18:05.525  1324  1377 I wf_dream: deltatime:0:412203
+11-01 18:18:05.525  1324  1377 I wf_dream: delta: 0.4122009277
+11-01 18:18:05.937  1324  1377 I wf_dream: delta too large: 0.4122161865
+11-01 18:18:05.937  1324  1377 I wf_dream: timeofday:1793531885:937136
+11-01 18:18:05.937  1324  1377 I wf_dream: lasttimeofday: 1793531885:524906
+11-01 18:18:05.937  1324  1377 I wf_dream: deltatime:0:412230
+11-01 18:18:05.937  1324  1377 I wf_dream: delta: 0.4122161865
+11-01 18:18:06.349  1324  1377 I wf_dream: delta too large: 0.4125213623
+11-01 18:18:06.349  1324  1377 I wf_dream: timeofday:1793531886:349663
+11-01 18:18:06.349  1324  1377 I wf_dream: lasttimeofday: 1793531885:937136
+11-01 18:18:06.350  1324  1377 I wf_dream: deltatime:0:412527
+11-01 18:18:06.350  1324  1377 I wf_dream: delta: 0.4125213623
+11-01 18:18:06.762  1324  1377 I wf_dream: delta too large: 0.4121704102
+11-01 18:18:06.762  1324  1377 I wf_dream: timeofday:1793531886:761841
+11-01 18:18:06.762  1324  1377 I wf_dream: lasttimeofday: 1793531886:349663
+11-01 18:18:06.762  1324  1377 I wf_dream: deltatime:0:412178
+11-01 18:18:06.762  1324  1377 I wf_dream: delta: 0.4121704102
+11-01 18:18:07.174  1324  1377 I wf_dream: delta too large: 0.4123687744
+11-01 18:18:07.174  1324  1377 I wf_dream: timeofday:1793531887:174221
+11-01 18:18:07.174  1324  1377 I wf_dream: lasttimeofday: 1793531886:761841
+11-01 18:18:07.174  1324  1377 I wf_dream: deltatime:0:412380
+11-01 18:18:07.174  1324  1377 I wf_dream: delta: 0.4123687744
+11-01 18:18:07.599  1324  1377 I wf_dream: delta too large: 0.424331665
+11-01 18:18:07.599  1324  1377 I wf_dream: timeofday:1793531887:598557
+11-01 18:18:07.599  1324  1377 I wf_dream: lasttimeofday: 1793531887:174221
+11-01 18:18:07.599  1324  1377 I wf_dream: deltatime:0:424336
+11-01 18:18:07.599  1324  1377 I wf_dream: delta: 0.424331665
+11-01 18:18:08.026  1324  1377 I wf_dream: delta too large: 0.4281768799
+11-01 18:18:08.027  1324  1377 I wf_dream: timeofday:1793531888:26738
+11-01 18:18:08.027  1324  1377 I wf_dream: lasttimeofday: 1793531887:598557
+11-01 18:18:08.027  1324  1377 I wf_dream: deltatime:0:428181
+11-01 18:18:08.027  1324  1377 I wf_dream: delta: 0.4281768799
+11-01 18:18:08.456  1324  1377 I wf_dream: delta too large: 0.4291381836
+11-01 18:18:08.456  1324  1377 I wf_dream: timeofday:1793531888:455881
+11-01 18:18:08.456  1324  1377 I wf_dream: lasttimeofday: 1793531888:26738
+11-01 18:18:08.456  1324  1377 I wf_dream: deltatime:0:429143
+11-01 18:18:08.456  1324  1377 I wf_dream: delta: 0.4291381836
+11-01 18:18:08.883  1324  1377 I wf_dream: delta too large: 0.4271850586
+11-01 18:18:08.883  1324  1377 I wf_dream: timeofday:1793531888:883069
+11-01 18:18:08.883  1324  1377 I wf_dream: lasttimeofday: 1793531888:455881
+11-01 18:18:08.883  1324  1377 I wf_dream: deltatime:0:427188
+11-01 18:18:08.883  1324  1377 I wf_dream: delta: 0.4271850586
+11-01 18:18:09.310  1324  1377 I wf_dream: delta too large: 0.4276733398
+11-01 18:18:09.311  1324  1377 I wf_dream: timeofday:1793531889:310746
+11-01 18:18:09.311  1324  1377 I wf_dream: lasttimeofday: 1793531888:883069
+11-01 18:18:09.311  1324  1377 I wf_dream: deltatime:0:427677
+11-01 18:18:09.311  1324  1377 I wf_dream: delta: 0.4276733398
+11-01 18:18:09.737  1324  1377 I wf_dream: delta too large: 0.4264221191
+11-01 18:18:09.737  1324  1377 I wf_dream: timeofday:1793531889:737178
+11-01 18:18:09.737  1324  1377 I wf_dream: lasttimeofday: 1793531889:310746
+11-01 18:18:09.737  1324  1377 I wf_dream: deltatime:0:426432
+11-01 18:18:09.737  1324  1377 I wf_dream: delta: 0.4264221191
+11-01 18:18:10.167  1324  1377 I wf_dream: delta too large: 0.4301605225
+11-01 18:18:10.167  1324  1377 I wf_dream: timeofday:1793531890:167340
+11-01 18:18:10.167  1324  1377 I wf_dream: lasttimeofday: 1793531889:737178
+11-01 18:18:10.167  1324  1377 I wf_dream: deltatime:0:430162
+11-01 18:18:10.167  1324  1377 I wf_dream: delta: 0.4301605225
+11-01 18:18:10.615  1324  1377 I wf_dream: delta too large: 0.4483032227
+11-01 18:18:10.615  1324  1377 I wf_dream: timeofday:1793531890:615653
+11-01 18:18:10.616  1324  1377 I wf_dream: lasttimeofday: 1793531890:167340
+11-01 18:18:10.616  1324  1377 I wf_dream: deltatime:0:448313
+11-01 18:18:10.616  1324  1377 I wf_dream: delta: 0.4483032227
+11-01 18:18:10.725  1324  1350 I dry.plantedtank: Explicit concurrent mark compact GC freed 2823(128KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2148KB/4296KB, paused 247us,3.934ms total 24.307ms
+11-01 18:18:11.038  1324  1377 I wf_dream: delta too large: 0.4227142334
+11-01 18:18:11.038  1324  1377 I wf_dream: timeofday:1793531891:38377
+11-01 18:18:11.038  1324  1377 I wf_dream: lasttimeofday: 1793531890:615653
+11-01 18:18:11.038  1324  1377 I wf_dream: deltatime:0:422724
+11-01 18:18:11.038  1324  1377 I wf_dream: delta: 0.4227142334
+11-01 18:18:11.459  1324  1377 I wf_dream: delta too large: 0.4208221436
+11-01 18:18:11.459  1324  1377 I wf_dream: timeofday:1793531891:459204
+11-01 18:18:11.459  1324  1377 I wf_dream: lasttimeofday: 1793531891:38377
+11-01 18:18:11.459  1324  1377 I wf_dream: deltatime:0:420827
+11-01 18:18:11.459  1324  1377 I wf_dream: delta: 0.4208221436
+11-01 18:18:11.891  1324  1377 I wf_dream: delta too large: 0.4322509766
+11-01 18:18:11.891  1324  1377 I wf_dream: timeofday:1793531891:891459
+11-01 18:18:11.891  1324  1377 I wf_dream: lasttimeofday: 1793531891:459204
+11-01 18:18:11.891  1324  1377 I wf_dream: deltatime:0:432255
+11-01 18:18:11.891  1324  1377 I wf_dream: delta: 0.4322509766
+11-01 18:18:12.313  1324  1377 I wf_dream: delta too large: 0.4213409424
+11-01 18:18:12.313  1324  1377 I wf_dream: timeofday:1793531892:312808
+11-01 18:18:12.313  1324  1377 I wf_dream: lasttimeofday: 1793531891:891459
+11-01 18:18:12.313  1324  1377 I wf_dream: deltatime:0:421349
+11-01 18:18:12.313  1324  1377 I wf_dream: delta: 0.4213409424
+11-01 18:18:12.731  1324  1377 I wf_dream: delta too large: 0.4183959961
+11-01 18:18:12.731  1324  1377 I wf_dream: timeofday:1793531892:731209
+11-01 18:18:12.731  1324  1377 I wf_dream: lasttimeofday: 1793531892:312808
+11-01 18:18:12.731  1324  1377 I wf_dream: deltatime:0:418401
+11-01 18:18:12.731  1324  1377 I wf_dream: delta: 0.4183959961
+11-01 18:18:13.150  1324  1377 I wf_dream: delta too large: 0.4192047119
+11-01 18:18:13.150  1324  1377 I wf_dream: timeofday:1793531893:150428
+11-01 18:18:13.150  1324  1377 I wf_dream: lasttimeofday: 1793531892:731209
+11-01 18:18:13.150  1324  1377 I wf_dream: deltatime:0:419219
+11-01 18:18:13.150  1324  1377 I wf_dream: delta: 0.4192047119
+11-01 18:18:13.569  1324  1377 I wf_dream: delta too large: 0.418548584
+11-01 18:18:13.569  1324  1377 I wf_dream: timeofday:1793531893:568977
+11-01 18:18:13.569  1324  1377 I wf_dream: lasttimeofday: 1793531893:150428
+11-01 18:18:13.569  1324  1377 I wf_dream: deltatime:0:418549
+11-01 18:18:13.569  1324  1377 I wf_dream: delta: 0.418548584
+11-01 18:18:13.987  1324  1377 I wf_dream: delta too large: 0.4178924561
+11-01 18:18:13.987  1324  1377 I wf_dream: timeofday:1793531893:986879
+11-01 18:18:13.987  1324  1377 I wf_dream: lasttimeofday: 1793531893:568977
+11-01 18:18:13.987  1324  1377 I wf_dream: deltatime:0:417902
+11-01 18:18:13.987  1324  1377 I wf_dream: delta: 0.4178924561
+11-01 18:18:14.407  1324  1377 I wf_dream: delta too large: 0.4201660156
+11-01 18:18:14.407  1324  1377 I wf_dream: timeofday:1793531894:407057
+11-01 18:18:14.407  1324  1377 I wf_dream: lasttimeofday: 1793531893:986879
+11-01 18:18:14.407  1324  1377 I wf_dream: deltatime:0:420178
+11-01 18:18:14.407  1324  1377 I wf_dream: delta: 0.4201660156
+11-01 18:18:14.834  1324  1377 I wf_dream: delta too large: 0.4274902344
+11-01 18:18:14.834  1324  1377 I wf_dream: timeofday:1793531894:834557
+11-01 18:18:14.834  1324  1377 I wf_dream: lasttimeofday: 1793531894:407057
+11-01 18:18:14.834  1324  1377 I wf_dream: deltatime:0:427500
+11-01 18:18:14.834  1324  1377 I wf_dream: delta: 0.4274902344
+11-01 18:18:15.262  1324  1377 I wf_dream: delta too large: 0.4281768799
+11-01 18:18:15.263  1324  1377 I wf_dream: timeofday:1793531895:262747
+11-01 18:18:15.263  1324  1377 I wf_dream: lasttimeofday: 1793531894:834557
+11-01 18:18:15.263  1324  1377 I wf_dream: deltatime:0:428190
+11-01 18:18:15.263  1324  1377 I wf_dream: delta: 0.4281768799
+11-01 18:18:15.691  1324  1377 I wf_dream: delta too large: 0.428894043
+11-01 18:18:15.691  1324  1377 I wf_dream: timeofday:1793531895:691649
+11-01 18:18:15.691  1324  1377 I wf_dream: lasttimeofday: 1793531895:262747
+11-01 18:18:15.691  1324  1377 I wf_dream: deltatime:0:428902
+11-01 18:18:15.692  1324  1377 I wf_dream: delta: 0.428894043
+11-01 18:18:16.119  1324  1377 I wf_dream: delta too large: 0.4273834229
+11-01 18:18:16.119  1324  1377 I wf_dream: timeofday:1793531896:119033
+11-01 18:18:16.119  1324  1377 I wf_dream: lasttimeofday: 1793531895:691649
+11-01 18:18:16.119  1324  1377 I wf_dream: deltatime:0:427384
+11-01 18:18:16.119  1324  1377 I wf_dream: delta: 0.4273834229
+11-01 18:18:16.548  1324  1377 I wf_dream: delta too large: 0.4290771484
+11-01 18:18:16.548  1324  1377 I wf_dream: timeofday:1793531896:548122
+11-01 18:18:16.548  1324  1377 I wf_dream: lasttimeofday: 1793531896:119033
+11-01 18:18:16.548  1324  1377 I wf_dream: deltatime:0:429089
+11-01 18:18:16.548  1324  1377 I wf_dream: delta: 0.4290771484
+11-01 18:18:16.975  1324  1377 I wf_dream: delta too large: 0.4273223877
+11-01 18:18:16.975  1324  1377 I wf_dream: timeofday:1793531896:975445
+11-01 18:18:16.975  1324  1377 I wf_dream: lasttimeofday: 1793531896:548122
+11-01 18:18:16.975  1324  1377 I wf_dream: deltatime:0:427323
+11-01 18:18:16.975  1324  1377 I wf_dream: delta: 0.4273223877
+11-01 18:18:17.400  1324  1377 I wf_dream: delta too large: 0.4245300293
+11-01 18:18:17.400  1324  1377 I wf_dream: timeofday:1793531897:399988
+11-01 18:18:17.400  1324  1377 I wf_dream: lasttimeofday: 1793531896:975445
+11-01 18:18:17.400  1324  1377 I wf_dream: deltatime:0:424543
+11-01 18:18:17.400  1324  1377 I wf_dream: delta: 0.4245300293
+11-01 18:18:17.821  1324  1377 I wf_dream: delta too large: 0.4217376709
+11-01 18:18:17.822  1324  1377 I wf_dream: timeofday:1793531897:821734
+11-01 18:18:17.822  1324  1377 I wf_dream: lasttimeofday: 1793531897:399988
+11-01 18:18:17.822  1324  1377 I wf_dream: deltatime:0:421746
+11-01 18:18:17.822  1324  1377 I wf_dream: delta: 0.4217376709
+11-01 18:18:18.240  1324  1377 I wf_dream: delta too large: 0.4184417725
+11-01 18:18:18.240  1324  1377 I wf_dream: timeofday:1793531898:240188
+11-01 18:18:18.240  1324  1377 I wf_dream: lasttimeofday: 1793531897:821734
+11-01 18:18:18.240  1324  1377 I wf_dream: deltatime:0:418454
+11-01 18:18:18.240  1324  1377 I wf_dream: delta: 0.4184417725
+11-01 18:18:18.659  1324  1377 I wf_dream: delta too large: 0.4186859131
+11-01 18:18:18.659  1324  1377 I wf_dream: timeofday:1793531898:658878
+11-01 18:18:18.659  1324  1377 I wf_dream: lasttimeofday: 1793531898:240188
+11-01 18:18:18.659  1324  1377 I wf_dream: deltatime:0:418690
+11-01 18:18:18.659  1324  1377 I wf_dream: delta: 0.4186859131
+11-01 18:18:18.659  1324  1377 I wf_dream: , _bContinue = 1, _curLevel->done() = 1
+11-01 18:18:18.727  1324  1377 I wf_dream: zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+11-01 18:18:18.728  1324  1377 I wf_dream: zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+11-01 18:18:18.729  1324  1377 I wf_dream: LMalloc of 412 not 8-byte aligned, rounding up
+11-01 18:18:18.729  1324  1377 I wf_dream: LMalloc of 7620 not 8-byte aligned, rounding up
+11-01 18:18:18.736  1324  1377 I wf_dream: ROOM-RENDER scope=all-active source=default
+11-01 18:18:18.736  1324  1377 I wf_dream: LMalloc of 20 not 8-byte aligned, rounding up
+11-01 18:18:18.736  1324  1377 I wf_dream: LMalloc of 20 not 8-byte aligned, rounding up
+11-01 18:18:18.736  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.736  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.736  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.736  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.736  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.736  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.737  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.737  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.737  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.737  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.737  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.737  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.737  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.737  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.737  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.737  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.737  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.737  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.737  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.737  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.737  1324  1377 I wf_dream: Level::Level: leveldata= 0xe0d43968, object count  = 31
+11-01 18:18:18.737  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 4118)
+11-01 18:18:18.738  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 150)
+11-01 18:18:18.738  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 16)
+11-01 18:18:18.738  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 16)
+11-01 18:18:18.738  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:18:18.738  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.738  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:18:18.738  1324  1377 I wf_dream: PixelMap::Load: this = 0xdf46bc28
+11-01 18:18:18.739  1324  1377 I wf_dream: PixelMap::Load: this = 0xdf46bc58
+11-01 18:18:18.742  1324  1377 I wf_dream: LMalloc of 28 not 8-byte aligned, rounding up
+11-01 18:18:18.742  1324  1377 I wf_dream: LMalloc of 28 not 8-byte aligned, rounding up
+11-01 18:18:18.742  1324  1377 I wf_dream: LMalloc of 28 not 8-byte aligned, rounding up
+11-01 18:18:18.742  1324  1377 I wf_dream: LMalloc of 28 not 8-byte aligned, rounding up
+11-01 18:18:18.742  1324  1377 I wf_dream: LMalloc of 940 not 8-byte aligned, rounding up
+11-01 18:18:18.742  1324  1377 I wf_dream: LMalloc of 140 not 8-byte aligned, rounding up
+11-01 18:18:18.742  1324  1377 I wf_dream: LMalloc of 68 not 8-byte aligned, rounding up
+11-01 18:18:18.742  1324  1377 I wf_dream: LMalloc of 100 not 8-byte aligned, rounding up
+11-01 18:18:18.743  1324  1377 I wf_dream: DMalloc of 228 not 8-byte aligned, rounding up
+11-01 18:18:18.743  1324  1377 I wf_dream: [Actor] idx=2 class=23 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.743  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.743  1324  1377 I wf_dream: [Actor] idx=3 class=13 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.743  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.743  1324  1377 I wf_dream: DMalloc of 52 not 8-byte aligned, rounding up
+11-01 18:18:18.743  1324  1377 I wf_dream: DMalloc of 252 not 8-byte aligned, rounding up
+11-01 18:18:18.743  1324  1377 I wf_dream: [Actor] idx=4 class=20 commonOff=10340 NumberOfLocalMailboxes=0
+11-01 18:18:18.743  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.743  1324  1377 I wf_dream: DMalloc of 228 not 8-byte aligned, rounding up
+11-01 18:18:18.743  1324  1377 I wf_dream: [Actor] idx=6 class=11 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.743  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.743  1324  1377 I wf_dream: [Actor] idx=7 class=16 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.743  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.743  1324  1377 I wf_dream: [Actor] idx=8 class=3 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.743  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.743  1324  1377 I wf_dream: [Actor] idx=9 class=22 commonOff=11080 NumberOfLocalMailboxes=6
+11-01 18:18:18.743  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.743  1324  1377 I wf_dream: [Actor] idx=10 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.743  1324  1377 I wf_dream: [Actor] idx=11 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.744  1324  1377 I wf_dream: [Actor] idx=12 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.744  1324  1377 I wf_dream: [Actor] idx=13 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.744  1324  1377 I wf_dream: [Actor] idx=14 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.744  1324  1377 I wf_dream: [Actor] idx=15 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.744  1324  1377 I wf_dream: [Actor] idx=16 class=7 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.744  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.744  1324  1377 I wf_dream: [Actor] idx=17 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.744  1324  1377 I wf_dream: [Actor] idx=18 class=7 commonOff=11652 NumberOfLocalMailboxes=0
+11-01 18:18:18.744  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.744  1324  1377 I wf_dream: [Actor] idx=19 class=7 commonOff=11652 NumberOfLocalMailboxes=0
+11-01 18:18:18.744  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.744  1324  1377 I wf_dream: [Actor] idx=20 class=7 commonOff=11652 NumberOfLocalMailboxes=0
+11-01 18:18:18.744  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.744  1324  1377 I wf_dream: [Actor] idx=21 class=7 commonOff=11652 NumberOfLocalMailboxes=0
+11-01 18:18:18.744  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.744  1324  1377 I wf_dream: [Actor] idx=22 class=7 commonOff=11652 NumberOfLocalMailboxes=0
+11-01 18:18:18.744  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.744  1324  1377 I wf_dream: [Actor] idx=23 class=7 commonOff=11652 NumberOfLocalMailboxes=0
+11-01 18:18:18.745  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.745  1324  1377 I wf_dream: [Actor] idx=24 class=7 commonOff=11652 NumberOfLocalMailboxes=0
+11-01 18:18:18.745  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.745  1324  1377 I wf_dream: [Actor] idx=25 class=7 commonOff=11652 NumberOfLocalMailboxes=0
+11-01 18:18:18.745  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.745  1324  1377 I wf_dream: [Actor] idx=26 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.745  1324  1377 I wf_dream: [Actor] idx=27 class=5 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.745  1324  1377 I wf_dream: DMalloc of 228 not 8-byte aligned, rounding up
+11-01 18:18:18.745  1324  1377 I wf_dream: [Actor] idx=28 class=23 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.745  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.745  1324  1377 I wf_dream: [Actor] idx=29 class=3 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.745  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.745  1324  1377 I wf_dream: [Actor] idx=30 class=16 commonOff=9628 NumberOfLocalMailboxes=0
+11-01 18:18:18.745  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.746  1324  1377 I wf_dream: LMalloc of 20 not 8-byte aligned, rounding up
+11-01 18:18:18.746  1324  1377 I wf_dream: LMalloc of 212 not 8-byte aligned, rounding up
+11-01 18:18:18.746  1324  1377 I wf_dream: DMalloc of 60 not 8-byte aligned, rounding up
+11-01 18:18:18.746  1324  1377 I wf_dream: DMalloc of 404 not 8-byte aligned, rounding up
+11-01 18:18:18.746  1324  1377 I wf_dream: DMalloc of 442 not 8-byte aligned, rounding up
+11-01 18:18:18.746  1324  1377 I wf_dream: DMalloc of 450 not 8-byte aligned, rounding up
+11-01 18:18:18.746  1324  1377 I wf_dream: DMalloc of 404 not 8-byte aligned, rounding up
+11-01 18:18:18.747  1324  1377 I wf_dream: Walking from 0
+11-01 18:18:18.747  1324  1377 I wf_dream: 0->0
+11-01 18:18:18.747  1324  1377 I wf_dream: 0->0
+11-01 18:18:18.747  1324  1377 I wf_dream: LMalloc of 20 not 8-byte aligned, rounding up
+11-01 18:18:18.747  1324  1377 I wf_dream: LMalloc of 20 not 8-byte aligned, rounding up
+11-01 18:18:18.749  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 4118)
+11-01 18:18:18.750  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 131094)
+11-01 18:18:18.776  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 64)
+11-01 18:18:18.776  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 16)
+11-01 18:18:18.776  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:18:18.776  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 4692)
+11-01 18:18:18.777  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:18:18.777  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:18:18.777  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:18:18.777  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:18:18.777  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 1260)
+11-01 18:18:18.778  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:18:18.778  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 412)
+11-01 18:18:18.778  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 412)
+11-01 18:18:18.778  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 412)
+11-01 18:18:18.778  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 412)
+11-01 18:18:18.778  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 412)
+11-01 18:18:18.778  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 412)
+11-01 18:18:18.778  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 412)
+11-01 18:18:18.779  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 412)
+11-01 18:18:18.779  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:18:18.779  1324  1377 I wf_dream: ASS closed without all data read (bytesLeft = 588)
+11-01 18:18:18.779  1324  1377 I wf_dream: DMalloc of 84 not 8-byte aligned, rounding up
+11-01 18:18:18.779  1324  1377 I wf_dream: PixelMap::Load: this = 0xdf46bc88
+11-01 18:18:18.780  1324  1377 I wf_dream: PixelMap::Load: this = 0xdf46bcb8
+11-01 18:18:18.786  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:18:18.786  1324  1377 I wf_dream: LMalloc of 28 not 8-byte aligned, rounding up
+11-01 18:18:18.789  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:18:18.790  1324  1377 I wf_dream: LMalloc of 28 not 8-byte aligned, rounding up
+11-01 18:18:18.790  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.790  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.790  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.790  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.790  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:18:18.790  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.790  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.790  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.790  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.790  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.790  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:18:18.790  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.791  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.791  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.791  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 264)
+11-01 18:18:18.791  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.791  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.791  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.792  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.792  1324  1377 I wf_dream: LMalloc of 2436 not 8-byte aligned, rounding up
+11-01 18:18:18.793  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.793  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.794  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.794  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 2640)
+11-01 18:18:18.794  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.796  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.796  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.796  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.797  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.797  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:18:18.797  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.797  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.797  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.797  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 264)
+11-01 18:18:18.797  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.797  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.798  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.798  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.798  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.798  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:18:18.798  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.798  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.798  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.798  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 264)
+11-01 18:18:18.798  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.798  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.799  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.799  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.799  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.799  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:18:18.799  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.799  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.799  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.799  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 264)
+11-01 18:18:18.799  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.799  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.800  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.800  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.800  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.800  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:18:18.800  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.800  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.800  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.800  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 264)
+11-01 18:18:18.800  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.801  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.801  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.801  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.801  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.801  1324  1377 I wf_dream: LMalloc of 996 not 8-byte aligned, rounding up
+11-01 18:18:18.801  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.801  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.802  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.802  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.802  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.802  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:18:18.802  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.802  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.802  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.802  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 264)
+11-01 18:18:18.802  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.803  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.803  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.803  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.803  1324  1377 I wf_dream: material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+11-01 18:18:18.803  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.803  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:18:18.803  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.803  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.803  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.803  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.803  1324  1377 I wf_dream: material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+11-01 18:18:18.803  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.803  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:18:18.803  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.803  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.803  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.803  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.804  1324  1377 I wf_dream: material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+11-01 18:18:18.804  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.804  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:18:18.804  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.804  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.804  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.804  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.804  1324  1377 I wf_dream: material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+11-01 18:18:18.804  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.804  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:18:18.804  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.804  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.804  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.804  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.805  1324  1377 I wf_dream: material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+11-01 18:18:18.805  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.805  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:18:18.805  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.805  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.805  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.805  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.805  1324  1377 I wf_dream: material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+11-01 18:18:18.805  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.805  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:18:18.805  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.805  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.805  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.805  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.805  1324  1377 I wf_dream: material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+11-01 18:18:18.805  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.805  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:18:18.806  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.806  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.806  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.806  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.806  1324  1377 I wf_dream: material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+11-01 18:18:18.806  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.806  1324  1377 I wf_dream: LMalloc of 76 not 8-byte aligned, rounding up
+11-01 18:18:18.806  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.806  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.806  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.806  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.806  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.806  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:18:18.807  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.807  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.807  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.807  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 264)
+11-01 18:18:18.807  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.807  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.807  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.807  1324  1377 I wf_dream: LMalloc of 108 not 8-byte aligned, rounding up
+11-01 18:18:18.807  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.807  1324  1377 I wf_dream: LMalloc of 276 not 8-byte aligned, rounding up
+11-01 18:18:18.808  1324  1377 I wf_dream: RenderActor3DAnimates constructed with no animations!
+11-01 18:18:18.808  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.808  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.808  1324  1377 I wf_dream: MATL closed without all data read (bytesLeft = 264)
+11-01 18:18:18.808  1324  1377 I wf_dream: LMalloc of 44 not 8-byte aligned, rounding up
+11-01 18:18:18.817  1324  1377 I wf_dream: zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+11-01 18:18:18.818  1324  1377 I wf_dream: zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+11-01 18:18:18.818  1324  1377 I wf_dream: audio: MusicPlayer — soundfont not found: florestan-subset.sf2
+11-01 18:18:18.818  1324  1377 I wf_dream: audio: sfx[0] not found: wflevels/qbert_practice/sfx/qbert_hop.wav
+11-01 18:18:18.818  1324  1377 I wf_dream: audio: sfx[1] not found: wflevels/qbert_practice/sfx/qbert_land.wav
+11-01 18:18:18.818  1324  1377 I wf_dream: audio: sfx[2] not found: wflevels/qbert_practice/sfx/qbert_fall.wav
+11-01 18:18:18.818  1324  1377 I wf_dream: audio: sfx[3] not found: wflevels/qbert_practice/sfx/qbert_swear.wav
+11-01 18:18:18.818  1324  1377 I wf_dream: audio: sfx[4] not found: wflevels/qbert_practice/sfx/qbert_round_clear.wav
+11-01 18:18:18.818  1324  1377 I wf_dream: audio: sfx[5] not found: wflevels/qbert_practice/sfx/qbert_kill.wav
+11-01 18:18:18.818  1324  1377 I wf_dream: audio: sfx[6] not found: wflevels/qbert_practice/sfx/qbert_disc.wav
+11-01 18:18:18.818  1324  1377 I wf_dream: DMalloc of 36 not 8-byte aligned, rounding up
+11-01 18:18:19.062  1324  1377 I wf_dream: PLANTS generation=2 seed=3879646629 mode=saltwater shoots=384 vertices=79936 triangles=47360 graph_ms=10.169 mesh_ms=216.831
+11-01 18:18:19.062  1324  1377 I wf_dream: PLANTS settings-source=RPRP seed=3879646629 water=saltwater age=0 speed=6 textures=1 sway=1 random_entry=1 selector_override=0
+11-01 18:18:19.240  1324  1377 I wf_dream: planted_bridge: tank 2 water=saltwater seed=random speed=8 hold=5
+11-01 18:18:19.242  1324  1377 I wf_dream: delta too large: 0.534286499
+11-01 18:18:19.242  1324  1377 I wf_dream: timeofday:1793531899:242162
+11-01 18:18:19.242  1324  1377 I wf_dream: lasttimeofday: 1793531898:707870
+11-01 18:18:19.242  1324  1377 I wf_dream: deltatime:0:534292
+11-01 18:18:19.242  1324  1377 I wf_dream: delta: 0.534286499
+11-01 18:18:24.275  1324  1377 I wf_dream: delta too large: 0.2011108398
+11-01 18:18:24.275  1324  1377 I wf_dream: timeofday:1793531904:275624
+11-01 18:18:24.275  1324  1377 I wf_dream: lasttimeofday: 1793531904:74501
+11-01 18:18:24.276  1324  1377 I wf_dream: deltatime:0:201123
+11-01 18:18:24.276  1324  1377 I wf_dream: delta: 0.2011108398
+11-01 18:18:24.489  1324  1377 I wf_dream: delta too large: 0.2140197754
+11-01 18:18:24.489  1324  1377 I wf_dream: timeofday:1793531904:489647
+11-01 18:18:24.489  1324  1377 I wf_dream: lasttimeofday: 1793531904:275624
+11-01 18:18:24.490  1324  1377 I wf_dream: deltatime:0:214023
+11-01 18:18:24.490  1324  1377 I wf_dream: delta: 0.2140197754
+11-01 18:18:24.729  1324  1377 I wf_dream: delta too large: 0.2400817871
+11-01 18:18:24.730  1324  1377 I wf_dream: timeofday:1793531904:729736
+11-01 18:18:24.730  1324  1377 I wf_dream: lasttimeofday: 1793531904:489647
+11-01 18:18:24.730  1324  1377 I wf_dream: deltatime:0:240089
+11-01 18:18:24.730  1324  1377 I wf_dream: delta: 0.2400817871
+11-01 18:18:25.347  1324  1377 I wf_dream: delta too large: 0.2249298096
+11-01 18:18:25.347  1324  1377 I wf_dream: timeofday:1793531905:346985
+11-01 18:18:25.347  1324  1377 I wf_dream: lasttimeofday: 1793531905:122048
+11-01 18:18:25.347  1324  1377 I wf_dream: deltatime:0:224937
+11-01 18:18:25.347  1324  1377 I wf_dream: delta: 0.2249298096
+11-01 18:18:25.559  1324  1377 I wf_dream: delta too large: 0.2124328613
+11-01 18:18:25.559  1324  1377 I wf_dream: timeofday:1793531905:559424
+11-01 18:18:25.559  1324  1377 I wf_dream: lasttimeofday: 1793531905:346985
+11-01 18:18:25.559  1324  1377 I wf_dream: deltatime:0:212439
+11-01 18:18:25.559  1324  1377 I wf_dream: delta: 0.2124328613
+11-01 18:18:25.771  1324  1377 I wf_dream: delta too large: 0.211807251
+11-01 18:18:25.771  1324  1377 I wf_dream: timeofday:1793531905:771236
+11-01 18:18:25.771  1324  1377 I wf_dream: lasttimeofday: 1793531905:559424
+11-01 18:18:25.771  1324  1377 I wf_dream: deltatime:0:211812
+11-01 18:18:25.771  1324  1377 I wf_dream: delta: 0.211807251
+11-01 18:18:26.010  1324  1377 I wf_dream: delta too large: 0.2395324707
+11-01 18:18:26.011  1324  1377 I wf_dream: timeofday:1793531906:10770
+11-01 18:18:26.011  1324  1377 I wf_dream: lasttimeofday: 1793531905:771236
+11-01 18:18:26.011  1324  1377 I wf_dream: deltatime:0:239534
+11-01 18:18:26.011  1324  1377 I wf_dream: delta: 0.2395324707
+11-01 18:18:26.269  1324  1377 I wf_dream: delta too large: 0.2583007812
+11-01 18:18:26.269  1324  1377 I wf_dream: timeofday:1793531906:269084
+11-01 18:18:26.269  1324  1377 I wf_dream: lasttimeofday: 1793531906:10770
+11-01 18:18:26.269  1324  1377 I wf_dream: deltatime:0:258314
+11-01 18:18:26.269  1324  1377 I wf_dream: delta: 0.2583007812
+11-01 18:18:26.547  1324  1377 I wf_dream: delta too large: 0.2784881592
+11-01 18:18:26.547  1324  1377 I wf_dream: timeofday:1793531906:547581
+11-01 18:18:26.547  1324  1377 I wf_dream: lasttimeofday: 1793531906:269084
+11-01 18:18:26.547  1324  1377 I wf_dream: deltatime:0:278497
+11-01 18:18:26.547  1324  1377 I wf_dream: delta: 0.2784881592
+11-01 18:18:26.772  1324  1377 I wf_dream: delta too large: 0.2243041992
+11-01 18:18:26.772  1324  1377 I wf_dream: timeofday:1793531906:771894
+11-01 18:18:26.772  1324  1377 I wf_dream: lasttimeofday: 1793531906:547581
+11-01 18:18:26.772  1324  1377 I wf_dream: deltatime:0:224313
+11-01 18:18:26.772  1324  1377 I wf_dream: delta: 0.2243041992
+11-01 18:18:26.995  1324  1377 I wf_dream: delta too large: 0.2232208252
+11-01 18:18:26.995  1324  1377 I wf_dream: timeofday:1793531906:995115
+11-01 18:18:26.995  1324  1377 I wf_dream: lasttimeofday: 1793531906:771894
+11-01 18:18:26.995  1324  1377 I wf_dream: deltatime:0:223221
+11-01 18:18:26.995  1324  1377 I wf_dream: delta: 0.2232208252
+11-01 18:18:27.266  1324  1377 I wf_dream: delta too large: 0.270980835
+11-01 18:18:27.266  1324  1377 I wf_dream: timeofday:1793531907:266104
+11-01 18:18:27.266  1324  1377 I wf_dream: lasttimeofday: 1793531906:995115
+11-01 18:18:27.266  1324  1377 I wf_dream: deltatime:0:270989
+11-01 18:18:27.266  1324  1377 I wf_dream: delta: 0.270980835
+11-01 18:18:27.521  1324  1377 I wf_dream: delta too large: 0.2555847168
+11-01 18:18:27.522  1324  1377 I wf_dream: timeofday:1793531907:521699
+11-01 18:18:27.522  1324  1377 I wf_dream: lasttimeofday: 1793531907:266104
+11-01 18:18:27.522  1324  1377 I wf_dream: deltatime:0:255595
+11-01 18:18:27.522  1324  1377 I wf_dream: delta: 0.2555847168
+11-01 18:18:27.757  1324  1377 I wf_dream: delta too large: 0.2355957031
+11-01 18:18:27.757  1324  1377 I wf_dream: timeofday:1793531907:757298
+11-01 18:18:27.757  1324  1377 I wf_dream: lasttimeofday: 1793531907:521699
+11-01 18:18:27.757  1324  1377 I wf_dream: deltatime:0:235599
+11-01 18:18:27.757  1324  1377 I wf_dream: delta: 0.2355957031
+11-01 18:18:28.030  1324  1377 I wf_dream: delta too large: 0.2726135254
+11-01 18:18:28.030  1324  1377 I wf_dream: timeofday:1793531908:29926
+11-01 18:18:28.030  1324  1377 I wf_dream: lasttimeofday: 1793531907:757298
+11-01 18:18:28.030  1324  1377 I wf_dream: deltatime:0:272628
+11-01 18:18:28.030  1324  1377 I wf_dream: delta: 0.2726135254
+11-01 18:18:28.328  1324  1377 I wf_dream: delta too large: 0.2980804443
+11-01 18:18:28.328  1324  1377 I wf_dream: timeofday:1793531908:328020
+11-01 18:18:28.328  1324  1377 I wf_dream: lasttimeofday: 1793531908:29926
+11-01 18:18:28.328  1324  1377 I wf_dream: deltatime:0:298094
+11-01 18:18:28.328  1324  1377 I wf_dream: delta: 0.2980804443
+11-01 18:18:28.641  1324  1377 I wf_dream: delta too large: 0.3134002686
+11-01 18:18:28.641  1324  1377 I wf_dream: timeofday:1793531908:641426
+11-01 18:18:28.642  1324  1377 I wf_dream: lasttimeofday: 1793531908:328020
+11-01 18:18:28.642  1324  1377 I wf_dream: deltatime:0:313406
+11-01 18:18:28.642  1324  1377 I wf_dream: delta: 0.3134002686
+11-01 18:18:28.897  1324  1377 I wf_dream: delta too large: 0.2555999756
+11-01 18:18:28.897  1324  1377 I wf_dream: timeofday:1793531908:897026
+11-01 18:18:28.897  1324  1377 I wf_dream: lasttimeofday: 1793531908:641426
+11-01 18:18:28.897  1324  1377 I wf_dream: deltatime:0:255600
+11-01 18:18:28.897  1324  1377 I wf_dream: delta: 0.2555999756
+11-01 18:18:29.145  1324  1377 I wf_dream: delta too large: 0.2481384277
+11-01 18:18:29.145  1324  1377 I wf_dream: timeofday:1793531909:145168
+11-01 18:18:29.145  1324  1377 I wf_dream: lasttimeofday: 1793531908:897026
+11-01 18:18:29.145  1324  1377 I wf_dream: deltatime:0:248142
+11-01 18:18:29.145  1324  1377 I wf_dream: delta: 0.2481384277
+11-01 18:18:29.463  1324  1377 I wf_dream: delta too large: 0.3179016113
+11-01 18:18:29.463  1324  1377 I wf_dream: timeofday:1793531909:463082
+11-01 18:18:29.463  1324  1377 I wf_dream: lasttimeofday: 1793531909:145168
+11-01 18:18:29.463  1324  1377 I wf_dream: deltatime:0:317914
+11-01 18:18:29.463  1324  1377 I wf_dream: delta: 0.3179016113
+11-01 18:18:29.763  1324  1377 I wf_dream: delta too large: 0.3005981445
+11-01 18:18:29.764  1324  1377 I wf_dream: timeofday:1793531909:763681
+11-01 18:18:29.764  1324  1377 I wf_dream: lasttimeofday: 1793531909:463082
+11-01 18:18:29.764  1324  1377 I wf_dream: deltatime:0:300599
+11-01 18:18:29.764  1324  1377 I wf_dream: delta: 0.3005981445
+11-01 18:18:30.027  1324  1377 I wf_dream: delta too large: 0.2639465332
+11-01 18:18:30.027  1324  1377 I wf_dream: timeofday:1793531910:27629
+11-01 18:18:30.027  1324  1377 I wf_dream: lasttimeofday: 1793531909:763681
+11-01 18:18:30.027  1324  1377 I wf_dream: deltatime:0:263948
+11-01 18:18:30.027  1324  1377 I wf_dream: delta: 0.2639465332
+11-01 18:18:30.345  1324  1377 I wf_dream: delta too large: 0.3178405762
+11-01 18:18:30.345  1324  1377 I wf_dream: timeofday:1793531910:345471
+11-01 18:18:30.345  1324  1377 I wf_dream: lasttimeofday: 1793531910:27629
+11-01 18:18:30.345  1324  1377 I wf_dream: deltatime:0:317842
+11-01 18:18:30.345  1324  1377 I wf_dream: delta: 0.3178405762
+11-01 18:18:30.678  1324  1377 I wf_dream: delta too large: 0.3328857422
+11-01 18:18:30.678  1324  1377 I wf_dream: timeofday:1793531910:678358
+11-01 18:18:30.678  1324  1377 I wf_dream: lasttimeofday: 1793531910:345471
+11-01 18:18:30.678  1324  1377 I wf_dream: deltatime:0:332887
+11-01 18:18:30.678  1324  1377 I wf_dream: delta: 0.3328857422
+11-01 18:18:31.024  1324  1377 I wf_dream: delta too large: 0.3463745117
+11-01 18:18:31.025  1324  1377 I wf_dream: timeofday:1793531911:24747
+11-01 18:18:31.025  1324  1377 I wf_dream: lasttimeofday: 1793531910:678358
+11-01 18:18:31.025  1324  1377 I wf_dream: deltatime:0:346389
+11-01 18:18:31.025  1324  1377 I wf_dream: delta: 0.3463745117
+11-01 18:18:31.315  1324  1377 I wf_dream: delta too large: 0.290725708
+11-01 18:18:31.315  1324  1377 I wf_dream: timeofday:1793531911:315478
+11-01 18:18:31.315  1324  1377 I wf_dream: lasttimeofday: 1793531911:24747
+11-01 18:18:31.315  1324  1377 I wf_dream: deltatime:0:290731
+11-01 18:18:31.315  1324  1377 I wf_dream: delta: 0.290725708
+11-01 18:18:31.597  1324  1377 I wf_dream: delta too large: 0.2816314697
+11-01 18:18:31.597  1324  1377 I wf_dream: timeofday:1793531911:597116
+11-01 18:18:31.597  1324  1377 I wf_dream: lasttimeofday: 1793531911:315478
+11-01 18:18:31.597  1324  1377 I wf_dream: deltatime:0:281638
+11-01 18:18:31.597  1324  1377 I wf_dream: delta: 0.2816314697
+11-01 18:18:31.944  1324  1377 I wf_dream: delta too large: 0.3474578857
+11-01 18:18:31.944  1324  1377 I wf_dream: timeofday:1793531911:944585
+11-01 18:18:31.944  1324  1377 I wf_dream: lasttimeofday: 1793531911:597116
+11-01 18:18:31.944  1324  1377 I wf_dream: deltatime:0:347469
+11-01 18:18:31.945  1324  1377 I wf_dream: delta: 0.3474578857
+11-01 18:18:32.288  1324  1377 I wf_dream: delta too large: 0.3435974121
+11-01 18:18:32.290  1324  1377 I wf_dream: timeofday:1793531912:288189
+11-01 18:18:32.290  1324  1377 I wf_dream: lasttimeofday: 1793531911:944585
+11-01 18:18:32.290  1324  1377 I wf_dream: deltatime:0:343604
+11-01 18:18:32.290  1324  1377 I wf_dream: delta: 0.3435974121
+11-01 18:18:32.585  1324  1377 I wf_dream: delta too large: 0.2971038818
+11-01 18:18:32.585  1324  1377 I wf_dream: timeofday:1793531912:585301
+11-01 18:18:32.585  1324  1377 I wf_dream: lasttimeofday: 1793531912:288189
+11-01 18:18:32.585  1324  1377 I wf_dream: deltatime:0:297112
+11-01 18:18:32.585  1324  1377 I wf_dream: delta: 0.2971038818
+11-01 18:18:32.944  1324  1377 I wf_dream: delta too large: 0.3586578369
+11-01 18:18:32.944  1324  1377 I wf_dream: timeofday:1793531912:943959
+11-01 18:18:32.944  1324  1377 I wf_dream: lasttimeofday: 1793531912:585301
+11-01 18:18:32.944  1324  1377 I wf_dream: deltatime:0:358658
+11-01 18:18:32.944  1324  1377 I wf_dream: delta: 0.3586578369
+11-01 18:18:33.325  1324  1377 I wf_dream: delta too large: 0.381149292
+11-01 18:18:33.325  1324  1377 I wf_dream: timeofday:1793531913:325117
+11-01 18:18:33.325  1324  1377 I wf_dream: lasttimeofday: 1793531912:943959
+11-01 18:18:33.325  1324  1377 I wf_dream: deltatime:0:381158
+11-01 18:18:33.325  1324  1377 I wf_dream: delta: 0.381149292
+11-01 18:18:33.706  1324  1377 I wf_dream: delta too large: 0.3808898926
+11-01 18:18:33.706  1324  1377 I wf_dream: timeofday:1793531913:706015
+11-01 18:18:33.706  1324  1377 I wf_dream: lasttimeofday: 1793531913:325117
+11-01 18:18:33.706  1324  1377 I wf_dream: deltatime:0:380898
+11-01 18:18:33.706  1324  1377 I wf_dream: delta: 0.3808898926
+11-01 18:18:34.037  1324  1377 I wf_dream: delta too large: 0.3307037354
+11-01 18:18:34.037  1324  1377 I wf_dream: timeofday:1793531914:36719
+11-01 18:18:34.037  1324  1377 I wf_dream: lasttimeofday: 1793531913:706015
+11-01 18:18:34.037  1324  1377 I wf_dream: deltatime:0:330704
+11-01 18:18:34.037  1324  1377 I wf_dream: delta: 0.3307037354
+11-01 18:18:34.271  1324  1350 I dry.plantedtank: Explicit concurrent mark compact GC freed 2823(128KB) AllocSpace objects, 1(20KB) LOS objects, 49% free, 2148KB/4296KB, paused 248us,4.131ms total 24.438ms
+11-01 18:18:34.354  1324  1377 I wf_dream: delta too large: 0.3177947998
+11-01 18:18:34.354  1324  1377 I wf_dream: timeofday:1793531914:354528
+11-01 18:18:34.354  1324  1377 I wf_dream: lasttimeofday: 1793531914:36719
+11-01 18:18:34.354  1324  1377 I wf_dream: deltatime:0:317809
+11-01 18:18:34.355  1324  1377 I wf_dream: delta: 0.3177947998
+11-01 18:18:34.749  1324  1377 I wf_dream: delta too large: 0.3949737549
+11-01 18:18:34.749  1324  1377 I wf_dream: timeofday:1793531914:749506
+11-01 18:18:34.749  1324  1377 I wf_dream: lasttimeofday: 1793531914:354528
+11-01 18:18:34.749  1324  1377 I wf_dream: deltatime:0:394978
+11-01 18:18:34.749  1324  1377 I wf_dream: delta: 0.3949737549

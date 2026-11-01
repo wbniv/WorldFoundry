@@ -1,0 +1,354 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="800" viewBox="0 0 1040 800">
+<rect width="100%" height="100%" fill="#fff"/>
+<style>text{font-family:system-ui,sans-serif;fill:#18212b}.title{font-size:22px;font-weight:650}.axis{font-size:13px}.grid{stroke:#d9e0e7;stroke-width:1}.line{fill:none;stroke:#1677a8;stroke-width:2}.point{fill:#1677a8;opacity:.58}</style>
+<text x="90" y="38" class="title">Planted Tank soak — process PSS</text>
+<text x="90" y="61" class="axis">cast1 · PID 1324 · 235 successful samples · 51 tank starts / 50 reloads</text>
+<line x1="90" y1="310.0" x2="990" y2="310.0" class="grid"/>
+<text x="78" y="314.0" text-anchor="end" class="axis">70</text>
+<line x1="90" y1="275.3" x2="990" y2="275.3" class="grid"/>
+<text x="78" y="279.3" text-anchor="end" class="axis">80</text>
+<line x1="90" y1="240.7" x2="990" y2="240.7" class="grid"/>
+<text x="78" y="244.7" text-anchor="end" class="axis">90</text>
+<line x1="90" y1="206.0" x2="990" y2="206.0" class="grid"/>
+<text x="78" y="210.0" text-anchor="end" class="axis">100</text>
+<line x1="90" y1="171.3" x2="990" y2="171.3" class="grid"/>
+<text x="78" y="175.3" text-anchor="end" class="axis">110</text>
+<line x1="90" y1="136.7" x2="990" y2="136.7" class="grid"/>
+<text x="78" y="140.7" text-anchor="end" class="axis">120</text>
+<line x1="90" y1="102.0" x2="990" y2="102.0" class="grid"/>
+<text x="78" y="106.0" text-anchor="end" class="axis">130</text>
+<line x1="90.0" y1="102" x2="90.0" y2="310" class="grid"/>
+<text x="90.0" y="332" text-anchor="middle" class="axis">0</text>
+<line x1="187.6" y1="102" x2="187.6" y2="310" class="grid"/>
+<text x="187.6" y="332" text-anchor="middle" class="axis">10</text>
+<line x1="285.3" y1="102" x2="285.3" y2="310" class="grid"/>
+<text x="285.3" y="332" text-anchor="middle" class="axis">20</text>
+<line x1="382.9" y1="102" x2="382.9" y2="310" class="grid"/>
+<text x="382.9" y="332" text-anchor="middle" class="axis">30</text>
+<line x1="480.6" y1="102" x2="480.6" y2="310" class="grid"/>
+<text x="480.6" y="332" text-anchor="middle" class="axis">40</text>
+<line x1="578.2" y1="102" x2="578.2" y2="310" class="grid"/>
+<text x="578.2" y="332" text-anchor="middle" class="axis">50</text>
+<line x1="675.9" y1="102" x2="675.9" y2="310" class="grid"/>
+<text x="675.9" y="332" text-anchor="middle" class="axis">60</text>
+<line x1="773.5" y1="102" x2="773.5" y2="310" class="grid"/>
+<text x="773.5" y="332" text-anchor="middle" class="axis">70</text>
+<line x1="871.2" y1="102" x2="871.2" y2="310" class="grid"/>
+<text x="871.2" y="332" text-anchor="middle" class="axis">80</text>
+<line x1="968.8" y1="102" x2="968.8" y2="310" class="grid"/>
+<text x="968.8" y="332" text-anchor="middle" class="axis">90</text>
+<circle cx="90.0" cy="169.1" r="2.2" class="point"/>
+<circle cx="96.4" cy="137.0" r="2.2" class="point"/>
+<circle cx="100.4" cy="137.1" r="2.2" class="point"/>
+<circle cx="104.2" cy="137.0" r="2.2" class="point"/>
+<circle cx="108.1" cy="140.4" r="2.2" class="point"/>
+<circle cx="111.8" cy="136.5" r="2.2" class="point"/>
+<circle cx="115.7" cy="135.8" r="2.2" class="point"/>
+<circle cx="119.5" cy="145.4" r="2.2" class="point"/>
+<circle cx="123.2" cy="145.3" r="2.2" class="point"/>
+<circle cx="127.2" cy="136.9" r="2.2" class="point"/>
+<circle cx="131.4" cy="136.1" r="2.2" class="point"/>
+<circle cx="135.5" cy="136.0" r="2.2" class="point"/>
+<circle cx="139.7" cy="139.0" r="2.2" class="point"/>
+<circle cx="143.9" cy="130.3" r="2.2" class="point"/>
+<circle cx="148.2" cy="129.5" r="2.2" class="point"/>
+<circle cx="152.3" cy="129.5" r="2.2" class="point"/>
+<circle cx="156.4" cy="137.6" r="2.2" class="point"/>
+<circle cx="160.4" cy="129.2" r="2.2" class="point"/>
+<circle cx="164.4" cy="128.9" r="2.2" class="point"/>
+<circle cx="168.6" cy="129.0" r="2.2" class="point"/>
+<circle cx="172.9" cy="138.0" r="2.2" class="point"/>
+<circle cx="177.0" cy="128.9" r="2.2" class="point"/>
+<circle cx="181.2" cy="128.8" r="2.2" class="point"/>
+<circle cx="185.4" cy="128.8" r="2.2" class="point"/>
+<circle cx="189.5" cy="139.9" r="2.2" class="point"/>
+<circle cx="193.7" cy="126.0" r="2.2" class="point"/>
+<circle cx="197.6" cy="124.9" r="2.2" class="point"/>
+<circle cx="201.8" cy="124.9" r="2.2" class="point"/>
+<circle cx="205.9" cy="124.9" r="2.2" class="point"/>
+<circle cx="209.8" cy="132.9" r="2.2" class="point"/>
+<circle cx="213.7" cy="127.1" r="2.2" class="point"/>
+<circle cx="217.8" cy="126.3" r="2.2" class="point"/>
+<circle cx="221.8" cy="126.3" r="2.2" class="point"/>
+<circle cx="225.8" cy="126.2" r="2.2" class="point"/>
+<circle cx="229.8" cy="125.3" r="2.2" class="point"/>
+<circle cx="233.9" cy="124.4" r="2.2" class="point"/>
+<circle cx="238.0" cy="124.4" r="2.2" class="point"/>
+<circle cx="242.2" cy="124.4" r="2.2" class="point"/>
+<circle cx="246.4" cy="134.8" r="2.2" class="point"/>
+<circle cx="250.5" cy="127.9" r="2.2" class="point"/>
+<circle cx="254.8" cy="127.4" r="2.2" class="point"/>
+<circle cx="258.8" cy="127.4" r="2.2" class="point"/>
+<circle cx="262.7" cy="136.4" r="2.2" class="point"/>
+<circle cx="266.7" cy="127.5" r="2.2" class="point"/>
+<circle cx="270.7" cy="126.8" r="2.2" class="point"/>
+<circle cx="274.6" cy="126.8" r="2.2" class="point"/>
+<circle cx="278.5" cy="126.8" r="2.2" class="point"/>
+<circle cx="282.3" cy="130.3" r="2.2" class="point"/>
+<circle cx="286.2" cy="130.9" r="2.2" class="point"/>
+<circle cx="290.0" cy="130.8" r="2.2" class="point"/>
+<circle cx="293.9" cy="131.1" r="2.2" class="point"/>
+<circle cx="297.7" cy="135.5" r="2.2" class="point"/>
+<circle cx="301.6" cy="129.9" r="2.2" class="point"/>
+<circle cx="305.3" cy="130.4" r="2.2" class="point"/>
+<circle cx="309.0" cy="130.4" r="2.2" class="point"/>
+<circle cx="312.7" cy="144.3" r="2.2" class="point"/>
+<circle cx="316.4" cy="138.0" r="2.2" class="point"/>
+<circle cx="320.2" cy="147.7" r="2.2" class="point"/>
+<circle cx="323.9" cy="156.0" r="2.2" class="point"/>
+<circle cx="327.6" cy="148.1" r="2.2" class="point"/>
+<circle cx="331.3" cy="154.4" r="2.2" class="point"/>
+<circle cx="335.1" cy="144.6" r="2.2" class="point"/>
+<circle cx="338.9" cy="143.0" r="2.2" class="point"/>
+<circle cx="342.6" cy="143.0" r="2.2" class="point"/>
+<circle cx="346.3" cy="143.0" r="2.2" class="point"/>
+<circle cx="350.0" cy="143.3" r="2.2" class="point"/>
+<circle cx="353.8" cy="141.1" r="2.2" class="point"/>
+<circle cx="357.5" cy="141.7" r="2.2" class="point"/>
+<circle cx="361.3" cy="141.7" r="2.2" class="point"/>
+<circle cx="365.0" cy="145.7" r="2.2" class="point"/>
+<circle cx="368.7" cy="138.6" r="2.2" class="point"/>
+<circle cx="372.6" cy="137.6" r="2.2" class="point"/>
+<circle cx="376.3" cy="137.5" r="2.2" class="point"/>
+<circle cx="380.1" cy="137.6" r="2.2" class="point"/>
+<circle cx="383.8" cy="144.8" r="2.2" class="point"/>
+<circle cx="387.5" cy="142.0" r="2.2" class="point"/>
+<circle cx="391.2" cy="141.9" r="2.2" class="point"/>
+<circle cx="395.0" cy="141.9" r="2.2" class="point"/>
+<circle cx="398.8" cy="150.5" r="2.2" class="point"/>
+<circle cx="402.6" cy="139.5" r="2.2" class="point"/>
+<circle cx="406.3" cy="138.1" r="2.2" class="point"/>
+<circle cx="410.0" cy="138.1" r="2.2" class="point"/>
+<circle cx="413.7" cy="138.1" r="2.2" class="point"/>
+<circle cx="417.5" cy="188.4" r="2.2" class="point"/>
+<circle cx="421.3" cy="174.5" r="2.2" class="point"/>
+<circle cx="425.0" cy="172.4" r="2.2" class="point"/>
+<circle cx="428.8" cy="172.3" r="2.2" class="point"/>
+<circle cx="432.5" cy="216.8" r="2.2" class="point"/>
+<circle cx="436.4" cy="210.8" r="2.2" class="point"/>
+<circle cx="440.2" cy="204.8" r="2.2" class="point"/>
+<circle cx="444.0" cy="204.2" r="2.2" class="point"/>
+<circle cx="447.8" cy="203.7" r="2.2" class="point"/>
+<circle cx="451.6" cy="203.7" r="2.2" class="point"/>
+<circle cx="456.0" cy="207.2" r="2.2" class="point"/>
+<circle cx="460.3" cy="204.6" r="2.2" class="point"/>
+<circle cx="464.2" cy="204.7" r="2.2" class="point"/>
+<circle cx="467.9" cy="204.7" r="2.2" class="point"/>
+<circle cx="471.6" cy="215.1" r="2.2" class="point"/>
+<circle cx="475.3" cy="204.7" r="2.2" class="point"/>
+<circle cx="479.0" cy="203.4" r="2.2" class="point"/>
+<circle cx="482.8" cy="203.4" r="2.2" class="point"/>
+<circle cx="486.5" cy="203.4" r="2.2" class="point"/>
+<circle cx="490.3" cy="206.0" r="2.2" class="point"/>
+<circle cx="494.0" cy="200.3" r="2.2" class="point"/>
+<circle cx="497.8" cy="201.0" r="2.2" class="point"/>
+<circle cx="501.6" cy="200.9" r="2.2" class="point"/>
+<circle cx="505.3" cy="210.4" r="2.2" class="point"/>
+<circle cx="509.0" cy="199.3" r="2.2" class="point"/>
+<circle cx="512.8" cy="198.2" r="2.2" class="point"/>
+<circle cx="516.6" cy="198.2" r="2.2" class="point"/>
+<circle cx="520.4" cy="198.3" r="2.2" class="point"/>
+<circle cx="524.3" cy="206.9" r="2.2" class="point"/>
+<circle cx="528.0" cy="201.1" r="2.2" class="point"/>
+<circle cx="531.9" cy="200.6" r="2.2" class="point"/>
+<circle cx="535.7" cy="200.6" r="2.2" class="point"/>
+<circle cx="539.4" cy="238.1" r="2.2" class="point"/>
+<circle cx="543.3" cy="228.5" r="2.2" class="point"/>
+<circle cx="547.0" cy="227.1" r="2.2" class="point"/>
+<circle cx="550.7" cy="227.3" r="2.2" class="point"/>
+<circle cx="554.5" cy="231.0" r="2.2" class="point"/>
+<circle cx="558.2" cy="236.8" r="2.2" class="point"/>
+<circle cx="562.0" cy="230.6" r="2.2" class="point"/>
+<circle cx="565.8" cy="230.1" r="2.2" class="point"/>
+<circle cx="569.5" cy="230.0" r="2.2" class="point"/>
+<circle cx="573.2" cy="230.0" r="2.2" class="point"/>
+<circle cx="576.9" cy="225.6" r="2.2" class="point"/>
+<circle cx="580.7" cy="224.6" r="2.2" class="point"/>
+<circle cx="584.4" cy="224.5" r="2.2" class="point"/>
+<circle cx="588.2" cy="224.5" r="2.2" class="point"/>
+<circle cx="592.0" cy="224.5" r="2.2" class="point"/>
+<circle cx="595.8" cy="231.4" r="2.2" class="point"/>
+<circle cx="599.7" cy="227.8" r="2.2" class="point"/>
+<circle cx="603.5" cy="227.8" r="2.2" class="point"/>
+<circle cx="607.3" cy="227.7" r="2.2" class="point"/>
+<circle cx="611.3" cy="227.7" r="2.2" class="point"/>
+<circle cx="615.1" cy="224.8" r="2.2" class="point"/>
+<circle cx="618.9" cy="221.3" r="2.2" class="point"/>
+<circle cx="622.7" cy="220.8" r="2.2" class="point"/>
+<circle cx="626.6" cy="228.6" r="2.2" class="point"/>
+<circle cx="630.5" cy="228.6" r="2.2" class="point"/>
+<circle cx="634.3" cy="223.6" r="2.2" class="point"/>
+<circle cx="638.0" cy="246.5" r="2.2" class="point"/>
+<circle cx="641.8" cy="246.5" r="2.2" class="point"/>
+<circle cx="645.5" cy="246.5" r="2.2" class="point"/>
+<circle cx="649.3" cy="246.5" r="2.2" class="point"/>
+<circle cx="653.1" cy="247.1" r="2.2" class="point"/>
+<circle cx="656.8" cy="244.7" r="2.2" class="point"/>
+<circle cx="660.7" cy="244.7" r="2.2" class="point"/>
+<circle cx="664.6" cy="244.5" r="2.2" class="point"/>
+<circle cx="668.3" cy="261.5" r="2.2" class="point"/>
+<circle cx="672.1" cy="249.1" r="2.2" class="point"/>
+<circle cx="675.9" cy="268.2" r="2.2" class="point"/>
+<circle cx="679.7" cy="268.2" r="2.2" class="point"/>
+<circle cx="683.4" cy="268.2" r="2.2" class="point"/>
+<circle cx="687.1" cy="258.2" r="2.2" class="point"/>
+<circle cx="690.8" cy="253.7" r="2.2" class="point"/>
+<circle cx="694.4" cy="252.9" r="2.2" class="point"/>
+<circle cx="698.1" cy="252.9" r="2.2" class="point"/>
+<circle cx="701.8" cy="252.9" r="2.2" class="point"/>
+<circle cx="705.5" cy="255.6" r="2.2" class="point"/>
+<circle cx="709.3" cy="249.0" r="2.2" class="point"/>
+<circle cx="713.0" cy="248.1" r="2.2" class="point"/>
+<circle cx="716.7" cy="248.1" r="2.2" class="point"/>
+<circle cx="720.3" cy="248.1" r="2.2" class="point"/>
+<circle cx="724.1" cy="253.8" r="2.2" class="point"/>
+<circle cx="727.8" cy="245.1" r="2.2" class="point"/>
+<circle cx="731.5" cy="244.2" r="2.2" class="point"/>
+<circle cx="735.2" cy="244.1" r="2.2" class="point"/>
+<circle cx="739.0" cy="262.7" r="2.2" class="point"/>
+<circle cx="742.9" cy="262.7" r="2.2" class="point"/>
+<circle cx="746.8" cy="256.0" r="2.2" class="point"/>
+<circle cx="750.7" cy="253.6" r="2.2" class="point"/>
+<circle cx="754.5" cy="253.5" r="2.2" class="point"/>
+<circle cx="758.3" cy="253.5" r="2.2" class="point"/>
+<circle cx="762.0" cy="253.5" r="2.2" class="point"/>
+<circle cx="765.9" cy="265.3" r="2.2" class="point"/>
+<circle cx="769.7" cy="257.9" r="2.2" class="point"/>
+<circle cx="773.5" cy="257.9" r="2.2" class="point"/>
+<circle cx="777.2" cy="257.9" r="2.2" class="point"/>
+<circle cx="781.1" cy="257.9" r="2.2" class="point"/>
+<circle cx="784.8" cy="261.1" r="2.2" class="point"/>
+<circle cx="788.6" cy="259.7" r="2.2" class="point"/>
+<circle cx="792.4" cy="259.7" r="2.2" class="point"/>
+<circle cx="796.2" cy="259.6" r="2.2" class="point"/>
+<circle cx="799.8" cy="261.4" r="2.2" class="point"/>
+<circle cx="803.5" cy="254.3" r="2.2" class="point"/>
+<circle cx="807.3" cy="253.4" r="2.2" class="point"/>
+<circle cx="811.0" cy="253.3" r="2.2" class="point"/>
+<circle cx="814.7" cy="253.3" r="2.2" class="point"/>
+<circle cx="818.4" cy="255.6" r="2.2" class="point"/>
+<circle cx="822.0" cy="259.7" r="2.2" class="point"/>
+<circle cx="825.7" cy="259.3" r="2.2" class="point"/>
+<circle cx="829.4" cy="259.3" r="2.2" class="point"/>
+<circle cx="833.2" cy="259.3" r="2.2" class="point"/>
+<circle cx="837.0" cy="254.3" r="2.2" class="point"/>
+<circle cx="841.0" cy="249.3" r="2.2" class="point"/>
+<circle cx="845.0" cy="249.2" r="2.2" class="point"/>
+<circle cx="849.0" cy="249.2" r="2.2" class="point"/>
+<circle cx="852.8" cy="249.2" r="2.2" class="point"/>
+<circle cx="856.7" cy="256.0" r="2.2" class="point"/>
+<circle cx="860.5" cy="254.2" r="2.2" class="point"/>
+<circle cx="864.4" cy="254.0" r="2.2" class="point"/>
+<circle cx="868.1" cy="253.9" r="2.2" class="point"/>
+<circle cx="871.9" cy="277.4" r="2.2" class="point"/>
+<circle cx="875.7" cy="266.2" r="2.2" class="point"/>
+<circle cx="879.5" cy="264.0" r="2.2" class="point"/>
+<circle cx="883.5" cy="264.0" r="2.2" class="point"/>
+<circle cx="887.5" cy="264.3" r="2.2" class="point"/>
+<circle cx="891.3" cy="267.3" r="2.2" class="point"/>
+<circle cx="895.3" cy="264.0" r="2.2" class="point"/>
+<circle cx="899.1" cy="263.8" r="2.2" class="point"/>
+<circle cx="902.9" cy="263.8" r="2.2" class="point"/>
+<circle cx="906.8" cy="272.5" r="2.2" class="point"/>
+<circle cx="910.6" cy="263.0" r="2.2" class="point"/>
+<circle cx="914.5" cy="262.7" r="2.2" class="point"/>
+<circle cx="918.3" cy="262.8" r="2.2" class="point"/>
+<circle cx="922.2" cy="262.8" r="2.2" class="point"/>
+<circle cx="925.9" cy="259.9" r="2.2" class="point"/>
+<circle cx="929.8" cy="257.5" r="2.2" class="point"/>
+<circle cx="933.6" cy="269.1" r="2.2" class="point"/>
+<circle cx="937.6" cy="269.1" r="2.2" class="point"/>
+<circle cx="941.4" cy="269.1" r="2.2" class="point"/>
+<circle cx="945.3" cy="262.0" r="2.2" class="point"/>
+<circle cx="949.0" cy="259.4" r="2.2" class="point"/>
+<circle cx="952.8" cy="259.3" r="2.2" class="point"/>
+<circle cx="956.5" cy="259.3" r="2.2" class="point"/>
+<circle cx="960.3" cy="274.4" r="2.2" class="point"/>
+<circle cx="964.0" cy="262.2" r="2.2" class="point"/>
+<circle cx="967.8" cy="261.5" r="2.2" class="point"/>
+<circle cx="971.5" cy="261.5" r="2.2" class="point"/>
+<circle cx="975.2" cy="261.4" r="2.2" class="point"/>
+<circle cx="978.9" cy="262.7" r="2.2" class="point"/>
+<circle cx="982.7" cy="256.2" r="2.2" class="point"/>
+<circle cx="986.3" cy="255.9" r="2.2" class="point"/>
+<circle cx="990.0" cy="255.9" r="2.2" class="point"/>
+<polyline points="90.0,169.1 96.4,137.0 100.4,137.1 104.2,137.0 108.1,140.4 111.8,136.5 115.7,135.8 119.5,145.4 123.2,145.3 127.2,136.9 131.4,136.1 135.5,136.0 139.7,139.0 143.9,130.3 148.2,129.5 152.3,129.5 156.4,137.6 160.4,129.2 164.4,128.9 168.6,129.0 172.9,138.0 177.0,128.9 181.2,128.8 185.4,128.8 189.5,139.9 193.7,126.0 197.6,124.9 201.8,124.9 205.9,124.9 209.8,132.9 213.7,127.1 217.8,126.3 221.8,126.3 225.8,126.2 229.8,125.3 233.9,124.4 238.0,124.4 242.2,124.4 246.4,134.8 250.5,127.9 254.8,127.4 258.8,127.4 262.7,136.4 266.7,127.5 270.7,126.8 274.6,126.8 278.5,126.8 282.3,130.3 286.2,130.9 290.0,130.8 293.9,131.1 297.7,135.5 301.6,129.9 305.3,130.4 309.0,130.4 312.7,144.3 316.4,138.0 320.2,147.7 323.9,156.0 327.6,148.1 331.3,154.4 335.1,144.6 338.9,143.0 342.6,143.0 346.3,143.0 350.0,143.3 353.8,141.1 357.5,141.7 361.3,141.7 365.0,145.7 368.7,138.6 372.6,137.6 376.3,137.5 380.1,137.6 383.8,144.8 387.5,142.0 391.2,141.9 395.0,141.9 398.8,150.5 402.6,139.5 406.3,138.1 410.0,138.1 413.7,138.1 417.5,188.4 421.3,174.5 425.0,172.4 428.8,172.3 432.5,216.8 436.4,210.8 440.2,204.8 444.0,204.2 447.8,203.7 451.6,203.7 456.0,207.2 460.3,204.6 464.2,204.7 467.9,204.7 471.6,215.1 475.3,204.7 479.0,203.4 482.8,203.4 486.5,203.4 490.3,206.0 494.0,200.3 497.8,201.0 501.6,200.9 505.3,210.4 509.0,199.3 512.8,198.2 516.6,198.2 520.4,198.3 524.3,206.9 528.0,201.1 531.9,200.6 535.7,200.6 539.4,238.1 543.3,228.5 547.0,227.1 550.7,227.3 554.5,231.0 558.2,236.8 562.0,230.6 565.8,230.1 569.5,230.0 573.2,230.0 576.9,225.6 580.7,224.6 584.4,224.5 588.2,224.5 592.0,224.5 595.8,231.4 599.7,227.8 603.5,227.8 607.3,227.7 611.3,227.7 615.1,224.8 618.9,221.3 622.7,220.8 626.6,228.6 630.5,228.6 634.3,223.6 638.0,246.5 641.8,246.5 645.5,246.5 649.3,246.5 653.1,247.1 656.8,244.7 660.7,244.7 664.6,244.5 668.3,261.5 672.1,249.1 675.9,268.2 679.7,268.2 683.4,268.2 687.1,258.2 690.8,253.7 694.4,252.9 698.1,252.9 701.8,252.9 705.5,255.6 709.3,249.0 713.0,248.1 716.7,248.1 720.3,248.1 724.1,253.8 727.8,245.1 731.5,244.2 735.2,244.1 739.0,262.7 742.9,262.7 746.8,256.0 750.7,253.6 754.5,253.5 758.3,253.5 762.0,253.5 765.9,265.3 769.7,257.9 773.5,257.9 777.2,257.9 781.1,257.9 784.8,261.1 788.6,259.7 792.4,259.7 796.2,259.6 799.8,261.4 803.5,254.3 807.3,253.4 811.0,253.3 814.7,253.3 818.4,255.6 822.0,259.7 825.7,259.3 829.4,259.3 833.2,259.3 837.0,254.3 841.0,249.3 845.0,249.2 849.0,249.2 852.8,249.2 856.7,256.0 860.5,254.2 864.4,254.0 868.1,253.9 871.9,277.4 875.7,266.2 879.5,264.0 883.5,264.0 887.5,264.3 891.3,267.3 895.3,264.0 899.1,263.8 902.9,263.8 906.8,272.5 910.6,263.0 914.5,262.7 918.3,262.8 922.2,262.8 925.9,259.9 929.8,257.5 933.6,269.1 937.6,269.1 941.4,269.1 945.3,262.0 949.0,259.4 952.8,259.3 956.5,259.3 960.3,274.4 964.0,262.2 967.8,261.5 971.5,261.5 975.2,261.4 978.9,262.7 982.7,256.2 986.3,255.9 990.0,255.9" class="line"/>
+<text x="540.0" y="358" text-anchor="middle" class="axis">Minutes since first tank marker</text>
+<text x="24" y="206.0" transform="rotate(-90 24 206.0)" text-anchor="middle" class="axis">PSS (MiB)</text>
+<text x="90" y="365" class="title" style="font-size:18px">Final ten minutes</text>
+<line x1="90" y1="570.0" x2="990" y2="570.0" class="grid"/>
+<text x="78" y="574.0" text-anchor="end" class="axis">78</text>
+<line x1="90" y1="545.0" x2="990" y2="545.0" class="grid"/>
+<text x="78" y="549.0" text-anchor="end" class="axis">80</text>
+<line x1="90" y1="520.0" x2="990" y2="520.0" class="grid"/>
+<text x="78" y="524.0" text-anchor="end" class="axis">82</text>
+<line x1="90" y1="495.0" x2="990" y2="495.0" class="grid"/>
+<text x="78" y="499.0" text-anchor="end" class="axis">84</text>
+<line x1="90" y1="470.0" x2="990" y2="470.0" class="grid"/>
+<text x="78" y="474.0" text-anchor="end" class="axis">86</text>
+<line x1="90" y1="445.0" x2="990" y2="445.0" class="grid"/>
+<text x="78" y="449.0" text-anchor="end" class="axis">88</text>
+<line x1="90" y1="420.0" x2="990" y2="420.0" class="grid"/>
+<text x="78" y="424.0" text-anchor="end" class="axis">90</text>
+<line x1="90" y1="395.0" x2="990" y2="395.0" class="grid"/>
+<text x="78" y="399.0" text-anchor="end" class="axis">92</text>
+<line x1="90.0" y1="395" x2="90.0" y2="570" class="grid"/>
+<text x="90.0" y="592" text-anchor="middle" class="axis">0</text>
+<line x1="270.0" y1="395" x2="270.0" y2="570" class="grid"/>
+<text x="270.0" y="592" text-anchor="middle" class="axis">2</text>
+<line x1="450.0" y1="395" x2="450.0" y2="570" class="grid"/>
+<text x="450.0" y="592" text-anchor="middle" class="axis">4</text>
+<line x1="630.0" y1="395" x2="630.0" y2="570" class="grid"/>
+<text x="630.0" y="592" text-anchor="middle" class="axis">6</text>
+<line x1="810.0" y1="395" x2="810.0" y2="570" class="grid"/>
+<text x="810.0" y="592" text-anchor="middle" class="axis">8</text>
+<line x1="990.0" y1="395" x2="990.0" y2="570" class="grid"/>
+<text x="990.0" y="592" text-anchor="middle" class="axis">10</text>
+<circle cx="116.9" cy="504.0" r="2.2" class="point"/>
+<circle cx="152.0" cy="503.5" r="2.2" class="point"/>
+<circle cx="187.5" cy="503.5" r="2.2" class="point"/>
+<circle cx="222.8" cy="534.7" r="2.2" class="point"/>
+<circle cx="257.9" cy="500.5" r="2.2" class="point"/>
+<circle cx="293.9" cy="499.5" r="2.2" class="point"/>
+<circle cx="329.3" cy="499.7" r="2.2" class="point"/>
+<circle cx="364.7" cy="499.7" r="2.2" class="point"/>
+<circle cx="399.7" cy="489.3" r="2.2" class="point"/>
+<circle cx="434.7" cy="480.8" r="2.2" class="point"/>
+<circle cx="469.9" cy="522.5" r="2.2" class="point"/>
+<circle cx="506.7" cy="522.5" r="2.2" class="point"/>
+<circle cx="542.3" cy="522.5" r="2.2" class="point"/>
+<circle cx="577.8" cy="496.8" r="2.2" class="point"/>
+<circle cx="612.4" cy="487.5" r="2.2" class="point"/>
+<circle cx="647.1" cy="487.1" r="2.2" class="point"/>
+<circle cx="681.4" cy="487.2" r="2.2" class="point"/>
+<circle cx="716.0" cy="541.6" r="2.2" class="point"/>
+<circle cx="750.5" cy="497.7" r="2.2" class="point"/>
+<circle cx="785.4" cy="495.1" r="2.2" class="point"/>
+<circle cx="819.4" cy="495.1" r="2.2" class="point"/>
+<circle cx="853.3" cy="494.9" r="2.2" class="point"/>
+<circle cx="887.5" cy="499.4" r="2.2" class="point"/>
+<circle cx="922.4" cy="475.9" r="2.2" class="point"/>
+<circle cx="956.2" cy="474.8" r="2.2" class="point"/>
+<circle cx="990.0" cy="474.8" r="2.2" class="point"/>
+<polyline points="116.9,504.0 152.0,503.5 187.5,503.5 222.8,534.7 257.9,500.5 293.9,499.5 329.3,499.7 364.7,499.7 399.7,489.3 434.7,480.8 469.9,522.5 506.7,522.5 542.3,522.5 577.8,496.8 612.4,487.5 647.1,487.1 681.4,487.2 716.0,541.6 750.5,497.7 785.4,495.1 819.4,495.1 853.3,494.9 887.5,499.4 922.4,475.9 956.2,474.8 990.0,474.8" class="line"/>
+<text x="540.0" y="618" text-anchor="middle" class="axis">Minutes within final ten-minute window</text>
+<text x="24" y="482.5" transform="rotate(-90 24 482.5)" text-anchor="middle" class="axis">PSS (MiB)</text>
+<text x="90" y="645" class="title" style="font-size:18px">Final-window spread versus criterion</text>
+<line x1="250.0" y1="675" x2="250.0" y2="755" class="grid"/>
+<text x="250.0" y="774" text-anchor="middle" class="axis">0 MiB</text>
+<line x1="412.5" y1="675" x2="412.5" y2="755" class="grid"/>
+<text x="412.5" y="774" text-anchor="middle" class="axis">2 MiB</text>
+<line x1="575.0" y1="675" x2="575.0" y2="755" class="grid"/>
+<text x="575.0" y="774" text-anchor="middle" class="axis">4 MiB</text>
+<line x1="737.5" y1="675" x2="737.5" y2="755" class="grid"/>
+<text x="737.5" y="774" text-anchor="middle" class="axis">6 MiB</text>
+<line x1="900.0" y1="675" x2="900.0" y2="755" class="grid"/>
+<text x="900.0" y="774" text-anchor="middle" class="axis">8 MiB</text>
+<text x="90" y="700" class="axis">Measured spread</text>
+<rect x="250" y="682" width="434.2" height="24" rx="3" fill="#c45a22"/>
+<text x="694.2" y="700" class="axis">5.34 MiB</text>
+<text x="90" y="740" class="axis">4 MiB limit</text>
+<rect x="250" y="722" width="325.0" height="24" rx="3" fill="#34875b"/>
+<text x="585.0" y="740" class="axis">4.00 MiB</text>
+<text x="90" y="795" class="axis">PSS fell over the full run; the threshold is a spread check, and the final-window spread exceeds it.</text>
+</svg>
