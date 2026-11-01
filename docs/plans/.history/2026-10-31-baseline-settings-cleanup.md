@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-01](https://github.com/wbniv/WorldFoundry/commit/c1fa09b4) | Settings plan: the Pixel launches the two-owner level; its picker cannot be driven |
 | [2026-11-01](https://github.com/wbniv/WorldFoundry/commit/9eadef08) | Settings plan: the 27 Field types rows as drawn on cast1, with five observations |
 | [2026-11-01](https://github.com/wbniv/WorldFoundry/commit/3b9e79f2) | Settings plan: device acceptance on cast1 and cast2 (two validators pass, one known gap) |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/c26fb971) | Settings plan: the validator commit is on coordinator main |
@@ -9,6 +10,11 @@
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/e6fe62eb) | Baseline: add a ladder of eight Utah teapots (52 to 16 256 faces) |
 
 <!--history-meta v1
+c1fa09b4	author	Will Norris
+c1fa09b4	added	3
+c1fa09b4	deleted	3
+c1fa09b4	files	1
+c1fa09b4	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
 9eadef08	author	Will Norris
 9eadef08	added	24
 9eadef08	deleted	3
