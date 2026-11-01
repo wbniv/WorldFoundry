@@ -1,6 +1,6 @@
 # Baseline settings: two owners and nothing else
 
-**Status:** Built and verified on the host (2026‑10‑31): steps 1 to 6 pass, with the corrections recorded under each. Step 7 (device acceptance) is not run: the validator change is committed locally in the coordinator project as `dd3590a` on `main` (also `77920cc` on branch `baseline-two-owners-validators`; not pushed), and awaits a release and deploy, which needs Will's sudo ([patch](2026-10-31-baseline-settings-cleanup/validator-patch.diff)). Two findings changed the build, see **Implementation notes**: the Runtime settings owner authors one editable row (accepted by Will, 2026‑10‑31: "we totally want this option"), and Field types has its own schema. Rank **T4**: it changes what the level exports, the cooker bindings, the verifier, and the two device validators that live in the coordinator project.
+**Status:** Built and verified on the host (2026‑10‑31): steps 1 to 6 pass, with the corrections recorded under each. Step 7 (device acceptance) is partly run (2026‑11‑01): the validator change (`dd3590a`, released as coordinator 0.1.26, not pushed) passes `baseline-settings` and `baseline-picker` on cast1 and cast2; `baseline-runtime-options` fails on read-only runtime rows, a known gap; the Pixel and the 27-row capture are not run ([patch](2026-10-31-baseline-settings-cleanup/validator-patch.diff)). Two findings changed the build, see **Implementation notes**: the Runtime settings owner authors one editable row (accepted by Will, 2026‑10‑31: "we totally want this option"), and Field types has its own schema. Rank **T4**: it changes what the level exports, the cooker bindings, the verifier, and the two device validators that live in the coordinator project.
 
 ## Context
 
@@ -397,4 +397,18 @@ Run 2026‑10‑31 on the host, in the shared tree. Raw output under each step. 
 
 7. On the Pixel and cast2 (once the validators are deployed): hold A opens the picker with two owners; Pick in 3D shows one bracket and, on OK, the "Objects here" list with both; each owner opens its form; Apply and Cancel behave; the captured Field types sections show the observed presentation for all 27 rows.
 
-    **NOT RUN.** It needs the validator patch deployed under `/opt/wf-device-coordinator`, which is Will's to review and deploy. No device acceptance is claimed. The APK to test is `wflevels/baseline/build/baseline-eebab09d285f2939.apk` (SHA‑256 `eebab09d285f2939b829c0c3be579429818f2f30220427d568cabb599970635a`, frozen runtime `dd81405c…a815c`).
+    **PARTIAL (2026‑11‑01): two of three validators pass on cast1 and cast2; the third fails on a known gap; the Pixel and the 27-row capture were not run.** The coordinator was released as 0.1.26 (`task coordinator:release`, Will entered sudo; transcript `docs/diagnostics/Chromecast-coordinator-deployment-20261101-065330-*.log` in the coordinator project: "Standalone release verified; queue resumed; reservations and device identities retained"). APK `baseline-eebab09d285f2939.apk`, SHA-256 `eebab09d285f2939b829c0c3be579429818f2f30220427d568cabb599970635a`. Evidence is in the coordinator project under `docs/diagnostics/baseline-two-owners-<job>/`.
+
+    ```
+    chromecast-test-01 (cast1)   baseline-settings         J‑2d8785a9055f   completed   21 of 21 assertions true
+    chromecast-test-01 (cast1)   baseline-picker           J‑4c1ad0453c39   completed   12 of 12 assertions true
+    chromecast-test-02 (cast2)   baseline-settings         J‑b93155b5b22f   completed   21 of 21 assertions true
+    chromecast-test-02 (cast2)   baseline-picker           J‑c744e44be0b1   completed   12 of 12 assertions true
+    chromecast-test-01 (cast1)   baseline-runtime-options  J‑435fbdf76f77   recovery-required: plugin-error   7 assertions true, then failed
+    ```
+
+    **PASS** for the picker with two owners (`two_candidates`, `one_bracket_in_view`, `same_spot_short_list`, `ok_opens_owner_form`, `tv_form_is_that_owner`) and for the settings flow (`tv_selects_second_owner`, `other_owner_separate`, `apply_readback`, `home_cancels_uncommitted_draft`), on both TVs.
+
+    **FAIL, known gap: `baseline-runtime-options`.** Its first seven assertions held (`two_owners`, `tv_back_applies_fps` among them). It then sets `runtime_fixed_clock` and `runtime_clock_hz` from the phone form and waits for the values to change; the phone model reports those rows `readonly: true`, so the wait times out (`failure_location` `plant_checks.py:108:model`, "Timed out waiting for expected property snapshot"). The rows were already read-only before this change (see the Current-state table); editing them is the open TODO item "Runtime object editing on OAS/OAD". The coordinator readded cast1 by itself (`J‑c7937640e502`, health ready). Until that item lands, the fixed-clock part of this validator cannot pass; trimming it to the build is a separate coordinator release, left undone.
+
+    **NOT RUN:** the Pixel (the validators drive a TV), and the capture of all 27 Field types rows as presented, which no validator takes; both stay open for this item.

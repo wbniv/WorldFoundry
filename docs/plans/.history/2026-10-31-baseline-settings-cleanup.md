@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/c26fb971) | Settings plan: the validator commit is on coordinator main |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/c95d44bf) | Settings plan: the validator change is committed in the coordinator repo |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/d460aba6) | Settings cleanup: the editable Show FPS row is accepted |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/df676a00) | Baseline settings: two owners, Field types and Runtime settings |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/e6fe62eb) | Baseline: add a ladder of eight Utah teapots (52 to 16 256 faces) |
 
 <!--history-meta v1
+c26fb971	author	Will Norris
+c26fb971	added	2
+c26fb971	deleted	2
+c26fb971	files	1
+c26fb971	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
 c95d44bf	author	Will Norris
 c95d44bf	added	2
 c95d44bf	deleted	2
