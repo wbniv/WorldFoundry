@@ -407,5 +407,91 @@ an i7‑1185G7 that was shared with other sessions (load average 8–11 on 8 thr
     in the Jellyfish tank and no dialog. The cause is not known; it needs someone with the phone in hand
     to see what the installer is waiting for.
 
-    **FAIL (incomplete)**: one of the seven tanks profiled (Lionfish, on the Pixel 8 Pro); the other six
-    did not complete because the Pixel stopped on hung installs; the Chromecast HD cost is not measured.
+    ~~**FAIL (incomplete)**: one of the seven tanks profiled (Lionfish, on the Pixel 8 Pro); the other six
+    did not complete because the Pixel stopped on hung installs; the Chromecast HD cost is not measured.~~
+    Superseded by step 7: Will chose cast1 instead of the Pixel, and all seven tanks completed there.
+
+7. Device cost of the fix on the Chromecast HD (cast1), all seven tanks. Same frozen APKs and recipes
+   as step 6, submitted with `task chromecast:submit DEVICE=chromecast-test-01 RECIPE=<recipe> ASYNC=true`
+   on 2026‑11‑01 from 19:53; all seven finished overnight. Each receipt reads `succeeded / completed`,
+   and each job's cleanup re-installed the after build (`8e7d98eb…`, verified), so no job ended uncertain
+   and no restore failed. Evidence: `~/tmp/deformer-normals-cast1/<job>/`, summarized with
+   `scripts/profile-deformer-normals.py summarize ~/tmp/deformer-normals-cast1/<job> --out <job>.json`.
+
+    Betta's scene selection on cast1 confirmed the right tank, so the Pixel failure (step 6) was specific
+    to the Pixel:
+
+    ```
+    {'scene': 'betta', 'expected_index': 2, 'cursor_before_selection': 2, 'corrective_down_keys': 0,
+     'cursor_indices': [0, 1, 2], 'selected_indices': [2], 'started_indices': [2], 'confirmed': True}
+    ```
+
+    **All numbers in this step are Chromecast HD (cast1).** Frame rate: four runs per build (before-1,
+    before-2 and after-1, after-2, two runs each, alternating), min–max and median. p50 and p95 are
+    presented-frame intervals; missed refresh is the percentage of frames over 1.5 refresh intervals.
+
+    | Tank (job) | fps before | fps after | Outside spread? | p50 / p95 ms, before → after | Missed refresh %, before → after |
+    |---|---|---|---|---|---|
+    | Lionfish (J‑f41ce99aacf7) | 47.6–48.1 (47.9) | 46.3–46.8 (46.6) | **yes, lower** | 16.68 / 33.37 → same | 24.3–25.6 → 27.4–28.4 |
+    | Arowana (J‑5bbba2fbfed8) | 59.7–59.9 (59.8) | 59.4–59.8 (59.6) | no | 16.68 / 16.68 → same | 0.0–0.3 → 0.2–0.9 |
+    | Betta (J‑ac94b4d4e1ed) | 59.7–59.8 (59.8) | 59.7–59.9 (59.8) | no | 16.68 / 16.68 → same | 0.2–0.3 → 0.1–0.3 |
+    | Jellyfish (J‑43d8e662aec2) | 57.6–58.4 (58.2) | 57.9–58.4 (58.0) | no | 16.68 / 16.68 → same | 2.6–4.1 → 2.6–3.6 |
+    | Tiger Barbs (J‑554731d046ef) | 33.1–33.6 (33.3) | 32.3–32.8 (32.7) | **yes, lower** | 33.37 / 33.37 → same | 77.5–79.2 → 81.3–83.6 |
+    | Planted tank (J‑f97660519b6e) | 34.3–35.4 (34.7) | 32.5–37.9 (37.0) | no (noisy) | 33.37 / 33.37–50.05 → same | 64.3–68.9 → 54.1–76.0 |
+    | Clownfish (J‑b4ce040c9502) | 59.8–59.9 (59.9) | 59.8–59.9 (59.9) | no | 16.68 / 16.68 → same | 0.0–0.2 → 0.0–0.2 |
+
+    CPU per frame from the `--frame-profile` runs (thread CPU ms; mean of the 5 s windows after level
+    load, window min–max in brackets). The deform call sits in the `pose` section in the tanks whose
+    scripts mark one (Lionfish, Tiger Barbs) and in `animation` in the others; `animation` encloses
+    `pose` where both exist.
+
+    | Tank | pose before → after | animation before → after | total before → after | Δ total | Deform calls / frame |
+    |---|---|---|---|---|---|
+    | Lionfish | 0.730 [0.719–0.743] → 1.346 [1.314–1.375] | 0.593 → 1.208 | 15.00 → 15.58 | +0.57 | 2 |
+    | Arowana | — | 0.170 [0.166–0.174] → 0.697 [0.677–0.708] | 6.69 → 7.16 | +0.47 | 10 |
+    | Betta | 0.053 → 0.053 | 0.086 [0.081–0.088] → 0.298 [0.279–0.309] | 4.53 → 4.73 | +0.20 | 7 |
+    | Jellyfish | — | 0.270 [0.265–0.280] → 0.546 [0.539–0.553] | 10.34 → 10.56 | +0.23 | 12 |
+    | Tiger Barbs | 4.340 [4.287–4.452] → 4.910 [4.861–4.957] | 0.248 → 0.792 | 26.27 → 26.81 | +0.54 | 50 |
+    | Planted tank | — | 6.222 [5.981–6.787] → 7.054 [6.722–7.740] | 18.94 → 21.21 | (noise) | 2 |
+    | Clownfish | — | — | 2.78 → 2.77 | none | 0 |
+
+    The render section is unchanged within its spread in every tank (Lionfish 13.47 → 13.42, Tiger
+    Barbs 8.50 → 8.39), and the faces-culled counter differs by under 0.1 % (Lionfish 2062.3 → 2062.0
+    of 8502), so the fix moves CPU time into the deform pass and changes almost nothing in the render.
+
+    Reading the table:
+
+    - **The cost is 0.2–0.6 ms of CPU per frame** in the five tanks that deform at idle: Betta +0.21
+      (`animation`), Jellyfish +0.28, Arowana +0.53, Tiger Barbs +0.54 to +0.57, Lionfish +0.62 (`pose`).
+    - **Heavier meshes cost more per call.** Lionfish pays about 0.31 ms per 4068-face fish. The 50 barbs
+      pay about 11 µs each. Arowana's 0.53 ms covers its body (5000 faces) and fins over 10 calls.
+    - **Against the desktop estimate**, cast1 is about 3× slower per call. The desktop measured about
+      98 µs per lionfish call on a loaded i7, against about 310 µs here. The Pixel 8 Pro's Lionfish (step 6:
+      +0.12 ms per frame, so about 60 µs a fish) is about 5× faster than cast1.
+    - **Frame rate drops outside the spread only in the two tanks that were already over budget:**
+      Lionfish 47.9 → 46.6 fps (−1.3, −2.7 %) and Tiger Barbs 33.3 → 32.7 fps (−0.6, −1.8 %). Their
+      missed-refresh share rises by about 3 and 4 points.
+    - **The tanks that hold 60 fps** (Arowana, Betta, Clownfish) and Jellyfish (58) **show no change**
+      outside the spread.
+    - **Planted tank is not a usable measurement.** Its plants differ between launches: faces submitted
+      were 30 892 before and 35 497 after, and render CPU ranged 2.8–26.6 ms within one run. So its
+      fps and total move with the scene, not with the fix.
+    - **Clownfish has no deform call at idle** (0 per frame), so the fix cannot cost anything there.
+
+    **PASS**: all seven tanks completed on cast1 with clean receipts and restores, and the fix's cost is
+    measured. Whether that cost is acceptable is Will's decision (below), so the TODO item stays
+    `[verify T3]` until he decides.
+
+    **Recommendation (for Will to decide):**
+
+    - **Keep the fix.** Rest-pose normals make bent fins and bodies cull and light wrongly
+      (Verification step 2 and the mockups), and the cost is invisible in every tank that holds its
+      frame rate.
+    - **It does cost a visible ~1–3 % in the two tanks that were already over budget on cast1:**
+      Lionfish −1.3 fps and Tiger Barbs −0.6 fps.
+    - **If those fps should come back,** the cheapest follow-up is to recompute only faces with a vertex
+      that can move. The deformers already know which vertices are static: the front 35 % of the fish
+      body, and the lion trunk and zero-weight regions. That would save part of the Lionfish cost and
+      little of the barbs'.
+    - **Recomputing every second frame would halve the cost,** at the price of normals one frame stale.
+    - **Do not change both** until Will says the fps matter more than the simpler single pass.
