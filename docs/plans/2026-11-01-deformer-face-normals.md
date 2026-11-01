@@ -480,19 +480,25 @@ an i7‑1185G7 that was shared with other sessions (load average 8–11 on 8 thr
     - **Clownfish has no deform call at idle** (0 per frame), so the fix cannot cost anything there.
 
     **PASS**: all seven tanks completed on cast1 with clean receipts and restores, and the fix's cost is
-    measured. Whether that cost is acceptable is Will's decision (below), so the TODO item stays
-    `[verify T3]` until he decides.
+    measured. ~~Whether that cost is acceptable is Will's decision (below), so the TODO item stays
+    `[verify T3]` until he decides.~~
 
-    **Recommendation (for Will to decide):**
+    **Verdict, 2026‑11‑02: Will accepted the cost** ("cost ok"): Lionfish −1.3 fps, Tiger Barbs
+    −0.6 fps, 0.2–0.6 ms of CPU a frame on cast1. The moved-faces-only and every-other-frame options
+    below were offered and not taken; the single full pass stays. The TODO item is done.
+
+    **Recommendation (as offered before the verdict):**
 
     - **Keep the fix.** Rest-pose normals make bent fins and bodies cull and light wrongly
       (Verification step 2 and the mockups), and the cost is invisible in every tank that holds its
       frame rate.
     - **It does cost a visible ~1–3 % in the two tanks that were already over budget on cast1:**
       Lionfish −1.3 fps and Tiger Barbs −0.6 fps.
-    - **If those fps should come back,** the cheapest follow-up is to recompute only faces with a vertex
+    - ~~**If those fps should come back,** the cheapest follow-up is to recompute only faces with a vertex
       that can move. The deformers already know which vertices are static: the front 35 % of the fish
       body, and the lion trunk and zero-weight regions. That would save part of the Lionfish cost and
-      little of the barbs'.
-    - **Recomputing every second frame would halve the cost,** at the price of normals one frame stale.
-    - **Do not change both** until Will says the fps matter more than the simpler single pass.
+      little of the barbs'.~~ Not taken (2026‑11‑02).
+    - ~~**Recomputing every second frame would halve the cost,** at the price of normals one frame stale.~~
+      Not taken (2026‑11‑02).
+    - ~~**Do not change both** until Will says the fps matter more than the simpler single pass.~~
+      Decided: keep the single pass.

@@ -46,7 +46,6 @@
 - [T2] **Sky-dome banding: let `export_level.py` set `LIGHTING_PRELIT` from a Blender material property (`wf_prelit`).** The engine half landed in `2c80521f` (prelit faces now genuinely skip the lighting term, proven winding-invariant), but `wflevels/condo_639_640/skydome.iff` (and `_tour`, `moon_site01`) carry flags `0x2` = `TEXTURE_MAPPED | LIGHTING_LIT` — the sky is lit per face, hence the faint horizontal bands. Emit flag 4 when the material has `wf_prelit`, set it on the three sky domes' materials, rebuild those levels, and A/B: bands gone, everything else byte-identical (`-rate20 --capture-frame`). Add a `.lev`/MATL round-trip test for the flag. Split out of the prelit item on 2026‑09‑21.
 - [T2] **Snowgoons-import fog trap: inherited Earth-fog defaults grey out distant terrain.** Levels scaffolded off snowgoons inherit `FoggingColor=0x888888`, `FoggingStartDistance=20`, `FoggingCompleteDistance=30` → any pixel past ~30 m fades to flat `#888888`. Workaround overrides the three fields per-level; consider adding an opt-in "strip snowgoons fog" to `wf_blender` import_level. [plan](docs/plans/2026-05-31-uninitialised-fog-defaults.md)
 - [T2] Investigate [stereowrap](https://github.com/jtsiomb/stereowrap)
-- [verify T3] **Stale face normals in the five existing deformers.** Fixed: fish, fin, swim, jelly and lion poses now recompute every face normal with `DFRM`'s triangle-normal routine (`face_normal.h`); `deformer_golden` checks them within 1e‑4 and passes on desktop; all eight tanks open on cast1 (J‑5332f869244c). Profiled on cast1, all seven tanks: +0.2–0.6 ms CPU a frame; fps drops outside the spread only in Lionfish (47.9 → 46.6) and Tiger Barbs (33.3 → 32.7), both already over budget. Waiting on Will's verdict: keep as is, or recompute only faces that can move. [plan](docs/plans/2026-11-01-deformer-face-normals.md)
 
 ### Engine Robustness
 
@@ -192,6 +191,7 @@
 
 
 ## Done
+- ✅ 2026-11-02 — [stale-deformer-normals] Five deformers recompute face normals each pose; cast1 cost accepted. See [plan](docs/plans/2026-11-01-deformer-face-normals.md).
 - ✅ 2026-11-01 — [lionfish-auto-goldfish] Director releases a goldfish 45‑60 s after the tank empties; host, desktop, cast2, CI pass. See [plan](docs/plans/2026-11-01-lionfish-auto-goldfish.md).
 - ✅ 2026‑11‑01 — [field-presentations] The eleven proposed Field types cases draw their own control on TV and phone; seen on cast2. See [plan](docs/plans/2026-11-01-field-presentations.md).
 - ✅ 2026-10-31 — [baseline-utah-teapots] Eight Utah teapots (52…16 256 faces) in the baseline; cast1 about 53 fps, Pixel 120. See [plan](docs/plans/2026-10-31-baseline-utah-teapots.md).
