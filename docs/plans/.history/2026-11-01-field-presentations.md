@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-11-01](https://github.com/wbniv/WorldFoundry/commit/ab292c05) | Field presentations: APK on a refreshed runtime; Release desktop build task |
 | [2026-11-01](https://github.com/wbniv/WorldFoundry/commit/ea44a512) | Field presentations: a distinct control for every settings case |
 
 <!--history-meta v1
+ab292c05	author	Will Norris
+ab292c05	added	17
+ab292c05	deleted	2
+ab292c05	files	1
+ab292c05	body	- Plan step 5: baseline-5b47e27b5516e543.apk (SHA-256 5b47e27b…7f47) on the\n  condo diagnostic runtime 205b4ede…f617, built from a clean worktree at\n  0ff49194; both ABIs carry the new controls.\n- Taskfile: build-desktop-release (CMake + Ninja in build-docker/jelly-engine)\n  as baseline:check's dependency. task build's debug binary cannot run the\n  baseline: it stops on the teapot's polygon assertion and has no\n  source-tree UI font fallback.\n- TODO: the item moves to verify; the cast1 capture remains.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
 ea44a512	author	Will Norris
 ea44a512	added	210
 ea44a512	deleted	0

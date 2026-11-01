@@ -1,6 +1,6 @@
 # Field presentations: a distinct control for every case
 
-**Status:** Built and verified on the host and desktop (2026‑11‑01): steps 1 to 5 pass. The APK `baseline-5b47e27b5516e543.apk` is on a refreshed runtime. Step 6 (cast1) is the coordinator's to run. Choice-row keys follow Will's option 6 (see Decision). Rank **T4**: it changes the engine form, both settings renderers (TV and phone touch), the OAD normalizer and engine validation, then refreshes the baseline's frozen native runtime. TODO: the `[wip T4]` item "Field presentations" in `TODO.md`.
+**Status:** Built and verified on the host and desktop (2026‑11‑01): steps 1 to 5 pass. The APK `baseline-5b47e27b5516e543.apk` is on a refreshed runtime. Step 6 passed on cast2 for the TV form (cast1 was busy); the phone form, the path-error message and a five-option list were not seen on a device. Choice-row keys follow Will's option 6 (see Decision). Rank **T4**: it changes the engine form, both settings renderers (TV and phone touch), the OAD normalizer and engine validation, then refreshes the baseline's frozen native runtime. TODO: the `[wip T4]` item "Field presentations" in `TODO.md`.
 
 ## Context
 
@@ -222,4 +222,19 @@ Run 2026‑11‑01 in the shared tree. The desktop engine is the Release build i
 
 6. On cast1 (the coordinator runs this): the eleven cases draw as in the mockups.
 
-    **NOT RUN:** the coordinator runs it after the APK.
+    **PASS on cast2, TV form only (2026‑11‑01, coordinator job `J‑a8499d72871b`, interactive, APK `5b47e27b5516e543`).** Cast1 was held by another session's recording (`J‑78ff6443bb9f`, until about 13:25), so I used cast2 (`chromecast-test-02`, also a Chromecast, armeabi-v7a). The generic interactive job opened the chooser (hold OK, Down, OK) and stepped through Field types with `input:hold` and `input:frame`; frames are in the coordinator project under `docs/diagnostics/field-types-capture-new/`.
+
+    ```
+    Numbers     Trigger mailbox: 100  with bounds "0 – 159" at the right; slider ends "0" and "100"
+    Choices     Mode, Powerup, Water type, Tool: value box with a down arrow; Powerup shows an id chip ("2 Flying")
+                Direction: two segments, Forward | Reverse
+                Placement: value box wraps to two lines; the list wraps its three long options
+                hint on a four-option row: "Left / right: change   A: open list"; open list: "Up / down: choose   A: select   Back: close", footer "Close list"
+                Left on Placement's first option: focus went to the Choices section rail (no trap)
+    Switches    Sway: a pill switch reading On (was "Sway: 1")
+    Text        Asset path: file mark, folder "plants/" dimmed, "leaf.png" bright
+    ```
+
+    [numbers](2026-11-01-field-presentations/device-numbers.png), [Powerup closed](2026-11-01-field-presentations/device-powerup-closed.png), [Powerup open](2026-11-01-field-presentations/device-powerup-open.png), [Direction](2026-11-01-field-presentations/device-direction.png), [Placement open](2026-11-01-field-presentations/device-placement-open.png), [rail exit](2026-11-01-field-presentations/device-rail-exit.png), [switches](2026-11-01-field-presentations/device-switches.png), [text](2026-11-01-field-presentations/device-text.png).
+
+    **Not seen on a device:** the phone touch form (the coordinator has no phone touch workflow), the path-error message (the interactive job cannot type text), a choice row with five or more options (every Field types choice row has two to four), and cast1 (busy). While testing I pressed Left on Powerup, which cycled Flying to Speed, and the closing Back applied it on cast2; the job is finished.
