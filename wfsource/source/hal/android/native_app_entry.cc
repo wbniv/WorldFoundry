@@ -55,6 +55,7 @@
 
 #include <hal/hal.h>
 #include <hal/lifecycle.h>
+#include <hal/args_file.hp>
 #include <pigsys/pigsys.hp>
 #include <hal/android/wf_android_export.hp>
 #include <game/level_menu.h>   // Back: selected level -> selector -> exit
@@ -785,10 +786,16 @@ android_main(struct android_app* app)
     // separated arguments appended after argv[0] (the condo app's VRAM overrides,
     // the same flags `task run-condo` passes on the desktop). Absent → argv[0] only,
     // as before. docs/plans/2026-10-01-condo-chromecast.md.
+    //
+    // Parsed by hal/args_file.hp, the parser the iOS app uses too (CTest args_file).
+    // The limits are the ones this loop always had: at most 1023 bytes are read (text
+    // after a NUL byte is ignored), and at most 31 arguments follow argv[0].
+    // Static: HALStart and the pigsys globals keep pointing at these strings.
     static char argBuf[1024];
-    char arg0[] = "wf_game";
-    char* argv[33] = { arg0 };
-    int argc = 1;
+    static std::vector<std::string> argStore;
+    static std::vector<char*> argPtrs;
+    argStore.assign(1, "wf_game");
+    argPtrs.clear();
     if (gAssetMgr)
     {
         if (AAsset* a = AAssetManager_open(gAssetMgr, "wf_args.txt", AASSET_MODE_BUFFER))
@@ -796,23 +803,23 @@ android_main(struct android_app* app)
             const int n = AAsset_read(a, argBuf, sizeof(argBuf) - 1);
             AAsset_close(a);
             argBuf[n > 0 ? n : 0] = '\0';
-            for (char* tok = strtok(argBuf, " \t\r\n"); tok && argc < 32; tok = strtok(nullptr, " \t\r\n"))
+            // "qr_logo=planet|full|none": what sits in the middle of the phone-controller QR code
+            // (default planet). SplitArgsText hands it back as a setting: the engine never sees it.
+            std::vector<std::string> settings;
+            wfargs::SplitArgsText(std::string(argBuf), argStore, &settings, 32);
+            for (const std::string& s : settings)
             {
-                // "qr_logo=planet|full|none": what sits in the middle of the phone-controller QR code
-                // (default planet). Read here and not passed on: the engine never sees it.
-                if (std::strncmp(tok, "qr_logo=", 8) == 0)
-                {
-                    const int mode = phonepad::ParseLogoMode(tok + 8);
-                    if (mode >= 0) gPhoneOverlay.SetLogo(mode);
-                    WFLOG("android_main: %s%s", tok, mode >= 0 ? "" : " (unknown: use planet, full or none)");
-                    continue;
-                }
-                argv[argc++] = tok;
+                const int mode = phonepad::ParseLogoMode(s.c_str() + 8);
+                if (mode >= 0) gPhoneOverlay.SetLogo(mode);
+                WFLOG("android_main: %s%s", s.c_str(), mode >= 0 ? "" : " (unknown: use planet, full or none)");
             }
-            WFLOG("android_main: wf_args.txt gave %d argument(s)", argc - 1);
+            WFLOG("android_main: wf_args.txt gave %d argument(s)", static_cast<int>(argStore.size()) - 1);
         }
     }
-    argv[argc] = nullptr;
+    for (std::string& s : argStore) argPtrs.push_back(&s[0]);
+    const int argc = static_cast<int>(argPtrs.size());
+    argPtrs.push_back(nullptr);   // argv[argc] = nullptr;
+    char** argv = argPtrs.data();
     // HALStart hands PIGSMain the pigsys globals, not its own argc/argv; on the
     // desktop sys_init() fills them, Android never called it, so PIGSMain saw
     // argc = 0 and every argument was dropped. Set them here.

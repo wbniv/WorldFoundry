@@ -10,15 +10,15 @@
 // for example the Finding Your Way chapter's VRAM slot sizes. The format is
 // the one hal/android/native_app_entry.cc reads; a home-screen launch has no
 // other way to get arguments, so without this file the engine sees argv[0]
-// only.
+// only. Both platforms parse it with this header.
 //
 // "qr_logo=" tokens are app settings for the phone-controller overlay, not
 // engine arguments: SplitArgsText hands them back separately and never puts
 // them in the argument list.
 //
 // Header-only and platform-free so the parsing is tested on the Linux host
-// (tests/args_file_test.cc, CTest args_file); hal/ios/native_app_entry.mm is
-// the caller.
+// (tests/args_file_test.cc, CTest args_file); the callers are
+// hal/android/native_app_entry.cc and hal/ios/native_app_entry.mm.
 //=============================================================================
 
 #ifndef _WF_HAL_ARGS_FILE_HP
@@ -32,14 +32,19 @@ namespace wfargs
 {
 
 // Appends the arguments in `text` to `args`; "qr_logo=" tokens go to
-// `settings` instead (dropped when settings is null).
+// `settings` instead (dropped when settings is null). `maxArgs` caps the size
+// of `args` (argv0 included when the caller put it there first): the scan
+// stops as soon as args holds that many, so later tokens, settings too, are
+// not read. That is Android's original strtok loop exactly (a 33-entry argv,
+// `argc < 32` in the loop condition); the default is no cap.
 inline void
 SplitArgsText(const std::string& text, std::vector<std::string>& args,
-              std::vector<std::string>* settings = nullptr)
+              std::vector<std::string>* settings = nullptr,
+              std::vector<std::string>::size_type maxArgs = static_cast<std::vector<std::string>::size_type>(-1))
 {
     static const char kSpace[] = " \t\r\n";
     std::string::size_type pos = text.find_first_not_of(kSpace);
-    while (pos != std::string::npos)
+    while (pos != std::string::npos && args.size() < maxArgs)
     {
         const std::string::size_type end = text.find_first_of(kSpace, pos);
         std::string token = text.substr(pos, end == std::string::npos ? std::string::npos : end - pos);

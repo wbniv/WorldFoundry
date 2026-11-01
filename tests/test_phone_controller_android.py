@@ -157,8 +157,12 @@ def test_qr_logo_switch_is_read_from_wf_args_and_kept_from_the_engine():
     """wf_args.txt 'qr_logo=planet|full|none' picks the logo in the QR (default planet); the token never reaches
     the engine's argv (docs/plans/2026-09-30-aquarium-chromecast.md, design item 4)."""
     src = ENTRY.read_text()
-    loop = src[src.index('strtok(argBuf'):src.index("argv[argc] = nullptr;")]
-    assert loop.index('strncmp(tok, "qr_logo=", 8) == 0') < loop.index("continue;") < loop.index("argv[argc++] = tok;")
+    # The split is hal/args_file.hp's (CTest args_file checks qr_logo= never reaches the argument list); here, the
+    # settings it hands back are what set the logo, and the argument list is what becomes argv.
+    loop = src[src.index('AAssetManager_open(gAssetMgr, "wf_args.txt"'):src.index("char** argv = argPtrs.data();")]
+    assert loop.index("wfargs::SplitArgsText(std::string(argBuf), argStore, &settings, 32);") \
+        < loop.index("gPhoneOverlay.SetLogo(mode);") < loop.index("argPtrs.push_back(&s[0]);")
+    assert "qr_logo" not in loop[loop.index("for (std::string& s : argStore)"):]
     hdr = (REPO / "wfsource" / "source" / "hal" / "phonepad" / "phonepad_overlay.h").read_text()
     assert "int         logo_       = kLogoPlanet;" in hdr
     for app in ("aquarium", "condo"):
