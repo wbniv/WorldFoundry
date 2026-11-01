@@ -193,7 +193,7 @@ Ran in the worktree `.worktrees/lionfish-auto-goldfish` (based on `origin/2026-n
 
     **PASS**: after the commit, a rebuild from the committed inputs leaves no changed file under `wflevels/`. The same command on the unchanged `origin/2026-new-level` inputs, before any edit, also left `git status` empty (the host route reproduces the container-built committed outputs byte for byte).
 
-4. **`task aquarium-check` passes.**
+4. ~~**`task aquarium-check` passes.**~~
 
     ```
     $ docker image inspect wf-blender:local
@@ -202,7 +202,19 @@ Ran in the worktree `.worktrees/lionfish-auto-goldfish` (based on `origin/2026-n
     /dev/nvme0n1p2  469G  442G  3.1G 100% /
     ```
 
-    **NOT RUN (open)**: `aquarium-check` rebuilds in the Blender container, and `scripts/in-linux-container.sh` builds `wf-blender:local` on first use. The image is not in the local store and the root disk has 3.1&nbsp;GB free, so it was not built. Step 3 is the host-route equivalent; CI (`.github/workflows/level-outputs.yml`) runs the real check on push.
+    **NOT RUN locally**: `aquarium-check` rebuilds in the Blender container, and `scripts/in-linux-container.sh` builds `wf-blender:local` on first use. The image is not in the local store and the root disk had 3.1&nbsp;GB free, so it was not built. Step 3 is the host-route equivalent.
+
+    CI stands in for the local run: the same check (`.github/workflows/level-outputs.yml`, which runs `scripts/aquarium-levels.sh check`) on a head that contains both commits of this change (`7a68013f`, `d47951da`):
+
+    ```
+    $ gh run list --branch 2026-new-level --workflow "Level outputs fresh" --limit 2 --json databaseId,headSha,conclusion,status
+    {"conclusion":"success","databaseId":41306899657,"headSha":"45915d338717c6f1ca4858b423d3ae548d448cd2","status":"completed"}
+    {"conclusion":"cancelled","databaseId":41306755116,"headSha":"d47951da316853b8e1c2ae4be939dd3a50e4fa84","status":"completed"}
+    $ git merge-base --is-ancestor d47951da 45915d33 && echo contains
+    contains
+    ```
+
+    **PASS (by CI)**: [Level outputs fresh, run 41306899657](https://github.com/wbniv/WorldFoundry/actions/runs/41306899657), head `45915d33`, conclusion **success**. The run on `d47951da` itself was cancelled because a newer push superseded it.
 
 5. ~~**Selector bundle payload parity: the Lionfish standalone inside `aquarium-menu-cd.iff` is byte-identical to `wflevels/aquarium_lionfish-standalone.iff`; the manifest has no payload hash to update.**~~
 

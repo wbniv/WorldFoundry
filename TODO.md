@@ -2,7 +2,6 @@
 
 ## Open
 
-- [verify T3] **Lionfish: automatic goldfish every 45‑60 s when the tank is empty.** Director-owned countdown in `gf-tick` (`lionfish_feeding.fth`), mailboxes 980‑982, `LIONFISH_AUTO_GOLDFISH` opt-out. Host tests (31), desktop (releases at 52.11 s and 56.95 s after a catch) and cast2 (J‑cb97b6863d6d: released between 45.6 and 59.5 s) pass. Open: step 4, `task aquarium-check`, not run because the Blender image is not built and the root disk is nearly full (host-route rebuild matches). [plan](docs/plans/2026-11-01-lionfish-auto-goldfish.md)
 - [verify T4] **Baseline settings cleanup: two owners.** Built: Field types (the 27 type × showAs cases) and Runtime settings, both at (2, −4, 1); sample owners, empty section and gallery preset removed from the level. Host tests, desktop and bundle checks pass. The editable Show FPS row is accepted ("we totally want this option"). Device acceptance (2026‑11‑01, coordinator 0.1.26): `baseline-settings` and `baseline-picker` pass on cast1 and cast2; `baseline-runtime-options` fails because the Runtime rows are read-only on the phone, a known gap kept whole until runtime editing exists (Will, 2026‑11‑01: "yes"). The 27 Field types rows were captured on cast1 (2026‑11‑01) with five observations in the plan. The Pixel launches the level (2026‑11‑01); its picker and forms were not driven: the coordinator's phone-input jobs are one tap each and relaunch the app at cleanup. Not done: that validator, and the Pixel's picker and forms. [plan](docs/plans/2026-10-31-baseline-settings-cleanup.md)
 ### Platform / Display
 
@@ -193,6 +192,7 @@
 
 
 ## Done
+- ✅ 2026-11-01 — [lionfish-auto-goldfish] Director releases a goldfish 45‑60 s after the tank empties; host, desktop, cast2, CI pass. See [plan](docs/plans/2026-11-01-lionfish-auto-goldfish.md).
 - ✅ 2026‑11‑01 — [field-presentations] The eleven proposed Field types cases draw their own control on TV and phone; seen on cast2. See [plan](docs/plans/2026-11-01-field-presentations.md).
 - ✅ 2026-10-31 — [baseline-utah-teapots] Eight Utah teapots (52…16 256 faces) in the baseline; cast1 about 53 fps, Pixel 120. See [plan](docs/plans/2026-10-31-baseline-utah-teapots.md).
 - ✅ 2026-10-31 — [main-cd-manifest] The main cd.iff's level list is one manifest (wflevels/main-cd.manifest) read by build, verify and tests; bundle refreshed. See [plan](docs/plans/2026-10-31-baseline-utah-teapots.md).
