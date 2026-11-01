@@ -21,8 +21,10 @@ Timeline of `run`, seconds after `simctl launch` returns:
   20     screenshot: the opening card; the app must be alive
   22     touch script presses A: closes the card (SELECT: continue)
   25,26  two screenshots one second apart: the Temple braziers must change
-  27-31  touch script holds UP twice (the Cast1 Temple-to-Love route)
-  32     screenshot at the Love portal; A pressed at 32.6 and again at 35
+  27-32.5 touch script holds UP for 2 s, then 3.2 s: the Cast1 Temple-to-Love
+         route's two 2 s holds, the second lengthened so the player walks up
+         against the portal wall (see ROUTE_NOTE)
+  33     screenshot at the Love portal; A pressed at 33.4 and again at 35.5
   39     screenshot: Love arrival (stretch goal, informational)
   40     screenshot, background (Settings), resume, screenshot again;
          tests/check_frame_rate_log.py --resume. Last, because a resume can
@@ -65,11 +67,19 @@ BUNDLE_ID = "org.worldfoundry.wf-game"
 # Seconds after launch; see the module docstring.
 CARD_AT = 20.0
 FIRE_AT = (25.0, 26.0)
-PORTAL_AT = 32.0
+PORTAL_AT = 33.0
 LOVE_AT = 39.0
 RESUME_AT = 40.0
 RESUME_SETTLE = 3.0
-TOUCH_SCRIPT = "a@22+0.3,up@27+2,up@29.3+2,a@32.6+0.15,a@35+0.3"
+TOUCH_SCRIPT = "a@22+0.3,up@27+2,up@29.3+3.2,a@33.4+0.15,a@35.5+0.3"
+# ROUTE_NOTE. Select at the Love portal acts only within 2.5 units of the
+# portal's spot (0, 9): `fy-near` in the chapter's chapter_script.py. The
+# Cast1 route's 4 s of UP ends close to that edge. Run 6ae72785 crossed it on
+# the iPhone and stopped short on the iPad, and run 6ae7245a stopped short on
+# the iPhone: in the portal frames the door is 230, 195 and 160 px tall, while
+# the player (a fixed 3.8 units from the camera) is the same size. Walking
+# 1.2 s longer presses the player against the portal wall, inside the radius
+# whatever the simulator's frame pacing did to the walk.
 FIRE_BLOB_MIN = 20   # run 1, iPhone: the brazier's cluster was 60 pixels at 471x1024
 
 ZFORTH_ERROR = re.compile(r"zforth[: ].*\b(error|unknown|failed)\b")
@@ -275,6 +285,14 @@ def pick_devices():
     return None, []
 
 
+def mean_diff(a: Path, b: Path):
+    wa, ha, pa = read_png(downscaled(a))
+    wb, hb, pb = read_png(downscaled(b))
+    if (wa, ha) != (wb, hb):
+        return None
+    return round(sum(abs(x - y) for x, y in zip(pa, pb)) / len(pa), 2)
+
+
 def downscaled(shot: Path) -> Path:
     small = shot.with_suffix(".small.png")
     subprocess.run(["sips", "-Z", "1024", "-s", "format", "png", str(shot), "--out", str(small)],
@@ -286,6 +304,7 @@ def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
     v = {"label": label, "name": name, "install": False, "launch": False, "alive_20s": False,
          "alive_end": False, "fps_check": False, "fire_pixels": 0, "fire_bbox": None,
          "fire_blob_pixels": 0, "fire_blob_bbox": None, "resume_mean_diff": None,
+         "love_frame_diff": None,
          "card_colours": 0, "level_loaded_at": None}
     stdout_f, stderr_f = out / f"ios-chapter-{label}-stdout.txt", out / f"ios-chapter-{label}-stderr.txt"
     shot = lambda tag: out / f"ios-chapter-{label}-{tag}.png"
@@ -328,8 +347,8 @@ def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
     card = snap("card")
     wait_until(FIRE_AT[0]); fire1 = snap("fire-1")
     wait_until(FIRE_AT[1]); fire2 = snap("fire-2")
-    wait_until(PORTAL_AT); snap("portal")
-    wait_until(LOVE_AT); snap("love")
+    wait_until(PORTAL_AT); portal = snap("portal")
+    wait_until(LOVE_AT); love = snap("love")
     wait_until(RESUME_AT); before = snap("resume-before")
     sh(["xcrun", "simctl", "launch", udid, "com.apple.Preferences"])
     time.sleep(2)
@@ -354,11 +373,12 @@ def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
             v["fire_blob_pixels"], v["fire_blob_bbox"] = fire_blob(wa, ha, mask)
             v["fire_frame"] = [wa, ha]
             write_png(shot("fire-diff"), wa, ha, mask)
+    if portal.exists() and love.exists():
+        # Informational: Love's street looks nothing like the Temple wall, so a
+        # large difference means the A press at the portal took the player in.
+        v["love_frame_diff"] = mean_diff(portal, love)
     if before.exists() and after.exists():
-        wa, ha, pa = read_png(downscaled(before))
-        wb, hb, pb = read_png(downscaled(after))
-        if (wa, ha) == (wb, hb):
-            v["resume_mean_diff"] = round(sum(abs(x - y) for x, y in zip(pa, pb)) / len(pa), 2)
+        v["resume_mean_diff"] = mean_diff(before, after)
     for f in out.glob(f"ios-chapter-{label}-*.small.png"):
         f.unlink()
 
@@ -403,6 +423,7 @@ def run(app: Path, out: Path) -> int:
               f"texture_slot_error={v['texture_slot_error']} fps_check={v['fps_check']} "
               f"fire_pixels={v['fire_pixels']} fire_blob_pixels={v['fire_blob_pixels']} "
               f"fire_blob_bbox={v['fire_blob_bbox']} resume_mean_diff={v['resume_mean_diff']} "
+              f"love_frame_diff={v['love_frame_diff']} "
               f"card_colours={v['card_colours']} "
               f"level_loaded_at={v['level_loaded_at']} touch_a={v['touch_a']} touch_up={v['touch_up']}")
         for line in v["zforth_errors"]:

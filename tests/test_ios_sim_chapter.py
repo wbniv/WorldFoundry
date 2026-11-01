@@ -145,3 +145,31 @@ def test_bundle_refuses_a_different_apk_or_level(tmp_path):
         chapter.bundle(tmp_path / "chapter.apk", "0" * 64, hashlib.sha256(level).hexdigest(), app, tmp_path / "o")
     with pytest.raises(SystemExit, match="cd.iff SHA-256 mismatch"):
         chapter.bundle(tmp_path / "chapter.apk", apk_sha, "0" * 64, app, tmp_path / "o")
+
+
+def parse_touch_script(text):
+    """Python mirror of wf_touch::ParseScript (hal/ios/touch_pad.cc)."""
+    entries = []
+    for entry in text.split(","):
+        button, rest = entry.split("@")
+        start, duration = rest.split("+")
+        entries.append((button, float(start), float(duration)))
+    return entries
+
+
+def test_route_walks_into_the_love_portal_trigger_before_selecting():
+    """Regression for run 6ae72785: the iPad stopped at the portal's edge, outside
+    the 2.5-unit Select radius (chapter_script.py fy-near), after the Cast1
+    route's 4 s of UP. The route now walks 5.2 s, into the portal wall, and
+    every press lands inside the screenshots' timeline."""
+    entries = parse_touch_script(chapter.TOUCH_SCRIPT)
+    ups = [e for e in entries if e[0] == "up"]
+    presses = [e for e in entries if e[0] == "a"]
+    assert sum(d for _, _, d in ups) >= 5.0
+    walk_end = max(s + d for _, s, d in ups)
+    card_close, portal_presses = presses[0], presses[1:]
+    assert card_close[1] + card_close[2] < chapter.FIRE_AT[0] < ups[0][1]
+    assert walk_end < chapter.PORTAL_AT < min(s for _, s, _ in portal_presses)
+    assert max(s + d for _, s, d in portal_presses) < chapter.LOVE_AT < chapter.RESUME_AT
+    for (_, s1, d1), (_, s2, _) in zip(entries, entries[1:]):
+        assert s1 + d1 < s2, "presses must not overlap: a chord is a different input"
