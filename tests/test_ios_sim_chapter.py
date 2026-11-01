@@ -44,12 +44,33 @@ def test_fire_change_counts_only_fire_coloured_changes(tmp_path):
     wa, ha, pa = chapter.read_png(tmp_path / "a.png")
     wb, hb, pb = chapter.read_png(tmp_path / "b.png")
     count, bbox = chapter.fire_change(wa, ha, pa, pb)
-    assert count == 6 * 12       # rows 10-21 of the 6-wide flame column change
-    assert bbox == (40, 10, 45, 21)
+    assert count == 6 * 8        # rows 12-19: fire in both frames, a different shade
+    assert bbox == (40, 12, 45, 19)
     assert chapter.fire_change(wa, ha, pa, pa) == (0, None)
     mask = bytearray(w * h * 3)
     chapter.fire_change(wa, ha, pa, pb, mask=mask)
-    assert mask.count(255) == 3 * 6 * 12       # the reviewer's mask marks exactly those
+    assert mask.count(255) == 3 * 6 * 8       # the reviewer's mask marks exactly those
+
+
+def test_fire_blob_keeps_a_flame_patch_and_drops_moved_edges():
+    w, h = 80, 60
+    mask = bytearray(w * h * 3)
+
+    def mark(x, y):
+        mask[(y * w + x) * 3:(y * w + x) * 3 + 3] = b"\xff\xff\xff"
+    for y in range(40, 54):                 # a speckled 20 x 14 flame patch, about half set
+        for x in range(10, 30):
+            if (x * 7 + y * 3) % 2 == 0:
+                mark(x, y)
+    for x in range(40, 80):                 # a moved banner edge: 40 x 3 line
+        for y in range(5, 8):
+            mark(x, y)
+    for x, y in [(60, 30), (62, 31), (64, 32), (66, 33), (68, 34)]:   # a thin diagonal
+        mark(x, y)
+    count, bbox = chapter.fire_blob(w, h, mask)
+    assert count == sum(1 for y in range(40, 54) for x in range(10, 30) if (x * 7 + y * 3) % 2 == 0)
+    assert bbox[0] >= 10 and bbox[2] <= 29 and bbox[1] >= 40 and bbox[3] <= 53
+    assert chapter.fire_blob(w, h, bytearray(w * h * 3)) == (0, None)
 
 
 def test_fire_palette_excludes_hud_and_trim():
@@ -83,11 +104,11 @@ def test_log_findings():
 def test_device_ok_needs_every_check():
     good = {"install": True, "launch": True, "alive_20s": True, "alive_end": True, "wf_args": 8,
             "room_render": True, "zforth_errors": [], "texture_slot_error": False,
-            "fps_check": True, "fire_pixels": 120}
+            "fps_check": True, "fire_blob_pixels": 60}
     assert chapter.device_ok(good)
     for key, value in [("alive_end", False), ("wf_args", 0), ("room_render", False),
                        ("zforth_errors", ["zforth error"]), ("texture_slot_error", True),
-                       ("fps_check", False), ("fire_pixels", 3)]:
+                       ("fps_check", False), ("fire_blob_pixels", 5)]:
         assert not chapter.device_ok(good | {key: value}), key
 
 

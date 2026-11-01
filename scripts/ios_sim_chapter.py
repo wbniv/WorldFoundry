@@ -19,12 +19,15 @@ Timeline of `run`, seconds after `simctl launch` returns:
          only from the bundled wf_args.txt, as a home-screen launch would;
          WF_TOUCH_SCRIPT (hal/ios/input.mm) is the scripted input
   20     screenshot: the opening card; the app must be alive
-  20-25  background (Settings) and resume; tests/check_frame_rate_log.py --resume
-  28     touch script presses A: closes the card (SELECT: continue)
-  31,32  two screenshots one second apart: the Temple braziers must change
-  33-37  touch script holds UP twice (the Cast1 Temple-to-Love route)
-  38     screenshot at the Love portal; A pressed at 38.6
-  42     screenshot: Love arrival (stretch goal, informational)
+  22     touch script presses A: closes the card (SELECT: continue)
+  25,26  two screenshots one second apart: the Temple braziers must change
+  27-31  touch script holds UP twice (the Cast1 Temple-to-Love route)
+  32     screenshot at the Love portal; A pressed at 32.6 and again at 35
+  39     screenshot: Love arrival (stretch goal, informational)
+  40     screenshot, background (Settings), resume, screenshot again;
+         tests/check_frame_rate_log.py --resume. Last, because a resume can
+         take many seconds (26 s on the iPad in the first run), which would
+         push the scripted presses out of step with the screenshots.
 
 The touch script is the engine's own CI input path: it presses each button's
 on-screen centre through the same tracker and hit test a finger uses; only
@@ -33,8 +36,9 @@ UIKit's touch delivery is skipped. simctl itself has no tap injection.
 Verdict per device (`IOS IPHONE: OK` / `IOS IPAD: OK`) needs install, launch,
 alive at 20 s and at the end, wf_args.txt read with its arguments,
 `ROOM-RENDER scope=current-only`, no zForth or texture-slot error, the
-pause/resume frame-rate check, and changed fire-coloured pixels between the two
-brazier screenshots. The iOS touch HUD is a D-pad with A and B, not Android's
+pause/resume frame-rate check, and a solid patch of changed fire-coloured
+pixels between the two brazier screenshots (a flame flickers as a blob; the
+thin edges a swaying banner or the camera leaves do not count). The iOS touch HUD is a D-pad with A and B, not Android's
 joystick with A to D (see hal/ios/input.mm and hal/android/touch_controls.h),
 so touch parity is reported on its own line and is not part of OK.
 """
@@ -60,11 +64,13 @@ BUNDLE_ID = "org.worldfoundry.wf-game"
 
 # Seconds after launch; see the module docstring.
 CARD_AT = 20.0
+FIRE_AT = (25.0, 26.0)
+PORTAL_AT = 32.0
+LOVE_AT = 39.0
+RESUME_AT = 40.0
 RESUME_SETTLE = 3.0
-FIRE_AT = (31.0, 32.0)
-PORTAL_AT = 38.0
-LOVE_AT = 42.0
-TOUCH_SCRIPT = "a@28+0.3,up@33+2,up@35.3+2,a@38.6+0.15"
+TOUCH_SCRIPT = "a@22+0.3,up@27+2,up@29.3+2,a@32.6+0.15,a@35+0.3"
+FIRE_BLOB_MIN = 20   # run 1, iPhone: the brazier's cluster was 60 pixels at 471x1024
 
 ZFORTH_ERROR = re.compile(r"zforth[: ].*\b(error|unknown|failed)\b")
 TEXTURE_SLOT_ERROR = "does not fit its"
@@ -161,7 +167,11 @@ def write_png(path: Path, w: int, h: int, px: bytes) -> None:
 
 def fire_change(w: int, h: int, px_a, px_b, threshold: int = 24, mask=None):
     """Pixels that changed between two frames (any channel by more than
-    `threshold`) where either frame is fire-coloured. Returns (count, bbox).
+    `threshold`) and are fire-coloured in both: a flame moving between its
+    shades. An edge that moved has gold trim on one side and stone or shadow
+    on the other, so it is fire-coloured in one frame only and is not counted
+    (on the first iPhone run this kept 81 of 523 changed pixels, 60 of them
+    the brazier). Returns (count, bbox).
     With `mask` (a bytearray of w*h*3, frame A dimmed), counted pixels are
     painted white there, for the reviewer."""
     count, x0, y0, x1, y1 = 0, w, h, -1, -1
@@ -171,7 +181,7 @@ def fire_change(w: int, h: int, px_a, px_b, threshold: int = 24, mask=None):
         rb, gb, bb = px_b[o], px_b[o + 1], px_b[o + 2]
         if abs(ra - rb) <= threshold and abs(ga - gb) <= threshold and abs(ba - bb) <= threshold:
             continue
-        if not (is_fire(ra, ga, ba) or is_fire(rb, gb, bb)):
+        if not (is_fire(ra, ga, ba) and is_fire(rb, gb, bb)):
             continue
         count += 1
         if mask is not None:
@@ -179,6 +189,41 @@ def fire_change(w: int, h: int, px_a, px_b, threshold: int = 24, mask=None):
         x, y = i % w, i // w
         x0, y0, x1, y1 = min(x0, x), min(y0, y), max(x1, x), max(y1, y)
     return count, ((x0, y0, x1, y1) if count else None)
+
+
+def fire_blob(w: int, h: int, mask, link: int = 3, min_side: int = 8, max_aspect: float = 4.0):
+    """The flame-shaped part of a fire_change mask. Counted (white) pixels are
+    grouped into clusters (pixels within `link` of each other join); a cluster
+    counts when its bounding box is at least `min_side` on both sides and no
+    more than `max_aspect` times longer than wide. A flickering flame leaves a
+    speckled, roughly square patch; an edge that moved (a swaying banner, the
+    camera) leaves a long thin line. Returns (pixels in flame-shaped clusters,
+    bbox of the largest)."""
+    marked = {i // 3 for i in range(0, len(mask), 3)
+              if mask[i] == 255 and mask[i + 1] == 255 and mask[i + 2] == 255}
+    seen, total, best = set(), 0, (0, None)
+    for start in marked:
+        if start in seen:
+            continue
+        seen.add(start)
+        stack, members = [start], []
+        while stack:
+            i = stack.pop()
+            members.append(i)
+            x, y = i % w, i // w
+            for dy in range(-link, link + 1):
+                for dx in range(-link, link + 1):
+                    j = (y + dy) * w + x + dx
+                    if 0 <= x + dx < w and 0 <= y + dy < h and j in marked and j not in seen:
+                        seen.add(j)
+                        stack.append(j)
+        xs, ys = [i % w for i in members], [i // w for i in members]
+        bw, bh = max(xs) - min(xs) + 1, max(ys) - min(ys) + 1
+        if min(bw, bh) >= min_side and max(bw, bh) <= max_aspect * min(bw, bh):
+            total += len(members)
+            if len(members) > best[0]:
+                best = (len(members), (min(xs), min(ys), max(xs), max(ys)))
+    return total, best[1]
 
 
 def centre_colours(w: int, h: int, px) -> int:
@@ -203,7 +248,7 @@ def log_findings(text: str) -> dict:
 def device_ok(v: dict) -> bool:
     return (v["install"] and v["launch"] and v["alive_20s"] and v["alive_end"]
             and v["wf_args"] > 0 and v["room_render"] and not v["zforth_errors"]
-            and not v["texture_slot_error"] and v["fps_check"] and v["fire_pixels"] >= 20)
+            and not v["texture_slot_error"] and v["fps_check"] and v["fire_blob_pixels"] >= FIRE_BLOB_MIN)
 
 
 # ─── run ────────────────────────────────────────────────────────────────────
@@ -240,6 +285,7 @@ def downscaled(shot: Path) -> Path:
 def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
     v = {"label": label, "name": name, "install": False, "launch": False, "alive_20s": False,
          "alive_end": False, "fps_check": False, "fire_pixels": 0, "fire_bbox": None,
+         "fire_blob_pixels": 0, "fire_blob_bbox": None, "resume_mean_diff": None,
          "card_colours": 0, "level_loaded_at": None}
     stdout_f, stderr_f = out / f"ios-chapter-{label}-stdout.txt", out / f"ios-chapter-{label}-stderr.txt"
     shot = lambda tag: out / f"ios-chapter-{label}-{tag}.png"
@@ -280,18 +326,21 @@ def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
     wait_until(CARD_AT)
     v["alive_20s"] = alive()
     card = snap("card")
-    sh(["xcrun", "simctl", "launch", udid, "com.apple.Preferences"])
-    time.sleep(2)
-    sh(["xcrun", "simctl", "launch", udid, BUNDLE_ID])
-    time.sleep(RESUME_SETTLE)
-    fps = sh([sys.executable, str(REPO / "tests" / "check_frame_rate_log.py"), str(stdout_f), "--resume"])
-    log(f"{label}: frame-rate check: {(fps.stdout + fps.stderr).strip()[-300:]}")
-    v["fps_check"] = fps.returncode == 0
     wait_until(FIRE_AT[0]); fire1 = snap("fire-1")
     wait_until(FIRE_AT[1]); fire2 = snap("fire-2")
     wait_until(PORTAL_AT); snap("portal")
     wait_until(LOVE_AT); snap("love")
-    v["alive_end"] = alive()
+    wait_until(RESUME_AT); before = snap("resume-before")
+    sh(["xcrun", "simctl", "launch", udid, "com.apple.Preferences"])
+    time.sleep(2)
+    sh(["xcrun", "simctl", "launch", udid, BUNDLE_ID])
+    log(f"{label}: resumed at t={time.monotonic() - t0:.1f} s")
+    time.sleep(RESUME_SETTLE)
+    after = snap("resume-after")
+    fps = sh([sys.executable, str(REPO / "tests" / "check_frame_rate_log.py"), str(stdout_f), "--resume"])
+    log(f"{label}: frame-rate check: {(fps.stdout + fps.stderr).strip()[-300:]}")
+    v["fps_check"] = fps.returncode == 0
+    v["alive_end"] = alive()   # the same pid: background and resume kept the process
 
     if card.exists():
         w, h, px = read_png(downscaled(card))
@@ -302,8 +351,14 @@ def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
         if (wa, ha) == (wb, hb):
             mask = bytearray(c // 3 for c in pa)
             v["fire_pixels"], v["fire_bbox"] = fire_change(wa, ha, pa, pb, mask=mask)
+            v["fire_blob_pixels"], v["fire_blob_bbox"] = fire_blob(wa, ha, mask)
             v["fire_frame"] = [wa, ha]
             write_png(shot("fire-diff"), wa, ha, mask)
+    if before.exists() and after.exists():
+        wa, ha, pa = read_png(downscaled(before))
+        wb, hb, pb = read_png(downscaled(after))
+        if (wa, ha) == (wb, hb):
+            v["resume_mean_diff"] = round(sum(abs(x - y) for x, y in zip(pa, pb)) / len(pa), 2)
     for f in out.glob(f"ios-chapter-{label}-*.small.png"):
         f.unlink()
 
@@ -346,7 +401,9 @@ def run(app: Path, out: Path) -> int:
               f"alive_20s={v['alive_20s']} alive_end={v['alive_end']} wf_args={v['wf_args']} "
               f"room_render={v['room_render']} zforth_errors={len(v['zforth_errors'])} "
               f"texture_slot_error={v['texture_slot_error']} fps_check={v['fps_check']} "
-              f"fire_pixels={v['fire_pixels']} fire_bbox={v['fire_bbox']} card_colours={v['card_colours']} "
+              f"fire_pixels={v['fire_pixels']} fire_blob_pixels={v['fire_blob_pixels']} "
+              f"fire_blob_bbox={v['fire_blob_bbox']} resume_mean_diff={v['resume_mean_diff']} "
+              f"card_colours={v['card_colours']} "
               f"level_loaded_at={v['level_loaded_at']} touch_a={v['touch_a']} touch_up={v['touch_up']}")
         for line in v["zforth_errors"]:
             print(f"  zforth: {line}")
