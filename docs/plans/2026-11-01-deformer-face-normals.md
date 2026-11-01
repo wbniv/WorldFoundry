@@ -386,4 +386,26 @@ an i7‑1185G7 that was shared with other sessions (load average 8–11 on 8 thr
     Lionfish tank). Scaling 0.12 ms by an unmeasured factor would be a guess, so the Chromecast HD cost
     stays **not measured**.
 
-    **FAIL (incomplete)**: one of the seven tanks profiled; the Chromecast HD cost is not measured.
+    *Second attempt, after Will restarted and readded the Pixel (ready at 19:38).*
+
+    - Betta J‑8be03933aaf7: before-1 installed, then scene selection did not confirm the Betta entry
+      (`scene-selection.json`: expected index 2, `confirmed: false`); the job ended `uncertain /
+      plugin-error`. The coordinator's automatic readd J‑81d3a82a2d17 brought the Pixel back to ready.
+    - Jellyfish J‑40f37539c88f: before-1 ran (119.2 and 120.0 fps, p50 8.33 ms), then the install of the
+      after build hung again: `adb install -r 8e7d98eb….apk` had no return code after 90.5 s, the job
+      ended `uncertain / device-command-timeout`, and the automatic readd J‑3ece8347f0eb failed with
+      `cleanup-requires-restart`. The Pixel is `recovery-required` again (administrator readd).
+    - As instructed, I stopped there: no readd, no adb. I cancelled my remaining queued Pixel jobs so they
+      would not wedge the phone again right after the next readd: Tiger Barbs J‑70c9b24a8673, Planted
+      tank J‑5ddc2a9a70fa, Clownfish J‑2d9ebdd6f03e, and the resubmitted Arowana J‑1eaa7071ebe5 and Betta
+      J‑05b56bf89105.
+
+    The install history across the three jobs that reached it: the after build (gradle release,
+    `8e7d98eb…`) installed in 3.5–4.4 s four times and hung at 90 s twice; the before build and both
+    `--frame-profile` copies never hung (3.4–11.5 s, seven installs). Every hang was the after build
+    replacing the before build. The device screenshot at the hang shows the before build still running
+    in the Jellyfish tank and no dialog. The cause is not known; it needs someone with the phone in hand
+    to see what the installer is waiting for.
+
+    **FAIL (incomplete)**: one of the seven tanks profiled (Lionfish, on the Pixel 8 Pro); the other six
+    did not complete because the Pixel stopped on hung installs; the Chromecast HD cost is not measured.
