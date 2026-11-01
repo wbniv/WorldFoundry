@@ -171,5 +171,9 @@ def test_route_walks_into_the_love_portal_trigger_before_selecting():
     assert card_close[1] + card_close[2] < chapter.FIRE_AT[0] < ups[0][1]
     assert walk_end < chapter.PORTAL_AT < min(s for _, s, _ in portal_presses)
     assert max(s + d for _, s, d in portal_presses) < chapter.LOVE_AT < chapter.RESUME_AT
+    for _, _, d in presses:
+        # Long enough to outlast a slow simulator frame (run 6ae73396 lost a
+        # 0.3 s press), short of the chapter's 0.65 s hold-to-toggle-camera.
+        assert 0.45 <= d < 0.65
     for (_, s1, d1), (_, s2, _) in zip(entries, entries[1:]):
         assert s1 + d1 < s2, "presses must not overlap: a chord is a different input"

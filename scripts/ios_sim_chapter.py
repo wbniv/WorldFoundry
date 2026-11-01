@@ -71,7 +71,7 @@ PORTAL_AT = 33.0
 LOVE_AT = 39.0
 RESUME_AT = 40.0
 RESUME_SETTLE = 3.0
-TOUCH_SCRIPT = "a@22+0.3,up@27+2,up@29.3+3.2,a@33.4+0.15,a@35.5+0.3"
+TOUCH_SCRIPT = "a@22+0.5,up@27+2,up@29.3+3.2,a@33.4+0.5,a@35.5+0.5"
 # ROUTE_NOTE. Select at the Love portal acts only within 2.5 units of the
 # portal's spot (0, 9): `fy-near` in the chapter's chapter_script.py. The
 # Cast1 route's 4 s of UP ends close to that edge. Run 6ae72785 crossed it on
@@ -80,6 +80,14 @@ TOUCH_SCRIPT = "a@22+0.3,up@27+2,up@29.3+3.2,a@33.4+0.15,a@35.5+0.3"
 # the player (a fixed 3.8 units from the camera) is the same size. Walking
 # 1.2 s longer presses the player against the portal wall, inside the radius
 # whatever the simulator's frame pacing did to the walk.
+#
+# Every A is held 0.5 s. The iOS HAL keeps only the current button state
+# (hal/ios/input.mm), so a press shorter than one engine frame is never seen,
+# and in run 6ae73396 the iPhone simulator ran the card at 36 fps on average
+# with sampled frames as long as 166 ms; its 0.3 s card-closing A was lost and
+# the card stayed open. The chapter treats A as a short press below 0.65 s of
+# accumulated frame time (fy-input, each frame's share clamped to 0.05 s), so
+# 0.5 s stays a short press.
 FIRE_BLOB_MIN = 20   # run 1, iPhone: the brazier's cluster was 60 pixels at 471x1024
 
 ZFORTH_ERROR = re.compile(r"zforth[: ].*\b(error|unknown|failed)\b")
@@ -374,8 +382,8 @@ def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
             v["fire_frame"] = [wa, ha]
             write_png(shot("fire-diff"), wa, ha, mask)
     if portal.exists() and love.exists():
-        # Informational: Love's street looks nothing like the Temple wall, so a
-        # large difference means the A press at the portal took the player in.
+        # Informational only: run 6ae73396's iPhone scored 57.8 without entering
+        # Love (its portal frame was the still-open card). Read the frames.
         v["love_frame_diff"] = mean_diff(portal, love)
     if before.exists() and after.exists():
         v["resume_mean_diff"] = mean_diff(before, after)
