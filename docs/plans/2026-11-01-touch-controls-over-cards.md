@@ -71,8 +71,65 @@ Real states on a 1440×900 canvas; each thumbnail links to the live HTML.
 
 ## Verification
 
+Run 2026‑11‑01 in the worktree, build trees under `~/.cache` (Linux Debug `-DWF_ASAN=OFF`; Android NDK r26c, `RelWithDebInfo`, `android-21`), removed afterwards.
+
 1. Build and run the touch-control test through CTest: `cmake --build <build> --target android_touch_controls_test && ctest --test-dir <build> -R android_touch_controls --output-on-failure`
+
+    ```text
+    10: PASS: 182 Android touch control behavior checks
+    1/1 Test #10: android_touch_controls ...........   Passed    0.01 sec
+    ```
+
+    **PASS**
+
 2. The new checks fail without the fix: revert only `touch_controls.h` to `origin/2026-new-level`, rebuild; the test must fail to compile or fail its assertions.
+
+    ```text
+    # original header:
+    tests/android_touch_controls_test.cc:65:23: error: 'reading' was not declared in this scope
+    tests/android_touch_controls_test.cc:66:14: error: 'struct androidtouch::Layout' has no member named 'stick'
+    # original behaviour with the new names stubbed in (shown() always true, hit/update unchanged):
+    tct_stub: tests/android_touch_controls_test.cc:73: int main(): Assertion `shown(card,c)==kept' failed.
+    rc=134
+    ```
+
+    **PASS** (fails both ways without the fix)
+
 3. Full engine CTest suite passes: `ctest --test-dir <build> --output-on-failure`
+
+    ```text
+    93% tests passed, 3 tests failed out of 45
+    The following tests FAILED:
+    	  3 - deformer_golden (Failed)
+    	 15 - cross_room_teleports_mutation (Failed)            gl teleport
+    	 26 - opaque_material_programs (Failed)                 gl
+    # the same three on origin/2026-new-level (this change stashed, same build tree):
+    1/3 Test  #3: deformer_golden ..................***Failed    0.55 sec
+    2/3 Test #14: cross_room_teleports_mutation ....   Passed    7.92 sec
+    3/3 Test #25: opaque_material_programs .........***Failed    0.28 sec
+    # with this change, serially, three times:
+    2/2 Test #15: cross_room_teleports_mutation ....   Passed    7.87 sec
+    2/2 Test #15: cross_room_teleports_mutation ....   Passed    8.38 sec
+    2/2 Test #15: cross_room_teleports_mutation ....   Passed    7.81 sec
+    ```
+
+    **PASS with known failures:** `deformer_golden` (`atlas U outside bound texture: 319.84`, `gfx/material.cc:366`) and `opaque_material_programs` fail identically on the base branch. `cross_room_teleports_mutation` failed once under `ctest -j4` with `assert client.wait_for(... 'paused', timeout=5)` (`tests/verify_cross_room_teleports.py:85`), a 5 s wait while GL tests ran alongside it; it passes on the base and three times serially with the change.
+
 4. Android libraries compile and link for `arm64-v8a` and `armeabi-v7a`.
+
+    ```text
+    arm64-v8a configure=0
+    arm64-v8a build=0
+    libwf_game.so: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, for Android 21, built by NDK r26c (11394342)
+    armeabi-v7a configure=0
+    armeabi-v7a build=0
+    libwf_game.so: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, for Android 21, built by NDK r26c (11394342)
+    arm64-v8a: warnings in touched files: 0
+    armeabi-v7a: warnings in touched files: 0
+    ```
+
+    **PASS** (`gfx/display.cc` carries `android_window.cc`; `native_app_entry.cc` and `bitmap_presenter.cc` compiled in both)
+
 5. On a phone (not done here; Will's Pixel is off limits): open a card, see the joystick, B and D gone and A, C dimmed; A continues, C closes; close the card and the full HUD returns.
+
+    **NOT RUN:** needs an Android phone other than Will's Pixel 8 Pro.

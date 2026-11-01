@@ -1308,6 +1308,13 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     add_executable(object_picker_test tests/object_picker_test.cc)
     target_include_directories(object_picker_test PRIVATE ${CMAKE_SOURCE_DIR}/engine)
     add_test(NAME object_picker COMMAND object_picker_test)
+    # Android touch-control geometry, hit-test and pointer ownership, including the card-open
+    # layout (docs/plans/2026-11-01-touch-controls-over-cards.md). Header-only, so it runs on
+    # the desktop build; -UNDEBUG keeps its asserts in Release.
+    add_executable(android_touch_controls_test tests/android_touch_controls_test.cc)
+    target_include_directories(android_touch_controls_test PRIVATE ${SRC})
+    target_compile_options(android_touch_controls_test PRIVATE -UNDEBUG)
+    add_test(NAME android_touch_controls COMMAND android_touch_controls_test)
     if(NOT WF_FORTH_ENGINE STREQUAL "none" AND NOT WF_FORTH_ENGINE STREQUAL "zforth")
         add_executable(frame_rate_forth_probe tests/frame_rate_forth_probe.cc
             ${STUB_SRC}/scripting_${WF_FORTH_ENGINE}.cc)

@@ -14,7 +14,8 @@ struct Rect {
     bool contains(float x,float y) const {return x>=x0&&x<x1&&y>=y0&&y<y1;}
 };
 struct Control {Rect rect;uint32_t bit;const char* label;};
-struct Layout {Control controls[8]{};Rect pad;float cell=0;bool valid=false;};
+// stick and shown say which controls are drawn and hit-testable; reading() narrows them.
+struct Layout {Control controls[8]{};Rect pad;float cell=0;bool valid=false;bool stick=true;uint32_t shown=A|B|C|D;};
 struct Point {float x,y;int id=0;};
 struct Stick {float x=0,y=0;uint32_t bits=0;};
 inline float stickRadius(const Layout& l){return l.cell*1.2f;}
@@ -30,8 +31,12 @@ inline Stick stick(const Layout& l,float x,float y) {
 inline bool inStick(const Layout& l,float x,float y) {
     const float dx=x-(l.pad.x0+l.pad.x1)/2,dy=y-(l.pad.y0+l.pad.y1)/2;
     const float radius=stickRadius(l);
-    return l.valid&&dx*dx+dy*dy<=radius*radius*1.000001f;
+    return l.valid&&l.stick&&dx*dx+dy*dy<=radius*radius*1.000001f;
 }
+inline bool shown(const Layout& l,const Control& c){return (l.shown&c.bit)!=0;}
+// While a story card is open (game/bitmap_presenter.cc) the joystick, B and D would cover
+// its text; only A (select) and C (close) stay. docs/plans/2026-11-01-touch-controls-over-cards.md
+inline Layout reading(Layout l){l.stick=false;l.shown=A|C;return l;}
 inline Layout layout(float w,float h,float density,float bottomInset=0) {
     Layout l;
     if(w<=0||h<=0||density<=0)return l;
@@ -59,7 +64,7 @@ inline Layout layout(float w,float h,float density,float bottomInset=0) {
 inline uint32_t hit(const Layout& l,float x,float y) {
     if(!l.valid)return 0;
     if(inStick(l,x,y))return stick(l,x,y).bits;
-    for(int i=4;i<8;++i)if(l.controls[i].rect.contains(x,y))return l.controls[i].bit;
+    for(int i=4;i<8;++i)if(shown(l,l.controls[i])&&l.controls[i].rect.contains(x,y))return l.controls[i].bit;
     return 0;
 }
 inline uint32_t buttons(const Layout& l,const Point* points,size_t count,int released=-1,bool clear=false) {
@@ -85,11 +90,13 @@ struct State {
             } else if(action==Action::Down) {
                 bool taken=false;for(const auto& o:owners)if(o.joystick)taken=true;
                 if(inStick(l,p.x,p.y)) {if(!taken)owners.push_back({p.id,0,true});}
-                else for(int i=4;i<8;++i)if(l.controls[i].rect.contains(p.x,p.y)) {
+                else for(int i=4;i<8;++i)if(shown(l,l.controls[i])&&l.controls[i].rect.contains(p.x,p.y)) {
                     owners.push_back({p.id,l.controls[i].bit,false});break;
                 }
             }
         }
+        // A finger already on a control when it is hidden lets go of it.
+        owners.erase(std::remove_if(owners.begin(),owners.end(),[&](const Owner& o){return o.joystick?!l.stick:!(l.shown&o.bit);}),owners.end());
         position={};uint32_t mask=0;
         for(const auto& o:owners)for(size_t i=0;i<count;++i)if(points[i].id==o.id) {
             if(o.joystick){position=stick(l,points[i].x,points[i].y);mask|=position.bits;}

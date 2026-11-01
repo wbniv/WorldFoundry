@@ -390,18 +390,24 @@ WFAndroidDrawHUD()
     androidtouch::Layout layout;uint32_t held=0;float stickX=0,stickY=0;
     WFAndroidTouchLayout(w,h,&layout,&held,&stickX,&stickY);
     if(!layout.valid)return;
-    const float radius=androidtouch::stickRadius(layout),cx=(layout.pad.x0+layout.pad.x1)/2,cy=(layout.pad.y0+layout.pad.y1)/2;
-    PushHudDisc(verts,cx,cy,radius,fw,fh,.42f,.50f,.62f,.65f);
-    PushHudDisc(verts,cx,cy,radius-layout.cell*.03f,fw,fh,.05f,.075f,.125f,.55f);
-    const bool moving=(held&(androidtouch::Up|androidtouch::Down|androidtouch::Left|androidtouch::Right))!=0;
-    const float knobRadius=layout.cell*.6f,travel=radius-knobRadius;
-    PushHudDisc(verts,cx+stickX*travel,cy+stickY*travel,knobRadius,fw,fh,
-                moving?.42f:.22f,moving?.62f:.32f,moving?.85f:.46f,.85f);
+    // A story card hides the stick, B and D (androidtouch::reading); A and C stay, lighter, so
+    // the corner of a full page reads through them.
+    const bool reading=!layout.stick;
+    if(layout.stick) {
+        const float radius=androidtouch::stickRadius(layout),cx=(layout.pad.x0+layout.pad.x1)/2,cy=(layout.pad.y0+layout.pad.y1)/2;
+        PushHudDisc(verts,cx,cy,radius,fw,fh,.42f,.50f,.62f,.65f);
+        PushHudDisc(verts,cx,cy,radius-layout.cell*.03f,fw,fh,.05f,.075f,.125f,.55f);
+        const bool moving=(held&(androidtouch::Up|androidtouch::Down|androidtouch::Left|androidtouch::Right))!=0;
+        const float knobRadius=layout.cell*.6f,travel=radius-knobRadius;
+        PushHudDisc(verts,cx+stickX*travel,cy+stickY*travel,knobRadius,fw,fh,
+                    moving?.42f:.22f,moving?.62f:.32f,moving?.85f:.46f,.85f);
+    }
     for(int i=4;i<8;++i) {
         const auto& control=layout.controls[i];
+        if(!androidtouch::shown(layout,control))continue;
         const auto& r=control.rect;
         const bool action=control.bit<=androidtouch::D;
-        const float alpha=(held&control.bit)?0.85f:0.55f;
+        const float alpha=(held&control.bit)?0.85f:reading?0.30f:0.55f;
         PushHudRect(verts,r.x0,r.y0,r.x1,r.y1,fw,fh,
                     action?0.20f:0.38f,action?0.28f:0.38f,action?0.43f:0.38f,alpha);
         // The label in the UI font's SemiBold 36 (game/ui_font.hp), centred, its capitals as
@@ -409,7 +415,7 @@ WFAndroidDrawHUD()
         wfui::Transform t;
         t.s=7.0f*(r.x1-r.x0)/16.0f/(0.7f*36.0f);
         t.ox=(r.x0+r.x1)*0.5f;t.oy=(r.y0+r.y1)*0.5f;
-        wfui::TextBytes(glyphs,0,0,wfui::BodyBold,0xFFFFFFF2u,control.label,std::strlen(control.label),wfui::Middle,wfui::Centre,t);
+        wfui::TextBytes(glyphs,0,0,wfui::BodyBold,reading?0xFFFFFF99u:0xFFFFFFF2u,control.label,std::strlen(control.label),wfui::Middle,wfui::Centre,t);
     }
     if(propertyui::touchEnabled()&&wfprops::host().available()) {
         auto r=propertyui::touchEntryRect(w,h);

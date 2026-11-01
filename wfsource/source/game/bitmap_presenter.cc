@@ -16,10 +16,12 @@
 namespace bitmaptext
 {
 static const char* const kControls="SELECT: continue   LEFT / C: close   UP / DOWN: text size";
+static bool gReaderOpen=false;
+bool ReaderOpen(){return gReaderOpen;}
 void Presenter::Fatal(const char* error)const{fprintf(stderr,"BITMAP_TEXT: %s\n",error);abort();}
 void Presenter::Validate()const{_catalog.Validate();_body.Validate();assert(_signCount>=0&&_signCount<=MAX_LABELS);}
 bool Presenter::Load(const void* data,size_t bytes,const char*& error){Validate();if(!_catalog.Load(data,bytes,error))return false;if(_catalog.SelectVariant(0,28)<0||_catalog.SelectVariant(1,24)<0){error="chapter text requires Regular and SemiBold variants";return false;}if(_catalog.Pixels()[0]!=255){error="missing reserved solid backdrop texel";return false;}if(_catalog.LabelCount()>MAX_LABELS){error="too many bitmap labels";return false;}if(!RendererBackendGet().BitmapTextSupported()){error="renderer does not support native-pixel bitmap text";return false;}Validate();return true;}
-Presenter::~Presenter(){Validate();auto& rb=RendererBackendGet();if(_texture&&_generation==rb.TextureGeneration())rb.DestroyTexture(_texture);}
+Presenter::~Presenter(){Validate();gReaderOpen=false;auto& rb=RendererBackendGet();if(_texture&&_generation==rb.TextureGeneration())rb.DestroyTexture(_texture);}
 void Presenter::BeginLabels(){Validate();for(int i=0;i<_signCount;++i)_signs[i].visible=false;}
 void Presenter::BuildSigns(int height){
     Validate();if(height==_signHeight)return;_signHeight=height;_signCount=_catalog.LabelCount();
@@ -50,6 +52,7 @@ void Presenter::Draw(Mailboxes& mb,int width,int height){
         if(!_texture)Fatal("glyph atlas upload failed");
     }
     const int beat=mb.ReadMailbox(_catalog.Binding(0)).WholePart();
+    gReaderOpen=beat!=0;
     if(!beat){_beat=0;_page=-1;mb.WriteMailbox(_catalog.Binding(3),Scalar::zero);mb.WriteMailbox(_catalog.Binding(5),Scalar::zero);
         for(int i=0;i<_signCount;++i){const Sign& sign=_signs[i];if(sign.visible&&_catalog.GetLabel(i).realm==mb.ReadMailbox(_catalog.Binding(6)).WholePart())rb.DrawGlyphs(_signQuads+sign.first,sign.count,width,height,_texture,true,sign.x,sign.y,sign.depth);}return;
     }

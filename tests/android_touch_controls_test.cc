@@ -60,5 +60,34 @@ int main(){
     p[0]=p[1];
     assert(state.update(l,p,1,Action::Move)==A);++checks;
     assert(state.update(l,p,1,Action::Cancel)==0&&state.owners.empty());++checks;
+    // A story card open (docs/plans/2026-11-01-touch-controls-over-cards.md): the stick, B and
+    // D are neither drawn nor hit; A (select) and C (close) keep their place and still work.
+    const Layout card=reading(l);
+    assert(l.stick&&l.shown==(A|B|C|D));++checks;
+    assert(card.valid&&!card.stick&&card.shown==(A|C));++checks;
+    for(int i=4;i<8;++i) {
+        const auto& c=card.controls[i];
+        assert(c.rect.x0==l.controls[i].rect.x0&&c.rect.y0==l.controls[i].rect.y0);++checks;
+        const auto q=center(c.rect);
+        const bool kept=c.bit==A||c.bit==C;
+        assert(shown(card,c)==kept);++checks;
+        assert(hit(card,q.x,q.y)==(kept?c.bit:0u));++checks;
+    }
+    assert(!inStick(card,middle.x,middle.y));++checks;
+    assert(hit(l,middle.x-radius*.9f,middle.y)==Left);++checks;
+    assert(hit(card,middle.x-radius*.9f,middle.y)==0);++checks;   // LEFT would close the card
+    const auto b=center(l.controls[5].rect),c=center(l.controls[6].rect);
+    Point q[]={{middle.x-radius,middle.y,301},{b.x,b.y,302},{c.x,c.y,303}};
+    assert(state.update(l,q,1,Action::Down)==Left);++checks;
+    assert(state.update(l,q,2,Action::Down,1)==(Left|B));++checks;
+    // The card opens with the thumb on the stick and a finger on B: both let go.
+    assert(state.update(card,q,2,Action::Move)==0&&state.position.x==0&&state.owners.empty());++checks;
+    assert(state.update(card,q,3,Action::Down,2)==C);++checks;
+    q[0].id=304;
+    assert(state.update(card,q,3,Action::Down,0)==C&&state.owners.size()==1);++checks;
+    assert(state.update(card,q,3,Action::Cancel)==0);++checks;
+    // The card closes: the full layout is back.
+    assert(state.update(l,q,1,Action::Down)==Left);++checks;
+    assert(state.update(l,q,1,Action::Cancel)==0);++checks;
     std::printf("PASS: %d Android touch control behavior checks\n",checks);
 }

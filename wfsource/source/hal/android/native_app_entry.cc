@@ -58,6 +58,7 @@
 #include <pigsys/pigsys.hp>
 #include <hal/android/wf_android_export.hp>
 #include <game/level_menu.h>   // Back: selected level -> selector -> exit
+#include <game/bitmap_presenter.hp>   // ReaderOpen: a card hides the controls over it
 #include <game/runtime_property_touch.h>
 #include <hal/phonepad/phonepad.h>
 #include <hal/phonepad/phonepad_overlay.h>
@@ -356,7 +357,8 @@ androidtouch::Layout TouchLayout(int w,int h)
     float inset=0;
     if(gApp&&gApp->contentRect.bottom>0&&gApp->contentRect.bottom<=_halWindowHeight)
         inset=float(_halWindowHeight-gApp->contentRect.bottom);
-    return androidtouch::layout(w,h,density,inset);
+    const androidtouch::Layout l=androidtouch::layout(w,h,density,inset);
+    return bitmaptext::ReaderOpen()?androidtouch::reading(l):l;
 }
 
 float TouchDensity()

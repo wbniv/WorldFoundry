@@ -12,6 +12,9 @@
 class Mailboxes;
 namespace bitmaptext
 {
+// True while a Presenter is drawing a card (its beat is not 0); the Android touch HUD
+// hides the controls that would cover it. docs/plans/2026-11-01-touch-controls-over-cards.md
+bool ReaderOpen();
 class Presenter
 {
 public:
