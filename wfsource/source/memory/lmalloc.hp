@@ -48,6 +48,7 @@ public:
 	virtual void Clear();						// warning: all previous allocations are now invalid
 
 	virtual size_t BytesFree() const;         // returns # of bytes left in pool
+	size_t BytesTotal() const { return _endMemory - _memory; }
 
 	virtual bool ValidAllocation(void* memory);  // returns true if memory came from this
 	virtual bool Empty() const;

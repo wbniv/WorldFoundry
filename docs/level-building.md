@@ -749,7 +749,7 @@ objects:
 | `ActBox` | a mailbox | overlap → write `MailBox = MailBoxValue` (+ exit value, + `FieldFX` push) |
 | `ActBoxOR` | an Object (CamShot) | overlap → activate the referenced object (camera zones) |
 | `Warp` | a `Target` | overlap → teleport the entering actor to the Target's position (← SMB pipes) |
-| `Generator` | a template Object | on activation, spawn its `Object To Throw` (← `?`-block coins) |
+| `Generator` | an actor object with `Template Object = 1` | on activation, spawn its `Object To Throw` using that actor's actual type (← `?`-block coins) |
 | `Destroyer` | activation | remove objects on trigger |
 | `Spike` | contact | apply a `Health Modifier` to whoever touches it (← hazards) |
 | `Shield` | the Player | follows + absorbs hits (← power-ups) |
@@ -777,7 +777,7 @@ The authoritative list of what actually instantiates at runtime is the factory i
 | `Enemy` | damage-dealing NPC |
 | `StatPlat` | static platform / scenery — **scripts forbidden** (`actor.cc:736` asserts) |
 | `Platform` | movable / path-following surface (C++ minimal; motion via OAS movement block) |
-| `Generator` | spawns its `Object To Throw` template on activation |
+| `Generator` | spawns its `Object To Throw` actor on activation; the actor can be any type marked `Template Object = 1` |
 | `Gold` | collectible coin *(template-only — spawned, not placed directly)* |
 | `Dir` | FSN directory tower *(template-only — height ∝ √file-count in subdir)* |
 | `File` | FSN file box *(template-only — height ∝ √file-size / 50)* |

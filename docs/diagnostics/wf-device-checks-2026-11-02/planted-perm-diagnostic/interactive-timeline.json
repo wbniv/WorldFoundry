@@ -1,0 +1,112 @@
+[
+  {
+    "seq": 1,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793576086.9327953,
+    "expires": 1793576116.9327953,
+    "result": {
+      "captured": 1793576087.0343437,
+      "pid_before": 15573,
+      "pid_after": 15573,
+      "stable": true,
+      "total_pss_kb": 91487,
+      "meminfo": "input-sample-001-meminfo.txt",
+      "logcat": "input-sample-001-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.088,
+        "run_seconds": 1.683,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 2,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793576106.9100575,
+    "expires": 1793576136.9100575,
+    "result": {
+      "captured": 1793576107.0153742,
+      "pid_before": 15573,
+      "pid_after": 15573,
+      "stable": true,
+      "total_pss_kb": 102313,
+      "meminfo": "input-sample-002-meminfo.txt",
+      "logcat": "input-sample-002-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.105,
+        "run_seconds": 1.343,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 3,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793576127.2584102,
+    "expires": 1793576157.2584102,
+    "result": {
+      "captured": 1793576127.2946508,
+      "pid_before": 15573,
+      "pid_after": 15573,
+      "stable": true,
+      "total_pss_kb": 114818,
+      "meminfo": "input-sample-003-meminfo.txt",
+      "logcat": "input-sample-003-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.036,
+        "run_seconds": 1.756,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 4,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793576148.543538,
+    "expires": 1793576178.543538,
+    "result": {
+      "captured": 1793576148.6177433,
+      "pid_before": 15573,
+      "pid_after": 15573,
+      "stable": true,
+      "total_pss_kb": 119351,
+      "meminfo": "input-sample-004-meminfo.txt",
+      "logcat": "input-sample-004-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.074,
+        "run_seconds": 1.751,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 5,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793576170.1485627,
+    "expires": 1793576200.1485627,
+    "result": {
+      "captured": 1793576170.2742283,
+      "pid_before": 15573,
+      "pid_after": 15573,
+      "stable": true,
+      "total_pss_kb": 120257,
+      "meminfo": "input-sample-005-meminfo.txt",
+      "logcat": "input-sample-005-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.126,
+        "run_seconds": 1.821,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  }
+]

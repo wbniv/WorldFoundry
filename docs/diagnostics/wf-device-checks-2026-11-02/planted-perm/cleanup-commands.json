@@ -1,0 +1,29 @@
+[
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.plantedtank"
+    ],
+    "start": 1793574816.7047253,
+    "end": 1793574816.9727018,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1793574816.9748409,
+    "end": 1793574817.3427782,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1793574817.3445702,
+    "end": 1793574817.5611758,
+    "returncode": 0
+  }
+]

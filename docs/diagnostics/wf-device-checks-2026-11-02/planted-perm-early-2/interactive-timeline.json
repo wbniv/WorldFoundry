@@ -1,0 +1,90 @@
+[
+  {
+    "seq": 1,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793575005.9311416,
+    "expires": 1793575035.9311416,
+    "result": {
+      "captured": 1793575006.0147586,
+      "pid_before": 12366,
+      "pid_after": 12366,
+      "stable": true,
+      "total_pss_kb": 89708,
+      "meminfo": "input-sample-001-meminfo.txt",
+      "logcat": "input-sample-001-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.064,
+        "run_seconds": 1.444,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 2,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793575030.1783054,
+    "expires": 1793575060.1783054,
+    "result": {
+      "captured": 1793575030.2226043,
+      "pid_before": 12366,
+      "pid_after": 12366,
+      "stable": true,
+      "total_pss_kb": 105506,
+      "meminfo": "input-sample-002-meminfo.txt",
+      "logcat": "input-sample-002-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.044,
+        "run_seconds": 1.799,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 3,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793575053.668208,
+    "expires": 1793575083.668208,
+    "result": {
+      "captured": 1793575053.7195778,
+      "pid_before": 12366,
+      "pid_after": 12366,
+      "stable": true,
+      "total_pss_kb": 117162,
+      "meminfo": "input-sample-003-meminfo.txt",
+      "logcat": "input-sample-003-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.051,
+        "run_seconds": 1.678,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  },
+  {
+    "seq": 4,
+    "kind": "sample",
+    "state": "applied",
+    "created": 1793575076.878175,
+    "expires": 1793575106.878175,
+    "result": {
+      "captured": 1793575076.967363,
+      "pid_before": 12366,
+      "pid_after": 12366,
+      "stable": true,
+      "total_pss_kb": 117906,
+      "meminfo": "input-sample-004-meminfo.txt",
+      "logcat": "input-sample-004-logcat.txt",
+      "latency": {
+        "queued_to_picked_up": 0.089,
+        "run_seconds": 1.912,
+        "recording": false,
+        "phases": {}
+      }
+    }
+  }
+]

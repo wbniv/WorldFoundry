@@ -1,0 +1,353 @@
+[
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1793576060.367939,
+    "end": 1793576060.7921078,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576060.9028695,
+    "end": 1793576061.1869936,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~lHqVLk3Ih7kTkKqGKoMK2w==/org.worldfoundry.plantedtank-F1GZF_3hOLU37C6vrPIOoQ==/base.apk'"
+    ],
+    "start": 1793576061.1903389,
+    "end": 1793576061.6356182,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576061.6401432,
+    "end": 1793576062.0231874,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~lHqVLk3Ih7kTkKqGKoMK2w==/org.worldfoundry.plantedtank-F1GZF_3hOLU37C6vrPIOoQ==/base.apk'"
+    ],
+    "start": 1793576062.0286002,
+    "end": 1793576062.3283055,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "cat",
+      "/data/app/~~lHqVLk3Ih7kTkKqGKoMK2w==/org.worldfoundry.plantedtank-F1GZF_3hOLU37C6vrPIOoQ==/base.apk"
+    ],
+    "start": 1793576062.3328366,
+    "end": 1793576067.1871657,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "install",
+      "-r",
+      "/var/lib/wf-device-coordinator/inputs/a04321b9c6fe0796300a9941a4f022c3a2aa85bf5fa5e5efd77177bf91ebb893.apk"
+    ],
+    "start": 1793576067.3329856,
+    "end": 1793576071.6994762,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576071.702313,
+    "end": 1793576072.070812,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~OrNoNs3zMaeTt0f6rVGFig==/org.worldfoundry.plantedtank-Lt20IhISgTEOOC5gWsuUeQ==/base.apk'"
+    ],
+    "start": 1793576072.0741825,
+    "end": 1793576072.600519,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576072.647133,
+    "end": 1793576073.1107755,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1793576073.1147795,
+    "end": 1793576073.4785209,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n org.worldfoundry.plantedtank/org.worldfoundry.screensaver.PlantedTankActivity"
+    ],
+    "start": 1793576073.6306329,
+    "end": 1793576075.0266404,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1793576080.0394185,
+    "end": 1793576080.4332418,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576080.4500613,
+    "end": 1793576080.8307178,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1793576080.883501,
+    "end": 1793576081.3123944,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576081.3212173,
+    "end": 1793576081.6446195,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576087.0391796,
+    "end": 1793576087.3858883,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys meminfo org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576087.3893814,
+    "end": 1793576088.0312436,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576088.0365074,
+    "end": 1793576088.360077,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "logcat",
+      "-d",
+      "-t",
+      "1000",
+      "--pid=15573",
+      "-v",
+      "threadtime"
+    ],
+    "start": 1793576088.3633535,
+    "end": 1793576088.702855,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576107.0274491,
+    "end": 1793576107.280531,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys meminfo org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576107.2843113,
+    "end": 1793576107.744822,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576107.751278,
+    "end": 1793576108.0463705,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "logcat",
+      "-d",
+      "-t",
+      "1000",
+      "--pid=15573",
+      "-v",
+      "threadtime"
+    ],
+    "start": 1793576108.0506845,
+    "end": 1793576108.357576,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576127.2966213,
+    "end": 1793576127.5253074,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys meminfo org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576127.5288093,
+    "end": 1793576128.2293034,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576128.2337022,
+    "end": 1793576128.5472035,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "logcat",
+      "-d",
+      "-t",
+      "1000",
+      "--pid=15573",
+      "-v",
+      "threadtime"
+    ],
+    "start": 1793576128.55183,
+    "end": 1793576129.0505934,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576148.62079,
+    "end": 1793576148.8778942,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys meminfo org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576148.8820772,
+    "end": 1793576149.537815,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576149.5640104,
+    "end": 1793576149.8758392,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "logcat",
+      "-d",
+      "-t",
+      "1000",
+      "--pid=15573",
+      "-v",
+      "threadtime"
+    ],
+    "start": 1793576149.8786216,
+    "end": 1793576150.367931,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576170.2766356,
+    "end": 1793576170.528497,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys meminfo org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576170.5328877,
+    "end": 1793576171.2164292,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.plantedtank"
+    ],
+    "start": 1793576171.2223392,
+    "end": 1793576171.550473,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "logcat",
+      "-d",
+      "-t",
+      "1000",
+      "--pid=15573",
+      "-v",
+      "threadtime"
+    ],
+    "start": 1793576171.5554292,
+    "end": 1793576172.0952802,
+    "returncode": 0
+  }
+]

@@ -10,6 +10,10 @@
 #include <set>
 #include <string>
 #include <vector>
+#if defined(__ANDROID__)
+#include <android/log.h>
+#include <memory/lmalloc.hp>
+#endif
 //==============================================================================
 // level.cc:
 // Copyright ( c ) 1994,1995,1996,1997,1998,1999,2000,2001,2002,2003 World Foundry Group.  
@@ -875,6 +879,15 @@ Level::Level
 
 	DBSTREAM1( cprogress << "Done Loading Level" << std::endl; )
 	DBSTREAM1( casset << *_theAssetManager << std::endl; )
+#if defined(__ANDROID__)
+	const LMalloc& permMemory = static_cast<const LMalloc&>(
+		_theAssetManager->GetAssetSlot(AssetManager::PERM_SLOT_INDEX).GetSlotMemory());
+	const size_t permTotal = permMemory.BytesTotal();
+	const size_t permFree = permMemory.BytesFree();
+	__android_log_print(ANDROID_LOG_INFO, "wf_dream",
+		"PERM_POOL used_bytes=%zu total_bytes=%zu free_bytes=%zu",
+		permTotal - permFree, permTotal, permFree);
+#endif
 #ifdef PHYSICS_ENGINE_JOLT
 	// All StatPlat static bodies are now registered. Build the broadphase tree
 	// so CharacterVirtual queries can find them.

@@ -1,0 +1,14 @@
+[
+  {
+    "input": "b8bd0dae325fc16bf676c162b050bb66798c941c94a17875eb9eb82ca4da9a6b.apk",
+    "package": "org.worldfoundry.plantedtank",
+    "before_sha256": "b8bd0dae325fc16bf676c162b050bb66798c941c94a17875eb9eb82ca4da9a6b",
+    "action": "reuse",
+    "reason": "exact-match",
+    "variant": null,
+    "status": "verified",
+    "start": 1793574991.6482942,
+    "installed_sha256": "b8bd0dae325fc16bf676c162b050bb66798c941c94a17875eb9eb82ca4da9a6b",
+    "end": 1793574991.683456
+  }
+]

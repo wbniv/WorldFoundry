@@ -221,11 +221,11 @@ Sections sorted alphabetically by class name.
 
 **Source:** `generator.oas`
 **Includes:** `actor.inc` (default no mass)
-**Purpose.** Spawns instances of a `Template`-flagged actor at the generator's position, optionally on a periodic cadence and with random displacement. Triggered by mailbox — the canonical script primitive for "spawn an X."
+**Purpose.** Spawns instances of any actor type marked with the inherited `Template Object` flag at the generator's position, optionally on a periodic cadence and with random displacement. Triggered by mailbox — the canonical script primitive for "spawn an X."
 
 **Key OAD fields:**
 - `Activation MailBox` — Trigger mailbox (0–3999, default 1).
-- `Object To Throw` — Actor to spawn (object reference; should be a `Template`-flagged actor).
+- `Object To Throw` — Actor to spawn (object reference; mark the referenced level object with `Template Object = 1`).
 - `Generation Rate` — Time between spawns in seconds (fixed, 0.001–10.0, default 1.0).
 - **Object Velocity group:** X/Y/Z velocity at spawn (fixed, -100 to +100 m/s).
 - **Random Displacement group:** X/Y/Z range for spawn-position variance (fixed, -100 to +100).
@@ -465,15 +465,9 @@ Sections sorted alphabetically by class name.
 
 **Likely uses for arcade ports:** Cutscene camera-pan targets, follow-cam focus points. `mm_practice` uses two targets to anchor its CamShot.
 
-### `Template` — Generic template-actor base
+### `Template` — retired generic actor type
 
-**Source:** `template.oas`
-**Includes:** `actor.inc`
-**Purpose.** Abstract template base. Used to mark actors that are *not* placed in the level but live in a template pool — `generator` references these by name in its `Object To Throw` field.
-
-**Key OAD fields:** Empty custom block.
-
-**Likely uses for arcade ports:** Source pool for spawn-by-mailbox patterns: ball/Coily/disc templates (Q✱bert), enemy variants (Galaga), pellet types (Pac-Man), bomb (Bomberman).
+The empty generic `template.oas` type and its generated `template.oad` descriptor were retired on 2026‑11‑02. They added no fields and were not required by Generator. The inherited `Template Object` flag remains active: Level pools any flagged actor, and Generator constructs the referenced actor using its actual type. Use that flag with concrete actor types for spawn-by-mailbox patterns.
 
 ### `Test` — Editor field-type test harness
 
