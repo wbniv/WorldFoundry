@@ -133,6 +133,14 @@ To regenerate: build `deformer_golden_test`, run it with `--dump` into a scratch
 PNG with `google-chrome --headless=new --window-size=1440,900 --screenshot=<page>.png file://<page>.html`
 (quantised to 256 colours to stay under 512 KB).
 
+Real device frames sit beside them: the Lionfish tank on the Pixel 8 Pro with each build, and every tank
+of the selector on the Chromecast HD (cast1) with the fixed build. Fish swim freely in these, so the
+before and after poses are not matched, and a per-face difference is not visible at this scale; the
+matched-pose comparison is the canvas pages above. `scripts/profile-deformer-normals.py frames` builds
+the page from the coordinator evidence.
+
+[![Device frames: Pixel 8 Pro Lionfish before and after, cast1 all tanks](2026-11-01-deformer-face-normals/device.png)](2026-11-01-deformer-face-normals/device.html)
+
 ## Deliberately ugly visual regression case
 
 **Status, 2026‑11‑01:** not built in the engine. The camera choice from mesh data and the before/after
@@ -291,6 +299,91 @@ an i7‑1185G7 that was shared with other sessions (load average 8–11 on 8 thr
 
 5. On a Chromecast, every tank of the eight-tank selector opens and animates (coordinator job).
 
-    **Not run.** It needs an APK built from this change, and the root disk had under 1 GB free (at one
-    point 349 MB) throughout, while an Android build needs several GB. No coordinator job was submitted.
-    The `[verify T3]` TODO entry carries this step.
+    Run on chromecast-test-01 (Chromecast HD) with the fixed build: release aquarium APK built at
+    611cc679 (sha256 `8e7d98eb…51d72`) with `./gradlew --offline :app:assembleAquariumRelease` in a tmpfs
+    worktree, then `task chromecast:check DEVICE=chromecast-test-01 APP=aquarium APK=<frozen>
+    VALIDATOR=menu-back ASYNC=true`, job J‑5332f869244c, 2026‑11‑01 about 18:15:
+
+    ```
+    J-5332f869244c: completed {"error": null, "health": "ready"}
+    ```
+
+    `assertions.json`:
+
+    ```
+    clownfish     start_back_home_resume PASS
+    blue-shrimp   start_back_home_resume PASS
+    betta_animated_pixels 3758
+    betta         start_back_home_resume PASS
+    jellyfish     start_back_home_resume PASS
+    lionfish      start_back_home_resume PASS
+    planted-tank  start_back_home_resume PASS
+    arowana       start_back_home_resume PASS
+    tiger-barbs   start_back_home_resume PASS
+    ```
+
+    **PASS**: the selector opens and each of the eight tanks starts, returns to the selector on Back and
+    survives Home/resume. Only Betta has a validator assertion of motion (3758 changed pixels); the other
+    tanks' frames are on the device-frames page above.
+
+6. Device cost of the fix (added after Will asked for a device profile; moved from cast1 to the Pixel
+   on his instruction, "use pixel instead"). Same release APKs as step 5: before at 609fca52 (sha256
+   `b7c3fd44…8936f`), after at 611cc679, both built in one tmpfs worktree that differed only by the fix.
+   `scripts/profile-deformer-normals.py prepare` froze them, made a `--frame-profile` copy of each, and
+   wrote one `variant-benchmark` recipe per tank: before, after, before, after (two runs each, 15 s warmup,
+   20 s measured), then one `--frame-profile` run of each build. Submitted with
+   `task chromecast:submit DEVICE=phone-pixel-8-pro RECIPE=<recipe> ASYNC=true`.
+
+    The seven jobs first queued on cast1 (J‑dccd0380833a, J‑96ec06b7daac, J‑b248d21ceac0,
+    J‑25473b630591, J‑59fe5dbe3517, J‑26eecac5e92d, J‑eff28facf79a) waited behind another session's
+    interactive job and were cancelled unstarted when the profile moved to the Pixel.
+
+    **All numbers below are Pixel 8 Pro, not Chromecast HD.**
+
+    *Lionfish, J‑ec51380f6189, completed.* Frame times (presented-frame intervals, SurfaceFlinger):
+
+    | Variant | fps per run | p50 ms | p95 ms | missed refresh % |
+    |---|---|---|---|---|
+    | before-1 | 116.4, 113.6 | 8.34, 8.34 | 8.62, 8.58 | 0.17, 0.09 |
+    | after-1 | 120.0, 108.3 | 8.34, 8.34 | 8.58, 8.60 | 0.00, 0.46 |
+    | before-2 | 118.1, 119.9 | 8.34, 8.34 | 8.57, 8.59 | 0.17, 0.04 |
+    | after-2 | 117.8, 120.0 | 8.34, 8.34 | 8.57, 8.57 | 0.17, 0.00 |
+
+    The Pixel presents at its 120 Hz refresh in both builds; the run-to-run spread (108–120 fps) is
+    larger than any difference between builds, so fps and frame time show **no measurable difference**.
+
+    CPU sections from the `--frame-profile` runs (thread CPU ms per frame; mean of the eight 5 s windows
+    after level load, window-to-window min–max in brackets):
+
+    | Section | Before | After | Change |
+    |---|---|---|---|
+    | pose | 0.177 [0.166–0.199] | 0.298 [0.273–0.351] | +0.12 |
+    | animation | 0.131 [0.123–0.148] | 0.251 [0.230–0.297] | +0.12 |
+    | director | 0.276 [0.259–0.311] | 0.396 [0.363–0.466] | +0.12 |
+    | update | 0.424 [0.404–0.469] | 0.543 [0.505–0.624] | +0.12 |
+    | render | 2.879 [2.739–3.158] | 2.852 [2.629–3.226] | none |
+    | total | 3.304 [3.148–3.627] | 3.395 [3.134–3.850] | inside the spread |
+
+    The same +0.12 ms appears in four sections that nest around the scripted deform call, and the ranges
+    do not overlap, so it is the recompute: about 0.12 ms per frame for the tank's two lionfish
+    (`fish-deformations` and the render counters are identical in both builds: 2 deform calls, 15 render
+    actors, 8502 faces submitted), so about 60 µs per 4068-face lionfish per frame, or about 15 ns a face.
+    The desktop estimate (about 98 µs a call on a loaded i7) is the same order. Render time and the
+    faces-culled counter (2064 of 8502 in both) do not change measurably in this tank.
+
+    *Arowana, J‑fb133480bb05: did not finish.* before-1, after-1 and before-2 ran (119.2–120.0 fps, at
+    the refresh rate); the install of the after build for after-2 (`adb install -r`, issued by the
+    coordinator) did not return and was cut off after about 90 s. The job ended `uncertain /
+    device-command-timeout`, the coordinator's automatic readd J‑9ad7f7662e8e failed with
+    `cleanup-requires-restart`, and the Pixel is `recovery-required` until an administrator readds it.
+    Betta J‑8be03933aaf7, Jellyfish J‑40f37539c88f, Tiger Barbs J‑70c9b24a8673, Planted tank
+    J‑5ddc2a9a70fa and Clownfish J‑2d9ebdd6f03e are queued behind that recovery and have not run.
+
+    **What the Pixel can and cannot say about the Chromecast HD.** It shows the cost is real, small and
+    proportional to faces, with no change in what is drawn per frame. It cannot give the Chromecast's
+    number: the Pixel's cores are several times faster than the Chromecast HD's, and the Pixel has
+    headroom at 120 Hz while cast1 runs near its budget (the selector showed about 50 fps in the
+    Lionfish tank). Scaling 0.12 ms by an unmeasured factor would be a guess, so the Chromecast HD cost
+    stays **not measured**.
+
+    **FAIL (incomplete)**: one of the seven tanks profiled; the Chromecast HD cost is not measured.
