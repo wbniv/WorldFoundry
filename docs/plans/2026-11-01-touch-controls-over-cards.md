@@ -132,4 +132,16 @@ Run 2026‑11‑01 in the worktree, build trees under `~/.cache` (Linux Debug `-
 
 5. On a phone (not done here; Will's Pixel is off limits): open a card, see the joystick, B and D gone and A, C dimmed; A continues, C closes; close the card and the full HUD returns.
 
-    **NOT RUN:** needs an Android phone other than Will's Pixel 8 Pro.
+    Run 2026‑11‑01 on Will's Pixel 8 Pro (approved by Will that day) through the coordinator: the published v0.11 APK with only `lib/arm64-v8a/libwf_game.so` replaced by this commit's build (`b7b6335a…`), variant SHA-256 `37fbb45a53775e086467bfa6fc0ad2e8e2d31d5af12491ecc8fdadd63e0e0699`, versionCode 1100, installed by plain update (`J‑92b6d08c0267`). Evidence: `finding-your-way/docs/diagnostics/touch-controls-over-cards-pixel-2026-11-01/README.md`.
+
+    ```text
+    J-9ec308aae2c2 check 30 s: completed; reusing-installed-apk (37fbb45a...)
+    screenshot.png 2244x1008: THE TEMPLE card open; joystick, B and D absent; only C and A drawn
+    A/C panel fill  (38,52,71)   was (42,59,85) on v0.11 2026-10-31; background (32,43,54)
+    brightest label (168,174,181) was (244,245,246)
+    before card / A continues / C closes / HUD returns / joystick-area tap: not run
+    J-bdc1b6b0d5fa cleanup: am start -W -n com.google.android.apps.nexuslauncher/.NexusLauncherActivity
+    J-130f06b6317f restore: installed_sha256 b984f5ec395c618e9d12036f7575c77aa66fe0cf698b5e8cb3a574663a3e376f
+    ```
+
+    **PARTIAL:** card open **PASS** (joystick, B and D hidden; A and C lighter). The rest is **NOT RUN**: each coordinator `phone-input` job starts the launcher again in cleanup, and `check` force-stops the app, so taps need Will to open the game on the Pixel first.
