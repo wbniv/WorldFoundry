@@ -1,6 +1,6 @@
 # Field presentations: a distinct control for every case
 
-**Status:** Built and verified on the host and desktop (2026‑11‑01): steps 1 to 4 pass. Step 5 (APK on a refreshed runtime) and step 6 (cast1) are still to come. The choice-row keys are an open decision for Will (see below). Rank **T4**: it changes the engine form, both settings renderers (TV and phone touch), the OAD normalizer and engine validation, then refreshes the baseline's frozen native runtime. TODO: the `[wip T4]` item "Field presentations" in `TODO.md`.
+**Status:** Built and verified on the host and desktop (2026‑11‑01): steps 1 to 5 pass. The APK `baseline-5b47e27b5516e543.apk` is on a refreshed runtime. Step 6 (cast1) is the coordinator's to run. Choice-row keys follow Will's option 6 (see Decision). Rank **T4**: it changes the engine form, both settings renderers (TV and phone touch), the OAD normalizer and engine validation, then refreshes the baseline's frozen native runtime. TODO: the `[wip T4]` item "Field presentations" in `TODO.md`.
 
 ## Context
 
@@ -203,7 +203,22 @@ Run 2026‑11‑01 in the shared tree. The desktop engine is the Release build i
 
 5. The APK is rebuilt on a refreshed runtime; its path and SHA‑256 are recorded here.
 
-    **NOT RUN yet** (next: the condo diagnostic runtime from a clean worktree at this commit).
+    ```
+    $ ./gradlew :app:assembleCondoDiagnostic --offline     # clean worktree at 0ff49194 (origin/2026-new-level)
+    APK page alignment: PASS (…/worldfoundry-condo-diagnostic.apk)
+    BUILD SUCCESSFUL in 6m 39s
+    $ python3 wflevels/baseline/build.py --package-only --runtime …/worldfoundry-condo-diagnostic.apk --refresh-runtime
+    Frozen APK: …/wflevels/baseline/build/baseline-5b47e27b5516e543.apk
+    $ sha256sum wflevels/baseline/build/baseline-5b47e27b5516e543.apk
+    5b47e27b5516e543830d1885e9e134b299402378f1125608a0e1966f7ab81f47
+    ```
+
+    **PASS.** The runtime is `worldfoundry-condo-diagnostic.apk`, SHA‑256 `205b4ede4ab25d10716f4100b457fa6fbe3dc084aa297df385c17063ebf7f617`. It was built from a clean worktree at the pushed commit, so no uncommitted work from other sessions is compiled in. Both ABIs carry the new code: each `libwf_game.so` contains "Enter a relative path: names separated by /" and "Close list".
+    - The APK's native libraries are byte-identical to the runtime's.
+    - Its `assets/cd.iff` matches `build/cd.iff`, built from level `56dd3459…6ee`.
+    - The previous runtime stays in `build/` as `runtime-dd81405c…a815c.apk`.
+
+    The pushed engine also includes an upstream change that came in with the rebase (`engine/stubs/scripting_zforth.cc`, 14 lines).
 
 6. On cast1 (the coordinator runs this): the eleven cases draw as in the mockups.
 

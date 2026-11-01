@@ -1040,8 +1040,16 @@ tasks:
 
   baseline:check:
     desc: "Run an owned native desktop baseline movement/collision/camera session"
+    deps: [build-desktop-release]
     cmds:
       - python3 wflevels/baseline/verify.py --desktop
+
+  build-desktop-release:
+    desc: "Release engine/wf_game for baseline:check (CMake + Ninja in build-docker/jelly-engine; a no-op when up to date). task build's debug binary cannot run baseline: it stops on the 16 256-face teapot's polygon assertion and has no source-tree UI font fallback"
+    deps: [vendor-unpack]
+    cmds:
+      - cmake -S . -B build-docker/jelly-engine -G Ninja -DCMAKE_BUILD_TYPE=Release
+      - cmake --build build-docker/jelly-engine --target wf_game
 
   baseline:fresh:
     desc: "Prove the committed baseline outputs (level bundles, settings catalogs, actor map, main cd.iff) rebuild identically from their inputs. Exits 1 and leaves them rebuilt when stale, so commit them with the input change (scripts/baseline-fresh.py)"
