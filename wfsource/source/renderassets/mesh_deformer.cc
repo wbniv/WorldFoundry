@@ -14,6 +14,7 @@
 #include <renderassets/jelly_deform.h>
 #include <renderassets/lionfish_deform.h>
 #include <renderassets/dfrm_deform.h>
+#include <renderassets/face_normal.h>
 
 #include <algorithm>
 #include <cmath>
@@ -21,6 +22,30 @@
 #include <vector>
 
 namespace {
+
+// The species kinds move vertices; culling and lighting read the stored face
+// normals, so every pose rewrites them from the posed positions, with DFRM's
+// triangle-normal routine (the loader's winding). One pass, no allocation; a
+// degenerate face keeps its last normal. Each actor owns its face list (the
+// on-disk constructor), so this touches no other actor.
+// docs/plans/2026-11-01-deformer-face-normals.md
+void RecomputeFaceNormals(const DeformTarget& t)
+{
+    TriFace* faces = t.object.GetWritableFaceList();
+    const int faceCount = t.object.GetFaceCount();
+    const Vertex3D* vertices = t.vertices;
+    for (int f = 0; f < faceCount; ++f) {
+        const Vector3& a = vertices[faces[f].v1Index].position;
+        const Vector3& b = vertices[faces[f].v2Index].position;
+        const Vector3& c = vertices[faces[f].v3Index].position;
+        const float v0[3] = {a.X().AsFloat(), a.Y().AsFloat(), a.Z().AsFloat()};
+        const float v1[3] = {b.X().AsFloat(), b.Y().AsFloat(), b.Z().AsFloat()};
+        const float v2[3] = {c.X().AsFloat(), c.Y().AsFloat(), c.Z().AsFloat()};
+        float n[3];
+        if (wf_render::TriangleNormal(v0, v1, v2, n))
+            faces[f].normal = Vector3ToPS12(Vector3(Scalar(n[0]), Scalar(n[1]), Scalar(n[2])));
+    }
+}
 
 class FishDeformer : public MeshDeformer {
 public:
@@ -43,6 +68,7 @@ public:
         const float angle=phase*6.283185307f,sine=std::sin(angle),cosine=std::cos(angle);
         amplitude=std::max(0.f,std::min(.12f,amplitude))*_length;
         for(int i=0;i<count;i++) vertices[i].position.SetY(Scalar(_weights[i].deform(sine,cosine,amplitude)));
+        RecomputeFaceNormals(t);
         return DeformStatus::Ok;
     }
 private:
@@ -92,6 +118,7 @@ public:
             vertices[i].position.SetY(Scalar(_weights[i].bentY(sine,cosine,amplitude)));
             vertices[i].position.SetZ(Scalar(_weights[i].bentZ(sine,cosine,amplitude,spread)));
         }
+        RecomputeFaceNormals(t);
         return DeformStatus::Ok;
     }
 private:
@@ -136,6 +163,7 @@ public:
         finAmplitude=std::max(0.f,std::min(.15f,finAmplitude));
         for(int i=0;i<count;i++) vertices[i].position.SetY(Scalar(_weights[i].deform(
             sine,cosine,amplitude,bend,finSine,finCosine,finAmplitude)));
+        RecomputeFaceNormals(t);
         return DeformStatus::Ok;
     }
 private:
@@ -170,6 +198,7 @@ public:
             float x,y,z; _weights[i].deform(contraction,phase,pitchLag,rollLag,x,y,z);
             vertices[i].position=Vector3(Scalar(x),Scalar(y),Scalar(z));
         }
+        RecomputeFaceNormals(t);
         return DeformStatus::Ok;
     }
 private:
@@ -206,6 +235,7 @@ public:
             float x,y,z;wf_render::lionPose(_rest[i],rig[i],phase,drive,turn,gape,x,y,z);
             vertices[i].position=Vector3(Scalar(x),Scalar(y),Scalar(z));
         }
+        RecomputeFaceNormals(t);
         t.object.SetLionPalette(dark,light);
         return DeformStatus::Ok;
     }

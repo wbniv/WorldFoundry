@@ -14,6 +14,15 @@
 // The fixtures were recorded from the code before the E0 generic-slot move
 // (docs/plans/2026-10-16-saltwater-seahorses.md, E0 "Regression guard"); the
 // comparison is exact, so any change in arithmetic order fails it.
+//
+// After every step it also checks the face normals: each face's stored normal
+// must equal a fresh CalculateNormal of its deformed vertices within 1e-4
+// (docs/plans/2026-11-01-deformer-face-normals.md). Degenerate faces, which
+// keep their last normal by design, are skipped.
+//
+//   deformer_golden <repo-root> <fixture-dir> --bench    time each kind's Deform call
+//   deformer_golden <repo-root> <out-dir> --dump         write <case>.json: faces, rest and
+//       per-step positions (input to scripts/deformer-normals-mockups.py)
 #include <renderassets/rendacto.hp>
 #include <gfx/pixelmap.hp>
 #include <gfx/material.hp>
@@ -21,6 +30,7 @@
 #include <hal/halbase.h>
 #include <streams/binstrm.hp>
 
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -74,6 +84,35 @@ void Capture(RenderActor3D& actor, std::vector<uint32_t>& out)
         out.push_back(object.GetMaterial(i).PaletteLight());
     }
 }
+
+// Largest component difference between each face's stored normal and a fresh
+// CalculateNormal of its current vertices. Returns the number of faces checked.
+int CheckNormals(RenderActor3D& actor, float& maxError)
+{
+    RenderObject3D& object = const_cast<RenderObject3D&>(*actor.GetRenderObject());
+    const Vertex3D* vertices = object.GetWrittableVertexList();
+    const TriFace* faces = object.GetWritableFaceList();
+    int checked = 0;
+    for (int f = 0; f < object.GetFaceCount(); ++f) {
+        const Vector3 v0 = PSToVector3(vertices[faces[f].v1Index].position);
+        const Vector3 v1 = PSToVector3(vertices[faces[f].v2Index].position);
+        const Vector3 v2 = PSToVector3(vertices[faces[f].v3Index].position);
+        const Vector3 cross = (v1 - v0).CrossProduct(v2 - v0);
+        const float len = std::sqrt(cross.X().AsFloat()*cross.X().AsFloat() + cross.Y().AsFloat()*cross.Y().AsFloat()
+                                    + cross.Z().AsFloat()*cross.Z().AsFloat());
+        if (!(len > 1e-12f)) continue;                   // degenerate: keeps its last normal
+        const Vector3 fresh = CalculateNormal(v0, v1, v2);
+        const Vector3 stored = PSToVector3(faces[f].normal);
+        for (int k = 0; k < 3; ++k) {
+            const float e = std::fabs(fresh[k].AsFloat() - stored[k].AsFloat());
+            if (!(e <= maxError)) maxError = std::isfinite(e) ? e : std::numeric_limits<float>::infinity();
+        }
+        ++checked;
+    }
+    return checked;
+}
+
+const float NormalTolerance = 1e-4f;
 
 struct Case
 {
@@ -144,12 +183,16 @@ std::vector<Case> Cases()
 
 int main(int argc, char** argv)
 {
-    if (argc < 3 || (argc > 3 && std::strcmp(argv[3], "--record") != 0)) {
-        std::fprintf(stderr, "usage: deformer_golden <repo-root> <fixture-dir> [--record]\n");
+    const bool modeOk = argc == 3 || (argc == 4 && (std::strcmp(argv[3], "--record") == 0 ||
+                        std::strcmp(argv[3], "--bench") == 0 || std::strcmp(argv[3], "--dump") == 0));
+    if (!modeOk) {
+        std::fprintf(stderr, "usage: deformer_golden <repo-root> <fixture-dir> [--record|--bench|--dump]\n");
         return 2;
     }
     const std::string root = argv[1], fixtures = argv[2];
-    const bool record = argc > 3;
+    const bool record = argc > 3 && std::strcmp(argv[3], "--record") == 0;
+    const bool bench = argc > 3 && std::strcmp(argv[3], "--bench") == 0;
+    const bool dump = argc > 3 && std::strcmp(argv[3], "--dump") == 0;
 
     static std::vector<char> scratch(4 << 20), heap(256 << 20);
     _HALScratchLmalloc = new LMalloc(scratch.data(), scratch.size() MEMORY_NAMED(COMMA "golden-scratch"));
@@ -161,9 +204,62 @@ int main(int argc, char** argv)
         std::vector<char> bytes = ReadFile(root + "/" + c.mesh);
         binistream input(bytes.data(), int32(bytes.size()));
         RenderActor3D actor(memory, input, 0, callbacks);
+        if (bench) {
+            // The second step is a successful pose for every kind: bind on the
+            // first call, then time the steady-state Deform calls alone.
+            const int calls = 20000;
+            c.steps[0](actor);
+            const auto start = std::chrono::steady_clock::now();
+            for (int i = 0; i < calls; ++i) c.steps[1](actor);
+            const double ns = std::chrono::duration<double, std::nano>(std::chrono::steady_clock::now() - start).count() / calls;
+            const RenderObject3D& object = *actor.GetRenderObject();
+            std::printf("bench %-22s %5d vertices %5d faces %9.0f ns per Deform call\n", c.name,
+                        const_cast<RenderObject3D&>(object).GetVertexCount(), object.GetFaceCount(), ns);
+            continue;
+        }
+        if (dump) {
+            RenderObject3D& object = const_cast<RenderObject3D&>(*actor.GetRenderObject());
+            const std::string path = fixtures + "/" + c.name + ".json";
+            FILE* f = std::fopen(path.c_str(), "w");
+            if (!f) { std::fprintf(stderr, "deformer_golden: cannot write %s\n", path.c_str()); return 2; }
+            auto positions = [&]() {
+                const Vertex3D* v = object.GetWrittableVertexList();
+                std::fprintf(f, "[");
+                for (int i = 0; i < object.GetVertexCount(); ++i)
+                    std::fprintf(f, "%s%.7g,%.7g,%.7g", i ? "," : "", v[i].position.X().AsFloat(),
+                                 v[i].position.Y().AsFloat(), v[i].position.Z().AsFloat());
+                std::fprintf(f, "]");
+            };
+            const TriFace* faces = object.GetWritableFaceList();
+            std::fprintf(f, "{\"name\":\"%s\",\"mesh\":\"%s\",\"faces\":[", c.name, c.mesh);
+            for (int i = 0; i < object.GetFaceCount(); ++i)
+                std::fprintf(f, "%s%d,%d,%d", i ? "," : "", faces[i].v1Index, faces[i].v2Index, faces[i].v3Index);
+            std::fprintf(f, "],\"rest\":");
+            positions();
+            std::fprintf(f, ",\"steps\":[");
+            for (size_t s = 0; s < c.steps.size(); ++s) { c.steps[s](actor); if (s) std::fprintf(f, ","); positions(); }
+            std::fprintf(f, "]}\n");
+            std::fclose(f);
+            std::printf("dumped %-22s %s\n", c.name, path.c_str());
+            continue;
+        }
         std::vector<uint32_t> got;
         got.push_back(uint32_t(c.steps.size()));
-        for (const auto& step : c.steps) { step(actor); Capture(actor, got); }
+        float normalError = 0;
+        int normalFaces = 0;
+        for (const auto& step : c.steps) {
+            step(actor); Capture(actor, got);
+            normalFaces = CheckNormals(actor, normalError);
+        }
+        if (!record) {
+            if (normalError <= NormalTolerance) {
+                std::printf("ok   %-22s normals: %d faces, max error %.2g\n", c.name, normalFaces, normalError);
+            } else {
+                ++failures;
+                std::printf("FAIL %-22s normals: max error %.3g over %d faces (tolerance %.0e)\n",
+                            c.name, normalError, normalFaces, NormalTolerance);
+            }
+        }
 
         const std::string path = fixtures + "/" + c.name + ".bin";
         if (record) {
