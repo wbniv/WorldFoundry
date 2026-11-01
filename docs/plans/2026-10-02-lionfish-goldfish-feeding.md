@@ -4,6 +4,8 @@ Date: 2026-10-02. Status: **implemented, integrated into the six-tank selector, 
 
 Will requested a goldfish mesh and animation for the Lionfish level. **A + DOWN releases one goldfish**, with **at most three live goldfish** in the tank. The resident lionfish chases goldfish. The player can approach a goldfish and **press A to eat it**.
 
+> **Follow-up, 2026‑11‑01:** the Director now also releases a goldfish by itself, 45‑60&nbsp;s after the tank becomes empty (`gf-auto-tick` in `gf-tick`, mailboxes 980‑982). See [automatic goldfish release](2026-11-01-lionfish-auto-goldfish.md).
+
 - [x] Inspect the current lionfish assets, input handling, resident motion and actor allocation.
 - [x] Specify asset, controls, goldfish lifecycle, pursuit and verification below.
 - [x] Build and inspect the animated goldfish asset.

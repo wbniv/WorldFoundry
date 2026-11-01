@@ -409,10 +409,30 @@
     800 tk@ gf-idle-x tk! 802 tk@ gf-idle-z tk!
   then
   0 gf-rstate tk! -1 gf-rlook tk!
+  0 gf-auto-clock tk! -1 gf-auto-due tk! gf-auto-seed0 gf-auto-seed tk!
   gf-initial 0 > if gf-initial 0 do gf-release-one loop then ;
+\ Automatic release, Director-owned: a countdown that runs only while no goldfish is
+\ live (a reserved fish still counts). Each countdown draws a fresh gf-auto-min..max
+\ seconds from a 15-bit LCG (the state fits a fixed-point mailbox); same seed, same
+\ sequence. Time is elapsed DELTA_TIME clamped to gf-auto-stall per tick, so a stall
+\ cannot fire a release. No clear spawn point: retry after gf-auto-retry seconds.
+: gf-auto-draw
+  gf-auto-seed tk@ 389 * 13849 + 32768 mod dup gf-auto-seed tk!
+  32768 / gf-auto-max gf-auto-min - * gf-auto-min + gf-auto-due tk! ;
+: gf-auto-tick
+  gf-count tk@ 0 > if 0 gf-auto-clock tk! -1 gf-auto-due tk! else
+    gf-auto-due tk@ 0 < if gf-auto-draw 0 gf-auto-clock tk! then
+    gf-auto-clock tk@ INDEXOF_DELTA_TIME tk@ 0 max gf-auto-stall min + dup gf-auto-clock tk!
+    gf-auto-due tk@ >= if
+      gf-release-one
+      gf-count tk@ 0 = if gf-auto-due tk@ gf-auto-retry - gf-auto-clock tk!
+      else 0 gf-auto-clock tk! -1 gf-auto-due tk! then
+    then
+  then ;
 : gf-tick
   4 profile-begin
   gf-release tk@ if gf-release-one 0 gf-release tk! then
+  gf-auto if gf-auto-tick then
   gf-eat tk@ if gf-player-eat 0 gf-eat tk! then
   3 0 do i gf-i tk! gf-live if 15 gf@ 0 > if
     15 gf@ gf-owner tk! 3 gs@ 1 <> if gf-swim then

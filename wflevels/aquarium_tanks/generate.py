@@ -417,7 +417,8 @@ if BETTA_FINS:
 feeding=''
 if FEEDING:
     header+=goldfish.constants(indices,int(os.environ.get('LIONFISH_INITIAL_GOLDFISH','0')),
-                              os.environ.get('LIONFISH_AUTOEAT','1')!='0')
+                              os.environ.get('LIONFISH_AUTOEAT','1')!='0',
+                              os.environ.get('LIONFISH_AUTO_GOLDFISH','1')!='0')
     feeding=(COMMON/'lionfish_feeding.fth').read_text()
     feeding=(COMMON/'lionfish_suction.fth').read_text()+'\n'+feeding
     obstacles=': gf-obstacles\n'
@@ -622,6 +623,8 @@ if C.KIND=='arowana':
               'observation_time':.65,'sight_range':5.5,'sight_memory':.8,
               'slot_fields':['active','generation','x','y','z','yaw','vx','vy','vz','phase','age',
                              'resident_awareness','alarm','escape_remaining','escape_cooldown','strike_owner'],
-              'visibility':'slot active flag'} if FEEDING else None)),indent=2)+'\n')
+              'visibility':'slot active flag',
+              'auto_release':({'enabled':os.environ.get('LIONFISH_AUTO_GOLDFISH','1')!='0',
+                               'mailboxes':goldfish.AUTO_MAILBOXES,'tuning':goldfish.AUTO_TUNING})} if FEEDING else None)),indent=2)+'\n')
 print(f'[{LEVEL}] {COUNT} animals; {len(objects)} actors; profile={PROFILE}')
 bpy.ops.wf.export_level(filepath=str(HERE/(LEVEL+'.lev')))

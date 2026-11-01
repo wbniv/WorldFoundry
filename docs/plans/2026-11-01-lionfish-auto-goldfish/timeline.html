@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<!-- Plan mockup: Lionfish automatic goldfish release. Self-contained, 1440x900. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Auto goldfish timeline</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1f2328; --muted: #656d76; --line: #d1d9e0; --panel: #f6f8fa;
+    --accent: #0969da; --gold: #f39318; --count: #1a7f37; --held: #8c959f; --retry: #cf222e;
+    --water1: #1d5a73; --water2: #0d3448; --sand: #b9b49c; --rock: #5a6e78;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --line: #30363d; --panel: #161b22;
+      --accent: #4493f8; --count: #3fb950; --held: #6e7681; --retry: #f85149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; width: 1440px; height: 900px; overflow: hidden; background: var(--bg); color: var(--fg);
+         font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display: flex; align-items: center; gap: 12px; padding: 14px 24px;
+           border-bottom: 1px solid var(--line); background: var(--panel); }
+  header h1 { margin: 0; font-size: 16px; font-weight: 600; }
+  header .tag { margin-left: auto; font: 600 11px ui-monospace, Menlo, monospace; color: var(--muted);
+                border: 1px solid var(--line); border-radius: 10px; padding: 2px 8px; }
+  section { padding: 22px 32px; }
+  h2 { font-size: 15px; margin: 0 0 10px; }
+  .note { color: var(--muted); font-size: 13px; }
+  svg text { font-family: ui-sans-serif, system-ui, sans-serif; }
+  .tanks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 10px; }
+  .card { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); padding: 12px; cursor: pointer; }
+  .card[aria-selected="true"] { outline: 2px solid var(--accent); }
+  .card h3 { margin: 0 0 6px; font-size: 14px; }
+  .card p { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+  .mono { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; margin-right: 18px; font-size: 13px; }
+  .sw { width: 22px; height: 8px; border-radius: 4px; display: inline-block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Lionfish: automatic goldfish release (Director <span class="mono">gf-tick</span>)</h1>
+  <span class="tag">desktop run, 20&nbsp;Hz stepped clock</span>
+</header>
+<section>
+  <h2>Timeline: one level session</h2>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--count)"></i>countdown running (tank empty)</span>
+    <span><i class="sw" style="background:var(--held)"></i>held at 0 (goldfish live)</span>
+    <span><i class="sw" style="background:var(--retry)"></i>retry every 2&nbsp;s (no clear spawn point)</span>
+    <span><i class="sw" style="background:var(--gold)"></i>release (<span class="mono">GF 1</span>)</span>
+  </div>
+  <svg id="tl" width="1376" height="250" viewBox="0 0 1376 250" role="img" aria-label="timeline"></svg>
+  <p class="note">Times are the measured desktop run (real <span class="mono">wf_game</span>, fixed 0.05&nbsp;s frames stepped through the debug bridge):
+    first release at 52.11&nbsp;s, resident catch at 68.90&nbsp;s, next release 56.95&nbsp;s later at 125.85&nbsp;s.
+    The bottom lane is the retry case from the host test: nothing clear at the deadline, so the next try is 2&nbsp;s later, not 45–60&nbsp;s.</p>
+
+  <h2 style="margin-top:14px">Tank states (click a card)</h2>
+  <div class="tanks" id="tanks"></div>
+</section>
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function el(tag, attrs, parent, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  parent.appendChild(e); return e;
+}
+// --- Timeline -----------------------------------------------------------------------
+const tl = document.getElementById('tl');
+const X0 = 40, X1 = 1350, T = 140, x = t => X0 + (X1 - X0) * t / T;
+el('line', {x1: X0, y1: 150, x2: X1, y2: 150, stroke: css('--line'), 'stroke-width': 2}, tl);
+for (let t = 0; t <= T; t += 10) {
+  el('line', {x1: x(t), y1: 145, x2: x(t), y2: 155, stroke: css('--muted')}, tl);
+  el('text', {x: x(t), y: 172, 'text-anchor': 'middle', 'font-size': 12, fill: css('--muted')}, tl, t + ' s');
+}
+// 45-60 s windows for the two countdowns.
+[[0, 'countdown 1: drew 52.11 s'], [68.9, 'countdown 2: drew 56.95 s']].forEach(([s, label]) => {
+  el('rect', {x: x(s + 45), y: 60, width: x(s + 60) - x(s + 45), height: 70, fill: css('--count'), opacity: .12}, tl);
+  el('text', {x: x(s + 52.5), y: 54, 'text-anchor': 'middle', 'font-size': 12, fill: css('--count')}, tl, '45–60 s window');
+});
+const lanes = [[0, 52.11, '--count', 'countdown 1: drew 52.11 s'], [52.11, 68.9, '--held', 'goldfish live: held at 0'],
+               [68.9, 125.85, '--count', 'countdown 2: drew 56.95 s'], [125.85, 140, '--held', 'goldfish live']];
+lanes.forEach(([a, b, c, label]) => {
+  el('rect', {x: x(a), y: 92, width: x(b) - x(a), height: 26, rx: 6, fill: css(c)}, tl);
+  el('text', {x: (x(a) + x(b)) / 2, y: 110, 'text-anchor': 'middle', 'font-size': 12, fill: '#fff'}, tl, label);
+});
+[[52.11, 'GF 1 release'], [125.85, 'GF 1 release']].forEach(([t, l]) => {
+  el('circle', {cx: x(t), cy: 150, r: 8, fill: css('--gold')}, tl);
+  el('text', {x: x(t), y: 30, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 600, fill: css('--gold')}, tl, l + ' @ ' + t.toFixed(2) + ' s');
+  el('line', {x1: x(t), y1: 36, x2: x(t), y2: 142, stroke: css('--gold'), 'stroke-dasharray': '3 3'}, tl);
+});
+el('circle', {cx: x(68.9), cy: 150, r: 7, fill: css('--fg')}, tl);
+el('text', {x: x(68.9), y: 196, 'text-anchor': 'middle', 'font-size': 12, fill: css('--fg')}, tl, 'GF 3 resident capture @ 68.90 s');
+// Retry lane (test case g).
+el('rect', {x: x(0), y: 214, width: x(52.11) - x(0), height: 14, rx: 4, fill: css('--count'), opacity: .55}, tl);
+for (let t = 52.11, k = 0; k < 3; t += 2, k++)
+  el('rect', {x: x(t), y: 214, width: x(t + 2) - x(t) - 2, height: 14, rx: 3, fill: css('--retry')}, tl);
+el('circle', {cx: x(58.11), cy: 221, r: 6, fill: css('--gold')}, tl);
+el('text', {x: x(60), y: 226, 'font-size': 12, fill: css('--retry')}, tl, 'retry case: no clear point at 52.11 s, tries every 2 s, released once clear (no log while blocked)');
+
+// --- Tank states ---------------------------------------------------------------------
+const states = [
+  {t: 'Empty, counting', fish: false, eaten: false, clock: '40.15 / 52.11 s',
+   p: 'Level start: zero goldfish, a fresh countdown. gf-auto-clock rises with DELTA_TIME (≤ 0.2 s per tick).'},
+  {t: 'Goldfish live', fish: true, eaten: false, clock: 'held at 0',
+   p: 'Released at 52.11 s by gf-release-one; the Visibility Mailbox shows it. No predator is told; the resident must see it.'},
+  {t: 'Eaten, new countdown', fish: false, eaten: true, clock: '0 → 56.95 s',
+   p: 'gf-consume at capture drops gf-count to 0; the next tick draws a new 45–60 s interval.'},
+  {t: 'No clear spawn point', fish: false, eaten: false, retry: true, clock: 'due − 2 s',
+   p: 'Both mouths or live prey near every spawn point: count unchanged, no GF 1, retry 2 s later.'}
+];
+const tanks = document.getElementById('tanks');
+states.forEach((s, i) => {
+  const card = document.createElement('div'); card.className = 'card'; card.setAttribute('aria-selected', i === 1);
+  card.innerHTML = `<h3>${s.t}</h3>`;
+  const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '0 0 320 200'); svg.setAttribute('width', '100%');
+  card.appendChild(svg);
+  el('rect', {x: 0, y: 0, width: 320, height: 200, fill: css('--water2')}, svg);
+  el('rect', {x: 0, y: 20, width: 320, height: 120, fill: css('--water1')}, svg);
+  el('rect', {x: 0, y: 140, width: 320, height: 60, fill: css('--sand')}, svg);
+  [[10, 60], [70, 50], [250, 60]].forEach(([rx, w]) => el('path', {d: `M${rx} 150 l10 -20 h${w - 20} l10 20 z`, fill: css('--rock')}, svg));
+  const lion = (cx, cy, s) => { const g = el('g', {transform: `translate(${cx} ${cy}) scale(${s})`}, svg);
+    el('ellipse', {cx: 0, cy: 0, rx: 34, ry: 12, fill: '#e8e0d4'}, g);
+    for (let k = -24; k <= 24; k += 8) el('rect', {x: k, y: -11, width: 3, height: 22, fill: '#6b2b1a'}, g);
+    el('path', {d: 'M-30 0 l-18 -14 v28 z', fill: '#9aa5ad', opacity: .7}, g); };
+  lion(120, 95, 1); lion(250, 80, .8);
+  if (s.fish) { el('ellipse', {cx: 70, cy: 50, rx: 10, ry: 6, fill: css('--gold')}, svg);
+                el('path', {d: 'M60 50 l-8 -6 v12 z', fill: css('--gold')}, svg); }
+  if (s.eaten) el('text', {x: 160, y: 40, 'text-anchor': 'middle', 'font-size': 12, fill: '#fff'}, svg, 'gulp: GF 3');
+  if (s.retry) [-1, -.35, .8, 2.8, -2.8, -4.2, 4.2].forEach(v => {
+    const px = 160 + v * 34; el('line', {x1: px - 5, y1: 30, x2: px + 5, y2: 40, stroke: css('--retry'), 'stroke-width': 2}, svg);
+    el('line', {x1: px + 5, y1: 30, x2: px - 5, y2: 40, stroke: css('--retry'), 'stroke-width': 2}, svg); });
+  el('rect', {x: 196, y: 172, width: 118, height: 20, rx: 4, fill: '#000', opacity: .55}, svg);
+  el('text', {x: 255, y: 186, 'text-anchor': 'middle', 'font-size': 11, fill: '#fff', class: 'mono'}, svg, s.clock);
+  const p = document.createElement('p'); p.textContent = s.p; card.appendChild(p);
+  card.onclick = () => { tanks.querySelectorAll('.card').forEach(c => c.setAttribute('aria-selected', false)); card.setAttribute('aria-selected', true); };
+  tanks.appendChild(card);
+});
+</script>
+</body>
+</html>

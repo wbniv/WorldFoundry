@@ -32,8 +32,18 @@ def tank(tmp_path,request):
         text=(ROOT/'wflevels/aquarium_lionfish/aquarium_lionfish.lev').read_text()
         encoded=re.search(r'\{ \'STR\' \{ \'NAME\' "Script" \} \{ \'STR\' ("(?:\\.|[^"\\])*")',text).group(1)
         script=json.loads(encoded).removesuffix('\ntk-director-tick\n')
-        script=script.replace(': gf-log-char 0 sys ;',': gf-log-char drop ;').replace(': gf-log-num 1 sys ;',': gf-log-num drop ;')
-        if getattr(request,'param',False):script=script.replace(': tk-touch 0 ;',': tk-touch 1 ;')
+        # Log hooks: count `GF 1` (release) events in 1998 instead of printing them.
+        script=script.replace(': gf-log-char 0 sys ;',': gf-log-char 71 = if 1 1996 tk! then ;')
+        script=script.replace(': gf-log-num 1 sys ;',': gf-log-num 1996 tk@ if 0 1996 tk! 1 = if 1998 tk@ 1 + 1998 tk! then else drop then ;')
+        # Test-only switch (host mailbox 1999, 0 by default) that rejects every spawn point.
+        spawn_end='then loop gf-spawn-slot tk@ gf-i tk! ;'
+        assert script.count(spawn_end)==1
+        script=script.replace(spawn_end,'then loop gf-spawn-slot tk@ gf-i tk! 1999 tk@ if 0 gf-clear tk! then ;')
+        param=getattr(request,'param',False)
+        if param is True:script=script.replace(': tk-touch 0 ;',': tk-touch 1 ;')
+        if param=='no-auto':
+            assert ': gf-auto 1 ;' in script
+            script=script.replace(': gf-auto 1 ;',': gf-auto 0 ;')
         target=tmp_path/'director.fth';target.write_text(script)
         assert h.load(target)=='ok'
         h.write(1907,.05)
@@ -289,3 +299,123 @@ def test_pitched_mouth_and_sight_follow_forward_axis(tank):
     assert h.read(964)==1
     evaluate(h,'.65 2 gf! 0 3 gf! 2.5 4 gf! gf-player-mouth gf-edible gf-see tk!')
     assert h.read(964)==0
+
+# --- Automatic release (docs/plans/2026-11-01-lionfish-auto-goldfish.md) -----------------
+AUTO=goldfish.AUTO_TUNING
+CLOCK,DUE=goldfish.AUTO_MAILBOXES['gf-auto-clock'],goldfish.AUTO_MAILBOXES['gf-auto-due']
+RELEASES=1998  # `GF 1` events counted by the fixture's log hooks
+BLOCK=1999     # test switch: every spawn point rejected
+
+def intervals(n):
+    """The countdowns the generated seed must produce: the same LCG as gf-auto-draw."""
+    s=AUTO['gf-auto-seed0'];out=[]
+    for _ in range(n):
+        s=(s*389+13849)%32768
+        out.append(AUTO['gf-auto-min']+(AUTO['gf-auto-max']-AUTO['gf-auto-min'])*s/32768)
+    return out
+
+def ticks(h,n,dt=.05):
+    # do..loop only compiles inside a definition.
+    h.write(1907,dt);evaluate(h,': auto-ticks 0 do gf-tick loop ;');evaluate(h,f'{n} auto-ticks')
+
+def until_release(h,limit,dt=.05):
+    """Tick until gf-count rises; return the number of ticks, or None."""
+    h.write(1907,dt);start=h.read(933)
+    for k in range(1,limit+1):
+        evaluate(h,'gf-tick')
+        if h.read(933)>start:return k
+    return None
+
+def test_auto_constants_are_disjoint_and_switchable():
+    values=goldfish.AUTO_MAILBOXES
+    assert sorted(values.values())==[980,981,982]
+    assert AUTO['gf-auto-min']==45 and AUTO['gf-auto-max']==60 and AUTO['gf-auto-retry']==2 and AUTO['gf-auto-stall']==.2
+    names={'Player':39,'goldfish-0':1,'goldfish-1':2,'goldfish-2':3,'animal-01-body':4}
+    assert ': gf-auto 1 ;' in goldfish.constants(names)
+    assert ': gf-auto 0 ;' in goldfish.constants(names,auto=False)
+    with pytest.raises(AssertionError):goldfish.check_auto_mailboxes({'gf-other':980,**values})
+    here=ROOT/'wflevels/aquarium_lionfish'
+    assert ': gf-auto 1 ;' in (here/'aquarium_lionfish.lev').read_text()
+    auto=json.loads((here/'actor-map.json').read_text())['feeding']['auto_release']
+    assert auto=={'enabled':True,'mailboxes':values,'tuning':AUTO}
+    assert all(i>=1 and 45<=t<60 for i,t in enumerate(intervals(50),1))
+
+def test_auto_release_waits_45s_then_releases_by_60s(tank):
+    h=tank
+    assert h.read(933)==0
+    ticks(h,899)                                   # (a) 44.95 s: nothing yet
+    assert h.read(933)==0 and h.read(RELEASES)==0
+    k=until_release(h,300)                         # (b) one release in [45, 60]
+    elapsed=(899+k)*.05
+    assert 45<=elapsed<=60
+    assert elapsed==pytest.approx(intervals(1)[0],abs=.051)
+    assert h.read(RELEASES)==1 and live(h)==[1,0,0]
+
+def test_no_countdown_while_a_goldfish_is_live(tank):
+    h=tank
+    evaluate(h,': check-live gf-count tk@ 0 > gf-auto-clock tk@ 0 <> & if 1 1995 tk! then ;')
+    evaluate(h,'gf-release-one')                   # (c) a live fish holds the countdown at 0
+    h.write(1907,.05);eaten=released=None
+    for k in range(1,1801):
+        evaluate(h,'gf-tick check-live')
+        if eaten is None and h.read(934)+h.read(935)>0:eaten=k
+        if eaten and released is None and h.read(RELEASES)==2:released=k
+    assert h.read(1995)==0 and h.read(933)<=1
+    # The resident finds the fish on its own (the release notifies nobody) and eats it;
+    # only then does a countdown run, and it releases the next fish 45-60 s later.
+    assert h.read(935)==1 and eaten is not None and released is not None
+    assert 45<=(released-eaten)*.05<=60
+    assert (released-eaten)*.05==pytest.approx(intervals(1)[0],abs=.11)
+
+def test_new_countdown_after_last_fish_is_eaten(tank):
+    h=tank
+    first,second=intervals(2)
+    k=until_release(h,1300);assert (k*.05)==pytest.approx(first,abs=.051)
+    evaluate(h,'0 gf-i tk! 2 15 gf!');ticks(h,5)  # reserved by a strike: still live, no countdown
+    assert h.read(933)==1 and h.read(CLOCK)==0 and h.read(1000)==1
+    evaluate(h,'0 gf-i tk! gf-consume')            # (d) capture: the tank is empty again
+    assert h.read(933)==0
+    ticks(h,899);assert h.read(933)==0
+    k=until_release(h,300)
+    assert (899+k)*.05==pytest.approx(second,abs=.051)
+    assert 45<=(899+k)*.05<=60 and h.read(RELEASES)==2
+
+def test_manual_release_preempts_the_countdown(tank):
+    h=tank
+    ticks(h,400)                                    # 20 s into the first countdown
+    assert h.read(CLOCK)==pytest.approx(20,abs=.06)
+    h.write(930,1);evaluate(h,'gf-tick')            # (e) A+DOWN request
+    assert h.read(933)==1 and h.read(CLOCK)==0 and h.read(DUE)==-1 and h.read(RELEASES)==1
+    evaluate(h,'0 gf-i tk! gf-consume')
+    ticks(h,899);assert h.read(933)==0              # the 20 s did not carry over
+    k=until_release(h,300)
+    assert (899+k)*.05==pytest.approx(intervals(2)[1],abs=.051) and h.read(RELEASES)==2
+
+def test_stall_cannot_fire_an_early_release(tank):
+    h=tank
+    ticks(h,1,dt=100)                               # (f) a 100 s hitch counts as 0.2 s
+    assert h.read(CLOCK)==pytest.approx(.2) and h.read(933)==0
+    ticks(h,200,dt=5)                               # 1000 s of stalls, 40.2 s counted
+    assert h.read(CLOCK)==pytest.approx(40.2,abs=.01) and h.read(933)==0 and h.read(RELEASES)==0
+    k=until_release(h,400)
+    assert 40.2+k*.05==pytest.approx(intervals(1)[0],abs=.051)
+
+def test_retry_after_two_seconds_without_a_clear_spawn_point(tank):
+    h=tank
+    due=intervals(1)[0]
+    h.write(BLOCK,1)
+    ticks(h,int(due/.05)+1)                          # (g) the countdown fired but nothing was clear
+    assert h.read(933)==0 and h.read(RELEASES)==0 and h.read(1001)==0
+    assert h.read(CLOCK)==pytest.approx(due-AUTO['gf-auto-retry'],abs=.051)
+    ticks(h,200)                                     # still blocked: retried every 2 s, no log
+    assert h.read(933)==0 and h.read(RELEASES)==0
+    h.write(BLOCK,0)
+    k=until_release(h,1000)
+    assert k<=int(AUTO['gf-auto-retry']/.05)+1       # a short retry, not another 45-60 s
+    assert h.read(RELEASES)==1
+
+@pytest.mark.parametrize('tank',['no-auto'],indirect=True)
+def test_auto_release_can_be_switched_off(tank):
+    h=tank
+    ticks(h,1400)
+    assert h.read(933)==0 and h.read(RELEASES)==0 and h.read(CLOCK)==0

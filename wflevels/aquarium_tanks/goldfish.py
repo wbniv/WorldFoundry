@@ -43,7 +43,26 @@ def blender_mesh(bpy, here):
         for loop in poly.loop_indices:uv.data[loop].uv=((keys.index(key)+.5)/4,.5)
     return data
 
-def constants(indices, initial=0, autoeat=True):
+# Automatic release (docs/plans/2026-11-01-lionfish-auto-goldfish.md): Director mailboxes
+# in the free 980..989 gap and the tuning, all in one place.
+AUTO_MAILBOXES={'gf-auto-clock':980,'gf-auto-due':981,'gf-auto-seed':982}
+AUTO_TUNING={'gf-auto-min':45,'gf-auto-max':60,'gf-auto-retry':2,'gf-auto-stall':.2,'gf-auto-seed0':2026}
+# Every other mailbox range the lionfish Director and Player scripts touch.
+RESERVED=[(600,627,'controller'),(650,655,'posing'),(800,811,'resident route'),(930,979,'gf scratch'),
+          (1000,1047,'prey slots'),(1050,1073,'sensory memories'),(1100,1111,'resident'),
+          (1200,1231,'strikes'),(1300,1347,'suction flow')]
+
+def check_auto_mailboxes(values):
+    """The automatic-release mailboxes are disjoint from every other consumer and below 1900."""
+    taken={v for k,v in values.items() if k not in AUTO_MAILBOXES and k not in AUTO_TUNING and isinstance(v,int) and v>=600}
+    for name,box in AUTO_MAILBOXES.items():
+        assert box<1900,(name,box)
+        assert box not in taken,(name,box)
+        for lo,hi,what in RESERVED:assert not lo<=box<=hi,(name,box,what)
+    assert len(set(AUTO_MAILBOXES.values()))==len(AUTO_MAILBOXES)
+    assert 0<AUTO_TUNING['gf-auto-min']<=AUTO_TUNING['gf-auto-max'] and 0<=AUTO_TUNING['gf-auto-seed0']<32768
+
+def constants(indices, initial=0, autoeat=True, auto=True):
     assert 0<=initial<=3
     values={'gf-release':930,'gf-eat':931,'gf-target':932,'gf-count':933,'gf-consumed-player':934,
             'gf-consumed-resident':935,'gf-bite-player':936,'gf-bite-resident':937,
@@ -61,7 +80,9 @@ def constants(indices, initial=0, autoeat=True):
             'gf-rx':1100,'gf-ry':1101,'gf-rz':1102,'gf-ryaw':1103,'gf-rv':1104,
             'gf-rphase':1105,'gf-idle-x':1106,'gf-idle-z':1107,
             'gf-rstate':1108,'gf-rlook':1109,'gf-rpitch':1110,'gf-rroll':1111,'gf-mouth-pitch':979,
-            'gf-initial':initial,'gf-autoeat':int(autoeat),'gf-resident':int(any(n.startswith('animal-01-') for n in indices))}
+            'gf-initial':initial,'gf-autoeat':int(autoeat),'gf-resident':int(any(n.startswith('animal-01-') for n in indices)),
+            **AUTO_MAILBOXES,**AUTO_TUNING,'gf-auto':int(auto)}
+    check_auto_mailboxes(values)
     text=''.join(f': {k} {v} ;\n' for k,v in values.items())
     text+=': gf-actor gf-i read-mailbox 0 = if '+str(indices['goldfish-0'])+' else gf-i read-mailbox 1 = if '+str(indices['goldfish-1'])+' else '+str(indices['goldfish-2'])+' then then ;\n'
     return text

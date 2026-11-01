@@ -211,6 +211,21 @@
       "escape_cooldown",
       "strike_owner"
     ],
-    "visibility": "slot active flag"
+    "visibility": "slot active flag",
+    "auto_release": {
+      "enabled": true,
+      "mailboxes": {
+        "gf-auto-clock": 980,
+        "gf-auto-due": 981,
+        "gf-auto-seed": 982
+      },
+      "tuning": {
+        "gf-auto-min": 45,
+        "gf-auto-max": 60,
+        "gf-auto-retry": 2,
+        "gf-auto-stall": 0.2,
+        "gf-auto-seed0": 2026
+      }
+    }
   }
 }
