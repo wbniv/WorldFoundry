@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Card open, after the fix: joystick, B and D hidden; A and C kept, dimmed</title><style>
+:root{--bg:#f6f8fa;--fg:#1f2328;--muted:#656d76;--line:#d1d9e0}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--fg:#e6edf3;--muted:#9198a1;--line:#30363d}}
+*{box-sizing:border-box}
+body{margin:0;width:1440px;height:900px;overflow:hidden;background:var(--bg);color:var(--fg);
+ font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:18px 32px 0}
+h1{margin:0;font-size:20px;font-weight:600}
+p.sub{margin:4px 0 0;color:var(--muted);font-size:14px}
+.stage{position:absolute;left:0;right:0;top:96px;bottom:70px;display:flex;align-items:center;justify-content:center}
+.bezel{background:#111;border-radius:46px;padding:22px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.screen{position:relative;overflow:hidden;background:#000}
+.surface{position:absolute;left:0;top:0;transform-origin:0 0;font-family:"Segoe UI",Roboto,sans-serif}
+.surface>div{position:absolute}
+.street{left:0;top:0;right:0;bottom:0;background:linear-gradient(#7aa6d6 0,#c9dcef 45%,#8d7a63 45%,#5e5141 100%)}
+.card{left:0;top:0;right:0;bottom:0;background:#202B36}
+.heading{color:#ECD7A2;font-weight:600;letter-spacing:.02em}
+.progress,.ctrl{color:#C8BEA6}
+.body{color:#F3EEE3;overflow:hidden}
+.ring{border-radius:50%;background:rgba(13,19,32,.55);border:3px solid rgba(107,128,158,.65)}
+.knob{border-radius:50%;background:rgba(56,82,117,.85)}
+.btn{background:rgba(51,71,110,.55);color:rgba(255,255,255,.95);text-align:center;font-weight:700}
+.btn.dim{background:rgba(51,71,110,.30);color:rgba(255,255,255,.6)}
+.fps{background:#000;color:#fff;font-family:monospace;padding:0 4px}
+footer{position:absolute;left:32px;right:32px;bottom:16px;color:var(--muted);font-size:13px}
+</style></head>
+<body><header><h1>Card open, after the fix: joystick, B and D hidden; A and C kept, dimmed</h1><p class="sub">A (select / continue) and C (close) stay tappable; their fill drops so a body line beneath stays readable.</p></header>
+<div class="stage"><div class="bezel"><div class="screen" style="width:1300.0px;height:584.0px">
+<div class="surface" style="width:2244px;height:1008px;transform:scale(0.57932)">
+<div class="card"></div>
+<div class="heading" style="left:89.76px;top:40.32px;font-size:54px">FIRST LOVE</div>
+<div class="progress" style="right:89.76px;top:53.82px;font-size:36px">1 / 2</div>
+<div class="body" style="left:89.76px;right:89.76px;top:134.22px;height:763.8599999999999px;font-size:42px;line-height:55.86px">Four realms await: Love, Reason, Truth and God. Begin with Love. Walk toward the red portal and press Select. Directions move and turn. A short Select press interacts; hold Select to switch between third person and first person. Keep holding Select to open level settings. The camera changes; your choices do not. Approach a speaker or object to interact. You can revisit the arguments before choosing a doorway. Each realm keeps its own doors, and each door asks a question of the one who walks through it. First Love waits on the street of Love with a story about the morning she met him, and Reason keeps a ledger of every argument you have heard so far. When a card runs to a second page, Select turns the page and the counter at the top right shows how far you have read. Truth and God are further on; their doors open only once Love and Reason have been heard, and the street remembers which arguments you chose to hear and which you walked past.</div>
+<div class="ctrl" style="left:89.76px;top:919.0799999999999px;font-size:36px">SELECT: continue &nbsp;&nbsp; LEFT / C: close &nbsp;&nbsp; UP / DOWN: text size</div>
+<div class="btn dim" style="left:2050.905px;top:767.655px;width:161.595px;height:161.595px;font-size:71.1018px;line-height:161.595px">A</div>
+<div class="btn dim" style="left:1889.3100000000002px;top:767.655px;width:161.595px;height:161.595px;font-size:71.1018px;line-height:161.595px">C</div>
+<div class="fps" style="right:31.5px;bottom:10.5px;font-size:23.625px">119.9</div>
+</div></div></div></div>
+<footer>The joystick and B / D are also removed from the hit-test, not only from the drawing &nbsp;|&nbsp; surface 2244&times;1008, density 2.625, control cell 135 px, button edge 162 px</footer>
+</body></html>

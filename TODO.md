@@ -553,6 +553,7 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** The other observations from cast1, unless a control built here fixes them as a side effect: the "(read only)" label without a padlock, six-decimal slider end labels, and the flattened multi-line Notes. — _from [2026-11-01-field-presentations.md](docs/plans/2026-11-01-field-presentations.md)_  <!-- fp:cadeeb3810eceee2 -->
 - [ ] **(triage)** Making runtime options editable. — _from [2026-11-01-field-presentations.md](docs/plans/2026-11-01-field-presentations.md)_  <!-- fp:9accc37a706abee4 -->
 - [ ] **(triage)** The connected-phone browser form (`controller.html`), apart from path validation, which it gets from the engine. — _from [2026-11-01-field-presentations.md](docs/plans/2026-11-01-field-presentations.md)_  <!-- fp:6493cbe44aeb14fa -->
+- [verify] **2026-11-01-touch-controls-over-cards** — Verification section present but no PASS recorded — run + record the steps. _from [2026-11-01-touch-controls-over-cards.md](docs/plans/2026-11-01-touch-controls-over-cards.md)_  <!-- fp:ddcde95542b1ce1a -->
 <!-- END auto-captured-deferrals -->
 
 
