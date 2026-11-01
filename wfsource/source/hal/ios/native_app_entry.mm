@@ -22,10 +22,14 @@
 #import <UIKit/UIKit.h>
 #import "metal_view.h"
 #import "touch_hud.h"
+#include <hal/args_file.hp>
 #include <hal/asset_accessor.hp>
 #include <hal/hal.h>
+#include <pigsys/pigsys.hp>
 
 #include <pthread.h>
+#include <string>
+#include <vector>
 
 // Defined in hal/ios/platform.mm. C++ linkage (matches the Linux/Android HAL;
 // extern "C" here would mismatch the definition's mangling and fail at link).
@@ -49,13 +53,55 @@ extern "C" void HALNotifyResume(void);
 static pthread_t sEngineThread;
 static bool      sEngineThreadStarted = false;
 
+// The engine's command line: argv[0], then the bundle's wf_args.txt (the
+// format Android reads from assets/, hal/args_file.hp), then any launch
+// arguments. A home-screen launch has no launch arguments, so the bundled
+// file is the only way an app such as the Finding Your Way chapter gets its
+// VRAM slot sizes; a simulator `simctl launch <udid> <id> --flag` still adds
+// to (and, for last-one-wins switches, overrides) them. Static: HALStart and
+// the pigsys globals keep pointing at these strings for the process lifetime.
+static std::vector<std::string> sArgStore;
+static std::vector<char*>       sArgv;
+
+static void WFBuildEngineArguments()
+{
+    @autoreleasepool {
+        std::string fileText;
+        NSString* path = [[NSBundle mainBundle] pathForResource:@"wf_args" ofType:@"txt"];
+        if (path) {
+            NSData* data = [NSData dataWithContentsOfFile:path];
+            if (data)
+                fileText.assign((const char*)data.bytes, (size_t)data.length);
+        }
+        std::vector<std::string> launchArgs;
+        NSArray<NSString*>* processArgs = [[NSProcessInfo processInfo] arguments];
+        for (NSUInteger i = 1; i < processArgs.count; ++i)   // [0] is the executable
+            launchArgs.push_back(std::string([processArgs[i] UTF8String]));
+
+        std::vector<std::string> settings;   // qr_logo=: no phone overlay on iOS
+        sArgStore = wfargs::ComposeArgs("wf_game", fileText, launchArgs, &settings);
+        sArgv.clear();
+        for (std::string& arg : sArgStore)
+            sArgv.push_back(&arg[0]);
+        sArgv.push_back(nullptr);
+
+        const size_t fileArgs = sArgStore.size() - 1 - launchArgs.size();
+        NSLog(@"wf_game: wf_args.txt %s, gave %zu argument(s); %zu launch argument(s)",
+              path ? "found" : "absent", fileArgs, launchArgs.size());
+        for (size_t i = 1; i < sArgStore.size(); ++i)
+            NSLog(@"wf_game: arg[%zu] %s", i, sArgStore[i].c_str());
+    }
+}
+
 static void* WFEngineThreadMain(void* /*arg*/)
 {
     NSLog(@"wf_game: engine thread enter");
-    static int   argc    = 1;
-    static char  arg0[]  = "wf_game";
-    static char* argv[2] = { arg0, nullptr };
-    HALStart(argc, argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
+    WFBuildEngineArguments();
+    // HALStart hands PIGSMain the pigsys globals, not its own argc/argv (see
+    // hal/android/native_app_entry.cc); set them, or every argument is dropped.
+    __argc = (int)sArgv.size() - 1;
+    __argv = sArgv.data();
+    HALStart(__argc, __argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
     NSLog(@"wf_game: engine thread exit (HALStart returned)");
     return nullptr;
 }

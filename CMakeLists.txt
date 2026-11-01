@@ -1320,6 +1320,11 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     add_executable(egl_rebuild_test tests/egl_rebuild_test.cc)
     target_include_directories(egl_rebuild_test PRIVATE ${SRC})
     add_test(NAME egl_rebuild COMMAND egl_rebuild_test)
+    # wf_args.txt parsing shared by the Android format and the iOS app
+    # (hal/args_file.hp; docs/plans in the chapter repo, 2026-11-01-parmenides-on-ios).
+    add_executable(args_file_test tests/args_file_test.cc)
+    target_include_directories(args_file_test PRIVATE ${SRC})
+    add_test(NAME args_file COMMAND args_file_test)
     if(NOT WF_FORTH_ENGINE STREQUAL "none" AND NOT WF_FORTH_ENGINE STREQUAL "zforth")
         add_executable(frame_rate_forth_probe tests/frame_rate_forth_probe.cc
             ${STUB_SRC}/scripting_${WF_FORTH_ENGINE}.cc)

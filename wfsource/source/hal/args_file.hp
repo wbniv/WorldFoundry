@@ -1,0 +1,76 @@
+//=============================================================================
+// hal/args_file.hp: the per-app wf_args.txt command line, shared by platforms
+// Copyright ( c ) 2026 World Foundry Group
+// Part of the World Foundry 3D video game engine/production environment
+// for more information about World Foundry, see www.worldfoundry.org
+//=============================================================================
+// An app may ship a wf_args.txt beside its cd.iff (Android: assets/; iOS: the
+// .app bundle). Its arguments are whitespace-separated (space, tab, CR, LF),
+// with no quoting, and go after argv[0] — the same flags a desktop run passes,
+// for example the Finding Your Way chapter's VRAM slot sizes. The format is
+// the one hal/android/native_app_entry.cc reads; a home-screen launch has no
+// other way to get arguments, so without this file the engine sees argv[0]
+// only.
+//
+// "qr_logo=" tokens are app settings for the phone-controller overlay, not
+// engine arguments: SplitArgsText hands them back separately and never puts
+// them in the argument list.
+//
+// Header-only and platform-free so the parsing is tested on the Linux host
+// (tests/args_file_test.cc, CTest args_file); hal/ios/native_app_entry.mm is
+// the caller.
+//=============================================================================
+
+#ifndef _WF_HAL_ARGS_FILE_HP
+#define _WF_HAL_ARGS_FILE_HP
+
+#include <cstring>
+#include <string>
+#include <vector>
+
+namespace wfargs
+{
+
+// Appends the arguments in `text` to `args`; "qr_logo=" tokens go to
+// `settings` instead (dropped when settings is null).
+inline void
+SplitArgsText(const std::string& text, std::vector<std::string>& args,
+              std::vector<std::string>* settings = nullptr)
+{
+    static const char kSpace[] = " \t\r\n";
+    std::string::size_type pos = text.find_first_not_of(kSpace);
+    while (pos != std::string::npos)
+    {
+        const std::string::size_type end = text.find_first_of(kSpace, pos);
+        std::string token = text.substr(pos, end == std::string::npos ? std::string::npos : end - pos);
+        if (token.compare(0, 8, "qr_logo=") == 0)
+        {
+            if (settings) settings->push_back(token);
+        }
+        else
+        {
+            args.push_back(token);
+        }
+        pos = end == std::string::npos ? end : text.find_first_not_of(kSpace, end);
+    }
+}
+
+// The full argument list for HALStart: argv0, then the file's arguments, then
+// any launch arguments (a simulator `simctl launch ... --flag`). Launch
+// arguments come last so that, for the engine's last-one-wins switches, a CI
+// run can override what the bundle ships.
+inline std::vector<std::string>
+ComposeArgs(const char* argv0, const std::string& fileText,
+            const std::vector<std::string>& launchArgs,
+            std::vector<std::string>* settings = nullptr)
+{
+    std::vector<std::string> args;
+    args.push_back(argv0 ? argv0 : "wf_game");
+    SplitArgsText(fileText, args, settings);
+    args.insert(args.end(), launchArgs.begin(), launchArgs.end());
+    return args;
+}
+
+}  // namespace wfargs
+
+#endif
