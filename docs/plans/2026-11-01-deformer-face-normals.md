@@ -437,7 +437,7 @@ an i7‑1185G7 that was shared with other sessions (load average 8–11 on 8 thr
     | Betta (J‑ac94b4d4e1ed) | 59.7–59.8 (59.8) | 59.7–59.9 (59.8) | no | 16.68 / 16.68 → same | 0.2–0.3 → 0.1–0.3 |
     | Jellyfish (J‑43d8e662aec2) | 57.6–58.4 (58.2) | 57.9–58.4 (58.0) | no | 16.68 / 16.68 → same | 2.6–4.1 → 2.6–3.6 |
     | Tiger Barbs (J‑554731d046ef) | 33.1–33.6 (33.3) | 32.3–32.8 (32.7) | **yes, lower** | 33.37 / 33.37 → same | 77.5–79.2 → 81.3–83.6 |
-    | Planted tank (J‑f97660519b6e) | 34.3–35.4 (34.7) | 32.5–37.9 (37.0) | no (noisy) | 33.37 / 33.37–50.05 → same | 64.3–68.9 → 54.1–76.0 |
+    | Planted tank (J‑f97660519b6e) | 34.3–35.4 (34.7) | 32.5–37.9 (37.0) | no (seed not pinned) | 33.37 / 33.37–50.05 → same | 64.3–68.9 → 54.1–76.0 |
     | Clownfish (J‑b4ce040c9502) | 59.8–59.9 (59.9) | 59.8–59.9 (59.9) | no | 16.68 / 16.68 → same | 0.0–0.2 → 0.0–0.2 |
 
     CPU per frame from the `--frame-profile` runs (thread CPU ms; mean of the 5 s windows after level
@@ -452,7 +452,7 @@ an i7‑1185G7 that was shared with other sessions (load average 8–11 on 8 thr
     | Betta | 0.053 → 0.053 | 0.086 [0.081–0.088] → 0.298 [0.279–0.309] | 4.53 → 4.73 | +0.20 | 7 |
     | Jellyfish | — | 0.270 [0.265–0.280] → 0.546 [0.539–0.553] | 10.34 → 10.56 | +0.23 | 12 |
     | Tiger Barbs | 4.340 [4.287–4.452] → 4.910 [4.861–4.957] | 0.248 → 0.792 | 26.27 → 26.81 | +0.54 | 50 |
-    | Planted tank | — | 6.222 [5.981–6.787] → 7.054 [6.722–7.740] | 18.94 → 21.21 | (noise) | 2 |
+    | Planted tank | — | 6.222 [5.981–6.787] → 7.054 [6.722–7.740] | 18.94 → 21.21 | (seed not pinned) | 2 |
     | Clownfish | — | — | 2.78 → 2.77 | none | 0 |
 
     The render section is unchanged within its spread in every tank (Lionfish 13.47 → 13.42, Tiger
@@ -473,9 +473,10 @@ an i7‑1185G7 that was shared with other sessions (load average 8–11 on 8 thr
       missed-refresh share rises by about 3 and 4 points.
     - **The tanks that hold 60 fps** (Arowana, Betta, Clownfish) and Jellyfish (58) **show no change**
       outside the spread.
-    - **Planted tank is not a usable measurement.** Its plants differ between launches: faces submitted
-      were 30 892 before and 35 497 after, and render CPU ranged 2.8–26.6 ms within one run. So its
-      fps and total move with the scene, not with the fix.
+    - **Planted tank: the two builds were launched without a pinned seed, so the plants differed**
+      (30 892 faces submitted before, 35 497 after; render CPU 2.8–26.6 ms within one run). Its fps
+      and total therefore follow the scene, not the fix. A fixed seed makes the level reproducible; it
+      was not re-run, because Will does not need the Planted tank result.
     - **Clownfish has no deform call at idle** (0 per frame), so the fix cannot cost anything there.
 
     **PASS**: all seven tanks completed on cast1 with clean receipts and restores, and the fix's cost is
