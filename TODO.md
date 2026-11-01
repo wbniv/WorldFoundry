@@ -2,7 +2,6 @@
 
 ## Open
 
-- [verify T4] **Field presentations: a distinct control for every case.** The eleven `proposed` Field types cases get their own control on the TV and the phone touch form: choice lists (option 6: 2 to 4 options cycle and leave from the first, 5 or more open a list; A always opens it), numbered list, wrapping list, segments, switch (TOGGLE becomes Bool at export), bounds on the mailbox editor, and path mark plus engine path validation. Built, pushed (`0ff49194`) and verified on host and desktop; APK `baseline-5b47e27b5516e543.apk` on a refreshed runtime. Left: the cast1 capture. Rank T4: engine form, both renderers, normalizer, frozen runtime. [plan](docs/plans/2026-11-01-field-presentations.md)
 - [verify T4] **Baseline settings cleanup: two owners.** Built: Field types (the 27 type × showAs cases) and Runtime settings, both at (2, −4, 1); sample owners, empty section and gallery preset removed from the level. Host tests, desktop and bundle checks pass. The editable Show FPS row is accepted ("we totally want this option"). Device acceptance (2026‑11‑01, coordinator 0.1.26): `baseline-settings` and `baseline-picker` pass on cast1 and cast2; `baseline-runtime-options` fails because the Runtime rows are read-only on the phone, a known gap kept whole until runtime editing exists (Will, 2026‑11‑01: "yes"). The 27 Field types rows were captured on cast1 (2026‑11‑01) with five observations in the plan. The Pixel launches the level (2026‑11‑01); its picker and forms cannot be driven, as the coordinator has no phone input workflow. Not done: that validator, and the Pixel's picker and forms. [plan](docs/plans/2026-10-31-baseline-settings-cleanup.md)
 ### Platform / Display
 
@@ -175,6 +174,7 @@
 
 
 ## Done
+- ✅ 2026‑11‑01 — [field-presentations] The eleven proposed Field types cases draw their own control on TV and phone; seen on cast2. See [plan](docs/plans/2026-11-01-field-presentations.md).
 - ✅ 2026-10-31 — [baseline-utah-teapots] Eight Utah teapots (52…16 256 faces) in the baseline; cast1 about 53 fps, Pixel 120. See [plan](docs/plans/2026-10-31-baseline-utah-teapots.md).
 - ✅ 2026-10-31 — [main-cd-manifest] The main cd.iff's level list is one manifest (wflevels/main-cd.manifest) read by build, verify and tests; bundle refreshed. See [plan](docs/plans/2026-10-31-baseline-utah-teapots.md).
 
