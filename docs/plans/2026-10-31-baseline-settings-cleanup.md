@@ -1,6 +1,6 @@
 # Baseline settings: two owners and nothing else
 
-**Status:** Built and verified on the host (2026‑10‑31): steps 1 to 6 pass, with the corrections recorded under each. Step 7 (device acceptance) is partly run (2026‑11‑01): the validator change (`dd3590a`, released as coordinator 0.1.26, not pushed) passes `baseline-settings` and `baseline-picker` on cast1 and cast2; `baseline-runtime-options` fails on read-only runtime rows, a known gap; the Pixel and the 27-row capture are not run ([patch](2026-10-31-baseline-settings-cleanup/validator-patch.diff)). Two findings changed the build, see **Implementation notes**: the Runtime settings owner authors one editable row (accepted by Will, 2026‑10‑31: "we totally want this option"), and Field types has its own schema. Rank **T4**: it changes what the level exports, the cooker bindings, the verifier, and the two device validators that live in the coordinator project.
+**Status:** Built and verified on the host (2026‑10‑31): steps 1 to 6 pass, with the corrections recorded under each. Step 7 (device acceptance) is partly run (2026‑11‑01): the validator change (`dd3590a`, released as coordinator 0.1.26, not pushed) passes `baseline-settings` and `baseline-picker` on cast1 and cast2; `baseline-runtime-options` fails on read-only runtime rows, a known gap; the Pixel is not run; the 27-row capture is done ([patch](2026-10-31-baseline-settings-cleanup/validator-patch.diff)). Two findings changed the build, see **Implementation notes**: the Runtime settings owner authors one editable row (accepted by Will, 2026‑10‑31: "we totally want this option"), and Field types has its own schema. Rank **T4**: it changes what the level exports, the cooker bindings, the verifier, and the two device validators that live in the coordinator project.
 
 ## Context
 
@@ -397,7 +397,7 @@ Run 2026‑10‑31 on the host, in the shared tree. Raw output under each step. 
 
 7. On the Pixel and cast2 (once the validators are deployed): hold A opens the picker with two owners; Pick in 3D shows one bracket and, on OK, the "Objects here" list with both; each owner opens its form; Apply and Cancel behave; the captured Field types sections show the observed presentation for all 27 rows.
 
-    **PARTIAL (2026‑11‑01): two of three validators pass on cast1 and cast2; the third fails on a known gap; the Pixel and the 27-row capture were not run.** The coordinator was released as 0.1.26 (`task coordinator:release`, Will entered sudo; transcript `docs/diagnostics/Chromecast-coordinator-deployment-20261101-065330-*.log` in the coordinator project: "Standalone release verified; queue resumed; reservations and device identities retained"). APK `baseline-eebab09d285f2939.apk`, SHA-256 `eebab09d285f2939b829c0c3be579429818f2f30220427d568cabb599970635a`. Evidence is in the coordinator project under `docs/diagnostics/baseline-two-owners-<job>/`.
+    **PARTIAL (2026‑11‑01): two of three validators pass on cast1 and cast2; the third fails on a known gap; the Pixel was not run; the 27-row capture is done below.** The coordinator was released as 0.1.26 (`task coordinator:release`, Will entered sudo; transcript `docs/diagnostics/Chromecast-coordinator-deployment-20261101-065330-*.log` in the coordinator project: "Standalone release verified; queue resumed; reservations and device identities retained"). APK `baseline-eebab09d285f2939.apk`, SHA-256 `eebab09d285f2939b829c0c3be579429818f2f30220427d568cabb599970635a`. Evidence is in the coordinator project under `docs/diagnostics/baseline-two-owners-<job>/`.
 
     ```
     chromecast-test-01 (cast1)   baseline-settings         J‑2d8785a9055f   completed   21 of 21 assertions true
@@ -411,4 +411,25 @@ Run 2026‑10‑31 on the host, in the shared tree. Raw output under each step. 
 
     **FAIL, known gap: `baseline-runtime-options`.** Its first seven assertions held (`two_owners`, `tv_back_applies_fps` among them). It then sets `runtime_fixed_clock` and `runtime_clock_hz` from the phone form and waits for the values to change; the phone model reports those rows `readonly: true`, so the wait times out (`failure_location` `plant_checks.py:108:model`, "Timed out waiting for expected property snapshot"). The rows were already read-only before this change (see the Current-state table); editing them is the open TODO item "Runtime object editing on OAS/OAD". The coordinator readded cast1 by itself (`J‑c7937640e502`, health ready). Until that item lands, the fixed-clock part of this validator cannot pass; trimming it to the build is a separate coordinator release, left undone.
 
-    **NOT RUN:** the Pixel (the validators drive a TV), and the capture of all 27 Field types rows as presented, which no validator takes; both stay open for this item.
+    **NOT RUN:** the Pixel (the validators drive a TV).
+
+    **27-row capture, done (2026‑11‑01, cast1, job `J‑44a5dcd08235`).** No coordinator change was needed: the existing generic interactive job (`task chromecast:record … INTERACTIVE=true`, then `input:hold` and `input:frame`) opened the chooser (hold OK, Down, OK) with no phone connected and stepped through the six sections. APK `eebab09d285f2939`. I pressed Back once to close the form; no row was edited. Frames are copied beside this plan; the full set is in the coordinator project under `docs/diagnostics/field-types-capture/`.
+
+    | Section | Rows as shown on the TV | Frame |
+    | --- | --- | --- |
+    | Numbers (9) | `Hold seconds: 120`, `Opacity: 65` with a 0–100 slider, `Tint: #6EB6C6` with a colour swatch, `Trigger mailbox: 100`, `Count: 7`, `Initial age: 12.5`, `Sway: 0.65` with a 0–1 slider, `Current count: 7 (read only)` dimmed, `Intensity: 75` under a "Lighting" group with its help line | [rows 1–5](2026-10-31-baseline-settings-cleanup/device-numbers-1.png), [rows 5–9](2026-10-31-baseline-settings-cleanup/device-numbers-2.png) |
+    | Choices (9) | `Mode: Calm`, `Powerup: Flying`, `Water type: Freshwater`, `Habitat` as two segments, `Growth: 1×` as a four-stop slider (Paused, 1×, 2×, 4×), `Direction: Forward`, `Tool: Staff`, `Species` as twelve chips, `Placement: Along the northern wall, facing the glass` | [rows 1–5](2026-10-31-baseline-settings-cleanup/device-choices-1.png), [rows 6–9](2026-10-31-baseline-settings-cleanup/device-choices-2.png) |
+    | Switches (2) | `Textures: On`, `Sway: 1` | [switches](2026-10-31-baseline-settings-cleanup/device-switches.png) |
+    | Text (4) | `Caption: Garden`, `Seed: 4294967295`, `Notes: Two-line description Second line`, `Asset path: plants/leaf.png` | [text](2026-10-31-baseline-settings-cleanup/device-text.png) |
+    | References (1) | `Target: Player01 (read only)` dimmed; hint reads "Read only: arrows select, Left: sections" | [references](2026-10-31-baseline-settings-cleanup/device-references.png) |
+    | Actions (2) | `Regenerate tank`; the second row is the invisible spacer | [actions](2026-10-31-baseline-settings-cleanup/device-actions.png) |
+
+    **PASS** for what the plan set out to show: 26 visible rows plus the spacer, in the six sections, in form order, with each type × showAs case drawn by its own control (number, slider, swatch, drop-down, segments, chips, stepped slider, checkbox, toggle, text, reference, action).
+
+    **Observations for Will, against the mockup and the house rules (none changes this item's result):**
+    - **Read-only rows say "(read only)" in the label** (`Current count`, `Target`) and carry no padlock; the house rule is dimmed plus a padlock with no status words.
+    - **Slider end labels print six decimals** (`0.000000`, `100.000000`, `1.000000`).
+    - **The toggle row shows `Sway: 1`**, where the checkbox row shows `Textures: On`; the same label "Sway" also names the Numbers slider.
+    - **The multi-line Notes value is flattened** onto one line (`Two-line description Second line`).
+    - **No key returns from a Choices row to the section list**: Left changes the value there, so the only way out is Back, which closes the form (reached via Numbers it works: Left, then Down).
+    - **The Actions row is inert**, as recorded earlier.

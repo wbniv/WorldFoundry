@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-01](https://github.com/wbniv/WorldFoundry/commit/3b9e79f2) | Settings plan: device acceptance on cast1 and cast2 (two validators pass, one known gap) |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/c26fb971) | Settings plan: the validator commit is on coordinator main |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/c95d44bf) | Settings plan: the validator change is committed in the coordinator repo |
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/d460aba6) | Settings cleanup: the editable Show FPS row is accepted |
@@ -7,6 +8,11 @@
 | [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/e6fe62eb) | Baseline: add a ladder of eight Utah teapots (52 to 16 256 faces) |
 
 <!--history-meta v1
+3b9e79f2	author	Will Norris
+3b9e79f2	added	16
+3b9e79f2	deleted	2
+3b9e79f2	files	1
+3b9e79f2	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
 c26fb971	author	Will Norris
 c26fb971	added	2
 c26fb971	deleted	2
