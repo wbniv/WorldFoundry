@@ -27,29 +27,17 @@ Will added five things while the plan was being written:
 
 ### The content rule (Will, 2026‑11‑02)
 
-Nothing in this tank is derived from the existing eight tanks:
+**No species already in a tank** (Will, 2026‑11‑02, correcting a wider reading: “only ‘no species already in a tank’”). Meshes, rigs, textures, Forth controllers, helpers and tank shells from the other tanks **may be reused** wherever they fit.
 
-- no species already in a tank;
-- no mesh, rig, texture or Forth controller from them.
+The species already taken are:
 
-That excludes the obvious reef picks:
+- the clownfish and its bubble-tip anemone, *Entacmaea quadricolor* (Clownfish & Sea Anemone);
+- the long-spined urchin *Diadema setosum*, the longsnout seahorse *Hippocampus reidi* and the rainbow goby (Planted Tank);
+- the blue shrimp, the betta, the jellyfish, the lionfish and its goldfish, the Asian arowana and the tiger barbs (their own tanks).
 
-| Excluded | Already in |
-|---|---|
-| Clownfish and any host anemone (*Entacmaea*, *Heteractis*) | Clownfish & Sea Anemone |
-| Long-spined urchin *Diadema setosum* | Planted Tank (saltwater) |
-| Seahorses; gobies of any kind | Planted Tank |
-| Jellyfish | Jellyfish |
-| Freshwater shrimp | Blue Shrimp |
-| Lionfish | Lionfish |
+Another species of a taken group (a different anemone, clownfish or goby) is allowed by the rule. The roster here doesn't use one: D1 and D2 are decided.
 
-**Shared engine mechanisms and the tank's container are infrastructure, not contents.** These may be used:
-
-- the `DFRM` operator, the generic `swim-deform` operation (see the [Arowana README](../../wflevels/aquarium_arowana/README.md)) and Forth movement primitives;
-- the menu and bundle tools (`cdpack`, `aquarium-levels.sh`) and the Blender container;
-- an existing tank shell (glass, colliders, cameras). D4 chooses the shell on its merits.
-
-`tests/test_aquarium_thai_reef.py` enforces the rule (verification step 5).
+`tests/test_aquarium_thai_reef.py` enforces it: no roster species may appear in another tank's species list (verification step 5).
 
 ### What exists today
 
@@ -79,7 +67,7 @@ Will accepted every recommendation in the third column (2026‑11‑02). The fou
 
 | # | Decision | Decided (the recommendation) | Alternatives weighed |
 |---|---|---|---|
-| D1 | The pair of fish | **Decided.** **2 × humbug damselfish, *Dascyllus aruanus*.** A pair that lives in one cauliflower-coral head and dives into it when threatened, so the fish show off the coral as habitat. Reef-safe and small (≈ 8 cm). **No Gulf of Thailand record found yet** ([Reef Life Survey](https://reeflifesurvey.com/species/dascyllus-aruanus/) gives the range only); Phase 0 must find one or swap | **Copperband butterflyfish *Chelmon rostratus*:** a Gulf fish usually seen in pairs, but it eats tube worms and feather dusters, the stars of this tank. **Pink anemonefish *Amphiprion perideraion*:** photographed at Ko Nang Yuan ([snorkeling-report](https://www.snorkeling-report.com/species/amphiprion-perideraion/)), but anemonefish plus anemone repeats tank 1 (content rule) |
+| D1 | The pair of fish | **Decided.** **2 × humbug damselfish, *Dascyllus aruanus*.** A pair that lives in one cauliflower-coral head and dives into it when threatened, so the fish show off the coral as habitat. Reef-safe and small (≈ 8 cm). **No Gulf of Thailand record found yet** ([Reef Life Survey](https://reeflifesurvey.com/species/dascyllus-aruanus/) gives the range only); Phase 0 must find one or swap | **Copperband butterflyfish *Chelmon rostratus*:** a Gulf fish usually seen in pairs, but it eats tube worms and feather dusters, the stars of this tank. **Pink anemonefish *Amphiprion perideraion*:** photographed at Ko Nang Yuan ([snorkeling-report](https://www.snorkeling-report.com/species/amphiprion-perideraion/)), a different species, so the content rule allows it; but an anemonefish in its anemone repeats tank 1's subject |
 | D2 | The single fish | **Decided.** **1 × juvenile yellow boxfish, *Ostracion cubicus*.** Bright yellow with black spots below about 4 cm ([CIESM atlas](https://ciesm.org/atlas/fishes_2nd_edition/Ostracion_cubicus.pdf)). Its rigid box body, rowed by its fins, is unlike any fish in the other tanks. A Ko Tao dive operator reports juveniles on shallow coral heads at 3–12 m ([Big Blue Diving](https://www.bigbluediving.com/koh-tao-marine-life/yellow-boxfish/)); that is not a scientific record, so Phase 0 needs one | **Blue-ringed angelfish *Pomacanthus annularis*:** a Gulf fish, but it grows to about 45 cm and nips sponges and corals. **Pajama cardinalfish:** its range is Java to Fiji; no Gulf record ([FishBase](https://nrm-fishbaselinux01.nrm.se/summary/5778)) |
 | D3 | What the remote drives | **Decided.** **The boxfish.** It is slow, can hover and turn on the spot, and the whole reef reacts to it: crowns snap shut, the humbugs dive, the crab threatens, shrimp clean it. The humbugs are AI | A humbug (it can't leave its coral head without looking wrong). No player (viewer only); the reef would then need an auto-driver anyway, which the screensaver variant provides |
 | D4 | Tank shell | **Decided.** **A new rimless reef tank, 120 × 60 × 55 cm** (about 400 L). 60 cm front to back leaves room for two rock masses, an arch and a cave with water in front of them | Reuse the existing 48 × 13 × 21 in shell: cheaper, because its colliders and cameras exist, and the content rule allows it (a shell is not contents). But 13 in (33 cm) front to back fits only a flat rock wall, not an arch and a cave |
@@ -196,7 +184,7 @@ flowchart TD
 
 ### What lives here
 
-25 kinds of life: 22 invertebrates (and coralline algae) plus 3 fish. Each kind gets a **new model**, built in this tank's own generator (`wflevels/aquarium_thai_reef/reef/`). The "Gulf record" column is what Phase 0 must establish. Until a source is read, nothing in it is a claim.
+25 kinds of life: 22 invertebrates (and coralline algae) plus 3 fish. Each kind is modelled in this tank's generator (`wflevels/aquarium_thai_reef/reef/`). Existing rigs, controllers and helpers from the other tanks are reused where they fit. The "Gulf record" column is what Phase 0 must establish. Until a source is read, nothing in it is a claim.
 
 | # | Kind | Species | Role in the tank | How it moves | Actor (DFRM v2) | Gulf record |
 |---|---|---|---|---|---|---|
@@ -584,7 +572,7 @@ flowchart TD
     task aquarium-check
     python3 -m pytest -q tests/test_aquarium_thai_reef.py -k same_anchors
     ```
-5. Budgets and the content rule. `report_budget.py` reports, per style: realistic ≤ 48,000 static triangles; anime ≤ 30,000 plus ≤ 16,000 hull triangles; ≤ 8 groups and ≤ 16 animated actors each. The test fails if any level input (mesh, texture, `.fth`, generator import) comes from another tank's directory, or if any species name in the roster appears in another tank's sources.
+5. Budgets and the content rule. `report_budget.py` reports, per style: realistic ≤ 48,000 static triangles; anime ≤ 30,000 plus ≤ 16,000 hull triangles; ≤ 8 groups and ≤ 16 animated actors each. The test fails if any roster species appears in another tank's species list.
     ```sh
     python3 wflevels/aquarium_thai_reef/report_budget.py
     python3 -m pytest -q tests/test_aquarium_thai_reef.py

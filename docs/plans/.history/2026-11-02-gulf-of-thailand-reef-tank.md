@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/2e8f756b) | Plan: Gulf of Thailand Reef decisions D1-D10 accepted |
 | [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/dc27d780) | Plan: a tank shell is not covered by the content rule |
 | [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/ecc095dd) | Plan: Gulf of Thailand Reef in two visual styles |
 | [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/a0c95dda) | Plan: Gulf of Thailand Reef tank, A3 poster and DFRM v2 |
 
 <!--history-meta v1
+2e8f756b	author	Will Norris
+2e8f756b	added	15
+2e8f756b	deleted	13
+2e8f756b	files	1
+2e8f756b	body	Will accepted every recommendation ("D1-D10: i accept your\nrecommendations"), which grants engine permission for exactly E1-E7\n(multi-curve DFRM) and S1-S3 (style shading) as the plan specifies.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSDDhrLioJf35p1WRH
 dc27d780	author	Will Norris
 dc27d780	added	5
 dc27d780	deleted	4
