@@ -30,7 +30,7 @@ Will added five things while the plan was being written:
 Nothing in this tank is derived from the existing eight tanks:
 
 - no species already in a tank;
-- no mesh, rig, texture, Forth controller or tank shell from them.
+- no mesh, rig, texture or Forth controller from them.
 
 That excludes the obvious reef picks:
 
@@ -43,10 +43,11 @@ That excludes the obvious reef picks:
 | Freshwater shrimp | Blue Shrimp |
 | Lionfish | Lionfish |
 
-**Shared engine mechanisms are infrastructure, not contents.** These may be used:
+**Shared engine mechanisms and the tank's container are infrastructure, not contents.** These may be used:
 
 - the `DFRM` operator, the generic `swim-deform` operation (see the [Arowana README](../../wflevels/aquarium_arowana/README.md)) and Forth movement primitives;
-- the menu and bundle tools (`cdpack`, `aquarium-levels.sh`) and the Blender container.
+- the menu and bundle tools (`cdpack`, `aquarium-levels.sh`) and the Blender container;
+- an existing tank shell (glass, colliders, cameras). D4 chooses the shell on its merits.
 
 `tests/test_aquarium_thai_reef.py` enforces the rule (verification step 5).
 
@@ -79,7 +80,7 @@ That excludes the obvious reef picks:
 | D1 | The pair of fish | **2 × humbug damselfish, *Dascyllus aruanus*.** A pair that lives in one cauliflower-coral head and dives into it when threatened, so the fish show off the coral as habitat. Reef-safe and small (≈ 8 cm). **No Gulf of Thailand record found yet** ([Reef Life Survey](https://reeflifesurvey.com/species/dascyllus-aruanus/) gives the range only); Phase 0 must find one or swap | **Copperband butterflyfish *Chelmon rostratus*:** a Gulf fish usually seen in pairs, but it eats tube worms and feather dusters, the stars of this tank. **Pink anemonefish *Amphiprion perideraion*:** photographed at Ko Nang Yuan ([snorkeling-report](https://www.snorkeling-report.com/species/amphiprion-perideraion/)), but anemonefish plus anemone repeats tank 1 (content rule) |
 | D2 | The single fish | **1 × juvenile yellow boxfish, *Ostracion cubicus*.** Bright yellow with black spots below about 4 cm ([CIESM atlas](https://ciesm.org/atlas/fishes_2nd_edition/Ostracion_cubicus.pdf)). Its rigid box body, rowed by its fins, is unlike any fish in the other tanks. A Ko Tao dive operator reports juveniles on shallow coral heads at 3–12 m ([Big Blue Diving](https://www.bigbluediving.com/koh-tao-marine-life/yellow-boxfish/)); that is not a scientific record, so Phase 0 needs one | **Blue-ringed angelfish *Pomacanthus annularis*:** a Gulf fish, but it grows to about 45 cm and nips sponges and corals. **Pajama cardinalfish:** its range is Java to Fiji; no Gulf record ([FishBase](https://nrm-fishbaselinux01.nrm.se/summary/5778)) |
 | D3 | What the remote drives | **The boxfish.** It is slow, can hover and turn on the spot, and the whole reef reacts to it: crowns snap shut, the humbugs dive, the crab threatens, shrimp clean it. The humbugs are AI | A humbug (it can't leave its coral head without looking wrong). No player (viewer only); the reef would then need an auto-driver anyway, which the screensaver variant provides |
-| D4 | Tank shell | **A new rimless reef tank, 120 × 60 × 55 cm** (about 400 L). Deeper front to back than the existing shells, so the rockwork has an arch and a cave. A new shell under the content rule | Reuse the existing 48 × 13 × 21 in shell: cheaper (colliders and cameras exist), but it breaks the content rule and is too shallow for rockwork |
+| D4 | Tank shell | **A new rimless reef tank, 120 × 60 × 55 cm** (about 400 L). 60 cm front to back leaves room for two rock masses, an arch and a cave with water in front of them | Reuse the existing 48 × 13 × 21 in shell: cheaper, because its colliders and cameras exist, and the content rule allows it (a shell is not contents). But 13 in (33 cm) front to back fits only a flat rock wall, not an arch and a cave |
 | D5 | Names | **Menu: "Gulf of Thailand Reef" and "Gulf of Thailand Reef — Anime". Dream: "Thai Reef" and "Thai Reef Anime". Level ids `aquarium_thai_reef` and `aquarium_thai_reef_anime`.** The longer label measures ≈ 860 px of the 1,154 px row, so neither is truncated | "… — Realistic" on the first as well (longer, and the realistic tank is the canonical one); "Bay of Thailand Reef" (Will's words; not the sea's English name) |
 | D6 | Frame-rate gate on cast1, wide idle | **≥ 20 FPS** (≤ 50 ms), about the Planted Tank without seahorses | **≥ 14.4 FPS**, what the Planted Tank ships at with six pairs. That allows more ornament but is visibly slower |
 | D7 | **Engine change: multi-curve `DFRM` (v2)** | **Yes: allow E1–E7.** It cuts the reef's animated actors from 33 to 16. It also gives the crab, shrimp and boxfish real articulated legs, antennae and fins, and gives worm crowns a cheap retract. All of it is backward-compatible: v1 chunks parse and pose exactly as today | **No engine change:** 33 actors, rigid crab and shrimp legs, a feather star made of five 2-arm actors. **Smaller engine change:** raise only `DfrmMaxTransforms` 3 → 16. That gives legs as rigid hinges, but no curling arms and no retract. Comparison under the proposal |

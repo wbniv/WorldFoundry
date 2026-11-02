@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/ecc095dd) | Plan: Gulf of Thailand Reef in two visual styles |
 | [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/a0c95dda) | Plan: Gulf of Thailand Reef tank, A3 poster and DFRM v2 |
 
 <!--history-meta v1
+ecc095dd	author	Will Norris
+ecc095dd	added	131
+ecc095dd	deleted	28
+ecc095dd	files	1
+ecc095dd	body	Will asked for two versions of the reef tank: ultra-realistic and\ncartoon/anime/cel-shaded. One seeded scene is cooked as two levels\n(selector rows 9 and 10, both in the Dream list) with shared behaviour\nand per-style assets, light, water and outlines. Adds the style-shading\nengine proposal S1-S3 (absorption, caustics, toon bands; off by default,\nD10), a side-by-side style mockup and four more diagrams. TODO gains the\nS1-S3 item and Will's saved two-habitats idea; the commit hook's six\ncaptured deferrals for this plan are included.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSDDhrLioJf35p1WRH
 a0c95dda	author	Will Norris
 a0c95dda	added	519
 a0c95dda	deleted	0
