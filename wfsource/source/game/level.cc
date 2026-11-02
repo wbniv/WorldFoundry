@@ -48,6 +48,8 @@
 #include <room/room.hp>
 #include <gfx/static_mesh.hp>
 #include <gfx/renderer_backend.hp>
+#include <gfx/authored_view.hp>
+#include <gfx/display.hp>
 #include <physics/collision.hp>
 #ifdef PHYSICS_ENGINE_JOLT
 #include <physics/jolt/jolt_backend.hp>
@@ -627,6 +629,30 @@ Level::Level
     std::fprintf(stderr, "ROOM-RENDER scope=%s source=%s\n",
                  _renderCurrentRoomOnly ? "current-only" : "all-active",
                  _runtimeProperties.schema("LevelRenderSettings") ? "RPRP" : "default");
+    // The level's authored frame (gfx/authored_view.hp): Authored aspect and Maximum aspect,
+    // next to Room Render Scope, 0 = off. Set for every level, so a level without them puts
+    // the view back to today's 60 degrees. --authored-aspect= / --maximum-aspect= win.
+    {
+        bool authoredFound = false, maximumFound = false;
+        std::string viewError;
+        wfview::Settings settings;
+        settings.authoredAspect = wfprops::aspectSetting(_runtimeProperties, "Authored aspect", authoredFound, viewError);
+        settings.maximumAspect  = wfprops::aspectSetting(_runtimeProperties, "Maximum aspect", maximumFound, viewError);
+        if (!viewError.empty()) std::fprintf(stderr, "VIEW setting invalid: %s\n", viewError.c_str());
+        wfview::levelSettings() = settings;
+        int sw = 0, sh = 0;
+        if (Display* display = Display::GetActive()) display->GetSurfaceSize(sw, sh);
+        if (sw <= 0 || sh <= 0) { sw = 1; sh = 1; }
+        const wfview::Settings e = wfview::effective();
+        const wfview::View v = wfview::view(sw, sh, e.authoredAspect, e.maximumAspect);
+        const wfview::Settings& o = wfview::argumentOverrides();
+        const bool fromArgs = o.authoredAspect >= 0.0f || o.maximumAspect >= 0.0f;
+        std::fprintf(stderr, "VIEW authored=%.3f screen=%.3f hfov=%.1f vfov=%.1f maximum=%.3f surface=%dx%d "
+                             "viewport=%d,%d,%dx%d pillarbox=%d source=%s\n",
+                     e.authoredAspect, double(sw) / double(sh), v.HorizontalFov(), v.verticalFov, e.maximumAspect,
+                     sw, sh, v.x, v.y, v.width, v.height, v.pillarbox ? 1 : 0,
+                     fromArgs ? "argument" : (authoredFound || maximumFound) ? "level" : "default");
+    }
     wfprops::host().bind(&_runtimeProperties);
     // Keep the Temple's optional stained-glass shaft in a script-visible mailbox.
     // The OAS field is editable; its value changes only after the form commits.
