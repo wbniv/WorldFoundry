@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Mockups for docs/plans/2026-11-02-gulf-of-thailand-reef-tank.md.
 
-Writes four self-contained 1440x900 HTML mockups beside this script and, with
+Writes five self-contained 1440x900 HTML mockups beside this script and, with
 --png, a same-basename PNG for each (headless google-chrome):
 
   tank-wide.html   the reef from the default wide camera, every species labelled
   tank-close.html  the close camera in two states (calm / boxfish passing)
+  styles.html      the two visual styles (ultra-realistic, anime/cel) on one reef
   selectors.html   the Android tank menu (9 entries) and the Dream tank list
   poster.html      the A3 poster layout, drawn with the same species art
 
@@ -731,40 +732,150 @@ def menu_svg(rows, cursor, first, total) -> str:
     return "".join(g)
 
 
+REAL_LABEL, CEL_LABEL = "Gulf of Thailand Reef", "Gulf of Thailand Reef — Anime"
+DREAM_REAL, DREAM_CEL = "Thai Reef", "Thai Reef Anime"
+
+
 def selectors() -> str:
     rows = ["Clownfish &amp; Sea Anemone", "Blue Shrimp", "Calm Betta", "Jellyfish", "Lionfish",
-            "Planted Tank", "Asian Arowana", "Tiger Barbs", "Gulf of Thailand Reef"]
+            "Planted Tank", "Asian Arowana", "Tiger Barbs", REAL_LABEL, CEL_LABEL]
     dream = ["Random", "Clownfish", "Blue Shrimp", "Betta", "Jellyfish", "Lionfish",
-             "Planted Urchin", "Arowana", "Tiger Barbs", "Thai Reef"]
-    phone = ['<div style="width:300px;border:10px solid #2b313b;border-radius:28px;background:#111823;padding:14px 16px;font-size:12.5px;line-height:1.2">',
-             '<div style="font-weight:650;font-size:15px">WF Screensaver</div><div style="color:#8b98a9;margin-bottom:6px">Bedroom TV · connected</div>',
-             '<div style="color:#8b98a9;margin:4px 0">Tank</div>']
+             "Planted Urchin", "Arowana", "Tiger Barbs", DREAM_REAL, DREAM_CEL]
+    phone = ['<div style="width:300px;border:10px solid #2b313b;border-radius:28px;background:#111823;padding:12px 16px;font-size:12.5px;line-height:1.15">',
+             '<div style="font-weight:650;font-size:15px">WF Screensaver</div><div style="color:#8b98a9;margin-bottom:4px">Bedroom TV · connected</div>',
+             '<div style="color:#8b98a9;margin:2px 0">Tank</div>']
     for d in dream:
-        sel = d == "Thai Reef"
-        phone.append(f'<div style="display:flex;align-items:center;gap:10px;padding:4px 10px;border-radius:7px;'
+        sel = d == DREAM_CEL
+        new = d in (DREAM_REAL, DREAM_CEL)
+        phone.append(f'<div style="display:flex;align-items:center;gap:10px;padding:3px 10px;border-radius:7px;'
                      f'{"background:#1f3a24;border:1px solid #4cc764;" if sel else "border:1px solid transparent;"}">'
                      f'<span style="width:14px;height:14px;border-radius:50%;border:2px solid {"#4cc764" if sel else "#5b6676"};'
                      f'{"background:radial-gradient(#4cc764 45%,transparent 50%)" if sel else ""}"></span>{d}'
-                     f'{"<span style=margin-left:auto;color:#ffd166;font-size:11px>new</span>" if sel else ""}</div>')
-    phone.append('<div style="color:#8b98a9;font-size:11.5px;margin-top:6px">Random now draws from 9 tanks.</div></div>')
+                     f'{"<span style=margin-left:auto;color:#ffd166;font-size:11px>new</span>" if new else ""}</div>')
+    phone.append('<div style="color:#8b98a9;font-size:11.5px;margin-top:4px">Random now draws from 10 tanks.</div></div>')
     body = ('<div style="display:grid;grid-template-columns:612px 612px;gap:48px;padding:12px 60px 0 60px">'
-            '<div><h2>1. TV selector — new tank chosen</h2><p class="cap">Row 9 of 9; the list scrolls as today (6 visible rows). '
-            'The "new" pill is mockup-only.</p>' + menu_svg(rows, 8, 3, 9) + '</div>'
+            '<div><h2>1. TV selector — the anime reef chosen</h2><p class="cap">Row 10 of 10; the list scrolls as today (6 visible rows). '
+            'The "new" pill is mockup-only.</p>' + menu_svg(rows, 9, 4, 10) + '</div>'
             '<div><h2>2. TV selector — opened (first row)</h2><p class="cap">Indices 0–7 are unchanged, so saved resume state and '
-            'tests keyed on them keep working. The counter reads 1 / 9.</p>' + menu_svg(rows, 0, 0, 9) + '</div></div>'
+            'tests keyed on them keep working. The counter reads 1 / 10.</p>' + menu_svg(rows, 0, 0, 10) + '</div></div>'
             '<div style="display:grid;grid-template-columns:340px 1fr;gap:24px;padding:10px 60px">'
             '<div><h2>3. Phone — Dream tank list</h2>' + "".join(phone) + '</div>'
             '<div style="display:flex;flex-direction:column;gap:10px;padding-top:26px">'
-            '<div class="note"><b>Menu manifest.</b> One line appended to <code>wflevels/aquarium-menu.manifest</code>:<br>'
-            '<code>level aquarium_thai_reef-standalone.iff | Gulf of Thailand Reef</code></div>'
-            '<div class="note"><b>Dream list.</b> <code>TankChoice.IDS</code> gains <code>aquarium_thai_reef</code>, '
-            '<code>LABELS</code> gains <code>Thai Reef</code> (the phone list is short-label). '
+            '<div class="note"><b>Menu manifest.</b> Two lines appended to <code>wflevels/aquarium-menu.manifest</code>:<br>'
+            f'<code>level aquarium_thai_reef-standalone.iff | {REAL_LABEL}</code><br>'
+            f'<code>level aquarium_thai_reef_anime-standalone.iff | {CEL_LABEL}</code></div>'
+            '<div class="note"><b>Dream list.</b> <code>TankChoice.IDS</code> gains <code>aquarium_thai_reef</code> and '
+            f'<code>aquarium_thai_reef_anime</code>; <code>LABELS</code> gains <code>{DREAM_REAL}</code> and <code>{DREAM_CEL}</code>. '
             '<code>TankSettingsProvider</code> already serialises every entry, so no phone code changes.</div>'
-            '<div class="note"><b>Same-length lists, checked.</b> <code>tests/test_aquarium_menu.py</code> (TOC 11 → 12 chunks, 9 titles) '
+            '<div class="note"><b>Same-length lists, checked.</b> <code>tests/test_aquarium_menu.py</code> (TOC 11 → 13 chunks, 10 titles) '
             'and <code>tests/test_aquarium_screensaver_input.py</code> pin both lists, so a half-registered tank fails CI.</div>'
-            '<div class="note"><b>Long label.</b> "Gulf of Thailand Reef" measures ≈ 610 px of the 1,154 px row at Regular 56, '
+            f'<div class="note"><b>Long label.</b> "{CEL_LABEL}" measures ≈ 860 px of the 1,154 px row at SemiBold 56, '
             'so it needs no truncation.</div></div></div>')
-    return page("Selectors — ninth tank", "Android aquarium menu · Dream tank setting", body)
+    return page("Selectors — two reef styles", "Android aquarium menu · Dream tank setting", body)
+
+
+# ─────────────────────────────── the two styles ─────────────────────────────
+
+STYLE_DEFS = """
+<svg width="0" height="0" style="position:absolute">
+<defs>
+  <filter id="real" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.032" numOctaves="4" seed="7" result="mottle"/>
+    <feColorMatrix in="mottle" type="saturate" values="0" result="mottleG"/>
+    <feComposite in="SourceGraphic" in2="mottleG" operator="arithmetic" k1="1.15" k2="0.55" k3="0" k4="0" result="mottled"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="3" result="grain"/>
+    <feColorMatrix in="grain" type="saturate" values="0" result="grainG"/>
+    <feComposite in="mottled" in2="grainG" operator="arithmetic" k1="0.5" k2="0.78" k3="0" k4="0" result="grained"/>
+    <feGaussianBlur in="grained" stdDeviation="0.7" result="soft"/>
+    <feColorMatrix in="soft" type="matrix" result="graded"
+      values="0.70 0.10 0.02 0 0.01   0.04 0.95 0.12 0 0.04   0.02 0.16 1.0 0 0.07   0 0 0 1 0"/>
+  </filter>
+  <filter id="caustic" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="turbulence" baseFrequency="0.011 0.026" numOctaves="2" seed="11" result="t"/>
+    <feColorMatrix in="t" type="luminanceToAlpha" result="ta"/>
+    <feComponentTransfer in="ta" result="lines"><feFuncA type="table" tableValues="1 0.55 0 0 0 0 0 0"/></feComponentTransfer>
+    <feFlood flood-color="#d9fbff" result="c"/>
+    <feComposite in="c" in2="lines" operator="in"/>
+  </filter>
+  <filter id="cel" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feColorMatrix in="SourceGraphic" type="saturate" values="1.45" result="sat"/>
+    <feComponentTransfer in="sat" result="post">
+      <feFuncR type="discrete" tableValues="0.04 0.30 0.58 0.84 1"/>
+      <feFuncG type="discrete" tableValues="0.06 0.32 0.60 0.86 1"/>
+      <feFuncB type="discrete" tableValues="0.14 0.40 0.66 0.90 1"/>
+    </feComponentTransfer>
+    <feColorMatrix in="SourceGraphic" type="saturate" values="0" result="grey"/>
+    <feConvolveMatrix in="grey" order="3" kernelMatrix="-1 -1 -1 -1 8 -1 -1 -1 -1" divisor="1" preserveAlpha="true" result="edge"/>
+    <feColorMatrix in="edge" type="luminanceToAlpha" result="edgeA"/>
+    <feComponentTransfer in="edgeA" result="edgeT"><feFuncA type="discrete" tableValues="0 1 1 1 1 1"/></feComponentTransfer>
+    <feMorphology in="edgeT" operator="dilate" radius="0.7" result="thick"/>
+    <feFlood flood-color="#1c1236" result="ink"/>
+    <feComposite in="ink" in2="thick" operator="in" result="lines"/>
+    <feMerge><feMergeNode in="post"/><feMergeNode in="lines"/></feMerge>
+  </filter>
+  <radialGradient id="vignette" cx="50%" cy="45%" r="75%">
+    <stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/>
+  </radialGradient>
+  <linearGradient id="causticMask" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".85" stop-color="#fff" stop-opacity=".12"/>
+    <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+  </linearGradient>
+  <mask id="cmask"><rect width="1600" height="900" fill="url(#causticMask)"/></mask>
+  <linearGradient id="haze" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#3fa7b8" stop-opacity=".10"/><stop offset=".6" stop-color="#0e5a6e" stop-opacity=".22"/>
+    <stop offset="1" stop-color="#062a3a" stop-opacity=".30"/>
+  </linearGradient>
+</defs>
+</svg>"""
+
+
+def sparkle(x, y, r):
+    return (f'<path d="M{f(x)},{f(y-r)} Q{f(x+r*.16)},{f(y-r*.16)} {f(x+r)},{f(y)} Q{f(x+r*.16)},{f(y+r*.16)} {f(x)},{f(y+r)} '
+            f'Q{f(x-r*.16)},{f(y+r*.16)} {f(x-r)},{f(y)} Q{f(x-r*.16)},{f(y-r*.16)} {f(x)},{f(y-r)}Z" fill="#fff"/>')
+
+
+def styled_tv(style: str, vb: str, w: int, h: int, state: str) -> str:
+    """One TV frame: the shared reef (<use>) under a style filter, plus that style's overlays."""
+    use = f'<use href="#reef-{state}" filter="url(#{style})"/>'
+    if style == "real":
+        over = ('<rect width="1600" height="900" filter="url(#caustic)" mask="url(#cmask)" style="mix-blend-mode:screen"/>'
+                '<rect width="1600" height="900" fill="url(#haze)"/>'
+                + "".join(f'<circle cx="{x}" cy="{y}" r="{r}" fill="none" stroke="#dff7ff" stroke-opacity=".55" stroke-width="1.2"/>'
+                          for x, y, r in ((612, 520, 4), (618, 470, 3), (606, 420, 2.5), (1012, 380, 3), (1018, 330, 2)))
+                + '<rect width="1600" height="900" fill="url(#vignette)"/>')
+    else:
+        rng = random.Random(5)
+        over = "".join(sparkle(rng.uniform(60, 1540), rng.uniform(40, 360), rng.uniform(5, 13)) for _ in range(16))
+        over += "".join(f'<circle cx="{x}" cy="{y}" r="{r}" fill="#e9fdff" stroke="#1c1236" stroke-width="2.5"/>'
+                        f'<circle cx="{x-r*.35}" cy="{y-r*.35}" r="{r*.3}" fill="#fff"/>'
+                        for x, y, r in ((612, 520, 7), (622, 468, 5), (606, 425, 4), (1012, 380, 6), (1020, 335, 4)))
+        # anime eye highlights on the fish (wide state positions)
+        if state == "calm":
+            over += ('<circle cx="928" cy="272" r="5" fill="#fff"/><circle cx="314" cy="254" r="3" fill="#fff"/>'
+                     '<circle cx="357" cy="232" r="3" fill="#fff"/>')
+    return (f'<svg width="{w}" height="{h}" viewBox="{vb}" preserveAspectRatio="xMidYMid slice" '
+            f'style="display:block;border:6px solid #1a1a1a;border-radius:6px;box-shadow:0 0 0 1px #30363d">{use}{over}</svg>')
+
+
+def styles() -> str:
+    defs = (f'<svg width="0" height="0" style="position:absolute"><defs><g id="reef-calm">{reef_scene("calm")}</g></defs></svg>'
+            + STYLE_DEFS)
+    wide, close = "0 0 1600 900", "380 392 760 427.5"
+    W, H = 640, 360
+    body = (defs +
+            '<div style="display:grid;grid-template-columns:640px 640px;gap:12px 40px;padding:6px 60px 0">'
+            f'<div><h2>1. Ultra-realistic — "{REAL_LABEL}"</h2><p class="cap">Baked light and occlusion, '
+            'photographic-detail atlas, per-channel water absorption (reds fade first), caustics on lit surfaces, '
+            'drifting bubbles, a soft vignette. Same reef, same behaviour.</p>' + styled_tv("real", wide, W, H, "calm") + '</div>'
+            f'<div><h2>2. Cartoon / anime / cel — "{CEL_LABEL}"</h2><p class="cap">Flat posterised palette, 3-band toon light, '
+            'ink outlines (inverted hull), saturated colour, sparkles and big eye highlights; cartoon bubbles.</p>'
+            + styled_tv("cel", wide, W, H, "calm") + '</div>'
+            + styled_tv("real", close, W, H, "calm").replace('<svg', '<div><svg', 1).replace('</svg>', '</svg></div>', 1)
+            + styled_tv("cel", close, W, H, "calm").replace('<svg', '<div><svg', 1).replace('</svg>', '</svg></div>', 1)
+            + '</div>'
+            '<p class="cap" style="padding:6px 60px 0">Mockup approximations with SVG filters: the real looks come from the '
+            'per-style assets and shaders in the plan (style table, engine proposal S1–S3), not from post-processing.</p>')
+    return page("Two styles, one reef", "ultra-realistic · cartoon / anime / cel-shaded · wide and close cameras", body)
 
 
 # ─────────────────────────────── the poster ─────────────────────────────────
@@ -910,7 +1021,7 @@ def poster() -> str:
     return page("A3 poster — Reef of the Gulf of Thailand", "habitat · invertebrates · the two fishes", body)
 
 
-MOCKUPS = {"tank-wide": tank_wide, "tank-close": tank_close, "selectors": selectors, "poster": poster}
+MOCKUPS = {"tank-wide": tank_wide, "tank-close": tank_close, "styles": styles, "selectors": selectors, "poster": poster}
 
 
 def main() -> int:
@@ -931,6 +1042,13 @@ def main() -> int:
             subprocess.run(["google-chrome", "--headless=new", "--disable-gpu", "--hide-scrollbars",
                             "--window-size=1440,900", f"--screenshot={HERE / (name + '.png')}", out.as_uri()],
                            check=True, capture_output=True)
+            png = HERE / (name + ".png")
+            if png.stat().st_size > 512 * 1024:   # bundle rule: <= 512 KB per file
+                from PIL import Image
+                im = Image.open(png).convert("RGB").quantize(colors=256, method=Image.Quantize.MEDIANCUT,
+                                                             dither=Image.Dither.FLOYDSTEINBERG)
+                im.save(png, optimize=True)
+            print(f"  {png.name}: {png.stat().st_size/1024:.0f} KB")
     return 0
 
 

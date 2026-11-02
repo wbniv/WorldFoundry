@@ -1,8 +1,13 @@
-# Gulf of Thailand Reef: a ninth aquarium tank of reef invertebrates, and an A3 poster
+# Gulf of Thailand Reef: one reef in two visual styles (ultra-realistic and anime), and an A3 poster
 
-2 November 2026 · **Plan, awaiting Will's decisions (D1–D8)**. Nothing is built yet. **D7 asks for engine permission:** a multi-curve `DFRM` (E1–E7 below). [`AGENTS.md:9-14`](../../AGENTS.md) requires that permission before any engine edit.
+2 November 2026 · **Plan, awaiting Will's decisions (D1–D10)**. Nothing is built yet. The reef ships as **two tanks in the selector**: an ultra-realistic one and a cartoon/anime/cel-shaded one. **Two engine permissions are asked:** D7, a multi-curve `DFRM` (E1–E7), and D10, style shading (S1–S3). [`AGENTS.md:9-14`](../../AGENTS.md) requires permission before any engine edit.
 
-**In TODO.md** since 2026‑11‑02: the tank (Level / Gameplay, T4) and the `DFRM` v2 engine change (Level / Gameplay, T4, blocked on D7).
+**In TODO.md** since 2026‑11‑02, all under Level / Gameplay:
+
+- the two-style tank (T4);
+- the `DFRM` v2 engine change (T4, blocked on D7);
+- the style-shading engine change (T4, blocked on D10);
+- a later idea Will asked to keep: **two Gulf habitats**, an inner-Gulf turbid reef and a clear island reef (T4).
 
 ## Context
 
@@ -10,11 +15,13 @@ Will asked (2026‑11‑02) for a new aquarium tank in the selector:
 
 > i want a saltwater reef tank. it should be incredibly ornate and populated with live rocks. it should mostly be about the non-vertebrate reef life but it should include 3 fish (2 of 1 type, 1 of another type). the habitat represented is the bay of thailand. also generate an A3 poster about the habitat, non-vertebrate life in the tank, and the 2 types of fish
 
-Will added three things while the plan was being written:
+Will added five things while the plan was being written:
 
 1. **"don't base new tank contents on existing tanks."** This is the **content rule** below.
 2. **"add a (small) crab, native to gulf of thailand."** That is the coral guard crab, *Trapezia cymodoce*.
 3. **"probably an engine update. provide lots of details about the proposed change, including scope/cost/etc."** This is the reply to the finding that `DFRM` poses only one curve per mesh. See [Engine proposal: DFRM v2](#engine-proposal-dfrm-v2-several-curves-in-one-mesh).
+4. **"i'd like you to make 2 versions of this tank"**, then, asked which kind: **"2 different visual style: 1) ultra-realistic 2) cartoon/anime/cell-shading"**. See [Two visual styles](#two-visual-styles).
+5. **"save #1 suggestion in TODO"**: the two-habitats idea (inner Gulf and island reef) is a TODO item, not part of this plan.
 
 **"Bay of Thailand"** is the **Gulf of Thailand**. Its Thai name, อ่าวไทย (*Ao Thai*), means "Thai bay". The plan uses the English chart name, and D5 confirms the label.
 
@@ -73,14 +80,18 @@ That excludes the obvious reef picks:
 | D2 | The single fish | **1 × juvenile yellow boxfish, *Ostracion cubicus*.** Bright yellow with black spots below about 4 cm ([CIESM atlas](https://ciesm.org/atlas/fishes_2nd_edition/Ostracion_cubicus.pdf)). Its rigid box body, rowed by its fins, is unlike any fish in the other tanks. A Ko Tao dive operator reports juveniles on shallow coral heads at 3–12 m ([Big Blue Diving](https://www.bigbluediving.com/koh-tao-marine-life/yellow-boxfish/)); that is not a scientific record, so Phase 0 needs one | **Blue-ringed angelfish *Pomacanthus annularis*:** a Gulf fish, but it grows to about 45 cm and nips sponges and corals. **Pajama cardinalfish:** its range is Java to Fiji; no Gulf record ([FishBase](https://nrm-fishbaselinux01.nrm.se/summary/5778)) |
 | D3 | What the remote drives | **The boxfish.** It is slow, can hover and turn on the spot, and the whole reef reacts to it: crowns snap shut, the humbugs dive, the crab threatens, shrimp clean it. The humbugs are AI | A humbug (it can't leave its coral head without looking wrong). No player (viewer only); the reef would then need an auto-driver anyway, which the screensaver variant provides |
 | D4 | Tank shell | **A new rimless reef tank, 120 × 60 × 55 cm** (about 400 L). Deeper front to back than the existing shells, so the rockwork has an arch and a cave. A new shell under the content rule | Reuse the existing 48 × 13 × 21 in shell: cheaper (colliders and cameras exist), but it breaks the content rule and is too shallow for rockwork |
-| D5 | Names | **Menu: "Gulf of Thailand Reef". Dream: "Thai Reef". Level id `aquarium_thai_reef`.** The label measures ≈ 610 px of the 1,154 px row, so it is not truncated | "Bay of Thailand Reef" (Will's words; not the sea's English name) |
+| D5 | Names | **Menu: "Gulf of Thailand Reef" and "Gulf of Thailand Reef — Anime". Dream: "Thai Reef" and "Thai Reef Anime". Level ids `aquarium_thai_reef` and `aquarium_thai_reef_anime`.** The longer label measures ≈ 860 px of the 1,154 px row, so neither is truncated | "… — Realistic" on the first as well (longer, and the realistic tank is the canonical one); "Bay of Thailand Reef" (Will's words; not the sea's English name) |
 | D6 | Frame-rate gate on cast1, wide idle | **≥ 20 FPS** (≤ 50 ms), about the Planted Tank without seahorses | **≥ 14.4 FPS**, what the Planted Tank ships at with six pairs. That allows more ornament but is visibly slower |
 | D7 | **Engine change: multi-curve `DFRM` (v2)** | **Yes: allow E1–E7.** It cuts the reef's animated actors from 33 to 16. It also gives the crab, shrimp and boxfish real articulated legs, antennae and fins, and gives worm crowns a cheap retract. All of it is backward-compatible: v1 chunks parse and pose exactly as today | **No engine change:** 33 actors, rigid crab and shrimp legs, a feather star made of five 2-arm actors. **Smaller engine change:** raise only `DfrmMaxTransforms` 3 → 16. That gives legs as rigid hinges, but no curling arms and no retract. Comparison under the proposal |
-| D8 | Screensaver Dream entry | **Yes**, in Phase 4: "Thai Reef" is added to `TankChoice`, and Random draws from nine | Selector only, and the Dream list stays at eight |
+| D8 | Screensaver Dream entries | **Yes, both**, in Phase 4: "Thai Reef" and "Thai Reef Anime" are added to `TankChoice`, and Random draws from ten | Only the realistic one; or selector only, and the Dream list stays at eight |
+| D9 | How the two styles ship | **Two levels, two selector rows**, built from one scene description. Each style has its own assets, lighting fields and budgets, and is loaded alone, so neither pays for the other's memory | One level with a Style setting that swaps assets at load: one row, but both atlases resident or a reload path that doesn't exist today |
+| D10 | **Engine change: style shading (S1–S3)** | **Yes: allow S1 (water absorption) and S3 (toon bands); S2 (caustics) behind a cast1 cost gate.** All three are off by default, so every existing level renders identically | **No engine change:** realistic uses the existing linear fog and baked light only; anime bakes its bands into vertex colours, so moving actors stay smoothly lit and clash with the banded reef. Outlines need no engine change in any option |
 
 ## The tank
 
 [![Wide view: two rock masses and a central arch, 25 kinds of life, numbered](2026-11-02-gulf-of-thailand-reef-tank/tank-wide.png)](2026-11-02-gulf-of-thailand-reef-tank/tank-wide.html)
+
+*The layout and behaviour mockups are drawn style-neutral; [Two visual styles](#two-visual-styles) shows the two looks.*
 
 **Layout.** The tank sits at ×10 world scale, as the other tanks do.
 
@@ -106,6 +117,79 @@ That excludes the obvious reef picks:
     - barrel sponge: a ridged trapezoid;
     - sea squirts.
 - **Static budget.** At most **48,000 triangles in at most 8 static groups**: rock 16k, hard corals 18k, soft corals, sponges and fans 9k, sand, rubble and shell 5k. That is below the Planted Tank's 66,048, to leave frame time for the animated life.
+
+## Two visual styles
+
+[![The same reef, ultra-realistic (left) and anime/cel-shaded (right), wide and close](2026-11-02-gulf-of-thailand-reef-tank/styles.png)](2026-11-02-gulf-of-thailand-reef-tank/styles.html)
+
+The two styles share the reef and differ only in how it looks:
+
+- **Shared:** the rock skeleton, every placement, the species roster, the reef director, the fish controllers and the cameras.
+- **Per style:** surfaces, light, water and outlines.
+
+One scene description (`reef/scene.py`, seeded) is written out twice by the generator, `--style realistic` and `--style anime`. That gives two levels with identical anchor points, so one director script and one set of timing tests serve both. *The mockup approximates both looks with SVG filters; the real looks come from the assets and shaders below, not from post-processing.*
+
+```mermaid
+flowchart LR
+    SC["reef/scene.py<br/>one seeded scene:<br/>skeleton, placements, anchors"] --> R["--style realistic"]
+    SC --> A["--style anime"]
+    R --> RA["dense meshes, baked light + AO,<br/>photographic atlas,<br/>absorption + caustics fields"]
+    A --> AA["simplified meshes, posterised atlas,<br/>inverted-hull outlines,<br/>toon-band field"]
+    RA --> L1["aquarium_thai_reef<br/>(menu row 9)"]
+    AA --> L2["aquarium_thai_reef_anime<br/>(menu row 10)"]
+    F["shared Forth:<br/>reef_director, boxfish_motion,<br/>humbug_pair, screensaver driver"] --> L1
+    F --> L2
+```
+
+| Aspect | 1 · Ultra-realistic | 2 · Cartoon / anime / cel |
+|---|---|---|
+| Rock and coral surfaces | dense meshes; a 1024² **photographic-detail atlas** (coralline crust, polyp fields, sponge pores, sand grain) generated from layered noise at texel scale | simplified silhouettes, fewer triangles; a 512² **posterised atlas**: 3 tones per hue family, hand-picked saturated palette |
+| Light on the static reef | **baked** in the Blender container (Cycles: sun through the surface plus sky, ambient occlusion in crevices and the cave) into vertex colours | baked, then **quantised to 3 bands** (lit, mid, shadow) in the vertex colours |
+| Light on moving actors | engine per-vertex lights (three directional plus ambient), matched to the bake | **S3** toon bands in the fragment shader, so actors band like the reef |
+| Water | **S1**: per-channel absorption with distance (red goes first, then green), toward a deep teal | flat gradient bands, no fog, crisp far rock |
+| Light from above | **S2**: moving caustic web on upward faces; god-ray shafts are geometry (translucent once the texture-alpha TODO lands, opaque-faint until then) | static painted light shafts in two flat tones |
+| Outlines | none | **inverted hull**: an outward-pushed, winding-flipped dark shell on rocks, corals, fish, crab and shrimp, drawn by the existing engine-wide back-face culling ([plan](2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md)). No engine change |
+| Fish faces | anatomical eyes, small | larger eyes with two white highlights; humbugs and boxfish get readable expressions (calm, alarmed when the reef flinches) |
+| Particles | small, sparse, translucent-looking bubbles | big outlined bubbles with highlights; sparkle stars near the surface |
+| Motion | as in the behaviour section | the same timings, with 15 % more amplitude on fins and claws, and a squash on the boxfish's burst |
+| Static budget | ≤ 48,000 triangles, ≤ 8 groups | ≤ 30,000 triangles plus ≤ 16,000 hull triangles, ≤ 8 groups |
+| Frame gate (D6) | ≥ 20 FPS cast1, wide idle | ≥ 20 FPS cast1, wide idle |
+
+**Outlines on deformed actors.** A hull is part of the same mesh, and its vertices carry the same `DFRM` or `swim-deform` bindings, pushed outward. So the outline bends with the fin or claw it surrounds; hull faces follow the same face-normal rules as the body. Tiny crowns and polyps get no hull: at TV distance their outline would be a solid dark blob.
+
+## Engine proposal: style shading (S1–S3)
+
+All three features live in the shared vertex and fragment shaders: GL ([`backend_modern.cc:70-164`](../../wfsource/source/gfx/glpipeline/backend_modern.cc)) and Metal (`backend_metal.mm`). They are switched by new fields on the **Camera** object, the object that already carries `FoggingColor`, `FoggingStartDistance` and `FoggingCompleteDistance` ([`camera.oas`](../../wfsource/source/oas/camera.oas), read in [`camera.cc:67`](../../wfsource/source/game/camera.cc)). **Every new field defaults to off**, so every existing level renders exactly as today.
+
+```mermaid
+flowchart TD
+    CAM["Camera object fields (camera.oas)<br/>WaterAbsorb RGB · CausticStrength ·<br/>CausticScale · ToonBands"] --> CC["game/camera.cc<br/>reads OAD each frame (as fog today)"]
+    CC --> RB["RendererBackend<br/>SetWater(...) · SetCaustics(...) · SetToonBands(n)"]
+    RB --> GL["GL backend_modern.cc<br/>uniforms u_absorb, u_caustic, u_toon_bands"]
+    RB --> MT["Metal backend_metal.mm<br/>same uniforms in its buffer"]
+    GL --> VS["vertex: v_absorb = exp(−u_absorb·d)<br/>(+ world xy, normal z for S2)"]
+    GL --> FS["fragment: bands on v_lit (S3) →<br/>albedo·lit + caustic (S2) → absorb mix (S1)"]
+```
+
+| | **S1 — water absorption** (realistic) | **S2 — caustics** (realistic) | **S3 — toon bands** (anime) |
+|---|---|---|---|
+| What it does | replaces the single-colour linear fog with **per-channel** exponential absorption toward the fog colour: `c = mix(fog, c, exp(−k_rgb·d))`. Red fades by a few metres (×10 world units), blue last | adds a moving web of light on upward-facing surfaces: a procedural pattern of world x/y and level time, weighted by the normal's z and by S1's green absorption | quantises lighting brightness into *n* bands while keeping hue: `l *= q(y)/y`, with `y = max(l.r, l.g, l.b)` |
+| Shader cost | vertex: 1 `exp` on a vec3 and 1 new vec3 varying; fragment: unchanged (a `mix` either way) | fragment: about 4 `sin` and 1 `pow` per pixel, plus 2 varyings (world xy, normal z). **The one feature with a real fill-rate risk** on cast1 | fragment: 1 `max`, 1 `floor`, 1 divide |
+| Camera fields | `WaterAbsorbR/G/B` (FX32, 0 = off) | `CausticStrength` (FX32, 0 = off), `CausticScale` | `ToonBands` (I32, 0 = off; the anime level uses 3) |
+| Gate | none needed | **cast1: ≤ 2 ms frame time with it on vs off.** If it misses, use S2b: the same pattern evaluated per vertex (coarser, a fraction of the cost), or drop caustics | none needed |
+
+**Scope and cost.**
+
+| | |
+|---|---|
+| **Files changed** | `gfx/glpipeline/backend_modern.cc` (shaders and uniform plumbing), `gfx/metal/backend_metal.mm`, `gfx/renderer_backend.hp`, `gfx/glpipeline/backend_factory.cc` (state forwarding, as fog does at `:87-88`), `game/camera.cc`, `oas/camera.oas` |
+| **Size, estimated** | shaders about +25 lines per backend; plumbing about +80 lines; the OAD adds 6 fields |
+| **Effort** | one T4 agent session plus a cast1 session for S2's gate. Rank T4: every level draws through these shaders |
+| **Memory** | none beyond a few uniforms; no new textures (S2 is procedural) |
+| **Risk 1: existing levels change** | Off by default. **Regression guard:** a capture sweep of every level with all S fields at 0 must be **pixel-identical** to captures from before the change (the pattern of `tests/test_backface_cull_invariant.py`) |
+| **Risk 2: GL and Metal disagree** | One shared shader test scene, rendered on Linux GL and on the macOS/iOS Metal build in CI. Band edges and absorption must match within 1/255 per channel |
+| **Risk 3: old cooked levels** | New OAD fields need defaults in old `.lvl` files. Phase S confirms how levcomp treats a field a level doesn't carry; if it doesn't default it, the fields go at the end of the OAD with defaults, and every level is re-cooked in the same commit |
+| **Not in scope** | Per-pixel lighting, normal maps, screen-space effects, a post-process pass, real translucency (the open texture-alpha TODO) |
 
 ### What lives here
 
@@ -380,10 +464,14 @@ Claims to verify before print. **Nothing below is a claim yet.**
 flowchart TD
     D["Will decides D1–D8"] --> P0["Phase 0<br/>research + A3 poster"]
     D --> PE["Phase E<br/>DFRM v2 (D7)"]
+    D --> PS["Phase S<br/>style shading (D10)"]
     D --> P1["Phase 1<br/>shell, rockscape, static reef,<br/>atlas + cast1 gate"]
     P0 -->|"final species list"| P2
     P1 --> P2["Phase 2<br/>invertebrates + reef director"]
     PE --> P2
+    PS --> P1b["Phase 1b<br/>two style passes<br/>(realistic, anime)"]
+    P1 --> P1b
+    P1b --> P2
     P2 --> P3["Phase 3<br/>humbugs + boxfish"]
     P3 --> P4["Phase 4<br/>selector + Dream"]
     P4 --> P5["Phase 5<br/>cast1 / cast2 acceptance"]
@@ -391,47 +479,52 @@ flowchart TD
 
 - **Phase 0 — research and poster** (T3). As above. It produces the **final species list**, which gates Phase 2's models.
 - **Phase E — `DFRM` v2** (T4, after D7). E1–E7. It can run alongside Phases 0 and 1.
+- **Phase S — style shading** (T4, after D10). S1–S3, the capture-sweep regression guard and S2's cast1 gate. It can run alongside Phases 0, 1 and E.
 - **Phase 1 — the shell and the static reef** (T4).
     - New shell, colliders and cameras (D4).
     - Rockscape, coral, sponge and atlas generators, and `config.py` with the seed and the budgets.
     - Container build: `bash wflevels/aquarium_thai_reef/build.sh`, wrapped as `task aquarium-thai-reef-level`. `report_budget.py` prints triangles per static group.
     - **Early cast1 gate.** The static reef alone, with no actors and the default camera, must be **≤ 38 ms** (leaving at least 12 ms for life under D6's 50 ms). If it misses, thin the static groups before Phase 2 starts: sand and rubble first, then the far rock, then the coral tip rows.
-- **Phase 2 — invertebrates and the reef director** (T3, design settled here).
+- **Phase 1b — the two style passes** (T4).
+    - **Realistic:** Cycles light and AO bake, the photographic atlas, Camera fields for S1 and S2.
+    - **Anime:** simplified meshes, posterised atlas, banded bake, outline hulls, `ToonBands = 3`.
+    - **Both:** desktop captures from the same camera, pose and seed, side by side, for Will's review before Phase 2 builds the moving life in both styles.
+- **Phase 2 — invertebrates and the reef director** (T3, design settled here). Every model in both styles. The hulls and the posterised skins are generated from the same rig.
     - The models and rigs in the roster, the director and its state machines.
     - Desktop capture: `scripts/check-thai-reef.py --video` drives the boxfish past each reactor and asserts every reaction within its timing window.
 - **Phase 3 — the fish** (T3). Humbug and boxfish models, `boxfish_motion.fth`, the humbug-pair controller, and the screensaver driver.
 - **Phase 4 — selector and Dream** (T2).
 
-[![TV selector at 9 of 9 and at 1 of 9; the phone's Dream tank list with Thai Reef](2026-11-02-gulf-of-thailand-reef-tank/selectors.png)](2026-11-02-gulf-of-thailand-reef-tank/selectors.html)
+[![TV selector at 10 of 10 and at 1 of 10; the phone's Dream tank list with both reefs](2026-11-02-gulf-of-thailand-reef-tank/selectors.png)](2026-11-02-gulf-of-thailand-reef-tank/selectors.html)
 
-Phase 4 appends one line to `aquarium-menu.manifest` and adds the tank everywhere the eight are listed. Indices 0–7 don't move, so saved state and tests keyed on them still work.
+Phase 4 appends two lines to `aquarium-menu.manifest` and adds both tanks everywhere the eight are listed. Indices 0–7 don't move, so saved state and tests keyed on them still work.
 
-`scripts/build-aquarium-screensaver-levels.py` currently carries **another session's uncommitted edits**. Phase 4 waits for them to land, or merges on top; it never commits them.
+`scripts/build-aquarium-screensaver-levels.py` currently carries **uncommitted edits from the Planted Tank screensaver work** (TODO "Planted Tank screensaver (third Dream)", `[verify T3]`), along with `scripts/build-object-properties.py` and `tests/test_aquarium_screensaver_catalog.py`. Phase 4 waits for that item to commit them, or merges on top; it never commits them.
 
 ```mermaid
 flowchart LR
-    M["aquarium-menu.manifest<br/>+ 'level aquarium_thai_reef-standalone.iff<br/>| Gulf of Thailand Reef'"] --> CD["task build-cd-iff-aquarium-menu<br/>(cdpack, shell-menu.fth)"]
-    L["task aquarium-thai-reef-level"] --> CD
+    M["aquarium-menu.manifest<br/>+ 2 level lines (rows 9, 10)"] --> CD["task build-cd-iff-aquarium-menu<br/>(cdpack, shell-menu.fth)"]
+    L["task aquarium-thai-reef-level<br/>task aquarium-thai-reef-anime-level"] --> CD
     CD --> B["wflevels/aquarium-menu-cd.iff"]
     B --> APK["task build-apk"]
     SS["build-aquarium-screensaver-levels.py<br/>TANKS + thai_reef_screensaver.fth"] --> SB["aquarium-screensaver-cd.iff"]
-    TC["TankChoice.java<br/>IDS + LABELS 'Thai Reef'"] --> SAPK["screensaver APK"]
+    TC["TankChoice.java<br/>IDS + LABELS: Thai Reef, Thai Reef Anime"] --> SAPK["screensaver APK"]
     SB --> SAPK
     TC --> TP["TankSettingsProvider<br/>(no change)"] --> PH["phone tank list"]
 ```
 
-- **Phase 5 — acceptance** (T3). Install on cast1 (cast2 if it's available) through the coordinator. Selector, Back, the D6 frame-rate gate over 120 s wide idle, a Dream run with "Thai Reef" selected, then restore the device's original settings.
+- **Phase 5 — acceptance** (T3). Install on cast1 (cast2 if it's available) through the coordinator. For **both** levels: selector and Back, the D6 frame-rate gate over 120 s wide idle, and a Dream run. Then restore the device's original settings.
 
 ## Pipeline: from generator to TV
 
 ```mermaid
 flowchart TD
-    G["reef/*.py generators<br/>(seed 2026‑11‑02, config.py)"] --> BL["Blender container<br/>bash wflevels/aquarium_thai_reef/build.sh"]
+    G["reef/*.py generators<br/>(seed 2026‑11‑02, config.py)"] --> BL["Blender container, once per style<br/>bash wflevels/aquarium_thai_reef/build.sh<br/>bash wflevels/aquarium_thai_reef_anime/build.sh"]
     BL --> LEV["aquarium_thai_reef.lev"]
     BL --> MESH["mesh .iff files<br/>(DFRM v2 chunks via dfrm_chunk.py)"]
-    BL --> TGA["reef atlas 1024² .tga"]
+    BL --> TGA["reef atlas .tga<br/>(1024² realistic, 512² anime)"]
     LEV --> LC["levcomp-rs → .lvl"]
-    MESH --> IC["iffcomp-rs → aquarium_thai_reef.iff<br/>+ -standalone.iff"]
+    MESH --> IC["iffcomp-rs → aquarium_thai_reef[_anime].iff<br/>+ -standalone.iff"]
     TGA --> TX["textile-rs → Perm/Room pages"]
     LC --> IC
     TX --> IC
@@ -444,13 +537,15 @@ flowchart TD
 
 | Path | New / changed | What |
 |---|---|---|
-| `wflevels/aquarium_thai_reef/` | new | `config.py`, `build.sh`, `run.sh`, `README.md`, `generate.py`, `reef/{rockscape,corals,sponges,invertebrates,fishes,atlas}.py`, `report_budget.py`, Forth: `reef_director.fth`, `boxfish_motion.fth`, `humbug_pair.fth`, `thai_reef_screensaver.fth` |
+| `wflevels/aquarium_thai_reef/` | new | `config.py`, `build.sh`, `run.sh`, `README.md`, `generate.py`, `reef/{scene,rockscape,corals,sponges,invertebrates,fishes,atlas,style_realistic,style_anime,hull}.py`, `report_budget.py`, Forth: `reef_director.fth`, `boxfish_motion.fth`, `humbug_pair.fth`, `thai_reef_screensaver.fth` |
+| `wflevels/aquarium_thai_reef_anime/` | new | `build.sh` and `run.sh` that call the shared generator with `--style anime`; the cooked anime level |
 | `scripts/check-thai-reef.py` | new | desktop reaction and motion capture |
 | `tests/test_aquarium_thai_reef.py` | new | budgets, the content rule, director timing tables |
 | `docs/reference/thai-reef-research.md`, `docs/reference/gulf-of-thailand-reef-poster/` | new | research, poster, test |
 | `wflevels/aquarium-menu.manifest`, `Taskfile.yml`, `scripts/aquarium-levels.sh`, `scripts/compare-level-build-routes.sh`, `scripts/build-aquarium-screensaver-levels.py`, `scripts/build-aquarium-variant.py`, `android/screensaver/…/TankChoice.java` | changed | registration (Phase 4) |
-| `tests/test_aquarium_menu.py`, `tests/test_aquarium_screensaver_input.py`, `tests/test_species_movement.py` | changed | 9 tanks, a 12-chunk TOC |
+| `tests/test_aquarium_menu.py`, `tests/test_aquarium_screensaver_input.py`, `tests/test_species_movement.py` | changed | 10 tanks, a 13-chunk TOC |
 | Engine and `DFRM` tooling | changed | Phase E only, after D7 (list under the proposal) |
+| Shaders, renderer backend, Camera OAD | changed | Phase S only, after D10 (list under the proposal) |
 
 ## Out of scope
 
@@ -479,12 +574,14 @@ flowchart TD
     python3 -m pytest -q tests/test_dfrm_export.py tests/test_seahorse_tail.py tests/test_seahorse_behaviour.py
     task aquarium-check
     ```
-4. The level builds in the container and its outputs are fresh.
+4. Both levels build in the container, their outputs are fresh, and their anchor tables are identical.
     ```sh
     task aquarium-thai-reef-level
+    task aquarium-thai-reef-anime-level
     task aquarium-check
+    python3 -m pytest -q tests/test_aquarium_thai_reef.py -k same_anchors
     ```
-5. Budgets and the content rule. `report_budget.py` reports ≤ 48,000 static triangles in ≤ 8 groups and ≤ 16 animated actors. The test fails if any level input (mesh, texture, `.fth`, generator import) comes from another tank's directory, or if any species name in the roster appears in another tank's sources.
+5. Budgets and the content rule. `report_budget.py` reports, per style: realistic ≤ 48,000 static triangles; anime ≤ 30,000 plus ≤ 16,000 hull triangles; ≤ 8 groups and ≤ 16 animated actors each. The test fails if any level input (mesh, texture, `.fth`, generator import) comes from another tank's directory, or if any species name in the roster appears in another tank's sources.
     ```sh
     python3 wflevels/aquarium_thai_reef/report_budget.py
     python3 -m pytest -q tests/test_aquarium_thai_reef.py
@@ -494,26 +591,32 @@ flowchart TD
     bash wflevels/aquarium_thai_reef/run.sh
     python3 scripts/check-thai-reef.py --video
     ```
-7. The selector lists nine tanks; indices 0–7 are unchanged.
+7. The selector lists ten tanks; indices 0–7 are unchanged.
     ```sh
     python3 -m pytest -q tests/test_aquarium_menu.py
     task build-cd-iff-aquarium-menu
     ```
-8. The screensaver variant and the Dream list include the tank.
+8. The screensaver variants and the Dream list include both tanks.
     ```sh
     python3 -m pytest -q tests/test_aquarium_screensaver_input.py tests/test_aquarium_screensaver_catalog.py
     ```
-9. On cast1: choosing row 9 starts the reef, Back returns to the menu, and rows 1–8 still start their tanks.
-10. On cast1: wide idle for 120 s at the default population meets D6, measured with the protocol of the [seahorse comparison](2026-10-16-saltwater-seahorses/comparison.md).
+9. On cast1: rows 9 and 10 start the realistic and the anime reef, Back returns to the menu from each, and rows 1–8 still start their tanks.
+10. On cast1: each style, wide idle for 120 s at the default population, meets D6, measured with the protocol of the [seahorse comparison](2026-10-16-saltwater-seahorses/comparison.md).
 11. On cast1: E7.1, Planted Tank with six pairs inside its 17 October run range; E7.2, the merge bench reported.
-12. On cast1: Dream with "Thai Reef" selected shows the tank and runs the screensaver driver for 5 minutes; the original Dream selection is restored afterwards.
+12. On cast1: Dream with "Thai Reef", then with "Thai Reef Anime", selected shows that tank and runs the screensaver driver for 5 minutes each; the original Dream selection is restored afterwards.
 13. The poster PDF is copied to `~/Documents/TO PRINT/`.
+14. Style shading (Phase S): with every new Camera field at 0, a capture sweep of all levels is pixel-identical to the pre-change captures, on GL and on Metal. The shared shader test scene matches across the two backends within 1/255 per channel. On cast1, S2 costs ≤ 2 ms against S2 off.
+    ```sh
+    python3 -m pytest -q tests/test_style_shading_invariant.py
+    ```
+15. Style review: desktop captures of both levels from the same camera, pose and seed are attached to the plan, and Will approves both looks before Phase 2.
 
 ## Mockups
 
-All four are self-contained, 1440 × 900, rebuilt by `python3 docs/plans/2026-11-02-gulf-of-thailand-reef-tank/build_mockups.py --png` from one seed. They are design intent, not game assets.
+All five are self-contained, 1440 × 900, rebuilt by `python3 docs/plans/2026-11-02-gulf-of-thailand-reef-tank/build_mockups.py --png` from one seed. They are design intent, not game assets.
 
 - [Wide view](2026-11-02-gulf-of-thailand-reef-tank/tank-wide.html): every species numbered, with the labels outside the TV frame.
 - [Close camera](2026-11-02-gulf-of-thailand-reef-tank/tank-close.html): calm against flinching, and one pass second by second.
-- [Selectors](2026-11-02-gulf-of-thailand-reef-tank/selectors.html): TV menu at 9 / 9 and 1 / 9, and the phone's Dream list.
+- [Two styles](2026-11-02-gulf-of-thailand-reef-tank/styles.html): ultra-realistic beside anime/cel, wide and close.
+- [Selectors](2026-11-02-gulf-of-thailand-reef-tank/selectors.html): TV menu at 10 / 10 and 1 / 10, and the phone's Dream list.
 - [Poster](2026-11-02-gulf-of-thailand-reef-tank/poster.html): the A3 layout.
