@@ -238,3 +238,8 @@ Run 2026‑11‑01 in the shared tree. The desktop engine is the Release build i
     [numbers](2026-11-01-field-presentations/device-numbers.png), [Powerup closed](2026-11-01-field-presentations/device-powerup-closed.png), [Powerup open](2026-11-01-field-presentations/device-powerup-open.png), [Direction](2026-11-01-field-presentations/device-direction.png), [Placement open](2026-11-01-field-presentations/device-placement-open.png), [rail exit](2026-11-01-field-presentations/device-rail-exit.png), [switches](2026-11-01-field-presentations/device-switches.png), [text](2026-11-01-field-presentations/device-text.png).
 
     **Not seen on a device:** the phone touch form (the coordinator's phone-input jobs are one tap each and relaunch the app at cleanup, so they cannot walk a modal flow), the path-error message (the interactive job cannot type text), a choice row with five or more options (every Field types choice row has two to four), and cast1 (busy). While testing I pressed Left on Powerup, which cycled Flying to Speed, and the closing Back applied it on cast2; the job is finished.
+
+## Follow-up note (2026‑11‑02): the Powerup value on cast2
+
+During step 6 the Powerup row on cast2 was cycled from Flying to Speed and closed with Back, which applies it. Whether that survived is **not verified**: no job has read the form on cast2 since, and I found no code in the property or screensaver paths that stores an edited Field value across a relaunch (a search of the game property sources and the screensaver Java settings classes found persistence only for the screensaver's own settings). The baseline app was relaunched on cast2 by later jobs (for example `J‑7b868f3fbee5`). To settle it, open the Field types form on cast2 and read the Powerup row.
+

@@ -308,3 +308,9 @@ Ran 2026‑11‑02 06:30‑07:10 (+0700) in a sparse worktree of `origin/2026-ne
     ```
 
     **PASS.**
+
+## Follow-up notes (2026‑11‑02)
+
+- **No `GF 1` line from the Dream.** `screensaver-show` collects no app log, so the screensaver proof above is visual: frames at +46.2 s (empty) and +56.7 s (goldfish). The same Director script did log the release on cast2 in the plain aquarium run, [auto-goldfish plan](2026-11-01-lionfish-auto-goldfish.md) jobs `J‑cb97b6863d6d` (one `GF 1` by 59.5 s) and `J‑c85c256de8bd`. The Dream wrapper adds no logging of its own, so a `GF 1` line from the Dream itself would need an app change; none is planned.
+- **cast2 state.** The aquarium screensaver from this APK stays installed on cast2 (no uninstall workflow). Its lionfish preview was still on screen at 07:53; a plain `check` job does not close it, because the job's cleanup restores the previous foreground, which is the preview. Closing it needs a remote Back key or the next screensaver selection.
+
