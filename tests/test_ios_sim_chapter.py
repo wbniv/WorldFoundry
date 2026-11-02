@@ -304,6 +304,23 @@ def test_band_mask_drops_the_hud_and_the_frame_counter():
     assert not keep[230 * 480 + 30] and not keep[269 * 480 + 479] and keep[100 * 480 + 240]
 
 
+def test_letterbox_survives_a_system_banner_and_rotate_never_verifies_a_letterbox():
+    # The iPad at a third: 688 x 917, the app band at rows 200..716 (602 // 3, 1548 // 3).
+    w, h, y3, ch3 = 688, 917, 200, 516
+    def frame(banner: bool):
+        px = bytearray(w * h * 3)                                # black bars
+        px[y3 * w * 3:(y3 + ch3) * w * 3] = bytes([120, 110, 100]) * (w * ch3)   # the picture
+        if banner:   # run 6ae806b1's iPad portal frame: a light banner in the top bar's upper part
+            for y in range(6, 40):
+                px[(y * w + 150) * 3:(y * w + 540) * 3] = bytes([230, 230, 230]) * 390
+        return px
+    assert chapter.letterbox_state(w, h, frame(False), y3, ch3) == (True, True)
+    assert chapter.letterbox_state(w, h, frame(True), y3, ch3) == (True, True)
+    # The iPhone's sideways frame fills the screenshot: no dark bars, so rotate may verify.
+    full = bytearray([120, 110, 100]) * (402 * 874)
+    assert chapter.letterbox_state(402, 874, full, 343, 185) == (False, False)
+
+
 def test_row_mean_and_outline():
     px = bytearray(3 * 4 * 4)
     out = chapter.outline(4, 4, px, (0, 0, 4, 4), colour=(255, 255, 255), width=1)

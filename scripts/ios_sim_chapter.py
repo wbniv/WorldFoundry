@@ -651,6 +651,20 @@ def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
     return v
 
 
+def letterbox_state(w: int, h: int, px, y3: int, ch3: int) -> tuple[bool, bool]:
+    """(letterboxed, bars_dark) for a screenshot whose app band would span rows y3..y3+ch3.
+    Letterboxed: the bars above and below the band are black and the band is not; that is
+    also the check that the crop is right. The top bar is judged by its lower half, next to
+    the band: a system banner ("Ready for Apple Intelligence", run 6ae806b1's iPad portal
+    frame) sits in the top bar's upper part. bars_dark ignores the band, for the rotate
+    path's check that the frame was not letterboxed after all."""
+    top = row_mean(w, px, y3 // 2, max(y3 // 2 + 1, y3 - 2))
+    bottom = row_mean(w, px, min(h, y3 + ch3 + 2), h)
+    bars_dark = y3 > 4 and max(top, bottom) < 6
+    inside = row_mean(w, px, y3 + 2, y3 + ch3 - 2)
+    return bars_dark and inside > 20, bars_dark
+
+
 def app_frame(shot: Path, surface: tuple[int, int], out_png: Path):
     """The app area of a simulator screenshot, upright, at a third of the surface size,
     written to out_png. Returns (w, h, px, placement, verified)."""
@@ -662,16 +676,15 @@ def app_frame(shot: Path, surface: tuple[int, int], out_png: Path):
     w, h, px = read_png(small)
     small.unlink()
     W, H = surface
-    # Is it letterboxed? The rows above and below where a band would sit are black, and
-    # the band itself is not. That is also the check that the crop is right.
     _, (_, by, _, bh) = app_placement(sw, sh_, W, H, True)
     y3, ch3 = by // FRAME_SCALE, bh // FRAME_SCALE
-    outside = max(row_mean(w, px, 0, max(0, y3 - 2)), row_mean(w, px, min(h, y3 + ch3 + 2), h))
-    inside = row_mean(w, px, y3 + 2, y3 + ch3 - 2)
-    letterboxed = y3 > 4 and outside < 6 and inside > 20
+    letterboxed, bars_dark = letterbox_state(w, h, px, y3, ch3)
     kind, _ = app_placement(sw, sh_, W, H, letterboxed)
     verified = True
     if kind == "rotate":
+        # A letterboxed frame must never pass as a sideways one (run 6ae806b1's iPad
+        # portal frame: a system banner over the top bar sent it here, crop_ok stayed True).
+        verified = not bars_dark
         w, h, px = rotate_ccw(w, h, px)
     if kind == "band":
         verified = letterboxed
