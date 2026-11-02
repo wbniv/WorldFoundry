@@ -1325,6 +1325,11 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     add_executable(args_file_test tests/args_file_test.cc)
     target_include_directories(args_file_test PRIVATE ${SRC})
     add_test(NAME args_file COMMAND args_file_test)
+    # The view a level's authored frame needs on each screen (gfx/authored_view.hp;
+    # finding-your-way docs/plans/2026-11-02-fill-screen-keep-authored-frame.md).
+    add_executable(authored_view_test tests/authored_view_test.cc)
+    target_include_directories(authored_view_test PRIVATE ${SRC})
+    add_test(NAME authored_view COMMAND authored_view_test)
     if(NOT WF_FORTH_ENGINE STREQUAL "none" AND NOT WF_FORTH_ENGINE STREQUAL "zforth")
         add_executable(frame_rate_forth_probe tests/frame_rate_forth_probe.cc
             ${STUB_SRC}/scripting_${WF_FORTH_ENGINE}.cc)

@@ -41,6 +41,7 @@
 #import <QuartzCore/CAMetalLayer.h>
 
 #include <gfx/renderer_backend.hp>
+#include <gfx/authored_view.hp>
 #include <game/bitmap_text.hp>
 #include <hal/phonepad/phonepad_overlay.h>
 #include <gfx/pixelmap.hp>
@@ -52,6 +53,29 @@
 #include <cstdlib>
 #include <cstring>
 #include <vector>
+
+
+// gfx/authored_view.hp. Above the level's maximum aspect only, draw into the
+// centred rectangle: the render pass's load action has already cleared the
+// whole target to black, so the bars stay black. Below the cap (and with the
+// settings at 0, the default) this does nothing and the full-target viewport
+// set just before it stands. Metal's origin is top-left, GL's bottom-left; the
+// rectangle is full height and centred, so the numbers are the same.
+static void
+ApplyAuthoredViewport(id<MTLRenderCommandEncoder> enc, NSUInteger width, NSUInteger height)
+{
+    const wfview::View view = wfview::current((int)width, (int)height);
+    if (!view.pillarbox || !enc) return;
+    MTLViewport vp;
+    vp.originX = (double)view.x; vp.originY = 0.0;
+    vp.width   = (double)view.width; vp.height = (double)view.height;
+    vp.znear   = 0.0; vp.zfar = 1.0;
+    [enc setViewport:vp];
+    MTLScissorRect r;
+    r.x = (NSUInteger)view.x; r.y = 0;
+    r.width = (NSUInteger)view.width; r.height = (NSUInteger)view.height;
+    [enc setScissorRect:r];
+}
 
 namespace
 {
@@ -1068,6 +1092,7 @@ bool BeginFrame(int width, int height)
     vp.znear   = 0.0;
     vp.zfar    = 1.0;
     [sOffscreen.enc setViewport:vp];
+    ApplyAuthoredViewport(sOffscreen.enc, (NSUInteger)width, (NSUInteger)height);
 
     sMetalBackend.SetCurrentEncoder(sOffscreen.enc);
     return true;
@@ -1173,6 +1198,7 @@ bool BeginFrameToLayer(void* caMetalLayer, int width, int height)
     vp.width   = (double)width; vp.height = (double)height;
     vp.znear   = 0.0; vp.zfar = 1.0;
     [sOffscreen.enc setViewport:vp];
+    ApplyAuthoredViewport(sOffscreen.enc, (NSUInteger)width, (NSUInteger)height);
 
     sMetalBackend.SetCurrentEncoder(sOffscreen.enc);
     return true;
@@ -1331,6 +1357,7 @@ bool BeginFrameToLayer(void* caMetalLayer, int /*width*/, int /*height*/)
     vp.width   = (double)w; vp.height = (double)h;
     vp.znear   = 0.0; vp.zfar = 1.0;
     [sIosEnc setViewport:vp];
+    ApplyAuthoredViewport(sIosEnc, w, h);
 
     sMetalBackend.SetCurrentEncoder(sIosEnc);
     return true;

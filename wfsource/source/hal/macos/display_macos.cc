@@ -19,6 +19,7 @@
 #include <hal/hal.h>
 #include <memory/memory.hp>
 #include <gfx/renderer_backend.hp>
+#include <gfx/authored_view.hp>
 #include <gfx/metal/metal_offscreen.h>
 #include <hal/macos/window_macos.h>
 
@@ -204,6 +205,18 @@ Display::RenderBegin()
     }
     s_lastDrawableW = w;
     s_lastDrawableH = h;
+
+    // gfx/authored_view.hp. The constructor set today's 60 degrees and the
+    // drawable aspect once; while a level (or a runtime argument) sets an
+    // authored or maximum aspect, the projection follows the drawable every
+    // frame. With both 0 nothing here runs, so the default path is unchanged.
+    static bool viewApplied = false;
+    if (wfview::active() || viewApplied)
+    {
+        const wfview::View view = wfview::current(w, h);
+        RendererBackendGet().SetProjection(view.verticalFov, view.aspect, 1.0f, 1000.0f);
+        viewApplied = wfview::active();
+    }
 
     RendererBackendGet().SetLightingEnabled(true);
     RendererBackendGet().ResetModelView();
