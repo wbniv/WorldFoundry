@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/dc27d780) | Plan: a tank shell is not covered by the content rule |
 | [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/ecc095dd) | Plan: Gulf of Thailand Reef in two visual styles |
 | [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/a0c95dda) | Plan: Gulf of Thailand Reef tank, A3 poster and DFRM v2 |
 
 <!--history-meta v1
+dc27d780	author	Will Norris
+dc27d780	added	5
+dc27d780	deleted	4
+dc27d780	files	1
+dc27d780	body	Will queried the plan citing his content rule against reusing the\nexisting tank shell. A shell (glass, colliders, cameras) is not tank\ncontents, so reuse is allowed; D4 now recommends the new 60 cm-deep\nshell on its merits (the old one is 33 cm deep, too shallow for an\narch and a cave).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSDDhrLioJf35p1WRH
 ecc095dd	author	Will Norris
 ecc095dd	added	131
 ecc095dd	deleted	28
