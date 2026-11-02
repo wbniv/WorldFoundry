@@ -257,6 +257,48 @@ def test_frame_check_passes_the_authored_frame_and_fails_a_cut_one(tmp_path):
     assert chapter.frame_diff_pct(zoomed, ref, keep) > 5 * chapter.FRAME_CHECK_MAX_PCT
 
 
+def _shift(px, w, h, dx, dy, fill=(40, 40, 40)):
+    """px moved by (dx, dy): out[x, y] = px[x - dx, y - dy]; uncovered pixels get `fill`."""
+    out = bytearray(bytes(fill) * (w * h))
+    for y in range(h):
+        sy = y - dy
+        if not 0 <= sy < h:
+            continue
+        for x in range(w):
+            sx = x - dx
+            if 0 <= sx < w:
+                out[(y * w + x) * 3:(y * w + x) * 3 + 3] = px[(sy * w + sx) * 3:(sy * w + sx) * 3 + 3]
+    return out
+
+
+def test_frame_alignment_absorbs_one_pixel_and_hides_no_real_mismatch():
+    fw, fh, ref = chapter.read_png(chapter.FIXTURE)
+    keep = chapter.band_mask((0, 0, fw, fh), [], (fw, fh))
+    limit = chapter.FRAME_CHECK_MAX_PCT
+    # One pixel off (the harness registration of run 6ae806b1's iPad band): edges light up
+    # unaligned; the search finds the offset back and the frame matches.
+    one = _shift(ref, fw, fh, 1, -1)
+    assert chapter.frame_diff_pct(one, ref, keep) > 1.0
+    pct, offset = chapter.frame_diff_aligned(one, ref, keep, (fw, fh))
+    assert pct <= 0.5 and offset == (1, -1)
+    # The same frame needs no offset.
+    assert chapter.frame_diff_aligned(ref, ref, keep, (fw, fh)) == (0.0, (0, 0))
+    # Real mismatches stay far above the limit with the search.
+    for dx, dy in ((10, 0), (0, 10), (-10, 0), (7, 7)):
+        pct, _ = chapter.frame_diff_aligned(_shift(ref, fw, fh, dx, dy), ref, keep, (fw, fh))
+        assert pct > limit, (dx, dy, pct)
+    cw = round(fw * 0.75)                                  # the 4:3 frame with its sides cut
+    cw_, ch_, cut = chapter.crop(fw, fh, ref, (fw - cw) // 2, 0, cw, fh)
+    pct, _ = chapter.frame_diff_aligned(chapter.resize_box(cw_, ch_, cut, fw, fh), ref, keep, (fw, fh))
+    assert pct > 5 * limit
+    flipped = bytearray()                                  # another picture: the frame upside down
+    for y in reversed(range(fh)):
+        flipped += ref[y * fw * 3:(y + 1) * fw * 3]
+    assert chapter.frame_diff_aligned(flipped, ref, keep, (fw, fh))[0] > 5 * limit
+    grey = bytearray([90, 90, 90]) * (fw * fh)             # nothing drawn
+    assert chapter.frame_diff_aligned(grey, ref, keep, (fw, fh))[0] > 5 * limit
+
+
 def test_band_mask_drops_the_hud_and_the_frame_counter():
     keep = chapter.band_mask((0, 0, 480, 270), [(0, 200, 60, 260)], (480, 270))
     assert not keep[230 * 480 + 30] and not keep[269 * 480 + 479] and keep[100 * 480 + 240]

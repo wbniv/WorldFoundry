@@ -451,6 +451,43 @@ def frame_diff_pct(a, b, keep: list[bool], threshold: int = FRAME_DIFF_THRESHOLD
     return round(100.0 * bad / max(1, n), 2)
 
 
+FRAME_ALIGN_PX = 1   # the alignment search: +-1 pixel at 480 x 270 (about 0.2 % of the width)
+
+
+def frame_diff_aligned(a, b, keep: list[bool], size=FIXTURE_SIZE, search: int = FRAME_ALIGN_PX,
+                       threshold: int = FRAME_DIFF_THRESHOLD) -> tuple[float, tuple[int, int]]:
+    """frame_diff_pct at the best whole-pixel offset of `a` against `b` within +-search,
+    and that offset (dx, dy), comparing a at (x + dx, y + dy) with b at (x, y): the lowest
+    percentage wins, ties to the smaller offset. Pixels that offset pushes off
+    `a` are not compared; `keep` is in `b`'s coordinates.
+
+    Why: the band is cut from a simulator screenshot (app crop, rotate or band, a third-
+    size resample) and the fixture from a Chromecast capture, and the two land up to a
+    pixel apart at 480 x 270. Every edge in the scene then differs along a one-pixel line:
+    run 6ae806b1's iPad band measured 5.79 % unaligned and 4.18 % one pixel up. A real
+    mismatch does not hide in one pixel: a 10-pixel shift, the 4:3 frame with its sides
+    cut, or another room all stay far above the limit (tests/test_ios_sim_chapter.py)."""
+    tw, th = size
+    best = None
+    for dy in range(-search, search + 1):
+        for dx in range(-search, search + 1):
+            n = bad = 0
+            for y in range(max(0, -dy), min(th, th - dy)):
+                row, srow = y * tw, (y + dy) * tw
+                for x in range(max(0, -dx), min(tw, tw - dx)):
+                    i = row + x
+                    if not keep[i]:
+                        continue
+                    o, s = i * 3, (srow + x + dx) * 3
+                    n += 1
+                    if max(abs(a[s] - b[o]), abs(a[s + 1] - b[o + 1]), abs(a[s + 2] - b[o + 2])) > threshold:
+                        bad += 1
+            pct = round(100.0 * bad / max(1, n), 2)
+            if best is None or pct < best[0] or (pct == best[0] and abs(dx) + abs(dy) < sum(map(abs, best[1]))):
+                best = (pct, (dx, dy))
+    return best
+
+
 def outline(w: int, h: int, px, rect, colour=(255, 64, 160), width: int = 2) -> bytearray:
     out = bytearray(px)
     x, y, rw, rh = rect
@@ -700,11 +737,13 @@ def authored_frame(label: str, text: str, shots: dict, out: Path) -> dict:
         vw, vh, t, l, b, rt, cell = (float(x) for x in lm.groups())
         rects = hud_rects(vw, vh, t, l, b, rt, cell, w / vw)
     keep = band_mask(band, rects, (fw, fh))
-    r["frame_check_pct"] = frame_diff_pct(small, ref, keep)
+    r["frame_check_unaligned_pct"] = frame_diff_pct(small, ref, keep)
+    r["frame_check_pct"], r["frame_check_offset"] = frame_diff_aligned(small, ref, keep, (fw, fh))
     r["frame_check_compared_pct"] = round(100.0 * sum(keep) / len(keep), 1)
     log(f"{label}: FRAME CHECK {r['frame_check_pct']} % of compared pixels differ by more than "
-        f"{FRAME_DIFF_THRESHOLD} (max {FRAME_CHECK_MAX_PCT} %), {r['frame_check_compared_pct']} % compared, "
-        f"crop {kind} verified={r['crop_ok']}")
+        f"{FRAME_DIFF_THRESHOLD} (max {FRAME_CHECK_MAX_PCT} %) at offset {r['frame_check_offset']} "
+        f"(+-{FRAME_ALIGN_PX} px search; {r['frame_check_unaligned_pct']} % unaligned), "
+        f"{r['frame_check_compared_pct']} % compared, crop {kind} verified={r['crop_ok']}")
     return r
 
 
