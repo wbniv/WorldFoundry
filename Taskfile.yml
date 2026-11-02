@@ -655,6 +655,11 @@ tasks:
       WF_CC_APK_ARGS: '{{.CLI_ARGS}}'
       WF_CC_STAGE: '{{.STAGE | default ""}}'
       WF_CC_INTERACTIVE: '{{.INTERACTIVE | default ""}}'
+      WF_CC_RECORD: '{{.RECORD | default ""}}'
+      WF_CC_PANEL: '{{.PANEL | default ""}}'
+      WF_CC_KEYS: '{{.KEYS | default ""}}'
+      WF_CC_MILLISECONDS: '{{.MILLISECONDS | default ""}}'
+      WF_CC_SAMPLE: '{{.SAMPLE | default ""}}'
       WF_CC_REQUIRE_ABI: '{{.REQUIRE_ABI | default ""}}'
       WF_CC_WARMUP: '{{.WARMUP | default ""}}'
       WF_CC_RUNS: '{{.RUNS | default ""}}'
@@ -848,6 +853,41 @@ tasks:
     env: *chromecast_env
     cmds:
       - python3 scripts/chromecast.py task cancel
+
+  chromecast:input:frame:
+    desc: "Capture one frame from an owned interactive record JOB (start it with INTERACTIVE=true PANEL=require-hidden)"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task input-frame
+
+  chromecast:input:sample:
+    desc: "Read PID and total PSS inside an owned record JOB with RECORD=false"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task input-sample
+
+  chromecast:input:hold:
+    desc: "Hold 1-4 TV KEYS for MILLISECONDS in an owned interactive record JOB"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task input-hold
+
+  chromecast:input:finish:
+    desc: "End an owned interactive record JOB now and keep its video (a cancel discards the recording)"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task input-finish
+
+  chromecast:input:timeline:
+    desc: "Read an owned interactive record JOB's input timeline"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task input-timeline
 
   chromecast-aquarium:
     desc: "Compatibility alias: use task chromecast:check APP=aquarium DEVICE=..."
