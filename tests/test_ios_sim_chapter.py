@@ -177,3 +177,79 @@ def test_route_walks_into_the_love_portal_trigger_before_selecting():
         assert 0.45 <= d < 0.65
     for (_, s1, d1), (_, s2, _) in zip(entries, entries[1:]):
         assert s1 + d1 < s2, "presses must not overlap: a chord is a different input"
+
+
+# ─── authored frame (finding-your-way docs/plans/2026-11-02-fill-screen-keep-authored-frame.md) ───
+
+def test_expected_view_matches_the_plan_table():
+    for (w, h), (hfov, vfov) in {(1920, 1080): (91.5, 60.0), (2131, 1008): (101.3, 60.0),
+                                 (2622, 1206): (102.9, 60.0), (2752, 2064): (91.5, 75.2)}.items():
+        got = chapter.expected_view(w, h, 1.778, 2.25)
+        assert (round(got[0], 1), round(got[1], 1)) == (hfov, vfov), (w, h, got)
+    assert round(chapter.expected_view(2752, 2064, 0, 0)[1], 1) == 60.0      # off: today's 60 degrees
+    # over the cap: the 2.25 picture
+    assert [round(x, 1) for x in chapter.expected_view(3840, 1080, 1.778, 2.25)] == \
+        [round(x, 1) for x in chapter.expected_view(2250, 1000, 1.778, 2.25)]
+
+
+def test_launch_aspects():
+    assert chapter.launch_aspects(["--authored-aspect=1.778", "--maximum-aspect=2.25"]) == (1.778, 2.25)
+    assert chapter.launch_aspects([]) == (0.0, 0.0)
+
+
+def test_app_placement_ipad_band_and_iphone_rotation():
+    # Both screenshots have the surface's size transposed; the letterbox tells them apart.
+    assert chapter.app_placement(2064, 2752, 2752, 2064, True) == ("band", (0, 602, 2064, 1548))
+    assert chapter.app_placement(1206, 2622, 2622, 1206, False) == ("rotate", (0, 0, 2622, 1206))
+    assert chapter.app_placement(1920, 1080, 1920, 1080, False) == ("same", (0, 0, 1920, 1080))
+
+
+def test_rotate_ccw_turns_the_sideways_iphone_frame_upright():
+    # 2 x 1: A (red) left, B (blue) right. Counter-clockwise: B on top, A below.
+    w, h, px = chapter.rotate_ccw(2, 1, bytes([255, 0, 0, 0, 0, 255]))
+    assert (w, h) == (1, 2) and bytes(px) == bytes([0, 0, 255, 255, 0, 0])
+
+
+def test_authored_band_and_resize():
+    assert chapter.authored_band(2752, 2064, 1.778) == (0, 258, 2752, 1548)
+    assert chapter.authored_band(2622, 1206, 1.778) == (239, 0, 2144, 1206)
+    px = bytes([10, 20, 30]) * (4 * 4)
+    assert bytes(chapter.resize_box(4, 4, px, 2, 2)) == bytes([10, 20, 30]) * 4
+
+
+def test_hud_rects_mirror_the_touch_layout():
+    # iPad: "touch layout 1376x1032 pt, safe {0,0,25,0}, cell 72.0 pt", surface 2752 x 2064.
+    dpad, ab = chapter.hud_rects(1376, 1032, 0, 0, 25, 0, 72.0, 2.0)
+    assert dpad == (24.0, (1032 - 25 - 12 - 216) * 2, (12 + 216) * 2, (1032 - 25 - 12) * 2)
+    s = 72.0 * 120 / 66
+    assert ab == ((1376 - 12 - 2 * s) * 2, (1032 - 25 - 12 - s) * 2, (1376 - 12) * 2, (1032 - 25 - 12) * 2)
+
+
+def test_frame_check_passes_the_authored_frame_and_fails_a_cut_one(tmp_path):
+    fw, fh, ref = chapter.read_png(chapter.FIXTURE)
+    assert (fw, fh) == chapter.FIXTURE_SIZE
+    # An "iPad after" frame: the fixture with extra rows above and below (4:3 overall).
+    extra = (round(fw / (4 / 3)) - fh) // 2
+    w, h = fw, fh + 2 * extra
+    px = bytearray([40, 40, 40]) * (w * extra) + bytearray(ref) + bytearray([40, 40, 40]) * (w * extra)
+    band = chapter.authored_band(w, h, 1.778)
+    bw, bh, bpx = chapter.crop(w, h, px, *band)
+    small = chapter.resize_box(bw, bh, bpx, fw, fh)
+    keep = chapter.band_mask(band, [], (fw, fh))
+    assert chapter.frame_diff_pct(small, ref, keep) <= 1.0
+    # An "iPad today" frame: the middle three quarters of the width, stretched back: a crop.
+    cw = round(fw * 0.75)
+    cw_, ch_, cut = chapter.crop(fw, fh, ref, (fw - cw) // 2, 0, cw, fh)
+    zoomed = chapter.resize_box(cw_, ch_, cut, fw, fh)
+    assert chapter.frame_diff_pct(zoomed, ref, keep) > 5 * chapter.FRAME_CHECK_MAX_PCT
+
+
+def test_band_mask_drops_the_hud_and_the_frame_counter():
+    keep = chapter.band_mask((0, 0, 480, 270), [(0, 200, 60, 260)], (480, 270))
+    assert not keep[230 * 480 + 30] and not keep[269 * 480 + 479] and keep[100 * 480 + 240]
+
+
+def test_row_mean_and_outline():
+    px = bytearray(3 * 4 * 4)
+    out = chapter.outline(4, 4, px, (0, 0, 4, 4), colour=(255, 255, 255), width=1)
+    assert chapter.row_mean(4, out, 0, 1) == 255 and chapter.row_mean(4, out, 1, 3) < 255

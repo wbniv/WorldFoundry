@@ -49,6 +49,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -66,6 +67,7 @@ BUNDLE_ID = "org.worldfoundry.wf-game"
 
 # Seconds after launch; see the module docstring.
 CARD_AT = 20.0
+OPENING_AT = 24.0     # the Temple opening: card closed (A at 22), before the walk (27)
 FIRE_AT = (25.0, 26.0)
 PORTAL_AT = 33.0
 LOVE_AT = 39.0
@@ -89,6 +91,33 @@ TOUCH_SCRIPT = "a@22+0.5,up@27+2,up@29.3+3.2,a@33.4+0.5,a@35.5+0.5"
 # accumulated frame time (fy-input, each frame's share clamped to 0.05 s), so
 # 0.5 s stays a short press.
 FIRE_BLOB_MIN = 20   # run 1, iPhone: the brazier's cluster was 60 pixels at 471x1024
+
+# The authored frame (finding-your-way docs/plans/2026-11-02-fill-screen-keep-authored-
+# frame.md). FYW_LAUNCH_ARGS (codemagic.yaml) is passed to the app as launch arguments,
+# after the bundled wf_args.txt, e.g. "--authored-aspect=1.778 --maximum-aspect=2.25" to
+# turn the view on for the published v0.11 level, which predates the level settings.
+# With an authored aspect given, the VIEW line and the FRAME CHECK are part of OK.
+LAUNCH_ARGS = os.environ.get("FYW_LAUNCH_ARGS", "").split()
+FIXTURE = REPO / "ci-fixtures" / "finding-your-way" / "temple-opening-cast1-480x270.png"
+FIXTURE_SIZE = (480, 270)
+FRAME_SCALE = 3          # screenshots are resampled to a third before the pure-Python work
+FRAME_DIFF_THRESHOLD = 24
+# Measured, not guessed (2026-11-02), on run 6ae72785's frames (before this change) with
+# this pipeline (screenshot resampled to a third, cropped, area-averaged to 480 x 270),
+# HUD and frame counter masked, any channel more than 24 apart:
+#   iPhone 17 Pro Temple opening (its 2.174 screen already shows the authored frame at 60
+#   degrees, so its central 16:9 band IS the authored frame): 2.33 % and 2.42 % (two frames
+#   a second apart); 0.62 % and 0.72 % when the same frames are box-downscaled from full
+#   resolution, so most of the difference is the third-size resample, not the scene;
+#   iPad Temple opening today (sides cut): 64.7 %.
+# The Cast1-vs-Cast2 floor on Android GL is about 0.4 %; Metal on a simulator, the HUD's
+# edges, the resample and the goddess's animation add the rest. 6 % is 2.5 times the
+# measured match and a tenth of the cut frame. The after run reports the measured value.
+FRAME_CHECK_MAX_PCT = 6.0
+SURFACE_LINE = re.compile(r"BITMAP_TEXT .*?surface=(\d+)x(\d+)")
+TOUCH_LAYOUT = re.compile(r"touch layout ([\d.]+)x([\d.]+) pt, safe \{([-\d.]+),([-\d.]+),([-\d.]+),([-\d.]+)\}, "
+                          r"cell ([\d.]+) pt")
+VIEW_LINE = re.compile(r"VIEW authored=([\d.]+) screen=([\d.]+) hfov=([\d.]+) vfov=([\d.]+)")
 
 ZFORTH_ERROR = re.compile(r"zforth[: ].*\b(error|unknown|failed)\b")
 TEXTURE_SLOT_ERROR = "does not fit its"
@@ -264,9 +293,184 @@ def log_findings(text: str) -> dict:
 
 
 def device_ok(v: dict) -> bool:
-    return (v["install"] and v["launch"] and v["alive_20s"] and v["alive_end"]
-            and v["wf_args"] > 0 and v["room_render"] and not v["zforth_errors"]
-            and not v["texture_slot_error"] and v["fps_check"] and v["fire_blob_pixels"] >= FIRE_BLOB_MIN)
+    ok = (v["install"] and v["launch"] and v["alive_20s"] and v["alive_end"]
+          and v["wf_args"] > 0 and v["room_render"] and not v["zforth_errors"]
+          and not v["texture_slot_error"] and v["fps_check"] and v["fire_blob_pixels"] >= FIRE_BLOB_MIN)
+    if v.get("authored_expected"):
+        ok = ok and bool(v.get("view_ok")) and bool(v.get("crop_ok")) \
+            and v.get("frame_check_pct") is not None and v["frame_check_pct"] <= FRAME_CHECK_MAX_PCT
+    return ok
+
+
+# ─── authored frame: VIEW line, app crop, FRAME CHECK (host-tested) ────────
+
+def launch_aspects(args: list[str]) -> tuple[float, float]:
+    """The --authored-aspect / --maximum-aspect values among launch arguments (0 = off)."""
+    a = m = 0.0
+    for arg in args:
+        if arg.startswith("--authored-aspect="): a = float(arg.split("=", 1)[1])
+        if arg.startswith("--maximum-aspect="): m = float(arg.split("=", 1)[1])
+    return a, m
+
+
+def expected_view(w: int, h: int, authored: float, maximum: float) -> tuple[float, float]:
+    """(hfov, vfov) in degrees: a mirror of gfx/authored_view.hp's view()."""
+    aspect = w / h
+    if maximum > 0 and aspect > maximum:
+        aspect = round(h * maximum) / h
+    vfov = 60.0
+    if authored > 0 and aspect < authored:
+        vfov = math.degrees(2 * math.atan(math.tan(math.radians(30)) * authored / aspect))
+    hfov = math.degrees(2 * math.atan(math.tan(math.radians(vfov / 2)) * aspect))
+    return hfov, vfov
+
+
+def app_placement(sw: int, sh: int, w: int, h: int, letterboxed: bool):
+    """Where the landscape app (surface w x h) sits in a simulator screenshot sw x sh:
+    ('same', rect); ('band', rect) when the landscape app is letterboxed across a portrait
+    screenshot (the iPad: 2064 x 2752 holds a 2064 x 1548 band); or ('rotate', rect) when
+    the screenshot is the app turned a quarter (the iPhone). The iPad's and the iPhone's
+    screenshots both have the surface's size transposed, so the caller says which one it
+    is by looking for the black letterbox (`letterboxed`). rect = (x, y, width, height) in
+    screenshot pixels, after any rotation."""
+    if (sw, sh) == (w, h):
+        return "same", (0, 0, sw, sh)
+    if letterboxed or (sw, sh) != (h, w):
+        bh = round(h * sw / w)
+        return "band", (0, (sh - bh) // 2, sw, bh)
+    return "rotate", (0, 0, sh, sw)
+
+
+def rotate_ccw(w: int, h: int, px) -> tuple[int, int, bytearray]:
+    """A quarter turn counter-clockwise (what makes the iPhone's sideways screenshot upright)."""
+    out = bytearray(w * h * 3)
+    for y in range(h):
+        for x in range(w):
+            o = ((w - 1 - x) * h + y) * 3      # new size h x w: (x', y') = (y, w - 1 - x)
+            i = (y * w + x) * 3
+            out[o:o + 3] = px[i:i + 3]
+    return h, w, out
+
+
+def crop(w: int, h: int, px, x: int, y: int, cw: int, ch: int) -> tuple[int, int, bytearray]:
+    out = bytearray()
+    for row in range(y, y + ch):
+        out += px[(row * w + x) * 3:(row * w + x + cw) * 3]
+    return cw, ch, out
+
+
+def _area_weights(n: int, tn: int):
+    """For each of tn target cells over n source cells: [(source index, weight), ...] with
+    the weights the exact overlap fractions (they sum to 1)."""
+    out, scale = [], n / tn
+    for t in range(tn):
+        a, b = t * scale, (t + 1) * scale
+        cells, i = [], int(a)
+        while i < n and i < b:
+            w = min(b, i + 1) - max(a, i)
+            if w > 1e-9:
+                cells.append((i, w / scale))
+            i += 1
+        out.append(cells)
+    return out
+
+
+def resize_box(w: int, h: int, px, tw: int, th: int) -> bytearray:
+    """Exact area-average resize (separable): what PIL's BOX filter does, so a downscaled
+    simulator frame and the box-downscaled Cast1 fixture blur the same way."""
+    wx, wy = _area_weights(w, tw), _area_weights(h, th)
+    rows = []
+    for y in range(h):
+        base = y * w * 3
+        row = [0.0] * (tw * 3)
+        for tx, cells in enumerate(wx):
+            r = g = b = 0.0
+            for i, f in cells:
+                o = base + i * 3
+                r += px[o] * f; g += px[o + 1] * f; b += px[o + 2] * f
+            row[tx * 3], row[tx * 3 + 1], row[tx * 3 + 2] = r, g, b
+        rows.append(row)
+    out = bytearray(tw * th * 3)
+    for ty, cells in enumerate(wy):
+        o = ty * tw * 3
+        for k in range(tw * 3):
+            v = 0.0
+            for i, f in cells:
+                v += rows[i][k] * f
+            out[o + k] = min(255, int(v + 0.5))
+    return out
+
+
+def authored_band(w: int, h: int, authored: float) -> tuple[int, int, int, int]:
+    """The central authored-aspect part of a w x h frame: the authored frame."""
+    if w / h > authored:
+        bw = round(h * authored)
+        return (w - bw) // 2, 0, bw, h
+    bh = round(w / authored)
+    return 0, (h - bh) // 2, w, bh
+
+
+def hud_rects(view_w: float, view_h: float, top: float, left: float, bottom: float, right: float,
+              cell: float, scale: float) -> list[tuple[float, float, float, float]]:
+    """The touch HUD's D-pad and A/B block in surface pixels (x0, y0, x1, y1): a mirror of
+    wf_touch::ComputeLayout (hal/ios/touch_pad.cc) from the logged layout line."""
+    m, s = 12.0, cell * 120.0 / 66.0
+    dpad = (left + m, view_h - bottom - m - 3 * cell, left + m + 3 * cell, view_h - bottom - m)
+    ab = (view_w - right - m - 2 * s, view_h - bottom - m - s, view_w - right - m, view_h - bottom - m)
+    return [tuple(c * scale for c in r) for r in (dpad, ab)]
+
+
+def band_mask(band: tuple[int, int, int, int], rects, size=FIXTURE_SIZE) -> list[bool]:
+    """True where the FRAME CHECK compares: everything but the HUD rectangles (plus a two-
+    pixel margin) and the frame counter in the bottom-right corner (60 x 16 at 480 x 270)."""
+    tw, th = size
+    bx, by, bw, bh = band
+    keep = [True] * (tw * th)
+    boxes = []
+    for x0, y0, x1, y1 in rects:
+        boxes.append((int((x0 - bx) * tw / bw) - 2, int((y0 - by) * th / bh) - 2,
+                      int((x1 - bx) * tw / bw) + 3, int((y1 - by) * th / bh) + 3))
+    boxes.append((tw - 60, th - 16, tw, th))
+    for x0, y0, x1, y1 in boxes:
+        for y in range(max(0, y0), min(th, y1)):
+            for x in range(max(0, x0), min(tw, x1)):
+                keep[y * tw + x] = False
+    return keep
+
+
+def frame_diff_pct(a, b, keep: list[bool], threshold: int = FRAME_DIFF_THRESHOLD) -> float:
+    """Percent of compared pixels where any channel differs by more than `threshold`."""
+    n = bad = 0
+    for i, k in enumerate(keep):
+        if not k:
+            continue
+        o = i * 3
+        n += 1
+        if max(abs(a[o] - b[o]), abs(a[o + 1] - b[o + 1]), abs(a[o + 2] - b[o + 2])) > threshold:
+            bad += 1
+    return round(100.0 * bad / max(1, n), 2)
+
+
+def outline(w: int, h: int, px, rect, colour=(255, 64, 160), width: int = 2) -> bytearray:
+    out = bytearray(px)
+    x, y, rw, rh = rect
+    for t in range(width):
+        for xx in range(x, x + rw):
+            for yy in (y + t, y + rh - 1 - t):
+                if 0 <= xx < w and 0 <= yy < h:
+                    out[(yy * w + xx) * 3:(yy * w + xx) * 3 + 3] = bytes(colour)
+        for yy in range(y, y + rh):
+            for xx in (x + t, x + rw - 1 - t):
+                if 0 <= xx < w and 0 <= yy < h:
+                    out[(yy * w + xx) * 3:(yy * w + xx) * 3 + 3] = bytes(colour)
+    return out
+
+
+def row_mean(w: int, px, y0: int, y1: int) -> float:
+    if y1 <= y0:
+        return 0.0
+    seg = px[y0 * w * 3:y1 * w * 3]
+    return sum(seg) / max(1, len(seg))
 
 
 # ─── run ────────────────────────────────────────────────────────────────────
@@ -328,7 +532,7 @@ def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
                SIMCTL_CHILD_WF_TOUCH_SCRIPT=TOUCH_SCRIPT)
     start_wall = time.time()
     r = sh(["xcrun", "simctl", "launch", "--terminate-running-process",
-            f"--stdout={stdout_f}", f"--stderr={stderr_f}", udid, BUNDLE_ID], env=env)
+            f"--stdout={stdout_f}", f"--stderr={stderr_f}", udid, BUNDLE_ID, *LAUNCH_ARGS], env=env)
     log(r.stdout.strip() + r.stderr.strip())
     t0 = time.monotonic()
     v["launch"] = r.returncode == 0
@@ -353,6 +557,7 @@ def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
     wait_until(CARD_AT)
     v["alive_20s"] = alive()
     card = snap("card")
+    wait_until(OPENING_AT); opening = snap("opening")
     wait_until(FIRE_AT[0]); fire1 = snap("fire-1")
     wait_until(FIRE_AT[1]); fire2 = snap("fire-2")
     wait_until(PORTAL_AT); portal = snap("portal")
@@ -399,6 +604,7 @@ def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
         + "=== stderr ===\n" + (stderr_f.read_text(errors="replace") if stderr_f.exists() else "")
         + "=== unified log (wf_game, last 3m) ===\n" + ulog)
     v |= log_findings(text + "\n" + ulog)
+    v |= authored_frame(label, text, {"opening": opening, "card": card, "portal": portal, "love": love}, out)
     for f in Path.home().glob("Library/Logs/DiagnosticReports/wf_game*"):
         if f.stat().st_mtime >= start_wall:
             shutil.copy(f, out / f"ios-chapter-crash-{label}-{f.name}")
@@ -406,6 +612,90 @@ def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
     sh(["xcrun", "simctl", "terminate", udid, BUNDLE_ID])
     sh(["xcrun", "simctl", "shutdown", udid])
     return v
+
+
+def app_frame(shot: Path, surface: tuple[int, int], out_png: Path):
+    """The app area of a simulator screenshot, upright, at a third of the surface size,
+    written to out_png. Returns (w, h, px, placement, verified)."""
+    small = shot.with_suffix(".third.png")
+    sw, sh_ = struct.unpack(">II", shot.read_bytes()[16:24])   # the PNG IHDR
+    subprocess.run(["sips", "--resampleHeightWidth", str(sh_ // FRAME_SCALE), str(sw // FRAME_SCALE),
+                    "-s", "format", "png", str(shot), "--out", str(small)],
+                   check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    w, h, px = read_png(small)
+    small.unlink()
+    W, H = surface
+    # Is it letterboxed? The rows above and below where a band would sit are black, and
+    # the band itself is not. That is also the check that the crop is right.
+    _, (_, by, _, bh) = app_placement(sw, sh_, W, H, True)
+    y3, ch3 = by // FRAME_SCALE, bh // FRAME_SCALE
+    outside = max(row_mean(w, px, 0, max(0, y3 - 2)), row_mean(w, px, min(h, y3 + ch3 + 2), h))
+    inside = row_mean(w, px, y3 + 2, y3 + ch3 - 2)
+    letterboxed = y3 > 4 and outside < 6 and inside > 20
+    kind, _ = app_placement(sw, sh_, W, H, letterboxed)
+    verified = True
+    if kind == "rotate":
+        w, h, px = rotate_ccw(w, h, px)
+    if kind == "band":
+        verified = letterboxed
+        w, h, px = crop(w, h, px, 0, y3, w, ch3)
+    verified = verified and abs(w / h - W / H) < 0.01
+    write_png(out_png, w, h, px)
+    return w, h, px, kind, verified
+
+
+def authored_frame(label: str, text: str, shots: dict, out: Path) -> dict:
+    """The authored-frame evidence: the VIEW line, the app-area crops, the outlined opening,
+    and the FRAME CHECK of its central authored band against the Cast1 fixture."""
+    authored, maximum = launch_aspects(LAUNCH_ARGS)
+    r = {"authored_expected": authored > 0, "view_line": None, "view_ok": None, "surface": None,
+         "crop": None, "crop_ok": None, "frame_check_pct": None, "frame_check_max_pct": FRAME_CHECK_MAX_PCT}
+    m = VIEW_LINE.search(text)
+    if m:
+        r["view_line"] = m.group(0)
+    sm = SURFACE_LINE.search(text)
+    if not sm:
+        log(f"{label}: no surface size in the log; no app crop")
+        return r
+    W, H = int(sm.group(1)), int(sm.group(2))
+    r["surface"] = [W, H]
+    hfov, vfov = expected_view(W, H, authored, maximum)
+    r["view_expected"] = f"screen={W / H:.3f} hfov={hfov:.1f} vfov={vfov:.1f}"
+    if m:
+        r["view_ok"] = (abs(float(m.group(2)) - W / H) < 0.001 and f"{float(m.group(3)):.1f}" == f"{hfov:.1f}"
+                        and f"{float(m.group(4)):.1f}" == f"{vfov:.1f}" and abs(float(m.group(1)) - authored) < 0.0005)
+    frames = {}
+    for tag, shot in shots.items():
+        if shot.exists():
+            try:
+                frames[tag] = app_frame(shot, (W, H), out / f"ios-chapter-{label}-{tag}-app.png")
+            except Exception as e:  # one bad frame must not lose the verdict
+                log(f"{label}: app crop of {tag} failed: {e}")
+    if "opening" not in frames:
+        return r
+    w, h, px, kind, verified = frames["opening"]
+    r["crop"], r["crop_ok"] = kind, verified and all(f[4] for f in frames.values())
+    if not FIXTURE.exists():
+        log(f"{label}: no fixture {FIXTURE}")
+        return r
+    fw, fh, ref = read_png(FIXTURE)
+    band = authored_band(w, h, authored or 16 / 9)
+    bw_, bh_, bpx = crop(w, h, px, *band)
+    small = resize_box(bw_, bh_, bpx, fw, fh)
+    write_png(out / f"ios-chapter-{label}-opening-band.png", fw, fh, small)
+    write_png(out / f"ios-chapter-{label}-opening-outlined.png", w, h, outline(w, h, px, band))
+    lm = TOUCH_LAYOUT.search(text)
+    rects = []
+    if lm:
+        vw, vh, t, l, b, rt, cell = (float(x) for x in lm.groups())
+        rects = hud_rects(vw, vh, t, l, b, rt, cell, w / vw)
+    keep = band_mask(band, rects, (fw, fh))
+    r["frame_check_pct"] = frame_diff_pct(small, ref, keep)
+    r["frame_check_compared_pct"] = round(100.0 * sum(keep) / len(keep), 1)
+    log(f"{label}: FRAME CHECK {r['frame_check_pct']} % of compared pixels differ by more than "
+        f"{FRAME_DIFF_THRESHOLD} (max {FRAME_CHECK_MAX_PCT} %), {r['frame_check_compared_pct']} % compared, "
+        f"crop {kind} verified={r['crop_ok']}")
+    return r
 
 
 def run(app: Path, out: Path) -> int:
@@ -434,6 +724,10 @@ def run(app: Path, out: Path) -> int:
               f"love_frame_diff={v['love_frame_diff']} "
               f"card_colours={v['card_colours']} "
               f"level_loaded_at={v['level_loaded_at']} touch_a={v['touch_a']} touch_up={v['touch_up']}")
+        print(f"  {v['label']} view: {v.get('view_line')} expected {v.get('view_expected')} ok={v.get('view_ok')}")
+        print(f"  {v['label']} FRAME CHECK: {v.get('frame_check_pct')} % (max {FRAME_CHECK_MAX_PCT} %, "
+              f"{'part of OK' if v.get('authored_expected') else 'informational'}), surface={v.get('surface')}, "
+              f"crop={v.get('crop')} verified={v.get('crop_ok')}")
         for line in v["zforth_errors"]:
             print(f"  zforth: {line}")
         print(f"IOS {v['label'].upper()}: {'OK' if ok else 'FAIL'}")
