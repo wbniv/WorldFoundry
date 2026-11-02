@@ -211,6 +211,7 @@ Display::RenderBegin()
     // authored or maximum aspect, the projection follows the drawable every
     // frame. With both 0 nothing here runs, so the default path is unchanged.
     static bool viewApplied = false;
+    wfview::report(w, h);   // the VIEW line, when it changes; a log only
     if (wfview::active() || viewApplied)
     {
         const wfview::View view = wfview::current(w, h);

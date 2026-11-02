@@ -106,6 +106,32 @@ int main()
     wfview::argumentOverrides() = {-1.0f, -1.0f};
     Check(Near(wfview::effective().authoredAspect, 1.5, 1e-6) && wfview::active(), "without arguments the level applies");
 
+    // The VIEW line follows the applied surface (regression: Codemagic build 6ae7e5ed,
+    // where a one-shot line at level load logged iOS's 800x600 fallback on the iPhone).
+    wfview::argumentOverrides() = {1.778f, 2.25f};
+    wfview::source() = "argument";
+    Check(wfview::report(800, 600), "report: the first view is logged");
+    Check(!wfview::report(800, 600), "report: an unchanged view is not logged again");
+    Check(wfview::report(2622, 1206), "report: the real surface, once known, is logged");
+    Check(!wfview::report(0, 0), "report: no surface, no line");
+    wfview::argumentOverrides() = {0.0f, 2.25f};
+    Check(wfview::report(2622, 1206), "report: a settings change is logged");
+    wfview::source() = "level";
+    Check(wfview::report(2622, 1206), "report: a source change is logged");
+    {
+        wfview::argumentOverrides() = {1.778f, 2.25f};
+        wfview::source() = "argument";
+        char line[256];
+        wfview::formatLine(line, sizeof line, 2622, 1206);
+        Check(std::strcmp(line, "VIEW authored=1.778 screen=2.174 hfov=102.9 vfov=60.0 maximum=2.250 "
+                                "surface=2622x1206 viewport=0,0,2622x1206 pillarbox=0 source=argument") == 0,
+              "formatLine: the iPhone 17 Pro line");
+        wfview::formatLine(line, sizeof line, 2752, 2064);
+        Check(std::strcmp(line, "VIEW authored=1.778 screen=1.333 hfov=91.5 vfov=75.2 maximum=2.250 "
+                                "surface=2752x2064 viewport=0,0,2752x2064 pillarbox=0 source=argument") == 0,
+              "formatLine: the iPad Pro 13 line");
+    }
+
     std::printf("authored_view_test: PASS (%d checks)\n", checks);
     return 0;
 }

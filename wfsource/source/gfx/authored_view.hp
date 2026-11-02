@@ -121,6 +121,50 @@ inline View current(int width, int height)
     return view(width, height, s.authoredAspect, s.maximumAspect);
 }
 
+// Where the effective settings came from, for the VIEW line: "default",
+// "level" or "argument". game/level.cc sets it when a level loads.
+inline const char*& source() { static const char* s = "default"; return s; }
+
+// Writes the VIEW line (no newline) for the view applied to a width x height
+// surface with the effective settings, for example on the iPad:
+//   VIEW authored=1.778 screen=1.333 hfov=91.5 vfov=75.2 maximum=2.250
+//        surface=2752x2064 viewport=0,0,2752x2064 pillarbox=0 source=argument
+inline int formatLine(char* buf, std::size_t n, int width, int height)
+{
+    const Settings s = effective();
+    const View v = view(width, height, s.authoredAspect, s.maximumAspect);
+    return std::snprintf(buf, n,
+        "VIEW authored=%.3f screen=%.3f hfov=%.1f vfov=%.1f maximum=%.3f surface=%dx%d "
+        "viewport=%d,%d,%dx%d pillarbox=%d source=%s",
+        s.authoredAspect, double(width) / double(height), v.HorizontalFov(), v.verticalFov,
+        s.maximumAspect, width, height, v.x, v.y, v.width, v.height, v.pillarbox ? 1 : 0, source());
+}
+
+// Logs the VIEW line when the view applied differs from the one last logged
+// (surface size, settings or source); true when it logged. Each projection site
+// calls it with the size it actually applies, so the line follows the real
+// surface. A level can load before the platform knows that size: on iOS the
+// first viewWillLayoutSubviews can land after it, and the size until then is
+// the Display's 800x600 fallback (Codemagic build 6ae7e5ed, iPhone 17 Pro).
+// A one-shot line at level load reported that fallback while the picture,
+// rebuilt on the next frame, was right.
+inline bool report(int width, int height)
+{
+    if (width <= 0 || height <= 0) return false;
+    static int lastW = 0, lastH = 0;
+    static Settings lastS{-1.0f, -1.0f};
+    static const char* lastSource = nullptr;
+    const Settings s = effective();
+    if (width == lastW && height == lastH && s.authoredAspect == lastS.authoredAspect &&
+        s.maximumAspect == lastS.maximumAspect && source() == lastSource)
+        return false;
+    lastW = width; lastH = height; lastS = s; lastSource = source();
+    char line[256];
+    formatLine(line, sizeof line, width, height);
+    std::fprintf(stderr, "%s\n", line);
+    return true;
+}
+
 // Parses "--authored-aspect=N" / "--maximum-aspect=N"; true when the argument
 // was one of them (a malformed or negative number is reported and ignored).
 inline bool parseArgument(const char* arg)

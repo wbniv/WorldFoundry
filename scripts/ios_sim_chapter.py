@@ -644,13 +644,23 @@ def app_frame(shot: Path, surface: tuple[int, int], out_png: Path):
     return w, h, px, kind, verified
 
 
+def last_view_line(text: str):
+    """The engine's last VIEW line. It logs one each time the applied view changes
+    (gfx/authored_view.hp, wfview::report), so an early line can carry a size the
+    platform had not settled yet; the last one is the view the screenshots show."""
+    m = None
+    for m in VIEW_LINE.finditer(text):
+        pass
+    return m
+
+
 def authored_frame(label: str, text: str, shots: dict, out: Path) -> dict:
     """The authored-frame evidence: the VIEW line, the app-area crops, the outlined opening,
     and the FRAME CHECK of its central authored band against the Cast1 fixture."""
     authored, maximum = launch_aspects(LAUNCH_ARGS)
     r = {"authored_expected": authored > 0, "view_line": None, "view_ok": None, "surface": None,
          "crop": None, "crop_ok": None, "frame_check_pct": None, "frame_check_max_pct": FRAME_CHECK_MAX_PCT}
-    m = VIEW_LINE.search(text)
+    m = last_view_line(text)
     if m:
         r["view_line"] = m.group(0)
     sm = SURFACE_LINE.search(text)

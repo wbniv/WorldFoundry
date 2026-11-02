@@ -51,6 +51,7 @@ IosUpdateProjection(int fallbackW, int fallbackH)
     const int w = (_halWindowWidth  > 0) ? _halWindowWidth  : fallbackW;
     const int h = (_halWindowHeight > 0) ? _halWindowHeight : fallbackH;
     const wfview::Settings settings = wfview::effective();
+    wfview::report(w, h);   // the VIEW line, when the applied view changes
     if (w == s_projW && h == s_projH &&
         settings.authoredAspect == s_projSettings.authoredAspect &&
         settings.maximumAspect == s_projSettings.maximumAspect) return;

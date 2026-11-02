@@ -640,18 +640,11 @@ Level::Level
         settings.maximumAspect  = wfprops::aspectSetting(_runtimeProperties, "Maximum aspect", maximumFound, viewError);
         if (!viewError.empty()) std::fprintf(stderr, "VIEW setting invalid: %s\n", viewError.c_str());
         wfview::levelSettings() = settings;
-        int sw = 0, sh = 0;
-        if (Display* display = Display::GetActive()) display->GetSurfaceSize(sw, sh);
-        if (sw <= 0 || sh <= 0) { sw = 1; sh = 1; }
-        const wfview::Settings e = wfview::effective();
-        const wfview::View v = wfview::view(sw, sh, e.authoredAspect, e.maximumAspect);
         const wfview::Settings& o = wfview::argumentOverrides();
         const bool fromArgs = o.authoredAspect >= 0.0f || o.maximumAspect >= 0.0f;
-        std::fprintf(stderr, "VIEW authored=%.3f screen=%.3f hfov=%.1f vfov=%.1f maximum=%.3f surface=%dx%d "
-                             "viewport=%d,%d,%dx%d pillarbox=%d source=%s\n",
-                     e.authoredAspect, double(sw) / double(sh), v.HorizontalFov(), v.verticalFov, e.maximumAspect,
-                     sw, sh, v.x, v.y, v.width, v.height, v.pillarbox ? 1 : 0,
-                     fromArgs ? "argument" : (authoredFound || maximumFound) ? "level" : "default");
+        wfview::source() = fromArgs ? "argument" : (authoredFound || maximumFound) ? "level" : "default";
+        // No VIEW line here: the surface may not be known yet (iOS). The projection
+        // sites log it through wfview::report() with the size they apply.
     }
     wfprops::host().bind(&_runtimeProperties);
     // Keep the Temple's optional stained-glass shaft in a script-visible mailbox.

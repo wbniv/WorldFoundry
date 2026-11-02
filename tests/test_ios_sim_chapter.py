@@ -192,6 +192,19 @@ def test_expected_view_matches_the_plan_table():
         [round(x, 1) for x in chapter.expected_view(2250, 1000, 1.778, 2.25)]
 
 
+def test_last_view_line_is_the_settled_view():
+    # Codemagic build 6ae7e5ed (iPhone 17 Pro): the level logged iOS's 800x600 fallback
+    # before UIKit laid out the view. The engine now logs each change; the last one counts.
+    log = ("VIEW authored=1.778 screen=1.333 hfov=91.5 vfov=75.2 maximum=2.250 surface=800x600 "
+           "viewport=0,0,800x600 pillarbox=0 source=argument\n"
+           "ROOM-RENDER scope=all-active source=default\n"
+           "VIEW authored=1.778 screen=2.174 hfov=102.9 vfov=60.0 maximum=2.250 surface=2622x1206 "
+           "viewport=0,0,2622x1206 pillarbox=0 source=argument\n")
+    m = chapter.last_view_line(log)
+    assert m and m.group(2) == "2.174" and m.group(3) == "102.9"
+    assert chapter.last_view_line("no view here") is None
+
+
 def test_launch_aspects():
     assert chapter.launch_aspects(["--authored-aspect=1.778", "--maximum-aspect=2.25"]) == (1.778, 2.25)
     assert chapter.launch_aspects([]) == (0.0, 0.0)

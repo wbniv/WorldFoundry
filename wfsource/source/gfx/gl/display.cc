@@ -902,6 +902,7 @@ Display::RenderBegin()
        // then draw into the centred rectangle (viewport plus scissor, so the
        // clear below and the frame stay inside it).
        const wfview::View view = wfview::current(suw, suh);
+       wfview::report(suw, suh);   // the VIEW line, when the applied view changes
        static bool scissoring = false;   // only undo what a pillarboxed frame did
        if (scissoring) { glDisable(GL_SCISSOR_TEST); scissoring = false; }
        glViewport(0, 0, suw, suh);
