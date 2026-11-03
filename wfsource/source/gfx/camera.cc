@@ -29,6 +29,7 @@
 #include <hal/platform.h>
 #include <gfx/rendmatt.hp>
 #include <gfx/renderer_backend.hp>
+#include <gfx/backface_cull.hp>
 #include <cpplib/libstrm.hp>
 
 #if   defined(__LINUX__) || defined(__ANDROID__)
@@ -50,6 +51,7 @@ RenderCamera::RenderCamera(ViewPort& viewPort ) : _viewPort(viewPort)
 	,_eyeAngle(Angle::Degree(SCALAR_CONSTANT(2.5)))
 	,_eyeDistance(SCALAR_CONSTANT(0.025))
 #endif
+	,_style()
 {
 	_viewPort.Validate();
 }
@@ -240,6 +242,12 @@ RenderCamera::RenderBegin()
                               _fogNear.AsFloat(),
                               _fogFar.AsFloat());
    RendererBackendGet().SetFogEnabled(true);
+
+   // Style shading: the eye-to-world matrix is the camera's own position, so
+   // S2 can find world x/y and up from eye-space positions and normals.
+   if (RBStyleShadingActive(_style))
+      WfMatrix34ToGL(_position, _style.eyeToWorld);
+   RendererBackendGet().SetStyleShading(_style);
 
 
 #if 0

@@ -30,6 +30,7 @@
 #include "camera.hp"
 #include "movecam.hp"
 #include "level.hp"
+#include <cstddef>
 
 //==============================================================================
                             
@@ -66,6 +67,21 @@ Camera::Camera( const SObjectStartupData* startupData ) :
 	// set camera defaults
 	Color color(Color::FromInt(getOad()->FoggingColor));
 	GetRenderCamera().SetFog( color, Scalar(getOad()->GetFoggingStartDistance()), Scalar(getOad()->GetFoggingCompleteDistance()) );
+
+	// Old cooked levels have shorter camera payloads. Only read the appended
+	// style fields when the complete extension is present in this object.
+	RBStyleShading style = {};
+	const int payloadSize = startupData->objectData->OADSize;
+	if (payloadSize >= 0 && size_t(payloadSize) >= offsetof(_Camera, ToonBands) + sizeof(getOad()->ToonBands))
+	{
+		style.absorb[0] = getOad()->GetWaterAbsorbR().AsFloat();
+		style.absorb[1] = getOad()->GetWaterAbsorbG().AsFloat();
+		style.absorb[2] = getOad()->GetWaterAbsorbB().AsFloat();
+		style.causticStrength = getOad()->GetCausticStrength().AsFloat();
+		style.causticScale = getOad()->GetCausticScale().AsFloat();
+		style.toonBands = getOad()->ToonBands;
+	}
+	GetRenderCamera().SetStyleShading(style);
 
 	// Create collision box for the Camera actor, since some handlers do collision checking
 	_physicalAttributes.SetColSpace( Vector3( SCALAR_CONSTANT(-0.1), SCALAR_CONSTANT(-0.1), SCALAR_CONSTANT(-0.1) ),
@@ -129,6 +145,7 @@ void
 Camera::update()
 {
 	DBSTREAM3( ccamera << "Camera::update:" << std::endl; )
+	GetRenderCamera().SetStyleTime(theLevel->LevelClock().Current().AsFloat());
     GetMovementManager().update(*this, theLevel->GetObjectList());
 	// This is a hack, because the Camera actor doesn't get run like other actors
 	GetWritablePhysicalAttributes().HasRunPredictPosition(false);

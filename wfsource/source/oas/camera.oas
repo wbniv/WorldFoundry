@@ -22,6 +22,15 @@ TYPEHEADER(Camera)
 	TYPEENTRYFIXED32(FoggingCompleteDistance,Complete Distance,FIXED32(0),FIXED32(1000),FIXED32(20))
 	PROPERTY_SHEET_FOOTER
 
+	PROPERTY_SHEET_HEADER(Style Shading,0)
+	TYPEENTRYFIXED32(WaterAbsorbR,Water Absorption Red,FIXED32(0),FIXED32(10),FIXED32(0))
+	TYPEENTRYFIXED32(WaterAbsorbG,Water Absorption Green,FIXED32(0),FIXED32(10),FIXED32(0))
+	TYPEENTRYFIXED32(WaterAbsorbB,Water Absorption Blue,FIXED32(0),FIXED32(10),FIXED32(0))
+	TYPEENTRYFIXED32(CausticStrength,Caustic Strength,FIXED32(0),FIXED32(1),FIXED32(0))
+	TYPEENTRYFIXED32(CausticScale,Caustic Scale,FIXED32(0),FIXED32(1000),FIXED32(0))
+	TYPEENTRYINT32(ToonBands,Toon Bands,0,16,0,"0 disables toon shading",SHOW_AS_NUMBER)
+	PROPERTY_SHEET_FOOTER
+
 TYPEFOOTER
 
 @*============================================================================

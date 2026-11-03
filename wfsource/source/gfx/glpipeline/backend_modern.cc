@@ -91,6 +91,16 @@ static const char* kVS =
     "uniform int   u_fog;\n"
     "uniform float u_fog_start;\n"
     "uniform float u_fog_end;\n"
+    // Style shading (S1-S3) is compiled in only while the camera has a style
+    // field on (WF_STYLE). Without it the preprocessed source is the
+    // pre-style shader token for token, so a level with every field at zero
+    // renders through the same program it always did.
+    "#ifdef WF_STYLE\n"
+    "out vec3 v_absorb;\n"     // S1: per-channel fog/absorption factor
+    "out vec3 v_caustic;\n"    // S2: world x, world y, world normal z
+    "uniform mat4 u_eye_to_world;\n"
+    "uniform vec3 u_absorb;\n"
+    "#endif\n"
     "void main()\n"
     "{\n"
     "    gl_Position = u_mvp * vec4(a_pos, 1.0);\n"
@@ -123,6 +133,25 @@ static const char* kVS =
     "    } else {\n"
     "        v_fog_factor = 1.0;\n"
     "    }\n"
+    "#ifdef WF_STYLE\n"
+    "    vec3 eye = (u_mv * vec4(a_pos, 1.0)).xyz;\n"
+    "    vec3 styleNormal = a_normal;\n"
+    "    if (u_static_compact != 0) {\n"
+    "        vec2 e = a_normal.xy;\n"
+    "        vec3 decoded = vec3(e, 1.0 - abs(e.x) - abs(e.y));\n"
+    "        if (decoded.z < 0.0) decoded.xy = (1.0 - abs(decoded.yx)) * sign(decoded.xy);\n"
+    "        styleNormal = decoded;\n"
+    "    }\n"
+    "    vec3 worldNormal = mat3(u_eye_to_world) * (mat3(u_mv) * styleNormal);\n"
+    "    float normalLength = length(worldNormal);\n"
+    "    v_caustic = vec3((u_eye_to_world * vec4(eye, 1.0)).xy,\n"
+    "                     normalLength > 0.0 ? worldNormal.z / normalLength : 0.0);\n"
+    // S1 replaces the linear fog: exp(-k d) per channel over the eye
+    // distance d. With k all zero it is the linear fog factor on every channel.
+    "    if (u_fog == 0) v_absorb = vec3(1.0);\n"
+    "    else if (u_absorb.r + u_absorb.g + u_absorb.b > 0.0) v_absorb = exp(-u_absorb * length(eye));\n"
+    "    else v_absorb = vec3(v_fog_factor);\n"
+    "#endif\n"
     "}\n";
 
 static const char* kFS =
@@ -142,9 +171,40 @@ static const char* kFS =
     "uniform int u_alpha_cutout;\n"
     "uniform int u_fog;\n"
     "uniform vec3 u_fog_color;\n"
+    "#ifdef WF_STYLE\n"
+    "in vec3 v_absorb;\n"
+    "in vec3 v_caustic;\n"
+    "uniform int u_toon_bands;\n"
+    "uniform vec3 u_caustic;\n"   // strength, radians per world unit, level time
+    "#define WF_LIT style_lit\n"
+    "#define WF_FOG_FACTOR v_absorb\n"
+    "#else\n"
+    "#define WF_LIT v_lit\n"
+    "#define WF_FOG_FACTOR v_fog_factor\n"
+    "#endif\n"
     "void main()\n"
     "{\n"
-    "    vec4 c = vec4(v_color * v_lit, 1.0);\n"
+    "#ifdef WF_STYLE\n"
+    "    vec3 style_lit = v_lit;\n"
+    // S3: quantise brightness y = max channel to n bands (the darkest band is
+    // 1/n, never black), scaling all three channels so the hue is kept.
+    "    if (u_toon_bands > 0) {\n"
+    "        float y = max(v_lit.r, max(v_lit.g, v_lit.b));\n"
+    "        float n = float(u_toon_bands);\n"
+    "        if (y > 0.0) style_lit *= clamp(floor(y * n + 0.5), 1.0, n) / (n * y);\n"
+    "    }\n"
+    // S2: a moving web of light on upward faces, from world x/y and level
+    // time, dimmed by the green absorption (S1) on the way to the eye.
+    "    if (u_fog != 0 && u_caustic.x > 0.0 && v_caustic.z > 0.0) {\n"
+    "        vec2 p = v_caustic.xy * u_caustic.y;\n"
+    "        float t = u_caustic.z;\n"
+    "        float s = sin(p.x + t) + sin(p.y * 1.31 - t * 0.83)\n"
+    "                + sin((p.x + p.y) * 0.71 + t * 1.13) + sin((p.x - p.y) * 0.87 - t * 0.61);\n"
+    "        float web = pow(max(0.0, 1.0 - abs(s) * 0.5), 6.0);\n"
+    "        style_lit += vec3(u_caustic.x * web * v_caustic.z * v_absorb.g);\n"
+    "    }\n"
+    "#endif\n"
+    "    vec4 c = vec4(v_color * WF_LIT, 1.0);\n"
     "    if (WF_TEX_MODE != 0) {\n"
     "        float is_white = step(0.99, min(v_color.r, min(v_color.g, v_color.b)));\n"
     "        vec4 texel = texture(u_tex, v_uv);\n"
@@ -159,9 +219,9 @@ static const char* kFS =
     "#else\n"
     "        vec3 albedo = v_palette_dark.a > 0.5 ? mix(v_palette_dark.rgb, v_palette_light, clamp((texel.r - 0.08) / 0.85, 0.0, 1.0)) : ((WF_TEX_MODE & 2) != 0 ? texel.rgb * v_color : mix(v_color, texel.rgb, is_white));\n"
     "#endif\n"
-    "        c = vec4(albedo * v_lit, 1.0);\n"
+    "        c = vec4(albedo * WF_LIT, 1.0);\n"
     "    }\n"
-    "    if (u_fog != 0) c.rgb = mix(u_fog_color, c.rgb, v_fog_factor);\n"
+    "    if (u_fog != 0) c.rgb = mix(u_fog_color, c.rgb, WF_FOG_FACTOR);\n"
     "    c.a = v_opacity;\n"
     "    frag = c;\n"
     "}\n";
@@ -448,6 +508,21 @@ public:
         _fogColor[2] = b;
         _fogStart = start;
         _fogEnd   = end;
+    }
+
+    // Style shading (S1-S3). An inactive record while already inactive is a
+    // no-op: no flush, no state, so levels without style draw as before.
+    // Switching between active and inactive relinks the built-in programs
+    // with or without WF_STYLE; that happens at level load, not per frame.
+    void SetStyleShading(const RBStyleShading& style) override
+    {
+        const bool active = RBStyleShadingActive(style);
+        if (!active && !_styleActive) return;
+        Flush();
+        _style = style;
+        if (active == _styleActive) return;
+        _styleActive = active;
+        if (_inited && !_customProgram) RelinkBuiltinPrograms();
     }
 
     void SetTexturePalette(bool e,unsigned dark,unsigned light) override
@@ -1093,7 +1168,10 @@ private:
         GLint mvp=-1, mv=-1, tex=-1, useTex=-1, alphaCutout=-1;
         GLint lighting=-1, compact=-1, ambient=-1, lightDir=-1, lightColor=-1;
         GLint fog=-1, fogColor=-1, fogStart=-1, fogEnd=-1;
+        GLint eyeToWorld=-1, absorb=-1, toonBands=-1, caustic=-1;   // WF_STYLE only
     };
+    bool _styleActive = false;
+    RBStyleShading _style = {};
     ProgramUniforms _uniforms, _opaqueUniforms, _opaqueTexUniforms, _noPaletteUniforms;
     GLuint _opaqueProg = 0;
     GLuint _opaqueTexProg = 0;
@@ -1185,18 +1263,50 @@ private:
         uniforms.fogColor   = glGetUniformLocation(program, "u_fog_color");
         uniforms.fogStart   = glGetUniformLocation(program, "u_fog_start");
         uniforms.fogEnd     = glGetUniformLocation(program, "u_fog_end");
+        uniforms.eyeToWorld = glGetUniformLocation(program, "u_eye_to_world");
+        uniforms.absorb     = glGetUniformLocation(program, "u_absorb");
+        uniforms.toonBands  = glGetUniformLocation(program, "u_toon_bands");
+        uniforms.caustic    = glGetUniformLocation(program, "u_caustic");
         return uniforms;
+    }
+
+    // A built-in program from kVS and kFS, the fragment shader specialised by
+    // `defines`. While a style is active both stages also get WF_STYLE.
+    GLuint LinkBuiltinProgram(const char* defines)
+    {
+        const std::string style = _styleActive ? "#define WF_STYLE 1\n" : "";
+        const std::string vsSource = style + kVS;
+        const std::string fsSource = style + defines + kFS;
+        GLuint vs = CompileShader(GL_VERTEX_SHADER, vsSource.c_str());
+        GLuint fs = CompileShader(GL_FRAGMENT_SHADER, fsSource.c_str());
+        GLuint program = LinkProgram(vs, fs);
+        glDeleteShader(vs);
+        glDeleteShader(fs);
+        return program;
+    }
+
+    // The style switched on or off: replace every built-in program. The main
+    // program is linked now; the specialisations are linked again on first
+    // use, except a prewarmed no-palette program, which is relinked now too.
+    void RelinkBuiltinPrograms()
+    {
+        const bool noPalette = _noPaletteProg != 0;
+        glDeleteProgram(_prog);
+        if (_opaqueProg) glDeleteProgram(_opaqueProg);
+        if (_opaqueTexProg) glDeleteProgram(_opaqueTexProg);
+        if (_noPaletteProg) glDeleteProgram(_noPaletteProg);
+        _opaqueProg = _opaqueTexProg = _noPaletteProg = 0;
+        _opaqueUniforms = _opaqueTexUniforms = _noPaletteUniforms = ProgramUniforms{};
+        _prog = LinkBuiltinProgram("");
+        _uniforms = FetchUniformLocations(_prog);
+        if (noPalette) InitNoPaletteProgram("style");
     }
 
     void LazyInit()
     {
         if (_inited) return;
 
-        GLuint vs = CompileShader(GL_VERTEX_SHADER,   kVS);
-        GLuint fs = CompileShader(GL_FRAGMENT_SHADER, kFS);
-        _prog = LinkProgram(vs, fs);
-        glDeleteShader(vs);
-        glDeleteShader(fs);
+        _prog = LinkBuiltinProgram("");
 
         _uniforms = FetchUniformLocations(_prog);
 
@@ -1229,12 +1339,7 @@ private:
         if (_opaqueProg) return;
         // Compile out discard entirely; a runtime false branch can still make
         // the executable coverage-changing on tile-based GPUs.
-        const std::string opaqueFS = std::string("#define WF_OPAQUE 1\n") + kFS;
-        GLuint vs = CompileShader(GL_VERTEX_SHADER, kVS);
-        GLuint fs = CompileShader(GL_FRAGMENT_SHADER, opaqueFS.c_str());
-        _opaqueProg = LinkProgram(vs, fs);
-        glDeleteShader(vs);
-        glDeleteShader(fs);
+        _opaqueProg = LinkBuiltinProgram("#define WF_OPAQUE 1\n");
         _opaqueUniforms = FetchUniformLocations(_opaqueProg);
     }
 
@@ -1243,12 +1348,7 @@ private:
         if (_opaqueTexProg) return;
         // Textured opaque batches with normal modulation always pass
         // u_use_tex=1; specialize that uniform while retaining the color math.
-        const std::string source = std::string("#define WF_OPAQUE 1\n#define WF_TEX_MODE 1\n") + kFS;
-        GLuint vs = CompileShader(GL_VERTEX_SHADER, kVS);
-        GLuint fs = CompileShader(GL_FRAGMENT_SHADER, source.c_str());
-        _opaqueTexProg = LinkProgram(vs, fs);
-        glDeleteShader(vs);
-        glDeleteShader(fs);
+        _opaqueTexProg = LinkBuiltinProgram("#define WF_OPAQUE 1\n#define WF_TEX_MODE 1\n");
         _opaqueTexUniforms = FetchUniformLocations(_opaqueTexProg);
     }
 
@@ -1261,13 +1361,8 @@ private:
         const bool profiled = wf_profile::enabled();
         const auto started = profiled ? std::chrono::steady_clock::now()
                                       : std::chrono::steady_clock::time_point();
-        const std::string source = std::string(
-            "#define WF_OPAQUE 1\n#define WF_TEX_MODE 1\n#define WF_NO_PALETTE 1\n") + kFS;
-        GLuint vs = CompileShader(GL_VERTEX_SHADER, kVS);
-        GLuint fs = CompileShader(GL_FRAGMENT_SHADER, source.c_str());
-        _noPaletteProg = LinkProgram(vs, fs);
-        glDeleteShader(vs);
-        glDeleteShader(fs);
+        _noPaletteProg = LinkBuiltinProgram(
+            "#define WF_OPAQUE 1\n#define WF_TEX_MODE 1\n#define WF_NO_PALETTE 1\n");
         _noPaletteUniforms = FetchUniformLocations(_noPaletteProg);
         wf_profile::count(wf_profile::NoPalettePrograms);
         if (profiled)
@@ -1356,6 +1451,15 @@ private:
         glUniform3fv(uniforms.fogColor, 1, _fogColor);
         glUniform1f(uniforms.fogStart, _fogStart);
         glUniform1f(uniforms.fogEnd,   _fogEnd);
+        if (_styleActive)
+        {
+            glUniformMatrix4fv(uniforms.eyeToWorld, 1, GL_FALSE, _style.eyeToWorld);
+            glUniform3fv(uniforms.absorb, 1, _style.absorb);
+            glUniform1i(uniforms.toonBands, _style.toonBands);
+            const float cell = _style.causticScale > 0.0f ? _style.causticScale : 1.0f;
+            glUniform3f(uniforms.caustic, _style.causticStrength,
+                        6.28318530718f / cell, _style.time);
+        }
 
         if (_curTexture)
         {

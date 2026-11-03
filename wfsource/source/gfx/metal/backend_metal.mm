@@ -118,6 +118,8 @@ struct VertexOut {
     float  opacity;
     float4 palette_dark;
     float3 palette_light;
+    float3 absorb;
+    float3 caustic;
 };
 
 // Layout must match CPU-side Uniforms struct byte-for-byte.
@@ -136,6 +138,9 @@ struct Uniforms {
     float    fog_end;
     int      use_tex;
     int      _pad;
+    float4x4 eye_to_world;
+    float4   style_absorb;
+    float4   style_caustic; // strength, frequency, time, toon bands
 };
 
 vertex VertexOut wf_vs(VertexIn v                  [[stage_in]],
@@ -168,6 +173,14 @@ vertex VertexOut wf_vs(VertexIn v                  [[stage_in]],
     } else {
         o.fog_factor = 1.0;
     }
+    float3 eye = (u.mv * float4(v.pos, 1.0)).xyz;
+    float3 world_normal = (u.eye_to_world * (u.mv * float4(v.normal, 0.0))).xyz;
+    float normal_length = length(world_normal);
+    o.caustic = float3((u.eye_to_world * float4(eye, 1.0)).xy,
+                        normal_length > 0.0 ? world_normal.z / normal_length : 0.0);
+    o.absorb = u.fog == 0 ? float3(1.0) :
+        (u.style_absorb.x + u.style_absorb.y + u.style_absorb.z > 0.0 ?
+         exp(-u.style_absorb.xyz * length(eye)) : float3(o.fog_factor));
     return o;
 }
 
@@ -176,7 +189,21 @@ fragment float4 wf_fs(VertexOut v                  [[stage_in]],
                       texture2d<float> tex         [[texture(0)]],
                       sampler          smp         [[sampler(0)]])
 {
-    float4 c = float4(v.color * v.lit, 1.0);
+    float3 style_lit = v.lit;
+    float bands = u.style_caustic.w;
+    if (bands > 0.0) {
+        float y = max(v.lit.r, max(v.lit.g, v.lit.b));
+        if (y > 0.0) style_lit *= clamp(floor(y * bands + 0.5), 1.0, bands) / (bands * y);
+    }
+    if (u.fog != 0 && u.style_caustic.x > 0.0 && v.caustic.z > 0.0) {
+        float2 p = v.caustic.xy * u.style_caustic.y;
+        float t = u.style_caustic.z;
+        float s = sin(p.x + t) + sin(p.y * 1.31 - t * 0.83)
+                + sin((p.x + p.y) * 0.71 + t * 1.13) + sin((p.x - p.y) * 0.87 - t * 0.61);
+        float web = pow(max(0.0, 1.0 - abs(s) * 0.5), 6.0);
+        style_lit += float3(u.style_caustic.x * web * v.caustic.z * v.absorb.g);
+    }
+    float4 c = float4(v.color * style_lit, 1.0);
     // Phase 3: REPLACE-IF-WHITE, character for character the rule in
     // backend_modern.cc's kFS. WF's convention is that a white vertex colour
     // means "this face is textured" and any other colour means "flat coloured,
@@ -187,10 +214,13 @@ fragment float4 wf_fs(VertexOut v                  [[stage_in]],
         float is_white = step(0.99, min(v.color.r, min(v.color.g, v.color.b)));
         float3 sample=tex.sample(smp,v.uv).rgb;
         float3 albedo=v.palette_dark.a>0.5 ? mix(v.palette_dark.xyz,v.palette_light,clamp((sample.r-.08)/.85,0.0,1.0)) : ((u.use_tex & 2)!=0 ? sample*v.color : mix(v.color,sample,is_white));
-        c=float4(albedo*v.lit,1.0);
+        c=float4(albedo*style_lit,1.0);
     }
     if (u.fog != 0) {
-        c.rgb = mix(u.fog_color, c.rgb, v.fog_factor);
+        if (u.style_absorb.x + u.style_absorb.y + u.style_absorb.z > 0.0)
+            c.rgb = mix(u.fog_color, c.rgb, v.absorb);
+        else
+            c.rgb = mix(u.fog_color, c.rgb, v.fog_factor);
     }
     c.a = u.use_tex == 4 ? v.opacity * tex.sample(smp,v.uv).r : v.opacity;
     if(u.use_tex == 4){c.rgb=v.color;if(c.a==0.0)discard_fragment();}
@@ -223,6 +253,9 @@ struct Uniforms
     float          fog_end;
     int32_t        use_tex;
     int32_t        _pad;
+    simd::float4x4 eye_to_world;
+    simd::float4   style_absorb;
+    simd::float4   style_caustic;
 };
 
 // ---- matrix helpers (column-major, GL/Metal convention) ---------------------
@@ -398,6 +431,13 @@ public:
     {
         Flush();
         _fogEnabled = enabled;
+    }
+
+    void SetStyleShading(const RBStyleShading& style) override
+    {
+        if (!RBStyleShadingActive(style) && !RBStyleShadingActive(_style)) return;
+        Flush();
+        _style = style;
     }
 
     void DrawTriangle(const RBVertex& v0,
@@ -673,6 +713,7 @@ private:
     float _fogColor[3] = { 0.0f, 0.0f, 0.0f };
     float _fogStart = 1.0f;
     float _fogEnd   = 1000.0f;
+    RBStyleShading _style = {};
 
     const PixelMap* _curTexture = nullptr;
     // Whether the triangles pending in _cpu came from a LIGHTING_PRELIT
@@ -842,6 +883,11 @@ private:
         u.fog       = _fogEnabled ? 1 : 0;
         u.fog_start = _fogStart;
         u.fog_end   = _fogEnd;
+        u.eye_to_world = Float16ToSimd(_style.eyeToWorld);
+        u.style_absorb = simd::float4{_style.absorb[0], _style.absorb[1], _style.absorb[2], 0.0f};
+        const float cell = _style.causticScale > 0.0f ? _style.causticScale : 1.0f;
+        u.style_caustic = simd::float4{_style.causticStrength, 6.28318530718f / cell,
+                                     _style.time, float(_style.toonBands)};
         // Phase 3: texture on iff this batch has a PixelMap that actually owns a
         // GPU texture. GetTextureHandle() follows the _parent chain, so a
         // sub-pixelmap correctly reports its atlas parent's texture.

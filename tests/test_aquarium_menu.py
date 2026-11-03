@@ -6,8 +6,8 @@ from level_menu_harness import read_menu, read_toc, SHELL_MENU, CDPACK
 
 ROOT = Path(__file__).resolve().parents[1]
 LEVELS = ['aquarium', 'aquarium_blue_shrimp', 'aquarium_betta',
-          'aquarium_jellyfish', 'aquarium_lionfish', 'aquarium_plants', 'aquarium_arowana', 'aquarium_tiger_barbs']
-TITLES = ['Clownfish & Sea Anemone', 'Blue Shrimp', 'Calm Betta', 'Jellyfish', 'Lionfish', 'Planted Tank', 'Asian Arowana', 'Tiger Barbs']
+          'aquarium_jellyfish', 'aquarium_lionfish', 'aquarium_plants', 'aquarium_arowana', 'aquarium_tiger_barbs', 'aquarium_thai_reef', 'aquarium_thai_reef_anime']
+TITLES = ['Clownfish & Sea Anemone', 'Blue Shrimp', 'Calm Betta', 'Jellyfish', 'Lionfish', 'Planted Tank', 'Asian Arowana', 'Tiger Barbs', 'Gulf of Thailand Reef', 'Gulf of Thailand Reef - Anime']
 
 
 def test_menu_matches_current_standalones_and_manifest(tmp_path):
@@ -16,14 +16,14 @@ def test_menu_matches_current_standalones_and_manifest(tmp_path):
                     str(ROOT/'wflevels/aquarium-menu.manifest'), '-o', str(output)], check=True)
     data = output.read_bytes()
     assert data == (ROOT/'wflevels/aquarium-menu-cd.iff').read_bytes()
-    assert read_menu(data) == dict(version=1, levels=8, title='WF Aquarium',
+    assert read_menu(data) == dict(version=1, levels=10, title='WF Aquarium',
                                    prompt='Choose a tank', entries=list(enumerate(TITLES)))
     toc = read_toc(data)
     # SHEL, eight tanks, MENU, then cdpack's UI font (docs/plans/2026-10-17-settings-editor-font.md).
-    assert len(toc) == 11 and toc[0][0] == b'SHEL' and toc[-2][0] == b'MENU' and toc[-1][0] == b'UIFT'
+    assert len(toc) == 13 and toc[0][0] == b'SHEL' and toc[-2][0] == b'MENU' and toc[-1][0] == b'UIFT'
     shell_offset, shell_size = toc[0][1:]
     assert data[shell_offset+8:shell_offset+8+shell_size] == SHELL_MENU.read_bytes()
-    for (_, offset, size), level in zip(toc[1:9], LEVELS):
+    for (_, offset, size), level in zip(toc[1:11], LEVELS):
         assert data[offset:offset+size] == (ROOT/'wflevels'/(level+'-standalone.iff')).read_bytes()
 
 

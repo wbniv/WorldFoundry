@@ -23,6 +23,7 @@ MASK_TANKS = (
     ("aquarium_lionfish", 3.4, 760, 761, 762),
     ("aquarium_plants", 0.8, 760, 761, 762),
     ("aquarium_arowana", 8.0, 780, 781, 782),
+    ("aquarium_thai_reef", 3.3, 760, 761, 762),
 )
 VERTICAL_CASES = (
     ("aquarium_blue_shrimp", 3010, -1.0, 4, 0.0, 2),
@@ -31,6 +32,7 @@ VERTICAL_CASES = (
     ("aquarium_lionfish", 3011, 1.0, 2048, 4.0, 4096),
     ("aquarium_plants", 3010, -1.0, 2048, 0.0, 4096),
     ("aquarium_arowana", 3011, 4.0, 2048, 8.0, 4096),
+    ("aquarium_thai_reef", 3011, 1.0, 2048, 4.0, 4096),
 )
 
 
@@ -159,7 +161,8 @@ def test_generated_player_variants_match_sources_and_tank_order():
     for tank in tanks:
         name = builder["SCRIPT_NAMES"].get(tank, "screensaver_player.fth")
         source = ROOT / "wflevels" / tank
-        driver_dir = ROOT / "wflevels" / "aquarium" if tank == "aquarium_tiger_barbs" else source
+        driver_dir = ROOT / "wflevels" / "aquarium" if tank == "aquarium_tiger_barbs" else (
+            ROOT / "wflevels" / "aquarium_thai_reef" if tank == "aquarium_thai_reef_anime" else source)
         expected = builder["player_script"](
             (source / f"{tank}.lev").read_text(), tank,
             (driver_dir / name).read_text())

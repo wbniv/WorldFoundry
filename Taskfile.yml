@@ -1116,8 +1116,8 @@ tasks:
       - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell.fth wflevels/aquarium-standalone.iff -o '{{.CD_OUT}}'
 
   build-cd-iff-aquarium-menu:
-    desc: "Package the eight Aquarium tanks with the selector for Android (standalone/Apple bundle remains aquarium-cd.iff)"
-    deps: [tools-build, aquarium-level, aquarium-blue-shrimp-level, aquarium-betta-level, aquarium-jellyfish-level, aquarium-lionfish-level, aquarium-plants-level, aquarium-arowana-level, aquarium-tiger-barbs-level]
+    desc: "Package the Aquarium tanks with the selector for Android (standalone/Apple bundle remains aquarium-cd.iff)"
+    deps: [tools-build, aquarium-level, aquarium-blue-shrimp-level, aquarium-betta-level, aquarium-jellyfish-level, aquarium-lionfish-level, aquarium-plants-level, aquarium-arowana-level, aquarium-tiger-barbs-level, aquarium-thai-reef-level, aquarium-thai-reef-anime-level]
     cmds:
       - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell-menu.fth --manifest wflevels/aquarium-menu.manifest -o wflevels/aquarium-menu-cd.iff
 
@@ -1281,6 +1281,39 @@ tasks:
       - wflevels/aquarium.iff
       - wflevels/aquarium-standalone.iff
       - wflevels/aquarium-cd.iff
+
+  aquarium-thai-reef-level:
+    desc: "Build the static Gulf of Thailand reef blockout in the pinned Blender container; this is a scene prototype, not the finished two-style tank"
+    cmds:
+      - bash wflevels/aquarium_thai_reef/build.sh
+    sources:
+      - wflevels/aquarium_thai_reef/build.sh
+      - wflevels/aquarium_thai_reef/generate.py
+      - wflevels/aquarium_thai_reef/config.py
+      - wflevels/aquarium_thai_reef/aquarium_thai_reef-standalone.iff.txt
+      - wflevels/aquarium_thai_reef/textile.flags
+      - wflevels/aquarium_thai_reef/reef/*.py
+      - wfsource/source/oas/camera.oas
+      - wfsource/source/oas/camera.oad
+    generates:
+      - wflevels/aquarium_thai_reef.iff
+      - wflevels/aquarium_thai_reef-standalone.iff
+
+  aquarium-thai-reef-anime-level:
+    desc: "Build the anime Gulf of Thailand reef static-scene blockout in the pinned Blender container"
+    cmds:
+      - bash wflevels/aquarium_thai_reef_anime/build.sh
+    sources:
+      - wflevels/aquarium_thai_reef_anime/build.sh
+      - wflevels/aquarium_thai_reef_anime/textile.flags
+      - wflevels/aquarium_thai_reef_anime/aquarium_thai_reef_anime-standalone.iff.txt
+      - wflevels/aquarium_thai_reef/generate.py
+      - wflevels/aquarium_thai_reef/config.py
+      - wflevels/aquarium_thai_reef/reef/*.py
+      - wfsource/source/oas/camera.oas
+      - wfsource/source/oas/camera.oad
+    generates:
+      - wflevels/aquarium_thai_reef_anime-standalone.iff
 
   aquarium-blue-shrimp-level:
     desc: "Build the independent blue-shrimp Aquarium tank"

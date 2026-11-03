@@ -24,6 +24,17 @@
     Scalar GetFoggingStartDistance() const { return Scalar::FromFixed32(FoggingStartDistance); }
 	fixed32 FoggingCompleteDistance;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0)) */
     Scalar GetFoggingCompleteDistance() const { return Scalar::FromFixed32(FoggingCompleteDistance); }
+	fixed32 WaterAbsorbR;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 10 * 65536.0)) */
+    Scalar GetWaterAbsorbR() const { return Scalar::FromFixed32(WaterAbsorbR); }
+	fixed32 WaterAbsorbG;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 10 * 65536.0)) */
+    Scalar GetWaterAbsorbG() const { return Scalar::FromFixed32(WaterAbsorbG); }
+	fixed32 WaterAbsorbB;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 10 * 65536.0)) */
+    Scalar GetWaterAbsorbB() const { return Scalar::FromFixed32(WaterAbsorbB); }
+	fixed32 CausticStrength;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1 * 65536.0)) */
+    Scalar GetCausticStrength() const { return Scalar::FromFixed32(CausticStrength); }
+	fixed32 CausticScale;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0)) */
+    Scalar GetCausticScale() const { return Scalar::FromFixed32(CausticScale); }
+	int32 ToonBands;               /* Minumum: 0 Maximum: 16 Default: 0 */
 };
 /*============================================================================*/
 #endif         /* camera_HT */

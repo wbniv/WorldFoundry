@@ -35,17 +35,36 @@ def vm(tmp_path_factory):
         text=(here/(level+'.lev')).read_text()
         paths=[]
         prefix='sh' if kind=='blue_shrimp' else 'tk'
-        entries=('aq-player-tick','barb-player-tick\naq-camera-tick\nsd-tick') if kind=='tiger_barbs' else (prefix+'-player-tick',prefix+'-director-tick')
+        entries=('aq-player-tick','barb-player-tick\naq-camera-tick\nsd-tick') if kind=='tiger_barbs' else ('tk-player-tick','reef-tick') if kind=='thai_reef' else (prefix+'-player-tick',prefix+'-director-tick')
         for name,entry in zip(('Player','Director'),entries):
             block=text[text.index('{ \'NAME\' "'+name+'" }'):].split("{ 'OBJ'",1)[0]
             encoded=re.search(r'\{ \'STR\' \{ \'NAME\' "Script" \} \{ \'STR\' ("(?:\\.|[^"\\])*")',block).group(1)
             script=json.loads(encoded).removesuffix('\n'+entry+'\n')
             path=tmp/(kind+name+'.fth');path.write_text(definitions+script);paths.append(path)
-        result=subprocess.run([str(binary),*map(str,paths),str(mapping['indices']['Player']),str(mapping['indices']['Director']),*entries],input=trace,text=True,capture_output=True)
+        indices = mapping.get('indices', mapping.get('actors'))
+        result=subprocess.run([str(binary),*map(str,paths),str(indices['Player']),str(indices['Director']),*entries],input=trace,text=True,capture_output=True)
         assert result.returncode==0,result.stderr
         keys=['frame','x','y','z','vx','vy','vz',*range(600,751),*range(1100,1112),*range(1200,1281),'part-x','part-y','part-z','part-a','part-b','part-c']
         return [dict(zip(keys,map(float,row))) for row in csv.reader(io.StringIO(result.stdout))]
     return run
+
+def test_reef_boxfish_input_starts_and_stops(vm):
+    rows = vm('thai_reef', 'reset 0 0 2.5\nstep 60 8192 .0166667\nstep 180 0 .0166667\n')
+    assert rows[59]['vx'] > .5
+    assert abs(rows[-1]['vx']) < .01
+
+def test_reef_humbugs_detect_player_near_their_coral(vm):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('reef_scene', ROOT/'wflevels/aquarium_thai_reef/reef/scene.py')
+    scene = importlib.util.module_from_spec(spec)
+    import sys
+    sys.modules[spec.name] = scene
+    spec.loader.exec_module(scene)
+    x, y, z = scene.anchor_map()['humbug_pair']
+    near = vm('thai_reef', f'reset {x} {y} {z}\nstep 1 0 .0166667\n')
+    far = vm('thai_reef', 'reset 4 0 2\nstep 1 0 .0166667\n')
+    assert near[-1][641] != 0
+    assert far[-1][641] == 0
 
 @pytest.mark.parametrize('kind',['betta','lionfish'])
 @pytest.mark.parametrize('hz',[20,30,60])

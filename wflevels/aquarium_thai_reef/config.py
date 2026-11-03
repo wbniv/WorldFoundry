@@ -1,0 +1,8 @@
+"""Shared dimensions and budgets for the Gulf reef's static scene."""
+SEED = 20261102
+DIMENSIONS_M = (1.20, 0.60, 0.55)
+WORLD_SCALE = 10.0
+TITLE = 'Gulf of Thailand Reef'
+STATIC_TRIANGLES_MAX = 48000
+STATIC_GROUPS_MAX = 8
+
