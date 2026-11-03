@@ -155,6 +155,9 @@ public:
         _backend.SetFog(r,g,b,s,e);
     }
     void SetFogEnabled(bool e) override { _state.fogEnabled=e; _backend.SetFogEnabled(e); }
+    // Per camera, not per material: the translucent drain later in the same
+    // frame draws under the same style, so it is not part of State.
+    void SetStyleShading(const RBStyleShading& s) override { Drain(); _backend.SetStyleShading(s); }
     void SetAlphaCutout(bool e) override { _state.cutout=e; _backend.SetAlphaCutout(e); }
     void SetTextureModulation(bool e) override
     { _state.textureModulation=e; _backend.SetTextureModulation(e); }

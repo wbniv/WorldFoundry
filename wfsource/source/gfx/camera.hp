@@ -34,6 +34,7 @@
 #include <math/matrix34.hp>
 #include <gfx/viewport.hp>
 #include <gfx/rendobj3.hp>
+#include <gfx/renderer_backend.hp>
 
 //=============================================================================
 
@@ -63,6 +64,10 @@ public:
 	void SetDirectionalLight(int lightIndex,const Vector3& direction, Color48 color);
 
 	void SetFog(const Color& color,Scalar near, Scalar far);
+	// Style shading (S1-S3) from the Camera object; all zero is off. The
+	// eye-to-world matrix is filled in by RenderBegin.
+	void SetStyleShading(const RBStyleShading& style);
+	void SetStyleTime(float seconds) { _style.time = seconds; }
 
 #if defined(DO_STEREOGRAM)
 	void SetStereogram(Scalar eyeDistance, Angle eyeAngle);
@@ -86,6 +91,7 @@ private:
 	Color	_fogColor;
 	Scalar	_fogNear;
 	Scalar	_fogFar;
+	RBStyleShading	_style;
 
 	RendererScratchVariablesStruct*	_scratchMemory;
 #if DO_ASSERTIONS

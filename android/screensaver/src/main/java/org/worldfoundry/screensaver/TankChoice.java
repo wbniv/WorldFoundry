@@ -11,11 +11,11 @@ final class TankChoice {
     static final String[] IDS = {
             "aquarium", "aquarium_blue_shrimp", "aquarium_betta", "aquarium_jellyfish",
             "aquarium_lionfish", "aquarium_plants", "aquarium_arowana",
-            "aquarium_tiger_barbs"
+            "aquarium_tiger_barbs", "aquarium_thai_reef", "aquarium_thai_reef_anime"
     };
     static final String[] LABELS = {
             "Clownfish", "Blue Shrimp", "Betta", "Jellyfish", "Lionfish",
-            "Planted Urchin", "Arowana", "Tiger Barbs"
+            "Planted Urchin", "Arowana", "Tiger Barbs", "Thai Reef", "Thai Reef Anime"
     };
 
     private static final String PREFS = "screensaver";

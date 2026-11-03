@@ -56,6 +56,31 @@ struct RBStaticTriangle
 // needs to draw subsets of it). NULL means "none".
 typedef void* RBStaticMeshHandle;
 
+// ---- style shading (Phase S) -----------------------------------------------
+// The camera's look switches, from its Camera object fields. Every field at
+// zero is "off", and a backend given an inactive record draws exactly as it
+// did before style shading existed (the GL backend links the same shader
+// source). S1 and S2 apply only while fog is enabled, so overlays and the
+// matte pass, which disable fog, are untouched.
+// See docs/plans/2026-11-02-gulf-of-thailand-reef-tank.md "Engine proposal:
+// style shading (S1-S3)".
+struct RBStyleShading
+{
+    float absorb[3];        // S1: water absorption per world unit, per channel; 0 = off
+    float causticStrength;  // S2: light added on the caustic web's lines; 0 = off
+    float causticScale;     // S2: caustic cell size in world units (> 0)
+    float time;             // S2: level time in seconds; animates the web
+    int   toonBands;        // S3: lighting brightness bands; 0 = off
+    float eyeToWorld[16];   // camera's world matrix (eye space to world), GL column-major
+};
+
+inline bool
+RBStyleShadingActive(const RBStyleShading& style)
+{
+    return style.absorb[0] > 0.0f || style.absorb[1] > 0.0f || style.absorb[2] > 0.0f
+        || style.causticStrength > 0.0f || style.toonBands > 0;
+}
+
 // Pixel layout of the data handed to CreateTexture. Matches what PixelMap
 // actually stores, which is chosen by the SIXTEEN_BIT_VRAM build switch.
 enum RBTextureFormat
@@ -106,6 +131,11 @@ public:
     // Fog on/off. Params preserved across toggles (so matte can disable +
     // re-enable without re-specifying the camera's fog setup).
     virtual void SetFogEnabled(bool enabled) = 0;
+
+    // Style shading (S1-S3) for the camera about to render; see
+    // RBStyleShading. Called once per camera per frame. Backends without it
+    // ignore it, which is the same as every field at zero.
+    virtual void SetStyleShading(const RBStyleShading& /*style*/) {}
 
     // Opt-in texture alpha testing; existing materials remain opaque.
     virtual void SetAlphaCutout(bool /*enabled*/) {}

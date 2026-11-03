@@ -65,6 +65,15 @@ RenderCamera::SetFog(const Color& color,Scalar fogNear, Scalar fogFar)
 //============================================================================
 
 INLINE void
+RenderCamera::SetStyleShading(const RBStyleShading& style)
+{
+	assert(!_renderInProgress);			// cannot update while rendering
+	_style = style;
+}
+
+//============================================================================
+
+INLINE void
 RenderCamera::SetDirectionalLight(int lightIndex,const Vector3& direction, Color48 color)
 {
 //	cout << "SetDirLight: index = " << lightIndex << ", dir = " << direction << ", color = " << color << endl;

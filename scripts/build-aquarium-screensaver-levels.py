@@ -21,7 +21,7 @@ LEVELS = ROOT / "wflevels"
 TANKS = (
     "aquarium", "aquarium_blue_shrimp", "aquarium_betta", "aquarium_jellyfish",
     "aquarium_lionfish", "aquarium_plants", "aquarium_arowana",
-    "aquarium_tiger_barbs",
+    "aquarium_tiger_barbs", "aquarium_thai_reef", "aquarium_thai_reef_anime",
 )
 SCRIPT_NAMES = {"aquarium": "aquarium_screensaver.fth",
                 "aquarium_tiger_barbs": "tiger_barbs_screensaver.fth"}
@@ -123,7 +123,8 @@ def build(tank: str) -> Path:
     target = LEVELS / target_name
     target.mkdir(exist_ok=True)
     script_name = SCRIPT_NAMES.get(tank, "screensaver_player.fth")
-    driver_source = LEVELS / "aquarium" if tank == "aquarium_tiger_barbs" else source
+    driver_source = LEVELS / "aquarium" if tank == "aquarium_tiger_barbs" else (
+        LEVELS / "aquarium_thai_reef" if tank == "aquarium_thai_reef_anime" else source)
     driver = (driver_source / script_name).read_text()
     source_lev = source / (tank + ".lev")
     if not source_lev.is_file():

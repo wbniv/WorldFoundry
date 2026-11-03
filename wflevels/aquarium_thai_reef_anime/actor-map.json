@@ -1,0 +1,151 @@
+{
+  "level": "aquarium_thai_reef_anime",
+  "actors": {
+    "Room": 1,
+    "SunLight": 2,
+    "Camera": 3,
+    "Director": 4,
+    "LevelObj": 5,
+    "Matte": 6,
+    "cs_wide": 7,
+    "LookAt": 8,
+    "Player": 9,
+    "reef_left": 10,
+    "reef_right": 11,
+    "reef_arch": 12,
+    "reef_hard": 13,
+    "reef_soft": 14,
+    "reef_sponges": 15,
+    "reef_life": 16,
+    "reef_shell": 17,
+    "BoxfishVisual": 18,
+    "HumbugOne": 19,
+    "HumbugTwo": 20,
+    "AmbientLight": 21
+  },
+  "triangles": {
+    "reef_left": 2416,
+    "reef_right": 2484,
+    "reef_arch": 2216,
+    "reef_hard": 5336,
+    "reef_soft": 2380,
+    "reef_sponges": 240,
+    "reef_life": 12470,
+    "reef_shell": 72
+  },
+  "triangle_total": 27614,
+  "anchors": {
+    "coralline": [
+      -3.99,
+      0.5,
+      1.775
+    ],
+    "flowerpot": [
+      -4.375,
+      0.4,
+      2.38
+    ],
+    "cauliflower": [
+      -3.85,
+      0.35,
+      3.15
+    ],
+    "guard_crab": [
+      -3.136,
+      0.2,
+      2.82
+    ],
+    "humbug_pair": [
+      -3.255,
+      -0.15,
+      3.755
+    ],
+    "scroll_coral": [
+      -2.31,
+      0.5,
+      2.6275
+    ],
+    "feather_duster": [
+      -1.96,
+      0.15,
+      2.05
+    ],
+    "zoanthids": [
+      -3.29,
+      0.1,
+      1.775
+    ],
+    "nudibranch": [
+      -3.78,
+      -0.25,
+      1.335
+    ],
+    "mushroom_coral": [
+      -1.96,
+      -0.8,
+      0.5375
+    ],
+    "sea_fan_left": [
+      -4.9,
+      1.0,
+      2.93
+    ],
+    "leather_coral": [
+      -0.28,
+      0.7,
+      3.04
+    ],
+    "cup_coral": [
+      -0.07,
+      0.65,
+      2.16
+    ],
+    "cleaner_station": [
+      -0.7,
+      -0.15,
+      1.885
+    ],
+    "boulder_coral": [
+      -0.84,
+      0.0,
+      0.95
+    ],
+    "tree_worms": [
+      -0.175,
+      -0.15,
+      1.1975
+    ],
+    "feather_star": [
+      0.91,
+      0.3,
+      3.04
+    ],
+    "boxfish_spawn": [
+      0.7,
+      -0.5,
+      3.535
+    ],
+    "table_coral": [
+      3.43,
+      0.45,
+      3.15
+    ],
+    "giant_clam": [
+      1.82,
+      -0.9,
+      0.7025
+    ],
+    "hermit_crab": [
+      1.295,
+      -1.0,
+      0.444
+    ],
+    "barrel_sponge": [
+      4.76,
+      0.5,
+      1.555
+    ]
+  },
+  "rock_union": true,
+  "unverified": true
+}
