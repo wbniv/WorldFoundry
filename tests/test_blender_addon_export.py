@@ -294,3 +294,10 @@ def test_exported_faces_are_wf_outward(tmp_path: Path, wf_core_so: Path) -> None
             fc = ((v0[0] + v1[0] + v2[0]) / 3 - cx, (v0[1] + v1[1] + v2[1]) / 3 - cy, (v0[2] + v1[2] + v2[2]) / 3 - cz)
             dot = n[0] * fc[0] + n[1] * fc[1] + n[2] * fc[2]
             assert dot > 0, f"{name}: face ({a},{b},{c}) points INTO the box (dot {dot:.4g})"
+
+
+def test_baked_vertex_colors_preserve_seams_and_default_white(tmp_path: Path, wf_core_so: Path) -> None:
+    blender = _blender_bin()
+    subprocess.run([str(blender), '--background', '--factory-startup', '--python-exit-code', '1',
+                    '--python', str(REPO/'tests/blender_runner/baked_vertex_colors.py'), '--',
+                    str(REPO), str(tmp_path), str(wf_core_so.parent)], check=True, timeout=120)

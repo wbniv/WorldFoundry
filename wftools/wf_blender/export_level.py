@@ -617,6 +617,14 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
     _bmesh.ops.triangulate(bm, faces=bm.faces)
 
     uv_layer = bm.loops.layers.uv.active
+    color_name = blobj.get('wf_baked_vertex_color', '')
+    color_layer = bm.loops.layers.color.get(color_name) if color_name else None
+    if color_name and color_layer is None:
+        bm.free()
+        raise ValueError(f'{blobj.name}: missing corner byte color layer {color_name!r}')
+    if color_layer is None and any(mat and mat.get('wf_baked_vertex_color', False) for mat in mesh.materials):
+        bm.free()
+        raise ValueError(f'{blobj.name}: baked material requires a vertex color layer')
 
     bm.verts.ensure_lookup_table()
     bm.faces.ensure_lookup_table()
@@ -626,8 +634,8 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
     # vertex — without splitting, seam edges pick up the wrong UV from whichever
     # loop was visited first.
     split_rig = []
-    split_verts = []          # list of (co, u, v)
-    split_map   = {}          # (orig_vi, u_key, v_key) → new_vi
+    split_verts = []          # list of (co, u, v, packed RGB)
+    split_map   = {}          # (orig_vi, u_key, v_key, color) → new_vi
 
     face_triples = []         # list of (new_v1, new_v2, new_v3, mat_idx)
 
@@ -643,10 +651,12 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
             # Quantise to fixed-point to avoid spurious splits from float noise
             u_key = int(round(u * 65536))
             v_key = int(round(v * 65536))
-            key = (orig_vi, u_key, v_key)
+            rgb = tuple(max(0, min(255, round(float(c) * 255))) for c in loop[color_layer][:3]) if color_layer else (255, 255, 255)
+            packed_color = (rgb[0] << 16) | (rgb[1] << 8) | rgb[2]
+            key = (orig_vi, u_key, v_key, packed_color)
             if key not in split_map:
                 split_map[key] = len(split_verts)
-                split_verts.append((bm.verts[orig_vi].co.copy(), u, v))
+                split_verts.append((bm.verts[orig_vi].co.copy(), u, v, packed_color))
                 split_rig.append((rig[orig_vi] if rig is not None else ()) +
                                  (dfrm_meta[orig_vi] if dfrm_meta is not None else ()))
             tri.append(split_map[key])
@@ -662,9 +672,9 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
     # vertices by their fixed-point (position, uv) so identical verts merge and
     # the order is canonical; remap + sort faces. Geometry/rendering unchanged;
     # the bytes are now reproducible.
-    def _vkey(co, u, v):
+    def _vkey(co, u, v, color):
         return (int(round(co.x * 65536)), int(round(co.y * 65536)), int(round(co.z * 65536)),
-                int(round(u * 65536)), int(round(v * 65536)))
+                int(round(u * 65536)), int(round(v * 65536)), color)
     # Metadata is part of identity: coincident roots with different rig roles
     # must not merge even when their position and UV are identical.
     keys=[_vkey(*v)+meta for v,meta in zip(split_verts,split_rig)]
@@ -684,10 +694,10 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
 
     # Build VRTX payload
     vrtx = bytearray()
-    for co, u, v in split_verts:
+    for co, u, v, color in split_verts:
         wf_x, wf_y, wf_z = bl_to_wf(co.x, co.y, co.z)
         vrtx += struct.pack('<iiIiii',
-                            int(u * 65536), int(v * 65536), 0xFFFFFF,
+                            int(u * 65536), int(v * 65536), color,
                             int(wf_x * 65536), int(wf_y * 65536), int(wf_z * 65536))
 
     # Build FACE payload
@@ -728,6 +738,9 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
             flags |= 2|64
         if mat.get('wf_double_sided', False): flags |= 8
         if mat.get('wf_prelit', False): flags |= 4
+        if mat.get('wf_baked_vertex_color', False):
+            if not (flags & 4): raise ValueError('Baked vertex colors require a prelit material')
+            flags |= 1 | 32
         if mat.get('wf_alpha_cutout', False): flags |= 16
         return flags, color, tex
 

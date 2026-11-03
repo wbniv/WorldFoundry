@@ -98,6 +98,23 @@ def test_exported_reef_triangles_have_normalizable_area():
                 assert math.sqrt(sum(v*v for v in cross)) > 4 / 65536, (path, i // 8)
 
 
+@pytest.mark.parametrize('level', ['aquarium_thai_reef', 'aquarium_thai_reef_anime'])
+def test_static_reef_exports_prelit_vertex_colors(level):
+    for name in ('reef_left', 'reef_right', 'reef_arch', 'reef_hard',
+                 'reef_soft', 'reef_sponges', 'reef_life'):
+        data = (ROOT / 'wflevels' / level / (name + '.iff')).read_bytes()
+        chunks, pos = {}, 8
+        while pos + 8 <= len(data):
+            tag, size = struct.unpack_from('<4sI', data, pos)
+            chunks[tag] = data[pos + 8:pos + 8 + size]
+            pos += 8 + ((size + 3) & ~3)
+        flags = struct.unpack_from('<I', chunks[b'MATL'])[0]
+        colors = {struct.unpack_from('<I', chunks[b'VRTX'], i + 8)[0]
+                  for i in range(0, len(chunks[b'VRTX']), 24)}
+        assert flags & 0x27 == 0x27, (level, name, flags)
+        assert len(colors) > 1 and any(c != 0xffffff for c in colors), (level, name)
+
+
 def test_reef_render_actors_do_not_create_solid_player_overlap():
     for level in ('aquarium_thai_reef', 'aquarium_thai_reef_anime'):
         text = (ROOT / 'wflevels' / level / (level + '.lev')).read_text()
