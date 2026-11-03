@@ -1452,6 +1452,16 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     target_link_libraries(wf_opaque_material_gl_test PRIVATE wfengine)
     target_compile_options(wf_opaque_material_gl_test PRIVATE -fpermissive -w -fno-rtti)
     add_test(NAME opaque_material_programs COMMAND wf_opaque_material_gl_test)
+
+    add_executable(wf_prelit_material_flags_test tests/prelit_material_flags.cc)
+    target_link_libraries(wf_prelit_material_flags_test PRIVATE wfengine)
+    target_compile_options(wf_prelit_material_flags_test PRIVATE -fpermissive -w -fno-rtti)
+    add_test(NAME prelit_material_flags COMMAND wf_prelit_material_flags_test)
+    add_executable(wf_prelit_vertex_gl_test tests/prelit_vertex_gl.cc)
+    target_link_libraries(wf_prelit_vertex_gl_test PRIVATE wfengine)
+    target_compile_options(wf_prelit_vertex_gl_test PRIVATE -fpermissive -w -fno-rtti)
+    add_test(NAME prelit_vertex_gl COMMAND wf_prelit_vertex_gl_test)
+    set_tests_properties(prelit_vertex_gl PROPERTIES LABELS "gl")
     set_tests_properties(opaque_material_programs PROPERTIES LABELS "gl")
 
     # The four-lane static cull kernel against the scalar test (lanes model;

@@ -108,9 +108,9 @@ void
 Material::Construct()
 {
 
-   // kts kludge until all models have been updated to be flat shaded
-
-   if(_materialFlags & GOURAUD_SHADED)
+   // Preserve authored vertex lighting only for explicitly prelit materials.
+   // Existing dynamically lit materials retain the historical flat path.
+   if((_materialFlags & GOURAUD_SHADED) && !(_materialFlags & LIGHTING_PRELIT))
       _materialFlags &= ~GOURAUD_SHADED;
 
 	// kts kludge until we can get translucency from material

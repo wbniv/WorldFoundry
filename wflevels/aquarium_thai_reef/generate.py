@@ -23,6 +23,7 @@ p.add_argument('--level-id', default='aquarium_thai_reef')
 p.add_argument('--style', choices=('realistic', 'anime'), default='realistic')
 p.add_argument('--preview', type=Path, help='also render a Blender composition preview to this PNG')
 p.add_argument('--remesh-rocks', action='store_true', help='voxel-union the blockout rock masses before export')
+p.add_argument('--bake-light', action='store_true', help='bake static reef lighting and ambient occlusion')
 args = p.parse_args(sys.argv[sys.argv.index('--') + 1:])
 repo = args.repo.resolve()
 out = args.out.resolve()
@@ -142,6 +143,7 @@ def add_outline(data, width):
 groups = build_groups(Mesh)
 actual_triangles = {}
 actual_hull_triangles = {}
+outline_specs = []
 oad = repo / 'wfsource/source/oas/platform.oad'
 for name, mesh in groups.items():
     obj = bpy.data.objects.new(name, blender_mesh(mesh,
@@ -175,7 +177,7 @@ for name, mesh in groups.items():
     obj.data.calc_loop_triangles()
     actual_triangles[name] = len(obj.data.loop_triangles)
     if args.style == 'anime' and name in ('reef_left', 'reef_right', 'reef_arch', 'reef_hard'):
-        actual_hull_triangles[name] = add_outline(obj.data, .035)
+        outline_specs.append((name, obj, .035))
 
 # Simple rock proxies provide collision without making the visual meshes (or
 # the boxfish itself) static physics bodies. The central arch stays open.
@@ -229,7 +231,7 @@ for name, mesh, pos in (
     animated_triangles[name] = triangles(mesh)
     obj = bpy.data.objects.new(name, blender_mesh(mesh))
     if args.style == 'anime':
-        actual_hull_triangles[name] = add_outline(obj.data, .012)
+        outline_specs.append((name, obj, .012))
     bpy.context.scene.collection.objects.link(obj)
     obj.location = pos
     obj['wf_schema_path'] = str(oad)
@@ -258,7 +260,7 @@ for name, builder, pos in (
     animated_triangles[name] = triangles(mesh)
     obj = bpy.data.objects.new(name, blender_mesh(mesh))
     if args.style == 'anime' and name in ('GuardCrab', 'ShrimpOne', 'ShrimpTwo'):
-        actual_hull_triangles[name] = add_outline(obj.data, .006)
+        outline_specs.append((name, obj, .006))
     bpy.context.scene.collection.objects.link(obj)
     obj.location = pos
     obj['wf_schema_path'] = str(oad)
@@ -400,6 +402,13 @@ for name, anchor, offset, phase, amplitude in (
 life_tick += ';\n'
 tick = tick.replace(': reef-tick\n', shoal + worm_tick + life_tick + ': reef-tick\n reef-shoal reef-life\n')
 bpy.data.objects['Director']['wf_Script'] = header + core + tick
+if args.bake_light:
+    from reef.bake import bake_static
+    bake_static([bpy.data.objects[name] for name in groups if name != 'reef_shell'], mat, args.style)
+# Bake the visible surfaces before adding their reversed outline shells, so
+# the shells do not occlude the surfaces during Cycles' light and AO passes.
+for name, obj, width in outline_specs:
+    actual_hull_triangles[name] = add_outline(obj.data, width)
 triangle_total = sum(actual_triangles.values())
 triangle_limit = 30000 if args.style == 'anime' else STATIC_TRIANGLES_MAX
 if len(groups) > STATIC_GROUPS_MAX or triangle_total > triangle_limit:
