@@ -80,9 +80,9 @@ node.image = image
 mat.node_tree.links.new(node.outputs['Color'], mat.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
 # Swatches correspond to the atlas tile order. UVs are world-projected and kept
 # inside each tile; texturing and scale are provisional until rendered in-engine.
-swatches = {'rock':4, 'porites':3, 'pocillopora':1, 'pocillopora_tip':1,
-            'acropora':3, 'scroll':0, 'flowerpot':5, 'flowerpot_tip':5,
-            'leather':3, 'fan':0, 'sponge':2, 'sponge_rim':2,
+swatches = {'rock':4, 'porites':1, 'pocillopora':1, 'pocillopora_tip':1,
+            'acropora':1, 'scroll':0, 'flowerpot':5, 'flowerpot_tip':5,
+            'leather':1, 'fan':0, 'sponge':2, 'sponge_rim':2,
             'sponge_inner':2, 'sand':3, 'frame':4, 'coralline':0,
             'polyp':1, 'zoanthid':5, 'clam':6, 'fish':7}
 
