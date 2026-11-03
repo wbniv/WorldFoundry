@@ -1407,10 +1407,12 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                 // deform-block (182) ( block n kind actor -- status ): n consecutive mailboxes from block.
                 // Status is a DeformStatus (renderassets/mesh_deformer.h); DFRM also writes it to
                 // block + 39 and its wrap centre and tail tip to block + 33..38.
-                // docs/plans/2026-10-16-saltwater-seahorses.md, E0 and E3.
+                // docs/plans/2026-10-16-saltwater-seahorses.md, E0 and E3. DFRM v2 blocks are
+                // 40 + 4 x curves cells, at most 104 (DfrmMaxBlock;
+                // docs/plans/2026-11-02-gulf-of-thailand-reef-tank.md, E4).
                 const int actor=int(zf_pop(ctx)),kind=int(zf_pop(ctx)),n=int(zf_pop(ctx));
-                const int maxChannels=custom==53?8:40;
-                float channels[40]={0};
+                const int maxChannels=custom==53?8:104;
+                float channels[104]={0};
                 int block=-1;
                 DeformStatus status=DeformStatus::BadInput;
                 if(n>=0&&n<=maxChannels) {
@@ -1633,7 +1635,9 @@ void Init(MailboxesManager& mgr)
     if (r != ZF_OK)
         fprintf(stderr, "zforth: init failed (doom-fire-frame): %d\n", r);
 
-    r = zf_eval(&g_ctx, ": profile-begin 169 sys ; : profile-end 170 sys ; : fish-deform 171 sys ; : fin-deform 172 sys ; : swim-deform 173 sys ; : jelly-deform 174 sys ; : plant-register 175 sys ; : plant-step 176 sys ; : lion-pose 177 sys ; : property@ 178 sys ; : property-int-bytes@ 179 sys ; : property-text-byte@ 180 sys ; : deform 181 sys ; : deform-block 182 sys ; : dfrm-pose >r 33 6 r> deform-block ;");
+    // dfrm-pose ( block actor -- status ): a v1 DFRM block, cells 0..32 in.
+    // dfrm-pose-curves ( block curves actor -- status ): a v2 block, 40 + 4 x curves cells.
+    r = zf_eval(&g_ctx, ": profile-begin 169 sys ; : profile-end 170 sys ; : fish-deform 171 sys ; : fin-deform 172 sys ; : swim-deform 173 sys ; : jelly-deform 174 sys ; : plant-register 175 sys ; : plant-step 176 sys ; : lion-pose 177 sys ; : property@ 178 sys ; : property-int-bytes@ 179 sys ; : property-text-byte@ 180 sys ; : deform 181 sys ; : deform-block 182 sys ; : dfrm-pose >r 33 6 r> deform-block ; : dfrm-pose-curves >r 4 * 40 + 6 r> deform-block ;");
     if (r != ZF_OK) fprintf(stderr, "zforth: profiling/fish bridge init failed: %d\n", r);
 
     // FSN filesystem bridge words (custom 3-7 / sys 131-135)

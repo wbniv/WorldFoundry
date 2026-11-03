@@ -18,15 +18,32 @@
 #include <streams/binstrm.hp>
 
 #include <chrono>
+#include <atomic>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <memory>
+#include <new>
 #include <sstream>
 #include <string>
 #include <vector>
+
+namespace {
+std::atomic<bool> g_countAllocations{false};
+std::atomic<size_t> g_allocations{0};
+}
+void* operator new(std::size_t size) {
+    if (g_countAllocations.load(std::memory_order_relaxed)) ++g_allocations;
+    if (void* p = std::malloc(size ? size : 1)) return p;
+    throw std::bad_alloc();
+}
+void* operator new[](std::size_t size) { return ::operator new(size); }
+void operator delete(void* p) noexcept { std::free(p); }
+void operator delete[](void* p) noexcept { std::free(p); }
+void operator delete(void* p, std::size_t) noexcept { std::free(p); }
+void operator delete[](void* p, std::size_t) noexcept { std::free(p); }
 
 namespace {
 
@@ -99,17 +116,24 @@ std::vector<uint8_t> DfrmPayload(const std::vector<char>& modl)
 int Eval(const std::string& meshPath, const std::string& blocksPath)
 {
     std::unique_ptr<Mesh> m = Load(meshPath);
+    const auto payload = DfrmPayload(m->bytes);
+    uint32_t version = 0, curves = 0;
+    if (payload.size() >= 12) {
+        std::memcpy(&version, payload.data(), 4);
+        std::memcpy(&curves, payload.data() + 8, 4);
+    }
+    const int channels = version == 2 && curves <= 16 ? 40 + 4 * int(curves) : 40;
     std::ifstream in(blocksPath);
     std::string line;
     while (std::getline(in, line)) {
         std::istringstream ss(line);
         double now; ss >> now;
-        float block[40] = {0};
-        for (float& c : block) ss >> c;
+        float block[104] = {0};
+        for (int i = 0; i < channels; ++i) ss >> block[i];
         float rotation[9];                       // optional: the actor's world rotation
         int got = 0;
         while (got < 9 && (ss >> rotation[got])) ++got;
-        const DeformStatus status = m->actor->Deform(DeformKind::Dfrm, block, 40, now, got == 9 ? rotation : nullptr);
+        const DeformStatus status = m->actor->Deform(DeformKind::Dfrm, block, channels, now, got == 9 ? rotation : nullptr);
         std::printf("S %d\n", int(status));
         for (int i = 0; i < m->VertexCount(); ++i) {
             const Vector3& p = m->Vertices()[i].position;
@@ -385,6 +409,66 @@ void Exclusivity(const std::string& dir)
     }
 }
 
+void Version2Validation(const std::string& dir)
+{
+    std::unique_ptr<Mesh> m = Load(dir + "/v2.iff");
+    const auto payload = DfrmPayload(m->bytes);
+    wf_render::DfrmData data;
+    const char* reason = nullptr;
+    Check(wf_render::ParseDfrm(payload.data(), payload.size(), m->VertexCount(), data, reason), "v2 fixture parses");
+    auto rejected = [&](const char* name, size_t offset, uint32_t value, size_t bytes) {
+        auto bad = payload;
+        std::memcpy(bad.data() + offset, &value, bytes);
+        wf_render::DfrmData result;
+        const char* why = nullptr;
+        Check(!wf_render::ParseDfrm(bad.data(), bad.size(), m->VertexCount(), result, why), name);
+    };
+    rejected("v2 rejects partition gap", 32 + 52 + 36, 3, 2);
+    rejected("v2 rejects partition overlap", 32 + 52 + 36, 1, 2);
+    rejected("v2 rejects 17 curves", 8, 17, 4);
+    rejected("v2 rejects 257 samples", 12, 257, 4);
+    rejected("v1 rejects multiple curves", 0, 1, 4);
+    float block[52] = {};
+    block[40] = block[44] = block[48] = 1.f;
+    const auto ok = m->actor->Deform(DeformKind::Dfrm, block, 52, 0);
+    const auto before = m->Positions();
+    block[40] = .5f;
+    const auto shortBlock = m->actor->Deform(DeformKind::Dfrm, block, 51, 0);
+    Check(ok == DeformStatus::Ok && shortBlock == DeformStatus::BadInput && m->Positions() == before,
+          "v2 short block preserves previous pose", int(shortBlock));
+    auto s = Evaluator(dir + "/v2_16.iff");
+    float maxBlock[104] = {};
+    for (int c = 0; c < 16; ++c) maxBlock[40 + 4 * c] = 1.f;
+    s->eval.Evaluate(maxBlock, 104, 0);
+    g_allocations = 0;
+    g_countAllocations = true;
+    int result = 0;
+    for (int i = 0; i < 100; ++i) result |= s->eval.Evaluate(maxBlock, 104, i / 60.0);
+    g_countAllocations = false;
+    Check(result == 0 && g_allocations == 0, "v2 16-curve Evaluate makes no allocations", double(g_allocations.load()));
+
+    // A one-curve v2 at scale 1 must reproduce the original v1 evaluator's
+    // floating-point outputs exactly, including the clip and wrap paths.
+    auto one = Evaluator(dir + "/clips.iff");
+    auto two = Evaluator(dir + "/clips.iff");
+    two->data.version = wf_render::DfrmVersion2;
+    float legacy[40]; Block(legacy, 5.f);
+    legacy[21] = 1; legacy[22] = 10; legacy[23] = .04f; legacy[24] = .7f;
+    legacy[25] = 1; legacy[26] = .1f;
+    float extended[44] = {};
+    std::copy(legacy, legacy + 40, extended);
+    extended[40] = 1.f;
+    bool exact = true;
+    for (int i = 0; i < 7; ++i) {
+        const double now = i * .31;
+        exact &= one->eval.Evaluate(legacy, 40, now) == two->eval.Evaluate(extended, 44, now);
+        exact &= one->eval.Positions() == two->eval.Positions();
+        exact &= one->eval.FaceNormals() == two->eval.FaceNormals();
+        exact &= std::memcmp(one->eval.Outputs(), two->eval.Outputs(), 6 * sizeof(float)) == 0;
+    }
+    Check(exact, "v2 unit scale is bit-identical to v1");
+}
+
 void Timing(const std::string& dir)
 {
     // Best of 5 runs of 2000 poses each: the evaluator alone, then the whole
@@ -419,7 +503,7 @@ int main(int argc, char** argv)
     if (argc == 4 && std::strcmp(argv[1], "--eval") == 0) return Eval(argv[2], argv[3]);
     if (argc == 3 && std::strcmp(argv[1], "--unit") == 0) {
         const std::string dir = argv[2];
-        Geometry(dir); WorldVertical(dir); Clips(dir); Loader(dir); Exclusivity(dir); Timing(dir);
+        Geometry(dir); WorldVertical(dir); Clips(dir); Loader(dir); Exclusivity(dir); Version2Validation(dir); Timing(dir);
         std::printf("dfrm_strand unit: %s\n", g_failures ? "FAIL" : "PASS");
         return g_failures ? 1 : 0;
     }

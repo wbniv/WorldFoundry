@@ -46,16 +46,35 @@ def _sea_fan(mesh, base):
 
 def _clam(mesh, center):
     x, y, z = center
-    # Two fluted valves cradle the vivid, scalloped mantle.
-    mesh.ellipsoid((x, y, z), (.44, .31, .11), 'clam', 20, 7)
-    mesh.ellipsoid((x, y - .015, z + .14), (.36, .25, .11), 'clam', 20, 7)
-    mesh.ellipsoid((x, y - .025, z + .2), (.30, .205, .055), 'clam', 18, 6)
+    # Fluted, pale valves open around the vivid blue mantle.  The ribs fan
+    # from the low hinge, with a scalloped edge instead of stacked ellipsoids.
+    steps = 20
     for side in (-1, 1):
-        for i in range(7):
-            t = (i / 6 - .5) * 1.45
-            end = (x + side * (.16 + .16 * math.cos(t)),
-                   y - .02, z + .16 + .13 * math.sin(t))
-            mesh.swept_tube([(x, y, z + .04), end], .012, 'sand', 4)
+        def section(i):
+            t = -1 + 2*i/steps
+            span = math.sqrt(max(0, 1-t*t))
+            px = x + .43*t
+            scallop = 1 + .10*math.cos(i*math.pi)
+            return ((px, y, z),
+                    (px, y + side*.15*span, z + .035*span),
+                    (px, y + side*.30*span*scallop, z + .13*span))
+        for i in range(steps):
+            a, b = section(i), section(i+1)
+            for band in range(2):
+                points = [a[band], b[band], b[band+1], a[band+1]]
+                mesh.face(points if side < 0 else list(reversed(points)), 'sand')
+        for i in range(1, steps, 2):
+            a, b, c = section(i)
+            mesh.swept_tube([a, b, c], .008, 'sand', 4)
+    center_point = (x, y, z + .125)
+    edge = []
+    for i in range(24):
+        angle = math.tau*i/24
+        wave = 1 + .09*math.sin(8*angle)
+        edge.append((x + .36*math.cos(angle), y + .205*wave*math.sin(angle),
+                     z + .13 + .025*math.sin(8*angle)))
+    for i, point in enumerate(edge):
+        mesh.face([center_point, point, edge[(i+1) % len(edge)]], 'clam')
 
 
 def _zoanthids(mesh, center):
@@ -71,49 +90,59 @@ def _zoanthids(mesh, center):
         mesh.ellipsoid((px, py, pz + .13), (.022, .020, .009), 'polyp', 6, 3)
 
 
-def _worm_crowns(mesh, center, count=3):
+def worm_centers(center, count=15):
     x, y, z = center
+    result = []
     for worm in range(count):
-        wx = x + (worm - (count - 1) / 2) * .23
-        wz = z + .08 * (worm % 2)
-        mesh.swept_tube([(wx, y, wz - .15), (wx, y, wz + .16)], .028, 'sand', 6)
-        # Paired spiral plumes read as feather crowns at tank distance.
+        col, row = worm % 5, worm // 5
+        wx = x + (col - 2) * .25 + .03 * math.sin(worm * 2.3)
+        wy = y - .025 * row
+        wz = z + (row - 1) * .24 + .03 * math.sin(worm * 1.7)
+        result.append((wx, wy, wz))
+    return result
+
+
+def _worm_crowns(mesh, center, count=15, ranges=None):
+    for worm, (wx, wy, wz) in enumerate(worm_centers(center, count)):
+        start = len(mesh.vertices)
+        mesh.swept_tube([(wx, wy, wz - .08), (wx, wy, wz + .04)], .018, 'sand', 6)
+        # Two small, tiered conical plumes per worm. Their jagged fringes
+        # suggest the spiral radioles without overlapping adjacent crowns.
         for side in (-1, 1):
-            points = []
-            for step in range(13):
-                t = step / 12
-                angle = t * math.pi * 2.5
-                points.append((wx + side * (.035 + .16 * t) * math.cos(angle),
-                              y + .10 * t * math.sin(angle), wz + .15 + .34 * t))
-            mesh.swept_tube(points, .016, 'polyp', 5)
-            for j in range(1, 7):
-                t = j / 7
-                p = points[int(t * 12)]
-                for sign in (-1, 1):
-                    tip = (p[0] + sign * .075, p[1], p[2] + .055)
-                    mesh.swept_tube([p, tip], .008, 'coralline', 4)
+            cx = wx + side * .045
+            for tier in range(5):
+                z0 = wz + .025 + tier*.033
+                z1 = z0 + .014
+                width = .052 * (1 - tier/6)
+                upper = width * .52
+                mesh.face([(cx-width, wy-.025, z0), (cx+width, wy-.025, z0),
+                           (cx+upper, wy-.025, z1), (cx-upper, wy-.025, z1)],
+                          ('polyp', 'coralline', 'sponge')[worm % 3])
+        if ranges is not None:
+            ranges.append((start, len(mesh.vertices)))
 
 
 def _feather_star(mesh, center):
     x, y, z = center
     mesh.ellipsoid((x, y, z), (.14, .12, .09), 'coralline', 12, 6)
-    for arm in range(10):
-        a = math.tau * arm / 10
+    # Lamprometra palmata has 27–41 arms in the cited description; model 30.
+    for arm in range(30):
+        a = math.pi * (.06 + .88 * arm / 29)
         points = []
         for j in range(5):
             t = j / 4
-            radius = .12 + .72 * t
+            radius = .12 + (.60 + .11 * math.sin(arm * 2.1)) * t
             points.append((x + radius * math.cos(a + .08 * math.sin(t * math.pi)),
-                           y + .10 * math.sin(a) * t,
-                           z + .10 * math.sin(t * math.pi)))
-        mesh.swept_tube(points, .025, 'coralline', 5)
-        for j in range(1, 8):
-            p = points[min(3, j // 2)]
-            t = j / 8
+                           y + .06 * math.sin(a) * t,
+                           z + radius * math.sin(a) + .10 * math.sin(t * math.pi)))
+        mesh.swept_tube(points, .013, 'coralline', 5)
+        for j in range(1, 5):
+            p = points[j]
+            t = j / 5
             for sign in (-1, 1):
-                tip = (p[0] - sign * .15 * math.sin(a),
-                       p[1] + sign * .12 * math.cos(a), p[2] + .035 + .05 * t)
-                mesh.swept_tube([p, tip], .008, 'polyp', 4)
+                tip = (p[0] - sign * .10 * math.sin(a), p[1],
+                       p[2] + sign * .10 * math.cos(a) + .035 * t)
+                mesh.swept_tube([p, tip], .006, 'polyp', 4)
 
 
 def _mushroom_coral(mesh, center):
@@ -181,19 +210,36 @@ def _juvenile_boxfish(mesh, center):
 def populate(mesh):
     """Add visible static colonies; dynamic animals are authored separately."""
     a = anchor_map()
-    _sea_fan(mesh, (-4.45, -.55, 2.82))
     _clam(mesh, (a['giant_clam'][0], -1.15, .82))
     _zoanthids(mesh, (-3.55, -1.25, 1.55))
-    _nudibranch(mesh, (-4.0, -1.65, 1.05))
-    _worm_crowns(mesh, (-1.9, -.95, 2.0), 3)
-    _feather_star(mesh, (1.75, -.35, 2.8))
+    _zoanthids(mesh, (2.0, -1.05, 1.55))
+    _zoanthids(mesh, (4.0, -.95, 1.70))
+    # Small orange cup-coral clusters occupy the exposed faces and cave edge.
+    # They share the static life mesh instead of consuming individual actors.
+    for x, y, z in ((-4.4,-1.2,1.18), (-3.6,-1.25,1.25), (-1.9,-1.15,1.5),
+                    (1.75,-1.15,1.5), (3.1,-1.22,1.22), (4.4,-1.1,1.34)):
+        for i in range(3):
+            _cup(mesh, (x + (i-1)*.11, y, z + .025*(i % 2)),
+                 .065, .10 + .02*i, 'sponge', 8)
+    # Encrusting sponge and coralline form irregular crusts on the exposed
+    # rock, rather than circular objects sitting in front of it.
+    for x, y, z, rx, rz, color in (
+        (-4.55,-.90,1.35,.25,.16,'sponge'), (-3.8,-1.0,2.00,.22,.14,'coralline'),
+        (-3.05,-1.05,1.25,.27,.14,'sponge'), (-2.0,-.92,2.55,.20,.12,'coralline'),
+        (1.7,-.90,1.20,.23,.15,'sponge'), (2.35,-1.0,2.20,.20,.14,'coralline'),
+        (3.25,-1.0,1.22,.27,.14,'sponge'), (4.4,-.90,2.15,.22,.13,'coralline'),
+    ):
+        rng = random.Random(SEED + round((x + 6) * 1000) + round(z * 100))
+        edge = []
+        for i in range(15):
+            angle = math.tau * i / 15
+            radius = rng.uniform(.65, 1.2)
+            edge.append((x + rx * radius * math.cos(angle), y - .07,
+                         z + rz * radius * math.sin(angle)))
+        for i, point in enumerate(edge):
+            mesh.face([(x, y - .085, z), point, edge[(i + 1) % len(edge)]], color)
     _mushroom_coral(mesh, (-2.1, -1.0, .86))
     for i in range(6):
         angle = math.tau * i / 6
         center = (.72 + .22 * math.cos(angle), -.8 + .12 * math.sin(angle), 2.25)
         _cup(mesh, center, .12, .19 + .04 * (i % 2), 'coralline', 10)
-    # Static first-pass fish geometry. Separate mesh actors and their movement,
-    # reactions and controller are still required by the next reef phases.
-    _humbug(mesh, (-3.05, -1.8, 4.12), .78)
-    _humbug(mesh, (-3.62, -1.45, 3.82), .70)
-    _juvenile_boxfish(mesh, (1.62, -1.9, 3.62))

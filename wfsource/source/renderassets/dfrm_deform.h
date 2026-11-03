@@ -1,15 +1,17 @@
 //============================================================================
-// dfrm_deform.h: the DFRM v1 mesh chunk and its evaluator.
+// dfrm_deform.h: the DFRM mesh chunk (v1 and v2) and its evaluator.
 //
 // A rooted curve (a chain of rigid samples, one per tail ring) with clip
 // playback, an additive Hermite knot layer and a holdfast wrap, plus weighted
 // transforms (head, eyes). Plain C++17, no engine types, so tests can drive it
 // on a vertex array directly. docs/plans/2026-10-16-saltwater-seahorses.md,
 // Phase 1 E1-E5; the reference maths is wflevels/aquarium_tanks/dfrm_ref.py.
+// Version 2 (docs/plans/2026-11-02-gulf-of-thailand-reef-tank.md, E1-E4): the
+// same byte layout with 1-16 curves in one mesh; see "Version 2" below.
 //
 // Chunk layout (little-endian, 4-byte aligned; positions and lengths 16.16
 // fixed in model units, angles int16 centidegrees):
-//   header     32 B  u32 version(1) flags(0) curves samples transforms
+//   header     32 B  u32 version(1 or 2) flags(0) curves samples transforms
 //                    influences clips frames
 //   curve      52 B  i32 root[3] d[3] v[3]; u16 firstSample sampleCount;
 //                    u8 knotCount, pad[3]; u8 knots[8]   (s = v x d)
@@ -32,6 +34,19 @@
 // A clip id is its 1-based index in the clip table; 0 or unknown = no clip.
 // A vertical holdfast (wrap mode 2) is world-vertical: the lead-in turns the
 // tail horizontal in world space, using the actor's rotation from the caller.
+//
+// Version 2: no record changes size or meaning. 1-16 curves (v1: exactly 1)
+// partition the samples contiguously and in order (curve c's firstSample is the
+// sum of the earlier sampleCounts); up to 256 samples (v1: 64). Influence
+// indices stay global. One clip row poses every curve (stride unchanged). Only
+// curve 0's knots are driven; a curve after the first may carry no knots. Cells
+// 0-39 keep the v1 meaning (knots, wrap and outputs are curve 0's; clips A/B
+// and the transforms are shared). Cells 40 + 4c hold curve c's record: scale
+// about the curve's root (0.02-1, clamped), its own clip id (0 = follow the
+// shared pose), that clip's start (level s, blended in over cell 29's fade),
+// and a flex bias in degrees added to every sample of the curve before the
+// clamp. A v2 block is 40 + 4 x curves cells; fewer is DfrmBadInput. A v1 mesh
+// reads no records.
 //============================================================================
 #ifndef WF_DFRM_DEFORM_H
 #define WF_DFRM_DEFORM_H
@@ -43,11 +58,21 @@
 namespace wf_render {
 
 enum : int {
-    DfrmVersion = 1,
+    DfrmVersion = 1, DfrmVersion2 = 2,
     DfrmBlockSize = 40, DfrmInputCount = 33,
-    DfrmMaxSamples = 64, DfrmMaxKnots = 7, DfrmMaxTransforms = 3,
+    DfrmMaxSamplesV1 = 64, DfrmMaxSamples = 256, DfrmMaxCurves = 16,
+    DfrmMaxKnots = 7, DfrmMaxTransforms = 3,
     DfrmOutWrap = 33, DfrmOutTip = 36, DfrmOutStatus = 39,
+    DfrmCurveCells = 4,                                         // per-curve record, v2
+    DfrmCurveScale = 0, DfrmCurveClip = 1, DfrmCurveStart = 2, DfrmCurveBias = 3,
+    DfrmMaxBlock = DfrmBlockSize + DfrmCurveCells * DfrmMaxCurves,   // 104
 };
+constexpr float DfrmMinScale = .02f, DfrmMaxScale = 1.f;
+// Cells a block needs for this many curves of this chunk version.
+inline int DfrmBlockCells(int version, int curves)
+{
+    return version >= DfrmVersion2 ? DfrmBlockSize + DfrmCurveCells * curves : DfrmInputCount;
+}
 enum DfrmInfluenceKind : uint8_t { DfrmNone = 0, DfrmOnSample = 1, DfrmOnTransform = 2 };
 // Same values as DeformStatus (mesh_deformer.h).
 enum DfrmStatus : int { DfrmOk = 0, DfrmNoData = 1, DfrmClamped = 3, DfrmNotFinite = 4, DfrmBadInput = 5 };
@@ -63,6 +88,7 @@ struct DfrmInfluence { uint8_t kind; uint16_t index; float a, b, c; };
 struct DfrmClip { uint32_t nameHash; float fps; int frameCount; bool loop; int firstFrame; };
 
 struct DfrmData {
+    int version = DfrmVersion;
     std::vector<DfrmCurve> curves;
     std::vector<DfrmSample> samples;
     std::vector<DfrmTransform> transforms;
@@ -70,10 +96,12 @@ struct DfrmData {
     std::vector<DfrmClip> clips;
     std::vector<int16_t> frames;          // frameCount x frameStride
     int frameStride = 0;                  // 3 x samples + transforms
+    std::vector<uint8_t> sampleCurve;     // per sample: the curve it belongs to
 };
 
 // Validates everything; on failure returns false, leaves out untouched and
-// sets reason. v1 accepts exactly one curve (the block drives one curve).
+// sets reason. v1 accepts exactly one curve; v2 accepts 1-16 that partition
+// the samples in order.
 bool ParseDfrm(const void* bytes, size_t size, int vertexCount, DfrmData& out, const char*& reason);
 
 class DfrmEvaluator {
@@ -82,7 +110,7 @@ public:
     // per face; restNormals: 3 floats per face. False if counts do not match.
     bool Bind(const DfrmData& data, const float* rest, int vertexCount,
               const int* faces, const float* restNormals, int faceCount);
-    // One frame. block holds n >= DfrmInputCount cells. On DfrmOk or
+    // One frame. block holds n >= DfrmBlockCells(version, curves) cells. On DfrmOk or
     // DfrmClamped, Positions(), FaceNormals() and Outputs() hold the new pose;
     // on any other status they keep the previous one (no partial pose).
     // worldRotation: 9 floats, row i = model axis i in world (NULL = model frame).
@@ -93,7 +121,9 @@ public:
     bool FaceNormalDriven(int face) const { return _faceMode[face] != FaceStatic; }
     const float* Outputs() const { return _outputs; }       // wrap centre xyz, tip xyz
     // Inspection for tests: the last evaluated chain.
-    const std::vector<float>& Joints() const { return _joints; }   // 3 x (samples + 1)
+    // Joints: per curve, its root then one per sample: global sample i of curve c
+    // ends at joint i + c + 1 (v1: 3 x (samples + 1), as before).
+    const std::vector<float>& Joints() const { return _joints; }   // 3 x (samples + curves)
     const std::vector<float>& Frames() const { return _frames; }   // 9 per sample: d, v, s
     const std::vector<float>& Angles() const { return _angles; }   // 3 per sample, degrees, clamped
     float RootPitch() const { return _rootPitch; }
@@ -109,7 +139,7 @@ private:
     std::vector<float> _joints, _frames, _angles, _xf;
     // Per-frame working buffers, sized once in Bind so Evaluate never allocates.
     // The *Next buffers are swapped with the published ones on success only.
-    std::vector<float> _clipA, _clipB, _flex, _lateral, _twist;
+    std::vector<float> _clipA, _clipB, _clipC, _flex, _lateral, _twist, _scale;
     std::vector<float> _xfNext, _jointsNext, _framesNext, _positionsNext, _normalsNext;
     float _outputs[6] = {0, 0, 0, 0, 0, 0};
     float _rootPitch = 0;

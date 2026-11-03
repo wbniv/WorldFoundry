@@ -11,18 +11,21 @@ def hard_corals(mesh):
     # Recursively branched cauliflower-like head; one mesh, no actor per branch.
     rng = random.Random(SEED + 101)
     x, y, z = (-3.25, -.82, 3.05)
-    for i in range(18):
-        angle = math.tau * i / 18
-        base = (x + .10 * math.cos(angle), y + .12 * math.sin(angle), z - .38)
-        mid = (x + .28 * math.cos(angle), y + .25 * math.sin(angle), z + .02)
-        tip = (x + rng.uniform(.42, .60) * math.cos(angle),
-               y + rng.uniform(.37, .52) * math.sin(angle), z + rng.uniform(.35, .62))
-        mesh.swept_tube([base, mid, tip], .052, 'pocillopora', 6)
-        mesh.ellipsoid(tip, (.075, .075, .075), 'pocillopora_tip', 7, 4)
-        for sign in (-1, 1):
-            fork = (tip[0] + sign * .10 * math.cos(angle + .9),
-                    tip[1] + sign * .10 * math.sin(angle + .9), tip[2] + .13)
-            mesh.swept_tube([mid, tip, fork], .026, 'pocillopora', 5)
+    mesh.ellipsoid((x, y, z-.32), (.34, .28, .19), 'pocillopora', 12, 7)
+    for i in range(25):
+        angle = i * 2.399963
+        reach = rng.uniform(.23, .54)
+        base = (x + .12 * math.cos(angle), y + .10 * math.sin(angle), z - .28)
+        mid = (x + reach*.65 * math.cos(angle), y + reach*.55 * math.sin(angle),
+               z + rng.uniform(-.02, .15))
+        tip = (x + reach * math.cos(angle), y + reach*.8 * math.sin(angle),
+               z + rng.uniform(.18, .48))
+        mesh.swept_tube([base, mid, tip], rng.uniform(.035, .052), 'pocillopora', 6)
+        mesh.ellipsoid(tip, (.064, .058, .072), 'pocillopora_tip', 7, 4)
+        fork = (tip[0] + .12 * math.cos(angle + 1.0),
+                tip[1] + .10 * math.sin(angle + 1.0), tip[2] + rng.uniform(.08, .17))
+        mesh.swept_tube([mid, fork], .024, 'pocillopora', 5)
+        mesh.ellipsoid(fork, (.045, .045, .055), 'pocillopora_tip', 6, 4)
     x, y, z = (3.25, -.72, 2.82)
     mesh.swept_tube([(x,y,z-.65), (x,y,z)], .13, 'acropora', 8)
     # Broad table with a dense crown of short upright branchlets.

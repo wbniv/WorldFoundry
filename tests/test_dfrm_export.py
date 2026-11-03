@@ -10,6 +10,8 @@ int16 centidegrees. docs/plans/2026-10-16-saltwater-seahorses.md, E1 and E6.
 from __future__ import annotations
 
 import json
+import hashlib
+import ast
 import math
 import random
 import re
@@ -17,6 +19,7 @@ import shutil
 import struct
 import subprocess
 import sys
+import types
 from pathlib import Path
 
 import pytest
@@ -97,6 +100,107 @@ def exported():
     payload = dc.build_chunk(chain, positions, bindings, transforms, clips)
     return {'payload': payload, 'decoded': dc.decode(payload), 'positions': positions, 'expected': expected,
             'truth': truth, 'chain': chain}
+
+
+def test_v2_curves_round_trip_and_independent_clip():
+    chains = []
+    positions = []
+    bindings = []
+    for c in range(3):
+        chain = []
+        for i in range(2):
+            chain.append({'head': (c * 3, 0, -i), 'tail': (c * 3, 0, -i - 1),
+                          'z_axis': (1, 0, 0), 'limits': (90, 90, 90, 90)})
+            positions.append((c * 3 + .25, 0, -i))
+            bindings.append((dc.ON_SAMPLE, 2 * c + i, 1.0))
+        chains.append(chain)
+    row = [0.0] * 18
+    row[6] = 60.0  # first joint of the second curve only
+    clips = [{'name': 'bend', 'frames': [row]}]
+    chunk = dc.build_chunk_curves(chains, positions, bindings, clips=clips, knots=(0, 1))
+    decoded = dc.decode(chunk)
+    assert decoded['version'] == 2
+    assert [(c['first'], c['count']) for c in decoded['curves']] == [(0, 2), (2, 2), (4, 2)]
+    assert [i[1] for i in decoded['influences']] == list(range(6))
+    assert decoded['frames'][0] == row
+    rig = dfrm_ref.Rig(decoded, positions, [])
+    block = [0.0] * 52
+    for c in range(3):
+        block[40 + 4 * c] = 1.0
+    baseline = dfrm_ref.evaluate(rig, block, 3.0)
+    block[45], block[46] = 1.0, 2.0
+    posed = dfrm_ref.evaluate(rig, block, 3.0)
+    assert posed['positions'][:2] == baseline['positions'][:2]
+    assert posed['positions'][4:] == baseline['positions'][4:]
+    assert posed['positions'][2:4] != baseline['positions'][2:4]
+    block[45] = 0.0
+    block[44] = .02
+    small = dfrm_ref.evaluate(rig, block, 3.0)
+    root = decoded['curves'][1]['root']
+    for before, after in zip(baseline['positions'][2:4], small['positions'][2:4]):
+        assert max(abs(after[k] - (root[k] + .02 * (before[k] - root[k]))) for k in range(3)) < 1e-12
+    assert small['positions'][:2] == baseline['positions'][:2]
+    assert small['positions'][4:] == baseline['positions'][4:]
+    block[44] = 0.01
+    assert dfrm_ref.evaluate(rig, block, 3.0)['status'] == 3
+
+
+def test_single_curve_entry_point_is_identical(exported):
+    chain, positions, weights, _, transforms = synthetic_tail()
+    bindings = dc.bind_vertices(weights, CHAIN, XF)
+    _, clips = authored_clips()
+    assert dc.build_chunk_curves([chain], positions, bindings, transforms, clips) == exported['payload']
+    # Generated from the pre-v2 writer at the worktree's parent commit.
+    assert hashlib.sha256(exported['payload']).hexdigest() == '4f53bb3b9d7fd08c07de5bfc8dba5618641dd724cf5d307252353c7ae4c3e089'
+
+
+@pytest.mark.parametrize('raw', ['not-json', '[]', '[[]]', '[["a"]]',
+                                 '[["a", "a"]]', '[["a", "missing"]]',
+                                 '[["a", "head"]]'])
+def test_multicurve_bone_list_rejects_invalid_input(raw):
+    with pytest.raises(ValueError, match='wf_dfrm_curves'):
+        dc.parse_curve_names(raw, {'a', 'head'})
+
+
+def test_blender_collector_gathers_multicurve_bindings():
+    """Exercise the actual collector with a small armature-like fixture."""
+    path = ROOT / 'wftools/wf_blender/export_level.py'
+    module = ast.parse(path.read_text())
+    function = next(n for n in module.body if isinstance(n, ast.FunctionDef) and n.name == '_collect_dfrm_rig')
+    code = compile(ast.Module(body=[function], type_ignores=[]), str(path), 'exec')
+    ns = {'_dfrm_module': lambda: dc, '_dfrm_limits': lambda p, n: (90, 90, 90, 90)}
+    exec(code, ns)
+
+    class Identity:
+        col = [(1, 0, 0), (0, 1, 0), (1, 0, 0)]
+        def inverted(self): return self
+        def to_3x3(self): return self
+        def __matmul__(self, other): return other
+
+    names = [['a0', 'a1'], ['b0', 'b1']]
+    flat = sum(names, [])
+    bones = {}
+    class Bone(types.SimpleNamespace):
+        def __contains__(self, key): return False
+    for i, name in enumerate(flat):
+        x, z = i // 2, -(i % 2)
+        bones[name] = Bone(head_local=(x, 0, z), tail_local=(x, 0, z - 1), matrix_local=Identity())
+    arm = types.SimpleNamespace(matrix_world=Identity(), data=types.SimpleNamespace(bones=bones),
+                                pose=types.SimpleNamespace(bones={n: {} for n in flat}), animation_data=None)
+    class Obj(dict): pass
+    obj = Obj(wf_dfrm_curves=json.dumps(names))
+    obj.modifiers = [types.SimpleNamespace(type='ARMATURE', object=arm)]
+    obj.parent = None
+    obj.matrix_world = Identity()
+    obj.vertex_groups = [types.SimpleNamespace(index=i, name=n) for i, n in enumerate(flat)]
+    obj.data = types.SimpleNamespace(vertices=[types.SimpleNamespace(groups=[types.SimpleNamespace(group=i, weight=1)])
+                                               for i in range(4)])
+    rig = ns['_collect_dfrm_rig'](obj)
+    assert [len(c) for c in rig['chains']] == [2, 2]
+    assert [(k, i) for k, i, _ in rig['bindings']] == [(dc.ON_SAMPLE, i) for i in range(4)]
+    positions = [(0.1, 0, 0), (0.1, 0, -1), (1.1, 0, 0), (1.1, 0, -1)]
+    chunk = dc.build_chunk_curves(rig['chains'], positions, rig['bindings'], rig['transforms'], rig['clips'])
+    assert dc.decode(chunk)['version'] == 2
 
 
 def test_angles_round_trip_within_a_hundredth_of_a_degree(exported):

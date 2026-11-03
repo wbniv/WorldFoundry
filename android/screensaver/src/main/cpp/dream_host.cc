@@ -154,7 +154,7 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeStop(JNIEnv*, jclass) {
 extern "C" JNIEXPORT void JNICALL
 Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         JNIEnv* env, jclass, jobject manager, jobject surface, jint level, jstring logPath) {
-    if (level < 0 || level > 8) return;
+    if (level < 0 || level > 9) return;
     if (logPath) {
         const char* path = env->GetStringUTFChars(logPath, nullptr);
         if (path) {
@@ -181,7 +181,7 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         char slotHeight[] = "--vram-slot-height=1024";
         char permWidth[] = "--vram-perm-width=1024";
         char permHeight[] = "--vram-perm-height=1024";
-        char vramHeight[] = "--vram-height=1024";
+        char vramHeight[] = "--vram-height=2048";
         char noFps[] = "--no-fps";
         char* argv[] = {arg0, slotWidth, slotHeight, permWidth, permHeight, vramHeight, noFps, arg1, nullptr};
         __argc = 8;

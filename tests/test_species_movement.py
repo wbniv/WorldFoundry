@@ -44,7 +44,7 @@ def vm(tmp_path_factory):
         indices = mapping.get('indices', mapping.get('actors'))
         result=subprocess.run([str(binary),*map(str,paths),str(indices['Player']),str(indices['Director']),*entries],input=trace,text=True,capture_output=True)
         assert result.returncode==0,result.stderr
-        keys=['frame','x','y','z','vx','vy','vz',*range(600,751),*range(1100,1112),*range(1200,1281),'part-x','part-y','part-z','part-a','part-b','part-c']
+        keys=['frame','x','y','z','vx','vy','vz',*range(600,751),*range(1100,1112),*range(1200,1281),*range(1000,1035),'part-x','part-y','part-z','part-a','part-b','part-c','camshot']
         return [dict(zip(keys,map(float,row))) for row in csv.reader(io.StringIO(result.stdout))]
     return run
 
@@ -65,6 +65,36 @@ def test_reef_humbugs_detect_player_near_their_coral(vm):
     far = vm('thai_reef', 'reset 4 0 2\nstep 1 0 .0166667\n')
     assert near[-1][641] != 0
     assert far[-1][641] == 0
+
+def test_reef_worm_crowns_retract_near_player(vm):
+    near = vm('thai_reef', 'reset -2.75 -.95 2\nstep 60 0 .0166667\n')
+    far = vm('thai_reef', 'reset 4 0 4\nstep 60 0 .0166667\n')
+    assert near[8][642] < .05  # closes within 0.15 seconds at 60 Hz
+    assert far[0][642] > .99  # open on first frame when unthreatened
+    assert near[-1][642] < .3
+    assert far[-1][642] > .9
+    retreat = vm('thai_reef', 'reset -2.75 -.95 2\nstep 60 0 .0166667\nstep 180 8192 .0166667\nstep 300 0 .0166667\n')
+    assert retreat[239][642] < .3
+    assert retreat[-1][642] > .9
+    reopening = next(i for i in range(60, len(retreat)) if retreat[i][1007] == 0)
+    assert retreat[reopening][642] < .1
+    assert retreat[reopening + 90][642] > .95  # unfurls over 1.5 seconds
+    individual = vm('thai_reef', 'reset -3.25 -.95 1.76\nstep 180 0 .0166667\n')
+    assert individual[-1][1020] < .2
+    assert individual[-1][1034] > .9
+    assert 3 <= individual[-1][1000] < individual[-1][1001] <= 8
+
+def test_reef_cleaning_waits_for_a_stationary_visitor(vm):
+    rows = vm('thai_reef', 'reset -.7 -.15 1.885\nstep 180 0 .0166667\nstep 60 8192 .0166667\n')
+    assert rows[59][644] < 2
+    assert rows[179][644] >= 2
+    assert rows[-1][644] == 0
+
+def test_reef_camera_starts_wide_and_can_change_to_close(vm):
+    mapping = json.loads((ROOT/'wflevels/aquarium_thai_reef/actor-map.json').read_text())['actors']
+    rows = vm('thai_reef', 'reset .7 -.5 3.535\nstep 1 0 .05\nset 648 1\nstep 1 0 .05\n')
+    assert rows[0]['camshot'] == mapping['cs_wide']
+    assert rows[1]['camshot'] == mapping['cs_close']
 
 @pytest.mark.parametrize('kind',['betta','lionfish'])
 @pytest.mark.parametrize('hz',[20,30,60])

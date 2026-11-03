@@ -9,11 +9,24 @@ def _disc(mesh, x, y, z, r, color):
 
 def boxfish(Mesh):
     m = Mesh('reef_boxfish')
-    x0, x1, y0, y1, z0, z1 = -.22, .22, -.14, .14, -.16, .16
-    v = ((x0,y0,z0),(x1,y0,z0),(x1,y1,z0),(x0,y1,z0),
-         (x0,y0,z1),(x1,y0,z1),(x1,y1,z1),(x0,y1,z1))
-    for f in ((0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)):
-        m.face([v[i] for i in f], 'fish')
+    # Rounded, rigid box cross-sections retain the juvenile silhouette without
+    # bending the body when it swims. Its fins remain separate visual details.
+    rings = []
+    for x, radius in ((-.23,.67),(-.20,1),(.15,1),(.22,.86),(.24,.60)):
+        ring = []
+        for i in range(16):
+            angle = math.tau * i / 16
+            c, s = math.cos(angle), math.sin(angle)
+            y = .14 * radius * math.copysign(abs(c) ** .6, c)
+            z = .16 * radius * math.copysign(abs(s) ** .6, s)
+            ring.append((x,y,z))
+        rings.append(ring)
+    m.face(list(reversed(rings[0])), 'fish')
+    m.face(rings[-1], 'fish')
+    for a,b in zip(rings,rings[1:]):
+        for i in range(16):
+            j = (i+1) % 16
+            m.face([a[i],a[j],b[j],b[i]], 'fish')
     for side in (-1, 1):
         y = side * .142
         for x,z in ((-.14,-.08),(-.04,-.08),(.06,-.08),(-.14,.02),(-.04,.02),(.06,.02),(-.14,.11),(-.04,.11)):

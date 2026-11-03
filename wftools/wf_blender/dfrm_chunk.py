@@ -1,4 +1,4 @@
-"""DFRM v1 mesh chunk: build, encode and decode, without bpy.
+"""DFRM mesh chunk (v1 and v2): build, encode and decode, without bpy.
 
 The exporter (export_level.py, ``wf_dfrm_rig``) gathers a 35-bone tail chain,
 the head/eye bones, vertex groups and actions from Blender, then calls
@@ -6,6 +6,11 @@ the head/eye bones, vertex groups and actions from Blender, then calls
 byte layout and the control block are documented in
 wfsource/source/renderassets/dfrm_deform.h; the plan is
 docs/plans/2026-10-16-saltwater-seahorses.md (Phase 1, E1).
+
+:func:`build_chunk_curves` writes several chains into one mesh: version 2, the
+same byte layout with up to 16 curves partitioning up to 256 samples in order
+(docs/plans/2026-11-02-gulf-of-thailand-reef-tank.md, E1 and E5). With one
+chain it writes exactly what :func:`build_chunk` writes (version 1).
 
 Conventions (they match the engine's forward kinematics):
 
@@ -22,14 +27,44 @@ Conventions (they match the engine's forward kinematics):
 from __future__ import annotations
 
 import math
+import json
 import struct
 
 VERSION = 1
+VERSION2 = 2
 FPS = 30
-MAX_SAMPLES = 64
+MAX_SAMPLES = 64          # version 1
+MAX_SAMPLES_V2 = 256
+MAX_CURVES = 16
 MAX_KNOTS = 7
 MAX_TRANSFORMS = 3
 NONE, ON_SAMPLE, ON_TRANSFORM = 0, 1, 2
+
+
+def parse_curve_names(raw, available):
+    """Validate a mesh's JSON ``wf_dfrm_curves`` list against its armature.
+
+    Each inner list is an ordered root-to-tip chain; names are unique across
+    chains. Curve zero needs at least two bones for its driven knot table.
+    """
+    try:
+        groups = json.loads(raw)
+    except (TypeError, ValueError) as exc:
+        raise ValueError('wf_dfrm_curves must be JSON lists of bone names') from exc
+    if not isinstance(groups, list) or not 1 <= len(groups) <= MAX_CURVES:
+        raise ValueError('wf_dfrm_curves needs 1..16 curves')
+    if any(not isinstance(g, list) or not g or any(not isinstance(n, str) or not n for n in g) for g in groups):
+        raise ValueError('wf_dfrm_curves needs nonempty lists of bone names')
+    if len(groups[0]) < 2 or sum(map(len, groups)) > MAX_SAMPLES_V2:
+        raise ValueError('wf_dfrm_curves needs at least two bones in curve 0 and at most 256 in total')
+    names = [n for group in groups for n in group]
+    if len(set(names)) != len(names):
+        raise ValueError('wf_dfrm_curves bone names must be unique')
+    if any(n not in available for n in names):
+        raise ValueError('wf_dfrm_curves names a missing armature bone')
+    if any(n in ('head', 'eye_l', 'eye_r') for n in names):
+        raise ValueError('wf_dfrm_curves cannot use a transform bone')
+    return groups
 
 
 def fnv1a(name: str) -> int:
@@ -162,15 +197,43 @@ def build_chunk(chain, positions, bindings, transforms=(), clips=(), knots=(0, 6
     n = len(chain)
     if not 1 <= n <= MAX_SAMPLES:
         raise ValueError(f'DFRM chain needs 1..{MAX_SAMPLES} bones, got {n}')
-    if len(transforms) > MAX_TRANSFORMS:
-        raise ValueError('DFRM allows at most 3 transforms')
+    return _encode(VERSION, [chain], positions, bindings, transforms, clips, [_driven_knots(knots, n)])
+
+
+def build_chunk_curves(chains, positions, bindings, transforms=(), clips=(), knots=(0, 6, 12, 18, 24, 30, 34)):
+    """Encode several chains as one DFRM payload: version 2, or version 1 for one chain.
+
+    chains: 1..16 chains as :func:`build_chunk` takes them; each has its own
+      root and its own straight bind pose. Their samples are numbered in order:
+      chain c's bone i is global sample ``sum(len(chains[:c])) + i``.
+    bindings: (kind, index, weight) per vertex; a sample index is global.
+    clips: each frame lists 3 angles per global sample, then one per transform.
+    knots: curve 0's knot sample indices (only curve 0's knots are driven).
+      A later curve gets the two-knot table (0, n - 1), or none for one bone.
+    """
+    if len(chains) == 1:
+        return build_chunk(chains[0], positions, bindings, transforms, clips, knots)
+    if not 1 <= len(chains) <= MAX_CURVES:
+        raise ValueError(f'DFRM needs 1..{MAX_CURVES} curves, got {len(chains)}')
+    total = sum(len(c) for c in chains)
+    if any(len(c) < 1 for c in chains) or total > MAX_SAMPLES_V2:
+        raise ValueError(f'DFRM v2 needs 1..{MAX_SAMPLES_V2} bones, at least one per curve, got {total}')
+    tables = [_driven_knots(knots, len(chains[0]))]
+    tables += [[0, len(c) - 1] if len(c) >= 2 else [] for c in chains[1:]]
+    return _encode(VERSION2, chains, positions, bindings, transforms, clips, tables)
+
+
+def _driven_knots(knots, n):
     knots = [k for k in knots if k < n]
     if knots[-1] != n - 1:
         knots.append(n - 1)
     if not 2 <= len(knots) <= MAX_KNOTS:
         raise ValueError('DFRM needs 2..7 knots')
-    if len(positions) != len(bindings):
-        raise ValueError('DFRM bindings must match the vertex count')
+    return knots
+
+
+def _chain_frame(chain):
+    """A chain's root, rest frame (d, v, s) and bone lengths; the bind pose must be straight."""
     root = list(chain[0]['head'])
     d = _norm(_sub(chain[0]['tail'], chain[0]['head']))
     v = _norm(chain[0]['z_axis'])
@@ -190,12 +253,28 @@ def build_chunk(chain, positions, bindings, transforms=(), clips=(), knots=(0, 6
             raise ValueError(f'DFRM bone {i} is not aligned with the root: the bind pose must be straight')
         lengths.append(length)
         joint = list(bone['tail'])
-    heads = [list(b['head']) for b in chain]
+    return root, d, v, s, lengths
+
+
+def _encode(version, chains, positions, bindings, transforms, clips, knot_tables):
+    if len(transforms) > MAX_TRANSFORMS:
+        raise ValueError('DFRM allows at most 3 transforms')
+    if len(positions) != len(bindings):
+        raise ValueError('DFRM bindings must match the vertex count')
+    frames_ = [_chain_frame(c) for c in chains]
+    bones = [bone for c in chains for bone in c]               # global sample order
+    n = len(bones)
+    curve_of = [ci for ci, c in enumerate(chains) for _ in c]
+    lengths = [x for f in frames_ for x in f[4]]
+    heads = [list(b['head']) for b in bones]
 
     infl = []
     widest = [0.0] * n
     for p, (kind, index, weight) in zip(positions, bindings):
         if kind == ON_SAMPLE:
+            if not 0 <= index < n:
+                raise ValueError('DFRM sample binding out of range')
+            _root, d, v, s, _len = frames_[curve_of[index]]
             rel = _sub(p, heads[index])
             off = (_dot(rel, d), _dot(rel, v), _dot(rel, s))
             widest[index] = max(widest[index], abs(off[1]), abs(off[2]))
@@ -220,11 +299,14 @@ def build_chunk(chain, positions, bindings, transforms=(), clips=(), knots=(0, 6
                 raise ValueError(f"DFRM clip {c['name']} frame has {len(f)} angles, expected {stride}")
             frame_rows.append(struct.pack('<%dh' % stride, *(_centi(a) for a in f)))
 
-    out = bytearray(struct.pack('<8I', VERSION, 0, 1, n, len(transforms), len(positions),
+    out = bytearray(struct.pack('<8I', version, 0, len(chains), n, len(transforms), len(positions),
                                 len(clip_rows), len(frame_rows)))
-    out += struct.pack('<9i', *(_fixed(x) for x in root + d + v))
-    out += struct.pack('<HHB3x', 0, n, len(knots)) + bytes(knots + [0] * (8 - len(knots)))
-    for i, bone in enumerate(chain):
+    first = 0
+    for (root, d, v, _s, _len), chain, knots in zip(frames_, chains, knot_tables):
+        out += struct.pack('<9i', *(_fixed(x) for x in root + d + v))
+        out += struct.pack('<HHB3x', first, len(chain), len(knots)) + bytes(knots + [0] * (8 - len(knots)))
+        first += len(chain)
+    for i, bone in enumerate(bones):
         half = bone.get('half_width', widest[i])
         out += struct.pack('<ii4h', _fixed(lengths[i]), _fixed(half), *(_centi(a) for a in bone['limits']))
     for t in transforms:
@@ -236,7 +318,9 @@ def build_chunk(chain, positions, bindings, transforms=(), clips=(), knots=(0, 6
 
 
 def decode(payload: bytes) -> dict:
-    """Parse a DFRM v1 payload into plain Python values (for tests and tools)."""
+    """Parse a DFRM v1 or v2 payload into plain Python values (for tests and tools).
+
+    Curves keep their ``first``/``count``; influence sample indices are global."""
     version, flags, nc, ns, nt, ni, nk, nf = struct.unpack_from('<8I', payload, 0)
     o = 32
     curves = []

@@ -36,9 +36,11 @@ def _smooth_noise(x, y, scale, seed):
 def _detail(tile, x, y, seed):
     """Return a repeating, species-appropriate luminance variation."""
     if tile == 1:  # small coral polyps
-        dx, dy = (x + 16) % 32 - 16, (y + 16) % 32 - 16
+        cell_x, cell_y = x // 24, y // 24
+        dx = x % 24 - 12 + 5 * (_noise(cell_x, cell_y, seed + 101) - .5)
+        dy = y % 24 - 12 + 5 * (_noise(cell_x, cell_y, seed + 102) - .5)
         r = math.hypot(dx, dy)
-        return 13 * math.cos(r * 1.1) - 5 * (r > 11)
+        return 5 * math.cos(r * 1.1) - 3 * (r > 8) + 5 * (_noise(x, y, seed + 103) - .5)
     if tile == 2:  # barrel-sponge pores
         dx, dy = (x + 11) % 22 - 11, (y + 11) % 22 - 11
         r = math.hypot(dx, dy)
@@ -86,6 +88,12 @@ def write_atlas(path, seed=20261102, style='realistic'):
             # Small flat swatches for fish markings, sampled at their centres.
             if 768 <= x < 800 and 512 <= y < 528:
                 rgb = [18, 19, 22] if x < 784 else [245, 245, 237]
+            if 800 <= x < 896 and 512 <= y < 528:
+                band = (x - 800) // 16
+                if style == 'anime':
+                    rgb = [8 + 4 * band, 65 + 17 * band, 128 + 17 * band]
+                else:
+                    rgb = [8 + 3 * band, 44 + 8 * band, 64 + 10 * band]
             out.extend((rgb[2],rgb[1],rgb[0]))
     Path(path).write_bytes(out)
 

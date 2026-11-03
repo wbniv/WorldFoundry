@@ -11,6 +11,7 @@ from pathlib import Path
 from mathutils import Vector
 
 import bpy
+import bmesh
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -33,6 +34,7 @@ from reef.atlas import write_atlas
 from reef.geometry import build_groups, triangles
 from reef.scene import anchor_map
 from reef.fishes import boxfish, humbug
+from reef import life, invertebrates, worm_rig
 import species
 import wf_blender
 import wf_blender.operators as wf_operators
@@ -77,9 +79,9 @@ node.image = image
 mat.node_tree.links.new(node.outputs['Color'], mat.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
 # Swatches correspond to the atlas tile order. UVs are world-projected and kept
 # inside each tile; texturing and scale are provisional until rendered in-engine.
-swatches = {'rock':4, 'porites':1, 'pocillopora':1, 'pocillopora_tip':1,
-            'acropora':1, 'scroll':1, 'flowerpot':1, 'flowerpot_tip':1,
-            'leather':1, 'fan':0, 'sponge':2, 'sponge_rim':2,
+swatches = {'rock':4, 'porites':3, 'pocillopora':1, 'pocillopora_tip':1,
+            'acropora':3, 'scroll':0, 'flowerpot':5, 'flowerpot_tip':5,
+            'leather':3, 'fan':0, 'sponge':2, 'sponge_rim':2,
             'sponge_inner':2, 'sand':3, 'frame':4, 'coralline':0,
             'polyp':1, 'zoanthid':5, 'clam':6, 'fish':7}
 
@@ -89,9 +91,11 @@ def blender_mesh(mesh, smooth=False):
     data.materials.append(mat)
     uv = data.uv_layers.new(name='UVMap')
     for poly, key in zip(data.polygons, mesh.colors):
-        if key in ('fish_dark', 'fish_white'):
-            u = (776 if key == 'fish_dark' else 792) / 1024
-            v = 1 - 520 / 1024
+        if key in ('fish_dark', 'fish_white') or key.startswith('water_'):
+            x = (776 if key == 'fish_dark' else 792 if key == 'fish_white'
+                 else 808 + 16 * int(key.removeprefix('water_')))
+            u = x / 1024
+            v = 520 / 1024
             for li in poly.loop_indices:
                 uv.data[li].uv = (u, v)
             continue
@@ -99,8 +103,9 @@ def blender_mesh(mesh, smooth=False):
         for li in poly.loop_indices:
             x, y, z = data.vertices[data.loops[li].vertex_index].co
             # Leave a small margin to reduce bleeding between neighboring tiles.
-            u = (tile % 4 + .04 + .92 * ((x * .37 + y * .11) % 1)) / 4
-            v = 1 - (tile // 4 + .04 + .92 * ((z * .37 + y * .11) % 1)) / 2
+            frequency = 1.1 if tile == 1 else .37
+            u = (tile % 4 + .04 + .92 * ((x * frequency + y * .11) % 1)) / 4
+            v = (tile // 4 + .04 + .92 * ((z * frequency + y * .11) % 1)) / 2
             uv.data[li].uv = (u, v)
     data.update()
     if smooth:
@@ -108,9 +113,36 @@ def blender_mesh(mesh, smooth=False):
             poly.use_smooth = True
     return data
 
+
+def add_outline(data, width):
+    """Append a dark, reversed hull to an existing material/UV mesh."""
+    data.calc_loop_triangles()
+    before = len(data.loop_triangles)
+    bm = bmesh.new()
+    bm.from_mesh(data)
+    bm.normal_update()
+    duplicate = bmesh.ops.duplicate(bm, geom=list(bm.verts) + list(bm.edges) + list(bm.faces))['geom']
+    verts = [element for element in duplicate if isinstance(element, bmesh.types.BMVert)]
+    faces = [element for element in duplicate if isinstance(element, bmesh.types.BMFace)]
+    for vertex in verts:
+        vertex.co += vertex.normal * width
+    bmesh.ops.reverse_faces(bm, faces=faces)
+    uv_layer = bm.loops.layers.uv.active
+    if uv_layer is None:
+        raise ValueError('anime outline requires the mesh UV layer')
+    for face in faces:
+        for loop in face.loops:
+            loop[uv_layer].uv = (776 / 1024, 520 / 1024)
+    bm.to_mesh(data)
+    bm.free()
+    data.update()
+    data.calc_loop_triangles()
+    return len(data.loop_triangles) - before
+
 groups = build_groups(Mesh)
 actual_triangles = {}
-oad = repo / 'wfsource/source/oas/statplat.oad'
+actual_hull_triangles = {}
+oad = repo / 'wfsource/source/oas/platform.oad'
 for name, mesh in groups.items():
     obj = bpy.data.objects.new(name, blender_mesh(mesh,
         smooth=name in ('reef_left', 'reef_right', 'reef_arch')))
@@ -128,24 +160,43 @@ for name, mesh in groups.items():
         bpy.context.view_layer.objects.active = obj
         # The anime pass has a tighter static-geometry budget. A coarser rock
         # union preserves the same placements while leaving room for life.
-        obj.data.remesh_voxel_size = .17 if args.style == 'anime' else .12
+        obj.data.remesh_voxel_size = .17 if args.style == 'anime' else .10
         bpy.ops.object.voxel_remesh()
         obj.select_set(False)
         uv = obj.data.uv_layers.active or obj.data.uv_layers.new(name='UVMap')
         for loop in obj.data.loops:
             x, y, z = obj.data.vertices[loop.vertex_index].co
             u = (.04 + .92 * ((x * .37 + y * .11) % 1)) / 4
-            v = 1 - (1 + .04 + .92 * ((z * .37 + y * .11) % 1)) / 2
+            v = (1 + .04 + .92 * ((z * .37 + y * .11) % 1)) / 2
             uv.data[loop.index].uv = (u, v)
         for poly in obj.data.polygons:
             poly.use_smooth = True
         obj.data.update()
     obj.data.calc_loop_triangles()
     actual_triangles[name] = len(obj.data.loop_triangles)
+    if args.style == 'anime' and name in ('reef_left', 'reef_right', 'reef_arch', 'reef_hard'):
+        actual_hull_triangles[name] = add_outline(obj.data, .035)
 
-# A hidden hull satisfies Level::reset's Player requirement. All content here is
-# visual; these groups do not yet provide the planned custom collision proxies.
+# Simple rock proxies provide collision without making the visual meshes (or
+# the boxfish itself) static physics bodies. The central arch stays open.
 from reef.geometry import _box
+for name, lo, hi in (
+    ('RockColliderLeft', (-5.0, -.25, .72), (-1.65, 1.25, 2.5)),
+    ('RockColliderRight', (1.65, -.25, .72), (5.0, 1.25, 2.5)),
+):
+    proxy = Mesh(name.lower())
+    _box(proxy, lo, hi, 'rock')
+    obj = bpy.data.objects.new(name, blender_mesh(proxy))
+    bpy.context.scene.collection.objects.link(obj)
+    obj['wf_schema_path'] = str(repo / 'wfsource/source/oas/statplat.oad')
+    obj['wf_Mobility'] = 'Anchored'
+    obj['wf_Model Type'] = 'Mesh'
+    obj['wf_Mass'] = 0.0
+    obj['wf_Visibility Mailbox'] = 0
+    obj['wf_Mesh Name'] = proxy.name + '.iff'
+    obj['wf_original_mesh_name'] = proxy.name + '.iff'
+
+# A hidden hull satisfies Level::reset's Player requirement and drives the fish.
 hull = Mesh('player_hull')
 _box(hull, (-.05,-.05,-.05), (.05,.05,.05), 'rock')
 player = bpy.data.objects['Player']
@@ -169,12 +220,45 @@ for key, value in {'Running Acceleration':0, 'Walking Acceleration':0,
 
 # Fish have independent anchored render actors; the physics Player remains an
 # invisible control hull, as in the other standalone aquarium tanks.
+animated_triangles = {}
 for name, mesh, pos in (
     ('BoxfishVisual', boxfish(Mesh), anchor_map()['boxfish_spawn']),
     ('HumbugOne', humbug(Mesh), anchor_map()['humbug_pair']),
     ('HumbugTwo', humbug(Mesh), tuple(a+b for a,b in zip(anchor_map()['humbug_pair'], (.5,.1,-.2)))),
 ):
+    animated_triangles[name] = triangles(mesh)
     obj = bpy.data.objects.new(name, blender_mesh(mesh))
+    if args.style == 'anime':
+        actual_hull_triangles[name] = add_outline(obj.data, .012)
+    bpy.context.scene.collection.objects.link(obj)
+    obj.location = pos
+    obj['wf_schema_path'] = str(oad)
+    obj['wf_Mobility'] = 'Anchored'
+    obj['wf_Model Type'] = 'Mesh'
+    obj['wf_Mass'] = 0.0
+    obj['wf_Visibility Mailbox'] = 1
+    obj['wf_Mesh Name'] = mesh.name + '.iff'
+    obj['wf_original_mesh_name'] = mesh.name + '.iff'
+
+# Moving forms remain separate from the static reef so the director can pose
+# them without re-uploading the large static life group.
+worm_crown_origin = (-2.75, -1.35, 2.0)
+for name, builder, pos in (
+    ('SeaFan', life._sea_fan, (-4.45, -.55, 2.82)),
+    ('FeatherStar', life._feather_star, (1.75, -.35, 2.8)),
+    ('Nudibranch', life._nudibranch, (-4.0, -1.65, 1.05)),
+    ('WormCrowns', life._worm_crowns, worm_crown_origin),
+    ('GuardCrab', invertebrates.guard_crab, anchor_map()['guard_crab']),
+    ('ShrimpOne', invertebrates.banded_shrimp, anchor_map()['cleaner_station']),
+    ('ShrimpTwo', invertebrates.banded_shrimp, tuple(a+b for a,b in zip(anchor_map()['cleaner_station'], (.35,.12,0)))),
+    ('HermitCrab', invertebrates.hermit_crab, anchor_map()['hermit_crab']),
+):
+    mesh = Mesh(name.lower())
+    builder(mesh, (0, 0, 0))
+    animated_triangles[name] = triangles(mesh)
+    obj = bpy.data.objects.new(name, blender_mesh(mesh))
+    if args.style == 'anime' and name in ('GuardCrab', 'ShrimpOne', 'ShrimpTwo'):
+        actual_hull_triangles[name] = add_outline(obj.data, .006)
     bpy.context.scene.collection.objects.link(obj)
     obj.location = pos
     obj['wf_schema_path'] = str(oad)
@@ -198,10 +282,20 @@ for channel, value in zip(('Red','Green','Blue'),(.43,.48,.56)):
     ambient['wf_light'+channel] = value
 bpy.data.objects['LookAt'].location = (0, 0, 2.75)
 wide = bpy.data.objects['cs_wide']
-wide.location = (0, -16, 2.75)
+wide.location = (0, -7.5, 2.75)
 for axis in 'XYZ': wide['wf_Position '+axis] = 'Absolute'
 wide['wf_Rotation'] = 'Fixed'
 for key in ('Follow','Target','Track Object'): wide['wf_'+key] = 'LookAt'
+look_close = bpy.data.objects['LookAt'].copy()
+look_close.name = 'LookClose'
+look_close.location = (0, 0, 2.3)
+bpy.context.scene.collection.objects.link(look_close)
+close = wide.copy()
+close.name = 'cs_close'
+close.location = (0, -6.5, 2.3)
+for key in ('Follow', 'Target', 'Track Object'):
+    close['wf_'+key] = 'LookClose'
+bpy.context.scene.collection.objects.link(close)
 cam = bpy.data.objects['Camera']
 cam.location = wide.location
 cam['wf_Mass'] = 1.0
@@ -209,10 +303,13 @@ cam['wf_FoggingColor'] = 0x102b40
 cam['wf_FoggingStartDistance'] = 9
 cam['wf_FoggingCompleteDistance'] = 45
 if args.style == 'realistic':
-    cam['wf_WaterAbsorbR'] = .055
-    cam['wf_WaterAbsorbG'] = .025
-    cam['wf_WaterAbsorbB'] = .012
-    cam['wf_CausticStrength'] = .16
+    # The aquarium is only 1.2 m across; use a gentle absorption over its
+    # scaled camera distance so the sand and coral retain their warm colours.
+    cam['wf_WaterAbsorbR'] = .016
+    cam['wf_WaterAbsorbG'] = .009
+    cam['wf_WaterAbsorbB'] = .004
+    # S2 is gated on a matched Chromecast HD cost measurement.
+    cam['wf_CausticStrength'] = 0.0
     cam['wf_CausticScale'] = 5.0
     cam['wf_ToonBands'] = 0
 else:
@@ -235,17 +332,21 @@ mailboxes = {n:600+i for i,n in enumerate(['init','phase','heading','prev','mode
 header = ''.join(f': tk-{name} {number} ;\n' for name,number in mailboxes.items())
 for name, number in {'player':indices['Player'], 'touch':0, 'jelly':0, 'limit-x':5.3,
                      'limit-y':2.3, 'bottom':.9, 'top':5.0, 'speed':1.2,
-                     'focus-z':2.75, 'cam-close':indices['cs_wide'], 'cam-wide':indices['cs_wide']}.items():
+                     'focus-z':2.3, 'cam-close':indices['cs_close'], 'cam-wide':indices['cs_wide']}.items():
     header += f': tk-{name} {number} ;\n'
 header += species.header('betta')
 core = (repo/'wflevels/aquarium_tanks/controller.fth').read_text().replace(
     '\\ SPECIES_CONTROLLER', species.controller('betta'))
 player['wf_Script'] = header + core + '\ntk-player-tick\n'
 visual = indices['BoxfishVisual']
-tick = f': reef-tick\n {indices["cs_wide"]} INDEXOF_CAMSHOT tk!\n'
+tick = ': reef-tick\n'
 for axis in 'XYZ':
     tick += f' INDEXOF_{axis}_POS tk-player read-actor-mailbox INDEXOF_{axis}_POS {visual} write-actor-mailbox\n'
-tick += f' tk-heading tk@ INDEXOF_ROTATION_C {visual} write-actor-mailbox ;\nreef-tick\n'
+    tick += f' INDEXOF_{axis}_POS tk-player read-actor-mailbox tk-{axis.lower()} tk!\n'
+tick += (f' tk-heading tk@ INDEXOF_ROTATION_C {visual} write-actor-mailbox\n'
+         f' 648 tk@ 0 = if tk-x tk@ dup * tk-y tk@ dup * + '
+         f'tk-z tk@ tk-focus-z - dup * + 5 > if 1 648 tk! then then\n'
+         f' 648 tk@ if tk-camera-tick else {indices["cs_wide"]} INDEXOF_CAMSHOT tk! then ;\nreef-tick\n')
 fish_x, fish_y, fish_z = anchor_map()['humbug_pair']
 shoal = ': reef-shoal\n 640 tk@ tk-dt@ .12 * + tk-frac 640 tk!\n'
 shoal += (f' INDEXOF_X_POS tk-player read-actor-mailbox {fish_x} - dup * '
@@ -256,16 +357,80 @@ for name, offset, phase in (('HumbugOne', 0, 0), ('HumbugTwo', .5, .25)):
               f' {fish_z - (0 if not offset else .2)} 641 tk@ if .48 - then '
               f'INDEXOF_Z_POS {idx} write-actor-mailbox\n')
 shoal += ';\n'
-tick = tick.replace(': reef-tick\n', shoal + ': reef-tick\n reef-shoal\n')
+worm_tick = (': reef-worm ( x y z index -- ) 1063 tk! 1062 tk! 1061 tk! 1060 tk!\n'
+             ' INDEXOF_X_POS tk-player read-actor-mailbox 1060 tk@ - dup *\n'
+             ' INDEXOF_Y_POS tk-player read-actor-mailbox 1061 tk@ - dup * +\n'
+             ' INDEXOF_Z_POS tk-player read-actor-mailbox 1062 tk@ - dup * + .64 <\n'
+             ' if 1063 tk@ 7 * 15 mod .35 * 3 + 1000 1063 tk@ + tk!\n'
+             '    1020 1063 tk@ + tk@ tk-dt@ 6.533333 * - .02 max\n'
+             ' else 1000 1063 tk@ + tk@ tk-dt@ - 0 max 1000 1063 tk@ + tk!\n'
+             '    1020 1063 tk@ + tk@ 1000 1063 tk@ + tk@ 0 <=\n'
+             '    if tk-dt@ .653333 * + 1 min then\n'
+             ' then 1020 1063 tk@ + tk!\n'
+             ' 1020 1063 tk@ + tk@ 1195 1063 tk@ 4 * + tk! ;\n')
+life_tick = (f': reef-life\n 640 tk@ tk-sin .012 * INDEXOF_ROTATION_A {indices["SeaFan"]} write-actor-mailbox\n'
+             f' 640 tk@ .17 + tk-sin .018 * INDEXOF_ROTATION_C {indices["FeatherStar"]} write-actor-mailbox\n'
+             f' -4 640 tk@ tk-sin .18 * + INDEXOF_X_POS {indices["Nudibranch"]} write-actor-mailbox\n')
+life_tick += ' 1064 tk@ 0 = if\n' + ''.join(f' 1 {1020+i} tk!\n' for i in range(15)) + ' 1 1064 tk! then\n'
+for i, (x, y, z) in enumerate(life.worm_centers(worm_crown_origin)):
+    life_tick += f' {x:.6f} {y:.6f} {z:.6f} {i} reef-worm\n'
+life_tick += f' 1027 tk@ 642 tk! 1155 15 {indices["WormCrowns"]} dfrm-pose-curves 1099 tk!\n'
+station = anchor_map()['cleaner_station']
+life_tick += (f' 647 tk@ 0 = if {station[0]} 645 tk! {station[0]+.35} 646 tk! 1 647 tk! then\n'
+              f' INDEXOF_X_POS tk-player read-actor-mailbox {station[0]} - dup * '
+              f'INDEXOF_Z_POS tk-player read-actor-mailbox {station[2]} - dup * + 1 < '
+              f'INDEXOF_XSPEED tk-player read-actor-mailbox abs .1 < & '
+              f'INDEXOF_YSPEED tk-player read-actor-mailbox abs .1 < & '
+              f'INDEXOF_ZSPEED tk-player read-actor-mailbox abs .1 < & '
+              f'if 644 tk@ tk-dt@ + 3 min 644 tk! else 0 644 tk! then\n')
+for name, anchor, offset, phase, amplitude in (
+    ('GuardCrab', 'guard_crab', 0, 0, .025),
+    ('ShrimpOne', 'cleaner_station', 0, .25, .06),
+    ('ShrimpTwo', 'cleaner_station', .35, .5, .06),
+    ('HermitCrab', 'hermit_crab', 0, .75, .12),
+):
+    if name.startswith('Shrimp'):
+        cell = 645 if name == 'ShrimpOne' else 646
+        life_tick += (f' 644 tk@ 2 >= if INDEXOF_X_POS tk-player read-actor-mailbox {offset-.175} + '
+                      f'else {anchor_map()[anchor][0] + offset} 640 tk@ {phase} + tk-sin {amplitude} * + then '
+                      f'{cell} tk-v {cell} tk@ INDEXOF_X_POS {indices[name]} write-actor-mailbox\n')
+    else:
+        life_tick += (f' {anchor_map()[anchor][0] + offset} 640 tk@ {phase} + tk-sin {amplitude} * + '
+                      f'INDEXOF_X_POS {indices[name]} write-actor-mailbox\n')
+life_tick += ';\n'
+tick = tick.replace(': reef-tick\n', shoal + worm_tick + life_tick + ': reef-tick\n reef-shoal reef-life\n')
 bpy.data.objects['Director']['wf_Script'] = header + core + tick
 triangle_total = sum(actual_triangles.values())
 triangle_limit = 30000 if args.style == 'anime' else STATIC_TRIANGLES_MAX
 if len(groups) > STATIC_GROUPS_MAX or triangle_total > triangle_limit:
     raise ValueError(f'static reef exceeds budget: {len(groups)} groups, {triangle_total} triangles')
+if sum(actual_hull_triangles.values()) > 16000:
+    raise ValueError(f'anime outlines exceed budget: {sum(actual_hull_triangles.values())} triangles')
+if len(animated_triangles) > 16:
+    raise ValueError(f'reef exceeds animated actor budget: {len(animated_triangles)}')
+# The renderer normalizes each exported triangle's cross product. Very small
+# faces produced by rock remeshing or outline extrusion can fall below its
+# fixed-point normalization threshold, so discard them before export.
+for obj in bpy.context.scene.objects:
+    if obj.type != 'MESH' or not obj.data.polygons:
+        continue
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bmesh.ops.triangulate(bm, faces=list(bm.faces))
+    tiny = [face for face in bm.faces if face.calc_area() < .00008]
+    if tiny:
+        print(f'{obj.name}: removing {len(tiny)} undersized triangles')
+        bmesh.ops.delete(bm, geom=tiny, context='FACES')
+    bm.to_mesh(obj.data)
+    bm.free()
+    obj.data.update()
 (out / 'actor-map.json').write_text(json.dumps({'level':args.level_id, 'actors':indices,
     'triangles':actual_triangles, 'triangle_total':triangle_total,
-    'anchors':anchor_map(), 'rock_union':args.remesh_rocks, 'unverified':True}, indent=2)+'\n')
+    'animated_triangles':animated_triangles, 'hull_triangles':actual_hull_triangles, 'anchors':anchor_map(),
+    'rock_union':args.remesh_rocks, 'unverified':True}, indent=2)+'\n')
 bpy.ops.wf.export_level(filepath=str(out / f'{args.level_id}.lev'))
+from wf_blender import dfrm_chunk
+worm_rig.bind_exported_mesh(out / 'wormcrowns.iff', Mesh, dfrm_chunk)
 
 if args.preview:
     # A presentation-only camera and lights let the procedural scene be
