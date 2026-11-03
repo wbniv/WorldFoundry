@@ -9,7 +9,23 @@ ROOT = Path(__file__).resolve().parents[2]
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--repo', type=Path, default=ROOT, help='repository with aquarium_tanks/mesh.py')
 parser.add_argument('--json', action='store_true')
+parser.add_argument('--cooked', action='store_true', help='report the most recent Blender export for both styles')
 args = parser.parse_args()
+if args.cooked:
+    reports = {}
+    for level, limit in (('aquarium_thai_reef', 48000), ('aquarium_thai_reef_anime', 30000)):
+        data = json.loads((args.repo/'wflevels'/level/'actor-map.json').read_text())
+        animated = data['animated_triangles']
+        counts = data['triangles']
+        hull = sum(data.get('hull_triangles', {}).values())
+        reports[level] = {'static_triangles':sum(counts.values()), 'static_limit':limit,
+                          'hull_triangles':hull, 'hull_limit':16000,
+                          'static_groups':len(counts), 'animated_actors':len(animated),
+                          'animated_triangles':sum(animated.values())}
+        reports[level]['ok'] = (sum(counts.values()) <= limit and hull <= 16000 and len(counts) <= 8
+                                 and len(animated) <= 16)
+    print(json.dumps(reports, indent=2, sort_keys=True))
+    raise SystemExit(0 if all(row['ok'] for row in reports.values()) else 1)
 sys.path.insert(0, str(args.repo/'wflevels'/'aquarium_tanks'))
 from mesh import Mesh
 from config import STATIC_GROUPS_MAX, STATIC_TRIANGLES_MAX

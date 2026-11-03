@@ -243,17 +243,20 @@ private:
     std::vector<wf_render::LionRest> _rest;
 };
 
-// DFRM v1: rooted curve with clips, knots and wrap, plus weighted transforms
+// DFRM: rooted curves with clips, knots and wrap, plus weighted transforms
 // (renderassets/dfrm_deform.h). Channels are the control block's input cells
-// 0..32; the caller publishes Outputs() and the status to cells 33..39.
+// 0..32 (v1), or 0..39 plus a 4-cell record per curve (v2: 40 + 4 x curves, at
+// most 104); the caller publishes Outputs() and the status to cells 33..39.
 // Positions and face normals are written only for a complete pose (E5).
 class DfrmDeformer : public MeshDeformer {
 public:
     DeformKind Kind() const override { return DeformKind::Dfrm; }
-    int MaxChannels() const override { return wf_render::DfrmBlockSize; }
+    int MaxChannels() const override { return wf_render::DfrmMaxBlock; }
+    // Before the first Bind the chunk is unknown, so 33 cells pass here and the
+    // evaluator refuses a short v2 block (BadInput, rest pose kept).
     DeformStatus Check(const float*, int n) const override
     {
-        return n >= wf_render::DfrmInputCount ? DeformStatus::Ok : DeformStatus::BadInput;
+        return n >= _cells ? DeformStatus::Ok : DeformStatus::BadInput;
     }
     DeformStatus Bind(const DeformTarget& t, const float*, int) override
     {
@@ -274,6 +277,7 @@ public:
         }
         if (!_evaluator.Bind(*data, rest.data(), t.count, indices.data(), normals.data(), faceCount))
             return DeformStatus::NoMetadata;
+        _cells = wf_render::DfrmBlockCells(data->version, int(data->curves.size()));
         return DeformStatus::Ok;
     }
     DeformStatus Pose(const DeformTarget& t, const float* c, int n) override
@@ -299,6 +303,7 @@ public:
     }
 private:
     wf_render::DfrmEvaluator _evaluator;
+    int _cells = wf_render::DfrmInputCount;     // the bound chunk's block size
 };
 
 } // namespace

@@ -481,7 +481,12 @@ def _collect_dfrm_rig(blobj):
     """Gather the DFRM inputs for one mesh: chain, transforms, weights, clips.
 
     The armature is the mesh's Armature modifier target (or its armature
-    parent). Chain bones are tail_00, tail_01, ... in order; transform bones
+    parent). By default chain bones are tail_00, tail_01, ... in order.
+    A mesh with wf_dfrm_rig may set wf_dfrm_curves to a JSON string such as
+    '[["left_00", "left_01"], ["right_00", "right_01"]]': each list is
+    root-to-tip, and lists are ordered as the control-block curve records.
+    Bone names must exist and occur once; the first curve needs at least two
+    bones. The bind pose of each chain must be straight. Transform bones
     are head, eye_l and eye_r when present. Every action on the armature (its
     active action and NLA strips) is sampled at 30 fps; clip ids are 1-based
     in name order. See dfrm_chunk.py for the axis conventions.
@@ -496,21 +501,30 @@ def _collect_dfrm_rig(blobj):
     to_mesh = blobj.matrix_world.inverted() @ arm.matrix_world
     rot = to_mesh.to_3x3()
     bones = arm.data.bones
-    chain_names = []
-    while f'tail_{len(chain_names):02d}' in bones:
-        chain_names.append(f'tail_{len(chain_names):02d}')
-    if not chain_names:
-        raise ValueError('DFRM rig has no tail_00 bone')
+    if 'wf_dfrm_curves' in blobj:
+        # JSON ordered bone-name lists; one chain keeps the legacy v1 encoding.
+        groups = dfrm.parse_curve_names(blobj['wf_dfrm_curves'], bones)
+    else:
+        names = []
+        while f'tail_{len(names):02d}' in bones:
+            names.append(f'tail_{len(names):02d}')
+        if not names:
+            raise ValueError('DFRM rig has no tail_00 bone')
+        groups = [names]
+    chain_names = [name for group in groups for name in group]
     transform_names = [n for n in ('head', 'eye_l', 'eye_r') if n in bones]
-    chain = []
-    for name in chain_names:
-        b = bones[name]
-        axes = rot @ b.matrix_local.to_3x3()
-        bone = {'head': tuple(to_mesh @ b.head_local), 'tail': tuple(to_mesh @ b.tail_local),
-                'z_axis': tuple(axes.col[2]), 'limits': _dfrm_limits(arm.pose.bones[name], name)}
-        if 'wf_half_width' in b:
-            bone['half_width'] = float(b['wf_half_width'])
-        chain.append(bone)
+    chains = []
+    for group in groups:
+        chain = []
+        for name in group:
+            b = bones[name]
+            axes = rot @ b.matrix_local.to_3x3()
+            bone = {'head': tuple(to_mesh @ b.head_local), 'tail': tuple(to_mesh @ b.tail_local),
+                    'z_axis': tuple(axes.col[2]), 'limits': _dfrm_limits(arm.pose.bones[name], name)}
+            if 'wf_half_width' in b:
+                bone['half_width'] = float(b['wf_half_width'])
+            chain.append(bone)
+        chains.append(chain)
     transforms = []
     for name in transform_names:
         b, pb = bones[name], arm.pose.bones[name]
@@ -560,7 +574,7 @@ def _collect_dfrm_rig(blobj):
             if saved[0] is not None and saved[4] is not None:
                 ad.action_slot = saved[4]
             scene.frame_set(saved[2], subframe=saved[3])
-    return {'chain': chain, 'transforms': transforms, 'bindings': bindings, 'clips': clips}
+    return {'chains': chains, 'transforms': transforms, 'bindings': bindings, 'clips': clips}
 
 
 def _write_mesh_iff(blobj, filepath: str) -> bool:
@@ -591,7 +605,7 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
                 raise ValueError('Invalid lionfish rig point metadata')
             rig.append((region,round(weight*65536),*(round(v*65536) for v in pivot)))
 
-    # DFRM v1 (seahorse tail): per-vertex binding is part of the vertex identity,
+    # DFRM: per-vertex binding is part of the vertex identity,
     # like LRIG; offsets are computed from the final positions after the merge.
     dfrm_rig = _collect_dfrm_rig(blobj) if blobj.get('wf_dfrm_rig', False) else None
     dfrm_meta = ([(k, i, round(w * 65536)) for k, i, w in dfrm_rig['bindings']]
@@ -748,8 +762,8 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
     if dfrm_rig is not None:
         bindings=[(meta[-3],meta[-2],meta[-1]/65536) for meta in split_rig]
         positions=[tuple(bl_to_wf(co.x,co.y,co.z)) for co,_u,_v in split_verts]
-        dfrm_chunk_bytes=_write_iff_chunk('DFRM',_dfrm_module().build_chunk(
-            dfrm_rig['chain'],positions,bindings,dfrm_rig['transforms'],dfrm_rig['clips']))
+        dfrm_chunk_bytes=_write_iff_chunk('DFRM',_dfrm_module().build_chunk_curves(
+            dfrm_rig['chains'],positions,bindings,dfrm_rig['transforms'],dfrm_rig['clips']))
     # Assemble MODL
     inner = (
         _write_iff_chunk('VRTX', bytes(vrtx)) + lrig +

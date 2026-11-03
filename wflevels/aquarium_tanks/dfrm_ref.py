@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""DFRM v1 reference evaluator and the dfrm_strand parity driver.
+"""DFRM reference evaluator (v1 and v2) and the dfrm_strand parity driver.
 
 The maths is the tail-rig mockup's (docs/plans/2026-10-16-saltwater-seahorses/
 tail-rig.html: interp, expand, fk), extended the way the engine evaluator
@@ -7,7 +7,10 @@ tail-rig.html: interp, expand, fk), extended the way the engine evaluator
 crossfade, the additive knot layer, the wrap override with the vertical-post
 lead-in, the clamp, forward kinematics with re-orthonormalisation every 8
 samples, rigid vertices, weighted transforms, face normals and the write-backs.
-Double precision throughout; the C++ evaluator runs in float.
+Double precision throughout; the C++ evaluator runs in float. Version 2
+(docs/plans/2026-11-02-gulf-of-thailand-reef-tank.md, E1-E3): several curves in
+one mesh, each with its own root and a 4-cell record at block[40 + 4c] (scale,
+clip id, clip start, flex bias); knots, wrap and outputs stay on curve 0.
 
     dfrm_ref.py --check BINARY    the dfrm_strand ctest: writes test meshes, runs
                                   BINARY --eval on the seven mockup poses (and a
@@ -113,26 +116,41 @@ def hermite(knots, vals, x):
 # ── the reference evaluator ──
 
 class Rig:
-    """A decoded DFRM chunk plus the rest mesh, as RenderObject3D loads it."""
+    """A decoded DFRM chunk plus the rest mesh, as RenderObject3D loads it.
+
+    Joints are numbered as the engine does: curve c's root is joint first + c,
+    and global sample i of curve c ends at joint i + c + 1."""
 
     def __init__(self, chunk: dict, rest, faces):
         self.c = chunk
-        cv = chunk['curves'][0]
-        self.d0, self.v0, self.s0 = orthonormalize(normalize(cv['d']), normalize(cv['v']))
-        self.root = cv['root']
-        self.knots = cv['knots']
+        self.version = chunk.get('version', 1)
+        ns = len(chunk['samples'])
+        self.curves = []
+        for cv in chunk['curves']:
+            d, v, s = orthonormalize(normalize(cv['d']), normalize(cv['v']))
+            self.curves.append({'root': list(cv['root']), 'd': d, 'v': v, 's': s, 'knots': cv['knots'],
+                                'first': cv.get('first', 0), 'count': cv.get('count', ns)})
+        self.sample_curve = [ci for ci, cv in enumerate(self.curves) for _ in range(cv['count'])]
+        c0 = self.curves[0]
+        self.d0, self.v0, self.s0 = c0['d'], c0['v'], c0['s']
+        self.root = c0['root']
+        self.knots = c0['knots']
         self.rest = rest
         self.faces = faces
         self.rest_normals = [face_normal(rest[a], rest[b], rest[c]) for a, b, c in faces]
         self.pitch = math.degrees(math.atan2(-self.d0[0], -self.d0[2]))
-        self.rest_joints = [self.root[:]]
-        for smp in chunk['samples']:
-            self.rest_joints.append([self.rest_joints[-1][k] + self.d0[k] * smp['length'] for k in range(3)])
+        self.rest_joints = []
+        for cv in self.curves:
+            self.rest_joints.append(cv['root'][:])
+            for smp in chunk['samples'][cv['first']:cv['first'] + cv['count']]:
+                self.rest_joints.append([self.rest_joints[-1][k] + cv['d'][k] * smp['length'] for k in range(3)])
 
     def bound_rest(self, influence):
         """Where the rig places a sample-bound vertex at rest (joint + offset)."""
         _kind, i, a, b, c = influence
-        return [self.rest_joints[i][k] + a * self.d0[k] + b * self.v0[k] + c * self.s0[k] for k in range(3)]
+        ci = self.sample_curve[i]
+        cv, j = self.curves[ci], self.rest_joints[i + ci]
+        return [j[k] + a * cv['d'][k] + b * cv['v'][k] + c * cv['s'][k] for k in range(3)]
 
 
 def world_rotation(pitch=0.0, roll=0.0):
@@ -150,15 +168,21 @@ def evaluate(rig: Rig, block, now, world=None, chain_only=False):
     are unchanged): the behaviour tests and pose traces step it thousands of times."""
     c = rig.c
     S, T = c['samples'], c['transforms']
-    n, nt = len(S), len(T)
+    n, nt = len(S), len(T)                       # n: every curve's samples
+    n0 = rig.curves[0]['count']                  # curve 0: knots, wrap, outputs
     stride = 3 * n + nt
     frames, clips = c['frames'], c['clips']
+    records = rig.version >= 2                   # a v1 mesh reads no per-curve records
+    curves = rig.curves
+
+    def record(ci):
+        return block[40 + 4 * ci:44 + 4 * ci]
 
     def clip_of(cid):
         k = int(math.floor(cid + 0.5)) if cid >= 0 else -int(math.floor(-cid + 0.5))
         return clips[k - 1] if 1 <= k <= len(clips) and abs(cid - k) < 1e-3 else None
 
-    def sample(cl, start):
+    def sample(cl, start, k0=0, k1=stride):
         f = max(0.0, now - start) * cl['fps']
         cnt = cl['frames']
         if cl['loop']:
@@ -172,7 +196,12 @@ def evaluate(rig: Rig, block, now, world=None, chain_only=False):
             i0 = int(math.floor(f))
             i1, a = i0 + 1, f - i0
         p0, p1 = frames[cl['first'] + i0], frames[cl['first'] + i1]
-        return [p0[k] if a == 0 else p0[k] + (p1[k] - p0[k]) * a for k in range(stride)]
+        return [p0[k] if a == 0 else p0[k] + (p1[k] - p0[k]) * a for k in range(k0, k1)]
+
+    def fade_in(start):
+        fade = block[29]
+        w = (now - start) / fade if fade > 0 else (1.0 if now >= start else 0.0)
+        return min(1.0, max(0.0, w))
 
     A = [0.0] * stride
     ca, cb = clip_of(block[25]), clip_of(block[27])
@@ -180,27 +209,37 @@ def evaluate(rig: Rig, block, now, world=None, chain_only=False):
         A = sample(ca, block[26])
     if cb:
         B = sample(cb, block[28])
-        fade = block[29]
-        w = (now - block[28]) / fade if fade > 0 else (1.0 if now >= block[28] else 0.0)
-        w = min(1.0, max(0.0, w))
+        w = fade_in(block[28])
         if w >= 1:
             A = B
         elif w > 0:
             A = [A[k] + (B[k] - A[k]) * w for k in range(stride)]
+    if records:                                  # a curve's own clip replaces its slice of the shared pose
+        A = list(A)
+        for ci, cv in enumerate(curves):
+            own = clip_of(record(ci)[1])
+            if not own:
+                continue
+            k0, k1 = 3 * cv['first'], 3 * (cv['first'] + cv['count'])
+            P, w = sample(own, record(ci)[2], k0, k1), fade_in(record(ci)[2])
+            if w >= 1:
+                A[k0:k1] = P
+            elif w > 0:
+                A[k0:k1] = [A[k] + (P[k - k0] - A[k]) * w for k in range(k0, k1)]
 
     nk = len(rig.knots)
     kf = [block[3 * k] for k in range(nk)]
     kl = [block[3 * k + 1] for k in range(nk)]
     kt = [block[3 * k + 2] for k in range(nk)]
-    F = [A[3 * i] + hermite(rig.knots, kf, i) for i in range(n)]
-    L = [A[3 * i + 1] + hermite(rig.knots, kl, i) for i in range(n)]
-    Tw = [A[3 * i + 2] + hermite(rig.knots, kt, i) for i in range(n)]
+    F = [A[3 * i] + (hermite(rig.knots, kf, i) if i < n0 else 0.0) for i in range(n)]
+    L = [A[3 * i + 1] + (hermite(rig.knots, kl, i) if i < n0 else 0.0) for i in range(n)]
+    Tw = [A[3 * i + 2] + (hermite(rig.knots, kt, i) if i < n0 else 0.0) for i in range(n)]
 
     mode = int(math.floor(block[21] + 0.5))
     radius, progress = block[23], min(1.0, max(0.0, block[24]))
     wrapping = mode in (1, 2) and progress > 0 and radius > 0
-    start = min(float(n), max(0.0, block[22]))
-    s = n - (n - start) * progress
+    start = min(float(n0), max(0.0, block[22]))
+    s = n0 - (n0 - start) * progress
     if wrapping and mode == 2:
         # World-vertical post: flex phi makes d horizontal with v up when
         # d0.u cos phi + v0.u sin phi = 0 and v.u > 0 (u = world up in model axes).
@@ -219,11 +258,11 @@ def evaluate(rig: Rig, block, now, world=None, chain_only=False):
         i0 = max(0, int(math.floor(s)) - 5)
         acc = -pitch + sum(F[:i0])
         per, w = (90 - acc) / 5, min(1.0, progress * 4)
-        for i in range(i0, min(n, i0 + 5)):
+        for i in range(i0, min(n0, i0 + 5)):
             F[i] = F[i] * (1 - w) + per * w
             L[i] *= (1 - w)
     if wrapping:
-        for i in range(n):
+        for i in range(n0):
             w = max(0.0, min(1.0, i + 1 - s))
             if w == 0:
                 continue
@@ -237,6 +276,14 @@ def evaluate(rig: Rig, block, now, world=None, chain_only=False):
             Tw[i] *= (1 - w)
 
     clamped = False
+    scale = [1.0] * len(curves)
+    if records:                                  # flex bias, then the scale clamped to 0.02-1
+        for ci, cv in enumerate(curves):
+            sc, _clip, _start, bias = record(ci)
+            for i in range(cv['first'], cv['first'] + cv['count']):
+                F[i] += bias
+            scale[ci] = min(1.0, max(0.02, sc))
+            clamped = clamped or scale[ci] != sc
     for i in range(n):
         ven, dor, lat, tw = S[i]['limits']
         if F[i] > ven:
@@ -254,24 +301,29 @@ def evaluate(rig: Rig, block, now, world=None, chain_only=False):
         clamped = clamped or v != a
         xf.append(v)
 
-    d, v, sv, p = rig.d0[:], rig.v0[:], rig.s0[:], rig.root[:]
-    joints, fr = [p[:]], []
-    for i in range(n):
-        d, v = rot(d, v, math.radians(F[i]))
-        d, sv = rot(d, sv, math.radians(L[i]))
-        v, sv = rot(v, sv, math.radians(Tw[i]))
-        if (i + 1) % 8 == 0:
-            d, v, sv = orthonormalize(d, v)
-        fr.append((d[:], v[:], sv[:]))
-        p = [p[k] + d[k] * S[i]['length'] for k in range(3)]
+    joints, fr = [], []
+    for ci, cv in enumerate(curves):             # per curve from its own root; steps scaled about it
+        d, v, sv, p = cv['d'][:], cv['v'][:], cv['s'][:], cv['root'][:]
         joints.append(p[:])
+        for li in range(cv['count']):
+            i = cv['first'] + li
+            d, v = rot(d, v, math.radians(F[i]))
+            d, sv = rot(d, sv, math.radians(L[i]))
+            v, sv = rot(v, sv, math.radians(Tw[i]))
+            if (li + 1) % 8 == 0:
+                d, v, sv = orthonormalize(d, v)
+            fr.append((d[:], v[:], sv[:]))
+            p = [p[k] + d[k] * S[i]['length'] * scale[ci] for k in range(3)]
+            joints.append(p[:])
 
     pos = []
     for vi, (kind, index, a, b, cc) in enumerate([] if chain_only else c['influences']):
         r = rig.rest[vi]
         if kind == dc.ON_SAMPLE:
             dd, vv, ss = fr[index]
-            pos.append([joints[index][k] + a * dd[k] + b * vv[k] + cc * ss[k] for k in range(3)])
+            ci = rig.sample_curve[index]
+            sc, j = scale[ci], joints[index + ci]
+            pos.append([j[k] + sc * (a * dd[k] + b * vv[k] + cc * ss[k]) for k in range(3)])
         elif kind == dc.ON_TRANSFORM:
             tr = T[index]
             axis = normalize(tr['axis'])
@@ -290,7 +342,8 @@ def evaluate(rig: Rig, block, now, world=None, chain_only=False):
             normals.append(rn)
         elif same and ka[0] == dc.ON_SAMPLE:
             rn = face_normal(*(rig.bound_rest(k) for k in (ka, kb, kc))) or rn
-            co = (dot(rn, rig.d0), dot(rn, rig.v0), dot(rn, rig.s0))
+            cv = curves[rig.sample_curve[ka[1]]]
+            co = (dot(rn, cv['d']), dot(rn, cv['v']), dot(rn, cv['s']))
             dd, vv, ss = fr[ka[1]]
             normals.append([co[0] * dd[k] + co[1] * vv[k] + co[2] * ss[k] for k in range(3)])
         elif same and ka[0] == dc.ON_TRANSFORM and ka[2] == kb[2] == kc[2]:
@@ -300,17 +353,17 @@ def evaluate(rig: Rig, block, now, world=None, chain_only=False):
 
     centre = [0.0, 0.0, 0.0]
     if wrapping:
-        j = min(n - 1, max(0, int(math.ceil(s))))
+        j = min(n0 - 1, max(0, int(math.ceil(s))))
         dd, vv, ss = fr[j]
         nrm = vv if mode == 1 else ss
         theta = math.radians(F[j] if mode == 1 else L[j])
         if abs(theta) > 1e-4:
-            h = S[j]['length'] * 0.5 / math.tan(theta * 0.5)
+            h = S[j]['length'] * scale[0] * 0.5 / math.tan(theta * 0.5)
             centre = [0.5 * (joints[j][k] + joints[j + 1][k]) + nrm[k] * h for k in range(3)]
         else:
             centre = [joints[j][k] + nrm[k] * (radius + S[j]['half_width']) for k in range(3)]
     return {'status': 3 if clamped else 0, 'positions': pos, 'normals': normals,
-            'outputs': centre + joints[n], 'joints': joints, 'angles': (F, L, Tw)}
+            'outputs': centre + joints[n0], 'joints': joints, 'angles': (F, L, Tw)}
 
 
 # ── test meshes ──
@@ -435,12 +488,27 @@ def write_files(out: Path):
     (out / 'strand.iff').write_bytes(modl(pos, faces, payload))
     (out / 'bad_count.iff').write_bytes(modl(pos, faces, payload, extra_vertices=1))
     bad = bytearray(payload)
-    bad[0:4] = struct.pack('<I', 2)
+    bad[0:4] = struct.pack('<I', 3)
     (out / 'bad_version.iff').write_bytes(modl(pos, faces, bytes(bad)))
     bad = bytearray(payload)
     _v, _f, _nc, ns, nt = struct.unpack_from('<5I', payload, 0)
     struct.pack_into('<H', bad, 32 + 52 + 16 * ns + 28 * nt + 2, 99)    # first influence -> sample 99
     (out / 'bad_index.iff').write_bytes(modl(pos, faces, bytes(bad)))
+    chains, vertices, bindings = [], [], []
+    for c in range(3):
+        chains.append([{'head': (c * 2, 0, -i), 'tail': (c * 2, 0, -i - 1),
+                        'z_axis': (1, 0, 0), 'limits': (90, 90, 90, 90)} for i in range(2)])
+        vertices.extend([(c * 2 + .2, 0, 0), (c * 2, .2, 0), (c * 2 - .2, 0, 0)])
+        bindings.extend([(dc.ON_SAMPLE, c * 2, 1)] * 3)
+    payload = dc.build_chunk_curves(chains, vertices, bindings, knots=(0, 1))
+    (out / 'v2.iff').write_bytes(modl(vertices, [(0, 1, 2), (3, 4, 5), (6, 7, 8)], payload))
+    for c in range(3, 16):
+        chains.append([{'head': (c * 2, 0, -i), 'tail': (c * 2, 0, -i - 1),
+                        'z_axis': (1, 0, 0), 'limits': (90, 90, 90, 90)} for i in range(2)])
+        vertices.extend([(c * 2 + .2, 0, 0), (c * 2, .2, 0), (c * 2 - .2, 0, 0)])
+        bindings.extend([(dc.ON_SAMPLE, c * 2, 1)] * 3)
+    payload = dc.build_chunk_curves(chains, vertices, bindings, knots=(0, 1))
+    (out / 'v2_16.iff').write_bytes(modl(vertices, [(3*c, 3*c+1, 3*c+2) for c in range(16)], payload))
     # Two full coils: 40 uniform samples, 18 degrees each at the holdfast radius.
     n = 40
     pos, faces, payload = strand(n=n, lengths=[0.02] * n, half=[0.003] * n, limits=[(90, 90, 90, 30)] * n,
@@ -495,6 +563,38 @@ def check(binary: Path) -> int:
     with tempfile.TemporaryDirectory(prefix='dfrm-') as tmp:
         tmp = Path(tmp)
         cases = []
+        # Three distinct root frames, rigid triangles and one cross-curve face.
+        chains, pos, faces, bindings = [], [], [], []
+        for ci, pitch in enumerate((0.0, 25.0, -35.0)):
+            a = math.radians(pitch)
+            d, v = [-math.sin(a), 0, -math.cos(a)], [math.cos(a), 0, -math.sin(a)]
+            root = [ci * 2.0, 0, 0]
+            chain = []
+            for i in range(3):
+                head = [root[k] + d[k] * i for k in range(3)]
+                tail = [root[k] + d[k] * (i + 1) for k in range(3)]
+                chain.append({'head': head, 'tail': tail, 'z_axis': v, 'limits': (90, 90, 90, 90)})
+                start = len(pos)
+                for x, y in ((0.2, 0), (0, 0.2), (-0.2, 0)):
+                    pos.append([head[k] + x * v[k] + (y if k == 1 else 0) for k in range(3)])
+                    bindings.append((dc.ON_SAMPLE, 3 * ci + i, 1.0))
+                faces.append((start, start + 1, start + 2))
+            chains.append(chain)
+        faces.append((0, 9, 18))
+        row = [0.0] * 27
+        row[9:18] = [30.0, 5.0, 0.0] * 3
+        payload = dc.build_chunk_curves(chains, pos, bindings,
+                                        clips=[{'name': 'bend', 'frames': [row]}], knots=(0, 1, 2))
+        seq = []
+        for now in (0.0, 1.0, 1.99, 2.0, 2.25, 2.5, 3.0):
+            block = [0.0] * 52
+            block[29] = 0.5
+            for ci in range(3):
+                block[40 + 4 * ci] = 1.0
+            block[45], block[46] = 1.0, 2.0
+            block[51] = 10.0
+            seq.append((now, block))
+        cases.append(('three-curves', pos, faces, payload, seq))
         for name in PRESETS:
             pos, faces, payload = strand(pitch=PRESETS[name][1])
             cases.append((name, pos, faces, payload, [(0.0, preset_block(name))]))
