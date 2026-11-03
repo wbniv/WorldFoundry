@@ -40,7 +40,12 @@ def _detail(tile, x, y, seed):
         dx = x % 24 - 12 + 5 * (_noise(cell_x, cell_y, seed + 101) - .5)
         dy = y % 24 - 12 + 5 * (_noise(cell_x, cell_y, seed + 102) - .5)
         r = math.hypot(dx, dy)
-        return 5 * math.cos(r * 1.1) - 3 * (r > 8) + 5 * (_noise(x, y, seed + 103) - .5)
+        # Contrasting calices and surrounding tissue remain visible at tank
+        # distance, including on the broad Porites and Acropora surfaces.
+        return (-24 * math.exp(-(r * r) / 11)
+                + 14 * math.exp(-((r - 6) ** 2) / 7)
+                + 8 * (_smooth_noise(x, y, 12, seed + 104) - .5)
+                + 5 * (_noise(x, y, seed + 103) - .5))
     if tile == 2:  # barrel-sponge pores
         dx, dy = (x + 11) % 22 - 11, (y + 11) % 22 - 11
         r = math.hypot(dx, dy)
