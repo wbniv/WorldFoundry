@@ -15,7 +15,7 @@ import bmesh
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from config import STATIC_GROUPS_MAX, STATIC_TRIANGLES_MAX
+from config import ANIME_HULL_TRIANGLES_MAX, ANIME_STATIC_TRIANGLES_MAX, STATIC_GROUPS_MAX, STATIC_TRIANGLES_MAX
 p = argparse.ArgumentParser()
 p.add_argument('--repo', required=True, type=Path)
 p.add_argument('--out', required=True, type=Path)
@@ -24,6 +24,9 @@ p.add_argument('--style', choices=('realistic', 'anime'), default='realistic')
 p.add_argument('--preview', type=Path, help='also render a Blender composition preview to this PNG')
 p.add_argument('--remesh-rocks', action='store_true', help='voxel-union the blockout rock masses before export')
 p.add_argument('--bake-light', action='store_true', help='bake static reef lighting and ambient occlusion')
+p.add_argument('--verification-target', choices=('duster', 'clam', 'crab', 'shrimp'),
+               help='make a diagnostic view centered on one reaction')
+p.add_argument('--verification-far', action='store_true', help='place the fish away from the diagnostic target')
 args = p.parse_args(sys.argv[sys.argv.index('--') + 1:])
 repo = args.repo.resolve()
 out = args.out.resolve()
@@ -35,7 +38,7 @@ from reef.atlas import write_atlas
 from reef.geometry import build_groups, triangles
 from reef.scene import anchor_map
 from reef.fishes import boxfish, humbug
-from reef import life, invertebrates, worm_rig
+from reef import life, invertebrates, worm_rig, crab_rig, feather_rig, flora_rig, corals
 import species
 import wf_blender
 import wf_blender.operators as wf_operators
@@ -203,7 +206,13 @@ hull = Mesh('player_hull')
 _box(hull, (-.05,-.05,-.05), (.05,.05,.05), 'rock')
 player = bpy.data.objects['Player']
 player.data = blender_mesh(hull)
-player.location = anchor_map()['boxfish_spawn']
+targets = {'duster': anchor_map()['feather_duster'],
+           'clam': (anchor_map()['giant_clam'][0], -1.15, .82),
+           'crab': anchor_map()['guard_crab'], 'shrimp': anchor_map()['cleaner_station']}
+verification = targets.get(args.verification_target)
+player.location = ((verification[0] + (.3 if not args.verification_far else 3),
+                    verification[1], max(.9, verification[2] + .35))
+                   if verification else anchor_map()['boxfish_spawn'])
 player['wf_Model Type'] = 'Mesh'
 player['wf_Mesh Name'] = 'player_hull.iff'
 player['wf_original_mesh_name'] = 'player_hull.iff'
@@ -250,6 +259,10 @@ for name, builder, pos in (
     ('FeatherStar', life._feather_star, (1.75, -.35, 2.8)),
     ('Nudibranch', life._nudibranch, (-4.0, -1.65, 1.05)),
     ('WormCrowns', life._worm_crowns, worm_crown_origin),
+    ('FeatherDusters', life.feather_dusters, anchor_map()['feather_duster']),
+    ('FlowerpotCoral', corals.flowerpot, (-4.15, -.85, 2.42)),
+    ('LeatherCoral', corals.leather_coral, (4.0, -.72, 2.76)),
+    ('GiantClam', life._clam, (anchor_map()['giant_clam'][0], -1.15, .82)),
     ('GuardCrab', invertebrates.guard_crab, anchor_map()['guard_crab']),
     ('ShrimpOne', invertebrates.banded_shrimp, anchor_map()['cleaner_station']),
     ('ShrimpTwo', invertebrates.banded_shrimp, tuple(a+b for a,b in zip(anchor_map()['cleaner_station'], (.35,.12,0)))),
@@ -285,6 +298,9 @@ for channel, value in zip(('Red','Green','Blue'),(.43,.48,.56)):
 bpy.data.objects['LookAt'].location = (0, 0, 2.75)
 wide = bpy.data.objects['cs_wide']
 wide.location = (0, -7.5, 2.75)
+if verification:
+    bpy.data.objects['LookAt'].location = verification
+    wide.location = (verification[0], verification[1] - 3.0, verification[2] + .4)
 for axis in 'XYZ': wide['wf_Position '+axis] = 'Absolute'
 wide['wf_Rotation'] = 'Fixed'
 for key in ('Follow','Target','Track Object'): wide['wf_'+key] = 'LookAt'
@@ -349,14 +365,19 @@ tick += (f' tk-heading tk@ INDEXOF_ROTATION_C {visual} write-actor-mailbox\n'
          f' 648 tk@ 0 = if tk-x tk@ dup * tk-y tk@ dup * + '
          f'tk-z tk@ tk-focus-z - dup * + 5 > if 1 648 tk! then then\n'
          f' 648 tk@ if tk-camera-tick else {indices["cs_wide"]} INDEXOF_CAMSHOT tk! then ;\nreef-tick\n')
+if verification:
+    tick = tick[:tick.index(' 648 tk@ if tk-camera-tick')] + f' {indices["cs_wide"]} INDEXOF_CAMSHOT tk! ;\nreef-tick\n'
 fish_x, fish_y, fish_z = anchor_map()['humbug_pair']
 shoal = ': reef-shoal\n 640 tk@ tk-dt@ .12 * + tk-frac 640 tk!\n'
 shoal += (f' INDEXOF_X_POS tk-player read-actor-mailbox {fish_x} - dup * '
           f'INDEXOF_Z_POS tk-player read-actor-mailbox {fish_z} - dup * + 1.44 < 641 tk!\n')
+shoal += (' 641 tk@ if 2.5 740 tk! else 740 tk@ tk-dt@ - 0 max 740 tk! then\n'
+          ' 740 tk@ 0 > if 741 tk@ tk-dt@ 2 * + 1 min '
+          'else 741 tk@ tk-dt@ - 0 max then 741 tk!\n')
 for name, offset, phase in (('HumbugOne', 0, 0), ('HumbugTwo', .5, .25)):
     idx = indices[name]
     shoal += (f' {fish_x+offset} 640 tk@ {phase} + tk-sin .22 * + INDEXOF_X_POS {idx} write-actor-mailbox\n'
-              f' {fish_z - (0 if not offset else .2)} 641 tk@ if .48 - then '
+              f' {fish_z - (0 if not offset else .2)} 741 tk@ .48 * - '
               f'INDEXOF_Z_POS {idx} write-actor-mailbox\n')
 shoal += ';\n'
 worm_tick = (': reef-worm ( x y z index -- ) 1063 tk! 1062 tk! 1061 tk! 1060 tk!\n'
@@ -372,19 +393,91 @@ worm_tick = (': reef-worm ( x y z index -- ) 1063 tk! 1062 tk! 1061 tk! 1060 tk!
              ' 1020 1063 tk@ + tk@ 1195 1063 tk@ 4 * + tk! ;\n')
 life_tick = (f': reef-life\n 640 tk@ tk-sin .012 * INDEXOF_ROTATION_A {indices["SeaFan"]} write-actor-mailbox\n'
              f' 640 tk@ .17 + tk-sin .018 * INDEXOF_ROTATION_C {indices["FeatherStar"]} write-actor-mailbox\n'
-             f' -4 640 tk@ tk-sin .18 * + INDEXOF_X_POS {indices["Nudibranch"]} write-actor-mailbox\n')
+             f' 751 tk@ tk-dt@ .03 * + tk-frac 751 tk!\n'
+             f' -4 751 tk@ tk-sin .32 * + INDEXOF_X_POS {indices["Nudibranch"]} write-actor-mailbox\n'
+             f' 1.05 751 tk@ .25 + tk-sin .07 * + INDEXOF_Z_POS {indices["Nudibranch"]} write-actor-mailbox\n')
 life_tick += ' 1064 tk@ 0 = if\n' + ''.join(f' 1 {1020+i} tk!\n' for i in range(15)) + ' 1 1064 tk! then\n'
 for i, (x, y, z) in enumerate(life.worm_centers(worm_crown_origin)):
     life_tick += f' {x:.6f} {y:.6f} {z:.6f} {i} reef-worm\n'
 life_tick += f' 1027 tk@ 642 tk! 1155 15 {indices["WormCrowns"]} dfrm-pose-curves 1099 tk!\n'
+duster_x, duster_y, duster_z = anchor_map()['feather_duster']
+life_tick += ' 788 tk@ 0 = if 1 784 tk! 1 785 tk! 1 786 tk! 1 787 tk! 1 788 tk! then\n'
+for worm in range(4):
+    x, y, z = duster_x + (worm-1.5)*.42, duster_y, duster_z + (worm % 2)*.12
+    timer, scale, control = 780+worm, 784+worm, 1255+40+worm*4
+    life_tick += (f' INDEXOF_X_POS tk-player read-actor-mailbox {x} - dup * '
+                  f'INDEXOF_Y_POS tk-player read-actor-mailbox {y} - dup * + '
+                  f'INDEXOF_Z_POS tk-player read-actor-mailbox {z} - dup * + .64 < '
+                  f'if {3+worm} {timer} tk! {scale} tk@ tk-dt@ 4.9 * - .02 max '
+                  f'else {timer} tk@ tk-dt@ - 0 max {timer} tk! '
+                  f'{scale} tk@ {timer} tk@ 0 <= if tk-dt@ .4 * + 1 min then then '
+                  f'dup {scale} tk! {control} tk!\n')
+life_tick += f' 1255 4 {indices["FeatherDusters"]} dfrm-pose-curves 1099 tk!\n'
+life_tick += (' 790 tk@ tk-dt@ .008 * + tk-frac 790 tk!\n'
+              ' 789 tk@ tk-dt@ 790 tk@ tk-sin .5 * .5 + .06 * .075 + * + tk-frac 789 tk!\n')
+for curve in range(12):
+    control = 1391+40+curve*4
+    life_tick += f' 1 {control} tk! 789 tk@ {curve*.09} + tk-sin 7 * {control+3} tk!\n'
+life_tick += f' 1391 12 {indices["FlowerpotCoral"]} dfrm-pose-curves 1099 tk!\n'
+life_tick += (f' 640 tk@ tk-sin .075 * .925 + 1519 tk! '
+              f'1 1523 tk! 640 tk@ tk-sin 4 * 1522 tk! '
+              f'1479 2 {indices["LeatherCoral"]} dfrm-pose-curves 1099 tk!\n')
+for curve in range(10):
+    control = 1311 + 40 + 4 * curve
+    life_tick += f' 1 {control} tk! 640 tk@ {curve * .08} + tk-sin 12 * {control + 3} tk!\n'
+life_tick += f' 1311 10 {indices["FeatherStar"]} dfrm-pose-curves 1099 tk!\n'
+clam_x = anchor_map()['giant_clam'][0]
+life_tick += (f' INDEXOF_X_POS tk-player read-actor-mailbox {clam_x} - dup * '
+              f' INDEXOF_Y_POS tk-player read-actor-mailbox -1.15 - dup * + 1 < '
+              f' INDEXOF_Z_POS tk-player read-actor-mailbox .82 > & '
+              f' if 4 746 tk! else 746 tk@ tk-dt@ - 0 max 746 tk! then\n'
+              f' 746 tk@ 0 > if 745 tk@ tk-dt@ 3 * + 1 min '
+              f'else 745 tk@ tk-dt@ - 0 max then 745 tk!\n'
+              f' 1 440 tk! 1 444 tk! 1 745 tk@ .65 * - 448 tk! '
+              f' 745 tk@ 22 * 443 tk! 745 tk@ 22 * 447 tk!\n'
+              f' 400 3 {indices["GiantClam"]} dfrm-pose-curves 1099 tk!\n')
 station = anchor_map()['cleaner_station']
-life_tick += (f' 647 tk@ 0 = if {station[0]} 645 tk! {station[0]+.35} 646 tk! 1 647 tk! then\n'
+crab_x, crab_y, crab_z = anchor_map()['guard_crab']
+life_tick += (f' INDEXOF_X_POS tk-player read-actor-mailbox {crab_x} - dup * '
+              f'INDEXOF_Y_POS tk-player read-actor-mailbox {crab_y} - dup * + '
+              f'INDEXOF_Z_POS tk-player read-actor-mailbox {crab_z} - dup * + 1 < '
+              f'if 2 643 tk! else 643 tk@ tk-dt@ - 0 max 643 tk! then '
+              f'643 tk@ 0 > if .16 else 0 then INDEXOF_ROTATION_A {indices["GuardCrab"]} write-actor-mailbox\n')
+for curve in range(10):
+    base = 1531 + 40 + 4 * curve
+    life_tick += f' 1 {base} tk!\n'
+    if curve in (4, 9):
+        life_tick += f' 643 tk@ 0 > if 42 else 0 then {base + 3} tk!\n'
+    else:
+        life_tick += f' 640 tk@ {curve * .125} + tk-sin 18 * {base + 3} tk!\n'
+life_tick += f' 1531 10 {indices["GuardCrab"]} dfrm-pose-curves 1099 tk!\n'
+for curve in range(6):
+    control = 1611 + 40 + 4 * curve
+    life_tick += f' 1 {control} tk! 640 tk@ {curve * .17} + tk-sin 16 * {control + 3} tk!\n'
+life_tick += f' 1611 6 {indices["HermitCrab"]} dfrm-pose-curves 1099 tk!\n'
+for shrimp, block, phase in (('ShrimpOne', 1675, 0), ('ShrimpTwo', 1739, .3)):
+    for curve in range(6):
+        control = block + 40 + 4 * curve
+        amplitude = 12 if curve % 3 == 1 else 20
+        life_tick += (f' 1 {control} tk! 640 tk@ {phase + curve * .13} + tk-sin '
+                      f'{amplitude} * {control + 3} tk!\n')
+    life_tick += f' {block} 6 {indices[shrimp]} dfrm-pose-curves 1099 tk!\n'
+for curve in range(5):
+    control = 1803 + 40 + 4 * curve
+    life_tick += f' 1 {control} tk! 640 tk@ {curve * .19} + tk-sin 20 * {control + 3} tk!\n'
+life_tick += f' 1803 5 {indices["BoxfishVisual"]} dfrm-pose-curves 1099 tk!\n'
+life_tick += (f' 647 tk@ 0 = if {station[0]} 645 tk! {station[0]+.35} 646 tk! '
+              f'{station[1]} 747 tk! {station[1]+.12} 748 tk! '
+              f'{station[2]} 749 tk! {station[2]} 750 tk! 1 647 tk! then\n'
               f' INDEXOF_X_POS tk-player read-actor-mailbox {station[0]} - dup * '
               f'INDEXOF_Z_POS tk-player read-actor-mailbox {station[2]} - dup * + 1 < '
               f'INDEXOF_XSPEED tk-player read-actor-mailbox abs .1 < & '
               f'INDEXOF_YSPEED tk-player read-actor-mailbox abs .1 < & '
               f'INDEXOF_ZSPEED tk-player read-actor-mailbox abs .1 < & '
               f'if 644 tk@ tk-dt@ + 3 min 644 tk! else 0 644 tk! then\n')
+life_tick += (' 644 tk@ 2 >= 744 tk@ 0 = & if 5 743 tk! 1 744 tk! then\n'
+              ' 644 tk@ 0 = if 0 744 tk! then\n'
+              ' 743 tk@ tk-dt@ - 0 max 743 tk!\n')
 for name, anchor, offset, phase, amplitude in (
     ('GuardCrab', 'guard_crab', 0, 0, .025),
     ('ShrimpOne', 'cleaner_station', 0, .25, .06),
@@ -393,9 +486,24 @@ for name, anchor, offset, phase, amplitude in (
 ):
     if name.startswith('Shrimp'):
         cell = 645 if name == 'ShrimpOne' else 646
-        life_tick += (f' 644 tk@ 2 >= if INDEXOF_X_POS tk-player read-actor-mailbox {offset-.175} + '
+        ycell = 747 if name == 'ShrimpOne' else 748
+        zcell = 749 if name == 'ShrimpOne' else 750
+        yoffset = 0 if name == 'ShrimpOne' else .12
+        life_tick += (f' 743 tk@ 0 > if INDEXOF_X_POS tk-player read-actor-mailbox {offset-.175} + '
                       f'else {anchor_map()[anchor][0] + offset} 640 tk@ {phase} + tk-sin {amplitude} * + then '
                       f'{cell} tk-v {cell} tk@ INDEXOF_X_POS {indices[name]} write-actor-mailbox\n')
+        life_tick += (f' 743 tk@ 0 > if INDEXOF_Y_POS tk-player read-actor-mailbox {yoffset-.06} + '
+                      f'else {station[1] + yoffset} then {ycell} tk-v '
+                      f'{ycell} tk@ INDEXOF_Y_POS {indices[name]} write-actor-mailbox\n'
+                      f' 743 tk@ 0 > if INDEXOF_Z_POS tk-player read-actor-mailbox -.08 + '
+                      f'else {station[2]} then {zcell} tk-v '
+                      f'{zcell} tk@ INDEXOF_Z_POS {indices[name]} write-actor-mailbox\n')
+    elif name == 'GuardCrab':
+        # Traverse a small loop around the host head, including a climb and descent.
+        life_tick += (f' {anchor_map()[anchor][0]} 640 tk@ tk-sin .12 * + '
+                      f'INDEXOF_X_POS {indices[name]} write-actor-mailbox\n'
+                      f' {anchor_map()[anchor][2]} 640 tk@ .25 + tk-sin .12 * + '
+                      f'INDEXOF_Z_POS {indices[name]} write-actor-mailbox\n')
     else:
         life_tick += (f' {anchor_map()[anchor][0] + offset} 640 tk@ {phase} + tk-sin {amplitude} * + '
                       f'INDEXOF_X_POS {indices[name]} write-actor-mailbox\n')
@@ -410,10 +518,10 @@ if args.bake_light:
 for name, obj, width in outline_specs:
     actual_hull_triangles[name] = add_outline(obj.data, width)
 triangle_total = sum(actual_triangles.values())
-triangle_limit = 30000 if args.style == 'anime' else STATIC_TRIANGLES_MAX
+triangle_limit = ANIME_STATIC_TRIANGLES_MAX if args.style == 'anime' else STATIC_TRIANGLES_MAX
 if len(groups) > STATIC_GROUPS_MAX or triangle_total > triangle_limit:
     raise ValueError(f'static reef exceeds budget: {len(groups)} groups, {triangle_total} triangles')
-if sum(actual_hull_triangles.values()) > 16000:
+if sum(actual_hull_triangles.values()) > ANIME_HULL_TRIANGLES_MAX:
     raise ValueError(f'anime outlines exceed budget: {sum(actual_hull_triangles.values())} triangles')
 if len(animated_triangles) > 16:
     raise ValueError(f'reef exceeds animated actor budget: {len(animated_triangles)}')
@@ -440,6 +548,15 @@ for obj in bpy.context.scene.objects:
 bpy.ops.wf.export_level(filepath=str(out / f'{args.level_id}.lev'))
 from wf_blender import dfrm_chunk
 worm_rig.bind_exported_mesh(out / 'wormcrowns.iff', Mesh, dfrm_chunk)
+feather_rig.bind_exported_mesh(out / 'featherstar.iff', Mesh, dfrm_chunk)
+crab_rig.bind_exported_mesh(out / 'guardcrab.iff', Mesh, dfrm_chunk)
+crab_rig.bind_exported_mesh(out / 'hermitcrab.iff', Mesh, dfrm_chunk, species='hermit')
+for shrimp in ('shrimpone', 'shrimptwo'):
+    crab_rig.bind_exported_mesh(out / f'{shrimp}.iff', Mesh, dfrm_chunk, species='shrimp')
+crab_rig.bind_exported_mesh(out / 'reef_boxfish.iff', Mesh, dfrm_chunk, species='boxfish')
+crab_rig.bind_exported_mesh(out / 'giantclam.iff', Mesh, dfrm_chunk, species='clam')
+for name, kind in (('featherdusters', 'dusters'), ('flowerpotcoral', 'flowerpot'), ('leathercoral', 'leather')):
+    flora_rig.bind_exported_mesh(out / f'{name}.iff', Mesh, dfrm_chunk, kind)
 
 if args.preview:
     # A presentation-only camera and lights let the procedural scene be

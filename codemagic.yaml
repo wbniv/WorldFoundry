@@ -549,6 +549,12 @@ workflows:
         FYW_APK_URL: https://indri.studio/apps/finding-your-way/milestones/2026-10-31-v0.11-rc1-promotion/parmenides-v0.11-b984f5ec395c618e.apk
         FYW_APK_SHA256: b984f5ec395c618e9d12036f7575c77aa66fe0cf698b5e8cb3a574663a3e376f
         FYW_LEVEL_SHA256: d0cac7acd9a36844067ef161d4391209e454943a99b60709f57facd916e7dfc3
+        # The authored frame (gfx/authored_view.hp): passed to the app as launch arguments,
+        # which override the level's Authored aspect / Maximum aspect. The published v0.11
+        # level predates those settings, so this is how CI proves the view on it; with an
+        # authored aspect given, the VIEW line and the FRAME CHECK are part of OK. Empty =
+        # today's view. Plan: chapter repo, docs/plans/2026-11-02-fill-screen-keep-authored-frame.md.
+        FYW_LAUNCH_ARGS: --authored-aspect=1.778 --maximum-aspect=2.25
     triggering:
       events: []
       cancel_previous_builds: true

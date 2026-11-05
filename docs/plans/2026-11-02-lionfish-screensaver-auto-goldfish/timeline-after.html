@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<!--
+  Plan mockup: the Aquarium screensaver's Lionfish tank, before and after the rebuild that
+  carries the Director's automatic goldfish release. Self-contained (inline CSS/JS only),
+  1440x900 logical canvas. Plan: ../2026-11-02-lionfish-screensaver-auto-goldfish.md
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lionfish screensaver timeline</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1f2328; --muted: #656d76;
+    --line: #d1d9e0; --panel: #f6f8fa; --accent: #0969da;
+    --water: #0e3b55; --water2: #145a7a; --sand: #b89b6a; --rock: #5d5a55;
+    --gold: #f2a63a; --warn: #bf3989; --ok: #1a7f37;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1;
+      --line: #30363d; --panel: #161b22; --accent: #4493f8;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; width: 1440px; height: 900px; overflow: hidden;
+    background: var(--bg); color: var(--fg);
+    font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  header {
+    display: flex; align-items: center; gap: 12px; height: 57px;
+    padding: 14px 24px; border-bottom: 1px solid var(--line); background: var(--panel);
+  }
+  header h1 { margin: 0; font-size: 16px; font-weight: 600; }
+  header .tag {
+    margin-left: auto; font: 600 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .04em; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 10px; padding: 2px 8px;
+  }
+  main { display: grid; grid-template-columns: 240px 1fr; height: 843px; }
+  nav { border-right: 1px solid var(--line); padding: 16px; background: var(--panel); }
+  nav button {
+    display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: 6px;
+    border: 0; background: none; color: var(--fg); font: inherit; font-size: 14px; cursor: pointer;
+  }
+  nav button[aria-current="page"] { background: var(--accent); color: #fff; }
+  nav p { color: var(--muted); font-size: 12px; margin: 18px 4px 0; }
+  section { padding: 22px 30px; }
+  .lede { margin: 0 0 14px; color: var(--muted); max-width: 1100px; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .card { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--panel); }
+  .card h3 { margin: 0; padding: 8px 12px; font-size: 14px; border-bottom: 1px solid var(--line); }
+  .card .cap { padding: 8px 12px; font-size: 13px; color: var(--muted); min-height: 58px; }
+  .tv { position: relative; height: 216px; background: linear-gradient(var(--water2), var(--water)); overflow: hidden; }
+  .sand { position: absolute; left: 0; right: 0; bottom: 0; height: 34px; background: var(--sand); }
+  .rock { position: absolute; bottom: 22px; width: 70px; height: 38px; border-radius: 40% 50% 10% 10%; background: var(--rock); }
+  .fish { position: absolute; width: 74px; height: 30px; }
+  .gold { position: absolute; width: 26px; height: 14px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 3px rgba(242,166,58,.25); }
+  .gold::after { content: ""; position: absolute; right: -9px; top: 2px; border-left: 10px solid var(--gold); border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+  .look { position: absolute; border-top: 2px dashed rgba(255,255,255,.7); transform-origin: left center; }
+  .clock { position: absolute; right: 8px; top: 6px; font: 600 12px ui-monospace, monospace; color: #fff; background: rgba(0,0,0,.45); border-radius: 4px; padding: 1px 6px; }
+  .bar { position: relative; height: 70px; margin: 26px 0 6px; }
+  .track { position: absolute; left: 0; right: 0; top: 26px; height: 18px; border-radius: 9px; background: var(--line); }
+  .seg { position: absolute; top: 26px; height: 18px; }
+  .tick { position: absolute; top: 48px; font: 12px ui-monospace, monospace; color: var(--muted); transform: translateX(-50%); white-space: nowrap; }
+  .mark { position: absolute; top: 18px; height: 34px; border-left: 2px solid var(--fg); }
+  .mark span { position: absolute; top: -20px; left: 4px; white-space: nowrap; font-size: 12px; }
+  .legend { display: flex; gap: 22px; font-size: 13px; color: var(--muted); margin-top: 16px; }
+  .sw { display: inline-block; width: 14px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+  .verdict { margin-top: 14px; padding: 10px 14px; border-radius: 6px; border: 1px solid var(--line); font-size: 14px; }
+  .verdict b.bad { color: var(--warn); } .verdict b.good { color: var(--ok); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Aquarium screensaver · Lionfish tank · one Dream run, no input</h1>
+  <span class="tag">MOCKUP · NOT SHIPPED</span>
+</header>
+<main>
+  <nav>
+    <button data-view="before" aria-current="page">Before: bundle of 2026‑10‑30</button>
+    <button data-view="after">After: rebuilt bundle</button>
+    <button data-view="retry">After: no clear spawn point</button>
+    <p>Captures through the coordinator at about 40&nbsp;s and 65&nbsp;s after the preview starts, as on the earlier cast2 check.</p>
+  </nav>
+  <section>
+    <p class="lede" id="lede"></p>
+    <div class="cards" id="cards"></div>
+    <div class="bar" id="bar"><div class="track"></div></div>
+    <div class="legend">
+      <span><i class="sw" style="background:#9aa6b2"></i>Countdown (gf-auto-clock, mailbox 980)</span>
+      <span><i class="sw" style="background:var(--gold)"></i>Goldfish live (gf-count 1)</span>
+      <span><i class="sw" style="background:#d1d9e0"></i>Empty, nothing pending</span>
+    </div>
+    <div class="verdict" id="verdict"></div>
+  </section>
+</main>
+<script>
+const FISH = (x, y, flip, colour) => `<svg class="fish" style="left:${x}px;top:${y}px;${flip ? 'transform:scaleX(-1)' : ''}" viewBox="0 0 74 30">
+  <path d="M4 15 Q20 2 44 8 L60 15 L44 22 Q20 28 4 15Z" fill="${colour}"/>
+  <path d="M58 15 L72 4 L70 26Z" fill="${colour}" opacity=".8"/>
+  <g stroke="#fff" stroke-width="1.4" opacity=".75"><path d="M18 8 V22"/><path d="M26 6 V24"/><path d="M34 6 V24"/></g>
+  <path d="M12 9 L6 0 M16 7 L14 -2 M22 6 L24 -3" stroke="${colour}" stroke-width="2"/>
+  <circle cx="11" cy="13" r="2" fill="#fff"/></svg>`;
+const TANK = (t, extra) => `<div class="tv"><div class="sand"></div>
+  <div class="rock" style="left:40px"></div><div class="rock" style="left:300px;width:90px"></div>
+  ${FISH(80, 70, false, '#c0392b')}${FISH(270, 120, true, '#a93226')}${extra || ''}<span class="clock">t = ${t}</span></div>`;
+const GOLD = (x, y) => `<div class="gold" style="left:${x}px;top:${y}px"></div>`;
+const LOOK = (x, y, len, deg) => `<div class="look" style="left:${x}px;top:${y}px;width:${len}px;transform:rotate(${deg}deg)"></div>`;
+const VIEWS = {
+  before: {
+    lede: 'The shipped bundle was packed on 2026‑10‑30 from a lionfish export without the Director countdown. In the screensaver nobody presses DOWN + A, so the tank never gets a goldfish: two lionfish patrol an empty tank for the whole hold.',
+    cards: [
+      ['≈ 40 s', TANK('40 s'), 'Two lionfish, no prey. The Director has no gf-auto-tick, so nothing is counting.'],
+      ['≈ 65 s', TANK('65 s'), 'Still empty. No GF 1 line in the log.'],
+      ['End of hold', TANK('10 min'), 'Empty for the whole Dream. The only release path is the manual chord, and a Dream takes no input.'],
+    ],
+    segs: [[0, 75, '#d1d9e0']], marks: [],
+    verdict: '<b class="bad">Before:</b> no goldfish ever appears in the screensaver.',
+  },
+  after: {
+    lede: 'Rebuilt from the exported aquarium_lionfish.lev, the screensaver keeps the canonical Director, so its countdown runs: the first goldfish arrives 45‑60 s after the level starts (seed 2026 draws 52.11 s on the desktop), and a resident notices it by sight and closes in.',
+    cards: [
+      ['≈ 40 s: empty, counting', TANK('40 s'), 'Counting: mailbox 980 near 40 of a 45‑60 s draw. Nothing released yet.'],
+      ['≈ 52 s: released', TANK('53 s', GOLD(190, 60)), 'gf-release-one puts a goldfish at a clear spawn point; log line GF 1.'],
+      ['≈ 65 s: the resident notices it', TANK('65 s', GOLD(205, 92) + LOOK(150, 86, 55, 8)), 'A lionfish turns toward the goldfish and stalks it; after the capture (GF 3) the next countdown starts.'],
+    ],
+    segs: [[0, 52, '#9aa6b2'], [52, 69, 'var(--gold)'], [69, 75, '#9aa6b2']],
+    marks: [[45, '45 s earliest'], [52, 'release (GF 1)'], [60, '60 s latest'], [69, 'eaten (GF 3)']],
+    verdict: '<b class="good">After:</b> a goldfish at 45‑60 s with no input; the 65 s capture shows it live or being stalked.',
+  },
+  retry: {
+    lede: 'Edge state: if both lionfish block every spawn point when the deadline arrives, gf-release-one finds no clear point; the Director retries 2 s later without logging, so the release slips by a few seconds but still happens.',
+    cards: [
+      ['≈ 52 s: deadline, blocked', TANK('52 s'), 'Deadline reached, no clear spawn point: retry in 2 s (unlogged).'],
+      ['≈ 54 s: released', TANK('54 s', GOLD(330, 50)), 'The next try finds a clear point; GF 1 is logged once.'],
+      ['≈ 65 s', TANK('65 s', GOLD(300, 80) + LOOK(340, 128, 50, -60)), 'Same as the normal case from here.'],
+    ],
+    segs: [[0, 54, '#9aa6b2'], [54, 75, 'var(--gold)']],
+    marks: [[52, 'deadline'], [54, 'retry releases']],
+    verdict: 'The device check accepts a first release anywhere from 45 s to about 62 s for this reason.',
+  },
+};
+const MAX = 75, W = 1120;
+function show(name) {
+  const v = VIEWS[name];
+  document.querySelectorAll('nav button').forEach(b => b.removeAttribute('aria-current'));
+  document.querySelector(`nav button[data-view="${name}"]`).setAttribute('aria-current', 'page');
+  document.getElementById('lede').textContent = v.lede;
+  document.getElementById('cards').innerHTML = v.cards.map(([h, tv, cap]) => `<div class="card"><h3>${h}</h3>${tv}<div class="cap">${cap}</div></div>`).join('');
+  const x = s => (s / MAX * W).toFixed(1);
+  let bar = '<div class="track"></div>';
+  bar += v.segs.map(([a, b, c]) => `<div class="seg" style="left:${x(a)}px;width:${x(b - a)}px;background:${c};border-radius:${a === 0 ? '9px 0 0 9px' : '0'}"></div>`).join('');
+  bar += [0, 15, 30, 40, 45, 60, 65, 75].map(s => `<span class="tick" style="left:${x(s)}px">${s} s</span>`).join('');
+  bar += [[40, 'capture 1'], [65, 'capture 2']].map(([s, l]) => `<div class="mark" style="left:${x(s)}px;border-color:var(--accent)"><span style="top:38px;color:var(--accent)">${l}</span></div>`).join('');
+  bar += v.marks.map(([s, l]) => `<div class="mark" style="left:${x(s)}px"><span>${l}</span></div>`).join('');
+  document.getElementById('bar').innerHTML = bar;
+  document.getElementById('bar').style.width = W + 'px';
+  document.getElementById('verdict').innerHTML = v.verdict;
+}
+document.querySelectorAll('nav button').forEach(b => b.addEventListener('click', () => show(b.dataset.view)));
+show(location.hash.slice(1) in VIEWS ? location.hash.slice(1) : 'after');
+</script>
+</body>
+</html>

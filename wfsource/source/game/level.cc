@@ -48,6 +48,8 @@
 #include <room/room.hp>
 #include <gfx/static_mesh.hp>
 #include <gfx/renderer_backend.hp>
+#include <gfx/authored_view.hp>
+#include <gfx/display.hp>
 #include <physics/collision.hp>
 #ifdef PHYSICS_ENGINE_JOLT
 #include <physics/jolt/jolt_backend.hp>
@@ -627,6 +629,23 @@ Level::Level
     std::fprintf(stderr, "ROOM-RENDER scope=%s source=%s\n",
                  _renderCurrentRoomOnly ? "current-only" : "all-active",
                  _runtimeProperties.schema("LevelRenderSettings") ? "RPRP" : "default");
+    // The level's authored frame (gfx/authored_view.hp): Authored aspect and Maximum aspect,
+    // next to Room Render Scope, 0 = off. Set for every level, so a level without them puts
+    // the view back to today's 60 degrees. --authored-aspect= / --maximum-aspect= win.
+    {
+        bool authoredFound = false, maximumFound = false;
+        std::string viewError;
+        wfview::Settings settings;
+        settings.authoredAspect = wfprops::aspectSetting(_runtimeProperties, "Authored aspect", authoredFound, viewError);
+        settings.maximumAspect  = wfprops::aspectSetting(_runtimeProperties, "Maximum aspect", maximumFound, viewError);
+        if (!viewError.empty()) std::fprintf(stderr, "VIEW setting invalid: %s\n", viewError.c_str());
+        wfview::levelSettings() = settings;
+        const wfview::Settings& o = wfview::argumentOverrides();
+        const bool fromArgs = o.authoredAspect >= 0.0f || o.maximumAspect >= 0.0f;
+        wfview::source() = fromArgs ? "argument" : (authoredFound || maximumFound) ? "level" : "default";
+        // No VIEW line here: the surface may not be known yet (iOS). The projection
+        // sites log it through wfview::report() with the size they apply.
+    }
     wfprops::host().bind(&_runtimeProperties);
     // Keep the Temple's optional stained-glass shaft in a script-visible mailbox.
     // The OAS field is editable; its value changes only after the form commits.

@@ -27,6 +27,7 @@
 // Original Author: Kevin T. Seghetti
 //============================================================================
 
+#include <gfx/authored_view.hp>
 #include <hal/hal.h>
 #include <hal/lifecycle.h>
 #if defined(WF_ENABLE_STEAM)
@@ -662,8 +663,10 @@ WFInitGL()
     glViewport(0, 0, suw, suh);
     AssertGLOK();
 
-    const float fAspect = float(suw) / float(suh);
-    RendererBackendGet().SetProjection(60.0f, fAspect, 1.0f, 1000.0f);
+    // gfx/authored_view.hp: 60 degrees and float(suw) / float(suh) unless the
+    // level (or a runtime argument) set an authored or maximum aspect.
+    const wfview::View view = wfview::current(suw, suh);
+    RendererBackendGet().SetProjection(view.verticalFov, view.aspect, 1.0f, 1000.0f);
 }
 
 #if defined(__EMSCRIPTEN__)
@@ -678,8 +681,8 @@ void WFResizeSurface(int w, int h)
     if (w <= 0 || h <= 0) return;
     if (auto* d = Display::GetActive()) d->SetLiveWindowSize(w, h);
     glViewport(0, 0, w, h);
-    const float fAspect = float(w) / float(h);
-    RendererBackendGet().SetProjection(60.0f, fAspect, 1.0f, 1000.0f);
+    const wfview::View view = wfview::current(w, h);   // gfx/authored_view.hp
+    RendererBackendGet().SetProjection(view.verticalFov, view.aspect, 1.0f, 1000.0f);
 }
 #endif
 //==============================================================================
@@ -893,8 +896,26 @@ Display::RenderBegin()
    {
        int suw, suh;
        GetSurfaceSize(suw, suh);
+       // gfx/authored_view.hp: today's 60 degrees and float(suw) / float(suh)
+       // unless the level (or a runtime argument) sets an authored or maximum
+       // aspect. Above the maximum aspect only: clear the whole surface black,
+       // then draw into the centred rectangle (viewport plus scissor, so the
+       // clear below and the frame stay inside it).
+       const wfview::View view = wfview::current(suw, suh);
+       wfview::report(suw, suh);   // the VIEW line, when the applied view changes
+       static bool scissoring = false;   // only undo what a pillarboxed frame did
+       if (scissoring) { glDisable(GL_SCISSOR_TEST); scissoring = false; }
        glViewport(0, 0, suw, suh);
-       RendererBackendGet().SetProjection(60.0f, float(suw) / float(suh), 1.0f, 1000.0f);
+       if (view.pillarbox)
+       {
+           glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+           glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+           glViewport(view.x, view.y, view.width, view.height);
+           glScissor(view.x, view.y, view.width, view.height);
+           glEnable(GL_SCISSOR_TEST);
+           scissoring = true;
+       }
+       RendererBackendGet().SetProjection(view.verticalFov, view.aspect, 1.0f, 1000.0f);
        AssertGLOK();
    }
    glClearColor( _backgroundColorRed, _backgroundColorGreen, _backgroundColorBlue, 1.0 );

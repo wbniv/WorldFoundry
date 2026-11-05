@@ -32,6 +32,7 @@
 #include <hal/lifecycle.h>
 #include <gfx/display.hp>
 #include <gfx/vmem.hp>
+#include <gfx/authored_view.hp>
 #include <gfx/static_mesh.hp>
 
 #if defined(__LINUX__) || defined(__ANDROID__)
@@ -284,6 +285,11 @@ ParseCommandLine(int argc, char** argv)
             }
             wfprops::launchOverrides().set(std::string(spec,dot),std::string(dot+1,eq),std::string(eq+1));
         }
+        // --authored-aspect=N / --maximum-aspect=N: override the level's Authored aspect and
+        // Maximum aspect (gfx/authored_view.hp). A test and override path: CI uses it to prove
+        // the view on a published level that predates the two settings.
+        else if ( wfview::parseArgument(argv[index]) )
+            ;
 		else if ( strcmp( argv[index]+1, "-no-fps" ) == 0 )
 		{
 			fpscounter::enabled = false;

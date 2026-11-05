@@ -21,6 +21,7 @@
 #include <hal/hal.h>
 #include <memory/memory.hp>
 #include <gfx/renderer_backend.hp>
+#include <gfx/authored_view.hp>
 #include <gfx/metal/metal_offscreen.h>
 
 #include <sys/time.h>
@@ -40,17 +41,26 @@ extern "C" bool  WFIosWaitForVSync(int timeout_ms);
 // lands after the engine thread got here).
 static int s_projW = 0;
 static int s_projH = 0;
+// ... and the authored/maximum aspect it was built for (gfx/authored_view.hp):
+// the level sets them after the Display exists, so they are part of the key.
+static wfview::Settings s_projSettings;
 
 static void
 IosUpdateProjection(int fallbackW, int fallbackH)
 {
     const int w = (_halWindowWidth  > 0) ? _halWindowWidth  : fallbackW;
     const int h = (_halWindowHeight > 0) ? _halWindowHeight : fallbackH;
-    if (w == s_projW && h == s_projH) return;
+    const wfview::Settings settings = wfview::effective();
+    wfview::report(w, h);   // the VIEW line, when the applied view changes
+    if (w == s_projW && h == s_projH &&
+        settings.authoredAspect == s_projSettings.authoredAspect &&
+        settings.maximumAspect == s_projSettings.maximumAspect) return;
     s_projW = w;
     s_projH = h;
-    RendererBackendGet().SetProjection(60.0f, float(w) / float(h ? h : 1),
-                                       1.0f, 1000.0f);
+    s_projSettings = settings;
+    // Settings 0 (the default): 60 degrees and float(w) / float(h), as before.
+    const wfview::View view = wfview::view(w, h ? h : 1, settings.authoredAspect, settings.maximumAspect);
+    RendererBackendGet().SetProjection(view.verticalFov, view.aspect, 1.0f, 1000.0f);
 }
 
 //==============================================================================

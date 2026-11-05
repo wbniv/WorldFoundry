@@ -16,7 +16,72 @@ sys.path.insert(0, str(ROOT / 'wftools' / 'wf_blender'))
 from mesh import Mesh
 from reef.geometry import build_groups, triangles
 from reef.scene import ANCHORS, TANK, anchor_map
+from config import ANIME_HULL_TRIANGLES_MAX, STATIC_GROUPS_MAX, STATIC_TRIANGLES_MAX
 import dfrm_chunk
+
+
+@pytest.mark.parametrize('level', ['aquarium_thai_reef', 'aquarium_thai_reef_anime'])
+@pytest.mark.parametrize('model,curves', [('guardcrab', 10), ('hermitcrab', 6),
+                                          ('shrimpone', 6), ('shrimptwo', 6),
+                                          ('featherstar', 10), ('reef_boxfish', 5),
+                                          ('giantclam', 3), ('featherdusters', 4),
+                                          ('flowerpotcoral', 12)])
+def test_exported_animal_rigs_have_independent_curves(level, model, curves):
+    data = (ROOT / 'wflevels' / level / (model + '.iff')).read_bytes()
+    offset = 8
+    payload = None
+    while offset < len(data):
+        tag, size = struct.unpack_from('<4sI', data, offset)
+        if tag == b'DFRM':
+            payload = data[offset + 8:offset + 8 + size]
+            break
+        offset += 8 + ((size + 3) & ~3)
+    assert payload is not None
+    rig = dfrm_chunk.decode(payload)
+    assert len(rig['curves']) == curves
+    bound = {entry[1] // 2 for entry in rig['influences'] if entry[0] == dfrm_chunk.ON_SAMPLE}
+    assert bound == set(range(curves))
+
+
+@pytest.mark.parametrize('level', ['aquarium_thai_reef', 'aquarium_thai_reef_anime'])
+def test_leather_coral_has_a_bound_deflation_curve(level):
+    data = (ROOT / 'wflevels' / level / 'leathercoral.iff').read_bytes()
+    offset = 8
+    while offset < len(data):
+        tag, size = struct.unpack_from('<4sI', data, offset)
+        if tag == b'DFRM':
+            rig = dfrm_chunk.decode(data[offset+8:offset+8+size])
+            assert len(rig['curves']) == 2
+            assert any(entry[0] == dfrm_chunk.ON_SAMPLE and entry[1] == 0 for entry in rig['influences'])
+            return
+        offset += 8 + ((size+3) & ~3)
+    pytest.fail('leather coral has no deformation data')
+
+
+@pytest.mark.parametrize('model,curves,posed', [
+    ('featherdusters', 4, 'scale'), ('flowerpotcoral', 12, 'flex'),
+    ('leathercoral', 2, 'scale'),
+])
+def test_colony_rigs_move_exported_vertices(model, curves, posed):
+    import dfrm_ref
+    data = (ROOT/'wflevels/aquarium_thai_reef'/(model+'.iff')).read_bytes()
+    offset, chunks = 8, {}
+    while offset < len(data):
+        tag, size = struct.unpack_from('<4sI', data, offset)
+        chunks[tag] = data[offset+8:offset+8+size]
+        offset += 8 + ((size+3) & ~3)
+    vertices = [tuple(v/65536 for v in struct.unpack_from('<iii', chunks[b'VRTX'], i+12))
+                for i in range(0, len(chunks[b'VRTX']), 24)]
+    faces = [struct.unpack_from('<hhh', chunks[b'FACE'], i) for i in range(0, len(chunks[b'FACE']), 8)]
+    rig = dfrm_ref.Rig(dfrm_chunk.decode(chunks[b'DFRM']), vertices, faces)
+    neutral = [0.] * (40 + curves*4)
+    for i in range(curves):
+        neutral[40+4*i] = 1
+    posed_block = neutral.copy()
+    posed_block[40 if posed == 'scale' else 43] = (.85 if model == 'leathercoral' else .35) if posed == 'scale' else 7
+    before = dfrm_ref.evaluate(rig, neutral, 0)['positions']
+    after = dfrm_ref.evaluate(rig, posed_block, 0)['positions']
+    assert max(math.dist(a, b) for a,b in zip(before, after)) > .02
 
 
 def test_scene_anchors_are_unique_and_inside_tank():
@@ -33,15 +98,15 @@ def test_same_anchors_in_both_exported_styles():
     assert maps[0]['anchors'] == maps[1]['anchors']
     assert maps[0]['anchors'] == {k: list(v) for k, v in anchor_map().items()}
     assert sum(maps[0]['hull_triangles'].values()) == 0
-    assert 0 < sum(maps[1]['hull_triangles'].values()) <= 16000
+    assert 0 < sum(maps[1]['hull_triangles'].values()) <= ANIME_HULL_TRIANGLES_MAX
     assert all(len(m['animated_triangles']) <= 16 for m in maps)
 
 
 def test_blockout_geometry_is_deterministic_and_within_group_budget():
     first = build_groups(Mesh)
     second = build_groups(Mesh)
-    assert len(first) <= 8
-    assert sum(map(triangles, first.values())) <= 48000
+    assert len(first) <= STATIC_GROUPS_MAX
+    assert sum(map(triangles, first.values())) <= STATIC_TRIANGLES_MAX
     for name, mesh in first.items():
         other = second[name]
         assert (mesh.vertices, mesh.faces, mesh.colors) == (

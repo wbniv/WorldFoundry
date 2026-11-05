@@ -8,12 +8,12 @@ import random
 from .scene import ROCK_MASSES, SEED, from_mockup
 
 
-def rock_blob(mesh, center, radii, rng, color='rock', segments=20, rings=10):
+def rock_blob(mesh, center, radii, rng, color='rock', segments=32, rings=16):
     cx, cy, cz = center
     rx, ry, rz = radii
     north = (cx, cy, cz + rz)
     south = (cx, cy, cz - rz)
-    # Smooth low-frequency lobes read as eroded rock rather than vertex noise.
+    # Broad eroded lobes plus smaller ledges break up the rounded blockout.
     phase = rng.uniform(0, math.tau)
     loops = []
     for j in range(1, rings):
@@ -21,9 +21,10 @@ def rock_blob(mesh, center, radii, rng, color='rock', segments=20, rings=10):
         row = []
         for i in range(segments):
             theta = math.tau * i / segments
-            wobble = (1 + .08 * math.sin(3 * theta + phase) * math.sin(phi)
-                      + .055 * math.cos(5 * theta - 2 * phi + phase)
-                      + .025 * math.sin(8 * theta + 3 * phi))
+            wobble = (1 + .12 * math.sin(3 * theta + phase) * math.sin(phi)
+                      + .075 * math.cos(5 * theta - 2 * phi + phase)
+                      + .045 * math.sin(8 * theta + 3 * phi)
+                      + .025 * math.sin(11 * theta - 5 * phi + phase))
             row.append((cx + rx * math.sin(phi) * math.cos(theta) * wobble,
                         cy + ry * math.sin(phi) * math.sin(theta) * wobble,
                         cz + rz * math.cos(phi) * wobble))
