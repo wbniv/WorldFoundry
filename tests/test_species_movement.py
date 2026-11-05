@@ -4,6 +4,7 @@ import csv
 import io
 import json
 import math
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -31,6 +32,8 @@ def vm(tmp_path_factory):
     subprocess.run(['cc','-O1','-I'+str(ROOT/'engine/stubs'),'-I'+str(vendor),str(ROOT/'tests/species_vm.c'),str(vendor/'zforth.c'),'-lm','-o',str(binary)],check=True)
     def run(kind,trace):
         level='aquarium_'+kind; here=ROOT/'wflevels'/level
+        if kind == 'thai_reef' and os.environ.get('REEF_TEST_LEVEL_DIR'):
+            here = Path(os.environ['REEF_TEST_LEVEL_DIR'])
         mapping=json.loads((here/'actor-map.json').read_text())
         text=(here/(level+'.lev')).read_text()
         paths=[]
@@ -44,7 +47,7 @@ def vm(tmp_path_factory):
         indices = mapping.get('indices', mapping.get('actors'))
         result=subprocess.run([str(binary),*map(str,paths),str(indices['Player']),str(indices['Director']),*entries],input=trace,text=True,capture_output=True)
         assert result.returncode==0,result.stderr
-        keys=['frame','x','y','z','vx','vy','vz',*range(600,751),*range(1100,1112),*range(1200,1281),*range(1000,1035),'part-x','part-y','part-z','part-a','part-b','part-c','camshot']
+        keys=['frame','x','y','z','vx','vy','vz',*range(600,751),*range(1100,1112),*range(1200,1281),*range(1000,1035),*range(780,791),'part-x','part-y','part-z','part-a','part-b','part-c','camshot']
         return [dict(zip(keys,map(float,row))) for row in csv.reader(io.StringIO(result.stdout))]
     return run
 
@@ -65,6 +68,10 @@ def test_reef_humbugs_detect_player_near_their_coral(vm):
     far = vm('thai_reef', 'reset 4 0 2\nstep 1 0 .0166667\n')
     assert near[-1][641] != 0
     assert far[-1][641] == 0
+    retreat = vm('thai_reef', f'reset {x} {y} {z}\nstep 60 0 .0166667\nstep 360 8192 .0166667\nstep 180 0 .0166667\n')
+    assert retreat[29][741] > .9
+    assert any(not row[641] and row[740] > 1 and row[741] > .9 for row in retreat)
+    assert retreat[-1][741] < .01
 
 def test_reef_worm_crowns_retract_near_player(vm):
     near = vm('thai_reef', 'reset -2.75 -.95 2\nstep 60 0 .0166667\n')
@@ -84,11 +91,72 @@ def test_reef_worm_crowns_retract_near_player(vm):
     assert individual[-1][1034] > .9
     assert 3 <= individual[-1][1000] < individual[-1][1001] <= 8
 
+
+def test_reef_feather_dusters_retract_independently(vm):
+    mapping = json.loads((ROOT/'wflevels/aquarium_thai_reef/actor-map.json').read_text())
+    x,y,z = mapping['anchors']['feather_duster']
+    rows = vm('thai_reef', f'reset {x-.63} {y} {z}\nstep 60 0 .0166667\nstep 360 16384 .0166667\nstep 360 0 .0166667\n')
+    assert rows[12][784] < .05
+    assert rows[12][787] > .95
+    assert rows[-1][784] > .95
+
+
+def test_flowerpot_sway_accelerates_with_current(vm):
+    rows = vm('thai_reef', 'reset 4 0 2\nstep 3000 0 .0166667\n')
+    def phase_step(i):
+        return (rows[i+1][789] - rows[i][789]) % 1
+    assert phase_step(1500) > phase_step(0) * 1.1
+
 def test_reef_cleaning_waits_for_a_stationary_visitor(vm):
     rows = vm('thai_reef', 'reset -.7 -.15 1.885\nstep 180 0 .0166667\nstep 60 8192 .0166667\n')
     assert rows[59][644] < 2
     assert rows[179][644] >= 2
     assert rows[-1][644] == 0
+    assert rows[59][743] == 0
+    assert rows[179][743] > 3
+    assert rows[-1][743] > 2
+    mapping = json.loads((ROOT/'wflevels/aquarium_thai_reef/actor-map.json').read_text())['actors']
+    cleaning = vm('thai_reef', f'reset -.7 -.15 2.1\nset 650 {mapping["ShrimpOne"]}\nstep 240 0 .0166667\n')
+    assert cleaning[-1][743] > 0
+    assert abs(cleaning[-1]['part-y'] - (-.21)) < .03
+    assert abs(cleaning[-1]['part-z'] - 2.02) < .03
+
+
+def test_reef_clam_closes_under_fish_and_reopens(vm):
+    mapping = json.loads((ROOT/'wflevels/aquarium_thai_reef/actor-map.json').read_text())
+    x = mapping['anchors']['giant_clam'][0]
+    rows = vm('thai_reef', f'reset {x} -1.15 1.5\nstep 60 0 .0166667\nstep 360 16384 .0166667\nstep 300 0 .0166667\n')
+    assert rows[30][745] > .95
+    assert any(0 < row[746] < 3 and row[745] > .95 for row in rows)
+    assert rows[-1][745] < .01
+
+
+def test_reef_nudibranch_follows_a_slow_rock_path(vm):
+    mapping = json.loads((ROOT/'wflevels/aquarium_thai_reef/actor-map.json').read_text())['actors']
+    rows = vm('thai_reef', f'reset 4 0 2\nset 650 {mapping["Nudibranch"]}\nstep 600 0 .0166667\n')
+    assert max(r['part-x'] for r in rows) - min(r['part-x'] for r in rows) > .3
+    assert max(r['part-z'] for r in rows) - min(r['part-z'] for r in rows) > .05
+
+
+def test_reef_guard_crab_reacts_to_nearby_boxfish(vm):
+    mapping = json.loads((ROOT/'wflevels/aquarium_thai_reef/actor-map.json').read_text())['actors']
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('reef_crab_scene', ROOT/'wflevels/aquarium_thai_reef/reef/scene.py')
+    scene = importlib.util.module_from_spec(spec)
+    import sys
+    sys.modules[spec.name] = scene
+    spec.loader.exec_module(scene)
+    x, y, z = scene.anchor_map()['guard_crab']
+    actor = mapping['GuardCrab']
+    near = vm('thai_reef', f'reset {x} {y} {z}\nset 650 {actor}\nstep 1 0 .0166667\n')
+    far = vm('thai_reef', f'reset 4 0 2\nset 650 {actor}\nstep 1 0 .0166667\n')
+    assert near[-1]['part-a'] == pytest.approx(.16)
+    assert far[-1]['part-a'] == pytest.approx(0)
+
+    retreat = vm('thai_reef', f'reset {x} {y} {z}\nset 650 {actor}\nstep 60 0 .0166667\nstep 360 8192 .0166667\nstep 180 0 .0166667\n')
+    assert any(0 < row[643] < 1 and row['part-a'] == pytest.approx(.16) for row in retreat)
+    assert retreat[-1]['part-a'] == pytest.approx(0)
+    assert max(row['part-z'] for row in far + retreat) - min(row['part-z'] for row in far + retreat) > .1
 
 def test_reef_camera_starts_wide_and_can_change_to_close(vm):
     mapping = json.loads((ROOT/'wflevels/aquarium_thai_reef/actor-map.json').read_text())['actors']

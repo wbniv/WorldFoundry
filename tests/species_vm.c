@@ -52,6 +52,7 @@ int main(int argc,char**argv){
     for(int j=1100;j<=1111;j++)printf(",%.9g",globals[j]);
     for(int j=1200;j<=1280;j++)printf(",%.9g",globals[j]);
     for(int j=1000;j<=1034;j++)printf(",%.9g",globals[j]);
+  for(int j=780;j<=790;j++)printf(",%.9g",globals[j]);
     int a=(int)globals[650];for(int j=3009;j<=3014;j++)printf(",%.9g",actors[a][j]);
     printf(",%.9g",actors[director][1921]);
     printf("\n");

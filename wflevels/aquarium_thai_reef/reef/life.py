@@ -22,34 +22,61 @@ def _cup(mesh, center, radius, height, color, sides=12):
                  y + radius * .5 * math.sin(math.tau * nxt / sides), z)
         mesh.face([low_a, low_b, outer[nxt], outer[i]], color)
         mesh.face([outer[i], outer[nxt], inner[nxt], inner[i]], 'polyp')
+    # A visible oral disc and short radiating tentacles make each cup a live
+    # coral polyp instead of an empty faceted vase.
+    disc = [(x + .32*radius*math.cos(math.tau*i/sides),
+             y + .32*radius*math.sin(math.tau*i/sides), z + height*.75)
+            for i in range(sides)]
+    mesh.face(disc, 'polyp')
+    for i in range(sides):
+        angle = math.tau*i/sides
+        start = (x + .38*radius*math.cos(angle),y + .38*radius*math.sin(angle),z + height*.78)
+        end = (x + .92*radius*math.cos(angle),y + .92*radius*math.sin(angle),z + height*1.12)
+        mesh.swept_tube([start,end], .013, 'polyp', 5)
 
 
 def _sea_fan(mesh, base):
     x, y, z = base
-    rng = random.Random(SEED + 401)
-    crown = (x, y, z + 1.35)
-    mesh.swept_tube([(x, y, z - .3), (x, y, z + .5), crown], .035, 'coralline', 6)
-    for side in (-1, 1):
-        for j in range(7):
-            h = .22 + j * .16
-            span = .12 + j * .045
-            start = (x, y, z + h)
-            tip = (x + side * span, y, z + h + .34 + rng.uniform(-.04, .04))
-            mid = (x + side * span * .5, y, z + h + .2)
-            mesh.swept_tube([start, mid, tip], .018, 'coralline', 5)
-            if j in (2, 4, 6):
-                for twig_side in (-1, 1):
-                    branch = (tip[0] + twig_side * .14, y,
-                              tip[2] + .11 + rng.uniform(-.03, .03))
-                    mesh.swept_tube([mid, tip, branch], .012, 'coralline', 4)
+    # Radial primary branches and irregular cross-branches form a broad, open
+    # gorgonian fan rather than a single trunk with symmetrical side twigs.
+    mesh.swept_tube([(x, y, z-.3), (x, y, z+.05), (x, y, z+.22)], .032, 'coralline', 6)
+    spokes = []
+    for i in range(13):
+        a = math.pi * (.10 + .80 * i / 12)
+        reach = 1.06 + .08 * math.sin(i * 2.3)
+        points = []
+        for j in range(6):
+            t = j / 5
+            radius = reach * t
+            points.append((x + .72 * radius * math.cos(a),
+                           y + .045 * math.sin(i * 1.7 + t * 4),
+                           z + .18 + radius * math.sin(a)))
+        mesh.swept_tube(points, .014 if i % 3 else .019, 'coralline', 5)
+        spokes.append(points)
+        # Fine split tips break the otherwise perfectly radial outer edge.
+        for side in (-1, 1):
+            tip = points[-1]
+            end = (tip[0] + side*.045*math.sin(a) + .018*math.cos(a),
+                   tip[1] + side*.012,
+                   tip[2] - side*.045*math.cos(a) + .035*math.sin(a))
+            mesh.swept_tube([points[-2],tip,end], .013, 'coralline', 5)
+    for i in range(12):
+        for j in range(1, 5):
+            if (i + j) % 5 == 0:
+                continue
+            a, b = spokes[i][j], spokes[i+1][j]
+            middle = ((a[0]+b[0])/2, (a[1]+b[1])/2 - .012,
+                      (a[2]+b[2])/2 + .018 * math.sin(i*3+j))
+            mesh.swept_tube([a, middle, b], .013, 'coralline', 4)
 
 
-def _clam(mesh, center):
+def _clam(mesh, center, limb_ranges=None):
     x, y, z = center
     # Fluted, pale valves open around the vivid blue mantle.  The ribs fan
     # from the low hinge, with a scalloped edge instead of stacked ellipsoids.
     steps = 20
     for side in (-1, 1):
+        start = len(mesh.vertices)
         def section(i):
             t = -1 + 2*i/steps
             span = math.sqrt(max(0, 1-t*t))
@@ -65,7 +92,10 @@ def _clam(mesh, center):
                 mesh.face(points if side < 0 else list(reversed(points)), 'sand')
         for i in range(1, steps, 2):
             a, b, c = section(i)
-            mesh.swept_tube([a, b, c], .008, 'sand', 4)
+            mesh.swept_tube([a, b, c], .013, 'sand', 4)
+        if limb_ranges is not None:
+            limb_ranges.append((start, len(mesh.vertices), (x,y,z), (0,side,0), (0,0,1)))
+    start = len(mesh.vertices)
     center_point = (x, y, z + .125)
     edge = []
     for i in range(24):
@@ -75,6 +105,23 @@ def _clam(mesh, center):
                      z + .13 + .025*math.sin(8*angle)))
     for i, point in enumerate(edge):
         mesh.face([center_point, point, edge[(i+1) % len(edge)]], 'clam')
+    # Pale mantle markings sit on the blue tissue and follow its oval outline.
+    # Their irregular spacing makes the animal read as a patterned clam at the
+    # wide tank view without assigning another actor or texture page.
+    for row in range(-2, 3):
+        for column in range(-4, 5):
+            px = .071*column + .009*math.sin(row*2.3+column)
+            py = .055*row + .006*math.sin(column*1.8)
+            if (px/.32)**2 + (py/.17)**2 > .85:
+                continue
+            radius = .017 + .003*(1+math.sin(column*3.1+row))/2
+            points = [(x+px+radius*math.cos(math.tau*i/8),
+                       y+py+radius*math.sin(math.tau*i/8),z+.151)
+                      for i in range(8)]
+            for i in range(8):
+                mesh.face([(x+px,y+py,z+.151),points[i],points[(i+1)%8]], 'fish_white')
+    if limb_ranges is not None:
+        limb_ranges.append((start, len(mesh.vertices), (x,y,z+.125), (0,1,0), (0,0,1)))
 
 
 def _zoanthids(mesh, center):
@@ -88,6 +135,13 @@ def _zoanthids(mesh, center):
         mesh.swept_tube([(px, py, pz), (px, py, pz + .09)], .018, 'zoanthid', 6)
         mesh.ellipsoid((px, py, pz + .11), (.052, .048, .025), 'zoanthid', 7, 4)
         mesh.ellipsoid((px, py, pz + .13), (.022, .020, .009), 'polyp', 6, 3)
+        # Short tentacles frame each oral disc instead of a smooth button.
+        for tentacle in range(8):
+            angle = math.tau*tentacle/8 + i*.17
+            start = (px+.034*math.cos(angle),py+.031*math.sin(angle),pz+.125)
+            end = (px+.065*math.cos(angle),py+.060*math.sin(angle),
+                   pz+.135+.007*math.sin(i+tentacle))
+            mesh.swept_tube([start,end], .013, 'zoanthid', 5)
 
 
 def worm_centers(center, count=15):
@@ -118,15 +172,45 @@ def _worm_crowns(mesh, center, count=15, ranges=None):
                 mesh.face([(cx-width, wy-.025, z0), (cx+width, wy-.025, z0),
                            (cx+upper, wy-.025, z1), (cx-upper, wy-.025, z1)],
                           ('polyp', 'coralline', 'sponge')[worm % 3])
+                # Individual radioles project from each tier, softening the
+                # stacked-strip silhouette while preserving the single rigged
+                # crown and its existing per-worm vertex range.
+                for direction in (-1, 1):
+                    for ray in range(3):
+                        root_x = cx + direction*width*(.28 + .24*ray)
+                        tip_x = root_x + direction*(.030 + .008*ray)*(1-tier/7)
+                        mesh.face([(root_x, wy-.026, z0),
+                                   (tip_x, wy-.026, z0+.010),
+                                   (root_x+direction*.004, wy-.026, z0+.020)],
+                                  ('polyp', 'coralline', 'sponge')[worm % 3])
         if ranges is not None:
             ranges.append((start, len(mesh.vertices)))
 
 
-def _feather_star(mesh, center):
+def feather_dusters(mesh, center, ranges=None):
+    """Four banded fan worms, with independently retractable crowns."""
+    x, y, z = center
+    for worm in range(4):
+        cx, cy, cz = x + (worm-1.5)*.42, y, z + (worm % 2)*.12
+        begin = len(mesh.vertices)
+        mesh.swept_tube([(cx,cy,cz-.24),(cx,cy,cz+.02)], .035, 'sand', 6)
+        for ray in range(19):
+            angle = math.pi * (.04 + .92*ray/18)
+            outer = (cx+.25*math.cos(angle), cy, cz+.28*math.sin(angle))
+            inner = (cx+.07*math.cos(angle), cy, cz+.07*math.sin(angle))
+            mid = tuple((a+b)*.5 for a,b in zip(inner, outer))
+            mesh.swept_tube([inner, mid], .014, 'fish_white' if ray % 2 else 'sponge', 4)
+            mesh.swept_tube([mid, outer], .014, 'sponge' if ray % 2 else 'fish_white', 4)
+        if ranges is not None:
+            ranges.append((begin, len(mesh.vertices), (cx,cy,cz-.24)))
+
+
+def _feather_star(mesh, center, ranges=None):
     x, y, z = center
     mesh.ellipsoid((x, y, z), (.14, .12, .09), 'coralline', 12, 6)
     # Lamprometra palmata has 27–41 arms in the cited description; model 30.
     for arm in range(30):
+        start = len(mesh.vertices)
         a = math.pi * (.06 + .88 * arm / 29)
         points = []
         for j in range(5):
@@ -136,35 +220,64 @@ def _feather_star(mesh, center):
                            y + .06 * math.sin(a) * t,
                            z + radius * math.sin(a) + .10 * math.sin(t * math.pi)))
         mesh.swept_tube(points, .013, 'coralline', 5)
-        for j in range(1, 5):
-            p = points[j]
-            t = j / 5
+        # Closely spaced, alternating pinnules make each arm feathery rather
+        # than reading as a few widely spaced sticks.
+        for j in range(1, 10):
+            t = j / 10
+            segment = min(3, int(t*4))
+            fraction = t*4 - segment
+            p = tuple(points[segment][k]*(1-fraction) + points[segment+1][k]*fraction
+                      for k in range(3))
             for sign in (-1, 1):
-                tip = (p[0] - sign * .10 * math.sin(a), p[1],
-                       p[2] + sign * .10 * math.cos(a) + .035 * t)
-                mesh.swept_tube([p, tip], .006, 'polyp', 4)
+                length = .055 + .045*math.sin(math.pi*t)
+                tip = (p[0] - sign*length*math.sin(a), p[1]+.012*sign*math.sin(arm),
+                       p[2] + sign*length*math.cos(a) + .025*t)
+                mesh.swept_tube([p, tip], .013, 'polyp', 5)
+        if ranges is not None:
+            ranges.append((start, len(mesh.vertices)))
 
 
 def _mushroom_coral(mesh, center):
     x, y, z = center
-    mesh.ellipsoid((x, y, z), (.47, .32, .075), 'coralline', 24, 6)
-    for i in range(16):
-        a = math.tau * i / 16
-        end = (x + .43 * math.cos(a), y + .29 * math.sin(a), z + .025)
-        mesh.swept_tube([(x, y, z + .02), end], .009, 'polyp', 4)
+    # A shallow, scalloped disc and raised radial septa give the solitary
+    # coral a more organic surface than a smooth flattened ellipsoid.
+    def point(angle, fraction):
+        edge = 1 + .07*math.sin(9*angle) + .035*math.sin(17*angle+.4)
+        return (x + .47*fraction*edge*math.cos(angle),
+                y + .32*fraction*edge*math.sin(angle),
+                z + .075*(1-fraction*fraction) + .012*fraction*math.sin(9*angle))
+    for i in range(32):
+        a, b = math.tau*i/32, math.tau*(i+1)/32
+        for ring in range(4):
+            p, q = ring/4, (ring+1)/4
+            if ring == 0:
+                mesh.face([point(a,0),point(a,q),point(b,q)], 'coralline')
+            else:
+                mesh.face([point(a,p),point(a,q),point(b,q),point(b,p)], 'coralline')
+        ridge = [point(a,f) for f in (.12,.4,.7,.95)]
+        mesh.swept_tube([(p[0],p[1],p[2]+.008) for p in ridge], .013, 'polyp', 5)
 
 
 def _nudibranch(mesh, center):
     x, y, z = center
-    mesh.ellipsoid((x, y, z), (.31, .16, .10), 'zoanthid', 16, 8)
-    mesh.ellipsoid((x - .23, y, z + .055), (.12, .105, .10), 'polyp', 10, 6)
+    # Phyllidia's dark mantle carries broken pale ridges and yellow tubercles;
+    # keep those markings in geometry so they remain visible at tank scale.
+    mesh.ellipsoid((x, y, z), (.31, .16, .10), 'fish_dark', 16, 8)
+    mesh.ellipsoid((x - .23, y, z + .055), (.12, .105, .10), 'fish_dark', 10, 6)
+    for side in (-1, 1):
+        ridge = []
+        for i in range(7):
+            t = i/6
+            ridge.append((x-.22+.44*t, y+side*(.075+.018*math.sin(t*math.pi)),
+                          z+.075+.025*math.sin(t*math.pi)))
+        mesh.swept_tube(ridge, .012, 'clam', 5)
     for i in range(13):
         t = i / 12
         px = x - .2 + .42 * t
         py = y + .10 * math.sin(t * math.pi * 2)
         pz = z + .09 + .035 * math.sin(t * math.pi)
-        mesh.swept_tube([(px, py, pz), (px, py, pz + .12)], .018, 'polyp', 5)
-        mesh.ellipsoid((px, py, pz + .13), (.033, .033, .046), 'polyp', 6, 4)
+        mesh.swept_tube([(px, py, pz), (px, py, pz + .08)], .016, 'clam', 5)
+        mesh.ellipsoid((px, py, pz + .09), (.029, .029, .037), 'fish', 6, 4)
     for side in (-1, 1):
         mesh.swept_tube([(x-.28,y,z+.12),(x-.31,y+side*.05,z+.24)], .012, 'clam', 4)
 
@@ -207,10 +320,27 @@ def _juvenile_boxfish(mesh, center):
     mesh.ellipsoid((x+.28,y-.235,z+.08),(.035,.018,.035),'rock',8,5)
 
 
+def _encrusting_patch(mesh, center, rx, rz, color):
+    """An irregular crust with a low, uneven surface on the rock face."""
+    x,y,z = center
+    rng = random.Random(SEED + round((x + 6)*1000) + round(z*100))
+    radii = [rng.uniform(.65,1.2) for _ in range(15)]
+    def point(i, fraction):
+        angle = math.tau*(i % 15)/15
+        radius = radii[i % 15]*fraction
+        relief = .018*(1-fraction) + .016*math.sin(3*angle+fraction*4)*fraction*(1-fraction)
+        return (x+rx*radius*math.cos(angle), y-.07-relief,
+                z+rz*radius*math.sin(angle))
+    for i in range(15):
+        mesh.face([point(0,0),point(i,1/3),point(i+1,1/3)],color)
+        for ring in (1,2):
+            a,b=ring/3,(ring+1)/3
+            mesh.face([point(i,a),point(i,b),point(i+1,b),point(i+1,a)],color)
+
+
 def populate(mesh):
     """Add visible static colonies; dynamic animals are authored separately."""
     a = anchor_map()
-    _clam(mesh, (a['giant_clam'][0], -1.15, .82))
     _zoanthids(mesh, (-3.55, -1.25, 1.55))
     _zoanthids(mesh, (2.0, -1.05, 1.55))
     _zoanthids(mesh, (4.0, -.95, 1.70))
@@ -229,15 +359,7 @@ def populate(mesh):
         (1.7,-.90,1.20,.23,.15,'sponge'), (2.35,-1.0,2.20,.20,.14,'coralline'),
         (3.25,-1.0,1.22,.27,.14,'sponge'), (4.4,-.90,2.15,.22,.13,'coralline'),
     ):
-        rng = random.Random(SEED + round((x + 6) * 1000) + round(z * 100))
-        edge = []
-        for i in range(15):
-            angle = math.tau * i / 15
-            radius = rng.uniform(.65, 1.2)
-            edge.append((x + rx * radius * math.cos(angle), y - .07,
-                         z + rz * radius * math.sin(angle)))
-        for i, point in enumerate(edge):
-            mesh.face([(x, y - .085, z), point, edge[(i + 1) % len(edge)]], color)
+        _encrusting_patch(mesh, (x,y,z), rx, rz, color)
     _mushroom_coral(mesh, (-2.1, -1.0, .86))
     for i in range(6):
         angle = math.tau * i / 6

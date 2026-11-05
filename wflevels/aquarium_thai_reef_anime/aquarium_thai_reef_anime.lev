@@ -282,7 +282,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' ": tk-init 600 ;\n: tk-phase 601 ;\n: tk-heading 602 ;\n: tk-prev 603 ;\n: tk-mode 604 ;\n: tk-dart 605 ;\n: tk-cooldown 606 ;\n: tk-dx 607 ;\n: tk-dy 608 ;\n: tk-dz 609 ;\n: tk-vx 610 ;\n: tk-vy 611 ;\n: tk-vz 612 ;\n: tk-target 613 ;\n: tk-x 614 ;\n: tk-y 615 ;\n: tk-z 616 ;\n: tk-yaw 617 ;\n: tk-scale 618 ;\n: tk-sy 619 ;\n: tk-cy 620 ;\n: tk-actor 621 ;\n: tk-ox 622 ;\n: tk-oy 623 ;\n: tk-oz 624 ;\n: tk-camera 625 ;\n: tk-clock 626 ;\n: tk-pulse 627 ;\n: tk-player 9 ;\n: tk-touch 0 ;\n: tk-jelly 0 ;\n: tk-limit-x 5.3 ;\n: tk-limit-y 2.3 ;\n: tk-bottom 0.9 ;\n: tk-top 5.0 ;\n: tk-speed 1.2 ;\n: tk-focus-z 2.3 ;\n: tk-cam-close 33 ;\n: tk-cam-wide 7 ;\n: tk-pitch 700 ;\n: tk-roll 701 ;\n: tk-pose-pitch 702 ;\n: tk-pose-roll 703 ;\n: tk-drive 704 ;\n: tk-pitch-target 705 ;\n: tk-error 706 ;\n: tk-steer 707 ;\n: tk-fx 708 ;\n: tk-fy 709 ;\n: tk-fz 710 ;\n: tk-cp 711 ;\n: tk-sp 712 ;\n: tk-cr 713 ;\n: tk-sr 714 ;\n: tk-lateral 715 ;\n: tk-vertical 716 ;\n: tk-cap 717 ;\n: tk-neutral 718 ;\n: tk-action 719 ;\n: tk-local-x 720 ;\n: tk-cap-pos 721 ;\n: tk-cap-hi 722 ;\n: tk-cap-lo 723 ;\n: tk-cap-facing 724 ;\n: tk-turn-side 725 ;\n: tk-last-target 726 ;\n: tk-pose-drive 727 ;\n: tk-turn-rate 0.55 ; : tk-pitch-max .0833333 ;\n\\ Three independent tanks: bounded phases, input, neutral buoyancy and posing.\n: tk@ read-mailbox ; : tk! write-mailbox ;\n: tk-frac begin dup 1 >= if 1 - 0 else 1 then until\n  begin dup 0 < if 1 + 0 else 1 then until ;\n: tk-sin tk-frac dup .5 > if .5 - -1 else 1 then >r\n  2 * dup 1 swap - * dup 16 * swap 4 * 5 swap - / r> * ;\n: tk-cos .25 + tk-sin ;\n: tk-wrap dup .5 > if 1 - then dup -.5 < if 1 + then ;\n: tk-atan-oct dup 1 swap - .04345 * .125 + * ;\n: tk-atan2\n  2dup abs swap abs + .000001 < if 2drop 0 else\n    over abs over abs 2dup > if swap / tk-atan-oct .25 swap - else / tk-atan-oct then\n    over 0 < if .5 swap - then rot 0 < if negate then nip then ;\n: tk-held INDEXOF_HARDWARE_JOYSTICK1_RAW tk@ & 0 <> if 1 else 0 then ;\n: tk-edge dup tk-held swap tk-prev tk@ & 0 <> if drop 0 then ;\n: tk-dt@ INDEXOF_DELTA_TIME tk@ dup .2 > if drop 0 else 0 max .05 min then ;\n: tk-v ( target mb -- ) >r r@ tk@ - tk-dt@ 5 * 1 min * r@ tk@ + r> tk! ;\n: tk-bounds ( lo hi mb -- ) >r r@ tk@ min max r> tk! ;\n\\ One-button TV: Up+OK changes plane; OK-first remains Action.\n: tk-toggle 1 tk-mode tk@ - tk-mode tk! 1 tk-neutral tk! ;\n: tk-input\n  0 tk-action tk!\n  JOYSTICK_BUTTON_RIGHT tk-held JOYSTICK_BUTTON_LEFT tk-held - tk-dx tk!\n  JOYSTICK_BUTTON_UP tk-held JOYSTICK_BUTTON_DOWN tk-held -\n  tk-touch if\n    JOYSTICK_BUTTON_A tk-edge if tk-toggle then\n    tk-mode tk@ if tk-dy tk! 0 tk-dz tk! else tk-dz tk! 0 tk-dy tk! then\n    JOYSTICK_BUTTON_B tk-edge tk-action tk!\n  else\n    tk-mode tk@ if tk-dy tk! 0 tk-dz tk! else tk-dz tk! 0 tk-dy tk! then\n    JOYSTICK_BUTTON_C tk-held JOYSTICK_BUTTON_B tk-held - dup 0 <> if tk-dy tk! else drop then\n    JOYSTICK_BUTTON_A tk-edge if\n      JOYSTICK_BUTTON_UP tk-held if tk-toggle else 1 tk-action tk! then\n    then\n  then\n  INDEXOF_DELTA_TIME tk@ .2 > if 1 tk-neutral tk! 0 tk-dart tk! 0 tk-drive tk! then\n  tk-neutral tk@ if\n    0 tk-dx tk! 0 tk-dy tk! 0 tk-dz tk! 0 tk-action tk!\n    INDEXOF_HARDWARE_JOYSTICK1_RAW tk@ 30727 & 0 = if 0 tk-neutral tk! then\n  then\n  tk-action tk@ if tk-cooldown tk@ 0 <= if .3 tk-dart tk! 1 tk-cooldown tk! then then\n  INDEXOF_HARDWARE_JOYSTICK1_RAW tk@ tk-prev tk!\n  tk-dart tk@ tk-dt@ - 0 max tk-dart tk!\n  tk-cooldown tk@ tk-dt@ - 0 max tk-cooldown tk! ;\n\\ Betta / lionfish: orient, forward cruise, brake, hover. No axis sliding.\n: tk-forward\n  tk-pitch tk@ tk-cos tk-heading tk@ tk-cos * tk-fx tk!\n  tk-pitch tk@ tk-cos tk-heading tk@ tk-sin * tk-fy tk!\n  tk-pitch tk@ tk-sin tk-fz tk! ;\n: tk-axis-cap ( facing lo hi position -- cap )\n  tk-cap-pos tk! tk-cap-hi tk! tk-cap-lo tk! tk-cap-facing tk!\n  tk-cap-facing tk@ abs .0001 < if 10 else\n    tk-cap-facing tk@ 0 > if tk-cap-hi tk@ tk-cap-pos tk@ - else\n      tk-cap-lo tk@ tk-cap-pos tk@ - then tk-cap-facing tk@ / .20 / 0 max\n  then ;\n: tk-caps\n  tk-fx tk@ tk-limit-x negate tk-limit-x INDEXOF_X_POS tk@ tk-axis-cap\n  tk-fy tk@ tk-limit-y negate tk-limit-y INDEXOF_Y_POS tk@ tk-axis-cap min\n  tk-fz tk@ tk-bottom tk-top INDEXOF_Z_POS tk@ tk-axis-cap min\n  tk-drive tk@ min tk-drive tk! ;\n: tk-player-tick\n  0 INDEXOF_INPUT tk! tk-input\n  tk-dx tk@ abs tk-dy tk@ abs + 0 > if\n    tk-dy tk@ tk-dx tk@ tk-atan2 tk-target tk!\n  then\n  tk-target tk@ tk-last-target tk@ - tk-wrap abs .001 > if 0 tk-turn-side tk! then\n  tk-target tk@ tk-last-target tk!\n  tk-target tk@ tk-heading tk@ - tk-wrap tk-error tk!\n  \\ Keep the chosen arc stable; prefer front glass only while both arcs have room.\n  tk-error tk@ abs .45 > tk-turn-side tk@ 0 = & if\n    tk-heading tk@ tk-cos 0 >= if -1 else 1 then\n    INDEXOF_Y_POS tk@ tk-limit-y negate - .10 < if negate then tk-turn-side tk!\n  then\n  tk-turn-side tk@ 0 <> if\n    tk-error tk@ tk-turn-side tk@ * 0 < if tk-error tk@ tk-turn-side tk@ + tk-error tk! then\n    tk-error tk@ abs .40 < if 0 tk-turn-side tk! then\n  then\n  tk-error tk@ tk-dt@ tk-turn-rate * dup >r negate max r> min dup tk-steer tk!\n  tk-heading tk@ + tk-frac tk-heading tk!\n  tk-dz tk@ tk-pitch-max * tk-pitch-target tk!\n  tk-pitch-target tk@ tk-pitch tk@ - tk-dt@ .18 * dup >r negate max r> min\n  tk-pitch tk@ + tk-pitch tk!\n  tk-steer tk@ tk-dt@ .0001 max / -.06 * -.018 max .018 min tk-roll tk-v\n  tk-dx tk@ abs tk-dy tk@ abs + tk-dz tk@ abs + 0 > tk-dart tk@ 0 > | if\n    tk-speed tk-error tk@ abs .125 > if .18 * then\n    tk-dart tk@ 0 > if tk-error tk@ abs .125 <= if 1.35 * then then\n  else 0 then tk-drive tk-v\n  tk-limit-x negate tk-limit-x INDEXOF_X_POS tk-bounds\n  tk-limit-y negate tk-limit-y INDEXOF_Y_POS tk-bounds\n  tk-bottom tk-top INDEXOF_Z_POS tk-bounds\n  tk-forward tk-caps\n  tk-drive tk@ .002 < if 0 tk-drive tk! then\n  tk-drive tk@ tk-fx tk@ * dup tk-vx tk! INDEXOF_XSPEED tk!\n  tk-drive tk@ tk-fy tk@ * dup tk-vy tk! INDEXOF_YSPEED tk!\n  tk-drive tk@ tk-fz tk@ * dup tk-vz tk! INDEXOF_ZSPEED tk! ;\n\n\\ Root matrix Rz(yaw) Ry(-elevation) Rx(bank), shared by every attachment.\n: tk-root\n  tk-pose-pitch tk@ tk-cos tk-cp tk! tk-pose-pitch tk@ tk-sin tk-sp tk!\n  tk-pose-roll tk@ tk-cos tk-cr tk! tk-pose-roll tk@ tk-sin tk-sr tk! ;\n: tk-place ( ox oy oz actor -- ) tk-actor tk! tk-oz tk! tk-oy tk! dup tk-local-x tk! tk-ox tk!\n  tk-oy tk@ tk-cr tk@ * tk-oz tk@ tk-sr tk@ * - tk-lateral tk!\n  tk-oy tk@ tk-sr tk@ * tk-oz tk@ tk-cr tk@ * + tk-vertical tk!\n  tk-ox tk@ tk-cp tk@ * tk-vertical tk@ tk-sp tk@ * - tk-ox tk!\n  tk-ox tk@ tk-cy tk@ * tk-lateral tk@ tk-sy tk@ * - tk-scale tk@ * tk-x tk@ +\n  INDEXOF_X_POS tk-actor tk@ write-actor-mailbox\n  tk-ox tk@ tk-sy tk@ * tk-lateral tk@ tk-cy tk@ * + tk-scale tk@ * tk-y tk@ +\n  INDEXOF_Y_POS tk-actor tk@ write-actor-mailbox\n  \\ Re-read original x: tk-ox above is the projected horizontal component.\n  tk-local-x tk@ tk-sp tk@ * tk-vertical tk@ tk-cp tk@ * + tk-scale tk@ * tk-z tk@ +\n  INDEXOF_Z_POS tk-actor tk@ write-actor-mailbox ;\n: tk-orient ( a b c actor -- ) >r rot tk-pose-roll tk@ + INDEXOF_ROTATION_A r@ write-actor-mailbox\n  swap tk-pose-pitch tk@ - INDEXOF_ROTATION_B r@ write-actor-mailbox INDEXOF_ROTATION_C r> write-actor-mailbox ;\n: tk-part ( ox oy oz a b c actor -- ) dup >r tk-orient r> tk-place ;\n: tk-gait tk-phase tk@ tk-sin ;\n: tk-camera-tick\n  tk-x tk@ dup * tk-y tk@ dup * + tk-z tk@ tk-focus-z - dup * +\n  tk-camera tk@ if 5 > if 0 tk-camera tk! then else 2.8 < if 1 tk-camera tk! then then\n  tk-camera tk@ if tk-cam-close else tk-cam-wide then INDEXOF_CAMSHOT tk! ;\n: reef-shoal\n 640 tk@ tk-dt@ .12 * + tk-frac 640 tk!\n INDEXOF_X_POS tk-player read-actor-mailbox -3.255 - dup * INDEXOF_Z_POS tk-player read-actor-mailbox 3.755 - dup * + 1.44 < 641 tk!\n -3.255 640 tk@ 0 + tk-sin .22 * + INDEXOF_X_POS 21 write-actor-mailbox\n 3.755 641 tk@ if .48 - then INDEXOF_Z_POS 21 write-actor-mailbox\n -2.755 640 tk@ 0.25 + tk-sin .22 * + INDEXOF_X_POS 22 write-actor-mailbox\n 3.5549999999999997 641 tk@ if .48 - then INDEXOF_Z_POS 22 write-actor-mailbox\n;\n: reef-worm ( x y z index -- ) 1063 tk! 1062 tk! 1061 tk! 1060 tk!\n INDEXOF_X_POS tk-player read-actor-mailbox 1060 tk@ - dup *\n INDEXOF_Y_POS tk-player read-actor-mailbox 1061 tk@ - dup * +\n INDEXOF_Z_POS tk-player read-actor-mailbox 1062 tk@ - dup * + .64 <\n if 1063 tk@ 7 * 15 mod .35 * 3 + 1000 1063 tk@ + tk!\n    1020 1063 tk@ + tk@ tk-dt@ 6.533333 * - .02 max\n else 1000 1063 tk@ + tk@ tk-dt@ - 0 max 1000 1063 tk@ + tk!\n    1020 1063 tk@ + tk@ 1000 1063 tk@ + tk@ 0 <=\n    if tk-dt@ .653333 * + 1 min then\n then 1020 1063 tk@ + tk!\n 1020 1063 tk@ + tk@ 1195 1063 tk@ 4 * + tk! ;\n: reef-life\n 640 tk@ tk-sin .012 * INDEXOF_ROTATION_A 23 write-actor-mailbox\n 640 tk@ .17 + tk-sin .018 * INDEXOF_ROTATION_C 24 write-actor-mailbox\n -4 640 tk@ tk-sin .18 * + INDEXOF_X_POS 25 write-actor-mailbox\n 1064 tk@ 0 = if\n 1 1020 tk!\n 1 1021 tk!\n 1 1022 tk!\n 1 1023 tk!\n 1 1024 tk!\n 1 1025 tk!\n 1 1026 tk!\n 1 1027 tk!\n 1 1028 tk!\n 1 1029 tk!\n 1 1030 tk!\n 1 1031 tk!\n 1 1032 tk!\n 1 1033 tk!\n 1 1034 tk!\n 1 1064 tk! then\n -3.250000 -1.350000 1.760000 0 reef-worm\n -2.977629 -1.350000 1.789750 1 reef-worm\n -2.779811 -1.350000 1.752334 2 reef-worm\n -2.482647 -1.350000 1.732226 3 reef-worm\n -2.243313 -1.350000 1.774823 4 reef-worm\n -3.276264 -1.375000 2.023955 5 reef-worm\n -2.971689 -1.375000 1.979004 6 reef-worm\n -2.761462 -1.375000 1.981456 7 reef-worm\n -2.513037 -1.375000 2.025775 8 reef-worm\n -2.221165 -1.375000 2.011902 9 reef-worm\n -3.275387 -1.400000 2.211158 10 reef-worm\n -2.995006 -1.400000 2.235530 11 reef-worm\n -2.731269 -1.400000 2.269994 12 reef-worm\n -2.529955 -1.400000 2.236741 13 reef-worm\n -2.228815 -1.400000 2.210846 14 reef-worm\n 1027 tk@ 642 tk! 1155 15 26 dfrm-pose-curves 1099 tk!\n 647 tk@ 0 = if -0.7 645 tk! -0.35 646 tk! 1 647 tk! then\n INDEXOF_X_POS tk-player read-actor-mailbox -0.7 - dup * INDEXOF_Z_POS tk-player read-actor-mailbox 1.885 - dup * + 1 < INDEXOF_XSPEED tk-player read-actor-mailbox abs .1 < & INDEXOF_YSPEED tk-player read-actor-mailbox abs .1 < & INDEXOF_ZSPEED tk-player read-actor-mailbox abs .1 < & if 644 tk@ tk-dt@ + 3 min 644 tk! else 0 644 tk! then\n -3.136 640 tk@ 0 + tk-sin 0.025 * + INDEXOF_X_POS 27 write-actor-mailbox\n 644 tk@ 2 >= if INDEXOF_X_POS tk-player read-actor-mailbox -0.175 + else -0.7 640 tk@ 0.25 + tk-sin 0.06 * + then 645 tk-v 645 tk@ INDEXOF_X_POS 28 write-actor-mailbox\n 644 tk@ 2 >= if INDEXOF_X_POS tk-player read-actor-mailbox 0.175 + else -0.35 640 tk@ 0.5 + tk-sin 0.06 * + then 646 tk-v 646 tk@ INDEXOF_X_POS 29 write-actor-mailbox\n 1.295 640 tk@ 0.75 + tk-sin 0.12 * + INDEXOF_X_POS 30 write-actor-mailbox\n;\n: reef-tick\n reef-shoal reef-life\n INDEXOF_X_POS tk-player read-actor-mailbox INDEXOF_X_POS 20 write-actor-mailbox\n INDEXOF_X_POS tk-player read-actor-mailbox tk-x tk!\n INDEXOF_Y_POS tk-player read-actor-mailbox INDEXOF_Y_POS 20 write-actor-mailbox\n INDEXOF_Y_POS tk-player read-actor-mailbox tk-y tk!\n INDEXOF_Z_POS tk-player read-actor-mailbox INDEXOF_Z_POS 20 write-actor-mailbox\n INDEXOF_Z_POS tk-player read-actor-mailbox tk-z tk!\n tk-heading tk@ INDEXOF_ROTATION_C 20 write-actor-mailbox\n 648 tk@ 0 = if tk-x tk@ dup * tk-y tk@ dup * + tk-z tk@ tk-focus-z - dup * + 5 > if 1 648 tk! then then\n 648 tk@ if tk-camera-tick else 7 INDEXOF_CAMSHOT tk! then ;\nreef-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": tk-init 600 ;\n: tk-phase 601 ;\n: tk-heading 602 ;\n: tk-prev 603 ;\n: tk-mode 604 ;\n: tk-dart 605 ;\n: tk-cooldown 606 ;\n: tk-dx 607 ;\n: tk-dy 608 ;\n: tk-dz 609 ;\n: tk-vx 610 ;\n: tk-vy 611 ;\n: tk-vz 612 ;\n: tk-target 613 ;\n: tk-x 614 ;\n: tk-y 615 ;\n: tk-z 616 ;\n: tk-yaw 617 ;\n: tk-scale 618 ;\n: tk-sy 619 ;\n: tk-cy 620 ;\n: tk-actor 621 ;\n: tk-ox 622 ;\n: tk-oy 623 ;\n: tk-oz 624 ;\n: tk-camera 625 ;\n: tk-clock 626 ;\n: tk-pulse 627 ;\n: tk-player 9 ;\n: tk-touch 0 ;\n: tk-jelly 0 ;\n: tk-limit-x 5.3 ;\n: tk-limit-y 2.3 ;\n: tk-bottom 0.9 ;\n: tk-top 5.0 ;\n: tk-speed 1.2 ;\n: tk-focus-z 2.3 ;\n: tk-cam-close 40 ;\n: tk-cam-wide 7 ;\n: tk-pitch 700 ;\n: tk-roll 701 ;\n: tk-pose-pitch 702 ;\n: tk-pose-roll 703 ;\n: tk-drive 704 ;\n: tk-pitch-target 705 ;\n: tk-error 706 ;\n: tk-steer 707 ;\n: tk-fx 708 ;\n: tk-fy 709 ;\n: tk-fz 710 ;\n: tk-cp 711 ;\n: tk-sp 712 ;\n: tk-cr 713 ;\n: tk-sr 714 ;\n: tk-lateral 715 ;\n: tk-vertical 716 ;\n: tk-cap 717 ;\n: tk-neutral 718 ;\n: tk-action 719 ;\n: tk-local-x 720 ;\n: tk-cap-pos 721 ;\n: tk-cap-hi 722 ;\n: tk-cap-lo 723 ;\n: tk-cap-facing 724 ;\n: tk-turn-side 725 ;\n: tk-last-target 726 ;\n: tk-pose-drive 727 ;\n: tk-turn-rate 0.55 ; : tk-pitch-max .0833333 ;\n\\ Three independent tanks: bounded phases, input, neutral buoyancy and posing.\n: tk@ read-mailbox ; : tk! write-mailbox ;\n: tk-frac begin dup 1 >= if 1 - 0 else 1 then until\n  begin dup 0 < if 1 + 0 else 1 then until ;\n: tk-sin tk-frac dup .5 > if .5 - -1 else 1 then >r\n  2 * dup 1 swap - * dup 16 * swap 4 * 5 swap - / r> * ;\n: tk-cos .25 + tk-sin ;\n: tk-wrap dup .5 > if 1 - then dup -.5 < if 1 + then ;\n: tk-atan-oct dup 1 swap - .04345 * .125 + * ;\n: tk-atan2\n  2dup abs swap abs + .000001 < if 2drop 0 else\n    over abs over abs 2dup > if swap / tk-atan-oct .25 swap - else / tk-atan-oct then\n    over 0 < if .5 swap - then rot 0 < if negate then nip then ;\n: tk-held INDEXOF_HARDWARE_JOYSTICK1_RAW tk@ & 0 <> if 1 else 0 then ;\n: tk-edge dup tk-held swap tk-prev tk@ & 0 <> if drop 0 then ;\n: tk-dt@ INDEXOF_DELTA_TIME tk@ dup .2 > if drop 0 else 0 max .05 min then ;\n: tk-v ( target mb -- ) >r r@ tk@ - tk-dt@ 5 * 1 min * r@ tk@ + r> tk! ;\n: tk-bounds ( lo hi mb -- ) >r r@ tk@ min max r> tk! ;\n\\ One-button TV: Up+OK changes plane; OK-first remains Action.\n: tk-toggle 1 tk-mode tk@ - tk-mode tk! 1 tk-neutral tk! ;\n: tk-input\n  0 tk-action tk!\n  JOYSTICK_BUTTON_RIGHT tk-held JOYSTICK_BUTTON_LEFT tk-held - tk-dx tk!\n  JOYSTICK_BUTTON_UP tk-held JOYSTICK_BUTTON_DOWN tk-held -\n  tk-touch if\n    JOYSTICK_BUTTON_A tk-edge if tk-toggle then\n    tk-mode tk@ if tk-dy tk! 0 tk-dz tk! else tk-dz tk! 0 tk-dy tk! then\n    JOYSTICK_BUTTON_B tk-edge tk-action tk!\n  else\n    tk-mode tk@ if tk-dy tk! 0 tk-dz tk! else tk-dz tk! 0 tk-dy tk! then\n    JOYSTICK_BUTTON_C tk-held JOYSTICK_BUTTON_B tk-held - dup 0 <> if tk-dy tk! else drop then\n    JOYSTICK_BUTTON_A tk-edge if\n      JOYSTICK_BUTTON_UP tk-held if tk-toggle else 1 tk-action tk! then\n    then\n  then\n  INDEXOF_DELTA_TIME tk@ .2 > if 1 tk-neutral tk! 0 tk-dart tk! 0 tk-drive tk! then\n  tk-neutral tk@ if\n    0 tk-dx tk! 0 tk-dy tk! 0 tk-dz tk! 0 tk-action tk!\n    INDEXOF_HARDWARE_JOYSTICK1_RAW tk@ 30727 & 0 = if 0 tk-neutral tk! then\n  then\n  tk-action tk@ if tk-cooldown tk@ 0 <= if .3 tk-dart tk! 1 tk-cooldown tk! then then\n  INDEXOF_HARDWARE_JOYSTICK1_RAW tk@ tk-prev tk!\n  tk-dart tk@ tk-dt@ - 0 max tk-dart tk!\n  tk-cooldown tk@ tk-dt@ - 0 max tk-cooldown tk! ;\n\\ Betta / lionfish: orient, forward cruise, brake, hover. No axis sliding.\n: tk-forward\n  tk-pitch tk@ tk-cos tk-heading tk@ tk-cos * tk-fx tk!\n  tk-pitch tk@ tk-cos tk-heading tk@ tk-sin * tk-fy tk!\n  tk-pitch tk@ tk-sin tk-fz tk! ;\n: tk-axis-cap ( facing lo hi position -- cap )\n  tk-cap-pos tk! tk-cap-hi tk! tk-cap-lo tk! tk-cap-facing tk!\n  tk-cap-facing tk@ abs .0001 < if 10 else\n    tk-cap-facing tk@ 0 > if tk-cap-hi tk@ tk-cap-pos tk@ - else\n      tk-cap-lo tk@ tk-cap-pos tk@ - then tk-cap-facing tk@ / .20 / 0 max\n  then ;\n: tk-caps\n  tk-fx tk@ tk-limit-x negate tk-limit-x INDEXOF_X_POS tk@ tk-axis-cap\n  tk-fy tk@ tk-limit-y negate tk-limit-y INDEXOF_Y_POS tk@ tk-axis-cap min\n  tk-fz tk@ tk-bottom tk-top INDEXOF_Z_POS tk@ tk-axis-cap min\n  tk-drive tk@ min tk-drive tk! ;\n: tk-player-tick\n  0 INDEXOF_INPUT tk! tk-input\n  tk-dx tk@ abs tk-dy tk@ abs + 0 > if\n    tk-dy tk@ tk-dx tk@ tk-atan2 tk-target tk!\n  then\n  tk-target tk@ tk-last-target tk@ - tk-wrap abs .001 > if 0 tk-turn-side tk! then\n  tk-target tk@ tk-last-target tk!\n  tk-target tk@ tk-heading tk@ - tk-wrap tk-error tk!\n  \\ Keep the chosen arc stable; prefer front glass only while both arcs have room.\n  tk-error tk@ abs .45 > tk-turn-side tk@ 0 = & if\n    tk-heading tk@ tk-cos 0 >= if -1 else 1 then\n    INDEXOF_Y_POS tk@ tk-limit-y negate - .10 < if negate then tk-turn-side tk!\n  then\n  tk-turn-side tk@ 0 <> if\n    tk-error tk@ tk-turn-side tk@ * 0 < if tk-error tk@ tk-turn-side tk@ + tk-error tk! then\n    tk-error tk@ abs .40 < if 0 tk-turn-side tk! then\n  then\n  tk-error tk@ tk-dt@ tk-turn-rate * dup >r negate max r> min dup tk-steer tk!\n  tk-heading tk@ + tk-frac tk-heading tk!\n  tk-dz tk@ tk-pitch-max * tk-pitch-target tk!\n  tk-pitch-target tk@ tk-pitch tk@ - tk-dt@ .18 * dup >r negate max r> min\n  tk-pitch tk@ + tk-pitch tk!\n  tk-steer tk@ tk-dt@ .0001 max / -.06 * -.018 max .018 min tk-roll tk-v\n  tk-dx tk@ abs tk-dy tk@ abs + tk-dz tk@ abs + 0 > tk-dart tk@ 0 > | if\n    tk-speed tk-error tk@ abs .125 > if .18 * then\n    tk-dart tk@ 0 > if tk-error tk@ abs .125 <= if 1.35 * then then\n  else 0 then tk-drive tk-v\n  tk-limit-x negate tk-limit-x INDEXOF_X_POS tk-bounds\n  tk-limit-y negate tk-limit-y INDEXOF_Y_POS tk-bounds\n  tk-bottom tk-top INDEXOF_Z_POS tk-bounds\n  tk-forward tk-caps\n  tk-drive tk@ .002 < if 0 tk-drive tk! then\n  tk-drive tk@ tk-fx tk@ * dup tk-vx tk! INDEXOF_XSPEED tk!\n  tk-drive tk@ tk-fy tk@ * dup tk-vy tk! INDEXOF_YSPEED tk!\n  tk-drive tk@ tk-fz tk@ * dup tk-vz tk! INDEXOF_ZSPEED tk! ;\n\n\\ Root matrix Rz(yaw) Ry(-elevation) Rx(bank), shared by every attachment.\n: tk-root\n  tk-pose-pitch tk@ tk-cos tk-cp tk! tk-pose-pitch tk@ tk-sin tk-sp tk!\n  tk-pose-roll tk@ tk-cos tk-cr tk! tk-pose-roll tk@ tk-sin tk-sr tk! ;\n: tk-place ( ox oy oz actor -- ) tk-actor tk! tk-oz tk! tk-oy tk! dup tk-local-x tk! tk-ox tk!\n  tk-oy tk@ tk-cr tk@ * tk-oz tk@ tk-sr tk@ * - tk-lateral tk!\n  tk-oy tk@ tk-sr tk@ * tk-oz tk@ tk-cr tk@ * + tk-vertical tk!\n  tk-ox tk@ tk-cp tk@ * tk-vertical tk@ tk-sp tk@ * - tk-ox tk!\n  tk-ox tk@ tk-cy tk@ * tk-lateral tk@ tk-sy tk@ * - tk-scale tk@ * tk-x tk@ +\n  INDEXOF_X_POS tk-actor tk@ write-actor-mailbox\n  tk-ox tk@ tk-sy tk@ * tk-lateral tk@ tk-cy tk@ * + tk-scale tk@ * tk-y tk@ +\n  INDEXOF_Y_POS tk-actor tk@ write-actor-mailbox\n  \\ Re-read original x: tk-ox above is the projected horizontal component.\n  tk-local-x tk@ tk-sp tk@ * tk-vertical tk@ tk-cp tk@ * + tk-scale tk@ * tk-z tk@ +\n  INDEXOF_Z_POS tk-actor tk@ write-actor-mailbox ;\n: tk-orient ( a b c actor -- ) >r rot tk-pose-roll tk@ + INDEXOF_ROTATION_A r@ write-actor-mailbox\n  swap tk-pose-pitch tk@ - INDEXOF_ROTATION_B r@ write-actor-mailbox INDEXOF_ROTATION_C r> write-actor-mailbox ;\n: tk-part ( ox oy oz a b c actor -- ) dup >r tk-orient r> tk-place ;\n: tk-gait tk-phase tk@ tk-sin ;\n: tk-camera-tick\n  tk-x tk@ dup * tk-y tk@ dup * + tk-z tk@ tk-focus-z - dup * +\n  tk-camera tk@ if 5 > if 0 tk-camera tk! then else 2.8 < if 1 tk-camera tk! then then\n  tk-camera tk@ if tk-cam-close else tk-cam-wide then INDEXOF_CAMSHOT tk! ;\n: reef-shoal\n 640 tk@ tk-dt@ .12 * + tk-frac 640 tk!\n INDEXOF_X_POS tk-player read-actor-mailbox -3.255 - dup * INDEXOF_Z_POS tk-player read-actor-mailbox 3.755 - dup * + 1.44 < 641 tk!\n 641 tk@ if 2.5 740 tk! else 740 tk@ tk-dt@ - 0 max 740 tk! then\n 740 tk@ 0 > if 741 tk@ tk-dt@ 2 * + 1 min else 741 tk@ tk-dt@ - 0 max then 741 tk!\n -3.255 640 tk@ 0 + tk-sin .22 * + INDEXOF_X_POS 24 write-actor-mailbox\n 3.755 741 tk@ .48 * - INDEXOF_Z_POS 24 write-actor-mailbox\n -2.755 640 tk@ 0.25 + tk-sin .22 * + INDEXOF_X_POS 25 write-actor-mailbox\n 3.5549999999999997 741 tk@ .48 * - INDEXOF_Z_POS 25 write-actor-mailbox\n;\n: reef-worm ( x y z index -- ) 1063 tk! 1062 tk! 1061 tk! 1060 tk!\n INDEXOF_X_POS tk-player read-actor-mailbox 1060 tk@ - dup *\n INDEXOF_Y_POS tk-player read-actor-mailbox 1061 tk@ - dup * +\n INDEXOF_Z_POS tk-player read-actor-mailbox 1062 tk@ - dup * + .64 <\n if 1063 tk@ 7 * 15 mod .35 * 3 + 1000 1063 tk@ + tk!\n    1020 1063 tk@ + tk@ tk-dt@ 6.533333 * - .02 max\n else 1000 1063 tk@ + tk@ tk-dt@ - 0 max 1000 1063 tk@ + tk!\n    1020 1063 tk@ + tk@ 1000 1063 tk@ + tk@ 0 <=\n    if tk-dt@ .653333 * + 1 min then\n then 1020 1063 tk@ + tk!\n 1020 1063 tk@ + tk@ 1195 1063 tk@ 4 * + tk! ;\n: reef-life\n 640 tk@ tk-sin .012 * INDEXOF_ROTATION_A 26 write-actor-mailbox\n 640 tk@ .17 + tk-sin .018 * INDEXOF_ROTATION_C 27 write-actor-mailbox\n 751 tk@ tk-dt@ .03 * + tk-frac 751 tk!\n -4 751 tk@ tk-sin .32 * + INDEXOF_X_POS 28 write-actor-mailbox\n 1.05 751 tk@ .25 + tk-sin .07 * + INDEXOF_Z_POS 28 write-actor-mailbox\n 1064 tk@ 0 = if\n 1 1020 tk!\n 1 1021 tk!\n 1 1022 tk!\n 1 1023 tk!\n 1 1024 tk!\n 1 1025 tk!\n 1 1026 tk!\n 1 1027 tk!\n 1 1028 tk!\n 1 1029 tk!\n 1 1030 tk!\n 1 1031 tk!\n 1 1032 tk!\n 1 1033 tk!\n 1 1034 tk!\n 1 1064 tk! then\n -3.250000 -1.350000 1.760000 0 reef-worm\n -2.977629 -1.350000 1.789750 1 reef-worm\n -2.779811 -1.350000 1.752334 2 reef-worm\n -2.482647 -1.350000 1.732226 3 reef-worm\n -2.243313 -1.350000 1.774823 4 reef-worm\n -3.276264 -1.375000 2.023955 5 reef-worm\n -2.971689 -1.375000 1.979004 6 reef-worm\n -2.761462 -1.375000 1.981456 7 reef-worm\n -2.513037 -1.375000 2.025775 8 reef-worm\n -2.221165 -1.375000 2.011902 9 reef-worm\n -3.275387 -1.400000 2.211158 10 reef-worm\n -2.995006 -1.400000 2.235530 11 reef-worm\n -2.731269 -1.400000 2.269994 12 reef-worm\n -2.529955 -1.400000 2.236741 13 reef-worm\n -2.228815 -1.400000 2.210846 14 reef-worm\n 1027 tk@ 642 tk! 1155 15 29 dfrm-pose-curves 1099 tk!\n 788 tk@ 0 = if 1 784 tk! 1 785 tk! 1 786 tk! 1 787 tk! 1 788 tk! then\n INDEXOF_X_POS tk-player read-actor-mailbox -2.59 - dup * INDEXOF_Y_POS tk-player read-actor-mailbox 0.15 - dup * + INDEXOF_Z_POS tk-player read-actor-mailbox 2.05 - dup * + .64 < if 3 780 tk! 784 tk@ tk-dt@ 4.9 * - .02 max else 780 tk@ tk-dt@ - 0 max 780 tk! 784 tk@ 780 tk@ 0 <= if tk-dt@ .4 * + 1 min then then dup 784 tk! 1295 tk!\n INDEXOF_X_POS tk-player read-actor-mailbox -2.17 - dup * INDEXOF_Y_POS tk-player read-actor-mailbox 0.15 - dup * + INDEXOF_Z_POS tk-player read-actor-mailbox 2.17 - dup * + .64 < if 4 781 tk! 785 tk@ tk-dt@ 4.9 * - .02 max else 781 tk@ tk-dt@ - 0 max 781 tk! 785 tk@ 781 tk@ 0 <= if tk-dt@ .4 * + 1 min then then dup 785 tk! 1299 tk!\n INDEXOF_X_POS tk-player read-actor-mailbox -1.75 - dup * INDEXOF_Y_POS tk-player read-actor-mailbox 0.15 - dup * + INDEXOF_Z_POS tk-player read-actor-mailbox 2.05 - dup * + .64 < if 5 782 tk! 786 tk@ tk-dt@ 4.9 * - .02 max else 782 tk@ tk-dt@ - 0 max 782 tk! 786 tk@ 782 tk@ 0 <= if tk-dt@ .4 * + 1 min then then dup 786 tk! 1303 tk!\n INDEXOF_X_POS tk-player read-actor-mailbox -1.33 - dup * INDEXOF_Y_POS tk-player read-actor-mailbox 0.15 - dup * + INDEXOF_Z_POS tk-player read-actor-mailbox 2.17 - dup * + .64 < if 6 783 tk! 787 tk@ tk-dt@ 4.9 * - .02 max else 783 tk@ tk-dt@ - 0 max 783 tk! 787 tk@ 783 tk@ 0 <= if tk-dt@ .4 * + 1 min then then dup 787 tk! 1307 tk!\n 1255 4 30 dfrm-pose-curves 1099 tk!\n 790 tk@ tk-dt@ .008 * + tk-frac 790 tk!\n 789 tk@ tk-dt@ 790 tk@ tk-sin .5 * .5 + .06 * .075 + * + tk-frac 789 tk!\n 1 1431 tk! 789 tk@ 0.0 + tk-sin 7 * 1434 tk!\n 1 1435 tk! 789 tk@ 0.09 + tk-sin 7 * 1438 tk!\n 1 1439 tk! 789 tk@ 0.18 + tk-sin 7 * 1442 tk!\n 1 1443 tk! 789 tk@ 0.27 + tk-sin 7 * 1446 tk!\n 1 1447 tk! 789 tk@ 0.36 + tk-sin 7 * 1450 tk!\n 1 1451 tk! 789 tk@ 0.44999999999999996 + tk-sin 7 * 1454 tk!\n 1 1455 tk! 789 tk@ 0.54 + tk-sin 7 * 1458 tk!\n 1 1459 tk! 789 tk@ 0.63 + tk-sin 7 * 1462 tk!\n 1 1463 tk! 789 tk@ 0.72 + tk-sin 7 * 1466 tk!\n 1 1467 tk! 789 tk@ 0.8099999999999999 + tk-sin 7 * 1470 tk!\n 1 1471 tk! 789 tk@ 0.8999999999999999 + tk-sin 7 * 1474 tk!\n 1 1475 tk! 789 tk@ 0.99 + tk-sin 7 * 1478 tk!\n 1391 12 31 dfrm-pose-curves 1099 tk!\n 640 tk@ tk-sin .075 * .925 + 1519 tk! 1 1523 tk! 640 tk@ tk-sin 4 * 1522 tk! 1479 2 32 dfrm-pose-curves 1099 tk!\n 1 1351 tk! 640 tk@ 0.0 + tk-sin 12 * 1354 tk!\n 1 1355 tk! 640 tk@ 0.08 + tk-sin 12 * 1358 tk!\n 1 1359 tk! 640 tk@ 0.16 + tk-sin 12 * 1362 tk!\n 1 1363 tk! 640 tk@ 0.24 + tk-sin 12 * 1366 tk!\n 1 1367 tk! 640 tk@ 0.32 + tk-sin 12 * 1370 tk!\n 1 1371 tk! 640 tk@ 0.4 + tk-sin 12 * 1374 tk!\n 1 1375 tk! 640 tk@ 0.48 + tk-sin 12 * 1378 tk!\n 1 1379 tk! 640 tk@ 0.56 + tk-sin 12 * 1382 tk!\n 1 1383 tk! 640 tk@ 0.64 + tk-sin 12 * 1386 tk!\n 1 1387 tk! 640 tk@ 0.72 + tk-sin 12 * 1390 tk!\n 1311 10 27 dfrm-pose-curves 1099 tk!\n INDEXOF_X_POS tk-player read-actor-mailbox 1.82 - dup *  INDEXOF_Y_POS tk-player read-actor-mailbox -1.15 - dup * + 1 <  INDEXOF_Z_POS tk-player read-actor-mailbox .82 > &  if 4 746 tk! else 746 tk@ tk-dt@ - 0 max 746 tk! then\n 746 tk@ 0 > if 745 tk@ tk-dt@ 3 * + 1 min else 745 tk@ tk-dt@ - 0 max then 745 tk!\n 1 440 tk! 1 444 tk! 1 745 tk@ .65 * - 448 tk!  745 tk@ 22 * 443 tk! 745 tk@ 22 * 447 tk!\n 400 3 33 dfrm-pose-curves 1099 tk!\n INDEXOF_X_POS tk-player read-actor-mailbox -3.136 - dup * INDEXOF_Y_POS tk-player read-actor-mailbox 0.2 - dup * + INDEXOF_Z_POS tk-player read-actor-mailbox 2.82 - dup * + 1 < if 2 643 tk! else 643 tk@ tk-dt@ - 0 max 643 tk! then 643 tk@ 0 > if .16 else 0 then INDEXOF_ROTATION_A 34 write-actor-mailbox\n 1 1571 tk!\n 640 tk@ 0.0 + tk-sin 18 * 1574 tk!\n 1 1575 tk!\n 640 tk@ 0.125 + tk-sin 18 * 1578 tk!\n 1 1579 tk!\n 640 tk@ 0.25 + tk-sin 18 * 1582 tk!\n 1 1583 tk!\n 640 tk@ 0.375 + tk-sin 18 * 1586 tk!\n 1 1587 tk!\n 643 tk@ 0 > if 42 else 0 then 1590 tk!\n 1 1591 tk!\n 640 tk@ 0.625 + tk-sin 18 * 1594 tk!\n 1 1595 tk!\n 640 tk@ 0.75 + tk-sin 18 * 1598 tk!\n 1 1599 tk!\n 640 tk@ 0.875 + tk-sin 18 * 1602 tk!\n 1 1603 tk!\n 640 tk@ 1.0 + tk-sin 18 * 1606 tk!\n 1 1607 tk!\n 643 tk@ 0 > if 42 else 0 then 1610 tk!\n 1531 10 34 dfrm-pose-curves 1099 tk!\n 1 1651 tk! 640 tk@ 0.0 + tk-sin 16 * 1654 tk!\n 1 1655 tk! 640 tk@ 0.17 + tk-sin 16 * 1658 tk!\n 1 1659 tk! 640 tk@ 0.34 + tk-sin 16 * 1662 tk!\n 1 1663 tk! 640 tk@ 0.51 + tk-sin 16 * 1666 tk!\n 1 1667 tk! 640 tk@ 0.68 + tk-sin 16 * 1670 tk!\n 1 1671 tk! 640 tk@ 0.8500000000000001 + tk-sin 16 * 1674 tk!\n 1611 6 37 dfrm-pose-curves 1099 tk!\n 1 1715 tk! 640 tk@ 0.0 + tk-sin 20 * 1718 tk!\n 1 1719 tk! 640 tk@ 0.13 + tk-sin 12 * 1722 tk!\n 1 1723 tk! 640 tk@ 0.26 + tk-sin 20 * 1726 tk!\n 1 1727 tk! 640 tk@ 0.39 + tk-sin 20 * 1730 tk!\n 1 1731 tk! 640 tk@ 0.52 + tk-sin 12 * 1734 tk!\n 1 1735 tk! 640 tk@ 0.65 + tk-sin 20 * 1738 tk!\n 1675 6 35 dfrm-pose-curves 1099 tk!\n 1 1779 tk! 640 tk@ 0.3 + tk-sin 20 * 1782 tk!\n 1 1783 tk! 640 tk@ 0.43 + tk-sin 12 * 1786 tk!\n 1 1787 tk! 640 tk@ 0.56 + tk-sin 20 * 1790 tk!\n 1 1791 tk! 640 tk@ 0.69 + tk-sin 20 * 1794 tk!\n 1 1795 tk! 640 tk@ 0.8200000000000001 + tk-sin 12 * 1798 tk!\n 1 1799 tk! 640 tk@ 0.95 + tk-sin 20 * 1802 tk!\n 1739 6 36 dfrm-pose-curves 1099 tk!\n 1 1843 tk! 640 tk@ 0.0 + tk-sin 20 * 1846 tk!\n 1 1847 tk! 640 tk@ 0.19 + tk-sin 20 * 1850 tk!\n 1 1851 tk! 640 tk@ 0.38 + tk-sin 20 * 1854 tk!\n 1 1855 tk! 640 tk@ 0.5700000000000001 + tk-sin 20 * 1858 tk!\n 1 1859 tk! 640 tk@ 0.76 + tk-sin 20 * 1862 tk!\n 1803 5 23 dfrm-pose-curves 1099 tk!\n 647 tk@ 0 = if -0.7 645 tk! -0.35 646 tk! -0.15 747 tk! -0.03 748 tk! 1.885 749 tk! 1.885 750 tk! 1 647 tk! then\n INDEXOF_X_POS tk-player read-actor-mailbox -0.7 - dup * INDEXOF_Z_POS tk-player read-actor-mailbox 1.885 - dup * + 1 < INDEXOF_XSPEED tk-player read-actor-mailbox abs .1 < & INDEXOF_YSPEED tk-player read-actor-mailbox abs .1 < & INDEXOF_ZSPEED tk-player read-actor-mailbox abs .1 < & if 644 tk@ tk-dt@ + 3 min 644 tk! else 0 644 tk! then\n 644 tk@ 2 >= 744 tk@ 0 = & if 5 743 tk! 1 744 tk! then\n 644 tk@ 0 = if 0 744 tk! then\n 743 tk@ tk-dt@ - 0 max 743 tk!\n -3.136 640 tk@ tk-sin .12 * + INDEXOF_X_POS 34 write-actor-mailbox\n 2.82 640 tk@ .25 + tk-sin .12 * + INDEXOF_Z_POS 34 write-actor-mailbox\n 743 tk@ 0 > if INDEXOF_X_POS tk-player read-actor-mailbox -0.175 + else -0.7 640 tk@ 0.25 + tk-sin 0.06 * + then 645 tk-v 645 tk@ INDEXOF_X_POS 35 write-actor-mailbox\n 743 tk@ 0 > if INDEXOF_Y_POS tk-player read-actor-mailbox -0.06 + else -0.15 then 747 tk-v 747 tk@ INDEXOF_Y_POS 35 write-actor-mailbox\n 743 tk@ 0 > if INDEXOF_Z_POS tk-player read-actor-mailbox -.08 + else 1.885 then 749 tk-v 749 tk@ INDEXOF_Z_POS 35 write-actor-mailbox\n 743 tk@ 0 > if INDEXOF_X_POS tk-player read-actor-mailbox 0.175 + else -0.35 640 tk@ 0.5 + tk-sin 0.06 * + then 646 tk-v 646 tk@ INDEXOF_X_POS 36 write-actor-mailbox\n 743 tk@ 0 > if INDEXOF_Y_POS tk-player read-actor-mailbox 0.06 + else -0.03 then 748 tk-v 748 tk@ INDEXOF_Y_POS 36 write-actor-mailbox\n 743 tk@ 0 > if INDEXOF_Z_POS tk-player read-actor-mailbox -.08 + else 1.885 then 750 tk-v 750 tk@ INDEXOF_Z_POS 36 write-actor-mailbox\n 1.295 640 tk@ 0.75 + tk-sin 0.12 * + INDEXOF_X_POS 37 write-actor-mailbox\n;\n: reef-tick\n reef-shoal reef-life\n INDEXOF_X_POS tk-player read-actor-mailbox INDEXOF_X_POS 23 write-actor-mailbox\n INDEXOF_X_POS tk-player read-actor-mailbox tk-x tk!\n INDEXOF_Y_POS tk-player read-actor-mailbox INDEXOF_Y_POS 23 write-actor-mailbox\n INDEXOF_Y_POS tk-player read-actor-mailbox tk-y tk!\n INDEXOF_Z_POS tk-player read-actor-mailbox INDEXOF_Z_POS 23 write-actor-mailbox\n INDEXOF_Z_POS tk-player read-actor-mailbox tk-z tk!\n tk-heading tk@ INDEXOF_ROTATION_C 23 write-actor-mailbox\n 648 tk@ 0 = if tk-x tk@ dup * tk-y tk@ dup * + tk-z tk@ tk-focus-z - dup * + 5 > if 1 648 tk! then then\n 648 tk@ if tk-camera-tick else 7 INDEXOF_CAMSHOT tk! then ;\nreef-tick\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'STR' { 'NAME' "Cave Logic Studios Notes|" } { 'STR' "" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
@@ -922,7 +922,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' ": tk-init 600 ;\n: tk-phase 601 ;\n: tk-heading 602 ;\n: tk-prev 603 ;\n: tk-mode 604 ;\n: tk-dart 605 ;\n: tk-cooldown 606 ;\n: tk-dx 607 ;\n: tk-dy 608 ;\n: tk-dz 609 ;\n: tk-vx 610 ;\n: tk-vy 611 ;\n: tk-vz 612 ;\n: tk-target 613 ;\n: tk-x 614 ;\n: tk-y 615 ;\n: tk-z 616 ;\n: tk-yaw 617 ;\n: tk-scale 618 ;\n: tk-sy 619 ;\n: tk-cy 620 ;\n: tk-actor 621 ;\n: tk-ox 622 ;\n: tk-oy 623 ;\n: tk-oz 624 ;\n: tk-camera 625 ;\n: tk-clock 626 ;\n: tk-pulse 627 ;\n: tk-player 9 ;\n: tk-touch 0 ;\n: tk-jelly 0 ;\n: tk-limit-x 5.3 ;\n: tk-limit-y 2.3 ;\n: tk-bottom 0.9 ;\n: tk-top 5.0 ;\n: tk-speed 1.2 ;\n: tk-focus-z 2.3 ;\n: tk-cam-close 33 ;\n: tk-cam-wide 7 ;\n: tk-pitch 700 ;\n: tk-roll 701 ;\n: tk-pose-pitch 702 ;\n: tk-pose-roll 703 ;\n: tk-drive 704 ;\n: tk-pitch-target 705 ;\n: tk-error 706 ;\n: tk-steer 707 ;\n: tk-fx 708 ;\n: tk-fy 709 ;\n: tk-fz 710 ;\n: tk-cp 711 ;\n: tk-sp 712 ;\n: tk-cr 713 ;\n: tk-sr 714 ;\n: tk-lateral 715 ;\n: tk-vertical 716 ;\n: tk-cap 717 ;\n: tk-neutral 718 ;\n: tk-action 719 ;\n: tk-local-x 720 ;\n: tk-cap-pos 721 ;\n: tk-cap-hi 722 ;\n: tk-cap-lo 723 ;\n: tk-cap-facing 724 ;\n: tk-turn-side 725 ;\n: tk-last-target 726 ;\n: tk-pose-drive 727 ;\n: tk-turn-rate 0.55 ; : tk-pitch-max .0833333 ;\n\\ Three independent tanks: bounded phases, input, neutral buoyancy and posing.\n: tk@ read-mailbox ; : tk! write-mailbox ;\n: tk-frac begin dup 1 >= if 1 - 0 else 1 then until\n  begin dup 0 < if 1 + 0 else 1 then until ;\n: tk-sin tk-frac dup .5 > if .5 - -1 else 1 then >r\n  2 * dup 1 swap - * dup 16 * swap 4 * 5 swap - / r> * ;\n: tk-cos .25 + tk-sin ;\n: tk-wrap dup .5 > if 1 - then dup -.5 < if 1 + then ;\n: tk-atan-oct dup 1 swap - .04345 * .125 + * ;\n: tk-atan2\n  2dup abs swap abs + .000001 < if 2drop 0 else\n    over abs over abs 2dup > if swap / tk-atan-oct .25 swap - else / tk-atan-oct then\n    over 0 < if .5 swap - then rot 0 < if negate then nip then ;\n: tk-held INDEXOF_HARDWARE_JOYSTICK1_RAW tk@ & 0 <> if 1 else 0 then ;\n: tk-edge dup tk-held swap tk-prev tk@ & 0 <> if drop 0 then ;\n: tk-dt@ INDEXOF_DELTA_TIME tk@ dup .2 > if drop 0 else 0 max .05 min then ;\n: tk-v ( target mb -- ) >r r@ tk@ - tk-dt@ 5 * 1 min * r@ tk@ + r> tk! ;\n: tk-bounds ( lo hi mb -- ) >r r@ tk@ min max r> tk! ;\n\\ One-button TV: Up+OK changes plane; OK-first remains Action.\n: tk-toggle 1 tk-mode tk@ - tk-mode tk! 1 tk-neutral tk! ;\n: tk-input\n  0 tk-action tk!\n  JOYSTICK_BUTTON_RIGHT tk-held JOYSTICK_BUTTON_LEFT tk-held - tk-dx tk!\n  JOYSTICK_BUTTON_UP tk-held JOYSTICK_BUTTON_DOWN tk-held -\n  tk-touch if\n    JOYSTICK_BUTTON_A tk-edge if tk-toggle then\n    tk-mode tk@ if tk-dy tk! 0 tk-dz tk! else tk-dz tk! 0 tk-dy tk! then\n    JOYSTICK_BUTTON_B tk-edge tk-action tk!\n  else\n    tk-mode tk@ if tk-dy tk! 0 tk-dz tk! else tk-dz tk! 0 tk-dy tk! then\n    JOYSTICK_BUTTON_C tk-held JOYSTICK_BUTTON_B tk-held - dup 0 <> if tk-dy tk! else drop then\n    JOYSTICK_BUTTON_A tk-edge if\n      JOYSTICK_BUTTON_UP tk-held if tk-toggle else 1 tk-action tk! then\n    then\n  then\n  INDEXOF_DELTA_TIME tk@ .2 > if 1 tk-neutral tk! 0 tk-dart tk! 0 tk-drive tk! then\n  tk-neutral tk@ if\n    0 tk-dx tk! 0 tk-dy tk! 0 tk-dz tk! 0 tk-action tk!\n    INDEXOF_HARDWARE_JOYSTICK1_RAW tk@ 30727 & 0 = if 0 tk-neutral tk! then\n  then\n  tk-action tk@ if tk-cooldown tk@ 0 <= if .3 tk-dart tk! 1 tk-cooldown tk! then then\n  INDEXOF_HARDWARE_JOYSTICK1_RAW tk@ tk-prev tk!\n  tk-dart tk@ tk-dt@ - 0 max tk-dart tk!\n  tk-cooldown tk@ tk-dt@ - 0 max tk-cooldown tk! ;\n\\ Betta / lionfish: orient, forward cruise, brake, hover. No axis sliding.\n: tk-forward\n  tk-pitch tk@ tk-cos tk-heading tk@ tk-cos * tk-fx tk!\n  tk-pitch tk@ tk-cos tk-heading tk@ tk-sin * tk-fy tk!\n  tk-pitch tk@ tk-sin tk-fz tk! ;\n: tk-axis-cap ( facing lo hi position -- cap )\n  tk-cap-pos tk! tk-cap-hi tk! tk-cap-lo tk! tk-cap-facing tk!\n  tk-cap-facing tk@ abs .0001 < if 10 else\n    tk-cap-facing tk@ 0 > if tk-cap-hi tk@ tk-cap-pos tk@ - else\n      tk-cap-lo tk@ tk-cap-pos tk@ - then tk-cap-facing tk@ / .20 / 0 max\n  then ;\n: tk-caps\n  tk-fx tk@ tk-limit-x negate tk-limit-x INDEXOF_X_POS tk@ tk-axis-cap\n  tk-fy tk@ tk-limit-y negate tk-limit-y INDEXOF_Y_POS tk@ tk-axis-cap min\n  tk-fz tk@ tk-bottom tk-top INDEXOF_Z_POS tk@ tk-axis-cap min\n  tk-drive tk@ min tk-drive tk! ;\n: tk-player-tick\n  0 INDEXOF_INPUT tk! tk-input\n  tk-dx tk@ abs tk-dy tk@ abs + 0 > if\n    tk-dy tk@ tk-dx tk@ tk-atan2 tk-target tk!\n  then\n  tk-target tk@ tk-last-target tk@ - tk-wrap abs .001 > if 0 tk-turn-side tk! then\n  tk-target tk@ tk-last-target tk!\n  tk-target tk@ tk-heading tk@ - tk-wrap tk-error tk!\n  \\ Keep the chosen arc stable; prefer front glass only while both arcs have room.\n  tk-error tk@ abs .45 > tk-turn-side tk@ 0 = & if\n    tk-heading tk@ tk-cos 0 >= if -1 else 1 then\n    INDEXOF_Y_POS tk@ tk-limit-y negate - .10 < if negate then tk-turn-side tk!\n  then\n  tk-turn-side tk@ 0 <> if\n    tk-error tk@ tk-turn-side tk@ * 0 < if tk-error tk@ tk-turn-side tk@ + tk-error tk! then\n    tk-error tk@ abs .40 < if 0 tk-turn-side tk! then\n  then\n  tk-error tk@ tk-dt@ tk-turn-rate * dup >r negate max r> min dup tk-steer tk!\n  tk-heading tk@ + tk-frac tk-heading tk!\n  tk-dz tk@ tk-pitch-max * tk-pitch-target tk!\n  tk-pitch-target tk@ tk-pitch tk@ - tk-dt@ .18 * dup >r negate max r> min\n  tk-pitch tk@ + tk-pitch tk!\n  tk-steer tk@ tk-dt@ .0001 max / -.06 * -.018 max .018 min tk-roll tk-v\n  tk-dx tk@ abs tk-dy tk@ abs + tk-dz tk@ abs + 0 > tk-dart tk@ 0 > | if\n    tk-speed tk-error tk@ abs .125 > if .18 * then\n    tk-dart tk@ 0 > if tk-error tk@ abs .125 <= if 1.35 * then then\n  else 0 then tk-drive tk-v\n  tk-limit-x negate tk-limit-x INDEXOF_X_POS tk-bounds\n  tk-limit-y negate tk-limit-y INDEXOF_Y_POS tk-bounds\n  tk-bottom tk-top INDEXOF_Z_POS tk-bounds\n  tk-forward tk-caps\n  tk-drive tk@ .002 < if 0 tk-drive tk! then\n  tk-drive tk@ tk-fx tk@ * dup tk-vx tk! INDEXOF_XSPEED tk!\n  tk-drive tk@ tk-fy tk@ * dup tk-vy tk! INDEXOF_YSPEED tk!\n  tk-drive tk@ tk-fz tk@ * dup tk-vz tk! INDEXOF_ZSPEED tk! ;\n\n\\ Root matrix Rz(yaw) Ry(-elevation) Rx(bank), shared by every attachment.\n: tk-root\n  tk-pose-pitch tk@ tk-cos tk-cp tk! tk-pose-pitch tk@ tk-sin tk-sp tk!\n  tk-pose-roll tk@ tk-cos tk-cr tk! tk-pose-roll tk@ tk-sin tk-sr tk! ;\n: tk-place ( ox oy oz actor -- ) tk-actor tk! tk-oz tk! tk-oy tk! dup tk-local-x tk! tk-ox tk!\n  tk-oy tk@ tk-cr tk@ * tk-oz tk@ tk-sr tk@ * - tk-lateral tk!\n  tk-oy tk@ tk-sr tk@ * tk-oz tk@ tk-cr tk@ * + tk-vertical tk!\n  tk-ox tk@ tk-cp tk@ * tk-vertical tk@ tk-sp tk@ * - tk-ox tk!\n  tk-ox tk@ tk-cy tk@ * tk-lateral tk@ tk-sy tk@ * - tk-scale tk@ * tk-x tk@ +\n  INDEXOF_X_POS tk-actor tk@ write-actor-mailbox\n  tk-ox tk@ tk-sy tk@ * tk-lateral tk@ tk-cy tk@ * + tk-scale tk@ * tk-y tk@ +\n  INDEXOF_Y_POS tk-actor tk@ write-actor-mailbox\n  \\ Re-read original x: tk-ox above is the projected horizontal component.\n  tk-local-x tk@ tk-sp tk@ * tk-vertical tk@ tk-cp tk@ * + tk-scale tk@ * tk-z tk@ +\n  INDEXOF_Z_POS tk-actor tk@ write-actor-mailbox ;\n: tk-orient ( a b c actor -- ) >r rot tk-pose-roll tk@ + INDEXOF_ROTATION_A r@ write-actor-mailbox\n  swap tk-pose-pitch tk@ - INDEXOF_ROTATION_B r@ write-actor-mailbox INDEXOF_ROTATION_C r> write-actor-mailbox ;\n: tk-part ( ox oy oz a b c actor -- ) dup >r tk-orient r> tk-place ;\n: tk-gait tk-phase tk@ tk-sin ;\n: tk-camera-tick\n  tk-x tk@ dup * tk-y tk@ dup * + tk-z tk@ tk-focus-z - dup * +\n  tk-camera tk@ if 5 > if 0 tk-camera tk! then else 2.8 < if 1 tk-camera tk! then then\n  tk-camera tk@ if tk-cam-close else tk-cam-wide then INDEXOF_CAMSHOT tk! ;\n\ntk-player-tick\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": tk-init 600 ;\n: tk-phase 601 ;\n: tk-heading 602 ;\n: tk-prev 603 ;\n: tk-mode 604 ;\n: tk-dart 605 ;\n: tk-cooldown 606 ;\n: tk-dx 607 ;\n: tk-dy 608 ;\n: tk-dz 609 ;\n: tk-vx 610 ;\n: tk-vy 611 ;\n: tk-vz 612 ;\n: tk-target 613 ;\n: tk-x 614 ;\n: tk-y 615 ;\n: tk-z 616 ;\n: tk-yaw 617 ;\n: tk-scale 618 ;\n: tk-sy 619 ;\n: tk-cy 620 ;\n: tk-actor 621 ;\n: tk-ox 622 ;\n: tk-oy 623 ;\n: tk-oz 624 ;\n: tk-camera 625 ;\n: tk-clock 626 ;\n: tk-pulse 627 ;\n: tk-player 9 ;\n: tk-touch 0 ;\n: tk-jelly 0 ;\n: tk-limit-x 5.3 ;\n: tk-limit-y 2.3 ;\n: tk-bottom 0.9 ;\n: tk-top 5.0 ;\n: tk-speed 1.2 ;\n: tk-focus-z 2.3 ;\n: tk-cam-close 40 ;\n: tk-cam-wide 7 ;\n: tk-pitch 700 ;\n: tk-roll 701 ;\n: tk-pose-pitch 702 ;\n: tk-pose-roll 703 ;\n: tk-drive 704 ;\n: tk-pitch-target 705 ;\n: tk-error 706 ;\n: tk-steer 707 ;\n: tk-fx 708 ;\n: tk-fy 709 ;\n: tk-fz 710 ;\n: tk-cp 711 ;\n: tk-sp 712 ;\n: tk-cr 713 ;\n: tk-sr 714 ;\n: tk-lateral 715 ;\n: tk-vertical 716 ;\n: tk-cap 717 ;\n: tk-neutral 718 ;\n: tk-action 719 ;\n: tk-local-x 720 ;\n: tk-cap-pos 721 ;\n: tk-cap-hi 722 ;\n: tk-cap-lo 723 ;\n: tk-cap-facing 724 ;\n: tk-turn-side 725 ;\n: tk-last-target 726 ;\n: tk-pose-drive 727 ;\n: tk-turn-rate 0.55 ; : tk-pitch-max .0833333 ;\n\\ Three independent tanks: bounded phases, input, neutral buoyancy and posing.\n: tk@ read-mailbox ; : tk! write-mailbox ;\n: tk-frac begin dup 1 >= if 1 - 0 else 1 then until\n  begin dup 0 < if 1 + 0 else 1 then until ;\n: tk-sin tk-frac dup .5 > if .5 - -1 else 1 then >r\n  2 * dup 1 swap - * dup 16 * swap 4 * 5 swap - / r> * ;\n: tk-cos .25 + tk-sin ;\n: tk-wrap dup .5 > if 1 - then dup -.5 < if 1 + then ;\n: tk-atan-oct dup 1 swap - .04345 * .125 + * ;\n: tk-atan2\n  2dup abs swap abs + .000001 < if 2drop 0 else\n    over abs over abs 2dup > if swap / tk-atan-oct .25 swap - else / tk-atan-oct then\n    over 0 < if .5 swap - then rot 0 < if negate then nip then ;\n: tk-held INDEXOF_HARDWARE_JOYSTICK1_RAW tk@ & 0 <> if 1 else 0 then ;\n: tk-edge dup tk-held swap tk-prev tk@ & 0 <> if drop 0 then ;\n: tk-dt@ INDEXOF_DELTA_TIME tk@ dup .2 > if drop 0 else 0 max .05 min then ;\n: tk-v ( target mb -- ) >r r@ tk@ - tk-dt@ 5 * 1 min * r@ tk@ + r> tk! ;\n: tk-bounds ( lo hi mb -- ) >r r@ tk@ min max r> tk! ;\n\\ One-button TV: Up+OK changes plane; OK-first remains Action.\n: tk-toggle 1 tk-mode tk@ - tk-mode tk! 1 tk-neutral tk! ;\n: tk-input\n  0 tk-action tk!\n  JOYSTICK_BUTTON_RIGHT tk-held JOYSTICK_BUTTON_LEFT tk-held - tk-dx tk!\n  JOYSTICK_BUTTON_UP tk-held JOYSTICK_BUTTON_DOWN tk-held -\n  tk-touch if\n    JOYSTICK_BUTTON_A tk-edge if tk-toggle then\n    tk-mode tk@ if tk-dy tk! 0 tk-dz tk! else tk-dz tk! 0 tk-dy tk! then\n    JOYSTICK_BUTTON_B tk-edge tk-action tk!\n  else\n    tk-mode tk@ if tk-dy tk! 0 tk-dz tk! else tk-dz tk! 0 tk-dy tk! then\n    JOYSTICK_BUTTON_C tk-held JOYSTICK_BUTTON_B tk-held - dup 0 <> if tk-dy tk! else drop then\n    JOYSTICK_BUTTON_A tk-edge if\n      JOYSTICK_BUTTON_UP tk-held if tk-toggle else 1 tk-action tk! then\n    then\n  then\n  INDEXOF_DELTA_TIME tk@ .2 > if 1 tk-neutral tk! 0 tk-dart tk! 0 tk-drive tk! then\n  tk-neutral tk@ if\n    0 tk-dx tk! 0 tk-dy tk! 0 tk-dz tk! 0 tk-action tk!\n    INDEXOF_HARDWARE_JOYSTICK1_RAW tk@ 30727 & 0 = if 0 tk-neutral tk! then\n  then\n  tk-action tk@ if tk-cooldown tk@ 0 <= if .3 tk-dart tk! 1 tk-cooldown tk! then then\n  INDEXOF_HARDWARE_JOYSTICK1_RAW tk@ tk-prev tk!\n  tk-dart tk@ tk-dt@ - 0 max tk-dart tk!\n  tk-cooldown tk@ tk-dt@ - 0 max tk-cooldown tk! ;\n\\ Betta / lionfish: orient, forward cruise, brake, hover. No axis sliding.\n: tk-forward\n  tk-pitch tk@ tk-cos tk-heading tk@ tk-cos * tk-fx tk!\n  tk-pitch tk@ tk-cos tk-heading tk@ tk-sin * tk-fy tk!\n  tk-pitch tk@ tk-sin tk-fz tk! ;\n: tk-axis-cap ( facing lo hi position -- cap )\n  tk-cap-pos tk! tk-cap-hi tk! tk-cap-lo tk! tk-cap-facing tk!\n  tk-cap-facing tk@ abs .0001 < if 10 else\n    tk-cap-facing tk@ 0 > if tk-cap-hi tk@ tk-cap-pos tk@ - else\n      tk-cap-lo tk@ tk-cap-pos tk@ - then tk-cap-facing tk@ / .20 / 0 max\n  then ;\n: tk-caps\n  tk-fx tk@ tk-limit-x negate tk-limit-x INDEXOF_X_POS tk@ tk-axis-cap\n  tk-fy tk@ tk-limit-y negate tk-limit-y INDEXOF_Y_POS tk@ tk-axis-cap min\n  tk-fz tk@ tk-bottom tk-top INDEXOF_Z_POS tk@ tk-axis-cap min\n  tk-drive tk@ min tk-drive tk! ;\n: tk-player-tick\n  0 INDEXOF_INPUT tk! tk-input\n  tk-dx tk@ abs tk-dy tk@ abs + 0 > if\n    tk-dy tk@ tk-dx tk@ tk-atan2 tk-target tk!\n  then\n  tk-target tk@ tk-last-target tk@ - tk-wrap abs .001 > if 0 tk-turn-side tk! then\n  tk-target tk@ tk-last-target tk!\n  tk-target tk@ tk-heading tk@ - tk-wrap tk-error tk!\n  \\ Keep the chosen arc stable; prefer front glass only while both arcs have room.\n  tk-error tk@ abs .45 > tk-turn-side tk@ 0 = & if\n    tk-heading tk@ tk-cos 0 >= if -1 else 1 then\n    INDEXOF_Y_POS tk@ tk-limit-y negate - .10 < if negate then tk-turn-side tk!\n  then\n  tk-turn-side tk@ 0 <> if\n    tk-error tk@ tk-turn-side tk@ * 0 < if tk-error tk@ tk-turn-side tk@ + tk-error tk! then\n    tk-error tk@ abs .40 < if 0 tk-turn-side tk! then\n  then\n  tk-error tk@ tk-dt@ tk-turn-rate * dup >r negate max r> min dup tk-steer tk!\n  tk-heading tk@ + tk-frac tk-heading tk!\n  tk-dz tk@ tk-pitch-max * tk-pitch-target tk!\n  tk-pitch-target tk@ tk-pitch tk@ - tk-dt@ .18 * dup >r negate max r> min\n  tk-pitch tk@ + tk-pitch tk!\n  tk-steer tk@ tk-dt@ .0001 max / -.06 * -.018 max .018 min tk-roll tk-v\n  tk-dx tk@ abs tk-dy tk@ abs + tk-dz tk@ abs + 0 > tk-dart tk@ 0 > | if\n    tk-speed tk-error tk@ abs .125 > if .18 * then\n    tk-dart tk@ 0 > if tk-error tk@ abs .125 <= if 1.35 * then then\n  else 0 then tk-drive tk-v\n  tk-limit-x negate tk-limit-x INDEXOF_X_POS tk-bounds\n  tk-limit-y negate tk-limit-y INDEXOF_Y_POS tk-bounds\n  tk-bottom tk-top INDEXOF_Z_POS tk-bounds\n  tk-forward tk-caps\n  tk-drive tk@ .002 < if 0 tk-drive tk! then\n  tk-drive tk@ tk-fx tk@ * dup tk-vx tk! INDEXOF_XSPEED tk!\n  tk-drive tk@ tk-fy tk@ * dup tk-vy tk! INDEXOF_YSPEED tk!\n  tk-drive tk@ tk-fz tk@ * dup tk-vz tk! INDEXOF_ZSPEED tk! ;\n\n\\ Root matrix Rz(yaw) Ry(-elevation) Rx(bank), shared by every attachment.\n: tk-root\n  tk-pose-pitch tk@ tk-cos tk-cp tk! tk-pose-pitch tk@ tk-sin tk-sp tk!\n  tk-pose-roll tk@ tk-cos tk-cr tk! tk-pose-roll tk@ tk-sin tk-sr tk! ;\n: tk-place ( ox oy oz actor -- ) tk-actor tk! tk-oz tk! tk-oy tk! dup tk-local-x tk! tk-ox tk!\n  tk-oy tk@ tk-cr tk@ * tk-oz tk@ tk-sr tk@ * - tk-lateral tk!\n  tk-oy tk@ tk-sr tk@ * tk-oz tk@ tk-cr tk@ * + tk-vertical tk!\n  tk-ox tk@ tk-cp tk@ * tk-vertical tk@ tk-sp tk@ * - tk-ox tk!\n  tk-ox tk@ tk-cy tk@ * tk-lateral tk@ tk-sy tk@ * - tk-scale tk@ * tk-x tk@ +\n  INDEXOF_X_POS tk-actor tk@ write-actor-mailbox\n  tk-ox tk@ tk-sy tk@ * tk-lateral tk@ tk-cy tk@ * + tk-scale tk@ * tk-y tk@ +\n  INDEXOF_Y_POS tk-actor tk@ write-actor-mailbox\n  \\ Re-read original x: tk-ox above is the projected horizontal component.\n  tk-local-x tk@ tk-sp tk@ * tk-vertical tk@ tk-cp tk@ * + tk-scale tk@ * tk-z tk@ +\n  INDEXOF_Z_POS tk-actor tk@ write-actor-mailbox ;\n: tk-orient ( a b c actor -- ) >r rot tk-pose-roll tk@ + INDEXOF_ROTATION_A r@ write-actor-mailbox\n  swap tk-pose-pitch tk@ - INDEXOF_ROTATION_B r@ write-actor-mailbox INDEXOF_ROTATION_C r> write-actor-mailbox ;\n: tk-part ( ox oy oz a b c actor -- ) dup >r tk-orient r> tk-place ;\n: tk-gait tk-phase tk@ tk-sin ;\n: tk-camera-tick\n  tk-x tk@ dup * tk-y tk@ dup * + tk-z tk@ tk-focus-z - dup * +\n  tk-camera tk@ if 5 > if 0 tk-camera tk! then else 2.8 < if 1 tk-camera tk! then then\n  tk-camera tk@ if tk-cam-close else tk-cam-wide then INDEXOF_CAMSHOT tk! ;\n\ntk-player-tick\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'STR' { 'NAME' "Cave Logic Studios Notes|" } { 'STR' "" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "player_hull.iff" } }
@@ -979,7 +979,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -5.1237473487854004(1.15.16) -0.5170736908912659(1.15.16) 0.5474902391433716(1.15.16) -1.4322522878646851(1.15.16) 1.4905370473861694(1.15.16) 3.0753233432769775(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -5.1847376823425293(1.15.16) -0.5777343511581421(1.15.16) 0.5116097331047058(1.15.16) -1.3473145961761475(1.15.16) 1.5338228940963745(1.15.16) 3.0955553054809570(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_left.iff" } }
@@ -989,9 +989,9 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_left.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0008449717398708(1.15.16) } { 'STR' "0.000845" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0012761423526053(1.15.16) } { 'STR' "0.001276" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0010353035541776(1.15.16) } { 'STR' "-0.001035" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0001857844750665(1.15.16) } { 'STR' "-0.000186" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0001663851281140(1.15.16) } { 'STR' "0.000166" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0009308165649406(1.15.16) } { 'STR' "0.000931" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
@@ -1000,7 +1000,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 1.4195570945739746(1.15.16) -0.5305467844009399(1.15.16) 0.6947181820869446(1.15.16) 5.3049964904785156(1.15.16) 1.4376924037933350(1.15.16) 3.2164504528045654(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 1.3155907392501831(1.15.16) -0.5847850441932678(1.15.16) 0.6482397913932800(1.15.16) 5.3660874366760254(1.15.16) 1.4828884601593018(1.15.16) 3.2356309890747070(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_right.iff" } }
@@ -1010,9 +1010,9 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_right.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0003789050936241(1.15.16) } { 'STR' "-0.000379" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0004772909148976(1.15.16) } { 'STR' "0.000477" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0002980916214476(1.15.16) } { 'STR' "0.000298" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0002518968324942(1.15.16) } { 'STR' "0.000252" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0003475818703709(1.15.16) } { 'STR' "0.000348" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0003934141233274(1.15.16) } { 'STR' "-0.000393" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
@@ -1021,7 +1021,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.8068175315856934(1.15.16) -0.2447262555360794(1.15.16) 0.7778452038764954(1.15.16) 1.9905536174774170(1.15.16) 1.2201682329177856(1.15.16) 3.1189627647399902(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.8405727148056030(1.15.16) -0.2771653532981873(1.15.16) 0.7450116872787476(1.15.16) 2.0510559082031250(1.15.16) 1.2609801292419434(1.15.16) 3.1189610958099365(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_arch.iff" } }
@@ -1031,10 +1031,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_arch.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0006652918923892(1.15.16) } { 'STR' "-0.000665" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0003311452946212(1.15.16) } { 'STR' "-0.000331" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0009016250349219(1.15.16) } { 'STR' "-0.000902" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000000000000000(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000405517213637(1.15.16) } { 'STR' "0.000041" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0034159101609299(1.15.16) } { 'STR' "-0.003416" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0019786620983811(1.15.16) } { 'STR' "0.001979" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "reef_hard" }
@@ -1042,7 +1042,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -3.8326997756958008(1.15.16) -1.4090279340744019(1.15.16) 1.2853463888168335(1.15.16) 4.1227345466613770(1.15.16) -0.0309720411896706(1.15.16) 3.6956901550292969(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -3.8326997756958008(1.15.16) -1.4096237421035767(1.15.16) 1.2747799158096313(1.15.16) 3.9621627330780029(1.15.16) -0.0581515878438950(1.15.16) 3.6956901550292969(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_hard.iff" } }
@@ -1052,9 +1052,9 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_hard.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000012221633(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000071925729(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000046845549(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000002121781(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000036883728(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000029994513(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
@@ -1063,7 +1063,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -4.6300001144409180(1.15.16) -1.3664000034332275(1.15.16) 1.7527778148651123(1.15.16) 4.6199998855590820(1.15.16) -0.2617838680744171(1.15.16) 3.0032603740692139(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -2.5288717746734619(1.15.16) -1.3421330451965332(1.15.16) 1.7699458599090576(1.15.16) -1.1711282730102539(1.15.16) -0.4468159973621368(1.15.16) 2.3988525867462158(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_soft.iff" } }
@@ -1073,9 +1073,9 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_soft.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0007795548530937(1.15.16) } { 'STR' "0.000780" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000955351341604(1.15.16) } { 'STR' "-0.000096" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.1169678678544348(1.15.16) } { 'STR' "0.116968" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0007790246212675(1.15.16) } { 'STR' "0.000779" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0050827661926397(1.15.16) } { 'STR' "0.005083" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.8125581843433557(1.15.16) } { 'STR' "0.812558" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
@@ -1084,7 +1084,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 4.2804121971130371(1.15.16) -1.1690000295639038(1.15.16) 1.6499999761581421(1.15.16) 5.2195878028869629(1.15.16) -0.2919853329658508(1.15.16) 2.6150000095367432(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 4.2804121971130371(1.15.16) -1.1737036705017090(1.15.16) 1.6499999761581421(1.15.16) 5.2195878028869629(1.15.16) -0.2912523746490479(1.15.16) 2.6393511295318604(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_sponges.iff" } }
@@ -1094,9 +1094,9 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_sponges.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000021546536(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0005217326261724(1.15.16) } { 'STR' "0.000522" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.2525155152504643(1.15.16) } { 'STR' "0.252516" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0001408955879924(1.15.16) } { 'STR' "0.000141" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0005057552771177(1.15.16) } { 'STR' "0.000506" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0374557398446389(1.15.16) } { 'STR' "0.037456" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
@@ -1105,7 +1105,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -4.8218312263488770(1.15.16) -1.5055028200149536(1.15.16) 0.7850000262260437(1.15.16) 4.6090407371520996(1.15.16) -0.5819501876831055(1.15.16) 2.6733722686767578(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -3.9766232967376709(1.15.16) -1.5270782709121704(1.15.16) 1.5170533657073975(1.15.16) 2.2402458190917969(1.15.16) -0.8562240004539490(1.15.16) 1.7329357862472534(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_life.iff" } }
@@ -1115,10 +1115,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_life.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000119564823749(1.15.16) } { 'STR' "0.000012" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0131419584472587(1.15.16) } { 'STR' "-0.013142" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0003488040377488(1.15.16) } { 'STR' "0.000349" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000315609912(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0009564674327988(1.15.16) } { 'STR' "-0.000956" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0000000016897903(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000000000000000(1.15.16) } { 'STR' "-0.000000" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "reef_shell" }
@@ -1139,6 +1139,69 @@
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0009689440841330(1.15.16) } { 'STR' "0.000969" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0183414309887292(1.15.16) } { 'STR' "-0.018341" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.2927337535173308(1.15.16) } { 'STR' "0.292734" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "reef_life_1" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 1.5733766555786133(1.15.16) -1.3270783424377441(1.15.16) 1.5170533657073975(1.15.16) 4.3358049392700195(1.15.16) -0.7346121668815613(1.15.16) 1.8829357624053955(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_life_1.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_life_1.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000075901367348(1.15.16) } { 'STR' "0.000008" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0012282008687849(1.15.16) } { 'STR' "-0.001228" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0001620705572467(1.15.16) } { 'STR' "-0.000162" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "reef_life_2" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -4.8218312263488770(1.15.16) -1.3288950920104980(1.15.16) 0.8479999899864197(1.15.16) 4.6090407371520996(1.15.16) -0.6472840905189514(1.15.16) 2.6733722686767578(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_life_2.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_life_2.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000066563619826(1.15.16) } { 'STR' "0.000007" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0651200946750890(1.15.16) } { 'STR' "-0.065120" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0421350811414885(1.15.16) } { 'STR' "0.042135" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "reef_life_3" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 0.3799999952316284(1.15.16) -1.0192151069641113(1.15.16) 2.2500000000000000(1.15.16) 1.0599999427795410(1.15.16) -0.5807848572731018(1.15.16) 2.5154886245727539(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_life_3.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_life_3.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0002351005195883(1.15.16) } { 'STR' "0.000235" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000763506868458(1.15.16) } { 'STR' "-0.000076" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0636848369043230(1.15.16) } { 'STR' "0.063685" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
@@ -1189,7 +1252,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3600000143051147(1.15.16) -0.2544797658920288(1.15.16) -0.1719469428062439(1.15.16) 0.2520000040531158(1.15.16) 0.2500000000000000(1.15.16) 0.2500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.4000000059604645(1.15.16) -0.2477900534868240(1.15.16) -0.2349999994039536(1.15.16) 0.2916970551013947(1.15.16) 0.2399999946355820(1.15.16) 0.2500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_boxfish.iff" } }
@@ -1199,10 +1262,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_boxfish.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000007801338(1.15.16) } { 'STR' "-0.000000" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000001231501(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000987155(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000000002587092(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000006056115(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000818745(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000656296(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000000002328647(1.15.16) } { 'STR' "-0.000000" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "HumbugOne" }
@@ -1210,7 +1273,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.4399999976158142(1.15.16) -0.1164933964610100(1.15.16) -0.2296053022146225(1.15.16) 0.3072617352008820(1.15.16) 0.1164933964610100(1.15.16) 0.2296053022146225(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.4499999880790710(1.15.16) -0.1703740805387497(1.15.16) -0.2500000000000000(1.15.16) 0.3072617352008820(1.15.16) 0.1599999964237213(1.15.16) 0.2899999916553497(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_humbug.iff" } }
@@ -1220,10 +1283,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_humbug.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000007937254(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000006158762(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000000025835764(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000001442033(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000000014631938(1.15.16) } { 'STR' "-0.000000" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "HumbugTwo" }
@@ -1231,7 +1294,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.4399999976158142(1.15.16) -0.1164933964610100(1.15.16) -0.2296053022146225(1.15.16) 0.3072617352008820(1.15.16) 0.1164933964610100(1.15.16) 0.2296053022146225(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.4499999880790710(1.15.16) -0.1703740805387497(1.15.16) -0.2500000000000000(1.15.16) 0.3072617352008820(1.15.16) 0.1599999964237213(1.15.16) 0.2899999916553497(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_humbug.iff" } }
@@ -1241,10 +1304,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_humbug.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000007937254(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000006158762(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000000021867136(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000001442033(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000000011840963(1.15.16) } { 'STR' "-0.000000" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "SeaFan" }
@@ -1252,7 +1315,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.5362288951873779(1.15.16) -0.0303108897060156(1.15.16) -0.3000000119209290(1.15.16) 0.5361946225166321(1.15.16) 0.0303108897060156(1.15.16) 1.6165643930435181(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.8005161881446838(1.15.16) -0.0681349337100983(1.15.16) -0.3000000119209290(1.15.16) 0.7663122415542603(1.15.16) 0.0682561472058296(1.15.16) 1.3603794574737549(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "seafan.iff" } }
@@ -1262,10 +1325,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "seafan.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0002097947956444(1.15.16) } { 'STR' "0.000210" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0002889601302058(1.15.16) } { 'STR' "0.000289" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0117399423315817(1.15.16) } { 'STR' "-0.011740" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0341991514669946(1.15.16) } { 'STR' "-0.034199" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0003473443086291(1.15.16) } { 'STR' "0.000347" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0114783569127353(1.15.16) } { 'STR' "0.011478" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0119201370227357(1.15.16) } { 'STR' "-0.011920" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0414735641543454(1.15.16) } { 'STR' "-0.041474" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "FeatherStar" }
@@ -1273,7 +1336,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.8068198561668396(1.15.16) -0.1199999973177910(1.15.16) -0.0900000035762787(1.15.16) 0.8158985972404480(1.15.16) 0.1199999973177910(1.15.16) 0.8504977226257324(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7749469876289368(1.15.16) -0.1199999973177910(1.15.16) -0.0900000035762787(1.15.16) 0.7839626073837280(1.15.16) 0.1199999973177910(1.15.16) 0.8092513680458069(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "featherstar.iff" } }
@@ -1283,10 +1346,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "featherstar.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0038680568780976(1.15.16) } { 'STR' "0.003868" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0015109337097417(1.15.16) } { 'STR' "0.001511" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0122940510269371(1.15.16) } { 'STR' "-0.012294" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0281830695419307(1.15.16) } { 'STR' "-0.028183" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0013046109658772(1.15.16) } { 'STR' "0.001305" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0005096006646609(1.15.16) } { 'STR' "0.000510" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0041465155736092(1.15.16) } { 'STR' "-0.004147" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0095055344476931(1.15.16) } { 'STR' "-0.009506" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "Nudibranch" }
@@ -1294,7 +1357,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3499999940395355(1.15.16) -0.1599999964237213(1.15.16) -0.1000000014901161(1.15.16) 0.3100000023841858(1.15.16) 0.1599999964237213(1.15.16) 0.2948371767997742(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3499999940395355(1.15.16) -0.1599999964237213(1.15.16) -0.1000000014901161(1.15.16) 0.3100000023841858(1.15.16) 0.1599999964237213(1.15.16) 0.2470429390668869(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "nudibranch.iff" } }
@@ -1304,10 +1367,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "nudibranch.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000021100277(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000291038(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0000000002182787(1.15.16) } { 'STR' "-0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000000087173248(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000039509382(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000161450730(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0017312506765454(1.15.16) } { 'STR' "-0.001731" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0018178555709432(1.15.16) } { 'STR' "-0.001818" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "WormCrowns" }
@@ -1315,7 +1378,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6232635378837585(1.15.16) -0.0750000029802322(1.15.16) -0.3477744460105896(1.15.16) 0.6258345842361450(1.15.16) 0.0155884576961398(1.15.16) 0.4409937858581543(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6567835807800293(1.15.16) -0.0759999975562096(1.15.16) -0.3477744460105896(1.15.16) 0.6593545675277710(1.15.16) 0.0155884576961398(1.15.16) 0.4469937980175018(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "wormcrowns.iff" } }
@@ -1325,10 +1388,94 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "wormcrowns.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000023841858(1.15.16) } { 'STR' "-0.000000" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.5000000000000000(1.15.16) } { 'STR' "-0.500000" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000009536743(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.2000000000000000(1.15.16) } { 'STR' "-0.200000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.6750000184774398(1.15.16) } { 'STR' "0.675000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.2700000073909760(1.15.16) } { 'STR' "0.270000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "FeatherDusters" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -1.9600000381469727(1.15.16) 0.1500000059604645(1.15.16) 2.0499999523162842(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.8800700306892395(1.15.16) -0.0303108897060156(1.15.16) -0.2399999946355820(1.15.16) 0.8800700306892395(1.15.16) 0.0303108897060156(1.15.16) 0.4000000059604645(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "featherdusters.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "featherdusters.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000004578350(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000001072334(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000242926493(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000489186583(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "FlowerpotCoral" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -4.1500000953674316(1.15.16) -0.8500000238418579(1.15.16) 2.4200000762939453(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.4799999892711639(1.15.16) -0.3481194972991943(1.15.16) -0.2715569734573364(1.15.16) 0.4799999892711639(1.15.16) 0.3458479642868042(1.15.16) 0.5575116872787476(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "flowerpotcoral.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "flowerpotcoral.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000087640680(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000009585838(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0000000115696341(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000091871638(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "LeatherCoral" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 4.0000000000000000(1.15.16) -0.7200000286102295(1.15.16) 2.7599999904632568(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6609112620353699(1.15.16) -0.4545805454254150(1.15.16) -0.4658965170383453(1.15.16) 0.6845918893814087(1.15.16) 0.5071563124656677(1.15.16) 0.2321553379297256(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "leathercoral.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "leathercoral.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0016576856776061(1.15.16) } { 'STR' "0.001658" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0006316823843098(1.15.16) } { 'STR' "0.000632" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.1569642952572424(1.15.16) } { 'STR' "0.156964" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.4393973847887097(1.15.16) } { 'STR' "0.439397" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "GiantClam" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 1.8200000524520874(1.15.16) -1.1499999761581421(1.15.16) 0.8199999928474426(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.4300000071525574(1.15.16) -0.3300000131130219(1.15.16) -0.0126599352806807(1.15.16) 0.4300000071525574(1.15.16) 0.3300000131130219(1.15.16) 0.1516506373882294(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "giantclam.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "giantclam.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000003512087(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000177395(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.2011317997461274(1.15.16) } { 'STR' "0.201132" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.1649280736936174(1.15.16) } { 'STR' "0.164928" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "GuardCrab" }
@@ -1336,7 +1483,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.1173808425664902(1.15.16) -0.1612436473369598(1.15.16) -0.0515035353600979(1.15.16) 0.1903828978538513(1.15.16) 0.1612436473369598(1.15.16) 0.0693196877837181(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.1255738437175751(1.15.16) -0.1680708527565002(1.15.16) -0.0580453909933567(1.15.16) 0.2288229018449783(1.15.16) 0.1686878204345703(1.15.16) 0.0810765773057938(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "guardcrab.iff" } }
@@ -1346,10 +1493,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "guardcrab.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000028995816(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000003384445(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0000000002689778(1.15.16) } { 'STR' "-0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000000097839162(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000005382644(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000015179849(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0000000040686646(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000000128580340(1.15.16) } { 'STR' "-0.000000" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "ShrimpOne" }
@@ -1357,7 +1504,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2955884635448456(1.15.16) -0.1471888720989227(1.15.16) -0.0873623788356781(1.15.16) 0.3051931560039520(1.15.16) 0.1471888720989227(1.15.16) 0.1365375518798828(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3541387021541595(1.15.16) -0.1589966416358948(1.15.16) -0.0947792381048203(1.15.16) 0.3106767237186432(1.15.16) 0.1578620672225952(1.15.16) 0.1446613818407059(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "shrimpone.iff" } }
@@ -1367,10 +1514,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "shrimpone.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000026944371(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000017346772(1.15.16) } { 'STR' "-0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0000000008815572(1.15.16) } { 'STR' "-0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000000032876397(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000005335060(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000002343726(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000028326470(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000050012413(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "ShrimpTwo" }
@@ -1378,7 +1525,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2955884635448456(1.15.16) -0.1471888720989227(1.15.16) -0.0873623788356781(1.15.16) 0.3051931560039520(1.15.16) 0.1471888720989227(1.15.16) 0.1365375518798828(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3541387021541595(1.15.16) -0.1589966416358948(1.15.16) -0.0947792381048203(1.15.16) 0.3106767237186432(1.15.16) 0.1578620672225952(1.15.16) 0.1446613818407059(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "shrimptwo.iff" } }
@@ -1388,10 +1535,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "shrimptwo.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000026944371(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000017346772(1.15.16) } { 'STR' "-0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0000000008815572(1.15.16) } { 'STR' "-0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000000025527480(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000005335060(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000002343726(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000028326470(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000051598437(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "HermitCrab" }
@@ -1399,7 +1546,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2199999988079071(1.15.16) -0.1241159662604332(1.15.16) -0.0367406271398067(1.15.16) 0.1350000053644180(1.15.16) 0.1241159662604332(1.15.16) 0.2167406231164932(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.2549999952316284(1.15.16) -0.1272029429674149(1.15.16) -0.0367406271398067(1.15.16) 0.1500000059604645(1.15.16) 0.1272029429674149(1.15.16) 0.2167406231164932(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "hermitcrab.iff" } }
@@ -1409,10 +1556,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "hermitcrab.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000020412550(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000014799098(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000001530941(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000012314890(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0021277060077409(1.15.16) } { 'STR' "-0.002128" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000006639311(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0036175672721583(1.15.16) } { 'STR' "0.003618" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0011491786352439(1.15.16) } { 'STR' "-0.001149" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "AmbientLight" }

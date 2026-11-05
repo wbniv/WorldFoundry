@@ -3,9 +3,10 @@
     { 'ALGN' .align( 2048 ) }
     { 'RAM'
         'OBJD' 1000000l
-        'PERM' 1000000l
-        'ROOM' 12000000l
+        'PERM' 4000000l
+        'ROOM' 32000000l
         'FLAG' 1l 1l
+        'SLOT' 1l
     }
     { 'ALGN' .align( 2048 ) }
     [ "../aquarium_thai_reef_anime.iff" ]

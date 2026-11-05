@@ -12,7 +12,7 @@ def _box(mesh, lo, hi, color):
 
 
 def build_groups(Mesh):
-    """Build eight static mesh groups. This does not create physics bodies."""
+    """Build static mesh groups. This does not create physics bodies."""
     groups = {name: Mesh(name) for name in ('reef_left', 'reef_right', 'reef_arch',
               'reef_hard', 'reef_soft', 'reef_sponges', 'reef_life', 'reef_shell')}
     for group in ('left','right','arch'):
@@ -21,6 +21,17 @@ def build_groups(Mesh):
     corals.soft_corals(groups['reef_soft'])
     sponges.populate(groups['reef_sponges'])
     life.populate(groups['reef_life'])
+    # FACE indices are signed 16-bit; baked corner colors can split vertices.
+    # Partition the detailed life mesh on face boundaries before export.
+    original = groups['reef_life']
+    pieces = [Mesh('reef_life')]
+    for face, color in zip(original.faces, original.colors):
+        if len(pieces[-1].vertices) + len(face) > 18000:
+            pieces.append(Mesh('reef_life_' + str(len(pieces))))
+        pieces[-1].face([original.vertices[i] for i in face], color)
+    groups['reef_life'] = pieces[0]
+    for piece in pieces[1:]:
+        groups[piece.name] = piece
     shell=groups['reef_shell']
     # Extend the distant water beyond the physical tank frame so the camera's
     # wide view never exposes the black matte around the reef.  This backdrop
