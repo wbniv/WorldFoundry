@@ -24,27 +24,60 @@
 //============================================================================
 
 #pragma message ("KTS " __FILE__ ": move this into the math directory")
+#include <cmath>
+#include <cstdint>
+
+#if defined(SCALAR_TYPE_FIXED)
+// Differences of 16.16 coordinates can need 33 bits. Each unsigned product
+// fits in 64 bits, but their signed difference can require 65. Subtract the
+// magnitudes before conversion so nearly parallel edges do not lose their
+// small, nonzero cross product to floating-point cancellation.
+inline double FaceCrossComponent(int64_t a, int64_t b, int64_t c, int64_t d)
+{
+    const uint64_t p = uint64_t(a < 0 ? -a : a) * uint64_t(b < 0 ? -b : b);
+    const uint64_t q = uint64_t(c < 0 ? -c : c) * uint64_t(d < 0 ? -d : d);
+    const bool pn = (a < 0) != (b < 0), qn = (c < 0) != (d < 0);
+    if (pn != qn) return pn ? -double(p) - double(q) : double(p) + double(q);
+    if (p >= q) return pn ? -double(p - q) : double(p - q);
+    return pn ? double(q - p) : -double(q - p);
+}
+#endif
+
 inline Vector3
 CalculateNormal( const Vector3& v0, const Vector3& v1, const Vector3& v2 )
 {
-//	cout << "Calculate Normal:" << std::endl;
-	Vector3 fn;
-	Vector3 a,b;
-
-	// Match Blender's face order: (v1-v0) x (v2-v0).
-	a = v1 - v0;
-	b = v2 - v0;
-	fn = a.CrossProduct(b);
-//	cout << "cross product = " << fn << std::endl;
-	fn.Normalize();
-
-//	cout << "v0 = " << v0 << ", v1 = " << v1 << ", v2 =" << v2 << std::endl;
-//	cout << "v1-v0 = " << a << std::endl;
-//	cout << "v2-v0 = " << b << std::endl;
-//	cout << "result = " << fn << std::endl;
-
-//	Scalar d =	fn.DotProduct(v0);
-	return(fn);
+#if defined(SCALAR_TYPE_FIXED)
+    const int64_t ax=int64_t(v1.X().AsLong())-v0.X().AsLong();
+    const int64_t ay=int64_t(v1.Y().AsLong())-v0.Y().AsLong();
+    const int64_t az=int64_t(v1.Z().AsLong())-v0.Z().AsLong();
+    const int64_t bx=int64_t(v2.X().AsLong())-v0.X().AsLong();
+    const int64_t by=int64_t(v2.Y().AsLong())-v0.Y().AsLong();
+    const int64_t bz=int64_t(v2.Z().AsLong())-v0.Z().AsLong();
+    const double x=FaceCrossComponent(ay,bz,az,by);
+    const double y=FaceCrossComponent(az,bx,ax,bz);
+    const double z=FaceCrossComponent(ax,by,ay,bx);
+#else
+    // Keep the old arithmetic and winding for ordinary faces. The fallback
+    // computes differences and cross products in double before normalization.
+    Vector3 fn=(v1-v0).CrossProduct(v2-v0);
+    const Scalar length=fn.Length();
+    if (length.Abs() > Scalar(0,4) && std::isfinite(length.AsFloat())) {
+        const Scalar scale=SCALAR_CONSTANT(1)/length;
+        return Vector3(fn.X()*scale, fn.Y()*scale, fn.Z()*scale);
+    }
+    const double ax=double(v1.X().AsFloat())-v0.X().AsFloat();
+    const double ay=double(v1.Y().AsFloat())-v0.Y().AsFloat();
+    const double az=double(v1.Z().AsFloat())-v0.Z().AsFloat();
+    const double bx=double(v2.X().AsFloat())-v0.X().AsFloat();
+    const double by=double(v2.Y().AsFloat())-v0.Y().AsFloat();
+    const double bz=double(v2.Z().AsFloat())-v0.Z().AsFloat();
+    const double x=ay*bz-az*by, y=az*bx-ax*bz, z=ax*by-ay*bx;
+#endif
+    const double lengthWide=std::sqrt(x*x+y*y+z*z);
+    // A collapsed face has no direction; use a stable zero normal.
+    if (!(lengthWide > 0.0) || !std::isfinite(lengthWide))
+        return Vector3(Scalar::FromDouble(0), Scalar::FromDouble(0), Scalar::FromDouble(0));
+    return Vector3(Scalar::FromDouble(x/lengthWide), Scalar::FromDouble(y/lengthWide), Scalar::FromDouble(z/lengthWide));
 }
 
 //============================================================================

@@ -1,0 +1,8 @@
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x27
+load_us=73.352
+peak_rss_kib=44208
+face=0 normal=(0,0,1)
+face=1 normal=(0,0,1)
+face=2 normal=(0,0,0)

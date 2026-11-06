@@ -1,0 +1,4 @@
+edge=1 cross=1 baseline=1 conditional=1 conditional_z=1
+edge=0.00999999978 cross=9.99999975e-05 baseline=1 conditional=1 conditional_z=1
+edge=0.00100000005 cross=1.00000011e-06 baseline=0 conditional=1 conditional_z=1
+edge=0 cross=0 baseline=0 conditional=0 conditional_z=0

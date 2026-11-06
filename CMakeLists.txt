@@ -1277,6 +1277,11 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     target_compile_options(dfrm_strand_test PRIVATE -fno-rtti -fpermissive)
     find_package(Python3 COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
+        add_executable(face_loader_regression_test docs/diagnostics/reef-triangle-normal-2026-11-06/loader-probe.cpp)
+        target_link_libraries(face_loader_regression_test PRIVATE wfengine)
+        target_compile_options(face_loader_regression_test PRIVATE -fno-rtti -fpermissive)
+        add_test(NAME face_loader_regression COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_SOURCE_DIR}/tests/face_loader_regression.py ${CMAKE_SOURCE_DIR} $<TARGET_FILE:face_loader_regression_test>)
         add_test(NAME dfrm_strand COMMAND ${Python3_EXECUTABLE}
             ${CMAKE_SOURCE_DIR}/wflevels/aquarium_tanks/dfrm_ref.py --check $<TARGET_FILE:dfrm_strand_test>)
     endif()

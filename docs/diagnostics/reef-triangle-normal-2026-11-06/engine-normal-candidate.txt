@@ -1,0 +1,4 @@
+edge=1 normal=(0,0,1)
+edge=0.00999999978 normal=(0,0,1)
+edge=0.00100000005 normal=(0,0,1)
+edge=0 normal=(0,0,0)
