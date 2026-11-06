@@ -40,7 +40,24 @@ Release APKs were built from the same sources with the baseline and candidate `f
 | Realistic | `3937e2b7b71f681aac91249f4e471d691b63f7a250194a9802640229a944ba28` |
 | Anime | `c1e7c8f1ad5bef0026ac284510885f4e8b5a146f40206ee42b481df76f5beeb9` |
 
-The first realistic baseline profile J‑add7120f138d failed with the device locked. Original-APK installation J‑f11d1273d673 reported a transport error, but its recovery journal verified SHA-256 `91fd64499085fffc86161f8547c0d3216f6b544c15f145fb71326517bf01b8f5`. Retry J‑189c5d0925e7 installed the first benchmark APK and failed to confirm the one-entry menu cursor. Subsequent two-entry attempts J‑a5bd778fd66c and J‑ddb6260be9a9 failed; the latter reported that the target left the foreground. No Android profile measurements were collected. Original-APK installation J‑1b7e20a1e67d is queued following those attempts and needs verification.
+The first realistic baseline profile J‑add7120f138d failed with the device locked. Original-APK installation J‑f11d1273d673 reported a transport error, but its recovery journal verified SHA-256 `91fd64499085fffc86161f8547c0d3216f6b544c15f145fb71326517bf01b8f5`. Retry J‑189c5d0925e7 installed the first benchmark APK and failed to confirm the one-entry menu cursor. Subsequent two-entry attempts J‑a5bd778fd66c and J‑ddb6260be9a9 did not complete; the latter reported that the target left the foreground. Original-APK installation J‑1b7e20a1e67d was refused because the app was foreground; a later attempt succeeded as described below.
+
+Correction after inspecting the downloaded evidence: J‑a5bd778fd66c completed its **first** realistic baseline run before the overall job failed on a later run. Its frame capture shows the reef; over that 20-second run the coordinator reported 59.89 FPS, median frame interval 16.67 ms, p95 16.95 ms, worst 33.36 ms, and 0.16% missed refreshes. The process memory sample reported 180,536 KiB PSS and 317,320 KiB RSS. These are single-run baseline observations, not a paired result or acceptance. The same job's final scene-selection file reflects the subsequent attempt and does not negate the captured first run. J‑2f896e30a3df subsequently restored and launcher-verified the original APK. Will reported concurrently using the Pixel; a foreground change can result from that normal use and should not be attributed to an application crash without further evidence. Complete an uninterrupted paired comparison when an authorized device is available for the workload.
+
+### Pixel paired wide-idle profiles, 2026‑11‑07
+
+Four coordinator jobs completed on the Pixel 8 Pro: realistic baseline J‑246829891d23, realistic candidate J‑399fe3f2383c, anime baseline J‑67793d9a9661 and anime candidate J‑1b92e72d2a8a. Each used three 20-second measurements with a 10-second warm-up per run. The coordinator scene label `clownfish` selects menu index zero in the benchmark-only APKs; screenshots confirm that the selected level is the corresponding reef. Matching variants have identical packed level assets, and outside signing metadata the original two APKs differ only in their two native engine libraries.
+
+| Reef | Variant | Median FPS | Median of run p95 frame intervals | Worst frame across runs | Median sampled PSS | Median sampled RSS |
+|---|---|---:|---:|---:|---:|---:|
+| Realistic | baseline | 59.995 | 16.893 ms | 33.510 ms | 177,422 KiB | 308,896 KiB |
+| Realistic | candidate | 59.996 | 16.923 ms | 33.637 ms | 181,976 KiB | 313,224 KiB |
+| Anime | baseline | 59.939 | 16.919 ms | 33.383 ms | 188,601 KiB | 320,240 KiB |
+| Anime | candidate | 59.994 | 16.931 ms | 33.438 ms | 186,268 KiB | 318,124 KiB |
+
+The [per-run results](pixel-results.csv) include median and p95 frame intervals, worst frame, missed-refresh rate and memory. The realistic p95 increased 0.030 ms and anime 0.012 ms; these short idle runs do not establish a reproducible frame-time regression. Median PSS changed by +4,554 KiB and −2,333 KiB respectively; the three realistic baseline samples span 8,899 KiB, so the apparent difference is not conclusive evidence of intrinsic memory growth. Measurements were grouped baseline then candidate, rather than alternated, and process PSS/RSS samples are not peak or isolated allocator measurements. Load-time, fixed-point performance, and a reaction/input workload were not measured by these jobs, so the full proposed performance gate remains open. No additional geometry was included for these comparisons.
+
+The coordinator completed original APK restoration J‑8035fad0a67e with launcher verification after the profiles. Its intended APK SHA-256 is `91fd64499085fffc86161f8547c0d3216f6b544c15f145fb71326517bf01b8f5`.
 
 Reference hashes for later identical-input comparisons:
 
