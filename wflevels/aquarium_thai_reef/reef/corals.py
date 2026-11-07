@@ -98,16 +98,16 @@ def soft_corals(mesh):
 
 def flowerpot(mesh, center, ranges=None):
     x,y,z = center
-    mesh.ellipsoid((x,y,z), (.48,.34,.28), 'flowerpot', 18, 9)
+    mesh.ellipsoid((x,y,z), (.48,.34,.28), 'flowerpot', 32, 16)
     for i in range(20):
         start = len(mesh.vertices)
         t=math.tau*i/20
         h=.42 + .10*math.sin(i*2.4)
         base=(x+.29*math.cos(t),y+.21*math.sin(t),z+.12)
         tip=(x+.36*math.cos(t),y+.27*math.sin(t),z+h)
-        mesh.swept_tube([base,tip], .027, 'flowerpot_tip', 5)
+        mesh.swept_tube([base,tip], .027, 'flowerpot_tip', 10)
         # Short radiating tentacles give each polyp its flower-like crown.
-        mesh.ellipsoid(tip, (.035,.035,.025), 'flowerpot_tip', 8, 4)
+        mesh.ellipsoid(tip, (.035,.035,.025), 'flowerpot_tip', 12, 6)
         for petal in range(8):
             a = math.tau*petal/8 + t*.3
             end = (tip[0]+.075*math.cos(a), tip[1]+.075*math.sin(a),

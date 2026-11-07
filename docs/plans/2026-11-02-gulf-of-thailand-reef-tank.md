@@ -78,6 +78,10 @@ Will accepted every recommendation in the third column (2026‑11‑02). The fou
 | D9 | How the two styles ship | **Decided.** **Two levels, two selector rows**, built from one scene description. Each style has its own assets, lighting fields and budgets, and is loaded alone, so neither pays for the other's memory | One level with a Style setting that swaps assets at load: one row, but both atlases resident or a reload path that doesn't exist today |
 | D10 | **Engine change: style shading (S1–S3)** | **Decided.** **Yes: allow S1 (water absorption) and S3 (toon bands); S2 (caustics) behind a cast1 cost gate.** All three are off by default, so every existing level renders identically | **No engine change:** realistic uses the existing linear fog and baked light only; anime bakes its bands into vertex colours, so moving actors stay smoothly lit and clash with the banded reef. Outlines need no engine change in any option |
 
+## Visual polish update, 2026‑11‑07
+
+The flowerpot base and stalks have finer geometry and face-oriented texture mapping; the closed clam has a dedicated striped shell texture; and the anime hard-coral outline hull was narrowed. Matching Pixel views in both styles show a legible flowerpot pattern and shell striping, and the anime branching coral shows substantially fewer black artifacts. Both reef builds and 34 reef tests pass, and the full APK was restored on the Pixel. Before-and-after source and game views are in the [catalogue](../diagnostics/reef-refinement-catalogue-2026-11-04/reef-refinement-catalogue.pdf); see the [audit](../diagnostics/reef-triangle-normal-2026-11-06/catalogue-survival-audit.md) for evidence and remaining acceptance work. The Lenovo was unavailable.
+
 ## The tank
 
 [![Wide view: two rock masses and a central arch, 25 kinds of life, numbered](2026-11-02-gulf-of-thailand-reef-tank/tank-wide.png)](2026-11-02-gulf-of-thailand-reef-tank/tank-wide.html)

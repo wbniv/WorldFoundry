@@ -93,6 +93,15 @@ def blender_mesh(mesh, smooth=False):
     data = bpy.data.meshes.new(mesh.name)
     data.from_pydata(mesh.vertices, [], mesh.faces)
     data.materials.append(mat)
+    data.update()
+    # Project flowerpot faces along their dominant normal. A single X/Z
+    # projection collapses on the sides of vertical stalks and stretches the
+    # atlas across the rounded base. Object-local bounds avoid wrap seams.
+    flowerpot_bounds = None
+    if any(key in ('flowerpot', 'flowerpot_tip') for key in mesh.colors):
+        flowerpot_bounds = [(min(v.co[axis] for v in data.vertices),
+                             max(v.co[axis] for v in data.vertices))
+                            for axis in range(3)]
     uv = data.uv_layers.new(name='UVMap')
     for poly, key in zip(data.polygons, mesh.colors):
         if key in ('fish_dark', 'fish_white') or key.startswith('water_'):
@@ -103,7 +112,27 @@ def blender_mesh(mesh, smooth=False):
             for li in poly.loop_indices:
                 uv.data[li].uv = (u, v)
             continue
+        if key == 'clam_shell':
+            for li in poly.loop_indices:
+                co = data.vertices[data.loops[li].vertex_index].co
+                along = max(0.0, min(1.0, (co.x + .45) / .90))
+                across = max(0.0, min(1.0, abs(co.y) / .32))
+                uv.data[li].uv = ((900 + 120 * along) / 1024,
+                                  (500 + 24 * across) / 1024)
+            continue
         tile = swatches[key]
+        if key in ('flowerpot', 'flowerpot_tip'):
+            normal_axis = max(range(3), key=lambda axis: abs(poly.normal[axis]))
+            axes = ((1, 2), (0, 2), (0, 1))[normal_axis]
+            for li in poly.loop_indices:
+                co = data.vertices[data.loops[li].vertex_index].co
+                values = []
+                for axis in axes:
+                    lo, hi = flowerpot_bounds[axis]
+                    values.append((co[axis] - lo) / (hi - lo) if hi > lo else .5)
+                uv.data[li].uv = ((tile % 4 + .04 + .92 * values[0]) / 4,
+                                  (tile // 4 + .04 + .92 * values[1]) / 2)
+            continue
         for li in poly.loop_indices:
             x, y, z = data.vertices[data.loops[li].vertex_index].co
             # Leave a small margin to reduce bleeding between neighboring tiles.
@@ -180,7 +209,10 @@ for name, mesh in groups.items():
     obj.data.calc_loop_triangles()
     actual_triangles[name] = len(obj.data.loop_triangles)
     if args.style == 'anime' and name in ('reef_left', 'reef_right', 'reef_arch', 'reef_hard'):
-        outline_specs.append((name, obj, .035))
+        # Reef-hard contains many overlapping narrow coral branches. A rock-
+        # sized expansion pushes their back-facing hulls through adjacent
+        # branches, producing black speckles across their visible surfaces.
+        outline_specs.append((name, obj, .004 if name == 'reef_hard' else .035))
 
 # Simple rock proxies provide collision without making the visual meshes (or
 # the boxfish itself) static physics bodies. The central arch stays open.

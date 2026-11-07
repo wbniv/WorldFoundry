@@ -89,10 +89,10 @@ def _clam(mesh, center, limb_ranges=None):
             a, b = section(i), section(i+1)
             for band in range(2):
                 points = [a[band], b[band], b[band+1], a[band+1]]
-                mesh.face(points if side < 0 else list(reversed(points)), 'sand')
+                mesh.face(points if side < 0 else list(reversed(points)), 'clam_shell')
         for i in range(3, steps, 6):
             a, b, c = section(i)
-            mesh.swept_tube([a, b, c], .008, 'sand', 4)
+            mesh.swept_tube([a, b, c], .008, 'clam_shell', 4)
         if limb_ranges is not None:
             limb_ranges.append((start, len(mesh.vertices), (x,y,z), (0,side,0), (0,0,1)))
     start = len(mesh.vertices)

@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/9dab404c) | Plan: the content rule is species only |
 | [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/2e8f756b) | Plan: Gulf of Thailand Reef decisions D1-D10 accepted |
 | [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/dc27d780) | Plan: a tank shell is not covered by the content rule |
 | [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/ecc095dd) | Plan: Gulf of Thailand Reef in two visual styles |
 | [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/a0c95dda) | Plan: Gulf of Thailand Reef tank, A3 poster and DFRM v2 |
 
 <!--history-meta v1
+9dab404c	author	Will Norris
+9dab404c	added	10
+9dab404c	deleted	22
+9dab404c	files	1
+9dab404c	body	Will narrowed the rule to "no species already in a tank". Meshes, rigs,\ntextures, Forth controllers, helpers and shells from other tanks may be\nreused. The plan's rule section, D1's rationale, the roster note,\nverification step 5 and the TODO item now say so.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSDDhrLioJf35p1WRH
 2e8f756b	author	Will Norris
 2e8f756b	added	15
 2e8f756b	deleted	13

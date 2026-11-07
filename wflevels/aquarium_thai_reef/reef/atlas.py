@@ -99,6 +99,16 @@ def write_atlas(path, seed=20261102, style='realistic'):
                     rgb = [8 + 4 * band, 65 + 17 * band, 128 + 17 * band]
                 else:
                     rgb = [8 + 3 * band, 44 + 8 * band, 64 + 10 * band]
+            # A narrow, previously unused atlas margin supplies the clam's
+            # shell. The sand tile is deliberately left unchanged.
+            if 896 <= x < 1024 and 496 <= y < 528:
+                grain = _smooth_noise(x, y, 5, seed + 231) - .5
+                ridge = math.cos((x - 896) * math.tau / 12)
+                value = 14 * grain + 20 * ridge
+                if style == 'anime':
+                    value = round(value / 18) * 18
+                base_shell = (191, 161, 126) if style == 'realistic' else (211, 174, 125)
+                rgb = [max(0, min(255, round(c + value))) for c in base_shell]
             out.extend((rgb[2],rgb[1],rgb[0]))
     Path(path).write_bytes(out)
 
