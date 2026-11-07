@@ -147,3 +147,51 @@ the realistic reef and held then released the on-screen joystick: the boxfish
 visibly moved left and remained stationary after release. This route stopped
 above the shrimp and did not verify cleaning. J‑6faec5f14dc5 is a queued
 follow-up route toward the shrimp; it has not run while the Pixel is locked.
+
+On 2026-11-08, J‑ce3dbf215982 used the full APK and ordinary joystick input
+to steer the boxfish to the cleaner station. The captured frames show the shrimp
+move onto the stationary fish and then return to their station; this verifies
+the realistic-style reaction for that approach. The game footage also includes
+an unrelated picture-in-picture window, so retain the evidence privately.
+J‑c704b93eabc8 steered the fish toward the crab's host coral, but the crab's
+claws remain too small and obscured to verify its threat or climbing. Anime
+cleaning and a clearer crab view remain open.
+J‑01515339f286 repeated the user-steered station approach in anime style;
+the recording shows shrimp on the boxfish and returning toward the station.
+This also contains a personal picture-in-picture window and is private evidence.
+The crab's threat and climbing remain visually unverified.
+
+## Guard-crab placement, 2026-11-08
+
+The crab anchor had depth `0.2`, while the actual cauliflower colony is
+centred at depth `-.82`; the crab was hidden behind the coral, in the rock.
+A temporary close-camera comparison J‑97618af2b30c placed it at the
+camera-facing branches and showed its leg movement and changing claw pose
+through a timed diagnostic fish approach and departure. The approach was a
+teleport, not joystick steering. The source anchor and both saved levels now
+place it at approximately `(-3.101, -1.12, 3.1995)`. The
+[refinement catalogue](../reef-refinement-catalogue-2026-11-04/reef-refinement-catalogue.pdf)
+contains before-and-after Pixel views with different close-camera positions.
+
+The rebuilt full Aquarium APK (SHA-256
+`30554973298a13e9352344864ee42f6f804888df3439952194cc1508ebdfef1e`)
+was installed on the Pixel. J‑71a97bd6508b and J‑5bb225bdd54e show the
+corrected crab in realistic and anime styles respectively. J‑a00bc6a603b8
+steered the fish towards its coral in the full realistic level; the wide view
+still does not resolve the claws clearly enough to verify the threat through
+normal steering. The close diagnostic shows its movement, but does not alone
+prove a continuous gameplay interaction. The movement and reef suites passed
+60 tests; the added host-position and crab checks passed 2 tests.
+
+Lenovo reconnect J‑187c16a734aa failed `device-not-found-on-network`; its
+wireless-debugging endpoint was not advertising. The updated APK has not been
+installed or checked on that device. The Pixel evidence above includes an
+unrelated picture-in-picture window and is private.
+
+J‑4aa8eed14a05 used the corrected crab position and a close diagnostic camera
+with the foreground rock and coral present. It steered the fish toward and away
+from the crab using the touch joystick rather than teleporting it. The close
+frames show the crab changing leg and claw poses against the host coral while
+the fish moves; proximity-trigger timing remains less certain without runtime
+telemetry. This is a diagnostic camera, not the ordinary wide view. Restore of
+the full corrected APK was submitted as J‑a49487047589.

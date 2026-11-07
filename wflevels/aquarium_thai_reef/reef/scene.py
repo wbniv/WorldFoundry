@@ -36,7 +36,9 @@ ANCHORS = (
     Anchor('coralline', 'Corallinales', 230, 610, .5),
     Anchor('flowerpot', 'Goniopora sp.', 175, 500, .4),
     Anchor('cauliflower', 'Pocillopora damicornis', 250, 360, .35),
-    Anchor('guard_crab', 'Trapezia cymodoce', 352, 420, .2),
+    # The host colony is at (-3.25, -.82, 3.05); keep the crab on its
+    # camera-facing branches rather than buried in the rock behind it.
+    Anchor('guard_crab', 'Trapezia cymodoce', 357, 351, -1.12),
     Anchor('humbug_pair', 'Dascyllus aruanus', 335, 250, -.15),
     Anchor('scroll_coral', 'Turbinaria sp.', 470, 455, .5),
     Anchor('feather_duster', 'Sabellastarte sp.', 520, 560, .15),

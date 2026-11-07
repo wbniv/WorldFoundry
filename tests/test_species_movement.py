@@ -122,6 +122,20 @@ def test_reef_cleaning_waits_for_a_stationary_visitor(vm):
     assert abs(cleaning[-1]['part-z'] - 2.34) < .03
 
 
+def test_guard_crab_is_on_the_camera_facing_host_coral():
+    import importlib.util
+    import sys
+    spec = importlib.util.spec_from_file_location('reef_scene_crab_placement', ROOT/'wflevels/aquarium_thai_reef/reef/scene.py')
+    scene = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = scene
+    spec.loader.exec_module(scene)
+    x, y, z = scene.anchor_map()['guard_crab']
+    # The actual host branches are centred at (-3.25, -.82, 3.05).
+    assert abs(x - (-3.25)) < .5
+    assert -.4 < y - (-.82) < 0
+    assert 2.8 < z < 3.55
+
+
 def test_reef_clam_closes_under_fish_and_reopens(vm):
     mapping = json.loads((ROOT/'wflevels/aquarium_thai_reef/actor-map.json').read_text())
     x = mapping['anchors']['giant_clam'][0]
