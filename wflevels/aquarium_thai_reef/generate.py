@@ -527,7 +527,9 @@ for name, anchor, offset, phase, amplitude in (
         life_tick += (f' 743 tk@ 0 > if INDEXOF_Y_POS tk-player read-actor-mailbox {yoffset-.06} + '
                       f'else {station[1] + yoffset} then {ycell} tk-v '
                       f'{ycell} tk@ INDEXOF_Y_POS {indices[name]} write-actor-mailbox\n'
-                      f' 743 tk@ 0 > if INDEXOF_Z_POS tk-player read-actor-mailbox -.08 + '
+                      # Body centers sit above the boxfish, with the shrimp legs
+                      # reaching its back instead of their bodies intersecting it.
+                      f' 743 tk@ 0 > if INDEXOF_Z_POS tk-player read-actor-mailbox .24 + '
                       f'else {station[2]} then {zcell} tk-v '
                       f'{zcell} tk@ INDEXOF_Z_POS {indices[name]} write-actor-mailbox\n')
     elif name == 'GuardCrab':

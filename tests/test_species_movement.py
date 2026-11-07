@@ -119,7 +119,7 @@ def test_reef_cleaning_waits_for_a_stationary_visitor(vm):
     cleaning = vm('thai_reef', f'reset -.7 -.15 2.1\nset 650 {mapping["ShrimpOne"]}\nstep 240 0 .0166667\n')
     assert cleaning[-1][743] > 0
     assert abs(cleaning[-1]['part-y'] - (-.21)) < .03
-    assert abs(cleaning[-1]['part-z'] - 2.02) < .03
+    assert abs(cleaning[-1]['part-z'] - 2.34) < .03
 
 
 def test_reef_clam_closes_under_fish_and_reopens(vm):
