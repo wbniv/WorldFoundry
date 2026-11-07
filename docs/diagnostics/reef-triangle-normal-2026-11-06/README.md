@@ -55,9 +55,22 @@ Four coordinator jobs completed on the Pixel 8 Pro: realistic baseline J‑24682
 | Anime | baseline | 59.939 | 16.919 ms | 33.383 ms | 188,601 KiB | 320,240 KiB |
 | Anime | candidate | 59.994 | 16.931 ms | 33.438 ms | 186,268 KiB | 318,124 KiB |
 
-The [per-run results](pixel-results.csv) include median and p95 frame intervals, worst frame, missed-refresh rate and memory. The realistic p95 increased 0.030 ms and anime 0.012 ms; these short idle runs do not establish a reproducible frame-time regression. Median PSS changed by +4,554 KiB and −2,333 KiB respectively; the three realistic baseline samples span 8,899 KiB, so the apparent difference is not conclusive evidence of intrinsic memory growth. Measurements were grouped baseline then candidate, rather than alternated, and process PSS/RSS samples are not peak or isolated allocator measurements. Load-time, fixed-point performance, and a reaction/input workload were not measured by these jobs, so the full proposed performance gate remains open. No additional geometry was included for these comparisons.
+The [per-run results](pixel-results.csv) include median and p95 frame intervals, worst frame, missed-refresh rate and memory. The realistic p95 increased 0.030 ms and anime 0.012 ms; these short idle runs do not establish a reproducible frame-time regression. Median PSS changed by +4,554 KiB and −2,333 KiB respectively; the three realistic baseline samples span 8,899 KiB, so the apparent difference is not conclusive evidence of intrinsic memory growth. Measurements were grouped baseline then candidate, rather than alternated, and process PSS/RSS samples are not peak or isolated allocator measurements. Load-time and fixed-point performance were not measured by these jobs, so the full proposed performance gate remains open. No additional geometry was included for these comparisons.
 
 The coordinator completed original APK restoration J‑8035fad0a67e with launcher verification after the profiles. Its intended APK SHA-256 is `91fd64499085fffc86161f8547c0d3216f6b544c15f145fb71326517bf01b8f5`.
+
+### Pixel movement workload, 2026‑11‑07
+
+One 30-second profile per variant followed a 10-second warm-up and the same two eight-second directional holds, with 3 seconds between holds. Coordinator evidence verifies all four touch edges per run; the realistic baseline captures show the player fish moved across the scene. This is a movement/animation workload, not proof that every species reaction triggered. Realistic baseline/candidate jobs were J‑1f2cdc9ed490 and J‑116b76825d9c; anime baseline/candidate were J‑ada0661f2e1d and J‑a0c45d82c399. All completed successfully with `device-edges-verified`. [Raw per-run metrics](pixel-reaction-results.csv):
+
+| Reef | Variant | FPS | p95 frame interval | Worst frame | Sampled PSS | Sampled RSS |
+|---|---|---:|---:|---:|---:|---:|
+| Realistic | baseline | 59.925 | 16.927 ms | 33.624 ms | 182,771 KiB | 312,616 KiB |
+| Realistic | candidate | 59.967 | 16.923 ms | 32.607 ms | 185,126 KiB | 313,548 KiB |
+| Anime | baseline | 59.988 | 16.915 ms | 17.361 ms | 188,300 KiB | 316,772 KiB |
+| Anime | candidate | 59.995 | 16.925 ms | 17.390 ms | 189,440 KiB | 317,160 KiB |
+
+These single samples show no clear frame-time regression and cannot establish a reproducible memory delta. They include the coordinator touch/capture workload, which was the same for both variants. Device level-load timing, peak memory and fixed-point performance remain unmeasured; don't infer them from these results. The original APK was restored again by J‑1d2aa943ff6a, with launcher verification.
 
 Reference hashes for later identical-input comparisons:
 

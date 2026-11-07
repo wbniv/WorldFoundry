@@ -1,0 +1,5 @@
+style,variant,fps,p50_ms,p95_ms,worst_ms,missed_refresh_percent,pss_kib,rss_kib,touch_result
+realistic,baseline,59.92498965368511,16.667439,16.926554,33.623617,0.10869565217391304,182771,312616,device-edges-verified
+realistic,candidate,59.96695072565101,16.663982,16.92334,32.607218,0.05417118093174431,185126,313548,device-edges-verified
+anime,baseline,59.98752029350264,16.66626,16.915161,17.36141,0.0,188300,316772,device-edges-verified
+anime,candidate,59.9953277356602,16.664225,16.92513,17.390096,0.0,189440,317160,device-edges-verified
