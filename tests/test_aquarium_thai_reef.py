@@ -140,8 +140,9 @@ def test_screensaver_native_host_accepts_both_reef_choices_and_texture_pages():
         assert height > page_height
 
 
-def test_exported_reef_triangles_have_normalizable_area():
+def test_exported_reef_triangles_preserve_small_nondegenerate_faces():
     for level in ('aquarium_thai_reef', 'aquarium_thai_reef_anime'):
+        small = 0
         for path in (ROOT / 'wflevels' / level).glob('*.iff'):
             data = path.read_bytes()
             if data[:4] != b'MODL':
@@ -153,14 +154,18 @@ def test_exported_reef_triangles_have_normalizable_area():
                 pos += 8 + ((size + 3) & ~3)
             if b'VRTX' not in chunks or b'FACE' not in chunks:
                 continue
-            vertices = [tuple(v / 65536 for v in struct.unpack_from('<iii', chunks[b'VRTX'], i + 12))
+            vertices = [struct.unpack_from('<iii', chunks[b'VRTX'], i + 12)
                         for i in range(0, len(chunks[b'VRTX']), 24)]
             for i in range(0, len(chunks[b'FACE']), 8):
                 a, b, c = (vertices[index] for index in struct.unpack_from('<hhh', chunks[b'FACE'], i))
                 ab, ac = ([b[j] - a[j] for j in range(3)], [c[j] - a[j] for j in range(3)])
                 cross = (ab[1]*ac[2] - ab[2]*ac[1], ab[2]*ac[0] - ab[0]*ac[2],
                          ab[0]*ac[1] - ab[1]*ac[0])
-                assert math.sqrt(sum(v*v for v in cross)) > 4 / 65536, (path, i // 8)
+                cross_squared = sum(v*v for v in cross)
+                assert cross_squared > 0, (path, i // 8)
+                if cross_squared < (2 * .00008 * 65536**2)**2:
+                    small += 1
+        assert small > 0, (level, 'valid small faces were discarded')
 
 
 @pytest.mark.parametrize('level', ['aquarium_thai_reef', 'aquarium_thai_reef_anime'])

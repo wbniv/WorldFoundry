@@ -70,7 +70,30 @@ One 30-second profile per variant followed a 10-second warm-up and the same two 
 | Anime | baseline | 59.988 | 16.915 ms | 17.361 ms | 188,300 KiB | 316,772 KiB |
 | Anime | candidate | 59.995 | 16.925 ms | 17.390 ms | 189,440 KiB | 317,160 KiB |
 
-These single samples show no clear frame-time regression and cannot establish a reproducible memory delta. They include the coordinator touch/capture workload, which was the same for both variants. Device level-load timing, peak memory and fixed-point performance remain unmeasured; don't infer them from these results. The original APK was restored again by J‑1d2aa943ff6a, with launcher verification.
+These single samples show no clear frame-time regression and cannot establish a reproducible memory delta. They include the coordinator touch/capture workload, which was the same for both variants. Device load time is measured separately below; peak memory and fixed-point performance remain unmeasured. The original APK was restored again by J‑1d2aa943ff6a, with launcher verification.
+
+### Pixel level-construction timing, 2026‑11‑07
+
+The existing `--frame-profile` flag was added equally to the matched baseline and candidate benchmark APKs using [make-load-profile-apks.py](make-load-profile-apks.py); the reef level assets did not change. For each style and variant, the coordinator launched the reef three times and captured the engine's `level-load` start/end timestamps. The [individual timestamps and durations](pixel-level-load-results.csv) were matched to the next measurement anchor to distinguish them from older appended log entries. Jobs: realistic baseline J‑45b4300901b3, realistic candidate J‑362452b6cec2, anime baseline J‑21d3f52270f0, and anime candidate J‑f8d9455d0452.
+
+| Reef | Baseline level construction (ms) | Candidate level construction (ms) |
+|---|---|---|
+| Realistic | 82.751, 85.820, 80.145 | 78.322, 77.965, 131.129 |
+| Anime | 117.416, 100.639, 119.315 | 83.940, 83.388, 124.129 |
+
+Medians are 82.751 → 78.322 ms for realistic and 117.416 → 83.940 ms for anime. Three sequentially grouped samples, including the slower candidate outliers, do not establish the p95, cold/warm behavior or a causal speedup; the opt-in profiler also adds the same instrumentation to both variants. The timing covers `WFGame::LoadLevel`, including construction and optional prewarm, rather than APK startup or menu selection. It does not measure peak memory. After the jobs, restoration J‑b4a59ff27812 reported a plugin error; its recovery journal verified the original installed APK SHA-256 `91fd64499085fffc86161f8547c0d3216f6b544c15f145fb71326517bf01b8f5`. A follow-up install/launcher verification was submitted separately.
+
+The [18-page catalogue audit](catalogue-survival-audit.md) maps every explicitly export-survival entry to the current source. No restoration has been made by that audit.
+
+The follow-up installation J‑31a4a398b1c0 timed out while running `adb install -r` even though its recorded pre-install hash was already the original APK hash. Its cleanup and automatic readd J‑61e6bdc8e060 left the Pixel fenced with `cleanup-requires-restart`. The coordinator explains that an interrupted installer can have a delayed commit, so the matching pre-install hash alone does not establish that it is safe to clear the fence. After Will requested recovery, reboot-and-readd J‑7f0fdd1debd8 verified a completed boot, the original APK hash and safe cleanup; the Pixel returned ready. This follow-up was unnecessary after the prior journal had already verified the original APK hash. A [separate plan](../../plans/2026-11-07-coordinator-installer-self-recovery.md) proposes automatic recovery without a routine reboot; that change is not implemented or deployed.
+
+An attempt to compile the original fixed-point vector/scalar sources for the current x86-64 host as a baseline benchmark failed before linking: `Vector3::Length` and `RLength` have ambiguous conversions from `unsigned long` to `Scalar`, and the legacy Linux scalar source produced additional compile errors under that configuration. The candidate's header-level fixed-point correctness regression passes; it is not a fixed-point engine performance benchmark. A supported fixed-point build configuration is still needed for that comparison.
+
+The coordinator profiles collected end-of-run `dumpsys meminfo` snapshots, not a process peak. The existing interactive sample also reads a point-in-time `meminfo` snapshot after startup. Neither can establish a peak during level construction, so the table above does not relabel the largest snapshot as a peak.
+
+## First restoration and in-game review
+
+The generator now retains small valid triangles and writes a per-object, per-face `triangle-diagnostics.json`; the original 0.010 leather-polyp radius has been restored with the later deflation rig intact. Both pinned level builds and all 34 reef tests passed. The [catalogue](../reef-refinement-catalogue-2026-11-04/reef-refinement-catalogue.pdf) has the source-mesh before/after on page 49 and realistic/anime Pixel close-ups on page 50. The full menu APK was reinstalled and hash-verified on the Pixel after the diagnostic captures. The [catalogue audit](catalogue-survival-audit.md) records the source evidence, exact face counts, loader checks, capture job IDs and remaining restoration work.
 
 Reference hashes for later identical-input comparisons:
 

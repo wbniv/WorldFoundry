@@ -141,7 +141,7 @@ def leather_coral(mesh, center, ranges=None):
             start = crown(t,ring)
             end = (start[0]+.016*math.cos(t),start[1]+.016*math.sin(t),
                    start[2]+.045+.012*math.sin(i*2.1))
-            mesh.swept_tube([start,end], .013, 'flowerpot_tip', 5)
+            mesh.swept_tube([start,end], .010, 'flowerpot_tip', 5)
     if ranges is not None:
         ranges.append((range_start, len(mesh.vertices), (x,y,z-.45)))
 

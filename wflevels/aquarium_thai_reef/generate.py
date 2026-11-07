@@ -525,22 +525,42 @@ if sum(actual_hull_triangles.values()) > ANIME_HULL_TRIANGLES_MAX:
     raise ValueError(f'anime outlines exceed budget: {sum(actual_hull_triangles.values())} triangles')
 if len(animated_triangles) > 16:
     raise ValueError(f'reef exceeds animated actor budget: {len(animated_triangles)}')
-# The renderer normalizes each exported triangle's cross product. Very small
-# faces produced by rock remeshing or outline extrusion can fall below its
-# fixed-point normalization threshold, so discard them before export.
+# Keep small valid faces. Record actual degeneracy separately, including faces
+# that collapse after the exporter's 16.16 coordinate conversion. The export
+# may still canonicalize coincident vertices; identify affected source faces
+# instead of silently treating every small face as invalid.
+triangle_diagnostics = {}
 for obj in bpy.context.scene.objects:
     if obj.type != 'MESH' or not obj.data.polygons:
         continue
     bm = bmesh.new()
     bm.from_mesh(obj.data)
     bmesh.ops.triangulate(bm, faces=list(bm.faces))
-    tiny = [face for face in bm.faces if face.calc_area() < .00008]
-    if tiny:
-        print(f'{obj.name}: removing {len(tiny)} undersized triangles')
-        bmesh.ops.delete(bm, geom=tiny, context='FACES')
+    bm.faces.index_update()
+    small, zero_area, quantized_degenerate = [], [], []
+    for face in bm.faces:
+        area = face.calc_area()
+        points = [tuple(int(c * 65536) for c in vertex.co) for vertex in face.verts]
+        a, b, c = points
+        u = tuple(b[i] - a[i] for i in range(3))
+        v = tuple(c[i] - a[i] for i in range(3))
+        cross = (u[1]*v[2] - u[2]*v[1], u[2]*v[0] - u[0]*v[2],
+                 u[0]*v[1] - u[1]*v[0])
+        if area == 0:
+            zero_area.append(face.index)
+        elif cross == (0, 0, 0):
+            quantized_degenerate.append(face.index)
+        elif area < .00008:
+            small.append(face.index)
+    if small or zero_area or quantized_degenerate:
+        triangle_diagnostics[obj.name] = {'small_valid_faces': small,
+            'zero_area_faces': zero_area, 'quantized_degenerate_faces': quantized_degenerate}
+        print(f'{obj.name}: retaining {len(small)} small valid faces; '
+              f'{len(zero_area)} zero-area, {len(quantized_degenerate)} quantization-degenerate')
     bm.to_mesh(obj.data)
     bm.free()
     obj.data.update()
+(out / 'triangle-diagnostics.json').write_text(json.dumps(triangle_diagnostics, indent=2)+'\n')
 (out / 'actor-map.json').write_text(json.dumps({'level':args.level_id, 'actors':indices,
     'triangles':actual_triangles, 'triangle_total':triangle_total,
     'animated_triangles':animated_triangles, 'hull_triangles':actual_hull_triangles, 'anchors':anchor_map(),

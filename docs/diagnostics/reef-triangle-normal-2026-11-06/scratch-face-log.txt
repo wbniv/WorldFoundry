@@ -1,0 +1,14 @@
+realistic (host Blender 5.0.1):
+reef_left: retaining 19 undersized triangles; exactly-zero=0
+reef_right: retaining 14 undersized triangles; exactly-zero=0
+reef_arch: retaining 22 undersized triangles; exactly-zero=0
+SeaFan: retaining 1 undersized triangles; exactly-zero=0
+GiantClam: retaining 8 undersized triangles; exactly-zero=8
+Info: Exported 40 objects to /tmp/reef-unfiltered-probe/realistic/aquarium_thai_reef.lev
+anime (host Blender 5.0.1):
+reef_left: retaining 7 undersized triangles; exactly-zero=0
+reef_right: retaining 7 undersized triangles; exactly-zero=0
+reef_arch: retaining 5 undersized triangles; exactly-zero=0
+SeaFan: retaining 1 undersized triangles; exactly-zero=0
+GiantClam: retaining 8 undersized triangles; exactly-zero=8
+Info: Exported 40 objects to /tmp/reef-unfiltered-probe/anime/aquarium_thai_reef_anime.lev
