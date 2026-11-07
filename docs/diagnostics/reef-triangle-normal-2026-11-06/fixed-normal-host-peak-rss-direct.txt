@@ -1,0 +1,80 @@
+1 baseline faces=12372 nanos=44741967 checksum=-4033100
+peak_rss_kib=4576
+1 candidate faces=12372 nanos=15684783 checksum=-23462950
+peak_rss_kib=4576
+2 baseline faces=12372 nanos=43174268 checksum=-4033100
+peak_rss_kib=4576
+2 candidate faces=12372 nanos=17053395 checksum=-23462950
+peak_rss_kib=4640
+3 baseline faces=12372 nanos=44155491 checksum=-4033100
+peak_rss_kib=4628
+3 candidate faces=12372 nanos=17628016 checksum=-23462950
+peak_rss_kib=4560
+4 baseline faces=12372 nanos=45663703 checksum=-4033100
+peak_rss_kib=4628
+4 candidate faces=12372 nanos=17748517 checksum=-23462950
+peak_rss_kib=4648
+5 baseline faces=12372 nanos=45560918 checksum=-4033100
+peak_rss_kib=4644
+5 candidate faces=12372 nanos=20718272 checksum=-23462950
+peak_rss_kib=4636
+6 baseline faces=12372 nanos=46303692 checksum=-4033100
+peak_rss_kib=4668
+6 candidate faces=12372 nanos=21407741 checksum=-23462950
+peak_rss_kib=4604
+7 baseline faces=12372 nanos=53167771 checksum=-4033100
+peak_rss_kib=4464
+7 candidate faces=12372 nanos=21085642 checksum=-23462950
+peak_rss_kib=4588
+8 baseline faces=12372 nanos=49624655 checksum=-4033100
+peak_rss_kib=4576
+8 candidate faces=12372 nanos=22863909 checksum=-23462950
+peak_rss_kib=4576
+9 baseline faces=12372 nanos=53246599 checksum=-4033100
+peak_rss_kib=4572
+9 candidate faces=12372 nanos=23602852 checksum=-23462950
+peak_rss_kib=4576
+10 baseline faces=12372 nanos=53000201 checksum=-4033100
+peak_rss_kib=4544
+10 candidate faces=12372 nanos=19977991 checksum=-23462950
+peak_rss_kib=4564
+11 baseline faces=12372 nanos=46463183 checksum=-4033100
+peak_rss_kib=4636
+11 candidate faces=12372 nanos=20956559 checksum=-23462950
+peak_rss_kib=4508
+12 baseline faces=12372 nanos=54764635 checksum=-4033100
+peak_rss_kib=4572
+12 candidate faces=12372 nanos=21594811 checksum=-23462950
+peak_rss_kib=4576
+13 baseline faces=12372 nanos=60843573 checksum=-4033100
+peak_rss_kib=4636
+13 candidate faces=12372 nanos=29426168 checksum=-23462950
+peak_rss_kib=4640
+14 baseline faces=12372 nanos=74001840 checksum=-4033100
+peak_rss_kib=4636
+14 candidate faces=12372 nanos=34672972 checksum=-23462950
+peak_rss_kib=4560
+15 baseline faces=12372 nanos=58610268 checksum=-4033100
+peak_rss_kib=4468
+15 candidate faces=12372 nanos=19329246 checksum=-23462950
+peak_rss_kib=4552
+16 baseline faces=12372 nanos=50102389 checksum=-4033100
+peak_rss_kib=4572
+16 candidate faces=12372 nanos=18334627 checksum=-23462950
+peak_rss_kib=4624
+17 baseline faces=12372 nanos=55155181 checksum=-4033100
+peak_rss_kib=4640
+17 candidate faces=12372 nanos=18812004 checksum=-23462950
+peak_rss_kib=4620
+18 baseline faces=12372 nanos=52867021 checksum=-4033100
+peak_rss_kib=4504
+18 candidate faces=12372 nanos=27948391 checksum=-23462950
+peak_rss_kib=4640
+19 baseline faces=12372 nanos=59463280 checksum=-4033100
+peak_rss_kib=4512
+19 candidate faces=12372 nanos=19321046 checksum=-23462950
+peak_rss_kib=4556
+20 baseline faces=12372 nanos=47474174 checksum=-4033100
+peak_rss_kib=4648
+20 candidate faces=12372 nanos=18699314 checksum=-23462950
+peak_rss_kib=4640

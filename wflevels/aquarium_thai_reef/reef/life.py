@@ -32,7 +32,7 @@ def _cup(mesh, center, radius, height, color, sides=12):
         angle = math.tau*i/sides
         start = (x + .38*radius*math.cos(angle),y + .38*radius*math.sin(angle),z + height*.78)
         end = (x + .92*radius*math.cos(angle),y + .92*radius*math.sin(angle),z + height*1.12)
-        mesh.swept_tube([start,end], .013, 'polyp', 5)
+        mesh.swept_tube([start,end], .009, 'polyp', 5)
 
 
 def _sea_fan(mesh, base):
@@ -59,7 +59,7 @@ def _sea_fan(mesh, base):
             end = (tip[0] + side*.045*math.sin(a) + .018*math.cos(a),
                    tip[1] + side*.012,
                    tip[2] - side*.045*math.cos(a) + .035*math.sin(a))
-            mesh.swept_tube([points[-2],tip,end], .013, 'coralline', 5)
+            mesh.swept_tube([points[-2],tip,end], .009, 'coralline', 5)
     for i in range(12):
         for j in range(1, 5):
             if (i + j) % 5 == 0:
@@ -67,21 +67,21 @@ def _sea_fan(mesh, base):
             a, b = spokes[i][j], spokes[i+1][j]
             middle = ((a[0]+b[0])/2, (a[1]+b[1])/2 - .012,
                       (a[2]+b[2])/2 + .018 * math.sin(i*3+j))
-            mesh.swept_tube([a, middle, b], .013, 'coralline', 4)
+            mesh.swept_tube([a, middle, b], .009, 'coralline', 4)
 
 
 def _clam(mesh, center, limb_ranges=None):
     x, y, z = center
     # Fluted, pale valves open around the vivid blue mantle.  The ribs fan
     # from the low hinge, with a scalloped edge instead of stacked ellipsoids.
-    steps = 20
+    steps = 60
     for side in (-1, 1):
         start = len(mesh.vertices)
         def section(i):
             t = -1 + 2*i/steps
             span = math.sqrt(max(0, 1-t*t))
             px = x + .43*t
-            scallop = 1 + .10*math.cos(i*math.pi)
+            scallop = 1 + .06*math.cos(i*math.pi/3)
             return ((px, y, z),
                     (px, y + side*.15*span, z + .035*span),
                     (px, y + side*.30*span*scallop, z + .13*span))
@@ -90,9 +90,9 @@ def _clam(mesh, center, limb_ranges=None):
             for band in range(2):
                 points = [a[band], b[band], b[band+1], a[band+1]]
                 mesh.face(points if side < 0 else list(reversed(points)), 'sand')
-        for i in range(1, steps, 2):
+        for i in range(3, steps, 6):
             a, b, c = section(i)
-            mesh.swept_tube([a, b, c], .013, 'sand', 4)
+            mesh.swept_tube([a, b, c], .008, 'sand', 4)
         if limb_ranges is not None:
             limb_ranges.append((start, len(mesh.vertices), (x,y,z), (0,side,0), (0,0,1)))
     start = len(mesh.vertices)
@@ -114,12 +114,11 @@ def _clam(mesh, center, limb_ranges=None):
             py = .055*row + .006*math.sin(column*1.8)
             if (px/.32)**2 + (py/.17)**2 > .85:
                 continue
-            radius = .017 + .003*(1+math.sin(column*3.1+row))/2
+            radius = .009 + .003*(1+math.sin(column*3.1+row))/2
             points = [(x+px+radius*math.cos(math.tau*i/8),
-                       y+py+radius*math.sin(math.tau*i/8),z+.151)
+                       y+py+radius*.8*math.sin(math.tau*i/8),z+.151)
                       for i in range(8)]
-            for i in range(8):
-                mesh.face([(x+px,y+py,z+.151),points[i],points[(i+1)%8]], 'fish_white')
+            mesh.face(points, 'fish_white')
     if limb_ranges is not None:
         limb_ranges.append((start, len(mesh.vertices), (x,y,z+.125), (0,1,0), (0,0,1)))
 
@@ -141,7 +140,7 @@ def _zoanthids(mesh, center):
             start = (px+.034*math.cos(angle),py+.031*math.sin(angle),pz+.125)
             end = (px+.065*math.cos(angle),py+.060*math.sin(angle),
                    pz+.135+.007*math.sin(i+tentacle))
-            mesh.swept_tube([start,end], .013, 'zoanthid', 5)
+            mesh.swept_tube([start,end], .009, 'zoanthid', 5)
 
 
 def worm_centers(center, count=15):
@@ -178,7 +177,7 @@ def _worm_crowns(mesh, center, count=15, ranges=None):
                 for direction in (-1, 1):
                     for ray in range(3):
                         root_x = cx + direction*width*(.28 + .24*ray)
-                        tip_x = root_x + direction*(.030 + .008*ray)*(1-tier/7)
+                        tip_x = root_x + direction*(.018 + .006*ray)*(1-tier/7)
                         mesh.face([(root_x, wy-.026, z0),
                                    (tip_x, wy-.026, z0+.010),
                                    (root_x+direction*.004, wy-.026, z0+.020)],
@@ -232,7 +231,7 @@ def _feather_star(mesh, center, ranges=None):
                 length = .055 + .045*math.sin(math.pi*t)
                 tip = (p[0] - sign*length*math.sin(a), p[1]+.012*sign*math.sin(arm),
                        p[2] + sign*length*math.cos(a) + .025*t)
-                mesh.swept_tube([p, tip], .013, 'polyp', 5)
+                mesh.swept_tube([p, tip], .007, 'polyp', 5)
         if ranges is not None:
             ranges.append((start, len(mesh.vertices)))
 
@@ -255,7 +254,7 @@ def _mushroom_coral(mesh, center):
             else:
                 mesh.face([point(a,p),point(a,q),point(b,q),point(b,p)], 'coralline')
         ridge = [point(a,f) for f in (.12,.4,.7,.95)]
-        mesh.swept_tube([(p[0],p[1],p[2]+.008) for p in ridge], .013, 'polyp', 5)
+        mesh.swept_tube([(p[0],p[1],p[2]+.008) for p in ridge], .010, 'polyp', 5)
 
 
 def _nudibranch(mesh, center):

@@ -112,7 +112,7 @@ def flowerpot(mesh, center, ranges=None):
             a = math.tau*petal/8 + t*.3
             end = (tip[0]+.075*math.cos(a), tip[1]+.075*math.sin(a),
                    tip[2]+.018+.008*math.sin(3*a))
-            mesh.swept_tube([tip,end], .013, 'flowerpot_tip', 5)
+            mesh.swept_tube([tip,end], .010, 'flowerpot_tip', 5)
         if ranges is not None:
             ranges.append((start, len(mesh.vertices), base))
 

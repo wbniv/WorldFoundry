@@ -3,13 +3,8 @@ import math
 
 
 def _disc(mesh, x, y, z, r, color):
-    # A center fan avoids the tiny ear triangles produced when the exporter
-    # triangulates small n-gons. Preserve visible marks at the minimum size.
-    r = max(r, .016)
-    edge = [(x + r * math.cos(math.tau * i / 8), y,
-             z + r * math.sin(math.tau * i / 8)) for i in range(8)]
-    for i in range(8):
-        mesh.face([(x,y,z),edge[i],edge[(i+1)%8]], color)
+    mesh.face([(x + r * math.cos(math.tau * i / 12), y,
+                z + r * math.sin(math.tau * i / 12)) for i in range(12)], color)
 
 
 def boxfish(Mesh, fin_ranges=None):
