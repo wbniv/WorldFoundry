@@ -1,6 +1,6 @@
 # Christmas tree worms, rebuilt: review, 8 November 2026
 
-W1 of the [reef finishing plan](../../plans/2026-11-08-reef-tanks-finish.md), for Will's review. Will, 2026‑11‑08: "work on the christmas tree worms part only and let's review when done". D1–D4 accepted ("D1-D4: all yes").
+W1 of the [reef finishing plan](../../plans/2026-11-08-reef-tanks-finish.md). **Approved by Will, 2026‑11‑08** ("approved"). Will, 2026‑11‑08: "work on the christmas tree worms part only and let's review when done". D1–D4 accepted ("D1-D4: all yes").
 
 > [!NOTE]
 > The new views below are **Blender renders** (CPU Cycles, the static bake's sun, both styles' real reef atlases) of the generator's own meshes and UVs. They are **not engine captures**. The desktop engine could not run in a container on this machine: the host `engine/wf_game` needs glibc 2.43, the linux-test image has an older glibc, and the Blender image has no GL. Engine views need a device run (Pixel or Lenovo, through the coordinator), using the close-up variants that [`build-worm-views.sh`](build-worm-views.sh) builds.
