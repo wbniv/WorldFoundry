@@ -113,7 +113,8 @@ def test_built_level_places_and_drives_worms_from_the_mouths(level):
     text = (folder / f'{level}.lev').read_text()
     for i, w in enumerate(worm_mouths()):
         x, y, z = w['mouth']
-        assert f'{x:.6f} {y:.6f} {z:.6f} {i} reef-worm' in text
+        # W5c: each mouth is offset by the left hero's layout displacement (cells 904 / 907).
+        assert f'{x:.6f} 904 tk@ + {y:.6f} 907 tk@ + {z:.6f} {i} reef-worm' in text
 
 
 @pytest.mark.parametrize('level', LEVELS)

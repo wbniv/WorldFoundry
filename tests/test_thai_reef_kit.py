@@ -142,7 +142,7 @@ def test_colliders_are_pivot_centred_and_heroes_keep_todays_boxes(level):
 
 
 @pytest.mark.parametrize('level', LEVELS)
-def test_every_hideable_piece_has_its_own_free_cell_and_fixed_shows_the_heroes(level):
+def test_every_hideable_piece_has_its_own_free_cell_and_the_layout_drives_it(level):
     blocks = _lev_blocks(level)
     data = _actor_map(level)
     cells = []
@@ -154,13 +154,11 @@ def test_every_hideable_piece_has_its_own_free_cell_and_fixed_shows_the_heroes(l
         cells.append(clump['cell'])
         assert _visibility(blocks[clump['actor']]) == clump['cell']
     assert len(cells) == len(set(cells)) and all(2 <= c <= 599 for c in cells)
+    # W5c's layout shows the modules (Fixed: the three heroes) and writes every cell once.
     script = re.search(r'"Script" \} \{ \'STR\' "(.*?)" \}', blocks['Director']).group(1)
-    init = re.search(r': reef-kit-init (.*?) ;', script).group(1)
-    for hero in kit.HEROES:
-        assert f' 1 {kit.module_cell(hero["name"])} tk!' in init
-    for module in data['kit']['modules'][len(kit.HEROES):]:
-        assert f' {module["cell"]} tk!' not in init
-    assert 'reef-kit-init reef-shoal' in script
+    assert ': reef-layout?' in script and 'reef-poll reef-layout? reef-shoal reef-life' in script
+    for module in data['kit']['modules']:
+        assert f' {module["cell"]} tk!' in script
 
 
 def test_site_tables_are_module_local_points_on_each_module():

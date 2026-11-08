@@ -142,6 +142,7 @@ FIXED_STATIC = [name for name, piece in static.items() if piece['kind'] != 'fill
 actual_triangles = {}
 actual_hull_triangles = {}
 outline_specs = []
+footprints = {}
 oad = repo / 'wfsource/source/oas/platform.oad'
 for name, piece in static.items():
     mesh, kind = piece['mesh'], piece['kind']
@@ -188,6 +189,12 @@ for name, piece in static.items():
         obj.location = kit.filler_park(kit.MODULES.index(piece['module']) - len(kit.HEROES))
     obj.data.calc_loop_triangles()
     actual_triangles[name] = len(obj.data.loop_triangles)
+    if rocky:
+        # W5c spaces modules by footprint: 0.85 of the rock's half width about its pivot
+        # (about the share of the rock its collider covers), so neighbours may touch, as
+        # today's left rock and arch do, but never interpenetrate.
+        xs = [v.co.x for v in obj.data.vertices]
+        footprints[piece['module']] = round(.85 * max(abs(min(xs)), abs(max(xs))), 4)
     if args.style == 'anime' and kind in ('rock', 'filler', 'hard'):
         # Hard-coral dressing contains many overlapping narrow coral branches. A
         # rock-sized expansion pushes their back-facing hulls through adjacent
@@ -409,6 +416,25 @@ room['wf_original_bbox'] = (-25,-30,-6,25,10,18)
 room['wf_had_authored_bbox'] = True
 objects = [o for o in bpy.context.scene.objects if o.get('wf_schema_path')]
 indices = {o.name:i+1 for i,o in enumerate(objects)}
+kit_map = {'modules': [], 'clumps': clumps, 'attached': attached,
+           'fixed_layout': {h['name']: list(h['pivot']) for h in kit.HEROES}, 'park_z': kit.PARK_Z}
+for index, module in enumerate(kit.MODULES):
+    pieces = [name for name, piece in static.items() if piece['module'] == module]
+    hero = index < len(kit.HEROES)
+    kit_map['modules'].append({
+        'name': module, 'role': 'hero' if hero else 'filler', 'cell': kit.module_cell(module),
+        'rock': 'reef_' + module, 'pieces': pieces, 'piece_actors': [indices[n] for n in pieces],
+        'collider': collider_names[module][0], 'collider_actor': indices[collider_names[module][0]],
+        'collider_box': {'lo': collider_names[module][1], 'hi': collider_names[module][2]},
+        'pivot': list(kit.hero_pivot(module)) if hero else None,
+        'park': None if hero else list(kit.filler_park(index - len(kit.HEROES))),
+        'attached': [n for n, a in attached.items() if a['module'] == module],
+        'sites': [{'p': list(s['p']), 'n': list(s['n'])} for s in kit.site_table(module)],
+        'triangles': sum(actual_triangles[n] for n in pieces),
+        'footprint_half': footprints[module],
+        'attached_offsets': [[indices[n], attached[n]['offset']] for n, a in attached.items() if a['module'] == module]})
+for clump in clumps:
+    clump['actor_index'] = indices[clump['actor']]
 mailboxes = {n:600+i for i,n in enumerate(['init','phase','heading','prev','mode','dart','cooldown','dx','dy','dz',
     'vx','vy','vz','target','x','y','z','yaw','scale','sy','cy','actor','ox','oy','oz','camera','clock','pulse'])}
 header = ''.join(f': tk-{name} {number} ;\n' for name,number in mailboxes.items())
@@ -445,15 +471,25 @@ tick += (rotate(visual, c='tk-heading tk@') +
 if verification:
     tick = tick[:tick.index(' 648 tk@ if tk-camera-tick')] + f' {indices["cs_wide"]} INDEXOF_CAMSHOT tk! ;\nreef-tick\n'
 fish_x, fish_y, fish_z = anchor_map()['humbug_pair']
+# W5c: every reaction anchor moves with the hero module it belongs to (layout cells 904-909
+# hold each hero's displacement from its Fixed pivot), and a hidden hero's reactions are
+# skipped (880-882 hold which modules show). Fixed leaves every displacement at 0.
+HERO = {h['name']: i for i, h in enumerate(kit.HEROES)}
+def kx(v, hero):
+    return f'{v} {904 + HERO[hero]} tk@ +'
+def ky(v, hero):
+    return f'{v} {907 + HERO[hero]} tk@ +'
+def shown(hero):
+    return f'{880 + HERO[hero]} tk@'
 shoal = ': reef-shoal\n 640 tk@ tk-dt@ .12 * + tk-frac 640 tk!\n'
-shoal += (f' INDEXOF_X_POS tk-player read-actor-mailbox {fish_x} - dup * '
+shoal += (f' INDEXOF_X_POS tk-player read-actor-mailbox {kx(fish_x, "left")} - dup * '
           f'INDEXOF_Z_POS tk-player read-actor-mailbox {fish_z} - dup * + 1.44 < 641 tk!\n')
 shoal += (' 641 tk@ if 2.5 740 tk! else 740 tk@ tk-dt@ - 0 max 740 tk! then\n'
           ' 740 tk@ 0 > if 741 tk@ tk-dt@ 2 * + 1 min '
           'else 741 tk@ tk-dt@ - 0 max then 741 tk!\n')
 for name, offset, phase in (('HumbugOne', 0, 0), ('HumbugTwo', .5, .25)):
     idx = indices[name]
-    shoal += (f' {fish_x+offset} 640 tk@ {phase} + tk-sin .22 * + INDEXOF_X_POS {idx} write-actor-mailbox\n'
+    shoal += (f' {kx(fish_x+offset, "left")} 640 tk@ {phase} + tk-sin .22 * + INDEXOF_X_POS {idx} write-actor-mailbox\n'
               f' {fish_z - (0 if not offset else .2)} 741 tk@ .48 * - '
               f'INDEXOF_Z_POS {idx} write-actor-mailbox\n')
 shoal += ';\n'
@@ -475,7 +511,7 @@ life_tick = (': reef-life\n' + rotate(indices["SeaFan"], a='640 tk@ tk-sin .012 
              # The slug crawls back and forth along the sand at the foot of the
              # left rock (reef.placement.NUDIBRANCH_PATH), on the sand without
              # bobbing, and turns to face its direction of travel (front = -x).
-             f' {nudi_path["x"]} 751 tk@ tk-sin {nudi_path["amplitude"]} * + '
+             f' {kx(nudi_path["x"], "left")} 751 tk@ tk-sin {nudi_path["amplitude"]} * + '
              f'INDEXOF_X_POS {indices["Nudibranch"]} write-actor-mailbox\n'
              f' {anchor_map()["nudibranch"][2]} INDEXOF_Z_POS {indices["Nudibranch"]} write-actor-mailbox\n'
              # Headings are in revolutions: half a turn faces +x.
@@ -483,25 +519,27 @@ life_tick = (': reef-life\n' + rotate(indices["SeaFan"], a='640 tk@ tk-sin .012 
 # ReefSettings (plan W5a), owned by the Director: Layout, Rocks, Colonies,
 # Seed (fields 1-4). Polled once a second into 860-863 so a settings-panel
 # change is seen without a reload; W5c lays out the reef from them.
-life_tick += (f' 864 tk@ tk-dt@ - dup 864 tk! 0 <= if 1 864 tk!'
+poll = (f': reef-poll 864 tk@ tk-dt@ - dup 864 tk! 0 <= if 1 864 tk!'
               f' {indices["Director"]} 1 property@ if else drop 0 then 860 tk!'
               f' {indices["Director"]} 2 property@ if else drop 3 then 861 tk!'
               f' {indices["Director"]} 3 property@ if else drop 1 then 862 tk!'
               f' {indices["Director"]} 4 property-int-bytes@ if drop 65536 * swap 256 * + +'
-              f' else drop drop drop drop 0 then 863 tk! then\n')
+              f' else drop drop drop drop 0 then 863 tk! then ;\n')
 life_tick += ' 1064 tk@ 0 = if\n' + ''.join(f' 1 {1020+i} tk!\n' for i in range(15)) + ' 1 1064 tk! then\n'
+life_tick += f' {shown("left")} if\n'
 for i, worm in enumerate(worm_mouths()):
     x, y, z = worm['mouth']
-    life_tick += f' {x:.6f} {y:.6f} {z:.6f} {i} reef-worm\n'
+    life_tick += f' {kx(f"{x:.6f}", "left")} {ky(f"{y:.6f}", "left")} {z:.6f} {i} reef-worm\n'
+life_tick += ' then\n'
 life_tick += f' 1027 tk@ 642 tk! 1155 15 {indices["WormCrowns"]} dfrm-pose-curves 1099 tk!\n'
 duster_x, duster_y, duster_z = anchor_map()['feather_duster']
 life_tick += ' 788 tk@ 0 = if 1 784 tk! 1 785 tk! 1 786 tk! 1 787 tk! 1 788 tk! then\n'
 for worm in range(4):
     x, y, z = duster_x + (worm-1.5)*.42, duster_y, duster_z + (worm % 2)*.12
     timer, scale, control = 780+worm, 784+worm, 1255+40+worm*4
-    life_tick += (f' INDEXOF_X_POS tk-player read-actor-mailbox {x} - dup * '
-                  f'INDEXOF_Y_POS tk-player read-actor-mailbox {y} - dup * + '
-                  f'INDEXOF_Z_POS tk-player read-actor-mailbox {z} - dup * + .64 < '
+    life_tick += (f' INDEXOF_X_POS tk-player read-actor-mailbox {kx(x, "left")} - dup * '
+                  f'INDEXOF_Y_POS tk-player read-actor-mailbox {ky(y, "left")} - dup * + '
+                  f'INDEXOF_Z_POS tk-player read-actor-mailbox {z} - dup * + .64 < {shown("left")} & '
                   f'if {3+worm} {timer} tk! {scale} tk@ tk-dt@ 4.9 * - .02 max '
                   f'else {timer} tk@ tk-dt@ - 0 max {timer} tk! '
                   f'{scale} tk@ {timer} tk@ 0 <= if tk-dt@ .4 * + 1 min then then '
@@ -521,9 +559,9 @@ for curve in range(10):
     life_tick += f' 1 {control} tk! 640 tk@ {curve * .08} + tk-sin 12 * {control + 3} tk!\n'
 life_tick += f' 1311 10 {indices["FeatherStar"]} dfrm-pose-curves 1099 tk!\n'
 clam_x = anchor_map()['giant_clam'][0]
-life_tick += (f' INDEXOF_X_POS tk-player read-actor-mailbox {clam_x} - dup * '
-              f' INDEXOF_Y_POS tk-player read-actor-mailbox -1.15 - dup * + 1 < '
-              f' INDEXOF_Z_POS tk-player read-actor-mailbox .82 > & '
+life_tick += (f' INDEXOF_X_POS tk-player read-actor-mailbox {kx(clam_x, "arch")} - dup * '
+              f' INDEXOF_Y_POS tk-player read-actor-mailbox {ky(-1.15, "arch")} - dup * + 1 < '
+              f' INDEXOF_Z_POS tk-player read-actor-mailbox .82 > & {shown("arch")} & '
               f' if 4 746 tk! else 746 tk@ tk-dt@ - 0 max 746 tk! then\n'
               f' 746 tk@ 0 > if 745 tk@ tk-dt@ 3 * + 1 min '
               f'else 745 tk@ tk-dt@ - 0 max then 745 tk!\n'
@@ -532,9 +570,9 @@ life_tick += (f' INDEXOF_X_POS tk-player read-actor-mailbox {clam_x} - dup * '
               f' 400 3 {indices["GiantClam"]} dfrm-pose-curves 1099 tk!\n')
 station = anchor_map()['cleaner_station']
 crab_x, crab_y, crab_z = anchor_map()['guard_crab']
-life_tick += (f' INDEXOF_X_POS tk-player read-actor-mailbox {crab_x} - dup * '
-              f'INDEXOF_Y_POS tk-player read-actor-mailbox {crab_y} - dup * + '
-              f'INDEXOF_Z_POS tk-player read-actor-mailbox {crab_z} - dup * + 1 < '
+life_tick += (f' INDEXOF_X_POS tk-player read-actor-mailbox {kx(crab_x, "left")} - dup * '
+              f'INDEXOF_Y_POS tk-player read-actor-mailbox {ky(crab_y, "left")} - dup * + '
+              f'INDEXOF_Z_POS tk-player read-actor-mailbox {crab_z} - dup * + 1 < {shown("left")} & '
               f'if 2 643 tk! else 643 tk@ tk-dt@ - 0 max 643 tk! then '
               + rotate(indices["GuardCrab"], a='643 tk@ 0 > if .16 else 0 then'))
 for curve in range(10):
@@ -560,11 +598,11 @@ for curve in range(5):
     control = 1803 + 40 + 4 * curve
     life_tick += f' 1 {control} tk! 640 tk@ {curve * .19} + tk-sin 20 * {control + 3} tk!\n'
 life_tick += f' 1803 5 {indices["BoxfishVisual"]} dfrm-pose-curves 1099 tk!\n'
-life_tick += (f' 647 tk@ 0 = if {station[0]} 645 tk! {station[0]+.35} 646 tk! '
-              f'{station[1]} 747 tk! {station[1]+.12} 748 tk! '
+life_tick += (f' 647 tk@ 0 = if {kx(station[0], "arch")} 645 tk! {kx(station[0]+.35, "arch")} 646 tk! '
+              f'{ky(station[1], "arch")} 747 tk! {ky(station[1]+.12, "arch")} 748 tk! '
               f'{station[2]} 749 tk! {station[2]} 750 tk! 1 647 tk! then\n'
-              f' INDEXOF_X_POS tk-player read-actor-mailbox {station[0]} - dup * '
-              f'INDEXOF_Z_POS tk-player read-actor-mailbox {station[2]} - dup * + 1 < '
+              f' INDEXOF_X_POS tk-player read-actor-mailbox {kx(station[0], "arch")} - dup * '
+              f'INDEXOF_Z_POS tk-player read-actor-mailbox {station[2]} - dup * + 1 < {shown("arch")} & '
               f'INDEXOF_XSPEED tk-player read-actor-mailbox abs .1 < & '
               f'INDEXOF_YSPEED tk-player read-actor-mailbox abs .1 < & '
               f'INDEXOF_ZSPEED tk-player read-actor-mailbox abs .1 < & '
@@ -584,10 +622,10 @@ for name, anchor, offset, phase, amplitude in (
         zcell = 749 if name == 'ShrimpOne' else 750
         yoffset = 0 if name == 'ShrimpOne' else .12
         life_tick += (f' 743 tk@ 0 > if INDEXOF_X_POS tk-player read-actor-mailbox {offset-.175} + '
-                      f'else {anchor_map()[anchor][0] + offset} 640 tk@ {phase} + tk-sin {amplitude} * + then '
+                      f'else {kx(anchor_map()[anchor][0] + offset, "arch")} 640 tk@ {phase} + tk-sin {amplitude} * + then '
                       f'{cell} tk-v {cell} tk@ INDEXOF_X_POS {indices[name]} write-actor-mailbox\n')
         life_tick += (f' 743 tk@ 0 > if INDEXOF_Y_POS tk-player read-actor-mailbox {yoffset-.06} + '
-                      f'else {station[1] + yoffset} then {ycell} tk-v '
+                      f'else {ky(station[1] + yoffset, "arch")} then {ycell} tk-v '
                       f'{ycell} tk@ INDEXOF_Y_POS {indices[name]} write-actor-mailbox\n'
                       # Body centers sit above the boxfish, with the shrimp legs
                       # reaching its back instead of their bodies intersecting it.
@@ -596,21 +634,24 @@ for name, anchor, offset, phase, amplitude in (
                       f'{zcell} tk@ INDEXOF_Z_POS {indices[name]} write-actor-mailbox\n')
     elif name == 'GuardCrab':
         # Traverse a small loop around the host head, including a climb and descent.
-        life_tick += (f' {anchor_map()[anchor][0]} 640 tk@ tk-sin .12 * + '
+        life_tick += (f' {kx(anchor_map()[anchor][0], "left")} 640 tk@ tk-sin .12 * + '
                       f'INDEXOF_X_POS {indices[name]} write-actor-mailbox\n'
                       f' {anchor_map()[anchor][2]} 640 tk@ .25 + tk-sin .12 * + '
                       f'INDEXOF_Z_POS {indices[name]} write-actor-mailbox\n')
     else:
-        life_tick += (f' {anchor_map()[anchor][0] + offset} 640 tk@ {phase} + tk-sin {amplitude} * + '
+        life_tick += (f' {kx(anchor_map()[anchor][0] + offset, "arch")} 640 tk@ {phase} + tk-sin {amplitude} * + '
                       f'INDEXOF_X_POS {indices[name]} write-actor-mailbox\n')
 life_tick += ';\n'
-# Kit visibility (plan W5b): every kit piece is hidden until its cell is set. Until W5c's
-# layout exists, the Director shows the Fixed arrangement (the three hero modules) once at
-# entry; fillers and colony clumps stay hidden and parked.
-kit_init = (f': reef-kit-init {kit.KIT_INIT_GUARD} tk@ 0 = if'
-            + ''.join(f' 1 {kit.module_cell(h["name"])} tk!' for h in kit.HEROES)
-            + f' 1 {kit.KIT_INIT_GUARD} tk! then ;\n')
-tick = tick.replace(': reef-tick\n', shoal + worm_tick + life_tick + kit_init + ': reef-tick\n reef-kit-init reef-shoal reef-life\n')
+# The layout (plan W5c, reef/layout.py): Fixed is the reviewed W3 reef exactly; Random lays out
+# the kit from the ReefSettings the Director polls. It runs on the first tick, after the
+# poll, and again whenever a setting changes.
+from reef.layout import forth_layout
+layout_src = forth_layout(kit_map, footprints, [(indices['HumbugOne'], bpy.data.objects['HumbugOne'].location.y),
+                                              (indices['HumbugTwo'], bpy.data.objects['HumbugTwo'].location.y)],
+                          'write-actor-mailbox')
+# Poll first, then lay out, then the reactions, so the first tick already runs on the layout.
+tick = tick.replace(': reef-tick\n', shoal + worm_tick + life_tick + poll + layout_src
+                    + ': reef-tick\n reef-poll reef-layout? reef-shoal reef-life\n')
 bpy.data.objects['Director']['wf_Script'] = header + core + tick
 if args.bake_light:
     from reef.bake import bake_static
@@ -690,23 +731,6 @@ for obj in bpy.context.scene.objects:
     bm.free()
     obj.data.update()
 (out / 'triangle-diagnostics.json').write_text(json.dumps(triangle_diagnostics, indent=2)+'\n')
-kit_map = {'modules': [], 'clumps': clumps, 'attached': attached, 'init_guard': kit.KIT_INIT_GUARD,
-           'fixed_layout': {h['name']: list(h['pivot']) for h in kit.HEROES}, 'park_z': kit.PARK_Z}
-for index, module in enumerate(kit.MODULES):
-    pieces = [name for name, piece in static.items() if piece['module'] == module]
-    hero = index < len(kit.HEROES)
-    kit_map['modules'].append({
-        'name': module, 'role': 'hero' if hero else 'filler', 'cell': kit.module_cell(module),
-        'rock': 'reef_' + module, 'pieces': pieces, 'piece_actors': [indices[n] for n in pieces],
-        'collider': collider_names[module][0], 'collider_actor': indices[collider_names[module][0]],
-        'collider_box': {'lo': collider_names[module][1], 'hi': collider_names[module][2]},
-        'pivot': list(kit.hero_pivot(module)) if hero else None,
-        'park': None if hero else list(kit.filler_park(index - len(kit.HEROES))),
-        'attached': [n for n, a in attached.items() if a['module'] == module],
-        'sites': [{'p': list(s['p']), 'n': list(s['n'])} for s in kit.site_table(module)],
-        'triangles': sum(actual_triangles[n] for n in pieces)})
-for clump in clumps:
-    clump['actor_index'] = indices[clump['actor']]
 (out / 'actor-map.json').write_text(json.dumps({'level':args.level_id, 'actors':indices, 'indices':indices,
     'triangles':actual_triangles, 'triangle_total':triangle_total, 'kit':kit_map, 'kit_budget':kit_budget,
     'animated_triangles':animated_triangles, 'hull_triangles':actual_hull_triangles, 'anchors':anchor_map(),

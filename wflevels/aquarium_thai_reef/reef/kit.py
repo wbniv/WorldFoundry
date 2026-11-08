@@ -25,7 +25,6 @@ from .surface import SAND_Z, _segment_distance, _wobble, arch_path, rock_blobs, 
 # show and hide together) or a colony clump.
 MODULE_CELL_BASE = 200
 CLUMP_CELL_BASE = 210
-KIT_INIT_GUARD = 1112          # unassigned in the original plan's allocation table (1112-1139)
 PARK_Z = -4.0                  # inside the room box (z >= -6), under the sand and the frame
 
 # Heroes keep today's rock and today's colliders exactly: their pivot is the centre of the

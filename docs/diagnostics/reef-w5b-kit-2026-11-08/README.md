@@ -143,3 +143,42 @@ Run in the linux-test container: `test_aquarium_thai_reef`, `test_thai_reef_sett
 - `test_worm_engine_pose_leaves_other_crowns_unchanged`: the host-built harness does not run in the container;
 - two menu-Taskfile tests;
 - one screensaver-variant import.
+
+## The anime K0 slowdown (2026‑11‑08, after P4)
+
+**Question:** why anime K0 (the kit level with Fixed shown) runs about 0.9 ms slower than P0 (the pre-W5b level), while realistic K0 does not.
+
+**Method:** A/B probes on cast1 under the same protocol as above (anime, wide idle, 120 s window, three alternating runs each). Each probe changes one thing. Job lists and per-run figures are in [`probes/anime-cost/`](probes/anime-cost/). The two scratch generator variants used for K4 and K5 are there too.
+
+| Probe | What changes against K0 (the committed W5b level) | Runs (FPS) | Median | Δ |
+|---|---|---|---:|---|
+| K0 | — (control) | 20.81, 20.96, 20.84 | 47.99 ms | — |
+| K1 | the shell (sand and water backdrop) drawn after the dressing instead of first | 20.99, 20.94, 20.94 | 47.75 ms | −0.24 ms vs K0; runs overlap, so noise |
+| K3 | K1 + the 12 hidden kit actors (3 fillers, 9 clumps) removed from the render list | 20.86, 20.87, 20.94 | 47.91 ms | = K1 (K1 same session: 47.87 ms) |
+| K4 | K1 + today's **merged** dressing groups (`reef_hard`, `reef_soft`, … as before W5b) instead of the per-module pieces | 21.33, 21.11, 21.07 | **47.37 ms** | −0.57 ms vs K1 (same session: 47.94 ms); = P0 (same session: 47.13 ms) |
+| K5 | K1 with the per-module pieces kept but **not** re-pivoted (left at the world origin) | 20.86, 20.93, 20.79 | 47.94 ms | = K1 (same session: 47.75 ms); P0 46.89 ms |
+
+Jobs:
+- **K0, K1, P4B:** J‑804511b2554f, J‑e6714ae3ef67, J‑a835ad18695d (K0); J‑2dc87926021f, J‑4bc33b01a71c, J‑02332452ccd3 (K1); J‑e1f342a87cdf, J‑b419b745cc47, J‑9a3fcb9908ab (P4B, P4 on K1: 49.24 ms, the same as P4's 49.35 ms).
+- **K3 session:** J‑379f670af075, J‑61db5b6c3865, J‑a3466c005b60 (K3), with K1 and P0 in [`jobs-k3.tsv`](probes/anime-cost/jobs-k3.tsv).
+- **K4 session:** J‑1348e6f23431, J‑9f25300730f2, J‑b18fb5ea77dc (K4), with K1 and P0 in [`jobs-k4.tsv`](probes/anime-cost/jobs-k4.tsv). One P0 run there (J‑7f7101e988a5) had an incomplete window and is excluded.
+- **K5 session:** J‑84627e77b049, J‑d6ababf2fc20, J‑76dba44240d3 (K5), with K1 and P0 in [`jobs-k5.tsv`](probes/anime-cost/jobs-k5.tsv).
+
+**Conclusion:** about 0.6–0.9 ms in anime comes from drawing the hero dressing as more, smaller per-module pieces (7 pieces, split by host rock) instead of the old merged groups.
+- **Draw order is not the cause.** K1 is within noise of K0.
+- **The hidden kit actors are not the cause.** K3 equals K1. Outlines are in-mesh hulls, and a hidden actor is skipped before its draw (`level.cc:1533`), so it pays no outline cost.
+- **Position and pivot are not the cause.** K5 equals K1.
+- **Merging the dressing back recovers it.** K4 equals P0.
+- **Realistic is unaffected:** K0 +0.12 ms, inside the noise.
+
+**Where the per-piece cost sits** (best reading, **unproven**):
+- A frame-profiled pair (`--frame-profile`; P0 J‑68930b9e007d and J‑97d6f945f65b, K0 J‑8ed004058aa2 and J‑95cc75165151) shows the same work on every counter: 27 draws, 15 static draws, 106,880 faces submitted, 52,760 faces culled, 54,120 triangles, 6,297,312 static vertex bytes, 12 uploads per frame.
+- The visible actor and face totals also match in the cooked levels ([`count_draws.py`](probes/anime-cost/count_draws.py)).
+- The extra time appears inside the profiler's **Render** section: 33.6–33.9 ms in P0 against 34.3–34.6 ms in K0. That section includes the GL driver calls and any wait on the GPU. Actors take +0.08 ms (the 16 extra actors), and Update and Director do not change.
+- So the cost is not CPU work the engine counts. Most likely it is **on the GPU side of the static draws:** the same triangles, grouped differently per draw, change how the Mali GPU tiles and shades the coral dressing, which is dense, overlapping and outlined.
+- Two points fit an overdraw or tiling cost: it appears only in anime, whose hard-coral pieces carry the outline hull and whose dressing has the most depth complexity; and moving the shell (K1) did not help.
+- Not tested: grouping by kind across modules (K6 was built but not run when the investigation stopped). Mali hardware counters were not available through the coordinator.
+
+**Decision (Will, 2026‑11‑08):** "keep the slowdown; the increased flexibility is worth it". The per-module split stays. Anime P4 passes the gate at 20.26 FPS (20.31 FPS on K1). The working tree's reef generator and levels are back at the committed W5b state (`65d165bf`).
+
+**Device:** cast1 was restored to `30554973…` by install job J‑b8e2b08b5184, verified `5af99a98…` → `30554973…`. It reports `Idle · nothing queued (ready)`.
