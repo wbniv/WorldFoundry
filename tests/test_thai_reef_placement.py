@@ -233,3 +233,30 @@ def test_coral_head_residents_move_with_their_host():
     shift = placement.host_shift()
     for name in ('guard_crab', 'humbug_pair'):
         assert anchors[name] == pytest.approx(tuple(authored[name][i] + shift[i] for i in range(3)), abs=1e-5)
+
+
+# Found by the W5 R0 spike: rotation writes from scripts went into one Euler
+# shared by every actor and applied only on a C write, so the sea fan's sway
+# (A only) never applied and leaked into the feather star and nudibranch, and
+# the guard crab's threat tilt (A only) pitched the boxfish about 58 degrees.
+# The engine now applies each axis to its own actor (tests/test_actor_rotation_mailboxes.py);
+# the reef still writes whole rotations. Headings are revolutions: the
+# nudibranch's old 3.141593 turned it ~51 degrees, not half a turn.
+@pytest.mark.parametrize('level', LEVELS)
+def test_every_rotation_is_written_whole_and_committed(level):
+    import re
+    text = (ROOT / 'wflevels' / level / f'{level}.lev').read_text()
+    writes = re.findall(r'INDEXOF_ROTATION_([ABC]) (\d+) write-actor-mailbox', text)
+    assert writes
+    pending = {}
+    for axis, actor in writes:
+        if axis in 'AB':
+            pending.setdefault(actor, set()).add(axis)
+        else:
+            assert pending.pop(actor, set()) == {'A', 'B'}, f'actor {actor} commits C without A and B'
+        others = [a for a in pending if a != actor]
+        assert not others, f'rotation for actor(s) {others} left uncommitted before actor {actor}'
+    assert not pending
+    nudibranch = json.loads((ROOT / 'wflevels' / level / 'actor-map.json').read_text())['actors']['Nudibranch']
+    assert f'if .5 else 0 then INDEXOF_ROTATION_C {nudibranch}' in text
+    assert '3.141593' not in text

@@ -343,12 +343,25 @@ header += species.header('betta')
 core = (repo/'wflevels/aquarium_tanks/controller.fth').read_text().replace(
     '\\ SPECIES_CONTROLLER', species.controller('betta'))
 player['wf_Script'] = header + core + '\ntk-player-tick\n'
+def rotate(index, a='0', b='0', c='0'):
+    """Forth that sets an actor's whole rotation, in revolutions.
+
+    Writing all three axes keeps each actor's orientation explicit. (Until
+    2026-11-08 the engine also required it: rotation writes from scripts went
+    into one Euler shared by every actor and applied only on a C write, so a
+    lone A or B write leaked into the next actor. The engine now applies each
+    axis to its own actor.) Arguments are Forth expressions.
+    """
+    return (f' {a} INDEXOF_ROTATION_A {index} write-actor-mailbox'
+            f' {b} INDEXOF_ROTATION_B {index} write-actor-mailbox'
+            f' {c} INDEXOF_ROTATION_C {index} write-actor-mailbox\n')
+
 visual = indices['BoxfishVisual']
 tick = ': reef-tick\n'
 for axis in 'XYZ':
     tick += f' INDEXOF_{axis}_POS tk-player read-actor-mailbox INDEXOF_{axis}_POS {visual} write-actor-mailbox\n'
     tick += f' INDEXOF_{axis}_POS tk-player read-actor-mailbox tk-{axis.lower()} tk!\n'
-tick += (f' tk-heading tk@ INDEXOF_ROTATION_C {visual} write-actor-mailbox\n'
+tick += (rotate(visual, c='tk-heading tk@') +
          f' 648 tk@ 0 = if tk-x tk@ dup * tk-y tk@ dup * + '
          f'tk-z tk@ tk-focus-z - dup * + 5 > if 1 648 tk! then then\n'
          f' 648 tk@ if tk-camera-tick else {indices["cs_wide"]} INDEXOF_CAMSHOT tk! then ;\nreef-tick\n')
@@ -379,8 +392,8 @@ worm_tick = (': reef-worm ( x y z index -- ) 1063 tk! 1062 tk! 1061 tk! 1060 tk!
              ' then 1020 1063 tk@ + tk!\n'
              ' 1020 1063 tk@ + tk@ 1195 1063 tk@ 4 * + tk! ;\n')
 from reef.placement import NUDIBRANCH_PATH as nudi_path
-life_tick = (f': reef-life\n 640 tk@ tk-sin .012 * INDEXOF_ROTATION_A {indices["SeaFan"]} write-actor-mailbox\n'
-             f' 640 tk@ .17 + tk-sin .018 * INDEXOF_ROTATION_C {indices["FeatherStar"]} write-actor-mailbox\n'
+life_tick = (': reef-life\n' + rotate(indices["SeaFan"], a='640 tk@ tk-sin .012 *')
+             + rotate(indices["FeatherStar"], c='640 tk@ .17 + tk-sin .018 *') +
              f' 751 tk@ tk-dt@ .03 * + tk-frac 751 tk!\n'
              # The slug crawls back and forth along the sand at the foot of the
              # left rock (reef.placement.NUDIBRANCH_PATH), on the sand without
@@ -388,8 +401,8 @@ life_tick = (f': reef-life\n 640 tk@ tk-sin .012 * INDEXOF_ROTATION_A {indices["
              f' {nudi_path["x"]} 751 tk@ tk-sin {nudi_path["amplitude"]} * + '
              f'INDEXOF_X_POS {indices["Nudibranch"]} write-actor-mailbox\n'
              f' {anchor_map()["nudibranch"][2]} INDEXOF_Z_POS {indices["Nudibranch"]} write-actor-mailbox\n'
-             f' 751 tk@ .25 + tk-sin 0 > if 3.141593 else 0 then '
-             f'INDEXOF_ROTATION_C {indices["Nudibranch"]} write-actor-mailbox\n')
+             # Headings are in revolutions: half a turn faces +x.
+             + rotate(indices["Nudibranch"], c='751 tk@ .25 + tk-sin 0 > if .5 else 0 then'))
 life_tick += ' 1064 tk@ 0 = if\n' + ''.join(f' 1 {1020+i} tk!\n' for i in range(15)) + ' 1 1064 tk! then\n'
 for i, worm in enumerate(worm_mouths()):
     x, y, z = worm['mouth']
@@ -437,7 +450,7 @@ life_tick += (f' INDEXOF_X_POS tk-player read-actor-mailbox {crab_x} - dup * '
               f'INDEXOF_Y_POS tk-player read-actor-mailbox {crab_y} - dup * + '
               f'INDEXOF_Z_POS tk-player read-actor-mailbox {crab_z} - dup * + 1 < '
               f'if 2 643 tk! else 643 tk@ tk-dt@ - 0 max 643 tk! then '
-              f'643 tk@ 0 > if .16 else 0 then INDEXOF_ROTATION_A {indices["GuardCrab"]} write-actor-mailbox\n')
+              + rotate(indices["GuardCrab"], a='643 tk@ 0 > if .16 else 0 then'))
 for curve in range(10):
     base = 1531 + 40 + 4 * curve
     life_tick += f' 1 {base} tk!\n'
