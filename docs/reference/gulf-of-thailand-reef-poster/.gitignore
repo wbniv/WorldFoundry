@@ -1,0 +1,9 @@
+# Generated review drafts (rebuild with make_review_draft.py / export_poster.py).
+review-draft.html
+review-draft-a3.pdf
+# Superseded illustrations; make_poster.py uses humbug-illustration-v3.png and
+# guard-crab-illustration-v2.png.
+humbug-illustration.png
+humbug-illustration-v2.png
+guard-crab-illustration.png
+__pycache__/

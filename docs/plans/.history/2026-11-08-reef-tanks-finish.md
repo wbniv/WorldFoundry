@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/4bb0d148) | Reef research: boxfish Gulf record closed (D2); humbug flagged (D1) |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/fef6db28) | Reef: keep W5b's anime per-piece cost (Will); speed work deferred to TODO |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/65d165bf) | Reef W5b: rock-module kit, site tables, worst-visible and room-slot budgets |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/8decb672) | Reef plan: realistic P3 abort is the 32 MB room slot; W5b budget in bytes |
@@ -19,6 +20,11 @@
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b756367f) | Plan: finish the reef tanks (worms, skins, placement, acceptance) |
 
 <!--history-meta v1
+4bb0d148	author	Will Norris
+4bb0d148	added	3
+4bb0d148	deleted	3
+4bb0d148	files	1
+4bb0d148	body	D2: Ostracion cubicus is recorded at Hin Khao, Ko Tao (Sutthacheep et al.\n2022) and in 11 research-grade GBIF occurrences on the Ko Tao and\nChumphon pinnacles.\n\nD1: no citable Gulf of Thailand record for Dascyllus aruanus. GBIF has\nnone in the Gulf, iNaturalist only captive ones, and the Gulf surveys\nread list D. reticulatus and D. trimaculatus instead. Search log and\noptions for Will are in the research ledger; nothing swapped. Poster\nexport (steps 2, 13) stays blocked on D1 and the visual-review gate.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 fef6db28	author	Will Norris
 fef6db28	added	1
 fef6db28	deleted	1
