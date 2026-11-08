@@ -288,5 +288,7 @@ unresolved-installer outcome only after an owned, safely finished recovery and
 fresh shared-transport verification; it leaves the device fence and install
 journal intact. Container tests cover local isolation, unsafe or racing evidence,
 and other origins' fences. This does not force Android to complete an install:
-the existing automatic installer retry budget remains bounded. The change is
-not yet deployed or verified on hardware.
+the existing automatic installer retry budget remains bounded. Coordinator
+0.1.89 (`ac9d275`) was deployed through the reviewed, recovery-preserving
+upgrade on 2026-11-08; the queue resumed. The isolation path has not been
+reproduced on hardware since deployment.
