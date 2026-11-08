@@ -10,37 +10,53 @@
     "cs_wide": 7,
     "LookAt": 8,
     "Player": 9,
-    "reef_left": 10,
-    "reef_right": 11,
+    "reef_shell": 10,
+    "reef_left": 11,
     "reef_arch": 12,
-    "reef_hard": 13,
-    "reef_soft": 14,
-    "reef_sponges": 15,
-    "reef_life": 16,
-    "reef_shell": 17,
-    "reef_life_1": 18,
-    "reef_life_2": 19,
-    "reef_life_3": 20,
-    "RockColliderLeft": 21,
-    "RockColliderRight": 22,
-    "BoxfishVisual": 23,
-    "HumbugOne": 24,
-    "HumbugTwo": 25,
-    "SeaFan": 26,
-    "FeatherStar": 27,
-    "Nudibranch": 28,
-    "WormCrowns": 29,
-    "FeatherDusters": 30,
-    "FlowerpotCoral": 31,
-    "LeatherCoral": 32,
-    "GiantClam": 33,
-    "GuardCrab": 34,
-    "ShrimpOne": 35,
-    "ShrimpTwo": 36,
-    "HermitCrab": 37,
-    "AmbientLight": 38,
-    "LookClose": 39,
-    "cs_close": 40
+    "reef_right": 13,
+    "reef_hard_left": 14,
+    "reef_life_left": 15,
+    "reef_life_left_1": 16,
+    "reef_life_arch": 17,
+    "reef_hard_right": 18,
+    "reef_life_right": 19,
+    "reef_life_right_1": 20,
+    "reef_ledge": 21,
+    "reef_pillars": 22,
+    "reef_tall": 23,
+    "RockColliderLeft": 24,
+    "RockColliderArch": 25,
+    "RockColliderRight": 26,
+    "RockColliderLedge": 27,
+    "RockColliderPillars": 28,
+    "RockColliderTall": 29,
+    "BoxfishVisual": 30,
+    "HumbugOne": 31,
+    "HumbugTwo": 32,
+    "SeaFan": 33,
+    "FeatherStar": 34,
+    "Nudibranch": 35,
+    "WormCrowns": 36,
+    "FeatherDusters": 37,
+    "FlowerpotCoral": 38,
+    "LeatherCoral": 39,
+    "GiantClam": 40,
+    "GuardCrab": 41,
+    "ShrimpOne": 42,
+    "ShrimpTwo": 43,
+    "HermitCrab": 44,
+    "KitClumpZoanthid1": 45,
+    "KitClumpZoanthid2": 46,
+    "KitClumpZoanthid3": 47,
+    "KitClumpCups1": 48,
+    "KitClumpCups2": 49,
+    "KitClumpCups3": 50,
+    "KitClumpCrust1": 51,
+    "KitClumpCrust2": 52,
+    "KitClumpCrust3": 53,
+    "AmbientLight": 54,
+    "LookClose": 55,
+    "cs_close": 56
   },
   "indices": {
     "Room": 1,
@@ -52,52 +68,1699 @@
     "cs_wide": 7,
     "LookAt": 8,
     "Player": 9,
-    "reef_left": 10,
-    "reef_right": 11,
+    "reef_shell": 10,
+    "reef_left": 11,
     "reef_arch": 12,
-    "reef_hard": 13,
-    "reef_soft": 14,
-    "reef_sponges": 15,
-    "reef_life": 16,
-    "reef_shell": 17,
-    "reef_life_1": 18,
-    "reef_life_2": 19,
-    "reef_life_3": 20,
-    "RockColliderLeft": 21,
-    "RockColliderRight": 22,
-    "BoxfishVisual": 23,
-    "HumbugOne": 24,
-    "HumbugTwo": 25,
-    "SeaFan": 26,
-    "FeatherStar": 27,
-    "Nudibranch": 28,
-    "WormCrowns": 29,
-    "FeatherDusters": 30,
-    "FlowerpotCoral": 31,
-    "LeatherCoral": 32,
-    "GiantClam": 33,
-    "GuardCrab": 34,
-    "ShrimpOne": 35,
-    "ShrimpTwo": 36,
-    "HermitCrab": 37,
-    "AmbientLight": 38,
-    "LookClose": 39,
-    "cs_close": 40
+    "reef_right": 13,
+    "reef_hard_left": 14,
+    "reef_life_left": 15,
+    "reef_life_left_1": 16,
+    "reef_life_arch": 17,
+    "reef_hard_right": 18,
+    "reef_life_right": 19,
+    "reef_life_right_1": 20,
+    "reef_ledge": 21,
+    "reef_pillars": 22,
+    "reef_tall": 23,
+    "RockColliderLeft": 24,
+    "RockColliderArch": 25,
+    "RockColliderRight": 26,
+    "RockColliderLedge": 27,
+    "RockColliderPillars": 28,
+    "RockColliderTall": 29,
+    "BoxfishVisual": 30,
+    "HumbugOne": 31,
+    "HumbugTwo": 32,
+    "SeaFan": 33,
+    "FeatherStar": 34,
+    "Nudibranch": 35,
+    "WormCrowns": 36,
+    "FeatherDusters": 37,
+    "FlowerpotCoral": 38,
+    "LeatherCoral": 39,
+    "GiantClam": 40,
+    "GuardCrab": 41,
+    "ShrimpOne": 42,
+    "ShrimpTwo": 43,
+    "HermitCrab": 44,
+    "KitClumpZoanthid1": 45,
+    "KitClumpZoanthid2": 46,
+    "KitClumpZoanthid3": 47,
+    "KitClumpCups1": 48,
+    "KitClumpCups2": 49,
+    "KitClumpCups3": 50,
+    "KitClumpCrust1": 51,
+    "KitClumpCrust2": 52,
+    "KitClumpCrust3": 53,
+    "AmbientLight": 54,
+    "LookClose": 55,
+    "cs_close": 56
   },
   "triangles": {
-    "reef_left": 2556,
-    "reef_right": 2680,
-    "reef_arch": 2312,
-    "reef_hard": 11606,
-    "reef_soft": 864,
-    "reef_sponges": 480,
-    "reef_life": 8866,
     "reef_shell": 1964,
-    "reef_life_1": 8883,
-    "reef_life_2": 9079,
-    "reef_life_3": 1212
+    "reef_left": 2556,
+    "reef_arch": 2312,
+    "reef_right": 2680,
+    "reef_hard_left": 8282,
+    "reef_life_left": 8896,
+    "reef_life_left_1": 2414,
+    "reef_life_arch": 7507,
+    "reef_hard_right": 3324,
+    "reef_life_right": 8870,
+    "reef_life_right_1": 1697,
+    "reef_ledge": 552,
+    "reef_pillars": 520,
+    "reef_tall": 568
   },
   "triangle_total": 50502,
+  "kit": {
+    "modules": [
+      {
+        "name": "left",
+        "role": "hero",
+        "cell": 200,
+        "rock": "reef_left",
+        "pieces": [
+          "reef_left",
+          "reef_hard_left",
+          "reef_life_left",
+          "reef_life_left_1"
+        ],
+        "piece_actors": [
+          11,
+          14,
+          15,
+          16
+        ],
+        "collider": "RockColliderLeft",
+        "collider_actor": 24,
+        "collider_box": {
+          "lo": [
+            -1.675,
+            -0.75,
+            0.0
+          ],
+          "hi": [
+            1.675,
+            0.75,
+            1.78
+          ]
+        },
+        "pivot": [
+          -3.325,
+          0.5,
+          0.72
+        ],
+        "park": null,
+        "attached": [
+          "SeaFan",
+          "Nudibranch",
+          "WormCrowns",
+          "FeatherDusters",
+          "FlowerpotCoral",
+          "GuardCrab"
+        ],
+        "sites": [
+          {
+            "p": [
+              1.0919,
+              -0.4053,
+              1.6648
+            ],
+            "n": [
+              0.5773,
+              -0.5802,
+              0.5745
+            ]
+          },
+          {
+            "p": [
+              -0.2951,
+              -0.6517,
+              1.8899
+            ],
+            "n": [
+              -0.0048,
+              -0.9987,
+              -0.0514
+            ]
+          },
+          {
+            "p": [
+              1.537,
+              -0.4801,
+              0.6872
+            ],
+            "n": [
+              0.3568,
+              -0.861,
+              -0.3625
+            ]
+          },
+          {
+            "p": [
+              0.9078,
+              -0.0141,
+              2.0145
+            ],
+            "n": [
+              0.1645,
+              -0.0389,
+              0.9856
+            ]
+          },
+          {
+            "p": [
+              0.2537,
+              0.789,
+              1.89
+            ],
+            "n": [
+              0.291,
+              0.838,
+              0.4617
+            ]
+          },
+          {
+            "p": [
+              -1.2989,
+              -0.2862,
+              1.7102
+            ],
+            "n": [
+              -0.5604,
+              -0.4404,
+              0.7014
+            ]
+          },
+          {
+            "p": [
+              0.5053,
+              -0.5111,
+              1.9011
+            ],
+            "n": [
+              0.2962,
+              -0.7044,
+              0.645
+            ]
+          },
+          {
+            "p": [
+              -0.3861,
+              -0.8271,
+              0.206
+            ],
+            "n": [
+              0.1595,
+              -0.9002,
+              -0.4053
+            ]
+          },
+          {
+            "p": [
+              -0.8848,
+              -0.7158,
+              1.6708
+            ],
+            "n": [
+              -0.0173,
+              -0.8963,
+              0.4431
+            ]
+          },
+          {
+            "p": [
+              -0.9212,
+              -1.0657,
+              0.8056
+            ],
+            "n": [
+              0.015,
+              -0.9918,
+              0.1268
+            ]
+          },
+          {
+            "p": [
+              1.2115,
+              -0.6717,
+              0.9016
+            ],
+            "n": [
+              0.2421,
+              -0.8389,
+              0.4874
+            ]
+          },
+          {
+            "p": [
+              0.1244,
+              -0.0394,
+              2.25
+            ],
+            "n": [
+              0.1148,
+              -0.4516,
+              0.8848
+            ]
+          },
+          {
+            "p": [
+              -1.2356,
+              -0.7978,
+              1.1608
+            ],
+            "n": [
+              -0.5274,
+              -0.7329,
+              0.4297
+            ]
+          },
+          {
+            "p": [
+              -1.1002,
+              -0.248,
+              0.2611
+            ],
+            "n": [
+              -0.183,
+              -0.914,
+              -0.3621
+            ]
+          },
+          {
+            "p": [
+              0.0745,
+              -0.5846,
+              2.049
+            ],
+            "n": [
+              0.0637,
+              -0.5257,
+              0.8483
+            ]
+          },
+          {
+            "p": [
+              0.2024,
+              -0.827,
+              0.8734
+            ],
+            "n": [
+              0.0457,
+              -0.9927,
+              0.1119
+            ]
+          }
+        ],
+        "triangles": 22148
+      },
+      {
+        "name": "arch",
+        "role": "hero",
+        "cell": 201,
+        "rock": "reef_arch",
+        "pieces": [
+          "reef_arch",
+          "reef_life_arch"
+        ],
+        "piece_actors": [
+          12,
+          17
+        ],
+        "collider": "RockColliderArch",
+        "collider_actor": 25,
+        "collider_box": {
+          "lo": [
+            -1.3,
+            -0.7,
+            1.73
+          ],
+          "hi": [
+            1.3,
+            0.7,
+            2.33
+          ]
+        },
+        "pivot": [
+          0.15,
+          0.5,
+          0.72
+        ],
+        "park": null,
+        "attached": [
+          "GiantClam",
+          "ShrimpOne",
+          "ShrimpTwo",
+          "HermitCrab"
+        ],
+        "sites": [
+          {
+            "p": [
+              1.5999,
+              0.0753,
+              1.3116
+            ],
+            "n": [
+              0.7425,
+              0.0878,
+              0.664
+            ]
+          },
+          {
+            "p": [
+              0.4713,
+              0.1423,
+              2.1078
+            ],
+            "n": [
+              -0.2848,
+              0.3078,
+              0.9078
+            ]
+          },
+          {
+            "p": [
+              -1.2239,
+              -0.5608,
+              0.1935
+            ],
+            "n": [
+              0.4879,
+              -0.6463,
+              -0.5867
+            ]
+          },
+          {
+            "p": [
+              0.6589,
+              -0.5843,
+              1.3509
+            ],
+            "n": [
+              -0.6792,
+              -0.6507,
+              -0.3396
+            ]
+          },
+          {
+            "p": [
+              1.1188,
+              -0.6259,
+              1.5594
+            ],
+            "n": [
+              0.5744,
+              -0.7665,
+              0.2873
+            ]
+          },
+          {
+            "p": [
+              -1.6389,
+              0.2871,
+              1.1771
+            ],
+            "n": [
+              -0.5677,
+              0.5993,
+              0.5644
+            ]
+          },
+          {
+            "p": [
+              0.253,
+              -0.7043,
+              1.9497
+            ],
+            "n": [
+              -0.1095,
+              -0.9842,
+              -0.1394
+            ]
+          },
+          {
+            "p": [
+              1.0138,
+              -0.1368,
+              2.1701
+            ],
+            "n": [
+              0.2969,
+              0.3744,
+              0.8785
+            ]
+          },
+          {
+            "p": [
+              1.2843,
+              -0.7052,
+              0.8423
+            ],
+            "n": [
+              0.1454,
+              -0.9867,
+              0.0727
+            ]
+          },
+          {
+            "p": [
+              -0.6448,
+              0.1524,
+              0.6032
+            ],
+            "n": [
+              0.8212,
+              -0.5259,
+              -0.2216
+            ]
+          },
+          {
+            "p": [
+              -1.0044,
+              -0.4903,
+              2.0171
+            ],
+            "n": [
+              -0.6014,
+              -0.3094,
+              0.7366
+            ]
+          },
+          {
+            "p": [
+              1.4201,
+              -0.5064,
+              1.2178
+            ],
+            "n": [
+              0.245,
+              -0.6834,
+              0.6877
+            ]
+          },
+          {
+            "p": [
+              1.769,
+              0.1359,
+              0.5512
+            ],
+            "n": [
+              0.8356,
+              -0.4229,
+              -0.3506
+            ]
+          },
+          {
+            "p": [
+              0.6159,
+              -0.6738,
+              1.9458
+            ],
+            "n": [
+              0.2699,
+              -0.8995,
+              0.3435
+            ]
+          },
+          {
+            "p": [
+              0.2996,
+              -0.3796,
+              2.3979
+            ],
+            "n": [
+              0.1793,
+              -0.0823,
+              0.9803
+            ]
+          },
+          {
+            "p": [
+              0.7892,
+              0.4497,
+              2.1367
+            ],
+            "n": [
+              -0.0445,
+              0.197,
+              0.9794
+            ]
+          }
+        ],
+        "triangles": 9819
+      },
+      {
+        "name": "right",
+        "role": "hero",
+        "cell": 202,
+        "rock": "reef_right",
+        "pieces": [
+          "reef_right",
+          "reef_hard_right",
+          "reef_life_right",
+          "reef_life_right_1"
+        ],
+        "piece_actors": [
+          13,
+          18,
+          19,
+          20
+        ],
+        "collider": "RockColliderRight",
+        "collider_actor": 26,
+        "collider_box": {
+          "lo": [
+            -1.675,
+            -0.75,
+            0.0
+          ],
+          "hi": [
+            1.675,
+            0.75,
+            1.78
+          ]
+        },
+        "pivot": [
+          3.325,
+          0.5,
+          0.72
+        ],
+        "park": null,
+        "attached": [
+          "FeatherStar",
+          "LeatherCoral"
+        ],
+        "sites": [
+          {
+            "p": [
+              0.1797,
+              -0.8042,
+              1.8022
+            ],
+            "n": [
+              -0.1582,
+              -0.9007,
+              0.4047
+            ]
+          },
+          {
+            "p": [
+              1.5772,
+              -0.559,
+              0.9539
+            ],
+            "n": [
+              0.8984,
+              -0.36,
+              0.2516
+            ]
+          },
+          {
+            "p": [
+              -0.9161,
+              0.5156,
+              1.7459
+            ],
+            "n": [
+              0.2271,
+              0.8028,
+              0.5514
+            ]
+          },
+          {
+            "p": [
+              1.8112,
+              -0.2137,
+              0.8631
+            ],
+            "n": [
+              0.8472,
+              -0.0984,
+              0.5221
+            ]
+          },
+          {
+            "p": [
+              0.4903,
+              -0.9513,
+              0.9658
+            ],
+            "n": [
+              0.5126,
+              -0.8237,
+              0.2426
+            ]
+          },
+          {
+            "p": [
+              0.5452,
+              -0.5588,
+              0.3355
+            ],
+            "n": [
+              0.6787,
+              -0.5058,
+              -0.5325
+            ]
+          },
+          {
+            "p": [
+              -0.5523,
+              0.4093,
+              2.3338
+            ],
+            "n": [
+              -0.6174,
+              0.3211,
+              0.7181
+            ]
+          },
+          {
+            "p": [
+              0.2606,
+              -0.6098,
+              2.0915
+            ],
+            "n": [
+              0.518,
+              -0.784,
+              0.3422
+            ]
+          },
+          {
+            "p": [
+              -0.4992,
+              -0.7399,
+              2.0221
+            ],
+            "n": [
+              -0.0826,
+              -0.8693,
+              0.4874
+            ]
+          },
+          {
+            "p": [
+              -0.7151,
+              -0.7177,
+              1.437
+            ],
+            "n": [
+              -0.5038,
+              -0.4994,
+              0.7048
+            ]
+          },
+          {
+            "p": [
+              1.4209,
+              0.1129,
+              1.6866
+            ],
+            "n": [
+              0.7233,
+              -0.6866,
+              0.0732
+            ]
+          },
+          {
+            "p": [
+              -1.0763,
+              -0.6428,
+              1.0882
+            ],
+            "n": [
+              0.4237,
+              -0.884,
+              -0.1977
+            ]
+          },
+          {
+            "p": [
+              -0.1534,
+              -0.6163,
+              1.8203
+            ],
+            "n": [
+              0.2555,
+              -0.9215,
+              -0.2924
+            ]
+          },
+          {
+            "p": [
+              -0.3004,
+              -0.949,
+              1.3294
+            ],
+            "n": [
+              0.002,
+              -0.9609,
+              0.277
+            ]
+          },
+          {
+            "p": [
+              0.5021,
+              -0.9468,
+              0.6628
+            ],
+            "n": [
+              0.6809,
+              -0.691,
+              -0.2427
+            ]
+          },
+          {
+            "p": [
+              0.0934,
+              -0.0105,
+              2.4846
+            ],
+            "n": [
+              -0.0235,
+              -0.6773,
+              0.7353
+            ]
+          }
+        ],
+        "triangles": 16571
+      },
+      {
+        "name": "ledge",
+        "role": "filler",
+        "cell": 203,
+        "rock": "reef_ledge",
+        "pieces": [
+          "reef_ledge"
+        ],
+        "piece_actors": [
+          21
+        ],
+        "collider": "RockColliderLedge",
+        "collider_actor": 27,
+        "collider_box": {
+          "lo": [
+            -1.03,
+            -0.5225,
+            0.0
+          ],
+          "hi": [
+            1.03,
+            0.5225,
+            0.773
+          ]
+        },
+        "pivot": null,
+        "park": [
+          -4.0,
+          1.5,
+          -4.0
+        ],
+        "attached": [],
+        "sites": [
+          {
+            "p": [
+              -0.7878,
+              -0.1838,
+              0.16
+            ],
+            "n": [
+              -0.2951,
+              -0.8611,
+              -0.4139
+            ]
+          },
+          {
+            "p": [
+              0.3317,
+              -0.2377,
+              0.75
+            ],
+            "n": [
+              -0.3131,
+              -0.1533,
+              0.9373
+            ]
+          },
+          {
+            "p": [
+              -0.3944,
+              -0.1371,
+              0.8114
+            ],
+            "n": [
+              0.1817,
+              -0.6213,
+              0.7622
+            ]
+          },
+          {
+            "p": [
+              0.0491,
+              -0.1399,
+              0.823
+            ],
+            "n": [
+              0.4839,
+              0.0108,
+              0.8751
+            ]
+          },
+          {
+            "p": [
+              -0.2546,
+              0.2693,
+              0.7613
+            ],
+            "n": [
+              0.1578,
+              0.6371,
+              0.7544
+            ]
+          },
+          {
+            "p": [
+              -0.8745,
+              -0.3146,
+              0.6649
+            ],
+            "n": [
+              -0.1305,
+              -0.7788,
+              0.6135
+            ]
+          },
+          {
+            "p": [
+              -0.6161,
+              0.2179,
+              0.8931
+            ],
+            "n": [
+              0.5799,
+              0.0494,
+              0.8132
+            ]
+          },
+          {
+            "p": [
+              1.1579,
+              0.1512,
+              0.4713
+            ],
+            "n": [
+              0.6585,
+              -0.1047,
+              0.7453
+            ]
+          },
+          {
+            "p": [
+              -0.4461,
+              -0.6218,
+              0.3481
+            ],
+            "n": [
+              -0.0174,
+              -0.965,
+              0.2616
+            ]
+          },
+          {
+            "p": [
+              0.0303,
+              0.3813,
+              0.6862
+            ],
+            "n": [
+              -0.0597,
+              0.6491,
+              0.7584
+            ]
+          },
+          {
+            "p": [
+              -0.7602,
+              -0.0579,
+              0.9037
+            ],
+            "n": [
+              0.1704,
+              -0.5593,
+              0.8113
+            ]
+          },
+          {
+            "p": [
+              0.4757,
+              0.2148,
+              0.7483
+            ],
+            "n": [
+              -0.1512,
+              0.4219,
+              0.894
+            ]
+          },
+          {
+            "p": [
+              0.9951,
+              -0.1799,
+              0.7305
+            ],
+            "n": [
+              0.1363,
+              -0.8215,
+              0.5536
+            ]
+          },
+          {
+            "p": [
+              0.1426,
+              -0.5471,
+              0.1651
+            ],
+            "n": [
+              0.0715,
+              -0.9823,
+              -0.1731
+            ]
+          },
+          {
+            "p": [
+              -0.2317,
+              -0.5217,
+              0.5727
+            ],
+            "n": [
+              -0.0585,
+              -0.7535,
+              0.6548
+            ]
+          },
+          {
+            "p": [
+              -0.935,
+              -0.3605,
+              0.3931
+            ],
+            "n": [
+              -0.3347,
+              -0.8136,
+              -0.4754
+            ]
+          }
+        ],
+        "triangles": 552
+      },
+      {
+        "name": "pillars",
+        "role": "filler",
+        "cell": 204,
+        "rock": "reef_pillars",
+        "pieces": [
+          "reef_pillars"
+        ],
+        "piece_actors": [
+          22
+        ],
+        "collider": "RockColliderPillars",
+        "collider_actor": 28,
+        "collider_box": {
+          "lo": [
+            -0.7525,
+            -0.4305,
+            0.0
+          ],
+          "hi": [
+            0.7525,
+            0.4305,
+            1.457
+          ]
+        },
+        "pivot": null,
+        "park": [
+          0.0,
+          1.5,
+          -4.0
+        ],
+        "attached": [],
+        "sites": [
+          {
+            "p": [
+              0.2124,
+              -0.1898,
+              0.4645
+            ],
+            "n": [
+              -0.2353,
+              -0.548,
+              0.8027
+            ]
+          },
+          {
+            "p": [
+              0.5049,
+              -0.2383,
+              0.5981
+            ],
+            "n": [
+              -0.4536,
+              -0.8912,
+              -0.0058
+            ]
+          },
+          {
+            "p": [
+              -0.6788,
+              -0.2246,
+              0.2652
+            ],
+            "n": [
+              -0.1121,
+              -0.9873,
+              0.1122
+            ]
+          },
+          {
+            "p": [
+              -0.4318,
+              -0.1766,
+              1.6385
+            ],
+            "n": [
+              0.5522,
+              -0.6004,
+              0.5784
+            ]
+          },
+          {
+            "p": [
+              0.5393,
+              -0.3114,
+              0.3217
+            ],
+            "n": [
+              0.4669,
+              -0.867,
+              0.1739
+            ]
+          },
+          {
+            "p": [
+              0.4066,
+              0.4752,
+              0.335
+            ],
+            "n": [
+              0.1259,
+              0.5937,
+              0.7948
+            ]
+          },
+          {
+            "p": [
+              -0.2759,
+              -0.314,
+              0.2059
+            ],
+            "n": [
+              -0.5244,
+              -0.6966,
+              -0.4897
+            ]
+          },
+          {
+            "p": [
+              0.2498,
+              -0.1005,
+              0.7344
+            ],
+            "n": [
+              0.0617,
+              -0.9918,
+              0.1116
+            ]
+          },
+          {
+            "p": [
+              -0.3482,
+              -0.3426,
+              0.5777
+            ],
+            "n": [
+              -0.4226,
+              -0.9045,
+              -0.0567
+            ]
+          },
+          {
+            "p": [
+              0.4141,
+              -0.1833,
+              1.0463
+            ],
+            "n": [
+              -0.2526,
+              -0.9596,
+              0.1237
+            ]
+          },
+          {
+            "p": [
+              -0.7135,
+              -0.212,
+              1.1272
+            ],
+            "n": [
+              -0.0669,
+              -0.9924,
+              0.1037
+            ]
+          },
+          {
+            "p": [
+              0.6309,
+              0.1904,
+              1.1758
+            ],
+            "n": [
+              0.7765,
+              -0.614,
+              0.1413
+            ]
+          },
+          {
+            "p": [
+              -0.0382,
+              -0.35,
+              0.3994
+            ],
+            "n": [
+              -0.0223,
+              -0.7998,
+              0.5998
+            ]
+          },
+          {
+            "p": [
+              -0.3482,
+              -0.3009,
+              1.1792
+            ],
+            "n": [
+              0.221,
+              -0.9293,
+              0.2958
+            ]
+          },
+          {
+            "p": [
+              -0.1957,
+              -0.1917,
+              1.4257
+            ],
+            "n": [
+              0.8684,
+              -0.4399,
+              0.2288
+            ]
+          },
+          {
+            "p": [
+              0.4494,
+              0.048,
+              1.3966
+            ],
+            "n": [
+              -0.6912,
+              -0.561,
+              0.4556
+            ]
+          }
+        ],
+        "triangles": 520
+      },
+      {
+        "name": "tall",
+        "role": "filler",
+        "cell": 205,
+        "rock": "reef_tall",
+        "pieces": [
+          "reef_tall"
+        ],
+        "piece_actors": [
+          23
+        ],
+        "collider": "RockColliderTall",
+        "collider_actor": 29,
+        "collider_box": {
+          "lo": [
+            -0.6702,
+            -0.4393,
+            0.0
+          ],
+          "hi": [
+            0.6702,
+            0.4393,
+            1.769
+          ]
+        },
+        "pivot": null,
+        "park": [
+          4.0,
+          1.5,
+          -4.0
+        ],
+        "attached": [],
+        "sites": [
+          {
+            "p": [
+              -0.0092,
+              -0.3558,
+              1.6013
+            ],
+            "n": [
+              0.5748,
+              -0.7081,
+              0.4102
+            ]
+          },
+          {
+            "p": [
+              0.392,
+              -0.1277,
+              2.0367
+            ],
+            "n": [
+              0.6176,
+              -0.5574,
+              0.5549
+            ]
+          },
+          {
+            "p": [
+              -0.0527,
+              -0.5161,
+              0.6832
+            ],
+            "n": [
+              0.1619,
+              -0.9859,
+              -0.0422
+            ]
+          },
+          {
+            "p": [
+              -0.0341,
+              -0.0407,
+              1.9879
+            ],
+            "n": [
+              -0.1849,
+              -0.8179,
+              0.5448
+            ]
+          },
+          {
+            "p": [
+              -0.2188,
+              -0.539,
+              0.9742
+            ],
+            "n": [
+              -0.1581,
+              -0.9839,
+              0.0838
+            ]
+          },
+          {
+            "p": [
+              -0.3755,
+              -0.3846,
+              0.6327
+            ],
+            "n": [
+              0.0916,
+              -0.4492,
+              0.8887
+            ]
+          },
+          {
+            "p": [
+              0.3949,
+              -0.1635,
+              1.6101
+            ],
+            "n": [
+              0.9166,
+              -0.3784,
+              -0.1288
+            ]
+          },
+          {
+            "p": [
+              0.3127,
+              -0.2354,
+              0.3102
+            ],
+            "n": [
+              -0.0794,
+              -0.9593,
+              -0.2709
+            ]
+          },
+          {
+            "p": [
+              -0.1817,
+              -0.545,
+              0.2297
+            ],
+            "n": [
+              0.2122,
+              -0.974,
+              -0.0794
+            ]
+          },
+          {
+            "p": [
+              0.2016,
+              -0.4547,
+              0.8477
+            ],
+            "n": [
+              0.5923,
+              -0.8049,
+              0.035
+            ]
+          },
+          {
+            "p": [
+              0.3162,
+              -0.3688,
+              1.396
+            ],
+            "n": [
+              0.8423,
+              -0.478,
+              0.2492
+            ]
+          },
+          {
+            "p": [
+              0.2086,
+              0.1231,
+              2.1468
+            ],
+            "n": [
+              0.5462,
+              0.2679,
+              0.7937
+            ]
+          },
+          {
+            "p": [
+              -0.488,
+              -0.1097,
+              1.0261
+            ],
+            "n": [
+              -0.8854,
+              -0.4102,
+              0.2186
+            ]
+          },
+          {
+            "p": [
+              -0.261,
+              0.0774,
+              1.8267
+            ],
+            "n": [
+              -0.3952,
+              -0.7919,
+              0.4656
+            ]
+          },
+          {
+            "p": [
+              -0.7519,
+              -0.2068,
+              0.4524
+            ],
+            "n": [
+              -0.6229,
+              -0.519,
+              0.5854
+            ]
+          },
+          {
+            "p": [
+              0.4781,
+              -0.0471,
+              1.2212
+            ],
+            "n": [
+              0.8744,
+              -0.4806,
+              0.0666
+            ]
+          }
+        ],
+        "triangles": 568
+      }
+    ],
+    "clumps": [
+      {
+        "actor": "KitClumpZoanthid1",
+        "kind": "zoanthid",
+        "cell": 210,
+        "triangles": 856,
+        "mesh": "kit_zoanthid.iff",
+        "actor_index": 45
+      },
+      {
+        "actor": "KitClumpZoanthid2",
+        "kind": "zoanthid",
+        "cell": 211,
+        "triangles": 856,
+        "mesh": "kit_zoanthid.iff",
+        "actor_index": 46
+      },
+      {
+        "actor": "KitClumpZoanthid3",
+        "kind": "zoanthid",
+        "cell": 212,
+        "triangles": 856,
+        "mesh": "kit_zoanthid.iff",
+        "actor_index": 47
+      },
+      {
+        "actor": "KitClumpCups1",
+        "kind": "cups",
+        "cell": 213,
+        "triangles": 498,
+        "mesh": "kit_cups.iff",
+        "actor_index": 48
+      },
+      {
+        "actor": "KitClumpCups2",
+        "kind": "cups",
+        "cell": 214,
+        "triangles": 498,
+        "mesh": "kit_cups.iff",
+        "actor_index": 49
+      },
+      {
+        "actor": "KitClumpCups3",
+        "kind": "cups",
+        "cell": 215,
+        "triangles": 498,
+        "mesh": "kit_cups.iff",
+        "actor_index": 50
+      },
+      {
+        "actor": "KitClumpCrust1",
+        "kind": "crust",
+        "cell": 216,
+        "triangles": 75,
+        "mesh": "kit_crust.iff",
+        "actor_index": 51
+      },
+      {
+        "actor": "KitClumpCrust2",
+        "kind": "crust",
+        "cell": 217,
+        "triangles": 75,
+        "mesh": "kit_crust.iff",
+        "actor_index": 52
+      },
+      {
+        "actor": "KitClumpCrust3",
+        "kind": "crust",
+        "cell": 218,
+        "triangles": 75,
+        "mesh": "kit_crust.iff",
+        "actor_index": 53
+      }
+    ],
+    "attached": {
+      "SeaFan": {
+        "module": "left",
+        "offset": [
+          -1.125,
+          -0.81,
+          1.49161
+        ]
+      },
+      "FeatherStar": {
+        "module": "right",
+        "offset": [
+          -1.575,
+          -0.43,
+          1.73503
+        ]
+      },
+      "Nudibranch": {
+        "module": "left",
+        "offset": [
+          -0.675,
+          -1.25,
+          -0.004
+        ]
+      },
+      "WormCrowns": {
+        "module": "left",
+        "offset": [
+          0.48942,
+          -1.59053,
+          1.27625
+        ]
+      },
+      "FeatherDusters": {
+        "module": "left",
+        "offset": [
+          1.365,
+          -0.58,
+          1.3522
+        ]
+      },
+      "FlowerpotCoral": {
+        "module": "left",
+        "offset": [
+          -0.825,
+          -0.89,
+          1.47427
+        ]
+      },
+      "LeatherCoral": {
+        "module": "right",
+        "offset": [
+          0.675,
+          -0.52,
+          2.51356
+        ]
+      },
+      "GiantClam": {
+        "module": "arch",
+        "offset": [
+          1.67,
+          -1.65,
+          -0.04421
+        ]
+      },
+      "GuardCrab": {
+        "module": "left",
+        "offset": [
+          0.224,
+          -1.02,
+          2.5744
+        ]
+      },
+      "ShrimpOne": {
+        "module": "arch",
+        "offset": [
+          -0.85,
+          -0.65,
+          0.07398
+        ]
+      },
+      "ShrimpTwo": {
+        "module": "arch",
+        "offset": [
+          -0.5,
+          -0.53,
+          0.07398
+        ]
+      },
+      "HermitCrab": {
+        "module": "arch",
+        "offset": [
+          1.145,
+          -1.5,
+          0.00674
+        ]
+      }
+    },
+    "init_guard": 1112,
+    "fixed_layout": {
+      "left": [
+        -3.325,
+        0.5,
+        0.72
+      ],
+      "arch": [
+        0.15,
+        0.5,
+        0.72
+      ],
+      "right": [
+        3.325,
+        0.5,
+        0.72
+      ]
+    },
+    "park_z": -4.0
+  },
+  "kit_budget": {
+    "fixed": {
+      "groups": 11,
+      "triangles": 50502,
+      "hull_triangles": 22462
+    },
+    "worst_visible": {
+      "groups": 22,
+      "triangles": 55909,
+      "hull_triangles": 23582,
+      "pieces": [
+        "reef_shell",
+        "reef_left",
+        "reef_arch",
+        "reef_right",
+        "reef_hard_left",
+        "reef_life_left",
+        "reef_life_left_1",
+        "reef_life_arch",
+        "reef_hard_right",
+        "reef_life_right",
+        "reef_life_right_1",
+        "reef_tall",
+        "reef_ledge",
+        "KitClumpZoanthid1",
+        "KitClumpZoanthid2",
+        "KitClumpZoanthid3",
+        "KitClumpCups1",
+        "KitClumpCups2",
+        "KitClumpCups3",
+        "KitClumpCrust1",
+        "KitClumpCrust2",
+        "KitClumpCrust3"
+      ]
+    }
+  },
   "animated_triangles": {
     "BoxfishVisual": 412,
     "HumbugOne": 286,
@@ -117,9 +1780,13 @@
   },
   "hull_triangles": {
     "reef_left": 2556,
-    "reef_right": 2680,
     "reef_arch": 2312,
-    "reef_hard": 11606,
+    "reef_right": 2680,
+    "reef_hard_left": 8282,
+    "reef_hard_right": 3324,
+    "reef_ledge": 552,
+    "reef_pillars": 520,
+    "reef_tall": 568,
     "BoxfishVisual": 412,
     "HumbugOne": 286,
     "HumbugTwo": 286,

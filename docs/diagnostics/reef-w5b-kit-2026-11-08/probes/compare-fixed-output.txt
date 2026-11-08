@@ -1,0 +1,6 @@
+aquarium_thai_reef triangles before 98304 after 98304 DIFFER: 11894 only-after, 11894 only-before
+  baked grey level mean/median before 163.08 142 after 163.11 142.0
+aquarium_thai_reef_anime triangles before 106878 after 106878 DIFFER: 14101 only-after, 14101 only-before
+  baked grey level mean/median before 200.5 160.0 after 200.52 160.0
+aquarium_thai_reef vertices 107043 107002 max position offset 0.000038 max UV offset 0.000000 baked grey |diff| histogram [(0, 76898), (1, 6712), (2, 4669), (3, 3491), (4, 2882), (5, 2469)] ... max 47
+aquarium_thai_reef_anime vertices 94354 94366 max position offset 0.005087 max UV offset 0.000443 baked grey |diff| histogram [(0, 93800), (44, 301), (51, 265)] ... max 51

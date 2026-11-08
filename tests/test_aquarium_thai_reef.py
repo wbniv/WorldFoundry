@@ -98,7 +98,11 @@ def test_same_anchors_in_both_exported_styles():
     assert maps[0]['anchors'] == maps[1]['anchors']
     assert maps[0]['anchors'] == {k: list(v) for k, v in anchor_map().items()}
     assert sum(maps[0]['hull_triangles'].values()) == 0
-    assert 0 < sum(maps[1]['hull_triangles'].values()) <= ANIME_HULL_TRIANGLES_MAX
+    # Plan W5b: the anime hull budget bounds the hulls visible at once (the worst kit set
+    # plus the animals), not every loaded kit piece; hidden fillers carry hulls too.
+    assert 0 < maps[1]['kit_budget']['worst_visible']['hull_triangles'] <= ANIME_HULL_TRIANGLES_MAX
+    assert maps[1]['kit_budget']['fixed']['hull_triangles'] == sum(
+        v for k, v in maps[1]['hull_triangles'].items() if k not in ('reef_ledge', 'reef_pillars', 'reef_tall'))
     assert all(len(m['animated_triangles']) <= 16 for m in maps)
 
 
@@ -170,8 +174,11 @@ def test_exported_reef_triangles_preserve_small_nondegenerate_faces():
 
 @pytest.mark.parametrize('level', ['aquarium_thai_reef', 'aquarium_thai_reef_anime'])
 def test_static_reef_exports_prelit_vertex_colors(level):
-    for name in ('reef_left', 'reef_right', 'reef_arch', 'reef_hard',
-                 'reef_soft', 'reef_sponges', 'reef_life'):
+    # Plan W5b split today's merged dressing groups by host module (reef_hard_left, ...)
+    # and added filler rocks; every baked static piece must still be prelit.
+    for name in ('reef_left', 'reef_right', 'reef_arch', 'reef_hard_left', 'reef_hard_right',
+                 'reef_life_left', 'reef_life_arch', 'reef_life_right',
+                 'reef_ledge', 'reef_pillars', 'reef_tall'):
         data = (ROOT / 'wflevels' / level / (name + '.iff')).read_bytes()
         chunks, pos = {}, 8
         while pos + 8 <= len(data):

@@ -11,6 +11,8 @@ blender --background --python-exit-code 1 \
   --out "$REEF_ROOT/wflevels/aquarium_thai_reef_anime" \
   --level-id aquarium_thai_reef_anime --style anime --remesh-rocks --bake-light
 bash wftools/wf_blender/build_level_binary.sh aquarium_thai_reef_anime
+# Static and Room #0 slot budgets for the kit (plan 2026-11-08 W5b); fails the build.
+python3 wflevels/aquarium_thai_reef/report_budget.py --cooked --level aquarium_thai_reef_anime
 
 # Level settings object (plan 2026-11-08 W5a): ReefSettings, owned by the Director.
 cargo build --release --offline --manifest-path wftools/wf_attr_edit/Cargo.toml

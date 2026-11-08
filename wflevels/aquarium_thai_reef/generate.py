@@ -8,14 +8,15 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 import bpy
 import bmesh
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from config import ANIME_HULL_TRIANGLES_MAX, ANIME_STATIC_TRIANGLES_MAX, STATIC_GROUPS_MAX, STATIC_TRIANGLES_MAX
+from config import (ANIME_HULL_TRIANGLES_MAX, ANIME_STATIC_TRIANGLES_MAX, KIT_VISIBLE_GROUPS_MAX,
+                    KIT_VISIBLE_TRIANGLES_MAX, STATIC_GROUPS_MAX, STATIC_TRIANGLES_MAX)
 p = argparse.ArgumentParser()
 p.add_argument('--repo', required=True, type=Path)
 p.add_argument('--out', required=True, type=Path)
@@ -39,7 +40,7 @@ from reef import uvmap
 from reef.geometry import build_groups, triangles
 from reef.scene import anchor_map, worm_mouths, worm_origin
 from reef.fishes import boxfish, humbug
-from reef import life, invertebrates, worm_rig, crab_rig, feather_rig, flora_rig, corals
+from reef import life, invertebrates, worm_rig, crab_rig, feather_rig, flora_rig, corals, kit
 import species
 import wf_blender
 import wf_blender.operators as wf_operators
@@ -127,28 +128,44 @@ def add_outline(data, width):
     return len(data.loop_triangles) - before
 
 groups = build_groups(Mesh)
+# The rock-module kit (plan W5b, reef/kit.py). The Fixed layout is one arrangement of it:
+# the hero modules are today's three rock masses, each with the dressing that grows on it,
+# so the static scene below is today's geometry, split by host module and re-pivoted.
+static = {'reef_shell': {'mesh': groups['reef_shell'], 'module': None, 'kind': 'shell'}}
+for hero in kit.HEROES:
+    static[hero['rock']] = {'mesh': groups[hero['rock']], 'module': hero['name'], 'kind': 'rock'}
+for piece_name, (hero_name, kind, piece) in kit.dressing_pieces(groups, Mesh, uvmap.face_uvs).items():
+    static[piece_name] = {'mesh': piece, 'module': hero_name, 'kind': kind}
+for filler in kit.FILLERS:
+    static[filler['rock']] = {'mesh': kit.filler_mesh(Mesh, filler), 'module': filler['name'], 'kind': 'filler'}
+FIXED_STATIC = [name for name, piece in static.items() if piece['kind'] != 'filler']
 actual_triangles = {}
 actual_hull_triangles = {}
 outline_specs = []
 oad = repo / 'wfsource/source/oas/platform.oad'
-for name, mesh in groups.items():
-    obj = bpy.data.objects.new(name, blender_mesh(mesh,
-        smooth=name in ('reef_left', 'reef_right', 'reef_arch')))
+for name, piece in static.items():
+    mesh, kind = piece['mesh'], piece['kind']
+    rocky = kind in ('rock', 'filler')
+    obj = bpy.data.objects.new(name, blender_mesh(mesh, smooth=rocky))
     bpy.context.scene.collection.objects.link(obj)
     obj['wf_schema_path'] = str(oad)
     obj['wf_Mobility'] = 'Anchored'
     obj['wf_Model Type'] = 'Mesh'
     obj['wf_Mass'] = 0.0
-    obj['wf_Visibility Mailbox'] = 1
+    obj['wf_Visibility Mailbox'] = 1 if piece['module'] is None else kit.module_cell(piece['module'])
     obj['wf_Mesh Name'] = name + '.iff'
     obj['wf_original_mesh_name'] = name + '.iff'
-    if args.remesh_rocks and name in ('reef_left', 'reef_right', 'reef_arch'):
+    if args.remesh_rocks and rocky:
         bpy.ops.object.select_all(action='DESELECT')
         obj.select_set(True)
         bpy.context.view_layer.objects.active = obj
         # The anime pass has a tighter static-geometry budget. A coarser rock
         # union preserves the same placements while leaving room for life.
-        obj.data.remesh_voxel_size = .17 if args.style == 'anime' else .10
+        # Fillers (shown only by the Random layout) are coarser still.
+        if kind == 'filler':
+            obj.data.remesh_voxel_size = .22 if args.style == 'anime' else .13
+        else:
+            obj.data.remesh_voxel_size = .17 if args.style == 'anime' else .10
         bpy.ops.object.voxel_remesh()
         obj.select_set(False)
         uv = obj.data.uv_layers.active or obj.data.uv_layers.new(name='UVMap')
@@ -160,25 +177,48 @@ for name, mesh in groups.items():
         for poly in obj.data.polygons:
             poly.use_smooth = True
         obj.data.update()
+    # Re-pivot every hero piece onto its module's foot after the world-space remesh and UVs,
+    # so the world geometry (and the Fixed look) is unchanged. Fillers are authored locally.
+    if piece['module'] in kit.MODULES[:len(kit.HEROES)]:
+        pivot = kit.hero_pivot(piece['module'])
+        obj.data.transform(Matrix.Translation(Vector(pivot) * -1))
+        obj.data.update()
+        obj.location = pivot
+    elif kind == 'filler':
+        obj.location = kit.filler_park(kit.MODULES.index(piece['module']) - len(kit.HEROES))
     obj.data.calc_loop_triangles()
     actual_triangles[name] = len(obj.data.loop_triangles)
-    if args.style == 'anime' and name in ('reef_left', 'reef_right', 'reef_arch', 'reef_hard'):
-        # Reef-hard contains many overlapping narrow coral branches. A rock-
-        # sized expansion pushes their back-facing hulls through adjacent
+    if args.style == 'anime' and kind in ('rock', 'filler', 'hard'):
+        # Hard-coral dressing contains many overlapping narrow coral branches. A
+        # rock-sized expansion pushes their back-facing hulls through adjacent
         # branches, producing black speckles across their visible surfaces.
-        outline_specs.append((name, obj, .004 if name == 'reef_hard' else .035))
+        outline_specs.append((name, obj, .004 if kind == 'hard' else .035))
 
 # Simple rock proxies provide collision without making the visual meshes (or
-# the boxfish itself) static physics bodies. The central arch stays open.
+# the boxfish itself) static physics bodies. One pivot-centred box per kit module
+# (plan W5b): Jolt never rotates a static body, and a box centred on the pivot is
+# unchanged by the two allowed headings (0 and 1/2 revolution). The heroes' boxes
+# are today's RockColliderLeft/Right exactly; the arch's covers the lintel only,
+# so its cave stays open. Filler colliders wait, parked with their hidden rock.
 from reef.geometry import _box
-for name, lo, hi in (
-    ('RockColliderLeft', (-5.0, -.25, .72), (-1.65, 1.25, 2.5)),
-    ('RockColliderRight', (1.65, -.25, .72), (5.0, 1.25, 2.5)),
-):
+collider_names = {}
+for index, module in enumerate(kit.MODULES):
+    hero = next((h for h in kit.HEROES if h['name'] == module), None)
+    if hero:
+        name, (lo, hi), location = hero['collider_name'], hero['collider'], hero['pivot']
+    else:
+        filler_mesh = static['reef_' + module]['mesh']
+        top = max(v[2] for v in filler_mesh.vertices)
+        half_x = .85 * (max(v[0] for v in filler_mesh.vertices) - min(v[0] for v in filler_mesh.vertices)) / 2
+        half_y = .85 * (max(v[1] for v in filler_mesh.vertices) - min(v[1] for v in filler_mesh.vertices)) / 2
+        name = 'RockCollider' + module.capitalize()
+        lo, hi = (-half_x, -half_y, 0.0), (half_x, half_y, round(.8 * top, 3))
+        location = kit.filler_park(index - len(kit.HEROES))
     proxy = Mesh(name.lower())
     _box(proxy, lo, hi, 'rock')
     obj = bpy.data.objects.new(name, blender_mesh(proxy))
     bpy.context.scene.collection.objects.link(obj)
+    obj.location = location
     obj['wf_schema_path'] = str(repo / 'wfsource/source/oas/statplat.oad')
     obj['wf_Mobility'] = 'Anchored'
     obj['wf_Model Type'] = 'Mesh'
@@ -186,6 +226,7 @@ for name, lo, hi in (
     obj['wf_Visibility Mailbox'] = 0
     obj['wf_Mesh Name'] = proxy.name + '.iff'
     obj['wf_original_mesh_name'] = proxy.name + '.iff'
+    collider_names[module] = (name, [round(v, 4) for v in lo], [round(v, 4) for v in hi])
 
 # A hidden hull satisfies Level::reset's Player requirement and drives the fish.
 hull = Mesh('player_hull')
@@ -270,6 +311,42 @@ for name, builder, pos in (
     obj['wf_Visibility Mailbox'] = 1
     obj['wf_Mesh Name'] = mesh.name + '.iff'
     obj['wf_original_mesh_name'] = mesh.name + '.iff'
+
+# Attached life belongs to the hero module it grows on (plan W5b): it shows and hides with
+# that module, and W5c places it at the module pivot plus this offset. The fish swim freely.
+ATTACHED = ('SeaFan', 'FeatherStar', 'Nudibranch', 'WormCrowns', 'FeatherDusters', 'FlowerpotCoral',
+            'LeatherCoral', 'GiantClam', 'GuardCrab', 'ShrimpOne', 'ShrimpTwo', 'HermitCrab')
+attached = {}
+for name in ATTACHED:
+    obj = bpy.data.objects[name]
+    position = tuple(obj.location)
+    host = kit.host_of_point(position)
+    pivot = kit.hero_pivot(host)
+    obj['wf_Visibility Mailbox'] = kit.module_cell(host)
+    attached[name] = {'module': host, 'offset': [round(position[i] - pivot[i], 5) for i in range(3)]}
+
+# Colony clumps (plan W5b): small static pieces W5c places on site-table points, rotating
+# local +z onto the site normal. One shared mesh per kind; each clump has its own cell and
+# waits, hidden and parked, until W5c shows it. They are not baked (lit like the animals).
+clumps = []
+for kind, count in kit.CLUMPS:
+    clump = kit.clump_mesh(Mesh, kind)
+    data = blender_mesh(clump)
+    for k in range(count):
+        serial = len(clumps)
+        name = f'KitClump{kind.capitalize()}{k + 1}'
+        obj = bpy.data.objects.new(name, data)
+        bpy.context.scene.collection.objects.link(obj)
+        obj.location = kit.clump_park(serial)
+        obj['wf_schema_path'] = str(oad)
+        obj['wf_Mobility'] = 'Anchored'
+        obj['wf_Model Type'] = 'Mesh'
+        obj['wf_Mass'] = 0.0
+        obj['wf_Visibility Mailbox'] = kit.CLUMP_CELL_BASE + serial
+        obj['wf_Mesh Name'] = clump.name + '.iff'
+        obj['wf_original_mesh_name'] = clump.name + '.iff'
+        clumps.append({'actor': name, 'kind': kind, 'cell': kit.CLUMP_CELL_BASE + serial,
+                       'triangles': triangles(clump), 'mesh': clump.name + '.iff'})
 
 sun = bpy.data.objects['SunLight']
 sun.rotation_euler = (0, .6981317, 1.5707963)
@@ -527,21 +604,54 @@ for name, anchor, offset, phase, amplitude in (
         life_tick += (f' {anchor_map()[anchor][0] + offset} 640 tk@ {phase} + tk-sin {amplitude} * + '
                       f'INDEXOF_X_POS {indices[name]} write-actor-mailbox\n')
 life_tick += ';\n'
-tick = tick.replace(': reef-tick\n', shoal + worm_tick + life_tick + ': reef-tick\n reef-shoal reef-life\n')
+# Kit visibility (plan W5b): every kit piece is hidden until its cell is set. Until W5c's
+# layout exists, the Director shows the Fixed arrangement (the three hero modules) once at
+# entry; fillers and colony clumps stay hidden and parked.
+kit_init = (f': reef-kit-init {kit.KIT_INIT_GUARD} tk@ 0 = if'
+            + ''.join(f' 1 {kit.module_cell(h["name"])} tk!' for h in kit.HEROES)
+            + f' 1 {kit.KIT_INIT_GUARD} tk! then ;\n')
+tick = tick.replace(': reef-tick\n', shoal + worm_tick + life_tick + kit_init + ': reef-tick\n reef-kit-init reef-shoal reef-life\n')
 bpy.data.objects['Director']['wf_Script'] = header + core + tick
 if args.bake_light:
     from reef.bake import bake_static
-    bake_static([bpy.data.objects[name] for name in groups if name != 'reef_shell'], mat, args.style)
+    fillers = [bpy.data.objects[f['rock']] for f in kit.FILLERS]
+    # Fixed scene first, with the parked fillers out of the way below the sand and frame.
+    bake_static([bpy.data.objects[name] for name in FIXED_STATIC if name != 'reef_shell'], mat, args.style)
+    # Fillers have no fixed neighbourhood: bake each alone, far from the reef, then park it.
+    parked = [tuple(obj.location) for obj in fillers]
+    for k, obj in enumerate(fillers):
+        obj.location = (40.0 + 10.0 * k, 0.0, 0.0)
+    bake_static(fillers, mat, args.style)
+    for obj, location in zip(fillers, parked):
+        obj.location = location
 # Bake the visible surfaces before adding their reversed outline shells, so
 # the shells do not occlude the surfaces during Cycles' light and AO passes.
 for name, obj, width in outline_specs:
     actual_hull_triangles[name] = add_outline(obj.data, width)
-triangle_total = sum(actual_triangles.values())
+# Static budgets (plan W5b) count what can be visible at once, not every loaded group:
+# the Fixed arrangement, and the worst Random set = the three heroes with their dressing,
+# the two largest fillers (D6: at most 5 rocks, heroes first) and every colony clump.
 triangle_limit = ANIME_STATIC_TRIANGLES_MAX if args.style == 'anime' else STATIC_TRIANGLES_MAX
-if len(groups) > STATIC_GROUPS_MAX or triangle_total > triangle_limit:
-    raise ValueError(f'static reef exceeds budget: {len(groups)} groups, {triangle_total} triangles')
-if sum(actual_hull_triangles.values()) > ANIME_HULL_TRIANGLES_MAX:
-    raise ValueError(f'anime outlines exceed budget: {sum(actual_hull_triangles.values())} triangles')
+fixed_triangles = sum(actual_triangles[name] for name in FIXED_STATIC)
+largest_fillers = sorted((f['rock'] for f in kit.FILLERS), key=lambda n: -actual_triangles[n])[:2]
+worst_static = FIXED_STATIC + largest_fillers
+worst_triangles = (sum(actual_triangles[name] for name in worst_static)
+                   + sum(c['triangles'] for c in clumps))
+# Outline hulls visible at once: the worst static set's plus every animal's (the fish and
+# crabs always show), which is what ANIME_HULL_TRIANGLES_MAX has always bounded.
+animal_hull = sum(actual_hull_triangles.get(name, 0) for name in animated_triangles)
+worst_hull = sum(actual_hull_triangles.get(name, 0) for name in worst_static) + animal_hull
+kit_budget = {'fixed': {'groups': len(FIXED_STATIC), 'triangles': fixed_triangles,
+                        'hull_triangles': sum(actual_hull_triangles.get(n, 0) for n in FIXED_STATIC) + animal_hull},
+              'worst_visible': {'groups': len(worst_static) + len(clumps), 'triangles': worst_triangles,
+                                'hull_triangles': worst_hull, 'pieces': worst_static + [c['actor'] for c in clumps]}}
+triangle_total = fixed_triangles
+if len(FIXED_STATIC) > STATIC_GROUPS_MAX or fixed_triangles > triangle_limit:
+    raise ValueError(f'Fixed reef exceeds budget: {len(FIXED_STATIC)} groups, {fixed_triangles} triangles')
+if worst_triangles > KIT_VISIBLE_TRIANGLES_MAX[args.style] or len(worst_static) + len(clumps) > KIT_VISIBLE_GROUPS_MAX:
+    raise ValueError(f'worst visible kit set exceeds budget: {kit_budget["worst_visible"]}')
+if worst_hull > ANIME_HULL_TRIANGLES_MAX:
+    raise ValueError(f'anime outlines exceed budget: {worst_hull} triangles visible at once')
 if len(animated_triangles) > 16:
     raise ValueError(f'reef exceeds animated actor budget: {len(animated_triangles)}')
 # Keep small valid faces. Record actual degeneracy separately, including faces
@@ -580,8 +690,25 @@ for obj in bpy.context.scene.objects:
     bm.free()
     obj.data.update()
 (out / 'triangle-diagnostics.json').write_text(json.dumps(triangle_diagnostics, indent=2)+'\n')
+kit_map = {'modules': [], 'clumps': clumps, 'attached': attached, 'init_guard': kit.KIT_INIT_GUARD,
+           'fixed_layout': {h['name']: list(h['pivot']) for h in kit.HEROES}, 'park_z': kit.PARK_Z}
+for index, module in enumerate(kit.MODULES):
+    pieces = [name for name, piece in static.items() if piece['module'] == module]
+    hero = index < len(kit.HEROES)
+    kit_map['modules'].append({
+        'name': module, 'role': 'hero' if hero else 'filler', 'cell': kit.module_cell(module),
+        'rock': 'reef_' + module, 'pieces': pieces, 'piece_actors': [indices[n] for n in pieces],
+        'collider': collider_names[module][0], 'collider_actor': indices[collider_names[module][0]],
+        'collider_box': {'lo': collider_names[module][1], 'hi': collider_names[module][2]},
+        'pivot': list(kit.hero_pivot(module)) if hero else None,
+        'park': None if hero else list(kit.filler_park(index - len(kit.HEROES))),
+        'attached': [n for n, a in attached.items() if a['module'] == module],
+        'sites': [{'p': list(s['p']), 'n': list(s['n'])} for s in kit.site_table(module)],
+        'triangles': sum(actual_triangles[n] for n in pieces)})
+for clump in clumps:
+    clump['actor_index'] = indices[clump['actor']]
 (out / 'actor-map.json').write_text(json.dumps({'level':args.level_id, 'actors':indices, 'indices':indices,
-    'triangles':actual_triangles, 'triangle_total':triangle_total,
+    'triangles':actual_triangles, 'triangle_total':triangle_total, 'kit':kit_map, 'kit_budget':kit_budget,
     'animated_triangles':animated_triangles, 'hull_triangles':actual_hull_triangles, 'anchors':anchor_map(),
     'rock_union':args.remesh_rocks, 'unverified':True}, indent=2)+'\n')
 bpy.ops.wf.export_level(filepath=str(out / f'{args.level_id}.lev'))

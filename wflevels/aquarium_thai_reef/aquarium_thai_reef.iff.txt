@@ -24,33 +24,43 @@
 	// Example: `$3fff001` = `IFF` + room `fff` (`PERM`) + slot `001`.
 	{ 'ASMP'
 		$3fff001l { 'STR' "player_hull.iff" }  // IFF PERM fff:001
-		$3000001l { 'STR' "reef_left.iff" }  // IFF RM0 000:001
-		$3000002l { 'STR' "reef_right.iff" }  // IFF RM0 000:002
+		$3000001l { 'STR' "reef_shell.iff" }  // IFF RM0 000:001
+		$3000002l { 'STR' "reef_left.iff" }  // IFF RM0 000:002
 		$3000003l { 'STR' "reef_arch.iff" }  // IFF RM0 000:003
-		$3000004l { 'STR' "reef_hard.iff" }  // IFF RM0 000:004
-		$3000005l { 'STR' "reef_soft.iff" }  // IFF RM0 000:005
-		$3000006l { 'STR' "reef_sponges.iff" }  // IFF RM0 000:006
-		$3000007l { 'STR' "reef_life.iff" }  // IFF RM0 000:007
-		$3000008l { 'STR' "reef_shell.iff" }  // IFF RM0 000:008
-		$3000009l { 'STR' "reef_life_1.iff" }  // IFF RM0 000:009
-		$300000al { 'STR' "reef_life_2.iff" }  // IFF RM0 000:00a
-		$300000bl { 'STR' "reef_life_3.iff" }  // IFF RM0 000:00b
-		$300000cl { 'STR' "rockcolliderleft.iff" }  // IFF RM0 000:00c
-		$300000dl { 'STR' "rockcolliderright.iff" }  // IFF RM0 000:00d
-		$300000el { 'STR' "reef_boxfish.iff" }  // IFF RM0 000:00e
-		$300000fl { 'STR' "reef_humbug.iff" }  // IFF RM0 000:00f
-		$3000010l { 'STR' "seafan.iff" }  // IFF RM0 000:010
-		$3000011l { 'STR' "featherstar.iff" }  // IFF RM0 000:011
-		$3000012l { 'STR' "nudibranch.iff" }  // IFF RM0 000:012
-		$3000013l { 'STR' "wormcrowns.iff" }  // IFF RM0 000:013
-		$3000014l { 'STR' "featherdusters.iff" }  // IFF RM0 000:014
-		$3000015l { 'STR' "flowerpotcoral.iff" }  // IFF RM0 000:015
-		$3000016l { 'STR' "leathercoral.iff" }  // IFF RM0 000:016
-		$3000017l { 'STR' "giantclam.iff" }  // IFF RM0 000:017
-		$3000018l { 'STR' "guardcrab.iff" }  // IFF RM0 000:018
-		$3000019l { 'STR' "shrimpone.iff" }  // IFF RM0 000:019
-		$300001al { 'STR' "shrimptwo.iff" }  // IFF RM0 000:01a
-		$300001bl { 'STR' "hermitcrab.iff" }  // IFF RM0 000:01b
+		$3000004l { 'STR' "reef_right.iff" }  // IFF RM0 000:004
+		$3000005l { 'STR' "reef_hard_left.iff" }  // IFF RM0 000:005
+		$3000006l { 'STR' "reef_life_left.iff" }  // IFF RM0 000:006
+		$3000007l { 'STR' "reef_life_left_1.iff" }  // IFF RM0 000:007
+		$3000008l { 'STR' "reef_life_arch.iff" }  // IFF RM0 000:008
+		$3000009l { 'STR' "reef_hard_right.iff" }  // IFF RM0 000:009
+		$300000al { 'STR' "reef_life_right.iff" }  // IFF RM0 000:00a
+		$300000bl { 'STR' "reef_life_right_1.iff" }  // IFF RM0 000:00b
+		$300000cl { 'STR' "reef_ledge.iff" }  // IFF RM0 000:00c
+		$300000dl { 'STR' "reef_pillars.iff" }  // IFF RM0 000:00d
+		$300000el { 'STR' "reef_tall.iff" }  // IFF RM0 000:00e
+		$300000fl { 'STR' "rockcolliderleft.iff" }  // IFF RM0 000:00f
+		$3000010l { 'STR' "rockcolliderarch.iff" }  // IFF RM0 000:010
+		$3000011l { 'STR' "rockcolliderright.iff" }  // IFF RM0 000:011
+		$3000012l { 'STR' "rockcolliderledge.iff" }  // IFF RM0 000:012
+		$3000013l { 'STR' "rockcolliderpillars.iff" }  // IFF RM0 000:013
+		$3000014l { 'STR' "rockcollidertall.iff" }  // IFF RM0 000:014
+		$3000015l { 'STR' "reef_boxfish.iff" }  // IFF RM0 000:015
+		$3000016l { 'STR' "reef_humbug.iff" }  // IFF RM0 000:016
+		$3000017l { 'STR' "seafan.iff" }  // IFF RM0 000:017
+		$3000018l { 'STR' "featherstar.iff" }  // IFF RM0 000:018
+		$3000019l { 'STR' "nudibranch.iff" }  // IFF RM0 000:019
+		$300001al { 'STR' "wormcrowns.iff" }  // IFF RM0 000:01a
+		$300001bl { 'STR' "featherdusters.iff" }  // IFF RM0 000:01b
+		$300001cl { 'STR' "flowerpotcoral.iff" }  // IFF RM0 000:01c
+		$300001dl { 'STR' "leathercoral.iff" }  // IFF RM0 000:01d
+		$300001el { 'STR' "giantclam.iff" }  // IFF RM0 000:01e
+		$300001fl { 'STR' "guardcrab.iff" }  // IFF RM0 000:01f
+		$3000020l { 'STR' "shrimpone.iff" }  // IFF RM0 000:020
+		$3000021l { 'STR' "shrimptwo.iff" }  // IFF RM0 000:021
+		$3000022l { 'STR' "hermitcrab.iff" }  // IFF RM0 000:022
+		$3000023l { 'STR' "kit_zoanthid.iff" }  // IFF RM0 000:023
+		$3000024l { 'STR' "kit_cups.iff" }  // IFF RM0 000:024
+		$3000025l { 'STR' "kit_crust.iff" }  // IFF RM0 000:025
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "aquarium_thai_reef.lvl" ] }
@@ -68,33 +78,43 @@
 		{ 'ASS' $1000fffl [ "Room0.tga" ] }    // TGA RM0 000:fff
 		{ 'ASS' $5000fffl [ "Room0.ruv" ] }    // RUV RM0 000:fff
 		{ 'ASS' $7000fffl [ "Room0.cyc" ] }    // CYC RM0 000:fff
-		{ 'ASS' $3000001l [ "reef_left.iff" ] }  // IFF RM0 000:001
-		{ 'ASS' $3000002l [ "reef_right.iff" ] }  // IFF RM0 000:002
+		{ 'ASS' $3000001l [ "reef_shell.iff" ] }  // IFF RM0 000:001
+		{ 'ASS' $3000002l [ "reef_left.iff" ] }  // IFF RM0 000:002
 		{ 'ASS' $3000003l [ "reef_arch.iff" ] }  // IFF RM0 000:003
-		{ 'ASS' $3000004l [ "reef_hard.iff" ] }  // IFF RM0 000:004
-		{ 'ASS' $3000005l [ "reef_soft.iff" ] }  // IFF RM0 000:005
-		{ 'ASS' $3000006l [ "reef_sponges.iff" ] }  // IFF RM0 000:006
-		{ 'ASS' $3000007l [ "reef_life.iff" ] }  // IFF RM0 000:007
-		{ 'ASS' $3000008l [ "reef_shell.iff" ] }  // IFF RM0 000:008
-		{ 'ASS' $3000009l [ "reef_life_1.iff" ] }  // IFF RM0 000:009
-		{ 'ASS' $300000al [ "reef_life_2.iff" ] }  // IFF RM0 000:00a
-		{ 'ASS' $300000bl [ "reef_life_3.iff" ] }  // IFF RM0 000:00b
-		{ 'ASS' $300000cl [ "rockcolliderleft.iff" ] }  // IFF RM0 000:00c
-		{ 'ASS' $300000dl [ "rockcolliderright.iff" ] }  // IFF RM0 000:00d
-		{ 'ASS' $300000el [ "reef_boxfish.iff" ] }  // IFF RM0 000:00e
-		{ 'ASS' $300000fl [ "reef_humbug.iff" ] }  // IFF RM0 000:00f
-		{ 'ASS' $3000010l [ "seafan.iff" ] }  // IFF RM0 000:010
-		{ 'ASS' $3000011l [ "featherstar.iff" ] }  // IFF RM0 000:011
-		{ 'ASS' $3000012l [ "nudibranch.iff" ] }  // IFF RM0 000:012
-		{ 'ASS' $3000013l [ "wormcrowns.iff" ] }  // IFF RM0 000:013
-		{ 'ASS' $3000014l [ "featherdusters.iff" ] }  // IFF RM0 000:014
-		{ 'ASS' $3000015l [ "flowerpotcoral.iff" ] }  // IFF RM0 000:015
-		{ 'ASS' $3000016l [ "leathercoral.iff" ] }  // IFF RM0 000:016
-		{ 'ASS' $3000017l [ "giantclam.iff" ] }  // IFF RM0 000:017
-		{ 'ASS' $3000018l [ "guardcrab.iff" ] }  // IFF RM0 000:018
-		{ 'ASS' $3000019l [ "shrimpone.iff" ] }  // IFF RM0 000:019
-		{ 'ASS' $300001al [ "shrimptwo.iff" ] }  // IFF RM0 000:01a
-		{ 'ASS' $300001bl [ "hermitcrab.iff" ] }  // IFF RM0 000:01b
+		{ 'ASS' $3000004l [ "reef_right.iff" ] }  // IFF RM0 000:004
+		{ 'ASS' $3000005l [ "reef_hard_left.iff" ] }  // IFF RM0 000:005
+		{ 'ASS' $3000006l [ "reef_life_left.iff" ] }  // IFF RM0 000:006
+		{ 'ASS' $3000007l [ "reef_life_left_1.iff" ] }  // IFF RM0 000:007
+		{ 'ASS' $3000008l [ "reef_life_arch.iff" ] }  // IFF RM0 000:008
+		{ 'ASS' $3000009l [ "reef_hard_right.iff" ] }  // IFF RM0 000:009
+		{ 'ASS' $300000al [ "reef_life_right.iff" ] }  // IFF RM0 000:00a
+		{ 'ASS' $300000bl [ "reef_life_right_1.iff" ] }  // IFF RM0 000:00b
+		{ 'ASS' $300000cl [ "reef_ledge.iff" ] }  // IFF RM0 000:00c
+		{ 'ASS' $300000dl [ "reef_pillars.iff" ] }  // IFF RM0 000:00d
+		{ 'ASS' $300000el [ "reef_tall.iff" ] }  // IFF RM0 000:00e
+		{ 'ASS' $300000fl [ "rockcolliderleft.iff" ] }  // IFF RM0 000:00f
+		{ 'ASS' $3000010l [ "rockcolliderarch.iff" ] }  // IFF RM0 000:010
+		{ 'ASS' $3000011l [ "rockcolliderright.iff" ] }  // IFF RM0 000:011
+		{ 'ASS' $3000012l [ "rockcolliderledge.iff" ] }  // IFF RM0 000:012
+		{ 'ASS' $3000013l [ "rockcolliderpillars.iff" ] }  // IFF RM0 000:013
+		{ 'ASS' $3000014l [ "rockcollidertall.iff" ] }  // IFF RM0 000:014
+		{ 'ASS' $3000015l [ "reef_boxfish.iff" ] }  // IFF RM0 000:015
+		{ 'ASS' $3000016l [ "reef_humbug.iff" ] }  // IFF RM0 000:016
+		{ 'ASS' $3000017l [ "seafan.iff" ] }  // IFF RM0 000:017
+		{ 'ASS' $3000018l [ "featherstar.iff" ] }  // IFF RM0 000:018
+		{ 'ASS' $3000019l [ "nudibranch.iff" ] }  // IFF RM0 000:019
+		{ 'ASS' $300001al [ "wormcrowns.iff" ] }  // IFF RM0 000:01a
+		{ 'ASS' $300001bl [ "featherdusters.iff" ] }  // IFF RM0 000:01b
+		{ 'ASS' $300001cl [ "flowerpotcoral.iff" ] }  // IFF RM0 000:01c
+		{ 'ASS' $300001dl [ "leathercoral.iff" ] }  // IFF RM0 000:01d
+		{ 'ASS' $300001el [ "giantclam.iff" ] }  // IFF RM0 000:01e
+		{ 'ASS' $300001fl [ "guardcrab.iff" ] }  // IFF RM0 000:01f
+		{ 'ASS' $3000020l [ "shrimpone.iff" ] }  // IFF RM0 000:020
+		{ 'ASS' $3000021l [ "shrimptwo.iff" ] }  // IFF RM0 000:021
+		{ 'ASS' $3000022l [ "hermitcrab.iff" ] }  // IFF RM0 000:022
+		{ 'ASS' $3000023l [ "kit_zoanthid.iff" ] }  // IFF RM0 000:023
+		{ 'ASS' $3000024l [ "kit_cups.iff" ] }  // IFF RM0 000:024
+		{ 'ASS' $3000025l [ "kit_crust.iff" ] }  // IFF RM0 000:025
 	}
 	{ 'ALGN' .align(2048) }
 }

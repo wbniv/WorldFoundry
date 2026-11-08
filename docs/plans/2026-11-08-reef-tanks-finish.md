@@ -285,6 +285,18 @@ flowchart LR
     - **Hero modules** carry the behaviours: the **arch** (cave, cleaner station), the **boulder** (Porites, worms, feather dusters) and the **coral-head mass** (cauliflower head, guard crab, humbugs, flowerpot).
     - **Filler modules** carry the variety: a ledge, twin pillars, a tall mass, a barrel-sponge mass and a table-coral mass.
     - **Colony pieces** are a few pre-built clumps (zoanthid and cup clumps, crust candidates per module), each a small actor.
+
+    **As built (W5b, 2026‑11‑08; [review](../diagnostics/reef-w5b-kit-2026-11-08/README.md)).**
+    - **Six modules, not eight.** The heroes are today's three rocks: left, arch and right. Each carries the corals and animals that grow on it. The fillers are a ledge, twin pillars and a tall mass. The sketch's barrel-sponge and table-coral masses are both today's right rock, which cannot be split without changing Fixed.
+    - **Colliders** are pivot-centred boxes: left and right are today's boxes. The arch gains a box over the lintel only, so the cave stays open. It is the one behavioural change to Fixed: the fish can no longer swim through the lintel rock.
+    - **Site tables:** 16 points per module. **Clumps:** 9 (3 zoanthid, 3 cup, 3 crust), built growing up +z for W5c to turn onto a site normal.
+    - **Visibility cells:** 200–205 for the modules (a module's rock, corals and attached animals share its cell), 210–218 for the clumps, and 1112 as the guard cell. `actor-map.json` carries a `kit` section: pivots, park positions, actor indices, collider boxes, attached-animal offsets, sites and Fixed pivots.
+    - **Fixed is the three heroes at their Fixed pivots.** A Director word, `reef-kit-init`, shows them once at entry; W5c replaces it. The cooked meshes match the old ones to 0.04 mm, and same-camera renders differ on at most 0.036 % of pixels, which is bake noise.
+    - **Budgets:** the build now fails on any of these. Worst visible set: realistic 71,729 triangles in 22 groups, anime 55,909, against 72,000 and 22. Anime hulls: 23,582 of 24,000. Room #0 slot: realistic 18.3 MB, anime 18.4 MB, of 32 MB. Actors go from 41 to 56.
+    - **Heroes keep heading 0.** Their backs are bare, because W3 dressed only the faces the camera sees ([3-rock arrangement](../diagnostics/reef-w5b-kit-2026-11-08/arrange-3-wide.jpg)). W5c may turn fillers by ½ revolution, but not heroes.
+
+    [![Kit modules with site points](../diagnostics/reef-w5b-kit-2026-11-08/kit-row.jpg)](../diagnostics/reef-w5b-kit-2026-11-08/kit-row.jpg)
+    [![Five-rock static arrangement](../diagnostics/reef-w5b-kit-2026-11-08/arrange-5-wide.jpg)](../diagnostics/reef-w5b-kit-2026-11-08/arrange-5-wide.jpg)
 - **The Forth layout** (W5c). At entry the Director:
     1. reads the settings with `property@`;
     2. seeds `random`;
@@ -385,7 +397,7 @@ Probes P0–P3 ran on cast1 through the coordinator: three alternating runs of e
 1. ~~W5a settings (T3).~~ Done, `a205df47`.
 2. ~~The R0 device run, P0–P3, on copies of today's meshes.~~ Done; see above.
 3. ~~Find the cause of the realistic P3 load abort (T4).~~ The 32 MB room slot ran out; see above.
-4. W5b, the kit, together with the budget-report change (T4), then P4. **Design note:** express the Fixed layout as one arrangement of the kit's modules, so that both layouts share actors instead of each carrying its own copies.
+4. ~~W5b, the kit, together with the budget-report change (T4), then P4.~~ Built; P4 passes on cast1: realistic 22.03 FPS, anime 20.26 FPS. **Open:** with Fixed shown, the anime kit level is 0.93 ms slower than before (20.83 against 21.24 FPS), and the cause is unknown. It is being profiled before W5c adds visible geometry. **Design note:** express the Fixed layout as one arrangement of the kit's modules, so that both layouts share actors instead of each carrying its own copies.
 5. W5c, the Forth layout (T3).
 
 ### Decisions for Will

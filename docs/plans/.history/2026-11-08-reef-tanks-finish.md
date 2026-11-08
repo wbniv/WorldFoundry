@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/8decb672) | Reef plan: realistic P3 abort is the 32 MB room slot; W5b budget in bytes |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/094f53a6) | Reef plan: R0 device run P0–P3 on cast1; realistic 97-object load abort |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/a205df47) | Reef: ReefSettings level settings object (plan W5a) |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/ed2b171e) | Reef plan: W5 R0 spike results; D9 (where ReefSettings appears) |
@@ -16,6 +17,11 @@
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b756367f) | Plan: finish the reef tanks (worms, skins, placement, acceptance) |
 
 <!--history-meta v1
+8decb672	author	Will Norris
+8decb672	added	6
+8decb672	deleted	4
+8decb672	files	1
+8decb672	body	A record job kept logcat: FatalError Lmalloc out of memory in Named\nRoom #0. Each mesh actor copies its mesh into the level's 32,000,000-byte\nslot; realistic P3 needs ~33.1 MB. Same level at 36 or 48 MB loads on\ncast1. Not an engine bug. Decision: W5b stays inside 32 MB with a\nbuild-time slot check; 36 MB is the tested fallback.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 094f53a6	author	Will Norris
 094f53a6	added	26
 094f53a6	deleted	8
