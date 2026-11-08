@@ -149,6 +149,14 @@ With every panel out, only the perimeter frame stays in the view. With all six i
 | **No mullions**; top and bottom rails fixed to the concrete at intervals along their length | The rails alone carry the panels across 268 cm, so they must not sag or bow |
 | Option: **clear polycarbonate inserts** the same size as the panels, priced separately | For the wet season, if wanted |
 
+**Frame details** (page 2 of the spec sheet, and the [frame-detail mockup](2026-09-30-condo-balcony-shade/frame-detail.html)). There are three schematic sections, with millimetre sizes given only as examples, because the shop's own profiles govern:
+
+- **A, head rail:** a 40 mm deep outer stop, a brush seal, 3 mm clearance for heat expansion, and a 20 mm lift space above the panel. The box-section rail keeps the 268 cm span stiff and is anchored into the ledge soffit at intervals.
+- **B, sill rail:** a 17 mm outer stop with a weep hole. The channel floor slopes outward, the panel stands on setting blocks, and the inner lip is 12 mm high, lower than the 20 mm lift. A spring bolt into the sill stops the panel being lifted out.
+- **C, plan section:** the jamb is anchored into the reveal. At each joint the two 20 mm panel edges meet across a 3 mm brush seal, so a joint shows as about a 43 mm black line.
+
+To take a panel out, release the bolt, lift the panel into the lift space, swing the bottom inward over the inner lip, and lower it out. All of this is done from inside. The sheet also asks the shop to send its real sections before fabrication. The SVG comes from [`build_frame_detail.py`](2026-09-30-condo-balcony-shade/build_frame_detail.py).
+
 **Rain.** Mesh cuts down rain spray but does not stop wind-driven rain, so plan C does not meet plan A's 99 % rule. The polycarbonate inserts are the way to reach it within this frame.
 
 ### B. Level model (`blender_create_condo.py`)
@@ -182,6 +190,10 @@ Rejected: a two-state visibility swap (open/closed with no travel) — cheap but
 [![Plan C elevation](2026-09-30-condo-balcony-shade/elevation-plan-c.png)](2026-09-30-condo-balcony-shade/elevation-plan-c.html)
 
 **Plan C elevation**: the black perimeter frame with six pet-mesh panels meeting edge to edge, drawn with a 2.5 cm frame face and 2 cm panel edges. Buttons switch between all six panels in, panel 3 out, and all out. [Open the interactive mockup](2026-09-30-condo-balcony-shade/elevation-plan-c.html).
+
+[![Plan C frame details](2026-09-30-condo-balcony-shade/frame-detail.png)](2026-09-30-condo-balcony-shade/frame-detail.html)
+
+**Plan C frame details**: schematic head, sill and plan sections with a numbered key and the removal sequence. [Open the mockup](2026-09-30-condo-balcony-shade/frame-detail.html).
 
 [![Plan B elevation and plan](2026-09-30-condo-balcony-shade/elevation-plan-b.png)](2026-09-30-condo-balcony-shade/elevation-plan-b.html)
 

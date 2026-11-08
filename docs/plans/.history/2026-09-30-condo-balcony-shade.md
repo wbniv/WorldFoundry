@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/84f2e6ab) | Balcony plan C: no mullions; panels meet edge to edge |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/d74dbdb0) | Balcony plan C: fixed black frame with six pop-out pet-mesh panels |
 | [2026-10-09](https://github.com/wbniv/WorldFoundry/commit/ef99d415) | Record pending coordinator, runtime diagnostics and aquarium work |
 | [2026-10-08](https://github.com/wbniv/WorldFoundry/commit/8db6d8c6) | Plan condo 639 balcony plan B: aluminium bi-fold glazed window that stacks clear |
@@ -23,6 +24,11 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/ce0a2fa6) | Plan condo 639 balcony zip screen (solar-strip motor) and 7 cm floor recess |
 
 <!--history-meta v1
+84f2e6ab	author	Will Norris
+84f2e6ab	added	13
+84f2e6ab	deleted	13
+84f2e6ab	files	1
+84f2e6ab	body	Recompute the view arithmetic for a perimeter-only frame (panel width,\nmesh per panel, aluminium in view with panels in and out), require rails\nfixed along their length and seals at panel joints, and redraw the\nspec-sheet elevation and mockup without mullions.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 d74dbdb0	author	Will Norris
 d74dbdb0	added	38
 d74dbdb0	deleted	0
