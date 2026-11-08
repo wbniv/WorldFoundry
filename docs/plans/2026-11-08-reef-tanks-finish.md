@@ -108,6 +108,11 @@ Every mesh does carry the atlas: `blender_mesh` UV-maps all faces ([`generate.py
 
 ## W1 — Christmas tree worms, rebuilt (T4)
 
+**As built and approved** (Blender renders of the exported meshes; [worm review](../diagnostics/reef-worms-2026-11-08/README.md)). Left: cast1 before. Right: rebuilt.
+
+[![Worms, before and after](../diagnostics/reef-worms-2026-11-08/before-after-realistic.jpg)](../diagnostics/reef-worms-2026-11-08/README.md)
+
+
 Rank T4: model, rig, director and placement all change together, and judging the look takes visual judgement against device captures.
 
 ```mermaid
@@ -172,6 +177,14 @@ stateDiagram-v2
 
 ## W2 — skins for the actors that read as untextured (T3)
 
+**As built and approved** ([skins review](../diagnostics/reef-skins-2026-11-08/README.md)). Before and after for the mobile animals and the twice-rebuilt nudibranch:
+
+| Before | After |
+|---|---|
+| ![](../diagnostics/reef-skins-2026-11-08/animals-realistic-before.jpg) | ![](../diagnostics/reef-skins-2026-11-08/animals-realistic-after.jpg) |
+| ![](../diagnostics/reef-skins-2026-11-08/nudibranch-realistic-before.jpg) | ![](../diagnostics/reef-skins-2026-11-08/nudibranch-realistic-after.jpg) |
+
+
 One rule for every creature: **object-local UVs into its own cell**, so texel density depends on the part rather than on world position. Limbs and bodies use cylindrical UVs along each part's axis; shells use a spiral; flat discs use planar UVs. The static reef keeps its world-projected UVs.
 
 | Atlas cell | Used by | Content (realistic; anime posterises it) |
@@ -192,6 +205,14 @@ One rule for every creature: **object-local UVs into its own cell**, so texel de
 
 ## W3 — placement: nothing floats, everything attaches (T3)
 
+**As built and approved** ([placement review](../diagnostics/reef-placement-2026-11-08/README.md)). A three-quarter view shows the depth that the front camera hides:
+
+| Before | After |
+|---|---|
+| ![](../diagnostics/reef-placement-2026-11-08/three-quarter-before.jpg) | ![](../diagnostics/reef-placement-2026-11-08/three-quarter-after.jpg) |
+| ![](../diagnostics/reef-placement-2026-11-08/left-side-before.jpg) | ![](../diagnostics/reef-placement-2026-11-08/left-side-after.jpg) |
+
+
 [![Front and side elevations: today's worm grid in front of the boulder against the proposed mouths on it](2026-11-08-reef-tanks-finish/placement.png)](2026-11-08-reef-tanks-finish/placement.html)
 
 - **One source of truth.** Every actor position moves into `scene.py`'s anchor table, and `generate.py` reads it. Today the two disagree: `tree_worms` is at (−0.18, −0.15, 1.20) in the table but placed at (−2.75, −1.35, 2.0); `nudibranch` is (−3.78, −0.25, 1.34) against (−4.0, −1.65, 1.05); the leather coral and others differ too. Original verification step 4 ("anchor tables identical") passes today only because both styles share the same wrong table.
@@ -203,6 +224,144 @@ One rule for every creature: **object-local UVs into its own cell**, so texel de
     - every worm axis is within 37° of its surface normal (cos ≥ 0.8);
     - no two worm mouths are closer than 0.14;
     - every position in `generate.py` comes from the anchor table.
+
+## W5 — procedural reef: random rocks, a rock count and clustered colonies, laid out in Forth (plan only)
+
+**Status: proposed, not started. Awaiting Will's decisions D5–D8 and the R0 spike.** W3's fixed placement shipped first, as asked (`1a30b727`, approved, pushed).
+
+Will, 2026‑11‑08:
+- "can we do that randomly-ish on initial placement in clusters? (not unlike the planted tank level)"
+- "do the fixed placement that you've already developed first"
+- "i also want the rocks able to be randomly generated, heh" and "user can specify amount of rocks, too"
+- "can we do the placement in forth instead of custom engine code?"
+- "we need to add a settings object to the level, too, ofc (or does it already have one???)"
+
+### What exists
+
+- **The reef has no settings object.** Its actors are the scene objects, lights, cameras, Director and the reef pieces, and it has no `settings.rprp`.
+- **The Jellyfish tank is the template.** A per-level `settings.oas` (`JellyfishSettings`, owned by the Director) is compiled by `oas2oad`, bound by `settings-bindings.json`, and turned into an RP01 catalog by `build-object-properties.py`. Its Forth reads fields with `property@ ( owner field -- value flag )` (`jelly_motion.fth:2`). Its **Companions 0–50** field sets how many pre-built jellyfish are visible: the same shape as a rock count.
+- **The Planted Tank grows plants in engine C++** (`plant_growth.h`, `colonies(seed)`): 16 founders at random, then lineages that grow by short steps from a random member, with per-kind step sizes, heading jitter, a crowding radius and an excluded fish route. `planted::enter()` draws a fresh seed on every level entry, and the Dream host can pass a fixed one.
+- **Forth already has a seeded generator** (`random`, `seed-random`, `scripting_zforth.cc:17-18`). Its state starts at 1 and nothing reseeds it per level, so a fresh seed per entry needs an entropy source (R0, question 3).
+- **The reef cannot simply copy the Planted Tank.** Its rock, corals and colonies are baked meshes with Cycles light, anime outline hulls and static colliders, and every placement is resolved against that fixed rock at export (W3).
+
+### Proposed design (option A, recommended): a baked kit, laid out by Forth at level entry
+
+```mermaid
+flowchart LR
+    subgraph Export["Export (Python + Blender, once)"]
+        K["rock module kit<br/>K modules: mesh + baked light<br/>+ anime hull + collider"]
+        S["per-module site tables<br/>attachment points + normals<br/>resolved on that module (W3 code)"]
+        C["colony pieces<br/>zoanthid and cup clumps,<br/>per-module crust candidates"]
+    end
+    subgraph Level["Level entry (Forth Director)"]
+        R["read ReefSettings<br/>property@: seed, rock count,<br/>density, layout"]
+        L["seeded layout<br/>pick N modules, space them<br/>along the sand"]
+        F["founders + lineages<br/>over the chosen modules' sites"]
+        W["write positions, headings,<br/>visibility; hide the rest"]
+        A["reaction anchors =<br/>module position + baked offset"]
+    end
+    K --> L
+    S --> F
+    C --> F
+    R --> L --> F --> W
+    L --> A
+```
+
+- **Settings object `ReefSettings`, owned by the Director** (W5a). It needs no engine change:
+
+    ```
+    TYPEHEADER(ReefSettings)
+        PROPERTY_SHEET_HEADER(Reef,1)
+        TYPEENTRYINT32(Layout,,0,1,1,"Fixed|Random",SHOW_AS_SLIDER,"Fixed is the reviewed layout; Random builds a new reef")
+        TYPEENTRYINT32(Rocks,,1,5,3,"1|2|3|4|5",SHOW_AS_SLIDER,"How many rock masses stand on the sand")
+        TYPEENTRYINT32(Colonies,,0,2,1,"Sparse|Normal|Dense",SHOW_AS_SLIDER,"How much attached life grows on the rock")
+        TYPEENTRYINT32(Seed,,0,2147483647,0,,SHOW_AS_NUMBER,"0 draws a new reef on every entry")
+        PROPERTY_SHEET_FOOTER
+    TYPEFOOTER
+    ```
+
+    It is exposed wherever Settings already appear: the TV settings panel, the phone's Dream settings and the coordinator tray, through the generic provider the Planted Tank introduced.
+- **The kit** (W5b). The export bakes K rock modules. Each has its mesh, baked light, anime hull, its own collider, and a **site table**: attachment points and normals resolved on that module with W3's surface code.
+    - **Hero modules** carry the behaviours: the **arch** (cave, cleaner station), the **boulder** (Porites, worms, feather dusters) and the **coral-head mass** (cauliflower head, guard crab, humbugs, flowerpot).
+    - **Filler modules** carry the variety: a ledge, twin pillars, a tall mass, a barrel-sponge mass and a table-coral mass.
+    - **Colony pieces** are a few pre-built clumps (zoanthid and cup clumps, crust candidates per module), each a small actor.
+- **The Forth layout** (W5c). At entry the Director:
+    1. reads the settings with `property@`;
+    2. seeds `random`;
+    3. picks N modules, keeping the heroes first while N ≥ 3;
+    4. spaces the modules along the sand with seeded gaps;
+    5. runs the Planted Tank's founder-and-lineage scheme over the chosen modules' site tables;
+    6. writes every piece's position, heading and visibility once, and hides what is unused.
+
+    No ray casting happens at run time: every surface was resolved at export. Each reaction anchor (worm mouths, clam, crab, cleaner station) becomes its module's position plus an offset baked at export.
+- **Fewer than three rocks.** Below three rocks some heroes are absent, and the Director skips their reactions; the cleaner station needs the arch, for example. D6 decides the range.
+
+```mermaid
+sequenceDiagram
+    participant U as "Viewer (TV panel / phone / coordinator)"
+    participant P as "Settings provider"
+    participant E as "Engine (level load)"
+    participant D as "Forth Director"
+    U->>P: "Rocks = 4, Seed = 0"
+    P->>E: "write ReefSettings fields"
+    E->>D: "level entry, first tick"
+    D->>D: "property@ Layout, Rocks, Colonies, Seed"
+    D->>D: "seed-random (Seed, or a fresh entropy seed)"
+    D->>E: "write module positions + visibility"
+    D->>E: "write colony positions, headings, visibility"
+    D->>D: "store module-relative reaction anchors"
+    Note over D,E: "each later tick: reactions only, the layout is never redone"
+```
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> Fixed: "Layout = Fixed"
+    [*] --> Random: "Layout = Random"
+    Fixed --> Shown: "the reviewed W3 reef"
+    Random --> Seeded: "Seed > 0"
+    Random --> Fresh: "Seed = 0"
+    Fresh --> Seeded: "entropy seed drawn on entry"
+    Seeded --> Shown: "same seed, same reef"
+```
+
+### Options weighed
+
+| | **A. Forth lays out a baked kit (recommended)** | B. Engine C++ generator, like `plant_growth.h` | C. Bake whole-level variants |
+|---|---|---|---|
+| New engine code | none, if R0 passes | a reef generator in the engine (needs permission) | none |
+| Rock shapes | K baked modules in seeded arrangements; optional per-lobe scale through DFRM | truly new rock every entry | only the baked variants |
+| Baked light, anime hulls | kept | lost, unless rebuilt in the engine | kept |
+| Rock count | 1–5 from the kit | any | one variant per count, times seeds |
+| Memory | the kit (estimate in R0) | small | one level per variant (about 8 MB each) |
+| Effort | T4 spike, then T3 | T4+, engine | T2, but the APK grows fast |
+
+### R0 — feasibility spike (T3, first)
+
+The spike answers these questions with measurements on the desktop and the Pixel, through the coordinator:
+
+1. **Moving pieces.** Can Forth reposition anchored mesh actors once at entry, and do they render and cull correctly afterwards at no per-frame cost?
+2. **Colliders.** Can a static collider move, or must each module carry its own collider actor that is shown or hidden with it? The boxfish's braking depends on the colliders.
+3. **Entropy.** What gives Forth a fresh seed per entry? Candidates are a host-passed seed (as the Planted Dream does) or an existing engine value. The fallback, a one-word `fresh-seed` engine primitive, needs permission.
+4. **Cost.** What do hidden actors cost, and what does the actor total do to cast1's frame time? Today's lowest median is 22.21 FPS against the 20 FPS gate.
+5. **Settings.** Does `property@` read a new Director-owned `ReefSettings`, and does the generic provider expose it on the TV, the phone and the coordinator?
+6. **Memory.** How big is the kit compared with today's 8 MB level?
+7. **Optional.** Can multi-curve DFRM lobe scales give cheap rock-shape variety, posed once at entry?
+
+### Decisions for Will
+
+| # | Decision | Recommendation |
+|---|---|---|
+| D5 | Architecture | **A**: a baked kit laid out by Forth. No engine code if R0 passes |
+| D6 | Rock count | **1–5, default 3**, today's look. Heroes come first; with fewer than 3 rocks some behaviours are absent |
+| D7 | Seed | **Seed 0 = a new reef on every entry** (like the Planted Tank); any other value repeats exactly |
+| D8 | Keep the fixed layout | **Yes**: Layout = Fixed shows the reviewed W3 reef; the default is Random once W5 passes review |
+
+### Mock-ups
+
+These are Blender renders of design prototypes, not engine captures. The colony prototype (`scatter_prototype.py`) runs the Planted Tank's founder-and-lineage scheme over the current rock with the production builders. The rock prototype (`render_rock_layouts.py`) arranges a toy module kit for different seeds and counts.
+
+[![W5 mock-ups: the fixed W3 layout, three colony seeds and four rock layouts](2026-11-08-reef-tanks-finish/w5-layouts.png)](2026-11-08-reef-tanks-finish/w5-layouts.html)
 
 ## W4 — the rest of the original plan (T3, coordinator for devices)
 
@@ -244,7 +403,16 @@ flowchart TD
     W0 --> CHK["check-thai-reef.py · T3"]
     CHK --> W4
     W0 --> POS["poster final + print · T3"]
+    REV -->|"approved"| R0["W5 R0 spike: move pieces, colliders,<br/>entropy, cost, settings · T3"]
+    R0 --> D5{"Will decides D5–D8"}
+    D5 --> W5a["W5a ReefSettings object + catalog · T2"]
+    D5 --> W5b["W5b rock-module kit + site tables · T4"]
+    W5a --> W5c["W5c Forth layout + module-relative anchors · T3"]
+    W5b --> W5c
+    W5c --> W4
 ```
+
+*W1–W3 are done and approved (green in the status diagram); W5 is proposed.*
 
 - **W0 and W2** can share one T3 agent: they touch the atlas and the UV writer.
 - **W1** is a T4 agent. **W3** runs after it, because the anchor table includes the new worm mouths.
@@ -305,3 +473,4 @@ All three are self-contained, 1440 × 900, and rebuilt with `python3 docs/plans/
 - [Worms](2026-11-08-reef-tanks-finish/worms.html): today's crowns in both styles; the rebuilt crowns set into the boulder; open, snapping and hidden states; the eight morphs in both styles.
 - [Placement](2026-11-08-reef-tanks-finish/placement.html): front and side elevations in world units, today against after; the actors that float.
 - [Skins](2026-11-08-reef-tanks-finish/skins.html): per-actor today vs proposed skin; the repacked atlas.
+- [W5 layouts](2026-11-08-reef-tanks-finish/w5-layouts.html): the fixed W3 layout, three seeds of clustered colonies, and four seeded rock layouts with different rock counts. Rebuilt with `render_scatter.py` and `render_rock_layouts.py` in the Blender container.
