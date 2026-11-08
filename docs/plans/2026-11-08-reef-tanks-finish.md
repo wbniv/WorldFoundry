@@ -227,7 +227,7 @@ One rule for every creature: **object-local UVs into its own cell**, so texel de
 
 ## W5 — procedural reef: random rocks, a rock count and clustered colonies, laid out in Forth (plan only)
 
-**Status: proposed, not started. Awaiting Will's decisions D5–D8 and the R0 spike.** W3's fixed placement shipped first, as asked (`1a30b727`, approved, pushed).
+**Status: D5–D8 decided** (Will, 2026‑11‑08: "d5: forth, d6: ok, d7: ok, d8: yes"). **The R0 spike is in progress.** W3's fixed placement shipped first, as asked (`1a30b727`, approved, pushed).
 
 Will, 2026‑11‑08:
 - "can we do that randomly-ish on initial placement in clusters? (not unlike the planted tank level)"
@@ -350,7 +350,7 @@ The spike answers these questions with measurements on the desktop and the Pixel
 
 ### Decisions for Will
 
-| # | Decision | Recommendation |
+| # | Decision | Decided (Will, 2026‑11‑08) |
 |---|---|---|
 | D5 | Architecture | **A**: a baked kit laid out by Forth. No engine code if R0 passes |
 | D6 | Rock count | **1–5, default 3**, today's look. Heroes come first; with fewer than 3 rocks some behaviours are absent |
