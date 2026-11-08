@@ -362,7 +362,7 @@ Private evidence is in `/tmp/reef-tablet-profile-realistic` and
 `/tmp/reef-tablet-profile-anime`. Recalculate with
 `python3 docs/diagnostics/reef-gameplay-verification-2026-11-05/profile-idle-window.py EVIDENCE_DIRECTORY`.
 
-## Cast1 wide-view performance, 2026-11-08 (in progress)
+## Cast1 wide-view performance, 2026-11-08
 
 Will made cast1 available. Jobs J‑c37040e4a233 (realistic) and
 J‑24ee1da60153 (anime) selected the appropriate style and measured 135 seconds;
@@ -372,9 +372,12 @@ and 22.30 FPS (p95 66.73 ms, p99 83.42 ms), respectively. Each sample includes
 one verification screenshot. The initial realistic sample also overlapped a
 tablet install attempt; no SurfaceFlinger sampling holes were reported.
 Both exceed the plan's 20 FPS average threshold individually, but the
-three-run median required by its referenced protocol is not yet available.
-Additional runs J‑3d5628c2b7d7, J‑550a740dd413, J‑54952b294001 and
-J‑bc816fc0e458 have been submitted in alternating styles. The second realistic
-run measured 24.38 FPS; the remaining runs must complete and be checked.
-Selected frame data and images for the first pair are in
+three-run median is used for the plan's referenced protocol. Additional runs
+J‑3d5628c2b7d7, J‑550a740dd413, J‑54952b294001 and J‑bc816fc0e458
+completed in alternating styles with the correct wide views and no reported
+sampling holes. Their 120-second window rates were 24.38, 22.18, 24.51 and
+22.21 FPS, respectively. The three-run median is **24.38 FPS realistic** and
+**22.21 FPS anime**, both above the 20 FPS gate. These are wide idle results;
+they do not establish interactive or long-duration thermal performance.
+Selected frame data and images for all six runs are in
 `docs/diagnostics/reef-cast1-performance-2026-11-08/`.

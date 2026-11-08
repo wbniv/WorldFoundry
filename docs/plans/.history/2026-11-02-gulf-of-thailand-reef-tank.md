@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/c5999723) | Record cast1 reef performance progress |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/71f23c4d) | Record reef motion and tablet performance checks |
 | [2026-11-07](https://github.com/wbniv/WorldFoundry/commit/fec5f37c) | Polish reef coral textures and anime outlines |
 | [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/9dab404c) | Plan: the content rule is species only |
@@ -9,6 +10,10 @@
 | [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/a0c95dda) | Plan: Gulf of Thailand Reef tank, A3 poster and DFRM v2 |
 
 <!--history-meta v1
+c5999723	author	Will Norris
+c5999723	added	4
+c5999723	deleted	0
+c5999723	files	1
 71f23c4d	author	Will Norris
 71f23c4d	added	24
 71f23c4d	deleted	0
