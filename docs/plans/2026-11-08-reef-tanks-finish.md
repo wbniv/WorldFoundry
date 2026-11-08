@@ -397,7 +397,7 @@ Probes P0–P3 ran on cast1 through the coordinator: three alternating runs of e
 1. ~~W5a settings (T3).~~ Done, `a205df47`.
 2. ~~The R0 device run, P0–P3, on copies of today's meshes.~~ Done; see above.
 3. ~~Find the cause of the realistic P3 load abort (T4).~~ The 32 MB room slot ran out; see above.
-4. ~~W5b, the kit, together with the budget-report change (T4), then P4.~~ Built; P4 passes on cast1: realistic 22.03 FPS, anime 20.26 FPS. **Open:** with Fixed shown, the anime kit level is 0.93 ms slower than before (20.83 against 21.24 FPS), and the cause is unknown. It is being profiled before W5c adds visible geometry. **Design note:** express the Fixed layout as one arrangement of the kit's modules, so that both layouts share actors instead of each carrying its own copies.
+4. ~~W5b, the kit, together with the budget-report change (T4), then P4.~~ Built; P4 passes on cast1: realistic 22.03 FPS, anime 20.26 FPS. With Fixed shown, the anime kit level is about 0.9 ms slower than before (20.83 against 21.24 FPS). Probes K1–K5 traced it to drawing the dressing as more, smaller per-module pieces; where the pieces sit doesn't matter. **Kept** (Will, 2026‑11‑08: "keep the slowdown; the increased flexibility is worth it"; "i'd rather we finish this level than worry about 1fps"). Finding the speed again is a TODO item for after the reef ships. **Design note:** express the Fixed layout as one arrangement of the kit's modules, so that both layouts share actors instead of each carrying its own copies.
 5. W5c, the Forth layout (T3).
 
 ### Decisions for Will
