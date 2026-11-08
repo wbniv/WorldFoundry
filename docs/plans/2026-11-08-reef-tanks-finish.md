@@ -25,7 +25,7 @@ The original plan's **verification steps are the spec**. This table records each
 | 7 | Selector lists ten tanks; indices 0–7 unchanged | **Built, not recorded** | Rows 9 and 10 are in `aquarium-menu.manifest`. |
 | 8 | Screensaver variants and Dream list | **Built, not recorded** | Both tanks are in `TankChoice.java` and `build-aquarium-screensaver-levels.py`. |
 | 9 | cast1: rows 9/10 start, Back returns, rows 1–8 still work | **Open** | Checked on the Lenovo and Pixel only. |
-| 10 | cast1: each style meets D6 (≥ 20 FPS) over 120 s wide idle | **Passing so far; re-run needed** | Medians: realistic 24.31, 26.24 and 26.34 FPS; anime 22.30, 24.44 and 24.29 FPS. W1 and W2 change animated geometry, so this step must be measured again after them. |
+| 10 | cast1: each style meets D6 (≥ 20 FPS) over 120 s wide idle | **PASS today; must be re-run** | Three-run medians recorded in `c1fd1d10`: realistic 24.38 FPS, anime 22.21 FPS. W1 and W2 change animated geometry, so this step is measured again after them. |
 | 11 | cast1: E7.1 seahorse no-regression and E7.2 merge bench | **Open** | No record found. |
 | 12 | cast1: Dream with each reef for 5 min; selection restored | **Open** | — |
 | 13 | Poster PDF copied to `~/Documents/TO PRINT/` | **Open** | — |
@@ -128,7 +128,7 @@ flowchart LR
 - **Twin spiral cones.** Each worm has two cones standing side by side on the crown axis, 0.11 units apart. Each cone has a 6-sided core with 5 rings, and **4 helical turns** of radiole fins, 10 per turn.
 - **Radioles are two-sided fins.** Each is two back-to-back triangles, because engine-wide back-face culling would drop a single-sided fin seen from behind ([culling plan](2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md)).
 - **Operculum.** A small spined cap beside the cones, hinged on the collar. It stays put when the crown retracts, so a "hidden" worm still reads as a worm.
-- **Budget.** About 310 triangles per worm, so **≤ 5,000 for all 15** (1,500 today). The cast1 headroom from step 10 (lowest median 22.3 FPS against a 20 FPS gate) is the reason this is affordable. Step 10 is re-measured, and the fallback is 3 turns per cone (about 3,800 triangles). Do not cut anything else to pay for it (Will, 2026‑11‑06: retain geometry, raise budgets).
+- **Budget.** About 310 triangles per worm, so **≤ 5,000 for all 15** (1,500 today). The cast1 headroom from step 10 (anime median 22.21 FPS against a 20 FPS gate) is the reason this is affordable. Step 10 is re-measured, and the fallback is 3 turns per cone (about 3,800 triangles). Do not cut anything else to pay for it (Will, 2026‑11‑06: retain geometry, raise budgets).
 
 ### Texture and colour
 
