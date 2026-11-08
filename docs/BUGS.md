@@ -158,9 +158,9 @@ CTest regressions and Chromecast verification for the supported teleport paths.
 
 ## Rotation mailboxes share Euler state across actors and commit only on yaw — 2026-10-06
 
-**Status:** OPEN. Root cause confirmed in the pinned production source; scoped runtime fix proposed, awaiting authorization.
+**Status:** FIXED [`4ca61197`](https://github.com/wbniv/WorldFoundry/commit/4ca61197) (2026‑11‑08, on `2026-new-level`; engine change approved by Will: "we should fix the engine"). Compiles in the linux-test container; the behavioural regression and device acceptance listed under **Investigation** are still pending.
 
-**Symptom:** Independent wing/limb pitch writes do not immediately update their actor's orientation. A later yaw write can apply another actor's pitch/roll to its recipient; yaw-only updates can also erase an actor's authored other axes. Surfaced during Finding Your Way iteration A's independently animated rigid parts. Actual repaired-runtime regression and device acceptance remain pending.
+**Symptom:** Independent wing/limb pitch writes do not immediately update their actor's orientation. A later yaw write can apply another actor's pitch/roll to its recipient; yaw-only updates can also erase an actor's authored other axes. Surfaced during Finding Your Way iteration A's independently animated rigid parts. Surfaced again on 2026‑11‑08 by the Thai reef's W5 R0 spike ([report](diagnostics/reef-w5-r0-2026-11-08/README.md)): the sea fan's A-only sway never applied, the feather star and nudibranch picked up the fan's tilt on their C writes, and the guard crab's A-only threat tilt (0.16 revolution) pitched the boxfish, whose heading write came next in the same tick.
 
 **Root cause:** `Actor::WriteSystemMailbox` (`wfsource/source/game/actor.cc`) declares one function-wide `static Euler rotationEuler`. `EMAILBOX_ROTATION_A` and `EMAILBOX_ROTATION_B` modify the shared scratch value but never call `SetRotation`; `EMAILBOX_ROTATION_C` commits all three shared axes to the receiving actor. Reads use the target actor's physical orientation, so a pitch-only write need not agree with readback.
 
@@ -168,9 +168,65 @@ CTest regressions and Chromecast verification for the supported teleport paths.
 
 **Why dormant:** Contiguous A/B/C writes to the same actor can make the final orientation appear correct. The new proof separately updates rigid-part pitch and player yaw, exposing both uncommitted axes and shared state. Historical use frequency and why earlier content did not report it are not established.
 
-**Fix:** Proposed: for each axis write, copy the receiving actor's current `PhysicalAttributes::Rotation()`, replace only that axis, and call `SetRotation` immediately. Preserve the other axes, mailbox IDs and revolution units; remove the shared static. A temporary level-side all-axis sequence can demonstrate art motion while the engine proposal is reviewed. Long-session animation phase wrapping is a separate level-script issue.
+**Fix:** As proposed: each axis write copies the receiving actor's current `PhysicalAttributes::Rotation()`, replaces only that axis and calls `SetRotation` immediately. The other axes, mailbox IDs and revolution units are preserved, and the shared static is gone. Scripts that write A, B and C for each actor behave as before; the urchin scripts (`urchin_motion.fth`, `urchin_spines.fth`), which write only B and C, now keep their own A instead of inheriting another actor's. The Thai reef also writes whole rotations through `generate.rotate()` ([`c5b6bc33`](https://github.com/wbniv/WorldFoundry/commit/c5b6bc33)). Source guard: `tests/test_actor_rotation_mailboxes.py` fails on the old code. Long-session animation phase wrapping remains a separate level-script issue.
 
-**Diff:** No engine patch applied yet. The proposed implementation and old-code negative control are in the investigation plan; replace this note with the actual approved fix diff and commit when implemented.
+**Diff** (`wfsource/source/game/actor.cc`, `Actor::WriteSystemMailbox`, [`4ca61197`](https://github.com/wbniv/WorldFoundry/commit/4ca61197)):
+```diff
+@@ -1416,8 +1416,6 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
+ {
+     RangeCheck(EMAILBOX_LOCAL_SYSTEM_START,boxnum,EMAILBOX_LOCAL_SYSTEM_MAX);
+ 
+-    static Euler rotationEuler;         // kts major kludge, what we really need is a wider interface to the scripting language
+-
+   //  cerr << "write-mailbox[" << boxnum << "]=[" << value << "]\t";
+ 	DBSTREAM2( cmailbox << "local system mailbox " << boxnum << " set to " << value << std::endl; )
+ 
+@@ -1513,12 +1511,17 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
+             theLevel->NotifyPositionWrite(*this);
+             break;
+         }
++        // Each axis write updates this actor's own rotation at once (revolutions).
++        // These writes used to go into one static Euler shared by every actor,
++        // applied only on a C write, so a lone A or B write leaked into whichever
++        // actor wrote C next and never reached its own actor.
+         case EMAILBOX_ROTATION_A:
+         {
+             Angle rot( Angle::Revolution( value ) );
+             DBSTREAM4( cstats << "actor got rotation a of " << rot << std::endl; )
+-       rotationEuler.SetA(rot);
+-            //_physicalAttributes.SetRotationA( rot );
++            Euler rotation = _physicalAttributes.Rotation();
++            rotation.SetA(rot);
++            _physicalAttributes.SetRotation( rotation );
+             break;
+         }
+ 
+@@ -1526,8 +1529,9 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
+         {
+             Angle rot( Angle::Revolution( value ) );
+             DBSTREAM4( cstats << "actor got rotation b of " << rot << std::endl; )
+-       rotationEuler.SetB(rot);
+-            //_physicalAttributes.SetRotationB( rot );
++            Euler rotation = _physicalAttributes.Rotation();
++            rotation.SetB(rot);
++            _physicalAttributes.SetRotation( rotation );
+             break;
+         }
+ 
+@@ -1535,9 +1539,9 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
+         {
+             Angle rot( Angle::Revolution( value ) );
+             DBSTREAM4( cstats << "actor got rotation c of " << rot << std::endl; )
+-       rotationEuler.SetC(rot);
+-            _physicalAttributes.SetRotation( rotationEuler );
+-            //_physicalAttributes.SetRotationC( rot );
++            Euler rotation = _physicalAttributes.Rotation();
++            rotation.SetC(rot);
++            _physicalAttributes.SetRotation( rotation );
+             break;
+         }
+ 
+```
 
 **Investigation:** [Finding Your Way rotation-mailbox runtime proposal](../../finding-your-way/docs/plans/2026-10-06-rotation-mailbox-runtime-fix.md). Required regression covers individual axes, all six write orders, authored nonzero orientations and interleaved actors, followed by desktop/both Android ABIs and actual Pixel/Chromecast captures.
 
