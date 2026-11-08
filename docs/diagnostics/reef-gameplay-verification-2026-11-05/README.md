@@ -195,3 +195,83 @@ frames show the crab changing leg and claw poses against the host coral while
 the fish moves; proximity-trigger timing remains less certain without runtime
 telemetry. This is a diagnostic camera, not the ordinary wide view. Restore of
 the full corrected APK was submitted as J‑a49487047589.
+
+J‑6d8a4146e8a4 steered the fish in a temporary close-camera build containing
+an indicator driven by the crab's reaction timer. The indicator was not visible
+in sampled frames, so the recording cannot distinguish a missed trigger from
+an obscured marker. The full APK was restored by J‑0224c1900369. A follow-up
+J‑b3814015dc81 adds a brief forced-on calibration period for the marker and
+is queued while the Pixel is locked. Its diagnostic APK must be replaced by
+the full app after the run. Lenovo reconnect J‑8cc313eefc82 again found no
+advertising wireless-debugging endpoint.
+J‑b3814015dc81 completed, but a personal picture-in-picture overlay covered
+the joystick region and the calibration marker was not established in sampled
+frames. The run does not verify crab trigger timing; preserve its evidence
+privately. Full corrected Aquarium was restored by J‑4cd9fb3ac8bb. Do not run
+further joystick sequences while another app's overlay covers the control.
+Lenovo reconnect J‑e8b297be473e, after the tablet was reported unlocked, still
+returned `device-not-found-on-network`; the coordinator could not determine
+whether wireless debugging was enabled. The APK was not installed there.
+
+After wireless debugging was enabled, Lenovo readd J‑6a039ec58c5e succeeded.
+J‑379b023a53c9 installed and hash-verified the corrected full APK
+`30554973298a13e9352344864ee42f6f804888df3439952194cc1508ebdfef1e`,
+and its `verify-launch` continuation completed. The enrolled tablet profile
+supports capture but does not advertise record, check, profile, or phone-input;
+the reef has not yet been selected and visually reviewed on the Lenovo.
+
+The coordinator was updated to admit scripted touch for a tablet only after a
+matching per-serial touchscreen probe. The first Lenovo touch run
+J‑7400aeb55f9b failed before injection because Android 11 exposes the focused
+stack API under a different name. Coordinator 0.1.87 added that version-aware
+focus check and retained the display, foreground, content and release guards.
+After deployment, calibration J‑65c3760c6ad4 successfully selected a menu row.
+Coordinator-owned touch recordings J‑36db5c2fc926 and J‑d3867b99cdaa then
+selected and displayed the realistic and anime reef respectively on the Lenovo.
+Both completed with cleanup and the full corrected APK remained installed.
+These are visual selector and idle checks, not a tablet gameplay or performance
+acceptance. Coordinator admission tests passed 97; the Android helper safety
+suite passed 16 JVM cases, and touch execution tests passed 31.
+
+On the Lenovo, coordinator-owned joystick runs J‑f4c621fc0d59 (realistic)
+and J‑4caacc2f89ed (anime) steered the boxfish to the cleaner station. In each
+recording, the shrimp move onto the stationary fish and then return to the
+station. These are short gameplay checks, not performance or long-duration
+acceptance. The crab proximity-trigger timing remains unverified.
+J‑af5188878e59 repeated the calibrated crab-timer diagnostic on the Lenovo
+without the Pixel's picture-in-picture overlay. The test completed, but the
+marker still was not identifiable in the frames, including its calibration
+period. It cannot establish trigger timing; the marker design needs correction.
+Full Aquarium was restored and its install verified by J‑66ca0912543f.
+
+## Measured crab proximity, 2026-11-08
+
+J‑eb43c3376ab9 exposed a diagnostic-only script error (`.` is not a defined
+Forth word in this engine). The temporary logging generator was corrected to
+use the existing print syscall; the actual reef scripts were unchanged.
+J‑27c68e995bee then recorded a steered approach that stopped at a minimum
+sampled distance of 1.125 from the crab, outside the 1.0 trigger radius.
+J‑978de2d35186 extended the approach: the logged timer was zero at sampled
+distance 1.19, then 2.0 at distance 0.64. It stayed at 2.0 while the fish was
+near, counted down after departure, and reached zero approximately two seconds
+later. The video shows the crab in its host coral and moving its legs and
+claws. This uses a close diagnostic camera and sampled 0.5-second telemetry;
+it does not claim the ordinary wide view resolves individual claws.
+
+Restore J‑c28adb8b5161 dispatched the full Aquarium install but failed while
+waiting for the Android 11 installer to finish. Recovery jobs J‑95305b69c895,
+J‑52944815658c and J‑63475961cba6 found that exact token-bound session still
+active, committed and sealed with no final status. The coordinator has kept
+its recovery fence; the installed APK and cleanup are unverified. Do not infer
+restoration from a package hash alone or start a new install before safe
+reconciliation. The coordinator is retrying recovery automatically.
+
+Automatic recovery J‑9e4210b681fa again reported the installer commit
+unresolved. Its receipt records a healthy shared transport refresh, no
+transport failure phases, no lifecycle flags and no surviving processes. The
+Pixel nevertheless remains held by the shared fence: the coordinator's
+automatic localization currently accepts a failed recovery that proves device
+loss, but not this device-local installer cleanup refusal. Extending that
+transition needs the same exclusive transport authority and race-safe evidence
+revalidation, while retaining the Lenovo's device fence and install journal;
+the healthy transport evidence does not prove the install is terminal.
