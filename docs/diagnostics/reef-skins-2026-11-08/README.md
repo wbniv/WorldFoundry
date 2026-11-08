@@ -3,23 +3,25 @@
 W2 of the [reef finishing plan](../../plans/2026-11-08-reef-tanks-finish.md), for Will's review. Will, 2026‑11‑08: "go ahead with W2". Colours follow the sourced [skin colour references](../../reference/thai-reef-skin-colours.md) (W0).
 
 > [!NOTE]
-> These are **Blender renders** (CPU Cycles, the static bake's sun) of the generator's own meshes with each style's real atlas. They are not engine captures, for the same reason as the [worm review](../reef-worms-2026-11-08/README.md): the desktop engine cannot run in the containers on this machine. In each image the **top row is before** (the code at `b8831c71` and its UV rule) and the **bottom row is after**.
+> These are **Blender renders** (CPU Cycles, the static bake's sun) of the generator's own meshes with each style's real atlas. They are not engine captures, for the same reason as the [worm review](../reef-worms-2026-11-08/README.md): the desktop engine cannot run in the containers on this machine. **Before** is the code at `b8831c71` with its UV rule; **after** is this change. Every image is labelled.
 
 ## Mobile animals
 
-Guard crab, banded shrimp, hermit crab, nudibranch, humbug.
+Left to right: guard crab, banded shrimp, hermit crab, nudibranch, humbug.
 
-![Realistic animals, before above, after below](realistic-animals.jpg)
-
-![Anime animals, before above, after below](anime-animals.jpg)
+| | Before | After |
+|---|---|---|
+| Realistic | ![](animals-realistic-before.jpg) | ![](animals-realistic-after.jpg) |
+| Anime | ![](animals-anime-before.jpg) | ![](animals-anime-after.jpg) |
 
 ## Sessile life
 
-Feather dusters, zoanthid carpet, sea fan, feather star.
+Left to right: feather dusters, zoanthid carpet, sea fan, feather star.
 
-![Realistic sessile life, before above, after below](realistic-sessile.jpg)
-
-![Anime sessile life, before above, after below](anime-sessile.jpg)
+| | Before | After |
+|---|---|---|
+| Realistic | ![](sessile-realistic-before.jpg) | ![](sessile-realistic-after.jpg) |
+| Anime | ![](sessile-anime-before.jpg) | ![](sessile-anime-after.jpg) |
 
 ## What changed
 
