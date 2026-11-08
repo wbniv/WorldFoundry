@@ -1,7 +1,7 @@
 """Procedural static coral blockouts using the established tank Mesh API."""
 import math
 import random
-from .scene import SEED
+from .scene import SEED, PORITES_LOBES, porites_relief
 
 
 def _massive_coral(mesh, center, radii, segments, rings):
@@ -12,15 +12,15 @@ def _massive_coral(mesh, center, radii, segments, rings):
         point = mesh.vertices[index]
         u = tuple((point[i] - center[i]) / radii[i] for i in range(3))
         # Smooth, multi-scale growth contours retain the massive colony shape.
-        relief = (1 + .055 * math.sin(7*u[0]+4*u[2])*math.cos(5*u[1]-2*u[2])
-                  + .025 * math.sin(13*u[0]+7*u[1]+3*u[2]))
+        relief = porites_relief(u)
         mesh.vertices[index] = tuple(center[i] + (point[i]-center[i])*relief for i in range(3))
 
 
 def hard_corals(mesh):
     """Add the major massive, branching, and table coral colonies."""
-    _massive_coral(mesh, (-2.75, -.78, 1.75), (.72, .48, .43), 32, 16)
-    _massive_coral(mesh, (-2.25, -.72, 1.88), (.42, .40, .34), 24, 12)
+    (main_c, main_r), (small_c, small_r) = PORITES_LOBES
+    _massive_coral(mesh, main_c, main_r, 32, 16)
+    _massive_coral(mesh, small_c, small_r, 24, 12)
     # Recursively branched cauliflower-like head; one mesh, no actor per branch.
     rng = random.Random(SEED + 101)
     x, y, z = (-3.25, -.82, 3.05)

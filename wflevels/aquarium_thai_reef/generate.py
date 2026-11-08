@@ -24,7 +24,7 @@ p.add_argument('--style', choices=('realistic', 'anime'), default='realistic')
 p.add_argument('--preview', type=Path, help='also render a Blender composition preview to this PNG')
 p.add_argument('--remesh-rocks', action='store_true', help='voxel-union the blockout rock masses before export')
 p.add_argument('--bake-light', action='store_true', help='bake static reef lighting and ambient occlusion')
-p.add_argument('--verification-target', choices=('duster', 'clam', 'crab', 'shrimp'),
+p.add_argument('--verification-target', choices=('duster', 'clam', 'crab', 'shrimp', 'worms'),
                help='make a diagnostic view centered on one reaction')
 p.add_argument('--verification-far', action='store_true', help='place the fish away from the diagnostic target')
 args = p.parse_args(sys.argv[sys.argv.index('--') + 1:])
@@ -34,9 +34,9 @@ out.mkdir(parents=True, exist_ok=True)
 sys.path.insert(0, str(repo / 'wflevels/aquarium_tanks'))
 sys.path.insert(0, str(repo / 'wftools'))
 from mesh import Mesh
-from reef.atlas import write_atlas
+from reef.atlas import write_atlas, FISH_DARK, FISH_WHITE, WATER_X0, CLAM_SHELL
 from reef.geometry import build_groups, triangles
-from reef.scene import anchor_map
+from reef.scene import anchor_map, worm_mouths, worm_origin
 from reef.fishes import boxfish, humbug
 from reef import life, invertebrates, worm_rig, crab_rig, feather_rig, flora_rig, corals
 import species
@@ -103,12 +103,18 @@ def blender_mesh(mesh, smooth=False):
                              max(v.co[axis] for v in data.vertices))
                             for axis in range(3)]
     uv = data.uv_layers.new(name='UVMap')
-    for poly, key in zip(data.polygons, mesh.colors):
+    explicit = getattr(mesh, 'face_uvs', {})
+    for index, (poly, key) in enumerate(zip(data.polygons, mesh.colors)):
+        if index in explicit:
+            # Object-local UVs authored with the geometry (e.g. worm crowns).
+            for li, value in zip(poly.loop_indices, explicit[index]):
+                uv.data[li].uv = value
+            continue
         if key in ('fish_dark', 'fish_white') or key.startswith('water_'):
-            x = (776 if key == 'fish_dark' else 792 if key == 'fish_white'
-                 else 808 + 16 * int(key.removeprefix('water_')))
+            x, y = (FISH_DARK if key == 'fish_dark' else FISH_WHITE if key == 'fish_white'
+                    else (WATER_X0 + 8 + 16 * int(key.removeprefix('water_')), FISH_DARK[1]))
             u = x / 1024
-            v = 520 / 1024
+            v = y / 1024
             for li in poly.loop_indices:
                 uv.data[li].uv = (u, v)
             continue
@@ -117,8 +123,9 @@ def blender_mesh(mesh, smooth=False):
                 co = data.vertices[data.loops[li].vertex_index].co
                 along = max(0.0, min(1.0, (co.x + .45) / .90))
                 across = max(0.0, min(1.0, abs(co.y) / .32))
-                uv.data[li].uv = ((900 + 120 * along) / 1024,
-                                  (500 + 24 * across) / 1024)
+                cx, cy, cw, ch = CLAM_SHELL
+                uv.data[li].uv = ((cx + 4 + (cw - 8) * along) / 1024,
+                                  (cy + 4 + (ch - 8) * across) / 1024)
             continue
         tile = swatches[key]
         if key in ('flowerpot', 'flowerpot_tip'):
@@ -131,14 +138,14 @@ def blender_mesh(mesh, smooth=False):
                     lo, hi = flowerpot_bounds[axis]
                     values.append((co[axis] - lo) / (hi - lo) if hi > lo else .5)
                 uv.data[li].uv = ((tile % 4 + .04 + .92 * values[0]) / 4,
-                                  (tile // 4 + .04 + .92 * values[1]) / 2)
+                                  (tile // 4 + .04 + .92 * values[1]) / 4)
             continue
         for li in poly.loop_indices:
             x, y, z = data.vertices[data.loops[li].vertex_index].co
             # Leave a small margin to reduce bleeding between neighboring tiles.
             frequency = 1.1 if tile == 1 else .37
             u = (tile % 4 + .04 + .92 * ((x * frequency + y * .11) % 1)) / 4
-            v = (tile // 4 + .04 + .92 * ((z * frequency + y * .11) % 1)) / 2
+            v = (tile // 4 + .04 + .92 * ((z * frequency + y * .11) % 1)) / 4
             uv.data[li].uv = (u, v)
     data.update()
     if smooth:
@@ -165,7 +172,7 @@ def add_outline(data, width):
         raise ValueError('anime outline requires the mesh UV layer')
     for face in faces:
         for loop in face.loops:
-            loop[uv_layer].uv = (776 / 1024, 520 / 1024)
+            loop[uv_layer].uv = (FISH_DARK[0] / 1024, FISH_DARK[1] / 1024)
     bm.to_mesh(data)
     bm.free()
     data.update()
@@ -201,7 +208,7 @@ for name, mesh in groups.items():
         for loop in obj.data.loops:
             x, y, z = obj.data.vertices[loop.vertex_index].co
             u = (.04 + .92 * ((x * .37 + y * .11) % 1)) / 4
-            v = (1 + .04 + .92 * ((z * .37 + y * .11) % 1)) / 2
+            v = (1 + .04 + .92 * ((z * .37 + y * .11) % 1)) / 4
             uv.data[loop.index].uv = (u, v)
         for poly in obj.data.polygons:
             poly.use_smooth = True
@@ -240,7 +247,8 @@ player = bpy.data.objects['Player']
 player.data = blender_mesh(hull)
 targets = {'duster': anchor_map()['feather_duster'],
            'clam': (anchor_map()['giant_clam'][0], -1.15, .82),
-           'crab': anchor_map()['guard_crab'], 'shrimp': anchor_map()['cleaner_station']}
+           'crab': anchor_map()['guard_crab'], 'shrimp': anchor_map()['cleaner_station'],
+           'worms': worm_origin()}
 verification = targets.get(args.verification_target)
 player.location = ((verification[0] + (.3 if not args.verification_far else 3),
                     verification[1], max(.9, verification[2] + .35))
@@ -285,12 +293,12 @@ for name, mesh, pos in (
 
 # Moving forms remain separate from the static reef so the director can pose
 # them without re-uploading the large static life group.
-worm_crown_origin = (-2.75, -1.35, 2.0)
+worm_crown_origin = worm_origin()
 for name, builder, pos in (
     ('SeaFan', life._sea_fan, (-4.45, -.55, 2.82)),
     ('FeatherStar', life._feather_star, (1.75, -.35, 2.8)),
     ('Nudibranch', life._nudibranch, (-4.0, -1.65, 1.05)),
-    ('WormCrowns', life._worm_crowns, worm_crown_origin),
+    ('WormCrowns', lambda mesh, _: life.worm_crowns(mesh, worm_crown_origin), worm_crown_origin),
     ('FeatherDusters', life.feather_dusters, anchor_map()['feather_duster']),
     ('FlowerpotCoral', corals.flowerpot, (-4.15, -.85, 2.42)),
     ('LeatherCoral', corals.leather_coral, (4.0, -.72, 2.76)),
@@ -429,7 +437,8 @@ life_tick = (f': reef-life\n 640 tk@ tk-sin .012 * INDEXOF_ROTATION_A {indices["
              f' -4 751 tk@ tk-sin .32 * + INDEXOF_X_POS {indices["Nudibranch"]} write-actor-mailbox\n'
              f' 1.05 751 tk@ .25 + tk-sin .07 * + INDEXOF_Z_POS {indices["Nudibranch"]} write-actor-mailbox\n')
 life_tick += ' 1064 tk@ 0 = if\n' + ''.join(f' 1 {1020+i} tk!\n' for i in range(15)) + ' 1 1064 tk! then\n'
-for i, (x, y, z) in enumerate(life.worm_centers(worm_crown_origin)):
+for i, worm in enumerate(worm_mouths()):
+    x, y, z = worm['mouth']
     life_tick += f' {x:.6f} {y:.6f} {z:.6f} {i} reef-worm\n'
 life_tick += f' 1027 tk@ 642 tk! 1155 15 {indices["WormCrowns"]} dfrm-pose-curves 1099 tk!\n'
 duster_x, duster_y, duster_z = anchor_map()['feather_duster']

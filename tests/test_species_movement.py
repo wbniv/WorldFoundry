@@ -86,10 +86,21 @@ def test_reef_worm_crowns_retract_near_player(vm):
     reopening = next(i for i in range(60, len(retreat)) if retreat[i][1007] == 0)
     assert retreat[reopening][642] < .1
     assert retreat[reopening + 90][642] > .95  # unfurls over 1.5 seconds
-    individual = vm('thai_reef', 'reset -3.25 -.95 1.76\nstep 180 0 .0166667\n')
-    assert individual[-1][1020] < .2
-    assert individual[-1][1034] > .9
-    assert 3 <= individual[-1][1000] < individual[-1][1001] <= 8
+    # Worm mouths come from the reef generator (plan 2026-11-08 W1); put the
+    # fish just in front of worm 0 and check each worm reacts on its own.
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'wflevels' / 'aquarium_thai_reef'))
+    from reef.scene import worm_mouths
+    worms = worm_mouths()
+    fish = tuple(worms[0]['mouth'][i] + .3 * worms[0]['normal'][i] for i in range(3))
+    individual = vm('thai_reef', 'reset {:.4f} {:.4f} {:.4f}\nstep 180 0 .0166667\n'.format(*fish))
+    near = [i for i, w in enumerate(worms) if math.dist(fish, w['mouth']) < .75]
+    far = max(range(len(worms)), key=lambda i: math.dist(fish, worms[i]['mouth']))
+    assert 0 in near and math.dist(fish, worms[far]['mouth']) > .85
+    assert all(individual[-1][1020 + i] < .2 for i in near)
+    assert individual[-1][1020 + far] > .9
+    timers = [individual[-1][1000 + i] for i in near]
+    assert all(3 <= t <= 8 for t in timers) and len(near) >= 2 and len(set(timers)) > 1
 
 
 def test_reef_feather_dusters_retract_independently(vm):

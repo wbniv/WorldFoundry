@@ -18,6 +18,8 @@ def build_groups(Mesh):
     for group in ('left','right','arch'):
         rockscape.populate(groups['reef_' + group], group)
     corals.hard_corals(groups['reef_hard'])
+    # Worm collars and opercula belong to the boulder: static, baked, outlined.
+    life.worm_collars(groups['reef_hard'])
     corals.soft_corals(groups['reef_soft'])
     sponges.populate(groups['reef_sponges'])
     life.populate(groups['reef_life'])

@@ -143,47 +143,185 @@ def _zoanthids(mesh, center):
             mesh.swept_tube([start,end], .009, 'zoanthid', 5)
 
 
-def worm_centers(center, count=15):
-    x, y, z = center
-    result = []
-    for worm in range(count):
-        col, row = worm % 5, worm // 5
-        wx = x + (col - 2) * .25 + .03 * math.sin(worm * 2.3)
-        wy = y - .025 * row
-        wz = z + (row - 1) * .24 + .03 * math.sin(worm * 1.7)
-        result.append((wx, wy, wz))
-    return result
+# Christmas tree worms (Spirobranchus): the tube is buried in the Porites
+# boulder; only a calcareous collar, the operculum and two spiral crowns show.
+# Mouths, axes, sizes and colour morphs come from scene.worm_mouths().
+WORM_CELL = 8                 # atlas cell (atlas.py): 8 morph rows of 32 px
+WORM_TURNS = 4.5              # helical turns of radioles per crown
+WORM_SEGMENTS = 36            # ribbon segments per crown (8 per turn)
+WORM_CORE_SIDES = 4
 
 
-def _worm_crowns(mesh, center, count=15, ranges=None):
-    for worm, (wx, wy, wz) in enumerate(worm_centers(center, count)):
+def _v_add(*vs):
+    return tuple(sum(v[i] for v in vs) for i in range(3))
+
+
+def _v_mul(v, k):
+    return tuple(x * k for x in v)
+
+
+def _v_unit(v):
+    m = math.sqrt(sum(x * x for x in v))
+    return tuple(x / m for x in v)
+
+
+def _v_cross(a, b):
+    return (a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0])
+
+
+def _v_dot(a, b):
+    return sum(x * y for x, y in zip(a, b))
+
+
+def worm_frame(axis):
+    """Unit axis plus two perpendiculars; e1 runs roughly screen-right."""
+    e1 = _v_unit(_v_cross(axis, (0, -1, 0)))
+    e2 = _v_cross(axis, e1)
+    return e1, e2
+
+
+def worm_height(size):
+    return .17 * size
+
+
+def _uv_face(mesh, points, uvs, key='worm'):
+    mesh.face(points, key)
+    if not hasattr(mesh, 'face_uvs'):
+        mesh.face_uvs = {}
+    mesh.face_uvs[len(mesh.faces) - 1] = tuple(uvs)
+
+
+def _oriented(points, uvs, outward):
+    """Order a quad so its right-hand normal points along outward."""
+    a, b, c = points[0], points[1], points[2]
+    n = _v_cross(tuple(b[i] - a[i] for i in range(3)), tuple(c[i] - a[i] for i in range(3)))
+    if _v_dot(n, outward) < 0:
+        return list(reversed(points)), list(reversed(uvs))
+    return list(points), list(uvs)
+
+
+def worm_crowns(mesh, origin, ranges=None):
+    """Twin spiral crowns for every worm, in coordinates local to origin.
+
+    Each crown is a thin core cone wrapped by a two-sided helical ribbon of
+    radioles with a jagged outer edge. UVs are explicit (mesh.face_uvs):
+    u runs along the helix, v from the radiole roots to their tips inside the
+    worm's morph row. ranges, if given, receives one dict per worm with its
+    vertex range, local mouth, axis and crown height (for worm_rig).
+    """
+    from .scene import worm_mouths
+    cell_u0 = (WORM_CELL % 4) * 256 / 1024
+    for worm in worm_mouths():
         start = len(mesh.vertices)
-        mesh.swept_tube([(wx, wy, wz - .08), (wx, wy, wz + .04)], .018, 'sand', 6)
-        # Two small, tiered conical plumes per worm. Their jagged fringes
-        # suggest the spiral radioles without overlapping adjacent crowns.
+        mouth = tuple(worm['mouth'][i] - origin[i] for i in range(3))
+        axis, size = worm['axis'], worm['size']
+        e1, _ = worm_frame(axis)
+        height, base_r = worm_height(size), .055 * size
+        row_v0 = ((WORM_CELL // 4) * 256 + 32 * worm['morph']) / 1024
+        v_root, v_tip = row_v0 + 4 / 1024, row_v0 + 28 / 1024
         for side in (-1, 1):
-            cx = wx + side * .045
-            for tier in range(5):
-                z0 = wz + .025 + tier*.033
-                z1 = z0 + .014
-                width = .052 * (1 - tier/6)
-                upper = width * .52
-                mesh.face([(cx-width, wy-.025, z0), (cx+width, wy-.025, z0),
-                           (cx+upper, wy-.025, z1), (cx-upper, wy-.025, z1)],
-                          ('polyp', 'coralline', 'sponge')[worm % 3])
-                # Individual radioles project from each tier, softening the
-                # stacked-strip silhouette while preserving the single rigged
-                # crown and its existing per-worm vertex range.
-                for direction in (-1, 1):
-                    for ray in range(3):
-                        root_x = cx + direction*width*(.28 + .24*ray)
-                        tip_x = root_x + direction*(.018 + .006*ray)*(1-tier/7)
-                        mesh.face([(root_x, wy-.026, z0),
-                                   (tip_x, wy-.026, z0+.010),
-                                   (root_x+direction*.004, wy-.026, z0+.020)],
-                                  ('polyp', 'coralline', 'sponge')[worm % 3])
+            # The two spirals splay slightly from the shared mouth.
+            c_axis = _v_unit(_v_add(axis, _v_mul(e1, side * .10)))
+            c1, c2 = worm_frame(c_axis)
+            # Lifted a little along the axis so the off-centre base clears the coral.
+            base = _v_add(mouth, _v_mul(e1, side * .03 * size), _v_mul(axis, .012 * size))
+
+            def centre(t):
+                return _v_add(base, _v_mul(c_axis, t * height))
+
+            def core_r(t):
+                return base_r * .32 * (1 - t)
+
+            def radial(angle):
+                return _v_add(_v_mul(c1, math.cos(angle)), _v_mul(c2, math.sin(angle)))
+
+            # Core cone.
+            rings = (0, .4, .75)
+            for ri in range(len(rings)):
+                t0 = rings[ri]
+                for k in range(WORM_CORE_SIDES):
+                    a0 = math.tau * k / WORM_CORE_SIDES
+                    a1 = math.tau * (k + 1) / WORM_CORE_SIDES
+                    u0 = cell_u0 + (.04 + .92 * k / WORM_CORE_SIDES) * .25
+                    u1 = cell_u0 + (.04 + .92 * (k + 1) / WORM_CORE_SIDES) * .25
+                    p00 = _v_add(centre(t0), _v_mul(radial(a0), core_r(t0)))
+                    p01 = _v_add(centre(t0), _v_mul(radial(a1), core_r(t0)))
+                    if ri + 1 < len(rings):
+                        t1 = rings[ri + 1]
+                        p10 = _v_add(centre(t1), _v_mul(radial(a0), core_r(t1)))
+                        p11 = _v_add(centre(t1), _v_mul(radial(a1), core_r(t1)))
+                        pts, uvs = _oriented([p00, p01, p11, p10],
+                                             [(u0, v_root)] * 2 + [(u1, v_root)] * 2,
+                                             radial((a0 + a1) / 2))
+                    else:
+                        apex = centre(1.0)
+                        pts, uvs = _oriented([p00, p01, apex],
+                                             [(u0, v_root), (u1, v_root), (u0, v_tip)],
+                                             radial((a0 + a1) / 2))
+                    _uv_face(mesh, pts, uvs)
+            # Helical ribbon of radioles, two-sided so back-face culling
+            # never hides the far side of a whorl.
+            phase = 0 if side < 0 else math.pi
+            inner, outer, us = [], [], []
+            for k in range(WORM_SEGMENTS + 1):
+                f = k / WORM_SEGMENTS
+                t = .1 + .86 * f
+                angle = phase + side * WORM_TURNS * math.tau * f
+                d = radial(angle)
+                reach = base_r * (1 - .82 * t)
+                inner.append(_v_add(centre(t), _v_mul(d, core_r(t))))
+                outer.append(_v_add(centre(t), _v_mul(d, reach), _v_mul(c_axis, -.18 * reach)))
+                us.append(cell_u0 + (.04 + .92 * f) * .25)
+            for k in range(WORM_SEGMENTS):
+                quad = [inner[k], outer[k], outer[k + 1], inner[k + 1]]
+                uvs = [(us[k], v_root), (us[k], v_tip), (us[k + 1], v_tip), (us[k + 1], v_root)]
+                for facing in (c_axis, _v_mul(c_axis, -1)):
+                    pts, puv = _oriented(quad, uvs, facing)
+                    _uv_face(mesh, pts, puv)
         if ranges is not None:
-            ranges.append((start, len(mesh.vertices)))
+            ranges.append({'start': start, 'end': len(mesh.vertices), 'mouth': mouth,
+                           'axis': axis, 'height': height})
+
+
+def worm_collars(mesh):
+    """Static calcareous collars and opercula at every worm mouth (world space)."""
+    from .scene import worm_mouths
+    for worm in worm_mouths():
+        n, s = worm['normal'], worm['size']
+        e1 = _v_unit(_v_cross(n, (0, -1, 0)))
+        e2 = _v_cross(n, e1)
+        base = _v_add(worm['surface'], _v_mul(n, -.01 * s))
+        top = _v_add(worm['surface'], _v_mul(n, .012 * s))
+        sides = 8
+        def ring(centre, radius):
+            return [_v_add(centre, _v_mul(e1, radius * math.cos(math.tau * k / sides)),
+                           _v_mul(e2, radius * math.sin(math.tau * k / sides))) for k in range(sides)]
+        out_lo, out_hi = ring(base, .03 * s), ring(top, .027 * s)
+        in_hi, in_lo = ring(top, .019 * s), ring(_v_add(top, _v_mul(n, -.02 * s)), .019 * s)
+        for k in range(sides):
+            j = (k + 1) % sides
+            mid = _v_unit(_v_add(_v_mul(e1, math.cos(math.tau * (k + .5) / sides)),
+                                 _v_mul(e2, math.sin(math.tau * (k + .5) / sides))))
+            for quad, facing in (([out_lo[k], out_lo[j], out_hi[j], out_hi[k]], mid),
+                                 ([out_hi[k], out_hi[j], in_hi[j], in_hi[k]], n),
+                                 ([in_hi[k], in_hi[j], in_lo[j], in_lo[k]], _v_mul(mid, -1))):
+                pts, _ = _oriented(quad, [(0, 0)] * 4, facing)
+                mesh.face(pts, 'sand')
+        # Operculum: a small spined cap resting on the collar's upper rim.
+        cap_c = _v_add(top, _v_mul(e2, .026 * s), _v_mul(n, .004 * s))
+        cap = ring(cap_c, .013 * s)
+        cap_top = _v_add(cap_c, _v_mul(n, .006 * s))
+        for k in range(sides):
+            j = (k + 1) % sides
+            pts, _ = _oriented([cap[k], cap[j], cap_top], [(0, 0)] * 3, n)
+            mesh.face(pts, 'sand')
+        for spine in (-1, 1):
+            root = _v_add(cap_top, _v_mul(e1, spine * .005 * s))
+            tip = _v_add(root, _v_mul(n, .012 * s), _v_mul(e1, spine * .004 * s))
+            side_a = _v_add(root, _v_mul(e2, .003 * s))
+            side_b = _v_add(root, _v_mul(e2, -.003 * s))
+            for tri in ([side_a, side_b, tip], [side_b, side_a, tip]):
+                mesh.face(tri, 'sand')
 
 
 def feather_dusters(mesh, center, ranges=None):

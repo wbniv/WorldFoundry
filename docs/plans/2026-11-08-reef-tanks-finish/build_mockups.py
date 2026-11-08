@@ -33,9 +33,19 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 CAPTURES = REPO / "docs/diagnostics/reef-cast1-performance-2026-11-08"
 sys.path.insert(0, str(REPO / "wflevels/aquarium_thai_reef"))
-from reef.life import worm_centers  # noqa: E402  (today's worm grid)
 
 SEED = 20261108
+
+
+def worm_centers(center, count=15):
+    """The 2026-11-08 worm grid (life.py before the W1 rebuild), for "today"."""
+    x, y, z = center
+    out = []
+    for worm in range(count):
+        col, row = worm % 5, worm // 5
+        out.append((x + (col - 2) * .25 + .03 * math.sin(worm * 2.3), y - .025 * row,
+                    z + (row - 1) * .24 + .03 * math.sin(worm * 1.7)))
+    return out
 WORM_ORIGIN_TODAY = (-2.75, -1.35, 2.0)   # generate.py worm_crown_origin
 # Porites lobes, reef/corals.py hard_corals(): centre, radii
 LOBES = (((-2.75, -.78, 1.75), (.72, .48, .43)),

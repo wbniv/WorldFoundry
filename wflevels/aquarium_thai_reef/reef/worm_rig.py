@@ -1,18 +1,23 @@
-"""Bind the exported textured worm mesh to fifteen independent DFRM curves."""
+"""Bind the exported textured worm mesh to fifteen independent DFRM curves.
+
+Each curve is rooted at its worm's tube mouth and runs along the crown axis
+in two samples of half the crown height, so the per-curve scale (retract)
+collapses the crown into the mouth and the crown can also sway.
+"""
 import itertools
 import struct
 
-from .life import _worm_crowns, worm_centers
+from .life import worm_crowns, worm_frame
+from .scene import worm_origin
 
 
 def bind_exported_mesh(path, Mesh, dfrm):
     source = Mesh('worm_source')
     ranges = []
-    _worm_crowns(source, (0, 0, 0), ranges=ranges)
-    centers = worm_centers((0, 0, 0))
+    worm_crowns(source, worm_origin(), ranges=ranges)
     buckets = {}
-    for curve, (start, end) in enumerate(ranges):
-        for p in source.vertices[start:end]:
+    for curve, r in enumerate(ranges):
+        for p in source.vertices[r['start']:r['end']]:
             key = tuple(round(v * 1000) for v in p)
             buckets.setdefault(key, []).append((p, curve))
 
@@ -43,16 +48,18 @@ def bind_exported_mesh(path, Mesh, dfrm):
         if best is None or sum((p[i] - best[0][i]) ** 2 for i in range(3)) > .000001:
             raise ValueError(f'cannot map exported worm vertex {p}')
         curve = best[1]
-        root_z = centers[curve][2] - .15
-        sample = 2 * curve + int(p[2] >= root_z + .32)
+        r = ranges[curve]
+        along = sum((p[i] - r['mouth'][i]) * r['axis'][i] for i in range(3))
+        sample = 2 * curve + int(along >= r['height'] / 2)
         bindings.append((dfrm.ON_SAMPLE, sample, 1.0))
 
     chains = []
-    for x, y, z in centers:
-        root_z = z - .15
-        chains.append([{'head': (x, y, root_z + i * .32),
-                        'tail': (x, y, root_z + (i + 1) * .32),
-                        'z_axis': (1, 0, 0), 'limits': (45, 45, 45, 45)}
+    for r in ranges:
+        mouth, axis, half = r['mouth'], r['axis'], r['height'] / 2
+        _, e2 = worm_frame(axis)
+        chains.append([{'head': tuple(mouth[k] + axis[k] * half * i for k in range(3)),
+                        'tail': tuple(mouth[k] + axis[k] * half * (i + 1) for k in range(3)),
+                        'z_axis': e2, 'limits': (45, 45, 45, 45)}
                        for i in range(2)])
     payload = dfrm.build_chunk_curves(chains, vertices, bindings, knots=(0, 1))
     chunk = b'DFRM' + struct.pack('<I', len(payload)) + payload + b'\0' * (-len(payload) % 4)

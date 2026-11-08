@@ -46,7 +46,7 @@
     "reef_left": 7260,
     "reef_right": 7568,
     "reef_arch": 6608,
-    "reef_hard": 10706,
+    "reef_hard": 11606,
     "reef_soft": 864,
     "reef_sponges": 480,
     "reef_life": 8866,
@@ -55,7 +55,7 @@
     "reef_life_2": 9079,
     "reef_life_3": 1212
   },
-  "triangle_total": 63490,
+  "triangle_total": 64390,
   "animated_triangles": {
     "BoxfishVisual": 412,
     "HumbugOne": 286,
@@ -63,7 +63,7 @@
     "SeaFan": 2216,
     "FeatherStar": 10140,
     "Nudibranch": 1156,
-    "WormCrowns": 1500,
+    "WormCrowns": 4920,
     "FeatherDusters": 1904,
     "FlowerpotCoral": 6640,
     "LeatherCoral": 1228,
@@ -151,9 +151,9 @@
       0.95
     ],
     "tree_worms": [
-      -0.175,
-      -0.15,
-      1.1975
+      -2.83558,
+      -1.09053,
+      1.99625
     ],
     "feather_star": [
       0.91,

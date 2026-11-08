@@ -17,6 +17,7 @@ from mesh import Mesh
 from reef.geometry import build_groups
 from reef.fishes import boxfish, humbug
 from reef import life, invertebrates, corals
+from reef.scene import worm_origin
 FLAT={'fish_dark','fish_white'}
 def area(vs):
     a=[0,0,0]
@@ -27,8 +28,15 @@ def area(vs):
 RESULTS={}
 def report(name, m):
     tot=0; flat=0; keys=collections.Counter(); small=0
-    for f,k in zip(m.faces,m.colors):
+    explicit=getattr(m,'face_uvs',{})
+    for fi,(f,k) in enumerate(zip(m.faces,m.colors)):
         vs=[m.vertices[i] for i in f]; a=area(vs); tot+=a; keys[k]+=a
+        if fi in explicit:
+            uv=explicit[fi]  # authored UVs: measure their own texel extent
+            span=math.sqrt(area([(u*1024,v*1024,0) for u,v in uv]))
+            big=max(max(u for u,_ in uv)-min(u for u,_ in uv), max(v for _,v in uv)-min(v for _,v in uv))*1024
+            if max(span,big)<3: small+=a
+            continue
         if k in FLAT or k.startswith('water_'): flat+=a
         # world-projected tile UV: 0.37 cycles/unit over 0.23 of 1024 => ~87 texels/unit; 1.1 for polyp
         span=math.sqrt(a)*(256*.92*(1.1 if k in('porites','pocillopora','pocillopora_tip','acropora','leather','polyp') else .37))
@@ -39,7 +47,7 @@ def report(name, m):
 for n,g in build_groups(Mesh).items():
     if n!='reef_shell': report(n,g)
 for n,mk in (('Boxfish',boxfish),('Humbug',humbug)): report(n,mk(Mesh))
-for n,b in (('SeaFan',life._sea_fan),('FeatherStar',life._feather_star),('Nudibranch',life._nudibranch),('WormCrowns',life._worm_crowns),('FeatherDusters',life.feather_dusters),('Flowerpot',corals.flowerpot),('Leather',corals.leather_coral),('GiantClam',life._clam),('GuardCrab',invertebrates.guard_crab),('Shrimp',invertebrates.banded_shrimp),('HermitCrab',invertebrates.hermit_crab)):
+for n,b in (('SeaFan',life._sea_fan),('FeatherStar',life._feather_star),('Nudibranch',life._nudibranch),('WormCrowns',lambda m,_: life.worm_crowns(m, worm_origin())),('FeatherDusters',life.feather_dusters),('Flowerpot',corals.flowerpot),('Leather',corals.leather_coral),('GiantClam',life._clam),('GuardCrab',invertebrates.guard_crab),('Shrimp',invertebrates.banded_shrimp),('HermitCrab',invertebrates.hermit_crab)):
     m=Mesh(n.lower()); b(m,(0,0,0)); report(n,m)
 
 if '--check' in sys.argv[1:]:
