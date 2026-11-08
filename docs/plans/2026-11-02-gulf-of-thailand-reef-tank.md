@@ -11,6 +11,10 @@ timer activates inside its 1.0 radius and clears about two seconds after the
 fish leaves; the normal wide view does not resolve its individual claws. Both
 reef styles have been selected and seen on the Lenovo. The full Aquarium APK
 was restored there and its hash verified after an initially delayed install.
+Close-camera joystick recordings also show the clam, feather dusters,
+Christmas-tree worms, and humbugs react to approach and recover after
+departure in both styles. The original realistic worm job needed coordinator
+recovery despite retaining usable video; see the verification notes for limits.
 These findings supersede older incomplete observations below; the remaining
 reaction, motion, longer performance and acceptance checks are still open.
 Evidence and limitations are in the [gameplay verification notes](../diagnostics/reef-gameplay-verification-2026-11-05/README.md).

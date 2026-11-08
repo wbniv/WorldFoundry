@@ -290,8 +290,8 @@ journal intact. Container tests cover local isolation, unsafe or racing evidence
 and other origins' fences. This does not force Android to complete an install:
 the existing automatic installer retry budget remains bounded. Coordinator
 0.1.89 (`ac9d275`) was deployed through the reviewed, recovery-preserving
-upgrade on 2026-11-08; the queue resumed. The isolation path has not been
-reproduced on hardware since deployment.
+upgrade on 2026-11-08; the queue resumed. Later live isolation evidence is
+recorded below.
 
 On 2026-11-08 Lenovo recordings J‑18b5f791b808 (realistic) and
 J‑219de7340cc1 (anime) reused the verified full APK and completed with safe
@@ -389,6 +389,23 @@ style, the fish moved down into the coral as the boxfish approached and
 returned above it after departure. This verifies the visible transition, not
 its precise timing. Private recordings are in `/tmp/reef-humbug-steered-real`
 and `/tmp/reef-humbug-steered-anime`; J‑2400c6a05a72 restored the full app.
+
+Anime crab close-camera recording J‑a1377ed60dc6 used a snapshot of committed
+reef source `33552e4a`, avoiding another agent's in-progress worm changes.
+One-second samples show the claws changing from forward to raised as the fish
+approaches and settling as it retreats; the fish clips through the diagnostic
+camera intermittently, so the gesture is partly obscured. This visually
+corroborates the threat transition without independently measuring its timer.
+Private evidence is at `/tmp/reef-crab-steered-anime`. Full-app restore
+J‑d4f6e297ff51 initially had an unresolved installer commit. Automatic readd
+J‑52aa901722ad verified the transport and narrowed the shared fence while
+retaining the tablet fence; the recorded `shared-fence-localized` event is
+live evidence for coordinator 0.1.89's isolation path. Automatic retry
+J‑229aea2d7cb8 later confirmed terminal success, verified the full APK hash
+`30554973298a13e9352344864ee42f6f804888df3439952194cc1508ebdfef1e`, removed
+the temporary installer files and reported safe restoration. The event proves
+the shared fence was removed; no unrelated device job was used as a live
+admission test during that interval.
 
 ## Lenovo wide-view performance, 2026-11-08
 
