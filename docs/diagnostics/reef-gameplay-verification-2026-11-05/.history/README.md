@@ -1,10 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/64fef609) | Record reef crab gameplay verification |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/c2bf2057) | Place guard crab on its host coral |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b9baa575) | Improve reef shrimp cleaning placement |
 | [2026-11-05](https://github.com/wbniv/WorldFoundry/commit/2e8c25c0) | Refine reef models and animate tank life |
 
 <!--history-meta v1
+64fef609	author	Will Norris
+64fef609	added	80
+64fef609	deleted	0
+64fef609	files	1
 c2bf2057	author	Will Norris
 c2bf2057	added	48
 c2bf2057	deleted	0

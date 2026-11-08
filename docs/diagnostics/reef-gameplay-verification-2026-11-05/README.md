@@ -275,3 +275,18 @@ loss, but not this device-local installer cleanup refusal. Extending that
 transition needs the same exclusive transport authority and race-safe evidence
 revalidation, while retaining the Lenovo's device fence and install journal;
 the healthy transport evidence does not prove the install is terminal.
+
+Subsequent automatic recovery J‑2fef9b1ef0b3 observed that session terminal
+with successful status, verified the installed full APK hash
+`30554973298a13e9352344864ee42f6f804888df3439952194cc1508ebdfef1e`, and
+removed both temporary installer files. Its receipt reports safe restoration;
+the Lenovo and Pixel subsequently reported ready. The delay and unnecessary
+shared hold still require a coordinator correction.
+
+Coordinator change `97bc567` permits automatic isolation for this exact
+unresolved-installer outcome only after an owned, safely finished recovery and
+fresh shared-transport verification; it leaves the device fence and install
+journal intact. Container tests cover local isolation, unsafe or racing evidence,
+and other origins' fences. This does not force Android to complete an install:
+the existing automatic installer retry budget remains bounded. The change is
+not yet deployed or verified on hardware.
