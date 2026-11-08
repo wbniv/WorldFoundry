@@ -83,7 +83,7 @@ Every mesh does carry the atlas: `blender_mesh` UV-maps all faces ([`generate.py
 | Nudibranch | 667 | **62 %** | 25 % | flat black, `clam` | needs its own skin |
 | Feather dusters | 944 | **42 %** | 4 % | flat white, `sponge` | needs its own skin |
 | Zoanthid carpets (static `reef_life`, `reef_life_1`; 94 % zoanthid) | 9,124 | 0 % | **66 %** | `zoanthid` | object-local UVs |
-| Humbugs ×2 | 122 each | **100 %** | 0 % | flat black and white | bars are correct; add a sheen |
+| Humbugs ×2 | 122 each | **100 %** | 0 % | flat black and white | bars are correct; add a sheen. **Since 2026‑11‑09 (D10) the pair is *Dascyllus reticulatus*:** one black bar behind the head, a faint grey rear bar, a scale-net body ([review](../diagnostics/reef-humbug-swap-2026-11-09/README.md)) |
 | Sea fan | 1,067 | 0 % | 16 % | `coralline` | **accept untextured** (D3) |
 | Feather star | 4,512 | 0 % | 6 % | `polyp`, `coralline` | **accept untextured** (D3) |
 | Flowerpot, leather coral, clam, boxfish, rock, hard corals | — | ≤ 4 % | ≤ 30 % | own tiles | OK |
@@ -197,10 +197,10 @@ One rule for every creature: **object-local UVs into its own cell**, so texel de
 | 12 nudibranch | nudibranch | black body, grey-blue longitudinal ridges, yellow tubercle tips (W0 reference) |
 | 13 hermit shell | hermit crab | gastropod shell with spiral growth lines; banded legs |
 | 14 crust fine | encrusting sponge and coralline crusts | fine crust mottle at the crusts' scale |
-| 15 utility | humbugs, fans, water | flat swatches, water bands, clam shell, white-to-grey sheen, fan gradient |
+| 15 utility | humbugs, fans, water | flat swatches, water bands, clam shell, white-to-grey sheen, fan gradient; since D10 also a grey swatch and the *D. reticulatus* scale net (rows 192–255) |
 
 - **Zoanthid carpets** keep tile 5. Each polyp disc gets planar UVs that span one flower-head cell, so every polyp shows an oral disc and a ring of tentacles instead of a sub-texel smear.
-- **Humbugs** keep their bars. In the realistic style only, a belly-to-back sheen from cell 15 replaces flat white.
+- **Humbugs** keep their bars. In the realistic style only, a belly-to-back sheen from cell 15 replaces flat white. *Superseded 2026‑11‑09 by D10:* the pair is now *Dascyllus reticulatus*, with one black bar behind the head running onto the dorsal and pelvic fins, a faint grey rear bar, a pale grey body with a dark scale-margin net (realistic only), black pelvic fins, a dark pectoral-base spot and a pale tail. Internal names stay `humbug`.
 - **Sea fan and feather star** (D3): a base-to-tip gradient only. *As built,* the feather star's pinnules keep the tan polyp tile: with gradient pinnules it lost its two-tone, feathery look.
 - *As built:* every face's UVs now come from one pure-Python module, `reef/uvmap.py`, which the generator, the texel audit and the review renders all use. Colour references are in [`thai-reef-skin-colours.md`](../reference/thai-reef-skin-colours.md); the shared research ledger was another session's uncommitted file, so W0 went into a separate file.
 

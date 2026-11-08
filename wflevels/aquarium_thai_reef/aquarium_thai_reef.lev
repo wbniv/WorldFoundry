@@ -1430,10 +1430,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_humbug.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0109371178412250(1.15.16) } { 'STR' "-0.010937" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.2286713923607673(1.15.16) } { 'STR' "-0.228671" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0107123825431176(1.15.16) } { 'STR' "-0.010712" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.2300711429282410(1.15.16) } { 'STR' "-0.230071" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0673018040115287(1.15.16) } { 'STR' "-0.067302" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0686632051712640(1.15.16) } { 'STR' "-0.068663" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "HumbugTwo" }
@@ -1451,10 +1451,10 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "reef_humbug.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0109371178412250(1.15.16) } { 'STR' "-0.010937" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.2286713923607673(1.15.16) } { 'STR' "-0.228671" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0107123825431176(1.15.16) } { 'STR' "-0.010712" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.2300711429282410(1.15.16) } { 'STR' "-0.230071" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0956375076201688(1.15.16) } { 'STR' "-0.095638" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0970265162209704(1.15.16) } { 'STR' "-0.097027" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "SeaFan" }

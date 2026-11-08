@@ -8,7 +8,7 @@ UV convention: u = x / 1024, v = y / 1024 with y measured from the atlas top
 Key families, in order of precedence:
   explicit       mesh.face_uvs[face] authored with the geometry (worm crowns,
                  zoanthid discs)
-  flat swatches  fish_dark, fish_white, water_N: one texel in utility cell 15
+  flat swatches  fish_dark, fish_white, fish_grey, water_N: one texel in utility cell 15
   clam_shell     the striped shell strip in cell 15
   flowerpot      tile 5, per-face dominant-normal projection over mesh bounds
   SKINS          creature skins in cells 9-15: projected (mirrored repeat)
@@ -17,7 +17,7 @@ Key families, in order of precedence:
   SWATCH         static surface tiles 0-7, world projected (0.37 cycles/unit;
                  1.1 for the polyp tile)
 """
-from .atlas import CELL, CLAM_SHELL, FISH_DARK, FISH_WHITE, WATER_X0
+from .atlas import CELL, CLAM_SHELL, FISH_DARK, FISH_GREY, FISH_WHITE, WATER_X0
 
 SWATCH = {'rock': 4, 'porites': 1, 'pocillopora': 1, 'pocillopora_tip': 1,
           'acropora': 1, 'scroll': 0, 'flowerpot': 5, 'flowerpot_tip': 5,
@@ -46,6 +46,10 @@ SKINS = {
     # Zoanthid columns and tentacles: the mottled coralline tile, densely.
     'zoanthid_column': (0, (0, 0, 256, 256), 6.0, 'project'),
     'humbug_white': (15, (0, 96, 256, 32), 0.0, 'height'),
+    # Dascyllus reticulatus body (D10): grey scales with dark margins in a 64-px
+    # square; 4 cycles/unit puts about 7 px (0.03 units) per scale, some 20
+    # scales along the 0.62-unit body.
+    'humbug_scales': (15, (0, 192, 64, 64), 4.0, 'project'),
     'fan_grad': (15, (0, 128, 256, 32), 0.0, 'height'),
     'star_grad': (15, (0, 160, 256, 32), 0.0, 'height'),
 }
@@ -87,8 +91,9 @@ def face_uvs(mesh):
         pts = [mesh.vertices[i] for i in face]
         if index in explicit:
             out.append(list(explicit[index]))
-        elif key in ('fish_dark', 'fish_white') or key.startswith('water_'):
+        elif key in ('fish_dark', 'fish_white', 'fish_grey') or key.startswith('water_'):
             x, y = (FISH_DARK if key == 'fish_dark' else FISH_WHITE if key == 'fish_white'
+                    else FISH_GREY if key == 'fish_grey'
                     else (WATER_X0 + 8 + 16 * int(key.removeprefix('water_')), FISH_DARK[1]))
             out.append([(x / 1024, y / 1024)] * len(pts))
         elif key == 'clam_shell':

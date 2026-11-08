@@ -1839,12 +1839,12 @@
     "fixed": {
       "groups": 11,
       "triangles": 50502,
-      "hull_triangles": 22462
+      "hull_triangles": 22474
     },
     "worst_visible": {
       "groups": 22,
       "triangles": 55909,
-      "hull_triangles": 23582,
+      "hull_triangles": 23594,
       "pieces": [
         "reef_shell",
         "reef_left",
@@ -1873,8 +1873,8 @@
   },
   "animated_triangles": {
     "BoxfishVisual": 412,
-    "HumbugOne": 286,
-    "HumbugTwo": 286,
+    "HumbugOne": 292,
+    "HumbugTwo": 292,
     "SeaFan": 2216,
     "FeatherStar": 10140,
     "Nudibranch": 1952,
@@ -1898,8 +1898,8 @@
     "reef_pillars": 520,
     "reef_tall": 568,
     "BoxfishVisual": 412,
-    "HumbugOne": 286,
-    "HumbugTwo": 286,
+    "HumbugOne": 292,
+    "HumbugTwo": 292,
     "GuardCrab": 868,
     "ShrimpOne": 728,
     "ShrimpTwo": 728

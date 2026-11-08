@@ -512,23 +512,6 @@ def _nudibranch(mesh, center):
         mesh.ellipsoid(tip, (.014, .014, .016), 'nudi_tubercle', 6, 4)
 
 
-def _humbug(mesh, center, scale=1.0):
-    """A small three-bar humbug silhouette, facing right."""
-    x, y, z = center
-    mesh.ellipsoid((x, y, z), (.43*scale, .17*scale, .27*scale), 'sand', 18, 10)
-    # Three dark vertical bars wrap around the white body as narrow ellipsoids.
-    for offset in (-.20, .02, .23):
-        mesh.ellipsoid((x+offset*scale, y-.012*scale, z),
-                       (.065*scale, .177*scale, .275*scale), 'rock', 10, 7)
-    mesh.face([(x+.38*scale,y,z), (x+.67*scale,y,z+.23*scale),
-               (x+.67*scale,y,z-.23*scale)], 'sand')
-    for dz in (-.10, .10):
-        mesh.face([(x-.04*scale,y,z+dz), (x+.14*scale,y,z+dz+.19*scale),
-                   (x+.23*scale,y,z+dz)], 'polyp')
-    mesh.ellipsoid((x-.31*scale,y-.15*scale,z+.095*scale),
-                   (.035*scale,.025*scale,.035*scale), 'clam', 8, 5)
-
-
 def _juvenile_boxfish(mesh, center):
     """Bright juvenile yellow boxfish, with the characteristic dark spots."""
     x, y, z = center

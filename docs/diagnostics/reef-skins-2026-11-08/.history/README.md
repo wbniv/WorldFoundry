@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/5030e6cd) | Reef plan: W2 approved, W3 started |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/144f06af) | Reef: nudibranch mantle skin and matching height-field shape |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/7e42d059) | Reef: rebuild the nudibranch model; W2 skins approved |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b46fc80d) | Reef skins review: labelled before/after table |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/068281ff) | Reef: creature skins in their own atlas cells (plan W2) |
 
 <!--history-meta v1
+5030e6cd	author	Will Norris
+5030e6cd	added	2
+5030e6cd	deleted	2
+5030e6cd	files	1
+5030e6cd	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 144f06af	author	Will Norris
 144f06af	added	18
 144f06af	deleted	4

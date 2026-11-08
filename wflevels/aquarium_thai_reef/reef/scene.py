@@ -42,7 +42,8 @@ ANCHORS = (
     # The host colony is at (-3.25, -.82, 3.05); keep the crab on its
     # camera-facing branches rather than buried in the rock behind it.
     Anchor('guard_crab', 'Trapezia cymodoce', 357, 351, -1.12),
-    Anchor('humbug_pair', 'Dascyllus aruanus', 335, 250, -.15),
+    # humbug = Dascyllus reticulatus (headband humbug), D10 (Will, 2026-11-09).
+    Anchor('humbug_pair', 'Dascyllus reticulatus', 335, 250, -.15),
     Anchor('scroll_coral', 'Turbinaria sp.', 470, 455, .5),
     Anchor('feather_duster', 'Sabellastarte sp.', 520, 560, .15),
     Anchor('zoanthids', 'Zoanthus sp.', 330, 610, .1),

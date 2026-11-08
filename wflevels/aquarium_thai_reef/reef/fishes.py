@@ -1,4 +1,8 @@
-"""Procedural juvenile boxfish and humbug meshes, in local tank units."""
+"""Procedural juvenile boxfish and humbug meshes, in local tank units.
+
+humbug = Dascyllus reticulatus (headband humbug), D10 (Will, 2026-11-09); the
+internal names stay "humbug".
+"""
 import math
 
 
@@ -63,11 +67,21 @@ def boxfish(Mesh, fin_ranges=None):
 
 
 def humbug(Mesh):
+    """humbug = Dascyllus reticulatus (headband humbug), D10.
+
+    Pale grey scaled body; one broad black bar just behind the head that runs
+    onto the dorsal and pelvic fins; a fainter grey bar under the rear dorsal;
+    grey anal fin; black pelvic fins; a dark spot at the pectoral base; pale tail
+    (FishBase, Reef Life Survey; docs/reference/thai-reef-research.md). Faces +x.
+    """
     m = Mesh('reef_humbug')
-    # Elliptical rings along the body, with alternating broad black bars.
+    # Elliptical rings along the body, rear (x = -.32) to snout (x = .30).
     xs = (-.32,-.25,-.18,-.11,-.04,.03,.10,.17,.24,.30)
     for j in range(len(xs)-1):
-        color = 'fish_dark' if j in (1, 4, 7) else 'humbug_white'
+        color = ('fish_dark' if j in (4, 5) else      # x -.04-.10: the bar behind the head
+                 'fish_grey' if j == 2 else           # x -.18 to -.11: the faint rear bar
+                 'humbug_white' if j == 8 else        # snout: unscaled, pale
+                 'humbug_scales')
         def ring(x):
             r = math.sqrt(max(0, 1 - (x / .34) ** 2))
             return [(x, .105*r*math.cos(math.tau*i/12), .22*r*math.sin(math.tau*i/12)) for i in range(12)]
@@ -75,20 +89,24 @@ def humbug(Mesh):
         for i in range(12):
             k=(i+1)%12
             m.face([a[i],a[k],b[k],b[i]],color)
-    # Forked caudal, dorsal and anal fins make the striped silhouette read as
-    # a damselfish from the wide tank camera.
+    # Forked pale caudal; dorsal and anal fins split where the bar meets them, so
+    # the bar runs onto the front dorsal and the pelvic fins, and the rear fins
+    # stay grey. The fins keep the old outline, so the silhouette is unchanged.
     m.face([(-.29,0,0),(-.45,0,.13),(-.40,0,0)],'humbug_white')
     m.face([(-.29,0,0),(-.40,0,0),(-.45,0,-.13)],'humbug_white')
-    m.face([(-.22,0,.15),(-.16,0,.26),(.04,0,.29),(.20,0,.17)],'fish_dark')
-    m.face([(-.20,0,-.14),(-.12,0,-.25),(.05,0,-.25),(.18,0,-.14)],'fish_dark')
+    m.face([(-.22,0,.15),(-.16,0,.26),(-.04,0,.278),(-.04,0,.156)],'fish_grey')
+    m.face([(-.04,0,.156),(-.04,0,.278),(.04,0,.29),(.20,0,.17)],'fish_dark')
+    m.face([(-.20,0,-.14),(-.12,0,-.25),(-.04,0,-.25),(-.04,0,-.14)],'fish_grey')
+    m.face([(-.04,0,-.14),(-.04,0,-.25),(.05,0,-.25),(.18,0,-.14)],'fish_dark')
     for side in (-1,1):
-        # A pale eye ring and a smaller dark pupil remain legible against
-        # either a dark body bar or the light face.
+        # A pale eye ring and a smaller dark pupil on the pale face.
         _disc(m,.20,side*.092,.07,.029,'fish_white')
         _disc(m,.205,side*.094,.07,.016,'fish_dark')
         _disc(m,.285,side*.048,-.025,.010,'fish_dark')
-        m.face([(.08,side*.09,.01),(-.06,side*.16,-.04),(.03,side*.10,-.10)],'fish_white')
-        # A second, smaller fin layer gives the pectoral fin a tapered edge.
+        # Clear pectoral fin, two layers for a tapered edge, and the dark spot
+        # on its base (FishBase), as a small triangle just outside the fin root.
+        m.face([(.08,side*.09,.01),(-.06,side*.16,-.04),(.03,side*.10,-.10)],'humbug_white')
         m.face([(.07,side*.095,.005),(-.045,side*.155,-.045),
-                (.025,side*.105,-.075)],'fish_dark')
+                (.025,side*.105,-.075)],'humbug_white')
+        m.face([(.075,side*.101,.006),(.035,side*.121,-.012),(.055,side*.110,-.045)],'fish_dark')
     return m

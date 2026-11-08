@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/b090a8fd) | Reef W5c: Forth layout finished; review renders, cast1 Random-5 gate, docs |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/bfe00512) | Reef: swap humbug for Dascyllus reticulatus in research (D10); park and commit poster sources |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/4bb0d148) | Reef research: boxfish Gulf record closed (D2); humbug flagged (D1) |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/fef6db28) | Reef: keep W5b's anime per-piece cost (Will); speed work deferred to TODO |
@@ -21,6 +22,11 @@
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b756367f) | Plan: finish the reef tanks (worms, skins, placement, acceptance) |
 
 <!--history-meta v1
+b090a8fd	author	Will Norris
+b090a8fd	added	24
+b090a8fd	deleted	1
+b090a8fd	files	1
+b090a8fd	body	Random 5 rocks on cast1: realistic 22.11, anime 20.52 FPS (gate 20).\n4-5 rocks use two rows (right hero behind the fillers). Seed 0 keeps\nits drawn seed across Colonies changes. level_asset_links.py makes\nrelative links so the reef Dream variants rebuild in the container;\nthe species-VM fixture gains random/seed-random. Layout default stays\nFixed until Will reviews. Reef suites: 179 passed, 4 known failures.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 bfe00512	author	Will Norris
 bfe00512	added	4
 bfe00512	deleted	3

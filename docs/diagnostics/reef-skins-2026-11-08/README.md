@@ -5,6 +5,9 @@ W2 of the [reef finishing plan](../../plans/2026-11-08-reef-tanks-finish.md). **
 > [!NOTE]
 > These are **Blender renders** (CPU Cycles, the static bake's sun) of the generator's own meshes with each style's real atlas. They are not engine captures, for the same reason as the [worm review](../reef-worms-2026-11-08/README.md): the desktop engine cannot run in the containers on this machine. **Before** is the code at `b8831c71` with its UV rule; **after** is this change. Every image is labelled.
 
+> [!NOTE]
+> **2026‑11‑09: the humbug skin below is superseded.** Will swapped the humbug *Dascyllus aruanus* (no citable Gulf of Thailand record) for *Dascyllus reticulatus* (D10). Its new skin, one black bar behind the head, a faint grey rear bar and a scale-net body, is reviewed in [reef-humbug-swap-2026-11-09](../reef-humbug-swap-2026-11-09/README.md). The other skins here are unchanged.
+
 ## Mobile animals
 
 Left to right: guard crab, banded shrimp, hermit crab, nudibranch, humbug.

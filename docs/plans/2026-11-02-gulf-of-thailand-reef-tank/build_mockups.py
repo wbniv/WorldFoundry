@@ -452,7 +452,7 @@ CALLOUTS = [
     ("Flowerpot coral", "Goniopora sp.", 175, 500),
     ("Cauliflower coral head", "Pocillopora damicornis", 250, 360),
     ("Coral guard crab", "Trapezia cymodoce", 352, 420),
-    ("Humbug damselfish ×2", "Dascyllus aruanus", 335, 250),
+    ("Reticulated dascyllus ×2", "Dascyllus reticulatus", 335, 250),
     ("Yellow scroll coral", "Turbinaria sp.", 470, 455),
     ("Feather duster worm", "Sabellastarte sp.", 520, 560),
     ("Zoanthid carpet", "Palythoa / Zoanthus", 330, 610),
@@ -976,8 +976,8 @@ def poster_svg() -> str:
     y0 = 386
     g.append('<text x="12" y="370" font-size="6" font-weight="700" fill="#0b3a5e">3 · The two fishes</text>')
     g.append(f'<g transform="translate(26 {y0+2}) scale(.32)">{humbug(rng, 0, 0, 1, 1)}{humbug(rng, 52, -10, .9, -1)}</g>')
-    g.append(f'<text x="50" y="{y0-3}" font-size="4.4" font-weight="700" fill="#0b3a5e">Humbug damselfish ×2</text>'
-             f'<text x="50" y="{y0+2}" font-size="3" font-style="italic" fill="#555">Dascyllus aruanus — lives in one branching coral head, dives into it</text>')
+    g.append(f'<text x="50" y="{y0-3}" font-size="4.4" font-weight="700" fill="#0b3a5e">Reticulated dascyllus ×2</text>'
+             f'<text x="50" y="{y0+2}" font-size="3" font-style="italic" fill="#555">Dascyllus reticulatus — lives in one branching coral head, dives into it</text>')
     g.append(f'<g transform="translate(166 {y0+1}) scale(.34)">{boxfish(rng, 0, 0, 1, 1)}</g>')
     g.append(f'<text x="182" y="{y0-3}" font-size="4.4" font-weight="700" fill="#0b3a5e">Yellow boxfish (juvenile)</text>'
              f'<text x="182" y="{y0+2}" font-size="3" font-style="italic" fill="#555">Ostracion cubicus — rigid box, swims with its fins</text>')

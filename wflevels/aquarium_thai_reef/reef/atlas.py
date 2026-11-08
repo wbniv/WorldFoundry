@@ -11,7 +11,8 @@ Layout: 16 cells of 256 x 256, cell i at x = (i % 4) * 256, y = (i // 4) * 256
   13    hermit crab: borrowed shell, legs, shell lip
   14    encrusting sponge and coralline crusts
   15    utility: flat fish swatches, water bands, clam shell, humbug sheen,
-        sea-fan and feather-star base-to-tip gradients
+        sea-fan and feather-star base-to-tip gradients, humbug body scales
+        (the humbug is Dascyllus reticulatus since D10, 2026-11-09)
 Colour references: docs/reference/thai-reef-skin-colours.md
 """
 from pathlib import Path
@@ -45,6 +46,13 @@ FISH_DARK = (UTIL_X + 8, UTIL_Y + 8)
 FISH_WHITE = (UTIL_X + 24, UTIL_Y + 8)
 WATER_X0 = UTIL_X + 40          # six 16-px bands from here, centre +8
 CLAM_SHELL = (UTIL_X, UTIL_Y + 32, 128, 32)   # x, y, width, height
+# Dascyllus reticulatus (the 'humbug' pair, D10): a mid-grey swatch for the faint
+# rear bar and anal fin, after the water bands (which end at UTIL_X + 136).
+FISH_GREY = (UTIL_X + 152, UTIL_Y + 8)
+# Its pale grey body with dark scale margins (the 'reticulated' net): a 64 x 64
+# square at cell rows 192-255, so the projected UVs stay isotropic. Realistic only
+# paints the net; anime keeps the body one flat tone.
+HUMBUG_SCALES = (UTIL_X, UTIL_Y + 192, 64, 64)   # x, y, width, height
 
 
 NUDI_RIDGE_V = (.267, .5, .733)      # ridge centres across the mantle (v)
@@ -187,7 +195,7 @@ def _creature_texel(cell, x, y, seed):
 
 # Utility gradients: (realistic base, realistic tip, anime base, anime tip).
 GRADIENTS = {
-    96: ((250, 250, 246), (200, 210, 222), (245, 245, 237), (245, 245, 237)),   # humbug: belly -> back
+    96: ((242, 244, 240), (196, 204, 206), (232, 234, 228), (232, 234, 228)),   # humbug fins/tail: pale grey
     128: ((100, 44, 112), (222, 152, 218), (178, 60, 168), (250, 156, 236)),    # sea fan
     160: ((130, 58, 96), (232, 178, 200), (200, 70, 140), (255, 192, 222)),     # feather star
 }
@@ -267,6 +275,22 @@ def _detail(tile, x, y, seed):
     return (_smooth_noise(x, y, 15, seed + 7) - .5) * 22
 
 
+def _humbug_scale_texel(x, y, style, seed):
+    """Dascyllus reticulatus body: pale grey, blackish scale margins (FishBase).
+
+    A diamond lattice of 8-px scales: texels on either diagonal line are the
+    darker scale margins, which read as a net at close range and as a slightly
+    darker grey from the wide camera. Anime is flat.
+    """
+    if style == 'anime':
+        return [214, 218, 220]
+    base = (212, 216, 216)      # uniform: the mirrored UV repeat would band a gradient
+    grain = (_smooth_noise(x, y, 4, seed + 911) - .5) * 8
+    edge = min((x + y) % 8, (8 - (x + y) % 8) % 8, (x - y) % 8, (8 - (x - y) % 8) % 8)
+    rim = -58 if edge == 0 else -18 if edge == 1 else 0
+    return [max(0, min(255, round(c + grain + rim))) for c in base]
+
+
 def write_atlas(path, seed=20261102, style='realistic'):
     """Write deterministic BGR pixels in top-left TGA order."""
     if style not in ('realistic', 'anime'):
@@ -302,6 +326,11 @@ def write_atlas(path, seed=20261102, style='realistic'):
                 # Small flat swatches for fish markings and the outline hull.
                 if UTIL_Y <= y < UTIL_Y + 16 and UTIL_X <= x < UTIL_X + 32:
                     rgb = [18, 19, 22] if x < UTIL_X + 16 else [245, 245, 237]
+                if UTIL_Y <= y < UTIL_Y + 16 and FISH_GREY[0] - 8 <= x < FISH_GREY[0] + 8:
+                    rgb = [112, 116, 120] if style == 'realistic' else [118, 122, 132]
+                hx, hy, hw, hh = HUMBUG_SCALES
+                if hx <= x < hx + hw and hy <= y < hy + hh:
+                    rgb = _humbug_scale_texel(x - hx, y - hy, style, seed)
                 if UTIL_Y <= y < UTIL_Y + 16 and WATER_X0 <= x < WATER_X0 + 96:
                     band = (x - WATER_X0) // 16
                     if style == 'anime':
