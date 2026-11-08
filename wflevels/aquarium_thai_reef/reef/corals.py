@@ -23,7 +23,8 @@ def hard_corals(mesh):
     _massive_coral(mesh, small_c, small_r, 24, 12)
     # Recursively branched cauliflower-like head; one mesh, no actor per branch.
     rng = random.Random(SEED + 101)
-    x, y, z = (-3.25, -.82, 3.05)
+    from .placement import coral_centre
+    x, y, z = coral_centre('PocilloporaHead')    # on the rock top (plan W3)
     mesh.ellipsoid((x, y, z-.32), (.34, .28, .19), 'pocillopora', 12, 7)
     for i in range(25):
         angle = i * 2.399963
@@ -49,7 +50,7 @@ def hard_corals(mesh):
                    tip[2]+.07+.025*math.sin(i+side))
             mesh.swept_tube([start,end], .016, 'pocillopora', 5)
             mesh.ellipsoid(end, (.024,.022,.030), 'pocillopora_tip', 6, 4)
-    x, y, z = (3.25, -.72, 2.82)
+    x, y, z = coral_centre('TableCoral')          # on the rock top (plan W3)
     mesh.swept_tube([(x,y,z-.65), (x,y,z-.29), (x,y,z-.12)], .13, 'acropora', 8)
     # The table is supported by an irregular radial network, with forked
     # branches at its rim, rather than a solid elliptical plate.

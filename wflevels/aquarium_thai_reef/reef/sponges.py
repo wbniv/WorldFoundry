@@ -2,8 +2,12 @@
 import math
 
 
-def populate(mesh):
-    x,y,z = 4.75, -.72, 2.0
+def populate(mesh, center=None):
+    """The barrel sponge, standing on the right rock (reef.placement)."""
+    if center is None:
+        from .placement import actor_position
+        center = actor_position('BarrelSponge')
+    x, y, z = center
     n = 40
     for i in range(n):
         a,b=math.tau*i/n,math.tau*(i+1)/n

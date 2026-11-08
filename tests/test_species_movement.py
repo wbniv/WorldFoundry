@@ -56,13 +56,19 @@ def test_reef_boxfish_input_starts_and_stops(vm):
     assert rows[59]['vx'] > .5
     assert abs(rows[-1]['vx']) < .01
 
-def test_reef_humbugs_detect_player_near_their_coral(vm):
-    import importlib.util
-    spec = importlib.util.spec_from_file_location('reef_scene', ROOT/'wflevels/aquarium_thai_reef/reef/scene.py')
-    scene = importlib.util.module_from_spec(spec)
+
+def _reef_scene():
+    """The reef scene module, imported as part of its package (its anchor
+    table resolves placements through reef.placement)."""
     import sys
-    sys.modules[spec.name] = scene
-    spec.loader.exec_module(scene)
+    for path in (ROOT / 'wflevels' / 'aquarium_tanks', ROOT / 'wflevels' / 'aquarium_thai_reef'):
+        if str(path) not in sys.path:
+            sys.path.insert(0, str(path))
+    from reef import scene
+    return scene
+
+def test_reef_humbugs_detect_player_near_their_coral(vm):
+    scene = _reef_scene()
     x, y, z = scene.anchor_map()['humbug_pair']
     near = vm('thai_reef', f'reset {x} {y} {z}\nstep 1 0 .0166667\n')
     far = vm('thai_reef', 'reset 4 0 2\nstep 1 0 .0166667\n')
@@ -119,7 +125,10 @@ def test_flowerpot_sway_accelerates_with_current(vm):
     assert phase_step(1500) > phase_step(0) * 1.1
 
 def test_reef_cleaning_waits_for_a_stationary_visitor(vm):
-    rows = vm('thai_reef', 'reset -.7 -.15 1.885\nstep 180 0 .0166667\nstep 60 8192 .0166667\n')
+    # The station is on the cave floor (plan W3); the fish waits just above it.
+    sx, sy, sz = _reef_scene().anchor_map()['cleaner_station']
+    fz = round(max(.9, sz + .3), 4)
+    rows = vm('thai_reef', f'reset {sx} {sy} {fz}\nstep 180 0 .0166667\nstep 60 8192 .0166667\n')
     assert rows[59][644] < 2
     assert rows[179][644] >= 2
     assert rows[-1][644] == 0
@@ -127,24 +136,22 @@ def test_reef_cleaning_waits_for_a_stationary_visitor(vm):
     assert rows[179][743] > 3
     assert rows[-1][743] > 2
     mapping = json.loads((ROOT/'wflevels/aquarium_thai_reef/actor-map.json').read_text())['actors']
-    cleaning = vm('thai_reef', f'reset -.7 -.15 2.1\nset 650 {mapping["ShrimpOne"]}\nstep 240 0 .0166667\n')
+    cleaning = vm('thai_reef', f'reset {sx} {sy} {fz}\nset 650 {mapping["ShrimpOne"]}\nstep 240 0 .0166667\n')
     assert cleaning[-1][743] > 0
-    assert abs(cleaning[-1]['part-y'] - (-.21)) < .03
-    assert abs(cleaning[-1]['part-z'] - 2.34) < .03
+    assert abs(cleaning[-1]['part-y'] - (sy - .06)) < .03     # legs on the fish's back
+    assert abs(cleaning[-1]['part-z'] - (fz + .24)) < .03
 
 
 def test_guard_crab_is_on_the_camera_facing_host_coral():
-    import importlib.util
-    import sys
-    spec = importlib.util.spec_from_file_location('reef_scene_crab_placement', ROOT/'wflevels/aquarium_thai_reef/reef/scene.py')
-    scene = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = scene
-    spec.loader.exec_module(scene)
-    x, y, z = scene.anchor_map()['guard_crab']
-    # The actual host branches are centred at (-3.25, -.82, 3.05).
-    assert abs(x - (-3.25)) < .5
-    assert -.4 < y - (-.82) < 0
-    assert 2.8 < z < 3.55
+    scene = _reef_scene()
+    anchors = scene.anchor_map()
+    x, y, z = anchors['guard_crab']
+    # The host head stands on the rock top (plan W3); the crab keeps its
+    # authored place on the head's camera-facing branches.
+    hx, hy, hz = anchors['cauliflower']
+    assert abs(x - hx) < .5
+    assert -.4 < y - hy < 0
+    assert hz - .25 < z < hz + .5
 
 
 def test_reef_clam_closes_under_fish_and_reopens(vm):
@@ -156,21 +163,19 @@ def test_reef_clam_closes_under_fish_and_reopens(vm):
     assert rows[-1][745] < .01
 
 
-def test_reef_nudibranch_follows_a_slow_rock_path(vm):
+def test_reef_nudibranch_crawls_along_the_sand(vm):
+    # Plan W3: the slug crawls at the foot of the left rock without bobbing
+    # (it used to rise and fall 0.07 while hanging 0.33 above the sand).
     mapping = json.loads((ROOT/'wflevels/aquarium_thai_reef/actor-map.json').read_text())['actors']
     rows = vm('thai_reef', f'reset 4 0 2\nset 650 {mapping["Nudibranch"]}\nstep 600 0 .0166667\n')
+    rest_z = _reef_scene().anchor_map()['nudibranch'][2]
     assert max(r['part-x'] for r in rows) - min(r['part-x'] for r in rows) > .3
-    assert max(r['part-z'] for r in rows) - min(r['part-z'] for r in rows) > .05
+    assert all(abs(r['part-z'] - rest_z) < .001 for r in rows[1:])
 
 
 def test_reef_guard_crab_reacts_to_nearby_boxfish(vm):
     mapping = json.loads((ROOT/'wflevels/aquarium_thai_reef/actor-map.json').read_text())['actors']
-    import importlib.util
-    spec = importlib.util.spec_from_file_location('reef_crab_scene', ROOT/'wflevels/aquarium_thai_reef/reef/scene.py')
-    scene = importlib.util.module_from_spec(spec)
-    import sys
-    sys.modules[spec.name] = scene
-    spec.loader.exec_module(scene)
+    scene = _reef_scene()
     x, y, z = scene.anchor_map()['guard_crab']
     actor = mapping['GuardCrab']
     near = vm('thai_reef', f'reset {x} {y} {z}\nset 650 {actor}\nstep 1 0 .0166667\n')

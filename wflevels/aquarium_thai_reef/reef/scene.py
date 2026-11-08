@@ -182,4 +182,15 @@ def anchor_map():
     anchors = {a.name: a.position for a in ANCHORS}
     # The worms are placed by worm_mouths(), not by the mockup anchor.
     anchors['tree_worms'] = worm_origin()
+    # Attached and ground-dwelling actors report where they really are,
+    # resolved on their host surface (reef.placement, plan W3).
+    from .placement import ANCHOR_ACTORS, actor_position, coral_centre, host_shift
+    for anchor, actor in ANCHOR_ACTORS.items():
+        anchors[anchor] = actor_position(actor)
+    # The cauliflower head now stands on the rock; its guard crab and humbug
+    # pair keep their authored offsets from it.
+    shift = host_shift()
+    for anchor in ('guard_crab', 'humbug_pair'):
+        anchors[anchor] = tuple(round(anchors[anchor][i] + shift[i], 5) for i in range(3))
+    anchors['cauliflower'] = coral_centre('PocilloporaHead')
     return anchors

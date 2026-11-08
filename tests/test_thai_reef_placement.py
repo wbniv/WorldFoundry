@@ -131,3 +131,105 @@ def test_worm_curves_are_rooted_at_the_tube_mouths(level):
         local = [w['mouth'][i] - origin[i] for i in range(3)]
         assert math.dist(curve['root'], local) < 1e-3
         assert sum(a * b for a, b in zip(curve['d'], w['axis'])) > .999
+
+
+# ── W3: nothing floats, everything attaches ─────────────────────────────────
+# Regression guard for the 2026-11-08 audit: zoanthid carpets, cup corals,
+# crusts and several actors floated 0.3-1.3 world units (1 unit = 1 m at the
+# tank's x10 scale) in front of or above their rock or sand, the hermit crab
+# was buried under the sand, and the cleaner shrimp hung in mid-air.
+from reef import placement  # noqa: E402
+from reef.geometry import build_groups  # noqa: E402
+from reef.surface import SAND_Z, rock_gap  # noqa: E402
+
+ROCK_TOL = .05    # flat bases on curved rock; analytic vs exported rock is about 0.01
+
+
+@pytest.fixture(scope='module')
+def static_groups():
+    return build_groups(Mesh)
+
+
+def _life_vertices(groups):
+    out = []
+    for name, m in groups.items():
+        if name.startswith('reef_life'):
+            out += [(m.vertices[i], key) for face, key in zip(m.faces, m.colors) for i in face]
+    return out
+
+
+def test_crusts_lie_on_the_rock(static_groups):
+    crust = [v for v, key in _life_vertices(static_groups) if key.startswith('crust_')]
+    assert crust
+    gaps = [rock_gap(v) for v in crust[::7]]
+    assert max(gaps) <= .02 and min(gaps) >= -.03
+
+
+@pytest.mark.parametrize('x,z', [(-3.55, 1.55), (2.0, 1.55), (4.0, 1.70),
+                                 (-4.4, 1.18), (-3.6, 1.25), (-1.9, 1.5), (1.75, 1.5), (3.1, 1.22), (4.4, 1.34)])
+def test_zoanthid_and_cup_clusters_touch_the_rock(static_groups, x, z):
+    near = [v for v, key in _life_vertices(static_groups)
+            if key in ('zoanthid_column', 'sponge') and abs(v[0] - x) < .2 and abs(v[2] - z) < .2]
+    assert near, (x, z)
+    deepest = sorted(near, key=lambda v: -v[1])[:12]      # the vertices furthest into the scene
+    assert min(abs(rock_gap(v)) for v in deepest) <= ROCK_TOL
+
+
+@pytest.mark.parametrize('name', sorted(set(placement.UPRIGHT) - set(placement.HOST_LOCAL_MIN)))
+def test_upright_actors_stand_on_their_host(name):
+    host = placement.UPRIGHT[name][0]
+    base = placement.actor_position(name) if name in placement.ANCHOR_ACTORS.values() else None
+    surface, _ = placement.surface_for(name)
+    local_min = placement._local_min_z(name)
+    position = base or placement.upright_position(name, local_min)
+    lowest = position[2] + local_min
+    if host == 'sand':
+        assert SAND_Z - .07 <= lowest <= SAND_Z + .005, (name, lowest)
+    else:
+        assert surface[2] - .06 <= lowest <= surface[2] + .005, (name, lowest)
+        assert rock_gap(surface) == pytest.approx(0, abs=.02)
+
+
+def test_clam_is_sunk_and_hermit_is_on_the_sand():
+    clam = placement.actor_position('GiantClam')[2] + placement._local_min_z('GiantClam')
+    hermit = placement.actor_position('HermitCrab')[2] + placement._local_min_z('HermitCrab')
+    assert clam == pytest.approx(SAND_Z - .052, abs=.002)   # valves buried to 40 % of their height
+    assert SAND_Z - .04 <= hermit <= SAND_Z     # was 0.31 under the sand
+
+
+def test_moving_ground_animals_rest_on_the_sand():
+    for name in ('Nudibranch', 'Shrimp'):
+        lowest = placement.actor_position(name)[2] + placement._local_min_z(name)
+        assert SAND_Z - .015 <= lowest <= SAND_Z + .001, (name, lowest)
+
+
+@pytest.mark.parametrize('level', LEVELS)
+def test_built_level_uses_the_resolved_positions(level):
+    folder = ROOT / 'wflevels' / level
+    anchors = json.loads((folder / 'actor-map.json').read_text())['anchors']
+    for anchor, actor in placement.ANCHOR_ACTORS.items():
+        assert tuple(anchors[anchor]) == pytest.approx(placement.actor_position(actor), abs=1e-6), anchor
+    text = (folder / f'{level}.lev').read_text()
+    assert '1.05 751 tk@ .25 + tk-sin .07 *' not in text        # the slug no longer bobs
+    assert f'{placement.actor_position("Nudibranch")[2]} INDEXOF_Z_POS' in text
+
+
+@pytest.mark.parametrize('name', ['PocilloporaHead', 'TableCoral'])
+def test_static_host_corals_stand_on_the_rock(name, static_groups):
+    centre = placement.coral_centre(name)
+    surface, _ = placement.surface_for(name)
+    lowest = centre[2] + placement.HOST_LOCAL_MIN[name]
+    assert surface[2] - .06 <= lowest <= surface[2] + .005
+    hard = static_groups['reef_hard']
+    region = [v for v in hard.vertices if abs(v[0] - centre[0]) < .35 and abs(v[1] - centre[1]) < .3
+              and v[2] > lowest - .1]      # this coral only, not the boulder below
+    assert min(v[2] for v in region) == pytest.approx(lowest, abs=.02)
+
+
+def test_coral_head_residents_move_with_their_host():
+    from reef.scene import ANCHORS
+    authored = {a.name: a.position for a in ANCHORS}
+    anchors = anchor_map()
+    shift = placement.host_shift()
+    for name in ('guard_crab', 'humbug_pair'):
+        assert anchors[name] == pytest.approx(tuple(authored[name][i] + shift[i] for i in range(3)), abs=1e-5)

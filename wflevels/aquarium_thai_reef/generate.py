@@ -193,7 +193,7 @@ _box(hull, (-.05,-.05,-.05), (.05,.05,.05), 'rock')
 player = bpy.data.objects['Player']
 player.data = blender_mesh(hull)
 targets = {'duster': anchor_map()['feather_duster'],
-           'clam': (anchor_map()['giant_clam'][0], -1.15, .82),
+           'clam': anchor_map()['giant_clam'],
            'crab': anchor_map()['guard_crab'], 'shrimp': anchor_map()['cleaner_station'],
            'worms': worm_origin()}
 verification = targets.get(args.verification_target)
@@ -242,14 +242,14 @@ for name, mesh, pos in (
 # them without re-uploading the large static life group.
 worm_crown_origin = worm_origin()
 for name, builder, pos in (
-    ('SeaFan', life._sea_fan, (-4.45, -.55, 2.82)),
-    ('FeatherStar', life._feather_star, (1.75, -.35, 2.8)),
-    ('Nudibranch', life._nudibranch, (-4.0, -1.65, 1.05)),
+    ('SeaFan', life._sea_fan, anchor_map()['sea_fan_left']),
+    ('FeatherStar', life._feather_star, anchor_map()['feather_star']),
+    ('Nudibranch', life._nudibranch, anchor_map()['nudibranch']),
     ('WormCrowns', lambda mesh, _: life.worm_crowns(mesh, worm_crown_origin), worm_crown_origin),
     ('FeatherDusters', life.feather_dusters, anchor_map()['feather_duster']),
-    ('FlowerpotCoral', corals.flowerpot, (-4.15, -.85, 2.42)),
-    ('LeatherCoral', corals.leather_coral, (4.0, -.72, 2.76)),
-    ('GiantClam', life._clam, (anchor_map()['giant_clam'][0], -1.15, .82)),
+    ('FlowerpotCoral', corals.flowerpot, anchor_map()['flowerpot']),
+    ('LeatherCoral', corals.leather_coral, anchor_map()['leather_coral']),
+    ('GiantClam', life._clam, anchor_map()['giant_clam']),
     ('GuardCrab', invertebrates.guard_crab, anchor_map()['guard_crab']),
     ('ShrimpOne', invertebrates.banded_shrimp, anchor_map()['cleaner_station']),
     ('ShrimpTwo', invertebrates.banded_shrimp, tuple(a+b for a,b in zip(anchor_map()['cleaner_station'], (.35,.12,0)))),
@@ -378,11 +378,18 @@ worm_tick = (': reef-worm ( x y z index -- ) 1063 tk! 1062 tk! 1061 tk! 1060 tk!
              '    if tk-dt@ .653333 * + 1 min then\n'
              ' then 1020 1063 tk@ + tk!\n'
              ' 1020 1063 tk@ + tk@ 1195 1063 tk@ 4 * + tk! ;\n')
+from reef.placement import NUDIBRANCH_PATH as nudi_path
 life_tick = (f': reef-life\n 640 tk@ tk-sin .012 * INDEXOF_ROTATION_A {indices["SeaFan"]} write-actor-mailbox\n'
              f' 640 tk@ .17 + tk-sin .018 * INDEXOF_ROTATION_C {indices["FeatherStar"]} write-actor-mailbox\n'
              f' 751 tk@ tk-dt@ .03 * + tk-frac 751 tk!\n'
-             f' -4 751 tk@ tk-sin .32 * + INDEXOF_X_POS {indices["Nudibranch"]} write-actor-mailbox\n'
-             f' 1.05 751 tk@ .25 + tk-sin .07 * + INDEXOF_Z_POS {indices["Nudibranch"]} write-actor-mailbox\n')
+             # The slug crawls back and forth along the sand at the foot of the
+             # left rock (reef.placement.NUDIBRANCH_PATH), on the sand without
+             # bobbing, and turns to face its direction of travel (front = -x).
+             f' {nudi_path["x"]} 751 tk@ tk-sin {nudi_path["amplitude"]} * + '
+             f'INDEXOF_X_POS {indices["Nudibranch"]} write-actor-mailbox\n'
+             f' {anchor_map()["nudibranch"][2]} INDEXOF_Z_POS {indices["Nudibranch"]} write-actor-mailbox\n'
+             f' 751 tk@ .25 + tk-sin 0 > if 3.141593 else 0 then '
+             f'INDEXOF_ROTATION_C {indices["Nudibranch"]} write-actor-mailbox\n')
 life_tick += ' 1064 tk@ 0 = if\n' + ''.join(f' 1 {1020+i} tk!\n' for i in range(15)) + ' 1 1064 tk! then\n'
 for i, worm in enumerate(worm_mouths()):
     x, y, z = worm['mouth']

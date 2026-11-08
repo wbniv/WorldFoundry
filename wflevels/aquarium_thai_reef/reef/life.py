@@ -123,35 +123,63 @@ def _clam(mesh, center, limb_ranges=None):
         limb_ranges.append((start, len(mesh.vertices), (x,y,z+.125), (0,1,0), (0,0,1)))
 
 
+def _zoanthid_polyp(mesh, i):
+    """One zoanthid polyp at the origin, growing along +z (local frame)."""
+    pz = .035 * math.sin(i * 2.1) * .3
+    mesh.swept_tube([(0, 0, pz - .02), (0, 0, pz + .09)], .018, 'zoanthid_column', 6)
+    first = len(mesh.faces)
+    mesh.ellipsoid((0, 0, pz + .11), (.052, .048, .025), 'zoanthid', 7, 4)
+    mesh.ellipsoid((0, 0, pz + .13), (.022, .020, .009), 'zoanthid', 6, 3)
+    # Head and oral disc map onto one flower-head motif of the zoanthid
+    # tile (atlas tile 5: heads every 42 px), viewed along the polyp, so each
+    # polyp shows a disc and tentacle ring instead of a sub-texel smear.
+    centre = (256 + 42 * (1 + i % 5), 256 + 42 * (1 + (i // 5) % 5))
+    if not hasattr(mesh, 'face_uvs'):
+        mesh.face_uvs = {}
+    for f in range(first, len(mesh.faces)):
+        mesh.face_uvs[f] = tuple(((centre[0] + 19 * mesh.vertices[v][0] / .052) / 1024,
+                                  (centre[1] + 19 * mesh.vertices[v][1] / .052) / 1024)
+                                 for v in mesh.faces[f])
+    # Short tentacles frame each oral disc instead of a smooth button.
+    for tentacle in range(8):
+        angle = math.tau*tentacle/8 + i*.17
+        start = (.034*math.cos(angle), .031*math.sin(angle), pz+.125)
+        end = (.065*math.cos(angle), .060*math.sin(angle), pz+.135+.007*math.sin(i+tentacle))
+        mesh.swept_tube([start, end], .009, 'zoanthid_column', 5)
+
+
+def _placed(target, build, base, axis, spin=0.0):
+    """Build into a local frame (base at the origin, growing +z), then move it
+    onto base with +z along axis. Explicit face UVs travel with the faces."""
+    from mesh import Mesh          # the shared primitive mesh (wflevels/aquarium_tanks)
+    from .placement import frame
+    tmp = Mesh('local')
+    build(tmp)
+    e1, e2, a = frame(axis)
+    c, s_ = math.cos(spin), math.sin(spin)
+    e1, e2 = (tuple(c*e1[k] + s_*e2[k] for k in range(3)), tuple(-s_*e1[k] + c*e2[k] for k in range(3)))
+    explicit = getattr(tmp, 'face_uvs', {})
+    for index, (face, key) in enumerate(zip(tmp.faces, tmp.colors)):
+        pts = [tuple(base[k] + v[0]*e1[k] + v[1]*e2[k] + v[2]*a[k] for k in range(3))
+               for v in (tmp.vertices[i] for i in face)]
+        target.face(pts, key)
+        if index in explicit:
+            if not hasattr(target, 'face_uvs'):
+                target.face_uvs = {}
+            target.face_uvs[len(target.faces) - 1] = explicit[index]
+
+
 def _zoanthids(mesh, center):
-    x, y, z = center
-    rng = random.Random(SEED + 402)
+    """A zoanthid carpet on the rock face around (x, z): every polyp sits on
+    the surface and grows out of it (plan W3)."""
+    from .placement import grow_axis, on_rock_face
+    x, _, z = center
     for i in range(34):
         a = i * 2.399963
         r = .08 + .31 * math.sqrt((i + .5) / 34)
-        px, py = x + r * math.cos(a), y + r * math.sin(a) * .62
-        pz = z + .035 * math.sin(i * 2.1)
-        mesh.swept_tube([(px, py, pz), (px, py, pz + .09)], .018, 'zoanthid_column', 6)
-        first = len(mesh.faces)
-        mesh.ellipsoid((px, py, pz + .11), (.052, .048, .025), 'zoanthid', 7, 4)
-        mesh.ellipsoid((px, py, pz + .13), (.022, .020, .009), 'zoanthid', 6, 3)
-        # Head and oral disc map onto one flower-head motif of the zoanthid
-        # tile (atlas tile 5: heads every 42 px), viewed from above, so each
-        # polyp shows a disc and tentacle ring instead of a sub-texel smear.
-        centre = (256 + 42 * (1 + i % 5), 256 + 42 * (1 + (i // 5) % 5))
-        if not hasattr(mesh, 'face_uvs'):
-            mesh.face_uvs = {}
-        for f in range(first, len(mesh.faces)):
-            mesh.face_uvs[f] = tuple(((centre[0] + 19 * (mesh.vertices[v][0] - px) / .052) / 1024,
-                                      (centre[1] + 19 * (mesh.vertices[v][1] - py) / .052) / 1024)
-                                     for v in mesh.faces[f])
-        # Short tentacles frame each oral disc instead of a smooth button.
-        for tentacle in range(8):
-            angle = math.tau*tentacle/8 + i*.17
-            start = (px+.034*math.cos(angle),py+.031*math.sin(angle),pz+.125)
-            end = (px+.065*math.cos(angle),py+.060*math.sin(angle),
-                   pz+.135+.007*math.sin(i+tentacle))
-            mesh.swept_tube([start,end], .009, 'zoanthid_column', 5)
+        base, normal = on_rock_face(x + r * math.cos(a), z + r * math.sin(a) * .62)
+        base = tuple(base[k] - .01 * normal[k] for k in range(3))
+        _placed(mesh, lambda m, i=i: _zoanthid_polyp(m, i), base, grow_axis(normal, .3), spin=i * .7)
 
 
 # Christmas tree worms (Spirobranchus): the tube is buried in the Porites
@@ -528,12 +556,29 @@ def _encrusting_patch(mesh, center, rx, rz, color):
     x,y,z = center
     rng = random.Random(SEED + round((x + 6)*1000) + round(z*100))
     radii = [rng.uniform(.65,1.2) for _ in range(15)]
+    from .placement import on_rock_face
+    centre_y = on_rock_face(x, z)[0][1]
+
     def point(i, fraction):
         angle = math.tau*(i % 15)/15
         radius = radii[i % 15]*fraction
-        relief = .018*(1-fraction) + .016*math.sin(3*angle+fraction*4)*fraction*(1-fraction)
-        return (x+rx*radius*math.cos(angle), y-.07-relief,
-                z+rz*radius*math.sin(angle))
+        relief = .008*(1-fraction) + .006*math.sin(3*angle+fraction*4)*fraction*(1-fraction)
+        # Conform to the rock: at most about 1 world cm proud of its surface.
+        # Where the outline runs past the rock's silhouette, pull it inward
+        # until there is rock behind it, so the crust never overhangs water.
+        scale = 1.0
+        while True:
+            px = x + rx*radius*scale*math.cos(angle)
+            pz = z + rz*radius*scale*math.sin(angle)
+            try:
+                surface_y = on_rock_face(round(px, 4), round(pz, 4))[0][1]
+            except ValueError:
+                surface_y = None
+            if surface_y is not None and abs(surface_y - centre_y) < .25:
+                return (px, surface_y - relief, pz)
+            if scale <= .05:
+                return (x, centre_y - relief, z)
+            scale -= .1
     for i in range(15):
         mesh.face([point(0,0),point(i,1/3),point(i+1,1/3)],color)
         for ring in (1,2):
@@ -542,29 +587,36 @@ def _encrusting_patch(mesh, center, rx, rz, color):
 
 
 def populate(mesh):
-    """Add visible static colonies; dynamic animals are authored separately."""
-    a = anchor_map()
+    """Add visible static colonies; dynamic animals are authored separately.
+    Everything attached is placed on its host surface (reef.placement)."""
+    from mesh import Mesh
+    from .placement import grow_axis, on_rock_face, on_rock_top, upright_position
     _zoanthids(mesh, (-3.55, -1.25, 1.55))
     _zoanthids(mesh, (2.0, -1.05, 1.55))
     _zoanthids(mesh, (4.0, -.95, 1.70))
-    # Small orange cup-coral clusters occupy the exposed faces and cave edge.
-    # They share the static life mesh instead of consuming individual actors.
-    for x, y, z in ((-4.4,-1.2,1.18), (-3.6,-1.25,1.25), (-1.9,-1.15,1.5),
-                    (1.75,-1.15,1.5), (3.1,-1.22,1.22), (4.4,-1.1,1.34)):
+    # Small orange cup-coral clusters on the exposed rock faces and cave edge,
+    # each cup on the surface and growing out of it.
+    for x, z in ((-4.4, 1.18), (-3.6, 1.25), (-1.9, 1.5), (1.75, 1.5), (3.1, 1.22), (4.4, 1.34)):
         for i in range(3):
-            _cup(mesh, (x + (i-1)*.11, y, z + .025*(i % 2)),
-                 .065, .10 + .02*i, 'sponge', 8)
-    # Encrusting sponge and coralline form irregular crusts on the exposed
-    # rock, rather than circular objects sitting in front of it.
-    for x, y, z, rx, rz, color in (
-        (-4.55,-.90,1.35,.25,.16,'sponge'), (-3.8,-1.0,2.00,.22,.14,'coralline'),
-        (-3.05,-1.05,1.25,.27,.14,'sponge'), (-2.0,-.92,2.55,.20,.12,'coralline'),
-        (1.7,-.90,1.20,.23,.15,'sponge'), (2.35,-1.0,2.20,.20,.14,'coralline'),
-        (3.25,-1.0,1.22,.27,.14,'sponge'), (4.4,-.90,2.15,.22,.13,'coralline'),
+            base, normal = on_rock_face(x + (i-1)*.11, z + .025*(i % 2))
+            base = tuple(base[k] - .015 * normal[k] for k in range(3))
+            _placed(mesh, lambda m, i=i: _cup(m, (0, 0, 0), .065, .10 + .02*i, 'sponge', 8),
+                    base, grow_axis(normal, .3), spin=i)
+    # Encrusting sponge and coralline crusts, conformed onto the rock face.
+    for x, z, rx, rz, color in (
+        (-4.55, 1.35, .25, .16, 'sponge'), (-3.8, 2.00, .22, .14, 'coralline'),
+        (-3.05, 1.25, .27, .14, 'sponge'), (-2.0, 2.55, .20, .12, 'coralline'),
+        (1.7, 1.20, .23, .15, 'sponge'), (2.35, 2.20, .20, .14, 'coralline'),
+        (3.25, 1.22, .27, .14, 'sponge'), (4.4, 2.15, .22, .13, 'coralline'),
     ):
-        _encrusting_patch(mesh, (x,y,z), rx, rz, color)
-    _mushroom_coral(mesh, (-2.1, -1.0, .86))
+        _encrusting_patch(mesh, (x, 0, z), rx, rz, color)
+    # The mushroom coral lies free on the sand.
+    local = Mesh('local'); _mushroom_coral(local, (0, 0, 0))
+    _mushroom_coral(mesh, upright_position('MushroomCoral', min(v[2] for v in local.vertices)))
+    # Tubastraea cups ring the top of the arch.
     for i in range(6):
         angle = math.tau * i / 6
-        center = (.72 + .22 * math.cos(angle), -.8 + .12 * math.sin(angle), 2.25)
-        _cup(mesh, center, .12, .19 + .04 * (i % 2), 'coralline', 10)
+        base, normal = on_rock_top(.72 + .22 * math.cos(angle), -.8 + .12 * math.sin(angle) - .6, min_up=.5)
+        base = tuple(base[k] - .02 * normal[k] for k in range(3))
+        _placed(mesh, lambda m, i=i: _cup(m, (0, 0, 0), .12, .19 + .04 * (i % 2), 'coralline', 10),
+                base, grow_axis(normal, .6), spin=angle)
