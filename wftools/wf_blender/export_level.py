@@ -774,7 +774,7 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
     dfrm_chunk_bytes=b''
     if dfrm_rig is not None:
         bindings=[(meta[-3],meta[-2],meta[-1]/65536) for meta in split_rig]
-        positions=[tuple(bl_to_wf(co.x,co.y,co.z)) for co,_u,_v in split_verts]
+        positions=[tuple(bl_to_wf(co.x,co.y,co.z)) for co,_u,_v,_c in split_verts]
         dfrm_chunk_bytes=_write_iff_chunk('DFRM',_dfrm_module().build_chunk_curves(
             dfrm_rig['chains'],positions,bindings,dfrm_rig['transforms'],dfrm_rig['clips']))
     # Assemble MODL
