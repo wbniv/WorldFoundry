@@ -37,7 +37,7 @@ SKINS = {
     'shrimp_white': (11, (0, 128, 256, 128), 5.0, 'project'),
     'nudi_body': (12, (0, 0, 256, 128), 3.0, 'project'),
     'nudi_ridge': (12, (0, 128, 256, 64), 5.0, 'project'),
-    'nudi_tubercle': (12, (0, 192, 256, 64), 0.0, 'height'),
+    'nudi_tubercle': (12, (0, 192, 256, 64), 8.0, 'project'),   # mottled yellow-orange caps
     'hermit_shell': (13, (0, 0, 256, 128), 3.0, 'project'),
     'hermit_leg': (13, (0, 128, 256, 64), 6.0, 'project'),
     'hermit_lip': (13, (0, 192, 256, 64), 4.0, 'project'),

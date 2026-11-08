@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b46fc80d) | Reef skins review: labelled before/after table |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/068281ff) | Reef: creature skins in their own atlas cells (plan W2) |
 
 <!--history-meta v1
+b46fc80d	author	Will Norris
+b46fc80d	added	11
+b46fc80d	deleted	9
+b46fc80d	files	1
+b46fc80d	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 068281ff	author	Will Norris
 068281ff	added	57
 068281ff	deleted	0

@@ -407,29 +407,52 @@ def _mushroom_coral(mesh, center):
         mesh.swept_tube([(p[0],p[1],p[2]+.008) for p in ridge], .010, 'polyp', 5)
 
 
+NUDI_LENGTH, NUDI_WIDTH, NUDI_HEIGHT = .30, .15, .055   # mantle half-extents
+NUDI_RIDGES = (-.07, 0.0, .07)                            # ridge offsets across the mantle
+
+
+def _nudi_surface(x, y, z, px, py):
+    """Height of the mantle's upper surface above local point (px, py)."""
+    q = 1 - ((px - x) / NUDI_LENGTH) ** 2 - ((py - y) / NUDI_WIDTH) ** 2
+    return z + NUDI_HEIGHT * math.sqrt(max(0.0, q))
+
+
 def _nudibranch(mesh, center):
+    """Phyllidia varicosa: a low black mantle with three blue-grey ridges,
+    yellow-capped tubercles on the ridges and yellow rhinophores (front = -x).
+    Colours: docs/reference/thai-reef-skin-colours.md."""
     x, y, z = center
-    # Phyllidia's dark mantle carries broken pale ridges and yellow tubercles;
-    # keep those markings in geometry so they remain visible at tank scale.
-    mesh.ellipsoid((x, y, z), (.31, .16, .10), 'nudi_body', 16, 8)
-    mesh.ellipsoid((x - .23, y, z + .055), (.12, .105, .10), 'nudi_body', 10, 6)
-    for side in (-1, 1):
+    first = len(mesh.faces)
+    mesh.ellipsoid((x, y, z), (NUDI_LENGTH, NUDI_WIDTH, NUDI_HEIGHT), 'nudi_body', 18, 8)
+    # The mantle texture repeats the ridge pattern, mapped top-down along the
+    # body, so the stripes still read where the geometry is too small to see.
+    if not hasattr(mesh, 'face_uvs'):
+        mesh.face_uvs = {}
+    for f in range(first, len(mesh.faces)):
+        # Atlas cell 12 (x 0-255, y 768-1023), body rows 3-125.
+        mesh.face_uvs[f] = tuple(((3 + 250 * (mesh.vertices[v][0] - x + NUDI_LENGTH) / (2 * NUDI_LENGTH)) / 1024,
+                                  (768 + 3 + 122 * (mesh.vertices[v][1] - y + NUDI_WIDTH) / (2 * NUDI_WIDTH)) / 1024)
+                                 for v in mesh.faces[f])
+    for offset in NUDI_RIDGES:
+        reach = NUDI_LENGTH * .78 * math.sqrt(1 - (offset / NUDI_WIDTH) ** 2)
         ridge = []
         for i in range(7):
-            t = i/6
-            ridge.append((x-.22+.44*t, y+side*(.075+.018*math.sin(t*math.pi)),
-                          z+.075+.025*math.sin(t*math.pi)))
-        mesh.swept_tube(ridge, .012, 'nudi_ridge', 5)
-    for i in range(13):
-        t = i / 12
-        px = x - .2 + .42 * t
-        py = y + .10 * math.sin(t * math.pi * 2)
-        pz = z + .09 + .035 * math.sin(t * math.pi)
-        mesh.swept_tube([(px, py, pz), (px, py, pz + .08)], .016, 'nudi_ridge', 5)
-        mesh.ellipsoid((px, py, pz + .09), (.029, .029, .037), 'nudi_tubercle', 6, 4)
+            px = x - reach + 2 * reach * i / 6
+            py = y + offset
+            ridge.append((px, py, _nudi_surface(x, y, z, px, py) + .004))
+        mesh.swept_tube(ridge, .014, 'nudi_ridge', 5)
+        # Tubercles sit directly on the ridge, capped in yellow.
+        for i in range(6):
+            px = x - reach * .9 + 1.8 * reach * (i + .5) / 6
+            py = y + offset + .006 * math.sin(i * 2.3 + offset * 40)
+            pz = _nudi_surface(x, y, z, px, py) + .018
+            mesh.ellipsoid((px, py, pz), (.021, .021, .019), 'nudi_tubercle', 6, 4)
     for side in (-1, 1):
-        # Rhinophores are yellow (docs/reference/thai-reef-skin-colours.md).
-        mesh.swept_tube([(x-.28,y,z+.12),(x-.31,y+side*.05,z+.24)], .012, 'nudi_tubercle', 4)
+        base = (x - NUDI_LENGTH * .78, y + side * .04,
+                _nudi_surface(x, y, z, x - NUDI_LENGTH * .78, y + side * .04))
+        tip = (base[0] - .03, base[1] + side * .012, base[2] + .07)
+        mesh.swept_tube([base, tip], .011, 'nudi_tubercle', 5)
+        mesh.ellipsoid(tip, (.014, .014, .016), 'nudi_tubercle', 6, 4)
 
 
 def _humbug(mesh, center, scale=1.0):

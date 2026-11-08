@@ -85,6 +85,16 @@ def _creature_texel(cell, x, y, seed):
         return (240, 236, 226), (-18 if y % 16 == 0 else 0) + 6 * grain
     if cell == 12:                                 # Phyllidia varicosa
         if y < 128:
+            # Mantle, mapped top-down (u along the body, v across it): three
+            # blue-grey ridges with yellow tubercles, short transverse ridges
+            # toward the margins, on black.
+            v = (y - 3) / 122
+            for ridge in (.267, .5, .733):          # matches life.NUDI_RIDGES
+                if abs(v - ridge) < .035:
+                    dot = (x % 24 - 12) ** 2 + ((v - ridge) * 122) ** 2 < 20
+                    return ((242, 204, 40) if dot else (122, 146, 170)), 4 * grain
+            if (v < .14 or v > .86) and x % 16 < 2:
+                return (50, 60, 74), 4 * grain
             return (16, 17, 20), (22 if _noise(x, y, seed + 551) > .9 else 0) + 4 * grain
         if y < 192:
             return (122, 146, 170), 18 * smooth + 6 * grain

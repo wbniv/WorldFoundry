@@ -128,8 +128,10 @@ sessile = [(lambda: built(life.feather_dusters), (0, 0, .2)),
 
 for style in ('realistic', 'anime'):
     mat = material_for(style)
+    nudibranch = [(lambda: built(life._nudibranch), (0, 0, 0))]
     for name, row, target, distance, lens in (('animals', animals, (1.55, 0, .08), 4.6, 42),
-                                              ('sessile', sessile, (2.0, 0, .35), 5.0, 45)):
+                                              ('sessile', sessile, (2.0, 0, .35), 5.0, 45),
+                                              ('nudibranch', nudibranch, (0, 0, .03), 1.5, 50)):
         objs = [to_blender(make(), mat, offset) for make, offset in row]
         cam.location = (target[0], target[1] - distance, target[2] + distance * .28)
         cam.rotation_euler = (Vector(target) - cam.location).to_track_quat('-Z', 'Y').to_euler()
