@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/d1ee0167) | Balcony plan C v2: weather inserts so no rain gets in while away |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/9b7fdc33) | Balcony plan C: frame detail sections |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/84f2e6ab) | Balcony plan C: no mullions; panels meet edge to edge |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/d74dbdb0) | Balcony plan C: fixed black frame with six pop-out pet-mesh panels |
@@ -25,6 +26,11 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/ce0a2fa6) | Plan condo 639 balcony zip screen (solar-strip motor) and 7 cm floor recess |
 
 <!--history-meta v1
+d1ee0167	author	Will Norris
+d1ee0167	added	31
+d1ee0167	deleted	3
+d1ee0167	files	1
+d1ee0167	body	New v2 spec sheet (v1 untouched): the frame takes six pet-mesh screens\nor six gasketed weather inserts in the same rails. Seals move onto the\npanels, cam latches compress them, inserts interlock at rebated joints,\nand the sill gets a 25 outer stop, 18 water dam, baffled weeps and a\ndrip edge. Adds an insert material choice, a hose test at handover, v2\nframe-detail sections and mockup, an inserts state on the elevation,\nand plan section A3 v2 with open questions 17-18.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 9b7fdc33	author	Will Norris
 9b7fdc33	added	12
 9b7fdc33	deleted	0
