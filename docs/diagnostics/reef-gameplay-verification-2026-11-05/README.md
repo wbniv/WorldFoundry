@@ -338,6 +338,15 @@ measured. Private evidence is under `/tmp/reef-flowerpot-current-evidence` and
 `/tmp/reef-flowerpot-current-anime-evidence`. Full Aquarium was restored and
 hash-verified by J‑79311cba0b22 after the anime run.
 
+Reviewing 20–24 seconds of each close-camera recording at two-second intervals
+shows repeated sway and return for the flowerpot stalks and repeated
+contraction/expansion and lean for the leather coral in both styles. These
+are visual cycles rather than a quantitative timing or amplitude measurement.
+In the 70-second normal wide-view recordings, those small coral movements are
+not clearly readable at the full-tank scale. The sea fan's larger sway is
+visible. These findings do not establish approach/retraction behavior for the
+other animals.
+
 ## Lenovo wide-view performance, 2026-11-08
 
 Profile jobs J‑8cb1fbdb8224 (realistic) and J‑b00ff4f7b72e (anime) reused
@@ -352,3 +361,20 @@ are single Lenovo idle runs, not the plan's Chromecast performance acceptance.
 Private evidence is in `/tmp/reef-tablet-profile-realistic` and
 `/tmp/reef-tablet-profile-anime`. Recalculate with
 `python3 docs/diagnostics/reef-gameplay-verification-2026-11-05/profile-idle-window.py EVIDENCE_DIRECTORY`.
+
+## Cast1 wide-view performance, 2026-11-08 (in progress)
+
+Will made cast1 available. Jobs J‑c37040e4a233 (realistic) and
+J‑24ee1da60153 (anime) selected the appropriate style and measured 135 seconds;
+screenshots confirm the normal wide views. The 120 seconds starting two seconds
+after the selector release measured 24.31 FPS (p95 66.73 ms, p99 66.73 ms)
+and 22.30 FPS (p95 66.73 ms, p99 83.42 ms), respectively. Each sample includes
+one verification screenshot. The initial realistic sample also overlapped a
+tablet install attempt; no SurfaceFlinger sampling holes were reported.
+Both exceed the plan's 20 FPS average threshold individually, but the
+three-run median required by its referenced protocol is not yet available.
+Additional runs J‑3d5628c2b7d7, J‑550a740dd413, J‑54952b294001 and
+J‑bc816fc0e458 have been submitted in alternating styles. The second realistic
+run measured 24.38 FPS; the remaining runs must complete and be checked.
+Selected frame data and images for the first pair are in
+`docs/diagnostics/reef-cast1-performance-2026-11-08/`.

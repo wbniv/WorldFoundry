@@ -25,6 +25,10 @@ Lenovo wide-idle profiles of both styles measured approximately 60.9 presented
 FPS over 120 seconds after selection, with continuous samples and one
 verification screenshot in each window. These are tablet measurements; the
 specified Chromecast acceptance remains open.
+Cast1's first wide-idle samples measured 24.31 FPS realistic and 22.30 FPS
+anime over 120 seconds, both above the 20 FPS target. Further runs are in
+progress to establish the referenced three-run medians; see the
+[verification notes](../diagnostics/reef-gameplay-verification-2026-11-05/README.md).
 
 **In TODO.md** since 2026‑11‑02, all under Level / Gameplay:
 

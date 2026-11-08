@@ -4,14 +4,21 @@ Usage: python3 profile-idle-window.py EVIDENCE_DIRECTORY
 The final touch release is followed by a two-second settling interval.
 """
 import json
+import csv
 import sys
 from pathlib import Path
 
 root = Path(sys.argv[1])
-touch = json.loads((root / 'touch-evidence.json').read_text())
-edges = touch['observed_edges'].values()
-release_ms = max(edge['device_uptime_ms'] for edge in edges
-                 if edge['action'] == 2 and edge['accepted'])
+if (root / 'touch-evidence.json').exists():
+    touch = json.loads((root / 'touch-evidence.json').read_text())
+    edges = touch['observed_edges'].values()
+    release_ms = max(edge['device_uptime_ms'] for edge in edges
+                     if edge['action'] == 2 and edge['accepted'])
+else:
+    with (root / 'input-timeline.csv').open(newline='') as stream:
+        rows = list(csv.reader(stream))
+    release_ms = max(int(row[2]) for row in rows
+                     if row[0] != 'ANCHOR' and row[3:6] == ['23', '1', '1'])
 start = (release_ms + 2000) * 1_000_000
 presents = sorted(set(json.loads((root / 'run-1/presents-ns.json').read_text())))
 window = [value for value in presents if start <= value <= start + 120_000_000_000]
