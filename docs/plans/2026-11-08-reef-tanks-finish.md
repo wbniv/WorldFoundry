@@ -227,7 +227,7 @@ One rule for every creature: **object-local UVs into its own cell**, so texel de
 
 ## W5 — procedural reef: random rocks, a rock count and clustered colonies, laid out in Forth (plan only)
 
-**Status: D5–D8 decided** (Will, 2026‑11‑08: "d5: forth, d6: ok, d7: ok, d8: yes"). **R0's code reading is done** ([report](../diagnostics/reef-w5-r0-2026-11-08/README.md)): Forth-only is feasible with no engine change for W5 itself. The device measurement is still to run, and **D9 awaits Will**. W3's fixed placement shipped first, as asked (`1a30b727`, approved, pushed).
+**Status: D5–D8 decided** (Will, 2026‑11‑08: "d5: forth, d6: ok, d7: ok, d8: yes"). **R0's code reading is done** ([report](../diagnostics/reef-w5-r0-2026-11-08/README.md)): Forth-only is feasible with no engine change for W5 itself. The device measurement is still to run. **D9 is decided:** a level settings object, with no app code. **W5a is in progress.** W3's fixed placement shipped first, as asked (`1a30b727`, approved, pushed).
 
 Will, 2026‑11‑08:
 - "can we do that randomly-ish on initial placement in clusters? (not unlike the planted tank level)"
@@ -377,7 +377,7 @@ Full evidence is in the [R0 report](../diagnostics/reef-w5-r0-2026-11-08/README.
 | D5 | Architecture | **A**: a baked kit laid out by Forth. No engine code if R0 passes |
 | D6 | Rock count | **1–5, default 3**, today's look. Heroes come first; with fewer than 3 rocks some behaviours are absent |
 | D7 | Seed | **Seed 0 = a new reef on every entry** (like the Planted Tank); any other value repeats exactly |
-| D9 | Where ReefSettings appears | **Awaiting Will.** (a) **TV settings panel only**, which works with W5a as specified; or (b) also the phone Dream settings and the coordinator tray, which needs an aquarium-flavour settings provider and a launch-override bridge in the Android app (app code, not engine). Recommendation: **(a) now, (b) as its own TODO item** |
+| D9 | Where ReefSettings appears | **Decided** (Will, 2026‑11‑08: "you don't need any new android app code. use a level settings object (check out planted tank, duh)"). ReefSettings is a **level settings object** like the Planted Tank's, with **no app code**. R0 had read the phone and coordinator path as Planted-only; W5a's device check confirms what each surface shows |
 | D8 | Keep the fixed layout | **Yes**: Layout = Fixed shows the reviewed W3 reef; the default is Random once W5 passes review |
 
 ### Mock-ups

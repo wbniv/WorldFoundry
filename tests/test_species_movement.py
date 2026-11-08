@@ -47,7 +47,7 @@ def vm(tmp_path_factory):
         indices = mapping.get('indices', mapping.get('actors'))
         result=subprocess.run([str(binary),*map(str,paths),str(indices['Player']),str(indices['Director']),*entries],input=trace,text=True,capture_output=True)
         assert result.returncode==0,result.stderr
-        keys=['frame','x','y','z','vx','vy','vz',*range(600,751),*range(1100,1112),*range(1200,1281),*range(1000,1035),*range(780,791),'part-x','part-y','part-z','part-a','part-b','part-c','camshot']
+        keys=['frame','x','y','z','vx','vy','vz',*range(600,751),*range(1100,1112),*range(1200,1281),*range(1000,1035),*range(780,791),*range(860,866),'part-x','part-y','part-z','part-a','part-b','part-c','camshot']
         return [dict(zip(keys,map(float,row))) for row in csv.reader(io.StringIO(result.stdout))]
     return run
 
@@ -322,3 +322,13 @@ def test_jelly_bounded_slow_frame_integration(vm):
         ends.append(rows[-1])
     assert max(r['x'] for r in ends)-min(r['x'] for r in ends)<.10
     assert max(r['z'] for r in ends)-min(r['z'] for r in ends)<.10
+
+
+def test_reef_director_reads_reef_settings(vm):
+    """ReefSettings (plan W5a): defaults without a catalog, panel values with one."""
+    mapping = json.loads((ROOT/'wflevels/aquarium_thai_reef/actor-map.json').read_text())
+    director = mapping.get('indices', mapping['actors'])['Director']
+    defaults = vm('thai_reef', 'reset 4 0 4\nstep 2 0 .0166667\n')
+    assert (defaults[-1][860], defaults[-1][861], defaults[-1][862], defaults[-1][863]) == (0, 3, 1, 0)
+    chosen = vm('thai_reef', f'prop {director} 1 1\nprop {director} 2 5\nprop {director} 3 2\nreset 4 0 4\nstep 2 0 .0166667\n')
+    assert (chosen[-1][860], chosen[-1][861], chosen[-1][862]) == (1, 5, 2)

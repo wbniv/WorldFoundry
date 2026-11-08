@@ -1333,6 +1333,8 @@ tasks:
       - wflevels/aquarium_thai_reef/aquarium_thai_reef-standalone.iff.txt
       - wflevels/aquarium_thai_reef/textile.flags
       - wflevels/aquarium_thai_reef/reef/*.py
+      - wflevels/aquarium_thai_reef/settings.oas
+      - wflevels/aquarium_thai_reef/settings-bindings.json
       - wfsource/source/oas/camera.oas
       - wfsource/source/oas/camera.oad
     generates:
@@ -1350,6 +1352,8 @@ tasks:
       - wflevels/aquarium_thai_reef/generate.py
       - wflevels/aquarium_thai_reef/config.py
       - wflevels/aquarium_thai_reef/reef/*.py
+      - wflevels/aquarium_thai_reef/settings.oas
+      - wflevels/aquarium_thai_reef/settings-bindings.json
       - wfsource/source/oas/camera.oas
       - wfsource/source/oas/camera.oad
     generates:

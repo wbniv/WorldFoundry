@@ -403,6 +403,15 @@ life_tick = (': reef-life\n' + rotate(indices["SeaFan"], a='640 tk@ tk-sin .012 
              f' {anchor_map()["nudibranch"][2]} INDEXOF_Z_POS {indices["Nudibranch"]} write-actor-mailbox\n'
              # Headings are in revolutions: half a turn faces +x.
              + rotate(indices["Nudibranch"], c='751 tk@ .25 + tk-sin 0 > if .5 else 0 then'))
+# ReefSettings (plan W5a), owned by the Director: Layout, Rocks, Colonies,
+# Seed (fields 1-4). Polled once a second into 860-863 so a settings-panel
+# change is seen without a reload; W5c lays out the reef from them.
+life_tick += (f' 864 tk@ tk-dt@ - dup 864 tk! 0 <= if 1 864 tk!'
+              f' {indices["Director"]} 1 property@ if else drop 0 then 860 tk!'
+              f' {indices["Director"]} 2 property@ if else drop 3 then 861 tk!'
+              f' {indices["Director"]} 3 property@ if else drop 1 then 862 tk!'
+              f' {indices["Director"]} 4 property-int-bytes@ if drop 65536 * swap 256 * + +'
+              f' else drop drop drop drop 0 then 863 tk! then\n')
 life_tick += ' 1064 tk@ 0 = if\n' + ''.join(f' 1 {1020+i} tk!\n' for i in range(15)) + ' 1 1064 tk! then\n'
 for i, worm in enumerate(worm_mouths()):
     x, y, z = worm['mouth']
@@ -571,11 +580,17 @@ for obj in bpy.context.scene.objects:
     bm.free()
     obj.data.update()
 (out / 'triangle-diagnostics.json').write_text(json.dumps(triangle_diagnostics, indent=2)+'\n')
-(out / 'actor-map.json').write_text(json.dumps({'level':args.level_id, 'actors':indices,
+(out / 'actor-map.json').write_text(json.dumps({'level':args.level_id, 'actors':indices, 'indices':indices,
     'triangles':actual_triangles, 'triangle_total':triangle_total,
     'animated_triangles':animated_triangles, 'hull_triangles':actual_hull_triangles, 'anchors':anchor_map(),
     'rock_union':args.remesh_rocks, 'unverified':True}, indent=2)+'\n')
 bpy.ops.wf.export_level(filepath=str(out / f'{args.level_id}.lev'))
+# Level settings object (plan W5a): both styles carry the same ReefSettings.
+import shutil
+for settings_file in ('settings.oas', 'settings-bindings.json'):
+    source = repo / 'wflevels/aquarium_thai_reef' / settings_file
+    if source.resolve() != (out / settings_file).resolve():
+        shutil.copyfile(source, out / settings_file)
 from wf_blender import dfrm_chunk
 worm_rig.bind_exported_mesh(out / 'wormcrowns.iff', Mesh, dfrm_chunk)
 feather_rig.bind_exported_mesh(out / 'featherstar.iff', Mesh, dfrm_chunk)

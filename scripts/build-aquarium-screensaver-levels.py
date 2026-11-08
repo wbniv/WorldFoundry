@@ -68,6 +68,9 @@ def check_tank_catalog(level: bytes, tank: str) -> None:
     if tank == "aquarium_jellyfish_screensaver":
         schema = b"JellyfishSettings"
         keys = (b"Pulse tempo", b"Stroke strength", b"Companions", b"Jellyfish size")
+    elif tank in ("aquarium_thai_reef_screensaver", "aquarium_thai_reef_anime_screensaver"):
+        schema = b"ReefSettings"
+        keys = (b"Layout", b"Rocks", b"Colonies", b"Seed")
     else:
         schema = b"PlantedTankSettings"
         keys = (b"Seed", b"Water type", b"Growth speed", b"Initial age", b"Textures", b"Sway",

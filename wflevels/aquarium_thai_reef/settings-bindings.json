@@ -1,0 +1,19 @@
+{
+ "version": 1,
+ "owner": "Director",
+ "title": "Gulf of Thailand Reef / Director",
+ "fields": {
+  "Layout": {
+   "id": 1
+  },
+  "Rocks": {
+   "id": 2
+  },
+  "Colonies": {
+   "id": 3
+  },
+  "Seed": {
+   "id": 4
+  }
+ }
+}
