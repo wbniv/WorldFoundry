@@ -2,6 +2,30 @@
 
 2 November 2026 · **Plan — all ten decisions made** (Will, 2026‑11‑02: "D1-D10: i accept your recommendations"). The reef ships as **two tanks in the selector**: an ultra-realistic one and a cartoon/anime/cel-shaded one. **Engine permission is granted for exactly E1–E7 (multi-curve `DFRM`) and S1–S3 (style shading) as specified here**; any engine edit beyond them still needs its own permission ([`AGENTS.md:9-14`](../../AGENTS.md)).
 
+## Gameplay verification update, 2026-11-08
+
+On both Pixel and Lenovo, real joystick input brought the fish to the cleaner
+station and recordings showed the shrimp climb onto it and return. A Lenovo
+close-camera recording and half-second telemetry verified the crab's proximity
+timer activates inside its 1.0 radius and clears about two seconds after the
+fish leaves; the normal wide view does not resolve its individual claws. Both
+reef styles have been selected and seen on the Lenovo. The full Aquarium APK
+was restored there and its hash verified after an initially delayed install.
+These findings supersede older incomplete observations below; the remaining
+reaction, motion, longer performance and acceptance checks are still open.
+Evidence and limitations are in the [gameplay verification notes](../diagnostics/reef-gameplay-verification-2026-11-05/README.md).
+
+Subsequent Lenovo close-camera recordings show leather-coral posture changes
+and flowerpot stalk movement in both styles. These views do not yet establish
+the complete deflation/current timing or readability from the normal wide view.
+The production anime actor map records 21,562 outline triangles against its
+24,000 budget. A later scratch diagnostic's 27,570 count came from omitting
+the standard rock-union option; it did not measure the shipped geometry.
+Lenovo wide-idle profiles of both styles measured approximately 60.9 presented
+FPS over 120 seconds after selection, with continuous samples and one
+verification screenshot in each window. These are tablet measurements; the
+specified Chromecast acceptance remains open.
+
 **In TODO.md** since 2026‑11‑02, all under Level / Gameplay:
 
 - the two-style tank (T4);

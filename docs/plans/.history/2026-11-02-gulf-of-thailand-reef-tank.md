@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-07](https://github.com/wbniv/WorldFoundry/commit/fec5f37c) | Polish reef coral textures and anime outlines |
 | [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/9dab404c) | Plan: the content rule is species only |
 | [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/2e8f756b) | Plan: Gulf of Thailand Reef decisions D1-D10 accepted |
 | [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/dc27d780) | Plan: a tank shell is not covered by the content rule |
@@ -7,6 +8,10 @@
 | [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/a0c95dda) | Plan: Gulf of Thailand Reef tank, A3 poster and DFRM v2 |
 
 <!--history-meta v1
+fec5f37c	author	Will Norris
+fec5f37c	added	4
+fec5f37c	deleted	0
+fec5f37c	files	1
 9dab404c	author	Will Norris
 9dab404c	added	10
 9dab404c	deleted	22

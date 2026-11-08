@@ -292,3 +292,63 @@ the existing automatic installer retry budget remains bounded. Coordinator
 0.1.89 (`ac9d275`) was deployed through the reviewed, recovery-preserving
 upgrade on 2026-11-08; the queue resumed. The isolation path has not been
 reproduced on hardware since deployment.
+
+On 2026-11-08 Lenovo recordings J‑18b5f791b808 (realistic) and
+J‑219de7340cc1 (anime) reused the verified full APK and completed with safe
+cleanup. Both show the ordinary wide reef view and visible animal motion over
+70 seconds. The corals occupy too few pixels in that view to establish the
+flowerpot and leather deformations; close views remain necessary. Evidence is
+stored privately under `/tmp/reef-coral-live-review` and
+`/tmp/reef-coral-live-review-anime` and includes device screen recordings.
+
+J‑e89e49c573d6 recorded the current realistic leather-coral mesh through a
+temporary close camera, with the fish placed away. The two captures show the
+coral leaning and changing shape; they do not independently establish the
+timing or full extent of the deflation cycle. The recording and stills are
+private at `/tmp/reef-leather-current-evidence`. The close camera is diagnostic,
+not the ordinary player view. Full Aquarium restoration was queued separately
+as J‑ecac0a53a06f.
+That restore initially timed out in the Android installer. Automatic recovery
+J‑5dcacd7cdda8 subsequently confirmed terminal success, verified the full APK
+hash `30554973298a13e9352344864ee42f6f804888df3439952194cc1508ebdfef1e`,
+removed the temporary installer files, and reported safe restoration. The
+shared transport was held during recovery; this successful terminal cleanup
+does not exercise the new unresolved-installer localization transition.
+
+An anime close-camera generator run reported 27,570 outline triangles and
+refused its budget because the diagnostic omitted `--remesh-rocks`, which the
+normal anime build supplies. The production actor map records 21,562 outline
+triangles against the 24,000 limit. The diagnostic's three unmerged rock
+outlines account for the entire 6,008-triangle difference; all other recorded
+outline counts match. The camera-only retry bypassed that scratch check and
+packaged the already-built production meshes, without changing their geometry
+or the production budget.
+
+J‑e9554bc9789c used a current-asset close camera for the anime leather coral.
+The captures show a posture change; they do not measure the full deflation
+cycle. The full Aquarium APK was then hash-verified and restored by
+J‑86d0b4b0da99. The close-view recording is private under
+`/tmp/reef-leather-current-anime-evidence`.
+
+Current-asset close-camera Lenovo recordings J‑2516fab279cc (realistic) and
+J‑b963f0c590b1 (anime) show the flowerpot stalks changing their lean. These
+are diagnostic views with the fish placed away, not proof that the small motion
+is legible in the ordinary wide view or that the current's full cycle has been
+measured. Private evidence is under `/tmp/reef-flowerpot-current-evidence` and
+`/tmp/reef-flowerpot-current-anime-evidence`. Full Aquarium was restored and
+hash-verified by J‑79311cba0b22 after the anime run.
+
+## Lenovo wide-view performance, 2026-11-08
+
+Profile jobs J‑8cb1fbdb8224 (realistic) and J‑b00ff4f7b72e (anime) reused
+the full APK, selected the respective reef with scripted touch, and measured
+130 seconds of SurfaceFlinger presentation timestamps. Screenshots confirm
+the selected styles. In each 120-second window beginning two seconds after
+the final selector release, realistic recorded 60.86 FPS, p95 16.62 ms, p99
+16.79 ms and worst 32.91 ms; anime recorded 60.88 FPS, p95 16.61 ms, p99
+16.78 ms and worst 17.08 ms. There were no reported sampling holes. Each
+window includes one screenshot capture and its measurement overhead; these
+are single Lenovo idle runs, not the plan's Chromecast performance acceptance.
+Private evidence is in `/tmp/reef-tablet-profile-realistic` and
+`/tmp/reef-tablet-profile-anime`. Recalculate with
+`python3 docs/diagnostics/reef-gameplay-verification-2026-11-05/profile-idle-window.py EVIDENCE_DIRECTORY`.
