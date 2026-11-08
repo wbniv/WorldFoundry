@@ -2496,3 +2496,12 @@ then
 
 Choose the despawn threshold to be well below `z_max` and after any camera cutback that
 references the actor, so the camera is never active and tracking a despawned actor.
+
+
+## Rotation writes from scripts only half worked (fixed 2026‑11‑08)
+
+**Symptom:** a script writing `INDEXOF_ROTATION_A` or `INDEXOF_ROTATION_B` saw no effect on its own actor, and a different actor tilted instead.
+
+**Cause:** `Actor::WriteSystemMailbox` kept one `static Euler` shared by every actor and applied it only on a `ROTATION_C` write. An A or B write was held until *some* actor wrote C, and then landed on that actor. In the Thai reef, the sea fan's sway never applied, and the guard crab's threat tilt pitched the boxfish.
+
+**Fix:** each of A, B and C now updates the writing actor's own rotation immediately (`wfsource/source/game/actor.cc`, guarded by `tests/test_actor_rotation_mailboxes.py`). All values are revolutions: write `.5` for a half turn, not `3.14159`. Levels that wrote only B and C (the urchin scripts) now keep their own A instead of inheriting another actor's.

@@ -1416,8 +1416,6 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
 {
     RangeCheck(EMAILBOX_LOCAL_SYSTEM_START,boxnum,EMAILBOX_LOCAL_SYSTEM_MAX);
 
-    static Euler rotationEuler;         // kts major kludge, what we really need is a wider interface to the scripting language
-
   //  cerr << "write-mailbox[" << boxnum << "]=[" << value << "]\t";
 	DBSTREAM2( cmailbox << "local system mailbox " << boxnum << " set to " << value << std::endl; )
 
@@ -1513,12 +1511,17 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
             theLevel->NotifyPositionWrite(*this);
             break;
         }
+        // Each axis write updates this actor's own rotation at once (revolutions).
+        // These writes used to go into one static Euler shared by every actor,
+        // applied only on a C write, so a lone A or B write leaked into whichever
+        // actor wrote C next and never reached its own actor.
         case EMAILBOX_ROTATION_A:
         {
             Angle rot( Angle::Revolution( value ) );
             DBSTREAM4( cstats << "actor got rotation a of " << rot << std::endl; )
-       rotationEuler.SetA(rot);
-            //_physicalAttributes.SetRotationA( rot );
+            Euler rotation = _physicalAttributes.Rotation();
+            rotation.SetA(rot);
+            _physicalAttributes.SetRotation( rotation );
             break;
         }
 
@@ -1526,8 +1529,9 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
         {
             Angle rot( Angle::Revolution( value ) );
             DBSTREAM4( cstats << "actor got rotation b of " << rot << std::endl; )
-       rotationEuler.SetB(rot);
-            //_physicalAttributes.SetRotationB( rot );
+            Euler rotation = _physicalAttributes.Rotation();
+            rotation.SetB(rot);
+            _physicalAttributes.SetRotation( rotation );
             break;
         }
 
@@ -1535,9 +1539,9 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
         {
             Angle rot( Angle::Revolution( value ) );
             DBSTREAM4( cstats << "actor got rotation c of " << rot << std::endl; )
-       rotationEuler.SetC(rot);
-            _physicalAttributes.SetRotation( rotationEuler );
-            //_physicalAttributes.SetRotationC( rot );
+            Euler rotation = _physicalAttributes.Rotation();
+            rotation.SetC(rot);
+            _physicalAttributes.SetRotation( rotation );
             break;
         }
 
