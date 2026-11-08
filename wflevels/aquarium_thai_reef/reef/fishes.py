@@ -67,7 +67,7 @@ def humbug(Mesh):
     # Elliptical rings along the body, with alternating broad black bars.
     xs = (-.32,-.25,-.18,-.11,-.04,.03,.10,.17,.24,.30)
     for j in range(len(xs)-1):
-        color = 'fish_dark' if j in (1, 4, 7) else 'fish_white'
+        color = 'fish_dark' if j in (1, 4, 7) else 'humbug_white'
         def ring(x):
             r = math.sqrt(max(0, 1 - (x / .34) ** 2))
             return [(x, .105*r*math.cos(math.tau*i/12), .22*r*math.sin(math.tau*i/12)) for i in range(12)]
@@ -77,8 +77,8 @@ def humbug(Mesh):
             m.face([a[i],a[k],b[k],b[i]],color)
     # Forked caudal, dorsal and anal fins make the striped silhouette read as
     # a damselfish from the wide tank camera.
-    m.face([(-.29,0,0),(-.45,0,.13),(-.40,0,0)],'fish_white')
-    m.face([(-.29,0,0),(-.40,0,0),(-.45,0,-.13)],'fish_white')
+    m.face([(-.29,0,0),(-.45,0,.13),(-.40,0,0)],'humbug_white')
+    m.face([(-.29,0,0),(-.40,0,0),(-.45,0,-.13)],'humbug_white')
     m.face([(-.22,0,.15),(-.16,0,.26),(.04,0,.29),(.20,0,.17)],'fish_dark')
     m.face([(-.20,0,-.14),(-.12,0,-.25),(.05,0,-.25),(.18,0,-.14)],'fish_dark')
     for side in (-1,1):

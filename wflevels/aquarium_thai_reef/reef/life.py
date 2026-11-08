@@ -39,7 +39,7 @@ def _sea_fan(mesh, base):
     x, y, z = base
     # Radial primary branches and irregular cross-branches form a broad, open
     # gorgonian fan rather than a single trunk with symmetrical side twigs.
-    mesh.swept_tube([(x, y, z-.3), (x, y, z+.05), (x, y, z+.22)], .032, 'coralline', 6)
+    mesh.swept_tube([(x, y, z-.3), (x, y, z+.05), (x, y, z+.22)], .032, 'fan_grad', 6)
     spokes = []
     for i in range(13):
         a = math.pi * (.10 + .80 * i / 12)
@@ -51,7 +51,7 @@ def _sea_fan(mesh, base):
             points.append((x + .72 * radius * math.cos(a),
                            y + .045 * math.sin(i * 1.7 + t * 4),
                            z + .18 + radius * math.sin(a)))
-        mesh.swept_tube(points, .014 if i % 3 else .019, 'coralline', 5)
+        mesh.swept_tube(points, .014 if i % 3 else .019, 'fan_grad', 5)
         spokes.append(points)
         # Fine split tips break the otherwise perfectly radial outer edge.
         for side in (-1, 1):
@@ -59,7 +59,7 @@ def _sea_fan(mesh, base):
             end = (tip[0] + side*.045*math.sin(a) + .018*math.cos(a),
                    tip[1] + side*.012,
                    tip[2] - side*.045*math.cos(a) + .035*math.sin(a))
-            mesh.swept_tube([points[-2],tip,end], .009, 'coralline', 5)
+            mesh.swept_tube([points[-2],tip,end], .009, 'fan_grad', 5)
     for i in range(12):
         for j in range(1, 5):
             if (i + j) % 5 == 0:
@@ -67,7 +67,7 @@ def _sea_fan(mesh, base):
             a, b = spokes[i][j], spokes[i+1][j]
             middle = ((a[0]+b[0])/2, (a[1]+b[1])/2 - .012,
                       (a[2]+b[2])/2 + .018 * math.sin(i*3+j))
-            mesh.swept_tube([a, middle, b], .009, 'coralline', 4)
+            mesh.swept_tube([a, middle, b], .009, 'fan_grad', 4)
 
 
 def _clam(mesh, center, limb_ranges=None):
@@ -131,16 +131,27 @@ def _zoanthids(mesh, center):
         r = .08 + .31 * math.sqrt((i + .5) / 34)
         px, py = x + r * math.cos(a), y + r * math.sin(a) * .62
         pz = z + .035 * math.sin(i * 2.1)
-        mesh.swept_tube([(px, py, pz), (px, py, pz + .09)], .018, 'zoanthid', 6)
+        mesh.swept_tube([(px, py, pz), (px, py, pz + .09)], .018, 'zoanthid_column', 6)
+        first = len(mesh.faces)
         mesh.ellipsoid((px, py, pz + .11), (.052, .048, .025), 'zoanthid', 7, 4)
-        mesh.ellipsoid((px, py, pz + .13), (.022, .020, .009), 'polyp', 6, 3)
+        mesh.ellipsoid((px, py, pz + .13), (.022, .020, .009), 'zoanthid', 6, 3)
+        # Head and oral disc map onto one flower-head motif of the zoanthid
+        # tile (atlas tile 5: heads every 42 px), viewed from above, so each
+        # polyp shows a disc and tentacle ring instead of a sub-texel smear.
+        centre = (256 + 42 * (1 + i % 5), 256 + 42 * (1 + (i // 5) % 5))
+        if not hasattr(mesh, 'face_uvs'):
+            mesh.face_uvs = {}
+        for f in range(first, len(mesh.faces)):
+            mesh.face_uvs[f] = tuple(((centre[0] + 19 * (mesh.vertices[v][0] - px) / .052) / 1024,
+                                      (centre[1] + 19 * (mesh.vertices[v][1] - py) / .052) / 1024)
+                                     for v in mesh.faces[f])
         # Short tentacles frame each oral disc instead of a smooth button.
         for tentacle in range(8):
             angle = math.tau*tentacle/8 + i*.17
             start = (px+.034*math.cos(angle),py+.031*math.sin(angle),pz+.125)
             end = (px+.065*math.cos(angle),py+.060*math.sin(angle),
                    pz+.135+.007*math.sin(i+tentacle))
-            mesh.swept_tube([start,end], .009, 'zoanthid', 5)
+            mesh.swept_tube([start,end], .009, 'zoanthid_column', 5)
 
 
 # Christmas tree worms (Spirobranchus): the tube is buried in the Porites
@@ -330,21 +341,21 @@ def feather_dusters(mesh, center, ranges=None):
     for worm in range(4):
         cx, cy, cz = x + (worm-1.5)*.42, y, z + (worm % 2)*.12
         begin = len(mesh.vertices)
-        mesh.swept_tube([(cx,cy,cz-.24),(cx,cy,cz+.02)], .035, 'sand', 6)
+        mesh.swept_tube([(cx,cy,cz-.24),(cx,cy,cz+.02)], .035, 'duster_tube', 6)
         for ray in range(19):
             angle = math.pi * (.04 + .92*ray/18)
             outer = (cx+.25*math.cos(angle), cy, cz+.28*math.sin(angle))
             inner = (cx+.07*math.cos(angle), cy, cz+.07*math.sin(angle))
             mid = tuple((a+b)*.5 for a,b in zip(inner, outer))
-            mesh.swept_tube([inner, mid], .014, 'fish_white' if ray % 2 else 'sponge', 4)
-            mesh.swept_tube([mid, outer], .014, 'sponge' if ray % 2 else 'fish_white', 4)
+            mesh.swept_tube([inner, mid], .014, 'duster_light' if ray % 2 else 'duster_dark', 4)
+            mesh.swept_tube([mid, outer], .014, 'duster_dark' if ray % 2 else 'duster_light', 4)
         if ranges is not None:
             ranges.append((begin, len(mesh.vertices), (cx,cy,cz-.24)))
 
 
 def _feather_star(mesh, center, ranges=None):
     x, y, z = center
-    mesh.ellipsoid((x, y, z), (.14, .12, .09), 'coralline', 12, 6)
+    mesh.ellipsoid((x, y, z), (.14, .12, .09), 'star_grad', 12, 6)
     # Lamprometra palmata has 27–41 arms in the cited description; model 30.
     for arm in range(30):
         start = len(mesh.vertices)
@@ -356,7 +367,7 @@ def _feather_star(mesh, center, ranges=None):
             points.append((x + radius * math.cos(a + .08 * math.sin(t * math.pi)),
                            y + .06 * math.sin(a) * t,
                            z + radius * math.sin(a) + .10 * math.sin(t * math.pi)))
-        mesh.swept_tube(points, .013, 'coralline', 5)
+        mesh.swept_tube(points, .013, 'star_grad', 5)
         # Closely spaced, alternating pinnules make each arm feathery rather
         # than reading as a few widely spaced sticks.
         for j in range(1, 10):
@@ -369,6 +380,7 @@ def _feather_star(mesh, center, ranges=None):
                 length = .055 + .045*math.sin(math.pi*t)
                 tip = (p[0] - sign*length*math.sin(a), p[1]+.012*sign*math.sin(arm),
                        p[2] + sign*length*math.cos(a) + .025*t)
+                # Pinnules keep the tan polyp tile: two tones read as feathery.
                 mesh.swept_tube([p, tip], .007, 'polyp', 5)
         if ranges is not None:
             ranges.append((start, len(mesh.vertices)))
@@ -399,24 +411,25 @@ def _nudibranch(mesh, center):
     x, y, z = center
     # Phyllidia's dark mantle carries broken pale ridges and yellow tubercles;
     # keep those markings in geometry so they remain visible at tank scale.
-    mesh.ellipsoid((x, y, z), (.31, .16, .10), 'fish_dark', 16, 8)
-    mesh.ellipsoid((x - .23, y, z + .055), (.12, .105, .10), 'fish_dark', 10, 6)
+    mesh.ellipsoid((x, y, z), (.31, .16, .10), 'nudi_body', 16, 8)
+    mesh.ellipsoid((x - .23, y, z + .055), (.12, .105, .10), 'nudi_body', 10, 6)
     for side in (-1, 1):
         ridge = []
         for i in range(7):
             t = i/6
             ridge.append((x-.22+.44*t, y+side*(.075+.018*math.sin(t*math.pi)),
                           z+.075+.025*math.sin(t*math.pi)))
-        mesh.swept_tube(ridge, .012, 'clam', 5)
+        mesh.swept_tube(ridge, .012, 'nudi_ridge', 5)
     for i in range(13):
         t = i / 12
         px = x - .2 + .42 * t
         py = y + .10 * math.sin(t * math.pi * 2)
         pz = z + .09 + .035 * math.sin(t * math.pi)
-        mesh.swept_tube([(px, py, pz), (px, py, pz + .08)], .016, 'clam', 5)
-        mesh.ellipsoid((px, py, pz + .09), (.029, .029, .037), 'fish', 6, 4)
+        mesh.swept_tube([(px, py, pz), (px, py, pz + .08)], .016, 'nudi_ridge', 5)
+        mesh.ellipsoid((px, py, pz + .09), (.029, .029, .037), 'nudi_tubercle', 6, 4)
     for side in (-1, 1):
-        mesh.swept_tube([(x-.28,y,z+.12),(x-.31,y+side*.05,z+.24)], .012, 'clam', 4)
+        # Rhinophores are yellow (docs/reference/thai-reef-skin-colours.md).
+        mesh.swept_tube([(x-.28,y,z+.12),(x-.31,y+side*.05,z+.24)], .012, 'nudi_tubercle', 4)
 
 
 def _humbug(mesh, center, scale=1.0):
@@ -459,6 +472,7 @@ def _juvenile_boxfish(mesh, center):
 
 def _encrusting_patch(mesh, center, rx, rz, color):
     """An irregular crust with a low, uneven surface on the rock face."""
+    color = {'sponge': 'crust_sponge', 'coralline': 'crust_coralline'}[color]
     x,y,z = center
     rng = random.Random(SEED + round((x + 6)*1000) + round(z*100))
     radii = [rng.uniform(.65,1.2) for _ in range(15)]

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Texel-coverage audit for the Thai reef generator meshes (plan W2).
 
-For each static group and actor, prints the share of face area that samples a
-single flat texel (fish_dark / fish_white / water_*) and the share in faces
-spanning fewer than 3 texels of their world-projected tile. --check exits 1 if
+For each static group and actor, prints the share of face area whose exported
+UVs (reef/uvmap.py) cover a single texel (a flat swatch) and the share in
+faces spanning fewer than 3 texels. --check exits 1 if
 any creature W2 reskins is still above 20 % on either measure.
 Usage: python3 docs/plans/2026-11-08-reef-tanks-finish/texcov.py [--check]
 """
@@ -16,7 +16,7 @@ sys.path.insert(0,R+'/wflevels/aquarium_tanks'); sys.path.insert(0,R+'/wflevels/
 from mesh import Mesh
 from reef.geometry import build_groups
 from reef.fishes import boxfish, humbug
-from reef import life, invertebrates, corals
+from reef import life, invertebrates, corals, uvmap
 from reef.scene import worm_origin
 FLAT={'fish_dark','fish_white'}
 def area(vs):
@@ -27,20 +27,14 @@ def area(vs):
     return 0.5*math.sqrt(sum(x*x for x in a))
 RESULTS={}
 def report(name, m):
-    tot=0; flat=0; keys=collections.Counter(); small=0
-    explicit=getattr(m,'face_uvs',{})
-    for fi,(f,k) in enumerate(zip(m.faces,m.colors)):
-        vs=[m.vertices[i] for i in f]; a=area(vs); tot+=a; keys[k]+=a
-        if fi in explicit:
-            uv=explicit[fi]  # authored UVs: measure their own texel extent
-            span=math.sqrt(area([(u*1024,v*1024,0) for u,v in uv]))
-            big=max(max(u for u,_ in uv)-min(u for u,_ in uv), max(v for _,v in uv)-min(v for _,v in uv))*1024
-            if max(span,big)<3: small+=a
-            continue
-        if k in FLAT or k.startswith('water_'): flat+=a
-        # world-projected tile UV: 0.37 cycles/unit over 0.23 of 1024 => ~87 texels/unit; 1.1 for polyp
-        span=math.sqrt(a)*(256*.92*(1.1 if k in('porites','pocillopora','pocillopora_tip','acropora','leather','polyp') else .37))
-        if not (k in FLAT or k.startswith('water_')) and span<3: small+=a
+    """Measure the exported UVs (reef.uvmap), in texels of the 1024 atlas."""
+    uvs=uvmap.face_uvs(m)
+    tot=0; flat=0; small=0; keys=collections.Counter()
+    for f,k,uv in zip(m.faces,m.colors,uvs):
+        a=area([m.vertices[i] for i in f]); tot+=a; keys[k]+=a
+        extent=max(max(u for u,_ in uv)-min(u for u,_ in uv), max(v for _,v in uv)-min(v for _,v in uv))*1024
+        if extent<.5: flat+=a          # one texel: a flat swatch
+        elif extent<3: small+=a        # a face spanning under 3 texels
     RESULTS[name]=(100*flat/tot,100*small/tot)
     top=', '.join(f'{k} {100*v/tot:.0f}%' for k,v in keys.most_common(4))
     print(f'{name:15s} faces {len(m.faces):6d}  flat-swatch {100*flat/tot:5.1f}%  sub-3-texel {100*small/tot:5.1f}%  | {top}')

@@ -4,8 +4,15 @@ Layout: 16 cells of 256 x 256, cell i at x = (i % 4) * 256, y = (i // 4) * 256
 (top-left origin; UV v = y / 1024 in this pipeline).
   0-7   surface tiles, TILES order (world-projected UVs)
   8     Christmas tree worm morphs: 8 rows of 32 px, root -> tip along v
-  9-14  reserved for creature skins (neutral fill)
-  15    utility: flat fish swatches, water bands, clam shell, outline dark
+  9     feather-duster radioles (light, dark) and tube
+  10    guard crab: shell, legs, claw fingers
+  11    banded shrimp: red and white bands
+  12    nudibranch: body, ridges, tubercle gradient
+  13    hermit crab: borrowed shell, legs, shell lip
+  14    encrusting sponge and coralline crusts
+  15    utility: flat fish swatches, water bands, clam shell, humbug sheen,
+        sea-fan and feather-star base-to-tip gradients
+Colour references: docs/reference/thai-reef-skin-colours.md
 """
 from pathlib import Path
 import math
@@ -38,6 +45,73 @@ FISH_DARK = (UTIL_X + 8, UTIL_Y + 8)
 FISH_WHITE = (UTIL_X + 24, UTIL_Y + 8)
 WATER_X0 = UTIL_X + 40          # six 16-px bands from here, centre +8
 CLAM_SHELL = (UTIL_X, UTIL_Y + 32, 128, 32)   # x, y, width, height
+
+
+def _mix(a, b, t):
+    return tuple(x + (y - x) * t for x, y in zip(a, b))
+
+
+def _saturate(rgb, k=1.25):
+    m = sum(rgb) / 3
+    return tuple(m + (c - m) * k for c in rgb)
+
+
+def _creature_texel(cell, x, y, seed):
+    """(base rgb, shade) for creature cells 9-14 at cell-local x, y."""
+    grain = (_noise(x, y, seed + 500 + cell) - .5)
+    smooth = _smooth_noise(x, y, 14, seed + 520 + cell) - .5
+    if cell == 9:                                  # Sabellastarte radioles and tube
+        if y < 96:
+            return (226, 206, 168), (-58 if (x + y) % 8 == 0 else 0) + 8 * grain
+        if y < 192:
+            return (96, 58, 36), (46 if (x - y) % 8 == 0 else 0) + 8 * grain
+        return (128, 116, 92), 30 * grain + 10 * smooth
+    if cell == 10:                                 # Trapezia cymodoce
+        if y < 128:
+            cx, cy = x // 32, y // 32
+            spot = _noise(cx, cy, seed + 531) > .78
+            dx = x % 32 - 8 - 16 * _noise(cx, cy, seed + 532)
+            dy = y % 32 - 8 - 16 * _noise(cx, cy, seed + 533)
+            if spot and dx * dx + dy * dy < 18:
+                return (232, 96, 52), 6 * grain
+            return (172, 88, 46), 22 * smooth + 6 * grain
+        if y < 208:
+            return ((70, 38, 26) if (x // 20) % 4 == 0 else (150, 76, 42)), 8 * grain
+        return (52, 30, 24), 10 * grain
+    if cell == 11:                                 # Stenopus hispidus bands
+        if y < 128:
+            fleck = 40 if _noise(x, y, seed + 541) > .93 else 0
+            return (200, 32, 40), fleck + 14 * smooth + 6 * grain
+        return (240, 236, 226), (-18 if y % 16 == 0 else 0) + 6 * grain
+    if cell == 12:                                 # Phyllidia varicosa
+        if y < 128:
+            return (16, 17, 20), (22 if _noise(x, y, seed + 551) > .9 else 0) + 4 * grain
+        if y < 192:
+            return (122, 146, 170), 18 * smooth + 6 * grain
+        return _mix((232, 140, 30), (242, 204, 40), (y - 192) / 63), 6 * grain
+    if cell == 13:                                 # Dardanus lagopodes in a borrowed shell
+        if y < 128:
+            band = math.sin((x * .6 + y * .9) / 3.5) > .72     # fine spiral growth lines
+            return ((120, 82, 52) if band else (214, 196, 160)), 14 * smooth + 6 * grain
+        if y < 192:
+            if _noise(x, y, seed + 561) > .95:
+                return (235, 230, 220), 0
+            return _mix((138, 58, 46), (92, 34, 40), max(0.0, min(1.0, smooth + .5))), 6 * grain
+        return (236, 224, 200), 12 * smooth + 4 * grain
+    # cell 14: encrusting crusts
+    if y < 128:
+        pore = (x % 10 - 5) ** 2 + (y % 10 - 5) ** 2 < 4
+        return (190, 110, 60), (-40 if pore else 0) + 14 * smooth + 6 * grain
+    bump = _smooth_noise(x, y, 5, seed + 571) - .5
+    return (178, 98, 150), 26 * smooth + 22 * bump + 4 * grain
+
+
+# Utility gradients: (realistic base, realistic tip, anime base, anime tip).
+GRADIENTS = {
+    96: ((250, 250, 246), (200, 210, 222), (245, 245, 237), (245, 245, 237)),   # humbug: belly -> back
+    128: ((100, 44, 112), (222, 152, 218), (178, 60, 168), (250, 156, 236)),    # sea fan
+    160: ((130, 58, 96), (232, 178, 200), (200, 70, 140), (255, 192, 222)),     # feather star
+}
 
 
 def _worm_texel(x, y, style):
@@ -135,6 +209,11 @@ def write_atlas(path, seed=20261102, style='realistic'):
                 if style == 'anime':
                     shade = round(shade / 22) * 22
                 rgb = [max(0, min(255, round(c + shade))) for c in base]
+            elif i < UTILITY_CELL:
+                base, shade = _creature_texel(i, local_x, local_y, seed)
+                if style == 'anime':
+                    base, shade = _saturate(base), round(shade / 22) * 22
+                rgb = [max(0, min(255, round(c + shade))) for c in base]
             else:
                 rgb = [128, 128, 128]
             if i == UTILITY_CELL:
@@ -147,6 +226,15 @@ def write_atlas(path, seed=20261102, style='realistic'):
                         rgb = [8 + 4 * band, 65 + 17 * band, 128 + 17 * band]
                     else:
                         rgb = [8 + 3 * band, 44 + 8 * band, 64 + 10 * band]
+                gy = local_y - local_y % 32
+                if gy in GRADIENTS:
+                    rb, rt, ab, at = GRADIENTS[gy]
+                    t = 1 - (local_y - gy) / 31          # strip bottom = base, top = tip
+                    if style == 'anime':
+                        t = 0.0 if t < .34 else .5 if t < .67 else 1.0
+                        rgb = [round(c) for c in _mix(ab, at, t)]
+                    else:
+                        rgb = [round(c) for c in _mix(rb, rt, t)]
                 cx, cy, cw, ch = CLAM_SHELL
                 if cx <= x < cx + cw and cy <= y < cy + ch:
                     grain = _smooth_noise(x, y, 5, seed + 231) - .5

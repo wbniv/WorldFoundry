@@ -34,7 +34,8 @@ out.mkdir(parents=True, exist_ok=True)
 sys.path.insert(0, str(repo / 'wflevels/aquarium_tanks'))
 sys.path.insert(0, str(repo / 'wftools'))
 from mesh import Mesh
-from reef.atlas import write_atlas, FISH_DARK, FISH_WHITE, WATER_X0, CLAM_SHELL
+from reef.atlas import write_atlas, FISH_DARK
+from reef import uvmap
 from reef.geometry import build_groups, triangles
 from reef.scene import anchor_map, worm_mouths, worm_origin
 from reef.fishes import boxfish, humbug
@@ -81,72 +82,18 @@ image = bpy.data.images.load(str(atlas_path), check_existing=True)
 node = mat.node_tree.nodes.new('ShaderNodeTexImage')
 node.image = image
 mat.node_tree.links.new(node.outputs['Color'], mat.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
-# Swatches correspond to the atlas tile order. UVs are world-projected and kept
-# inside each tile; texturing and scale are provisional until rendered in-engine.
-swatches = {'rock':4, 'porites':1, 'pocillopora':1, 'pocillopora_tip':1,
-            'acropora':1, 'scroll':0, 'flowerpot':5, 'flowerpot_tip':5,
-            'leather':1, 'fan':0, 'sponge':2, 'sponge_rim':2,
-            'sponge_inner':2, 'sand':3, 'frame':4, 'coralline':0,
-            'polyp':1, 'zoanthid':5, 'clam':6, 'fish':7}
-
+# Atlas UVs come from reef/uvmap.py, the same pure-Python function the texel
+# audit and the review renders use (static tiles world-projected; creature
+# skins, worm crowns and zoanthid discs in their own cells).
 def blender_mesh(mesh, smooth=False):
     data = bpy.data.meshes.new(mesh.name)
     data.from_pydata(mesh.vertices, [], mesh.faces)
     data.materials.append(mat)
     data.update()
-    # Project flowerpot faces along their dominant normal. A single X/Z
-    # projection collapses on the sides of vertical stalks and stretches the
-    # atlas across the rounded base. Object-local bounds avoid wrap seams.
-    flowerpot_bounds = None
-    if any(key in ('flowerpot', 'flowerpot_tip') for key in mesh.colors):
-        flowerpot_bounds = [(min(v.co[axis] for v in data.vertices),
-                             max(v.co[axis] for v in data.vertices))
-                            for axis in range(3)]
     uv = data.uv_layers.new(name='UVMap')
-    explicit = getattr(mesh, 'face_uvs', {})
-    for index, (poly, key) in enumerate(zip(data.polygons, mesh.colors)):
-        if index in explicit:
-            # Object-local UVs authored with the geometry (e.g. worm crowns).
-            for li, value in zip(poly.loop_indices, explicit[index]):
-                uv.data[li].uv = value
-            continue
-        if key in ('fish_dark', 'fish_white') or key.startswith('water_'):
-            x, y = (FISH_DARK if key == 'fish_dark' else FISH_WHITE if key == 'fish_white'
-                    else (WATER_X0 + 8 + 16 * int(key.removeprefix('water_')), FISH_DARK[1]))
-            u = x / 1024
-            v = y / 1024
-            for li in poly.loop_indices:
-                uv.data[li].uv = (u, v)
-            continue
-        if key == 'clam_shell':
-            for li in poly.loop_indices:
-                co = data.vertices[data.loops[li].vertex_index].co
-                along = max(0.0, min(1.0, (co.x + .45) / .90))
-                across = max(0.0, min(1.0, abs(co.y) / .32))
-                cx, cy, cw, ch = CLAM_SHELL
-                uv.data[li].uv = ((cx + 4 + (cw - 8) * along) / 1024,
-                                  (cy + 4 + (ch - 8) * across) / 1024)
-            continue
-        tile = swatches[key]
-        if key in ('flowerpot', 'flowerpot_tip'):
-            normal_axis = max(range(3), key=lambda axis: abs(poly.normal[axis]))
-            axes = ((1, 2), (0, 2), (0, 1))[normal_axis]
-            for li in poly.loop_indices:
-                co = data.vertices[data.loops[li].vertex_index].co
-                values = []
-                for axis in axes:
-                    lo, hi = flowerpot_bounds[axis]
-                    values.append((co[axis] - lo) / (hi - lo) if hi > lo else .5)
-                uv.data[li].uv = ((tile % 4 + .04 + .92 * values[0]) / 4,
-                                  (tile // 4 + .04 + .92 * values[1]) / 4)
-            continue
-        for li in poly.loop_indices:
-            x, y, z = data.vertices[data.loops[li].vertex_index].co
-            # Leave a small margin to reduce bleeding between neighboring tiles.
-            frequency = 1.1 if tile == 1 else .37
-            u = (tile % 4 + .04 + .92 * ((x * frequency + y * .11) % 1)) / 4
-            v = (tile // 4 + .04 + .92 * ((z * frequency + y * .11) % 1)) / 4
-            uv.data[li].uv = (u, v)
+    for poly, face_uv in zip(data.polygons, uvmap.face_uvs(mesh)):
+        for li, value in zip(poly.loop_indices, face_uv):
+            uv.data[li].uv = value
     data.update()
     if smooth:
         for poly in data.polygons:

@@ -26,11 +26,16 @@ def build_groups(Mesh):
     # FACE indices are signed 16-bit; baked corner colors can split vertices.
     # Partition the detailed life mesh on face boundaries before export.
     original = groups['reef_life']
+    explicit = getattr(original, 'face_uvs', {})
     pieces = [Mesh('reef_life')]
-    for face, color in zip(original.faces, original.colors):
+    for index, (face, color) in enumerate(zip(original.faces, original.colors)):
         if len(pieces[-1].vertices) + len(face) > 18000:
             pieces.append(Mesh('reef_life_' + str(len(pieces))))
         pieces[-1].face([original.vertices[i] for i in face], color)
+        if index in explicit:          # carry authored UVs (zoanthid discs)
+            if not hasattr(pieces[-1], 'face_uvs'):
+                pieces[-1].face_uvs = {}
+            pieces[-1].face_uvs[len(pieces[-1].faces) - 1] = explicit[index]
     groups['reef_life'] = pieces[0]
     for piece in pieces[1:]:
         groups[piece.name] = piece

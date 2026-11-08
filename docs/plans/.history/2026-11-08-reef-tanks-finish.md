@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/2099c8e7) | Reef plan: W1 worms approved |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b8831c71) | Reef: rebuild the Christmas tree worms (plan W1) |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/04a42178) | Plan: reef finish, record the completed cast1 frame-rate gate |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b756367f) | Plan: finish the reef tanks (worms, skins, placement, acceptance) |
 
 <!--history-meta v1
+2099c8e7	author	Will Norris
+2099c8e7	added	1
+2099c8e7	deleted	1
+2099c8e7	files	1
+2099c8e7	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 b8831c71	author	Will Norris
 b8831c71	added	9
 b8831c71	deleted	9
