@@ -25,7 +25,7 @@ The original plan's **verification steps are the spec**. This table records each
 | 7 | Selector lists ten tanks; indices 0–7 unchanged | **Built, not recorded** | Rows 9 and 10 are in `aquarium-menu.manifest`. |
 | 8 | Screensaver variants and Dream list | **Built, not recorded** | Both tanks are in `TankChoice.java` and `build-aquarium-screensaver-levels.py`. |
 | 9 | cast1: rows 9/10 start, Back returns, rows 1–8 still work | **Open** | Checked on the Lenovo and Pixel only. |
-| 10 | cast1: each style meets D6 (≥ 20 FPS) over 120 s wide idle | **PASS today; must be re-run** | Three-run medians recorded in `c1fd1d10`: realistic 24.38 FPS, anime 22.21 FPS. W1 and W2 change animated geometry, so this step is measured again after them. |
+| 10 | cast1: each style meets D6 (≥ 20 FPS) over 120 s wide idle | **PASS after W1–W3 and W5a** | Three-run medians recorded in `c1fd1d10`: realistic 24.38 FPS, anime 22.21 FPS. Re-run after W1–W3 and W5a as R0's P0 (2026‑11‑08): **realistic 22.95 FPS, anime 21.19 FPS**. The APK's libraries predate `4ca61197`. Run again after W5. |
 | 11 | cast1: E7.1 seahorse no-regression and E7.2 merge bench | **Open** | No record found. |
 | 12 | cast1: Dream with each reef for 5 min; selection restored | **Open** | — |
 | 13 | Poster PDF copied to `~/Documents/TO PRINT/` | **Open** | — |
@@ -227,7 +227,7 @@ One rule for every creature: **object-local UVs into its own cell**, so texel de
 
 ## W5 — procedural reef: random rocks, a rock count and clustered colonies, laid out in Forth (plan only)
 
-**Status: D5–D8 decided** (Will, 2026‑11‑08: "d5: forth, d6: ok, d7: ok, d8: yes"). **R0's code reading is done** ([report](../diagnostics/reef-w5-r0-2026-11-08/README.md)): Forth-only is feasible with no engine change for W5 itself. The device measurement is still to run. **D9 is decided:** a level settings object, with no app code. **W5a is in progress.** W3's fixed placement shipped first, as asked (`1a30b727`, approved, pushed).
+**Status: D5–D8 decided** (Will, 2026‑11‑08: "d5: forth, d6: ok, d7: ok, d8: yes"). **R0's code reading is done** ([report](../diagnostics/reef-w5-r0-2026-11-08/README.md)): Forth-only is feasible with no engine change for W5 itself. **The device run (P0–P3) is done:** hidden and moved pieces cost almost nothing, but a realistic level of 97 objects aborts at load, which blocks W5b's realistic object budget (see [R0 device results](#r0-device-results-cast1-2026-11-08)). **D9 is decided:** a level settings object, with no app code. **W5a is done** (`a205df47`). W3's fixed placement shipped first, as asked (`1a30b727`, approved, pushed).
 
 Will, 2026‑11‑08:
 - "can we do that randomly-ish on initial placement in clusters? (not unlike the planted tank level)"
@@ -360,15 +360,31 @@ Full evidence is in the [R0 report](../diagnostics/reef-w5-r0-2026-11-08/README.
 | 4 | Settings | **Partial** | `property@` and the TV panel (hold A for 1 s) work for any Director-owned catalog. It takes six build steps: `.oas` and bindings for both styles, an `indices` key in the reef actor-map, oas2oad and properties steps in both `build.sh` files, and a `check_tank_catalog` branch. **The phone and coordinator need app work:** the generic provider and the launch-override bridge are Planted-only today (D9) |
 | 5 | Memory | **Within limits** | An 8-module kit adds about 0.7 MB realistic and up to 1.95 MB anime, giving levels of roughly 8.7–12.4 MB. The static budgets (11 groups, 70,000 triangles) must count the worst-case visible set, not every loaded group |
 | 6 | DFRM lobes | **Partial; not for W5** | A pose applied once persists, but it takes the mesh off the static-bake path permanently, so it is redrawn the slow way every frame |
-| 7 | Device cost | **Recipe written, not run** | Probe levels P0–P4 on cast1 and the Pixel through `task chromecast:profile`, three alternating runs each, with pass criteria in the report |
+| 7 | Device cost | **Run on cast1 (P0–P3); see below** | Probe levels P0–P4 on cast1 and the Pixel through `task chromecast:profile`, three alternating runs each, with pass criteria in the report. P4 needs the authored kit |
 
 **The rotation bug R0 found is fixed.** Rotation writes from scripts went into one shared Euler that applied only on a C write ([BUGS.md](../BUGS.md), dormant since 2002). The engine now applies each axis to its own actor ([`4ca61197`](https://github.com/wbniv/WorldFoundry/commit/4ca61197), approved by Will). The reef writes whole rotations, and its nudibranch, which turned about 51° because `3.141593` is in revolutions, now turns half a revolution ([`c5b6bc33`](https://github.com/wbniv/WorldFoundry/commit/c5b6bc33)).
 
+### R0 device results (cast1, 2026‑11‑08)
+
+Probes P0–P3 ran on cast1 through the coordinator: three alternating runs of each probe in each style, wide idle, measured over 120 s. Details are in [section 8 of the R0 report](../diagnostics/reef-w5-r0-2026-11-08/README.md#8-device-measurement-probes-p0p3-run-20261108-cast1). The Pixel did not run, because its screen was locked; it is capped at 60 FPS on this reef in any case.
+
+| Style | P0 (today) | P1 (+16 hidden) | P2 (+21 moved once) | P3 (97 objects) |
+|---|---:|---:|---:|---:|
+| Realistic | 22.95 FPS (43.57 ms) | 43.63 ms | 43.59 ms | **aborts at load, 4 of 4** |
+| Anime | 21.19 FPS (47.20 ms) | 47.33 ms | 47.06 ms | 47.56 ms |
+
+- **Run-to-run spread:** 0.5–0.8 ms, so every difference in the table except the abort is noise.
+- **A hidden actor costs about 4–8 µs a frame,** and a moved actor costs nothing once the one-shot layout is done. The kit's roughly 40 extra actors would cost about 0.25 ms.
+- **Headroom against the 20 FPS gate:** 6.4 ms realistic and **2.8 ms anime.** The kit fits on frame time if its worst-case visible set adds no more than about 2 ms in anime, which means staying near today's 64k static triangles. P4 checks that once the kit exists.
+- **Today's levels are slower than the `c1fd1d10` baseline** (24.38 and 22.21 FPS). W1–W3 and W5a added geometry, and the probe APK's libraries are a day older. Both styles still pass 20 FPS, so this run also serves as the re-run of original step 10 that W1 and W2 required (see the table at the top).
+- **Blocker: the realistic P3 level aborts at load** with SIGABRT, after `object count = 97` and before the script interpreter starts. Anime P3 has the same 97 objects with smaller meshes, and it loads. Realistic P1 (57 objects) also loads. The cause is **not yet known**. The coordinator keeps no logcat for a failed job, and `wf.log` has no assert text. **W5b's realistic kit waits until the cause is found** (T4, in progress), or else stays at or below 57 objects.
+
 **Order after R0:**
-1. W5a settings (T3).
-2. The R0 device run, P0–P3, on copies of today's meshes.
-3. W5b, the kit, together with the budget-report change (T4), then P4.
-4. W5c, the Forth layout (T3).
+1. ~~W5a settings (T3).~~ Done, `a205df47`.
+2. ~~The R0 device run, P0–P3, on copies of today's meshes.~~ Done; see above.
+3. Find the cause of the realistic P3 load abort, and fix it if the fix is contained (T4).
+4. W5b, the kit, together with the budget-report change (T4), then P4. **Design note:** express the Fixed layout as one arrangement of the kit's modules, so that both layouts share actors instead of each carrying its own copies.
+5. W5c, the Forth layout (T3).
 
 ### Decisions for Will
 
@@ -429,7 +445,9 @@ flowchart TD
     REV -->|"approved"| R0["W5 R0 spike: move pieces, colliders,<br/>entropy, cost, settings · T3"]
     R0 --> D5{"Will decides D5–D8"}
     D5 --> W5a["W5a ReefSettings object + catalog · T2"]
-    D5 --> W5b["W5b rock-module kit + site tables · T4"]
+    W5a --> DEV["R0 device run P0–P3 on cast1<br/>(done: realistic P3 aborts at load)"]
+    DEV --> ABORT["Find the realistic P3 load-abort cause · T4"]
+    ABORT --> W5b["W5b rock-module kit + site tables · T4"]
     W5a --> W5c["W5c Forth layout + module-relative anchors · T3"]
     W5b --> W5c
     W5c --> W4

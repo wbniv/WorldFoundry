@@ -1,0 +1,12 @@
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+
+!!! wf_game crashed: signal=6 si_code=-1 si_addr=0x73f !!!
+  fault pc 0xe7b23b36 /apex/com.android.runtime/lib/bionic/libc.so+0x62b36
+Level::Level: leveldata= 0xdb888c28, object count  = 97
+PixelMap::Load: this = 0xd9533690
+PixelMap::Load: this = 0xd95336b8
+this = 0xd9536bc8,setting _memory to 0xd9536798
+PixelMap::Load: this = 0xd95336e0
+PixelMap::Load: this = 0xd9533708
+!!! wf_game crashed: signal=6 si_code=-1 si_addr=0x73f !!!

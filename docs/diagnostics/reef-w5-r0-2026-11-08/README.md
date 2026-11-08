@@ -246,3 +246,80 @@ The anime outline hulls live **inside** each group's mesh (anime `hull_triangles
     2. **R0 device run (coordinator):** probes P0 to P3 from section 7, before the kit is authored. They need only copies of today's meshes.
     3. **W5b, the kit (T4):** re-pivoted modules with local site tables, anime hulls in-mesh, and per-module box colliders. Extend the budget report to the worst-case visible set, then run P4.
     4. **W5c, Forth layout (T3):** pick, space, founders and lineages, one-shot writes, parked leftovers, module-relative reaction anchors, a re-layout on settings change, and the boxfish patrol lane kept clear. The screensaver driver patrols x = ±3.3 at z 2.2 to 2.8, in front of the reef (`wflevels/aquarium_thai_reef/screensaver_player.fth:3-15`), and the fish's spawn must stay clear of every collider.
+
+---
+
+## 8. Device measurement, probes P0–P3 (run 2026‑11‑08, cast1)
+
+**Device.** Everything ran on **cast1** (`chromecast-test-01`, Chromecast HD), unreserved, through the coordinator only. **The Pixel did not run.** Both Pixel jobs (J‑da222e5af0e1, J‑388257414170) waited with the coordinator hold `device-locked` (the phone's screen lock; `plugin_core/device_waits.py:187-188`). I cancelled them before they started, so nothing was installed on the Pixel. The Pixel also runs this reef at its 60 FPS refresh cap (J‑5bf08c0ff7ce: 59.84 FPS), so it could not have resolved costs of tens of microseconds in any case.
+
+**Probes.**
+
+- **Levels:** built by [`probes/make_probes.py`](probes/make_probes.py) as copies of today's `wflevels/aquarium_thai_reef*` directories (W5a, `a205df47`), with only the `.lev` edited:
+    - **P1:** adds 8 `KitModule` platforms (byte copies of `reef_left`, `reef_right` and `reef_arch` meshes, visibility cells 200–207, left at 0) and 8 `KitCollider` StatPlats (copies of the rock colliders, parked at z − 4).
+    - **P2:** P1, plus a one-shot `r0-once` layout on the first Director tick (guard cell 1112). It moves rocks 10–12 and colliders 21–22 by +0.2 in x, and all 16 kit actors to new places, writing X/Y/Z and then rotation A, B, C.
+    - **P3:** P1 plus 40 hidden `KitClump` platforms sharing one copy of `reef_life_3.iff` (1,212 triangles), visibility cells 208–247. That makes 97 objects, against 41 today.
+- **Reproducing:** the scripts in [`probes/`](probes/) expect to run from `build-docker/r0/` (they locate their inputs relative to their own directory): copy them there, then run `make_probes.py` → `build_all.sh` → `repack.py` → submit → `analyse.py`.
+- **Compiling:** [`probes/build_all.sh`](probes/build_all.sh), in the Blender container, using the wflevels cook tools (a copy of `build_level_binary.sh` that only redirects the level directory), the ReefSettings catalog and `cdpack`. **The P0 bundle is byte-identical to the committed `wflevels/aquarium-menu-cd.iff`**, which shows that the pipeline reproduces today's level.
+- **Forth check:** before any device run, the species VM confirmed P2's one-shot writes ([`probes/test_r0_vm.py`](probes/test_r0_vm.py), in the linux-test container: 1 passed). The reef VM tests pass on P1 and P2.
+- **APKs:** [`probes/repack.py`](probes/repack.py) took `android/app/.../worldfoundry-aquarium-release.apk` (2026‑11‑07, sha256 `eaa3059a…`), swapped `assets/cd.iff` (same libraries, same `wf_args.txt`), then zipaligned and signed it with the debug key, as `scripts/wf_device/prepare_variants.py` does. **Deviation:** those libraries predate the rotation fix `4ca61197`. This does not affect the probes: P0–P3 share the libraries, and P2 writes A, B and C in order for every actor, so the old latch gives the same pose.
+- **Recipe.** The receipts of J‑c37040e4a233 and J‑24ee1da60153 do not store the request. I recovered it from their `input-score.json` and `input-timeline.csv` instead:
+    - `workflow=profile`, `app=aquarium`, `duration=135`, `runs=1`, default warmup;
+    - `input_script`: 8 (realistic) or 9 (anime) `DPAD_DOWN` holds of 100 ms every 0.5 s from 1.0 s, then `DPAD_CENTER`, plus a `selected-reef` capture at 12 s;
+    - `PANEL=require-hidden`. The coordinator demands this for scripted input.
+
+    The recipes are [`probes/recipe-realistic.json`](probes/recipe-realistic.json) and [`probes/recipe-anime.json`](probes/recipe-anime.json).
+- **Window:** 120 s, starting 2 s after the selector release (`reef-gameplay-verification-2026-11-05/profile-idle-window.py`, the baseline protocol).
+- **Order:** three rounds per style, P0 P1 P2 P3 / P3 P2 P1 P0 / P0 P1 P2 P3, alternating between styles. Every job is listed in [`probes/jobs.tsv`](probes/jobs.tsv) and every per-run figure in [`probes/results.json`](probes/results.json).
+
+**Screens.** The captures confirm the wide reef view for each probe. P2's [capture](cast1-realistic-P2-moved.png) shows the three rock masses moved 0.2 to the right of their corals, which stayed in place. Compare it with [P0](cast1-realistic-P0.png). The hidden kit copies stay invisible: no doubled rock appears.
+
+### Results (cast1, wide idle; median of 3 runs)
+
+| Style | Probe | Runs (FPS) | Median FPS | Median frame | Δ against P0 |
+|---|---|---|---:|---:|---:|
+| Realistic | P0 | 23.20, 22.95, 22.94 | **22.95** | 43.57 ms | — |
+| Realistic | P1 (+16 hidden) | 23.13, 22.91, 22.92 | 22.92 | 43.63 ms | +0.06 ms |
+| Realistic | P2 (+21 moved once) | 22.96, 22.90, 22.94 | 22.94 | 43.59 ms | +0.02 ms |
+| Realistic | P3 (97 objects) | **aborted at load in 3 of 3 runs** (+1 check run) | — | — | — |
+| Anime | P0 | 21.19, 20.95, 21.32 | **21.19** | 47.20 ms | — |
+| Anime | P1 (+16 hidden) | 21.13, 21.13, 21.32 | 21.13 | 47.33 ms | +0.13 ms |
+| Anime | P2 (+21 moved once) | 21.17, 21.25, 21.41 | 21.25 | 47.06 ms | −0.14 ms |
+| Anime | P3 (+56 hidden, 97 objects) | 20.99, 21.13, 21.02 | 21.02 | 47.56 ms | +0.36 ms |
+
+- **Noise:** the spread across the runs of one probe is 0.48 ms (realistic P0) and 0.82 ms (anime P0). The p95, p99 and worst intervals are the same vsync multiples (50/66.7/83.4/100.1 ms) in every probe.
+- **Re-run:** one realistic P2 run (J‑01631123a331) ended `plugin-error` with observation `scripted-input-OperationalError`. That is a coordinator-side fault, not the app: it was a force stop. It was re-run as J‑93c1afbd7c5d.
+- **The today-level baseline is lower than 2026‑11‑08's** 24.38 and 22.21 FPS. The levels have grown since then (W1–W3, W5a), and the APK libraries differ. P0 is the control for this experiment, and the gate is judged against it.
+
+### Costs
+
+| Question | Measured |
+|---|---|
+| **Cost per hidden actor** | **≈ 4–8 µs/frame** (P1−P0: +0.06 ms realistic, +0.13 ms anime, over 16 actors: 8 hidden mesh platforms and 8 parked StatPlats). Both are inside the run-to-run noise. The upper bound from the noise is about 0.5 ms for 16 actors (≈ 30 µs each) |
+| **Cost per moved actor** (steady state after the one-shot layout) | **0, within noise** (P2−P1: −0.04 ms realistic, −0.27 ms anime, 21 actors moved once, 3 of them visible rocks with their colliders) |
+| **Actor total against frame time** | **≈ 6 µs per extra hidden actor** (anime: P3−P1 = +0.23 ms for 40 actors; P3−P0 = +0.36 ms for 56). At that slope, the W5b kit's roughly 40 extra actors cost about 0.25 ms |
+| **Realistic P3** | **Aborts at level load, reproducibly** |
+
+### Realistic P3 aborts at load
+
+- **What happened:** J‑62fd13ec34ad, J‑bcc1c425596d and J‑5e92ddf8ece8 (profile) and the check run J‑b5ae7a435210 all failed `target-left-foreground`.
+- **Device log** (the cumulative `wf.log` pulled with a later job): `object count = 97`, room textures loaded, then `!!! wf_game crashed: signal=6` (SIGABRT in `libc`) while the actors were being built. That is before the level's script interpreter is created, which is the point where anime P3 goes on to print its `zforth:` lines ([excerpt](probes/realistic-P3-abort.txt)).
+- **Anime P3 loads.** It is the same 97 objects and the same edits, but every mesh in it is smaller: the anime `reef_life_3` is 37 KB against 59 KB, and the anime rocks are 2.5k triangles against 7k.
+- **Cause: UNKNOWN.** The coordinator saves no `logcat` for a failed job, so the abort message is missing. Its absence from `wf.log` suggests a libc or allocator abort, not a WF `AssertMsg`.
+- **Leading hypothesis (not proven):** a per-level memory pool overflows on realistic-size meshes instantiated many times. Every `RenderObject3D` builds its own vertex and face copy, so 40 instances of a 1.2k-triangle mesh are about 40 mesh copies. The realistic P1 level (57 objects, the 8 rock-size copies) still loads.
+- **To find it:** a run that keeps `logcat` for a failed job, or the same level in a debug APK. That is a T4 debugging task, outside this run's remit. I stopped at the evidence above.
+
+### Does W5b as specified fit under cast1's 20 FPS gate?
+
+- **On frame time: yes, with a condition.**
+    - Hidden modules, parked colliders and a one-shot layout cost ≤ 0.13 ms in either style.
+    - Today's headroom is 6.4 ms realistic (43.6 against 50 ms) and **2.8 ms anime** (47.2 against 50 ms).
+    - So the kit fits as long as the **worst-case visible** set (5 modules plus dressing) adds no more than about 2 ms of rendering in anime. In practice that means visible triangles stay close to today's 64k static. P4 (the worst visible set) needs the authored kit and was not run.
+- **On loading: not yet.** A realistic level of 97 objects aborts on cast1. W5b is about 8 modules, 8 colliders and about 24 colony pieces, plus today's 41 actors if the Fixed set is kept. That is about 80–100 objects, the same order as P3. **ESCALATE: W5b's realistic object budget is blocked on the realistic-P3 load abort.** Its cause must be found (T4) before the kit is authored, or the kit must be held below the P1 size (57 objects) until it is.
+
+### Device restoration
+
+- **APK:** the profile workflow restores the foreground and the temporary files, **but leaves the last installed APK on the device.** After the runs, cast1 held `r0-P3` (`d0ba029c…`). I reinstalled the APK that was there before my first job (sha256 `30554973…`, the same APK as baseline jobs J‑c37040e4a233 and J‑24ee1da60153), from a byte-identical local copy (`/tmp/reef-shrimp-full-build/aquarium-shrimp.apk`), through the coordinator. Install job J‑1c72f42ea749 verified `d0ba029c… → 30554973…`.
+- **Device state:** cast1 reports `Idle · nothing queued (ready)`, with the launcher in the foreground.
+- **Settings:** no device settings were changed. `PANEL=require-hidden` is per-job.
+- **Pixel:** untouched; its two jobs were cancelled while queued.

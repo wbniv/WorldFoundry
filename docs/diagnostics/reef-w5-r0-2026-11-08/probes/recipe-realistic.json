@@ -1,0 +1,66 @@
+{
+ "workflow": "profile",
+ "app": "aquarium",
+ "duration": 135,
+ "runs": 1,
+ "input_script": [
+  {
+   "at": 1.0,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 100
+  },
+  {
+   "at": 1.5,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 100
+  },
+  {
+   "at": 2.0,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 100
+  },
+  {
+   "at": 2.5,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 100
+  },
+  {
+   "at": 3.0,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 100
+  },
+  {
+   "at": 3.5,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 100
+  },
+  {
+   "at": 4.0,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 100
+  },
+  {
+   "at": 4.5,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 100
+  },
+  {
+   "at": 5.0,
+   "key": "DPAD_CENTER",
+   "action": "hold",
+   "ms": 100
+  },
+  {
+   "at": 12,
+   "capture": "selected-reef"
+  }
+ ]
+}

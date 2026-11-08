@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/a205df47) | Reef: ReefSettings level settings object (plan W5a) |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/ed2b171e) | Reef plan: W5 R0 spike results; D9 (where ReefSettings appears) |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/aac370a8) | Reef plan: W5 decisions D5-D8 recorded |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/09da72be) | Reef plan: W5 procedural reef (random rocks, rock count, clustered colonies) |
@@ -14,6 +15,11 @@
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b756367f) | Plan: finish the reef tanks (worms, skins, placement, acceptance) |
 
 <!--history-meta v1
+a205df47	author	Will Norris
+a205df47	added	2
+a205df47	deleted	2
+a205df47	files	1
+a205df47	body	A Director-owned level settings object, like the Jellyfish and Planted\ntanks': Layout (Fixed|Random, default Fixed until W5c), Rocks (1-5,\ndefault 3), Colonies (Sparse|Normal|Dense) and Seed (24-bit; 0 = a new\nreef on every entry). Both styles carry the catalog: generate.py copies\nsettings.oas/bindings next to each level and writes 'indices' into the\nactor map; both build.sh files run oas2oad and build-object-properties\n(the Jellyfish recipe); the screensaver catalog check knows ReefSettings.\nThe Director polls the four fields once a second (property@, and\nproperty-int-bytes@ for Seed) into mailboxes 860-863 for W5c. D9: a\nlevel settings object with no app code (Will). New test_thai_reef_settings\nplus a VM test that panel values reach the Director.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 ed2b171e	author	Will Norris
 ed2b171e	added	25
 ed2b171e	deleted	2
