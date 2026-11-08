@@ -16,8 +16,8 @@ The original plan's **verification steps are the spec**. This table records each
 
 | # | Original verification step | State | Evidence / gap |
 |---|---|---|---|
-| 1 | Research complete; every species has a Gulf record or was swapped | **Open** | [`thai-reef-research.md`](../reference/thai-reef-research.md) still says "research in progress, not a final species list". No Gulf record yet for the humbug (D1). The boxfish has only a dive-operator report (D2). |
-| 2 | Poster exports to one A3 page | **Partial** | Only `review-draft-a3.pdf` exists. `gulf-of-thailand-reef-a3.pdf` has not been made. |
+| 1 | Research complete; every species has a Gulf record or was swapped | **Open: waiting on Will (D1)** | 2026‑11‑09: **boxfish (D2) closed**, recorded at Hin Khao, Ko Tao ([Sutthacheep et al. 2022](https://ph02.tci-thaijo.org/index.php/RIST/article/view/247959)) plus 11 research-grade GBIF occurrences on the Ko Tao and Chumphon pinnacles. **Humbug (D1) flagged, not swapped:** GBIF has 0 Gulf occurrences, iNaturalist only captive ones, and the Gulf surveys read (Satapoomin 2000 extract, Sattahip 2017, Tho Chu 2023) list *D. reticulatus* and *D. trimaculatus* but not *D. aruanus*. Search log and options (recorded congener *D. reticulatus*, pink anemonefish, copperband, or keep with a qualified claim) in [`thai-reef-research.md`](../reference/thai-reef-research.md#d1-and-d2-searches). Every other species has its record there. |
+| 2 | Poster exports to one A3 page | **Blocked** | Only `review-draft-a3.pdf` exists. 2026‑11‑09: not exported, for two reasons. The poster prints "Recorded in the Gulf of Thailand" for the humbug, which D1 must settle first. And `make_poster.py` refuses until the research ledger carries `Poster visual review: approved`, which is Will's call. The poster test today: 12 passed, 8 skipped, 3 failed, 12 errors, all from that closed gate. |
 | 3 | `DFRM` v2 tests; eight tanks unchanged | **Built, not recorded** | The reef uses `dfrm-pose-curves` with 15-curve and 10-curve actors. The TODO item is still `[wip]` and no PASS is recorded. |
 | 4 | Both levels build; anchor tables identical | **Built, not recorded** | Both `actor-map.json` files exist. **The anchor table no longer matches the placements** (see [W3](#w3--placement-nothing-floats-everything-attaches)). |
 | 5 | Budgets and content rule | **Met on the numbers** | Realistic: 63,490 static triangles in 11 groups. Anime: 49,602 static plus 21,562 hull of 24,000. 15 animated actors (limit 16). The last recorded run had 34 reef tests passing (2026‑11‑07). |
@@ -28,7 +28,7 @@ The original plan's **verification steps are the spec**. This table records each
 | 10 | cast1: each style meets D6 (≥ 20 FPS) over 120 s wide idle | **PASS after W1–W3 and W5a** | Three-run medians recorded in `c1fd1d10`: realistic 24.38 FPS, anime 22.21 FPS. Re-run after W1–W3 and W5a as R0's P0 (2026‑11‑08): **realistic 22.95 FPS, anime 21.19 FPS**. The APK's libraries predate `4ca61197`. Run again after W5. |
 | 11 | cast1: E7.1 seahorse no-regression and E7.2 merge bench | **Open** | No record found. |
 | 12 | cast1: Dream with each reef for 5 min; selection restored | **Open** | — |
-| 13 | Poster PDF copied to `~/Documents/TO PRINT/` | **Open** | — |
+| 13 | Poster PDF copied to `~/Documents/TO PRINT/` | **Blocked** | Waits on step 2. |
 | 14 | Pixel-identical sweep with S fields off; GL/Metal within 1/255; S2 ≤ 2 ms | **Partial** | `tests/test_style_shading_invariant.py` exists, but it has no Metal case. Caustics ship off (`CausticStrength 0`) until their gate is measured. |
 | 15 | Will approves both looks | **Open** | Today's feedback is the first review. This plan answers it. |
 

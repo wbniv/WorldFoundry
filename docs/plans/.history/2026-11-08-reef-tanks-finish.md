@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/fef6db28) | Reef: keep W5b's anime per-piece cost (Will); speed work deferred to TODO |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/65d165bf) | Reef W5b: rock-module kit, site tables, worst-visible and room-slot budgets |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/8decb672) | Reef plan: realistic P3 abort is the 32 MB room slot; W5b budget in bytes |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/094f53a6) | Reef plan: R0 device run P0–P3 on cast1; realistic 97-object load abort |
@@ -18,6 +19,11 @@
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b756367f) | Plan: finish the reef tanks (worms, skins, placement, acceptance) |
 
 <!--history-meta v1
+fef6db28	author	Will Norris
+fef6db28	added	1
+fef6db28	deleted	1
+fef6db28	files	1
+fef6db28	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 65d165bf	author	Will Norris
 65d165bf	added	13
 65d165bf	deleted	1
