@@ -24,7 +24,7 @@ def vm(tmp_path_factory):
     constants.update({f'JOYSTICK_BUTTON_{k}':1<<i for i,k in enumerate('ABCDEFGHIJK')})
     constants.update({f'JOYSTICK_BUTTON_{k}':1<<i for i,k in enumerate(('UP','DOWN','RIGHT','LEFT'),11)})
     definitions+='\n'+''.join(f': {k} {v} ;\n' for k,v in constants.items())
-    definitions+=": read-mailbox 128 sys ; : write-mailbox 129 sys ; : write-actor-mailbox 130 sys ; : read-actor-mailbox 152 sys ; : r@ ' lit , 0 , ' pickr , ; immediate\n"
+    definitions+=": read-mailbox 128 sys ; : write-mailbox 129 sys ; : write-actor-mailbox 130 sys ; : read-actor-mailbox 152 sys ; : random 153 sys ; : seed-random 154 sys ; : r@ ' lit , 0 , ' pickr , ; immediate\n"
     # The engine's own bridge words (profile-begin 169 .. dfrm-pose), read from the source so the list can't drift.
     definitions+=re.search(r'zf_eval\(&g_ctx, "(: profile-begin [^"]*)"\)',src).group(1)+'\n'
     vendor=ROOT/'engine/vendor/zforth-41db72d1/src/zforth'

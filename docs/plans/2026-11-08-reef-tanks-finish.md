@@ -399,7 +399,30 @@ Probes P0–P3 ran on cast1 through the coordinator: three alternating runs of e
 2. ~~The R0 device run, P0–P3, on copies of today's meshes.~~ Done; see above.
 3. ~~Find the cause of the realistic P3 load abort (T4).~~ The 32 MB room slot ran out; see above.
 4. ~~W5b, the kit, together with the budget-report change (T4), then P4.~~ Built; P4 passes on cast1: realistic 22.03 FPS, anime 20.26 FPS. With Fixed shown, the anime kit level is about 0.9 ms slower than before (20.83 against 21.24 FPS). Probes K1–K5 traced it to drawing the dressing as more, smaller per-module pieces; where the pieces sit doesn't matter. **Kept** (Will, 2026‑11‑08: "keep the slowdown; the increased flexibility is worth it"; "i'd rather we finish this level than worry about 1fps"). Finding the speed again is a TODO item for after the reef ships. **Design note:** express the Fixed layout as one arrangement of the kit's modules, so that both layouts share actors instead of each carrying its own copies.
-5. W5c, the Forth layout (T3).
+5. ~~W5c, the Forth layout (T3).~~ Built 2026‑11‑09 ([review](../diagnostics/reef-w5c-layout-2026-11-08/README.md)). Layout still defaults to Fixed; it switches to Random once Will approves the renders.
+
+### W5c as built (2026‑11‑09)
+
+- **Each tick:** the settings poll, then `reef-layout?`, then the reactions. The layout runs on the first tick and again whenever Layout, Rocks, Colonies or Seed changes. The Forth tables (pivots, sites, offsets) are generated from `actor-map.json`'s `kit` section at export, so nothing ray-casts at run time.
+- **Fixed** writes exactly today's positions (tested).
+- **Seed:** Seed 0 draws a seed and keeps it while Seed stays 0, so changing Colonies leaves the rocks where they are. Any other Seed repeats exactly. The generator discards 16 values after seeding, because neighbouring small seeds picked the same rocks.
+- **Rocks:** with 3 or more, all three heroes show plus seeded fillers; below 3, seeded heroes. Heroes keep heading 0; fillers take 0 or ½.
+- **Deviation: 4–5 rocks use two rows.** The sand front holds about 11.2 units of rock footprint, and the three heroes alone take 10.0. So with 4 or 5 rocks the fillers stand in front and the right hero (table coral, barrel sponge and leather coral, with no reactions) stands behind them. It can end up mostly hidden behind the left rock. Which hero stands at the back is one constant in `reef/layout.py`.
+- **Footprints** are 0.85 × each rock's half-width. Rocks may touch at their lumpy edges, as the left rock and the arch already do in Fixed, but never overlap.
+- **Colonies:** Sparse, Normal and Dense show 3, 6 and 9 clumps, grown founder-and-lineage over the shown fillers' site points.
+- **Reactions** follow their hero and are skipped while it is hidden; cleaning needs the arch. The humbugs stay visible when the left hero is hidden.
+- **The patrol lane and the fish's spawn** stay clear of every collider (tested for 3–5 rocks over several seeds).
+- **Mailboxes:** 870–875 hold the applied settings, the laid-out flag and the seed in use. 880–909 hold each module's shown flag, pivot, heading and hero displacement. 910–960 are layout scratch. Visibility cells: 200–205 (modules) and 210–218 (clumps). Cell 1112 is no longer used.
+- **cast1, Random with 5 rocks, Dense, Seed 0:** realistic 22.30, 22.09 and 22.11 FPS (median 22.11); anime 20.56, 20.52 and 20.31 FPS (median 20.52). Both pass the 20 FPS gate.
+- **Tests:** 14 new layout tests run the exported Director in the zForth VM, in both styles. The reef suites: 179 passed, 4 failed; the same 4 failed before W5b (the stale worm-harness binary, two menu-Taskfile tests and one screensaver import).
+- **Build fix:** `scripts/level_asset_links.py` now makes relative links, so the reef's Dream screensaver variants also rebuild in the container.
+
+[![Five rocks, seed 31](../diagnostics/reef-w5c-layout-2026-11-08/rocks5-seed31.jpg)](../diagnostics/reef-w5c-layout-2026-11-08/rocks5-seed31.jpg)
+[![Three rocks, seed 22](../diagnostics/reef-w5c-layout-2026-11-08/rocks3-seed22.jpg)](../diagnostics/reef-w5c-layout-2026-11-08/rocks3-seed22.jpg)
+[![One rock, seed 11](../diagnostics/reef-w5c-layout-2026-11-08/rocks1-seed11.jpg)](../diagnostics/reef-w5c-layout-2026-11-08/rocks1-seed11.jpg)
+[![cast1, Random with 5 rocks, realistic](../diagnostics/reef-w5c-layout-2026-11-08/cast1-random5-realistic.jpg)](../diagnostics/reef-w5c-layout-2026-11-08/cast1-random5-realistic.jpg)
+[![cast1, Random with 5 rocks, anime](../diagnostics/reef-w5c-layout-2026-11-08/cast1-random5-anime.jpg)](../diagnostics/reef-w5c-layout-2026-11-08/cast1-random5-anime.jpg)
+[![Colonies: dense](../diagnostics/reef-w5c-layout-2026-11-08/colonies-dense.jpg)](../diagnostics/reef-w5c-layout-2026-11-08/colonies-dense.jpg)
 
 ### Decisions for Will
 

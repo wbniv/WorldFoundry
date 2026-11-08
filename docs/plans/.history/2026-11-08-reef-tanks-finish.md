@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/bfe00512) | Reef: swap humbug for Dascyllus reticulatus in research (D10); park and commit poster sources |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/4bb0d148) | Reef research: boxfish Gulf record closed (D2); humbug flagged (D1) |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/fef6db28) | Reef: keep W5b's anime per-piece cost (Will); speed work deferred to TODO |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/65d165bf) | Reef W5b: rock-module kit, site tables, worst-visible and room-slot budgets |
@@ -20,6 +21,11 @@
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b756367f) | Plan: finish the reef tanks (worms, skins, placement, acceptance) |
 
 <!--history-meta v1
+bfe00512	author	Will Norris
+bfe00512	added	4
+bfe00512	deleted	3
+bfe00512	files	1
+bfe00512	body	Will, 2026-11-09: swap the humbug (no citable Gulf of Thailand record)\nfor the reticulated dascyllus, Dascyllus reticulatus, and "park poster".\n\n- thai-reef-research.md is final: every species has a Gulf record.\n  D. reticulatus: Satapoomin 2000 Gulf checklist, Dat et al. 2023 (Tho\n  Chu), CAS specimen off Koh Samet (GBIF 473068089), 45 research-grade\n  iNaturalist Gulf observations. D1/D2 search log kept as history.\n- Finishing plan: step 1 done; steps 2 and 13 parked; D10 recorded.\n- Poster sources committed so they are not lost: scripts, notes, test\n  and the six illustrations make_poster.py uses (2.4-3.8 MB each).\n  Review drafts and superseded illustrations are gitignored.\n- claims.py, reef_art.py label and the audit name D. reticulatus; the\n  humbug drawings still need redrawing (noted in claim-review-notes.md).\n\nThe poster test still fails on the closed visual-review gate (3 failed,\n12 passed, 8 skipped, 12 errors), as intended while the poster is parked.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 4bb0d148	author	Will Norris
 4bb0d148	added	3
 4bb0d148	deleted	3

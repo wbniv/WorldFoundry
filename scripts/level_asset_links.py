@@ -1,6 +1,7 @@
 """Share level build inputs without linking another level's writable outputs."""
 from __future__ import annotations
 
+import os
 from pathlib import Path
 import re
 
@@ -21,5 +22,14 @@ def link_source_assets(source: Path, target: Path) -> None:
         if asset.suffix not in {".iff", ".tga", ".flags"}:
             continue
         link = target / asset.name
-        if not link.is_symlink() and not link.exists():
-            link.symlink_to(asset.resolve())
+        # Relative links resolve the same on the host and in the build containers (repo at
+        # /src); an older absolute link to the host path is broken in a container, so replace
+        # any link that does not already point at this asset relatively.
+        relative = Path(os.path.relpath(asset, target))
+        if link.is_symlink():
+            if Path(os.readlink(link)) == relative:
+                continue
+            link.unlink()
+        elif link.exists():
+            continue
+        link.symlink_to(relative)
