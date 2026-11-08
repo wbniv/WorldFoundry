@@ -32,7 +32,7 @@
 </style>
 </head>
 <body>
-<header><h1>639 back balcony — plan C: fixed black aluminium frame, six pop-out pet-mesh panels, elevation from inside looking west</h1><span class="tag">MOCKUP — NOT SHIPPED</span></header>
+<header><h1>639 back balcony — plan C: fixed black aluminium frame, no mullions, six pop-out pet-mesh panels, elevation from inside looking west</h1><span class="tag">MOCKUP — NOT SHIPPED</span></header>
 <main>
 <div class="draw"><svg id="s" width="920" height="800" viewBox="-32 -40 342 200"></svg></div>
 <div class="side">
@@ -44,23 +44,25 @@
   <table>
     <tr><td>Clear opening</td><td>268 × 111 cm</td></tr>
     <tr><td>Frame depth</td><td>4.5 cm, on a 10 cm cap</td></tr>
-    <tr><td>Profile faces (drawn)</td><td>2.5 cm — example; the shop gives the real figure</td></tr>
-    <tr><td>Each bay, clear</td><td id="bay">≈ 41.8 × 106 cm</td></tr>
-    <tr><td>Aluminium in view, all out</td><td id="alu">≈ 11 % of the opening</td></tr>
-    <tr><td>At 3.8 cm faces</td><td>≈ 40.2 × 103 cm per bay; ≈ 16 %</td></tr>
+    <tr><td>Mullions</td><td>none: panels meet edge to edge</td></tr>
+    <tr><td>Drawn with</td><td>2.5 cm frame face, 2 cm panel edges (example; the shop gives the real figures)</td></tr>
+    <tr><td>Each panel</td><td id="bay">≈ 43.8 cm wide</td></tr>
+    <tr><td>Aluminium in view, all in</td><td id="aluin">≈ 18 %</td></tr>
+    <tr><td>Aluminium in view, all out</td><td id="alu">≈ 6 %</td></tr>
+    <tr><td>At 3.8 cm frame, 2.5 cm edges</td><td>≈ 24 % all in; ≈ 9.5 % all out</td></tr>
   </table>
   <h2>How it works</h2>
   <ul>
-    <li>Each panel seats against a stop on the frame's outer edge and is latched from inside; it can only leave inward.</li>
-    <li>All six panels are identical, so any one fits any bay.</li>
+    <li>Each panel seats against a stop along the outer edge of the top and bottom rails and is latched from inside; it can only leave inward.</li>
+    <li>All six panels are identical, so any one fits any position.</li>
     <li>Black pet mesh stops pigeons, cats and mosquitoes. It cuts rain spray but does not stop wind-driven rain.</li>
     <li>Optional: clear polycarbonate inserts of the same size for the wet season.</li>
   </ul>
 </div>
 </main>
 <script>
-const s=document.getElementById('s'), F=2.5, M=2.5, W=268, H=111;
-const bw=(W-2*F-5*M)/6, bh=H-2*F;
+const s=document.getElementById('s'), F=2.5, S=2, W=268, H=111;
+const bw=(W-2*F)/6, bh=H-2*F;
 function draw(state){
   let g=`<defs><pattern id="mesh" width="1.6" height="1.6" patternUnits="userSpaceOnUse"><rect width="1.6" height="1.6" fill="var(--mesh)"/><path d="M0 0H1.6M0 0V1.6" stroke="var(--meshl)" stroke-width=".18"/></pattern></defs>`;
   g+=`<rect x="0" y="0" width="${W}" height="${H}" fill="var(--sky)"/>`;
@@ -68,12 +70,11 @@ function draw(state){
   g+=`<rect x="-22" y="0" width="22" height="111" fill="var(--conc)"/><rect x="268" y="0" width="10" height="111" fill="var(--conc)"/>`;
   g+=`<text x="134" y="-13" font-size="5" text-anchor="middle">concrete ledge, 35 cm deep</text><text x="134" y="126" font-size="5" text-anchor="middle">pony wall, 10 cm cap</text>`;
   g+=`<text x="-11" y="56" font-size="4.4" text-anchor="middle" transform="rotate(-90 -11 56)">south wall</text><text x="273" y="56" font-size="4.4" text-anchor="middle" transform="rotate(-90 273 56)">north stub</text>`;
-  // frame: perimeter + mullions
+  // frame: perimeter only, no mullions; each panel has its own edge frame S
   g+=`<path fill="var(--frame)" fill-rule="evenodd" d="M0 0H${W}V${H}H0Z M${F} ${F}H${W-F}V${H-F}H${F}Z"/>`;
-  for(let i=1;i<6;i++){const x=F+i*bw+(i-1)*M; g+=`<rect x="${x}" y="${F}" width="${M}" height="${bh}" fill="var(--frame)"/>`;}
   for(let i=0;i<6;i++){
-    const x=F+i*(bw+M), out = state==='none' || (state==='one' && i===2);
-    if(!out) g+=`<rect x="${x}" y="${F}" width="${bw}" height="${bh}" fill="url(#mesh)" stroke="var(--meshl)" stroke-width=".25"/>`;
+    const x=F+i*bw, out = state==='none' || (state==='one' && i===2);
+    if(!out) g+=`<path fill="#2e2e2e" fill-rule="evenodd" stroke="#000" stroke-width=".3" d="M${x} ${F}h${bw}v${bh}h${-bw}Z M${x+S} ${F+S}v${bh-2*S}h${bw-2*S}v${-(bh-2*S)}Z"/><rect x="${x+S}" y="${F+S}" width="${bw-2*S}" height="${bh-2*S}" fill="url(#mesh)"/>`;
     g+=`<text x="${x+bw/2}" y="58" font-size="7" font-weight="700" text-anchor="middle" opacity="${out?.35:1}">${i+1}</text>`;
   }
   g+=`<g stroke="var(--muted)" stroke-width=".35" fill="none"><path d="M0 141V150M268 141V150M0 146H268"/><path d="M296 0H304M296 111H304M300 0V111"/></g>`;
@@ -81,8 +82,9 @@ function draw(state){
   s.innerHTML=g;
   document.querySelectorAll('#states button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.s===state));
 }
-document.getElementById('bay').textContent=`≈ ${bw.toFixed(1)} × ${bh} cm`;
-document.getElementById('alu').textContent=`≈ ${Math.round(100*(1-6*bw*bh/(W*H)))} % of the opening`;
+document.getElementById('bay').textContent=`≈ ${bw.toFixed(1)} cm wide; mesh ≈ ${(bw-2*S).toFixed(1)} × ${bh-2*S} cm`;
+document.getElementById('aluin').textContent=`≈ ${Math.round(100*(1-6*(bw-2*S)*(bh-2*S)/(W*H)))} %`;
+document.getElementById('alu').textContent=`≈ ${Math.round(100*(1-bw*6*bh/(W*H)))} %`;
 document.querySelectorAll('#states button').forEach(b=>b.onclick=()=>draw(b.dataset.s));
 draw('all');
 </script>

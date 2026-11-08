@@ -6,7 +6,7 @@
 <style>
 @page{size:A4 portrait;margin:8mm 9mm}
 *{box-sizing:border-box}
-body{margin:0;font:8.7pt/1.3 "Noto Sans","Noto Sans Thai",system-ui,sans-serif;color:#111;background:#fff}
+body{margin:0;font:8.5pt/1.28 "Noto Sans","Noto Sans Thai",system-ui,sans-serif;color:#111;background:#fff}
 h1{font-size:14pt;margin:0 0 .6mm}
 h2{font-size:10.5pt;margin:3mm 0 1.2mm;border-bottom:1.2px solid #222;padding-bottom:.4mm;break-after:avoid}
 p{margin:.8mm 0;orphans:3;widows:3}
@@ -21,7 +21,7 @@ th{background:#eee;font-size:8.6pt}
 .box{display:inline-block;width:3.6mm;height:3.6mm;border:1.2px solid #222;vertical-align:middle}
 .line{display:inline-block;width:15mm;border-bottom:.6px solid #555;height:4mm;vertical-align:bottom}
 .fig{margin:1mm 0 0}
-.fig svg{height:58mm;width:auto;display:block;margin:0 auto}
+.fig svg{height:50mm;width:auto;display:block;margin:0 auto}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:0 5mm;align-items:start}.two .ans{width:30%}.two .th,.two .en{width:35%}
 .req .th,.req .en{width:45%}.req .ans{width:10%}.req th.ans{font-size:7.6pt}
 .small{font-size:8pt;color:#444}
@@ -42,9 +42,9 @@ th{background:#eee;font-size:8.6pt}
 <tr><td>ความสูงช่องเปิด จากหลังผนังกันตกถึงใต้คานคอนกรีต</td><td class="ans">111&nbsp;cm</td><td>Opening height, pony-wall cap to concrete ledge soffit</td></tr>
 <tr><td>ความหนาหลังผนังกันตก</td><td class="ans">10&nbsp;cm</td><td>Pony-wall cap thickness</td></tr>
 <tr><td>ความลึกกรอบ</td><td class="ans">4.5&nbsp;cm</td><td>Frame depth</td></tr>
-<tr><td>จำนวนบาน</td><td class="ans">6 บานเท่ากัน</td><td>Six equal panels</td></tr>
-<tr class="fill"><td>หน้ากว้างกรอบรอบนอก</td><td class="ans"><span class="line"></span>&nbsp;cm</td><td>Outer frame face width</td></tr><tr class="fill"><td>หน้ากว้างเสาแบ่งช่อง (5 ต้น)</td><td class="ans"><span class="line"></span>&nbsp;cm</td><td>Mullion face width (five mullions)</td></tr><tr class="fill"><td>ขนาดบานมุ้ง กว้าง × สูง</td><td class="ans"><span class="line"></span>&nbsp;×&nbsp;<span class="line"></span></td><td>Screen panel size, width × height</td></tr></table>
-<p class="small">เจ้าของวัดเมื่อ 30&nbsp;ก.ย.&nbsp;2569 กรุณาวัดซ้ำ 3 จุดทั้งแนวกว้างและแนวสูง แล้วใช้ค่าที่น้อยที่สุด · Measured by the owner on 30&nbsp;September&nbsp;2026. Please re-measure width and height at three points each and work to the smallest.</p>
+<tr><td>จำนวนบาน เท่ากัน ไม่มีเสาแบ่งช่อง</td><td class="ans">6 บาน</td><td>Six equal panels, no mullions</td></tr>
+<tr class="fill"><td>หน้ากว้างกรอบรอบนอก</td><td class="ans"><span class="line"></span>&nbsp;cm</td><td>Outer frame face width</td></tr><tr class="fill"><td>หน้ากว้างขอบบานมุ้ง</td><td class="ans"><span class="line"></span>&nbsp;cm</td><td>Screen panel edge (stile) width</td></tr><tr class="fill"><td>ขนาดบานมุ้ง กว้าง × สูง</td><td class="ans"><span class="line"></span>&nbsp;×&nbsp;<span class="line"></span></td><td>Screen panel size, width × height</td></tr></table>
+<p class="small">เจ้าของวัดเมื่อ 30&nbsp;ก.ย.&nbsp;2569 กรุณาวัดซ้ำ 3 จุดทั้งแนวกว้างและแนวสูง แล้วใช้ค่าที่น้อยที่สุด · Owner measured 30&nbsp;Sep&nbsp;2026; please re-measure at three points each way and use the smallest.</p>
 <div class="fig">
 <svg viewBox="-32 -36 342 194" xmlns="http://www.w3.org/2000/svg" font-family="Noto Sans, Noto Sans Thai, sans-serif">
   <defs>
@@ -66,50 +66,53 @@ th{background:#eee;font-size:8.6pt}
   <text x="133" y="126" font-size="5.2" text-anchor="middle" fill="#333">ผนังกันตก หนา 10 cm · pony wall, 10 cm cap</text>
   <text x="-11" y="56" font-size="4.4" text-anchor="middle" fill="#333" transform="rotate(-90 -11 56)">ผนังทิศใต้ · south wall</text>
   <text x="273" y="56" font-size="4.4" text-anchor="middle" fill="#333" transform="rotate(-90 273 56)">ทิศเหนือ · north</text>
-  <!-- frame and six bays: profile faces drawn at 2.5 cm (example) -->
+  <!-- outer frame, 2.5 cm faces (example); six panels meet edge to edge, no mullions -->
   <rect x="0" y="0" width="268" height="111" fill="#111"/>
-  <g fill="url(#mesh)" stroke="#555" stroke-width=".25">
-    <rect x="2.5" y="2.5" width="41.75" height="106"/>
-    <rect x="46.75" y="2.5" width="41.75" height="106"/>
-    <rect x="91" y="2.5" width="41.75" height="106"/>
-    <rect x="135.25" y="2.5" width="41.75" height="106"/>
-    <rect x="179.5" y="2.5" width="41.75" height="106"/>
-    <rect x="223.75" y="2.5" width="41.75" height="106"/>
-  </g>
+  <rect x="2.50" y="2.5" width="43.83" height="106" fill="#2e2e2e" stroke="#000" stroke-width=".3"/>
+  <rect x="4.50" y="4.5" width="39.83" height="102" fill="url(#mesh)"/>
+  <rect x="46.33" y="2.5" width="43.83" height="106" fill="#2e2e2e" stroke="#000" stroke-width=".3"/>
+  <rect x="48.33" y="4.5" width="39.83" height="102" fill="url(#mesh)"/>
+  <rect x="90.17" y="2.5" width="43.83" height="106" fill="#2e2e2e" stroke="#000" stroke-width=".3"/>
+  <rect x="92.17" y="4.5" width="39.83" height="102" fill="url(#mesh)"/>
+  <rect x="134.00" y="2.5" width="43.83" height="106" fill="#2e2e2e" stroke="#000" stroke-width=".3"/>
+  <rect x="136.00" y="4.5" width="39.83" height="102" fill="url(#mesh)"/>
+  <rect x="177.83" y="2.5" width="43.83" height="106" fill="#2e2e2e" stroke="#000" stroke-width=".3"/>
+  <rect x="179.83" y="4.5" width="39.83" height="102" fill="url(#mesh)"/>
+  <rect x="221.67" y="2.5" width="43.83" height="106" fill="#2e2e2e" stroke="#000" stroke-width=".3"/>
+  <rect x="223.67" y="4.5" width="39.83" height="102" fill="url(#mesh)"/>
   <g font-size="7" font-weight="700" text-anchor="middle" fill="#333">
-    <text x="23.4" y="58">1</text><text x="67.6" y="58">2</text><text x="111.9" y="58">3</text>
-    <text x="156.1" y="58">4</text><text x="200.4" y="58">5</text><text x="244.6" y="58">6</text>
+    <text x="24.4" y="58">1</text><text x="68.2" y="58">2</text><text x="112.1" y="58">3</text><text x="155.9" y="58">4</text><text x="199.8" y="58">5</text><text x="243.6" y="58">6</text>
   </g>
   <!-- dimensions -->
   <g stroke="#333" stroke-width=".35" fill="none">
     <path d="M0 141V150M268 141V150M0 146H268"/>
     <path d="M296 0H304M296 111H304M300 0V111"/>
-    <path d="M2.5 -2V-6M44.25 -2V-6M2.5 -4H44.25"/>
+    <path d="M2.5 -2V-6M46.33 -2V-6M2.5 -4H46.33"/>
   </g>
   <g font-size="5.4" fill="#111" text-anchor="middle">
     <text x="134" y="155">268 cm</text>
     <text x="300" y="59" transform="rotate(-90 300 59)" dy="-2.2">111 cm</text>
-    <text x="23.4" y="-7.2" font-size="4.4">≈ 41.8 cm</text>
+    <text x="24.4" y="-7.2" font-size="4.4">≈ 43.8 cm</text>
   </g>
   <text x="-30" y="-32" font-size="4.6" fill="#333">มองจากด้านในห้อง หันไปทางทิศตะวันตก · View from inside, looking west · มาตราส่วนตามจริง · to scale</text>
 </svg>
 </div>
-<p class="small">ช่องมองแต่ละบานในรูปคิดจากเสาและกรอบหน้ากว้าง 2.5&nbsp;cm (ตัวอย่าง): ช่องละ ≈&nbsp;41.8&nbsp;×&nbsp;106&nbsp;cm · The bays above assume 2.5&nbsp;cm profile faces as an example, giving ≈&nbsp;41.8&nbsp;×&nbsp;106&nbsp;cm clear each. At 3.8&nbsp;cm faces they shrink to ≈&nbsp;40.2&nbsp;×&nbsp;103&nbsp;cm. Please fill in your actual sizes below.</p>
+<p class="small">ในรูปคิดจากกรอบรอบนอกหน้ากว้าง 2.5&nbsp;cm (ตัวอย่าง) และขอบบานมุ้ง 2&nbsp;cm: บานละ ≈&nbsp;43.8&nbsp;cm ไม่มีเสาแบ่งช่อง บานชนกันโดยตรง · Example: 2.5&nbsp;cm frame face, 2&nbsp;cm panel edges, so each panel is ≈&nbsp;43.8&nbsp;cm wide. No mullions; panels meet edge to edge.</p>
 
 
 
 <h2>2 · ข้อกำหนด · Requirements</h2>
 <table class="req">
 <tr><th class="th">ภาษาไทย</th><th class="ans">ยืนยัน · Confirm</th><th class="en">English</th></tr>
-<tr><td>ใส่และถอดบานจากด้านในห้องเท่านั้น บานพิงขอบกั้น (บ่า) ด้านนอกของกรอบ บานหลุดออกไปด้านนอกไม่ได้ ไม่ต้องเอื้อมออกนอกตัวอาคาร</td><td class="ans"><span class="box"></span></td><td>Panels fit and come out from inside only. Each seats against a stop on the frame's outer edge, so it can never leave outward, and nobody reaches outside the building.</td></tr>
+<tr><td>ใส่และถอดบานจากด้านในห้องเท่านั้น บานพิงขอบกั้น (บ่า) ด้านนอกของรางบนและรางล่าง บานหลุดออกไปด้านนอกไม่ได้</td><td class="ans"><span class="box"></span></td><td>Panels fit and come out from inside only. Each seats against a stop on the outer edge of the top and bottom rails, so it can never leave outward.</td></tr>
 <tr><td>ตัวล็อกที่ล็อกได้จริงทุกบาน ไม่ใช่แค่แรงเสียดทานหรือสปริง รับลมกระโชกชั้น 6 ได้</td><td class="ans"><span class="box"></span></td><td>A positive, lockable latch on every panel, not friction or springs alone. Holds in 6th-floor gusts.</td></tr>
 <tr><td>มุ้งลวดสำหรับสัตว์เลี้ยง (Pet Screen) สีดำ กันนกพิราบและแมว</td><td class="ans"><span class="box"></span></td><td>Pet-resistant mesh (pet screen), black, against pigeons and cats.</td></tr>
-<tr><td>ซีลแปรงหรือยางรอบทุกบาน ช่องว่างไม่เกิน 1&nbsp;มม. (กันยุง)</td><td class="ans"><span class="box"></span></td><td>Brush or rubber seal round every panel, no gap over 1&nbsp;mm (mosquitoes).</td></tr>
+<tr><td>ซีลแปรงหรือยางรอบทุกบาน รวมรอยต่อระหว่างบาน ช่องว่างไม่เกิน 1&nbsp;มม. (กันยุง)</td><td class="ans"><span class="box"></span></td><td>Brush or rubber seal round every panel, including where panels meet, no gap over 1&nbsp;mm (mosquitoes).</td></tr>
 <tr><td>ทั้ง 6 บานขนาดเท่ากัน สลับช่องกันได้</td><td class="ans"><span class="box"></span></td><td>All six panels identical and interchangeable between bays.</td></tr>
 <tr><td>เผื่อระยะการขยายตัว กรอบสีดำโดนแดดบ่ายร้อนจัด บานต้องไม่ฝืดหรือติดตอนร้อน ให้ซีลปิดช่องแทนการทำให้แน่น</td><td class="ans"><span class="box"></span></td><td>Allow for thermal expansion: the black frame gets very hot in afternoon sun, and panels must not bind when hot. Let the seals close the gap rather than fitting tight.</td></tr>
 <tr><td>ธรณีล่างลาดออกด้านนอก มีรูระบายน้ำ ยาแนวกันน้ำรอบกรอบกับคอนกรีต</td><td class="ans"><span class="box"></span></td><td>Bottom rail slopes outward with weep holes; frame sealed to the concrete all round.</td></tr>
 <tr><td>อะลูมิเนียมพ่นสีฝุ่น (พาวเดอร์โค้ท) สีดำ เหมือนหน้าต่างเดิมในห้อง สกรูและพุกสแตนเลส</td><td class="ans"><span class="box"></span></td><td>Powder-coated aluminium, black, matching the unit's existing windows; stainless screws and anchors.</td></tr>
-<tr><td>เสาแบ่งช่องบางที่สุดเท่าที่ยังแข็งแรงพอ</td><td class="ans"><span class="box"></span></td><td>Mullions as slim as strength allows.</td></tr>
+<tr><td>ไม่มีเสาแบ่งช่อง รางบนและรางล่างยึดกับคอนกรีตเป็นระยะตลอดแนว ช่วง 268&nbsp;cm ต้องไม่แอ่นหรือโก่ง</td><td class="ans"><span class="box"></span></td><td>No mullions. Top and bottom rails fixed to the concrete at intervals along their length, so the 268&nbsp;cm span cannot sag or bow.</td></tr>
 <tr class="opt"><td>(ตัวเลือก เสนอราคาแยก) แผ่นโพลีคาร์บอเนตใส ขนาดเดียวกับบานมุ้ง ใส่แทนในหน้าฝน</td><td class="ans"><span class="box"></span></td><td>(Option, price separately) clear polycarbonate inserts the same size as the screen panels, swapped in for the wet season.</td></tr>
 </table>
 
