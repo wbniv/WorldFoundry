@@ -16,7 +16,7 @@
 
 **Plan B requested, 2026‑10‑08 (Will):** a glazed aluminium folding window whose panes fold out of the way completely, as a fallback much closer to a traditional window installation. Specified in [A2. Plan B](#a2-plan-b-glazed-aluminium-folding-window-that-stacks-clear), with its own [mockup](2026-09-30-condo-balcony-shade/elevation-plan-b.html) and Open questions 11–14. Plan A remains the primary design.
 
-**Plan C being built, 2026‑11‑08 (Will):** a fixed black aluminium frame in the opening, matching the unit's other replacement windows, with six pet-mesh screen panels that pop out for the full view. It keeps out mosquitoes and pigeons and cuts down rain. Specified in [A3. Plan C](#a3-plan-c-fixed-screen-frame-with-six-pop-out-pet-mesh-panels), with a [mockup](2026-09-30-condo-balcony-shade/elevation-plan-c.html) and a one-page bilingual [fabricator spec sheet](../rfq/2026-11-08-639-balcony-screen-frame-spec.pdf).
+**Plan C being built, 2026‑11‑08 (Will):** a fixed black aluminium frame in the opening, matching the unit's other replacement windows, with six pet-mesh screen panels that pop out for the full view. It keeps out mosquitoes and pigeons and cuts down rain. Specified in [A3. Plan C](#a3-plan-c-fixed-screen-frame-with-six-pop-out-pet-mesh-panels), with a [mockup](2026-09-30-condo-balcony-shade/elevation-plan-c.html) and a one-page bilingual [fabricator spec sheet](../rfq/2026-11-08-639-balcony-screen-frame-spec.pdf). **v2 (2026‑11‑08)** adds weather inserts that swap in while Will is away so no rain gets in: [A3 v2](#a3-v2-weather-inserts-so-no-rain-gets-in-while-away), [v2 sheet](../rfq/2026-11-08-639-balcony-screen-frame-spec-v2.pdf).
 
 ## Context
 
@@ -157,7 +157,29 @@ With every panel out, only the perimeter frame stays in the view. With all six i
 
 To take a panel out, release the bolt, lift the panel into the lift space, swing the bottom inward over the inner lip, and lower it out. All of this is done from inside. The sheet also asks the shop to send its real sections before fabrication. The SVG comes from [`build_frame_detail.py`](2026-09-30-condo-balcony-shade/build_frame_detail.py).
 
-**Rain.** Mesh cuts down rain spray but does not stop wind-driven rain, so plan C does not meet plan A's 99 % rule. The polycarbonate inserts are the way to reach it within this frame.
+**Rain.** Mesh cuts down rain spray but does not stop wind-driven rain, so the screens alone do not meet plan A's 99 % rule. v2 below adds weather inserts that do, for while Will is away.
+
+#### A3 v2: weather inserts so no rain gets in while away
+
+**Requested by Will, 2026‑11‑08:** polycarbonate (or thin glass) inserts to fit while he is away, so that no rain gets inside. Specified in a separate [v2 spec sheet](../rfq/2026-11-08-639-balcony-screen-frame-spec-v2.pdf) ([HTML](../rfq/2026-11-08-639-balcony-screen-frame-spec-v2.html)). The v1 sheet stays as it was.
+
+**Design.** The frame takes **two panel sets in the same rails**: the six pet-mesh screens, and six weather inserts with the same outer size and thickness. Mesh cannot be made rain-tight, so the inserts replace the screens rather than going behind them. To make the inserts rain-tight, three things change from v1:
+
+| Change | v1 | v2 | Why |
+|---|---|---|---|
+| Seals | brush seals | seals live **on the panels**: brush on the screens, **EPDM bulb gaskets** on the inserts; the frame's outer stops are flat and continuous, with sealed corners | A brush stops insects, not water. A compressed gasket stops water |
+| Latches | spring bolt only | **compression (cam) latches** press each panel outward onto its seal, plus the anti-lift bolt; sized for wind on solid inserts | A gasket only seals when it is squeezed, and a solid insert takes the full wind load that mesh lets through |
+| Joints | butt joint | inserts have **rebated (shiplap) edges** with a gasket in the step; the shop details the end inserts and the fitting order | A butt joint with no mullion behind it is a straight path for rain |
+| Sill | outer stop 17, inner lip 12, plain weep hole | outer stop **25**, inner **water dam 18**, sloped floor, **baffled** weep holes | A higher dam holds back water pushed in by gusts, and the baffle stops wind blowing rain back through the weep |
+| Head | 40 deep, lift 20 | **45 deep, lift 25**, **drip edge** on the outer stop | Lift must still exceed the 18 dam so panels come out. The drip edge sheds water before it reaches the gasket |
+
+**Insert sheet** (the sheet asks the shop to price and the owner to choose one): **solid polycarbonate 4–5 mm, UV-protected, grey or bronze tint (recommended)**, about 3 kg per insert with its frame. It is unbreakable when handled 16 m up, and since the inserts are only in while Will is away, the tint costs nothing in view and cuts the heat in the closed-up balcony. The alternatives are clear polycarbonate (≈ 3 kg, for storms while home too, scratches more over the years), 5 mm tempered glass (≈ 6 kg, clearest, can shatter if knocked) or 6.38 mm laminated glass (≈ 7 kg, holds together if broken). Twin-wall polycarbonate is excluded because it cannot be seen through. These weights are estimates for one ≈ 44 × 106 cm insert.
+
+**Acceptance.** A hose test at handover: with all six inserts in, spray every joint and edge, and the inside must stay dry.
+
+**Storage.** The set not in use, six panels about 16 mm thick, stacks to roughly 10 cm.
+
+**Details** are on page 3 of the v2 sheet and in the [v2 frame-detail mockup](2026-09-30-condo-balcony-shade/frame-detail-v2.html), generated by [`build_frame_detail_v2.py`](2026-09-30-condo-balcony-shade/build_frame_detail_v2.py). Section A is the head with an insert, B the sill with an insert and its cam latch, C1 the inserts at a jamb and at a rebated joint, and C2 the unchanged screen joint.
 
 ### B. Level model (`blender_create_condo.py`)
 
@@ -190,6 +212,10 @@ Rejected: a two-state visibility swap (open/closed with no travel) — cheap but
 [![Plan C elevation](2026-09-30-condo-balcony-shade/elevation-plan-c.png)](2026-09-30-condo-balcony-shade/elevation-plan-c.html)
 
 **Plan C elevation**: the black perimeter frame with six pet-mesh panels meeting edge to edge, drawn with a 2.5 cm frame face and 2 cm panel edges. Buttons switch between all six panels in, panel 3 out, and all out. [Open the interactive mockup](2026-09-30-condo-balcony-shade/elevation-plan-c.html).
+
+[![Plan C v2 frame details](2026-09-30-condo-balcony-shade/frame-detail-v2.png)](2026-09-30-condo-balcony-shade/frame-detail-v2.html)
+
+**Plan C v2 frame details**: weather inserts and screens sharing the same rails. It shows gaskets, cam latch, rebated insert joint, 25/18 drained sill and drip edge. [Open the mockup](2026-09-30-condo-balcony-shade/frame-detail-v2.html). The elevation mockup above also has a **Weather inserts in (away)** state.
 
 [![Plan C frame details](2026-09-30-condo-balcony-shade/frame-detail.png)](2026-09-30-condo-balcony-shade/frame-detail.html)
 
@@ -230,8 +256,10 @@ Answers of 2026‑09‑30 are folded in; what is left has a default that the bui
 12. **Does the condo allow glazing the balcony opening?** A fixed glazed frame is a bigger façade change than a shade under the ledge, and some Bangkok condos forbid enclosing balconies. The LINE draft in the RFQ packet covers the zip screen only; a plan-B version is needed before any order.
 13. **Does a bi-fold sill fit the 10 cm cap?** Sill depths vary by profile. If it does not fit, a sub-sill or a cap extension is needed, and that changes the water path. Check at the shop's site measurement.
 14. **Access leaf and layout.** 4 × 67 cm one-way with no access leaf, or a layout that gives one (3 × 89 cm, or 3 + 1)? It depends on what the shop's system supports and on how hot the closed box gets.
-15. **Does plan C replace plans A and B, or sit alongside a zip screen?** Plan C is being built (2026‑11‑08). A zip screen would meet the 99 % rain rule, which plan C alone does not. Whether one can still be added depends on where the 4.5 cm frame sits on the 10 cm cap: the zip guides need about 5 cm of bare reveal face outboard of the frame.
+15. **Does plan C replace plans A and B, or sit alongside a zip screen?** Plan C is being built (2026‑11‑08). With the v2 weather inserts, plan C meets the 99 % rain rule while Will is away. With the screens in, rain through the mesh is accepted, or the inserts go in for a storm. A zip screen would meet the rule without swapping panels. Whether one can still be added depends on where the 4.5 cm frame sits on the 10 cm cap: the zip guides need about 5 cm of bare reveal face outboard of the frame.
 16. **Plan C frame face, panel edge and panel size.** These are blank on the spec sheet for the shop to fill in. The view arithmetic in A3 uses 2.5 cm / 2 cm and 3.8 cm / 2.5 cm until the shop gives the real figures.
+17. **Heat and damp while sealed.** With the inserts in and the glass doors shut, the balcony is a closed, west-facing box. Tinted inserts cut the heat. A ventilation slot would let air move but could also let rain in, so none is specified. Revisit if the grass or the room behind shows heat or damp after a trip away.
+18. **Has the shop started cutting the frame?** v2 changes the rail profiles from v1: a deeper head, a taller sill stop, a higher dam, baffled weeps, a drip edge and a flat gasket landing. Give the shop the v2 sheet before fabrication, or ask what can still change.
 
 ## Out of scope
 

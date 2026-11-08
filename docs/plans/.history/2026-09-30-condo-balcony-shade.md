@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/9b7fdc33) | Balcony plan C: frame detail sections |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/84f2e6ab) | Balcony plan C: no mullions; panels meet edge to edge |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/d74dbdb0) | Balcony plan C: fixed black frame with six pop-out pet-mesh panels |
 | [2026-10-09](https://github.com/wbniv/WorldFoundry/commit/ef99d415) | Record pending coordinator, runtime diagnostics and aquarium work |
@@ -24,6 +25,11 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/ce0a2fa6) | Plan condo 639 balcony zip screen (solar-strip motor) and 7 cm floor recess |
 
 <!--history-meta v1
+9b7fdc33	author	Will Norris
+9b7fdc33	added	12
+9b7fdc33	deleted	0
+9b7fdc33	files	1
+9b7fdc33	body	Schematic head, sill and plan sections (outer stops, lift space, brush\nseals, expansion clearance, spring bolt, sloped sill with weep hole,\npanel joint) with a numbered bilingual key and removal sequence, as page\n2 of the fabricator spec sheet and as a plan mockup.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 84f2e6ab	author	Will Norris
 84f2e6ab	added	13
 84f2e6ab	deleted	13
