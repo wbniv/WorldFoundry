@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/144f06af) | Reef: nudibranch mantle skin and matching height-field shape |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/7e42d059) | Reef: rebuild the nudibranch model; W2 skins approved |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b46fc80d) | Reef skins review: labelled before/after table |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/068281ff) | Reef: creature skins in their own atlas cells (plan W2) |
 
 <!--history-meta v1
+144f06af	author	Will Norris
+144f06af	added	18
+144f06af	deleted	4
+144f06af	files	1
+144f06af	body	Will: "Nudibranch still not approved. don't you have any textures for\nit?" The skin was three flat stripes, mostly seen edge-on. Atlas cell 12\nnow paints a mottled black mantle with wavy, shaded blue-grey ridges,\ndome-shaded yellow tubercles, grey inter-ridge tubercles and transverse\nmargin ridges. The mantle is a low height field whose ridges rise where\nthe skin paints them, with a 3D tubercle on every painted one (one shared\nlayout in atlas.py). Review renders are matte, like the engine.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 7e42d059	author	Will Norris
 7e42d059	added	11
 7e42d059	deleted	2

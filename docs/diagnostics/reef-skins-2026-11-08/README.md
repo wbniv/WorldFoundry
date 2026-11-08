@@ -1,6 +1,6 @@
 # Creature skins: review, 8 November 2026
 
-W2 of the [reef finishing plan](../../plans/2026-11-08-reef-tanks-finish.md). **Approved by Will, 2026‑11‑08, except the nudibranch** ("everything except nudibranch is approved"); the nudibranch was rebuilt below and awaits review. Will, 2026‑11‑08: "go ahead with W2". Colours follow the sourced [skin colour references](../../reference/thai-reef-skin-colours.md) (W0).
+W2 of the [reef finishing plan](../../plans/2026-11-08-reef-tanks-finish.md). **Approved by Will, 2026‑11‑08**: every skin first ("everything except nudibranch is approved"), then the twice-rebuilt nudibranch ("approved, go ahead with W3"). Will, 2026‑11‑08: "go ahead with W2". Colours follow the sourced [skin colour references](../../reference/thai-reef-skin-colours.md) (W0).
 
 > [!NOTE]
 > These are **Blender renders** (CPU Cycles, the static bake's sun) of the generator's own meshes with each style's real atlas. They are not engine captures, for the same reason as the [worm review](../reef-worms-2026-11-08/README.md): the desktop engine cannot run in the containers on this machine. **Before** is the code at `b8831c71` with its UV rule; **after** is this change. Every image is labelled.
@@ -14,7 +14,7 @@ Left to right: guard crab, banded shrimp, hermit crab, nudibranch, humbug.
 | Realistic | ![](animals-realistic-before.jpg) | ![](animals-realistic-after.jpg) |
 | Anime | ![](animals-anime-before.jpg) | ![](animals-anime-after.jpg) |
 
-## Nudibranch, rebuilt again (awaiting review)
+## Nudibranch, rebuilt again (approved by Will, 2026‑11‑08)
 
 **First rebuild, not approved.** Will: "Nudibranch still not approved. don't you have any textures for it?" There are no photographic textures in this project; every reef skin is painted procedurally in `reef/atlas.py`. The first rebuild's skin was three flat stripes on black, and the camera, about 16° above the slug, saw mostly its steep side. Separate ridge rails and tubercle balls also hid the painted top and did not line up with it.
 

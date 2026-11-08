@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/7e42d059) | Reef: rebuild the nudibranch model; W2 skins approved |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/068281ff) | Reef: creature skins in their own atlas cells (plan W2) |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/2099c8e7) | Reef plan: W1 worms approved |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b8831c71) | Reef: rebuild the Christmas tree worms (plan W1) |
@@ -7,6 +8,11 @@
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b756367f) | Plan: finish the reef tanks (worms, skins, placement, acceptance) |
 
 <!--history-meta v1
+7e42d059	author	Will Norris
+7e42d059	added	1
+7e42d059	deleted	1
+7e42d059	files	1
+7e42d059	body	Will approved every W2 skin except the nudibranch, which had barely\nchanged: its old tiles already approximated the colours and the model was\nthe problem (a tall blob with a fence of stalked tubercles). Phyllidia\nvaricosa now has a low flat mantle, three blue-grey ridges with\nyellow-capped tubercles on them, yellow rhinophores, and a top-down mantle\ntexture repeating the ridges with transverse margin ridges.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 068281ff	author	Will Norris
 068281ff	added	3
 068281ff	deleted	2
