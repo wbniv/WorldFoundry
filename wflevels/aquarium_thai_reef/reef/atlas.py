@@ -47,6 +47,84 @@ WATER_X0 = UTIL_X + 40          # six 16-px bands from here, centre +8
 CLAM_SHELL = (UTIL_X, UTIL_Y + 32, 128, 32)   # x, y, width, height
 
 
+NUDI_RIDGE_V = (.267, .5, .733)      # ridge centres across the mantle (v)
+NUDI_SEED = 20261102
+NUDI_CELL_W, NUDI_CELL_H = 255, 191  # painted mantle: u along x 0-255, v along y 0-191
+
+
+def nudi_ridge_centre(k, x):
+    """Ridge k's centre (v, 0-1) at mantle column x (0-255)."""
+    return NUDI_RIDGE_V[k] + .012 * math.sin(x * .07 + k * 2.1)
+
+
+def nudi_ridge_width(k, x):
+    """Ridge k's half-width (v units) at column x."""
+    return .040 + .022 * _smooth_noise(x, k * 50, 16, NUDI_SEED + 611)
+
+
+def nudi_tubercles():
+    """(x, y, radius) of every yellow tubercle, in mantle pixels. life.py
+    raises a 3D tubercle on each, so geometry and paint coincide."""
+    out = []
+    for k in range(len(NUDI_RIDGE_V)):
+        for cell_x in range(NUDI_CELL_W // 21 + 1):
+            tx = cell_x * 21 + 10 + 6 * (_noise(cell_x, k, NUDI_SEED + 612) - .5)
+            ty = (nudi_ridge_centre(k, tx) + .01 * (_noise(cell_x, k, NUDI_SEED + 613) - .5)) * NUDI_CELL_H
+            out.append((tx, ty, 5.5 + 3.5 * _noise(cell_x, k, NUDI_SEED + 614)))
+    return out
+
+
+def _nudi_mantle(x, y, seed):
+    """Phyllidia varicosa mantle, mapped top-down: u (x 0-255) runs along the
+    body, v (y 0-191) across it. Black, faintly mottled; three raised,
+    wavy blue-grey ridges carrying shaded yellow tubercles; small grey
+    tubercles between them; short transverse ridges out to a grey rim.
+    References: docs/reference/thai-reef-skin-colours.md."""
+    v = y / NUDI_CELL_H
+    mottle = _smooth_noise(x, y, 9, seed + 610) - .5
+    base = tuple(c + 14 * mottle for c in (16, 17, 21))
+    if v < .03 or v > .97:
+        return (44, 50, 60)
+    for tx, ty, radius in _NUDI_TUBERCLES:
+        dx, dy = x - tx, y - ty
+        if abs(dx) < radius and abs(dy) < radius:
+            d = math.hypot(dx, dy) / radius
+            if d < 1:
+                colour = _mix((252, 222, 70), (232, 158, 36), d ** 1.8)
+                glint = max(0.0, 1 - math.hypot(dx + radius * .35, dy + radius * .35) / (radius * .45))
+                return _mix(colour, (255, 244, 190), glint * .8)
+    for k in range(len(NUDI_RIDGE_V)):
+        dv = abs(v - nudi_ridge_centre(k, x))
+        width = nudi_ridge_width(k, x)
+        if dv < width:
+            profile = 1 - (dv / width) ** 2
+            colour = _mix((66, 84, 104), (150, 172, 194), profile)
+            return tuple(c + 10 * mottle for c in colour)
+    # Short transverse ridges toward both margins.
+    if v < .17 or v > .83:
+        cell_x = x // 13
+        rx = cell_x * 13 + 6 + 4 * (_noise(cell_x, int(v > .5), seed + 615) - .5)
+        reach = .07 + .08 * _noise(cell_x, int(v > .5), seed + 616)
+        edge = v if v < .5 else 1 - v
+        if abs(x - rx) < 1.8 and edge < .03 + reach:
+            return _mix((70, 86, 106), (126, 146, 168), 1 - abs(x - rx) / 1.8)
+    # Scattered small grey tubercles on the black between ridges.
+    cell_x, cell_y = x // 11, y // 11
+    if _noise(cell_x, cell_y, seed + 617) > .72:
+        sx = cell_x * 11 + 5 + 4 * (_noise(cell_x, cell_y, seed + 618) - .5)
+        sy = cell_y * 11 + 5 + 4 * (_noise(cell_x, cell_y, seed + 619) - .5)
+        if math.hypot(x - sx, y - sy) < 2.2:
+            return (62, 72, 86)
+    return base
+
+
+def _posterise(rgb):
+    """Anime: keep hue, snap brightness to one of three bands."""
+    peak = max(rgb) or 1
+    band = 40 if peak < 70 else 150 if peak < 175 else 245
+    return tuple(c * band / peak for c in rgb)
+
+
 def _mix(a, b, t):
     return tuple(x + (y - x) * t for x, y in zip(a, b))
 
@@ -84,21 +162,12 @@ def _creature_texel(cell, x, y, seed):
             return (200, 32, 40), fleck + 14 * smooth + 6 * grain
         return (240, 236, 226), (-18 if y % 16 == 0 else 0) + 6 * grain
     if cell == 12:                                 # Phyllidia varicosa
-        if y < 128:
-            # Mantle, mapped top-down (u along the body, v across it): three
-            # blue-grey ridges with yellow tubercles, short transverse ridges
-            # toward the margins, on black.
-            v = (y - 3) / 122
-            for ridge in (.267, .5, .733):          # matches life.NUDI_RIDGES
-                if abs(v - ridge) < .035:
-                    dot = (x % 24 - 12) ** 2 + ((v - ridge) * 122) ** 2 < 20
-                    return ((242, 204, 40) if dot else (122, 146, 170)), 4 * grain
-            if (v < .14 or v > .86) and x % 16 < 2:
-                return (50, 60, 74), 4 * grain
-            return (16, 17, 20), (22 if _noise(x, y, seed + 551) > .9 else 0) + 4 * grain
         if y < 192:
-            return (122, 146, 170), 18 * smooth + 6 * grain
-        return _mix((232, 140, 30), (242, 204, 40), (y - 192) / 63), 6 * grain
+            return _nudi_mantle(x, y, seed), 0
+        if y < 224:                                # ridge tubes: mottled blue-grey
+            return (120, 142, 166), 22 * smooth + 10 * grain - (18 if _noise(x, y, seed + 552) > .9 else 0)
+        # tubercle caps: yellow mottled toward orange
+        return _mix((246, 210, 52), (228, 136, 32), max(0.0, min(1.0, smooth + .45))), 6 * grain
     if cell == 13:                                 # Dardanus lagopodes in a borrowed shell
         if y < 128:
             band = math.sin((x * .6 + y * .9) / 3.5) > .72     # fine spiral growth lines
@@ -222,7 +291,10 @@ def write_atlas(path, seed=20261102, style='realistic'):
             elif i < UTILITY_CELL:
                 base, shade = _creature_texel(i, local_x, local_y, seed)
                 if style == 'anime':
-                    base, shade = _saturate(base), round(shade / 22) * 22
+                    if i == 12 and local_y < 192:      # painted mantle: posterise whole
+                        base, shade = _posterise(_saturate(base)), 0
+                    else:
+                        base, shade = _saturate(base), round(shade / 22) * 22
                 rgb = [max(0, min(255, round(c + shade))) for c in base]
             else:
                 rgb = [128, 128, 128]
@@ -257,3 +329,5 @@ def write_atlas(path, seed=20261102, style='realistic'):
             out.extend((rgb[2],rgb[1],rgb[0]))
     Path(path).write_bytes(out)
 
+
+_NUDI_TUBERCLES = nudi_tubercles()

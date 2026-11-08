@@ -81,6 +81,12 @@ def material_for(style):
     node.interpolation = 'Closest'
     bsdf = next(n for n in mat.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
     mat.node_tree.links.new(node.outputs['Color'], bsdf.inputs['Base Color'])
+    # Matte, like the engine's diffuse-only lighting: Cycles' default specular
+    # turns dark surfaces grey-white at grazing angles.
+    bsdf.inputs['Roughness'].default_value = 1.0
+    for name in ('Specular IOR Level', 'Specular'):
+        if name in bsdf.inputs:
+            bsdf.inputs[name].default_value = 0.0
     return mat
 
 
@@ -131,9 +137,16 @@ for style in ('realistic', 'anime'):
     nudibranch = [(lambda: built(life._nudibranch), (0, 0, 0))]
     for name, row, target, distance, lens in (('animals', animals, (1.55, 0, .08), 4.6, 42),
                                               ('sessile', sessile, (2.0, 0, .35), 5.0, 45),
-                                              ('nudibranch', nudibranch, (0, 0, .03), 1.5, 50)):
+                                              ('nudibranch', nudibranch, (0, 0, .03), 1.5, 50),
+                                              ('nudibranch-game', nudibranch, (0, 0, .03), 0, 50)):
         objs = [to_blender(make(), mat, offset) for make, offset in row]
-        cam.location = (target[0], target[1] - distance, target[2] + distance * .28)
+        if name == 'nudibranch-game':
+            # Same direction as the game's wide camera, (0, -7.5, 2.75), sees the
+            # slug at (-4.0, -1.65, 1.05): a grazing ~16 degree view.
+            d = Vector((4.0, -5.85, 1.7)).normalized() * 1.6
+            cam.location = (target[0] + d.x, target[1] + d.y, target[2] + d.z)
+        else:
+            cam.location = (target[0], target[1] - distance, target[2] + distance * .28)
         cam.rotation_euler = (Vector(target) - cam.location).to_track_quat('-Z', 'Y').to_euler()
         cam.data.lens = lens
         scene.render.filepath = str(OUT / f'{MODE}-{style}-{name}.png')

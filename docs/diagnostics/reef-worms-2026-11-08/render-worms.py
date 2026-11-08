@@ -69,6 +69,12 @@ def material_for(style):
     node.interpolation = 'Closest'
     bsdf = next(n for n in mat.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
     mat.node_tree.links.new(node.outputs['Color'], bsdf.inputs['Base Color'])
+    # Matte, like the engine's diffuse-only lighting: Cycles' default specular
+    # turns dark surfaces grey-white at grazing angles.
+    bsdf.inputs['Roughness'].default_value = 1.0
+    for name in ('Specular IOR Level', 'Specular'):
+        if name in bsdf.inputs:
+            bsdf.inputs[name].default_value = 0.0
     return mat
 
 

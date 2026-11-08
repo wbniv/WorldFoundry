@@ -407,49 +407,78 @@ def _mushroom_coral(mesh, center):
         mesh.swept_tube([(p[0],p[1],p[2]+.008) for p in ridge], .010, 'polyp', 5)
 
 
-NUDI_LENGTH, NUDI_WIDTH, NUDI_HEIGHT = .30, .15, .055   # mantle half-extents
-NUDI_RIDGES = (-.07, 0.0, .07)                            # ridge offsets across the mantle
+NUDI_LENGTH, NUDI_WIDTH, NUDI_HEIGHT = .30, .15, .04   # mantle half-length, half-width, dome height
+NUDI_RIDGE_HEIGHT = .012
+NUDI_GRID = (36, 14)                                     # mantle samples along, across
 
 
-def _nudi_surface(x, y, z, px, py):
-    """Height of the mantle's upper surface above local point (px, py)."""
-    q = 1 - ((px - x) / NUDI_LENGTH) ** 2 - ((py - y) / NUDI_WIDTH) ** 2
-    return z + NUDI_HEIGHT * math.sqrt(max(0.0, q))
+def _nudi_height(u, v):
+    """Mantle surface height at mantle coordinates u, v in [0, 1]: a low
+    dome plus the raised ridges, using the atlas's own ridge layout."""
+    from .atlas import NUDI_CELL_W, NUDI_RIDGE_V, nudi_ridge_centre, nudi_ridge_width
+    q = 1 - (2 * u - 1) ** 2 - (2 * v - 1) ** 2
+    if q <= 0:
+        return 0.0
+    dome = NUDI_HEIGHT * math.sqrt(q)
+    x = u * NUDI_CELL_W
+    ridge = max(max(0.0, 1 - ((v - nudi_ridge_centre(k, x)) / nudi_ridge_width(k, x)) ** 2)
+                for k in range(len(NUDI_RIDGE_V)))
+    return dome + NUDI_RIDGE_HEIGHT * ridge * min(1.0, 3 * math.sqrt(q))
 
 
 def _nudibranch(mesh, center):
-    """Phyllidia varicosa: a low black mantle with three blue-grey ridges,
-    yellow-capped tubercles on the ridges and yellow rhinophores (front = -x).
+    """Phyllidia varicosa (front = -x). The mantle is a height field whose
+    ridges rise exactly where atlas cell 12 paints them, and a 3D tubercle
+    sits on every painted tubercle, so geometry and texture agree.
     Colours: docs/reference/thai-reef-skin-colours.md."""
+    from .atlas import NUDI_CELL_H, NUDI_CELL_W, nudi_tubercles
     x, y, z = center
-    first = len(mesh.faces)
-    mesh.ellipsoid((x, y, z), (NUDI_LENGTH, NUDI_WIDTH, NUDI_HEIGHT), 'nudi_body', 18, 8)
-    # The mantle texture repeats the ridge pattern, mapped top-down along the
-    # body, so the stripes still read where the geometry is too small to see.
     if not hasattr(mesh, 'face_uvs'):
         mesh.face_uvs = {}
-    for f in range(first, len(mesh.faces)):
-        # Atlas cell 12 (x 0-255, y 768-1023), body rows 3-125.
-        mesh.face_uvs[f] = tuple(((3 + 250 * (mesh.vertices[v][0] - x + NUDI_LENGTH) / (2 * NUDI_LENGTH)) / 1024,
-                                  (768 + 3 + 122 * (mesh.vertices[v][1] - y + NUDI_WIDTH) / (2 * NUDI_WIDTH)) / 1024)
-                                 for v in mesh.faces[f])
-    for offset in NUDI_RIDGES:
-        reach = NUDI_LENGTH * .78 * math.sqrt(1 - (offset / NUDI_WIDTH) ** 2)
-        ridge = []
-        for i in range(7):
-            px = x - reach + 2 * reach * i / 6
-            py = y + offset
-            ridge.append((px, py, _nudi_surface(x, y, z, px, py) + .004))
-        mesh.swept_tube(ridge, .014, 'nudi_ridge', 5)
-        # Tubercles sit directly on the ridge, capped in yellow.
-        for i in range(6):
-            px = x - reach * .9 + 1.8 * reach * (i + .5) / 6
-            py = y + offset + .006 * math.sin(i * 2.3 + offset * 40)
-            pz = _nudi_surface(x, y, z, px, py) + .018
-            mesh.ellipsoid((px, py, pz), (.021, .021, .019), 'nudi_tubercle', 6, 4)
+    nu, nv = NUDI_GRID
+
+    def point(i, j):
+        u, v = i / nu, j / nv
+        # Elliptical outline: squeeze each column to the mantle's oval.
+        half = math.sqrt(max(0.0, 1 - (2 * u - 1) ** 2))
+        vv = .5 + (v - .5) * max(half, 1e-3)
+        return ((x - NUDI_LENGTH + 2 * NUDI_LENGTH * u, y - NUDI_WIDTH + 2 * NUDI_WIDTH * vv,
+                 z + _nudi_height(u, vv)), (u, vv))
+
+    def uv(m):
+        # Atlas cell 12 (x 0-255, y 768-1023), painted mantle rows 0-191.
+        return ((m[0] * NUDI_CELL_W + .5) / 1024, (768 + m[1] * NUDI_CELL_H + .5) / 1024)
+
+    for i in range(nu):
+        for j in range(nv):
+            corners = [point(i, j), point(i + 1, j), point(i + 1, j + 1), point(i, j + 1)]
+            pts = list(dict.fromkeys(c[0] for c in corners))
+            if len(pts) < 3:
+                continue
+            uvs = [uv(c[1]) for c in corners if c[0] in pts]
+            uvs = list(dict.fromkeys(uvs))[:len(pts)] if len(uvs) != len(pts) else uvs
+            pts, uvs = _oriented(pts, uvs, (0, 0, 1))
+            mesh.face(pts, 'nudi_body')
+            mesh.face_uvs[len(mesh.faces) - 1] = tuple(uvs)
+    # A flat sole closes the underside (never seen from the tank camera).
+    rim = [point(i, 0) for i in range(nu + 1)] + [point(i, nv) for i in range(nu, -1, -1)]
+    rim = list({r[0]: r for r in rim}.values())
+    sole = [((p[0], p[1], z), uv(m)) for p, m in reversed(rim)]
+    mesh.face([p for p, _ in sole], 'nudi_body')
+    mesh.face_uvs[len(mesh.faces) - 1] = tuple(t for _, t in sole)
+    # Yellow-capped tubercles, one on every painted tubercle.
+    su, sv = 2 * NUDI_LENGTH / NUDI_CELL_W, 2 * NUDI_WIDTH / NUDI_CELL_H
+    for tx, ty, radius in nudi_tubercles():
+        u, v = tx / NUDI_CELL_W, ty / NUDI_CELL_H
+        if 1 - (2 * u - 1) ** 2 - (2 * v - 1) ** 2 < .15:
+            continue
+        px, py = x - NUDI_LENGTH + 2 * NUDI_LENGTH * u, y - NUDI_WIDTH + 2 * NUDI_WIDTH * v
+        r = radius * .85
+        mesh.ellipsoid((px, py, z + _nudi_height(u, v) + r * sv * .4), (r * su, r * sv, r * sv * .9),
+                       'nudi_tubercle', 6, 3)
     for side in (-1, 1):
-        base = (x - NUDI_LENGTH * .78, y + side * .04,
-                _nudi_surface(x, y, z, x - NUDI_LENGTH * .78, y + side * .04))
+        u0 = .11
+        base = (x - NUDI_LENGTH + 2 * NUDI_LENGTH * u0, y + side * .035, z + _nudi_height(u0, .5 + side * .12))
         tip = (base[0] - .03, base[1] + side * .012, base[2] + .07)
         mesh.swept_tube([base, tip], .011, 'nudi_tubercle', 5)
         mesh.ellipsoid(tip, (.014, .014, .016), 'nudi_tubercle', 6, 4)

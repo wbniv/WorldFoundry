@@ -14,14 +14,28 @@ Left to right: guard crab, banded shrimp, hermit crab, nudibranch, humbug.
 | Realistic | ![](animals-realistic-before.jpg) | ![](animals-realistic-after.jpg) |
 | Anime | ![](animals-anime-before.jpg) | ![](animals-anime-after.jpg) |
 
-## Nudibranch, rebuilt (awaiting review)
+## Nudibranch, rebuilt again (awaiting review)
 
-Will asked whether the nudibranch had changed: barely. Its borrowed tiles (teal ridges, yellow boxfish tile) were already near the target colours, and the model was the real problem: a tall black blob with stalked tubercles in a single fence-like row. The rebuild follows the [colour references](../../reference/thai-reef-skin-colours.md): a low, flat black mantle; three raised blue-grey ridges along it; yellow-capped tubercles sitting directly on the ridges; yellow rhinophores at the front; and a mantle texture, mapped top-down, that repeats the ridges and adds short transverse ridges at the margins. 1,202 triangles (was 1,156). It still sits about 23 cm above the sand and bobs vertically; fixing that is W3.
+**First rebuild, not approved.** Will: "Nudibranch still not approved. don't you have any textures for it?" There are no photographic textures in this project; every reef skin is painted procedurally in `reef/atlas.py`. The first rebuild's skin was three flat stripes on black, and the camera, about 16° above the slug, saw mostly its steep side. Separate ridge rails and tubercle balls also hid the painted top and did not line up with it.
+
+**Second rebuild.** One layout now drives both paint and shape:
+
+- **Skin** (atlas cell 12, mantle 256 × 192 texels): faintly mottled black; three wavy blue-grey ridges, shaded to read as raised; about 36 yellow tubercles shaded as domes (deep yellow, orange rim, highlight); small grey tubercles between the ridges; short transverse ridges out to a grey rim. Anime posterises it to three brightness bands.
+- **Shape:** the mantle is a low dome height field (36 × 14 samples) whose ridges rise exactly where the skin paints them. A 3D tubercle sits on every painted tubercle, and the rhinophores are yellow. The side wall is gone, so the camera sees the patterned top. 1,952 triangles.
+- **Renders** are now matte. Cycles' default specular had been making dark surfaces look grey-white at grazing angles, which the engine never does. Before and after both use the matte material.
+
+| Painted skin | Realistic | Anime |
+|---|---|---|
+| Atlas cell 12 | ![](nudibranch-skin-realistic.png) | ![](nudibranch-skin-anime.png) |
 
 | | Before | After |
 |---|---|---|
-| Realistic | ![](nudibranch-realistic-before.jpg) | ![](nudibranch-realistic-after.jpg) |
-| Anime | ![](nudibranch-anime-before.jpg) | ![](nudibranch-anime-after.jpg) |
+| Close, realistic | ![](nudibranch-realistic-before.jpg) | ![](nudibranch-realistic-after.jpg) |
+| Close, anime | ![](nudibranch-anime-before.jpg) | ![](nudibranch-anime-after.jpg) |
+| From the game camera's angle, realistic | ![](nudibranch-game-realistic-before.jpg) | ![](nudibranch-game-realistic-after.jpg) |
+| From the game camera's angle, anime | ![](nudibranch-game-anime-before.jpg) | ![](nudibranch-game-anime-after.jpg) |
+
+It still sits about 23 cm above the sand and bobs vertically; fixing that is W3.
 
 ## Sessile life
 
