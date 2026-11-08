@@ -227,7 +227,7 @@ One rule for every creature: **object-local UVs into its own cell**, so texel de
 
 ## W5 — procedural reef: random rocks, a rock count and clustered colonies, laid out in Forth (plan only)
 
-**Status: D5–D8 decided** (Will, 2026‑11‑08: "d5: forth, d6: ok, d7: ok, d8: yes"). **The R0 spike is in progress.** W3's fixed placement shipped first, as asked (`1a30b727`, approved, pushed).
+**Status: D5–D8 decided** (Will, 2026‑11‑08: "d5: forth, d6: ok, d7: ok, d8: yes"). **R0's code reading is done** ([report](../diagnostics/reef-w5-r0-2026-11-08/README.md)): Forth-only is feasible with no engine change for W5 itself. The device measurement is still to run, and **D9 awaits Will**. W3's fixed placement shipped first, as asked (`1a30b727`, approved, pushed).
 
 Will, 2026‑11‑08:
 - "can we do that randomly-ish on initial placement in clusters? (not unlike the planted tank level)"
@@ -241,7 +241,7 @@ Will, 2026‑11‑08:
 - **The reef has no settings object.** Its actors are the scene objects, lights, cameras, Director and the reef pieces, and it has no `settings.rprp`.
 - **The Jellyfish tank is the template.** A per-level `settings.oas` (`JellyfishSettings`, owned by the Director) is compiled by `oas2oad`, bound by `settings-bindings.json`, and turned into an RP01 catalog by `build-object-properties.py`. Its Forth reads fields with `property@ ( owner field -- value flag )` (`jelly_motion.fth:2`). Its **Companions 0–50** field sets how many pre-built jellyfish are visible: the same shape as a rock count.
 - **The Planted Tank grows plants in engine C++** (`plant_growth.h`, `colonies(seed)`): 16 founders at random, then lineages that grow by short steps from a random member, with per-kind step sizes, heading jitter, a crowding radius and an excluded fish route. `planted::enter()` draws a fresh seed on every level entry, and the Dream host can pass a fixed one.
-- **Forth already has a seeded generator** (`random`, `seed-random`, `scripting_zforth.cc:17-18`). Its state starts at 1 and nothing reseeds it per level, so a fresh seed per entry needs an entropy source (R0, question 3).
+- **Forth already has a seeded generator** (`random`, `seed-random`, `scripting_zforth.cc:17-18`). *Corrected by R0:* `Init` reseeds it from the clock (`scripting_zforth.cc:1600-1606`) and every level load creates a new interpreter (`level.cc:896`), so `random` already differs on every entry and needs no entropy primitive.
 - **The reef cannot simply copy the Planted Tank.** Its rock, corals and colonies are baked meshes with Cycles light, anime outline hulls and static colliders, and every placement is resolved against that fixed rock at export (W3).
 
 ### Proposed design (option A, recommended): a baked kit, laid out by Forth at level entry
@@ -348,6 +348,28 @@ The spike answers these questions with measurements on the desktop and the Pixel
 6. **Memory.** How big is the kit compared with today's 8 MB level?
 7. **Optional.** Can multi-curve DFRM lobe scales give cheap rock-shape variety, posed once at entry?
 
+### R0 results (code reading, 2026‑11‑08)
+
+Full evidence is in the [R0 report](../diagnostics/reef-w5-r0-2026-11-08/README.md).
+
+| # | Question | Verdict | What it means for W5 |
+|---|---|---|---|
+| 1 | Moving pieces | **Yes** | The Director already moves anchored platforms. Render matrices are rebuilt each frame and the static bake is in local space, so a move needs no re-bake. A hidden actor skips its draw and costs only a small update. Each hideable piece needs its own visibility cell, from the free global mailboxes 2–599. Rotation writes were broken; see below |
+| 2 | Colliders | **Partial** | Position writes reach Jolt about two frames later; rotation and scale never do. Use one pivot-centred box collider per module, with headings 0 or ½ revolution. Park unused colliders at z = −4 *inside* the room box, because a statplat outside it asserts (`rooms.cc:157`). The "predictive braking" this plan's tank section describes does not exist: Jolt's character keeps the fish out of the rock |
+| 3 | Entropy | **Yes** | Fresh per entry already. Seed 0 means: draw `random`, then `seed-random` with it. Cap Seed at 24 bits, because Forth cells are floats and `property@` returns at most 32767; larger values go through `property-int-bytes@`. Showing the drawn seed on the panel would need a new `property!` word, which is an engine change |
+| 4 | Settings | **Partial** | `property@` and the TV panel (hold A for 1 s) work for any Director-owned catalog. It takes six build steps: `.oas` and bindings for both styles, an `indices` key in the reef actor-map, oas2oad and properties steps in both `build.sh` files, and a `check_tank_catalog` branch. **The phone and coordinator need app work:** the generic provider and the launch-override bridge are Planted-only today (D9) |
+| 5 | Memory | **Within limits** | An 8-module kit adds about 0.7 MB realistic and up to 1.95 MB anime, giving levels of roughly 8.7–12.4 MB. The static budgets (11 groups, 70,000 triangles) must count the worst-case visible set, not every loaded group |
+| 6 | DFRM lobes | **Partial; not for W5** | A pose applied once persists, but it takes the mesh off the static-bake path permanently, so it is redrawn the slow way every frame |
+| 7 | Device cost | **Recipe written, not run** | Probe levels P0–P4 on cast1 and the Pixel through `task chromecast:profile`, three alternating runs each, with pass criteria in the report |
+
+**The rotation bug R0 found is fixed.** Rotation writes from scripts went into one shared Euler that applied only on a C write ([BUGS.md](../BUGS.md), dormant since 2002). The engine now applies each axis to its own actor ([`4ca61197`](https://github.com/wbniv/WorldFoundry/commit/4ca61197), approved by Will). The reef writes whole rotations, and its nudibranch, which turned about 51° because `3.141593` is in revolutions, now turns half a revolution ([`c5b6bc33`](https://github.com/wbniv/WorldFoundry/commit/c5b6bc33)).
+
+**Order after R0:**
+1. W5a settings (T3).
+2. The R0 device run, P0–P3, on copies of today's meshes.
+3. W5b, the kit, together with the budget-report change (T4), then P4.
+4. W5c, the Forth layout (T3).
+
 ### Decisions for Will
 
 | # | Decision | Decided (Will, 2026‑11‑08) |
@@ -355,6 +377,7 @@ The spike answers these questions with measurements on the desktop and the Pixel
 | D5 | Architecture | **A**: a baked kit laid out by Forth. No engine code if R0 passes |
 | D6 | Rock count | **1–5, default 3**, today's look. Heroes come first; with fewer than 3 rocks some behaviours are absent |
 | D7 | Seed | **Seed 0 = a new reef on every entry** (like the Planted Tank); any other value repeats exactly |
+| D9 | Where ReefSettings appears | **Awaiting Will.** (a) **TV settings panel only**, which works with W5a as specified; or (b) also the phone Dream settings and the coordinator tray, which needs an aquarium-flavour settings provider and a launch-override bridge in the Android app (app code, not engine). Recommendation: **(a) now, (b) as its own TODO item** |
 | D8 | Keep the fixed layout | **Yes**: Layout = Fixed shows the reviewed W3 reef; the default is Random once W5 passes review |
 
 ### Mock-ups

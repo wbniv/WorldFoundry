@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/aac370a8) | Reef plan: W5 decisions D5-D8 recorded |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/09da72be) | Reef plan: W5 procedural reef (random rocks, rock count, clustered colonies) |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/8163dff4) | Reef plan: W3 placement approved |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/1a30b727) | Reef: nothing floats, everything attaches (plan W3) |
@@ -12,6 +13,11 @@
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b756367f) | Plan: finish the reef tanks (worms, skins, placement, acceptance) |
 
 <!--history-meta v1
+aac370a8	author	Will Norris
+aac370a8	added	2
+aac370a8	deleted	2
+aac370a8	files	1
+aac370a8	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 09da72be	author	Will Norris
 09da72be	added	169
 09da72be	deleted	0
