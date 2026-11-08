@@ -347,6 +347,49 @@ not clearly readable at the full-tank scale. The sea fan's larger sway is
 visible. These findings do not establish approach/retraction behavior for the
 other animals.
 
+On Lenovo, J‑67924e0e8255 (realistic) and J‑ae60463e179c (anime) used
+scripted joystick input to bring the fish toward the feather dusters and then
+away. The visible fans are extended before approach, retracted when the fish
+is near, and extended again after departure in both styles. The diagnostic
+camera is close and foreground coral still obscures part of the crowns; this
+does not establish normal-wide-view readability or individual timing. The
+full Aquarium APK was restored after each diagnostic, most recently by
+J‑b82e96957efe. Private recordings are at `/tmp/reef-duster-real-retry` and
+`/tmp/reef-duster-anime-retry`.
+
+J‑f45acb5c85ef (realistic) and J‑2d072cbdb349 (anime) used the same
+joystick approach-and-retreat pattern with a close diagnostic camera on the
+clam. In both recordings it is open before approach, closes while the fish is
+near, and opens again after departure. The recordings are private at
+`/tmp/reef-clam-steered-real` and `/tmp/reef-clam-steered-anime`; full Aquarium
+restoration followed as J‑835e6a83d8c5. These are visual transitions, not a
+precise measurement of each animation's timing.
+
+J‑9d7a2ddceb5b recorded the realistic Christmas-tree worms. Its recovered
+video shows the crowns extended before approach, retracted near the fish, and
+extended after departure. The job was not successful: a device-command timeout
+prevented normal cleanup verification. Its preserved protocol-2 trace shows
+all four touch edges accepted and released, followed by `COMPLETE`; the
+speculative cancellation was rejected by Android. Coordinator 0.1.94
+(`1ee9f4a`) added strict completed-trace and balanced-contact verification.
+After the recovery-preserving upgrade, J‑def1187b52ba verified the stopped
+helper and preserved trace, removed the recorder and remote files, restored the
+foreground, and cleared the fence without reboot. The full Aquarium restore
+J‑e49f61bf3fa7 then completed. The 29 focused coordinator tests passed. The
+worm recording remains private under `/tmp/reef-worm-failure`. Subsequent
+anime recording J‑32e6b72f7077 shows the same approach, retraction and
+reopening; its private evidence is in `/tmp/reef-worms-steered-anime`.
+Individual worm recovery timings remain unmeasured. These recordings use the
+reef assets from the frozen full APK with SHA-256
+`30554973298a13e9352344864ee42f6f804888df3439952194cc1508ebdfef1e`.
+
+J‑815f4edaf4a5 (realistic) and J‑f7661ce3bac6 (anime) steered the boxfish
+toward and away from the humbug pair with a close diagnostic camera. In each
+style, the fish moved down into the coral as the boxfish approached and
+returned above it after departure. This verifies the visible transition, not
+its precise timing. Private recordings are in `/tmp/reef-humbug-steered-real`
+and `/tmp/reef-humbug-steered-anime`; J‑2400c6a05a72 restored the full app.
+
 ## Lenovo wide-view performance, 2026-11-08
 
 Profile jobs J‑8cb1fbdb8224 (realistic) and J‑b00ff4f7b72e (anime) reused

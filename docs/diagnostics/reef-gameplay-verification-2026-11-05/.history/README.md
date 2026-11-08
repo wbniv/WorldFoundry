@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/c1fd1d10) | Complete cast1 reef frame-rate gate |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/c5999723) | Record cast1 reef performance progress |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/71f23c4d) | Record reef motion and tablet performance checks |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/5e69e405) | Record coordinator recovery deployment |
@@ -10,6 +11,10 @@
 | [2026-11-05](https://github.com/wbniv/WorldFoundry/commit/2e8c25c0) | Refine reef models and animate tank life |
 
 <!--history-meta v1
+c1fd1d10	author	Will Norris
+c1fd1d10	added	9
+c1fd1d10	deleted	6
+c1fd1d10	files	1
 c5999723	author	Will Norris
 c5999723	added	26
 c5999723	deleted	0
