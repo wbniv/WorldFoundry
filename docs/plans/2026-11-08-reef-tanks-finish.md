@@ -227,7 +227,7 @@ One rule for every creature: **object-local UVs into its own cell**, so texel de
 
 ## W5 — procedural reef: random rocks, a rock count and clustered colonies, laid out in Forth (plan only)
 
-**Status: D5–D8 decided** (Will, 2026‑11‑08: "d5: forth, d6: ok, d7: ok, d8: yes"). **R0's code reading is done** ([report](../diagnostics/reef-w5-r0-2026-11-08/README.md)): Forth-only is feasible with no engine change for W5 itself. **The device run (P0–P3) is done:** hidden and moved pieces cost almost nothing, but a realistic level of 97 objects aborts at load, which blocks W5b's realistic object budget (see [R0 device results](#r0-device-results-cast1-2026-11-08)). **D9 is decided:** a level settings object, with no app code. **W5a is done** (`a205df47`). W3's fixed placement shipped first, as asked (`1a30b727`, approved, pushed).
+**Status: D5–D8 decided** (Will, 2026‑11‑08: "d5: forth, d6: ok, d7: ok, d8: yes"). **R0's code reading is done** ([report](../diagnostics/reef-w5-r0-2026-11-08/README.md)): Forth-only is feasible with no engine change for W5 itself. **The device run (P0–P3) is done:** hidden and moved pieces cost almost nothing, and a realistic level of 97 objects aborted at load because it ran out of its 32 MB room memory slot. That sets W5b's budget in bytes, not objects (see [R0 device results](#r0-device-results-cast1-2026-11-08)). **D9 is decided:** a level settings object, with no app code. **W5a is done** (`a205df47`). W3's fixed placement shipped first, as asked (`1a30b727`, approved, pushed).
 
 Will, 2026‑11‑08:
 - "can we do that randomly-ish on initial placement in clusters? (not unlike the planted tank level)"
@@ -377,12 +377,14 @@ Probes P0–P3 ran on cast1 through the coordinator: three alternating runs of e
 - **A hidden actor costs about 4–8 µs a frame,** and a moved actor costs nothing once the one-shot layout is done. The kit's roughly 40 extra actors would cost about 0.25 ms.
 - **Headroom against the 20 FPS gate:** 6.4 ms realistic and **2.8 ms anime.** The kit fits on frame time if its worst-case visible set adds no more than about 2 ms in anime, which means staying near today's 64k static triangles. P4 checks that once the kit exists.
 - **Today's levels are slower than the `c1fd1d10` baseline** (24.38 and 22.21 FPS). W1–W3 and W5a added geometry, and the probe APK's libraries are a day older. Both styles still pass 20 FPS, so this run also serves as the re-run of original step 10 that W1 and W2 required (see the table at the top).
-- **Blocker: the realistic P3 level aborts at load** with SIGABRT, after `object count = 97` and before the script interpreter starts. Anime P3 has the same 97 objects with smaller meshes, and it loads. Realistic P1 (57 objects) also loads. The cause is **not yet known**. The coordinator keeps no logcat for a failed job, and `wf.log` has no assert text. **W5b's realistic kit waits until the cause is found** (T4, in progress), or else stays at or below 57 objects.
+- **The realistic P3 level aborted at load: it ran out of room memory** ([section 9 of the R0 report](../diagnostics/reef-w5-r0-2026-11-08/README.md#9-root-cause-of-the-realistic-p3-load-abort-2026-11-08)). A `record` job keeps logcat and caught `FatalError: Lmalloc … out of memory, request size = 106656 … Named Room #0`. Each level's wrapper sets its Room #0 slot to 32,000,000 bytes, and every mesh actor builds its own copy of its mesh in that slot. Realistic P3 needs about 33.1 MB. This is a per-level budget, not an engine bug. The same level with only the slot raised to 36 MB or 48 MB loads on cast1 (22.89 FPS at 36 MB).
+- **W5b's budget is bytes.** Free today: 15.06 MB realistic, 14.60 MB anime. Each mesh instance costs about 24 B per vertex, 108 B per face and 380 B per actor, plus each distinct mesh file's bytes once. W5b as sketched (Fixed set kept, 8 modules, 24 clumps) comes to about 29.5 MB of 32 MB.
+- **Decision (default, Will may override): keep W5b inside 32 MB and make the build check it.** `report_budget.py` gains a room-slot check per style using the formula above, and the build fails when a style goes over. If the kit needs more, raising the reef's two wrappers to 36 MB is the tested fallback: it affects only the reef levels. Sharing mesh data between instances, or dropping GL's second Primitive table, would be engine changes and are not proposed.
 
 **Order after R0:**
 1. ~~W5a settings (T3).~~ Done, `a205df47`.
 2. ~~The R0 device run, P0–P3, on copies of today's meshes.~~ Done; see above.
-3. Find the cause of the realistic P3 load abort, and fix it if the fix is contained (T4).
+3. ~~Find the cause of the realistic P3 load abort (T4).~~ The 32 MB room slot ran out; see above.
 4. W5b, the kit, together with the budget-report change (T4), then P4. **Design note:** express the Fixed layout as one arrangement of the kit's modules, so that both layouts share actors instead of each carrying its own copies.
 5. W5c, the Forth layout (T3).
 
@@ -446,7 +448,7 @@ flowchart TD
     R0 --> D5{"Will decides D5–D8"}
     D5 --> W5a["W5a ReefSettings object + catalog · T2"]
     W5a --> DEV["R0 device run P0–P3 on cast1<br/>(done: realistic P3 aborts at load)"]
-    DEV --> ABORT["Find the realistic P3 load-abort cause · T4"]
+    DEV --> ABORT["P3 abort: 32 MB room slot full<br/>(budget in bytes, checked at build)"]
     ABORT --> W5b["W5b rock-module kit + site tables · T4"]
     W5a --> W5c["W5c Forth layout + module-relative anchors · T3"]
     W5b --> W5c

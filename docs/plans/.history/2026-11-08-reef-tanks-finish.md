@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/094f53a6) | Reef plan: R0 device run P0–P3 on cast1; realistic 97-object load abort |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/a205df47) | Reef: ReefSettings level settings object (plan W5a) |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/ed2b171e) | Reef plan: W5 R0 spike results; D9 (where ReefSettings appears) |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/aac370a8) | Reef plan: W5 decisions D5-D8 recorded |
@@ -15,6 +16,11 @@
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b756367f) | Plan: finish the reef tanks (worms, skins, placement, acceptance) |
 
 <!--history-meta v1
+094f53a6	author	Will Norris
+094f53a6	added	26
+094f53a6	deleted	8
+094f53a6	files	1
+094f53a6	body	Probes on copies of today's reef levels, three alternating runs each:\nhidden actors cost ~4-8 us/frame, one-shot moves cost nothing after\nentry. Realistic P3 (97 objects) aborts at load 4 of 4; anime P3 loads.\nCause unknown; W5b's realistic kit waits on it. P0 doubles as the\nre-run of original step 10 (22.95 / 21.19 FPS, both above 20).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 a205df47	author	Will Norris
 a205df47	added	2
 a205df47	deleted	2

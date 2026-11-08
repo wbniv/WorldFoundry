@@ -323,3 +323,69 @@ The anime outline hulls live **inside** each group's mesh (anime `hull_triangles
 - **Device state:** cast1 reports `Idle · nothing queued (ready)`, with the launcher in the foreground.
 - **Settings:** no device settings were changed. `PANEL=require-hidden` is per-job.
 - **Pixel:** untouched; its two jobs were cancelled while queued.
+
+---
+
+## 9. Root cause of the realistic P3 load abort (2026‑11‑08)
+
+**Cause: the level's Room #0 asset slot runs out of memory.** The slot is an LMalloc of `cbRoom` = **32,000,000 bytes**, the `'ROOM' 32000000l` field in `wflevels/aquarium_thai_reef/aquarium_thai_reef-standalone.iff.txt` (the anime wrapper has the same value). Every mesh actor builds its **own** copy of its mesh in that slot when it binds its assets, so the slot fills with the number and size of mesh *instances*, not with object count as such. Realistic P3 needs about 33.1 MB. **This is a per-level memory budget, not an engine bug.** No out-of-bounds write and no undersized array is involved, and the engine refuses loudly and correctly. So there is **no fix commit**, and nothing goes in `docs/BUGS.md`.
+
+### Evidence
+
+1. **The abort message.** A `record` job with an input script goes through the coordinator's long-recording path, which saves `failure-logcat.txt` (crash, system and main buffers) when the app leaves the foreground (`/opt/wf-device-coordinator/.../long_recording.py:118-137`, `:335`). `profile` and `check` save no logcat on failure. Realistic P3 under `record`, job J‑9e2510e71511 ([excerpt](section9/realistic-P3-failure-logcat-excerpt.txt)):
+
+    ```
+    F wf_game : FatalError: Lmalloc based at address 0xd9a113f8 out of memory, request size = 106656. lmalloc remaining = 40672, Named Room #0
+    I Zygote  : Process 20717 exited due to signal 6 (Aborted)
+    ```
+
+    `LMalloc::Allocate` reports out-of-memory through `AssertMsg` (compiled out in release) and then `FatalError` (`wfsource/source/memory/lmalloc.cc:240-252`). On Android, `FatalError` writes to logcat only, at FATAL level, then calls `std::abort()` (`wfsource/source/hal/android/platform.cc:101-106`). That is why `wf.log` showed a bare SIGABRT.
+2. **The code path.**
+    - `AssetManager` carves one `cbPerm + slots × cbRoom` block from the HAL arena (`wfsource/source/asset/assets.cc:48`, `:220`).
+    - The arena is `cbHalLmalloc` = 64,000,000 bytes (`wfsource/source/hal/hal.cc:36`).
+    - `ActiveRooms` binds each room actor with that slot's memory (`wfsource/source/room/actrooms.cc:95`).
+    - `Actor::BindAssets` builds a `RenderActor3D` / `RenderObject3D` from the mesh stream in that memory (`wfsource/source/game/actor.cc:399-470`).
+    - The on-disk constructor allocates `Vertex3D[V]`, `Material[M]`, `TriFace[F+1]` (plus a temporary `TriFace[F]`, freed again) and, in `_InitPrimList`, **`Primitive[ORDER_TABLES × F]`** (`wfsource/source/gfx/rendobj3.cc:164-370`, `:52-60`). `ORDER_TABLES` = 2 on Linux and Android (`wfsource/source/gfx/otable.hp:52`).
+    - The failed request, 106,656 B, is exactly 2 × 1,212 faces × 44 B. That is the Primitive array of one `KitClump` (`reef_life_3`, 1,212 faces).
+3. **The arithmetic matches the failure point.** [`section9/slot_model.py`](section9/slot_model.py) charges the slot with:
+    - the room's mesh `.iff` bytes (the textures are not charged); and
+    - per mesh actor: 24·V + 20·(F+1) + 88·F, plus about 380 B.
+
+    It predicts the realistic P3 failure on **clump 34, at its Primitive allocation**, with 67 KB modelled against 40,672 B reported remaining. The 380 B per actor is the one fitted term (the RenderActor objects, materials and alignment). The device log agrees independently: realistic P3 printed 71 `material:` lines after `object count = 97`, against 37 for realistic P1. That is 34 more, one per clump, so clump 34 was being built when the abort came.
+
+    | Level | Model: mesh files + copies | Of 32,000,000 | Observed on cast1 |
+    |---|---:|---:|---|
+    | Realistic P0 (today) | 16.94 MB | 52.9% | loads |
+    | Anime P0 (today) | 17.40 MB | 54.4% | loads |
+    | Realistic P1 (+16) | 25.88 MB | 80.9% | loads |
+    | Anime P1 | 23.12 MB | 72.2% | loads |
+    | Anime P3 (97 objects) | 29.49 MB | 92.2% | loads |
+    | **Realistic P3 (97 objects)** | **33.15 MB** | **103.6%** | **aborts on clump 34** |
+
+4. **Confirmed on the device by raising only the budget.** I rebuilt realistic P3 unchanged except for the wrapper's `ROOM` field ([`section9/build_room36.sh`](section9/build_room36.sh), [`build_room48.sh`](section9/build_room48.sh)), in build-docker only:
+    - **ROOM 36,000,000:** profile J‑089af699b9b3 **loads** (`object count = 97`, no FatalError) and measures **22.89 FPS**, against realistic P0's 22.95 FPS median (+0.11 ms, inside the noise).
+    - **ROOM 48,000,000:** record J‑605d155b9845 **loads** too.
+
+### The limit under today's engine
+
+- **The limit is bytes, not objects.** The realistic reef slot has **15.06 MB free today**; anime has 14.60 MB.
+- Each instance of a mesh costs about **24 B per vertex + 108 B per face + 380 B**, and each *distinct* mesh file costs its file bytes once more. A rock module of about 6.5k faces and 5.7k vertices costs about 0.84 MB per instance plus about 0.19 MB of file. A 1.2k-face colony clump costs about 0.18 MB per instance.
+- Object count only matters through that 380 B: 1,000 tiny actors would cost about 0.4 MB.
+- **W5b estimate (realistic, Fixed set kept):**
+    - today: 16.9 MB;
+    - 8 distinct modules of about 6.5k faces: +8.2 MB;
+    - 24 colony clumps of 1.2k faces sharing one file: +4.3 MB.
+    - Total about **29.5 MB of 32 MB (92%)**. It fits, but with little margin: any more instanced faces, or dropping the Fixed-set sharing, overflows. Count the slot in `report_budget.py` for both styles before W5b grows.
+
+### Options
+
+None of these is implemented.
+
+| Option | Effect | Cost or risk |
+|---|---|---|
+| **A. Raise the reef's `ROOM`** in its two wrappers (36 or 48 MB; both loaded P3 on cast1) | +4 to +16 MB of headroom; affects only the two reef levels | It takes more of the 64 MB HAL arena. At 48 MB, PERM 4 + ROOM 48 + OBJD 1 = 53 MB of the arena, and the arena's other users (UI font 2.8 MB, level objects) left enough to load. The ceiling above 48 MB is **untested**. It is a memory-budget decision for Will |
+| **B. Keep W5b inside 32 MB** | No change | Budget about 13–15 MB of new instanced geometry per style, using the formula above. Add a slot check to `report_budget.py` |
+| **C. Share mesh data between instances** (copy-on-write `RenderObject3D` for actors that use the same mesh unmodified) | Each extra instance of a clump falls from about 0.18 MB to its per-instance Primitives only | An engine design change. Per-instance material colour, deformers and the static-bake state all key on the object's own arrays. Needs permission (T4/T5) |
+| **D. Drop the second order table** on GL builds, where `ORDER_TABLES = 2` was a PlayStation double buffer | Saves 44 B per face per instance (about 40% of a copy) | An engine-wide change to the render path. It needs a check that the GL backend never reads the second table. Needs permission |
+
+**Device:** cast1 was restored to APK `30554973…` by install job J‑35b48354c015, verified `bb090b11…` (my ROOM‑48 probe) → `30554973…`. cast1 reports `Idle · nothing queued (ready)`. The Pixel was not used. Two further hypotheses (object count, the per-level OBJD DMalloc) were not needed, because the first one was confirmed.

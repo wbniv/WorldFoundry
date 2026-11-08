@@ -1,0 +1,4 @@
+11-08 17:47:35.243 20717 20736 I wf_game : level-menu: LEVEL_TO_RUN=8 (Gulf of Thailand Reef)
+11-08 17:47:35.244 20717 20736 I wf_game : level-menu: level 8 starts
+11-08 17:47:36.155 20717 20736 F wf_game : FatalError: Lmalloc based at address 0xd9a113f8 out of memory, request size = 106656. lmalloc remaining = 40672, Named Room #0
+11-08 17:47:36.225   385   385 I Zygote  : Process 20717 exited due to signal 6 (Aborted)
