@@ -1,6 +1,6 @@
 # Placement: nothing floats, everything attaches. Review, 8 November 2026
 
-W3 of the [reef finishing plan](../../plans/2026-11-08-reef-tanks-finish.md), for Will's review. Will, 2026‑11‑08: "approved, go ahead with W3".
+W3 of the [reef finishing plan](../../plans/2026-11-08-reef-tanks-finish.md). **Approved by Will, 2026‑11‑08** ("placement looks great!"). Will, 2026‑11‑08: "approved, go ahead with W3".
 
 **Units.** Distances are world units: 1 unit = 1 m at the tank's ×10 scale = 10 cm real. "World cm" below means hundredths of a unit.
 
