@@ -16,6 +16,8 @@
 
 **Plan B requested, 2026‑10‑08 (Will):** a glazed aluminium folding window whose panes fold out of the way completely, as a fallback much closer to a traditional window installation. Specified in [A2. Plan B](#a2-plan-b-glazed-aluminium-folding-window-that-stacks-clear), with its own [mockup](2026-09-30-condo-balcony-shade/elevation-plan-b.html) and Open questions 11–14. Plan A remains the primary design.
 
+**Plan C being built, 2026‑11‑08 (Will):** a fixed black aluminium frame in the opening, matching the unit's other replacement windows, with six pet-mesh screen panels that pop out for the full view. It keeps out mosquitoes and pigeons and cuts down rain. Specified in [A3. Plan C](#a3-plan-c-fixed-screen-frame-with-six-pop-out-pet-mesh-panels), with a [mockup](2026-09-30-condo-balcony-shade/elevation-plan-c.html) and a one-page bilingual [fabricator spec sheet](../rfq/2026-11-08-639-balcony-screen-frame-spec.pdf).
+
 ## Context
 
 The back balcony of 639 is an open opening onto the west (Bangkok afternoon sun, monsoon rain, gusts, 6th floor ≈ 16 m up). Will wants a **motorised outdoor zip screen in a cassette, mounted under the concrete ledge (beam) of the opening**, with a **mains-powered motor, without a motor battery or solar charger** (power decision revised 2026-10-07).
@@ -119,6 +121,36 @@ Specification to quote against. The measurements are plan A's; nothing is remeas
 
 Sources: [Nuline bifold windows](https://nulinewindows.com.au/bifold-windows) (650–700 mm panels, up to 900 mm; inward or outward), [Vetrina bi-fold guide](https://www.vetrinawindows.com/articles/aluminum-bi-fold-doors-sizes-panel-counts-slider-comparison) (top-hung vs bottom-rolling, stacking to one or both sides, traffic leaf), [Lumon retractable glazing](https://lumon.com/us/professionals/glazing-solutions/lumon-glazing/) (6–12 mm toughened panes, 2–3 mm gaps, folds inside, can be secured against wind), [Sunflex slide-and-turn](https://www.sunflex-aluminiumsystems.com/products/slide-and-turn-systems) (SF25: 8–12 mm tempered glass; linear sliders leave part of the opening occupied), [Solarlux SL 25](https://solarlux.com/en/systems/balcony-glazing-sl-25.html), [SGQ 2026 aluminium window price guide](https://smartglassquality.com/2026/04/07/aluminium-window-guide/) and [installation labour](https://smartglassquality.com/2026/04/16/aluminum-door-window-price/) (Thai).
 
+### A3. Plan C: fixed screen frame with six pop-out pet-mesh panels
+
+**Being built (Will, 2026‑11‑08).** A fixed aluminium frame, painted black like the unit's other replacement windows, fills the 268 × 111 cm opening. It is divided into six bays, each holding a removable screen panel. With all six panels in, the screens keep out mosquitoes and pigeons. With them out, the opening holds only the frame. Will has asked the shop for **pet-resistant mesh**, mainly against pigeons and also against cats. The **frame is 4.5 cm deep**, so it sits on the 10 cm pony-wall cap with 5.5 cm to spare.
+
+**Arithmetic.** With an outer frame face *F* and five mullions of face *M*, each bay is (268 − 2*F* − 5*M*) / 6 wide and 111 − 2*F* tall. The shop has not given its profile faces yet, so here are two common sizes:
+
+| Profile faces | Each bay, clear | Aluminium in view with every panel out |
+|---|---|---|
+| 2.5 cm | ≈ 41.8 × 106 cm | ≈ 11 % of the opening |
+| 3.8 cm | ≈ 40.2 × 103 cm | ≈ 16 % of the opening |
+
+Each panel is a little larger than its bay because its edges sit in the frame's rebate. The shop sets that size.
+
+**Requirements on the spec sheet** ([HTML](../rfq/2026-11-08-639-balcony-screen-frame-spec.html), [PDF](../rfq/2026-11-08-639-balcony-screen-frame-spec.pdf)), each with a confirm box for the shop:
+
+| Requirement | Why |
+|---|---|
+| Panels fit and come out **from inside only**, seated against a stop on the frame's outer edge | At 16 m, a panel must never be able to leave outward, whether pushed by a cat, a pigeon or a gust, and nobody should reach outside to handle one |
+| A positive, lockable **latch** on every panel, not friction or springs alone | Wind suction on a west face pulls panels inward, and only the latch holds against that |
+| **Pet mesh, black** | Pigeons and cats. Black mesh behind a black frame is the easiest to see through |
+| Brush or rubber **seals**, no gap over 1 mm | Mosquitoes get through any larger gap |
+| Six **identical**, interchangeable panels | Any panel fits any bay |
+| **Expansion clearance** | A black frame in afternoon sun gets very hot and expands, so a tight fit jams. The seals should close the gap instead |
+| **Bottom rail sloped outward with weep holes**, frame sealed to the concrete | Rain that gets through the mesh drains out |
+| **Powder coat**, stainless fasteners | The panels are handled often, and wet paint chips at the edges |
+| Slim **mullions** | Five posts stand in the view |
+| Option: **clear polycarbonate inserts** the same size as the panels, priced separately | For the wet season, if wanted |
+
+**Rain.** Mesh cuts down rain spray but does not stop wind-driven rain, so plan C does not meet plan A's 99 % rule. The polycarbonate inserts are the way to reach it within this frame.
+
 ### B. Level model (`blender_create_condo.py`)
 
 The source `.blend` is read-only, so all of this is a new section (**§ 7d**) in `wflevels/condo_639_640/blender_create_condo.py`, following the pattern of § 7c (telescoping glass doors) and gated by `CONDO_SHADE=0` to switch it off.
@@ -146,6 +178,10 @@ Rejected: a two-state visibility swap (open/closed with no travel) — cheap but
 [![Section through the opening](2026-09-30-condo-balcony-shade/section.png)](2026-09-30-condo-balcony-shade/section.html)
 
 **Section** — the 7 cm floor step, pony wall, cassette under the soffit, beam, and a sun-altitude slider to judge what the west-facing strip sees. [Open the interactive mockup](2026-09-30-condo-balcony-shade/section.html).
+
+[![Plan C elevation](2026-09-30-condo-balcony-shade/elevation-plan-c.png)](2026-09-30-condo-balcony-shade/elevation-plan-c.html)
+
+**Plan C elevation**: the black frame with six pet-mesh bays, drawn with 2.5 cm profile faces. Buttons switch between all six panels in, panel 3 out, and all out. [Open the interactive mockup](2026-09-30-condo-balcony-shade/elevation-plan-c.html).
 
 [![Plan B elevation and plan](2026-09-30-condo-balcony-shade/elevation-plan-b.png)](2026-09-30-condo-balcony-shade/elevation-plan-b.html)
 
@@ -182,6 +218,8 @@ Answers of 2026‑09‑30 are folded in; what is left has a default that the bui
 12. **Does the condo allow glazing the balcony opening?** A fixed glazed frame is a bigger façade change than a shade under the ledge, and some Bangkok condos forbid enclosing balconies. The LINE draft in the RFQ packet covers the zip screen only; a plan-B version is needed before any order.
 13. **Does a bi-fold sill fit the 10 cm cap?** Sill depths vary by profile. If it does not fit, a sub-sill or a cap extension is needed, and that changes the water path. Check at the shop's site measurement.
 14. **Access leaf and layout.** 4 × 67 cm one-way with no access leaf, or a layout that gives one (3 × 89 cm, or 3 + 1)? It depends on what the shop's system supports and on how hot the closed box gets.
+15. **Does plan C replace plans A and B, or sit alongside a zip screen?** Plan C is being built (2026‑11‑08). A zip screen would meet the 99 % rain rule, which plan C alone does not. Whether one can still be added depends on where the 4.5 cm frame sits on the 10 cm cap: the zip guides need about 5 cm of bare reveal face outboard of the frame.
+16. **Plan C profile faces and panel size.** These are blank on the spec sheet for the shop to fill in. The arithmetic in A3 uses 2.5 cm and 3.8 cm until the shop gives the real figures.
 
 ## Out of scope
 
