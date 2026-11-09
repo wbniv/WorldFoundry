@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/52e3b25d) | Reef: the cleaning ends when the boxfish leaves reach (shrimp fix) |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/13b3d659) | Reef W4: cast1 acceptance record; Dream host VRAM width fix |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/9818ff39) | Reef W4 step 6: desktop reaction test passes in both styles |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/8e938f3a) | Reef W5: ReefSettings Layout defaults to Random (Will approved) |
@@ -26,6 +27,11 @@
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b756367f) | Plan: finish the reef tanks (worms, skins, placement, acceptance) |
 
 <!--history-meta v1
+52e3b25d	author	Will Norris
+52e3b25d	added	1
+52e3b25d	deleted	1
+52e3b25d	files	1
+52e3b25d	body	Before: once cleaning timer 743 was set nothing cleared it, so a fish\nleaving mid-clean was chased by both shrimp for the rest of the 5 s\n(3.45 s, 3.72 units from the cave mouth in the engine). Now cell 742\nholds "fish within the station's reach" and the clean ends on the\nfirst tick it is 0; the 2 s still-start, the 5 s clean while the fish\nstays, and the station are unchanged.\n\nAfter, in the engine, both styles (and Random Seed 7): the clean ends\n0.00 s after the fish is seen gone and ShrimpOne stays within 0.14 of\nthe cave mouth. check-thai-reef.py asserts that window (ends <= 0.1 s,\nreach <= 1.2, home <= 0.1). New VM regression test\ntest_reef_cleaning_ends_when_the_fish_leaves_reach; the old cleaning\ntest had asserted the bug (cleaning continued after the fish swam out\nof reach) and now asserts the clean ends.\n\nRebuilt both levels, the menu bundle (other tanks at HEAD) and the reef\nDream variants. texcov PASS; reef suites 180 passed, 4 known failures.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 13b3d659	author	Will Norris
 13b3d659	added	5
 13b3d659	deleted	5

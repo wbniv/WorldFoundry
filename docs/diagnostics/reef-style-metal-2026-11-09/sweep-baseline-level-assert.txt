@@ -1,0 +1,6 @@
+LMalloc of 182436 not 8-byte aligned, rounding up
++- ASSERTION MESSAGE ---------------------------------------------------------+
+AssertMsg:Probably have a polygon which is too small, length = 5.071111445e-05
++- ASSERTION FAILED ----------------------------------------------------------+
+|length.Abs() > Scalar(0,4)                                                   |
+|in file "/Users/builder/clone/.style-trees/baseline/wfsource/source/math/vector3.hpi" on line 243                    |

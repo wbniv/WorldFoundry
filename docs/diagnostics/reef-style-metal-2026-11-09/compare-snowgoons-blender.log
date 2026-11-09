@@ -1,0 +1,6 @@
+640x480: exact=307198/307200 (99.999349%)
+max channel delta histogram: {0: 307198, 1: 2}
+coverage IoU=100849/100849 (100.000000%)
+pixels exceeding tolerance 0: 2
+difference bbox (inclusive): 2,394–309,398
+FAIL
