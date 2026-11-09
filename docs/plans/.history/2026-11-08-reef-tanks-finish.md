@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/8e938f3a) | Reef W5: ReefSettings Layout defaults to Random (Will approved) |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/380337c3) | Reef D10: the humbug pair becomes Dascyllus reticulatus in both styles |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/b090a8fd) | Reef W5c: Forth layout finished; review renders, cast1 Random-5 gate, docs |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/bfe00512) | Reef: swap humbug for Dascyllus reticulatus in research (D10); park and commit poster sources |
@@ -23,6 +24,11 @@
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b756367f) | Plan: finish the reef tanks (worms, skins, placement, acceptance) |
 
 <!--history-meta v1
+8e938f3a	author	Will Norris
+8e938f3a	added	5
+8e938f3a	deleted	5
+8e938f3a	files	1
+8e938f3a	body	Will, 2026-11-09: "Approve, default Random". Seed 0, Rocks 3, Colonies\nNormal stay, so every entry lays out a new reef; Fixed stays selectable\nand still reproduces the reviewed reef. Without a catalog (species-VM\ntests) the poll's fallback stays Fixed. Both reef standalones and the\nmenu bundle rebuilt. Reef suites were still running at commit time\n(requested commit); results follow from the agent.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 380337c3	author	Will Norris
 380337c3	added	3
 380337c3	deleted	3

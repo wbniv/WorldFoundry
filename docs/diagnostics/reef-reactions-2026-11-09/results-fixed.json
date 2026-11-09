@@ -1,0 +1,582 @@
+{
+  "realistic": [
+    {
+      "label": "worm 0",
+      "close": 0.15,
+      "reopen": 3.05,
+      "expected": 3.0,
+      "window": [
+        3,
+        8
+      ],
+      "open": 4.5,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 1",
+      "close": 0.15,
+      "reopen": 5.5,
+      "expected": 5.449999999999999,
+      "window": [
+        3,
+        8
+      ],
+      "open": 6.949999999999999,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 2",
+      "close": 0.15,
+      "reopen": 7.949999999999999,
+      "expected": 7.8999999999999995,
+      "window": [
+        3,
+        8
+      ],
+      "open": 9.3999,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 3",
+      "close": 0.15,
+      "reopen": 5.15,
+      "expected": 5.1,
+      "window": [
+        3,
+        8
+      ],
+      "open": 6.6,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 4",
+      "close": 0.15,
+      "reopen": 7.6,
+      "expected": 7.55,
+      "window": [
+        3,
+        8
+      ],
+      "open": 9.0499,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 5",
+      "close": 0.15,
+      "reopen": 4.8,
+      "expected": 4.75,
+      "window": [
+        3,
+        8
+      ],
+      "open": 6.25,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 6",
+      "close": 0.15,
+      "reopen": 7.25,
+      "expected": 7.199999999999999,
+      "window": [
+        3,
+        8
+      ],
+      "open": 8.6999,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 7",
+      "close": 0.15,
+      "reopen": 4.45,
+      "expected": 4.4,
+      "window": [
+        3,
+        8
+      ],
+      "open": 5.9,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 8",
+      "close": 0.15,
+      "reopen": 6.9,
+      "expected": 6.85,
+      "window": [
+        3,
+        8
+      ],
+      "open": 8.35,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 9",
+      "close": 0.15,
+      "reopen": 4.1,
+      "expected": 4.05,
+      "window": [
+        3,
+        8
+      ],
+      "open": 5.55,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 10",
+      "close": 0.15,
+      "reopen": 6.550000000000001,
+      "expected": 6.5,
+      "window": [
+        3,
+        8
+      ],
+      "open": 8.0,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 11",
+      "close": 0.15,
+      "reopen": 3.75,
+      "expected": 3.7,
+      "window": [
+        3,
+        8
+      ],
+      "open": 5.2,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 12",
+      "close": 0.15,
+      "reopen": 6.2,
+      "expected": 6.15,
+      "window": [
+        3,
+        8
+      ],
+      "open": 7.65,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 13",
+      "close": 0.15,
+      "reopen": 3.4000000000000004,
+      "expected": 3.35,
+      "window": [
+        3,
+        8
+      ],
+      "open": 4.85,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 14",
+      "close": 0.15,
+      "reopen": 5.85,
+      "expected": 5.8,
+      "window": [
+        3,
+        8
+      ],
+      "open": 7.300000000000001,
+      "verdict": "PASS"
+    },
+    {
+      "label": "duster 0",
+      "close": 0.2,
+      "reopen": 3.0499,
+      "expected": 3,
+      "window": [
+        3,
+        8
+      ],
+      "open": 5.4499,
+      "verdict": "PASS"
+    },
+    {
+      "label": "duster 1",
+      "close": 0.2,
+      "reopen": 4.0499,
+      "expected": 4,
+      "window": [
+        3,
+        8
+      ],
+      "open": 6.4499,
+      "verdict": "PASS"
+    },
+    {
+      "label": "duster 2",
+      "close": 0.2,
+      "reopen": 5.0499,
+      "expected": 5,
+      "window": [
+        3,
+        8
+      ],
+      "open": 7.4498999999999995,
+      "verdict": "PASS"
+    },
+    {
+      "label": "duster 3",
+      "close": 0.2,
+      "reopen": 6.0499,
+      "expected": 6,
+      "window": [
+        3,
+        8
+      ],
+      "open": 8.4498,
+      "verdict": "PASS"
+    },
+    {
+      "label": "giant clam",
+      "close": 0.35,
+      "reopen": 4.0499,
+      "expected": 4,
+      "window": [
+        3,
+        8
+      ],
+      "open": 4.9999,
+      "verdict": "PASS"
+    },
+    {
+      "label": "guard crab",
+      "close": 0.05,
+      "reopen": 2.0500999999999996,
+      "expected": 2,
+      "window": [
+        1.9,
+        2.15
+      ],
+      "open": 2.0500999999999996,
+      "verdict": "PASS"
+    },
+    {
+      "label": "dascyllus pair",
+      "close": 0.5,
+      "reopen": 2.5501000000000005,
+      "expected": 2.5,
+      "window": [
+        2.4,
+        2.65
+      ],
+      "open": 3.5002000000000004,
+      "verdict": "PASS"
+    },
+    {
+      "label": "cleaner shrimp",
+      "close": 2.0501,
+      "reopen": 4.9503,
+      "expected": 2.0,
+      "window": [
+        2.0,
+        2.0
+      ],
+      "open": null,
+      "verdict": "PASS",
+      "shrimp_x_after": -0.662132,
+      "note": "close = cleaning start after arriving still (window 2 s); reopen = cleaning length (window 4-6 s)"
+    },
+    {
+      "label": "shrimp, fish leaves",
+      "close": null,
+      "reopen": 3.44915771484375,
+      "expected": null,
+      "window": null,
+      "open": null,
+      "verdict": "FINDING: shrimp keep cleaning 3.45 s after the fish leaves and follow it 3.72 units from the cave mouth",
+      "reach": 3.7249999999999996
+    }
+  ],
+  "anime": [
+    {
+      "label": "worm 0",
+      "close": 0.15,
+      "reopen": 3.0500000000000003,
+      "expected": 3.0,
+      "window": [
+        3,
+        8
+      ],
+      "open": 4.5,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 1",
+      "close": 0.15,
+      "reopen": 5.5,
+      "expected": 5.449999999999999,
+      "window": [
+        3,
+        8
+      ],
+      "open": 6.950000000000001,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 2",
+      "close": 0.15,
+      "reopen": 7.950000000000001,
+      "expected": 7.8999999999999995,
+      "window": [
+        3,
+        8
+      ],
+      "open": 9.3999,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 3",
+      "close": 0.15,
+      "reopen": 5.15,
+      "expected": 5.1,
+      "window": [
+        3,
+        8
+      ],
+      "open": 6.6,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 4",
+      "close": 0.15,
+      "reopen": 7.6,
+      "expected": 7.55,
+      "window": [
+        3,
+        8
+      ],
+      "open": 9.049900000000001,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 5",
+      "close": 0.15,
+      "reopen": 4.800000000000001,
+      "expected": 4.75,
+      "window": [
+        3,
+        8
+      ],
+      "open": 6.25,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 6",
+      "close": 0.15,
+      "reopen": 7.25,
+      "expected": 7.199999999999999,
+      "window": [
+        3,
+        8
+      ],
+      "open": 8.6999,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 7",
+      "close": 0.15,
+      "reopen": 4.449999999999999,
+      "expected": 4.4,
+      "window": [
+        3,
+        8
+      ],
+      "open": 5.9,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 8",
+      "close": 0.15,
+      "reopen": 6.9,
+      "expected": 6.85,
+      "window": [
+        3,
+        8
+      ],
+      "open": 8.35,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 9",
+      "close": 0.15,
+      "reopen": 4.1,
+      "expected": 4.05,
+      "window": [
+        3,
+        8
+      ],
+      "open": 5.550000000000001,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 10",
+      "close": 0.15,
+      "reopen": 6.550000000000001,
+      "expected": 6.5,
+      "window": [
+        3,
+        8
+      ],
+      "open": 8.0,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 11",
+      "close": 0.15,
+      "reopen": 3.7499999999999996,
+      "expected": 3.7,
+      "window": [
+        3,
+        8
+      ],
+      "open": 5.199999999999999,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 12",
+      "close": 0.15,
+      "reopen": 6.199999999999999,
+      "expected": 6.15,
+      "window": [
+        3,
+        8
+      ],
+      "open": 7.65,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 13",
+      "close": 0.15,
+      "reopen": 3.4,
+      "expected": 3.35,
+      "window": [
+        3,
+        8
+      ],
+      "open": 4.85,
+      "verdict": "PASS"
+    },
+    {
+      "label": "worm 14",
+      "close": 0.15,
+      "reopen": 5.85,
+      "expected": 5.8,
+      "window": [
+        3,
+        8
+      ],
+      "open": 7.300000000000001,
+      "verdict": "PASS"
+    },
+    {
+      "label": "duster 0",
+      "close": 0.2,
+      "reopen": 3.0499,
+      "expected": 3,
+      "window": [
+        3,
+        8
+      ],
+      "open": 5.4499,
+      "verdict": "PASS"
+    },
+    {
+      "label": "duster 1",
+      "close": 0.2,
+      "reopen": 4.0499,
+      "expected": 4,
+      "window": [
+        3,
+        8
+      ],
+      "open": 6.4499,
+      "verdict": "PASS"
+    },
+    {
+      "label": "duster 2",
+      "close": 0.2,
+      "reopen": 5.0499,
+      "expected": 5,
+      "window": [
+        3,
+        8
+      ],
+      "open": 7.4498999999999995,
+      "verdict": "PASS"
+    },
+    {
+      "label": "duster 3",
+      "close": 0.2,
+      "reopen": 6.0499,
+      "expected": 6,
+      "window": [
+        3,
+        8
+      ],
+      "open": 8.4498,
+      "verdict": "PASS"
+    },
+    {
+      "label": "giant clam",
+      "close": 0.35,
+      "reopen": 4.0499,
+      "expected": 4,
+      "window": [
+        3,
+        8
+      ],
+      "open": 4.9999,
+      "verdict": "PASS"
+    },
+    {
+      "label": "guard crab",
+      "close": 0.05,
+      "reopen": 2.0500999999999996,
+      "expected": 2,
+      "window": [
+        1.9,
+        2.15
+      ],
+      "open": 2.0500999999999996,
+      "verdict": "PASS"
+    },
+    {
+      "label": "dascyllus pair",
+      "close": 0.5,
+      "reopen": 2.5501000000000005,
+      "expected": 2.5,
+      "window": [
+        2.4,
+        2.65
+      ],
+      "open": 3.5002000000000004,
+      "verdict": "PASS"
+    },
+    {
+      "label": "cleaner shrimp",
+      "close": 2.0501,
+      "reopen": 4.9503,
+      "expected": 2.0,
+      "window": [
+        2.0,
+        2.0
+      ],
+      "open": null,
+      "verdict": "PASS",
+      "shrimp_x_after": -0.663877,
+      "note": "close = cleaning start after arriving still (window 2 s); reopen = cleaning length (window 4-6 s)"
+    },
+    {
+      "label": "shrimp, fish leaves",
+      "close": null,
+      "reopen": 3.44915771484375,
+      "expected": null,
+      "window": null,
+      "open": null,
+      "verdict": "FINDING: shrimp keep cleaning 3.45 s after the fish leaves and follow it 3.72 units from the cave mouth",
+      "reach": 3.7249999999999996
+    }
+  ]
+}

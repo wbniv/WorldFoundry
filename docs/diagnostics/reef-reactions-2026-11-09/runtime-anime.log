@@ -1,0 +1,3774 @@
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+audio: miniaudio v0.11.25 ready
+UI_FONT 1024x2048 atlas, 2770432 bytes
+jolt: RegisterDefaultAllocator
+jolt: Factory
+jolt: RegisterTypes
+jolt: RunSelftest
+jolt: selftest ok (sphere fell to z=5.098)
+jolt: backend init
+jolt: init complete
+ROOM-RENDER scope=all-active source=default
+Level::Level: leveldata= 0x7dffcae2b838, object count  = 57
+PixelMap::Load: this = 0x7dffc8ad6368
+PixelMap::Load: this = 0x7dffc8ad63a0
+[Actor] idx=2 class=23 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=3 class=13 commonOff=48468 NumberOfLocalMailboxes=0
+this = 0x7dffc8ad9850,setting _memory to 0x7dffc8ad9308
+[Actor] idx=4 class=20 commonOff=49180 NumberOfLocalMailboxes=0
+[Actor] idx=6 class=11 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=7 class=16 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=8 class=3 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=9 class=22 commonOff=49920 NumberOfLocalMailboxes=6
+[Actor] idx=10 class=7 commonOff=50228 NumberOfLocalMailboxes=0
+[Actor] idx=11 class=7 commonOff=50428 NumberOfLocalMailboxes=0
+[Actor] idx=12 class=7 commonOff=50628 NumberOfLocalMailboxes=0
+[Actor] idx=13 class=7 commonOff=50828 NumberOfLocalMailboxes=0
+[Actor] idx=14 class=7 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=15 class=7 commonOff=51028 NumberOfLocalMailboxes=0
+[Actor] idx=16 class=7 commonOff=51072 NumberOfLocalMailboxes=0
+[Actor] idx=17 class=7 commonOff=51116 NumberOfLocalMailboxes=0
+[Actor] idx=18 class=7 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=19 class=7 commonOff=51160 NumberOfLocalMailboxes=0
+[Actor] idx=20 class=7 commonOff=51204 NumberOfLocalMailboxes=0
+[Actor] idx=21 class=7 commonOff=51248 NumberOfLocalMailboxes=0
+[Actor] idx=22 class=7 commonOff=51448 NumberOfLocalMailboxes=0
+[Actor] idx=23 class=7 commonOff=51648 NumberOfLocalMailboxes=0
+[Actor] idx=24 class=5 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=25 class=5 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=26 class=5 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=27 class=5 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=28 class=5 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=29 class=5 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=30 class=7 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=31 class=7 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=32 class=7 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=33 class=7 commonOff=51956 NumberOfLocalMailboxes=0
+[Actor] idx=34 class=7 commonOff=52000 NumberOfLocalMailboxes=0
+[Actor] idx=35 class=7 commonOff=52044 NumberOfLocalMailboxes=0
+[Actor] idx=36 class=7 commonOff=52088 NumberOfLocalMailboxes=0
+[Actor] idx=37 class=7 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=38 class=7 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=39 class=7 commonOff=52132 NumberOfLocalMailboxes=0
+[Actor] idx=40 class=7 commonOff=52176 NumberOfLocalMailboxes=0
+[Actor] idx=41 class=7 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=42 class=7 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=43 class=7 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=44 class=7 commonOff=52220 NumberOfLocalMailboxes=0
+[Actor] idx=45 class=7 commonOff=52264 NumberOfLocalMailboxes=0
+[Actor] idx=46 class=7 commonOff=52464 NumberOfLocalMailboxes=0
+[Actor] idx=47 class=7 commonOff=52664 NumberOfLocalMailboxes=0
+[Actor] idx=48 class=7 commonOff=52864 NumberOfLocalMailboxes=0
+[Actor] idx=49 class=7 commonOff=52864 NumberOfLocalMailboxes=0
+[Actor] idx=50 class=7 commonOff=52864 NumberOfLocalMailboxes=0
+[Actor] idx=51 class=7 commonOff=53376 NumberOfLocalMailboxes=0
+[Actor] idx=52 class=7 commonOff=53576 NumberOfLocalMailboxes=0
+[Actor] idx=53 class=7 commonOff=53776 NumberOfLocalMailboxes=0
+[Actor] idx=54 class=23 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=55 class=3 commonOff=48468 NumberOfLocalMailboxes=0
+[Actor] idx=56 class=16 commonOff=48468 NumberOfLocalMailboxes=0
+PixelMap::Load: this = 0x7dffc8ad63d8
+PixelMap::Load: this = 0x7dffc8ad6410
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+fennel: loaded (143294 bytes embedded)
+quickjs: runtime initialised
+quickjs smoke: 1+2 -> 3 (expect 3)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+audio: MusicPlayer — soundfont not found: florestan-subset.sf2
+audio: sfx[0] not found: wflevels/qbert_practice/sfx/qbert_hop.wav
+audio: sfx[1] not found: wflevels/qbert_practice/sfx/qbert_land.wav
+audio: sfx[2] not found: wflevels/qbert_practice/sfx/qbert_fall.wav
+audio: sfx[3] not found: wflevels/qbert_practice/sfx/qbert_swear.wav
+audio: sfx[4] not found: wflevels/qbert_practice/sfx/qbert_round_clear.wav
+audio: sfx[5] not found: wflevels/qbert_practice/sfx/qbert_kill.wav
+audio: sfx[6] not found: wflevels/qbert_practice/sfx/qbert_disc.wav
+[debug] listening on :18001
+rest_api: listening on http://127.0.0.1:19001
+delta too large: 0.6187591553
+timeofday:1794191387:557871
+lasttimeofday: 1794191386:939102
+deltatime:0:618769
+delta: 0.6187591553
+VIEW authored=0.000 screen=1.778 hfov=91.5 vfov=60.0 maximum=0.000 surface=1280x720 viewport=0,0,1280x720 pillarbox=0 source=default
+[debug] client connected fd=9 from 127.0.0.1
+delta too large: 0.8011016846
+timeofday:1794191388:358973
+lasttimeofday: 1794191387:557871
+deltatime:0:801102
+delta: 0.8011016846
+delta too large: 0.2464447021
+timeofday:1794191388:605426
+lasttimeofday: 1794191388:358973
+deltatime:0:246453
+delta: 0.2464447021
+delta too large: 0.2254486084
+timeofday:1794191388:830881
+lasttimeofday: 1794191388:605426
+deltatime:0:225455
+delta: 0.2254486084
+delta too large: 0.3021392822
+timeofday:1794191389:133033
+lasttimeofday: 1794191388:830881
+deltatime:0:302152
+delta: 0.3021392822
+delta too large: 0.2721862793
+timeofday:1794191392:478496
+lasttimeofday: 1794191392:206297
+deltatime:0:272199
+delta: 0.2721862793
+delta too large: 0.2982940674
+timeofday:1794191393:129454
+lasttimeofday: 1794191392:831147
+deltatime:0:298307
+delta: 0.2982940674
+delta too large: 0.299697876
+timeofday:1794191393:429158
+lasttimeofday: 1794191393:129454
+deltatime:0:299704
+delta: 0.299697876
+delta too large: 0.2297973633
+timeofday:1794191393:658964
+lasttimeofday: 1794191393:429158
+deltatime:0:229806
+delta: 0.2297973633
+delta too large: 0.2227630615
+timeofday:1794191394:260180
+lasttimeofday: 1794191394:37416
+deltatime:0:222764
+delta: 0.2227630615
+delta too large: 0.2059631348
+timeofday:1794191395:92800
+lasttimeofday: 1794191394:886825
+deltatime:0:205975
+delta: 0.2059631348
+delta too large: 0.2442779541
+timeofday:1794191395:337087
+lasttimeofday: 1794191395:92800
+deltatime:0:244287
+delta: 0.2442779541
+delta too large: 0.2401428223
+timeofday:1794191395:726333
+lasttimeofday: 1794191395:486176
+deltatime:0:240157
+delta: 0.2401428223
+delta too large: 0.223449707
+timeofday:1794191395:949793
+lasttimeofday: 1794191395:726333
+deltatime:0:223460
+delta: 0.223449707
+delta too large: 0.2225189209
+timeofday:1794191397:949173
+lasttimeofday: 1794191397:726653
+deltatime:0:222520
+delta: 0.2225189209
+delta too large: 0.2621002197
+timeofday:1794191398:853299
+lasttimeofday: 1794191398:591184
+deltatime:0:262115
+delta: 0.2621002197
+delta too large: 0.3217468262
+timeofday:1794191413:901181
+lasttimeofday: 1794191413:579424
+deltatime:0:321757
+delta: 0.3217468262
+delta too large: 0.3049926758
+timeofday:1794191414:330081
+lasttimeofday: 1794191414:25076
+deltatime:0:305005
+delta: 0.3049926758
+delta too large: 0.2966918945
+timeofday:1794191414:788997
+lasttimeofday: 1794191414:492290
+deltatime:0:296707
+delta: 0.2966918945
+delta too large: 0.2784118652
+timeofday:1794191415:222379
+lasttimeofday: 1794191414:943961
+deltatime:0:278418
+delta: 0.2784118652
+delta too large: 0.2746276855
+timeofday:1794191415:679832
+lasttimeofday: 1794191415:405198
+deltatime:0:274634
+delta: 0.2746276855
+delta too large: 0.3324432373
+timeofday:1794191416:198938
+lasttimeofday: 1794191415:866487
+deltatime:0:332451
+delta: 0.3324432373
+delta too large: 0.2883605957
+timeofday:1794191416:682423
+lasttimeofday: 1794191416:394060
+deltatime:0:288363
+delta: 0.2883605957
+delta too large: 0.3321533203
+timeofday:1794191417:189671
+lasttimeofday: 1794191416:857511
+deltatime:0:332160
+delta: 0.3321533203
+delta too large: 0.2259216309
+timeofday:1794191417:618432
+lasttimeofday: 1794191417:392496
+deltatime:0:225936
+delta: 0.2259216309
+delta too large: 0.283706665
+timeofday:1794191418:44525
+lasttimeofday: 1794191417:760807
+deltatime:0:283718
+delta: 0.283706665
+delta too large: 0.3738708496
+timeofday:1794191418:635158
+lasttimeofday: 1794191418:261278
+deltatime:0:373880
+delta: 0.3738708496
+delta too large: 0.4512023926
+timeofday:1794191419:382097
+lasttimeofday: 1794191418:930893
+deltatime:0:451204
+delta: 0.4512023926
+delta too large: 0.3523101807
+timeofday:1794191420:86857
+lasttimeofday: 1794191419:734535
+deltatime:0:352322
+delta: 0.3523101807
+delta too large: 0.4214019775
+timeofday:1794191420:738649
+lasttimeofday: 1794191420:317232
+deltatime:0:421417
+delta: 0.4214019775
+delta too large: 0.2090454102
+timeofday:1794191420:947696
+lasttimeofday: 1794191420:738649
+deltatime:0:209047
+delta: 0.2090454102
+delta too large: 0.2053375244
+timeofday:1794191421:153037
+lasttimeofday: 1794191420:947696
+deltatime:0:205341
+delta: 0.2053375244
+delta too large: 0.5100097656
+timeofday:1794191421:663054
+lasttimeofday: 1794191421:153037
+deltatime:0:510017
+delta: 0.5100097656
+delta too large: 0.2950897217
+timeofday:1794191422:257970
+lasttimeofday: 1794191421:962876
+deltatime:0:295094
+delta: 0.2950897217
+delta too large: 0.2272491455
+timeofday:1794191422:719624
+lasttimeofday: 1794191422:492360
+deltatime:0:227264
+delta: 0.2272491455
+delta too large: 0.2513427734
+timeofday:1794191423:166518
+lasttimeofday: 1794191422:915162
+deltatime:0:251356
+delta: 0.2513427734
+delta too large: 0.3813476562
+timeofday:1794191423:708277
+lasttimeofday: 1794191423:326923
+deltatime:0:381354
+delta: 0.3813476562
+delta too large: 0.3349914551
+timeofday:1794191424:357306
+lasttimeofday: 1794191424:22312
+deltatime:0:334994
+delta: 0.3349914551
+delta too large: 0.3365325928
+timeofday:1794191424:901087
+lasttimeofday: 1794191424:564549
+deltatime:0:336538
+delta: 0.3365325928
+delta too large: 0.2577056885
+timeofday:1794191425:322429
+lasttimeofday: 1794191425:64715
+deltatime:0:257714
+delta: 0.2577056885
+delta too large: 0.2511901855
+timeofday:1794191425:817212
+lasttimeofday: 1794191425:566013
+deltatime:0:251199
+delta: 0.2511901855
+delta too large: 0.3455505371
+timeofday:1794191426:319649
+lasttimeofday: 1794191425:974088
+deltatime:0:345561
+delta: 0.3455505371
+delta too large: 0.2574462891
+timeofday:1794191426:747889
+lasttimeofday: 1794191426:490431
+deltatime:0:257458
+delta: 0.2574462891
+delta too large: 0.3290405273
+timeofday:1794191427:320515
+lasttimeofday: 1794191426:991469
+deltatime:0:329046
+delta: 0.3290405273
+delta too large: 0.2341766357
+timeofday:1794191427:865682
+lasttimeofday: 1794191427:631499
+deltatime:0:234183
+delta: 0.2341766357
+delta too large: 0.2467803955
+timeofday:1794191428:378780
+lasttimeofday: 1794191428:131987
+deltatime:0:246793
+delta: 0.2467803955
+delta too large: 0.271484375
+timeofday:1794191428:799859
+lasttimeofday: 1794191428:528364
+deltatime:0:271495
+delta: 0.271484375
+delta too large: 0.2790374756
+timeofday:1794191429:354031
+lasttimeofday: 1794191429:74984
+deltatime:0:279047
+delta: 0.2790374756
+delta too large: 0.2887115479
+timeofday:1794191429:776262
+lasttimeofday: 1794191429:487547
+deltatime:0:288715
+delta: 0.2887115479
+delta too large: 0.326461792
+timeofday:1794191430:323648
+lasttimeofday: 1794191429:997174
+deltatime:0:326474
+delta: 0.326461792
+delta too large: 0.3783569336
+timeofday:1794191430:917214
+lasttimeofday: 1794191430:538850
+deltatime:0:378364
+delta: 0.3783569336
+delta too large: 0.4486999512
+timeofday:1794191431:634023
+lasttimeofday: 1794191431:185316
+deltatime:0:448707
+delta: 0.4486999512
+delta too large: 0.3385009766
+timeofday:1794191432:263709
+lasttimeofday: 1794191431:925196
+deltatime:0:338513
+delta: 0.3385009766
+delta too large: 0.2599334717
+timeofday:1794191432:818080
+lasttimeofday: 1794191432:558144
+deltatime:0:259936
+delta: 0.2599334717
+delta too large: 0.3718719482
+timeofday:1794191433:376304
+lasttimeofday: 1794191433:4427
+deltatime:0:371877
+delta: 0.3718719482
+delta too large: 0.3242492676
+timeofday:1794191433:955331
+lasttimeofday: 1794191433:631073
+deltatime:0:324258
+delta: 0.3242492676
+delta too large: 0.2730865479
+timeofday:1794191434:391246
+lasttimeofday: 1794191434:118149
+deltatime:0:273097
+delta: 0.2730865479
+delta too large: 0.2641448975
+timeofday:1794191434:832943
+lasttimeofday: 1794191434:568784
+deltatime:0:264159
+delta: 0.2641448975
+delta too large: 0.2947387695
+timeofday:1794191435:347362
+lasttimeofday: 1794191435:52623
+deltatime:0:294739
+delta: 0.2947387695
+delta too large: 0.3168029785
+timeofday:1794191435:829522
+lasttimeofday: 1794191435:512707
+deltatime:0:316815
+delta: 0.3168029785
+delta too large: 0.2813720703
+timeofday:1794191436:307010
+lasttimeofday: 1794191436:25623
+deltatime:0:281387
+delta: 0.2813720703
+delta too large: 0.3345184326
+timeofday:1794191436:843994
+lasttimeofday: 1794191436:509473
+deltatime:0:334521
+delta: 0.3345184326
+delta too large: 0.3255004883
+timeofday:1794191437:346682
+lasttimeofday: 1794191437:21170
+deltatime:0:325512
+delta: 0.3255004883
+delta too large: 0.3835601807
+timeofday:1794191437:966542
+lasttimeofday: 1794191437:582968
+deltatime:0:383574
+delta: 0.3835601807
+delta too large: 0.3425750732
+timeofday:1794191438:534021
+lasttimeofday: 1794191438:191434
+deltatime:0:342587
+delta: 0.3425750732
+delta too large: 0.3818206787
+timeofday:1794191439:238850
+lasttimeofday: 1794191438:857026
+deltatime:0:381824
+delta: 0.3818206787
+delta too large: 0.3391723633
+timeofday:1794191439:795392
+lasttimeofday: 1794191439:456207
+deltatime:0:339185
+delta: 0.3391723633
+delta too large: 0.2322998047
+timeofday:1794191440:218313
+lasttimeofday: 1794191439:985999
+deltatime:0:232314
+delta: 0.2322998047
+delta too large: 0.2778625488
+timeofday:1794191440:679748
+lasttimeofday: 1794191440:401884
+deltatime:0:277864
+delta: 0.2778625488
+delta too large: 0.3607940674
+timeofday:1794191441:220252
+lasttimeofday: 1794191440:859447
+deltatime:0:360805
+delta: 0.3607940674
+delta too large: 0.342880249
+timeofday:1794191441:891971
+lasttimeofday: 1794191441:549087
+deltatime:0:342884
+delta: 0.342880249
+delta too large: 0.2411193848
+timeofday:1794191442:276586
+lasttimeofday: 1794191442:35455
+deltatime:0:241131
+delta: 0.2411193848
+delta too large: 0.2825469971
+timeofday:1794191442:741629
+lasttimeofday: 1794191442:459071
+deltatime:0:282558
+delta: 0.2825469971
+delta too large: 0.2378692627
+timeofday:1794191443:123437
+lasttimeofday: 1794191442:885562
+deltatime:0:237875
+delta: 0.2378692627
+delta too large: 0.2823181152
+timeofday:1794191443:615471
+lasttimeofday: 1794191443:333150
+deltatime:0:282321
+delta: 0.2823181152
+delta too large: 0.2636260986
+timeofday:1794191444:220887
+lasttimeofday: 1794191443:957260
+deltatime:0:263627
+delta: 0.2636260986
+delta too large: 0.2377166748
+timeofday:1794191444:618529
+lasttimeofday: 1794191444:380801
+deltatime:0:237728
+delta: 0.2377166748
+delta too large: 0.2106933594
+timeofday:1794191445:56345
+lasttimeofday: 1794191444:845643
+deltatime:0:210702
+delta: 0.2106933594
+delta too large: 0.2600097656
+timeofday:1794191445:521349
+lasttimeofday: 1794191445:261332
+deltatime:0:260017
+delta: 0.2600097656
+delta too large: 0.2507171631
+timeofday:1794191445:910251
+lasttimeofday: 1794191445:659524
+deltatime:0:250727
+delta: 0.2507171631
+delta too large: 0.303237915
+timeofday:1794191446:469842
+lasttimeofday: 1794191446:166597
+deltatime:0:303245
+delta: 0.303237915
+delta too large: 0.381729126
+timeofday:1794191447:101194
+lasttimeofday: 1794191446:719456
+deltatime:0:381738
+delta: 0.381729126
+delta too large: 0.4016418457
+timeofday:1794191447:727086
+lasttimeofday: 1794191447:325430
+deltatime:0:401656
+delta: 0.4016418457
+delta too large: 0.3151855469
+timeofday:1794191448:270830
+lasttimeofday: 1794191447:955633
+deltatime:0:315197
+delta: 0.3151855469
+delta too large: 0.3475341797
+timeofday:1794191448:809239
+lasttimeofday: 1794191448:461693
+deltatime:0:347546
+delta: 0.3475341797
+delta too large: 0.3550720215
+timeofday:1794191449:452795
+lasttimeofday: 1794191449:97712
+deltatime:0:355083
+delta: 0.3550720215
+delta too large: 0.3571166992
+timeofday:1794191449:962840
+lasttimeofday: 1794191449:605721
+deltatime:0:357119
+delta: 0.3571166992
+delta too large: 0.32862854
+timeofday:1794191450:590787
+lasttimeofday: 1794191450:262157
+deltatime:0:328630
+delta: 0.32862854
+delta too large: 0.3728942871
+timeofday:1794191451:161791
+lasttimeofday: 1794191450:788891
+deltatime:0:372900
+delta: 0.3728942871
+delta too large: 0.3692016602
+timeofday:1794191451:852825
+lasttimeofday: 1794191451:483623
+deltatime:0:369202
+delta: 0.3692016602
+delta too large: 0.2253112793
+timeofday:1794191452:78143
+lasttimeofday: 1794191451:852825
+deltatime:0:225318
+delta: 0.2253112793
+delta too large: 0.4373931885
+timeofday:1794191452:676684
+lasttimeofday: 1794191452:239276
+deltatime:0:437408
+delta: 0.4373931885
+delta too large: 0.4031829834
+timeofday:1794191453:348627
+lasttimeofday: 1794191452:945444
+deltatime:0:403183
+delta: 0.4031829834
+delta too large: 0.397857666
+timeofday:1794191454:45242
+lasttimeofday: 1794191453:647375
+deltatime:0:397867
+delta: 0.397857666
+delta too large: 0.3269042969
+timeofday:1794191454:682955
+lasttimeofday: 1794191454:356039
+deltatime:0:326916
+delta: 0.3269042969
+delta too large: 0.2576141357
+timeofday:1794191455:247018
+lasttimeofday: 1794191454:989399
+deltatime:0:257619
+delta: 0.2576141357
+delta too large: 0.2266235352
+timeofday:1794191455:734075
+lasttimeofday: 1794191455:507438
+deltatime:0:226637
+delta: 0.2266235352
+delta too large: 0.2568969727
+timeofday:1794191456:113437
+lasttimeofday: 1794191455:856526
+deltatime:0:256911
+delta: 0.2568969727
+delta too large: 0.3346862793
+timeofday:1794191456:623945
+lasttimeofday: 1794191456:289258
+deltatime:0:334687
+delta: 0.3346862793
+delta too large: 0.3625030518
+timeofday:1794191457:267167
+lasttimeofday: 1794191456:904658
+deltatime:0:362509
+delta: 0.3625030518
+delta too large: 0.2377166748
+timeofday:1794191457:737391
+lasttimeofday: 1794191457:499674
+deltatime:0:237717
+delta: 0.2377166748
+delta too large: 0.2559661865
+timeofday:1794191458:207280
+lasttimeofday: 1794191457:951311
+deltatime:0:255969
+delta: 0.2559661865
+delta too large: 0.2542877197
+timeofday:1794191458:631868
+lasttimeofday: 1794191458:377573
+deltatime:0:254295
+delta: 0.2542877197
+delta too large: 0.2962799072
+timeofday:1794191459:101856
+lasttimeofday: 1794191458:805569
+deltatime:0:296287
+delta: 0.2962799072
+delta too large: 0.2827453613
+timeofday:1794191459:593217
+lasttimeofday: 1794191459:310465
+deltatime:0:282752
+delta: 0.2827453613
+delta too large: 0.2200622559
+timeofday:1794191460:59000
+lasttimeofday: 1794191459:838931
+deltatime:0:220069
+delta: 0.2200622559
+delta too large: 0.2531890869
+timeofday:1794191460:492825
+lasttimeofday: 1794191460:239622
+deltatime:0:253203
+delta: 0.2531890869
+delta too large: 0.3414001465
+timeofday:1794191461:18423
+lasttimeofday: 1794191460:677020
+deltatime:0:341403
+delta: 0.3414001465
+delta too large: 0.3524169922
+timeofday:1794191461:602278
+lasttimeofday: 1794191461:249860
+deltatime:0:352418
+delta: 0.3524169922
+delta too large: 0.2788238525
+timeofday:1794191462:35234
+lasttimeofday: 1794191461:756400
+deltatime:0:278834
+delta: 0.2788238525
+delta too large: 0.3533935547
+timeofday:1794191462:553104
+lasttimeofday: 1794191462:199697
+deltatime:0:353407
+delta: 0.3533935547
+delta too large: 0.3437957764
+timeofday:1794191463:166355
+lasttimeofday: 1794191462:822549
+deltatime:0:343806
+delta: 0.3437957764
+delta too large: 0.2962493896
+timeofday:1794191463:662282
+lasttimeofday: 1794191463:366030
+deltatime:0:296252
+delta: 0.2962493896
+delta too large: 0.3778839111
+timeofday:1794191464:301401
+lasttimeofday: 1794191463:923511
+deltatime:0:377890
+delta: 0.3778839111
+delta too large: 0.2968597412
+timeofday:1794191464:773642
+lasttimeofday: 1794191464:476772
+deltatime:0:296870
+delta: 0.2968597412
+delta too large: 0.3676605225
+timeofday:1794191465:404968
+lasttimeofday: 1794191465:37294
+deltatime:0:367674
+delta: 0.3676605225
+delta too large: 0.2780456543
+timeofday:1794191465:904526
+lasttimeofday: 1794191465:626472
+deltatime:0:278054
+delta: 0.2780456543
+delta too large: 0.2496490479
+timeofday:1794191466:278104
+lasttimeofday: 1794191466:28454
+deltatime:0:249650
+delta: 0.2496490479
+delta too large: 0.3242645264
+timeofday:1794191466:861582
+lasttimeofday: 1794191466:537315
+deltatime:0:324267
+delta: 0.3242645264
+delta too large: 0.2834320068
+timeofday:1794191467:367009
+lasttimeofday: 1794191467:83562
+deltatime:0:283447
+delta: 0.2834320068
+delta too large: 0.2528839111
+timeofday:1794191467:788815
+lasttimeofday: 1794191467:535920
+deltatime:0:252895
+delta: 0.2528839111
+delta too large: 0.3171539307
+timeofday:1794191468:325167
+lasttimeofday: 1794191468:8013
+deltatime:0:317154
+delta: 0.3171539307
+delta too large: 0.3361663818
+timeofday:1794191468:925917
+lasttimeofday: 1794191468:589741
+deltatime:0:336176
+delta: 0.3361663818
+delta too large: 0.3027191162
+timeofday:1794191469:392435
+lasttimeofday: 1794191469:89712
+deltatime:0:302723
+delta: 0.3027191162
+delta too large: 0.2795562744
+timeofday:1794191469:896983
+lasttimeofday: 1794191469:617425
+deltatime:0:279558
+delta: 0.2795562744
+delta too large: 0.3742523193
+timeofday:1794191470:550182
+lasttimeofday: 1794191470:175928
+deltatime:0:374254
+delta: 0.3742523193
+delta too large: 0.4021759033
+timeofday:1794191471:303180
+lasttimeofday: 1794191470:900997
+deltatime:0:402183
+delta: 0.4021759033
+delta too large: 0.329574585
+timeofday:1794191471:850009
+lasttimeofday: 1794191471:520426
+deltatime:0:329583
+delta: 0.329574585
+delta too large: 0.2967071533
+timeofday:1794191472:389863
+lasttimeofday: 1794191472:93147
+deltatime:0:296716
+delta: 0.2967071533
+delta too large: 0.3329772949
+timeofday:1794191472:950998
+lasttimeofday: 1794191472:618018
+deltatime:0:332980
+delta: 0.3329772949
+delta too large: 0.3209991455
+timeofday:1794191473:582172
+lasttimeofday: 1794191473:261160
+deltatime:0:321012
+delta: 0.3209991455
+delta too large: 0.3981323242
+timeofday:1794191474:213177
+lasttimeofday: 1794191473:815031
+deltatime:0:398146
+delta: 0.3981323242
+delta too large: 0.3558044434
+timeofday:1794191474:760398
+lasttimeofday: 1794191474:404586
+deltatime:0:355812
+delta: 0.3558044434
+delta too large: 0.4463500977
+timeofday:1794191475:418530
+lasttimeofday: 1794191474:972165
+deltatime:0:446365
+delta: 0.4463500977
+delta too large: 0.3671569824
+timeofday:1794191476:24999
+lasttimeofday: 1794191475:657838
+deltatime:0:367161
+delta: 0.3671569824
+delta too large: 0.3587646484
+timeofday:1794191476:576903
+lasttimeofday: 1794191476:218129
+deltatime:0:358774
+delta: 0.3587646484
+delta too large: 0.3753051758
+timeofday:1794191477:197550
+lasttimeofday: 1794191476:822244
+deltatime:0:375306
+delta: 0.3753051758
+delta too large: 0.3135986328
+timeofday:1794191477:687942
+lasttimeofday: 1794191477:374340
+deltatime:0:313602
+delta: 0.3135986328
+delta too large: 0.3186035156
+timeofday:1794191478:205900
+lasttimeofday: 1794191477:887289
+deltatime:0:318611
+delta: 0.3186035156
+delta too large: 0.304473877
+timeofday:1794191478:774575
+lasttimeofday: 1794191478:470089
+deltatime:0:304486
+delta: 0.304473877
+delta too large: 0.395690918
+timeofday:1794191479:367895
+lasttimeofday: 1794191478:972197
+deltatime:0:395698
+delta: 0.395690918
+delta too large: 0.3755645752
+timeofday:1794191479:953231
+lasttimeofday: 1794191479:577659
+deltatime:0:375572
+delta: 0.3755645752
+delta too large: 0.3163604736
+timeofday:1794191480:480954
+lasttimeofday: 1794191480:164588
+deltatime:0:316366
+delta: 0.3163604736
+delta too large: 0.4503936768
+timeofday:1794191481:219027
+lasttimeofday: 1794191480:768625
+deltatime:0:450402
+delta: 0.4503936768
+delta too large: 0.2598419189
+timeofday:1794191482:797701
+lasttimeofday: 1794191482:537845
+deltatime:0:259856
+delta: 0.2598419189
+delta too large: 0.2425689697
+timeofday:1794191483:40270
+lasttimeofday: 1794191482:797701
+deltatime:0:242569
+delta: 0.2425689697
+delta too large: 0.2485809326
+timeofday:1794191486:24637
+lasttimeofday: 1794191485:776050
+deltatime:0:248587
+delta: 0.2485809326
+delta too large: 0.2095031738
+timeofday:1794191486:234152
+lasttimeofday: 1794191486:24637
+deltatime:0:209515
+delta: 0.2095031738
+delta too large: 0.2255096436
+timeofday:1794191488:837984
+lasttimeofday: 1794191488:612465
+deltatime:0:225519
+delta: 0.2255096436
+delta too large: 0.2239532471
+timeofday:1794191489:247129
+lasttimeofday: 1794191489:23171
+deltatime:0:223958
+delta: 0.2239532471
+delta too large: 0.2105712891
+timeofday:1794191490:868156
+lasttimeofday: 1794191490:657577
+deltatime:0:210579
+delta: 0.2105712891
+delta too large: 0.2154388428
+timeofday:1794191496:45538
+lasttimeofday: 1794191495:830093
+deltatime:0:215445
+delta: 0.2154388428
+delta too large: 0.2122497559
+timeofday:1794191496:491139
+lasttimeofday: 1794191496:278877
+deltatime:0:212262
+delta: 0.2122497559
+delta too large: 0.2653045654
+timeofday:1794191503:6575
+lasttimeofday: 1794191502:741264
+deltatime:0:265311
+delta: 0.2653045654
+delta too large: 0.2015075684
+timeofday:1794191511:811089
+lasttimeofday: 1794191511:609578
+deltatime:0:201511
+delta: 0.2015075684
+delta too large: 0.2003326416
+timeofday:1794191512:11434
+lasttimeofday: 1794191511:811089
+deltatime:0:200345
+delta: 0.2003326416
+delta too large: 0.239730835
+timeofday:1794191513:690931
+lasttimeofday: 1794191513:451188
+deltatime:0:239743
+delta: 0.239730835
+delta too large: 0.218963623
+timeofday:1794191514:260165
+lasttimeofday: 1794191514:41193
+deltatime:0:218972
+delta: 0.218963623
+delta too large: 0.2201385498
+timeofday:1794191515:191619
+lasttimeofday: 1794191514:971473
+deltatime:0:220146
+delta: 0.2201385498
+delta too large: 0.2153015137
+timeofday:1794191515:937612
+lasttimeofday: 1794191515:722308
+deltatime:0:215304
+delta: 0.2153015137
+delta too large: 0.3129730225
+timeofday:1794191516:594146
+lasttimeofday: 1794191516:281170
+deltatime:0:312976
+delta: 0.3129730225
+delta too large: 0.3380889893
+timeofday:1794191517:102141
+lasttimeofday: 1794191516:764047
+deltatime:0:338094
+delta: 0.3380889893
+delta too large: 0.2004241943
+timeofday:1794191517:492422
+lasttimeofday: 1794191517:291988
+deltatime:0:200434
+delta: 0.2004241943
+delta too large: 0.2148895264
+timeofday:1794191517:707323
+lasttimeofday: 1794191517:492422
+deltatime:0:214901
+delta: 0.2148895264
+delta too large: 0.2314453125
+timeofday:1794191518:802181
+lasttimeofday: 1794191518:570724
+deltatime:0:231457
+delta: 0.2314453125
+delta too large: 0.2740783691
+timeofday:1794191519:241263
+lasttimeofday: 1794191518:967179
+deltatime:0:274084
+delta: 0.2740783691
+delta too large: 0.2044525146
+timeofday:1794191519:445721
+lasttimeofday: 1794191519:241263
+deltatime:0:204458
+delta: 0.2044525146
+delta too large: 0.2236022949
+timeofday:1794191519:669329
+lasttimeofday: 1794191519:445721
+deltatime:0:223608
+delta: 0.2236022949
+delta too large: 0.2240142822
+timeofday:1794191521:335204
+lasttimeofday: 1794191521:111181
+deltatime:0:224023
+delta: 0.2240142822
+delta too large: 0.2108459473
+timeofday:1794191524:747906
+lasttimeofday: 1794191524:537058
+deltatime:0:210848
+delta: 0.2108459473
+delta too large: 0.2312469482
+timeofday:1794191524:979165
+lasttimeofday: 1794191524:747906
+deltatime:0:231259
+delta: 0.2312469482
+delta too large: 0.204574585
+timeofday:1794191525:183745
+lasttimeofday: 1794191524:979165
+deltatime:0:204580
+delta: 0.204574585
+delta too large: 0.2465057373
+timeofday:1794191525:430255
+lasttimeofday: 1794191525:183745
+deltatime:0:246510
+delta: 0.2465057373
+delta too large: 0.2976531982
+timeofday:1794191525:727919
+lasttimeofday: 1794191525:430255
+deltatime:0:297664
+delta: 0.2976531982
+delta too large: 0.2134857178
+timeofday:1794191525:941419
+lasttimeofday: 1794191525:727919
+deltatime:0:213500
+delta: 0.2134857178
+delta too large: 0.2808227539
+timeofday:1794191526:693030
+lasttimeofday: 1794191526:412192
+deltatime:0:280838
+delta: 0.2808227539
+delta too large: 0.2463531494
+timeofday:1794191526:939388
+lasttimeofday: 1794191526:693030
+deltatime:0:246358
+delta: 0.2463531494
+delta too large: 0.2028961182
+timeofday:1794191528:383254
+lasttimeofday: 1794191528:180356
+deltatime:0:202898
+delta: 0.2028961182
+delta too large: 0.2114868164
+timeofday:1794191530:27658
+lasttimeofday: 1794191529:816160
+deltatime:0:211498
+delta: 0.2114868164
+delta too large: 0.3712463379
+timeofday:1794191530:398914
+lasttimeofday: 1794191530:27658
+deltatime:0:371256
+delta: 0.3712463379
+delta too large: 0.3591461182
+timeofday:1794191531:9517
+lasttimeofday: 1794191530:650368
+deltatime:0:359149
+delta: 0.3591461182
+delta too large: 0.5928344727
+timeofday:1794191531:914168
+lasttimeofday: 1794191531:321322
+deltatime:0:592846
+delta: 0.5928344727
+delta too large: 0.378616333
+timeofday:1794191532:513453
+lasttimeofday: 1794191532:134834
+deltatime:0:378619
+delta: 0.378616333
+delta too large: 0.506362915
+timeofday:1794191533:371170
+lasttimeofday: 1794191532:864800
+deltatime:0:506370
+delta: 0.506362915
+delta too large: 0.6454772949
+timeofday:1794191534:349668
+lasttimeofday: 1794191533:704180
+deltatime:0:645488
+delta: 0.6454772949
+delta too large: 0.2215118408
+timeofday:1794191534:571193
+lasttimeofday: 1794191534:349668
+deltatime:0:221525
+delta: 0.2215118408
+delta too large: 0.3566741943
+timeofday:1794191534:927880
+lasttimeofday: 1794191534:571193
+deltatime:0:356687
+delta: 0.3566741943
+delta too large: 0.3806915283
+timeofday:1794191535:308575
+lasttimeofday: 1794191534:927880
+deltatime:0:380695
+delta: 0.3806915283
+delta too large: 0.2866210938
+timeofday:1794191535:796023
+lasttimeofday: 1794191535:509390
+deltatime:0:286633
+delta: 0.2866210938
+delta too large: 0.3513946533
+timeofday:1794191536:325196
+lasttimeofday: 1794191535:973800
+deltatime:0:351396
+delta: 0.3513946533
+delta too large: 0.207321167
+timeofday:1794191536:681336
+lasttimeofday: 1794191536:474012
+deltatime:0:207324
+delta: 0.207321167
+delta too large: 0.3695526123
+timeofday:1794191537:50889
+lasttimeofday: 1794191536:681336
+deltatime:0:369553
+delta: 0.3695526123
+delta too large: 0.350479126
+timeofday:1794191537:582168
+lasttimeofday: 1794191537:231684
+deltatime:0:350484
+delta: 0.350479126
+delta too large: 0.4284362793
+timeofday:1794191538:243241
+lasttimeofday: 1794191537:814797
+deltatime:0:428444
+delta: 0.4284362793
+delta too large: 0.5284118652
+timeofday:1794191539:65628
+lasttimeofday: 1794191538:537210
+deltatime:0:528418
+delta: 0.5284118652
+delta too large: 0.2125091553
+timeofday:1794191539:579876
+lasttimeofday: 1794191539:367363
+deltatime:0:212513
+delta: 0.2125091553
+delta too large: 0.2881011963
+timeofday:1794191540:124938
+lasttimeofday: 1794191539:836831
+deltatime:0:288107
+delta: 0.2881011963
+delta too large: 0.3876342773
+timeofday:1794191540:879052
+lasttimeofday: 1794191540:491407
+deltatime:0:387645
+delta: 0.3876342773
+delta too large: 0.3772888184
+timeofday:1794191541:504837
+lasttimeofday: 1794191541:127538
+deltatime:0:377299
+delta: 0.3772888184
+delta too large: 0.3515014648
+timeofday:1794191542:207185
+lasttimeofday: 1794191541:855676
+deltatime:0:351509
+delta: 0.3515014648
+delta too large: 0.4065704346
+timeofday:1794191542:899379
+lasttimeofday: 1794191542:492799
+deltatime:0:406580
+delta: 0.4065704346
+delta too large: 0.2247772217
+timeofday:1794191543:124159
+lasttimeofday: 1794191542:899379
+deltatime:0:224780
+delta: 0.2247772217
+delta too large: 0.4717102051
+timeofday:1794191543:728266
+lasttimeofday: 1794191543:256555
+deltatime:0:471711
+delta: 0.4717102051
+delta too large: 0.2130279541
+timeofday:1794191543:941306
+lasttimeofday: 1794191543:728266
+deltatime:0:213040
+delta: 0.2130279541
+delta too large: 0.2209320068
+timeofday:1794191544:162242
+lasttimeofday: 1794191543:941306
+deltatime:0:220936
+delta: 0.2209320068
+delta too large: 0.4280395508
+timeofday:1794191544:590285
+lasttimeofday: 1794191544:162242
+deltatime:0:428043
+delta: 0.4280395508
+delta too large: 0.3357086182
+timeofday:1794191545:303664
+lasttimeofday: 1794191544:967947
+deltatime:0:335717
+delta: 0.3357086182
+delta too large: 0.3815765381
+timeofday:1794191545:947616
+lasttimeofday: 1794191545:566036
+deltatime:0:381580
+delta: 0.3815765381
+delta too large: 0.451461792
+timeofday:1794191546:726421
+lasttimeofday: 1794191546:274946
+deltatime:0:451475
+delta: 0.451461792
+delta too large: 0.2346038818
+timeofday:1794191546:961033
+lasttimeofday: 1794191546:726421
+deltatime:0:234612
+delta: 0.2346038818
+delta too large: 0.428604126
+timeofday:1794191547:558783
+lasttimeofday: 1794191547:130178
+deltatime:0:428605
+delta: 0.428604126
+delta too large: 0.3144683838
+timeofday:1794191547:873257
+lasttimeofday: 1794191547:558783
+deltatime:0:314474
+delta: 0.3144683838
+delta too large: 0.2639160156
+timeofday:1794191548:137175
+lasttimeofday: 1794191547:873257
+deltatime:0:263918
+delta: 0.2639160156
+delta too large: 0.4912872314
+timeofday:1794191548:628472
+lasttimeofday: 1794191548:137175
+deltatime:0:491297
+delta: 0.4912872314
+delta too large: 0.3857727051
+timeofday:1794191549:324692
+lasttimeofday: 1794191548:938913
+deltatime:0:385779
+delta: 0.3857727051
+delta too large: 0.4618225098
+timeofday:1794191550:68720
+lasttimeofday: 1794191549:606884
+deltatime:0:461836
+delta: 0.4618225098
+delta too large: 0.4515991211
+timeofday:1794191550:731446
+lasttimeofday: 1794191550:279842
+deltatime:0:451604
+delta: 0.4515991211
+delta too large: 0.2967376709
+timeofday:1794191551:28186
+lasttimeofday: 1794191550:731446
+deltatime:0:296740
+delta: 0.2967376709
+delta too large: 0.2388305664
+timeofday:1794191551:267020
+lasttimeofday: 1794191551:28186
+deltatime:0:238834
+delta: 0.2388305664
+delta too large: 0.4511260986
+timeofday:1794191551:718158
+lasttimeofday: 1794191551:267020
+deltatime:0:451138
+delta: 0.4511260986
+delta too large: 0.2195281982
+timeofday:1794191551:937687
+lasttimeofday: 1794191551:718158
+deltatime:0:219529
+delta: 0.2195281982
+delta too large: 0.255065918
+timeofday:1794191552:192758
+lasttimeofday: 1794191551:937687
+deltatime:0:255071
+delta: 0.255065918
+delta too large: 0.5032806396
+timeofday:1794191552:696043
+lasttimeofday: 1794191552:192758
+deltatime:0:503285
+delta: 0.5032806396
+delta too large: 0.5361480713
+timeofday:1794191553:507245
+lasttimeofday: 1794191552:971084
+deltatime:0:536161
+delta: 0.5361480713
+delta too large: 0.2811431885
+timeofday:1794191553:788401
+lasttimeofday: 1794191553:507245
+deltatime:0:281156
+delta: 0.2811431885
+delta too large: 0.3148345947
+timeofday:1794191554:271737
+lasttimeofday: 1794191553:956890
+deltatime:0:314847
+delta: 0.3148345947
+delta too large: 0.3261871338
+timeofday:1794191554:800682
+lasttimeofday: 1794191554:474492
+deltatime:0:326190
+delta: 0.3261871338
+delta too large: 0.3858184814
+timeofday:1794191555:416967
+lasttimeofday: 1794191555:31147
+deltatime:0:385820
+delta: 0.3858184814
+delta too large: 0.2096252441
+timeofday:1794191555:752174
+lasttimeofday: 1794191555:542548
+deltatime:0:209626
+delta: 0.2096252441
+delta too large: 0.4375152588
+timeofday:1794191556:189696
+lasttimeofday: 1794191555:752174
+deltatime:0:437522
+delta: 0.4375152588
+delta too large: 0.2004699707
+timeofday:1794191556:390169
+lasttimeofday: 1794191556:189696
+deltatime:0:200473
+delta: 0.2004699707
+delta too large: 0.2778167725
+timeofday:1794191556:667991
+lasttimeofday: 1794191556:390169
+deltatime:0:277822
+delta: 0.2778167725
+delta too large: 0.5900726318
+timeofday:1794191557:258074
+lasttimeofday: 1794191556:667991
+deltatime:0:590083
+delta: 0.5900726318
+delta too large: 0.3710479736
+timeofday:1794191557:884175
+lasttimeofday: 1794191557:513123
+deltatime:0:371052
+delta: 0.3710479736
+delta too large: 0.4378509521
+timeofday:1794191558:642488
+lasttimeofday: 1794191558:204628
+deltatime:0:437860
+delta: 0.4378509521
+delta too large: 0.5366516113
+timeofday:1794191559:502969
+lasttimeofday: 1794191558:966316
+deltatime:0:536653
+delta: 0.5366516113
+delta too large: 0.3572235107
+timeofday:1794191560:114853
+lasttimeofday: 1794191559:757628
+deltatime:0:357225
+delta: 0.3572235107
+delta too large: 0.3476867676
+timeofday:1794191560:761752
+lasttimeofday: 1794191560:414056
+deltatime:0:347696
+delta: 0.3476867676
+delta too large: 0.4623565674
+timeofday:1794191561:512609
+lasttimeofday: 1794191561:50251
+deltatime:0:462358
+delta: 0.4623565674
+delta too large: 0.3677368164
+timeofday:1794191562:141583
+lasttimeofday: 1794191561:773843
+deltatime:0:367740
+delta: 0.3677368164
+delta too large: 0.6035003662
+timeofday:1794191563:84694
+lasttimeofday: 1794191562:481188
+deltatime:0:603506
+delta: 0.6035003662
+delta too large: 0.2793121338
+timeofday:1794191563:364018
+lasttimeofday: 1794191563:84694
+deltatime:0:279324
+delta: 0.2793121338
+delta too large: 0.3893280029
+timeofday:1794191563:901240
+lasttimeofday: 1794191563:511901
+deltatime:0:389339
+delta: 0.3893280029
+delta too large: 0.3754425049
+timeofday:1794191564:605024
+lasttimeofday: 1794191564:229578
+deltatime:0:375446
+delta: 0.3754425049
+delta too large: 0.4212188721
+timeofday:1794191565:250383
+lasttimeofday: 1794191564:829162
+deltatime:0:421221
+delta: 0.4212188721
+delta too large: 0.3826446533
+timeofday:1794191565:922387
+lasttimeofday: 1794191565:539730
+deltatime:0:382657
+delta: 0.3826446533
+delta too large: 0.3342590332
+timeofday:1794191566:547161
+lasttimeofday: 1794191566:212889
+deltatime:0:334272
+delta: 0.3342590332
+delta too large: 0.4375305176
+timeofday:1794191567:289091
+lasttimeofday: 1794191566:851552
+deltatime:0:437539
+delta: 0.4375305176
+delta too large: 0.394241333
+timeofday:1794191567:987202
+lasttimeofday: 1794191567:592951
+deltatime:0:394251
+delta: 0.394241333
+delta too large: 0.3041229248
+timeofday:1794191568:521357
+lasttimeofday: 1794191568:217220
+deltatime:0:304137
+delta: 0.3041229248
+delta too large: 0.4090576172
+timeofday:1794191569:218107
+lasttimeofday: 1794191568:809038
+deltatime:0:409069
+delta: 0.4090576172
+delta too large: 0.3541412354
+timeofday:1794191569:746438
+lasttimeofday: 1794191569:392282
+deltatime:0:354156
+delta: 0.3541412354
+delta too large: 0.3285369873
+timeofday:1794191570:297740
+lasttimeofday: 1794191569:969194
+deltatime:0:328546
+delta: 0.3285369873
+delta too large: 0.3553314209
+timeofday:1794191570:942580
+lasttimeofday: 1794191570:587246
+deltatime:0:355334
+delta: 0.3553314209
+delta too large: 0.3466339111
+timeofday:1794191571:610182
+lasttimeofday: 1794191571:263537
+deltatime:0:346645
+delta: 0.3466339111
+delta too large: 0.3368988037
+timeofday:1794191572:257906
+lasttimeofday: 1794191571:921000
+deltatime:0:336906
+delta: 0.3368988037
+delta too large: 0.4826660156
+timeofday:1794191572:975836
+lasttimeofday: 1794191572:493161
+deltatime:0:482675
+delta: 0.4826660156
+delta too large: 0.3569946289
+timeofday:1794191573:669074
+lasttimeofday: 1794191573:312073
+deltatime:0:357001
+delta: 0.3569946289
+delta too large: 0.3177642822
+timeofday:1794191574:195924
+lasttimeofday: 1794191573:878155
+deltatime:0:317769
+delta: 0.3177642822
+delta too large: 0.3357696533
+timeofday:1794191574:789328
+lasttimeofday: 1794191574:453548
+deltatime:0:335780
+delta: 0.3357696533
+delta too large: 0.2870635986
+timeofday:1794191575:273727
+lasttimeofday: 1794191574:986659
+deltatime:0:287068
+delta: 0.2870635986
+delta too large: 0.3143768311
+timeofday:1794191575:778907
+lasttimeofday: 1794191575:464527
+deltatime:0:314380
+delta: 0.3143768311
+delta too large: 0.2841491699
+timeofday:1794191576:261806
+lasttimeofday: 1794191575:977648
+deltatime:0:284158
+delta: 0.2841491699
+delta too large: 0.2479705811
+timeofday:1794191576:669379
+lasttimeofday: 1794191576:421404
+deltatime:0:247975
+delta: 0.2479705811
+delta too large: 0.294921875
+timeofday:1794191577:116959
+lasttimeofday: 1794191576:822032
+deltatime:0:294927
+delta: 0.294921875
+delta too large: 0.5116119385
+timeofday:1794191577:804474
+lasttimeofday: 1794191577:292853
+deltatime:0:511621
+delta: 0.5116119385
+delta too large: 0.2979431152
+timeofday:1794191578:304165
+lasttimeofday: 1794191578:6216
+deltatime:0:297949
+delta: 0.2979431152
+delta too large: 0.2359771729
+timeofday:1794191578:745789
+lasttimeofday: 1794191578:509797
+deltatime:0:235992
+delta: 0.2359771729
+delta too large: 0.291015625
+timeofday:1794191579:343077
+lasttimeofday: 1794191579:52048
+deltatime:0:291029
+delta: 0.291015625
+delta too large: 0.3083190918
+timeofday:1794191579:841662
+lasttimeofday: 1794191579:533337
+deltatime:0:308325
+delta: 0.3083190918
+delta too large: 0.3294067383
+timeofday:1794191580:342923
+lasttimeofday: 1794191580:13504
+deltatime:0:329419
+delta: 0.3294067383
+delta too large: 0.3390808105
+timeofday:1794191580:852788
+lasttimeofday: 1794191580:513707
+deltatime:0:339081
+delta: 0.3390808105
+delta too large: 0.3345031738
+timeofday:1794191581:497485
+lasttimeofday: 1794191581:162967
+deltatime:0:334518
+delta: 0.3345031738
+delta too large: 0.3406219482
+timeofday:1794191582:61414
+lasttimeofday: 1794191581:720788
+deltatime:0:340626
+delta: 0.3406219482
+delta too large: 0.304977417
+timeofday:1794191582:546627
+lasttimeofday: 1794191582:241646
+deltatime:0:304981
+delta: 0.304977417
+delta too large: 0.3154449463
+timeofday:1794191583:40981
+lasttimeofday: 1794191582:725533
+deltatime:0:315448
+delta: 0.3154449463
+delta too large: 0.3179931641
+timeofday:1794191583:568190
+lasttimeofday: 1794191583:250191
+deltatime:0:317999
+delta: 0.3179931641
+delta too large: 0.5268707275
+timeofday:1794191584:397285
+lasttimeofday: 1794191583:870403
+deltatime:0:526882
+delta: 0.5268707275
+delta too large: 0.2483062744
+timeofday:1794191584:645602
+lasttimeofday: 1794191584:397285
+deltatime:0:248317
+delta: 0.2483062744
+delta too large: 0.4108734131
+timeofday:1794191585:227463
+lasttimeofday: 1794191584:816575
+deltatime:0:410888
+delta: 0.4108734131
+delta too large: 0.3662567139
+timeofday:1794191585:921359
+lasttimeofday: 1794191585:555091
+deltatime:0:366268
+delta: 0.3662567139
+delta too large: 0.3971710205
+timeofday:1794191586:596480
+lasttimeofday: 1794191586:199296
+deltatime:0:397184
+delta: 0.3971710205
+delta too large: 0.2425537109
+timeofday:1794191586:839037
+lasttimeofday: 1794191586:596480
+deltatime:0:242557
+delta: 0.2425537109
+delta too large: 0.3980102539
+timeofday:1794191587:400556
+lasttimeofday: 1794191587:2538
+deltatime:0:398018
+delta: 0.3980102539
+delta too large: 0.4109802246
+timeofday:1794191588:72886
+lasttimeofday: 1794191587:661892
+deltatime:0:410994
+delta: 0.4109802246
+delta too large: 0.2186431885
+timeofday:1794191588:440161
+lasttimeofday: 1794191588:221517
+deltatime:0:218644
+delta: 0.2186431885
+delta too large: 0.3951416016
+timeofday:1794191588:835306
+lasttimeofday: 1794191588:440161
+deltatime:0:395145
+delta: 0.3951416016
+delta too large: 0.3261871338
+timeofday:1794191589:496231
+lasttimeofday: 1794191589:170038
+deltatime:0:326193
+delta: 0.3261871338
+delta too large: 0.3032836914
+timeofday:1794191589:949052
+lasttimeofday: 1794191589:645757
+deltatime:0:303295
+delta: 0.3032836914
+delta too large: 0.3192749023
+timeofday:1794191590:499814
+lasttimeofday: 1794191590:180528
+deltatime:0:319286
+delta: 0.3192749023
+delta too large: 0.4119110107
+timeofday:1794191591:297972
+lasttimeofday: 1794191590:886052
+deltatime:0:411920
+delta: 0.4119110107
+delta too large: 0.3749389648
+timeofday:1794191591:981187
+lasttimeofday: 1794191591:606237
+deltatime:0:374950
+delta: 0.3749389648
+delta too large: 0.2785491943
+timeofday:1794191592:521026
+lasttimeofday: 1794191592:242475
+deltatime:0:278551
+delta: 0.2785491943
+delta too large: 0.3105163574
+timeofday:1794191593:14023
+lasttimeofday: 1794191592:703505
+deltatime:0:310518
+delta: 0.3105163574
+delta too large: 0.25831604
+timeofday:1794191593:492267
+lasttimeofday: 1794191593:233940
+deltatime:0:258327
+delta: 0.25831604
+delta too large: 0.3191070557
+timeofday:1794191593:996371
+lasttimeofday: 1794191593:677251
+deltatime:0:319120
+delta: 0.3191070557
+delta too large: 0.2952270508
+timeofday:1794191594:506186
+lasttimeofday: 1794191594:210958
+deltatime:0:295228
+delta: 0.2952270508
+delta too large: 0.2924041748
+timeofday:1794191595:26180
+lasttimeofday: 1794191594:733770
+deltatime:0:292410
+delta: 0.2924041748
+delta too large: 0.2109222412
+timeofday:1794191595:429230
+lasttimeofday: 1794191595:218302
+deltatime:0:210928
+delta: 0.2109222412
+delta too large: 0.3278045654
+timeofday:1794191596:36046
+lasttimeofday: 1794191595:708230
+deltatime:0:327816
+delta: 0.3278045654
+delta too large: 0.2863922119
+timeofday:1794191596:497672
+lasttimeofday: 1794191596:211274
+deltatime:0:286398
+delta: 0.2863922119
+delta too large: 0.3580474854
+timeofday:1794191597:51669
+lasttimeofday: 1794191596:693617
+deltatime:0:358052
+delta: 0.3580474854
+delta too large: 0.3685302734
+timeofday:1794191597:683032
+lasttimeofday: 1794191597:314495
+deltatime:0:368537
+delta: 0.3685302734
+delta too large: 0.415725708
+timeofday:1794191598:293909
+lasttimeofday: 1794191597:878173
+deltatime:0:415736
+delta: 0.415725708
+delta too large: 0.298034668
+timeofday:1794191598:858663
+lasttimeofday: 1794191598:560626
+deltatime:0:298037
+delta: 0.298034668
+delta too large: 0.3433532715
+timeofday:1794191599:368719
+lasttimeofday: 1794191599:25352
+deltatime:0:343367
+delta: 0.3433532715
+delta too large: 0.34715271
+timeofday:1794191599:901967
+lasttimeofday: 1794191599:554812
+deltatime:0:347155
+delta: 0.34715271
+delta too large: 0.3381958008
+timeofday:1794191600:393793
+lasttimeofday: 1794191600:55595
+deltatime:0:338198
+delta: 0.3381958008
+delta too large: 0.3514709473
+timeofday:1794191600:963185
+lasttimeofday: 1794191600:611711
+deltatime:0:351474
+delta: 0.3514709473
+delta too large: 0.3207550049
+timeofday:1794191601:509767
+lasttimeofday: 1794191601:188999
+deltatime:0:320768
+delta: 0.3207550049
+delta too large: 0.2382202148
+timeofday:1794191602:13317
+lasttimeofday: 1794191601:775090
+deltatime:0:238227
+delta: 0.2382202148
+delta too large: 0.3592834473
+timeofday:1794191602:614504
+lasttimeofday: 1794191602:255219
+deltatime:0:359285
+delta: 0.3592834473
+delta too large: 0.3598022461
+timeofday:1794191603:115479
+lasttimeofday: 1794191602:755669
+deltatime:0:359810
+delta: 0.3598022461
+delta too large: 0.2433929443
+timeofday:1794191603:668285
+lasttimeofday: 1794191603:424878
+deltatime:0:243407
+delta: 0.2433929443
+delta too large: 0.3045959473
+timeofday:1794191604:155290
+lasttimeofday: 1794191603:850690
+deltatime:0:304600
+delta: 0.3045959473
+delta too large: 0.2903594971
+timeofday:1794191606:296184
+lasttimeofday: 1794191606:5823
+deltatime:0:290361
+delta: 0.2903594971
+delta too large: 0.2559967041
+timeofday:1794191608:803171
+lasttimeofday: 1794191608:547172
+deltatime:0:255999
+delta: 0.2559967041
+delta too large: 0.2136993408
+timeofday:1794191609:207257
+lasttimeofday: 1794191608:993552
+deltatime:0:213705
+delta: 0.2136993408
+delta too large: 0.2033538818
+timeofday:1794191610:762172
+lasttimeofday: 1794191610:558804
+deltatime:0:203368
+delta: 0.2033538818
+delta too large: 0.2179718018
+timeofday:1794191614:86943
+lasttimeofday: 1794191613:868959
+deltatime:0:217984
+delta: 0.2179718018
+delta too large: 0.2673797607
+timeofday:1794191615:668275
+lasttimeofday: 1794191615:400893
+deltatime:0:267382
+delta: 0.2673797607
+delta too large: 0.2114868164
+timeofday:1794191616:38812
+lasttimeofday: 1794191615:827321
+deltatime:0:211491
+delta: 0.2114868164
+delta too large: 0.2073822021
+timeofday:1794191618:863134
+lasttimeofday: 1794191618:655740
+deltatime:0:207394
+delta: 0.2073822021
+delta too large: 0.2147369385
+timeofday:1794191619:77873
+lasttimeofday: 1794191618:863134
+deltatime:0:214739
+delta: 0.2147369385
+delta too large: 0.2052307129
+timeofday:1794191631:33950
+lasttimeofday: 1794191630:828716
+deltatime:0:205234
+delta: 0.2052307129
+delta too large: 0.2172851562
+timeofday:1794191631:417243
+lasttimeofday: 1794191631:199956
+deltatime:0:217287
+delta: 0.2172851562
+delta too large: 0.2225036621
+timeofday:1794191638:342521
+lasttimeofday: 1794191638:120015
+deltatime:0:222506
+delta: 0.2225036621
+delta too large: 0.2213897705
+timeofday:1794191641:758686
+lasttimeofday: 1794191641:537287
+deltatime:0:221399
+delta: 0.2213897705
+delta too large: 0.274520874
+timeofday:1794191642:211092
+lasttimeofday: 1794191641:936566
+deltatime:0:274526
+delta: 0.274520874
+delta too large: 0.2525177002
+timeofday:1794191642:603990
+lasttimeofday: 1794191642:351458
+deltatime:0:252532
+delta: 0.2525177002
+delta too large: 0.3058624268
+timeofday:1794191643:94762
+lasttimeofday: 1794191642:788885
+deltatime:0:305877
+delta: 0.3058624268
+delta too large: 0.3131713867
+timeofday:1794191643:613331
+lasttimeofday: 1794191643:300152
+deltatime:0:313179
+delta: 0.3131713867
+delta too large: 0.2633361816
+timeofday:1794191644:33306
+lasttimeofday: 1794191643:769968
+deltatime:0:263338
+delta: 0.2633361816
+delta too large: 0.293838501
+timeofday:1794191644:548568
+lasttimeofday: 1794191644:254721
+deltatime:0:293847
+delta: 0.293838501
+delta too large: 0.339263916
+timeofday:1794191645:130903
+lasttimeofday: 1794191644:791632
+deltatime:0:339271
+delta: 0.339263916
+delta too large: 0.2530212402
+timeofday:1794191645:624184
+lasttimeofday: 1794191645:371150
+deltatime:0:253034
+delta: 0.2530212402
+delta too large: 0.3500823975
+timeofday:1794191646:147444
+lasttimeofday: 1794191645:797357
+deltatime:0:350087
+delta: 0.3500823975
+delta too large: 0.3132629395
+timeofday:1794191646:738850
+lasttimeofday: 1794191646:425574
+deltatime:0:313276
+delta: 0.3132629395
+delta too large: 0.3420410156
+timeofday:1794191647:322099
+lasttimeofday: 1794191646:980056
+deltatime:0:342043
+delta: 0.3420410156
+delta too large: 0.3326416016
+timeofday:1794191647:813028
+lasttimeofday: 1794191647:480374
+deltatime:0:332654
+delta: 0.3326416016
+delta too large: 0.3464050293
+timeofday:1794191648:360983
+lasttimeofday: 1794191648:14573
+deltatime:0:346410
+delta: 0.3464050293
+delta too large: 0.3214416504
+timeofday:1794191648:937617
+lasttimeofday: 1794191648:616173
+deltatime:0:321444
+delta: 0.3214416504
+delta too large: 0.3298187256
+timeofday:1794191649:570993
+lasttimeofday: 1794191649:241160
+deltatime:0:329833
+delta: 0.3298187256
+delta too large: 0.3020782471
+timeofday:1794191650:26423
+lasttimeofday: 1794191649:724341
+deltatime:0:302082
+delta: 0.3020782471
+delta too large: 0.255279541
+timeofday:1794191650:446063
+lasttimeofday: 1794191650:190771
+deltatime:0:255292
+delta: 0.255279541
+delta too large: 0.4386749268
+timeofday:1794191651:152184
+lasttimeofday: 1794191650:713505
+deltatime:0:438679
+delta: 0.4386749268
+delta too large: 0.2282562256
+timeofday:1794191651:557417
+lasttimeofday: 1794191651:329156
+deltatime:0:228261
+delta: 0.2282562256
+delta too large: 0.2925872803
+timeofday:1794191651:850009
+lasttimeofday: 1794191651:557417
+deltatime:0:292592
+delta: 0.2925872803
+delta too large: 0.2178344727
+timeofday:1794191652:205009
+lasttimeofday: 1794191651:987164
+deltatime:0:217845
+delta: 0.2178344727
+delta too large: 0.2548370361
+timeofday:1794191652:590944
+lasttimeofday: 1794191652:336100
+deltatime:0:254844
+delta: 0.2548370361
+delta too large: 0.3346099854
+timeofday:1794191653:100173
+lasttimeofday: 1794191652:765560
+deltatime:0:334613
+delta: 0.3346099854
+delta too large: 0.2962646484
+timeofday:1794191653:565267
+lasttimeofday: 1794191653:268994
+deltatime:0:296273
+delta: 0.2962646484
+delta too large: 0.2763519287
+timeofday:1794191654:95868
+lasttimeofday: 1794191653:819506
+deltatime:0:276362
+delta: 0.2763519287
+delta too large: 0.2314147949
+timeofday:1794191654:553241
+lasttimeofday: 1794191654:321815
+deltatime:0:231426
+delta: 0.2314147949
+delta too large: 0.3019866943
+timeofday:1794191655:55132
+lasttimeofday: 1794191654:753142
+deltatime:0:301990
+delta: 0.3019866943
+delta too large: 0.2240905762
+timeofday:1794191655:460768
+lasttimeofday: 1794191655:236673
+deltatime:0:224095
+delta: 0.2240905762
+delta too large: 0.3234710693
+timeofday:1794191656:54551
+lasttimeofday: 1794191655:731071
+deltatime:0:323480
+delta: 0.3234710693
+delta too large: 0.3227539062
+timeofday:1794191656:656820
+lasttimeofday: 1794191656:334058
+deltatime:0:322762
+delta: 0.3227539062
+delta too large: 0.3134002686
+timeofday:1794191657:257418
+lasttimeofday: 1794191656:944005
+deltatime:0:313413
+delta: 0.3134002686
+delta too large: 0.3045501709
+timeofday:1794191657:796589
+lasttimeofday: 1794191657:492029
+deltatime:0:304560
+delta: 0.3045501709
+delta too large: 0.3131561279
+timeofday:1794191658:378167
+lasttimeofday: 1794191658:65000
+deltatime:0:313167
+delta: 0.3131561279
+delta too large: 0.2989654541
+timeofday:1794191658:932850
+lasttimeofday: 1794191658:633882
+deltatime:0:298968
+delta: 0.2989654541
+delta too large: 0.2950897217
+timeofday:1794191659:480448
+lasttimeofday: 1794191659:185347
+deltatime:0:295101
+delta: 0.2950897217
+delta too large: 0.2607727051
+timeofday:1794191659:948232
+lasttimeofday: 1794191659:687455
+deltatime:0:260777
+delta: 0.2607727051
+delta too large: 0.318069458
+timeofday:1794191660:463141
+lasttimeofday: 1794191660:145060
+deltatime:0:318081
+delta: 0.318069458
+delta too large: 0.3011779785
+timeofday:1794191660:994910
+lasttimeofday: 1794191660:693721
+deltatime:0:301189
+delta: 0.3011779785
+delta too large: 0.30078125
+timeofday:1794191661:489448
+lasttimeofday: 1794191661:188655
+deltatime:0:300793
+delta: 0.30078125
+delta too large: 0.261428833
+timeofday:1794191661:925495
+lasttimeofday: 1794191661:664059
+deltatime:0:261436
+delta: 0.261428833
+delta too large: 0.2824859619
+timeofday:1794191662:350058
+lasttimeofday: 1794191662:67564
+deltatime:0:282494
+delta: 0.2824859619
+delta too large: 0.3496246338
+timeofday:1794191662:908481
+lasttimeofday: 1794191662:558856
+deltatime:0:349625
+delta: 0.3496246338
+delta too large: 0.289855957
+timeofday:1794191663:440617
+lasttimeofday: 1794191663:150761
+deltatime:0:289856
+delta: 0.289855957
+delta too large: 0.3054199219
+timeofday:1794191664:14974
+lasttimeofday: 1794191663:709546
+deltatime:0:305428
+delta: 0.3054199219
+delta too large: 0.2544555664
+timeofday:1794191664:513992
+lasttimeofday: 1794191664:259533
+deltatime:0:254459
+delta: 0.2544555664
+delta too large: 0.2968902588
+timeofday:1794191665:11259
+lasttimeofday: 1794191664:714354
+deltatime:0:296905
+delta: 0.2968902588
+delta too large: 0.2905273438
+timeofday:1794191665:580948
+lasttimeofday: 1794191665:290410
+deltatime:0:290538
+delta: 0.2905273438
+delta too large: 0.307144165
+timeofday:1794191666:78870
+lasttimeofday: 1794191665:771718
+deltatime:0:307152
+delta: 0.307144165
+delta too large: 0.2954711914
+timeofday:1794191666:599000
+lasttimeofday: 1794191666:303524
+deltatime:0:295476
+delta: 0.2954711914
+delta too large: 0.3197631836
+timeofday:1794191667:101291
+lasttimeofday: 1794191666:781522
+deltatime:0:319769
+delta: 0.3197631836
+delta too large: 0.2439575195
+timeofday:1794191667:517102
+lasttimeofday: 1794191667:273135
+deltatime:0:243967
+delta: 0.2439575195
+delta too large: 0.267288208
+timeofday:1794191667:987698
+lasttimeofday: 1794191667:720396
+deltatime:0:267302
+delta: 0.267288208
+delta too large: 0.2056274414
+timeofday:1794191668:361196
+lasttimeofday: 1794191668:155558
+deltatime:0:205638
+delta: 0.2056274414
+delta too large: 0.3109130859
+timeofday:1794191668:811294
+lasttimeofday: 1794191668:500371
+deltatime:0:310923
+delta: 0.3109130859
+delta too large: 0.3145751953
+timeofday:1794191669:340216
+lasttimeofday: 1794191669:25630
+deltatime:0:314586
+delta: 0.3145751953
+delta too large: 0.203994751
+timeofday:1794191669:686287
+lasttimeofday: 1794191669:482278
+deltatime:0:204009
+delta: 0.203994751
+delta too large: 0.2107086182
+timeofday:1794191670:11453
+lasttimeofday: 1794191669:800740
+deltatime:0:210713
+delta: 0.2107086182
+delta too large: 0.240737915
+timeofday:1794191670:428935
+lasttimeofday: 1794191670:188186
+deltatime:0:240749
+delta: 0.240737915
+delta too large: 0.2651519775
+timeofday:1794191670:935616
+lasttimeofday: 1794191670:670449
+deltatime:0:265167
+delta: 0.2651519775
+delta too large: 0.263381958
+timeofday:1794191671:377374
+lasttimeofday: 1794191671:113979
+deltatime:0:263395
+delta: 0.263381958
+delta too large: 0.3461456299
+timeofday:1794191671:918604
+lasttimeofday: 1794191671:572448
+deltatime:0:346156
+delta: 0.3461456299
+delta too large: 0.2769165039
+timeofday:1794191672:892892
+lasttimeofday: 1794191672:615963
+deltatime:0:276929
+delta: 0.2769165039
+delta too large: 0.2542724609
+timeofday:1794191673:306850
+lasttimeofday: 1794191673:52568
+deltatime:0:254282
+delta: 0.2542724609
+delta too large: 0.2316741943
+timeofday:1794191673:670827
+lasttimeofday: 1794191673:439141
+deltatime:0:231686
+delta: 0.2316741943
+delta too large: 0.2203521729
+timeofday:1794191674:73366
+lasttimeofday: 1794191673:853009
+deltatime:0:220357
+delta: 0.2203521729
+delta too large: 0.2904663086
+timeofday:1794191674:512255
+lasttimeofday: 1794191674:221776
+deltatime:0:290479
+delta: 0.2904663086
+delta too large: 0.2519073486
+timeofday:1794191674:900157
+lasttimeofday: 1794191674:648244
+deltatime:0:251913
+delta: 0.2519073486
+delta too large: 0.220489502
+timeofday:1794191675:344562
+lasttimeofday: 1794191675:124060
+deltatime:0:220502
+delta: 0.220489502
+delta too large: 0.2750854492
+timeofday:1794191675:902853
+lasttimeofday: 1794191675:627767
+deltatime:0:275086
+delta: 0.2750854492
+delta too large: 0.2065429688
+timeofday:1794191676:329478
+lasttimeofday: 1794191676:122932
+deltatime:0:206546
+delta: 0.2065429688
+delta too large: 0.2660522461
+timeofday:1794191676:773924
+lasttimeofday: 1794191676:507861
+deltatime:0:266063
+delta: 0.2660522461
+delta too large: 0.2071228027
+timeofday:1794191677:162628
+lasttimeofday: 1794191676:955493
+deltatime:0:207135
+delta: 0.2071228027
+delta too large: 0.2140045166
+timeofday:1794191677:546208
+lasttimeofday: 1794191677:332192
+deltatime:0:214016
+delta: 0.2140045166
+delta too large: 0.2148742676
+timeofday:1794191677:957934
+lasttimeofday: 1794191677:743055
+deltatime:0:214879
+delta: 0.2148742676
+delta too large: 0.2610321045
+timeofday:1794191678:432016
+lasttimeofday: 1794191678:170978
+deltatime:0:261038
+delta: 0.2610321045
+delta too large: 0.3311920166
+timeofday:1794191678:933476
+lasttimeofday: 1794191678:602276
+deltatime:0:331200
+delta: 0.3311920166
+delta too large: 0.2796783447
+timeofday:1794191679:409421
+lasttimeofday: 1794191679:129734
+deltatime:0:279687
+delta: 0.2796783447
+delta too large: 0.2324829102
+timeofday:1794191679:790275
+lasttimeofday: 1794191679:557787
+deltatime:0:232488
+delta: 0.2324829102
+delta too large: 0.249710083
+timeofday:1794191680:240248
+lasttimeofday: 1794191679:990535
+deltatime:0:249713
+delta: 0.249710083
+delta too large: 0.2751159668
+timeofday:1794191703:171185
+lasttimeofday: 1794191702:896063
+deltatime:0:275122
+delta: 0.2751159668
+delta too large: 0.3857116699
+timeofday:1794191710:46369
+lasttimeofday: 1794191709:660657
+deltatime:0:385712
+delta: 0.3857116699
+delta too large: 0.3609313965
+timeofday:1794191710:726020
+lasttimeofday: 1794191710:365085
+deltatime:0:360935
+delta: 0.3609313965
+delta too large: 0.2149963379
+timeofday:1794191710:941020
+lasttimeofday: 1794191710:726020
+deltatime:0:215000
+delta: 0.2149963379
+delta too large: 0.4061431885
+timeofday:1794191711:505780
+lasttimeofday: 1794191711:99625
+deltatime:0:406155
+delta: 0.4061431885
+delta too large: 0.2107543945
+timeofday:1794191711:716537
+lasttimeofday: 1794191711:505780
+deltatime:0:210757
+delta: 0.2107543945
+delta too large: 0.3478851318
+timeofday:1794191712:412625
+lasttimeofday: 1794191712:64727
+deltatime:0:347898
+delta: 0.3478851318
+delta too large: 0.3802337646
+timeofday:1794191713:61424
+lasttimeofday: 1794191712:681176
+deltatime:0:380248
+delta: 0.3802337646
+delta too large: 0.2633972168
+timeofday:1794191713:521916
+lasttimeofday: 1794191713:258518
+deltatime:0:263398
+delta: 0.2633972168
+delta too large: 0.2607269287
+timeofday:1794191714:40217
+lasttimeofday: 1794191713:779483
+deltatime:0:260734
+delta: 0.2607269287
+delta too large: 0.2387237549
+timeofday:1794191714:519708
+lasttimeofday: 1794191714:280981
+deltatime:0:238727
+delta: 0.2387237549
+delta too large: 0.2200775146
+timeofday:1794191714:944497
+lasttimeofday: 1794191714:724409
+deltatime:0:220088
+delta: 0.2200775146
+delta too large: 0.2367858887
+timeofday:1794191715:341802
+lasttimeofday: 1794191715:105006
+deltatime:0:236796
+delta: 0.2367858887
+delta too large: 0.3128356934
+timeofday:1794191715:801188
+lasttimeofday: 1794191715:488343
+deltatime:0:312845
+delta: 0.3128356934
+delta too large: 0.3831939697
+timeofday:1794191716:447954
+lasttimeofday: 1794191716:64749
+deltatime:0:383205
+delta: 0.3831939697
+delta too large: 0.3456115723
+timeofday:1794191717:82937
+lasttimeofday: 1794191716:737316
+deltatime:0:345621
+delta: 0.3456115723
+delta too large: 0.3889923096
+timeofday:1794191717:655958
+lasttimeofday: 1794191717:266965
+deltatime:0:388993
+delta: 0.3889923096
+delta too large: 0.3266906738
+timeofday:1794191718:258877
+lasttimeofday: 1794191717:932174
+deltatime:0:326703
+delta: 0.3266906738
+delta too large: 0.440826416
+timeofday:1794191718:931030
+lasttimeofday: 1794191718:490197
+deltatime:0:440833
+delta: 0.440826416
+delta too large: 0.4023590088
+timeofday:1794191719:610331
+lasttimeofday: 1794191719:207971
+deltatime:0:402360
+delta: 0.4023590088
+delta too large: 0.3044128418
+timeofday:1794191720:194762
+lasttimeofday: 1794191719:890348
+deltatime:0:304414
+delta: 0.3044128418
+delta too large: 0.3497161865
+timeofday:1794191720:824545
+lasttimeofday: 1794191720:474818
+deltatime:0:349727
+delta: 0.3497161865
+delta too large: 0.3096618652
+timeofday:1794191721:292713
+lasttimeofday: 1794191720:983051
+deltatime:0:309662
+delta: 0.3096618652
+delta too large: 0.4235687256
+timeofday:1794191721:716284
+lasttimeofday: 1794191721:292713
+deltatime:0:423571
+delta: 0.4235687256
+delta too large: 0.3555450439
+timeofday:1794191722:334029
+lasttimeofday: 1794191721:978470
+deltatime:0:355559
+delta: 0.3555450439
+delta too large: 0.274230957
+timeofday:1794191723:9101
+lasttimeofday: 1794191722:734861
+deltatime:0:274240
+delta: 0.274230957
+delta too large: 0.3084411621
+timeofday:1794191723:581328
+lasttimeofday: 1794191723:272884
+deltatime:0:308444
+delta: 0.3084411621
+delta too large: 0.3915405273
+timeofday:1794191724:159603
+lasttimeofday: 1794191723:768049
+deltatime:0:391554
+delta: 0.3915405273
+delta too large: 0.3292541504
+timeofday:1794191724:762160
+lasttimeofday: 1794191724:432900
+deltatime:0:329260
+delta: 0.3292541504
+delta too large: 0.266418457
+timeofday:1794191725:245314
+lasttimeofday: 1794191724:978894
+deltatime:0:266420
+delta: 0.266418457
+delta too large: 0.2590332031
+timeofday:1794191725:677062
+lasttimeofday: 1794191725:418015
+deltatime:0:259047
+delta: 0.2590332031
+delta too large: 0.3683929443
+timeofday:1794191726:251657
+lasttimeofday: 1794191725:883259
+deltatime:0:368398
+delta: 0.3683929443
+delta too large: 0.3617553711
+timeofday:1794191726:850565
+lasttimeofday: 1794191726:488796
+deltatime:0:361769
+delta: 0.3617553711
+delta too large: 0.3949279785
+timeofday:1794191727:556312
+lasttimeofday: 1794191727:161370
+deltatime:0:394942
+delta: 0.3949279785
+delta too large: 0.398727417
+timeofday:1794191728:182988
+lasttimeofday: 1794191727:784246
+deltatime:0:398742
+delta: 0.398727417
+delta too large: 0.4947052002
+timeofday:1794191728:902356
+lasttimeofday: 1794191728:407649
+deltatime:0:494707
+delta: 0.4947052002
+delta too large: 0.4413299561
+timeofday:1794191729:578949
+lasttimeofday: 1794191729:137618
+deltatime:0:441331
+delta: 0.4413299561
+delta too large: 0.2727661133
+timeofday:1794191730:6097
+lasttimeofday: 1794191729:733322
+deltatime:0:272775
+delta: 0.2727661133
+delta too large: 0.3714141846
+timeofday:1794191730:672919
+lasttimeofday: 1794191730:301494
+deltatime:0:371425
+delta: 0.3714141846
+delta too large: 0.3985443115
+timeofday:1794191731:263279
+lasttimeofday: 1794191730:864726
+deltatime:0:398553
+delta: 0.3985443115
+delta too large: 0.3744506836
+timeofday:1794191731:890473
+lasttimeofday: 1794191731:516019
+deltatime:0:374454
+delta: 0.3744506836
+delta too large: 0.4234466553
+timeofday:1794191732:511048
+lasttimeofday: 1794191732:87597
+deltatime:0:423451
+delta: 0.4234466553
+delta too large: 0.391708374
+timeofday:1794191733:190701
+lasttimeofday: 1794191732:798988
+deltatime:0:391713
+delta: 0.391708374
+delta too large: 0.3890228271
+timeofday:1794191733:814294
+lasttimeofday: 1794191733:425269
+deltatime:0:389025
+delta: 0.3890228271
+delta too large: 0.3675537109
+timeofday:1794191734:459536
+lasttimeofday: 1794191734:91980
+deltatime:0:367556
+delta: 0.3675537109
+delta too large: 0.3754119873
+timeofday:1794191735:19175
+lasttimeofday: 1794191734:643759
+deltatime:0:375416
+delta: 0.3754119873
+delta too large: 0.2586364746
+timeofday:1794191735:486007
+lasttimeofday: 1794191735:227368
+deltatime:0:258639
+delta: 0.2586364746
+delta too large: 0.3579101562
+timeofday:1794191736:70087
+lasttimeofday: 1794191735:712168
+deltatime:0:357919
+delta: 0.3579101562
+delta too large: 0.3583679199
+timeofday:1794191736:640447
+lasttimeofday: 1794191736:282068
+deltatime:0:358379
+delta: 0.3583679199
+delta too large: 0.3476409912
+timeofday:1794191737:183294
+lasttimeofday: 1794191736:835644
+deltatime:0:347650
+delta: 0.3476409912
+delta too large: 0.2824401855
+timeofday:1794191737:644205
+lasttimeofday: 1794191737:361756
+deltatime:0:282449
+delta: 0.2824401855
+delta too large: 0.3312072754
+timeofday:1794191738:265270
+lasttimeofday: 1794191737:934057
+deltatime:0:331213
+delta: 0.3312072754
+delta too large: 0.4666748047
+timeofday:1794191739:4006
+lasttimeofday: 1794191738:537329
+deltatime:0:466677
+delta: 0.4666748047
+delta too large: 0.2024383545
+timeofday:1794191739:206457
+lasttimeofday: 1794191739:4006
+deltatime:0:202451
+delta: 0.2024383545
+delta too large: 0.4007110596
+timeofday:1794191739:758685
+lasttimeofday: 1794191739:357967
+deltatime:0:400718
+delta: 0.4007110596
+delta too large: 0.2301635742
+timeofday:1794191740:399343
+lasttimeofday: 1794191740:169174
+deltatime:0:230169
+delta: 0.2301635742
+delta too large: 0.2454681396
+timeofday:1794191740:979413
+lasttimeofday: 1794191740:733942
+deltatime:0:245471
+delta: 0.2454681396
+delta too large: 0.2520599365
+timeofday:1794191742:592978
+lasttimeofday: 1794191742:340916
+deltatime:0:252062
+delta: 0.2520599365
+delta too large: 0.2152557373
+timeofday:1794191746:696176
+lasttimeofday: 1794191746:480920
+deltatime:0:215256
+delta: 0.2152557373
+delta too large: 0.2916107178
+timeofday:1794191767:285916
+lasttimeofday: 1794191766:994304
+deltatime:0:291612
+delta: 0.2916107178
+delta too large: 0.2108917236
+timeofday:1794191767:639175
+lasttimeofday: 1794191767:428278
+deltatime:0:210897
+delta: 0.2108917236
+delta too large: 0.2658996582
+timeofday:1794191768:26141
+lasttimeofday: 1794191767:760235
+deltatime:0:265906
+delta: 0.2658996582
+delta too large: 0.2245483398
+timeofday:1794191768:415577
+lasttimeofday: 1794191768:191024
+deltatime:0:224553
+delta: 0.2245483398
+delta too large: 0.2556304932
+timeofday:1794191769:44311
+lasttimeofday: 1794191768:788671
+deltatime:0:255640
+delta: 0.2556304932
+delta too large: 0.2649536133
+timeofday:1794191769:503379
+lasttimeofday: 1794191769:238423
+deltatime:0:264956
+delta: 0.2649536133
+delta too large: 0.3410949707
+timeofday:1794191769:986883
+lasttimeofday: 1794191769:645773
+deltatime:0:341110
+delta: 0.3410949707
+delta too large: 0.2206878662
+timeofday:1794191770:352879
+lasttimeofday: 1794191770:132183
+deltatime:0:220696
+delta: 0.2206878662
+delta too large: 0.2149200439
+timeofday:1794191770:676598
+lasttimeofday: 1794191770:461663
+deltatime:0:214935
+delta: 0.2149200439
+delta too large: 0.2328338623
+timeofday:1794191771:99988
+lasttimeofday: 1794191770:867145
+deltatime:0:232843
+delta: 0.2328338623
+delta too large: 0.3201446533
+timeofday:1794191771:643229
+lasttimeofday: 1794191771:323083
+deltatime:0:320146
+delta: 0.3201446533
+delta too large: 0.2428131104
+timeofday:1794191772:75670
+lasttimeofday: 1794191771:832844
+deltatime:0:242826
+delta: 0.2428131104
+delta too large: 0.2158966064
+timeofday:1794191772:831763
+lasttimeofday: 1794191772:615854
+deltatime:0:215909
+delta: 0.2158966064
+delta too large: 0.2798614502
+timeofday:1794191773:338680
+lasttimeofday: 1794191773:58805
+deltatime:0:279875
+delta: 0.2798614502
+delta too large: 0.2453918457
+timeofday:1794191773:704771
+lasttimeofday: 1794191773:459364
+deltatime:0:245407
+delta: 0.2453918457
+delta too large: 0.2385406494
+timeofday:1794191774:96066
+lasttimeofday: 1794191773:857517
+deltatime:0:238549
+delta: 0.2385406494
+delta too large: 0.3524475098
+timeofday:1794191774:633379
+lasttimeofday: 1794191774:280919
+deltatime:0:352460
+delta: 0.3524475098
+delta too large: 0.3402099609
+timeofday:1794191775:222131
+lasttimeofday: 1794191774:881910
+deltatime:0:340221
+delta: 0.3402099609
+delta too large: 0.2535400391
+timeofday:1794191775:663622
+lasttimeofday: 1794191775:410076
+deltatime:0:253546
+delta: 0.2535400391
+delta too large: 0.2348937988
+timeofday:1794191776:27705
+lasttimeofday: 1794191775:792806
+deltatime:0:234899
+delta: 0.2348937988
+delta too large: 0.419418335
+timeofday:1794191776:743088
+lasttimeofday: 1794191776:323668
+deltatime:0:419420
+delta: 0.419418335
+delta too large: 0.2552032471
+timeofday:1794191777:180196
+lasttimeofday: 1794191776:924990
+deltatime:0:255206
+delta: 0.2552032471
+delta too large: 0.2582855225
+timeofday:1794191777:649920
+lasttimeofday: 1794191777:391632
+deltatime:0:258288
+delta: 0.2582855225
+delta too large: 0.2549438477
+timeofday:1794191778:140434
+lasttimeofday: 1794191777:885486
+deltatime:0:254948
+delta: 0.2549438477
+delta too large: 0.3557281494
+timeofday:1794191778:674203
+lasttimeofday: 1794191778:318473
+deltatime:0:355730
+delta: 0.3557281494
+delta too large: 0.2477264404
+timeofday:1794191779:178937
+lasttimeofday: 1794191778:931203
+deltatime:0:247734
+delta: 0.2477264404
+delta too large: 0.205078125
+timeofday:1794191780:397730
+lasttimeofday: 1794191780:192643
+deltatime:0:205087
+delta: 0.205078125
+delta too large: 0.2504119873
+timeofday:1794191780:804904
+lasttimeofday: 1794191780:554489
+deltatime:0:250415
+delta: 0.2504119873
+delta too large: 0.2544555664
+timeofday:1794191781:233521
+lasttimeofday: 1794191780:979051
+deltatime:0:254470
+delta: 0.2544555664
+delta too large: 0.2588653564
+timeofday:1794191781:649893
+lasttimeofday: 1794191781:391019
+deltatime:0:258874
+delta: 0.2588653564
+delta too large: 0.2377624512
+timeofday:1794191782:115134
+lasttimeofday: 1794191781:877358
+deltatime:0:237776
+delta: 0.2377624512
+delta too large: 0.2446289062
+timeofday:1794191782:567485
+lasttimeofday: 1794191782:322844
+deltatime:0:244641
+delta: 0.2446289062
+delta too large: 0.2159881592
+timeofday:1794191782:995542
+lasttimeofday: 1794191782:779542
+deltatime:0:216000
+delta: 0.2159881592
+delta too large: 0.2080383301
+timeofday:1794191783:416007
+lasttimeofday: 1794191783:207961
+deltatime:0:208046
+delta: 0.2080383301
+delta too large: 0.216217041
+timeofday:1794191783:750182
+lasttimeofday: 1794191783:533957
+deltatime:0:216225
+delta: 0.216217041
+delta too large: 0.2252044678
+timeofday:1794191784:140560
+lasttimeofday: 1794191783:915355
+deltatime:0:225205
+delta: 0.2252044678
+delta too large: 0.2648162842
+timeofday:1794191784:601066
+lasttimeofday: 1794191784:336237
+deltatime:0:264829
+delta: 0.2648162842
+delta too large: 0.2631988525
+timeofday:1794191785:81856
+lasttimeofday: 1794191784:818648
+deltatime:0:263208
+delta: 0.2631988525
+delta too large: 0.2344055176
+timeofday:1794191785:512225
+lasttimeofday: 1794191785:277818
+deltatime:0:234407
+delta: 0.2344055176
+delta too large: 0.2644348145
+timeofday:1794191785:918042
+lasttimeofday: 1794191785:653602
+deltatime:0:264440
+delta: 0.2644348145
+delta too large: 0.2449951172
+timeofday:1794191786:317787
+lasttimeofday: 1794191786:72777
+deltatime:0:245010
+delta: 0.2449951172
+delta too large: 0.2125091553
+timeofday:1794191786:744699
+lasttimeofday: 1794191786:532188
+deltatime:0:212511
+delta: 0.2125091553
+delta too large: 0.2317504883
+timeofday:1794191787:209649
+lasttimeofday: 1794191786:977885
+deltatime:0:231764
+delta: 0.2317504883
+delta too large: 0.3223266602
+timeofday:1794191787:661131
+lasttimeofday: 1794191787:338802
+deltatime:0:322329
+delta: 0.3223266602
+delta too large: 0.2417602539
+timeofday:1794191788:165262
+lasttimeofday: 1794191787:923495
+deltatime:0:241767
+delta: 0.2417602539
+delta too large: 0.2474365234
+timeofday:1794191788:537307
+lasttimeofday: 1794191788:289863
+deltatime:0:247444
+delta: 0.2474365234
+delta too large: 0.2744293213
+timeofday:1794191789:75123
+lasttimeofday: 1794191788:800680
+deltatime:0:274443
+delta: 0.2744293213
+delta too large: 0.2269592285
+timeofday:1794191789:529796
+lasttimeofday: 1794191789:302834
+deltatime:0:226962
+delta: 0.2269592285
+delta too large: 0.2766571045
+timeofday:1794191790:63644
+lasttimeofday: 1794191789:786984
+deltatime:0:276660
+delta: 0.2766571045
+delta too large: 0.2107543945
+timeofday:1794191790:404134
+lasttimeofday: 1794191790:193374
+deltatime:0:210760
+delta: 0.2107543945
+delta too large: 0.245803833
+timeofday:1794191790:795684
+lasttimeofday: 1794191790:549868
+deltatime:0:245816
+delta: 0.245803833
+delta too large: 0.2916259766
+timeofday:1794191791:251534
+lasttimeofday: 1794191790:959907
+deltatime:0:291627
+delta: 0.2916259766
+delta too large: 0.2448577881
+timeofday:1794191791:704010
+lasttimeofday: 1794191791:459148
+deltatime:0:244862
+delta: 0.2448577881
+delta too large: 0.3043518066
+timeofday:1794191792:152301
+lasttimeofday: 1794191791:847939
+deltatime:0:304362
+delta: 0.3043518066
+delta too large: 0.2622375488
+timeofday:1794191792:667663
+lasttimeofday: 1794191792:405411
+deltatime:0:262252
+delta: 0.2622375488
+delta too large: 0.2989959717
+timeofday:1794191793:140270
+lasttimeofday: 1794191792:841272
+deltatime:0:298998
+delta: 0.2989959717
+delta too large: 0.24609375
+timeofday:1794191793:608056
+lasttimeofday: 1794191793:361952
+deltatime:0:246104
+delta: 0.24609375
+delta too large: 0.2047424316
+timeofday:1794191793:945853
+lasttimeofday: 1794191793:741096
+deltatime:0:204757
+delta: 0.2047424316
+delta too large: 0.2716064453
+timeofday:1794191794:399927
+lasttimeofday: 1794191794:128316
+deltatime:0:271611
+delta: 0.2716064453
+delta too large: 0.2994842529
+timeofday:1794191794:915927
+lasttimeofday: 1794191794:616438
+deltatime:0:299489
+delta: 0.2994842529
+delta too large: 0.3196411133
+timeofday:1794191795:418752
+lasttimeofday: 1794191795:99103
+deltatime:0:319649
+delta: 0.3196411133
+delta too large: 0.3226165771
+timeofday:1794191795:999252
+lasttimeofday: 1794191795:676634
+deltatime:0:322618
+delta: 0.3226165771
+delta too large: 0.23387146
+timeofday:1794191818:20195
+lasttimeofday: 1794191817:786312
+deltatime:0:233883
+delta: 0.23387146
+delta too large: 0.2532501221
+timeofday:1794191818:478980
+lasttimeofday: 1794191818:225718
+deltatime:0:253262
+delta: 0.2532501221
+delta too large: 0.2691802979
+timeofday:1794191818:912069
+lasttimeofday: 1794191818:642886
+deltatime:0:269183
+delta: 0.2691802979
+delta too large: 0.2563018799
+timeofday:1794191819:343275
+lasttimeofday: 1794191819:86960
+deltatime:0:256315
+delta: 0.2563018799
+delta too large: 0.2385864258
+timeofday:1794191819:866922
+lasttimeofday: 1794191819:628330
+deltatime:0:238592
+delta: 0.2385864258
+delta too large: 0.2349700928
+timeofday:1794191820:284034
+lasttimeofday: 1794191820:49055
+deltatime:0:234979
+delta: 0.2349700928
+delta too large: 0.2669830322
+timeofday:1794191820:677419
+lasttimeofday: 1794191820:410423
+deltatime:0:266996
+delta: 0.2669830322
+delta too large: 0.2745666504
+timeofday:1794191821:100784
+lasttimeofday: 1794191820:826211
+deltatime:0:274573
+delta: 0.2745666504
+delta too large: 0.2284698486
+timeofday:1794191821:549260
+lasttimeofday: 1794191821:320780
+deltatime:0:228480
+delta: 0.2284698486
+delta too large: 0.2245941162
+timeofday:1794191821:967019
+lasttimeofday: 1794191821:742423
+deltatime:0:224596
+delta: 0.2245941162
+delta too large: 0.2057189941
+timeofday:1794191822:315847
+lasttimeofday: 1794191822:110126
+deltatime:0:205721
+delta: 0.2057189941
+delta too large: 0.2401580811
+timeofday:1794191822:762692
+lasttimeofday: 1794191822:522524
+deltatime:0:240168
+delta: 0.2401580811
+delta too large: 0.2494049072
+timeofday:1794191823:279453
+lasttimeofday: 1794191823:30041
+deltatime:0:249412
+delta: 0.2494049072
+delta too large: 0.2567138672
+timeofday:1794191823:740295
+lasttimeofday: 1794191823:483573
+deltatime:0:256722
+delta: 0.2567138672
+delta too large: 0.2399902344
+timeofday:1794191824:141311
+lasttimeofday: 1794191823:901312
+deltatime:0:239999
+delta: 0.2399902344
+delta too large: 0.2830810547
+timeofday:1794191824:666650
+lasttimeofday: 1794191824:383561
+deltatime:0:283089
+delta: 0.2830810547
+delta too large: 0.2582550049
+timeofday:1794191825:203057
+lasttimeofday: 1794191824:944798
+deltatime:0:258259
+delta: 0.2582550049
+delta too large: 0.3026275635
+timeofday:1794191826:32537
+lasttimeofday: 1794191825:729906
+deltatime:0:302631
+delta: 0.3026275635
+delta too large: 0.2471923828
+timeofday:1794191826:525339
+lasttimeofday: 1794191826:278136
+deltatime:0:247203
+delta: 0.2471923828
+delta too large: 0.2240905762
+timeofday:1794191826:922239
+lasttimeofday: 1794191826:698139
+deltatime:0:224100
+delta: 0.2240905762
+delta too large: 0.2500152588
+timeofday:1794191827:365766
+lasttimeofday: 1794191827:115736
+deltatime:0:250030
+delta: 0.2500152588
+delta too large: 0.2289428711
+timeofday:1794191827:792180
+lasttimeofday: 1794191827:563226
+deltatime:0:228954
+delta: 0.2289428711
+delta too large: 0.2561035156
+timeofday:1794191828:220244
+lasttimeofday: 1794191827:964135
+deltatime:0:256109
+delta: 0.2561035156
+delta too large: 0.2959899902
+timeofday:1794191828:721724
+lasttimeofday: 1794191828:425732
+deltatime:0:295992
+delta: 0.2959899902
+delta too large: 0.2587890625
+timeofday:1794191829:150850
+lasttimeofday: 1794191828:892055
+deltatime:0:258795
+delta: 0.2587890625
+delta too large: 0.2141723633
+timeofday:1794191829:566063
+lasttimeofday: 1794191829:351879
+deltatime:0:214184
+delta: 0.2141723633
+delta too large: 0.3621673584
+timeofday:1794191830:176273
+lasttimeofday: 1794191829:814098
+deltatime:0:362175
+delta: 0.3621673584
+delta too large: 0.2518768311
+timeofday:1794191830:612842
+lasttimeofday: 1794191830:360952
+deltatime:0:251890
+delta: 0.2518768311
+delta too large: 0.2707824707
+timeofday:1794191831:96130
+lasttimeofday: 1794191830:825337
+deltatime:0:270793
+delta: 0.2707824707
+delta too large: 0.2382049561
+timeofday:1794191831:498203
+lasttimeofday: 1794191831:259992
+deltatime:0:238211
+delta: 0.2382049561
+delta too large: 0.2756652832
+timeofday:1794191831:964800
+lasttimeofday: 1794191831:689132
+deltatime:0:275668
+delta: 0.2756652832
+delta too large: 0.2566223145
+timeofday:1794191832:381656
+lasttimeofday: 1794191832:125025
+deltatime:0:256631
+delta: 0.2566223145
+delta too large: 0.2363128662
+timeofday:1794191832:771648
+lasttimeofday: 1794191832:535321
+deltatime:0:236327
+delta: 0.2363128662
+delta too large: 0.2471160889
+timeofday:1794191833:162994
+lasttimeofday: 1794191832:915876
+deltatime:0:247118
+delta: 0.2471160889
+delta too large: 0.3131713867
+timeofday:1794191833:613185
+lasttimeofday: 1794191833:300009
+deltatime:0:313176
+delta: 0.3131713867
+delta too large: 0.2904205322
+timeofday:1794191834:58273
+lasttimeofday: 1794191833:767843
+deltatime:0:290430
+delta: 0.2904205322
+delta too large: 0.2152099609
+timeofday:1794191834:411186
+lasttimeofday: 1794191834:195971
+deltatime:0:215215
+delta: 0.2152099609
+delta too large: 0.2832489014
+timeofday:1794191834:833811
+lasttimeofday: 1794191834:550562
+deltatime:0:283249
+delta: 0.2832489014
+delta too large: 0.2615203857
+timeofday:1794191835:251539
+lasttimeofday: 1794191834:990006
+deltatime:0:261533
+delta: 0.2615203857
+delta too large: 0.2643280029
+timeofday:1794191835:668258
+lasttimeofday: 1794191835:403923
+deltatime:0:264335
+delta: 0.2643280029
+delta too large: 0.2376251221
+timeofday:1794191836:38887
+lasttimeofday: 1794191835:801256
+deltatime:0:237631
+delta: 0.2376251221
+delta too large: 0.2889404297
+timeofday:1794191836:515282
+lasttimeofday: 1794191836:226332
+deltatime:0:288950
+delta: 0.2889404297
+delta too large: 0.2507019043
+timeofday:1794191836:975669
+lasttimeofday: 1794191836:724965
+deltatime:0:250704
+delta: 0.2507019043
+delta too large: 0.2102813721
+timeofday:1794191837:363085
+lasttimeofday: 1794191837:152791
+deltatime:0:210294
+delta: 0.2102813721
+delta too large: 0.2009429932
+timeofday:1794191837:755485
+lasttimeofday: 1794191837:554527
+deltatime:0:200958
+delta: 0.2009429932
+delta too large: 0.2285308838
+timeofday:1794191838:248353
+lasttimeofday: 1794191838:19807
+deltatime:0:228546
+delta: 0.2285308838
+delta too large: 0.3030548096
+timeofday:1794191838:731915
+lasttimeofday: 1794191838:428846
+deltatime:0:303069
+delta: 0.3030548096
+delta too large: 0.2449188232
+timeofday:1794191839:260935
+lasttimeofday: 1794191839:16012
+deltatime:0:244923
+delta: 0.2449188232
+delta too large: 0.2460479736
+timeofday:1794191839:670249
+lasttimeofday: 1794191839:424193
+deltatime:0:246056
+delta: 0.2460479736
+delta too large: 0.3580627441
+timeofday:1794191840:277129
+lasttimeofday: 1794191839:919059
+deltatime:0:358070
+delta: 0.3580627441
+delta too large: 0.2801971436
+timeofday:1794191840:758678
+lasttimeofday: 1794191840:478466
+deltatime:0:280212
+delta: 0.2801971436
+delta too large: 0.247177124
+timeofday:1794191841:163697
+lasttimeofday: 1794191840:916516
+deltatime:0:247181
+delta: 0.247177124
+delta too large: 0.2691040039
+timeofday:1794191841:567589
+lasttimeofday: 1794191841:298480
+deltatime:0:269109
+delta: 0.2691040039
+delta too large: 0.2602386475
+timeofday:1794191841:958991
+lasttimeofday: 1794191841:698740
+deltatime:0:260251
+delta: 0.2602386475
+delta too large: 0.2290649414
+timeofday:1794191842:426989
+lasttimeofday: 1794191842:197923
+deltatime:0:229066
+delta: 0.2290649414
+delta too large: 0.2604370117
+timeofday:1794191842:890652
+lasttimeofday: 1794191842:630209
+deltatime:0:260443
+delta: 0.2604370117
+delta too large: 0.2538299561
+timeofday:1794191843:349601
+lasttimeofday: 1794191843:95756
+deltatime:0:253845
+delta: 0.2538299561
+delta too large: 0.2511291504
+timeofday:1794191843:914870
+lasttimeofday: 1794191843:663730
+deltatime:0:251140
+delta: 0.2511291504
+delta too large: 0.2126464844
+timeofday:1794191844:335169
+lasttimeofday: 1794191844:122518
+deltatime:0:212651
+delta: 0.2126464844
+delta too large: 0.2932739258
+timeofday:1794191844:759178
+lasttimeofday: 1794191844:465899
+deltatime:0:293279
+delta: 0.2932739258
+delta too large: 0.2254638672
+timeofday:1794191845:192243
+lasttimeofday: 1794191844:966766
+deltatime:0:225477
+delta: 0.2254638672
+delta too large: 0.2698364258
+timeofday:1794191845:602203
+lasttimeofday: 1794191845:332358
+deltatime:0:269845
+delta: 0.2698364258
+delta too large: 0.26902771
+timeofday:1794191846:59721
+lasttimeofday: 1794191845:790687
+deltatime:0:269034
+delta: 0.26902771
+delta too large: 0.2980651855
+timeofday:1794191846:567796
+lasttimeofday: 1794191846:269726
+deltatime:0:298070
+delta: 0.2980651855
+delta too large: 0.3408508301
+timeofday:1794191847:99154
+lasttimeofday: 1794191846:758296
+deltatime:0:340858
+delta: 0.3408508301
+delta too large: 0.2917633057
+timeofday:1794191847:641977
+lasttimeofday: 1794191847:350208
+deltatime:0:291769
+delta: 0.2917633057
+delta too large: 0.2307891846
+timeofday:1794191848:143194
+lasttimeofday: 1794191847:912391
+deltatime:0:230803
+delta: 0.2307891846
+delta too large: 0.2789916992
+timeofday:1794191848:552917
+lasttimeofday: 1794191848:273914
+deltatime:0:279003
+delta: 0.2789916992
+delta too large: 0.310043335
+timeofday:1794191849:90817
+lasttimeofday: 1794191848:780759
+deltatime:0:310058
+delta: 0.310043335
+delta too large: 0.2999267578
+timeofday:1794191849:572196
+lasttimeofday: 1794191849:272256
+deltatime:0:299940
+delta: 0.2999267578
+delta too large: 0.207901001
+timeofday:1794191849:909766
+lasttimeofday: 1794191849:701853
+deltatime:0:207913
+delta: 0.207901001
+delta too large: 0.2497558594
+timeofday:1794191850:354568
+lasttimeofday: 1794191850:104805
+deltatime:0:249763
+delta: 0.2497558594
+delta too large: 0.2571411133
+timeofday:1794191850:788199
+lasttimeofday: 1794191850:531051
+deltatime:0:257148
+delta: 0.2571411133
+delta too large: 0.2655792236
+timeofday:1794191851:213649
+lasttimeofday: 1794191850:948061
+deltatime:0:265588
+delta: 0.2655792236
+delta too large: 0.2351226807
+timeofday:1794191851:583929
+lasttimeofday: 1794191851:348792
+deltatime:0:235137
+delta: 0.2351226807
+delta too large: 0.2274627686
+timeofday:1794191852:15049
+lasttimeofday: 1794191851:787575
+deltatime:0:227474
+delta: 0.2274627686
+delta too large: 0.2472839355
+timeofday:1794191852:457658
+lasttimeofday: 1794191852:210368
+deltatime:0:247290
+delta: 0.2472839355
+delta too large: 0.2821655273
+timeofday:1794191852:898331
+lasttimeofday: 1794191852:616162
+deltatime:0:282169
+delta: 0.2821655273
+delta too large: 0.2500915527
+timeofday:1794191853:329760
+lasttimeofday: 1794191853:79661
+deltatime:0:250099
+delta: 0.2500915527
+delta too large: 0.2679595947
+timeofday:1794191853:739959
+lasttimeofday: 1794191853:471996
+deltatime:0:267963
+delta: 0.2679595947
+delta too large: 0.2639770508
+timeofday:1794191854:208071
+lasttimeofday: 1794191853:944091
+deltatime:0:263980
+delta: 0.2639770508
+delta too large: 0.3695678711
+timeofday:1794191854:807154
+lasttimeofday: 1794191854:437576
+deltatime:0:369578
+delta: 0.3695678711
+delta too large: 0.2249450684
+timeofday:1794191855:223665
+lasttimeofday: 1794191854:998713
+deltatime:0:224952
+delta: 0.2249450684
+delta too large: 0.297454834
+timeofday:1794191855:724373
+lasttimeofday: 1794191855:426912
+deltatime:0:297461
+delta: 0.297454834
+delta too large: 0.234664917
+timeofday:1794191856:159560
+lasttimeofday: 1794191855:924895
+deltatime:0:234665
+delta: 0.234664917
+delta too large: 0.2082214355
+timeofday:1794191856:607169
+lasttimeofday: 1794191856:398939
+deltatime:0:208230
+delta: 0.2082214355
+delta too large: 0.3024139404
+timeofday:1794191857:32864
+lasttimeofday: 1794191856:730437
+deltatime:0:302427
+delta: 0.3024139404
+delta too large: 0.2517089844
+timeofday:1794191857:478023
+lasttimeofday: 1794191857:226304
+deltatime:0:251719
+delta: 0.2517089844
+delta too large: 0.2443847656
+timeofday:1794191857:968014
+lasttimeofday: 1794191857:723614
+deltatime:0:244400
+delta: 0.2443847656
+delta too large: 0.238494873
+timeofday:1794191858:333163
+lasttimeofday: 1794191858:94666
+deltatime:0:238497
+delta: 0.238494873
+delta too large: 0.2450714111
+timeofday:1794191858:809579
+lasttimeofday: 1794191858:564505
+deltatime:0:245074
+delta: 0.2450714111
+delta too large: 0.2498931885
+timeofday:1794191859:260773
+lasttimeofday: 1794191859:10865
+deltatime:0:249908
+delta: 0.2498931885
+delta too large: 0.2022857666
+timeofday:1794191859:589845
+lasttimeofday: 1794191859:387547
+deltatime:0:202298
+delta: 0.2022857666
+delta too large: 0.2230377197
+timeofday:1794191859:974672
+lasttimeofday: 1794191859:751624
+deltatime:0:223048
+delta: 0.2230377197
+delta too large: 0.2056121826
+timeofday:1794191860:368521
+lasttimeofday: 1794191860:162907
+deltatime:0:205614
+delta: 0.2056121826
+delta too large: 0.2461395264
+timeofday:1794191860:844973
+lasttimeofday: 1794191860:598829
+deltatime:0:246144
+delta: 0.2461395264
+delta too large: 0.287979126
+timeofday:1794191861:380166
+lasttimeofday: 1794191861:92178
+deltatime:0:287988
+delta: 0.287979126
+delta too large: 0.279510498
+timeofday:1794191861:798518
+lasttimeofday: 1794191861:518995
+deltatime:0:279523
+delta: 0.279510498
+delta too large: 0.2332458496
+timeofday:1794191862:186973
+lasttimeofday: 1794191861:953714
+deltatime:0:233259
+delta: 0.2332458496
+delta too large: 0.2328643799
+timeofday:1794191862:659959
+lasttimeofday: 1794191862:427094
+deltatime:0:232865
+delta: 0.2328643799
+delta too large: 0.2275543213
+timeofday:1794191863:20049
+lasttimeofday: 1794191862:792489
+deltatime:0:227560
+delta: 0.2275543213
+delta too large: 0.2476654053
+timeofday:1794191863:492854
+lasttimeofday: 1794191863:245176
+deltatime:0:247678
+delta: 0.2476654053
+delta too large: 0.2695617676
+timeofday:1794191863:927283
+lasttimeofday: 1794191863:657715
+deltatime:0:269568
+delta: 0.2695617676
+delta too large: 0.2431182861
+timeofday:1794191864:321192
+lasttimeofday: 1794191864:78065
+deltatime:0:243127
+delta: 0.2431182861
+delta too large: 0.2270050049
+timeofday:1794191893:168250
+lasttimeofday: 1794191892:941238
+deltatime:0:227012
+delta: 0.2270050049
+delta too large: 0.2645721436
+timeofday:1794191893:620680
+lasttimeofday: 1794191893:356100
+deltatime:0:264580
+delta: 0.2645721436
+delta too large: 0.2403869629
+timeofday:1794191894:139221
+lasttimeofday: 1794191893:898821
+deltatime:0:240400
+delta: 0.2403869629
+delta too large: 0.2602081299
+timeofday:1794191894:634402
+lasttimeofday: 1794191894:374181
+deltatime:0:260221
+delta: 0.2602081299
+delta too large: 0.2491912842
+timeofday:1794191895:159134
+lasttimeofday: 1794191894:909938
+deltatime:0:249196
+delta: 0.2491912842
+delta too large: 0.3298797607
+timeofday:1794191895:667104
+lasttimeofday: 1794191895:337220
+deltatime:0:329884
+delta: 0.3298797607
+delta too large: 0.275390625
+timeofday:1794191896:147419
+lasttimeofday: 1794191895:872019
+deltatime:0:275400
+delta: 0.275390625
+delta too large: 0.4904022217
+timeofday:1794191896:873576
+lasttimeofday: 1794191896:383170
+deltatime:0:490406
+delta: 0.4904022217
+delta too large: 0.3602752686
+timeofday:1794191897:487190
+lasttimeofday: 1794191897:126910
+deltatime:0:360280
+delta: 0.3602752686
+delta too large: 0.2529754639
+timeofday:1794191897:969090
+lasttimeofday: 1794191897:716102
+deltatime:0:252988
+delta: 0.2529754639
+delta too large: 0.3348846436
+timeofday:1794191898:478555
+lasttimeofday: 1794191898:143658
+deltatime:0:334897
+delta: 0.3348846436
+delta too large: 0.330581665
+timeofday:1794191899:14773
+lasttimeofday: 1794191898:684190
+deltatime:0:330583
+delta: 0.330581665
+delta too large: 0.3026885986
+timeofday:1794191899:468055
+lasttimeofday: 1794191899:165355
+deltatime:0:302700
+delta: 0.3026885986
+delta too large: 0.2894744873
+timeofday:1794191899:986239
+lasttimeofday: 1794191899:696750
+deltatime:0:289489
+delta: 0.2894744873
+delta too large: 0.2974700928
+timeofday:1794191900:487831
+lasttimeofday: 1794191900:190360
+deltatime:0:297471
+delta: 0.2974700928
+delta too large: 0.2725219727
+timeofday:1794191900:982395
+lasttimeofday: 1794191900:709868
+deltatime:0:272527
+delta: 0.2725219727
+delta too large: 0.2760162354
+timeofday:1794191901:432534
+lasttimeofday: 1794191901:156516
+deltatime:0:276018
+delta: 0.2760162354
+delta too large: 0.3320465088
+timeofday:1794191901:928103
+lasttimeofday: 1794191901:596050
+deltatime:0:332053
+delta: 0.3320465088
+delta too large: 0.3216552734
+timeofday:1794191902:398056
+lasttimeofday: 1794191902:76387
+deltatime:0:321669
+delta: 0.3216552734
+delta too large: 0.3549499512
+timeofday:1794191902:954987
+lasttimeofday: 1794191902:600027
+deltatime:0:354960
+delta: 0.3549499512
+delta too large: 0.3668060303
+timeofday:1794191903:539026
+lasttimeofday: 1794191903:172208
+deltatime:0:366818
+delta: 0.3668060303
+delta too large: 0.2994537354
+timeofday:1794191904:8786
+lasttimeofday: 1794191903:709322
+deltatime:0:299464
+delta: 0.2994537354
+delta too large: 0.2326965332
+timeofday:1794191904:391006
+lasttimeofday: 1794191904:158304
+deltatime:0:232702
+delta: 0.2326965332
+delta too large: 0.242767334
+timeofday:1794191904:787676
+lasttimeofday: 1794191904:544901
+deltatime:0:242775
+delta: 0.242767334
+delta too large: 0.2897033691
+timeofday:1794191905:257678
+lasttimeofday: 1794191904:967961
+deltatime:0:289717
+delta: 0.2897033691
+delta too large: 0.3349151611
+timeofday:1794191905:822311
+lasttimeofday: 1794191905:487393
+deltatime:0:334918
+delta: 0.3349151611
+delta too large: 0.3159179688
+timeofday:1794191906:336921
+lasttimeofday: 1794191906:20993
+deltatime:0:315928
+delta: 0.3159179688
+delta too large: 0.256362915
+timeofday:1794191906:806440
+lasttimeofday: 1794191906:550070
+deltatime:0:256370
+delta: 0.256362915
+delta too large: 0.2387084961
+timeofday:1794191907:203135
+lasttimeofday: 1794191906:964416
+deltatime:0:238719
+delta: 0.2387084961
+delta too large: 0.2030029297
+timeofday:1794191907:544491
+lasttimeofday: 1794191907:341476
+deltatime:0:203015
+delta: 0.2030029297
+delta too large: 0.2168731689
+timeofday:1794191907:975189
+lasttimeofday: 1794191907:758310
+deltatime:0:216879
+delta: 0.2168731689
+delta too large: 0.2177276611
+timeofday:1794191908:376937
+lasttimeofday: 1794191908:159208
+deltatime:0:217729
+delta: 0.2177276611
+delta too large: 0.291015625
+timeofday:1794191908:873903
+lasttimeofday: 1794191908:582875
+deltatime:0:291028
+delta: 0.291015625
+delta too large: 0.2138366699
+timeofday:1794191909:316426
+lasttimeofday: 1794191909:102582
+deltatime:0:213844
+delta: 0.2138366699
+delta too large: 0.2174682617
+timeofday:1794191909:740210
+lasttimeofday: 1794191909:522730
+deltatime:0:217480
+delta: 0.2174682617
+delta too large: 0.3112487793
+timeofday:1794191910:277672
+lasttimeofday: 1794191909:966413
+deltatime:0:311259
+delta: 0.3112487793
+delta too large: 0.3330078125
+timeofday:1794191910:882650
+lasttimeofday: 1794191910:549641
+deltatime:0:333009
+delta: 0.3330078125
+delta too large: 0.2942504883
+timeofday:1794191911:453128
+lasttimeofday: 1794191911:158872
+deltatime:0:294256
+delta: 0.2942504883
+delta too large: 0.2303771973
+timeofday:1794191911:902883
+lasttimeofday: 1794191911:672498
+deltatime:0:230385
+delta: 0.2303771973
+delta too large: 0.2072753906
+timeofday:1794191912:330902
+lasttimeofday: 1794191912:123624
+deltatime:0:207278
+delta: 0.2072753906
+delta too large: 0.2914276123
+timeofday:1794191912:778599
+lasttimeofday: 1794191912:487163
+deltatime:0:291436
+delta: 0.2914276123
+delta too large: 0.2445068359
+timeofday:1794191913:225228
+lasttimeofday: 1794191912:980715
+deltatime:0:244513
+delta: 0.2445068359
+delta too large: 0.2361450195
+timeofday:1794191913:690626
+lasttimeofday: 1794191913:454471
+deltatime:0:236155
+delta: 0.2361450195
+delta too large: 0.3411560059
+timeofday:1794191914:208201
+lasttimeofday: 1794191913:867030
+deltatime:0:341171
+delta: 0.3411560059
+delta too large: 0.3279266357
+timeofday:1794191914:804957
+lasttimeofday: 1794191914:477016
+deltatime:0:327941
+delta: 0.3279266357
+delta too large: 0.270904541
+timeofday:1794191915:342003
+lasttimeofday: 1794191915:71093
+deltatime:0:270910
+delta: 0.270904541
+delta too large: 0.2537994385
+timeofday:1794191915:781617
+lasttimeofday: 1794191915:527812
+deltatime:0:253805
+delta: 0.2537994385
+delta too large: 0.2700805664
+timeofday:1794191916:229603
+lasttimeofday: 1794191915:959512
+deltatime:0:270091
+delta: 0.2700805664
+delta too large: 0.3094787598
+timeofday:1794191916:687985
+lasttimeofday: 1794191916:378500
+deltatime:0:309485
+delta: 0.3094787598
+delta too large: 0.3678283691
+timeofday:1794191917:245995
+lasttimeofday: 1794191916:878158
+deltatime:0:367837
+delta: 0.3678283691
+delta too large: 0.2026062012
+timeofday:1794191917:448608
+lasttimeofday: 1794191917:245995
+deltatime:0:202613
+delta: 0.2026062012
+delta too large: 0.4086456299
+timeofday:1794191917:975942
+lasttimeofday: 1794191917:567288
+deltatime:0:408654
+delta: 0.4086456299
+delta too large: 0.4036407471
+timeofday:1794191918:595187
+lasttimeofday: 1794191918:191533
+deltatime:0:403654
+delta: 0.4036407471
+delta too large: 0.325088501
+timeofday:1794191919:168502
+lasttimeofday: 1794191918:843407
+deltatime:0:325095
+delta: 0.325088501
+delta too large: 0.3117370605
+timeofday:1794191919:704954
+lasttimeofday: 1794191919:393213
+deltatime:0:311741
+delta: 0.3117370605
+delta too large: 0.2211456299
+timeofday:1794191920:145129
+lasttimeofday: 1794191919:923974
+deltatime:0:221155
+delta: 0.2211456299
+delta too large: 0.244644165
+timeofday:1794191920:575047
+lasttimeofday: 1794191920:330389
+deltatime:0:244658
+delta: 0.244644165
+delta too large: 0.2600097656
+timeofday:1794191920:950822
+lasttimeofday: 1794191920:690799
+deltatime:0:260023
+delta: 0.2600097656
+delta too large: 0.2705841064
+timeofday:1794191921:443338
+lasttimeofday: 1794191921:172745
+deltatime:0:270593
+delta: 0.2705841064
+delta too large: 0.2890014648
+timeofday:1794191921:950904
+lasttimeofday: 1794191921:661899
+deltatime:0:289005
+delta: 0.2890014648
+delta too large: 0.2635192871
+timeofday:1794191922:396084
+lasttimeofday: 1794191922:132561
+deltatime:0:263523
+delta: 0.2635192871
+delta too large: 0.2163848877
+timeofday:1794191923:266706
+lasttimeofday: 1794191923:50316
+deltatime:0:216390
+delta: 0.2163848877
+delta too large: 0.2556915283
+timeofday:1794191923:715922
+lasttimeofday: 1794191923:460221
+deltatime:0:255701
+delta: 0.2556915283
+delta too large: 0.2354888916
+timeofday:1794191924:82808
+lasttimeofday: 1794191923:847312
+deltatime:0:235496
+delta: 0.2354888916
+delta too large: 0.2059783936
+timeofday:1794191924:477148
+lasttimeofday: 1794191924:271166
+deltatime:0:205982
+delta: 0.2059783936
+delta too large: 0.3195953369
+timeofday:1794191924:997881
+lasttimeofday: 1794191924:678281
+deltatime:0:319600
+delta: 0.3195953369
+delta too large: 0.2416992188
+timeofday:1794191925:428874
+lasttimeofday: 1794191925:187173
+deltatime:0:241701
+delta: 0.2416992188
+delta too large: 0.2479858398
+timeofday:1794191925:870109
+lasttimeofday: 1794191925:622109
+deltatime:0:248000
+delta: 0.2479858398
+delta too large: 0.2936553955
+timeofday:1794191926:336674
+lasttimeofday: 1794191926:43014
+deltatime:0:293660
+delta: 0.2936553955
+delta too large: 0.3235321045
+timeofday:1794191926:996772
+lasttimeofday: 1794191926:673232
+deltatime:0:323540
+delta: 0.3235321045
+delta too large: 0.2922058105
+timeofday:1794191927:458294
+lasttimeofday: 1794191927:166082
+deltatime:0:292212
+delta: 0.2922058105
+delta too large: 0.3087310791
+timeofday:1794191928:37906
+lasttimeofday: 1794191927:729163
+deltatime:0:308743
+delta: 0.3087310791
+delta too large: 0.2581481934
+timeofday:1794191928:526345
+lasttimeofday: 1794191928:268191
+deltatime:0:258154
+delta: 0.2581481934
+delta too large: 0.2505645752
+timeofday:1794191929:18910
+lasttimeofday: 1794191928:768339
+deltatime:0:250571
+delta: 0.2505645752
+delta too large: 0.2481689453
+timeofday:1794191929:479572
+lasttimeofday: 1794191929:231402
+deltatime:0:248170
+delta: 0.2481689453
+delta too large: 0.2698974609
+timeofday:1794191930:34454
+lasttimeofday: 1794191929:764550
+deltatime:0:269904
+delta: 0.2698974609
+delta too large: 0.2566070557
+timeofday:1794191930:543673
+lasttimeofday: 1794191930:287059
+deltatime:0:256614
+delta: 0.2566070557
+delta too large: 0.2345123291
+timeofday:1794191930:948346
+lasttimeofday: 1794191930:713826
+deltatime:0:234520
+delta: 0.2345123291
+delta too large: 0.3180541992
+timeofday:1794191931:569093
+lasttimeofday: 1794191931:251035
+deltatime:0:318058
+delta: 0.3180541992
+delta too large: 0.2495269775
+timeofday:1794191931:979898
+lasttimeofday: 1794191931:730358
+deltatime:0:249540
+delta: 0.2495269775
+delta too large: 0.3351135254
+timeofday:1794191932:525597
+lasttimeofday: 1794191932:190473
+deltatime:0:335124
+delta: 0.3351135254
+delta too large: 0.3853912354
+timeofday:1794191933:188645
+lasttimeofday: 1794191932:803242
+deltatime:0:385403
+delta: 0.3853912354
+delta too large: 0.3283538818
+timeofday:1794191933:785532
+lasttimeofday: 1794191933:457178
+deltatime:0:328354
+delta: 0.3283538818
+delta too large: 0.2382507324
+timeofday:1794191934:236212
+lasttimeofday: 1794191933:997959
+deltatime:0:238253
+delta: 0.2382507324
+delta too large: 0.2442016602
+timeofday:1794191934:715250
+lasttimeofday: 1794191934:471042
+deltatime:0:244208
+delta: 0.2442016602
+delta too large: 0.2459411621
+timeofday:1794191935:171387
+lasttimeofday: 1794191934:925434
+deltatime:0:245953
+delta: 0.2459411621
+delta too large: 0.3588104248
+timeofday:1794191935:884295
+lasttimeofday: 1794191935:525484
+deltatime:0:358811
+delta: 0.3588104248
+delta too large: 0.3394470215
+timeofday:1794191936:454828
+lasttimeofday: 1794191936:115377
+deltatime:0:339451
+delta: 0.3394470215
+delta too large: 0.2539978027
+timeofday:1794191937:13980
+lasttimeofday: 1794191936:759969
+deltatime:0:254011
+delta: 0.2539978027
+delta too large: 0.2916564941
+timeofday:1794191937:571908
+lasttimeofday: 1794191937:280249
+deltatime:0:291659
+delta: 0.2916564941
+delta too large: 0.2633666992
+timeofday:1794191938:3573
+lasttimeofday: 1794191937:740196
+deltatime:0:263377
+delta: 0.2633666992
+delta too large: 0.2485198975
+timeofday:1794191938:389004
+lasttimeofday: 1794191938:140472
+deltatime:0:248532
+delta: 0.2485198975
+delta too large: 0.2731933594
+timeofday:1794191938:812160
+lasttimeofday: 1794191938:538957
+deltatime:0:273203
+delta: 0.2731933594
+delta too large: 0.2586669922
+timeofday:1794191939:257733
+lasttimeofday: 1794191938:999058
+deltatime:0:258675
+delta: 0.2586669922
+delta too large: 0.2275085449
+timeofday:1794191939:671014
+lasttimeofday: 1794191939:443494
+deltatime:0:227520
+delta: 0.2275085449
+delta too large: 0.2128753662
+timeofday:1794191948:486493
+lasttimeofday: 1794191948:273609
+deltatime:0:212884
+delta: 0.2128753662
