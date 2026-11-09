@@ -54,9 +54,16 @@ android {
             }
         }
         getByName("release") {
+            // As the game app's release (android/app/build.gradle.kts): signed with the
+            // debug keystore so it installs by sideload, not debuggable, and the native
+            // code built as CMake Release (-O3 + thin LTO for wfengine, Jolt and zforth).
+            // A Debug Dream ran the reef at about 3 FPS on cast1 (2026-11-09).
+            signingConfig = signingConfigs.getByName("debug")
+            isDebuggable = false
             externalNativeBuild {
                 cmake {
                     arguments += "-DCMAKE_PROJECT_wf_game_INCLUDE=${projectDir}/dream-project-hook.cmake"
+                    arguments += "-DCMAKE_BUILD_TYPE=Release"
                     targets += "wf_dream"
                 }
             }
