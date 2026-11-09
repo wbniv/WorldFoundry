@@ -615,12 +615,14 @@ workflows:
   # layer 1b). Builds libwf_game.so (Release, android-21) for arm64-v8a and
   # armeabi-v7a at WF_BYTES_BASE and at the triggering commit, in one build tree per
   # ABI, and compares every loaded section (scripts/android_alloc_sections_equal.py).
-  # Linux, because scripts/build-runtime-property-core.py links the Rust core with
-  # the NDK's linux-x86_64 clang. Manual only.
+  # A Mac (linux_x2 is not on the billing plan, build 6af12925): the NDK's
+  # darwin-x86_64 toolchain is linked as linux-x86_64, the path
+  # scripts/build-runtime-property-core.py hard-codes for the Rust core's linker.
+  # Base and head build on the same host, so the comparison holds. Manual only.
   #------------------------------------------------------------------------------
   android-touch-bytes:
     name: Android library bytes (touch parity)
-    instance_type: linux_x2
+    instance_type: mac_mini_m2
     max_build_duration: 90
     environment:
       vars:
@@ -638,14 +640,16 @@ workflows:
             yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" "ndk;$WF_NDK_VERSION" --sdk_root="$SDK" > /dev/null
           fi
           ls "$SDK/ndk/$WF_NDK_VERSION/build/cmake/android.toolchain.cmake"
+          prebuilt="$SDK/ndk/$WF_NDK_VERSION/toolchains/llvm/prebuilt"
+          [ -e "$prebuilt/linux-x86_64" ] || ln -s darwin-x86_64 "$prebuilt/linux-x86_64"
+          ls "$prebuilt"
           if ! command -v cargo >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/cargo" ]; then
             curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --no-modify-path
           fi
           export PATH="$HOME/.cargo/bin:$PATH"
           rustup target add aarch64-linux-android armv7-linux-androideabi
           echo "PATH=$PATH" >> "$CM_ENV"
-          command -v ninja >/dev/null 2>&1 || pip3 install --user ninja
-          echo "PATH=$HOME/.local/bin:$PATH" >> "$CM_ENV"
+          command -v ninja >/dev/null 2>&1 || brew install ninja
           cmake --version | head -1
           cd engine/vendor
           if [ ! -d jolt-physics-5.5.0 ]; then
