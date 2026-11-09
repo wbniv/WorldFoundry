@@ -181,14 +181,18 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         char slotHeight[] = "--vram-slot-height=1024";
         char permWidth[] = "--vram-perm-width=1024";
         char permHeight[] = "--vram-perm-height=1024";
+        // The same VRAM page as the aquarium app (android/app/src/aquarium/assets/wf_args.txt).
+        // The reef tanks carry 1024-wide textures, which the 1024 default width rejects
+        // (rmuv.hpi asserts w < VRAMWidth); tests/test_dream_host_vram.py keeps the two in step.
+        char vramWidth[] = "--vram-width=2048";
         char vramHeight[] = "--vram-height=2048";
         char noFps[] = "--no-fps";
-        char* argv[] = {arg0, slotWidth, slotHeight, permWidth, permHeight, vramHeight, noFps, arg1, nullptr};
-        __argc = 8;
+        char* argv[] = {arg0, slotWidth, slotHeight, permWidth, permHeight, vramWidth, vramHeight, noFps, arg1, nullptr};
+        __argc = 9;
         __argv = argv;
         // Tank 0's overrides: the engine applies them when the level registry loads.
         plantedBridge.startFirstTank(launchOverrideSink);
-        HALStart(8, argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
+        HALStart(9, argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
         std::fprintf(stderr, "wf_dream: HALStart returned\n");
         windowReady.store(false);
         activeWindow = nullptr;

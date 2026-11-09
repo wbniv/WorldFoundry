@@ -1,0 +1,8 @@
+lasttimeofday: 1794194860:44912
+deltatime:0:337654
+delta: 0.3376464844
+delta too large: 0.3416595459
+timeofday:1794194860:724230
+lasttimeofday: 1794194860:382566
+deltatime:0:341664
+delta: 0.3416595459

@@ -1,0 +1,9 @@
+LMalloc of 44 not 8-byte aligned, rounding up
+LMalloc of 108 not 8-byte aligned, rounding up
++- ASSERTION MESSAGE ---------------------------------------------------------+
+AssertMsg:w = 1024, Display::VRAMWidth = 1024
++- ASSERTION FAILED ----------------------------------------------------------+
+|(ptrdiff_t)(w) < (ptrdiff_t)(Display::VRAMWidth)                             |
+|in file "/home/will/WorldFoundry-wbniv/wfsource/source/gfx/rmuv.hpi" on line 35  |
++-----------------------------------------------------------------------------+
+FORTIFY: pthread_mutex_lock called on a destroyed mutex (0xcd425430)
