@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/1d7253ae) | Balcony plan C v2: side window ventilates the balcony; no vent in the frame |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/d1ee0167) | Balcony plan C v2: weather inserts so no rain gets in while away |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/9b7fdc33) | Balcony plan C: frame detail sections |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/84f2e6ab) | Balcony plan C: no mullions; panels meet edge to edge |
@@ -26,6 +27,11 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/ce0a2fa6) | Plan condo 639 balcony zip screen (solar-strip motor) and 7 cm floor recess |
 
 <!--history-meta v1
+1d7253ae	author	Will Norris
+1d7253ae	added	3
+1d7253ae	deleted	1
+1d7253ae	files	1
+1d7253ae	body	Resolves open question 17: the balcony's side window lets air through at\nall times, so the sealed inserts do not close it in.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 d1ee0167	author	Will Norris
 d1ee0167	added	31
 d1ee0167	deleted	3
