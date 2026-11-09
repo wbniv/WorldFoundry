@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/bf228952) | Unpark runtime object editing; Sea Stars settings become an OAS object |
 | [2026-10-17](https://github.com/wbniv/WorldFoundry/commit/f7f13672) | Record Phase P steps 11-12 on Cast1: baseline-picker and baseline-settings pass |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/1f3cfb94) | Record the picker's green macOS build (Metal CameraMatrices) |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/068eac5f) | Record Phase P verification: steps 9, 10 and 12 pass on desktop; step 11 escalated |
@@ -10,6 +11,11 @@
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/7ef36fbb) | Plan runtime object editing on OAS/OAD to replace RP02 |
 
 <!--history-meta v1
+bf228952	author	Will Norris
+bf228952	added	16
+bf228952	deleted	0
+bf228952	files	1
+bf228952	body	Will chose option 1 (Sea Stars D11): SeaStarsSettings is a standard OAS\ntype inheriting Settings, placed once in the level and read with property@,\nwith no RPRP catalog. Runtime object editing moves from Parked to Open\nahead of Sea Stars. Its plan now lists all ten levels that carry RPRP\ncatalogs; O4 (engine scope) is still open.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqQp7NCXUWp7VRzdCnw
 f7f13672	author	Will Norris
 f7f13672	added	64
 f7f13672	deleted	9

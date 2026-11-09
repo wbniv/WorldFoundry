@@ -1,6 +1,6 @@
 # Sea Stars: an eleventh aquarium tank of Indo-Pacific starfish
 
-**Status: draft, 2026‑11‑10.** D11 is decided. Waiting on Will's answers to D1–D10. Sea Stars' settings depend on [runtime object editing](2026-10-16-runtime-object-editing.md), which is unparked and goes first. Its engine scope (O4 there) still needs Will's confirmation. Nothing is built yet.
+**Status: draft, 2026‑11‑10.** D11 is decided. Waiting on Will's answers to D1–D10. Sea Stars' settings depend on [runtime object editing](2026-10-16-runtime-object-editing.md), which is unparked and goes first. Its engine scope (O4 there) was approved on 2026‑11‑10. Nothing is built yet.
 
 ## Context
 
@@ -293,7 +293,7 @@ flowchart TD
     P0 --> P3["Phase 3 (T3)<br/>star generator, 6 species,<br/>atlas cells, underside skin"]
     P2 --> P3
     P3 --> P4["Phase 4 (T3)<br/>player, director, settings,<br/>autopilot, parking"]
-    ROE["Runtime object editing<br/>Phases 0–2 (T4, needs O4)"] -->|"Settings type, overlay,<br/>property@, OAD chunk"| P4
+    ROE["Runtime object editing<br/>Phases 0–2 (T4, O4 approved)"] -->|"Settings type, overlay,<br/>property@, OAD chunk"| P4
     P4 --> P5["Phase 5 (T2)<br/>selector + screensaver variant<br/>+ Dream registration"]
     P5 --> P6["Phase 6 (T3)<br/>cast1 acceptance"]
 ```

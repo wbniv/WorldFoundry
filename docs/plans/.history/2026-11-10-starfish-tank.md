@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/bf228952) | Unpark runtime object editing; Sea Stars settings become an OAS object |
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/71433569) | Plan: Sea Stars D11, RPRP catalog vs Settings OAS object |
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/b27dfd11) | Plan: Sea Stars settings are an RP01 catalog on the standalone .iff, not a level object |
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/a94e1f27) | Plan: Sea Stars gets a screensaver variant and level settings |
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/b3f8bf3e) | Plan: Sea Stars, an eleventh aquarium tank of Indo-Pacific sea stars |
 
 <!--history-meta v1
+bf228952	author	Will Norris
+bf228952	added	36
+bf228952	deleted	29
+bf228952	files	1
+bf228952	body	Will chose option 1 (Sea Stars D11): SeaStarsSettings is a standard OAS\ntype inheriting Settings, placed once in the level and read with property@,\nwith no RPRP catalog. Runtime object editing moves from Parked to Open\nahead of Sea Stars. Its plan now lists all ten levels that carry RPRP\ncatalogs; O4 (engine scope) is still open.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqQp7NCXUWp7VRzdCnw
 71433569	author	Will Norris
 71433569	added	3
 71433569	deleted	2
