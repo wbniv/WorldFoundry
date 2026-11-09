@@ -38,7 +38,7 @@
 <div class="side">
   <h2>State</h2>
   <div class="btns" id="states">
-    <button data-s="all">All six in</button><button data-s="one">Panel 3 out</button><button data-s="none">All out (max view)</button><button data-s="ins">Weather inserts in (away)</button><button data-s="solar">Solar inserts in (away)</button>
+    <button data-s="all">All six in</button><button data-s="one">Panel 3 out</button><button data-s="none">All out (max view)</button><button data-s="ins">Weather inserts in (away)</button><button data-s="solar">Custom solar inserts (A)</button><button data-s="stock">Stock 50 W panels (B)</button>
   </div>
   <h2>Sizes</h2>
   <table>
@@ -57,7 +57,7 @@
     <li>All six panels are identical, so any one fits any position.</li>
     <li>Black pet mesh stops pigeons, cats and mosquitoes. It cuts rain spray but does not stop wind-driven rain.</li>
     <li>v2: six weather inserts (tinted polycarbonate or glass) swap into the same positions while away, gasketed, with rebated joints and a drained sill, so no rain gets in.</li>
-    <li>Solar option: the same insert frame holds a frameless glass-glass solar laminate instead of the polycarbonate sheet: 2 × 10 half-cut 182&nbsp;mm cells, ≈&nbsp;65–75&nbsp;W each, ≈&nbsp;400–450&nbsp;W for six. The grey band shows the ledge's shadow at a 45° sun.</li>
+    <li>Solar (A): a custom glass-glass laminate in the insert frame, ≈&nbsp;400–450&nbsp;W for six. (B): a stock 50&nbsp;W panel low in each insert, clear polycarbonate above, 300&nbsp;W. The grey band is the ledge's shadow at a 45° sun.</li>
   </ul>
 </div>
 </main>
@@ -74,12 +74,13 @@ function draw(state){
   // frame: perimeter only, no mullions; each panel has its own edge frame S
   g+=`<path fill="var(--frame)" fill-rule="evenodd" d="M0 0H${W}V${H}H0Z M${F} ${F}H${W-F}V${H-F}H${F}Z"/>`;
   for(let i=0;i<6;i++){
-    const x=F+i*bw, out = state==='none' || (state==='one' && i===2), ins = state==='ins', sol = state==='solar';
-    if(!out) g+=`<path fill="#2e2e2e" fill-rule="evenodd" stroke="#000" stroke-width=".3" d="M${x} ${F}h${bw}v${bh}h${-bw}Z M${x+S} ${F+S}v${bh-2*S}h${bw-2*S}v${-(bh-2*S)}Z"/><rect x="${x+S}" y="${F+S}" width="${bw-2*S}" height="${bh-2*S}" fill="${ins?'rgba(120,105,85,.55)':sol?'#d9dde3':'url(#mesh)'}"/>`;
+    const x=F+i*bw, out = state==='none' || (state==='one' && i===2), ins = state==='ins', sol = state==='solar', stk = state==='stock';
+    if(!out) g+=`<path fill="#2e2e2e" fill-rule="evenodd" stroke="#000" stroke-width=".3" d="M${x} ${F}h${bw}v${bh}h${-bw}Z M${x+S} ${F+S}v${bh-2*S}h${bw-2*S}v${-(bh-2*S)}Z"/><rect x="${x+S}" y="${F+S}" width="${bw-2*S}" height="${bh-2*S}" fill="${ins?'rgba(120,105,85,.55)':sol?'#d9dde3':stk?'rgba(207,230,245,.35)':'url(#mesh)'}"/>`;
+    if(!out && stk){ const pw=39.5, ph=63, px=x+(bw-pw)/2, py=F+bh-S-ph; g+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="#3a3d42"/>`; const cw=(pw-3)/4, ch=(ph-3)/9; for(let r=0;r<9;r++) for(let c=0;c<4;c++) g+=`<rect x="${px+1.5+c*cw+.15}" y="${py+1.5+r*ch+.15}" width="${cw-.3}" height="${ch-.3}" fill="#1c2b4d"/>`; g+=`<rect x="${x}" y="${F}" width="${bw}" height="32.5" fill="rgba(0,0,0,.28)"/>`; }
     if(!out && sol){ const cx=x+bw/2-18.4, cy=F+S+(bh-2*S-93)/2; for(let r=0;r<10;r++) for(let c=0;c<2;c++) g+=`<rect x="${cx+c*18.6}" y="${cy+r*9.3}" width="18.2" height="9.1" fill="#1c2b4d" stroke="#3d5689" stroke-width=".15"/>`; g+=`<rect x="${x}" y="${F}" width="${bw}" height="32.5" fill="rgba(0,0,0,.28)"/>`; }
-    g+=`<text x="${x+bw/2}" y="58" font-size="7" font-weight="700" text-anchor="middle" opacity="${out?.35:1}" style="${state==='solar'?'fill:#fff':''}">${i+1}</text>`;
+    g+=`<text x="${x+bw/2}" y="58" font-size="7" font-weight="700" text-anchor="middle" opacity="${out?.35:1}" style="${(state==='solar'||state==='stock')?'fill:#fff':''}">${i+1}</text>`;
   }
-  if(state==='solar') g+=`<text x="134" y="-4" font-size="4.4" text-anchor="middle">shaded band: the ledge\'s shadow at a 45° sun (35 cm deep)</text>`;
+  if(state==='solar'||state==='stock') g+=`<text x="134" y="-4" font-size="4.4" text-anchor="middle">shaded band: the ledge\'s shadow at a 45° sun (35 cm deep)</text>`;
   g+=`<g stroke="var(--muted)" stroke-width=".35" fill="none"><path d="M0 141V150M268 141V150M0 146H268"/><path d="M296 0H304M296 111H304M300 0V111"/></g>`;
   g+=`<text x="134" y="155" font-size="5.4" text-anchor="middle">268 cm</text><text x="300" y="57" font-size="5.4" text-anchor="middle" transform="rotate(-90 300 57)" dy="-2.2">111 cm</text>`;
   s.innerHTML=g;
@@ -89,7 +90,7 @@ document.getElementById('bay').textContent=`≈ ${bw.toFixed(1)} cm wide; mesh �
 document.getElementById('aluin').textContent=`≈ ${Math.round(100*(1-6*(bw-2*S)*(bh-2*S)/(W*H)))} %`;
 document.getElementById('alu').textContent=`≈ ${Math.round(100*(1-bw*6*bh/(W*H)))} %`;
 document.querySelectorAll('#states button').forEach(b=>b.onclick=()=>draw(b.dataset.s));
-draw(['all','one','none','ins','solar'].includes(location.hash.slice(1))?location.hash.slice(1):'all');
+draw(['all','one','none','ins','solar','stock'].includes(location.hash.slice(1))?location.hash.slice(1):'all');
 </script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 
 9 November 2026 · **Being built** (Will, 2026‑11‑08). This is the plan for the balcony opening from now on. The earlier options, a motorised zip screen (plan A) and a glazed bi-fold window (plan B), are archived in the [balcony shade plan](2026-09-30-condo-balcony-shade.md), which also holds the game's level model of the balcony.
 
-**TL;DR.** A fixed black aluminium frame, 4.5 cm deep, with no mullions, fills the 268 × 111 cm opening. Six identical panels stand side by side in its rails and come out from inside for the full view. Three panel sets share the rails: **pet-mesh screens** for daily use, **weather inserts** (tinted polycarbonate or glass) that make it rain-tight while Will is away, and optional **solar inserts**, about 400–450 W for six. Shop sheets: [v1](../rfq/2026-11-08-639-balcony-screen-frame-spec.pdf) (screens only) and [v2](../rfq/2026-11-08-639-balcony-screen-frame-spec-v2.pdf) (screens and weather inserts; give the shop this one).
+**TL;DR.** A fixed black aluminium frame, 4.5 cm deep, with no mullions, fills the 268 × 111 cm opening. Six identical panels stand side by side in its rails and come out from inside for the full view. Three panel sets share the rails: **pet-mesh screens** for daily use, **weather inserts** (tinted polycarbonate or glass) that make it rain-tight while Will is away, and optional **solar inserts**: custom panels if a Thai maker will build six (≈ 350 W after the ledge's shade), or six stock 50 W panels from a Bangkok shop (≈ 245 W). Shop sheets: [v1](../rfq/2026-11-08-639-balcony-screen-frame-spec.pdf) (screens only) and [v2](../rfq/2026-11-08-639-balcony-screen-frame-spec-v2.pdf) (screens and weather inserts; give the shop this one).
 
 ## Context
 
@@ -93,11 +93,11 @@ To take a panel out, release the bolt, lift the panel into the lift space, swing
 
 **Request** (Will, 2026‑11‑09): the option to fit solar panels in the frame instead of the screens or the weather inserts, using new panels made for it, or the six existing positions if that can seal the opening in place of polycarbonate.
 
-**Answer: yes, the six positions work.** A solar insert is the v2 weather insert with a **frameless glass-glass solar laminate in place of the polycarbonate sheet**. It keeps the same insert frame, EPDM gaskets, rebated joints and cam latches, so it seals as well as the polycarbonate, in the same rails, with **no change to the frame or the v2 sheet**. The insert's glazing pocket already takes up to 6.38 mm laminated glass, and a 2 mm + 2 mm glass-glass laminate is about 5 mm thick. Solar inserts can therefore be ordered later, to the sheet size the shop gives for the polycarbonate.
+**Answer: yes, the six positions work.** The cleanest solar insert (option A below) is the v2 weather insert with a **frameless glass-glass solar laminate in place of the polycarbonate sheet**. It keeps the same insert frame, EPDM gaskets, rebated joints and cam latches, so it seals as well as the polycarbonate, in the same rails, with **no change to the frame or the v2 sheet**. The insert's glazing pocket already takes up to 6.38 mm laminated glass, and a 2 mm + 2 mm glass-glass laminate is about 5 mm thick. Solar inserts can therefore be ordered later, to the sheet size the shop gives for the polycarbonate.
 
 [![Plan C with solar inserts](2026-11-09-condo-639-balcony-screen-frame/elevation-plan-c-solar.png)](2026-11-09-condo-639-balcony-screen-frame/elevation-plan-c.html#solar)
 
-**What fits.** Each position shows a sheet of about 39.8 × 102 cm (2.5 cm frame face, 2 cm panel edges) or 38.4 × 98 cm (3.8 cm, 2.5 cm). Two columns of today's standard 182 mm cells, cut in half (182 × 91 mm), make a block 36.4 cm wide, and ten rows make it about 93 cm tall, which fits either case:
+**What fits a custom laminate.** Each position shows a sheet of about 39.8 × 102 cm (2.5 cm frame face, 2 cm panel edges) or 38.4 × 98 cm (3.8 cm, 2.5 cm). Two columns of today's standard 182 mm cells, cut in half (182 × 91 mm), make a block 36.4 cm wide, and ten rows make it about 93 cm tall, which fits either case:
 
 | Item | Per insert | Six inserts |
 |---|---|---|
@@ -108,11 +108,40 @@ To take a panel out, release the bolt, lift the panel into the lift space, swing
 | Weight with insert frame | ≈ 5 kg, like the tempered-glass option | ≈ 30 kg |
 | Yield, vertical west, Bangkok | | ≈ 1.7–2.2 kWh per kW per day by month before the ledge shade; ≈ 0.6 kWh/day for the set after it, only while fitted |
 
-**No catalogue panel fits.** The near misses: a 70 W narrow panel at 1070 × 360 × 25 mm ([Exotronic](https://mygenerator.com.au/product/exotronic-70w-narrow-fixed-monocrystalline-solar-panel)) is 5 cm too tall; a 60 W panel at 830 × 400 × 25 mm ([Couleenergy](https://couleenergy.com/?p=4070)) is too wide for the 3.8 cm frame case; "slim" 100–130 W panels ([Rich Solar MEGA 130 Slim](https://richsolar.com/products/mega-130-slim-130-watt-12-volt-solar-panel)) are 1.5–1.7 m long. Framed panels are also 25–35 mm thick against the 16 mm insert. So the laminate is a custom size: dual-glass makers build to order ([Couleenergy custom dual-glass](https://couleenergy.com/?p=3930)), and six identical pieces is a small, simple order.
+### Buying in Thailand, and other ways to fit
 
-**Bigger new panels gain nothing.** With no mullions, the panel widths are free: three inserts of ≈ 87.7 cm or two of ≈ 131.5 cm would fit the same rails. But the power is set by the glass area, about 2.4 m² of the 2.97 m² opening, so it stays ≈ 400–450 W. Bigger inserts weigh ≈ 10–15 kg each to lift in 16 m up, need their own latch positions, and no longer swap with the screens. Six of one size is the better design.
+**Will, 2026‑11‑09:** "i can't order custom panels made in usa --- i'm in thailand!", asking about other panel sizes, marine flexible panels, and letting the extra 5 cm of a too-tall panel hang over the room side of the pony-wall cap.
 
-**Yield and the ledge.** [PVGIS](https://re.jrc.ec.europa.eu/pvg_tools/en/) gives 671 kWh per kW per year for a vertical west face in Bangkok (13.70 N, 100.55 E, 14 % system losses), 46 % of the 1,472 at the best tilt of 17°. The 35 cm ledge shades the top of the panels whenever the sun is high: by a sun-path calculation, about a third of the direct sun reaching the sheets falls in its shadow, and direct sun is roughly half of what a west wall receives, so expect about 15–20 % less. That holds only if the **bypass diodes split each laminate into horizontal bands**, because the shadow moves down from the top; cells strung top to bottom would lose most of their output whenever the top row is shaded. So the six give about 230 kWh a year, ≈ 0.6 kWh a day, if fitted all year.
+**Where to buy.** Thai shops sell standard sizes; none found advertises custom sizes outright. Two are worth asking for a ≈ 40 × 95 cm panel: [Sunnergy](https://www.sunnergysolar.com/category/164/%E0%B8%AB%E0%B8%A1%E0%B8%A7%E0%B8%94%E0%B9%81%E0%B8%9C%E0%B8%87%E0%B9%82%E0%B8%8B%E0%B8%A5%E0%B9%88%E0%B8%B2%E0%B9%80%E0%B8%8B%E0%B8%A5%E0%B8%A5%E0%B9%8C) says it makes 5–400 W panels and designs systems to order, and [NSTHAI](https://www.nsthai.com/solar-panel) lists 5–200 W stock sizes and asks buyers to enquire about sizes not in its table. Chinese factories make custom sizes and ship to Bangkok, but custom work usually starts at 50 or more pieces, with single samples sold as prototypes ([Alibaba's seller guide](https://seller.alibaba.com/blogs/2026/southeast-asia/renewable-energy/custom-size-solar-panels-lead-time-moq-guide-alibaba-b2b)).
+
+**The ledge decides more than the panel size.** On a vertical west wall in Bangkok, 53 % of the sunlight is direct, 33 % diffuse sky and 14 % reflected ([PVGIS](https://re.jrc.ec.europa.eu/pvg_tools/en/), 2020 hourly data). The 35 cm ledge's shadow reaches more than 5 cm down for 94 % of the direct sun, more than 20 cm for 65 %, more than 30 cm for 48 % and more than 40 cm for 35 % (sun-path calculation). Two rules follow:
+
+- **Mount the panel low** in its insert, with clear polycarbonate filling the space above, so the shadow falls on the filler first.
+- **Orient the bypass-diode groups as horizontal bands.** Standard panels usually group their cells along the long side, so a portrait panel has vertical groups: a shadow on its top edge cuts every group and loses nearly all the direct light, about half the panel's output. Turned landscape, the groups become bands and only the top one drops out. Check each model's datasheet for its diode layout.
+
+**Options**, nameplate watts for the whole opening and an estimate after the ledge's shadow (other losses are in the yield figure below):
+
+| Option | Where from | Inserts | Nameplate | After ledge shade | Notes |
+|---|---|---|---|---|---|
+| A. Custom glass-glass laminate, 2 × 10 half-cut cells, bands horizontal | ask Sunnergy or NSTHAI; China at 50+ pieces | 6 alike, swap with the screens | ≈ 420 W | ≈ 350 W | the best result, if a maker will build 6 |
+| B. **50 W stock panel, 630 × 395 × 25 mm**, one per insert at the bottom, clear polycarbonate above | [NSTHAI](https://www.nsthai.com/solar-panel) stock | 6 alike, swap with the screens | 300 W | ≈ 245 W | **recommended stock option**: available now, keeps six identical inserts, light |
+| C. 60 W stock panel, 790 × 405 × 25 mm, at the bottom | [Solarbesttech](https://www.solarbesttech.com/th/products/444046-%E0%B9%81%E0%B8%9C%E0%B8%87%E0%B9%82%E0%B8%8B%E0%B8%A5%E0%B9%88%E0%B8%B2%E0%B9%80%E0%B8%8B%E0%B8%A5%E0%B8%A5%E0%B9%8C-mono-solar-panel-%E0%B8%A3%E0%B8%B8%E0%B9%88%E0%B8%99-gspv60m-60w-5bb) | 6 alike | 360 W | ≈ 250 W | taller, so it reaches up into more shadow; 40.5 cm wide, so the insert edge covers its frame border |
+| D. 100 W stock panel, 620 × 765 mm, turned landscape at the bottom | NSTHAI stock | 3 double-width (≈ 88 cm) | 300 W | ≈ 265 W | least shade loss if its diode halves become bands; ≈ 8 kg per insert (estimate) |
+| E. 150 W stock panel, 980 × 765 mm, portrait | NSTHAI stock | 3 double-width | 450 W | ≈ 225 W | fits with no overhang, but portrait: the ledge costs about half; ≈ 10 kg per insert (estimate) |
+| F. Marine semi-flexible ≈ 50 W, ≈ 810 × 330 × 2 mm, bonded to the outer face of each polycarbonate insert | flexible panels are sold in Thailand ([JIB](https://www.jib.co.th/web/product/readProduct/83316/1379/SOLAR-PANAL--แผงโซล่าเซลล์--ECOFLOW-100W-FLEXIBLE-SOLAR-PANEL)); this narrow size is a listing seen on Alibaba | the weather inserts themselves | ≈ 300 W | ≈ 200 W | thinnest, but bonded flat with no air behind it runs hot; check the warranty |
+| G. Stock panels on brackets **behind clear weather inserts**, inside | any stock size, e.g. two 200 W, 1200 × 765 mm, landscape | the weather inserts, unchanged | 400 W | ≈ 280 W | no change to frame or inserts; loses ≈ 10–15 % through the polycarbonate; needs clear, not tinted, inserts |
+
+The "after ledge shade" column applies the shadow figures above to each layout (direct light lost where the shadow reaches a diode group, diffuse and reflected light kept). It is an estimate, not a measurement.
+
+**The overhang idea (Will).** A 160 W panel at 1055 × 765 mm is 3.5–7.5 cm too tall for a double-width insert, and its bottom could hang below the cap on the room side in a holding channel. It would need the frame set at the cap's inner edge and a sill that lets the panel pass inboard of the water dam, so a sill that the shop has not drawn yet; and as a portrait panel it loses about half to the ledge, ≈ 240 W after shade. Option E fits without the overhang, and B, D or G do better, so the overhang is not worth the special sill.
+
+[![Option B: stock 50 W panels low in each insert](2026-11-09-condo-639-balcony-screen-frame/elevation-plan-c-stock.png)](2026-11-09-condo-639-balcony-screen-frame/elevation-plan-c.html#stock)
+
+**Recommendation.** Ask Sunnergy and NSTHAI to quote option A. If neither will build six, use option B: six stock 50 W panels, one at the bottom of each insert, clear polycarbonate above. Any of the double-width options (D, E) needs the cam latches to work at any panel width, so ask the shop now whether the latches engage a continuous groove along the rails (open question 7).
+
+**Thickness.** Stock panels are 25–30 mm thick against a 16 mm insert. The insert frame holds the panel with its glass in the insert's plane, and the panel's frame stands about 10–15 mm proud on the room side, which the rails do not mind. A gasket or silicone bead seals the panel's frame to the insert frame on the outside face.
+
+**Yield and the ledge.** [PVGIS](https://re.jrc.ec.europa.eu/pvg_tools/en/) gives 671 kWh per kW per year for a vertical west face in Bangkok (13.70 N, 100.55 E, 14 % system losses), 46 % of the 1,472 at the best tilt of 17°. The 35 cm ledge shades the top of the panels whenever the sun is high: by a sun-path calculation, about a third of the direct sun reaching the sheets falls in its shadow, and direct sun is roughly half of what a west wall receives, so expect about 15–20 % less. That holds only if the **bypass diodes split each laminate into horizontal bands**, because the shadow moves down from the top; cells strung top to bottom would lose most of their output whenever the top row is shaded. So the six custom laminates give about 230 kWh a year, ≈ 0.6 kWh a day, if fitted all year; the stock options in the table give roughly 0.4–0.5 kWh a day.
 
 **Wiring.** An edge-mounted slim junction box on each laminate with short leads and plug connectors at the sill, on the room side, so an insert still pops out after one unplug and the set still stacks to about 10 cm. Two strings of three panels run to a small MPPT charge controller indoors.
 
@@ -142,7 +171,7 @@ stateDiagram-v2
 
 [![Elevation](2026-11-09-condo-639-balcony-screen-frame/elevation-plan-c.png)](2026-11-09-condo-639-balcony-screen-frame/elevation-plan-c.html)
 
-**Elevation**: the black perimeter frame with six panels meeting edge to edge, drawn with a 2.5 cm frame face and 2 cm panel edges. Buttons switch between all six screens in, panel 3 out, all out, weather inserts in and solar inserts in. [Open the interactive mockup](2026-11-09-condo-639-balcony-screen-frame/elevation-plan-c.html).
+**Elevation**: the black perimeter frame with six panels meeting edge to edge, drawn with a 2.5 cm frame face and 2 cm panel edges. Buttons switch between all six screens in, panel 3 out, all out, weather inserts in, custom solar inserts in, and stock 50 W panels in (option B). [Open the interactive mockup](2026-11-09-condo-639-balcony-screen-frame/elevation-plan-c.html).
 
 [![v2 frame details](2026-11-09-condo-639-balcony-screen-frame/frame-detail-v2.png)](2026-11-09-condo-639-balcony-screen-frame/frame-detail-v2.html)
 
@@ -160,6 +189,7 @@ stateDiagram-v2
 4. **Mixed sets.** Can a screen sit next to a weather or solar insert? The inserts have rebated edges and the screens do not. Ask the shop to detail that joint, or keep each set whole.
 5. ~~**Does this replace the zip screen and the bi-fold?**~~ Answered 2026‑11‑09: yes, this is the plan going forward (Will); plans A and B are archived.
 6. ~~**Heat and damp while sealed.**~~ Answered 2026‑11‑08: the side window lets air through at all times (Will), so the balcony is not a closed box with the inserts in. The frame and inserts need no vent of their own.
+7. **Latches at any panel width?** Ask the shop whether the cam latches engage a continuous groove along the rails. If they do, double-width solar inserts (options D, E) fit later with no frame change; if the latch points are fixed at the six panel positions, only the six-alike options (A, B, C, F, G) do.
 
 ## Out of scope
 
