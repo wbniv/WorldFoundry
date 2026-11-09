@@ -635,9 +635,12 @@ workflows:
         script: |
           set -euo pipefail
           exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
-          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME}}"
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          echo "Android SDK: ${SDK:-unset}"
           if [ ! -d "$SDK/ndk/$WF_NDK_VERSION" ]; then
-            yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" "ndk;$WF_NDK_VERSION" --sdk_root="$SDK" > /dev/null
+            # (yes || true): under pipefail, yes dies of SIGPIPE when sdkmanager exits,
+            # and the step would exit 141 (build 6af12980).
+            (yes || true) | "$SDK/cmdline-tools/latest/bin/sdkmanager" "ndk;$WF_NDK_VERSION" --sdk_root="$SDK" | tail -3
           fi
           ls "$SDK/ndk/$WF_NDK_VERSION/build/cmake/android.toolchain.cmake"
           prebuilt="$SDK/ndk/$WF_NDK_VERSION/toolchains/llvm/prebuilt"
@@ -650,11 +653,11 @@ workflows:
           rustup target add aarch64-linux-android armv7-linux-androideabi
           echo "PATH=$PATH" >> "$CM_ENV"
           command -v ninja >/dev/null 2>&1 || brew install ninja
-          cmake --version | head -1
+          cmake --version | sed -n 1p
           cd engine/vendor
           if [ ! -d jolt-physics-5.5.0 ]; then
             tar -xzf jolt-physics-5.5.0.tar.gz
-            mv "$(tar -tzf jolt-physics-5.5.0.tar.gz | head -1 | cut -d/ -f1)" jolt-physics-5.5.0
+            mv "$(tar -tzf jolt-physics-5.5.0.tar.gz | sed -n 1p | cut -d/ -f1)" jolt-physics-5.5.0
           fi
       - name: Build base and head, compare loaded sections
         script: |

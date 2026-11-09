@@ -52,7 +52,7 @@ for rev in base head; do
     start=$(date +%s)
     cmake --build "$bld" --target wf_game > "$out/build-$rev-$abi.log" 2>&1 \
       || { echo "$(ts) build $rev $abi failed"; grep -E -A3 'error:|FAILED' "$out/build-$rev-$abi.log" | head -60; exit 1; }
-    lib=$(find "$bld" -name libwf_game.so -type f | head -1)
+    lib=$(find "$bld" -name libwf_game.so -type f | sed -n 1p)
     cp "$lib" "$out/libwf_game-$rev-$abi.so"
     echo "$(ts) built $rev $abi in $(( $(date +%s) - start )) s: $(wc -c < "$lib") bytes," \
          "$(grep -c '^\[' "$out/build-$rev-$abi.log" || true) build steps"
