@@ -102,7 +102,7 @@ def reactors():
         # Held for the whole clean (2 s still + 5 s), then away.
         dict(name='shrimp', hero='arch', at=(a['cleaner_station'][0], -.6, 1.2), hold=7.6, after=3.0,
              parts=[]),
-        # The fish leaves 1.5 s into the clean: an observation, not a window (the plan sets none).
+        # The fish leaves 1.5 s into the clean: the clean must end and the shrimp stay home.
         dict(name='shrimp-leave', hero='arch', at=(a['cleaner_station'][0], -.6, 1.2), hold=3.5, after=6.0,
              parts=[]),
     ]
@@ -389,15 +389,26 @@ def judge_shrimp(trace, near_frames, left, at, fish):
 
 
 def observe_shrimp_leave(trace, near_frames, at):
-    """How far ShrimpOne travels from the cave mouth if the fish leaves mid-clean."""
+    """The fish leaves 1.5 s into a clean: the clean must end within 2 frames (0.1 s) and
+    ShrimpOne must stay within 1.2 units of the cave mouth and be back within 0.1 of it
+    by the end (fixed 2026-11-09; before the fix they followed the fish ~3.7 units)."""
     after = trace[near_frames:]
     still = [row for row in after if row['cells']['743'] > 0]
-    reach = max((abs(row['shrimp_x'] - at[0]) for row in still), default=0.0)
     length = len(still) * FRAME
-    verdict = (f'FINDING: shrimp keep cleaning {length:.2f} s after the fish leaves and follow it '
-               f'{reach:.2f} units from the cave mouth' if reach > 1 else 'PASS')
-    return dict(label='shrimp, fish leaves', close=None, reopen=length, expected=None, window=None,
-                open=None, verdict=verdict, reach=reach)
+    reach = max((abs(row['shrimp_x'] - at[0]) for row in after), default=0.0)
+    home = abs(after[-1]['shrimp_x'] - at[0])
+    if length > 2 * FRAME + 1e-6:
+        verdict = f'FAIL shrimp keep cleaning {length:.2f} s after the fish leaves'
+    elif reach > 1.2:
+        verdict = f'FAIL shrimp follow the fish {reach:.2f} units from the cave mouth'
+    elif home > .1:
+        verdict = f'FAIL shrimp end {home:.2f} units from the station'
+    else:
+        verdict = 'PASS'
+    return dict(label='shrimp, fish leaves', close=None, reopen=length, expected=0.0,
+                window=[0.0, round(2 * FRAME, 2)], open=None, verdict=verdict, reach=reach, home=home,
+                note='reopen = cleaning time left after the fish leaves; reach = furthest ShrimpOne '
+                     'gets from the cave mouth')
 
 
 def write_video(frames, path):

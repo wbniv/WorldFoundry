@@ -2,7 +2,7 @@
 
 This is original reef-plan verification step 6, under W4 of the [finishing plan](../../plans/2026-11-08-reef-tanks-finish.md). [`scripts/check-thai-reef.py`](../../../scripts/check-thai-reef.py) runs the real engine (`wf_game`) on both reef levels. It drives the boxfish to each reactor over the debug bridge, holds it there, moves it away, and reads each reaction from the Director's own cells, frame by frame (0.05 s per frame at `-rate20`).
 
-**Result: every reaction is inside its window in both styles.** There is one behaviour finding, for the shrimp, [below](#finding-the-shrimp-chase-a-fish-that-leaves-mid-clean).
+**Result: every reaction is inside its window in both styles.** The one behaviour finding, the shrimp chasing a fish that leaves mid-clean, is fixed and now has an asserted window ([below](#fixed-the-shrimp-chased-a-fish-that-left-mid-clean)).
 
 ## How it runs
 
@@ -34,6 +34,7 @@ Do not let `xvfb-run` be the container's PID 1 (run it inside `bash -c '…; ech
 | Guard crab (claws-up threat) | 0.05 | 2.05 (2) | 2 s | 2.05 | **PASS** |
 | Dascyllus pair (dive into the coral head) | 0.50 | 2.55 (2.5) | 2.5 s | 3.50 | **PASS** |
 | Cleaner shrimp | cleaning starts 2.05 s after arriving still | cleaning lasts 4.95 s | starts after 2 s; lasts 4–6 s | — | **PASS** |
+| Shrimp, fish leaves mid-clean | — | cleaning ends 0.00 s after the fish is seen gone; ShrimpOne stays within 0.14 of the cave mouth | ends within 0.1 s; stays within 1.2; home within 0.1 | — | **PASS** (since the fix) |
 
 The pair's dive is checked on the actor itself as well as on the cell: HumbugOne's engine z drops by 0.48 (from 3.85 to 3.37) and comes back. During the clean, ShrimpOne moves to the fish's x − 0.175, as the script intends.
 
@@ -41,15 +42,15 @@ Per-reaction traces are in [`frames/`](frames/), and the full table is in [`resu
 
 ### Random layout (bonus)
 
-`--random-seed 7` runs the realistic level with Layout = Random and Seed 7. The reactor positions are read from the hero-displacement cells 904–909. This seed moves the left hero, with its worms, pair and crab, about 7.1 units to the right side of the tank (the worms sit at x ≈ +4.3). It also moves the arch, with the clam and the cleaner station, by (−0.06, +0.08). **Every reaction passes there too, with the same times** ([`results-random-seed7.json`](results-random-seed7.json)). Under Random the script parks the fish at whichever candidate spot is furthest from every moved reactor. It also takes the leave time from the fish's own position, because the bridge can apply a position write a frame or two after the step is sent.
+`--random-seed 7` runs the realistic level with Layout = Random and Seed 7. The reactor positions are read from the hero-displacement cells 904–909. This seed moves the left hero, with its worms, pair and crab, about 7.1 units to the right side of the tank (the worms sit at x ≈ +4.3). It also moves the arch, with the clam and the cleaner station, by (−0.06, +0.08). **Every reaction passes there too, with the same times, the fixed shrimp included** ([`results-random-seed7.json`](results-random-seed7.json)). Under Random the script parks the fish at whichever candidate spot is furthest from every moved reactor. It also takes the leave time from the fish's own position, because the bridge can apply a position write a frame or two after the step is sent.
 
-## Finding: the shrimp chase a fish that leaves mid-clean
+## Fixed: the shrimp chased a fish that left mid-clean
 
-If the boxfish leaves while the shrimp are cleaning it, they keep cleaning for the rest of their 5 s timer and follow it across the tank. In both styles, the fish left 1.5 s into the clean: the shrimp kept going for 3.45 s and reached 3.7 units from the cave mouth, x −0.875 to 2.8 within 0.45 s.
+**Before (first run).** If the boxfish left while the shrimp were cleaning it, they kept cleaning for the rest of their 5 s timer and followed it across the tank. In both styles, the fish left 1.5 s into the clean: the shrimp kept going for **3.45 s** and reached **3.72 units** from the cave mouth (4.02 under Random Seed 7). The cause, in `generate.py`: once cleaning timer 743 was set, nothing cleared it when the fish left reach; only the stillness accumulator 644 reset.
 
-The cause, in `generate.py`: once cleaning timer 743 is set, nothing clears it when the fish leaves reach. Only the stillness accumulator 644 resets, and 743 counts down on its own.
+**Fix (2026‑11‑09, after the cast1 acceptance APK was built).** The reef now keeps an in-reach flag (cell 742: the fish within x,z distance 1 of the station, with the arch shown). The clean ends on the first tick that flag is 0, and the shrimp glide back to the station. The 2 s still-start, the 5 s clean while the fish stays, and the station are unchanged.
 
-The plan sets no window for this, so the script reports it as a finding, not a failure. The fix is to clear 743 when the fish leaves reach, with a regression test, and it is scheduled after the cast1 acceptance run (coordinator, 2026‑11‑09). Evidence: [`realistic-shrimp-leave.webp`](realistic-shrimp-leave.webp) and [`anime-shrimp-leave.webp`](anime-shrimp-leave.webp).
+**After.** The clean ends **0.00 s** after the fish is seen gone, and ShrimpOne gets no further than **0.14 units** from the cave mouth, ending 0.04 from its station, in both styles. The script now asserts a window for this row: the clean ends within 0.1 s, the shrimp stay within 1.2 units, and they finish within 0.1 of the station. The regression test is `tests/test_species_movement.py::test_reef_cleaning_ends_when_the_fish_leaves_reach`. The older `test_reef_cleaning_waits_for_a_stationary_visitor` had asserted that cleaning continued after the fish swam out of reach (the bug); it now asserts that the clean ends. Evidence: [`realistic-shrimp-leave.webp`](realistic-shrimp-leave.webp) and [`anime-shrimp-leave.webp`](anime-shrimp-leave.webp).
 
 ## Video and stills
 

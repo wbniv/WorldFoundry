@@ -134,12 +134,36 @@ def test_reef_cleaning_waits_for_a_stationary_visitor(vm):
     assert rows[-1][644] == 0
     assert rows[59][743] == 0
     assert rows[179][743] > 3
-    assert rows[-1][743] > 2
+    # Swimming away for 1 s takes the fish out of the station's reach, which now ends the
+    # clean (until 2026-11-09 the shrimp kept cleaning and followed it across the tank).
+    assert (rows[-1]['x'] - sx) ** 2 + (rows[-1]['z'] - sz) ** 2 >= 1
+    assert rows[-1][743] == 0
     mapping = json.loads((ROOT/'wflevels/aquarium_thai_reef/actor-map.json').read_text())['actors']
     cleaning = vm('thai_reef', f'reset {sx} {sy} {fz}\nset 650 {mapping["ShrimpOne"]}\nstep 240 0 .0166667\n')
     assert cleaning[-1][743] > 0
     assert abs(cleaning[-1]['part-y'] - (sy - .06)) < .03     # legs on the fish's back
     assert abs(cleaning[-1]['part-z'] - (fz + .24)) < .03
+
+
+def test_reef_cleaning_ends_when_the_fish_leaves_reach(vm):
+    """Regression (reactions review 2026-11-09): a fish that leaves mid-clean used to be
+    chased across the tank by both shrimp for the rest of the 5 s timer. Leaving the
+    station's reach (x,z distance >= 1) must end the clean within a tick or two, and the
+    shrimp must head back to the station."""
+    sx, sy, sz = _reef_scene().anchor_map()['cleaner_station']
+    fz = round(max(.9, sz + .3), 4)
+    mapping = json.loads((ROOT/'wflevels/aquarium_thai_reef/actor-map.json').read_text())['actors']
+    rows = vm('thai_reef', f'reset {sx} {sy} {fz}\nset 650 {mapping["ShrimpOne"]}\n'
+                           f'step 150 0 .0166667\nstep 240 8192 .0166667\nstep 120 0 .0166667\n')
+    assert rows[149][743] > 0                                  # cleaning under way
+    out = next(i for i in range(150, len(rows))
+               if (rows[i]['x'] - sx) ** 2 + (rows[i]['z'] - sz) ** 2 >= 1)
+    assert all(rows[i][743] > 0 for i in range(150, out - 1))  # still cleaning while in reach
+    assert rows[out + 1][743] == 0                             # ends at once on leaving
+    assert all(r[743] == 0 for r in rows[out + 1:])
+    far = max(abs(r['part-x'] - sx) for r in rows[out:])
+    assert far < 1.2, f'shrimp followed the fish {far:.2f} units'
+    assert abs(rows[-1]['part-x'] - sx) < .1                   # back at the station
 
 
 def test_guard_crab_is_on_the_camera_facing_host_coral():

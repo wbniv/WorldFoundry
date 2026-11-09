@@ -603,15 +603,20 @@ life_tick += f' 1803 5 {indices["BoxfishVisual"]} dfrm-pose-curves 1099 tk!\n'
 life_tick += (f' 647 tk@ 0 = if {kx(station[0], "arch")} 645 tk! {kx(station[0]+.35, "arch")} 646 tk! '
               f'{ky(station[1], "arch")} 747 tk! {ky(station[1]+.12, "arch")} 748 tk! '
               f'{station[2]} 749 tk! {station[2]} 750 tk! 1 647 tk! then\n'
+              # 742: the fish is within the station's reach (x,z distance < 1, arch shown).
               f' INDEXOF_X_POS tk-player read-actor-mailbox {kx(station[0], "arch")} - dup * '
-              f'INDEXOF_Z_POS tk-player read-actor-mailbox {station[2]} - dup * + 1 < {shown("arch")} & '
+              f'INDEXOF_Z_POS tk-player read-actor-mailbox {station[2]} - dup * + 1 < {shown("arch")} & 742 tk!\n'
+              f' 742 tk@ '
               f'INDEXOF_XSPEED tk-player read-actor-mailbox abs .1 < & '
               f'INDEXOF_YSPEED tk-player read-actor-mailbox abs .1 < & '
               f'INDEXOF_ZSPEED tk-player read-actor-mailbox abs .1 < & '
               f'if 644 tk@ tk-dt@ + 3 min 644 tk! else 0 644 tk! then\n')
 life_tick += (' 644 tk@ 2 >= 744 tk@ 0 = & if 5 743 tk! 1 744 tk! then\n'
               ' 644 tk@ 0 = if 0 744 tk! then\n'
-              ' 743 tk@ tk-dt@ - 0 max 743 tk!\n')
+              ' 743 tk@ tk-dt@ - 0 max 743 tk!\n'
+              # A fish that leaves reach ends the clean at once, so the shrimp go back to the
+              # station instead of following it across the tank (reactions review, 2026-11-09).
+              ' 742 tk@ 0 = if 0 743 tk! then\n')
 for name, anchor, offset, phase, amplitude in (
     ('GuardCrab', 'guard_crab', 0, 0, .025),
     ('ShrimpOne', 'cleaner_station', 0, .25, .06),

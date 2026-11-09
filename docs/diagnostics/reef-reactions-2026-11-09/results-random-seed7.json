@@ -21,19 +21,19 @@
         3,
         8
       ],
-      "open": 6.95,
+      "open": 6.949999999999999,
       "verdict": "PASS"
     },
     {
       "label": "worm 2",
       "close": 0.15,
-      "reopen": 7.95,
+      "reopen": 7.949999999999999,
       "expected": 7.8999999999999995,
       "window": [
         3,
         8
       ],
-      "open": 9.399899999999999,
+      "open": 9.3999,
       "verdict": "PASS"
     },
     {
@@ -45,13 +45,13 @@
         3,
         8
       ],
-      "open": 6.6000000000000005,
+      "open": 6.6,
       "verdict": "PASS"
     },
     {
       "label": "worm 4",
       "close": 0.15,
-      "reopen": 7.6000000000000005,
+      "reopen": 7.6,
       "expected": 7.55,
       "window": [
         3,
@@ -75,7 +75,7 @@
     {
       "label": "worm 6",
       "close": 0.15,
-      "reopen": 7.250000000000001,
+      "reopen": 7.25,
       "expected": 7.199999999999999,
       "window": [
         3,
@@ -99,7 +99,7 @@
     {
       "label": "worm 8",
       "close": 0.15,
-      "reopen": 6.8999999999999995,
+      "reopen": 6.9,
       "expected": 6.85,
       "window": [
         3,
@@ -111,7 +111,7 @@
     {
       "label": "worm 9",
       "close": 0.15,
-      "reopen": 4.1000000000000005,
+      "reopen": 4.1,
       "expected": 4.05,
       "window": [
         3,
@@ -123,7 +123,7 @@
     {
       "label": "worm 10",
       "close": 0.15,
-      "reopen": 6.55,
+      "reopen": 6.550000000000001,
       "expected": 6.5,
       "window": [
         3,
@@ -153,7 +153,7 @@
         3,
         8
       ],
-      "open": 7.6499999999999995,
+      "open": 7.65,
       "verdict": "PASS"
     },
     {
@@ -165,19 +165,19 @@
         3,
         8
       ],
-      "open": 4.8500000000000005,
+      "open": 4.85,
       "verdict": "PASS"
     },
     {
       "label": "worm 14",
       "close": 0.15,
-      "reopen": 5.8500000000000005,
+      "reopen": 5.85,
       "expected": 5.8,
       "window": [
         3,
         8
       ],
-      "open": 7.3,
+      "open": 7.300000000000001,
       "verdict": "PASS"
     },
     {
@@ -281,12 +281,17 @@
     {
       "label": "shrimp, fish leaves",
       "close": null,
-      "reopen": 3.44915771484375,
-      "expected": null,
-      "window": null,
+      "reopen": 0.0,
+      "expected": 0.0,
+      "window": [
+        0.0,
+        0.1
+      ],
       "open": null,
-      "verdict": "FINDING: shrimp keep cleaning 3.45 s after the fish leaves and follow it 4.02 units from the cave mouth",
-      "reach": 4.01954
+      "verdict": "PASS",
+      "reach": 0.13895600000000008,
+      "home": 0.03788200000000008,
+      "note": "reopen = cleaning time left after the fish leaves; reach = furthest ShrimpOne gets from the cave mouth"
     }
   ]
 }
