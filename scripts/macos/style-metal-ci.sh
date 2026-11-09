@@ -67,7 +67,8 @@ build_engine() {   # $1 = source tree, $2 = build dir, $3 = label; echoes the bi
     ( cd "$build" && cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_OSX_ARCHITECTURES=arm64 \
           -DWF_ASAN=OFF "$tree" >"$OUT/logs/configure-$label.log" 2>&1 \
       && ninja wf_game >"$OUT/logs/build-$label.log" 2>&1 ) \
-      || { echo "$(stamp) BUILD FAILED: $label (see logs/build-$label.log)" >&2; tail -20 "$OUT/logs/build-$label.log" >&2 || true; return 1; }
+      || { echo "$(stamp) BUILD FAILED: $label (see logs/{configure,build}-$label.log)" >&2
+           tail -20 "$OUT/logs/configure-$label.log" "$OUT/logs/build-$label.log" >&2 2>/dev/null || true; return 1; }
     echo "$(stamp) built $label in $(( $(date +%s) - started )) s" >&2
     echo "$tree/engine/wf_game.app/Contents/MacOS/wf_game"
 }
@@ -95,6 +96,10 @@ if [ "${STYLE_SKIP_SWEEP:-0}" != 1 ]; then
     rm -rf "$WT"; git -C "$CM_BUILD_DIR" worktree prune
     git -C "$CM_BUILD_DIR" worktree add --quiet --detach "$WT/baseline" "$BASE_REV"
     git -C "$CM_BUILD_DIR" worktree add --quiet --detach "$WT/candidate" "$CAND_REV"
+    # A worktree starts with empty submodules (third_party/glfw and friends).
+    for tree in "$WT/baseline" "$WT/candidate"; do
+        git -C "$tree" submodule update --init --recursive --quiet
+    done
     # git-lfs or not, the cooked levels are ordinary blobs in this repo.
     BASE_BIN=$(build_engine "$WT/baseline" "$WT/build-baseline" baseline)
     CAND_BIN=$(build_engine "$WT/candidate" "$WT/build-candidate" candidate)
