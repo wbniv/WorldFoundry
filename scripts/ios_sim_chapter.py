@@ -770,9 +770,24 @@ def letterbox_state(w: int, h: int, px, y3: int, ch3: int) -> tuple[bool, bool]:
     return bars_dark and inside > 20, bars_dark
 
 
-def app_frame(shot: Path, surface: tuple[int, int], out_png: Path):
+def band_kind(device: str, w: int, h: int, px, y3: int, ch3: int) -> tuple[bool, bool, bool]:
+    """(band, verified_if_band, bars_dark) for a portrait screenshot of the landscape app
+    whose band would span rows y3..y3+ch3 (see app_frame)."""
+    letterboxed, bars_dark = letterbox_state(w, h, px, y3, ch3)
+    windowed = device == "ipad" and not letterboxed and row_mean(w, px, y3 + 2, y3 + ch3 - 2) > 20
+    return letterboxed or device == "ipad", letterboxed or windowed, bars_dark
+
+
+def app_frame(shot: Path, surface: tuple[int, int], out_png: Path, device: str = "iphone"):
     """The app area of a simulator screenshot, upright, at a third of the surface size,
-    written to out_png. Returns (w, h, px, placement, verified)."""
+    written to out_png. Returns (w, h, px, placement, verified).
+
+    On the iPad the landscape app on a portrait simulator is always a band: iPadOS scales
+    the landscape window into the portrait screen. While the app was landscape-only the
+    band sat in black bars; since it also allows portrait (and CI pins landscape with
+    -WFOrientation), iPadOS draws the same band as a window over the home screen
+    (build 6af12b6d), so the bars are wallpaper and the dock, not black. The black-bar
+    test still decides between band and rotate on the iPhone only."""
     small = shot.with_suffix(".third.png")
     sw, sh_ = struct.unpack(">II", shot.read_bytes()[16:24])   # the PNG IHDR
     subprocess.run(["sips", "--resampleHeightWidth", str(sh_ // FRAME_SCALE), str(sw // FRAME_SCALE),
@@ -783,8 +798,8 @@ def app_frame(shot: Path, surface: tuple[int, int], out_png: Path):
     W, H = surface
     _, (_, by, _, bh) = app_placement(sw, sh_, W, H, True)
     y3, ch3 = by // FRAME_SCALE, bh // FRAME_SCALE
-    letterboxed, bars_dark = letterbox_state(w, h, px, y3, ch3)
-    kind, _ = app_placement(sw, sh_, W, H, letterboxed)
+    is_band, band_ok, bars_dark = band_kind(device, w, h, px, y3, ch3)
+    kind, _ = app_placement(sw, sh_, W, H, is_band)
     verified = True
     if kind == "rotate":
         # A letterboxed frame must never pass as a sideways one (run 6ae806b1's iPad
@@ -792,7 +807,7 @@ def app_frame(shot: Path, surface: tuple[int, int], out_png: Path):
         verified = not bars_dark
         w, h, px = rotate_ccw(w, h, px)
     if kind == "band":
-        verified = letterboxed
+        verified = band_ok
         w, h, px = crop(w, h, px, 0, y3, w, ch3)
     verified = verified and abs(w / h - W / H) < 0.01
     write_png(out_png, w, h, px)
@@ -833,7 +848,7 @@ def authored_frame(label: str, text: str, shots: dict, out: Path) -> dict:
     for tag, shot in shots.items():
         if shot.exists():
             try:
-                frames[tag] = app_frame(shot, (W, H), out / f"ios-chapter-{label}-{tag}-app.png")
+                frames[tag] = app_frame(shot, (W, H), out / f"ios-chapter-{label}-{tag}-app.png", label)
             except Exception as e:  # one bad frame must not lose the verdict
                 log(f"{label}: app crop of {tag} failed: {e}")
     if "opening" not in frames:

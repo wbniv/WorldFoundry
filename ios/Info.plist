@@ -47,8 +47,10 @@
         <string>UIInterfaceOrientationLandscapeLeft</string>
         <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
-    <!-- Full screen on iPad, as before: with every orientation allowed, iPadOS would
-         otherwise offer Split View and Slide Over and ignore the -WFOrientation pin. -->
+    <!-- Opts out of Split View and Slide Over on iPadOS before 26. iPadOS 26 does not
+         honour it (it is deprecated there): with portrait allowed, the simulator's iPad
+         shows the app as a window over the home screen rather than letterboxed in black
+         (Codemagic build 6af12b6d). The -WFOrientation pin still holds inside the window. -->
     <key>UIRequiresFullScreen</key>
     <true/>
     <key>UIStatusBarHidden</key>

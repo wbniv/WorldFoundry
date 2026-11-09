@@ -379,3 +379,28 @@ def test_row_mean_and_outline():
     px = bytearray(3 * 4 * 4)
     out = chapter.outline(4, 4, px, (0, 0, 4, 4), colour=(255, 255, 255), width=1)
     assert chapter.row_mean(4, out, 0, 1) == 255 and chapter.row_mean(4, out, 1, 3) < 255
+
+
+def test_ipad_band_holds_when_ipados_draws_it_as_a_window():
+    # Build 6af12b6d: with portrait allowed and -WFOrientation landscape, iPadOS draws the
+    # landscape app as a band over the home screen (wallpaper and dock), not in black bars.
+    # The black-bar test called that "rotate" (crop verified by aspect only) and the FRAME
+    # CHECK compared a sideways frame: 90.15 %. On the iPad it is always the band.
+    w, h, y3, ch3 = 688, 917, 200, 516
+    px = bytearray()
+    for y in range(h):
+        colour = (40, 120, 200) if not (y3 <= y < y3 + ch3) else (150, 130, 100)   # wallpaper / scene
+        px += bytes(colour) * w
+    assert chapter.letterbox_state(w, h, px, y3, ch3) == (False, False)
+    assert chapter.band_kind("ipad", w, h, px, y3, ch3) == (True, True, False)
+    # The iPhone keeps the old rule: no black bars means the frame is the app turned a quarter.
+    assert chapter.band_kind("iphone", w, h, px, y3, ch3) == (False, False, False)
+    # A black-letterboxed iPad (the app before portrait) is still a verified band.
+    dark = bytearray()
+    for y in range(h):
+        dark += bytes((150, 130, 100) if y3 <= y < y3 + ch3 else (0, 0, 0)) * w
+    assert chapter.band_kind("ipad", w, h, dark, y3, ch3) == (True, True, True)
+    # An iPad band with nothing drawn in it is not verified.
+    blank = bytearray(bytes((40, 120, 200)) * (w * y3) + bytes((0, 0, 0)) * (w * ch3)
+                      + bytes((40, 120, 200)) * (w * (h - y3 - ch3)))
+    assert chapter.band_kind("ipad", w, h, blank, y3, ch3)[1] is False
