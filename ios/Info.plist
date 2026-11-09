@@ -30,16 +30,27 @@
     <array>
         <string>arm64</string>
     </array>
+    <!-- Portrait on as well as landscape (Will, 2026-11-08; finding-your-way
+         docs/plans/2026-11-08-ios-touch-parity.md). No upside-down portrait on
+         iPhone. hal/ios/native_app_entry.mm can pin one orientation for CI with
+         the launch argument -WFOrientation landscape|portrait. -->
     <key>UISupportedInterfaceOrientations</key>
     <array>
+        <string>UIInterfaceOrientationPortrait</string>
         <string>UIInterfaceOrientationLandscapeLeft</string>
         <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
     <key>UISupportedInterfaceOrientations~ipad</key>
     <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
         <string>UIInterfaceOrientationLandscapeLeft</string>
         <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
+    <!-- Full screen on iPad, as before: with every orientation allowed, iPadOS would
+         otherwise offer Split View and Slide Over and ignore the -WFOrientation pin. -->
+    <key>UIRequiresFullScreen</key>
+    <true/>
     <key>UIStatusBarHidden</key>
     <true/>
     <key>UIViewControllerBasedStatusBarAppearance</key>

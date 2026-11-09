@@ -196,7 +196,7 @@ static void WFResume(UIView* root, const char* why)
 }
 
 // A game: keep the home indicator out of the way and make a swipe from the
-// bottom / side edges reach the D-pad and A/B first (a second swipe still
+// bottom / side edges reach the joystick and A to D first (a second swipe still
 // goes to the system).
 - (BOOL)prefersHomeIndicatorAutoHidden
 {
@@ -206,6 +206,19 @@ static void WFResume(UIView* root, const char* why)
 - (UIRectEdge)preferredScreenEdgesDeferringSystemGestures
 {
     return UIRectEdgeBottom | UIRectEdgeLeft | UIRectEdgeRight;
+}
+
+// Every orientation ios/Info.plist allows (portrait and landscape), unless the
+// launch argument -WFOrientation landscape|portrait pins one: a simulator boots
+// in portrait, so CI pins the chapter run to landscape to keep its baseline and
+// pins portrait for the portrait HUD tour (scripts/ios_sim_chapter.py).
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    NSString* pin = [[NSUserDefaults standardUserDefaults] stringForKey:@"WFOrientation"];
+    if ([pin isEqualToString:@"landscape"]) return UIInterfaceOrientationMaskLandscape;
+    if ([pin isEqualToString:@"portrait"])  return UIInterfaceOrientationMaskPortrait;
+    return [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad
+        ? UIInterfaceOrientationMaskAll : UIInterfaceOrientationMaskAllButUpsideDown;
 }
 
 - (void)viewWillLayoutSubviews
