@@ -1,6 +1,6 @@
 # Sea Stars: an eleventh aquarium tank of Indo-Pacific starfish
 
-**Status: draft, 2026‑11‑10.** Waiting on Will's answers to D1–D8. Nothing is built yet.
+**Status: draft, 2026‑11‑10.** Waiting on Will's answers to D1–D10. Nothing is built yet.
 
 ## Context
 
@@ -13,6 +13,11 @@ Will asked on 2026‑11‑10: "i want to add a new tank level to the aquarium pa
 | Roster | **Several species**: 4–6 kinds that differ in shape and colour |
 
 The tank is the eleventh entry in the Android selector and the Dream list. It reuses the reef's shell, rock generator, `DFRM` v2 and style shading. **No engine change is expected**, and Phase 1 exists to prove it (see [Engine](#engine)).
+
+Will then added two requirements while this plan was being written:
+
+1. **"make sure there's a screensaver version, too"**: the `aquarium_sea_stars_screensaver` Dream variant. See [Screensaver](#screensaver).
+2. **"there should be level settings (number of sea stars, etc.)"**: a Director-owned `SeaStarsSettings` object. See [Level settings](#level-settings).
 
 ### The content rule
 
@@ -33,7 +38,7 @@ There's no shared species list to check this against. The reef plan's check (its
 
 ## Decisions for Will
 
-Each row gives a recommendation and its alternatives. Answering "D1–D8: all yes" accepts every recommendation.
+Each row gives a recommendation and its alternatives. Answering "D1–D10: all yes" accepts every recommendation.
 
 | # | Decision | Recommendation | Alternatives |
 |---|---|---|---|
@@ -45,6 +50,8 @@ Each row gives a recommendation and its alternatives. Answering "D1–D8: all ye
 | D6 | Visual style | **One style, realistic**, with S1 clear-lagoon absorption and S2 caustics on | Two styles (realistic and anime) like the reef: twice the art and twice the acceptance work |
 | D7 | Frame-rate gate on cast1, wide idle | **≥ 20 FPS (≤ 50 ms)**, the reef's gate | ≥ 30 FPS. The reef manages 21.8 FPS, so 30 FPS is a target to measure against, not a promise |
 | D8 | The A button | **Reach**: the star rears up on two arms for 2 s (sea stars do this to reach for food or to right themselves) | Swap the leading arm without moving. Or leave A unused |
+| D9 | The settings | **Nine fields:** a count for each resident species, Speed (Slow, Normal, Fast), Glass climbing (Off, On), Caustics (Off, On) and Seed ([list](#level-settings)). The player's species is shown read-only | Fewer fields: counts and Seed only. Or add Player species (any of the five-armed stars), which needs an underside skin for each one |
+| D10 | Maximum counts, and the gate at the maximum | **4 chocolate-chip, 5 *Fromia*, 4 sand-sifting, 2 brittle, 2 cushion** (17 residents). The D7 gate must also hold at the maximum. If it doesn't, Phase 4 lowers the maximums until it does, and doesn't ask for a slower gate | Allow a slower maximum (≥ 15 FPS at full population) and keep the higher counts |
 
 ## The tank
 
@@ -147,6 +154,99 @@ sequenceDiagram
 
 The chocolate-chip stars, the *Fromia* and the cushion star don't react. They run on timers alone, so the tank keeps moving when nobody is playing.
 
+## Level settings
+
+[![The SeaStarsSettings phone form at defaults, at maximum population, and with every count at 0](2026-11-10-starfish-tank/settings.png)](2026-11-10-starfish-tank/settings.html)
+
+The tank gets a **Director-owned settings object**, `SeaStarsSettings`, like the reef's `ReefSettings` and the Jellyfish and Planted tanks' objects. It's the same machinery: `settings.oas` declares the fields, `settings-bindings.json` binds them to the Director, and `build-object-properties.py` attaches the RPRP catalog. The phone form is generated from the catalog. Runtime object editing is still parked, so nothing new is needed for this.
+
+| Field | Kind | Range | Default | Applies |
+|---|---|---|---|---|
+| Chocolate-chip stars | slider | 0–4 | 2 | live |
+| Red Fromia | slider | 0–5 | 3 | live |
+| Sand-sifting stars | slider | 0–4 | 2 | live |
+| Brittle stars | slider | 0–2 | 1 | live |
+| Cushion stars | slider | 0–2 | 1 | live |
+| Speed | radio | Slow, Normal, Fast (× 10, × 20, × 40 real speed for the residents; the player scales the same way) | Normal | live |
+| Glass climbing | radio | Off, On | On | live; a star on the glass when it turns off climbs down first |
+| Caustics | radio | Off, On (the S2 Camera field) | On | live |
+| Seed | number | 0–16777215; 0 picks new resident spots on every entry | 0 | next entry |
+
+**The level holds the maximum population (D10).** The `.lev` places all 17 residents. At level load, and again whenever a count changes, the Director **parks** the extras: they're hidden, moved out of view, and skipped in the director's update loop. A count that goes up unparks a resident at a free spot from the seeded list and fades it in over 2 s. The player is never parked. With every count at 0, the tank holds only the player, and the Dream autopilot still runs.
+
+Phase 4 measures how much a parked actor costs. If a hidden actor still pays for its deform or its draw, parking has to skip both (that's still a Forth-side change, not an engine one). The D7 gate is measured at the defaults **and** at the maximum ([verification](#verification) step 9).
+
+```mermaid
+flowchart LR
+    OAS["settings.oas<br/>SeaStarsSettings"] --> BOP["build-object-properties.py<br/>RPRP catalog"]
+    BIND["settings-bindings.json<br/>owner: Director"] --> BOP
+    BOP --> LVL["aquarium_sea_stars-standalone.iff"]
+    BOP --> SSV["aquarium_sea_stars_screensaver-standalone.iff"]
+    PH["Phone form<br/>(TankSettingsProvider)"] -->|"edit"| CAT["catalog values"]
+    TV["TV level settings"] -->|"edit"| CAT
+    CAT -->|"polled once a second"| DIR["star_director.fth<br/>mailboxes (allocated Phase 4)"]
+    DIR --> PARK["park / unpark residents"]
+    DIR --> SPD["clip rates (Speed)"]
+    DIR --> GL["glass planes on / off"]
+    DIR --> CAM["Camera caustics field"]
+```
+
+```mermaid
+sequenceDiagram
+    participant U as Will (phone)
+    participant C as Settings catalog
+    participant D as star_director.fth
+    participant R as Resident actors
+    U->>C: Red Fromia 3 → 5
+    loop once a second
+        D->>C: read the 9 fields
+    end
+    D->>D: 2 more Fromia wanted
+    D->>R: unpark Fromia 4 and 5 at free rock-route spots
+    R-->>D: fading in (2 s)
+    U->>C: Seed 0 → 4242
+    D->>D: Seed is read on the next entry only
+```
+
+## Screensaver
+
+[![The Dream variant: autopilot climbing the front glass at defaults, autopilot on the sand at maximum population, one autopilot cycle](2026-11-10-starfish-tank/screensaver.png)](2026-11-10-starfish-tank/screensaver.html)
+
+Every tank has a Dream variant, and so does this one: **`aquarium_sea_stars_screensaver`**. `scripts/build-aquarium-screensaver-levels.py` makes it from the canonical level in the usual way:
+
+- It **swaps the player's script** for the autopilot, `sea_stars_screensaver.fth`, which drives the player star along seeded waypoints with no input. The same driver takes over in the playable level after 30 s of no input.
+- It **attaches the `SeaStarsSettings` catalog**, so the phone's Dream settings edit the same nine fields. `check_tank_catalog` gets a Sea Stars branch that checks for the schema and its keys.
+- It's **full screen, with no HUD and no input**, like the other Dream variants.
+- `TankChoice.java` gets `aquarium_sea_stars` / "Sea Stars" as its eleventh entry, and `TankSettingsProvider` sends it to the phone unchanged.
+
+```mermaid
+flowchart LR
+    LEV["aquarium_sea_stars.lev<br/>(canonical)"] --> BSL["build-aquarium-screensaver-levels.py<br/>TANKS + aquarium_sea_stars"]
+    FTH["sea_stars_screensaver.fth<br/>(autopilot)"] --> BSL
+    BSL -->|"player script swapped"| VAR["aquarium_sea_stars_screensaver.lev"]
+    VAR --> BLB["build_level_binary.sh"]
+    BLB --> STD["…_screensaver-standalone.iff"]
+    STD --> CATA["attach SeaStarsSettings catalog<br/>check_tank_catalog"]
+    CATA --> CD["aquarium-screensaver-cd.iff"]
+    CD --> APK["screensaver APK<br/>TankChoice: + Sea Stars"]
+```
+
+```mermaid
+stateDiagram-v2
+    [*] --> Enter
+    Enter --> PickWaypoint: seeded spots
+    PickWaypoint --> Glide
+    Glide --> Pause: arrived
+    Pause --> PickWaypoint: after 10–40 s
+    PickWaypoint --> ClimbFront: every 3rd waypoint
+    ClimbFront --> AlongBack: if Glass climbing is On
+    AlongBack --> PickWaypoint
+    Pause --> Reach: 1 in 5 pauses
+    Reach --> PickWaypoint: after 2 s
+```
+
+If Glass climbing is Off, the autopilot skips the glass legs, and every waypoint is on the sand.
+
 ## How the arms move
 
 Each five-armed star is one mesh with one `DFRM` v2 curve per arm (5 of the 16 allowed). The clips come from the same generator for every species, scaled by arm length:
@@ -175,14 +275,14 @@ The risky part is holding the player on a plane. A swimming player already moves
 
 ```mermaid
 flowchart TD
-    D["Will decides D1–D8"] --> P0["Phase 0 (T2)<br/>species sheet: sizes, colours,<br/>behaviours, speeds, with sources"]
+    D["Will decides D1–D10"] --> P0["Phase 0 (T2)<br/>species sheet: sizes, colours,<br/>behaviours, speeds, with sources"]
     D --> P1["Phase 1 (T4)<br/>crawl-controller spike:<br/>sand, 4 glass planes, corners"]
     P1 -->|"no engine change needed"| P2["Phase 2 (T3)<br/>static tank + cast1 gate ≤ 38 ms"]
     P1 -->|"Jolt fights the clamp"| EP["Stop: engine proposal to Will"]
     P0 --> P3["Phase 3 (T3)<br/>star generator, 6 species,<br/>atlas cells, underside skin"]
     P2 --> P3
-    P3 --> P4["Phase 4 (T3)<br/>player, director,<br/>screensaver driver"]
-    P4 --> P5["Phase 5 (T2)<br/>selector + Dream registration"]
+    P3 --> P4["Phase 4 (T3)<br/>player, director, settings,<br/>autopilot, parking"]
+    P4 --> P5["Phase 5 (T2)<br/>selector + screensaver variant<br/>+ Dream registration"]
     P5 --> P6["Phase 6 (T3)<br/>cast1 acceptance"]
 ```
 
@@ -190,9 +290,9 @@ flowchart TD
 - **Phase 1, crawl-controller spike** (T4). A placeholder five-armed star goes in the reef shell with its colliders. The spike covers the leader-arm steering, the four glass planes, the corner roll and rock avoidance. It runs headless on the desktop with a trace test: a scripted input goes once round the tank and up the front glass, and the test asserts the star is always on a plane (within 1 mm) and inside the tank. Rank T4 because the result decides whether an engine change is needed.
 - **Phase 2, static tank** (T3). The shell, sand, three outcrops, the ledge and the seagrass, built by `wflevels/aquarium_sea_stars/build.sh` in the Blender container and wrapped as `task aquarium-sea-stars-level`. `report_budget.py` prints the triangles in each static group. The early cast1 gate is ≤ 38 ms with no actors. If it misses, thin the rocks before Phase 3.
 - **Phase 3, the stars** (T3). `stars.py` is the parametric generator. It makes six species, their atlas cells, and the player's underside skin (grooves and mouth), with five-curve `DFRM` v2 chunks written by `dfrm_chunk.py`. Desktop captures from the close camera go to Will for an art review.
-- **Phase 4, behaviour** (T3). `sea_star_player.fth`, `star_director.fth` and `sea_stars_screensaver.fth`. `scripts/check-sea-stars.py --video` drives the player past the brittle star and over a sand-sifting star, and asserts each reaction within its timing window.
-- **Phase 5, registration** (T2). One line is appended to the manifest, and the tank is added wherever the ten are listed ([files](#new-and-changed-files)). Indices 0–9 don't move.
-- **Phase 6, acceptance** (T3). Through the coordinator on cast1 (and cast2 if it's free): the selector and Back, the D7 frame gate over 120 s of wide idle, and a 10-minute Dream run. Then restore the device's original settings and Dream selection.
+- **Phase 4, behaviour** (T3). `sea_star_player.fth`, `star_director.fth` and `sea_stars_screensaver.fth`. `scripts/check-sea-stars.py --video` drives the player past the brittle star and over a sand-sifting star, and asserts each reaction within its timing window. **Settings:** `settings.oas`, `settings-bindings.json`, the Director's once-a-second poll, parking and unparking, and a desktop run at the maximum population with a measured cost per parked actor.
+- **Phase 5, registration and the screensaver** (T2). One line is appended to the manifest, and the tank is added wherever the ten are listed ([files](#new-and-changed-files)). Indices 0–9 don't move. Also build the `aquarium_sea_stars_screensaver` variant with its catalog, add the `check_tank_catalog` branch, and add the `TankChoice.java` entry. The other session's uncommitted edits to `build-aquarium-screensaver-levels.py` stay uncommitted: merge on top of them and stage only this plan's hunks.
+- **Phase 6, acceptance** (T3). Through the coordinator on cast1 (and cast2 if it's free): the selector and Back, the D7 frame gate at the defaults and at the maximum population, each over 120 s of wide idle, and a 10-minute Dream run, and a settings change made on the phone during the Dream that shows on the TV within 2 s. Then restore the device's original settings and Dream selection.
 
 Work happens in a sparse worktree branched from `2026-new-level` (a full checkout is 4.2 GB). The finish line is a push to `2026-new-level`, with no PR to master.
 
@@ -223,14 +323,16 @@ flowchart TD
 
 | Path | New / changed | What |
 |---|---|---|
-| `wflevels/aquarium_sea_stars/` | new | `config.py`, `build.sh`, `run.sh`, `generate.py`, `stars.py`, `scene.py`, `report_budget.py`; Forth: `sea_star_player.fth`, `star_director.fth`, `sea_stars_screensaver.fth` |
+| `wflevels/aquarium_sea_stars/` | new | `config.py`, `build.sh`, `run.sh`, `generate.py`, `stars.py`, `scene.py`, `report_budget.py`, `settings.oas`, `settings-bindings.json`; Forth: `sea_star_player.fth`, `star_director.fth`, `sea_stars_screensaver.fth` |
+| `wflevels/aquarium_sea_stars_screensaver/` | new (generated) | the Dream variant, written by `build-aquarium-screensaver-levels.py`, gitignored like the other variants |
 | `wflevels/aquarium_species.json` | new | each tank's species list, the source for the content-rule test |
 | `scripts/check-sea-stars.py` | new | desktop reaction and trace capture |
 | `tests/test_aquarium_sea_stars.py` | new | budgets, director timing tables, the plane-hold trace |
+| `tests/test_sea_stars_settings.py` | new | the nine fields, their ranges and defaults, the bindings, park and unpark under count changes |
 | `tests/test_aquarium_species.py` | new | no species in two tanks |
 | `docs/reference/sea-stars-research.md` | new | the Phase 0 species sheet |
-| `wflevels/aquarium-menu.manifest`, `Taskfile.yml` (`aquarium-sea-stars-level`, `build-cd-iff-aquarium-menu` deps), `scripts/aquarium-levels.sh`, `scripts/compare-level-build-routes.sh`, `scripts/build-aquarium-screensaver-levels.py` (`TANKS`), `scripts/build-aquarium-variant.py`, `android/screensaver/…/TankChoice.java` | changed | registration (Phase 5) |
-| `tests/test_aquarium_menu.py`, `tests/test_aquarium_screensaver_input.py`, `tests/test_species_movement.py` | changed | 11 tanks and the new TOC count |
+| `wflevels/aquarium-menu.manifest`, `Taskfile.yml` (`aquarium-sea-stars-level`, `build-cd-iff-aquarium-menu` deps), `scripts/aquarium-levels.sh`, `scripts/compare-level-build-routes.sh`, `scripts/build-aquarium-screensaver-levels.py` (`TANKS`, the `check_tank_catalog` branch), `scripts/build-aquarium-variant.py`, `android/screensaver/…/TankChoice.java` | changed | registration (Phase 5) |
+| `tests/test_aquarium_menu.py`, `tests/test_aquarium_screensaver_input.py`, `tests/test_species_movement.py`, `tests/test_aquarium_screensaver_catalog.py` | changed | 11 tanks, the new TOC count, and the Sea Stars catalog |
 | Engine | **none** | unless Phase 1 escalates |
 
 ## Out of scope
@@ -239,7 +341,7 @@ flowchart TD
 - Feeding, stomach eversion, regrowing arms, or anything carried over between sessions.
 - An anime twin (D6), and an A3 poster (not asked for).
 - Companion invertebrates such as urchins, sea cucumbers or a harlequin shrimp. Will chose several sea-star species instead.
-- Settings sheets (population counts, speeds). The tank ships with fixed values.
+- Choosing the player's species in the settings (D9 shows it read-only).
 
 ## Verification
 
@@ -272,15 +374,25 @@ flowchart TD
     ```
     scripts/in-linux-container.sh python3 -m pytest tests/test_aquarium_menu.py tests/test_aquarium_screensaver_input.py tests/test_species_movement.py tests/test_aquarium_screensaver_catalog.py -v
     ```
-8. On cast1, the early gate: the static tank with no actors runs at ≤ 38 ms, median over 120 s of wide idle (coordinator `profile`).
-9. On cast1, the D7 gate: the full tank runs at ≥ 20 FPS, median over 120 s of wide idle; the selector reaches Sea Stars and Back returns to the menu.
-10. On cast1, the Dream: Sea Stars, picked on the phone, runs for 10 minutes with no crash, and the autopilot climbs the front glass at least once (recorded MP4). Then the device's original Dream selection and settings are restored.
+8. The settings object declares the nine fields with the D9 ranges and defaults, and the Director parks and unparks to match each count, from all zero to the maximum, in a desktop run.
+    ```
+    scripts/in-linux-container.sh python3 -m pytest tests/test_sea_stars_settings.py -v
+    ```
+9. The screensaver variant builds and carries the `SeaStarsSettings` catalog with all nine keys.
+    ```
+    python3 scripts/build-aquarium-screensaver-levels.py aquarium_sea_stars
+    ```
+10. On cast1, the early gate: the static tank with no actors runs at ≤ 38 ms, median over 120 s of wide idle (coordinator `profile`).
+11. On cast1, the D7 gate: the full tank runs at the defaults **and** at the maximum population at ≥ 20 FPS, median over 120 s of wide idle; the selector reaches Sea Stars and Back returns to the menu.
+12. On cast1, the Dream: Sea Stars, picked on the phone, runs for 10 minutes with no crash, and the autopilot climbs the front glass at least once (recorded MP4). During the run, Red Fromia changed from 3 to 5 on the phone shows two more *Fromia* on the TV within 2 s. Then the device's original Dream selection and settings are restored.
 
 ## Mockups
 
-All four are self-contained, 1440 × 900, and rebuilt by `python3 docs/plans/2026-11-10-starfish-tank/build_mockups.py --png` from one seed. They show design intent, not game assets.
+All six are self-contained, 1440 × 900, and rebuilt by `python3 docs/plans/2026-11-10-starfish-tank/build_mockups.py --png` from one seed. They show design intent, not game assets.
 
 - [Wide view](2026-11-10-starfish-tank/tank-wide.html): every species numbered, with the labels outside the TV frame.
 - [Player](2026-11-10-starfish-tank/player.html): on the sand, on the front glass (underside), the corner roll, and the controls.
 - [Residents](2026-11-10-starfish-tank/residents.html): two states for each resident.
+- [Settings](2026-11-10-starfish-tank/settings.html): the `SeaStarsSettings` phone form at the defaults, at the maximum population, and with every count at 0 (the empty tank).
+- [Screensaver](2026-11-10-starfish-tank/screensaver.html): the Dream variant at the defaults (the autopilot on the front glass) and at the maximum, plus one autopilot cycle.
 - [Selectors](2026-11-10-starfish-tank/selectors.html): the TV menu at 11 / 11 and 1 / 11, and the phone's Dream list.

@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Mockups for docs/plans/2026-11-10-starfish-tank.md.
 
-Writes four self-contained 1440x900 HTML mockups beside this script and, with
+Writes six self-contained 1440x900 HTML mockups beside this script and, with
 --png, a same-basename PNG for each (headless google-chrome):
 
   tank-wide.html   the tank from the default wide camera, every species numbered
   player.html      the player sea star: on the sand, on the front glass, at a corner
   residents.html   the residents' two states each (hidden / out, calm / fleeing)
+  settings.html    the SeaStarsSettings phone form: defaults, maximum, only the player
+  screensaver.html the Dream variant: autopilot frames and one autopilot cycle
   selectors.html   the TV tank menu at 11 / 11 and 1 / 11, and the phone's Dream list
 
 Everything is procedural SVG from one seeded RNG, so a rerun is byte-identical.
@@ -444,7 +446,100 @@ def selectors() -> str:
     return page("Sea Stars selectors", body)
 
 
-MOCKUPS = {"tank-wide": tank_wide, "player": player, "residents": residents, "selectors": selectors}
+SETTINGS = [  # (label, kind, lo, hi, default, choices)
+    ("Chocolate-chip stars", "slider", 0, 4, 2, None),
+    ("Red Fromia", "slider", 0, 5, 3, None),
+    ("Sand-sifting stars", "slider", 0, 4, 2, None),
+    ("Brittle stars", "slider", 0, 2, 1, None),
+    ("Cushion stars", "slider", 0, 2, 1, None),
+    ("Speed", "radio", 0, 2, 1, ["Slow", "Normal", "Fast"]),
+    ("Glass climbing", "radio", 0, 1, 1, ["Off", "On"]),
+    ("Caustics", "radio", 0, 1, 1, ["Off", "On"]),
+    ("Seed", "number", 0, 16777215, 0, None),
+]
+
+
+def phone_form(values: dict, title: str) -> str:
+    rows = ['<div style="padding:10px 16px;border-bottom:1px solid #e3e7ec;color:#9aa5b1;display:flex;justify-content:space-between">'
+            '<span>Player</span><span>Blue sea star &#128274;</span></div>']
+    for label, kind, lo, hi, d, ch in SETTINGS:
+        v = values.get(label, d)
+        if kind == "slider":
+            pct = 100 * (v - lo) / (hi - lo)
+            ctl = (f'<div style="display:flex;align-items:center;gap:10px;margin-top:6px"><div style="flex:1;height:4px;background:#d5dce4;border-radius:2px;position:relative">'
+                   f'<div style="width:{pct:.0f}%;height:4px;background:#1f6fd1;border-radius:2px"></div>'
+                   f'<div style="position:absolute;left:calc({pct:.0f}% - 8px);top:-6px;width:16px;height:16px;border-radius:50%;background:#1f6fd1"></div></div>'
+                   f'<b style="width:18px;text-align:right">{v}</b></div>')
+        elif kind == "radio":
+            ctl = '<div style="display:flex;gap:14px;margin-top:6px">' + "".join(
+                f'<span>{"&#9673;" if i == v else "&#9675;"} {c}</span>' for i, c in enumerate(ch)) + "</div>"
+        else:
+            ctl = (f'<div style="margin-top:6px;border:1px solid #c9d3de;border-radius:4px;padding:3px 8px;width:120px">{v}</div>')
+        rows.append(f'<div style="padding:8px 16px;border-bottom:1px solid #e3e7ec"><div>{label}</div>{ctl}</div>')
+    return (f'<div style="width:300px;height:690px;border:10px solid #111;border-radius:30px;background:#fff;color:#13202e;overflow:hidden;font-size:13.5px">'
+            f'<div style="padding:14px 16px;font-weight:600;font-size:15.5px;border-bottom:1px solid #ccd">&#8249; {title}</div>{"".join(rows)}</div>')
+
+
+def settings() -> str:
+    states = [
+        ("Defaults", {}, "Ships like this: 9 residents, the D7 gate is measured here."),
+        ("Maximum population", {"Chocolate-chip stars": 4, "Red Fromia": 5, "Sand-sifting stars": 4, "Brittle stars": 2, "Cushion stars": 2},
+         "17 residents + the player. Phase 4 measures this too; a maximum that misses the gate is lowered (D10)."),
+        ("Only the player", {"Chocolate-chip stars": 0, "Red Fromia": 0, "Sand-sifting stars": 0, "Brittle stars": 0, "Cushion stars": 0, "Seed": 4242},
+         "All counts 0: the empty tank. The Director parks every resident; the player and the Dream autopilot still run."),
+    ]
+    cols = "".join(f'<div style="width:330px"><h2>{t}</h2>{phone_form(v, "Sea Stars settings")}<div class="cap" style="width:300px">{c}</div></div>'
+                   for t, v, c in states)
+    notes = ('<div style="width:300px;font-size:13.5px;color:var(--mute);padding-top:30px">'
+             '<h2>Notes</h2><p>Editable rows carry no marker. The read-only row is dimmed with a padlock.</p>'
+             '<p>Counts, Speed, Glass climbing and Caustics apply <b style="color:var(--ink)">live</b>: the Director polls the settings once a second.</p>'
+             '<p>Seed applies on the next entry. 0 draws new resident spots each time; any other value repeats them.</p>'
+             '<p>The same form opens from the Dream tank list and the TV level. Both read one catalog, <code>SeaStarsSettings</code>.</p></div>')
+    body = (f'<h1>Level settings: SeaStarsSettings</h1><p class="sub">A Director-owned settings object, as the Reef, Jellyfish and Planted tanks have. '
+            f'The phone form is generated from <code>settings.oas</code>.</p><div style="display:flex;gap:26px">{cols}{notes}</div>')
+    return page("Sea Stars settings", body)
+
+
+def screensaver() -> str:
+    rng = random.Random(SEED + 3)
+    W, H, hz = 760, 428, 175
+    def frame(extra, many=False):
+        sv = [water_and_sand(W, H, hz, rng), rock(220, 240, 170, 90, rng), rock(570, 220, 220, 110, rng),
+              seagrass(60, 220, rng, 7, 70), seagrass(700, 212, rng, 6, 60), rubble(W, hz, H, rng, 30)]
+        n_cc, n_fr, n_ar = (4, 5, 4) if many else (2, 3, 2)
+        for i in range(n_cc):
+            sv.append(star(120 + i * 160, 360 + (i % 2) * 30, "protoreaster", rot=i * .7, squash=.5, scale=.8))
+        for i in range(n_fr):
+            sv.append(star(180 + i * 95 + (i > 1) * 200, 205 + (i % 2) * 22 - (i > 1) * 10, "fromia", rot=i, scale=.7))
+        for i in range(n_ar):
+            sv.append(star(90 + i * 190, 405, "archaster", rot=i * .4, squash=.45, scale=.75, buried=.7 if i % 2 else 0))
+        sv.append(star(520, 285, "ophiarachna", rot=.4, bends=[.5, -.4, .3, -.5, .2], squash=.5, scale=.7))
+        if many:
+            sv.append(star(300, 300, "ophiarachna", rot=1.4, bends=[.6, -.3, .4, -.5, .2], squash=.5, scale=.7))
+            sv.append(star(680, 395, "culcita", squash=.55, scale=.75))
+        sv.append(star(45, 400, "culcita", squash=.55, scale=.75))
+        sv.append(extra)
+        return f'<div class="tv"><svg width="660" height="372" viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg">{"".join(sv)}</svg></div>'
+    glass = star(380, 120, "linckia", rot=.25, scale=1.25, underside=True)   # autopilot up the front glass
+    sand = star(400, 330, "linckia", rot=.1, lifts=[10, 0, 0, 0, 0], squash=.55, scale=1.0)
+    steps = [("0:00", "enter: seeded spots"), ("0:20", "glide to sand spot"), ("1:10", "pause 10–40 s"),
+             ("2:30", "up the front glass"), ("4:00", "along the back glass"), ("5:30", "rear up (reach)"),
+             ("…", "repeat; no HUD, no input")]
+    tl = "".join(f'<div style="flex:1;border-top:3px solid var(--accent);padding-top:6px;font-size:12.5px"><b>{t}</b><br>'
+                 f'<span style="color:var(--mute)">{d}</span></div>' for t, d in steps)
+    body = (f'<h1>Screensaver: <code>aquarium_sea_stars_screensaver</code></h1>'
+            f'<p class="sub">The Dream variant swaps the player script for the autopilot (<code>sea_stars_screensaver.fth</code>) and carries the '
+            f'<code>SeaStarsSettings</code> catalog. Full screen, no HUD, no input.</p>'
+            f'<div style="display:flex;gap:30px"><div><h2>Defaults: autopilot climbing the front glass</h2>{frame(glass)}</div>'
+            f'<div><h2>Maximum population: autopilot on the sand</h2>{frame(sand, True)}</div></div>'
+            f'<h2 style="margin-top:18px">One autopilot cycle (seeded waypoints)</h2><div style="display:flex;gap:10px;width:1376px">{tl}</div>'
+            f'<div class="cap" style="margin-top:12px">The Dream picks Sea Stars from the phone list; the settings form opens from that list. '
+            f'Leaving the Dream restores the TV; the settings stay as set.</div>')
+    return page("Sea Stars screensaver", body)
+
+
+MOCKUPS = {"tank-wide": tank_wide, "player": player, "residents": residents, "settings": settings,
+           "screensaver": screensaver, "selectors": selectors}
 
 
 def main() -> int:
