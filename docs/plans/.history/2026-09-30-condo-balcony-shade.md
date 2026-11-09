@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/3d14652a) | Balcony plan C: solar inserts option in the same insert frame |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/1d7253ae) | Balcony plan C v2: side window ventilates the balcony; no vent in the frame |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/d1ee0167) | Balcony plan C v2: weather inserts so no rain gets in while away |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/9b7fdc33) | Balcony plan C: frame detail sections |
@@ -27,6 +28,11 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/ce0a2fa6) | Plan condo 639 balcony zip screen (solar-strip motor) and 7 cm floor recess |
 
 <!--history-meta v1
+3d14652a	author	Will Norris
+3d14652a	added	53
+3d14652a	deleted	2
+3d14652a	files	1
+3d14652a	body	A glass-glass solar laminate replaces the polycarbonate sheet in the v2\ninsert frame, so it seals the same way with no frame change: 2 x 10\nhalf-cut 182 mm cells, about 65-75 W each, 400-450 W for six. Adds the\nfit and yield arithmetic (PVGIS vertical west, ledge shading), why no\ncatalogue panel or larger panel fits better, wiring, power-destination\nand mixed-set questions 19-20, and a solar state in the elevation mockup.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 1d7253ae	author	Will Norris
 1d7253ae	added	3
 1d7253ae	deleted	1
