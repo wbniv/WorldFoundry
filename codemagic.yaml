@@ -610,6 +610,66 @@ workflows:
       - ios-touch-*.zip
 
   #------------------------------------------------------------------------------
+  # android-touch-bytes — proof that the iOS touch-parity change leaves the Android
+  # library byte-identical (chapter repo, docs/plans/2026-11-08-ios-touch-parity.md,
+  # layer 1b). Builds libwf_game.so (Release, android-21) for arm64-v8a and
+  # armeabi-v7a at WF_BYTES_BASE and at the triggering commit, in one build tree per
+  # ABI, and compares every loaded section (scripts/android_alloc_sections_equal.py).
+  # Linux, because scripts/build-runtime-property-core.py links the Rust core with
+  # the NDK's linux-x86_64 clang. Manual only.
+  #------------------------------------------------------------------------------
+  android-touch-bytes:
+    name: Android library bytes (touch parity)
+    instance_type: linux_x2
+    max_build_duration: 90
+    environment:
+      vars:
+        WF_NDK_VERSION: "26.2.11394342"
+        WF_BYTES_BASE: 380337c3ee8ac683153a783fe323793d24f8b98e
+    triggering:
+      events: []
+    scripts:
+      - name: NDK, Rust Android targets, Ninja, Jolt
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME}}"
+          if [ ! -d "$SDK/ndk/$WF_NDK_VERSION" ]; then
+            yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" "ndk;$WF_NDK_VERSION" --sdk_root="$SDK" > /dev/null
+          fi
+          ls "$SDK/ndk/$WF_NDK_VERSION/build/cmake/android.toolchain.cmake"
+          if ! command -v cargo >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/cargo" ]; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --no-modify-path
+          fi
+          export PATH="$HOME/.cargo/bin:$PATH"
+          rustup target add aarch64-linux-android armv7-linux-androideabi
+          echo "PATH=$PATH" >> "$CM_ENV"
+          command -v ninja >/dev/null 2>&1 || pip3 install --user ninja
+          echo "PATH=$HOME/.local/bin:$PATH" >> "$CM_ENV"
+          cmake --version | head -1
+          cd engine/vendor
+          if [ ! -d jolt-physics-5.5.0 ]; then
+            tar -xzf jolt-physics-5.5.0.tar.gz
+            mv "$(tar -tzf jolt-physics-5.5.0.tar.gz | head -1 | cut -d/ -f1)" jolt-physics-5.5.0
+          fi
+      - name: Build base and head, compare loaded sections
+        script: |
+          set -euo pipefail
+          exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
+          cd "$CM_BUILD_DIR"
+          git fetch --quiet --unshallow 2>/dev/null || true
+          head_sha=$(git rev-parse HEAD)
+          tools=$(mktemp -d)
+          cp scripts/android_touch_bytes.sh scripts/android_alloc_sections_equal.py "$tools/"
+          SRC="$CM_BUILD_DIR" NDK="${ANDROID_SDK_ROOT:-$ANDROID_HOME}/ndk/$WF_NDK_VERSION" \
+            bash "$tools/android_touch_bytes.sh" "$WF_BYTES_BASE" "$head_sha" "$CM_BUILD_DIR/android-bytes"
+    artifacts:
+      - cm-build.log
+      - android-bytes/*.txt
+      - android-bytes/*.log
+      - android-bytes/*.so
+
+  #------------------------------------------------------------------------------
   # android-apk-debug — debug APK (arm64-v8a) for phone + Google TV sideload.
   #
   # See docs/plans/2026-04-23-chromecast-googletv-port.md Phase 1.
