@@ -1,6 +1,6 @@
 # Sea Stars: an eleventh aquarium tank of Indo-Pacific starfish
 
-**Status: draft, 2026‑11‑10.** Waiting on Will's answers to D1–D10. Nothing is built yet.
+**Status: draft, 2026‑11‑10.** Waiting on Will's answers to D1–D11. Nothing is built yet.
 
 ## Context
 
@@ -38,7 +38,7 @@ There's no shared species list to check this against. The reef plan's check (its
 
 ## Decisions for Will
 
-Each row gives a recommendation and its alternatives. Answering "D1–D10: all yes" accepts every recommendation.
+Each row gives a recommendation and its alternatives. Answering "D1–D11: all yes" accepts every recommendation.
 
 | # | Decision | Recommendation | Alternatives |
 |---|---|---|---|
@@ -52,6 +52,7 @@ Each row gives a recommendation and its alternatives. Answering "D1–D10: all y
 | D8 | The A button | **Reach**: the star rears up on two arms for 2 s (sea stars do this to reach for food or to right themselves) | Swap the leading arm without moving. Or leave A unused |
 | D9 | The settings | **Nine fields:** a count for each resident species, Speed (Slow, Normal, Fast), Glass climbing (Off, On), Caustics (Off, On) and Seed ([list](#level-settings)). The player's species is shown read-only | Fewer fields: counts and Seed only. Or add Player species (any of the five-armed stars), which needs an underside skin for each one |
 | D10 | Maximum counts, and the gate at the maximum | **4 chocolate-chip, 5 *Fromia*, 4 sand-sifting, 2 brittle, 2 cushion** (17 residents). The D7 gate must also hold at the maximum. If it doesn't, Phase 4 lowers the maximums until it does, and doesn't ask for a slower gate | Allow a slower maximum (≥ 15 FPS at full population) and keep the higher counts |
+| D11 | How the settings reach the engine (Will, 2026‑11‑10: "i thought all this RPRP chunks were gone … it's just duplicated work with OAS/OAD and the Settings class") | **Unpark [runtime object editing](2026-10-16-runtime-object-editing.md) and do it first:** `SeaStarsSettings` becomes a standard OAS object in the level that inherits `Settings` (decision M1 there), with no RPRP catalog. That needs engine scope O4 confirmed, and it moves the five existing catalogs over | Ship on RPRP now, as the five existing catalogs do, and migrate with them later |
 
 ## The tank
 

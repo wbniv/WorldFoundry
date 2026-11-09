@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/b27dfd11) | Plan: Sea Stars settings are an RP01 catalog on the standalone .iff, not a level object |
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/a94e1f27) | Plan: Sea Stars gets a screensaver variant and level settings |
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/b3f8bf3e) | Plan: Sea Stars, an eleventh aquarium tank of Indo-Pacific sea stars |
 
 <!--history-meta v1
+b27dfd11	author	Will Norris
+b27dfd11	added	7
+b27dfd11	deleted	1
+b27dfd11	files	1
+b27dfd11	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqQp7NCXUWp7VRzdCnw
 a94e1f27	author	Will Norris
 a94e1f27	added	128
 a94e1f27	deleted	16
