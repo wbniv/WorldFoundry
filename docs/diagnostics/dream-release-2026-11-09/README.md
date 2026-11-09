@@ -51,3 +51,46 @@ The coordinator's `simpleperf` workflow needs a profileable or debuggable APK. A
 | Running | nothing | nothing (J‑aaef14afe56b at 14:45 UTC, 21:45 in Bangkok: Seahorse Grid selected, nothing running) |
 
 The press job (Home) relaunches the foreground it found, so it brought the Aquarium preview back. A `sleep` job was needed to end the preview before the package could be reinstalled. cast1 was left asleep; it wakes on its remote.
+
+## Seahorse Grid and Planted Tank, 10 November 2026
+
+This is the TODO item "Seahorse Grid and Planted Dreams as Release builds". The method matches the Aquarium measurement above:
+
+- **Bundles:** the Seahorse Grid bundle comes from `scripts/build-aquarium-screensaver-levels.py`, which runs `scripts/build-seahorse-grid-level.py`. The Planted bundle comes from `task build-planted-level` (Blender container). Both Debug and Release APKs of each flavor were built from the same bundles.
+- **Measurement:** the coordinator `profile` workflow, run three times per cell. `APP=seahorse-screensaver` profiles `SeahorseGridActivity`, and `APP=planted-screensaver` profiles `PlantedTankActivity`. Each is the same native player as its Dream.
+
+| Dream | Debug FPS (3 runs) | Release FPS (3 runs) | Debug frame p50 | Release frame p50 |
+|---|---|---|---|---|
+| Seahorse Grid | **4.18** (4.18, 4.16, 4.18), J‑28568ef14f13 | **29.64** (28.87, 29.85, 29.64), J‑23ac242afa30 | 233.6 ms | 33.4 ms |
+| Planted Tank | **6.06** (5.81, 6.06, 6.22), J‑6d155064b9e3 | **39.99** (39.99, 36.06, 43.19), J‑69d51edc1ba5 | 166.8 ms | 16.7 ms |
+
+Release is about 7× faster again.
+
+- **APK hashes:** Seahorse Debug `ef94e758…`, Release `25dfeda6…`. Planted Debug `c4f5242a…`, Release `bccdf04b…`. All are in [`results-seahorse-planted.json`](results-seahorse-planted.json).
+- **The real Dream path:** each Release Dream ran for 60 s through `screensaver-show`, and `screensaver-status` followed. Both previews were running, both settings providers were `ready`, and neither asserted.
+    - Seahorse Grid: J‑d1a3151896ae, then J‑eb3eca851a51, orientation `landscape`.
+    - Planted Tank: J‑d85d720c39c1, then J‑e51f074a05b3, with the eight fields unchanged: 1 `random`, 2 `random`, 3 `3`, 4 `0`, 5–7 `true`, 10 `120`.
+    - The only frames over 0.2 s came one per level load, and none came after a load ([Seahorse status](release-dream-seahorse-status.json), [log tail](release-dream-seahorse-status-engine-log-tail.txt); [Planted status](release-dream-planted-status.json), [log tail](release-dream-planted-status-engine-log-tail.txt)).
+
+| | Debug | Release |
+|---|---|---|
+| Seahorse Grid | ![](seahorse-debug.jpg) | ![](seahorse-release.jpg) |
+| Planted Tank | ![](planted-debug.jpg) | ![](planted-release.jpg) |
+
+**What changed:**
+
+- `Taskfile.yml`: `build-planted-apk` now runs `assemblePlantedRelease`. A new `build-seahorse-screensaver-apk`, in the style of the Aquarium task, builds the bundles in the container, then runs `assembleSeahorseRelease`.
+- `tests/test_screensaver_release_build.py`: covers all three tasks.
+- `android/screensaver/README.md` and `docs/device-coordinator.md`: give the Release outputs.
+
+**cast1 afterwards** (status J‑088e7887a7ff, 22:51 UTC, 05:51 in Bangkok):
+
+| | Before (J‑9197100e3710) | After |
+|---|---|---|
+| Selected Dream | Seahorse Grid | Seahorse Grid (J‑30a014dccf45) |
+| Seahorse Grid package | `71b5a1e5…` (Debug) | **Release `25dfeda6…`** (J‑9aa342f3bf87: `installed_sha256` = `25dfeda644d1…`) |
+| Planted Tank package | `a04321b9…` (Debug) | **Release `bccdf04b…`** (J‑8863a9cc92ae: `installed_sha256` = `bccdf04bdd9d…`) |
+| Aquarium package | Release `ecf5e860…` | unchanged |
+| Settings | Seahorse orientation `landscape`; Planted fields as listed above | unchanged; no setting job ran |
+| Game APK | `30554973…` | untouched |
+| Running | nothing | nothing; cast1 was put to sleep (J‑ffc5cca976bf) to end the previews |

@@ -8,18 +8,15 @@ The player has no phone-controller prompt, QR code, or controller server, and re
 
 All three Dreams and their live previews show only the level render. Each app has its own launcher icon with the approved lower-right World Foundry badge; their TV banners also include it. Regenerate icon resources with `python3 scripts/gen-screensaver-android-icons.py`.
 
-Build the Aquarium Dream with `task build-aquarium-screensaver-apk`. It builds the level bundles in the Linux container, then `./gradlew :screensaver:assembleAquariumRelease --offline`. **The Aquarium Dream ships as a Release build.** A Debug build ran the reef Dream at 3 FPS on cast1, against 22 FPS for Release ([measurements](../../docs/diagnostics/dream-release-2026-11-09/README.md)). The release build type is signed with the debug keystore, like the game app's, so it installs by sideload.
+All three Dreams ship as Release builds ([measurements](../../docs/diagnostics/dream-release-2026-11-09/README.md)). The release build type is signed with the debug keystore, like the game app's, so it installs by sideload.
 
-The Seahorse Grid and Planted Tank Dreams still build as Debug. Their Release builds work, but nobody has measured them yet:
+| Dream | Build task | Output | FPS on cast1, Debug → Release |
+|---|---|---|---|
+| Aquarium | `task build-aquarium-screensaver-apk` | `android/screensaver/build/outputs/apk/aquarium/release/screensaver-aquarium-release.apk` | reef 2.98 → 21.8, clownfish 30 → 59 |
+| Seahorse Grid | `task build-seahorse-screensaver-apk` | `android/screensaver/build/outputs/apk/seahorse/release/screensaver-seahorse-release.apk` | 4.2 → 29.6 |
+| Planted Tank | `task build-planted-apk` | `android/screensaver/build/outputs/apk/planted/release/screensaver-planted-release.apk` | 6.1 → 40.0 |
 
-```sh
-cargo build --release --offline --manifest-path wftools/cdpack-rs/Cargo.toml
-python3 scripts/build-aquarium-screensaver-levels.py
-cd android
-./gradlew :screensaver:assembleSeahorseDebug --offline
-```
-
-The outputs are `android/screensaver/build/outputs/apk/aquarium/release/screensaver-aquarium-release.apk` and `android/screensaver/build/outputs/apk/seahorse/debug/screensaver-seahorse-debug.apk`. Freeze copies before submitting coordinator jobs. The Aquarium bundle order in `scripts/build-aquarium-screensaver-levels.py` must match `TankChoice.IDS`; the Seahorse bundle has its sole level at index zero.
+The Aquarium and Seahorse tasks build the level bundles in the Linux container with `python3 scripts/build-aquarium-screensaver-levels.py`, which also runs `scripts/build-seahorse-grid-level.py`. They then run `./gradlew :screensaver:assemble<Flavor>Release --offline` on the host. The Debug variants (`assemble<Flavor>Debug`) still build, for the coordinator's simpleperf, which needs a debuggable or profileable APK. Freeze copies before submitting coordinator jobs. The Aquarium bundle order in `scripts/build-aquarium-screensaver-levels.py` must match `TankChoice.IDS`; the Seahorse bundle has its sole level at index zero.
 
 The selected Dream advertises `org.worldfoundry.screensaver.settings`. Its shell-only provider answers `getCapabilities` with a base64-encoded schema-1 JSON choice list and accepts `setSetting` with `tank:<id>` or `orientation:<value>`. The coordinator uses a reviewed mapping for this Dream package and authority, validates the response, and offers those choices in the KDE tray. A changed preference takes effect at the next Dream start.
 
@@ -73,4 +70,4 @@ task chromecast:screensaver-setting DEVICE=chromecast-test-01 SETTING_ID=4.2 VAL
 
 The provider also answers `getCapabilities`, `getSettings` and `resetSettings`. `getCapabilities` serves `assets/planted-settings.json` with the saved values filled in. `scripts/gen-settings-capabilities.py` generates that schema-2 file from the level's OAD-derived `settings.rprp` during `build_planted()`. It preserves the catalog owner and includes all eight fields; its show-as modifiers choose the UI type. The app adapter adds its `random` water policy, removes the unsupported Paused speed choice, and marks the derived Random seed on entry field read-only. It also appends the app-level [Orientation](#orientation) choice to the first owner, which is not part of the catalog. Seed uses `random` as its unset value. The generated asset is gitignored, and the provider throws if it is missing. `task test-planted-screensaver` checks the catalog and runs `PlantedConfigTest` against a freshly generated asset.
 
-Build and test with tasks, from the repo root: `task build-planted-level` (Blender container, then the bundle `wflevels/planted-screensaver-cd.iff` linked into the flavor), `task build-planted-apk` (runs the level build first, then `./gradlew :screensaver:assemblePlantedDebug --offline` for arm64-v8a and armeabi-v7a; the Chromecasts need armeabi-v7a) and `task test-planted-screensaver` (the C++ container tests, the python tests and `PlantedConfigTest`). The APK is `android/screensaver/build/outputs/apk/planted/debug/screensaver-planted-debug.apk`. The coordinator also has a declarative package allowlist; its generic Settings reader uses the provider authority and schema, without app-specific field rules. See [the device coordinator guide](../../docs/device-coordinator.md#planted-tank-screensaver) and the plan.
+Build and test with tasks, from the repo root: `task build-planted-level` (Blender container, then the bundle `wflevels/planted-screensaver-cd.iff` linked into the flavor), `task build-planted-apk` (runs the level build first, then `./gradlew :screensaver:assemblePlantedRelease --offline` for arm64-v8a and armeabi-v7a; the Chromecasts need armeabi-v7a) and `task test-planted-screensaver` (the C++ container tests, the python tests and `PlantedConfigTest`). The APK is `android/screensaver/build/outputs/apk/planted/release/screensaver-planted-release.apk`. The coordinator also has a declarative package allowlist; its generic Settings reader uses the provider authority and schema, without app-specific field rules. See [the device coordinator guide](../../docs/device-coordinator.md#planted-tank-screensaver) and the plan.

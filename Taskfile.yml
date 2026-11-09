@@ -1679,12 +1679,18 @@ tasks:
       - scripts/in-linux-container.sh python3 scripts/build-aquarium-screensaver-levels.py
       - cd android && ANDROID_HOME=/usr/lib/android-sdk ./gradlew :screensaver:assembleAquariumRelease --offline
 
+  build-seahorse-screensaver-apk:
+    desc: "Seahorse Grid Dream screensaver APK as a Release build (CMake Release: -O3 + thin LTO; debug-keystore signed for sideload; arm64-v8a + armeabi-v7a). Debug 4.2 FPS, Release 29.6 FPS on cast1 (docs/diagnostics/dream-release-2026-11-09). Builds the Dream levels and bundles in the Linux container first. Lands at android/screensaver/build/outputs/apk/seahorse/release/screensaver-seahorse-release.apk; freeze a copy before submitting coordinator jobs."
+    cmds:
+      - scripts/in-linux-container.sh python3 scripts/build-aquarium-screensaver-levels.py
+      - cd android && ANDROID_HOME=/usr/lib/android-sdk ./gradlew :screensaver:assembleSeahorseRelease --offline
+
   build-planted-apk:
-    desc: "Planted Tank screensaver debug APK for arm64-v8a and armeabi-v7a (the Chromecasts need armeabi-v7a), offline Gradle per android/screensaver/README.md. Lands at android/screensaver/build/outputs/apk/planted/debug/screensaver-planted-debug.apk; freeze a copy before submitting coordinator jobs."
+    desc: "Planted Tank screensaver APK as a Release build (CMake Release: -O3 + thin LTO; debug-keystore signed for sideload) for arm64-v8a and armeabi-v7a (the Chromecasts need armeabi-v7a), offline Gradle per android/screensaver/README.md. Debug 6.1 FPS, Release 40.0 FPS on cast1 (docs/diagnostics/dream-release-2026-11-09). Lands at android/screensaver/build/outputs/apk/planted/release/screensaver-planted-release.apk; freeze a copy before submitting coordinator jobs."
     deps: [build-planted-level]
     dir: android
     cmds:
-      - ./gradlew :screensaver:assemblePlantedDebug --offline
+      - ./gradlew :screensaver:assemblePlantedRelease --offline
 
   test-screensaver-orientation:
     desc: "Plain-Java OrientationChoiceTest for the screensavers' orientation setting (docs/plans/2026-10-24-screensaver-landscape-orientation.md): values, parsing, saved-value fallback and the ActivityInfo mapping. Repo mounted read-only."

@@ -185,7 +185,7 @@ task test-planted-screensaver
 ```
 
 The APK lands at
-`android/screensaver/build/outputs/apk/planted/debug/screensaver-planted-debug.apk`.
+`android/screensaver/build/outputs/apk/planted/release/screensaver-planted-release.apk` (a Release build since 2026‑11‑10).
 The Chromecasts need its armeabi-v7a library; the build includes it.
 
 Parameters (`water`, `seed`, `speed`, `hold`) take two command shapes. Activity
