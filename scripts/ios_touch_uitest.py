@@ -103,7 +103,10 @@ def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
            out / f"ios-touch-{label}-xcodebuild.log", env=env)
     seconds = int(time.monotonic() - t0) + 10
     applog = sh(["xcrun", "simctl", "spawn", udid, "log", "show", "--predicate",
-                 'processImagePath CONTAINS "wf_game" AND eventMessage CONTAINS "touch"',
+                 # Every wf_game line, not only the touch ones: build 6af131a7's launches
+                 # aborted at level load (LMalloc::Allocate -> FatalError), and the
+                 # arguments and the engine's last lines are the evidence.
+                 'processImagePath CONTAINS "wf_game"',
                  "--style", "compact", "--last", f"{seconds}s"]).stdout
     (out / f"ios-touch-{label}-app.log").write_text(applog)
     text = r.stdout + r.stderr
