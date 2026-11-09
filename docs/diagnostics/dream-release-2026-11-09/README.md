@@ -46,8 +46,8 @@ The coordinator's `simpleperf` workflow needs a profileable or debuggable APK. A
 |---|---|---|
 | Selected Dream | Seahorse Grid | Seahorse Grid (J‑14b6eec60eb4) |
 | Aquarium Dream `tank` | `random` | `random` (J‑4449c311eee7) |
-| Aquarium screensaver package | `5dfdba1f…` (the acceptance run's VRAM fix) | `5dfdba1f…` reinstalled (J‑07dbc6b02d14; before it, the Release `ecf5e860…`) |
+| Aquarium screensaver package | `5dfdba1f…` (the acceptance run's VRAM fix, a Debug build) | **the Release Dream `ecf5e860…`** (Will, 2026‑11‑09; J‑86a904b436e0 verified `installed_sha256` = `ecf5e860de06…`). The original `5dfdba1f…` was reinstalled first (J‑07dbc6b02d14), on a mistaken instruction to restore it |
 | Game APK | `30554973…` | unchanged: no job here installed it; every installation recorded was `org.worldfoundry.screensaver` |
-| Running | nothing | nothing (status at 14:07 UTC; 21:07 in Bangkok) |
+| Running | nothing | nothing (J‑aaef14afe56b at 14:45 UTC, 21:45 in Bangkok: Seahorse Grid selected, nothing running) |
 
 The press job (Home) relaunches the foreground it found, so it brought the Aquarium preview back. A `sleep` job was needed to end the preview before the package could be reinstalled. cast1 was left asleep; it wakes on its remote.
