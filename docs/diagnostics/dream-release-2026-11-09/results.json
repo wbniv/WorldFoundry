@@ -1,0 +1,136 @@
+{
+ "device": "chromecast-test-01 (Chromecast HD, Android 14, armeabi-v7a)",
+ "method": "coordinator profile workflow, APP=screensaver, RUNS=3: SurfaceFlinger presents of the Dream app (AquariumActivity, the same native player as the Dream), tank set through the Dream settings provider",
+ "apk_sha256": {
+  "debug": "1aed6afaeeeed3d1299836c16bf457def44d674a9eb8cc5b635ad2d1cd7a3618",
+  "release": "ecf5e860de062fe1e8a1449895182c26bd98251397039ba6c7b644c445e66b95"
+ },
+ "results": [
+  {
+   "build": "debug",
+   "tank": "aquarium_thai_reef",
+   "job": "J-5d49ce5bf974",
+   "median_fps": 2.98,
+   "runs_fps": [
+    2.98,
+    2.98,
+    2.97
+   ],
+   "p50_ms": [
+    333.7,
+    333.7,
+    333.7
+   ],
+   "p95_ms": [
+    350.4,
+    367.0,
+    367.0
+   ]
+  },
+  {
+   "build": "debug",
+   "tank": "aquarium_thai_reef_anime",
+   "job": "J-4e980e4a70d2",
+   "median_fps": 2.72,
+   "runs_fps": [
+    2.74,
+    2.72,
+    2.68
+   ],
+   "p50_ms": [
+    367.0,
+    367.0,
+    367.0
+   ],
+   "p95_ms": [
+    383.7,
+    383.7,
+    383.7
+   ]
+  },
+  {
+   "build": "debug",
+   "tank": "aquarium",
+   "job": "J-4238977c0b92",
+   "median_fps": 29.97,
+   "runs_fps": [
+    44.31,
+    29.97,
+    29.97
+   ],
+   "p50_ms": [
+    16.7,
+    33.4,
+    33.4
+   ],
+   "p95_ms": [
+    33.4,
+    33.4,
+    33.4
+   ]
+  },
+  {
+   "build": "release",
+   "tank": "aquarium_thai_reef",
+   "job": "J-883bea8d512b",
+   "median_fps": 21.8,
+   "runs_fps": [
+    21.54,
+    21.8,
+    22.13
+   ],
+   "p50_ms": [
+    50.1,
+    50.1,
+    50.0
+   ],
+   "p95_ms": [
+    50.1,
+    50.1,
+    50.1
+   ]
+  },
+  {
+   "build": "release",
+   "tank": "aquarium_thai_reef_anime",
+   "job": "J-dea21d67c01b",
+   "median_fps": 19.98,
+   "runs_fps": [
+    19.81,
+    20.12,
+    19.98
+   ],
+   "p50_ms": [
+    50.1,
+    50.1,
+    50.1
+   ],
+   "p95_ms": [
+    66.7,
+    66.7,
+    66.7
+   ]
+  },
+  {
+   "build": "release",
+   "tank": "aquarium",
+   "job": "J-e5df22c22935",
+   "median_fps": 59.45,
+   "runs_fps": [
+    29.97,
+    59.45,
+    59.45
+   ],
+   "p50_ms": [
+    33.4,
+    16.7,
+    16.7
+   ],
+   "p95_ms": [
+    33.4,
+    16.7,
+    16.7
+   ]
+  }
+ ]
+}

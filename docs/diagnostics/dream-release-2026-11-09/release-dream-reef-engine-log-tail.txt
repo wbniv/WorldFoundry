@@ -1,0 +1,87 @@
+nOff=52884 NumberOfLocalMailboxes=0
+[Actor] idx=34 class=7 commonOff=52928 NumberOfLocalMailboxes=0
+[Actor] idx=35 class=7 commonOff=52972 NumberOfLocalMailboxes=0
+[Actor] idx=36 class=7 commonOff=53016 NumberOfLocalMailboxes=0
+[Actor] idx=37 class=7 commonOff=49176 NumberOfLocalMailboxes=0
+[Actor] idx=38 class=7 commonOff=49176 NumberOfLocalMailboxes=0
+[Actor] idx=39 class=7 commonOff=53060 NumberOfLocalMailboxes=0
+[Actor] idx=40 class=7 commonOff=53104 NumberOfLocalMailboxes=0
+[Actor] idx=41 class=7 commonOff=53148 NumberOfLocalMailboxes=0
+[Actor] idx=42 class=7 commonOff=53192 NumberOfLocalMailboxes=0
+[Actor] idx=43 class=7 commonOff=53236 NumberOfLocalMailboxes=0
+[Actor] idx=44 class=7 commonOff=53280 NumberOfLocalMailboxes=0
+[Actor] idx=45 class=7 commonOff=53324 NumberOfLocalMailboxes=0
+[Actor] idx=46 class=7 commonOff=53524 NumberOfLocalMailboxes=0
+[Actor] idx=47 class=7 commonOff=53724 NumberOfLocalMailboxes=0
+[Actor] idx=48 class=7 commonOff=53924 NumberOfLocalMailboxes=0
+[Actor] idx=49 class=7 commonOff=53924 NumberOfLocalMailboxes=0
+[Actor] idx=50 class=7 commonOff=53924 NumberOfLocalMailboxes=0
+[Actor] idx=51 class=7 commonOff=54436 NumberOfLocalMailboxes=0
+[Actor] idx=52 class=7 commonOff=54636 NumberOfLocalMailboxes=0
+[Actor] idx=53 class=7 commonOff=54836 NumberOfLocalMailboxes=0
+[Actor] idx=54 class=23 commonOff=49176 NumberOfLocalMailboxes=0
+[Actor] idx=55 class=3 commonOff=49176 NumberOfLocalMailboxes=0
+[Actor] idx=56 class=16 commonOff=49176 NumberOfLocalMailboxes=0
+PixelMap::Load: this = 0xd93df660
+PixelMap::Load: this = 0xd93df688
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x27
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="reef_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+audio: MusicPlayer — soundfont not found: florestan-subset.sf2
+audio: sfx[0] not found: wflevels/qbert_practice/sfx/qbert_hop.wav
+audio: sfx[1] not found: wflevels/qbert_practice/sfx/qbert_land.wav
+audio: sfx[2] not found: wflevels/qbert_practice/sfx/qbert_fall.wav
+audio: sfx[3] not found: wflevels/qbert_practice/sfx/qbert_swear.wav
+audio: sfx[4] not found: wflevels/qbert_practice/sfx/qbert_round_clear.wav
+audio: sfx[5] not found: wflevels/qbert_practice/sfx/qbert_kill.wav
+audio: sfx[6] not found: wflevels/qbert_practice/sfx/qbert_disc.wav
+delta too large: 0.845703125
+timeofday:1794232027:369009
+lasttimeofday: 1794232026:523295
+deltatime:0:845714
+delta: 0.845703125
+VIEW authored=0.000 screen=1.778 hfov=91.5 vfov=60.0 maximum=0.000 surface=1920x1080 viewport=0,0,1920x1080 pillarbox=0 source=default
