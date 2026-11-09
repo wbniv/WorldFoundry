@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/380337c3) | Reef D10: the humbug pair becomes Dascyllus reticulatus in both styles |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/b090a8fd) | Reef W5c: Forth layout finished; review renders, cast1 Random-5 gate, docs |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/bfe00512) | Reef: swap humbug for Dascyllus reticulatus in research (D10); park and commit poster sources |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/4bb0d148) | Reef research: boxfish Gulf record closed (D2); humbug flagged (D1) |
@@ -22,6 +23,11 @@
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b756367f) | Plan: finish the reef tanks (worms, skins, placement, acceptance) |
 
 <!--history-meta v1
+380337c3	author	Will Norris
+380337c3	added	3
+380337c3	deleted	3
+380337c3	files	1
+380337c3	body	Will, 2026-11-09: swap the humbug (no citable Gulf of Thailand record)\nfor the reticulated dascyllus. Internal names stay "humbug" (headband\nhumbug); scene.py's species string is 'Dascyllus reticulatus'.\n\n- Skin (fishes.humbug, atlas cell 15, uvmap): one black bar behind the\n  head onto the front dorsal and pelvic fins, a faint grey rear bar,\n  pale grey body with a dark scale-margin net (realistic only; anime\n  flat), grey rear dorsal and anal fins, pectoral-base spot, pale snout\n  and tail. New fish_grey swatch after the water bands; 64 px scale\n  square at rows 192-255. Silhouette and behaviour unchanged; 292\n  triangles per fish (was 286); anime worst hull set 23,594 of 24,000.\n- Deleted the uncalled life._humbug().\n- Rebuilt both levels, the Aquarium menu bundle (other tanks at HEAD)\n  and the reef Dream variants (ignored outputs).\n- Docs: original plan D1 and species rows, mockup labels, finishing\n  plan W2 rows, skins-review note; review renders in\n  docs/diagnostics/reef-humbug-swap-2026-11-09/.\n\ntexcov --check PASS. Reef suites: 191 passed; failures are the 4 known\nones (worm harness, two menu-Taskfile tests, one screensaver import)\nplus the parked poster's visual-review gate.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 b090a8fd	author	Will Norris
 b090a8fd	added	24
 b090a8fd	deleted	1

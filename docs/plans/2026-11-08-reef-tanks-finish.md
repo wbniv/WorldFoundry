@@ -98,7 +98,7 @@ Every mesh does carry the atlas: `blender_mesh` UV-maps all faces ([`generate.py
 | D2 | Where the creature skins live | **Repack the existing 1024² atlas from 8 tiles of 256 × 512 into 16 cells of 256 × 256.** Eight new creature cells, no new texture memory, no engine change | A second texture page for creatures. W0 would first have to confirm the exporter, textile and the material path support two pages per level; the repack avoids that question |
 | D3 | Sea fan and feather star | **Accept untextured** (Will: "might actually be ok for the things that look like fans"). Add only a base-to-tip colour gradient through the new utility cell | Give them their own cells; at 1–2 cm branch width no pattern survives at TV distance |
 | D4 | Worm size | **True to life at ×10**: crowns 0.15–0.22 units tall, with a ±15 % random size per worm. The close camera shows them well | 1.3× for the wide view. That is more readable, but they would sit oversized next to the crab and shrimp |
-| D10 | The pair of fish (original plan D1) | **Decided** (Will, 2026‑11‑09: "swap the humbug for the reticulated dascyllus, *Dascyllus reticulatus*"). The humbug *D. aruanus* has no citable Gulf of Thailand record; *D. reticulatus* is recorded in the Gulf (Satapoomin 2000, Tho Chu, CAS specimens off Koh Samet, Ko Tao observations), lives in the same *Pocillopora* host, and no other tank uses it. Behaviour is unchanged; the skin and names change. Evidence in [`thai-reef-research.md`](../reference/thai-reef-research.md#d1-and-d2-searches) | Pink anemonefish (repeats tank 1's subject); copperband butterflyfish (eats the tank's worms); keep *D. aruanus* with a qualified poster claim |
+| D10 | The pair of fish (original plan D1) | **Decided** (Will, 2026‑11‑09: "swap the humbug for the reticulated dascyllus, *Dascyllus reticulatus*"). **Skin approved** by Will, 2026‑11‑09 ([review](../diagnostics/reef-humbug-swap-2026-11-09/README.md)). The humbug *D. aruanus* has no citable Gulf of Thailand record; *D. reticulatus* is recorded in the Gulf (Satapoomin 2000, Tho Chu, CAS specimens off Koh Samet, Ko Tao observations), lives in the same *Pocillopora* host, and no other tank uses it. Behaviour is unchanged; the skin and names change. Evidence in [`thai-reef-research.md`](../reference/thai-reef-research.md#d1-and-d2-searches) | Pink anemonefish (repeats tank 1's subject); copperband butterflyfish (eats the tank's worms); keep *D. aruanus* with a qualified poster claim |
 
 ## W0 — research note and atlas repack (T3)
 
@@ -228,7 +228,7 @@ One rule for every creature: **object-local UVs into its own cell**, so texel de
 
 ## W5 — procedural reef: random rocks, a rock count and clustered colonies, laid out in Forth (plan only)
 
-**Status: D5–D8 decided** (Will, 2026‑11‑08: "d5: forth, d6: ok, d7: ok, d8: yes"). **R0's code reading is done** ([report](../diagnostics/reef-w5-r0-2026-11-08/README.md)): Forth-only is feasible with no engine change for W5 itself. **The device run (P0–P3) is done:** hidden and moved pieces cost almost nothing, and a realistic level of 97 objects aborted at load because it ran out of its 32 MB room memory slot. That sets W5b's budget in bytes, not objects (see [R0 device results](#r0-device-results-cast1-2026-11-08)). **D9 is decided:** a level settings object, with no app code. **W5a is done** (`a205df47`). W3's fixed placement shipped first, as asked (`1a30b727`, approved, pushed).
+**Status: W5 done** (2026‑11‑09): W5a–W5c built, and Will approved the layout with Random as the default ("Approve, default Random"). **D5–D8 decided** (Will, 2026‑11‑08: "d5: forth, d6: ok, d7: ok, d8: yes"). **R0's code reading is done** ([report](../diagnostics/reef-w5-r0-2026-11-08/README.md)): Forth-only is feasible with no engine change for W5 itself. **The device run (P0–P3) is done:** hidden and moved pieces cost almost nothing, and a realistic level of 97 objects aborted at load because it ran out of its 32 MB room memory slot. That sets W5b's budget in bytes, not objects (see [R0 device results](#r0-device-results-cast1-2026-11-08)). **D9 is decided:** a level settings object, with no app code. **W5a is done** (`a205df47`). W3's fixed placement shipped first, as asked (`1a30b727`, approved, pushed).
 
 Will, 2026‑11‑08:
 - "can we do that randomly-ish on initial placement in clusters? (not unlike the planted tank level)"
@@ -399,7 +399,7 @@ Probes P0–P3 ran on cast1 through the coordinator: three alternating runs of e
 2. ~~The R0 device run, P0–P3, on copies of today's meshes.~~ Done; see above.
 3. ~~Find the cause of the realistic P3 load abort (T4).~~ The 32 MB room slot ran out; see above.
 4. ~~W5b, the kit, together with the budget-report change (T4), then P4.~~ Built; P4 passes on cast1: realistic 22.03 FPS, anime 20.26 FPS. With Fixed shown, the anime kit level is about 0.9 ms slower than before (20.83 against 21.24 FPS). Probes K1–K5 traced it to drawing the dressing as more, smaller per-module pieces; where the pieces sit doesn't matter. **Kept** (Will, 2026‑11‑08: "keep the slowdown; the increased flexibility is worth it"; "i'd rather we finish this level than worry about 1fps"). Finding the speed again is a TODO item for after the reef ships. **Design note:** express the Fixed layout as one arrangement of the kit's modules, so that both layouts share actors instead of each carrying its own copies.
-5. ~~W5c, the Forth layout (T3).~~ Built 2026‑11‑09 ([review](../diagnostics/reef-w5c-layout-2026-11-08/README.md)). Layout still defaults to Fixed; it switches to Random once Will approves the renders.
+5. ~~W5c, the Forth layout (T3).~~ Built 2026‑11‑09 ([review](../diagnostics/reef-w5c-layout-2026-11-08/README.md)). **Layout now defaults to Random**, approved by Will, 2026‑11‑09: "Approve, default Random". Rocks 3, Colonies Normal and Seed 0, so a new reef appears on every entry; Fixed stays selectable and still reproduces the reviewed W3 reef (tested).
 
 ### W5c as built (2026‑11‑09)
 
@@ -432,7 +432,7 @@ Probes P0–P3 ran on cast1 through the coordinator: three alternating runs of e
 | D6 | Rock count | **1–5, default 3**, today's look. Heroes come first; with fewer than 3 rocks some behaviours are absent |
 | D7 | Seed | **Seed 0 = a new reef on every entry** (like the Planted Tank); any other value repeats exactly |
 | D9 | Where ReefSettings appears | **Decided** (Will, 2026‑11‑08: "you don't need any new android app code. use a level settings object (check out planted tank, duh)"). ReefSettings is a **level settings object** like the Planted Tank's, with **no app code**. R0 had read the phone and coordinator path as Planted-only; W5a's device check confirms what each surface shows |
-| D8 | Keep the fixed layout | **Yes**: Layout = Fixed shows the reviewed W3 reef; the default is Random once W5 passes review |
+| D8 | Keep the fixed layout | **Yes**: Layout = Fixed shows the reviewed W3 reef; the default is Random once W5 passes review. **Done 2026‑11‑09:** default Random (Will: "Approve, default Random") |
 
 ### Mock-ups
 
@@ -491,7 +491,7 @@ flowchart TD
     W5c --> W4
 ```
 
-*W1–W3 are done and approved (green in the status diagram); W5 is proposed.*
+*W1–W3 and W5 are done and approved (Will approved W5 with "Approve, default Random", 2026‑11‑09).*
 
 - **W0 and W2** can share one T3 agent: they touch the atlas and the UV writer.
 - **W1** is a T4 agent. **W3** runs after it, because the anchor table includes the new worm mouths.

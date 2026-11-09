@@ -1,7 +1,7 @@
 """The reef's level settings object, ReefSettings (plan 2026-11-08 W5a).
 
 A Director-owned settings object like the Jellyfish and Planted tanks':
-Layout (Fixed|Random), Rocks (1-5, default 3), Colonies (Sparse|Normal|Dense)
+Layout (Fixed|Random, default Random), Rocks (1-5, default 3), Colonies (Sparse|Normal|Dense)
 and Seed (0 = a new reef on every entry). The Director polls it once a
 second into mailboxes 860-863; W5c lays out the reef from those values.
 """
@@ -19,7 +19,8 @@ FIELDS = {'Layout': 1, 'Rocks': 2, 'Colonies': 3, 'Seed': 4}
 def test_settings_object_declares_the_four_fields():
     oas = (ROOT / 'wflevels/aquarium_thai_reef/settings.oas').read_text()
     assert 'TYPEHEADER(ReefSettings)' in oas
-    assert re.search(r'TYPEENTRYINT32\(Layout,,0,1,0,"Fixed\|Random"', oas)
+    # Default Random (Will, 2026-11-09: "Approve, default Random"); Fixed stays selectable.
+    assert re.search(r'TYPEENTRYINT32\(Layout,,0,1,1,"Fixed\|Random"', oas)
     assert re.search(r'TYPEENTRYINT32\(Rocks,,1,5,3,', oas)               # D6: 1-5, default 3
     assert re.search(r'TYPEENTRYINT32\(Colonies,,0,2,1,"Sparse\|Normal\|Dense"', oas)
     assert re.search(r'TYPEENTRYINT32\(Seed,,0,16777215,0,', oas)         # 24 bits: Forth cells are floats

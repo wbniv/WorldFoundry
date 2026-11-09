@@ -518,7 +518,9 @@ life_tick = (': reef-life\n' + rotate(indices["SeaFan"], a='640 tk@ tk-sin .012 
              + rotate(indices["Nudibranch"], c='751 tk@ .25 + tk-sin 0 > if .5 else 0 then'))
 # ReefSettings (plan W5a), owned by the Director: Layout, Rocks, Colonies,
 # Seed (fields 1-4). Polled once a second into 860-863 so a settings-panel
-# change is seen without a reload; W5c lays out the reef from them.
+# change is seen without a reload; W5c lays out the reef from them. The shipped catalog
+# defaults Layout to Random (settings.oas; Will, 2026-11-09). The fallbacks below apply only
+# without a catalog (the species-VM tests), where Fixed keeps the anchors deterministic.
 poll = (f': reef-poll 864 tk@ tk-dt@ - dup 864 tk! 0 <= if 1 864 tk!'
               f' {indices["Director"]} 1 property@ if else drop 0 then 860 tk!'
               f' {indices["Director"]} 2 property@ if else drop 3 then 861 tk!'
