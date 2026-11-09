@@ -145,15 +145,13 @@ The "after ledge shade" column applies the shadow figures above to each layout (
 
 **Wiring.** An edge-mounted slim junction box on each laminate with short leads and plug connectors at the sill, on the room side, so an insert still pops out after one unplug and the set still stacks to about 10 cm. Two strings of three panels run to a small MPPT charge controller indoors.
 
-**Where the power goes** is open question 3: the inserts are in only while Will is away, when nothing in the flat uses much. An off-grid battery could keep the router, sensors or a fan running while away, which fits the [home backup power research](/home/will/docs/plans/2026-10-07-home-backup-power.md). Feeding the condo's wiring needs a grid-tie inverter and MEA's approval, and Thailand's rules are being eased ([Tilleke & Gibbins, 2025](https://www.tilleke.com/insights/thailand-eases-rules-for-solar-rooftop-installations/15/)), but nothing found covers a small plug-in system in a condo or the juristic person's consent.
+**Where the power goes: an off-grid battery, no grid-tie inverter** (Will, 2026‑11‑09). The inserts are in only while Will is away, when nothing in the flat uses much, so the panels charge a battery that keeps the router, sensors or a fan running, which fits the [home backup power research](/home/will/docs/plans/2026-10-07-home-backup-power.md). Nothing feeds the condo wiring, so no MEA approval or juristic-person consent is needed for it.
 
 ```mermaid
 flowchart LR
-  P["6 solar inserts<br/>≈ 400–450 W"] -->|"plug at the sill<br/>2 strings of 3"| C["MPPT charge controller"]
+  P["6 solar inserts<br/>300–450 W rated"] -->|"plug at the sill<br/>2 strings of 3"| C["MPPT charge controller"]
   C --> B["Battery"]
   B --> L["Router, sensors, fan<br/>while away"]
-  P -.->|"needs MEA approval<br/>and condo consent"| I["Grid-tie inverter"]
-  I -.-> G["Condo wiring"]
 ```
 
 **Mixing sets.** All three sets have the same outer size, so positions can mix, for example solar at the ends and screens in the middle. A solar or weather insert has a rebated edge and a screen does not, so the joint between two different kinds needs a detail from the shop (open question 4). Rain-tightness needs all six positions sealed (inserts or solar).
@@ -185,7 +183,7 @@ stateDiagram-v2
 
 1. **Frame face, panel edge and panel size.** These are blank on the spec sheet for the shop to fill in. The view arithmetic uses 2.5 cm / 2 cm and 3.8 cm / 2.5 cm until the shop gives the real figures.
 2. **Has the shop started cutting the frame?** v2 changes the rail profiles from v1: a deeper head, a taller sill stop, a higher dam, baffled weeps, a drip edge and a flat gasket landing. Give the shop the v2 sheet before fabrication, or ask what can still change.
-3. **Where does the solar power go?** An off-grid battery for loads that run while Will is away, or a grid-tie inverter into the condo wiring, which needs MEA approval and probably the juristic person's consent. Decide before ordering solar inserts; the controller and the cable route follow from it.
+3. ~~**Where does the solar power go?**~~ Answered 2026‑11‑09: an off-grid battery; no grid-tie inverter (Will). Still to size: the battery and the loads it runs while away.
 4. **Mixed sets.** Can a screen sit next to a weather or solar insert? The inserts have rebated edges and the screens do not. Ask the shop to detail that joint, or keep each set whole.
 5. ~~**Does this replace the zip screen and the bi-fold?**~~ Answered 2026‑11‑09: yes, this is the plan going forward (Will); plans A and B are archived.
 6. ~~**Heat and damp while sealed.**~~ Answered 2026‑11‑08: the side window lets air through at all times (Will), so the balcony is not a closed box with the inserts in. The frame and inserts need no vent of their own.
@@ -195,7 +193,7 @@ stateDiagram-v2
 
 - Choosing the shop or the price; the frame is already ordered.
 - A level-model version of the frame in the game's condo level, which still models the archived zip screen.
-- Buying solar inserts before open question 3 is answered.
+- A grid-tie inverter or any connection of the solar set to the condo wiring (Will, 2026‑11‑09).
 
 ## Verification
 
