@@ -119,10 +119,17 @@ if [ "${STYLE_SKIP_SWEEP:-0}" != 1 ]; then
             [ -n "$arg" ] && extra+=("$arg")
         done < <(json "'\n'.join(d['sweep']['extra'].get('$name', []))")
         ok=1
-        for side in baseline candidate; do
-            bin=$BASE_BIN; [ "$side" = candidate ] && bin=$CAND_BIN
+        # Each engine runs twice: <side>-repeat separates run-to-run noise from a real change.
+        for side in baseline candidate baseline-repeat candidate-repeat; do
+            bin=$BASE_BIN; [ "${side%-repeat}" = candidate ] && bin=$CAND_BIN
             capture "$bin" "$GAME" "$OUT/sweep/$name-$side.png" "$OUT/logs/sweep-$name-$side.log" \
                 "${SWEEP_ARGS[@]}" ${extra[@]+"${extra[@]}"} "-L$level" || ok=0
+        done
+        for side in baseline candidate; do
+            same=same
+            [ "$ok" = 1 ] && ! python3 "$COMPARE" "$OUT/sweep/$name-$side.png" "$OUT/sweep/$name-$side-repeat.png" \
+                >"$OUT/logs/compare-$name-$side-repeat.log" 2>&1 && same=differs
+            [ "$ok" = 1 ] && printf 'repeat\t%s-%s\t%s\n' "$name" "$side" "$same" | tee -a "$SUMMARY"
         done
         if [ "$ok" = 0 ]; then
             verdict=missing; missing=$((missing + 1))
@@ -144,6 +151,14 @@ while IFS=$'\t' read -r name level; do
     if capture "$HEAD_BIN" "$CM_BUILD_DIR/wfsource/source/game" "$OUT/scene/$name-metal.png" \
             "$OUT/logs/scene-$name.log" "${SCENE_ARGS[@]}" "-L$CM_BUILD_DIR/$level"; then
         printf 'scene\t%s\tcaptured\n' "$name" | tee -a "$SUMMARY"
+        same=same
+        if ! capture "$HEAD_BIN" "$CM_BUILD_DIR/wfsource/source/game" "$OUT/scene/$name-metal-repeat.png" \
+                "$OUT/logs/scene-$name-repeat.log" "${SCENE_ARGS[@]}" "-L$CM_BUILD_DIR/$level" \
+            || ! python3 "$COMPARE" "$OUT/scene/$name-metal.png" "$OUT/scene/$name-metal-repeat.png" \
+                >"$OUT/logs/compare-scene-$name-repeat.log" 2>&1; then
+            same=differs
+        fi
+        printf 'repeat\tscene-%s\t%s\n' "$name" "$same" | tee -a "$SUMMARY"
     else
         printf 'scene\t%s\tmissing\n' "$name" | tee -a "$SUMMARY"
     fi
@@ -152,7 +167,7 @@ done < <(json "'\n'.join(k + '\t' + v for k, v in d['scenes'].items())")
 python3 - "$SUMMARY" "$OUT/summary.json" "$(git -C "$CM_BUILD_DIR" rev-parse HEAD)" <<'PY'
 import json, sys
 rows = [line.rstrip('\n').split('\t') for line in open(sys.argv[1]) if line.strip()]
-out = {'checkout': sys.argv[3], 'sweep': {}, 'scene': {}}
+out = {'checkout': sys.argv[3], 'sweep': {}, 'scene': {}, 'repeat': {}}
 for kind, name, verdict in rows:
     out[kind][name] = verdict
 json.dump(out, open(sys.argv[2], 'w'), indent=2)

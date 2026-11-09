@@ -1,5 +1,5 @@
 {
-  "comment": "Shared style-shading test scene (reef plan, risk 2 and step 14). Rendered on Linux GL by tests/test_style_shading_invariant.py and on Metal by scripts/macos/style-metal-ci.sh with the same flags; captures must agree within max_channel_delta per channel. Realistic exercises S1 water absorption, anime S3 toon bands. ReefSettings Seed 7 makes the Random layout and the fish deterministic.",
+  "comment": "Shared style-shading test scene (reef plan, risk 2 and step 14). Rendered on Linux GL by tests/test_style_shading_invariant.py and on Metal by scripts/macos/style-metal-ci.sh with the same flags; captures must agree within max_channel_delta per channel. Realistic exercises S1 water absorption, anime S3 toon bands. ReefSettings Seed 7 makes the Random layout and the fish deterministic. The geom-* scenes (scripts/build-style-geometry-scene.py) keep only the reef shell and the three hero rocks: no sub-pixel silhouettes, so the strict gate tests the shading math alone.",
   "max_channel_delta": 1,
   "common_args": [
     "--frame-step-smoke=30",
@@ -18,7 +18,9 @@
   "capture_frame": 20,
   "scenes": {
     "reef-realistic-s1": "wflevels/aquarium_thai_reef-standalone.iff",
-    "reef-anime-s3": "wflevels/aquarium_thai_reef_anime-standalone.iff"
+    "reef-anime-s3": "wflevels/aquarium_thai_reef_anime-standalone.iff",
+    "geom-realistic-s1": "wflevels/style_geom_realistic-standalone.iff",
+    "geom-anime-s3": "wflevels/style_geom_anime-standalone.iff"
   },
   "sweep": {
     "comment": "Existing-level sweep (step 14): every *-standalone.iff of the baseline tree, S fields at their defaults, frame 20; baseline and candidate engines must be pixel-identical. vram: [width, height, slot, perm height] for levels whose textures exceed the defaults.",

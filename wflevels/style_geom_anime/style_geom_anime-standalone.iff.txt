@@ -1,0 +1,13 @@
+// Temporary standalone wrapper for desktop inspection of the static scene.
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 1000000l
+        'PERM' 4000000l
+        'ROOM' 32000000l
+        'FLAG' 1l 1l
+        'SLOT' 1l
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../style_geom_anime.iff" ]
+}
