@@ -32,17 +32,34 @@ Timeline of `run`, seconds after `simctl launch` returns:
          push the scripted presses out of step with the screenshots.
 
 The touch script is the engine's own CI input path: it presses each button's
-on-screen centre through the same tracker and hit test a finger uses; only
-UIKit's touch delivery is skipped. simctl itself has no tap injection.
+on-screen point through the same pad and shared touch logic a finger uses;
+only UIKit's touch delivery is skipped. simctl itself has no tap injection.
+The chapter launch pins landscape (-WFOrientation landscape), so the
+timeline keeps its landscape baseline now that the app allows portrait.
+
+After the timeline, two HUD tours per device (touch parity, finding-your-way
+docs/plans/2026-11-08-ios-touch-parity.md, layer 2), each a fresh launch with
+TOUR_SCRIPT, first pinned to landscape and then to portrait:
+
+  20     screenshot: the opening card; only A and C are drawn
+  20.5   script presses B, then LEFT at 21.5: hidden over a card, no bits
+  23     script presses C: bits 0x0004, the card closes ("touch reading off")
+  26     screenshot: the full HUD, joystick and A to D
+  27-31  script holds the stick right with B and D (0x200a)
+  29.5   screenshot: the knob pushed right, B and D bright
+
+tour_verdict() reads the order of the "touch reading" and "touch buttons"
+log lines. TOUCH PARITY is MET (scripted) when the landscape tour passes on
+both devices; the portrait tours are reported on their own line, with the
+VIEW line (the authored frame's view in portrait).
 
 Verdict per device (`IOS IPHONE: OK` / `IOS IPAD: OK`) needs install, launch,
 alive at 20 s and at the end, wf_args.txt read with its arguments,
 `ROOM-RENDER scope=current-only`, no zForth or texture-slot error, the
 pause/resume frame-rate check, and a solid patch of changed fire-coloured
 pixels between the two brazier screenshots (a flame flickers as a blob; the
-thin edges a swaying banner or the camera leaves do not count). The iOS touch HUD is a D-pad with A and B, not Android's
-joystick with A to D (see hal/ios/input.mm and hal/android/touch_controls.h),
-so touch parity is reported on its own line and is not part of OK.
+thin edges a swaying banner or the camera leaves do not count). Touch parity
+(the HUD tours above) is reported on its own lines and is not part of OK.
 """
 from __future__ import annotations
 
@@ -74,6 +91,14 @@ LOVE_AT = 39.0
 RESUME_AT = 40.0
 RESUME_SETTLE = 3.0
 TOUCH_SCRIPT = "a@22+0.5,up@27+2,up@29.3+3.2,a@33.4+0.5,a@35.5+0.5"
+ORIENTATION_PIN = ["-WFOrientation", "landscape"]   # hal/ios/native_app_entry.mm
+# The HUD tour (module docstring). B and D are 0x0002 and 0x0008, LEFT 0x4000,
+# C 0x0004; the chord is RIGHT | B | D.
+TOUR_SCRIPT = "b@20.5+0.6,left@21.5+0.6,c@23+0.6,right@27+4,b@27+4,d@27+4"
+TOUR_CARD_AT, TOUR_FULL_AT, TOUR_HELD_AT, TOUR_END = 20.0, 26.0, 29.5, 32.0
+TOUR_CHORD = 0x2000 | 0x0002 | 0x0008
+TOUR_HIDDEN_BITS = 0x0002 | 0x0008 | 0x0800 | 0x1000 | 0x2000 | 0x4000
+TOUCH_EVENT = re.compile(r"touch (?:buttons 0x([0-9a-fA-F]+)|reading (on|off))")
 # ROUTE_NOTE. Select at the Love portal acts only within 2.5 units of the
 # portal's spot (0, 9): `fy-near` in the chapter's chapter_script.py. The
 # Cast1 route's 4 s of UP ends close to that edge. Run 6ae72785 crossed it on
@@ -410,14 +435,58 @@ def authored_band(w: int, h: int, authored: float) -> tuple[int, int, int, int]:
     return 0, (h - bh) // 2, w, bh
 
 
+def touch_layout(view_w: float, view_h: float, top: float, left: float, bottom: float, right: float):
+    """(cell, joystick square, A-to-D block) in points, (x0, y0, x1, y1): a mirror of
+    wftouch::layout(w, h, 1, Insets) in hal/touch_controls.h, the layout Android and iOS
+    share. None when the view is too small for any control."""
+    w, h = view_w - left - right, view_h - top
+    margin = 12.0
+    bot = h - max(bottom, 24.0) - 6.0
+    avail = bot - margin
+    cell = max(48.0, min(64.0, avail * .15))
+    cell = min(cell, avail / 3, (w - 3 * margin) / 5.4)
+    if w <= 0 or h <= 0 or cell <= 0:
+        return None
+    pad_cell = cell * 1.2 * 2 / 3
+    pad = (left + margin, top + bot - 3 * pad_cell, left + margin + 3 * pad_cell, top + bot)
+    edge = 1.2 * cell
+    x1 = left + w - margin
+    block = (x1 - 2 * edge, top + bot - 2 * edge, x1, top + bot)
+    return cell, pad, block
+
+
 def hud_rects(view_w: float, view_h: float, top: float, left: float, bottom: float, right: float,
               cell: float, scale: float) -> list[tuple[float, float, float, float]]:
-    """The touch HUD's D-pad and A/B block in surface pixels (x0, y0, x1, y1): a mirror of
-    wf_touch::ComputeLayout (hal/ios/touch_pad.cc) from the logged layout line."""
-    m, s = 12.0, cell * 120.0 / 66.0
-    dpad = (left + m, view_h - bottom - m - 3 * cell, left + m + 3 * cell, view_h - bottom - m)
-    ab = (view_w - right - m - 2 * s, view_h - bottom - m - s, view_w - right - m, view_h - bottom - m)
-    return [tuple(c * scale for c in r) for r in (dpad, ab)]
+    """The touch HUD's joystick square and A-to-D block in surface pixels, from the logged
+    layout line (its cell is a cross-check: it must match the mirror)."""
+    l = touch_layout(view_w, view_h, top, left, bottom, right)
+    if not l:
+        return []
+    if abs(l[0] - cell) > 0.06:
+        log(f"hud_rects: logged cell {cell} pt, mirror {l[0]:.2f} pt: hal/touch_controls.h changed?")
+    return [tuple(c * scale for c in r) for r in (l[1], l[2])]
+
+
+def tour_verdict(text: str) -> dict:
+    """Judge a HUD tour from the order of its touch log lines (TOUR_SCRIPT):
+    the card narrows the HUD before any press; B and LEFT over the card send nothing;
+    C sends 0x0004 and closes the card; then the chord RIGHT | B | D comes through."""
+    events = [("buttons", int(m.group(1), 16)) if m.group(1) else ("reading", m.group(2))
+              for m in TOUCH_EVENT.finditer(text)]
+    r = {"events": len(events), "reading_first": False, "hidden_ignored": False,
+         "c_closes": False, "chord": False}
+    first_press = next((i for i, (k, v) in enumerate(events) if k == "buttons" and v), None)
+    on = next((i for i, e in enumerate(events) if e == ("reading", "on")), None)
+    if on is None or first_press is None:
+        return r | {"ok": False}
+    r["reading_first"] = on < first_press
+    off = next((i for i, e in enumerate(events) if e == ("reading", "off") and i > on), None)
+    card = events[on:off if off is not None else len(events)]
+    r["hidden_ignored"] = not any(k == "buttons" and v & TOUR_HIDDEN_BITS for k, v in card)
+    r["c_closes"] = events[first_press] == ("buttons", 0x0004) and off is not None and off > first_press
+    r["chord"] = off is not None and ("buttons", TOUR_CHORD) in events[off:]
+    r["ok"] = all(r[k] for k in ("reading_first", "hidden_ignored", "c_closes", "chord"))
+    return r
 
 
 def band_mask(band: tuple[int, int, int, int], rects, size=FIXTURE_SIZE) -> list[bool]:
@@ -569,7 +638,7 @@ def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
                SIMCTL_CHILD_WF_TOUCH_SCRIPT=TOUCH_SCRIPT)
     start_wall = time.time()
     r = sh(["xcrun", "simctl", "launch", "--terminate-running-process",
-            f"--stdout={stdout_f}", f"--stderr={stderr_f}", udid, BUNDLE_ID, *LAUNCH_ARGS], env=env)
+            f"--stdout={stdout_f}", f"--stderr={stderr_f}", udid, BUNDLE_ID, *LAUNCH_ARGS, *ORIENTATION_PIN], env=env)
     log(r.stdout.strip() + r.stderr.strip())
     t0 = time.monotonic()
     v["launch"] = r.returncode == 0
@@ -642,12 +711,48 @@ def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
         + "=== unified log (wf_game, last 3m) ===\n" + ulog)
     v |= log_findings(text + "\n" + ulog)
     v |= authored_frame(label, text, {"opening": opening, "card": card, "portal": portal, "love": love}, out)
+    for orientation in ("landscape", "portrait"):
+        v[f"tour_{orientation}"] = hud_tour(label, udid, orientation, out)
     for f in Path.home().glob("Library/Logs/DiagnosticReports/wf_game*"):
         if f.stat().st_mtime >= start_wall:
             shutil.copy(f, out / f"ios-chapter-crash-{label}-{f.name}")
             log(f"{label}: crash report {f.name}")
     sh(["xcrun", "simctl", "terminate", udid, BUNDLE_ID])
     sh(["xcrun", "simctl", "shutdown", udid])
+    return v
+
+
+def hud_tour(label: str, udid: str, orientation: str, out: Path) -> dict:
+    """One HUD tour launch (module docstring): three screenshots and the verdict."""
+    tag = f"ios-chapter-{label}-tour-{orientation}"
+    stderr_f = out / f"{tag}-stderr.txt"
+    env = dict(os.environ, SIMCTL_CHILD_WF_TOUCH_SCRIPT=TOUR_SCRIPT)
+    r = sh(["xcrun", "simctl", "launch", "--terminate-running-process", f"--stderr={stderr_f}",
+            udid, BUNDLE_ID, *LAUNCH_ARGS, "-WFOrientation", orientation], env=env)
+    t0 = time.monotonic()
+    if r.returncode != 0:
+        log(f"{label}: tour {orientation}: launch failed: {r.stderr.strip()}")
+        return {"ok": False, "launch": False}
+    for at, name in ((TOUR_CARD_AT, "card"), (TOUR_FULL_AT, "full"), (TOUR_HELD_AT, "held")):
+        time.sleep(max(0.0, at - (time.monotonic() - t0)))
+        sh(["xcrun", "simctl", "io", udid, "screenshot", str(out / f"{tag}-{name}.png")])
+        log(f"{label}: tour {orientation}: screenshot {name} at t={time.monotonic() - t0:.1f} s")
+    time.sleep(max(0.0, TOUR_END - (time.monotonic() - t0)))
+    seconds = int(time.monotonic() - t0) + 5
+    ulog = sh(["xcrun", "simctl", "spawn", udid, "log", "show", "--predicate",
+               'processImagePath CONTAINS "wf_game"', "--style", "compact", "--last", f"{seconds}s"]).stdout
+    err = stderr_f.read_text(errors="replace") if stderr_f.exists() else ""
+    (out / f"{tag}.log").write_text(f"=== stderr ===\n{err}=== unified log (last {seconds}s) ===\n{ulog}")
+    # NSLog reaches the unified log; use the stderr copy only if the unified log has none.
+    v = tour_verdict(ulog if TOUCH_EVENT.search(ulog) else err)
+    view = last_view_line(err + "\n" + ulog)
+    lm = None
+    for lm in TOUCH_LAYOUT.finditer(ulog + "\n" + err):
+        pass
+    v |= {"launch": True, "view_line": view.group(0) if view else None,
+          "layout_line": lm.group(0) if lm else None}
+    log(f"{label}: tour {orientation}: {v}")
+    sh(["xcrun", "simctl", "terminate", udid, BUNDLE_ID])
     return v
 
 
@@ -793,9 +898,18 @@ def run(app: Path, out: Path) -> int:
         for line in v["zforth_errors"]:
             print(f"  zforth: {line}")
         print(f"IOS {v['label'].upper()}: {'OK' if ok else 'FAIL'}")
-    print("TOUCH PARITY: NOT MET (iOS HUD is a D-pad with A and B, hal/ios/input.mm; "
-          "Android draws a joystick with A to D and narrows to A and C over a card, "
-          "hal/android/touch_controls.h)")
+    for v in results:
+        for o in ("landscape", "portrait"):
+            t = v.get(f"tour_{o}") or {}
+            print(f"  {v['label']} tour {o}: ok={t.get('ok')} reading_first={t.get('reading_first')} "
+                  f"hidden_ignored={t.get('hidden_ignored')} c_closes={t.get('c_closes')} chord={t.get('chord')}")
+            print(f"    {t.get('layout_line')}")
+            print(f"    {t.get('view_line')}")
+    met = bool(results) and all((v.get("tour_landscape") or {}).get("ok") for v in results)
+    print(f"TOUCH PARITY: {'MET' if met else 'NOT MET'} (scripted: WF_TOUCH_SCRIPT skips UIKit touch delivery; "
+          "joystick and A to D, A and C only over a card, hal/touch_controls.h)")
+    portrait = bool(results) and all((v.get("tour_portrait") or {}).get("ok") for v in results)
+    print(f"TOUCH PORTRAIT: {'MET' if portrait else 'NOT MET'} (scripted, -WFOrientation portrait)")
     if not any(d[0] == "ipad" for d in devices):
         print("IOS IPAD: FAIL (no iPad on an iOS runtime with an iPhone)")
     return rc

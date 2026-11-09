@@ -1,0 +1,53 @@
+# XcodeGen spec for the touch UI tests (layer 3 of finding-your-way
+# docs/plans/2026-11-08-ios-touch-parity.md). Generate and run with
+# scripts/ios_touch_uitest.py on a Mac (Codemagic ios-simulator-chapter):
+#   xcodegen generate --spec ios/uitests/project.yml
+#
+# WFTouchHost is an empty app: a UI-test bundle needs a target application,
+# and using wf_game itself would make `xcodebuild test` reinstall a wf_game.app
+# without the chapter over the chapter copy. The tests drive the installed
+# chapter app by bundle id (org.worldfoundry.wf-game) instead, and tap its
+# on-screen controls through UIKit (XCUITest synthesises real touch events).
+name: WFTouchUITests
+options:
+  bundleIdPrefix: org.worldfoundry
+  deploymentTarget:
+    iOS: "15.0"
+settings:
+  base:
+    CODE_SIGN_IDENTITY: "-"
+    CODE_SIGN_STYLE: Manual
+    DEVELOPMENT_TEAM: ""
+    SWIFT_VERSION: "5.0"
+targets:
+  WFTouchHost:
+    type: application
+    platform: iOS
+    sources: [host]
+    info:
+      path: host/Info.plist
+      properties:
+        UILaunchScreen: {}
+        CFBundleDisplayName: WFTouchHost
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.worldfoundry.wf-touch-host
+  WFTouchUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [tests]
+    dependencies:
+      - target: WFTouchHost
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.worldfoundry.wf-touch-uitests
+        TEST_TARGET_NAME: WFTouchHost
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  WFTouchUITests:
+    build:
+      targets:
+        WFTouchHost: all
+        WFTouchUITests: [test]
+    test:
+      targets: [WFTouchUITests]

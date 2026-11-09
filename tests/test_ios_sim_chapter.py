@@ -231,11 +231,65 @@ def test_authored_band_and_resize():
 
 
 def test_hud_rects_mirror_the_touch_layout():
-    # iPad: "touch layout 1376x1032 pt, safe {0,0,25,0}, cell 72.0 pt", surface 2752 x 2064.
-    dpad, ab = chapter.hud_rects(1376, 1032, 0, 0, 25, 0, 72.0, 2.0)
-    assert dpad == (24.0, (1032 - 25 - 12 - 216) * 2, (12 + 216) * 2, (1032 - 25 - 12) * 2)
-    s = 72.0 * 120 / 66
-    assert ab == ((1376 - 12 - 2 * s) * 2, (1032 - 25 - 12 - s) * 2, (1376 - 12) * 2, (1032 - 25 - 12) * 2)
+    # iPhone: "touch layout 874x402 pt, safe {0,62,20,62}" with the shared layout
+    # (hal/touch_controls.h): cell 54, joystick square 2.4 cells, A to D block 2.4 cells.
+    cell, pad, block = chapter.touch_layout(874, 402, 0, 62, 20, 62)
+    assert cell == pytest.approx(54.0)
+    assert pad == pytest.approx((74.0, 242.4, 203.6, 372.0))
+    assert block == pytest.approx((670.4, 242.4, 800.0, 372.0))
+    stick, ab = chapter.hud_rects(874, 402, 0, 62, 20, 62, 54.0, 3.0)
+    assert stick == pytest.approx(tuple(c * 3 for c in pad))
+    assert ab == pytest.approx(tuple(c * 3 for c in block))
+    # iPad: the 64 pt cap; portrait iPhone: the top inset is reserved, the cap holds.
+    assert chapter.touch_layout(1376, 1032, 0, 0, 25, 0)[0] == pytest.approx(64.0)
+    cell, pad, block = chapter.touch_layout(402, 874, 62, 0, 34, 0)
+    assert cell == pytest.approx(64.0) and pad[3] == pytest.approx(874 - 34 - 6)
+    assert pad[2] < block[0]
+    assert chapter.touch_layout(100, 100, 0, 60, 0, 60) is None
+    assert chapter.hud_rects(100, 100, 0, 60, 0, 60, 0.0, 1.0) == []
+
+
+TOUR_GOOD = """\
+wf_game: touch layout 874x402 pt, safe {0,62,20,62}, cell 54.0 pt
+wf_game: touch reading on
+wf_game: touch buttons 0x0004
+wf_game: touch reading off
+wf_game: touch buttons 0x0000
+wf_game: touch buttons 0x2000
+wf_game: touch buttons 0x200a
+wf_game: touch buttons 0x0000
+"""
+
+
+def test_tour_verdict_passes_the_scripted_tour():
+    v = chapter.tour_verdict(TOUR_GOOD)
+    assert v["ok"] and v["reading_first"] and v["hidden_ignored"] and v["c_closes"] and v["chord"]
+
+
+def test_tour_verdict_fails_each_parity_defect():
+    # Today's iOS HUD: never narrows over a card.
+    assert not chapter.tour_verdict(TOUR_GOOD.replace("wf_game: touch reading on\n", ""))["ok"]
+    # B (hidden over a card) still sends its bit.
+    leak = TOUR_GOOD.replace("touch reading on\n", "touch reading on\nwf_game: touch buttons 0x0002\nwf_game: touch buttons 0x0000\n")
+    v = chapter.tour_verdict(leak)
+    assert not v["ok"] and not v["hidden_ignored"]
+    # LEFT on the joystick still works over a card (it would close the card).
+    v = chapter.tour_verdict(TOUR_GOOD.replace("touch reading on\n", "touch reading on\nwf_game: touch buttons 0x4000\n"))
+    assert not v["ok"] and not v["hidden_ignored"]
+    # C pressed but the card stayed open.
+    v = chapter.tour_verdict(TOUR_GOOD.replace("wf_game: touch reading off\n", ""))
+    assert not v["ok"] and not v["c_closes"]
+    # No C or D on the HUD: the chord never comes through.
+    v = chapter.tour_verdict(TOUR_GOOD.replace("0x200a", "0x2002"))
+    assert not v["ok"] and not v["chord"]
+    assert not chapter.tour_verdict("")["ok"]
+
+
+def test_tour_script_parses_and_presses_what_the_verdict_expects():
+    entries = [e.split("@")[0] for e in chapter.TOUR_SCRIPT.split(",")]
+    assert entries == ["b", "left", "c", "right", "b", "d"]
+    assert chapter.TOUR_CHORD == 0x200a
+    assert chapter.ORIENTATION_PIN == ["-WFOrientation", "landscape"]
 
 
 def test_frame_check_passes_the_authored_frame_and_fails_a_cut_one(tmp_path):

@@ -108,3 +108,7 @@ wflevels/aquarium-screensaver-cd.iff
 wflevels/planted-screensaver-cd.iff
 # The Planted Tank APK's coordinator settings, generated from settings.oad by build_planted().
 android/screensaver/src/planted/assets/planted-settings.json
+
+# Touch UI tests (scripts/ios_touch_uitest.py): generated project and build products
+ios/uitests/WFTouchUITests.xcodeproj/
+build-uitests/

@@ -35,6 +35,7 @@ extern int _halWindowHeight;
 // hal/ios/metal_view.mm
 extern "C" void* WFIosMetalLayer(void);
 extern "C" bool  WFIosWaitForVSync(int timeout_ms);
+extern "C" void  WFIosTouchFrame(void);   // hal/ios/input.mm: card flag → touch controls
 
 // Surface size the projection was last built for; re-derived when the view
 // lays out after the Display was constructed (rotation, or a layout that
@@ -159,6 +160,9 @@ Display::RenderEnd()
     // issues the draw call, so presenting before it would show an empty frame.
     RendererBackendGet().EndFrame();
     wf_metal::EndFrameToLayer();
+    // The frame is drawn (a card included): hand the story card flag to the
+    // touch controls. Here rather than PageFlip so the stepped path gets it too.
+    WFIosTouchFrame();
 }
 
 //==============================================================================
