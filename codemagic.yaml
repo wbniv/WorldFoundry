@@ -1087,3 +1087,54 @@ workflows:
       cancel_previous_builds: true
     scripts: *macos_desktop_scripts
     artifacts: *macos_desktop_artifacts
+
+  #------------------------------------------------------------------------------
+  # macos-style-metal — the Metal half of the reef plan's step 14 (style
+  # shading S1-S3): an existing-level sweep on pre-style and style Metal engines
+  # (pixel-identical with every new Camera field at 0), plus the shared style
+  # scene for the GL-vs-Metal 1/255 comparison. scripts/macos/style-metal-ci.sh
+  # does the work; tests/test_style_shading_invariant.py judges the artifacts.
+  # Manual only: three Debug engine builds plus the sweep, about 30 Mac minutes.
+  #------------------------------------------------------------------------------
+  macos-style-metal:
+    name: macOS Metal style-shading sweep (manual)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    cache:
+      cache_paths:
+        - build-macos
+        - engine/vendor/jolt-physics-5.5.0
+        - ~/.rustup
+        - ~/.cargo
+    environment:
+      xcode: latest
+    triggering:
+      events: []
+      cancel_previous_builds: true
+    scripts:
+      - name: Toolchain versions
+        script: |
+          set -euo pipefail
+          sw_vers
+          cmake --version
+          ninja --version 2>/dev/null || brew install ninja
+      - name: Install Rust toolchain
+        script: |
+          set -euo pipefail
+          if ! command -v cargo >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/cargo" ]; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --no-modify-path
+          fi
+          export PATH="$HOME/.cargo/bin:$PATH"
+          echo "PATH=$PATH" >> "$CM_ENV"
+          cargo --version
+      - name: Style sweep and shared scene through Metal
+        script: |
+          set -euo pipefail
+          bash scripts/macos/style-metal-ci.sh 2>&1 | tee "$CM_BUILD_DIR/style-metal.log"
+    artifacts:
+      - style-metal.log
+      - style-metal/summary.json
+      - style-metal/summary.tsv
+      - style-metal/sweep/*.png
+      - style-metal/scene/*.png
+      - style-metal/logs/*.log

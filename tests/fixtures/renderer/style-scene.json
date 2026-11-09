@@ -1,0 +1,90 @@
+{
+  "comment": "Shared style-shading test scene (reef plan, risk 2 and step 14). Rendered on Linux GL by tests/test_style_shading_invariant.py and on Metal by scripts/macos/style-metal-ci.sh with the same flags; captures must agree within max_channel_delta per channel. Realistic exercises S1 water absorption, anime S3 toon bands. ReefSettings Seed 7 makes the Random layout and the fish deterministic.",
+  "max_channel_delta": 1,
+  "common_args": [
+    "--frame-step-smoke=30",
+    "--cycles=1",
+    "-rate20",
+    "--no-fps",
+    "--vram-width=4096",
+    "--vram-height=2048",
+    "--vram-slot-width=1024",
+    "--vram-slot-height=1024",
+    "--vram-perm-width=1024",
+    "--vram-perm-height=1024",
+    "--property=ReefSettings.Layout=1",
+    "--property=ReefSettings.Seed=7"
+  ],
+  "capture_frame": 20,
+  "scenes": {
+    "reef-realistic-s1": "wflevels/aquarium_thai_reef-standalone.iff",
+    "reef-anime-s3": "wflevels/aquarium_thai_reef_anime-standalone.iff"
+  },
+  "sweep": {
+    "comment": "Existing-level sweep (step 14): every *-standalone.iff of the baseline tree, S fields at their defaults, frame 20; baseline and candidate engines must be pixel-identical. vram: [width, height, slot, perm height] for levels whose textures exceed the defaults.",
+    "baseline_rev": "fd9349c8e29f03a021987b640f0d378b13458d86",
+    "candidate_rev": "b03f5cb58985f0c6a8c8e4422b89216e28243645",
+    "args": [
+      "--frame-step-smoke=30",
+      "--cycles=1",
+      "-rate20",
+      "--no-fps"
+    ],
+    "vram": {
+      "baseline": [
+        5120,
+        2048,
+        1024,
+        1024
+      ],
+      "condo_639_640": [
+        4096,
+        2048,
+        1024,
+        1024
+      ],
+      "condo_639_640_tour": [
+        4096,
+        2048,
+        1024,
+        1024
+      ],
+      "condo_639_640_touch": [
+        4096,
+        2048,
+        1024,
+        1024
+      ],
+      "moon_site01": [
+        4096,
+        2048,
+        1024,
+        512
+      ],
+      "aquarium_lionfish": [
+        2048,
+        1024,
+        512,
+        1024
+      ],
+      "aquarium_plants": [
+        2048,
+        1024,
+        512,
+        1024
+      ],
+      "seahorse_grid": [
+        2048,
+        1024,
+        512,
+        1024
+      ]
+    },
+    "extra": {
+      "aquarium_plants": [
+        "--property=PlantedTankSettings.Random seed on entry=0",
+        "--property=PlantedTankSettings.Seed=123456"
+      ]
+    }
+  }
+}
