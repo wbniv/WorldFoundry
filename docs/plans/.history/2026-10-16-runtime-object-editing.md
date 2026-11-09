@@ -1,11 +1,35 @@
 | Date | Change |
 |------|--------|
+| [2026-10-17](https://github.com/wbniv/WorldFoundry/commit/f7f13672) | Record Phase P steps 11-12 on Cast1: baseline-picker and baseline-settings pass |
+| [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/1f3cfb94) | Record the picker's green macOS build (Metal CameraMatrices) |
+| [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/068eac5f) | Record Phase P verification: steps 9, 10 and 12 pass on desktop; step 11 escalated |
+| [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/eed52fb0) | Runtime object editing: --edit-all decided (M9); Blender container in progress |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/c41fd682) | Plan the 3D object picker as an option in the object chooser |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/3801e13d) | Runtime object editing plan: fix flowchart and decisions table |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/928ee745) | Runtime object editing: no 'live' in the UI; padlock on read-only fields |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/7ef36fbb) | Plan runtime object editing on OAS/OAD to replace RP02 |
 
 <!--history-meta v1
+f7f13672	author	Will Norris
+f7f13672	added	64
+f7f13672	deleted	9
+f7f13672	files	1
+f7f13672	body	Rebased onto 2026-new-level 9f97f5dd (normals migration, six seahorse pairs); baseline level and main cd.iff regenerated from the merged sources. On chromecast-test-01 with baseline-7ef645811cec98b9.apk, J-6922370e7eb5 (baseline-picker) passed 12 assertions and J-28f5619ea275 (baseline-settings) passed 21; the fallback baseline-72a39130 was reinstalled and its hash verified (J-4ff83e75e56f). Desktop step-10 screenshots recaptured on the merged tree. Evidence under docs/diagnostics/picker-3d/.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01T3gB59hNsFhWnCTTKHc1yk
+1f3cfb94	author	Will Norris
+1f3cfb94	added	2
+1f3cfb94	deleted	0
+1f3cfb94	files	1
+1f3cfb94	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01T3gB59hNsFhWnCTTKHc1yk
+068eac5f	author	Will Norris
+068eac5f	added	89
+068eac5f	deleted	0
+068eac5f	files	1
+068eac5f	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01T3gB59hNsFhWnCTTKHc1yk
+eed52fb0	author	Will Norris
+eed52fb0	added	2
+eed52fb0	deleted	1
+eed52fb0	files	1
+eed52fb0	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01T3gB59hNsFhWnCTTKHc1yk
 c41fd682	author	Will Norris
 c41fd682	added	49
 c41fd682	deleted	1

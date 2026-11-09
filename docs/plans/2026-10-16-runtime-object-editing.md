@@ -1,6 +1,22 @@
 # Runtime object editing on OAS/OAD: any object, standard types, no catalog chunk
 
 16 October 2026 · **Proposed.** It supersedes [RP02](2026-10-11-rp02-property-catalog.md) and keeps the goal of the [runtime object editor plan](2026-10-06-runtime-oas-oad-object-editor.md): any object can be edited on the TV or phone. That plan's host, TV form and phone form stay. Its `RP01` data layer is replaced. Engine changes need Will's confirmation of the scope below; the 2026‑10‑06 authorisation covered that plan's "minimal core changes".
+## Unparked, 2026‑11‑10
+
+Will unparked this plan so that the new Sea Stars tank can go first ([Sea Stars D11](2026-11-10-starfish-tank.md#decisions-for-will), "option 1"). He said: "i thought all this RPRP chunks were gone (they should be cuz it's just duplicated work with OAS/OAD and the Settings class)". They aren't gone, and the RPRP route has grown since this plan was written. **O4 (engine permission) is still open.** Will has to confirm the scope under [Engine changes](#engine-changes-scope-for-o4) before Phase 1 starts.
+
+**What has changed since 2026‑10‑16.** This plan migrates two users, the planted tank and the baseline. Today, ten standalone levels carry an `RPRP` catalog, and nine `settings-bindings.json` files feed them:
+
+| Settings type | Levels carrying it (`-standalone.iff`) |
+|---|---|
+| `PlantedTankSettings` | `aquarium_plants`, `aquarium_plants_screensaver`, `planted_tank_screensaver` (the plants-only Dream) |
+| `JellyfishSettings` | `aquarium_jellyfish`, `aquarium_jellyfish_screensaver` |
+| `ReefSettings` | `aquarium_thai_reef`, `aquarium_thai_reef_anime`, and both screensaver variants |
+| Baseline (Field types, Runtime) | `baseline` |
+
+There are other readers too: Android's `PlantedSettingsProvider` reads the catalog, `check_tank_catalog` in `build-aquarium-screensaver-levels.py` checks it, and the launch-override table landed in `f3c3ff16`. **Phase 3 below becomes "migrate every catalog user"**: the four types, the two Android providers and the screensaver build. Phase 5 then removes `RP01`, as written. The first new user of this route is `SeaStarsSettings` ([plan](2026-11-10-starfish-tank.md#level-settings)), and it never gets a catalog. Phase 0's trace also re-surveys the code: line numbers above are from 2026‑10‑16.
+
+
 
 ## Decisions
 

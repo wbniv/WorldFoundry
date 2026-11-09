@@ -492,11 +492,11 @@ def settings() -> str:
                    for t, v, c in states)
     notes = ('<div style="width:300px;font-size:13.5px;color:var(--mute);padding-top:30px">'
              '<h2>Notes</h2><p>Editable rows carry no marker. The read-only row is dimmed with a padlock.</p>'
-             '<p>Counts, Speed, Glass climbing and Caustics apply <b style="color:var(--ink)">live</b>: the Director polls the settings once a second.</p>'
-             '<p>Seed applies on the next entry. 0 draws new resident spots each time; any other value repeats them.</p>'
-             '<p>The same form opens from the Dream tank list and the TV level. Both read one catalog, <code>SeaStarsSettings</code>.</p></div>')
-    body = (f'<h1>Level settings: SeaStarsSettings</h1><p class="sub">A Director-owned settings object, as the Reef, Jellyfish and Planted tanks have. '
-            f'The phone form is generated from <code>settings.oas</code>.</p><div style="display:flex;gap:26px">{cols}{notes}</div>')
+             '<p>Every field takes effect within a second: the Director reads the object with <code>property@</code> once a second.</p>'
+             '<p>Seed is live too: the residents glide to the spots of the new seed. 0 draws new spots on every entry.</p>'
+             '<p>One <code>SeaStarsSettings</code> object sits in the level (a standard OAS type that inherits <code>Settings</code>). The TV and phone forms come from its <code>.oad</code>; no RPRP catalog.</p></div>')
+    body = (f'<h1>Level settings: SeaStarsSettings</h1><p class="sub">A <code>SeaStarsSettings</code> object in the level, a standard OAS type. '
+            f'The forms are generated from its <code>.oad</code>.</p><div style="display:flex;gap:26px">{cols}{notes}</div>')
     return page("Sea Stars settings", body)
 
 
@@ -529,7 +529,7 @@ def screensaver() -> str:
                  f'<span style="color:var(--mute)">{d}</span></div>' for t, d in steps)
     body = (f'<h1>Screensaver: <code>aquarium_sea_stars_screensaver</code></h1>'
             f'<p class="sub">The Dream variant swaps the player script for the autopilot (<code>sea_stars_screensaver.fth</code>) and carries the '
-            f'<code>SeaStarsSettings</code> catalog. Full screen, no HUD, no input.</p>'
+            f'<code>SeaStarsSettings</code> object. Full screen, no HUD, no input.</p>'
             f'<div style="display:flex;gap:30px"><div><h2>Defaults: autopilot climbing the front glass</h2>{frame(glass)}</div>'
             f'<div><h2>Maximum population: autopilot on the sand</h2>{frame(sand, True)}</div></div>'
             f'<h2 style="margin-top:18px">One autopilot cycle (seeded waypoints)</h2><div style="display:flex;gap:10px;width:1376px">{tl}</div>'

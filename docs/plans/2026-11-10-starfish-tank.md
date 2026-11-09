@@ -1,6 +1,6 @@
 # Sea Stars: an eleventh aquarium tank of Indo-Pacific starfish
 
-**Status: draft, 2026‑11‑10.** Waiting on Will's answers to D1–D11. Nothing is built yet.
+**Status: draft, 2026‑11‑10.** D11 is decided. Waiting on Will's answers to D1–D10. Sea Stars' settings depend on [runtime object editing](2026-10-16-runtime-object-editing.md), which is unparked and goes first. Its engine scope (O4 there) still needs Will's confirmation. Nothing is built yet.
 
 ## Context
 
@@ -52,7 +52,7 @@ Each row gives a recommendation and its alternatives. Answering "D1–D11: all y
 | D8 | The A button | **Reach**: the star rears up on two arms for 2 s (sea stars do this to reach for food or to right themselves) | Swap the leading arm without moving. Or leave A unused |
 | D9 | The settings | **Nine fields:** a count for each resident species, Speed (Slow, Normal, Fast), Glass climbing (Off, On), Caustics (Off, On) and Seed ([list](#level-settings)). The player's species is shown read-only | Fewer fields: counts and Seed only. Or add Player species (any of the five-armed stars), which needs an underside skin for each one |
 | D10 | Maximum counts, and the gate at the maximum | **4 chocolate-chip, 5 *Fromia*, 4 sand-sifting, 2 brittle, 2 cushion** (17 residents). The D7 gate must also hold at the maximum. If it doesn't, Phase 4 lowers the maximums until it does, and doesn't ask for a slower gate | Allow a slower maximum (≥ 15 FPS at full population) and keep the higher counts |
-| D11 | How the settings reach the engine (Will, 2026‑11‑10: "i thought all this RPRP chunks were gone … it's just duplicated work with OAS/OAD and the Settings class") | **Unpark [runtime object editing](2026-10-16-runtime-object-editing.md) and do it first:** `SeaStarsSettings` becomes a standard OAS object in the level that inherits `Settings` (decision M1 there), with no RPRP catalog. That needs engine scope O4 confirmed, and it moves the five existing catalogs over | Ship on RPRP now, as the five existing catalogs do, and migrate with them later |
+| D11 | How the settings reach the engine | **Decided (Will, 2026‑11‑10: "option 1").** Unpark [runtime object editing](2026-10-16-runtime-object-editing.md) and do it first. `SeaStarsSettings` is a standard OAS object type that inherits `Settings` (M1 there), and one instance of it sits in the level. There is **no RPRP catalog and no `settings-bindings.json`**. Will raised it: "i thought all this RPRP chunks were gone (they should be cuz it's just duplicated work with OAS/OAD and the Settings class)" | Rejected: ship on RPRP now and migrate later |
 
 ## The tank
 
@@ -159,13 +159,15 @@ The chocolate-chip stars, the *Fromia* and the cushion star don't react. They ru
 
 [![The SeaStarsSettings phone form at defaults, at maximum population, and with every count at 0](2026-11-10-starfish-tank/settings.png)](2026-11-10-starfish-tank/settings.html)
 
-The tank gets a settings catalog, `SeaStarsSettings`, built the same way as the reef's `ReefSettings` and the Jellyfish and Planted tanks' catalogs. **It is not an object in the level file.** Nothing in `aquarium_sea_stars.lev` or the compiled `.lvl` names it (the reef's `.lev` and `.lvl` contain no `ReefSettings` either). There are three pieces instead:
+`SeaStarsSettings` is **a standard OAS object type**, and **one instance of it sits in the level** (D11). It's built the way the [runtime object editing](2026-10-16-runtime-object-editing.md) plan designs it, not the way today's RPRP catalogs work:
 
-- **`settings.oas`** declares the type: the field names, ranges, defaults and how each one is shown. It is compiled to an `.oad`.
-- **`settings-bindings.json`** gives each field an id and names the actor that owns the catalog: the Director, which already exists in the level.
-- **`build-object-properties.py attach()`** turns those two files into an `RP01` record and appends it to the **`-standalone.iff`**, after the level has compiled. It goes in as one `RPRP` chunk plus a reference to it. Only the standalone files carry it: the reef's `aquarium_thai_reef.iff` has none, and its `-standalone.iff` has one. The screensaver variant gets its own copy (`check_tank_catalog`).
+- **`wfsource/source/oas/seastarssettings.oas`**: `TYPEHEADER(Sea Stars Settings, SeaStarsSettings)`, `@include actor.inc`, `@include settings.inc`, then the nine fields below. Each field is `SHOW_AS_…|SHOW_AS_LIVE` (M8), and it's registered as an `OBJECTENTRY`, so the `.mas` rules generate its `.oad` and `.ht`.
+- **The generator places one `SeaStarsSettings` object** in `aquarium_sea_stars.lev`. levcomp-rs writes its struct with the defaults, lists it in `LevelObj`'s Editable Objects with the automatic label "Sea Stars Settings", and ships its `.oad` as an `OAD ` chunk.
+- **The Director finds it by a reference resolved at export.** The generator writes the settings object's actor index into the director script, in the same way `tk-player` is written today. The Director reads the fields with `property@ ( actor field -- value valid )`, which reads the writable overlay. Nothing scans for the type at runtime (M3).
+- **Edits** go to the object's writable overlay. `OnPropertiesChanged` is a no-op, because the Director polls once a second. Every field is live, and each one has a test that edits it and checks the effect (M8).
+- **The TV and phone forms** are built from the type's `.oad`. The phone's Dream settings use the same object in the screensaver variant.
 
-At runtime the Director reads the values from the catalog, through mailboxes, once a second. The phone form is generated from the catalog. The parked TODO item "Runtime object editing on OAS/OAD (replaces RP02)" would make settings holders real OAS objects in the level and retire this catalog path. Until that lands, this tank uses the catalog path like every other tank, and nothing new is needed.
+This replaces the RPRP route that the reef, Jellyfish and Planted tanks use today. Those five catalogs move over in the runtime object editing work, not here.
 
 | Field | Kind | Range | Default | Applies |
 |---|---|---|---|---|
@@ -177,7 +179,7 @@ At runtime the Director reads the values from the catalog, through mailboxes, on
 | Speed | radio | Slow, Normal, Fast (× 10, × 20, × 40 real speed for the residents; the player scales the same way) | Normal | live |
 | Glass climbing | radio | Off, On | On | live; a star on the glass when it turns off climbs down first |
 | Caustics | radio | Off, On (the S2 Camera field) | On | live |
-| Seed | number | 0–16777215; 0 picks new resident spots on every entry | 0 | next entry |
+| Seed | number | 0–2147483647 (M4); 0 picks new resident spots on every entry | 0 | live: the residents glide to the new spots (unparked ones fade in) |
 
 **The level holds the maximum population (D10).** The `.lev` places all 17 residents. At level load, and again whenever a count changes, the Director **parks** the extras: they're hidden, moved out of view, and skipped in the director's update loop. A count that goes up unparks a resident at a free spot from the seeded list and fades it in over 2 s. The player is never parked. With every count at 0, the tank holds only the player, and the Dream autopilot still runs.
 
@@ -185,13 +187,15 @@ Phase 4 measures how much a parked actor costs. If a hidden actor still pays for
 
 ```mermaid
 flowchart LR
-    OAS["settings.oas<br/>SeaStarsSettings"] --> BOP["build-object-properties.py<br/>RPRP catalog"]
-    BIND["settings-bindings.json<br/>owner: Director"] --> BOP
-    BOP --> LVL["aquarium_sea_stars-standalone.iff"]
-    BOP --> SSV["aquarium_sea_stars_screensaver-standalone.iff"]
-    PH["Phone form<br/>(TankSettingsProvider)"] -->|"edit"| CAT["catalog values"]
-    TV["TV level settings"] -->|"edit"| CAT
-    CAT -->|"polled once a second"| DIR["star_director.fth<br/>mailboxes (allocated Phase 4)"]
+    OAS["seastarssettings.oas<br/>@include actor.inc, settings.inc"] --> OAD[".oad + .ht"]
+    GEN["generate.py<br/>places 1 SeaStarsSettings object"] --> LEVF["aquarium_sea_stars.lev"]
+    OAD --> LC["levcomp-rs<br/>struct bytes, Editable Objects list,<br/>OAD chunk"]
+    LEVF --> LC
+    LC --> LVL["aquarium_sea_stars.iff<br/>(+ screensaver variant)"]
+    LVL --> OV["runtime: writable overlay<br/>of the object's struct"]
+    PH["Phone form<br/>(from the .oad)"] -->|"edit"| OV
+    TV["TV form<br/>(from the .oad)"] -->|"edit"| OV
+    OV -->|"property@, once a second"| DIR["star_director.fth<br/>settings actor index written at export"]
     DIR --> PARK["park / unpark residents"]
     DIR --> SPD["clip rates (Speed)"]
     DIR --> GL["glass planes on / off"]
@@ -201,18 +205,18 @@ flowchart LR
 ```mermaid
 sequenceDiagram
     participant U as Will (phone)
-    participant C as Settings catalog
+    participant C as SeaStarsSettings overlay
     participant D as star_director.fth
     participant R as Resident actors
     U->>C: Red Fromia 3 → 5
     loop once a second
-        D->>C: read the 9 fields
+        D->>C: property@ × 9 fields
     end
     D->>D: 2 more Fromia wanted
     D->>R: unpark Fromia 4 and 5 at free rock-route spots
     R-->>D: fading in (2 s)
     U->>C: Seed 0 → 4242
-    D->>D: Seed is read on the next entry only
+    D->>R: re-pick spots from seed 4242, residents glide there
 ```
 
 ## Screensaver
@@ -222,7 +226,7 @@ sequenceDiagram
 Every tank has a Dream variant, and so does this one: **`aquarium_sea_stars_screensaver`**. `scripts/build-aquarium-screensaver-levels.py` makes it from the canonical level in the usual way:
 
 - It **swaps the player's script** for the autopilot, `sea_stars_screensaver.fth`, which drives the player star along seeded waypoints with no input. The same driver takes over in the playable level after 30 s of no input.
-- It **attaches the `SeaStarsSettings` catalog**, so the phone's Dream settings edit the same nine fields. `check_tank_catalog` gets a Sea Stars branch that checks for the schema and its keys.
+- It **keeps the `SeaStarsSettings` object** from the canonical level, so the phone's Dream settings edit the same nine fields. The variant's test checks that the object, its Editable Objects entry and its `OAD ` chunk are present. There is no `check_tank_catalog` branch.
 - It's **full screen, with no HUD and no input**, like the other Dream variants.
 - `TankChoice.java` gets `aquarium_sea_stars` / "Sea Stars" as its eleventh entry, and `TankSettingsProvider` sends it to the phone unchanged.
 
@@ -233,7 +237,7 @@ flowchart LR
     BSL -->|"player script swapped"| VAR["aquarium_sea_stars_screensaver.lev"]
     VAR --> BLB["build_level_binary.sh"]
     BLB --> STD["…_screensaver-standalone.iff"]
-    STD --> CATA["attach SeaStarsSettings catalog<br/>check_tank_catalog"]
+    STD --> CATA["check: SeaStarsSettings object,<br/>Editable Objects entry, OAD chunk"]
     CATA --> CD["aquarium-screensaver-cd.iff"]
     CD --> APK["screensaver APK<br/>TankChoice: + Sea Stars"]
 ```
@@ -289,6 +293,7 @@ flowchart TD
     P0 --> P3["Phase 3 (T3)<br/>star generator, 6 species,<br/>atlas cells, underside skin"]
     P2 --> P3
     P3 --> P4["Phase 4 (T3)<br/>player, director, settings,<br/>autopilot, parking"]
+    ROE["Runtime object editing<br/>Phases 0–2 (T4, needs O4)"] -->|"Settings type, overlay,<br/>property@, OAD chunk"| P4
     P4 --> P5["Phase 5 (T2)<br/>selector + screensaver variant<br/>+ Dream registration"]
     P5 --> P6["Phase 6 (T3)<br/>cast1 acceptance"]
 ```
@@ -297,8 +302,9 @@ flowchart TD
 - **Phase 1, crawl-controller spike** (T4). A placeholder five-armed star goes in the reef shell with its colliders. The spike covers the leader-arm steering, the four glass planes, the corner roll and rock avoidance. It runs headless on the desktop with a trace test: a scripted input goes once round the tank and up the front glass, and the test asserts the star is always on a plane (within 1 mm) and inside the tank. Rank T4 because the result decides whether an engine change is needed.
 - **Phase 2, static tank** (T3). The shell, sand, three outcrops, the ledge and the seagrass, built by `wflevels/aquarium_sea_stars/build.sh` in the Blender container and wrapped as `task aquarium-sea-stars-level`. `report_budget.py` prints the triangles in each static group. The early cast1 gate is ≤ 38 ms with no actors. If it misses, thin the rocks before Phase 3.
 - **Phase 3, the stars** (T3). `stars.py` is the parametric generator. It makes six species, their atlas cells, and the player's underside skin (grooves and mouth), with five-curve `DFRM` v2 chunks written by `dfrm_chunk.py`. Desktop captures from the close camera go to Will for an art review.
-- **Phase 4, behaviour** (T3). `sea_star_player.fth`, `star_director.fth` and `sea_stars_screensaver.fth`. `scripts/check-sea-stars.py --video` drives the player past the brittle star and over a sand-sifting star, and asserts each reaction within its timing window. **Settings:** `settings.oas`, `settings-bindings.json`, the Director's once-a-second poll, parking and unparking, and a desktop run at the maximum population with a measured cost per parked actor.
-- **Phase 5, registration and the screensaver** (T2). One line is appended to the manifest, and the tank is added wherever the ten are listed ([files](#new-and-changed-files)). Indices 0–9 don't move. Also build the `aquarium_sea_stars_screensaver` variant with its catalog, add the `check_tank_catalog` branch, and add the `TankChoice.java` entry. The other session's uncommitted edits to `build-aquarium-screensaver-levels.py` stay uncommitted: merge on top of them and stage only this plan's hunks.
+- **Before Phase 4: runtime object editing Phases 0–2** ([plan](2026-10-16-runtime-object-editing.md)). They provide `settings.inc`, the writable overlay, `property@` reading it, the Editable Objects list and the `OAD ` chunk. Phases 0–3 of this plan don't need it, so the two can run side by side.
+- **Phase 4, behaviour** (T3). `sea_star_player.fth`, `star_director.fth` and `sea_stars_screensaver.fth`. `scripts/check-sea-stars.py --video` drives the player past the brittle star and over a sand-sifting star, and asserts each reaction within its timing window. **Settings:** `seastarssettings.oas`, the object in the level, the Director's once-a-second `property@` poll, parking and unparking, and a desktop run at the maximum population with a measured cost per parked actor.
+- **Phase 5, registration and the screensaver** (T2). One line is appended to the manifest, and the tank is added wherever the ten are listed ([files](#new-and-changed-files)). Indices 0–9 don't move. Also build the `aquarium_sea_stars_screensaver` variant, check that it keeps the settings object, and add the `TankChoice.java` entry. The other session's uncommitted edits to `build-aquarium-screensaver-levels.py` stay uncommitted: merge on top of them and stage only this plan's hunks.
 - **Phase 6, acceptance** (T3). Through the coordinator on cast1 (and cast2 if it's free): the selector and Back, the D7 frame gate at the defaults and at the maximum population, each over 120 s of wide idle, and a 10-minute Dream run, and a settings change made on the phone during the Dream that shows on the TV within 2 s. Then restore the device's original settings and Dream selection.
 
 Work happens in a sparse worktree branched from `2026-new-level` (a full checkout is 4.2 GB). The finish line is a push to `2026-new-level`, with no PR to master.
@@ -330,16 +336,17 @@ flowchart TD
 
 | Path | New / changed | What |
 |---|---|---|
-| `wflevels/aquarium_sea_stars/` | new | `config.py`, `build.sh`, `run.sh`, `generate.py`, `stars.py`, `scene.py`, `report_budget.py`, `settings.oas`, `settings-bindings.json`; Forth: `sea_star_player.fth`, `star_director.fth`, `sea_stars_screensaver.fth` |
+| `wflevels/aquarium_sea_stars/` | new | `config.py`, `build.sh`, `run.sh`, `generate.py`, `stars.py`, `scene.py`, `report_budget.py`, `settings` object placement in `generate.py`; Forth: `sea_star_player.fth`, `star_director.fth`, `sea_stars_screensaver.fth` |
+| `wfsource/source/oas/seastarssettings.oas`, its `OBJECTENTRY` | new | the settings type (D11); it needs runtime object editing's `settings.inc` |
 | `wflevels/aquarium_sea_stars_screensaver/` | new (generated) | the Dream variant, written by `build-aquarium-screensaver-levels.py`, gitignored like the other variants |
 | `wflevels/aquarium_species.json` | new | each tank's species list, the source for the content-rule test |
 | `scripts/check-sea-stars.py` | new | desktop reaction and trace capture |
 | `tests/test_aquarium_sea_stars.py` | new | budgets, director timing tables, the plane-hold trace |
-| `tests/test_sea_stars_settings.py` | new | the nine fields, their ranges and defaults, the bindings, park and unpark under count changes |
+| `tests/test_sea_stars_settings.py` | new | the nine fields, their ranges and defaults, `SHOW_AS_LIVE` on each, the export-time actor index, and an edit-and-check test for every field, including park and unpark under count changes |
 | `tests/test_aquarium_species.py` | new | no species in two tanks |
 | `docs/reference/sea-stars-research.md` | new | the Phase 0 species sheet |
-| `wflevels/aquarium-menu.manifest`, `Taskfile.yml` (`aquarium-sea-stars-level`, `build-cd-iff-aquarium-menu` deps), `scripts/aquarium-levels.sh`, `scripts/compare-level-build-routes.sh`, `scripts/build-aquarium-screensaver-levels.py` (`TANKS`, the `check_tank_catalog` branch), `scripts/build-aquarium-variant.py`, `android/screensaver/…/TankChoice.java` | changed | registration (Phase 5) |
-| `tests/test_aquarium_menu.py`, `tests/test_aquarium_screensaver_input.py`, `tests/test_species_movement.py`, `tests/test_aquarium_screensaver_catalog.py` | changed | 11 tanks, the new TOC count, and the Sea Stars catalog |
+| `wflevels/aquarium-menu.manifest`, `Taskfile.yml` (`aquarium-sea-stars-level`, `build-cd-iff-aquarium-menu` deps), `scripts/aquarium-levels.sh`, `scripts/compare-level-build-routes.sh`, `scripts/build-aquarium-screensaver-levels.py` (`TANKS`), `scripts/build-aquarium-variant.py`, `android/screensaver/…/TankChoice.java` | changed | registration (Phase 5) |
+| `tests/test_aquarium_menu.py`, `tests/test_aquarium_screensaver_input.py`, `tests/test_species_movement.py` | changed | 11 tanks, and the new TOC count |
 | Engine | **none** | unless Phase 1 escalates |
 
 ## Out of scope
@@ -379,15 +386,15 @@ flowchart TD
     ```
 7. The registration tests pass with 11 tanks.
     ```
-    scripts/in-linux-container.sh python3 -m pytest tests/test_aquarium_menu.py tests/test_aquarium_screensaver_input.py tests/test_species_movement.py tests/test_aquarium_screensaver_catalog.py -v
+    scripts/in-linux-container.sh python3 -m pytest tests/test_aquarium_menu.py tests/test_aquarium_screensaver_input.py tests/test_species_movement.py -v
     ```
 8. The settings object declares the nine fields with the D9 ranges and defaults, and the Director parks and unparks to match each count, from all zero to the maximum, in a desktop run.
     ```
     scripts/in-linux-container.sh python3 -m pytest tests/test_sea_stars_settings.py -v
     ```
-9. The screensaver variant builds and carries the `SeaStarsSettings` catalog with all nine keys.
+9. The screensaver variant builds and keeps the `SeaStarsSettings` object, its Editable Objects entry and its `OAD ` chunk. No `RPRP` chunk appears in either Sea Stars `.iff`.
     ```
-    python3 scripts/build-aquarium-screensaver-levels.py aquarium_sea_stars
+    python3 scripts/build-aquarium-screensaver-levels.py aquarium_sea_stars && ! grep -a -q RPRP wflevels/aquarium_sea_stars-standalone.iff wflevels/aquarium_sea_stars_screensaver-standalone.iff
     ```
 10. On cast1, the early gate: the static tank with no actors runs at ≤ 38 ms, median over 120 s of wide idle (coordinator `profile`).
 11. On cast1, the D7 gate: the full tank runs at the defaults **and** at the maximum population at ≥ 20 FPS, median over 120 s of wide idle; the selector reaches Sea Stars and Back returns to the menu.
