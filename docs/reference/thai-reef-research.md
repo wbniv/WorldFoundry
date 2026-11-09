@@ -2,6 +2,10 @@
 
 Final, 9 November 2026. **Every species in the tank has a Gulf of Thailand record.** The pair of fish is now the reticulated dascyllus *Dascyllus reticulatus* (Will, 2026‑11‑09, decision D10 of the [finishing plan](../plans/2026-11-08-reef-tanks-finish.md)), because no citable Gulf record was found for the humbug *D. aruanus* ([D1 and D2 searches](#d1-and-d2-searches)). This is a source ledger and the final species list; it is **not an approval to print** (the poster is parked, Will, 2026‑11‑09: "park poster"). A published occurrence is evidence of presence at the stated place and time, not proof of abundance at every reef. Genus-only records do not establish a particular species. Behaviour and timing invented for the simulation must be labelled as such.
 
+## Vendored sources
+
+Every source cited by this ledger, the skin-colour reference, the poster and the reef plans' species citations is archived in the private repository `wbniv/WorldFoundry-sources`, at commit `d5028cd` (2026‑11‑09). Its `thai-reef/index.json` maps each cited URL to the sha256 of its vendored copy, with a status (ok, bot-blocked, gone or paywalled) and an existing Wayback Machine snapshot where there is one. Of 126 URLs, 98 are vendored, 23 were bot-blocked and 5 are gone. The copies themselves stay private, because most are copyrighted.
+
 ## Gulf records read
 
 | Planned taxon | Record and locator | Scope and limits |
