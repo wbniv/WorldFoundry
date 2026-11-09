@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/9a6d4b11) | Reef step 14: the committed style-gl-sweep.sh reproduces 34/34 identical |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/d49cc850) | Reef step 14 PASS: GL sweep identical; untextured GL/Metal scene strict pass |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/51bab0f5) | Metal: compile the style shader as a separate program (reef step 14 strict sweep) |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/93e7ba07) | Reef: step 12 PASS (anime Dream rerun, restore verified); step 14 S2 and Metal evidence |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/b9eba308) | Reef step 14: Metal sweep and GL/Metal scene recorded; caustics fixtures |
 
 <!--history-meta v1
+9a6d4b11	author	Will Norris
+9a6d4b11	added	1
+9a6d4b11	deleted	1
+9a6d4b11	files	1
+9a6d4b11	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 d49cc850	author	Will Norris
 d49cc850	added	54
 d49cc850	deleted	6

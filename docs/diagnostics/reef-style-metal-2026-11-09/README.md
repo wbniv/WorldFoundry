@@ -11,7 +11,7 @@ This record covers both halves of row 14 in the [finishing plan](../../plans/202
 | **GL sweep:** `fd9349c8` against `b03f5cb5` and against HEAD `51bab0f5`, every style field 0 | **PASS (strict).** All 34 levels pixel-identical ([gl-sweep.tsv](gl-sweep.tsv)). See [GL sweep](#gl-sweep). |
 | **Metal sweep:** `fd9349c8` against the style engine | **PASS (strict) after the fix** in `51bab0f5`. All 34 levels identical. See [Probe, fix and untextured scene](#probe-fix-and-untextured-scene-2026-11-09-after-wills-go-ahead). |
 | **Shared scene GL against Metal, untextured** (`flat-*`, boxes lifted) | **PASS (strict).** S3 is byte-identical; S1 is within 1/255 on every pixel. See [Untextured scene](#untextured-scene-strict-pass-after-lifting-the-boxes). |
-| Shared scene GL against Metal, textured (`reef-*`, `geom-*`) | Fails strictly, and only on bilinear texture sampling. |
+| Shared scene GL against Metal, textured (`reef-*`, `geom-*`) | Fails strictly, and only on bilinear texture sampling. **Marked expected-fail** (Will, 2026‑11‑09: "Mark expected-fail"): `pytest.mark.xfail(strict=True)`, so an unexpected pass is reported. The untextured `flat-*` scenes stay hard asserts. In the container run against run 6's artifacts: 2 passed, 4 xfailed. |
 | `baseline` level | No capture from `fd9349c8` or `b03f5cb5` on either backend: both assert on a degenerate polygon. HEAD renders it. |
 
 The sections below are in the order the work happened. The first run's numbers come first and the later sections supersede them.

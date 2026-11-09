@@ -104,9 +104,22 @@ def test_metal_sweep_is_pixel_identical():
     assert not failures, "Metal sweep:\n" + "\n".join(failures)
 
 
+# Will, 2026-11-09: "Mark expected-fail" for the textured scenes. Their only GL/Metal
+# differences are texture sampling; the untextured flat-* scenes cover the shading and
+# stay hard asserts.
+TEXTURE_SAMPLING = pytest.mark.xfail(strict=True, reason=(
+    "texture sampling differs between Mesa llvmpipe and the Apple GPU (bilinear, no mipmaps: "
+    "backend_modern.cc:811-812, backend_metal.mm:853-854); the untextured flat-* scenes cover "
+    "the S1/S3 shading. See docs/diagnostics/reef-style-metal-2026-11-09/README.md"))
+
+
+def _scene_param(scene):
+    return pytest.param(scene, marks=() if scene.startswith("flat-") else TEXTURE_SAMPLING)
+
+
 @pytest.mark.skipif(METAL is None or not GL_ENGINE or not os.environ.get("DISPLAY"),
                     reason="requires WF_STYLE_METAL_DIR, WF_STYLE_GL_ENGINE and DISPLAY")
-@pytest.mark.parametrize("scene", sorted(FIXTURE["scenes"]))
+@pytest.mark.parametrize("scene", [_scene_param(s) for s in sorted(FIXTURE["scenes"])])
 def test_style_scene_gl_matches_metal(scene, tmp_path):
     image = pytest.importorskip("PIL.Image")
     image_chops = pytest.importorskip("PIL.ImageChops")
