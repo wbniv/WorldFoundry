@@ -87,22 +87,31 @@ SUMMARY="$OUT/summary.tsv"
 if [ "${STYLE_SKIP_SWEEP:-0}" != 1 ]; then
     BASE_REV=$(json "d['sweep']['baseline_rev']")
     CAND_REV=$(json "d['sweep']['candidate_rev']")
+    # Optional third engine for a one-off experiment (style-scene.json sweep.probe_rev):
+    # rendered beside the other two and compared with the baseline.
+    PROBE_REV=$(json "d['sweep'].get('probe_rev', '')")
     if [ "$(git -C "$CM_BUILD_DIR" rev-parse --is-shallow-repository)" = true ]; then
         git -C "$CM_BUILD_DIR" fetch --quiet --unshallow origin || true
     fi
     git -C "$CM_BUILD_DIR" cat-file -e "$BASE_REV^{commit}" 2>/dev/null \
         || git -C "$CM_BUILD_DIR" fetch --quiet origin "$BASE_REV" "$CAND_REV"
+    if [ -n "$PROBE_REV" ] && ! git -C "$CM_BUILD_DIR" cat-file -e "$PROBE_REV^{commit}" 2>/dev/null; then
+        git -C "$CM_BUILD_DIR" fetch --quiet origin "$PROBE_REV" || git -C "$CM_BUILD_DIR" fetch --quiet origin '+refs/heads/scratch/*:refs/remotes/origin/scratch/*'
+    fi
     WT="$CM_BUILD_DIR/.style-trees"
     rm -rf "$WT"; git -C "$CM_BUILD_DIR" worktree prune
     git -C "$CM_BUILD_DIR" worktree add --quiet --detach "$WT/baseline" "$BASE_REV"
     git -C "$CM_BUILD_DIR" worktree add --quiet --detach "$WT/candidate" "$CAND_REV"
+    [ -n "$PROBE_REV" ] && git -C "$CM_BUILD_DIR" worktree add --quiet --detach "$WT/probe" "$PROBE_REV"
     # A worktree starts with empty submodules (third_party/glfw and friends).
-    for tree in "$WT/baseline" "$WT/candidate"; do
+    for tree in "$WT/baseline" "$WT/candidate" ${PROBE_REV:+"$WT/probe"}; do
         git -C "$tree" submodule update --init --recursive --quiet
     done
     # git-lfs or not, the cooked levels are ordinary blobs in this repo.
     BASE_BIN=$(build_engine "$WT/baseline" "$WT/build-baseline" baseline)
     CAND_BIN=$(build_engine "$WT/candidate" "$WT/build-candidate" candidate)
+    PROBE_BIN=""
+    [ -n "$PROBE_REV" ] && PROBE_BIN=$(build_engine "$WT/probe" "$WT/build-probe" probe)
     GAME="$WT/baseline/wfsource/source/game"
     read -r -a SWEEP_ARGS <<<"$(json "' '.join(d['sweep']['args'])")"
     identical=0; differs=0; missing=0
@@ -120,8 +129,11 @@ if [ "${STYLE_SKIP_SWEEP:-0}" != 1 ]; then
         done < <(json "'\n'.join(d['sweep']['extra'].get('$name', []))")
         ok=1
         # Each engine runs twice: <side>-repeat separates run-to-run noise from a real change.
-        for side in baseline candidate baseline-repeat candidate-repeat; do
+        sides=(baseline candidate baseline-repeat candidate-repeat)
+        [ -n "$PROBE_BIN" ] && sides+=(probe)
+        for side in "${sides[@]}"; do
             bin=$BASE_BIN; [ "${side%-repeat}" = candidate ] && bin=$CAND_BIN
+            [ "$side" = probe ] && bin=$PROBE_BIN
             capture "$bin" "$GAME" "$OUT/sweep/$name-$side.png" "$OUT/logs/sweep-$name-$side.log" \
                 "${SWEEP_ARGS[@]}" ${extra[@]+"${extra[@]}"} "-L$level" || ok=0
         done
@@ -140,6 +152,12 @@ if [ "${STYLE_SKIP_SWEEP:-0}" != 1 ]; then
             verdict=differs; differs=$((differs + 1))
         fi
         printf 'sweep\t%s\t%s\n' "$name" "$verdict" | tee -a "$SUMMARY"
+        if [ -n "$PROBE_BIN" ] && [ "$ok" = 1 ]; then
+            probe=identical
+            python3 "$COMPARE" "$OUT/sweep/$name-baseline.png" "$OUT/sweep/$name-probe.png" \
+                >"$OUT/logs/compare-$name-probe.log" 2>&1 || probe=differs
+            printf 'probe\t%s\t%s\n' "$name" "$probe" | tee -a "$SUMMARY"
+        fi
     done
     echo "$(stamp) SWEEP: identical=$identical differs=$differs missing=$missing"
 fi
@@ -167,7 +185,7 @@ done < <(json "'\n'.join(k + '\t' + v for k, v in d['scenes'].items())")
 python3 - "$SUMMARY" "$OUT/summary.json" "$(git -C "$CM_BUILD_DIR" rev-parse HEAD)" <<'PY'
 import json, sys
 rows = [line.rstrip('\n').split('\t') for line in open(sys.argv[1]) if line.strip()]
-out = {'checkout': sys.argv[3], 'sweep': {}, 'scene': {}, 'repeat': {}}
+out = {'checkout': sys.argv[3], 'sweep': {}, 'scene': {}, 'repeat': {}, 'probe': {}}
 for kind, name, verdict in rows:
     out[kind][name] = verdict
 json.dump(out, open(sys.argv[2], 'w'), indent=2)
