@@ -320,8 +320,9 @@ FillDisc(CGFloat cx, CGFloat cy, CGFloat r, CGFloat red, CGFloat green, CGFloat 
         };
         NSString* label = [NSString stringWithUTF8String:c.label];
         const CGSize ts = [label sizeWithAttributes:attrs];
-        [label drawAtPoint:CGPointMake(CGRectGetMidX(rect) - ts.width / 2,
-                                       CGRectGetMidY(rect) - ts.height / 2)
+        // Centre by hand: CGRectGetMidX/Y live in CoreGraphics, which wf_game does not link.
+        [label drawAtPoint:CGPointMake(rect.origin.x + (rect.size.width - ts.width) / 2,
+                                       rect.origin.y + (rect.size.height - ts.height) / 2)
             withAttributes:attrs];
     }
 }
