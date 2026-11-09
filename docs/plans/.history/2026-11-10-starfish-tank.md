@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/a94e1f27) | Plan: Sea Stars gets a screensaver variant and level settings |
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/b3f8bf3e) | Plan: Sea Stars, an eleventh aquarium tank of Indo-Pacific sea stars |
 
 <!--history-meta v1
+a94e1f27	author	Will Norris
+a94e1f27	added	128
+a94e1f27	deleted	16
+a94e1f27	files	1
+a94e1f27	body	Adds aquarium_sea_stars_screensaver (autopilot driver, SeaStarsSettings\ncatalog) and a Director-owned SeaStarsSettings object: a count for each\nresident species, plus speed, glass climbing, caustics and seed. The\nlevel holds the maximum population and parks the extras. Adds D9-D10,\ntwo new mockups (settings, screensaver), five diagrams, and verification\nsteps for the settings and the screensaver.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqQp7NCXUWp7VRzdCnw
 b3f8bf3e	author	Will Norris
 b3f8bf3e	added	286
 b3f8bf3e	deleted	0

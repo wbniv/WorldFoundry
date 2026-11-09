@@ -158,7 +158,13 @@ The chocolate-chip stars, the *Fromia* and the cushion star don't react. They ru
 
 [![The SeaStarsSettings phone form at defaults, at maximum population, and with every count at 0](2026-11-10-starfish-tank/settings.png)](2026-11-10-starfish-tank/settings.html)
 
-The tank gets a **Director-owned settings object**, `SeaStarsSettings`, like the reef's `ReefSettings` and the Jellyfish and Planted tanks' objects. It's the same machinery: `settings.oas` declares the fields, `settings-bindings.json` binds them to the Director, and `build-object-properties.py` attaches the RPRP catalog. The phone form is generated from the catalog. Runtime object editing is still parked, so nothing new is needed for this.
+The tank gets a settings catalog, `SeaStarsSettings`, built the same way as the reef's `ReefSettings` and the Jellyfish and Planted tanks' catalogs. **It is not an object in the level file.** Nothing in `aquarium_sea_stars.lev` or the compiled `.lvl` names it (the reef's `.lev` and `.lvl` contain no `ReefSettings` either). There are three pieces instead:
+
+- **`settings.oas`** declares the type: the field names, ranges, defaults and how each one is shown. It is compiled to an `.oad`.
+- **`settings-bindings.json`** gives each field an id and names the actor that owns the catalog: the Director, which already exists in the level.
+- **`build-object-properties.py attach()`** turns those two files into an `RP01` record and appends it to the **`-standalone.iff`**, after the level has compiled. It goes in as one `RPRP` chunk plus a reference to it. Only the standalone files carry it: the reef's `aquarium_thai_reef.iff` has none, and its `-standalone.iff` has one. The screensaver variant gets its own copy (`check_tank_catalog`).
+
+At runtime the Director reads the values from the catalog, through mailboxes, once a second. The phone form is generated from the catalog. The parked TODO item "Runtime object editing on OAS/OAD (replaces RP02)" would make settings holders real OAS objects in the level and retire this catalog path. Until that lands, this tank uses the catalog path like every other tank, and nothing new is needed.
 
 | Field | Kind | Range | Default | Applies |
 |---|---|---|---|---|
