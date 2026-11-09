@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/86816ad6) | Plans index: add the condo 639 balcony screen-frame plan |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/2e623339) | Plans index: reef tanks finish plan |
 | [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/d6cc9f99) | docs: index the lionfish screensaver auto-goldfish plan |
 | [2026-10-30](https://github.com/wbniv/WorldFoundry/commit/bdf5683e) | Index recent settings plans |
@@ -70,6 +71,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+86816ad6	author	Will Norris
+86816ad6	added	1
+86816ad6	deleted	0
+86816ad6	files	1
+86816ad6	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 2e623339	author	Will Norris
 2e623339	added	1
 2e623339	deleted	0
