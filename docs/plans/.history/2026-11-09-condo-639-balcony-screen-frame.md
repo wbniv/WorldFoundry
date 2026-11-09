@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/b5561098) | Balcony screen frame: solar charges an off-grid battery; no grid-tie |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/adc50caa) | Balcony screen frame: solar options buyable in Thailand |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/7a50bd79) | Balcony: break the screen frame out as its own plan; archive A and B |
 
 <!--history-meta v1
+b5561098	author	Will Norris
+b5561098	added	4
+b5561098	deleted	6
+b5561098	files	1
+b5561098	body	Will's decision answers open question 3; the grid-tie branch leaves the\npower diagram and moves to out of scope.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 adc50caa	author	Will Norris
 adc50caa	added	37
 adc50caa	deleted	7
