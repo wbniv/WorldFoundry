@@ -37,6 +37,18 @@ task md -- <file>        # render Markdown
 - `cd.iff` is the asset bundle; all assets loaded via `HALGetAssetAccessor()`, never from raw file paths.
 - Mesh actors that rest on a surface: author the **base (lowest vertex) at local z=0**, not centered — both placement and scale (mailboxes 3040-3042) pivot on the origin, so a centered mesh sinks/grows through the floor. See `docs/level-building.md` "Mesh origin". Exception: spheres / vertically-symmetric props.
 
+## Containers
+
+Builds, tests and engine runs happen in containers, never on the host. The one entry point is `scripts/in-linux-container.sh` (repo at `/src`, `build-docker/` at `/build`, memory capped, core dumps off); pick the image with `WF_CONTAINER_IMAGE`.
+
+| `WF_CONTAINER_IMAGE` | Image (Dockerfile) | Base | Use it for |
+|---|---|---|---|
+| `linux-test` (default) | `wf-linux-test:local` ([`docker/Dockerfile.linux-test`](docker/Dockerfile.linux-test), `task linux-test-image`) | Ubuntu 24.04 | the C++ toolchain, ctest, pytest; **running `wf_game` headless** under `xvfb-run` with Mesa llvmpipe (precedent: `scripts/planted-cycle-desktop-run.sh`). Build the engine inside it (`scripts/build-wf-game-container.sh`); the host-built `engine/wf_game` doesn't run there (glibc) |
+| `blender` | `wf-blender:local` ([`docker/Dockerfile.blender`](docker/Dockerfile.blender), `task blender-image`) | Ubuntu 26.04, the host's Blender | `blender --background` level generation (`wflevels/*/build.sh`), Cycles renders for reviews. No GL: use CPU Cycles, not Workbench/EEVEE |
+| `blender` + `WF_BLENDER_DOCKERFILE=Dockerfile.blender.public` | same, from bare `ubuntu:26.04` ([`docker/Dockerfile.blender.public`](docker/Dockerfile.blender.public), `task blender-image-public`) | Ubuntu 26.04 | CI and builds outside the lab |
+
+`linux-test` is still on 24.04 while the host and the Blender image are on 26.04 (resolute).
+
 ## Coordinate Systems
 
 ### World Foundry (WF)
