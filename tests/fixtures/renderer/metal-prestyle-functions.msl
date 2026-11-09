@@ -1,0 +1,72 @@
+// Pre-style Metal shader functions, from fd9349c8 (the commit before style shading,
+// b03f5cb5). tests/test_metal_style_variants.py checks that backend_metal.mm's kMSL,
+// preprocessed without WF_STYLE, is token-for-token this text.
+struct VertexOut {
+    float4 position  [[position]];
+    float3 color;
+    float2 uv;
+    float3 lit;
+    float  fog_factor;
+    float  opacity;
+    float4 palette_dark;
+    float3 palette_light;
+};
+
+vertex VertexOut wf_vs(VertexIn v                  [[stage_in]],
+                       constant Uniforms& u        [[buffer(1)]])
+{
+    VertexOut o;
+    o.position = u.mvp * float4(v.pos, 1.0);
+    o.color    = v.color;
+    o.uv       = v.uv;
+    o.opacity  = v.opacity;
+    o.palette_dark = v.palette_dark;
+    o.palette_light = v.palette_light;
+
+    if (u.lighting != 0) {
+        float3 N = normalize((u.mv * float4(v.normal, 0.0)).xyz);
+        float3 lit = u.ambient;
+        for (int i = 0; i < 3; ++i) {
+            lit += u.light_color[i].xyz *
+                   max(0.0, dot(N, u.light_dir[i].xyz));
+        }
+        o.lit = lit;
+    } else {
+        o.lit = float3(1.0);
+    }
+
+    if (u.fog != 0) {
+        float eye_dist = -(u.mv * float4(v.pos, 1.0)).z;
+        o.fog_factor = clamp((u.fog_end - eye_dist) /
+                             (u.fog_end - u.fog_start), 0.0, 1.0);
+    } else {
+        o.fog_factor = 1.0;
+    }
+    return o;
+}
+
+fragment float4 wf_fs(VertexOut v                  [[stage_in]],
+                      constant Uniforms& u         [[buffer(1)]],
+                      texture2d<float> tex         [[texture(0)]],
+                      sampler          smp         [[sampler(0)]])
+{
+    float4 c = float4(v.color * v.lit, 1.0);
+    // Phase 3: REPLACE-IF-WHITE, character for character the rule in
+    // backend_modern.cc's kFS. WF's convention is that a white vertex colour
+    // means "this face is textured" and any other colour means "flat coloured,
+    // ignore the texture" — so it is a mix() selected by whiteness, NOT a
+    // modulate. Modulating (the obvious guess) happens to agree on white faces
+    // and silently darkens every coloured-but-textured face.
+    if (u.use_tex != 0) {
+        float is_white = step(0.99, min(v.color.r, min(v.color.g, v.color.b)));
+        float3 sample=tex.sample(smp,v.uv).rgb;
+        float3 albedo=v.palette_dark.a>0.5 ? mix(v.palette_dark.xyz,v.palette_light,clamp((sample.r-.08)/.85,0.0,1.0)) : ((u.use_tex & 2)!=0 ? sample*v.color : mix(v.color,sample,is_white));
+        c=float4(albedo*v.lit,1.0);
+    }
+    if (u.fog != 0) {
+        c.rgb = mix(u.fog_color, c.rgb, v.fog_factor);
+    }
+    c.a = u.use_tex == 4 ? v.opacity * tex.sample(smp,v.uv).r : v.opacity;
+    if(u.use_tex == 4){c.rgb=v.color;if(c.a==0.0)discard_fragment();}
+    return c;
+}

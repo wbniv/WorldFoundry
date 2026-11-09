@@ -91,6 +91,64 @@ So the strict scene gate fails because of texture sampling under heavy minificat
 
 **3. The `baseline` level asserts on both engines** (a degenerate polygon, `math/vector3.hpi:243`). This predates Phase S.
 
+## Probe, fix and untextured scene (2026‑11‑09, after Will's go-ahead)
+
+Will, 2026‑11‑09: **"Allow the probe"** and **"Build it"** (the untextured level). There were two more Metal runs; the month is at 221 of 400 minutes after them.
+
+### Probe: confirmed
+
+Run [6af1ade1](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6af1ade1fd52964acfe0d851) (16 min) built a third engine from the scratch branch `scratch/metal-style-probe`. It is `b03f5cb5` with the style work removed from Metal `wf_vs`; the two style outputs are set to constants that the style-off fragment path never reads.
+
+**All 34 levels are pixel-identical to `fd9349c8`**, including `aquarium_arowana` and `snowgoons-blender` ([summary](summary-run4-probe.tsv)). The style engine itself still differs as before.
+
+So the cause is the unused style arithmetic in `wf_vs`:
+- `eye`, `world_normal` and its length,
+- the `caustic` and `absorb` outputs,
+
+which change Metal's fast-math code generation for the existing position and fog math.
+
+### Fix: two Metal programs, now on `2026-new-level`
+
+Two candidates were considered:
+
+| Option | Trade-off | Verdict |
+|---|---|---|
+| **Compile `kMSL` twice, with and without `WF_STYLE`** (GL already does this with `#ifdef WF_STYLE`), and bind the style pipelines only while style shading is active | It costs a second library compile and two more pipeline states at start-up. The style-off program is the pre-style text exactly, so it cannot drift. | **Chosen** |
+| Turn off FP contraction (`fp_contract(off)` / `precise`) on the position and fog math | It changes the style-off code relative to the pre-style engine too, so it would *not* reproduce `fd9349c8`'s pixels; it is also slower and needs annotating by hand. | Rejected |
+
+Changes in `wfsource/source/gfx/metal/backend_metal.mm`:
+- **Shader:** every style addition in `kMSL` sits under `#ifdef WF_STYLE`: the `VertexOut` fields, the `wf_vs` work, and the fragment's `style_lit` and absorption branch. `WF_LIT` follows GL's macro.
+- **Pipelines:** the host compiles a second library with `preprocessorMacros = { WF_STYLE: 1 }` and builds `_stylePipeline` and `_styleBlendPipeline` from it.
+- **Selection:** the flush picks the pair by `RBStyleShadingActive(_style)`. `SetStyleShading` already flushes whenever activity changes.
+
+**Proof:** run [6af1b29c](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6af1b29c240003ac8a655bd7) (16 min).
+- **Style-off:** `b03f5cb5` with the fix renders **all 34 levels pixel-identical to `fd9349c8`** ([summary](summary-run5-fix.tsv)).
+- **Style-on:** the fixed head's style program renders all six style scenes byte-identical to run 4's unfixed head, so the style path is unchanged.
+
+**Test:** `tests/test_metal_style_variants.py`.
+- It preprocesses `kMSL` without `WF_STYLE` and checks that `VertexOut`, `wf_vs` and `wf_fs` match `fd9349c8`'s shader token for token (`tests/fixtures/renderer/metal-prestyle-functions.msl`).
+- It also checks that the `WF_STYLE` program keeps the style math, and that the host builds and selects both pipeline pairs.
+- It fails on the unfixed file and passes on the fix: 4 passed in the container together with the invariant test.
+
+No `docs/BUGS.md` entry: the style code is from 2026, so that file's rule excludes it.
+
+### Untextured scene: shading matches, one raster pixel remains
+
+`scripts/build-style-flat-scene.py` writes `style_flat_realistic` (S1) and `style_flat_anime` (S3). Each is a subdivided floor and back wall plus five rotated boxes. Every face has a flat material colour and is dynamically lit, with nothing textured, under the reef Camera, fog and style fields.
+
+| Scene | Exact | Δ = 1 | Δ > 1 |
+|---|---|---|---|
+| flat-realistic-s1 | 306,966 | 233 | **1** |
+| flat-anime-s3 | **307,199** | 0 | **1** |
+
+[![Untextured scenes: GL, Metal, and the differing pixels](flat-gl-vs-metal.jpg)](flat-gl-vs-metal.jpg)
+
+- **S3 bands** match exactly on every pixel but one.
+- **S1 absorption** is within 1/255 on every pixel but one. The 233 Δ = 1 pixels lie along triangle diagonals, where the per-vertex `exp(-absorb · length(eye))` is interpolated; that is the two backends rounding the exponential an ulp apart.
+- **The pixel over 1/255 is the same pixel in both scenes:** (479, 401), the blue box's lower-right corner against the floor. GL (Mesa llvmpipe) gives it to the floor, (149, 163, 155), and Metal to the box, (69, 99, 187). That is a rasterizer coverage tie-break at a shared vertex on a silhouette, not shading.
+
+So the strict scene gate still fails, on exactly one pixel of rasterization. No gate was loosened; this is the evidence for Will.
+
 ## Reproduce
 
 ```sh

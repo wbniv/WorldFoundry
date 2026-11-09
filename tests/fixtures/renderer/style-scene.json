@@ -89,8 +89,6 @@
         "--property=PlantedTankSettings.Random seed on entry=0",
         "--property=PlantedTankSettings.Seed=123456"
       ]
-    },
-    "probe_rev": "13f2ba1fb0e61704aa6214c325c68001c3d54590",
-    "probe_comment": "Temporary (2026-11-09): scratch/metal-style-probe = b03f5cb5 without the style work in Metal wf_vs. Remove after the probe run."
+    }
   }
 }

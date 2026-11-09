@@ -142,8 +142,10 @@ struct VertexOut {
     float  opacity;
     float4 palette_dark;
     float3 palette_light;
+#ifdef WF_STYLE
     float3 absorb;
     float3 caustic;
+#endif
 };
 
 // Layout must match CPU-side Uniforms struct byte-for-byte.
@@ -197,6 +199,7 @@ vertex VertexOut wf_vs(VertexIn v                  [[stage_in]],
     } else {
         o.fog_factor = 1.0;
     }
+#ifdef WF_STYLE
     float3 eye = (u.mv * float4(v.pos, 1.0)).xyz;
     float3 world_normal = (u.eye_to_world * (u.mv * float4(v.normal, 0.0))).xyz;
     float normal_length = length(world_normal);
@@ -205,6 +208,7 @@ vertex VertexOut wf_vs(VertexIn v                  [[stage_in]],
     o.absorb = u.fog == 0 ? float3(1.0) :
         (u.style_absorb.x + u.style_absorb.y + u.style_absorb.z > 0.0 ?
          exp(-u.style_absorb.xyz * length(eye)) : float3(o.fog_factor));
+#endif
     return o;
 }
 
@@ -213,6 +217,12 @@ fragment float4 wf_fs(VertexOut v                  [[stage_in]],
                       texture2d<float> tex         [[texture(0)]],
                       sampler          smp         [[sampler(0)]])
 {
+    // WF_STYLE selects the style program. Without it this text preprocesses to
+    // the pre-style shader exactly (tests/test_metal_style_variants.py), like
+    // GL's #ifdef WF_STYLE in backend_modern.cc: under fast-math even unused
+    // style work in wf_vs moved style-off pixels by 1/255 (reef plan step 14).
+#ifdef WF_STYLE
+#define WF_LIT style_lit
     float3 style_lit = v.lit;
     float bands = u.style_caustic.w;
     if (bands > 0.0) {
@@ -227,7 +237,10 @@ fragment float4 wf_fs(VertexOut v                  [[stage_in]],
         float web = pow(max(0.0, 1.0 - abs(s) * 0.5), 6.0);
         style_lit += float3(u.style_caustic.x * web * v.caustic.z * v.absorb.g);
     }
-    float4 c = float4(v.color * style_lit, 1.0);
+#else
+#define WF_LIT v.lit
+#endif
+    float4 c = float4(v.color * WF_LIT, 1.0);
     // Phase 3: REPLACE-IF-WHITE, character for character the rule in
     // backend_modern.cc's kFS. WF's convention is that a white vertex colour
     // means "this face is textured" and any other colour means "flat coloured,
@@ -238,12 +251,14 @@ fragment float4 wf_fs(VertexOut v                  [[stage_in]],
         float is_white = step(0.99, min(v.color.r, min(v.color.g, v.color.b)));
         float3 sample=tex.sample(smp,v.uv).rgb;
         float3 albedo=v.palette_dark.a>0.5 ? mix(v.palette_dark.xyz,v.palette_light,clamp((sample.r-.08)/.85,0.0,1.0)) : ((u.use_tex & 2)!=0 ? sample*v.color : mix(v.color,sample,is_white));
-        c=float4(albedo*style_lit,1.0);
+        c=float4(albedo*WF_LIT,1.0);
     }
     if (u.fog != 0) {
+#ifdef WF_STYLE
         if (u.style_absorb.x + u.style_absorb.y + u.style_absorb.z > 0.0)
             c.rgb = mix(u.fog_color, c.rgb, v.absorb);
         else
+#endif
             c.rgb = mix(u.fog_color, c.rgb, v.fog_factor);
     }
     c.a = u.use_tex == 4 ? v.opacity * tex.sample(smp,v.uv).r : v.opacity;
@@ -697,6 +712,10 @@ private:
     id<MTLCommandQueue>        _queue           = nil;
     id<MTLRenderPipelineState> _pipeline        = nil;
     id<MTLRenderPipelineState> _blendPipeline = nil;
+    // The same pair compiled with WF_STYLE, bound only while style shading is
+    // active, so a level with every style field at 0 runs the pre-style program.
+    id<MTLRenderPipelineState> _stylePipeline      = nil;
+    id<MTLRenderPipelineState> _styleBlendPipeline = nil;
     id<MTLDepthStencilState> _blendDepth = nil;
     id<MTLDepthStencilState> _overlayDepth = nil;
     bool _overlay = false;
@@ -780,6 +799,15 @@ private:
             NSLog(@"wf_game: MetalBackend shader compile failed: %@", err);
             return;
         }
+        MTLCompileOptions* styleOptions = [[MTLCompileOptions alloc] init];
+        styleOptions.preprocessorMacros = @{ @"WF_STYLE": @1 };
+        id<MTLLibrary> styleLib = [_device newLibraryWithSource:src
+                                                        options:styleOptions
+                                                          error:&err];
+        if (!styleLib) {
+            NSLog(@"wf_game: MetalBackend style shader compile failed: %@", err);
+            return;
+        }
         id<MTLFunction> vs = [lib newFunctionWithName:@"wf_vs"];
         id<MTLFunction> fs = [lib newFunctionWithName:@"wf_fs"];
 
@@ -828,6 +856,12 @@ private:
             NSLog(@"wf_game: MetalBackend pipeline create failed: %@", err);
             return;
         }
+        pd.vertexFunction   = [styleLib newFunctionWithName:@"wf_vs"];
+        pd.fragmentFunction = [styleLib newFunctionWithName:@"wf_fs"];
+        _stylePipeline = [_device newRenderPipelineStateWithDescriptor:pd error:&err];
+        if (!_stylePipeline) { NSLog(@"wf_game: style pipeline failed: %@", err); return; }
+        pd.vertexFunction   = vs;
+        pd.fragmentFunction = fs;
 
         pd.colorAttachments[0].blendingEnabled = YES;
         pd.colorAttachments[0].sourceRGBBlendFactor = MTLBlendFactorSourceAlpha;
@@ -836,6 +870,10 @@ private:
         pd.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
         _blendPipeline = [_device newRenderPipelineStateWithDescriptor:pd error:&err];
         if (!_blendPipeline) { NSLog(@"wf_game: blend pipeline failed: %@", err); return; }
+        pd.vertexFunction   = [styleLib newFunctionWithName:@"wf_vs"];
+        pd.fragmentFunction = [styleLib newFunctionWithName:@"wf_fs"];
+        _styleBlendPipeline = [_device newRenderPipelineStateWithDescriptor:pd error:&err];
+        if (!_styleBlendPipeline) { NSLog(@"wf_game: style blend pipeline failed: %@", err); return; }
         // Standard opaque depth test. GL's default is GL_LESS with writes on,
         // so this matches backend_modern.cc rather than inventing a policy.
         MTLDepthStencilDescriptor* dsd = [[MTLDepthStencilDescriptor alloc] init];
@@ -975,7 +1013,11 @@ private:
             return;
         }
 
-        [_encoder setRenderPipelineState:(_bitmapPass||_opacity < 1.0f ? _blendPipeline : _pipeline)];
+        // SetStyleShading flushes whenever activity changes, so one batch has one program.
+        const bool styled = RBStyleShadingActive(_style);
+        [_encoder setRenderPipelineState:(_bitmapPass||_opacity < 1.0f
+                                          ? (styled ? _styleBlendPipeline : _blendPipeline)
+                                          : (styled ? _stylePipeline : _pipeline))];
         if (_depthState)
             [_encoder setDepthStencilState:(_overlay ? _overlayDepth : (_bitmapPass||_opacity < 1.0f ? _blendDepth : _depthState))];
         // One batch = one texture (DrawTriangle flushes on a texture change),
