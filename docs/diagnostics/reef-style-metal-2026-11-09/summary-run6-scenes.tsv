@@ -1,0 +1,12 @@
+scene	reef-realistic-s1	captured
+repeat	scene-reef-realistic-s1	same
+scene	reef-anime-s3	captured
+repeat	scene-reef-anime-s3	same
+scene	geom-realistic-s1	captured
+repeat	scene-geom-realistic-s1	same
+scene	geom-anime-s3	captured
+repeat	scene-geom-anime-s3	same
+scene	flat-realistic-s1	captured
+repeat	scene-flat-realistic-s1	same
+scene	flat-anime-s3	captured
+repeat	scene-flat-anime-s3	same

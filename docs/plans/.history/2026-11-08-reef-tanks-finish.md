@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/51bab0f5) | Metal: compile the style shader as a separate program (reef step 14 strict sweep) |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/93e7ba07) | Reef: step 12 PASS (anime Dream rerun, restore verified); step 14 S2 and Metal evidence |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/b9eba308) | Reef step 14: Metal sweep and GL/Metal scene recorded; caustics fixtures |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/52e3b25d) | Reef: the cleaning ends when the boxfish leaves reach (shrimp fix) |
@@ -29,6 +30,11 @@
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b756367f) | Plan: finish the reef tanks (worms, skins, placement, acceptance) |
 
 <!--history-meta v1
+51bab0f5	author	Will Norris
+51bab0f5	added	2
+51bab0f5	deleted	2
+51bab0f5	files	1
+51bab0f5	body	With every style field at 0, the Metal style engine moved 3 pixels by\n1/255 against the pre-style engine (aquarium_arowana, snowgoons-blender),\ndeterministically. A probe without the style work in wf_vs was pixel-\nidentical (Codemagic 6af1ade1): under fast-math the unused eye/normal/\nabsorb/caustic arithmetic changed code generation for the position and\nfog math. kMSL now keeps every style addition under #ifdef WF_STYLE (as\nGL does), the host compiles a second library with WF_STYLE and binds its\npipelines only while style shading is active. Proof run 6af1b29c: the fix\non b03f5cb5 renders all 34 sweep levels identical to fd9349c8, and the\nstyle program's output is byte-identical to before.\ntests/test_metal_style_variants.py keeps the style-off text equal to the\npre-style shader token for token.\n\nAlso records the untextured-scene result (one raster tie-break pixel)\nand folds the caustics decision into step 15 (Will, 2026-11-09).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 93e7ba07	author	Will Norris
 93e7ba07	added	2
 93e7ba07	deleted	2
