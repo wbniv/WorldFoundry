@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/d49cc850) | Reef step 14 PASS: GL sweep identical; untextured GL/Metal scene strict pass |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/51bab0f5) | Metal: compile the style shader as a separate program (reef step 14 strict sweep) |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/93e7ba07) | Reef: step 12 PASS (anime Dream rerun, restore verified); step 14 S2 and Metal evidence |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/b9eba308) | Reef step 14: Metal sweep and GL/Metal scene recorded; caustics fixtures |
 
 <!--history-meta v1
+d49cc850	author	Will Norris
+d49cc850	added	54
+d49cc850	deleted	6
+d49cc850	files	1
+d49cc850	body	GL (Will: "Run it"): DESIGNER_CHEATS Debug engines at fd9349c8, b03f5cb5\nand HEAD render all 34 sweep levels pixel-identically with every style\nfield at 0 (baseline level asserts on the pre-style engines).\nscripts/style-gl-sweep.sh reproduces it.\n\nUntextured scene (Will: "Fix the scene"): with the boxes lifted 0.12 off\nthe floor the depth tie is gone; Metal run 6af1bd90 (scenes-only, 6 min)\nagainst GL gives S3 byte-identical and S1 within 1/255 on every pixel; the\nstrict test passes for both flat scenes. Row 14 struck as PASS; caustics\nstay off pending step 15.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 51bab0f5	author	Will Norris
 51bab0f5	added	58
 51bab0f5	deleted	0

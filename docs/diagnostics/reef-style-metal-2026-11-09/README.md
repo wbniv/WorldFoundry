@@ -195,7 +195,7 @@ Each was built from `git archive` sources plus the main checkout's submodules, w
 | `b03f5cb5` (style, fields 0) | **34** | 0 | 1 |
 | HEAD `51bab0f5` | **34** | 0 | 1 |
 
-The per-level table is [gl-sweep.tsv](gl-sweep.tsv). To reproduce, run `scripts/style-gl-sweep.sh`; it defaults to the style commit and HEAD. GL needed no fix: its style code compiles only under `#ifdef WF_STYLE`, so a style-off level runs the old program text. Even the engine changes made between 3 and 9 November leave every one of these levels pixel-identical on GL.
+The per-level table is [gl-sweep.tsv](gl-sweep.tsv). To reproduce, run `scripts/style-gl-sweep.sh`; it defaults to the style commit and HEAD. The committed script was then run once end to end with its defaults (2026‑11‑09; HEAD was `86816ad6`). It rebuilt all three engines in the container and reproduced the result: `b03f5cb5` and HEAD each **34/34 identical**, `baseline` missing as above, exit 0. It needed no fix. GL needed no fix: its style code compiles only under `#ifdef WF_STYLE`, so a style-off level runs the old program text. Even the engine changes made between 3 and 9 November leave every one of these levels pixel-identical on GL.
 
 ## Reproduce
 
