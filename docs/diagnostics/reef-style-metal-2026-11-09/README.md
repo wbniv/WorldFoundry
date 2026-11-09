@@ -9,7 +9,7 @@ This record covers the Metal half: the [finishing plan](../../plans/2026-11-08-r
 | Part | Result |
 |---|---|
 | CI Metal can render it | **Yes.** Three Debug Metal engines built in about 75 s each, and every capture was written headless. |
-| Sweep: baseline `fd9349c8` vs style `b03f5cb5`, 35 levels of the baseline tree | **32 identical, 2 differ by 1/255 on 1–2 pixels, 1 level asserts on both engines.** Strictly this fails "pixel-identical". |
+| Sweep: baseline `fd9349c8` vs style `b03f5cb5`, 35 levels of the baseline tree | **32 identical, 2 differ by 1/255 on 1–2 pixels, 1 level asserts on both engines.** Strictly this fails "pixel-identical". Run 3 shows the difference is deterministic, not noise (see below). |
 | Shared scene, GL vs Metal (checkout `1cb09178`) | **Shading matches; the strict per-pixel gate fails on raster edges.** 99.97% of pixels are within 1/255. 94 and 96 isolated pixels exceed it, and 82 and 86 of those lie on a geometry edge. |
 
 ## Sweep
@@ -45,14 +45,51 @@ There are 307,200 pixels in each frame.
 
 The absorption and band math agree to 1/255 across both frames. The 47,030 Δ = 1 pixels in the realistic frame are the absorption blend rounding differently. The pixels beyond 1/255 are single pixels along silhouettes (fins, antennae, coral tips), where the two rasterizers decide coverage differently. The aquarium parity gate meets the same effect; it allows a per-pixel tolerance of 3, with a coverage IoU. The plan's "within 1/255 per channel" does not allow for coverage differences on edges, so as written it cannot pass on any textured scene with fine geometry.
 
-## Decision needed
+## Decision: keep the strict gates and investigate
 
-The strict reading of both checks fails, and only by a handful of pixels. Someone needs to choose one of these:
+Will, 2026‑11‑09: **"Keep strict, investigate."** No gate was loosened. A third Metal run, [6af1a232](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6af1a232be8402b33d6c2857) at checkout `9f8bddd9`, took 13 Mac minutes. The month now stands at 189 of 400; that total includes other sessions' iOS builds. It added two things:
+- Every sweep level is rendered twice per engine, and every scene twice.
+- Two geometry-only scenes from `scripts/build-style-geometry-scene.py` (`style_geom_realistic` and `style_geom_anime`). Each keeps only the reef shell and the three hero rocks, under the reef's own Camera, fog and lights, so there are no fins, antennae or coral tips. Per-level results: [summary-run3.tsv](summary-run3.tsv).
 
-1. **Gate as now measured:** the sweep allows a channel delta of 1 on at most a few pixels, and the scene is "within 1/255 on all but edge pixels", for example at most 0.05% of pixels beyond 1/255.
-2. **Keep the strict gates** and investigate:
-    - Rerun the Metal sweep to split noise from rounding.
-    - Build a geometry-only scene that has no sub-pixel silhouettes.
+### What the strict gates show
+
+**1. Metal is deterministic, so the sweep difference is a real 1-LSB change.** All 72 repeat pairs are byte-identical: 34 levels × 2 engines, plus the 4 scenes. The run-3 captures of both engines also match run 2 byte for byte. So `aquarium_arowana` and `snowgoons-blender` differ between the baseline and style engines for a fixed reason, every time:
+
+| Level | Pixel | Baseline `fd9349c8` | Style `b03f5cb5`, every S field 0 |
+|---|---|---|---|
+| `aquarium_arowana` | (49, 264), open water | (24, 54, 75) | (24, 54, **76**) |
+| `snowgoons-blender` | (2, 394) | (25, 34, 24) | (25, 34, **25**) |
+| `snowgoons-blender` | (309, 398) | (182, 182, 191) | (182, 182, **190**) |
+
+With every field at 0, the Metal fragment shader evaluates the same expressions as before:
+- `v.color * style_lit` with `style_lit = v.lit`.
+- `mix(u.fog_color, c.rgb, v.fog_factor)` on the `else` branch.
+
+The vertex shader is what changed. `wf_vs` now also computes `eye = (u.mv * float4(v.pos, 1.0)).xyz`, the world normal and its length, and two more outputs, `absorb` and `caustic` (`backend_metal.mm`, the lines added after `o.fog_factor` in `b03f5cb5`). Metal compiles with fast-math, so the compiler can now share `u.mv * pos` with the existing position and fog-distance arithmetic and contract it into different FMAs. That would move one output by an ulp, and so one pixel by 1/255.
+
+GL cannot show this effect. It compiles the style code only under `#ifdef WF_STYLE` (`backend_modern.cc` kVS/kFS), so a style-off level runs the old program text unchanged.
+
+This is the leading hypothesis, but it is **not proven**. Proving it needs one Metal run of a candidate engine whose `wf_vs` leaves out the `eye`, `world_normal`, `caustic` and `absorb` lines. If that run is pixel-identical to the baseline, the vertex-shader change is the cause. That is an engine edit, which I have not made without permission. If it is confirmed, two fixes would satisfy the strict gate:
+- Compile two Metal pipelines, with and without style, the way GL uses `WF_STYLE`.
+- Use `[[clang::fp_contract(off)]]` / `precise` on the existing position and fog math.
+
+**2. On the geometry-only scenes, every remaining pixel over 1/255 is texture sampling, not S1 or S3 math.**
+
+| Scene | Exact | Δ = 1 | Δ > 1 | Max Δ |
+|---|---|---|---|---|
+| geom-realistic-s1 | 265,280 | 41,895 | 25 | 113 |
+| geom-anime-s3 | 305,122 | 2,055 | 23 | 143 |
+
+[![Geometry-only scenes: GL, Metal, and the pixels over 1/255 circled](geom-gl-vs-metal.jpg)](geom-gl-vs-metal.jpg)
+
+Three things show this:
+- **Same pixels in both scenes.** 16 of the over-1/255 pixels are at identical coordinates in both scenes, for example (317, 325), (289, 335), (362, 337) and (528, 380). Yet the two scenes run entirely different style math: absorption with no bands, against bands with linear fog. A difference in the S1 or S3 code cannot put the same error at the same pixels in both.
+- **Sand and rock texture only.** Every circled pixel is on the sand or a rock face. Those surfaces sample the reef atlas with bilinear filtering and no mipmaps (`backend_modern.cc:811-812` `GL_LINEAR`; `backend_metal.mm:853-854` `MTLSamplerMinMagFilterLinear`, texture `mipmapped:NO` at `backend_metal.mm:635`). At this grazing angle the sand is minified many texels per pixel, so a sub-texel difference in where `texture(u_tex, v_uv)` / `tex.sample(smp, v.uv)` lands picks a different texel neighbourhood. Next to a pebble that means up to 113/255; (528, 380) is a pebble on Metal and sand on GL. The Linux reference is Mesa llvmpipe, which quantises bilinear weights and texel positions differently from the Apple GPU.
+- **The style math matches to 1/255.** The Δ = 1 pixels follow the style math: 41,895 with S1 absorption against 2,055 with S3 bands alone. That is consistent with `exp(-u_absorb * length(eye))` (GL kVS) and `exp(-u.style_absorb.xyz * length(eye))` (Metal `wf_vs`) rounding 1 ulp apart. All of them are within 1/255.
+
+So the strict scene gate fails because of texture sampling under heavy minification, which is an existing difference between the backends. An untextured scene would test the shading alone. The reef assets have no untextured large surfaces, so that would need a purpose-built flat-coloured level: planes and boxes with vertex colours, fog on, and the S1/S3 Camera fields set. That is about one hour of level work and one more Metal run of about 13 minutes.
+
+**3. The `baseline` level asserts on both engines** (a degenerate polygon, `math/vector3.hpi:243`). This predates Phase S.
 
 ## Reproduce
 

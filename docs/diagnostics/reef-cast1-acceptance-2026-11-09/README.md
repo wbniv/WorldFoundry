@@ -11,7 +11,7 @@ Device: cast1 (`chromecast-test-01`, Chromecast HD, Android 14, armeabi‑v7a). 
 | 10 | 120 s wide idle, 3 alternating runs per style, Layout = Random, gate ≥ 20 FPS | **PASS**: realistic **22.50**, anime **20.69** |
 | 11 | E7.1: six-pair Planted Tank inside the 17 October range (69.09–69.28 ms) | **FAIL**: 71.25 ms (+2.0 ms, 14.04 FPS) |
 | 11 | E7.2: merge bench reported | **PASS** (reported, below) |
-| 12 | Dream with each reef for 5 min; selection restored | **Partial**: realistic ran for 5 min 23 s; anime started, then cast1 left the network before its 5‑minute check. **Not restored yet** |
+| 12 | Dream with each reef for 5 min; selection restored | **PASS** (rerun of anime at 10:26 after cast1 came back): realistic ran 5 min 27 s, anime 5 min 29 s. Seahorse Grid, `tank = random` and game APK `30554973…` are restored and verified. |
 | 15 | Matched captures, wide and close, for Will | Captured; **open until Will approves** |
 
 ## APK
@@ -83,17 +83,39 @@ Steps:
 2. **Idle trigger failed.** `screensaver-trigger` (J‑f650519de8c9) waited 12 min, and the Dream never started: `dream-not-observed`. The likely cause is that cast1's `stay_on_while_plugged_in` is `3`, which keeps the screen awake while it is powered. I did not change that setting.
 3. **Bug: the reef crashed the Dream host.** `screensaver-show` runs the Dream's own player (`ScreensaverPreviewActivity` with the `DREAM` extra; Android allows only root to force a system Dream). It showed the home screen ([capture](step12-reef-before-fix-home.jpg)). The engine log [asserts](step12-dream-assert-before-fix.txt): `w = 1024, Display::VRAMWidth = 1024` in `gfx/rmuv.hpi`. `android/screensaver/src/main/cpp/dream_host.cc` passed no `--vram-width`, so it got the engine default of 1024. The reef tanks carry 1024‑wide textures, and the aquarium app runs them with `--vram-width=2048` (`android/app/src/aquarium/assets/wf_args.txt`). **Fix:** the host now passes `--vram-width=2048`, so its VRAM flags match the app's. `tests/test_dream_host_vram.py` keeps the two in step; it fails on the old host and passes on the new one. The fixed Dream APK is `5dfdba1f…` (J‑b0e6de41a159).
 4. **Realistic reef: PASS.** Shown at 03:22:14 ([start](step12-reef-start.jpg)). It was still running at 03:27:41: J‑0b3b16e50d80 found the preview running, and the capture shows the boxfish moved ([5 min](step12-reef-5min.jpg)). That is 5 min 27 s with no assertion.
-5. **Anime reef: started, not held.** Set `tank = aquarium_thai_reef_anime` (J‑02a7c5340dc3). The first show (J‑7142156468e8) timed out in `am start -S -W` after 30 s while it stopped the running reef; the coordinator cleaned up automatically. The retry (J‑2cf5e063303f) showed it at 03:30:04 ([start](step12-anime-start.jpg)). **At the 5‑minute check (03:35:25), cast1 had left the network:** J‑11d3b927e99c failed with `device-not-found-on-network`, and the coordinator reports that Wireless debugging is not advertising. I did not readd or recover it.
+5. **Anime reef, first attempt: started, not held.** Set `tank = aquarium_thai_reef_anime` (J‑02a7c5340dc3). The first show (J‑7142156468e8) timed out in `am start -S -W` after 30 s while it stopped the running reef; the coordinator cleaned up automatically. The retry (J‑2cf5e063303f) showed it at 03:30:04 ([start](step12-anime-start.jpg)). **At the 5‑minute check (03:35:25), cast1 had left the network:** J‑11d3b927e99c failed with `device-not-found-on-network`, and the coordinator reports that Wireless debugging is not advertising. I did not readd or recover it.
 
 **Finding: the Dream runs the reef at about 3 FPS.** The engine log at 5 minutes shows `delta too large`, with frame deltas of 0.330–0.358 s (median 0.338 s over 60 frames; [log tail](step12-reef-5min-engine-log-tail.txt)). The screensaver APK is `assembleAquariumDebug`, so its native code is a Debug CMake build. The game APK is Release and holds 22 FPS. Whether to ship the Dream's native code as Release is a decision outside W4.
 
-**Still to do once cast1 is back:**
-- Rerun the anime 5‑minute hold.
-- Set `tank` back to `random`.
-- Select Seahorse Grid again.
-- Restore the game APK to `30554973…`.
+6. **Anime reef, rerun: PASS.** cast1 came back, and J‑74f94d8345e6 found the Aquarium Dream selected with `tank = aquarium_thai_reef_anime` and nothing running. J‑603bc7b25e25 showed it at 10:25:58 ([start](step12-anime-start-rerun.jpg)). At 10:31:27, J‑51343810350b found it still running, with no assertion, and the capture (J‑338900c7f521) shows the fish moved ([5 min](step12-anime-5min.jpg)). That is 5 min 29 s. Its frame deltas run 0.359–0.391 s, median 0.372 s ([log tail](step12-anime-5min-engine-log-tail.txt)), so the anime reef runs at about 2.7 FPS in this Debug build.
+7. **Restore, verified:**
+    - `tank` is `random` again (J‑9ae89b31f5eb, previous `aquarium_thai_reef_anime`).
+    - Seahorse Grid is selected again (J‑f774bdac689a).
+    - At 10:51:10, J‑efe87984ede2 read Seahorse Grid selected, with no Dream or preview running.
+    - The game APK is `30554973…`, verified by J‑8b8fb391115b and J‑2b38a192738a. The second of those is a duplicate submission and a no-op.
 
-The Aquarium screensaver package is now `5dfdba1f…` (the VRAM fix), not the original `64c09d87…`. The coordinator pulled the original into J‑bce21b2fc53a's `pre-install-launcher.apk` (root-only store). It can be put back if wanted. Without the fix, the original asserts on either reef.
+The Aquarium screensaver package stays at `5dfdba1f…` (the VRAM fix), not the original `64c09d87…`, as the coordinator asked while Will decides. The coordinator pulled the original into J‑bce21b2fc53a's `pre-install-launcher.apk` (root-only store). It can be put back if wanted. Without the fix, the original asserts on either reef.
+
+## Step 14, S2 half: caustics cost on cast1
+
+The fixtures come from `scripts/build-reef-caustic-variants.py`:
+- `reef_caustic_off` is byte-identical to `aquarium_thai_reef`.
+- `reef_caustic_on` differs in one byte: `CausticStrength` 0.25, the 2026‑11‑02 fixture value.
+
+Each was packaged as a direct-launch APK on the acceptance APK (`build-dfrm-e7-bench-apks.py`), with `--property=ReefSettings.Layout=1` and `--property=ReefSettings.Seed=7` added to `wf_args.txt`. Both variants therefore show the same reef.
+
+| | Runs (FPS) | Median FPS | ms per frame |
+|---|---|---|---|
+| Caustics off (J‑16e5385fefc7) | 22.90, 22.86, 22.93 | 22.90 | 43.66 |
+| Caustics on (J‑16e5385fefc7) | 22.62, 22.62, 22.46 | 22.62 | 44.21 |
+
+**S2 costs 0.55 ms per presented frame, which passes the ≤ 2 ms gate.** The `--frame-profile` repeats (J‑da00ce5e76c1) put CPU update plus render at 38.43 ms off and 38.54 ms on, so the caustics cost is on the GPU.
+
+Both jobs ended `recovery-required / restored`, the same cleanup pattern as E7.2; the coordinator restored the acceptance APK.
+
+Captures: [off](step14-s2-caustics-off.jpg), [on](step14-s2-caustics-on.jpg). The light web is visible on the sand.
+
+Caustics stay off in the shipped level until Will has seen the look, because turning them on changes the realistic style he approves in step 15.
 
 ## Step 15: style review (open for Will)
 
