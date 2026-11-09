@@ -24,7 +24,10 @@ SCENES = {'style_flat_realistic': 'style_geom_realistic', 'style_flat_anime': 's
 MESH = 'style_flat_shell.iff'
 COLORS = [0xC8BC9A, 0x6E7F86, 0xB8553A, 0x3F7F5A, 0xD9C24A, 0x5A6FB8, 0x9A4F8E]  # floor, wall, boxes
 VISIBILITY = re.compile(r"(\{ 'I32' \{ 'NAME' \"Visibility Mailbox\" \} \{ 'DATA' )\d+l( \} \{ 'STR' )\"\d+\"")
-# (centre x, y, half size, height, heading in degrees, colour index)
+# (centre x, y, half size, height, heading in degrees, colour index). Every box floats
+# LIFT above the floor: a box standing on it shares its bottom edge's depth with the
+# floor, and the two backends broke that depth tie differently on one pixel (2026-11-09).
+LIFT = 0.12
 BOXES = [(-5.0, -0.5, .8, 1.6, 20, 2), (-2.4, 1.2, .9, 2.4, 45, 3), (0.0, -1.4, .7, 1.2, 10, 4),
          (2.6, 0.8, 1.0, 2.0, 60, 5), (5.2, -0.2, .8, 2.8, 30, 6)]
 
@@ -56,8 +59,8 @@ class Builder:
     def box(self, cx, cy, half, height, heading, material):
         c, s = math.cos(math.radians(heading)), math.sin(math.radians(heading))
         corner = lambda x, y, z: (cx + x * c - y * s, cy + x * s + y * c, z)
-        lo = [corner(x, y, 0.0) for x, y in ((-half, -half), (half, -half), (half, half), (-half, half))]
-        hi = [(x, y, height) for x, y, _ in lo]
+        lo = [corner(x, y, LIFT) for x, y in ((-half, -half), (half, -half), (half, half), (-half, half))]
+        hi = [(x, y, LIFT + height) for x, y, _ in lo]
         self.quad(*hi, material)                                   # top
         for k in range(4):
             n = (k + 1) % 4

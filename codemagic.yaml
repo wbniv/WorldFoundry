@@ -1100,7 +1100,7 @@ workflows:
     name: macOS Metal style-shading sweep (manual)
     instance_type: mac_mini_m2
     max_build_duration: 60
-    cache:
+    cache: &style_metal_cache
       cache_paths:
         - build-macos
         - engine/vendor/jolt-physics-5.5.0
@@ -1111,7 +1111,7 @@ workflows:
     triggering:
       events: []
       cancel_previous_builds: true
-    scripts:
+    scripts: &style_metal_scripts
       - name: Toolchain versions
         script: |
           set -euo pipefail
@@ -1131,10 +1131,27 @@ workflows:
         script: |
           set -euo pipefail
           bash scripts/macos/style-metal-ci.sh 2>&1 | tee "$CM_BUILD_DIR/style-metal.log"
-    artifacts:
+    artifacts: &style_metal_artifacts
       - style-metal.log
       - style-metal/summary.json
       - style-metal/summary.tsv
       - style-metal/sweep/*.png
       - style-metal/scene/*.png
       - style-metal/logs/*.log
+
+  # The shared style scenes only (STYLE_SKIP_SWEEP=1): one Debug build of this
+  # checkout, about 6 Mac minutes. Use it when only the scenes changed.
+  macos-style-metal-scenes:
+    name: macOS Metal style scenes only (manual)
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+    cache: *style_metal_cache
+    environment:
+      xcode: latest
+      vars:
+        STYLE_SKIP_SWEEP: "1"
+    triggering:
+      events: []
+      cancel_previous_builds: true
+    scripts: *style_metal_scripts
+    artifacts: *style_metal_artifacts
