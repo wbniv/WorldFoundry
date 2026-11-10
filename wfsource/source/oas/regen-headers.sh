@@ -66,14 +66,15 @@ for oas in *.oas; do
 done
 echo "  $count .ht files written to $OUTDIR" >&2
 
-echo "Regenerating objects.{c,col,e,h,inc,lc}..." >&2
+echo "Regenerating objects.{c,col,e,h,inc,lc,names}..." >&2
 "$PREP" objects.s   "$OUTDIR/objects.c"
 "$PREP" objects.cos "$OUTDIR/objects.col"
 "$PREP" objects.es  "$OUTDIR/objects.e"
 "$PREP" objects.hs  "$OUTDIR/objects.h"
 "$PREP" objects.ins "$OUTDIR/objects.inc"
 "$PREP" objects.lcs "$OUTDIR/objects.lc"
-echo "  objects.c objects.col objects.e objects.h objects.inc objects.lc written to $OUTDIR" >&2
+"$PREP" objects.names.s "$OUTDIR/objects.names"
+echo "  objects.c objects.col objects.e objects.h objects.inc objects.lc objects.names written to $OUTDIR" >&2
 
 echo "Generating engine/mutation/kpropmap_generated.inc..." >&2
 # In normal mode (OUTDIR == SCRIPT_DIR) write to the canonical source-tree location.
