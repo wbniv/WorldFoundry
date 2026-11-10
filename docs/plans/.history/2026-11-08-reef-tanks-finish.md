@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/6ba89afa) | Reef step 14: mark the textured GL/Metal scene comparisons expected-fail |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/d49cc850) | Reef step 14 PASS: GL sweep identical; untextured GL/Metal scene strict pass |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/51bab0f5) | Metal: compile the style shader as a separate program (reef step 14 strict sweep) |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/93e7ba07) | Reef: step 12 PASS (anime Dream rerun, restore verified); step 14 S2 and Metal evidence |
@@ -31,6 +32,11 @@
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b756367f) | Plan: finish the reef tanks (worms, skins, placement, acceptance) |
 
 <!--history-meta v1
+6ba89afa	author	Will Norris
+6ba89afa	added	1
+6ba89afa	deleted	1
+6ba89afa	files	1
+6ba89afa	body	Will (2026-11-09): "Mark expected-fail". The reef-* and geom-* scenes\ndiffer only through texture sampling (llvmpipe vs the Apple GPU, bilinear,\nno mipmaps); they are xfail(strict=True) so an unexpected pass is\nreported. The untextured flat-* scenes stay hard asserts. Container run\nagainst Metal run 6af1bd90: 2 passed, 4 xfailed.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 d49cc850	author	Will Norris
 d49cc850	added	1
 d49cc850	deleted	1
