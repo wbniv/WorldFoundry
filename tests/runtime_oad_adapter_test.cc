@@ -39,6 +39,23 @@ int main(int argc, char** argv) {
     const auto* field = object.field(uint32_t(seed));
     assert(field && field->key == "Seed" && !field->readonly);
     assert(*object.get(uint32_t(seed)) == "2147483647");
+    std::string applied;
+    object.apply = [&](const std::map<uint32_t, std::string>& draft, std::string& reason) {
+        const auto& value = draft.at(uint32_t(seed));
+        if (value == "9") { reason = "backing write failed"; return false; }
+        if (!wfprops::applyOadObject(trimmed.data(), trimmed.size(), sheet, seedLocation.offset,
+                                     payload.data(), payload.size(), common.data(), common.size(), draft, reason)) return false;
+        applied = value; return true;
+    };
+    wfprops::Registry registry;
+    assert(registry.add(std::move(object), error));
+    wfprops::Edit edit;
+    assert(edit.begin(registry, 7) && edit.set(uint32_t(seed), "42") && edit.commit());
+    assert(applied == "42" && *registry.object(7)->get(uint32_t(seed)) == "42");
+    int32_t stored = 0; std::memcpy(&stored, payload.data() + prefix.offset, 4); assert(stored == 42);
+    assert(edit.begin(registry, 7) && edit.set(uint32_t(seed), "9") && !edit.commit());
+    assert(edit.error == "backing write failed" && *registry.object(7)->get(uint32_t(seed)) == "42");
+    std::memcpy(&stored, payload.data() + prefix.offset, 4); assert(stored == 42);
     assert(!wfprops::buildOadObject(7, "x", "x", trimmed.data(), trimmed.size(), sheet,
                                      seedLocation.offset, payload.data(), 1,
                                      common.data(), common.size(), object, error));

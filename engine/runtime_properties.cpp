@@ -38,6 +38,15 @@ bool Registry::load(const uint8_t* data,size_t size,std::string& error){
     if(!r.valid||r.left){error="Malformed property catalog";return false;}
     objects_=std::move(loaded);error.clear();return true;
 }
+bool Registry::add(Object object,std::string& error){
+    if(!object.actor||objects_.count(object.actor)){error="Duplicate or invalid property object";return false;}
+    std::map<uint32_t,bool> seen;
+    for(const auto& field:object.fields)if(field.stored()){
+        if(!field.id||seen.count(field.id)||!object.values.count(field.id)){error="Invalid property fields";return false;}
+        seen[field.id]=true;
+    }
+    object.generation=++serial_;object.revision=0;objects_.emplace(object.actor,std::move(object));error.clear();return true;
+}
 Object* Registry::object(uint32_t actor){auto i=objects_.find(actor);return i==objects_.end()?nullptr:&i->second;}
 const Object* Registry::object(uint32_t actor) const {auto i=objects_.find(actor);return i==objects_.end()?nullptr:&i->second;}
 Object* Registry::schema(const std::string& name){for(auto& pair:objects_)if(pair.second.schema==name)return &pair.second;return nullptr;}
@@ -48,9 +57,9 @@ std::vector<uint32_t> Registry::editableObjects() const {
     return result;
 }
 void Registry::remove(uint32_t actor){objects_.erase(actor);}
-bool Registry::clone(uint32_t source,uint32_t actor){auto* initial=object(source);if(!initial||!actor)return false;Object copy=*initial;copy.actor=actor;copy.generation=++serial_;copy.revision=0;objects_[actor]=std::move(copy);return true;}
+bool Registry::clone(uint32_t source,uint32_t actor){auto* initial=object(source);if(!initial||!actor||initial->apply)return false;Object copy=*initial;copy.actor=actor;copy.generation=++serial_;copy.revision=0;objects_[actor]=std::move(copy);return true;}
 void Registry::clear(){objects_.clear();++serial_;}
-bool Registry::set(uint32_t actor,uint32_t id,const std::string& v,std::string& error){auto* o=object(actor);const Field* f=o?o->field(id):nullptr;if(!f||f->readonly){error="Property is not editable";return false;}int s=validate(*f,v);if(s){error=validationMessage(s);return false;}if(o->values[id]!=v){o->values[id]=v;++o->revision;}error.clear();return true;}
+bool Registry::set(uint32_t actor,uint32_t id,const std::string& v,std::string& error){auto* o=object(actor);const Field* f=o?o->field(id):nullptr;if(!f||f->readonly){error="Property is not editable";return false;}int s=validate(*f,v);if(s){error=validationMessage(s);return false;}if(o->values[id]!=v){auto draft=o->values;draft[id]=v;if(o->apply&&!o->apply(draft,error))return false;o->values=std::move(draft);++o->revision;}error.clear();return true;}
 void LaunchOverrides::set(std::string schema,std::string key,std::string value){std::lock_guard<std::mutex> lock(mutex_);values_[{std::move(schema),std::move(key)}]=std::move(value);}
 void LaunchOverrides::erase(const std::string& schema,const std::string& key){std::lock_guard<std::mutex> lock(mutex_);values_.erase({schema,key});}
 void LaunchOverrides::clear(){std::lock_guard<std::mutex> lock(mutex_);values_.clear();}
@@ -64,7 +73,11 @@ std::vector<std::string> LaunchOverrides::apply(Registry& registry) const {
             const Field* f=nullptr;for(const auto& candidate:o.fields)if(candidate.key==key&&candidate.stored()){f=&candidate;break;}
             if(!f){if(reason.empty())reason="no such field";continue;}
             if(int status=validate(*f,value)){if(reason.empty())reason=validationMessage(status);continue;}
-            std::string& current=o.values[f->id];if(current!=value){current=value;++o.revision;}
+            std::string& current=o.values[f->id];if(current!=value){
+                auto draft=o.values;draft[f->id]=value;std::string applyError;
+                if(o.apply&&!o.apply(draft,applyError)){if(reason.empty())reason=applyError.empty()?"could not apply value":applyError;continue;}
+                o.values=std::move(draft);++o.revision;
+            }
         }
         if(!reason.empty())rejected.push_back(schema+"."+key+"="+value+": "+reason);
     }
@@ -76,7 +89,7 @@ bool Edit::begin(Registry& r,uint32_t a){cancel();Object* o=r.object(a);if(!o)re
 Object* Edit::object() const {Object* o=registry?registry->object(actor):nullptr;return o&&o->generation==generation?o:nullptr;}
 bool Edit::set(uint32_t id,const std::string& value){auto* o=object();const Field* f=o?o->field(id):nullptr;if(!open||!f||f->readonly||value.size()>65536)return false;draft[id]=value;error.clear();return true;}
 bool Edit::validate(){auto* o=object();if(!open||!o||o->revision!=revision){error="Properties changed; reopen the editor";return false;}for(const auto& f:o->fields)if(f.stored()){auto i=draft.find(f.id);if(i==draft.end()){error="Missing property value";return false;}int s=wfprops::validate(f,i->second);if(s){error=f.label+": "+validationMessage(s);return false;}}error.clear();return true;}
-bool Edit::commit(){if(!validate())return false;auto* o=object();if(o->values!=draft){o->values=draft;++o->revision;}open=false;return true;}
+bool Edit::commit(){if(!validate())return false;auto* o=object();if(o->values!=draft){if(o->apply&&!o->apply(draft,error))return false;o->values=draft;++o->revision;}open=false;return true;}
 void Edit::cancel(){open=false;registry=nullptr;draft.clear();error.clear();}
 std::string json(const std::string& v){std::string out="\"";const char* hex="0123456789abcdef";for(unsigned char c:v){if(c=='"'||c=='\\'){out+='\\';out+=c;}else if(c<32){out+="\\u00";out+=hex[c>>4];out+=hex[c&15];}else out+=c;}return out+'"';}
 std::string snapshot(const Edit& e,bool available,bool phone){auto* o=e.object();std::string s="{\"available\":"+std::string(available?"true":"false")+",\"open\":"+(e.open?"true":"false")+",\"phone\":"+(phone?"true":"false")+",\"session\":"+std::to_string(e.session)+",\"error\":"+json(e.error)+",\"title\":"+json(o?o->title:"")+",\"fields\":[";bool first=true;if(o)for(const auto& f:o->fields){if(!first)s+=',';first=false;auto i=e.draft.find(f.id);s+="{\"id\":"+std::to_string(f.id)+",\"kind\":"+std::to_string(f.kind)+",\"show\":"+std::to_string(f.show)+",\"rule\":"+std::to_string(f.rule)+",\"readonly\":"+(f.readonly?"true":"false")+",\"min\":"+std::to_string(f.minimum)+",\"max\":"+std::to_string(f.maximum)+",\"scale\":"+std::to_string(f.scale)+",\"maxLength\":"+std::to_string(f.maxLength)+",\"key\":"+json(f.key)+",\"label\":"+json(f.label)+",\"help\":"+json(f.help)+",\"choices\":"+json(f.choices)+",\"value\":"+json(i==e.draft.end()?"":i->second)+"}";}return s+"]}";}

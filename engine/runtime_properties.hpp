@@ -20,12 +20,16 @@ struct Object {
     uint32_t actor=0; uint64_t generation=0,revision=0;
     std::string schema,title;std::vector<Field> fields;
     std::map<uint32_t,std::string> values;
+    // Optional backing store for OAD-derived objects. The callback must either
+    // apply the whole validated draft or leave its backing bytes unchanged.
+    std::function<bool(const std::map<uint32_t,std::string>&,std::string&)> apply;
     const Field* field(uint32_t id) const;
     const std::string* get(uint32_t id) const;
 };
 class Registry {
 public:
     bool load(const uint8_t* data,size_t size,std::string& error);
+    bool add(Object object,std::string& error);
     Object* object(uint32_t actor);
     const Object* object(uint32_t actor) const;
     Object* schema(const std::string& name);
