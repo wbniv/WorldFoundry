@@ -19,6 +19,21 @@ typedef struct WfOadFieldLocation {
 int wf_attr_oad_field_location(const uint8_t *oad, size_t oad_len, size_t index,
                                uint32_t start_offset, WfOadFieldLocation *out);
 
+/* Strings are UTF-8 pointer/length pairs valid only during the callback. */
+typedef struct WfOadString { const uint8_t *data; size_t length; } WfOadString;
+typedef struct WfOadField {
+    size_t index;
+    uint32_t kind, show, live, width, scale;
+    int32_t minimum, maximum, default_value;
+    WfOadString key, label, help, group, choices;
+} WfOadField;
+typedef int (*WfOadFieldVisitor)(void *context, const WfOadField *field);
+
+/* Visit visible normalized fields in descriptor order. A visitor returning
+ * nonzero stops traversal and makes the function return 1. */
+int wf_attr_oad_visit(const uint8_t *oad, size_t oad_len,
+                      WfOadFieldVisitor visitor, void *context);
+
 #ifdef __cplusplus
 }
 #endif

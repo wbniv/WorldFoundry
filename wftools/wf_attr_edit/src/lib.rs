@@ -69,6 +69,63 @@ pub struct OadFieldLocation {
     pub width: u32,
 }
 
+#[repr(C)]
+struct OadString { data: *const u8, length: usize }
+impl OadString {
+    fn borrowed(s: &str) -> Self { Self { data: s.as_ptr(), length: s.len() } }
+}
+
+#[repr(C)]
+pub struct OadField {
+    index: usize,
+    kind: u32, show: u32, live: u32, width: u32, scale: u32,
+    minimum: i32, maximum: i32, default_value: i32,
+    key: OadString, label: OadString, help: OadString, group: OadString, choices: OadString,
+}
+
+/// Visit visible normalized OAD fields; borrowed strings live for one callback.
+///
+/// # Safety
+/// `oad` must point to `oad_len` readable bytes, and the visitor must obey the
+/// callback contract and not retain the borrowed pointers.
+#[no_mangle]
+pub unsafe extern "C" fn wf_attr_oad_visit(
+    oad: *const u8, oad_len: usize,
+    visitor: Option<unsafe extern "C" fn(*mut std::ffi::c_void, *const OadField) -> i32>,
+    context: *mut std::ffi::c_void,
+) -> i32 {
+    if oad.is_null() || visitor.is_none() || oad_len < wf_oad::HEADER_SIZE || oad_len > 16 * 1024 * 1024
+        || (oad_len - wf_oad::HEADER_SIZE) % wf_oad::ENTRY_SIZE != 0 { return 1; }
+    let bytes = std::slice::from_raw_parts(oad, oad_len);
+    let Ok(oad) = wf_oad::OadFile::read(&mut std::io::Cursor::new(bytes)) else { return 1; };
+    let schema = wf_attr_schema::from_oad(&oad);
+    for (index, field) in schema.fields.iter().enumerate() {
+        if !field.is_visible() { continue; }
+        let (kind, choices) = match &field.kind {
+            FieldKind::Int => (0, String::new()),
+            FieldKind::Float => (1, String::new()),
+            FieldKind::Enum { items } => (2, items.join("|")),
+            FieldKind::Str | FieldKind::Annotation => (3, String::new()),
+            FieldKind::Bool => (4, String::new()),
+            FieldKind::Section => (5, String::new()),
+            FieldKind::Group => (6, String::new()),
+            FieldKind::GroupEnd => (7, String::new()),
+            FieldKind::FileRef { .. } | FieldKind::ObjRef { .. } => (8, String::new()),
+            FieldKind::Skip => continue,
+        };
+        let item = OadField {
+            index, kind, show: field.show_as as u32, live: u32::from(field.live),
+            width: field.byte_width as u32, scale: field.fp_scale as u32,
+            minimum: field.min_raw, maximum: field.max_raw, default_value: field.default_raw,
+            key: OadString::borrowed(&field.key), label: OadString::borrowed(&field.label),
+            help: OadString::borrowed(&field.help), group: OadString::borrowed(&field.group),
+            choices: OadString::borrowed(&choices),
+        };
+        if visitor.unwrap()(context, &item) != 0 { return 1; }
+    }
+    0
+}
+
 /// Resolve a local entry index in a full or trimmed OAD. Returns 0 on success;
 /// malformed descriptors, structural fields and invalid arguments return 1.
 /// The caller supplies the payload offset of the first descriptor in the OAD.

@@ -1335,7 +1335,8 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     target_link_libraries(oad_field_location_test PRIVATE wf_property_core ${CMAKE_DL_LIBS})
     target_compile_options(oad_field_location_test PRIVATE -UNDEBUG)
     add_test(NAME oad_field_location COMMAND oad_field_location_test
-        ${CMAKE_SOURCE_DIR}/wftools/wf_oad/tests/fixtures/levelobj.oad)
+        ${CMAKE_SOURCE_DIR}/wftools/wf_oad/tests/fixtures/levelobj.oad
+        ${CMAKE_SOURCE_DIR}/wfsource/source/oas/plantedtanksettings.oad)
     add_executable(runtime_editable_list_test tests/runtime_editable_list_test.cc)
     target_include_directories(runtime_editable_list_test PRIVATE ${CMAKE_SOURCE_DIR}/engine)
     target_compile_options(runtime_editable_list_test PRIVATE -UNDEBUG)

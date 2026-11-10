@@ -6,8 +6,19 @@
 #include <iterator>
 #include <vector>
 
+struct Fields { bool seed = false; bool water = false; };
+static int visit(void* context, const WfOadField* field) {
+    auto* found = static_cast<Fields*>(context);
+    const std::string key(reinterpret_cast<const char*>(field->key.data), field->key.length);
+    if (key == "Seed") found->seed = field->kind == 0 && field->live == 1 && field->width == 4;
+    if (key == "Water type") {
+        const std::string choices(reinterpret_cast<const char*>(field->choices.data), field->choices.length);
+        found->water = field->kind == 2 && field->live == 1 && choices == "Freshwater|Saltwater";
+    }
+    return 0;
+}
 int main(int argc, char** argv) {
-    assert(argc == 2);
+    assert(argc == 3);
     std::ifstream in(argv[1], std::ios::binary);
     std::vector<uint8_t> bytes((std::istreambuf_iterator<char>(in)), {});
     constexpr size_t header = 80, entry = 1491;
@@ -22,4 +33,10 @@ int main(int argc, char** argv) {
     assert(location.common_pointer == -1 && location.offset == 572 && location.width == 4);
     assert(wf_attr_oad_field_location(bytes.data(), bytes.size() - 1, index, 0, &location) != 0);
     assert(wf_attr_oad_field_location(nullptr, bytes.size(), index, 0, &location) != 0);
+    std::ifstream schemaFile(argv[2], std::ios::binary);
+    std::vector<uint8_t> schema((std::istreambuf_iterator<char>(schemaFile)), {});
+    Fields found;
+    assert(wf_attr_oad_visit(schema.data(), schema.size(), visit, &found) == 0);
+    assert(found.seed && found.water);
+    assert(wf_attr_oad_visit(schema.data(), schema.size() - 1, visit, &found) != 0);
 }
