@@ -1,0 +1,18 @@
+# bad: [bf2289527c1c39481a8790346f8d611bbd886d24] Unpark runtime object editing; Sea Stars settings become an OAS object
+# good: [9f97f5dd5b2e1c437344743128ebfd77b5221ea2] Merge six seahorse pairs into current level integration
+git bisect start 'bf2289527c1c39481a8790346f8d611bbd886d24' '9f97f5dd' '--' 'wfsource' 'engine' 'android' 'CMakeLists.txt' 'wflevels/aquarium_plants' 'wflevels/aquarium-menu-cd.iff' 'scripts/plant_settings_catalog.py' 'scripts/build-planted-seahorse-variants.py'
+# bad: [e7e3689fbfadbe38add09bdb5de32b63c27c5dd6] Bridge stained glass setting on corrected fire runtime
+git bisect bad e7e3689fbfadbe38add09bdb5de32b63c27c5dd6
+# bad: [eea849fe16b4ff34758ee5e1423ac399675a7495] Planted Tank screensaver: native host bridge (Phase 2b)
+git bisect bad eea849fe16b4ff34758ee5e1423ac399675a7495
+# good: [228b9cd43d468c609b4276c7d3d27ef0b72b7c07] UI font Phase 3: Chromecast 1 verification; settings row counter moved
+git bisect good 228b9cd43d468c609b4276c7d3d27ef0b72b7c07
+# bad: [e64929665374113160b50976cfc1abf4701da3c0] Merge production no-palette selector
+git bisect bad e64929665374113160b50976cfc1abf4701da3c0
+# bad: [59d554e4327ce0fb84369960cb3e2c40842727ab] Prewarm the no-palette program at level load when the level opts in
+git bisect bad 59d554e4327ce0fb84369960cb3e2c40842727ab
+# good: [6d0e936328478ddff81d095c9d3b85a041efa78b] Add the level-owned PrewarmNoPaletteProgram Level Object field
+git bisect good 6d0e936328478ddff81d095c9d3b85a041efa78b
+# bad: [a86f420b0cb66068cf70eb1dd3b44c94e48c091b] Select the no-palette opaque program for wholly ordinary batches
+git bisect bad a86f420b0cb66068cf70eb1dd3b44c94e48c091b
+# first bad commit: [a86f420b0cb66068cf70eb1dd3b44c94e48c091b] Select the no-palette opaque program for wholly ordinary batches

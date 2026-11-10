@@ -1,0 +1,59 @@
+e7e3689f bad 70.69 vs 69.24 (+1.45)
+eea849fe bad R=70.41 A=69.12 delta=1.29
+228b9cd4 good R=69.03 A=68.93 delta=0.1
+Bisecting: 6 revisions left to test after this (roughly 3 steps)
+[e64929665374113160b50976cfc1abf4701da3c0] Merge production no-palette selector
+e6492966 unclear R=69.96 A=69.17 delta=0.79
+e6492966 bad (partial) remeasure R=70.0 A=69.26 delta=0.74; two runs agree, ~+0.75 step
+59d554e4 bad R=70.11 A=69.49 delta=0.62
+Bisecting: 1 revision left to test after this (roughly 1 step)
+[6d0e936328478ddff81d095c9d3b85a041efa78b] Add the level-owned PrewarmNoPaletteProgram Level Object field
+6d0e9363 good R=69.24 A=69.25 delta=-0.01
+Bisecting: 0 revisions left to test after this (roughly 0 steps)
+[a86f420b0cb66068cf70eb1dd3b44c94e48c091b] Select the no-palette opaque program for wholly ordinary batches
+a86f420b bad R=70.56 A=69.44 delta=1.12 (job J-9ad564cdc199, completed while the loop was stopped)
+a86f420b0cb66068cf70eb1dd3b44c94e48c091b is the first bad commit
+commit a86f420b0cb66068cf70eb1dd3b44c94e48c091b
+Author: Will Norris <will@biohack.net>
+--- second bisect (PATCH=nosel), good a86f420b, bad 9db13e82
+5538a0c8 bad R=71.46 A=69.34 delta=2.12
+Bisecting: 26 revisions left to test after this (roughly 5 steps)
+[fe42885050bfbe6cd42402e8bbdfea63908f9c79] Take the default orientation from a string resource
+fe428850 unclear R=70.11 A=69.51 delta=0.6
+Bisecting: 13 revisions left to test after this (roughly 4 steps)
+[3d56263d515d09b697c857d1915fe3e42e47f660] Planted Tank Phase 4a: Taskfile build and test entries, coordinator and README docs
+fe428850 marked bad (partial +0.6); thresholds now bad>0.4 good<0.25
+3d56263d bad R=70.01 A=69.56 delta=0.45
+Bisecting: 6 revisions left to test after this (roughly 3 steps)
+[6bd292d34967768e29af4d2799ba4c67c169bf83] Fix Baseline TV icon logo placement
+6bd292d3 bad R=70.02 A=69.36 delta=0.66
+Bisecting: 2 revisions left to test after this (roughly 2 steps)
+[54f44b51586fcf8ab61aa314e711fbfb56b03b12] Add live aquarium screensaver with per-tank players
+54f44b51 good R=69.71 A=69.6 delta=0.11
+Bisecting: 0 revisions left to test after this (roughly 1 step)
+[e64929665374113160b50976cfc1abf4701da3c0] Merge production no-palette selector
+e6492966 bad R=70.07 A=69.46 delta=0.61
+Bisecting: 0 revisions left to test after this (roughly 0 steps)
+[59d554e4327ce0fb84369960cb3e2c40842727ab] Prewarm the no-palette program at level load when the level opts in
+59d554e4 bad R=70.19 A=69.55 delta=0.64
+59d554e4327ce0fb84369960cb3e2c40842727ab is the first bad commit
+commit 59d554e4327ce0fb84369960cb3e2c40842727ab
+--- third bisect (PATCH=nosel), good fe428850 (+0.6), bad 5538a0c8 (+2.12); bad>1.3 good<0.95
+e7e3689f good R=70.25 A=69.36 delta=0.89
+Bisecting: 7 revisions left to test after this (roughly 3 steps)
+[7e3b2581a8350bbbb704349fb0aeab46c39247f7] Cull four baked faces at a time with NEON on 32-bit ARM
+7e3b2581 good R=70.19 A=69.37 delta=0.82
+Bisecting: 4 revisions left to test after this (roughly 2 steps)
+[2c9f9ee7500c7cb63e39917e55ae4a17b592f494] Align slider maximum label with track end
+2c9f9ee7 good R=70.28 A=69.68 delta=0.6
+Bisecting: 2 revisions left to test after this (roughly 1 step)
+[8c00ca282326f44dfb23215ba91744a56d73d9c0] Merge compact vertex and static culling work
+8c00ca28 good R=70.5 A=69.6 delta=0.9
+Bisecting: 0 revisions left to test after this (roughly 1 step)
+[4b82c74aefeb01c8110e2df3f22b7b2255314dc9] Fix duplicate Metal display definitions
+4b82c74a bad R=71.19 A=69.62 delta=1.57
+Bisecting: 0 revisions left to test after this (roughly 0 steps)
+[9a982a5d17ee994924fae765fdf3aacc08947baa] Count the frame's last batch in the frame profile
+9a982a5d bad R=70.92 A=69.36 delta=1.56
+9a982a5d17ee994924fae765fdf3aacc08947baa is the first bad commit
+commit 9a982a5d17ee994924fae765fdf3aacc08947baa

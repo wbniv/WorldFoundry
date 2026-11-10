@@ -1,0 +1,16 @@
+# bad: [5538a0c8863cd4944b166474ec41dafe64bfbfbf] Merge remote-tracking branch 'origin/feat/stained-glass-level-setting' into rc/v0.11-engine-trial
+# good: [fe42885050bfbe6cd42402e8bbdfea63908f9c79] Take the default orientation from a string resource
+git bisect start '5538a0c8' 'fe428850' '--' 'wfsource' 'engine' 'android' 'CMakeLists.txt' 'wflevels/aquarium_plants' 'wflevels/aquarium-menu-cd.iff' 'scripts/plant_settings_catalog.py' 'scripts/build-planted-seahorse-variants.py'
+# good: [e7e3689fbfadbe38add09bdb5de32b63c27c5dd6] Bridge stained glass setting on corrected fire runtime
+git bisect good e7e3689fbfadbe38add09bdb5de32b63c27c5dd6
+# good: [7e3b2581a8350bbbb704349fb0aeab46c39247f7] Cull four baked faces at a time with NEON on 32-bit ARM
+git bisect good 7e3b2581a8350bbbb704349fb0aeab46c39247f7
+# good: [2c9f9ee7500c7cb63e39917e55ae4a17b592f494] Align slider maximum label with track end
+git bisect good 2c9f9ee7500c7cb63e39917e55ae4a17b592f494
+# good: [8c00ca282326f44dfb23215ba91744a56d73d9c0] Merge compact vertex and static culling work
+git bisect good 8c00ca282326f44dfb23215ba91744a56d73d9c0
+# bad: [4b82c74aefeb01c8110e2df3f22b7b2255314dc9] Fix duplicate Metal display definitions
+git bisect bad 4b82c74aefeb01c8110e2df3f22b7b2255314dc9
+# bad: [9a982a5d17ee994924fae765fdf3aacc08947baa] Count the frame's last batch in the frame profile
+git bisect bad 9a982a5d17ee994924fae765fdf3aacc08947baa
+# first bad commit: [9a982a5d17ee994924fae765fdf3aacc08947baa] Count the frame's last batch in the frame profile

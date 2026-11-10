@@ -1,0 +1,1532 @@
+[
+ {
+  "evidence": "ev-228b9cd4",
+  "job": "J-21686704b5a4",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.5067,
+  "mean_frame_ms": 68.934,
+  "frames": 872
+ },
+ {
+  "evidence": "ev-228b9cd4",
+  "job": "J-21686704b5a4",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4466,
+  "mean_frame_ms": 69.221,
+  "frames": 872
+ },
+ {
+  "evidence": "ev-228b9cd4",
+  "job": "J-21686704b5a4",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.5279,
+  "mean_frame_ms": 68.833,
+  "frames": 874
+ },
+ {
+  "evidence": "ev-228b9cd4",
+  "job": "J-21686704b5a4",
+  "variant": "R1",
+  "apk_sha256_12": "f75446895b5d",
+  "fps": 14.3504,
+  "mean_frame_ms": 69.684,
+  "frames": 865
+ },
+ {
+  "evidence": "ev-228b9cd4",
+  "job": "J-21686704b5a4",
+  "variant": "R2",
+  "apk_sha256_12": "f75446895b5d",
+  "fps": 14.5647,
+  "mean_frame_ms": 68.659,
+  "frames": 875
+ },
+ {
+  "evidence": "ev-228b9cd4",
+  "job": "J-21686704b5a4",
+  "variant": "R3",
+  "apk_sha256_12": "f75446895b5d",
+  "fps": 14.4872,
+  "mean_frame_ms": 69.027,
+  "frames": 873
+ },
+ {
+  "evidence": "ev-2c9f9ee7",
+  "job": "J-4ee7c77e0be4",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3504,
+  "mean_frame_ms": 69.684,
+  "frames": 865
+ },
+ {
+  "evidence": "ev-2c9f9ee7",
+  "job": "J-4ee7c77e0be4",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.361,
+  "mean_frame_ms": 69.633,
+  "frames": 863
+ },
+ {
+  "evidence": "ev-2c9f9ee7",
+  "job": "J-4ee7c77e0be4",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3436,
+  "mean_frame_ms": 69.717,
+  "frames": 861
+ },
+ {
+  "evidence": "ev-2c9f9ee7",
+  "job": "J-4ee7c77e0be4",
+  "variant": "R1",
+  "apk_sha256_12": "61e1790ee2da",
+  "fps": 14.243,
+  "mean_frame_ms": 70.21,
+  "frames": 859
+ },
+ {
+  "evidence": "ev-2c9f9ee7",
+  "job": "J-4ee7c77e0be4",
+  "variant": "R2",
+  "apk_sha256_12": "61e1790ee2da",
+  "fps": 14.1486,
+  "mean_frame_ms": 70.679,
+  "frames": 850
+ },
+ {
+  "evidence": "ev-2c9f9ee7",
+  "job": "J-4ee7c77e0be4",
+  "variant": "R3",
+  "apk_sha256_12": "61e1790ee2da",
+  "fps": 14.2287,
+  "mean_frame_ms": 70.281,
+  "frames": 856
+ },
+ {
+  "evidence": "ev-3d56263d",
+  "job": "J-ba59fdab6d76",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3763,
+  "mean_frame_ms": 69.559,
+  "frames": 862
+ },
+ {
+  "evidence": "ev-3d56263d",
+  "job": "J-ba59fdab6d76",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4476,
+  "mean_frame_ms": 69.216,
+  "frames": 867
+ },
+ {
+  "evidence": "ev-3d56263d",
+  "job": "J-ba59fdab6d76",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3769,
+  "mean_frame_ms": 69.556,
+  "frames": 863
+ },
+ {
+  "evidence": "ev-3d56263d",
+  "job": "J-ba59fdab6d76",
+  "variant": "R1",
+  "apk_sha256_12": "98237d4a38c1",
+  "fps": 14.3252,
+  "mean_frame_ms": 69.807,
+  "frames": 863
+ },
+ {
+  "evidence": "ev-3d56263d",
+  "job": "J-ba59fdab6d76",
+  "variant": "R2",
+  "apk_sha256_12": "98237d4a38c1",
+  "fps": 14.1601,
+  "mean_frame_ms": 70.621,
+  "frames": 854
+ },
+ {
+  "evidence": "ev-3d56263d",
+  "job": "J-ba59fdab6d76",
+  "variant": "R3",
+  "apk_sha256_12": "98237d4a38c1",
+  "fps": 14.2833,
+  "mean_frame_ms": 70.012,
+  "frames": 860
+ },
+ {
+  "evidence": "ev-4b82c74a",
+  "job": "J-5251f236981d",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.353,
+  "mean_frame_ms": 69.672,
+  "frames": 863
+ },
+ {
+  "evidence": "ev-4b82c74a",
+  "job": "J-5251f236981d",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3643,
+  "mean_frame_ms": 69.617,
+  "frames": 862
+ },
+ {
+  "evidence": "ev-4b82c74a",
+  "job": "J-5251f236981d",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3716,
+  "mean_frame_ms": 69.582,
+  "frames": 861
+ },
+ {
+  "evidence": "ev-4b82c74a",
+  "job": "J-5251f236981d",
+  "variant": "R1",
+  "apk_sha256_12": "8449ed2e9b6a",
+  "fps": 14.0352,
+  "mean_frame_ms": 71.249,
+  "frames": 846
+ },
+ {
+  "evidence": "ev-4b82c74a",
+  "job": "J-5251f236981d",
+  "variant": "R2",
+  "apk_sha256_12": "8449ed2e9b6a",
+  "fps": 14.0606,
+  "mean_frame_ms": 71.121,
+  "frames": 848
+ },
+ {
+  "evidence": "ev-4b82c74a",
+  "job": "J-5251f236981d",
+  "variant": "R3",
+  "apk_sha256_12": "8449ed2e9b6a",
+  "fps": 14.0477,
+  "mean_frame_ms": 71.186,
+  "frames": 843
+ },
+ {
+  "evidence": "ev-54f44b51",
+  "job": "J-df8dad14cc8f",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3683,
+  "mean_frame_ms": 69.598,
+  "frames": 862
+ },
+ {
+  "evidence": "ev-54f44b51",
+  "job": "J-df8dad14cc8f",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3656,
+  "mean_frame_ms": 69.611,
+  "frames": 864
+ },
+ {
+  "evidence": "ev-54f44b51",
+  "job": "J-df8dad14cc8f",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4642,
+  "mean_frame_ms": 69.136,
+  "frames": 868
+ },
+ {
+  "evidence": "ev-54f44b51",
+  "job": "J-df8dad14cc8f",
+  "variant": "R1",
+  "apk_sha256_12": "2249268b7fbe",
+  "fps": 14.4088,
+  "mean_frame_ms": 69.402,
+  "frames": 869
+ },
+ {
+  "evidence": "ev-54f44b51",
+  "job": "J-df8dad14cc8f",
+  "variant": "R2",
+  "apk_sha256_12": "2249268b7fbe",
+  "fps": 14.3457,
+  "mean_frame_ms": 69.707,
+  "frames": 864
+ },
+ {
+  "evidence": "ev-54f44b51",
+  "job": "J-df8dad14cc8f",
+  "variant": "R3",
+  "apk_sha256_12": "2249268b7fbe",
+  "fps": 14.3371,
+  "mean_frame_ms": 69.749,
+  "frames": 863
+ },
+ {
+  "evidence": "ev-5538a0c8",
+  "job": "J-4545a804caee",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4223,
+  "mean_frame_ms": 69.337,
+  "frames": 865
+ },
+ {
+  "evidence": "ev-5538a0c8",
+  "job": "J-4545a804caee",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4082,
+  "mean_frame_ms": 69.405,
+  "frames": 868
+ },
+ {
+  "evidence": "ev-5538a0c8",
+  "job": "J-4545a804caee",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4322,
+  "mean_frame_ms": 69.29,
+  "frames": 868
+ },
+ {
+  "evidence": "ev-5538a0c8",
+  "job": "J-4545a804caee",
+  "variant": "R1",
+  "apk_sha256_12": "10a167e46afe",
+  "fps": 14.0313,
+  "mean_frame_ms": 71.269,
+  "frames": 846
+ },
+ {
+  "evidence": "ev-5538a0c8",
+  "job": "J-4545a804caee",
+  "variant": "R2",
+  "apk_sha256_12": "10a167e46afe",
+  "fps": 13.9932,
+  "mean_frame_ms": 71.463,
+  "frames": 843
+ },
+ {
+  "evidence": "ev-5538a0c8",
+  "job": "J-4545a804caee",
+  "variant": "R3",
+  "apk_sha256_12": "10a167e46afe",
+  "fps": 13.8719,
+  "mean_frame_ms": 72.088,
+  "frames": 835
+ },
+ {
+  "evidence": "ev-59d554e4",
+  "job": "J-14d4faf68f6b",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3863,
+  "mean_frame_ms": 69.511,
+  "frames": 865
+ },
+ {
+  "evidence": "ev-59d554e4",
+  "job": "J-14d4faf68f6b",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3556,
+  "mean_frame_ms": 69.659,
+  "frames": 861
+ },
+ {
+  "evidence": "ev-59d554e4",
+  "job": "J-14d4faf68f6b",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.379,
+  "mean_frame_ms": 69.546,
+  "frames": 866
+ },
+ {
+  "evidence": "ev-59d554e4",
+  "job": "J-14d4faf68f6b",
+  "variant": "R1",
+  "apk_sha256_12": "992a0e8350b2",
+  "fps": 14.2476,
+  "mean_frame_ms": 70.187,
+  "frames": 855
+ },
+ {
+  "evidence": "ev-59d554e4",
+  "job": "J-14d4faf68f6b",
+  "variant": "R2",
+  "apk_sha256_12": "992a0e8350b2",
+  "fps": 14.2002,
+  "mean_frame_ms": 70.421,
+  "frames": 855
+ },
+ {
+  "evidence": "ev-59d554e4",
+  "job": "J-14d4faf68f6b",
+  "variant": "R3",
+  "apk_sha256_12": "992a0e8350b2",
+  "fps": 14.2762,
+  "mean_frame_ms": 70.047,
+  "frames": 856
+ },
+ {
+  "evidence": "ev-6bd292d3",
+  "job": "J-fb41eea0d9f0",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4677,
+  "mean_frame_ms": 69.12,
+  "frames": 867
+ },
+ {
+  "evidence": "ev-6bd292d3",
+  "job": "J-fb41eea0d9f0",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4035,
+  "mean_frame_ms": 69.427,
+  "frames": 867
+ },
+ {
+  "evidence": "ev-6bd292d3",
+  "job": "J-fb41eea0d9f0",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4183,
+  "mean_frame_ms": 69.356,
+  "frames": 865
+ },
+ {
+  "evidence": "ev-6bd292d3",
+  "job": "J-fb41eea0d9f0",
+  "variant": "R1",
+  "apk_sha256_12": "418af3ca4185",
+  "fps": 14.2809,
+  "mean_frame_ms": 70.023,
+  "frames": 857
+ },
+ {
+  "evidence": "ev-6bd292d3",
+  "job": "J-fb41eea0d9f0",
+  "variant": "R2",
+  "apk_sha256_12": "418af3ca4185",
+  "fps": 14.2944,
+  "mean_frame_ms": 69.957,
+  "frames": 859
+ },
+ {
+  "evidence": "ev-6bd292d3",
+  "job": "J-fb41eea0d9f0",
+  "variant": "R3",
+  "apk_sha256_12": "418af3ca4185",
+  "fps": 14.2603,
+  "mean_frame_ms": 70.125,
+  "frames": 856
+ },
+ {
+  "evidence": "ev-6d0e9363",
+  "job": "J-0d60da1fc04b",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3603,
+  "mean_frame_ms": 69.637,
+  "frames": 862
+ },
+ {
+  "evidence": "ev-6d0e9363",
+  "job": "J-0d60da1fc04b",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4408,
+  "mean_frame_ms": 69.248,
+  "frames": 869
+ },
+ {
+  "evidence": "ev-6d0e9363",
+  "job": "J-0d60da1fc04b",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4683,
+  "mean_frame_ms": 69.117,
+  "frames": 868
+ },
+ {
+  "evidence": "ev-6d0e9363",
+  "job": "J-0d60da1fc04b",
+  "variant": "R1",
+  "apk_sha256_12": "e27ecb4ddbbf",
+  "fps": 14.443,
+  "mean_frame_ms": 69.238,
+  "frames": 866
+ },
+ {
+  "evidence": "ev-6d0e9363",
+  "job": "J-0d60da1fc04b",
+  "variant": "R2",
+  "apk_sha256_12": "e27ecb4ddbbf",
+  "fps": 14.5516,
+  "mean_frame_ms": 68.721,
+  "frames": 873
+ },
+ {
+  "evidence": "ev-6d0e9363",
+  "job": "J-0d60da1fc04b",
+  "variant": "R3",
+  "apk_sha256_12": "e27ecb4ddbbf",
+  "fps": 14.4229,
+  "mean_frame_ms": 69.334,
+  "frames": 866
+ },
+ {
+  "evidence": "ev-7e3b2581",
+  "job": "J-9ef0317eec2f",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3556,
+  "mean_frame_ms": 69.659,
+  "frames": 861
+ },
+ {
+  "evidence": "ev-7e3b2581",
+  "job": "J-9ef0317eec2f",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4408,
+  "mean_frame_ms": 69.248,
+  "frames": 869
+ },
+ {
+  "evidence": "ev-7e3b2581",
+  "job": "J-9ef0317eec2f",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4155,
+  "mean_frame_ms": 69.37,
+  "frames": 867
+ },
+ {
+  "evidence": "ev-7e3b2581",
+  "job": "J-9ef0317eec2f",
+  "variant": "R1",
+  "apk_sha256_12": "8bbf395c3356",
+  "fps": 14.2453,
+  "mean_frame_ms": 70.199,
+  "frames": 857
+ },
+ {
+  "evidence": "ev-7e3b2581",
+  "job": "J-9ef0317eec2f",
+  "variant": "R2",
+  "apk_sha256_12": "8bbf395c3356",
+  "fps": 14.2469,
+  "mean_frame_ms": 70.191,
+  "frames": 859
+ },
+ {
+  "evidence": "ev-7e3b2581",
+  "job": "J-9ef0317eec2f",
+  "variant": "R3",
+  "apk_sha256_12": "8bbf395c3356",
+  "fps": 14.2793,
+  "mean_frame_ms": 70.031,
+  "frames": 860
+ },
+ {
+  "evidence": "ev-8c00ca28",
+  "job": "J-4c15da5ced54",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.2746,
+  "mean_frame_ms": 70.055,
+  "frames": 859
+ },
+ {
+  "evidence": "ev-8c00ca28",
+  "job": "J-4c15da5ced54",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3677,
+  "mean_frame_ms": 69.601,
+  "frames": 867
+ },
+ {
+  "evidence": "ev-8c00ca28",
+  "job": "J-4c15da5ced54",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.47,
+  "mean_frame_ms": 69.109,
+  "frames": 871
+ },
+ {
+  "evidence": "ev-8c00ca28",
+  "job": "J-4c15da5ced54",
+  "variant": "R1",
+  "apk_sha256_12": "e03235d7bcf3",
+  "fps": 14.2055,
+  "mean_frame_ms": 70.395,
+  "frames": 852
+ },
+ {
+  "evidence": "ev-8c00ca28",
+  "job": "J-4c15da5ced54",
+  "variant": "R2",
+  "apk_sha256_12": "e03235d7bcf3",
+  "fps": 14.1583,
+  "mean_frame_ms": 70.63,
+  "frames": 852
+ },
+ {
+  "evidence": "ev-8c00ca28",
+  "job": "J-4c15da5ced54",
+  "variant": "R3",
+  "apk_sha256_12": "e03235d7bcf3",
+  "fps": 14.1845,
+  "mean_frame_ms": 70.499,
+  "frames": 855
+ },
+ {
+  "evidence": "ev-9a982a5d",
+  "job": "J-3f2f98b2dc22",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3929,
+  "mean_frame_ms": 69.479,
+  "frames": 863
+ },
+ {
+  "evidence": "ev-9a982a5d",
+  "job": "J-3f2f98b2dc22",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4183,
+  "mean_frame_ms": 69.356,
+  "frames": 865
+ },
+ {
+  "evidence": "ev-9a982a5d",
+  "job": "J-3f2f98b2dc22",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4202,
+  "mean_frame_ms": 69.347,
+  "frames": 868
+ },
+ {
+  "evidence": "ev-9a982a5d",
+  "job": "J-3f2f98b2dc22",
+  "variant": "R1",
+  "apk_sha256_12": "2e4d4b6b1cc2",
+  "fps": 14.1006,
+  "mean_frame_ms": 70.919,
+  "frames": 849
+ },
+ {
+  "evidence": "ev-9a982a5d",
+  "job": "J-3f2f98b2dc22",
+  "variant": "R2",
+  "apk_sha256_12": "2e4d4b6b1cc2",
+  "fps": 14.1555,
+  "mean_frame_ms": 70.644,
+  "frames": 849
+ },
+ {
+  "evidence": "ev-9a982a5d",
+  "job": "J-3f2f98b2dc22",
+  "variant": "R3",
+  "apk_sha256_12": "2e4d4b6b1cc2",
+  "fps": 14.0176,
+  "mean_frame_ms": 71.339,
+  "frames": 844
+ },
+ {
+  "evidence": "ev-9a98rev",
+  "job": "J-9112f3a6f520",
+  "variant": "8c00n1",
+  "apk_sha256_12": "e03235d7bcf3",
+  "fps": 14.125,
+  "mean_frame_ms": 70.796,
+  "frames": 850
+ },
+ {
+  "evidence": "ev-9a98rev",
+  "job": "J-9112f3a6f520",
+  "variant": "8c00n2",
+  "apk_sha256_12": "e03235d7bcf3",
+  "fps": 14.1889,
+  "mean_frame_ms": 70.478,
+  "frames": 851
+ },
+ {
+  "evidence": "ev-9a98rev",
+  "job": "J-9112f3a6f520",
+  "variant": "9a98n1",
+  "apk_sha256_12": "71efd0e94615",
+  "fps": 14.0324,
+  "mean_frame_ms": 71.264,
+  "frames": 847
+ },
+ {
+  "evidence": "ev-9a98rev",
+  "job": "J-9112f3a6f520",
+  "variant": "9a98n2",
+  "apk_sha256_12": "71efd0e94615",
+  "fps": 14.0732,
+  "mean_frame_ms": 71.057,
+  "frames": 845
+ },
+ {
+  "evidence": "ev-9a98rev",
+  "job": "J-9112f3a6f520",
+  "variant": "9a98rev1",
+  "apk_sha256_12": "da3914690e37",
+  "fps": 14.0771,
+  "mean_frame_ms": 71.038,
+  "frames": 845
+ },
+ {
+  "evidence": "ev-9a98rev",
+  "job": "J-9112f3a6f520",
+  "variant": "9a98rev2",
+  "apk_sha256_12": "da3914690e37",
+  "fps": 14.084,
+  "mean_frame_ms": 71.003,
+  "frames": 848
+ },
+ {
+  "evidence": "ev-J-7c02cbe2155a",
+  "job": "J-7c02cbe2155a",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4849,
+  "mean_frame_ms": 69.037,
+  "frames": 869
+ },
+ {
+  "evidence": "ev-J-7c02cbe2155a",
+  "job": "J-7c02cbe2155a",
+  "variant": "D1",
+  "apk_sha256_12": "e66b616706c2",
+  "fps": 13.9793,
+  "mean_frame_ms": 71.534,
+  "frames": 841
+ },
+ {
+  "evidence": "ev-J-8d87f04ac09d",
+  "job": "J-8d87f04ac09d",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4309,
+  "mean_frame_ms": 69.296,
+  "frames": 866
+ },
+ {
+  "evidence": "ev-J-8d87f04ac09d",
+  "job": "J-8d87f04ac09d",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.478,
+  "mean_frame_ms": 69.07,
+  "frames": 871
+ },
+ {
+  "evidence": "ev-J-8d87f04ac09d",
+  "job": "J-8d87f04ac09d",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4309,
+  "mean_frame_ms": 69.296,
+  "frames": 866
+ },
+ {
+  "evidence": "ev-J-8d87f04ac09d",
+  "job": "J-8d87f04ac09d",
+  "variant": "D1",
+  "apk_sha256_12": "e66b616706c2",
+  "fps": 14.032,
+  "mean_frame_ms": 71.265,
+  "frames": 843
+ },
+ {
+  "evidence": "ev-J-8d87f04ac09d",
+  "job": "J-8d87f04ac09d",
+  "variant": "D2",
+  "apk_sha256_12": "e66b616706c2",
+  "fps": 14.0391,
+  "mean_frame_ms": 71.23,
+  "frames": 846
+ },
+ {
+  "evidence": "ev-J-8d87f04ac09d",
+  "job": "J-8d87f04ac09d",
+  "variant": "D3",
+  "apk_sha256_12": "e66b616706c2",
+  "fps": 14.0303,
+  "mean_frame_ms": 71.274,
+  "frames": 845
+ },
+ {
+  "evidence": "ev-J-e42241665377",
+  "job": "J-e42241665377",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.2627,
+  "mean_frame_ms": 70.113,
+  "frames": 859
+ },
+ {
+  "evidence": "ev-a86f420b",
+  "job": "J-9ad564cdc199",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3809,
+  "mean_frame_ms": 69.537,
+  "frames": 863
+ },
+ {
+  "evidence": "ev-a86f420b",
+  "job": "J-9ad564cdc199",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4008,
+  "mean_frame_ms": 69.44,
+  "frames": 869
+ },
+ {
+  "evidence": "ev-a86f420b",
+  "job": "J-9ad564cdc199",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.5183,
+  "mean_frame_ms": 68.879,
+  "frames": 871
+ },
+ {
+  "evidence": "ev-a86f420b",
+  "job": "J-9ad564cdc199",
+  "variant": "R1",
+  "apk_sha256_12": "12c8b42aef3b",
+  "fps": 14.273,
+  "mean_frame_ms": 70.062,
+  "frames": 857
+ },
+ {
+  "evidence": "ev-a86f420b",
+  "job": "J-9ad564cdc199",
+  "variant": "R2",
+  "apk_sha256_12": "12c8b42aef3b",
+  "fps": 14.1722,
+  "mean_frame_ms": 70.561,
+  "frames": 850
+ },
+ {
+  "evidence": "ev-a86f420b",
+  "job": "J-9ad564cdc199",
+  "variant": "R3",
+  "apk_sha256_12": "12c8b42aef3b",
+  "fps": 14.131,
+  "mean_frame_ms": 70.767,
+  "frames": 848
+ },
+ {
+  "evidence": "ev-a86parts",
+  "job": "J-ef53331b86b7",
+  "variant": "full1",
+  "apk_sha256_12": "96826620255e",
+  "fps": 14.2103,
+  "mean_frame_ms": 70.371,
+  "frames": 853
+ },
+ {
+  "evidence": "ev-a86parts",
+  "job": "J-ef53331b86b7",
+  "variant": "full2",
+  "apk_sha256_12": "96826620255e",
+  "fps": 14.254,
+  "mean_frame_ms": 70.156,
+  "frames": 858
+ },
+ {
+  "evidence": "ev-a86parts",
+  "job": "J-ef53331b86b7",
+  "variant": "nosel1",
+  "apk_sha256_12": "23a000f858ba",
+  "fps": 14.3103,
+  "mean_frame_ms": 69.88,
+  "frames": 859
+ },
+ {
+  "evidence": "ev-a86parts",
+  "job": "J-ef53331b86b7",
+  "variant": "nosel2",
+  "apk_sha256_12": "23a000f858ba",
+  "fps": 14.3039,
+  "mean_frame_ms": 69.911,
+  "frames": 861
+ },
+ {
+  "evidence": "ev-a86parts",
+  "job": "J-ef53331b86b7",
+  "variant": "off1",
+  "apk_sha256_12": "77e83634f5b4",
+  "fps": 14.349,
+  "mean_frame_ms": 69.691,
+  "frames": 863
+ },
+ {
+  "evidence": "ev-a86parts",
+  "job": "J-ef53331b86b7",
+  "variant": "off2",
+  "apk_sha256_12": "77e83634f5b4",
+  "fps": 14.3636,
+  "mean_frame_ms": 69.621,
+  "frames": 861
+ },
+ {
+  "evidence": "ev-check59",
+  "job": "J-d5318dbee59d",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3683,
+  "mean_frame_ms": 69.598,
+  "frames": 862
+ },
+ {
+  "evidence": "ev-check59",
+  "job": "J-d5318dbee59d",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4162,
+  "mean_frame_ms": 69.367,
+  "frames": 868
+ },
+ {
+  "evidence": "ev-check59",
+  "job": "J-d5318dbee59d",
+  "variant": "off1",
+  "apk_sha256_12": "77e83634f5b4",
+  "fps": 14.4075,
+  "mean_frame_ms": 69.408,
+  "frames": 867
+ },
+ {
+  "evidence": "ev-check59",
+  "job": "J-d5318dbee59d",
+  "variant": "off2",
+  "apk_sha256_12": "77e83634f5b4",
+  "fps": 14.3537,
+  "mean_frame_ms": 69.668,
+  "frames": 864
+ },
+ {
+  "evidence": "ev-check59",
+  "job": "J-d5318dbee59d",
+  "variant": "pre1",
+  "apk_sha256_12": "992a0e8350b2",
+  "fps": 14.2468,
+  "mean_frame_ms": 70.191,
+  "frames": 854
+ },
+ {
+  "evidence": "ev-check59",
+  "job": "J-d5318dbee59d",
+  "variant": "pre2",
+  "apk_sha256_12": "992a0e8350b2",
+  "fps": 14.3125,
+  "mean_frame_ms": 69.869,
+  "frames": 862
+ },
+ {
+  "evidence": "ev-cpu",
+  "job": "J-71228c3c5832",
+  "variant": "headcpu1",
+  "apk_sha256_12": "c61f85696faa",
+  "fps": 13.7736,
+  "mean_frame_ms": 72.603,
+  "frames": 830
+ },
+ {
+  "evidence": "ev-cpu",
+  "job": "J-71228c3c5832",
+  "variant": "noselcpu1",
+  "apk_sha256_12": "f08de90a53b0",
+  "fps": 13.8131,
+  "mean_frame_ms": 72.395,
+  "frames": 828
+ },
+ {
+  "evidence": "ev-cpu",
+  "job": "J-71228c3c5832",
+  "variant": "post1",
+  "apk_sha256_12": "ce2331f39ab9",
+  "fps": 13.9078,
+  "mean_frame_ms": 71.902,
+  "frames": 836
+ },
+ {
+  "evidence": "ev-cpu",
+  "job": "J-71228c3c5832",
+  "variant": "post2",
+  "apk_sha256_12": "ce2331f39ab9",
+  "fps": 14.0841,
+  "mean_frame_ms": 71.002,
+  "frames": 852
+ },
+ {
+  "evidence": "ev-cpu",
+  "job": "J-71228c3c5832",
+  "variant": "pre1",
+  "apk_sha256_12": "42c909c18de2",
+  "fps": 14.3556,
+  "mean_frame_ms": 69.659,
+  "frames": 861
+ },
+ {
+  "evidence": "ev-cpu",
+  "job": "J-71228c3c5832",
+  "variant": "pre2",
+  "apk_sha256_12": "42c909c18de2",
+  "fps": 14.3418,
+  "mean_frame_ms": 69.726,
+  "frames": 864
+ },
+ {
+  "evidence": "ev-e6492966",
+  "job": "J-429caaef2b0d",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4168,
+  "mean_frame_ms": 69.364,
+  "frames": 869
+ },
+ {
+  "evidence": "ev-e6492966",
+  "job": "J-429caaef2b0d",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3976,
+  "mean_frame_ms": 69.456,
+  "frames": 864
+ },
+ {
+  "evidence": "ev-e6492966",
+  "job": "J-429caaef2b0d",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3903,
+  "mean_frame_ms": 69.491,
+  "frames": 865
+ },
+ {
+  "evidence": "ev-e6492966",
+  "job": "J-429caaef2b0d",
+  "variant": "R1",
+  "apk_sha256_12": "8f7df7e89279",
+  "fps": 14.3118,
+  "mean_frame_ms": 69.872,
+  "frames": 861
+ },
+ {
+  "evidence": "ev-e6492966",
+  "job": "J-429caaef2b0d",
+  "variant": "R2",
+  "apk_sha256_12": "8f7df7e89279",
+  "fps": 14.2706,
+  "mean_frame_ms": 70.074,
+  "frames": 859
+ },
+ {
+  "evidence": "ev-e6492966",
+  "job": "J-429caaef2b0d",
+  "variant": "R3",
+  "apk_sha256_12": "8f7df7e89279",
+  "fps": 14.2627,
+  "mean_frame_ms": 70.113,
+  "frames": 859
+ },
+ {
+  "evidence": "ev-e6492966-a",
+  "job": "J-68c555fd67fc",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4706,
+  "mean_frame_ms": 69.106,
+  "frames": 872
+ },
+ {
+  "evidence": "ev-e6492966-a",
+  "job": "J-68c555fd67fc",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4516,
+  "mean_frame_ms": 69.196,
+  "frames": 867
+ },
+ {
+  "evidence": "ev-e6492966-a",
+  "job": "J-68c555fd67fc",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4562,
+  "mean_frame_ms": 69.174,
+  "frames": 868
+ },
+ {
+  "evidence": "ev-e6492966-a",
+  "job": "J-68c555fd67fc",
+  "variant": "R1",
+  "apk_sha256_12": "77e118c2724e",
+  "fps": 14.2011,
+  "mean_frame_ms": 70.417,
+  "frames": 856
+ },
+ {
+  "evidence": "ev-e6492966-a",
+  "job": "J-68c555fd67fc",
+  "variant": "R2",
+  "apk_sha256_12": "77e118c2724e",
+  "fps": 14.3291,
+  "mean_frame_ms": 69.788,
+  "frames": 863
+ },
+ {
+  "evidence": "ev-e6492966-a",
+  "job": "J-68c555fd67fc",
+  "variant": "R3",
+  "apk_sha256_12": "77e118c2724e",
+  "fps": 14.2944,
+  "mean_frame_ms": 69.957,
+  "frames": 859
+ },
+ {
+  "evidence": "ev-e7e3689f",
+  "job": "J-db463abcf108",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4448,
+  "mean_frame_ms": 69.229,
+  "frames": 869
+ },
+ {
+  "evidence": "ev-e7e3689f",
+  "job": "J-db463abcf108",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3683,
+  "mean_frame_ms": 69.598,
+  "frames": 862
+ },
+ {
+  "evidence": "ev-e7e3689f",
+  "job": "J-db463abcf108",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4168,
+  "mean_frame_ms": 69.364,
+  "frames": 869
+ },
+ {
+  "evidence": "ev-e7e3689f",
+  "job": "J-db463abcf108",
+  "variant": "R1",
+  "apk_sha256_12": "83dd884a4c63",
+  "fps": 14.2349,
+  "mean_frame_ms": 70.25,
+  "frames": 854
+ },
+ {
+  "evidence": "ev-e7e3689f",
+  "job": "J-db463abcf108",
+  "variant": "R2",
+  "apk_sha256_12": "83dd884a4c63",
+  "fps": 14.2651,
+  "mean_frame_ms": 70.101,
+  "frames": 857
+ },
+ {
+  "evidence": "ev-e7e3689f",
+  "job": "J-db463abcf108",
+  "variant": "R3",
+  "apk_sha256_12": "83dd884a4c63",
+  "fps": 14.2024,
+  "mean_frame_ms": 70.41,
+  "frames": 853
+ },
+ {
+  "evidence": "ev-eea849fe",
+  "job": "J-75d6ffad1915",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.5091,
+  "mean_frame_ms": 68.922,
+  "frames": 869
+ },
+ {
+  "evidence": "ev-eea849fe",
+  "job": "J-75d6ffad1915",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3823,
+  "mean_frame_ms": 69.53,
+  "frames": 865
+ },
+ {
+  "evidence": "ev-eea849fe",
+  "job": "J-75d6ffad1915",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.4683,
+  "mean_frame_ms": 69.117,
+  "frames": 868
+ },
+ {
+  "evidence": "ev-eea849fe",
+  "job": "J-75d6ffad1915",
+  "variant": "R1",
+  "apk_sha256_12": "7c93724336c9",
+  "fps": 14.2349,
+  "mean_frame_ms": 70.25,
+  "frames": 854
+ },
+ {
+  "evidence": "ev-eea849fe",
+  "job": "J-75d6ffad1915",
+  "variant": "R2",
+  "apk_sha256_12": "7c93724336c9",
+  "fps": 14.1976,
+  "mean_frame_ms": 70.434,
+  "frames": 852
+ },
+ {
+  "evidence": "ev-eea849fe",
+  "job": "J-75d6ffad1915",
+  "variant": "R3",
+  "apk_sha256_12": "7c93724336c9",
+  "fps": 14.2024,
+  "mean_frame_ms": 70.41,
+  "frames": 853
+ },
+ {
+  "evidence": "ev-fe428850",
+  "job": "J-f7bb4c553ac1",
+  "variant": "A1",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3849,
+  "mean_frame_ms": 69.517,
+  "frames": 863
+ },
+ {
+  "evidence": "ev-fe428850",
+  "job": "J-f7bb4c553ac1",
+  "variant": "A2",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.405,
+  "mean_frame_ms": 69.421,
+  "frames": 863
+ },
+ {
+  "evidence": "ev-fe428850",
+  "job": "J-f7bb4c553ac1",
+  "variant": "A3",
+  "apk_sha256_12": "d109f8ae4902",
+  "fps": 14.3856,
+  "mean_frame_ms": 69.514,
+  "frames": 864
+ },
+ {
+  "evidence": "ev-fe428850",
+  "job": "J-f7bb4c553ac1",
+  "variant": "R1",
+  "apk_sha256_12": "88abf6acde70",
+  "fps": 14.2999,
+  "mean_frame_ms": 69.931,
+  "frames": 861
+ },
+ {
+  "evidence": "ev-fe428850",
+  "job": "J-f7bb4c553ac1",
+  "variant": "R2",
+  "apk_sha256_12": "88abf6acde70",
+  "fps": 14.2603,
+  "mean_frame_ms": 70.125,
+  "frames": 856
+ },
+ {
+  "evidence": "ev-fe428850",
+  "job": "J-f7bb4c553ac1",
+  "variant": "R3",
+  "apk_sha256_12": "88abf6acde70",
+  "fps": 14.2643,
+  "mean_frame_ms": 70.105,
+  "frames": 856
+ },
+ {
+  "evidence": "ev-fix",
+  "job": "J-f5a90d73690d",
+  "variant": "H1",
+  "apk_sha256_12": "316b344f75ff",
+  "fps": 13.9295,
+  "mean_frame_ms": 71.79,
+  "frames": 838
+ },
+ {
+  "evidence": "ev-fix",
+  "job": "J-f5a90d73690d",
+  "variant": "H2",
+  "apk_sha256_12": "316b344f75ff",
+  "fps": 13.8721,
+  "mean_frame_ms": 72.087,
+  "frames": 832
+ },
+ {
+  "evidence": "ev-fix",
+  "job": "J-f5a90d73690d",
+  "variant": "H3",
+  "apk_sha256_12": "316b344f75ff",
+  "fps": 13.9271,
+  "mean_frame_ms": 71.802,
+  "frames": 836
+ },
+ {
+  "evidence": "ev-fix",
+  "job": "J-f5a90d73690d",
+  "variant": "N1",
+  "apk_sha256_12": "ceafa1e32bb0",
+  "fps": 13.9322,
+  "mean_frame_ms": 71.776,
+  "frames": 837
+ },
+ {
+  "evidence": "ev-fix",
+  "job": "J-f5a90d73690d",
+  "variant": "N2",
+  "apk_sha256_12": "ceafa1e32bb0",
+  "fps": 14.0026,
+  "mean_frame_ms": 71.415,
+  "frames": 841
+ },
+ {
+  "evidence": "ev-fix",
+  "job": "J-f5a90d73690d",
+  "variant": "N3",
+  "apk_sha256_12": "ceafa1e32bb0",
+  "fps": 14.0625,
+  "mean_frame_ms": 71.111,
+  "frames": 846
+ },
+ {
+  "evidence": "ev-h3",
+  "job": "J-b52bdb3f0d30",
+  "variant": "off1",
+  "apk_sha256_12": "77e83634f5b4",
+  "fps": 14.3956,
+  "mean_frame_ms": 69.466,
+  "frames": 867
+ },
+ {
+  "evidence": "ev-h3",
+  "job": "J-b52bdb3f0d30",
+  "variant": "off2",
+  "apk_sha256_12": "77e83634f5b4",
+  "fps": 14.3942,
+  "mean_frame_ms": 69.472,
+  "frames": 865
+ },
+ {
+  "evidence": "ev-h3",
+  "job": "J-b52bdb3f0d30",
+  "variant": "pad1",
+  "apk_sha256_12": "6ac2c16a1c5d",
+  "fps": 14.3769,
+  "mean_frame_ms": 69.556,
+  "frames": 863
+ },
+ {
+  "evidence": "ev-h3",
+  "job": "J-b52bdb3f0d30",
+  "variant": "pad2",
+  "apk_sha256_12": "6ac2c16a1c5d",
+  "fps": 14.4048,
+  "mean_frame_ms": 69.421,
+  "frames": 869
+ },
+ {
+  "evidence": "ev-h3",
+  "job": "J-b52bdb3f0d30",
+  "variant": "par1",
+  "apk_sha256_12": "9fce4dfe1a88",
+  "fps": 14.4235,
+  "mean_frame_ms": 69.331,
+  "frames": 867
+ },
+ {
+  "evidence": "ev-h3",
+  "job": "J-b52bdb3f0d30",
+  "variant": "par2",
+  "apk_sha256_12": "9fce4dfe1a88",
+  "fps": 14.4082,
+  "mean_frame_ms": 69.405,
+  "frames": 868
+ },
+ {
+  "evidence": "ev-lay59",
+  "job": "J-27e622f209d4",
+  "variant": "59n1",
+  "apk_sha256_12": "992a0e8350b2",
+  "fps": 14.2833,
+  "mean_frame_ms": 70.012,
+  "frames": 860
+ },
+ {
+  "evidence": "ev-lay59",
+  "job": "J-27e622f209d4",
+  "variant": "59n2",
+  "apk_sha256_12": "992a0e8350b2",
+  "fps": 14.3497,
+  "mean_frame_ms": 69.688,
+  "frames": 864
+ },
+ {
+  "evidence": "ev-lay59",
+  "job": "J-27e622f209d4",
+  "variant": "59pad1",
+  "apk_sha256_12": "bea12a081352",
+  "fps": 14.269,
+  "mean_frame_ms": 70.082,
+  "frames": 857
+ },
+ {
+  "evidence": "ev-lay59",
+  "job": "J-27e622f209d4",
+  "variant": "59pad2",
+  "apk_sha256_12": "bea12a081352",
+  "fps": 14.2517,
+  "mean_frame_ms": 70.167,
+  "frames": 860
+ },
+ {
+  "evidence": "ev-lay59",
+  "job": "J-27e622f209d4",
+  "variant": "a86n1",
+  "apk_sha256_12": "23a000f858ba",
+  "fps": 14.2042,
+  "mean_frame_ms": 70.402,
+  "frames": 855
+ },
+ {
+  "evidence": "ev-lay59",
+  "job": "J-27e622f209d4",
+  "variant": "a86n2",
+  "apk_sha256_12": "23a000f858ba",
+  "fps": 14.2952,
+  "mean_frame_ms": 69.954,
+  "frames": 860
+ },
+ {
+  "evidence": "ev-lay9a",
+  "job": "J-bd2039ec67a9",
+  "variant": "8c00n1",
+  "apk_sha256_12": "e03235d7bcf3",
+  "fps": 14.1937,
+  "mean_frame_ms": 70.454,
+  "frames": 852
+ },
+ {
+  "evidence": "ev-lay9a",
+  "job": "J-bd2039ec67a9",
+  "variant": "8c00n2",
+  "apk_sha256_12": "e03235d7bcf3",
+  "fps": 14.1661,
+  "mean_frame_ms": 70.591,
+  "frames": 852
+ },
+ {
+  "evidence": "ev-lay9a",
+  "job": "J-bd2039ec67a9",
+  "variant": "9a98n1",
+  "apk_sha256_12": "2e4d4b6b1cc2",
+  "fps": 14.1055,
+  "mean_frame_ms": 70.894,
+  "frames": 850
+ },
+ {
+  "evidence": "ev-lay9a",
+  "job": "J-bd2039ec67a9",
+  "variant": "9a98n2",
+  "apk_sha256_12": "2e4d4b6b1cc2",
+  "fps": 14.0087,
+  "mean_frame_ms": 71.384,
+  "frames": 843
+ },
+ {
+  "evidence": "ev-lay9a",
+  "job": "J-bd2039ec67a9",
+  "variant": "cpu59n1",
+  "apk_sha256_12": "8edc1f0d8c5c",
+  "fps": 14.0703,
+  "mean_frame_ms": 71.072,
+  "frames": 846
+ },
+ {
+  "evidence": "ev-nonote",
+  "job": "J-39fd70fcd17f",
+  "variant": "H1",
+  "apk_sha256_12": "0e49472d41e1",
+  "fps": 13.9755,
+  "mean_frame_ms": 71.554,
+  "frames": 841
+ },
+ {
+  "evidence": "ev-nonote",
+  "job": "J-39fd70fcd17f",
+  "variant": "H2",
+  "apk_sha256_12": "0e49472d41e1",
+  "fps": 13.8643,
+  "mean_frame_ms": 72.127,
+  "frames": 832
+ },
+ {
+  "evidence": "ev-nonote",
+  "job": "J-39fd70fcd17f",
+  "variant": "H3",
+  "apk_sha256_12": "0e49472d41e1",
+  "fps": 13.8871,
+  "mean_frame_ms": 72.009,
+  "frames": 838
+ },
+ {
+  "evidence": "ev-nonote",
+  "job": "J-39fd70fcd17f",
+  "variant": "X1",
+  "apk_sha256_12": "9d315c293e21",
+  "fps": 13.9337,
+  "mean_frame_ms": 71.768,
+  "frames": 835
+ },
+ {
+  "evidence": "ev-nonote",
+  "job": "J-39fd70fcd17f",
+  "variant": "X2",
+  "apk_sha256_12": "9d315c293e21",
+  "fps": 14.0104,
+  "mean_frame_ms": 71.375,
+  "frames": 841
+ },
+ {
+  "evidence": "ev-nonote",
+  "job": "J-39fd70fcd17f",
+  "variant": "X3",
+  "apk_sha256_12": "9d315c293e21",
+  "fps": 14.0674,
+  "mean_frame_ms": 71.086,
+  "frames": 847
+ }
+]
