@@ -1058,6 +1058,14 @@ class WF_OT_import_level(bpy.types.Operator, ImportHelper):
 
             context.collection.objects.link(blobj)
 
+            # Editor Label is export metadata, not an OAD field: adding it to
+            # actor.inc would shift every existing type's payload layout.
+            for chunk in _children_by_tag(obj_chunk, 'STR'):
+                name, value = _name_value(chunk)
+                if name == "Editor Label" and value:
+                    blobj["wf_Editor Label"] = str(value[0])
+                    break
+
             # Import PATH animation data (if present)
             try:
                 _import_path_block(blobj, obj_chunk, context.scene)
@@ -1306,6 +1314,11 @@ def export_scene_to_lev(context, filepath: str, mesh_dir: str = "") -> tuple[boo
                 f"{fp(wf_local_max[0])} {fp(wf_local_max[1])} {fp(wf_local_max[2])}  //min(x,y,z)-max(x,y,z)\n\t\t}} }}"
             )
         lines.append(f'\t\t{{ \'STR\' {{ \'NAME\' "Class Name" }} {{ \'DATA\' "{typename}" }} }}')
+        editor_label = obj.get("wf_Editor Label")
+        if editor_label:
+            label = str(editor_label).replace('\\', '\\\\').replace('"', '\\"')
+            label = label.replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t')
+            lines.append(f'\t\t{{ \'STR\' {{ \'NAME\' "Editor Label" }} {{ \'STR\' "{label}" }} }}')
 
         orig_mesh = obj.get("wf_original_mesh_name", None)
         has_mesh = (orig_mesh != "") if orig_mesh is not None else (obj.data and obj.data.polygons)

@@ -320,6 +320,27 @@ For runtime use Taskfile entries: `task run-level -- wflevels/<level>.iff` (no b
 
 ## Authoring conventions
 
+### Labels for runtime-editable objects
+
+Runtime object editing is in development. An object is listed for editing when
+its OAS type declares at least one live field. levcomp normally labels it with
+the type's display name, adding an ordinal when the level has more than one
+editable object of that type, for example `Seahorse 1` and `Seahorse 2`.
+
+To choose a different label, add the string custom property `wf_Editor Label`
+to the object in Blender. The importer preserves it and the exporter writes it
+to the `.lev`. For a level authored directly as text IFF, put this field inside
+the object's `OBJ` block:
+
+```text
+{ 'STR' { 'NAME' "Editor Label" } { 'STR' "Goldie" } }
+```
+
+The property is optional; an absent or empty value uses the automatic label.
+Every editable object's final label must be unique within the level. levcomp
+rejects duplicate labels, including a custom label that matches an automatic
+one. The label is export metadata rather than an OAS field.
+
 ### Materials and Cast1 performance
 
 The modern renderer supports painted textures, palette recoloring, lighting,
