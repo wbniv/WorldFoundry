@@ -152,6 +152,9 @@
 			int32 MusicVb;	/* This is a packedAssetID */
 			int32 MusicSeq;	/* This is a packedAssetID */
 	int32 PrewarmNoPaletteProgram;        /* Default: 0 */
+	int32 EditableObjects;
+	int32 EditableObjectLabels;
+	int32 EditableTypeDescriptors;
 };
 /*============================================================================*/
 #endif         /* levelobj_HT */

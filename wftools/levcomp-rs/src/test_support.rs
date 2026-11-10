@@ -33,6 +33,13 @@ pub fn entry(button_type: ButtonType, name: &str, items: &str, show_as: u8, def:
     }
 }
 
+/// An XDATA entry with the given conversion action (1 = COPY, 2 = OBJECTLIST).
+pub fn xdata(name: &str, action: u8) -> OadEntry {
+    let mut e = entry(ButtonType::XData, name, "", 0, 0);
+    e.union_bytes[0] = action;
+    e
+}
+
 /// A `.oad` whose header names the type `display`.
 pub fn schema(display: &str, entries: Vec<OadEntry>) -> OadFile {
     OadFile {

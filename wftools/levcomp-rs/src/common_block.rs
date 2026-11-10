@@ -44,7 +44,49 @@ impl CommonBlockBuilder {
         new_off as i32
     }
 
+    /// Like [`add`](Self::add), but a run is reused only when **every** byte
+    /// matches. `add` ignores the last byte (iff2lvl's `memcmp(.., size-1)`),
+    /// so a string whose length is 3 mod 4 has no padding to compare and can
+    /// alias a longer one: `"Cat\0"` matches the start of `"Cats…"` (R8).
+    /// `add` keeps that behaviour for the iff2lvl oracle; new data uses this.
+    pub fn add_exact(&mut self, bytes: &[u8]) -> i32 {
+        debug_assert_eq!(bytes.len() % 4, 0);
+        if !bytes.is_empty() && self.data.len() >= bytes.len() {
+            let mut off = 0;
+            while off + bytes.len() <= self.data.len() {
+                if &self.data[off..off + bytes.len()] == bytes {
+                    return off as i32;
+                }
+                off += 4;
+            }
+        }
+        let new_off = self.data.len();
+        self.data.extend_from_slice(bytes);
+        new_off as i32
+    }
+
     pub fn bytes(&self) -> &[u8] {
         &self.data
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// R8: `"Cat"` must not resolve to the start of `"Cats"`.
+    #[test]
+    fn exact_add_does_not_alias_a_longer_string() {
+        let mut legacy = CommonBlockBuilder::new();
+        let cats = legacy.add(b"Cats\0\0\0\0");
+        assert_eq!(legacy.add(b"Cat\0"), cats, "the legacy add aliases (kept for iff2lvl parity)");
+
+        let mut common = CommonBlockBuilder::new();
+        let cats = common.add_exact(b"Cats\0\0\0\0");
+        let cat = common.add_exact(b"Cat\0");
+        assert_ne!(cat, cats);
+        assert_eq!(&common.bytes()[cat as usize..cat as usize + 4], b"Cat\0");
+        assert_eq!(common.add_exact(b"Cat\0"), cat, "an exact match is still shared");
+        assert_eq!(common.add_exact(b"Cats\0\0\0\0"), cats);
     }
 }

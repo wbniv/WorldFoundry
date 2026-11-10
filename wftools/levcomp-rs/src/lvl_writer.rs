@@ -160,6 +160,15 @@ pub fn write(plan: &mut LevelPlan) -> Result<Vec<u8>, String> {
             .unwrap_or_default();
         oad_payloads.push(payload);
     }
+    // Runtime object editing: the Editable Objects list, labels and trimmed
+    // descriptors go at the end of the common area, then into the Level
+    // Object (editable.rs). Nothing editable leaves the -1s pass 2 wrote.
+    let editable = crate::editable::plan(plan.objects, plan.schemas, plan.classes)?;
+    let editable_offsets = crate::editable::emit(&editable, &mut common);
+    crate::editable::patch_levelobj(plan.objects, plan.schemas, &mut oad_payloads, editable_offsets)?;
+    if !editable.indices.is_empty() {
+        eprintln!("  editable objects: {} ({})", editable.indices.len(), editable.labels.join(", "));
+    }
     let room_sizes: Vec<usize> = room_list.iter().map(|r| r.byte_size()).collect();
     let rooms_total: usize = room_sizes.iter().sum();
 

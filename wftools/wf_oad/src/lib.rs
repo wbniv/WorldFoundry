@@ -519,7 +519,7 @@ mod tests {
             ("actbox.oad",    "Activation Box",                    149),
             ("actboxor.oad",  "Activation Box Object Reference",   139),
             ("alias.oad",     "Alias",                               3),
-            ("camera.oad",    "Camera",                            137),
+            ("camera.oad",    "Camera",                            144),
             ("camshot.oad",   "Camera Shot",                       158),
             ("destroy.oad",   "Destroyer",                         138),
             ("director.oad",  "Director",                          129),
@@ -527,8 +527,8 @@ mod tests {
             ("enemy.oad",     "Enemy",                             129),
             ("explode.oad",   "Explosion",                         131),
             ("generato.oad",  "Generator",                         142),
-            ("gold.oad",      "Gold",                              128),
-            ("levelobj.oad",  "Level Object",                      270),
+            ("gold.oad",      "Gold",                              129),
+            ("levelobj.oad",  "Level Object",                      276),
             ("light.oad",     "Light",                             137),
             ("matte.oad",     "Matte",                             129),
             ("missile.oad",   "Missile",                           132),
@@ -572,6 +572,37 @@ mod tests {
         assert!(!show_as_is_live(6 | SHOW_AS_VECTOR));
         // Every base code (0..=12) fits under the mask, so masking never changes one.
         for code in 0..=12u8 { assert_eq!(show_as_base(code), code); }
+    }
+
+    /// R10 (runtime object editing): the Blender generators read their schemas
+    /// from tests/fixtures/, levcomp from wfsource/source/oas/. A field missing
+    /// from a stale fixture is silently dropped from every level a generator
+    /// exports, so every fixture that has a counterpart in wfsource/source/oas
+    /// must be byte-identical to it. After regenerating a `.oad` there, copy it
+    /// here: `cp wfsource/source/oas/<stem>.oad wftools/wf_oad/tests/fixtures/`.
+    /// (`destroy.oad` and `generato.oad` are the 2016 files under their old
+    /// 8.3 names and have no counterpart.)
+    #[test]
+    fn fixtures_match_wfsource_oas() {
+        let manifest = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        let fixtures = manifest.join("tests/fixtures");
+        let source = manifest.join("../../wfsource/source/oas");
+        let mut checked = 0;
+        let mut stale = Vec::new();
+        for entry in std::fs::read_dir(&fixtures).expect("read fixtures") {
+            let path = entry.unwrap().path();
+            if path.extension().and_then(|e| e.to_str()) != Some("oad") { continue; }
+            let twin = source.join(path.file_name().unwrap());
+            if !twin.exists() { continue; }
+            checked += 1;
+            if std::fs::read(&path).unwrap() != std::fs::read(&twin).unwrap() {
+                stale.push(path.file_name().unwrap().to_string_lossy().into_owned());
+            }
+        }
+        stale.sort();
+        assert!(checked >= 25, "expected the fixtures to have counterparts, checked {checked}");
+        assert!(stale.is_empty(),
+            "fixtures differ from wfsource/source/oas (copy them over): {stale:?}");
     }
 
     #[test]

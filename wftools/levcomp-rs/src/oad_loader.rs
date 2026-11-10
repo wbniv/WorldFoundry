@@ -60,6 +60,11 @@ impl OadSchemas {
     pub fn get(&self, class: &str) -> Option<&OadFile> {
         self.by_class.get(&class.to_lowercase())
     }
+
+    #[cfg(test)]
+    pub fn insert(&mut self, class: &str, oad: OadFile) {
+        self.by_class.insert(class.to_lowercase(), oad);
+    }
 }
 
 /// Field binary size when stored in either per-object OAD or common block.
@@ -163,6 +168,11 @@ pub fn precompute_xdata_offsets(
             }
             let action = entry.xdata_conversion_action();
             if !(1..=4).contains(&action) {
+                continue;
+            }
+            // levcomp computes the Level Object's runtime-editing fields after
+            // pass 2 (editable.rs); pass 2 writes -1 for them meanwhile.
+            if crate::editable::is_synthesized(&obj.class_name, entry.name_str()) {
                 continue;
             }
             let text = obj

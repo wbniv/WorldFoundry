@@ -27,6 +27,7 @@
 
 #include <oas/levelobj.ht>
 #include <cstddef>
+#include <cstring>
 
 // True when a payload of payloadBytes holds [offset, offset + size).
 inline bool
@@ -44,6 +45,48 @@ LevelObjPrewarmNoPaletteProgram(const _LevelObj* oad, int payloadBytes)
 	    && LevelObjPayloadHolds(payloadBytes, offsetof(_LevelObj, PrewarmNoPaletteProgram),
 	                            sizeof(oad->PrewarmNoPaletteProgram))
 	    && oad->PrewarmNoPaletteProgram != 0;
+}
+
+// The Runtime Editing fields (levelobj.oas, after PrewarmNoPaletteProgram) are
+// common-area offsets written by levcomp, or -1 when the level has nothing
+// editable. A level compiled before they existed has no bytes for them and
+// reads as -1: nothing editable. docs/plans/2026-10-16-runtime-object-editing.md
+inline int32
+LevelObjAppendedOffset(const _LevelObj* oad, int payloadBytes, size_t offset)
+{
+	if (!oad || !LevelObjPayloadHolds(payloadBytes, offset, sizeof(int32)))
+		return -1;
+	int32 value;
+	std::memcpy(&value, reinterpret_cast<const char*>(oad) + offset, sizeof(value));
+	return value;
+}
+
+// The -1-terminated list of editable level object indices.
+inline int32
+LevelObjEditableObjectsOffset(const _LevelObj* oad, int payloadBytes)
+{
+	return LevelObjAppendedOffset(oad, payloadBytes, offsetof(_LevelObj, EditableObjects));
+}
+
+// One NUL-terminated label per Editable Objects entry, in list order.
+inline int32
+LevelObjEditableObjectLabelsOffset(const _LevelObj* oad, int payloadBytes)
+{
+	return LevelObjAppendedOffset(oad, payloadBytes, offsetof(_LevelObj, EditableObjectLabels));
+}
+
+// The per-type table of trimmed .oad descriptors (layout in levelobj.oas).
+inline int32
+LevelObjEditableTypeDescriptorsOffset(const _LevelObj* oad, int payloadBytes)
+{
+	return LevelObjAppendedOffset(oad, payloadBytes, offsetof(_LevelObj, EditableTypeDescriptors));
+}
+
+// True when the level lists at least one editable object.
+inline bool
+LevelObjHasEditableObjects(const _LevelObj* oad, int payloadBytes)
+{
+	return LevelObjEditableObjectsOffset(oad, payloadBytes) >= 0;
 }
 
 #endif // !_LevelObjFields_HP

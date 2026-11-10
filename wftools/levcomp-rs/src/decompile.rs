@@ -481,6 +481,12 @@ fn emit_oad_fields(
                 } else {
                     -1
                 };
+                // The Level Object's runtime-editing fields are binary blobs
+                // levcomp rebuilds from the level; never emit them as text.
+                if crate::editable::is_synthesized_field(entry.name_str()) {
+                    i += 1;
+                    continue;
+                }
                 match action {
                     4 | 1 | 3 => {
                         // SCRIPT / COPY / CONTEXTUALANIMATIONLIST

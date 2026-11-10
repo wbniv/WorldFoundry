@@ -174,6 +174,32 @@ TYPEHEADER(Level Object,LevelObj)
 	TYPEENTRYBOOLEAN(Prewarm No Palette Program,,0,SHOW_AS_CHECKBOX,"Link the no-palette opaque shader while the level loads: longer level entry and no first-draw pause")
 	PROPERTY_SHEET_FOOTER
 
+	PROPERTY_SHEET_HEADER(Runtime Editing,0)
+@*	----------------------------------------
+@*	Appended after Prewarm No Palette Program, as above: an older level's Level
+@*	Object payload ends before these, and the engine reads them only through
+@*	game/levelobj_fields.hp, so it has nothing editable. levcomp writes all three
+@*	itself (docs/plans/2026-10-16-runtime-object-editing.md, Phase 1); a value
+@*	authored in the .lev is ignored. Each is a common-area offset, or -1 when
+@*	the level has no editable object.
+@*
+@*	Editable Objects: the -1-terminated int32 list of level object indices
+@*	(the .lev order plus 1) of every object whose type declares a SHOW_AS_LIVE
+@*	field (M3, M7).
+	TYPEENTRYXDATA_CONVERT(Editable Objects,,"Editable Objects|",XDATA_NOT_REQUIRED,"Objects editable at runtime; written by levcomp",,,,XDATA_OBJECTLIST)
+@*	Editable Object Labels: one NUL-terminated label per list entry, in list
+@*	order: the type's display name plus an ordinal when the level has more than
+@*	one of that type ("Seahorse 2"), or the object's Editor Label (M6, R1, R3).
+	TYPEENTRYXDATA_CONVERT(Editable Object Labels,,"Editable Object Labels|",XDATA_NOT_REQUIRED,"Picker label of each editable object; written by levcomp",,,,XDATA_COPY)
+@*	Editable Type Descriptors: int32 count, then per editable type, in order of
+@*	first appearance in the list, five int32: type id (objects.lc index), index
+@*	of the first descriptor shipped, payload offset of that descriptor's data in
+@*	the object's OAD payload, common-area offset of the trimmed .oad, and its
+@*	length in bytes. The trimmed .oad is the type's 80-byte .oad header followed
+@*	by its entries from its first own PROPERTY_SHEET_HEADER on (R2, R9).
+	TYPEENTRYXDATA_CONVERT(Editable Type Descriptors,,"Editable Type Descriptors|",XDATA_NOT_REQUIRED,"OAD descriptors of each editable type; written by levcomp",,,,XDATA_COPY)
+	PROPERTY_SHEET_FOOTER
+
 TYPEFOOTER
 
 @*============================================================================

@@ -1313,6 +1313,23 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     add_executable(object_picker_test tests/object_picker_test.cc)
     target_include_directories(object_picker_test PRIVATE ${CMAKE_SOURCE_DIR}/engine)
     add_test(NAME object_picker COMMAND object_picker_test)
+    # Level Object appended fields (game/levelobj_fields.hp): committed levels compiled
+    # before the Runtime Editing appends load unchanged, with nothing editable
+    # (docs/plans/2026-10-16-runtime-object-editing.md, step 7). tests/test_levelobj_fields.py
+    # runs the same probe under ASan with negative controls.
+    add_executable(levelobj_fields_test tests/levelobj_fields_test.cc)
+    target_include_directories(levelobj_fields_test PRIVATE ${SRC})
+    target_compile_definitions(levelobj_fields_test PRIVATE ${WF_DEFS})
+    foreach(_lvl_case "mm_practice/mm_practice.lvl|568" "aquarium_thai_reef/aquarium_thai_reef.lvl|572")
+        string(REPLACE "|" ";" _lvl_parts "${_lvl_case}")
+        list(GET _lvl_parts 0 _lvl_file)
+        list(GET _lvl_parts 1 _lvl_bytes)
+        get_filename_component(_lvl_name "${_lvl_file}" NAME_WE)
+        add_test(NAME levelobj_short_record_${_lvl_name}
+            COMMAND levelobj_fields_test level ${CMAKE_SOURCE_DIR}/wflevels/${_lvl_file})
+        set_tests_properties(levelobj_short_record_${_lvl_name} PROPERTIES PASS_REGULAR_EXPRESSION
+            "payload-bytes=${_lvl_bytes} prewarm=0 editable=-1 labels=-1 types=-1 has-editable=0")
+    endforeach()
     # Android touch-control geometry, hit-test and pointer ownership, including the card-open
     # layout (docs/plans/2026-11-01-touch-controls-over-cards.md). Header-only, so it runs on
     # the desktop build; -UNDEBUG keeps its asserts in Release.

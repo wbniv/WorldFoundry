@@ -17,6 +17,7 @@
 mod asset_registry;
 mod common_block;
 mod decompile;
+mod editable;
 mod lc_parser;
 mod lev_parser;
 mod ini_writer;

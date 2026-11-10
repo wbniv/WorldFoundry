@@ -1,4 +1,8 @@
-"""Level Object compatibility for the appended PrewarmNoPaletteProgram field.
+"""Level Object compatibility for its appended fields.
+
+PrewarmNoPaletteProgram, then the three Runtime Editing offsets (Editable
+Objects, Editable Object Labels, Editable Type Descriptors), were appended to
+levelobj.oas after its original layout.
 
 The engine casts a level's Level Object OAD payload to ``_LevelObj``. The new
 field is appended after the original 568-byte layout, so a level compiled
@@ -10,10 +14,15 @@ length (``_ObjectOnDisk::OADSize``) holds it.
   field) decodes as off, from an allocation of exactly its payload, under
   AddressSanitizer. The unchecked read of the same payload is the negative
   control: ASan must report the over-read, so the probe can detect one.
+* A level compiled after PrewarmNoPaletteProgram but before the Runtime Editing
+  fields (``wflevels/aquarium_thai_reef/aquarium_thai_reef.lvl``, 572 bytes)
+  reads as nothing editable, with the same ASan negative control
+  (docs/plans/2026-10-16-runtime-object-editing.md, verification step 7).
 * The same level's ``.lev`` recompiled with the current schema (levcomp reads
-  ``wfsource/source/oas``) gains exactly the 4 appended bytes, defaults off
-  without editing, decodes on when the field is authored ``True``, and keeps
-  the original 568 bytes unchanged.
+  ``wfsource/source/oas``) gains exactly the 16 appended bytes, defaults off
+  without editing, decodes on when the field is authored ``True``, keeps the
+  original 568 bytes unchanged, and writes -1 (nothing editable) for each
+  Runtime Editing offset.
 
 Needs g++ with -fsanitize=address and the iffcomp/levcomp Rust tools (built
 with cargo when absent; CARGO_TARGET_DIR is honoured).
@@ -33,9 +42,14 @@ import pytest
 REPO = Path(__file__).resolve().parent.parent
 OAS = REPO / "wfsource" / "source" / "oas"
 OLD_LEVEL = REPO / "wflevels" / "mm_practice"
+PREWARM_LEVEL = REPO / "wflevels" / "aquarium_thai_reef" / "aquarium_thai_reef.lvl"
 LEVELOBJ_KIND = 15        # Actor::LevelObj_KIND, objects.e order
 OBJ_HEADER = 68           # sizeof(_ObjectOnDisk); OADSize is the int16 at 66
 ORIGINAL_BYTES = 568      # Level Object payload before the field was appended
+PREWARM_BYTES = 572       # ... with PrewarmNoPaletteProgram, before Runtime Editing
+CURRENT_BYTES = 584       # ... with the three Runtime Editing offsets
+EDITING = ["EditableObjects", "EditableObjectLabels", "EditableTypeDescriptors"]
+NOTHING_EDITABLE = "editable=-1 labels=-1 types=-1 has-editable=0"
 FIELD = "Prewarm No Palette Program"
 
 
@@ -106,10 +120,11 @@ def with_field(lev_text: str, value: bool) -> str:
 
 def test_field_is_appended_after_the_original_layout(probe):
     out = subprocess.run([str(probe), "layout"], capture_output=True, text=True, check=True).stdout
-    assert out.strip() == f"offset={ORIGINAL_BYTES} size={ORIGINAL_BYTES + 4}"
+    assert out.strip() == (f"prewarm={ORIGINAL_BYTES} editable={PREWARM_BYTES} labels={PREWARM_BYTES + 4} "
+                           f"types={PREWARM_BYTES + 8} size={CURRENT_BYTES}")
     header = (OAS / "levelobj.ht").read_text()
     members = re.findall(r"^\s*(?:int32|fixed32)\s+(\w+);", header, re.M)
-    assert members[-1] == "PrewarmNoPaletteProgram", "new Level Object fields must stay appended"
+    assert members[-4:] == ["PrewarmNoPaletteProgram", *EDITING], "new Level Object fields must stay appended"
 
 
 def test_old_level_decodes_off_without_reading_past_its_payload(probe, tmp_path):
@@ -117,9 +132,20 @@ def test_old_level_decodes_off_without_reading_past_its_payload(probe, tmp_path)
     assert len(payload) == ORIGINAL_BYTES
     checked = run(probe, "decode", payload, tmp_path)
     assert checked.returncode == 0, checked.stderr
-    assert checked.stdout.strip() == f"payload-bytes={ORIGINAL_BYTES} prewarm=0"
+    assert checked.stdout.strip() == f"payload-bytes={ORIGINAL_BYTES} prewarm=0 {NOTHING_EDITABLE}"
     # Negative control: the same read without the length check is caught.
     unchecked = run(probe, "unchecked", payload, tmp_path)
+    assert unchecked.returncode != 0 and "heap-buffer-overflow" in unchecked.stderr, unchecked.stderr[-2000:]
+
+
+def test_level_before_runtime_editing_has_nothing_editable(probe, tmp_path):
+    """A level compiled before the Runtime Editing appends loads unchanged, with nothing editable."""
+    payload = level_object_payload(PREWARM_LEVEL.read_bytes())
+    assert len(payload) == PREWARM_BYTES
+    checked = run(probe, "decode", payload, tmp_path)
+    assert checked.returncode == 0, checked.stderr
+    assert checked.stdout.strip() == f"payload-bytes={PREWARM_BYTES} prewarm=0 {NOTHING_EDITABLE}"
+    unchecked = run(probe, "unchecked-editable", payload, tmp_path)
     assert unchecked.returncode != 0 and "heap-buffer-overflow" in unchecked.stderr, unchecked.stderr[-2000:]
 
 
@@ -131,11 +157,12 @@ def test_recompiled_level_round_trips_the_field(probe, tmp_path):
         work = tmp_path / label
         work.mkdir()
         payload = level_object_payload(compile_level(text, work))
-        assert len(payload) == ORIGINAL_BYTES + 4, label
+        assert len(payload) == CURRENT_BYTES, label
         assert payload[:ORIGINAL_BYTES] == old, f"{label}: original Level Object bytes changed"
+        assert payload[PREWARM_BYTES:] == b"\xff" * 12, f"{label}: nothing editable must write -1 offsets"
         decoded = run(probe, "decode", payload, tmp_path)
         assert decoded.returncode == 0, decoded.stderr
         results[label] = decoded.stdout.strip()
-    assert results == {"absent": "payload-bytes=572 prewarm=0",
-                       "false": "payload-bytes=572 prewarm=0",
-                       "true": "payload-bytes=572 prewarm=1"}
+    assert results == {"absent": f"payload-bytes={CURRENT_BYTES} prewarm=0 {NOTHING_EDITABLE}",
+                       "false": f"payload-bytes={CURRENT_BYTES} prewarm=0 {NOTHING_EDITABLE}",
+                       "true": f"payload-bytes={CURRENT_BYTES} prewarm=1 {NOTHING_EDITABLE}"}
