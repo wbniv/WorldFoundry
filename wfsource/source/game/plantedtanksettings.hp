@@ -1,0 +1,45 @@
+//============================================================================
+// plantedtanksettings.hp: the planted tank's settings holder
+// Copyright ( c ) 2026 World Foundry Group
+// Part of the World Foundry 3D video game engine/production environment
+// for more information about World Foundry, see www.worldfoundry.org
+//==============================================================================
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// Version 2 as published by the Free Software Foundation
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//==============================================================================
+//
+// A settings holder (oas/settings.inc, oas/plantedtanksettings.oas): an actor
+// that never renders or updates and only carries the tank's options in its OAD
+// struct. Registered in objects.mac so the type id exists; no level places one
+// until the planted tank migrates to it (runtime object editing, Phase 3).
+//============================================================================
+
+#ifndef _PlantedTankSettings_HP
+#define _PlantedTankSettings_HP
+
+#include "actor.hp"
+
+class PlantedTankSettings: public Actor
+{
+public:
+	PlantedTankSettings(const SObjectStartupData* startupData);
+	virtual ~PlantedTankSettings()	{ }
+
+	virtual EActorKind kind() const;
+
+	virtual void update();
+
+	virtual bool CanRender() const;
+	virtual bool CanUpdate() const;
+};
+
+Actor*
+OadPlantedTankSettings(const SObjectStartupData* startupData);
+
+#endif // !_PlantedTankSettings_HP

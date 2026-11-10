@@ -1,0 +1,31 @@
+/*============================================================================*/
+/* plantedtanksettings.ht: created from OADTYPES.S and plantedtanksettings.oas DO NOT MODIFY */
+/*============================================================================*/
+#include <pigsys/pigsys.hp>
+#include <math/scalar.hp>
+/*      maximum value of a long int     */
+/* minimum value of a long int  */
+#ifndef plantedtanksettings_HT
+#define plantedtanksettings_HT
+ struct _PlantedTankSettings {
+	int32 moveblocPageOffset;                 /* offset in page data for this objects page */
+	int32 toolsetPageOffset;                 /* offset in page data for this objects page */
+	int32 commonPageOffset;                 /* offset in page data for this objects page */
+			int32 MeshName;	/* This is a packedAssetID */
+	int32 meshPageOffset;                 /* offset in page data for this objects page */
+	int32 shadowPageOffset;                 /* offset in page data for this objects page */
+	int32 TemplateObject;        /* Default: 0 */
+	int32 Seed;               /* Minumum: 0 Maximum: 2147483647 Default: 0 */
+	int32 Watertype;               /* Minumum: 0 Maximum: 1 Default: 0 */
+	int32 Growthspeed;               /* Minumum: 0 Maximum: 6 Default: 3 */
+	fixed32 Initialage;         /* Minumum: 0 Maximum: 15728640 */
+    Scalar GetInitialage() const { return Scalar::FromFixed32(Initialage); }
+	int32 Textures;        /* Default: 1 */
+	int32 Sway;        /* Default: 1 */
+	int32 Randomseedonentry;        /* Default: 1 */
+	int32 Seahorses;               /* Minumum: 0 Maximum: 6 Default: 6 */
+	int32 Greeting;        /* Default: 1 */
+};
+/*============================================================================*/
+#endif         /* plantedtanksettings_HT */
+/*============================================================================*/

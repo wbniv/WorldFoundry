@@ -48,6 +48,8 @@ enum EActorKind {
 
         File_KIND,
         Dir_KIND,
+
+        PlantedTankSettings_KIND,
 	};
 
 
