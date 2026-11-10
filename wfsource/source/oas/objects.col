@@ -50,8 +50,6 @@ int collisionTable[] =
 
         	1,	// File
         	1,	// Dir
-
-        	0,	// PlantedTankSettings
 	
 };
 

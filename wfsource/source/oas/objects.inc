@@ -70,9 +70,6 @@
         	
 #include "dir.hp"
 
-        	
-#include "plantedtanksettings.hp"
-
 
 
 

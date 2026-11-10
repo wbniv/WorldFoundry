@@ -54,10 +54,6 @@ OBJECTSHEADER
 
         OBJECTONLYTEMPLATEENTRY(File,1)
         OBJECTONLYTEMPLATEENTRY(Dir,1)
-
-@* Settings holders (settings.inc). Append new types after the last entry, never
-@* between existing ones: the position is the type id compiled into every level.
-        OBJECTENTRY(PlantedTankSettings,0)
 OBJECTSFOOTER
 
 @*============================================================================

@@ -133,11 +133,6 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
 			object = NULL; 
 			break;
 
-        	case Actor::PlantedTankSettings_KIND:
-			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
-				object = OadPlantedTankSettings(startData); 
-			break;
-
 
 
 
@@ -291,10 +286,6 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
 			break;
         	case Actor::Dir_KIND:
 			object = OadDir(startData); 
-			break;
-
-        	case Actor::PlantedTankSettings_KIND:
-			object = OadPlantedTankSettings(startData); 
 			break;
 
 
