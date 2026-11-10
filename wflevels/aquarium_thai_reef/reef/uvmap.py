@@ -14,8 +14,8 @@ Key families, in order of precedence:
   SKINS          creature skins in cells 9-15: projected (mirrored repeat)
                  within a sub-rect at a per-key frequency, or a base-to-top
                  gradient ('height')
-  SWATCH         static surface tiles 0-7, world projected (0.37 cycles/unit;
-                 1.1 for the polyp tile)
+  SWATCH         static surface tiles 0-7, world projected, mirrored repeat
+                 (0.37 cycles/unit; 1.1 for the coral-surface and sponge tiles)
 """
 from .atlas import CELL, CLAM_SHELL, FISH_DARK, FISH_GREY, FISH_WHITE, WATER_X0
 
@@ -50,6 +50,12 @@ SKINS = {
     # square; 4 cycles/unit puts about 7 px (0.03 units) per scale, some 20
     # scales along the 0.62-unit body.
     'humbug_scales': (15, (0, 192, 64, 64), 4.0, 'project'),
+    # Goniopora flowerpot (2026-11-10): tan-brown corallite skeleton, striped purple polyp
+    # columns, banded tentacles and pale mouths, each at small-object density.
+    'gon_body': (15, (64, 192, 64, 64), 5.0, 'project'),
+    'gon_polyp': (15, (128, 192, 64, 64), 7.0, 'project'),
+    'gon_tentacle': (15, (192, 192, 64, 64), 9.0, 'project'),
+    'gon_mouth': (15, (0, 64, 64, 32), 9.0, 'project'),
     'fan_grad': (15, (0, 128, 256, 32), 0.0, 'height'),
     'star_grad': (15, (0, 160, 256, 32), 0.0, 'height'),
 }
@@ -138,11 +144,16 @@ def face_uvs(mesh):
             out.append(row)
         else:
             tile = SWATCH[key]
-            frequency = 1.1 if tile == 1 else .37
+            # The coral-surface and sponge tiles carry small features (corallites, pores),
+            # so they repeat 3x denser than the rock-scale tiles.
+            frequency = 1.1 if tile in (1, 2) else .37
             row = []
+            # Mirrored repeat (as the creature skins): a plain `% 1` wrap gave every face
+            # that crossed a repeat boundary UVs spanning the whole tile, a smeared streak
+            # that the flat tiles hid and the painted ones (2026-11-10) would show.
             for x, y, z in pts:
-                u = (tile % 4 + .04 + .92 * ((x * frequency + y * .11) % 1)) / 4
-                v = (tile // 4 + .04 + .92 * ((z * frequency + y * .11) % 1)) / 4
+                u = (tile % 4 + .04 + .92 * _mirror(x * frequency + y * .11)) / 4
+                v = (tile // 4 + .04 + .92 * _mirror(z * frequency + y * .11)) / 4
                 row.append((u, v))
             out.append(row)
     return out

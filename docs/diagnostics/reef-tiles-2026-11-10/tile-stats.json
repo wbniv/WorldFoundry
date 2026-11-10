@@ -1,0 +1,334 @@
+{
+ "realistic": {
+  "before": [
+   {
+    "tile": 0,
+    "name": "coralline",
+    "std": 5.2,
+    "mean_rgb": [
+     171,
+     105,
+     148
+    ]
+   },
+   {
+    "tile": 1,
+    "name": "coral surface",
+    "std": 7.0,
+    "mean_rgb": [
+     205,
+     148,
+     131
+    ]
+   },
+   {
+    "tile": 2,
+    "name": "sponge",
+    "std": 6.3,
+    "mean_rgb": [
+     180,
+     110,
+     66
+    ]
+   },
+   {
+    "tile": 3,
+    "name": "sand",
+    "std": 3.0,
+    "mean_rgb": [
+     213,
+     197,
+     158
+    ]
+   },
+   {
+    "tile": 4,
+    "name": "rock",
+    "std": 8.2,
+    "mean_rgb": [
+     115,
+     111,
+     91
+    ]
+   },
+   {
+    "tile": 5,
+    "name": "flower heads",
+    "std": 6.0,
+    "mean_rgb": [
+     151,
+     115,
+     164
+    ]
+   },
+   {
+    "tile": 6,
+    "name": "clam mantle",
+    "std": 12.9,
+    "mean_rgb": [
+     61,
+     153,
+     155
+    ]
+   },
+   {
+    "tile": 7,
+    "name": "boxfish",
+    "std": 8.2,
+    "mean_rgb": [
+     225,
+     186,
+     75
+    ]
+   }
+  ],
+  "after": [
+   {
+    "tile": 0,
+    "name": "coralline",
+    "std": 41.6,
+    "mean_rgb": [
+     171,
+     105,
+     148
+    ]
+   },
+   {
+    "tile": 1,
+    "name": "coral surface",
+    "std": 40.8,
+    "mean_rgb": [
+     200,
+     145,
+     128
+    ]
+   },
+   {
+    "tile": 2,
+    "name": "sponge",
+    "std": 39.1,
+    "mean_rgb": [
+     182,
+     112,
+     71
+    ]
+   },
+   {
+    "tile": 3,
+    "name": "sand",
+    "std": 27.1,
+    "mean_rgb": [
+     212,
+     197,
+     158
+    ]
+   },
+   {
+    "tile": 4,
+    "name": "rock",
+    "std": 39.7,
+    "mean_rgb": [
+     115,
+     111,
+     91
+    ]
+   },
+   {
+    "tile": 5,
+    "name": "flower heads",
+    "std": 46.0,
+    "mean_rgb": [
+     151,
+     115,
+     164
+    ]
+   },
+   {
+    "tile": 6,
+    "name": "clam mantle",
+    "std": 32.0,
+    "mean_rgb": [
+     61,
+     153,
+     155
+    ]
+   },
+   {
+    "tile": 7,
+    "name": "boxfish",
+    "std": 8.2,
+    "mean_rgb": [
+     225,
+     186,
+     75
+    ]
+   }
+  ]
+ },
+ "anime": {
+  "before": [
+   {
+    "tile": 0,
+    "name": "coralline",
+    "std": 2.2,
+    "mean_rgb": [
+     224,
+     102,
+     179
+    ]
+   },
+   {
+    "tile": 1,
+    "name": "coral surface",
+    "std": 6.9,
+    "mean_rgb": [
+     254,
+     157,
+     110
+    ]
+   },
+   {
+    "tile": 2,
+    "name": "sponge",
+    "std": 5.8,
+    "mean_rgb": [
+     246,
+     109,
+     62
+    ]
+   },
+   {
+    "tile": 3,
+    "name": "sand",
+    "std": 0.0,
+    "mean_rgb": [
+     244,
+     219,
+     157
+    ]
+   },
+   {
+    "tile": 4,
+    "name": "rock",
+    "std": 9.5,
+    "mean_rgb": [
+     111,
+     96,
+     82
+    ]
+   },
+   {
+    "tile": 5,
+    "name": "flower heads",
+    "std": 6.9,
+    "mean_rgb": [
+     204,
+     108,
+     224
+    ]
+   },
+   {
+    "tile": 6,
+    "name": "clam mantle",
+    "std": 16.7,
+    "mean_rgb": [
+     49,
+     194,
+     207
+    ]
+   },
+   {
+    "tile": 7,
+    "name": "boxfish",
+    "std": 7.2,
+    "mean_rgb": [
+     255,
+     217,
+     56
+    ]
+   }
+  ],
+  "after": [
+   {
+    "tile": 0,
+    "name": "coralline",
+    "std": 27.5,
+    "mean_rgb": [
+     222,
+     102,
+     179
+    ]
+   },
+   {
+    "tile": 1,
+    "name": "coral surface",
+    "std": 24.5,
+    "mean_rgb": [
+     245,
+     155,
+     108
+    ]
+   },
+   {
+    "tile": 2,
+    "name": "sponge",
+    "std": 25.1,
+    "mean_rgb": [
+     240,
+     111,
+     64
+    ]
+   },
+   {
+    "tile": 3,
+    "name": "sand",
+    "std": 9.8,
+    "mean_rgb": [
+     243,
+     219,
+     157
+    ]
+   },
+   {
+    "tile": 4,
+    "name": "rock",
+    "std": 28.3,
+    "mean_rgb": [
+     111,
+     96,
+     82
+    ]
+   },
+   {
+    "tile": 5,
+    "name": "flower heads",
+    "std": 19.1,
+    "mean_rgb": [
+     205,
+     109,
+     225
+    ]
+   },
+   {
+    "tile": 6,
+    "name": "clam mantle",
+    "std": 28.3,
+    "mean_rgb": [
+     49,
+     194,
+     207
+    ]
+   },
+   {
+    "tile": 7,
+    "name": "boxfish",
+    "std": 7.2,
+    "mean_rgb": [
+     255,
+     217,
+     56
+    ]
+   }
+  ]
+ }
+}

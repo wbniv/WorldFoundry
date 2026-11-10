@@ -97,25 +97,54 @@ def soft_corals(mesh):
                     mesh.face([point(r0,t0),point(r1,t0),point(r1,t1),point(r0,t1)],'scroll')
 
 
+FLOWERPOT_RADII = (.48, .34, .28)
+FLOWERPOT_POLYPS = 100
+
+
 def flowerpot(mesh, center, ranges=None):
-    x,y,z = center
-    mesh.ellipsoid((x,y,z), (.48,.34,.28), 'flowerpot', 32, 16)
-    for i in range(20):
+    """Goniopora: a dome almost hidden under ~100 short polyps (reef flowerpot review 2026-11-10).
+
+    The body is a cheap 16 x 8 ellipsoid in the tan-brown corallite skin. Polyps stand
+    on Fibonacci points over the dome down to about its equator, along the surface
+    normal; each is a striped column, a pale mouth and a ring of five tentacles.
+    `ranges` gets (first vertex, end vertex, base) per polyp for the 12-curve sway rig.
+    """
+    x, y, z = center
+    rx, ry, rz = FLOWERPOT_RADII
+    mesh.ellipsoid((x, y, z), (rx, ry, rz), 'gon_body', 16, 8)
+    golden = math.pi * (3 - math.sqrt(5))
+    placed = i = 0
+    while placed < FLOWERPOT_POLYPS and i < 4 * FLOWERPOT_POLYPS:
+        k = i + .5
+        cz = 1 - k / (1.05 * FLOWERPOT_POLYPS)
+        i += 1
+        if cz < .02:
+            break
+        r = math.sqrt(max(0.0, 1 - cz * cz))
+        a = golden * i
+        nx, ny, nz = r * math.cos(a), r * math.sin(a), cz
+        base = (x + rx * nx, y + ry * ny, z + rz * nz)
+        gx, gy, gz = nx / rx, ny / ry, nz / rz
+        gl = math.sqrt(gx * gx + gy * gy + gz * gz)
+        gx, gy, gz = gx / gl, gy / gl, gz / gl
+        h = .13 + .05 * math.sin(i * 2.7)
+        tip = (base[0] + gx * h, base[1] + gy * h, base[2] + gz * h)
         start = len(mesh.vertices)
-        t=math.tau*i/20
-        h=.42 + .10*math.sin(i*2.4)
-        base=(x+.29*math.cos(t),y+.21*math.sin(t),z+.12)
-        tip=(x+.36*math.cos(t),y+.27*math.sin(t),z+h)
-        mesh.swept_tube([base,tip], .027, 'flowerpot_tip', 10)
-        # Short radiating tentacles give each polyp its flower-like crown.
-        mesh.ellipsoid(tip, (.035,.035,.025), 'flowerpot_tip', 12, 6)
-        for petal in range(8):
-            a = math.tau*petal/8 + t*.3
-            end = (tip[0]+.075*math.cos(a), tip[1]+.075*math.sin(a),
-                   tip[2]+.018+.008*math.sin(3*a))
-            mesh.swept_tube([tip,end], .010, 'flowerpot_tip', 5)
+        mesh.swept_tube([base, tip], .022, 'gon_polyp', 5)
+        mesh.ellipsoid(tip, (.026, .026, .018), 'gon_mouth', 5, 2)
+        ux, uy, uz = (-gy, gx, 0) if abs(gz) < .9 else (1, 0, 0)
+        ul = math.sqrt(ux * ux + uy * uy + uz * uz)
+        ux, uy, uz = ux / ul, uy / ul, uz / ul
+        vx, vy, vz = gy * uz - gz * uy, gz * ux - gx * uz, gx * uy - gy * ux
+        for petal in range(5):
+            t = math.tau * petal / 5 + i
+            d = (math.cos(t) * ux + math.sin(t) * vx, math.cos(t) * uy + math.sin(t) * vy,
+                 math.cos(t) * uz + math.sin(t) * vz)
+            end = tuple(tip[j] + .05 * d[j] + .012 * (gx, gy, gz)[j] for j in range(3))
+            mesh.swept_tube([tip, end], .008, 'gon_tentacle', 3)
         if ranges is not None:
             ranges.append((start, len(mesh.vertices), base))
+        placed += 1
 
 
 def leather_coral(mesh, center, ranges=None):

@@ -53,6 +53,10 @@ FISH_GREY = (UTIL_X + 152, UTIL_Y + 8)
 # square at cell rows 192-255, so the projected UVs stay isotropic. Realistic only
 # paints the net; anime keeps the body one flat tone.
 HUMBUG_SCALES = (UTIL_X, UTIL_Y + 192, 64, 64)   # x, y, width, height
+# Goniopora flowerpot skins (2026-11-10), each a 64-px region of cell 15:
+# skeleton, polyp column, tentacles, mouth.
+GONIOPORA = {'body': (UTIL_X + 64, UTIL_Y + 192, 64, 64), 'polyp': (UTIL_X + 128, UTIL_Y + 192, 64, 64),
+             'tentacle': (UTIL_X + 192, UTIL_Y + 192, 64, 64), 'mouth': (UTIL_X, UTIL_Y + 64, 64, 32)}
 
 
 NUDI_RIDGE_V = (.267, .5, .733)      # ridge centres across the mantle (v)
@@ -275,6 +279,220 @@ def _detail(tile, x, y, seed):
     return (_smooth_noise(x, y, 15, seed + 7) - .5) * 22
 
 
+# Surface tiles 0-6 (reef tiles review, 2026-11-10). Each is painted from what the
+# material looks like, with real contrast (luminance std dev about 25-50, against
+# 5-8 before), shifted to keep its mean colour, and tileable so the world-projected
+# repeat has no seams. Anime posterises the same shapes to three flat tones.
+# Tile 7 is the boxfish's approved skin and keeps its own painter (_detail).
+SURFACE_TILES = (0, 1, 2, 3, 4, 5, 6)
+
+
+def _tvalue(ix, iy, n, seed):
+    return _noise((ix % n) * 1543, (iy % n) * 2917, seed)
+
+
+def _tnoise(x, y, cell, seed):
+    """Tileable smooth value noise over the 256-px tile, lattice spacing `cell`."""
+    n = CELL // cell
+    gx, gy = x / cell, y / cell
+    ix, iy = int(gx), int(gy)
+    fx, fy = gx - ix, gy - iy
+    fx, fy = fx * fx * (3 - 2 * fx), fy * fy * (3 - 2 * fy)
+    a, b = _tvalue(ix, iy, n, seed), _tvalue(ix + 1, iy, n, seed)
+    c, d = _tvalue(ix, iy + 1, n, seed), _tvalue(ix + 1, iy + 1, n, seed)
+    return (a * (1 - fx) + b * fx) * (1 - fy) + (c * (1 - fx) + d * fx) * fy
+
+
+def _fbm(x, y, seed, cells=(64, 32, 16, 8)):
+    total = weight = 0.0
+    w = 1.0
+    for k, cell in enumerate(cells):
+        total += w * _tnoise(x, y, cell, seed + 17 * k)
+        weight += w
+        w *= .55
+    return total / weight
+
+
+def _voronoi(x, y, cell, seed, jitter=.8):
+    """Tileable cellular noise: (nearest distance, second distance, angle to nearest, id)."""
+    n = CELL // cell
+    cx, cy = x // cell, y // cell
+    best = second = 1e9
+    angle, ident = 0.0, 0
+    for dy in (-1, 0, 1):
+        for dx in (-1, 0, 1):
+            gx, gy = cx + dx, cy + dy
+            wx, wy = gx % n, gy % n
+            px = (gx + .5 + jitter * (_noise(wx, wy, seed) - .5)) * cell
+            py = (gy + .5 + jitter * (_noise(wx, wy, seed + 1) - .5)) * cell
+            dist = math.hypot(x - px, y - py)
+            if dist < best:
+                second, best = best, dist
+                angle, ident = math.atan2(y - py, x - px), wx + n * wy
+            elif dist < second:
+                second = dist
+    return best, second, angle, ident
+
+
+def _surface_texel(tile, x, y, seed, fine=True):
+    """Luminance offset for surface tile `tile` at (x, y) inside its 256-px cell.
+
+    fine=False drops the per-texel grain (and the sand's specks), for anime, whose
+    three posterised tones would otherwise break into speckle along each edge.
+    """
+    grain = _noise(x, y, seed + 900 + tile) - .5 if fine else 0.0
+    if tile == 0:   # crustose coralline algae: mottled crust, pale growing margins, fine seams
+        # Warp the cells so the crust patches are irregular, not paving stones.
+        wx = (x + 14 * (_tnoise(x, y, 64, seed + 13) - .5)) % CELL
+        wy = (y + 14 * (_tnoise(x, y, 64, seed + 14) - .5)) % CELL
+        d1, d2, _, ident = _voronoi(int(wx), int(wy), 32, seed + 10)
+        edge = d2 - d1
+        tone = (_noise(ident, 7, seed + 11) - .5) * 30
+        mottle = (_fbm(x, y, seed + 12, (32, 16, 8)) - .5) * 80
+        seam = -26 * math.exp(-(edge / 1.4) ** 2)
+        rim = 24 * math.exp(-((edge - 4.0) / 2.6) ** 2)
+        return tone + mottle + seam + rim + 10 * grain
+    if tile == 1:   # coral surface: corallite pits, septa and ridged walls
+        d1, d2, angle, _ = _voronoi(x, y, 16, seed + 20, jitter=.55)
+        edge = d2 - d1
+        if d1 < 3.2:
+            v = -42 * (1 - d1 / 3.2) - 10
+        else:
+            v = 8 * math.cos(angle * 12) * math.exp(-((d1 - 4.6) ** 2) / 3)
+        if edge < 2.4:
+            v += 30 * (1 - edge / 2.4)
+        return v + (_fbm(x, y, seed + 21, (64, 32)) - .5) * 22 + 6 * grain
+    if tile == 2:   # sponge: pores in a ridged, mottled surface
+        d1, _, _, _ = _voronoi(x, y, 16, seed + 30, jitter=.7)
+        ridge = 15 * math.sin((x + 9 * _tnoise(x, y, 32, seed + 31)) * math.tau / 32)
+        if d1 < 3.0:
+            return -62 + 6 * grain
+        rim = 16 * math.exp(-((d1 - 3.8) ** 2) / 1.5)
+        return ridge + rim + (_fbm(x, y, seed + 32, (32, 16)) - .5) * 30 + 8 * grain
+    if tile == 3:   # sand: wind-ripple bands and scattered dark and pale grains
+        warp = 10 * _tnoise(x, y, 64, seed + 40)
+        ripple = 15 * math.sin((y + warp) * math.tau / 32)
+        speck = _noise(x, y, seed + 41)
+        dot = (-40 if speck < .07 else 30 if speck > .95 else 0) if fine else 0
+        return ripple + dot + (_fbm(x, y, seed + 42, (32, 8)) - .5) * 16 + 12 * grain
+    if tile == 4:   # live rock: crevices, pits, mineral grain and flecks
+        crack = abs(_fbm(x, y, seed + 50, (64, 32, 16)) - .5)
+        d1, _, _, _ = _voronoi(x, y, 32, seed + 51, jitter=.9)
+        v = (_fbm(x, y, seed + 52, (64, 32, 16)) - .5) * 70
+        v -= 24 * math.exp(-(crack / .016) ** 2)
+        if d1 < 5.5:
+            v -= 30 * (1 - d1 / 5.5) ** 1.5
+        fleck = _noise(x, y, seed + 53)
+        v += 22 if fleck > .988 and fine else 0
+        return v + 12 * grain
+    if tile == 5:   # zoanthid flower heads: dark mouths, striped discs, tentacle crowns
+        d1, d2, angle, _ = _voronoi(x, y, 32, seed + 60, jitter=.3)
+        if d1 < 3.5:
+            return -60 + 6 * grain
+        if d1 < 8.5:
+            return 6 + 14 * math.cos(angle * 10) + 6 * grain
+        if d1 < 13.5 and d2 - d1 > 2:
+            return 34 * math.cos(angle * 8) ** 2 - 4 + 6 * grain
+        return -46 + 8 * grain
+    if tile == 6:   # giant clam mantle: wavy bands and iridescent spots
+        band = 20 * math.sin((x + 7 * math.sin(y * math.tau / 64)) * math.tau / 32)
+        d1, _, _, _ = _voronoi(x, y, 16, seed + 70, jitter=.8)
+        spot = 42 * max(0.0, 1 - d1 / 2.8)
+        return band + spot + (_fbm(x, y, seed + 71, (32, 16)) - .5) * 20 + 6 * grain
+    raise ValueError(tile)
+
+
+def _surface_shades(seed, style):
+    """Per-tile 256 x 256 luminance offsets with a zero mean (the mean colour holds).
+
+    Realistic uses the painted offsets; anime posterises them to three flat tones
+    (dark, mid, light), so the same shapes read under its toon bands and outlines.
+    """
+    key = (seed, style)
+    if key in _SURFACE_CACHE:
+        return _SURFACE_CACHE[key]
+    shades = {}
+    for tile in SURFACE_TILES:
+        values = [_surface_texel(tile, x, y, seed, fine=style == 'realistic')
+                  for y in range(CELL) for x in range(CELL)]
+        if style == 'anime':
+            ordered = sorted(values)
+            lo, hi = ordered[len(ordered) // 4], ordered[3 * len(ordered) // 4]
+            dark, light = ANIME_TONES.get(tile, (-42.0, 38.0))
+            values = [dark if v < lo else light if v > hi else 0.0 for v in values]
+        mean = sum(values) / len(values)
+        values = [v - mean for v in values]
+        if style == 'realistic':
+            # Scale the painted offsets to the tile's target contrast (std dev).
+            std = (sum(v * v for v in values) / len(values)) ** .5 or 1.0
+            gain = SURFACE_CONTRAST[tile] / std
+            values = [v * gain for v in values]
+        shades[tile] = values
+    _SURFACE_CACHE[key] = shades
+    return shades
+
+
+# Target luminance std dev per surface tile, realistic style (the brief: 30-60).
+# Sand and the clam mantle stay lower so the sand bed and the mantle do not get noisy.
+SURFACE_CONTRAST = {0: 42, 1: 42, 2: 40, 3: 28, 4: 40, 5: 46, 6: 32}
+# Anime dark and light tone offsets; the sand stays quiet so its ripples do not band the floor.
+ANIME_TONES = {3: (-16.0, 12.0)}
+_SURFACE_CACHE = {}
+
+
+def _goniopora_texel(part, x, y, style, seed):
+    """Goniopora skins: x, y inside the part's region. Anime posterises to three tones."""
+    grain = _noise(x, y, seed + 801) - .5
+    if part == 'body':      # tan-brown skeleton, dark corallite pits, pale walls
+        base = (150, 116, 82) if style == 'realistic' else (176, 128, 84)
+        n = 64
+        d1, d2 = _voronoi_n(x, y, 8, n, seed + 802)
+        v = -70 * max(0.0, 1 - d1 / 3.0) + 26 * max(0.0, 1 - (d2 - d1) / 1.6) + 12 * grain
+    elif part == 'polyp':   # purple column with fine stripes along the polyp
+        base = (142, 100, 176) if style == 'realistic' else (176, 102, 220)
+        v = 20 * math.cos(x * math.tau / 8) + 10 * (_tnoise_n(x, y, 16, 64, seed + 803) - .5) + 8 * grain
+    elif part == 'tentacle':  # lighter purple with pale bands
+        base = (170, 132, 202) if style == 'realistic' else (204, 140, 240)
+        v = 26 * math.cos(y * math.tau / 10) + 8 * grain
+    else:                   # pale cream-lilac mouth disc
+        base = (226, 210, 222) if style == 'realistic' else (246, 226, 244)
+        v = 14 * (_tnoise_n(x, y, 8, 64, seed + 804) - .5) + 6 * grain
+    if style == 'anime':
+        v = -34 if v < -12 else 26 if v > 12 else 0
+    return [max(0, min(255, round(c + v))) for c in base]
+
+
+def _tnoise_n(x, y, cell, size, seed):
+    """Tileable value noise over a `size`-px region."""
+    n = size // cell
+    gx, gy = x / cell, y / cell
+    ix, iy = int(gx), int(gy)
+    fx, fy = gx - ix, gy - iy
+    fx, fy = fx * fx * (3 - 2 * fx), fy * fy * (3 - 2 * fy)
+    a, b = _tvalue(ix, iy, n, seed), _tvalue(ix + 1, iy, n, seed)
+    c, d = _tvalue(ix, iy + 1, n, seed), _tvalue(ix + 1, iy + 1, n, seed)
+    return (a * (1 - fx) + b * fx) * (1 - fy) + (c * (1 - fx) + d * fx) * fy
+
+
+def _voronoi_n(x, y, cell, size, seed):
+    """Cellular noise tileable over a `size`-px region: (nearest, second nearest)."""
+    n = size // cell
+    cx, cy = x // cell, y // cell
+    best = second = 1e9
+    for dy in (-1, 0, 1):
+        for dx in (-1, 0, 1):
+            gx, gy = cx + dx, cy + dy
+            wx, wy = gx % n, gy % n
+            px = (gx + .5 + .6 * (_noise(wx, wy, seed) - .5)) * cell
+            py = (gy + .5 + .6 * (_noise(wx, wy, seed + 1) - .5)) * cell
+            dist = math.hypot(x - px, y - py)
+            if dist < best:
+                second, best = best, dist
+            elif dist < second:
+                second = dist
+    return best, second
+
+
 def _humbug_scale_texel(x, y, style, seed):
     """Dascyllus reticulatus body: pale grey, blackish scale margins (FishBase).
 
@@ -296,6 +514,7 @@ def write_atlas(path, seed=20261102, style='realistic'):
     if style not in ('realistic', 'anime'):
         raise ValueError(f'unknown reef style: {style}')
     palette = BASE if style == 'realistic' else ANIME
+    surface = _surface_shades(seed, style)
     out=bytearray(struct.pack('<BBBHHBHHHHBB',0,0,2,0,0,0,0,0,SIZE,SIZE,24,0x20))
     for y in range(SIZE):
         for x in range(SIZE):
@@ -303,6 +522,9 @@ def write_atlas(path, seed=20261102, style='realistic'):
             local_x, local_y = x % CELL, y % CELL
             if i == WORM_CELL:
                 rgb = _worm_texel(local_x, local_y, style)
+            elif i in surface:
+                rgb = [max(0, min(255, round(c + surface[i][local_y * CELL + local_x])))
+                       for c in palette[i]]
             elif i < len(TILES):
                 base = palette[i]
                 detail = _detail(i, local_x, local_y, seed)
@@ -331,6 +553,9 @@ def write_atlas(path, seed=20261102, style='realistic'):
                 hx, hy, hw, hh = HUMBUG_SCALES
                 if hx <= x < hx + hw and hy <= y < hy + hh:
                     rgb = _humbug_scale_texel(x - hx, y - hy, style, seed)
+                for part, (gx0, gy0, gw, gh) in GONIOPORA.items():
+                    if gx0 <= x < gx0 + gw and gy0 <= y < gy0 + gh:
+                        rgb = _goniopora_texel(part, x - gx0, y - gy0, style, seed)
                 if UTIL_Y <= y < UTIL_Y + 16 and WATER_X0 <= x < WATER_X0 + 96:
                     band = (x - WATER_X0) // 16
                     if style == 'anime':

@@ -204,6 +204,22 @@ One rule for every creature: **object-local UVs into its own cell**, so texel de
 - **Sea fan and feather star** (D3): a base-to-tip gradient only. *As built,* the feather star's pinnules keep the tan polyp tile: with gradient pinnules it lost its two-tone, feathery look.
 - *As built:* every face's UVs now come from one pure-Python module, `reef/uvmap.py`, which the generator, the texel audit and the review renders all use. Colour references are in [`thai-reef-skin-colours.md`](../reference/thai-reef-skin-colours.md); the shared research ledger was another session's uncommitted file, so W0 went into a separate file.
 
+### W2 follow-up: surface tiles and the flowerpot (2026‑11‑10, approved)
+
+Will found the static corals and rock reading as solid colours: the shared surface tiles had a luminance standard deviation of 5–8, against 70 for the painted nudibranch.
+
+- **Surface tiles 0–6 repainted** ([review](../diagnostics/reef-tiles-2026-11-10/README.md)):
+    - The tiles now show coralline crust, corallite pits, sponge pores, sand ripples, rock crevices, zoanthid crowns and clam bands. Their standard deviation is 27–46, and their mean colours are kept.
+    - Anime posterises the same shapes to three tones.
+    - The world-projected surfaces now use a mirrored repeat, which ends the wrap-smeared faces, and the sponge tile repeats at 1.1 cycles per unit.
+    - Approved: Will, 2026‑11‑10, "ok flowerpot now".
+- **The flowerpot rebuilt as *Goniopora*** ([review](../diagnostics/reef-flowerpot-2026-11-10/README.md)):
+    - About 100 short polyps on a 16 × 8 body.
+    - Four dedicated skins in cell 15: a tan-brown corallite skeleton, striped purple columns, banded tentacles and pale mouths.
+    - Still 12 sway curves, now grouped by azimuth sector.
+    - 6,640 → 6,824 triangles; it is an animated actor, so the static budgets do not change.
+    - Approved: Will, 2026‑11‑10, "ok, new approved".
+
 ## W3 — placement: nothing floats, everything attaches (T3)
 
 **As built and approved** ([placement review](../diagnostics/reef-placement-2026-11-08/README.md)). A three-quarter view shows the depth that the front camera hides:

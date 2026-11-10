@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/f13ce8bf) | Reef tanks finished; style review (step 15) parked by Will |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/6ba89afa) | Reef step 14: mark the textured GL/Metal scene comparisons expected-fail |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/d49cc850) | Reef step 14 PASS: GL sweep identical; untextured GL/Metal scene strict pass |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/51bab0f5) | Metal: compile the style shader as a separate program (reef step 14 strict sweep) |
@@ -32,6 +33,11 @@
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/b756367f) | Plan: finish the reef tanks (worms, skins, placement, acceptance) |
 
 <!--history-meta v1
+f13ce8bf	author	Will Norris
+f13ce8bf	added	1
+f13ce8bf	deleted	1
+f13ce8bf	files	1
+f13ce8bf	body	Will, 2026-11-10: "Park it, ship as is". Both looks ship as built with\ncaustics off; the review and the caustics call become a parked T5 item.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 6ba89afa	author	Will Norris
 6ba89afa	added	1
 6ba89afa	deleted	1

@@ -1,5 +1,6 @@
 """Independent deformers for the fan worms and living soft corals."""
 import itertools
+import math
 import struct
 from . import corals, life
 
@@ -12,7 +13,13 @@ def bind_exported_mesh(path, Mesh, dfrm, kind):
     owners = [None] * len(source.vertices)
     roots = [[] for _ in range(group_count)]
     for i, (start, end, root) in enumerate(ranges):
-        group = i * group_count // len(ranges) if kind == 'flowerpot' else i
+        if kind == 'flowerpot':
+            # Twelve azimuth sectors of the dome, so each curve sways a coherent patch of
+            # polyps about its own centre (the polyps are on Fibonacci points, so index
+            # order is scattered over the whole dome).
+            group = int((math.atan2(root[1], root[0]) / math.tau % 1) * group_count) % group_count
+        else:
+            group = i
         roots[group].append(root)
         owners[start:end] = [group] * (end-start)
     for group in range(group_count):
