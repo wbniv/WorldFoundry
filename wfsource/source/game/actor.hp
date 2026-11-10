@@ -24,6 +24,7 @@
 
 #ifndef _ACTOR_HP
 #define _ACTOR_HP
+#include <cstdint>
 
 //============================================================================
 
@@ -151,7 +152,7 @@ public:
 	virtual void update();
 	// Called after a validated runtime property edit has updated this actor's
 	// OAD overlay. Field IDs are the original OAD descriptor indices.
-	virtual void OnPropertiesChanged(const uint32* fields, size_t count) { (void)fields; (void)count; }
+	virtual void OnPropertiesChanged(const std::uint32_t* fields, size_t count) { (void)fields; (void)count; }
 	void UpdateAnimation();
 	void StartFrame();				// this is a catch all, it is guaranteed to run after all actors have run update, but before prepareToRender
 

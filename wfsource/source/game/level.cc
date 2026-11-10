@@ -797,7 +797,7 @@ Level::Level
 	for (uint32_t actor : _editableIndices) editableObject[actor] = true;
 	_editableObjectData.resize(size_t(_levelData->objectCount));
 	_editableCommonPages.resize(size_t(_levelData->objectCount));
-	_editableCommonBlocks.resize(size_t(_levelData->objectCount));
+	_editableCommonBlocks = new CommonBlock*[size_t(_levelData->objectCount)]();
 	initModels();
 	_theAssetManager->LoadPermanents();
 
@@ -870,7 +870,7 @@ Level::Level
 			auto& copy = _editableObjectData[size_t(index)];
 			auto& pages = _editableCommonPages[size_t(index)];
 			auto& commonBlock = _editableCommonBlocks[size_t(index)];
-			commonBlock.reset(new CommonBlock(editableCommon, int(editableCommonSize)));
+			commonBlock = new CommonBlock(editableCommon, int(editableCommonSize));
 			commonBlock->SetOverrides(&pages);
 			copy.resize(sizeof(_ObjectOnDisk) + size_t(objdata->OADSize));
 			std::memcpy(copy.data(), objdata, copy.size());
@@ -922,7 +922,7 @@ Level::Level
 		}
 		ConstructStartupData( startupData, objdata, index );
 		if (_editableCommonBlocks[size_t(index)])
-			startupData.commonBlock = _editableCommonBlocks[size_t(index)].get();
+			startupData.commonBlock = _editableCommonBlocks[size_t(index)];
 
 		constructObject( startupData, index );
 
@@ -1092,6 +1092,9 @@ Level::~Level()
 			MEMORY_DELETE((*_memory),_actors[actorIndex],Actor);
 		}
 	}
+	for (int index = 0; index < _levelData->objectCount; ++index) delete _editableCommonBlocks[index];
+	delete[] _editableCommonBlocks;
+	_editableCommonBlocks = nullptr;
 
 	// Shut down the scripting VMs while their mailboxes and script data are
 	// still alive, before releasing the per-level allocator that owns them.
