@@ -1336,6 +1336,10 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     target_compile_options(oad_field_location_test PRIVATE -UNDEBUG)
     add_test(NAME oad_field_location COMMAND oad_field_location_test
         ${CMAKE_SOURCE_DIR}/wftools/wf_oad/tests/fixtures/levelobj.oad)
+    add_executable(runtime_editable_list_test tests/runtime_editable_list_test.cc)
+    target_include_directories(runtime_editable_list_test PRIVATE ${CMAKE_SOURCE_DIR}/engine)
+    target_compile_options(runtime_editable_list_test PRIVATE -UNDEBUG)
+    add_test(NAME runtime_editable_list COMMAND runtime_editable_list_test)
     # Android touch-control geometry, hit-test and pointer ownership, including the card-open
     # layout (docs/plans/2026-11-01-touch-controls-over-cards.md). Header-only, so it runs on
     # the desktop build; -UNDEBUG keeps its asserts in Release.

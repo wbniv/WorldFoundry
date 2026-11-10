@@ -64,6 +64,8 @@
 #include "mailbox.hp"
 #include "actor.hp"
 #include "../../../engine/runtime_properties.hpp"
+#include <cstdint>
+#include <vector>
 
 //============================================================================
 // Class and Structure Prototypes
@@ -232,6 +234,9 @@ private:
    const CommonBlock*      _commonBlock;
 	_LevelObj*					_levelOad;
 	int32						_levelOadSize = 0;	// bytes of *_levelOad on disk (its OADSize)
+	// Kept alive through actor destruction; each listed object gets its own
+	// _ObjectOnDisk and OAD payload before its constructor reads either one.
+	std::vector<std::vector<std::uint8_t>> _editableObjectData;
 	LevelRooms*				    	_theLevelRooms;
 	ActiveRooms*					_theActiveRooms;  // needs to be after _numRooms
    BaseObjectList             _actors;

@@ -2,6 +2,7 @@
 #include "../../../engine/runtime_property_host.hpp"
 #include "../../../engine/room_render_settings.hpp"
 #include "../../../engine/runtime_diagnostics.hpp"
+#include "../../../engine/runtime_editable_list.hpp"
 #include "runtime_profile.hp"
 #include "bitmap_presenter.hp"
 #include <algorithm>
@@ -768,6 +769,17 @@ Level::Level
 		", Common Data size " << _levelData->commonDataLength << std::endl; )
 
 	initLevelOad();
+	std::vector<uint32_t> editableIndices;
+	if (!wfedit::editableIndices((char*)_levelData + _levelData->commonDataOffset,
+	                             size_t(_levelData->commonDataLength),
+	                             LevelObjEditableObjectsOffset(_levelOad, _levelOadSize),
+	                             size_t(_levelData->objectCount), editableIndices)) {
+		std::fprintf(stderr, "Invalid editable object list in level\n");
+		std::abort();
+	}
+	std::vector<bool> editableObject(size_t(_levelData->objectCount), false);
+	for (uint32_t actor : editableIndices) editableObject[actor] = true;
+	_editableObjectData.resize(size_t(_levelData->objectCount));
 	initModels();
 	_theAssetManager->LoadPermanents();
 
@@ -832,6 +844,16 @@ Level::Level
 		_ObjectOnDisk * objdata = ( _ObjectOnDisk * )( (( char * )_levelData ) + objArray[index] );
 
 		SObjectStartupData startupData;
+		if (editableObject[size_t(index)]) {
+			if (objdata->OADSize < 0) {
+				std::fprintf(stderr, "Invalid OAD size for editable object %d\n", index);
+				std::abort();
+			}
+			auto& copy = _editableObjectData[size_t(index)];
+			copy.resize(sizeof(_ObjectOnDisk) + size_t(objdata->OADSize));
+			std::memcpy(copy.data(), objdata, copy.size());
+			objdata = reinterpret_cast<_ObjectOnDisk*>(copy.data());
+		}
 		ConstructStartupData( startupData, objdata, index );
 
 		constructObject( startupData, index );
