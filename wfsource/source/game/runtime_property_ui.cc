@@ -24,7 +24,9 @@ void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect
  syncText(editor,phone);auto& f=editor;auto* object=f.edit.object();if(!object)return;text(225,150,4,object->title);
  struct ArrowPainter {decltype(rect)& draw;void Rect(float x0,float y0,float x1,float y1,uint32_t c){draw(x0,y0,x1-x0,y1-y0,c);}} painter{rect};
  auto item=[&](bool focused,float x,float y,float width,float height,const std::string& label,bool ghost=false){rect(x,y,width,height,focused?0x497b51ffu:ghost?0x1c302affu:0x233e31ffu);// One-line rows centre their label (mockup 2); taller rows (slider, options) keep it at the top.
-  const float middle=height<=80?y+height*.5f:y+28.5f;text(x+18,middle-3.5f*3,3,label.substr(0,size_t(width/19)),ghost?0x9eb1a7ffu:0xf1f2e4ffu);};
+  const float middle=height<=80?y+height*.5f:y+28.5f;
+  if(ghost){const uint32_t c=0x9eb1a7ffu;rect(x+14,middle-3,20,15,c);rect(x+17,middle-12,3,10,c);rect(x+28,middle-12,3,10,c);rect(x+20,middle-15,8,3,c);}
+  text(x+(ghost?46:18),middle-3.5f*3,3,label.substr(0,size_t((width-(ghost?28:0))/19)),ghost?0x9eb1a7ffu:0xf1f2e4ffu);};
  if(phone){text(225,350,4,"Edit properties on your connected phone");}
  else {
   size_t sectionStart=f.section>5?f.section-5:0;
@@ -60,7 +62,7 @@ void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect
     // Glyphs draw after every rectangle, so the open list cannot cover row text: while it is
     // open, rows show only their label, short enough to end left of the list.
     const bool underList=f.list;
-    std::string rowText=field.kind==9||radio||own?field.label:field.label+": "+value+(field.readonly?" (read only)":"");
+    std::string rowText=field.kind==9||radio||own?field.label:field.label+": "+value;
     if(underList)rowText=rowText.substr(0,20);
     item(focusedRow,600,y,1080,rowHeight-12,rowText,field.readonly);
     DrawnRow drawn{field.id,wfprops::controlName(control),600,y,1680,y+rowHeight-12,1};

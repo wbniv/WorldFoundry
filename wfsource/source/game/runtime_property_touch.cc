@@ -156,7 +156,8 @@ void renderForm(Canvas& c,wfprops::Form& form){
   for(size_t j=0;j<rows[size_t(i)];++j){const auto& marker=object->fields[j];if(marker.kind==6)group=marker.label;else if(marker.kind==5||marker.kind==7)group.clear();}
   if(!group.empty())c.label(listX+13,y+12,12,group,accent,false,listW-28);
   float labelY=y+(group.empty()?24:32),valueY=y+(group.empty()?52:59);
-  c.label(listX+13,labelY,17,field.label,field.readonly?muted:ink,true,listW-28);
+  if(field.readonly){c.box(listX+13,labelY-3,13,10,muted);c.box(listX+15,labelY-9,2,7,muted);c.box(listX+22,labelY-9,2,7,muted);c.box(listX+17,labelY-11,5,2,muted);}
+  c.label(listX+(field.readonly?33:13),labelY,17,field.label,field.readonly?muted:ink,true,listW-(field.readonly?48:28));
   const auto control=wfprops::presentation(field);
   // Segments: a TOGGLE enum with up to four options, and a two-option radio (unchanged).
   const int optionCount=choices(field);
