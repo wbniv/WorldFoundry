@@ -15,6 +15,16 @@ def catalog():
     bindings=json.loads((ROOT/'wflevels/aquarium_plants/settings-bindings.json').read_text())
     return M.catalog(ROOT/'wflevels/aquarium_plants/settings.oad',bindings,1)
 
+def test_normalized_schema_reports_original_oad_indices(catalog):
+    oad = ROOT/'wfsource/source/oas/plantedtanksettings.oad'
+    schema = M.oad_schema(oad)
+    raw = oad.read_bytes()
+    for field in schema['fields']:
+        offset = 80 + field['index'] * 1491
+        name = raw[offset + 1:offset + 65].split(b'\0', 1)[0].decode()
+        assert field['key'] == name
+    assert next(f['index'] for f in schema['fields'] if f['key'] == 'Hold seconds') > 0
+
 def test_real_core_edit_isolation_and_readback(catalog,tmp_path):
     second=M.catalog(ROOT/'wflevels/aquarium_plants/settings.oad',json.loads((ROOT/'wflevels/aquarium_plants/settings-bindings.json').read_text()),2)
     payload=catalog[:4]+struct.pack('<I',2)+catalog[8:]+second[8:]
