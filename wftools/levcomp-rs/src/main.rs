@@ -25,6 +25,8 @@ mod lvl_writer;
 mod mesh_bbox;
 mod oad_loader;
 mod rooms;
+#[cfg(test)]
+mod test_support;
 
 use std::path::Path;
 use std::process;

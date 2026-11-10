@@ -88,9 +88,18 @@ typedef char buttonType;
 #define			SHOW_AS_FILENAME		12
 
 
+/* Modifier bits, OR-ed onto one of the presentations above. */
+#define			SHOW_AS_LIVE			0x40	/* the engine re-reads the field after construction, so a runtime edit takes effect */
 #define			SHOW_AS_VECTOR			0x80
+#define			SHOW_AS_BASE_MASK		0x3f	/* the presentation without the modifier bits */
 //} visualRepresentation;
 typedef char visualRepresentation;
+
+/* Compare a showAs byte only through ShowAsBase: a live radio field is
+   SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE (0x45), never equal to SHOW_AS_RADIOBUTTONS.
+   The Rust twin is wf_oad::show_as_base. */
+static inline int ShowAsBase( int showAs ) { return showAs & SHOW_AS_BASE_MASK; }
+static inline int ShowAsIsLive( int showAs ) { return ( showAs & SHOW_AS_LIVE ) != 0; }
 
 /*============================================================================*/
 /* WARNING: if you change this array, you must update oadFlagNames in oad.cc in levelcon */

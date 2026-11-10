@@ -399,8 +399,11 @@ fn int_value(entry: &OadEntry, chunk: Option<&wf_iff::IffChunk>, _obj: &LevObjec
     const SHOW_AS_DROPMENU: u8 = 4;
     const SHOW_AS_RADIOBUTTONS: u8 = 5;
     let items = entry.string_str();
-    let use_str = entry.show_as == SHOW_AS_DROPMENU
-        || entry.show_as == SHOW_AS_RADIOBUTTONS;
+    // Compare the presentation without its modifier bits: a radio field
+    // declared SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE is 0x45 (R4).
+    let show_as = entry.show_as_base();
+    let use_str = show_as == SHOW_AS_DROPMENU
+        || show_as == SHOW_AS_RADIOBUTTONS;
     if use_str && !items.is_empty() && items.contains('|') {
         let label = field_str_child_only(chunk);
         if !label.is_empty() {

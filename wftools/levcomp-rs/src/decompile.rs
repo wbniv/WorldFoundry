@@ -301,7 +301,7 @@ fn emit_oad_fields(
                 let items = entry.string_str();
                 // SHOW_AS_DROPMENU (4): enum label stored in string; no DATA chunk.
                 // All other showAs values: DATA chunk with integer + STR with decimal.
-                if entry.show_as == 4 {
+                if entry.show_as_base() == 4 {
                     let labels: Vec<&str> = items.split('|').collect();
                     let label = labels.get(raw as usize).copied().unwrap_or("");
                     out.push_str(&format!(
@@ -341,7 +341,7 @@ fn emit_oad_fields(
                 };
                 let items = entry.string_str();
                 // Same showAs logic as Int32.
-                if entry.show_as == 4 {
+                if entry.show_as_base() == 4 {
                     let labels: Vec<&str> = items.split('|').collect();
                     let label = labels.get(raw as usize).copied().unwrap_or("");
                     out.push_str(&format!(
@@ -379,7 +379,7 @@ fn emit_oad_fields(
                     entry.def
                 };
                 let items = entry.string_str();
-                if entry.show_as == 4 {
+                if entry.show_as_base() == 4 {
                     let labels: Vec<&str> = items.split('|').collect();
                     let label = labels.get(raw as usize).copied().unwrap_or("");
                     out.push_str(&format!(
@@ -906,6 +906,49 @@ mod tests {
         assert_eq!(select_entry(&entries, "1").unwrap().offset, 0x1000);   // decimal index
         assert!(select_entry(&entries, "9").is_err());                    // index out of range
         assert!(select_entry(&entries, "NOPE").is_err());                 // unknown tag
+    }
+
+    /// A live enum field round-trips through levcomp: the compiler resolves its
+    /// `.lev` label to the index, and the decompiler writes the same label back.
+    /// Both sides compared the raw showAs byte before R4, so a field declared
+    /// `SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE` (0x45) lost its label and compiled to
+    /// the schema default, and a live drop menu decompiled as a bare number.
+    #[test]
+    fn live_enum_fields_round_trip_their_labels() {
+        use crate::asset_registry::AssetRegistry;
+        use crate::common_block::CommonBlockBuilder;
+        use crate::oad_loader::serialize_oad_data;
+        use crate::test_support::{entry, object, schema, str_field};
+        use wf_oad::SHOW_AS_LIVE;
+        const DROPMENU: u8 = 4;
+        const RADIO: u8 = 5;
+
+        let oad = schema("Live Test", vec![
+            entry(ButtonType::Int32, "Water type", "Freshwater|Saltwater", RADIO | SHOW_AS_LIVE, 0),
+            entry(ButtonType::Int32, "Kind", "A|B|C", DROPMENU | SHOW_AS_LIVE, 0),
+            entry(ButtonType::Int32, "Plain radio", "Off|On", RADIO, 0),
+        ]);
+        // Labels only, no DATA child: the value can come only from the label.
+        let obj = object("Live01", "livetest", vec![
+            str_field("I32", "Water type", "Saltwater"),
+            str_field("I32", "Kind", "C"),
+            str_field("I32", "Plain radio", "On"),
+        ]);
+        let mut common = CommonBlockBuilder::new();
+        let bytes = serialize_oad_data(&oad, &obj, 0, &mut common, &HashMap::new(),
+                                       &HashMap::new(), &mut AssetRegistry::new(), 0);
+        let values: Vec<i32> = bytes.chunks(4).map(|c| i32::from_le_bytes(c.try_into().unwrap())).collect();
+        assert_eq!(values, vec![1, 2, 1], "live labels must resolve like plain ones");
+
+        let classes = ClassMap { names: vec!["nullobject".into(), "livetest".into()] };
+        let schemas = OadSchemas::empty();
+        let (assets, names) = (HashMap::new(), Vec::new());
+        let ctx = DecompileCtx { classes: &classes, schemas: &schemas, asset_map: &assets, obj_names: &names };
+        let mut text = String::new();
+        emit_oad_fields(&oad, &bytes, common.bytes(), &ctx, &mut text);
+        assert!(text.contains("'STR' \"C\""), "live drop menu must decompile to its label:\n{text}");
+        assert!(!text.contains("'DATA' 2l"), "live drop menu must not decompile to a number:\n{text}");
+        assert!(text.contains("'DATA' 1l  //Freshwater|Saltwater"), "radio keeps DATA + STR:\n{text}");
     }
 
     #[test]

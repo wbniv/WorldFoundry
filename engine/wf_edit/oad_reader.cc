@@ -79,7 +79,11 @@ bool LoadOad(const std::string& oad_path, std::vector<OadEntry>& out)
         oe.name = std::string(d.name, ::strnlen(d.name, sizeof(d.name)));
         oe.display_name = std::string(d.xdata.displayName,
                                       ::strnlen(d.xdata.displayName, sizeof(d.xdata.displayName)));
-        oe.show_as = static_cast<int>(d.showAs);
+        // The presentation without SHOW_AS_LIVE / SHOW_AS_VECTOR, so every
+        // exact SHOW_AS_* comparison downstream (property_panel.cc WidgetFor,
+        // level_doc.cc enum detection) sees a live field as its plain kind.
+        oe.show_as = ShowAsBase(static_cast<unsigned char>(d.showAs));
+        oe.live = ShowAsIsLive(static_cast<unsigned char>(d.showAs));
         oe.min = static_cast<long>(d.min);
         oe.max = static_cast<long>(d.max);
         oe.def = static_cast<long>(d.def);

@@ -187,6 +187,26 @@ impl ButtonType {
     }
 }
 
+// ── showAs modifier bits ──────────────────────────────────────────────────────
+
+/// `SHOW_AS_LIVE` (oad.h): the engine re-reads this field after construction,
+/// so a runtime edit takes effect. A modifier bit OR-ed onto a presentation,
+/// e.g. `SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE`, like `SHOW_AS_VECTOR`.
+pub const SHOW_AS_LIVE: u8 = 0x40;
+/// `SHOW_AS_VECTOR` (oad.h): an object reference drawn as a vector.
+pub const SHOW_AS_VECTOR: u8 = 0x80;
+/// The presentation code without the modifier bits (`SHOW_AS_BASE_MASK`, oad.h).
+pub const SHOW_AS_BASE_MASK: u8 = 0x3f;
+
+/// The presentation (`SHOW_AS_NUMBER` … `SHOW_AS_FILENAME`) of a raw showAs
+/// byte, with `SHOW_AS_LIVE` and `SHOW_AS_VECTOR` taken off. Compare this,
+/// never the raw byte: a live radio field is `0x45`, not `5`. The C++ twin is
+/// `ShowAsBase` in wfsource/source/oas/oad.h.
+pub fn show_as_base(show_as: u8) -> u8 { show_as & SHOW_AS_BASE_MASK }
+
+/// True when a raw showAs byte carries `SHOW_AS_LIVE`.
+pub fn show_as_is_live(show_as: u8) -> bool { show_as & SHOW_AS_LIVE != 0 }
+
 // ── xdata conversion actions ──────────────────────────────────────────────────
 
 pub const XDATA_CONVERSION_NAMES: &[&str] = &[
@@ -297,6 +317,10 @@ impl OadEntry {
     pub fn name_str(&self) -> &str { cstr(&self.name) }
     pub fn string_str(&self) -> &str { cstr(&self.string) }
     pub fn help_str(&self) -> &str { cstr(&self.help_message) }
+    /// The presentation without modifier bits; see [`show_as_base`].
+    pub fn show_as_base(&self) -> u8 { show_as_base(self.show_as) }
+    /// True when the field is declared `SHOW_AS_LIVE`; see [`show_as_is_live`].
+    pub fn is_live(&self) -> bool { show_as_is_live(self.show_as) }
     /// Raw bytes of the Windows file-dialog filter string (null-separated pairs).
     /// Format: `Desc1\0Pattern1\0Desc2\0Pattern2\0\0`.
     pub fn lpstr_filter_bytes(&self) -> &[u8] { &self.lpstr_filter }
@@ -535,6 +559,19 @@ mod tests {
             assert_eq!(oad.entries.len(), *expected_entries,
                 "entry count mismatch in {filename}");
         }
+    }
+
+    #[test]
+    fn show_as_modifiers_mask_off() {
+        const RADIO: u8 = 5;
+        assert_eq!(show_as_base(RADIO | SHOW_AS_LIVE), RADIO);
+        assert_eq!(show_as_base(6 | SHOW_AS_VECTOR), 6);
+        assert_eq!(show_as_base(2 | SHOW_AS_LIVE | SHOW_AS_VECTOR), 2);
+        assert!(show_as_is_live(RADIO | SHOW_AS_LIVE));
+        assert!(!show_as_is_live(RADIO));
+        assert!(!show_as_is_live(6 | SHOW_AS_VECTOR));
+        // Every base code (0..=12) fits under the mask, so masking never changes one.
+        for code in 0..=12u8 { assert_eq!(show_as_base(code), code); }
     }
 
     #[test]

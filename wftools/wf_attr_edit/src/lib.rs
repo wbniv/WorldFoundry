@@ -41,7 +41,7 @@ pub fn check(kind: u32, low: i32, high: i32, scale: u32, width: u32,
     };
     let f = FieldDescriptor {key:"value".into(),label:"value".into(),kind:field_kind,
         help:String::new(),group:String::new(),min_raw:low,max_raw:if kind==3 {max_len as i32} else {high},
-        default_raw:0,byte_width:width as u8,fp_scale:scale as f64,show_as:0,file_filter:String::new()};
+        default_raw:0,byte_width:width as u8,fp_scale:scale as f64,show_as:0,live:false,file_filter:String::new()};
     let schema=Schema{name:String::new(),fields:vec![f]};
     let mut values=Values::new();values.insert("value".into(),parsed);
     if wf_attr_validate::validate(&schema,&values).iter().any(|i|i.is_error) {2} else {0}

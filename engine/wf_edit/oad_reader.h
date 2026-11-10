@@ -28,7 +28,8 @@ struct OadEntry {
     std::string              display_name;  // short UI label ("Max Speed"); xdata.displayName.
                                             // For GROUP_START/STOP this slot is junk ("displayName")
                                             // — the group title lives in `name`, not here.
-    int                      show_as = 0;
+    int                      show_as = 0;     // SHOW_AS_* without modifier bits (ShowAsBase)
+    bool                     live = false;    // declared SHOW_AS_LIVE
     long                     min = 0;
     long                     max = 0;
     long                     def = 0;

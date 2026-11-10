@@ -62,9 +62,13 @@ struct PyField {
     /// Serialized byte width (1, 2, or 4).  0 for Group/Skip/variable.
     #[pyo3(get)]
     byte_width: u8,
-    /// Raw `visualRepresentation`: 0=plain, 4/5=dropmenu, 6=hidden, 8=checkbox.
+    /// `visualRepresentation` without its modifier bits (SHOW_AS_LIVE,
+    /// SHOW_AS_VECTOR): 0=plain, 4/5=dropmenu, 6=hidden, 8=checkbox.
     #[pyo3(get)]
     show_as: u8,
+    /// True when the field is declared SHOW_AS_LIVE (re-read by the engine).
+    #[pyo3(get)]
+    live: bool,
     enum_items: Vec<String>,
     /// For `ObjRef` fields: optional class-name filter from the OAD `string`
     /// field (e.g. `"Room"`).  Empty string means any object type is accepted.
@@ -120,6 +124,7 @@ fn field_from_desc(desc: &FieldDescriptor) -> PyField {
         fp_scale:        desc.fp_scale,
         byte_width:      desc.byte_width,
         show_as:         desc.show_as,
+        live:            desc.live,
         enum_items,
         class_tag,
         file_filter,

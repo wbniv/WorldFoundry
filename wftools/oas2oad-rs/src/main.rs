@@ -78,6 +78,7 @@ typedef char buttonType;
 #define SHOW_AS_COMBOBOX    10
 #define SHOW_AS_TEXTEDITOR  11
 #define SHOW_AS_FILENAME    12
+#define SHOW_AS_LIVE        0x40
 #define SHOW_AS_VECTOR      0x80
 
 typedef unsigned char visualRepresentation;

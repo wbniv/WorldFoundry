@@ -126,14 +126,18 @@ pub struct FieldDescriptor {
     /// `display_value = raw_value / fp_scale`.
     /// 0.0 for non-Float fields.
     pub fp_scale: f64,
-    /// Raw `visualRepresentation` byte from the OAD entry.
-    /// Useful for rendering hints:
+    /// The OAD entry's `visualRepresentation`, without its modifier bits
+    /// (`wf_oad::show_as_base`: `SHOW_AS_LIVE` 0x40 and `SHOW_AS_VECTOR` 0x80
+    /// are taken off), so it can be compared exactly. Rendering hints:
     ///   0 → plain numeric
     ///   4 → dropmenu (use dropdown)
     ///   5 → dropmenu (use dropdown)
     ///   6 → hidden / internal (consider skipping in UI)
     ///   8 → checkbox (render bool-style toggle)
     pub show_as: u8,
+    /// True when the entry is declared `SHOW_AS_LIVE`: the engine re-reads the
+    /// field after construction, so a runtime edit takes effect.
+    pub live: bool,
     /// Semicolon-separated glob patterns for `FileRef` fields (e.g. `"*.iff;*.bmp"`).
     /// Derived from the OAD `lpstr_filter` Windows file-dialog filter string.
     /// Empty string for all other field kinds.
@@ -210,7 +214,7 @@ pub fn from_oad(oad: &OadFile) -> Schema {
         };
         let help  = entry.help_str().to_owned();
 
-        let kind = classify(entry.button_type, entry.string_str(), entry.lpstr_filter_bytes(), entry.show_as, entry.xdata_conversion_action());
+        let kind = classify(entry.button_type, entry.string_str(), entry.lpstr_filter_bytes(), entry.show_as_base(), entry.xdata_conversion_action());
 
         // Track the current group from PropertySheet / GroupStart names.
         match entry.button_type {
@@ -245,7 +249,8 @@ pub fn from_oad(oad: &OadFile) -> Schema {
             default_raw: entry.def,
             byte_width,
             fp_scale,
-            show_as:     entry.show_as,
+            show_as:     entry.show_as_base(),
+            live:        entry.is_live(),
             file_filter,
         });
     }
@@ -552,6 +557,39 @@ mod tests {
         // XDATA_COPY (conversionAction=1) and any other non-zero action → Skip.
         let kind = super::classify(wf_oad::ButtonType::XData, "", &[0u8; 512], 0, 1);
         assert!(matches!(kind, FieldKind::Skip), "expected Skip, got {kind:?}");
+    }
+
+    /// R4: a live field reads as its plain presentation, plus `live`. Before the
+    /// mask, a live checkbox (0x48) classified as Int and a live hidden field
+    /// (0x46) showed in the editor.
+    #[test]
+    fn live_bit_is_masked_off_show_as() {
+        let mut bytes = Vec::new();
+        OadFile {
+            header: load_fixture("disabled.oad").header,
+            entries: Vec::new(),
+        }.write(&mut bytes).unwrap();
+        let mut oad = OadFile::read(&mut Cursor::new(&bytes)).unwrap();
+        let mut checkbox = load_fixture("player.oad").entries.into_iter()
+            .find(|e| e.name_str() == "hp").expect("hp entry");
+        checkbox.button_type = wf_oad::ButtonType::Int32;  // TYPEENTRYBOOLEAN's type
+        checkbox.show_as = 8 | wf_oad::SHOW_AS_LIVE;
+        let mut hidden = checkbox.clone();
+        hidden.name[..6].copy_from_slice(b"Secret");
+        hidden.name[6] = 0;
+        hidden.show_as = 6 | wf_oad::SHOW_AS_LIVE;
+        let mut plain = checkbox.clone();
+        plain.name[..5].copy_from_slice(b"Plain");
+        plain.name[5] = 0;
+        plain.show_as = 8;
+        oad.entries = vec![checkbox, hidden, plain];
+        let schema = from_oad(&oad);
+        let (live, secret, plain) = (&schema.fields[0], &schema.fields[1], &schema.fields[2]);
+        assert_eq!((live.show_as, live.live), (8, true));
+        assert!(matches!(live.kind, FieldKind::Bool), "live checkbox must stay Bool: {:?}", live.kind);
+        assert_eq!((secret.show_as, secret.live), (6, true));
+        assert!(!secret.is_visible(), "a live hidden field is still hidden");
+        assert_eq!((plain.show_as, plain.live), (8, false));
     }
 
     #[test]
