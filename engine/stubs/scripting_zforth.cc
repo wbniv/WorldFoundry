@@ -1384,7 +1384,8 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                 auto* registry=wfprops::activeRegistry();
                 auto* object=registry?registry->object(actor):nullptr;
                 const wfprops::Field* descriptor=object?object->field(field):nullptr;
-                const std::string* value=object?object->get(field):nullptr;
+                std::string readValue;
+                const std::string* value=object&&object->readValue(field,readValue)?&readValue:nullptr;
                 bool valid=theLevel && actor>0 && actor<theLevel->GetMaxObjectIndex() && theLevel->GetObject(actor) && descriptor && value;
                 if(custom==50) {
                     double number=0;

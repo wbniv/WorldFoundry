@@ -16,6 +16,10 @@ bool buildOadObject(uint32_t actor, const std::string& schema, const std::string
                     const uint8_t* common, size_t commonLength,
                     Object& out, std::string& error);
 
+bool readOadField(const Field& field, const uint8_t* payload, size_t payloadLength,
+                  const uint8_t* common, size_t commonLength, const std::vector<CommonPage>& pages,
+                  std::string& value);
+
 // Apply a validated draft atomically, copying a shared common page on its first
 // write and leaving the level's original common area untouched.
 bool applyOadObject(const uint8_t* oad, size_t oadLength, uint32_t firstIndex,

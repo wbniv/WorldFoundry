@@ -113,34 +113,43 @@ int visit(void* opaque, const WfOadField* source) {
         (location.width != 1 && location.width != 2 && location.width != 4)) {
         *ctx.error = "invalid field location for " + field.key; return 1;
     }
-    const uint8_t* base = ctx.payload; size_t available = ctx.payloadLength;
-    if (location.common_pointer >= 0) {
-        const size_t pointer = size_t(location.common_pointer);
-        if (pointer > ctx.payloadLength || ctx.payloadLength - pointer < 4) {
-            *ctx.error = "common pointer outside payload"; return 1;
-        }
-        int32_t offset; std::memcpy(&offset, ctx.payload + pointer, 4);
-        if (offset < 0 || size_t(offset) > ctx.commonLength) {
-            *ctx.error = "common pointer outside common area"; return 1;
-        }
-        base = ctx.common + offset; available = ctx.commonLength - size_t(offset);
-    }
-    if (location.offset > available || location.width > available - location.offset) {
+    field.oadCommonPointer = location.common_pointer; field.oadOffset = location.offset; field.width = location.width;
+    const std::vector<CommonPage> noPages;
+    if (!readOadField(field, ctx.payload, ctx.payloadLength, ctx.common, ctx.commonLength, noPages, field.initial)) {
         *ctx.error = "field outside payload for " + field.key; return 1;
     }
-    int32_t raw = 0;
-    if (location.width == 4) std::memcpy(&raw, base + location.offset, 4);
-    else if (location.width == 2) { int16_t value; std::memcpy(&value, base + location.offset, 2); raw = value; }
-    else { int8_t value; std::memcpy(&value, base + location.offset, 1); raw = value; }
-    if (field.kind == 1) {
-        if (!field.scale) { *ctx.error = "fixed field has zero scale"; return 1; }
-        std::ostringstream text; text << std::setprecision(17) << double(raw) / field.scale;
-        field.initial = text.str();
-    } else field.initial = std::to_string(raw);
     ctx.object->values.emplace(field.id, field.initial);
     ctx.object->fields.push_back(std::move(field));
     return 0;
 }
+}
+
+bool readOadField(const Field& field, const uint8_t* payload, size_t payloadLength,
+                  const uint8_t* common, size_t commonLength, const std::vector<CommonPage>& pages,
+                  std::string& value) {
+    if (!payload || !common || (field.width != 1 && field.width != 2 && field.width != 4)) return false;
+    const uint8_t* base = payload; size_t available = payloadLength;
+    if (field.oadCommonPointer >= 0) {
+        const size_t pointer = size_t(field.oadCommonPointer);
+        if (pointer > payloadLength || payloadLength - pointer < 4) return false;
+        int32_t offset; std::memcpy(&offset, payload + pointer, 4);
+        auto page = std::find_if(pages.begin(), pages.end(), [offset](const CommonPage& p) { return p.handle == offset; });
+        if (page != pages.end()) { base = page->bytes.data(); available = page->bytes.size(); }
+        else {
+            if (offset < 0 || size_t(offset) > commonLength) return false;
+            base = common + offset; available = commonLength - size_t(offset);
+        }
+    }
+    if (field.oadOffset > available || field.width > available - field.oadOffset) return false;
+    int32_t raw = 0;
+    if (field.width == 4) std::memcpy(&raw, base + field.oadOffset, 4);
+    else if (field.width == 2) { int16_t n; std::memcpy(&n, base + field.oadOffset, 2); raw = n; }
+    else { int8_t n; std::memcpy(&n, base + field.oadOffset, 1); raw = n; }
+    if (field.kind == 1) {
+        if (!field.scale) return false;
+        std::ostringstream text; text << std::setprecision(17) << double(raw) / field.scale; value = text.str();
+    } else value = std::to_string(raw);
+    return true;
 }
 
 bool buildOadObject(uint32_t actor, const std::string& schema, const std::string& label,

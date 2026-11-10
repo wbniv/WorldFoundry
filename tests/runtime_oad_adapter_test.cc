@@ -44,6 +44,11 @@ int main(int argc, char** argv) {
     std::string applied;
     wfprops::Registry registry;
     unsigned changeCount = 0;
+    object.read = [&](uint32_t id, std::string& value) {
+        const auto* field = registry.object(7) ? registry.object(7)->field(id) : nullptr;
+        return field && wfprops::readOadField(*field, payload.data(), payload.size(),
+                                               common.data(), common.size(), pages, value);
+    };
     object.apply = [&](const std::map<uint32_t, std::string>& draft, std::string& reason) {
         const auto& value = draft.at(uint32_t(seed));
         if (value == "9") { reason = "backing write failed"; return false; }
@@ -80,6 +85,16 @@ int main(int argc, char** argv) {
     host.bind(&registry); assert(host.open() && !host.picker && !legacyCalled);
     assert(host.form.edit.set(uint32_t(seed), "37") && host.apply() && !legacyCalled);
     std::memcpy(&stored, payload.data() + prefix.offset, 4); assert(stored == 37);
+    stored = 58; std::memcpy(payload.data() + prefix.offset, &stored, 4);
+    std::string direct;
+    assert(registry.object(7)->readValue(uint32_t(seed), direct) && direct == "58");
+    assert(host.open() && host.form.edit.draft[uint32_t(seed)] == "58");
+    assert(host.form.edit.set(uint32_t(seed), "60"));
+    stored = 59; std::memcpy(payload.data() + prefix.offset, &stored, 4);
+    assert(!host.apply() && host.form.edit.error == "Properties changed; reopen the editor");
+    host.close();
+    assert(registry.set(7, uint32_t(seed), "58", error));
+    std::memcpy(&stored, payload.data() + prefix.offset, 4); assert(stored == 58);
     assert(!wfprops::buildOadObject(7, "x", "x", trimmed.data(), trimmed.size(), sheet,
                                      seedLocation.offset, payload.data(), 1,
                                      common.data(), common.size(), object, error));
@@ -126,6 +141,10 @@ int main(int argc, char** argv) {
                                    firstPages, draft, error));
     std::memcpy(&pageValue, firstPages[0].bytes.data(), 4);
     assert(firstPages.size() == 1 && firstPages[0].bytes.data() == stableAddress && pageValue == 73);
+    assert(wfprops::readOadField(*first.field(102), firstPayload.data(), firstPayload.size(),
+                                 sharedCommon.data(), sharedCommon.size(), firstPages, direct) && direct == "73");
+    assert(wfprops::readOadField(*first.field(102), secondPayload.data(), secondPayload.size(),
+                                 sharedCommon.data(), sharedCommon.size(), secondPages, direct) && direct == "11");
     draft[102] = "999999999999";
     assert(!wfprops::applyOadObject(sharedOad.data(), sharedOad.size(), 100, 0,
                                     firstPayload.data(), firstPayload.size(), sharedCommon.data(), sharedCommon.size(),

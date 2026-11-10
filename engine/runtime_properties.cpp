@@ -16,6 +16,8 @@ struct Reader {
 }
 const Field* Object::field(uint32_t id) const {for(const auto& f:fields)if(f.id==id&&f.stored())return &f;return nullptr;}
 const std::string* Object::get(uint32_t id) const {auto i=values.find(id);return i==values.end()?nullptr:&i->second;}
+bool Object::readValue(uint32_t id,std::string& value) const {if(read)return read(id,value);const auto* current=get(id);if(!current)return false;value=*current;return true;}
+bool Object::refresh(){if(!read)return true;auto updated=values;for(auto& item:updated)if(!readValue(item.first,item.second))return false;if(updated!=values){values=std::move(updated);++revision;}return true;}
 Registry*& activeRegistry(){static Registry* registry=nullptr;return registry;}
 int validate(const Field& f,const std::string& v){if(f.kind==8)return v==f.initial?0:1;if(presentation(f)==Control::Path&&!relativePath(v))return 6;return wf_attr_check(f.kind,f.minimum,f.maximum,f.scale,f.width,f.maxLength,f.rule,reinterpret_cast<const uint8_t*>(f.choices.data()),f.choices.size(),reinterpret_cast<const uint8_t*>(v.data()),v.size());}
 const char* validationMessage(int s){switch(s){case 1:return "Enter a valid value for this field";case 2:return "Value is outside the field range";case 3:return "Choose one of the listed values";case 4:return "Text is too long";case 5:return "Enter a seed from 0 to 4294967295";case 6:return "Enter a relative path: names separated by /";default:return "Invalid property value";}}
@@ -59,7 +61,7 @@ std::vector<uint32_t> Registry::editableObjects() const {
 void Registry::remove(uint32_t actor){objects_.erase(actor);}
 bool Registry::clone(uint32_t source,uint32_t actor){auto* initial=object(source);if(!initial||!actor||initial->oadBacked||initial->apply)return false;Object copy=*initial;copy.actor=actor;copy.generation=++serial_;copy.revision=0;objects_[actor]=std::move(copy);return true;}
 void Registry::clear(){objects_.clear();++serial_;}
-bool Registry::set(uint32_t actor,uint32_t id,const std::string& v,std::string& error){auto* o=object(actor);const Field* f=o?o->field(id):nullptr;if(!f||f->readonly){error="Property is not editable";return false;}int s=validate(*f,v);if(s){error=validationMessage(s);return false;}if(o->values[id]!=v){auto draft=o->values;draft[id]=v;if(o->apply&&!o->apply(draft,error))return false;o->values=std::move(draft);++o->revision;if(o->changed)o->changed({id});}error.clear();return true;}
+bool Registry::set(uint32_t actor,uint32_t id,const std::string& v,std::string& error){auto* o=object(actor);const Field* f=o?o->field(id):nullptr;if(!f||f->readonly){error="Property is not editable";return false;}int s=validate(*f,v);if(s){error=validationMessage(s);return false;}if(!o->refresh()){error="Could not read property values";return false;}if(o->values[id]!=v){auto draft=o->values;draft[id]=v;if(o->apply&&!o->apply(draft,error))return false;o->values=std::move(draft);++o->revision;if(o->changed)o->changed({id});}error.clear();return true;}
 void LaunchOverrides::set(std::string schema,std::string key,std::string value){std::lock_guard<std::mutex> lock(mutex_);values_[{std::move(schema),std::move(key)}]=std::move(value);}
 void LaunchOverrides::erase(const std::string& schema,const std::string& key){std::lock_guard<std::mutex> lock(mutex_);values_.erase({schema,key});}
 void LaunchOverrides::clear(){std::lock_guard<std::mutex> lock(mutex_);values_.clear();}
@@ -71,6 +73,7 @@ std::vector<std::string> LaunchOverrides::applyObjectLocked(Object& o) const {
         const Field* f=nullptr;for(const auto& candidate:o.fields)if(candidate.key==key&&candidate.stored()){f=&candidate;break;}
         std::string reason;
         if(!f)reason="no such field";
+        else if(!o.refresh())reason="could not read property values";
         else if(int status=validate(*f,value))reason=validationMessage(status);
         else if(o.values[f->id]!=value){
             auto draft=o.values;draft[f->id]=value;
@@ -93,6 +96,7 @@ std::vector<std::string> LaunchOverrides::apply(Registry& registry) const {
             Object& o=pair.second;if(o.schema!=schema)continue;
             const Field* f=nullptr;for(const auto& candidate:o.fields)if(candidate.key==key&&candidate.stored()){f=&candidate;break;}
             if(!f){if(reason.empty())reason="no such field";continue;}
+            if(!o.refresh()){if(reason.empty())reason="could not read property values";continue;}
             if(int status=validate(*f,value)){if(reason.empty())reason=validationMessage(status);continue;}
             std::string& current=o.values[f->id];if(current!=value){
                 auto draft=o.values;draft[f->id]=value;std::string applyError;
@@ -106,10 +110,10 @@ std::vector<std::string> LaunchOverrides::apply(Registry& registry) const {
 }
 LaunchOverrides& launchOverrides(){static LaunchOverrides overrides;return overrides;}
 uint64_t nextSession(){static uint64_t next=0;return ++next;}
-bool Edit::begin(Registry& r,uint32_t a){cancel();Object* o=r.object(a);if(!o)return false;session=nextSession();registry=&r;actor=a;generation=o->generation;revision=o->revision;draft=o->values;open=true;return true;}
+bool Edit::begin(Registry& r,uint32_t a){cancel();Object* o=r.object(a);if(!o||!o->refresh())return false;session=nextSession();registry=&r;actor=a;generation=o->generation;revision=o->revision;draft=o->values;open=true;return true;}
 Object* Edit::object() const {Object* o=registry?registry->object(actor):nullptr;return o&&o->generation==generation?o:nullptr;}
 bool Edit::set(uint32_t id,const std::string& value){auto* o=object();const Field* f=o?o->field(id):nullptr;if(!open||!f||f->readonly||value.size()>65536)return false;draft[id]=value;error.clear();return true;}
-bool Edit::validate(){auto* o=object();if(!open||!o||o->revision!=revision){error="Properties changed; reopen the editor";return false;}for(const auto& f:o->fields)if(f.stored()){auto i=draft.find(f.id);if(i==draft.end()){error="Missing property value";return false;}int s=wfprops::validate(f,i->second);if(s){error=f.label+": "+validationMessage(s);return false;}}error.clear();return true;}
+bool Edit::validate(){auto* o=object();if(!open||!o||o->revision!=revision){error="Properties changed; reopen the editor";return false;}if(o->read)for(const auto& current:o->values){std::string actual;if(!o->readValue(current.first,actual)||actual!=current.second){error="Properties changed; reopen the editor";return false;}}for(const auto& f:o->fields)if(f.stored()){auto i=draft.find(f.id);if(i==draft.end()){error="Missing property value";return false;}int s=wfprops::validate(f,i->second);if(s){error=f.label+": "+validationMessage(s);return false;}}error.clear();return true;}
 bool Edit::commit(){if(!validate())return false;auto* o=object();if(o->values!=draft){std::vector<uint32_t> changed;for(const auto& item:draft){auto old=o->values.find(item.first);if(old==o->values.end()||old->second!=item.second)changed.push_back(item.first);}if(o->apply&&!o->apply(draft,error))return false;o->values=draft;++o->revision;if(o->changed)o->changed(changed);}open=false;return true;}
 void Edit::cancel(){open=false;registry=nullptr;draft.clear();error.clear();}
 std::string json(const std::string& v){std::string out="\"";const char* hex="0123456789abcdef";for(unsigned char c:v){if(c=='"'||c=='\\'){out+='\\';out+=c;}else if(c<32){out+="\\u00";out+=hex[c>>4];out+=hex[c&15];}else out+=c;}return out+'"';}

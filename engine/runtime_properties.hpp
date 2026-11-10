@@ -13,6 +13,7 @@ namespace wfprops {
 struct Field {
     uint32_t id=0; uint8_t kind=0,show=0,readonly=0,rule=0;
     int32_t minimum=0,maximum=0;uint32_t scale=0,width=0,maxLength=0;
+    int32_t oadCommonPointer=-1;uint32_t oadOffset=0;
     std::string key,label,help,group,choices,initial;
     bool stored() const {return kind<5 || kind==8;}
 };
@@ -25,8 +26,11 @@ struct Object {
     // apply the whole validated draft or leave its backing bytes unchanged.
     std::function<bool(const std::map<uint32_t,std::string>&,std::string&)> apply;
     std::function<void(const std::vector<uint32_t>&)> changed;
+    std::function<bool(uint32_t,std::string&)> read;
     const Field* field(uint32_t id) const;
     const std::string* get(uint32_t id) const;
+    bool readValue(uint32_t id,std::string& value) const;
+    bool refresh();
 };
 class Registry {
 public:

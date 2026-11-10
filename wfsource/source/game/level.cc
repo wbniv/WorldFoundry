@@ -899,6 +899,14 @@ Level::Level
 				                               descriptor.payloadOffset, payload, payloadSize,
 				                               common, editableCommonSize, *pagesPtr, values, reason);
 			};
+			std::map<uint32_t, wfprops::Field> oadFields;
+			for (const auto& field : model.fields) if (field.stored()) oadFields.emplace(field.id, field);
+			model.read = [payload, payloadSize, common, editableCommonSize, pagesPtr = &pages, fields = std::move(oadFields)]
+			    (uint32_t id, std::string& value) {
+				auto field = fields.find(id);
+				return field != fields.end() && wfprops::readOadField(field->second, payload, payloadSize,
+				                                                       common, editableCommonSize, *pagesPtr, value);
+			};
 			model.changed = [this, index](const std::vector<uint32_t>& changed) {
 				if (_actors[index] && IsActor(_actors[index]))
 					static_cast<Actor*>(_actors[index])->OnPropertiesChanged(changed.data(), changed.size());
