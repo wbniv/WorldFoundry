@@ -18,6 +18,10 @@ typedef struct WfOadFieldLocation {
  * omitted from a trimmed OAD. Returns 0 on success, 1 for an invalid field. */
 int wf_attr_oad_field_location(const uint8_t *oad, size_t oad_len, size_t index,
                                uint32_t start_offset, WfOadFieldLocation *out);
+/* Size in bytes of the complete common block containing index; returns 1 if
+ * the descriptor is not inside a complete common block. */
+int wf_attr_oad_common_size(const uint8_t *oad, size_t oad_len, size_t index,
+                            uint32_t *out_size);
 
 /* Strings are UTF-8 pointer/length pairs valid only during the callback. */
 typedef struct WfOadString { const uint8_t *data; size_t length; } WfOadString;

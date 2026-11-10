@@ -158,6 +158,24 @@ pub unsafe extern "C" fn wf_attr_oad_field_location(
     0
 }
 
+/// Size of the serialized common block containing the selected descriptor.
+///
+/// # Safety
+/// `oad` must point to `oad_len` readable bytes and `out_size` to writable storage.
+#[no_mangle]
+pub unsafe extern "C" fn wf_attr_oad_common_size(
+    oad: *const u8, oad_len: usize, index: usize, out_size: *mut u32,
+) -> i32 {
+    if oad.is_null() || out_size.is_null() || oad_len < wf_oad::HEADER_SIZE || oad_len > 16 * 1024 * 1024
+        || (oad_len - wf_oad::HEADER_SIZE) % wf_oad::ENTRY_SIZE != 0 { return 1; }
+    let bytes = std::slice::from_raw_parts(oad, oad_len);
+    let Ok(schema) = wf_oad::OadFile::read(&mut std::io::Cursor::new(bytes)) else { return 1; };
+    let Some(size) = wf_oad::common_block_size(&schema.entries, index) else { return 1; };
+    let Ok(size) = u32::try_from(size) else { return 1; };
+    *out_size = size;
+    0
+}
+
 #[cfg(test)] mod tests {
     use super::*;
     #[test] fn enum_offset_and_width(){assert_eq!(check(2,3,5,0,4,0,0,"a|b|c","4"),0);assert_eq!(check(2,3,5,0,4,0,0,"a|b|c","2"),3);assert_eq!(check(0,-1000,1000,0,1,0,0,"","128"),2);}
@@ -180,6 +198,13 @@ pub unsafe extern "C" fn wf_attr_oad_field_location(
         assert_eq!(unsafe { wf_attr_oad_field_location(bytes.as_ptr(), bytes.len(), common_index, 0, &mut result) }, 0);
         assert_eq!(result.common_pointer, pointer as i32);
         assert_eq!(result.offset, offset as u32);
+        let mut size = 0;
+        assert_eq!(unsafe { wf_attr_oad_common_size(bytes.as_ptr(), bytes.len(), common_index, &mut size) }, 0);
+        assert!(size >= result.offset + result.width && size % 4 == 0);
+        assert_eq!(unsafe { wf_attr_oad_common_size(bytes.as_ptr(), bytes.len(), index, &mut size) }, 1);
+        let mut incomplete = schema.clone();
+        incomplete.entries.truncate(common_index + 1);
+        assert_eq!(wf_oad::common_block_size(&incomplete.entries, common_index), None);
         assert_eq!(unsafe { wf_attr_oad_field_location(bytes.as_ptr(), bytes.len() - 1, index, 0, &mut result) }, 1);
         assert_eq!(unsafe { wf_attr_oad_field_location(bytes.as_ptr(), bytes.len(), schema.entries.len(), 0, &mut result) }, 1);
     }

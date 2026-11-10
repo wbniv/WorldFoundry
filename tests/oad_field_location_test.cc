@@ -33,6 +33,15 @@ int main(int argc, char** argv) {
     assert(location.common_pointer == -1 && location.offset == 572 && location.width == 4);
     assert(wf_attr_oad_field_location(bytes.data(), bytes.size() - 1, index, 0, &location) != 0);
     assert(wf_attr_oad_field_location(nullptr, bytes.size(), index, 0, &location) != 0);
+    bool foundCommon = false;
+    for (size_t i = 0; i < (bytes.size() - header) / entry; ++i) {
+        if (wf_attr_oad_field_location(bytes.data(), bytes.size(), i, 0, &location) || location.common_pointer < 0) continue;
+        uint32_t span = 0;
+        assert(wf_attr_oad_common_size(bytes.data(), bytes.size(), i, &span) == 0);
+        assert(span >= location.offset + location.width && span % 4 == 0);
+        foundCommon = true; break;
+    }
+    assert(foundCommon);
     std::ifstream schemaFile(argv[2], std::ios::binary);
     std::vector<uint8_t> schema((std::istreambuf_iterator<char>(schemaFile)), {});
     Fields found;

@@ -434,6 +434,31 @@ pub fn field_location(entries: &[OadEntry], index: usize, start_offset: usize) -
     None
 }
 
+/// Size of the common block containing `index`, including the four-byte
+/// alignment used by levcomp. Returns None for fields outside a complete block.
+pub fn common_block_size(entries: &[OadEntry], index: usize) -> Option<usize> {
+    if index >= entries.len() { return None; }
+    let mut start = None;
+    for (i, entry) in entries.iter().enumerate().take(index + 1) {
+        match entry.button_type {
+            ButtonType::CommonBlock => { if start.is_some() { return None; } start = Some(i); }
+            ButtonType::EndCommon => { start = None; }
+            _ => {}
+        }
+    }
+    let start = start?;
+    if index == start { return None; }
+    let mut size = 0usize;
+    for entry in &entries[start + 1..] {
+        match entry.button_type {
+            ButtonType::EndCommon => return size.checked_add(3).map(|n| n & !3),
+            ButtonType::CommonBlock => return None,
+            _ => size = size.checked_add(field_size(entry))?,
+        }
+    }
+    None
+}
+
 #[derive(Debug, Clone)]
 pub struct OadFile {
     pub header: OadHeader,
