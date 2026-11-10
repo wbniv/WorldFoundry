@@ -65,6 +65,7 @@
 #include "actor.hp"
 #include "../../../engine/runtime_properties.hpp"
 #include "../../../engine/runtime_editable_list.hpp"
+#include "../../../engine/runtime_edit_all.hpp"
 #include <cstdint>
 #include <vector>
 
@@ -243,6 +244,9 @@ private:
 	std::vector<uint32_t> _editableIndices;
 	std::vector<std::string> _editableLabels;
 	std::vector<wfedit::EditableType> _editableTypes;
+#if defined(WF_RUNTIME_EDIT_ALL)
+	std::vector<std::vector<std::uint8_t>> _debugOads;
+#endif
 	LevelRooms*				    	_theLevelRooms;
 	ActiveRooms*					_theActiveRooms;  // needs to be after _numRooms
    BaseObjectList             _actors;

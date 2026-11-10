@@ -78,7 +78,7 @@ impl OadString {
 #[repr(C)]
 pub struct OadField {
     index: usize,
-    kind: u32, show: u32, live: u32, width: u32, scale: u32,
+    kind: u32, show: u32, live: u32, width: u32, scale: u32, storage_width: u32,
     minimum: i32, maximum: i32, default_value: i32,
     key: OadString, label: OadString, help: OadString, group: OadString, choices: OadString,
 }
@@ -116,6 +116,7 @@ pub unsafe extern "C" fn wf_attr_oad_visit(
         let item = OadField {
             index, kind, show: field.show_as as u32, live: u32::from(field.live),
             width: field.byte_width as u32, scale: field.fp_scale as u32,
+            storage_width: wf_oad::field_size(&oad.entries[index]) as u32,
             minimum: field.min_raw, maximum: field.max_raw, default_value: field.default_raw,
             key: OadString::borrowed(&field.key), label: OadString::borrowed(&field.label),
             help: OadString::borrowed(&field.help), group: OadString::borrowed(&field.group),

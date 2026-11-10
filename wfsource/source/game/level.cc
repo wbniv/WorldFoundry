@@ -4,6 +4,7 @@
 #include "../../../engine/runtime_diagnostics.hpp"
 #include "../../../engine/runtime_editable_list.hpp"
 #include "../../../engine/runtime_oad_adapter.hpp"
+#include "../../../engine/runtime_edit_all.hpp"
 #include "runtime_profile.hp"
 #include "bitmap_presenter.hp"
 #include <algorithm>
@@ -12,6 +13,12 @@
 #include <set>
 #include <string>
 #include <vector>
+#if defined(WF_RUNTIME_EDIT_ALL)
+#include <cctype>
+#include <cstring>
+#include <fstream>
+#include <iterator>
+#endif
 #if defined(__ANDROID__)
 #include <android/log.h>
 #include <memory/lmalloc.hp>
@@ -793,6 +800,49 @@ Level::Level
 		std::fprintf(stderr, "Invalid editable object data in level\n");
 		std::abort();
 	}
+	int32* objArray = ( int32* )( (char* )_levelData + ( _levelData->objectsOffset ));
+#if defined(WF_RUNTIME_EDIT_ALL)
+	const bool editAll = wfprops::editAllEnabled();
+	if (editAll) {
+		_debugOads.reserve(size_t(_levelData->objectCount));
+		std::vector<bool> listed(size_t(_levelData->objectCount), false);
+		for (uint32_t actor : _editableIndices) listed[actor] = true;
+		std::set<int> loadedTypes;
+		for (int actor = 1; actor < _levelData->objectCount; ++actor) {
+			const auto* data = reinterpret_cast<const _ObjectOnDisk*>((const char*)_levelData + objArray[actor]);
+			const int type = data->type;
+			if (type <= 0 || type >= Actor::MAX_OBJECT_TYPES) continue;
+			if (!loadedTypes.count(type)) {
+				std::string name = kOadObjectNames[type];
+				std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c) { return char(std::tolower(c)); });
+				std::ifstream input("wfsource/source/oas/" + name + ".oad", std::ios::binary);
+				if (!input) { std::fprintf(stderr, "edit-all: missing %s.oad\n", name.c_str()); continue; }
+				std::vector<uint8_t> bytes((std::istreambuf_iterator<char>(input)), {});
+				if (bytes.size() < 80 || (bytes.size() - 80) % 1491 || bytes.size() > 16 * 1024 * 1024) {
+					std::fprintf(stderr, "edit-all: invalid %s.oad\n", name.c_str()); continue;
+				}
+				_debugOads.push_back(std::move(bytes));
+				const auto& saved = _debugOads.back();
+				wfedit::EditableType descriptor{type, 0, 0, saved.data(), saved.size()};
+				auto existing = std::find_if(_editableTypes.begin(), _editableTypes.end(),
+				                             [type](const wfedit::EditableType& v) { return v.type == type; });
+				if (existing == _editableTypes.end()) _editableTypes.push_back(descriptor); else *existing = descriptor;
+				loadedTypes.insert(type);
+			}
+			if (!listed[actor] && loadedTypes.count(type)) {
+				const auto descriptor = std::find_if(_editableTypes.begin(), _editableTypes.end(),
+				                                     [type](const wfedit::EditableType& v) { return v.type == type; });
+				const char* display = reinterpret_cast<const char*>(descriptor->oad + 8);
+				const void* end = std::memchr(display, 0, 68);
+				const std::string title(display, end ? static_cast<const char*>(end) - display : 68);
+				_editableIndices.push_back(uint32_t(actor));
+				_editableLabels.push_back(title + " " + std::to_string(actor));
+			}
+		}
+	}
+#else
+	const bool editAll = false;
+#endif
 	std::vector<bool> editableObject(size_t(_levelData->objectCount), false);
 	for (uint32_t actor : _editableIndices) editableObject[actor] = true;
 	_editableObjectData.resize(size_t(_levelData->objectCount));
@@ -803,7 +853,6 @@ Level::Level
 
 	DBSTREAM1( cflow << "Level::Level: read in objects" << std::endl; )
 	DBSTREAM1( cprogress << "Reading objects" << std::endl; )
-	int32* objArray = ( int32* )( (char* )_levelData + ( _levelData->objectsOffset ));
 
 	int32 numTempObjects = _levelOad ? _levelOad->NumberOfTemporaryObjects : 0;
 	DBSTREAM3( cnull << "Number of temp objects = " << numTempObjects << std::endl; )
@@ -875,6 +924,7 @@ Level::Level
 			copy.resize(sizeof(_ObjectOnDisk) + size_t(objdata->OADSize));
 			std::memcpy(copy.data(), objdata, copy.size());
 			objdata = reinterpret_cast<_ObjectOnDisk*>(copy.data());
+			if (editAll && objdata->type == Actor::LevelObj_KIND) _levelOad = reinterpret_cast<_LevelObj*>(objdata + 1);
 			auto type = std::find_if(_editableTypes.begin(), _editableTypes.end(),
 			                         [objdata](const wfedit::EditableType& value) { return value.type == objdata->type; });
 			if (type == _editableTypes.end() || objdata->type <= 0 || objdata->type >= Actor::MAX_OBJECT_TYPES) {
@@ -890,14 +940,14 @@ Level::Level
 			if (!wfprops::buildOadObject(index, kOadObjectNames[objdata->type], _editableLabels[listIndex],
 			                             descriptor.oad, descriptor.oadLength, descriptor.first,
 			                             descriptor.payloadOffset, payload, payloadSize, common,
-			                             editableCommonSize, model, error)) {
+			                             editableCommonSize, model, error, editAll, editAll)) {
 				std::fprintf(stderr, "Invalid editable actor %d: %s\n", index, error.c_str()); std::abort();
 			}
-			model.apply = [descriptor, payload, payloadSize, common, editableCommonSize, pagesPtr = &pages]
+			model.apply = [descriptor, payload, payloadSize, common, editableCommonSize, pagesPtr = &pages, editAll]
 			    (const std::map<uint32_t, std::string>& values, std::string& reason) {
 				return wfprops::applyOadObject(descriptor.oad, descriptor.oadLength, descriptor.first,
 				                               descriptor.payloadOffset, payload, payloadSize,
-				                               common, editableCommonSize, *pagesPtr, values, reason);
+				                               common, editableCommonSize, *pagesPtr, values, reason, editAll);
 			};
 			std::map<uint32_t, wfprops::Field> oadFields;
 			for (const auto& field : model.fields) if (field.stored()) oadFields.emplace(field.id, field);

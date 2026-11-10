@@ -13,12 +13,13 @@ int main(int argc, char** argv) {
     std::vector<uint8_t> full((std::istreambuf_iterator<char>(input)), {});
     constexpr size_t header = 80, entry = 1491;
     assert(full.size() >= header && (full.size() - header) % entry == 0);
-    size_t sheet = 0, seed = 0;
+    size_t sheet = 0, seed = 0, initialAge = 0;
     for (size_t i = 0; header + (i + 1) * entry <= full.size(); ++i) {
         const auto* e = full.data() + header + i * entry;
         const char* name = reinterpret_cast<const char*>(e + 1);
         if (e[0] == 8 && std::strcmp(name, "Plant growth") == 0) sheet = i;
         if (std::strcmp(name, "Seed") == 0) seed = i;
+        if (std::strcmp(name, "Initial age") == 0) initialAge = i;
     }
     assert(sheet > 0 && seed > sheet);
     WfOadFieldLocation prefix{}, seedLocation{};
@@ -98,6 +99,37 @@ int main(int argc, char** argv) {
     assert(!wfprops::buildOadObject(7, "x", "x", trimmed.data(), trimmed.size(), sheet,
                                      seedLocation.offset, payload.data(), 1,
                                      common.data(), common.size(), object, error));
+
+    // Debug edit-all exposes non-live fields, but omits fields added after an
+    // older level's payload. Writes to the remaining fields still work.
+    wfprops::Object debug;
+    assert(initialAge > seed);
+    assert(wfprops::buildOadObject(8, "x", "x", trimmed.data(), trimmed.size(), sheet,
+                                  seedLocation.offset, payload.data(), payload.size(),
+                                  common.data(), common.size(), debug, error, true, true));
+    assert(debug.field(uint32_t(initialAge)) && !debug.field(uint32_t(initialAge))->readonly);
+    const size_t oldPayloadSize = prefix.offset + 4;
+    assert(wfprops::buildOadObject(8, "x", "x", trimmed.data(), trimmed.size(), sheet,
+                                  seedLocation.offset, payload.data(), oldPayloadSize,
+                                  common.data(), common.size(), debug, error, true, true));
+    assert(debug.field(uint32_t(seed)) && !debug.field(uint32_t(initialAge)));
+    auto oldDraft = debug.values;
+    oldDraft[uint32_t(seed)] = "41";
+    assert(wfprops::applyOadObject(trimmed.data(), trimmed.size(), sheet, seedLocation.offset,
+                                   payload.data(), oldPayloadSize, common.data(), common.size(),
+                                   pages, oldDraft, error, true));
+    std::memcpy(&stored, payload.data() + prefix.offset, 4); assert(stored == 41);
+
+    // A full debug descriptor can legitimately put a stored field at index 0.
+    std::vector<uint8_t> zeroOad(full.begin(), full.begin() + header);
+    zeroOad.insert(zeroOad.end(), full.begin() + header + seed * entry,
+                   full.begin() + header + (seed + 1) * entry);
+    std::vector<uint8_t> zeroPayload(4);
+    wfprops::Object zeroObject;
+    assert(wfprops::buildOadObject(9, "x", "x", zeroOad.data(), zeroOad.size(), 0, 0,
+                                  zeroPayload.data(), zeroPayload.size(), common.data(), common.size(),
+                                  zeroObject, error, true, true));
+    assert(zeroObject.field(0) && registry.add(std::move(zeroObject), error));
 
     // Put the real live Seed descriptor inside a common block. Two actors
     // start with the same page; an edit must copy only the first actor's page.

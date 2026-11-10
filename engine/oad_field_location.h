@@ -27,7 +27,7 @@ int wf_attr_oad_common_size(const uint8_t *oad, size_t oad_len, size_t index,
 typedef struct WfOadString { const uint8_t *data; size_t length; } WfOadString;
 typedef struct WfOadField {
     size_t index;
-    uint32_t kind, show, live, width, scale;
+    uint32_t kind, show, live, width, scale, storage_width;
     int32_t minimum, maximum, default_value;
     WfOadString key, label, help, group, choices;
 } WfOadField;

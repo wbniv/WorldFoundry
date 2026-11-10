@@ -44,7 +44,7 @@ bool Registry::add(Object object,std::string& error){
     if(!object.actor||objects_.count(object.actor)){error="Duplicate or invalid property object";return false;}
     std::map<uint32_t,bool> seen;
     for(const auto& field:object.fields)if(field.stored()){
-        if(!field.id||seen.count(field.id)||!object.values.count(field.id)){error="Invalid property fields";return false;}
+        if((!field.id&&!object.oadBacked)||seen.count(field.id)||!object.values.count(field.id)){error="Invalid property fields";return false;}
         seen[field.id]=true;
     }
     object.generation=++serial_;object.revision=0;objects_.emplace(object.actor,std::move(object));error.clear();return true;

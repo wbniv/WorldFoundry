@@ -14,7 +14,8 @@ bool buildOadObject(uint32_t actor, const std::string& schema, const std::string
                     const uint8_t* oad, size_t oadLength, uint32_t firstIndex,
                     uint32_t payloadOffset, const uint8_t* payload, size_t payloadLength,
                     const uint8_t* common, size_t commonLength,
-                    Object& out, std::string& error);
+                    Object& out, std::string& error,
+                    bool allWritable = false, bool allowMissingTail = false);
 
 bool readOadField(const Field& field, const uint8_t* payload, size_t payloadLength,
                   const uint8_t* common, size_t commonLength, const std::vector<CommonPage>& pages,
@@ -26,5 +27,6 @@ bool applyOadObject(const uint8_t* oad, size_t oadLength, uint32_t firstIndex,
                     uint32_t payloadOffset, uint8_t* payload, size_t payloadLength,
                     const uint8_t* common, size_t commonLength,
                     std::vector<CommonPage>& pages,
-                    const std::map<uint32_t, std::string>& values, std::string& error);
+                    const std::map<uint32_t, std::string>& values, std::string& error,
+                    bool allowMissingTail = false);
 }

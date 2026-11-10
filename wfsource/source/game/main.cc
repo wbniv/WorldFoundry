@@ -1,4 +1,5 @@
 #include <game/plant_settings.h>
+#include "../../../engine/runtime_edit_all.hpp"
 //==============================================================================
 // main.cc:
 // Copyright (c) 1994,1995,1996,1997,1999,2000,2001,2002,2003 World Foundry Group  
@@ -271,6 +272,11 @@ ParseCommandLine(int argc, char** argv)
 			++index;
 			DBSTREAM1( cprogress << "Debug bridge bind: " << gDebugBind << std::endl; )
 		}
+#if defined(WF_RUNTIME_EDIT_ALL)
+        else if ( strcmp(argv[index], "--edit-all")==0 ) {
+            wfprops::editAllEnabled() = true;
+        }
+#endif
         else if ( strncmp(argv[index], "--plant-",8)==0 ) {
             std::fprintf(stderr,"wf_game: removed plant CLI override: %s; cook plant settings into the level RPRP catalog\n",argv[index]);
             std::exit(2);

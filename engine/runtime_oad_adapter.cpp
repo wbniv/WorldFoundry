@@ -19,6 +19,7 @@ struct Context {
     const uint8_t* payload; size_t payloadLength;
     const uint8_t* common; size_t commonLength;
     Object* object; std::string* error;
+    bool allWritable, allowMissingTail;
 };
 struct ApplyContext {
     const uint8_t* oad; size_t oadLength; uint32_t first, prefix;
@@ -27,19 +28,25 @@ struct ApplyContext {
     std::vector<CommonPage>* pages;
     const std::map<uint32_t, std::string>* values;
     std::string* error;
+    bool allowMissingTail;
 };
 int applyField(void* opaque, const WfOadField* source) {
     auto& ctx = *static_cast<ApplyContext*>(opaque);
-    if (source->kind == 3 || source->kind >= 5) return 0;
+    if (source->kind == 3 || source->kind >= 5 || !source->storage_width) return 0;
     if (source->index > std::numeric_limits<uint32_t>::max() - ctx.first) {
         *ctx.error = "descriptor index overflows"; return 1;
     }
-    auto value = ctx.values->find(ctx.first + uint32_t(source->index));
-    if (value == ctx.values->end()) { *ctx.error = "missing field value"; return 1; }
     WfOadFieldLocation location{};
     if (wf_attr_oad_field_location(ctx.oad, ctx.oadLength, source->index, ctx.prefix, &location) ||
         (location.width != 1 && location.width != 2 && location.width != 4)) {
         *ctx.error = "invalid field location"; return 1;
+    }
+    auto value = ctx.values->find(ctx.first + uint32_t(source->index));
+    if (value == ctx.values->end()) {
+        const size_t at = location.common_pointer >= 0 ? size_t(location.common_pointer) : location.offset;
+        const size_t width = location.common_pointer >= 0 ? 4 : location.width;
+        if (ctx.allowMissingTail && (at > ctx.payload->size() || width > ctx.payload->size() - at)) return 0;
+        *ctx.error = "missing field value"; return 1;
     }
     char* end = nullptr; errno = 0;
     int64_t raw;
@@ -99,21 +106,25 @@ int visit(void* opaque, const WfOadField* source) {
     if (source->kind == 3 || source->kind >= 8) return 0;
     Field field;
     field.kind = uint8_t(source->kind); field.show = uint8_t(source->show);
-    field.readonly = !source->live; field.minimum = source->minimum; field.maximum = source->maximum;
+    field.readonly = !source->live && !ctx.allWritable; field.minimum = source->minimum; field.maximum = source->maximum;
     field.scale = source->scale; field.width = source->width; field.maxLength = 256;
     field.key = str(source->key); field.label = str(source->label); field.help = str(source->help);
     field.group = str(source->group); field.choices = str(source->choices);
     if (source->kind >= 5) { ctx.object->fields.push_back(std::move(field)); return 0; }
+    if (!source->storage_width) return 0;
     if (source->index > std::numeric_limits<uint32_t>::max() - ctx.first) {
         *ctx.error = "descriptor index overflows"; return 1;
     }
     field.id = ctx.first + uint32_t(source->index);
     WfOadFieldLocation location{};
-    if (!field.id || wf_attr_oad_field_location(ctx.oad, ctx.oadLength, source->index, ctx.prefix, &location) ||
+    if (wf_attr_oad_field_location(ctx.oad, ctx.oadLength, source->index, ctx.prefix, &location) ||
         (location.width != 1 && location.width != 2 && location.width != 4)) {
         *ctx.error = "invalid field location for " + field.key; return 1;
     }
     field.oadCommonPointer = location.common_pointer; field.oadOffset = location.offset; field.width = location.width;
+    const size_t payloadLocation = location.common_pointer >= 0 ? size_t(location.common_pointer) : location.offset;
+    const size_t payloadWidth = location.common_pointer >= 0 ? 4 : location.width;
+    if (ctx.allowMissingTail && (payloadLocation > ctx.payloadLength || payloadWidth > ctx.payloadLength - payloadLocation)) return 0;
     const std::vector<CommonPage> noPages;
     if (!readOadField(field, ctx.payload, ctx.payloadLength, ctx.common, ctx.commonLength, noPages, field.initial)) {
         *ctx.error = "field outside payload for " + field.key; return 1;
@@ -155,12 +166,13 @@ bool readOadField(const Field& field, const uint8_t* payload, size_t payloadLeng
 bool buildOadObject(uint32_t actor, const std::string& schema, const std::string& label,
                     const uint8_t* oad, size_t oadLength, uint32_t firstIndex,
                     uint32_t payloadOffset, const uint8_t* payload, size_t payloadLength,
-                    const uint8_t* common, size_t commonLength, Object& out, std::string& error) {
+                    const uint8_t* common, size_t commonLength, Object& out, std::string& error,
+                    bool allWritable, bool allowMissingTail) {
     error.clear();
     if (!actor || !oad || !payload || !common) { error = "missing OAD object data"; return false; }
     Object result; result.actor = actor; result.schema = schema; result.title = label; result.oadBacked = true;
     Context context{oad, oadLength, firstIndex, payloadOffset, payload, payloadLength, common, commonLength,
-                    &result, &error};
+                    &result, &error, allWritable, allowMissingTail};
     if (wf_attr_oad_visit(oad, oadLength, visit, &context)) {
         if (error.empty()) error = "malformed OAD descriptor";
         return false;
@@ -173,13 +185,13 @@ bool applyOadObject(const uint8_t* oad, size_t oadLength, uint32_t firstIndex,
                     uint32_t payloadOffset, uint8_t* payload, size_t payloadLength,
                     const uint8_t* common, size_t commonLength,
                     std::vector<CommonPage>& pages,
-                    const std::map<uint32_t, std::string>& values, std::string& error) {
+                    const std::map<uint32_t, std::string>& values, std::string& error, bool allowMissingTail) {
     error.clear();
     if (!oad || !payload || !common) { error = "missing OAD object data"; return false; }
     std::vector<uint8_t> staged(payload, payload + payloadLength);
     std::vector<CommonPage> stagedPages = pages;
     ApplyContext context{oad, oadLength, firstIndex, payloadOffset, &staged, common, commonLength,
-                         &stagedPages, &values, &error};
+                         &stagedPages, &values, &error, allowMissingTail};
     if (wf_attr_oad_visit(oad, oadLength, applyField, &context)) {
         if (error.empty()) error = "malformed OAD descriptor";
         return false;
