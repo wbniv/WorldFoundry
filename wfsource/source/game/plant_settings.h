@@ -22,22 +22,37 @@ inline const char* speedLabel(int i){const char* v[]={"Paused","0.25x","0.5x","1
 inline uint32_t freshSeed(){static uint32_t serial=0;uint64_t t=std::chrono::steady_clock::now().time_since_epoch().count();plantgrowth::Random r(uint32_t(t)^uint32_t(t>>32)^++serial);return r.next();}
 inline bool parseSeed(const std::string& v,uint32_t& result){if(v.empty()||v.size()>10||v.find_first_not_of("0123456789")!=std::string::npos)return false;uint64_t n=0;for(char c:v){n=n*10+unsigned(c-'0');if(n>UINT32_MAX)return false;}result=uint32_t(n);return true;}
 inline void regenerate(uint32_t seed,bool salt){auto& s=state();s.seed=seed;s.salt=salt;s.age=s.water=0;auto started=std::chrono::steady_clock::now();s.shoots=plantgrowth::colonies(seed,salt);auto graphDone=std::chrono::steady_clock::now();s.chunks=plantgrowth::meshes(seed,salt,s.shoots);auto meshDone=std::chrono::steady_clock::now();s.topologySlot=0;s.generation++;s.geometryGeneration++;s.pending=false;std::fprintf(stderr,"PLANTS generation=%u seed=%u mode=%s shoots=%zu vertices=",s.generation,seed,salt?"saltwater":"freshwater",s.shoots.size());size_t verts=0,faces=0;for(const auto& c:s.chunks){verts+=c.vertices.size();faces+=c.faces.size();}std::fprintf(stderr,"%zu triangles=%zu graph_ms=%.3f mesh_ms=%.3f\n",verts,faces,std::chrono::duration<double,std::milli>(graphDone-started).count(),std::chrono::duration<double,std::milli>(meshDone-graphDone).count());}
+// Called after the settings actor's overlay is committed. Entry-only fields
+// are deliberately ignored here; the next level entry consumes them.
+inline void applyActorSettings(uint32_t seed,bool salt,int speed,bool textures,bool sway,bool seedChanged,bool waterChanged){
+ auto& s=state();if(!s.active)return;
+ if(!seedChanged)seed=s.seed;
+ if(!waterChanged)salt=s.salt;
+ const bool changed=seed!=s.seed||salt!=s.salt;
+ s.speed=std::max(0,std::min(6,speed));
+ if(textures!=s.textures||sway!=s.sway)++s.geometryGeneration;
+ s.textures=textures;s.sway=sway;
+ if(changed)regenerate(seed,salt);
+}
 inline void syncProperties();
 inline void registerSettings();
 inline void enter(){
  auto& s=state();const bool selected=s.explicitSeed;s.active=true;s.selector=false;
  auto* registry=wfprops::activeRegistry();auto* object=registry?registry->schema("PlantedTankSettings"):nullptr;
- auto value=[&](unsigned id,const std::string& fallback){auto* v=object?object->get(id):nullptr;return v?*v:fallback;};
+ auto value=[&](unsigned id,const char* key,const std::string& fallback){
+  if(object&&object->oadBacked){for(const auto& field:object->fields)if(field.stored()&&field.key==key){auto* v=object->get(field.id);return v?*v:fallback;}return fallback;}
+  auto* v=object?object->get(id):nullptr;return v?*v:fallback;
+ };
  if(!selected){
-  s.randomEntry=value(7,"1")!="0";uint32_t authored=0;
-  s.seed=!s.randomEntry&&parseSeed(value(1,"0"),authored)?authored:freshSeed();
-  s.salt=value(2,"0")=="1";s.speed=std::max(0,std::min(6,std::atoi(value(3,"3").c_str())));
-  auto age=value(4,"0");char* end=nullptr;double parsed=std::strtod(age.c_str(),&end);
+  s.randomEntry=value(7,"Random seed on entry","1")!="0";uint32_t authored=0;
+  s.seed=!s.randomEntry&&parseSeed(value(1,"Seed","0"),authored)?authored:freshSeed();
+  s.salt=value(2,"Water type","0")=="1";s.speed=std::max(0,std::min(6,std::atoi(value(3,"Growth speed","3").c_str())));
+  auto age=value(4,"Initial age","0");char* end=nullptr;double parsed=std::strtod(age.c_str(),&end);
   s.initialAge=end&&end!=age.c_str()&&!*end&&std::isfinite(parsed)&&parsed>=0&&parsed<=240?float(parsed):0;
-  s.textures=value(5,"1")!="0";s.sway=value(6,"1")!="0";
+  s.textures=value(5,"Textures","1")!="0";s.sway=value(6,"Sway","1")!="0";
  }
  s.explicitSeed=false;regenerate(s.seed,s.salt);s.age=s.initialAge;
- std::fprintf(stderr,"PLANTS settings-source=%s seed=%u water=%s age=%.6g speed=%d textures=%d sway=%d random_entry=%d selector_override=%d\n",object?"RPRP":"legacy-defaults",s.seed,s.salt?"saltwater":"freshwater",s.age,s.speed,int(s.textures),int(s.sway),int(s.randomEntry),int(selected));
+ std::fprintf(stderr,"PLANTS settings-source=%s seed=%u water=%s age=%.6g speed=%d textures=%d sway=%d random_entry=%d selector_override=%d\n",object?(object->oadBacked?"OAD":"RPRP"):"legacy-defaults",s.seed,s.salt?"saltwater":"freshwater",s.age,s.speed,int(s.textures),int(s.sway),int(s.randomEntry),int(selected));
  syncProperties();registerSettings();
 }
 inline wfprops::Form& form();
@@ -47,7 +62,7 @@ inline wfprops::Registry& previewProperties(){static wfprops::Registry registry;
 #include "../../../wflevels/aquarium_plants/settings-catalog.inc"
 };std::string error;loaded=registry.load(bytes,sizeof(bytes),error);}return registry;}
 inline wfprops::Registry& properties(){auto* r=wfprops::activeRegistry();return state().active&&r&&r->schema("PlantedTankSettings")?*r:previewProperties();}
-inline void syncProperties(){auto& s=state();auto& r=properties();auto* o=r.schema("PlantedTankSettings");if(!o)return;std::string error;r.set(o->actor,1,std::to_string(s.seed),error);r.set(o->actor,2,s.salt?"1":"0",error);r.set(o->actor,3,std::to_string(s.speed),error);if(o->field(5))r.set(o->actor,5,s.textures?"1":"0",error);if(o->field(6))r.set(o->actor,6,s.sway?"1":"0",error);}
+inline void syncProperties(){auto& s=state();auto& r=properties();auto* o=r.schema("PlantedTankSettings");if(!o||o->oadBacked)return;std::string error;r.set(o->actor,1,std::to_string(s.seed),error);r.set(o->actor,2,s.salt?"1":"0",error);r.set(o->actor,3,std::to_string(s.speed),error);if(o->field(5))r.set(o->actor,5,s.textures?"1":"0",error);if(o->field(6))r.set(o->actor,6,s.sway?"1":"0",error);}
 // Simulation callbacks consume committed values; the shared host owns drafts/UI.
 inline void registerSettings(){
  wfprops::Consumer consumer;

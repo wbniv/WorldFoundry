@@ -16,6 +16,7 @@
 
 #include <oas/plantedtanksettings.ht>
 #include "plantedtanksettings.hp"
+#include "plant_settings.h"
 
 PlantedTankSettings::PlantedTankSettings(const SObjectStartupData* startupData)
 	: Actor(startupData)
@@ -44,6 +45,23 @@ bool
 PlantedTankSettings::CanUpdate() const
 {
 	return false;
+}
+
+void
+PlantedTankSettings::OnPropertiesChanged(const std::uint32_t* fields, size_t count)
+{
+	const auto& settings = *static_cast<const _PlantedTankSettings*>(_oadData);
+	bool seedChanged = false, waterChanged = false;
+	auto* registry = wfprops::activeRegistry();
+	const auto* object = registry ? registry->object(GetActorIndex()) : nullptr;
+	for (size_t i = 0; object && i < count; ++i) {
+		const auto* field = object->field(fields[i]);
+		if (field && field->key == "Seed") seedChanged = true;
+		if (field && field->key == "Water type") waterChanged = true;
+	}
+	planted::applyActorSettings(uint32_t(settings.Seed), settings.Watertype != 0,
+	                            settings.Growthspeed, settings.Textures != 0, settings.Sway != 0,
+	                            seedChanged, waterChanged);
 }
 
 Actor*

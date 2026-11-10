@@ -37,6 +37,7 @@ public:
 
 	virtual bool CanRender() const;
 	virtual bool CanUpdate() const;
+	virtual void OnPropertiesChanged(const std::uint32_t* fields, size_t count) override;
 };
 
 Actor*

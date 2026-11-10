@@ -1,9 +1,14 @@
 // Portable seeded growth and settings contracts, including phone session replay.
 #include <game/plant_ui.h>
 #include <game/runtime_property_controls.h>
+#include <game/ui_font.hp>
 #include <cassert>
+#include <fstream>
 #include <iostream>
-int main(){
+int main(int argc,char** argv){
+ assert(argc==2);std::ifstream font(argv[1],std::ios::binary);
+ std::vector<uint8_t> atlas((std::istreambuf_iterator<char>(font)),{});const char* fontError=nullptr;
+ assert(wfui::Load(atlas.data(),atlas.size(),fontError));
  propertyui::TextRequest request;propertyui::textHost().show=[&](const propertyui::TextRequest& value){request=value;return true;};propertyui::textHost().hide=[](uint64_t){};
  for(bool salt:{false,true})for(unsigned seed:{0u,1u,713u,4294967295u}){
  auto a=plantgrowth::colonies(seed,salt),b=plantgrowth::colonies(seed,salt);
@@ -16,7 +21,20 @@ int main(){
  for(auto& f:ch.faces)assert(f.a<ch.vertices.size()&&f.b<ch.vertices.size()&&f.c<ch.vertices.size());}
  }
  uint32_t n;assert(planted::parseSeed("4294967295",n)&&n==UINT32_MAX);for(auto s:{"4294967296","-1","","1e2","1.2"," 1","12345678901"})assert(!planted::parseSeed(s,n));assert(planted::parseSeed("0",n)&&n==0);
- auto& s=planted::state();s.active=true;planted::regenerate(713,false);s.speed=3;planted::tick(.1,0);assert(s.age==.1f);s.speed=0;planted::tick(.1,0);assert(s.age==.1f&&s.water==.2f);planted::open();planted::tick(.1,0);assert(s.water==.2f);auto session=wfprops::host().session();
+ auto& s=planted::state();s.active=true;planted::regenerate(713,false);
+ auto actorGeneration=s.generation;auto geometry=s.geometryGeneration;
+ planted::applyActorSettings(0,false,5,false,true,false,false);
+ assert(s.seed==713&&s.generation==actorGeneration&&s.speed==5&&!s.textures&&s.geometryGeneration==geometry+1);
+ planted::applyActorSettings(42,true,2,true,false,true,true);
+ assert(s.seed==42&&s.salt&&s.speed==2&&s.textures&&!s.sway&&s.generation==actorGeneration+1);
+ wfprops::Registry actorRegistry;wfprops::Object actorSettings;actorSettings.actor=9;actorSettings.schema="PlantedTankSettings";actorSettings.oadBacked=true;
+ auto actorField=[&](unsigned id,const char* key,const char* value){wfprops::Field f;f.id=id;f.key=key;actorSettings.fields.push_back(f);actorSettings.values[id]=value;};
+ actorField(129,"Seed","56");actorField(130,"Water type","1");actorField(131,"Growth speed","4");
+ actorField(132,"Initial age","12");actorField(133,"Textures","0");actorField(134,"Sway","1");actorField(135,"Random seed on entry","0");
+ std::string error;assert(actorRegistry.add(std::move(actorSettings),error));wfprops::activeRegistry()=&actorRegistry;
+ planted::enter();assert(s.seed==56&&s.salt&&s.speed==4&&s.age==12&&!s.textures&&s.sway);
+ assert(*actorRegistry.object(9)->get(129)=="56");wfprops::activeRegistry()=nullptr;
+ s.textures=true;s.sway=true;planted::regenerate(713,false);s.speed=3;planted::tick(.1,0);assert(s.age==.1f);s.speed=0;planted::tick(.1,0);assert(s.age==.1f&&s.water==.2f);planted::open();planted::tick(.1,0);assert(s.water==.2f);auto session=wfprops::host().session();
  auto send=[&](const std::string& verb,const std::string& tail=""){planted::command("r:"+std::to_string(planted::form().edit.session)+":"+verb+(tail.empty()?"":":"+tail));};
  planted::command("r:0:set:1:42");assert(s.seed==713&&wfprops::host().modal);
  send("set","1:4294967295");send("set","2:1");send("set","3:4");send("action","100");assert(s.seed==UINT32_MAX&&s.salt&&s.speed==4&&!wfprops::host().modal);
