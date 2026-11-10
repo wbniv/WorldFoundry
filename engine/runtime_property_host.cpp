@@ -21,7 +21,9 @@ bool Host::openOwner(uint32_t actor,uint32_t openingButtons){
     const auto eligible=registry_->editableObjects();
     if(std::find(eligible.begin(),eligible.end(),actor)==eligible.end())return false;
     auto* object=registry_->object(actor);const auto name=object->schema;
-    auto consumer=consumers_.find(name);
+    // Legacy RP01 consumers use binding IDs, which differ from OAD descriptor
+    // indices. OAD-backed actors get their own change hook during migration.
+    auto consumer=object->oadBacked?consumers_.end():consumers_.find(name);
     if(consumer!=consumers_.end()&&consumer->second.beforeOpen)consumer->second.beforeOpen();
     if(!form.begin(*registry_,actor,openingButtons))return false;
     picker=false;resetPick();modal=true;previous_=openingButtons;hold_=0;
@@ -36,7 +38,7 @@ void Host::checkOwner(){
 bool Host::apply(const std::string& action){
     checkOwner();if(!modal||picker)return false;
     auto* object=form.edit.object();if(!object)return false;
-    auto it=consumers_.find(object->schema);Consumer consumer=it==consumers_.end()?Consumer{}:it->second;
+    auto it=object->oadBacked?consumers_.end():consumers_.find(object->schema);Consumer consumer=it==consumers_.end()?Consumer{}:it->second;
     if(!consumer.committed&&action!="apply")return false;
     if(consumer.beforeCommit&&!consumer.beforeCommit(form,action))return false;
     if(!form.edit.commit())return false;

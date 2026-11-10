@@ -3,6 +3,7 @@
 #include "../../../engine/room_render_settings.hpp"
 #include "../../../engine/runtime_diagnostics.hpp"
 #include "../../../engine/runtime_editable_list.hpp"
+#include "../../../engine/runtime_oad_adapter.hpp"
 #include "runtime_profile.hp"
 #include "bitmap_presenter.hp"
 #include <algorithm>
@@ -95,6 +96,14 @@
 // this is where the case statment built by the oad conversion process is included
 
 #include "oas/objects.c"
+
+namespace {
+const char* const kOadObjectNames[] = {
+#include <oas/objects.names>
+};
+static_assert(sizeof(kOadObjectNames) / sizeof(kOadObjectNames[0]) == Actor::MAX_OBJECT_TYPES,
+              "object type names must match objects.e");
+}
 
 //==============================================================================
 // Externs
@@ -860,6 +869,42 @@ Level::Level
 			copy.resize(sizeof(_ObjectOnDisk) + size_t(objdata->OADSize));
 			std::memcpy(copy.data(), objdata, copy.size());
 			objdata = reinterpret_cast<_ObjectOnDisk*>(copy.data());
+			auto type = std::find_if(_editableTypes.begin(), _editableTypes.end(),
+			                         [objdata](const wfedit::EditableType& value) { return value.type == objdata->type; });
+			if (type == _editableTypes.end() || objdata->type <= 0 || objdata->type >= Actor::MAX_OBJECT_TYPES) {
+				std::fprintf(stderr, "Missing editable descriptors for actor %d\n", index);
+				std::abort();
+			}
+			const size_t listIndex = size_t(std::find(_editableIndices.begin(), _editableIndices.end(), uint32_t(index)) - _editableIndices.begin());
+			const wfedit::EditableType descriptor = *type;
+			wfprops::Object model; std::string error;
+			uint8_t* payload = copy.data() + sizeof(_ObjectOnDisk);
+			const size_t payloadSize = copy.size() - sizeof(_ObjectOnDisk);
+			const auto* common = static_cast<const uint8_t*>(editableCommon);
+			if (!wfprops::buildOadObject(index, kOadObjectNames[objdata->type], _editableLabels[listIndex],
+			                             descriptor.oad, descriptor.oadLength, descriptor.first,
+			                             descriptor.payloadOffset, payload, payloadSize, common,
+			                             editableCommonSize, model, error)) {
+				std::fprintf(stderr, "Invalid editable actor %d: %s\n", index, error.c_str()); std::abort();
+			}
+			model.apply = [descriptor, payload, payloadSize, common, editableCommonSize]
+			    (const std::map<uint32_t, std::string>& values, std::string& reason) {
+				return wfprops::applyOadObject(descriptor.oad, descriptor.oadLength, descriptor.first,
+				                               descriptor.payloadOffset, payload, payloadSize,
+				                               common, editableCommonSize, values, reason);
+			};
+			model.changed = [this, index](const std::vector<uint32_t>& changed) {
+				if (_actors[index] && IsActor(_actors[index]))
+					static_cast<Actor*>(_actors[index])->OnPropertiesChanged(changed.data(), changed.size());
+			};
+			for (const auto& rejected : wfprops::launchOverrides().applyObject(model))
+				std::fprintf(stderr, "PROPERTIES launch-override rejected: %s\n", rejected.c_str());
+			if (!_runtimeProperties.add(std::move(model), error)) {
+				std::fprintf(stderr, "Could not register editable actor %d: %s\n", index, error.c_str()); std::abort();
+			}
+			if (wf_profile::enabled())
+				std::fprintf(stderr, "editable-object: actor=%d type=%s label=%s\n",
+				             index, kOadObjectNames[objdata->type], _editableLabels[listIndex].c_str());
 		}
 		ConstructStartupData( startupData, objdata, index );
 

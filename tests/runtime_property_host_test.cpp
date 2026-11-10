@@ -35,6 +35,17 @@ int main(int argc,char** argv){
  assert(host.open());registry.remove(22);host.command("r:"+std::to_string(host.session())+":select:11");assert(!host.modal);
  host.openOwner(11);assert(registry.set(11,40,"1",error));assert(!host.apply());host.close();
  assert(host.open());assert(!host.picker);host.close();host.bind(nullptr);assert(!host.available());
+ // An OAD-backed object must not call the legacy consumer for the same type:
+ // legacy IDs are binding IDs, whereas OAD IDs are descriptor indices.
+ {
+  wfprops::Object o=*registry.object(11);o.actor=55;o.oadBacked=true;
+  o.apply=[](const std::map<uint32_t,std::string>&,std::string&){return true;};
+  wfprops::Registry oadRegistry;assert(oadRegistry.add(std::move(o),error));
+  wfprops::Host oadHost;bool legacyCalled=false;
+  oadHost.consumer(oadRegistry.object(55)->schema,wfprops::Consumer{[&](){legacyCalled=true;},{},[&](const wfprops::Object&,const std::string&){legacyCalled=true;}});
+  oadHost.bind(&oadRegistry);assert(oadHost.open());assert(!legacyCalled);
+  assert(oadHost.form.edit.set(40,"2")&&oadHost.apply());assert(!legacyCalled);
+ }
  // Load-time settings remain queryable without taking the level's held OK.
  wfprops::Registry readonlyRegistry=registry;
  auto* readonlyOwner=readonlyRegistry.object(11);

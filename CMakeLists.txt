@@ -1342,7 +1342,8 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     target_compile_options(runtime_editable_list_test PRIVATE -UNDEBUG)
     add_test(NAME runtime_editable_list COMMAND runtime_editable_list_test)
     add_executable(runtime_oad_adapter_test tests/runtime_oad_adapter_test.cc
-        engine/runtime_oad_adapter.cpp engine/runtime_properties.cpp)
+        engine/runtime_oad_adapter.cpp engine/runtime_properties.cpp
+        engine/runtime_property_form.cpp engine/runtime_property_host.cpp)
     target_include_directories(runtime_oad_adapter_test PRIVATE ${CMAKE_SOURCE_DIR}/engine)
     target_link_libraries(runtime_oad_adapter_test PRIVATE wf_property_core ${CMAKE_DL_LIBS})
     target_compile_options(runtime_oad_adapter_test PRIVATE -UNDEBUG)

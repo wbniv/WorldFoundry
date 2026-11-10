@@ -18,11 +18,13 @@ struct Field {
 };
 struct Object {
     uint32_t actor=0; uint64_t generation=0,revision=0;
+    bool oadBacked=false;
     std::string schema,title;std::vector<Field> fields;
     std::map<uint32_t,std::string> values;
     // Optional backing store for OAD-derived objects. The callback must either
     // apply the whole validated draft or leave its backing bytes unchanged.
     std::function<bool(const std::map<uint32_t,std::string>&,std::string&)> apply;
+    std::function<void(const std::vector<uint32_t>&)> changed;
     const Field* field(uint32_t id) const;
     const std::string* get(uint32_t id) const;
 };
@@ -78,9 +80,13 @@ public:
     // bumps the revision of each object it changes. Returns "schema.key=value: reason" for
     // each override it rejects. Counts one application per call.
     std::vector<std::string> apply(Registry& registry) const;
+    // Apply to one newly constructed OAD model without reapplying overrides to
+    // existing registry objects or incrementing the level-load counter.
+    std::vector<std::string> applyObject(Object& object) const;
     // Number of apply() calls so far: a host compares it to detect that a new level loaded.
     uint64_t applications() const {return applications_.load();}
 private:
+    std::vector<std::string> applyObjectLocked(Object& object) const;
     mutable std::mutex mutex_;   // the host may write from a JNI/UI thread
     std::map<std::pair<std::string,std::string>,std::string> values_;
     mutable std::atomic<uint64_t> applications_{0};

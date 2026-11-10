@@ -1,5 +1,6 @@
 #include "runtime_oad_adapter.hpp"
 #include "oad_field_location.h"
+#include "runtime_property_host.hpp"
 #include <cassert>
 #include <cstring>
 #include <fstream>
@@ -40,6 +41,8 @@ int main(int argc, char** argv) {
     assert(field && field->key == "Seed" && !field->readonly);
     assert(*object.get(uint32_t(seed)) == "2147483647");
     std::string applied;
+    wfprops::Registry registry;
+    unsigned changeCount = 0;
     object.apply = [&](const std::map<uint32_t, std::string>& draft, std::string& reason) {
         const auto& value = draft.at(uint32_t(seed));
         if (value == "9") { reason = "backing write failed"; return false; }
@@ -47,15 +50,35 @@ int main(int argc, char** argv) {
                                      payload.data(), payload.size(), common.data(), common.size(), draft, reason)) return false;
         applied = value; return true;
     };
-    wfprops::Registry registry;
+    object.changed = [&](const std::vector<uint32_t>& fields) {
+        assert((fields == std::vector<uint32_t>{uint32_t(seed)}));
+        assert(registry.object(7) && *registry.object(7)->get(uint32_t(seed)) == applied);
+        ++changeCount;
+    };
     assert(registry.add(std::move(object), error));
     wfprops::Edit edit;
     assert(edit.begin(registry, 7) && edit.set(uint32_t(seed), "42") && edit.commit());
     assert(applied == "42" && *registry.object(7)->get(uint32_t(seed)) == "42");
+    assert(changeCount == 1);
     int32_t stored = 0; std::memcpy(&stored, payload.data() + prefix.offset, 4); assert(stored == 42);
     assert(edit.begin(registry, 7) && edit.set(uint32_t(seed), "9") && !edit.commit());
     assert(edit.error == "backing write failed" && *registry.object(7)->get(uint32_t(seed)) == "42");
+    assert(changeCount == 1);
     std::memcpy(&stored, payload.data() + prefix.offset, 4); assert(stored == 42);
+    wfprops::LaunchOverrides overrides;
+    overrides.set("PlantedTankSettings", "Seed", "73");
+    assert(overrides.applyObject(*registry.object(7)).empty());
+    assert(overrides.applications() == 0);
+    std::memcpy(&stored, payload.data() + prefix.offset, 4); assert(stored == 73);
+    overrides.set("PlantedTankSettings", "Seed", "9");
+    assert(!overrides.applyObject(*registry.object(7)).empty());
+    assert(*registry.object(7)->get(uint32_t(seed)) == "73");
+    edit.cancel();
+    wfprops::Host host; bool legacyCalled = false;
+    host.consumer("PlantedTankSettings", wfprops::Consumer{[&](){legacyCalled = true;}, {}, {}});
+    host.bind(&registry); assert(host.open() && !host.picker && !legacyCalled);
+    assert(host.form.edit.set(uint32_t(seed), "37") && host.apply() && !legacyCalled);
+    std::memcpy(&stored, payload.data() + prefix.offset, 4); assert(stored == 37);
     assert(!wfprops::buildOadObject(7, "x", "x", trimmed.data(), trimmed.size(), sheet,
                                      seedLocation.offset, payload.data(), 1,
                                      common.data(), common.size(), object, error));
