@@ -769,16 +769,23 @@ Level::Level
 		", Common Data size " << _levelData->commonDataLength << std::endl; )
 
 	initLevelOad();
-	std::vector<uint32_t> editableIndices;
-	if (!wfedit::editableIndices((char*)_levelData + _levelData->commonDataOffset,
-	                             size_t(_levelData->commonDataLength),
+	const void* editableCommon = (char*)_levelData + _levelData->commonDataOffset;
+	const size_t editableCommonSize = size_t(_levelData->commonDataLength);
+	if (!wfedit::editableIndices(editableCommon, editableCommonSize,
 	                             LevelObjEditableObjectsOffset(_levelOad, _levelOadSize),
-	                             size_t(_levelData->objectCount), editableIndices)) {
-		std::fprintf(stderr, "Invalid editable object list in level\n");
+	                             size_t(_levelData->objectCount), _editableIndices) ||
+	    !wfedit::editableLabels(editableCommon, editableCommonSize,
+	                            LevelObjEditableObjectLabelsOffset(_levelOad, _levelOadSize),
+	                            _editableIndices.size(), _editableLabels) ||
+	    !wfedit::editableTypes(editableCommon, editableCommonSize,
+	                           LevelObjEditableTypeDescriptorsOffset(_levelOad, _levelOadSize),
+	                           _editableTypes) ||
+	    (!_editableIndices.empty() && _editableTypes.empty())) {
+		std::fprintf(stderr, "Invalid editable object data in level\n");
 		std::abort();
 	}
 	std::vector<bool> editableObject(size_t(_levelData->objectCount), false);
-	for (uint32_t actor : editableIndices) editableObject[actor] = true;
+	for (uint32_t actor : _editableIndices) editableObject[actor] = true;
 	_editableObjectData.resize(size_t(_levelData->objectCount));
 	initModels();
 	_theAssetManager->LoadPermanents();
