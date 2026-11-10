@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
                                     common.data(), common.size(), object, error));
     assert(object.actor == 7 && object.title == "Goldie");
     const auto* field = object.field(uint32_t(seed));
-    assert(field && field->key == "Seed" && !field->readonly);
+    assert(field && field->key == "Seed" && !field->readonly && field->maxLength >= 10);
     assert(*object.get(uint32_t(seed)) == "2147483647");
     std::string applied;
     wfprops::Registry registry;

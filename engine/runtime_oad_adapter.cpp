@@ -100,7 +100,7 @@ int visit(void* opaque, const WfOadField* source) {
     Field field;
     field.kind = uint8_t(source->kind); field.show = uint8_t(source->show);
     field.readonly = !source->live; field.minimum = source->minimum; field.maximum = source->maximum;
-    field.scale = source->scale; field.width = source->width;
+    field.scale = source->scale; field.width = source->width; field.maxLength = 256;
     field.key = str(source->key); field.label = str(source->label); field.help = str(source->help);
     field.group = str(source->group); field.choices = str(source->choices);
     if (source->kind >= 5) { ctx.object->fields.push_back(std::move(field)); return 0; }
