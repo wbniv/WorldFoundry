@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/4f4b4f99) | Runtime object editing: O4 engine scope approved (Will, 2026-11-10) |
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/bf228952) | Unpark runtime object editing; Sea Stars settings become an OAS object |
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/71433569) | Plan: Sea Stars D11, RPRP catalog vs Settings OAS object |
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/b27dfd11) | Plan: Sea Stars settings are an RP01 catalog on the standalone .iff, not a level object |
@@ -7,6 +8,11 @@
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/b3f8bf3e) | Plan: Sea Stars, an eleventh aquarium tank of Indo-Pacific sea stars |
 
 <!--history-meta v1
+4f4b4f99	author	Will Norris
+4f4b4f99	added	2
+4f4b4f99	deleted	2
+4f4b4f99	files	1
+4f4b4f99	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqQp7NCXUWp7VRzdCnw
 bf228952	author	Will Norris
 bf228952	added	36
 bf228952	deleted	29

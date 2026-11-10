@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/4f4b4f99) | Runtime object editing: O4 engine scope approved (Will, 2026-11-10) |
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/bf228952) | Unpark runtime object editing; Sea Stars settings become an OAS object |
 | [2026-10-17](https://github.com/wbniv/WorldFoundry/commit/f7f13672) | Record Phase P steps 11-12 on Cast1: baseline-picker and baseline-settings pass |
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/1f3cfb94) | Record the picker's green macOS build (Metal CameraMatrices) |
@@ -11,6 +12,11 @@
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/7ef36fbb) | Plan runtime object editing on OAS/OAD to replace RP02 |
 
 <!--history-meta v1
+4f4b4f99	author	Will Norris
+4f4b4f99	added	2
+4f4b4f99	deleted	2
+4f4b4f99	files	1
+4f4b4f99	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqQp7NCXUWp7VRzdCnw
 bf228952	author	Will Norris
 bf228952	added	16
 bf228952	deleted	0

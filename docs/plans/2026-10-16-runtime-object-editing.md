@@ -40,6 +40,40 @@ There are other readers too: Android's `PlantedSettingsProvider` reads the catal
 |---|---|---|
 | O4 | Engine permission | **Approved 2026‑11‑10** (Will: "yes, engine scope approved"). The scope is "Engine changes" plus the migration of every catalog user. |
 
+## Phase 0 outcomes, 2026‑11‑10
+
+[Phase 0 trace](2026-10-16-runtime-object-editing/phase0-trace.md) (commit `6cfea43e`). The trace found that design item 2 can't be built as written, and it lists 15 risks (R1–R15). This section records how each one is settled. Where it conflicts with the Design section below, this section wins.
+
+**Will decided (2026‑11‑10):**
+
+| # | Finding | Decision |
+|---|---|---|
+| R1 | Appending **Editor Label** to `actor.inc` breaks every compiled level. `actor.inc` is included **before** each type's own fields, so the new field would be inserted in the middle of every struct and move every type-specific field by 4 bytes. `OADSize` can't detect that | **Resolve at export** (Will: "#1 but make TODO for better cleanup"). Editor Label is a plain custom property on the `.lev` object, not an OAD field. levcomp reads it and writes the final labels into `LevelObj` (R3). No class struct changes, so no existing level is touched. **M6's behaviour is unchanged**; only where the override is stored changes. Follow-up TODO: "Editor Label as a real OAD field" |
+| R7 | M4's INT32 cap narrows the planted Seed, a `uint32` today (`PlantedConfig.SEED_MAX = 4294967295`) | **Keep M4 and clamp** (Will: "Keep M4, clamp"). Phase 3 clamps saved values above 2 147 483 647, with a test, and changes `SEED_MAX` and `parseSeed` in the same commit |
+| R11b | Bounded text fields (`BUTTON_STRING`) have no OAD equivalent: struct fields are `int32`/`fixed32` only | **Drop the text examples** (Will: "#1 but add TODO"). The planted Seed becomes an `INT32` number. The baseline's Field types sheet loses its text and path rows. Follow-up TODO: "Fixed-size string fields in the OAD overlay" |
+
+**Settled by the orchestrator, following the trace's recommendations** (Will can overrule any of them):
+
+| # | Finding | Settled as |
+|---|---|---|
+| R2 | A shipped `.oad` is about 207 KB per type, not 12 KB, because `actor.inc` adds 128 entries of 1 491 bytes each | Ship only the type's own entries, from its first own `PROPERTY_SHEET_HEADER` onward, plus the index of the first entry shipped, so descriptor indices stay global |
+| R3 | `XDATA_OBJECTLIST` holds indices only, so labels have nowhere to go | A second appended `LevelObj` field, **Editable Object Labels** (`XDATA_COPY`, NUL-separated, in list order). levcomp fails the build on a duplicate (M6) |
+| R4 | `SHOW_AS_LIVE` (0x40) breaks exact `show_as ==` comparisons in levcomp, `wf_attr_schema`, the Blender exporter and `wf_edit` | One masking helper (`show_as & 0x3f`) in `wf_oad` and in C++, used everywhere, then a `wf_core.so` rebuild. A radio-plus-live field round-trip test |
+| R5 | RP01 already uses the name `Settings` | Never register a `Settings` type in `objects.mac`. `settings.inc` is an include only. Runtime options key on their own type name in Phase 4 |
+| R6 | `property@` returns only [-32768, 32768) | A Seed above that range is read with `property-int-bytes@` (syscall 179), whose kind check is widened to accept `INT32` descriptors |
+| R8 | Common-area string dedup can match `"Cat"` to `"Cats"` | Labels are added with an exact-match `add`, with a `"Cat"`/`"Cats"` test |
+| R9 | There's no generic chunk lookup for an `OAD ` chunk | **No new chunk.** The descriptor bytes go in the LVL common area, referenced from `LevelObj` by an offset per editable type. Plan item 4's "`OAD ` chunk" means this from now on |
+| R10 | Two copies of the schemas (`wf_oad/tests/fixtures/` and `wfsource/source/oas/`) already disagree | New types are authored only against `wfsource/source/oas`. Phase 1 adds a test that the fixtures match, or re-syncs them |
+| R12 | The menu preview needs the planted form before any level loads | The engine embeds the default struct and the shipped descriptors from `wfsource/source/oas` at build time. That's not a level catalog |
+| R13 | Launch overrides apply to every object of a schema, which would be a runtime type scan (M3) | Apply them only to objects on the `LevelObj` list |
+| R14 | `--edit-all` needs `.oad` files the export didn't ship | Desktop and debug builds load `wfsource/source/oas/<class>.oad` from disk, found by type id through `objects.lc` |
+| R15 | The plan asks for a C++ port of levcomp's offset walker plus a parity test | **Reuse instead:** export one `extern "C"` walker from `wf_attr_edit`, which the engine already links and which uses levcomp's own `wf_oad` crate. The same code computes the offsets on both sides, so they can't drift, and the parity test becomes a smoke test |
+| R11a, R11c | RP01 form actions (Regenerate, New random seed) and validation rules | Actions: a small per-type action table in the C++ class, beside `OnPropertiesChanged`. Validation: from the OAD min and max |
+
+**Answer to "which other levels need remediation":** because of R1, no level outside the six catalog users (and their four generated Dream variants) changes. The `levelobj.oas` appends are read through a bounded helper (precedent: `levelobj_fields.hp:31-47`), so older levels without them read as "nothing editable".
+
+**Phase 1 is now:** `settings.inc`; `plantedtanksettings.oas` registered at the end of `objects.mac`; `regen-headers.sh` then `oas2oad`; `SHOW_AS_LIVE` with the R4 helper; the `LevelObj` appends (Editable Objects, Editable Object Labels, descriptor offsets); levcomp writing a non-empty `XDATA_OBJECTLIST` (it only ever writes the terminator today), the labels (from the `.lev` Editor Label property, R1) and the trimmed descriptors (R2, R9); and tests for each. No `actor.inc` change.
+
 ## Context: what exists today, from the code
 
 The planted tank's settings exist in **five forms**:
