@@ -86,17 +86,10 @@ pub struct EditablePlan {
 /// as `per_object_size` does. `None` when the entry lies inside a
 /// COMMONBLOCK section, where it has no per-object bytes.
 pub fn payload_offset(schema: &OadFile, index: usize) -> Option<usize> {
-    let mut size = 0;
-    let mut in_common = false;
-    for entry in &schema.entries[..index] {
-        match entry.button_type {
-            ButtonType::CommonBlock => { size += 4; in_common = true; }
-            ButtonType::EndCommon => in_common = false,
-            _ => if !in_common { size += field_size(entry); },
-        }
+    match wf_oad::field_location(&schema.entries, index, 0)? {
+        wf_oad::FieldLocation::Object { offset } => Some(offset),
+        wf_oad::FieldLocation::Common { .. } => None,
     }
-    let target = schema.entries.get(index)?;
-    if in_common && target.button_type != ButtonType::CommonBlock { None } else { Some(size) }
 }
 
 /// The type's own descriptors (R2): the index of its first own
@@ -414,6 +407,19 @@ mod tests {
         assert_eq!(names, vec!["Seahorse", "Colour", "Size"]);
         // Payload: movebloc offset (4) + Template Object (4) precede the sheet.
         assert_eq!(payload_offset(horse, first), Some(8));
+    }
+
+    #[test]
+    fn shared_walker_locates_common_and_trimmed_fields() {
+        let s = schemas();
+        let horse = s.get("seahorse").unwrap();
+        assert_eq!(wf_oad::field_location(&horse.entries, 1, 0),
+                   Some(wf_oad::FieldLocation::Common { pointer_offset: 0, offset: 0 }));
+        assert_eq!(wf_oad::field_location(&horse.entries, 4, 0),
+                   Some(wf_oad::FieldLocation::Object { offset: 4 }));
+        assert_eq!(wf_oad::field_location(&horse.entries[5..], 1, 8),
+                   Some(wf_oad::FieldLocation::Object { offset: 8 }));
+        assert_eq!(wf_oad::field_location(&horse.entries, horse.entries.len(), 0), None);
     }
 
     #[test]

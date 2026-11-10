@@ -367,6 +367,73 @@ impl fmt::Display for OadEntry {
 
 // ── OAD file ──────────────────────────────────────────────────────────────────
 
+/// Field binary size when stored in either per-object OAD or common block.
+/// Matches `wftools/lvldump-rs/src/oad.rs::field_size` (which is itself a port
+/// of `wftools/iff2lvl/oad.cc::QObjectAttributeDataEntry::SizeOfOnDisk`).
+pub fn field_size(entry: &OadEntry) -> usize {
+    match entry.button_type {
+        ButtonType::Fixed32
+        | ButtonType::Int32
+        | ButtonType::ObjectReference
+        | ButtonType::Filename
+        | ButtonType::CommonBlock
+        | ButtonType::MeshName
+        | ButtonType::ClassReference => 4,
+
+        ButtonType::Fixed16 | ButtonType::Int16 => 2,
+        ButtonType::Int8 => 1,
+        ButtonType::String => entry.len as usize,
+
+        ButtonType::XData => {
+            // Action ∈ [1..=4] (COPY/OBJECTLIST/CONTEXTUALANIMATIONLIST/SCRIPT)
+            // burns 4 bytes; IGNORE (0) and anything else burns 0.
+            let action = entry.xdata_conversion_action();
+            if (1..=4).contains(&action) { 4 } else { 0 }
+        }
+
+        _ => 0,
+    }
+}
+
+/// Location of a descriptor's stored bytes, relative to the object payload or
+/// to a common block referenced by an offset in that payload.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FieldLocation {
+    Object { offset: usize },
+    Common { pointer_offset: usize, offset: usize },
+}
+
+/// Walk OAD entries using the same sizes levcomp writes. `start_offset` is the
+/// object payload position at the first supplied entry, allowing a trimmed OAD
+/// to use the prefix offset shipped beside it.
+pub fn field_location(entries: &[OadEntry], index: usize, start_offset: usize) -> Option<FieldLocation> {
+    let mut object = start_offset;
+    let mut common: Option<(usize, usize)> = None;
+    for (i, entry) in entries.iter().enumerate() {
+        if i == index {
+            return match (entry.button_type, common) {
+                (ButtonType::EndCommon, Some(_)) => None,
+                (ButtonType::CommonBlock, _) => Some(FieldLocation::Object { offset: object }),
+                (_, Some((pointer_offset, offset))) => Some(FieldLocation::Common { pointer_offset, offset }),
+                _ => Some(FieldLocation::Object { offset: object }),
+            };
+        }
+        match entry.button_type {
+            ButtonType::CommonBlock => {
+                if common.is_some() { return None; }
+                common = Some((object, 0));
+                object = object.checked_add(4)?;
+            }
+            ButtonType::EndCommon => { common = None; }
+            _ => match &mut common {
+                Some((_, offset)) => *offset = offset.checked_add(field_size(entry))?,
+                None => object = object.checked_add(field_size(entry))?,
+            },
+        }
+    }
+    None
+}
+
 #[derive(Debug, Clone)]
 pub struct OadFile {
     pub header: OadHeader,

@@ -1330,6 +1330,12 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
         set_tests_properties(levelobj_short_record_${_lvl_name} PROPERTIES PASS_REGULAR_EXPRESSION
             "payload-bytes=${_lvl_bytes} prewarm=0 editable=-1 labels=-1 types=-1 has-editable=0")
     endforeach()
+    add_executable(oad_field_location_test tests/oad_field_location_test.cc)
+    target_include_directories(oad_field_location_test PRIVATE ${CMAKE_SOURCE_DIR}/engine)
+    target_link_libraries(oad_field_location_test PRIVATE wf_property_core ${CMAKE_DL_LIBS})
+    target_compile_options(oad_field_location_test PRIVATE -UNDEBUG)
+    add_test(NAME oad_field_location COMMAND oad_field_location_test
+        ${CMAKE_SOURCE_DIR}/wftools/wf_oad/tests/fixtures/levelobj.oad)
     # Android touch-control geometry, hit-test and pointer ownership, including the card-open
     # layout (docs/plans/2026-11-01-touch-controls-over-cards.md). Header-only, so it runs on
     # the desktop build; -UNDEBUG keeps its asserts in Release.

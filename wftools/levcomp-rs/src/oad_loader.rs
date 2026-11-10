@@ -67,33 +67,7 @@ impl OadSchemas {
     }
 }
 
-/// Field binary size when stored in either per-object OAD or common block.
-/// Matches `wftools/lvldump-rs/src/oad.rs::field_size` (which is itself a port
-/// of `wftools/iff2lvl/oad.cc::QObjectAttributeDataEntry::SizeOfOnDisk`).
-pub fn field_size(entry: &OadEntry) -> usize {
-    match entry.button_type {
-        ButtonType::Fixed32
-        | ButtonType::Int32
-        | ButtonType::ObjectReference
-        | ButtonType::Filename
-        | ButtonType::CommonBlock
-        | ButtonType::MeshName
-        | ButtonType::ClassReference => 4,
-
-        ButtonType::Fixed16 | ButtonType::Int16 => 2,
-        ButtonType::Int8 => 1,
-        ButtonType::String => entry.len as usize,
-
-        ButtonType::XData => {
-            // Action ∈ [1..=4] (COPY/OBJECTLIST/CONTEXTUALANIMATIONLIST/SCRIPT)
-            // burns 4 bytes; IGNORE (0) and anything else burns 0.
-            let action = entry.xdata_conversion_action();
-            if (1..=4).contains(&action) { 4 } else { 0 }
-        }
-
-        _ => 0,
-    }
-}
+pub use wf_oad::field_size;
 
 /// Compute the per-object OAD data size for a class: sum of field sizes for
 /// every entry that lives *outside* a COMMONBLOCK (including the COMMONBLOCK

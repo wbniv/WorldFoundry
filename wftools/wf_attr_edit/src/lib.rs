@@ -58,9 +58,72 @@ pub unsafe extern "C" fn wf_attr_check(kind:u32, low:i32, high:i32, scale:u32,
     check(kind,low,high,scale,width,max_len,rule,c,v)
 }
 
+/// Location of a field in an object payload or a referenced common block.
+/// `common_pointer` is -1 for an object field; otherwise it is the byte offset
+/// of the common-area pointer in the payload and `offset` is within that block.
+#[repr(C)]
+#[derive(Debug, Default, PartialEq, Eq)]
+pub struct OadFieldLocation {
+    pub common_pointer: i32,
+    pub offset: u32,
+    pub width: u32,
+}
+
+/// Resolve a local entry index in a full or trimmed OAD. Returns 0 on success;
+/// malformed descriptors, structural fields and invalid arguments return 1.
+/// The caller supplies the payload offset of the first descriptor in the OAD.
+///
+/// # Safety
+/// `oad` must point to `oad_len` readable bytes and `out` to writable storage.
+#[no_mangle]
+pub unsafe extern "C" fn wf_attr_oad_field_location(
+    oad: *const u8, oad_len: usize, index: usize, start_offset: u32,
+    out: *mut OadFieldLocation,
+) -> i32 {
+    if oad.is_null() || out.is_null() || oad_len < wf_oad::HEADER_SIZE || oad_len > 16 * 1024 * 1024
+        || (oad_len - wf_oad::HEADER_SIZE) % wf_oad::ENTRY_SIZE != 0 { return 1; }
+    let bytes = std::slice::from_raw_parts(oad, oad_len);
+    let Ok(schema) = wf_oad::OadFile::read(&mut std::io::Cursor::new(bytes)) else { return 1; };
+    let Some(entry) = schema.entries.get(index) else { return 1; };
+    let width = wf_oad::field_size(entry);
+    if width == 0 || entry.button_type == wf_oad::ButtonType::CommonBlock { return 1; }
+    let Some(location) = wf_oad::field_location(&schema.entries, index, start_offset as usize) else { return 1; };
+    let (common_pointer, offset) = match location {
+        wf_oad::FieldLocation::Object { offset } => (-1, offset),
+        wf_oad::FieldLocation::Common { pointer_offset, offset } => {
+            let Ok(pointer_offset) = i32::try_from(pointer_offset) else { return 1; };
+            (pointer_offset, offset)
+        }
+    };
+    let Ok(offset) = u32::try_from(offset) else { return 1; };
+    let Ok(width) = u32::try_from(width) else { return 1; };
+    *out = OadFieldLocation { common_pointer, offset, width };
+    0
+}
+
 #[cfg(test)] mod tests {
     use super::*;
     #[test] fn enum_offset_and_width(){assert_eq!(check(2,3,5,0,4,0,0,"a|b|c","4"),0);assert_eq!(check(2,3,5,0,4,0,0,"a|b|c","2"),3);assert_eq!(check(0,-1000,1000,0,1,0,0,"","128"),2);}
     #[test] fn exact_seed_text(){for s in ["0","713","4294967295"]{assert_eq!(check(3,0,0,0,0,10,1,"",s),0)}for s in ["-1","4294967296","NaN",""]{assert_ne!(check(3,0,0,0,0,10,1,"",s),0)}}
     #[test] fn fixed_scale_and_finite(){assert_eq!(check(1,0,65536,65536,4,0,0,"",".5"),0);assert_eq!(check(1,0,65536,65536,4,0,0,"","NaN"),1);assert_eq!(check(1,0,65536,65536,4,0,0,"","2"),2);}
+    #[test] fn oad_field_location_uses_shared_walker() {
+        let bytes = include_bytes!("../../wf_oad/tests/fixtures/levelobj.oad");
+        let schema = wf_oad::OadFile::read(&mut std::io::Cursor::new(bytes)).unwrap();
+        let index = schema.entries.iter().position(|e| e.name_str() == "Editable Objects").unwrap();
+        let mut result = OadFieldLocation::default();
+        assert_eq!(unsafe { wf_attr_oad_field_location(bytes.as_ptr(), bytes.len(), index, 0, &mut result) }, 0);
+        assert_eq!(result, OadFieldLocation { common_pointer: -1, offset: 572, width: 4 });
+        let (common_index, pointer, offset) = schema.entries.iter().enumerate().find_map(|(i, e)| {
+            if wf_oad::field_size(e) == 0 || e.button_type == wf_oad::ButtonType::CommonBlock { return None; }
+            match wf_oad::field_location(&schema.entries, i, 0) {
+                Some(wf_oad::FieldLocation::Common { pointer_offset, offset }) => Some((i, pointer_offset, offset)),
+                _ => None,
+            }
+        }).expect("fixture has a stored common-block field");
+        assert_eq!(unsafe { wf_attr_oad_field_location(bytes.as_ptr(), bytes.len(), common_index, 0, &mut result) }, 0);
+        assert_eq!(result.common_pointer, pointer as i32);
+        assert_eq!(result.offset, offset as u32);
+        assert_eq!(unsafe { wf_attr_oad_field_location(bytes.as_ptr(), bytes.len() - 1, index, 0, &mut result) }, 1);
+        assert_eq!(unsafe { wf_attr_oad_field_location(bytes.as_ptr(), bytes.len(), schema.entries.len(), 0, &mut result) }, 1);
+    }
 }
