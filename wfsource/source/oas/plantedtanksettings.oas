@@ -37,6 +37,10 @@ TYPEHEADER(Planted Tank Settings,PlantedTankSettings)
 	TYPEENTRYBOOLEAN(Greeting,,1,SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"Saltwater only: pairs meet on one post for about two minutes")
 	PROPERTY_SHEET_FOOTER
 
+	PROPERTY_SHEET_HEADER(Screensaver,0)
+	TYPEENTRYINT32(Hold seconds,,0,86400,120,"",SHOW_AS_NUMBER|SHOW_AS_LIVE,"Seconds a fully grown tank stays on screen before the next tank")
+	PROPERTY_SHEET_FOOTER
+
 TYPEFOOTER
 
 @*============================================================================

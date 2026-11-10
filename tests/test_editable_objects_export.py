@@ -174,7 +174,9 @@ def test_descriptors_are_trimmed_to_the_types_own_sheets(editable_level):
     entries = oad_entries(oad)
     assert entries[0][1] == "Plant growth" and entries[0][0] == 8   # BUTTON_PROPERTY_SHEET
     live = [name for _, name, show in entries if show & SHOW_AS_LIVE]
-    assert live == ["Seed", "Water type", "Growth speed", "Textures", "Sway", "Seahorses", "Greeting"]
+    assert live == ["Seed", "Water type", "Growth speed", "Textures", "Sway", "Seahorses", "Greeting", "Hold seconds"]
+    screensaver = next(i for i, entry in enumerate(entries) if entry[1] == "Screensaver")
+    assert entries[screensaver + 1][1] == "Hold seconds"
     # The payload offset finds the first object's authored Seed, then Water type.
     first_settings = editable_level.objects[editable_level.editable()[0]][1]
     seed, water = struct.unpack_from("<ii", first_settings, payload_offset)

@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/77b1bfb5) | Runtime object editing: Phase 0 outcomes and decisions |
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/4f4b4f99) | Runtime object editing: O4 engine scope approved (Will, 2026-11-10) |
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/bf228952) | Unpark runtime object editing; Sea Stars settings become an OAS object |
 | [2026-10-17](https://github.com/wbniv/WorldFoundry/commit/f7f13672) | Record Phase P steps 11-12 on Cast1: baseline-picker and baseline-settings pass |
@@ -12,6 +13,11 @@
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/7ef36fbb) | Plan runtime object editing on OAS/OAD to replace RP02 |
 
 <!--history-meta v1
+77b1bfb5	author	Will Norris
+77b1bfb5	added	34
+77b1bfb5	deleted	0
+77b1bfb5	files	1
+77b1bfb5	body	Will decided R1 (Editor Label resolved at export, not in actor.inc, which\nwould shift every struct), R7 (keep the INT32 Seed cap, clamp the planted\nseed) and R11b (drop bounded text fields). The other trace risks are\nsettled in the plan. Two follow-up TODOs: Editor Label as a real OAD field,\nand fixed-size string fields in the overlay.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqQp7NCXUWp7VRzdCnw
 4f4b4f99	author	Will Norris
 4f4b4f99	added	2
 4f4b4f99	deleted	2
