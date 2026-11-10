@@ -960,7 +960,7 @@ add_custom_target(wf_property_core_build DEPENDS "${WF_PROPERTY_LIB}")
 add_library(wf_property_core STATIC IMPORTED GLOBAL)
 set_target_properties(wf_property_core PROPERTIES IMPORTED_LOCATION "${WF_PROPERTY_LIB}")
 add_dependencies(wf_property_core wf_property_core_build)
-list(APPEND WF_SOURCES "${CMAKE_SOURCE_DIR}/engine/runtime_properties.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_property_form.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_property_host.cpp" "${CMAKE_SOURCE_DIR}/wfsource/source/game/runtime_options.cc")
+list(APPEND WF_SOURCES "${CMAKE_SOURCE_DIR}/engine/runtime_properties.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_oad_adapter.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_property_form.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_property_host.cpp" "${CMAKE_SOURCE_DIR}/wfsource/source/game/runtime_options.cc")
 add_library(wfengine STATIC ${WF_SOURCES})
 # The UI font (game/ui_font.hp) comes from cd.iff's UIFT chunk. Linux desktop
 # -L runs often have no cd.iff in their working directory, so they read the
@@ -1341,6 +1341,13 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     target_include_directories(runtime_editable_list_test PRIVATE ${CMAKE_SOURCE_DIR}/engine)
     target_compile_options(runtime_editable_list_test PRIVATE -UNDEBUG)
     add_test(NAME runtime_editable_list COMMAND runtime_editable_list_test)
+    add_executable(runtime_oad_adapter_test tests/runtime_oad_adapter_test.cc
+        engine/runtime_oad_adapter.cpp engine/runtime_properties.cpp)
+    target_include_directories(runtime_oad_adapter_test PRIVATE ${CMAKE_SOURCE_DIR}/engine)
+    target_link_libraries(runtime_oad_adapter_test PRIVATE wf_property_core ${CMAKE_DL_LIBS})
+    target_compile_options(runtime_oad_adapter_test PRIVATE -UNDEBUG)
+    add_test(NAME runtime_oad_adapter COMMAND runtime_oad_adapter_test
+        ${CMAKE_SOURCE_DIR}/wfsource/source/oas/plantedtanksettings.oad)
     # Android touch-control geometry, hit-test and pointer ownership, including the card-open
     # layout (docs/plans/2026-11-01-touch-controls-over-cards.md). Header-only, so it runs on
     # the desktop build; -UNDEBUG keeps its asserts in Release.
