@@ -60,7 +60,7 @@ def tool(name: str) -> Path:
 
 
 def settings_object(name: str, seed: int | None = None, water: str | None = None,
-                    label: str | None = None) -> str:
+                    label: str | None = None, hold_seconds: int | None = None) -> str:
     fields = [f"\t\t{{ 'NAME' \"{name}\" }}",
               "\t\t{ 'VEC3' { 'NAME' \"Position\" } { 'DATA' 0.0(1.15.16) 0.0(1.15.16) 0.0(1.15.16) } }",
               "\t\t{ 'EULR' { 'NAME' \"Orientation\" } { 'DATA' 0.0(1.15.16) 0.0(1.15.16) 0.0(1.15.16) } }",
@@ -71,6 +71,8 @@ def settings_object(name: str, seed: int | None = None, water: str | None = None
         fields.append(f"\t\t{{ 'I32' {{ 'NAME' \"Water type\" }} {{ 'STR' \"{water}\" }} }}")
     if label is not None:   # a plain .lev field, not an OAD field (R1)
         fields.append(f"\t\t{{ 'STR' {{ 'NAME' \"Editor Label\" }} {{ 'STR' \"{label}\" }} }}")
+    if hold_seconds is not None:
+        fields.append(f"\t\t{{ 'I32' {{ 'NAME' \"Hold seconds\" }} {{ 'DATA' {hold_seconds}l }} }}")
     return "\t{ 'OBJ'\n" + "\n".join(fields) + "\n\t}\n"
 
 
@@ -143,7 +145,7 @@ def oad_entries(oad: bytes) -> list[tuple[int, str, int]]:
 @pytest.fixture(scope="module")
 def editable_level(tmp_path_factory) -> Level:
     work = tmp_path_factory.mktemp("editable")
-    text = level_with(settings_object("Settings.001", seed=2147483647, water="Saltwater"),
+    text = level_with(settings_object("Settings.001", seed=2147483647, water="Saltwater", hold_seconds=600),
                       settings_object("Settings.002", label="Goldie"),
                       settings_object("Settings.003"))
     result = compile_level(text, work)
@@ -181,6 +183,9 @@ def test_descriptors_are_trimmed_to_the_types_own_sheets(editable_level):
     first_settings = editable_level.objects[editable_level.editable()[0]][1]
     seed, water = struct.unpack_from("<ii", first_settings, payload_offset)
     assert (seed, water) == (2147483647, 1), "a radio|live field authored by label must compile to its index"
+    second_settings = editable_level.objects[editable_level.editable()[1]][1]
+    assert struct.unpack_from("<i", first_settings, len(first_settings) - 4)[0] == 600
+    assert struct.unpack_from("<i", second_settings, len(second_settings) - 4)[0] == 120
 
 
 def test_duplicate_label_fails_the_build(tmp_path):
