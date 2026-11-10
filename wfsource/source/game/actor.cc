@@ -656,7 +656,7 @@ OODMax(const SObjectStartupData* startupData)
 const Actor::NonStatPlatData Actor::_statPlatData(NULL,NULL);
 
 Actor::Actor( const SObjectStartupData* startupData ) : 
-   MovementObject( startupData, (void*)( startupData->objectData + 1 ),theLevel->GetCommonBlock(),theLevel->LevelClock()),
+   MovementObject( startupData, (void*)( startupData->objectData + 1 ),*startupData->commonBlock,theLevel->LevelClock()),
 	_physicalAttributes( 
                            OODPosition(startupData),
                            OODRotation(startupData),

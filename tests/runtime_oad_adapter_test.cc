@@ -30,6 +30,7 @@ int main(int argc, char** argv) {
     assert(wf_attr_oad_field_location(trimmed.data(), trimmed.size(), seed - sheet,
                                       seedLocation.offset, &prefix) == 0);
     std::vector<uint8_t> payload(1024), common(1024);
+    std::vector<wfprops::CommonPage> pages;
     const int32_t authoredSeed = 2147483647;
     std::memcpy(payload.data() + prefix.offset, &authoredSeed, 4);
     wfprops::Object object; std::string error;
@@ -47,7 +48,7 @@ int main(int argc, char** argv) {
         const auto& value = draft.at(uint32_t(seed));
         if (value == "9") { reason = "backing write failed"; return false; }
         if (!wfprops::applyOadObject(trimmed.data(), trimmed.size(), sheet, seedLocation.offset,
-                                     payload.data(), payload.size(), common.data(), common.size(), draft, reason)) return false;
+                                     payload.data(), payload.size(), common.data(), common.size(), pages, draft, reason)) return false;
         applied = value; return true;
     };
     object.changed = [&](const std::vector<uint32_t>& fields) {
@@ -82,4 +83,52 @@ int main(int argc, char** argv) {
     assert(!wfprops::buildOadObject(7, "x", "x", trimmed.data(), trimmed.size(), sheet,
                                      seedLocation.offset, payload.data(), 1,
                                      common.data(), common.size(), object, error));
+
+    // Put the real live Seed descriptor inside a common block. Two actors
+    // start with the same page; an edit must copy only the first actor's page.
+    size_t block = SIZE_MAX, end = SIZE_MAX;
+    for (size_t i = 0; header + (i + 1) * entry <= full.size(); ++i) {
+        const auto type = full[header + i * entry];
+        if (type == 17 && block == SIZE_MAX) block = i;
+        if (type == 18 && block != SIZE_MAX && end == SIZE_MAX) end = i;
+    }
+    assert(block != SIZE_MAX && end != SIZE_MAX && end > block);
+    std::vector<uint8_t> sharedOad(full.begin(), full.begin() + header);
+    auto appendEntry = [&](size_t i) {
+        sharedOad.insert(sharedOad.end(), full.begin() + header + i * entry,
+                         full.begin() + header + (i + 1) * entry);
+    };
+    appendEntry(sheet); appendEntry(block); appendEntry(seed); appendEntry(end);
+    std::vector<uint8_t> sharedCommon(16), firstPayload(4), secondPayload(4);
+    const int32_t originalOffset = 4, initial = 11;
+    std::memcpy(firstPayload.data(), &originalOffset, 4);
+    std::memcpy(secondPayload.data(), &originalOffset, 4);
+    std::memcpy(sharedCommon.data() + originalOffset, &initial, 4);
+    wfprops::Object first;
+    assert(wfprops::buildOadObject(1, "Test", "First", sharedOad.data(), sharedOad.size(), 100, 0,
+                                    firstPayload.data(), firstPayload.size(), sharedCommon.data(), sharedCommon.size(), first, error));
+    assert(*first.get(102) == "11");
+    std::vector<wfprops::CommonPage> firstPages, secondPages;
+    auto draft = first.values; draft[102] = "42";
+    assert(wfprops::applyOadObject(sharedOad.data(), sharedOad.size(), 100, 0,
+                                   firstPayload.data(), firstPayload.size(), sharedCommon.data(), sharedCommon.size(),
+                                   firstPages, draft, error));
+    int32_t handle = 0, pageValue = 0, untouched = 0;
+    std::memcpy(&handle, firstPayload.data(), 4);
+    std::memcpy(&pageValue, firstPages[0].bytes.data(), 4);
+    std::memcpy(&untouched, sharedCommon.data() + originalOffset, 4);
+    assert(firstPages.size() == 1 && handle == firstPages[0].handle && pageValue == 42 && untouched == 11);
+    assert(secondPages.empty() && std::memcmp(secondPayload.data(), &originalOffset, 4) == 0);
+    const auto* stableAddress = firstPages[0].bytes.data();
+    draft[102] = "73";
+    assert(wfprops::applyOadObject(sharedOad.data(), sharedOad.size(), 100, 0,
+                                   firstPayload.data(), firstPayload.size(), sharedCommon.data(), sharedCommon.size(),
+                                   firstPages, draft, error));
+    std::memcpy(&pageValue, firstPages[0].bytes.data(), 4);
+    assert(firstPages.size() == 1 && firstPages[0].bytes.data() == stableAddress && pageValue == 73);
+    draft[102] = "999999999999";
+    assert(!wfprops::applyOadObject(sharedOad.data(), sharedOad.size(), 100, 0,
+                                    firstPayload.data(), firstPayload.size(), sharedCommon.data(), sharedCommon.size(),
+                                    firstPages, draft, error));
+    std::memcpy(&pageValue, firstPages[0].bytes.data(), 4); assert(pageValue == 73);
 }

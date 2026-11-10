@@ -1,5 +1,6 @@
 #include "runtime_oad_adapter.hpp"
 #include "oad_field_location.h"
+#include <algorithm>
 #include <cstring>
 #include <cerrno>
 #include <cmath>
@@ -23,6 +24,7 @@ struct ApplyContext {
     const uint8_t* oad; size_t oadLength; uint32_t first, prefix;
     std::vector<uint8_t>* payload;
     const uint8_t* common; size_t commonLength;
+    std::vector<CommonPage>* pages;
     const std::map<uint32_t, std::string>* values;
     std::string* error;
 };
@@ -61,13 +63,28 @@ int applyField(void* opaque, const WfOadField* source) {
         const size_t pointer = size_t(location.common_pointer);
         if (pointer > available || available - pointer < 4) { *ctx.error = "common pointer outside payload"; return 1; }
         int32_t offset; std::memcpy(&offset, base + pointer, 4);
-        if (offset < 0 || size_t(offset) > ctx.commonLength || location.offset > ctx.commonLength - size_t(offset) ||
-            location.width > ctx.commonLength - size_t(offset) - location.offset) {
-            *ctx.error = "field outside common area"; return 1;
+        auto page = std::find_if(ctx.pages->begin(), ctx.pages->end(),
+                                 [offset](const CommonPage& p) { return p.handle == offset; });
+        if (page == ctx.pages->end()) {
+            uint32_t size = 0;
+            if (offset < 0 || wf_attr_oad_common_size(ctx.oad, ctx.oadLength, source->index, &size) ||
+                size_t(offset) > ctx.commonLength || size > ctx.commonLength - size_t(offset) ||
+                location.offset > size || location.width > size - location.offset) {
+                *ctx.error = "field outside common area"; return 1;
+            }
+            if (!std::memcmp(ctx.common + offset + location.offset, encoded, location.width)) return 0;
+            if (ctx.commonLength > size_t(INT32_MAX) - 3) { *ctx.error = "common area too large"; return 1; }
+            const size_t baseHandle = (ctx.commonLength + 3) & ~size_t(3);
+            if (ctx.pages->size() > (size_t(INT32_MAX) - baseHandle) / 4) { *ctx.error = "too many common pages"; return 1; }
+            const int32_t handle = int32_t(baseHandle + ctx.pages->size() * 4);
+            ctx.pages->push_back({handle, std::vector<uint8_t>(ctx.common + offset, ctx.common + offset + size)});
+            std::memcpy(base + pointer, &handle, 4);
+            page = ctx.pages->end() - 1;
         }
-        if (std::memcmp(ctx.common + offset + location.offset, encoded, location.width)) {
-            *ctx.error = "editing common-block fields is not yet available"; return 1;
+        if (location.offset > page->bytes.size() || location.width > page->bytes.size() - location.offset) {
+            *ctx.error = "field outside private common page"; return 1;
         }
+        std::memcpy(page->bytes.data() + location.offset, encoded, location.width);
         return 0;
     }
     if (location.offset > available || location.width > available - location.offset) {
@@ -132,7 +149,7 @@ bool buildOadObject(uint32_t actor, const std::string& schema, const std::string
                     const uint8_t* common, size_t commonLength, Object& out, std::string& error) {
     error.clear();
     if (!actor || !oad || !payload || !common) { error = "missing OAD object data"; return false; }
-    Object result; result.actor = actor; result.schema = schema; result.title = label;
+    Object result; result.actor = actor; result.schema = schema; result.title = label; result.oadBacked = true;
     Context context{oad, oadLength, firstIndex, payloadOffset, payload, payloadLength, common, commonLength,
                     &result, &error};
     if (wf_attr_oad_visit(oad, oadLength, visit, &context)) {
@@ -146,15 +163,25 @@ bool buildOadObject(uint32_t actor, const std::string& schema, const std::string
 bool applyOadObject(const uint8_t* oad, size_t oadLength, uint32_t firstIndex,
                     uint32_t payloadOffset, uint8_t* payload, size_t payloadLength,
                     const uint8_t* common, size_t commonLength,
+                    std::vector<CommonPage>& pages,
                     const std::map<uint32_t, std::string>& values, std::string& error) {
     error.clear();
     if (!oad || !payload || !common) { error = "missing OAD object data"; return false; }
     std::vector<uint8_t> staged(payload, payload + payloadLength);
-    ApplyContext context{oad, oadLength, firstIndex, payloadOffset, &staged, common, commonLength, &values, &error};
+    std::vector<CommonPage> stagedPages = pages;
+    ApplyContext context{oad, oadLength, firstIndex, payloadOffset, &staged, common, commonLength,
+                         &stagedPages, &values, &error};
     if (wf_attr_oad_visit(oad, oadLength, applyField, &context)) {
         if (error.empty()) error = "malformed OAD descriptor";
         return false;
     }
+    // Existing page buffers keep their addresses: actors may hold pointers to
+    // them. Reserve first, then update in place and append newly copied pages.
+    pages.reserve(stagedPages.size());
+    const size_t oldCount = pages.size();
+    for (size_t i = 0; i < oldCount; ++i)
+        std::memcpy(pages[i].bytes.data(), stagedPages[i].bytes.data(), pages[i].bytes.size());
+    for (size_t i = oldCount; i < stagedPages.size(); ++i) pages.push_back(std::move(stagedPages[i]));
     std::memcpy(payload, staged.data(), payloadLength);
     return true;
 }

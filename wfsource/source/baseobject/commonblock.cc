@@ -41,6 +41,8 @@ const void*
 CommonBlock::GetBlockPtr(int32 offset) const
 {
    Validate();
+   if (_overrides) for (const auto& page : *_overrides)
+      if (page.handle == offset) return page.bytes.data();
    assert(_commonBlockSize);           // not allowed to look up if this is a NULL instance
    RangeCheck(0,offset,_commonBlockSize);
 	assert( (offset & 3) == 0 );

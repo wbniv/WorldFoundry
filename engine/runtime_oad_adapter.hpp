@@ -1,6 +1,7 @@
 #pragma once
 
 #include "runtime_properties.hpp"
+#include "runtime_oad_common.hpp"
 #include <cstddef>
 #include <cstdint>
 #include <string>
@@ -15,10 +16,11 @@ bool buildOadObject(uint32_t actor, const std::string& schema, const std::string
                     const uint8_t* common, size_t commonLength,
                     Object& out, std::string& error);
 
-// Apply a validated draft atomically. Common-area writes are rejected until a
-// per-object common block can be copied; they never modify shared bytes.
+// Apply a validated draft atomically, copying a shared common page on its first
+// write and leaving the level's original common area untouched.
 bool applyOadObject(const uint8_t* oad, size_t oadLength, uint32_t firstIndex,
                     uint32_t payloadOffset, uint8_t* payload, size_t payloadLength,
                     const uint8_t* common, size_t commonLength,
+                    std::vector<CommonPage>& pages,
                     const std::map<uint32_t, std::string>& values, std::string& error);
 }

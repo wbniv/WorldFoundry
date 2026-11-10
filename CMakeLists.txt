@@ -1349,6 +1349,10 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     target_compile_options(runtime_oad_adapter_test PRIVATE -UNDEBUG)
     add_test(NAME runtime_oad_adapter COMMAND runtime_oad_adapter_test
         ${CMAKE_SOURCE_DIR}/wfsource/source/oas/plantedtanksettings.oad)
+    add_executable(runtime_common_override_test tests/runtime_common_override_test.cc)
+    target_link_libraries(runtime_common_override_test PRIVATE wfengine)
+    target_compile_options(runtime_common_override_test PRIVATE -UNDEBUG)
+    add_test(NAME runtime_common_override COMMAND runtime_common_override_test)
     # Android touch-control geometry, hit-test and pointer ownership, including the card-open
     # layout (docs/plans/2026-11-01-touch-controls-over-cards.md). Header-only, so it runs on
     # the desktop build; -UNDEBUG keeps its asserts in Release.

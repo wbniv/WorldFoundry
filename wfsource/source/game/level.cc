@@ -796,6 +796,8 @@ Level::Level
 	std::vector<bool> editableObject(size_t(_levelData->objectCount), false);
 	for (uint32_t actor : _editableIndices) editableObject[actor] = true;
 	_editableObjectData.resize(size_t(_levelData->objectCount));
+	_editableCommonPages.resize(size_t(_levelData->objectCount));
+	_editableCommonBlocks.resize(size_t(_levelData->objectCount));
 	initModels();
 	_theAssetManager->LoadPermanents();
 
@@ -866,6 +868,10 @@ Level::Level
 				std::abort();
 			}
 			auto& copy = _editableObjectData[size_t(index)];
+			auto& pages = _editableCommonPages[size_t(index)];
+			auto& commonBlock = _editableCommonBlocks[size_t(index)];
+			commonBlock.reset(new CommonBlock(editableCommon, int(editableCommonSize)));
+			commonBlock->SetOverrides(&pages);
 			copy.resize(sizeof(_ObjectOnDisk) + size_t(objdata->OADSize));
 			std::memcpy(copy.data(), objdata, copy.size());
 			objdata = reinterpret_cast<_ObjectOnDisk*>(copy.data());
@@ -887,11 +893,11 @@ Level::Level
 			                             editableCommonSize, model, error)) {
 				std::fprintf(stderr, "Invalid editable actor %d: %s\n", index, error.c_str()); std::abort();
 			}
-			model.apply = [descriptor, payload, payloadSize, common, editableCommonSize]
+			model.apply = [descriptor, payload, payloadSize, common, editableCommonSize, pagesPtr = &pages]
 			    (const std::map<uint32_t, std::string>& values, std::string& reason) {
 				return wfprops::applyOadObject(descriptor.oad, descriptor.oadLength, descriptor.first,
 				                               descriptor.payloadOffset, payload, payloadSize,
-				                               common, editableCommonSize, values, reason);
+				                               common, editableCommonSize, *pagesPtr, values, reason);
 			};
 			model.changed = [this, index](const std::vector<uint32_t>& changed) {
 				if (_actors[index] && IsActor(_actors[index]))
@@ -907,6 +913,8 @@ Level::Level
 				             index, kOadObjectNames[objdata->type], _editableLabels[listIndex].c_str());
 		}
 		ConstructStartupData( startupData, objdata, index );
+		if (_editableCommonBlocks[size_t(index)])
+			startupData.commonBlock = _editableCommonBlocks[size_t(index)].get();
 
 		constructObject( startupData, index );
 

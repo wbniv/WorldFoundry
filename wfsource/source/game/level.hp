@@ -66,6 +66,7 @@
 #include "../../../engine/runtime_properties.hpp"
 #include "../../../engine/runtime_editable_list.hpp"
 #include <cstdint>
+#include <memory>
 #include <vector>
 
 //============================================================================
@@ -238,6 +239,8 @@ private:
 	// Kept alive through actor destruction; each listed object gets its own
 	// _ObjectOnDisk and OAD payload before its constructor reads either one.
 	std::vector<std::vector<std::uint8_t>> _editableObjectData;
+	std::vector<std::vector<wfprops::CommonPage>> _editableCommonPages;
+	std::vector<std::unique_ptr<CommonBlock>> _editableCommonBlocks;
 	std::vector<uint32_t> _editableIndices;
 	std::vector<std::string> _editableLabels;
 	std::vector<wfedit::EditableType> _editableTypes;
