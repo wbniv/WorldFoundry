@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/e7ba0bb8) | Balcony screen frame: solar inserts also go in to harvest power at home |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/e84c3807) | Balcony screen frame: controller and 50 Ah battery prices; payback range |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/d1a67569) | Balcony screen frame: battery prices from AliExpress Thailand; revised payback |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/65ab436c) | Balcony screen frame: payback estimate for the solar option |
@@ -10,6 +11,11 @@
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/7a50bd79) | Balcony: break the screen frame out as its own plan; archive A and B |
 
 <!--history-meta v1
+e7ba0bb8	author	Will Norris
+e7ba0bb8	added	13
+e7ba0bb8	deleted	10
+e7ba0bb8	files	1
+e7ba0bb8	body	Will (2026-11-11): the solar set goes in whenever he would rather harvest\npower than have the view, not only while away. Updates the power use,\npayback reading, power diagram and panel-set state diagram.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 e84c3807	author	Will Norris
 e84c3807	added	2
 e84c3807	deleted	2
