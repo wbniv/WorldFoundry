@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/4572a098) | Balcony screen frame: solar value at both the base and the top MEA rate |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/be93d8f3) | Balcony screen frame: value of the solar yield at MEA's 2026 tariff |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/b5561098) | Balcony screen frame: solar charges an off-grid battery; no grid-tie |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/adc50caa) | Balcony screen frame: solar options buyable in Thailand |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/7a50bd79) | Balcony: break the screen frame out as its own plan; archive A and B |
 
 <!--history-meta v1
+4572a098	author	Will Norris
+4572a098	added	1
+4572a098	deleted	1
+4572a098	files	1
+4572a098	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 be93d8f3	author	Will Norris
 be93d8f3	added	1
 be93d8f3	deleted	1
