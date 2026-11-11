@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/418a87be) | Balcony screen frame: Lazada stock panels; solar set no longer six-alike |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/e7ba0bb8) | Balcony screen frame: solar inserts also go in to harvest power at home |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/e84c3807) | Balcony screen frame: controller and 50 Ah battery prices; payback range |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/d1a67569) | Balcony screen frame: battery prices from AliExpress Thailand; revised payback |
@@ -11,6 +12,11 @@
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/7a50bd79) | Balcony: break the screen frame out as its own plan; archive A and B |
 
 <!--history-meta v1
+418a87be	author	Will Norris
+418a87be	added	14
+418a87be	deleted	12
+418a87be	files	1
+418a87be	body	Will (2026-11-11): six panels were for aesthetics, so the solar set need\nnot match them. Recommends eight 18 V 50 W panels (600 x 460, Lazada\nflash price 234.52 THB) sideways, two high, in four quarter-width\ninserts: 400 W, about 280-320 W after the ledge's shade. Adds the 18 V\n30 W (390 x 430) and 80 W (960 x 460) sizes, revises the yield value and\npayback (panels 2-3 years; whole kit 4.5-19 years), and redraws the\nstock mockup state.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 e7ba0bb8	author	Will Norris
 e7ba0bb8	added	13
 e7ba0bb8	deleted	10

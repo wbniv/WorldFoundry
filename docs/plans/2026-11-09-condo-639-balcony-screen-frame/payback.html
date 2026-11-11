@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Solar payback</title>
+<style>
+  .viz-root { color-scheme: light;
+    --surface-1:#fcfcfb; --page:#ffffff; --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#7a7974;
+    --grid:#e6e5e1; --axis:#b9b8b2; --ref:#8a8984; --line:#d1d9e0; --panel:#f6f8fa; --accent:#0969da;
+    --series-1:#2a78d6; --series-2:#eb6834; --band-1:rgba(42,120,214,.16); --band-2:rgba(235,104,52,.16); }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root { color-scheme: dark;
+      --surface-1:#1a1a19; --page:#0d1117; --text-primary:#f0efec; --text-secondary:#c3c2b7; --text-muted:#9a9990;
+      --grid:#2c2c2a; --axis:#55544f; --ref:#8d8c86; --line:#30363d; --panel:#161b22; --accent:#4493f8;
+      --series-1:#3987e5; --series-2:#d95926; --band-1:rgba(57,135,229,.22); --band-2:rgba(217,89,38,.22); }
+  }
+  :root[data-theme="dark"] .viz-root { color-scheme: dark;
+      --surface-1:#1a1a19; --page:#0d1117; --text-primary:#f0efec; --text-secondary:#c3c2b7; --text-muted:#9a9990;
+      --grid:#2c2c2a; --axis:#55544f; --ref:#8d8c86; --line:#30363d; --panel:#161b22; --accent:#4493f8;
+      --series-1:#3987e5; --series-2:#d95926; --band-1:rgba(57,135,229,.22); --band-2:rgba(217,89,38,.22); }
+  * { box-sizing:border-box; }
+  body { margin:0; background:#fff; }
+  .viz-root { width:1440px; height:900px; overflow:hidden; background:var(--page); color:var(--text-primary);
+    font:14px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+  header { display:flex; align-items:center; gap:12px; padding:12px 24px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header h1 { margin:0; font-size:16px; font-weight:600; }
+  header .tag { margin-left:auto; font:600 11px ui-monospace,Menlo,monospace; letter-spacing:.04em; color:var(--text-secondary);
+    border:1px solid var(--line); border-radius:10px; padding:2px 8px; }
+  .filters { display:flex; align-items:center; gap:8px; padding:10px 24px 0; color:var(--text-secondary); font-size:13px; }
+  .filters button { font:600 13px inherit; padding:5px 12px; border:1px solid var(--line); background:var(--panel); color:var(--text-primary); border-radius:6px; cursor:pointer; }
+  .filters button[aria-pressed="true"] { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .grid { display:grid; grid-template-columns:820px 1fr; gap:20px; padding:10px 24px; }
+  .card { background:var(--surface-1); border:1px solid var(--line); border-radius:8px; padding:12px 14px; position:relative; }
+  .card h2 { margin:0 0 2px; font-size:14px; } .card p.sub { margin:0 0 6px; color:var(--text-secondary); font-size:12.5px; }
+  .legend { display:flex; gap:16px; font-size:12.5px; color:var(--text-secondary); margin:2px 0 4px; }
+  .legend i { display:inline-block; width:14px; height:10px; border-radius:2px; margin-right:6px; vertical-align:-1px; }
+  svg text { fill:var(--text-secondary); font-size:11.5px; }
+  .tip { position:absolute; pointer-events:none; background:var(--surface-1); border:1px solid var(--axis); border-radius:6px; padding:6px 8px; font-size:12px; color:var(--text-primary); display:none; white-space:nowrap; box-shadow:0 2px 8px rgba(0,0,0,.12); }
+  .notes { font-size:12.5px; color:var(--text-secondary); margin:6px 0 0; }
+  details { font-size:12px; color:var(--text-secondary); } table { border-collapse:collapse; } td,th { padding:2px 6px; border-bottom:1px solid var(--grid); text-align:right; } th:first-child,td:first-child{text-align:left}
+</style>
+</head>
+<body>
+<div class="viz-root">
+<header><h1>639 balcony solar, option B (eight 50&nbsp;W panels, ≈&nbsp;190–215&nbsp;kWh a year): payback</h1><span class="tag">ESTIMATE — PRICES UNTIL BOUGHT</span></header>
+<div class="filters">Electricity price rise per year:
+  <button data-e="0">0&nbsp;% (flat)</button><button data-e="0.02">2&nbsp;%</button><button data-e="0.04">4&nbsp;%</button>
+  <span style="margin-left:10px">Panels lose 0.5&nbsp;% of output a year in every case.</span></div>
+<div class="grid">
+  <div class="card" id="c1">
+    <h2>Cumulative electricity saved vs what it cost</h2>
+    <p class="sub">Each band runs from MEA's base rate (lower edge) to its top rate (upper edge). Payback is where a band crosses a cost line.</p>
+    <div class="legend"><span><i style="background:var(--series-1)"></i>Panels fitted all year</span><span><i style="background:var(--series-2)"></i>Panels fitted half the year</span><span><i style="background:none;border-top:2px dashed var(--ref);height:0;width:16px"></i>Cost</span></div>
+    <svg id="s1" width="790" height="610"></svg>
+    <div class="tip" id="t1"></div>
+  </div>
+  <div class="card" id="c2">
+    <h2>Payback, in years</h2>
+    <p class="sub">Bar from top rate (left end) to base rate (right end).</p>
+    <div class="legend"><span><i style="background:var(--series-1)"></i>Fitted all year</span><span><i style="background:var(--series-2)"></i>Half the year</span></div>
+    <svg id="s2" width="530" height="300"></svg>
+    <div class="tip" id="t2"></div>
+    <p class="notes">The ready-made 50&nbsp;Ah battery is replaced once, in year 10 (+฿8,400). The panels are assumed to last 25 years. Savings count only power the battery's loads use.</p>
+    <details><summary>Table</summary><table id="tbl"></table></details>
+  </div>
+</div>
+</div>
+<script>
+const YRS=25, D=0.005;
+const RATES={all:[643,1040], half:[322,520]};   // THB per year in year 1: [base, top]
+const COSTS=[
+  {k:'p', label:'Panels only, ฿1,880', c:1880},
+  {k:'s', label:'Kit, 25 Ah DIY battery, ฿4,800', c:4800},
+  {k:'r', label:'Kit, 50 Ah ready-made, ฿12,000', c:12000, repl:[10,8400]},
+];
+const costAt=(o,n)=>o.c+(o.repl && n>o.repl[0] ? o.repl[1] : 0);
+const cum=(a,e,n)=>{let s=0; for(let k=1;k<=n;k++) s+=a*((1+e)*(1-D))**(k-1); return s;};
+const cumF=(a,e,t)=>{const n=Math.floor(t); return cum(a,e,n)+(t-n)*a*((1+e)*(1-D))**n;};
+function payback(o,a,e){ for(let n=1;n<=40;n++){ const s=cum(a,e,n), c=costAt(o,n); if(s>=c){ const p=cum(a,e,n-1); return n-1+(c-p)/(s-p);} } return Infinity; }
+const fmt=n=>'฿'+Math.round(n).toLocaleString('en-US');
+const fy=v=>!isFinite(v)?'40+':v>YRS?v.toFixed(0):v.toFixed(1);
+let E=0;
+function draw(){
+  document.querySelectorAll('.filters button').forEach(b=>b.setAttribute('aria-pressed', String(+b.dataset.e===E)));
+  // ---- chart 1
+  const s1=document.getElementById('s1'), W=790,H=610, L=64,R=170,T=10,B=40, pw=W-L-R, ph=H-T-B, YM=Math.max(22000, Math.ceil(cum(RATES.all[1],E,YRS)/4000)*4000);
+  const X=t=>L+t/YRS*pw, Y=v=>T+ph-Math.min(v,YM)/YM*ph;
+  let g='';
+  for(let v=0;v<=YM;v+=2000){ g+=`<line x1="${L}" x2="${L+pw}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--grid)"/>`; if(v%4000===0) g+=`<text x="${L-8}" y="${Y(v)+4}" text-anchor="end">${fmt(v)}</text>`; }
+  for(let t=0;t<=YRS;t+=5){ g+=`<text x="${X(t)}" y="${T+ph+18}" text-anchor="middle">${t}</text>`; }
+  g+=`<text x="${L+pw/2}" y="${H-4}" text-anchor="middle">years</text><line x1="${L}" x2="${L+pw}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--axis)"/>`;
+  // bands
+  [['half','--band-2','--series-2'],['all','--band-1','--series-1']].forEach(([key,band,ser])=>{
+    const [lo,hi]=RATES[key]; let up='',dn='';
+    for(let i=0;i<=YRS*4;i++){ const t=i/4; up+=`${i?'L':'M'}${X(t).toFixed(1)} ${Y(cumF(hi,E,t)).toFixed(1)}`; }
+    for(let i=YRS*4;i>=0;i--){ const t=i/4; dn+=`L${X(t).toFixed(1)} ${Y(cumF(lo,E,t)).toFixed(1)}`; }
+    g+=`<path d="${up}${dn}Z" fill="var(${band})"/>`;
+    let l1='',l2=''; for(let i=0;i<=YRS*4;i++){ const t=i/4; l1+=`${i?'L':'M'}${X(t).toFixed(1)} ${Y(cumF(hi,E,t)).toFixed(1)}`; l2+=`${i?'L':'M'}${X(t).toFixed(1)} ${Y(cumF(lo,E,t)).toFixed(1)}`; }
+    g+=`<path d="${l1}" fill="none" stroke="var(${ser})" stroke-width="2"/><path d="${l2}" fill="none" stroke="var(${ser})" stroke-width="2" stroke-dasharray="1 0"/>`;
+  });
+  // cost lines
+  COSTS.forEach(o=>{ let d=''; if(o.repl){ d=`M${X(0)} ${Y(o.c)}H${X(o.repl[0])}V${Y(o.c+o.repl[1])}H${X(YRS)}`; } else d=`M${X(0)} ${Y(o.c)}H${X(YRS)}`;
+    g+=`<path d="${d}" fill="none" stroke="var(--ref)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+    const yl=o.repl?Y(o.c+o.repl[1]):Y(o.c); g+=`<text x="${X(YRS)+6}" y="${yl+4}" style="fill:var(--text-primary)">${o.label.replace(', ','</tspan><tspan x="'+(X(YRS)+6)+'" dy="14">')}</text>`; });
+  // break-even dots (all year, top & base) on each cost
+  COSTS.forEach(o=>{ [['all','--series-1'],['half','--series-2']].forEach(([key,ser])=>RATES[key].forEach(a=>{ const p=payback(o,a,E); if(p<=YRS){ g+=`<circle cx="${X(p)}" cy="${Y(costAt(o,Math.ceil(p)))}" r="4.5" fill="var(${ser})" stroke="var(--surface-1)" stroke-width="2"/>`; } })); });
+  g+=`<line id="xh" x1="0" x2="0" y1="${T}" y2="${T+ph}" stroke="var(--axis)" visibility="hidden"/><rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="transparent" id="hit"/>`;
+  s1.innerHTML=g;
+  const tip=document.getElementById('t1'), xh=s1.querySelector('#xh');
+  s1.querySelector('#hit').onmousemove=ev=>{ const r=s1.getBoundingClientRect(); const t=Math.max(0,Math.min(YRS,Math.round((ev.clientX-r.left-L)/pw*YRS))); xh.setAttribute('x1',X(t)); xh.setAttribute('x2',X(t)); xh.setAttribute('visibility','visible');
+    tip.style.display='block'; tip.style.left=(X(t)+30)+'px'; tip.style.top='120px';
+    tip.innerHTML=`<b>Year ${t}</b><br>All year: ${fmt(cum(RATES.all[0],E,t))} – ${fmt(cum(RATES.all[1],E,t))}<br>Half year: ${fmt(cum(RATES.half[0],E,t))} – ${fmt(cum(RATES.half[1],E,t))}`; };
+  s1.querySelector('#hit').onmouseleave=()=>{ tip.style.display='none'; xh.setAttribute('visibility','hidden'); };
+  // ---- chart 2: payback range bars
+  const s2=document.getElementById('s2'), W2=530, L2=150, R2=70, T2=6, rowH=70, XM=40, pw2=W2-L2-R2;
+  const X2=v=>L2+Math.min(v,XM)/XM*pw2; let h='';
+  for(let v=0;v<=XM;v+=10){ h+=`<line x1="${X2(v)}" x2="${X2(v)}" y1="${T2}" y2="${T2+rowH*3}" stroke="var(--grid)"/><text x="${X2(v)}" y="${T2+rowH*3+16}" text-anchor="middle">${v}</text>`; }
+  h+=`<line x1="${X2(25)}" x2="${X2(25)}" y1="${T2}" y2="${T2+rowH*3}" stroke="var(--ref)" stroke-dasharray="4 3"/><text x="${X2(25)}" y="${T2+rowH*3+32}" text-anchor="middle">panel life</text>`;
+  let rows='<tr><th>Cost</th><th>All year</th><th>Half year</th></tr>';
+  COSTS.forEach((o,i)=>{ const y0=T2+i*rowH; h+=`<text x="${L2-10}" y="${y0+28}" text-anchor="end" style="fill:var(--text-primary)">${o.label.split(', ')[0]}</text><text x="${L2-10}" y="${y0+43}" text-anchor="end">${o.label.split(', ')[1]}</text>`;
+    const cell=[];
+    [['all','--series-1',14],['half','--series-2',36]].forEach(([key,ser,dy])=>{ const a=payback(o,RATES[key][1],E), b=payback(o,RATES[key][0],E); const x1=X2(a), x2=X2(b);
+      h+=`<rect x="${x1}" y="${y0+dy}" width="${Math.max(4,x2-x1)}" height="12" rx="4" fill="var(${ser})"><title>${o.label}, fitted ${key==='all'?'all year':'half the year'}: ${fy(a)}–${fy(b)} years</title></rect>`;
+      h+=`<text x="${Math.min(x2,X2(XM))+6}" y="${y0+dy+10}">${fy(a)}–${fy(b)}</text>`; cell.push(`${fy(a)}–${fy(b)}`); });
+    rows+=`<tr><td>${o.label}</td><td>${cell[0]}</td><td>${cell[1]}</td></tr>`; });
+  h+=`<text x="${X2(XM)+10}" y="${T2+rowH*3+16}">years</text>`;
+  s2.innerHTML=h; document.getElementById('tbl').innerHTML=rows;
+}
+document.querySelectorAll('.filters button').forEach(b=>b.onclick=()=>{E=+b.dataset.e; draw();});
+const hs=location.hash.slice(1); if(['0','0.02','0.04'].includes(hs)) E=+hs;
+draw();
+</script>
+</body>
+</html>

@@ -139,6 +139,8 @@ The "after ledge shade" column applies the shadow figures above to each layout (
 
 [![Option B: eight stock 50 W panels, landscape, in four wide inserts](2026-11-09-condo-639-balcony-screen-frame/elevation-plan-c-stock.png)](2026-11-09-condo-639-balcony-screen-frame/elevation-plan-c.html#stock)
 
+[![Option B layout: the four inserts and one insert enlarged, with dimensions and wiring](2026-11-09-condo-639-balcony-screen-frame/solar-insert-b.png)](2026-11-09-condo-639-balcony-screen-frame/solar-insert-b.html)
+
 **Recommendation.** Ask Sunnergy and NSTHAI to quote option A. If neither will build six, use option B: eight stock 18 V 50 W panels, turned sideways and stacked two high in four inserts a quarter of the width. The six screens set the look of the frame; the solar set has no reason to match them (Will, 2026‑11‑11: "6 panels was for aesthetics"). Any of the double-width options (D, E) needs the cam latches to work at any panel width, so ask the shop now whether the latches engage a continuous groove along the rails (open question 7).
 
 **Thickness.** Stock panels are 25–30 mm thick against a 16 mm insert. The insert frame holds the panel with its glass in the insert's plane, and the panel's frame stands about 10–15 mm proud on the room side, which the rails do not mind. A gasket or silicone bead seals the panel's frame to the insert frame on the outside face.
@@ -154,13 +156,28 @@ The "after ledge shade" column applies the shadow figures above to each layout (
 
 With the flash-sale panels and a small DIY battery, the kit pays back in about 5 years if the panels stay in most of the year; with a ready-made 50 Ah battery, which lasts roughly ten years, it barely pays back. Since Will may fit them whenever he does not need the view, not only while away (2026‑11‑11), the "fitted all year" column is the realistic end. The value also counts only power the battery's loads use: a router alone (≈ 90 kWh a year, 300–435 THB) pays back far more slowly than loads that use the whole yield, such as a fan or charging while home. The case for solar here is mainly independent power, not the bill.
 
-**Wiring.** An edge-mounted slim junction box on each laminate with short leads and plug connectors at the sill, on the room side, so an insert still pops out after one unplug and the set still stacks to about 10 cm. Two strings of three panels run to a small MPPT charge controller indoors.
+**Electricity price rises.** The table above holds the price flat. Thai household rates move with the Ft fuel charge, which the regulator resets every four months, so the charts let the price rise 0, 2 or 4 % a year, and in every case the panels lose 0.5 % of their output a year. A rise barely changes the short paybacks and shortens the long ones:
+
+| Cost counted, option B | Flat price | +2 % a year | +4 % a year |
+|---|---|---|---|
+| Panels only, ≈ ฿1,880, fitted all year | 1.8–2.9 years | 1.8–2.9 years | 1.8–2.8 years |
+| Kit with a 25 Ah DIY battery, ≈ ฿4,800, fitted all year | 4.7–7.6 years | 4.5–7.1 years | 4.4–6.7 years |
+| Kit with a 50 Ah ready-made battery, ≈ ฿12,000, replaced in year 10, fitted all year | 21–35 years | 17–26 years | 10–22 years |
+| Same three, fitted half the year | 3.6–5.9 / 9.4–15.5 / 40+ years | 3.5–5.6 / 8.7–13.6 / 31–40+ years | 3.5–5.4 / 8.1–12.2 / 25–34 years |
+
+[![Payback charts: cumulative savings against cost, and payback years, at a flat electricity price](2026-11-09-condo-639-balcony-screen-frame/payback.png)](2026-11-09-condo-639-balcony-screen-frame/payback.html)
+
+[![The same charts with the electricity price rising 4 % a year](2026-11-09-condo-639-balcony-screen-frame/payback-4pct.png)](2026-11-09-condo-639-balcony-screen-frame/payback.html#0.04)
+
+
+**Wiring.** Every panel is wired in parallel: the two in an insert join at their junction boxes, each insert has one plug at the sill on the room side, and the four plugs meet at a branch connector before a 20 A MPPT controller indoors. In parallel each panel works on its own, so the shaded upper panels do not drag down the lower ones. Eight 50 W panels give at most ≈ 22 A at full sun, which a vertical west wall never sees; the controller simply caps the charge on a rare bright moment. An insert still pops out after one unplug.
 
 **Where the power goes: an off-grid battery, no grid-tie inverter** (Will, 2026‑11‑09). The solar inserts go in while Will is away, and also whenever he would rather harvest power than have the view, since the condo has other windows (Will, 2026‑11‑11). The panels charge a battery that keeps the router, sensors or a fan running while he is away and powers small loads such as a fan, lights or charging when he is home, which fits the [home backup power research](/home/will/docs/plans/2026-10-07-home-backup-power.md). Nothing feeds the condo wiring, so no MEA approval or juristic-person consent is needed for it.
 
 ```mermaid
 flowchart LR
-  P["6 solar inserts<br/>300–450 W rated"] -->|"plug at the sill<br/>2 strings of 3"| C["MPPT charge controller"]
+  P["4 solar inserts<br/>8 × 50 W, 400 W rated"] -->|"1 plug per insert<br/>all in parallel"| Y["Branch connector<br/>+ fuse"]
+  Y --> C["MPPT charge controller<br/>20 A, LiFePO4 setting"]
   C --> B["Battery"]
   B --> L["Router, sensors, fan,<br/>lights, charging"]
 ```
