@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/e84c3807) | Balcony screen frame: controller and 50 Ah battery prices; payback range |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/d1a67569) | Balcony screen frame: battery prices from AliExpress Thailand; revised payback |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/65ab436c) | Balcony screen frame: payback estimate for the solar option |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/4572a098) | Balcony screen frame: solar value at both the base and the top MEA rate |
@@ -9,6 +10,11 @@
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/7a50bd79) | Balcony: break the screen frame out as its own plan; archive A and B |
 
 <!--history-meta v1
+e84c3807	author	Will Norris
+e84c3807	added	2
+e84c3807	deleted	2
+e84c3807	files	1
+e84c3807	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 d1a67569	author	Will Norris
 d1a67569	added	3
 d1a67569	deleted	3

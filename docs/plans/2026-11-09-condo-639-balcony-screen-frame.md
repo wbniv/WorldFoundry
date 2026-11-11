@@ -23,7 +23,7 @@ Measured by Will (2026‑09‑30):
 flowchart LR
   F["Fixed black frame<br/>no mullions"] --> S["6 pet-mesh screens<br/>daily, or out for the view"]
   F --> W["6 weather inserts<br/>while away: rain-tight"]
-  F --> P["6 solar inserts, optional<br/>while away: rain-tight + power"]
+  F --> P["6 solar inserts, optional<br/>away, or harvesting at home:<br/>rain-tight + power"]
 ```
 
 ## Design: fixed frame, six pop-out pet-mesh screens
@@ -150,28 +150,31 @@ The "after ledge shade" column applies the shadow figures above to each layout (
 | Panels only, ≈ 6,000 THB | 7.5–11 years | 15–21 years |
 | Whole off-grid kit, ≈ 9,000–16,000 THB | 11–29 years | 22–58 years |
 
-A LiFePO4 battery lasts roughly ten years, so the whole kit pays back on electricity only if the panels stay fitted all year, after more than a decade; and if the battery only runs a router while Will is away (≈ 90 kWh a year, 300–435 THB) it pays back even more slowly. The case for solar here is running the router, sensors or a fan on its own power while away, not the bill.
+A LiFePO4 battery lasts roughly ten years, so the whole kit pays back on electricity only if the panels stay in most of the year, after more than a decade. Since Will may fit them whenever he does not need the view, not only while away (2026‑11‑11), the "fitted all year" column is the realistic end. The value also counts only power the battery's loads use: a router alone (≈ 90 kWh a year, 300–435 THB) pays back far more slowly than loads that use the whole yield, such as a fan or charging while home. The case for solar here is mainly independent power, not the bill.
 
 **Wiring.** An edge-mounted slim junction box on each laminate with short leads and plug connectors at the sill, on the room side, so an insert still pops out after one unplug and the set still stacks to about 10 cm. Two strings of three panels run to a small MPPT charge controller indoors.
 
-**Where the power goes: an off-grid battery, no grid-tie inverter** (Will, 2026‑11‑09). The inserts are in only while Will is away, when nothing in the flat uses much, so the panels charge a battery that keeps the router, sensors or a fan running, which fits the [home backup power research](/home/will/docs/plans/2026-10-07-home-backup-power.md). Nothing feeds the condo wiring, so no MEA approval or juristic-person consent is needed for it.
+**Where the power goes: an off-grid battery, no grid-tie inverter** (Will, 2026‑11‑09). The solar inserts go in while Will is away, and also whenever he would rather harvest power than have the view, since the condo has other windows (Will, 2026‑11‑11). The panels charge a battery that keeps the router, sensors or a fan running while he is away and powers small loads such as a fan, lights or charging when he is home, which fits the [home backup power research](/home/will/docs/plans/2026-10-07-home-backup-power.md). Nothing feeds the condo wiring, so no MEA approval or juristic-person consent is needed for it.
 
 ```mermaid
 flowchart LR
   P["6 solar inserts<br/>300–450 W rated"] -->|"plug at the sill<br/>2 strings of 3"| C["MPPT charge controller"]
   C --> B["Battery"]
-  B --> L["Router, sensors, fan<br/>while away"]
+  B --> L["Router, sensors, fan,<br/>lights, charging"]
 ```
 
 **Mixing sets.** All three sets have the same outer size, so positions can mix, for example solar at the ends and screens in the middle. A solar or weather insert has a rebated edge and a screen does not, so the joint between two different kinds needs a detail from the shop (open question 4). Rain-tightness needs all six positions sealed (inserts or solar).
 
 ```mermaid
 stateDiagram-v2
-  [*] --> Home
-  Home: Home - screens in, or out for the view
-  Away: Away - six weather or solar inserts, rain-tight
-  Home --> Away: swap all six from inside
-  Away --> Home: swap back
+  [*] --> View
+  View: Screens in, or out for the view
+  Sealed: Six weather inserts - rain-tight
+  Solar: Six solar inserts - rain-tight and charging
+  View --> Sealed: away, solar not wanted
+  View --> Solar: away, or harvesting at home
+  Sealed --> View: swap back from inside
+  Solar --> View: swap back from inside
 ```
 
 ## Mockups
@@ -192,7 +195,7 @@ stateDiagram-v2
 
 1. **Frame face, panel edge and panel size.** These are blank on the spec sheet for the shop to fill in. The view arithmetic uses 2.5 cm / 2 cm and 3.8 cm / 2.5 cm until the shop gives the real figures.
 2. **Has the shop started cutting the frame?** v2 changes the rail profiles from v1: a deeper head, a taller sill stop, a higher dam, baffled weeps, a drip edge and a flat gasket landing. Give the shop the v2 sheet before fabrication, or ask what can still change.
-3. ~~**Where does the solar power go?**~~ Answered 2026‑11‑09: an off-grid battery; no grid-tie inverter (Will). Still to size: the battery and the loads it runs while away.
+3. ~~**Where does the solar power go?**~~ Answered 2026‑11‑09: an off-grid battery; no grid-tie inverter (Will). Still to size: the battery and the loads it runs.
 4. **Mixed sets.** Can a screen sit next to a weather or solar insert? The inserts have rebated edges and the screens do not. Ask the shop to detail that joint, or keep each set whole.
 5. ~~**Does this replace the zip screen and the bi-fold?**~~ Answered 2026‑11‑09: yes, this is the plan going forward (Will); plans A and B are archived.
 6. ~~**Heat and damp while sealed.**~~ Answered 2026‑11‑08: the side window lets air through at all times (Will), so the balcony is not a closed box with the inserts in. The frame and inserts need no vent of their own.
