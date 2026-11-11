@@ -1,5 +1,5 @@
 """Generate the two SVG figures for page 5 of the v3 shop sheet (solar inserts and the
-continuous latch channel). Prints a JSON object {"layout": "<svg…>", "channel": "<svg…>"}.
+continuous latch channel). Prints a JSON object {"layout": …, "channel": …, "combos": …} of <svg> strings.
 
 Units are mm. Sizes follow the plan's example frame (25 mm face, 20 mm insert edges);
 the shop's own profiles govern.
@@ -149,5 +149,32 @@ def channel_svg():
             + ''.join(o) + '</svg>')
 
 
+def combos_svg():
+    """Figure E: which partial solar sets fit, with screens (or weather inserts) and a 1/12 filler."""
+    clear = W - 2 * F
+    q, six, twelfth = clear / 4, clear / 6, clear / 12
+    rows = [('4', [('S', q)] * 4),
+            ('2', [('S', q)] * 2 + [('M', six)] * 3),
+            ('1', [('S', q)] + [('f', twelfth)] + [('M', six)] * 4),
+            ('3', [('S', q)] * 3 + [('f', twelfth)] + [('M', six)])]
+    th = {'4': 'บานโซลาร์ 4 บาน', '2': 'โซลาร์ 2 + บานมุ้งหรือบานกันฝน 3', '1': 'โซลาร์ 1 + บานแคบ 1 + บานมุ้งหรือบานกันฝน 4', '3': 'โซลาร์ 3 + บานแคบ 1 + บานมุ้งหรือบานกันฝน 1'}
+    en = {'4': '4 solar', '2': '2 solar + 3 screens or weather inserts', '1': '1 solar + 1 narrow filler + 4 screens or inserts', '3': '3 solar + 1 narrow filler + 1 screen or insert'}
+    k, ox, oy, rh = 0.62, 70, 110, 130
+    o = ['<text x="30" y="50" class="h">E · ใส่บานโซลาร์ 1–4 บาน · Fitting 1, 2, 3 or 4 solar inserts</text>']
+    for r, (n, segs) in enumerate(rows):
+        y, x = oy + r * rh, ox
+        for kind, w in segs:
+            fill = {'S': '#1c2b4d', 'M': '#9aa6b0', 'f': '#dfeaf3'}[kind]
+            o.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w*k-4:.1f}" height="90" fill="{fill}" stroke="#111" stroke-width="3"/>')
+            x += w * k
+        o.append(f'<text x="{ox+clear*k+30:.1f}" y="{y+38:.1f}" class="t">{th[n]}</text><text x="{ox+clear*k+30:.1f}" y="{y+80:.1f}" class="s">{en[n]}</text>')
+    y = oy + 4 * rh + 20
+    o.append(f'<rect x="{ox}" y="{y}" width="40" height="34" fill="#1c2b4d"/><text x="{ox+52}" y="{y+28}" class="s">โซลาร์ 1/4 · solar, a quarter (≈ 657)</text>'
+             f'<rect x="{ox+700}" y="{y}" width="40" height="34" fill="#9aa6b0" stroke="#111" stroke-width="2"/><text x="{ox+752}" y="{y+28}" class="s">บานมุ้งหรือบานกันฝน 1/6 · screen or insert, a sixth (≈ 438)</text>'
+             f'<rect x="{ox+1800}" y="{y}" width="40" height="34" fill="#dfeaf3" stroke="#111" stroke-width="2"/><text x="{ox+1852}" y="{y+28}" class="s">บานแคบ 1/12 · narrow filler, a twelfth (≈ 219)</text>')
+    return (f'<svg viewBox="0 0 2700 {y+70}" xmlns="http://www.w3.org/2000/svg" font-family="Noto Sans, Noto Sans Thai, sans-serif">{STYLE}'
+            + ''.join(o) + '</svg>')
+
+
 if __name__ == '__main__':
-    print(json.dumps({'layout': layout_svg(), 'channel': channel_svg()}))
+    print(json.dumps({'layout': layout_svg(), 'channel': channel_svg(), 'combos': combos_svg()}))
