@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/be05fad1) | Balcony solar research: turning the inserts 6 degrees instead of tilting |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/e51a74d5) | Balcony solar: the ledge runs inward, so no shade; test a tilted 10 cm frame |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/c24de9c3) | Balcony screen frame: v3 shop sheet; split solar research and v1/v2 archive |
 
 <!--history-meta v1
+be05fad1	author	Will Norris
+be05fad1	added	3
+be05fad1	deleted	1
+be05fad1	files	1
+be05fad1	body	PVGIS: +2.5 % facing 6 degrees toward the south, -3.2 % toward the north,\nbefore sawtooth self-shading and the loss of sealed joints.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 e51a74d5	author	Will Norris
 e51a74d5	added	51
 e51a74d5	deleted	27

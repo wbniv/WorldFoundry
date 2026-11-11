@@ -78,6 +78,8 @@ With a small DIY battery, the kit pays back in about 5 years if the panels stay 
 
 [![The same charts with the electricity price rising 4 % a year](2026-11-11-condo-639-balcony-solar-research/payback-4pct.png)](2026-11-11-condo-639-balcony-solar-research/payback.html#0.04)
 
+With a price rise selected, each payback bar keeps a dashed outline of its flat-price payback and is labelled with the years saved: at 4 % a year, a few months for the panels alone and the DIY kit, and 7–25 years for the kit with a ready-made battery.
+
 ## Variation: a 10 cm frame with the solar inserts tilted
 
 **Idea** (Will, 2026‑11‑11): make the frame 10 cm deep, the full width of the pony-wall cap, and let the solar inserts lean within that depth, top inward, so the panels face a little more toward the sky. The pet screens stay vertical at the outer stop.

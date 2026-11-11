@@ -56,7 +56,7 @@
   </div>
   <div class="card" id="c2">
     <h2>Payback, in years</h2>
-    <p class="sub">Bar from top rate (left end) to base rate (right end).</p>
+    <p class="sub">Bar from top rate (left end) to base rate (right end). With a price rise, the dashed outline is the flat-price payback and the bracket gives the years saved.</p>
     <div class="legend"><span><i style="background:var(--series-1)"></i>Fitted all year</span><span><i style="background:var(--series-2)"></i>Half the year</span></div>
     <svg id="s2" width="530" height="300"></svg>
     <div class="tip" id="t2"></div>
@@ -76,7 +76,7 @@ const COSTS=[
 const costAt=(o,n)=>o.c+(o.repl && n>o.repl[0] ? o.repl[1] : 0);
 const cum=(a,e,n)=>{let s=0; for(let k=1;k<=n;k++) s+=a*((1+e)*(1-D))**(k-1); return s;};
 const cumF=(a,e,t)=>{const n=Math.floor(t); return cum(a,e,n)+(t-n)*a*((1+e)*(1-D))**n;};
-function payback(o,a,e){ for(let n=1;n<=40;n++){ const s=cum(a,e,n), c=costAt(o,n); if(s>=c){ const p=cum(a,e,n-1); return n-1+(c-p)/(s-p);} } return Infinity; }
+function payback(o,a,e){ for(let n=1;n<=60;n++){ const s=cum(a,e,n), c=costAt(o,n); if(s>=c){ const p=cum(a,e,n-1); return n-1+(c-p)/(s-p);} } return Infinity; }
 const fmt=n=>'฿'+Math.round(n).toLocaleString('en-US');
 const fy=v=>!isFinite(v)?'40+':v>YRS?v.toFixed(0):v.toFixed(1);
 let E=0;
@@ -112,7 +112,7 @@ function draw(){
     tip.innerHTML=`<b>Year ${t}</b><br>All year: ${fmt(cum(RATES.all[0],E,t))} – ${fmt(cum(RATES.all[1],E,t))}<br>Half year: ${fmt(cum(RATES.half[0],E,t))} – ${fmt(cum(RATES.half[1],E,t))}`; };
   s1.querySelector('#hit').onmouseleave=()=>{ tip.style.display='none'; xh.setAttribute('visibility','hidden'); };
   // ---- chart 2: payback range bars
-  const s2=document.getElementById('s2'), W2=530, L2=150, R2=70, T2=6, rowH=70, XM=40, pw2=W2-L2-R2;
+  const s2=document.getElementById('s2'), W2=530, L2=150, R2=150, T2=6, rowH=70, XM=40, pw2=W2-L2-R2;
   const X2=v=>L2+Math.min(v,XM)/XM*pw2; let h='';
   for(let v=0;v<=XM;v+=10){ h+=`<line x1="${X2(v)}" x2="${X2(v)}" y1="${T2}" y2="${T2+rowH*3}" stroke="var(--grid)"/><text x="${X2(v)}" y="${T2+rowH*3+16}" text-anchor="middle">${v}</text>`; }
   h+=`<line x1="${X2(25)}" x2="${X2(25)}" y1="${T2}" y2="${T2+rowH*3}" stroke="var(--ref)" stroke-dasharray="4 3"/><text x="${X2(25)}" y="${T2+rowH*3+32}" text-anchor="middle">panel life</text>`;
@@ -120,8 +120,12 @@ function draw(){
   COSTS.forEach((o,i)=>{ const y0=T2+i*rowH; h+=`<text x="${L2-10}" y="${y0+28}" text-anchor="end" style="fill:var(--text-primary)">${o.label.split(', ')[0]}</text><text x="${L2-10}" y="${y0+43}" text-anchor="end">${o.label.split(', ')[1]}</text>`;
     const cell=[];
     [['all','--series-1',14],['half','--series-2',36]].forEach(([key,ser,dy])=>{ const a=payback(o,RATES[key][1],E), b=payback(o,RATES[key][0],E); const x1=X2(a), x2=X2(b);
+      const a0=payback(o,RATES[key][1],0), b0=payback(o,RATES[key][0],0);
+      if(E>0) h+=`<rect x="${X2(a0)}" y="${y0+dy}" width="${Math.max(4,X2(b0)-X2(a0))}" height="12" rx="4" fill="none" stroke="var(${ser})" stroke-width="1.5" stroke-dasharray="3 2"><title>at a flat price: ${fy(a0)}–${fy(b0)} years</title></rect>`;
       h+=`<rect x="${x1}" y="${y0+dy}" width="${Math.max(4,x2-x1)}" height="12" rx="4" fill="var(${ser})"><title>${o.label}, fitted ${key==='all'?'all year':'half the year'}: ${fy(a)}–${fy(b)} years</title></rect>`;
-      h+=`<text x="${Math.min(x2,X2(XM))+6}" y="${y0+dy+10}">${fy(a)}–${fy(b)}</text>`; cell.push(`${fy(a)}–${fy(b)}`); });
+      const da=isFinite(a0)&&isFinite(a)?a0-a:0, db=isFinite(b0)&&isFinite(b)?b0-b:0;
+      const fd=v=>v<0.05?'0':'−'+v.toFixed(1); const dl = E>0 && (da>0.05||db>0.05) ? ` (${fd(da)} to ${fd(db)} yr)` : '';
+      h+=`<text x="${Math.min(Math.max(x2, E>0?X2(b0):x2),X2(XM))+6}" y="${y0+dy+10}">${fy(a)}–${fy(b)}${dl}</text>`; cell.push(`${fy(a)}–${fy(b)}${dl}`); });
     rows+=`<tr><td>${o.label}</td><td>${cell[0]}</td><td>${cell[1]}</td></tr>`; });
   h+=`<text x="${X2(XM)+10}" y="${T2+rowH*3+16}">years</text>`;
   s2.innerHTML=h; document.getElementById('tbl').innerHTML=rows;
