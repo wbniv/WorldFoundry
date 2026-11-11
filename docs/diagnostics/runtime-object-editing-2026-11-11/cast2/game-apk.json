@@ -1,0 +1,10 @@
+{
+  "commit": "cd6b9e9e",
+  "apk": "build-docker/runtime-editing-android/aquarium-game-actor-settings-cd6b9e9e.apk",
+  "sha256": "635980d9a540581f6812d420226373694147ae6f01f46ffec43138200fa03a81",
+  "abis": [
+    "arm64-v8a",
+    "armeabi-v7a"
+  ],
+  "rprp_chunks": 0
+}

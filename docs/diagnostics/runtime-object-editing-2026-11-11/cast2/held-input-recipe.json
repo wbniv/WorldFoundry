@@ -1,0 +1,93 @@
+{
+  "duration": 50,
+  "input_script": [
+    {
+      "at": 5,
+      "key": "DPAD_DOWN",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 5.4,
+      "key": "DPAD_DOWN",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 5.8,
+      "key": "DPAD_DOWN",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 6.2,
+      "key": "DPAD_DOWN",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 6.6,
+      "key": "DPAD_DOWN",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 7.2,
+      "key": "DPAD_CENTER",
+      "action": "hold",
+      "ms": 100
+    },
+    {
+      "at": 17,
+      "capture": "before-right"
+    },
+    {
+      "at": 18,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 3000
+    },
+    {
+      "at": 21.5,
+      "capture": "after-right"
+    },
+    {
+      "at": 23,
+      "key": "DPAD_LEFT",
+      "action": "hold",
+      "ms": 3000
+    },
+    {
+      "at": 26.5,
+      "capture": "after-left"
+    },
+    {
+      "at": 28,
+      "key": "DPAD_UP",
+      "action": "hold",
+      "ms": 3000
+    },
+    {
+      "at": 31.5,
+      "capture": "after-up"
+    },
+    {
+      "at": 33,
+      "key": "DPAD_DOWN",
+      "action": "hold",
+      "ms": 3000
+    },
+    {
+      "at": 36.5,
+      "capture": "after-down"
+    },
+    {
+      "at": 40,
+      "capture": "released-settled"
+    },
+    {
+      "at": 46,
+      "capture": "released-later"
+    }
+  ]
+}

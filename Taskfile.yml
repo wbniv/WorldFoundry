@@ -757,6 +757,13 @@ tasks:
     cmds:
       - PYTHONPATH=/opt/wf-device-coordinator/vendor python3 scripts/chromecast.py task configure
 
+  chromecast:screensaver-list:
+    desc: "List installed screensavers and the current selection through the coordinator"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task screensaver-list
+
   chromecast:screensaver-select:
     desc: "Select an installed screensaver through the coordinator (COMPONENT=package/service)"
     silent: true

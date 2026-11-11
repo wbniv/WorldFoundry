@@ -1,6 +1,34 @@
 # Runtime object editing on OAS/OAD: any object, standard types, no catalog chunk
 
-16 October 2026 · **Proposed.** It supersedes [RP02](2026-10-11-rp02-property-catalog.md) and keeps the goal of the [runtime object editor plan](2026-10-06-runtime-oas-oad-object-editor.md): any object can be edited on the TV or phone. That plan's host, TV form and phone form stay. Its `RP01` data layer is replaced. Engine changes need Will's confirmation of the scope below; the 2026‑10‑06 authorisation covered that plan's "minimal core changes".
+16 October 2026 · **Implemented 11 November 2026; final cast2 input recording pending.** It supersedes [RP02](2026-10-11-rp02-property-catalog.md) and keeps the goal of the [runtime object editor plan](2026-10-06-runtime-oas-oad-object-editor.md): any object can be edited on the TV or phone. That plan's host, TV form and phone form stay. Its `RP01` data layer is replaced. Engine changes need Will's confirmation of the scope below; the 2026‑10‑06 authorisation covered that plan's "minimal core changes".
+## Closeout status, 2026‑11‑11
+
+The OAS/OAD migration is implemented and pushed (`cd6b9e9e`, `11744a1b`).
+All catalog users now use settings actors or the separate RuntimeDiagnostics
+form. The production RP01 reader, catalog cooker and per-level catalog sources
+are removed. UI test fixtures retain their synthetic format. Editor labels
+round-trip through Blender and remain available in text IFF levels.
+
+The engine and both Android ABIs build. Adapter/preview/diagnostics native tests,
+the 69-test isolated baseline/screensaver suite, 42 presentation/touch checks,
+12 phone/host/property tests, and 114 Android bridge checks passed. Current
+Aquarium and Planted previews rendered on both Chromecasts. Cast2's Planted
+provider advertises owner 31, the signed seed range and Hold seconds. The
+original Seahorse selection was restored after testing.
+
+[Cast2 evidence and scope](../diagnostics/runtime-object-editing-2026-11-11/cast2/README.md)
+records the captures, APK hashes and coordinator jobs. The older held-input run
+J‑897f46fd7891 completed but used pre-migration code, so it is not final-build
+acceptance. The fresh gameplay APK is built and signed; its four-direction
+recording J‑2a9de06204d9 is queued. The coordinator currently reports control
+unavailable for all devices. **Do not mark that final input check passed until
+its recording and release captures have been inspected.**
+
+The separate baseline Pixel/forms/runtime-options acceptance, Planted soak and
+exact-timing gates, real-OAD Editor Label cleanup and fixed-size strings remain
+in their own TODO items. Historical design and trace sections below describe
+the pre-migration state; this dated status supersedes their implementation status.
+
 ## Unparked, 2026‑11‑10
 
 Will unparked this plan so that the new Sea Stars tank can go first ([Sea Stars D11](2026-11-10-starfish-tank.md#decisions-for-will), "option 1"). He said: "i thought all this RPRP chunks were gone (they should be cuz it's just duplicated work with OAS/OAD and the Settings class)". They aren't gone, and the RPRP route has grown since this plan was written. **O4 approved (Will, 2026‑11‑10: "yes, engine scope approved")**, for the scope under [Engine changes](#engine-changes-scope-for-o4), extended to migrating every catalog user listed below.
