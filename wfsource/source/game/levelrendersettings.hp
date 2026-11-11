@@ -1,0 +1,15 @@
+#ifndef _LevelRenderSettings_HP
+#define _LevelRenderSettings_HP
+#include "actor.hp"
+class LevelRenderSettings: public Actor {
+public:
+    LevelRenderSettings(const SObjectStartupData* startupData);
+    virtual ~LevelRenderSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadLevelRenderSettings(const SObjectStartupData* startupData);
+#endif

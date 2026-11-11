@@ -94,6 +94,6 @@ def test_each_example_accepts_the_intended_touch_action(touch_harness, case):
     # every other case draws the control its showAs resolves to (the JSON "control").
     drawn = "segments" if case["id"] in ("enum-radio", "enum-toggle") else case["control"]
     subprocess.run([
-        str(touch_harness), str(ROOT / "wflevels/planted_tank_screensaver/settings.rprp"),
+        str(touch_harness), str(ROOT / "tests/fixtures/touch_settings.rprp"),
         case["id"], case["type"], show.group(1), drawn,
         str(ROOT / "wfsource/source/game/ui-font.wfga")], check=True)

@@ -1,10 +1,10 @@
 \ Jelly: the stroke drives propulsion and bell deformation, never a fish gait.
 : j-setting ( field fallback -- value ) swap j-settings-owner swap property@ if nip else drop then ;
-: j-tempo 1 2 j-setting dup 0 = if drop .5 else dup 1 = if drop .75 else
+: j-tempo j-tempo-field 2 j-setting dup 0 = if drop .5 else dup 1 = if drop .75 else
   dup 3 = if drop 1.25 else 4 = if 1.5 else 1 then then then then ;
-: j-strength 2 1 j-setting dup 0 = if drop .7 else 2 = if 1.3 else 1 then then ;
-: j-companions 3 5 j-setting ;
-: j-size 4 1 j-setting dup 0 = if drop .75 else 2 = if 1.25 else 1 then then ;
+: j-strength j-strength-field 1 j-setting dup 0 = if drop .7 else 2 = if 1.3 else 1 then then ;
+: j-companions j-companions-field 5 j-setting ;
+: j-size j-size-field 1 j-setting dup 0 = if drop .75 else 2 = if 1.25 else 1 then then ;
 : j-ease dup dup * swap 2 * 3 swap - * ;
 : j-contract dup .20 < if .20 / j-ease else dup .50 < if
   .20 - .30 / j-ease 1 swap - else drop 0 then then ;

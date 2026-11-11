@@ -12,10 +12,9 @@ import hashlib
 import json
 from pathlib import Path
 import re
-import struct
 import subprocess
 import zipfile
-from plant_settings_catalog import configure_level
+from plant_settings_actor import configure_level
 
 ROOT = Path(__file__).resolve().parents[1]
 CAMERA = 'tk-camera tk@ if tk-cam-close else tk-cam-wide then INDEXOF_CAMSHOT tk!'
@@ -74,20 +73,17 @@ def patch_level(level, sources, view):
     return bytes(result), slots
 
 
-def verify_catalog_only(before, after):
-    """The existing RPRP replacement may change only size/locator and catalog."""
-    locator = 2056 + struct.unpack_from('<I', before, 2052)[0] - 12
-    if before[locator:locator + 4] != b'RPRP' or after[locator:locator + 4] != b'RPRP':
-        raise ValueError('Expected an existing RPRP catalog')
-    start = 2048 + struct.unpack_from('<I', before, locator + 4)[0]
-    if 2048 + struct.unpack_from('<I', after, locator + 4)[0] != start:
-        raise ValueError('Catalog replacement moved asset data')
-    restored = bytearray(after[:start])
-    for offset, size in ((4, 4), (locator + 4, 8)):
-        restored[offset:offset + size] = before[offset:offset + size]
-    if bytes(restored) != before[:start]:
-        raise ValueError('Property cooking changed bytes outside the catalog')
-    return dict(asset_prefix_bytes=start, asset_prefix_sha256=sha(before[:start]))
+def verify_actor_only(before, after, offsets):
+    """The fixture may change only the listed settings-actor scalar fields."""
+    if len(before) != len(after):
+        raise ValueError('Settings edit changed level size')
+    restored = bytearray(after)
+    for offset in offsets:
+        if offset < 0 or offset + 4 > len(before): raise ValueError('Invalid settings field offset')
+        restored[offset:offset + 4] = before[offset:offset + 4]
+    if bytes(restored) != before:
+        raise ValueError('Settings edit changed bytes outside actor fields')
+    return dict(field_offsets=offsets, original_sha256=sha(before))
 
 
 def main():
@@ -112,7 +108,7 @@ def main():
         for label, count in COUNTS.items():
             level, settings = configure_level(changed, dict(seed=713, water='saltwater', age=150,
                 speed=0, textures=True, sway=True, random_entry=False, seahorses=count, greeting=True))
-            preservation = verify_catalog_only(changed, level)
+            preservation = verify_actor_only(changed, level, settings['field_offsets'])
             stem = f'{view}-{label}'
             standalone = args.out / (stem + '-standalone.iff')
             cd = args.out / (stem + '-cd.iff')

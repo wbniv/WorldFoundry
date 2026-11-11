@@ -1,0 +1,10 @@
+@* Runtime controls for the Gulf of Thailand reef.
+TYPEHEADER(Reef Settings,ReefSettings)
+    @include settings.inc
+    PROPERTY_SHEET_HEADER(Reef,1)
+    TYPEENTRYINT32(Layout,,0,1,1,"Fixed|Random",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Fixed is the reviewed reef; Random builds a new reef from the seed")
+    TYPEENTRYINT32(Rocks,,1,5,3,"1|2|3|4|5",SHOW_AS_SLIDER|SHOW_AS_LIVE,"Random layout: how many rock masses stand on the sand")
+    TYPEENTRYINT32(Colonies,,0,2,1,"Sparse|Normal|Dense",SHOW_AS_SLIDER|SHOW_AS_LIVE,"Random layout: how much attached life grows on the rock")
+    TYPEENTRYINT32(Seed,,0,16777215,0,"",SHOW_AS_NUMBER|SHOW_AS_LIVE,"Random layout: 0 draws a new reef on every entry; any other value repeats it")
+    PROPERTY_SHEET_FOOTER
+TYPEFOOTER

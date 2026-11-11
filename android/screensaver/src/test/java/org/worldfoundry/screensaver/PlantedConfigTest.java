@@ -75,10 +75,11 @@ public final class PlantedConfigTest {
         // seed
         accepts("seed", "0", "seed=0");
         accepts("seed", "713", "seed=713");
-        accepts("seed", "4294967295", "seed=4294967295");
-        accepts("seed", 4294967295L, "seed=4294967295");
+        accepts("seed", "2147483647", "seed=2147483647");
+        accepts("seed", 2147483647L, "seed=2147483647");
         accepts("seed", 713, "seed=713");
-        String seedMessage = "seed must be a whole number from 0 to 4294967295";
+        String seedMessage = "seed must be a whole number from 0 to 2147483647";
+        rejects("seed", "2147483648", seedMessage);
         rejects("seed", "4294967296", seedMessage);
         rejects("seed", 4294967296L, seedMessage);
         rejects("seed", "99999999999999999999999", seedMessage);
@@ -89,8 +90,11 @@ public final class PlantedConfigTest {
         rejects("seed", "abc", seedMessage);
         rejects("seed", "", seedMessage);
         rejects("seed", "0x10", seedMessage);
-        PlantedConfig seeded = none.withSeed(4294967295L);
-        check(seeded.hasSeed() && seeded.seed() == 4294967295L, "seed stored as a long");
+        PlantedConfig seeded = none.withSeed(2147483647L);
+        check(seeded.hasSeed() && seeded.seed() == 2147483647L, "seed stored as a long");
+        check("2147483647".equals(PlantedConfig.clampSavedSeed("4294967295")), "old saved seed clamps");
+        check("2147483647".equals(PlantedConfig.clampSavedSeed("2147483648")), "first oversized seed clamps");
+        check("4294967296".equals(PlantedConfig.clampSavedSeed("4294967296")), "invalid old seed stays invalid");
         check(!seeded.withoutSeed().hasSeed(), "one-run random seed clears the explicit seed");
 
         // speed
@@ -242,9 +246,9 @@ public final class PlantedConfigTest {
         check(speed.equals(Arrays.asList("0", "1", "2", "3", "4", "5", "6")),
                 "OAD speed indices are 0 through 6");
         for (String value : PlantedConfig.speedValues()) accepts("speed", value, "speed=" + value);
-        check("4294967295".equals(property(field(json, "Seed"), "maximum")), "Seed maximum matches validator");
+        check("2147483647".equals(property(field(json, "Seed"), "maximum")), "Seed maximum matches validator");
         check("86400".equals(property(field(json, "Hold seconds"), "maximum")), "Hold maximum matches validator");
-        accepts("seed", "4294967295", "seed=4294967295");
+        accepts("seed", "2147483647", "seed=2147483647");
         accepts("hold", "86400", "hold=86400");
         rejects("speed", "0", "paused");
     }

@@ -7,6 +7,10 @@
 #include <string>
 
 namespace wfprops {
+// Populate an object payload from a descriptor's numeric defaults. Preview
+// schemas must be trimmed to direct fields; common blocks need level data.
+bool buildOadDefaults(const uint8_t* oad, size_t oadLength, uint32_t payloadOffset,
+                      size_t payloadLength, std::vector<uint8_t>& payload, std::string& error);
 // Construct the form model from the type's shipped OAD and this object's
 // actual payload. firstIndex and payloadOffset describe the omitted prefix of
 // a trimmed descriptor. The caller retains ownership of all supplied bytes.

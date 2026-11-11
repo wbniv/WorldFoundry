@@ -3,6 +3,7 @@ import importlib.util
 import json
 from pathlib import Path
 import struct
+import subprocess
 
 import pytest
 
@@ -13,48 +14,22 @@ SPEC = importlib.util.spec_from_file_location(
 GEN = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(GEN)
 
-
-def test_planted_catalog_has_all_fields_and_presentations():
-    payload = (ROOT / "wflevels/planted_tank_screensaver/settings.rprp").read_bytes()
-    result = GEN.capabilities(payload)
-    assert result["schema"] == 2
-    assert [(obj["owner"], obj["type"]) for obj in result["objects"]] == [
-        (4, "PlantedTankSettings")]
-    fields = {field["key"]: field for field in result["objects"][0]["settings"]}
-    assert len(fields) == 8
-    assert fields["Water type"]["type"] == "choice"
-    assert fields["Growth speed"]["options"][0]["label"] == "Paused"
-    assert fields["Textures"]["type"] == "boolean"
-    assert fields["Seed"]["maximum"] == "4294967295"
-    assert fields["Hold seconds"]["maximum"] == "86400"
+def test_planted_actor_capabilities_use_oad_field_indices():
+    subprocess.run(['cargo','build','--release','--offline','--manifest-path',str(ROOT/'wftools/wf_attr_edit/Cargo.toml')],check=True)
+    oas = ROOT/'wfsource/source/oas'
+    result = GEN.capabilities_oad(oas/'plantedtanksettings.oad', oas/'actor.oad', 17,
+                                  'PlantedTankSettings', 'Planted Tank', ('Seahorses', 'Greeting'))
+    owner, = result['objects']
+    assert owner['owner'] == 17
+    fields = {field['key']: field for field in owner['settings']}
+    assert len(fields) == 8 and fields['Seed']['maximum'] == '2147483647'
+    assert fields['Hold seconds']['value'] == '120' and fields['Hold seconds']['maximum'] == '86400'
+    assert not fields['Hold seconds']['readonly'] and fields['Initial age']['readonly']
 
 
-def test_baseline_level_has_its_two_owners():
-    level = (ROOT / "wflevels/baseline-standalone.iff").read_bytes()
-    offset = level.rfind(b"RPRP")
-    assert offset > 0
-    size, = struct.unpack_from("<I", level, offset + 4)
-    payload = level[offset + 8:offset + 8 + size]
-    objects = GEN.capabilities(payload)["objects"]
-    ids = json.loads((ROOT / "wflevels/baseline/actor-map.json").read_text())["indices"]
-    assert [(obj["owner"], obj["type"], obj["title"]) for obj in objects] == [
-        (ids["FieldTypes"], "FieldTypes", "Field types"),
-        (ids["RuntimeSettings"], "Settings", "Runtime settings")]
-    # Capabilities carry settings only: Field types' action and spacer rows are not settings.
-    assert [len(obj["settings"]) for obj in objects] == [25, 85]
 
-
-def test_truncated_catalog_is_rejected():
-    payload = (ROOT / "wflevels/planted_tank_screensaver/settings.rprp").read_bytes()
-    with pytest.raises(GEN.CatalogError, match="truncated"):
-        GEN.capabilities(payload[:-1])
-
-
-def test_command_writes_bounded_json(tmp_path):
-    import subprocess
-    out = tmp_path / "settings.json"
-    subprocess.run(["python3", str(ROOT / "scripts/gen-settings-capabilities.py"),
-                    "--rprp", str(ROOT / "wflevels/planted_tank_screensaver/settings.rprp"),
-                    "--out", str(out)], check=True, capture_output=True)
-    assert len(out.read_bytes()) < 8192
-    assert json.loads(out.read_text())["objects"][0]["owner"] == 4
+def test_invalid_inherited_oad_is_rejected(tmp_path):
+    invalid = tmp_path / "invalid.oad"
+    invalid.write_bytes(b"bad")
+    with pytest.raises(GEN.CatalogError, match="invalid inherited OAD"):
+        GEN.capabilities_oad(invalid, invalid, 17, "Settings", "Settings")

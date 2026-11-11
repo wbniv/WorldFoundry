@@ -1,0 +1,7 @@
+@* A level may place this actor to expose the engine's runtime diagnostics UI.
+TYPEHEADER(Runtime Diagnostics,RuntimeDiagnostics)
+    @include settings.inc
+    PROPERTY_SHEET_HEADER(Runtime diagnostics,1)
+    TYPEENTRYBOOLEAN(Show runtime diagnostics,,1,SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"Enable the runtime diagnostics page")
+    PROPERTY_SHEET_FOOTER
+TYPEFOOTER

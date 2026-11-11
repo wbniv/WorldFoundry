@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Seahorse device variants of one built aquarium APK: the planted tank's authored
-settings are cooked into the bundled selector cd.iff (plant_settings_catalog.configure_cd),
+settings are cooked into the bundled selector cd.iff (plant_settings_actor.configure_cd),
 everything else (native libraries, wf_args.txt, resources) is kept byte for byte, and the
 APK is aligned and signed with the local debug key, as build-aquarium-variant.py does.
 
@@ -22,7 +22,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
-from plant_settings_catalog import configure_cd  # noqa: E402
+from plant_settings_actor import configure_cd  # noqa: E402
 
 VARIANTS = {
     'none': dict(water='saltwater', seahorses=0),

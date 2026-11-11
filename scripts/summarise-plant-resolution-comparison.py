@@ -52,7 +52,7 @@ for variant in recipe['variants']:
             return path.read_text() if path.exists() else gzip.open(str(path)+'.gz','rt').read()
         log = read_log('wf.log').rsplit('=== wf_game android_main',1)[-1]
         if identities[name].get('plant_catalog'):
-            assert re.search(r'PLANTS settings-source=RPRP seed=713 water='+identities[name]['plant_catalog']['settings']['water']+r' age=150(?:\.0*)? speed=0 textures=1 sway=0',log), name
+            assert re.search(r'PLANTS settings-source=OAD seed=713 water='+identities[name]['plant_catalog']['settings']['water']+r' age=150(?:\.0*)? speed=0 textures=1 sway=0',log), name
         else:
             # Archived measurements retain their original CLI/native identities.
             assert '--plant-seed=713' in log and '--plant-age=150' in log, name

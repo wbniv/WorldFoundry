@@ -34,7 +34,6 @@ struct Object {
 };
 class Registry {
 public:
-    bool load(const uint8_t* data,size_t size,std::string& error);
     bool add(Object object,std::string& error);
     Object* object(uint32_t actor);
     const Object* object(uint32_t actor) const;

@@ -3,7 +3,7 @@ and Runtime settings (the runtime and load-time sheets), standing on one spot.
 
 docs/plans/2026-10-31-baseline-settings-cleanup.md. The checks run on the source
 (field_types.py), on the generated bindings, on the catalog cooked into the committed
-level, and through the engine's own registry, host and runtime-options code.
+level, and through a synthetic fixture for the engine registry and host.
 """
 import importlib.util
 import json
@@ -29,18 +29,21 @@ def load(name, path):
 
 
 VERIFY = load('baseline_verify', BASE / 'verify.py')
-COOKER = load('baseline_cooker', ROOT / 'scripts/build-object-properties.py')
+COOKER = load('baseline_cooker', ROOT / 'tests/fixtures/build_property_fixture.py')
 TOUCH = load('touch_examples_test', ROOT / 'tests/test_touch_settings_plan_examples.py')
 CASES = json.loads(field_types.EXAMPLES_PATH.read_text())
 IDS = json.loads((BASE / 'actor-map.json').read_text())['indices']
 RUNTIME_SHEETS = ['Runtime Options', 'Level Memory', 'Level Behavior']
 
 
+def fixture_payload():
+    types = COOKER.catalog(BASE / 'field-types.oad', json.loads((BASE / 'field-types-bindings.json').read_text()), IDS['FieldTypes'])
+    runtime = COOKER.catalog(BASE / 'runtime-settings.oad', json.loads((BASE / 'runtime-settings-bindings.json').read_text()), IDS['RuntimeSettings'])
+    return b'RP01' + struct.pack('<I', 2) + types[8:] + runtime[8:]
+
+
 def level_owners():
-    level = (ROOT / 'wflevels/baseline-standalone.iff').read_bytes()
-    offset = level.rfind(b'RPRP')
-    size, = struct.unpack_from('<I', level, offset + 4)
-    return VERIFY.catalog_rows(level[offset + 8:offset + 8 + size])
+    return VERIFY.catalog_rows(fixture_payload())
 
 
 def check_source(rows):
@@ -143,18 +146,17 @@ def test_the_two_owners_share_one_spot():
     inventory = BASE / 'build/scene-inventory.json'  # written by every export (task baseline:build)
     if not inventory.exists():
         pytest.skip('no build/scene-inventory.json; run task baseline:build')
-    config = [o for o in json.loads(inventory.read_text()) if o['collection'] == 'CONFIG' and o['schema'] == 'target.oad']
+    config = [o for o in json.loads(inventory.read_text()) if o['collection'] == 'CONFIG' and o['schema'] in ('fieldtypes.oad', 'runtimediagnostics.oad')]
+    if not config:
+        pytest.skip('scene inventory predates settings actor migration; rebuild baseline')
     assert [o['name'] for o in config] == ['FieldTypes', 'RuntimeSettings']
     assert config[0]['position'] == config[1]['position'] == list(map(float, field_types.POSITION))
 
 
 def test_engine_registry_loads_both_owners_syncs_runtime_and_ignores_the_action(tmp_path):
-    """The real registry/host/runtime-options code on the catalog cooked into the level."""
-    level = (ROOT / 'wflevels/baseline-standalone.iff').read_bytes()
-    offset = level.rfind(b'RPRP')
-    size, = struct.unpack_from('<I', level, offset + 4)
-    payload = tmp_path / 'baseline.rprp'
-    payload.write_bytes(level[offset + 8:offset + 8 + size])
+    """The real registry/host/runtime-options code on a synthetic settings fixture."""
+    payload = tmp_path / 'fixture.rprp'
+    payload.write_bytes(fixture_payload())
     exe = tmp_path / 'baseline-owners'
     subprocess.run(['c++', '-std=c++17', '-O1', '-I' + str(ROOT / 'engine'), str(ROOT / 'tests/baseline_owners_test.cpp'),
                     *[str(ROOT / 'engine' / n) for n in ['runtime_properties.cpp', 'runtime_property_form.cpp', 'runtime_property_host.cpp']],

@@ -1,3 +1,4 @@
+#include "fixture_registry.hpp"
 #include "runtime_property_host.hpp"
 #include <hal/phonepad/phonepad.h>
 #include <fstream>
@@ -8,7 +9,7 @@
 int main(int argc,char** argv){
  if(argc!=4)return 2;
  std::ifstream file(argv[1],std::ios::binary);std::vector<uint8_t> bytes((std::istreambuf_iterator<char>(file)),{});
- wfprops::Registry registry;std::string error;if(!registry.load(bytes.data(),bytes.size(),error))return 3;
+ wfprops::Registry registry;std::string error;if(!testfixture::load(registry,bytes.data(),bytes.size(),error))return 3;
  // Authored colour-field fixture for the generic UI tests; no gameplay consumer.
  for(auto actor:registry.editableObjects()){auto* object=registry.object(actor);wfprops::Field field;field.id=201;field.kind=0;field.show=7;field.width=4;field.maximum=0xffffff;field.key=field.label="Tint";field.initial="5801868";object->fields.push_back(field);object->values[field.id]=field.initial;}
  wfprops::Host host;host.bind(&registry);

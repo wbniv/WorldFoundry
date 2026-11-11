@@ -34,7 +34,8 @@
     "room-backdrop": 27,
     "AmbientLight": 28,
     "LookClose": 29,
-    "cs_close": 30
+    "cs_close": 30,
+    "PlantedTankSettings": 31
   },
   "mailboxes": {
     "init": 600,

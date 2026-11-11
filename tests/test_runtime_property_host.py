@@ -10,7 +10,7 @@ ROOT=Path(__file__).resolve().parents[1]
 @pytest.fixture(scope='module')
 def builds(tmp_path_factory):
     out=tmp_path_factory.mktemp('generic-settings')
-    spec=importlib.util.spec_from_file_location('catalog',ROOT/'scripts/build-object-properties.py')
+    spec=importlib.util.spec_from_file_location('catalog',ROOT/'tests/fixtures/build_property_fixture.py')
     cooker=importlib.util.module_from_spec(spec);spec.loader.exec_module(cooker)
     # Two same-schema owners from the descriptor coverage fixture (not a level owner).
     bindings=json.loads((ROOT/'wflevels/baseline/settings-gallery-bindings.json').read_text())

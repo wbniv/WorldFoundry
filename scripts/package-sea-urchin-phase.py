@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 import subprocess
 import zipfile
-from plant_settings_catalog import configure_cd,require_catalog_runtime,reject_removed_arguments
+from plant_settings_actor import configure_cd,require_actor_runtime,reject_removed_arguments
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -26,7 +26,7 @@ def main():
     tools = Path('/home/will/android-sdk-local/build-tools/34.0.0')
     receipts = []
     with zipfile.ZipFile(a.base) as source:
-        require_catalog_runtime(source)
+        require_actor_runtime(source)
         args = source.read('assets/wf_args.txt').decode() if 'assets/wf_args.txt' in source.namelist() else ''
         reject_removed_arguments(args)
         if not a.ordinary:cd,plant_catalog=configure_cd(cd,dict(seed=713,water='saltwater',age=150,speed=0))

@@ -171,9 +171,8 @@ RETIRED_OWNERS = ('SampleSettings', 'SampleSettings2', 'SampleSettings3')
 def settings_owners():
     """The two settings owners, both on one spot so Pick in 3D shows "Objects here".
 
-    FieldTypes carries one field per touch-settings example and RuntimeSettings carries
-    the runtime and load-time sheets (settings_fixture.py); both are plain target actors
-    in CONFIG. On a reviewed file this also removes the three retired SampleSettings
+    FieldTypes carries scalar control examples and RuntimeSettings opens the engine's
+    runtime diagnostics. On a reviewed file this also removes the three retired SampleSettings
     owners. Refuses if either owner is already there, so it never runs twice.
     """
     from field_types import POSITION
@@ -185,8 +184,9 @@ def settings_owners():
             bpy.data.objects.remove(bpy.data.objects[name], do_unlink=True)
     if 'CONFIG' in bpy.data.collections:  # a reviewed file: reuse its collection, never CONFIG.001
         COLLECTIONS.setdefault('CONFIG', bpy.data.collections['CONFIG'])
-    for name in SETTINGS_OWNERS:
-        actor(name, 'target', 'CONFIG', pos=POSITION)
+    for name, schema in [('FieldTypes', 'fieldtypes'), ('RuntimeSettings', 'runtimediagnostics')]:
+        obj=actor(name, schema, 'CONFIG', pos=POSITION)
+        obj['wf_Editor Label'] = 'Field types' if name == 'FieldTypes' else 'Runtime settings'
 
 def relativize():
     """Make schema and texture references portable relative to the saved file."""
@@ -278,7 +278,7 @@ def build(preset):
     actor('CoordinateLabels','platform','DEBUG_DEFAULT',labels.mesh(),fields={'Mass':0.0})
     from fixtures import add_fixtures
     add_fixtures(preset, actor, Geometry, material, label)
-    # Stable schema instances can be catalogued without native actor-class changes.
+    # Settings actors provide scalar examples and runtime diagnostics.
     settings_owners()
     add_teapots()
     objects=[o for o in bpy.context.scene.objects if o.get('wf_schema_path')]

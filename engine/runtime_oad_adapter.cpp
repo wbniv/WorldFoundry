@@ -14,6 +14,23 @@ namespace {
 std::string str(WfOadString value) {
     return std::string(reinterpret_cast<const char*>(value.data), value.length);
 }
+struct DefaultsContext {
+    const uint8_t* oad; size_t length; uint32_t prefix;
+    std::vector<uint8_t>* payload; std::string* error;
+};
+int defaultField(void* opaque, const WfOadField* source) {
+    auto& ctx = *static_cast<DefaultsContext*>(opaque);
+    if (source->kind == 3 || source->kind >= 5 || !source->storage_width) return 0;
+    WfOadFieldLocation location{};
+    if (wf_attr_oad_field_location(ctx.oad, ctx.length, source->index, ctx.prefix, &location) ||
+        location.common_pointer >= 0 || (location.width != 1 && location.width != 2 && location.width != 4) ||
+        location.offset > ctx.payload->size() || location.width > ctx.payload->size() - location.offset) {
+        *ctx.error = "invalid preview default location"; return 1;
+    }
+    const uint32_t raw = uint32_t(source->default_value);
+    for (size_t i = 0; i < location.width; ++i) (*ctx.payload)[location.offset + i] = uint8_t(raw >> (8 * i));
+    return 0;
+}
 struct Context {
     const uint8_t* oad; size_t oadLength; uint32_t first, prefix;
     const uint8_t* payload; size_t payloadLength;
@@ -100,6 +117,7 @@ int applyField(void* opaque, const WfOadField* source) {
     std::memcpy(base + location.offset, encoded, location.width);
     return 0;
 }
+
 int visit(void* opaque, const WfOadField* source) {
     auto& ctx = *static_cast<Context*>(opaque);
     // String overlays are deliberately deferred; see R11b in the plan.
@@ -133,6 +151,20 @@ int visit(void* opaque, const WfOadField* source) {
     ctx.object->fields.push_back(std::move(field));
     return 0;
 }
+}
+
+bool buildOadDefaults(const uint8_t* oad, size_t oadLength, uint32_t payloadOffset,
+                      size_t payloadLength, std::vector<uint8_t>& payload, std::string& error) {
+    error.clear();
+    if (!oad) { error = "missing OAD descriptor"; return false; }
+    std::vector<uint8_t> result(payloadLength);
+    DefaultsContext context{oad, oadLength, payloadOffset, &result, &error};
+    if (wf_attr_oad_visit(oad, oadLength, defaultField, &context)) {
+        if (error.empty()) error = "malformed OAD descriptor";
+        return false;
+    }
+    payload = std::move(result);
+    return true;
 }
 
 bool readOadField(const Field& field, const uint8_t* payload, size_t payloadLength,

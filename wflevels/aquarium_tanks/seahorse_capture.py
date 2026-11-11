@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests'))
 sys.path.insert(0, str(ROOT / 'scripts'))
 from debug_bridge_client import BridgeClient  # noqa: E402
-from plant_settings_catalog import configure_level  # noqa: E402
+from plant_settings_actor import configure_level  # noqa: E402
 
 VRAM = ['--vram-width=2048', '--vram-height=1024', '--vram-slot-width=512', '--vram-slot-height=512',
         '--vram-perm-width=1024', '--vram-perm-height=1024']   # android/app/src/aquarium/assets/wf_args.txt

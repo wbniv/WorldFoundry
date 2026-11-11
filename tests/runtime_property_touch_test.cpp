@@ -1,3 +1,4 @@
+#include "fixture_registry.hpp"
 #include <game/runtime_property_touch.h>
 #include <game/runtime_property_controls.h>
 #include <cassert>
@@ -18,7 +19,7 @@ int main(int argc,char** argv){
  {const char* fontError=nullptr;assert(wfui::Load(atlas.data(),atlas.size(),fontError));}
  std::ifstream file(argv[1],std::ios::binary);
  std::vector<uint8_t> bytes((std::istreambuf_iterator<char>(file)),{});
- wfprops::Registry registry;std::string error;assert(registry.load(bytes.data(),bytes.size(),error));
+ wfprops::Registry registry;std::string error;assert(testfixture::load(registry,bytes.data(),bytes.size(),error));
  auto owners=registry.editableObjects();assert(!owners.empty());
  auto* object=registry.object(owners.front());assert(object);
  object->fields.clear();object->values.clear();

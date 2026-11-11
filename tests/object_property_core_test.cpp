@@ -1,3 +1,4 @@
+#include "fixture_registry.hpp"
 #include "runtime_properties.hpp"
 #include "runtime_property_form.hpp"
 #include <cassert>
@@ -6,7 +7,7 @@
 int main(int argc,char** argv){
     assert(argc==2);std::ifstream in(argv[1],std::ios::binary);
     std::vector<uint8_t> data((std::istreambuf_iterator<char>(in)),{});
-    wfprops::Registry r;std::string error;assert(r.load(data.data(),data.size(),error));
+    wfprops::Registry r;std::string error;assert(testfixture::load(r,data.data(),data.size(),error));
     auto* a=r.object(1);auto* b=r.object(2);assert(a&&b);
     wfprops::Edit edit;assert(edit.begin(r,1));assert(edit.set(1,"4294967295"));
     assert(*a->get(1)=="0");assert(edit.commit());assert(*a->get(1)=="4294967295"&&*b->get(1)=="0");
@@ -15,7 +16,7 @@ int main(int argc,char** argv){
     assert(edit.begin(r,1));assert(edit.set(2,"1"));assert(r.set(1,3,"4",error));assert(!edit.commit());
     assert(*a->get(2)=="0");
     assert(edit.begin(r,2));r.remove(2);assert(!edit.commit());
-    auto bad=data;bad.resize(15);assert(!r.load(bad.data(),bad.size(),error));assert(r.object(1));
+    auto bad=data;bad.resize(15);assert(!testfixture::load(r,bad.data(),bad.size(),error));assert(r.object(1));
     assert(wfprops::decode("A%3AB%25",error)&&error=="A:B%");assert(!wfprops::decode("%xy",error));
     wfprops::Form form;assert(form.begin(r,1,1));
     // Two authored sheets (Phase 3). Headers carry id 0, so no row can alias a field.

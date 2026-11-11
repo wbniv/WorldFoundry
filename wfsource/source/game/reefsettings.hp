@@ -1,0 +1,16 @@
+#ifndef _ReefSettings_HP
+#define _ReefSettings_HP
+#include "actor.hp"
+class ReefSettings: public Actor {
+public:
+    ReefSettings(const SObjectStartupData* startupData);
+    virtual ~ReefSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    // The Director polls the overlay and rebuilds its layout when it changes.
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadReefSettings(const SObjectStartupData* startupData);
+#endif

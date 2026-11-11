@@ -58,6 +58,11 @@ OBJECTSHEADER
 @* Settings holders (settings.inc). Append new types after the last entry, never
 @* between existing ones: the position is the type id compiled into every level.
         OBJECTENTRY(PlantedTankSettings,0)
+        OBJECTENTRY(JellyfishSettings,0)
+        OBJECTENTRY(ReefSettings,0)
+        OBJECTENTRY(RuntimeDiagnostics,0)
+        OBJECTENTRY(FieldTypes,0)
+        OBJECTENTRY(LevelRenderSettings,0)
 OBJECTSFOOTER
 
 @*============================================================================

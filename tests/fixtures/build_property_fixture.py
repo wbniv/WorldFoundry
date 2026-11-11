@@ -10,7 +10,7 @@ from pathlib import Path
 import struct
 import subprocess
 
-ROOT=Path(__file__).resolve().parents[1]
+ROOT=Path(__file__).resolve().parents[2]
 KINDS={'Int':0,'Float':1,'Enum':2,'Str':3,'Bool':4,'Section':5,'Group':6,'GroupEnd':7,'FileRef':8,'ObjRef':8,'Annotation':3}
 
 def string(value):
@@ -19,7 +19,7 @@ def string(value):
 
 def oad_schema(oad):
     """The Rust normalizer's view of a compiled OAD: name plus fields (key, label, kind, show,
-    choices, min, max, default, scale). Shared with scripts/gen-planted-capabilities.py."""
+    choices, min, max, default, scale)."""
     tool=ROOT/'wftools/wf_attr_edit/target/release/catalog'
     return json.loads(subprocess.check_output([tool,str(oad)],text=True))
 

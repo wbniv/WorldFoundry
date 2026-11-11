@@ -960,7 +960,20 @@ add_custom_target(wf_property_core_build DEPENDS "${WF_PROPERTY_LIB}")
 add_library(wf_property_core STATIC IMPORTED GLOBAL)
 set_target_properties(wf_property_core PROPERTIES IMPORTED_LOCATION "${WF_PROPERTY_LIB}")
 add_dependencies(wf_property_core wf_property_core_build)
-list(APPEND WF_SOURCES "${CMAKE_SOURCE_DIR}/engine/runtime_properties.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_oad_adapter.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_property_form.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_property_host.cpp" "${CMAKE_SOURCE_DIR}/wfsource/source/game/runtime_options.cc")
+set(WF_PLANTED_OAD_INCLUDE "${CMAKE_CURRENT_BINARY_DIR}/generated/planted_oad.inc")
+set(WF_RUNTIME_DIAGNOSTICS_INCLUDE "${CMAKE_CURRENT_BINARY_DIR}/generated/runtime_diagnostics_fields.inc")
+add_custom_command(OUTPUT "${WF_RUNTIME_DIAGNOSTICS_INCLUDE}"
+    COMMAND python3 "${CMAKE_SOURCE_DIR}/scripts/gen-runtime-diagnostics.py" "${WF_RUNTIME_DIAGNOSTICS_INCLUDE}"
+    DEPENDS "${CMAKE_SOURCE_DIR}/scripts/gen-runtime-diagnostics.py" "${CMAKE_SOURCE_DIR}/scripts/runtime_options_inventory.py"
+            "${CMAKE_SOURCE_DIR}/scripts/level_memory_settings.py" "${CMAKE_SOURCE_DIR}/wfsource/source/game/gamestrm.inc"
+            "${CMAKE_SOURCE_DIR}/wfsource/source/libstrm.inc"
+    VERBATIM)
+add_custom_command(OUTPUT "${WF_PLANTED_OAD_INCLUDE}"
+    COMMAND python3 "${CMAKE_SOURCE_DIR}/scripts/embed-planted-oad.py"
+        "${CMAKE_SOURCE_DIR}/wfsource/source/oas/plantedtanksettings.oad" "${WF_PLANTED_OAD_INCLUDE}"
+    DEPENDS "${CMAKE_SOURCE_DIR}/scripts/embed-planted-oad.py" "${CMAKE_SOURCE_DIR}/wfsource/source/oas/plantedtanksettings.oad"
+    VERBATIM)
+list(APPEND WF_SOURCES "${CMAKE_SOURCE_DIR}/engine/runtime_properties.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_oad_adapter.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_property_form.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_property_host.cpp" "${CMAKE_SOURCE_DIR}/engine/planted_preview.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_diagnostics_form.cpp" "${WF_PLANTED_OAD_INCLUDE}" "${WF_RUNTIME_DIAGNOSTICS_INCLUDE}" "${CMAKE_SOURCE_DIR}/wfsource/source/game/runtime_options.cc")
 add_library(wfengine STATIC ${WF_SOURCES})
 # The UI font (game/ui_font.hp) comes from cd.iff's UIFT chunk. Linux desktop
 # -L runs often have no cd.iff in their working directory, so they read the
@@ -979,6 +992,7 @@ if(WF_TELEPORT_UBSAN)
 endif()
 target_link_libraries(wfengine PUBLIC wf_property_core)
 target_include_directories(wfengine PUBLIC ${WF_INCLUDES})
+target_include_directories(wfengine PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_compile_definitions(wfengine PUBLIC ${WF_DEFS})
 target_compile_options(wfengine PRIVATE
     -fpermissive -w
@@ -1349,6 +1363,20 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     target_compile_options(runtime_oad_adapter_test PRIVATE -UNDEBUG)
     add_test(NAME runtime_oad_adapter COMMAND runtime_oad_adapter_test
         ${CMAKE_SOURCE_DIR}/wfsource/source/oas/plantedtanksettings.oad)
+    add_executable(planted_preview_test tests/planted_preview_test.cpp
+        engine/planted_preview.cpp engine/runtime_oad_adapter.cpp engine/runtime_properties.cpp
+        "${WF_PLANTED_OAD_INCLUDE}")
+    target_include_directories(planted_preview_test PRIVATE ${CMAKE_SOURCE_DIR}/engine "${CMAKE_CURRENT_BINARY_DIR}/generated")
+    target_link_libraries(planted_preview_test PRIVATE wf_property_core ${CMAKE_DL_LIBS})
+    target_compile_options(planted_preview_test PRIVATE -UNDEBUG)
+    add_test(NAME planted_preview COMMAND planted_preview_test)
+    add_executable(runtime_diagnostics_form_test tests/runtime_diagnostics_form_test.cpp
+        engine/runtime_diagnostics_form.cpp engine/runtime_properties.cpp engine/runtime_property_form.cpp
+        engine/runtime_property_host.cpp "${WF_RUNTIME_DIAGNOSTICS_INCLUDE}")
+    target_include_directories(runtime_diagnostics_form_test PRIVATE ${CMAKE_SOURCE_DIR}/engine "${CMAKE_CURRENT_BINARY_DIR}/generated")
+    target_link_libraries(runtime_diagnostics_form_test PRIVATE wf_property_core ${CMAKE_DL_LIBS})
+    target_compile_options(runtime_diagnostics_form_test PRIVATE -UNDEBUG)
+    add_test(NAME runtime_diagnostics_form COMMAND runtime_diagnostics_form_test)
     add_executable(runtime_common_override_test tests/runtime_common_override_test.cc)
     target_link_libraries(runtime_common_override_test PRIVATE wfengine)
     target_compile_options(runtime_common_override_test PRIVATE -UNDEBUG)

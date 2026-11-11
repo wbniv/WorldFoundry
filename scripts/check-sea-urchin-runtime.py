@@ -11,7 +11,7 @@ import time
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tests'))
 from debug_bridge_client import BridgeClient
-from plant_settings_catalog import configure_level
+from plant_settings_actor import configure_level
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)

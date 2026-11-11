@@ -1,3 +1,4 @@
+#include "fixture_registry.hpp"
 // The TV settings form on the baseline's real Field types catalog: what each row draws, the
 // open choice lists, and the keys of the new controls (docs/plans/2026-11-01-field-presentations.md).
 // Usage: presentation form <payload> <field-types actor> <ui-font.wfga>
@@ -16,8 +17,8 @@ static constexpr uint32_t A=1,Up=1u<<11,Down=1u<<12,Right=1u<<13,Left=1u<<14;
 int main(int argc,char** argv){
  assert(argc>=3);const std::string mode=argv[1];auto bytes=slurp(argv[2]);
  wfprops::Registry registry;std::string error;
- if(mode=="load"){if(!registry.load(bytes.data(),bytes.size(),error)){std::printf("load-failed %s\n",error.c_str());return 1;}std::printf("loaded %zu\n",registry.editableObjects().size());return 0;}
- assert(argc==5&&registry.load(bytes.data(),bytes.size(),error));
+ if(mode=="load"){if(!testfixture::load(registry,bytes.data(),bytes.size(),error)){std::printf("load-failed %s\n",error.c_str());return 1;}std::printf("loaded %zu\n",registry.editableObjects().size());return 0;}
+ assert(argc==5&&testfixture::load(registry,bytes.data(),bytes.size(),error));
  static std::vector<uint8_t> atlas=slurp(argv[4]);{const char* fontError=nullptr;assert(wfui::Load(atlas.data(),atlas.size(),fontError));}
  const uint32_t actor=uint32_t(std::atoi(argv[3]));
  auto& host=wfprops::host();host.bind(&registry);assert(host.openOwner(actor));auto& f=host.form;

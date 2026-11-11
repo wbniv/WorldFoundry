@@ -32,8 +32,8 @@ def structural():
     check('explicit player bounds',objs['Player']['bounds']==c['player_bounds'])
     check('no imported adventure/scaffold content',not re.search(r'snowgoons|parmenides|goddess|temple',json.dumps(inventory),re.I))
     check('default excludes diagnostics',preset!='default' or all(o['collection']!='DIAGNOSTICS' for o in inventory))
-    config=[o['name'] for o in inventory if o['collection']=='CONFIG' and o['schema']=='target.oad']
-    check('two settings owners: FieldTypes and RuntimeSettings, target actors in CONFIG',config==['FieldTypes','RuntimeSettings'],config=config)
+    config=[o['name'] for o in inventory if o['collection']=='CONFIG' and o['schema'] in ('fieldtypes.oad','runtimediagnostics.oad')]
+    check('two settings actors in CONFIG',config==['FieldTypes','RuntimeSettings'],config=config)
     check('Pick in 3D fixture: the two owners share one spot',objs['FieldTypes']['position']==objs['RuntimeSettings']['position'],position=objs['FieldTypes']['position'])
     check('default explicit runtime camera/room objects',all(n in objs for n in ['Level','Room','Camera','CameraOrigin','TargetFollow','TargetFirst','Follow','FirstPerson','Directional','Ambient','Background']))
     from teapot import face_count
@@ -57,14 +57,11 @@ def structural():
     for f in spec['fields']:
         e=entries[f['key']]
         check('compiled descriptor '+f['key'],e[0]==f['button_type'] and e[591]==f['show_code'] and struct.unpack_from('<iii',e,65)==(f['min'],f['max'],f['default']))
-    data=(OUT/'settings.rprp').read_bytes()
-    owners=catalog_rows(data)
-    check('catalog contains the two owners',[(o['owner'],o['schema']) for o in owners]==[(ids['FieldTypes'],'FieldTypes'),(ids['RuntimeSettings'],'Settings')],owners=[(o['owner'],o['schema'],o['title']) for o in owners])
-    examples=[c['id'] for c in json.loads((ROOT/'docs/plans/2026-10-29-touch-settings-examples.json').read_text())]
-    types,runtime=owners
-    check('Field types: one row per touch-settings example',sorted(r['key'] for r in types['rows'])==sorted(examples),rows=len(types['rows']))
-    check('Field types carries no runtime sheet',not any(r['key'].startswith(('runtime_','memory_')) for r in types['rows']) and set(types['sheets'])=={'Numbers','Choices','Switches','Text','References','Actions'},sheets=types['sheets'])
-    check('Runtime settings carries exactly the three runtime sheets, 85 rows',runtime['sheets']==['Runtime Options','Level Memory','Level Behavior'] and len(runtime['rows'])==85,sheets=runtime['sheets'],rows=len(runtime['rows']))
+    data=(ROOT/'wflevels/baseline-standalone.iff').read_bytes()
+    check('level has no legacy settings catalog',b'RPRP' not in data)
+    for name in ('fieldtypes','runtimediagnostics'):
+        schema=(ROOT/'wfsource/source/oas'/f'{name}.oad').read_bytes()
+        check('compiled actor descriptor '+name,len(schema)>=80 and (len(schema)-80)%1491==0)
     check('standalone L4 and sector-aligned asset', (ROOT/'wflevels/baseline-standalone.iff').read_bytes()[:2]==b'L4' and (ROOT/'wflevels/baseline-standalone.iff').stat().st_size%2048==0)
 
 def catalog_rows(payload):
@@ -124,7 +121,7 @@ def desktop(bundle=None):
     # Out-of-range launch overrides, rejected by name only when the engine has loaded that
     # owner's schema and field: positive evidence that both owners are in its registry.
     # A rejected override changes nothing.
-    probes=['FieldTypes.int-number=999999','Settings.runtime_show_fps=7']
+    probes=['FieldTypes.int-number=999999','RuntimeDiagnostics.runtime_show_fps=7']
     args+=['--property='+p for p in probes]
     if bundle:
         shutil.copyfile(bundle,capture/'cd.iff')
@@ -154,7 +151,7 @@ def desktop(bundle=None):
         check('native script compilation succeeds','zforth compile error' not in (capture/'engine.log').read_text())
         # The engine validates every authored initial value when it loads the catalog.
         text=(capture/'engine.log').read_text()
-        check('engine loads the settings catalog','PROPERTIES load failed' not in text)
+        check('engine loads the settings actors','PROPERTIES load failed' not in text)
         rejected=[line for line in text.splitlines() if line.startswith('PROPERTIES launch-override rejected: ')]
         check('engine registry holds both owners (launch-override probes rejected by name)',all(any(line.startswith('PROPERTIES launch-override rejected: '+p+': ') for line in rejected) for p in probes),rejected=rejected)
         start=position();check('native player grounded at spawn',all(v is not None for v in start) and abs(start[0])<.05 and abs(start[1]+5)<.05 and .85<start[2]<1.05,position=start)

@@ -278,7 +278,7 @@ ParseCommandLine(int argc, char** argv)
         }
 #endif
         else if ( strncmp(argv[index], "--plant-",8)==0 ) {
-            std::fprintf(stderr,"wf_game: removed plant CLI override: %s; cook plant settings into the level RPRP catalog\n",argv[index]);
+            std::fprintf(stderr,"wf_game: removed plant CLI override: %s; author settings on the level's settings actor\n",argv[index]);
             std::exit(2);
         }
         // --property=Schema.Key=Value (repeatable): a launch override, applied each time a level

@@ -97,7 +97,7 @@ Params parseLine(const std::string& line, std::vector<std::string>* warnings) {
         } else if (key == "seed") {
             uint64_t seed = 0;
             if (value == "random") p.hasSeed = false;
-            else if (parseWhole(value, 4294967295ull, seed)) { p.hasSeed = true; p.seed = uint32_t(seed); }
+            else if (parseWhole(value, 2147483647ull, seed)) { p.hasSeed = true; p.seed = uint32_t(seed); }
             else bad();
         } else if (key == "speed") {
             static const double speeds[] = {0.25, 0.5, 1, 2, 4, 8};
@@ -127,7 +127,7 @@ Tank tankFor(const Params& params, uint32_t k, const std::function<uint32_t()>& 
     Tank t;
     t.index = k;
     t.hasSeed = params.hasSeed;
-    if (params.hasSeed) t.seed = k == 0 ? params.seed : mix32(params.seed, k);
+    if (params.hasSeed) t.seed = k == 0 ? params.seed : (mix32(params.seed, k) & 0x7fffffffu);
     if (params.water == Water::Fresh) t.water = 0;
     else if (params.water == Water::Salt) t.water = 1;
     else if (params.hasSeed) t.water = int(mix32(params.seed, k) >> 31);

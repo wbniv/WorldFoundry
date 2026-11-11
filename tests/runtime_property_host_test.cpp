@@ -1,3 +1,4 @@
+#include "fixture_registry.hpp"
 #include "runtime_property_host.hpp"
 #include <cassert>
 #include <fstream>
@@ -7,7 +8,7 @@
 int main(int argc,char** argv){
  assert(argc==2);std::ifstream file(argv[1],std::ios::binary);
  std::vector<uint8_t> bytes((std::istreambuf_iterator<char>(file)),{});
- wfprops::Registry registry;std::string error;assert(registry.load(bytes.data(),bytes.size(),error));
+ wfprops::Registry registry;std::string error;assert(testfixture::load(registry,bytes.data(),bytes.size(),error));
  assert((registry.editableObjects()==std::vector<uint32_t>{11,22}));
  wfprops::Host host;host.bind(&registry);host.gesture(0,.05);
  // A directional OK chord remains a level action, even when held.
@@ -72,7 +73,7 @@ int main(int argc,char** argv){
  assert(!readonlyHost.available()&&!readonlyHost.open());
  // ---- Pick in 3D (docs/plans/2026-10-16-runtime-object-editing.md, Phase P)
  {
-  wfprops::Registry fresh;assert(fresh.load(bytes.data(),bytes.size(),error));
+  wfprops::Registry fresh;assert(testfixture::load(fresh,bytes.data(),bytes.size(),error));
   wfprops::Host pick;pick.bind(&fresh);
   std::map<uint32_t,wfpick::Vec3> where={{11,{0,0,-10}},{22,{3,0,-10}}};bool cameraOn=true;
   pick.world.camera=[&](wfpick::Camera& c){if(!cameraOn)return false;for(int i=0;i<16;++i)c.view[i]=c.proj[i]=0;c.view[0]=c.view[5]=c.view[10]=c.view[15]=1;

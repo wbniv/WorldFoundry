@@ -1,0 +1,32 @@
+@* Generated from field_types.py; do not hand-edit.
+TYPEHEADER(Field Types,FieldTypes)
+    @include settings.inc
+PROPERTY_SHEET_HEADER(Numbers,1)
+TYPEENTRYINT32(int-number,Hold seconds,0,86400,120,"",SHOW_AS_NUMBER|SHOW_AS_LIVE,"")
+TYPEENTRYINT32(int-slider,Opacity,0,100,65,"",SHOW_AS_SLIDER|SHOW_AS_LIVE,"")
+TYPEENTRYINT32(int-color,Tint,0,16777215,7255750,"",SHOW_AS_COLOR|SHOW_AS_LIVE,"")
+TYPEENTRYINT32(int-mailbox,Trigger mailbox,0,159,100,"",SHOW_AS_MAILBOX|SHOW_AS_LIVE,"")
+TYPEENTRYINT32(int-default,Count,0,99,7,"",SHOW_AS_N_A|SHOW_AS_LIVE,"")
+TYPEENTRYFIXED32(float-number,Initial age,0,15728640,819200,SHOW_AS_NUMBER|SHOW_AS_LIVE,"")
+TYPEENTRYFIXED32(float-slider,Sway,0,65536,42598,SHOW_AS_SLIDER|SHOW_AS_LIVE,"")
+TYPEENTRYINT32(int-readonly,Current count,0,99,7,"",SHOW_AS_NUMBER,"")
+GROUP_START(Lighting)
+TYPEENTRYINT32(int-help,Intensity,0,100,75,"",SHOW_AS_NUMBER|SHOW_AS_LIVE,"How bright the lights are; 0 is off.")
+GROUP_STOP()
+PROPERTY_SHEET_FOOTER
+PROPERTY_SHEET_HEADER(Choices,0)
+TYPEENTRYINT32(enum-default,Mode,0,2,0,"Calm|Lively|Stormy",SHOW_AS_N_A|SHOW_AS_LIVE,"")
+TYPEENTRYINT32(enum-number,Powerup,0,3,2,"None|Speed|Flying|Shield",SHOW_AS_NUMBER|SHOW_AS_LIVE,"")
+TYPEENTRYINT32(enum-dropdown,Water type,0,1,0,"Freshwater|Saltwater",SHOW_AS_DROPMENU|SHOW_AS_LIVE,"")
+TYPEENTRYINT32(enum-radio,Habitat,0,1,0,"Freshwater|Saltwater",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"")
+TYPEENTRYINT32(enum-slider,Growth,0,3,1,"Paused|1×|2×|4×",SHOW_AS_SLIDER|SHOW_AS_LIVE,"")
+TYPEENTRYINT32(enum-toggle,Direction,0,1,0,"Forward|Reverse",SHOW_AS_TOGGLE|SHOW_AS_LIVE,"")
+TYPEENTRYINT32(enum-combo,Tool,0,2,0,"Staff|Sword|Bow",SHOW_AS_COMBOBOX|SHOW_AS_LIVE,"")
+TYPEENTRYINT32(enum-many,Species,0,11,3,"Choice 1|Choice 2|Choice 3|Choice 4|Choice 5|Choice 6|Choice 7|Choice 8|Choice 9|Choice 10|Choice 11|Choice 12",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"")
+TYPEENTRYINT32(enum-long,Placement,0,2,0,"Along the northern wall; facing the glass|In the middle of the tank; under the light|Beside the filter intake; behind the rocks",SHOW_AS_DROPMENU|SHOW_AS_LIVE,"")
+PROPERTY_SHEET_FOOTER
+PROPERTY_SHEET_HEADER(Switches,0)
+TYPEENTRYINT32(bool-checkbox,Textures,0,1,1,"",SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"")
+TYPEENTRYINT32(bool-toggle,Sway,0,1,1,"",SHOW_AS_TOGGLE|SHOW_AS_LIVE,"")
+PROPERTY_SHEET_FOOTER
+TYPEFOOTER

@@ -10,6 +10,7 @@ OAS goes through oas2oad/prep; no runtime or global actor packing is changed.
 Unsupported presentations are recorded, not presented as implemented widgets.
 """
 import json
+import importlib.util
 from pathlib import Path
 
 HERE=Path(__file__).resolve().parent
@@ -24,9 +25,10 @@ RUNTIME_INSTALL_TRIGGER='runtime_show_fps'
 WIDTH={'INT8':1,'INT16':2,'INT32':4,'FIXED16':2,'FIXED32':4,'STRING':32,'OBJECT_REFERENCE':4,'CAMERA_REFERENCE':4,'LIGHT_REFERENCE':4,'CLASS_REFERENCE':4}
 
 def create(memory=None):
-    from runtime_options_fixture import write_manifest, sheet
-    runtime_fields=write_manifest(HERE)
-    runtime_lines,runtime_bindings=sheet(runtime_fields)
+    spec=importlib.util.spec_from_file_location('runtime_options_inventory',HERE.parents[1]/'scripts/runtime_options_inventory.py')
+    inventory=importlib.util.module_from_spec(spec);spec.loader.exec_module(inventory)
+    runtime_fields=inventory.write_manifest(HERE)
+    runtime_lines,runtime_bindings=inventory.sheet(runtime_fields)
     from memory_settings_fixture import sheet as memory_sheet
     memory_lines,memory_bindings=memory_sheet(memory)
     fields=[]

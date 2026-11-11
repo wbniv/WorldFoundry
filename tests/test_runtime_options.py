@@ -9,7 +9,8 @@ import sys
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'wflevels/baseline'))
-from runtime_options_fixture import inventory
+sys.path.insert(0,str(ROOT/'scripts'))
+from runtime_options_inventory import inventory
 from settings_fixture import RUNTIME_INSTALL_TRIGGER
 
 def test_inventory_and_stable_pair():
@@ -39,7 +40,7 @@ def test_active_long_parser_switches_accounted_for():
     assert found<=cli, found-cli
 
 def test_real_catalog_process_transactions(tmp_path):
-    spec=importlib.util.spec_from_file_location('cooker',ROOT/'scripts/build-object-properties.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+    spec=importlib.util.spec_from_file_location('cooker',ROOT/'tests/fixtures/build_property_fixture.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
     # The coverage fixture: one schema with runtime rows and editable sample fields.
     b=json.loads((ROOT/'wflevels/baseline/settings-gallery-bindings.json').read_text())
     catalogs=[m.catalog(ROOT/'wflevels/baseline/settings-gallery.oad',b,a) for a in [11,22]]

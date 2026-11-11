@@ -56,7 +56,8 @@
     "KitClumpCrust3": 53,
     "AmbientLight": 54,
     "LookClose": 55,
-    "cs_close": 56
+    "cs_close": 56,
+    "ReefSettings": 57
   },
   "indices": {
     "Room": 1,
@@ -114,7 +115,8 @@
     "KitClumpCrust3": 53,
     "AmbientLight": 54,
     "LookClose": 55,
-    "cs_close": 56
+    "cs_close": 56,
+    "ReefSettings": 57
   },
   "triangles": {
     "reef_shell": 1964,

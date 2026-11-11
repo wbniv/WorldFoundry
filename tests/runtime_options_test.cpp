@@ -1,3 +1,4 @@
+#include "fixture_registry.hpp"
 #include "runtime_options.hpp"
 #include <cassert>
 #include <fstream>
@@ -5,7 +6,7 @@
 #include <iostream>
 int main(int argc,char** argv){
  assert(argc==2);std::ifstream input(argv[1],std::ios::binary);std::vector<uint8_t> bytes((std::istreambuf_iterator<char>(input)),{});
- wfprops::Registry r;std::string error;assert(r.load(bytes.data(),bytes.size(),error));auto& host=wfprops::host();host.bind(&r);
+ wfprops::Registry r;std::string error;assert(testfixture::load(r,bytes.data(),bytes.size(),error));auto& host=wfprops::host();host.bind(&r);
  wfoptions::Snapshot globals={{"runtime_show_fps",{"1",true,"FPS overlay"}},{"runtime_fixed_clock",{"0",true,"Clock"}},{"runtime_clock_hz",{"20",true,"Rate"}},{"runtime_frame_profile",{"0",true,"Enable only"}},{"runtime_script_profile",{"0",false,"Backend unavailable"}},{"runtime_static_mesh",{"On",false,"Cached"}}};
  int applied=0,prepared=0;bool preparationFails=false;
  wfoptions::install(r,{[&](){return globals;},[&](const wfoptions::Changes&,std::string& err){++prepared;if(preparationFails){err="prepare failed";return false;}return true;},[&](const wfoptions::Changes& changes){++applied;for(auto& change:changes)globals[change.first].value=change.second;}});

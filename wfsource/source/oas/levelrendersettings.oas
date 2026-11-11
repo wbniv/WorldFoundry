@@ -1,0 +1,10 @@
+@* Authored view and room rendering settings.
+TYPEHEADER(Level Render Settings,LevelRenderSettings)
+    @include settings.inc
+    PROPERTY_SHEET_HEADER(Rendering,1)
+    TYPEENTRYINT32(Room Render Scope,,0,1,0,"All active|Current room",SHOW_AS_RADIOBUTTONS,"Choose which active rooms are rendered")
+    TYPEENTRYBOOLEAN(Stained glass light,,0,SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"Enable the stained glass light")
+    TYPEENTRYFIXED32(Authored aspect,,0,6553600,0,SHOW_AS_NUMBER,"Authored camera aspect; zero uses the default")
+    TYPEENTRYFIXED32(Maximum aspect,,0,6553600,0,SHOW_AS_NUMBER,"Maximum camera aspect; zero disables the cap")
+    PROPERTY_SHEET_FOOTER
+TYPEFOOTER

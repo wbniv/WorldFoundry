@@ -1,3 +1,4 @@
+#include "fixture_registry.hpp"
 // wfprops::LaunchOverrides (docs/plans/2026-10-21-planted-tank-screensaver.md, Phase 2c).
 // Built and run by `task test-launch-overrides` in wf-linux-test:local.
 #undef NDEBUG  // the checks below carry side effects
@@ -27,7 +28,7 @@ std::vector<uint8_t> catalog(){
     w.number(3);w.text("OtherSettings");w.text("Other");w.number(1);w.field(1,3,0,1,0,0,0,10,"Seed","0");
     return w.bytes;
 }
-void load(wfprops::Registry& r){auto b=catalog();std::string error;bool ok=r.load(b.data(),b.size(),error);if(!ok)std::fprintf(stderr,"load: %s\n",error.c_str());assert(ok);}
+void load(wfprops::Registry& r){auto b=catalog();std::string error;bool ok=testfixture::load(r,b.data(),b.size(),error);if(!ok)std::fprintf(stderr,"load: %s\n",error.c_str());assert(ok);}
 const std::string& value(wfprops::Registry& r,uint32_t actor,uint32_t id){return *r.object(actor)->get(id);}
 }
 int main(){

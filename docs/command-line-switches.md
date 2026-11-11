@@ -155,7 +155,7 @@ arguments fail with an explicit migration error. No replacement launch aliases
 or plant environment overrides are provided.
 
 `--property=Schema.Key=Value` (repeatable) is the generic launch override. It
-sets a field of every object whose RPRP schema is `Schema` each time a level
+sets a field of every object whose actor type is `Schema` each time a level
 loads, before any script runs, including read-only fields; `Key` is the field
 key (the OAS field name), for example
 `--property="PlantedTankSettings.Growth speed=6"`. A schema the level lacks is
@@ -164,20 +164,13 @@ skipped; an unknown key or an invalid value logs
 as the screensaver fill the same table through `wfprops::launchOverrides()`
 ([plan](plans/2026-10-21-planted-tank-screensaver.md), Phase 2c).
 
-Plant values now come from the level's cooked `PlantedTankSettings` RPRP catalog:
-Seed (ID 1, uint32), Water type (2), Growth speed (3, indices 0–6), Initial age
-(4, 0–240 seconds), Textures (5), Sway (6), and Random seed on entry (7).
-Initial age and random-entry policy are authored, read-only entry settings.
-Defaults retain random entry, age zero, freshwater, 1x growth, textures and sway.
-Providing a fixture seed disables random entry unless explicitly requested.
-Seed or water changes on Apply regenerate at age zero. Speed, texture and sway
-changes apply live without resetting growth; Cancel retains committed values.
-Regenerate and New random seed retain their existing behavior.
+Plant values come from the level's `PlantedTankSettings` actor. Seed is in the
+range 0–2,147,483,647. Water type, growth speed, textures, sway and the
+screensaver's Hold seconds can be changed live. Initial age and random-entry
+policy are authored, read-only entry settings. Defaults retain random entry,
+age zero, freshwater, 1x growth, textures and sway. Seed or water changes on
+Apply regenerate at age zero; speed, texture and sway changes do not reset
+growth. Cancel retains committed values.
 
-Profiling and atlas-comparison recipes use
-[scripts/plant_settings_catalog.py](../scripts/plant_settings_catalog.py) to cook
-these values through OAS → OAD → RPRP, retaining unrelated owners and geometry.
-Receipts include authored settings and catalog/level/CD/APK hashes, and packaging
-checks native-library identities. Rebuild the runtime before packaging: recipes
-reject libraries without the plant catalog consumer and stale plant arguments.
-Ordinary VRAM and profiler arguments remain separate and are preserved.
+Profiling recipes use [plant_settings_actor.py](../scripts/plant_settings_actor.py)
+to update the actor in a compiled level while preserving unrelated level data.

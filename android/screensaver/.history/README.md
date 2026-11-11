@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/5e02476e) | Seahorse Grid and Planted Dreams ship as Release (cast1: 4.2->29.6, 6.1->40.0 FPS) |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/12caf005) | Aquarium Dream ships as Release: 2.98 -> 21.8 FPS on the reef (cast1) |
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/fe428850) | Take the default orientation from a string resource |
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/9aebf986) | Document the screensavers' orientation setting |
@@ -14,6 +15,11 @@
 | [2026-10-18](https://github.com/wbniv/WorldFoundry/commit/54f44b51) | Add live aquarium screensaver with per-tank players |
 
 <!--history-meta v1
+5e02476e	author	Will Norris
+5e02476e	added	8
+5e02476e	deleted	11
+5e02476e	files	1
+5e02476e	body	Measured on cast1 through the coordinator profile workflow, 3 runs each,\nDebug and Release from the same bundles: Seahorse Grid 4.18 -> 29.64 FPS,\nPlanted Tank 6.06 -> 39.99. Each Release Dream ran in the real Dream path\n(screensaver-show + screensaver-status) with no assertion and its settings\nprovider ready.\n\nbuild-planted-apk now assembles PlantedRelease; new\nbuild-seahorse-screensaver-apk (bundles in the container, then\nassembleSeahorseRelease). tests/test_screensaver_release_build.py covers\nall three Dream tasks. README and device-coordinator.md give the Release\noutputs. cast1: Seahorse Grid selected, Release Dreams installed for\nSeahorse (25dfeda6) and Planted (bccdf04b), settings and game APK\nuntouched.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 12caf005	author	Will Norris
 12caf005	added	5
 12caf005	deleted	3

@@ -1,0 +1,15 @@
+#ifndef _RuntimeDiagnostics_HP
+#define _RuntimeDiagnostics_HP
+#include "actor.hp"
+class RuntimeDiagnostics: public Actor {
+public:
+    RuntimeDiagnostics(const SObjectStartupData* startupData);
+    virtual ~RuntimeDiagnostics() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadRuntimeDiagnostics(const SObjectStartupData* startupData);
+#endif

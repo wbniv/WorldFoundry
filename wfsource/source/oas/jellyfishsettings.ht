@@ -1,0 +1,25 @@
+/*============================================================================*/
+/* jellyfishsettings.ht: created from OADTYPES.S and jellyfishsettings.oas DO NOT MODIFY */
+/*============================================================================*/
+#include <pigsys/pigsys.hp>
+#include <math/scalar.hp>
+/*      maximum value of a long int     */
+/* minimum value of a long int  */
+#ifndef jellyfishsettings_HT
+#define jellyfishsettings_HT
+ struct _JellyfishSettings {
+	int32 moveblocPageOffset;                 /* offset in page data for this objects page */
+	int32 toolsetPageOffset;                 /* offset in page data for this objects page */
+	int32 commonPageOffset;                 /* offset in page data for this objects page */
+			int32 MeshName;	/* This is a packedAssetID */
+	int32 meshPageOffset;                 /* offset in page data for this objects page */
+	int32 shadowPageOffset;                 /* offset in page data for this objects page */
+	int32 TemplateObject;        /* Default: 0 */
+    int32 Pulsetempo;               /* Minumum: 0 Maximum: 4 Default: 2 */
+    int32 Strokestrength;               /* Minumum: 0 Maximum: 2 Default: 1 */
+    int32 Companions;               /* Minumum: 0 Maximum: 50 Default: 5 */
+    int32 Jellyfishsize;               /* Minumum: 0 Maximum: 2 Default: 1 */
+};
+/*============================================================================*/
+#endif         /* jellyfishsettings_HT */
+/*============================================================================*/

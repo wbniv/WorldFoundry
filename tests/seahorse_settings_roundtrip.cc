@@ -17,35 +17,36 @@ static double propertyAt(const wfprops::Object& o,unsigned id,bool& ok){
 int main(){
  auto& registry=planted::previewProperties();
  auto* o=registry.schema("PlantedTankSettings");CHECK(o);
- CHECK(o->field(8)&&o->field(9));
+ auto id=[&](const char* key){auto* field=planted::fieldNamed(*o,key);CHECK(field);return field->id;};
+ const auto countId=id("Seahorses"), greetingId=id("Greeting"), seedId=id("Seed"), speedId=id("Growth speed");
  bool ok=false;
- CHECK(propertyAt(*o,8,ok)==6&&ok);                      // default 6 pairs
- CHECK(propertyAt(*o,9,ok)==1&&ok);                      // greeting on
+ CHECK(propertyAt(*o,countId,ok)==6&&ok);                      // default 6 pairs
+ CHECK(propertyAt(*o,greetingId,ok)==1&&ok);                      // greeting on
  auto& s=planted::state();s.active=true;planted::regenerate(713,true);
  planted::syncProperties();planted::registerSettings();wfprops::host().bind(&registry);
- const auto seed=*o->get(1);
+ const auto seed=*o->get(seedId);
  // Each count, through the host's Apply and through the TV form's Back-applies path.
  for(int count:{0,1,2,3,4,5,6}){
   for(int path=0;path<2;++path){
    CHECK(wfprops::host().openOwner(o->actor));
-   CHECK(wfprops::host().form.edit.set(8,std::to_string(count)));
-   CHECK(wfprops::host().form.edit.set(9,count==1?"0":"1"));
+   CHECK(wfprops::host().form.edit.set(countId,std::to_string(count)));
+   CHECK(wfprops::host().form.edit.set(greetingId,count==1?"0":"1"));
    CHECK(path==0?wfprops::host().apply():planted::apply());
    CHECK(!wfprops::host().modal);
-   CHECK(propertyAt(*o,8,ok)==count&&ok);
-   CHECK(propertyAt(*o,9,ok)==(count==1?0:1)&&ok);
-   CHECK(*o->get(1)==seed&&s.salt);                       // the plant fields are untouched
+   CHECK(propertyAt(*o,countId,ok)==count&&ok);
+   CHECK(propertyAt(*o,greetingId,ok)==(count==1?0:1)&&ok);
+   CHECK(*o->get(seedId)==seed&&s.salt);                       // the plant fields are untouched
   }
  }
  // A plant-only Apply keeps the seahorse fields.
  CHECK(wfprops::host().openOwner(o->actor));
- CHECK(wfprops::host().form.edit.set(3,"5"));
+ CHECK(wfprops::host().form.edit.set(speedId,"5"));
  CHECK(wfprops::host().apply());
- CHECK(s.speed==5&&propertyAt(*o,8,ok)==6&&propertyAt(*o,9,ok)==1);
+ CHECK(s.speed==5&&propertyAt(*o,countId,ok)==6&&propertyAt(*o,greetingId,ok)==1);
  // Out-of-range counts are refused, not committed.
  CHECK(wfprops::host().openOwner(o->actor));
- bool refused=!wfprops::host().form.edit.set(8,"7")||!wfprops::host().apply();
- CHECK(refused&&propertyAt(*o,8,ok)==6);
+ bool refused=!wfprops::host().form.edit.set(countId,"7")||!wfprops::host().apply();
+ CHECK(refused&&propertyAt(*o,countId,ok)==6);
  wfprops::host().close();
  std::printf("seahorse settings round-trip ok\n");
  return 0;

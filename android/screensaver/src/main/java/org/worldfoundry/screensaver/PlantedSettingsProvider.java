@@ -21,12 +21,12 @@ import java.util.Iterator;
 /**
  * Shell-only settings contract for the Planted Tank, same shape as TankSettingsProvider.
  * Methods: getCapabilities, getSettings, setSetting (arg {@code key:value}), resetSettings.
- * getCapabilities serves the owner-aware RP01/OAD-generated asset with saved values, plus the
+ * getCapabilities serves the owner-aware OAD-generated asset with saved values, plus the
  * app-level orientation, which is not a level property: it is appended to the first owner as
  * field {@code orientation} (wire ID {@code <owner>.orientation}) and never enters the catalog.
  */
 public final class PlantedSettingsProvider extends ContentProvider {
-    /** Generated from the level's OAD-derived RP01 catalog. */
+    /** Generated from the level's settings actor OAD. */
     static final String CAPABILITIES_ASSET = "planted-settings.json";
     /** The adapter-added field's OAD-style name; no OAD field carries it. */
     static final String ORIENTATION_KEY = "Orientation";

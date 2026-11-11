@@ -30,6 +30,24 @@ int main(int argc, char** argv) {
     trimmed.insert(trimmed.end(), full.begin() + header + sheet * entry, full.end());
     assert(wf_attr_oad_field_location(trimmed.data(), trimmed.size(), seed - sheet,
                                       seedLocation.offset, &prefix) == 0);
+    std::vector<uint8_t> defaults;
+    std::string defaultError;
+    assert(wfprops::buildOadDefaults(trimmed.data(), trimmed.size(), seedLocation.offset,
+                                    1024, defaults, defaultError));
+    std::vector<uint8_t> emptyCommon(1024);
+    wfprops::Object preview;
+    assert(wfprops::buildOadObject(1, "PlantedTankSettings", "Preview", trimmed.data(), trimmed.size(),
+                                   sheet, seedLocation.offset, defaults.data(), defaults.size(),
+                                   emptyCommon.data(), emptyCommon.size(), preview, defaultError));
+    auto previewValue = [&](const char* key) -> std::string {
+        for (const auto& f : preview.fields) if (f.stored() && f.key == key) return *preview.get(f.id);
+        assert(false); return {};
+    };
+    assert(previewValue("Seed") == "0" && previewValue("Growth speed") == "3");
+    assert(previewValue("Random seed on entry") == "1" && previewValue("Hold seconds") == "120");
+    auto savedDefaults = defaults;
+    assert(!wfprops::buildOadDefaults(trimmed.data(), trimmed.size(), seedLocation.offset,
+                                      1, defaults, defaultError) && defaults == savedDefaults);
     std::vector<uint8_t> payload(1024), common(1024);
     std::vector<wfprops::CommonPage> pages;
     const int32_t authoredSeed = 2147483647;

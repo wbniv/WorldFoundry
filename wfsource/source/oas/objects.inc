@@ -72,6 +72,16 @@
 
         	
 #include "plantedtanksettings.hp"
+        	
+#include "jellyfishsettings.hp"
+        	
+#include "reefsettings.hp"
+        	
+#include "runtimediagnostics.hp"
+        	
+#include "fieldtypes.hp"
+        	
+#include "levelrendersettings.hp"
 
 
 

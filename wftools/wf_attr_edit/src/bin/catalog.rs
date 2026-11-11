@@ -4,5 +4,5 @@ fn quote(s:&str)->String {let mut out=String::from("\"");for c in s.chars(){matc
 fn main(){let path=env::args().nth(1).expect("catalog <schema.oad>");let bytes=fs::read(path).unwrap();let oad=wf_oad::OadFile::read(&mut Cursor::new(bytes)).unwrap();let s=wf_attr_schema::from_oad(&oad);
     print!("{{\"name\":{},\"fields\":[",quote(&s.name));
     for (i,f) in s.fields.iter().enumerate(){if i>0{print!(",")};let choices=if let wf_attr_schema::FieldKind::Enum{items}=&f.kind{items.join("|")}else{String::new()};
-        print!("{{\"index\":{},\"key\":{},\"label\":{},\"kind\":{},\"help\":{},\"group\":{},\"choices\":{},\"min\":{},\"max\":{},\"default\":{},\"show\":{},\"width\":{},\"scale\":{}}}",i,quote(&f.key),quote(&f.label),quote(f.kind.tag()),quote(&f.help),quote(&f.group),quote(&choices),f.min_raw,f.max_raw,f.default_raw,f.show_as,f.byte_width,f.fp_scale as u32);
+        print!("{{\"index\":{},\"key\":{},\"label\":{},\"kind\":{},\"help\":{},\"group\":{},\"choices\":{},\"min\":{},\"max\":{},\"default\":{},\"show\":{},\"width\":{},\"scale\":{},\"live\":{}}}",i,quote(&f.key),quote(&f.label),quote(f.kind.tag()),quote(&f.help),quote(&f.group),quote(&choices),f.min_raw,f.max_raw,f.default_raw,f.show_as,f.byte_width,f.fp_scale as u32,f.live);
     }println!("]}}");}

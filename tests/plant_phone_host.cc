@@ -7,7 +7,7 @@
 #include <thread>
 int main(int argc,char** argv){if(argc!=3&&argc!=4)return 2;bool controls=argc==4;phonepad::Config cfg;cfg.bindAddr=0x7f000001u;cfg.port=0;cfg.pin="123456";std::ifstream a(argv[1]),b(argv[2]);std::ostringstream x,y;x<<a.rdbuf();y<<b.rdbuf();cfg.pageHtml=x.str();cfg.layoutJson=y.str();
 wfprops::Form generic;auto& registry=planted::previewProperties();auto* owner=registry.schema("PlantedTankSettings");
-if(controls){owner->title="Generic control fixtures";owner->fields.clear();owner->values.clear();
+if(controls){owner->title="Generic control fixtures";owner->fields.clear();owner->values.clear();owner->apply={};
 wfprops::Field color;color.id=201;color.kind=0;color.show=7;color.width=4;color.maximum=0xffffff;color.key="Tint";color.label="Tint";color.initial="5801868";owner->fields.push_back(color);owner->values[color.id]=color.initial;
 wfprops::Field name;name.id=202;name.kind=3;name.maxLength=32;name.key="Name";name.label="Name";name.initial="River garden";owner->fields.push_back(name);owner->values[name.id]=name.initial;
 color.id=203;color.readonly=1;color.key="LockedTint";color.label="Locked tint";owner->fields.push_back(color);owner->values[color.id]=color.initial;

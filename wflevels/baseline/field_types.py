@@ -185,6 +185,38 @@ def oas(types, shows):
     return '\n'.join(lines) + '\n'
 
 
+def actor_oas(types, shows):
+    """Actor schema for scalar examples; bounded text awaits OAD overlay support."""
+    lines = ['@* Generated from field_types.py; do not hand-edit.',
+             'TYPEHEADER(Field Types,FieldTypes)', '    @include settings.inc']
+    resolved = rows()
+    for section in ('Numbers', 'Choices', 'Switches'):
+        lines.append('PROPERTY_SHEET_HEADER(%s,%d)' % (section, 1 if section == 'Numbers' else 0))
+        group = None
+        for row in resolved:
+            if row['section'] != section or row['kind'] not in ('Int', 'Float', 'Enum', 'Bool'):
+                continue
+            if row['group'] != group:
+                if group is not None: lines.append('GROUP_STOP()')
+                group = row['group']
+                if group is not None: lines.append('GROUP_START(' + group + ')')
+            show = 'SHOW_AS_' + row['show'] + ('' if row['readonly'] else '|SHOW_AS_LIVE')
+            label = row['label'].replace(',', ';')
+            help_text = row['help'].replace(',', ';')
+            if row['type'] == 'FIXED32':
+                entry = 'TYPEENTRYFIXED32(%s,%s,%s,%s,%s,%s,"%s")' % (
+                    row['key'], label, row['lo'], row['hi'], row['default'], show, help_text)
+            else:
+                choices = '|'.join(row.get('choices') or []).replace(',', ';')
+                entry = 'TYPEENTRYINT32(%s,%s,%s,%s,%s,"%s",%s,"%s")' % (
+                    row['key'], label, row['lo'], row['hi'], row['default'], choices, show, help_text)
+            lines.append(entry)
+        if group is not None: lines.append('GROUP_STOP()')
+        lines.append('PROPERTY_SHEET_FOOTER')
+    lines.append('TYPEFOOTER')
+    return '\n'.join(lines) + '\n'
+
+
 def bindings():
     """field-types-bindings.json: ids and initial values; the two actions after the fields."""
     fields, actions = {}, []

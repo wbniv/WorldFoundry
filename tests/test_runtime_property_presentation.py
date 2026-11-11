@@ -2,7 +2,7 @@
 segments and switch keep focus escapable, and path validation refuses no committed catalog.
 
 docs/plans/2026-11-01-field-presentations.md. Runs the real form, host and TV renderer on the
-catalog cooked into the baseline level (tests/runtime_property_presentation_test.cpp).
+synthetic Field types fixture (tests/runtime_property_presentation_test.cpp).
 """
 import json
 from pathlib import Path
@@ -10,6 +10,7 @@ import struct
 import subprocess
 
 import pytest
+from test_baseline_field_types import fixture_payload
 
 ROOT = Path(__file__).resolve().parents[1]
 CASES = {c["id"]: c for c in json.loads((ROOT / "docs/plans/2026-10-29-touch-settings-examples.json").read_text())}
@@ -42,7 +43,7 @@ def harness(tmp_path_factory):
 @pytest.fixture(scope="module")
 def tv(harness, tmp_path_factory):
     rprp = tmp_path_factory.mktemp("catalog") / "baseline.rprp"
-    rprp.write_bytes(payload((ROOT / "wflevels/baseline-standalone.iff").read_bytes()))
+    rprp.write_bytes(fixture_payload())
     result = subprocess.run([str(harness), "form", str(rprp), str(IDS["FieldTypes"]),
                              str(ROOT / "wfsource/source/game/ui-font.wfga")], capture_output=True, text=True)
     assert result.returncode == 0 and result.stdout.rstrip().endswith("done"), result.stdout + result.stderr
@@ -179,29 +180,8 @@ def test_mailbox_editor_and_path_validation(tv):
     assert facts["path-accepted"] == "1"
 
 
-def committed_catalogs():
-    """Every committed RPRP catalog: standalone .rprp files and the chunks in level files."""
-    files = subprocess.run(["git", "-C", str(ROOT), "ls-files", "*.rprp", "wflevels/*.iff"],
-                           capture_output=True, text=True, check=True).stdout.split()
-    # Built catalogs that are on disk but not tracked (the planted tank's, among others).
-    files += sorted(str(p.relative_to(ROOT)) for p in (ROOT / "wflevels").glob("*/*.rprp") if str(p.relative_to(ROOT)) not in files)
-    found = []
-    for name in files:
-        data = (ROOT / name).read_bytes()
-        if name.endswith(".rprp"):
-            found.append((name, data))
-        elif b"RPRP" in data and data[:2] == b"L4":
-            body = payload(data)
-            if body[:4] == b"RP01":
-                found.append((name, body))
-    return found
-
-
-def test_path_validation_refuses_no_committed_catalog(harness, tmp_path):
-    catalogs = committed_catalogs()
-    assert any(name == "wflevels/baseline-standalone.iff" for name, _ in catalogs)
-    for name, body in catalogs:
-        path = tmp_path / (Path(name).name + ".rp01")
-        path.write_bytes(body)
-        result = subprocess.run([str(harness), "load", str(path)], capture_output=True, text=True)
-        assert result.returncode == 0, (name, result.stdout)
+def test_path_validation_accepts_fixture(harness, tmp_path):
+    path = tmp_path / "field-types.rp01"
+    path.write_bytes(fixture_payload())
+    result = subprocess.run([str(harness), "load", str(path)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stdout + result.stderr

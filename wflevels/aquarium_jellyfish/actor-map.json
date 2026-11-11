@@ -84,7 +84,8 @@
     "room-backdrop": 77,
     "AmbientLight": 78,
     "LookClose": 79,
-    "cs_close": 80
+    "cs_close": 80,
+    "JellyfishSettings": 81
   },
   "mailboxes": {
     "init": 600,

@@ -9,7 +9,7 @@ import shutil
 import subprocess
 import zipfile
 from PIL import Image
-from plant_settings_catalog import configure_cd,configure_level,require_catalog_runtime,reject_removed_arguments
+from plant_settings_actor import configure_cd,configure_level,require_actor_runtime,reject_removed_arguments
 
 ROOT = Path(__file__).resolve().parents[1]
 p = argparse.ArgumentParser(description=__doc__)
@@ -23,7 +23,7 @@ normal = a.out / 'normal.apk'
 shutil.copyfile(a.apk, normal)
 sha = lambda data: hashlib.sha256(data).hexdigest()
 with zipfile.ZipFile(normal) as base:
-    require_catalog_runtime(base)
+    require_actor_runtime(base)
     if 'assets/wf_args.txt' in base.namelist():reject_removed_arguments(base.read('assets/wf_args.txt').decode())
     runtime_args = base.read('assets/wf_args.txt').decode() if 'assets/wf_args.txt' in base.namelist() else ''
     permanent_size = Image.open(ROOT/'wflevels/aquarium_plants/Perm.tga').size

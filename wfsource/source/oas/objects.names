@@ -41,6 +41,11 @@
         "Dir",
 
         "PlantedTankSettings",
+        "JellyfishSettings",
+        "ReefSettings",
+        "RuntimeDiagnostics",
+        "FieldTypes",
+        "LevelRenderSettings",
 
 
 

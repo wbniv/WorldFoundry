@@ -18,21 +18,21 @@ struct Backend {
     // Game-thread commit after Edit::commit; all work here must be infallible.
     std::function<void(const Changes&)> apply;
 };
-inline void install(wfprops::Registry& registry,Backend backend) {
+inline void install(wfprops::Registry& registry,Backend backend,const std::string& schema="Settings") {
     struct Session {Snapshot snapshot;Changes changes;};
     auto session=std::make_shared<Session>();
     std::map<std::pair<uint32_t,uint32_t>,wfprops::Field> authoredFields;
     for(auto actor:registry.editableObjects()) {
         auto* object=registry.object(actor);
-        if(object->schema!="Settings")continue;
+        if(object->schema!=schema)continue;
         for(const auto& field:object->fields)
             if(field.id>=1000&&field.id<1200&&field.key.compare(0,8,"runtime_")==0)
                 authoredFields[{actor,field.id}]=field;
     }
-    auto sync=[&registry,backend,authoredFields](){
+    auto sync=[&registry,backend,authoredFields,schema](){
         const auto snapshot=backend.read();
         for(auto actor:registry.editableObjects()) {
-            auto* object=registry.object(actor);if(object->schema!="Settings")continue;
+            auto* object=registry.object(actor);if(object->schema!=schema)continue;
             bool changed=false;
             for(auto& field:object->fields) {
                 if(field.id<1000||field.id>=1200||field.key.compare(0,8,"runtime_"))continue;
@@ -78,7 +78,7 @@ inline void install(wfprops::Registry& registry,Backend backend) {
         if(!session->changes.empty())backend.apply(session->changes);
         session->changes.clear();sync();
     };
-    wfprops::host().consumer("Settings",std::move(consumer));
+    wfprops::host().consumer(schema,std::move(consumer));
     sync();
 }
 // Production adapter, registered when a Settings object has runtime option fields.

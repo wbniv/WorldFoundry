@@ -15,7 +15,7 @@ import struct
 import subprocess
 import zipfile
 
-from plant_settings_catalog import configure_level
+from plant_settings_actor import configure_level
 
 
 PLANTED_TOC_INDEX = 6  # SHEL, then the eight tanks in TankChoice.IDS order.

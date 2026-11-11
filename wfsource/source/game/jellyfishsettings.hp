@@ -1,0 +1,16 @@
+#ifndef _JellyfishSettings_HP
+#define _JellyfishSettings_HP
+#include "actor.hp"
+class JellyfishSettings: public Actor {
+public:
+    JellyfishSettings(const SObjectStartupData* startupData);
+    virtual ~JellyfishSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    // The Director's Forth reads all four live fields from the overlay each frame.
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadJellyfishSettings(const SObjectStartupData* startupData);
+#endif

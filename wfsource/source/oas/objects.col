@@ -52,6 +52,11 @@ int collisionTable[] =
         	1,	// Dir
 
         	0,	// PlantedTankSettings
+        	0,	// JellyfishSettings
+        	0,	// ReefSettings
+        	0,	// RuntimeDiagnostics
+        	0,	// FieldTypes
+        	0,	// LevelRenderSettings
 	
 };
 

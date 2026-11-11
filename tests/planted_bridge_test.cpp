@@ -60,9 +60,9 @@ int main() {
     // Every key, in PlantedConfig.toLine() order and spelling.
     {
         std::vector<std::string> w;
-        Params p = parseLine("water=saltwater;seed=4294967295;speed=0.25;hold=86400;age=30.5;textures=false;sway=false", &w);
+        Params p = parseLine("water=saltwater;seed=2147483647;speed=0.25;hold=86400;age=30.5;textures=false;sway=false", &w);
         CHECK(w.empty());
-        CHECK(p.water == Water::Salt && p.hasSeed && p.seed == 4294967295u);
+        CHECK(p.water == Water::Salt && p.hasSeed && p.seed == 2147483647u);
         CHECK(p.speedIndex == 1 && p.hold == 86400 && p.age == "30.5" && !p.textures && !p.sway);
     }
     // Speed index mapping, water aliases, seed=random.
@@ -74,6 +74,7 @@ int main() {
         CHECK(parseLine("water=freshwater", nullptr).water == Water::Fresh);
         CHECK(parseLine("water=random", nullptr).water == Water::Random);
         CHECK(!parseLine("seed=random", nullptr).hasSeed);
+        CHECK(!parseLine("seed=2147483648", nullptr).hasSeed);
         Params z = parseLine("seed=0;hold=0;age=0", nullptr);
         CHECK(z.hasSeed && z.seed == 0 && z.hold == 0 && z.age == "0");
     }
@@ -94,7 +95,7 @@ int main() {
         auto never = []() -> uint32_t { assert(!"random used with a fixed seed"); return 0; };
         Tank t0 = tankFor(p, 0, never), t1 = tankFor(p, 1, never), t2 = tankFor(p, 2, never);
         CHECK(t0.hasSeed && t0.seed == 713);               // tank 0 uses the seed exactly
-        CHECK(t1.seed == 0xd121a56bu && t2.seed == 0xcb260c1fu);
+        CHECK(t1.seed == 0x5121a56bu && t2.seed == 0x4b260c1fu);
         CHECK(t0.water == 0 && t1.water == 1 && t2.water == 1 && tankFor(p, 3, never).water == 0);  // top bit of mix32
         // Replays: the same parameters give the same run.
         for (uint32_t k = 0; k < 50; ++k) {
@@ -172,7 +173,7 @@ int main() {
         CHECK(s.at(kTextures) == "0" && s.at(kSway) == "1");
         CHECK(h.log.back() == "planted_bridge: tank 0 water=freshwater seed=713 speed=8 hold=5");
         s.counter = 8; h.bridge.pump(s);    // tank 0 loaded
-        CHECK(h.bridge.pendingTank() == 1 && s.at(kSeed) == std::to_string(0xd121a56bu) && s.at(kWater) == "1");
+        CHECK(h.bridge.pendingTank() == 1 && s.at(kSeed) == std::to_string(0x5121a56bu) && s.at(kWater) == "1");
         s.counter = 10; h.bridge.pump(s);   // two loads in one pump: tanks 1 and 2 loaded, set 3 only
         CHECK(h.bridge.pendingTank() == 3 && s.at(kSeed) == std::to_string(0x331c8c49u) && s.at(kWater) == "0");
         size_t lines = h.log.size();

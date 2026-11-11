@@ -8,10 +8,7 @@
 @* editing.md, M7, M8). A live field is one the engine re-reads after the level
 @* loads, so a runtime edit takes effect; the rest show read-only.
 @*
-@* Declared only, as of Phase 1: no level places one yet. Phase 3 migrates the
-@* planted tank from its RP01 catalog (wflevels/aquarium_plants/settings.oas)
-@* to this type. Until a level ships with it, fields may still change; after
-@* that, append new fields at the end only.
+@* Levels place this actor to carry their authored settings.
 @*
 @* Help strings must not contain commas: prep splits macro arguments on them.
 @*============================================================================

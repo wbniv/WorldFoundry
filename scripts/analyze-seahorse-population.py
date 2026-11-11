@@ -60,7 +60,7 @@ def presentation(folder):
     if marker < 0:
         raise ValueError(f'no current level-load marker in cumulative log: {folder}')
     current = log[marker:]
-    fixture = ('PLANTS settings-source=RPRP seed=713 water=saltwater age=150 speed=0 '
+    fixture = ('PLANTS settings-source=OAD seed=713 water=saltwater age=150 speed=0 '
                'textures=1 sway=1 random_entry=0 selector_override=0')
     if fixture not in current:
         raise ValueError(f'wrong or missing authored plant fixture: {folder}')

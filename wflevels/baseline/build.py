@@ -2,12 +2,10 @@
 """Export/build/package baseline with the existing tools and frozen native code."""
 import argparse
 import hashlib
-import importlib.util
 import json
 import os
 from pathlib import Path
 import shutil
-import struct
 import subprocess
 import zipfile
 
@@ -43,27 +41,17 @@ def build(preset,blend=None):
             run('blender','--background','--python-exit-code','1','--python',HERE/'generate.py','--','--output',blend,'--preset',preset,'--overwrite')
     export(blend)
     run('bash',ROOT/'wftools/wf_blender/build_level_binary.sh','baseline',cwd=ROOT)
-    spec=importlib.util.spec_from_file_location('baseline_catalog',ROOT/'scripts/build-object-properties.py')
-    cooker=importlib.util.module_from_spec(spec);spec.loader.exec_module(cooker)
     # settings-gallery is the descriptor coverage fixture: compiled for verify.py and the
     # host tests, never attached to the level.
     for name in OWNER_SHEETS+['settings-gallery']:
         run(ROOT/'wftools/oas2oad-rs/target/release/oas2oad','--types='+str(ROOT/'wfsource/source/oas/types3ds.s'),'--prep='+str(ROOT/'wftools/prep/prep'),'-o',HERE/(name+'.oad'),HERE/(name+'.oas'))
-    ids=json.loads((HERE/'actor-map.json').read_text())['indices']
-    # Two owners, each with its own sheet: Field types, then Runtime settings.
-    catalogs=[]
-    for name in OWNER_SHEETS:
-        bindings=json.loads((HERE/(name+'-bindings.json')).read_text())
-        catalogs.append(cooker.catalog(HERE/(name+'.oad'),bindings,ids[bindings['owner']]))
-    payload=b'RP01'+struct.pack('<I',len(catalogs))+b''.join(c[8:] for c in catalogs)
     level=ROOT/'wflevels/baseline-standalone.iff'
-    level.write_bytes(cooker.attach(project_legacy(level.read_bytes(),memory),payload))
-    (OUT/'settings.rprp').write_bytes(payload)
+    level.write_bytes(project_legacy(level.read_bytes(),memory))
     snapshot=OUT/(preset+'-standalone.iff');shutil.copyfile(level,snapshot)
     run(ROOT/'wftools/cdpack-rs/target/release/cdpack',ROOT/'wfsource/source/game/shell.fth',snapshot,'-o',OUT/'cd.iff')
     receipt=dict(preset=preset,blend=str(blend),blendSha256=digest(blend),configSha256=digest(HERE/'baseline.json'),standalone=str(snapshot),levelSha256=digest(snapshot),cdSha256=digest(OUT/'cd.iff'),levelBuildChangesEngine=False,desktopExecutableSha256=digest(ROOT/'engine/wf_game'),toolHashes={str(p.relative_to(ROOT)):digest(p) for p in [ROOT/'wftools/iffcomp-rs/target/release/iffcomp',ROOT/'wftools/levcomp-rs/target/release/levcomp',ROOT/'wftools/textile-rs/target/release/textile',ROOT/'wftools/oas2oad-rs/target/release/oas2oad',ROOT/'wftools/wf_attr_edit/target/release/catalog']})
     receipt['levelMemory']=dict(authored=memory,sourceSha256=digest(HERE/'memory-settings.json'),application='RAM fields at level load; read-only while running')
-    receipt['settingsOwners']={str(p.relative_to(ROOT)):digest(p) for p in [HERE/'field_types.py',HERE/'runtime_options_fixture.py',HERE/'runtime-options.json']+[HERE/(n+e) for n in OWNER_SHEETS for e in ('.oas','.oad','-bindings.json')]+[OUT/'settings.rprp']}
+    receipt['settingsOwners']={str(p.relative_to(ROOT)):digest(p) for p in [HERE/'field_types.py',ROOT/'scripts/runtime_options_inventory.py',ROOT/'wfsource/source/oas/fieldtypes.oad',ROOT/'wfsource/source/oas/runtimediagnostics.oad']}
     (OUT/'build-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
     print('Built:',snapshot,'sha256',receipt['levelSha256'])
     return receipt

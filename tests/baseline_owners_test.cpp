@@ -1,3 +1,4 @@
+#include "fixture_registry.hpp"
 // The baseline's two settings owners through the real registry, host and runtime-options
 // consumer (docs/plans/2026-10-31-baseline-settings-cleanup.md, Risks). Driven by
 // tests/test_baseline_field_types.py with the RP01 payload cooked into the built level.
@@ -14,7 +15,7 @@ int main(int argc,char** argv){
  const uint32_t types=uint32_t(std::atoi(argv[2])),runtime=uint32_t(std::atoi(argv[3]));
  wfprops::Registry r;std::string error;
  // Every authored initial value passes the engine's own validation, or load fails.
- if(!r.load(bytes.data(),bytes.size(),error)){std::cout<<"load-failed "<<error<<"\n";return 1;}
+ if(!testfixture::load(r,bytes.data(),bytes.size(),error)){std::cout<<"load-failed "<<error<<"\n";return 1;}
  for(uint32_t actor:{types,runtime}){
   const auto* o=r.object(actor);assert(o);
   std::cout<<"object "<<actor<<" "<<o->schema<<" fields="<<o->fields.size()<<" title="<<o->title<<"\n";

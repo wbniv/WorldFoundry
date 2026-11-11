@@ -6,7 +6,7 @@ under the Release wf_game, stepped at a fixed 20 Hz through the debug bridge.
    probe -> grasp -> hold, then a wide view while it swims, then the greeting (forced
    due by writing the shared greeting timer, 1173), close on the whip.
 2. Settings: one wide shot per Seahorses setting (None through 6 pairs) and freshwater,
-   each a fresh run of the level cooked with that setting (plant_settings_catalog).
+   each a fresh run of the level cooked with that setting (plant_settings_actor).
 
 Every shot records each seahorse's state, spot, wrap progress, DFRM status and the
 contact error (the engine-reported wrap centre against its post's axis) in capture.json.
@@ -29,7 +29,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tests'))
 sys.path.insert(0, str(ROOT / 'scripts'))
 from debug_bridge_client import BridgeClient  # noqa: E402
-from plant_settings_catalog import configure_level  # noqa: E402
+from plant_settings_actor import configure_level  # noqa: E402
 import seahorse as sh  # noqa: E402
 
 VRAM = ['--vram-width=2048', '--vram-height=1024', '--vram-slot-width=512', '--vram-slot-height=512',

@@ -85,7 +85,8 @@
     "room-backdrop": 78,
     "AmbientLight": 79,
     "LookClose": 80,
-    "cs_close": 81
+    "cs_close": 81,
+    "PlantedTankSettings": 82
   },
   "mailboxes": {
     "init": 600,

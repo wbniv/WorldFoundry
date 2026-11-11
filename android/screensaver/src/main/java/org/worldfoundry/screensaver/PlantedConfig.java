@@ -30,7 +30,7 @@ final class PlantedConfig {
     static final String SALTWATER = "saltwater";
     static final String RANDOM = "random";
 
-    static final long SEED_MAX = 4294967295L;
+    static final long SEED_MAX = 2147483647L;
     static final long HOLD_MAX = 86400L;
     static final double AGE_MAX = 240.0;
 
@@ -145,8 +145,18 @@ final class PlantedConfig {
 
     PlantedConfig withSeed(Object value) {
         long parsed = wholeNumber(value, SEED_MAX,
-                "seed must be a whole number from 0 to 4294967295");
+                "seed must be a whole number from 0 to 2147483647");
         return new PlantedConfig(water, parsed, speed, hold, age, textures, sway);
+    }
+
+    static String clampSavedSeed(String value) {
+        if (!DIGITS.matcher(value).matches()) return value;
+        try {
+            long seed = Long.parseLong(value);
+            return seed > SEED_MAX && seed <= 4294967295L ? Long.toString(SEED_MAX) : value;
+        } catch (NumberFormatException invalid) {
+            return value;
+        }
     }
 
     PlantedConfig withoutSeed() {

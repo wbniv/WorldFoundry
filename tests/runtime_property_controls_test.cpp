@@ -1,3 +1,4 @@
+#include "fixture_registry.hpp"
 #include <game/runtime_property_controls.h>
 #include <game/runtime_property_ui.h>
 #include <cassert>
@@ -6,7 +7,7 @@
 #include <set>
 int main(int argc,char** argv){
  assert(argc==3);std::ifstream file(argv[1],std::ios::binary);std::vector<uint8_t> bytes((std::istreambuf_iterator<char>(file)),{});
- wfprops::Registry registry;std::string error;assert(registry.load(bytes.data(),bytes.size(),error));auto* object=registry.object(1);assert(object);
+ wfprops::Registry registry;std::string error;assert(testfixture::load(registry,bytes.data(),bytes.size(),error));auto* object=registry.object(1);assert(object);
  object->fields.clear();object->values.clear();wfprops::Field field;field.id=201;field.kind=0;field.show=7;field.width=4;field.maximum=0xffffff;field.key=field.label="Tint";field.initial="5801868";object->fields.push_back(field);object->values[field.id]=field.initial;
  field=wfprops::Field{};field.id=202;field.kind=3;field.maxLength=32;field.key=field.label="Name";field.initial="Original name";object->fields.push_back(field);object->values[field.id]=field.initial;
  field.id=205;field.rule=2;field.maxLength=4096;field.key=field.label="Notes";field.initial="First line\nSecond line";object->fields.push_back(field);object->values[field.id]=field.initial;

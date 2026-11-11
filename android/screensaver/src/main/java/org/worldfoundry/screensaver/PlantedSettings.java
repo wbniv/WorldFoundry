@@ -16,6 +16,7 @@ final class PlantedSettings {
         for (String key : PlantedConfig.KEYS) {
             String saved = prefs.getString(key, null);
             if (saved == null) continue;
+            if (PlantedConfig.SEED.equals(key)) saved = PlantedConfig.clampSavedSeed(saved);
             try {
                 config = config.with(key, saved);
             } catch (IllegalArgumentException stale) {

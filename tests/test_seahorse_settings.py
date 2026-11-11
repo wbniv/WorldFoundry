@@ -5,6 +5,7 @@ import json
 import re
 import subprocess
 from pathlib import Path
+from plant_preview_build import preview_sources
 
 ROOT = Path(__file__).resolve().parents[1]
 HERE = ROOT / 'wflevels/aquarium_plants'
@@ -22,6 +23,7 @@ def test_sheet_and_bindings():
 def test_fields_8_and_9_round_trip_through_apply(tmp_path):
     exe = tmp_path / 'roundtrip'
     subprocess.run(['g++', '-std=c++17', '-O1', '-pthread', '-I' + str(ROOT / 'wfsource/source'),
+                    *preview_sources(tmp_path),
                     str(ROOT / 'tests/seahorse_settings_roundtrip.cc'),
                     *(str(ROOT / 'engine' / n) for n in ('runtime_properties.cpp', 'runtime_property_form.cpp',
                                                          'runtime_property_host.cpp')),

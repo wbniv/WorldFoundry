@@ -5,7 +5,7 @@ The planted tank with **plants only**: no urchin, goby, seahorses, posts or graz
 - **Camera.** The wide shot sits at `(0, -8.25, 2.5)`, so the tank fills about 90% of a 16:9 frame (Spike S3), and the fog distances are scaled by 0.64. The Director always selects the wide shot.
 - **Player.** An invisible hull (`player_hull.iff`, visibility 0); `Level::reset()` needs a Player. Its script only writes `0 INDEXOF_INPUT`.
 - **Cycle.** The Director runs `wflevels/aquarium_tanks/planted_cycle.fth`: a growth clock that mirrors `planted::tick` (`dt × speed`, a frame over 0.2 s counts as 0) starts at `Initial age`; at the 195 s maturity bound it holds for `Hold seconds` of level time (`TIME`), then writes `LEVEL_TO_RUN` = 0 and `END_OF_LEVEL` = 1 (never 0). The reload runs `planted::enter()` again: a new tank.
-- **Settings.** `settings.oas` and `settings-bindings.json` keep fields 1 to 7 of the planted tank and add `Hold seconds` (id 10, 0 to 86400, default 120). There are no Seahorses or Greeting fields.
+- **Settings.** The level places the shared `PlantedTankSettings` actor. Its Screensaver section contains `Hold seconds` (0 to 86400, default 120); changes take effect when the next hold starts. The app's settings provider omits the actor's Seahorses and Greeting fields because this level has no animals.
 - **Memory.** `PERM` is 1 MB (no animal rigs or textures) and `ROOM` stays 24 MB for the runtime foliage.
 
 Build (in the Blender container): `bash wflevels/planted_tank_screensaver/build.sh`. Tests: `python3 -m pytest -q tests/test_planted_screensaver.py`.

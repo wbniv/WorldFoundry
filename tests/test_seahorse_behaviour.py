@@ -60,7 +60,7 @@ class Tank:
             assert self.h.eval(w) == 'ok', w
         motion = (TANKS / 'urchin_motion.fth').read_text()
         source = (sh.forth_definitions(motion, ['uf-hypot']) + sh.posts_forth() + sh.clips_forth()
-                  + sh.behaviour_source(DIRECTOR, TANKS)
+                  + sh.behaviour_source(DIRECTOR, TANKS, sh.SETTING_COUNT, sh.SETTING_GREETING)
                   + ': tick\n' + before + ' pg-salt if\n' + inside + ' then ;\n')
         path = ROOT / 'build-docker' / 'tmp'
         path.mkdir(parents=True, exist_ok=True)

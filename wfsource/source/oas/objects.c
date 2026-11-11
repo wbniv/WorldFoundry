@@ -137,6 +137,26 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
 			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
 				object = OadPlantedTankSettings(startData); 
 			break;
+        	case Actor::JellyfishSettings_KIND:
+			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
+				object = OadJellyfishSettings(startData); 
+			break;
+        	case Actor::ReefSettings_KIND:
+			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
+				object = OadReefSettings(startData); 
+			break;
+        	case Actor::RuntimeDiagnostics_KIND:
+			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
+				object = OadRuntimeDiagnostics(startData); 
+			break;
+        	case Actor::FieldTypes_KIND:
+			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
+				object = OadFieldTypes(startData); 
+			break;
+        	case Actor::LevelRenderSettings_KIND:
+			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
+				object = OadLevelRenderSettings(startData); 
+			break;
 
 
 
@@ -295,6 +315,21 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
 
         	case Actor::PlantedTankSettings_KIND:
 			object = OadPlantedTankSettings(startData); 
+			break;
+        	case Actor::JellyfishSettings_KIND:
+			object = OadJellyfishSettings(startData); 
+			break;
+        	case Actor::ReefSettings_KIND:
+			object = OadReefSettings(startData); 
+			break;
+        	case Actor::RuntimeDiagnostics_KIND:
+			object = OadRuntimeDiagnostics(startData); 
+			break;
+        	case Actor::FieldTypes_KIND:
+			object = OadFieldTypes(startData); 
+			break;
+        	case Actor::LevelRenderSettings_KIND:
+			object = OadLevelRenderSettings(startData); 
 			break;
 
 

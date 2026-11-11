@@ -341,6 +341,18 @@ Every editable object's final label must be unique within the level. levcomp
 rejects duplicate labels, including a custom label that matches an automatic
 one. The label is export metadata rather than an OAS field.
 
+### Settings actors
+
+Place a settings actor in the level to expose its fields to runtime editing.
+`PlantedTankSettings` controls plant growth and contains **Hold seconds** in its
+Screensaver section (0–86,400 seconds, default 120). `JellyfishSettings` and
+`ReefSettings` control their respective aquarium behaviors. `LevelRenderSettings`
+provides the render scope, aspect and stained-glass settings. These are ordinary
+actor OAD fields and can be authored in Blender or directly in a text IFF level.
+Live fields can be changed during play; other fields are read-only in the editor.
+The baseline level also places `RuntimeDiagnostics`, which exposes runtime options
+and read-only memory and behavior diagnostics in a separate form.
+
 ### Materials and Cast1 performance
 
 The modern renderer supports painted textures, palette recoloring, lighting,

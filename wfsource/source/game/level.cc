@@ -5,6 +5,7 @@
 #include "../../../engine/runtime_editable_list.hpp"
 #include "../../../engine/runtime_oad_adapter.hpp"
 #include "../../../engine/runtime_edit_all.hpp"
+#include "../../../engine/runtime_diagnostics_form.hpp"
 #include "runtime_profile.hp"
 #include "bitmap_presenter.hp"
 #include <algorithm>
@@ -618,64 +619,16 @@ Level::Level
 	// so this seek is done in game
     const int32 propertyRamStart = _levelFile->FilePos();
 	_levelFile->ReadBytes( memoryConfigurationBytes, DiskFileCD::_SECTOR_SIZE );
-    // Optional catalog locator in RAM padding; fixed actor/LVL layouts stay intact.
     const uint32 ramSize = plmc->cbRamChunk;
-    // FLAG-only levels have 36 RAM bytes plus the 12-byte locator; SLOT is optional.
-    if(ramSize>=48 && ramSize+8<=DiskFileCD::_SECTOR_SIZE) {
-        uint32 locator[3];std::memcpy(locator,memoryConfigurationBytes+ramSize-4,sizeof(locator));
-        if(locator[0]==IFFTAG('R','P','R','P') && locator[1]>=2048 && locator[1]%2048==0 && locator[1]<=uint32(INT32_MAX-propertyRamStart)-locator[2] && locator[2]>=8 && locator[2]<=4*1024*1024 && locator[2]%2048==0) {
-            const int32 resume=_levelFile->FilePos();
-            std::vector<uint8_t> catalog(locator[2]);
-            _levelFile->SeekRandom(propertyRamStart+locator[1]);
-            _levelFile->ReadBytes(catalog.data(),locator[2]);
-            _levelFile->SeekRandom(resume);
-            uint32 payload=0;std::memcpy(&payload,catalog.data()+4,4);
-            std::string error;
-            if(std::memcmp(catalog.data(),"RPRP",4)||payload>catalog.size()-8||!_runtimeProperties.load(catalog.data()+8,payload,error))
-                std::fprintf(stderr,"PROPERTIES load failed: %s\n",error.c_str());
-        }
-    }
-    // Host/CLI launch overrides (runtime_properties.hpp): before any reader sees the registry.
-    for(const std::string& rejected:wfprops::launchOverrides().apply(_runtimeProperties))
-        std::fprintf(stderr,"PROPERTIES launch-override rejected: %s\n",rejected.c_str());
     wfprops::activeRegistry()=&_runtimeProperties;
-    std::string renderSettingError;
-    _renderCurrentRoomOnly = wfprops::currentRoomOnly(_runtimeProperties, renderSettingError);
-    if (!renderSettingError.empty())
-        std::fprintf(stderr, "ROOM-RENDER setting invalid: %s; using all-active\n", renderSettingError.c_str());
-    std::fprintf(stderr, "ROOM-RENDER scope=%s source=%s\n",
-                 _renderCurrentRoomOnly ? "current-only" : "all-active",
-                 _runtimeProperties.schema("LevelRenderSettings") ? "RPRP" : "default");
-    // The level's authored frame (gfx/authored_view.hp): Authored aspect and Maximum aspect,
-    // next to Room Render Scope, 0 = off. Set for every level, so a level without them puts
-    // the view back to today's 60 degrees. --authored-aspect= / --maximum-aspect= win.
-    {
-        bool authoredFound = false, maximumFound = false;
-        std::string viewError;
-        wfview::Settings settings;
-        settings.authoredAspect = wfprops::aspectSetting(_runtimeProperties, "Authored aspect", authoredFound, viewError);
-        settings.maximumAspect  = wfprops::aspectSetting(_runtimeProperties, "Maximum aspect", maximumFound, viewError);
-        if (!viewError.empty()) std::fprintf(stderr, "VIEW setting invalid: %s\n", viewError.c_str());
-        wfview::levelSettings() = settings;
-        const wfview::Settings& o = wfview::argumentOverrides();
-        const bool fromArgs = o.authoredAspect >= 0.0f || o.maximumAspect >= 0.0f;
-        wfview::source() = fromArgs ? "argument" : (authoredFound || maximumFound) ? "level" : "default";
-        // No VIEW line here: the surface may not be known yet (iOS). The projection
-        // sites log it through wfview::report() with the size they apply.
-    }
     wfprops::host().bind(&_runtimeProperties);
     // Keep the Temple's optional stained-glass shaft in a script-visible mailbox.
     // The OAS field is editable; its value changes only after the form commits.
     auto applyStainedGlassLight=[this](const wfprops::Object& settings){
-        const std::string* value=settings.get(2);
+        const std::string* value=nullptr;
+        for(const auto& field:settings.fields) if(field.stored()&&field.key=="Stained glass light") { value=settings.get(field.id);break; }
         _mailboxes.WriteMailbox(621,Scalar(value&&*value=="1"?1:0,0));
     };
-    if(const wfprops::Object* settings=_runtimeProperties.schema("LevelRenderSettings"))
-        applyStainedGlassLight(*settings);
-    wfprops::host().consumer("LevelRenderSettings",
-        wfprops::Consumer{ {}, {}, [applyStainedGlassLight](const wfprops::Object& settings,const std::string&){
-            applyStainedGlassLight(settings);
-        }});
     // Pick in 3D: where the chooser's objects are, read only while it is open.
     wfprops::host().world.camera=[](wfpick::Camera& camera){return RendererBackendGet().CameraMatrices(camera.view,camera.proj);};
     wfprops::host().world.locate=[this](uint32_t actor,wfpick::Candidate& candidate){
@@ -688,7 +641,6 @@ Level::Level
         if(candidate.bounded){const Vector3 lo=physical.Min(),hi=physical.Max();
             candidate.lo={lo.X().AsFloat(),lo.Y().AsFloat(),lo.Z().AsFloat()};candidate.hi={hi.X().AsFloat(),hi.Y().AsFloat(),hi.Z().AsFloat()};}
         return true;};
-    wfoptions::registerRuntimeOptions(_runtimeProperties);
 	assert( plmc->tagRam == IFFTAG('R','A','M','\0') );
 	assert( plmc->tagObjects == IFFTAG('O','B','J','D') );
 	assert( plmc->tagPerm == IFFTAG('P','E','R','M') );
@@ -711,7 +663,7 @@ Level::Level
 	assert( ValidPtr( newMemory ) );
 	_memory.Set(newMemory,&HALLmalloc);
     // Optional pre-rendered glyph catalog in RAM padding. The locator is not
-    // part of actor/LVL structures and leaves the RPRP tail locator intact.
+    // part of actor/LVL structures.
     for(unsigned off=44;off+12<=ramSize+8&&off+12<=2048;off+=4){
         uint32 locator[3];std::memcpy(locator,memoryConfigurationBytes+off,12);
         if(locator[0]!=IFFTAG('D','L','O','G'))continue;
@@ -957,10 +909,22 @@ Level::Level
 				return field != fields.end() && wfprops::readOadField(field->second, payload, payloadSize,
 				                                                       common, editableCommonSize, *pagesPtr, value);
 			};
-			model.changed = [this, index](const std::vector<uint32_t>& changed) {
+			model.changed = [this, index, applyStainedGlassLight](const std::vector<uint32_t>& changed) {
 				if (_actors[index] && IsActor(_actors[index]))
 					static_cast<Actor*>(_actors[index])->OnPropertiesChanged(changed.data(), changed.size());
+				const auto* object = _runtimeProperties.object(index);
+				if (object && object->schema == "LevelRenderSettings") applyStainedGlassLight(*object);
 			};
+			if (objdata->type == Actor::RuntimeDiagnostics_KIND) {
+				const std::map<std::string, std::string> memory = {
+					{"memory_object_heap_bytes", std::to_string(plmc->cbObjectsDRam)},
+					{"memory_permanent_asset_bytes", std::to_string(plmc->cbPerm)},
+					{"memory_room_asset_bytes", std::to_string(plmc->cbRoom)},
+					{"memory_active_room_slots", std::to_string(numActiveRoomSlots)},
+					{"memory_doom_stick", std::to_string(plmc->doomStickFlag)},
+					{"memory_bungee_camera", std::to_string(plmc->bungeeCamFlag)}};
+				model = wfoptions::diagnosticsForm(index, _editableLabels[listIndex], memory);
+			}
 			for (const auto& rejected : wfprops::launchOverrides().applyObject(model))
 				std::fprintf(stderr, "PROPERTIES launch-override rejected: %s\n", rejected.c_str());
 			if (!_runtimeProperties.add(std::move(model), error)) {
@@ -978,6 +942,21 @@ Level::Level
 
 		DBSTREAM2( cdebug << "Level::Level: Done" << std::endl; )
 	}
+	for(const std::string& rejected:wfprops::launchOverrides().apply(_runtimeProperties))
+		std::fprintf(stderr,"PROPERTIES launch-override rejected: %s\n",rejected.c_str());
+	std::string renderSettingError;
+	_renderCurrentRoomOnly = wfprops::currentRoomOnly(_runtimeProperties, renderSettingError);
+	if (!renderSettingError.empty()) std::fprintf(stderr, "ROOM-RENDER setting invalid: %s; using all-active\n", renderSettingError.c_str());
+	std::fprintf(stderr, "ROOM-RENDER scope=%s source=%s\n", _renderCurrentRoomOnly ? "current-only" : "all-active",
+	             _runtimeProperties.schema("LevelRenderSettings") ? "actor" : "default");
+	bool authoredFound=false, maximumFound=false;std::string viewError;wfview::Settings view;
+	view.authoredAspect=wfprops::aspectSetting(_runtimeProperties,"Authored aspect",authoredFound,viewError);
+	view.maximumAspect=wfprops::aspectSetting(_runtimeProperties,"Maximum aspect",maximumFound,viewError);
+	if(!viewError.empty())std::fprintf(stderr,"VIEW setting invalid: %s\n",viewError.c_str());
+	wfview::levelSettings()=view;const auto& overrides=wfview::argumentOverrides();
+	wfview::source()=(overrides.authoredAspect>=0.0f||overrides.maximumAspect>=0.0f)?"argument":(authoredFound||maximumFound)?"level":"default";
+	if(const auto* settings=_runtimeProperties.schema("LevelRenderSettings"))applyStainedGlassLight(*settings);
+	wfoptions::registerRuntimeOptions(_runtimeProperties);
 
 	if ( !_camera )
 		DBSTREAM1( cwarn << "Warning: No camera in level" << std::endl; )
@@ -1064,7 +1043,7 @@ Level::~Level()
     if(_bitmapBundle){_memory->Free(_bitmapBundle);_bitmapBundle=NULL;}
 
     if(wfprops::host().registry()==&_runtimeProperties){wfprops::host().bind(nullptr);wfprops::host().world={};
-        wfprops::host().consumer("LevelRenderSettings",{});}
+        wfprops::host().consumer("LevelRenderSettings",{});wfprops::host().consumer("RuntimeDiagnostics",{});}
     if(wfprops::activeRegistry()==&_runtimeProperties)wfprops::activeRegistry()=nullptr;
 	// HALLmalloc is a stack/bump allocator — Free must happen in strict
 	// reverse-allocation order or lmalloc.cc:308 asserts. The construction

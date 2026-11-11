@@ -1,0 +1,27 @@
+/*============================================================================*/
+/* levelrendersettings.ht: created from OADTYPES.S and levelrendersettings.oas DO NOT MODIFY */
+/*============================================================================*/
+#include <pigsys/pigsys.hp>
+#include <math/scalar.hp>
+/*      maximum value of a long int     */
+/* minimum value of a long int  */
+#ifndef levelrendersettings_HT
+#define levelrendersettings_HT
+ struct _LevelRenderSettings {
+	int32 moveblocPageOffset;                 /* offset in page data for this objects page */
+	int32 toolsetPageOffset;                 /* offset in page data for this objects page */
+	int32 commonPageOffset;                 /* offset in page data for this objects page */
+			int32 MeshName;	/* This is a packedAssetID */
+	int32 meshPageOffset;                 /* offset in page data for this objects page */
+	int32 shadowPageOffset;                 /* offset in page data for this objects page */
+	int32 TemplateObject;        /* Default: 0 */
+    int32 RoomRenderScope;               /* Minumum: 0 Maximum: 1 Default: 0 */
+    int32 Stainedglasslight;        /* Default: 0 */
+    fixed32 Authoredaspect;         /* Minumum: 0 Maximum: 6553600 */
+    Scalar GetAuthoredaspect() const { return Scalar::FromFixed32(Authoredaspect); }
+    fixed32 Maximumaspect;         /* Minumum: 0 Maximum: 6553600 */
+    Scalar GetMaximumaspect() const { return Scalar::FromFixed32(Maximumaspect); }
+};
+/*============================================================================*/
+#endif         /* levelrendersettings_HT */
+/*============================================================================*/

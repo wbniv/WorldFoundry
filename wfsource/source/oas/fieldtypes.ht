@@ -1,0 +1,43 @@
+/*============================================================================*/
+/* fieldtypes.ht: created from OADTYPES.S and fieldtypes.oas DO NOT MODIFY */
+/*============================================================================*/
+#include <pigsys/pigsys.hp>
+#include <math/scalar.hp>
+/*      maximum value of a long int     */
+/* minimum value of a long int  */
+#ifndef fieldtypes_HT
+#define fieldtypes_HT
+ struct _FieldTypes {
+	int32 moveblocPageOffset;                 /* offset in page data for this objects page */
+	int32 toolsetPageOffset;                 /* offset in page data for this objects page */
+	int32 commonPageOffset;                 /* offset in page data for this objects page */
+			int32 MeshName;	/* This is a packedAssetID */
+	int32 meshPageOffset;                 /* offset in page data for this objects page */
+	int32 shadowPageOffset;                 /* offset in page data for this objects page */
+	int32 TemplateObject;        /* Default: 0 */
+int32 intnumber;               /* Minumum: 0 Maximum: 86400 Default: 120 */
+int32 intslider;               /* Minumum: 0 Maximum: 100 Default: 65 */
+int32 intcolor;               /* Minumum: 0 Maximum: 16777215 Default: 7255750 */
+int32 intmailbox;               /* Minumum: 0 Maximum: 159 Default: 100 */
+int32 intdefault;               /* Minumum: 0 Maximum: 99 Default: 7 */
+fixed32 floatnumber;         /* Minumum: 0 Maximum: 15728640 */
+    Scalar Getfloatnumber() const { return Scalar::FromFixed32(floatnumber); }
+fixed32 floatslider;         /* Minumum: 0 Maximum: 65536 */
+    Scalar Getfloatslider() const { return Scalar::FromFixed32(floatslider); }
+int32 intreadonly;               /* Minumum: 0 Maximum: 99 Default: 7 */
+int32 inthelp;               /* Minumum: 0 Maximum: 100 Default: 75 */
+int32 enumdefault;               /* Minumum: 0 Maximum: 2 Default: 0 */
+int32 enumnumber;               /* Minumum: 0 Maximum: 3 Default: 2 */
+int32 enumdropdown;               /* Minumum: 0 Maximum: 1 Default: 0 */
+int32 enumradio;               /* Minumum: 0 Maximum: 1 Default: 0 */
+int32 enumslider;               /* Minumum: 0 Maximum: 3 Default: 1 */
+int32 enumtoggle;               /* Minumum: 0 Maximum: 1 Default: 0 */
+int32 enumcombo;               /* Minumum: 0 Maximum: 2 Default: 0 */
+int32 enummany;               /* Minumum: 0 Maximum: 11 Default: 3 */
+int32 enumlong;               /* Minumum: 0 Maximum: 2 Default: 0 */
+int32 boolcheckbox;               /* Minumum: 0 Maximum: 1 Default: 1 */
+int32 booltoggle;               /* Minumum: 0 Maximum: 1 Default: 1 */
+};
+/*============================================================================*/
+#endif         /* fieldtypes_HT */
+/*============================================================================*/

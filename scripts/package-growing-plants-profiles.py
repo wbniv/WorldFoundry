@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Package matched plant snapshots using one native binary, with archived identities."""
 import argparse,hashlib,json,subprocess,zipfile
-from plant_settings_catalog import configure_cd,require_catalog_runtime,reject_removed_arguments
+from plant_settings_actor import configure_cd,require_actor_runtime,reject_removed_arguments
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('--apk',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
@@ -21,7 +21,7 @@ old_cd=a.out/'old-static-menu.iff'
 subprocess.run([str(ROOT/'wftools/cdpack-rs/target/release/cdpack'),str(ROOT/'wfsource/source/game/shell-menu.fth'),'--manifest',str(manifest),'-o',str(old_cd)],check=True)
 old=old_cd.read_bytes()
 with zipfile.ZipFile(a.apk) as frozen:
- require_catalog_runtime(frozen);current=frozen.read('assets/cd.iff')
+ require_actor_runtime(frozen);current=frozen.read('assets/cd.iff')
  runtime_args=frozen.read('assets/wf_args.txt').decode() if 'assets/wf_args.txt' in frozen.namelist() else ''
  reject_removed_arguments(runtime_args)
 buildtools=Path('/home/will/android-sdk-local/build-tools/34.0.0')

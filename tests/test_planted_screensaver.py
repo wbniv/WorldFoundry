@@ -12,10 +12,12 @@ from pathlib import Path
 import re
 import struct
 import subprocess
+import sys
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
 LEVEL = ROOT / "wflevels/planted_tank_screensaver"
 LEV = LEVEL / "planted_tank_screensaver.lev"
 STANDALONE = ROOT / "wflevels/planted_tank_screensaver-standalone.iff"
@@ -112,59 +114,17 @@ def test_end_of_level_is_only_ever_written_with_one():
 
 # --- The catalog -------------------------------------------------------------------------
 
-def test_settings_sources_drop_seahorses_and_add_hold():
-    bindings = json.loads((LEVEL / "settings-bindings.json").read_text())
-    fields = bindings["fields"]
-    assert bindings["owner"] == "Director"
-    assert {k: v["id"] for k, v in fields.items()} == {
-        "Seed": 1, "Water type": 2, "Growth speed": 3, "Initial age": 4, "Textures": 5,
-        "Sway": 6, "Random seed on entry": 7, "Hold seconds": 10}
-    assert not fields["Hold seconds"].get("readonly")
-    oas = "\n".join(line for line in (LEVEL / "settings.oas").read_text().splitlines()
-                    if not line.startswith("@*"))
-    assert "TYPEHEADER(PlantedTankSettings)" in oas
+def test_settings_actor_has_screensaver_hold():
+    oas = (ROOT / "wfsource/source/oas/plantedtanksettings.oas").read_text()
+    assert "PROPERTY_SHEET_HEADER(Screensaver,0)" in oas
     assert re.search(r"TYPEENTRYINT32\(Hold seconds,,0,86400,120,", oas)
-    assert "Seahorses" not in oas and "Greeting" not in oas
-
-
-def _catalog_fields(level: bytes):
-    """Decode the RP01 catalog appended by build-object-properties.py."""
-    start = level.index(b"RP01")
-    data = memoryview(level)[start:]
-    pos = 12
-
-    def string():
-        nonlocal pos
-        n = struct.unpack_from("<I", data, pos)[0]
-        pos += 4
-        value = bytes(data[pos:pos + n]).decode()
-        pos += n
-        return value
-
-    schema, _title = string(), string()
-    fields = {}
-    count = struct.unpack_from("<I", data, pos)[0]
-    pos += 4
-    for _ in range(count):
-        fid, kind, _show, readonly, _rule, low, high = struct.unpack_from("<IBBBBii", data, pos)
-        pos += struct.calcsize("<IBBBBiiIII")
-        key, _label, _help, _group, _choices, initial = (string() for _ in range(6))
-        fields[key] = dict(id=fid, kind=kind, readonly=bool(readonly), min=low, max=high, initial=initial)
-    return schema, fields
+    assert "PlantedTankSettings" in json.loads((LEVEL / "actor-map.json").read_text())["indices"]
 
 
 @pytest.mark.skipif(not STANDALONE.is_file(), reason="build wflevels/planted_tank_screensaver first")
-def test_standalone_level_carries_the_catalog():
+def test_standalone_level_carries_the_actor_descriptor():
     level = STANDALONE.read_bytes()
-    builder.check_catalog(level)
-    schema, fields = _catalog_fields(level)
-    assert schema == "PlantedTankSettings"
-    stored = {k: v for k, v in fields.items() if v["id"] and v["id"] < 100}
-    assert {k: v["id"] for k, v in stored.items()} == {
-        "Seed": 1, "Water type": 2, "Growth speed": 3, "Initial age": 4, "Textures": 5,
-        "Sway": 6, "Random seed on entry": 7, "Hold seconds": 10}
-    hold = stored["Hold seconds"]
-    assert (hold["kind"], hold["readonly"], hold["min"], hold["max"], hold["initial"]) == (0, False, 0, 86400, "120")
+    assert b"RPRP" not in level and b"Hold seconds" in level
 
 
 def _toc(bundle: bytes):
@@ -176,7 +136,7 @@ def _toc(bundle: bytes):
 def test_bundle_holds_exactly_one_level():
     bundle = BUNDLE.read_bytes()
     assert _toc(bundle) == [b"SHEL", b"L4\0\0", b"UIFT"]
-    assert bundle.count(b"PlantedTankSettings") == 1 and b"Hold seconds" in bundle
+    assert b"RPRP" not in bundle and b"Hold seconds" in bundle
 
 
 # --- The Director cycle in zForth --------------------------------------------------------
@@ -193,9 +153,10 @@ def test_cycle_constants_mirror_planted_tick():
     assert SPEEDS == [0, .25, .5, 1, 2, 4, 8]
     script = director_script()
     for word, value in (("pt-stall", "0.2"), ("pt-max-age", "240"), ("pt-bound", "195"),
-                        ("pt-hold-default", "120"), ("pt-hold-max", "86400"), ("pt-director", "4"),
-                        ("pt-speed-field", "3"), ("pt-age-field", "4"), ("pt-hold-field", "10")):
+                        ("pt-hold-default", "120"), ("pt-hold-max", "86400")):
         assert f": {word} {value} ;" in script, word
+    owner = json.loads((LEVEL / "actor-map.json").read_text())["indices"]["PlantedTankSettings"]
+    assert f": pt-director {owner} ;" in script
 
 
 @pytest.fixture(scope="session")
@@ -251,7 +212,9 @@ class Tank:
         assert self.h.load(path) == "ok"
         self.time = 0.0
         if catalog:
-            for field, value in ((3, speed_index), (4, age)):
+            speed = int(re.search(r": pt-speed-field (\d+) ;", script).group(1))
+            age_field = int(re.search(r": pt-age-field (\d+) ;", script).group(1))
+            for field, value in ((speed, speed_index), (age_field, age)):
                 self.h.write(FIELD + field, value)
                 self.h.write(VALID + field, 1)
             self.set_hold(hold)

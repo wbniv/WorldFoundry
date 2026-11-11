@@ -11,7 +11,7 @@
 @*		PROPERTY_SHEET_HEADER(...)
 @*
 @* This file is an include only. Never register a type named Settings in
-@* objects.mac: the RP01 runtime options already use that name (R5).
+@* objects.mac: runtime diagnostics use their own actor.
 @*
 @* The defaults below must come before actor.inc, because actor.inc and the
 @* blocks it includes take each one only when it isn't defined yet. They make

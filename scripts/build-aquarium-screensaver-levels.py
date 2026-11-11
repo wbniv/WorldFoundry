@@ -61,63 +61,31 @@ def player_script(level_text: str, tank: str, driver: str) -> str:
     return "\t{ 'OBJ'".join(blocks)
 
 
-def check_tank_catalog(level: bytes, tank: str) -> None:
-    """Verify the tank variant carries its canonical settings catalog."""
-    # Two RPRP tags make one catalog: the RAM chunk's reference and the chunk itself
-    # (build-object-properties.py attach()), as in aquarium_plants-standalone.iff.
-    if tank == "aquarium_jellyfish_screensaver":
-        schema = b"JellyfishSettings"
-        keys = (b"Pulse tempo", b"Stroke strength", b"Companions", b"Jellyfish size")
-    elif tank in ("aquarium_thai_reef_screensaver", "aquarium_thai_reef_anime_screensaver"):
-        schema = b"ReefSettings"
-        keys = (b"Layout", b"Rocks", b"Colonies", b"Seed")
+def check_actor_settings(level: bytes, tank: str) -> None:
+    """Check that the compiled variant uses actor descriptors and no catalog."""
+    if b"RPRP" in level:
+        raise ValueError(f"{tank}: unexpected RPRP catalog")
+    expected = {"aquarium_plants": b"Hold seconds", "aquarium_jellyfish": b"Pulse tempo",
+                "aquarium_thai_reef": b"Colonies", "aquarium_thai_reef_anime": b"Colonies"}.get(tank)
+    if expected is not None and expected not in level:
+        raise ValueError(f"{tank}: missing settings actor descriptor")
+
+
+def planted_saltwater_variant(level_text: str) -> str:
+    """Give the Planted Urchin Dream its authored saltwater setting."""
+    blocks = level_text.split("\t{ 'OBJ'")
+    settings_blocks = [i for i, block in enumerate(blocks) if re.search(r"\{ 'NAME' \"PlantedTankSettings\" \}", block)]
+    if len(settings_blocks) != 1:
+        raise ValueError("aquarium_plants: expected one settings actor")
+    i = settings_blocks[0]
+    water = r"\{ 'I32'\s+\{ 'NAME' \"Water type\" \}.*?\}\s*\}"
+    setting = "{ 'I32' { 'NAME' \"Water type\" } { 'DATA' 1l } }"
+    if re.search(water, blocks[i]):
+        blocks[i] = re.sub(water, lambda _: setting, blocks[i], count=1)
     else:
-        schema = b"PlantedTankSettings"
-        keys = (b"Seed", b"Water type", b"Growth speed", b"Initial age", b"Textures", b"Sway",
-                b"Random seed on entry", b"Seahorses", b"Greeting")
-    if level.count(b"RPRP") != 2 or level.count(schema) != 1:
-        raise ValueError(f"{tank}: expected one {schema.decode()} RPRP catalog")
-    for key in keys:
-        if key not in level:
-            raise ValueError(f"{tank}: catalog field {key.decode()} missing")
-    # The Planted Tank flavor's hold-then-reload cycle does not exist in the Aquarium.
-    if b"Hold seconds" in level:
-        raise ValueError(f"{tank}: catalog has the Hold seconds field")
-
-
-def attach_catalog(tank: str) -> bool:
-    """Attach the canonical tank's settings catalog (RPRP) to its screensaver variant.
-
-    The variant swaps only the Player's script, so the canonical's OAS, bindings and actor map
-    apply as they are; the actor indices are checked against the variant's own .lev. Tanks
-    without a settings-bindings.json have no catalog and are left alone. Rebuilding replaces
-    the catalog already in the standalone (build-object-properties.py attach()), so this must
-    run on the variant's -standalone.iff before cdpack packs the bundle.
-    """
-    source = LEVELS / tank
-    bindings_path = source / "settings-bindings.json"
-    if not bindings_path.is_file():
-        return False
-    target_name = tank + "_screensaver"
-    target = LEVELS / target_name
-    standalone = LEVELS / (target_name + "-standalone.iff")
-    indices = json.loads((source / "actor-map.json").read_text())["indices"]
-    blocks = (target / (target_name + ".lev")).read_text().split("\t{ 'OBJ'")
-    for name, index in indices.items():
-        if index >= len(blocks) or not re.search(r"\{ 'NAME' \"" + re.escape(name) + r"\" \}", blocks[index]):
-            raise ValueError(f"{target_name}: actor {name} is not object {index}; the canonical actor map does not fit")
-    oad = target / "settings.oad"
-    subprocess.run([str(ROOT / "wftools/oas2oad-rs/target/release/oas2oad"),
-                    f"--types={ROOT / 'wfsource/source/oas/types3ds.s'}",
-                    f"--prep={ROOT / 'wftools/prep/prep'}",
-                    "-o", str(oad), str(source / "settings.oas")], cwd=ROOT, check=True)
-    subprocess.run(["python3", "scripts/build-object-properties.py",
-                    "--oad", str(oad), "--bindings", str(bindings_path),
-                    "--actor-map", str(source / "actor-map.json"),
-                    "--out", str(target / "settings.rprp"),
-                    "--level", str(standalone)], cwd=ROOT, check=True)
-    check_tank_catalog(standalone.read_bytes(), target_name)
-    return True
+        marker = "{ 'NAME' \"PlantedTankSettings\" }"
+        blocks[i] = blocks[i].replace(marker, marker + "\n\t\t" + setting, 1)
+    return "\t{ 'OBJ'".join(blocks)
 
 
 def build(tank: str) -> Path:
@@ -132,7 +100,10 @@ def build(tank: str) -> Path:
     source_lev = source / (tank + ".lev")
     if not source_lev.is_file():
         raise FileNotFoundError(f"{source_lev}: build the canonical tank first")
-    (target / (target_name + ".lev")).write_text(player_script(source_lev.read_text(), tank, driver))
+    level_text = player_script(source_lev.read_text(), tank, driver)
+    if tank == "aquarium_plants":
+        level_text = planted_saltwater_variant(level_text)
+    (target / (target_name + ".lev")).write_text(level_text)
     wrapper = (source / (tank + "-standalone.iff.txt")).read_text()
     old_ref, new_ref = f'"../{tank}.iff"', f'"../{target_name}.iff"'
     if old_ref not in wrapper:
@@ -142,7 +113,7 @@ def build(tank: str) -> Path:
     (target / ".gitignore").write_text("# Generated screensaver level and linked assets\n*\n")
     subprocess.run(["bash", "wftools/wf_blender/build_level_binary.sh", target_name],
                    cwd=ROOT, check=True)
-    attach_catalog(tank)
+    check_actor_settings((LEVELS / (target_name + "-standalone.iff")).read_bytes(), tank)
     return LEVELS / (target_name + "-standalone.iff")
 
 
@@ -193,23 +164,8 @@ def check_planted(level_text: str, actor_map: dict, asset_inc: str) -> None:
         raise ValueError(f"{PLANTED}: END_OF_LEVEL must only be written with 1, found {writes}")
 
 
-def check_catalog(level: bytes) -> None:
-    """One RPRP catalog: PlantedTankSettings with Hold seconds and no seahorse fields."""
-    # Two RPRP tags make one catalog: the RAM chunk's reference and the chunk itself
-    # (build-object-properties.py attach()), as in aquarium_plants-standalone.iff.
-    if level.count(b"RPRP") != 2 or level.count(b"PlantedTankSettings") != 1:
-        raise ValueError(f"{PLANTED}: expected one PlantedTankSettings RPRP catalog")
-    for key in (b"Seed", b"Water type", b"Growth speed", b"Initial age", b"Textures", b"Sway",
-                b"Random seed on entry", b"Hold seconds"):
-        if key not in level:
-            raise ValueError(f"{PLANTED}: catalog field {key.decode()} missing")
-    for key in (b"Seahorses", b"Greeting"):
-        if key in level:
-            raise ValueError(f"{PLANTED}: catalog has the {key.decode()} field")
-
-
 def build_planted() -> Path:
-    """The Planted Tank screensaver: its own plants-only level, no driver swap, its catalog."""
+    """Build the plants-only screensaver and its actor-derived provider metadata."""
     source = LEVELS / PLANTED
     lev = source / (PLANTED + ".lev")
     if not lev.is_file():
@@ -217,23 +173,16 @@ def build_planted() -> Path:
     subprocess.run(["bash", "wftools/wf_blender/build_level_binary.sh", PLANTED], cwd=ROOT, check=True)
     check_planted(lev.read_text(), json.loads((source / "actor-map.json").read_text()),
                   (source / "asset.inc").read_text() if (source / "asset.inc").is_file() else "")
-    oad = source / "settings.oad"
-    subprocess.run([str(ROOT / "wftools/oas2oad-rs/target/release/oas2oad"),
-                    f"--types={ROOT / 'wfsource/source/oas/types3ds.s'}",
-                    f"--prep={ROOT / 'wftools/prep/prep'}",
-                    "-o", str(oad), str(source / "settings.oas")], cwd=ROOT, check=True)
     standalone = LEVELS / (PLANTED + "-standalone.iff")
-    subprocess.run(["python3", "scripts/build-object-properties.py",
-                    "--oad", str(oad), "--bindings", str(source / "settings-bindings.json"),
-                    "--actor-map", str(source / "actor-map.json"),
-                    "--out", str(source / "settings.rprp"),
-                    "--include", str(source / "settings-catalog.inc"),
-                    "--level", str(standalone)], cwd=ROOT, check=True)
-    check_catalog(standalone.read_bytes())
-    # RP01 carries each Settings owner and its OAD-derived fields. Generate the
-    # provider asset from that exact catalog rather than a second field list.
+    if b"RPRP" in standalone.read_bytes():
+        raise ValueError(f"{PLANTED}: unexpected RPRP catalog")
+    # The provider advertises the same OAD fields as the runtime actor.
     subprocess.run(["python3", "scripts/gen-settings-capabilities.py",
-                    "--rprp", str(source / "settings.rprp"), "--out",
+                    "--oad", str(ROOT / "wfsource/source/oas/plantedtanksettings.oad"),
+                    "--inherited-oad", str(ROOT / "wfsource/source/oas/actor.oad"),
+                    "--actor-map", str(source / "actor-map.json"), "--actor-name", "PlantedTankSettings",
+                    "--type", "PlantedTankSettings", "--title", "Planted Tank Screensaver",
+                    "--exclude", "Seahorses", "--exclude", "Greeting", "--out",
                     str(ROOT / "android/screensaver/src/planted/assets/planted-settings.json")],
                    cwd=ROOT, check=True)
     subprocess.run([str(ROOT / "wftools/cdpack-rs/target/release/cdpack"),

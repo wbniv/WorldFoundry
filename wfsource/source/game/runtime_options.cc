@@ -137,10 +137,10 @@ void surfaceSize(int width,int height){surfaceWidth=width;surfaceHeight=height;}
 void registerRuntimeOptions(wfprops::Registry& registry){
     for(auto actor:registry.editableObjects()){
         const auto* object=registry.object(actor);
-        if(!object||object->schema!="Settings")continue;
+        if(!object||object->schema!="RuntimeDiagnostics")continue;
         for(const auto& field:object->fields){
             if(field.id>=1000&&field.id<1200&&field.key.compare(0,8,"runtime_")==0){
-                install(registry,Backend{read,prepare,apply});
+                install(registry,Backend{read,prepare,apply},object->schema);
                 return;
             }
         }

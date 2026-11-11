@@ -1,41 +1,16 @@
 #!/usr/bin/env python3
-"""Turn an OAD-derived RP01 settings catalog into a provider capabilities asset.
-
-RP01 already records every owner, its type, and the fields compiled from its OAD.
-Reading that catalog keeps multiple Settings objects distinct and avoids an
-application-specific list of exposed fields.
-"""
+"""Generate a provider capabilities asset from an actor OAD."""
 import argparse
 from decimal import Decimal
 import json
 from pathlib import Path
-import struct
+import subprocess
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 class CatalogError(ValueError):
     pass
-
-
-class Reader:
-    def __init__(self, data):
-        self.data = memoryview(data)
-        self.pos = 0
-
-    def take(self, length):
-        if length < 0 or self.pos + length > len(self.data):
-            raise CatalogError("truncated RP01 catalog")
-        chunk = self.data[self.pos:self.pos + length]
-        self.pos += length
-        return chunk
-
-    def unpack(self, fmt):
-        return struct.unpack(fmt, self.take(struct.calcsize(fmt)))
-
-    def string(self):
-        length, = self.unpack("<I")
-        if length > 65536:
-            raise CatalogError("oversized RP01 string")
-        return bytes(self.take(length)).decode("utf-8")
 
 
 def _number(raw, scale):
@@ -50,7 +25,7 @@ def _field(record):
     if not 1 <= fid <= 32767 or kind in (9, 10):
         return None  # A sheet/group marker or an action, not a setting field.
     if show == 6:
-        raise CatalogError(f"hidden field {key} should not be in RP01")
+        raise CatalogError(f"hidden field {key} cannot be exposed")
     setting = {"id": str(fid), "key": key, "label": label or key,
                "show": show, "value": initial, "readonly": bool(readonly)}
     if group:
@@ -84,49 +59,45 @@ def _field(record):
     return setting
 
 
-def capabilities(payload):
-    reader = Reader(payload)
-    if bytes(reader.take(4)) != b"RP01":
-        raise CatalogError("missing RP01 header")
-    count, = reader.unpack("<I")
-    if not 1 <= count <= 64:
-        raise CatalogError("invalid Settings owner count")
-    objects = []
-    seen_owners = set()
-    for _ in range(count):
-        owner, = reader.unpack("<I")
-        type_name, title = reader.string(), reader.string()
-        if owner in seen_owners or not 1 <= len(type_name) <= 96:
-            raise CatalogError("duplicate owner or invalid catalog type")
-        seen_owners.add(owner)
-        field_count, = reader.unpack("<I")
-        if field_count > 1024:
-            raise CatalogError("oversized Settings field count")
-        settings = []
-        ids = set()
-        for _ in range(field_count):
-            head = reader.unpack("<IBBBBiiIII")
-            strings = tuple(reader.string() for _ in range(6))
-            entry = _field(head + strings)
-            if entry is None:
-                continue
-            if entry["id"] in ids:
-                raise CatalogError(f"{type_name}: duplicate field {entry['id']}")
-            ids.add(entry["id"])
-            settings.append(entry)
-        objects.append({"owner": owner, "type": type_name, "title": title,
-                        "settings": settings})
-    if reader.pos != len(reader.data):
-        raise CatalogError("trailing RP01 bytes")
-    return {"schema": 2, "objects": objects}
+def capabilities_oad(oad, inherited, actor, type_name, title, excluded=()):
+    """Build one provider owner from the same actor descriptor used at runtime."""
+    prefix = inherited.read_bytes()
+    if len(prefix) < 80 or (len(prefix) - 80) % 1491:
+        raise CatalogError("invalid inherited OAD")
+    first = (len(prefix) - 80) // 1491
+    normalized = json.loads(subprocess.check_output(
+        [str(ROOT/'wftools/wf_attr_edit/target/release/catalog'), str(oad)], text=True))
+    kinds = {'Int': 0, 'Float': 1, 'Enum': 2, 'Bool': 4}
+    settings = []
+    for field in normalized['fields']:
+        if field['index'] < first or field['key'] in excluded or field['kind'] not in kinds or field['show'] == 6:
+            continue
+        kind = kinds[field['kind']]
+        initial = _number(field['default'], field['scale']) if kind == 1 else str(field['default'])
+        record = (field['index'], kind, field['show'], not field['live'], 0,
+                  field['min'], field['max'], field['scale'], field['width'], 256,
+                  field['key'], field['label'], field['help'], field['group'], field['choices'], initial)
+        setting = _field(record)
+        if setting is not None:
+            settings.append(setting)
+    return {'schema': 2, 'objects': [{'owner': actor, 'type': type_name, 'title': title, 'settings': settings}]}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--rprp", type=Path, required=True)
+    parser.add_argument("--oad", type=Path, required=True)
+    parser.add_argument("--inherited-oad", type=Path)
+    parser.add_argument("--actor-map", type=Path)
+    parser.add_argument("--actor-name")
+    parser.add_argument("--type")
+    parser.add_argument("--title")
+    parser.add_argument("--exclude", action="append", default=[])
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
-    document = capabilities(args.rprp.read_bytes())
+    if not all((args.inherited_oad, args.actor_map, args.actor_name, args.type, args.title)):
+        parser.error("--oad requires --inherited-oad, --actor-map, --actor-name, --type and --title")
+    actor = json.loads(args.actor_map.read_text())['indices'][args.actor_name]
+    document = capabilities_oad(args.oad, args.inherited_oad, actor, args.type, args.title, args.exclude)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     temporary = args.out.with_suffix(args.out.suffix + ".tmp")
     temporary.write_text(json.dumps(document, separators=(",", ":")) + "\n")

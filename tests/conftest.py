@@ -89,7 +89,6 @@ BUILD_OUTPUTS = {
     "wf_attr_edit/target/release/catalog": "task build-test-tools",
     "oas2oad-rs/target/release/oas2oad": "task build-test-tools",
     "cdpack-rs/target/release/cdpack": "task build-test-tools",
-    "planted_tank_screensaver/settings.rprp": "task build-planted-level",
 }
 _module_needs: dict = {}
 

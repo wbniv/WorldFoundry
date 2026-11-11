@@ -52,6 +52,11 @@
         Dir_KIND,
 
         PlantedTankSettings_KIND,
+        JellyfishSettings_KIND,
+        ReefSettings_KIND,
+        RuntimeDiagnostics_KIND,
+        FieldTypes_KIND,
+        LevelRenderSettings_KIND,
 
 
 

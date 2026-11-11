@@ -1,19 +1,10 @@
 #include "runtime_properties.hpp"
 #include "runtime_property_presentation.hpp"
 #include <algorithm>
-#include <cstring>
 #include <limits>
 
 extern "C" int wf_attr_check(uint32_t,int32_t,int32_t,uint32_t,uint32_t,uint32_t,uint32_t,const uint8_t*,size_t,const uint8_t*,size_t);
 namespace wfprops {
-namespace {
-struct Reader {
-    const uint8_t* p;size_t left;bool valid=true;
-    uint32_t number(){if(left<4){valid=false;return 0;}uint32_t n=uint32_t(p[0])|uint32_t(p[1])<<8|uint32_t(p[2])<<16|uint32_t(p[3])<<24;p+=4;left-=4;return n;}
-    uint8_t byte(){if(!left){valid=false;return 0;}--left;return *p++;}
-    std::string text(){uint32_t n=number();if(!valid||n>left||n>65536){valid=false;return {}; }std::string s(reinterpret_cast<const char*>(p),n);p+=n;left-=n;return s;}
-};
-}
 const Field* Object::field(uint32_t id) const {for(const auto& f:fields)if(f.id==id&&f.stored())return &f;return nullptr;}
 const std::string* Object::get(uint32_t id) const {auto i=values.find(id);return i==values.end()?nullptr:&i->second;}
 bool Object::readValue(uint32_t id,std::string& value) const {if(read)return read(id,value);const auto* current=get(id);if(!current)return false;value=*current;return true;}
@@ -21,25 +12,6 @@ bool Object::refresh(){if(!read)return true;auto updated=values;for(auto& item:u
 Registry*& activeRegistry(){static Registry* registry=nullptr;return registry;}
 int validate(const Field& f,const std::string& v){if(f.kind==8)return v==f.initial?0:1;if(presentation(f)==Control::Path&&!relativePath(v))return 6;return wf_attr_check(f.kind,f.minimum,f.maximum,f.scale,f.width,f.maxLength,f.rule,reinterpret_cast<const uint8_t*>(f.choices.data()),f.choices.size(),reinterpret_cast<const uint8_t*>(v.data()),v.size());}
 const char* validationMessage(int s){switch(s){case 1:return "Enter a valid value for this field";case 2:return "Value is outside the field range";case 3:return "Choose one of the listed values";case 4:return "Text is too long";case 5:return "Enter a seed from 0 to 4294967295";case 6:return "Enter a relative path: names separated by /";default:return "Invalid property value";}}
-bool Registry::load(const uint8_t* data,size_t size,std::string& error){
-    if(size<8||std::memcmp(data,"RP01",4)){error="Unsupported property catalog";return false;}
-    Reader r{data+4,size-4};uint32_t count=r.number();if(count>4096){error="Too many property objects";return false;}
-    std::map<uint32_t,Object> loaded;
-    for(uint32_t i=0;i<count&&r.valid;i++){
-        Object o;o.actor=r.number();o.schema=r.text();o.title=r.text();o.generation=++serial_;
-        uint32_t n=r.number();if(!o.actor||n>16384||loaded.count(o.actor)){r.valid=false;break;}
-        for(uint32_t j=0;j<n&&r.valid;j++){
-            Field f;f.id=r.number();f.kind=r.byte();f.show=r.byte();f.readonly=r.byte();f.rule=r.byte();
-            f.minimum=int32_t(r.number());f.maximum=int32_t(r.number());f.scale=r.number();f.width=r.number();f.maxLength=r.number();
-            f.key=r.text();f.label=r.text();f.help=r.text();f.group=r.text();f.choices=r.text();f.initial=r.text();
-            if(f.kind>10||f.id>32767||(f.stored()&&(!f.id||o.values.count(f.id)||validate(f,f.initial)))){r.valid=false;break;}
-            if(f.stored())o.values[f.id]=f.initial;
-            o.fields.push_back(std::move(f));
-        }loaded.emplace(o.actor,std::move(o));
-    }
-    if(!r.valid||r.left){error="Malformed property catalog";return false;}
-    objects_=std::move(loaded);error.clear();return true;
-}
 bool Registry::add(Object object,std::string& error){
     if(!object.actor||objects_.count(object.actor)){error="Duplicate or invalid property object";return false;}
     std::map<uint32_t,bool> seen;

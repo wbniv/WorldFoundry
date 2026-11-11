@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import random
 import re
+import subprocess
 import sys
 import addon_utils
 import bpy
@@ -396,6 +397,17 @@ cam['wf_FoggingColor']=0x102b40;cam['wf_FoggingStartDistance']=fog_start;cam['wf
 bpy.data.objects['Matte']['wf_Matte Type']='Color';bpy.data.objects['Matte']['wf_Background Color']=0x09141e
 room=bpy.data.objects['Room'];room.location=(0,0,0);box_fields(room,(-60,-70,-6,60,30,40) if C.KIND=='arowana' else (-25,-30,-6,25,10,18))
 
+if C.KIND in ('plants','jellyfish'):
+    settings_name='PlantedTankSettings' if C.KIND=='plants' else 'JellyfishSettings'
+    settings=bpy.data.objects.new(settings_name,None)
+    bpy.context.scene.collection.objects.link(settings)
+    settings['wf_schema_path']=str(REPO/'wfsource/source/oas'/f'{settings_name.lower()}.oad')
+    settings['wf_Model Type']='None'
+    settings['wf_Mass']=0.0
+    box_fields(settings,(-.1,-.1,-.1,.1,.1,.1))
+    normalized=json.loads(subprocess.check_output([str(REPO/'wftools/wf_attr_edit/target/release/catalog'),settings['wf_schema_path']],text=True))
+    settings_fields={field['key']:field['index'] for field in normalized['fields'] if field['width']}
+
 objects=[o for o in bpy.context.scene.objects if o.get('wf_schema_path')]
 indices={o.name:i+1 for i,o in enumerate(objects)}
 mailboxes={n:600+i for i,n in enumerate(['init','phase','heading','prev','mode','dart','cooldown','dx','dy','dz',
@@ -409,7 +421,10 @@ for n,v in {'player':indices['Player'],'touch':int(PROFILE=='touch'),'jelly':int
             'limit-x':LIMIT_X,'limit-y':LIMIT_Y,'bottom':C.BOTTOM,'top':C.TOP,'speed':C.SPEED,
             'focus-z':C.CLOSE_LOOK[2],'cam-close':indices['cs_close'],'cam-wide':indices['cs_wide']}.items():header+=word(n,v)
 if C.KIND!='plants':header+=species.header(C.KIND)
-if C.KIND=='jellyfish':header+=f': j-settings-owner {indices["Director"]} ; : j-visible-count 1790 ;\n'
+if C.KIND=='jellyfish':
+    header+=f': j-settings-owner {indices["JellyfishSettings"]} ; : j-visible-count 1790 ;\n'
+    for name,key in [('tempo-field','Pulse tempo'),('strength-field','Stroke strength'),('companions-field','Companions'),('size-field','Jellyfish size')]:
+        header+=f': j-{name} {settings_fields[key]} ;\n'
 core=(COMMON/'controller.fth').read_text().replace('\\ SPECIES_CONTROLLER',species.controller(C.KIND))
 if BETTA_FINS:
     header+=': bf-drive 660 ; : bf-turn 661 ; : bf-last-yaw 662 ; : bf-swim-phase 663 ; : bf-pect-phase 664 ; : bf-sweep 665 ; : bf-spread 666 ;\n'
@@ -526,7 +541,7 @@ if C.KIND=='plants':
     if os.environ.get('PLANTED_TANK_DETAIL','runtime')=='runtime':
         core=core.replace("  JOYSTICK_BUTTON_A tk-edge tk-neutral tk@ not & if 1 tk-camera tk@ - tk-camera tk! then", "  \\ Camera taps and settings holds are handled by the native plant settings.")
     core=core.replace(': tk-player-tick',': tk-urchin-player-tick')
-    header+=f': pg-salt {indices["Director"]} 2 property@ if else drop 0 then ;\n'
+    header+=f': pg-salt {indices["PlantedTankSettings"]} {settings_fields["Water type"]} property@ if else drop 0 then ;\n'
     if ANIMALS:
         header+=': gb-ceiling 4.35 ; : gb-limit tk-limit-x ;\n'
         core+=': gb@ read-mailbox ;\n'+goby.perch_forth(C.ROCKS,SAND,C.BOTTOM)
@@ -547,7 +562,7 @@ if C.KIND=='plants':
         core+=(COMMON/'urchin_spines.fth').read_text()
         posts_forth=seahorse.posts_forth()
         (HERE/'seahorse_posts.fth').write_text(posts_forth)
-        core+=posts_forth+seahorse.clips_forth()+seahorse.behaviour_source(indices['Director'],COMMON)
+        core+=posts_forth+seahorse.clips_forth()+seahorse.behaviour_source(indices['PlantedTankSettings'],COMMON,settings_fields['Seahorses'],settings_fields['Greeting'])
         for k,(obj,index,offset,rest_b,rest_c) in enumerate(urchin_spines):
             tick+=f' {num(offset[0])} {num(offset[1])} {num(offset[2])} {num(rest_b)} {num(rest_c)} {num(4.1+k*.41)} {1 if k%2==0 else -1} {k} {indices[obj.name]} us-spine\n'
         tick+=sh_salt
@@ -563,10 +578,9 @@ if C.KIND=='plants':
         # The screensaver stays on the wide shot: the Dream takes no input.
         tick=": tk-director-tick\n tk-cam-wide INDEXOF_CAMSHOT tk!\n"
         assert os.environ.get('PLANTED_TANK_DETAIL','runtime')=='runtime','the grow/hold cycle needs runtime plants'
-        # Grow/hold/end cycle (planted_cycle.fth); field ids come from this level's bindings.
-        fields=json.loads((HERE/'settings-bindings.json').read_text())['fields']
-        cycle={'pt-director':indices['Director'],'pt-speed-field':fields['Growth speed']['id'],
-               'pt-age-field':fields['Initial age']['id'],'pt-hold-field':fields['Hold seconds']['id'],
+        # Grow/hold/end cycle uses the actor's OAD descriptor indices.
+        cycle={'pt-director':indices['PlantedTankSettings'],'pt-speed-field':settings_fields['Growth speed'],
+               'pt-age-field':settings_fields['Initial age'],'pt-hold-field':settings_fields['Hold seconds'],
                'pt-bound':C.MATURITY_BOUND,'pt-max-age':240,'pt-stall':.2,
                'pt-hold-default':C.HOLD_SECONDS,'pt-hold-max':86400,'pt-level-to-run':5000,
                'pt-clock':730,'pt-holding':731,'pt-hold':732,'pt-hold-begin':733,'pt-ended':734}

@@ -1,0 +1,25 @@
+/*============================================================================*/
+/* reefsettings.ht: created from OADTYPES.S and reefsettings.oas DO NOT MODIFY */
+/*============================================================================*/
+#include <pigsys/pigsys.hp>
+#include <math/scalar.hp>
+/*      maximum value of a long int     */
+/* minimum value of a long int  */
+#ifndef reefsettings_HT
+#define reefsettings_HT
+ struct _ReefSettings {
+	int32 moveblocPageOffset;                 /* offset in page data for this objects page */
+	int32 toolsetPageOffset;                 /* offset in page data for this objects page */
+	int32 commonPageOffset;                 /* offset in page data for this objects page */
+			int32 MeshName;	/* This is a packedAssetID */
+	int32 meshPageOffset;                 /* offset in page data for this objects page */
+	int32 shadowPageOffset;                 /* offset in page data for this objects page */
+	int32 TemplateObject;        /* Default: 0 */
+    int32 Layout;               /* Minumum: 0 Maximum: 1 Default: 1 */
+    int32 Rocks;               /* Minumum: 1 Maximum: 5 Default: 3 */
+    int32 Colonies;               /* Minumum: 0 Maximum: 2 Default: 1 */
+    int32 Seed;               /* Minumum: 0 Maximum: 16777215 Default: 0 */
+};
+/*============================================================================*/
+#endif         /* reefsettings_HT */
+/*============================================================================*/
