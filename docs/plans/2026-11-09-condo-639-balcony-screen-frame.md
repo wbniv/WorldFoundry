@@ -1,6 +1,6 @@
 # Condo 639 back balcony: fixed screen frame with pop-out panels
 
-9 November 2026 · **Being built** (Will, 2026‑11‑08). This is the plan for the balcony opening from now on. The earlier options, a motorised zip screen (plan A) and a glazed bi-fold window (plan B), are archived in the [balcony shade plan](2026-09-30-condo-balcony-shade.md), which also holds the game's level model of the balcony.
+9 November 2026 · **Ordered** (Will, 2026‑11‑08); **the shop has not started cutting** (Will, 2026‑11‑11), so the v3 sheet can still set the rail profiles. This is the plan for the balcony opening from now on. The earlier options, a motorised zip screen (plan A) and a glazed bi-fold window (plan B), are archived in the [balcony shade plan](2026-09-30-condo-balcony-shade.md), which also holds the game's level model of the balcony.
 
 **TL;DR.** A fixed black aluminium frame, 4.5 cm deep, with no mullions, fills the 268 × 111 cm opening. Six identical panels stand side by side in its rails and come out from inside for the full view. Three panel sets share the rails: **pet-mesh screens** for daily use, **weather inserts** (tinted polycarbonate or glass) that make it rain-tight while Will is away, and optional **solar inserts**: eight stock 18 V 50 W panels from Lazada, two stacked sideways in each of four wider solar inserts (400 W, ≈ 268 kWh a year), or custom panels if a Thai maker will build six. Shop sheet: [v3](../rfq/2026-11-11-639-balcony-screen-frame-spec-v3.pdf) (give the shop this one); v1 and v2 are in the [archive](2026-11-11-condo-639-balcony-screen-frame-archive.md).
 
@@ -115,7 +115,7 @@ stateDiagram-v2
 ## Open questions
 
 1. **Frame face, panel edge and panel size.** These are blank on the spec sheet for the shop to fill in. The view arithmetic uses 2.5 cm / 2 cm and 3.8 cm / 2.5 cm until the shop gives the real figures.
-2. **Has the shop started cutting the frame?** v3 changes the rail profiles from v1: a deeper head, a taller sill stop, a higher dam, baffled weeps, a drip edge, a flat gasket landing and the continuous latch channel. Give the shop the v3 sheet before fabrication, or ask what can still change.
+2. ~~**Has the shop started cutting the frame?**~~ Answered 2026‑11‑11: no (Will). Give the shop the v3 sheet before it starts: v3 changes the rail profiles from v1 (a deeper head, a taller sill stop, a higher dam, baffled weeps, a drip edge, a flat gasket landing and the continuous latch channel).
 3. ~~**Where does the solar power go?**~~ Answered 2026‑11‑09: an off-grid battery; no grid-tie inverter (Will). Still to size: the battery and the loads it runs.
 4. ~~**Mixed sets.**~~ Answered 2026‑11‑11: the v3 sheet requires a solar insert to sit next to a screen or a weather insert, with the joints detailed by the shop, and 2 solar inserts with 3 weather inserts to keep the opening rain-tight.
 5. ~~**Does this replace the zip screen and the bi-fold?**~~ Answered 2026‑11‑09: yes, this is the plan going forward (Will); plans A and B are archived.

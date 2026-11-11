@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/e51a74d5) | Balcony solar: the ledge runs inward, so no shade; test a tilted 10 cm frame |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/7a50bd79) | Balcony: break the screen frame out as its own plan; archive A and B |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/3d14652a) | Balcony plan C: solar inserts option in the same insert frame |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/1d7253ae) | Balcony plan C v2: side window ventilates the balcony; no vent in the frame |
@@ -29,6 +30,11 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/ce0a2fa6) | Plan condo 639 balcony zip screen (solar-strip motor) and 7 cm floor recess |
 
 <!--history-meta v1
+e51a74d5	author	Will Norris
+e51a74d5	added	1
+e51a74d5	deleted	1
+e51a74d5	files	1
+e51a74d5	body	Will (2026-11-11): the ledge's outer edge is flush with the outside wall\nand it runs 35 cm inward, so panels at the frame's outer plane are never\nshaded. Removes the ledge-shadow model and shadow bands, recomputes yield\n(option B 400 W = 268 kWh a year), value and payback with the 2026-11-11\nLazada checkout price, and answers the shade plan's open question 4.\n\nAdds the tilt variation: a 10 cm frame lets the solar inserts lean 3.8\ndegrees; PVGIS hourly planes plus the soffit's shadow give +2 % a year\n(+6 kWh, 20-29 THB), with a sun study at five moments. Verdict: not\nworth a deeper frame.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 7a50bd79	author	Will Norris
 7a50bd79	added	12
 7a50bd79	deleted	128
