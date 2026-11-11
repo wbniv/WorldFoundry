@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/e196a6ca) | Balcony screen frame: payback charts, price-rise scenarios, option B layout diagram |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/418a87be) | Balcony screen frame: Lazada stock panels; solar set no longer six-alike |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/e7ba0bb8) | Balcony screen frame: solar inserts also go in to harvest power at home |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/e84c3807) | Balcony screen frame: controller and 50 Ah battery prices; payback range |
@@ -12,6 +13,11 @@
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/7a50bd79) | Balcony: break the screen frame out as its own plan; archive A and B |
 
 <!--history-meta v1
+e196a6ca	author	Will Norris
+e196a6ca	added	19
+e196a6ca	deleted	2
+e196a6ca	files	1
+e196a6ca	body	Interactive payback charts (cumulative savings against cost, payback\nyears) with 0/2/4 % yearly electricity price rise and 0.5 %/yr panel\nageing; a dimensioned diagram of the four solar inserts and one insert\nenlarged; parallel wiring in place of two strings.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 418a87be	author	Will Norris
 418a87be	added	14
 418a87be	deleted	12
