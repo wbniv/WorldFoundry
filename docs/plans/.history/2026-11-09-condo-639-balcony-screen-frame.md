@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/7cdf39b7) | Balcony screen frame: fit 1, 2, 3 or 4 solar inserts; index the new docs |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/c24de9c3) | Balcony screen frame: v3 shop sheet; split solar research and v1/v2 archive |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/e196a6ca) | Balcony screen frame: payback charts, price-rise scenarios, option B layout diagram |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/418a87be) | Balcony screen frame: Lazada stock panels; solar set no longer six-alike |
@@ -14,6 +15,11 @@
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/7a50bd79) | Balcony: break the screen frame out as its own plan; archive A and B |
 
 <!--history-meta v1
+7cdf39b7	author	Will Norris
+7cdf39b7	added	8
+7cdf39b7	deleted	4
+7cdf39b7	files	1
+7cdf39b7	body	Two quarter-width solar inserts equal three screens; one or three use a\nnarrow 1/12 filler made in mesh and in sealed polycarbonate. The v3\nsheet gains figure E (the four combinations), filler and any-type-next-\nto-any-type requirements, and a separate page for the solar\nrequirements. Answers open question 4. Adds plan-index rows for the\nsolar research and the v1/v2 archive.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 c24de9c3	author	Will Norris
 c24de9c3	added	18
 c24de9c3	deleted	120
