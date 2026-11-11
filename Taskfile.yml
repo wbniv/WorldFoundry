@@ -676,6 +676,7 @@ tasks:
       WF_CC_REASON: '{{.REASON | default ""}}'
       WF_CC_FREQUENCY: '{{.FREQUENCY | default ""}}'
       WF_CC_CALLGRAPH: '{{.CALLGRAPH | default ""}}'
+      WF_CC_COMPONENT: '{{.COMPONENT | default ""}}'
       WF_CC_SETTING_ID: '{{.SETTING_ID | default ""}}'
       WF_CC_VALUE: '{{.VALUE | default ""}}'
       WF_CC_OVERRIDES: '{{.OVERRIDES | default ""}}'
@@ -755,6 +756,13 @@ tasks:
     env: *chromecast_env
     cmds:
       - PYTHONPATH=/opt/wf-device-coordinator/vendor python3 scripts/chromecast.py task configure
+
+  chromecast:screensaver-select:
+    desc: "Select an installed screensaver through the coordinator (COMPONENT=package/service)"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task screensaver-select
 
   chromecast:screensaver-trigger:
     desc: "Trigger the selected TV screensaver through the shared coordinator"

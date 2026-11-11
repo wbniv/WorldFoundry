@@ -192,13 +192,13 @@ Parameters (`water`, `seed`, `speed`, `hold`) take two command shapes. Activity
 extras apply to that run only; the settings provider saves values for the Dream. On the dedicated TVs, use the coordinator's owned Settings workflows:
 
 ```sh
-task chromecast:screensaver-setting DEVICE=chromecast-test-01 SETTING_ID=4.2 VALUE=1
-task chromecast:screensaver-show DEVICE=chromecast-test-01 OVERRIDES='{"4.2":"1"}'
+task chromecast:screensaver-setting DEVICE=chromecast-test-01 SETTING_ID=31.130 VALUE=1
+task chromecast:screensaver-show DEVICE=chromecast-test-01 OVERRIDES='{"31.130":"1"}'
 ```
 
-Here `4.2` identifies owner 4 (Director), field 2 (Water type), and `1` is
+Here `31.130` identifies the PlantedTankSettings actor (owner 31), OAD field 130 (Water type), and `1` is
 Saltwater. The owner/field IDs and labels come from the app's `getCapabilities`
-document, generated from the OAD-derived `RP01` catalog by
+document, generated from the actor OAD by
 `scripts/gen-settings-capabilities.py`. The provider authority is declared in
 the APK manifest. The coordinator has a separate package allowlist for APK
 admission; Settings fields are discovered from the provider rather than copied
