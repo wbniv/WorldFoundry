@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/7a50bd79) | Balcony: break the screen frame out as its own plan; archive A and B |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/3d14652a) | Balcony plan C: solar inserts option in the same insert frame |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/1d7253ae) | Balcony plan C v2: side window ventilates the balcony; no vent in the frame |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/d1ee0167) | Balcony plan C v2: weather inserts so no rain gets in while away |
@@ -28,6 +29,11 @@
 | [2026-09-30](https://github.com/wbniv/WorldFoundry/commit/ce0a2fa6) | Plan condo 639 balcony zip screen (solar-strip motor) and 7 cm floor recess |
 
 <!--history-meta v1
+7a50bd79	author	Will Norris
+7a50bd79	added	12
+7a50bd79	deleted	128
+7a50bd79	files	1
+7a50bd79	body	The fixed screen frame (formerly plan C) is the plan going forward, so it\nmoves to docs/plans/2026-11-09-condo-639-balcony-screen-frame.md with its\nmockups and SVG generators: context and measurements, the v1 screens, v2\nweather inserts, solar inserts, open questions renumbered 1-6, and\nhandover verification checks. The balcony shade plan marks plans A (zip\nscreen) and B (bi-fold) archived and points to the new plan; its level\nmodel section is unchanged. The plan-B RFQ TODO item is parked.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 3d14652a	author	Will Norris
 3d14652a	added	53
 3d14652a	deleted	2

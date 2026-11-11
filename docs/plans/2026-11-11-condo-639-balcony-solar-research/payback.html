@@ -42,7 +42,7 @@
 </head>
 <body>
 <div class="viz-root">
-<header><h1>639 balcony solar, option B (eight 50&nbsp;W panels, ≈&nbsp;190–215&nbsp;kWh a year): payback</h1><span class="tag">ESTIMATE — PRICES UNTIL BOUGHT</span></header>
+<header><h1>639 balcony solar, option B (eight 50&nbsp;W panels, ≈&nbsp;268&nbsp;kWh a year, unshaded): payback</h1><span class="tag">ESTIMATE — PRICES UNTIL BOUGHT</span></header>
 <div class="filters">Electricity price rise per year:
   <button data-e="0">0&nbsp;% (flat)</button><button data-e="0.02">2&nbsp;%</button><button data-e="0.04">4&nbsp;%</button>
   <span style="margin-left:10px">Panels lose 0.5&nbsp;% of output a year in every case.</span></div>
@@ -67,11 +67,11 @@
 </div>
 <script>
 const YRS=25, D=0.005;
-const RATES={all:[643,1040], half:[322,520]};   // THB per year in year 1: [base, top]
+const RATES={all:[907,1296], half:[454,648]};   // THB per year in year 1: [base, top]
 const COSTS=[
-  {k:'p', label:'Panels only, ฿1,880', c:1880},
-  {k:'s', label:'Kit, 25 Ah DIY battery, ฿4,800', c:4800},
-  {k:'r', label:'Kit, 50 Ah ready-made, ฿12,000', c:12000, repl:[10,8400]},
+  {k:'p', label:'Panels only, ฿2,740', c:2740},
+  {k:'s', label:'Kit, 25 Ah DIY battery, ฿5,600', c:5600},
+  {k:'r', label:'Kit, 50 Ah ready-made, ฿12,800', c:12800, repl:[10,8400]},
 ];
 const costAt=(o,n)=>o.c+(o.repl && n>o.repl[0] ? o.repl[1] : 0);
 const cum=(a,e,n)=>{let s=0; for(let k=1;k<=n;k++) s+=a*((1+e)*(1-D))**(k-1); return s;};

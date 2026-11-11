@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tilted solar inserts</title>
+<style>
+  :root { --bg:#fff; --fg:#1f2328; --muted:#656d76; --line:#d1d9e0; --panel:#f6f8fa; --conc:#d7d4ce; --concl:#b9b5ad; --frame:#111;
+          --cell:#1c2b4d; --pc:#dfeaf3; --sun:#d98a00; --shade:rgba(0,0,0,.35); --good:#1a7f37; }
+  @media (prefers-color-scheme: dark) { :root:where(:not([data-theme="light"])) { --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --line:#30363d; --panel:#161b22; --conc:#4a4843; --concl:#5d5a54; --frame:#000; --pc:#1d3347; --sun:#f0a020; --good:#3fb950; } }
+  :root[data-theme="dark"] { --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --line:#30363d; --panel:#161b22; --conc:#4a4843; --concl:#5d5a54; --frame:#000; --pc:#1d3347; --sun:#f0a020; --good:#3fb950; }
+  * { box-sizing:border-box; }
+  body { margin:0; width:1440px; height:900px; overflow:hidden; background:var(--bg); color:var(--fg); font:13.5px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+  header { display:flex; align-items:center; gap:12px; padding:11px 24px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header h1 { margin:0; font-size:16px; font-weight:600; } header .tag { margin-left:auto; font:600 11px ui-monospace,Menlo,monospace; color:var(--muted); border:1px solid var(--line); border-radius:10px; padding:2px 8px; }
+  .wrap { display:grid; grid-template-columns:860px 1fr; gap:18px; padding:10px 22px; }
+  svg text { fill:var(--fg); font-family:ui-sans-serif,system-ui,sans-serif; font-size:12px; }
+  .m { fill:var(--muted); } .h { font-size:14px; font-weight:700; }
+  table { border-collapse:collapse; width:100%; font-size:12.5px; margin:4px 0 10px; } th,td { border-bottom:1px solid var(--line); padding:3px 5px; text-align:right; } th:first-child,td:first-child { text-align:left; }
+  th { color:var(--muted); font-weight:600; } h2 { font-size:13px; margin:6px 0 2px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  .pos { color:var(--good); font-weight:600; } p { margin:4px 0; color:var(--muted); font-size:12.5px; }
+</style>
+</head>
+<body>
+<header><h1>Variation: a 10&nbsp;cm frame with the solar inserts tilted — section through the opening, looking north</h1><span class="tag">SUN STUDY — 400&nbsp;W SET, OPTION B LAYOUT</span></header>
+<div class="wrap">
+  <svg id="s" width="860" height="820"></svg>
+  <div>
+    <h2>Five moments (21st of the month, solar time)</h2>
+    <table id="mom"><tr><th>Moment</th><th>Sun height</th><th>Angle in section</th><th>Direct sun on tilted vs vertical</th><th>Soffit shadow on tilted</th></tr></table>
+    <h2>Year round (PVGIS hourly, 2020, Bangkok)</h2>
+    <table id="yr"><tr><th>Panel</th><th>Depth needed</th><th>Sun on the panel</th><th>After soffit shadow</th><th>kWh a year</th><th>Δ ฿ a year</th></tr></table>
+    <p>The soffit is the underside of the ledge, which runs 35&nbsp;cm inward from the flush outside wall (Will, 2026‑11‑11). A vertical panel at the outer edge of the cap has nothing above it outside, so it is never shaded. Tilting the top inward faces the panel a little more toward the sky, but moves its top under the soffit, which shades it whenever the sun is high. In option B the top 9&nbsp;cm of each insert is clear polycarbonate, so a shadow shallower than that costs nothing.</p>
+    <p>Δ ฿ uses MEA's base and top 2026 rates (3.38 and 4.84&nbsp;฿/kWh). Pet screens stay vertical at the outer stop in every case.</p>
+  </div>
+</div>
+<script>
+const s=document.getElementById('s');
+const MOM=[ // name, sun altitude, profile angle (deg), direct gain %, soffit shadow cm (tilted 3.8°)
+ ['21 Mar 13:00',69.5,74.6,23.8,20.4],['21 Mar 15:00',43.3,44.1,6.2,6.4],['21 Mar 17:00',14.5,14.5,1.5,1.8],['21 Jun 15:00',46.4,48.2,7.2,7.3],['21 Dec 15:00',32.4,39.6,5.3,5.5]];
+const YR=[['Vertical, 4.5 cm frame (as built)','4.5 cm','100 %','100 %',268,null],
+          ['Tilted 3.8°, 10 cm frame','10 cm','+6.9 %','+2.2 %',274,[20,29]],
+          ['Tilted 8.7° (top 16 cm in)','≈ 19 cm','+15.1 %','+1.2 %',271,[10,15]],
+          ['Tilted 20° (top 36 cm in, leaning into the room)','≈ 39 cm','+35.9 %','+5.7 %',283,[51,73]]];
+const mt=document.getElementById('mom'); MOM.forEach(m=>mt.innerHTML+=`<tr><td>${m[0]}</td><td>${m[1]}°</td><td>${m[2]}°</td><td class="pos">+${m[3]} %</td><td>${m[4]} cm${m[4]<9?' (on the polycarbonate)':''}</td></tr>`);
+const yt=document.getElementById('yr'); YR.forEach(r=>yt.innerHTML+=`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]?'+'+r[5][0]+'–'+r[5][1]:'—'}</td></tr>`);
+// --- drawing: two sections side by side
+const k=3.4; let g='';
+const RAYS=[[MOM[1],'21 Mar 15:00','none'],[MOM[3],'21 Jun 15:00','8 5'],[MOM[0],'21 Mar 13:00','2 4']];
+function section(ox, label, tilted){
+  const oy=125+(141)*k;                                  // y=0 at cap top
+  const X=x=>ox+x*k, Y=y=>oy-y*k;
+  let h=`<text x="${X(-55)}" y="34" class="h">${label}</text>`;
+  RAYS.forEach((r,i)=>{ h+=`<line x1="${X(-55)}" y1="${52+i*16}" x2="${X(-45)}" y2="${52+i*16}" stroke="var(--sun)" stroke-width="2" stroke-dasharray="${r[2]}"/><text x="${X(-42)}" y="${56+i*16}" style="fill:var(--sun)">${r[1]} · ${r[0][2]}° in section</text>`; });
+  h+=`<rect x="${X(0)}" y="${Y(141)}" width="${35*k}" height="${30*k}" fill="var(--conc)"/><path d="M${X(0)} ${Y(141)}l${12*k} ${-2*k}l${8*k} ${4*k}l${15*k} ${-2*k}" stroke="var(--bg)" stroke-width="3" fill="none"/>`;
+  h+=`<rect x="${X(0)}" y="${Y(0)}" width="${10*k}" height="${28*k}" fill="var(--conc)"/>`;
+  h+=`<line x1="${X(0)}" y1="${Y(141)}" x2="${X(0)}" y2="${Y(-28)}" stroke="var(--muted)" stroke-dasharray="4 4"/>`;
+  h+=`<text x="${X(-3)}" y="${Y(20)}" text-anchor="end" class="m">outside wall, flush</text>`;
+  h+=`<text x="${X(17.5)}" y="${Y(124)}" text-anchor="middle" class="m">ledge, 35 cm in</text><text x="${X(37)}" y="${Y(108)}" class="m">soffit</text><text x="${X(12)}" y="${Y(-14)}" class="m">cap 10 cm</text>`;
+  h+=`<text x="${X(-55)}" y="${Y(40)}" class="m">OUT (west)</text><text x="${X(40)}" y="${Y(40)}" class="m">IN</text>`;
+  const depth=tilted?10:4.5, t=tilted?7:0;
+  h+=`<rect x="${X(0)}" y="${Y(111)}" width="${depth*k}" height="${3*k}" fill="var(--frame)"/><rect x="${X(0)}" y="${Y(3)}" width="${depth*k}" height="${3*k}" fill="var(--frame)"/>`;
+  const bx=1.5, by=3, tx=1.5+t, ty=108;
+  h+=`<line x1="${X(bx)}" y1="${Y(by)}" x2="${X(tx)}" y2="${Y(ty)}" stroke="var(--cell)" stroke-width="${2.6*k}"/>`;
+  const fy=ty-9, fx=bx+t*(fy-by)/(ty-by);
+  h+=`<line x1="${X(fx)}" y1="${Y(fy)}" x2="${X(tx)}" y2="${Y(ty)}" stroke="var(--pc)" stroke-width="${2.6*k}"/>`;
+  h+=`<text x="${X(tx+6)}" y="${Y(ty-5)}" class="m">clear polycarbonate, 9 cm</text><text x="${X(bx+6+t/2)}" y="${Y(60)}">2 panels, landscape</text>`;
+  h+=`<text x="${X(-55)}" y="${Y(-24)}" class="m">frame ${depth} cm deep${tilted?' · top leans 7 cm in (3.8°)':' · panel vertical'}</text>`;
+  RAYS.forEach(([m,lab,dash])=>{
+    const a=m[2]*Math.PI/180, ta=Math.tan(a);
+    const pa=t/(ty-by);
+    let yh = tilted ? (111/ta - bx + pa*by)/(pa + 1/ta) : 111 - bx*ta;
+    const xh=(111-yh)/ta;
+    let x0=-55, y0=111+55*ta; if(y0>141){ y0=141; x0=-(30)/ta; }
+    h+=`<line x1="${X(x0)}" y1="${Y(y0)}" x2="${X(xh)}" y2="${Y(yh)}" stroke="var(--sun)" stroke-width="2" stroke-dasharray="${dash}"/>`;
+    if(tilted && 111-yh-3>0.5) h+=`<line x1="${X(xh)+7}" y1="${Y(yh)}" x2="${X(tx)+7}" y2="${Y(ty)}" stroke="var(--shade)" stroke-width="5"/>`;
+  });
+  if(tilted) h+=`<text x="${X(tx+6)}" y="${Y(ty-20)}" class="m">dark bar: soffit shadow,</text><text x="${X(tx+6)}" y="${Y(ty-31)}" class="m">deepest at 13:00 (20 cm)</text>`;
+  else h+=`<text x="${X(8)}" y="${Y(90)}" class="m">never shaded:</text><text x="${X(8)}" y="${Y(79)}" class="m">nothing above it outside</text>`;
+  return h;
+}
+g+=section(210, 'A · Vertical, in the 4.5 cm frame (as built)', false);
+g+=section(630, 'B · Tilted, in a 10 cm frame', true);
+s.innerHTML=g;
+</script>
+</body>
+</html>

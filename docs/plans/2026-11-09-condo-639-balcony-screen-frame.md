@@ -2,7 +2,7 @@
 
 9 November 2026 · **Being built** (Will, 2026‑11‑08). This is the plan for the balcony opening from now on. The earlier options, a motorised zip screen (plan A) and a glazed bi-fold window (plan B), are archived in the [balcony shade plan](2026-09-30-condo-balcony-shade.md), which also holds the game's level model of the balcony.
 
-**TL;DR.** A fixed black aluminium frame, 4.5 cm deep, with no mullions, fills the 268 × 111 cm opening. Six identical panels stand side by side in its rails and come out from inside for the full view. Three panel sets share the rails: **pet-mesh screens** for daily use, **weather inserts** (tinted polycarbonate or glass) that make it rain-tight while Will is away, and optional **solar inserts**: custom panels if a Thai maker will build six (≈ 350 W after the ledge's shade), or eight stock 18 V 50 W panels from Lazada, two stacked sideways in each of four wider solar inserts (≈ 280–320 W). Shop sheet: [v3](../rfq/2026-11-11-639-balcony-screen-frame-spec-v3.pdf) (give the shop this one); v1 and v2 are in the [archive](2026-11-11-condo-639-balcony-screen-frame-archive.md).
+**TL;DR.** A fixed black aluminium frame, 4.5 cm deep, with no mullions, fills the 268 × 111 cm opening. Six identical panels stand side by side in its rails and come out from inside for the full view. Three panel sets share the rails: **pet-mesh screens** for daily use, **weather inserts** (tinted polycarbonate or glass) that make it rain-tight while Will is away, and optional **solar inserts**: eight stock 18 V 50 W panels from Lazada, two stacked sideways in each of four wider solar inserts (400 W, ≈ 268 kWh a year), or custom panels if a Thai maker will build six. Shop sheet: [v3](../rfq/2026-11-11-639-balcony-screen-frame-spec-v3.pdf) (give the shop this one); v1 and v2 are in the [archive](2026-11-11-condo-639-balcony-screen-frame-archive.md).
 
 ## Context
 
@@ -14,7 +14,7 @@ Measured by Will (2026‑09‑30):
 |---|---|
 | Opening, clear | 268 cm wide × 111 cm tall, pony-wall cap to ledge soffit |
 | Pony-wall cap | 10 cm thick |
-| Concrete ledge above | 35 cm deep, about 64 cm tall, along the whole west wall |
+| Concrete ledge above | 35 cm deep, about 64 cm tall, along the whole west wall; its outer edge is flush with the flat outside wall and it runs inward over the balcony (Will, 2026‑11‑11), so it does not shade the opening from outside |
 | Jambs | full wall to the south, a 10 cm stub to the north |
 | Frame depth | 4.5 cm, on the 10 cm cap |
 | Ventilation | a side window lets air through at all times (Will, 2026‑11‑08) |
@@ -64,7 +64,7 @@ The frame takes the six pet-mesh screens and six weather inserts with the same o
 
 **Request** (Will, 2026‑11‑09, 2026‑11‑11): an optional set of solar panels in the frame, to go in while Will is away or whenever he would rather harvest power than have the view. The six screens set the look of the frame; the solar set need not match them ("6 panels was for aesthetics"). The research, including the options not chosen, is in the [solar research document](2026-11-11-condo-639-balcony-solar-research.md).
 
-**Recommended (option B).** Eight 18 V 50 W stock panels, 600 × 460 mm, from Lazada (฿234.52 each on a LazFlash sale, ฿1,299 normally), turned sideways and stacked two high in **four inserts a quarter of the width (≈ 65.75 cm)**, clear polycarbonate filling the rest. 400 W rated, about 280–320 W after the 35 cm ledge's shadow, ≈ 190–215 kWh a year if fitted all year. Panels low and sideways keep the shadow to the top band. Each insert ≈ 8–10 kg (estimate), sealed and latched like the weather inserts, one plug at the sill. Asking Sunnergy or NSTHAI for custom laminates in the six positions (option A, ≈ 350 W after shade) remains open.
+**Recommended (option B).** Eight 18 V 50 W stock panels, 600 × 460 mm, from Lazada (≈ ฿2,740 for eight delivered at the 2026‑11‑11 checkout, ฿1,299 each at list), turned sideways and stacked two high in **four inserts a quarter of the width (≈ 65.75 cm)**, clear polycarbonate filling the rest. 400 W rated and unshaded, since nothing projects over the opening outside: ≈ 268 kWh a year if fitted all year. Each insert ≈ 8–10 kg (estimate), sealed and latched like the weather inserts, one plug at the sill. Asking Sunnergy or NSTHAI for custom laminates in the six positions (option A, ≈ 420 W) remains open. Tilting the inserts in a deeper, 10 cm frame was tested and gains only about 2 % ([variation](2026-11-11-condo-639-balcony-solar-research.md#variation-a-10-cm-frame-with-the-solar-inserts-tilted)).
 
 **Fitting 1, 2, 3 or 4 solar inserts** (Will, 2026‑11‑11). Two solar inserts take exactly the width of three screens (2 × ¼ = 3 × ⅙), so 2 solar + 3 screens or weather inserts fits with nothing extra. With one or three, the rest of the opening is simply left open, screens out (Will: "for non-even configurations, i'd just leave the screens out"), so each solar insert must lock securely on its own. The continuous latch channel allows every combination; only 4 solar, or 2 solar with 3 weather inserts, keeps the opening rain-tight.
 
@@ -72,11 +72,11 @@ The frame takes the six pet-mesh screens and six weather inserts with the same o
 
 [![Option B layout: the four inserts and one insert enlarged, with dimensions and wiring](2026-11-09-condo-639-balcony-screen-frame/solar-insert-b.png)](2026-11-09-condo-639-balcony-screen-frame/solar-insert-b.html)
 
-**Payback.** The panels alone (≈ ฿1,880) pay back in about 2–3 years at MEA's 2026 rates if fitted all year; the whole off-grid kit (panels, a 20 A MPPT controller and a 12 V LiFePO4 battery, ≈ ฿4,800–12,000) in about 4.5–19 years, sooner if electricity prices rise. Savings count only power the battery's loads use. Details, sources and the price-rise scenarios are in the [research](2026-11-11-condo-639-balcony-solar-research.md#yield-value-and-payback).
+**Payback.** The panels alone (≈ ฿2,740 delivered) pay back in about 2–3 years at MEA's 2026 rates if fitted all year; the whole off-grid kit (panels, a 20 A MPPT controller and a 12 V LiFePO4 battery, ≈ ฿5,600–12,800) in about 4.5–25 years, sooner if electricity prices rise. Savings count only power the battery's loads use. Details, sources and the price-rise scenarios are in the [research](2026-11-11-condo-639-balcony-solar-research.md#yield-value-and-payback).
 
 [![Payback charts](2026-11-11-condo-639-balcony-solar-research/payback.png)](2026-11-11-condo-639-balcony-solar-research/payback.html)
 
-**Wiring.** Every panel is wired in parallel: the two in an insert join at their junction boxes, each insert has one plug at the sill on the room side, and the four plugs meet at a branch connector before a 20 A MPPT controller indoors. In parallel each panel works on its own, so the shaded upper panels do not drag down the lower ones. Eight 50 W panels give at most ≈ 22 A at full sun, which a vertical west wall never sees; the controller simply caps the charge on a rare bright moment. An insert still pops out after one unplug.
+**Wiring.** Every panel is wired in parallel: the two in an insert join at their junction boxes, each insert has one plug at the sill on the room side, and the four plugs meet at a branch connector before a 20 A MPPT controller indoors. In parallel each panel works on its own, so one dirty or failed panel does not drag down the rest. Eight 50 W panels give at most ≈ 22 A at full sun, which a vertical west wall never sees; the controller simply caps the charge on a rare bright moment. An insert still pops out after one unplug.
 
 **Where the power goes: an off-grid battery, no grid-tie inverter** (Will, 2026‑11‑09). The solar inserts go in while Will is away, and also whenever he would rather harvest power than have the view, since the condo has other windows (Will, 2026‑11‑11). The panels charge a battery that keeps the router, sensors or a fan running while he is away and powers small loads such as a fan, lights or charging when he is home, which fits the [home backup power research](/home/will/docs/plans/2026-10-07-home-backup-power.md). Nothing feeds the condo wiring, so no MEA approval or juristic-person consent is needed for it.
 

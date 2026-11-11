@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/ac5e1468) | Balcony screen frame: 1 or 3 solar inserts leave the rest open; drop fillers |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/7cdf39b7) | Balcony screen frame: fit 1, 2, 3 or 4 solar inserts; index the new docs |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/c24de9c3) | Balcony screen frame: v3 shop sheet; split solar research and v1/v2 archive |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/e196a6ca) | Balcony screen frame: payback charts, price-rise scenarios, option B layout diagram |
@@ -15,6 +16,11 @@
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/7a50bd79) | Balcony: break the screen frame out as its own plan; archive A and B |
 
 <!--history-meta v1
+ac5e1468	author	Will Norris
+ac5e1468	added	5
+ac5e1468	deleted	5
+ac5e1468	files	1
+ac5e1468	body	Will (2026-11-11): for non-even solar configurations the screens just\nstay out, so the narrow 1/12 filler goes. Figure E shows the remaining\nwidth as open; the sheet requires a lone solar insert to lock securely.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 7cdf39b7	author	Will Norris
 7cdf39b7	added	8
 7cdf39b7	deleted	4

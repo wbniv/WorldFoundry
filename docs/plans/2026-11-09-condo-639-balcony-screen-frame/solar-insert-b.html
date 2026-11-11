@@ -24,8 +24,8 @@
 <svg id="s" width="1440" height="843"></svg>
 <div class="notes"><ul>
   <li>Drawn with a 2.5&nbsp;cm frame face and 2&nbsp;cm insert edges (the plan's example). With a 3.8&nbsp;cm face and 2.5&nbsp;cm edges, each insert's clear width is 60.1&nbsp;cm: the 60&nbsp;cm panel still fits, its own frame border running under the insert edge.</li>
-  <li>The panels sit at the bottom; clear polycarbonate fills the strip above, where the ledge's shadow falls first.</li>
-  <li>Sideways, a shadow across the top costs the upper panel's top band rather than the whole panel; each panel works on its own because all eight are wired in parallel.</li>
+  <li>The panels sit at the bottom; clear polycarbonate fills the strip above.</li>
+  <li>The ledge runs inward from the flush outside wall, so nothing shades the panels from above; all eight are wired in parallel, each working on its own.</li>
   <li>Each insert unplugs at the sill (one plug) and lifts out like the screens. Needs latches that work at any panel width (open question 7).</li>
 </ul></div>
 <script>
@@ -37,7 +37,7 @@ const k=2.45, ox=60, oy=80, X=x=>ox+x*k, Y=y=>oy+y*k;
 g+=`<text x="${ox}" y="${oy-46}" class="h">A · The opening with the four solar inserts</text>`;
 g+=`<rect x="${X(-12)}" y="${Y(-14)}" width="${(W+22)*k}" height="${14*k}" fill="var(--conc)"/><rect x="${X(-12)}" y="${Y(H)}" width="${(W+22)*k}" height="${12*k}" fill="var(--conc)"/>`;
 g+=`<rect x="${X(-12)}" y="${Y(0)}" width="${12*k}" height="${H*k}" fill="var(--conc)"/><rect x="${X(W)}" y="${Y(0)}" width="${10*k}" height="${H*k}" fill="var(--conc)"/>`;
-g+=`<text x="${X(W/2)}" y="${Y(-5)}" text-anchor="middle" class="dt">concrete ledge (35 cm deep)</text><text x="${X(W/2)}" y="${Y(H+8)}" text-anchor="middle" class="dt">pony-wall cap</text>`;
+g+=`<text x="${X(W/2)}" y="${Y(-5)}" text-anchor="middle" class="dt">concrete ledge (runs 35 cm inward)</text><text x="${X(W/2)}" y="${Y(H+8)}" text-anchor="middle" class="dt">pony-wall cap</text>`;
 g+=`<path fill="var(--frame)" fill-rule="evenodd" d="M${X(0)} ${Y(0)}H${X(W)}V${Y(H)}H${X(0)}Z M${X(F)} ${Y(F)}H${X(W-F)}V${Y(H-F)}H${X(F)}Z"/>`;
 function insert(x0,y0,kk,label){ const XX=x=>x0+x*kk, YY=y=>y0+y*kk; let h='';
   h+=`<path fill="var(--edge)" fill-rule="evenodd" d="M${XX(0)} ${YY(0)}h${qw*kk}v${bh*kk}h${-qw*kk}Z M${XX(S)} ${YY(S)}v${(bh-2*S)*kk}h${(qw-2*S)*kk}v${-(bh-2*S)*kk}Z"/>`;
@@ -48,7 +48,7 @@ function insert(x0,y0,kk,label){ const XX=x=>x0+x*kk, YY=y=>y0+y*kk; let h='';
   if(label) h+=`<text x="${XX(qw/2)}" y="${YY(bh/2)+5}" text-anchor="middle" style="fill:#fff;font-weight:700">${label}</text>`;
   return h; }
 for(let i=0;i<4;i++) g+=insert(X(F+i*qw),Y(F),k,i+1);
-g+=`<rect x="${X(F)}" y="${Y(F)}" width="${(W-2*F)*k}" height="${32.5*k}" fill="var(--shade)"/><text x="${X(W/2)}" y="${Y(F+6)}" text-anchor="middle" style="fill:#fff;font-size:11.5px">ledge shadow at a 45° sun</text>`;
+
 // dims A
 const dA=Y(H+18); g+=`<path class="dim" d="M${X(0)} ${dA-5}v10M${X(W)} ${dA-5}v10M${X(0)} ${dA}H${X(W)}"/><text x="${X(W/2)}" y="${dA+16}" text-anchor="middle" class="dt">268 cm opening</text>`;
 const dB=Y(H+28); g+=`<path class="dim" d="M${X(F)} ${dB-5}v10M${X(F+qw)} ${dB-5}v10M${X(F)} ${dB}H${X(F+qw)}"/><text x="${X(F)}" y="${dB+16}" class="dt">each insert ≈ 65.75 cm (a quarter of 263)</text>`;
