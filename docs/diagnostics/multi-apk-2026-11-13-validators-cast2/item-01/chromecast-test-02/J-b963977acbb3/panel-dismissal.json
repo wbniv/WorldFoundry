@@ -1,0 +1,116 @@
+{
+  "schema": 2,
+  "source": "frozen-apk+current-process-log",
+  "controller_advertised": true,
+  "process": "5327",
+  "controller_state": "open",
+  "policy": "best-effort",
+  "variant": null,
+  "panel_visibility": "verified-hidden",
+  "reason": "hide-acknowledged-and-panel-not-detected",
+  "back_sent": true,
+  "back_keys_sent": 1,
+  "back_outcome": "hidden",
+  "before": {
+    "qr_white": 0.652,
+    "qr_black": 0.339,
+    "panel_fill": 1.0,
+    "size": [
+      1920,
+      1080
+    ],
+    "state": "present"
+  },
+  "after": {
+    "qr_white": 0.011,
+    "qr_black": 0.0,
+    "panel_fill": 1.0,
+    "size": [
+      1920,
+      1080
+    ],
+    "state": "absent"
+  },
+  "last_wake_at": "2026-11-12T17:37:32.959Z",
+  "wake_in_flight_at_back": false,
+  "back_sent_at": "2026-11-12T17:37:42.376Z",
+  "elapsed_seconds": 6.86,
+  "history": [
+    {
+      "schema": 2,
+      "source": "frozen-apk+current-process-log",
+      "controller_advertised": true,
+      "process": "5125",
+      "controller_state": "open",
+      "policy": "best-effort",
+      "variant": null,
+      "panel_visibility": "verified-hidden",
+      "reason": "hide-acknowledged-and-panel-not-detected",
+      "back_sent": true,
+      "back_keys_sent": 1,
+      "back_outcome": "hidden",
+      "before": {
+        "qr_white": 0.651,
+        "qr_black": 0.34,
+        "panel_fill": 1.0,
+        "size": [
+          1920,
+          1080
+        ],
+        "state": "present"
+      },
+      "after": {
+        "qr_white": 0.011,
+        "qr_black": 0.0,
+        "panel_fill": 1.0,
+        "size": [
+          1920,
+          1080
+        ],
+        "state": "absent"
+      },
+      "last_wake_at": "2026-11-12T17:37:09.507Z",
+      "wake_in_flight_at_back": false,
+      "back_sent_at": "2026-11-12T17:37:20.056Z",
+      "elapsed_seconds": 7.194
+    },
+    {
+      "schema": 2,
+      "source": "frozen-apk+current-process-log",
+      "controller_advertised": true,
+      "process": "5327",
+      "controller_state": "open",
+      "policy": "best-effort",
+      "variant": null,
+      "panel_visibility": "verified-hidden",
+      "reason": "hide-acknowledged-and-panel-not-detected",
+      "back_sent": true,
+      "back_keys_sent": 1,
+      "back_outcome": "hidden",
+      "before": {
+        "qr_white": 0.652,
+        "qr_black": 0.339,
+        "panel_fill": 1.0,
+        "size": [
+          1920,
+          1080
+        ],
+        "state": "present"
+      },
+      "after": {
+        "qr_white": 0.011,
+        "qr_black": 0.0,
+        "panel_fill": 1.0,
+        "size": [
+          1920,
+          1080
+        ],
+        "state": "absent"
+      },
+      "last_wake_at": "2026-11-12T17:37:32.959Z",
+      "wake_in_flight_at_back": false,
+      "back_sent_at": "2026-11-12T17:37:42.376Z",
+      "elapsed_seconds": 6.86
+    }
+  ]
+}

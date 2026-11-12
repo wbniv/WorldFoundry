@@ -1,0 +1,47 @@
+[
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.coreservices.bootmode.DispatchActivity"
+    ],
+    "start": 1794505717.6557846,
+    "end": 1794505717.978314,
+    "returncode": 255
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.LEANBACK_LAUNCHER -p com.google.android.apps.tv.launcherx"
+    ],
+    "start": 1794505717.9817903,
+    "end": 1794505718.320008,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME"
+    ],
+    "start": 1794505718.322145,
+    "end": 1794505718.524742,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -a android.intent.action.MAIN -c android.intent.category.HOME"
+    ],
+    "start": 1794505718.5265365,
+    "end": 1794505718.780475,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794505718.7824013,
+    "end": 1794505719.0281873,
+    "returncode": 0
+  }
+]

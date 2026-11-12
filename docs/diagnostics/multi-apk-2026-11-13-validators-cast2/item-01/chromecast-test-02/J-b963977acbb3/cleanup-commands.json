@@ -1,0 +1,92 @@
+[
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-b963977acbb3-install-884a52138b892703eab0e5b44a2e81cf.apk"
+    ],
+    "start": 1794505175.6574502,
+    "end": 1794505175.927253,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test ! -e /data/local/tmp/wf-J-b963977acbb3-install-884a52138b892703eab0e5b44a2e81cf.apk; echo wf-status=$?"
+    ],
+    "start": 1794505175.92997,
+    "end": 1794505176.0683436,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-b963977acbb3-install-884a52138b892703eab0e5b44a2e81cf-helper.jar"
+    ],
+    "start": 1794505176.1021442,
+    "end": 1794505176.2832875,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test ! -e /data/local/tmp/wf-J-b963977acbb3-install-884a52138b892703eab0e5b44a2e81cf-helper.jar; echo wf-status=$?"
+    ],
+    "start": 1794505176.2856798,
+    "end": 1794505176.4246793,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1794505176.4508605,
+    "end": 1794505176.7448118,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.coreservices.bootmode.DispatchActivity"
+    ],
+    "start": 1794505176.7467463,
+    "end": 1794505177.014601,
+    "returncode": 255
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.LEANBACK_LAUNCHER -p com.google.android.apps.tv.launcherx"
+    ],
+    "start": 1794505177.0161912,
+    "end": 1794505177.1926787,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME"
+    ],
+    "start": 1794505177.1951451,
+    "end": 1794505177.3815627,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -a android.intent.action.MAIN -c android.intent.category.HOME"
+    ],
+    "start": 1794505177.3839138,
+    "end": 1794505177.5999458,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794505177.6027365,
+    "end": 1794505177.8005385,
+    "returncode": 0
+  }
+]

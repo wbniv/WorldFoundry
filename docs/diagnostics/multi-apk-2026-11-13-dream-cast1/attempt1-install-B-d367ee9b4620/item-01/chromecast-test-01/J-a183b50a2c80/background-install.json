@@ -1,0 +1,11 @@
+{
+  "before": [
+    "    Resumed: ActivityRecord{86f17f6 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t4103}",
+    "  ResumedActivity: ActivityRecord{86f17f6 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t4103}"
+  ],
+  "after": [
+    "    Resumed: ActivityRecord{86f17f6 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t4103}",
+    "  ResumedActivity: ActivityRecord{86f17f6 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t4103}"
+  ],
+  "foreground_unchanged": true
+}

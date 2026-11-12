@@ -1,0 +1,101 @@
+[
+  {
+    "args": [
+      "shell",
+      "cmd package query-services --brief --components -a android.service.dreams.DreamService"
+    ],
+    "start": 1794504863.8755589,
+    "end": 1794504864.0342078,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1794504864.037535,
+    "end": 1794504864.2363136,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_enabled"
+    ],
+    "start": 1794504864.2386048,
+    "end": 1794504864.4275703,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_activate_on_sleep"
+    ],
+    "start": 1794504864.4298003,
+    "end": 1794504864.6340096,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get system screen_off_timeout"
+    ],
+    "start": 1794504864.6362112,
+    "end": 1794504864.8217547,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure sleep_timeout"
+    ],
+    "start": 1794504864.8234675,
+    "end": 1794504865.000234,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get global stay_on_while_plugged_in"
+    ],
+    "start": 1794504865.0022378,
+    "end": 1794504865.1758583,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1794504865.178085,
+    "end": 1794504865.3410568,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794504865.3439307,
+    "end": 1794504865.5420449,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "content call --uri content://org.worldfoundry.seahorsegrid.settings --method getCapabilities"
+    ],
+    "start": 1794504865.5458484,
+    "end": 1794504867.8064218,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "tail -n 300 /sdcard/Android/data/org.worldfoundry.seahorsegrid/files/wf.log"
+    ],
+    "start": 1794504867.8090563,
+    "end": 1794504867.9746492,
+    "returncode": 0
+  }
+]

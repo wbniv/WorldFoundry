@@ -1,0 +1,6 @@
+{
+  "endpoint": "192.168.4.27:36355",
+  "local": "tcp:33095",
+  "remote": "tcp:7777",
+  "removed": true
+}

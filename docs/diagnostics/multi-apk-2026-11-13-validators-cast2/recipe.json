@@ -1,0 +1,8 @@
+{
+  "workflow": "check",
+  "device": "chromecast-test-02",
+  "items": [
+    {"app": "aquarium", "apk": "/home/will/WorldFoundry-wbniv/build-docker/show/aquarium-show.apk", "validator": "menu-back"},
+    {"app": "baseline", "apk": "/home/will/WorldFoundry-wbniv/wflevels/baseline/build/baseline-5b47e27b5516e543.apk", "validator": "baseline-settings"}
+  ]
+}

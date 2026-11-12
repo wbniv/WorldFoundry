@@ -1,0 +1,5 @@
+Released key 19 after 2200 ms
+Released key 20 after 800 ms
+Released key 22 after 800 ms
+Released key 21 after 800 ms
+Released key 23 after 1500 ms

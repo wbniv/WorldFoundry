@@ -1,0 +1,8 @@
+{
+  "status": "captured",
+  "package": "org.worldfoundry.wf_game.baseline",
+  "installed_sha256": "eebab09d285f2939b829c0c3be579429818f2f30220427d568cabb599970635a",
+  "labels": [
+    "WF baseline"
+  ]
+}

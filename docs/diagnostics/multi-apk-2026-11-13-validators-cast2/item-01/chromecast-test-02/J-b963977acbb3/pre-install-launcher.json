@@ -1,0 +1,9 @@
+{
+  "status": "captured",
+  "package": "org.worldfoundry.wf_game.aquarium",
+  "installed_sha256": "635980d9a540581f6812d420226373694147ae6f01f46ffec43138200fa03a81",
+  "labels": [
+    "WF Aquarium",
+    "Aquarium Log"
+  ]
+}

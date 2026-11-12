@@ -1,0 +1,81 @@
+{
+  "id": "B-be5ba75e20e7",
+  "owner": "91e7a66d81613eb5397d20c6",
+  "targets": [
+    "chromecast-test-02"
+  ],
+  "created": 1794505000.7627447,
+  "jobs": [
+    {
+      "id": "J-b963977acbb3",
+      "owner": "91e7a66d81613eb5397d20c6",
+      "accepted": 1794505000.7630737,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "workflow": "check",
+        "app": "aquarium",
+        "apk": "e2ac53f5fbaa1c638f63de2be16bfecfabbc2243f846c099612d228dcc869321.apk",
+        "validator": "menu-back",
+        "device": "chromecast-test-02"
+      },
+      "device": "chromecast-test-02",
+      "generation": 5648,
+      "cancel": 0,
+      "error": null,
+      "started": 1794505000.9253206,
+      "finished": 1794505178.2308555,
+      "worker_pid": 224043,
+      "recovery_resolved": 0,
+      "installation": null,
+      "expected_until": 1794506080.9670577,
+      "battery_history_parser": 1,
+      "owner_label": "interactive",
+      "target": "chromecast-test-02",
+      "item": 0,
+      "retry_of": null,
+      "retried_by": null,
+      "automatic_recovery": null,
+      "device_wait": null
+    },
+    {
+      "id": "J-63eada1c2dc0",
+      "owner": "91e7a66d81613eb5397d20c6",
+      "accepted": 1794505000.7635627,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "workflow": "check",
+        "app": "baseline",
+        "apk": "5b47e27b5516e543830d1885e9e134b299402378f1125608a0e1966f7ab81f47.apk",
+        "validator": "baseline-settings",
+        "device": "chromecast-test-02"
+      },
+      "device": "chromecast-test-02",
+      "generation": 5649,
+      "cancel": 0,
+      "error": null,
+      "started": 1794505178.370404,
+      "finished": 1794505265.4324648,
+      "worker_pid": 228996,
+      "recovery_resolved": 0,
+      "installation": null,
+      "expected_until": 1794506258.4170737,
+      "battery_history_parser": 1,
+      "owner_label": "interactive",
+      "target": "chromecast-test-02",
+      "item": 1,
+      "retry_of": null,
+      "retried_by": null,
+      "automatic_recovery": null,
+      "device_wait": null
+    }
+  ],
+  "progress": {
+    "installed": 0,
+    "launcher_verified": 0,
+    "install_total": 0
+  },
+  "multi_apk": true,
+  "state": "completed"
+}

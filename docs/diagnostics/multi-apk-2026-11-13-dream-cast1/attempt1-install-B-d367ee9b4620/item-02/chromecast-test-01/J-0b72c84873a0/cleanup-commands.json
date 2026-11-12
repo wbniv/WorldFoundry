@@ -1,0 +1,47 @@
+[
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-0b72c84873a0-launcher.xml"
+    ],
+    "start": 1794505822.1772628,
+    "end": 1794505822.381501,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test ! -e /data/local/tmp/wf-J-0b72c84873a0-launcher.xml; echo wf-status=$?"
+    ],
+    "start": 1794505822.3839602,
+    "end": 1794505822.5368304,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.wf_game.baseline"
+    ],
+    "start": 1794505822.5687768,
+    "end": 1794505822.7765908,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1794505822.7799282,
+    "end": 1794505823.0306604,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794505823.0335402,
+    "end": 1794505823.4277706,
+    "returncode": 0
+  }
+]
