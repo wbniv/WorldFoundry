@@ -128,3 +128,7 @@ scripts/swap-apk-assets.py --apk ENGINE.apk --from REFERENCE.apk --out OUT.apk
 ```
 
 The scripts carry the absolute paths used on this machine: the worktree, the build-docker output, the show APK and the 9f97f5dd reference `A-9f97.apk`.
+
+## Decision
+
+Will, 2026‑11‑13: **accept the drift** (option D). `a86f420b` stays as is; its ~0.6 ms is under 1 % of the 71 ms frame, and the remaining ~1.4 ms is unattributed. No fix is planned. The scratch worktree `/home/will/wf-bisect` can be removed.
