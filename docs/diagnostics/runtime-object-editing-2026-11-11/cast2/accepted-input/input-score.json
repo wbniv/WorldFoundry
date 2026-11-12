@@ -1,0 +1,167 @@
+{
+  "score": {
+    "version": 1,
+    "timebase": "milliseconds-from-run-start",
+    "events": [
+      {
+        "seq": 1,
+        "t": 5000,
+        "key": "DPAD_DOWN",
+        "edge": "down"
+      },
+      {
+        "seq": 2,
+        "t": 5100,
+        "key": "DPAD_DOWN",
+        "edge": "up"
+      },
+      {
+        "seq": 3,
+        "t": 5400,
+        "key": "DPAD_DOWN",
+        "edge": "down"
+      },
+      {
+        "seq": 4,
+        "t": 5500,
+        "key": "DPAD_DOWN",
+        "edge": "up"
+      },
+      {
+        "seq": 5,
+        "t": 5800,
+        "key": "DPAD_DOWN",
+        "edge": "down"
+      },
+      {
+        "seq": 6,
+        "t": 5900,
+        "key": "DPAD_DOWN",
+        "edge": "up"
+      },
+      {
+        "seq": 7,
+        "t": 6200,
+        "key": "DPAD_DOWN",
+        "edge": "down"
+      },
+      {
+        "seq": 8,
+        "t": 6300,
+        "key": "DPAD_DOWN",
+        "edge": "up"
+      },
+      {
+        "seq": 9,
+        "t": 6600,
+        "key": "DPAD_DOWN",
+        "edge": "down"
+      },
+      {
+        "seq": 10,
+        "t": 6700,
+        "key": "DPAD_DOWN",
+        "edge": "up"
+      },
+      {
+        "seq": 11,
+        "t": 7200,
+        "key": "DPAD_CENTER",
+        "edge": "down"
+      },
+      {
+        "seq": 12,
+        "t": 7300,
+        "key": "DPAD_CENTER",
+        "edge": "up"
+      },
+      {
+        "seq": 13,
+        "t": 18000,
+        "key": "DPAD_RIGHT",
+        "edge": "down"
+      },
+      {
+        "seq": 14,
+        "t": 21000,
+        "key": "DPAD_RIGHT",
+        "edge": "up"
+      },
+      {
+        "seq": 15,
+        "t": 23000,
+        "key": "DPAD_LEFT",
+        "edge": "down"
+      },
+      {
+        "seq": 16,
+        "t": 26000,
+        "key": "DPAD_LEFT",
+        "edge": "up"
+      },
+      {
+        "seq": 17,
+        "t": 28000,
+        "key": "DPAD_UP",
+        "edge": "down"
+      },
+      {
+        "seq": 18,
+        "t": 31000,
+        "key": "DPAD_UP",
+        "edge": "up"
+      },
+      {
+        "seq": 19,
+        "t": 33000,
+        "key": "DPAD_DOWN",
+        "edge": "down"
+      },
+      {
+        "seq": 20,
+        "t": 36000,
+        "key": "DPAD_DOWN",
+        "edge": "up"
+      }
+    ]
+  },
+  "captures": [
+    {
+      "t": 17000,
+      "label": "before-right",
+      "step": 6
+    },
+    {
+      "t": 21500,
+      "label": "after-right",
+      "step": 8
+    },
+    {
+      "t": 26500,
+      "label": "after-left",
+      "step": 10
+    },
+    {
+      "t": 31500,
+      "label": "after-up",
+      "step": 12
+    },
+    {
+      "t": 36500,
+      "label": "after-down",
+      "step": 14
+    },
+    {
+      "t": 40000,
+      "label": "released-settled",
+      "step": 15
+    },
+    {
+      "t": 46000,
+      "label": "released-later",
+      "step": 16
+    }
+  ],
+  "sha256": "f850b0f040fae4186a3b29686118e692e0972692951b093e4b021993138cde4d",
+  "bytes": 1086
+}

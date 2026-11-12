@@ -1,0 +1,670 @@
+{
+  "schema": 1,
+  "score_sha256": "f850b0f040fae4186a3b29686118e692e0972692951b093e4b021993138cde4d",
+  "clock_calibration": {
+    "offset_seconds": 1.3429267406463623,
+    "uncertainty_seconds": 0.07554288005828858
+  },
+  "device_anchor": {
+    "device_uptime_ms": 344426011,
+    "device_wall_ms": 1794390758106
+  },
+  "host_start_wall": 1794390758.0123236,
+  "events": [
+    {
+      "seq": 1,
+      "t": 5000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344431089,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 5078,
+      "lateness_ms": 78,
+      "recording_relative_ms": 6662,
+      "segment": 1,
+      "segment_relative_ms": 6662
+    },
+    {
+      "seq": 2,
+      "t": 5100,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344431143,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 5132,
+      "lateness_ms": 32,
+      "recording_relative_ms": 6716,
+      "segment": 1,
+      "segment_relative_ms": 6716
+    },
+    {
+      "seq": 3,
+      "t": 5400,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344431472,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 5461,
+      "lateness_ms": 61,
+      "recording_relative_ms": 7045,
+      "segment": 1,
+      "segment_relative_ms": 7045
+    },
+    {
+      "seq": 4,
+      "t": 5500,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344431560,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 5549,
+      "lateness_ms": 49,
+      "recording_relative_ms": 7133,
+      "segment": 1,
+      "segment_relative_ms": 7133
+    },
+    {
+      "seq": 5,
+      "t": 5800,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344431872,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 5861,
+      "lateness_ms": 61,
+      "recording_relative_ms": 7445,
+      "segment": 1,
+      "segment_relative_ms": 7445
+    },
+    {
+      "seq": 6,
+      "t": 5900,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344431960,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 5949,
+      "lateness_ms": 49,
+      "recording_relative_ms": 7533,
+      "segment": 1,
+      "segment_relative_ms": 7533
+    },
+    {
+      "seq": 7,
+      "t": 6200,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344432256,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 6245,
+      "lateness_ms": 45,
+      "recording_relative_ms": 7829,
+      "segment": 1,
+      "segment_relative_ms": 7829
+    },
+    {
+      "seq": 8,
+      "t": 6300,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344432378,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 6367,
+      "lateness_ms": 67,
+      "recording_relative_ms": 7951,
+      "segment": 1,
+      "segment_relative_ms": 7951
+    },
+    {
+      "seq": 9,
+      "t": 6600,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344432655,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 6644,
+      "lateness_ms": 44,
+      "recording_relative_ms": 8228,
+      "segment": 1,
+      "segment_relative_ms": 8228
+    },
+    {
+      "seq": 10,
+      "t": 6700,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344432761,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 6750,
+      "lateness_ms": 50,
+      "recording_relative_ms": 8334,
+      "segment": 1,
+      "segment_relative_ms": 8334
+    },
+    {
+      "seq": 11,
+      "t": 7200,
+      "key": "DPAD_CENTER",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344433256,
+        "code": 23,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 7245,
+      "lateness_ms": 45,
+      "recording_relative_ms": 8829,
+      "segment": 1,
+      "segment_relative_ms": 8829
+    },
+    {
+      "seq": 12,
+      "t": 7300,
+      "key": "DPAD_CENTER",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344433378,
+        "code": 23,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 7367,
+      "lateness_ms": 67,
+      "recording_relative_ms": 8951,
+      "segment": 1,
+      "segment_relative_ms": 8951
+    },
+    {
+      "seq": 13,
+      "t": 18000,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344444113,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 18102,
+      "lateness_ms": 102,
+      "recording_relative_ms": 19686,
+      "segment": 1,
+      "segment_relative_ms": 19686
+    },
+    {
+      "seq": 14,
+      "t": 21000,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344447158,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 21147,
+      "lateness_ms": 147,
+      "recording_relative_ms": 22731,
+      "segment": 1,
+      "segment_relative_ms": 22731
+    },
+    {
+      "seq": 15,
+      "t": 23000,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344449213,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 23202,
+      "lateness_ms": 202,
+      "recording_relative_ms": 24786,
+      "segment": 1,
+      "segment_relative_ms": 24786
+    },
+    {
+      "seq": 16,
+      "t": 26000,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344452164,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 26153,
+      "lateness_ms": 153,
+      "recording_relative_ms": 27737,
+      "segment": 1,
+      "segment_relative_ms": 27737
+    },
+    {
+      "seq": 17,
+      "t": 28000,
+      "key": "DPAD_UP",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344454207,
+        "code": 19,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 28196,
+      "lateness_ms": 196,
+      "recording_relative_ms": 29780,
+      "segment": 1,
+      "segment_relative_ms": 29780
+    },
+    {
+      "seq": 18,
+      "t": 31000,
+      "key": "DPAD_UP",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344457285,
+        "code": 19,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 31274,
+      "lateness_ms": 274,
+      "recording_relative_ms": 32858,
+      "segment": 1,
+      "segment_relative_ms": 32858
+    },
+    {
+      "seq": 19,
+      "t": 33000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344459244,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 33233,
+      "lateness_ms": 233,
+      "recording_relative_ms": 34817,
+      "segment": 1,
+      "segment_relative_ms": 34817
+    },
+    {
+      "seq": 20,
+      "t": 36000,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 344462206,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 36195,
+      "lateness_ms": 195,
+      "recording_relative_ms": 37779,
+      "segment": 1,
+      "segment_relative_ms": 37779
+    }
+  ],
+  "emergency_releases": [],
+  "foreground_aborts": [],
+  "captures": [
+    {
+      "label": "before-right",
+      "planned_ms": 17000,
+      "started": 1794390776.4490209,
+      "ended": 1794390777.7097623,
+      "file": "input-frame-001.png",
+      "bytes": 82609,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "after-right",
+      "planned_ms": 21500,
+      "started": 1794390780.9490478,
+      "ended": 1794390782.0872283,
+      "file": "input-frame-002.png",
+      "bytes": 93129,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "after-left",
+      "planned_ms": 26500,
+      "started": 1794390785.950749,
+      "ended": 1794390786.9901645,
+      "file": "input-frame-003.png",
+      "bytes": 112226,
+      "schedule_lateness_ms": 2
+    },
+    {
+      "label": "after-up",
+      "planned_ms": 31500,
+      "started": 1794390790.9490392,
+      "ended": 1794390791.989118,
+      "file": "input-frame-004.png",
+      "bytes": 133801,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "after-down",
+      "planned_ms": 36500,
+      "started": 1794390795.949037,
+      "ended": 1794390797.0404575,
+      "file": "input-frame-005.png",
+      "bytes": 152686,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "released-settled",
+      "planned_ms": 40000,
+      "started": 1794390799.4494033,
+      "ended": 1794390800.613816,
+      "file": "input-frame-006.png",
+      "bytes": 165644,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "released-later",
+      "planned_ms": 46000,
+      "started": 1794390805.4490895,
+      "ended": 1794390806.6906574,
+      "file": "input-frame-007.png",
+      "bytes": 185711,
+      "schedule_lateness_ms": 0
+    }
+  ],
+  "result": "completed",
+  "key_log": {
+    "tolerance_ms": 100,
+    "log_interval_complete": false,
+    "matching_edges": [
+      {
+        "seq": 1,
+        "logged": {
+          "device_wall_ms": 1794390763182,
+          "code": 20,
+          "edge": "down"
+        },
+        "difference_ms": -2
+      },
+      {
+        "seq": 2,
+        "logged": {
+          "device_wall_ms": 1794390763232,
+          "code": 20,
+          "edge": "up"
+        },
+        "difference_ms": -6
+      },
+      {
+        "seq": 3,
+        "logged": {
+          "device_wall_ms": 1794390763566,
+          "code": 20,
+          "edge": "down"
+        },
+        "difference_ms": -1
+      },
+      {
+        "seq": 4,
+        "logged": {
+          "device_wall_ms": 1794390763648,
+          "code": 20,
+          "edge": "up"
+        },
+        "difference_ms": -7
+      },
+      {
+        "seq": 5,
+        "logged": {
+          "device_wall_ms": 1794390763965,
+          "code": 20,
+          "edge": "down"
+        },
+        "difference_ms": -2
+      },
+      {
+        "seq": 6,
+        "logged": {
+          "device_wall_ms": 1794390764033,
+          "code": 20,
+          "edge": "up"
+        },
+        "difference_ms": -22
+      },
+      {
+        "seq": 7,
+        "logged": {
+          "device_wall_ms": 1794390764350,
+          "code": 20,
+          "edge": "down"
+        },
+        "difference_ms": -1
+      },
+      {
+        "seq": 8,
+        "logged": {
+          "device_wall_ms": 1794390764450,
+          "code": 20,
+          "edge": "up"
+        },
+        "difference_ms": -23
+      },
+      {
+        "seq": 9,
+        "logged": {
+          "device_wall_ms": 1794390764749,
+          "code": 20,
+          "edge": "down"
+        },
+        "difference_ms": -1
+      },
+      {
+        "seq": 10,
+        "logged": {
+          "device_wall_ms": 1794390764850,
+          "code": 20,
+          "edge": "up"
+        },
+        "difference_ms": -6
+      },
+      {
+        "seq": 11,
+        "logged": {
+          "device_wall_ms": 1794390765350,
+          "code": 23,
+          "edge": "down"
+        },
+        "difference_ms": -1
+      },
+      {
+        "seq": 12,
+        "logged": {
+          "device_wall_ms": 1794390765450,
+          "code": 23,
+          "edge": "up"
+        },
+        "difference_ms": -23
+      },
+      {
+        "seq": 13,
+        "logged": {
+          "device_wall_ms": 1794390776207,
+          "code": 22,
+          "edge": "down"
+        },
+        "difference_ms": -1
+      },
+      {
+        "seq": 14,
+        "logged": {
+          "device_wall_ms": 1794390779247,
+          "code": 22,
+          "edge": "up"
+        },
+        "difference_ms": -6
+      },
+      {
+        "seq": 15,
+        "logged": {
+          "device_wall_ms": 1794390781307,
+          "code": 21,
+          "edge": "down"
+        },
+        "difference_ms": -1
+      },
+      {
+        "seq": 16,
+        "logged": {
+          "device_wall_ms": 1794390784243,
+          "code": 21,
+          "edge": "up"
+        },
+        "difference_ms": -16
+      },
+      {
+        "seq": 17,
+        "logged": {
+          "device_wall_ms": 1794390786301,
+          "code": 19,
+          "edge": "down"
+        },
+        "difference_ms": -1
+      },
+      {
+        "seq": 18,
+        "logged": {
+          "device_wall_ms": 1794390789359,
+          "code": 19,
+          "edge": "up"
+        },
+        "difference_ms": -21
+      },
+      {
+        "seq": 19,
+        "logged": {
+          "device_wall_ms": 1794390791338,
+          "code": 20,
+          "edge": "down"
+        },
+        "difference_ms": -1
+      },
+      {
+        "seq": 20,
+        "logged": {
+          "device_wall_ms": 1794390794282,
+          "code": 20,
+          "edge": "up"
+        },
+        "difference_ms": -19
+      }
+    ],
+    "ambiguous": [],
+    "foreign_keys": [],
+    "unmatched_observed_if_incomplete": [
+      {
+        "device_wall_ms": 1794390737281,
+        "code": 4,
+        "edge": "down"
+      },
+      {
+        "device_wall_ms": 1794390737315,
+        "code": 4,
+        "edge": "up"
+      }
+    ],
+    "dropped_sensitive_lines": 1,
+    "truncated": false
+  },
+  "recording_mapping": {
+    "method": "device wall to host calibration",
+    "uncertainty_ms": 76,
+    "segment_boundary_uncertainty": "host screenrecord start/exit times; no frame-level claim"
+  }
+}

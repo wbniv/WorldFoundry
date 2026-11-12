@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/3883eff5) | Record cast2 screensaver validation and remaining input check |
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/7b5a13e7) | Add screensaver hold to planted tank settings |
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/77b1bfb5) | Runtime object editing: Phase 0 outcomes and decisions |
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/4f4b4f99) | Runtime object editing: O4 engine scope approved (Will, 2026-11-10) |
@@ -14,6 +15,10 @@
 | [2026-10-16](https://github.com/wbniv/WorldFoundry/commit/7ef36fbb) | Plan runtime object editing on OAS/OAD to replace RP02 |
 
 <!--history-meta v1
+3883eff5	author	Will Norris
+3883eff5	added	29
+3883eff5	deleted	1
+3883eff5	files	1
 7b5a13e7	author	Will Norris
 7b5a13e7	added	1
 7b5a13e7	deleted	0

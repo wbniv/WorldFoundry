@@ -1,7 +1,7 @@
 # Runtime object editing on OAS/OAD: any object, standard types, no catalog chunk
 
-16 October 2026 · **Implemented 11 November 2026; final cast2 input recording pending.** It supersedes [RP02](2026-10-11-rp02-property-catalog.md) and keeps the goal of the [runtime object editor plan](2026-10-06-runtime-oas-oad-object-editor.md): any object can be edited on the TV or phone. That plan's host, TV form and phone form stay. Its `RP01` data layer is replaced. Engine changes need Will's confirmation of the scope below; the 2026‑10‑06 authorisation covered that plan's "minimal core changes".
-## Closeout status, 2026‑11‑11
+16 October 2026 · **Implemented 11 November 2026; verification complete 13 November 2026.** It supersedes [RP02](2026-10-11-rp02-property-catalog.md) and keeps the goal of the [runtime object editor plan](2026-10-06-runtime-oas-oad-object-editor.md): any object can be edited on the TV or phone. That plan's host, TV form and phone form stay. Its `RP01` data layer is replaced. Engine changes need Will's confirmation of the scope below; the 2026‑10‑06 authorisation covered that plan's "minimal core changes".
+## Closeout status, 2026‑11‑13
 
 The OAS/OAD migration is implemented and pushed (`cd6b9e9e`, `11744a1b`).
 All catalog users now use settings actors or the separate RuntimeDiagnostics
@@ -19,10 +19,13 @@ original Seahorse selection was restored after testing.
 [Cast2 evidence and scope](../diagnostics/runtime-object-editing-2026-11-11/cast2/README.md)
 records the captures, APK hashes and coordinator jobs. The older held-input run
 J‑897f46fd7891 completed but used pre-migration code, so it is not final-build
-acceptance. The fresh gameplay APK is built and signed; its four-direction
-recording J‑2a9de06204d9 is queued. The coordinator currently reports control
-unavailable for all devices. **Do not mark that final input check passed until
-its recording and release captures have been inspected.**
+acceptance. **PASS:** the fresh gameplay recording J‑2a9de06204d9 completed on
+cast2 with the migrated APK. All 20 key edges were accepted, four held directions
+moved the player, and the two later release captures showed it settled while the
+plants kept growing. The native log confirms `settings-source=OAD`; cleanup
+restored foreground and input with no aborts or emergency releases. The captures
+and actual input timeline were inspected on 13 November. Runtime object editing
+implementation and its final outstanding device verification are closed.
 
 The separate baseline Pixel/forms/runtime-options acceptance, Planted soak and
 exact-timing gates, real-OAD Editor Label cleanup and fixed-size strings remain

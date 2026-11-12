@@ -1,0 +1,12 @@
+{
+  "job": "J-2a9de06204d9",
+  "status": "PASS",
+  "apk_sha256": "635980d9a540581f6812d420226373694147ae6f01f46ffec43138200fa03a81",
+  "accepted_edges": 20,
+  "foreground_aborts": 0,
+  "emergency_releases": 0,
+  "cleanup_restored": true,
+  "device_health": "ready",
+  "visual_review": "Right, Left, Up and Down move the player; captures at 40s and 46s retain the same player position while plants grow.",
+  "settings_source": "OAD"
+}

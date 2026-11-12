@@ -16,15 +16,16 @@ UI fixtures remain under tests. Native checks, the 69-test isolated level suite,
 checks passed. Both APK ABIs build. Current Aquarium and Planted previews rendered
 on cast1 and cast2, and both devices' original Seahorse selections were restored.
 
-## One final check remains
+## Verification complete, 13 November
 
-J‑2a9de06204d9 is the fresh cast2 gameplay held/released-input recording. It is
-queued because coordinator control became unavailable for every device before
-execution. Follow it through `task chromecast:watch JOB=J-2a9de06204d9`, download
-evidence through the coordinator, and inspect the four directions plus the 40s
-and 46s released-scene captures. Only then close the runtime-editing verification
-TODO. J‑897f46fd7891 completed but used pre-migration RPRP code; it is historical
-evidence, not final acceptance. No raw-device fallback is authorized.
+J‑2a9de06204d9 completed successfully after coordinator control recovered. Its
+installed APK hash matches the current gameplay build below. All 20 key edges
+were accepted, there were no foreground aborts or emergency releases, and the
+cleanup journal restored all effects. Seven captures were inspected: movement
+works in all four directions and the 40s/46s release captures show the player
+settled while plants continue growing. The final native log uses OAD settings.
+The main runtime-editing TODO is closed; separate follow-ups above remain open.
+The accepted captures, actual timeline and verdict are in the cast2 evidence.
 
 Current gameplay APK:
 `build-docker/runtime-editing-android/aquarium-game-actor-settings-cd6b9e9e.apk`,

@@ -38,8 +38,24 @@ It includes both ABIs and the migrated menu bundle with no RPRP catalog.
 [held-input-recipe.json](held-input-recipe.json) enters the planted tank, holds
 Right, Left, Up and Down for three seconds each, releases each direction, and
 captures the scene again at 40 and 46 seconds after all input is released.
-Final recording: J‑2a9de06204d9. Its result is pending: coordinator control became unavailable for all devices
-before it could start. Do not count the historical recording as this check.
+**PASS — reviewed 13 November 2026.** Final recording J‑2a9de06204d9 completed
+after coordinator control recovered, using the exact APK hash in game-apk.json.
+All 20 key edges were applied and accepted. There were no foreground aborts or
+emergency releases; the journal confirms cleanup restored all effects, including
+foreground and input. The final native entry log reports `settings-source=OAD`.
+
+The seven captures were inspected: Right moves the player right, Left returns
+it, Up moves it up and Down returns it. The 40s and 46s captures show the player
+settled in the same position while the plants keep growing. This is input and
+rendering acceptance, not a frame-rate/performance gate.
+
+[Verdict](accepted-input/verdict.json) · [actual input timeline](accepted-input/input-timeline.json)
+· [OAD entry log](accepted-input/settings-source.log)
+
+![After right](accepted-input/input-frame-002.png)
+![After up](accepted-input/input-frame-004.png)
+![Released at 40 seconds](accepted-input/input-frame-006.png)
+![Released at 46 seconds](accepted-input/input-frame-007.png)
 
 ## Scope of closeout
 
