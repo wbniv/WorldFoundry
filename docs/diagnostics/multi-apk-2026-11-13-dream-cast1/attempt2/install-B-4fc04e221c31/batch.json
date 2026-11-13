@@ -1,0 +1,79 @@
+{
+  "id": "B-4fc04e221c31",
+  "owner": "91e7a66d81613eb5397d20c6",
+  "targets": [
+    "chromecast-test-01"
+  ],
+  "created": 1794532403.0062652,
+  "jobs": [
+    {
+      "id": "J-e69e1279c050",
+      "owner": "91e7a66d81613eb5397d20c6",
+      "accepted": 1794532403.0095422,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "workflow": "verify-launch",
+        "apk": "e2ac53f5fbaa1c638f63de2be16bfecfabbc2243f846c099612d228dcc869321.apk",
+        "app": "aquarium",
+        "device": "chromecast-test-01"
+      },
+      "device": "chromecast-test-01",
+      "generation": 6808,
+      "cancel": 0,
+      "error": null,
+      "started": 1794533143.762232,
+      "finished": 1794533168.8553853,
+      "worker_pid": 629601,
+      "recovery_resolved": 0,
+      "installation": "e2ac53f5fbaa1c638f63de2be16bfecfabbc2243f846c099612d228dcc869321.apk",
+      "expected_until": 1794534223.8053184,
+      "battery_history_parser": 1,
+      "owner_label": "interactive",
+      "target": "chromecast-test-01",
+      "item": 0,
+      "retry_of": null,
+      "retried_by": null,
+      "automatic_recovery": null,
+      "device_wait": null
+    },
+    {
+      "id": "J-b16927dbfc85",
+      "owner": "91e7a66d81613eb5397d20c6",
+      "accepted": 1794532403.010707,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "workflow": "verify-launch",
+        "apk": "5b47e27b5516e543830d1885e9e134b299402378f1125608a0e1966f7ab81f47.apk",
+        "app": "baseline",
+        "device": "chromecast-test-01"
+      },
+      "device": "chromecast-test-01",
+      "generation": 6810,
+      "cancel": 0,
+      "error": null,
+      "started": 1794533192.5247974,
+      "finished": 1794533219.9235156,
+      "worker_pid": 632037,
+      "recovery_resolved": 0,
+      "installation": "5b47e27b5516e543830d1885e9e134b299402378f1125608a0e1966f7ab81f47.apk",
+      "expected_until": 1794534272.6055326,
+      "battery_history_parser": 1,
+      "owner_label": "interactive",
+      "target": "chromecast-test-01",
+      "item": 1,
+      "retry_of": null,
+      "retried_by": null,
+      "automatic_recovery": null,
+      "device_wait": null
+    }
+  ],
+  "progress": {
+    "installed": 2,
+    "launcher_verified": 2,
+    "install_total": 2
+  },
+  "multi_apk": true,
+  "state": "completed"
+}

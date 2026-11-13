@@ -1,0 +1,101 @@
+[
+  {
+    "args": [
+      "shell",
+      "cmd package query-services --brief --components -a android.service.dreams.DreamService"
+    ],
+    "start": 1794535203.6035903,
+    "end": 1794535203.864266,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1794535203.8717258,
+    "end": 1794535204.3761954,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_enabled"
+    ],
+    "start": 1794535204.3791835,
+    "end": 1794535205.4410226,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_activate_on_sleep"
+    ],
+    "start": 1794535205.450773,
+    "end": 1794535205.7290013,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get system screen_off_timeout"
+    ],
+    "start": 1794535205.732793,
+    "end": 1794535206.1419358,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure sleep_timeout"
+    ],
+    "start": 1794535206.148911,
+    "end": 1794535206.5664432,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get global stay_on_while_plugged_in"
+    ],
+    "start": 1794535206.5701637,
+    "end": 1794535206.976824,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1794535206.9793124,
+    "end": 1794535207.3345835,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794535207.3378103,
+    "end": 1794535207.5730326,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "content call --uri content://org.worldfoundry.seahorsegrid.settings --method getCapabilities"
+    ],
+    "start": 1794535207.577252,
+    "end": 1794535210.096863,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "tail -n 300 /sdcard/Android/data/org.worldfoundry.seahorsegrid/files/wf.log"
+    ],
+    "start": 1794535210.101016,
+    "end": 1794535210.4196718,
+    "returncode": 0
+  }
+]

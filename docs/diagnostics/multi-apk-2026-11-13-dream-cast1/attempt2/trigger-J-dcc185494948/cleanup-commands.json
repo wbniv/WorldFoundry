@@ -1,0 +1,56 @@
+[
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1794533048.316287,
+    "end": 1794533048.5577455,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794533048.560563,
+    "end": 1794533048.751411,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1794533048.7562392,
+    "end": 1794533049.182713,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794533049.3353386,
+    "end": 1794533049.7063246,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1794533049.708719,
+    "end": 1794533050.0365582,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794533050.0380344,
+    "end": 1794533050.2239282,
+    "returncode": 0
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "before": [
+    "    topResumedActivity=ActivityRecord{5ec7b22 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t4125}",
+    "    Resumed: ActivityRecord{5ec7b22 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t4125}",
+    "  ResumedActivity: ActivityRecord{5ec7b22 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t4125}"
+  ],
+  "after": [
+    "    topResumedActivity=ActivityRecord{5ec7b22 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t4125}",
+    "    Resumed: ActivityRecord{5ec7b22 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t4125}",
+    "  ResumedActivity: ActivityRecord{5ec7b22 u0 com.google.android.apps.tv.launcherx/.home.HomeActivity t4125}"
+  ],
+  "foreground_unchanged": true
+}

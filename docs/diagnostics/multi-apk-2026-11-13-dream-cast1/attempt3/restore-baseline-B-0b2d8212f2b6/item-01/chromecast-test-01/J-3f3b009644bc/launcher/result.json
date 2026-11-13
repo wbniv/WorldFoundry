@@ -1,0 +1,50 @@
+{
+  "status": "verified",
+  "home": "com.google.android.apps.tv.launcherx/.home.HomeActivity",
+  "apk": "6c2453387655802b7206c6487512f017a3ffce5e877d88da19f908011621b783.apk",
+  "attempts": [
+    {
+      "bounds": [
+        1572,
+        906,
+        1724,
+        1058
+      ],
+      "reference": "expected-icon-1.png",
+      "resource": "res/drawable/icon.png",
+      "kind": "icon",
+      "mean_absolute_error": 6.202286719437115,
+      "rms_error": 12.119852769136207,
+      "worst_region_error": 19.869415807560138,
+      "brightness_gain": 0.9104401150375596,
+      "normalisation": "gain",
+      "scrim_gain": 0.6119780244619714,
+      "scrim_offset": 12.938147876703818,
+      "scrim_correlation": 0.9987865073113505,
+      "verified": true,
+      "verifier_revision": "transparent-circle-v1",
+      "reference_alpha": [
+        {
+          "kind": "banner",
+          "mode": "RGBA",
+          "minimum": 255
+        },
+        {
+          "kind": "icon",
+          "mode": "RGBA",
+          "minimum": 255
+        }
+      ],
+      "screenshot": "attempt-1-view-1.png",
+      "hierarchy": "attempt-1-view-1.xml",
+      "attempt": 1,
+      "launcher_label": "WF baseline"
+    }
+  ],
+  "refreshes": [
+    {
+      "operation": "launcher-force-stop-and-home",
+      "package": "com.google.android.apps.tv.launcherx"
+    }
+  ]
+}

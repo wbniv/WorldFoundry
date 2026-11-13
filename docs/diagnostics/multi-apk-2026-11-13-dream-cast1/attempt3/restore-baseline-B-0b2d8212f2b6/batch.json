@@ -1,0 +1,48 @@
+{
+  "id": "B-0b2d8212f2b6",
+  "owner": "91e7a66d81613eb5397d20c6",
+  "targets": [
+    "chromecast-test-01"
+  ],
+  "created": 1794534305.7246614,
+  "jobs": [
+    {
+      "id": "J-3f3b009644bc",
+      "owner": "91e7a66d81613eb5397d20c6",
+      "accepted": 1794534305.7248828,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "workflow": "verify-launch",
+        "apk": "6c2453387655802b7206c6487512f017a3ffce5e877d88da19f908011621b783.apk",
+        "app": "baseline",
+        "device": "chromecast-test-01"
+      },
+      "device": "chromecast-test-01",
+      "generation": 6826,
+      "cancel": 0,
+      "error": null,
+      "started": 1794534338.2606514,
+      "finished": 1794534368.5629175,
+      "worker_pid": 675820,
+      "recovery_resolved": 0,
+      "installation": "6c2453387655802b7206c6487512f017a3ffce5e877d88da19f908011621b783.apk",
+      "expected_until": 1794535418.3079243,
+      "battery_history_parser": 1,
+      "owner_label": "interactive",
+      "target": "chromecast-test-01",
+      "item": 0,
+      "retry_of": null,
+      "retried_by": null,
+      "automatic_recovery": null,
+      "device_wait": null
+    }
+  ],
+  "progress": {
+    "installed": 1,
+    "launcher_verified": 1,
+    "install_total": 1
+  },
+  "multi_apk": true,
+  "state": "completed"
+}

@@ -1,0 +1,48 @@
+{
+  "id": "B-e3727f47ffe9",
+  "owner": "91e7a66d81613eb5397d20c6",
+  "targets": [
+    "chromecast-test-01"
+  ],
+  "created": 1794535113.0914688,
+  "jobs": [
+    {
+      "id": "J-1b9482638d60",
+      "owner": "91e7a66d81613eb5397d20c6",
+      "accepted": 1794535113.0916889,
+      "state": "completed",
+      "phase": "completed",
+      "request": {
+        "workflow": "verify-launch",
+        "apk": "bd599a2863c4be153b032dd501c2c136f255be1bcd80df64cd1bd86eb342346d.apk",
+        "app": "seahorse-screensaver",
+        "device": "chromecast-test-01"
+      },
+      "device": "chromecast-test-01",
+      "generation": 6837,
+      "cancel": 0,
+      "error": null,
+      "started": 1794535144.4831758,
+      "finished": 1794535170.9571776,
+      "worker_pid": 700800,
+      "recovery_resolved": 0,
+      "installation": "bd599a2863c4be153b032dd501c2c136f255be1bcd80df64cd1bd86eb342346d.apk",
+      "expected_until": 1794536224.523507,
+      "battery_history_parser": 1,
+      "owner_label": "interactive",
+      "target": "chromecast-test-01",
+      "item": 0,
+      "retry_of": null,
+      "retried_by": null,
+      "automatic_recovery": null,
+      "device_wait": null
+    }
+  ],
+  "progress": {
+    "installed": 1,
+    "launcher_verified": 1,
+    "install_total": 1
+  },
+  "multi_apk": true,
+  "state": "completed"
+}

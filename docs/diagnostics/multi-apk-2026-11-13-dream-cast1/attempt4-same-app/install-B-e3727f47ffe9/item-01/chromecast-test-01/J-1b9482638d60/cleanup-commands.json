@@ -1,0 +1,47 @@
+[
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-1b9482638d60-launcher.xml"
+    ],
+    "start": 1794535168.29849,
+    "end": 1794535168.6637914,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test ! -e /data/local/tmp/wf-J-1b9482638d60-launcher.xml; echo wf-status=$?"
+    ],
+    "start": 1794535168.666637,
+    "end": 1794535169.0219233,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.seahorsegrid"
+    ],
+    "start": 1794535169.0558798,
+    "end": 1794535169.5151324,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1794535169.5205224,
+    "end": 1794535169.9234765,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794535169.9266758,
+    "end": 1794535170.3208153,
+    "returncode": 0
+  }
+]

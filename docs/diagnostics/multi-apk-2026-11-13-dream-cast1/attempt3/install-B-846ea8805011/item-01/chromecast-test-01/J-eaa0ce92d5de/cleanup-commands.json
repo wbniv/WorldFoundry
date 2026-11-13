@@ -1,0 +1,65 @@
+[
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-eaa0ce92d5de-launcher.xml"
+    ],
+    "start": 1794534097.4258063,
+    "end": 1794534097.8340886,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test ! -e /data/local/tmp/wf-J-eaa0ce92d5de-launcher.xml; echo wf-status=$?"
+    ],
+    "start": 1794534097.8370614,
+    "end": 1794534097.993787,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1794534098.0275283,
+    "end": 1794534098.4710522,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1794534098.475817,
+    "end": 1794534098.8774529,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME"
+    ],
+    "start": 1794534098.8817108,
+    "end": 1794534099.446081,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1794534099.4500434,
+    "end": 1794534099.7142534,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794534099.719237,
+    "end": 1794534100.1298409,
+    "returncode": 0
+  }
+]

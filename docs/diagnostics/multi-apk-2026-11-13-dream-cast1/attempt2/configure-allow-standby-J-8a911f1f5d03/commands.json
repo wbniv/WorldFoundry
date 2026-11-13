@@ -1,0 +1,29 @@
+[
+  {
+    "args": [
+      "shell",
+      "settings get global stay_on_while_plugged_in"
+    ],
+    "start": 1794532368.7322214,
+    "end": 1794532369.1111505,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings put global stay_on_while_plugged_in 0"
+    ],
+    "start": 1794532369.1483843,
+    "end": 1794532369.5246122,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get global stay_on_while_plugged_in"
+    ],
+    "start": 1794532369.5267715,
+    "end": 1794532369.701628,
+    "returncode": 0
+  }
+]

@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-11-13](https://github.com/wbniv/WorldFoundry/commit/d217ea72) | Multi-APK dream attempt 2: Seahorse Release at HEAD on cast1; allow-standby pending |
 | [2026-11-13](https://github.com/wbniv/WorldFoundry/commit/8f3ed151) | Multi-APK acceptance: per-app validators and cast2 held input pass; dream blocked |
 
 <!--history-meta v1
+d217ea72	author	Will Norris
+d217ea72	added	25
+d217ea72	deleted	0
+d217ea72	files	1
+d217ea72	body	Record cast1's before-state, the denied allow-standby configure call\n(waiting on Will), the finding that allow-standby leaves the 2 h\nsleep_timeout in place, and the HEAD Seahorse Release install\n(B-fc80f79c72a5, 25dfeda6 -> bd599a28) with the Dream still selected.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 8f3ed151	author	Will Norris
 8f3ed151	added	46
 8f3ed151	deleted	0

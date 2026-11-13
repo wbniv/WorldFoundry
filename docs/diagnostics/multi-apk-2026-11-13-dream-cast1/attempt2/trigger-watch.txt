@@ -1,0 +1,11 @@
+J-dcc185494948: accepted {"device": "chromecast-test-01", "workflow": "screensaver-trigger"}
+J-dcc185494948: granted {"device": "chromecast-test-01", "generation": 6805}
+J-dcc185494948: phase {"phase": "android-transport-prepare"}
+J-dcc185494948: phase {"phase": "connecting"}
+J-dcc185494948: phase {"phase": "preparing-screensaver-trigger"}
+J-dcc185494948: phase {"phase": "waiting-for-screensaver"}
+J-dcc185494948: phase {"phase": "connecting"}
+J-dcc185494948: phase {"phase": "awaiting-supervision"}
+J-dcc185494948: device-endpoint-advertised {"device": "chromecast-test-01", "endpoint": "192.168.4.61:33435", "verified": false}
+J-dcc185494948: completed {"error": null, "health": "ready"}
+J-dcc185494948: completed

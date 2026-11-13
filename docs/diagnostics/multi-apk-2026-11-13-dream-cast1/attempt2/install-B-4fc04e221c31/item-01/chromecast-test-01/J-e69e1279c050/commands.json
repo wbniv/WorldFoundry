@@ -1,0 +1,138 @@
+[
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794533147.6335769,
+    "end": 1794533148.101915,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1794533148.151374,
+    "end": 1794533148.5167298,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~BsK_TfCWeL0OBNlAVZg-Lw==/org.worldfoundry.wf_game.aquarium-LW-_Y4P6EXewx69G1m3HVA==/base.apk'"
+    ],
+    "start": 1794533148.5182478,
+    "end": 1794533148.7339785,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1794533148.7985084,
+    "end": 1794533149.1247761,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.aquarium"
+    ],
+    "start": 1794533149.1278422,
+    "end": 1794533149.4947903,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~BsK_TfCWeL0OBNlAVZg-Lw==/org.worldfoundry.wf_game.aquarium-LW-_Y4P6EXewx69G1m3HVA==/base.apk'"
+    ],
+    "start": 1794533149.4970908,
+    "end": 1794533149.714615,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME"
+    ],
+    "start": 1794533150.2639816,
+    "end": 1794533150.528464,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop com.google.android.apps.tv.launcherx"
+    ],
+    "start": 1794533150.5315292,
+    "end": 1794533150.8052528,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1794533150.8507473,
+    "end": 1794533151.1625364,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794533151.3152714,
+    "end": 1794533151.6926882,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1794533151.6961012,
+    "end": 1794533152.275916,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794533155.2787125,
+    "end": 1794533155.6713421,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "uiautomator dump --compressed /data/local/tmp/wf-J-e69e1279c050-launcher.xml"
+    ],
+    "start": 1794533155.7322187,
+    "end": 1794533159.1458457,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /data/local/tmp/wf-J-e69e1279c050-launcher.xml"
+    ],
+    "start": 1794533159.1480556,
+    "end": 1794533159.3402178,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1794533159.3429036,
+    "end": 1794533164.7797554,
+    "returncode": 0
+  }
+]

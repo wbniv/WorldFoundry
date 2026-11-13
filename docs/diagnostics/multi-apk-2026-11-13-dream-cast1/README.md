@@ -45,7 +45,7 @@ The `adb-failure-1.json` in the trigger job is the known cleanup step that canno
 launcher's `DispatchActivity` (`SecurityException … not exported`). The job was not
 affected.
 
-## Attempt 2 (cast1, `attempt2/`): prepared, waiting on Will
+## Attempt 2 (cast1, `attempt2/`): preparation
 
 - **Before state** (`screensaver-list` J‑aab3112143a1): Seahorse Grid Dream selected,
   `enabled` 1, `activate_on_sleep` 1, `idle_timeout_ms` 600000, `sleep_timeout_ms`
@@ -69,3 +69,67 @@ affected.
   `restored`, health `ready`.
 - **After** (`screensaver-list` J‑c008d1e5d421): the Seahorse Grid Dream is still
   selected; every other value is unchanged, including `stay_on_while_plugged_in` 3.
+
+## allow-standby applied (`attempt2/configure-allow-standby-J-8a911f1f5d03/`)
+
+The coordinator session ran `CHANGE=allow-standby` on cast1 on Will's direct instruction (J‑8a911f1f5d03):
+`stay_on_while_plugged_in` original 3, read-back 0, health `ready`. Will's permanent setup for cast1
+is now stay-on 0 with the Seahorse Grid Dream selected.
+
+## Attempt 2, trigger (`attempt2/trigger-J-dcc185494948/`, `attempt2/install-B-4fc04e221c31/`)
+
+- `screensaver-trigger` J‑dcc185494948 **observed the Dream**: `running_state: running`, active component
+  Seahorse Grid, `stay_on_while_plugged_in` 0, at 01:23:35 UTC (`screensaver.png` shows the seahorse grid).
+- The trigger job's own cleanup then restored the earlier foreground (the launcher). It woke the cast
+  (`woke_before_retry: true`) after an `am start -W` HOME timed out (`foreground-restore-failure.json`).
+- The two-APK install queued behind it (B‑4fc04e221c31: J‑e69e1279c050, J‑b16927dbfc85) therefore found
+  the launcher in front, not the Dream. Both installed and verified, but this run is **not** the
+  dreaming case. A queued job behind `screensaver-trigger` can never meet the Dream for this reason.
+
+## Attempt 3: two-APK install against the idle Dream — PASS (`attempt3/`)
+
+1. With no job after 08:26:55 local, cast1 went into the Seahorse Dream on its own 10-minute idle timer.
+   `capture` J‑6a7e59b90a7a (08:40) shows the seahorse grid.
+2. Batch `B‑846ea8805011` (Aquarium show `e2ac53f5…`, Baseline `5b47e27b…`):
+   - **J‑eaa0ce92d5de (Aquarium):** `background-install.json` records `before` = the Seahorse
+     `DreamActivity`, `foreground_unchanged: true`. The install ran under the Dream without
+     disturbing it. Launcher verification then woke the cast (`input keyevent KEYCODE_WAKEUP`
+     08:41:17, then `am start -n …HomeActivity` without `-W`, 08:41:18: fix `4b23847` on hardware)
+     and verified the tile (`gain`). Cleanup recorded the Dream as `transient_dream` and left the
+     launcher in front; `restored`, health `ready`.
+   - **J‑20f3828bfd8b (Baseline):** ran next on the awake launcher; installed (`6c245338…` →
+     `5b47e27b…`), launcher `verified`, foreground unchanged, `restored`.
+   - Afterwards: the Dream is not running and the launcher is in front. The Dream starts again on
+     the next idle timeout (see attempt 4).
+3. **Baseline displacement and repair.** Between attempt 2 and attempt 3, another session installed its
+   Baseline diagnostic build `6c245338…` on cast1 (`runtime-editing-followups-2026-11-13`, J‑8c0da2aee2ea,
+   built 2026‑11‑13 08:17). It is newer than `5b47e27b…`. Attempt 3 overwrote it, so batch
+   `B‑0b2d8212f2b6` (J‑3f3b009644bc) reinstalled `6c245338…` (`5b47e27b…` → `6c245338…`, verified,
+   launcher verified).
+4. Another owner's `preview-video` (J‑fbc417b66adc) ran on cast1 just before the capture. Its evidence
+   was not kept here.
+
+## Attempt 4: same-app Dream (fix `0c706d6`) — PASS (`attempt4-same-app/`)
+
+- After another idle period, `capture` J‑eaae62db8517 (08:58) shows the Seahorse Dream.
+- Batch `B‑e3727f47ffe9`, J‑1b9482638d60: install the Seahorse screensaver `bd599a28…` (the package
+  whose Dream was running).
+  - `foreground-before-install.txt`: Seahorse `DreamActivity` on top.
+  - The job **woke first** (08:59:11 `KEYCODE_WAKEUP`, `am start` HOME): `foreground-after-wake.txt` shows
+    the launcher.
+  - It then installed in the background (`foreground_unchanged: true`), `bd599a28…` → `bd599a28…`
+    verified, launcher `verified`, `succeeded`/`completed`, `restored`, health `ready`.
+  - The 2026‑10‑25 `plugin-error` (J‑d2b5478d6fa1, J‑4ed799902b09) did not recur. With the Dream
+    woken there is no foreground conflict, so the job installs rather than failing.
+
+## Final state of cast1 (`final-state/`, `screensaver-list` J‑0ec0aae5157b)
+
+| Setting / package | Value |
+|---|---|
+| Selected Dream | `org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService` (`bd599a28…`, Release built at HEAD `8f3ed151`) |
+| `stay_on_while_plugged_in` | 0 (standby allowed, Will's setup) |
+| `enabled` / `activate_on_sleep` | 1 / 1 |
+| `idle_timeout_ms` / `sleep_timeout_ms` | 600000 / 7200000 (the 2 h sleep timer is unchanged) |
+| Aquarium | `e2ac53f5…` (show build) |
+| Baseline | `6c245338…` (the other session's newest diagnostic build, restored) |
+| Queue | idle, nothing queued, health `ready` |

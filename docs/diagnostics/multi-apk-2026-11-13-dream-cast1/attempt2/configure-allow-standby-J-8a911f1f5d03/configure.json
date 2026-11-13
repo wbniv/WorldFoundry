@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "device": "chromecast-test-01",
+  "collected_at": "2026-11-13T01:12:49.733737+00:00",
+  "configuration": "allow-standby",
+  "changes": [
+    {
+      "kind": "configuration",
+      "namespace": "global",
+      "key": "stay_on_while_plugged_in",
+      "state": "set",
+      "value": "3",
+      "target": "0",
+      "changed": true
+    }
+  ],
+  "persistent_settings_changed": true,
+  "reverse_with": [
+    "stay-awake-while-powered"
+  ],
+  "note": "persistent: cleanup does not undo this. Originals are recorded per setting; run a configuration in reverse_with to put the device back."
+}

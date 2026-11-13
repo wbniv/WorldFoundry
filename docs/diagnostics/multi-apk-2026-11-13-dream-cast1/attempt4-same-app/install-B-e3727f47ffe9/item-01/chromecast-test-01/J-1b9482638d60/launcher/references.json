@@ -1,0 +1,73 @@
+{
+  "package": "org.worldfoundry.seahorsegrid",
+  "label": "World Foundry Seahorse Grid Screensaver",
+  "apk_sha256": "bd599a2863c4be153b032dd501c2c136f255be1bcd80df64cd1bd86eb342346d",
+  "references": [
+    {
+      "kind": "banner",
+      "resource": "res/gU.png",
+      "file": "expected-banner-0.png",
+      "sha256": "e8e5d3e95c29d421393d22dc6edfa6f3362b6331e93d496779b8fcb55c327ca7"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/QZ.png",
+      "file": "expected-adaptive-1.png",
+      "sha256": "67bd24c37e4a999bd5624e24034d68e1531b3fc6682504fc6074ec21bf1218c1"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/zr.png",
+      "file": "expected-adaptive-2.png",
+      "sha256": "91c9d5072559c8e3f92bdede34aa5905ebb110dcfd4ca3431151a9adf9eff692"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/Em.png",
+      "file": "expected-adaptive-3.png",
+      "sha256": "d72e3785db423b7441d0517ee2ccaf2647bd91eee905b6a89ca4a15ef8811a80"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/Lf.png",
+      "file": "expected-adaptive-4.png",
+      "sha256": "06ba4e7ef1b47813ade608b2f2bc24567e2b861ddced83d73375d42c35925ad2"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/as.png",
+      "file": "expected-adaptive-5.png",
+      "sha256": "6ccbe3c313996a03dcda3f5eb7308633952644058c5b632d3cf5e3c415ff7b28"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/9w.png",
+      "file": "expected-icon-6.png",
+      "sha256": "7af9ac3e61f5db34996b278f361e9698134b3d94ecb0f1e22c6d65339e8e6afd"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/yn.png",
+      "file": "expected-icon-7.png",
+      "sha256": "1a5265787072f99ad9d8acd8567bce59a0f9e578b06e1e712691b3065a5d7571"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/FS.png",
+      "file": "expected-icon-8.png",
+      "sha256": "81c77cda846df4c15ea6e0e81684294caaf7fe297695c39683850126961dc705"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/RJ.png",
+      "file": "expected-icon-9.png",
+      "sha256": "4c87a72f0ba79565856e54e88703ee21ad0680cbb2b6d814b0a061dc43738651"
+    },
+    {
+      "kind": "icon",
+      "resource": "res/o-.png",
+      "file": "expected-icon-10.png",
+      "sha256": "15063eb8e8936955d54ebd10d3113cfbea7c66c02eb0914be235675b86f1d083"
+    }
+  ]
+}
