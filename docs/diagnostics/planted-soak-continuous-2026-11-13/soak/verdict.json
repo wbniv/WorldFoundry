@@ -1,0 +1,28 @@
+{
+  "job": "J-bf9150654784",
+  "invalid": null,
+  "samples": 81,
+  "all_stable": true,
+  "pids": [
+    30527
+  ],
+  "tank_starts_observed": 51,
+  "reloads_lower_bound": 50,
+  "run_span_s": 1467.3,
+  "max_gap_s": 24.1,
+  "median_gap_s": 17.9,
+  "pss_min_kib": 73859,
+  "pss_max_kib": 110623,
+  "final10_samples": 34,
+  "final10_span_s": 587.5,
+  "final10_max_gap_s": 20.6,
+  "final10_min_kib": 73859,
+  "final10_max_kib": 85707,
+  "final10_median_kib": 83417.5,
+  "final10_spread_kib": 11848,
+  "limit_kib_exclusive": 4096,
+  "rolling10_spread_min_kib": 11848,
+  "rolling10_spread_max_kib": 29991,
+  "fatal_markers": [],
+  "pass": false
+}

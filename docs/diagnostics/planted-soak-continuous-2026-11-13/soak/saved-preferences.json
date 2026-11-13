@@ -1,0 +1,13 @@
+{
+  "original_component": "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService",
+  "settings": {
+    "Growth speed": {
+      "wire_id": "31.131",
+      "value": "3"
+    },
+    "Hold seconds": {
+      "wire_id": "31.140",
+      "value": "120"
+    }
+  }
+}

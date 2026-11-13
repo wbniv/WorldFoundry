@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-13](https://github.com/wbniv/WorldFoundry/commit/943d8799) | Record runtime editing device follow-ups and scoped proposals |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/996c9350) | docs: Planted Tank device results on cast1 (install, overrides, saltwater save, natural Dream) |
 | [2026-10-22](https://github.com/wbniv/WorldFoundry/commit/749e3bbf) | docs: refresh planted tank verification status |
 | [2026-10-22](https://github.com/wbniv/WorldFoundry/commit/80f43e98) | Use generic Settings catalogs for screensaver controls |
@@ -22,6 +23,10 @@
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4266a44c) | Plan the Planted Tank screensaver |
 
 <!--history-meta v1
+943d8799	author	Will Norris
+943d8799	added	16
+943d8799	deleted	0
+943d8799	files	1
 996c9350	author	Will Norris
 996c9350	added	24
 996c9350	deleted	2

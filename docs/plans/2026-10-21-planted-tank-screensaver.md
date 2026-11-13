@@ -272,9 +272,31 @@ Build, level and test steps run in the project's containers (`wf-blender:local` 
 8. **Default timing at 1×.** One uninterrupted cycle on a device: reload-to-reload equals the bound plus 120 s within 5 s.
 
     **NOT RUN — device unavailable.** The device frame rate during a planted tank is not measured either, so whether level time equals wall time on the TV (it does only above 10 FPS) is still open.
+    **PASS — production Release on cast1, 2026‑11‑13** (J‑cbc06d527a67, no video, 17 stable process samples): tank-start markers 09:01:09.859 and 09:06:24.975, **315.116 s** between starts against 195 + 120 = 315 s ±5 s. [Evidence](../diagnostics/runtime-editing-followups-2026-11-13/README.md#default-timing-pass).
+
 9. **Soak.** 50 tanks at 8× with hold 5 on a device: the same process id throughout, no crash, and PSS spread under 4 MiB after warm-up.
 
     **NOT RUN — device unavailable.** The coordinator can now set `speed` and `hold` through the advertised Settings fields; `PERM` 1 MB is not yet checked on a device.
+    **Continuous-sampling repeat on cast2, 2026‑11‑13: FAIL on memory spread.** Why the J‑c21e98845289 run had a 914.8 s gap: the host laptop suspended from 09:30:24 to 09:45:17 +0700, which froze the host-side sampler while the device kept running. Its loop timed itself with `time.monotonic()`, which stops during suspend. The repeat holds a `systemd-inhibit sleep:idle` block lock, times itself on the wall clock and aborts on any gap over 60 s. The limit is unchanged.
+
+    ```
+    $ python3 docs/diagnostics/planted-soak-continuous-2026-11-13/run-soak.py     # J-bf9150654784, Release 2d8f70c1, speed 6 (8x), hold 5
+    2026-11-13T15:22:08+0700 samples 81 tank starts 51 pss 83363
+    2026-11-13T15:23:22+0700 restoration verified True
+    $ python3 docs/diagnostics/planted-soak-continuous-2026-11-13/analyse.py
+      "samples": 81, "all_stable": true, "pids": [30527],
+      "tank_starts_observed": 51, "reloads_lower_bound": 50,
+      "run_span_s": 1467.3, "max_gap_s": 24.1, "median_gap_s": 17.9,
+      "pss_min_kib": 73859, "pss_max_kib": 110623,
+      "final10_samples": 34, "final10_span_s": 587.5, "final10_max_gap_s": 20.6,
+      "final10_min_kib": 73859, "final10_max_kib": 85707, "final10_median_kib": 83417.5,
+      "final10_spread_kib": 11848, "limit_kib_exclusive": 4096,
+      "rolling10_spread_min_kib": 11848, "rolling10_spread_max_kib": 29991,
+      "fatal_markers": [], "pass": false
+    ```
+
+    **PASS** for the same PID (30527 in all 81 samples), 50 reloads and no crash marker. **FAIL** for the memory gate: with continuous coverage (34 samples, no gap over 20.6 s), the final-ten-minute PSS spread is **11,848 KiB** against a limit below 4,096 KiB. Without the single lowest sample it is still 10,388 KiB. Between the highest and lowest samples, nearly all of the difference is GL mtrack (44,900 against 34,900 KiB). Over the final window, GL mtrack spans 10,288 KiB and Native Heap 5,907 KiB. PSS falls over the run (about 100–110 MiB early, 80–85 MiB late), so it does not grow. Cast2 restored and read back: speed 3, hold 120, Seahorse Grid selected, activation and timeouts unchanged. No engine investigation was authorized; the limit is Will's. [Evidence](../diagnostics/planted-soak-continuous-2026-11-13/README.md).
+
 10. **Icon and banner.** `python3 scripts/gen-screensaver-android-icons.py` writes the planted resources; the pixel test finds the badge lower-right in the banner and inside the safe circle of the foreground; the Apps row capture shows the banner.
 
     ```
@@ -356,3 +378,10 @@ criterion and repeat with continuous sampling. No engine investigation/fix is
 authorized by this check. Readback confirmed speed 3, hold 120 and original
 Seahorse Grid selection restored; cleanup succeeded with health ready and no
 survivors. [Evidence](../diagnostics/runtime-editing-followups-2026-11-13/README.md).
+
+**Continuous-sampling repeat (cast2 J‑bf9150654784, same day): memory gate FAIL.**
+The 914.8 s gap was the host laptop suspending (09:30–09:45 +0700) under a sampler timed
+with `time.monotonic()`. The repeat held a sleep inhibitor and sampled every 17.9 s
+(largest gap 24.1 s). It ran 50 reloads in PID 30527 with no crash, but the final
+ten minutes' PSS spread was 11,848 KiB (limit below 4,096). The 4 MiB limit is kept, and
+the next step is Will's decision. [Evidence](../diagnostics/planted-soak-continuous-2026-11-13/README.md).
