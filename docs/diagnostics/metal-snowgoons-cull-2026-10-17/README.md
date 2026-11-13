@@ -96,7 +96,9 @@ A frame-20 capture sees one camera view only. As a second check, a geometry scan
 
 ## Codemagic
 
-None triggered. 0 Mac-minutes.
+None triggered before the fix. 0 Mac-minutes.
+
+**Confirmation (2026‑11‑13):** [build 6af718ec](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6af718ec22fa19415f4b31b1), workflow `macos-desktop-debug`, commit `8200a766` on `2026-new-level` (contains merge `15a00eb6`). Step **Compare deterministic capture with Linux reference**: success, and every other step of the build succeeded too. Duration 14:15 to 14:21 UTC, about 6 Mac-minutes on `mac_mini_m2`. The month's total was 226 before and about 232 after (budget 500, our cap 400).
 
 ## Not verified
 
