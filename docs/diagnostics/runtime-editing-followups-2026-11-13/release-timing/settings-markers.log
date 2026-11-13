@@ -1,0 +1,6 @@
+11-13 09:01:09.320 28354 28379 I wf_dream: planted_bridge: configured "water=random;speed=1;hold=120"
+11-13 09:01:09.320 28354 28379 I wf_dream: planted_bridge: tank 0 water=saltwater seed=random speed=1 hold=120
+11-13 09:01:09.859 28354 28379 I wf_dream: PLANTS settings-source=OAD seed=2109663229 water=saltwater age=0 speed=3 textures=1 sway=1 random_entry=1 selector_override=0
+11-13 09:01:09.873 28354 28379 I wf_dream: planted_bridge: tank 1 water=saltwater seed=random speed=1 hold=120
+11-13 09:06:24.975 28354 28379 I wf_dream: PLANTS settings-source=OAD seed=702220395 water=saltwater age=0 speed=3 textures=1 sway=1 random_entry=1 selector_override=0
+11-13 09:06:24.985 28354 28379 I wf_dream: planted_bridge: tank 2 water=freshwater seed=random speed=1 hold=120

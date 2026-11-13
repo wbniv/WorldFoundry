@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "job": "J-cbc06d527a67",
+  "expected_seconds": 315,
+  "observed_seconds": 315.116,
+  "tolerance_seconds": 5,
+  "stable_pid": true,
+  "cleanup_restored": true,
+  "samples": 17,
+  "build_type": "Release",
+  "video": false
+}

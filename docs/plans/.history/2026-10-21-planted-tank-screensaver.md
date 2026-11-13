@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/996c9350) | docs: Planted Tank device results on cast1 (install, overrides, saltwater save, natural Dream) |
 | [2026-10-22](https://github.com/wbniv/WorldFoundry/commit/749e3bbf) | docs: refresh planted tank verification status |
 | [2026-10-22](https://github.com/wbniv/WorldFoundry/commit/80f43e98) | Use generic Settings catalogs for screensaver controls |
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/91990750) | Planted Tank plan: Phase 4b now lists the coordinator registration entries |
@@ -21,6 +22,11 @@
 | [2026-10-21](https://github.com/wbniv/WorldFoundry/commit/4266a44c) | Plan the Planted Tank screensaver |
 
 <!--history-meta v1
+996c9350	author	Will Norris
+996c9350	added	24
+996c9350	deleted	2
+996c9350	files	1
+996c9350	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01PkFSbo6jcue9Gfyb6U9HVs
 749e3bbf	author	Will Norris
 749e3bbf	added	20
 749e3bbf	deleted	20

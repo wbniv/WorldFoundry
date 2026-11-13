@@ -1,0 +1,25 @@
+{
+  "status": "NOT ACCEPTED",
+  "job": "J-c21e98845289",
+  "tank_starts_observed": 63,
+  "reloads_observed_lower_bound": 62,
+  "same_pid": [
+    17159
+  ],
+  "all_samples_stable": true,
+  "samples": 73,
+  "max_sampling_gap_seconds": 914.7946031093597,
+  "final_10minute_samples": 2,
+  "final_10minute_sample_span_seconds": 19.93484330177307,
+  "final_10minute_observed_pss_spread_kib": 2466,
+  "pss_limit_kib_exclusive": 4096,
+  "reason": "A 914.8-second sampling gap leaves only two PSS samples in final ten minutes; insufficient coverage to accept strict memory gate. Earlier rolling window spread was 5764 KiB.",
+  "fatal_markers_found": [],
+  "session_status": "succeeded",
+  "health": "ready",
+  "cleanup_restored": true,
+  "survivors": [],
+  "speed": 6,
+  "hold_seconds": 5,
+  "video": false
+}

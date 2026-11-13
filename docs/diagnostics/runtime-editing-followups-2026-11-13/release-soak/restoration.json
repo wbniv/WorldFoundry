@@ -1,0 +1,10 @@
+{
+  "device": "chromecast-test-02",
+  "settings": {
+    "Growth speed": "3",
+    "Hold seconds": "120"
+  },
+  "selected_component": "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService",
+  "running_state": "not-running",
+  "readback_verified": true
+}

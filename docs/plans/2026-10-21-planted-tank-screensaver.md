@@ -340,3 +340,19 @@ Made with Will on 2026‑10‑21:
 3. **Animals:** none; plants only.
 
 Still open: nothing blocking. If a fixed `seed` should repeat the identical tank every cycle instead of deriving later tanks from it, say so; the plan derives them.
+
+## Follow-up acceptance, 13 November 2026
+
+Device checks and proposals only; no engine edits. Production Release default
+timing **passes**: cast1 J‑cbc06d527a67 measured 315.116 seconds between tank
+starts at 1× with hold 120, within ±5 seconds of the 195 + 120 target.
+
+The cast2 Release soak J‑c21e98845289 recorded 63 tank starts (at least 62 reloads)
+in one PID, all 73 process samples stable, no fatal marker in collected logs.
+The memory gate remains **unaccepted**: a 914.8-second sampling gap leaves only
+two samples in the final ten minutes. Their 2,466 KiB spread is insufficient
+coverage; an earlier rolling window spread was 5,764 KiB. Keep the below-4,096 KiB
+criterion and repeat with continuous sampling. No engine investigation/fix is
+authorized by this check. Readback confirmed speed 3, hold 120 and original
+Seahorse Grid selection restored; cleanup succeeded with health ready and no
+survivors. [Evidence](../diagnostics/runtime-editing-followups-2026-11-13/README.md).

@@ -1,0 +1,1097 @@
+[
+  {
+    "captured": 1794535720.5663424,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 94137,
+    "meminfo": "input-sample-001-meminfo.txt",
+    "logcat": "input-sample-001-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.076,
+      "run_seconds": 1.823,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794535744.3856034,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 114114,
+    "meminfo": "input-sample-002-meminfo.txt",
+    "logcat": "input-sample-002-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.137,
+      "run_seconds": 1.26,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794535762.6499987,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 100929,
+    "meminfo": "input-sample-003-meminfo.txt",
+    "logcat": "input-sample-003-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.06,
+      "run_seconds": 1.218,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794535780.8696237,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 102106,
+    "meminfo": "input-sample-004-meminfo.txt",
+    "logcat": "input-sample-004-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.144,
+      "run_seconds": 1.396,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794535799.46098,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105979,
+    "meminfo": "input-sample-005-meminfo.txt",
+    "logcat": "input-sample-005-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.072,
+      "run_seconds": 1.6,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794535819.6564562,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 104531,
+    "meminfo": "input-sample-006-meminfo.txt",
+    "logcat": "input-sample-006-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.073,
+      "run_seconds": 1.277,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794535837.2151778,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 106132,
+    "meminfo": "input-sample-007-meminfo.txt",
+    "logcat": "input-sample-007-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.075,
+      "run_seconds": 1.368,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794535856.0869424,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 107700,
+    "meminfo": "input-sample-008-meminfo.txt",
+    "logcat": "input-sample-008-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.065,
+      "run_seconds": 1.15,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794535875.390024,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 103767,
+    "meminfo": "input-sample-009-meminfo.txt",
+    "logcat": "input-sample-009-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.053,
+      "run_seconds": 1.51,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794535895.865183,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 106207,
+    "meminfo": "input-sample-010-meminfo.txt",
+    "logcat": "input-sample-010-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.1,
+      "run_seconds": 1.233,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794535915.1540003,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 106339,
+    "meminfo": "input-sample-011-meminfo.txt",
+    "logcat": "input-sample-011-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.08,
+      "run_seconds": 1.209,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794535933.2150671,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 103620,
+    "meminfo": "input-sample-012-meminfo.txt",
+    "logcat": "input-sample-012-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.069,
+      "run_seconds": 1.397,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794535951.7567184,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 108034,
+    "meminfo": "input-sample-013-meminfo.txt",
+    "logcat": "input-sample-013-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.131,
+      "run_seconds": 1.71,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794535973.8019333,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 108522,
+    "meminfo": "input-sample-014-meminfo.txt",
+    "logcat": "input-sample-014-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.075,
+      "run_seconds": 1.233,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794535992.8177872,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 104275,
+    "meminfo": "input-sample-015-meminfo.txt",
+    "logcat": "input-sample-015-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.105,
+      "run_seconds": 1.186,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536010.2068443,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 102827,
+    "meminfo": "input-sample-016-meminfo.txt",
+    "logcat": "input-sample-016-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.125,
+      "run_seconds": 1.285,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536028.415506,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 104303,
+    "meminfo": "input-sample-017-meminfo.txt",
+    "logcat": "input-sample-017-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.122,
+      "run_seconds": 1.408,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536049.2754965,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 107866,
+    "meminfo": "input-sample-018-meminfo.txt",
+    "logcat": "input-sample-018-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.084,
+      "run_seconds": 1.169,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536066.7920067,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105387,
+    "meminfo": "input-sample-019-meminfo.txt",
+    "logcat": "input-sample-019-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.062,
+      "run_seconds": 1.161,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536083.9328156,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 104418,
+    "meminfo": "input-sample-020-meminfo.txt",
+    "logcat": "input-sample-020-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.095,
+      "run_seconds": 0.944,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536101.2728019,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105818,
+    "meminfo": "input-sample-021-meminfo.txt",
+    "logcat": "input-sample-021-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.045,
+      "run_seconds": 1.229,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536120.336073,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 106119,
+    "meminfo": "input-sample-022-meminfo.txt",
+    "logcat": "input-sample-022-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.051,
+      "run_seconds": 1.08,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536137.2677064,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 108258,
+    "meminfo": "input-sample-023-meminfo.txt",
+    "logcat": "input-sample-023-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.038,
+      "run_seconds": 1.078,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536155.0359674,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 104966,
+    "meminfo": "input-sample-024-meminfo.txt",
+    "logcat": "input-sample-024-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.116,
+      "run_seconds": 1.221,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536174.2756486,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105119,
+    "meminfo": "input-sample-025-meminfo.txt",
+    "logcat": "input-sample-025-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.112,
+      "run_seconds": 1.294,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536196.1732621,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 108162,
+    "meminfo": "input-sample-026-meminfo.txt",
+    "logcat": "input-sample-026-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.135,
+      "run_seconds": 1.343,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536214.969951,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105064,
+    "meminfo": "input-sample-027-meminfo.txt",
+    "logcat": "input-sample-027-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.044,
+      "run_seconds": 1.27,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536234.7451959,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 106073,
+    "meminfo": "input-sample-028-meminfo.txt",
+    "logcat": "input-sample-028-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.061,
+      "run_seconds": 1.398,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536252.9500837,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 106133,
+    "meminfo": "input-sample-029-meminfo.txt",
+    "logcat": "input-sample-029-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.127,
+      "run_seconds": 1.416,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536273.0870833,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105397,
+    "meminfo": "input-sample-030-meminfo.txt",
+    "logcat": "input-sample-030-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.055,
+      "run_seconds": 1.138,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536290.405717,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 104276,
+    "meminfo": "input-sample-031-meminfo.txt",
+    "logcat": "input-sample-031-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.057,
+      "run_seconds": 1.5,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536308.2141092,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105439,
+    "meminfo": "input-sample-032-meminfo.txt",
+    "logcat": "input-sample-032-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.046,
+      "run_seconds": 1.268,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536326.0491686,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105499,
+    "meminfo": "input-sample-033-meminfo.txt",
+    "logcat": "input-sample-033-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.023,
+      "run_seconds": 1.323,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536346.343951,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 102830,
+    "meminfo": "input-sample-034-meminfo.txt",
+    "logcat": "input-sample-034-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.053,
+      "run_seconds": 1.388,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536364.8361604,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 104676,
+    "meminfo": "input-sample-035-meminfo.txt",
+    "logcat": "input-sample-035-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.086,
+      "run_seconds": 1.587,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536383.0164912,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 107269,
+    "meminfo": "input-sample-036-meminfo.txt",
+    "logcat": "input-sample-036-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.119,
+      "run_seconds": 1.241,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536400.8199527,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 102825,
+    "meminfo": "input-sample-037-meminfo.txt",
+    "logcat": "input-sample-037-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.13,
+      "run_seconds": 1.138,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536420.2165926,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105969,
+    "meminfo": "input-sample-038-meminfo.txt",
+    "logcat": "input-sample-038-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.169,
+      "run_seconds": 1.332,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536437.3290462,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 104766,
+    "meminfo": "input-sample-039-meminfo.txt",
+    "logcat": "input-sample-039-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.049,
+      "run_seconds": 1.091,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536454.3071253,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105701,
+    "meminfo": "input-sample-040-meminfo.txt",
+    "logcat": "input-sample-040-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.056,
+      "run_seconds": 1.147,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536471.5626187,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 107781,
+    "meminfo": "input-sample-041-meminfo.txt",
+    "logcat": "input-sample-041-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.047,
+      "run_seconds": 1.202,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536491.0400465,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 102485,
+    "meminfo": "input-sample-042-meminfo.txt",
+    "logcat": "input-sample-042-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.114,
+      "run_seconds": 1.015,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536508.2763748,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105413,
+    "meminfo": "input-sample-043-meminfo.txt",
+    "logcat": "input-sample-043-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.126,
+      "run_seconds": 1.284,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536525.3167748,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105382,
+    "meminfo": "input-sample-044-meminfo.txt",
+    "logcat": "input-sample-044-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.063,
+      "run_seconds": 0.977,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536542.2537217,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105417,
+    "meminfo": "input-sample-045-meminfo.txt",
+    "logcat": "input-sample-045-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.073,
+      "run_seconds": 1.473,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536561.8061645,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105722,
+    "meminfo": "input-sample-046-meminfo.txt",
+    "logcat": "input-sample-046-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.103,
+      "run_seconds": 1.156,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536578.8592796,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 103461,
+    "meminfo": "input-sample-047-meminfo.txt",
+    "logcat": "input-sample-047-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.11,
+      "run_seconds": 1.024,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536595.9335508,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 107221,
+    "meminfo": "input-sample-048-meminfo.txt",
+    "logcat": "input-sample-048-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.077,
+      "run_seconds": 1.185,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536613.2208438,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105233,
+    "meminfo": "input-sample-049-meminfo.txt",
+    "logcat": "input-sample-049-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.057,
+      "run_seconds": 1.18,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536632.8532345,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 107541,
+    "meminfo": "input-sample-050-meminfo.txt",
+    "logcat": "input-sample-050-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.138,
+      "run_seconds": 1.069,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536649.8163738,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 107561,
+    "meminfo": "input-sample-051-meminfo.txt",
+    "logcat": "input-sample-051-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.086,
+      "run_seconds": 1.042,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536667.11754,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 102461,
+    "meminfo": "input-sample-052-meminfo.txt",
+    "logcat": "input-sample-052-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.038,
+      "run_seconds": 1.17,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536684.278254,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 107337,
+    "meminfo": "input-sample-053-meminfo.txt",
+    "logcat": "input-sample-053-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.104,
+      "run_seconds": 1.214,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536703.3171377,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 107045,
+    "meminfo": "input-sample-054-meminfo.txt",
+    "logcat": "input-sample-054-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.048,
+      "run_seconds": 1.122,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536720.416842,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 107705,
+    "meminfo": "input-sample-055-meminfo.txt",
+    "logcat": "input-sample-055-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.119,
+      "run_seconds": 0.973,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536737.374548,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 107665,
+    "meminfo": "input-sample-056-meminfo.txt",
+    "logcat": "input-sample-056-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.04,
+      "run_seconds": 1.224,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536754.4596446,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 102885,
+    "meminfo": "input-sample-057-meminfo.txt",
+    "logcat": "input-sample-057-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.063,
+      "run_seconds": 1.115,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536773.6985466,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 108225,
+    "meminfo": "input-sample-058-meminfo.txt",
+    "logcat": "input-sample-058-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.079,
+      "run_seconds": 1.112,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536790.7190244,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105822,
+    "meminfo": "input-sample-059-meminfo.txt",
+    "logcat": "input-sample-059-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.056,
+      "run_seconds": 0.996,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536807.7090795,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 106066,
+    "meminfo": "input-sample-060-meminfo.txt",
+    "logcat": "input-sample-060-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.077,
+      "run_seconds": 1.186,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536825.4071207,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 104550,
+    "meminfo": "input-sample-061-meminfo.txt",
+    "logcat": "input-sample-061-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.128,
+      "run_seconds": 1.55,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536846.0787623,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105794,
+    "meminfo": "input-sample-062-meminfo.txt",
+    "logcat": "input-sample-062-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.076,
+      "run_seconds": 1.169,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536863.1762483,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 106874,
+    "meminfo": "input-sample-063-meminfo.txt",
+    "logcat": "input-sample-063-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.127,
+      "run_seconds": 0.999,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536880.2197094,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 107291,
+    "meminfo": "input-sample-064-meminfo.txt",
+    "logcat": "input-sample-064-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.056,
+      "run_seconds": 1.287,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536897.6594713,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 107323,
+    "meminfo": "input-sample-065-meminfo.txt",
+    "logcat": "input-sample-065-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.118,
+      "run_seconds": 1.227,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536917.657016,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 106482,
+    "meminfo": "input-sample-066-meminfo.txt",
+    "logcat": "input-sample-066-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.123,
+      "run_seconds": 1.183,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536934.8422532,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105275,
+    "meminfo": "input-sample-067-meminfo.txt",
+    "logcat": "input-sample-067-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.133,
+      "run_seconds": 1.124,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536952.104741,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 106050,
+    "meminfo": "input-sample-068-meminfo.txt",
+    "logcat": "input-sample-068-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.118,
+      "run_seconds": 1.279,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536969.4239225,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 107118,
+    "meminfo": "input-sample-069-meminfo.txt",
+    "logcat": "input-sample-069-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.125,
+      "run_seconds": 1.103,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794536989.3599555,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 102374,
+    "meminfo": "input-sample-070-meminfo.txt",
+    "logcat": "input-sample-070-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.081,
+      "run_seconds": 1.258,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794537006.5366638,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 107058,
+    "meminfo": "input-sample-071-meminfo.txt",
+    "logcat": "input-sample-071-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.097,
+      "run_seconds": 1.121,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794537921.3312669,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 105001,
+    "meminfo": "input-sample-072-meminfo.txt",
+    "logcat": "input-sample-072-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.117,
+      "run_seconds": 2.842,
+      "recording": false,
+      "phases": {}
+    }
+  },
+  {
+    "captured": 1794537941.2661102,
+    "pid_before": 17159,
+    "pid_after": 17159,
+    "stable": true,
+    "total_pss_kb": 107467,
+    "meminfo": "input-sample-073-meminfo.txt",
+    "logcat": "input-sample-073-logcat.txt",
+    "latency": {
+      "queued_to_picked_up": 0.09,
+      "run_seconds": 1.173,
+      "recording": false,
+      "phases": {}
+    }
+  }
+]

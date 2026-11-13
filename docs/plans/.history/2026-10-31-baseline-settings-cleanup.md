@@ -1,59 +1,77 @@
 | Date | Change |
 |------|--------|
-| [2026-11-01](https://github.com/wbniv/WorldFoundry/commit/c66de59e) | Settings plan: the eleven proposed presentations as drawn on cast1 |
-| [2026-11-01](https://github.com/wbniv/WorldFoundry/commit/c1fa09b4) | Settings plan: the Pixel launches the two-owner level; its picker cannot be driven |
-| [2026-11-01](https://github.com/wbniv/WorldFoundry/commit/9eadef08) | Settings plan: the 27 Field types rows as drawn on cast1, with five observations |
-| [2026-11-01](https://github.com/wbniv/WorldFoundry/commit/3b9e79f2) | Settings plan: device acceptance on cast1 and cast2 (two validators pass, one known gap) |
-| [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/c26fb971) | Settings plan: the validator commit is on coordinator main |
-| [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/c95d44bf) | Settings plan: the validator change is committed in the coordinator repo |
-| [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/d460aba6) | Settings cleanup: the editable Show FPS row is accepted |
-| [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/df676a00) | Baseline settings: two owners, Field types and Runtime settings |
-| [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/e6fe62eb) | Baseline: add a ladder of eight Utah teapots (52 to 16 256 faces) |
+| [2026-11-02](https://github.com/wbniv/WorldFoundry/commit/eb71f9ec) | Baseline cleanup: the two validators on the Pixel end plugin-error (they drive TV keys) |
+| [2026-11-01](https://github.com/wbniv/WorldFoundry/commit/d8ebd3ca) | Correct the phone input claim: phone-input jobs exist but cannot walk a modal flow |
+| [2026-11-01](https://github.com/wbniv/WorldFoundry/commit/0ff49194) | Field presentations: a distinct control for every settings case |
+| [2026-11-01](https://github.com/wbniv/WorldFoundry/commit/6020754d) | Settings plan: the eleven proposed presentations as drawn on cast1 |
+| [2026-11-01](https://github.com/wbniv/WorldFoundry/commit/1f8330a2) | Settings plan: the Pixel launches the two-owner level; its picker cannot be driven |
+| [2026-11-01](https://github.com/wbniv/WorldFoundry/commit/f6a20adc) | Settings plan: the 27 Field types rows as drawn on cast1, with five observations |
+| [2026-11-01](https://github.com/wbniv/WorldFoundry/commit/1c903d22) | Settings plan: device acceptance on cast1 and cast2 (two validators pass, one known gap) |
+| [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/66f898a1) | Settings plan: the validator commit is on coordinator main |
+| [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/be39e581) | Settings plan: the validator change is committed in the coordinator repo |
+| [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/af8ab247) | Settings cleanup: the editable Show FPS row is accepted |
+| [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/57ea118d) | Baseline settings: two owners, Field types and Runtime settings |
+| [2026-10-31](https://github.com/wbniv/WorldFoundry/commit/df39b24d) | Baseline: add a ladder of eight Utah teapots (52 to 16 256 faces) |
 
 <!--history-meta v1
-c66de59e	author	Will Norris
-c66de59e	added	17
-c66de59e	deleted	1
-c66de59e	files	1
-c66de59e	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
-c1fa09b4	author	Will Norris
-c1fa09b4	added	3
-c1fa09b4	deleted	3
-c1fa09b4	files	1
-c1fa09b4	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
-9eadef08	author	Will Norris
-9eadef08	added	24
-9eadef08	deleted	3
-9eadef08	files	1
-9eadef08	body	Captured with the coordinator's generic interactive job; no coordinator change.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
-3b9e79f2	author	Will Norris
-3b9e79f2	added	16
-3b9e79f2	deleted	2
-3b9e79f2	files	1
-3b9e79f2	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
-c26fb971	author	Will Norris
-c26fb971	added	2
-c26fb971	deleted	2
-c26fb971	files	1
-c26fb971	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
-c95d44bf	author	Will Norris
-c95d44bf	added	2
-c95d44bf	deleted	2
-c95d44bf	files	1
-c95d44bf	body	The validator patch for the two-owner layout is now a real commit in the\ncoordinator project, 77920cc on the local branch baseline-two-owners-validators\n(based on 57a1ecf, one commit ahead, not pushed, nothing deployed). It covers all\nthree baseline validators, including baseline-runtime-options, which was also\nstale. The full containerised suite passes on the branch (2833 passed, 35\nskipped). validator-patch.diff is regenerated from that commit with\nformat-patch, and the plan's status line and risk row now say so.\n\nRecorded in the plan: the runtime-options validator can no longer show process-\nwide values syncing between two owners on a device (the level has one runtime\nowner now); that coverage stays in tests/test_runtime_options.py. The device\nrun is still the first real test of the validators' new key paths.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
-d460aba6	author	Will Norris
-d460aba6	added	2
-d460aba6	deleted	2
-d460aba6	files	1
-d460aba6	body	The agent that built the cleanup authored one runtime row, runtime_show_fps,\nas editable, because the engine lists only owners with an editable field and\nRuntime settings would otherwise never appear in the picker. Will accepted it\nand wants the option ("The editable Show FPS row: accept it. we totally want\nthis option"). The plan and the TODO item record that, so neither still lists\nit as awaiting approval. The validator patch is the one decision left, and it\nis now being applied in the coordinator repo as a local commit.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
-df676a00	author	Will Norris
-df676a00	added	234
-df676a00	deleted	5
-df676a00	files	1
-df676a00	body	The baseline exported three identical settings owners (five sample fields,\nan empty section and the runtime sheets, three times) and had no settings\nwith one of every type. It now exports two, both target actors in CONFIG at\n(2, -4, 1), so Pick in 3D still shows the "Objects here" list on a device:\n\n- FieldTypes ("Field types", actor 19): 27 fields, one per case in\n  docs/plans/2026-10-29-touch-settings-examples.json, in six sections.\n  wflevels/baseline/field_types.py is the single source (a stable field id,\n  section and descriptor per example id; labels and values come from the\n  JSON). It has its own schema so Apply is not routed through the\n  runtime-options check, which refuses Apply when process globals differ.\n- RuntimeSettings ("Runtime settings", actor 20): Runtime Options (79 rows),\n  Level Memory (4) and Level Behavior (2), moved over once. Git sees the\n  sheets as renames of the old ones.\n\nRemoved from the level: SampleSettings, SampleSettings2, SampleSettings3, the\nfive-field sample sheet, the empty section and the settings-gallery preset\n(and its task). The 118-field gallery stays as a build-time fixture:\nverify.py still checks every declared descriptor type, every presentation\ncode and the OAD framing, and the generic host tests cook it.\n\nThe reviewed baseline.blend is edited in place, not regenerated:\ngenerate.py --settings-owners <blend> removes the three owners and adds the\ntwo, and refuses to run twice (build() creates the same two).\n\nFindings that shaped it, both in the plan:\n- An action key nobody registered is ignored, not an error\n  (Host::apply returns before commit or close), so the Action row ships\n  inert and is recorded as a gap. tests/baseline_owners_test.cpp shows it on\n  the cooked catalog.\n- With all 85 runtime rows authored read-only, Runtime settings would not\n  be editable. The engine lists only editable owners in the chooser and\n  registers the runtime-options consumer only for them, so the owner would\n  have vanished and Pick in 3D never appeared. One row, runtime_show_fps, is\n  authored editable; after install, sync sets every row's read-only flag from\n  the backend. This is the one deviation from the plan and needs Will's OK.\n\nThe main cd.iff and the APK are rebuilt. The validator change for the device\nchecks is a patch file in the plan folder, not applied to the coordinator\nrepo, which Will deploys.\n\nVerified on the host: 106 tests pass across the eight affected modules; the\ncatalog read-back shows two objects (25 rows through the capabilities reader,\nwhich drops Action and Spacer; 27 raw) and 85; task baseline:verify, and\ntask baseline:check 155 of 155 on two runs; the desktop session loads the\nbaseline from the main bundle as level 7, 167 of 167. Not done: device\nacceptance (needs the patch deployed); the bridge read of a runtime value\n(the desktop build has no property read operation; launch-override probes and\nthe harness sync stand in). One of the agent's seven desktop runs failed\n"native player grounded at spawn" with the evidence overwritten; it is\nunexplained. Already failing and untouched: test_object_properties\ncatalog_replacement_on_flag_only_baseline_ram, test_phase_a, test_baseline_icon\nand test_engine_smb_menu_chain_and_return.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
-e6fe62eb	author	Will Norris
-e6fe62eb	added	171
-e6fe62eb	deleted	0
-e6fe62eb	files	1
-e6fe62eb	body	The baseline had no curved, many-face mesh to measure renderer, memory and\nload-time cost against. It now has eight Utah teapots in a row at y = 10, one\nper tessellation level (n = 1, 2, 3, 4, 6, 8, 12, 16): 52, 240, 552, 992,\n2256, 4032, 9120 and 16256 faces, 33500 in all, each with a standing label\nboard. They are visual-only platform actors in a new TEAPOTS collection,\ncreated last so actor ids 1-21 do not move (the new actors are 22-30).\n\nReference data: Newell's 32-patch Bezier teapot, vendored verbatim as\nwflevels/baseline/data/teapotCGA.bpt (source, hash and provenance in\ndata/README.md). Cross-checked against the three.js TeapotGeometry table:\nall 32 patches identical, same order. wflevels/baseline/teapot.py tessellates\nit with no Blender dependency. Every level has 64n^2 - 8n faces except n = 1,\nwhich has 52: four more triangles are collinear and are dropped.\n\nWinding needs no correction. A prototype suggested mixed patch orientation;\nan orientation pass written for it flipped zero triangles at every level, so\nit was removed. The tests check consistency and outward winding per shell,\nwith a mutation test showing the checks fail on broken winding.\n\ngenerate.py gains add_teapots() (also run by build()) and --add-teapots\n<blend>, which appends the collection to the reviewed baseline.blend without\nregenerating it and refuses to run twice.\n\nMemory: the full ladder did not fit the authored 4000000-byte room budget\n(Lmalloc out of memory loading Room 0). It needs about 6.7 MB per slot, so\nmemory-settings.json now authors room_asset_bytes = 8000000. The settings\ncatalogs and bindings carry that value; nothing else in them changed.\n\nVerified: tests/test_baseline_teapots.py (30), task baseline:verify and\ntask baseline:check (118 descriptor checks plus every structural and native\ncheck, 60 FPS on the desktop). Not done: the Pixel install is queued behind a\ncoordinator maintenance window and cast2 is unreachable (needs its Wireless\ndebugging address), so the frame rate on the devices is unmeasured. The main\ncd.iff is not rebuilt: it already drifted (qbert entry, and verify.py --bundle\nexpects 9 TOC entries, now 10); recorded in the plan.\n\nAlso adds the plan for cleaning the baseline settings down to two owners\n(Field types, the 27 sensible type x showAs cases; and Runtime settings), with\nreal cast1 captures of Pick in 3D. Plan only; nothing in it is built.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
+eb71f9ec	author	Will Norris
+eb71f9ec	added	2
+eb71f9ec	deleted	0
+eb71f9ec	files	1
+eb71f9ec	body	Both baseline-settings and baseline-picker ran on phone-pixel-8-pro with the\nfield-presentations APK and ended plugin-error after their recorded assertions\nheld; the Pixel recovered by itself. Recorded in the plan and the TODO line,\nwith a frame of the phone's touch chooser.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
+d8ebd3ca	author	Will Norris
+d8ebd3ca	added	2
+d8ebd3ca	deleted	2
+d8ebd3ca	files	1
+d8ebd3ca	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
+0ff49194	author	Will Norris
+0ff49194	added	15
+0ff49194	deleted	15
+0ff49194	files	1
+0ff49194	body	The eleven "proposed" Field types cases now draw their own control on the\nTV form and on the phone touch form (docs/plans/2026-11-01-field-presentations.md):\n\n- engine/runtime_property_presentation.hpp maps a field's compiled kind,\n  showAs, rule and options to its control, and holds the row-key table\n  wfprops::keys(). Choice rows follow Will's option 6: up to\n  kCycleChoicesMax (4) options cycle with Left / Right and leave to the\n  rail from the first option; more only open the list; A opens it either way.\n- TV: choice boxes with a down-arrow and an open list (numbered ids,\n  wrapped long options), two-segment toggle, pill switch, mailbox bounds,\n  path with a file mark. Rows draw no text under an open list.\n- Touch: numbered and wrapping choice sheets, checkbox and switch drawn\n  differently, bounds and path marks; segment taps now choose the segment\n  (the row target used to swallow them).\n- The OAD normalizer makes an integer TOGGLE without choices a Bool; the\n  Field types catalog, level and main cd.iff are rebuilt.\n- Engine validation refuses a FILENAME value that is not a relative path.\n- Tests: each of the 27 cases asserts its control (engine, TV render, touch\n  fixture); key tests follow the rule table for 2, 4, 5 and 12 options;\n  every committed catalog still loads.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
+6020754d	author	Will Norris
+6020754d	added	17
+6020754d	deleted	1
+6020754d	files	1
+6020754d	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
+1f8330a2	author	Will Norris
+1f8330a2	added	3
+1f8330a2	deleted	3
+1f8330a2	files	1
+1f8330a2	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
+f6a20adc	author	Will Norris
+f6a20adc	added	24
+f6a20adc	deleted	3
+f6a20adc	files	1
+f6a20adc	body	Captured with the coordinator's generic interactive job; no coordinator change.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
+1c903d22	author	Will Norris
+1c903d22	added	16
+1c903d22	deleted	2
+1c903d22	files	1
+1c903d22	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
+66f898a1	author	Will Norris
+66f898a1	added	2
+66f898a1	deleted	2
+66f898a1	files	1
+66f898a1	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
+be39e581	author	Will Norris
+be39e581	added	2
+be39e581	deleted	2
+be39e581	files	1
+be39e581	body	The validator patch for the two-owner layout is now a real commit in the\ncoordinator project, 77920cc on the local branch baseline-two-owners-validators\n(based on 57a1ecf, one commit ahead, not pushed, nothing deployed). It covers all\nthree baseline validators, including baseline-runtime-options, which was also\nstale. The full containerised suite passes on the branch (2833 passed, 35\nskipped). validator-patch.diff is regenerated from that commit with\nformat-patch, and the plan's status line and risk row now say so.\n\nRecorded in the plan: the runtime-options validator can no longer show process-\nwide values syncing between two owners on a device (the level has one runtime\nowner now); that coverage stays in tests/test_runtime_options.py. The device\nrun is still the first real test of the validators' new key paths.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
+af8ab247	author	Will Norris
+af8ab247	added	2
+af8ab247	deleted	2
+af8ab247	files	1
+af8ab247	body	The agent that built the cleanup authored one runtime row, runtime_show_fps,\nas editable, because the engine lists only owners with an editable field and\nRuntime settings would otherwise never appear in the picker. Will accepted it\nand wants the option ("The editable Show FPS row: accept it. we totally want\nthis option"). The plan and the TODO item record that, so neither still lists\nit as awaiting approval. The validator patch is the one decision left, and it\nis now being applied in the coordinator repo as a local commit.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
+57ea118d	author	Will Norris
+57ea118d	added	234
+57ea118d	deleted	5
+57ea118d	files	1
+57ea118d	body	The baseline exported three identical settings owners (five sample fields,\nan empty section and the runtime sheets, three times) and had no settings\nwith one of every type. It now exports two, both target actors in CONFIG at\n(2, -4, 1), so Pick in 3D still shows the "Objects here" list on a device:\n\n- FieldTypes ("Field types", actor 19): 27 fields, one per case in\n  docs/plans/2026-10-29-touch-settings-examples.json, in six sections.\n  wflevels/baseline/field_types.py is the single source (a stable field id,\n  section and descriptor per example id; labels and values come from the\n  JSON). It has its own schema so Apply is not routed through the\n  runtime-options check, which refuses Apply when process globals differ.\n- RuntimeSettings ("Runtime settings", actor 20): Runtime Options (79 rows),\n  Level Memory (4) and Level Behavior (2), moved over once. Git sees the\n  sheets as renames of the old ones.\n\nRemoved from the level: SampleSettings, SampleSettings2, SampleSettings3, the\nfive-field sample sheet, the empty section and the settings-gallery preset\n(and its task). The 118-field gallery stays as a build-time fixture:\nverify.py still checks every declared descriptor type, every presentation\ncode and the OAD framing, and the generic host tests cook it.\n\nThe reviewed baseline.blend is edited in place, not regenerated:\ngenerate.py --settings-owners <blend> removes the three owners and adds the\ntwo, and refuses to run twice (build() creates the same two).\n\nFindings that shaped it, both in the plan:\n- An action key nobody registered is ignored, not an error\n  (Host::apply returns before commit or close), so the Action row ships\n  inert and is recorded as a gap. tests/baseline_owners_test.cpp shows it on\n  the cooked catalog.\n- With all 85 runtime rows authored read-only, Runtime settings would not\n  be editable. The engine lists only editable owners in the chooser and\n  registers the runtime-options consumer only for them, so the owner would\n  have vanished and Pick in 3D never appeared. One row, runtime_show_fps, is\n  authored editable; after install, sync sets every row's read-only flag from\n  the backend. This is the one deviation from the plan and needs Will's OK.\n\nThe main cd.iff and the APK are rebuilt. The validator change for the device\nchecks is a patch file in the plan folder, not applied to the coordinator\nrepo, which Will deploys.\n\nVerified on the host: 106 tests pass across the eight affected modules; the\ncatalog read-back shows two objects (25 rows through the capabilities reader,\nwhich drops Action and Spacer; 27 raw) and 85; task baseline:verify, and\ntask baseline:check 155 of 155 on two runs; the desktop session loads the\nbaseline from the main bundle as level 7, 167 of 167. Not done: device\nacceptance (needs the patch deployed); the bridge read of a runtime value\n(the desktop build has no property read operation; launch-override probes and\nthe harness sync stand in). One of the agent's seven desktop runs failed\n"native player grounded at spawn" with the evidence overwritten; it is\nunexplained. Already failing and untouched: test_object_properties\ncatalog_replacement_on_flag_only_baseline_ram, test_phase_a, test_baseline_icon\nand test_engine_smb_menu_chain_and_return.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
+df39b24d	author	Will Norris
+df39b24d	added	171
+df39b24d	deleted	0
+df39b24d	files	1
+df39b24d	body	The baseline had no curved, many-face mesh to measure renderer, memory and\nload-time cost against. It now has eight Utah teapots in a row at y = 10, one\nper tessellation level (n = 1, 2, 3, 4, 6, 8, 12, 16): 52, 240, 552, 992,\n2256, 4032, 9120 and 16256 faces, 33500 in all, each with a standing label\nboard. They are visual-only platform actors in a new TEAPOTS collection,\ncreated last so actor ids 1-21 do not move (the new actors are 22-30).\n\nReference data: Newell's 32-patch Bezier teapot, vendored verbatim as\nwflevels/baseline/data/teapotCGA.bpt (source, hash and provenance in\ndata/README.md). Cross-checked against the three.js TeapotGeometry table:\nall 32 patches identical, same order. wflevels/baseline/teapot.py tessellates\nit with no Blender dependency. Every level has 64n^2 - 8n faces except n = 1,\nwhich has 52: four more triangles are collinear and are dropped.\n\nWinding needs no correction. A prototype suggested mixed patch orientation;\nan orientation pass written for it flipped zero triangles at every level, so\nit was removed. The tests check consistency and outward winding per shell,\nwith a mutation test showing the checks fail on broken winding.\n\ngenerate.py gains add_teapots() (also run by build()) and --add-teapots\n<blend>, which appends the collection to the reviewed baseline.blend without\nregenerating it and refuses to run twice.\n\nMemory: the full ladder did not fit the authored 4000000-byte room budget\n(Lmalloc out of memory loading Room 0). It needs about 6.7 MB per slot, so\nmemory-settings.json now authors room_asset_bytes = 8000000. The settings\ncatalogs and bindings carry that value; nothing else in them changed.\n\nVerified: tests/test_baseline_teapots.py (30), task baseline:verify and\ntask baseline:check (118 descriptor checks plus every structural and native\ncheck, 60 FPS on the desktop). Not done: the Pixel install is queued behind a\ncoordinator maintenance window and cast2 is unreachable (needs its Wireless\ndebugging address), so the frame rate on the devices is unmeasured. The main\ncd.iff is not rebuilt: it already drifted (qbert entry, and verify.py --bundle\nexpects 9 TOC entries, now 10); recorded in the plan.\n\nAlso adds the plan for cleaning the baseline settings down to two owners\n(Field types, the 27 sensible type x showAs cases; and Runtime settings), with\nreal cast1 captures of Pick in 3D. Plan only; nothing in it is built.\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqSWpcGmU9ZTVy7HDyx
 -->

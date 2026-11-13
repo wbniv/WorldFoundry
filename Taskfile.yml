@@ -876,6 +876,13 @@ tasks:
     cmds:
       - python3 scripts/chromecast.py task input-frame
 
+  chromecast:input:touch:
+    desc: "Run a verified touch RECIPE inside an owned interactive phone/tablet JOB"
+    silent: true
+    env: *chromecast_env
+    cmds:
+      - python3 scripts/chromecast.py task input-touch
+
   chromecast:input:sample:
     desc: "Read PID and total PSS inside an owned record JOB with RECORD=false"
     silent: true

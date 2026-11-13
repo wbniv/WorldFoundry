@@ -1,0 +1,6 @@
+{
+  "path": "build-docker/runtime-editing-android/planted-release-followups.apk",
+  "sha256": "2d8f70c1f81566de0cb6ff937b3ca2075a45d635fbdd74e1760a0ea96fbdfd90",
+  "build_type": "Release",
+  "engine_source_changes": false
+}

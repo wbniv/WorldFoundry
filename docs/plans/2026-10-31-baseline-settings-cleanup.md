@@ -451,3 +451,19 @@ Run 2026‑10‑31 on the host, in the shared tree. Raw output under each step. 
     - **The multi-line Notes value is flattened** onto one line (`Two-line description Second line`).
     - **No key returns from a Choices row to the section list**: Left changes the value there, so the only way out is Back, which closes the form (reached via Numbers it works: Left, then Down). **Partly fixed 2026‑11‑01** (Will's option 6): Left on the first option now reaches the sections from the choice boxes (Mode, Powerup, Water type, Tool, Placement; a box with 5 or more options leaves from any option) and from Direction on its first segment. Habitat, Growth and Species keep their keys unchanged, so moving to Mode at its first option, then Left, is always a way out.
     - **The Actions row is inert**, as recorded earlier.
+
+## Follow-up device checks, 13 November 2026
+
+Scope: device checks and proposals only. The catalog-free diagnostic baseline
+reached the actual RuntimeDiagnostics TV form on cast1, J‑8c0da2aee2ea, with
+Show FPS=1, Fixed clock=0 and Clock Hz=20. The deployed validator still expects
+Settings and fails before exercising edits; runtime-options acceptance remains
+open. An [OAD-aware validator patch proposal](2026-10-16-runtime-object-editing/followups/runtime-options-validator-proposal.diff)
+is prepared, not deployed. The broader validator also needs current field keys
+and explicitly deferred bounded-text cases.
+
+After unlocking, the Pixel rendered the baseline. Both owned touch attempts
+rejected the score before injection because its expected accessibility-root
+rectangle did not match. The [frame-context proposal](2026-10-16-runtime-object-editing/followups/pixel-frame-context.md)
+exposes the measured geometry without weakening that guard. Picker/forms remain
+unaccepted. [Curated evidence](../diagnostics/runtime-editing-followups-2026-11-13/README.md).

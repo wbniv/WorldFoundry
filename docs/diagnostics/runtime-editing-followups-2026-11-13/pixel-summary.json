@@ -1,0 +1,32 @@
+{
+  "display": {
+    "width": 2244,
+    "height": 1008,
+    "rotation": 1
+  },
+  "attempts": [
+    {
+      "job": "J-9544c851c1d3",
+      "content_rect": [
+        0,
+        0,
+        2244,
+        1008
+      ]
+    },
+    {
+      "job": "J-c324a8bad601",
+      "content_rect": [
+        113,
+        63,
+        2244,
+        954
+      ]
+    }
+  ],
+  "result": "app-content-changed",
+  "injected_edges": 0,
+  "render": "verified",
+  "picker_forms": "NOT ACCEPTED",
+  "guard_modified": false
+}

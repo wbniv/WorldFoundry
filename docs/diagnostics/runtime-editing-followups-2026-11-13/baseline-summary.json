@@ -1,0 +1,45 @@
+{
+  "job": "J-8c0da2aee2ea",
+  "assertions": {
+    "baseline_catalog": true,
+    "actual_clock_readback": true,
+    "tv_opens_runtime_settings": false
+  },
+  "runtime_forms": [
+    {
+      "label": "tv-form",
+      "actor": 20,
+      "schema": "RuntimeDiagnostics",
+      "edit": {
+        "error": "",
+        "open": true,
+        "session": 2
+      },
+      "fields": [
+        {
+          "committed": "1",
+          "draft": "1",
+          "field": 1000,
+          "id": "RuntimeDiagnostics:1000",
+          "key": "runtime_show_fps"
+        },
+        {
+          "committed": "0",
+          "draft": "0",
+          "field": 1001,
+          "id": "RuntimeDiagnostics:1001",
+          "key": "runtime_fixed_clock"
+        },
+        {
+          "committed": "20",
+          "draft": "20",
+          "field": 1002,
+          "id": "RuntimeDiagnostics:1002",
+          "key": "runtime_clock_hz"
+        }
+      ]
+    }
+  ],
+  "clock_measurements": [],
+  "acceptance": "BLOCKED: retired Settings schema expectation; no edits exercised"
+}
