@@ -642,7 +642,8 @@ if player:
         "422 read-mailbox stick 422 write-mailbox\n"
         # Game-over restart guard — three nested checks before allowing restart:
         #   if [420=1] if [590=0] if [591=0] if [prev=0] if [stick!=0] restart
-        # Each guard has an else drop so prev_stick is consumed in all paths.
+        # Guards [1]-[3] have an else drop so prev_stick is consumed in all
+        # paths; [4] consumes it itself.
         # exit fires after all inner branches, inside the [420=1] guard.
         # Stack at entry: ( prev_stick )
         "420 read-mailbox 1 = if "                # [1] game-over?
@@ -682,7 +683,9 @@ if player:
         "6 1.4142136 * INDEXOF_Y_POS write-mailbox "
         "15 INDEXOF_Z_POS write-mailbox "
         "then "          # [5 close] stick check — no else; silent when stick==0
-        "else drop "     # [4 else] prev_stick was non-zero: discard it
+        # [4] has no else: `0 =` and `if` already consumed prev_stick. An
+        # `else drop` here underran the stack (zforth error 3) on every frame
+        # a key was held as the game-over hold ran out.
         "then "          # [4 close]
         "else drop "     # [3 else] hold timer still running: discard prev_stick
         "then "          # [3 close]
@@ -1118,6 +1121,15 @@ _CLIMBER_Z_MUL  = CUBE_SIZE                                  # 2.0
 # At R=4: 384 ticks (~6.4s); R=8: 288 (~4.8s); R=12: 192 (~3.2s); R=15: 120 (~2s).
 _SPAWN_INTERVAL_FORTH = "425 read-mailbox 24 * 480 swap - dup 120 < if drop 120 then "
 
+# Round gates for the late enemies: the green ball first appears on L2 (round >= 4),
+# Ugg and Wrong-Way on L3 (round >= 8). The director arms their spawn timers only from
+# those rounds, and the spawn blocks must test the same gate, because an unarmed timer
+# reads 0 and a spawn block treats 0 as "spawn now" (docs/plans/2026-11-14-qbert-remote-hop.md).
+_GB_ROUND_GATE      = "425 read-mailbox 3 > "
+_CLIMBER_ROUND_GATE = "425 read-mailbox 7 > "
+# Enemies spawn only in play: after the intro (418 INTRO_DONE) and not in game over (420).
+_SPAWN_GATE = "418 read-mailbox 1 = 420 read-mailbox 0 = & "
+
 # Forth: trigger a popup from the player's current cube position (row=mb400, col=mb401).
 # Writes POPUP_VALUE_MB and POPUP_PENDING_X/Y/Z then the director activates on next tick.
 def _popup_trigger_forth(value):
@@ -1242,7 +1254,7 @@ def _gen_sequencer_block():
     parts = []
 
     # Block A: sequencer dispatch — decrement timer; on fire write SPAWN_REQ
-    parts.append(f"418 read-mailbox 1 = if ")
+    parts.append(f"{_SPAWN_GATE}if ")
     parts.append(f"{SEQ_TIMER_MB} read-mailbox dup 0 > if ")
     parts.append(f"1 - {SEQ_TIMER_MB} write-mailbox ")
     parts.append("else drop ")
@@ -3060,6 +3072,42 @@ def _broadcast_color_to_all_cubes(rgb, mb_idx):
         f"loop "
     )
 
+def _retire_enemies_forth():
+    """Forth: take every enemy off the board after a death, as the arcade does.
+
+    Phase 0 stops each enemy script before its contact check (enemies run after the
+    director in actor order, so none can touch Q*bert again this frame), the active
+    mirror 0 hides it, Z parks it below the room. Coily's globals go back to "no egg
+    this round" so the sequencer can send a new one, and the sequencer reloads for
+    the round so the board refills from empty. Without this a single contact cost a
+    life every frame the enemy stayed on Q*bert's cube, ending the game in three
+    frames (docs/plans/2026-11-14-qbert-remote-hop.md).
+    """
+    enemies = [(_rb_mb(k, _RB_OFF_PHASE), RB_MB_ACTIVE_BASE + k, REDBALL_ACTOR_BASE + k)
+               for k in range(REDBALL_COUNT)]
+    enemies += [
+        (GB_MB_BASE + _RB_OFF_PHASE,    GB_MB_ACTIVE,          GB_ACTOR_IDX),
+        (SLICK_MB_BASE + _RB_OFF_PHASE, SLICK_MB_ACTIVE,       SLICK_ACTOR_IDX),
+        (SAM_MB_BASE + _RB_OFF_PHASE,   SAM_MB_ACTIVE,         SAM_ACTOR_IDX),
+        (UGG_MB_BASE + _RB_OFF_PHASE,   UGG_MB_ACTIVE,         UGG_ACTOR_IDX),
+        (WW_MB_BASE + _RB_OFF_PHASE,    WW_MB_ACTIVE,          WW_ACTOR_IDX),
+        (_CE_MB_PHASE,                  COILY_EGG_ACTIVE_MB,   COILY_EGG_ACTOR_IDX),
+        (_CE2_MB_PHASE,                 COILY_EGG2_ACTIVE_MB,  COILY_EGG2_ACTOR_IDX),
+        (_CS_MB_PHASE,                  COILY_SNAKE_ACTIVE_MB, COILY_SNAKE_ACTOR_IDX),
+    ]
+    parts = [
+        f"0 {phase} write-mailbox 0 {active} write-mailbox {REDBALL_PARK_Z} 3011 {actor} write-actor-mailbox "
+        for phase, active, actor in enemies
+    ]
+    parts.append(
+        f"0 {GB_MB_FREEZE_TIMER} write-mailbox "
+        f"0 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+        f"0 {COILY_MB_ROUND_DONE} write-mailbox "
+        f"0 {SPAWN_REQ_MB} write-mailbox "
+    )
+    parts.append(_gen_seq_reload_forth())
+    return "".join(parts)
+
 DIRECTOR_SCRIPT = "".join([
     "\\ wf qbert director MVP\n",  # first line skipped as sigil
     # One-shot level init — sets lives = 3 once on first tick. The player's
@@ -3104,7 +3152,7 @@ DIRECTOR_SCRIPT = "".join([
     f"0 {GB_MB_ACTIVE} write-mailbox "
     f"0 {SLICK_MB_ACTIVE} write-mailbox "
     f"0 {SAM_MB_ACTIVE} write-mailbox "
-    f"425 read-mailbox 3 > if "
+    f"{_GB_ROUND_GATE}if "
     f"{_SPAWN_INTERVAL_FORTH}{GB_MB_SPAWN_TIMER} write-mailbox "
     f"then ",
     # Sequencer init: seed timer with R0 reload; clear step and pending request.
@@ -3114,7 +3162,7 @@ DIRECTOR_SCRIPT = "".join([
     # Ugg & Wrong-Way: clear active mirrors; arm first-spawn delay only from L3 (round >= 8).
     f"0 {UGG_MB_ACTIVE} write-mailbox "
     f"0 {WW_MB_ACTIVE} write-mailbox "
-    f"425 read-mailbox 7 > if "
+    f"{_CLIMBER_ROUND_GATE}if "
     f"{_SPAWN_INTERVAL_FORTH}{UGG_MB_SPAWN_TIMER} write-mailbox "
     f"{_SPAWN_INTERVAL_FORTH}{WW_MB_SPAWN_TIMER} write-mailbox "
     f"then ",
@@ -3160,15 +3208,17 @@ DIRECTOR_SCRIPT = "".join([
     # same tick it is posted.
     _gen_sequencer_block(),
     # ── Green Ball: freeze timer + per-round spawn ────────────────────────────
-    # Gated on INTRO_DONE. Each tick: decrement freeze timer if active; otherwise
-    # decrement green spawn timer; on hitting 0 with green idle, wake green.
-    f"418 read-mailbox 1 = if "
+    # Gated on play (INTRO_DONE, not GAME_OVER). Each tick: decrement freeze timer
+    # if active; otherwise, from L2 on, decrement green spawn timer; on hitting 0
+    # with green idle, wake green.
+    f"{_SPAWN_GATE}if "
     # Decrement FREEZE_TIMER if > 0.
     f"{GB_MB_FREEZE_TIMER} read-mailbox dup 0 > if "
     f"1 - {GB_MB_FREEZE_TIMER} write-mailbox "
     f"else drop "
     f"then "
-    # Green-ball spawn (only when not currently freezing).
+    # Green-ball spawn (only from L2, and not while freezing).
+    f"{_GB_ROUND_GATE}if "
     f"{GB_MB_FREEZE_TIMER} read-mailbox 0 = if "
     f"{GB_MB_ACTIVE} read-mailbox 0 = if "
     f"{GB_MB_SPAWN_TIMER} read-mailbox dup 0 > if "
@@ -3186,7 +3236,7 @@ DIRECTOR_SCRIPT = "".join([
     f"1 {GB_MB_BASE + _RB_OFF_PHASE} {GB_ACTOR_IDX} write-actor-mailbox "
     f"1 {GB_MB_ACTIVE} write-mailbox "
     f"{_SPAWN_INTERVAL_FORTH}{GB_MB_SPAWN_TIMER} write-mailbox "
-    f"then then then "
+    f"then then then then "
     f"then\n",
     # ── Ugg & Wrong-Way spawn blocks (climbers) ───────────────────────────────
     # Spawn at the BOTTOM of their edge (row=6, col=6 for Ugg / col=0 for WW),
@@ -3195,7 +3245,8 @@ DIRECTOR_SCRIPT = "".join([
     # (write 0 to A/B/C — C commits identity), then DELTA_PITCH ±0.25 to tip
     # the body onto its side face.
     *[
-        f"418 read-mailbox 1 = if "
+        f"{_SPAWN_GATE}if "
+        f"{_CLIMBER_ROUND_GATE}if "                  # L3 on (round >= 8)
         f"{GB_MB_FREEZE_TIMER} read-mailbox 0 = if "
         f"{_active_mb} read-mailbox 0 = if "
         f"{_rival_mb} read-mailbox 0 = if "          # no simultaneous climbers
@@ -3223,7 +3274,7 @@ DIRECTOR_SCRIPT = "".join([
         f"1 {_base + _RB_OFF_PHASE} {_actor_idx} write-actor-mailbox "
         f"1 {_active_mb} write-mailbox "
         f"{_SPAWN_INTERVAL_FORTH}{_timer_mb} write-mailbox "
-        f"then then then then then "
+        f"then then then then then then "
         f"then\n"
         for (_base, _active_mb, _rival_mb, _timer_mb, _actor_idx, _spawn_col, _pitch, _yaw) in [
             (UGG_MB_BASE, UGG_MB_ACTIVE, WW_MB_ACTIVE,  UGG_MB_SPAWN_TIMER, UGG_ACTOR_IDX, 6, UGG_PITCH, UGG_YAW_AFTER_PITCH),
@@ -3234,7 +3285,7 @@ DIRECTOR_SCRIPT = "".join([
     # Same logic as egg1 but guarded by ROUND_NUMBER > 11 (L4) and uses
     # CE2_MB_* mailboxes. Does NOT set COILY_MB_PHASE_GLOBAL on spawn —
     # egg1 owns that flag. Egg2 acts as an independent extra threat.
-    f"418 read-mailbox 1 = if "
+    f"{_SPAWN_GATE}if "
     f"425 read-mailbox 11 > if "
     f"{COILY_EGG2_ROUND_DONE} read-mailbox 0 = if "
     f"{COILY_MB_SPAWN_DELAY_2} read-mailbox dup 0 > if "
@@ -3297,6 +3348,9 @@ DIRECTOR_SCRIPT = "".join([
     f"{CS_DEATH_HOLD_FRAMES} 415 write-mailbox ",
     "72 read-mailbox 1 - dup 72 write-mailbox ",
     "0 = if 1 420 write-mailbox then ",
+    # One death, one life: clear the board so the enemy that touched Q*bert
+    # cannot touch him again next frame.
+    _retire_enemies_forth(),
     "0 414 write-mailbox then\n",
     "418 read-mailbox 1 = if ",
     "415 read-mailbox dup 0 > if 1 - dup 415 write-mailbox ",
@@ -3462,7 +3516,7 @@ DIRECTOR_SCRIPT = "".join([
     f"0 {SAM_MB_BASE + _RB_OFF_PHASE} {SAM_ACTOR_IDX} write-actor-mailbox "
     f"{REDBALL_PARK_Z} 3011 {SAM_ACTOR_IDX} write-actor-mailbox "
     f"0 {SAM_MB_ACTIVE} write-mailbox "
-    f"425 read-mailbox 3 > if "
+    f"{_GB_ROUND_GATE}if "
     f"{_SPAWN_INTERVAL_FORTH}{GB_MB_SPAWN_TIMER} write-mailbox "
     f"then "
     # Sequencer reset: step back to 0; reload timer from new round's reload value.
@@ -3476,7 +3530,7 @@ DIRECTOR_SCRIPT = "".join([
     f"0 {WW_MB_BASE + _RB_OFF_PHASE} {WW_ACTOR_IDX} write-actor-mailbox "
     f"{REDBALL_PARK_Z} 3011 {WW_ACTOR_IDX} write-actor-mailbox "
     f"0 {WW_MB_ACTIVE} write-mailbox "
-    f"425 read-mailbox 7 > if "
+    f"{_CLIMBER_ROUND_GATE}if "
     f"{_SPAWN_INTERVAL_FORTH}{UGG_MB_SPAWN_TIMER} write-mailbox "
     f"{_SPAWN_INTERVAL_FORTH}{WW_MB_SPAWN_TIMER} write-mailbox "
     f"then "

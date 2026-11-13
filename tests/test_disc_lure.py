@@ -84,12 +84,17 @@ def test_disc_lure_right(bridge):
 
 
 def test_no_spurious_retire_at_normal_coord(bridge):
-    """Snake at a normal pyramid coord (row=2, col=1) must NOT retire."""
+    """Snake at a normal pyramid coord (row=2, col=1) must NOT take the disc-lure retirement.
+
+    The snake chases Q*bert, who stands on the apex, and may catch him inside the
+    window; since docs/plans/2026-11-14-qbert-remote-hop.md a death clears the board,
+    snake included. So the lure is told apart by its +500, not by COILY_SNAKE_ACTIVE.
+    """
     _setup(bridge, row=2, col=1)
     try:
         time.sleep(0.5)   # let several landing ticks pass
-        val = bridge.mailbox_values.get((1, COILY_SNAKE_ACTIVE), 1.0)
-        assert val == 1.0, \
-            f"snake spuriously retired at (2,1); COILY_SNAKE_ACTIVE={val}"
+        score = bridge.mailbox_values.get((1, MB_SCORE), 0.0)
+        assert score != 500.0, \
+            f"snake took the disc-lure retirement at (2,1); score={score}"
     finally:
         _teardown(bridge)
