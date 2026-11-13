@@ -276,6 +276,8 @@ Build, level and test steps run in the project's containers (`wf-blender:local` 
 
 9. **Soak.** 50 tanks at 8× with hold 5 on a device: the same process id throughout, no crash, and PSS spread under 4 MiB after warm-up.
 
+    **Decision 2026‑11‑13 (Will): the PSS-spread condition is dropped** ("we decided this wasn't important"); memory is covered instead by resource tracking, which checks that allocated things are freed. Same PID and no crash passed in both cast2 runs below, so step 9 passes and the item is closed.
+
     **NOT RUN — device unavailable.** The coordinator can now set `speed` and `hold` through the advertised Settings fields; `PERM` 1 MB is not yet checked on a device.
     **Continuous-sampling repeat on cast2, 2026‑11‑13: FAIL on memory spread.** Why the J‑c21e98845289 run had a 914.8 s gap: the host laptop suspended from 09:30:24 to 09:45:17 +0700, which froze the host-side sampler while the device kept running. Its loop timed itself with `time.monotonic()`, which stops during suspend. The repeat holds a `systemd-inhibit sleep:idle` block lock, times itself on the wall clock and aborts on any gap over 60 s. The limit is unchanged.
 
