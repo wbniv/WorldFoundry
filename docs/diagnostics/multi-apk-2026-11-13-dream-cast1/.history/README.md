@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-11-13](https://github.com/wbniv/WorldFoundry/commit/589e020c) | Multi-APK acceptance: dreaming-cast and same-app Dream pass on cast1; verify |
 | [2026-11-13](https://github.com/wbniv/WorldFoundry/commit/d217ea72) | Multi-APK dream attempt 2: Seahorse Release at HEAD on cast1; allow-standby pending |
 | [2026-11-13](https://github.com/wbniv/WorldFoundry/commit/8f3ed151) | Multi-APK acceptance: per-app validators and cast2 held input pass; dream blocked |
 
 <!--history-meta v1
+589e020c	author	Will Norris
+589e020c	added	65
+589e020c	deleted	1
+589e020c	files	1
+589e020c	body	With allow-standby applied on cast1 (J-8a911f1f5d03), a two-APK install\nran under the idle Seahorse Dream (B-846ea8805011): Aquarium installed with\nthe Dream in front and the foreground unchanged, launcher verification\nwoke the cast (KEYCODE_WAKEUP, HOME without -W) and verified both tiles.\nThe same-app Dream case (B-e3727f47ffe9) woke first and then installed.\nSimpleperf is waived; variant restoration is covered by the 2026-11-10\nbisect. Another session's newer Baseline diagnostic build was restored on\ncast1 after the run overwrote it. TODO marker to [verify T3].\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 d217ea72	author	Will Norris
 d217ea72	added	25
 d217ea72	deleted	0

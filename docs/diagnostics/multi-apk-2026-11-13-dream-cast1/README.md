@@ -133,3 +133,7 @@ is now stay-on 0 with the Seahorse Grid Dream selected.
 | Aquarium | `e2ac53f5…` (show build) |
 | Baseline | `6c245338…` (the other session's newest diagnostic build, restored) |
 | Queue | idle, nothing queued, health `ready` |
+
+## Follow-up: Dream when idle, never full sleep (`followup-dream-without-sleep/`)
+
+The coordinator's new reviewed `CHANGE=dream-without-sleep` (`a80d9a5`, release 0.1.141; [plan](https://github.com/wbniv/chromecast-coordinator/blob/main/docs/plans/2026-11-13-dream-without-sleep.md)) was applied on cast1 by the coordinator session (J‑27f60408d469): `sleep_timeout` 7200000 → -1, stay-on already 0. An earlier attempt, J‑73786707fc33, had found cast1 in full standby under the old 2 h timer (`device-not-found-on-network`). The read-back is J‑bc627eb4dee5: stay-on 0, `sleep_timeout_ms` -1, Seahorse Dream selected and running. Capture J‑a116601ea2c5 at 13:25 shows the Dream. A read-only probe at 15:25 +0700 (J‑2bda356261bd), 2 h 20 min after Will's remote wake, found cast1 `ready` and still dreaming. `attentive_timeout` is not read by the coordinator.
