@@ -1,0 +1,102 @@
+{
+  "samples": 167,
+  "z_range": [
+    -0.621842,
+    -0.621841
+  ],
+  "stops": {
+    "south-stopped": {
+      "segment": "south-stopped",
+      "time": 32.099796,
+      "x": -0.999817,
+      "y": -45.64777,
+      "z": -0.621841
+    },
+    "east-stopped": {
+      "segment": "east-stopped",
+      "time": 58.0994,
+      "x": 29.64777,
+      "y": -45.64777,
+      "z": -0.621842
+    },
+    "west-stopped": {
+      "segment": "west-stopped",
+      "time": 99.101448,
+      "x": -29.64777,
+      "y": -45.64777,
+      "z": -0.621842
+    },
+    "north-west-side-stopped": {
+      "segment": "north-west-side-stopped",
+      "time": 140.103943,
+      "x": -29.64777,
+      "y": 21.64777,
+      "z": -0.621842
+    },
+    "behind-house-stopped": {
+      "segment": "behind-house-stopped",
+      "time": 166.10553,
+      "x": 29.64777,
+      "y": 21.64777,
+      "z": -0.621842
+    }
+  },
+  "room_pool": {
+    "used": 231776,
+    "budget": 400000,
+    "fraction": 0.57944
+  },
+  "tests": {
+    "geometry": 8,
+    "render_references": 2
+  },
+  "apk_sha256": "6fc954de48cbb97ba360ae7556bd25832b71a0164278aa27d913bd63d9e5bbd7",
+  "apk_changed_entries": [
+    "assets/cd.iff"
+  ],
+  "device_jobs": {
+    "baseline": "J-3bcbf7bda27c",
+    "final": "J-6cb91628968d",
+    "shipping_record": "J-0707cd5a14a5",
+    "baseline_profile": "J-2e6d001dd38b",
+    "shipping_profile": "J-849e50e3e5f0",
+    "shipping_confirmation": "J-ddc5d83b5573",
+    "baseline_confirmation": "J-f07e4ef2d3aa"
+  },
+  "vertices": 808,
+  "triangles": 1070,
+  "source_base": "ab3fc569703e78169d333730a557ce2465fb8dbf",
+  "artifact_hashes": {
+    "wflevels/snowgoons-blender/yard01.iff": "d2d8e692504d094d2c02dad880e76f7053716e83f7027190b6ea577dfa9e65d2",
+    "wflevels/snowgoons-blender/snowgoons.lev": "158080d5db2caf5f2a1b4b6b1188681a27681072dc54b83da0c7b195ee40f079",
+    "wflevels/snowgoons.iff": "92afe285a96f150869135e841858c54dbe545193fe1f25733ab1a9924f75c434",
+    "wflevels/snowgoons-standalone.iff": "c0b2fab7c92f611e6c60deab78644c04cef8c8af831e746060a142a81ea10d88",
+    "wflevels/snowgoons-cd.iff": "bd74b9f5317479049fa8506a0008b681924d85894b844afa5ea09b5ed933b9c7"
+  },
+  "performance": {
+    "baseline_fps": [
+      59.04413703898584,
+      59.3612473032111,
+      59.3612483436521
+    ],
+    "shipping_fps": [
+      29.969989266450355,
+      59.44323888620777,
+      59.526600153068436
+    ],
+    "baseline_median": 59.3612473032111,
+    "shipping_median": 59.44323888620777,
+    "confirmation_fps": [
+      45.70728448297632,
+      59.11207820351306
+    ],
+    "confirmation_median": 52.409681343244685,
+    "baseline_confirmation_fps": [
+      51.68378428194276,
+      59.04291830816449
+    ],
+    "five_run_baseline_median": 59.04413703898584,
+    "five_run_shipping_median": 59.11207820351306,
+    "verdict": "Median parity measured; intermittent dips remain unexplained, including a shipping run at 29.97 FPS. Do not claim worst-case/startup parity."
+  }
+}

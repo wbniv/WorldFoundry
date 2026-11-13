@@ -1,0 +1,10 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0 -- /usr/bin/python3
+cachedir: .pytest_cache
+rootdir: /src
+collecting ... collected 2 items
+
+tests/test_renderer_references_fresh.py::test_reference_matches_a_fresh_linux_capture[snowgoons] PASSED [ 50%]
+tests/test_renderer_references_fresh.py::test_reference_matches_a_fresh_linux_capture[aquarium] PASSED [100%]
+
+============================== 2 passed in 7.84s ===============================

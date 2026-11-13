@@ -19,6 +19,10 @@
 # `wflevels/<level-name>/` with `<level-name>.lev` and the per-mesh .iff
 # files Blender (or the historical max2lev pipeline) produced. Final
 # output is written to `wflevels/<level-name>.iff`.
+# WF_LEVEL_DIR optionally selects a different source directory (absolute, or
+# relative to the repository); final outputs still use wflevels/<level-name>.
+# WF_TEXTILE_OUT_DIR optionally isolates atlas output when source models are
+# shared with another level; generated IFF includes point into that directory.
 
 set -euo pipefail
 
@@ -28,7 +32,9 @@ LEVEL="${1:?usage: build_level_binary.sh <level-name>}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-LEVEL_DIR="$REPO/wflevels/$LEVEL"
+LEVEL_DIR="${WF_LEVEL_DIR:-$REPO/wflevels/$LEVEL}"
+[[ "$LEVEL_DIR" = /* ]] || LEVEL_DIR="$REPO/$LEVEL_DIR"
+LEVEL_DIR="$(cd "$LEVEL_DIR" && pwd)"
 OAD_DIR="$REPO/wfsource/source/oas"
 OBJECTS_LC="$OAD_DIR/objects.lc"
 
@@ -85,7 +91,8 @@ if [[ -f "$LEVEL_DIR/textile.flags" ]]; then
   source "$LEVEL_DIR/textile.flags"
   echo "    textile.flags overrides: PAGEX=$PAGEX PAGEY=$PAGEY PERMPAGEX=$PERMPAGEX PERMPAGEY=$PERMPAGEY"
 fi
-"$TEXTILE" -ini="$LEVEL.ini" -Tlinux \
+TEXTILE_OUT_DIR="${WF_TEXTILE_OUT_DIR:-.}"
+"$TEXTILE" -ini="$LEVEL.ini" -Tlinux -outdir="$TEXTILE_OUT_DIR" \
   -transparent=0,0,0 \
   -pagex=$PAGEX -pagey=$PAGEY \
   -permpagex=$PERMPAGEX -permpagey=$PERMPAGEY \
@@ -94,8 +101,18 @@ fi
   -flipyout -powerof2size \
   >/dev/null 2>&1
 
-echo "[4/5] iffcomp-rs  $LEVEL.iff.txt  →  ../$LEVEL.iff"
-"$IFFCOMP" -binary -o="../$LEVEL.iff" "$LEVEL.iff.txt" >/dev/null
+if [[ "$TEXTILE_OUT_DIR" != "." ]]; then
+  python3 - "$LEVEL.iff.txt" "$TEXTILE_OUT_DIR" <<'PY'
+import pathlib, re, sys
+path = pathlib.Path(sys.argv[1])
+prefix = pathlib.Path(sys.argv[2])
+pattern = r'\[ "((?:Room\d+|Perm|pal\d+|palPerm)\.(?:tga|ruv|cyc))" \]'
+path.write_text(re.sub(pattern, lambda m: '[ "' + (prefix / m[1]).as_posix() + '" ]', path.read_text()))
+PY
+fi
+
+echo "[4/5] iffcomp-rs  $LEVEL.iff.txt  →  $REPO/wflevels/$LEVEL.iff"
+"$IFFCOMP" -binary -o="$REPO/wflevels/$LEVEL.iff" "$LEVEL.iff.txt" >/dev/null
 
 SIZE=$(stat -c %s "$REPO/wflevels/$LEVEL.iff")
 echo
@@ -105,7 +122,7 @@ STANDALONE_TXT="$LEVEL-standalone.iff.txt"
 if [[ -f "$STANDALONE_TXT" ]]; then
   echo
   echo "[5/5] iffcomp-rs  $STANDALONE_TXT  →  ../$LEVEL-standalone.iff"
-  "$IFFCOMP" -binary -o="../$LEVEL-standalone.iff" "$STANDALONE_TXT" >/dev/null
+  "$IFFCOMP" -binary -o="$REPO/wflevels/$LEVEL-standalone.iff" "$STANDALONE_TXT" >/dev/null
   SIZE_S=$(stat -c %s "$REPO/wflevels/$LEVEL-standalone.iff")
   echo "✓ built $REPO/wflevels/$LEVEL-standalone.iff ($SIZE_S bytes)"
 fi

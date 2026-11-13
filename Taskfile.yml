@@ -1198,6 +1198,44 @@ tasks:
       - mkdir -p "$(dirname '{{.CD_OUT}}')"
       - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell.fth wflevels/smb_w1_1-standalone.iff wflevels/smb_w1_2-standalone.iff wflevels/smb_w1_3-standalone.iff wflevels/smb_w1_4-standalone.iff -o '{{.CD_OUT}}'
 
+  snowgoons-yard:
+    desc: "Generate the classic Snowgoons acre yard, snowgoon and authored layout"
+    sources:
+      - wflevels/snowgoons-blender/make_yard.py
+      - wflevels/snowgoons-blender/make_snowgoon.py
+      - wflevels/snowgoons-blender/snowman01.iff
+      - wflevels/snowgoons-blender/quadpatch01.iff
+      - scripts/add_ambient_light.py
+      - scripts/relight_level.py
+      - scripts/audit_face_hand.py
+    generates:
+      - wflevels/snowgoons-blender/yard01.iff
+      - wflevels/snowgoons-blender/snowgoon.iff
+      - wflevels/snowgoons-blender/snowgoons.lev
+    cmds:
+      - python3 wflevels/snowgoons-blender/make_yard.py --lev
+      - python3 wflevels/snowgoons-blender/make_snowgoon.py
+
+  snowgoons-level:
+    desc: "Build the classic one-acre Snowgoons level, standalone and Android CD bundle"
+    deps: [snowgoons-yard]
+    sources:
+      - wflevels/snowgoons-blender/*.iff
+      - wflevels/snowgoons-blender/snowgoons.lev
+      - wflevels/snowgoons-blender/snowgoons-standalone.iff.txt
+      - wflevels/snowgoons-blender/*.tga
+      - wflevels/snowgoons-blender/*.flags
+      - wftools/wf_blender/build_level_binary.sh
+      - wfsource/source/oas/*.oad
+      - wfsource/source/game/shell.fth
+    generates:
+      - wflevels/snowgoons.iff
+      - wflevels/snowgoons-standalone.iff
+      - wflevels/snowgoons-cd.iff
+    cmds:
+      - scripts/in-linux-container.sh env WF_LEVEL_DIR=wflevels/snowgoons-blender WF_TEXTILE_OUT_DIR=classic-atlas wftools/wf_blender/build_level_binary.sh snowgoons
+      - task: build-cd-iff-snowgoons
+
   build-cd-iff-snowgoons:
     desc: "Assemble the snowgoons-only cd.iff (TOC 0 = wflevels/snowgoons-standalone.iff, which writes no LEVEL_TO_RUN) via cdpack-rs → wflevels/snowgoons-cd.iff, or CD_OUT=<path>. The Android snowgoons app (org.worldfoundry.wf_game) bundles it"
     vars:

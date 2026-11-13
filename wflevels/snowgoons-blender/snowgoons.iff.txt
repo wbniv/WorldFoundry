@@ -27,36 +27,38 @@
 		$3fff001l { 'STR' "tree02.iff" }  // IFF PERM fff:001
 		$3fff002l { 'STR' "tree03.iff" }  // IFF PERM fff:002
 		$3fff003l { 'STR' "player.iff" }  // IFF PERM fff:003
+		$3fff004l { 'STR' "snowgoon.iff" }  // IFF PERM fff:004
+		$3000001l { 'STR' "yard01.iff" }  // IFF RM0 000:001
 		$3001001l { 'STR' "house.iff" }  // IFF RM1 001:001
-		$3001002l { 'STR' "quadpatch01.iff" }  // IFF RM1 001:002
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "snowgoons.lvl" ] }
 	{ 'ALGN' .align(2048) }
 	{ 'PERM'
-		{ 'ASS' $1fffffel [ "palPerm.tga" ] }  // TGA PERM fff:ffe
-		{ 'ASS' $1ffffffl [ "Perm.tga" ] }     // TGA PERM fff:fff
-		{ 'ASS' $5ffffffl [ "Perm.ruv" ] }     // RUV PERM fff:fff
-		{ 'ASS' $7ffffffl [ "Perm.cyc" ] }     // CYC PERM fff:fff
+		{ 'ASS' $1fffffel [ "classic-atlas/palPerm.tga" ] }  // TGA PERM fff:ffe
+		{ 'ASS' $1ffffffl [ "classic-atlas/Perm.tga" ] }     // TGA PERM fff:fff
+		{ 'ASS' $5ffffffl [ "classic-atlas/Perm.ruv" ] }     // RUV PERM fff:fff
+		{ 'ASS' $7ffffffl [ "classic-atlas/Perm.cyc" ] }     // CYC PERM fff:fff
 		{ 'ASS' $3fff001l [ "tree02.iff" ] }  // IFF PERM fff:001
 		{ 'ASS' $3fff002l [ "tree03.iff" ] }  // IFF PERM fff:002
 		{ 'ASS' $3fff003l [ "player.iff" ] }  // IFF PERM fff:003
+		{ 'ASS' $3fff004l [ "snowgoon.iff" ] }  // IFF PERM fff:004
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM0'
-		{ 'ASS' $1000ffel [ "pal0.tga" ] }      // TGA RM0 000:ffe
-		{ 'ASS' $1000fffl [ "Room0.tga" ] }    // TGA RM0 000:fff
-		{ 'ASS' $5000fffl [ "Room0.ruv" ] }    // RUV RM0 000:fff
-		{ 'ASS' $7000fffl [ "Room0.cyc" ] }    // CYC RM0 000:fff
+		{ 'ASS' $1000ffel [ "classic-atlas/pal0.tga" ] }      // TGA RM0 000:ffe
+		{ 'ASS' $1000fffl [ "classic-atlas/Room0.tga" ] }    // TGA RM0 000:fff
+		{ 'ASS' $5000fffl [ "classic-atlas/Room0.ruv" ] }    // RUV RM0 000:fff
+		{ 'ASS' $7000fffl [ "classic-atlas/Room0.cyc" ] }    // CYC RM0 000:fff
+		{ 'ASS' $3000001l [ "yard01.iff" ] }  // IFF RM0 000:001
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM1'
-		{ 'ASS' $1001ffel [ "pal1.tga" ] }      // TGA RM1 001:ffe
-		{ 'ASS' $1001fffl [ "Room1.tga" ] }    // TGA RM1 001:fff
-		{ 'ASS' $5001fffl [ "Room1.ruv" ] }    // RUV RM1 001:fff
-		{ 'ASS' $7001fffl [ "Room1.cyc" ] }    // CYC RM1 001:fff
+		{ 'ASS' $1001ffel [ "classic-atlas/pal1.tga" ] }      // TGA RM1 001:ffe
+		{ 'ASS' $1001fffl [ "classic-atlas/Room1.tga" ] }    // TGA RM1 001:fff
+		{ 'ASS' $5001fffl [ "classic-atlas/Room1.ruv" ] }    // RUV RM1 001:fff
+		{ 'ASS' $7001fffl [ "classic-atlas/Room1.cyc" ] }    // CYC RM1 001:fff
 		{ 'ASS' $3001001l [ "house.iff" ] }  // IFF RM1 001:001
-		{ 'ASS' $3001002l [ "quadpatch01.iff" ] }  // IFF RM1 001:002
 	}
 	{ 'ALGN' .align(2048) }
 }

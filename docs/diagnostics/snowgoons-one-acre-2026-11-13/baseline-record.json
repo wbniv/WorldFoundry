@@ -1,0 +1,42 @@
+{
+  "workflow": "record",
+  "app": "snowgoons",
+  "apk": "/home/will/WorldFoundry-wbniv/android/app/build/outputs/apk/snowgoons/release/worldfoundry-snowgoons-release.apk",
+  "duration": 60,
+  "warmup": 5,
+  "input_script": [
+    {
+      "at": 1,
+      "capture": "opening"
+    },
+    {
+      "at": 3,
+      "key": "DPAD_UP",
+      "action": "hold",
+      "ms": 15000
+    },
+    {
+      "at": 19,
+      "key": "DPAD_UP",
+      "action": "hold",
+      "ms": 15000
+    },
+    {
+      "at": 35,
+      "key": "DPAD_RIGHT",
+      "action": "hold",
+      "ms": 1000
+    },
+    {
+      "at": 38,
+      "key": "DPAD_UP",
+      "action": "hold",
+      "ms": 15000
+    },
+    {
+      "at": 55,
+      "capture": "far-end"
+    }
+  ],
+  "panel": "require-hidden"
+}

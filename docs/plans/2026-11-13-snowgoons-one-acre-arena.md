@@ -1,9 +1,71 @@
 # Snowgoons: a one-acre backyard
 
 **Date:** 2026‑11‑13
-**Status:** plan for Will's review. Nothing is implemented yet; the mockups below are renders, not the shipped asset.
+**Status:** implemented, desktop/device functional checks passed (2026-11-14); median FPS parity measured, but intermittent low runs remain an acceptance concern. The original design and mockups are retained below; the implementation record describes the tested corrections.
 **TODO:** Level / Gameplay, "Snowgoons arena: enlarge the backyard to one acre" (T4).
 **Ask (Will):** enlarge the Snowgoons arena / backyard to the equivalent of 1 acre (4,046.86 m², about 63.6 × 63.6 m, or a backyard-shaped rectangle of the same area).
+
+## Implementation record — 2026-11-14
+
+**Subsequent addition:** Will requested one snowgoon after installing the yard.
+The classic scene now includes the original two-headed snowman near the player
+start, using the existing Enemy class. This is additional to the arena work and
+its performance measurements below. See the [snowgoon evidence](../diagnostics/snowgoon-2026-11-14/README.md).
+
+
+Implemented option B: a 60 × 68 m lawn (4,080 m², 1.008 acre), the 2 m hedge
+band, 2.1 m walls and four 4.2 m pillars. The house, trees, rooms, lights and
+player horizontal spawn remain unchanged. Player Z is −0.60; the lawn is −0.62.
+Camera fog distances are 40 / 100 m. No engine source was changed for this work.
+
+Three details changed after testing:
+
+1. **The yard is render-only anchored scenery.** The existing actor named
+   `statplat_2` uses the existing `platform` class, MovementClass 7 and Anchored
+   mobility. The dedicated slab and four walls provide collision. Combining the
+   double-sided tiled trimesh floor with the slab produced seam hops; the
+   render-only yard passes the full held-input traversal. No new actor type.
+2. **Collider local boxes are centred on their actors.** Their world bounds still
+   match the design below, but slab origin is at Z −1.12 with local Z ±0.5;
+   wall origins are at Z 0.43 with local Z ±1.05. Existing box-body position
+   updates discard a nonzero local centre offset: the original proposed slab
+   moved its collision top 0.5 m above the visible lawn and launched the player.
+   Centred bounds avoid that defect without an engine edit.
+3. **The classic atlas is isolated.** Room sorting uses the world bounding-box
+   centre, so the larger yard belongs to Room0. `WF_TEXTILE_OUT_DIR=classic-atlas`
+   keeps its outputs separate; generated classic IFF includes use that directory.
+   Shared Room0/Room1 textures, the Blender scaffold and both Blender bundles
+   remain byte-identical. The final generator emits 808 shared vertices / 1,070 faces. UVs are inset inside
+   the existing texture edge texels; this removes atlas-colour seams seen on device.
+
+The standalone ROOM budget is 400,000 bytes. Before vertex sharing, GDB measured
+260,576 bytes used in the occupied room slot; the original 300,000-byte budget
+left less than the required 25% headroom. The final shared mesh uses 231,776
+bytes after 20 frames (57.9%). This is measured
+usage at those boundaries, not instrumentation of every transient allocation.
+
+Desktop results: all geometry/bundle tests pass; both renderer freshness checks
+pass without reference regeneration. Held-input traversal reaches south, east,
+west and north walls, then crosses behind the house; samples stay at approximately
+Z −0.62184 throughout. Today's original player also stayed at a stable height
+(about −0.01659) during the baseline observation; the feared falling-player
+hypothesis was not observed.
+
+The broad Android tests have existing failures involving newer UIFT chunks,
+common APK assets, coordinator task changes and stale unrelated APKs. They are
+recorded separately from the focused yard checks. The frozen test APK is an
+asset-only rebuild of the existing Snowgoons release APK with the current
+`assets/cd.iff`, aligned and signed; it preserves the existing native/Java code.
+
+Chromecast HD final held-input recording J‑0707cd5a14a5 completed without a fatal
+error. Five-run SurfaceFlinger medians are 59.1121 FPS (acre) and 59.0441 FPS
+(original). Both builds vary; the acre includes a 29.97 FPS run, and a longer
+warm-up does not eliminate all dips. Median parity is measured; worst-case/startup
+parity is not established. Preserve that acceptance concern. No engine changes
+or culling-default changes were made to force the performance result.
+
+Commands, captures, position samples, memory readings and device results:
+[implementation evidence](../diagnostics/snowgoons-one-acre-2026-11-13/README.md).
 
 ## Summary
 
@@ -180,7 +242,7 @@ flowchart LR
     T5 --> T6["APK rebuild after the<br/>install campaign, then a<br/>coordinator device job"]
 ```
 
-## Choices for Will
+## Original options (recommended defaults selected for implementation)
 
 | # | Choice | Recommended | Alternative |
 |---|---|---|---|

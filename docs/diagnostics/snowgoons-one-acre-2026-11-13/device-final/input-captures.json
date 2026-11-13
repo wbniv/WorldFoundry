@@ -1,0 +1,26 @@
+{
+  "score_sha256": "c0f9f3257ede04122796eebcaefb20f3567b342a6e03204e59c83551ccd46205",
+  "host_start_wall": 1794589935.6939702,
+  "host_start_monotonic": 841272.564704492,
+  "captures": [
+    {
+      "label": "opening",
+      "planned_ms": 1000,
+      "started": 1794589941.5453687,
+      "ended": 1794589948.548494,
+      "file": "input-frame-001.png",
+      "bytes": 894298,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "far-end",
+      "planned_ms": 55000,
+      "started": 1794589995.5453727,
+      "ended": 1794589998.2402813,
+      "file": "input-frame-002.png",
+      "bytes": 264829,
+      "schedule_lateness_ms": 0
+    }
+  ],
+  "result": "completed"
+}

@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/7cdf39b7) | Balcony screen frame: fit 1, 2, 3 or 4 solar inserts; index the new docs |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/0e58a6c7) | Plans index: add the two coordinator recovery plans (2026-11-06, 2026-11-07) |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/86816ad6) | Plans index: add the condo 639 balcony screen-frame plan |
 | [2026-11-08](https://github.com/wbniv/WorldFoundry/commit/2e623339) | Plans index: reef tanks finish plan |
@@ -72,6 +73,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+7cdf39b7	author	Will Norris
+7cdf39b7	added	2
+7cdf39b7	deleted	0
+7cdf39b7	files	1
+7cdf39b7	body	Two quarter-width solar inserts equal three screens; one or three use a\nnarrow 1/12 filler made in mesh and in sealed polycarbonate. The v3\nsheet gains figure E (the four combinations), filler and any-type-next-\nto-any-type requirements, and a separate page for the solar\nrequirements. Answers open question 4. Adds plan-index rows for the\nsolar research and the v1/v2 archive.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqRTjYzU5APTKovfevg
 0e58a6c7	author	Will Norris
 0e58a6c7	added	2
 0e58a6c7	deleted	0

@@ -1,0 +1,441 @@
+{
+  "budgets": {
+    "cleanup": 180,
+    "cleanup_consumed": 1.2702056359266862,
+    "execution": 900,
+    "execution_consumed": 17.08912964502815,
+    "execution_deadline": 845661.027804818,
+    "forced": 1081,
+    "forced_consumed": 21.387599210022017,
+    "forced_deadline": 845842.027804818,
+    "granted": 844761.027804818
+  },
+  "cleanup_attempts": 1,
+  "connected": true,
+  "device": "tablet-lenovo-tab-p11-pro-19a57145",
+  "diagnostics": {
+    "advertised-endpoint-reused": {
+      "endpoint": "192.168.4.29:46447",
+      "observed_at": 1794593427.2840917
+    },
+    "mdns-endpoint": {
+      "endpoint": "192.168.4.29:46447",
+      "observed_at": 1794593426.9803085
+    }
+  },
+  "flags": {},
+  "health": "ready",
+  "job": "J-2855f4aad5ed",
+  "journal": [
+    {
+      "job": "J-2855f4aad5ed",
+      "key": "install:1",
+      "format": 1,
+      "original": {
+        "before_hash": "6fc954de48cbb97ba360ae7556bd25832b71a0164278aa27d913bd63d9e5bbd7",
+        "before_visible": true,
+        "boot_id": "fa70ac26-2548-4a3b-b255-6a12bc9fcb62",
+        "helper": "/data/local/tmp/wf-J-2855f4aad5ed-install-0f7370f63399e60d8e824431ccf2de32-helper.jar",
+        "input": "cb734288b45f0cbe1f63862c311586362fd0a2eeb3f83692b4d9a3a5f7c304e0.apk",
+        "kind": "install",
+        "package": "org.worldfoundry.wf_game",
+        "protocol": "session-v2",
+        "token": "wf-coordinator://install/0f7370f63399e60d8e824431ccf2de32",
+        "user": "all"
+      },
+      "restored": 1,
+      "verification": {
+        "installed_sha256": "cb734288b45f0cbe1f63862c311586362fd0a2eeb3f83692b4d9a3a5f7c304e0",
+        "session_id": 1133146315
+      },
+      "device": "tablet-lenovo-tab-p11-pro-19a57145",
+      "backend": "android",
+      "scopes": [
+        "device:tablet-lenovo-tab-p11-pro-19a57145",
+        "transport:android"
+      ]
+    },
+    {
+      "job": "J-2855f4aad5ed",
+      "key": "remote:/data/local/tmp/wf-J-2855f4aad5ed-install-0f7370f63399e60d8e824431ccf2de32.apk",
+      "format": 1,
+      "original": {
+        "kind": "remote",
+        "path": "/data/local/tmp/wf-J-2855f4aad5ed-install-0f7370f63399e60d8e824431ccf2de32.apk"
+      },
+      "restored": 1,
+      "verification": {
+        "removed": "/data/local/tmp/wf-J-2855f4aad5ed-install-0f7370f63399e60d8e824431ccf2de32.apk"
+      },
+      "device": "tablet-lenovo-tab-p11-pro-19a57145",
+      "backend": "android",
+      "scopes": [
+        "device:tablet-lenovo-tab-p11-pro-19a57145",
+        "transport:android"
+      ]
+    },
+    {
+      "job": "J-2855f4aad5ed",
+      "key": "remote:/data/local/tmp/wf-J-2855f4aad5ed-install-0f7370f63399e60d8e824431ccf2de32-helper.jar",
+      "format": 1,
+      "original": {
+        "kind": "remote",
+        "path": "/data/local/tmp/wf-J-2855f4aad5ed-install-0f7370f63399e60d8e824431ccf2de32-helper.jar"
+      },
+      "restored": 1,
+      "verification": {
+        "removed": "/data/local/tmp/wf-J-2855f4aad5ed-install-0f7370f63399e60d8e824431ccf2de32-helper.jar"
+      },
+      "device": "tablet-lenovo-tab-p11-pro-19a57145",
+      "backend": "android",
+      "scopes": [
+        "device:tablet-lenovo-tab-p11-pro-19a57145",
+        "transport:android"
+      ]
+    },
+    {
+      "job": "J-2855f4aad5ed",
+      "key": "install:1:create",
+      "format": 1,
+      "original": {
+        "install_key": "install:1",
+        "kind": "install-create-marker",
+        "token": "wf-coordinator://install/0f7370f63399e60d8e824431ccf2de32"
+      },
+      "restored": 1,
+      "verification": {
+        "marker_recorded": true
+      },
+      "device": "tablet-lenovo-tab-p11-pro-19a57145",
+      "backend": "android",
+      "scopes": [
+        "device:tablet-lenovo-tab-p11-pro-19a57145",
+        "transport:android"
+      ]
+    },
+    {
+      "job": "J-2855f4aad5ed",
+      "key": "install:1:session",
+      "format": 1,
+      "original": {
+        "install_key": "install:1",
+        "kind": "install-session-marker",
+        "session_id": 1133146315,
+        "token": "wf-coordinator://install/0f7370f63399e60d8e824431ccf2de32"
+      },
+      "restored": 1,
+      "verification": {
+        "marker_recorded": true
+      },
+      "device": "tablet-lenovo-tab-p11-pro-19a57145",
+      "backend": "android",
+      "scopes": [
+        "device:tablet-lenovo-tab-p11-pro-19a57145",
+        "transport:android"
+      ]
+    },
+    {
+      "job": "J-2855f4aad5ed",
+      "key": "install:1:commit",
+      "format": 1,
+      "original": {
+        "install_key": "install:1",
+        "kind": "install-commit-marker",
+        "protocol": "binder-token-v1",
+        "session_id": 1133146315,
+        "token": "wf-coordinator://install/0f7370f63399e60d8e824431ccf2de32"
+      },
+      "restored": 1,
+      "verification": {
+        "marker_recorded": true
+      },
+      "device": "tablet-lenovo-tab-p11-pro-19a57145",
+      "backend": "android",
+      "scopes": [
+        "device:tablet-lenovo-tab-p11-pro-19a57145",
+        "transport:android"
+      ]
+    }
+  ],
+  "observations": {
+    "J-2855f4aad5ed:remote:/data/local/tmp/wf-J-2855f4aad5ed-install-0f7370f63399e60d8e824431ccf2de32-helper.jar": {
+      "removed": "/data/local/tmp/wf-J-2855f4aad5ed-install-0f7370f63399e60d8e824431ccf2de32-helper.jar"
+    },
+    "J-2855f4aad5ed:remote:/data/local/tmp/wf-J-2855f4aad5ed-install-0f7370f63399e60d8e824431ccf2de32.apk": {
+      "removed": "/data/local/tmp/wf-J-2855f4aad5ed-install-0f7370f63399e60d8e824431ccf2de32.apk"
+    }
+  },
+  "plugin": {
+    "cleanup": {
+      "observations": {
+        "J-2855f4aad5ed:remote:/data/local/tmp/wf-J-2855f4aad5ed-install-0f7370f63399e60d8e824431ccf2de32-helper.jar": {
+          "removed": "/data/local/tmp/wf-J-2855f4aad5ed-install-0f7370f63399e60d8e824431ccf2de32-helper.jar"
+        },
+        "J-2855f4aad5ed:remote:/data/local/tmp/wf-J-2855f4aad5ed-install-0f7370f63399e60d8e824431ccf2de32.apk": {
+          "removed": "/data/local/tmp/wf-J-2855f4aad5ed-install-0f7370f63399e60d8e824431ccf2de32.apk"
+        }
+      },
+      "reason": "restored",
+      "recovery_state": null,
+      "restoration": "safe"
+    },
+    "run": {
+      "details": {
+        "apk_installations": [
+          {
+            "action": "install",
+            "before_sha256": "6fc954de48cbb97ba360ae7556bd25832b71a0164278aa27d913bd63d9e5bbd7",
+            "end": 1794593443.3891456,
+            "input": "cb734288b45f0cbe1f63862c311586362fd0a2eeb3f83692b4d9a3a5f7c304e0.apk",
+            "installed_sha256": "cb734288b45f0cbe1f63862c311586362fd0a2eeb3f83692b4d9a3a5f7c304e0",
+            "journal_key": "install:1",
+            "package": "org.worldfoundry.wf_game",
+            "reason": "explicit-install",
+            "start": 1794593430.6872191,
+            "status": "verified",
+            "variant": null
+          }
+        ],
+        "next_workflow": "verify-launch",
+        "profile": "tablet",
+        "workflow": "install"
+      },
+      "reason": "completed",
+      "recovery_state": null,
+      "status": "succeeded"
+    }
+  },
+  "reaped": [],
+  "reason": "completed",
+  "status": "succeeded",
+  "survivors": [],
+  "tool_diagnostics": [
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "aapt"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    }
+  ],
+  "transport_failure_phases": [],
+  "transport_recovery": [],
+  "version": 1,
+  "work_started": true
+}

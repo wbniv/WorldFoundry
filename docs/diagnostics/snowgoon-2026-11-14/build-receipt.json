@@ -1,0 +1,13 @@
+{
+  "apk": "/home/will/WorldFoundry-wbniv/build-docker/snowgoon-2026-11-14/snowgoons-release.apk",
+  "sha256": "cb734288b45f0cbe1f63862c311586362fd0a2eeb3f83692b4d9a3a5f7c304e0",
+  "native_code": "unchanged",
+  "canonical_apk_updated": "android/app/build/outputs/apk/snowgoons/release/worldfoundry-snowgoons-release.apk",
+  "actor": "Snowgoon",
+  "position": [
+    5,
+    -3,
+    -0.6
+  ],
+  "height_m": 2.1951904296875
+}

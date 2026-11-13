@@ -1,0 +1,264 @@
+Breakpoint 1 at 0x1112d5: file /src/wfsource/source/game/game.cc, line 623.
+warning: Error disabling address space randomization: Operation not permitted
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+[New Thread 0x7aba463876c0 (LWP 24)]
+[New Thread 0x7aba3d9ff6c0 (LWP 25)]
+[New Thread 0x7aba45a856c0 (LWP 26)]
+audio: miniaudio v0.11.25 ready
+DEBUG = 1,
+DO_ASSERTIONS = 1, NO_ASSERT_EXPR = 0, USE_INLINE_DEFS = 1, WF_BIG_ENDIAN = 0
+argc = 5, argv: /build/snowgoons-acceptance/wf_game -pps --frame-step-smoke=2 -L/src/wflevels/snowgoons-standalone.iff -rate20 
+cbHalLmalloc = 64000000, cbHalScratchLmalloc = 180000
+wf_game v0.4.1, Built:Nov 13 2026,16:19:34 by kts
+-pps
+--frame-step-smoke=2
+Frame-step API smoke: 2 frames
+-L/src/wflevels/snowgoons-standalone.iff
+Level override path: /src/wflevels/snowgoons-standalone.iff
+-rate20
+Fake clock delta = 0.05000000075
+argc = 5, commandIndex = 5
+Level=-1
+cerror:
+cwarn:
+cstats:
+cprogress:
+wf_game Ver 0.4.1, Built:Nov 13 2026,16:19:34 by kts
+DBSTREAMS UI_FONT 1024x2048 atlas, 2770432 bytes
+main::constructing the game
+WFGame::WFGame
+jolt: RegisterDefaultAllocator
+jolt: Factory
+jolt: RegisterTypes
+jolt: RunSelftest
+jolt: selftest ok (sphere fell to z=5.098)
+jolt: backend init
+jolt: init complete
+[New Thread 0x7aba3d1fe6c0 (LWP 27)]
+[New Thread 0x7aba3c9fd6c0 (LWP 28)]
+[New Thread 0x7aba354cc6c0 (LWP 29)]
+[New Thread 0x7aba34ccb6c0 (LWP 30)]
+[New Thread 0x7aba276716c0 (LWP 31)]
+[New Thread 0x7aba26e706c0 (LWP 32)]
+[New Thread 0x7aba2666f6c0 (LWP 33)]
+[New Thread 0x7aba25e6e6c0 (LWP 34)]
+[New Thread 0x7aba2566d6c0 (LWP 35)]
+[New Thread 0x7aba24e6c6c0 (LWP 36)]
+[New Thread 0x7ab9fffff6c0 (LWP 37)]
+[New Thread 0x7ab9ff7fe6c0 (LWP 38)]
+[New Thread 0x7ab9feffd6c0 (LWP 39)]
+[New Thread 0x7ab9fe7fc6c0 (LWP 40)]
+[New Thread 0x7ab9fdffb6c0 (LWP 41)]
+[New Thread 0x7ab9fd7fa6c0 (LWP 42)]
+[New Thread 0x7ab9fcff96c0 (LWP 43)]
+main::frame-step API smoke (2 frames Ã— 1 cycles)
+SmokeRunFrameStep: opening /src/wflevels/snowgoons-standalone.iff (frames=2 cycles=1)
+SmokeRunFrameStep: cycle 1/1
+LMalloc of 412 not 8-byte aligned, rounding up
+LMalloc of 7620 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+Level::Level: leveldata= 0x7aba46502ed0, object count  = 39
+_levelData->versionNum = 28 and LEVEL_VERSION = 28
+theLevel = 0x7aba463b9bf8, commonBlock = CommonBlockBase: ÿÿÿÿ\ wf
+100 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then
+ 99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then
+ 98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then                                                                                                                                                                                                                    
+, size = 3636
+Level Loaded: Object Count: 39, Path Count 1, Channel Count: 1, Room Count 2, Common Data size 3636
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 112)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 10028)
+ASS closed without all data read (bytesLeft = 10028)
+ASS closed without all data read (bytesLeft = 588)
+PixelMap::Load: this = 0x7aba463b9408
+PixelMap::Load: this = 0x7aba463b9450
+LMalloc of 124 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 124 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+Reading objects
+LMalloc of 100 not 8-byte aligned, rounding up
+LMalloc of 100 not 8-byte aligned, rounding up
+LMalloc of 124 not 8-byte aligned, rounding up
+[Actor] idx=1 class=5 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=2 class=5 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=3 class=5 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=4 class=5 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=5 class=17 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=7 class=23 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=8 class=13 commonOff=656 NumberOfLocalMailboxes=0
+this = 0x7aba463bd1d0,setting _memory to 0x7aba463bc5f0
+DMalloc of 52 not 8-byte aligned, rounding up
+[Actor] idx=9 class=20 commonOff=1732 NumberOfLocalMailboxes=0
+[Actor] idx=11 class=11 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=12 class=16 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=13 class=3 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=14 class=3 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=15 class=5 commonOff=2736 NumberOfLocalMailboxes=0
+[Actor] idx=17 class=17 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=18 class=23 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=19 class=5 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=20 class=5 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=21 class=5 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=22 class=5 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=23 class=5 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=24 class=5 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=25 class=5 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=26 class=5 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=27 class=5 commonOff=2780 NumberOfLocalMailboxes=0
+[Actor] idx=28 class=5 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=29 class=6 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=31 class=19 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=32 class=19 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=33 class=22 commonOff=3280 NumberOfLocalMailboxes=6
+[Actor] idx=35 class=16 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=36 class=3 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=37 class=23 commonOff=656 NumberOfLocalMailboxes=0
+[Actor] idx=38 class=23 commonOff=656 NumberOfLocalMailboxes=0
+ROOM-RENDER scope=all-active source=default
+Reading rooms
+DMalloc of 412 not 8-byte aligned, rounding up
+DMalloc of 414 not 8-byte aligned, rounding up
+DMalloc of 426 not 8-byte aligned, rounding up
+DMalloc of 404 not 8-byte aligned, rounding up
+DMalloc of 402 not 8-byte aligned, rounding up
+DMalloc of 42 not 8-byte aligned, rounding up
+DMalloc of 412 not 8-byte aligned, rounding up
+DMalloc of 428 not 8-byte aligned, rounding up
+DMalloc of 404 not 8-byte aligned, rounding up
+DMalloc of 402 not 8-byte aligned, rounding up
+Walking from 0
+0->0
+backward
+1->2
+0->0, 1->2
+1->2, 0->0
+Done loading level data
+Doing reset
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 49174)
+ASS closed without all data read (bytesLeft = 1072)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 18492)
+PixelMap::Load: this = 0x7aba463b95b8
+PixelMap::Load: this = 0x7aba463b9600
+LMalloc of 1084 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 1084 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+material: texture="G_Shakes.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_ShakesWsnowSnow.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_shakesWsnowLM.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_shakesWsnowLB.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_shakesWsnowRT.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_ShakesWsnowLT.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_shakesWsnowBtmLft.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_ShakesWsnowBtmRt.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_ShakesWsnowRB.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_shakesWsnowTpRt.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_shakesWsnowRT.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_shakesWsnowRM.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_ShakesWsnowRBalt.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_shakesWsnowRMalt.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_LogCabinLogs.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_LogCabinLogs2.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_LogCabinLogsBlueS.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_LogCabinLogsBlueDk.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_windowL.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_windowTp.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_DoorF.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_steppsR.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_DoorFg.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+LMalloc of 5916 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 7392)
+material: texture="G_Bark.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_TrSnow.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+LMalloc of 7916 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 792)
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 32790)
+ASS closed without all data read (bytesLeft = 448)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 49252)
+PixelMap::Load: this = 0x7aba463b9498
+PixelMap::Load: this = 0x7aba463b94e0
+LMalloc of 460 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 460 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+material: texture="G_HedgeWsnow.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_HedgeWsnowTp.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_HedgeWsnowSide.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_SnowyGrass.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_SnowyGrass1.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_SnowyGrass11.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_SnowyGr.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_SnowyGrassBdr.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_SnowyGrassBR.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+LMalloc of 21436 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 6864)
+material: texture="G_Bark.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="G_TrSnow.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+LMalloc of 7916 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 792)
+[Actor] idx=0 class=19 commonOff=656 NumberOfLocalMailboxes=0
+Actor::setCurrentPosition: MovementObject:
+Actor #0 (unknown) Mailboxes = [Mailboxes: 
+Local storage: 
+] doesn't have mobility set!
+Actor::setCurrentPosition: MovementObject:
+Actor #39 (unknown) Mailboxes = [Mailboxes: 
+Local storage: 
+] doesn't have mobility set!
+common block stuff
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+Done Loading Level
+audio: MusicPlayer â€” soundfont not found: florestan-subset.sf2
+audio: sfx[0] loaded (wflevels/qbert_practice/sfx/qbert_hop.wav, 9746 B)
+audio: sfx[1] loaded (wflevels/qbert_practice/sfx/qbert_land.wav, 9746 B)
+audio: sfx[2] loaded (wflevels/qbert_practice/sfx/qbert_fall.wav, 66194 B)
+audio: sfx[3] loaded (wflevels/qbert_practice/sfx/qbert_swear.wav, 92654 B)
+audio: sfx[4] loaded (wflevels/qbert_practice/sfx/qbert_round_clear.wav, 66194 B)
+audio: sfx[5] loaded (wflevels/qbert_practice/sfx/qbert_kill.wav, 61784 B)
+audio: sfx[6] loaded (wflevels/qbert_practice/sfx/qbert_disc.wav, 61784 B)
+[New Thread 0x7ab9dbfff6c0 (LWP 44)]
+rest_api: listening on http://127.0.0.1:8765
+[debug] listening on :7777
+[New Thread 0x7ab9d35ff6c0 (LWP 45)]
+Entering main game loop
+SmokeRunFrameStep: LoadLevel done, stepping 2 frames
+
+Thread 1 "wf_game" hit Breakpoint 1, WFGame::StepFrame (this=0x7aba463b43a0, do_swap=true, out_dt=0x7fff8e1d6a7c) at /src/wfsource/source/game/game.cc:623
+623	{
+ROOM_POOL 0 260576 300000
+POOL_ERROR Cannot access memory at address 0x60
+ROOM_POOL 2 82312 300000
+EXCLUDED std::vector of length 1, capacity 1 = {{mID = 8388609}}
+BODY 0 id {mID = 16777216} actor 1 pos [-0.0359344482421875, 12.053939819335938, -0.12457275390625] box [-5.667999267578125, -5.46319580078125, -0.56854248046875] [6.2347869873046875, 4.534393310546875, 6.8015899658203125]
+BODY 1 id {mID = 16777217} actor 2 pos [0.0, -12.0, -0.6199951171875] box [-32.0, -36.0, 0.0] [32.0, 36.0, 4.1999969482421875]
+BODY 2 id {mID = 16777218} actor 3 pos [7.8676300048828125, -10.566192626953125, 0.800811767578125] box [-2.9961090087890625, -4.063995361328125, -2.670074462890625] [3.092315673828125, 3.461181640625, 4.8654632568359375]
+BODY 3 id {mID = 16777219} actor 4 pos [-8.121841430664062, 1.8334197998046875, 2.4252471923828125] box [-4.2773895263671875, -4.585479736328125, -3.3421783447265625] [3.84295654296875, 5.3451995849609375, 6.2530975341796875]
+BODY 4 id {mID = 8388612} actor 15 pos [0.0, -12.0, -0.6199951171875] box [-32.0, -36.0, -1.0] [32.0, 36.0, 0.0]
+BODY 5 id {mID = 8388613} actor 19 pos [0.0, -46.125, -0.6199951171875] box [-32.0, -0.125, 0.0] [32.0, 0.125, 2.0999908447265625]
+BODY 6 id {mID = 8388614} actor 20 pos [30.125, -12.0, -0.6199951171875] box [-0.125, -34.0, 0.0] [0.125, 34.0, 2.0999908447265625]
+BODY 7 id {mID = 8388615} actor 21 pos [-30.125, -12.0, -0.6199951171875] box [-0.125, -34.0, 0.0] [0.125, 34.0, 2.0999908447265625]
+BODY 8 id {mID = 8388616} actor 22 pos [0.0, 22.125, -0.6199951171875] box [-32.0, -0.125, 0.0] [32.0, 0.125, 2.0999908447265625]
+BODY 9 id {mID = 8388617} actor 23 pos [-1.9737548828125, 6.29180908203125, -0.6930084228515625] box [-4.2146148681640625, 0.4055938720703125, 0.0] [4.2146148681640625, 0.6555938720703125, 3.04388427734375]
+BODY 10 id {mID = 8388618} actor 24 pos [5.635955810546875, 6.4774169921875, -0.676971435546875] box [-1.147308349609375, 0.2182769775390625, 0.0] [1.147308349609375, 0.4682769775390625, 3.0]
+BODY 11 id {mID = 8388619} actor 25 pos [7.3007049560546875, 10.508712768554688, -0.676971435546875] box [-0.7802276611328125, -3.4739990234375, 0.0] [-0.5302276611328125, 3.4739990234375, 3.0]
+BODY 12 id {mID = 8388620} actor 26 pos [-6.4816436767578125, 10.452178955078125, -0.6923065185546875] box [-0.04498291015625, -3.4726104736328125, 0.0] [0.20501708984375, 3.4726104736328125, 3.0]
+BODY 13 id {mID = 8388621} actor 27 pos [3.3707122802734375, 7.1946563720703125, 0.5902862548828125] box [-1.1221466064453125, -1.0040283203125, -1.3229522705078125] [1.1221466064453125, 1.0040283203125, 0.0]
+BODY 14 id {mID = 8388622} actor 28 pos [3.3559417724609375, 7.3322906494140625, 0.0] box [-1.1242523193359375, 0.75, 0.0] [1.1242523193359375, 1.0, 4.497039794921875]

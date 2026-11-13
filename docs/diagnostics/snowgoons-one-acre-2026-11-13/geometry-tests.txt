@@ -1,0 +1,20 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0 -- /usr/bin/python3
+cachedir: .pytest_cache
+rootdir: /src
+collecting ... collected 8 items
+
+tests/test_snowgoons_one_acre_yard.py::test_lawn_area_winding_and_tiling Measured yard lawn: 4080.00 m²
+PASSED
+tests/test_snowgoons_one_acre_yard.py::test_layout_matches_geometry_and_does_not_hide_floor_from_spawn PASSED
+tests/test_snowgoons_one_acre_yard.py::test_shipped_bundle_contains_exact_generated_yard[snowgoons.iff] snowgoons.iff: 4080.00 m²
+PASSED
+tests/test_snowgoons_one_acre_yard.py::test_shipped_bundle_contains_exact_generated_yard[snowgoons-standalone.iff] snowgoons-standalone.iff: 4080.00 m²
+PASSED
+tests/test_snowgoons_one_acre_yard.py::test_shipped_bundle_contains_exact_generated_yard[snowgoons-cd.iff] snowgoons-cd.iff: 4080.00 m²
+PASSED
+tests/test_snowgoons_one_acre_yard.py::test_generator_is_deterministic_and_patcher_idempotent PASSED
+tests/test_snowgoons_one_acre_yard.py::test_classic_atlas_is_isolated_from_shared_scaffold PASSED
+tests/test_snowgoons_arena_faces_up.py::test_arena_horizontal_faces_point_up_everywhere PASSED
+
+============================== 8 passed in 0.64s ===============================

@@ -12,14 +12,14 @@
 // Run:
 //   cd wfsource/source/game && wf_game -L<repo>/wflevels/snowgoons-standalone.iff
 //
-// RAM memory-configuration values mirror wflevels/cd_snowgoons.iff.txt's
-// L4 block — keep in sync.
+// The classic acre yard needs its own ROOM headroom. Legacy CD layouts retain
+// their old budgets; build-cd-iff-snowgoons embeds this standalone wrapper.
 { 'L4'
     { 'ALGN' .align( 2048 ) }
     { 'RAM'
         'OBJD' 100000l
         'PERM' 300000l
-        'ROOM' 300000l
+        'ROOM' 400000l                 // acre yard: 260576 B measured at load
         'FLAG' 1l 1l                    // doomstick, bungeecam
     }
     { 'ALGN' .align( 2048 ) }

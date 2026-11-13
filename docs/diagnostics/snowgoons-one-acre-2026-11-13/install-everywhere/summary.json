@@ -1,0 +1,29 @@
+{
+  "batch": "B-4ba9216c45f7",
+  "installations": [
+    {
+      "device": "chromecast-test-01",
+      "job": "J-41259a47dc2e",
+      "status": "verified",
+      "sha256": "6fc954de48cbb97ba360ae7556bd25832b71a0164278aa27d913bd63d9e5bbd7"
+    },
+    {
+      "device": "tablet-lenovo-tab-p11-pro-19a57145",
+      "job": "J-5b0c9e58e8d3",
+      "status": "verified",
+      "sha256": "6fc954de48cbb97ba360ae7556bd25832b71a0164278aa27d913bd63d9e5bbd7"
+    },
+    {
+      "device": "chromecast-test-02",
+      "job": "J-80e2719f86b7",
+      "status": "verified",
+      "sha256": "6fc954de48cbb97ba360ae7556bd25832b71a0164278aa27d913bd63d9e5bbd7"
+    },
+    {
+      "device": "phone-pixel-8-pro",
+      "job": "J-a4c186230662",
+      "status": "verified",
+      "sha256": "6fc954de48cbb97ba360ae7556bd25832b71a0164278aa27d913bd63d9e5bbd7"
+    }
+  ]
+}

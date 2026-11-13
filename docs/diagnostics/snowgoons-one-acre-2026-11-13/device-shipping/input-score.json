@@ -1,0 +1,70 @@
+{
+  "score": {
+    "version": 1,
+    "timebase": "milliseconds-from-run-start",
+    "events": [
+      {
+        "seq": 1,
+        "t": 3000,
+        "key": "DPAD_UP",
+        "edge": "down"
+      },
+      {
+        "seq": 2,
+        "t": 18000,
+        "key": "DPAD_UP",
+        "edge": "up"
+      },
+      {
+        "seq": 3,
+        "t": 19000,
+        "key": "DPAD_UP",
+        "edge": "down"
+      },
+      {
+        "seq": 4,
+        "t": 34000,
+        "key": "DPAD_UP",
+        "edge": "up"
+      },
+      {
+        "seq": 5,
+        "t": 35000,
+        "key": "DPAD_RIGHT",
+        "edge": "down"
+      },
+      {
+        "seq": 6,
+        "t": 36000,
+        "key": "DPAD_RIGHT",
+        "edge": "up"
+      },
+      {
+        "seq": 7,
+        "t": 38000,
+        "key": "DPAD_UP",
+        "edge": "down"
+      },
+      {
+        "seq": 8,
+        "t": 53000,
+        "key": "DPAD_UP",
+        "edge": "up"
+      }
+    ]
+  },
+  "captures": [
+    {
+      "t": 1000,
+      "label": "opening",
+      "step": 0
+    },
+    {
+      "t": 55000,
+      "label": "far-end",
+      "step": 5
+    }
+  ],
+  "sha256": "c0f9f3257ede04122796eebcaefb20f3567b342a6e03204e59c83551ccd46205",
+  "bytes": 462
+}

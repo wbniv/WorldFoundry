@@ -1,0 +1,301 @@
+{
+  "device-baseline": {
+    "samples": [
+      {
+        "seconds": 0,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 2,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 4,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 6,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 8,
+        "text": "97.8",
+        "fps": 97.8
+      },
+      {
+        "seconds": 10,
+        "text": "48.4",
+        "fps": 48.4
+      },
+      {
+        "seconds": 12,
+        "text": "39.7",
+        "fps": 39.7
+      },
+      {
+        "seconds": 14,
+        "text": "30.9",
+        "fps": 30.9
+      },
+      {
+        "seconds": 16,
+        "text": "48.2",
+        "fps": 48.2
+      },
+      {
+        "seconds": 18,
+        "text": "99.1",
+        "fps": 99.1
+      },
+      {
+        "seconds": 20,
+        "text": "64.6",
+        "fps": 64.6
+      },
+      {
+        "seconds": 22,
+        "text": "60.9",
+        "fps": 60.9
+      },
+      {
+        "seconds": 24,
+        "text": ".",
+        "fps": null
+      },
+      {
+        "seconds": 26,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 28,
+        "text": "96.90",
+        "fps": null
+      },
+      {
+        "seconds": 30,
+        "text": "63.7",
+        "fps": 63.7
+      },
+      {
+        "seconds": 32,
+        "text": "63.7",
+        "fps": 63.7
+      },
+      {
+        "seconds": 34,
+        "text": "69.6",
+        "fps": 69.6
+      },
+      {
+        "seconds": 36,
+        "text": "69.2",
+        "fps": 69.2
+      },
+      {
+        "seconds": 38,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 40,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 42,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 44,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 46,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 48,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 50,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 52,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 54,
+        "text": "",
+        "fps": null
+      }
+    ],
+    "usable_after_4s": 12,
+    "median": 63.7,
+    "mean": 62.983333333333334
+  },
+  "device-final": {
+    "samples": [
+      {
+        "seconds": 0,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 2,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 4,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 6,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 8,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 10,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 12,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 14,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 16,
+        "text": "98.4",
+        "fps": 98.4
+      },
+      {
+        "seconds": 18,
+        "text": "99.6",
+        "fps": 99.6
+      },
+      {
+        "seconds": 20,
+        "text": "00",
+        "fps": null
+      },
+      {
+        "seconds": 22,
+        "text": "64.2",
+        "fps": 64.2
+      },
+      {
+        "seconds": 24,
+        "text": "99.9",
+        "fps": 99.9
+      },
+      {
+        "seconds": 26,
+        "text": "119.5",
+        "fps": 119.5
+      },
+      {
+        "seconds": 28,
+        "text": "61.5",
+        "fps": 61.5
+      },
+      {
+        "seconds": 30,
+        "text": "3",
+        "fps": null
+      },
+      {
+        "seconds": 32,
+        "text": "63.0",
+        "fps": 63.0
+      },
+      {
+        "seconds": 34,
+        "text": "61.7",
+        "fps": 61.7
+      },
+      {
+        "seconds": 36,
+        "text": "96.7",
+        "fps": 96.7
+      },
+      {
+        "seconds": 38,
+        "text": "69.7",
+        "fps": 69.7
+      },
+      {
+        "seconds": 40,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 42,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 44,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 46,
+        "text": "",
+        "fps": null
+      },
+      {
+        "seconds": 48,
+        "text": "61.7",
+        "fps": 61.7
+      },
+      {
+        "seconds": 50,
+        "text": "61.1",
+        "fps": 61.1
+      },
+      {
+        "seconds": 52,
+        "text": "65.3",
+        "fps": 65.3
+      },
+      {
+        "seconds": 54,
+        "text": "65.1",
+        "fps": 65.1
+      },
+      {
+        "seconds": 56,
+        "text": "99.5",
+        "fps": 99.5
+      }
+    ],
+    "usable_after_4s": 15,
+    "median": 65.3,
+    "mean": 79.12666666666667
+  }
+}

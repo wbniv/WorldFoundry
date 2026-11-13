@@ -1,0 +1,440 @@
+{
+  "budgets": {
+    "cleanup": 180,
+    "cleanup_consumed": 1.0262954189674929,
+    "execution": 900,
+    "execution_consumed": 26.142596447025426,
+    "execution_deadline": 844561.333314866,
+    "forced": 1081,
+    "forced_consumed": 29.3237784440862,
+    "forced_deadline": 844742.333314866,
+    "granted": 843661.333314866
+  },
+  "cleanup_attempts": 1,
+  "connected": true,
+  "device": "chromecast-test-02",
+  "diagnostics": {
+    "advertised-endpoint-reused": {
+      "endpoint": "192.168.4.27:36355",
+      "observed_at": 1794592326.7199981
+    },
+    "mdns-endpoint": {
+      "endpoint": "192.168.4.27:36355",
+      "observed_at": 1794592326.5537179
+    }
+  },
+  "flags": {},
+  "health": "ready",
+  "job": "J-80e2719f86b7",
+  "journal": [
+    {
+      "job": "J-80e2719f86b7",
+      "key": "install:1",
+      "format": 1,
+      "original": {
+        "before_hash": "2a97cf40a942b6e8be3b26cac331ffbf300dc8676135f8e2efeec2e97f4699c5",
+        "before_visible": true,
+        "boot_id": "99e33c14-f588-4006-a3ab-87fa5a1a0586",
+        "helper": "/data/local/tmp/wf-J-80e2719f86b7-install-0df85f654c76e830a9e8d0556103b7d0-helper.jar",
+        "input": "6fc954de48cbb97ba360ae7556bd25832b71a0164278aa27d913bd63d9e5bbd7.apk",
+        "kind": "install",
+        "package": "org.worldfoundry.wf_game",
+        "protocol": "session-v2",
+        "token": "wf-coordinator://install/0df85f654c76e830a9e8d0556103b7d0",
+        "user": "all"
+      },
+      "restored": 1,
+      "verification": {
+        "installed_sha256": "6fc954de48cbb97ba360ae7556bd25832b71a0164278aa27d913bd63d9e5bbd7",
+        "session_id": 131156424
+      },
+      "device": "chromecast-test-02",
+      "backend": "android",
+      "scopes": [
+        "device:chromecast-test-02",
+        "transport:android"
+      ]
+    },
+    {
+      "job": "J-80e2719f86b7",
+      "key": "remote:/data/local/tmp/wf-J-80e2719f86b7-install-0df85f654c76e830a9e8d0556103b7d0.apk",
+      "format": 1,
+      "original": {
+        "kind": "remote",
+        "path": "/data/local/tmp/wf-J-80e2719f86b7-install-0df85f654c76e830a9e8d0556103b7d0.apk"
+      },
+      "restored": 1,
+      "verification": {
+        "removed": "/data/local/tmp/wf-J-80e2719f86b7-install-0df85f654c76e830a9e8d0556103b7d0.apk"
+      },
+      "device": "chromecast-test-02",
+      "backend": "android",
+      "scopes": [
+        "device:chromecast-test-02",
+        "transport:android"
+      ]
+    },
+    {
+      "job": "J-80e2719f86b7",
+      "key": "remote:/data/local/tmp/wf-J-80e2719f86b7-install-0df85f654c76e830a9e8d0556103b7d0-helper.jar",
+      "format": 1,
+      "original": {
+        "kind": "remote",
+        "path": "/data/local/tmp/wf-J-80e2719f86b7-install-0df85f654c76e830a9e8d0556103b7d0-helper.jar"
+      },
+      "restored": 1,
+      "verification": {
+        "removed": "/data/local/tmp/wf-J-80e2719f86b7-install-0df85f654c76e830a9e8d0556103b7d0-helper.jar"
+      },
+      "device": "chromecast-test-02",
+      "backend": "android",
+      "scopes": [
+        "device:chromecast-test-02",
+        "transport:android"
+      ]
+    },
+    {
+      "job": "J-80e2719f86b7",
+      "key": "install:1:create",
+      "format": 1,
+      "original": {
+        "install_key": "install:1",
+        "kind": "install-create-marker",
+        "token": "wf-coordinator://install/0df85f654c76e830a9e8d0556103b7d0"
+      },
+      "restored": 1,
+      "verification": {
+        "marker_recorded": true
+      },
+      "device": "chromecast-test-02",
+      "backend": "android",
+      "scopes": [
+        "device:chromecast-test-02",
+        "transport:android"
+      ]
+    },
+    {
+      "job": "J-80e2719f86b7",
+      "key": "install:1:session",
+      "format": 1,
+      "original": {
+        "install_key": "install:1",
+        "kind": "install-session-marker",
+        "session_id": 131156424,
+        "token": "wf-coordinator://install/0df85f654c76e830a9e8d0556103b7d0"
+      },
+      "restored": 1,
+      "verification": {
+        "marker_recorded": true
+      },
+      "device": "chromecast-test-02",
+      "backend": "android",
+      "scopes": [
+        "device:chromecast-test-02",
+        "transport:android"
+      ]
+    },
+    {
+      "job": "J-80e2719f86b7",
+      "key": "install:1:commit",
+      "format": 1,
+      "original": {
+        "install_key": "install:1",
+        "kind": "install-commit-marker",
+        "protocol": "binder-token-v1",
+        "session_id": 131156424,
+        "token": "wf-coordinator://install/0df85f654c76e830a9e8d0556103b7d0"
+      },
+      "restored": 1,
+      "verification": {
+        "marker_recorded": true
+      },
+      "device": "chromecast-test-02",
+      "backend": "android",
+      "scopes": [
+        "device:chromecast-test-02",
+        "transport:android"
+      ]
+    }
+  ],
+  "observations": {
+    "J-80e2719f86b7:remote:/data/local/tmp/wf-J-80e2719f86b7-install-0df85f654c76e830a9e8d0556103b7d0-helper.jar": {
+      "removed": "/data/local/tmp/wf-J-80e2719f86b7-install-0df85f654c76e830a9e8d0556103b7d0-helper.jar"
+    },
+    "J-80e2719f86b7:remote:/data/local/tmp/wf-J-80e2719f86b7-install-0df85f654c76e830a9e8d0556103b7d0.apk": {
+      "removed": "/data/local/tmp/wf-J-80e2719f86b7-install-0df85f654c76e830a9e8d0556103b7d0.apk"
+    }
+  },
+  "plugin": {
+    "cleanup": {
+      "observations": {
+        "J-80e2719f86b7:remote:/data/local/tmp/wf-J-80e2719f86b7-install-0df85f654c76e830a9e8d0556103b7d0-helper.jar": {
+          "removed": "/data/local/tmp/wf-J-80e2719f86b7-install-0df85f654c76e830a9e8d0556103b7d0-helper.jar"
+        },
+        "J-80e2719f86b7:remote:/data/local/tmp/wf-J-80e2719f86b7-install-0df85f654c76e830a9e8d0556103b7d0.apk": {
+          "removed": "/data/local/tmp/wf-J-80e2719f86b7-install-0df85f654c76e830a9e8d0556103b7d0.apk"
+        }
+      },
+      "reason": "restored",
+      "recovery_state": null,
+      "restoration": "safe"
+    },
+    "run": {
+      "details": {
+        "apk_installations": [
+          {
+            "action": "install",
+            "before_sha256": "2a97cf40a942b6e8be3b26cac331ffbf300dc8676135f8e2efeec2e97f4699c5",
+            "end": 1794592352.2673652,
+            "input": "6fc954de48cbb97ba360ae7556bd25832b71a0164278aa27d913bd63d9e5bbd7.apk",
+            "installed_sha256": "6fc954de48cbb97ba360ae7556bd25832b71a0164278aa27d913bd63d9e5bbd7",
+            "journal_key": "install:1",
+            "package": "org.worldfoundry.wf_game",
+            "reason": "explicit-install",
+            "start": 1794592329.304238,
+            "status": "verified",
+            "variant": null
+          }
+        ],
+        "next_workflow": "verify-launch",
+        "profile": "tv",
+        "workflow": "install"
+      },
+      "reason": "completed",
+      "recovery_state": null,
+      "status": "succeeded"
+    }
+  },
+  "reaped": [],
+  "reason": "completed",
+  "status": "succeeded",
+  "survivors": [],
+  "tool_diagnostics": [
+    {
+      "phase": "job",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "aapt"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "aapt"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    },
+    {
+      "phase": "job",
+      "process_policy": "threads-only",
+      "returncode": 0,
+      "timed_out": false,
+      "tool": "adb"
+    }
+  ],
+  "transport_failure_phases": [],
+  "transport_recovery": [],
+  "version": 1,
+  "work_started": true
+}

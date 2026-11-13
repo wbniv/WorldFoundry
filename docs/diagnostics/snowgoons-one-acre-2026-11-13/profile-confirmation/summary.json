@@ -1,0 +1,51 @@
+{
+  "runs": [
+    {
+      "run": 1,
+      "frames": 562,
+      "interval_count": 562,
+      "fps": 45.70728448297632,
+      "refresh_ms": 16.683333,
+      "p50_ms": 16.683437,
+      "p90_ms": 33.36674,
+      "p95_ms": 33.366876,
+      "p99_ms": 33.367122,
+      "worst_ms": 33.367438,
+      "missed_refresh_percent": 31.13879003558719,
+      "duration_seconds": 12.0,
+      "layer": "org.worldfoundry.wf_game/android.app.NativeActivity#11503",
+      "measurement_anchor_ns": 545216632283749,
+      "measurement_start_wall_time": 1794591551.8138516,
+      "settling_reads": 2,
+      "sampling_holes": [],
+      "empty_sample_indices": [],
+      "latency_statistics_may_include_unobserved_bridges": false,
+      "observed_span_seconds": 12.2956331
+    },
+    {
+      "run": 2,
+      "frames": 714,
+      "interval_count": 714,
+      "fps": 59.11207820351306,
+      "refresh_ms": 16.683333,
+      "p50_ms": 16.683361,
+      "p90_ms": 16.683533,
+      "p95_ms": 16.683588,
+      "p99_ms": 16.684099,
+      "worst_ms": 66.733271,
+      "missed_refresh_percent": 0.9803921568627451,
+      "duration_seconds": 12.0,
+      "layer": "org.worldfoundry.wf_game/android.app.NativeActivity#11518",
+      "measurement_anchor_ns": 545282564905811,
+      "measurement_start_wall_time": 1794591617.7471416,
+      "settling_reads": 2,
+      "sampling_holes": [],
+      "empty_sample_indices": [],
+      "latency_statistics_may_include_unobserved_bridges": false,
+      "observed_span_seconds": 12.078749753
+    }
+  ],
+  "median": {
+    "fps": 52.409681343244685
+  }
+}

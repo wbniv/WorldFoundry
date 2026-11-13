@@ -1,0 +1,17 @@
+[
+  {
+    "device": "tablet-lenovo-tab-p11-pro-19a57145",
+    "job": "J-2855f4aad5ed",
+    "installed_sha256": "cb734288b45f0cbe1f63862c311586362fd0a2eeb3f83692b4d9a3a5f7c304e0"
+  },
+  {
+    "device": "chromecast-test-02",
+    "job": "J-bd20d5de48e2",
+    "installed_sha256": "cb734288b45f0cbe1f63862c311586362fd0a2eeb3f83692b4d9a3a5f7c304e0"
+  },
+  {
+    "device": "phone-pixel-8-pro",
+    "job": "J-05596f4565a4",
+    "installed_sha256": "cb734288b45f0cbe1f63862c311586362fd0a2eeb3f83692b4d9a3a5f7c304e0"
+  }
+]
