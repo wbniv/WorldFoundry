@@ -64,6 +64,9 @@
 #include <hal/phonepad/phonepad.h>
 #include <hal/phonepad/phonepad_overlay.h>
 #include <hal/android/touch_controls.h>
+#if defined(WF_INPUT_PROBE)
+#include <hal/android/input_probe.h>
+#endif
 
 extern "C" void _HALSetJoystickButtons(joystickButtonsF joystickButtons);
 
@@ -222,6 +225,23 @@ void Emit()
 // assets/controller.html on its Wi-Fi address while resumed. The phone's mask is
 // a third input source OR-ed in Emit(); the server releases it on every kind of
 // disconnect. Polled once per frame from WFAndroidPumpEvents on this thread.
+
+#if defined(WF_INPUT_PROBE)
+// ---- Input probe (docs/plans/2026-11-13-android-input-latency.md) -------------
+// WF_INPUT_PROBE builds only (gradle build type "inputprobe"). Times every key edge
+// on CLOCK_MONOTONIC from Android's event time through this thread's pump to the
+// next two swaps, logs per-second frame and backlog counts, and makes
+// gfx/gl/android_window.cc flash the screen while a key is held: the measurement
+// sits in the HAL, so no level's game logic is in it.
+inputprobe::Tracker gProbe;
+
+int64_t MonoNs()
+{
+    timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return int64_t(ts.tv_sec) * 1000000000LL + ts.tv_nsec;
+}
+#endif
 
 phonepad::Server    gPhone;
 phonepad::Overlay   gPhoneOverlay;
@@ -445,6 +465,9 @@ void HandleAppCmd(struct android_app* app, int32_t cmd)
         case APP_CMD_PAUSE:
             WFLOG("APP_CMD_PAUSE");
             gGamepadButtons=gTouchButtons=gPhoneButtons=0;gTouchState.clear();Emit();
+#if defined(WF_INPUT_PROBE)
+            gProbe.ReleaseAll();
+#endif
             propertyui::touchReset();
             gMenuTouchPointer=-1;
             wfprops::host().suspend();
@@ -461,6 +484,9 @@ void HandleAppCmd(struct android_app* app, int32_t cmd)
             // A native text dialog/IME can consume the release of the opening
             // key. Never carry that held game input across the UI transition.
             gGamepadButtons = gTouchButtons = gPhoneButtons = 0;
+#if defined(WF_INPUT_PROBE)
+            gProbe.ReleaseAll();
+#endif
             gTouchState.clear();
             propertyui::touchReset();
             gMenuTouchPointer=-1;
@@ -512,6 +538,17 @@ int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
         const int32_t keyCode = AKeyEvent_getKeyCode(event);
         const int32_t action  = AKeyEvent_getAction(event);
         const uint32_t mask   = MapKeyCode(keyCode);
+#if defined(WF_INPUT_PROBE)
+        {
+            const int32_t repeat = AKeyEvent_getRepeatCount(event);
+            const int64_t eventNs = AKeyEvent_getEventTime(event), nowNs = MonoNs();
+            const int64_t ageNs = gProbe.Key(keyCode, action, repeat, eventNs, nowNs);
+            if (repeat == 0)
+                WFLOG("probe key code=%d action=%d event_ms=%lld recv_ms=%lld age_ms=%lld frame=%llu",
+                      keyCode, action, (long long)(eventNs / 1000000), (long long)(nowNs / 1000000),
+                      (long long)(ageNs / 1000000), (unsigned long long)gProbe.Frame());
+        }
+#endif
         const uint32_t held = action == AKEY_EVENT_ACTION_DOWN ? (gGamepadButtons | mask)
                             : action == AKEY_EVENT_ACTION_UP ? (gGamepadButtons & ~mask) : gGamepadButtons;
         const uint64_t receipt = wfdiag::Receive("hardware", held,
@@ -692,18 +729,56 @@ extern "C" WF_ANDROID_EXPORT void
 WFAndroidPumpEvents()
 {
     if (!gApp) return;
+#if defined(WF_INPUT_PROBE)
+    gProbe.PumpBegin(MonoNs());
+#endif
     for (;;)
     {
         int events = 0;
         struct android_poll_source* source = nullptr;
         int ident = ALooper_pollOnce(0, nullptr, &events, (void**)&source);
         if (ident < 0) break;
+#if defined(WF_INPUT_PROBE)
+        gProbe.Ident();
+#endif
         if (source) source->process(gApp, source);
         if (gApp->destroyRequested) { gExitLoop = true; break; }
     }
+#if defined(WF_INPUT_PROBE)
+    gProbe.PumpEnd();
+    inputprobe::Stats stats;
+    if (gProbe.TakeStats(MonoNs(), &stats))
+        WFLOG("probe frames=%llu max_frame_ms=%lld events=%u max_events_per_pump=%u idents=%u max_idents_per_pump=%u pending=%d dropped=%u",
+              (unsigned long long)stats.frames, (long long)(stats.maxFrameNs / 1000000), stats.events,
+              stats.maxEventsPerPump, stats.idents, stats.maxIdentsPerPump, gProbe.Pending(), gProbe.Dropped());
+#endif
     PhonePoll();
     androidtext::poll();
 }
+
+#if defined(WF_INPUT_PROBE)
+// gfx/gl/android_window.cc: flash the frame while a key is held, and report each swap.
+extern "C" WF_ANDROID_EXPORT int
+WFAndroidInputProbeFlash()
+{
+    return gProbe.Held() ? 1 : 0;
+}
+
+extern "C" WF_ANDROID_EXPORT void
+WFAndroidInputProbeSwapped()
+{
+    inputprobe::Edge done[inputprobe::kMaxPending];
+    const int n = gProbe.Swap(MonoNs(), done, inputprobe::kMaxPending);
+    for (int i = 0; i < n; ++i)
+    {
+        const inputprobe::Edge& e = done[i];
+        WFLOG("probe swap code=%d action=%d frame=%llu event_to_recv_ms=%lld recv_to_swap1_ms=%lld recv_to_swap2_ms=%lld event_to_swap2_ms=%lld",
+              e.code, e.action, (unsigned long long)e.frame, (long long)((e.receiveNs - e.eventNs) / 1000000),
+              (long long)((e.swap1Ns - e.receiveNs) / 1000000), (long long)((e.swap2Ns - e.receiveNs) / 1000000),
+              (long long)((e.swap2Ns - e.eventNs) / 1000000));
+    }
+}
+#endif
 
 // The phone overlay's rectangles for a w x h surface, drawn by gfx/gl/android_window.cc after
 // the touch HUD, and its text's glyph quads (*glyphs, *glyphCount; wfui::Draw after the

@@ -35,6 +35,7 @@ option(WF_RUNTIME_DIAGNOSTICS "Read-only loopback runtime diagnostics (explicit 
 if(WF_RUNTIME_DIAGNOSTICS AND (IOS OR EMSCRIPTEN))
     message(FATAL_ERROR "Runtime diagnostics currently support native desktop and Android only")
 endif()
+option(WF_INPUT_PROBE "Android remote-key latency probe: logs and a key-held flash (gradle build type inputprobe only)" OFF)
 option(WF_ENABLE_STEAM    "Steamworks SDK"                OFF)
 # AddressSanitizer + UBSan. Default **ON for host Debug builds** — Debug exists
 # to catch bugs, computers are fast, and the whole engine+editor lifecycle is
@@ -808,6 +809,12 @@ if(WF_ENABLE_EDITOR)
     list(APPEND WF_DEFS WF_ENABLE_EDITOR)
 endif()
 
+# Android input probe (hal/android/input_probe.h, docs/plans/2026-11-13-android-input-latency.md):
+# gradle's "inputprobe" build type turns it on; every other build compiles none of it.
+if(WF_INPUT_PROBE)
+    list(APPEND WF_DEFS WF_INPUT_PROBE)
+endif()
+
 # ─── Engine mutation API (wfmut::) ────────────────────────────────────────────
 # Used by BOTH consumers:
 #   - debug_server.cc (step-6 refactor — bridge SET_TRANSFORM / SET_PROP /
@@ -1388,6 +1395,11 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     target_include_directories(android_touch_controls_test PRIVATE ${SRC})
     target_compile_options(android_touch_controls_test PRIVATE -UNDEBUG)
     add_test(NAME android_touch_controls COMMAND android_touch_controls_test)
+    # The Android input probe's per-key latency bookkeeping (hal/android/input_probe.h;
+    # docs/plans/2026-11-13-android-input-latency.md). Header-only, so it runs here.
+    add_executable(android_input_probe_test tests/android_input_probe_test.cc)
+    target_include_directories(android_input_probe_test PRIVATE ${SRC})
+    add_test(NAME android_input_probe COMMAND android_input_probe_test)
     # Android EGL context-loss recovery decisions (gfx/gl/egl_recovery.hp, used by
     # gl/android_window.cc): swap result, error and debug-drop flag in, action out.
     add_executable(egl_rebuild_test tests/egl_rebuild_test.cc)

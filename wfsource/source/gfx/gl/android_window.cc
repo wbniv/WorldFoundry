@@ -637,6 +637,44 @@ WFAndroidDrawLevelMenu(const PhonepadRect* rects, int n, int w, int h)
     if ( prevCull)  glEnable(GL_CULL_FACE);
 }
 
+#if defined(WF_INPUT_PROBE)
+// Defined in hal/android/native_app_entry.cc (docs/plans/2026-11-13-android-input-latency.md).
+extern "C" int  WFAndroidInputProbeFlash();
+extern "C" void WFAndroidInputProbeSwapped();
+
+// While a remote key is held, tint the whole frame magenta: the first swap
+// after the key reached the pump shows it, independent of the level's logic,
+// so a person or a screen capture can see when the app got the key.
+static void DrawInputProbeFlash()
+{
+    const int w = _halWindowWidth, h = _halWindowHeight;
+    if (w <= 0 || h <= 0 || !WFAndroidInputProbeFlash()) return;
+    HudInit();
+    if (gHudProg == 0) return;
+    std::vector<HudVert> verts;
+    PushHudRect(verts, 0, 0, float(w), float(h), float(w), float(h), 1.0f, 0.0f, 1.0f, 0.6f);
+    GLboolean prevBlend = glIsEnabled(GL_BLEND);
+    GLboolean prevDepth = glIsEnabled(GL_DEPTH_TEST);
+    GLboolean prevCull  = glIsEnabled(GL_CULL_FACE);
+    glViewport(0, 0, w, h);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glUseProgram(gHudProg);
+    glBindVertexArray(gHudVao);
+    glBindBuffer(GL_ARRAY_BUFFER, gHudVbo);
+    glBufferData(GL_ARRAY_BUFFER, GLsizeiptr(verts.size() * sizeof(HudVert)), verts.data(), GL_STREAM_DRAW);
+    glDrawArrays(GL_TRIANGLES, 0, GLsizei(verts.size()));
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glUseProgram(0);
+    if (!prevBlend) glDisable(GL_BLEND);
+    if ( prevDepth) glEnable(GL_DEPTH_TEST);
+    if ( prevCull)  glEnable(GL_CULL_FACE);
+}
+#endif
+
 #if defined(WF_RUNTIME_DIAGNOSTICS)
 // org.worldfoundry.wf_game.DropGlContextReceiver, which finding-your-way's
 // make_diagnostic_variant.py adds to diagnostic APKs, calls this on the Java
@@ -660,7 +698,13 @@ void AndroidSwapBuffers()
     WFAndroidEglRefreshSize();
     WFAndroidDrawHUD();
     WFAndroidDrawPhoneOverlay();
+#if defined(WF_INPUT_PROBE)
+    DrawInputProbeFlash();
+#endif
     const bool swapped = eglSwapBuffers(gEglDisplay, gEglSurface) == EGL_TRUE;
+#if defined(WF_INPUT_PROBE)
+    WFAndroidInputProbeSwapped();
+#endif
     const EGLint error = swapped ? EGL_SUCCESS : eglGetError();
     bool dropRequested = false;
 #if defined(WF_RUNTIME_DIAGNOSTICS)

@@ -90,6 +90,20 @@ android {
                 }
             }
         }
+        // docs/plans/2026-11-13-android-input-latency.md: a release build plus the input
+        // probe (WF_INPUT_PROBE). Same debug-keystore signature and versionCode as release,
+        // so it installs over a release APK and the release APK installs back over it.
+        create("inputprobe") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            versionNameSuffix = "-inputprobe"
+            matchingFallbacks += "release"
+            externalNativeBuild {
+                cmake {
+                    arguments += listOf("-DCMAKE_BUILD_TYPE=Release", "-DWF_INPUT_PROBE=ON")
+                }
+            }
+        }
         getByName("debug") {
             // AGP's default: CMake passes -DCMAKE_BUILD_TYPE=Debug, which in
             // our CMakeLists maps to -O0 -g for the wf_game target.
