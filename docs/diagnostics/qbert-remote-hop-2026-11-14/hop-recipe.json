@@ -1,0 +1,52 @@
+{
+ "workflow": "check",
+ "device": "chromecast-test-01",
+ "app": "qbert",
+ "apk": "/home/will/tmp/qbert-remote-hop/worldfoundry-qbert-release.apk",
+ "duration": 24,
+ "panel": "require-hidden",
+ "input_script": [
+  {
+   "at": 12.0,
+   "capture": "after-intro"
+  },
+  {
+   "at": 12.5,
+   "key": "DPAD_RIGHT",
+   "action": "hold",
+   "ms": 100
+  },
+  {
+   "at": 13.5,
+   "capture": "after-right-tap"
+  },
+  {
+   "at": 14.0,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 100
+  },
+  {
+   "at": 15.0,
+   "capture": "after-down-tap"
+  },
+  {
+   "at": 15.5,
+   "key": "DPAD_RIGHT",
+   "action": "hold",
+   "ms": 2000
+  },
+  {
+   "at": 16.0,
+   "capture": "during-right-hold"
+  },
+  {
+   "at": 18.0,
+   "capture": "after-right-hold"
+  },
+  {
+   "at": 21.0,
+   "capture": "later"
+  }
+ ]
+}

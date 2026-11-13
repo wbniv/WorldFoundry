@@ -225,3 +225,26 @@ regeneration supersedes these outputs.
    2 s hold make Q\*bert hop (captures show him off the apex and cube tops recoloured), and
    `wf.log` of that run has no `zforth error` line. Screensaver settings on cast1 unchanged
    (read-only `screensaver-list`).
+
+    APK built at `41c48094` in a clean sparse worktree
+    (`ANDROID_HOME=$HOME/android-sdk-local ./gradlew :app:assembleQbertRelease`:
+    `APK page alignment: PASS`, `BUILD SUCCESSFUL in 7m 3s`), frozen as
+    `~/tmp/qbert-remote-hop/worldfoundry-qbert-release.apk`, sha256 `742196b4…8c58a16`; its
+    `assets/cd.iff` is byte-identical to the committed `wflevels/qbert-cd.iff` (`a9cf9630…`).
+    Coordinator check J‑a6d314ffb843 on cast1 (recipe and evidence in
+    [`docs/diagnostics/qbert-remote-hop-2026-11-14/`](../diagnostics/qbert-remote-hop-2026-11-14/)):
+    ```
+    key code=22 action=0 mask=0x2000   planned 12.5 s  DPAD_RIGHT tap
+    key code=20 action=0 mask=0x1000   planned 14.0 s  DPAD_DOWN tap
+    key code=22 action=0 mask=0x2000   planned 15.5 s  DPAD_RIGHT held 2.0 s
+    after-intro        Q*bert on the apex, all tops blue
+    after-right-tap    Q*bert on (1,1), its top yellow
+    after-down-tap     Q*bert on (2,1), its top yellow
+    during-right-hold  (3,2) (4,3) (5,4) (6,5) yellow, "+25" popup; he hopped off the
+                       bottom-right edge, fell and is back on the apex (game still on)
+    wf.log, this run:  4 lines matching "zforth", all "zforth: INDEXOF_CAMSHOT = 1921"
+    ```
+    `screensaver-list` on cast1 afterwards: `selected_component`
+    `org.worldfoundry.seahorsegrid/...SeahorseGridDreamService`, `stay_on_while_plugged_in` 0,
+    `sleep_timeout_ms` -1, `idle_timeout_ms` 600000 (unchanged). PASS. The lives count is not
+    visible on Android (no HUD in the captures), so "one life per death" rests on step 1.

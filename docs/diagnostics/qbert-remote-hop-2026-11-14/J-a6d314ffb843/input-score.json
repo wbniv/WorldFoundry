@@ -1,0 +1,78 @@
+{
+  "score": {
+    "version": 1,
+    "timebase": "milliseconds-from-run-start",
+    "events": [
+      {
+        "seq": 1,
+        "t": 12500,
+        "key": "DPAD_RIGHT",
+        "edge": "down"
+      },
+      {
+        "seq": 2,
+        "t": 12600,
+        "key": "DPAD_RIGHT",
+        "edge": "up"
+      },
+      {
+        "seq": 3,
+        "t": 14000,
+        "key": "DPAD_DOWN",
+        "edge": "down"
+      },
+      {
+        "seq": 4,
+        "t": 14100,
+        "key": "DPAD_DOWN",
+        "edge": "up"
+      },
+      {
+        "seq": 5,
+        "t": 15500,
+        "key": "DPAD_RIGHT",
+        "edge": "down"
+      },
+      {
+        "seq": 6,
+        "t": 17500,
+        "key": "DPAD_RIGHT",
+        "edge": "up"
+      }
+    ]
+  },
+  "captures": [
+    {
+      "t": 12000,
+      "label": "after-intro",
+      "step": 0
+    },
+    {
+      "t": 13500,
+      "label": "after-right-tap",
+      "step": 2
+    },
+    {
+      "t": 15000,
+      "label": "after-down-tap",
+      "step": 4
+    },
+    {
+      "t": 16000,
+      "label": "during-right-hold",
+      "step": 6
+    },
+    {
+      "t": 18000,
+      "label": "after-right-hold",
+      "step": 7
+    },
+    {
+      "t": 21000,
+      "label": "later",
+      "step": 8
+    }
+  ],
+  "sha256": "cb15e7ad31654551233212ef0d822d8092f6fcbcf4913d00e34d88d4c2dec460",
+  "bytes": 375
+}

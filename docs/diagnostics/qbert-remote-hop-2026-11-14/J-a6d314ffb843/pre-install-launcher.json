@@ -1,0 +1,9 @@
+{
+  "status": "captured",
+  "package": "org.worldfoundry.wf_game.qbert",
+  "installed_sha256": "3b33384c271b4fb5dc618c8852bd91fea2e021fe09b0eef58694be3a0cff1d47",
+  "labels": [
+    "WF Q*bert",
+    "Q*bert Log"
+  ]
+}

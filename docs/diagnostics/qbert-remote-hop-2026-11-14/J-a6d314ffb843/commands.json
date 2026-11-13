@@ -1,0 +1,565 @@
+[
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794601171.9784808,
+    "end": 1794601172.2669358,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.qbert"
+    ],
+    "start": 1794601172.3416486,
+    "end": 1794601172.6639762,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~ZcIqe3Ifbnm1BGefgMiYxA==/org.worldfoundry.wf_game.qbert-Zp-LhDkj5g75uk_uqNRSLQ==/base.apk'"
+    ],
+    "start": 1794601172.6655421,
+    "end": 1794601172.8731918,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.qbert"
+    ],
+    "start": 1794601172.8771887,
+    "end": 1794601173.0640924,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~ZcIqe3Ifbnm1BGefgMiYxA==/org.worldfoundry.wf_game.qbert-Zp-LhDkj5g75uk_uqNRSLQ==/base.apk'"
+    ],
+    "start": 1794601173.0665536,
+    "end": 1794601173.2208884,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "cat",
+      "/data/app/~~ZcIqe3Ifbnm1BGefgMiYxA==/org.worldfoundry.wf_game.qbert-Zp-LhDkj5g75uk_uqNRSLQ==/base.apk"
+    ],
+    "start": 1794601173.2231238,
+    "end": 1794601175.835431,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "push",
+      "/opt/wf-device-coordinator/scripts/wf_device/plugins/android/resources/installer-helper.jar",
+      "/data/local/tmp/wf-J-a6d314ffb843-install-8e5e3ffa91aa6ace8ca60bc3b48d2fb2-helper.jar"
+    ],
+    "start": 1794601175.9782326,
+    "end": 1794601176.1507714,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum /data/local/tmp/wf-J-a6d314ffb843-install-8e5e3ffa91aa6ace8ca60bc3b48d2fb2-helper.jar"
+    ],
+    "start": 1794601176.1529915,
+    "end": 1794601176.3085208,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "CLASSPATH=/data/local/tmp/wf-J-a6d314ffb843-install-8e5e3ffa91aa6ace8ca60bc3b48d2fb2-helper.jar timeout 15 app_process /system/bin WfInstallerProbe 8e5e3ffa91aa6ace8ca60bc3b48d2fb2"
+    ],
+    "start": 1794601176.310833,
+    "end": 1794601178.4561498,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys package installs"
+    ],
+    "start": 1794601178.460719,
+    "end": 1794601179.084419,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "push",
+      "/var/lib/wf-device-coordinator/inputs/742196b486f491d1a63619cea3063254f09df58e4c305f45628e8518c8c58a16.apk",
+      "/data/local/tmp/wf-J-a6d314ffb843-install-8e5e3ffa91aa6ace8ca60bc3b48d2fb2.apk"
+    ],
+    "start": 1794601179.1223016,
+    "end": 1794601180.819063,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum /data/local/tmp/wf-J-a6d314ffb843-install-8e5e3ffa91aa6ace8ca60bc3b48d2fb2.apk"
+    ],
+    "start": 1794601180.8204358,
+    "end": 1794601181.0331728,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm install-create -r --user all --pkg org.worldfoundry.wf_game.qbert --originating-uri wf-coordinator://install/8e5e3ffa91aa6ace8ca60bc3b48d2fb2 -S 4196697"
+    ],
+    "start": 1794601181.1684313,
+    "end": 1794601181.4784997,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm install-write -S 4196697 383255846 base /data/local/tmp/wf-J-a6d314ffb843-install-8e5e3ffa91aa6ace8ca60bc3b48d2fb2.apk"
+    ],
+    "start": 1794601181.6129558,
+    "end": 1794601181.9089854,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum /data/local/tmp/wf-J-a6d314ffb843-install-8e5e3ffa91aa6ace8ca60bc3b48d2fb2-helper.jar"
+    ],
+    "start": 1794601181.9106874,
+    "end": 1794601182.2421455,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "CLASSPATH=/data/local/tmp/wf-J-a6d314ffb843-install-8e5e3ffa91aa6ace8ca60bc3b48d2fb2-helper.jar timeout 15 app_process /system/bin WfInstallerCommit 383255846 wf-coordinator://install/8e5e3ffa91aa6ace8ca60bc3b48d2fb2 org.worldfoundry.wf_game.qbert"
+    ],
+    "start": 1794601182.300207,
+    "end": 1794601183.417964,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys package installs"
+    ],
+    "start": 1794601183.4195423,
+    "end": 1794601183.9647014,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys package installs"
+    ],
+    "start": 1794601184.4981463,
+    "end": 1794601184.9952455,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys package installs"
+    ],
+    "start": 1794601185.5364842,
+    "end": 1794601185.9915576,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys package installs"
+    ],
+    "start": 1794601186.5305185,
+    "end": 1794601187.082917,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /proc/sys/kernel/random/boot_id"
+    ],
+    "start": 1794601187.1131063,
+    "end": 1794601187.6240013,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.wf_game.qbert"
+    ],
+    "start": 1794601187.6255746,
+    "end": 1794601187.889202,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~WHaisgQ89rGP6TbeXHXrcg==/org.worldfoundry.wf_game.qbert-FX4SJx6Hz0w7WG9jZHaHKg==/base.apk'"
+    ],
+    "start": 1794601187.890878,
+    "end": 1794601188.224858,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /proc/sys/kernel/random/boot_id"
+    ],
+    "start": 1794601188.2270448,
+    "end": 1794601188.4048867,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.wf_game.qbert"
+    ],
+    "start": 1794601188.4682133,
+    "end": 1794601188.8516529,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1794601188.8538105,
+    "end": 1794601189.0697303,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n org.worldfoundry.wf_game.qbert/android.app.NativeActivity"
+    ],
+    "start": 1794601189.2224126,
+    "end": 1794601191.0017562,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794601196.0059829,
+    "end": 1794601196.3055165,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.qbert"
+    ],
+    "start": 1794601196.3111453,
+    "end": 1794601196.6409957,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794601196.6624553,
+    "end": 1794601197.0307548,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.qbert"
+    ],
+    "start": 1794601197.036367,
+    "end": 1794601197.2165797,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794601197.2195933,
+    "end": 1794601197.393042,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.qbert"
+    ],
+    "start": 1794601197.4020705,
+    "end": 1794601197.5640738,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "push",
+      "/opt/wf-device-coordinator/scripts/wf_device/plugins/android/resources/capture-helper.jar",
+      "/data/local/tmp/wf-J-a6d314ffb843-keyscore.jar"
+    ],
+    "start": 1794601197.6185672,
+    "end": 1794601197.783858,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "push",
+      "/var/lib/wf-device-coordinator/evidence/J-a6d314ffb843/input-score.csv",
+      "/data/local/tmp/wf-J-a6d314ffb843-input.csv"
+    ],
+    "start": 1794601197.7854545,
+    "end": 1794601197.8850324,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "date",
+      "+%s%3N"
+    ],
+    "start": 1794601197.9082372,
+    "end": 1794601198.0640607,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test -s /data/local/tmp/wf-J-a6d314ffb843-input-log.csv; echo wf-status=$?"
+    ],
+    "start": 1794601198.0690105,
+    "end": 1794601198.1869369,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test -s /data/local/tmp/wf-J-a6d314ffb843-input-log.csv; echo wf-status=$?"
+    ],
+    "start": 1794601198.2897348,
+    "end": 1794601198.6188865,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test -s /data/local/tmp/wf-J-a6d314ffb843-input-log.csv; echo wf-status=$?"
+    ],
+    "start": 1794601198.7212026,
+    "end": 1794601199.0826705,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test -s /data/local/tmp/wf-J-a6d314ffb843-input-log.csv; echo wf-status=$?"
+    ],
+    "start": 1794601199.1874888,
+    "end": 1794601199.43932,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test -s /data/local/tmp/wf-J-a6d314ffb843-input-log.csv; echo wf-status=$?"
+    ],
+    "start": 1794601199.5433593,
+    "end": 1794601199.6651747,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test -s /data/local/tmp/wf-J-a6d314ffb843-input-log.csv; echo wf-status=$?"
+    ],
+    "start": 1794601199.7673879,
+    "end": 1794601200.0648186,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test -s /data/local/tmp/wf-J-a6d314ffb843-input-log.csv; echo wf-status=$?"
+    ],
+    "start": 1794601200.1681757,
+    "end": 1794601200.4759398,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "head",
+      "-n",
+      "1",
+      "/data/local/tmp/wf-J-a6d314ffb843-input-log.csv"
+    ],
+    "start": 1794601200.478823,
+    "end": 1794601200.6918736,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1794601212.1071098,
+    "end": 1794601213.660053,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1794601213.6629453,
+    "end": 1794601215.180413,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1794601215.1846745,
+    "end": 1794601216.6793387,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1794601216.681677,
+    "end": 1794601218.0342984,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1794601218.1072307,
+    "end": 1794601219.4570713,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1794601221.107469,
+    "end": 1794601222.5612063,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "pull",
+      "/data/local/tmp/wf-J-a6d314ffb843-input-log.csv",
+      "/var/lib/wf-device-coordinator/evidence/J-a6d314ffb843/input-timeline.csv"
+    ],
+    "start": 1794601222.5639102,
+    "end": 1794601222.7598367,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "logcat",
+      "-d",
+      "-v",
+      "epoch",
+      "--pid=16830"
+    ],
+    "start": 1794601222.7661536,
+    "end": 1794601223.0096743,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794601223.016982,
+    "end": 1794601223.2591968,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.qbert"
+    ],
+    "start": 1794601223.2663658,
+    "end": 1794601223.463721,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1794601223.466144,
+    "end": 1794601225.0283222,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pidof org.worldfoundry.wf_game.qbert"
+    ],
+    "start": 1794601225.0313065,
+    "end": 1794601225.2433293,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "logcat",
+      "-d",
+      "-v",
+      "threadtime",
+      "--pid=16830"
+    ],
+    "start": 1794601225.2452242,
+    "end": 1794601225.4656065,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "tail -c 4000000 /sdcard/Android/data/org.worldfoundry.wf_game.qbert/files/wf.log"
+    ],
+    "start": 1794601225.4679677,
+    "end": 1794601227.837249,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys meminfo org.worldfoundry.wf_game.qbert"
+    ],
+    "start": 1794601227.874248,
+    "end": 1794601229.822119,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys thermalservice"
+    ],
+    "start": 1794601229.8239408,
+    "end": 1794601230.2177918,
+    "returncode": 0
+  }
+]

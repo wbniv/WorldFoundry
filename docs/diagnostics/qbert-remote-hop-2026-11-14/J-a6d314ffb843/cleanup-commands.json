@@ -1,0 +1,184 @@
+[
+  {
+    "args": [
+      "shell",
+      "ps -A -o PID,ARGS"
+    ],
+    "start": 1794601230.3172584,
+    "end": 1794601230.705188,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "push",
+      "/opt/wf-device-coordinator/scripts/wf_device/plugins/android/resources/capture-helper.jar",
+      "/data/local/tmp/wf-J-a6d314ffb843-keyscore.jar"
+    ],
+    "start": 1794601230.7079372,
+    "end": 1794601230.8383083,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "CLASSPATH=/data/local/tmp/wf-J-a6d314ffb843-keyscore.jar timeout 10 app_process /system/bin WfKeyScore --release /data/local/tmp/wf-J-a6d314ffb843-input-log.csv"
+    ],
+    "start": 1794601230.839715,
+    "end": 1794601232.7698174,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "cat",
+      "/data/local/tmp/wf-J-a6d314ffb843-input-log.csv"
+    ],
+    "start": 1794601232.7722917,
+    "end": 1794601233.0880873,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-a6d314ffb843-install-8e5e3ffa91aa6ace8ca60bc3b48d2fb2.apk"
+    ],
+    "start": 1794601233.1227522,
+    "end": 1794601233.4522958,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test ! -e /data/local/tmp/wf-J-a6d314ffb843-install-8e5e3ffa91aa6ace8ca60bc3b48d2fb2.apk; echo wf-status=$?"
+    ],
+    "start": 1794601233.455395,
+    "end": 1794601233.5980566,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-a6d314ffb843-install-8e5e3ffa91aa6ace8ca60bc3b48d2fb2-helper.jar"
+    ],
+    "start": 1794601233.6410272,
+    "end": 1794601233.9858963,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test ! -e /data/local/tmp/wf-J-a6d314ffb843-install-8e5e3ffa91aa6ace8ca60bc3b48d2fb2-helper.jar; echo wf-status=$?"
+    ],
+    "start": 1794601233.989421,
+    "end": 1794601234.1496906,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-a6d314ffb843-keyscore.jar"
+    ],
+    "start": 1794601234.178293,
+    "end": 1794601234.3843017,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test ! -e /data/local/tmp/wf-J-a6d314ffb843-keyscore.jar; echo wf-status=$?"
+    ],
+    "start": 1794601234.3861926,
+    "end": 1794601234.5429668,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-a6d314ffb843-input.csv"
+    ],
+    "start": 1794601234.5763557,
+    "end": 1794601234.7893772,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test ! -e /data/local/tmp/wf-J-a6d314ffb843-input.csv; echo wf-status=$?"
+    ],
+    "start": 1794601234.792788,
+    "end": 1794601234.9719646,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-a6d314ffb843-input-log.csv"
+    ],
+    "start": 1794601235.022564,
+    "end": 1794601235.3973157,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test ! -e /data/local/tmp/wf-J-a6d314ffb843-input-log.csv; echo wf-status=$?"
+    ],
+    "start": 1794601235.4001706,
+    "end": 1794601235.5414746,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.wf_game.qbert"
+    ],
+    "start": 1794601235.5724237,
+    "end": 1794601235.8838422,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.coreservices.bootmode.DispatchActivity"
+    ],
+    "start": 1794601235.887032,
+    "end": 1794601236.2553754,
+    "returncode": 255
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.LEANBACK_LAUNCHER -p com.google.android.apps.tv.launcherx"
+    ],
+    "start": 1794601236.2582324,
+    "end": 1794601236.6701756,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME"
+    ],
+    "start": 1794601236.6744986,
+    "end": 1794601236.917512,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -a android.intent.action.MAIN -c android.intent.category.HOME"
+    ],
+    "start": 1794601236.9197628,
+    "end": 1794601237.7021232,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1794601237.7051263,
+    "end": 1794601238.2731144,
+    "returncode": 0
+  }
+]

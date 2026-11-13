@@ -1,0 +1,235 @@
+{
+  "schema": 1,
+  "score_sha256": "cb15e7ad31654551233212ef0d822d8092f6fcbcf4913d00e34d88d4c2dec460",
+  "clock_calibration": {
+    "offset_seconds": 0.7822868824005127,
+    "uncertainty_seconds": 0.07978208160400391
+  },
+  "device_anchor": {
+    "device_uptime_ms": 554864989,
+    "device_wall_ms": 1794601199322
+  },
+  "host_start_wall": 1794601198.064089,
+  "events": [
+    {
+      "seq": 1,
+      "t": 12500,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 554877558,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 12569,
+      "lateness_ms": 69
+    },
+    {
+      "seq": 2,
+      "t": 12600,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 554877632,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 12643,
+      "lateness_ms": 43
+    },
+    {
+      "seq": 3,
+      "t": 14000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 554879023,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 14034,
+      "lateness_ms": 34
+    },
+    {
+      "seq": 4,
+      "t": 14100,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 554879147,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 14158,
+      "lateness_ms": 58
+    },
+    {
+      "seq": 5,
+      "t": 15500,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 554880509,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 15520,
+      "lateness_ms": 20
+    },
+    {
+      "seq": 6,
+      "t": 17500,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 554882533,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 17544,
+      "lateness_ms": 44
+    }
+  ],
+  "emergency_releases": [],
+  "foreground_aborts": [],
+  "captures": [
+    {
+      "label": "after-intro",
+      "planned_ms": 12000,
+      "started": 1794601212.104402,
+      "ended": 1794601213.660315,
+      "file": "input-frame-001.png",
+      "bytes": 25569,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "after-right-tap",
+      "planned_ms": 13500,
+      "started": 1794601213.6603487,
+      "ended": 1794601215.1807253,
+      "file": "input-frame-002.png",
+      "bytes": 24414,
+      "schedule_lateness_ms": 56
+    },
+    {
+      "label": "after-down-tap",
+      "planned_ms": 15000,
+      "started": 1794601215.1807475,
+      "ended": 1794601216.6796122,
+      "file": "input-frame-003.png",
+      "bytes": 24000,
+      "schedule_lateness_ms": 76
+    },
+    {
+      "label": "during-right-hold",
+      "planned_ms": 16000,
+      "started": 1794601216.6796288,
+      "ended": 1794601218.0344794,
+      "file": "input-frame-004.png",
+      "bytes": 24961,
+      "schedule_lateness_ms": 575
+    },
+    {
+      "label": "after-right-hold",
+      "planned_ms": 18000,
+      "started": 1794601218.1044261,
+      "ended": 1794601219.4573126,
+      "file": "input-frame-005.png",
+      "bytes": 25491,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "later",
+      "planned_ms": 21000,
+      "started": 1794601221.1043944,
+      "ended": 1794601222.5613897,
+      "file": "input-frame-006.png",
+      "bytes": 25744,
+      "schedule_lateness_ms": 0
+    }
+  ],
+  "result": "completed",
+  "key_log": {
+    "tolerance_ms": 100,
+    "log_interval_complete": false,
+    "matching_edges": [
+      {
+        "seq": 1,
+        "logged": {
+          "device_wall_ms": 1794601211887,
+          "code": 22,
+          "edge": "down"
+        },
+        "difference_ms": -4
+      },
+      {
+        "seq": 2,
+        "logged": {
+          "device_wall_ms": 1794601211953,
+          "code": 22,
+          "edge": "up"
+        },
+        "difference_ms": -12
+      },
+      {
+        "seq": 3,
+        "logged": {
+          "device_wall_ms": 1794601213354,
+          "code": 20,
+          "edge": "down"
+        },
+        "difference_ms": -2
+      },
+      {
+        "seq": 4,
+        "logged": {
+          "device_wall_ms": 1794601213459,
+          "code": 20,
+          "edge": "up"
+        },
+        "difference_ms": -21
+      },
+      {
+        "seq": 5,
+        "logged": {
+          "device_wall_ms": 1794601214840,
+          "code": 22,
+          "edge": "down"
+        },
+        "difference_ms": -2
+      },
+      {
+        "seq": 6,
+        "logged": {
+          "device_wall_ms": 1794601216857,
+          "code": 22,
+          "edge": "up"
+        },
+        "difference_ms": -9
+      }
+    ],
+    "ambiguous": [],
+    "foreign_keys": [],
+    "unmatched_observed_if_incomplete": [],
+    "dropped_sensitive_lines": 0,
+    "truncated": false
+  }
+}
