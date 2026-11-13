@@ -11,6 +11,37 @@ A phase-locked repeat (J‑dadba4fb4900, one sample per tank at 20 s) also **fai
 a spread of 6,784 KiB. At a fixed phase, GL mtrack is flat; most of the spread is one
 −4,552 KiB step in Code PSS. See the last two sections.
 
+## Memory over time and level resets
+
+Dashed vertical lines mark all **50 level resets** in each run; triangles label
+every tenth reset. The initial level entry is marked separately. Yellow shading
+marks the final ten minutes. Sample and reset timestamps share the device clock.
+All recorded samples are shown, including off-phase samples in the second run.
+
+### Continuous sampling
+
+![Total PSS and memory categories over time, with each level reset marked](soak/memory-timeline.svg)
+
+[PNG](soak/memory-timeline.png) · [Sample data (KiB)](soak/memory-samples.csv) ·
+[Reset timestamps](soak/level-resets.csv)
+
+### Phase-locked repeat
+
+![Phase-locked run memory over time, with each level reset marked](soak-phase/memory-timeline.svg)
+
+[PNG](soak-phase/memory-timeline.png) · [Sample data (KiB)](soak-phase/memory-samples.csv) ·
+[Reset timestamps](soak-phase/level-resets.csv)
+
+The panels separate total PSS, graphics/native/mapped-code PSS, and Dalvik heap
+plus Android's Code summary. Mapped-code PSS sums `.so`, `.jar`, `.apk`, `.dex`
+and `.oat` rows. Code summary overlaps those mappings and is **not an additional
+allocation** to sum into the total. The curves connect measurements; memory
+between samples was not observed. These figures do not change either verdict.
+
+Regenerate SVG/PNG from the committed CSVs with
+`python3 docs/diagnostics/planted-soak-continuous-2026-11-13/plot-memory.py`.
+Add `--extract` to rebuild the CSVs from the retained raw evidence.
+
 ## Why the last run had a 914.8-second gap
 
 The gap was on the host side; the coordinator and the device were not the cause. This
