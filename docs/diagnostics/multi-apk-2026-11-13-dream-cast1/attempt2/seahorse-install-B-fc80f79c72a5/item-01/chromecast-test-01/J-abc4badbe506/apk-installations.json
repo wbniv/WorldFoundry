@@ -1,0 +1,15 @@
+[
+  {
+    "input": "bd599a2863c4be153b032dd501c2c136f255be1bcd80df64cd1bd86eb342346d.apk",
+    "package": "org.worldfoundry.seahorsegrid",
+    "before_sha256": "25dfeda644d1ad76da6cfed6ebdbd2d018169b441d78a04a27145545c1e38bb7",
+    "action": "install",
+    "reason": "explicit-install",
+    "variant": null,
+    "status": "verified",
+    "start": 1794531373.472135,
+    "journal_key": "install:1",
+    "installed_sha256": "bd599a2863c4be153b032dd501c2c136f255be1bcd80df64cd1bd86eb342346d",
+    "end": 1794531389.1739821
+  }
+]

@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-13](https://github.com/wbniv/WorldFoundry/commit/8f3ed151) | Multi-APK acceptance: per-app validators and cast2 held input pass; dream blocked |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/f21352b6) | docs: multi-APK plan records the two-APK install under a foreground app after deploy #3 |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/e91d5283) | docs: multi-APK plan records two-APK profile, record and simpleperf on cast2 |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/cb0cab59) | docs: two-APK check on cast2 ran both apps to completion |
@@ -11,6 +12,11 @@
 | [2026-10-19](https://github.com/wbniv/WorldFoundry/commit/aef1ef29) | Add multi-APK Chromecast commands |
 
 <!--history-meta v1
+8f3ed151	author	Will Norris
+8f3ed151	added	11
+8f3ed151	deleted	0
+8f3ed151	files	1
+8f3ed151	body	One RECIPE batch on cast2 (B-be5ba75e20e7) ran menu-back against Aquarium\nand baseline-settings against Baseline, both passing; the Baseline job\ncovers held/released D-pad input through an owned check. A two-APK install\non a dreaming cast could not be staged: screensaver-trigger ended\ndream-not-observed on cast1, likely because both casts keep\nstay_on_while_plugged_in 3. Simpleperf's coordinator bug is fixed\nupstream; the two-APK rerun still needs profileable current builds.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 f21352b6	author	Will Norris
 f21352b6	added	2
 f21352b6	deleted	1

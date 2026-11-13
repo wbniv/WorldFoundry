@@ -1,0 +1,99 @@
+Accepted J-c008d1e5d421: queued; screensaver-list
+Follow: task chromecast:watch JOB=J-c008d1e5d421
+J-c008d1e5d421: accepted {"device": "chromecast-test-01", "workflow": "screensaver-list"}
+J-c008d1e5d421: granted {"device": "chromecast-test-01", "generation": 6799}
+J-c008d1e5d421: phase {"phase": "android-transport-prepare"}
+J-c008d1e5d421: phase {"phase": "connecting"}
+J-c008d1e5d421: phase {"phase": "awaiting-supervision"}
+J-c008d1e5d421: device-endpoint-advertised {"device": "chromecast-test-01", "endpoint": "192.168.4.61:33435", "verified": false}
+J-c008d1e5d421: completed {"error": null, "health": "ready"}
+J-c008d1e5d421: completed
+J-c008d1e5d421: completed; verified 6 artifacts -> /home/will/WorldFoundry-wbniv/docs/diagnostics/multi-apk-2026-11-13-dream-cast1/attempt2/after-seahorse-screensaver-list
+Evidence: /home/will/WorldFoundry-wbniv/docs/diagnostics/multi-apk-2026-11-13-dream-cast1/attempt2/after-seahorse-screensaver-list
+{
+  "selected_component": "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService",
+  "enabled": "1",
+  "activate_on_sleep": "1",
+  "idle_timeout_ms": 600000,
+  "sleep_timeout_ms": 7200000,
+  "stay_on_while_plugged_in": 3,
+  "active_component": null,
+  "running_state": "not-running",
+  "preview_running": false,
+  "show_eligible": true,
+  "providers": [
+    "com.android.dreams.basic/com.android.dreams.basic.Colors",
+    "com.google.android.apps.tv.dreamx/com.google.android.apps.tv.dreamx.service.Backdrop",
+    "org.worldfoundry.plantedtank/org.worldfoundry.screensaver.PlantedTankDreamService",
+    "org.worldfoundry.screensaver/org.worldfoundry.screensaver.AquariumDreamService",
+    "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService"
+  ],
+  "selected_installed": true,
+  "content_settings": {
+    "state": "ready",
+    "schema": 1,
+    "objects": [
+      {
+        "owner": null,
+        "type": null,
+        "title": null,
+        "settings": [
+          {
+            "id": "orientation",
+            "type": "choice",
+            "label": "Orientation",
+            "value": "landscape",
+            "options": [
+              {
+                "id": "landscape",
+                "label": "Landscape"
+              },
+              {
+                "id": "sensor-landscape",
+                "label": "Sensor landscape"
+              },
+              {
+                "id": "follow-device",
+                "label": "Follow device"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "settings": [
+      {
+        "id": "orientation",
+        "type": "choice",
+        "label": "Orientation",
+        "value": "landscape",
+        "options": [
+          {
+            "id": "landscape",
+            "label": "Landscape"
+          },
+          {
+            "id": "sensor-landscape",
+            "label": "Sensor landscape"
+          },
+          {
+            "id": "follow-device",
+            "label": "Follow device"
+          }
+        ],
+        "wire_id": "orientation",
+        "owner": null,
+        "object_title": null
+      }
+    ]
+  },
+  "field_states": {
+    "selected_component": "set",
+    "enabled": "set",
+    "activate_on_sleep": "set",
+    "idle_timeout_ms": "set",
+    "sleep_timeout_ms": "set",
+    "stay_on_while_plugged_in": "set",
+    "running": "readable"
+  }
+}

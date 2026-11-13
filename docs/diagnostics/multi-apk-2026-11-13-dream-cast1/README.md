@@ -44,3 +44,28 @@ The same-app case (fix `0c706d6`) was not rerun, for the same reason.
 The `adb-failure-1.json` in the trigger job is the known cleanup step that cannot start the
 launcher's `DispatchActivity` (`SecurityException … not exported`). The job was not
 affected.
+
+## Attempt 2 (cast1, `attempt2/`): prepared, waiting on Will
+
+- **Before state** (`screensaver-list` J‑aab3112143a1): Seahorse Grid Dream selected,
+  `enabled` 1, `activate_on_sleep` 1, `idle_timeout_ms` 600000, `sleep_timeout_ms`
+  7200000, `stay_on_while_plugged_in` 3, `running_state: not-running`.
+- **`CHANGE=allow-standby` was not applied.** This session's permission classifier
+  denied the configure call. Will is being asked directly.
+- **What it changes** (coordinator `conditions.py`, `CONFIGURATIONS`): only global
+  `stay_on_while_plugged_in`, 3 → 0. The inverse is `CHANGE=stay-awake-while-powered`.
+  It does not touch `sleep_timeout`, and no reviewed coordinator configuration writes that
+  setting. Cast1's existing `sleep_timeout` of 7200000 (2 h) will probably put the cast into
+  standby after 2 h idle once stay-on is 0, where it may be unreachable for coordinator
+  jobs. That is not proved on the device.
+- **Seahorse Release built at HEAD `8f3ed151`** (`task build-seahorse-screensaver-apk`, level build in the
+  Linux container, then Gradle): `bd599a28…`, frozen as
+  `build-docker/seahorse-head/screensaver-seahorse-release-bd599a28.apk`. There were no
+  uncommitted source changes under `android/screensaver`, `engine`, `wfsource` or the level
+  script. The build regenerates the Seahorse level files, which already differed from the
+  committed copies in the working tree.
+- **Installed on cast1:** batch `B‑fc80f79c72a5`, J‑abc4badbe506, `25dfeda6…` (the
+  2026‑11‑10 Release) → `bd599a28…`, hash verified, launcher `verified`, cleanup
+  `restored`, health `ready`.
+- **After** (`screensaver-list` J‑c008d1e5d421): the Seahorse Grid Dream is still
+  selected; every other value is unchanged, including `stay_on_while_plugged_in` 3.

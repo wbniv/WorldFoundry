@@ -1,0 +1,95 @@
+{
+  "status": "verified",
+  "home": "com.google.android.apps.tv.launcherx/.home.HomeActivity",
+  "apk": "bd599a2863c4be153b032dd501c2c136f255be1bcd80df64cd1bd86eb342346d.apk",
+  "attempts": [
+    {
+      "bounds": [
+        1026,
+        906,
+        1178,
+        1058
+      ],
+      "reference": "expected-adaptive-3.png",
+      "resource": "res/Em.png",
+      "kind": "icon",
+      "mean_absolute_error": 0.7788038698328936,
+      "rms_error": 1.545058326101656,
+      "worst_region_error": 1.9896907216494846,
+      "brightness_gain": 1.3252947805959838,
+      "normalisation": "scrim",
+      "scrim_gain": 0.5970623134699389,
+      "scrim_offset": 13.21306397422474,
+      "scrim_correlation": 0.9988170284950113,
+      "verified": true,
+      "verifier_revision": "transparent-circle-v1",
+      "reference_alpha": [
+        {
+          "kind": "banner",
+          "mode": "RGBA",
+          "minimum": 255
+        },
+        {
+          "kind": "icon",
+          "mode": "RGBA",
+          "minimum": 255
+        },
+        {
+          "kind": "icon",
+          "mode": "RGBA",
+          "minimum": 255
+        },
+        {
+          "kind": "icon",
+          "mode": "RGBA",
+          "minimum": 255
+        },
+        {
+          "kind": "icon",
+          "mode": "RGBA",
+          "minimum": 255
+        },
+        {
+          "kind": "icon",
+          "mode": "RGBA",
+          "minimum": 255
+        },
+        {
+          "kind": "icon",
+          "mode": "RGBA",
+          "minimum": 255
+        },
+        {
+          "kind": "icon",
+          "mode": "RGBA",
+          "minimum": 255
+        },
+        {
+          "kind": "icon",
+          "mode": "RGBA",
+          "minimum": 255
+        },
+        {
+          "kind": "icon",
+          "mode": "RGBA",
+          "minimum": 255
+        },
+        {
+          "kind": "icon",
+          "mode": "RGBA",
+          "minimum": 255
+        }
+      ],
+      "screenshot": "attempt-1-view-1.png",
+      "hierarchy": "attempt-1-view-1.xml",
+      "attempt": 1,
+      "launcher_label": "World Foundry Seahorse Grid Screensaver"
+    }
+  ],
+  "refreshes": [
+    {
+      "operation": "launcher-force-stop-and-home",
+      "package": "com.google.android.apps.tv.launcherx"
+    }
+  ]
+}

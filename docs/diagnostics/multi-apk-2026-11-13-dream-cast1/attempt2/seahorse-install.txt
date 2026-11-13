@@ -1,0 +1,4 @@
+Batch devices: ▭ chromecast-test-01
+Accepted B-fc80f79c72a5: pending; install
+▭ chromecast-test-01: J-abc4badbe506
+Follow: task chromecast:watch BATCH=B-fc80f79c72a5
