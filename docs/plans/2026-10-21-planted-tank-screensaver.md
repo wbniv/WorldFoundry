@@ -297,6 +297,25 @@ Build, level and test steps run in the project's containers (`wf-blender:local` 
 
     **PASS** for the same PID (30527 in all 81 samples), 50 reloads and no crash marker. **FAIL** for the memory gate: with continuous coverage (34 samples, no gap over 20.6 s), the final-ten-minute PSS spread is **11,848 KiB** against a limit below 4,096 KiB. Without the single lowest sample it is still 10,388 KiB. Between the highest and lowest samples, nearly all of the difference is GL mtrack (44,900 against 34,900 KiB). Over the final window, GL mtrack spans 10,288 KiB and Native Heap 5,907 KiB. PSS falls over the run (about 100–110 MiB early, 80–85 MiB late), so it does not grow. Cast2 restored and read back: speed 3, hold 120, Seahorse Grid selected, activation and timeouts unchanged. No engine investigation was authorized; the limit is Will's. [Evidence](../diagnostics/planted-soak-continuous-2026-11-13/README.md).
 
+    **Phase-locked repeat on cast2, 2026‑11‑13: FAIL, 6,784 KiB.** Re-analysis of J‑bf9150654784 by phase (seconds since the latest tank start, timed on the device clock by the GC line that `dumpsys meminfo` forces) shows the 11,848 KiB spread comes from the hold. Both −10 MiB GL mtrack dips fall at 25.2 and 27.4 s. Spread by phase bin: 0–6 s 6,133 KiB, 6–12 s 3,520, 12–18 s 4,040, 18–24.4 s 2,529, hold 11,848. The repeat takes one sample per tank, 20 s after its start:
+
+    ```
+    $ python3 docs/diagnostics/planted-soak-continuous-2026-11-13/run-phase-soak.py   # J-dadba4fb4900, Release 2d8f70c1, speed 6 (8x), hold 5
+    2026-11-13T16:03:24+0700 sample 47 starts 51 phase 20.48 pss 113484 lat 1.23
+    2026-11-13T16:05:08+0700 restoration verified True
+    $ python3 docs/diagnostics/planted-soak-continuous-2026-11-13/analyse-phase.py
+      "samples": 47, "all_stable": true, "pids": [1221],
+      "tank_starts_observed": 51, "reloads_lower_bound": 50, "start_interval_s": [29.32, 29.36, 29.38],
+      "max_host_gap_s": 58.7, "phase_locked_samples": 32, "off_phase_samples": 15,
+      "final10_locked_samples": 21, "final10_span_s": 587.0, "final10_tanks": [31, 51],
+      "final10_phase_s": {"min": 18.81, "median": 20.21, "max": 22.28, "stdev": 0.84},
+      "final10_pss_kib": {"min": 112896, "median": 113804, "max": 119680},
+      "final10_spread_kib": 6784, "final10_gl_spread_kib": 180, "final10_native_spread_kib": 2611,
+      "limit_kib_exclusive": 4096, "fatal_markers": [], "pass": false
+    ```
+
+    **PASS** for the same PID (1221), 50 reloads and no crash marker. **FAIL** for the memory gate: the phase-locked final-ten-minute spread is **6,784 KiB** against a limit below 4,096 KiB. Phase-locking makes GL mtrack flat (180 KiB). Most of what remains is one −4,552 KiB step in Code PSS (mapped .so/.dex, 26,208 → 21,676 KiB, between samples 33 and 34 at tank 38). Without that step the spread would be 2,630 KiB, and the 14 samples after the step have a spread of 2,172 KiB, but those cover only about 6.9 minutes. Phase jitter was ±1.7 s (sd 0.84 s); it comes from `task` invocation latency on a host at load average 29–42. Cast2 restored and read back exactly: speed 3, hold 120, Seahorse Grid selected, stay-on 3, sleep 3,600,000 ms, idle 600,000 ms. [Evidence](../diagnostics/planted-soak-continuous-2026-11-13/README.md).
+
 10. **Icon and banner.** `python3 scripts/gen-screensaver-android-icons.py` writes the planted resources; the pixel test finds the badge lower-right in the banner and inside the safe circle of the foreground; the Apps row capture shows the banner.
 
     ```

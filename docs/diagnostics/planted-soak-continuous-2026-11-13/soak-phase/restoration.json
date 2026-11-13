@@ -1,0 +1,29 @@
+{
+  "device": "chromecast-test-02",
+  "settings": {
+    "Growth speed": "3",
+    "Hold seconds": "120"
+  },
+  "expected_settings": {
+    "Growth speed": "3",
+    "Hold seconds": "120"
+  },
+  "before": {
+    "selected_component": "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService",
+    "enabled": "1",
+    "activate_on_sleep": "1",
+    "idle_timeout_ms": 600000,
+    "sleep_timeout_ms": 3600000,
+    "stay_on_while_plugged_in": 3
+  },
+  "after": {
+    "selected_component": "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService",
+    "enabled": "1",
+    "activate_on_sleep": "1",
+    "idle_timeout_ms": 600000,
+    "sleep_timeout_ms": 3600000,
+    "stay_on_while_plugged_in": 3
+  },
+  "running_state": "not-running",
+  "readback_verified": true
+}
