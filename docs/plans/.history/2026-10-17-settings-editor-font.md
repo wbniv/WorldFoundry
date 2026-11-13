@@ -1,5 +1,7 @@
 | Date | Change |
 |------|--------|
+| [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/5aa92f1d) | docs: fixed-pitch FPS counter built, tests and desktop before/after |
+| [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/1f0d63e1) | docs: correct the old font's advance claim (digits equal, other characters vary) |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/c3eed575) | docs: fixed-width decisions for the FPS counter and classic-game HUD text |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/31af9c8b) | docs: scope the fixed-width HUD requirement (display.cc HUD is designer-build only) |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/347cc277) | docs: classic games keep a fixed-width HUD font (open requirement for the UI font work) |
@@ -13,6 +15,16 @@
 | [2026-10-17](https://github.com/wbniv/WorldFoundry/commit/6bc62d46) | Plan: the settings editor in Atkinson Hyperlegible Next, as finding-your-way |
 
 <!--history-meta v1
+5aa92f1d	author	Will Norris
+5aa92f1d	added	90
+5aa92f1d	deleted	0
+5aa92f1d	files	1
+5aa92f1d	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01PkFSbo6jcue9Gfyb6U9HVs
+1f0d63e1	author	Will Norris
+1f0d63e1	added	1
+1f0d63e1	deleted	1
+1f0d63e1	files	1
+1f0d63e1	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01PkFSbo6jcue9Gfyb6U9HVs
 c3eed575	author	Will Norris
 c3eed575	added	2
 c3eed575	deleted	1

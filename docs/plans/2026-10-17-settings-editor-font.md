@@ -493,6 +493,60 @@ Verification of this change:
 
     **PARTIAL PASS**: 14 of 16 checks completed, including every aquarium and baseline check on cast1 and all four apps' checks except qbert. Left: cast2 `baseline-picker` (the transport dropped mid-job; cast2 was then readded and is `ready`) and `qbert` `poke-resume` on both casts. Qbert itself runs: the job's screenshot is the pyramid at 60.3 FPS drawn with the new font, `wf.log` has `UI_FONT 1024x2048 atlas, 2770432 bytes` and no fatal, assertion or abort line. The `plugin-error` comes after the captures, so it is the validator or the coordinator with this app, not the build (filed in the coordinator `TODO.md`). These runs say nothing about the classic games' HUD fonts (see the open requirement above). The new builds stay installed on both casts; cast2 now also carries smb, snowgoons and qbert.
 
+    **Fourth round (2026‑11‑13, 12:45–13:05 UTC, 19:45–20:05 Bangkok): the last three checks.** The `plugin-error` above was not the validator: the J‑d595eeef313e evidence holds current-run `zforth compile error 7 (call)` lines after the `=== wf_game android_main` boundary, from eleven Qbert enemy scripts with doubled `\\ wf` markers. The 2026‑10‑25 note "no fatal, assertion or abort line" was true but missed those. The coordinator now reports that as `runtime-log-failure`. The app was fixed and rebuilt as `3b33384c…` (verified on cast1 in J‑a67c1c09eebc, installed on cast2 by J‑e239c8b0aa10; both entries are closed in the coordinator `TODO.md`). Both Qbert reruns use the frozen copy `/home/will/tmp/qbert-fixed-3b33384c/worldfoundry-qbert-release.apk`. Cast2 `baseline-picker` uses the newest baseline build there, `5b47e27b…` (2026‑11‑01, the one J‑63eada1c2dc0 reused today). A first attempt, J‑a48af2bde6a6, used `eebab09d…`. That is an older build (2026‑10‑31), and installing it over `5b47e27b` broke the "never install older over newer" rule; the run passed 12/12. J‑f05dab47872d put `5b47e27b` back and is the check of record. Since the 2026‑11‑01 baseline cleanup, the picker validator expects two candidates and one bracket, not the three of the first round.
+
+    ```
+    $ sha256sum /home/will/tmp/qbert-fixed-3b33384c/worldfoundry-qbert-release.apk
+    3b33384c271b4fb5dc618c8852bd91fea2e021fe09b0eef58694be3a0cff1d47  /home/will/tmp/qbert-fixed-3b33384c/worldfoundry-qbert-release.apk
+    $ task chromecast:screensaver-list DEVICE=chromecast-test-01      J-62150b75b123 (before)
+      "selected_component": "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService",
+      "sleep_timeout_ms": -1,
+      "stay_on_while_plugged_in": 0,
+    $ task chromecast:submit WORKFLOW=check DEVICE=chromecast-test-01 APP=qbert VALIDATOR=poke-resume APK=/home/will/tmp/qbert-fixed-3b33384c/worldfoundry-qbert-release.apk
+    Accepted J-039fff98daaf: queued; check
+    J-039fff98daaf: phase {"phase": "reusing-installed-apk"}
+    J-039fff98daaf: completed
+    J-039fff98daaf receipt: succeeded completed ready
+    J-039fff98daaf resume.json: same-process 28142 28142 28142 home_left_foreground True
+    J-f484ffd6354d resume.json: same-process 28678 28678 28678 home_left_foreground True    (an extra cast1 run by the orchestrator, at Will's request)
+    J-f484ffd6354d receipt: succeeded completed ready
+    $ task chromecast:screensaver-list DEVICE=chromecast-test-01      J-40fc94f8222b (after)
+      "selected_component": "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService",
+      "sleep_timeout_ms": -1,
+      "stay_on_while_plugged_in": 0,
+    $ task chromecast:status      (cast2 reservation released by Will)
+    ▭ chromecast-test-02: Idle · nothing queued (ready)
+    $ task chromecast:submit WORKFLOW=check DEVICE=chromecast-test-02 APP=baseline VALIDATOR=baseline-picker APK=…/baseline-eebab09d285f2939.apk ASYNC=true
+    Accepted J-a48af2bde6a6: queued; check
+    J-a48af2bde6a6 receipt: succeeded completed ready
+    apk-installations: before 5b47e27b5516e543… install different-hash → eebab09d285f2939   (the downgrade, see above)
+    $ task chromecast:submit WORKFLOW=check DEVICE=chromecast-test-02 APP=baseline VALIDATOR=baseline-picker APK=…/baseline-5b47e27b5516e543.apk ASYNC=true
+    Accepted J-f05dab47872d: queued; check
+    J-f05dab47872d: completed {"error": null, "health": "ready"}
+    {'health': 'ready', 'reason': 'completed', 'status': 'succeeded'}
+    eebab09d285f2939 install different-hash 5b47e27b5516e543 verified
+    12 / 12 {'baseline_catalog_attached': True, 'chooser_pauses_simulation': True, 'two_candidates': True, 'one_bracket_in_view': True, 'first_highlight_is_shared_spot': True, 'phone_right_keeps_single_highlight': True, 'same_spot_short_list': True, 'ok_opens_owner_form': True, 'tv_form_is_that_owner': True, 'back_chain_keeps_dialog': True, 'picker_holds_scene': True, 'closed_releases_input': True}
+    $ task chromecast:submit WORKFLOW=check DEVICE=chromecast-test-02 APP=qbert VALIDATOR=poke-resume APK=/home/will/tmp/qbert-fixed-3b33384c/worldfoundry-qbert-release.apk ASYNC=true
+    Accepted J-80fd6c7f8ad5: queued; check
+    J-80fd6c7f8ad5: completed {"error": null, "health": "ready"}
+    {'health': 'ready', 'reason': 'completed', 'status': 'succeeded'}
+    3b33384c271b4fb5 reuse exact-match 3b33384c271b4fb5
+    {'result': 'same-process', 'pid_before': 12750, 'pid_before_start': 12750, 'pid_after': 12750, 'home_left_foreground': True}
+    $ (wf.log after the last "=== wf_game android_main" boundary; all *logcat.txt)
+    J-80fd6c7f8ad5 segment errs=0 uifont=1
+      logcat fatal=0
+    J-a48af2bde6a6 segment errs=0 uifont=1
+      logcat fatal=0
+    J-f05dab47872d segment errs=0 uifont=1
+      logcat fatal=0
+    J-039fff98daaf segment errs=0 uifont=1
+      logcat fatal=0
+    ```
+
+    (`errs` counts `compile error`, `fatal`, `assert`, `abort` and `UI_FONT unavailable`; `uifont` counts `UI_FONT 1024x2048`. The older segments of each `wf.log` still hold the pre-fix builds' compile errors.)
+
+    **PASS: 16 of 16 checks on both casts.** Cast2's `baseline-picker` passes 12/12 on `5b47e27b`, with "2 objects here", the `Phone connected` toast and the hint strip drawn in Atkinson. Qbert `poke-resume` keeps one process across Home and resume on cast1 (J‑039fff98daaf, J‑f484ffd6354d) and on cast2 (J‑80fd6c7f8ad5), with no current-run error. On this Qbert build, the only text on screen is the FPS counter (for example "58.9" bottom-right in J‑039fff98daaf, "69.0" in J‑f484ffd6354d). Qbert draws no score or lives HUD, so its UI-font evidence is the FPS overlay alone, and these runs do not check a game HUD. That stays with the fixed-width requirement above. Cast1 still selects Seahorse Dream, with stay_on 0 and sleep_timeout -1. Raw evidence: `docs/diagnostics/chromecast-check-<job>/` (untracked).
+
 9. Cost recorded: `cd.iff` and APK size before and after, and Cast1 frame time on the fishtank menu and the planted tank before and after (three runs each).
 
     ```
