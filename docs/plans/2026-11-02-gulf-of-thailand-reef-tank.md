@@ -33,6 +33,68 @@ above the 20 FPS target. Selector/Back, Dream, and the other acceptance checks
 remain open; see the
 [verification notes](../diagnostics/reef-gameplay-verification-2026-11-05/README.md).
 
+## Visual polish update, 2026‑11‑07
+
+The flowerpot base and stalks have finer geometry and face-oriented texture mapping; the closed clam has a dedicated striped shell texture; and the anime hard-coral outline hull was narrowed. Matching Pixel views in both styles show a legible flowerpot pattern and shell striping, and the anime branching coral shows substantially fewer black artifacts. Both reef builds and 34 reef tests pass, and the full APK was restored on the Pixel. Before-and-after source and game views are in the [catalogue](../diagnostics/reef-refinement-catalogue-2026-11-04/reef-refinement-catalogue.pdf); see the [audit](../diagnostics/reef-triangle-normal-2026-11-06/catalogue-survival-audit.md) for evidence and remaining acceptance work. The Lenovo was unavailable.
+
+## Implementation and verification status, 2026‑11‑06
+
+The two reef levels, models and reaction controllers are built. Both styles
+completed short idle runs on the Pixel, and the regular Aquarium APK was
+restored after the diagnostic runs. The latest focused reef and movement suite
+passed **60 tests**. These results are progress, not acceptance of the full
+plan or of either style's appearance.
+
+- **Models and rigs:** The refined meshes, small-geometry audit, raised
+  provisional budgets and multi-curve rigs are present. Feather dusters have
+  independent retraction, flowerpot polyps sway with a changing current, and
+  the leather coral sways and deflates. Guard-crab legs and claws, shrimp
+  limbs, feather-star arms, hermit legs, boxfish fins and the clam have
+  deformation data. The source and posed previews are in the
+  [before-and-after catalogue](../diagnostics/reef-refinement-catalogue-2026-11-04/reef-refinement-catalogue.pdf);
+  they use swatches and do not establish game lighting or animation quality.
+  Will asked to retain the added geometry and raise the budget; do not reduce
+  polygons as a substitute for measuring performance.
+- **Observed reactions:** Controlled near/far Pixel builds show feather-duster
+  crowns retracted when the fish is nearby and visible when it is away,
+  partly obscured by coral. The clam closes under the fish and opens in the
+  far view. Its closed shell still looks unnaturally sharp and needs revision
+  and an updated catalogue comparison. These builds place the fish at authored
+  positions; they do not demonstrate steering or all reaction timing in play.
+- **Not yet visually verified:** The crab's host coral blocks the close-up of
+  its claws. The shrimp image shows them below the fish but does not establish
+  that they climb onto and clean it. Obtain clearer, timed gameplay footage
+  for these interactions, the other reaction transitions, and the new coral
+  motion in both styles; fix any defects found. The planned
+  `scripts/check-thai-reef.py --video` is not yet implemented. See the
+  [capture and job notes](../diagnostics/reef-gameplay-verification-2026-11-05/README.md).
+- **Coordinator touch input:** The coordinator agent reports touch-helper fix
+  0.1.69 deployed and pushed as `0ec8c6d`; its JVM and container tests passed.
+  A live touch test still needs to establish an actual hold, direction change,
+  release and recorded reaction. Use the coordinator's owned session, not a
+  direct device fallback. The Pixel is the current test device; the Lenovo was
+  unavailable at the last check. Chromecasts remain out of scope until Will
+  says otherwise.
+- **Still open:** Review and polish the in-game appearance of both styles;
+  complete the reaction and movement acceptance, selector/Back and Dream
+  checks, longer performance measurements, shader parity and regression
+  gates, species/research and poster acceptance, and the remaining checks
+  below. Previous 10-second Pixel idle runs do not satisfy the 120-second
+  device performance gate. Do not claim the full plan complete from tests or
+  static images alone.
+
+```mermaid
+flowchart LR
+    A["Exported rigs + controller tests<br/>60 focused tests passed"] --> B["Pixel near / far captures"]
+    B --> C["Clam closes; feather dusters retract<br/>view partly obscured"]
+    B --> D["Crab claws + shrimp cleaning<br/>clear footage still needed"]
+    E["Coordinator touch helper 0.1.69<br/>deployed; live test pending"] --> D
+    C --> F["Refine clam shape and appearance"]
+    D --> G["Gameplay acceptance in both styles"]
+    F --> G
+    G --> H["Selector, Dream, performance<br/>and remaining plan gates"]
+```
+
 **In TODO.md** since 2026‑11‑02, all under Level / Gameplay:
 
 - the two-style tank (T4);
@@ -85,7 +147,7 @@ Another species of a taken group (a different anemone, clownfish or goby) is all
     - **Every animated actor is expensive.**
 - **`DFRM` v1 poses one curve per mesh.** [`ParseDfrm`](../../wfsource/source/renderassets/dfrm_deform.cc) refuses any other count ("v1 needs exactly one curve", `dfrm_deform.cc:81`), and so does `Bind` (`:177`). A mesh also has at most three weighted transforms (`DfrmMaxTransforms`, `dfrm_deform.h:48`).
     - The zForth bridge reads at most 40 control cells (`scripting_zforth.cc:1412-1413`).
-    - So a 10-armed feather star, a crab's ten legs and a reef of worm crowns each need one actor per moving part: the expensive thing above.
+- So a feather star, a crab's ten legs and a reef of worm crowns each need multiple actors for independently moving parts: the expensive thing above.
 - **The poster pipeline** is settled; the [seahorse poster](../reference/seahorse-biomechanics-poster/README.md) shows it:
     - a research document comes first;
     - `make_poster.py` and `export_poster.py` (Playwright Chromium), an A3 PDF (297 × 420 mm), a 300 DPI PNG and `layout-review.json`;
@@ -109,13 +171,11 @@ Will accepted every recommendation in the third column (2026‑11‑02). The fou
 | D9 | How the two styles ship | **Decided.** **Two levels, two selector rows**, built from one scene description. Each style has its own assets, lighting fields and budgets, and is loaded alone, so neither pays for the other's memory | One level with a Style setting that swaps assets at load: one row, but both atlases resident or a reload path that doesn't exist today |
 | D10 | **Engine change: style shading (S1–S3)** | **Decided.** **Yes: allow S1 (water absorption) and S3 (toon bands); S2 (caustics) behind a cast1 cost gate.** All three are off by default, so every existing level renders identically | **No engine change:** realistic uses the existing linear fog and baked light only; anime bakes its bands into vertex colours, so moving actors stay smoothly lit and clash with the banded reef. Outlines need no engine change in any option |
 
-## Visual polish update, 2026‑11‑07
-
-The flowerpot base and stalks have finer geometry and face-oriented texture mapping; the closed clam has a dedicated striped shell texture; and the anime hard-coral outline hull was narrowed. Matching Pixel views in both styles show a legible flowerpot pattern and shell striping, and the anime branching coral shows substantially fewer black artifacts. Both reef builds and 34 reef tests pass, and the full APK was restored on the Pixel. Before-and-after source and game views are in the [catalogue](../diagnostics/reef-refinement-catalogue-2026-11-04/reef-refinement-catalogue.pdf); see the [audit](../diagnostics/reef-triangle-normal-2026-11-06/catalogue-survival-audit.md) for evidence and remaining acceptance work. The Lenovo was unavailable.
+The D7 comparison above records the original proposal. Subsequent species research and Will's removal of the sea cucumber changed the roster; actor counts and the feather-star arm grouping must be rechecked against the current design.
 
 ## The tank
 
-[![Wide view: two rock masses and a central arch, 25 kinds of life, numbered](2026-11-02-gulf-of-thailand-reef-tank/tank-wide.png)](2026-11-02-gulf-of-thailand-reef-tank/tank-wide.html)
+[![Wide view: two rock masses and a central arch, with reef life numbered](2026-11-02-gulf-of-thailand-reef-tank/tank-wide.png)](2026-11-02-gulf-of-thailand-reef-tank/tank-wide.html)
 
 *The layout and behaviour mockups are drawn style-neutral; [Two visual styles](#two-visual-styles) shows the two looks.*
 
@@ -141,7 +201,6 @@ The flowerpot base and stalks have finer geometry and face-oriented texture mapp
     - mushroom corals: radial discs;
     - gorgonians: fractal fans;
     - barrel sponge: a ridged trapezoid;
-    - sea squirts.
 - **Static budget.** At most **48,000 triangles in at most 8 static groups**: rock 16k, hard corals 18k, soft corals, sponges and fans 9k, sand, rubble and shell 5k. That is below the Planted Tank's 66,048, to leave frame time for the animated life.
 
 ## Two visual styles
@@ -178,7 +237,7 @@ flowchart LR
 | Fish faces | anatomical eyes, small | larger eyes with two white highlights; humbugs and boxfish get readable expressions (calm, alarmed when the reef flinches) |
 | Particles | small, sparse, translucent-looking bubbles | big outlined bubbles with highlights; sparkle stars near the surface |
 | Motion | as in the behaviour section | the same timings, with 15 % more amplitude on fins and claws, and a squash on the boxfish's burst |
-| Static budget | ≤ 48,000 triangles, ≤ 8 groups | ≤ 30,000 triangles plus ≤ 16,000 hull triangles, ≤ 8 groups |
+| Static budget | ≤ 70,000 triangles, ≤ 11 groups | ≤ 70,000 triangles plus ≤ 24,000 hull triangles, ≤ 11 groups (provisional increases 2026‑11‑04 at Will's direction; assess performance later) |
 | Frame gate (D6) | ≥ 20 FPS cast1, wide idle | ≥ 20 FPS cast1, wide idle |
 
 **Outlines on deformed actors.** A hull is part of the same mesh, and its vertices carry the same `DFRM` or `swim-deform` bindings, pushed outward. So the outline bends with the fin or claw it surrounds; hull faces follow the same face-normal rules as the body. Tiny crowns and polyps get no hull: at TV distance their outline would be a solid dark blob.
@@ -217,25 +276,72 @@ flowchart TD
 | **Risk 3: old cooked levels** | New OAD fields need defaults in old `.lvl` files. Phase S confirms how levcomp treats a field a level doesn't carry; if it doesn't default it, the fields go at the end of the OAD with defaults, and every level is re-cooked in the same commit |
 | **Not in scope** | Per-pixel lighting, normal maps, screen-space effects, a post-process pass, real translucency (the open texture-alpha TODO) |
 
+### Baked vertex lighting: approved engine change (Will, 2026‑11‑03)
+
+The realistic pass calls for baked light and ambient occlusion in vertex colors.
+The existing mesh format already stores a color per vertex and the GL and Metal
+backends already have a prelit Gouraud path, but `Material::Construct` clears
+`GOURAUD_SHADED` for every loaded material. Consequently an authored prelit
+mesh cannot currently reach that path. Will explicitly approved the following
+engine change on 2026‑11‑03.
+
+```mermaid
+flowchart LR
+    B["Blender / Cycles<br/>bake light + AO to vertex colors"] --> E["Exporter<br/>split vertices at UV and color seams;<br/>write VRTX colors and prelit Gouraud flags"]
+    E --> M["Material::Construct<br/>preserve Gouraud only when explicitly prelit"]
+    M --> P["Existing prelit Gouraud primitive<br/>interpolate baked vertex colors"]
+    P --> GL["GL backend"]
+    P --> MT["Metal backend"]
+    O["Existing materials without prelit + Gouraud"] --> L["Existing flat-shaded behavior"]
+```
+
+- **Engine scope:** in `wfsource/source/gfx/material.cc`, retain
+  `GOURAUD_SHADED` only for materials that also explicitly set
+  `LIGHTING_PRELIT`; continue clearing it for all other loaded materials. Use
+  the existing prelit renderer paths on GL and Metal. Do not change the
+  treatment of existing non-prelit materials or introduce a new global mode.
+- **Asset and tool scope:** bake the static reef's direct light and ambient
+  occlusion in the Blender container; export the resulting vertex colors and
+  the explicit prelit Gouraud material flags. A vertex split must include color
+  in its identity as well as UV and rig data, so hard color seams survive.
+  Preserve white as the default for meshes without a bake. Moving actors keep
+  their current dynamic lighting. The anime static bake is quantized to three
+  bands and shares the same placement and silhouette.
+- **Regression and acceptance:** test the material flag combinations and the
+  exporter round trip, including distinct colors at a shared position. Verify
+  the prelit interpolation on GL and Metal and retain the existing-level
+  pixel-invariance sweep. Build both reef styles, check their triangle and
+  texture budgets, capture matching views, and repeat the cast1 performance
+  gate before final style acceptance.
+
+**Progress, 2026‑11‑03:** Both styles now export baked static reef colors;
+the realistic bake reproduced byte for byte on a repeat run. Material flag,
+export seam and GL interpolation tests pass. Device previews are available for
+[realistic](../../diagnostics/reef-baked-preview-2026-11-03/realistic.png) and
+[anime](../../diagnostics/reef-baked-preview-2026-11-03/anime.png) style review.
+The APK is installed on the Lenovo and Pixel; both were locked during launch
+verification. Metal parity, the existing-level pixel sweep, the final cast1
+performance gate, and Will's visual approval remain open.
+
 ### What lives here
 
-25 kinds of life: 22 invertebrates (and coralline algae) plus 3 fish. Each kind is modelled in this tank's generator (`wflevels/aquarium_thai_reef/reef/`). Existing rigs, controllers and helpers from the other tanks are reused where they fit. The "Gulf record" column is what Phase 0 must establish. Until a source is read, nothing in it is a claim.
+The reef combines invertebrates, coralline algae and three fish. Each kind is modelled in this tank's generator (`wflevels/aquarium_thai_reef/reef/`). Existing rigs, controllers and helpers from the other tanks are reused where they fit. The "Gulf record" column is what Phase 0 must establish. Until a source is read, nothing in it is a claim.
 
 | # | Kind | Species | Role in the tank | How it moves | Actor (DFRM v2) | Gulf record |
 |---|---|---|---|---|---|---|
 | 1 | Christmas tree worms ×15 | *Spirobranchus* sp. | spiral crowns on the boulder and rock | snap shut (0.15 s) when the boxfish comes within 1.5 body lengths; reopen on their own 3–8 s timers | **1 actor, 15 curves** (scale retract) | to find |
 | 2 | Feather duster worms ×4 | *Sabellastarte* sp. | banded fans on the rock | furl 0.2 s / unfurl 2.5 s clips | **1 actor, 4 curves** | to find |
-| 3 | Feather star | Comatulida | 10 arms on the arch top | arm wave clip, per-arm phase | **1 actor, 10 curves** | to find |
+| 3 | Feather star | *Lamprometra palmata* | about 30 visible arms on the arch top | arm wave clip; groups of three arms share a curve | **1 actor, 10 curves** | [southern-Gulf survey](https://journal.nsm.or.th/en/node/161); morphology and grouped-motion budget need validation |
 | 4 | Fluted giant clam | *Tridacna squamosa* | blue mantle on the sand | mantle ripple; valves to 35 % when a shadow passes | 1 actor, transforms | to find |
-| 5 | Skunk cleaner shrimp ×2 | *Lysmata amboinensis* | cave-mouth station | antennae wave; walks onto the boxfish and "cleans" for 4–6 s if it stops in reach for 2 s | 2 actors, 6 curves each | to find |
+| 5 | Banded coral shrimp ×2 | *Stenopus hispidus* | cave-mouth station | antennae wave; walks onto the boxfish and "cleans" for 4–6 s if it stops in reach for 2 s | 2 actors, 6 curves each | Gulf record: [Thailand crustacean checklist](https://chm-thai.onep.go.th/wp-content/uploads/2021/09/ONEP_V05.pdf), p. 29 |
 | 6 | **Coral guard crab** | ***Trapezia cymodoce*** | lives inside the cauliflower coral head, which it defends | clambers among the branches; claws-up threat at the coral edge when the boxfish's nose comes close; back inside after 2–3 s | **1 actor, 10 curves** (8 legs, 2 claws) | **likely: see below** |
 | 7 | Hermit crab | Diogenidae | sand forager | slow walk with its shell | 1 actor, 6 curves | to find |
 | 8 | Phyllidia nudibranch | *Phyllidia varicosa* | yellow-and-black slug on the rock | crawls an authored rock path at 2 cm/min (tank time ×20) | 1 rigid actor | to find |
-| 9 | Blue sea star | *Linckia laevigata* | on the right rock face | glides, turns | 1 rigid actor | to find |
-| 10 | Sea cucumber | *Holothuria* sp. | sand sifter, leaving a trail | slow sand crawl | 1 rigid actor | to find |
+| 9 | **Dropped** | *Linckia laevigata* | No verified Gulf species record was found; dropped under the accepted swap-or-drop rule. | — | — | — |
+| 10 | **Removed** | — | Will removed the sea cucumber from both tank styles and the poster on 2026‑11‑02. | — | — | — |
 | 11 | Flowerpot coral | *Goniopora* sp. | long polyps on the left rock | polyp sway; sways faster in "current" | **1 actor, 12 curves** | to find |
 | 12 | Sea fans ×2, leather coral | gorgonian; *Sarcophyton* sp. | the far edges; the arch top | slow sway; the leather coral "deflates" (scale 0.85) once per cycle | **1 actor, 3 curves** | to find |
-| 13–22 | Static builders | *Porites lutea* boulder; table *Acropora*; *Pocillopora damicornis* (the crab's host); *Turbinaria* scrolls; *Tubastraea coccinea*; Fungiidae; *Xestospongia testudinaria*; *Polycarpa aurata*; *Palythoa*/*Zoanthus* carpets; coralline algae | the reef itself | static | static groups | to find |
+| 13–22 | Static builders | *Porites lutea* boulder; table *Acropora*; *Pocillopora damicornis* (the crab's host); *Turbinaria* scrolls; *Tubastraea coccinea*; Fungiidae; *Xestospongia testudinaria*; *Palythoa*/*Zoanthus* carpets; coralline algae | the reef itself | static | static groups | research review in progress; *Polycarpa aurata* dropped for lack of a verified Gulf species record |
 | — | Reticulated dascyllus ×2 (internal name: humbug) | *Dascyllus reticulatus* (D1, swapped by D10) | hover above their coral head | `swim-deform`; dive into the head when threatened | 2 actors | Gulf record: Satapoomin 2000 checklist; [Tho Chu, Table 1](https://bioflux.com.ro/docs/2023.3296-3315.pdf); [CAS specimen off Koh Samet](https://www.gbif.org/occurrence/473068089) |
 | — | Yellow boxfish, juvenile | *Ostracion cubicus* (D2) | the player | fins row and the box stays rigid (ostraciiform); 5 fins as 5 curves | 1 actor, 5 curves | dive-operator report only |
 
@@ -244,6 +350,8 @@ flowchart TD
 The crab's real behaviour fits the tank exactly. *Trapezia* crabs defend their host *Pocillopora* against coral predators ([Science News](https://www.sciencenews.org/blog/wild-things/crabs-guard-coral-army-sea-stars)), so in the game the crab threatens the boxfish when it noses the coral. The carapace is about 1.5 cm across, 15 cm in world units at ×10.
 
 **Swap rule.** If Phase 0 finds no Gulf of Thailand record for a species, it is replaced by a recorded congener with the same role, or dropped. Phase 0 records the swap in the research document and in this table, and never prints the unrecorded species.
+
+**Shrimp decision, 2026‑11‑02:** Will approved *Stenopus hispidus* in place of the planned *Lysmata amboinensis*. The model must use the banded coral shrimp's form and coloration. The Gulf checklist establishes occurrence; cleaning evidence from an Australian laboratory does not establish boxfish cleaning in the Gulf, and the game's timing is authored behavior.
 
 ### How the reef reacts
 
@@ -306,7 +414,7 @@ sequenceDiagram
 
 **Why.** The animated actors are the frame budget. On cast1 the six-pair seahorse population added 30 render actors, 52 draws, 46 vertex uploads and 21.54 ms of main-thread CPU per frame. That works out to **≈ 0.7 ms per added render actor**. This is an upper bound, because it also includes seahorse behaviour and 1,101-triangle meshes; the reef's small crowns and limbs cost less each. E7 measures the real figure; this plan does not assume it.
 
-With v2, the reef's moving parts merge: 15 worm crowns into one actor, the feather star's 10 arms into one, the crab's 10 limbs into one. That takes the tank from **33 animated actors to 16**. At the upper-bound rate, the 17 fewer actors could save **up to ≈ 12 ms per frame**. Even a quarter of that, about 3 ms, is the margin between missing and meeting D6's 20 FPS. The same change gives articulated legs, antennae and fins, which three rigid transforms can't.
+With v2, the reef's moving parts merge: 15 worm crowns into one actor, the feather star's arms into one, and the crab's 10 limbs into one. The original estimate was **33 animated actors versus 16**, before research-led roster removals; the final count and saving must be measured again. The chosen feather-star model has about 30 visible arms grouped three per curve, so the 10 curves animate groups rather than individual arms. The same change gives articulated legs, antennae and fins, which three rigid transforms can't.
 
 ```mermaid
 flowchart TD
@@ -375,6 +483,27 @@ A **version 1 chunk** must still carry exactly one curve, and it is parsed and p
 - A new word, `: dfrm-pose-curves ( block curves actor -- status ) >r 4 * 40 + 6 r> deform-block ;`, sits beside `dfrm-pose` (which still passes 33).
 - **Mailbox budget.** The reef's v2 actors use 100 + 56 + 80 + 88 + 52 + 80 + 64 + 64 + 64 + 60 = **708** director mailboxes. The seahorse director already uses 12 × 40 = 480. Phase E checks the director's mailbox range before relying on it.
 
+#### Reef global mailbox allocation
+
+The deformation blocks use **level-global user mailboxes**, not per-actor local slots. The valid global user range is **0–1900 inclusive**; 1901 starts the global system range (`mailbox.inc`). These allocations are for each reef level independently: the realistic and anime levels are never loaded together. All endpoints below are inclusive.
+
+| Owner | Global cells | Cells |
+|---|---:|---:|
+| Christmas tree worms, 15 curves | 1155–1254 | 100 |
+| Feather dusters, 4 curves | 1255–1310 | 56 |
+| Feather star, 10 curves | 1311–1390 | 80 |
+| Flowerpot coral, 12 curves | 1391–1478 | 88 |
+| Sea fans and leather coral, 3 curves | 1479–1530 | 52 |
+| Coral guard crab, 10 curves | 1531–1610 | 80 |
+| Hermit crab, 6 curves | 1611–1674 | 64 |
+| Cleaner shrimp 1, 6 curves | 1675–1738 | 64 |
+| Cleaner shrimp 2, 6 curves | 1739–1802 | 64 |
+| Boxfish fins, 5 curves | 1803–1862 | 60 |
+
+Reserve **600–699** for shared tank state; **700–717 and 719–739** for boxfish control, with **718** reserved for the existing tank neutral-input convention; **740–759** for the humbug pair; **760–779** for the Dream driver (including its input slot 760); and **780–799 plus 840–1099** for the reef director, reaction timers and scratch state. Keep **800–839**, **1100–1111** and **1140–1154** reserved for the existing urchin-motion, urchin-spine and goby helper addresses if a helper is reused. Cells **0–599**, **1112–1139** and **1863–1900** remain unallocated until explicitly assigned. The lionfish helpers use 1300–1347 and overlap the new deformation blocks: they cannot be included unchanged in this reef; any reused helper must be remapped and its accesses audited.
+
+These are reserved ranges, not proof that the as-yet-unwritten reef controllers obey them. Phase 2 must define every used cell, initialise each v2 scale to 1, and add a check covering every included script and generated constant: blocks have the sizes above, all declared ranges are disjoint and within 0–1900, and no literal or computed access crosses its owner's allocation. Include the Dream driver and any reused helpers in that check. The E4 mailbox gate stays open until that check passes for both levels.
+
 ### E5 — Tools
 
 - **`wftools/wf_blender/dfrm_chunk.py`.** `build_chunk(chain, …)` gains `build_chunk_curves(chains=[…], …)`, which writes version 2. `decode()` reads both versions. `build_chunk` with one chain stays byte-identical.
@@ -420,7 +549,7 @@ A **version 1 chunk** must still carry exactly one curve, and it is parsed and p
 |---|---|---|---|
 | Animated actors in the reef | 33 | 21 | **16** |
 | Worm crowns retract | 6 rigid cluster actors moved into the rock | same | each crown on its own timer, 1 actor |
-| Feather star | 5 actors × 2 mirrored arms, identical motion | arms as 1-hinge rigid rods | 10 curling arms, per-arm phase, 1 actor |
+| Feather star | multiple actors with shared arm motion | arms as 1-hinge rigid rods | about 30 visible arms in 10 independently phased groups, 1 actor |
 | Crab and shrimp legs | rigid, no walk | hinged, but legs can't curl | 2–3-segment legs, walk clips |
 | Boxfish fins | 3 of 5 fins move | 5 fins hinge | 5 fins row (curves), 1 actor |
 | Engine edit | none | 1 constant plus the block size | E1–E7 above |
@@ -466,7 +595,7 @@ Research first, saved before the poster: `docs/reference/thai-reef-research.md` 
 |---|---|
 | Header | "Reef of the Gulf of Thailand", แนวปะการังอ่าวไทย, a strip of the tank |
 | 1 · The habitat | schematic map (Ko Tao, Ko Samui, Ang Thong, Ko Chang, Ko Kut, Ko Lan, Ko Kham); 7 facts, each with a chip |
-| 2 · Life without a backbone | 16 cards: 8 that **move** (worms, duster, clam, feather star, shrimp, nudibranch, sea star, hermit crab), 7 that **build** (corals, sponge) and the **coral guard crab** that defends one. Each card says what it eats, how it defends itself, and what it does in the tank |
+| 2 · Life without a backbone | 15 cards in the current research draft: 7 that **move**, 7 that **build** and the **coral guard crab**. Each card covers feeding, a sourced defense or other response, and what it does in the tank |
 | 3 · The two fishes | why a humbug pair shares one coral head; how a boxfish swims with a rigid body; the boxfish's toxin, which matters in a real reef tank |
 | Footer | chip legend (verified · other region · ours) and the research document |
 
@@ -607,7 +736,7 @@ flowchart TD
     task aquarium-check
     python3 -m pytest -q tests/test_aquarium_thai_reef.py -k same_anchors
     ```
-5. Budgets and the content rule. `report_budget.py` reports, per style: realistic ≤ 48,000 static triangles; anime ≤ 30,000 plus ≤ 16,000 hull triangles; ≤ 8 groups and ≤ 16 animated actors each. The test fails if any roster species appears in another tank's species list.
+5. Budgets and the content rule. `report_budget.py` reports, per style: realistic ≤ 70,000 static triangles; anime ≤ 70,000 plus ≤ 24,000 hull triangles; ≤ 11 groups and ≤ 16 animated actors each. The test fails if any roster species appears in another tank's species list.
     ```sh
     python3 wflevels/aquarium_thai_reef/report_budget.py
     python3 -m pytest -q tests/test_aquarium_thai_reef.py
@@ -640,6 +769,8 @@ flowchart TD
 ## Mockups
 
 All five are self-contained, 1440 × 900, rebuilt by `python3 docs/plans/2026-11-02-gulf-of-thailand-reef-tank/build_mockups.py --png` from one seed. They are design intent, not game assets.
+
+The mockups show the approved banded coral shrimp; the redesigned poster is being developed separately.
 
 - [Wide view](2026-11-02-gulf-of-thailand-reef-tank/tank-wide.html): every species numbered, with the labels outside the TV frame.
 - [Close camera](2026-11-02-gulf-of-thailand-reef-tank/tank-close.html): calm against flinching, and one pass second by second.

@@ -284,23 +284,24 @@ def giant_clam(rng, x, y, w, open_=1.0):
 
 def crinoid(rng, x, y, r, phase=0.0):
     g = []
-    for k in range(10):
-        a0 = -math.pi / 2 + math.radians(-80 + k * 17.8)
+    for k in range(30):
+        a0 = -math.pi / 2 + math.radians(-80 + k * (160 / 29))
         pts, ticks = [], []
         for j in range(9):
             t = j / 8
-            a = a0 + math.sin(phase + k + t * 2.4) * 0.35 * t - (0.9 * t * t if k < 5 else -0.9 * t * t) * 0.6
+            a = a0 + math.sin(phase + k // 3 + t * 2.4) * 0.35 * t - (0.9 * t * t if k < 15 else -0.9 * t * t) * 0.6
             px = x + r * t * math.cos(a)
             py = y + r * t * math.sin(a)
             pts.append((px, py))
-            if 0 < j < 8:
+            if 0 < j < 8 and k % 3 == 1:
                 nx, ny = -math.sin(a), math.cos(a)
                 for sg in (-1, 1):
                     ticks.append(f'<line x1="{f(px)}" y1="{f(py)}" x2="{f(px+sg*nx*9+math.cos(a)*5)}" '
                                  f'y2="{f(py+sg*ny*9+math.sin(a)*5)}" stroke="#ffd34d" stroke-width="1.6"/>')
-        g.append(f'<path d="{smooth_open(pts)}" stroke="#f2a90f" stroke-width="4" fill="none" stroke-linecap="round"/>')
+        g.append(f'<path d="{smooth_open(pts)}" stroke="#f2a90f" stroke-width="2" fill="none" stroke-linecap="round"/>')
         g += ticks
-        g.append(f'<path d="{smooth_open(pts)}" stroke="#2b1d06" stroke-width="1.2" fill="none" stroke-dasharray="3 9"/>')
+        if k % 3 == 1:
+            g.append(f'<path d="{smooth_open(pts)}" stroke="#2b1d06" stroke-width="1.2" fill="none" stroke-dasharray="3 9"/>')
     g.append(f'<circle cx="{f(x)}" cy="{f(y)}" r="9" fill="#c47f08"/>')
     return "".join(g)
 
@@ -326,14 +327,15 @@ def cleaner_shrimp(rng, x, y, s=1.0, facing=1):
     sx = facing
     pts = [(x - 26 * s * sx, y), (x - 10 * s * sx, y - 9 * s), (x + 12 * s * sx, y - 8 * s), (x + 24 * s * sx, y - 2 * s),
            (x + 12 * s * sx, y + 6 * s), (x - 10 * s * sx, y + 7 * s)]
-    g = [f'<path d="{smooth_closed(pts)}" fill="#f6b33a"/>',
-         f'<path d="M{f(x-24*s*sx)},{f(y-2*s)} Q{f(x)},{f(y-12*s)} {f(x+22*s*sx)},{f(y-3*s)}" stroke="#d62828" stroke-width="{f(4*s)}" fill="none"/>',
-         f'<path d="M{f(x-24*s*sx)},{f(y-4*s)} Q{f(x)},{f(y-14*s)} {f(x+22*s*sx)},{f(y-5*s)}" stroke="#fff" stroke-width="{f(1.8*s)}" fill="none"/>']
+    g = [f'<path d="{smooth_closed(pts)}" fill="#f5ede0"/>']
+    for dx in (-15, -3, 9):
+        g.append(f'<path d="M{f(x+dx*s*sx)},{f(y-7*s)} l{f(4*s*sx)},{f(13*s)}" stroke="#bd2830" stroke-width="{f(4*s)}"/>')
     for k in range(5):
         lx = x + (-8 + k * 5) * s * sx
         g.append(f'<line x1="{f(lx)}" y1="{f(y+5*s)}" x2="{f(lx+3*s*sx)}" y2="{f(y+16*s)}" stroke="#f6d38a" stroke-width="{f(1.2*s)}"/>')
     for k in (-1, 1):
         g.append(f'<path d="M{f(x+22*s*sx)},{f(y-4*s)} q{f(30*s*sx)},{f((-30+k*8)*s)} {f(70*s*sx)},{f((-10+k*14)*s)}" stroke="#fff" stroke-width="{f(1.1*s)}" fill="none"/>')
+        g.append(f'<path d="M{f(x+15*s*sx)},{f(y+3*s)} l{f(25*s*sx)},{f((9+k*5)*s)} l{f(9*s*sx)},{f(-3*k*s)}" stroke="#c52c31" stroke-width="{f(2.5*s)}" fill="none"/>')
     g.append(f'<circle cx="{f(x+18*s*sx)}" cy="{f(y-5*s)}" r="{f(2*s)}" fill="#111"/>')
     return "".join(g)
 
@@ -359,14 +361,6 @@ def linckia(rng, x, y, s=1.0, rot=0):
         g.append(f'<line x1="{f(x)}" y1="{f(y)}" x2="{f(ex)}" y2="{f(ey)}" stroke="#2f6fd6" stroke-width="{f(11*s)}" stroke-linecap="round"/>')
         g.append(f'<line x1="{f(x)}" y1="{f(y)}" x2="{f(ex)}" y2="{f(ey)}" stroke="#5c95f0" stroke-width="{f(3*s)}" stroke-linecap="round"/>')
     g.append(f'<circle cx="{f(x)}" cy="{f(y)}" r="{f(9*s)}" fill="#2f6fd6"/></g>')
-    return "".join(g)
-
-
-def sea_cucumber(rng, x, y, s=1.0):
-    g = [f'<path d="M{f(x-200*s)},{f(y+8*s)} Q{f(x-120*s)},{f(y+2*s)} {f(x-50*s)},{f(y+6*s)}" stroke="#d9c393" stroke-width="{f(5*s)}" fill="none" opacity=".8"/>',
-         f'<path d="{blob(rng, x, y, 55*s, 13*s, 20, 0.05)}" fill="#1d1712"/>']
-    for _ in range(26):
-        g.append(f'<circle cx="{f(x+rng.uniform(-48,48)*s)}" cy="{f(y+rng.uniform(-10,4)*s)}" r="{f(2.4*s)}" fill="#3d3127"/>')
     return "".join(g)
 
 
@@ -458,20 +452,17 @@ CALLOUTS = [
     ("Zoanthid carpet", "Palythoa / Zoanthus", 330, 610),
     ("Phyllidia nudibranch", "Phyllidia varicosa", 260, 690),
     ("Mushroom coral", "Fungiidae", 520, 835),
-    ("Sea cucumber", "Holothuria sp.", 300, 860),
     ("Sea fan", "gorgonian", 100, 400),
     ("Leather coral", "Sarcophyton sp.", 760, 380),
     ("Orange cup coral", "Tubastraea coccinea", 790, 540),
-    ("Cleaner shrimp ×2", "Lysmata amboinensis", 700, 590),
+    ("Banded coral shrimp ×2", "Stenopus hispidus", 700, 590),
     ("Boulder coral", "Porites lutea", 680, 760),
     ("Christmas tree worms", "Spirobranchus sp.", 775, 715),
-    ("Feather star", "Comatulida", 930, 380),
+    ("Feather star", "Lamprometra palmata", 930, 380),
     ("Yellow boxfish (juvenile)", "Ostracion cubicus", 900, 290),
     ("Table coral", "Acropora sp.", 1290, 360),
     ("Fluted giant clam", "Tridacna squamosa", 1060, 805),
     ("Hermit crab", "Diogenidae", 985, 852),
-    ("Blue sea star", "Linckia laevigata", 1220, 650),
-    ("Gold-mouth sea squirts", "Polycarpa aurata", 1335, 585),
     ("Barrel sponge", "Xestospongia testudinaria", 1480, 650),
 ]
 
@@ -549,9 +540,6 @@ def reef_scene(state: str = "wide") -> str:
     g.append(feather_duster(rng, 520, 600, -100, out=not alert))
     g.append(feather_duster(rng, 1100, 610, -70, out=True))
     g.append(feather_duster(rng, 1372, 438, -60, out=True, s=0.8))
-    g.append(sea_squirt(rng, 1325, 602))
-    g.append(sea_squirt(rng, 1352, 622, 0.8))
-    g.append(linckia(rng, 1222, 652, 0.8, rot=18))
     g.append(phyllidia(rng, 262, 692, 1.0, rot=-12))
     g.append(cleaner_shrimp(rng, 700, 598, 1.0, facing=1 if not alert else -1))
     g.append(cleaner_shrimp(rng, 930, 606, 0.9, facing=-1))
@@ -568,7 +556,6 @@ def reef_scene(state: str = "wide") -> str:
     for wx, wy in ((430, 600), (455, 585), (1150, 650), (1395, 560), (240, 610)):
         g.append(christmas_tree_worm(rng, wx, wy, 1.0, not alert))
     g.append(feather_duster(rng, 1015, 560, -60, out=True, s=0.7))
-    g.append(sea_cucumber(rng, 300, 862))
     g.append(hermit_crab(rng, 985, 860))
     # humbugs live in the branching head: hover above it, or hide inside it
     if alert:
@@ -642,7 +629,7 @@ def tank_wide() -> str:
             + "".join(ov) +
             '<div style="position:absolute;left:240px;top:630px;width:960px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">'
             '<div class="note"><b>Wide camera, idle.</b> Two rock masses and a central arch on a sand bed; '
-            'the cave under the arch is the cleaner-shrimp station. 25 kinds of life, 3 of them fish.</div>'
+            'the cave under the arch is the cleaner-shrimp station. Three fish live among the reef life.</div>'
             '<div class="note"><b>Budget.</b> Static reef ≤ 48,000 triangles in ≤ 8 static groups; '
             '16 animated actors with multi-curve DFRM (33 without it); one 1024² reef atlas. Gate: ≥ 20 FPS on cast1.</div>'
             '<div class="note"><b>Labels sit outside the TV frame</b> and are not drawn in the game. '
@@ -918,10 +905,9 @@ GALLERY = [
     ("Christmas tree worm", "Spirobranchus", lambda r: christmas_tree_worm(r, 0, 10, 2.6)),
     ("Feather duster", "Sabellastarte", lambda r: feather_duster(r, 0, 32, -90, True, 0.75)),
     ("Fluted giant clam", "Tridacna squamosa", lambda r: giant_clam(r, 0, 6, 110)),
-    ("Feather star", "Comatulida", lambda r: crinoid(r, 0, 26, 52)),
-    ("Cleaner shrimp", "Lysmata amboinensis", lambda r: cleaner_shrimp(r, -14, 8, 1.1)),
+    ("Feather star", "Lamprometra palmata", lambda r: crinoid(r, 0, 26, 52)),
+    ("Banded coral shrimp", "Stenopus hispidus", lambda r: cleaner_shrimp(r, -14, 8, 1.1)),
     ("Phyllidia nudibranch", "Phyllidia varicosa", lambda r: phyllidia(r, 0, 4, 1.5)),
-    ("Blue sea star", "Linckia laevigata", lambda r: linckia(r, 0, 2, 0.55)),
     ("Hermit crab", "Diogenidae", lambda r: hermit_crab(r, 0, 12, 1.4)),
     ("Boulder coral", "Porites", lambda r: porites(r, 0, 26, 52, 34)),
     ("Table coral", "Acropora", lambda r: table_acropora(r, 0, -4, 120)),
@@ -1004,8 +990,8 @@ def poster() -> str:
             '<div class="note"><b>1 · The habitat.</b> A schematic map of the Gulf with the reef islands (Ko Tao, Ko Samui, Ang Thong, '
             'Ko Chang, Ko Kut, Ko Lan, Ko Kham), and seven facts: depth, reef type, monsoon, Porites dominance, bleaching years, '
             'substrate, temperature. Every fact prints with a chip.</div>'
-            '<div class="note"><b>2 · Life without a backbone.</b> 16 cards: eight that <i>move</i> in the tank (worms, clam, feather star, '
-            'shrimp, nudibranch, sea star, hermit crab), seven that <i>build</i> it (corals, sponge) and the coral guard crab that defends one. Each card: what it eats, '
+            '<div class="note"><b>2 · Life without a backbone.</b> 15 cards: seven that <i>move</i> in the tank (worms, clam, feather star, '
+            'shrimp, nudibranch, hermit crab), seven that <i>build</i> it (corals, sponge) and the coral guard crab that defends one. Each card: what it eats, '
             'how it defends itself, what it does in the tank.</div>'
             '<div class="note"><b>3 · The two fishes.</b> Why a pair of humbugs share one coral head, and how a boxfish swims with a rigid '
             'body (ostraciiform: fins row, the box does not bend). Includes the toxin note that matters to a real reef tank.</div>'
