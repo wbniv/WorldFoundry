@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-13](https://github.com/wbniv/WorldFoundry/commit/0532c59b) | UI font step 8: last three device checks PASS on both casts |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/5aa92f1d) | docs: fixed-pitch FPS counter built, tests and desktop before/after |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/1f0d63e1) | docs: correct the old font's advance claim (digits equal, other characters vary) |
 | [2026-10-25](https://github.com/wbniv/WorldFoundry/commit/c3eed575) | docs: fixed-width decisions for the FPS counter and classic-game HUD text |
@@ -15,6 +16,11 @@
 | [2026-10-17](https://github.com/wbniv/WorldFoundry/commit/6bc62d46) | Plan: the settings editor in Atkinson Hyperlegible Next, as finding-your-way |
 
 <!--history-meta v1
+0532c59b	author	Will Norris
+0532c59b	added	54
+0532c59b	deleted	0
+0532c59b	files	1
+0532c59b	body	Cast2 baseline-picker (J-f05dab47872d, 12/12 on 5b47e27b) and Q*bert\npoke-resume with the zForth-fixed 3b33384c build on cast1\n(J-039fff98daaf) and cast2 (J-80fd6c7f8ad5) complete step 8, 16 of 16.\nJ-a48af2bde6a6 briefly installed the older baseline eebab09d over\n5b47e27b on cast2; J-f05dab47872d restored it. The TODO no longer lists\nstep 9 as left (its PASS was already recorded); only the fixed-width\nHUD requirement remains. Stale agent stamp removed.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 5aa92f1d	author	Will Norris
 5aa92f1d	added	90
 5aa92f1d	deleted	0
