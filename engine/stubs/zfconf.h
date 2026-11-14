@@ -1,7 +1,7 @@
 /* zfconf.h — WF-specific zForth configuration.
  * Used instead of the vendor's src/linux/zfconf.h or src/atmega8/zfconf.h.
  * Placed in the stubs include directory so it shadows the vendor file when
- * -I<stubs_dir> is listed before -I<zforth_src_dir> in build_game.sh.
+ * -I<stubs_dir> is listed before -I<zforth_src_dir> in CMakeLists.txt.
  */
 #ifndef zfconf
 #define zfconf

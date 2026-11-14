@@ -37,8 +37,12 @@ its own switch; `ScriptRouter` currently dispatches at runtime by leading-byte s
 
 These are not set directly — `GNUMakefile.bld` derives them from `BUILDMODE`.
 
-> **Note:** `build_game.sh` does not implement BUILDMODE. It is hardcoded to a
-> debug-like configuration (`-O0 -g`, assertions on, iostreams on, validation off).
+> **Note:** CMake does not implement BUILDMODE. `CMAKE_BUILD_TYPE` picks the debug defines
+> (`WF_DEBUG_DEFINES`: on except Release/MinSizeRel), and on desktop Linux with the debug
+> defines `WF_DESIGNER_CHEATS` (`DESIGNER_CHEATS=1`) and `WF_TEST_CODE` (`DO_TEST_CODE=1`)
+> default on, as `task build` (`cmake/wf-game-dev.cmake`) builds; they are off, and cannot
+> be turned on, for Android, iOS, macOS and the web
+> ([plan](plans/2026-11-14-single-desktop-build.md)). Validation stays off.
 > The table below describes the old OpusMake system for reference.
 
 | Switch | `debug` | `safe-fast` | `release` | `final` | What it controls |

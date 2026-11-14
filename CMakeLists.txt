@@ -232,7 +232,34 @@ else()
     )
     message(STATUS "WF: release engine defines (no asserts, no DBSTREAM)")
 endif()
-list(APPEND WF_DEFS DO_VALIDATION=0 DO_TEST_CODE=0 DO_DEBUG_FILE_SYSTEM=0)
+# Desktop-Linux developer switches (docs/plans/2026-11-14-single-desktop-build.md).
+#   WF_DESIGNER_CHEATS -> DESIGNER_CHEATS=1: Linux GL --capture-frame and -record_video,
+#     the arcade / PILOT / moon HUD, free camera, VRAM slot colours, -halmem/-scratchmem,
+#     the version banner. Its pieces share globals (game/main.cc defines what
+#     gfx/gl/display.cc, game/game.cc and stubs/scripting_pilot.cc use), so it is one switch.
+#   WF_TEST_CODE -> DO_TEST_CODE=1: --debug-print-actors and the HAL test hooks.
+# Both default ON exactly where engine/build_game.sh (retired) put them: a desktop Linux
+# build with the debug defines (Debug, RelWithDebInfo; `task build`). Release and
+# MinSizeRel desktop builds default OFF; Android, iOS, macOS and the web build are OFF
+# and cannot turn them on, so their defines are unchanged.
+set(_wf_dev_switches_default OFF)
+if(NOT (ANDROID OR IOS OR APPLE OR EMSCRIPTEN) AND WF_DEBUG_DEFINES)
+    set(_wf_dev_switches_default ON)
+endif()
+option(WF_DESIGNER_CHEATS "Desktop Linux: DESIGNER_CHEATS (GL --capture-frame, -record_video, HUD, free camera)" ${_wf_dev_switches_default})
+option(WF_TEST_CODE "Desktop Linux: DO_TEST_CODE (--debug-print-actors, HAL test hooks)" ${_wf_dev_switches_default})
+if((ANDROID OR IOS OR APPLE OR EMSCRIPTEN) AND (WF_DESIGNER_CHEATS OR WF_TEST_CODE))
+    message(FATAL_ERROR "WF_DESIGNER_CHEATS and WF_TEST_CODE are desktop-Linux switches; turn them off for this target")
+endif()
+set(_wf_test_code 0)
+if(WF_TEST_CODE)
+    set(_wf_test_code 1)
+endif()
+list(APPEND WF_DEFS DO_VALIDATION=0 DO_TEST_CODE=${_wf_test_code} DO_DEBUG_FILE_SYSTEM=0)
+if(WF_DESIGNER_CHEATS)
+    list(APPEND WF_DEFS DESIGNER_CHEATS=1)
+endif()
+message(STATUS "WF: WF_DESIGNER_CHEATS=${WF_DESIGNER_CHEATS} WF_TEST_CODE=${WF_TEST_CODE}")
 
 if(WF_ASAN AND NOT ANDROID AND NOT IOS)
     # vptr is excluded: the whole project builds -fno-rtti (Jolt, wfengine,
@@ -1774,12 +1801,17 @@ if(WF_NEURAL_FORTH AND NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     add_test(NAME neural_forth_unit COMMAND nf_test)
 endif()
 
-# ─── Output location matches build_game.sh ────────────────────────────────────
+# ─── Output location: engine/wf_game ──────────────────────────────────────────
 if(NOT ANDROID AND NOT EMSCRIPTEN)
     # Emscripten keeps its .html/.js/.wasm/.data set in build-web/ — engine/ is
     # for native binaries.
     set_target_properties(wf_game PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/engine)
+    # An editor/dev-stack engine (`task build-editor`) is engine/wf_game-dev, so it
+    # never overwrites the lean engine/wf_game (as engine/build_game.sh did).
+    if(WF_ENABLE_EDITOR AND NOT (APPLE OR IOS))
+        set_target_properties(wf_game PROPERTIES OUTPUT_NAME wf_game-dev)
+    endif()
 endif()
 
 # ─── CRDT support library (under WF_ENABLE_EDITOR umbrella) ──────────────────

@@ -1,6 +1,6 @@
 // scripting_wren.cc — Wren scripting backend for wren_engine namespace.
 //
-// Compiled in when WF_ENABLE_WREN is defined (via build_game.sh).
+// Compiled in when WF_ENABLE_WREN is defined (CMakeLists.txt).
 // Sigil: `//wren\n` — ScriptRouter dispatches here before the generic `//`.
 //
 // Each RunScript call creates a fresh Wren module (unique name "s<N>") so

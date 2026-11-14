@@ -1,6 +1,6 @@
 // scripting_ficl.cc — ficl Forth backend for forth_engine namespace.
 //
-// Compiled in when WF_FORTH_ENGINE_FICL is defined (via build_game.sh).
+// Compiled in when WF_FORTH_ENGINE_FICL is defined (CMakeLists.txt).
 // Sigil: `\` — handled by ScriptRouter before dispatch here.
 //
 // Cell type: FICL_INT (native integer, 64-bit on x86-64). Mailbox values

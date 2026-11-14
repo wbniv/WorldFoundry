@@ -1,6 +1,6 @@
 // scripting_pforth.cc — pForth backend for forth_engine namespace.
 //
-// Compiled in when WF_FORTH_ENGINE_PFORTH is defined (via build_game.sh).
+// Compiled in when WF_FORTH_ENGINE_PFORTH is defined (CMakeLists.txt).
 // Sigil: `\` — handled by ScriptRouter before dispatch here.
 //
 // *** Why this file uses internal pforth headers ***
@@ -140,7 +140,7 @@ void Init(MailboxesManager& mgr)
     g_curObj = 0;
 
     // Locate system.fth relative to this executable's source layout.
-    // PFORTH_FTH_DIR is injected by build_game.sh as a -D define.
+    // PFORTH_FTH_DIR is injected by CMakeLists.txt as a -D define.
     // Fallback: look adjacent to the vendor directory.
 #ifdef PFORTH_FTH_DIR
     g_system_fth_path = PFORTH_FTH_DIR "/system.fth";

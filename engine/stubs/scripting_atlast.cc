@@ -1,6 +1,6 @@
 // scripting_atlast.cc — Atlast Forth backend for forth_engine namespace.
 //
-// Compiled in when WF_FORTH_ENGINE_ATLAST is defined (via build_game.sh).
+// Compiled in when WF_FORTH_ENGINE_ATLAST is defined (CMakeLists.txt).
 // Sigil: `\` — handled by ScriptRouter before dispatch here.
 //
 // Cell type: atl_int = int64_t. Mailbox values are cast to int64_t;

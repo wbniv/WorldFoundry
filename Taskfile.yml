@@ -71,21 +71,13 @@ tasks:
       - bash scripts/feature.sh list
 
   build:
-    desc: "Build wf_game (Forth + Jolt; canonical config)"
-    deps: [vendor-unpack]
-    env:
-      # Lua is linked into the Linux debug build so the in-engine Lua step
-      # debugger (MobDebug) has a host to bind to. Override with
-      # WF_LUA_ENGINE=none if you need a Forth-only binary.
-      WF_ENABLE_FENNEL: "0"
-      WF_JS_ENGINE: none
-      WF_WASM_ENGINE: none
-      WF_ENABLE_WREN: "0"
-      WF_FORTH_ENGINE: zforth
-      WF_PILOT_ENGINE: builtin
-      WF_PHYSICS_ENGINE: jolt
+    desc: "Build engine/wf_game, the desktop dev engine: CMake Debug + ASan, designer cheats (Linux --capture-frame), Lua + zForth + PILOT, Jolt (cmake/wf-game-dev.cmake) in build-wf-game/. Extra configure flags: task build -- -DWF_ASAN=OFF"
+    deps: [vendor-unpack-archives]
     cmds:
-      - bash engine/build_game.sh
+      # The one desktop build (docs/plans/2026-11-14-single-desktop-build.md). Lua is linked
+      # in so the in-engine Lua step debugger (MobDebug) has a host to bind to; for a
+      # Forth-only binary: task build -- -DWF_LUA_ENGINE=none
+      - bash scripts/build-wf-game.sh -- {{.CLI_ARGS}}
 
   test-forth-source:
     desc: "Test shared Forth comments and script boundaries against the actual VM"
@@ -98,7 +90,9 @@ tasks:
       - task: build
     status:
       - test -x engine/wf_game
-      - test engine/build_game.sh -ot engine/wf_game
+      - test scripts/build-wf-game.sh -ot engine/wf_game
+      - test cmake/wf-game-dev.cmake -ot engine/wf_game
+      - test CMakeLists.txt -ot engine/wf_game
       - test -z "$(find engine wfsource/source -type f \( -name '*.c' -o -name '*.cc' -o -name '*.cpp' -o -name '*.h' -o -name '*.hp' -o -name '*.hpi' -o -name '*.inc' -o -name '*.asm' -o -name '*.s' -o -name '*.fth' -o -name '*.lua' -o -name '*.fnl' -o -name 'CMakeLists.txt' -o -name 'Makefile' -o -name '*.mk' \) -newer engine/wf_game -print -quit)"
 
   build-cmake:
@@ -125,17 +119,8 @@ tasks:
   build-editor:
     desc: "Build wf_game with the editor / dev stack (debug bridge + REST + CRDT + mutation API). Requires Rust toolchain."
     deps: [vendor-unpack]
-    env:
-      WF_ENABLE_EDITOR: "1"
-      WF_ENABLE_FENNEL: "0"
-      WF_JS_ENGINE: none
-      WF_WASM_ENGINE: none
-      WF_ENABLE_WREN: "0"
-      WF_FORTH_ENGINE: zforth
-      WF_PILOT_ENGINE: builtin
-      WF_PHYSICS_ENGINE: jolt
     cmds:
-      - bash engine/build_game.sh
+      - bash scripts/build-wf-game.sh --editor
       - cmake -S . -B cmake-build-editor -DWF_ENABLE_EDITOR=ON -DCMAKE_BUILD_TYPE=Release
       - cmake --build cmake-build-editor --target wfcrdt_smoke wfcrdt_wrapper_test connect_retry_test -j
       - ./cmake-build-editor/engine/crdt/wfcrdt_smoke

@@ -10,7 +10,7 @@
 - [World Foundry engine project](project_world_foundry.md) — 3D engine being modernized; scripting mid-migration from Scheme `.s` to zForth (`\ wf`); snowgoons + shell already converted.
 - [Dev machine memory constraint](project_dev_machine_memory.md) — laptop is 16GB (2×8 SODIMM, upgradeable to 64GB); ASan wf-edit OOMs running 2 collab instances — use `task build-wf-edit-fast`.
 - [WASM editor Rust toolchain](project_wasm_editor_rust_toolchain.md) — browser wf-edit needs isolated rustup 1.85.1 + wasm32-unknown-emscripten + a yrs submodule patch; `task dev-setup-web-edit`.
-- [WF level build pipeline](reference_wf_build_pipeline.md) — Blender→.lev→.iff via `wftools/wf_blender/build_level_binary.sh`; engine via `engine/build_game.sh`; run via `wf_game -L <level>.iff`.
+- [WF level build pipeline](reference_wf_build_pipeline.md) — Blender→.lev→.iff via `wftools/wf_blender/build_level_binary.sh`; engine via `task build` (CMake); run via `wf_game -L <level>.iff`.
 - [WF docs/game-ideas/ format](reference_wf_game_ideas_docs.md) — sibling format for arcade-conversion briefs (~150 lines, Wikipedia hero, fixed section list).
 - [Verify scripting dialect across multiple files](feedback_verify_scripting_dialect.md) — mid-migration codebases have coexisting dialects; check `.s/.aib/.fth/.lev`-embedded before claiming canonical.
 - [User arcade-game familiarity](user_arcade_familiarity.md) — per-game notes on which 1980s titles the user has/hasn't played; ground briefs in Wikipedia/footage, not assumed shared "feel". Bubble Bobble: not played.

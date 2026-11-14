@@ -1,7 +1,7 @@
 #include <game/plant_settings.h>
 // scripting_zforth.cc — zForth backend for forth_engine namespace.
 //
-// Compiled in when WF_FORTH_ENGINE_ZFORTH is defined (via build_game.sh).
+// Compiled in when WF_FORTH_ENGINE_ZFORTH is defined (CMakeLists.txt).
 // Sigil: `\` — handled by ScriptRouter before dispatch here; RunScript
 // strips the `\ wf` opener line before passing to zf_eval.
 //

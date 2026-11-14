@@ -545,7 +545,7 @@ When the user asks to "add X to the glossary", this is the file. Do not store gl
 
 <b>One-time setup:</b> <code>cargo build --release</code> in each of the three crates under <code>wftools/</code>.<br/><br/>
 
-<b>Engine binary:</b> <code>engine/build_game.sh</code> produces <code>engine/wf_game</code>. Feature flags via env vars: <code>WF_LUA_ENGINE</code>, <code>WF_FORTH_ENGINE</code> (default <code>zforth</code>), <code>WF_JS_ENGINE</code>, <code>WF_WASM_ENGINE</code>.<br/><br/>
+<b>Engine binary:</b> <code>task build</code> (CMake) produces <code>engine/wf_game</code>. Feature flags via env vars: <code>WF_LUA_ENGINE</code>, <code>WF_FORTH_ENGINE</code> (default <code>zforth</code>), <code>WF_JS_ENGINE</code>, <code>WF_WASM_ENGINE</code>.<br/><br/>
 
 <b>Run a level:</b> <code>engine/wf_game -L wflevels/<name>.iff</code>.<br/><br/>
 

@@ -1,6 +1,6 @@
 // scripting_lua.cc — Lua 5.4 engine plug (+ optional Fennel sub-dispatch).
 //
-// Compiled in by build_game.sh when WF_LUA_ENGINE=lua54 (-DWF_ENABLE_LUA).
+// Compiled in by CMakeLists.txt when WF_LUA_ENGINE=lua54 (-DWF_ENABLE_LUA).
 
 #ifdef WF_ENABLE_LUA
 

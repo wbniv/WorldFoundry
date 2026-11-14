@@ -3,7 +3,7 @@
 comments (any bracket level), collapse runs of blank lines. Preserves all
 string literals byte-for-byte. Output remains valid Lua.
 
-Used by build_game.sh to shrink the embedded fennel.lua before xxd-i'ing
+Used by CMakeLists.txt (WF_ENABLE_FENNEL) to shrink the embedded fennel.lua before xxd-i'ing
 it into the binary.
 
 Usage: minify_lua.py <input.lua> <output.lua>

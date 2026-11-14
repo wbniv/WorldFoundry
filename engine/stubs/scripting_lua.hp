@@ -1,6 +1,6 @@
 // scripting_lua.hp — Lua 5.4 engine plug interface used by ScriptRouter.
 //
-// Compiled in when WF_LUA_ENGINE=lua54 (via build_game.sh).
+// Compiled in when WF_LUA_ENGINE=lua54 (CMakeLists.txt).
 // Lua handles scripts not claimed by any other sigil (plain-text fallthrough).
 // Fennel (`;` sigil) is a sub-dispatch inside lua_engine because it shares
 // the lua_State; it is not a peer at the router level.

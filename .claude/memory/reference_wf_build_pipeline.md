@@ -13,7 +13,7 @@ originSessionId: 1bb8f4e2-9146-4504-8289-793c96be779b
 
 **One-time setup:** `cargo build --release` in each of the three crates under `wftools/`.
 
-**Engine binary:** `engine/build_game.sh` produces `engine/wf_game`. Feature flags via env vars: `WF_LUA_ENGINE`, `WF_FORTH_ENGINE` (default `zforth`), `WF_JS_ENGINE`, `WF_WASM_ENGINE`.
+**Engine binary:** `task build` (`scripts/build-wf-game.sh`, CMake Debug with `cmake/wf-game-dev.cmake`) produces `engine/wf_game`. Feature flags are CMake options after `--`: `task build -- -DWF_LUA_ENGINE=none` (also `WF_FORTH_ENGINE`, `WF_JS_ENGINE`, `WF_WASM_ENGINE`, `WF_ASAN`). `engine/build_game.sh` was retired 2026-11-14.
 
 **Run a level:** `engine/wf_game -L wflevels/<name>.iff`.
 

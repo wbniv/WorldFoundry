@@ -1,6 +1,6 @@
 // scripting_embed.cc — embed eForth backend for forth_engine namespace.
 //
-// Compiled in when WF_FORTH_ENGINE_EMBED is defined (via build_game.sh).
+// Compiled in when WF_FORTH_ENGINE_EMBED is defined (CMakeLists.txt).
 // Sigil: `\` — handled by ScriptRouter before dispatch here.
 //
 // Cell type: uint16_t (embed is a 16-bit eForth VM). On the real fixed-point

@@ -30,7 +30,7 @@ BRIDGE_PORT = 7778
 @pytest.fixture(scope="session")
 def bridge():
     if not WF_GAME.exists():
-        pytest.skip(f"wf_game not built: {WF_GAME} missing (run engine/build_game.sh)")
+        pytest.skip(f"wf_game not built: {WF_GAME} missing (run task build)")
     if not LEVEL.exists():
         pytest.skip(f"qbert_practice level missing: {LEVEL}")
     if not os.environ.get("DISPLAY"):

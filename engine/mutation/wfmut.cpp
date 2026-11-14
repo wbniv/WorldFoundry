@@ -7,7 +7,7 @@
 // consumers drive wfmut::. The header provides no-op stubs when neither
 // flag is set, so callers compile cleanly; this TU compiles to an empty
 // translation unit and is excluded from the source list in CMakeLists.txt
-// and engine/build_game.sh in that case.
+// in that case.
 
 #include "wfmut.hpp"
 

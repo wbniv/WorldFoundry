@@ -1,6 +1,6 @@
 // scripting_wren.hp — Wren engine plug interface used by ScriptRouter.
 //
-// Compiled in when WF_ENABLE_WREN is defined (via build_game.sh).
+// Compiled in when WF_ENABLE_WREN is defined (CMakeLists.txt).
 // Sigil: `//wren\n` — ScriptRouter tests for this BEFORE the generic `//`
 // (JS) check so Wren scripts aren't mis-dispatched to the JS engine.
 //

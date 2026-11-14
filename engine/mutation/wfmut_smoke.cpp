@@ -6,7 +6,7 @@
 //
 // Same gate as wfmut: UNION of WF_DEBUG_BRIDGE and WF_ENABLE_EDITOR. Empty
 // TU when neither flag is set; excluded from the source list in CMakeLists
-// and engine/build_game.sh in that case.
+// in that case.
 
 #include "wfmut_smoke.hpp"
 

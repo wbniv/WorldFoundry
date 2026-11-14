@@ -1,6 +1,6 @@
 // scripting_wamr.cc — WAMR scripting backend for wamr_engine namespace.
 //
-// Compiled in when WF_WASM_ENGINE_WAMR is defined (via build_game.sh).
+// Compiled in when WF_WASM_ENGINE_WAMR is defined (CMakeLists.txt).
 // Sigil: `#b64\n` — handled by ScriptRouter before dispatch here.
 //
 // Uses the wasm-C-API (wasm_c_api.h) for portability.  One engine + store

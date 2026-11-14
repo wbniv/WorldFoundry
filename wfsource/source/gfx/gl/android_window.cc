@@ -11,7 +11,7 @@
 //============================================================================
 
 // Body is compiled only when included by gl/display.cc on the Android build.
-// If a build system (e.g. build_game.sh) sweeps the directory and compiles
+// If a build system (e.g. a directory glob) sweeps the directory and compiles
 // this TU directly on desktop, skip it: everything it defines is needed only
 // inside display.cc's translation unit.
 #if defined(__ANDROID__)

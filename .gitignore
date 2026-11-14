@@ -31,7 +31,7 @@ wf_game.app.dSYM/
 
 # Built game binary
 engine/wf_game
-# Built editor/dev engine binary (engine/build_game.sh WF_ENABLE_EDITOR=1)
+# Built editor/dev engine binary (task build-editor: CMake WF_ENABLE_EDITOR=ON)
 engine/wf_game-dev
 
 # Preprocessor temp files (build artifacts)

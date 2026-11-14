@@ -10,7 +10,7 @@
 // process aborts — a broken Jolt build should never silently continue.
 //
 // This file is compiled only when WF_PHYSICS_ENGINE=jolt
-// (-DPHYSICS_ENGINE_JOLT is in CXXFLAGS via build_game.sh).
+// (-DPHYSICS_ENGINE_JOLT comes from CMakeLists.txt).
 
 #ifdef PHYSICS_ENGINE_JOLT
 

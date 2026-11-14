@@ -4,8 +4,8 @@ Set WF_STYLE_BASELINE_ENGINE and WF_STYLE_CANDIDATE_ENGINE to frozen binaries
 built from the same source revision except for Phase S. Run under an X display
 inside the build container. This is a real image comparison, not a source check.
 The GL engines must define DESIGNER_CHEATS, or --capture-frame writes nothing
-(gfx/gl/display.cc): engine/build_game.sh defines it, a CMake build needs
--DCMAKE_CXX_FLAGS=-DDESIGNER_CHEATS=1. The Metal capture is not gated.
+(gfx/gl/display.cc): a CMake Debug build defines it (WF_DESIGNER_CHEATS, on by default
+there; `task build`), and engines built before that option need -DCMAKE_CXX_FLAGS=-DDESIGNER_CHEATS=1. The Metal capture is not gated.
 
 Metal (reef plan step 14): the macos-style-metal Codemagic workflow
 (scripts/macos/style-metal-ci.sh) renders the same sweep on pre-style and style

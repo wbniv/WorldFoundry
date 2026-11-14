@@ -1,6 +1,6 @@
 // scripting_wamr.hp — WAMR engine plug interface used by ScriptRouter.
 //
-// Compiled in when WF_WASM_ENGINE=wamr (via build_game.sh).
+// Compiled in when WF_WASM_ENGINE=wamr (CMakeLists.txt).
 // Sigil: `#b64\n` — same as wasm3; WF_WASM_ENGINE selects exactly one of
 // {none, wasm3, wamr} and the dispatch arm in ScriptRouter::RunScript routes
 // to whichever wasm_engine implementation is compiled in.

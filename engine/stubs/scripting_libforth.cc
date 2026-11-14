@@ -1,6 +1,6 @@
 // scripting_libforth.cc — libforth backend for forth_engine namespace.
 //
-// Compiled in when WF_FORTH_ENGINE_LIBFORTH is defined (via build_game.sh).
+// Compiled in when WF_FORTH_ENGINE_LIBFORTH is defined (CMakeLists.txt).
 // Sigil: `\` — handled by ScriptRouter before dispatch here.
 //
 // Cell type: forth_cell_t = uintptr_t (native pointer width, 64-bit on

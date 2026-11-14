@@ -65,11 +65,11 @@ as source and is linked in at build time.
 ## Notes
 
 - Optional. Only one JS engine (or none) links into a given build. Selection
-  happens in `wftools/wf_engine/build_game.sh` via `WF_JS_ENGINE`.
+  happens in `CMakeLists.txt` via `WF_JS_ENGINE`.
 - Optional. Only one wasm engine (or none) links into a given build. Selection
-  happens in `wftools/wf_engine/build_game.sh` via `WF_WASM_ENGINE`.
+  happens in `CMakeLists.txt` via `WF_WASM_ENGINE`.
 - Optional. Only one Forth engine (or none) links into a given build. Selection
-  happens in `wftools/wf_engine/build_game.sh` via `WF_FORTH_ENGINE`.
+  happens in `CMakeLists.txt` via `WF_FORTH_ENGINE`.
   Note: atlast source is under `atlast-<sha>/atlast-64/`; zForth core is under
   `zforth-<sha>/src/zforth/`.
 - See `docs/plans/2026-04-14-pluggable-scripting-engine.md` for the JS dispatch

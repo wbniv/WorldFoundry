@@ -22,12 +22,19 @@ Options:
   --poll            timer mode: do nothing if COMMIT is the one the last --poll took
   --tests-from REV  run REV's copies of the tests and their harness against COMMIT
                     (proves the guards catch a bug that predates them)
-  --builder B       cmake (default): scripts/build-wf-game-container.sh (CMake Release)
-                    build_game: engine/build_game.sh with `task build`'s settings, the
-                    debug engine (engine/wf_game) the freshness test documents. Only it
-                    compiles the Linux GL --capture-frame path (DESIGNER_CHEATS).
+  --builder B       dev (default): build-wf-game-container.sh --dev, the engine `task build`
+                    builds (cmake/wf-game-dev.cmake: Debug, ASan, WF_DESIGNER_CHEATS, so the
+                    Linux GL --capture-frame the freshness test needs works)
+                    release: build-wf-game-container.sh (CMake Release; no Linux capture,
+                    so renderer-fresh fails on it)
+                    build_game and cmake are the old names of dev and release
   --keep N          keep the newest N result directories (default 20)
   --no-notify       no desktop notification on failure
+
+The build scripts (scripts/build-wf-game.sh, build-wf-game-container.sh,
+in-linux-container.sh) always come from this checkout; cmake/wf-game-dev.cmake comes
+from it only when the commit has none. When the commit's CMakeLists.txt predates
+WF_DESIGNER_CHEATS, the dev builder passes -DCMAKE_CXX_FLAGS=-DDESIGNER_CHEATS=1 instead.
 
 Results: build-docker/local-ci/<sha12>[-tests-<rev12>]/ (summary.txt, result.tsv, one log
 per step), and build-docker/local-ci/latest (a copy of the newest summary).
@@ -40,12 +47,12 @@ Environment:
                       ages out anything a killed run leaves there)
   WF_CI_RESULTS       results directory (default <repo>/build-docker/local-ci)
   WF_CI_BRANCH        branch polled on origin (default 2026-new-level)
-  WF_CI_BUILDER       default for --builder (cmake)
+  WF_CI_BUILDER       default for --builder (dev)
   WF_CONTAINER_MEMORY container memory cap (default here 8g)
 EOF2
 }
 
-poll=0 tests_from="" builder="${WF_CI_BUILDER:-cmake}" keep=20 notify=1 commit=""
+poll=0 tests_from="" builder="${WF_CI_BUILDER:-dev}" keep=20 notify=1 commit=""
 while [ $# -gt 0 ]; do
     case "$1" in
         -h|--help) usage; exit 0 ;;
@@ -59,7 +66,12 @@ while [ $# -gt 0 ]; do
     esac
 done
 case "$keep" in ''|*[!0-9]*) echo "local-ci: --keep needs a number" >&2; exit 2 ;; esac
-case "$builder" in cmake|build_game) ;; *) echo "local-ci: --builder is cmake or build_game" >&2; exit 2 ;; esac
+case "$builder" in
+    dev|release) ;;
+    build_game) builder=dev ;;      # engine/build_game.sh retired (docs/plans/2026-11-14-single-desktop-build.md)
+    cmake) builder=release ;;
+    *) echo "local-ci: --builder is dev or release" >&2; exit 2 ;;
+esac
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 branch="${WF_CI_BRANCH:-2026-new-level}"
@@ -107,7 +119,7 @@ if [ -n "$tests_from" ]; then
 fi
 subject="$(git -C "$root" log -1 --format=%s "$sha")"
 name="${sha:0:12}${rev:+-tests-${rev:0:12}}"
-[ "$builder" = cmake ] || name="$name-$builder"
+[ "$builder" = dev ] || name="$name-$builder"
 out="$results/$name"
 rm -rf "$out"
 mkdir -p "$out"
@@ -131,21 +143,27 @@ git clone -q --local --no-checkout "$root" "$wt"
     git -C "$wt" checkout -q --detach "$sha"
 } >"$out/checkout.log" 2>&1 || { tail -20 "$out/checkout.log" >&2; die "checkout of ${sha:0:12} failed"; }
 if [ -n "$rev" ]; then
-    # The tests and their helpers must exist in REV; the build harness is taken from REV
-    # only where REV has it (build-wf-game-container.sh is younger than the arena fix).
+    # The tests and their helpers must exist in REV. (The build harness is the runner's; below.)
     for path in tests/test_snowgoons_arena_faces_up.py tests/test_renderer_references_fresh.py \
-                tests/compare_renderer_frames.py scripts/audit_face_hand.py \
-                scripts/build-wf-game-container.sh scripts/in-linux-container.sh; do
-        if ! git -C "$root" cat-file -e "$rev:$path" 2>/dev/null; then
-            case "$path" in tests/*|scripts/audit_face_hand.py) die "$path is not in ${rev:0:12}" ;; esac
-            log "keeping the commit's $path (not in ${rev:0:12})"
-            continue
-        fi
+                tests/compare_renderer_frames.py scripts/audit_face_hand.py; do
+        git -C "$root" cat-file -e "$rev:$path" 2>/dev/null || die "$path is not in ${rev:0:12}"
         mkdir -p "$(dirname "$wt/$path")"
         git -C "$root" show "$rev:$path" >"$wt/$path"
         case "$path" in *.sh) chmod +x "$wt/$path" ;; esac
     done
-    log "overlaid the CI tests and harness from ${rev:0:12}"
+    log "overlaid the CI tests from ${rev:0:12}"
+fi
+# The build scripts belong to the runner (this checkout), so the CI can build, and so
+# back-test, commits older than them or than their current options. The dev engine's
+# configuration, cmake/wf-game-dev.cmake, is the commit's when it has one.
+for path in scripts/build-wf-game.sh scripts/build-wf-game-container.sh scripts/in-linux-container.sh; do
+    mkdir -p "$(dirname "$wt/$path")"
+    cp "$root/$path" "$wt/$path"
+done
+if [ ! -e "$wt/cmake/wf-game-dev.cmake" ]; then
+    mkdir -p "$wt/cmake"
+    cp "$root/cmake/wf-game-dev.cmake" "$wt/cmake/wf-game-dev.cmake"
+    log "backfilled cmake/wf-game-dev.cmake from the runner (not in ${sha:0:12})"
 fi
 
 # ── Steps ────────────────────────────────────────────────────────────────────────────
@@ -169,17 +187,19 @@ pytest_verdict() {   # rc logfile
 in_container() { (cd "$wt" && scripts/in-linux-container.sh "$@"); }
 
 s=$SECONDS rc=0
-if [ "$builder" = cmake ]; then
+if [ "$builder" = release ]; then
     engine=/build/wf-game/src/engine/wf_game host_engine="$wt/build-docker/wf-game/src/engine/wf_game"
     in_container scripts/build-wf-game-container.sh >"$out/build.log" 2>&1 || rc=$?
 else
-    # engine/build_game.sh with the environment of `task build`, after `task vendor-unpack-archives`.
-    engine=/src/engine/wf_game host_engine="$wt/engine/wf_game"
-    WF_CONTAINER_ENV="WF_ENABLE_FENNEL=0 WF_JS_ENGINE=none WF_WASM_ENGINE=none WF_ENABLE_WREN=0 WF_FORTH_ENGINE=zforth WF_PILOT_ENGINE=builtin WF_PHYSICS_ENGINE=jolt" \
-        in_container bash -c 'set -euo pipefail
-            test -d engine/vendor/jolt-physics-5.5.0 || tar -xzf engine/vendor/jolt-physics-5.5.0.tar.gz \
-                --one-top-level=engine/vendor/jolt-physics-5.5.0 --strip-components=1
-            bash engine/build_game.sh' >"$out/build.log" 2>&1 || rc=$?
+    engine=/build/wf-game-dev/src/engine/wf_game host_engine="$wt/build-docker/wf-game-dev/src/engine/wf_game"
+    cmake_args=()
+    if ! grep -q WF_DESIGNER_CHEATS "$wt/CMakeLists.txt"; then
+        # A commit from before the option: define the switch directly, as style-gl-sweep.sh does.
+        cmake_args=(-DCMAKE_CXX_FLAGS=-DDESIGNER_CHEATS=1)
+        log "CMakeLists.txt of ${sha:0:12} predates WF_DESIGNER_CHEATS: passing ${cmake_args[*]}"
+    fi
+    in_container scripts/build-wf-game-container.sh --dev -- ${cmake_args[@]+"${cmake_args[@]}"} \
+        >"$out/build.log" 2>&1 || rc=$?
 fi
 if [ "$rc" -eq 0 ] && [ -x "$host_engine" ]; then
     record build PASS $((SECONDS - s))
