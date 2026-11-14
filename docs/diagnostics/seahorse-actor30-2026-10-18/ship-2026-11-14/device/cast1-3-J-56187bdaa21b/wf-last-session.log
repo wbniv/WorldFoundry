@@ -1,0 +1,252 @@
+=== wf_game android_main (log → /storage/emulated/0/Android/data/org.worldfoundry.wf_game.aquarium/files/wf.log) ===
+[580403.878561] (f_game.aquarium) Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+Could not open module param file '/sys/module/mali_kbase/parameters/large_page_conf'
+[580403.894118] (f_game.aquarium) Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+audio: miniaudio v0.11.25 ready
+UI_FONT 1024x2048 atlas, 2770432 bytes
+jolt: RegisterDefaultAllocator
+jolt: Factory
+jolt: RegisterTypes
+jolt: RunSelftest
+jolt: selftest ok (sphere fell to z=5.098)
+jolt: backend init
+jolt: init complete
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+VIEW authored=0.000 screen=1.778 hfov=91.5 vfov=60.0 maximum=0.000 surface=1920x1080 viewport=0,0,1920x1080 pillarbox=0 source=default
+Level::Level: leveldata= 0xdb28aee8, object count  = 83
+PixelMap::Load: this = 0xd94ee690
+PixelMap::Load: this = 0xd94ee6b8
+[Actor] idx=2 class=23 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=3 class=13 commonOff=41880 NumberOfLocalMailboxes=0
+this = 0xd94f1c08,setting _memory to 0xd94f17d8
+[Actor] idx=4 class=20 commonOff=42592 NumberOfLocalMailboxes=0
+[Actor] idx=6 class=11 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=7 class=16 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=8 class=3 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=9 class=22 commonOff=43332 NumberOfLocalMailboxes=6
+[Actor] idx=10 class=7 commonOff=43640 NumberOfLocalMailboxes=0
+[Actor] idx=11 class=7 commonOff=43840 NumberOfLocalMailboxes=0
+[Actor] idx=12 class=7 commonOff=43884 NumberOfLocalMailboxes=0
+[Actor] idx=13 class=7 commonOff=43884 NumberOfLocalMailboxes=0
+[Actor] idx=14 class=7 commonOff=43928 NumberOfLocalMailboxes=0
+[Actor] idx=15 class=7 commonOff=43928 NumberOfLocalMailboxes=0
+[Actor] idx=16 class=7 commonOff=43928 NumberOfLocalMailboxes=0
+[Actor] idx=17 class=7 commonOff=43928 NumberOfLocalMailboxes=0
+[Actor] idx=18 class=7 commonOff=43928 NumberOfLocalMailboxes=0
+[Actor] idx=19 class=7 commonOff=43884 NumberOfLocalMailboxes=0
+[Actor] idx=20 class=7 commonOff=43972 NumberOfLocalMailboxes=0
+[Actor] idx=21 class=7 commonOff=44016 NumberOfLocalMailboxes=0
+[Actor] idx=22 class=7 commonOff=44060 NumberOfLocalMailboxes=0
+[Actor] idx=23 class=7 commonOff=44104 NumberOfLocalMailboxes=0
+[Actor] idx=24 class=7 commonOff=44148 NumberOfLocalMailboxes=0
+[Actor] idx=25 class=7 commonOff=44192 NumberOfLocalMailboxes=0
+[Actor] idx=26 class=7 commonOff=44236 NumberOfLocalMailboxes=0
+[Actor] idx=27 class=7 commonOff=44280 NumberOfLocalMailboxes=0
+[Actor] idx=28 class=7 commonOff=44324 NumberOfLocalMailboxes=0
+[Actor] idx=29 class=7 commonOff=44524 NumberOfLocalMailboxes=0
+[Actor] idx=30 class=7 commonOff=44568 NumberOfLocalMailboxes=0
+[Actor] idx=31 class=7 commonOff=44612 NumberOfLocalMailboxes=0
+[Actor] idx=32 class=7 commonOff=44656 NumberOfLocalMailboxes=0
+[Actor] idx=33 class=7 commonOff=44856 NumberOfLocalMailboxes=0
+[Actor] idx=34 class=7 commonOff=44900 NumberOfLocalMailboxes=0
+[Actor] idx=35 class=7 commonOff=44944 NumberOfLocalMailboxes=0
+[Actor] idx=36 class=7 commonOff=44988 NumberOfLocalMailboxes=0
+[Actor] idx=37 class=7 commonOff=45188 NumberOfLocalMailboxes=0
+[Actor] idx=38 class=7 commonOff=45232 NumberOfLocalMailboxes=0
+[Actor] idx=39 class=7 commonOff=44612 NumberOfLocalMailboxes=0
+[Actor] idx=40 class=7 commonOff=45276 NumberOfLocalMailboxes=0
+[Actor] idx=41 class=7 commonOff=45188 NumberOfLocalMailboxes=0
+[Actor] idx=42 class=7 commonOff=45476 NumberOfLocalMailboxes=0
+[Actor] idx=43 class=7 commonOff=44612 NumberOfLocalMailboxes=0
+[Actor] idx=44 class=7 commonOff=45520 NumberOfLocalMailboxes=0
+[Actor] idx=45 class=7 commonOff=45188 NumberOfLocalMailboxes=0
+[Actor] idx=46 class=7 commonOff=45720 NumberOfLocalMailboxes=0
+[Actor] idx=47 class=7 commonOff=44612 NumberOfLocalMailboxes=0
+[Actor] idx=48 class=7 commonOff=45764 NumberOfLocalMailboxes=0
+[Actor] idx=49 class=7 commonOff=45188 NumberOfLocalMailboxes=0
+[Actor] idx=50 class=7 commonOff=45964 NumberOfLocalMailboxes=0
+[Actor] idx=51 class=7 commonOff=44612 NumberOfLocalMailboxes=0
+[Actor] idx=52 class=7 commonOff=46008 NumberOfLocalMailboxes=0
+[Actor] idx=53 class=7 commonOff=46052 NumberOfLocalMailboxes=0
+[Actor] idx=54 class=7 commonOff=46008 NumberOfLocalMailboxes=0
+[Actor] idx=55 class=7 commonOff=46008 NumberOfLocalMailboxes=0
+[Actor] idx=56 class=7 commonOff=46008 NumberOfLocalMailboxes=0
+[Actor] idx=57 class=7 commonOff=46008 NumberOfLocalMailboxes=0
+[Actor] idx=58 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=59 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=60 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=61 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=62 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=63 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=64 class=7 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=65 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=66 class=7 commonOff=46624 NumberOfLocalMailboxes=0
+[Actor] idx=67 class=7 commonOff=46668 NumberOfLocalMailboxes=0
+[Actor] idx=68 class=7 commonOff=46712 NumberOfLocalMailboxes=0
+[Actor] idx=69 class=7 commonOff=46756 NumberOfLocalMailboxes=0
+[Actor] idx=70 class=7 commonOff=46756 NumberOfLocalMailboxes=0
+[Actor] idx=71 class=7 commonOff=46756 NumberOfLocalMailboxes=0
+[Actor] idx=72 class=7 commonOff=46756 NumberOfLocalMailboxes=0
+[Actor] idx=73 class=7 commonOff=46756 NumberOfLocalMailboxes=0
+[Actor] idx=74 class=7 commonOff=46756 NumberOfLocalMailboxes=0
+[Actor] idx=75 class=7 commonOff=46756 NumberOfLocalMailboxes=0
+[Actor] idx=76 class=7 commonOff=46756 NumberOfLocalMailboxes=0
+[Actor] idx=77 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=78 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=79 class=23 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=80 class=3 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=81 class=16 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=82 class=29 commonOff=41880 NumberOfLocalMailboxes=0
+ROOM-RENDER scope=all-active source=default
+PixelMap::Load: this = 0xd94ee6e0
+PixelMap::Load: this = 0xd94ee708
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="goby_body.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="goby_fins.tga"  bTranslucent=0  bitdepth=15  flags_in=0xe
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+material: texture="goby_rock.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="goby_rock.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="goby_rock.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+audio: MusicPlayer — soundfont not found: florestan-subset.sf2
+audio: sfx[0] not found: wflevels/qbert_practice/sfx/qbert_hop.wav
+audio: sfx[1] not found: wflevels/qbert_practice/sfx/qbert_land.wav
+audio: sfx[2] not found: wflevels/qbert_practice/sfx/qbert_fall.wav
+audio: sfx[3] not found: wflevels/qbert_practice/sfx/qbert_swear.wav
+audio: sfx[4] not found: wflevels/qbert_practice/sfx/qbert_round_clear.wav
+audio: sfx[5] not found: wflevels/qbert_practice/sfx/qbert_kill.wav
+audio: sfx[6] not found: wflevels/qbert_practice/sfx/qbert_disc.wav
+PLANTS generation=1 seed=713 mode=saltwater shoots=384 vertices=78212 triangles=46540 graph_ms=1.836 mesh_ms=39.240
+PLANTS settings-source=OAD seed=713 water=saltwater age=150 speed=0 textures=1 sway=1 random_entry=0 selector_override=0
+delta too large: 0.3714904785
+timeofday:1794626759:329965
+lasttimeofday: 1794626758:958474
+deltatime:0:371491
+delta: 0.3714904785
+777 0 6.0191130638123 0.050674438476562 1 0.19111455976963 -3.3572306632996 -0.87990200519562 
+777 1 6.0191130638123 0.050674438476562 1 0.18662583827972 -2.866131067276 -0.50398308038712 
+777 0 6.0701384544373 0.051025390625 1 0.21345442533493 -3.3682518005371 -0.90185469388962 
+777 1 6.0701384544373 0.051025390625 1 0.20803813636303 -2.8578429222107 -0.4818796813488 
+777 0 6.1205229759216 0.050384521484375 1 0.23330490291119 -3.3785786628723 -0.92243766784668 
+777 1 6.1205229759216 0.050384521484375 1 0.22707740962505 -2.8501057624817 -0.46115082502365 
+777 0 6.1708922386169 0.050369262695312 1 0.25115922093391 -3.3873121738434 -0.93956863880157 
+777 1 6.1708922386169 0.050369262695312 1 0.24421015381813 -2.8435916900635 -0.44385653734207 
+777 0 6.2212157249451 0.050323486328125 1 0.26642143726349 -3.3956747055054 -0.95524573326111 
+777 1 6.2212157249451 0.050323486328125 1 0.25887441635132 -2.8372802734375 -0.42800840735435 
+777 0 6.2716155052185 0.050399780273438 1 0.27965748310089 -3.4036626815796 -0.96778362989426 
+777 1 6.2716155052185 0.050399780273438 1 0.27160793542862 -2.8310289382935 -0.41519463062286 
+777 0 6.3218626976013 0.050247192382812 1 0.29026624560356 -3.4109618663788 -0.97892612218857 
+777 1 6.3218626976013 0.050247192382812 1 0.28183954954147 -2.8252768516541 -0.40379881858826 
+777 0 6.3725218772888 0.0506591796875 1 0.29845169186592 -3.4178383350372 -0.98689389228821 
+777 1 6.3725218772888 0.0506591796875 1 0.28975856304169 -2.8196032047272 -0.39548492431641 
+777 0 6.4243712425232 0.051849365234375 1 0.30438694357872 -3.423691034317 -0.99272966384888 
+777 1 6.4243712425232 0.051849365234375 0.95833331346512 0.25547260046005 -2.818014383316 -0.39373248815536 
+777 0 6.4747862815857 0.0504150390625 1 0.30750554800034 -3.4298713207245 -0.99649882316589 
+777 1 6.4747862815857 0.0504150390625 0.91666662693024 0.21156105399132 -2.7847921848297 -0.41408202052116 
+777 0 6.5253081321716 0.050521850585938 1 0.30822712182999 -3.4346730709076 -0.99697697162628 
+777 1 6.5253081321716 0.050521850585938 0.87499994039536 0.15585654973984 -2.7527861595154 -0.44402360916138 
+777 0 6.5757994651794 0.050491333007812 1 0.30630725622177 -3.4398829936981 -0.99549382925034 
+777 1 6.5757994651794 0.050491333007812 0.83333325386047 0.088717848062515 -2.7212176322937 -0.48485380411148 
+777 0 6.6265807151794 0.05078125 1 0.30182698369026 -3.4440054893494 -0.99120378494263 
+777 1 6.6265807151794 0.05078125 0.79166656732559 0.016676552593708 -2.6966691017151 -0.53692311048508 
+777 0 6.6772856712341 0.050704956054688 1 0.29484510421753 -3.4487237930298 -0.98444336652756 
+777 1 6.6772856712341 0.050704956054688 0.74999988079071 -0.060396417975426 -2.6811604499817 -0.59654951095581 
+777 0 6.7284636497498 0.051177978515625 1 0.28539422154427 -3.4522528648376 -0.9753223657608 
+777 1 6.7284636497498 0.051177978515625 0.70833319425583 -0.07632452994585 -2.6795082092285 -0.66334229707718 
+777 0 6.7794432640076 0.050979614257812 1 0.27335888147354 -3.4549694061279 -0.963822722435 
+777 1 6.7794432640076 0.050979614257812 0.66666650772095 -0.099412217736244 -2.6881766319275 -0.69694542884827 
+777 0 6.8304076194763 0.05096435546875 1 0.25865313410759 -3.456848859787 -0.94967973232269 
+777 1 6.8304076194763 0.05096435546875 0.62499982118607 -0.1080520004034 -2.7080276012421 -0.73014843463898 
+777 0 6.881600856781 0.051193237304688 1 0.24161642789841 -3.4579682350159 -0.93283325433731 
+777 1 6.881600856781 0.051193237304688 0.58333313465118 -0.12481014430523 -2.7314982414246 -0.75206184387207 
+777 0 6.9325499534607 0.050949096679688 1 0.22240947186947 -3.457195520401 -0.91407263278961 
+777 1 6.9325499534607 0.050949096679688 0.5416664481163 -0.12308087944984 -2.7668240070343 -0.77569109201431 
+777 0 6.9832243919373 0.050674438476562 1 0.20093956589699 -3.4554653167725 -0.89334273338318 
+777 1 6.9832243919373 0.050674438476562 0.49999979138374 -0.13100332021713 -2.7989842891693 -0.78648316860199 
+777 0 7.0335631370544 0.050338745117188 1 0.17770332098007 -3.4526934623718 -0.87029242515564 
+777 1 7.0335631370544 0.050338745117188 0.45833313465118 -0.11802889406681 -2.8411707878113 -0.80016839504242 
+777 0 7.0843901634216 0.050827026367188 1 0.15259844064713 -3.4481692314148 -0.84602922201157 
+777 1 7.0843901634216 0.050827026367188 0.41666647791862 -0.11508656293154 -2.8732278347015 -0.79968655109406 
+777 0 7.1352019309998 0.050811767578125 1 0.12592023611069 -3.4416446685791 -0.81983971595764 
+777 1 7.1352019309998 0.050811767578125 0.37499982118607 -0.091311484575272 -2.9121432304382 -0.80219292640686 
+777 0 7.1859984397888 0.050796508789062 1 0.098379880189896 -3.4332778453827 -0.79240107536316 
+777 1 7.1859984397888 0.050796508789062 0.33333316445351 -0.075629360973835 -2.9357681274414 -0.79039537906647 
+777 0 7.2364439964294 0.050445556640625 1 0.069956943392754 -3.4238917827606 -0.76480847597122 
+777 1 7.2364439964294 0.050445556640625 0.29166650772095 -0.042918276041746 -2.9603588581085 -0.78020751476288 
+777 0 7.288583278656 0.052139282226562 1 0.040569327771664 -3.4121909141541 -0.73634874820709 
+777 1 7.288583278656 0.052139282226562 0.24999985098839 -0.012137431651354 -2.9673445224762 -0.75769603252411 
+777 0 7.3419890403748 0.05340576171875 1 0.010351750999689 -3.3987658023834 -0.70684671401978 
+777 1 7.3419890403748 0.05340576171875 0.20833319425583 0.027284314855933 -2.968266248703 -0.7331023812294 
+777 0 7.3940978050232 0.052108764648438 1 -0.018430024385452 -3.3838801383972 -0.67660665512085 
+777 1 7.3940978050232 0.052108764648438 0.16666653752327 0.049565479159355 -2.9523379802704 -0.70073521137238 
+777 0 7.4469542503357 0.0528564453125 1 -0.046913135796785 -3.3696942329407 -0.65001595020294 
+777 1 7.4469542503357 0.0528564453125 0.12499987334013 0.049422401934862 -2.9357092380524 -0.67629688978195 
+777 0 7.4993071556091 0.052352905273438 1 -0.073574997484684 -3.3526282310486 -0.62255126237869 
+777 1 7.4993071556091 0.052352905273438 0.08333320915699 0.048648245632648 -2.9263484477997 -0.66606557369232 
+777 0 7.5530028343201 0.053695678710938 1 -0.099024832248688 -3.3365025520325 -0.5983704328537 
+777 1 7.5530028343201 0.053695678710938 0.04166654497385 0.098003424704075 -2.9263484477997 -0.66606557369232 
+777 0 7.6070799827576 0.0540771484375 1 -0.12244934588671 -3.3189723491669 -0.57473355531693 
+777 1 7.6070799827576 0.0540771484375 0 0 -2.9263484477997 -0.66606557369232 
+777 0 7.6593718528748 0.052291870117188 1 -0.14281639456749 -3.3019433021545 -0.55384320020676 
+777 1 7.6593718528748 0.052291870117188 0 0 -2.9267907142639 -0.66601592302322 
+777 0 7.7133116722107 0.053939819335938 1 -0.16075190901756 -3.2878684997559 -0.53698438405991 
+777 1 7.7133116722107 0.053939819335938 0 0 -2.9276487827301 -0.66591960191727 
+777 0 7.7663359642029 0.053024291992188 1 -0.17592187225819 -3.2714195251465 -0.52184987068176 
+777 1 7.7663359642029 0.053024291992188 0 0 -2.928897857666 -0.66577941179276 
+777 0 7.8189177513123 0.052581787109375 1 -0.18781198561192 -3.2577044963837 -0.50974917411804 
+777 1 7.8189177513123 0.052581787109375 0 0 -2.9305143356323 -0.66559797525406 
+777 0 7.8808989524841 0.061981201171875 1 -0.19800564646721 -3.2454450130463 -0.50144517421722 
+777 1 7.8808989524841 0.061981201171875 0 0 -2.9324760437012 -0.66537779569626 
+777 0 7.9339690208435 0.053070068359375 1 -0.20370383560658 -3.2307388782501 -0.4931126832962 
+777 1 7.9339690208435 0.053070068359375 0 0 -2.9347624778748 -0.66512113809586 
+777 0 7.9944548606873 0.06048583984375 1 -0.20610977709293 -3.2233800888062 -0.49213314056396 
+777 1 7.9944548606873 0.06048583984375 0 0 -2.9373540878296 -0.66483026742935 

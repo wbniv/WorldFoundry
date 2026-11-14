@@ -1,0 +1,82 @@
+level-build: wflevels/aquarium_plants/build.sh in the container (Blender 5.0.1)
+warning: method `add_iff` is never used
+  --> src/asset_registry.rs:80:12
+   |
+48 | impl AssetRegistry {
+   | ------------------ method in this implementation
+...
+80 |     pub fn add_iff(&mut self, filename: &str) -> i32 {
+   |            ^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: function `extend_bbox` is never used
+   --> src/lvl_writer.rs:583:4
+    |
+583 | fn extend_bbox(mut base: [i32; 6], mesh: [i32; 6]) -> [i32; 6] {
+    |    ^^^^^^^^^^^
+
+warning: method `print_to` is never used
+   --> src/allocmap.rs:126:12
+    |
+30  | impl AllocationMap {
+    | ------------------ method in this implementation
+...
+126 |     pub fn print_to(&self, out: &mut dyn Write) {
+    |            ^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: fields `buf_height`, `cmap_start`, and `idx_pal` are never read
+  --> src/bitmap.rs:83:9
+   |
+75 | pub struct Bitmap {
+   |            ------ fields in this struct
+...
+83 |     pub buf_height:         i32,
+   |         ^^^^^^^^^^
+...
+87 |     pub cmap_start:         i32,
+   |         ^^^^^^^^^^
+...
+97 |     pub idx_pal:            i32,
+   |         ^^^^^^^
+
+warning: methods `pixel_ref`, `pixel_at`, `set_pixel`, `check_for_transparent`, `calculate_palette_info`, and `check_power_of2` are never used
+   --> src/bitmap.rs:185:8
+    |
+103 | impl Bitmap {
+    | ----------- methods in this implementation
+...
+185 |     fn pixel_ref(&mut self, x: i32, y: i32) -> &mut u16 {
+    |        ^^^^^^^^^
+...
+191 |     fn pixel_at(&self, x: i32, y: i32) -> u16 {
+    |        ^^^^^^^^
+...
+196 |     fn set_pixel(&mut self, x: i32, y: i32, val: u16) {
+    |        ^^^^^^^^^
+...
+246 |     fn check_for_transparent(&self) -> bool {
+    |        ^^^^^^^^^^^^^^^^^^^^^
+...
+260 |     fn calculate_palette_info(&mut self, palette: Option<&[[u8; 4]]>, n_entries: usize, col_transparent: u16) {
+    |        ^^^^^^^^^^^^^^^^^^^^^^
+...
+522 |     pub fn check_power_of2(&self, log: &mut dyn io::Write, global_error: &mut bool) -> bool {
+    |            ^^^^^^^^^^^^^^^
+
+    Finished `release` profile [optimized] target(s) in 0.20s
+/src/wflevels/aquarium_tanks/generate.py:74: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  mt.use_nodes = True
+Traceback (most recent call last):
+  File "/src/wflevels/aquarium_tanks/generate.py", line 615, in <module>
+    settings=dict(count=dict(field=seahorse.SETTING_COUNT,values=['None','1 pair']+[f'{n} pairs' for n in range(2,seahorse.PAIR_COUNT+1)],default=seahorse.PAIR_COUNT),
+                                   ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'seahorse' has no attribute 'SETTING_COUNT'
+
+Error: script failed, file: 'wflevels/aquarium_tanks/generate.py', exiting.
+Info: Imported 38 objects (0 skipped)
+Blender 5.0.1
+
+Blender quit

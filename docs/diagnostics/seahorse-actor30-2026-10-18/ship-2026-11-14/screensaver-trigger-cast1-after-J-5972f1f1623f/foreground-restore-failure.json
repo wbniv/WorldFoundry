@@ -1,0 +1,17 @@
+{
+  "origin": "J-5972f1f1623f",
+  "component": "com.google.android.apps.tv.launcherx/.home.HomeActivity",
+  "error": "Private ADB command exceeded its deadline",
+  "attempts": [],
+  "commands": [
+    {
+      "args": [
+        "shell",
+        "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+      ],
+      "start": 1794627769.4334953,
+      "end": 1794627799.505074,
+      "returncode": null
+    }
+  ]
+}

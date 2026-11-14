@@ -1,0 +1,173 @@
+level-build: wflevels/aquarium_plants/build.sh in the container (Blender 5.0.1)
+warning: method `add_iff` is never used
+  --> src/asset_registry.rs:80:12
+   |
+48 | impl AssetRegistry {
+   | ------------------ method in this implementation
+...
+80 |     pub fn add_iff(&mut self, filename: &str) -> i32 {
+   |            ^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: function `extend_bbox` is never used
+   --> src/lvl_writer.rs:583:4
+    |
+583 | fn extend_bbox(mut base: [i32; 6], mesh: [i32; 6]) -> [i32; 6] {
+    |    ^^^^^^^^^^^
+
+warning: method `print_to` is never used
+   --> src/allocmap.rs:126:12
+    |
+30  | impl AllocationMap {
+    | ------------------ method in this implementation
+...
+126 |     pub fn print_to(&self, out: &mut dyn Write) {
+    |            ^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: fields `buf_height`, `cmap_start`, and `idx_pal` are never read
+  --> src/bitmap.rs:83:9
+   |
+75 | pub struct Bitmap {
+   |            ------ fields in this struct
+...
+83 |     pub buf_height:         i32,
+   |         ^^^^^^^^^^
+...
+87 |     pub cmap_start:         i32,
+   |         ^^^^^^^^^^
+...
+97 |     pub idx_pal:            i32,
+   |         ^^^^^^^
+
+warning: methods `pixel_ref`, `pixel_at`, `set_pixel`, `check_for_transparent`, `calculate_palette_info`, and `check_power_of2` are never used
+   --> src/bitmap.rs:185:8
+    |
+103 | impl Bitmap {
+    | ----------- methods in this implementation
+...
+185 |     fn pixel_ref(&mut self, x: i32, y: i32) -> &mut u16 {
+    |        ^^^^^^^^^
+...
+191 |     fn pixel_at(&self, x: i32, y: i32) -> u16 {
+    |        ^^^^^^^^
+...
+196 |     fn set_pixel(&mut self, x: i32, y: i32, val: u16) {
+    |        ^^^^^^^^^
+...
+246 |     fn check_for_transparent(&self) -> bool {
+    |        ^^^^^^^^^^^^^^^^^^^^^
+...
+260 |     fn calculate_palette_info(&mut self, palette: Option<&[[u8; 4]]>, n_entries: usize, col_transparent: u16) {
+    |        ^^^^^^^^^^^^^^^^^^^^^^
+...
+522 |     pub fn check_power_of2(&self, log: &mut dyn io::Write, global_error: &mut bool) -> bool {
+    |            ^^^^^^^^^^^^^^^
+
+    Finished `release` profile [optimized] target(s) in 0.03s
+/src/wflevels/aquarium_tanks/generate.py:74: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  mt.use_nodes = True
+[wf_export] WARNING: Room.Adjacent Room 1 names 'room_16', which is not an exported object; levcomp will write no object
+[wf_export] WARNING: Player.Tool A names 'tool_34', which is not an exported object; levcomp will write no object
+Info: Imported 38 objects (0 skipped)
+[aquarium_plants] 1 animals; 82 actors; profile=remote
+Info: Exported 82 objects to /src/wflevels/aquarium_plants/aquarium_plants.lev
+Blender 5.0.1
+
+Blender quit
+[1/5] iffcomp-rs  aquarium_plants.lev  →  aquarium_plants.lev.bin
+[2/5] levcomp-rs  aquarium_plants.lev.bin  →  aquarium_plants.lvl + asset.inc + aquarium_plants.iff.txt + aquarium_plants.ini
+levcomp v0.1.0
+  input : aquarium_plants.lev.bin
+  .lc   : /src/wfsource/source/oas/objects.lc
+  output: aquarium_plants.lvl
+  oad   : /src/wfsource/source/oas
+  meshes: .
+  parsed 82 objects
+  loaded 35 classes
+  loaded OAD schemas
+  mesh bbox for sea_urchin.iff: [-34260, -34512, -14844, 33716, 34512, 28933]
+  mesh bbox for rainbow_goby_body.iff: [-22282, -5308, -3932, 21889, 5308, 6946]
+  mesh bbox for rainbow_goby_fins.iff: [-30146, -11468, -8519, 12451, 11468, 17629]
+  mesh bbox for urchin_tube_foot.iff: [-720, -1362, -1179, 6597, 1362, 1179]
+  mesh bbox for urchin_tube_foot.iff: [-720, -1362, -1179, 6597, 1362, 1179]
+  mesh bbox for urchin_tube_foot.iff: [-720, -1362, -1179, 6597, 1362, 1179]
+  mesh bbox for urchin_tube_foot.iff: [-720, -1362, -1179, 6597, 1362, 1179]
+  mesh bbox for urchin_tube_foot.iff: [-720, -1362, -1179, 6597, 1362, 1179]
+  mesh bbox for urchin_tube_foot.iff: [-720, -1362, -1179, 6597, 1362, 1179]
+  mesh bbox for urchin_tube_foot.iff: [-720, -1362, -1179, 6597, 1362, 1179]
+  mesh bbox for urchin_tube_foot.iff: [-720, -1362, -1179, 6597, 1362, 1179]
+  mesh bbox for urchin_spine_0.iff: [0, -1282, -1282, 12779, 1282, 1282]
+  mesh bbox for urchin_spine_1.iff: [0, -1282, -1282, 12779, 1282, 1282]
+  mesh bbox for urchin_spine_2.iff: [0, -1282, -1282, 12779, 1282, 1282]
+  mesh bbox for urchin_spine_3.iff: [0, -1282, -1282, 12779, 1282, 1282]
+  mesh bbox for urchin_spine_4.iff: [0, -1282, -1282, 15007, 1282, 1282]
+  mesh bbox for urchin_spine_5.iff: [0, -1282, -1282, 15007, 1282, 1282]
+  mesh bbox for urchin_spine_6.iff: [0, -1282, -1282, 15007, 1282, 1282]
+  mesh bbox for urchin_spine_7.iff: [0, -1282, -1282, 15007, 1282, 1282]
+  mesh bbox for seahorse_f_body.iff: [-2949, -4358, -59867, 22675, 4358, 41746]
+  mesh bbox for seahorse_f_fins.iff: [-7359, -3599, -1966, 2818, 3599, 36092]
+  mesh bbox for seahorse_m_body.iff: [-2949, -4358, -59867, 22675, 4358, 41746]
+  mesh bbox for seahorse_m_fins.iff: [-7359, -3599, -1966, 2818, 3599, 36092]
+  mesh bbox for seahorse_f_body.iff: [-2949, -4358, -59867, 22675, 4358, 41746]
+  mesh bbox for seahorse_f_fins.iff: [-7359, -3599, -1966, 2818, 3599, 36092]
+  mesh bbox for seahorse_m_body.iff: [-2949, -4358, -59867, 22675, 4358, 41746]
+  mesh bbox for seahorse_m_fins.iff: [-7359, -3599, -1966, 2818, 3599, 36092]
+  mesh bbox for seahorse_f_body.iff: [-2949, -4358, -59867, 22675, 4358, 41746]
+  mesh bbox for seahorse_f_fins.iff: [-7359, -3599, -1966, 2818, 3599, 36092]
+  mesh bbox for seahorse_m_body.iff: [-2949, -4358, -59867, 22675, 4358, 41746]
+  mesh bbox for seahorse_m_fins.iff: [-7359, -3599, -1966, 2818, 3599, 36092]
+  mesh bbox for seahorse_f_body.iff: [-2949, -4358, -59867, 22675, 4358, 41746]
+  mesh bbox for seahorse_f_fins.iff: [-7359, -3599, -1966, 2818, 3599, 36092]
+  mesh bbox for seahorse_m_body.iff: [-2949, -4358, -59867, 22675, 4358, 41746]
+  mesh bbox for seahorse_m_fins.iff: [-7359, -3599, -1966, 2818, 3599, 36092]
+  mesh bbox for seahorse_f_body.iff: [-2949, -4358, -59867, 22675, 4358, 41746]
+  mesh bbox for seahorse_f_fins.iff: [-7359, -3599, -1966, 2818, 3599, 36092]
+  mesh bbox for seahorse_m_body.iff: [-2949, -4358, -59867, 22675, 4358, 41746]
+  mesh bbox for seahorse_m_fins.iff: [-7359, -3599, -1966, 2818, 3599, 36092]
+  mesh bbox for seahorse_f_body.iff: [-2949, -4358, -59867, 22675, 4358, 41746]
+  mesh bbox for seahorse_f_fins.iff: [-7359, -3599, -1966, 2818, 3599, 36092]
+  mesh bbox for seahorse_m_body.iff: [-2949, -4358, -59867, 22675, 4358, 41746]
+  mesh bbox for seahorse_m_fins.iff: [-7359, -3599, -1966, 2818, 3599, 36092]
+  mesh bbox for seahorse_whip.iff: [-3932, -3932, 0, 3932, 3932, 245760]
+  mesh bbox for seahorse_branch.iff: [-4915, -4915, 0, 65536, 4915, 222822]
+  mesh bbox for seahorse_post_2.iff: [-3932, -3932, 0, 3932, 3932, 245760]
+  mesh bbox for seahorse_post_3.iff: [-3932, -3932, 0, 3932, 3932, 245760]
+  mesh bbox for seahorse_post_4.iff: [-3932, -3932, 0, 3932, 3932, 245760]
+  mesh bbox for seahorse_post_5.iff: [-3932, -3932, 0, 3932, 3932, 245760]
+  mesh bbox for tank_base.iff: [-399507, -108199, 0, 399507, 108199, 8323]
+  mesh bbox for water_back.iff: [-391184, 99876, 41615, 391184, 108199, 316276]
+  mesh bbox for back_air.iff: [-399507, 99876, 316276, 399507, 108199, 349569]
+  mesh bbox for tank_end__1.iff: [-399507, -108199, 0, -391184, 108199, 349569]
+  mesh bbox for tank_end_1.iff: [391184, -108199, 0, 399507, 108199, 349569]
+  mesh bbox for front_collider.iff: [-399507, -116523, 0, 399507, -108199, 349569]
+  mesh bbox for rim.iff: [-399507, -108199, 349569, 399507, 108199, 356122]
+  mesh bbox for floor.iff: [-391184, -99876, 8323, 391184, 99876, 41615]
+  mesh bbox for goby_grazing_rock_0.iff: [-65536, -36044, 0, 65536, 36044, 29491]
+  mesh bbox for goby_grazing_rock_1.iff: [-62259, -38010, 0, 62259, 38010, 42598]
+  mesh bbox for goby_grazing_rock_2.iff: [-72089, -40632, 0, 72089, 40632, 24903]
+  mesh bbox for plant_chunk_00.iff: [-386662, -91750, 41615, 386662, 91750, 315883]
+  mesh bbox for plant_chunk_01.iff: [-386662, -91750, 41615, 386662, 91750, 315883]
+  mesh bbox for plant_chunk_02.iff: [-386662, -91750, 41615, 386662, 91750, 315883]
+  mesh bbox for plant_chunk_03.iff: [-386662, -91750, 41615, 386662, 91750, 315883]
+  mesh bbox for plant_chunk_04.iff: [-386662, -91750, 41615, 386662, 91750, 315883]
+  mesh bbox for plant_chunk_05.iff: [-386662, -91750, 41615, 386662, 91750, 315883]
+  mesh bbox for plant_chunk_06.iff: [-386662, -91750, 41615, 386662, 91750, 315883]
+  mesh bbox for plant_chunk_07.iff: [-386662, -91750, 41615, 386662, 91750, 315883]
+  mesh bbox for stand.iff: [-409337, -118030, -163840, 409337, 118030, -1638]
+  mesh bbox for room_backdrop.iff: [-1966080, 196608, -327680, 1966080, 203161, 1310720]
+  editable objects: 1 (Planted Tank Settings)
+  wrote 75760 bytes
+  wrote asset.inc
+  wrote aquarium_plants.iff.txt
+  wrote aquarium_plants.ini
+[3/5] textile-rs  -ini=aquarium_plants.ini  →  palN.tga / RoomN.{tga,ruv,cyc} / Perm.{tga,ruv,cyc}
+    textile.flags overrides: PAGEX=256 PAGEY=256 PERMPAGEX=1024 PERMPAGEY=1024
+[4/5] iffcomp-rs  aquarium_plants.iff.txt  →  /src/wflevels/aquarium_plants.iff
+
+✓ built /src/wflevels/aquarium_plants.iff (1822720 bytes)
+
+[5/5] iffcomp-rs  aquarium_plants-standalone.iff.txt  →  ../aquarium_plants-standalone.iff
+✓ built /src/wflevels/aquarium_plants-standalone.iff (1826816 bytes)

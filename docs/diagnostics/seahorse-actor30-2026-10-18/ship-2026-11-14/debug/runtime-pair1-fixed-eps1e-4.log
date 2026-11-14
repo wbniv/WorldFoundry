@@ -1,0 +1,1291 @@
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+material: texture=""  bTranslucent=0  bitdepth=16  flags_in=0x2
+audio: miniaudio v0.11.25 ready
+wf_game v0.4.1, Built:Nov 14 2026,02:42:56 by kts
+-L/build/a30/pair1-fixed-eps1e-4.iff
+--vram-width=2048
+--vram-height=1024
+--vram-slot-width=512
+--vram-slot-height=512
+--vram-perm-width=1024
+--vram-perm-height=1024
+-width=320
+-height=240
+-rate20
+Fake clock delta = 0.05000000075
+--debug-port
+--debug-bind
+argc = 15, commandIndex = 15
+Level=-1
+cerror:
+cwarn:
+cstats:
+wf_game Ver 0.4.1, Built:Nov 14 2026,02:42:56 by kts
+DBSTREAMS UI_FONT 1024x2048 atlas, 2770432 bytes
+jolt: RegisterDefaultAllocator
+jolt: Factory
+jolt: RegisterTypes
+jolt: RunSelftest
+jolt: selftest ok (sphere fell to z=5.098)
+jolt: backend init
+jolt: init complete
+LMalloc of 412 not 8-byte aligned, rounding up
+LMalloc of 7620 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+Level::Level: leveldata= 0x7e1e3e772e68, object count  = 83
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 1048598)
+ASS closed without all data read (bytesLeft = 256)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 79980)
+ASS closed without all data read (bytesLeft = 10172)
+ASS closed without all data read (bytesLeft = 8416)
+ASS closed without all data read (bytesLeft = 1800)
+ASS closed without all data read (bytesLeft = 1460)
+ASS closed without all data read (bytesLeft = 1460)
+ASS closed without all data read (bytesLeft = 1460)
+ASS closed without all data read (bytesLeft = 1460)
+ASS closed without all data read (bytesLeft = 1460)
+ASS closed without all data read (bytesLeft = 1460)
+ASS closed without all data read (bytesLeft = 1460)
+ASS closed without all data read (bytesLeft = 1460)
+ASS closed without all data read (bytesLeft = 193788)
+ASS closed without all data read (bytesLeft = 2400)
+ASS closed without all data read (bytesLeft = 193788)
+ASS closed without all data read (bytesLeft = 2400)
+ASS closed without all data read (bytesLeft = 4100)
+ASS closed without all data read (bytesLeft = 5020)
+ASS closed without all data read (bytesLeft = 4100)
+ASS closed without all data read (bytesLeft = 4100)
+ASS closed without all data read (bytesLeft = 4100)
+ASS closed without all data read (bytesLeft = 4100)
+ASS closed without all data read (bytesLeft = 2908)
+ASS closed without all data read (bytesLeft = 2908)
+ASS closed without all data read (bytesLeft = 2908)
+PixelMap::Load: this = 0x7e1e3c9d6408
+PixelMap::Load: this = 0x7e1e3c9d6450
+LMalloc of 268 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 8428 not 8-byte aligned, rounding up
+LMalloc of 1812 not 8-byte aligned, rounding up
+LMalloc of 2412 not 8-byte aligned, rounding up
+LMalloc of 2412 not 8-byte aligned, rounding up
+LMalloc of 268 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 100 not 8-byte aligned, rounding up
+[Actor] idx=2 class=23 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=3 class=13 commonOff=41880 NumberOfLocalMailboxes=0
+this = 0x7e1e3c9d9b58,setting _memory to 0x7e1e3c9d95f0
+DMalloc of 52 not 8-byte aligned, rounding up
+[Actor] idx=4 class=20 commonOff=42592 NumberOfLocalMailboxes=0
+[Actor] idx=6 class=11 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=7 class=16 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=8 class=3 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=9 class=22 commonOff=43332 NumberOfLocalMailboxes=6
+[Actor] idx=10 class=7 commonOff=43640 NumberOfLocalMailboxes=0
+[Actor] idx=11 class=7 commonOff=43840 NumberOfLocalMailboxes=0
+[Actor] idx=12 class=7 commonOff=43884 NumberOfLocalMailboxes=0
+[Actor] idx=13 class=7 commonOff=43884 NumberOfLocalMailboxes=0
+[Actor] idx=14 class=7 commonOff=43928 NumberOfLocalMailboxes=0
+[Actor] idx=15 class=7 commonOff=43928 NumberOfLocalMailboxes=0
+[Actor] idx=16 class=7 commonOff=43928 NumberOfLocalMailboxes=0
+[Actor] idx=17 class=7 commonOff=43928 NumberOfLocalMailboxes=0
+[Actor] idx=18 class=7 commonOff=43928 NumberOfLocalMailboxes=0
+[Actor] idx=19 class=7 commonOff=43884 NumberOfLocalMailboxes=0
+[Actor] idx=20 class=7 commonOff=43972 NumberOfLocalMailboxes=0
+[Actor] idx=21 class=7 commonOff=44016 NumberOfLocalMailboxes=0
+[Actor] idx=22 class=7 commonOff=44060 NumberOfLocalMailboxes=0
+[Actor] idx=23 class=7 commonOff=44104 NumberOfLocalMailboxes=0
+[Actor] idx=24 class=7 commonOff=44148 NumberOfLocalMailboxes=0
+[Actor] idx=25 class=7 commonOff=44192 NumberOfLocalMailboxes=0
+[Actor] idx=26 class=7 commonOff=44236 NumberOfLocalMailboxes=0
+[Actor] idx=27 class=7 commonOff=44280 NumberOfLocalMailboxes=0
+[Actor] idx=28 class=7 commonOff=44324 NumberOfLocalMailboxes=0
+[Actor] idx=29 class=7 commonOff=44524 NumberOfLocalMailboxes=0
+[Actor] idx=30 class=7 commonOff=44568 NumberOfLocalMailboxes=0
+[Actor] idx=31 class=7 commonOff=44612 NumberOfLocalMailboxes=0
+[Actor] idx=32 class=7 commonOff=44656 NumberOfLocalMailboxes=0
+[Actor] idx=33 class=7 commonOff=44856 NumberOfLocalMailboxes=0
+[Actor] idx=34 class=7 commonOff=44900 NumberOfLocalMailboxes=0
+[Actor] idx=35 class=7 commonOff=44944 NumberOfLocalMailboxes=0
+[Actor] idx=36 class=7 commonOff=44988 NumberOfLocalMailboxes=0
+[Actor] idx=37 class=7 commonOff=45188 NumberOfLocalMailboxes=0
+[Actor] idx=38 class=7 commonOff=45232 NumberOfLocalMailboxes=0
+[Actor] idx=39 class=7 commonOff=44612 NumberOfLocalMailboxes=0
+[Actor] idx=40 class=7 commonOff=45276 NumberOfLocalMailboxes=0
+[Actor] idx=41 class=7 commonOff=45188 NumberOfLocalMailboxes=0
+[Actor] idx=42 class=7 commonOff=45476 NumberOfLocalMailboxes=0
+[Actor] idx=43 class=7 commonOff=44612 NumberOfLocalMailboxes=0
+[Actor] idx=44 class=7 commonOff=45520 NumberOfLocalMailboxes=0
+[Actor] idx=45 class=7 commonOff=45188 NumberOfLocalMailboxes=0
+[Actor] idx=46 class=7 commonOff=45720 NumberOfLocalMailboxes=0
+[Actor] idx=47 class=7 commonOff=44612 NumberOfLocalMailboxes=0
+[Actor] idx=48 class=7 commonOff=45764 NumberOfLocalMailboxes=0
+[Actor] idx=49 class=7 commonOff=45188 NumberOfLocalMailboxes=0
+[Actor] idx=50 class=7 commonOff=45964 NumberOfLocalMailboxes=0
+[Actor] idx=51 class=7 commonOff=44612 NumberOfLocalMailboxes=0
+[Actor] idx=52 class=7 commonOff=46008 NumberOfLocalMailboxes=0
+[Actor] idx=53 class=7 commonOff=46052 NumberOfLocalMailboxes=0
+[Actor] idx=54 class=7 commonOff=46008 NumberOfLocalMailboxes=0
+[Actor] idx=55 class=7 commonOff=46008 NumberOfLocalMailboxes=0
+[Actor] idx=56 class=7 commonOff=46008 NumberOfLocalMailboxes=0
+[Actor] idx=57 class=7 commonOff=46008 NumberOfLocalMailboxes=0
+[Actor] idx=58 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=59 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=60 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=61 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=62 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=63 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=64 class=7 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=65 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=66 class=7 commonOff=46624 NumberOfLocalMailboxes=0
+[Actor] idx=67 class=7 commonOff=46668 NumberOfLocalMailboxes=0
+[Actor] idx=68 class=7 commonOff=46712 NumberOfLocalMailboxes=0
+[Actor] idx=69 class=7 commonOff=46756 NumberOfLocalMailboxes=0
+[Actor] idx=70 class=7 commonOff=46756 NumberOfLocalMailboxes=0
+[Actor] idx=71 class=7 commonOff=46756 NumberOfLocalMailboxes=0
+[Actor] idx=72 class=7 commonOff=46756 NumberOfLocalMailboxes=0
+[Actor] idx=73 class=7 commonOff=46756 NumberOfLocalMailboxes=0
+[Actor] idx=74 class=7 commonOff=46756 NumberOfLocalMailboxes=0
+[Actor] idx=75 class=7 commonOff=46756 NumberOfLocalMailboxes=0
+[Actor] idx=76 class=7 commonOff=46756 NumberOfLocalMailboxes=0
+[Actor] idx=77 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=78 class=5 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=79 class=23 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=80 class=3 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=81 class=16 commonOff=41880 NumberOfLocalMailboxes=0
+[Actor] idx=82 class=29 commonOff=41880 NumberOfLocalMailboxes=0
+ROOM-RENDER scope=all-active source=default
+LMalloc of 20 not 8-byte aligned, rounding up
+DMalloc of 164 not 8-byte aligned, rounding up
+DMalloc of 404 not 8-byte aligned, rounding up
+DMalloc of 404 not 8-byte aligned, rounding up
+Walking from 0
+0->0
+0->0
+LMalloc of 20 not 8-byte aligned, rounding up
+LMalloc of 20 not 8-byte aligned, rounding up
+ASS closed without all data read (bytesLeft = 4118)
+ASS closed without all data read (bytesLeft = 131094)
+ASS closed without all data read (bytesLeft = 64)
+ASS closed without all data read (bytesLeft = 16)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 4692)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 1260)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 412)
+ASS closed without all data read (bytesLeft = 412)
+ASS closed without all data read (bytesLeft = 412)
+ASS closed without all data read (bytesLeft = 412)
+ASS closed without all data read (bytesLeft = 412)
+ASS closed without all data read (bytesLeft = 412)
+ASS closed without all data read (bytesLeft = 412)
+ASS closed without all data read (bytesLeft = 412)
+ASS closed without all data read (bytesLeft = 588)
+ASS closed without all data read (bytesLeft = 588)
+PixelMap::Load: this = 0x7e1e3c9d6498
+PixelMap::Load: this = 0x7e1e3c9d64e0
+LMalloc of 76 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+LMalloc of 76 not 8-byte aligned, rounding up
+LMalloc of 28 not 8-byte aligned, rounding up
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 53556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="goby_body.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 9716 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="goby_fins.tga"  bTranslucent=0  bitdepth=15  flags_in=0xe
+LMalloc of 6596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 1396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 1396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 1396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 1396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 1396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 1396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 1396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 1396 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="urchin_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 836 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+LMalloc of 20556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+LMalloc of 1516 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+LMalloc of 20556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+LMalloc of 1516 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+LMalloc of 20556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+LMalloc of 1516 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+LMalloc of 20556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+LMalloc of 1516 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+LMalloc of 20556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+LMalloc of 1516 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+LMalloc of 20556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+LMalloc of 1516 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+LMalloc of 20556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+LMalloc of 1516 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+LMalloc of 20556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+LMalloc of 1516 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+LMalloc of 20556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+LMalloc of 1516 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+LMalloc of 20556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+LMalloc of 1516 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+LMalloc of 20556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+LMalloc of 1516 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+LMalloc of 20556 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="seahorse_atlas.tga"  bTranslucent=0  bitdepth=15  flags_in=0xa
+LMalloc of 1516 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 3716 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 4516 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 3716 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 3716 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 3716 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 3716 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 2436 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 2640)
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 996 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+material: texture="goby_rock.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="goby_rock.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="goby_rock.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 2596 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 76 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 76 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 76 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 76 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 76 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 76 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 76 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+material: texture="leaf_surfaces.tga"  bTranslucent=0  bitdepth=15  flags_in=0x6
+LMalloc of 76 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+LMalloc of 276 not 8-byte aligned, rounding up
+RenderActor3DAnimates constructed with no animations!
+MATL closed without all data read (bytesLeft = 264)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+audio: MusicPlayer — soundfont not found: florestan-subset.sf2
+audio: sfx[0] not found: wflevels/qbert_practice/sfx/qbert_hop.wav
+audio: sfx[1] not found: wflevels/qbert_practice/sfx/qbert_land.wav
+audio: sfx[2] not found: wflevels/qbert_practice/sfx/qbert_fall.wav
+audio: sfx[3] not found: wflevels/qbert_practice/sfx/qbert_swear.wav
+audio: sfx[4] not found: wflevels/qbert_practice/sfx/qbert_round_clear.wav
+audio: sfx[5] not found: wflevels/qbert_practice/sfx/qbert_kill.wav
+audio: sfx[6] not found: wflevels/qbert_practice/sfx/qbert_disc.wav
+[debug] listening on :7800
+rest_api: listening on http://127.0.0.1:8800
+[debug] client connected fd=9 from 127.0.0.1
+PLANTS generation=1 seed=713 mode=saltwater shoots=384 vertices=78212 triangles=46540 graph_ms=5.382 mesh_ms=99.486
+PLANTS settings-source=OAD seed=713 water=saltwater age=150 speed=0 textures=1 sway=1 random_entry=0 selector_override=0
+delta too large: 2.076065063
+timeofday:1794624325:430048
+lasttimeofday: 1794624323:353982
+deltatime:2:76066
+delta: 2.076065063
+VIEW authored=0.000 screen=1.333 hfov=75.2 vfov=60.0 maximum=0.000 surface=320x240 viewport=0,0,320x240 pillarbox=0 source=default
+delta too large: 2.062515259
+timeofday:1794624327:492573
+lasttimeofday: 1794624325:430048
+deltatime:2:62525
+delta: 2.062515259
+delta too large: 0.2771606445
+timeofday:1794624327:769747
+lasttimeofday: 1794624327:492573
+deltatime:0:277174
+delta: 0.2771606445
+delta too large: 0.2917633057
+timeofday:1794624328:61518
+lasttimeofday: 1794624327:769747
+deltatime:0:291771
+delta: 0.2917633057
+delta too large: 0.3055419922
+timeofday:1794624328:367073
+lasttimeofday: 1794624328:61518
+deltatime:0:305555
+delta: 0.3055419922
+delta too large: 0.2214508057
+timeofday:1794624328:780327
+lasttimeofday: 1794624328:558868
+deltatime:0:221459
+delta: 0.2214508057
+delta too large: 0.3606719971
+timeofday:1794624329:141008
+lasttimeofday: 1794624328:780327
+deltatime:0:360681
+delta: 0.3606719971
+delta too large: 0.2176208496
+timeofday:1794624329:358630
+lasttimeofday: 1794624329:141008
+deltatime:0:217622
+delta: 0.2176208496
+delta too large: 0.24269104
+timeofday:1794624329:601325
+lasttimeofday: 1794624329:358630
+deltatime:0:242695
+delta: 0.24269104
+delta too large: 0.2619934082
+timeofday:1794624329:863329
+lasttimeofday: 1794624329:601325
+deltatime:0:262004
+delta: 0.2619934082
+delta too large: 0.3945465088
+timeofday:1794624330:257886
+lasttimeofday: 1794624329:863329
+deltatime:0:394557
+delta: 0.3945465088
+delta too large: 0.267791748
+timeofday:1794624330:525688
+lasttimeofday: 1794624330:257886
+deltatime:0:267802
+delta: 0.267791748
+delta too large: 0.2749176025
+timeofday:1794624330:800615
+lasttimeofday: 1794624330:525688
+deltatime:0:274927
+delta: 0.2749176025
+delta too large: 0.2140808105
+timeofday:1794624331:14699
+lasttimeofday: 1794624330:800615
+deltatime:0:214084
+delta: 0.2140808105
+delta too large: 0.3053741455
+timeofday:1794624331:320080
+lasttimeofday: 1794624331:14699
+deltatime:0:305381
+delta: 0.3053741455
+delta too large: 0.3737945557
+timeofday:1794624331:693879
+lasttimeofday: 1794624331:320080
+deltatime:0:373799
+delta: 0.3737945557
+delta too large: 0.2777709961
+timeofday:1794624331:971661
+lasttimeofday: 1794624331:693879
+deltatime:0:277782
+delta: 0.2777709961
+delta too large: 0.2648620605
+timeofday:1794624332:236524
+lasttimeofday: 1794624331:971661
+deltatime:0:264863
+delta: 0.2648620605
+delta too large: 0.3026275635
+timeofday:1794624332:539166
+lasttimeofday: 1794624332:236524
+deltatime:0:302642
+delta: 0.3026275635
+delta too large: 0.2414398193
+timeofday:1794624332:780612
+lasttimeofday: 1794624332:539166
+deltatime:0:241446
+delta: 0.2414398193
+delta too large: 0.2272949219
+timeofday:1794624333:7912
+lasttimeofday: 1794624332:780612
+deltatime:0:227300
+delta: 0.2272949219
+delta too large: 0.2165527344
+timeofday:1794624333:224466
+lasttimeofday: 1794624333:7912
+deltatime:0:216554
+delta: 0.2165527344
+delta too large: 0.3558959961
+timeofday:1794624333:580373
+lasttimeofday: 1794624333:224466
+deltatime:0:355907
+delta: 0.3558959961
+delta too large: 0.2118682861
+timeofday:1794624333:792249
+lasttimeofday: 1794624333:580373
+deltatime:0:211876
+delta: 0.2118682861
+delta too large: 0.2680511475
+timeofday:1794624334:60310
+lasttimeofday: 1794624333:792249
+deltatime:0:268061
+delta: 0.2680511475
+delta too large: 0.2409057617
+timeofday:1794624334:301225
+lasttimeofday: 1794624334:60310
+deltatime:0:240915
+delta: 0.2409057617
+delta too large: 0.2527618408
+timeofday:1794624334:553995
+lasttimeofday: 1794624334:301225
+deltatime:0:252770
+delta: 0.2527618408
+delta too large: 0.2516479492
+timeofday:1794624334:805652
+lasttimeofday: 1794624334:553995
+deltatime:0:251657
+delta: 0.2516479492
+delta too large: 0.2186431885
+timeofday:1794624335:602193
+lasttimeofday: 1794624335:383546
+deltatime:0:218647
+delta: 0.2186431885
+delta too large: 0.2543182373
+timeofday:1794624335:856518
+lasttimeofday: 1794624335:602193
+deltatime:0:254325
+delta: 0.2543182373
+delta too large: 0.2748413086
+timeofday:1794624336:131360
+lasttimeofday: 1794624335:856518
+deltatime:0:274842
+delta: 0.2748413086
+delta too large: 0.3520812988
+timeofday:1794624336:483454
+lasttimeofday: 1794624336:131360
+deltatime:0:352094
+delta: 0.3520812988
+delta too large: 0.2857055664
+timeofday:1794624336:769162
+lasttimeofday: 1794624336:483454
+deltatime:0:285708
+delta: 0.2857055664
+delta too large: 0.2913665771
+timeofday:1794624337:60530
+lasttimeofday: 1794624336:769162
+deltatime:0:291368
+delta: 0.2913665771
+delta too large: 0.3408050537
+timeofday:1794624337:401348
+lasttimeofday: 1794624337:60530
+deltatime:0:340818
+delta: 0.3408050537
+delta too large: 0.2916717529
+timeofday:1794624337:693032
+lasttimeofday: 1794624337:401348
+deltatime:0:291684
+delta: 0.2916717529
+delta too large: 0.2181243896
+timeofday:1794624337:911159
+lasttimeofday: 1794624337:693032
+deltatime:0:218127
+delta: 0.2181243896
+delta too large: 0.2039794922
+timeofday:1794624338:307574
+lasttimeofday: 1794624338:103582
+deltatime:0:203992
+delta: 0.2039794922
+delta too large: 0.200378418
+timeofday:1794624338:694245
+lasttimeofday: 1794624338:493863
+deltatime:0:200382
+delta: 0.200378418
+delta too large: 0.2024383545
+timeofday:1794624338:896697
+lasttimeofday: 1794624338:694245
+deltatime:0:202452
+delta: 0.2024383545
+delta too large: 0.2467956543
+timeofday:1794624339:143504
+lasttimeofday: 1794624338:896697
+deltatime:0:246807
+delta: 0.2467956543
+delta too large: 0.2370605469
+timeofday:1794624339:380572
+lasttimeofday: 1794624339:143504
+deltatime:0:237068
+delta: 0.2370605469
+delta too large: 0.2942199707
+timeofday:1794624339:674801
+lasttimeofday: 1794624339:380572
+deltatime:0:294229
+delta: 0.2942199707
+delta too large: 0.370300293
+timeofday:1794624340:45111
+lasttimeofday: 1794624339:674801
+deltatime:0:370310
+delta: 0.370300293
+delta too large: 0.4187164307
+timeofday:1794624340:463839
+lasttimeofday: 1794624340:45111
+deltatime:0:418728
+delta: 0.4187164307
+delta too large: 0.3458099365
+timeofday:1794624340:809660
+lasttimeofday: 1794624340:463839
+deltatime:0:345821
+delta: 0.3458099365
+delta too large: 0.2414398193
+timeofday:1794624341:51101
+lasttimeofday: 1794624340:809660
+deltatime:0:241441
+delta: 0.2414398193
+delta too large: 0.2761383057
+timeofday:1794624341:327253
+lasttimeofday: 1794624341:51101
+deltatime:0:276152
+delta: 0.2761383057
+delta too large: 0.2676391602
+timeofday:1794624341:594903
+lasttimeofday: 1794624341:327253
+deltatime:0:267650
+delta: 0.2676391602
+delta too large: 0.341293335
+timeofday:1794624341:936201
+lasttimeofday: 1794624341:594903
+deltatime:0:341298
+delta: 0.341293335
+delta too large: 0.2233276367
+timeofday:1794624342:159537
+lasttimeofday: 1794624341:936201
+deltatime:0:223336
+delta: 0.2233276367
+delta too large: 0.2660064697
+timeofday:1794624342:425553
+lasttimeofday: 1794624342:159537
+deltatime:0:266016
+delta: 0.2660064697
+delta too large: 0.2379760742
+timeofday:1794624342:663542
+lasttimeofday: 1794624342:425553
+deltatime:0:237989
+delta: 0.2379760742
+delta too large: 0.4340820312
+timeofday:1794624343:97626
+lasttimeofday: 1794624342:663542
+deltatime:0:434084
+delta: 0.4340820312
+delta too large: 0.2819519043
+timeofday:1794624343:379582
+lasttimeofday: 1794624343:97626
+deltatime:0:281956
+delta: 0.2819519043
+delta too large: 0.221206665
+timeofday:1794624343:600794
+lasttimeofday: 1794624343:379582
+deltatime:0:221212
+delta: 0.221206665
+delta too large: 0.2067108154
+timeofday:1794624343:807515
+lasttimeofday: 1794624343:600794
+deltatime:0:206721
+delta: 0.2067108154
+delta too large: 0.2428894043
+timeofday:1794624344:50410
+lasttimeofday: 1794624343:807515
+deltatime:0:242895
+delta: 0.2428894043
+delta too large: 0.2672119141
+timeofday:1794624344:508133
+lasttimeofday: 1794624344:240911
+deltatime:0:267222
+delta: 0.2672119141
+delta too large: 0.300201416
+timeofday:1794624344:808345
+lasttimeofday: 1794624344:508133
+deltatime:0:300212
+delta: 0.300201416
+delta too large: 0.2271118164
+timeofday:1794624345:35457
+lasttimeofday: 1794624344:808345
+deltatime:0:227112
+delta: 0.2271118164
+delta too large: 0.2306060791
+timeofday:1794624345:266068
+lasttimeofday: 1794624345:35457
+deltatime:0:230611
+delta: 0.2306060791
+delta too large: 0.2598266602
+timeofday:1794624345:525907
+lasttimeofday: 1794624345:266068
+deltatime:0:259839
+delta: 0.2598266602
+delta too large: 0.3145904541
+timeofday:1794624345:840502
+lasttimeofday: 1794624345:525907
+deltatime:0:314595
+delta: 0.3145904541
+delta too large: 0.2849884033
+timeofday:1794624346:125496
+lasttimeofday: 1794624345:840502
+deltatime:0:284994
+delta: 0.2849884033
+delta too large: 0.2198181152
+timeofday:1794624346:345329
+lasttimeofday: 1794624346:125496
+deltatime:0:219833
+delta: 0.2198181152
+delta too large: 0.2110748291
+timeofday:1794624346:556405
+lasttimeofday: 1794624346:345329
+deltatime:0:211076
+delta: 0.2110748291
+delta too large: 0.3360900879
+timeofday:1794624346:892507
+lasttimeofday: 1794624346:556405
+deltatime:0:336102
+delta: 0.3360900879
+delta too large: 0.3529968262
+timeofday:1794624347:245515
+lasttimeofday: 1794624346:892507
+deltatime:0:353008
+delta: 0.3529968262
+delta too large: 0.2691040039
+timeofday:1794624347:514623
+lasttimeofday: 1794624347:245515
+deltatime:0:269108
+delta: 0.2691040039
+delta too large: 0.2175598145
+timeofday:1794624347:915938
+lasttimeofday: 1794624347:698366
+deltatime:0:217572
+delta: 0.2175598145
+delta too large: 0.2361907959
+timeofday:1794624348:840348
+lasttimeofday: 1794624348:604149
+deltatime:0:236199
+delta: 0.2361907959
+delta too large: 0.2066802979
+timeofday:1794624349:47038
+lasttimeofday: 1794624348:840348
+deltatime:0:206690
+delta: 0.2066802979
+delta too large: 0.2565155029
+timeofday:1794624349:303565
+lasttimeofday: 1794624349:47038
+deltatime:0:256527
+delta: 0.2565155029
+delta too large: 0.2400665283
+timeofday:1794624349:543635
+lasttimeofday: 1794624349:303565
+deltatime:0:240070
+delta: 0.2400665283
+delta too large: 0.2142944336
+timeofday:1794624350:154538
+lasttimeofday: 1794624349:940239
+deltatime:0:214299
+delta: 0.2142944336
+delta too large: 0.2021026611
+timeofday:1794624350:537558
+lasttimeofday: 1794624350:335452
+deltatime:0:202106
+delta: 0.2021026611
+delta too large: 0.2232666016
+timeofday:1794624351:136844
+lasttimeofday: 1794624350:913564
+deltatime:0:223280
+delta: 0.2232666016
+delta too large: 0.2073059082
+timeofday:1794624351:878553
+lasttimeofday: 1794624351:671237
+deltatime:0:207316
+delta: 0.2073059082
+delta too large: 0.2120513916
+timeofday:1794624352:90608
+lasttimeofday: 1794624351:878553
+deltatime:0:212055
+delta: 0.2120513916
+delta too large: 0.3152770996
+timeofday:1794624352:405895
+lasttimeofday: 1794624352:90608
+deltatime:0:315287
+delta: 0.3152770996
+delta too large: 0.3997192383
+timeofday:1794624352:805625
+lasttimeofday: 1794624352:405895
+deltatime:0:399730
+delta: 0.3997192383
+delta too large: 0.2570343018
+timeofday:1794624353:62661
+lasttimeofday: 1794624352:805625
+deltatime:0:257036
+delta: 0.2570343018
+delta too large: 0.3328094482
+timeofday:1794624353:395472
+lasttimeofday: 1794624353:62661
+deltatime:0:332811
+delta: 0.3328094482
+delta too large: 0.2583770752
+timeofday:1794624353:653853
+lasttimeofday: 1794624353:395472
+deltatime:0:258381
+delta: 0.2583770752
+delta too large: 0.2121429443
+timeofday:1794624354:53564
+lasttimeofday: 1794624353:841410
+deltatime:0:212154
+delta: 0.2121429443
+delta too large: 0.2889556885
+timeofday:1794624354:342522
+lasttimeofday: 1794624354:53564
+deltatime:0:288958
+delta: 0.2889556885
+delta too large: 0.3484344482
+timeofday:1794624354:690970
+lasttimeofday: 1794624354:342522
+deltatime:0:348448
+delta: 0.3484344482
+delta too large: 0.3360748291
+timeofday:1794624355:27050
+lasttimeofday: 1794624354:690970
+deltatime:0:336080
+delta: 0.3360748291
+delta too large: 0.2034606934
+timeofday:1794624355:430007
+lasttimeofday: 1794624355:226545
+deltatime:0:203462
+delta: 0.2034606934
+delta too large: 0.277130127
+timeofday:1794624355:707146
+lasttimeofday: 1794624355:430007
+deltatime:0:277139
+delta: 0.277130127
+delta too large: 0.3044281006
+timeofday:1794624356:11577
+lasttimeofday: 1794624355:707146
+deltatime:0:304431
+delta: 0.3044281006
+delta too large: 0.2317352295
+timeofday:1794624356:243317
+lasttimeofday: 1794624356:11577
+deltatime:0:231740
+delta: 0.2317352295
+delta too large: 0.2451782227
+timeofday:1794624356:488507
+lasttimeofday: 1794624356:243317
+deltatime:0:245190
+delta: 0.2451782227
+delta too large: 0.207321167
+timeofday:1794624356:695829
+lasttimeofday: 1794624356:488507
+deltatime:0:207322
+delta: 0.207321167
+delta too large: 0.3680725098
+timeofday:1794624357:63910
+lasttimeofday: 1794624356:695829
+deltatime:0:368081
+delta: 0.3680725098
+delta too large: 0.2378234863
+timeofday:1794624357:301739
+lasttimeofday: 1794624357:63910
+deltatime:0:237829
+delta: 0.2378234863
+delta too large: 0.28565979
+timeofday:1794624357:587412
+lasttimeofday: 1794624357:301739
+deltatime:0:285673
+delta: 0.28565979
+delta too large: 0.2256317139
+timeofday:1794624357:813057
+lasttimeofday: 1794624357:587412
+deltatime:0:225645
+delta: 0.2256317139
+delta too large: 0.2165679932
+timeofday:1794624358:29639
+lasttimeofday: 1794624357:813057
+deltatime:0:216582
+delta: 0.2165679932
+delta too large: 0.2474975586
+timeofday:1794624358:277138
+lasttimeofday: 1794624358:29639
+deltatime:0:247499
+delta: 0.2474975586
+delta too large: 0.2173614502
+timeofday:1794624358:494507
+lasttimeofday: 1794624358:277138
+deltatime:0:217369
+delta: 0.2173614502
+delta too large: 0.2482147217
+timeofday:1794624358:742732
+lasttimeofday: 1794624358:494507
+deltatime:0:248225
+delta: 0.2482147217
+delta too large: 0.3363494873
+timeofday:1794624359:79094
+lasttimeofday: 1794624358:742732
+deltatime:0:336362
+delta: 0.3363494873
+delta too large: 0.3145904541
+timeofday:1794624359:393688
+lasttimeofday: 1794624359:79094
+deltatime:0:314594
+delta: 0.3145904541
+delta too large: 0.2953796387
+timeofday:1794624359:689082
+lasttimeofday: 1794624359:393688
+deltatime:0:295394
+delta: 0.2953796387
+delta too large: 0.2156066895
+timeofday:1794624359:904691
+lasttimeofday: 1794624359:689082
+deltatime:0:215609
+delta: 0.2156066895
+delta too large: 0.3628387451
+timeofday:1794624360:267542
+lasttimeofday: 1794624359:904691
+deltatime:0:362851
+delta: 0.3628387451
+delta too large: 0.2599334717
+timeofday:1794624360:527483
+lasttimeofday: 1794624360:267542
+deltatime:0:259941
+delta: 0.2599334717
+delta too large: 0.2247009277
+timeofday:1794624360:950325
+lasttimeofday: 1794624360:725623
+deltatime:0:224702
+delta: 0.2247009277
+delta too large: 0.2479095459
+timeofday:1794624361:198246
+lasttimeofday: 1794624360:950325
+deltatime:0:247921
+delta: 0.2479095459
+delta too large: 0.3988952637
+timeofday:1794624361:597142
+lasttimeofday: 1794624361:198246
+deltatime:0:398896
+delta: 0.3988952637
+delta too large: 0.2984313965
+timeofday:1794624361:895577
+lasttimeofday: 1794624361:597142
+deltatime:0:298435
+delta: 0.2984313965
+delta too large: 0.2459259033
+timeofday:1794624362:141512
+lasttimeofday: 1794624361:895577
+deltatime:0:245935
+delta: 0.2459259033
+delta too large: 0.2331848145
+timeofday:1794624362:374707
+lasttimeofday: 1794624362:141512
+deltatime:0:233195
+delta: 0.2331848145
+delta too large: 0.2108001709
+timeofday:1794624362:585510
+lasttimeofday: 1794624362:374707
+deltatime:0:210803
+delta: 0.2108001709
+delta too large: 0.2076416016
+timeofday:1794624362:793164
+lasttimeofday: 1794624362:585510
+deltatime:0:207654
+delta: 0.2076416016
+delta too large: 0.2100524902
+timeofday:1794624363:3224
+lasttimeofday: 1794624362:793164
+deltatime:0:210060
+delta: 0.2100524902
+delta too large: 0.2443237305
+timeofday:1794624363:247551
+lasttimeofday: 1794624363:3224
+deltatime:0:244327
+delta: 0.2443237305
+delta too large: 0.2221984863
+timeofday:1794624363:469759
+lasttimeofday: 1794624363:247551
+deltatime:0:222208
+delta: 0.2221984863
+delta too large: 0.2137145996
+timeofday:1794624363:683478
+lasttimeofday: 1794624363:469759
+deltatime:0:213719
+delta: 0.2137145996
+delta too large: 0.2141265869
+timeofday:1794624364:72590
+lasttimeofday: 1794624363:858457
+deltatime:0:214133
+delta: 0.2141265869
+delta too large: 0.3306274414
+timeofday:1794624364:403225
+lasttimeofday: 1794624364:72590
+deltatime:0:330635
+delta: 0.3306274414
+delta too large: 0.2478485107
+timeofday:1794624364:847244
+lasttimeofday: 1794624364:599393
+deltatime:0:247851
+delta: 0.2478485107
+delta too large: 0.2502593994
+timeofday:1794624365:97511
+lasttimeofday: 1794624364:847244
+deltatime:0:250267
+delta: 0.2502593994
+delta too large: 0.2475738525
+timeofday:1794624365:345085
+lasttimeofday: 1794624365:97511
+deltatime:0:247574
+delta: 0.2475738525
+delta too large: 0.200881958
+timeofday:1794624365:925513
+lasttimeofday: 1794624365:724629
+deltatime:0:200884
+delta: 0.200881958
+delta too large: 0.2021484375
+timeofday:1794624366:127672
+lasttimeofday: 1794624365:925513
+deltatime:0:202159
+delta: 0.2021484375
+delta too large: 0.257232666
+timeofday:1794624366:384915
+lasttimeofday: 1794624366:127672
+deltatime:0:257243
+delta: 0.257232666
+delta too large: 0.2423858643
+timeofday:1794624366:627310
+lasttimeofday: 1794624366:384915
+deltatime:0:242395
+delta: 0.2423858643
+delta too large: 0.2434539795
+timeofday:1794624366:870769
+lasttimeofday: 1794624366:627310
+deltatime:0:243459
+delta: 0.2434539795
+delta too large: 0.2138519287
+timeofday:1794624367:84623
+lasttimeofday: 1794624366:870769
+deltatime:0:213854
+delta: 0.2138519287
+delta too large: 0.2189025879
+timeofday:1794624367:503545
+lasttimeofday: 1794624367:284630
+deltatime:0:218915
+delta: 0.2189025879
+delta too large: 0.2402648926
+timeofday:1794624367:743817
+lasttimeofday: 1794624367:503545
+deltatime:0:240272
+delta: 0.2402648926
+delta too large: 0.2158660889
+timeofday:1794624368:148942
+lasttimeofday: 1794624367:933073
+deltatime:0:215869
+delta: 0.2158660889
+delta too large: 0.2373352051
+timeofday:1794624368:386284
+lasttimeofday: 1794624368:148942
+deltatime:0:237342
+delta: 0.2373352051
+delta too large: 0.2356109619
+timeofday:1794624368:621908
+lasttimeofday: 1794624368:386284
+deltatime:0:235624
+delta: 0.2356109619
+delta too large: 0.2112731934
+timeofday:1794624368:833188
+lasttimeofday: 1794624368:621908
+deltatime:0:211280
+delta: 0.2112731934
+delta too large: 0.2470397949
+timeofday:1794624369:466139
+lasttimeofday: 1794624369:219097
+deltatime:0:247042
+delta: 0.2470397949
+delta too large: 0.2531890869
+timeofday:1794624369:719329
+lasttimeofday: 1794624369:466139
+deltatime:0:253190
+delta: 0.2531890869
+delta too large: 0.2640228271
+timeofday:1794624369:983365
+lasttimeofday: 1794624369:719329
+deltatime:0:264036
+delta: 0.2640228271
+delta too large: 0.2650756836
+timeofday:1794624370:248448
+lasttimeofday: 1794624369:983365
+deltatime:0:265083
+delta: 0.2650756836
+delta too large: 0.3662414551
+timeofday:1794624370:614699
+lasttimeofday: 1794624370:248448
+deltatime:0:366251
+delta: 0.3662414551
+delta too large: 0.2559356689
+timeofday:1794624370:870641
+lasttimeofday: 1794624370:614699
+deltatime:0:255942
+delta: 0.2559356689
+delta too large: 0.2616271973
+timeofday:1794624371:132280
+lasttimeofday: 1794624370:870641
+deltatime:0:261639
+delta: 0.2616271973
+delta too large: 0.2248382568
+timeofday:1794624371:357130
+lasttimeofday: 1794624371:132280
+deltatime:0:224850
+delta: 0.2248382568
+delta too large: 0.2318572998
+timeofday:1794624371:588997
+lasttimeofday: 1794624371:357130
+deltatime:0:231867
+delta: 0.2318572998
+delta too large: 0.2328643799
+timeofday:1794624371:821874
+lasttimeofday: 1794624371:588997
+deltatime:0:232877
+delta: 0.2328643799
+delta too large: 0.2171936035
+timeofday:1794624372:39072
+lasttimeofday: 1794624371:821874
+deltatime:0:217198
+delta: 0.2171936035
+delta too large: 0.2175750732
+timeofday:1794624372:256649
+lasttimeofday: 1794624372:39072
+deltatime:0:217577
+delta: 0.2175750732
+delta too large: 0.2144470215
+timeofday:1794624372:471109
+lasttimeofday: 1794624372:256649
+deltatime:0:214460
+delta: 0.2144470215
+delta too large: 0.2328948975
+timeofday:1794624372:704018
+lasttimeofday: 1794624372:471109
+deltatime:0:232909
+delta: 0.2328948975
+delta too large: 0.2614135742
+timeofday:1794624372:965432
+lasttimeofday: 1794624372:704018
+deltatime:0:261414
+delta: 0.2614135742
+delta too large: 0.231918335
+timeofday:1794624373:197356
+lasttimeofday: 1794624372:965432
+deltatime:0:231924
+delta: 0.231918335
+delta too large: 0.2144622803
+timeofday:1794624373:411825
+lasttimeofday: 1794624373:197356
+deltatime:0:214469
+delta: 0.2144622803
+delta too large: 0.2359619141
+timeofday:1794624373:647798
+lasttimeofday: 1794624373:411825
+deltatime:0:235973
+delta: 0.2359619141
+delta too large: 0.222366333
+timeofday:1794624373:870166
+lasttimeofday: 1794624373:647798
+deltatime:0:222368
+delta: 0.222366333
+delta too large: 0.2291564941
+timeofday:1794624374:99328
+lasttimeofday: 1794624373:870166
+deltatime:0:229162
+delta: 0.2291564941
+delta too large: 0.2685852051
+timeofday:1794624374:367920
+lasttimeofday: 1794624374:99328
+deltatime:0:268592
+delta: 0.2685852051
+delta too large: 0.3163909912
+timeofday:1794624374:684324
+lasttimeofday: 1794624374:367920
+deltatime:0:316404
+delta: 0.3163909912
+delta too large: 0.24269104
+timeofday:1794624374:927029
+lasttimeofday: 1794624374:684324
+deltatime:0:242705
+delta: 0.24269104
+delta too large: 0.2253112793
+timeofday:1794624375:152354
+lasttimeofday: 1794624374:927029
+deltatime:0:225325
+delta: 0.2253112793
+delta too large: 0.3202056885
+timeofday:1794624375:472560
+lasttimeofday: 1794624375:152354
+deltatime:0:320206
+delta: 0.3202056885
+delta too large: 0.2999572754
+timeofday:1794624375:772528
+lasttimeofday: 1794624375:472560
+deltatime:0:299968
+delta: 0.2999572754
+delta too large: 0.3396759033
+timeofday:1794624376:307604
+lasttimeofday: 1794624375:967927
+deltatime:0:339677
+delta: 0.3396759033
+delta too large: 0.2539367676
+timeofday:1794624376:561543
+lasttimeofday: 1794624376:307604
+deltatime:0:253939
+delta: 0.2539367676
+delta too large: 0.2470550537
+timeofday:1794624376:808609
+lasttimeofday: 1794624376:561543
+deltatime:0:247066
+delta: 0.2470550537
+delta too large: 0.2144317627
+timeofday:1794624377:23050
+lasttimeofday: 1794624376:808609
+deltatime:0:214441
+delta: 0.2144317627
+delta too large: 0.2007598877
+timeofday:1794624377:223815
+lasttimeofday: 1794624377:23050
+deltatime:0:200765
+delta: 0.2007598877
+delta too large: 0.2453155518
+timeofday:1794624377:850478
+lasttimeofday: 1794624377:605158
+deltatime:0:245320
+delta: 0.2453155518
+delta too large: 0.2204284668
+timeofday:1794624378:267800
+lasttimeofday: 1794624378:47371
+deltatime:0:220429
+delta: 0.2204284668
+delta too large: 0.2098236084
+timeofday:1794624378:477624
+lasttimeofday: 1794624378:267800
+deltatime:0:209824
+delta: 0.2098236084
+delta too large: 0.2009887695
+timeofday:1794624378:678628
+lasttimeofday: 1794624378:477624
+deltatime:0:201004
+delta: 0.2009887695
+delta too large: 0.2040100098
+timeofday:1794624379:252570
+lasttimeofday: 1794624379:48552
+deltatime:0:204018
+delta: 0.2040100098
+delta too large: 0.2995300293
+timeofday:1794624379:552105
+lasttimeofday: 1794624379:252570
+deltatime:0:299535
+delta: 0.2995300293
+[debug] client disconnected fd=9

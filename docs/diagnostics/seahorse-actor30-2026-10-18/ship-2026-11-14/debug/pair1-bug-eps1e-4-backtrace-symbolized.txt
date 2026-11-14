@@ -1,0 +1,22 @@
+_sys_assert(int, char const*, char const*, int) at wfsource/source/pigsys/assert.cc:62
+WorldFoundryMailboxesManager::LookupMailboxes(int) at wfsource/source/game/level.cc:383 (discriminator 1)
+zf_host_sys at engine/stubs/scripting_zforth.cc:1030
+do_prim at engine/vendor/zforth-41db72d1/src/zforth/zforth.c:638
+ (inlined by) run at engine/vendor/zforth-41db72d1/src/zforth/zforth.c:469
+execute at engine/vendor/zforth-41db72d1/src/zforth/zforth.c:501
+ (inlined by) handle_word at engine/vendor/zforth-41db72d1/src/zforth/zforth.c:854
+ (inlined by) handle_char at engine/vendor/zforth-41db72d1/src/zforth/zforth.c:896
+ (inlined by) zf_eval at engine/vendor/zforth-41db72d1/src/zforth/zforth.c:982
+forth_engine::RunScript(char const*, int) at engine/stubs/scripting_zforth.cc:1898 (discriminator 2)
+ScriptRouter::RunScript(void const*, int, int) at engine/stubs/scripting_stub.cc:274
+Level::EvalScript(void const*, int, int) at wfsource/source/game/level.cc:345
+Actor::update() at wfsource/source/game/actor.cc:983 (discriminator 1)
+Director::update() at wfsource/source/game/director.cc:84
+Level::update(Scalar) at wfsource/source/game/level.cc:1403
+WFGame::StepFrame(bool, Scalar*) at wfsource/source/game/game.cc:684 (discriminator 1)
+WFGame::RunLevel(_DiskFile*) at wfsource/source/game/game.cc:846
+WFGame::RunGameScript() at wfsource/source/game/game.cc:240
+PIGSMain(int, char**) at wfsource/source/game/main.cc:653
+HALStart(int, char**, int, int, int) at wfsource/source/hal/hal.cc:86
+main at wfsource/source/hal/linux/platform_main.cc:42
+_start at ??:?

@@ -1,0 +1,22 @@
+{
+  "scene": "planted-tank",
+  "expected_index": 5,
+  "process": "22602",
+  "cursor_before_selection": 5,
+  "corrective_down_keys": 0,
+  "cursor_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "selected_indices": [
+    5
+  ],
+  "started_indices": [
+    5
+  ],
+  "confirmed": true
+}
