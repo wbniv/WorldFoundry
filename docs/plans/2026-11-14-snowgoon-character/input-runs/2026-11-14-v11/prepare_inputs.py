@@ -5,10 +5,12 @@ from hashlib import sha256
 import json
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 HERE = Path(__file__).resolve().parent
 SOURCE = HERE.parent.parent / "concept-turnaround-2d-v11-input-layout.png"
+GAME_CAPTURE = HERE.parents[3] / "diagnostics/snowgoon-2026-11-14/opening.png"
+GAME_CROP = (885, 225, 1020, 375)
 VIEWS = ("front", "left-profile", "back", "right-profile")
 GUTTER = 4
 TOP = 60
@@ -36,16 +38,30 @@ def main() -> None:
         crop = source.crop((x0, TOP, x1, BOTTOM))
         square = Image.new("RGB", (panel_width, panel_width), "white")
         square.paste(crop, (GUTTER, 0))
-        out = HERE / f"{label}.png"
-        square.save(out, format="PNG", optimize=False, compress_level=9)
-        records.append({
+        raw_out = HERE / f"{label}.png"
+        square.save(raw_out, format="PNG", optimize=False, compress_level=9)
+        out = raw_out
+        masked_region = None
+        if label == "front":
+            # Remove one isolated source-art fleck well clear of the twig itself.
+            square = square.copy()
+            masked_region = [149, 358, 157, 372]
+            ImageDraw.Draw(square).rectangle(masked_region, fill="white")
+            out = HERE / "front-cleaned.png"
+            square.save(out, format="PNG", optimize=False, compress_level=9)
+        record = {
             "label": label,
             "file": out.name,
             "sha256": digest(out),
             "source_crop_xyxy": [x0, TOP, x1, BOTTOM],
             "white_padding_px": {"left": GUTTER, "right": GUTTER},
             "dimensions_px": list(square.size),
-        })
+        }
+        if masked_region:
+            record["raw_file"] = raw_out.name
+            record["raw_sha256"] = digest(raw_out)
+            record["masked_region_xyxy_in_crop"] = masked_region
+        records.append(record)
 
     manifest = {
         "source": SOURCE.name,
@@ -62,10 +78,25 @@ def main() -> None:
             "canvas": "square RGB white background, no alpha",
         },
         "review_notes": [
-            "The front crop contains a small detached ink dash beside the left arm; review or mask before automated reconstruction."
+            "The detached front-view ink dash was masked in front-cleaned.png; the unmodified front.png crop is retained for traceability."
         ],
+        "in_game_comparison": {
+            "capture": "docs/diagnostics/snowgoon-2026-11-14/opening.png",
+            "capture_sha256": digest(GAME_CAPTURE),
+            "capture_dimensions_px": list(Image.open(GAME_CAPTURE).size),
+            "snowgoon_crop_xyxy": list(GAME_CROP),
+            "crop_file": "in-game-baseline.png",
+            "crop_sha256": None,
+            "measured_actor_bounds_in_capture_px_approx": [895, 237, 1009, 359],
+            "authored_actor_height_m": 2.20,
+        },
         "views": records,
     }
+    game_capture = Image.open(GAME_CAPTURE).convert("RGB")
+    game_crop = game_capture.crop(GAME_CROP)
+    game_out = HERE / "in-game-baseline.png"
+    game_crop.save(game_out, format="PNG", optimize=False, compress_level=9)
+    manifest["in_game_comparison"]["crop_sha256"] = digest(game_out)
     (HERE / "manifest.json").write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
     )

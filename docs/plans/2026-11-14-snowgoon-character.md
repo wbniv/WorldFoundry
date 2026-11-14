@@ -24,8 +24,16 @@ The existing source mesh contains 147 vertices and 200 triangles, is about
 2.20 m tall, and already has two heads and three static twig branches. The
 concept is a redesign and articulation guide, not a request to add a third
 branch to a two-armed source. The branches are geometry without a rig, so they
-cannot scoop, pack, or throw. A matched in-game capture is still needed to
-confirm scale and silhouette at play distance.
+cannot scoop, pack, or throw. The current 1280 × 720 gameplay capture shows the
+actor at about 114 × 122 screen pixels in perspective; it confirms scene scale
+and twin-head silhouette, but cannot show the static arms' action reach.
+
+![Current 2.20 m static snowgoon in the opening gameplay capture](2026-11-14-snowgoon-character/input-runs/2026-11-14-v11/in-game-baseline.png)
+
+At this view the static twig arms read short and do not communicate a scoop.
+The modeler reference therefore calls for thin but longer arms, plus a visible
+forward torso bend so the character lowers itself to the snow instead of
+reaching with straight arms alone.
 
 ### Reconstruction input layout
 
@@ -39,9 +47,17 @@ preprocessing layout; v10 remains the approved concept artwork.
 The four square crops and reproducible preprocessing record are in
 [`input-runs/2026-11-14-v11/`](2026-11-14-snowgoon-character/input-runs/2026-11-14-v11/).
 The crops exclude labels and panel dividers, retain the complete figures, and
-use identical 543 × 543 RGB canvases without resizing. Review the front crop's
-small detached ink dash beside the left arm before using these as automated
-reconstruction inputs.
+use identical 543 × 543 RGB canvases without resizing. The front input crop
+masks one detached ink fleck beside the left arm; its untouched source crop is
+retained alongside it.
+
+### Action pose reference
+
+The turnaround defines the design. This separate flat 2D pose strip makes the
+action's body movement explicit for the modeler: fold forward through the torso
+to scoop, rise partway to pack, then bend through the throw and recovery.
+
+![2D side-profile action poses showing a forward bend for scooping, a partial rise to pack, and a bent throw/recovery](2026-11-14-snowgoon-character/action-poses-2d-v1.png)
 
 ### Calvin & Hobbes visual references
 
@@ -148,8 +164,8 @@ original in-game sculpt with its own face, proportions, rig and texture.
 
 This 2D sheet is still a design prompt, not a final model specification. Review
 that the back and profile views preserve the same head order, silhouette, body
-shape, all three thin arms, shoulder roots, elbows, and arm lengths before using
-them for GPU reconstruction. Keep the game's chunky proportions. The two
+shape, all three thin arms, shoulder roots, elbows, and arm lengths before
+handoff to the 3D modeler. Keep the game's chunky proportions. The two
 smooth, similarly sized heads should remain visibly different and unsettling,
 with distinct expressions and a modest tapered carrot nose. All three arms
 should keep the longer, thin twig proportions seen in the strips. Their reach
@@ -161,19 +177,16 @@ snow body bare.
 
 - Keep this work in the classic Snowgoons level and its own asset/build paths;
   do not change the shared Blender scaffold or unrelated levels.
-- Use the four-view TRELLIS workflow in the
-  [Route C actor HOWTO](../../finding-your-way/docs/route-c-actor-how-to.md)
-  only after the views are coherent and approved. All four views must condition
-  each shape seed together. Start with two seeds, not an automatic sweep.
-- TRELLIS vertex colour is a source appearance, not the final game texture.
-  Preserve raw colour/attributes, unwrap and bake or paint a compact game-ready
-  texture, and inspect it under Snowgoons lighting.
+- This task produces 2D concept and modeling references. The 3D modeler owns
+  mesh, texture, rig, and animation creation; do not generate or build the 3D
+  model here. If the modeler chooses TRELLIS, the four views must condition
+  each shape seed together; retain raw colour and bake/paint a game texture.
 - Target at most 2,800 triangles for the complete snowgoon model, subject to
   review at game distance. Keep the final model, materials, animation and any
   projectile within the existing level's memory and frame budgets.
 - Do not alter engine source without a separate, concrete proposal and Will's
-  explicit permission. Continue Blender, level, asset, script and test work
-  independently where possible.
+  explicit permission. Read-only inspection of Blender/runtime asset support
+  can continue without engine edits.
 
 ## Work plan
 
@@ -188,9 +201,11 @@ snow body bare.
 - [x] Compare the approved concept with the original source mesh. Confirmed the
   source is 147 vertices/200 triangles, about 2.20 m tall, with two heads and
   three static twig branches.
-- [ ] Compare the approved concept with a matched in-game view. Confirm actor
-  scale, base/origin, body/head proportions, three-arm layout, twig joints,
-  hand shape, reach, and neutral pose at play distance.
+- [x] Compare with the current gameplay capture. The 2.20 m actor occupies
+  approximately `(895,237)`–`(1009,359)` in the 1280 × 720 opening capture;
+  see the crop and source/hash in the input manifest. The perspective view
+  confirms scene scale and twin-head silhouette. Its static arms cannot confirm
+  bending or action reach.
 - [x] Produce a corrected four-view 2D concept sheet: the front carrot nose is
   visible, the back is a true rear view with the head offset mirrored from the
   front, the left and right profiles face opposite directions with their
@@ -198,39 +213,30 @@ snow body bare.
   thin, long proportions. See `concept-turnaround-2d-v10.png`.
 - [x] Inspect the approved sheet and source resolution. The v10 illustration
   has adjacent arm tips across panel boundaries, so use the separate v11 input
-  layout. Crop all four views at one scale and save labels, preprocessing
-  settings, and SHA-256 hashes in the unique run directory. A small detached
-  ink dash in the front crop is flagged for review before automated use.
+  layout. Crop all four views at one scale and save preprocessing settings and
+  SHA-256 hashes in the unique run directory. The front input has the detached
+  ink fleck masked; its raw crop is retained.
 
-**Gate:** concept direction approved and four view crops prepared. Review the
-flagged front-view ink dash and compare scale with an in-game capture before
-automated reconstruction. A sheet with inconsistent views is not accepted as
-GPU input.
+**Gate:** approved 2D concept, spaced input layout, four crops, and action poses
+are ready for the 3D modeler. Do not start model generation in this task.
 
-### 2. GPU mesh and appearance candidates
+### 2. 3D modeler handoff: mesh and appearance
 
-- [ ] Follow the HOWTO's explicit GCP lifecycle: preflight, create, ready,
-  upload, generate, download, verify, delete, verify cleanup. Use a unique run
-  identity, bounded VM lifetime, fresh local output directory and current price
-  source. Do not take over another run's resources.
-- [ ] Pin TRELLIS code/weights, container digest, inference settings and two
-  seeds in the manifest. Prove with the adapter test that each seed consumes all
-  four images in one joint shape call.
-- [ ] Keep both raw meshes, vertex colours, Gaussian appearance, receipts,
-  input hashes and worker logs. Verify outputs locally, then delete the VM and
-  confirm its instance, disk and address are gone before review.
-- [ ] Compare both candidates from front, back, both profiles and three-quarter
-  views. Check the twin heads, face readability, arm attachment, shoulder and
-  elbow placement, hand silhouette, body intersections and lower-body shape.
-  Confirm that all three arms remain distinct, thin and articulable. Reject
-  candidates that fuse an arm into the torso or make the joints hard to read.
-- [ ] Select one candidate with recorded reasons. Clean it in Blender, preserve
-  the raw source, build a UV map and bake/paint a game-ready texture. Save an
-  editable Blender file and reproducible cleanup/export settings. Keep texture
-  allocation within the level's existing page budget where feasible.
+- [x] Prepare the modeler package: approved v10 turnaround, spaced v11 crops,
+  strip reference index, in-game baseline crop, and the 2D action-pose strip.
+- [ ] Hand off the package and request an editable Blender scene, a game-ready
+  textured model within the 2,800-triangle target, and front/back/profile/three-
+  quarter renders at game distance. Keep the original source mesh and textures
+  intact until the replacement is accepted.
+- [ ] Ask the modeler to show that both heads remain nearly equal in size, all
+  three thin arms have distinct shoulder roots and hand silhouettes, and the
+  model bends forward without body intersections or a broken silhouette.
+- [ ] Review returned geometry, materials, texture allocation, and scale against
+  the 2.20 m in-game baseline. Record the delivered source files and export
+  settings before integration.
 
-**Gate:** viable model and appearance candidate selected, audited and fitted to
-the existing approximately 2.2 m actor height and base/origin convention.
+**Gate:** modeler delivers a reviewable asset; only then begin rig/runtime
+validation and integration planning.
 
 ### 3. Articulation and rig validation
 
@@ -238,18 +244,20 @@ the existing approximately 2.2 m actor height and base/origin convention.
   Blender importer/exporter and actor scripts represent animated meshes.
   Separate confirmed support from assumptions; `snowgoon.iff` currently has no
   authored arm rig or action cycles.
-- [ ] Build a simple, stable rig with torso/root and three distinct arm roots:
+- [ ] Have the modeler build a simple, stable rig with torso/root and three
+  distinct arm roots:
   two high shoulder roots and the added third arm root on the upper torso. Give
   each thin twig arm independently movable upper segment, elbow, forearm and
-  forked hand pivots. Add only the body/head controls needed for readable weight
-  shifts and aiming.
-- [ ] In Blender, test shoulder lift/reach, elbow curl and hand orientation
-  on all three arms through the scoop, chest-level packing and forward throwing
-  ranges. Use the third arm to assist snow gathering/packing or balance, while
-  preserving a clear throw path for the throwing arm. Inspect both sides and
-  front/back. Reject intersections with the body, broken joints, bad pivots,
-  silhouette collapse and detached-looking limbs. Save labelled pose
-  renders and the editable rig scene.
+  forked hand pivots. Add a torso pivot at the middle/lower snow-body junction
+  so the upper body and both heads can fold forward together, then rise partway
+  for packing. Include only enough head control for readable weight shifts and
+  aiming.
+- [ ] Review poses in Blender: a visible forward torso fold lowers one hand to
+  the snow; the goon partly rises and brings two hands together to pack; the
+  throw uses torso bend/rotation, arm wind-up, release and follow-through. Use
+  the third arm to assist or balance. Reject body intersections, broken pivots,
+  reach achieved only by stretching arms, silhouette collapse and detached
+  limbs. Save labelled pose renders and the editable rig scene.
 - [ ] Determine whether the existing runtime can play the required rigged
   cycles. First test current asset/tool support and existing animation playback.
   If unsupported, document the exact format/runtime gap and propose the smallest
@@ -262,9 +270,10 @@ a reviewable engine-change proposal while asset/tooling work continues.
 
 ### 4. Animation and action behavior
 
-- [ ] Author and export a seamless idle, scoop, pack, throw and recovery cycle.
-  Keep the throwing hand, snowball and release frame aligned. Provide clear
-  anticipation, two-handed packing, one-handed release and follow-through;
+- [ ] Have the modeler author and export a seamless idle, scoop, pack, throw and
+  recovery cycle. Show a clear forward bend for scooping, a partial rise for
+  two-handed packing, then torso-led anticipation, one-handed release and
+  follow-through. Keep the throwing hand, snowball and release frame aligned;
   return to idle without a visible pop.
 - [ ] Add a snowball prop with held and flying states. Show it between the hands
   while packing, attach it to the throwing hand during wind-up, release it at

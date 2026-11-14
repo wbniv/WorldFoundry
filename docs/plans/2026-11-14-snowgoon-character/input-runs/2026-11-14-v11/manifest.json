@@ -19,13 +19,36 @@
     "canvas": "square RGB white background, no alpha"
   },
   "review_notes": [
-    "The front crop contains a small detached ink dash beside the left arm; review or mask before automated reconstruction."
+    "The detached front-view ink dash was masked in front-cleaned.png; the unmodified front.png crop is retained for traceability."
   ],
+  "in_game_comparison": {
+    "capture": "docs/diagnostics/snowgoon-2026-11-14/opening.png",
+    "capture_sha256": "786a2fde26417daf7c687059da21926a48aeb54054bd04b15f9575a6d9a28724",
+    "capture_dimensions_px": [
+      1280,
+      720
+    ],
+    "snowgoon_crop_xyxy": [
+      885,
+      225,
+      1020,
+      375
+    ],
+    "crop_file": "in-game-baseline.png",
+    "crop_sha256": "ba045afb52bde4e12fd09428f0f6696ec7367f04093c1236caf6a34301139ebf",
+    "measured_actor_bounds_in_capture_px_approx": [
+      895,
+      237,
+      1009,
+      359
+    ],
+    "authored_actor_height_m": 2.2
+  },
   "views": [
     {
       "label": "front",
-      "file": "front.png",
-      "sha256": "bad4d5c75c12e96e0b6a77229b658f24a720d38e3af0ba928d369fe83c75df4e",
+      "file": "front-cleaned.png",
+      "sha256": "fdaadff390661ac55af3ce43ab8e3e8f19cd5f8495c9f4cb4037e79c4b34f260",
       "source_crop_xyxy": [
         4,
         60,
@@ -39,6 +62,14 @@
       "dimensions_px": [
         543,
         543
+      ],
+      "raw_file": "front.png",
+      "raw_sha256": "bad4d5c75c12e96e0b6a77229b658f24a720d38e3af0ba928d369fe83c75df4e",
+      "masked_region_xyxy_in_crop": [
+        149,
+        358,
+        157,
+        372
       ]
     },
     {
