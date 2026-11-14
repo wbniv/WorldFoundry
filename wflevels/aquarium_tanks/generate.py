@@ -612,8 +612,8 @@ if C.KIND=='arowana':
     seahorses=(dict(pair_visibility=list(seahorse.PAIR_VISIBILITY),post_visibility=seahorse.POST_VISIBILITY,
                     block_base=seahorse.BLOCK_BASE,block_stride=seahorse.BLOCK_STRIDE,block_bases=list(seahorse.BLOCK_BASES),
                     block_cells=40,forth_cells=[40,97],cell_remap=dict(actor=11,offsets=[68,69,70],mailboxes=[1112,1113,1114]),greeting_state=[seahorse.GREET_BASE,seahorse.GREET_BASE+9],
-                    settings=dict(count=dict(field=seahorse.SETTING_COUNT,values=['None','1 pair']+[f'{n} pairs' for n in range(2,seahorse.PAIR_COUNT+1)],default=seahorse.PAIR_COUNT),
-                                  greeting=dict(field=seahorse.SETTING_GREETING,default=1)),
+                    settings=dict(count=dict(field=settings_fields['Seahorses'],values=['None','1 pair']+[f'{n} pairs' for n in range(2,seahorse.PAIR_COUNT+1)],default=seahorse.PAIR_COUNT),
+                                  greeting=dict(field=settings_fields['Greeting'],default=1)),
                     states=['hold','release','swim','probe','grasp','strike','greet'],behaviour='seahorse_behaviour.fth',
                     spots=[dict(spot=n,**{k:(list(v) if isinstance(v,(list,tuple)) else v) for k,v in seahorse.spot(n).items()})
                            for n in range(len(seahorse.SPOTS))],

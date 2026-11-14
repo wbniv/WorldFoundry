@@ -408,7 +408,7 @@
     ],
     "settings": {
       "count": {
-        "field": 8,
+        "field": 137,
         "values": [
           "None",
           "1 pair",
@@ -421,7 +421,7 @@
         "default": 6
       },
       "greeting": {
-        "field": 9,
+        "field": 138,
         "default": 1
       }
     },
