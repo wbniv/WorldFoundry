@@ -157,7 +157,7 @@ sequenceDiagram
 
 ## Verification
 
-Run 2026‑11‑14 in the sparse worktree `.worktrees/single-desktop-build` at `b4e0899a`. The disk stop line (15 GB free; other sessions were filling the disk at the same time) ended the run before steps 4, 5 (ctest) and 7 could finish; see each step.
+First run 2026‑11‑14 in the sparse worktree `.worktrees/single-desktop-build` at `b4e0899a`; the disk stop line (15 GB free, other sessions filling the disk) held steps 4, 5 and 7 back until 2026‑11‑15, when they were completed. **All nine steps PASS.**
 
 1. `task build`, now CMake, builds from a clean checkout: in the container, a fresh sparse clone of the change runs `scripts/build-wf-game.sh` (what `task build` runs; the container has no `task`) and writes `engine/wf_game`; on the host, `task --dry build` shows that command.
 
@@ -209,7 +209,35 @@ Run 2026‑11‑14 in the sparse worktree `.worktrees/single-desktop-build` at `
     2026-11-14T07:01:56Z local-ci: renderer-fresh: FAIL (10 s)
     tests/test_renderer_references_fresh.py::test_reference_matches_a_fresh_linux_capture[snowgoons]      ← log ends here
     ```
-    **PARTIAL**. The backfill and the pre-option shim work: a commit from before this change built as the dev engine (1293 s). The arena test failed on the real bug. The renderer-fresh result does **not** count: the session's disk guard killed its container at 15.09 GB free, mid-test, while the 4.0 GB clone was still on disk. The control run at `23658e9a` was stopped before its build for the same reason. Both are still owed and need about 20 GB free (the 15 GB floor plus a run's 4–5 GB peak).
+    That renderer-fresh result does not count: the session's disk guard killed its container at 15.09 GB free, mid-test, and the `23658e9a` control was stopped before its build.
+
+    **Third pass, 2026‑11‑15 00:54 +07** (63 GB free), both runs back to back from this worktree:
+    ```
+    $ WF_CI_RESULTS=~/WorldFoundry-wbniv/build-docker/local-ci scripts/local-ci.sh --no-notify --tests-from 23658e9a be86bbb9
+    2026-11-14T17:54:36Z local-ci: testing be86bbb9b006 (Index nine plans that had no row in docs/plans/README.md) with the tests of 23658e9a6cc6, builder dev; results in /home/will/WorldFoundry-wbniv/build-docker/local-ci/be86bbb9b006-tests-23658e9a6cc6
+    2026-11-14T17:54:42Z local-ci: overlaid the CI tests from 23658e9a6cc6
+    2026-11-14T17:54:42Z local-ci: backfilled cmake/wf-game-dev.cmake from the runner (not in be86bbb9b006)
+    2026-11-14T17:54:42Z local-ci: CMakeLists.txt of be86bbb9b006 predates WF_DESIGNER_CHEATS: passing -DCMAKE_CXX_FLAGS=-DDESIGNER_CHEATS=1
+    2026-11-14T18:04:46Z local-ci: build: PASS (604 s)
+    2026-11-14T18:04:48Z local-ci: arena-faces-up: FAIL (2 s)
+    2026-11-14T18:05:02Z local-ci: renderer-fresh: FAIL (14 s)
+    E           AssertionError: wflevels/cd.iff@149144: 283 of 283 horizontal arena faces point down; the floor is culled from above. Its migration decision must be reverse_all, not keep.
+    E       AssertionError: snowgoons: the committed Linux reference is stale (or the engine binary is older than the source):
+    E         640x480: exact=258357/307200 (84.100586%)
+    E         pixels exceeding tolerance 3: 39809
+    E         difference bbox (inclusive): 0,287–639,479
+    ========================= 1 failed, 1 passed in 11.43s =========================
+    exit=1
+    $ WF_CI_RESULTS=~/WorldFoundry-wbniv/build-docker/local-ci scripts/local-ci.sh --no-notify 23658e9a
+    2026-11-14T18:05:08Z local-ci: testing 23658e9a6cc6 (Reverse the snowgoons arena: its floor faced down on GL and Metal), builder dev; results in /home/will/WorldFoundry-wbniv/build-docker/local-ci/23658e9a6cc6
+    2026-11-14T18:05:14Z local-ci: backfilled cmake/wf-game-dev.cmake from the runner (not in 23658e9a6cc6)
+    2026-11-14T18:05:14Z local-ci: CMakeLists.txt of 23658e9a6cc6 predates WF_DESIGNER_CHEATS: passing -DCMAKE_CXX_FLAGS=-DDESIGNER_CHEATS=1
+    2026-11-14T18:14:55Z local-ci: build: PASS (581 s)
+    2026-11-14T18:14:57Z local-ci: arena-faces-up: PASS (2 s)
+    2026-11-14T18:15:09Z local-ci: renderer-fresh: PASS (12 s)
+    exit=0
+    ```
+    **PASS**: on the CMake `dev` builder both tests fail on the broken commit (39,809 pixels, the same count as the `build_game` proof in the local-CI plan) and both pass on the fix. (The aquarium case passes on both, as before: only snowgoons carries the bug.)
 5. The ctest and pytest suites that passed before still pass: ctest of the dev configuration before (`-DWF_DESIGNER_CHEATS=OFF -DWF_TEST_CODE=OFF`, the old CMake Debug defines) and after, same pass set; the engine-binary pytest tests (`test_game_shutdown.py`, `test_ui_font_missing.py`) pass with the dev engine.
 
     Engine-binary pytest, dev engine:
@@ -233,10 +261,49 @@ Run 2026‑11‑14 in the sparse worktree `.worktrees/single-desktop-build` at `
     ```
     The `-k 0` rerun of both configurations and their ctest was killed by the disk guard at 15.1 GB free. **PARTIAL**: shutdown PASS; `test_ui_font_missing` FAIL on a cause that predates this change; ctest before/after **NOT RUN**.
 
+    **Second pass, 2026‑11‑15** (63 GB free). "Before" is a real pre-change tree, `origin` `1a82f942` in its own sparse worktree, configured with the same `cmake/wf-game-dev.cmake` (its `CMakeLists.txt` has no option); "after" is this change. Each: every target with `ninja -k 0`, then `ctest -j2` with Xvfb on `:0` (the gl tests set `DISPLAY=:0` themselves; a first attempt under `xvfb-run -a` failed 23 tests in both trees on `XOpenDisplay`), then the two engine-binary tests on that tree's own `engine/wf_game`:
+    ```
+    == after: wfengine game/main.cc defines with CHEATS/TEST_CODE: -DDESIGNER_CHEATS=1 -DDO_TEST_CODE=1
+    targets that failed to build: CMakeFiles/dfrm_strand_test.dir/tests/dfrm_strand.cc.o
+    tests/dfrm_strand.cc:45:42: error: macro "delete" passed 2 arguments, but takes just 1
+    == after ctest exit 8
+    85% tests passed, 9 tests failed out of 61
+    	  3 - deformer_golden (Failed)
+    	  4 - face_loader_regression (Failed)
+    	  5 - dfrm_strand (Failed)
+    	 12 - levelobj_short_record_aquarium_thai_reef (Failed)
+    	 39 - opaque_material_programs (Failed)
+    	 40 - prelit_material_flags (Failed)
+    	 46 - pixelmap_context_loss (Failed)
+    	 47 - egl_rebuild_depth (Failed)
+    	 48 - frame_profile_flush (Failed)
+    -- engine pytest (engine/wf_game of this tree)
+    3 passed in 4.52s
+    1 failed, 1 passed in 1.65s
+
+    == before: wfengine game/main.cc defines with CHEATS/TEST_CODE: -DDO_TEST_CODE=0
+    targets that failed to build: CMakeFiles/dfrm_strand_test.dir/tests/dfrm_strand.cc.o
+    tests/dfrm_strand.cc:45:42: error: macro "delete" passed 2 arguments, but takes just 1
+    == before ctest exit 8
+    85% tests passed, 9 tests failed out of 61
+    	  (the same nine)
+    -- engine pytest (engine/wf_game of this tree)
+    3 passed in 4.16s
+    1 failed, 1 passed in 1.63s
+    E       AssertionError: ['DBSTREAMS UI_FONT unavailable: cd.iff has no UIFT chunk (repack it with cdpack, which adds wfsource/source/game/ui-font.wfga)']
+
+    $ diff <failing tests, after> <failing tests, before> && echo "failing sets identical"
+    failing sets identical
+    $ diff <passing tests, after> <passing tests, before> && echo "passing sets identical"
+    passing sets identical      (52 each)
+    ```
+    The nine fail the same way in both trees: `dfrm_strand` (F1, not built), `face_loader_regression` (`make-loader-fixture.py` exits 2), `opaque_material_programs`, `pixelmap_context_loss`, `egl_rebuild_depth` (UBSan: null `LMalloc` at `gfx/glpipeline/backend_factory.cc:269`), `prelit_material_flags` (an engine assertion), `frame_profile_flush` (LeakSanitizer), `deformer_golden` and `levelobj_short_record_aquarium_thai_reef`. All predate this change; they belong to the Debug ASan ctest tree, which nothing ran before.
+    **PASS**: the same 52 pass and the same 9 fail before and after; `test_game_shutdown` passes on both; `test_ui_font_missing` fails identically on the pre-change engine (F2 confirmed).
+
 ### Findings: two failures that predate this change
 
-- **F1 `dfrm_strand_test` does not compile in any Debug build.** `f86a9339` (2026‑11‑03, "Improve reef preview and fix aquarium loading") added `void operator delete(void* p, std::size_t) noexcept` at `tests/dfrm_strand.cc:45`. With `DO_ASSERTIONS=1`, `memory/memory.hp:169–170` defines the function-like macros `new(param)` and `delete(param)` (`MEMORY_TRACK_FILE_LINE`), so the two-argument `delete(` is a macro call with too many arguments. Release builds (no `DO_ASSERTIONS`) are unaffected, which is why the CMake Release ctest trees never showed it. **Confirmed pre-change:** it fails with the switches off, whose `wfengine` defines are byte-identical to `origin`'s CMake Debug (step 6), and the TU includes nothing this change touched. A one-line `#undef new` / `#undef delete` in the test after its includes would fix it; not done here (not this change's code).
-- **F2 `test_ui_font_missing.py::test_a_bundle_without_the_font_stops_start_up` fails on every debug-defines engine.** `game/main.cc:594` (unchanged since the 2010 first commit) writes `DBSTREAMS ` with no newline to `cver`, which is `std::cerr` (`cpplib/stdstrm.cc:45`), whenever `SW_DBSTREAM > 0`; the `UI_FONT unavailable` fatal line then lands on the same stderr line. The test (`ffd7fe2f`, 2026‑10‑17) compares the whole line, so it passes only on a Release engine (`SW_DBSTREAM=0`). Neither gate involves `DESIGNER_CHEATS` or `DO_TEST_CODE`. **Not yet observed on a pre-change engine:** a lean pre-change Debug build (about 0.7 GB) would have crossed the 15 GB floor. Fix options for whoever owns it: end the banner line, or match the line with `endswith`.
+- **F1 `dfrm_strand_test` does not compile in any Debug build.** `f86a9339` (2026‑11‑03, "Improve reef preview and fix aquarium loading") added `void operator delete(void* p, std::size_t) noexcept` at `tests/dfrm_strand.cc:45`. With `DO_ASSERTIONS=1`, `memory/memory.hp:169–170` defines the function-like macros `new(param)` and `delete(param)` (`MEMORY_TRACK_FILE_LINE`), so the two-argument `delete(` is a macro call with too many arguments. Release builds (no `DO_ASSERTIONS`) are unaffected, which is why the CMake Release ctest trees never showed it. **Confirmed pre-change:** it fails to compile in the real `1a82f942` tree (step 5, second pass), and with the switches off, whose `wfengine` defines are byte-identical to `origin`'s CMake Debug (step 6), and the TU includes nothing this change touched. A one-line `#undef new` / `#undef delete` in the test after its includes would fix it; not done here (not this change's code).
+- **F2 `test_ui_font_missing.py::test_a_bundle_without_the_font_stops_start_up` fails on every debug-defines engine.** `game/main.cc:594` (unchanged since the 2010 first commit) writes `DBSTREAMS ` with no newline to `cver`, which is `std::cerr` (`cpplib/stdstrm.cc:45`), whenever `SW_DBSTREAM > 0`; the `UI_FONT unavailable` fatal line then lands on the same stderr line. The test (`ffd7fe2f`, 2026‑10‑17) compares the whole line, so it passes only on a Release engine (`SW_DBSTREAM=0`). Neither gate involves `DESIGNER_CHEATS` or `DO_TEST_CODE`. **Confirmed pre-change** (step 5, second pass): the `1a82f942` engine fails with the identical `DBSTREAMS UI_FONT unavailable` line. Fix options for whoever owns it: end the banner line, or match the line with `endswith`.
 6. Android's compile definitions are unchanged: configure the Android NDK build at `origin/2026-new-level` and at the change, and diff the `wfengine` defines (`build.ninja` `DEFINES`); no difference. Same check for a desktop Release configure.
 
     `wfengine`'s `DEFINES` for `game/main.cc`, configured in the container (NDK 26.2.11394342, arm64-v8a, android-21) from `origin`'s `CMakeLists.txt` (before) and this change's (after):
@@ -270,7 +337,31 @@ Run 2026‑11‑14 in the sparse worktree `.worktrees/single-desktop-build` at `
     2026-11-14T06:26:45Z local-ci: arena-faces-up: PASS (6 s)
     2026-11-14T06:26:45Z local-ci: renderer-fresh: SKIP (no engine) (0 s)
     ```
-    **NOT COMPLETED**: the build was killed by this session's disk guard (`docker kill` when free space reached 15.3 GB, exit 137), not by a compile error; the same commit's dev engine built and passed renderer-fresh in steps 1–3. The clone, the harness copy and the `dev` builder ran; rerun when the disk allows.
+    That first run was killed by this session's disk guard (`docker kill` at 15.3 GB free, exit 137), not by a compile error.
+
+    **Timer run, 2026‑11‑14 21:01 +07** (after disk was freed): the runner clone's `local-ci.sh --poll` on the then HEAD `b8bffa69`, which contains this change, with the `dev` builder:
+    ```
+    $ journalctl --user -u wf-local-ci.service --since "2026-11-14 20:55" --until "2026-11-14 21:15"
+    Nov 14 21:01:04 will-latitude5320 systemd[1133]: Starting wf-local-ci.service - WorldFoundry local CI: build wf_game and run the renderer and arena tests on a new origin/2026-new-level...
+    Nov 14 21:01:11 will-latitude5320 local-ci.sh[1035498]: 2026-11-14T14:01:11Z local-ci: testing b8bffa694a58 (Close touch cancellation/recovery: Pixel step 5 passes with recording off), builder dev; results in /home/will/WorldFoundry-wbniv/build-docker/local-ci
+    Nov 14 21:11:03 will-latitude5320 local-ci.sh[1035498]: 2026-11-14T14:11:03Z local-ci: build: PASS (586 s)
+    Nov 14 21:11:05 will-latitude5320 local-ci.sh[1035498]: 2026-11-14T14:11:05Z local-ci: arena-faces-up: PASS (2 s)
+    Nov 14 21:11:17 will-latitude5320 local-ci.sh[1035498]: 2026-11-14T14:11:17Z local-ci: renderer-fresh: PASS (12 s)
+    Nov 14 21:11:18 will-latitude5320 systemd[1133]: Finished wf-local-ci.service - WorldFoundry local CI: build wf_game and run the renderer and arena tests on a new origin/2026-new-level.
+    $ cat build-docker/local-ci/latest
+    WF local CI   PASS
+    commit        b8bffa694a58  Close touch cancellation/recovery: Pixel step 5 passes with recording off
+    builder       dev
+    started       2026-11-14T14:01:11Z
+    finished      2026-11-14T14:11:17Z   (606 s)
+    results       /home/will/WorldFoundry-wbniv/build-docker/local-ci/b8bffa694a58
+
+    step                 result                 seconds
+    build                PASS                   586
+    arena-faces-up       PASS                   2
+    renderer-fresh       PASS                   12
+    ```
+    **PASS**
 8. Nothing still calls `build_game.sh`: `git grep -n build_game -- ':!docs/plans' ':!docs/transcripts' ':!docs/diagnostics'` lists only the retirement notes.
 
     Left after the sweep: the retirement notes (`CMakeLists.txt`, `scripts/build-wf-game.sh`, `scripts/local-ci.sh` aliases, `docs/dev-setup.md`, project memory), `TODO.md`, and dated records that describe what was true then (`docs/investigations/`, `docs/qbert/plans/`, `docs/drop-dead-renderers-plan.md`, `docs/BUGS.md`). Live how-tos (`docs/level-building.md`, `docs/linux-engine-port.md`, `docs/dev-setup.md`) now say `task build`.
