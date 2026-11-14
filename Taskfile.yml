@@ -2158,6 +2158,16 @@ tasks:
     cmds:
       - python3 -m pytest tests/test_level_menu.py -v
 
+  ci:local:
+    desc: "Local CI: build wf_game and run the renderer-freshness and snowgoons arena tests on origin/2026-new-level (or COMMIT=) in a throwaway sparse clone, in the Linux test container; results in build-docker/local-ci/latest (docs/plans/2026-11-14-local-ci.md)"
+    cmds:
+      - scripts/local-ci.sh {{.COMMIT}}
+
+  ci:install:
+    desc: "Install the local CI's systemd user timer (polls origin/2026-new-level every 30 min); idempotent, no sudo"
+    cmds:
+      - scripts/install-local-ci.sh
+
   linux-test-image:
     desc: "Build the Linux build/test container image (toolchain, X11/GL headers, Xvfb, Mesa llvmpipe): docker/Dockerfile.linux-test. Builds and tests run in this container, not on the host."
     cmds:

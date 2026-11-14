@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-14](https://github.com/wbniv/WorldFoundry/commit/c4dfbb7f) | Plans index: add the android-input-latency and planted-gl-memory-swing rows |
 | [2026-11-14](https://github.com/wbniv/WorldFoundry/commit/750a8db4) | Q*bert: the Blender generator regenerates a level that loads and plays |
 | [2026-11-14](https://github.com/wbniv/WorldFoundry/commit/583111c1) | Build a one-acre Snowgoons yard and add a snowgoon |
 | [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/7cdf39b7) | Balcony screen frame: fit 1, 2, 3 or 4 solar inserts; index the new docs |
@@ -75,6 +76,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+c4dfbb7f	author	Will Norris
+c4dfbb7f	added	2
+c4dfbb7f	deleted	0
+c4dfbb7f	files	1
+c4dfbb7f	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 750a8db4	author	Will Norris
 750a8db4	added	1
 750a8db4	deleted	0

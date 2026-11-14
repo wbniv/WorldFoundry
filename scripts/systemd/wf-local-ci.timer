@@ -1,0 +1,14 @@
+# Installed into ~/.config/systemd/user/ by scripts/install-local-ci.sh.
+# Every 30 min: a from-scratch engine build took 17 min under load, so shorter ticks would
+# mostly hit the lock (which makes an overlap a no-op anyway). Plan: docs/plans/2026-11-14-local-ci.md
+[Unit]
+Description=Poll origin/2026-new-level for the WorldFoundry local CI every 30 minutes
+
+[Timer]
+OnBootSec=5min
+OnCalendar=*:0/30
+RandomizedDelaySec=2min
+Persistent=false
+
+[Install]
+WantedBy=timers.target

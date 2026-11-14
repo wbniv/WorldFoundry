@@ -1,0 +1,13 @@
+# Rendered into ~/.config/systemd/user/ by scripts/install-local-ci.sh (@REPO@ = the checkout).
+# Plan: docs/plans/2026-11-14-local-ci.md
+[Unit]
+Description=WorldFoundry local CI: build wf_game and run the renderer and arena tests on a new origin/2026-new-level
+After=network-online.target
+
+[Service]
+Type=oneshot
+Nice=10
+IOSchedulingClass=idle
+ExecStart=@REPO@/scripts/local-ci.sh --poll
+# A step failure (exit 1) is a CI result, already notified; do not mark the unit failed for it.
+SuccessExitStatus=1

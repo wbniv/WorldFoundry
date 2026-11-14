@@ -22,6 +22,8 @@ Environment:
   WF_CONTAINER_CPUS     CPU cap (default all)
   WF_CONTAINER_ENV      space-separated docker -e entries, NAME or NAME=VALUE (no
                         spaces inside an entry); NAME alone forwards the caller's value
+  WF_CONTAINER_LABELS   space-separated docker --label entries, KEY=VALUE (no spaces
+                        inside an entry), e.g. org.wbniv.purpose=local-ci
   WF_CONTAINER_NETWORK  docker --network value (default: Docker's default bridge)
   WF_BLENDER_DOCKERFILE the Dockerfile for blender's first build (default Dockerfile.blender;
                         Dockerfile.blender.public where the lab registry is unreachable)
@@ -60,6 +62,9 @@ extra=()
 [ -n "${WF_CONTAINER_NETWORK:-}" ] && extra+=(--network "$WF_CONTAINER_NETWORK")
 for entry in ${WF_CONTAINER_ENV:-}; do
     extra+=(-e "$entry")
+done
+for entry in ${WF_CONTAINER_LABELS:-}; do
+    extra+=(--label "$entry")
 done
 # Files must come out owned by the calling user. A rootful daemon maps container
 # uids 1:1, so run as $(id -u). A rootless daemon maps container uid 0 to the
