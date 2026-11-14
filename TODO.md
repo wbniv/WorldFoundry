@@ -26,7 +26,6 @@
 
 - [T4] **Lua remote step debugger** — MobDebug / LuaLS-DAP wired into `lua_engine` for in-game step debugging.
 - [T3] **Review actor variable space w.r.t. scripting languages** — audit whether per-actor `_ENV` (Lua), JS object state, wasm linear memory, and Fennel locals all play well with the fixed-size mailbox array; document per-language limits.
-- [T5] **Review `write-actor-mailbox` — consider removing.** Custom syscall id 2 ([`engine/stubs/scripting_zforth.cc`](engine/stubs/scripting_zforth.cc)) lets one actor poke another's local mailbox (action-at-a-distance). Architecturally cleaner alternative is the signal-mailbox pattern in [`docs/level-building.md`](docs/level-building.md#mailbox-scope-rules). Only the qbert cube-colour fan-out uses it; weigh removal vs leaving a sharp tool in the box.
 - [T3] **Finish "priorities working in updates" — per-tick script execution ordering.** [`level.cc`](wfsource/source/game/level.cc) (~:978) has a hardcoded Director-after-loop special case ("FIX - manually update director until we get priorities working in updates"). No priority/phase mechanism for actor scripts → signal-mailbox chains incur a 1-tick lag at the consumer. Fix: add a `Priority`/`Phase` field to `common.inc`; sort the actor-update iteration by it. Trigger: when a level surfaces a noticeable lag. [docs/level-building.md](docs/level-building.md)
 - [T3] **Neural-forth pool size constants as OAD fields** (`NF_MAX_TENSORS`, `NF_MAX_PARAMS`, `NF_SLOT_VOCAB_SIZE`, …) — expose per-actor limits so complex AI nets can opt into larger pools without paying the cost globally.
 - [T4] **Redesign the shared Forth script loader** around parser/compiler boundaries, including arbitrary defining/immediate-word layouts; separate from the focused comment fix. [plan](docs/plans/2026-09-25-forth-comments-and-script-loading.md)
@@ -198,6 +197,7 @@
 
 
 ## Done
+- ✅ 2026‑11‑14 — [write-actor-mailbox-review] Kept (Will: close): every aquarium rig, condo camera, baseline, reef and Q*bert drive it per frame; not Q*bert-only.
 - ✅ 2026‑11‑14 — [seahorse-actor30-ship] Debug asserts on the bug; aquarium b71b08fc on both casts; a cast1 trace hit a 1.4e‑4 leftover, skipped. See [evidence](docs/diagnostics/seahorse-actor30-2026-10-18/README.md).
 - ✅ 2026‑11‑14 — [actor-mailbox-null-guard] Rejected (Will): skip-and-log guards go against the engine; `LookupMailboxes` asserts, so test in Debug first. See [evidence](docs/diagnostics/seahorse-actor30-2026-10-18/README.md).
 - ✅ 2026‑11‑14 — [qbert-blender-pipeline] Regenerates a level matching the committed one; actor refs resolved at export, CamShot check fires in Release. See [plan](docs/plans/2026-11-14-qbert-blender-pipeline-repair.md).
