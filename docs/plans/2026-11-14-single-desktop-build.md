@@ -195,7 +195,21 @@ Run 2026‑11‑14 in the sparse worktree `.worktrees/single-desktop-build` at `
     **PASS**
 4. The bug-class proof holds with the CMake dev builder: `scripts/local-ci.sh --no-notify --tests-from 23658e9a be86bbb9` fails both `arena-faces-up` and `renderer-fresh`; `scripts/local-ci.sh --no-notify 23658e9a` passes both.
 
-    **NOT RUN**: each run is a from-scratch dev build (about 2.5 GB with its clone), and free space was already at the 15 GB stop line. To run when the disk allows: the two commands above, from a checkout that has this change (the build scripts and the pre-option shim are the runner's).
+    **NOT RUN** on the first pass (disk). Second pass, 2026‑11‑14 14:39 +07, from this worktree:
+
+    ```
+    $ WF_CI_RESULTS=~/WorldFoundry-wbniv/build-docker/local-ci scripts/local-ci.sh --no-notify --tests-from 23658e9a be86bbb9
+    2026-11-14T06:39:46Z local-ci: testing be86bbb9b006 (Index nine plans that had no row in docs/plans/README.md) with the tests of 23658e9a6cc6, builder dev; results in /home/will/WorldFoundry-wbniv/build-docker/local-ci/be86bbb9b006-tests-23658e9a6cc6
+    2026-11-14T06:40:04Z local-ci: overlaid the CI tests from 23658e9a6cc6
+    2026-11-14T06:40:05Z local-ci: backfilled cmake/wf-game-dev.cmake from the runner (not in be86bbb9b006)
+    2026-11-14T06:40:05Z local-ci: CMakeLists.txt of be86bbb9b006 predates WF_DESIGNER_CHEATS: passing -DCMAKE_CXX_FLAGS=-DDESIGNER_CHEATS=1
+    2026-11-14T07:01:38Z local-ci: build: PASS (1293 s)
+    2026-11-14T07:01:45Z local-ci: arena-faces-up: FAIL (7 s)
+    E           AssertionError: wflevels/cd.iff@149144: 283 of 283 horizontal arena faces point down; the floor is culled from above. Its migration decision must be reverse_all, not keep.
+    2026-11-14T07:01:56Z local-ci: renderer-fresh: FAIL (10 s)
+    tests/test_renderer_references_fresh.py::test_reference_matches_a_fresh_linux_capture[snowgoons]      ← log ends here
+    ```
+    **PARTIAL**. The backfill and the pre-option shim work: a commit from before this change built as the dev engine (1293 s). The arena test failed on the real bug. The renderer-fresh result does **not** count: the session's disk guard killed its container at 15.09 GB free, mid-test, while the 4.0 GB clone was still on disk. The control run at `23658e9a` was stopped before its build for the same reason. Both are still owed and need about 20 GB free (the 15 GB floor plus a run's 4–5 GB peak).
 5. The ctest and pytest suites that passed before still pass: ctest of the dev configuration before (`-DWF_DESIGNER_CHEATS=OFF -DWF_TEST_CODE=OFF`, the old CMake Debug defines) and after, same pass set; the engine-binary pytest tests (`test_game_shutdown.py`, `test_ui_font_missing.py`) pass with the dev engine.
 
     Engine-binary pytest, dev engine:
@@ -218,6 +232,11 @@ Run 2026‑11‑14 in the sparse worktree `.worktrees/single-desktop-build` at `
     after: dfrm_strand.cc.o exit 1; first error: tests/dfrm_strand.cc:45:42: error: macro "delete" passed 2 arguments, but takes just 1
     ```
     The `-k 0` rerun of both configurations and their ctest was killed by the disk guard at 15.1 GB free. **PARTIAL**: shutdown PASS; `test_ui_font_missing` FAIL on a cause that predates this change; ctest before/after **NOT RUN**.
+
+### Findings: two failures that predate this change
+
+- **F1 `dfrm_strand_test` does not compile in any Debug build.** `f86a9339` (2026‑11‑03, "Improve reef preview and fix aquarium loading") added `void operator delete(void* p, std::size_t) noexcept` at `tests/dfrm_strand.cc:45`. With `DO_ASSERTIONS=1`, `memory/memory.hp:169–170` defines the function-like macros `new(param)` and `delete(param)` (`MEMORY_TRACK_FILE_LINE`), so the two-argument `delete(` is a macro call with too many arguments. Release builds (no `DO_ASSERTIONS`) are unaffected, which is why the CMake Release ctest trees never showed it. **Confirmed pre-change:** it fails with the switches off, whose `wfengine` defines are byte-identical to `origin`'s CMake Debug (step 6), and the TU includes nothing this change touched. A one-line `#undef new` / `#undef delete` in the test after its includes would fix it; not done here (not this change's code).
+- **F2 `test_ui_font_missing.py::test_a_bundle_without_the_font_stops_start_up` fails on every debug-defines engine.** `game/main.cc:594` (unchanged since the 2010 first commit) writes `DBSTREAMS ` with no newline to `cver`, which is `std::cerr` (`cpplib/stdstrm.cc:45`), whenever `SW_DBSTREAM > 0`; the `UI_FONT unavailable` fatal line then lands on the same stderr line. The test (`ffd7fe2f`, 2026‑10‑17) compares the whole line, so it passes only on a Release engine (`SW_DBSTREAM=0`). Neither gate involves `DESIGNER_CHEATS` or `DO_TEST_CODE`. **Not yet observed on a pre-change engine:** a lean pre-change Debug build (about 0.7 GB) would have crossed the 15 GB floor. Fix options for whoever owns it: end the banner line, or match the line with `endswith`.
 6. Android's compile definitions are unchanged: configure the Android NDK build at `origin/2026-new-level` and at the change, and diff the `wfengine` defines (`build.ninja` `DEFINES`); no difference. Same check for a desktop Release configure.
 
     `wfengine`'s `DEFINES` for `game/main.cc`, configured in the container (NDK 26.2.11394342, arm64-v8a, android-21) from `origin`'s `CMakeLists.txt` (before) and this change's (after):
