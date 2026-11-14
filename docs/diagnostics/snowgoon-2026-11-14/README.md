@@ -32,3 +32,12 @@ verification was blocked by its lock screen, after its installation succeeded.
 See [installation-summary.json](installation-summary.json). The prior arena's performance measurements remain
 historical evidence for that earlier scene; no new performance claim is made for
 the added actor.
+
+
+## Pixel unlocked follow-up
+
+After Will unlocked the Pixel, coordinator check J‑ef936d1a750f passed. The
+installed APK hash matches the snowgoon build, and the captured frame was
+reviewed: the snowgoon is visible on the lawn. The earlier lock-screen
+verification block is cleared. The job receipt and APK hash verification are
+saved in `pixel-unlocked-check/`; full captures remain in coordinator evidence.

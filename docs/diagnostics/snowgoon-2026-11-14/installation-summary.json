@@ -21,5 +21,10 @@
       "installed_sha256": "cb734288b45f0cbe1f63862c311586362fd0a2eeb3f83692b4d9a3a5f7c304e0"
     }
   ],
-  "pixel_launch_verification": "blocked by lock screen; installation hash verified"
+  "pixel_launch_verification": {
+    "status": "passed",
+    "job": "J-ef936d1a750f",
+    "snowgoon_visible": true,
+    "installed_sha256": "cb734288b45f0cbe1f63862c311586362fd0a2eeb3f83692b4d9a3a5f7c304e0"
+  }
 }

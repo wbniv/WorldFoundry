@@ -1,0 +1,14 @@
+[
+  {
+    "input": "cb734288b45f0cbe1f63862c311586362fd0a2eeb3f83692b4d9a3a5f7c304e0.apk",
+    "package": "org.worldfoundry.wf_game",
+    "before_sha256": "cb734288b45f0cbe1f63862c311586362fd0a2eeb3f83692b4d9a3a5f7c304e0",
+    "action": "reuse",
+    "reason": "exact-match",
+    "variant": null,
+    "status": "verified",
+    "start": 1794618703.2441857,
+    "installed_sha256": "cb734288b45f0cbe1f63862c311586362fd0a2eeb3f83692b4d9a3a5f7c304e0",
+    "end": 1794618703.2843988
+  }
+]
