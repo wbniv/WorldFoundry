@@ -2,8 +2,6 @@
 
 ## Open
 
-- [verify T3] **Coordinator touch cancellation and recovery.** Finish diagnosing the failed cancellation and verify on a device that an interrupted active touch is automatically released without a reboot; retain the fence when release cannot be proven. The pre-injection recovery change passed the coordinator suite but requires deployment and live verification. [plan](docs/plans/2026-11-06-coordinator-touch-cancellation-recovery.md)
-
 - [verify T4] **Baseline settings cleanup: two owners.** Built: Field types (the 27 type × showAs cases) and Runtime settings, both at (2, −4, 1); sample owners, empty section and gallery preset removed from the level. Host tests, desktop and bundle checks pass. The editable Show FPS row is accepted ("we totally want this option"). Device acceptance (2026‑11‑01, coordinator 0.1.26): `baseline-settings` and `baseline-picker` pass on cast1 and cast2; `baseline-runtime-options` fails because the Runtime rows are read-only on the phone, a known gap kept whole until runtime editing exists (Will, 2026‑11‑01: "yes"). The 27 Field types rows were captured on cast1 (2026‑11‑01) with five observations in the plan. The Pixel launches the level (2026‑11‑01); its picker and forms were not driven: the coordinator's phone-input jobs are one tap each and relaunch the app at cleanup. On 2026‑11‑02 both validators ran on the Pixel and ended `plugin-error` (they drive TV keys; the phone shows the touch form); its picker and forms stay unchecked. Not done: `baseline-runtime-options`, and the Pixel's picker and forms. [plan](docs/plans/2026-10-31-baseline-settings-cleanup.md) Follow-up 2026‑11‑13: current actor form reached on cast1, but the deployed validator expects retired Settings and stops before edits. Pixel rendering passes; both owned touch scores fail the exact root-geometry guard before injection. Validator/frame-context proposals prepared, not deployed. [follow-up evidence](docs/diagnostics/runtime-editing-followups-2026-11-13/README.md)
 ### Platform / Display
 
@@ -203,6 +201,7 @@
 
 
 ## Done
+- ✅ 2026‑11‑14 — [touch-cancel-recovery] Pixel: down/move/up, held contact cancelled and released without reboot, same boot. See [plan](docs/plans/2026-11-06-coordinator-touch-cancellation-recovery.md).
 - ✅ 2026‑11‑14 — [write-actor-mailbox-review] Kept (Will: close): every aquarium rig, condo camera, baseline, reef and Q*bert drive it per frame; not Q*bert-only.
 - ✅ 2026‑11‑14 — [seahorse-actor30-ship] Debug asserts on the bug; aquarium b71b08fc on both casts; a cast1 trace hit a 1.4e‑4 leftover, skipped. See [evidence](docs/diagnostics/seahorse-actor30-2026-10-18/README.md).
 - ✅ 2026‑11‑14 — [actor-mailbox-null-guard] Rejected (Will): skip-and-log guards go against the engine; `LookupMailboxes` asserts, so test in Debug first. See [evidence](docs/diagnostics/seahorse-actor30-2026-10-18/README.md).

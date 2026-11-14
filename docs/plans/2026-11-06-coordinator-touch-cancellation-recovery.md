@@ -1,6 +1,6 @@
 # Coordinator: touch cancellation and recovery without unnecessary reboot
 
-**Status: implementation in progress, 2026‑11‑06.** First resolve the coordinator's touch cancellation problem. The reef triangle/normal fix is a separate plan and waits for discussion and explicit engine permission.
+**Status: verified on the Pixel 2026‑11‑14 (recording off; see Verification).** Implementation started 2026‑11‑06. First resolve the coordinator's touch cancellation problem. The reef triangle/normal fix is a separate plan and waits for discussion and explicit engine permission.
 
 Coordinator commit `189025245ba5c6601aae4fe59ff4154fca37d680` adds a flushed pre-injection trace and automatic reconciliation when a stopped helper proves that it aborted before dispatching any touch. Additional changes require a complete, bounded trace and reject truncated or ambiguous evidence; otherwise recovery still attempts cancellation and retains the fence if release cannot be verified. The full rootless container suite passed (3,469 passed, 61 skipped), as did eight JVM helper tests. Live verification remains outstanding. In particular, the cause of the original cancellation failure and recovery of an interrupted active contact have not yet been proven on a device.
 
@@ -60,3 +60,140 @@ Step 5 was not exercised. No touch command reached the device, so nothing here s
 - No touch was injected. Two effects remain journaled for the next successful readd: `foreground` (restore to `com.google.android.apps.nexuslauncher/.NexusLauncherActivity`) and `recording-001` (`/data/local/tmp/wf-J-8421feb80c52-segment-001.mp4`).
 - Pattern, not a proven cause: both of today's drops on the Pixel happened while the job was running a 12 Mbit/s `screenrecord`. The first drop came about 5 minutes in, during the 202 MB pull; this one came within 8 s of the recorder starting. In both, the phone stopped being reachable on the network while the host stayed healthy. The evidence does not show whether the phone's Wi‑Fi, wireless debugging or sleep state changed.
 - Step 5 remains NOT RUN. The TODO item stays `[verify T3]`.
+
+## Verification (step 5), 2026‑11‑14, coordinator 0.1.156: PASS (no recording)
+
+Fifth attempt, after the coordinator's readds J‑1722f61af34d (it ran J‑8421feb80c52's cleanup: HOME restored, segment removed) and J‑5f1fb8e65f3b (endpoint 192.168.4.35:39001). All three jobs used the same owned session request with **`record: false`**. This is a deliberate deviation from step 5's "recordings", requested by the coordinator after two transport drops that both happened during a 12 Mbit/s recording. Evidence is the device touch trace, the initial, named and final PNGs, `touch-evidence.json` and the cleanup receipts. There is no video. Score frame: 2244×1008, rotation 1, `content_rect` `[113,0,2244,1008]`, which the guard accepted for the baseline APK, so the reef-APK fallback was not needed. Before every edge the helper confirmed that the target package `org.worldfoundry.wf_game.baseline` owned the active window's root.
+
+**The transport stayed up through all three jobs without recording** (13:48Z–13:56Z), all on boot `9d2bdf59-6cef-4a22-84ad-a5f6d40b32c4` (device uptime rises continuously: anchors 429344363 → 429526819 → 429595440). This is evidence, not proof, that the recorder triggers the drops.
+
+1. ~~**Job A, J‑c969e78c3f7c: real down/move/up, normal cleanup.**~~ Command 2 `touch-script` applied, `touch_edges: 4`. Device trace:
+
+    ```text
+    TRACE,2
+    ANCHOR,429344363,1794664226257
+    INJECT,1
+    1,200,429344600,0,0,1200,500,1
+    INJECT,2
+    2,600,429345001,0,1,1300,520,1
+    INJECT,3
+    3,1000,429345386,0,1,1400,540,1
+    INJECT,4
+    4,1400,429345809,0,2,1400,540,1
+    COMPLETE,429345820
+    ```
+
+    Receipt:
+
+    ```json
+    {
+     "status": "succeeded",
+     "reason": "completed",
+     "health": "ready",
+     "survivors": [],
+     "foreground": {
+      "component": "com.google.android.apps.nexuslauncher/.NexusLauncherActivity"
+     },
+     "remote:/data/local/tmp/wf-J-c969e78c3f7c-step-0002-touch-log.csv": {
+      "removed": "/data/local/tmp/wf-J-c969e78c3f7c-step-0002-touch-log.csv"
+     },
+     "remote:/data/local/tmp/wf-J-c969e78c3f7c-step-0002-touch.csv": {
+      "removed": "/data/local/tmp/wf-J-c969e78c3f7c-step-0002-touch.csv"
+     },
+     "remote:/data/local/tmp/wf-J-c969e78c3f7c-step-0002-touch.jar": {
+      "removed": "/data/local/tmp/wf-J-c969e78c3f7c-step-0002-touch.jar"
+     }
+    }
+    ```
+
+    **PASS.** One deviation: `input:finish` was refused with `Owned interactive job is not accepting input` (its phase stayed `touch-input` after the command applied), so the job ended on the 120 s idle limit and then ran its ordinary cleanup.
+
+2. ~~**Job B, J‑8ba432e6360a: interrupted active hold released automatically, without a reboot.**~~ Score: down at 0.2 s, move at 1.0 s, up at 14.0 s. `task chromecast:cancel` was sent 8 s after the job entered `touch-input`. Recovered device trace (down and move accepted, no up, no `COMPLETE`; the anchor is 13:53:28.713Z, so the up was due at 13:53:42.7Z):
+
+    ```text
+    TRACE,2
+    ANCHOR,429526819,1794664408713
+    INJECT,1
+    1,200,429527058,0,0,1200,500,1
+    INJECT,2
+    2,1000,429527860,0,1,1250,510,1
+    ```
+
+    Cleanup commands: `kill -2` on the helper's processes at 13:53:36.6Z, a `ps` check, the trace pulled, then `WfTouchScore --cancel` at 13:53:37.5Z, with its log read back at 13:53:38.1Z. The coordinator accepts `touch_cancelled` only when that log contains `CANCEL,…,1`. Then the owned files were removed, baseline was force-stopped and HOME was started. Job result: `cancelled: owner-cancelled`, health `ready`, no fence. Receipt:
+
+    ```json
+    {
+     "status": "cancelled",
+     "reason": "owner-cancelled",
+     "health": "ready",
+     "survivors": [],
+     "foreground": {
+      "component": "com.google.android.apps.nexuslauncher/.NexusLauncherActivity"
+     },
+     "remote:/data/local/tmp/wf-J-8ba432e6360a-step-0001-touch-log.csv": {
+      "removed": "/data/local/tmp/wf-J-8ba432e6360a-step-0001-touch-log.csv"
+     },
+     "remote:/data/local/tmp/wf-J-8ba432e6360a-step-0001-touch.csv": {
+      "removed": "/data/local/tmp/wf-J-8ba432e6360a-step-0001-touch.csv"
+     },
+     "remote:/data/local/tmp/wf-J-8ba432e6360a-step-0001-touch.jar": {
+      "removed": "/data/local/tmp/wf-J-8ba432e6360a-step-0001-touch.jar"
+     },
+     "touch-score-step-0001": {
+      "helper_stopped": true,
+      "touch_cancelled": true
+     }
+    }
+    ```
+
+    **PASS.** As expected, the cancelled job has no recording. The client's own touch call returned `touch-script rejected: {'error': 'Owner cancelled execution'}`.
+
+3. ~~**Job C, J‑14f864eb470c: ordinary touch on the same boot after recovery.**~~ `touch_edges: 4`. Device trace:
+
+    ```text
+    TRACE,2
+    ANCHOR,429595440,1794664477334
+    INJECT,1
+    1,200,429595674,0,0,1200,500,1
+    INJECT,2
+    2,600,429596094,0,1,1300,520,1
+    INJECT,3
+    3,1000,429596474,0,1,1400,540,1
+    INJECT,4
+    4,1400,429596879,0,2,1400,540,1
+    COMPLETE,429596886
+    ```
+
+    Receipt:
+
+    ```json
+    {
+     "status": "succeeded",
+     "reason": "completed",
+     "health": "ready",
+     "survivors": [],
+     "foreground": {
+      "component": "com.google.android.apps.nexuslauncher/.NexusLauncherActivity"
+     },
+     "remote:/data/local/tmp/wf-J-14f864eb470c-step-0001-touch-log.csv": {
+      "removed": "/data/local/tmp/wf-J-14f864eb470c-step-0001-touch-log.csv"
+     },
+     "remote:/data/local/tmp/wf-J-14f864eb470c-step-0001-touch.csv": {
+      "removed": "/data/local/tmp/wf-J-14f864eb470c-step-0001-touch.csv"
+     },
+     "remote:/data/local/tmp/wf-J-14f864eb470c-step-0001-touch.jar": {
+      "removed": "/data/local/tmp/wf-J-14f864eb470c-step-0001-touch.jar"
+     }
+    }
+    ```
+
+    **PASS.** The same `input:finish` refusal as job A applied; the job ended on the idle limit with ordinary cleanup.
+
+4. ~~**No surviving contact or helper; foreground restored.**~~ All three receipts show `survivors: []` and the owned touch files removed. Job B's journal entry `touch-score-step-0001` was restored with `helper_stopped: true, touch_cancelled: true`. Each job restored the HOME launcher (`com.google.android.apps.nexuslauncher/.NexusLauncherActivity`), which was in front when the run started. Afterwards the Pixel was `ready` with no pending cleanup. **PASS.**
+
+Follow-ups, not part of this acceptance:
+- After a touch command, `input:finish` is refused while the phase still reads `touch-input`, so interactive touch jobs end only on the idle limit.
+- The two drops with recording on (J‑20c62f455e96, J‑8421feb80c52) still lack a concrete cause.
+
+Private evidence (frames, logs) stays outside Git.
+
