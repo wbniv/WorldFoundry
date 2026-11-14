@@ -43,3 +43,9 @@ Step 5 was not exercised. No touch command reached the device, so nothing here s
 - A read-only capture, J‑adfc5fd31af1, was queued to test that detection live. It never started. The whole Android transport was `held by shared transport recovery` while cast1 sat in another session's recovery (automatic readd J‑3c8f67cb8540, origin J‑92e1e13969a3).
 - Will then began using the Pixel, and the verifier was told to stop. J‑adfc5fd31af1 was cancelled while still queued (`cancelled`, `started: null`). No touch job was submitted and no contact was injected. No fence or held contact belongs to this verification. Pixel health afterwards: `ready`. The foreground was left as Will had it.
 - **Step 5 is still unverified.** Down/move/up: NOT RUN. Interrupted active hold released without a reboot: NOT RUN. Evidence (timeline, recordings, receipts, no survivor): NOT RUN. The TODO item stays `[verify T3]`.
+
+### Third attempt, 2026‑11‑14 (12:54Z–13:24Z): blocked by the shared Android transport
+
+- Will cleared the Pixel for use again. Job A, J‑03d0ba7f54b2 (same session request), queued at 12:54Z and stayed `queued` for 29 minutes, according to the status-based wait loop. Every Android device showed `held by shared transport recovery`: cast1 was `recovery-required`, and its automatic readds kept failing with `device-not-found-on-network` (the latest being J‑831844b31006). The hold had lasted about 1 h 46 min. Other sessions' Pixel jobs were queued behind it as well (readd J‑ecb810a695e4, `screensaver-list` J‑e3be34504746 and J‑2c32ac409021).
+- J‑03d0ba7f54b2 was cancelled while still queued (`cancelled`, `started: null`), so it could not start unattended and idle out over the phone's foreground. No touch was injected, and no fence or contact belongs to this verification. The Pixel remains `ready`.
+- Step 5 remains NOT RUN. It needs cast1's transport hold cleared, or the Pixel separated from that hold, first.
