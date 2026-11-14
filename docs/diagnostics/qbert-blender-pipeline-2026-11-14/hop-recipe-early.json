@@ -1,0 +1,52 @@
+{
+ "workflow": "check",
+ "device": "chromecast-test-01",
+ "app": "qbert",
+ "apk": "/home/will/tmp/qbert-blender-pipeline/worldfoundry-qbert-release.apk",
+ "duration": 24,
+ "panel": "require-hidden",
+ "input_script": [
+  {
+   "at": 1.0,
+   "capture": "after-intro"
+  },
+  {
+   "at": 1.5,
+   "key": "DPAD_RIGHT",
+   "action": "hold",
+   "ms": 100
+  },
+  {
+   "at": 2.5,
+   "capture": "after-right-tap"
+  },
+  {
+   "at": 3.0,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 100
+  },
+  {
+   "at": 4.0,
+   "capture": "after-down-tap"
+  },
+  {
+   "at": 4.5,
+   "key": "DPAD_RIGHT",
+   "action": "hold",
+   "ms": 2000
+  },
+  {
+   "at": 5.0,
+   "capture": "during-right-hold"
+  },
+  {
+   "at": 7.0,
+   "capture": "after-right-hold"
+  },
+  {
+   "at": 21.0,
+   "capture": "later"
+  }
+ ]
+}

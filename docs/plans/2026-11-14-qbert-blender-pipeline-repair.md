@@ -255,8 +255,7 @@ would use the main checkout's exporter), the engine (Release, `WF_ASAN=OFF`) and
     after DOWN {400: 2.0, 401: 1.0, 402: 0.0, 418: 1.0, 419: 0.0, 420: 0.0, ..., 433: 0.625, ...}
     zforth errors: 2      (both "zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)")
     ```
-    The same readings as the shipped level in the remote-hop plan. PASS. Not re-checked on a
-    device.
+    The same readings as the shipped level in the remote-hop plan. PASS. On a device: step 7.
 
 6. A second regeneration is byte-identical to the first (`.lev`, `.lvl`, mesh files).
 
@@ -270,3 +269,80 @@ would use the main checkout's exporter), the engine (Release, `WF_ASAN=OFF`) and
     `qbert-cd.iff`). The `.blend` differs run to run (Blender writes save-time data); it is
     committed because it now carries the `{{actor:…}}` scripts, and `.blend1` (Blender's backup
     of the previous save) is left as committed.
+
+7. Device, cast1 through the coordinator (approved follow-up, Will 2026‑11‑14: "check new cd.iff
+   on cast1"): the Q\*bert release APK built from 750a8db4 is installed with a `check`; the game
+   does not end before the first key press, Q\*bert hops on `DPAD_RIGHT` and `DPAD_DOWN`, the
+   run's log has no zForth error and no fatal line, a capture shows the pyramid, and cast1's
+   screensaver settings are unchanged. Evidence in
+   [`docs/diagnostics/qbert-blender-pipeline-2026-11-14/`](../diagnostics/qbert-blender-pipeline-2026-11-14/).
+
+    **APK.** `assembleQbertRelease` (the flavour and build type of the remote-hop APK) at 750a8db4,
+    in `wf-blender:local` (Ubuntu 26.04, the host's distro) with the host's JDK 21,
+    `~/android-sdk-local` (NDK 26.2) and rustup (Android targets) mounted
+    (`build-docker/qbert-pipeline/build-qbert-apk.sh`, not committed: no Android image exists yet):
+    ```
+    APK page alignment: PASS (.../worldfoundry-qbert-release.apk)
+    BUILD SUCCESSFUL in 3m 18s
+    package: name='org.worldfoundry.wf_game.qbert' versionCode='7' versionName='0.5-qbert'
+    sha256 2c4427d73d8b2f8e79feec5d033f52b0adc8f643075b8fe57d6d551623d35a6c
+    assets/cd.iff sha256 7351bad0... == wflevels/qbert-cd.iff (750a8db4)
+    Signer #1 certificate SHA-256 digest: 79f65b24...c4cb   (the installed APK's)
+    ```
+    Installed before: versionCode 7, sha `742196b4` (the 41c48094 build, `inspect` J‑51534dae0dab);
+    same versionCode, newer build. The first container build signed with a throwaway debug key
+    (under rootless `--user 0:0` Java's `user.home` is `/root`), and cast1 refused it, changing
+    nothing: J‑7321db904812 `install-refused`, `INSTALL_FAILED_UPDATE_INCOMPATIBLE`,
+    `installed_sha256` still `742196b4`. Rebuilt with `user.home`/`ANDROID_USER_HOME` on the host
+    home; the signer then matches.
+
+    **Run 1, the remote-hop recipe unchanged** (`hop-recipe.json`, keys at 12.5/14.0/15.5 s),
+    J‑e4adf6447b87: queued behind the coordinator's maintenance pause, then `completed`;
+    install `742196b4` → `2c4427d7` verified.
+    ```
+    key code=22 action=0 mask=0x2000   DPAD_RIGHT tap
+    key code=20 action=0 mask=0x1000   DPAD_DOWN tap
+    key code=22 action=0 mask=0x2000   DPAD_RIGHT held 2.0 s
+    after-intro        Q*bert on the apex, all tops blue
+    after-right-tap    Q*bert on (1,1), its top yellow
+    after-down-tap     intro camera, all tops blue: the game had ended and DOWN restarted it
+    after-right-hold   (still in the replayed intro) / later: Q*bert on the apex, Coily on the board
+    ```
+    The first key press hopped, so the game had not ended before it; the DOWN press found the game
+    over. Cause, reproduced in the level-script VM for **both** the committed and the regenerated
+    `.lev` (identical frame for frame): Q\*bert stood idle on the apex ~19 s after the intro before
+    the first key (22.7 s from `EGL ready` to the first key; 21.7 s in the remote-hop run), the
+    board's enemies had taken two lives by then, and the third death right after the hop ends the
+    game. Pressing RIGHT after ≥ 19.25 s idle gives game over before the DOWN press; ≤ 19.0 s
+    does not; the remote-hop run sat 1 s earlier, on the other side of that line
+    (`build-docker/qbert-pipeline/vm_scan.py`):
+    ```
+    delay 1140 (19.00s): lives at press 1, game over before DOWN 0 ...   (both levels)
+    delay 1155 (19.25s): lives at press 1, game over before DOWN 1 ...   (both levels)
+    ```
+    FAIL for the recipe, not for the level: the timing, not the build, decides it.
+
+    **Run 2, the same keys and captures 11 s earlier** (`hop-recipe-early.json`), J‑1769bf80c39e:
+    `completed`, APK reused (`exact-match`, `2c4427d7`).
+    ```
+    key code=22 action=0 mask=0x2000   planned  1.5 s  DPAD_RIGHT tap
+    key code=20 action=0 mask=0x1000   planned  3.0 s  DPAD_DOWN tap
+    key code=22 action=0 mask=0x2000   planned  4.5 s  DPAD_RIGHT held 2.0 s
+    after-intro        Q*bert on the apex, all tops blue, Coily on the board (input-frame-001.png)
+    after-right-tap    Q*bert on (1,1), its top yellow
+    after-down-tap     (1,1) and (2,1) yellow, Q*bert hopping on down-right
+    after-right-hold   a yellow trail down the right-hand side to (6,5), Q*bert on (3,3); game on
+    wf-this-run.log (the app's wf.log from this launch's banner; the file keeps earlier launches):
+      zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)   x4, nothing else matching zforth
+      fatal / assertion / abort / segfault lines: 0;  logcat: 0 zforth, 0 fatal
+    ```
+    PASS. The persistent `wf.log` also holds ~20,000 `zforth compile error 2 (call)` lines for
+    every enemy script; all are from launches before this one (the same lines are in the
+    remote-hop run's copy), none from either run here.
+
+    **cast1 left as found**, `screensaver-list` before (J‑41bef52475e2) and after (J‑0c428cf8b8c6):
+    ```
+    before selected_component org.worldfoundry.seahorsegrid/...SeahorseGridDreamService, stay_on_while_plugged_in 0, sleep_timeout_ms -1, idle_timeout_ms 600000
+    after  selected_component org.worldfoundry.seahorsegrid/...SeahorseGridDreamService, stay_on_while_plugged_in 0, sleep_timeout_ms -1, idle_timeout_ms 600000
+    ```
+    PASS. cast1 now runs the 750a8db4 Q\*bert APK (`2c4427d7`).

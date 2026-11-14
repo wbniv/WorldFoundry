@@ -1,0 +1,10 @@
+{
+  "parser_limit_bytes": 16777216,
+  "read_complete": true,
+  "received_bytes": 557358,
+  "saved_bytes": 557358,
+  "artifact_truncated": false,
+  "sha256": "58a317f4d0657fe5c6a04548ed762dbfa157b30dec12015e484fb51628340d09",
+  "parsed": true,
+  "session_observed": true
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "input": "ae8a91ed2c286ad68eec0daf37f14c85a0202d5d8d351e0337cf106c1e06ec56.apk",
+    "package": "org.worldfoundry.wf_game.qbert",
+    "before_sha256": "742196b486f491d1a63619cea3063254f09df58e4c305f45628e8518c8c58a16",
+    "action": "install",
+    "reason": "different-hash",
+    "variant": null,
+    "status": "refused",
+    "start": 1794626709.6148689,
+    "journal_key": "install:1",
+    "install_failure": "INSTALL_FAILED_UPDATE_INCOMPATIBLE",
+    "installed_sha256": "742196b486f491d1a63619cea3063254f09df58e4c305f45628e8518c8c58a16",
+    "end": 1794626726.7959564
+  }
+]

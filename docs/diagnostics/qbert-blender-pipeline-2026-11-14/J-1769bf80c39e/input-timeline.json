@@ -1,0 +1,235 @@
+{
+  "schema": 1,
+  "score_sha256": "9e58c3666e1f6f2cf5e64edc98d5fa42fce2d65e1b7e8c12e29b3a3e0861b18e",
+  "clock_calibration": {
+    "offset_seconds": 0.921297550201416,
+    "uncertainty_seconds": 0.12513644790649414
+  },
+  "device_anchor": {
+    "device_uptime_ms": 583969279,
+    "device_wall_ms": 1794630303611
+  },
+  "host_start_wall": 1794630303.3044713,
+  "events": [
+    {
+      "seq": 1,
+      "t": 1500,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 583970811,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 1532,
+      "lateness_ms": 32
+    },
+    {
+      "seq": 2,
+      "t": 1600,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 583970915,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 1636,
+      "lateness_ms": 36
+    },
+    {
+      "seq": 3,
+      "t": 3000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 583972327,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 3048,
+      "lateness_ms": 48
+    },
+    {
+      "seq": 4,
+      "t": 3100,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 583972401,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 3122,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 5,
+      "t": 4500,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 583973797,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 4518,
+      "lateness_ms": 18
+    },
+    {
+      "seq": 6,
+      "t": 6500,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 583975820,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 6541,
+      "lateness_ms": 41
+    }
+  ],
+  "emergency_releases": [],
+  "foreground_aborts": [],
+  "captures": [
+    {
+      "label": "after-intro",
+      "planned_ms": 1000,
+      "started": 1794630305.5333128,
+      "ended": 1794630307.1010861,
+      "file": "input-frame-001.png",
+      "bytes": 24649,
+      "schedule_lateness_ms": 1
+    },
+    {
+      "label": "after-right-tap",
+      "planned_ms": 2500,
+      "started": 1794630307.1011238,
+      "ended": 1794630308.5682273,
+      "file": "input-frame-002.png",
+      "bytes": 25153,
+      "schedule_lateness_ms": 69
+    },
+    {
+      "label": "after-down-tap",
+      "planned_ms": 4000,
+      "started": 1794630308.5682461,
+      "ended": 1794630310.2397616,
+      "file": "input-frame-003.png",
+      "bytes": 24471,
+      "schedule_lateness_ms": 36
+    },
+    {
+      "label": "during-right-hold",
+      "planned_ms": 5000,
+      "started": 1794630310.239777,
+      "ended": 1794630311.6452098,
+      "file": "input-frame-004.png",
+      "bytes": 25223,
+      "schedule_lateness_ms": 707
+    },
+    {
+      "label": "after-right-hold",
+      "planned_ms": 7000,
+      "started": 1794630311.6452358,
+      "ended": 1794630313.1988485,
+      "file": "input-frame-005.png",
+      "bytes": 25020,
+      "schedule_lateness_ms": 113
+    },
+    {
+      "label": "later",
+      "planned_ms": 21000,
+      "started": 1794630325.5324285,
+      "ended": 1794630326.9924808,
+      "file": "input-frame-006.png",
+      "bytes": 25591,
+      "schedule_lateness_ms": 0
+    }
+  ],
+  "result": "completed",
+  "key_log": {
+    "tolerance_ms": 100,
+    "log_interval_complete": false,
+    "matching_edges": [
+      {
+        "seq": 1,
+        "logged": {
+          "device_wall_ms": 1794630305143,
+          "code": 22,
+          "edge": "down"
+        },
+        "difference_ms": 0
+      },
+      {
+        "seq": 2,
+        "logged": {
+          "device_wall_ms": 1794630305240,
+          "code": 22,
+          "edge": "up"
+        },
+        "difference_ms": -7
+      },
+      {
+        "seq": 3,
+        "logged": {
+          "device_wall_ms": 1794630306658,
+          "code": 20,
+          "edge": "down"
+        },
+        "difference_ms": -1
+      },
+      {
+        "seq": 4,
+        "logged": {
+          "device_wall_ms": 1794630306725,
+          "code": 20,
+          "edge": "up"
+        },
+        "difference_ms": -8
+      },
+      {
+        "seq": 5,
+        "logged": {
+          "device_wall_ms": 1794630308128,
+          "code": 22,
+          "edge": "down"
+        },
+        "difference_ms": -1
+      },
+      {
+        "seq": 6,
+        "logged": {
+          "device_wall_ms": 1794630310143,
+          "code": 22,
+          "edge": "up"
+        },
+        "difference_ms": -9
+      }
+    ],
+    "ambiguous": [],
+    "foreign_keys": [],
+    "unmatched_observed_if_incomplete": [],
+    "dropped_sensitive_lines": 0,
+    "truncated": false
+  }
+}

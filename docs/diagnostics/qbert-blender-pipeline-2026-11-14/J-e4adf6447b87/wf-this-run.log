@@ -1,0 +1,104 @@
+=== wf_game android_main (log → /storage/emulated/0/Android/data/org.worldfoundry.wf_game.qbert/files/wf.log) ===
+[583514.267659] (y.wf_game.qbert) Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+Could not open module param file '/sys/module/mali_kbase/parameters/large_page_conf'
+[583514.277290] (y.wf_game.qbert) Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+audio: miniaudio v0.11.25 ready
+UI_FONT 1024x2048 atlas, 2770432 bytes
+jolt: RegisterDefaultAllocator
+jolt: Factory
+jolt: RegisterTypes
+jolt: RunSelftest
+jolt: selftest ok (sphere fell to z=5.098)
+jolt: backend init
+jolt: init complete
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+Level::Level: leveldata= 0xd9c260b0, object count  = 68
+PixelMap::Load: this = 0xd94f2ed0
+PixelMap::Load: this = 0xd94f2ef8
+[Actor] idx=1 class=17 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=3 class=23 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=4 class=13 commonOff=50616 NumberOfLocalMailboxes=0
+this = 0xd94f6400,setting _memory to 0xd94f5e80
+[Actor] idx=5 class=20 commonOff=51320 NumberOfLocalMailboxes=0
+[Actor] idx=7 class=11 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=8 class=16 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=9 class=22 commonOff=51952 NumberOfLocalMailboxes=6
+[Actor] idx=10 class=3 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=11 class=3 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=12 class=16 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=13 class=16 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=14 class=16 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=15 class=16 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=16 class=16 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=17 class=16 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=18 class=6 commonOff=52368 NumberOfLocalMailboxes=0
+[Actor] idx=19 class=6 commonOff=52568 NumberOfLocalMailboxes=0
+[Actor] idx=20 class=6 commonOff=52768 NumberOfLocalMailboxes=0
+[Actor] idx=21 class=6 commonOff=52968 NumberOfLocalMailboxes=0
+[Actor] idx=22 class=6 commonOff=53168 NumberOfLocalMailboxes=0
+[Actor] idx=23 class=6 commonOff=53368 NumberOfLocalMailboxes=0
+[Actor] idx=24 class=6 commonOff=53568 NumberOfLocalMailboxes=0
+[Actor] idx=25 class=6 commonOff=53768 NumberOfLocalMailboxes=0
+[Actor] idx=26 class=6 commonOff=53968 NumberOfLocalMailboxes=0
+[Actor] idx=27 class=6 commonOff=54168 NumberOfLocalMailboxes=0
+[Actor] idx=28 class=6 commonOff=54368 NumberOfLocalMailboxes=0
+[Actor] idx=29 class=6 commonOff=54568 NumberOfLocalMailboxes=0
+[Actor] idx=30 class=6 commonOff=54612 NumberOfLocalMailboxes=0
+[Actor] idx=31 class=6 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=32 class=6 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=33 class=6 commonOff=54968 NumberOfLocalMailboxes=0
+[Actor] idx=34 class=6 commonOff=55168 NumberOfLocalMailboxes=0
+[Actor] idx=35 class=6 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=36 class=6 commonOff=55212 NumberOfLocalMailboxes=0
+[Actor] idx=37 class=6 commonOff=55256 NumberOfLocalMailboxes=0
+[Actor] idx=38 class=6 commonOff=55300 NumberOfLocalMailboxes=0
+[Actor] idx=39 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=40 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=41 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=42 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=43 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=44 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=45 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=46 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=47 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=48 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=49 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=50 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=51 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=52 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=53 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=54 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=55 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=56 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=57 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=58 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=59 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=60 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=61 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=62 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=63 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=64 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=65 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=66 class=5 commonOff=50616 NumberOfLocalMailboxes=0
+[Actor] idx=67 class=23 commonOff=50616 NumberOfLocalMailboxes=0
+ROOM-RENDER scope=all-active source=default
+PixelMap::Load: this = 0xd94f2f20
+PixelMap::Load: this = 0xd94f2f48
+material: texture="curse_bubble_text.tga"  bTranslucent=0  bitdepth=15  flags_in=0x2
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+audio: MusicPlayer — soundfont not found: florestan-subset.sf2
+audio: sfx[0] not found: wflevels/qbert_practice/sfx/qbert_hop.wav
+audio: sfx[1] not found: wflevels/qbert_practice/sfx/qbert_land.wav
+audio: sfx[2] not found: wflevels/qbert_practice/sfx/qbert_fall.wav
+audio: sfx[3] not found: wflevels/qbert_practice/sfx/qbert_swear.wav
+audio: sfx[4] not found: wflevels/qbert_practice/sfx/qbert_round_clear.wav
+audio: sfx[5] not found: wflevels/qbert_practice/sfx/qbert_kill.wav
+audio: sfx[6] not found: wflevels/qbert_practice/sfx/qbert_disc.wav
+delta too large: 0.2380828857
+timeofday:1794629848:990074
+lasttimeofday: 1794629848:751986
+deltatime:0:238088
+delta: 0.2380828857
+VIEW authored=0.000 screen=1.778 hfov=91.5 vfov=60.0 maximum=0.000 surface=1920x1080 viewport=0,0,1920x1080 pillarbox=0 source=default

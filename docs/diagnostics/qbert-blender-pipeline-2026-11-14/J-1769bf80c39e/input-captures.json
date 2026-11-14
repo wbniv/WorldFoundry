@@ -1,0 +1,62 @@
+{
+  "score_sha256": "9e58c3666e1f6f2cf5e64edc98d5fa42fce2d65e1b7e8c12e29b3a3e0861b18e",
+  "host_start_wall": 1794630303.3044713,
+  "host_start_monotonic": 881640.175204965,
+  "captures": [
+    {
+      "label": "after-intro",
+      "planned_ms": 1000,
+      "started": 1794630305.5333128,
+      "ended": 1794630307.1010861,
+      "file": "input-frame-001.png",
+      "bytes": 24649,
+      "schedule_lateness_ms": 1
+    },
+    {
+      "label": "after-right-tap",
+      "planned_ms": 2500,
+      "started": 1794630307.1011238,
+      "ended": 1794630308.5682273,
+      "file": "input-frame-002.png",
+      "bytes": 25153,
+      "schedule_lateness_ms": 69
+    },
+    {
+      "label": "after-down-tap",
+      "planned_ms": 4000,
+      "started": 1794630308.5682461,
+      "ended": 1794630310.2397616,
+      "file": "input-frame-003.png",
+      "bytes": 24471,
+      "schedule_lateness_ms": 36
+    },
+    {
+      "label": "during-right-hold",
+      "planned_ms": 5000,
+      "started": 1794630310.239777,
+      "ended": 1794630311.6452098,
+      "file": "input-frame-004.png",
+      "bytes": 25223,
+      "schedule_lateness_ms": 707
+    },
+    {
+      "label": "after-right-hold",
+      "planned_ms": 7000,
+      "started": 1794630311.6452358,
+      "ended": 1794630313.1988485,
+      "file": "input-frame-005.png",
+      "bytes": 25020,
+      "schedule_lateness_ms": 113
+    },
+    {
+      "label": "later",
+      "planned_ms": 21000,
+      "started": 1794630325.5324285,
+      "ended": 1794630326.9924808,
+      "file": "input-frame-006.png",
+      "bytes": 25591,
+      "schedule_lateness_ms": 0
+    }
+  ],
+  "result": "completed"
+}

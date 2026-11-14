@@ -1,0 +1,10 @@
+         1794630293.683 29209 29230 I wf_game : phone controller: off (no assets/layout.json)
+         1794630293.683 29209 29230 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+         1794630293.688 29209 29230 I wf_game : APP_CMD_RESUME
+         1794630293.720 29209 29230 I wf_game : APP_CMD_INIT_WINDOW
+         1794630305.143 29209 29230 I wf_game : key code=22 action=0 mask=0x2000
+         1794630305.240 29209 29230 I wf_game : key code=22 action=1 mask=0x2000
+         1794630306.658 29209 29230 I wf_game : key code=20 action=0 mask=0x1000
+         1794630306.725 29209 29230 I wf_game : key code=20 action=1 mask=0x1000
+         1794630308.128 29209 29230 I wf_game : key code=22 action=0 mask=0x2000
+         1794630310.143 29209 29230 I wf_game : key code=22 action=1 mask=0x2000
