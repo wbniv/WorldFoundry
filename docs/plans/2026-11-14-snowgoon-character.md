@@ -13,7 +13,7 @@ two-headed snowman silhouette from `snowman01.iff`. The existing 200-triangle
 mesh has thin, static twig arms; it is not a rig and cannot establish that those
 actions will read correctly.
 
-![2D orthographic concept sheet: front, left profile, back, and right profile; two near-equal smooth heads, visible front carrot nose, and three thin twig arms](2026-11-14-snowgoon-character/concept-turnaround-2d-v8.png)
+![2D orthographic concept sheet: front, left profile, back, and right profile; two near-equal smooth heads, visible front carrot nose, mirrored rear/profile head offsets, and three thin twig arms](2026-11-14-snowgoon-character/concept-turnaround-2d-v10.png)
 
 This is a flat 2D concept sheet for the 3D modeler and image-to-3D inputs. The
 four views are ordered front, left profile, back, and right profile. The earlier
@@ -176,9 +176,10 @@ snow body bare.
   scale, base/origin, body/head proportions, three-arm layout, twig joints,
   hand shape, reach, and neutral pose at play distance.
 - [x] Produce a corrected four-view 2D concept sheet: the front carrot nose is
-  visible, the back is a true rear view, the left and right profiles face
-  opposite directions and are labeled, and all three twig arms retain the
-  approved thin, long proportions. See `concept-turnaround-2d-v8.png`.
+  visible, the back is a true rear view with the head offset mirrored from the
+  front, the left and right profiles face opposite directions with their
+  near/far head offsets mirrored, and all three twig arms retain the approved
+  thin, long proportions. See `concept-turnaround-2d-v10.png`.
 - [ ] Inspect orthographic consistency and source resolution, then crop the
   views and save labels, preprocessing settings, and SHA-256 hashes in a unique
   input run directory. No GPU instance before this input gate passes.
