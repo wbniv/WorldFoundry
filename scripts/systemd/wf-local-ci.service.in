@@ -1,13 +1,21 @@
-# Rendered into ~/.config/systemd/user/ by scripts/install-local-ci.sh (@REPO@ = the checkout).
+# Rendered into ~/.config/systemd/user/ by scripts/install-local-ci.sh.
+#   @RUNNER@  the runner clone (scripts/ and cmake/ only), moved to origin's HEAD before each tick
+#   @RESULTS@ the results directory (the main checkout's build-docker/local-ci)
+# The runner is not the shared checkout: that one is worked in by several sessions and is
+# often stale or dirty, which froze the timer on an old local-ci.sh.
 # Plan: docs/plans/2026-11-14-local-ci.md
 [Unit]
-Description=WorldFoundry local CI: build wf_game and run the renderer and arena tests on a new origin/2026-new-level
+Description=WorldFoundry local CI: build wf_game and run the renderer and arena tests on a new origin/@BRANCH@
 After=network-online.target
 
 [Service]
 Type=oneshot
 Nice=10
 IOSchedulingClass=idle
-ExecStart=@REPO@/scripts/local-ci.sh --poll
+Environment=WF_CI_RESULTS=@RESULTS@
+Environment=WF_CI_BRANCH=@BRANCH@
+ExecStartPre=/usr/bin/git -C @RUNNER@ fetch -q origin @BRANCH@
+ExecStartPre=/usr/bin/git -C @RUNNER@ checkout -q --force --detach origin/@BRANCH@
+ExecStart=@RUNNER@/scripts/local-ci.sh --poll
 # A step failure (exit 1) is a CI result, already notified; do not mark the unit failed for it.
 SuccessExitStatus=1

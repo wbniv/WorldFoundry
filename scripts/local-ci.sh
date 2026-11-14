@@ -39,10 +39,13 @@ WF_DESIGNER_CHEATS, the dev builder passes -DCMAKE_CXX_FLAGS=-DDESIGNER_CHEATS=1
 Results: build-docker/local-ci/<sha12>[-tests-<rev12>]/ (summary.txt, result.tsv, one log
 per step), and build-docker/local-ci/latest (a copy of the newest summary).
 Exit: 0 all passed, nothing new, or another run holds the lock; 1 a step failed;
-      2 usage or preflight error (e.g. less than WF_CI_MIN_FREE_GB free).
+      2 usage or preflight error (e.g. less than WF_CI_MIN_FREE_GB + WF_CI_BUILD_GB free).
 
 Environment:
-  WF_CI_MIN_FREE_GB   free-disk floor in GB (default 15)
+  WF_CI_MIN_FREE_GB   free-disk floor in GB (default 15) that the run must not cross
+  WF_CI_BUILD_GB      what one run takes at its peak, in GB (default 5: the clone, its
+                      container copy and the dev engine's ASan build measured 4.0 GB);
+                      a run starts only with WF_CI_MIN_FREE_GB + WF_CI_BUILD_GB free
   WF_CI_SCRATCH       clone parent (default ~/.cache/wf-local-ci-scratch; disk-hygiene
                       ages out anything a killed run leaves there)
   WF_CI_RESULTS       results directory (default <repo>/build-docker/local-ci)
@@ -78,6 +81,7 @@ branch="${WF_CI_BRANCH:-2026-new-level}"
 results="${WF_CI_RESULTS:-$root/build-docker/local-ci}"
 scratch="${WF_CI_SCRATCH:-$HOME/.cache/wf-local-ci-scratch}"
 min_free="${WF_CI_MIN_FREE_GB:-15}"
+build_gb="${WF_CI_BUILD_GB:-5}"
 export WF_CONTAINER_MEMORY="${WF_CONTAINER_MEMORY:-8g}"
 export WF_CONTAINER_LABELS="org.wbniv.project=WorldFoundry-wbniv org.wbniv.purpose=local-ci org.wbniv.source=scripts/local-ci.sh"
 unset WF_CONTAINER_IMAGE   # the default, linux-test
@@ -89,8 +93,9 @@ die() { log "ERROR: $*" >&2; exit 2; }
 mkdir -p "$results" "$scratch"
 for dir in "$results" "$scratch"; do
     free="$(df -BG --output=avail "$dir" | tail -1 | tr -dc '0-9')"
-    [ "$free" -ge "$min_free" ] ||
-        die "only ${free} GB free on the filesystem of $dir (need ${min_free} GB, WF_CI_MIN_FREE_GB)"
+    # The floor must hold at the run's peak, not only at its start.
+    [ "$free" -ge $((min_free + build_gb)) ] ||
+        die "only ${free} GB free on the filesystem of $dir (need ${min_free} GB floor + ${build_gb} GB for the run: WF_CI_MIN_FREE_GB, WF_CI_BUILD_GB)"
 done
 docker info >/dev/null 2>&1 || die "Docker is not reachable (docker info failed)"
 
