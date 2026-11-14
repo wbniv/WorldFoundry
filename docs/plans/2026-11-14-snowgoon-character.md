@@ -27,6 +27,22 @@ branch to a two-armed source. The branches are geometry without a rig, so they
 cannot scoop, pack, or throw. A matched in-game capture is still needed to
 confirm scale and silhouette at play distance.
 
+### Reconstruction input layout
+
+The approved v10 sheet's arms crossed adjacent panel boundaries, so its panels
+cannot be cropped cleanly. This spaced v11 layout keeps the same four-view
+design direction and puts each complete figure in its own column. It is a
+preprocessing layout; v10 remains the approved concept artwork.
+
+![Spaced four-column 2D input layout with isolated front, left-profile, back, and right-profile Snowgoon drawings](2026-11-14-snowgoon-character/concept-turnaround-2d-v11-input-layout.png)
+
+The four square crops and reproducible preprocessing record are in
+[`input-runs/2026-11-14-v11/`](2026-11-14-snowgoon-character/input-runs/2026-11-14-v11/).
+The crops exclude labels and panel dividers, retain the complete figures, and
+use identical 543 × 543 RGB canvases without resizing. Review the front crop's
+small detached ink dash beside the left arm before using these as automated
+reconstruction inputs.
+
 ### Calvin & Hobbes visual references
 
 The source visual language is Bill Watterson's Calvin & Hobbes Snow Goons. The
@@ -171,7 +187,7 @@ snow body bare.
   thin twig arms, and no scarf. Will approved the sheet on 2026-11-14.
 - [x] Compare the approved concept with the original source mesh. Confirmed the
   source is 147 vertices/200 triangles, about 2.20 m tall, with two heads and
-  three static twig branches; see the diagnostic render above.
+  three static twig branches.
 - [ ] Compare the approved concept with a matched in-game view. Confirm actor
   scale, base/origin, body/head proportions, three-arm layout, twig joints,
   hand shape, reach, and neutral pose at play distance.
@@ -180,13 +196,16 @@ snow body bare.
   front, the left and right profiles face opposite directions with their
   near/far head offsets mirrored, and all three twig arms retain the approved
   thin, long proportions. See `concept-turnaround-2d-v10.png`.
-- [ ] Inspect orthographic consistency and source resolution, then crop the
-  views and save labels, preprocessing settings, and SHA-256 hashes in a unique
-  input run directory. No GPU instance before this input gate passes.
+- [x] Inspect the approved sheet and source resolution. The v10 illustration
+  has adjacent arm tips across panel boundaries, so use the separate v11 input
+  layout. Crop all four views at one scale and save labels, preprocessing
+  settings, and SHA-256 hashes in the unique run directory. A small detached
+  ink dash in the front crop is flagged for review before automated use.
 
-**Gate:** concept direction approved; four-view consistency and input
-preparation remain before reconstruction. A sheet with inconsistent views is
-not accepted as GPU input.
+**Gate:** concept direction approved and four view crops prepared. Review the
+flagged front-view ink dash and compare scale with an in-game capture before
+automated reconstruction. A sheet with inconsistent views is not accepted as
+GPU input.
 
 ### 2. GPU mesh and appearance candidates
 

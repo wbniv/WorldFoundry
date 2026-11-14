@@ -1,0 +1,102 @@
+{
+  "source": "concept-turnaround-2d-v11-input-layout.png",
+  "source_sha256": "4443f72ea5ebc3a11c77b74bde605c5799b2b94636fb5abc8af202cf69e2035a",
+  "source_dimensions_px": [
+    2172,
+    724
+  ],
+  "color_mode": "RGB",
+  "layout": "four equal, separated orthographic panels, left to right",
+  "preprocessing": {
+    "panel_split": "four equal-width columns",
+    "crop_y_px_exclusive": [
+      60,
+      603
+    ],
+    "panel_edge_trim_px": 4,
+    "resize": "none",
+    "labels_and_panel_dividers": "excluded from crops",
+    "canvas": "square RGB white background, no alpha"
+  },
+  "review_notes": [
+    "The front crop contains a small detached ink dash beside the left arm; review or mask before automated reconstruction."
+  ],
+  "views": [
+    {
+      "label": "front",
+      "file": "front.png",
+      "sha256": "bad4d5c75c12e96e0b6a77229b658f24a720d38e3af0ba928d369fe83c75df4e",
+      "source_crop_xyxy": [
+        4,
+        60,
+        539,
+        603
+      ],
+      "white_padding_px": {
+        "left": 4,
+        "right": 4
+      },
+      "dimensions_px": [
+        543,
+        543
+      ]
+    },
+    {
+      "label": "left-profile",
+      "file": "left-profile.png",
+      "sha256": "6d9a9c0f2ca7c5038a49f6f03b8557b5d624ddb008780437be292a9d1c242a33",
+      "source_crop_xyxy": [
+        547,
+        60,
+        1082,
+        603
+      ],
+      "white_padding_px": {
+        "left": 4,
+        "right": 4
+      },
+      "dimensions_px": [
+        543,
+        543
+      ]
+    },
+    {
+      "label": "back",
+      "file": "back.png",
+      "sha256": "01dd7e9ad849a7935e4da9ba39a3f51803b891ad519deec80cda02d491d2ddb1",
+      "source_crop_xyxy": [
+        1090,
+        60,
+        1625,
+        603
+      ],
+      "white_padding_px": {
+        "left": 4,
+        "right": 4
+      },
+      "dimensions_px": [
+        543,
+        543
+      ]
+    },
+    {
+      "label": "right-profile",
+      "file": "right-profile.png",
+      "sha256": "c6ff5f1b7a9804166c32e6595218aaf11138992ef83c7130df6177283496318b",
+      "source_crop_xyxy": [
+        1633,
+        60,
+        2168,
+        603
+      ],
+      "white_padding_px": {
+        "left": 4,
+        "right": 4
+      },
+      "dimensions_px": [
+        543,
+        543
+      ]
+    }
+  ]
+}
