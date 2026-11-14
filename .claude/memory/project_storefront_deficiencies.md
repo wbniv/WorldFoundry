@@ -4,7 +4,7 @@ description: Things the Blender sidebar asset browser can't do — captured as r
 type: project
 originSessionId: a53ff3a9-5044-46e2-a1ba-f4ed10c7b4dc
 ---
-These were identified while adding Sketchfab/commercial-provider support to `wftools/wf_blender/asset_browser.py` (2026-04-29). The user wants to build an improved storefront later; these are the gaps to solve.
+These were identified while adding Sketchfab/commercial-provider support to `wftools/wf_blender/asset_browser.py` (2026-04-29; now `wftools/blender_asset_finder/asset_browser.py`). The user wants to build an improved storefront later; these are the gaps to solve.
 
 1. **Linear-only layout** — Blender UIList is a fixed scrollable list; no masonry/grid, no resizable thumbnails. A web storefront could show 4–6 assets per row.
 2. **No in-viewport 3D preview** — can't orbit/inspect a model before importing. A storefront could embed a Sketchfab viewer iframe.

@@ -1031,7 +1031,7 @@ Most gameplay actors (platform, statplat) default to `VisibilityMailbox = 1` (re
 - **ActBoxOR objects**: write a named object's index to a mailbox when the Player enters
   their trigger volume. In snowgoons, one ActBoxOR writes `CamShot01`'s index to mailbox 1921 (`INDEXOF_CAMSHOT`)
   (`EMAILBOX_CAMSHOT`) when the Player enters.
-- **NullInterpreter stub**: `wftools/engine/stubs/scripting_stub.cc` — replaces Tcl scripting
+- **NullInterpreter stub**: `engine/stubs/scripting_stub.cc` — replaces Tcl scripting
   with a no-op. All `RunScript()` calls return 0. This is intentional pending replacement
   with a non-Tcl scripting system.
 
@@ -1049,7 +1049,7 @@ There is **no priority/phase/dependency mechanism for actor scripts.** Execution
 - A consumer that runs in the main loop will see the Director's writes only on the **next** tick (the Director hasn't run yet when the consumer fires in the main loop).
 - **Net result:** any signal chain that crosses through the Director and back into a main-loop actor accumulates exactly **one tick of lag** at the final consumer. At 60 Hz that's 16 ms — invisible for camera positioning, score updates, colour pulses; potentially relevant for input-driven physics if you're stacking multiple chains.
 
-**The alternative pattern — Director writes another actor's local mailbox directly via [`write-actor-mailbox`](../engine/stubs/scripting_zforth.cc) (custom syscall 2, signature `( val idx actor_idx -- )`)** — *also has the 1-tick lag*, because the target actor's update (which is what reads the changed mailbox) runs in the main loop before the Director's after-loop slot. The signal-chain design isn't slower than the direct-poke design on this metric; it's just architecturally cleaner. The direct-poke primitive is on the chopping block — see `TODO.md` § `SCRIPTING INFRASTRUCTURE`.
+**The alternative pattern — Director writes another actor's local mailbox directly via [`write-actor-mailbox`](../engine/stubs/scripting_zforth.cc) (custom syscall 2, signature `( val idx actor_idx -- )`)** — *also has the 1-tick lag*, because the target actor's update (which is what reads the changed mailbox) runs in the main loop before the Director's after-loop slot. The signal-chain design isn't slower than the direct-poke design on this metric; it's just architecturally cleaner. The direct-poke primitive stays: every aquarium rig, the condo camera, baseline, the reef and Q*bert drive it every frame (the removal review closed on 2026‑11‑14).
 
 **Controlling actor-index order within the main loop** — actors run in the order the Blender script creates them. To get producer-before-consumer ordering inside one tick, create the producer actor first in the `blender_create_*.py` script. If you're not sure, dump actor indices with `--debug-print-actors` (see [§ `--debug-print-actors`](#--debug-print-actors-debug-builds-only) above) and read off the load-order column. Note that this only gates intra-main-loop chains; it can't shorten chains that cross through the Director.
 

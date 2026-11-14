@@ -8,7 +8,7 @@
 |-------|-----------|
 | Engine | C++17 / CMake |
 | Scripting | Forth (zForth) — `WF_FORTH_ENGINE=zforth` |
-| Tools | Rust (iffcomp-rs, levcomp-rs, textile-rs, chargrab-rs) |
+| Tools | Rust (iffcomp-rs, levcomp-rs, textile-rs) |
 | Physics | Jolt |
 | Graphics | OpenGL (Linux/Android), Metal (iOS) |
 | Blender addon | Python (`wftools/wf_blender/`) |
@@ -75,7 +75,7 @@ The three angles are `a` (pitch / X-rot), `b` (roll / Y-rot), `c` (heading / Z-r
 currentDir() = (cos C, sin C, 0)
 ```
 
-> The comment in `movement.cc:698` says `(sin C, cos C, 0)` — that comment is **wrong**. The implementation is authoritative.
+> The comment in `movement.cc:711` says `(sin C, cos C, 0)` — that comment is **wrong**. The implementation is authoritative.
 
 | C value | currentDir | faces |
 |---------|-----------|-------|

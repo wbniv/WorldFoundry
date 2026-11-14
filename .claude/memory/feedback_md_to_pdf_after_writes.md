@@ -4,7 +4,7 @@ description: After any Write/Edit to a markdown file in this repo, run `task md 
 type: feedback
 originSessionId: 449354b2-8998-486b-a7dd-99e580496376
 ---
-After writing or updating any `.md` file in `/home/will/SRC/WorldFoundry-wbniv`, run `task md -- <path1> [<path2> ...]` (which calls `../python-tui-lib/scripts/md-to-pdf.sh`) without being asked. Multiple files in one invocation is fine and preferred.
+After writing or updating any `.md` file in `/home/will/WorldFoundry-wbniv`, run `task md -- <path1> [<path2> ...]` (which calls `~/python-tui-lib/scripts/md-to-html.sh` via the shared Taskfile) without being asked. Multiple files in one invocation is fine and preferred.
 
 **Why:** User expectation; they want to see the rendered output without having to ask each time. Confirmed 2026-04-28 after the user explicitly reminded me ("you're supposed to do this every time you write/update an .md file").
 

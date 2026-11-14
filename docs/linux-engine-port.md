@@ -150,7 +150,7 @@ until scripting is re-enabled.
 ## Scripting
 
 Tcl scripting is fully stubbed out (intentional — will be replaced with a non-Tcl system).
-See `wftools/engine/stubs/scripting_stub.cc`.
+See `engine/stubs/scripting_stub.cc`.
 
 Consequences of disabled scripting:
 - Player input forwarding (`write-mailbox $INDEXOF_INPUT ...`) doesn't run — player

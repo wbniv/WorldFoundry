@@ -205,6 +205,8 @@ Note: this is distinct from the older "wrong-coordinate-system" variant where th
 
 ### 5. Per-actor collision mailboxes are dead under Jolt physics
 
+**Status: fixed 2026‑05‑19** ([`6bb9a14a`](https://github.com/wbniv/WorldFoundry/commit/6bb9a14a)): `actor.cc` registers `JoltContactDispatch` through `JoltSetContactCallback`, so Jolt character contacts now call `Actor::Collision` on both actors and `COLLIDER_IDX` / `COLLISION_NORMAL_*` populate in interactive play. The entry below records the original failure.
+
 **Symptom:** Forth script that reads `INDEXOF_COLLIDER_IDX`, `INDEXOF_COLLISION_NORMAL_X/Y/Z` (mailboxes 3044–3047, added by [`f4071a3`](https://github.com/anthropics/wf/commit/f4071a3) — per-actor collision mailboxes) never sees a non-zero value during *interactive* play, even though the same script behaves correctly when the bridge directly `set_mailbox`'es those values. SMB W1-1's `?`-block "bump from below" trigger looks like this:
 
 ```forth
@@ -2387,7 +2389,7 @@ room proxy mirrors it.  The camshot tracks the proxy, which `GetObject` always f
 
 ## `MOBILITY_PHYSICS` actor as a quick driveable vehicle
 
-Proper Jolt `VehicleConstraint` is deferred (see `TODO.md`). In the meantime you can make any
+A real Jolt `VehicleConstraint` exists as `MOBILITY_VEHICLE` (`movement/movevehicle.cc`, since 2026‑06‑03, used by the moon level's Lunar Cruisers). For a quick hack without wheels you can still make any
 `MOBILITY_PHYSICS` actor respond to the joystick like a humanoid by combining two things:
 
 **1. Set `Script Controls Input = 'True'` on the vehicle actor.**  
@@ -2427,7 +2429,7 @@ vehicle_obj['wf_Turn Rate'] = 0.5   # non-zero → GroundHandler, not MarbleHand
 **Limitation:** the vehicle stays a Jolt `CharacterVirtual` — it can climb steps, fall, and
 collide with static geometry, but there's no suspension, steering angle, or wheel physics.
 The hack is useful for top-down or side-view contexts where the distinction isn't visible.
-See `TODO.md § VEHICLE PHYSICS` for the Jolt `VehicleConstraint` upgrade path.
+For suspension, steering and wheels use `MOBILITY_VEHICLE` instead (see `wflevels/moon_site01/blender_create_moon.py`).
 
 ---
 
