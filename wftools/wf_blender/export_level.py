@@ -441,6 +441,14 @@ def _write_iff_chunk(tag: str, payload: bytes) -> bytes:
     return tag_bytes + struct.pack('<I', size) + payload + b'\x00' * pad
 
 
+def _actor_refs_module():
+    try:
+        from . import actor_refs
+    except ImportError:          # loaded outside the add-on package (tests, scripts)
+        import actor_refs
+    return actor_refs
+
+
 def _dfrm_module():
     try:
         from . import dfrm_chunk
@@ -1229,6 +1237,10 @@ def export_scene_to_lev(context, filepath: str, mesh_dir: str = "") -> tuple[boo
     objects = [o for o in context.scene.objects if o.get(SCHEMA_PATH_KEY)]
     if not objects:
         return False, "No WF objects in scene (attach schemas first)"
+    # Actor references: `{{actor:NAME}}` in a script becomes NAME's index in this write
+    # order, and object-reference fields are checked against the exported names
+    # (wftools/wf_blender/actor_refs.py).
+    refs = {"indices": _actor_refs_module().index_map(o.name for o in objects), "errors": []}
 
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
     lines = ["{ 'LVL' "]
@@ -1378,7 +1390,7 @@ def export_scene_to_lev(context, filepath: str, mesh_dir: str = "") -> tuple[boo
         try:
             resolved = bpy.path.abspath(schema_path)
             schema = wf_core.load_schema(resolved)
-            emitted = _emit_lev_fields(obj, schema, fp)
+            emitted = _emit_lev_fields(obj, schema, fp, refs)
             for fl in emitted:
                 lines.append("\t\t" + fl)
             if typename.lower() == "light":
@@ -1425,6 +1437,8 @@ def export_scene_to_lev(context, filepath: str, mesh_dir: str = "") -> tuple[boo
         lines.append("\t}")
 
     lines.append("}")
+    if refs["errors"]:
+        return False, "Export refused: " + "; ".join(refs["errors"])
     text = "\n".join(lines) + "\n"
 
     try:
@@ -1660,7 +1674,7 @@ def _warn_if_light_fields_missing(obj, emitted, resolved_schema_path) -> None:
     )
 
 
-def _emit_lev_fields(obj, schema, fp) -> list[str]:
+def _emit_lev_fields(obj, schema, fp, refs=None) -> list[str]:
     """Walk every visible schema field and emit its value as a text-IFF
     chunk line matching the .lev format that iffcomp / levcomp-rs consume.
 
@@ -1668,7 +1682,25 @@ def _emit_lev_fields(obj, schema, fp) -> list[str]:
       { 'I32'  { 'NAME' "Mobility" } { 'DATA' 0l } { 'STR' "Anchored" } }
       { 'FX32' { 'NAME' "Mass" }     { 'DATA' 75.0(1.15.16) } { 'STR' "75.0" } }
       { 'STR'  { 'NAME' "Script" }   { 'STR' "write_mailbox(..." } }
+
+    `refs` ({"indices": {name: actor index}, "errors": [...]}, from export_scene_to_lev)
+    resolves `{{actor:NAME}}` in text fields and checks object references; an unknown
+    actor reference is appended to refs["errors"] and the export is refused. A dangling
+    object reference only warns: levcomp compiles it to "no object", and many template-
+    derived levels carry harmless ones (Adjacent Room 1, Tool A).
     """
+    import sys
+    actor_refs = _actor_refs_module()
+
+    def text_value(name, val):
+        text = str(val)
+        if refs is not None:
+            try:
+                text = actor_refs.resolve_actor_refs(text, refs["indices"], f"{obj.name}.{name}")
+            except ValueError as e:
+                refs["errors"].append(str(e))
+        return text
+
     lines = []
     for field in schema.fields():
         kind = field.kind
@@ -1734,7 +1766,7 @@ def _emit_lev_fields(obj, schema, fp) -> list[str]:
             # newlines inside `"..."`).  Mirrors the tokenizer's
             # escape-table on import.
             sv = (
-                str(val)
+                text_value(name, val)
                 .replace('\\', '\\\\')
                 .replace('"',  '\\"')
                 .replace('\n', '\\n')
@@ -1747,6 +1779,9 @@ def _emit_lev_fields(obj, schema, fp) -> list[str]:
 
         elif kind == "ObjRef":
             sv = str(val)
+            if refs is not None and actor_refs.dangling_reference(sv, refs["indices"]):
+                print(f"[wf_export] WARNING: {obj.name}.{name} names {sv!r}, which is not an "
+                      "exported object; levcomp will write no object", file=sys.stderr)
             lines.append(
                 f"{{ 'STR' {{ 'NAME' \"{name}\" }} "
                 f"{{ 'STR' \"{sv}\" }} }}")
@@ -1762,7 +1797,7 @@ def _emit_lev_fields(obj, schema, fp) -> list[str]:
             # stored text value, matching max2lev's XDATA→'STR' mapping.
             # Re-escape control characters (scripts can be multi-line).
             sv = (
-                str(val)
+                text_value(name, val)
                 .replace('\\', '\\\\')
                 .replace('"',  '\\"')
                 .replace('\n', '\\n')

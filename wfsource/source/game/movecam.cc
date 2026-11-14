@@ -33,6 +33,7 @@
 #include <math/euler.hp>
 
 #include <atomic>
+#include <cstdio>
 
 #include "movecam.hp"
 #include "camshot.hp"
@@ -242,6 +243,33 @@ CameraHandler::ResolveTrackObject(int32 idxTrackObject)
 }
 
 //============================================================================
+// A CamShot's Follow and Target name objects in the .lev; levcomp resolves the
+// names to object indices and writes 0 for a name it cannot find. That is bad
+// level data, not a programming invariant, so the check must fire in every
+// build: since 191c4c90 Release and MinSizeRel compile with DO_ASSERTIONS=0,
+// where assert() is ((void)0), and an unresolved Target then dereferenced a
+// null actor here (SIGSEGV on the first camera update). _sys_assert is the
+// engine's assertion report (box, backtrace, exit) and is compiled into every
+// build, so the assertion fires with the shot and the field named.
+
+static const PhysicalObject*
+RequireShotReference(const CamShot* shot, const char* field, int32 idxObject)
+{
+	const PhysicalObject* object = CameraHandler::ResolveTrackObject(idxObject);
+	if (!object)
+	{
+		char message[200];
+		snprintf(message, sizeof(message),
+		         "CamShot actor %d: %s is object %d, which is not an actor in this level "
+		         "(an object name the .lev could not resolve exports as 0)",
+		         int(shot->GetActorIndex()), field, int(idxObject));
+		std::fprintf(stderr, "%s\n", message);
+		_sys_assert(0, message, __FILE__, __LINE__);
+	}
+	return object;
+}
+
+//============================================================================
 // given a cameraShot struct, read all of the fields and fill out a cameraPosition struct accordingly
 
 int32
@@ -254,12 +282,9 @@ SetCameraParametersFromShot(const Actor* tempcamShotActor,cameraPosition& outPos
 
 	const _CamShot* shotData = camShotActor->GetOADData();           // oad shot data for this object
 	assert(shotData);
-	assert(shotData->Follow);
+	(void)bol;
 
-	BaseObject* bo = bol[shotData->Follow];
-   assert(ValidPtr(bo));
-   assert(IsPhysicalObject(bo));
-   PhysicalObject* po = static_cast<PhysicalObject*>(bo);
+	const PhysicalObject* po = RequireShotReference(camShotActor, "Follow", shotData->Follow);
 	const Vector3& followVect = po->GetPhysicalAttributes().PredictedPosition();
 
 	Vector3 camShotPos = camShotActor->GetPhysicalAttributes().PredictedPosition();
@@ -307,9 +332,7 @@ SetCameraParametersFromShot(const Actor* tempcamShotActor,cameraPosition& outPos
 //	outPos.direction.SetY(Scalar(shotData->LookAtY));
 //	outPos.direction.SetZ(Scalar(shotData->LookAtZ));
 
-	assert(shotData->Target);
-	assert(theLevel->GetObject(shotData->Target));
-	Vector3 targetPos = theLevel->getActor(shotData->Target)->GetPhysicalAttributes().PredictedPosition();
+	Vector3 targetPos = RequireShotReference(camShotActor, "Target", shotData->Target)->GetPhysicalAttributes().PredictedPosition();
 
 //	if(shotData->Focus)
 //	{			// relative

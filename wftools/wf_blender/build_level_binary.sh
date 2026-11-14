@@ -21,6 +21,9 @@
 # output is written to `wflevels/<level-name>.iff`.
 # WF_LEVEL_DIR optionally selects a different source directory (absolute, or
 # relative to the repository); final outputs still use wflevels/<level-name>.
+# WF_LEVEL_OUT_DIR optionally moves the final <level>.iff and <level>-standalone.iff
+# out of wflevels/ (a test building a level variant in a temp dir); the standalone
+# wrapper includes "../<level>.iff", so it must be the source directory's parent.
 # WF_TEXTILE_OUT_DIR optionally isolates atlas output when source models are
 # shared with another level; generated IFF includes point into that directory.
 
@@ -35,6 +38,7 @@ REPO="$(cd "$SCRIPT_DIR/../.." && pwd)"
 LEVEL_DIR="${WF_LEVEL_DIR:-$REPO/wflevels/$LEVEL}"
 [[ "$LEVEL_DIR" = /* ]] || LEVEL_DIR="$REPO/$LEVEL_DIR"
 LEVEL_DIR="$(cd "$LEVEL_DIR" && pwd)"
+OUT_DIR="${WF_LEVEL_OUT_DIR:-$REPO/wflevels}"
 OAD_DIR="$REPO/wfsource/source/oas"
 OBJECTS_LC="$OAD_DIR/objects.lc"
 
@@ -111,18 +115,18 @@ path.write_text(re.sub(pattern, lambda m: '[ "' + (prefix / m[1]).as_posix() + '
 PY
 fi
 
-echo "[4/5] iffcomp-rs  $LEVEL.iff.txt  →  $REPO/wflevels/$LEVEL.iff"
-"$IFFCOMP" -binary -o="$REPO/wflevels/$LEVEL.iff" "$LEVEL.iff.txt" >/dev/null
+echo "[4/5] iffcomp-rs  $LEVEL.iff.txt  →  $OUT_DIR/$LEVEL.iff"
+"$IFFCOMP" -binary -o="$OUT_DIR/$LEVEL.iff" "$LEVEL.iff.txt" >/dev/null
 
-SIZE=$(stat -c %s "$REPO/wflevels/$LEVEL.iff")
+SIZE=$(stat -c %s "$OUT_DIR/$LEVEL.iff")
 echo
-echo "✓ built $REPO/wflevels/$LEVEL.iff ($SIZE bytes)"
+echo "✓ built $OUT_DIR/$LEVEL.iff ($SIZE bytes)"
 
 STANDALONE_TXT="$LEVEL-standalone.iff.txt"
 if [[ -f "$STANDALONE_TXT" ]]; then
   echo
   echo "[5/5] iffcomp-rs  $STANDALONE_TXT  →  ../$LEVEL-standalone.iff"
-  "$IFFCOMP" -binary -o="$REPO/wflevels/$LEVEL-standalone.iff" "$STANDALONE_TXT" >/dev/null
-  SIZE_S=$(stat -c %s "$REPO/wflevels/$LEVEL-standalone.iff")
-  echo "✓ built $REPO/wflevels/$LEVEL-standalone.iff ($SIZE_S bytes)"
+  "$IFFCOMP" -binary -o="$OUT_DIR/$LEVEL-standalone.iff" "$STANDALONE_TXT" >/dev/null
+  SIZE_S=$(stat -c %s "$OUT_DIR/$LEVEL-standalone.iff")
+  echo "✓ built $OUT_DIR/$LEVEL-standalone.iff ($SIZE_S bytes)"
 fi

@@ -18,7 +18,7 @@ import pytest
 from debug_bridge_client import BridgeClient
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-WF_GAME   = REPO_ROOT / "engine" / "wf_game"
+WF_GAME   = Path(os.environ.get("WF_GAME", REPO_ROOT / "engine" / "wf_game"))  # or a container-built engine
 GAME_CWD  = REPO_ROOT / "wfsource" / "source" / "game"
 LIB_DIR   = REPO_ROOT / "engine" / "libs"
 LEVEL     = REPO_ROOT / "wflevels" / "qbert_practice-standalone.iff"

@@ -109,8 +109,8 @@ SQRT2 = math.sqrt(2.0)
 # Per-cube color overrides live on each cube actor's local mailboxes:
 #   3037 / 3038 / 3039 = EMAILBOX_FACE_COLOR_TOP / LIT / SHADOW (mailbox.inc)
 # The director writes them via the `write-actor-mailbox` zForth primitive,
-# addressing each cube by its actor index. CUBE_ACTOR_BASE is computed at
-# export time and embedded into the director Forth as a constant.
+# addressing each cube by its actor index: CUBE_ACTOR_BASE, cube_00's index,
+# resolved by the exporter (see "Actor references" below).
 INDEXOF_CUBE_STATE_BASE      = 200
 INDEXOF_CUBE_PREV_STATE_BASE = 228   # 228..255
 INDEXOF_ROUND_TOP_LUT_BASE   = 256   # 256..303 (16 rounds × 3 states)
@@ -266,15 +266,67 @@ import addon_utils
 addon_utils.enable("wf_blender", default_set=False, persistent=False)
 scene = bpy.context.scene
 
+# ── Actor references ──────────────────────────────────────────────────────────
+# Scripts address actors by index (`value mailbox ACTOR write-actor-mailbox`,
+# `INDEXOF_CAMSHOT`). The engine numbers actors in .lev order, which only the
+# exporter knows for certain, so every reference below is a `{{actor:NAME}}`
+# token that wf.export_level replaces with NAME's index in the order it writes
+# (wftools/wf_blender/actor_refs.py). The old hardcoded numbers (CamShots
+# 8/12/13, curse bubble 33) and creation-time counts went stale whenever an
+# object was created earlier (docs/plans/2026-11-14-qbert-blender-pipeline-repair.md).
+# The two base + runtime-offset uses (cs_intro_0 + phase, cube_00 + i) need
+# their groups contiguous; section 9 checks that before export.
+from wf_blender.actor_refs import actor_ref
+SCHEMA_PATH_KEY = 'wf_schema_path'
+CS_PYRAMID_IDX         = actor_ref('cs_pyramid')
+CS_DEATH_IDX           = actor_ref('cs_death')
+CS_INTRO_BASE_IDX      = actor_ref('cs_intro_0')      # + intro phase 0..4
+CUBE_ACTOR_BASE        = actor_ref('cube_00')         # + cube number 0..27
+GB_ACTOR_IDX           = actor_ref('greenball')
+SLICK_ACTOR_IDX        = actor_ref('slick')
+SAM_ACTOR_IDX          = actor_ref('sam')
+UGG_ACTOR_IDX          = actor_ref('ugg')
+WW_ACTOR_IDX           = actor_ref('wrongway')
+COILY_EGG_ACTOR_IDX    = actor_ref('coily_egg')
+COILY_EGG2_ACTOR_IDX   = actor_ref('coily_egg_2')
+COILY_SNAKE_ACTOR_IDX  = actor_ref('coily_snake')
+DISC_L_ACTOR_IDX       = actor_ref('disc_left')
+DISC_R_ACTOR_IDX       = actor_ref('disc_right')
+CURSE_BUBBLE_ACTOR_IDX = actor_ref('curse_bubble')
+POPUP25_ACTOR_IDX      = actor_ref('popup_25')
+POPUP100_ACTOR_IDX     = actor_ref('popup_100')
+POPUP300_ACTOR_IDX     = actor_ref('popup_300')
+POPUP50_ACTOR_IDX      = actor_ref('popup_50')
+POPUP500_ACTOR_IDX     = actor_ref('popup_500')
+
+
+def _redball_ref(k):
+    return actor_ref(f'redball_{k}')
+
 # ── 2. Import the snowgoons reference level ─────────────────────────────────────
 print(f"[qbert] Importing {SNOWGOONS_LEV}")
 bpy.ops.wf.import_level(filepath=SNOWGOONS_LEV)
 
-# ── 3. Identify what to keep vs delete ─────────────────────────────────────────
-KEEP_CLASSES = {'director', 'camera', 'levelobj', 'matte', 'light',
-                'room', 'camshot', 'target', 'actboxor', 'player'}
-DELETE_CLASSES = {'statplat', 'enemy', 'snowman01', 'missile',
-                  'tool', 'tool01', 'ground01', 'hp'}
+# ── 3. Keep the infrastructure objects, by name ────────────────────────────────
+# The template object kept for each role, and the name it takes in this level.
+# Picked by name, not "first of each class": since c782aa53 (2026-05-22) the
+# template names its objects class_N, and Blender sorts bpy.data.objects by
+# name, so "first" silently became actboxor_17/room_16/target_13 and the
+# CamShot's Target pointed at a deleted object. These picks reproduce the
+# objects the level was built from (the old Actboxor01/Room01/GMACamTar...).
+# If the template is renamed again this fails here, loudly.
+TEMPLATE_PICKS = {
+    'actboxor_17': 'Actboxor01',
+    'room_6':      'Room01',
+    'light_7':     'Light01',
+    'camera_8':    'Camera',
+    'director_9':  'Director',
+    'levelobj_10': 'Level',
+    'matte_11':    'Matte',
+    'camshot_12':  'cs_pyramid',
+    'target_36':   'Target01',
+    'player_33':   'Player',
+}
 
 
 def get_class(obj):
@@ -284,22 +336,27 @@ def get_class(obj):
     return ''
 
 
-# Delete gameplay objects from snowgoons
+def rename_object(obj, new_name):
+    """Rename OBJ and every object-reference field (wf_* string) that named it."""
+    old_name = obj.name
+    obj.name = new_name
+    assert obj.name == new_name, f"{new_name!r} is taken (got {obj.name!r})"
+    for other in bpy.data.objects:
+        for key in other.keys():
+            if key.startswith('wf_') and key != SCHEMA_PATH_KEY and other[key] == old_name:
+                other[key] = new_name
+
+
+_missing = [n for n in TEMPLATE_PICKS if n not in bpy.data.objects]
+assert not _missing, (f"template {SNOWGOONS_LEV} no longer has {_missing}; "
+                      "update TEMPLATE_PICKS in blender_create_qbert.py")
 for obj in list(bpy.data.objects):
-    if get_class(obj) in DELETE_CLASSES:
+    if obj.get(SCHEMA_PATH_KEY) and obj.name not in TEMPLATE_PICKS:
         bpy.data.objects.remove(obj, do_unlink=True)
+for _old, _new in TEMPLATE_PICKS.items():
+    rename_object(bpy.data.objects[_old], _new)
 
-# Drop duplicates: keep only the first of each infrastructure class
-seen = set()
-for obj in list(bpy.data.objects):
-    cn = get_class(obj)
-    if cn in KEEP_CLASSES:
-        if cn in seen:
-            bpy.data.objects.remove(obj, do_unlink=True)
-        else:
-            seen.add(cn)
-
-print("[qbert] Classes after strip:", sorted({get_class(o) for o in bpy.data.objects}))
+print("[qbert] Kept template objects:", sorted(TEMPLATE_PICKS.values()))
 
 
 def find_by_class(cn):
@@ -370,6 +427,7 @@ if light:
     # docs/plans/2026-09-20-relight-swept-levels.md.
     light.rotation_euler = (0.0, -math.radians(SUN_ALT_DEG), math.radians(SUN_AZ_DEG))
     light.name = 'Light01'
+    light['wf_had_authored_bbox'] = False   # a light has no collision box (nor its ambient copy)
     light['wf_lightType'] = 'Directional'
     light['wf_lightRed']   = SUN_KEY
     light['wf_lightGreen'] = SUN_KEY
@@ -528,6 +586,7 @@ def _build_qbert_player_mesh():
 player = find_by_class('player')
 if player:
     player.location = PLAYER_SPAWN_XYZ
+    player['wf_Tool A'] = ''   # the template's tool object is not kept
     # Authored rest yaw: rotate -90° about Z so engine-local +X (mesh "front",
     # i.e. snout/eyes/feet) aligns with world -Y, which is "toward the camera"
     # at (0, -22, 23). Engine and script both treat +X as forward; this
@@ -709,11 +768,9 @@ if player:
         "419 read-mailbox dup 0 > if "
         "dup 30 < if "
         # Curse bubble tracks the falling player (+2 in Z so it hovers above).
-        # Bubble actor idx = 33 (CURSE_BUBBLE_ACTOR_IDX). Verified by assert
-        # below after the bubble actor is created.
-        "INDEXOF_X_POS read-mailbox 3009 33 write-actor-mailbox "
-        "INDEXOF_Y_POS read-mailbox 3010 33 write-actor-mailbox "
-        "INDEXOF_Z_POS read-mailbox 2 + 3011 33 write-actor-mailbox "
+        f"INDEXOF_X_POS read-mailbox 3009 {CURSE_BUBBLE_ACTOR_IDX} write-actor-mailbox "
+        f"INDEXOF_Y_POS read-mailbox 3010 {CURSE_BUBBLE_ACTOR_IDX} write-actor-mailbox "
+        f"INDEXOF_Z_POS read-mailbox 2 + 3011 {CURSE_BUBBLE_ACTOR_IDX} write-actor-mailbox "
         # Phases 28..29 = splat (last two falling ticks): wide flat pancake,
         # rotation rates → 0 so the player lands still. Phases 1..27 = airborne
         # tumble + prolate stretch.
@@ -739,7 +796,7 @@ if player:
         "1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox "
         "0 3034 write-mailbox 0 3035 write-mailbox "
         # Park bubble at Z=-30 (same as REDBALL_PARK_Z, within room bbox).
-        "-30.0 3011 33 write-actor-mailbox "
+        f"-30.0 3011 {CURSE_BUBBLE_ACTOR_IDX} write-actor-mailbox "
         "then "
         "exit "
         "else drop "
@@ -853,6 +910,7 @@ if player:
 room = find_by_class('room')
 if room:
     room.location = ROOM_CENTRE
+    room['wf_Adjacent Room 1'] = ''   # one room; the template's second room is not kept
     bx0, by0, bz0, bx1, by1, bz1 = ROOM_BBOX_REL
     # Visualisation mesh — position-relative since Blender meshes are local-space.
     box_verts = [
@@ -877,6 +935,9 @@ if actboxor:
     # The snowgoons template's actboxor.Object referenced "CamShot01" by name.
     # We renamed CamShot01 → cs_pyramid above, so update the reference too.
     actboxor['wf_Object'] = 'cs_pyramid'
+    # Activated by any actor, as the level has always shipped (the template's
+    # "Actor" + player came with c782aa53's enum repair; the level predates it).
+    actboxor['wf_Activated By'] = 'All' if isinstance(actboxor.get('wf_Activated By'), str) else 0
 
 # CamShot 1 — cs_pyramid, the gameplay shot, all axes Absolute
 camshot = find_by_class('camshot')
@@ -900,6 +961,7 @@ if camshot:
     # framing. Point Track Object at Target02 (pyramid centre) so the look-at
     # stays on the pyramid regardless of where the player has hopped.
     camshot['wf_Track Object'] = 'Target02'
+    camshot['wf_Target'] = 'Target02'   # look-at; every later CamShot is a copy of this one
     camshot['wf_Follow'] = 'Target02'  # equal Follow → Position math degenerates
                                         # to absolute camshot position
 
@@ -1162,14 +1224,14 @@ def _spawn_rb_forth():
             f"{RB_MB_SPAWN_CLAIMED} read-mailbox 0 = if "
             f"{RB_MB_ACTIVE_BASE + k} read-mailbox 0 = if "
             f"{_RB_LFSR_STEP}"
-            f"{_rb_mb(k, _RB_OFF_COL)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
-            f"1 {_rb_mb(k, _RB_OFF_ROW)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
-            f"0 {_rb_mb(k, _RB_OFF_FROM_ROW)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
-            f"0 {_rb_mb(k, _RB_OFF_FROM_COL)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
-            f"{REDBALL_HOP_TICKS} {_rb_mb(k, _RB_OFF_COOLDOWN)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
-            f"{_RB_Z_AT_ROW_0} {_rb_mb(k, _RB_OFF_START_Z)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
-            f"{_RB_Z_AT_ROW_1} {_rb_mb(k, _RB_OFF_END_Z)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
-            f"1 {_rb_mb(k, _RB_OFF_PHASE)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+            f"{_rb_mb(k, _RB_OFF_COL)} {_redball_ref(k)} write-actor-mailbox "
+            f"1 {_rb_mb(k, _RB_OFF_ROW)} {_redball_ref(k)} write-actor-mailbox "
+            f"0 {_rb_mb(k, _RB_OFF_FROM_ROW)} {_redball_ref(k)} write-actor-mailbox "
+            f"0 {_rb_mb(k, _RB_OFF_FROM_COL)} {_redball_ref(k)} write-actor-mailbox "
+            f"{REDBALL_HOP_TICKS} {_rb_mb(k, _RB_OFF_COOLDOWN)} {_redball_ref(k)} write-actor-mailbox "
+            f"{_RB_Z_AT_ROW_0} {_rb_mb(k, _RB_OFF_START_Z)} {_redball_ref(k)} write-actor-mailbox "
+            f"{_RB_Z_AT_ROW_1} {_rb_mb(k, _RB_OFF_END_Z)} {_redball_ref(k)} write-actor-mailbox "
+            f"1 {_rb_mb(k, _RB_OFF_PHASE)} {_redball_ref(k)} write-actor-mailbox "
             f"1 {RB_MB_ACTIVE_BASE + k} write-mailbox "
             f"1 {RB_MB_SPAWN_CLAIMED} write-mailbox "
             f"then then "
@@ -1602,12 +1664,6 @@ _redball_bsdf = _redball_mat.node_tree.nodes.get('Principled BSDF')
 _redball_bsdf.inputs['Base Color'].default_value = (1.0, 0.0, 0.0, 1.0)
 _redball_mesh.materials.append(_redball_mat)
 
-# Capture actor index of the first ball so the director can address each via
-# write-actor-mailbox (REDBALL_ACTOR_BASE + K). Mirrors the CUBE_ACTOR_BASE
-# pattern.  All 3 balls created contiguously in this loop.
-SCHEMA_PATH_KEY = 'wf_schema_path'
-_pre_redball_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
-REDBALL_ACTOR_BASE = _pre_redball_actor_count + 1   # 1-based
 
 for _k in range(REDBALL_COUNT):
     _ball = bpy.data.objects.new(f'redball_{_k}', _redball_mesh)
@@ -1624,14 +1680,8 @@ for _k in range(REDBALL_COUNT):
     _ball['wf_NumberOfLocalMailboxes'] = 0   # state lives in globals 462..485
     _ball['wf_Script']              = redball_script(_k)
 
-# Sanity assertion mirroring the cube-base drift check in section 7.
-_post_redball_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
-assert _post_redball_actor_count == _pre_redball_actor_count + REDBALL_COUNT, (
-    f"Red ball actor count drift: expected +{REDBALL_COUNT}, got "
-    f"{_post_redball_actor_count - _pre_redball_actor_count}")
-
 print(f"[qbert] Created {REDBALL_COUNT} red balls "
-      f"(actor indices {REDBALL_ACTOR_BASE}..{REDBALL_ACTOR_BASE + REDBALL_COUNT - 1}); "
+      f"(redball_0..{REDBALL_COUNT - 1}); "
       f"hop {REDBALL_HOP_TICKS} ticks; "
       f"per-ball mailbox bases "
       f"{', '.join(str(_rb_mb(k, 0)) for k in range(REDBALL_COUNT))}")
@@ -1648,8 +1698,6 @@ _greenball_bsdf = _greenball_mat.node_tree.nodes.get('Principled BSDF')
 _greenball_bsdf.inputs['Base Color'].default_value = (0.10, 0.85, 0.20, 1.0)
 _greenball_mesh.materials.append(_greenball_mat)
 
-_pre_greenball_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
-GB_ACTOR_IDX = _pre_greenball_actor_count + 1
 
 _gball = bpy.data.objects.new('greenball', _greenball_mesh)
 _gball.location = (0.0, 0.0, REDBALL_PARK_Z)
@@ -1664,7 +1712,7 @@ _gball['wf_Visibility Mailbox']  = GB_MB_ACTIVE   # 0=parked/invisible, 1=on boa
 _gball['wf_NumberOfLocalMailboxes'] = 0
 _gball['wf_Script']              = redball_script(0, variant='green')
 
-print(f"[qbert] Created green ball (actor index {GB_ACTOR_IDX}); "
+print(f"[qbert] Created green ball; "
       f"mailbox base {GB_MB_BASE}; freeze {GB_FREEZE_TICKS} ticks on contact")
 
 # ── Humanoid mesh handle convention ───────────────────────────────────────────
@@ -1778,8 +1826,6 @@ def _build_flipper_actor(name, mesh_name, body_rgb, top_rgb, location):
     return body
 
 
-_pre_slick_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
-SLICK_ACTOR_IDX = _pre_slick_actor_count + 1
 
 _slick = _build_flipper_actor('slick', 'slick_mesh',
                               body_rgb=(0.13, 0.73, 0.19),   # arcade #21BA31 (HG101-04)
@@ -1795,8 +1841,6 @@ _slick['wf_Visibility Mailbox']  = SLICK_MB_ACTIVE   # 0=parked/invisible, 1=on 
 _slick['wf_NumberOfLocalMailboxes'] = 0
 _slick['wf_Script']              = redball_script(0, variant='slick')
 
-_pre_sam_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
-SAM_ACTOR_IDX = _pre_sam_actor_count + 1
 
 _sam = _build_flipper_actor('sam', 'sam_mesh',
                             body_rgb=(0.08, 0.55, 0.13),    # darker green so Sam reads distinct from Slick
@@ -1812,7 +1856,7 @@ _sam['wf_Visibility Mailbox']  = SAM_MB_ACTIVE   # 0=parked/invisible, 1=on boar
 _sam['wf_NumberOfLocalMailboxes'] = 0
 _sam['wf_Script']              = redball_script(0, variant='sam')
 
-print(f"[qbert] Created Slick (idx {SLICK_ACTOR_IDX}) + Sam (idx {SAM_ACTOR_IDX}); "
+print(f"[qbert] Created Slick + Sam; "
       f"mailbox bases {SLICK_MB_BASE} / {SAM_MB_BASE}; "
       f"spawn cadence {SLICK_SPAWN_INTERVAL}/{SAM_SPAWN_INTERVAL} ticks")
 
@@ -1906,8 +1950,6 @@ def _build_climber_actor(name, mesh_name, body_rgb, location):
     return body
 
 
-_pre_ugg_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
-UGG_ACTOR_IDX = _pre_ugg_actor_count + 1
 
 _ugg = _build_climber_actor('ugg', 'ugg_mesh',
                             body_rgb=(0.73, 0.00, 0.73),    # arcade #BA00BA — pure magenta
@@ -1922,8 +1964,6 @@ _ugg['wf_Visibility Mailbox']  = UGG_MB_ACTIVE   # 0=parked/invisible, 1=on boar
 _ugg['wf_NumberOfLocalMailboxes'] = 0
 _ugg['wf_Script']              = redball_script(0, variant='ugg')
 
-_pre_ww_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
-WW_ACTOR_IDX = _pre_ww_actor_count + 1
 
 _ww = _build_climber_actor('wrongway', 'wrongway_mesh',
                            body_rgb=(0.73, 0.00, 0.73),     # same magenta as Ugg (arcade sprites are identical; differ only by which side they climb)
@@ -1938,7 +1978,7 @@ _ww['wf_Visibility Mailbox']  = WW_MB_ACTIVE   # 0=parked/invisible, 1=on board
 _ww['wf_NumberOfLocalMailboxes'] = 0
 _ww['wf_Script']              = redball_script(0, variant='wrongway')
 
-print(f"[qbert] Created Ugg (idx {UGG_ACTOR_IDX}) + Wrong-Way (idx {WW_ACTOR_IDX}); "
+print(f"[qbert] Created Ugg + Wrong-Way; "
       f"mailbox bases {UGG_MB_BASE} / {WW_MB_BASE}")
 
 # ── 5d. Coily egg (Phase A) ──────────────────────────────────────────────────
@@ -2195,8 +2235,6 @@ _egg_bsdf = _egg_mat.node_tree.nodes.get('Principled BSDF')
 _egg_bsdf.inputs['Base Color'].default_value = (0.55, 0.10, 0.85, 1.0)
 _egg_mesh.materials.append(_egg_mat)
 
-_pre_egg_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
-COILY_EGG_ACTOR_IDX = _pre_egg_actor_count + 1
 
 _egg = bpy.data.objects.new('coily_egg', _egg_mesh)
 _egg.location = (0.0, 0.0, REDBALL_PARK_Z)
@@ -2211,7 +2249,7 @@ _egg['wf_Visibility Mailbox']  = COILY_EGG_ACTIVE_MB   # 0=parked, 1=hopping
 _egg['wf_NumberOfLocalMailboxes'] = 0
 _egg['wf_Script']              = coily_egg_script()
 
-print(f"[qbert] Created Coily egg (actor index {COILY_EGG_ACTOR_IDX}); "
+print(f"[qbert] Created Coily egg; "
       f"hop {COILY_EGG_HOP_TICKS} ticks; "
       f"globals 518..525 + 542..544")
 
@@ -2225,8 +2263,6 @@ _egg2_bsdf = _egg2_mat.node_tree.nodes.get('Principled BSDF')
 _egg2_bsdf.inputs['Base Color'].default_value = (0.55, 0.10, 0.85, 1.0)
 _egg2_mesh.materials.append(_egg2_mat)
 
-_pre_egg2_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
-COILY_EGG2_ACTOR_IDX = _pre_egg2_actor_count + 1
 
 _egg2 = bpy.data.objects.new('coily_egg_2', _egg2_mesh)
 _egg2.location = (0.0, 0.0, REDBALL_PARK_Z)
@@ -2241,7 +2277,7 @@ _egg2['wf_Visibility Mailbox']  = COILY_EGG2_ACTIVE_MB   # 0=parked, 1=hopping
 _egg2['wf_NumberOfLocalMailboxes'] = 0
 _egg2['wf_Script']              = coily_egg2_script()
 
-print(f"[qbert] Created Coily egg #2 (actor index {COILY_EGG2_ACTOR_IDX}); "
+print(f"[qbert] Created Coily egg #2; "
       f"L4-only; globals 575..583 + 584..586")
 
 # ── 5e. Coily snake (Phase B — egg transforms here at bottom row) ────────────
@@ -2410,8 +2446,6 @@ def _build_coily_snake_actor(name, mesh_name, location):
     body_obj.location = location
     return body_obj
 
-_pre_snake_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
-COILY_SNAKE_ACTOR_IDX = _pre_snake_actor_count + 1
 
 def coily_snake_script():
     """Phase C: snake chases Q*bert via greedy Manhattan-distance pursuit.
@@ -2582,7 +2616,7 @@ _snake['wf_Visibility Mailbox']  = COILY_SNAKE_ACTIVE_MB   # 0=parked, 1=chasing
 _snake['wf_NumberOfLocalMailboxes'] = 0
 _snake['wf_Script']              = coily_snake_script()
 
-print(f"[qbert] Created Coily snake (actor index {COILY_SNAKE_ACTOR_IDX}); "
+print(f"[qbert] Created Coily snake; "
       f"spiral bezier-curve mesh ({_COILY_SPIRAL_TURNS} turns × {_COILY_SPIRAL_PTS} pts, "
       f"tube radius {_COILY_TUBE_RADIUS}) + head, eyes, pupils, forked tongue")
 
@@ -2727,9 +2761,6 @@ def _disc_script(my_row, my_col, my_phase_mb, my_flash_mb):
     )
 
 
-_pre_disc_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
-DISC_L_ACTOR_IDX = _pre_disc_actor_count + 1
-DISC_R_ACTOR_IDX = _pre_disc_actor_count + 2
 
 for _name, _row, _col, _phase_mb, _flash_mb in (
     ('disc_left',  DISC_L_ROW, DISC_L_COL, _DL_MB_PHASE, _DL_MB_FLASH),
@@ -2750,13 +2781,11 @@ for _name, _row, _col, _phase_mb, _flash_mb in (
     _d['wf_Script']              = _disc_script(_row, _col, _phase_mb, _flash_mb)
 
 print(f"[qbert] Created 2 spinning discs at "
-      f"L(row={DISC_L_ROW},col={DISC_L_COL}) idx={DISC_L_ACTOR_IDX} / "
-      f"R(row={DISC_R_ROW},col={DISC_R_COL}) idx={DISC_R_ACTOR_IDX}; "
+      f"L(row={DISC_L_ROW},col={DISC_L_COL}) / "
+      f"R(row={DISC_R_ROW},col={DISC_R_COL}); "
       f"mesh {len(_DISC_VERTS)} verts / {len(_DISC_FACES)} faces")
 
 # Flash ring actors — one per disc, no script, visibility driven by flash countdown.
-DISC_FL_ACTOR_IDX = _pre_disc_actor_count + 3
-DISC_FR_ACTOR_IDX = _pre_disc_actor_count + 4
 for _fname, _frow, _fcol, _fflash_mb in (
     ('disc_flash_L', DISC_L_ROW, DISC_L_COL, _DL_MB_FLASH),
     ('disc_flash_R', DISC_R_ROW, DISC_R_COL, _DR_MB_FLASH),
@@ -2775,8 +2804,8 @@ for _fname, _frow, _fcol, _fflash_mb in (
     _fr['wf_NumberOfLocalMailboxes'] = 0
 
 print(f"[qbert] Created 2 disc flash rings: "
-      f"L idx={DISC_FL_ACTOR_IDX} (mb {_DL_MB_FLASH}) / "
-      f"R idx={DISC_FR_ACTOR_IDX} (mb {_DR_MB_FLASH}); "
+      f"L (mb {_DL_MB_FLASH}) / "
+      f"R (mb {_DR_MB_FLASH}); "
       f"washer {len(_FLASH_RING_VERTS)} verts / {len(_FLASH_RING_FACES)} faces")
 
 # ── 5c.8. Curse bubble ───────────────────────────────────────────────────────
@@ -2908,8 +2937,6 @@ def _make_curse_bubble_mesh(tex_path):
 
 _curse_tex_path = _generate_curse_bubble_texture(SCRIPT_DIR)
 
-_pre_bubble_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
-CURSE_BUBBLE_ACTOR_IDX = _pre_bubble_count + 1
 
 _bubble = bpy.data.objects.new('curse_bubble', _make_curse_bubble_mesh(_curse_tex_path))
 _bubble.location = (0.0, 0.0, REDBALL_PARK_Z)  # within room bbox so levcomp-rs adds it to RM0
@@ -2921,10 +2948,7 @@ _bubble['wf_Model Type']          = 'Mesh'
 _bubble['wf_Mobility']            = 'Anchored'
 _bubble['wf_Mass']                = 0.0
 _bubble['wf_Visibility Mailbox']  = 419   # FALL_PHASE: 0=idle (invisible), 1-30=falling (visible)
-print(f"[qbert] Created curse bubble actor idx={CURSE_BUBBLE_ACTOR_IDX} at {tuple(_bubble.location)}")
-assert CURSE_BUBBLE_ACTOR_IDX == 33, (
-    f"Bubble actor idx drifted to {CURSE_BUBBLE_ACTOR_IDX} — update hardcoded '33' in player script fall section"
-)
+print(f"[qbert] Created curse bubble at {tuple(_bubble.location)}")
 
 
 # ── 5c.9. Bonus-points popup actors ──────────────────────────────────────────
@@ -2971,20 +2995,12 @@ def _make_popup_actor(label, text_body, rgb):
     actor['wf_Visibility Mailbox'] = 1
     return actor
 
-_pre_popup_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
 _make_popup_actor('25',  '+25',  (1.00, 0.85, 0.00))   # gold
-POPUP25_ACTOR_IDX  = _pre_popup_count + 1
 _make_popup_actor('100', '+100', (0.40, 1.00, 0.20))   # lime
-POPUP100_ACTOR_IDX = _pre_popup_count + 2
 _make_popup_actor('300', '+300', (0.20, 0.90, 1.00))   # cyan
-POPUP300_ACTOR_IDX = _pre_popup_count + 3
 _make_popup_actor('50',  '+50',  (1.00, 0.55, 0.00))   # orange — 2nd-hop bonus
-POPUP50_ACTOR_IDX  = _pre_popup_count + 4
 _make_popup_actor('500', '+500', (1.00, 0.20, 0.80))   # hot magenta — Coily-off-disc
-POPUP500_ACTOR_IDX = _pre_popup_count + 5
-print(f"[qbert] Created popup actors: +25 idx={POPUP25_ACTOR_IDX}, "
-      f"+100 idx={POPUP100_ACTOR_IDX}, +300 idx={POPUP300_ACTOR_IDX}, "
-      f"+50 idx={POPUP50_ACTOR_IDX}, +500 idx={POPUP500_ACTOR_IDX}")
+print("[qbert] Created popup actors +25, +100, +300, +50, +500")
 
 
 # ── 6. Director — wire its Script for the game loop ───────────────────────────
@@ -3006,19 +3022,6 @@ print(f"[qbert] Created popup actors: +25 idx={POPUP25_ACTOR_IDX}, "
 #    (backslash + n) that confuses the tokenizer.
 #  - Stay within ASCII in the script body — non-ASCII bytes break
 #    parsing.
-# Camshot actor indices (assigned by .lev OBJ load order — verified via debug
-# bridge: `wf_game --debug-port 7777` then watch INDEXOF_CAMSHOT=1021 at idle).
-# These shift if you add/remove actors above them in blender_create_qbert.py.
-# If the order changes, re-run the engine with --debug-port and re-check.
-CS_PYRAMID_IDX = 8
-CS_DEATH_IDX = 12
-# cs_intro_0..cs_intro_4 are added immediately after cs_death in the actor
-# list (see "Intro cinematic CamShots" block above), so they take indices
-# 13..17 in OBJ load order. The director script references them as
-# (intro phase + CS_INTRO_BASE_IDX). Cubes shift to idx 18+; cube indices
-# don't matter (cubes are referenced by mailbox slot, not actor idx).
-CS_INTRO_BASE_IDX = 13  # cs_intro_0 = 13, ..., cs_intro_4 = 17
-
 # Death cutscene duration in ticks (~60 = 1s at 60 Hz).
 CS_DEATH_HOLD_FRAMES = 60
 
@@ -3047,14 +3050,6 @@ ROUND_TOP_COLORS    = _gen_cube.ROUND_TOP_COLORS    # 16 × (s0, s1, s2)
 LEVEL_SIDE_COLORS   = _gen_cube.LEVEL_SIDE_COLORS   # 4 × (lit, shadow)
 ROUND_SIDE_OVERRIDES = _gen_cube.ROUND_SIDE_OVERRIDES  # {round_idx: (lit, shadow)}
 
-# Compute CUBE_ACTOR_BASE here (before the director script needs it). The
-# level loader assigns 1-based actor indices in scene-collection order.
-# Cubes are appended last, so cube N's actor index = pre-cube count + 1 + N.
-SCHEMA_PATH_KEY = 'wf_schema_path'
-_pre_cube_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
-CUBE_ACTOR_BASE = _pre_cube_actor_count + 1
-print(f"[qbert] Pre-cube actor count = {_pre_cube_actor_count}; "
-      f"CUBE_ACTOR_BASE = {CUBE_ACTOR_BASE} (first cube's actor index)")
 
 # Forth fragment: populate ROUND_TOP_LUT (mb 256..303) at level init.
 #   slot 256 + r*3 + s = top RGB for (round r, state s)
@@ -3083,7 +3078,7 @@ def _retire_enemies_forth():
     life every frame the enemy stayed on Q*bert's cube, ending the game in three
     frames (docs/plans/2026-11-14-qbert-remote-hop.md).
     """
-    enemies = [(_rb_mb(k, _RB_OFF_PHASE), RB_MB_ACTIVE_BASE + k, REDBALL_ACTOR_BASE + k)
+    enemies = [(_rb_mb(k, _RB_OFF_PHASE), RB_MB_ACTIVE_BASE + k, _redball_ref(k))
                for k in range(REDBALL_COUNT)]
     enemies += [
         (GB_MB_BASE + _RB_OFF_PHASE,    GB_MB_ACTIVE,          GB_ACTOR_IDX),
@@ -3552,17 +3547,9 @@ if director:
 # come from runtime EMAILBOX_FACE_COLOR_TOP/LIT/SHADOW writes by the director,
 # not from baked-in .iff variants. All 28 actors reference the same cube.iff.
 #
-# CUBE_ACTOR_BASE was computed above (before the director script generation)
-# from the count of objects already in scene.objects when the cube creation
-# loop runs. The director uses CUBE_ACTOR_BASE + N to address cube N.
-#
-# Verify that the count we captured still matches now. If anything between
-# the count and this point added/removed actors, the indices will be wrong.
-_now_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
-assert _now_actor_count == _pre_cube_actor_count, (
-    f"Actor count drifted between CUBE_ACTOR_BASE capture ({_pre_cube_actor_count}) "
-    f"and cube creation ({_now_actor_count}); director Forth will address the "
-    f"wrong actors. Move the CUBE_ACTOR_BASE calculation closer to here.")
+# The director addresses cube N as CUBE_ACTOR_BASE + N (cube_00's index plus a
+# runtime offset), so cube_00..cube_27 must export contiguously; checked before
+# export (section 9).
 
 # One shared mesh datablock for all 28 cubes (saves Blender memory; engine
 # reads geometry from cube.iff regardless).
@@ -3623,6 +3610,50 @@ for obj in bpy.data.objects:
         wire_count += 1
 print(f"[qbert] Set {wire_count} non-rendering objects to wireframe display.")
 
+# ── 8b. Pin the export order and check every reference ───────────────────────
+# The exporter writes (and levcomp numbers) actors in scene.collection order,
+# which is link order. Correctness no longer depends on it (references are
+# tokens), but a pinned order keeps the level's actor numbering stable across
+# regenerations: the infrastructure head in the order the level has always had,
+# then everything else as created, and AmbientLight last, where the 2026-09-20
+# light sweep appended it to the committed level.
+EXPORT_HEAD = ['Actboxor01', 'Room01', 'Light01', 'Camera', 'Director', 'Level', 'Matte',
+               'cs_pyramid', 'Player', 'Target01', 'Target02', 'cs_death',
+               'cs_intro_0', 'cs_intro_1', 'cs_intro_2', 'cs_intro_3', 'cs_intro_4']
+EXPORT_TAIL = ['AmbientLight']
+_actors = [o for o in scene.collection.objects if o.get(SCHEMA_PATH_KEY)]
+_by_name = {o.name: o for o in _actors}
+assert not [o for o in scene.objects if o.get(SCHEMA_PATH_KEY) and o.name not in _by_name], \
+    "every actor must sit directly in the scene collection for the order to hold"
+_order = ([_by_name[n] for n in EXPORT_HEAD]
+          + [o for o in _actors if o.name not in EXPORT_HEAD + EXPORT_TAIL]
+          + [_by_name[n] for n in EXPORT_TAIL])
+for _o in _order:                       # unlink + relink appends: link order becomes _order
+    scene.collection.objects.unlink(_o)
+    scene.collection.objects.link(_o)
+_export_names = [o.name for o in scene.objects if o.get(SCHEMA_PATH_KEY)]
+assert _export_names == [o.name for o in _order], "relinking did not set the export order"
+
+# Groups the director addresses as base + runtime offset must be contiguous.
+for _group in ([f'cs_intro_{i}' for i in range(5)], [f'cube_{i:02d}' for i in range(28)]):
+    _first = _export_names.index(_group[0])
+    assert _export_names[_first:_first + len(_group)] == _group, f"{_group[0]}.. not contiguous"
+
+# No object reference may name an object that is not exported: levcomp writes
+# "no object" for an unknown name, and a CamShot with no Target crashes the
+# camera (the target_14 failure). The exporter only warns, for the many levels
+# that inherit harmless ones; this level allows none.
+import wf_core
+_dangling = []
+for _o in _order:
+    for _field in wf_core.load_schema(bpy.path.abspath(_o[SCHEMA_PATH_KEY])).fields():
+        if _field.kind == 'ObjRef':
+            _val = _o.get('wf_' + _field.key, '')
+            if _val and _val not in _export_names:
+                _dangling.append(f"{_o.name}.{_field.key} = {_val!r}")
+assert not _dangling, f"object references to objects that are not exported: {_dangling}"
+print(f"[qbert] Export order pinned: {len(_export_names)} actors, references checked")
+
 # ── 9. Save the .blend so the user can open it interactively ─────────────────
 OUT_BLEND = os.path.join(SCRIPT_DIR, 'qbert_practice.blend')
 print(f"[qbert] Saving .blend to {OUT_BLEND}")
@@ -3630,7 +3661,7 @@ bpy.ops.wm.save_as_mainfile(filepath=OUT_BLEND)
 
 # ── 9. Export the level ─────────────────────────────────────────────────────────
 print(f"[qbert] Exporting to {OUT_LEV}")
-bpy.ops.wf.export_level(filepath=OUT_LEV)
+assert bpy.ops.wf.export_level(filepath=OUT_LEV) == {'FINISHED'}, "export refused (see the report above)"
 
 # Phase 1 cube consolidation (2026-05-10):
 # All 28 cube actors reference the same cube.iff via wf_Mesh Name. The Blender

@@ -152,6 +152,11 @@ levcomp-rs changes since 2026‑10‑27 (rebuilding the committed `.lev` with to
 not reproduce the committed `.lvl` either). When the generator pipeline is repaired, a plain
 regeneration supersedes these outputs.
 
+**Update 2026‑11‑14:** repaired by
+[2026‑11‑14 Q\*bert Blender pipeline repair](2026-11-14-qbert-blender-pipeline-repair.md). A plain
+regeneration now reproduces this level's director and player scripts byte for byte, and
+`patch_lev_scripts.py` is no longer needed.
+
 ## Files
 
 - `wflevels/qbert_practice/blender_create_qbert.py`: the four changes above.

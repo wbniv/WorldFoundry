@@ -867,6 +867,7 @@ these, and new scripts should use them directly** rather than inlining the old w
 - **Memory:** `@ ! +! , here`
 - **Control flow:** `if … else … then` (`fi` = `then`), `begin … until`, `begin … again`, `limit start do … loop` (or `loop+`), loop indices `i` `j`
 - **WF bridge:** `read-mailbox ( idx -- val )`, `write-mailbox ( val idx -- )`, `write-actor-mailbox ( val idx actor -- )`
+- **Actor indices from names:** never type an actor number into a script. Write `{{actor:NAME}}` (in a generator, `actor_ref('NAME')` from `wftools/wf_blender/actor_refs.py`) and `wf.export_level` replaces it with NAME's index in the order it writes the `.lev`, refusing the export if no object has that name. Hardcoded numbers went stale in Q\*bert the moment an object was created earlier ([plan](plans/2026-11-14-qbert-blender-pipeline-repair.md)).
 - **Constants:** every `INDEXOF_*` mailbox name is pre-defined.
 
 > **New as of 2026-06-02:** `0= 0< 0> negate abs min max ?dup nip tuck -rot 2dup 2drop 2swap +! mod`
