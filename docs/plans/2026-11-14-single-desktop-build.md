@@ -157,12 +157,110 @@ sequenceDiagram
 
 ## Verification
 
+Run 2026‑11‑14 in the sparse worktree `.worktrees/single-desktop-build` at `b4e0899a`. The disk stop line (15 GB free; other sessions were filling the disk at the same time) ended the run before steps 4, 5 (ctest) and 7 could finish; see each step.
+
 1. `task build`, now CMake, builds from a clean checkout: in the container, a fresh sparse clone of the change runs `scripts/build-wf-game.sh` (what `task build` runs; the container has no `task`) and writes `engine/wf_game`; on the host, `task --dry build` shows that command.
+
+    The fresh worktree (checked out from `origin/2026-new-level`, nothing built; Jolt unpacked as `vendor-unpack-archives` does), built through `build-wf-game-container.sh --dev`, which copies the tree and runs `build-wf-game.sh` in it:
+
+    ```
+    $ scripts/in-linux-container.sh scripts/build-wf-game-container.sh --dev
+    -- WF: WF_DESIGNER_CHEATS=ON WF_TEST_CODE=ON
+    [364/364] Linking CXX executable /build/wf-game-dev/src/engine/wf_game
+    -rwxr-xr-x 1 root root 227869392 Nov 14 05:45 /build/wf-game-dev/src/engine/wf_game
+    exit=0
+    $ task --dry build | tail -2
+    task: [vendor-unpack-archives] test -d engine/vendor/jolt-physics-5.5.0 || tar -xzf engine/vendor/jolt-physics-5.5.0.tar.gz --one-top-level=engine/vendor/jolt-physics-5.5.0 --strip-components=1
+    task: [build] bash scripts/build-wf-game.sh --
+    $ task --dry build -- -DWF_ASAN=OFF | tail -1
+    task: [build] bash scripts/build-wf-game.sh -- '-DWF_ASAN=OFF'
+    ```
+    **PASS** (364 of 364 steps, from nothing)
 2. `--capture-frame` writes a PNG: the dev engine from step 1, under `xvfb-run`, with `--frame-step-smoke=30 --cycles=1 -Lwflevels/snowgoons-blender/snowgoons-standalone.iff -rate20 --no-fps --capture-frame=20=/tmp/f20.png`, leaves a 640×480 PNG.
+
+    ```
+    == step 2: --capture-frame
+    engine exit 0
+    /build/f20.png PNG 640 x 480
+    ```
+    **PASS** (before this change the CMake engine exited 0 with no file)
 3. `tests/test_renderer_references_fresh.py` passes at HEAD with the dev engine.
+
+    ```
+    $ WF_GAME=/build/wf-game-dev/src/engine/wf_game xvfb-run … python3 -m pytest -v -rs tests/test_renderer_references_fresh.py
+    tests/test_renderer_references_fresh.py::test_reference_matches_a_fresh_linux_capture[snowgoons] PASSED [ 50%]
+    tests/test_renderer_references_fresh.py::test_reference_matches_a_fresh_linux_capture[aquarium] PASSED [100%]
+    ============================== 2 passed in 19.39s ==============================
+    ```
+    **PASS**
 4. The bug-class proof holds with the CMake dev builder: `scripts/local-ci.sh --no-notify --tests-from 23658e9a be86bbb9` fails both `arena-faces-up` and `renderer-fresh`; `scripts/local-ci.sh --no-notify 23658e9a` passes both.
+
+    **NOT RUN**: each run is a from-scratch dev build (about 2.5 GB with its clone), and free space was already at the 15 GB stop line. To run when the disk allows: the two commands above, from a checkout that has this change (the build scripts and the pre-option shim are the runner's).
 5. The ctest and pytest suites that passed before still pass: ctest of the dev configuration before (`-DWF_DESIGNER_CHEATS=OFF -DWF_TEST_CODE=OFF`, the old CMake Debug defines) and after, same pass set; the engine-binary pytest tests (`test_game_shutdown.py`, `test_ui_font_missing.py`) pass with the dev engine.
+
+    Engine-binary pytest, dev engine:
+    ```
+    tests/test_game_shutdown.py::test_game_shutdown[bundle] PASSED           [ 33%]
+    tests/test_game_shutdown.py::test_game_shutdown[standalone] PASSED       [ 66%]
+    tests/test_game_shutdown.py::test_game_shutdown[cycles] PASSED           [100%]
+    ============================== 3 passed in 11.66s ==============================
+    tests/test_ui_font_missing.py::test_a_bundle_without_the_font_stops_start_up FAILED [ 50%]
+    tests/test_ui_font_missing.py::test_the_same_bundle_with_the_font_starts PASSED [100%]
+    E       AssertionError: ['DBSTREAMS UI_FONT unavailable: cd.iff has no UIFT chunk (repack it with cdpack, which adds wfsource/source/game/ui-font.wfga)']
+    ```
+    The failure is the debug stream banner, not this change: `game/main.cc:594` writes `DBSTREAMS ` with no newline to `cver` (`std::cerr`, `cpplib/stdstrm.cc:45`) under `SW_DBSTREAM > 0`, which every debug-defines build has with or without `DESIGNER_CHEATS`, and the `UI_FONT unavailable` line follows it on stderr. The test expects the bare line, so it can pass only on a Release engine. Not observed on a before-engine (the disk stop came first).
+
+    ctest: the "all targets" build of the after configuration stopped on `dfrm_strand_test`, which does not compile in **either** configuration (the `memory.hp` `new`/`delete` macros, on under `DO_ASSERTIONS`, collide with the test's own `operator delete`):
+    ```
+    -- WF: WF_DESIGNER_CHEATS=OFF WF_TEST_CODE=OFF
+    before: dfrm_strand.cc.o exit 1; first error: tests/dfrm_strand.cc:45:42: error: macro "delete" passed 2 arguments, but takes just 1
+    -- WF: WF_DESIGNER_CHEATS=ON WF_TEST_CODE=ON
+    after: dfrm_strand.cc.o exit 1; first error: tests/dfrm_strand.cc:45:42: error: macro "delete" passed 2 arguments, but takes just 1
+    ```
+    The `-k 0` rerun of both configurations and their ctest was killed by the disk guard at 15.1 GB free. **PARTIAL**: shutdown PASS; `test_ui_font_missing` FAIL on a cause that predates this change; ctest before/after **NOT RUN**.
 6. Android's compile definitions are unchanged: configure the Android NDK build at `origin/2026-new-level` and at the change, and diff the `wfengine` defines (`build.ninja` `DEFINES`); no difference. Same check for a desktop Release configure.
+
+    `wfengine`'s `DEFINES` for `game/main.cc`, configured in the container (NDK 26.2.11394342, arm64-v8a, android-21) from `origin`'s `CMakeLists.txt` (before) and this change's (after):
+    ```
+    == wfengine DEFINES, android: before → after
+    identical (20 defines)
+    == wfengine DEFINES, android-rel: before → after
+    identical (19 defines)
+    == wfengine DEFINES, release: before → after
+    identical (50 defines)
+    == wfengine DEFINES, debug: before → after
+    8a9
+    > -DDESIGNER_CHEATS=1
+    13c14
+    < -DDO_TEST_CODE=0
+    ---
+    > -DDO_TEST_CODE=1
+    $ cmake … android … -DWF_DESIGNER_CHEATS=ON
+    CMake Error at CMakeLists.txt:252 (message):
+      WF_DESIGNER_CHEATS and WF_TEST_CODE are desktop-Linux switches; turn them
+      off for this target
+    configure exit=1
+    ```
+    **PASS** (`android` is `task build-cmake-android`'s RelWithDebInfo, `android-rel` the Release the APK ships)
 7. `task ci:local` on the change's HEAD: build, arena-faces-up and renderer-fresh all PASS; then the local-CI plan's steps 2, 5 and 10 get their raw output.
+
+    ```
+    $ WF_CI_RESULTS=~/WorldFoundry-wbniv/build-docker/local-ci task ci:local COMMIT=b4e0899a
+    2026-11-14T06:07:35Z local-ci: testing b4e0899a3c2a (One desktop build: task build runs CMake; engine/build_game.sh retires), builder dev; results in /home/will/WorldFoundry-wbniv/build-docker/local-ci/b4e0899a3c2a
+    2026-11-14T06:26:39Z local-ci: build: FAIL (1089 s)
+    2026-11-14T06:26:45Z local-ci: arena-faces-up: PASS (6 s)
+    2026-11-14T06:26:45Z local-ci: renderer-fresh: SKIP (no engine) (0 s)
+    ```
+    **NOT COMPLETED**: the build was killed by this session's disk guard (`docker kill` when free space reached 15.3 GB, exit 137), not by a compile error; the same commit's dev engine built and passed renderer-fresh in steps 1–3. The clone, the harness copy and the `dev` builder ran; rerun when the disk allows.
 8. Nothing still calls `build_game.sh`: `git grep -n build_game -- ':!docs/plans' ':!docs/transcripts' ':!docs/diagnostics'` lists only the retirement notes.
+
+    Left after the sweep: the retirement notes (`CMakeLists.txt`, `scripts/build-wf-game.sh`, `scripts/local-ci.sh` aliases, `docs/dev-setup.md`, project memory), `TODO.md`, and dated records that describe what was true then (`docs/investigations/`, `docs/qbert/plans/`, `docs/drop-dead-renderers-plan.md`, `docs/BUGS.md`). Live how-tos (`docs/level-building.md`, `docs/linux-engine-port.md`, `docs/dev-setup.md`) now say `task build`.
+    **PASS**
 9. Every diagram here renders: `task md -- docs/plans/2026-11-14-single-desktop-build.md` prints no `mermaid.ink render failed`.
+
+    (This repo's Taskfile has no `md` task; the shared script directly.)
+    ```
+    $ ~/python-tui-lib/scripts/md-to-html.sh docs/plans/2026-11-14-single-desktop-build.md 2>&1 | grep -ci "mermaid.ink render failed"
+    0
+    ```
+    **PASS**

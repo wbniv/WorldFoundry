@@ -10,11 +10,10 @@ renders geometry with moving objects. Clean exit on quit.
 ## Build
 
 ```bash
-cd engine
-bash build_game.sh
+task build    # since 2026-11-14: CMake (scripts/build-wf-game.sh); engine/build_game.sh is retired
 ```
 
-Compiles all engine source under `wfsource/source/`, skipping test files, Windows MFC
+Originally `engine/build_game.sh`, which compiled all engine source under `wfsource/source/`, skipping test files, Windows MFC
 dialogs, and unreachable platform code. Scripting and platform stubs are in
 `wftools/engine/stubs/`.
 

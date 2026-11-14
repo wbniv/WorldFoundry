@@ -206,16 +206,16 @@ both `blender_create_mm_practice.py` and `blender_create_qbert.py`.
 ### Build & Run
 
 ```bash
-cd engine
-bash build_game.sh
+task build          # scripts/build-wf-game.sh: CMake Debug, cmake/wf-game-dev.cmake → engine/wf_game
 
 # Run:
 cd wfsource/source/game
 LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 ../../../engine/wf_game
 ```
 
-`build_game.sh` compiles all source dirs, skips test/Windows files, uses the scripting stub
-and platform stubs from `wftools/engine/stubs/`.
+The source list is `CMakeLists.txt`'s, the same one every other target builds from; the
+old `engine/build_game.sh` directory sweep was retired on 2026‑11‑14
+([plan](plans/2026-11-14-single-desktop-build.md)).
 
 For per-level builds (Q✱bert / mm_practice / etc.) use the four-stage Rust pipeline:
 
