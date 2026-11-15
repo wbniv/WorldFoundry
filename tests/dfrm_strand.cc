@@ -30,6 +30,11 @@
 #include <string>
 #include <vector>
 
+// memory/memory.hp (DO_ASSERTIONS) defines function-like new/delete macros that
+// would swallow the sized operator delete below.
+#undef new
+#undef delete
+
 namespace {
 std::atomic<bool> g_countAllocations{false};
 std::atomic<size_t> g_allocations{0};

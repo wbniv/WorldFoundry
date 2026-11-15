@@ -936,7 +936,7 @@ static std::unordered_map<const char*, std::string> g_scriptCache;
 // Populated by ReloadActorScript; consulted by RunScript before the
 // src-pointer cache. zForth's dict is append-only, so reloads accumulate
 // orphaned definitions in the global dict — restart the engine after
-// ~100 reloads (ZF_DICT_SIZE = 64 KB).
+// ~100 reloads (ZF_DICT_SIZE = 128 KB).
 static std::unordered_map<int, std::string> g_actorOverride;
 static int g_reloadCounter = 0;
 
