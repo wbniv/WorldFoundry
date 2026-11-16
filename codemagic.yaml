@@ -997,7 +997,7 @@ workflows:
           grep -E "^macos: window " "$CM_BUILD_DIR/macos-windowsize.log" || \
             echo "SIZE: no window line — flags not verified"
 
-      - name: Close paths and fullscreen (⌘Q, red button, Esc, -fullscreen)
+      - name: Close paths, fullscreen and bundle launch (⌘Q, red button, Esc, -fullscreen, open .app)
         script: |
           set -euo pipefail
           exec > >(tee -a "$CM_BUILD_DIR/cm-build.log") 2>&1
@@ -1014,11 +1014,17 @@ workflows:
           # acceptable ONLY because the Codemagic VM is destroyed after the
           # build; the grant is printed in the log, never done on a kept machine.
           #
+          # Runs D/E then launch engine/wf_game.app the way a double-click does
+          # (Finder's open, else LaunchServices `open`) with no arguments, and
+          # require an on-screen window that quits on ⌘Q (TODO: macOS Metal
+          # renderer, "double-click launch"). Every run sets WF_MACOS_KEYLOG=1 so
+          # key delivery is read from GLFW's key callback, not inferred.
+          #
           # CLOSE_PATHS_STRICT lists the checks that fail the build. Build
           # 6abd322f passed cmdq/red/fullscreen with real System Events input,
           # so those are strict; esc stays informational until its key-handler
           # control is proven, and the native-mode line is a known engine gap.
-          CLOSE_PATHS_STRICT="cmdq red fullscreen" OUT_DIR="$CM_BUILD_DIR" \
+          CLOSE_PATHS_STRICT="cmdq red fullscreen bundle" OUT_DIR="$CM_BUILD_DIR" \
             bash scripts/macos/close-paths-ci.sh \
             2>&1 | tee "$CM_BUILD_DIR/macos-close-paths.log"
 
@@ -1053,6 +1059,9 @@ workflows:
       - macos-screen-*.txt
       - macos-fullscreen-windows.txt
       - macos-fullscreen.png
+      # Runs D/E: the .app launched like a double-click (screenshot, ps line,
+      # window list, Resources listing, the key-logged run's stdout/stderr).
+      - macos-bundle-*
       - cm-build.log
       # The runnable product on macOS is the .app bundle, not a bare binary:
       # `engine/wf_game` matches nothing here (the Mach-O lives at
