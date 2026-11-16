@@ -1,7 +1,7 @@
 # macOS Metal renderer — human verification on a real Mac (Phase 4 real exit)
 
 **Date:** 2026‑09‑21
-**Status:** VNC session completed on 2026-09-21 (build `6ab05bfd14ac4c81a4d0ebca`); see Results below. Visible window, keyboard movement, camera following, and Esc leaving the app running are verified. Will also confirms having seen it running over Codemagic VNC. Remaining: ⌘Q/red-button close, fullscreen, normal bundle launch, and Retina; gamepad was not exercised. Do not repeat the already-passed visibility and movement checks as prerequisites. The runner is scale 1.0, so Retina still needs suitable hardware.
+**Status:** VNC session completed on 2026-09-21 (build `6ab05bfd14ac4c81a4d0ebca`); see Results below. Since then, CI on real OS input has closed ⌘Q and the red button (2026‑09‑30), and showed `-fullscreen` covering the display; build `6afa8fb2` also shows it keeping the native mode,, plus Esc-stays-open and the double-click launch (2026‑11‑16, build `6afa8fb2`). **Remaining: Retina only**, because the runner is scale 1.0; gamepad was not exercised.
 **Parent:** [2026-09-20-macos-metal-renderer.md](2026-09-20-macos-metal-renderer.md) — Phase 4's exit criterion is *"an interactive .app that plays snowgoons"*. CI proved window creation and drawable presentation; the completed VNC session subsequently demonstrated visible rendering and keyboard-driven movement. This document records that evidence and the remaining verification gaps.
 **TODO:** `TODO.md` — *macOS Metal renderer* (Open → Platform / Display) and *macOS: `-fullscreen` window flag*.
 
@@ -111,6 +111,7 @@ Driven entirely from Linux: SSH for launching and reading logs, a scripted VNC c
 4. **`-width`/`-height` — PASS on CI** (800×600 window logged, build `6ab056a80032a8f1e6ff325e`); not repeated in the session.
 5. **`-fullscreen` — not exercised** (session ended first).
 6. **Double-click / `cd.iff` bundle path — not exercised** (session ended first).
+   **2026‑11‑16 — PASS in CI** (build [`6afa8fb2`](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6afa8fb260f9595b44258e83)). Finder opened the bundle with no arguments, a window came up, SMB W1‑1 loaded from `Contents/Resources/cd.iff`, and ⌘Q quit. Two fixes were needed: the `Info.plist` `CFBundleExecutable` was Xcode-only syntax, and no arguments now means windowed. See [close-paths plan, 2026‑11‑16](2026-09-21-macos-close-paths.md).
 
 Still open after this session: ⌘Q, red button, `-fullscreen`, double-click, Retina. For the first four, the runbook's VNC path works if the client speaks ARD auth **and** delivers pointer/modifier events — TigerVNC fails at auth; use Remmina's VNC plugin or RealVNC Viewer — or grant Accessibility over SSH (SIP is off on the runner) and drive System Events. Retina needs hardware.
 

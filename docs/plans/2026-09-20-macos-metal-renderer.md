@@ -952,6 +952,24 @@ Steps a future implementation pass runs, in order. Per `~/CLAUDE.md` **Plan veri
     `TODO.md:7` therefore stays **OPEN**, narrowed to `-fullscreen` alone.
 
     **Close paths closed in CI, 2026‑09‑30.** In builds `6abd322f` and `6abd3554`, the step "Close paths and fullscreen" drives real System Events input after an ephemeral-VM TCC grant. **⌘Q → exit status 0** and **red button → exit status 0**, strict in the second build. **Esc**: still running, but CI could not show that plain keys reach the key callback, so it rests on the 09‑21 VNC PASS. Details: [close-paths plan, "CI step"](2026-09-21-macos-close-paths.md). Retina is still untested.
+
+    **Double-click launch and Esc key delivery: PASS in CI, 2026‑11‑16** (build [`6afa8fb2`](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6afa8fb260f9595b44258e83), commit `7e33b6e3`, 4.9 Mac-min, all steps green; runs D/E of `scripts/macos/close-paths-ci.sh`, details in the [close-paths plan](2026-09-21-macos-close-paths.md)). Two bugs were in the way. First, `macos/Info.plist` declared `CFBundleExecutable` as Xcode's `$(EXECUTABLE_NAME)`, which CMake + Ninja copies through literally, so build `6af718ec`'s bundle named no executable and LaunchServices could not start it. Second, with no arguments the engine stayed offscreen, because `--windowed` is opt-in, so a double-click would have produced a process with no window. The fixes are `${MACOSX_BUNDLE_EXECUTABLE_NAME}`, and `hal/macos/platform_main.cc` now sets `gWindowed` when launched with no arguments. The Esc control had been vacuous since `d6851aa7` (2026‑10‑10) deleted the `ball pos` logger it read. CI now reads the engine's own key log (`WF_MACOS_KEYLOG=1`).
+
+    ```
+    Info.plist CFBundleExecutable=[wf_game]; Contents/MacOS/wf_game executable: yes
+    launch via Finder (open POSIX file — the double-click's own Apple Event)
+    MACOS BUNDLE LAUNCH: OK (via finder; pid 4137, parent pid 1, arguments []; on-screen window 192,67 640x512; quit by ⌘Q, gone 0.2 s later; CFBundleExecutable=wf_game)
+    macos: launched with no arguments (Finder / LaunchServices): windowed
+    macos: window 640x480 points, 640x480 pixels (scale 1.0), CAMetalLayer attached
+    Opening cd.iff
+    Level::Level: leveldata= 0xc783c5028, object count  = 133
+    INPUT CONTROL: cgevent-pid reached=yes, system-events reached=yes, hid-tap reached=yes
+    MACOS ESC STAYS OPEN: OK (Esc reached the key callback 6 time(s) and the app was still running 4 s later; Right reached it via: hid-tap, cgevent-pid, system-events)
+    MACOS BUNDLE KEYS: Right presses logged: cgevent-pid 1, system-events 5, hid-tap 1; Esc presses logged 2, still running after Esc: yes; focus: macos: keylog on; window focus 1, key window 1, app active 1;
+    ```
+
+    **PASS.** Finder opened the bundle with no arguments, launchd is the parent, the window is on screen and SMB W1‑1 loads from the bundled `cd.iff`. Screenshot: [`ci-bundle-launch-2026-11-16.png`](2026-09-21-macos-human-verification/ci-bundle-launch-2026-11-16.png). A macOS 26 screen-recording consent prompt for `bash` covers the middle of it; it comes from the `screencapture` call, not from the app. Retina is now the only part of this step not exercised, because the runner is at scale 1.0.
+
 12. *(Phase 4)* `-width=800 -height=600` and `-fullscreen` produce correctly sized windows — closes `TODO.md:7`.
 
     **`-fullscreen`: covers the display, but not at native resolution (2026‑09‑30).** On the same builds, the window frame is 0,0 800×600 and so is the main display. However, the display was **switched from 1024×768 to 800×600** while fullscreen, and restored on exit. `Create()` passes the 640×480 default size together with the monitor, so GLFW picks the nearest video mode. **Partial:** the window covers the whole display. The open defect: `-fullscreen` should use the monitor's current mode (engine fix, not yet made). Retina is not testable here (`backingScaleFactor 1.0`).
