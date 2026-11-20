@@ -14,6 +14,18 @@ Plan: [Sea Stars](../../plans/2026-11-10-starfish-tank.md), verification steps 1
 
 The first Dream check (J‑d9db9b52ef42) ran, but showed the **Clownfish** tank. `dream_host.cc` built the positional level argument as `'0' + level`, so tank 10 became `:`, which the engine's `atoi()` reads as 0. Fixed in `f941db11` (decimal via `snprintf`); `tests/test_dream_host_vram.py` now fails if the one-digit form returns and checks the guard against the tank list. The game app was never affected.
 
+## Settings phases, 2026‑11‑20 (afternoon)
+
+| Step | What | Result |
+|---|---|---|
+| 10 | Early gate: empty tank (`--empty` variant) ≤ 38 ms | **PASS**: p50 33.37 ms in all three 120 s runs (J‑6813c0e83b5a run 1; runs 2 and 3 the same). 32.5–32.7 FPS, so the cost is the display's 30 fps pacing, not the level |
+| Phase 5 | The Dream's phone form on cast1 | **PASS**: the Aquarium Dream serves nine `sea-stars.*` settings (`phase5-settings.json`). Setting Red Fromia 5 and Chocolate-chip stars 4 through the coordinator showed 5 Fromia and 4 chips on screen (J‑4eee56be1c79) |
+| 12 | 10 minute Dream, recorded, with a glass climb | **FOUND A BUG, not closed.** The recording (J‑7c2edc48df59, 597 s, four MP4 segments) shows the star climbing once, then standing still from 42 s to 585 s. Cause below; the earlier 383 s "PASS" missed it because the climb comes in the first 14 s |
+
+**The autopilot stall.** Landing from the back wall latches the held DOWN (`st-change`, added for the stick-hold bounce); a latch clears only when the buttons change. Autopilot step 4 kept holding DOWN, so the star never left the back-right corner. It moved again only when a frame hitch over 200 ms forced a neutral stick (the recording has hitches of 250–420 ms). Reproduced in the zForth VM; fixed in `6c83fbb1` (step 4 presses nothing until the latch clears), guarded by `test_dream_autopilot_keeps_lapping` (600 s at 30 fps, at least 5 front-glass climbs, no standstill over 25 s; the old script gives 1 climb).
+
+**Still open on cast1:** install the fixed APKs (game `8aca0680…`, Dream `59d886aa…`, staged), record a fresh 10 minute Dream, check the star keeps lapping, restore the Seahorse baseline (`tank = random`), then the Phase 6 gate (20 FPS at the default and at the maximum population). The device was fenced `cleanup-unverified` at 17:32 by another principal's job whose foreground restore failed ("Original Dream is no longer selected"); a readd does not clear it, so it needs an administrator.
+
 ## Not covered
 
 - Step 10's no-actor gate (above).
