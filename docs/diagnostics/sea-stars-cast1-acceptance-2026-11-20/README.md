@@ -32,7 +32,9 @@ The first Dream check (J‑d9db9b52ef42) ran, but showed the **Clownfish** tank.
 
 **The coordinator fence.** After the first re-record attempt cast1 was fenced `cleanup-unverified` (an automatic readd failed its foreground restore: another principal's job began with the Aquarium Dream in the foreground, and my earlier restore had already selected the Seahorse Dream). It cleared by itself within about an hour and the queued jobs then ran. Lesson: end a Dream recording by restoring settings only when no other job can start in between, or leave the original Dream selected until the last job.
 
-**Still open on cast1:** the Phase 6 gate, at least 20 FPS (median of 3 × 120 s) at the default and at the maximum population.
+**Phase 6, default population: PASS at 20.35 FPS, after a fix.** Measured as steady-state level FPS (the 20–90 s buckets of each 120 s profile run), because the profile window opens before the level loads and its first 10 s are the menu at 60 FPS: that inflated every earlier figure (the "23.99" above is 20.70 steady; the 22.0 median of the first settings build is 18.5). The settings build with 17 residents placed ran at **18.45 / 18.50 FPS**, 5.8 ms a frame slower than the nine-resident build (20.70) with the same nine animals active. Cause: the eight parked residents (scale .001, update skipped) were still drawn, because the renderer skips an actor only when its visibility mailbox is zero (`level.cc`) and residents were authored with mailbox 1. The desktop's software renderer hid it (parking-cost ratio 0.998). Each resident's visibility mailbox is now its own `active` cell (`4d001445`; `test_parked_residents_are_not_drawn`). After the fix: **20.30 / 20.35 / 20.35 FPS**, median 20.35 against the 20 FPS gate (J‑c5225d47a161, J‑caef35d89c9a, J‑a763d40f66c6; [`phase6-default-fps.json`](phase6-default-fps.json)). The margin is 0.35 FPS. During one run the form was opened by hand about 100 s in; that tail is excluded.
+
+**Still open on cast1:** the Phase 6 gate at the maximum population (17 residents), through the real form with scripted input, with a fall back to lower maximums if it misses.
 
 ## Not covered
 
