@@ -1,6 +1,11 @@
 #ifndef _SeaStarsSettings_HP
 #define _SeaStarsSettings_HP
 #include "actor.hp"
+class RenderCamera;
+// The director's global mailbox that holds this entry's random seed, 1 to 32767, picked once per
+// level entry: Seed 0 means "new resident spots on every entry", and the director reads this cell.
+// Keep it equal to SC['entry'] in wflevels/aquarium_sea_stars/controller.py (a test checks it).
+constexpr int kSeaStarsEntrySeedMailbox = 1856;
 class SeaStarsSettings: public Actor {
 public:
     SeaStarsSettings(const SObjectStartupData* startupData);
@@ -9,8 +14,16 @@ public:
     virtual void update();
     virtual bool CanRender() const;
     virtual bool CanUpdate() const;
-    // The Director's Forth reads all nine live fields from the overlay once a second.
-    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+    // The Director's Forth reads the nine live fields from the overlay once a second. Caustics
+    // is the exception: the Camera reads its style once at load and Forth has no property
+    // writer, so an edit of Caustics is applied to the camera's style here.
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override;
+private:
+    RenderCamera* renderCamera() const;
+    void captureAuthoredCaustics(RenderCamera& camera);
+    bool _entrySeeded = false;
+    bool _captured = false;
+    float _authoredCaustics = 0.f;
 };
 Actor* OadSeaStarsSettings(const SObjectStartupData* startupData);
 #endif

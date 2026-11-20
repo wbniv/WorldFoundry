@@ -68,6 +68,9 @@ public:
 	// eye-to-world matrix is filled in by RenderBegin.
 	void SetStyleShading(const RBStyleShading& style);
 	void SetStyleTime(float seconds) { _style.time = seconds; }
+	// Runtime caustics strength (the SeaStarsSettings Caustics field); applied by RenderBegin.
+	float CausticStrength() const { return _style.causticStrength; }
+	void SetCausticStrength(float strength) { _style.causticStrength = strength; }
 
 #if defined(DO_STEREOGRAM)
 	void SetStereogram(Scalar eyeDistance, Angle eyeAngle);

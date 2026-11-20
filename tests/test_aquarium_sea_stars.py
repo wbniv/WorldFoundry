@@ -10,7 +10,7 @@ import sys
 import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'wflevels/aquarium_sea_stars'))
-from controller import player, director, CELLS
+from controller import player, director, CELLS, FIELD_LABELS
 from config import RESIDENTS
 
 @pytest.fixture(scope='module')
@@ -32,12 +32,19 @@ def crawl(tmp_path_factory):
     (tmp/'player.fth').write_text(definitions+player())
     definitions += re.search(r'zf_eval\(&g_ctx, "(: profile-begin [^"]*)"\)',src).group(1)+'\n'
     indices = {'Player':1,'Director':2,'BlueStar':3,'cs_wide':4,**{n:i+5 for i,(n,_,_) in enumerate(RESIDENTS)}}
-    (tmp/'director.fth').write_text(definitions+director(indices).removesuffix('st-director-tick\n'))
-    def run(trace):
+    indices['SeaStarsSettings'] = 5 + len(RESIDENTS)
+    # The VM's property@ holds 16 fields per actor, so the settings use small indices here.
+    fields = {label: i for i,label in enumerate(FIELD_LABELS.values())}
+    (tmp/'director.fth').write_text(definitions+director(indices, fields).removesuffix('st-director-tick\n'))
+    def raw(trace):
         result = subprocess.run([str(binary),str(tmp/'player.fth'),str(tmp/'director.fth'),'1','2','st-tick','st-director-tick'],input=trace,text=True,capture_output=True)
         assert result.returncode == 0, result.stderr
+        return result.stdout
+    def run(trace):
+        result = type('R',(),{})(); result.stdout = '\n'.join(l for l in raw(trace).splitlines() if l[:1].isdigit())
         keys = ['frame','x','y','z','vx','vy','vz',*range(600,751),*range(1100,1112),*range(1200,1281),*range(1000,1035),*range(780,791),*range(860,866),'part-x','part-y','part-z','part-a','part-b','part-c','camshot']
         return [dict(zip(keys,map(float,row))) for row in csv.reader(io.StringIO(result.stdout))]
+    run.raw = raw
     return run
 
 def test_plane_hold(crawl):

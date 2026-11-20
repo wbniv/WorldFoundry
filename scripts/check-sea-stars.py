@@ -15,7 +15,8 @@ import time
 ROOT=Path(__file__).resolve().parents[1]
 sys.path[:0]=[str(ROOT/'tests'),str(ROOT/'wflevels/aquarium_sea_stars')]
 from debug_bridge_client import BridgeClient
-from controller import CELLS
+from controller import CELLS, SC, rcell
+from config import RESIDENTS
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--wf-game',type=Path,default=ROOT/'build-docker/sea-stars-wf-game')
 p.add_argument('--out',type=Path,default=ROOT/'docs/diagnostics/sea-stars-2026-11-20')
@@ -35,7 +36,13 @@ cli=None
 try:
     cli=BridgeClient(port=a.port,timeout=45)
     cli.send({'op':'pause'})
-    for actor,boxes in ((player,(1906,3009,3010,3011,3018,3019,3020)),(director,(*CELLS.values(),745,746,751,752))):
+    serial={name:i for i,(name,_,_) in enumerate(RESIDENTS)}
+    sand_cells=[rcell('burrow',serial['SandOne']),rcell('burrow',serial['SandTwo'])]
+    brittle_cell=rcell('brittle-x',serial['Brittle'])
+    sand_actor=indices['SandOne']
+    for actor,boxes in ((player,(1906,3009,3010,3011,3018,3019,3020)),
+                        (director,(*CELLS.values(),*sand_cells,brittle_cell,SC['rclock'])),
+                        (sand_actor,(3009,3010))):
         for box in boxes:cli.watch(actor,box)
     def value(actor,box):
         with cli._lock:return cli.mailbox_values.get((actor,box),0.)
@@ -44,7 +51,7 @@ try:
         cli.inject_input('joystick1_raw',bits,duration_frames=-1)
         start=value(player,1906)
         cli.send({'op':'step','frames':frames})
-        deadline=time.monotonic()+45
+        deadline=time.monotonic()+max(45,frames*1.5)   # software rendering: 18 actors cost about a second a frame
         while value(player,1906)<start+frames*(3276/65536)-.002:
             if proc.poll() is not None:raise RuntimeError('engine exited')
             if time.monotonic()>deadline:raise RuntimeError('step timed out')
@@ -52,7 +59,7 @@ try:
         time.sleep(.04)
         row=dict(time=value(player,1906),position=[value(player,b) for b in (3009,3010,3011)],
             surface=cell(CELLS['surface']),roll=cell(CELLS['roll']),state=[cell(CELLS[k]) for k in ('x','y','z')],
-            sand=[cell(745),cell(746)],brittle=cell(751))
+            sand=[cell(c) for c in sand_cells],brittle=cell(brittle_cell))
         trace.append(row);return row
     def shot(name):
         cli.send({'op':'screenshot','filename':str(out/(name+'.png'))})
@@ -80,8 +87,12 @@ try:
     # Reaction thresholds are 25 cm for brittle, 8 cm for sand.
     place(3.3,.25,.8);r=step(8);assert r['brittle']>.3,r;shot('brittle-retreat')
     # Wake a sand star before approaching it; a nearby player forces a <1 s sink.
-    cli.set_mailbox(CELLS['clock'],70,director)
-    place(-1.8,-1.55,.8);r=step(20);assert r['sand'][0]<.05,r;shot('sand-buried')
+    # The resident clock runs the burrow cycle. With Seed 0 the spots vary per entry, so read
+    # where SandOne really is and bring the player to it.
+    cli.set_mailbox(SC['rclock'],70,director)
+    step(2)
+    sx,sy=value(sand_actor,3009),value(sand_actor,3010)
+    place(sx,sy,.8);r=step(20);assert r['sand'][0]<.05,(r,sx,sy);shot('sand-buried')
     place(0,0,.8);step(60,1);shot('reach')
     results=dict(status='PASS',checks=['actual engine movement and release','front-glass climb','four side corners','Jolt/script positions agree','brittle escape','sand contact burial'])
     (out/'results.json').write_text(json.dumps(results,indent=2)+'\n')

@@ -2,6 +2,8 @@
 \ a sand waypoint and a seeded pause. Both Dream and idle use this driver.
 : st-autopilot
   0 st-buttons st!
+  \ Glass climbing Off: skip the glass legs and go straight to the sand waypoint.
+  st-glass-on 0 = st-auto-step st@ 4 < & if 4 st-auto-step st! then
   st-auto-step st@ 0 = if
     JOYSTICK_BUTTON_DOWN st-buttons st!
     st-surface st@ 1 = if 1 st-auto-step st! then

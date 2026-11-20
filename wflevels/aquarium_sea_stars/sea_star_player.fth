@@ -34,18 +34,20 @@
   st-lock st@ if
     st-buttons st@ 30727 & st-lock st@ = if 0 st-dx st! 0 st-dy st! else 0 st-lock st! then
   then
+  st-glass-on 0 = st-surface st@ 0 <> & if 0 st-dx st! -1 st-dy st! then
   JOYSTICK_BUTTON_A st-held if
     st-prev st@ JOYSTICK_BUTTON_A & 0 = if 2 st-reach st! then
   then
   st-buttons st@ st-prev st! ;
+: st-sand-edge ( surface -- ) st-glass-on if st-change else drop then ;
 : st-sand
   st-x st@ st-dx st@ st-speed * st-dt st@ * + st-limit-x negate max st-limit-x min st-x st!
   st-y st@ st-dy st@ st-speed * st-dt st@ * + st-limit-y negate max st-limit-y min st-y st!
   st-bottom st-z st!
-  st-y st@ st-limit-y negate <= st-dy st@ 0 < & if 1 st-change then
-  st-x st@ st-limit-x >= st-dx st@ 0 > & if 2 st-change then
-  st-y st@ st-limit-y >= st-dy st@ 0 > & if 3 st-change then
-  st-x st@ st-limit-x negate <= st-dx st@ 0 < & if 4 st-change then ;
+  st-y st@ st-limit-y negate <= st-dy st@ 0 < & if 1 st-sand-edge then
+  st-x st@ st-limit-x >= st-dx st@ 0 > & if 2 st-sand-edge then
+  st-y st@ st-limit-y >= st-dy st@ 0 > & if 3 st-sand-edge then
+  st-x st@ st-limit-x negate <= st-dx st@ 0 < & if 4 st-sand-edge then ;
 : st-wall
   st-z st@ st-dy st@ st-speed * st-dt st@ * + st-bottom max st-top min st-z st!
   st-surface st@ 1 = if

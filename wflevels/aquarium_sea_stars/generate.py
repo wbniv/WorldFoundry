@@ -1,6 +1,7 @@
 """Export Sea Stars through the existing Blender level and DFRM pipelines."""
 import argparse
 import json
+import subprocess
 from pathlib import Path
 import sys
 import bpy
@@ -98,10 +99,20 @@ cam['wf_FoggingColor']=0x102b40;cam['wf_FoggingStartDistance']=9;cam['wf_Fogging
 for key,value in {'WaterAbsorbR':.016,'WaterAbsorbG':.009,'WaterAbsorbB':.004,'CausticStrength':.22,'CausticScale':5,'ToonBands':0}.items():cam['wf_'+key]=value
 bpy.data.objects['Matte']['wf_Matte Type']='Color';bpy.data.objects['Matte']['wf_Background Color']=0x09141e
 room=bpy.data.objects['Room'];room.location=(0,0,0);room['wf_original_bbox']=(-25,-30,-6,25,10,18);room['wf_had_authored_bbox']=True
+# One SeaStarsSettings object carries the nine live settings (docs/plans/2026-11-20-sea-stars-settings.md),
+# placed the way aquarium_tanks/generate.py places PlantedTankSettings. The director reads it with property@.
+settings=bpy.data.objects.new('SeaStarsSettings',None)
+bpy.context.scene.collection.objects.link(settings)
+settings['wf_schema_path']=str(repo/'wfsource/source/oas/seastarssettings.oad')
+settings['wf_Model Type']='None';settings['wf_Mass']=0.0
+settings['wf_original_bbox']=(-.1,-.1,-.1,.1,.1,.1);settings['wf_had_authored_bbox']=True
+catalog=json.loads(subprocess.check_output([str(repo/'wftools/wf_attr_edit/target/release/catalog'),settings['wf_schema_path']],text=True))
+settings_fields={f['key']:f['index'] for f in catalog['fields'] if f['width']}
+assert all(label in settings_fields for label in controller.FIELD_LABELS.values()),settings_fields
 objects=[o for o in bpy.context.scene.objects if o.get('wf_schema_path')]
 indices={o.name:i+1 for i,o in enumerate(objects)}
 player['wf_Script']=controller.player()+'\nst-tick\n'
-bpy.data.objects['Director']['wf_Script']=controller.director(indices) if not a.empty else f'{indices["cs_wide"]} INDEXOF_CAMSHOT write-mailbox\n'
+bpy.data.objects['Director']['wf_Script']=controller.director(indices,settings_fields) if not a.empty else f'{indices["cs_wide"]} INDEXOF_CAMSHOT write-mailbox\n'
 triangles={n:sum(len(f)-2 for f in m.faces) for n,m in static.items()}
 assert len(static)<=cfg.STATIC_GROUPS_MAX and sum(triangles.values())<=cfg.STATIC_TRIANGLES_MAX
 (out/'actor-map.json').write_text(json.dumps(dict(level='aquarium_sea_stars',actors=indices,indices=indices,static_triangles=triangles,

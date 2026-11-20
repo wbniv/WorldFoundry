@@ -1,4 +1,5 @@
-"""Sea Stars export-time configuration; D11 live settings are deferred."""
+"""Sea Stars export-time configuration. The level holds the maximum population (D10);
+the director parks the residents beyond the SeaStarsSettings counts."""
 SEED = 0
 TITLE = 'Sea Stars'
 STATIC_TRIANGLES_MAX = 20000
@@ -17,9 +18,22 @@ SPECIES = {
 }
 # Rock clearance is resolved at export, no runtime scene scan or raycast.
 ROCKS = ((-3.4, 1.15, 1.0, .70, 1.0), (0, 1.45, .75, .65, .65), (3.4, 1.1, 1.05, .70, 1.15))
+# The first nine are the shipped default population, in the shipped order, names and spots;
+# the rest are the extra spots a raised count unparks. Within a kind, residents are taken in
+# list order, so the default counts (2, 3, 2, 1, 1) select exactly the shipped nine.
 RESIDENTS = (
     ('ChipOne','chip',(-3.5,-.9,SAND_Z)), ('ChipTwo','chip',(3.1,-.9,SAND_Z)),
     ('FromiaOne','fromia',(-3.5,.6,1.8)), ('FromiaTwo','fromia',(0,1.0,1.35)), ('FromiaThree','fromia',(3.4,.5,1.8)),
     ('SandOne','sand',(-1.8,-1.55,SAND_Z)), ('SandTwo','sand',(1.8,-1.4,SAND_Z)),
     ('Brittle','brittle',(3.3,.25,SAND_Z)), ('Cushion','cushion',(-4.7,0,SAND_Z)),
+    ('ChipThree','chip',(-1.0,-.4,SAND_Z)), ('ChipFour','chip',(1.2,-1.7,SAND_Z)),
+    ('FromiaFour','fromia',(-3.0,.9,1.8)), ('FromiaFive','fromia',(3.8,.9,1.95)),
+    ('SandThree','sand',(-.3,-1.7,SAND_Z)), ('SandFour','sand',(4.2,-1.6,SAND_Z)),
+    ('BrittleTwo','brittle',(-2.6,.2,SAND_Z)), ('CushionTwo','cushion',(4.6,-.5,SAND_Z)),
 )
+KIND_ORDER = ('chip','fromia','sand','brittle','cushion')   # the order of the settings' five counts
+MAX_COUNTS = dict(chip=4, fromia=5, sand=4, brittle=2, cushion=2)       # D10
+DEFAULT_COUNTS = dict(chip=2, fromia=3, sand=2, brittle=1, cushion=1)   # D9
+# Seed offsets, in world units, by kind: (x amplitude, y amplitude). Chips and sand stars stay on
+# open sand in front of the rocks (rock fronts start at y = .4); Fromia only slide along a rock.
+SEED_SPREAD = dict(chip=(1.0,.5), sand=(1.0,.4), fromia=(.3,0))

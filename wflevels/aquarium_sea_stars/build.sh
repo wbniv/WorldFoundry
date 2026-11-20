@@ -14,6 +14,8 @@ for arg in "$@"; do
         *) echo "unknown argument: $arg" >&2; exit 2 ;;
     esac
 done
+# generate.py asks the catalog tool for the SeaStarsSettings field indices (as aquarium_plants does).
+cargo build --release --offline --manifest-path wftools/wf_attr_edit/Cargo.toml
 blender --background --python-exit-code 1 --python wflevels/aquarium_sea_stars/generate.py -- --repo "$ROOT" --out "$ROOT/wflevels/aquarium_sea_stars" "${EXTRA[@]}"
 bash wftools/wf_blender/build_level_binary.sh aquarium_sea_stars
 python3 wflevels/aquarium_sea_stars/report_budget.py

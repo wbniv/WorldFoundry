@@ -7,4 +7,6 @@ m=json.loads((Path(__file__).resolve().parent/'actor-map.json').read_text())
 t=m['static_triangles']
 print(json.dumps(dict(static_groups=len(t),static_triangles=sum(t.values()),groups=t,animated_actors=len(m['animated_triangles'])),indent=2))
 assert len(t)<=STATIC_GROUPS_MAX and sum(t.values())<=STATIC_TRIANGLES_MAX
-assert len(m['animated_triangles']) in (0,10)
+# The level holds the maximum population (the player and 17 residents); --empty has none.
+# The director parks the extras, so the default tank still shows 10 (docs/plans/2026-11-20-sea-stars-settings.md).
+assert len(m['animated_triangles']) in (0,18)

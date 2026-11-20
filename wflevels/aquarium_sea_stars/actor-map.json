@@ -27,7 +27,16 @@
     "SandTwo": 24,
     "Brittle": 25,
     "Cushion": 26,
-    "AmbientLight": 27
+    "ChipThree": 27,
+    "ChipFour": 28,
+    "FromiaFour": 29,
+    "FromiaFive": 30,
+    "SandThree": 31,
+    "SandFour": 32,
+    "BrittleTwo": 33,
+    "CushionTwo": 34,
+    "AmbientLight": 35,
+    "SeaStarsSettings": 36
   },
   "indices": {
     "Room": 1,
@@ -56,7 +65,16 @@
     "SandTwo": 24,
     "Brittle": 25,
     "Cushion": 26,
-    "AmbientLight": 27
+    "ChipThree": 27,
+    "ChipFour": 28,
+    "FromiaFour": 29,
+    "FromiaFive": 30,
+    "SandThree": 31,
+    "SandFour": 32,
+    "BrittleTwo": 33,
+    "CushionTwo": 34,
+    "AmbientLight": 35,
+    "SeaStarsSettings": 36
   },
   "static_triangles": {
     "sea_shell": 30,
@@ -74,7 +92,15 @@
     "SandOne": 6480,
     "SandTwo": 6480,
     "Brittle": 11980,
-    "Cushion": 3400
+    "Cushion": 3400,
+    "ChipThree": 3568,
+    "ChipFour": 3568,
+    "FromiaFour": 3400,
+    "FromiaFive": 3400,
+    "SandThree": 6480,
+    "SandFour": 6480,
+    "BrittleTwo": 11980,
+    "CushionTwo": 3400
   },
   "residents": [
     {
@@ -155,6 +181,78 @@
       "position": [
         -4.7,
         0,
+        0.8
+      ]
+    },
+    {
+      "name": "ChipThree",
+      "kind": "chip",
+      "position": [
+        -1.0,
+        -0.4,
+        0.8
+      ]
+    },
+    {
+      "name": "ChipFour",
+      "kind": "chip",
+      "position": [
+        1.2,
+        -1.7,
+        0.8
+      ]
+    },
+    {
+      "name": "FromiaFour",
+      "kind": "fromia",
+      "position": [
+        -3.0,
+        0.9,
+        1.8
+      ]
+    },
+    {
+      "name": "FromiaFive",
+      "kind": "fromia",
+      "position": [
+        3.8,
+        0.9,
+        1.95
+      ]
+    },
+    {
+      "name": "SandThree",
+      "kind": "sand",
+      "position": [
+        -0.3,
+        -1.7,
+        0.8
+      ]
+    },
+    {
+      "name": "SandFour",
+      "kind": "sand",
+      "position": [
+        4.2,
+        -1.6,
+        0.8
+      ]
+    },
+    {
+      "name": "BrittleTwo",
+      "kind": "brittle",
+      "position": [
+        -2.6,
+        0.2,
+        0.8
+      ]
+    },
+    {
+      "name": "CushionTwo",
+      "kind": "cushion",
+      "position": [
+        4.6,
+        -0.5,
         0.8
       ]
     }

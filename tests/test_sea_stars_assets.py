@@ -52,7 +52,11 @@ def test_static_and_animal_budget():
     data=json.loads((ROOT/'wflevels/aquarium_sea_stars/actor-map.json').read_text())
     assert len(data['static_triangles'])<=STATIC_GROUPS_MAX
     assert sum(data['static_triangles'].values())<=STATIC_TRIANGLES_MAX
-    assert len(data['animated_triangles'])==10
+    # The level holds the maximum population (the player and 17 residents); the director parks
+    # the extras, so the default tank shows the player and 9 residents (10 animated actors).
+    from config import RESIDENTS, DEFAULT_COUNTS
+    assert len(data['animated_triangles'])==1+len(RESIDENTS)==18
+    assert 1+sum(DEFAULT_COUNTS.values())==10
 
 def test_texture_is_512_square_and_has_no_transparent_texels():
     data=(ROOT/'wflevels/aquarium_sea_stars/stars_atlas.tga').read_bytes()
