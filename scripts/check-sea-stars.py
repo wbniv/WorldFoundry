@@ -93,7 +93,8 @@ try:
     step(2)
     sx,sy=value(sand_actor,3009),value(sand_actor,3010)
     place(sx,sy,.8);r=step(20);assert r['sand'][0]<.05,(r,sx,sy);shot('sand-buried')
-    place(0,0,.8);step(60,1);shot('reach')
+    # Reach is the press of OK. Holding OK for a second opens the settings form, which stops the level.
+    place(0,0,.8);step(3,1);step(57,0);shot('reach')
     results=dict(status='PASS',checks=['actual engine movement and release','front-glass climb','four side corners','Jolt/script positions agree','brittle escape','sand contact burial'])
     (out/'results.json').write_text(json.dumps(results,indent=2)+'\n')
     print(json.dumps(results))

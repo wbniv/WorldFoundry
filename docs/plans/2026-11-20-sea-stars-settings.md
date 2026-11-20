@@ -1,6 +1,6 @@
 # Sea Stars settings: the `SeaStarsSettings` object, parking and the phone's Dream form
 
-**Status: proposed, 2026‑11‑20. Nothing is built.** This is the deferred decision **D11** of the [Sea Stars plan](2026-11-10-starfish-tank.md#level-settings) (Will, 2026‑11‑20: "let's do D11 later", then "write me a plan for the settings task"). The first release shipped without it: the level places the default population (9 residents), and holding OK opens nothing because the level registers no editable object. This plan adds the settings, and it is the spec D1-D10 already accepted ("D1-D10: all"): nothing about the nine fields, their ranges or the 17-resident maximum is reopened here.
+**Status: Phases 0‑3 are built and verified on the desktop, 2026‑​11‑​20; Phase 4 (rebuild the Dream variant and bundles), Phase 5 (the phone's Dream form) and Phase 6 (the cast1 gate) are open.** This is the deferred decision **D11** of the [Sea Stars plan](2026-11-10-starfish-tank.md#level-settings) (Will, 2026‑​11‑​20: "let's do D11 later", then "accepting all recommendations. implement"). The type, the 17-resident level, the settings-driven director and the tests are in `53d7c718` and `01a1da62`. The nine fields, their ranges and the 17-resident maximum are exactly D9 and D10; nothing about them was reopened.
 
 ## Context
 
@@ -140,6 +140,18 @@ Work happens in a sparse worktree branched from `2026-new-level`; the finish lin
 - More resident species, an anime twin, feeding behaviour: all out of scope in the Sea Stars plan.
 - Moving the five RPRP catalogs of the other tanks to this mechanism (the runtime object editing work, not this item).
 
+## What building it found
+
+Three things differ from what this plan assumed, and one measurement.
+
+1. **Caustics needed a small C++ hook, not a Forth write.** Forth has only read words for properties (`property@`, `property-int-bytes@`), and the Camera reads its style once when it is built. `RenderCamera` now has `CausticStrength()` and `SetCausticStrength()` (the one engine-side addition, in `wfsource/source/gfx/camera.hp`), and the `SeaStarsSettings` class applies Caustics Off or On from `OnPropertiesChanged`, remembering the authored strength. The plan said no engine change; this is the smallest one that makes the field live.
+2. **Mailboxes above 1900 are actor-local.** `GLOBAL_USER_MAX` is 1900, so a cell written above it is private to the one actor that wrote it. Every shared cell therefore lives below it: DFRM blocks 640‑1719 (60 cells for each of the 18 animated actors), then the director's tables from 1720, with the scalars ending at 1867. `controller.py` asserts this and a test checks that no two cells collide.
+3. **Seed 0 needs a random value from outside Forth.** Forth has none, so the `SeaStarsSettings` class writes one per level entry into a shared cell (`kSeaStarsEntrySeedMailbox`, kept equal to the Forth cell by a test). A non‑zero Seed ignores it and gives the same spots every entry; each resident's offset is a function of the resolved seed, kept small enough to stay on open sand (or along a rock for Fromia), and a Seed edit makes residents glide, not jump.
+4. **Parked residents cost nothing measurable on the desktop.** The level with 8 parked residents ran at 31.7 ms per stepped frame against 31.8 ms for the 9‑resident level of `f8d95b37` (ratio 0.998, 2 alternating runs of 30 frames, software rendering; `docs/diagnostics/sea-stars-settings-2026-11-20/parking-cost.json`). This is not a cast1 figure: step 8 still decides.
+
+Also learned: **holding OK opens the settings form** (the level stops updating while it is open), and **Reach is the press of OK**, so a check that wants Reach must tap, not hold. Applying a form edit runs when the app's Back key does, which exists only inside the menu bundle, so applying an edit is covered by the zForth VM tests and on the device, not by the plain desktop run.
+
+
 ## Verification
 
 1. The type exists and declares the nine fields with the D9 ranges and defaults, each `SHOW_AS_LIVE`.
@@ -157,7 +169,7 @@ Work happens in a sparse worktree branched from `2026-new-level`; the finish lin
     ```
 4. Holding OK on the desktop opens the form built from the `.oad`, and Apply changes the tank.
     ```
-    WF_CONTAINER_IMAGE=linux-test scripts/in-linux-container.sh xvfb-run -a -s "-screen 0 1280x720x24" python3 scripts/check-sea-stars.py --settings
+    WF_CONTAINER_IMAGE=linux-test scripts/in-linux-container.sh timeout -s KILL 400 xvfb-run -a -s "-screen 0 1280x720x24" python3 scripts/check-sea-stars-settings.py form
     ```
 5. The default population still behaves exactly as shipped (the existing desktop check passes unchanged).
     ```
@@ -169,7 +181,7 @@ Work happens in a sparse worktree branched from `2026-new-level`; the finish lin
     ```
 7. A parked resident costs nothing: the frame time with all counts at 0 equals the frame time of a level with no residents, within the noise of 3 runs.
     ```
-    WF_CONTAINER_IMAGE=linux-test scripts/in-linux-container.sh xvfb-run -a python3 scripts/check-sea-stars.py --parking-cost
+    WF_CONTAINER_IMAGE=linux-test scripts/in-linux-container.sh timeout -s KILL 1500 xvfb-run -a -s "-screen 0 1280x720x24" python3 scripts/check-sea-stars-settings.py parking-cost --baseline-level /src/build-docker/sea-stars-baseline/aquarium_sea_stars-standalone.iff
     ```
 8. On cast1, Sea Stars holds 20 FPS (median of 3 runs of 120 s) at the default population **and** at the maximum, or the maximums are lowered until it does and recorded.
     ```
@@ -177,7 +189,7 @@ Work happens in a sparse worktree branched from `2026-new-level`; the finish lin
     ```
 9. On cast1 and on the phone, a change made to a count during the Dream shows on the TV within 2 s, and the device's original Dream settings are restored afterwards (Phase 5).
 
-Steps 4 and 7 use two flags of `scripts/check-sea-stars.py` that Phases 3 and 4 add (`--settings`, `--parking-cost`); they do not exist yet.
+Steps 4 and 7 are `scripts/check-sea-stars-settings.py form` and `parking-cost`. The baseline level for step 7 is `git show f8d95b37:wflevels/aquarium_sea_stars-standalone.iff`.
 
 ## Mockups
 

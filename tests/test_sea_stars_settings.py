@@ -316,3 +316,17 @@ def test_the_valid_cell_says_whether_the_overlay_answered(crawl):
     none = dumpg(crawl.raw(f"reset 0 0 .8\nstep 5 0 {FRAME}\ndumpg {valid} {valid}\n"), valid, valid)[valid]
     some = dumpg(crawl.raw(f"reset 0 0 .8\n{prop('seed', 9)}step 5 0 {FRAME}\ndumpg {valid} {valid}\n"), valid, valid)[valid]
     assert (none, some) == (0, 1)
+
+
+# --- phase 4: the Dream variant keeps the settings object ----------------------------------------
+def test_the_dream_variant_keeps_the_settings_object_and_has_no_rprp_chunk():
+    variant = ROOT / "wflevels/aquarium_sea_stars_screensaver/aquarium_sea_stars_screensaver.lev"
+    standalone = ROOT / "wflevels/aquarium_sea_stars_screensaver-standalone.iff"
+    if not variant.exists() or not standalone.exists():
+        pytest.skip("build it first: python3 scripts/build-aquarium-screensaver-levels.py aquarium_sea_stars")
+    text = variant.read_text()
+    assert "SeaStarsSettings" in text
+    # Only the Player's copy of the controller runs the autopilot; the director's copy stays 0.
+    assert text.count(": st-dream 1 ;") == 1 and text.count(": st-dream 0 ;") == 1
+    for iff in (ROOT / "wflevels/aquarium_sea_stars-standalone.iff", standalone):
+        assert b"RPRP" not in iff.read_bytes(), iff.name
