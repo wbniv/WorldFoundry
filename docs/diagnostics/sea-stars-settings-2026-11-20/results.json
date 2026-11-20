@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "checks": [
+    "actual engine movement and release",
+    "front-glass climb",
+    "four side corners",
+    "Jolt/script positions agree",
+    "brittle escape",
+    "sand contact burial"
+  ]
+}
