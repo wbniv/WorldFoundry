@@ -24,11 +24,18 @@ The first Dream check (J‑d9db9b52ef42) ran, but showed the **Clownfish** tank.
 
 **The autopilot stall.** Landing from the back wall latches the held DOWN (`st-change`, added for the stick-hold bounce); a latch clears only when the buttons change. Autopilot step 4 kept holding DOWN, so the star never left the back-right corner. It moved again only when a frame hitch over 200 ms forced a neutral stick (the recording has hitches of 250–420 ms). Reproduced in the zForth VM; fixed in `6c83fbb1` (step 4 presses nothing until the latch clears), guarded by `test_dream_autopilot_keeps_lapping` (600 s at 30 fps, at least 5 front-glass climbs, no standstill over 25 s; the old script gives 1 climb).
 
-**Still open on cast1:** install the fixed APKs (game `8aca0680…`, Dream `59d886aa…`, staged), record a fresh 10 minute Dream, check the star keeps lapping, restore the Seahorse baseline (`tank = random`), then the Phase 6 gate (20 FPS at the default and at the maximum population). The device was fenced `cleanup-unverified` at 17:32 by another principal's job whose foreground restore failed ("Original Dream is no longer selected"); a readd does not clear it, so it needs an administrator.
+**Re-recorded with the fix (game `8aca0680…`, Dream `59d886aa…`, J‑48fd1fcc99fb, 596 s): PASS.** The star laps continuously: eight large-star glass episodes (starting at 0, 49, 129, 211, 290, 373, 458 and 543 s, about 80 s apart, 8 climbs in 10 minutes), longest standstill 28 s (the scripted 20 s rest, stretched by the Dream's wall-clock pacing), against 9 minutes parked before the fix. [`dream10-fixed-front-glass.png`](dream10-fixed-front-glass.png) shows the climb at 83–87 s: the star at the front-right edge of the sand, then up the front glass with its oral side to the camera; per-second tracking is in [`dream10-fixed-star-track.json`](dream10-fixed-star-track.json) (second, blue pixels, x, y, height).
+
+**Baseline restored: PASS** (J‑bc48d1edffa3, J‑8b47d5173062, J‑a2f2bff9c0f3): Seahorse Dream selected and enabled, `activate_on_sleep` 1, idle 600000 ms, sleep timeout −1, stay-on 0, nothing running; every field equals [`cast1-settings-after-restore.json`](cast1-settings-after-restore.json) ([`cast1-settings-after-second-restore.json`](cast1-settings-after-second-restore.json)).
+
+**Mac and iOS, on Codemagic (branch `2026-new-level`):** macOS Desktop (Debug, headless) [build 6b002cad…](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6b002cada30564f93e0e18a7) and iOS Simulator (Debug) [build 6b002e8f…](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6b002e8f834ddd44ee9207c2), including the iPhone and iPad simulator run, both finished green. About 20 Mac minutes; 257 of 500 used this month.
+
+**The coordinator fence.** After the first re-record attempt cast1 was fenced `cleanup-unverified` (an automatic readd failed its foreground restore: another principal's job began with the Aquarium Dream in the foreground, and my earlier restore had already selected the Seahorse Dream). It cleared by itself within about an hour and the queued jobs then ran. Lesson: end a Dream recording by restoring settings only when no other job can start in between, or leave the original Dream selected until the last job.
+
+**Still open on cast1:** the Phase 6 gate, at least 20 FPS (median of 3 × 120 s) at the default and at the maximum population.
 
 ## Not covered
 
 - Step 10's no-actor gate (above).
-- The Dream ran 383 s, not 10 minutes, and the "glass climb at least once" is shown by one screenshot, not a recorded MP4.
 - The app APKs on cast1 are now the Sea Stars builds. Their previous builds were not recorded, so they were not restored.
 - cast2 smoke only (28.75 FPS, J‑3f080736b0cf); it is a faster device and not a gate.
