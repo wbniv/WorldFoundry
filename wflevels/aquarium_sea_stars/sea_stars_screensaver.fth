@@ -17,7 +17,9 @@
     JOYSTICK_BUTTON_DOWN st-buttons st!
     st-surface st@ 0 = if 4 st-auto-step st! then
   else st-auto-step st@ 4 = if
-    JOYSTICK_BUTTON_DOWN st-buttons st!
+    \ Landing from the back wall latches the DOWN that brought it here (st-change), and a latch
+    \ clears only when the buttons change. Press nothing until it clears, or the star never leaves.
+    st-lock st@ 0 = if JOYSTICK_BUTTON_DOWN st-buttons st! then
     st-y st@ .3 < if 5 st-auto-step st! 20 st-auto-wait st! then
   else
     st-auto-wait st@ st-dt st@ - 0 max dup st-auto-wait st!

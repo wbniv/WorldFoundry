@@ -15,7 +15,14 @@ from config import RESIDENTS
 
 @pytest.fixture(scope='module')
 def crawl(tmp_path_factory):
-    tmp = tmp_path_factory.mktemp('sea-stars-vm')
+    return build_crawl(tmp_path_factory.mktemp('sea-stars-vm'))
+
+@pytest.fixture(scope='module')
+def crawl_dream(tmp_path_factory):
+    # The Dream's level: the same scripts with st-dream 1, so the autopilot runs from the first frame.
+    return build_crawl(tmp_path_factory.mktemp('sea-stars-vm-dream'), dream=True)
+
+def build_crawl(tmp, dream=False):
     src = (ROOT/'engine/stubs/scripting_zforth.cc').read_text()
     core = src[src.index('static const char* kCoreBootstrap ='):src.index('void Init(')]
     core = re.sub(r'//[^\n]*','',core)
@@ -29,7 +36,7 @@ def crawl(tmp_path_factory):
     vendor = ROOT/'engine/vendor/zforth-41db72d1/src/zforth'
     binary = tmp/'vm'
     subprocess.run(['cc','-O1','-I'+str(ROOT/'engine/stubs'),'-I'+str(vendor),str(ROOT/'tests/species_vm.c'),str(vendor/'zforth.c'),'-lm','-o',str(binary)],check=True)
-    (tmp/'player.fth').write_text(definitions+player())
+    (tmp/'player.fth').write_text(definitions+(player().replace(': st-dream 0 ;', ': st-dream 1 ;') if dream else player()))
     definitions += re.search(r'zf_eval\(&g_ctx, "(: profile-begin [^"]*)"\)',src).group(1)+'\n'
     indices = {'Player':1,'Director':2,'BlueStar':3,'cs_wide':4,**{n:i+5 for i,(n,_,_) in enumerate(RESIDENTS)}}
     indices['SeaStarsSettings'] = 5 + len(RESIDENTS)
@@ -69,6 +76,20 @@ def test_release_stops_and_resume_requires_neutral(crawl):
 def test_idle_autopilot_climbs_front(crawl):
     rows = crawl('reset 0 0 .8\nstep 3600 0 .0166667\n')
     assert any(r[CELLS['surface']] == 1 and r['z'] > 2 for r in rows)
+
+def test_dream_autopilot_keeps_lapping(crawl_dream):
+    # The cast1 recording of a 10 minute Dream showed the star parked in a corner for 9 minutes:
+    # landing from the back wall latches the held DOWN (st-change), and the autopilot kept holding it.
+    rows = crawl_dream('reset 0 0 .8\nstep 18000 0 .0333667\n')       # 600 s at the device's 30 fps
+    surface = [int(r[CELLS['surface']]) for r in rows]
+    laps = sum(1 for a, b in zip(surface, surface[1:]) if a == 0 and b == 1)    # sand -> front glass
+    assert laps >= 5, f'the autopilot climbed the front glass {laps} times in 600 s'
+    still, longest = 0, 0
+    for a, b in zip(rows, rows[1:]):
+        moved = any(abs(a[k]-b[k]) > 1e-6 for k in ('x', 'y', 'z'))
+        still = 0 if moved else still + 1
+        longest = max(longest, still)
+    assert longest * .0333667 < 25, f'the star stood still for {longest * .0333667:.0f} s (the rest is 20 s)'
 
 def test_reach_does_not_repeat_while_held(crawl):
     rows = crawl('reset 0 0 .8\nstep 180 1 .0166667\n')
