@@ -95,6 +95,12 @@
 		{ 'I32' { 'NAME' "FoggingColor" } { 'DATA' 876410l } { 'STR' "876410" } }
 		{ 'FX32' { 'NAME' "FoggingStartDistance" } { 'DATA' 6.0000000000000000(1.15.16) } { 'STR' "6.0" } }
 		{ 'FX32' { 'NAME' "FoggingCompleteDistance" } { 'DATA' 40.0000000000000000(1.15.16) } { 'STR' "40.0" } }
+		{ 'FX32' { 'NAME' "WaterAbsorbR" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "WaterAbsorbG" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "WaterAbsorbB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "CausticStrength" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "CausticScale" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "ToonBands" } { 'DATA' 0l } { 'STR' "0" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -423,6 +429,7 @@
 		{ 'FILE' { 'NAME' "MusicVh" } { 'STR' "" } }
 		{ 'FILE' { 'NAME' "MusicVb" } { 'STR' "" } }
 		{ 'FILE' { 'NAME' "MusicSeq" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Prewarm No Palette Program" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
