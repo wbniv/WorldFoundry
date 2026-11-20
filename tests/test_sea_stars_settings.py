@@ -433,3 +433,20 @@ def test_parked_residents_are_not_drawn():
         assert 1 < cell < controller.GLOBAL_USER_MAX, f'{name}: active cell {cell} is not a global user mailbox'
         cells.append(cell)
     assert len(set(cells)) == len(cells)
+
+
+def test_residents_re_pose_one_frame_in_three_and_the_player_every_frame():
+    """The deform runs inside dfrm-pose-curves, about 1.2 ms a resident on cast1, and the arms move
+    slowly: each resident re-poses on its own phase (order among the posed, mod 3) of a 0, 1, 2 frame counter, so
+    the load is level. The player's star poses every frame: it answers the stick."""
+    import re
+    (_, tick), indices = _director_text()
+    gated = re.findall(r"fphase_cell st@ (\d) = if\n", tick.replace(str(controller.SC['fphase']), 'fphase_cell'))
+    posed = [(serial, kind) for serial, (name, kind, _) in enumerate(cfg.RESIDENTS) if kind != 'cushion']
+    assert len(gated) == len(posed), (len(gated), len(posed))              # one gate per posed resident
+    assert [int(g) for g in gated] == [slot % 3 for slot in range(len(posed))]   # by order among the posed
+    counts = [gated.count(str(p)) for p in '012']
+    assert max(counts) - min(counts) <= 1, counts                           # the phases are level
+    assert tick.count('dfrm-pose-curves') == len(posed) + 1                 # the player's star is the extra
+    # The counter itself cycles 0, 1, 2 once per director frame.
+    assert f"{controller.SC['fphase']} st@ 1 + dup 3 >= if drop 0 then {controller.SC['fphase']} st!" in tick

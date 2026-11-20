@@ -35,7 +35,7 @@ def rcell(table, serial):
 
 SCALAR_BASE = KBASE + len(KIND_TABLES)*KIND_STRIDE
 SCALARS = ('poll','speedf','glass','seed','entry','chip-n','fromia-n','sand-n','brittle-n','cushion-n',
-           'rclock','b0','b1','b2','b3','valid')
+           'rclock','b0','b1','b2','b3','valid','fphase')
 SC = {n: SCALAR_BASE+i for i,n in enumerate(SCALARS)}
 assert max(SC.values()) <= GLOBAL_USER_MAX, 'director cells must be level-global'
 COUNT_CELL = {k: SC[k+'-n'] for k in KIND_ORDER}
@@ -115,6 +115,10 @@ def director(indices, fields):
     # The resident clock runs at the Speed setting (x.5, x1, x2); the player's own speed scales
     # the same way in st-speed. The settings are polled at once, then once a second.
     tick += f' {rclock} st@ st-dt st-speedf * + {rclock} st!\n'
+    # Pose throttle: a resident's DFRM pose is evaluated inside its dfrm-pose-curves call, about 1.2 ms
+    # each on cast1, and the arms move slowly. Each resident re-poses on one frame in three (staggered
+    # by order among the posed residents, so the load is level); the player's star poses every frame. fphase cycles 0, 1, 2.
+    tick += f' {SC["fphase"]} st@ 1 + dup 3 >= if drop 0 then {SC["fphase"]} st!\n'
     tick += (f' {SC["poll"]} st@ st-dt - dup {SC["poll"]} st! 0 <= {rclock} st@ st-dt 2 * < | {SC["seed"]} st@ 0 = | '
              f'if st-poll 1 {SC["poll"]} st! then\n')
 
@@ -136,6 +140,7 @@ def director(indices, fields):
         return out + f' {block} 5 {actor} dfrm-pose-curves drop\n'
 
     tick += arms('BlueStar', 'linckia', 0)
+    pose_slot = 0                      # position among the residents that pose (cushions do not)
     for serial,(name,kind,(x,y,z)) in enumerate(RESIDENTS):
         act, fade = rcell('active',serial), rcell('fade',serial)
         ox, oy = rcell('ox',serial), rcell('oy',serial)
@@ -161,7 +166,10 @@ def director(indices, fields):
         # (no deform, no pose, no behaviour), so it costs only the scale write above.
         tick += f' {act} st@ if\n'
         if kind != 'cushion':
+            tick += f' {SC["fphase"]} st@ {pose_slot % 3} = if\n'
+            pose_slot += 1
             tick += arms(name, kind, serial+1, rcell('brittle-t',serial) if kind=='brittle' else None)
+            tick += ' then\n'
         if kind=='chip':
             # 20-60 second grazing pauses, straight segments between spots.
             cell = rcell('chip',serial)
