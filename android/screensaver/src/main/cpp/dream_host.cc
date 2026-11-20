@@ -175,8 +175,10 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         windowReady.store(true);
         // The positional argument selects the same TOC index as TankChoice.IDS.
         char arg0[] = "wf_dream";
-        char arg1[] = "0";
-        arg1[0] = static_cast<char>('0' + level);
+        // Decimal, not one ASCII digit: index 10 (Sea Stars) as '0' + 10 is ':', which atoi()
+        // reads as 0, so the Dream played the Clownfish tank. The engine parses it with atoi.
+        char arg1[12];
+        std::snprintf(arg1, sizeof arg1, "%d", int(level));
         char slotWidth[] = "--vram-slot-width=1024";
         char slotHeight[] = "--vram-slot-height=1024";
         char permWidth[] = "--vram-perm-width=1024";
