@@ -1,0 +1,42 @@
+{
+  "species": [
+    {
+      "kind": "linckia",
+      "name": "Blue sea star",
+      "scientific": "Linckia laevigata",
+      "image": "species-linckia.png"
+    },
+    {
+      "kind": "chip",
+      "name": "Chocolate-chip star",
+      "scientific": "Protoreaster nodosus",
+      "image": "species-chip.png"
+    },
+    {
+      "kind": "fromia",
+      "name": "Red Fromia",
+      "scientific": "Fromia milleporella",
+      "image": "species-fromia.png"
+    },
+    {
+      "kind": "sand",
+      "name": "Sand-sifting star",
+      "scientific": "Archaster typicus",
+      "image": "species-sand.png"
+    },
+    {
+      "kind": "brittle",
+      "name": "Green brittle star",
+      "scientific": "Ophiarachna incrassata",
+      "image": "species-brittle.png"
+    },
+    {
+      "kind": "cushion",
+      "name": "Cushion star",
+      "scientific": "Culcita novaeguineae",
+      "image": "species-cushion.png"
+    }
+  ],
+  "source": "wflevels/aquarium_sea_stars/sea_stars_assets.blend",
+  "renders": "Actual authored meshes and atlas under presentation lighting; no runtime verification implied."
+}

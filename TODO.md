@@ -434,4 +434,10 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** Any engine change. (Translucent radioles would need the texture-alpha TODO.) — _from [2026-11-08-reef-tanks-finish.md](docs/plans/2026-11-08-reef-tanks-finish.md)_  <!-- fp:7fdf14d0773f599c -->
 - [ ] **(triage)** The two-habitat tanks (separate TODO item). — _from [2026-11-08-reef-tanks-finish.md](docs/plans/2026-11-08-reef-tanks-finish.md)_  <!-- fp:70fd75097546c771 -->
 - [ ] **(triage)** Day/night polyp cycles, water-flow simulation (original plan's out-of-scope list). — _from [2026-11-08-reef-tanks-finish.md](docs/plans/2026-11-08-reef-tanks-finish.md)_  <!-- fp:a42bde585ce417b1 -->
+- [ ] **(triage)** Climbing the rocks. That needs surface data resolved at export for the rock meshes. The sand and the glass are planes, so they don't. — _from [2026-11-10-starfish-tank.md](docs/plans/2026-11-10-starfish-tank.md)_  <!-- fp:ffa49bcbc36e70f5 -->
+- [ ] **(triage)** Feeding, stomach eversion, regrowing arms, or anything carried over between sessions. — _from [2026-11-10-starfish-tank.md](docs/plans/2026-11-10-starfish-tank.md)_  <!-- fp:8925287b5166ba79 -->
+- [ ] **(triage)** An anime twin (D6), and an A3 poster (not asked for). — _from [2026-11-10-starfish-tank.md](docs/plans/2026-11-10-starfish-tank.md)_  <!-- fp:8c2a7781746060e3 -->
+- [ ] **(triage)** Companion invertebrates such as urchins, sea cucumbers or a harlequin shrimp. Will chose several sea-star species instead. — _from [2026-11-10-starfish-tank.md](docs/plans/2026-11-10-starfish-tank.md)_  <!-- fp:e7110e3e74ac5d69 -->
+- [ ] **(triage)** Choosing the player's species in the settings (D9 shows it read-only). — _from [2026-11-10-starfish-tank.md](docs/plans/2026-11-10-starfish-tank.md)_  <!-- fp:39c62f16c02e7d7b -->
+- [verify] **2026-11-10-starfish-tank** — Verification section present but no PASS recorded — run + record the steps. _from [2026-11-10-starfish-tank.md](docs/plans/2026-11-10-starfish-tank.md)_  <!-- fp:39f42c635e6e36ba -->
 <!-- END auto-captured-deferrals -->
