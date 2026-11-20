@@ -200,6 +200,7 @@
 
 
 ## Done
+- ✅ 2026‑11‑20 — [sea-stars-poster] A3 poster led by the six animals (tube feet, arm-tip eyes, sand, brittle stars, the tank and its Forth); `task poster-sea-stars`. See [plan](docs/plans/2026-11-20-sea-stars-poster.md).
 - ✅ 2026‑11‑15 — [dfrm-strand-debug] `dfrm_strand_test` compiles in Debug (`#undef new`/`delete`); zforth dict comment says 128 KB. See [plan](docs/plans/2026-11-14-single-desktop-build.md).
 - ✅ 2026‑11‑15 — [single-desktop-build] `task build` is CMake (`WF_DESIGNER_CHEATS`), Linux capture works; all 9 steps PASS. See [plan](docs/plans/2026-11-14-single-desktop-build.md).
 - ✅ 2026‑11‑15 — [local-ci] Timer CI runs origin's runner clone; build, arena, renderer-fresh PASS at HEAD. See [plan](docs/plans/2026-11-14-local-ci.md).

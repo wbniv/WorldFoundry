@@ -6,6 +6,7 @@ one player and nine residents. Live settings remain deferred (D11).
 
 ## Sources
 
+- [Algrain, Hennebert, Bertemes, Wattiez, Flammang & Lengerer 2022, *Open Biology* 12:220103](https://doi.org/10.1098/rsob.220103): sea stars adhere strongly but temporarily via a secreted blend of proteins that forms an adhesive footprint left behind on detachment; the tube feet hold a duo-gland adhesive system with two kinds of adhesive cell and de-adhesive cells (checked on the open-access page, 2026-11-20, in *Asterias rubens*). Used for the poster's tube-foot panel; the four-beat attach/pull/release drawing is an animation abstraction.
 - [Mueller, Bos, Graf & Gumanao 2011, *Aquatic Biology* 12:157–164](https://doi.org/10.3354/ab00326): measured mean locomotion on uniform substrate, **8.1 cm/min Linckia**, **18.8 cm/min Protoreaster**, **45.8 cm/min Archaster**. These are active movement rates, not time-averaged daily travel. Their maximum rates are higher. Specimens included Linckia 8–30 cm diameter, Protoreaster 4–28 cm and Archaster 2–10 cm.
 - [Garm & Nilsson 2014, visual navigation in Linckia](https://doi.org/10.1098/rspb.2013.3011): arm-tip compound eyes and visually guided reef navigation. The raised leading tip and red eyespot are based on this anatomy; the A-button two-second reach is a game animation.
 - [Bos et al. 2011, Archaster burrowing and habitat shifts](https://doi.org/10.1007/s00227-010-1588-0): sand burrowing is real. The game’s timed emergence and proximity-triggered fast burial are authored reactions, not measured biological latencies.
