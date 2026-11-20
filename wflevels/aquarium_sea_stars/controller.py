@@ -2,7 +2,7 @@
 from pathlib import Path
 from config import LIMIT_X, LIMIT_Y, SAND_Z, TOP, PLAYER_SPEED, ROCKS
 HERE = Path(__file__).resolve().parent
-CELLS = {name: 600+i for i,name in enumerate(('init','x','y','z','surface','old','roll','reach','idle','clock','dx','dy','buttons','prev','dt','neutral','auto-phase','heading','a','b','c','leader','turn','auto-step','auto-wait'))}
+CELLS = {name: 600+i for i,name in enumerate(('init','x','y','z','surface','old','roll','reach','idle','clock','dx','dy','buttons','prev','dt','neutral','auto-phase','heading','a','b','c','leader','turn','auto-step','auto-wait','lock'))}
 
 def header():
     text = ''.join(f': st-{n} {v} ;\n' for n,v in CELLS.items())
@@ -63,7 +63,13 @@ def director(indices):
             # Burrow cycle: 40-120 s rest; four-second emerge/sink.
             tick+=f' {phase} 100 st-mod dup 60 < if drop 0 else 60 - 4 / 1 min then {cell} st!\n'
             tick+=f' {phase} 100 st-mod 80 > if 100 {phase} 100 st-mod - 4 / 0 max 1 min {cell} st! then\n'
-            tick+=f' {x} {y} .8 st-near if {cell} st@ st-dt 4 * - 0 max {cell} st! then\n'
+            # Contact is latched (the cycle above is recomputed every frame): the star
+            # sinks in under a second and stays down 6 s after the player leaves.
+            cont=760+serial; sink=770+serial
+            tick+=f' {cont} st@ st-dt - 0 max {cont} st!\n'
+            tick+=f' {x} {y} .8 st-near if 6 {cont} st! then\n'
+            tick+=f' {cont} st@ 0 > if {sink} st@ st-dt 1.5 * + 1 min else {sink} st@ st-dt .25 * - 0 max then {sink} st!\n'
+            tick+=f' 1 {sink} st@ - {cell} st@ min {cell} st!\n'
             tick+=put(f'{z-.12} {cell} st@ .12 * +','INDEXOF_Z_POS',name)
             tick+=put(f'{x} {phase} 100 st-mod 64 - 0 max 16 min .015 * +','INDEXOF_X_POS',name)
         elif kind=='brittle':

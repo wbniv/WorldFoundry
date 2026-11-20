@@ -1156,7 +1156,7 @@ tasks:
 
   build-cd-iff-aquarium-menu:
     desc: "Package the Aquarium tanks with the selector for Android (standalone/Apple bundle remains aquarium-cd.iff)"
-    deps: [tools-build, aquarium-level, aquarium-blue-shrimp-level, aquarium-betta-level, aquarium-jellyfish-level, aquarium-lionfish-level, aquarium-plants-level, aquarium-arowana-level, aquarium-tiger-barbs-level, aquarium-thai-reef-level, aquarium-thai-reef-anime-level]
+    deps: [tools-build, aquarium-level, aquarium-blue-shrimp-level, aquarium-betta-level, aquarium-jellyfish-level, aquarium-lionfish-level, aquarium-plants-level, aquarium-arowana-level, aquarium-tiger-barbs-level, aquarium-thai-reef-level, aquarium-thai-reef-anime-level, aquarium-sea-stars-level]
     cmds:
       - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell-menu.fth --manifest wflevels/aquarium-menu.manifest -o wflevels/aquarium-menu-cd.iff
 
@@ -1358,6 +1358,19 @@ tasks:
       - wflevels/aquarium.iff
       - wflevels/aquarium-standalone.iff
       - wflevels/aquarium-cd.iff
+
+  aquarium-sea-stars-level:
+    desc: "Build the Sea Stars tank in the pinned Blender container"
+    cmds:
+      - bash wflevels/aquarium_sea_stars/build.sh
+    sources:
+      - wflevels/aquarium_sea_stars/*.py
+      - wflevels/aquarium_sea_stars/*.fth
+      - wflevels/aquarium_sea_stars/build.sh
+      - wflevels/aquarium_sea_stars/textile.flags
+      - wflevels/aquarium_sea_stars/aquarium_sea_stars-standalone.iff.txt
+    generates:
+      - wflevels/aquarium_sea_stars-standalone.iff
 
   aquarium-thai-reef-level:
     desc: "Build the static Gulf of Thailand reef blockout in the pinned Blender container; this is a scene prototype, not the finished two-style tank"

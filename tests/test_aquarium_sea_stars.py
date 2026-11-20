@@ -67,3 +67,10 @@ def test_reach_does_not_repeat_while_held(crawl):
     rows = crawl('reset 0 0 .8\nstep 180 1 .0166667\n')
     assert rows[0][CELLS['reach']] > 1.9
     assert rows[-1][CELLS['reach']] == 0
+
+
+def test_glass_pitch_puts_the_underside_against_the_glass():
+    # The top must face into the tank (-90 deg pitch); +90 shows the dorsal skin to the camera.
+    from pathlib import Path
+    src = (Path(__file__).resolve().parents[1] / 'wflevels/aquarium_sea_stars/star_director.fth').read_text()
+    assert '1 - .25 * -.25' in src

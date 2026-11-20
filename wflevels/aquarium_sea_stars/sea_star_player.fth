@@ -9,9 +9,13 @@
 : st-cos .25 + st-sin ;
 : st-held st-buttons st@ & 0 <> if 1 else 0 then ;
 : st-change ( surface -- )
+  \ Sand <-> glass flips what the stick means, so the press that caused it is
+  \ ignored until it changes; otherwise pushing into the glass would climb and
+  \ then step straight back down. Glass <-> glass keeps holding the direction.
+  dup 0 = st-surface st@ 0 = | if st-buttons st@ 30727 & else 0 then st-lock st!
   st-surface st@ st-old st! st-surface st! 1.2 st-roll st! ;
 : st-reset
-  0 st-surface st! 0 st-roll st! 0 st-idle st! 0 st-reach st!
+  0 st-surface st! 0 st-roll st! 0 st-idle st! 0 st-reach st! 0 st-lock st!
   INDEXOF_X_POS st@ st-x st! INDEXOF_Y_POS st@ st-y st!
   st-bottom st-z st! 1 st-init st! ;
 : st-input
@@ -27,6 +31,9 @@
   st-idle st@ 30 >= st-dream | if st-autopilot then
   JOYSTICK_BUTTON_RIGHT st-held JOYSTICK_BUTTON_LEFT st-held - st-dx st!
   JOYSTICK_BUTTON_UP st-held JOYSTICK_BUTTON_DOWN st-held - st-dy st!
+  st-lock st@ if
+    st-buttons st@ 30727 & st-lock st@ = if 0 st-dx st! 0 st-dy st! else 0 st-lock st! then
+  then
   JOYSTICK_BUTTON_A st-held if
     st-prev st@ JOYSTICK_BUTTON_A & 0 = if 2 st-reach st! then
   then

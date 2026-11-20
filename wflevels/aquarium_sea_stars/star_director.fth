@@ -17,7 +17,9 @@
   then ;
 : st-surface-angles ( surface -- a b c )
   dup 0 = if drop 0 0 st-heading st@ else
-    1 - .25 * .25 st-heading st@ negate rot then ;
+    \ Glass: pitch -90 deg so the top faces into the tank and the oral side
+    \ (grooves, mouth) faces the glass, then one quarter-turn per wall.
+    1 - .25 * -.25 st-heading st@ rot then ;
 : st-pose-player
   st-face
   st-surface st@ st-surface-angles st-c st! st-b st! st-a st!

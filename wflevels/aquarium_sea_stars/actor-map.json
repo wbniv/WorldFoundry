@@ -184,7 +184,8 @@
     "leader": 621,
     "turn": 622,
     "auto-step": 623,
-    "auto-wait": 624
+    "auto-wait": 624,
+    "lock": 625
   },
   "empty": false
 }
