@@ -410,3 +410,26 @@ def test_the_plain_java_validation_test_passes():
         run = subprocess.run([java, "-cp", tmp, "org.worldfoundry.screensaver.LevelSettingFieldTest"],
                              capture_output=True, text=True)
         assert run.returncode == 0 and " 0 failures" in run.stdout, run.stdout
+
+
+def test_parked_residents_are_not_drawn():
+    """The renderer draws an actor only if its visibility mailbox is nonzero (level.cc), and the
+    director writes 1/0 to a resident's active cell when it unparks/parks it. So each resident's
+    visibility mailbox must be its own active cell: a parked resident then costs no draw call.
+    On cast1 the 8 parked residents cost 5.8 ms a frame (18.5 FPS against 20.7) before this."""
+    import re
+    lev = (ROOT / 'wflevels/aquarium_sea_stars/aquarium_sea_stars.lev').read_text()
+    visibility = {}
+    for block in lev.split("\t{ 'OBJ' ")[1:]:
+        name = re.search(r"\{ 'NAME' \"([^\"]+)\" \}", block).group(1)
+        vis = re.search(r"\"Visibility Mailbox\" \} \{ 'DATA' (-?\d+)l", block)
+        if vis:
+            visibility[name] = int(vis.group(1))
+    assert visibility['BlueStar'] == 1                      # the player's star is always drawn
+    cells = []
+    for serial, (name, kind, pos) in enumerate(cfg.RESIDENTS):
+        cell = controller.rcell('active', serial)
+        assert visibility[name] == cell, f'{name}: visibility {visibility[name]}, active cell {cell}'
+        assert 1 < cell < controller.GLOBAL_USER_MAX, f'{name}: active cell {cell} is not a global user mailbox'
+        cells.append(cell)
+    assert len(set(cells)) == len(cells)

@@ -85,6 +85,12 @@ animals=[('BlueStar','linckia',(0,-1,.8)),*cfg.RESIDENTS]
 meshes={kind:stars.mesh(Mesh,kind) for kind in cfg.SPECIES}
 if not a.empty:
     for name,kind,pos in animals:actor(name,meshes[kind],pos,kind)
+    # A parked resident (scale .001, update skipped) must also not be drawn: the renderer draws an actor
+    # only if its visibility mailbox is nonzero, and a parked one still cost a draw call each frame on
+    # the Chromecast (18.5 FPS against 20.7 for the nine-resident level). The director writes 1/0 to a
+    # resident's active cell when it unparks/parks it, so that cell is its visibility mailbox.
+    for serial,(name,kind,pos) in enumerate(cfg.RESIDENTS):
+        bpy.data.objects[name]['wf_Visibility Mailbox']=controller.rcell('active',serial)
 sun=bpy.data.objects['SunLight'];sun.rotation_euler=(0,.6981317,1.5707963);sun['wf_lightType']='Directional'
 for channel,value in zip(('Red','Green','Blue'),(.64,.69,.75)):sun['wf_light'+channel]=value
 ambient=sun.copy();ambient.name='AmbientLight';bpy.context.scene.collection.objects.link(ambient);ambient['wf_lightType']='Ambient'

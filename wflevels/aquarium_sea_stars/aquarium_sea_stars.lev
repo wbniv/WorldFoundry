@@ -1147,7 +1147,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_chip.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1720l } { 'STR' "1720" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000020335109(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000000537944(1.15.16) } { 'STR' "-0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0229955932094914(1.15.16) } { 'STR' "-0.022996" } }
@@ -1168,7 +1168,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_chip.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1721l } { 'STR' "1721" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000020335109(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000000537944(1.15.16) } { 'STR' "-0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0229955932094914(1.15.16) } { 'STR' "-0.022996" } }
@@ -1189,7 +1189,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_fromia.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1722l } { 'STR' "1722" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000014246578(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000419095(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0336743195520507(1.15.16) } { 'STR' "-0.033674" } }
@@ -1210,7 +1210,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_fromia.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1723l } { 'STR' "1723" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000014246578(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000419095(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0336743195520507(1.15.16) } { 'STR' "-0.033674" } }
@@ -1231,7 +1231,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_fromia.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1724l } { 'STR' "1724" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000014246578(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000419095(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0336743195520507(1.15.16) } { 'STR' "-0.033674" } }
@@ -1252,7 +1252,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_sand.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1725l } { 'STR' "1725" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000068928527(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0003852814009103(1.15.16) } { 'STR' "-0.000385" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0151149591863757(1.15.16) } { 'STR' "-0.015115" } }
@@ -1273,7 +1273,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_sand.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1726l } { 'STR' "1726" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000068928527(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0003852814009103(1.15.16) } { 'STR' "-0.000385" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0151149591863757(1.15.16) } { 'STR' "-0.015115" } }
@@ -1294,7 +1294,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_brittle.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1727l } { 'STR' "1727" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000310935356(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000461799966(1.15.16) } { 'STR' "-0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000031478080(1.15.16) } { 'STR' "0.000000" } }
@@ -1315,7 +1315,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_cushion.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1728l } { 'STR' "1728" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000010488216(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000779336(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0668072221676509(1.15.16) } { 'STR' "-0.066807" } }
@@ -1336,7 +1336,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_chip.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1729l } { 'STR' "1729" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000020335109(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000000537944(1.15.16) } { 'STR' "-0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0229955932094914(1.15.16) } { 'STR' "-0.022996" } }
@@ -1357,7 +1357,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_chip.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1730l } { 'STR' "1730" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000020335109(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000000537944(1.15.16) } { 'STR' "-0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0229955932094914(1.15.16) } { 'STR' "-0.022996" } }
@@ -1378,7 +1378,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_fromia.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1731l } { 'STR' "1731" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000014246578(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000419095(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0336743195520507(1.15.16) } { 'STR' "-0.033674" } }
@@ -1399,7 +1399,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_fromia.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1732l } { 'STR' "1732" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000014246578(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000419095(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0336743195520507(1.15.16) } { 'STR' "-0.033674" } }
@@ -1420,7 +1420,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_sand.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1733l } { 'STR' "1733" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000068928527(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0003852814009103(1.15.16) } { 'STR' "-0.000385" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0151149591863757(1.15.16) } { 'STR' "-0.015115" } }
@@ -1441,7 +1441,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_sand.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1734l } { 'STR' "1734" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000068928527(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0003852814009103(1.15.16) } { 'STR' "-0.000385" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0151149591863757(1.15.16) } { 'STR' "-0.015115" } }
@@ -1462,7 +1462,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_brittle.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1735l } { 'STR' "1735" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000310935356(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000461799966(1.15.16) } { 'STR' "-0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000031478080(1.15.16) } { 'STR' "0.000000" } }
@@ -1483,7 +1483,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_cushion.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1736l } { 'STR' "1736" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000010488216(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000779336(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0668072221676509(1.15.16) } { 'STR' "-0.066807" } }
