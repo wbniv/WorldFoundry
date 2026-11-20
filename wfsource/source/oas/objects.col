@@ -57,6 +57,7 @@ int collisionTable[] =
         	0,	// RuntimeDiagnostics
         	0,	// FieldTypes
         	0,	// LevelRenderSettings
+        	0,	// SeaStarsSettings
 	
 };
 

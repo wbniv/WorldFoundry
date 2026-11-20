@@ -1,0 +1,38 @@
+@*============================================================================
+@* seastarssettings.oas: the Sea Stars tank's level settings
+@*============================================================================
+@*
+@* A settings holder (settings.inc): one object of this type in the Sea Stars
+@* level carries the tank's options, and levcomp lists it as editable because
+@* it declares SHOW_AS_LIVE fields (docs/plans/2026-10-16-runtime-object-
+@* editing.md, M7, M8). The Director's Forth re-reads every field once a second
+@* with property@ (property-int-bytes@ for Seed), so a runtime edit takes effect.
+@*
+@* The five counts are the numbers of each resident species. The level places
+@* the maximum population (17) and the Director parks the extras. See
+@* docs/plans/2026-11-20-sea-stars-settings.md.
+@*
+@* Help strings must not contain commas: prep splits macro arguments on them.
+@*============================================================================
+
+TYPEHEADER(Sea Stars Settings,SeaStarsSettings)
+	@include settings.inc
+
+	PROPERTY_SHEET_HEADER(Residents,1)
+@*	----------------------------------
+	TYPEENTRYINT32(Chocolate-chip stars,,0,4,2,"0|1|2|3|4",SHOW_AS_SLIDER|SHOW_AS_LIVE,"How many chocolate-chip stars live on the sand")
+	TYPEENTRYINT32(Red Fromia,,0,5,3,"0|1|2|3|4|5",SHOW_AS_SLIDER|SHOW_AS_LIVE,"How many red Fromia creep over the rocks")
+	TYPEENTRYINT32(Sand-sifting stars,,0,4,2,"0|1|2|3|4",SHOW_AS_SLIDER|SHOW_AS_LIVE,"How many sand-sifting stars bury and rise")
+	TYPEENTRYINT32(Brittle stars,,0,2,1,"0|1|2",SHOW_AS_SLIDER|SHOW_AS_LIVE,"How many green brittle stars hide under the ledges")
+	TYPEENTRYINT32(Cushion stars,,0,2,1,"0|1|2",SHOW_AS_SLIDER|SHOW_AS_LIVE,"How many cushion stars rest on the sand")
+	PROPERTY_SHEET_FOOTER
+
+	PROPERTY_SHEET_HEADER(Tank,0)
+@*	-----------------------------
+	TYPEENTRYINT32(Speed,,0,2,1,"Slow|Normal|Fast",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"How fast the stars move: 10 or 20 or 40 times real speed")
+	TYPEENTRYINT32(Glass climbing,,0,1,1,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Whether the player star may climb the glass; a star on the glass climbs down first")
+	TYPEENTRYINT32(Caustics,,0,1,1,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Moving light patterns on the sand")
+@*	Seed: INT32 capped at 2^31-1 (M4); larger saved values are clamped (R7).
+	TYPEENTRYINT32(Seed,,0,2147483647,0,"",SHOW_AS_NUMBER|SHOW_AS_LIVE,"Random number seed from 0 to 2147483647; 0 picks new resident spots on every entry")
+	PROPERTY_SHEET_FOOTER
+TYPEFOOTER

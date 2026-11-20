@@ -1,0 +1,30 @@
+/*============================================================================*/
+/* seastarssettings.ht: created from OADTYPES.S and seastarssettings.oas DO NOT MODIFY */
+/*============================================================================*/
+#include <pigsys/pigsys.hp>
+#include <math/scalar.hp>
+/*      maximum value of a long int     */
+/* minimum value of a long int  */
+#ifndef seastarssettings_HT
+#define seastarssettings_HT
+ struct _SeaStarsSettings {
+	int32 moveblocPageOffset;                 /* offset in page data for this objects page */
+	int32 toolsetPageOffset;                 /* offset in page data for this objects page */
+	int32 commonPageOffset;                 /* offset in page data for this objects page */
+			int32 MeshName;	/* This is a packedAssetID */
+	int32 meshPageOffset;                 /* offset in page data for this objects page */
+	int32 shadowPageOffset;                 /* offset in page data for this objects page */
+	int32 TemplateObject;        /* Default: 0 */
+	int32 Chocolatechipstars;               /* Minumum: 0 Maximum: 4 Default: 2 */
+	int32 RedFromia;               /* Minumum: 0 Maximum: 5 Default: 3 */
+	int32 Sandsiftingstars;               /* Minumum: 0 Maximum: 4 Default: 2 */
+	int32 Brittlestars;               /* Minumum: 0 Maximum: 2 Default: 1 */
+	int32 Cushionstars;               /* Minumum: 0 Maximum: 2 Default: 1 */
+	int32 Speed;               /* Minumum: 0 Maximum: 2 Default: 1 */
+	int32 Glassclimbing;               /* Minumum: 0 Maximum: 1 Default: 1 */
+	int32 Caustics;               /* Minumum: 0 Maximum: 1 Default: 1 */
+	int32 Seed;               /* Minumum: 0 Maximum: 2147483647 Default: 0 */
+};
+/*============================================================================*/
+#endif         /* seastarssettings_HT */
+/*============================================================================*/

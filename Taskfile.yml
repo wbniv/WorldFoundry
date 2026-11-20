@@ -1369,6 +1369,8 @@ tasks:
       - wflevels/aquarium_sea_stars/build.sh
       - wflevels/aquarium_sea_stars/textile.flags
       - wflevels/aquarium_sea_stars/aquarium_sea_stars-standalone.iff.txt
+      - wfsource/source/oas/seastarssettings.oas
+      - wfsource/source/oas/seastarssettings.oad
     generates:
       - wflevels/aquarium_sea_stars-standalone.iff
 

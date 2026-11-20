@@ -1,0 +1,16 @@
+#ifndef _SeaStarsSettings_HP
+#define _SeaStarsSettings_HP
+#include "actor.hp"
+class SeaStarsSettings: public Actor {
+public:
+    SeaStarsSettings(const SObjectStartupData* startupData);
+    virtual ~SeaStarsSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    // The Director's Forth reads all nine live fields from the overlay once a second.
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadSeaStarsSettings(const SObjectStartupData* startupData);
+#endif
