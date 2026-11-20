@@ -133,6 +133,26 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativePrepare(JNIEnv*, jclass) {
 }
 
 // Called on the player thread before nativeRun, Planted flavor only, with PlantedConfig.toLine().
+// One engine launch override, schema + OAD field key + value: the engine validates it against the
+// field and applies it when the level's registry loads. Level-agnostic (LevelSettings sends them);
+// the Planted bridge is a separate, Planted-specific path and is not involved.
+static std::string toStdString(JNIEnv* env, jstring text) {
+    std::string out;
+    if (!text) return out;
+    const char* chars = env->GetStringUTFChars(text, nullptr);
+    if (chars) {
+        out = chars;
+        env->ReleaseStringUTFChars(text, chars);
+    }
+    return out;
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_org_worldfoundry_screensaver_TankPlayer_nativeLaunchOverride(
+        JNIEnv* env, jclass, jstring schema, jstring key, jstring value) {
+    launchOverrideSink.set(toStdString(env, schema), toStdString(env, key), toStdString(env, value));
+}
+
 extern "C" JNIEXPORT void JNICALL
 Java_org_worldfoundry_screensaver_TankPlayer_nativeConfigure(JNIEnv* env, jclass, jstring line) {
     std::string text;

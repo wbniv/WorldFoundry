@@ -330,3 +330,83 @@ def test_the_dream_variant_keeps_the_settings_object_and_has_no_rprp_chunk():
     assert text.count(": st-dream 1 ;") == 1 and text.count(": st-dream 0 ;") == 1
     for iff in (ROOT / "wflevels/aquarium_sea_stars-standalone.iff", standalone):
         assert b"RPRP" not in iff.read_bytes(), iff.name
+
+
+# --- phase 5: the phone's Dream form (generic, OAD-driven; no Planted bridge) ---------------------
+import shutil  # noqa: E402
+import tempfile  # noqa: E402
+
+SCREENSAVER = ROOT / "android/screensaver/src"
+JAVA = SCREENSAVER / "main/java/org/worldfoundry/screensaver"
+ASSET = SCREENSAVER / "aquarium/assets/sea-stars-settings.json"
+
+
+def test_the_capabilities_asset_is_what_the_generator_makes_from_the_oad():
+    if not CATALOG.exists():
+        pytest.skip("build the catalog tool first")
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp) / "caps.json"
+        subprocess.run([sys.executable, str(ROOT / "scripts/gen-settings-capabilities.py"),
+                        "--oad", str(OAS / "seastarssettings.oad"), "--inherited-oad", str(OAS / "actor.oad"),
+                        "--actor-map", str(ROOT / "wflevels/aquarium_sea_stars/actor-map.json"),
+                        "--actor-name", "SeaStarsSettings", "--type", "SeaStarsSettings",
+                        "--title", "Sea Stars", "--out", str(out)], check=True, capture_output=True)
+        assert out.read_text() == ASSET.read_text(), \
+            "sea-stars-settings.json is stale: regenerate it with scripts/gen-settings-capabilities.py"
+
+
+def test_the_asset_offers_exactly_the_nine_fields_with_the_d9_ranges():
+    doc = json.loads(ASSET.read_text())
+    owner = doc["objects"][0]
+    assert owner["type"] == "SeaStarsSettings"
+    settings = {s["key"]: s for s in owner["settings"]}
+    assert list(settings) == list(FIELDS)
+    for label, (low, high, default) in FIELDS.items():
+        s = settings[label]
+        assert int(s["value"]) == default and not s["readonly"], label
+        if s["type"] == "choice":
+            assert [o["id"] for o in s["options"]] == [str(i) for i in range(low, high + 1)], label
+        else:
+            assert (label, s["type"], int(s["minimum"]), int(s["maximum"])) == ("Seed", "integer", low, high)
+
+
+def test_the_java_cpp_and_provider_agree_on_names_and_routes():
+    player = (JAVA / "TankPlayer.java").read_text()
+    host = (SCREENSAVER / "main/cpp/dream_host.cc").read_text()
+    # The JNI name matches the Java declaration, and it sets the engine's own launch overrides.
+    assert "native void nativeLaunchOverride(String schema, String key, String value)" in player
+    assert "Java_org_worldfoundry_screensaver_TankPlayer_nativeLaunchOverride" in host
+    assert "launchOverrideSink.set(" in host
+    # The tank that carries the settings is the one TankChoice lists last, by the same id the level uses.
+    ids = re.search(r"IDS = \{(.*?)\};", (JAVA / "TankChoice.java").read_text(), re.S).group(1)
+    tanks = re.findall(r'"(aquarium\w*)"', ids)
+    assert tanks[-1] == "aquarium_sea_stars"
+    settings = (JAVA / "LevelSettings.java").read_text()
+    assert 'SEA_STARS_TANK = "aquarium_sea_stars"' in settings and 'SEA_STARS_PREFIX = "sea-stars."' in settings
+    # Every place that starts a tank goes through TankLaunch, so the overrides always reach the engine.
+    for name in ("AquariumDreamService", "AquariumActivity", "ScreensaverPreviewActivity"):
+        text = (JAVA / f"{name}.java").read_text()
+        assert "TankLaunch.startChosen(this, player)" in text, name
+        assert "player.start(TankChoice" not in text, name
+    assert "LevelSettings.SEA_STARS_PREFIX" in (JAVA / "TankSettingsProvider.java").read_text()
+    # It is not the Planted bridge: nothing of the Sea Stars path touches it.
+    for name in ("LevelSettings", "LevelSettingField", "TankLaunch"):
+        assert "Planted" not in (JAVA / f"{name}.java").read_text(), name
+
+
+def test_the_plain_java_validation_test_passes():
+    java = next((p for p in ("/usr/lib/jvm/java-21-openjdk-amd64/bin/java", "/usr/lib/jvm/java-17-openjdk-amd64/bin/java",
+                             shutil.which("java") or "") if p and Path(p).exists()), None)
+    if not java:
+        pytest.skip("no java here; run it where a JDK or a JRE with jdk.compiler exists")
+    modules = subprocess.run([java, "--list-modules"], capture_output=True, text=True).stdout
+    if "jdk.compiler" not in modules:
+        pytest.skip("this java has no compiler module")
+    with tempfile.TemporaryDirectory() as tmp:
+        sources = [JAVA / "LevelSettingField.java",
+                   SCREENSAVER / "test/java/org/worldfoundry/screensaver/LevelSettingFieldTest.java"]
+        subprocess.run([java, "-m", "jdk.compiler/com.sun.tools.javac.Main", "-d", tmp, *map(str, sources)],
+                       check=True, capture_output=True)
+        run = subprocess.run([java, "-cp", tmp, "org.worldfoundry.screensaver.LevelSettingFieldTest"],
+                             capture_output=True, text=True)
+        assert run.returncode == 0 and " 0 failures" in run.stdout, run.stdout

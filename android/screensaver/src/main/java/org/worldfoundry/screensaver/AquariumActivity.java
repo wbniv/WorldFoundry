@@ -20,7 +20,7 @@ public final class AquariumActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        player.start(TankChoice.indexOf(TankChoice.chooseForDream(this)));
+        TankLaunch.startChosen(this, player);
     }
 
     @Override

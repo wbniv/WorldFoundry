@@ -40,9 +40,12 @@ public final class TankSettingsProvider extends ContentProvider {
                 JSONObject setting = new JSONObject().put("id", "tank")
                         .put("type", "choice").put("label", "Tank")
                         .put("value", TankChoice.get(getContext())).put("options", options);
-                JSONObject document = new JSONObject().put("schema", 1)
-                        .put("settings", new JSONArray().put(setting)
-                                .put(orientationSetting(OrientationSettings.load(getContext()))));
+                JSONArray settings = new JSONArray().put(setting)
+                        .put(orientationSetting(OrientationSettings.load(getContext())));
+                // The level settings of the tanks that have them (Sea Stars), from their OAD-generated asset.
+                JSONArray levelSettings = LevelSettings.seaStars(getContext()).capabilityEntries();
+                for (int i = 0; i < levelSettings.length(); i++) settings.put(levelSettings.get(i));
+                JSONObject document = new JSONObject().put("schema", 1).put("settings", settings);
                 result.putString("settings_b64", Base64.encodeToString(
                         document.toString().getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP));
             } catch (JSONException error) {
@@ -50,6 +53,14 @@ public final class TankSettingsProvider extends ContentProvider {
             }
         } else if ("getTank".equals(method)) {
             result.putString("tank", TankChoice.get(getContext()));
+        } else if ("setSetting".equals(method) && arg != null && arg.startsWith(LevelSettings.SEA_STARS_PREFIX)) {
+            int colon = arg.indexOf(':');
+            if (colon < 0) throw new IllegalArgumentException("setSetting needs id:value");
+            String id = arg.substring(0, colon);
+            LevelSettings seaStars = LevelSettings.seaStars(getContext());
+            result.putBoolean("saved", seaStars.set(id, arg.substring(colon + 1)));
+            result.putString("key", id);
+            result.putString("value", seaStars.currentValue(id));
         } else if ("setSetting".equals(method) && arg != null && arg.startsWith(ORIENTATION + ":")) {
             putOrientation(getContext(), result, arg.substring(ORIENTATION.length() + 1));
         } else if ("setSetting".equals(method)) {
