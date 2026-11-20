@@ -1,6 +1,6 @@
 # Sea Stars: an eleventh aquarium tank of Indo-Pacific starfish
 
-**Status: approved, 2026‑11‑20.** Will accepted every recommendation in D1–D10 on 2026‑11‑20 ("D1-D10: all"). **D11 is deferred** (Will, 2026‑11‑20: "i changed my mind again. let's do D11 later"): the first release has **no settings object, no parking and no Dream-settings form**, and the level ships with the default population. The settings design below is kept as the spec for the later item. Phase 0 is next. Nothing is built yet.
+**Status: approved, 2026‑11‑20.** Will accepted every recommendation in D1–D10 on 2026‑11‑20 ("D1-D10: all"). **D11 is deferred** (Will, 2026‑11‑20: "i changed my mind again. let's do D11 later"): the first release has **no settings object, no parking and no Dream-settings form**, and the level ships with the default population. The settings design below is kept as the spec for the later item. Implementation started 2026‑11‑20. Will subsequently requested **all 3D modelling and images first**. The six-species meshes, 512² atlas, tank scenery, editable Blender arm rigs and review renders are ready for review in `feat/sea-stars` (`.worktrees/sea-stars`). The crawl controller passes its zForth VM prototype tests; real-engine acceptance is still pending. Gameplay integration and device testing are held while Will reviews the completed asset pass. The Blender master reopens with its packed atlas and saved arm actions; all 16 asset checks pass. [Asset review](../reference/sea-stars-art/README.md).
 
 ## Context
 
@@ -272,7 +272,7 @@ Each five-armed star is one mesh with one `DFRM` v2 curve per arm (5 of the 16 a
 | `hide` | brittle star | the disc is still and two or three tips wave |
 | `bury` / `rise` | sand-sifting star | transforms only: it sinks 1 cm into the sand while the arms flatten |
 
-The cushion star has no arms worth bending. Its puff is a scale transform.
+The cushion star has no arms worth bending. Its puff is a scale transform. **Research clarification, 2026‑11‑20:** Will approved retaining the puff and exact reaction timings as intentionally stylized animation/gameplay; they are not claimed as measured biological behaviour. See the [species sheet](../reference/sea-stars-research.md).
 
 **Mailboxes:** each animated actor needs its control-block cells. Phase 4 allocates a global range next to the reef's [table](2026-11-02-gulf-of-thailand-reef-tank.md#reef-global-mailbox-allocation) and records it there.
 

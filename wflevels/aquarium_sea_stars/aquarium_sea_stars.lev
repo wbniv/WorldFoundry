@@ -1,0 +1,1427 @@
+{ 'LVL' 
+	{ 'OBJ' 
+		{ 'NAME' "Room" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -25.0000000000000000(1.15.16) -30.0000000000000000(1.15.16) -6.0000000000000000(1.15.16) 25.0000000000000000(1.15.16) 10.0000000000000000(1.15.16) 18.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "room" } }
+		{ 'FX32' { 'NAME' "hp" } { 'DATA' 32767.0000000000000000(1.15.16) } { 'STR' "32767.0" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'STR' { 'NAME' "Adjacent Room 1" } { 'STR' "room_16" } }
+		{ 'STR' { 'NAME' "Adjacent Room 2" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Room Loaded Mailbox" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "SunLight" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -20.0000000000000000(1.15.16) 1.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) 0.6981316208839417(1.15.16) 1.5707962512969971(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.1000000000000000(1.15.16) -0.1000000000000000(1.15.16) -0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "light" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 23l } { 'STR' "23" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Movement Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "Step Size" } { 'DATA' 0.5499877929687500(1.15.16) } { 'STR' "0.54998779296875" } }
+		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Horizontal Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.9499969482421875(1.15.16) } { 'STR' "0.9499969482421875" } }
+		{ 'I32' { 'NAME' "At End Of Path" } { 'STR' "Ping-Pong" } }
+		{ 'STR' { 'NAME' "Object To Follow" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Follow Offset" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.8999938964843750(1.15.16) } { 'STR' "0.899993896484375" } }
+		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 5.0000000000000000(1.15.16) } { 'STR' "5.0" } }
+		{ 'FX32' { 'NAME' "Crawling Acceleration" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Jumping Acceleration" } { 'DATA' 18.0000000000000000(1.15.16) } { 'STR' "18.0" } }
+		{ 'FX32' { 'NAME' "Jumping Momentum Transfer" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 9.8099975585937500(1.15.16) } { 'STR' "9.80999755859375" } }
+		{ 'FX32' { 'NAME' "Fall Anim Threshold" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "Stun Threshold" } { 'DATA' 2.5000000000000000(1.15.16) } { 'STR' "2.5" } }
+		{ 'FX32' { 'NAME' "Stun Duration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'STR' { 'NAME' "Tool A" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool B" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool C" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool D" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool E" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool F" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "hp" } { 'DATA' 32767.0000000000000000(1.15.16) } { 'STR' "32767.0" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'I32' { 'NAME' "Animation Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Matte Type" } { 'DATA' 1l } { 'STR' "Color" } }  //None|Color|Image
+		{ 'I32' { 'NAME' "Background Color" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Debug Background Color" } { 'DATA' 7829367l } { 'STR' "7829367" } }
+		{ 'FX32' { 'NAME' "Distance" } { 'DATA' 8000.0000000000000000(1.15.16) } { 'STR' "8000.0" } }
+		{ 'FILE' { 'NAME' "Tiles" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "Map" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "X Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Y Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'I32' { 'NAME' "generationType" } { 'STR' "Pulse" } }
+		{ 'FX32' { 'NAME' "period" } { 'DATA' 0.1499938964843750(1.15.16) } { 'STR' "0.149993896484375" } }
+		{ 'FX32' { 'NAME' "timeDelay" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "yArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "zArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "initialSphereRadius" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'FX32' { 'NAME' "sphereExpansionRate" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'I32' { 'NAME' "nParticles" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "initialVelocity" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "initialAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "lifeTime" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "initialAlpha" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "alphaDecrement" } { 'DATA' 0.0499877929687500(1.15.16) } { 'STR' "0.04998779296875" } }
+		{ 'I32' { 'NAME' "Type" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "forceType" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude2" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.6400000000000000(1.15.16) } { 'STR' "0.64" } }
+		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.6899999999999999(1.15.16) } { 'STR' "0.69" } }
+		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.7500000000000000(1.15.16) } { 'STR' "0.75" } }
+		{ 'FX32' { 'NAME' "lightX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "lightY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "lightZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "lightType" } { 'DATA' 0l } { 'STR' "Directional" } }  //Directional|Ambient
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Camera" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -8.5000000000000000(1.15.16) 4.0999999046325684(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.1000000000000000(1.15.16) -0.1000000000000000(1.15.16) -0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "camera" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 13l } { 'STR' "13" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Camera" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'I32' { 'NAME' "Movement Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "Step Size" } { 'DATA' 0.5499877929687500(1.15.16) } { 'STR' "0.54998779296875" } }
+		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Horizontal Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.9499969482421875(1.15.16) } { 'STR' "0.9499969482421875" } }
+		{ 'I32' { 'NAME' "At End Of Path" } { 'STR' "Ping-Pong" } }
+		{ 'STR' { 'NAME' "Object To Follow" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Follow Offset" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.8999938964843750(1.15.16) } { 'STR' "0.899993896484375" } }
+		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 5.0000000000000000(1.15.16) } { 'STR' "5.0" } }
+		{ 'FX32' { 'NAME' "Crawling Acceleration" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Jumping Acceleration" } { 'DATA' 18.0000000000000000(1.15.16) } { 'STR' "18.0" } }
+		{ 'FX32' { 'NAME' "Jumping Momentum Transfer" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 9.8099975585937500(1.15.16) } { 'STR' "9.80999755859375" } }
+		{ 'FX32' { 'NAME' "Fall Anim Threshold" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "Stun Threshold" } { 'DATA' 2.5000000000000000(1.15.16) } { 'STR' "2.5" } }
+		{ 'FX32' { 'NAME' "Stun Duration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'STR' { 'NAME' "Tool A" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool B" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool C" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool D" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool E" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool F" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "hp" } { 'DATA' 32767.0000000000000000(1.15.16) } { 'STR' "32767.0" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'I32' { 'NAME' "Animation Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Matte Type" } { 'DATA' 1l } { 'STR' "Color" } }  //None|Color|Image
+		{ 'I32' { 'NAME' "Background Color" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Debug Background Color" } { 'DATA' 7829367l } { 'STR' "7829367" } }
+		{ 'FX32' { 'NAME' "Distance" } { 'DATA' 8000.0000000000000000(1.15.16) } { 'STR' "8000.0" } }
+		{ 'FILE' { 'NAME' "Tiles" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "Map" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "X Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Y Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'I32' { 'NAME' "generationType" } { 'STR' "Pulse" } }
+		{ 'FX32' { 'NAME' "period" } { 'DATA' 0.1499938964843750(1.15.16) } { 'STR' "0.149993896484375" } }
+		{ 'FX32' { 'NAME' "timeDelay" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "yArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "zArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "initialSphereRadius" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'FX32' { 'NAME' "sphereExpansionRate" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'I32' { 'NAME' "nParticles" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "initialVelocity" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "initialAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "lifeTime" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "initialAlpha" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "alphaDecrement" } { 'DATA' 0.0499877929687500(1.15.16) } { 'STR' "0.04998779296875" } }
+		{ 'I32' { 'NAME' "Type" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "forceType" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude2" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FX32' { 'NAME' "EyeDistance" } { 'DATA' 0.0249938964843750(1.15.16) } { 'STR' "0.024993896484375" } }
+		{ 'FX32' { 'NAME' "EyeAngle" } { 'DATA' 2.5000000000000000(1.15.16) } { 'STR' "2.5" } }
+		{ 'I32' { 'NAME' "FoggingColor" } { 'DATA' 1059648l } { 'STR' "1059648" } }
+		{ 'FX32' { 'NAME' "FoggingStartDistance" } { 'DATA' 9.0000000000000000(1.15.16) } { 'STR' "9.0" } }
+		{ 'FX32' { 'NAME' "FoggingCompleteDistance" } { 'DATA' 45.0000000000000000(1.15.16) } { 'STR' "45.0" } }
+		{ 'FX32' { 'NAME' "WaterAbsorbR" } { 'DATA' 0.0160000000000000(1.15.16) } { 'STR' "0.016" } }
+		{ 'FX32' { 'NAME' "WaterAbsorbG" } { 'DATA' 0.0090000000000000(1.15.16) } { 'STR' "0.009" } }
+		{ 'FX32' { 'NAME' "WaterAbsorbB" } { 'DATA' 0.0040000000000000(1.15.16) } { 'STR' "0.004" } }
+		{ 'FX32' { 'NAME' "CausticStrength" } { 'DATA' 0.2200000000000000(1.15.16) } { 'STR' "0.22" } }
+		{ 'FX32' { 'NAME' "CausticScale" } { 'DATA' 5.0000000000000000(1.15.16) } { 'STR' "5.0" } }
+		{ 'I32' { 'NAME' "ToonBands" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Director" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -20.0000000000000000(1.15.16) 1.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.1000000000000000(1.15.16) -0.1000000000000000(1.15.16) -0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "director" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 20l } { 'STR' "20" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Movement Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "Step Size" } { 'DATA' 0.5499877929687500(1.15.16) } { 'STR' "0.54998779296875" } }
+		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Horizontal Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.9499969482421875(1.15.16) } { 'STR' "0.9499969482421875" } }
+		{ 'I32' { 'NAME' "At End Of Path" } { 'STR' "Ping-Pong" } }
+		{ 'STR' { 'NAME' "Object To Follow" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Follow Offset" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.8999938964843750(1.15.16) } { 'STR' "0.899993896484375" } }
+		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 5.0000000000000000(1.15.16) } { 'STR' "5.0" } }
+		{ 'FX32' { 'NAME' "Crawling Acceleration" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Jumping Acceleration" } { 'DATA' 18.0000000000000000(1.15.16) } { 'STR' "18.0" } }
+		{ 'FX32' { 'NAME' "Jumping Momentum Transfer" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 9.8099975585937500(1.15.16) } { 'STR' "9.80999755859375" } }
+		{ 'FX32' { 'NAME' "Fall Anim Threshold" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "Stun Threshold" } { 'DATA' 2.5000000000000000(1.15.16) } { 'STR' "2.5" } }
+		{ 'FX32' { 'NAME' "Stun Duration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'STR' { 'NAME' "Tool A" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool B" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool C" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool D" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool E" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool F" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "hp" } { 'DATA' 32767.0000000000000000(1.15.16) } { 'STR' "32767.0" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": st-init 600 ;\n: st-x 601 ;\n: st-y 602 ;\n: st-z 603 ;\n: st-surface 604 ;\n: st-old 605 ;\n: st-roll 606 ;\n: st-reach 607 ;\n: st-idle 608 ;\n: st-clock 609 ;\n: st-dx 610 ;\n: st-dy 611 ;\n: st-buttons 612 ;\n: st-prev 613 ;\n: st-dt 614 ;\n: st-neutral 615 ;\n: st-auto-phase 616 ;\n: st-heading 617 ;\n: st-a 618 ;\n: st-b 619 ;\n: st-c 620 ;\n: st-leader 621 ;\n: st-turn 622 ;\n: st-auto-step 623 ;\n: st-auto-wait 624 ;\n: st-dream 0 ;\n: st-limit-x 5.65 ;\n: st-limit-y 2.65 ;\n: st-bottom 0.8 ;\n: st-top 4.85 ;\n: st-speed 0.40499999999999997 ;\n\\ Sea Stars: surface id 0 sand, 1 front, 2 right, 3 back, 4 left.\n\\ All collision/clearance bounds are authored by the exporter.\n: st@ read-mailbox ; : st! write-mailbox ;\n: st-frac begin dup 1 >= if 1 - 0 else 1 then until\n  begin dup 0 < if 1 + 0 else 1 then until ;\n: st-sin st-frac dup .5 > if .5 - -1 else 1 then >r\n  2 * dup 1 swap - * dup 16 * swap 4 * 5 swap - / r> * ;\n: st-mod >r r@ / st-frac r> * ;\n: st-cos .25 + st-sin ;\n: st-held st-buttons st@ & 0 <> if 1 else 0 then ;\n: st-change ( surface -- )\n  st-surface st@ st-old st! st-surface st! 1.2 st-roll st! ;\n\\ Waypoints are authored: front wall, up, clockwise round to back, down,\n\\ a sand waypoint and a seeded pause. Both Dream and idle use this driver.\n: st-autopilot\n  0 st-buttons st!\n  st-auto-step st@ 0 = if\n    JOYSTICK_BUTTON_DOWN st-buttons st!\n    st-surface st@ 1 = if 1 st-auto-step st! then\n  else st-auto-step st@ 1 = if\n    JOYSTICK_BUTTON_UP st-buttons st!\n    st-z st@ 3 >= if 2 st-auto-step st! then\n  else st-auto-step st@ 2 = if\n    JOYSTICK_BUTTON_RIGHT st-buttons st!\n    st-surface st@ 3 = if 3 st-auto-step st! then\n  else st-auto-step st@ 3 = if\n    JOYSTICK_BUTTON_DOWN st-buttons st!\n    st-surface st@ 0 = if 4 st-auto-step st! then\n  else st-auto-step st@ 4 = if\n    JOYSTICK_BUTTON_DOWN st-buttons st!\n    st-y st@ .3 < if 5 st-auto-step st! 20 st-auto-wait st! then\n  else\n    st-auto-wait st@ st-dt st@ - 0 max dup st-auto-wait st!\n    0 <= if 0 st-auto-step st! then\n  then then then then then ;\n: st-avoid-rocks st-surface st@ 0 = if\n st-x st@ -4.62000 > st-x st@ -2.18000 < & st-y st@ 0.23000 > & st-y st@ 2.07000 < & if 0.23000 st-y st! then\n st-x st@ -0.97000 > st-x st@ 0.97000 < & st-y st@ 0.58000 > & st-y st@ 2.32000 < & if 0.58000 st-y st! then\n st-x st@ 2.13000 > st-x st@ 4.67000 < & st-y st@ 0.18000 > & st-y st@ 2.02000 < & if 0.18000 st-y st! then\n then ;\n: st-player 9 ; : st-visual 17 ;\n\\ Director constants and resident paths are generated at export.\n: st-dt INDEXOF_DELTA_TIME st@ 0 max .05 min ;\n: st-near ( x y radius -- flag ) dup * >r\n  INDEXOF_Y_POS st-player read-actor-mailbox - dup *\n  swap INDEXOF_X_POS st-player read-actor-mailbox - dup * +\n  INDEXOF_Z_POS st-player read-actor-mailbox st-bottom - dup * + r> < ;\n: st-face\n  st-dx st@ 0 <> st-dy st@ 0 <> | if\n    st-dx st@ 0 = if st-dy st@ 0 > if .25 else -.25 then else\n    st-dx st@ 0 > if\n      st-dy st@ 0 > if .125 else st-dy st@ 0 < if -.125 else 0 then then\n    else st-dy st@ 0 > if .375 else st-dy st@ 0 < if -.375 else .5 then then\n    then then st-turn st!\n    \\ Any arm leads; the body only turns by the residual, at most 36 degrees.\n    st-turn st@ 5 * .5 + 5 + 1000 mod 5 - dup 5 + 5 mod st-leader st!\n    .2 * st-turn st@ swap - st-heading st!\n  then ;\n: st-surface-angles ( surface -- a b c )\n  dup 0 = if drop 0 0 st-heading st@ else\n    1 - .25 * .25 st-heading st@ negate rot then ;\n: st-pose-player\n  st-face\n  st-surface st@ st-surface-angles st-c st! st-b st! st-a st!\n  st-roll st@ 0 > if\n    st-old st@ st-surface-angles\n    st-c st@ - dup .5 > if 1 - then dup -.5 < if 1 + then\n    st-roll st@ 1.2 / * st-c st@ + st-c st!\n    st-b st@ - st-roll st@ 1.2 / * st-b st@ + st-b st!\n    st-a st@ - st-roll st@ 1.2 / * st-a st@ + st-a st!\n  then\n  st-a st@ INDEXOF_ROTATION_A st-visual write-actor-mailbox\n  st-b st@ INDEXOF_ROTATION_B st-visual write-actor-mailbox\n  st-c st@ INDEXOF_ROTATION_C st-visual write-actor-mailbox\n  st-x st@ INDEXOF_X_POS st-visual write-actor-mailbox\n  st-y st@ INDEXOF_Y_POS st-visual write-actor-mailbox\n  st-z st@ INDEXOF_Z_POS st-visual write-actor-mailbox ;\n: st-director-tick st-pose-player\n 1 1140 st! 0 1141 st! st-clock st@ 0.0 - 1142 st!\n st-clock st@ .3 * 0.0 + st-sin 2 * st-leader st@ 0 = if 3.75 + then st-roll st@ 0 > if 15 + then st-reach st@ 0 > if 14 + then 1143 st!\n 1 1144 st! 0 1145 st! st-clock st@ 0.17 - 1146 st!\n st-clock st@ .3 * 0.2 + st-sin 2 * st-leader st@ 1 = if 3.75 + then st-roll st@ 0 > if 15 + then st-reach st@ 0 > if 14 + then 1147 st!\n 1 1148 st! 0 1149 st! st-clock st@ 0.34 - 1150 st!\n st-clock st@ .3 * 0.4 + st-sin 2 * st-leader st@ 2 = if 3.75 + then st-roll st@ 0 > if 15 + then st-reach st@ 0 > if 14 + then 1151 st!\n 1 1152 st! 0 1153 st! st-clock st@ 0.51 - 1154 st!\n st-clock st@ .3 * 0.6000000000000001 + st-sin 2 * st-leader st@ 3 = if 3.75 + then st-roll st@ 0 > if 15 + then st-reach st@ 0 > if -3 + then 1155 st!\n 1 1156 st! 0 1157 st! st-clock st@ 0.68 - 1158 st!\n st-clock st@ .3 * 0.8 + st-sin 2 * st-leader st@ 4 = if 3.75 + then st-roll st@ 0 > if 15 + then st-reach st@ 0 > if -3 + then 1159 st!\n 1100 5 17 dfrm-pose-curves drop\n 1 1200 st! 0 1201 st! st-clock st@ 0.0 - 1202 st!\n st-clock st@ .3 * 0.0 + st-sin 2 * 1203 st!\n 1 1204 st! 0 1205 st! st-clock st@ 0.17 - 1206 st!\n st-clock st@ .3 * 0.2 + st-sin 2 * 1207 st!\n 1 1208 st! 0 1209 st! st-clock st@ 0.34 - 1210 st!\n st-clock st@ .3 * 0.4 + st-sin 2 * 1211 st!\n 1 1212 st! 0 1213 st! st-clock st@ 0.51 - 1214 st!\n st-clock st@ .3 * 0.6000000000000001 + st-sin 2 * 1215 st!\n 1 1216 st! 0 1217 st! st-clock st@ 0.68 - 1218 st!\n st-clock st@ .3 * 0.8 + st-sin 2 * 1219 st!\n 1160 5 18 dfrm-pose-curves drop\n 1 1260 st! 0 1261 st! st-clock st@ 0.0 - 1262 st!\n st-clock st@ .3 * 0.0 + st-sin 2 * 1263 st!\n 1 1264 st! 0 1265 st! st-clock st@ 0.17 - 1266 st!\n st-clock st@ .3 * 0.2 + st-sin 2 * 1267 st!\n 1 1268 st! 0 1269 st! st-clock st@ 0.34 - 1270 st!\n st-clock st@ .3 * 0.4 + st-sin 2 * 1271 st!\n 1 1272 st! 0 1273 st! st-clock st@ 0.51 - 1274 st!\n st-clock st@ .3 * 0.6000000000000001 + st-sin 2 * 1275 st!\n 1 1276 st! 0 1277 st! st-clock st@ 0.68 - 1278 st!\n st-clock st@ .3 * 0.8 + st-sin 2 * 1279 st!\n 1220 5 19 dfrm-pose-curves drop\n 1 1320 st! 0 1321 st! st-clock st@ 0.0 - 1322 st!\n st-clock st@ .3 * 0.0 + st-sin 2 * 1323 st!\n 1 1324 st! 0 1325 st! st-clock st@ 0.17 - 1326 st!\n st-clock st@ .3 * 0.2 + st-sin 2 * 1327 st!\n 1 1328 st! 0 1329 st! st-clock st@ 0.34 - 1330 st!\n st-clock st@ .3 * 0.4 + st-sin 2 * 1331 st!\n 1 1332 st! 0 1333 st! st-clock st@ 0.51 - 1334 st!\n st-clock st@ .3 * 0.6000000000000001 + st-sin 2 * 1335 st!\n 1 1336 st! 0 1337 st! st-clock st@ 0.68 - 1338 st!\n st-clock st@ .3 * 0.8 + st-sin 2 * 1339 st!\n 1280 5 20 dfrm-pose-curves drop\n 1 1380 st! 0 1381 st! st-clock st@ 0.0 - 1382 st!\n st-clock st@ .3 * 0.0 + st-sin 2 * 1383 st!\n 1 1384 st! 0 1385 st! st-clock st@ 0.17 - 1386 st!\n st-clock st@ .3 * 0.2 + st-sin 2 * 1387 st!\n 1 1388 st! 0 1389 st! st-clock st@ 0.34 - 1390 st!\n st-clock st@ .3 * 0.4 + st-sin 2 * 1391 st!\n 1 1392 st! 0 1393 st! st-clock st@ 0.51 - 1394 st!\n st-clock st@ .3 * 0.6000000000000001 + st-sin 2 * 1395 st!\n 1 1396 st! 0 1397 st! st-clock st@ 0.68 - 1398 st!\n st-clock st@ .3 * 0.8 + st-sin 2 * 1399 st!\n 1340 5 21 dfrm-pose-curves drop\n 1 1440 st! 0 1441 st! st-clock st@ 0.0 - 1442 st!\n st-clock st@ .3 * 0.0 + st-sin 2 * 1443 st!\n 1 1444 st! 0 1445 st! st-clock st@ 0.17 - 1446 st!\n st-clock st@ .3 * 0.2 + st-sin 2 * 1447 st!\n 1 1448 st! 0 1449 st! st-clock st@ 0.34 - 1450 st!\n st-clock st@ .3 * 0.4 + st-sin 2 * 1451 st!\n 1 1452 st! 0 1453 st! st-clock st@ 0.51 - 1454 st!\n st-clock st@ .3 * 0.6000000000000001 + st-sin 2 * 1455 st!\n 1 1456 st! 0 1457 st! st-clock st@ 0.68 - 1458 st!\n st-clock st@ .3 * 0.8 + st-sin 2 * 1459 st!\n 1400 5 22 dfrm-pose-curves drop\n 1 1500 st! 0 1501 st! st-clock st@ 0.0 - 1502 st!\n st-clock st@ .3 * 0.0 + st-sin 2 * 1503 st!\n 1 1504 st! 0 1505 st! st-clock st@ 0.17 - 1506 st!\n st-clock st@ .3 * 0.2 + st-sin 2 * 1507 st!\n 1 1508 st! 0 1509 st! st-clock st@ 0.34 - 1510 st!\n st-clock st@ .3 * 0.4 + st-sin 2 * 1511 st!\n 1 1512 st! 0 1513 st! st-clock st@ 0.51 - 1514 st!\n st-clock st@ .3 * 0.6000000000000001 + st-sin 2 * 1515 st!\n 1 1516 st! 0 1517 st! st-clock st@ 0.68 - 1518 st!\n st-clock st@ .3 * 0.8 + st-sin 2 * 1519 st!\n 1460 5 23 dfrm-pose-curves drop\n 1 1560 st! 0 1561 st! st-clock st@ 0.0 - 1562 st!\n st-clock st@ .3 * 0.0 + st-sin 2 * 1563 st!\n 1 1564 st! 0 1565 st! st-clock st@ 0.17 - 1566 st!\n st-clock st@ .3 * 0.2 + st-sin 2 * 1567 st!\n 1 1568 st! 0 1569 st! st-clock st@ 0.34 - 1570 st!\n st-clock st@ .3 * 0.4 + st-sin 2 * 1571 st!\n 1 1572 st! 0 1573 st! st-clock st@ 0.51 - 1574 st!\n st-clock st@ .3 * 0.6000000000000001 + st-sin 2 * 1575 st!\n 1 1576 st! 0 1577 st! st-clock st@ 0.68 - 1578 st!\n st-clock st@ .3 * 0.8 + st-sin 2 * 1579 st!\n 1520 5 24 dfrm-pose-curves drop\n 1 1620 st! 0 1621 st! st-clock st@ 0.0 - 1622 st!\n 752 st@ 0 > if 2 else 1 then 1621 st!\n 0 1623 st!\n 1 1624 st! 0 1625 st! st-clock st@ 0.17 - 1626 st!\n 752 st@ 0 > if 2 else 1 then 1625 st!\n 0 1627 st!\n 1 1628 st! 0 1629 st! st-clock st@ 0.34 - 1630 st!\n 752 st@ 0 > if 2 else 1 then 1629 st!\n 0 1631 st!\n 1 1632 st! 0 1633 st! st-clock st@ 0.51 - 1634 st!\n 752 st@ 0 > if 2 else 1 then 1633 st!\n 0 1635 st!\n 1 1636 st! 0 1637 st! st-clock st@ 0.68 - 1638 st!\n 752 st@ 0 > if 2 else 1 then 1637 st!\n 0 1639 st!\n 1580 5 25 dfrm-pose-curves drop\n st-clock st@ 0.0 + 90 st-mod dup 30 > if 30 - 30 min 30 / else drop 0 then 700 st!\n -3.5 700 st@ .45 * + INDEXOF_X_POS 18 write-actor-mailbox\n st-clock st@ 0.18 + 90 st-mod dup 30 > if 30 - 30 min 30 / else drop 0 then 701 st!\n 3.1 701 st@ .45 * + INDEXOF_X_POS 19 write-actor-mailbox\n -3.5 st-clock st@ 0.36 + .02 * st-sin .10 * + INDEXOF_X_POS 20 write-actor-mailbox\n 0.18 INDEXOF_ROTATION_A 20 write-actor-mailbox\n 0 st-clock st@ 0.54 + .02 * st-sin .10 * + INDEXOF_X_POS 21 write-actor-mailbox\n 0.18 INDEXOF_ROTATION_A 21 write-actor-mailbox\n 3.4 st-clock st@ 0.72 + .02 * st-sin .10 * + INDEXOF_X_POS 22 write-actor-mailbox\n 0.18 INDEXOF_ROTATION_A 22 write-actor-mailbox\n st-clock st@ 0.8999999999999999 + 100 st-mod dup 60 < if drop 0 else 60 - 4 / 1 min then 745 st!\n st-clock st@ 0.8999999999999999 + 100 st-mod 80 > if 100 st-clock st@ 0.8999999999999999 + 100 st-mod - 4 / 0 max 1 min 745 st! then\n -1.8 -1.55 .8 st-near if 745 st@ st-dt 4 * - 0 max 745 st! then\n 0.68 745 st@ .12 * + INDEXOF_Z_POS 23 write-actor-mailbox\n -1.8 st-clock st@ 0.8999999999999999 + 100 st-mod 64 - 0 max 16 min .015 * + INDEXOF_X_POS 23 write-actor-mailbox\n st-clock st@ 1.08 + 100 st-mod dup 60 < if drop 0 else 60 - 4 / 1 min then 746 st!\n st-clock st@ 1.08 + 100 st-mod 80 > if 100 st-clock st@ 1.08 + 100 st-mod - 4 / 0 max 1 min 746 st! then\n 1.8 -1.4 .8 st-near if 746 st@ st-dt 4 * - 0 max 746 st! then\n 0.68 746 st@ .12 * + INDEXOF_Z_POS 24 write-actor-mailbox\n 1.8 st-clock st@ 1.08 + 100 st-mod 64 - 0 max 16 min .015 * + INDEXOF_X_POS 24 write-actor-mailbox\n 3.3 0.25 2.5 st-near if 6 752 st! then\n 752 st@ st-dt - 0 max 752 st!\n 752 st@ 0 > if 751 st@ st-dt 2.43 * + 3 min else 751 st@ st-dt .12 * - 0 max then 751 st!\n 3.3 751 st@ - INDEXOF_X_POS 25 write-actor-mailbox\n 1 st-clock st@ 1.44 + .1 * st-sin .04 * .04 + + INDEXOF_Z_SCALE 26 write-actor-mailbox\n 7 INDEXOF_CAMSHOT st! ;\nst-director-tick\n" } }
+		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'I32' { 'NAME' "Animation Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Matte Type" } { 'DATA' 1l } { 'STR' "Color" } }  //None|Color|Image
+		{ 'I32' { 'NAME' "Background Color" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Debug Background Color" } { 'DATA' 7829367l } { 'STR' "7829367" } }
+		{ 'FX32' { 'NAME' "Distance" } { 'DATA' 8000.0000000000000000(1.15.16) } { 'STR' "8000.0" } }
+		{ 'FILE' { 'NAME' "Tiles" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "Map" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "X Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Y Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'I32' { 'NAME' "generationType" } { 'STR' "Pulse" } }
+		{ 'FX32' { 'NAME' "period" } { 'DATA' 0.1499938964843750(1.15.16) } { 'STR' "0.149993896484375" } }
+		{ 'FX32' { 'NAME' "timeDelay" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "yArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "zArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "initialSphereRadius" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'FX32' { 'NAME' "sphereExpansionRate" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'I32' { 'NAME' "nParticles" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "initialVelocity" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "initialAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "lifeTime" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "initialAlpha" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "alphaDecrement" } { 'DATA' 0.0499877929687500(1.15.16) } { 'STR' "0.04998779296875" } }
+		{ 'I32' { 'NAME' "Type" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "forceType" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude2" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "LevelObj" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -20.0000000000000000(1.15.16) 1.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.1000000000000000(1.15.16) -0.1000000000000000(1.15.16) -0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "levelobj" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 15l } { 'STR' "15" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Movement Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "Step Size" } { 'DATA' 0.5499877929687500(1.15.16) } { 'STR' "0.54998779296875" } }
+		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Horizontal Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.9499969482421875(1.15.16) } { 'STR' "0.9499969482421875" } }
+		{ 'I32' { 'NAME' "At End Of Path" } { 'STR' "Ping-Pong" } }
+		{ 'STR' { 'NAME' "Object To Follow" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Follow Offset" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.8999938964843750(1.15.16) } { 'STR' "0.899993896484375" } }
+		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 5.0000000000000000(1.15.16) } { 'STR' "5.0" } }
+		{ 'FX32' { 'NAME' "Crawling Acceleration" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Jumping Acceleration" } { 'DATA' 18.0000000000000000(1.15.16) } { 'STR' "18.0" } }
+		{ 'FX32' { 'NAME' "Jumping Momentum Transfer" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 9.8099975585937500(1.15.16) } { 'STR' "9.80999755859375" } }
+		{ 'FX32' { 'NAME' "Fall Anim Threshold" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "Stun Threshold" } { 'DATA' 2.5000000000000000(1.15.16) } { 'STR' "2.5" } }
+		{ 'FX32' { 'NAME' "Stun Duration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'STR' { 'NAME' "Tool A" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool B" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool C" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool D" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool E" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool F" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "hp" } { 'DATA' 32767.0000000000000000(1.15.16) } { 'STR' "32767.0" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'I32' { 'NAME' "Animation Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Matte Type" } { 'DATA' 1l } { 'STR' "Color" } }  //None|Color|Image
+		{ 'I32' { 'NAME' "Background Color" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Debug Background Color" } { 'DATA' 7829367l } { 'STR' "7829367" } }
+		{ 'FX32' { 'NAME' "Distance" } { 'DATA' 8000.0000000000000000(1.15.16) } { 'STR' "8000.0" } }
+		{ 'FILE' { 'NAME' "Tiles" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "Map" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "X Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Y Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'I32' { 'NAME' "generationType" } { 'STR' "Pulse" } }
+		{ 'FX32' { 'NAME' "period" } { 'DATA' 0.1499938964843750(1.15.16) } { 'STR' "0.149993896484375" } }
+		{ 'FX32' { 'NAME' "timeDelay" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "yArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "zArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "initialSphereRadius" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'FX32' { 'NAME' "sphereExpansionRate" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'I32' { 'NAME' "nParticles" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "initialVelocity" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "initialAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "lifeTime" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "initialAlpha" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "alphaDecrement" } { 'DATA' 0.0499877929687500(1.15.16) } { 'STR' "0.04998779296875" } }
+		{ 'I32' { 'NAME' "Type" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "forceType" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude2" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Number Of Mailboxes" } { 'DATA' 101l } { 'STR' "101" } }
+		{ 'I32' { 'NAME' "Number Of Scratch Mailboxes" } { 'DATA' 10l } { 'STR' "10" } }
+		{ 'I32' { 'NAME' "Number Of Temporary Objects" } { 'DATA' 200l } { 'STR' "200" } }
+		{ 'FILE' { 'NAME' "sfx0" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx1" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx2" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx3" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx4" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx5" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx6" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx7" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx8" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx9" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx10" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx11" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx12" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx13" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx14" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx15" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx16" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx17" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx18" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx19" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx20" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx21" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx22" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx23" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx24" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx25" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx26" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx27" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx28" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx29" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx30" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx31" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx32" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx33" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx34" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx35" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx36" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx37" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx38" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx39" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx40" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx41" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx42" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx43" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx44" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx45" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx46" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx47" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx48" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx49" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx50" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx51" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx52" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx53" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx54" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx55" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx56" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx57" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx58" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx59" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx60" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx61" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx62" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx63" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx64" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx65" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx66" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx67" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx68" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx69" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx70" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx71" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx72" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx73" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx74" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx75" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx76" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx77" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx78" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx79" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx80" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx81" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx82" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx83" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx84" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx85" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx86" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx87" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx88" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx89" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx90" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx91" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx92" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx93" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx94" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx95" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx96" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx97" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx98" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx99" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx100" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx101" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx102" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx103" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx104" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx105" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx106" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx107" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx108" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx109" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx110" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx111" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx112" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx113" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx114" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx115" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx116" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx117" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx118" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx119" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx120" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx121" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx122" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx123" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx124" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx125" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx126" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "sfx127" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "Sound Yon" } { 'DATA' 20.0000000000000000(1.15.16) } { 'STR' "20.0" } }
+		{ 'FILE' { 'NAME' "MusicVh" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "MusicVb" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "MusicSeq" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Prewarm No Palette Program" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Matte" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -20.0000000000000000(1.15.16) 1.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.1000000000000000(1.15.16) -0.1000000000000000(1.15.16) -0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "matte" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 11l } { 'STR' "11" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Movement Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "Step Size" } { 'DATA' 0.5499877929687500(1.15.16) } { 'STR' "0.54998779296875" } }
+		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Horizontal Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.9499969482421875(1.15.16) } { 'STR' "0.9499969482421875" } }
+		{ 'I32' { 'NAME' "At End Of Path" } { 'STR' "Ping-Pong" } }
+		{ 'STR' { 'NAME' "Object To Follow" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Follow Offset" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.8999938964843750(1.15.16) } { 'STR' "0.899993896484375" } }
+		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 5.0000000000000000(1.15.16) } { 'STR' "5.0" } }
+		{ 'FX32' { 'NAME' "Crawling Acceleration" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Jumping Acceleration" } { 'DATA' 18.0000000000000000(1.15.16) } { 'STR' "18.0" } }
+		{ 'FX32' { 'NAME' "Jumping Momentum Transfer" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 9.8099975585937500(1.15.16) } { 'STR' "9.80999755859375" } }
+		{ 'FX32' { 'NAME' "Fall Anim Threshold" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "Stun Threshold" } { 'DATA' 2.5000000000000000(1.15.16) } { 'STR' "2.5" } }
+		{ 'FX32' { 'NAME' "Stun Duration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'STR' { 'NAME' "Tool A" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool B" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool C" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool D" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool E" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool F" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "hp" } { 'DATA' 32767.0000000000000000(1.15.16) } { 'STR' "32767.0" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'I32' { 'NAME' "Animation Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Matte Type" } { 'DATA' 1l } { 'STR' "Color" } }  //None|Color|Image
+		{ 'I32' { 'NAME' "Background Color" } { 'DATA' 594974l } { 'STR' "594974" } }
+		{ 'I32' { 'NAME' "Debug Background Color" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'FX32' { 'NAME' "Distance" } { 'DATA' 8000.0000000000000000(1.15.16) } { 'STR' "8000.0" } }
+		{ 'FILE' { 'NAME' "Tiles" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "Map" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "X Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Y Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'I32' { 'NAME' "generationType" } { 'STR' "Pulse" } }
+		{ 'FX32' { 'NAME' "period" } { 'DATA' 0.1499938964843750(1.15.16) } { 'STR' "0.149993896484375" } }
+		{ 'FX32' { 'NAME' "timeDelay" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "yArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "zArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "initialSphereRadius" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'FX32' { 'NAME' "sphereExpansionRate" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'I32' { 'NAME' "nParticles" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "initialVelocity" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "initialAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "lifeTime" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "initialAlpha" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "alphaDecrement" } { 'DATA' 0.0499877929687500(1.15.16) } { 'STR' "0.04998779296875" } }
+		{ 'I32' { 'NAME' "Type" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "forceType" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude2" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "cs_wide" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -8.5000000000000000(1.15.16) 4.0999999046325684(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.1000000000000000(1.15.16) -0.1000000000000000(1.15.16) -0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "camshot" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 16l } { 'STR' "16" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Movement Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "Step Size" } { 'DATA' 0.5499877929687500(1.15.16) } { 'STR' "0.54998779296875" } }
+		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Horizontal Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.9499969482421875(1.15.16) } { 'STR' "0.9499969482421875" } }
+		{ 'I32' { 'NAME' "At End Of Path" } { 'STR' "Ping-Pong" } }
+		{ 'STR' { 'NAME' "Object To Follow" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Follow Offset" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.8999938964843750(1.15.16) } { 'STR' "0.899993896484375" } }
+		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 5.0000000000000000(1.15.16) } { 'STR' "5.0" } }
+		{ 'FX32' { 'NAME' "Crawling Acceleration" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Jumping Acceleration" } { 'DATA' 18.0000000000000000(1.15.16) } { 'STR' "18.0" } }
+		{ 'FX32' { 'NAME' "Jumping Momentum Transfer" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 9.8099975585937500(1.15.16) } { 'STR' "9.80999755859375" } }
+		{ 'FX32' { 'NAME' "Fall Anim Threshold" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "Stun Threshold" } { 'DATA' 2.5000000000000000(1.15.16) } { 'STR' "2.5" } }
+		{ 'FX32' { 'NAME' "Stun Duration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'STR' { 'NAME' "Tool A" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool B" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool C" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool D" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool E" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool F" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "hp" } { 'DATA' 32767.0000000000000000(1.15.16) } { 'STR' "32767.0" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'I32' { 'NAME' "Animation Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Matte Type" } { 'DATA' 1l } { 'STR' "Color" } }  //None|Color|Image
+		{ 'I32' { 'NAME' "Background Color" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Debug Background Color" } { 'DATA' 7829367l } { 'STR' "7829367" } }
+		{ 'FX32' { 'NAME' "Distance" } { 'DATA' 8000.0000000000000000(1.15.16) } { 'STR' "8000.0" } }
+		{ 'FILE' { 'NAME' "Tiles" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "Map" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "X Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Y Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'I32' { 'NAME' "generationType" } { 'STR' "Pulse" } }
+		{ 'FX32' { 'NAME' "period" } { 'DATA' 0.1499938964843750(1.15.16) } { 'STR' "0.149993896484375" } }
+		{ 'FX32' { 'NAME' "timeDelay" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "yArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "zArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "initialSphereRadius" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'FX32' { 'NAME' "sphereExpansionRate" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'I32' { 'NAME' "nParticles" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "initialVelocity" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "initialAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "lifeTime" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "initialAlpha" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "alphaDecrement" } { 'DATA' 0.0499877929687500(1.15.16) } { 'STR' "0.04998779296875" } }
+		{ 'I32' { 'NAME' "Type" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "forceType" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude2" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Camera" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Target" } { 'STR' "LookAt" } }
+		{ 'STR' { 'NAME' "Follow" } { 'STR' "LookAt" } }
+		{ 'FX32' { 'NAME' "Climb Rate" } { 'DATA' 5.0000000000000000(1.15.16) } { 'STR' "5.0" } }
+		{ 'FX32' { 'NAME' "Elasticity" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'I32' { 'NAME' "Track Object Mailbox" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Track Object" } { 'STR' "LookAt" } }
+		{ 'I32' { 'NAME' "Rotation" } { 'DATA' 0l } { 'STR' "Fixed" } }  //Fixed|Track
+		{ 'I32' { 'NAME' "Position X" } { 'DATA' 0l } { 'STR' "Absolute" } }  //Absolute|Relative
+		{ 'I32' { 'NAME' "Position Y" } { 'DATA' 0l } { 'STR' "Absolute" } }  //Absolute|Relative
+		{ 'I32' { 'NAME' "Position Z" } { 'DATA' 0l } { 'STR' "Absolute" } }  //Absolute|Relative
+		{ 'FX32' { 'NAME' "FOV" } { 'DATA' 50.0000000000000000(1.15.16) } { 'STR' "50.0" } }
+		{ 'FX32' { 'NAME' "Roll" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Pan Time In Seconds" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Hither" } { 'DATA' 0.0999755859375000(1.15.16) } { 'STR' "0.0999755859375" } }
+		{ 'FX32' { 'NAME' "Yon" } { 'DATA' 1000.0000000000000000(1.15.16) } { 'STR' "1000.0" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "LookAt" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 2.3499999046325684(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.1000000000000000(1.15.16) -0.1000000000000000(1.15.16) -0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "target" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 3l } { 'STR' "3" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Movement Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "Step Size" } { 'DATA' 0.5499877929687500(1.15.16) } { 'STR' "0.54998779296875" } }
+		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Horizontal Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.9499969482421875(1.15.16) } { 'STR' "0.9499969482421875" } }
+		{ 'I32' { 'NAME' "At End Of Path" } { 'STR' "Ping-Pong" } }
+		{ 'STR' { 'NAME' "Object To Follow" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Follow Offset" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.8999938964843750(1.15.16) } { 'STR' "0.899993896484375" } }
+		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 5.0000000000000000(1.15.16) } { 'STR' "5.0" } }
+		{ 'FX32' { 'NAME' "Crawling Acceleration" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Jumping Acceleration" } { 'DATA' 18.0000000000000000(1.15.16) } { 'STR' "18.0" } }
+		{ 'FX32' { 'NAME' "Jumping Momentum Transfer" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 9.8099975585937500(1.15.16) } { 'STR' "9.80999755859375" } }
+		{ 'FX32' { 'NAME' "Fall Anim Threshold" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "Stun Threshold" } { 'DATA' 2.5000000000000000(1.15.16) } { 'STR' "2.5" } }
+		{ 'FX32' { 'NAME' "Stun Duration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'STR' { 'NAME' "Tool A" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool B" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool C" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool D" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool E" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool F" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "hp" } { 'DATA' 32767.0000000000000000(1.15.16) } { 'STR' "32767.0" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'I32' { 'NAME' "Animation Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Matte Type" } { 'DATA' 1l } { 'STR' "Color" } }  //None|Color|Image
+		{ 'I32' { 'NAME' "Background Color" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Debug Background Color" } { 'DATA' 7829367l } { 'STR' "7829367" } }
+		{ 'FX32' { 'NAME' "Distance" } { 'DATA' 8000.0000000000000000(1.15.16) } { 'STR' "8000.0" } }
+		{ 'FILE' { 'NAME' "Tiles" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "Map" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "X Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Y Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'I32' { 'NAME' "generationType" } { 'STR' "Pulse" } }
+		{ 'FX32' { 'NAME' "period" } { 'DATA' 0.1499938964843750(1.15.16) } { 'STR' "0.149993896484375" } }
+		{ 'FX32' { 'NAME' "timeDelay" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "yArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "zArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "initialSphereRadius" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'FX32' { 'NAME' "sphereExpansionRate" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'I32' { 'NAME' "nParticles" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "initialVelocity" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "initialAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "lifeTime" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "initialAlpha" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "alphaDecrement" } { 'DATA' 0.0499877929687500(1.15.16) } { 'STR' "0.04998779296875" } }
+		{ 'I32' { 'NAME' "Type" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "forceType" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude2" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Player" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -1.0000000000000000(1.15.16) 0.8000000119209290(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.0400000000000000(1.15.16) -0.0400000000000000(1.15.16) -0.0200000000000000(1.15.16) 0.0400000000000000(1.15.16) 0.0400000000000000(1.15.16) 0.0200000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "player" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sea_player_hull.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 22l } { 'STR' "22" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'I32' { 'NAME' "Movement Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "Step Size" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Horizontal Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.9499969482421875(1.15.16) } { 'STR' "0.9499969482421875" } }
+		{ 'I32' { 'NAME' "At End Of Path" } { 'STR' "Ping-Pong" } }
+		{ 'STR' { 'NAME' "Object To Follow" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Follow Offset" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 4.0000000000000000(1.15.16) } { 'STR' "4.0" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Crawling Acceleration" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Jumping Acceleration" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Jumping Momentum Transfer" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 4.0000000000000000(1.15.16) } { 'STR' "4.0" } }
+		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Fall Anim Threshold" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "Stun Threshold" } { 'DATA' 2.5000000000000000(1.15.16) } { 'STR' "2.5" } }
+		{ 'FX32' { 'NAME' "Stun Duration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'STR' { 'NAME' "Tool A" } { 'STR' "tool_34" } }
+		{ 'STR' { 'NAME' "Tool B" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool C" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool D" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool E" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool F" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "hp" } { 'DATA' 32767.0000000000000000(1.15.16) } { 'STR' "32767.0" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 6l } { 'STR' "6" } }
+		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' ": st-init 600 ;\n: st-x 601 ;\n: st-y 602 ;\n: st-z 603 ;\n: st-surface 604 ;\n: st-old 605 ;\n: st-roll 606 ;\n: st-reach 607 ;\n: st-idle 608 ;\n: st-clock 609 ;\n: st-dx 610 ;\n: st-dy 611 ;\n: st-buttons 612 ;\n: st-prev 613 ;\n: st-dt 614 ;\n: st-neutral 615 ;\n: st-auto-phase 616 ;\n: st-heading 617 ;\n: st-a 618 ;\n: st-b 619 ;\n: st-c 620 ;\n: st-leader 621 ;\n: st-turn 622 ;\n: st-auto-step 623 ;\n: st-auto-wait 624 ;\n: st-dream 0 ;\n: st-limit-x 5.65 ;\n: st-limit-y 2.65 ;\n: st-bottom 0.8 ;\n: st-top 4.85 ;\n: st-speed 0.40499999999999997 ;\n\\ Sea Stars: surface id 0 sand, 1 front, 2 right, 3 back, 4 left.\n\\ All collision/clearance bounds are authored by the exporter.\n: st@ read-mailbox ; : st! write-mailbox ;\n: st-frac begin dup 1 >= if 1 - 0 else 1 then until\n  begin dup 0 < if 1 + 0 else 1 then until ;\n: st-sin st-frac dup .5 > if .5 - -1 else 1 then >r\n  2 * dup 1 swap - * dup 16 * swap 4 * 5 swap - / r> * ;\n: st-mod >r r@ / st-frac r> * ;\n: st-cos .25 + st-sin ;\n: st-held st-buttons st@ & 0 <> if 1 else 0 then ;\n: st-change ( surface -- )\n  st-surface st@ st-old st! st-surface st! 1.2 st-roll st! ;\n\\ Waypoints are authored: front wall, up, clockwise round to back, down,\n\\ a sand waypoint and a seeded pause. Both Dream and idle use this driver.\n: st-autopilot\n  0 st-buttons st!\n  st-auto-step st@ 0 = if\n    JOYSTICK_BUTTON_DOWN st-buttons st!\n    st-surface st@ 1 = if 1 st-auto-step st! then\n  else st-auto-step st@ 1 = if\n    JOYSTICK_BUTTON_UP st-buttons st!\n    st-z st@ 3 >= if 2 st-auto-step st! then\n  else st-auto-step st@ 2 = if\n    JOYSTICK_BUTTON_RIGHT st-buttons st!\n    st-surface st@ 3 = if 3 st-auto-step st! then\n  else st-auto-step st@ 3 = if\n    JOYSTICK_BUTTON_DOWN st-buttons st!\n    st-surface st@ 0 = if 4 st-auto-step st! then\n  else st-auto-step st@ 4 = if\n    JOYSTICK_BUTTON_DOWN st-buttons st!\n    st-y st@ .3 < if 5 st-auto-step st! 20 st-auto-wait st! then\n  else\n    st-auto-wait st@ st-dt st@ - 0 max dup st-auto-wait st!\n    0 <= if 0 st-auto-step st! then\n  then then then then then ;\n: st-avoid-rocks st-surface st@ 0 = if\n st-x st@ -4.62000 > st-x st@ -2.18000 < & st-y st@ 0.23000 > & st-y st@ 2.07000 < & if 0.23000 st-y st! then\n st-x st@ -0.97000 > st-x st@ 0.97000 < & st-y st@ 0.58000 > & st-y st@ 2.32000 < & if 0.58000 st-y st! then\n st-x st@ 2.13000 > st-x st@ 4.67000 < & st-y st@ 0.18000 > & st-y st@ 2.02000 < & if 0.18000 st-y st! then\n then ;\n: st-reset\n  0 st-surface st! 0 st-roll st! 0 st-idle st! 0 st-reach st!\n  INDEXOF_X_POS st@ st-x st! INDEXOF_Y_POS st@ st-y st!\n  st-bottom st-z st! 1 st-init st! ;\n: st-input\n  INDEXOF_HARDWARE_JOYSTICK1_RAW st@ st-buttons st!\n  INDEXOF_DELTA_TIME st@ .2 > if 1 st-neutral st! then\n  st-neutral st@ if\n    st-buttons st@ 30727 & 0 = if 0 st-neutral st! then\n    0 st-buttons st!\n  then\n  st-buttons st@ 30727 & if 0 st-idle st! 0 st-auto-step st! else\n    st-idle st@ st-dt st@ + st-idle st!\n  then\n  st-idle st@ 30 >= st-dream | if st-autopilot then\n  JOYSTICK_BUTTON_RIGHT st-held JOYSTICK_BUTTON_LEFT st-held - st-dx st!\n  JOYSTICK_BUTTON_UP st-held JOYSTICK_BUTTON_DOWN st-held - st-dy st!\n  JOYSTICK_BUTTON_A st-held if\n    st-prev st@ JOYSTICK_BUTTON_A & 0 = if 2 st-reach st! then\n  then\n  st-buttons st@ st-prev st! ;\n: st-sand\n  st-x st@ st-dx st@ st-speed * st-dt st@ * + st-limit-x negate max st-limit-x min st-x st!\n  st-y st@ st-dy st@ st-speed * st-dt st@ * + st-limit-y negate max st-limit-y min st-y st!\n  st-bottom st-z st!\n  st-y st@ st-limit-y negate <= st-dy st@ 0 < & if 1 st-change then\n  st-x st@ st-limit-x >= st-dx st@ 0 > & if 2 st-change then\n  st-y st@ st-limit-y >= st-dy st@ 0 > & if 3 st-change then\n  st-x st@ st-limit-x negate <= st-dx st@ 0 < & if 4 st-change then ;\n: st-wall\n  st-z st@ st-dy st@ st-speed * st-dt st@ * + st-bottom max st-top min st-z st!\n  st-surface st@ 1 = if\n    st-limit-y negate st-y st!\n    st-x st@ st-dx st@ st-speed * st-dt st@ * + st-x st!\n    st-x st@ st-limit-x > if st-limit-x st-x st! 2 st-change then\n    st-x st@ st-limit-x negate < if st-limit-x negate st-x st! 4 st-change then\n  else st-surface st@ 2 = if\n    st-limit-x st-x st!\n    st-y st@ st-dx st@ st-speed * st-dt st@ * + st-y st!\n    st-y st@ st-limit-y > if st-limit-y st-y st! 3 st-change then\n    st-y st@ st-limit-y negate < if st-limit-y negate st-y st! 1 st-change then\n  else st-surface st@ 3 = if\n    st-limit-y st-y st!\n    st-x st@ st-dx st@ st-speed * st-dt st@ * - st-x st!\n    st-x st@ st-limit-x negate < if st-limit-x negate st-x st! 4 st-change then\n    st-x st@ st-limit-x > if st-limit-x st-x st! 2 st-change then\n  else\n    st-limit-x negate st-x st!\n    st-y st@ st-dx st@ st-speed * st-dt st@ * - st-y st!\n    st-y st@ st-limit-y negate < if st-limit-y negate st-y st! 1 st-change then\n    st-y st@ st-limit-y > if st-limit-y st-y st! 3 st-change then\n  then then then\n  st-z st@ st-bottom <= st-dy st@ 0 < & if 0 st-change then ;\n: st-tick\n  st-init st@ 0 = if st-reset then\n  INDEXOF_DELTA_TIME st@ dup .2 > if drop 0 else 0 max .05 min then st-dt st!\n  st-clock st@ st-dt st@ + st-clock st!\n  st-reach st@ st-dt st@ - 0 max st-reach st!\n  st-input\n  st-roll st@ 0 > if\n    st-roll st@ st-dt st@ - 0 max st-roll st!\n  else st-surface st@ 0 = if st-sand else st-wall then then\n  st-avoid-rocks\n  st-x st@ INDEXOF_X_POS st!\n  st-y st@ INDEXOF_Y_POS st!\n  st-z st@ INDEXOF_Z_POS st!\n  0 INDEXOF_XSPEED st! 0 INDEXOF_YSPEED st! 0 INDEXOF_ZSPEED st! ;\n\nst-tick\n" } }
+		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sea_player_hull.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Animation Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Matte Type" } { 'DATA' 1l } { 'STR' "Color" } }  //None|Color|Image
+		{ 'I32' { 'NAME' "Background Color" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Debug Background Color" } { 'DATA' 7829367l } { 'STR' "7829367" } }
+		{ 'FX32' { 'NAME' "Distance" } { 'DATA' 8000.0000000000000000(1.15.16) } { 'STR' "8000.0" } }
+		{ 'FILE' { 'NAME' "Tiles" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "Map" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "X Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Y Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'I32' { 'NAME' "generationType" } { 'STR' "Pulse" } }
+		{ 'FX32' { 'NAME' "period" } { 'DATA' 0.1499938964843750(1.15.16) } { 'STR' "0.149993896484375" } }
+		{ 'FX32' { 'NAME' "timeDelay" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "yArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "zArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "initialSphereRadius" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'FX32' { 'NAME' "sphereExpansionRate" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'I32' { 'NAME' "nParticles" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "initialVelocity" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "initialAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "lifeTime" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "initialAlpha" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "alphaDecrement" } { 'DATA' 0.0499877929687500(1.15.16) } { 'STR' "0.04998779296875" } }
+		{ 'I32' { 'NAME' "Type" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "forceType" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude2" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "sea_shell" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -16.0000000000000000(1.15.16) -3.0999999046325684(1.15.16) -1.0000000000000000(1.15.16) 16.0000000000000000(1.15.16) 3.2000000476837158(1.15.16) 11.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sea_shell.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sea_shell.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.2000000000000000(1.15.16) } { 'STR' "-0.200000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "sea_rocks" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -4.3586664199829102(1.15.16) 0.3242906630039215(1.15.16) 0.5321394205093384(1.15.16) 4.3925228118896484(1.15.16) 2.0783233642578125(1.15.16) 2.1258094310760498(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sea_rocks.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sea_rocks.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0004349587792575(1.15.16) } { 'STR' "0.000435" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0006760482732495(1.15.16) } { 'STR' "-0.000676" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0026970375942130(1.15.16) } { 'STR' "-0.002697" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "sea_grass" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -5.3750405311584473(1.15.16) 1.8806750774383545(1.15.16) 0.7749999761581421(1.15.16) 5.4573168754577637(1.15.16) 2.3487026691436768(1.15.16) 2.5316779613494873(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sea_grass.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sea_grass.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.9999999930461247(1.15.16) } { 'STR' "-1.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "sea_ledge" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 2.5999999046325684(1.15.16) -0.0500000007450581(1.15.16) 0.7749999761581421(1.15.16) 4.0300002098083496(1.15.16) 0.6499999761581421(1.15.16) 1.1200000047683716(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sea_ledge.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sea_ledge.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "RockProxy0" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -3.4000000953674316(1.15.16) 1.1499999761581421(1.15.16) 0.7749999761581421(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.0000000000000000(1.15.16) -0.6999999880790710(1.15.16) 0.0000000000000000(1.15.16) 1.0000000000000000(1.15.16) 0.6999999880790710(1.15.16) 1.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sea_rock_proxy0.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sea_rock_proxy0.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "RockProxy1" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 1.4500000476837158(1.15.16) 0.7749999761581421(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.6499999761581421(1.15.16) 0.0000000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.6499999761581421(1.15.16) 0.6499999761581421(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sea_rock_proxy1.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sea_rock_proxy1.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "RockProxy2" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 3.4000000953674316(1.15.16) 1.1000000238418579(1.15.16) 0.7749999761581421(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.0499999523162842(1.15.16) -0.6999999880790710(1.15.16) 0.0000000000000000(1.15.16) 1.0499999523162842(1.15.16) 0.6999999880790710(1.15.16) 1.1499999761581421(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sea_rock_proxy2.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sea_rock_proxy2.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "BlueStar" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -1.0000000000000000(1.15.16) 0.8000000119209290(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7404104471206665(1.15.16) -0.8570510745048523(1.15.16) -0.0178699195384979(1.15.16) 0.8999998569488525(1.15.16) 0.8570510745048523(1.15.16) 0.1049999967217445(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_linckia.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_linckia.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000164170585(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000001037066(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0592041506965955(1.15.16) } { 'STR' "-0.059204" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0473633213667515(1.15.16) } { 'STR' "-0.047363" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "ChipOne" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -3.5000000000000000(1.15.16) -0.8999999761581421(1.15.16) 0.8000000119209290(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.8090168833732605(1.15.16) -0.9510563611984253(1.15.16) -0.0195269100368023(1.15.16) 0.9999998211860657(1.15.16) 0.9510563611984253(1.15.16) 0.2549999952316284(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_chip.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_chip.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000020335109(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000000537944(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0229955932094914(1.15.16) } { 'STR' "-0.022996" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0183964819105951(1.15.16) } { 'STR' "-0.018396" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "ChipTwo" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 3.0999999046325684(1.15.16) -0.8999999761581421(1.15.16) 0.8000000119209290(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.8090168833732605(1.15.16) -0.9510563611984253(1.15.16) -0.0195269100368023(1.15.16) 0.9999998211860657(1.15.16) 0.9510563611984253(1.15.16) 0.2549999952316284(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_chip.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_chip.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000020335109(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000000537944(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0229955932094914(1.15.16) } { 'STR' "-0.022996" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0183964684894235(1.15.16) } { 'STR' "-0.018396" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "FromiaOne" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -3.5000000000000000(1.15.16) 0.6000000238418579(1.15.16) 1.7999999523162842(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3236067593097687(1.15.16) -0.3804225623607635(1.15.16) -0.0163217801600695(1.15.16) 0.3999999463558197(1.15.16) 0.3804225623607635(1.15.16) 0.0549999997019768(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_fromia.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_fromia.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000014246578(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000419095(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0336743195520507(1.15.16) } { 'STR' "-0.033674" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0606137785491310(1.15.16) } { 'STR' "-0.060614" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "FromiaTwo" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 1.0000000000000000(1.15.16) 1.3500000238418579(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3236067593097687(1.15.16) -0.3804225623607635(1.15.16) -0.0163217801600695(1.15.16) 0.3999999463558197(1.15.16) 0.3804225623607635(1.15.16) 0.0549999997019768(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_fromia.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_fromia.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000014246578(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000419095(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0336743195520507(1.15.16) } { 'STR' "-0.033674" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0454603321562173(1.15.16) } { 'STR' "-0.045460" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "FromiaThree" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 3.4000000953674316(1.15.16) 0.5000000000000000(1.15.16) 1.7999999523162842(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3236067593097687(1.15.16) -0.3804225623607635(1.15.16) -0.0163217801600695(1.15.16) 0.3999999463558197(1.15.16) 0.3804225623607635(1.15.16) 0.0549999997019768(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_fromia.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_fromia.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000014246578(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000419095(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0336743195520507(1.15.16) } { 'STR' "-0.033674" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0606137687231833(1.15.16) } { 'STR' "-0.060614" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "SandOne" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -1.7999999523162842(1.15.16) -1.5499999523162842(1.15.16) 0.8000000119209290(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.4670494496822357(1.15.16) -0.5424003601074219(1.15.16) -0.0163217801600695(1.15.16) 0.5739998817443848(1.15.16) 0.5447159409523010(1.15.16) 0.0450000017881393(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_sand.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_sand.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000068928527(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0003852814009103(1.15.16) } { 'STR' "-0.000385" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0151149591863757(1.15.16) } { 'STR' "-0.015115" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0114947937833803(1.15.16) } { 'STR' "-0.011495" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "SandTwo" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 1.7999999523162842(1.15.16) -1.3999999761581421(1.15.16) 0.8000000119209290(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.4670494496822357(1.15.16) -0.5424003601074219(1.15.16) -0.0163217801600695(1.15.16) 0.5739998817443848(1.15.16) 0.5447159409523010(1.15.16) 0.0450000017881393(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_sand.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_sand.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000068928527(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0003852814009103(1.15.16) } { 'STR' "-0.000385" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0151149591863757(1.15.16) } { 'STR' "-0.015115" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0115525611700618(1.15.16) } { 'STR' "-0.011553" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Brittle" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 3.2999999523162842(1.15.16) 0.2500000000000000(1.15.16) 0.8000000119209290(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.3690021038055420(1.15.16) -1.6082125902175903(1.15.16) -0.0370000004768372(1.15.16) 1.6900000572204590(1.15.16) 1.6082125902175903(1.15.16) 0.0729999989271164(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_brittle.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_brittle.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000310935356(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000461799966(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000031478080(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000935819132(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Cushion" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -4.6999998092651367(1.15.16) 0.0000000000000000(1.15.16) 0.8000000119209290(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6278076767921448(1.15.16) -0.6950903534889221(1.15.16) -0.0208626799285412(1.15.16) 0.7200000286102295(1.15.16) 0.6950903534889221(1.15.16) 0.3700000047683716(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_cushion.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_cushion.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000010488216(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000779336(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0668072221676509(1.15.16) } { 'STR' "-0.066807" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0534457834599861(1.15.16) } { 'STR' "-0.053446" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "AmbientLight" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -20.0000000000000000(1.15.16) 1.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) 0.6981316208839417(1.15.16) 1.5707962512969971(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.1000000000000000(1.15.16) -0.1000000000000000(1.15.16) -0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16) 0.1000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "light" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 23l } { 'STR' "23" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Movement Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "Step Size" } { 'DATA' 0.5499877929687500(1.15.16) } { 'STR' "0.54998779296875" } }
+		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Horizontal Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.9499969482421875(1.15.16) } { 'STR' "0.9499969482421875" } }
+		{ 'I32' { 'NAME' "At End Of Path" } { 'STR' "Ping-Pong" } }
+		{ 'STR' { 'NAME' "Object To Follow" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Follow Offset" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.8999938964843750(1.15.16) } { 'STR' "0.899993896484375" } }
+		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 5.0000000000000000(1.15.16) } { 'STR' "5.0" } }
+		{ 'FX32' { 'NAME' "Crawling Acceleration" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Jumping Acceleration" } { 'DATA' 18.0000000000000000(1.15.16) } { 'STR' "18.0" } }
+		{ 'FX32' { 'NAME' "Jumping Momentum Transfer" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 9.8099975585937500(1.15.16) } { 'STR' "9.80999755859375" } }
+		{ 'FX32' { 'NAME' "Fall Anim Threshold" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "Stun Threshold" } { 'DATA' 2.5000000000000000(1.15.16) } { 'STR' "2.5" } }
+		{ 'FX32' { 'NAME' "Stun Duration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'STR' { 'NAME' "Tool A" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool B" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool C" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool D" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool E" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool F" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "hp" } { 'DATA' 32767.0000000000000000(1.15.16) } { 'STR' "32767.0" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'I32' { 'NAME' "Animation Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Matte Type" } { 'DATA' 1l } { 'STR' "Color" } }  //None|Color|Image
+		{ 'I32' { 'NAME' "Background Color" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Debug Background Color" } { 'DATA' 7829367l } { 'STR' "7829367" } }
+		{ 'FX32' { 'NAME' "Distance" } { 'DATA' 8000.0000000000000000(1.15.16) } { 'STR' "8000.0" } }
+		{ 'FILE' { 'NAME' "Tiles" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "Map" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "X Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Y Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'I32' { 'NAME' "generationType" } { 'STR' "Pulse" } }
+		{ 'FX32' { 'NAME' "period" } { 'DATA' 0.1499938964843750(1.15.16) } { 'STR' "0.149993896484375" } }
+		{ 'FX32' { 'NAME' "timeDelay" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "yArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "zArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "initialSphereRadius" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'FX32' { 'NAME' "sphereExpansionRate" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'I32' { 'NAME' "nParticles" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "initialVelocity" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "initialAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "lifeTime" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "initialAlpha" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "alphaDecrement" } { 'DATA' 0.0499877929687500(1.15.16) } { 'STR' "0.04998779296875" } }
+		{ 'I32' { 'NAME' "Type" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "forceType" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude2" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.4300000000000000(1.15.16) } { 'STR' "0.43" } }
+		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.4700000000000000(1.15.16) } { 'STR' "0.47" } }
+		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.5200000000000000(1.15.16) } { 'STR' "0.52" } }
+		{ 'FX32' { 'NAME' "lightX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "lightY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "lightZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "lightType" } { 'DATA' 1l } { 'STR' "Ambient" } }  //Directional|Ambient
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+}
