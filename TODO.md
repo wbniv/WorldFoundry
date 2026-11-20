@@ -440,4 +440,8 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** Companion invertebrates such as urchins, sea cucumbers or a harlequin shrimp. Will chose several sea-star species instead. — _from [2026-11-10-starfish-tank.md](docs/plans/2026-11-10-starfish-tank.md)_  <!-- fp:e7110e3e74ac5d69 -->
 - [ ] **(triage)** Choosing the player's species in the settings (D9 shows it read-only). — _from [2026-11-10-starfish-tank.md](docs/plans/2026-11-10-starfish-tank.md)_  <!-- fp:39c62f16c02e7d7b -->
 - [verify] **2026-11-10-starfish-tank** — Verification section present but no PASS recorded — run + record the steps. _from [2026-11-10-starfish-tank.md](docs/plans/2026-11-10-starfish-tank.md)_  <!-- fp:39f42c635e6e36ba -->
+- [ ] **(triage)** Choosing the player's species (D9 shows it read-only). — _from [2026-11-20-sea-stars-settings.md](docs/plans/2026-11-20-sea-stars-settings.md)_  <!-- fp:97ad1d1a11421848 -->
+- [ ] **(triage)** More resident species, an anime twin, feeding behaviour: all out of scope in the Sea Stars plan. — _from [2026-11-20-sea-stars-settings.md](docs/plans/2026-11-20-sea-stars-settings.md)_  <!-- fp:64ed1ab64cad9dc8 -->
+- [ ] **(triage)** Moving the five RPRP catalogs of the other tanks to this mechanism (the runtime object editing work, not this item). — _from [2026-11-20-sea-stars-settings.md](docs/plans/2026-11-20-sea-stars-settings.md)_  <!-- fp:35623db67c52ae6a -->
+- [verify] **2026-11-20-sea-stars-settings** — Verification section present but no PASS recorded — run + record the steps. _from [2026-11-20-sea-stars-settings.md](docs/plans/2026-11-20-sea-stars-settings.md)_  <!-- fp:547552dade29e558 -->
 <!-- END auto-captured-deferrals -->
