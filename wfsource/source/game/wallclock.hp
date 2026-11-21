@@ -1,0 +1,137 @@
+// wallclock.hp: the time of day, for the WALL_HOUR, WALL_MINUTE and WALL_SECOND
+// system mailboxes. Header-only and free of engine types, so a unit test can
+// include it alone.
+//
+// Plan: docs/plans/2026-11-21-sixty-second-chain-reaction.md ("Engine: the wall clock").
+//
+//   Level::update samples the clock ONCE per frame (WallClock::sample) and latches
+//   hour, minute and second together, so a script never sees a new minute beside an
+//   old second.  The desktop engine can start the clock at a chosen time and run it
+//   at a chosen rate with WF_WALL_CLOCK=HH:MM:SS[.mmm][@rate].  Android has no
+//   override: nothing there sets the variable, and a device's own clock is what shows.
+#ifndef WF_WALLCLOCK_HP
+#define WF_WALLCLOCK_HP
+
+#include <chrono>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
+#include <string>
+
+namespace wf {
+
+struct WallTime {
+    int hour = 0;           // 0 to 23
+    int minute = 0;         // 0 to 59
+    float second = 0.0f;    // 0 up to but not including 60
+};
+
+// Seconds of the day (0 <= s < 86400) to a WallTime. The float second never rounds up to 60.
+inline WallTime WallTimeFromSecondOfDay(double s)
+{
+    s = std::fmod(s, 86400.0);
+    if (s < 0.0) s += 86400.0;
+    WallTime w;
+    w.hour = static_cast<int>(s / 3600.0);
+    w.minute = static_cast<int>(std::fmod(s, 3600.0) / 60.0);
+    double sec = std::fmod(s, 60.0);
+    float f = static_cast<float>(sec);
+    if (f >= 60.0f) f = std::nextafter(60.0f, 0.0f);
+    w.second = f;
+    return w;
+}
+
+// "HH:MM:SS", "HH:MM:SS.mmm", either followed by "@rate". On failure returns false and
+// sets `err`; the caller must stop the program (fail loudly, never skip and log).
+inline bool ParseWallClockSpec(const char* spec, double& startSecondOfDay, double& rate, std::string& err)
+{
+    rate = 1.0;
+    startSecondOfDay = 0.0;
+    if (!spec || !*spec) { err = "empty"; return false; }
+    std::string s(spec);
+    auto at = s.find('@');
+    if (at != std::string::npos) {
+        std::string r = s.substr(at + 1);
+        char* end = nullptr;
+        rate = std::strtod(r.c_str(), &end);
+        if (r.empty() || *end != '\0' || !std::isfinite(rate) || rate < 0.0) {
+            err = "rate after '@' must be a number of zero or more";
+            return false;
+        }
+        s.resize(at);
+    }
+    int h = 0, m = 0, n = 0;
+    double sec = 0.0;
+    // %n counts the characters used, so trailing junk is rejected.
+    if (std::sscanf(s.c_str(), "%d:%d:%lf%n", &h, &m, &sec, &n) != 3 || n != static_cast<int>(s.size())) {
+        err = "expected HH:MM:SS[.mmm][@rate]";
+        return false;
+    }
+    if (h < 0 || h > 23 || m < 0 || m > 59 || !(sec >= 0.0 && sec < 60.0)) {
+        err = "hour 0-23, minute 0-59, second 0 up to 60";
+        return false;
+    }
+    startSecondOfDay = h * 3600.0 + m * 60.0 + sec;
+    return true;
+}
+
+class WallClock {
+public:
+    // Desktop only. Returns false with `err` set when WF_WALL_CLOCK is present but malformed.
+    bool initFromEnvironment(std::string& err)
+    {
+        const char* spec = std::getenv("WF_WALL_CLOCK");
+        if (!spec) return true;
+        if (!ParseWallClockSpec(spec, _start, _rate, err)) {
+            err = std::string("WF_WALL_CLOCK='") + spec + "': " + err;
+            return false;
+        }
+        _override = true;
+        _t0Set = false;
+        return true;
+    }
+
+    void setOverride(double startSecondOfDay, double rate)
+    {
+        _override = true; _start = startSecondOfDay; _rate = rate; _t0Set = false;
+    }
+
+    bool overridden() const { return _override; }
+
+    // One call per frame.
+    WallTime sample()
+    {
+        if (_override) {
+            const auto now = std::chrono::steady_clock::now();
+            if (!_t0Set) { _t0 = now; _t0Set = true; }
+            const double elapsed = std::chrono::duration<double>(now - _t0).count();
+            return WallTimeFromSecondOfDay(_start + _rate * elapsed);
+        }
+        using namespace std::chrono;
+        const auto now = system_clock::now();
+        const std::time_t secs = system_clock::to_time_t(now);
+        const double frac = duration<double>(now.time_since_epoch()).count() - std::floor(duration<double>(now.time_since_epoch()).count());
+        std::tm local{};
+        localtime_r(&secs, &local);
+        return WallTimeFromSecondOfDay(local.tm_hour * 3600.0 + local.tm_min * 60.0 + local.tm_sec + frac);
+    }
+
+private:
+    bool _override = false;
+    double _start = 0.0;
+    double _rate = 1.0;
+    bool _t0Set = false;
+    std::chrono::steady_clock::time_point _t0{};
+};
+
+// The one clock for the process.
+inline WallClock& TheWallClock()
+{
+    static WallClock clock;
+    return clock;
+}
+
+}  // namespace wf
+
+#endif

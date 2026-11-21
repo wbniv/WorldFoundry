@@ -43,6 +43,7 @@
 
 #include "level.hp"
 #include "runtime_profile.hp"
+#include "wallclock.hp"
 #include <cstdlib>
 
 
@@ -543,6 +544,14 @@ PIGSMain( int argc, char* * argv )
 	DBSTREAM1( std::cout << __GAME__ << " v" << (char*)szVersion; )
 
 	DBSTREAM1( std::cout << ", Built:" << (char*)szDate << "," << (char*)szTime << " by " << szBuildUser << std::endl; )
+	// WF_WALL_CLOCK=HH:MM:SS[.mmm][@rate]: a malformed value stops the engine here, loudly.
+	{
+		std::string wallErr;
+		if ( !wf::TheWallClock().initFromEnvironment( wallErr ) ) {
+			std::fprintf( stderr, "wf_game: %s\n", wallErr.c_str() );
+			std::exit( 2 );
+		}
+	}
 	const char* fpsChecks = std::getenv("WF_FRAME_RATE_CHECKS");
 	gFrameRateChecks = fpsChecks && std::strcmp(fpsChecks, "1") == 0;
 	int commandIndex = ParseCommandLine(argc,argv);

@@ -69,6 +69,12 @@ so a red is detectable (`0` = pass).
 > through to the single-letter fallbacks). The older switches in the table above
 > take one dash; these take two.
 
+## Environment variables
+
+| Variable | Effect |
+|---|---|
+| `WF_WALL_CLOCK=HH:MM:SS[.mmm][@rate]` | Desktop only. Starts the time of day that the `WALL_HOUR`, `WALL_MINUTE` and `WALL_SECOND` system mailboxes (1922 to 1924) report at the given time, and runs it at `rate` times real time (default 1; `@0` freezes it; `@600` runs ten minutes a second). Without it the mailboxes follow the device's clock in its time zone. A malformed value stops the engine at start-up with exit status 2 and a message; it is never ignored. Android has no override. Plan: [Minute Machine](plans/2026-11-21-sixty-second-chain-reaction.md#engine-the-wall-clock). Tests: `task test-wall-clock`, `tests/test_wall_clock.py`. |
+
 ## Stream Redirection
 
 Three families of debug output streams can be redirected independently.
