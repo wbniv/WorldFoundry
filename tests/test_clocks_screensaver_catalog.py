@@ -93,3 +93,19 @@ def test_manifest_ids_are_stable_lowercase_and_not_the_reserved_random():
     for clock in MANIFEST.ids:
         assert re.fullmatch(r'[a-z][a-z0-9_]*', clock), clock
         assert clock != 'random'
+
+
+def test_build_clocks_apk_packs_the_bundle_and_checks_both_abis():
+    """The Chromecasts are armeabi-v7a only; the Pixel 8 Pro and the Lenovo tablet are arm64-v8a."""
+    import yaml
+    tasks = yaml.safe_load((ROOT / 'Taskfile.yml').read_text())['tasks']
+    assert tasks['clocks-bundle']['deps'] == ['minute-machine-level']
+    assert 'python3 scripts/pack-clocks-bundle.py' in ' '.join(tasks['clocks-bundle']['cmds'])
+    apk = tasks['build-clocks-apk']
+    assert apk['deps'] == ['clocks-bundle']
+    script = '\n'.join(str(c) for c in apk['cmds'])
+    assert ':screensaver:assembleClocksRelease --offline' in script
+    assert 'set -euo pipefail' in script
+    for abi in ('arm64-v8a', 'armeabi-v7a'):
+        assert abi in script, abi
+    assert re.search(r'abiFilters \+= setOf\("arm64-v8a", "armeabi-v7a"\)', GRADLE)

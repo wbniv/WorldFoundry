@@ -15,6 +15,7 @@ All three Dreams ship as Release builds ([measurements](../../docs/diagnostics/d
 | Aquarium | `task build-aquarium-screensaver-apk` | `android/screensaver/build/outputs/apk/aquarium/release/screensaver-aquarium-release.apk` | reef 2.98 → 21.8, clownfish 30 → 59 |
 | Seahorse Grid | `task build-seahorse-screensaver-apk` | `android/screensaver/build/outputs/apk/seahorse/release/screensaver-seahorse-release.apk` | 4.2 → 29.6 |
 | Planted Tank | `task build-planted-apk` | `android/screensaver/build/outputs/apk/planted/release/screensaver-planted-release.apk` | 6.1 → 40.0 |
+| WF Clocks | `task build-clocks-apk` | `android/screensaver/build/outputs/apk/clocks/release/screensaver-clocks-release.apk` | not measured yet |
 
 The Aquarium and Seahorse tasks build the level bundles in the Linux container with `python3 scripts/build-aquarium-screensaver-levels.py`, which also runs `scripts/build-seahorse-grid-level.py`. They then run `./gradlew :screensaver:assemble<Flavor>Release --offline` on the host. The Debug variants (`assemble<Flavor>Debug`) still build, for the coordinator's simpleperf, which needs a debuggable or profileable APK. Freeze copies before submitting coordinator jobs. The Aquarium bundle order in `scripts/build-aquarium-screensaver-levels.py` is the order of `wflevels/aquarium-menu.manifest`, the tank roster; Gradle copies that file into the Dream's assets as `levels.manifest` and `LevelCatalog` reads it, so a tank is added in the manifest only (plus a `SCRIPT_NAMES` line if it needs its own driver); the Seahorse bundle has its sole level at index zero.
 
@@ -41,6 +42,7 @@ Each app's shell-only settings provider offers the choice, and a change takes ef
 | Aquarium | `org.worldfoundry.screensaver.settings` | `orientation` (schema 1, beside `tank`) |
 | Seahorse Grid | `org.worldfoundry.seahorsegrid.settings` (`SeahorseSettingsProvider`) | `orientation` (schema 1, its only setting) |
 | Planted Tank | `org.worldfoundry.plantedtank.settings` | `31.orientation` (schema 2: the adapter appends it to the settings actor, currently actor `31`) |
+| WF Clocks | `org.worldfoundry.clocks.settings` (`ClocksSettingsProvider`) | `orientation` (schema 1, beside `clock`) |
 
 ```sh
 task chromecast:screensaver-setting DEVICE=phone-pixel-8-pro SETTING_ID=orientation VALUE=landscape
@@ -48,6 +50,15 @@ task chromecast:screensaver-setting DEVICE=phone-pixel-8-pro SETTING_ID=31.orien
 ```
 
 The coordinator side is not done yet: its Seahorse Grid application entry has no `settings_authority`, so the tray and `screensaver-setting` do not list the Seahorse Grid's orientation until it gets one.
+
+## WF Clocks
+
+**WF Clocks** (`org.worldfoundry.clocks`, flavor `clocks`) holds every World Foundry clock in one app and one `cd.iff`. The roster is `wflevels/clocks-menu.manifest`: today Minute Machine (`minute_machine`, level 0). A clock is added by appending one `level` line; ids are stable and the index is the table-of-contents position, so a saved choice never moves. `task clocks-bundle` packs the manifest with `shell-menu.fth` and its MENU chunk (`scripts/pack-clocks-bundle.py`, which stops naming any id with no built level), and `task build-clocks-apk` builds the Release APK for arm64-v8a and armeabi-v7a and checks both are in it. See [the Tide Harbour plan](../../docs/plans/2026-11-21-tide-harbour-clock.md), "The bundle and the chooser", and [the HOWTO](../../docs/howto/combine-levels-chooser-and-screensaver-launch.md).
+
+- **Launcher** (`ClocksActivity`): with no extra it opens the engine's chooser (`TankPlayer.start(-1)`; the host leaves out the positional level). With one clock in the bundle the engine starts it directly, as it does for any one-entry menu.
+- **One clock directly**: `adb shell am start -n org.worldfoundry.clocks/org.worldfoundry.screensaver.ClocksActivity --es org.worldfoundry.screensaver.LEVEL minute_machine` (or `random`). An unknown id is logged and shown, and nothing starts. It is one run only; the saved choice is not changed.
+- **Dream** (`ClocksDreamService`): the saved clock, default `random`, resolved once per run; never the chooser.
+- **Settings** (`ClocksSettingsProvider`, shell only): `getCapabilities`, `getClock`, and `setSetting` with `clock:<id>`, `clock:random` or `orientation:<value>`. Only this provider writes the saved choice, so a preview never overwrites it.
 
 ## Planted Tank
 
