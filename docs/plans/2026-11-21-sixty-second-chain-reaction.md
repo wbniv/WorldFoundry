@@ -70,7 +70,7 @@ The mockup runs from your computer's clock. "Last five seconds" and "Hour change
 | Latch pin | :02 to :05.5 | Sinks back as the spring relaxes, and seats under the next card |
 | Hopper | :07 to :20 | A short screw lift carries the sand from the trough back to the hopper |
 | Marble | :13 to :58 | Rolls back under the table, then rides the tall screw lift to the gate, where it waits 2 s |
-| Dominoes | :41 to :52 | A comb under the table stands them up in the order they fell, one every 0.7 s |
+| Dominoes | :41 to :52 | A comb under the table stands them up in the order they fell, one every 0.46 s |
 | Seesaw and gate | :52 | Swing back when the comb lifts the last domino off the seesaw |
 
 [![One minute, piece by piece: bars for acting and re-arming, thin lines for armed and spent](2026-11-21-sixty-second-chain-reaction/timeline.png)](2026-11-21-sixty-second-chain-reaction/timeline.html)
@@ -153,7 +153,7 @@ flowchart LR
 
 Four things follow from this, and each is tested ([verification](#verification)):
 
-- **A Dream that starts at any moment is correct on its first frame.** At 10:08:41 the comb is half-way along the dominoes and the marble is a third of the way up the lift.
+- **A Dream that starts at any moment is correct on its first frame.** At 10:08:47 the comb is half-way along the dominoes and the marble is two thirds of the way up the lift.
 - **A clock that jumps is harmless.** A time-zone change, a daylight-saving step or a network time correction changes the three numbers, and the next frame shows the new time. Nothing has to catch up.
 - **Pause and resume need no code.** The scene has nothing to restore.
 - **Two TVs show the same frame**, to within their clocks' difference.
@@ -164,7 +164,7 @@ The director writes only what changed. In the worst second, about 6 dominoes, 2 
 
 Each of the four drums is a real split-flap unit in miniature, so the engine needs no way to swap a texture at run time:
 
-- **A card is a thin two-sided mesh.** Its front carries the top half of one digit and its back the bottom half of the digit before it. The halves are baked from one digit atlas.
+- **A card is a thin two-sided mesh.** Its front carries the top half of one digit and its back the bottom half of the digit after it. The halves are baked from one digit atlas.
 - **A drum has one card for each digit it shows**: 3 for the tens of hours, 10 for the hours, 6 for the tens of minutes, 10 for the minutes. That is 29 cards.
 - **A card's pose depends on its slot**, the difference between its index and the drum's position. Slot 0 stands upright at the front and shows a top half. Slot 1 hangs at the front and shows a bottom half. The rest sit round the spindle behind them, as in the real thing, which also keeps hidden cards from lying in the same plane as visible ones.
 - **A flip** moves the drum's position by one over 0.4 s: the upright card falls through 180° about the spindle with a gravity curve.
