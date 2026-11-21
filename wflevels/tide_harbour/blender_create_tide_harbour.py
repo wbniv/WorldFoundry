@@ -13,6 +13,7 @@ per-mesh .iff files and actor-map.json.
 """
 import json
 import math
+import subprocess
 import sys
 from pathlib import Path
 
@@ -189,6 +190,15 @@ for name, kind, rgb in (('SunLight', 'Directional', (DIRECTIONAL,) * 3), ('Ambie
     # Measured 2026-11-21 (Tide Harbour spike, finding 2): a directional light travels along (cos B cos C, cos B sin C, -sin B)
     light.rotation_euler = (0.0, math.radians(LIGHT_B), math.radians(LIGHT_C))
 actor('Background', 'matte', fields={'Matte Type': 'Color', 'Background Color': 0x101828})
+# The settings object (plan D13): one TideHarbourSettings, no model and no mass, on the pier deck; the director reads
+# its fields with property@ at the field indices the catalog tool reports (written into the script and actor-map.json).
+settings = actor(tl.SETTINGS_ACTOR, 'tideharboursettings', pos=(-15.0, -9.5, tl.DECK_Z + 0.5),
+                 fields={'Editor Label': 'Tide Harbour', 'Visibility Mailbox': 0})
+catalog = json.loads(subprocess.check_output([str(REPO / 'wftools/wf_attr_edit/target/release/catalog'),
+                                              settings['wf_schema_path']], text=True))
+by_key = {f['key']: f for f in catalog['fields']}
+fields = {label: by_key[label]['index'] for label in tl.FIELD_LABELS.values()}
+assert all(by_key[label]['live'] for label in fields), 'every settings field must be live'
 
 # static scenery, then the toggled statics, then the moving actors (each group contiguous)
 for mesh in parts.static_meshes():
@@ -212,9 +222,9 @@ for prefix, count in (('bar_', tl.N_BARS), ('lantern_', len(tl.LANTERNS)), ('gli
     names = [f'{prefix}{k:02d}' if prefix == 'bar_' else f'{prefix}{k}' for k in range(count)]
     for a, b in zip(names, names[1:]):
         assert indices[b] - indices[a] == 1, f'{a} and {b} must be contiguous: the director loops over them'
-director['wf_Script'] = forth.director_script(indices)
+director['wf_Script'] = forth.director_script(indices, fields)
 
-(HERE / 'actor-map.json').write_text(json.dumps(dict(indices=indices, reference=list(REFERENCE)), indent=1) + '\n')
+(HERE / 'actor-map.json').write_text(json.dumps(dict(indices=indices, reference=list(REFERENCE), settings_fields=fields), indent=1) + '\n')
 posed = len(parts.all_meshes()) + 2
 print(f'{TAG} {len(objects)} actors ({posed} posed by the director, budget 150)')
 ok, msg = export_scene_to_lev(bpy.context, str(HERE / 'tide_harbour.lev'))

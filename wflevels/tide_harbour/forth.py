@@ -12,14 +12,15 @@ When the look's whole-degree step changes it re-colours every re-coloured materi
 FACE_COLOR mailboxes (3037 + slot). tests/verify_tide_harbour_forth.py runs this script in the real
 zForth VM against timeline.scene; scripts/check-tide-harbour.py runs it in the engine.
 
-Global user mailboxes: 600-659 scratch, 689 the last look step, 690-693 the settings (0 = default;
-nothing writes them until the settings object exists, plan D13), 700-706 visibility.
+Global user mailboxes: 600-659 scratch, 689 the last look step, 690-693 the settings (copied every frame
+from the TideHarbourSettings object with property@, plan D13; 0 is the default), 700-706 visibility.
 """
 from __future__ import annotations
 
 import argparse
 import json
 import sys
+from pathlib import Path
 from typing import Dict, List
 
 import parts
@@ -28,12 +29,12 @@ import timeline as tl
 CELLS = ["t", "sod", "hr", "mi", "sec", "day", "key", "ckey", "cday", "tide", "q", "w1", "w2", "w3", "w4", "w5",
          "kr", "kg", "kb", "hor-r", "hor-g", "hor-b", "zen-r", "zen-g", "zen-b", "sun-r", "sun-g", "sun-b", "lit",
          "dd", "hh", "q64", "r64", "g", "eqt", "dec", "sd", "cd", "ha", "sh", "ch", "up", "no", "we", "alt", "mf",
-         "son", "mon", "i", "u", "bz", "dy", "dz", "az", "sn", "cs", "kk"]
+         "son", "mon", "i", "u", "bz", "dy", "dz", "az", "sn", "cs", "kk", "sv"]
 assert 600 + len(CELLS) <= 689
 PREVQ = 689
 WORDS = {"floor", "frac", "trunc", "mod", "c01", "x", "y", "z", "a", "b", "c", "sx", "sy", "sz", "col", "byte", "pack",
          "ramp", "tide-sum", "sun", "slow", "palette", "bar-rgb", "recolour", "bars", "boats", "sky", "lights", "clock",
-         "show", "tick", "prevq"} | {"opt-" + k for k in tl.OPTION_CELLS}
+         "show", "tick", "prevq", "poll", "settings"} | {"opt-" + k for k in tl.OPTION_CELLS} | {"f-" + k for k in tl.OPTION_CELLS}
 
 
 def check_names() -> None:
@@ -307,6 +308,24 @@ def frame_words(ix: Dict[str, int]) -> List[str]:
     return L
 
 
+def poll_words(ix: Dict[str, int], fields: Dict[str, int]) -> List[str]:
+    """Copy each TideHarbourSettings field into its cell with property@ ( actor field -- value valid ); th-sv counts
+    the fields that answered, so the engine check can prove the object was read. A field that does not answer
+    leaves its cell as it was (0, the default, until the first read)."""
+    out = [f": th-settings {ix[tl.SETTINGS_ACTOR]} ;"]
+    out += [f": th-f-{k} {fields[label]} ;" for k, label in tl.FIELD_LABELS.items()]
+    out += [": th-poll", f"  0 {cell('sv')} th!"]
+    for k in tl.OPTION_CELLS:
+        out.append(f"  th-settings th-f-{k} property@ if th-opt-{k} th! {get('sv')} 1 + {cell('sv')} th! else drop then")
+    out.append(";")
+    return out
+
+
+def settings_fields() -> Dict[str, int]:
+    """The field indices the level build read from the catalog tool and wrote to actor-map.json."""
+    return json.loads((Path(__file__).resolve().parent / "actor-map.json").read_text())["settings_fields"]
+
+
 def tick() -> List[str]:
     return [": th-tick",
             f"  INDEXOF_WALL_HOUR th@ {cell('hr')} th!  INDEXOF_WALL_MINUTE th@ {cell('mi')} th!",
@@ -314,24 +333,28 @@ def tick() -> List[str]:
             f"  {get('mi')} 60 * {get('sec')} + {cell('t')} th!",
             f"  {get('hr')} 3600 * {get('mi')} 60 * + {get('sec')} th-floor + {cell('key')} th!",
             f"  {get('key')} {get('ckey')} <> {get('day')} 1 + {get('cday')} <> | if th-slow then",
+            "  th-poll",
             "  th-bars th-boats th-sky th-lights th-clock th-show",
             f"  {get('q')} 100 + th-prevq th@ <> if th-recolour {get('q')} 100 + th-prevq th! then ;"]
 
 
 def default_indices() -> Dict[str, int]:
     """Made-up actor indices for tests: each group contiguous, as the level builder guarantees."""
-    names = list(parts.all_meshes()) + [m.name for m in parts.static_meshes() + parts.toggled_static_meshes()] + ["cs_wide", "LookAt"]
+    names = (list(parts.all_meshes()) + [m.name for m in parts.static_meshes() + parts.toggled_static_meshes()]
+             + ["cs_wide", "LookAt", tl.SETTINGS_ACTOR])
     return {name: 100 + i for i, name in enumerate(names)}
 
 
-def definitions(ix: Dict[str, int]) -> str:
+def definitions(ix: Dict[str, int], fields: Dict[str, int] | None = None) -> str:
     """The script without its per-frame call (the last line, th-tick)."""
-    lines = library() + tide_sum() + sun_words() + slow_words() + palette_words() + recolour_words(ix) + frame_words(ix) + tick()
+    fields = fields or settings_fields()
+    lines = (library() + tide_sum() + sun_words() + slow_words() + palette_words() + recolour_words(ix) + frame_words(ix)
+             + poll_words(ix, fields) + tick())
     return "\n".join(lines) + "\n"
 
 
-def director_script(ix: Dict[str, int]) -> str:
-    return definitions(ix) + "\nth-tick\n"
+def director_script(ix: Dict[str, int], fields: Dict[str, int] | None = None) -> str:
+    return definitions(ix, fields) + "\nth-tick\n"
 
 
 def main(argv: List[str]) -> int:
