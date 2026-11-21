@@ -69,6 +69,12 @@ so a red is detectable (`0` = pass).
 > through to the single-letter fallbacks). The older switches in the table above
 > take one dash; these take two.
 
+## Environment variables
+
+| Variable | Effect |
+|---|---|
+| `WF_WALL_CLOCK=[YYYY-MM-DDT]HH:MM:SS[.mmm][+HH:MM\|-HH:MM\|Z][@rate]` | Desktop only. Starts the date and time of day that the `WALL_HOUR`, `WALL_MINUTE`, `WALL_SECOND`, `WALL_DAY` and `WALL_UTC_OFFSET` system mailboxes (1922 to 1926) report, and runs it at `rate` times real time (default 1; `@0` freezes it; `@600` runs ten minutes a second). A missing date means today's and a missing offset means this machine's own; years 2000 to 2099. `WALL_DAY` is whole calendar days since 2000-01-01 (that day is 0, 2026-11-21 is 9821) and `WALL_UTC_OFFSET` is local time minus UTC in minutes (Bangkok is 420), so for example `WF_WALL_CLOCK=2026-11-21T10:08:22+07:00@0` freezes Bangkok at that moment. All five are latched together once a frame, so a script never sees a new day beside an old hour. Without the variable the mailboxes follow the device's clock in its time zone. A malformed value stops the engine at start-up with exit status 2 and a message; it is never ignored. Android has no override. Plans: [Minute Machine](plans/2026-11-21-sixty-second-chain-reaction.md#engine-the-wall-clock) (time of day), [Tide Harbour](plans/2026-11-21-tide-harbour-clock.md#engine-changes-needing-permission) (date and offset). Tests: `task test-wall-clock`, `tests/test_wall_clock.py`. |
+
 ## Stream Redirection
 
 Three families of debug output streams can be redirected independently.

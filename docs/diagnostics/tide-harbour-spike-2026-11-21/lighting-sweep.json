@@ -1,0 +1,42 @@
+{
+ "m50_m70": {
+  "B_deg": -50.0,
+  "C_deg": -70.0,
+  "pier top (+z)": 0.5,
+  "pier front (-y)": 0.5,
+  "tower front (-y)": 0.55,
+  "tower left (-x)": 0.68
+ },
+ "40_90": {
+  "B_deg": 40.0,
+  "C_deg": 90.0,
+  "pier top (+z)": 1.0,
+  "pier front (-y)": 1.1,
+  "tower front (-y)": 1.14,
+  "tower left (-x)": 0.52
+ },
+ "m50_110": {
+  "B_deg": -50.0,
+  "C_deg": 110.0,
+  "pier top (+z)": 0.5,
+  "pier front (-y)": 0.97,
+  "tower front (-y)": 1.02,
+  "tower left (-x)": 0.52
+ },
+ "50_m70": {
+  "B_deg": 50.0,
+  "C_deg": -70.0,
+  "pier top (+z)": 1.1,
+  "pier front (-y)": 0.5,
+  "tower front (-y)": 0.55,
+  "tower left (-x)": 0.68
+ },
+ "50_110": {
+  "B_deg": 50.0,
+  "C_deg": 110.0,
+  "pier top (+z)": 1.1,
+  "pier front (-y)": 0.97,
+  "tower front (-y)": 1.02,
+  "tower left (-x)": 0.52
+ }
+}

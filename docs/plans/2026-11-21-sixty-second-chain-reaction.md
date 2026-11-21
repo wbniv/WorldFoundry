@@ -1,6 +1,6 @@
 # Minute Machine: a sixty-second chain reaction that drops the minute flap
 
-**Status: approved, 2026‑11‑21.** Will accepted every recommendation in D1 to D10 (2026‑11‑21: "D1-10: accept recommendations") and asked for it to be built ("implement / deploy / commit / push"). The engine addition that tells a script the time of day was approved first (Will, 2026‑11‑21: "yes, engine change to know TOD is pre-approved"). Phase 1 is next. Nothing is built yet.
+**Status: approved, 2026‑11‑21.** Will accepted every recommendation in D1 to D10 (2026‑11‑21: "D1-10: accept recommendations") and asked for it to be built ("implement / deploy / commit / push"). The engine addition that tells a script the time of day was approved first (Will, 2026‑11‑21: "yes, engine change to know TOD is pre-approved"). Phases 1 to 5 are built and pushed; Phase 6 (cast1) is in progress. See [What was built, and where it differs](#what-was-built-and-where-it-differs).
 
 ## Context
 
@@ -44,7 +44,7 @@ Each row has a recommendation and its alternatives. **Will accepted all ten reco
 | D7 | Look | **A painted wooden toy on a dark table**: wood rails, brass pulleys, a red marble, dominoes in a run of colours, black flap cards with off-white digits | Brass and steel laboratory apparatus. Or bright nursery colours on a light table |
 | D8 | Sound | **Silent**, like the other three Dreams | Clicks for the last five seconds and a bell on the hour |
 | D9 | Frame-rate gate on cast1 | **At least 30 FPS** as a Release build, median over 120 s. Seahorse Grid manages 29.6 FPS with 24 deforming meshes; this scene has no deformers | At least 20 FPS, the reef's gate |
-| D10 | Machines and settings in the first release | **One machine and no settings object.** Orientation is the only setting, as in Seahorse Grid. The timeline is a table, so a second machine is a second table, chosen from the minute of the day; it and a settings object are later items | Build two machines now. Or add settings now: machine, push-in, 12‑hour |
+| D10 | Machines and settings in the first release | **One machine and no settings object.** Orientation is the only setting, as in Seahorse Grid. The timeline is a table, so a second machine is a second table, chosen from the minute of the day; it and a settings object are later items | Build two machines now. Or add settings now: machine, push-in, 12‑hour | **Superseded 2026‑11‑21, for the settings object only:** Will, 2026‑11‑21: "make sure level has a settings object (same for all clocks---audit)". Every clock level now carries one, built the same way; Minute Machine's retrofit is Phase 2b of the [Tide Harbour plan](2026-11-21-tide-harbour-clock.md#settings-objects) and a TODO item. One machine stays.
 
 ## The machine
 
@@ -70,7 +70,7 @@ The mockup runs from your computer's clock. "Last five seconds" and "Hour change
 | Latch pin | :02 to :05.5 | Sinks back as the spring relaxes, and seats under the next card |
 | Hopper | :07 to :20 | A short screw lift carries the sand from the trough back to the hopper |
 | Marble | :13 to :58 | Rolls back under the table, then rides the tall screw lift to the gate, where it waits 2 s |
-| Dominoes | :41 to :52 | A comb under the table stands them up in the order they fell, one every 0.7 s |
+| Dominoes | :41 to :52 | A comb under the table stands them up in the order they fell, one every 0.46 s |
 | Seesaw and gate | :52 | Swing back when the comb lifts the last domino off the seesaw |
 
 [![One minute, piece by piece: bars for acting and re-arming, thin lines for armed and spent](2026-11-21-sixty-second-chain-reaction/timeline.png)](2026-11-21-sixty-second-chain-reaction/timeline.html)
@@ -153,7 +153,7 @@ flowchart LR
 
 Four things follow from this, and each is tested ([verification](#verification)):
 
-- **A Dream that starts at any moment is correct on its first frame.** At 10:08:41 the comb is half-way along the dominoes and the marble is a third of the way up the lift.
+- **A Dream that starts at any moment is correct on its first frame.** At 10:08:47 the comb is half-way along the dominoes and the marble is two thirds of the way up the lift.
 - **A clock that jumps is harmless.** A time-zone change, a daylight-saving step or a network time correction changes the three numbers, and the next frame shows the new time. Nothing has to catch up.
 - **Pause and resume need no code.** The scene has nothing to restore.
 - **Two TVs show the same frame**, to within their clocks' difference.
@@ -164,7 +164,7 @@ The director writes only what changed. In the worst second, about 6 dominoes, 2 
 
 Each of the four drums is a real split-flap unit in miniature, so the engine needs no way to swap a texture at run time:
 
-- **A card is a thin two-sided mesh.** Its front carries the top half of one digit and its back the bottom half of the digit before it. The halves are baked from one digit atlas.
+- **A card is a thin two-sided mesh.** Its front carries the top half of one digit and its back the bottom half of the digit after it. The halves are baked from one digit atlas.
 - **A drum has one card for each digit it shows**: 3 for the tens of hours, 10 for the hours, 6 for the tens of minutes, 10 for the minutes. That is 29 cards.
 - **A card's pose depends on its slot**, the difference between its index and the drum's position. Slot 0 stands upright at the front and shows a top half. Slot 1 hangs at the front and shows a bottom half. The rest sit round the spindle behind them, as in the real thing, which also keeps hidden cards from lying in the same plane as visible ones.
 - **A flip** moves the drum's position by one over 0.4 s: the upright card falls through 180° about the spindle with a gravity curve.
@@ -207,6 +207,23 @@ sequenceDiagram
 ```
 
 Other timepieces from the brainstorm (the orrery, the sundial, the globe) will want the date. That is a later addition in the same place, not part of this plan.
+
+## What was built, and where it differs
+
+Everything below is in `wflevels/minute_machine/`, `tests/` and `scripts/`, pushed to `2026-new-level`.
+
+| Plan | What happened |
+|---|---|
+| Phase 1 spike on a placeholder level of boxes | **Not built as a separate level.** The real level was built directly (Phases 3 and 4), so the spike's questions were answered on it: 73 animated actors pose from the clock; two-sided cards need no special handling, because each card is a closed box with art on both faces; the camera drifts on a proxy; the mailboxes stay exact across midnight. The cast1 frame-rate measurement moved to Phase 6, as planned |
+| Mailboxes `WALL_HOUR`, `WALL_MINUTE`, `WALL_SECOND` | As planned, ids 1922 to 1924, `GLOBAL_SYSTEM_MAX` 1925. Tested without an engine (`task test-wall-clock`) and in the Debug ASan engine (`tests/test_wall_clock.py`) |
+| The Forth's own sine | **Added, not in the plan:** `sin-rev ( revolutions -- sin )`, a double-precision sine in the Forth bridge (Will, 2026‑11‑21: "probably nothing is cheaper than a real sine on a real cpu's fp hw"). My first director used the older parabola, which is about 0.16 % off and put the camera 14 mm out; with `sin-rev` the whole director agrees with `timeline.py` to 0.002 mm |
+| Comb re-arm "one every 0.7 s" | 0.46 s, because 24 dominoes at 0.7 s would not finish by :52 |
+| Flap card back | Shows the digit **after** the card's own, not before |
+| Fallen flap cards | **Added, then corrected on cast1:** stacked in depth (`CARD_STACK`) so no two faces share a plane. The first spacing, 1 cm, was not enough: cards were 18 mm thick with art 10 mm proud, so the art of a card behind came out level with the front card's face, and **the hour 9 drew as 8** on the TV (found by reading the real screenshot, then reproduced on the desktop; no earlier check could see it). Cards are now 8 mm thick with art 4 mm proud, stacked 16 mm apart, and `tests/test_minute_machine_parts.py` fails if the spacing is not more than a card's thickness plus its art |
+| Two strings | **Added:** the pail string and the spring string change length, so each is a unit mesh scaled in z |
+| Director arithmetic | Each piecewise motion is a sum of eased steps (`channels.py`); a test proves the steps equal `timeline.py` on 1 ms samples, and the Forth is generated from the same steps. The director also runs, in the real zForth VM against mocked mailboxes, against `timeline.py` (`tests/verify_minute_machine_forth.py`: 125 frames across minute, hour and midnight, worst 0.0015 mm) |
+| Physics realism | **Not done; a TODO item** (Will, 2026‑11‑21: "ball down ramp isn't realistic physics (same for dominoes, really--falling too slowly)"). The marble eases over 4.2, 3.7 and 2.9 s where a rolling sphere on the same rails would take about 2.1, 2.1 and 1.3 s, and a domino tips in 2 s where a real one takes a fraction of a second. The motion is choreography to fit the 60 s budget, not simulation |
+| Camera | `CAMERA_R_PX` is 750 (7.5 m), after the first capture showed the machine filling 60 % of the width at 11 m |
 
 ## Android: a fourth Dream
 

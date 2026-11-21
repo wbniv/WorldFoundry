@@ -1,0 +1,93 @@
+{
+ "a": {
+  "variant": "a",
+  "posed_actors": 46,
+  "director_running": true,
+  "frames_seen": 267,
+  "frame_ms_median": 20.59,
+  "frame_ms_p90": 31.4,
+  "bar_18_z_moved": true,
+  "screenshot": true,
+  "alive": true,
+  "log_problems": 0
+ },
+ "b": {
+  "variant": "b",
+  "posed_actors": 100,
+  "director_running": true,
+  "frames_seen": 243,
+  "frame_ms_median": 23.5,
+  "frame_ms_p90": 30.58,
+  "bar_18_z_moved": true,
+  "screenshot": true,
+  "alive": true,
+  "log_problems": 0
+ },
+ "c": {
+  "variant": "c",
+  "posed_actors": 150,
+  "director_running": true,
+  "frames_seen": 164,
+  "frame_ms_median": 35.61,
+  "frame_ms_p90": 48.4,
+  "bar_18_z_moved": true,
+  "screenshot": true,
+  "alive": true,
+  "log_problems": 0
+ },
+ "d": {
+  "variant": "d",
+  "posed_actors": 150,
+  "director_running": true,
+  "frames_seen": 173,
+  "frame_ms_median": 33.57,
+  "frame_ms_p90": 42.93,
+  "bar_18_z_moved": true,
+  "shots": {
+   "6.0": {
+    "ok": true,
+    "hour_cell": 6.001637,
+    "darkness": 0.399345,
+    "veil": 4.0
+   },
+   "12.0": {
+    "ok": true,
+    "hour_cell": 12.002563,
+    "darkness": 0.0,
+    "veil": 0.0
+   },
+   "17.0": {
+    "ok": true,
+    "hour_cell": 17.001293,
+    "darkness": 0.000517,
+    "veil": 0.0
+   },
+   "18.25": {
+    "ok": true,
+    "hour_cell": 18.252918,
+    "darkness": 0.501167,
+    "veil": 5.0
+   },
+   "19.5": {
+    "ok": true,
+    "hour_cell": 19.500469,
+    "darkness": 1.0,
+    "veil": 9.0
+   },
+   "23.0": {
+    "ok": true,
+    "hour_cell": 23.002258,
+    "darkness": 1.0,
+    "veil": 9.0
+   },
+   "5.0": {
+    "ok": true,
+    "hour_cell": 5.001423,
+    "darkness": 0.799431,
+    "veil": 7.0
+   }
+  },
+  "alive": true,
+  "log_problems": 0
+ }
+}
