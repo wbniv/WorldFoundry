@@ -285,6 +285,12 @@ private:
 	int							_numTemplateObjects;
 	// system mailboxes requiring storage
 	int32						_camRollMailBox;						// mailbox index (was long → 8 bytes on LP64)
+	// Latched once per frame in update(): the date and time of day, read by the WALL_* system mailboxes.
+	int32						_wallDay = 0;
+	int32						_wallUtcOffset = 0;
+	int32						_wallHour = 0;
+	int32						_wallMinute = 0;
+	float						_wallSecond = 0.0f;
 	int32						_camShotMailBox;						// mailbox index (was long → 8 bytes on LP64)
 
    PointerContainer<Memory> _memory;

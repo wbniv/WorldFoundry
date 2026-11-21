@@ -1,0 +1,8 @@
+# Keep the authored sources, the level source and its wrapper; ignore everything the build writes.
+*
+!.gitignore
+!*.py
+!*.sh
+!minute_machine.lev
+!minute_machine-standalone.iff.txt
+!actor-map.json

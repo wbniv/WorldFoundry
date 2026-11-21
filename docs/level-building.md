@@ -451,6 +451,32 @@ brackets the level load on the same clock, and the five-second windows add the c
 `no-palette-draws` and `mixed-palette-draws` beside `draws`. See also
 [the troubleshooting entry](level-design-troubleshooting.md#level-entry-got-longer-or-play-pauses-when-an-ordinary-surface-first-appears).
 
+### Changing the look at run time without light control: translucent veils
+
+A script cannot change a light's colour or the clear colour (a `Light` reads its fields once, when it
+is built; runtime light control is a separate TODO item), so a scene that must turn from day to dusk
+and night uses parts that already move. Measured on the desktop engine on 2026‑11‑21 by the Tide Harbour
+Phase 0 spike (`wflevels/tide_spike/`, evidence in
+[`docs/diagnostics/tide-harbour-spike-2026-11-21/`](diagnostics/tide-harbour-spike-2026-11-21/README.md)):
+
+- A **veil** is a large box with a translucent material (`wf_opacity` below 1, tinted) in front of
+  the camera. Several of fixed opacity, from faint to dark, and a director that shows exactly one at a
+  time (each veil's `wf_Visibility Mailbox` is a global user mailbox the director writes 1 or 0),
+  give a stepwise but near-smooth change of look. It dims everything behind it, the sky and
+  the matte included.
+- What must stay bright (lit windows, lantern glows, a clock dial, the moon) is **drawn in front of
+  the veil**: an actor closer to the camera than the veil, scaled down along the same ray so it lands
+  where the real one is. It is then not dimmed.
+- Make veils and overlays **boxes with real depth** (0.3 to 0.5 m), not zero-thickness quads: a mesh
+  too thin along the camera-depth axis can be invisible (see the troubleshooting entry on thin objects).
+- A veil is lit like any face, so its colour is multiplied by that face's lit factor. A face lit to
+  about 1.0 shows its authored tint; one at ambient 0.5 shows half of it.
+- The near plane: `display.cc` passes 1.0 to `SetProjection`, while the baseline authors a CamShot
+  `Hither` of 0.1. Which one rules was not settled. Veils at 3 m and overlays at 2 m are safe either way.
+- **Not measured:** the cost on Chromecast HD. The table above says large overlapping translucent
+  sheets can cost more, and that is exactly what a full-screen veil is. Profile it on the device
+  (`--frame-profile`) before relying on it.
+
 ### Blender Viewport Display by Object Type
 
 **The rule: anything that does not render in the game engine should display as
@@ -663,22 +689,24 @@ If you author only Directional lights, any face whose normal isn't facing one of
 #
 #     Rz(C)·Ry(B)·(1,0,0) = (cos B·cos C, cos B·sin C, -sin B)
 #
-# That vector reaches the shader UNNEGATED (`RenderCamera::SetDirectionalLight`,
-# gfx/camera.hpi:68 → `lit += color * max(0, dot(N, u_light_dir))`,
-# glpipeline/backend_modern.cc:86), so it is the vector pointing *toward* the
-# light — a face is lit when its normal aligns with it. Therefore
+# CORRECTED 2026‑11‑21 (measured; docs/diagnostics/tide-harbour-spike-2026-11-21/):
+# for the outward-wound geometry every level now has (the Blender normal convention,
+# 2026‑10‑16), that vector is the direction the light TRAVELS, and a face is lit when
+# its normal OPPOSES it. So
 #
-#     B = -radians(alt)   puts the light `alt` degrees ABOVE the horizon
-#     C =  radians(az)    is its bearing
+#     B = +radians(alt)   tilts the light DOWN: the sun is `alt` degrees above the horizon
+#     C =  radians(az)    is the bearing the light travels toward
 #
-# ⚠ …for geometry wound outward. Much of the shipped content is wound INWARD —
-# the faces you see carry -Z / +Y normals (docs/level-design-troubleshooting.md,
-# "Mesh face normals & backface culling") — and those levels need the mirrored
-# aim (negative `alt`, azimuth + 180°) for the same visual result. Always verify
-# with a capture: aim the wrong way and every visible face drops to exactly the
-# ambient term. Measured per level in
-# docs/plans/2026-09-20-relight-swept-levels.md (qbert + marble-madness are
-# outward-wound; SMB, snowgoons, pilot_demo and the condo are inward-wound).
+# A face with normal -y (toward a camera at -y) is lit when the light travels toward +y,
+# so C = 90° (or anywhere around it) lights the faces a side-view camera sees.
+# The earlier text of this section said `B = -alt`. That was measured on 2026‑09‑20,
+# before the engine's face-normal hand was reversed on 2026‑10‑16, and it now leaves
+# every face at the ambient term alone: with five settings of B and C, and four faces of
+# known normal, tops, camera-facing fronts and left sides were lit exactly when they
+# opposed (cos B·cos C, cos B·sin C, -sin B), and never otherwise. The cause is inferred
+# from the dates, not shown. Levels relit before 2026‑10‑16, and `wf_light_aim()`, may
+# still carry the old sign. Always verify with a capture: aim the wrong way and every
+# visible face drops to exactly the ambient term (lit factor 0.50 for ambient 0.5).
 #
 # The older `(pi/2 - alt, 0, az)` recipe put altitude in A and produced an
 # exactly horizontal beam; it only looked lit from above because of a
@@ -687,7 +715,7 @@ If you author only Directional lights, any face whose normal isn't facing one of
 light = find_by_class('light')           # or create from scratch
 light.name = 'Sun'
 light.rotation_euler = (0.0,
-                        -math.radians(SUN_ALT_DEG),
+                        math.radians(SUN_ALT_DEG),     # + tilts the light down (corrected 2026‑11‑21)
                         math.radians(SUN_AZ_DEG))
 light['wf_lightType']  = 'Directional'
 light['wf_lightRed']   = 1.0
@@ -990,8 +1018,8 @@ WF mailboxes form a hierarchy. Understanding scope prevents the most common cros
 | Range | Name | Scope | Notes |
 |---|---|---|---|
 | 0–1 | `EMAILBOX_FALSE` / `EMAILBOX_TRUE` | Global, read-only | Set by engine at level load; write attempts are silently dropped (assert in debug builds). Use mb[1] as a "always-true" visibility mailbox. |
-| 2–999 | Global user | **Shared across all actors** | Director, player, cube actors, etc. all read/write the same cells. Q✱bert's cube-state mailboxes (200–227), round counter (425), etc. live here. |
-| 1000–1999 | Global system | Global, side-effects | `INDEXOF_CAMSHOT` = **1921** writes the active camera — verified against [`mailbox.inc`](../wfsource/source/mailbox/mailbox.inc) (`MAILBOXENTRY( CAMSHOT, 1921 )`) and the engine's `zforth: INDEXOF_CAMSHOT = 1921` line. **It is NOT 1021** — an earlier revision of this table said 1021; an ActBoxOR/script that writes the wrong slot silently fails to switch the camera. |
+| 2–1900 | Global user | **Shared across all actors** | Director, player, cube actors, etc. all read/write the same cells. `GLOBAL_USER_MAX` is 1900, inclusive (raised from 999 on 2026‑05‑09; [`mailbox.inc`](../wfsource/source/mailbox/mailbox.inc)). Q✱bert's cube-state mailboxes (200–227) and round counter (425) live here, as do the Minute Machine's scratch cells (600–699). A script may also use any of them as another actor's `wf_Visibility Mailbox`: write 1 or 0 and the actor is drawn or not (the tide spike used 700–716). |
+| 1901–1926 | Global system | Global, side-effects | `GLOBAL_SYSTEM_START` is 1901 and `GLOBAL_SYSTEM_MAX` 1927, exclusive ([`mailbox.inc`](../wfsource/source/mailbox/mailbox.inc)); this table said 1000–1999 until 2026‑11‑21. `INDEXOF_CAMSHOT` = **1921** writes the active camera. **It is NOT 1021**: an ActBoxOR/script that writes the wrong slot silently fails to switch the camera. 1922 to 1926 are read-only: `WALL_HOUR`, `WALL_MINUTE`, `WALL_SECOND`, `WALL_DAY` (whole days since 2000‑01‑01) and `WALL_UTC_OFFSET` (minutes), see [command-line-switches.md](command-line-switches.md). |
 | 2000–2099 | Local user | Per-actor | Each actor has its own storage at this range. Rarely needed for game logic. |
 | 3000–3036 | Local system | Per-actor, side-effects | **`INDEXOF_X_POS` = 3009, `INDEXOF_Y_POS` = 3010, `INDEXOF_Z_POS` = 3011.** Writing here moves the *calling actor's* position. |
 | 4000–4099 | Scratch | Per-script-call | Temporary storage within a single script execution. |
@@ -1176,7 +1204,7 @@ hard-fails on Blender import. Worked examples: `wflevels/condo_639_640/blender_c
 
 The `camera` actor carries three fog fields ([`camera.oas`](../wfsource/source/oas/camera.oas)):
 `FoggingColor`, `FoggingStartDistance`, `FoggingCompleteDistance`. The engine
-reads them per-level at [`game/camera.cc:56-57`](../wfsource/source/game/camera.cc)
+reads them per-level at [`game/camera.cc:68-69`](../wfsource/source/game/camera.cc)
 and calls the renderer's `SetFog`. The default values in the snowgoons scaffold
 are `#888888` ramp 20 → 30 m — tuned for an Earth-atmosphere chase-cam view of
 a small playable area; any pixel past 30 m fades to flat `#888888`.

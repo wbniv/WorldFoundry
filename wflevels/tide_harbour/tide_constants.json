@@ -1,0 +1,602 @@
+{
+ "what": "Harmonic constants for the predicted tide at the Royal Thai Navy Headquarters, Bangkok (Chao Phraya), fitted to the Hydrographic Department's published predicted highs and lows for 2026 and 2027. A fit to published predictions, not the department's own constants.",
+ "formula": "h(t) = z0_m + sum over constituents of amp_m * cos(2*pi*(cycles_per_hour * t + phase_rev)), t in hours since epoch",
+ "epoch_local": "2026-01-01T00:00:00+07:00",
+ "time_zone": "Thai local time, UTC+7: measured against UHSLC Ko Lak hourly GMT data (see check_time_zone.py)",
+ "datum": "metres above the lowest low water, as the table's footer prints it",
+ "z0_m": 2.2892,
+ "range_of_listed_extrema_m": [
+  0.53,
+  3.33
+ ],
+ "n_constituents": 64,
+ "validation_height_error_at_listed_events": {
+  "fitted_2026_scored_on_2027": {
+   "events": 1222,
+   "median_cm": 4.5356477515821725,
+   "p90_cm": 11.300904090025812,
+   "max_cm": 22.59468164533207
+  },
+  "fitted_2026_scored_on_2026": {
+   "events": 1225,
+   "median_cm": 4.492290357449491,
+   "p90_cm": 9.8802890576875,
+   "max_cm": 19.702971384115564
+  },
+  "fitted_2026_time_error_on_2027": {
+   "matched": 1222,
+   "of": 1222,
+   "median_min": 13.000005010453606,
+   "p90_min": 42.99999368236604
+  },
+  "fitted_2027_scored_on_2026": {
+   "events": 1225,
+   "median_cm": 4.125073901069509,
+   "p90_cm": 10.57947571647934,
+   "max_cm": 21.53609839257069
+  },
+  "fitted_2027_scored_on_2027": {
+   "events": 1222,
+   "median_cm": 3.941175588065482,
+   "p90_cm": 9.52762060272243,
+   "max_cm": 21.26074312668782
+  },
+  "fitted_2027_time_error_on_2026": {
+   "matched": 1213,
+   "of": 1225,
+   "median_min": 11.000000001695298,
+   "p90_min": 43.00000000104956
+  }
+ },
+ "error_vs_constituents_fitted_2026_scored_2027": {
+  "6": {
+   "events": 1222,
+   "median_cm": 28.04658457849738,
+   "p90_cm": 47.08625171982724,
+   "max_cm": 74.62609380444881
+  },
+  "12": {
+   "events": 1222,
+   "median_cm": 21.27528443177653,
+   "p90_cm": 34.97207678233934,
+   "max_cm": 44.59271337017356
+  },
+  "24": {
+   "events": 1222,
+   "median_cm": 10.603866708046139,
+   "p90_cm": 26.714277164800773,
+   "max_cm": 42.38093983668869
+  },
+  "32": {
+   "events": 1222,
+   "median_cm": 8.181279431028866,
+   "p90_cm": 19.564871877999686,
+   "max_cm": 30.108837500028486
+  },
+  "48": {
+   "events": 1222,
+   "median_cm": 5.6380683408184415,
+   "p90_cm": 13.625815195193464,
+   "max_cm": 25.88630216505412
+  },
+  "64": {
+   "events": 1222,
+   "median_cm": 4.5356477515821725,
+   "p90_cm": 11.300904090025812,
+   "max_cm": 22.59468164533207
+  },
+  "96": {
+   "events": 1222,
+   "median_cm": 3.807567292155112,
+   "p90_cm": 10.10053870165341,
+   "max_cm": 17.513267413240374
+  },
+  "171": {
+   "events": 1222,
+   "median_cm": 3.6551337668458084,
+   "p90_cm": 9.359119216756435,
+   "max_cm": 17.663308764472685
+  }
+ },
+ "table_stats": {
+  "2026": {
+   "events": 1225,
+   "days": 365,
+   "min_m": 0.53,
+   "max_m": 3.33,
+   "days_by_event_count": {
+    "1": 8,
+    "2": 92,
+    "3": 27,
+    "4": 238
+   },
+   "daily_range_median_m": 1.6500000000000001,
+   "daily_range_max_m": 2.59,
+   "max_gap_between_events_h": 17.45
+  },
+  "2027": {
+   "events": 1222,
+   "days": 365,
+   "min_m": 0.55,
+   "max_m": 3.25,
+   "days_by_event_count": {
+    "1": 6,
+    "2": 95,
+    "3": 30,
+    "4": 234
+   },
+   "daily_range_median_m": 1.63,
+   "daily_range_max_m": 2.54,
+   "max_gap_between_events_h": 20.816666666666666
+  }
+ },
+ "shipped_fit_in_sample": {
+  "events": 2447,
+  "median_cm": 5.197320360748714,
+  "p90_cm": 11.392915853800938,
+  "max_cm": 19.757603593573457
+ },
+ "constituents": [
+  {
+   "name": "K1",
+   "speed_deg_per_h": 15.041068600000001,
+   "cycles_per_hour": 0.041780746111111114,
+   "amp_m": 0.50016,
+   "phase_rev": 0.483028
+  },
+  {
+   "name": "M2",
+   "speed_deg_per_h": 28.9841042,
+   "cycles_per_hour": 0.08051140055555556,
+   "amp_m": 0.36263,
+   "phase_rev": 0.651953
+  },
+  {
+   "name": "O1",
+   "speed_deg_per_h": 13.9430356,
+   "cycles_per_hour": 0.03873065444444444,
+   "amp_m": 0.30916,
+   "phase_rev": 0.708823
+  },
+  {
+   "name": "S2",
+   "speed_deg_per_h": 30.000000000000004,
+   "cycles_per_hour": 0.08333333333333334,
+   "amp_m": 0.23096,
+   "phase_rev": 0.265559
+  },
+  {
+   "name": "Sa",
+   "speed_deg_per_h": 0.041066599999999995,
+   "cycles_per_hour": 0.00011407388888888888,
+   "amp_m": 0.17144,
+   "phase_rev": 0.027315
+  },
+  {
+   "name": "P1",
+   "speed_deg_per_h": 14.9589314,
+   "cycles_per_hour": 0.04155258722222222,
+   "amp_m": 0.13171,
+   "phase_rev": 0.367611
+  },
+  {
+   "name": "K2",
+   "speed_deg_per_h": 30.082137200000002,
+   "cycles_per_hour": 0.08356149222222223,
+   "amp_m": 0.08459,
+   "phase_rev": 0.972096
+  },
+  {
+   "name": "Mf",
+   "speed_deg_per_h": 1.098033,
+   "cycles_per_hour": 0.0030500916666666667,
+   "amp_m": 0.07751,
+   "phase_rev": 0.871321
+  },
+  {
+   "name": "Q1",
+   "speed_deg_per_h": 13.398660900000001,
+   "cycles_per_hour": 0.0372185025,
+   "amp_m": 0.0664,
+   "phase_rev": 0.714562
+  },
+  {
+   "name": "N2",
+   "speed_deg_per_h": 28.439729500000002,
+   "cycles_per_hour": 0.07899924861111111,
+   "amp_m": 0.05748,
+   "phase_rev": 0.754807
+  },
+  {
+   "name": "OO1",
+   "speed_deg_per_h": 16.1391016,
+   "cycles_per_hour": 0.04483083777777778,
+   "amp_m": 0.05516,
+   "phase_rev": 0.835356
+  },
+  {
+   "name": "Ssa",
+   "speed_deg_per_h": 0.0821372,
+   "cycles_per_hour": 0.00022815888888888888,
+   "amp_m": 0.05381,
+   "phase_rev": 0.391934
+  },
+  {
+   "name": "SO1",
+   "speed_deg_per_h": 16.056964400000002,
+   "cycles_per_hour": 0.04460267888888889,
+   "amp_m": 0.05101,
+   "phase_rev": 0.686926
+  },
+  {
+   "name": "MK3",
+   "speed_deg_per_h": 44.0251728,
+   "cycles_per_hour": 0.12229214666666667,
+   "amp_m": 0.04144,
+   "phase_rev": 0.336148
+  },
+  {
+   "name": "SO3",
+   "speed_deg_per_h": 43.9430356,
+   "cycles_per_hour": 0.12206398777777779,
+   "amp_m": 0.04088,
+   "phase_rev": 0.398347
+  },
+  {
+   "name": "+K1+M2+S2",
+   "speed_deg_per_h": 74.0251728,
+   "cycles_per_hour": 0.20562548000000003,
+   "amp_m": 0.03434,
+   "phase_rev": 0.949524
+  },
+  {
+   "name": "SIG1",
+   "speed_deg_per_h": 12.9271398,
+   "cycles_per_hour": 0.03590872166666667,
+   "amp_m": 0.03122,
+   "phase_rev": 0.718062
+  },
+  {
+   "name": "+2K1+P1",
+   "speed_deg_per_h": 45.0410686,
+   "cycles_per_hour": 0.12511407944444444,
+   "amp_m": 0.0309,
+   "phase_rev": 0.098902
+  },
+  {
+   "name": "M1",
+   "speed_deg_per_h": 14.4966939,
+   "cycles_per_hour": 0.040268594166666664,
+   "amp_m": 0.03082,
+   "phase_rev": 0.586538
+  },
+  {
+   "name": "+O1+P1",
+   "speed_deg_per_h": 28.901967,
+   "cycles_per_hour": 0.08028324166666666,
+   "amp_m": 0.03041,
+   "phase_rev": 0.268673
+  },
+  {
+   "name": "MU2",
+   "speed_deg_per_h": 27.968208399999998,
+   "cycles_per_hour": 0.07768946777777777,
+   "amp_m": 0.0286,
+   "phase_rev": 0.618877
+  },
+  {
+   "name": "2MS6",
+   "speed_deg_per_h": 87.9682084,
+   "cycles_per_hour": 0.24435613444444443,
+   "amp_m": 0.02743,
+   "phase_rev": 0.080877
+  },
+  {
+   "name": "2N2",
+   "speed_deg_per_h": 27.8953548,
+   "cycles_per_hour": 0.07748709666666667,
+   "amp_m": 0.02554,
+   "phase_rev": 0.797001
+  },
+  {
+   "name": "MSf",
+   "speed_deg_per_h": 1.0158958,
+   "cycles_per_hour": 0.002821932777777778,
+   "amp_m": 0.02516,
+   "phase_rev": 0.722197
+  },
+  {
+   "name": "Mm",
+   "speed_deg_per_h": 0.5443747,
+   "cycles_per_hour": 0.0015121519444444445,
+   "amp_m": 0.02444,
+   "phase_rev": 0.74437
+  },
+  {
+   "name": "+M2-P1",
+   "speed_deg_per_h": 14.0251728,
+   "cycles_per_hour": 0.038958813333333335,
+   "amp_m": 0.02281,
+   "phase_rev": 0.579048
+  },
+  {
+   "name": "L2",
+   "speed_deg_per_h": 29.5284789,
+   "cycles_per_hour": 0.0820235525,
+   "amp_m": 0.02114,
+   "phase_rev": 0.107332
+  },
+  {
+   "name": "+2M2+P1",
+   "speed_deg_per_h": 72.9271398,
+   "cycles_per_hour": 0.20257538833333336,
+   "amp_m": 0.01997,
+   "phase_rev": 0.098023
+  },
+  {
+   "name": "M4",
+   "speed_deg_per_h": 57.9682084,
+   "cycles_per_hour": 0.1610228011111111,
+   "amp_m": 0.01953,
+   "phase_rev": 0.544188
+  },
+  {
+   "name": "2SM6",
+   "speed_deg_per_h": 88.9841042,
+   "cycles_per_hour": 0.24717806722222224,
+   "amp_m": 0.01802,
+   "phase_rev": 0.690823
+  },
+  {
+   "name": "J1",
+   "speed_deg_per_h": 15.5854433,
+   "cycles_per_hour": 0.043292898055555556,
+   "amp_m": 0.01781,
+   "phase_rev": 0.361725
+  },
+  {
+   "name": "MO3",
+   "speed_deg_per_h": 42.9271398,
+   "cycles_per_hour": 0.119242055,
+   "amp_m": 0.01773,
+   "phase_rev": 0.504095
+  },
+  {
+   "name": "S1",
+   "speed_deg_per_h": 15.000002000000002,
+   "cycles_per_hour": 0.04166667222222223,
+   "amp_m": 0.01602,
+   "phase_rev": 0.150532
+  },
+  {
+   "name": "+K1+M2-P1",
+   "speed_deg_per_h": 29.066241400000003,
+   "cycles_per_hour": 0.08073955944444446,
+   "amp_m": 0.01494,
+   "phase_rev": 0.257158
+  },
+  {
+   "name": "-M2+S2+K2",
+   "speed_deg_per_h": 31.098033000000004,
+   "cycles_per_hour": 0.08638342500000001,
+   "amp_m": 0.01455,
+   "phase_rev": 0.587786
+  },
+  {
+   "name": "ETA2",
+   "speed_deg_per_h": 30.6265119,
+   "cycles_per_hour": 0.08507364416666667,
+   "amp_m": 0.01453,
+   "phase_rev": 0.834888
+  },
+  {
+   "name": "+K1+2M2",
+   "speed_deg_per_h": 73.009277,
+   "cycles_per_hour": 0.2028035472222222,
+   "amp_m": 0.01436,
+   "phase_rev": 0.429086
+  },
+  {
+   "name": "RHO1",
+   "speed_deg_per_h": 13.471514500000001,
+   "cycles_per_hour": 0.03742087361111111,
+   "amp_m": 0.01365,
+   "phase_rev": 0.961438
+  },
+  {
+   "name": "+O1+2K2",
+   "speed_deg_per_h": 74.10731,
+   "cycles_per_hour": 0.20585363888888888,
+   "amp_m": 0.01207,
+   "phase_rev": 0.578966
+  },
+  {
+   "name": "PHI1",
+   "speed_deg_per_h": 15.123205800000001,
+   "cycles_per_hour": 0.042008905,
+   "amp_m": 0.01203,
+   "phase_rev": 0.182063
+  },
+  {
+   "name": "+O1+2S2",
+   "speed_deg_per_h": 73.9430356,
+   "cycles_per_hour": 0.20539732111111111,
+   "amp_m": 0.01138,
+   "phase_rev": 0.685254
+  },
+  {
+   "name": "MSN6",
+   "speed_deg_per_h": 87.42383369999999,
+   "cycles_per_hour": 0.24284398249999997,
+   "amp_m": 0.01076,
+   "phase_rev": 0.146098
+  },
+  {
+   "name": "+2M2-P1",
+   "speed_deg_per_h": 43.009277,
+   "cycles_per_hour": 0.11947021388888888,
+   "amp_m": 0.01076,
+   "phase_rev": 0.532782
+  },
+  {
+   "name": "PSI1",
+   "speed_deg_per_h": 15.0821352,
+   "cycles_per_hour": 0.04189482,
+   "amp_m": 0.01072,
+   "phase_rev": 0.286122
+  },
+  {
+   "name": "-2O1+S2",
+   "speed_deg_per_h": 2.1139288000000036,
+   "cycles_per_hour": 0.005872024444444454,
+   "amp_m": 0.01065,
+   "phase_rev": 0.424428
+  },
+  {
+   "name": "MSK6",
+   "speed_deg_per_h": 89.0662414,
+   "cycles_per_hour": 0.2474062261111111,
+   "amp_m": 0.01031,
+   "phase_rev": 0.453744
+  },
+  {
+   "name": "T2",
+   "speed_deg_per_h": 29.9589334,
+   "cycles_per_hour": 0.08321925944444444,
+   "amp_m": 0.01025,
+   "phase_rev": 0.509192
+  },
+  {
+   "name": "MK4",
+   "speed_deg_per_h": 59.0662414,
+   "cycles_per_hour": 0.16407289277777778,
+   "amp_m": 0.0094,
+   "phase_rev": 0.260659
+  },
+  {
+   "name": "+2O1+P1",
+   "speed_deg_per_h": 42.8450026,
+   "cycles_per_hour": 0.11901389611111111,
+   "amp_m": 0.00925,
+   "phase_rev": 0.111562
+  },
+  {
+   "name": "2MK6",
+   "speed_deg_per_h": 88.0503456,
+   "cycles_per_hour": 0.24458429333333334,
+   "amp_m": 0.00906,
+   "phase_rev": 0.804649
+  },
+  {
+   "name": "+O1+Q1",
+   "speed_deg_per_h": 27.3416965,
+   "cycles_per_hour": 0.07594915694444444,
+   "amp_m": 0.00831,
+   "phase_rev": 0.703916
+  },
+  {
+   "name": "PI1",
+   "speed_deg_per_h": 14.917864800000002,
+   "cycles_per_hour": 0.041438513333333336,
+   "amp_m": 0.0078,
+   "phase_rev": 0.374539
+  },
+  {
+   "name": "MN4",
+   "speed_deg_per_h": 57.4238337,
+   "cycles_per_hour": 0.15951064916666668,
+   "amp_m": 0.00731,
+   "phase_rev": 0.525552
+  },
+  {
+   "name": "-M2+2K2",
+   "speed_deg_per_h": 31.180170200000003,
+   "cycles_per_hour": 0.0866115838888889,
+   "amp_m": 0.00714,
+   "phase_rev": 0.547284
+  },
+  {
+   "name": "+K1+2P1",
+   "speed_deg_per_h": 44.958931400000004,
+   "cycles_per_hour": 0.12488592055555557,
+   "amp_m": 0.0071,
+   "phase_rev": 0.200329
+  },
+  {
+   "name": "+N2+P1",
+   "speed_deg_per_h": 43.3986609,
+   "cycles_per_hour": 0.12055183583333334,
+   "amp_m": 0.00703,
+   "phase_rev": 0.652491
+  },
+  {
+   "name": "R2",
+   "speed_deg_per_h": 30.041066600000004,
+   "cycles_per_hour": 0.08344740722222223,
+   "amp_m": 0.00677,
+   "phase_rev": 0.338299
+  },
+  {
+   "name": "THE1",
+   "speed_deg_per_h": 15.5125897,
+   "cycles_per_hour": 0.04309052694444444,
+   "amp_m": 0.0055,
+   "phase_rev": 0.139892
+  },
+  {
+   "name": "+3K1",
+   "speed_deg_per_h": 45.1232058,
+   "cycles_per_hour": 0.12534223833333333,
+   "amp_m": 0.00541,
+   "phase_rev": 0.805225
+  },
+  {
+   "name": "+M2+N2+P1",
+   "speed_deg_per_h": 72.3827651,
+   "cycles_per_hour": 0.2010632363888889,
+   "amp_m": 0.00507,
+   "phase_rev": 0.112378
+  },
+  {
+   "name": "+2Q1",
+   "speed_deg_per_h": 26.797321800000002,
+   "cycles_per_hour": 0.074437005,
+   "amp_m": 0.00435,
+   "phase_rev": 0.010179
+  },
+  {
+   "name": "+2K1-N2",
+   "speed_deg_per_h": 1.6424076999999997,
+   "cycles_per_hour": 0.00456224361111111,
+   "amp_m": 0.00398,
+   "phase_rev": 0.592998
+  },
+  {
+   "name": "+K1+S2+N2",
+   "speed_deg_per_h": 73.4807981,
+   "cycles_per_hour": 0.20411332805555557,
+   "amp_m": 0.00384,
+   "phase_rev": 0.915273
+  },
+  {
+   "name": "+S2-Q1",
+   "speed_deg_per_h": 16.601339100000004,
+   "cycles_per_hour": 0.04611483083333334,
+   "amp_m": 0.00351,
+   "phase_rev": 0.262702
+  }
+ ],
+ "sources": {
+  "station": "HD, Royal Thai Navy Headquarters (Bangkok Metropolitan), 13 44' 36\" N 100 29' 25\" E",
+  "retrieved": "2026-11-21",
+  "sha256": {
+   "HD2026.pdf": "568a5538ee7fe77da29e5fdf9e22122fee1c27c8fb52a8e42afea3da9ce94469",
+   "HD2027.pdf": "c495c9c2a28cc0bbfbf7a9db389e46dbdb779134350539e47310f0e8ec0ae4ce"
+  },
+  "urls": [
+   "https://hydro.navy.mi.th/sevicetide",
+   "https://hydro.navy.mi.th/servicetide2570"
+  ]
+ },
+ "method": "linear least squares on (height = listed height, slope = 0) at every listed event; Doodson-number constituents plus shallow-water compounds; top N by amplitude refitted"
+}

@@ -1,0 +1,261 @@
+// wallclock.hp: the calendar day and the time of day, for the WALL_HOUR, WALL_MINUTE, WALL_SECOND,
+// WALL_DAY and WALL_UTC_OFFSET system mailboxes. Header-only and free of engine types, so a unit
+// test can include it alone.
+//
+// Plans: docs/plans/2026-11-21-sixty-second-chain-reaction.md ("Engine: the wall clock") for the
+// time of day; docs/plans/2026-11-21-tide-harbour-clock.md (E1) for the day and the UTC offset.
+//
+//   Level::update samples the clock ONCE per frame (WallClock::sample) and latches
+//   day, hour, minute, second and offset together from the same instant, so a script never
+//   sees a new minute beside an old second, or a new day beside an old hour.  The desktop
+//   engine can start the clock at a chosen date and time and run it at a chosen rate with
+//
+//       WF_WALL_CLOCK=[YYYY-MM-DDT]HH:MM:SS[.mmm][+HH:MM|-HH:MM|Z][@rate]
+//
+//   A missing date means today's; a missing offset means the machine's own.  Android has no
+//   override: nothing there sets the variable, and a device's own clock is what shows.
+//
+//   WALL_DAY is whole calendar days since 2000-01-01 in the clock's own (local) time, so
+//   2000-01-01 is day 0.  A float cell holds it exactly (it stays below 2^24 until the year 48000).
+#ifndef WF_WALLCLOCK_HP
+#define WF_WALLCLOCK_HP
+
+#include <chrono>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
+#include <string>
+
+namespace wf {
+
+struct WallTime {
+    int day = 0;                 // whole calendar days since 2000-01-01, local; 2000-01-01 is 0
+    int hour = 0;                // 0 to 23
+    int minute = 0;              // 0 to 59
+    float second = 0.0f;         // 0 up to but not including 60
+    int utcOffsetMinutes = 0;    // local time minus UTC, in minutes (Bangkok is 420)
+};
+
+// Days from 1970-01-01 to the given proleptic Gregorian date (Howard Hinnant's days_from_civil).
+inline long DaysFromCivil(int y, int m, int d)
+{
+    y -= m <= 2;
+    const long era = (y >= 0 ? y : y - 399) / 400;
+    const long yoe = y - era * 400;
+    const long doy = (153L * (m + (m > 2 ? -3 : 9)) + 2) / 5 + d - 1;
+    const long doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+    return era * 146097 + doe - 719468;
+}
+
+constexpr long kDaysFrom1970To2000 = 10957;
+
+// Whole days since 2000-01-01 for a calendar date.
+inline int DayNumber(int y, int m, int d) { return static_cast<int>(DaysFromCivil(y, m, d) - kDaysFrom1970To2000); }
+
+inline int DaysInMonth(int y, int m)
+{
+    static const int n[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    const bool leap = (y % 4 == 0 && y % 100 != 0) || y % 400 == 0;
+    return m == 2 && leap ? 29 : n[m - 1];
+}
+
+// Seconds of the day (0 <= s < 86400) to the hour, minute and second of a WallTime (day and offset
+// are left at 0). The float second never rounds up to 60.
+inline WallTime WallTimeFromSecondOfDay(double s)
+{
+    s = std::fmod(s, 86400.0);
+    if (s < 0.0) s += 86400.0;
+    WallTime w;
+    w.hour = static_cast<int>(s / 3600.0);
+    w.minute = static_cast<int>(std::fmod(s, 3600.0) / 60.0);
+    double sec = std::fmod(s, 60.0);
+    float f = static_cast<float>(sec);
+    if (f >= 60.0f) f = std::nextafter(60.0f, 0.0f);
+    w.second = f;
+    return w;
+}
+
+// A parsed WF_WALL_CLOCK.
+struct WallClockSpec {
+    bool hasDate = false;
+    int day = 0;                   // WALL_DAY of the date, when hasDate
+    bool hasOffset = false;
+    int utcOffsetMinutes = 0;      // when hasOffset
+    double startSecondOfDay = 0.0;
+    double rate = 1.0;
+};
+
+// "[YYYY-MM-DDT]HH:MM:SS[.mmm][+HH:MM|-HH:MM|Z][@rate]". On failure returns false and sets `err`;
+// the caller must stop the program (fail loudly, never skip and log). Years 2000 to 2099.
+inline bool ParseWallClockSpec(const char* spec, WallClockSpec& out, std::string& err)
+{
+    out = WallClockSpec();
+    if (!spec || !*spec) { err = "empty"; return false; }
+    static const char* const kGrammar = "expected [YYYY-MM-DDT]HH:MM:SS[.mmm][+HH:MM|-HH:MM|Z][@rate]";
+    std::string s(spec);
+    auto at = s.find('@');
+    if (at != std::string::npos) {
+        std::string r = s.substr(at + 1);
+        char* end = nullptr;
+        out.rate = std::strtod(r.c_str(), &end);
+        if (r.empty() || *end != '\0' || !std::isfinite(out.rate) || out.rate < 0.0) {
+            err = "rate after '@' must be a number of zero or more";
+            return false;
+        }
+        s.resize(at);
+    }
+    auto t = s.find('T');
+    if (t != std::string::npos) {
+        int y = 0, mo = 0, d = 0, n = 0;
+        const std::string date = s.substr(0, t);
+        if (std::sscanf(date.c_str(), "%d-%d-%d%n", &y, &mo, &d, &n) != 3 || n != static_cast<int>(date.size())) {
+            err = kGrammar;
+            return false;
+        }
+        if (y < 2000 || y > 2099 || mo < 1 || mo > 12 || d < 1 || d > DaysInMonth(y, mo)) {
+            err = "date must be a real day in 2000 to 2099";
+            return false;
+        }
+        out.hasDate = true;
+        out.day = DayNumber(y, mo, d);
+        s.erase(0, t + 1);
+    }
+    int h = 0, m = 0, n = 0;
+    double sec = 0.0;
+    // %n counts the characters used; what is left must be an offset or nothing.
+    if (std::sscanf(s.c_str(), "%d:%d:%lf%n", &h, &m, &sec, &n) != 3) {
+        err = kGrammar;
+        return false;
+    }
+    const std::string rest = s.substr(n);
+    if (rest == "Z") {
+        out.hasOffset = true;
+        out.utcOffsetMinutes = 0;
+    } else if (!rest.empty()) {
+        char sign = 0;
+        int oh = 0, om = 0, k = 0;
+        if (std::sscanf(rest.c_str(), "%c%d:%d%n", &sign, &oh, &om, &k) != 3 || k != static_cast<int>(rest.size()) ||
+            (sign != '+' && sign != '-')) {
+            err = kGrammar;
+            return false;
+        }
+        if (oh < 0 || oh > 14 || om < 0 || om > 59) {
+            err = "offset hours 0-14, minutes 0-59";
+            return false;
+        }
+        out.hasOffset = true;
+        out.utcOffsetMinutes = (sign == '-' ? -1 : 1) * (oh * 60 + om);
+    }
+    if (h < 0 || h > 23 || m < 0 || m > 59 || !(sec >= 0.0 && sec < 60.0)) {
+        err = "hour 0-23, minute 0-59, second 0 up to 60";
+        return false;
+    }
+    out.startSecondOfDay = h * 3600.0 + m * 60.0 + sec;
+    return true;
+}
+
+class WallClock {
+public:
+    // Desktop only. Returns false with `err` set when WF_WALL_CLOCK is present but malformed.
+    bool initFromEnvironment(std::string& err)
+    {
+        const char* spec = std::getenv("WF_WALL_CLOCK");
+        if (!spec) return true;
+        WallClockSpec parsed;
+        if (!ParseWallClockSpec(spec, parsed, err)) {
+            err = std::string("WF_WALL_CLOCK='") + spec + "': " + err;
+            return false;
+        }
+        setOverride(parsed);
+        return true;
+    }
+
+    void setOverride(const WallClockSpec& spec)
+    {
+        _override = true; _spec = spec; _t0Set = false; _began = false;
+    }
+
+    // Time of day only: today's date and the machine's own offset.
+    void setOverride(double startSecondOfDay, double rate)
+    {
+        WallClockSpec spec;
+        spec.startSecondOfDay = startSecondOfDay;
+        spec.rate = rate;
+        setOverride(spec);
+    }
+
+    bool overridden() const { return _override; }
+
+    // One call per frame.
+    WallTime sample()
+    {
+        using namespace std::chrono;
+        if (_override) {
+            const auto now = steady_clock::now();
+            if (!_t0Set) {
+                _t0 = now;
+                _t0Set = true;
+                begin();
+            }
+            return sampleAfter(duration<double>(now - _t0).count());
+        }
+        return realLocal();
+    }
+
+    // An overridden clock `elapsedSeconds` of real time after it started (the first sample). sample() is
+    // this with the real elapsed time; it is public so a test can step across midnight at exact instants.
+    WallTime sampleAfter(double elapsedSeconds)
+    {
+        if (_override && !_began) begin();
+        const double total = _spec.startSecondOfDay + _spec.rate * elapsedSeconds;
+        WallTime w = WallTimeFromSecondOfDay(total);
+        w.day = _startDay + static_cast<int>(std::floor(total / 86400.0));
+        w.utcOffsetMinutes = _offset;
+        return w;
+    }
+
+private:
+    // Fixes the starting date and offset: the override's, or this machine's today and own offset.
+    void begin()
+    {
+        _began = true;
+        _startDay = _spec.hasDate ? _spec.day : realLocal().day;
+        _offset = _spec.hasOffset ? _spec.utcOffsetMinutes : realLocal().utcOffsetMinutes;
+    }
+
+    // The device's own date and time, read from one instant so the fields agree.
+    static WallTime realLocal()
+    {
+        using namespace std::chrono;
+        const auto now = system_clock::now();
+        const std::time_t secs = system_clock::to_time_t(now);
+        const double since = duration<double>(now.time_since_epoch()).count();
+        const double frac = since - std::floor(since);
+        std::tm local{};
+        localtime_r(&secs, &local);
+        WallTime w = WallTimeFromSecondOfDay(local.tm_hour * 3600.0 + local.tm_min * 60.0 + local.tm_sec + frac);
+        w.day = DayNumber(local.tm_year + 1900, local.tm_mon + 1, local.tm_mday);
+        w.utcOffsetMinutes = static_cast<int>(local.tm_gmtoff / 60);
+        return w;
+    }
+
+    bool _override = false;
+    WallClockSpec _spec;
+    bool _t0Set = false;
+    bool _began = false;
+    int _startDay = 0;
+    int _offset = 0;
+    std::chrono::steady_clock::time_point _t0{};
+};
+
+// The one clock for the process.
+inline WallClock& TheWallClock()
+{
+    static WallClock clock;
+    return clock;
+}
+
+}  // namespace wf
+
+#endif

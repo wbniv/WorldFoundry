@@ -33,6 +33,7 @@
 
 #include "scripting_forth.hp"
 #include "forth_source.hp"
+#include "forth_math_zforth.hpp"
 
 extern "C" {
 #include <zforth.h>
@@ -1467,6 +1468,10 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
 #else
                 fprintf(stderr, "zforth: neural-forth syscall (200) received but WF_NEURAL_FORTH not compiled in\n");
 #endif
+            } else if (wf::forthmath::HandleSyscall(ctx, custom)) {
+                // custom 73 to 81: sin-rev cos-rev tan-rev asin-rev acos-rev atan-rev atan2-rev
+                // sincos-rev sqrt. Angles are in revolutions; the maths is in forth_math.hpp and the
+                // stack effects and aborts in forth_math_zforth.hpp. Plan: docs/plans/2026-11-21-forth-trig-words.md
             } else {
                 fprintf(stderr, "zforth: unknown sys id %d\n", (int)id);
             }
@@ -1718,6 +1723,13 @@ void Init(MailboxesManager& mgr)
     for (const auto& w : kFlWords) {
         char buf[64];
         snprintf(buf, sizeof(buf), ": %s %s ;", w.name, w.body);
+        if (zf_eval(&g_ctx, buf) != ZF_OK)
+            fprintf(stderr, "zforth: init failed (%s)\n", w.name);
+    }
+    // The trigonometry words (forth_math_zforth.hpp's table): ZF_SYSCALL_USER + custom.
+    for (const auto& w : wf::forthmath::kWords) {
+        char buf[64];
+        snprintf(buf, sizeof(buf), ": %s %d sys ;", w.name, (int)ZF_SYSCALL_USER + w.custom);
         if (zf_eval(&g_ctx, buf) != ZF_OK)
             fprintf(stderr, "zforth: init failed (%s)\n", w.name);
     }
