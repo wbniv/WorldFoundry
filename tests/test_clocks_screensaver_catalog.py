@@ -34,10 +34,15 @@ def test_clocks_flavor_has_its_own_application_id():
 def test_gradle_copies_the_clocks_manifest_into_the_flavor_assets_as_levels_manifest():
     copy = re.search(r'val copyClocksLevelCatalog by tasks\.registering\(Copy::class\) \{(.*?)\n\}', GRADLE, re.S)
     assert copy, 'copyClocksLevelCatalog task missing'
-    assert 'from(rootProject.file("../wflevels/clocks-menu.manifest"))' in copy.group(1)
+    assert 'from(clocksManifest)' in copy.group(1)
+    # The shipped roster unless a test build passes -PwfClocksManifest (task build-clocks-two-entry-apk).
+    assert re.search(r'val clocksManifest = \(findProperty\("wfClocksManifest"\) as String\?\)\?\.let \{ file\(it\) \}\s*'
+                     r'\?: rootProject\.file\("\.\./wflevels/clocks-menu\.manifest"\)', GRADLE)
+    assert re.search(r'val clocksBundleAssets = \(findProperty\("wfClocksAssets"\) as String\?\)\?\.let \{ file\(it\) \}\s*'
+                     r'\?: file\("src/clocks/assets"\)', GRADLE)
     assert 'rename { "levels.manifest" }' in copy.group(1)
     assert 'into(clocksCatalogAssets)' in copy.group(1)
-    assert 'sourceSets.getByName("clocks").assets.srcDir(clocksCatalogAssets)' in GRADLE
+    assert 'sourceSets.getByName("clocks").assets.setSrcDirs(listOf(clocksBundleAssets, clocksCatalogAssets))' in GRADLE
     assert re.search(r'tasks\.named\("preBuild"\) \{ dependsOn\([^)]*copyClocksLevelCatalog', GRADLE)
     assert 'LevelCatalog.ASSET' in (JAVA / 'TankChoice.java').read_text()
     assert re.search(r'ASSET = "levels\.manifest"', (JAVA / 'LevelCatalog.java').read_text())
@@ -125,3 +130,19 @@ def test_clocks_replaces_the_minutemachine_flavor():
     for density in ('mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi'):
         assert (APP / f'src/clocks/res/mipmap-{density}/ic_launcher.png').is_file(), density
     assert (APP / 'src/clocks/res/drawable/tv_banner.png').is_file()
+
+
+def test_two_entry_test_build_never_touches_the_shipped_roster():
+    """Acceptance support: a two-entry bundle so the chooser really appears, built from a throwaway
+    manifest under the Gradle build directory; the shipped manifest keeps Minute Machine only."""
+    import yaml
+    task = yaml.safe_load((ROOT / 'Taskfile.yml').read_text())['tasks']['build-clocks-two-entry-apk']
+    script = '\n'.join(str(c) for c in task['cmds'])
+    assert 'set -euo pipefail' in script
+    assert 'android/screensaver/build/clocks-two-entry' in script
+    assert '-PwfClocksManifest=' in script and '-PwfClocksAssets=' in script
+    assert '--no-link' in script                       # src/clocks/assets/cd.iff stays the shipped bundle
+    assert 'wflevels/clocks-menu.manifest' not in script
+    for abi in ('arm64-v8a', 'armeabi-v7a'):
+        assert abi in script
+    assert not any(i.endswith('_b') for i in MANIFEST.ids), MANIFEST.ids

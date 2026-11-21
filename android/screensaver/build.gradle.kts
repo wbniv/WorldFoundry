@@ -11,9 +11,15 @@ val copyAquariumLevelCatalog by tasks.registering(Copy::class) {
     into(aquariumCatalogAssets)
 }
 // WF Clocks (docs/plans/2026-11-21-tide-harbour-clock.md): the same, from wflevels/clocks-menu.manifest.
+// Test builds only (task build-clocks-two-entry-apk): -PwfClocksManifest=<manifest> and
+// -PwfClocksAssets=<dir holding its cd.iff> replace the shipped roster and bundle for that build.
+val clocksManifest = (findProperty("wfClocksManifest") as String?)?.let { file(it) }
+    ?: rootProject.file("../wflevels/clocks-menu.manifest")
+val clocksBundleAssets = (findProperty("wfClocksAssets") as String?)?.let { file(it) }
+    ?: file("src/clocks/assets")
 val clocksCatalogAssets = layout.buildDirectory.dir("generated/levelCatalog/clocks/assets")
 val copyClocksLevelCatalog by tasks.registering(Copy::class) {
-    from(rootProject.file("../wflevels/clocks-menu.manifest"))
+    from(clocksManifest)
     rename { "levels.manifest" }
     into(clocksCatalogAssets)
 }
@@ -106,7 +112,7 @@ android {
     // The aquarium flavor's level roster: wflevels/aquarium-menu.manifest, copied (never checked
     // in twice) into generated assets as levels.manifest, which LevelCatalog reads at runtime.
     sourceSets.getByName("aquarium").assets.srcDir(aquariumCatalogAssets)
-    sourceSets.getByName("clocks").assets.srcDir(clocksCatalogAssets)
+    sourceSets.getByName("clocks").assets.setSrcDirs(listOf(clocksBundleAssets, clocksCatalogAssets))
 }
 
 tasks.named("preBuild") { dependsOn(copyAquariumLevelCatalog, copyClocksLevelCatalog) }
