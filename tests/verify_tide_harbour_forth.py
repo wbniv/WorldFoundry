@@ -278,7 +278,7 @@ def cases():
     for sod in (9 * 3600 + 0.4, 9 * 3600 + 1.15, 9 * 3600 + 2.2, 9 * 3600 + 600 + 0.9, 9 * 3600 + 600 + 1.45, 9 * 3600 + 600 + 1.9,
                 10 * 3600 + 300.0, 10 * 3600 + 450.0, 10 * 3600 + 900.0, 10 * 3600 + 1350.0):
         out.append((today, sod, None))
-    # every value of every setting (Verification 13): drift off, Roman, no numerals, no gauge, no boats and birds
+    # every value of every setting (Verification 13): drift off, Thai (the default is Roman), no numerals, no gauge, no boats and birds
     for options in ({"drift": 1}, {"numerals": 1}, {"numerals": 2}, {"gauge": 1}, {"life": 1},
                     {"drift": 1, "numerals": 2, "gauge": 1, "life": 1}):
         out.append((today, 15 * 3600 + 150.0, options))

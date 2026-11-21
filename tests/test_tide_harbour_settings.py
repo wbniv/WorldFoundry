@@ -2,7 +2,7 @@
 set, the director stepped and the pose checked.
 
 The type is wfsource/source/oas/tideharboursettings.oas: settings.inc, the clocks' shared Clock sheet
-(clocksettings.inc: Camera drift, Slow or Off) and Tide Harbour's own sheet (Dial numerals: Thai, Roman or none;
+(clocksettings.inc: Camera drift, Slow or Off) and Tide Harbour's own sheet (Dial numerals: Roman, Thai or none;
 Gauge board: on or off; Boats and birds: on or off), every field live and its first choice the default. One object
 stands in the level; every frame the director reads each field with property@ and copies it into global cells
 690 to 693. The VM half sets the object's fields as property@ answers them; scripts/check-tide-harbour.py --options
@@ -27,7 +27,7 @@ import level_modules  # noqa: E402
 
 tl, _parts, forth = level_modules.load("tide_harbour", "timeline", "parts", "forth")
 
-Q9 = {"drift": ("Slow", "Off"), "numerals": ("Thai", "Roman", "None"), "gauge": ("On", "Off"), "life": ("On", "Off")}
+Q9 = {"drift": ("Slow", "Off"), "numerals": ("Roman", "Thai", "None"), "gauge": ("On", "Off"), "life": ("On", "Off")}
 MAP = json.loads((ROOT / "wflevels/tide_harbour/actor-map.json").read_text())
 TODAY = tl.wall_day(dt.date(2026, 11, 21))
 

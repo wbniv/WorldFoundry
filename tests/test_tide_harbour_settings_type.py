@@ -19,7 +19,7 @@ def test_the_type_includes_settings_and_the_shared_clock_sheet():
     shared = (OAS / "clocksettings.inc").read_text()
     entries = re.findall(r"TYPEENTRYINT32\(([^,]+),,(\d+),(\d+),(\d+),\"([^\"]*)\",([A-Z_|]+),", oas + shared)
     got = {name: (int(lo), int(hi), int(default), choices, "SHOW_AS_LIVE" in show) for name, lo, hi, default, choices, show in entries}
-    assert got == {"Camera drift": (0, 1, 0, "Slow|Off", True), "Dial numerals": (0, 2, 0, "Thai|Roman|None", True),
+    assert got == {"Camera drift": (0, 1, 0, "Slow|Off", True), "Dial numerals": (0, 2, 0, "Roman|Thai|None", True),
                    "Gauge board": (0, 1, 0, "On|Off", True), "Boats and birds": (0, 1, 0, "On|Off", True)}
     assert "Camera drift" in shared and "Camera drift" not in oas                 # the shared field lives in the shared sheet
     assert (OAS / "tideharboursettings.oad").is_file() and (OAS / "tideharboursettings.ht").is_file()

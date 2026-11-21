@@ -175,9 +175,10 @@ def test_the_options_change_only_what_they_name():
     assert base.poses["cs_wide"] != off.poses["cs_wide"]
     follows_camera = lambda k: k == "cs_wide" or k.startswith("panel_")        # the panel is posed from the camera's frame
     assert {k: v for k, v in off.poses.items() if not follows_camera(k)} == {k: v for k, v in base.poses.items() if not follows_camera(k)}
-    roman = tl.scene(TODAY, sod, {"numerals": 1}).visible
+    thai = tl.scene(TODAY, sod, {"numerals": 1}).visible
     none = tl.scene(TODAY, sod, {"numerals": 2}).visible
-    assert (base.visible[705], base.visible[706]) == (1, 0) and (roman[705], roman[706]) == (0, 1) and (none[705], none[706]) == (0, 0)
+    # Roman is the default (Will, 2026-11-21, reversing Q2): cell 705 is the Thai numerals, 706 the Roman
+    assert (base.visible[705], base.visible[706]) == (0, 1) and (thai[705], thai[706]) == (1, 0) and (none[705], none[706]) == (0, 0)
     assert tl.scene(TODAY, sod, {"gauge": 1}).visible[tl.VIS["gauge"]] == 0 and base.visible[tl.VIS["gauge"]] == 1
     life = tl.scene(TODAY, sod, {"life": 1}).visible
     assert life[tl.VIS["boats"]] == 0 and life[tl.VIS["birds"]] == 0 and base.visible[tl.VIS["boats"]] == 1

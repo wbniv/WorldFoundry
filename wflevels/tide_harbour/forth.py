@@ -328,8 +328,8 @@ def frame_words(ix: Dict[str, int]) -> List[str]:
           f"  {get('kk')} {get('alt')} 0 > & if 1 else 0 then {V['birds']} th!",
           f"  {get('kk')} if 1 else 0 then {V['boats']} th!",
           f"  th-opt-gauge th@ 0 = if 1 else 0 then {V['gauge']} th!",
-          f"  th-opt-numerals th@ 0 = if 1 else 0 then {V['numerals_thai']} th!",
-          f"  th-opt-numerals th@ 1 = if 1 else 0 then {V['numerals_roman']} th!",
+          f"  th-opt-numerals th@ 1 = if 1 else 0 then {V['numerals_thai']} th!",
+          f"  th-opt-numerals th@ 0 = if 1 else 0 then {V['numerals_roman']} th!",
           f"  {sc('rise')} 1 = if 1 else 0 then {V['arrow_up']} th!",
           f"  {sc('rise')} 1 = if 0 else 1 then {V['arrow_dn']} th! ;"]
     return L

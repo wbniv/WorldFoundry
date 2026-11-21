@@ -19,7 +19,7 @@ TYPEHEADER(Tide Harbour Settings,TideHarbourSettings)
 
 	PROPERTY_SHEET_HEADER(Tide Harbour,0)
 @*	-------------------------------------
-	TYPEENTRYINT32(Dial numerals,,0,2,0,"Thai|Roman|None",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The numerals on the tower dial: Thai digits or Roman numerals or none")
+	TYPEENTRYINT32(Dial numerals,,0,2,0,"Roman|Thai|None",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The numerals on the tower dial: Roman numerals or Thai digits or none")
 	TYPEENTRYINT32(Gauge board,,0,1,0,"On|Off",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The tide gauge board on the pier post")
 	TYPEENTRYINT32(Boats and birds,,0,1,0,"On|Off",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The boats on the river and the birds over it")
 	PROPERTY_SHEET_FOOTER

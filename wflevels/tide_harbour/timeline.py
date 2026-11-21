@@ -296,7 +296,7 @@ FIELD_LABELS = {"drift": "Camera drift", "numerals": "Dial numerals", "gauge": "
 OPTION_CELLS = {"drift": 690, "numerals": 691, "gauge": 692, "life": 693}
 OPTIONS = {   # name -> the values, default first (the cell holds the index)
     "drift": ("Slow", "Off"),
-    "numerals": ("Thai", "Roman", "None"),
+    "numerals": ("Roman", "Thai", "None"),     # Roman is the default (Will, 2026-11-21, reversing Q2)
     "gauge": ("On", "Off"),
     "life": ("On", "Off"),          # boats and birds
 }
@@ -478,7 +478,7 @@ def scene(day: int, sod: float, options: Dict[str, int] | None = None) -> Scene:
     life = opt["life"] == 0
     visible = {VIS["sun"]: int(sun_on), VIS["moon"]: int(moon_on), VIS["birds"]: int(life and s.alt_deg > 0.0),
                VIS["boats"]: int(life), VIS["gauge"]: int(opt["gauge"] == 0),
-               VIS["numerals_thai"]: int(opt["numerals"] == 0), VIS["numerals_roman"]: int(opt["numerals"] == 1),
+               VIS["numerals_thai"]: int(opt["numerals"] == 1), VIS["numerals_roman"]: int(opt["numerals"] == 0),
                VIS["arrow_up"]: int(reading.rise), VIS["arrow_dn"]: int(not reading.rise)}
     return Scene(P, colours, visible, h, q, s)
 
