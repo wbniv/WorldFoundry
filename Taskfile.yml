@@ -1724,6 +1724,13 @@ tasks:
       - |
         docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O1 -Wall -Wextra -Werror -I/src/android/screensaver/src/main/cpp /src/tests/planted_bridge_test.cpp /src/android/screensaver/src/main/cpp/planted_bridge.cc -o /tmp/planted_bridge && /tmp/planted_bridge'
 
+  test-forth-math:
+    desc: "The Forth math words' maths (engine/stubs/forth_math.hpp): every shared vector, identities, domain errors and 100000 random arguments, built twice (double Real, then -DWF_FORTH_MATH_FLOAT for single-FPU chips); plan docs/plans/2026-11-21-forth-trig-words.md"
+    cmds:
+      - python3 tests/gen_forth_math_vectors.py --check
+      - |
+        docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; for mode in "" "-DWF_FORTH_MATH_FLOAT"; do g++ -std=c++17 -O1 -Wall -Wextra $mode -I/src/engine/stubs -I/src/tests /src/tests/forth_math_test.cpp -o /tmp/forth_math_test && /tmp/forth_math_test; done'
+
   test-wall-clock:
     desc: "WALL_HOUR/WALL_MINUTE/WALL_SECOND clock logic (wfsource/source/game/wallclock.hp), pure C++ in wf-linux-test:local; plan docs/plans/2026-11-21-sixty-second-chain-reaction.md"
     cmds:

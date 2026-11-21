@@ -83,6 +83,8 @@ only `WF_LUA_ENGINE=lua54`; a Forth-scripted game needs only
 `WF_FORTH_ENGINE=zforth`. The scriptless build (no flags set) is also
 valid for games that need no scripting at all.
 
+**Forth math words.** zForth has no floating-point maths of its own; the bridge adds `sin-rev`, `cos-rev`, `tan-rev`, `asin-rev`, `acos-rev`, `atan-rev`, `atan2-rev`, `sincos-rev` and `sqrt`, with angles in revolutions. See [Forth math words](forth-math-words.md).
+
 ## Reference scripts: snowgoons player + director
 
 The same two gameplay scripts in each language. All access identical mailbox indices — the language is the only variable.

@@ -31,6 +31,7 @@ HOST = r'''
 #include <string>
 #include <vector>
 #include "zforth.h"
+#include "forth_math_zforth.hpp"       // the shipped trigonometry glue, shared with the bridge
 static zf_ctx ctx;
 static std::map<int, float> mbx;
 struct W { int actor, idx; float val; };
@@ -40,7 +41,7 @@ extern "C" zf_input_state zf_host_sys(zf_ctx*c, zf_syscall_id id, const char*) {
   else if (id == ZF_SYSCALL_TELL) { zf_pop(c); zf_pop(c); }
   else if ((int)id == 128) { int i = (int)zf_pop(c); zf_push(c, mbx.count(i) ? mbx[i] : 0.0f); }
   else if ((int)id == 129) { int i = (int)zf_pop(c); float v = zf_pop(c); mbx[i] = v; }
-  else if ((int)id == 201) { double t = (double)zf_pop(c); t -= floor(t); zf_push(c, (zf_cell)sin(6.283185307179586 * t)); }
+  else if ((int)id >= 128 && wf::forthmath::HandleSyscall(c, (int)id - 128)) {}
   else if ((int)id == 130) { int a = (int)zf_pop(c); int i = (int)zf_pop(c); float v = zf_pop(c); writes.push_back({a, i, v}); }
   else { fprintf(stderr, "unexpected syscall %d\n", (int)id); std::abort(); }
   return ZF_INPUT_INTERPRET;
@@ -59,7 +60,15 @@ static std::string slurp(const char* path) {
 static int eval(const std::string& s) { return (int)zf_eval(&ctx, s.c_str()); }
 int main(int argc, char** argv) {
   zf_init(&ctx, 0); zf_bootstrap(&ctx);
-  for (int i = 1; i < argc; i++) { int r = eval(slurp(argv[i])); if (r) { printf("LOADERR %s %d\n", argv[i], r); return 1; } }
+  for (int i = 1; i < argc; i++) {
+    int r = eval(slurp(argv[i])); if (r) { printf("LOADERR %s %d\n", argv[i], r); return 1; }
+    if (i == 1) {                                          // after the bootstrap, before the director: register the words as scripting_zforth.cc does
+      for (const auto& w : wf::forthmath::kWords) {
+        char buf[64]; snprintf(buf, sizeof buf, ": %s %d sys ;", w.name, 128 + w.custom);
+        if (eval(buf)) { printf("REGERR %s\n", w.name); return 1; }
+      }
+    }
+  }
   char line[256];
   while (fgets(line, sizeof line, stdin)) {
     if (line[0] == 'M') { int i; float v; sscanf(line + 2, "%d %f", &i, &v); mbx[i] = v; }
@@ -98,7 +107,7 @@ def build(tmp: Path):
     ids = mailbox_ids()
     consts = "\n".join(f"{ids[n]} constant INDEXOF_{n}" for n in CONSTANTS)
     (tmp / "bootstrap.fth").write_text(bootstrap + "\n: emit 0 sys ; : tell 2 sys ;\n" + strings +
-                                       "\n: read-mailbox 128 sys ; : write-mailbox 129 sys ; : write-actor-mailbox 130 sys ; : sin-rev 201 sys ;\n" + consts + "\n")
+                                       "\n: read-mailbox 128 sys ; : write-mailbox 129 sys ; : write-actor-mailbox 130 sys ;\n" + consts + "\n")
     ix = forth.default_indices()
     (tmp / "director.fth").write_text(forth.definitions(ix))
     (tmp / "host.cc").write_text(HOST)

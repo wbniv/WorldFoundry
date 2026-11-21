@@ -37,7 +37,7 @@ def w(name: str) -> str:
 ACTOR_OF = {"camera_proxy": "cs_wide", "camera_look": "LookAt"}
 
 CELLS = ["t", "hr", "mi", "phr", "pmi", "k", "n", "cur", "prv", "st", "tau", "acc", "j", "i", "q", "pos",
-         "f", "r", "ci", "dg", "az", "p", "dist", "tx", "see", "fill"]
+         "f", "r", "ci", "dg", "az", "p", "dist", "tx", "see", "fill", "sn", "cs"]
 
 
 def check_names() -> None:
@@ -136,11 +136,12 @@ def pieces(ix: Dict[str, int]) -> str:
     # camera: drift from the minute of the ten-minute period, push-in from the channel
     body.append("  mm-mi mm@ 10 mm-mod 60 * mm-t mm@ + 600 / mm-sin "
                 f"{n(tl.DRIFT_DEG / 360)} * mm-az mm!")
+    body.append("  mm-az mm@ sincos-rev mm-cs mm! mm-sn mm!")        # one call for both: the camera's sine and cosine
     body.append("  mm-c-push mm-p mm!")
     body.append(f"  {n(tl.CAMERA_R_PX)} 1 {n(tl.PUSH_IN)} mm-p mm@ * + / mm-dist mm!")
     body.append(f"  {n(tl.SCENE_CENTRE[0])} {n((tl.LATCH_POINT[0] - tl.SCENE_CENTRE[0]) * tl.PUSH_IN * 4)} mm-p mm@ * + mm-tx mm!")
-    b(f"mm-tx mm@ mm-dist mm@ mm-az mm@ mm-sin * + {n(PX)} *", "mm-x", "cs_wide")
-    b(f"mm-dist mm@ mm-az mm@ .25 + mm-sin * negate {n(PX)} *", "mm-y", "cs_wide")
+    b(f"mm-tx mm@ mm-dist mm@ mm-sn mm@ * + {n(PX)} *", "mm-x", "cs_wide")
+    b(f"mm-dist mm@ mm-cs mm@ * negate {n(PX)} *", "mm-y", "cs_wide")
     b(f"{n(tl.zm(tl.SCENE_CENTRE[1]))}", "mm-z", "cs_wide")
     b(f"mm-tx mm@ {n(PX)} *", "mm-x", "LookAt")
     b(f"{n(tl.zm(tl.SCENE_CENTRE[1]))}", "mm-z", "LookAt")
