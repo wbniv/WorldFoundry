@@ -1,6 +1,6 @@
 # Forth math words: the full trig set in the zForth bridge
 
-**Status: D1, D2, D4, D5, D6, D7 and D8 answered; D3 has a new recommendation after research; D9 (fixed point) is new and open (2026‑11‑21).** Will: "d1: sure", "d2: revolutions only", "d4: fail loudly", "d5: ok (not sure i care?)", "d6: add to TODO", "d7: sure!", "d8: use whatever the hardware is internally and interface with 32-bit float (and maybe fixed point again? will we need fixed point again for esp32 support?)", and on D3: "i'd lean towards exact not required, but that has upstream client implementations. need more research and a new recommendation". The research for [D3](#research-for-d3) and for [D8 and D9](#research-for-d8-and-d9) is below. Nothing is built.
+**Status: implemented 2026‑11‑21; verification recorded below.** Will: "implement trig plan". D3 and D9 had not been answered, so they were taken as recommended: **D3 option B** (plain `libm` and a shared vector file; no promise at special points) and **D9 deferred** (no fixed point until a chip is chosen). Two details changed in implementation and are now in the contract: a non-finite argument is a domain error for every word, and on a single-precision-FPU build `tan-rev` is only specified away from its poles (the angle `2π·x` is computed in `float` there). Earlier answers: D1, D2, D4, D5, D6, D7 and D8 by Will on 2026‑11‑21; the research for [D3](#research-for-d3) and [D8 and D9](#research-for-d8-and-d9) is below.
 
 ## Context
 
@@ -42,13 +42,13 @@ Each row has a recommendation and its alternatives.
 |---|---|---|---|
 | D1 | Which words (**answered: yes**, Will) | **Eight:** `cos-rev`, `tan-rev`, `asin-rev`, `acos-rev`, `atan-rev`, `atan2-rev`, `sincos-rev`, `sqrt` (with the existing `sin-rev`, the full circular set plus the square root every `atan2` user needs for a distance) | Only the six circular functions. Or add the six hyperbolic ones (`sinh`, `cosh`, `tanh`, `asinh`, `acosh`, `atanh`): nothing in the repository uses them, so they would be untested speculation |
 | D2 | Angle unit (**answered: revolutions only**, Will) | **Revolutions only**, every word suffixed `-rev`, like `sin-rev` and like the engine's Euler angles `a`, `b`, `c` | Also radian words (`sin`, `cos`, …): two units in one script is how a 360 ends up in a radian argument |
-| D3 | Exactness (**open: new recommendation**) | **Not exact: plain `libm`, plus a shared file of test vectors.** The contract is "the true value, rounded to a 32-bit float, within one ulp", with no promise at special points such as `sin-rev 0.5` (about 1.2 × 10⁻¹⁶) or `cos-rev 0.25`. Every client, now and later, tests against the same language-neutral vectors ([research](#research-for-d3)). Exactness can be added later without breaking any script, because it only shrinks errors; it could not be taken away | **A.** Exact at the quarter turns, by a quadrant reduction every client would have to copy bit for bit (my first recommendation). **C.** Plain `libm` plus a four-entry special case at the quarter turns |
+| D3 | Exactness (**taken as recommended, option B**) | **Not exact: plain `libm`, plus a shared file of test vectors.** The contract is "the true value, rounded to a 32-bit float, within one ulp", with no promise at special points such as `sin-rev 0.5` (about 1.2 × 10⁻¹⁶) or `cos-rev 0.25`. Every client, now and later, tests against the same language-neutral vectors ([research](#research-for-d3)). Exactness can be added later without breaking any script, because it only shrinks errors; it could not be taken away | **A.** Exact at the quarter turns, by a quadrant reduction every client would have to copy bit for bit (my first recommendation). **C.** Plain `libm` plus a four-entry special case at the quarter turns |
 | D4 | Domain errors (**answered: fail loudly**, Will) | **Fail loudly:** print the word and the argument to stderr, then abort the script's frame (`ZF_ABORT_EXTERNAL`). The domain errors are `asin-rev` and `acos-rev` outside −1 to 1, and `sqrt` of a negative; `tan-rev` at exactly ¼ or ¾ of a turn too, but only if D3 keeps the quarter turns exact (otherwise its pole just returns a very large number). The [words table](#the-words) has each one. The one tolerance: an argument up to 10⁻⁶ outside −1 to 1 is clamped, because the dot product of two unit vectors in a 32-bit cell is often 1.0000001 | Return 0 and keep going. The engine's rule is against that |
 | D5 | One implementation (**answered: ok**, Will: "not sure i care?") | | One implementation | **A header-only `engine/stubs/forth_math.hpp`**, used by the bridge and by the VM test host, so the tests run the code that ships | Write the maths in the bridge and again in the test host |
 | D6 | Migrating the 13 hand-rolled definitions (**answered: add to TODO**, done) | | Migrating the 13 hand-rolled definitions | **A separate item, after this one.** Each one changes motion slightly, because an approximation becomes the true value, and ten shipped tanks have captures and checks. Folded into this plan, a seven-file behaviour change would hide inside a maths-library addition. The consumer in this plan is the Minute Machine director | Migrate them here |
 | D7 | `sincos-rev ( rev -- sin cos )` (**answered: yes**, Will) | | `sincos-rev ( rev -- sin cos )` | **Yes, one syscall for both.** `tk-root` computes the sine and cosine of the same pitch and roll angles back to back, and a rotation matrix always needs the pair | Leave the pair as two calls |
 | D8 | Precision and speed (**answered**, Will: "use whatever the hardware is internally and interface with 32-bit float") | **Hardware-native precision inside, 32-bit float at the interface.** The maths runs in the widest type the chip does natively: `double` on phones and desktops, `float` (`sinf`, `atan2f`…) on a chip whose FPU is single-precision. `zf_cell` stays a 32-bit float. The type is one `Real` typedef in `forth_math.hpp`, chosen at compile time, and the conversion to and from a cell happens in one place, the bridge | Look-up tables, to save the call. Always `double`, which a single-precision chip would run in software |
-| D9 | Fixed point for ESP32-class chips (**new, open**) | **Not now.** No ESP32 plan or chip exists in the repository, and a fixed-point build with no target is untestable. Keep the door open: the `Real` typedef and the single cell boundary (D8) are the only two places a fixed-point variant would touch. Decide with the ESP32 plan, once it names a chip ([research](#research-for-d8-and-d9)) | Build a 16.16 variant now. Or make `float` the only supported cell forever |
+| D9 | Fixed point for ESP32-class chips (**deferred, as recommended**) | **Not now.** No ESP32 plan or chip exists in the repository, and a fixed-point build with no target is untestable. Keep the door open: the `Real` typedef and the single cell boundary (D8) are the only two places a fixed-point variant would touch. Decide with the ESP32 plan, once it names a chip ([research](#research-for-d8-and-d9)) | Build a 16.16 variant now. Or make `float` the only supported cell forever |
 
 ## Research for D3
 
@@ -96,7 +96,7 @@ All angles are in **revolutions**. `sincos-rev` leaves the sine below the cosine
 | `sin-rev` (exists) | `( rev -- sin )` | −1 to 1 | none; within one ulp of the true value (D3) |
 | `cos-rev` | `( rev -- cos )` | −1 to 1 | none; within one ulp of the true value (D3) |
 | `sincos-rev` | `( rev -- sin cos )` | each −1 to 1 | none |
-| `tan-rev` | `( rev -- tan )` | any | none under the recommended D3: near ¼ and ¾ of a turn it returns a very large number (about 1.6 × 10¹⁶ at ¼). Under option A it would refuse exactly ¼ and ¾ |
+| `tan-rev` | `( rev -- tan )` | any | none under D3 option B: near ¼ and ¾ of a turn it returns a very large number (about 1.6 × 10¹⁶ at ¼). Under option A it would refuse exactly ¼ and ¾ |
 | `asin-rev` | `( x -- rev )` | −¼ to ¼ | \|x\| > 1 + 10⁻⁶ |
 | `acos-rev` | `( x -- rev )` | 0 to ½ | \|x\| > 1 + 10⁻⁶ |
 | `atan-rev` | `( x -- rev )` | −¼ to ¼, never reached | none |
@@ -169,25 +169,71 @@ No mockups: the change has no visible surface (a script-language library).
     ```
     task test-forth-math
     ```
+    ```
+    task: [test-forth-math] python3 tests/gen_forth_math_vectors.py --check
+    vectors up to date
+    task: [test-forth-math] docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; for mode in "" "-DWF_FORTH_MATH_FLOAT"; do g++ -std=c++17 -O1 -Wall -Wextra $mode -I/src/engine/stubs -I/src/tests /src/tests/forth_math_test.cpp -o /tmp/forth_math_test && /tmp/forth_math_test; done'
+    forth_math_test (double Real): OK, 3329 checks, 860 shared vectors across 9 words
+    forth_math_test (float Real): OK, 3329 checks, 860 shared vectors across 9 words
+    ```
+    **PASS.** Every one of the 860 shared vectors, in both `Real` modes. The float run uses the single-FPU tolerances written into the vector file; see the contract note in the Status line.
 2. Every word runs in the real zForth VM, leaves both stacks empty, and a domain error aborts with the VM's external-abort code and leaves the VM usable on the next call. 10 000 calls grow neither the dictionary nor the stacks.
     ```
     python3 tests/verify_forth_math.py
     ```
+    ```
+    49 checks across 9 words in the real zForth VM: PASS
+    ```
+    **PASS.** Includes the named domain aborts (the VM's external-abort code, a message naming the word) and 10 000 calls of every word with no growth of the dictionary or the stacks.
 3. Every word works through the engine's own dispatcher.
     ```
     scripts/in-linux-container.sh scripts/build-wf-game-container.sh --dev
     WF_CONTAINER_ENV="WF_GAME=/build/wf-game-dev/src/engine/wf_game" scripts/in-linux-container.sh bash -c 'timeout 400 xvfb-run -a -s "-screen 0 1280x720x24" python3 tests/verify_forth_math_engine.py'
     ```
+    ```
+    18 engine checks: PASS
+    ```
+    **PASS.** Run in the container against the Debug ASan engine (`wf-game-dev`): all nine words through the bridge's own dispatcher, the domain error named in the engine log, the engine still running, and recovered by a good script.
 4. The Minute Machine director still matches its reference model with the shared header and `sincos-rev`, with no worse an error than today's 0.0016 mm, and the engine still matches its reference.
     ```
     python3 tests/verify_minute_machine_forth.py
     WF_CONTAINER_ENV="WF_GAME=/build/wf-game-dev/src/engine/wf_game" scripts/in-linux-container.sh bash -c 'timeout 900 xvfb-run -a -s "-screen 0 1280x720x24" python3 scripts/check-minute-machine.py --compare'
     ```
+    ```
+    125 frames; worst position 0.0015 mm, rotation 0.0008 deg, scale 0.000006
+    PASS
+    10:08:22: 75 actors; worst position 0.015 mm (domino_08/3009), rotation 0.005 deg (domino_00/3013), scale 0.00000 ()
+    10:08:41.5: 75 actors; worst position 0.015 mm (domino_08/3009), rotation 0.005 deg (domino_02/3013), scale 0.00000 (spring/3042)
+    10:08:57: 75 actors; worst position 0.015 mm (domino_08/3009), rotation 0.003 deg (seesaw/3013), scale 0.00000 (spring/3042)
+    12:59:59.9: 75 actors; worst position 0.015 mm (domino_08/3009), rotation 0.003 deg (seesaw/3013), scale 0.00000 (spring/3042)
+    13:00:00.3: 75 actors; worst position 0.015 mm (domino_08/3009), rotation 0.003 deg (seesaw/3013), scale 0.00000 (spring/3042)
+    13:00:00.9: 75 actors; worst position 0.015 mm (domino_08/3009), rotation 0.003 deg (seesaw/3013), scale 0.00000 (spring/3042)
+    00:00:00.6: 75 actors; worst position 0.015 mm (domino_08/3009), rotation 0.003 deg (seesaw/3013), scale 0.00000 (spring/3042)
+    23:59:59.95: 75 actors; worst position 0.015 mm (domino_08/3009), rotation 0.003 deg (seesaw/3013), scale 0.00000 (spring/3042)
+    PASS
+    ```
+    **PASS.** The director with the shared glue and `sincos-rev` agrees with `timeline.py` to 0.0015 mm in the VM, and the real engine agrees at eight times across the minute, the hour and midnight. `scripts/check-minute-machine.py --compare` needed a fix first: it watched 657 mailboxes at once and the bridge lost the tail of the first batch, so it now watches ten actors at a time and waits until every value has arrived.
 5. The reference document lists exactly the words the bridge registers, with the same stack effects.
     ```
     python3 -m pytest tests/test_forth_math_docs.py -v
     ```
+    ```
+    collecting ... collected 4 items
+    tests/test_forth_math_docs.py::test_the_document_lists_exactly_the_registered_words_with_their_stack_effects PASSED [ 25%]
+    tests/test_forth_math_docs.py::test_the_syscall_numbers_are_a_contiguous_block_after_the_neural_gate PASSED [ 50%]
+    tests/test_forth_math_docs.py::test_the_bridge_registers_and_dispatches_through_the_shared_table PASSED [ 75%]
+    tests/test_forth_math_docs.py::test_the_scripting_doc_points_at_the_reference PASSED [100%]
+    ============================== 4 passed in 0.08s ===============================
+    ```
+    **PASS.**
 6. Nothing else moved: the existing Forth tests still pass.
     ```
     task test-forth-source && python3 -m pytest tests/test_minute_machine_forth.py tests/test_minute_machine_timeline.py tests/test_minute_machine_channels.py -q
     ```
+    ```
+    task: [test-forth-source] python3 tests/verify_forth_source.py
+    PASS: 10105 checks, including 10000 repeated calls
+    .......................                                                  [100%]
+    23 passed in 58.57s
+    ```
+    **PASS.** 10 105 VM checks and the 23 Minute Machine, vector and VM tests.

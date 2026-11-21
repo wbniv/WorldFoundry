@@ -132,30 +132,42 @@ def compare(times: list[str], port: int) -> int:
         e = Engine(spec, port + i)
         try:
             poses = tl.all_poses(sod(spec))
-            for name in poses:
-                for mbx in FIELDS:
-                    e.client.watch(idx=indices[forth.ACTOR_OF.get(name, name)], mailbox=mbx)
-            e.step(6)
             worst = {"pos": (0.0, ""), "rot": (0.0, ""), "scale": (0.0, "")}
-            for name, p in poses.items():
-                got = {mbx: e.value(indices[forth.ACTOR_OF.get(name, name)], mbx) for mbx in FIELDS}
-                want = dict(zip(FIELDS, p))
-                for mbx in FIELDS:
-                    if math.isnan(got[mbx]):
-                        failures.append(f"{spec} {name}: mailbox {mbx} never reported")
-                        continue
-                    d = abs(got[mbx] - want[mbx])
-                    if mbx in (ROT_A, ROT_B, ROT_C):
-                        d = abs((got[mbx] - want[mbx] + .5) % 1.0 - .5)          # revolutions, modulo 1
-                        kind, limit = "rot", .5 / 360
-                    elif mbx in (X_SCALE, Y_SCALE, Z_SCALE):
-                        kind, limit = "scale", 1e-3 * max(1.0, abs(want[mbx])) + 2e-4
-                    else:
-                        kind, limit = "pos", 1e-3
-                    if d > worst[kind][0]:
-                        worst[kind] = (d, f"{name}/{mbx}")
-                    if d > limit:
-                        failures.append(f"{spec} {name} mailbox {mbx}: engine {got[mbx]:.6f} reference {want[mbx]:.6f} (off {d:.6f})")
+            names = list(poses)
+            # The bridge broadcasts a watch's first value in one write, and a batch of hundreds of
+            # mailboxes at once loses its tail. Watch a dozen actors at a time.
+            for g in range(0, len(names), 10):
+                group = names[g:g + 10]
+                watched = [(indices[forth.ACTOR_OF.get(name, name)], mbx) for name in group for mbx in FIELDS]
+                for actor, mbx in watched:
+                    e.client.watch(idx=actor, mailbox=mbx)
+                e.step(3)
+                # wait for the signal that every watched value has arrived; the deadline is only the failure guard
+                end = time.monotonic() + 10.0
+                while time.monotonic() < end and any(math.isnan(e.value(a, m)) for a, m in watched):
+                    time.sleep(0.02)
+                for name in group:
+                    p = poses[name]
+                    got = {mbx: e.value(indices[forth.ACTOR_OF.get(name, name)], mbx) for mbx in FIELDS}
+                    want = dict(zip(FIELDS, p))
+                    for mbx in FIELDS:
+                        if math.isnan(got[mbx]):
+                            failures.append(f"{spec} {name}: mailbox {mbx} never reported")
+                            continue
+                        d = abs(got[mbx] - want[mbx])
+                        if mbx in (ROT_A, ROT_B, ROT_C):
+                            d = abs((got[mbx] - want[mbx] + .5) % 1.0 - .5)          # revolutions, modulo 1
+                            kind, limit = "rot", .5 / 360
+                        elif mbx in (X_SCALE, Y_SCALE, Z_SCALE):
+                            kind, limit = "scale", 1e-3 * max(1.0, abs(want[mbx])) + 2e-4
+                        else:
+                            kind, limit = "pos", 1e-3
+                        if d > worst[kind][0]:
+                            worst[kind] = (d, f"{name}/{mbx}")
+                        if d > limit:
+                            failures.append(f"{spec} {name} mailbox {mbx}: engine {got[mbx]:.6f} reference {want[mbx]:.6f} (off {d:.6f})")
+                for actor, mbx in watched:
+                    e.client.unwatch(idx=actor, mailbox=mbx)
             print(f"{spec}: {len(poses)} actors; worst position {worst['pos'][0]*1000:.3f} mm ({worst['pos'][1]}), "
                   f"rotation {worst['rot'][0]*360:.3f} deg ({worst['rot'][1]}), scale {worst['scale'][0]:.5f} ({worst['scale'][1]})")
         finally:
