@@ -1,0 +1,76 @@
+//=============================================================================
+// hal/ios/launch_args.hp: which iOS launch arguments reach the engine
+// Copyright ( c ) 2026 World Foundry Group
+// Part of the World Foundry 3D video game engine/production environment
+// for more information about World Foundry, see www.worldfoundry.org
+//=============================================================================
+// An iOS launch argument pair "-Key value" is also an NSUserDefaults setting
+// (the argument domain). The iOS HAL reads its own settings that way:
+// -WFOrientation (native_app_entry.mm), -WFTouchDiagnostics and -WFTouchScript
+// (input.mm). UIKit and XCTest use the same form (-NS..., -Apple...).
+//
+// Those pairs are not engine switches, and they must not reach the engine's
+// command line: game/main.cc's ParseCommandLine stops at the first argument
+// that does not start with '-' or '/', and PIGSMain reads that argument as the
+// starting level number. So "-WFTouchDiagnostics 1", which the XCUITest tour
+// passes, made the chapter app load level 1 instead of level 0 and abort in
+// Level::Level (LMalloc::Allocate -> FatalError, Codemagic build 6af131a7).
+// "-WFOrientation landscape" only worked by luck: atoi("landscape") is 0.
+//
+// EngineLaunchArgs drops every argument whose key starts with "-WF", "-NS" or
+// "-Apple" (a capital after the prefix), together with the value after it;
+// everything else passes through in order. The engine's own switches are
+// lower case or "--" ("-L<path>" too has no such prefix), so none is dropped.
+//
+// Header-only and platform-free, so tests/test_ios_launch_args.py tests it on
+// the Linux host; the caller is hal/ios/native_app_entry.mm.
+//=============================================================================
+
+#ifndef _WF_HAL_IOS_LAUNCH_ARGS_HP
+#define _WF_HAL_IOS_LAUNCH_ARGS_HP
+
+#include <cctype>
+#include <cstring>
+#include <string>
+#include <vector>
+
+namespace wfios
+{
+
+// True for "-WFOrientation", "-NSDoubleLocalizedStrings", "-AppleLanguages":
+// a defaults key, one dash, a known prefix, then a capital letter.
+inline bool
+IsDefaultsKey(const std::string& arg)
+{
+    static const char* const kPrefixes[] = { "-WF", "-NS", "-Apple" };
+    for (const char* p : kPrefixes)
+    {
+        const std::size_t n = std::strlen(p);
+        if (arg.size() > n && arg.compare(0, n, p) == 0
+            && std::isupper(static_cast<unsigned char>(arg[n])))
+            return true;
+    }
+    return false;
+}
+
+// The launch arguments (process arguments after the executable) that go on the
+// engine's command line: every defaults pair removed, the rest in order.
+inline std::vector<std::string>
+EngineLaunchArgs(const std::vector<std::string>& launchArgs)
+{
+    std::vector<std::string> out;
+    for (std::size_t i = 0; i < launchArgs.size(); ++i)
+    {
+        if (IsDefaultsKey(launchArgs[i]))
+        {
+            ++i;   // and its value, when there is one
+            continue;
+        }
+        out.push_back(launchArgs[i]);
+    }
+    return out;
+}
+
+}  // namespace wfios
+
+#endif

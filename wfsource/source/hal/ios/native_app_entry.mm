@@ -25,6 +25,7 @@
 #include <hal/args_file.hp>
 #include <hal/asset_accessor.hp>
 #include <hal/hal.h>
+#include <hal/ios/launch_args.hp>
 #include <pigsys/pigsys.hp>
 
 #include <pthread.h>
@@ -73,10 +74,16 @@ static void WFBuildEngineArguments()
             if (data)
                 fileText.assign((const char*)data.bytes, (size_t)data.length);
         }
-        std::vector<std::string> launchArgs;
-        NSArray<NSString*>* processArgs = [[NSProcessInfo processInfo] arguments];
-        for (NSUInteger i = 1; i < processArgs.count; ++i)   // [0] is the executable
-            launchArgs.push_back(std::string([processArgs[i] UTF8String]));
+        std::vector<std::string> processArgs;
+        NSArray<NSString*>* nsArgs = [[NSProcessInfo processInfo] arguments];
+        for (NSUInteger i = 1; i < nsArgs.count; ++i)   // [0] is the executable
+            processArgs.push_back(std::string([nsArgs[i] UTF8String]));
+        // -WFOrientation landscape, -WFTouchDiagnostics 1 and the like are
+        // NSUserDefaults settings, not engine switches (hal/ios/launch_args.hp).
+        const std::vector<std::string> launchArgs = wfios::EngineLaunchArgs(processArgs);
+        if (launchArgs.size() != processArgs.size())
+            NSLog(@"wf_game: %zu launch argument(s) are NSUserDefaults settings, not engine switches",
+                  processArgs.size() - launchArgs.size());
 
         std::vector<std::string> settings;   // qr_logo=: no phone overlay on iOS
         sArgStore = wfargs::ComposeArgs("wf_game", fileText, launchArgs, &settings);
