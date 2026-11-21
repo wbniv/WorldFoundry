@@ -1,32 +1,38 @@
 //=============================================================================
-// hal/ios/input.mm: iOS input — touch D-pad + A/B → joystick bitmask
+// hal/ios/input.mm: iOS input — Android's touch controls → joystick bitmask
 // Copyright ( c ) 2026 World Foundry Group
 // Part of the World Foundry 3D video game engine/production environment
 // for more information about World Foundry, see www.worldfoundry.org
 //=============================================================================
-// Phase 3 of docs/plans/2026-04-21-ios-port-codemagic.md. Mirrors the Android
-// shim (hal/android/input.cc for the HAL entry points; the touch hit test and
-// gamepad|touch merge in hal/android/native_app_entry.cc; the HUD overlay in
-// gfx/gl/android_window.cc, commit c20e56e).
+// The touch controls are Android's: a joystick bottom-left and A, B, C, D
+// bottom-right, and while a story card is open only A and C. Layout, hit
+// testing and finger ownership are hal/touch_controls.h, the code Android
+// runs; hal/ios/touch_pad.cc adapts UIKit's touches to it. Both are
+// platform-free and unit-tested on Linux (tests/test_ios_touch_pad.py). This
+// file is only the UIKit glue. Plan: finding-your-way
+// docs/plans/2026-11-08-ios-touch-parity.md.
 //
-//   UITouch (main thread) → WFTouchHudView → wf_touch::TouchTracker
-//     → wf_touch::HitTest (touch_pad.cc) → _HALSetJoystickButtons
+//   UITouch (main thread) → WFTouchHudView → wf_touch::Pad
+//     → wftouch::State::update (shared) → _HALSetJoystickButtons
 //     → _JoystickButtonsF (engine thread)
-//
-// Layout math, hit testing and per-finger bookkeeping live in touch_pad.cc,
-// which is platform-independent and unit-tested on Linux
-// (tests/test_ios_touch_pad.py). This file is only the UIKit glue.
+//   bitmaptext::ReaderOpen() (engine thread, Display::RenderEnd)
+//     → WFIosTouchFrame → main queue → Pad::SetReading
 //
 // Differences from Android, and why:
-//   - The HUD is a UIKit overlay view, not GL/Metal quads drawn before the
-//     swap: the Metal encoder handoff (Phase 2C-B) is not wired, so a
-//     Metal-drawn HUD would never reach the screen, and an overlay keeps the
-//     HUD independent of renderer state entirely.
+//   - The HUD is a UIKit overlay view drawn with UIKit, not GL quads drawn
+//     before the swap: Android's WFAndroidDrawHUD (gfx/gl/android_window.cc)
+//     is raw GL, and an overlay keeps the HUD independent of renderer state.
+//     Colours, alphas and proportions are copied from it; the labels use the
+//     system semibold font (Android's UI font atlas is engine-rendered).
+//   - Sizes are points, inside the safe area on every side.
 //   - The button state is atomic: on iOS the engine runs on its own thread
 //     (native_app_entry.mm) while UIKit delivers touches on the main thread.
-//     On Android both happen on the game thread (WFAndroidPumpEvents).
-//   - Pressed buttons are drawn brighter, so a Simulator screenshot shows
-//     that a tap registered.
+//   - The card flag is read on the engine thread and handed to the main
+//     thread, and a finger on a control a card hides lets go at once.
+//   - Each visible control is an accessibility element (wf.touch.stick,
+//     wf.touch.A ... wf.touch.D), so a UI test can tap it through UIKit.
+//     -WFTouchDiagnostics 1 adds wf.touch.state, whose value is
+//     "held=0x.... seen=0x.... reading=0|1" (seen: every bit since launch).
 //=============================================================================
 
 #import <UIKit/UIKit.h>
@@ -36,28 +42,50 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cmath>
 #include <cstdlib>
 
+#include "press_latch.hp"
 #include "touch_pad.hp"
 #import "touch_hud.h"
 
-static_assert(wf_touch::kBtnA     == EJ_BUTTONF_A,     "touch_pad.hp kBtnA drifted");
-static_assert(wf_touch::kBtnB     == EJ_BUTTONF_B,     "touch_pad.hp kBtnB drifted");
-static_assert(wf_touch::kBtnUp    == EJ_BUTTONF_UP,    "touch_pad.hp kBtnUp drifted");
-static_assert(wf_touch::kBtnDown  == EJ_BUTTONF_DOWN,  "touch_pad.hp kBtnDown drifted");
-static_assert(wf_touch::kBtnLeft  == EJ_BUTTONF_LEFT,  "touch_pad.hp kBtnLeft drifted");
-static_assert(wf_touch::kBtnRight == EJ_BUTTONF_RIGHT, "touch_pad.hp kBtnRight drifted");
+static_assert(wf_touch::kBtnA     == EJ_BUTTONF_A,     "touch_controls.h A drifted");
+static_assert(wf_touch::kBtnB     == EJ_BUTTONF_B,     "touch_controls.h B drifted");
+static_assert(wf_touch::kBtnC     == EJ_BUTTONF_C,     "touch_controls.h C drifted");
+static_assert(wf_touch::kBtnD     == EJ_BUTTONF_D,     "touch_controls.h D drifted");
+static_assert(wf_touch::kBtnUp    == EJ_BUTTONF_UP,    "touch_controls.h Up drifted");
+static_assert(wf_touch::kBtnDown  == EJ_BUTTONF_DOWN,  "touch_controls.h Down drifted");
+static_assert(wf_touch::kBtnLeft  == EJ_BUTTONF_LEFT,  "touch_controls.h Left drifted");
+static_assert(wf_touch::kBtnRight == EJ_BUTTONF_RIGHT, "touch_controls.h Right drifted");
+
+// game/bitmap_presenter.hp; declared here so this Objective-C++ file does not
+// pull in the renderer headers that one includes.
+namespace bitmaptext { bool ReaderOpen(); }
+
+// The iOS target builds without ARC (see dealloc below); the cached
+// accessibility elements must neither leak nor die early either way.
+#if __has_feature(objc_arc)
+#define WF_AUTORELEASE(x) (x)
+#define WF_RELEASE(x)     ((void)0)
+#else
+#define WF_AUTORELEASE(x) [(x) autorelease]
+#define WF_RELEASE(x)     [(x) release]
+#endif
 
 //=============================================================================
 // HAL joystick entry points — same set as hal/android/input.cc.
 
-// Written on the main thread, read on the engine thread.
-static std::atomic<joystickButtonsF> _buttons{0};
+// Written on the main thread, read on the engine thread. A press stays until
+// the engine has read it, for at least one engine frame (hal/ios/press_latch.hp):
+// in build 6b01461c a 51 ms tap fell between two engine samples and was lost.
+// WFIosTouchFrame ends each engine frame.
+static_assert(sizeof(joystickButtonsF) == sizeof(uint32_t), "PressLatch holds 32 button bits");
+static wfios::PressLatch gButtons;
 
 extern "C" void
 _HALSetJoystickButtons(joystickButtonsF joystickButtons)
 {
-    _buttons.store(joystickButtons, std::memory_order_release);
+    gButtons.Set(joystickButtons);
 }
 
 // Public host-injection wrapper — see hal/_input.h. Cross-platform parity:
@@ -74,7 +102,7 @@ void _TermJoystickInterface(void) {}
 
 int _JoystickUserAbort(void)
 {
-    return (_buttons.load(std::memory_order_acquire) & 0x8000000) ? 1 : 0;
+    return (gButtons.Held() & 0x8000000) ? 1 : 0;
 }
 
 joystickButtonsF
@@ -82,7 +110,7 @@ _JoystickButtonsF(IJoystick joystick)
 {
     SJoystick* self = ITEMRETRIEVE(joystick, SJoystick);
     if (self->_stickNum == EJW_JOYSTICK1)
-        return _buttons.load(std::memory_order_acquire);
+        return gButtons.Read();
     return 0;
 }
 
@@ -96,28 +124,53 @@ namespace
 // half stays 0 until Phase 5 wires GCController (MFi).
 joystickButtonsF      gGamepadButtons = 0;
 joystickButtonsF      gTouchButtons   = 0;
+joystickButtonsF      gSeenButtons    = 0;   // diagnostics: every bit since launch
 
-wf_touch::Layout       gLayout;
-wf_touch::TouchTracker gTracker;
+wf_touch::Pad          gPad;
+wftouch::Stick         gDrawnStick;
 bool                   gInputSuspended = false;
 bool                   gHudEnabled     = true;
+bool                   gDiagnostics    = false;
 WFTouchHudView*        gHud            = nil;   // owned by the view hierarchy
+// The HUD's accessibility elements, kept until the controls change. XCTest
+// names an element by its address (the elementID in its log) and asks for its
+// attributes later, so elements made fresh (and autoreleased) on every query
+// were gone by then: in Codemagic build 6b013d1a, XCUITest saw the A and C
+// elements in the tree but each one "faulted in" with kAXErrorInvalidUIElement,
+// and wf.touch.A never existed for the test. Owned (+1) here.
+NSArray*               gAxElements     = nil;
+
+// Drop the cached elements (the controls moved, or which are shown changed)
+// and tell UIKit to ask again.
+void InvalidateAccessibility()
+{
+    WF_RELEASE(gAxElements);
+    gAxElements = nil;
+    UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
+}
 
 void Emit()
 {
     _HALSetJoystickButtons(gGamepadButtons | gTouchButtons);
 }
 
-// Recompute the touch bits from every tracked finger; log and redraw on a
-// change (the log line is what the Simulator CI run greps for).
+// Read the touch bits from the pad; log and redraw on a change (the log line
+// is what the Simulator CI run greps for), and redraw when the knob moves.
 void RecomputeTouch()
 {
     const joystickButtonsF now =
-        (gInputSuspended || !gHudEnabled) ? 0 : gTracker.Buttons(gLayout);
+        (gInputSuspended || !gHudEnabled) ? 0 : gPad.Buttons();
     if (now != gTouchButtons)
     {
         NSLog(@"wf_game: touch buttons 0x%04x", (unsigned)now);
         gTouchButtons = now;
+        gSeenButtons |= now;
+        [gHud setNeedsDisplay];
+    }
+    const wftouch::Stick s = gPad.StickPosition();
+    if (s.x != gDrawnStick.x || s.y != gDrawnStick.y)
+    {
+        gDrawnStick = s;
         [gHud setNeedsDisplay];
     }
     Emit();
@@ -129,7 +182,41 @@ inline uintptr_t TouchId(UITouch* t)
     return (uintptr_t)(__bridge void*)t;
 }
 
+void ApplyReading(bool reading)
+{
+    if (reading == gPad.Reading()) return;
+    gPad.SetReading(reading);
+    NSLog(@"wf_game: touch reading %s", reading ? "on" : "off");
+    [gHud setNeedsDisplay];
+    InvalidateAccessibility();   // the card shows only A and C
+    RecomputeTouch();
+}
+
+UIAccessibilityElement* ControlElement(id container, const wftouch::Rect& r,
+                                       NSString* ident, NSString* label)
+{
+    UIAccessibilityElement* e = WF_AUTORELEASE([[UIAccessibilityElement alloc] initWithAccessibilityContainer:container]);
+    e.accessibilityFrameInContainerSpace = CGRectMake(r.x0, r.y0, r.x1 - r.x0, r.y1 - r.y0);
+    e.accessibilityIdentifier = ident;
+    e.accessibilityLabel      = label;
+    e.accessibilityTraits     = UIAccessibilityTraitButton;
+    return e;
+}
+
 }  // namespace
+
+// wf.touch.state (-WFTouchDiagnostics 1): one cached element whose value is
+// read live, so a UI test polling it sees each press without a new element.
+@interface WFTouchStateElement : UIAccessibilityElement
+@end
+
+@implementation WFTouchStateElement
+- (NSString*)accessibilityValue
+{
+    return [NSString stringWithFormat:@"held=0x%04x seen=0x%04x reading=%d",
+            (unsigned)gTouchButtons, (unsigned)gSeenButtons, gPad.Reading() ? 1 : 0];
+}
+@end
 
 //=============================================================================
 
@@ -146,13 +233,20 @@ inline uintptr_t TouchId(UITouch* t)
     self.contentMode            = UIViewContentModeRedraw;
     self.autoresizingMask       = UIViewAutoresizingFlexibleWidth
                                 | UIViewAutoresizingFlexibleHeight;
+    self.isAccessibilityElement = NO;   // a container of one element per control
+    gDiagnostics = [[NSUserDefaults standardUserDefaults] boolForKey:@"WFTouchDiagnostics"];
     gHud = self;
     return self;
 }
 
 - (void)dealloc
 {
-    if (gHud == self) gHud = nil;
+    if (gHud == self)
+    {
+        gHud = nil;
+        WF_RELEASE(gAxElements);   // they name this view as their container
+        gAxElements = nil;
+    }
 #if !__has_feature(objc_arc)
     [super dealloc];
 #endif
@@ -163,16 +257,18 @@ inline uintptr_t TouchId(UITouch* t)
     [super layoutSubviews];
     const CGSize       sz = self.bounds.size;
     const UIEdgeInsets in = self.safeAreaInsets;
-    wf_touch::Insets insets;
+    wftouch::Insets insets;
     insets.top    = (float)in.top;
     insets.left   = (float)in.left;
     insets.bottom = (float)in.bottom;
     insets.right  = (float)in.right;
-    gLayout = wf_touch::ComputeLayout((float)sz.width, (float)sz.height, insets);
+    gPad.SetView((float)sz.width, (float)sz.height, insets);
+    // Format parsed by scripts/ios_sim_chapter.py (TOUCH_LAYOUT).
     NSLog(@"wf_game: touch layout %gx%g pt, safe {%g,%g,%g,%g}, cell %.1f pt",
-          sz.width, sz.height, in.top, in.left, in.bottom, in.right, gLayout.cell);
+          sz.width, sz.height, in.top, in.left, in.bottom, in.right, gPad.CurrentLayout().cell);
     [self setNeedsDisplay];
-    RecomputeTouch();   // held fingers are re-hit-tested against the new layout
+    InvalidateAccessibility();
+    RecomputeTouch();   // held fingers are re-hit against the new layout
 }
 
 - (void)safeAreaInsetsDidChange
@@ -187,7 +283,7 @@ inline uintptr_t TouchId(UITouch* t)
     for (UITouch* t in touches)
     {
         const CGPoint p = [t locationInView:self];
-        gTracker.Began(TouchId(t), (float)p.x, (float)p.y);
+        gPad.Began(TouchId(t), (float)p.x, (float)p.y);
     }
     RecomputeTouch();
 }
@@ -198,7 +294,7 @@ inline uintptr_t TouchId(UITouch* t)
     for (UITouch* t in touches)
     {
         const CGPoint p = [t locationInView:self];
-        gTracker.Moved(TouchId(t), (float)p.x, (float)p.y);
+        gPad.Moved(TouchId(t), (float)p.x, (float)p.y);
     }
     RecomputeTouch();
 }
@@ -206,40 +302,113 @@ inline uintptr_t TouchId(UITouch* t)
 - (void)touchesEnded:(NSSet<UITouch*>*)touches withEvent:(UIEvent*)event
 {
     for (UITouch* t in touches)
-        gTracker.Ended(TouchId(t));
+        gPad.Ended(TouchId(t));
     RecomputeTouch();
 }
 
+// UIKit cancels only the touches it names; each lets go like a lift.
 - (void)touchesCancelled:(NSSet<UITouch*>*)touches withEvent:(UIEvent*)event
 {
     for (UITouch* t in touches)
-        gTracker.Ended(TouchId(t));
+        gPad.Ended(TouchId(t));
     RecomputeTouch();
 }
 
-// Same rectangles the hit test uses, same colours as Android's HUD: gray
-// cross arms, red A, blue B; brighter while held.
+//-----------------------------------------------------------------------------
+// Drawing: Android's HUD (WFAndroidDrawHUD, gfx/gl/android_window.cc), same
+// colours and alphas. Keep the two in step.
+
 static void
-FillRect(const wf_touch::Rect& r, CGFloat red, CGFloat green, CGFloat blue,
-         CGFloat alpha, bool held)
+FillDisc(CGFloat cx, CGFloat cy, CGFloat r, CGFloat red, CGFloat green, CGFloat blue, CGFloat alpha)
 {
-    [[UIColor colorWithRed:red green:green blue:blue
-                     alpha:(held ? 0.85 : alpha)] setFill];
-    UIRectFillUsingBlendMode(CGRectMake(r.x0, r.y0, r.Width(), r.Height()),
-                             kCGBlendModeNormal);
+    [[UIColor colorWithRed:red green:green blue:blue alpha:alpha] setFill];
+    [[UIBezierPath bezierPathWithOvalInRect:CGRectMake(cx - r, cy - r, 2 * r, 2 * r)] fill];
 }
 
 - (void)drawRect:(CGRect)dirty
 {
-    if (!gLayout.valid) return;
+    const wftouch::Layout& l = gPad.CurrentLayout();
+    if (!l.valid || !gHudEnabled) return;
     const joystickButtonsF held = gTouchButtons;
-    const CGFloat g = 0.6, ga = 0.5;
-    FillRect(gLayout.Left(),  g, g, g, ga, held & wf_touch::kBtnLeft);
-    FillRect(gLayout.Right(), g, g, g, ga, held & wf_touch::kBtnRight);
-    FillRect(gLayout.Up(),    g, g, g, ga, held & wf_touch::kBtnUp);
-    FillRect(gLayout.Down(),  g, g, g, ga, held & wf_touch::kBtnDown);
-    FillRect(gLayout.a, 0.80, 0.25, 0.25, 0.55, held & wf_touch::kBtnA);
-    FillRect(gLayout.b, 0.25, 0.35, 0.85, 0.55, held & wf_touch::kBtnB);
+    const bool reading = !l.stick;
+    if (l.stick)
+    {
+        const CGFloat radius = wftouch::stickRadius(l);
+        const CGFloat cx = 0.5f * (l.pad.x0 + l.pad.x1), cy = 0.5f * (l.pad.y0 + l.pad.y1);
+        FillDisc(cx, cy, radius, .42, .50, .62, .65);
+        FillDisc(cx, cy, radius - l.cell * .03f, .05, .075, .125, .55);
+        const bool moving = (held & wf_touch::kStickBits) != 0;
+        const CGFloat knob = l.cell * .6f, travel = radius - knob;
+        const wftouch::Stick s = gPad.StickPosition();
+        FillDisc(cx + s.x * travel, cy + s.y * travel, knob,
+                 moving ? .42 : .22, moving ? .62 : .32, moving ? .85 : .46, .85);
+    }
+    for (int i = 4; i < 8; ++i)
+    {
+        const wftouch::Control& c = l.controls[i];
+        if (!wftouch::shown(l, c)) continue;
+        const wftouch::Rect& r = c.rect;
+        const CGRect rect = CGRectMake(r.x0, r.y0, r.x1 - r.x0, r.y1 - r.y0);
+        const CGFloat alpha = (held & c.bit) ? 0.85 : reading ? 0.30 : 0.55;
+        [[UIColor colorWithRed:0.20 green:0.28 blue:0.43 alpha:alpha] setFill];
+        UIRectFillUsingBlendMode(rect, kCGBlendModeNormal);
+        // Capitals 7/16 of the button's width tall, as on Android.
+        UIFont* font = [UIFont systemFontOfSize:rect.size.width * 7.0 / 16.0 / 0.7
+                                         weight:UIFontWeightSemibold];
+        NSDictionary* attrs = @{
+            NSFontAttributeName: font,
+            NSForegroundColorAttributeName: [UIColor colorWithWhite:1.0 alpha:(reading ? 0.60 : 0.95)],
+        };
+        NSString* label = [NSString stringWithUTF8String:c.label];
+        const CGSize ts = [label sizeWithAttributes:attrs];
+        // Centre by hand: CGRectGetMidX/Y live in CoreGraphics, which wf_game does not link.
+        [label drawAtPoint:CGPointMake(rect.origin.x + (rect.size.width - ts.width) / 2,
+                                       rect.origin.y + (rect.size.height - ts.height) / 2)
+            withAttributes:attrs];
+    }
+}
+
+//-----------------------------------------------------------------------------
+// Accessibility: one element per visible control (hidden ones have none),
+// built once per control change and kept (gAxElements, InvalidateAccessibility).
+
+- (NSArray*)accessibilityElements
+{
+    if (!gAxElements)
+        gAxElements = [[self buildAccessibilityElements] copy];   // +1, kept
+    return gAxElements;
+}
+
+- (NSArray*)buildAccessibilityElements
+{
+    NSMutableArray* out = [NSMutableArray array];
+    const wftouch::Layout& l = gPad.CurrentLayout();
+    if (!l.valid || !gHudEnabled) return out;
+    if (l.stick)
+    {
+        const CGFloat radius = wftouch::stickRadius(l);
+        const CGFloat cx = 0.5f * (l.pad.x0 + l.pad.x1), cy = 0.5f * (l.pad.y0 + l.pad.y1);
+        wftouch::Rect disc{ float(cx - radius), float(cy - radius), float(cx + radius), float(cy + radius) };
+        [out addObject:ControlElement(self, disc, @"wf.touch.stick", @"Joystick")];
+    }
+    for (int i = 4; i < 8; ++i)
+    {
+        const wftouch::Control& c = l.controls[i];
+        if (!wftouch::shown(l, c)) continue;
+        NSString* name = [NSString stringWithUTF8String:c.label];
+        [out addObject:ControlElement(self, c.rect, [@"wf.touch." stringByAppendingString:name],
+                                      [name stringByAppendingString:@" button"])];
+    }
+    if (gDiagnostics)
+    {
+        UIAccessibilityElement* e = WF_AUTORELEASE([[WFTouchStateElement alloc] initWithAccessibilityContainer:self]);
+        e.accessibilityFrameInContainerSpace = CGRectMake(0, 0, 4, 4);
+        e.accessibilityIdentifier = @"wf.touch.state";
+        e.accessibilityLabel      = @"Touch state";
+        e.accessibilityTraits     = UIAccessibilityTraitStaticText;
+        [out addObject:e];
+    }
+    return out;
 }
 
 @end
@@ -252,7 +421,8 @@ WFIosSetHudEnabled(int enabled)
     gHudEnabled = (enabled != 0);
     gHud.hidden = !gHudEnabled;       // hidden views receive no touches
     if (!gHudEnabled)
-        gTracker.ReleaseAll();
+        gPad.ReleaseAll();
+    InvalidateAccessibility();
     RecomputeTouch();
     NSLog(@"wf_game: touch HUD %s", gHudEnabled ? "enabled" : "disabled");
 }
@@ -261,8 +431,9 @@ extern "C" void
 WFIosInputSuspend(void)
 {
     gInputSuspended = true;
-    gTracker.ReleaseAll();
+    gPad.ReleaseAll();
     RecomputeTouch();
+    gButtons.Clear();   // no unread tap survives the trip out either
 }
 
 extern "C" void
@@ -272,9 +443,23 @@ WFIosInputResume(void)
     RecomputeTouch();
 }
 
+// Engine thread, once per frame after it is drawn (Display::RenderEnd in
+// hal/ios/display_ios.cc). The card flag is written while the frame is drawn
+// on this thread; the main thread only ever sees it through the queue.
+// It also ends the frame for the press latch: the taps this frame read go.
+extern "C" void
+WFIosTouchFrame(void)
+{
+    gButtons.FrameEnd();
+    static std::atomic<int> last{0};
+    const int open = bitmaptext::ReaderOpen() ? 1 : 0;
+    if (last.exchange(open) == open) return;
+    dispatch_async(dispatch_get_main_queue(), ^{ ApplyReading(open != 0); });
+}
+
 //=============================================================================
 // Simulator CI touch script. Presses each scripted button at its on-screen
-// centre through the same tracker + hit test + HAL path a finger uses; only
+// point through the same pad, shared logic and HAL path a finger uses; only
 // UIKit's touch delivery is skipped. Synthetic ids cannot collide with
 // UITouch pointers (those are heap addresses, never this small).
 
@@ -327,13 +512,13 @@ WFIosStartTouchScript(void)
             {
                 float x, y;
                 // Not laid out yet, or suspended: retry on the next tick.
-                if (gInputSuspended || !wf_touch::ButtonCenter(gLayout, e.button, &x, &y))
+                if (gInputSuspended || !wf_touch::ButtonCenter(gPad.CurrentLayout(), e.button, &x, &y))
                     continue;
-                gTracker.Began(kScriptIdBase + i, x, y);
+                gPad.Began(kScriptIdBase + i, x, y);
             }
             else
             {
-                gTracker.Ended(kScriptIdBase + i);
+                gPad.Ended(kScriptIdBase + i);
             }
             gScriptHeld[i] = want;
         }
