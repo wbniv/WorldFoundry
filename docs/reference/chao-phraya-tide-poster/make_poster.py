@@ -66,15 +66,17 @@ def load_data():
     try:
         const = json.loads((FIT / 'tide_constants.json').read_text())
         tz = json.loads((FIT / 'time_zone_check.json').read_text())
+        turns = json.loads((FIT / 'turning_points.json').read_text())
     except FileNotFoundError as e:
-        raise SystemExit(f'make_poster: {e.filename} is missing: run wflevels/tide_harbour/tide_fit/make_constants.py and check_time_zone.py')
+        raise SystemExit(f'make_poster: {e.filename} is missing: run wflevels/tide_harbour/tide_fit/make_constants.py, check_time_zone.py and count_turns.py')
     if not (CACHE / 'HD2026.pdf').exists():
         raise SystemExit(f'make_poster: {CACHE / "HD2026.pdf"} is missing: run wflevels/tide_harbour/tide_fit/fetch_sources.sh')
     from parse_hd import parse
-    return const, tz, parse(str(CACHE / 'HD2026.pdf'), 2026)
+    return const, tz, turns, parse(str(CACHE / 'HD2026.pdf'), 2026)
 
 
-CONST, TZ, EVENTS = load_data()
+CONST, TZ, TURNS, EVENTS = load_data()
+TURNS_2026 = TURNS['years']['2026']
 EPOCH = dt.datetime(2026, 1, 1)
 WAVE = {c['name']: c for c in CONST['constituents']}
 VAL = CONST['validation_height_error_at_listed_events']
@@ -208,6 +210,9 @@ PANELS = [
                   f'64 leave {BY_N["64"]["median_cm"]:.1f} cm.'),
         dict(status='ours', src=[], by='make_constants.py',
              text=f'Times are looser: at a flat top a few centimetres move the peak by an hour or two. The median error in the time of a high or low is {TIME_ERR["median_min"]:.0f} min.'),
+        dict(status='ours', src=[], by='count_turns.py',
+             text=f'The curve also wiggles at flat tops: it turns {TURNS_2026["model_turns"]} times in 2026 where the table lists {TURNS_2026["table_events"]} highs and lows. '
+                  f'Ignoring turns under {TURNS["min_swing_m"] * 100:.0f} cm leaves {TURNS_2026["turns_kept"]}.'),
     ]),
     dict(key='clock', title='Which clock does the table use?', claims=[
         dict(status='ours', src=[], by='check_time_zone.py',

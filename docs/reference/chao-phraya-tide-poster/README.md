@@ -15,6 +15,7 @@ Regenerate from the repository root:
 ```sh
 bash wflevels/tide_harbour/tide_fit/fetch_sources.sh      # once: one request per file, a pause between
 python3 -I wflevels/tide_harbour/tide_fit/make_constants.py
+python3 -I wflevels/tide_harbour/tide_fit/count_turns.py --json wflevels/tide_harbour/turning_points.json
 python3 -I wflevels/tide_harbour/tide_fit/check_time_zone.py --json wflevels/tide_harbour/time_zone_check.json
 python3 docs/reference/chao-phraya-tide-poster/make_poster.py
 python3 docs/reference/chao-phraya-tide-poster/export_poster.py
