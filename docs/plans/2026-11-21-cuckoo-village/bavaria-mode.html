@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440, initial-scale=1">
+<title>Cuckoo Village: Bavaria mode</title>
+<style>
+  :root { --bg:#0e1116; --panel:#171c24; --ink:#e8e6df; --dim:#9aa3b0; --line:#2a3240; --blue:#3a8fd6; --gold:#e0b04a; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; width:1440px; height:900px; background:var(--bg); color:var(--ink);
+    font:16px/1.4 system-ui,"Segoe UI",Roboto,sans-serif; overflow:hidden; }
+  h1 { font-size:26px; margin:0; padding:28px 40px 4px; font-weight:600; }
+  .sub { padding:0 40px 18px; color:var(--dim); }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:24px; padding:0 40px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:18px 20px; height:612px; }
+  .card h2 { margin:0 0 2px; font-size:20px; }
+  .card .tag { color:var(--dim); font-size:14px; margin-bottom:10px; }
+  svg { display:block; width:100%; }
+  .settings { margin:18px 40px 0; background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:12px 20px; display:flex; gap:28px; align-items:center; }
+  .settings b { color:var(--dim); font-weight:500; }
+  .seg { display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-left:10px; }
+  .seg span { padding:6px 16px; }
+  .seg .on { background:var(--blue); color:#fff; }
+  .note { color:var(--dim); font-size:14px; margin-left:auto; }
+</style>
+</head>
+<body>
+<h1>Cuckoo Village — Bavaria mode setting</h1>
+<div class="sub">Same village layout, tower, timeline and camera route; only paint, facade detail and the four figures change. Schematic mockup, not a rendering.</div>
+
+<div class="row">
+  <div class="card">
+    <h2>Classic (Bavaria mode off)</h2>
+    <div class="tag">Default · pale plaster, warm stone, tile roofs</div>
+    <svg viewBox="0 0 640 520" role="img" aria-label="Classic village facades and four figures">
+      <!-- facades -->
+      <g transform="translate(20,20)">
+        <rect x="0" y="40" width="130" height="110" fill="#e9dfc9"/><polygon points="-10,40 65,-10 140,40" fill="#a2573a"/>
+        <rect x="20" y="70" width="26" height="34" fill="#f2c15a"/><rect x="84" y="70" width="26" height="34" fill="#f2c15a"/>
+        <rect x="55" y="110" width="22" height="40" fill="#6b4a32"/>
+        <rect x="160" y="60" width="110" height="90" fill="#cdbf9c"/><polygon points="150,60 215,15 280,60" fill="#8f4a33"/>
+        <rect x="178" y="84" width="22" height="30" fill="#f2c15a"/><rect x="230" y="84" width="22" height="30" fill="#f2c15a"/>
+        <rect x="300" y="30" width="120" height="120" fill="#efe6d2"/><polygon points="290,30 360,-14 430,30" fill="#a2573a"/>
+        <rect x="320" y="60" width="24" height="32" fill="#f2c15a"/><rect x="376" y="60" width="24" height="32" fill="#f2c15a"/>
+        <rect x="450" y="55" width="130" height="95" fill="#d8cfb4"/><polygon points="440,55 515,10 590,55" fill="#8f4a33"/>
+        <rect x="470" y="80" width="22" height="30" fill="#f2c15a"/><rect x="540" y="80" width="22" height="30" fill="#f2c15a"/>
+      </g>
+      <text x="20" y="215" fill="#9aa3b0" font-size="14">Four figures (alcoves)</text>
+      <g fill="#c9b78f" stroke="#6b5a3a">
+        <g transform="translate(40,230)"><circle cx="40" cy="20" r="16"/><rect x="18" y="40" width="44" height="90" rx="10"/></g>
+        <g transform="translate(190,230)"><circle cx="40" cy="20" r="16"/><rect x="18" y="40" width="44" height="90" rx="10"/></g>
+        <g transform="translate(340,230)"><circle cx="40" cy="20" r="16"/><rect x="18" y="40" width="44" height="90" rx="10"/></g>
+        <g transform="translate(490,230)"><circle cx="40" cy="20" r="16"/><rect x="18" y="40" width="44" height="90" rx="10"/></g>
+      </g>
+      <g fill="#9aa3b0" font-size="13" text-anchor="middle">
+        <text x="80" y="390">Figure 1</text><text x="230" y="390">Figure 2</text><text x="380" y="390">Figure 3</text><text x="530" y="390">Figure 4</text>
+      </g>
+      <text x="20" y="430" fill="#9aa3b0" font-size="14">Dial runs clockwise (10:08)</text>
+      <text x="20" y="452" fill="#9aa3b0" font-size="14">Door and bird shared by both modes</text>
+      <text x="20" y="474" fill="#9aa3b0" font-size="14">Parade travels the usual way round · camera route same</text>
+      <g transform="translate(0,16)">
+      <circle cx="565" cy="448" r="52" fill="#f4f1e6" stroke="#6b5a3a" stroke-width="3"/>
+      <line x1="565.0" y1="400.0" x2="565.0" y2="407.0" stroke="#222" stroke-width="3"/>
+      <line x1="589.0" y1="406.4" x2="587.5" y2="409.0" stroke="#222" stroke-width="1.5"/>
+      <line x1="606.6" y1="424.0" x2="604.0" y2="425.5" stroke="#222" stroke-width="1.5"/>
+      <line x1="613.0" y1="448.0" x2="606.0" y2="448.0" stroke="#222" stroke-width="3"/>
+      <line x1="606.6" y1="472.0" x2="604.0" y2="470.5" stroke="#222" stroke-width="1.5"/>
+      <line x1="589.0" y1="489.6" x2="587.5" y2="487.0" stroke="#222" stroke-width="1.5"/>
+      <line x1="565.0" y1="496.0" x2="565.0" y2="489.0" stroke="#222" stroke-width="3"/>
+      <line x1="541.0" y1="489.6" x2="542.5" y2="487.0" stroke="#222" stroke-width="1.5"/>
+      <line x1="523.4" y1="472.0" x2="526.0" y2="470.5" stroke="#222" stroke-width="1.5"/>
+      <line x1="517.0" y1="448.0" x2="524.0" y2="448.0" stroke="#222" stroke-width="3"/>
+      <line x1="523.4" y1="424.0" x2="526.0" y2="425.5" stroke="#222" stroke-width="1.5"/>
+      <line x1="541.0" y1="406.4" x2="542.5" y2="409.0" stroke="#222" stroke-width="1.5"/>
+      <text x="565.0" y="423.0" fill="#222" font-size="14" font-weight="700" text-anchor="middle">12</text>
+      <text x="595.0" y="453.0" fill="#222" font-size="14" font-weight="700" text-anchor="middle">3</text>
+      <text x="565.0" y="483.0" fill="#222" font-size="14" font-weight="700" text-anchor="middle">6</text>
+      <text x="535.0" y="453.0" fill="#222" font-size="14" font-weight="700" text-anchor="middle">9</text>
+      <line x1="565" y1="448" x2="543.4" y2="433.5" stroke="#111" stroke-width="5" stroke-linecap="round"/>
+      <line x1="565" y1="448" x2="595.1" y2="420.9" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h2>Bavaria (Bavaria mode on)</h2>
+    <div class="tag">Mode on · white-and-blue lozenges, painted facades, Bavarian figures</div>
+    <svg viewBox="0 0 640 520" role="img" aria-label="Bavaria village facades and four figures">
+      <defs>
+        <pattern id="loz" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="11" height="11" fill="#3a8fd6"/><rect x="11" y="11" width="11" height="11" fill="#3a8fd6"/>
+          <rect x="11" width="11" height="11" fill="#f4f6f8"/><rect y="11" width="11" height="11" fill="#f4f6f8"/>
+        </pattern>
+      </defs>
+      <g transform="translate(20,20)">
+        <!-- timbered/painted house with shutters -->
+        <rect x="0" y="40" width="130" height="110" fill="#f6efdc"/><polygon points="-10,40 65,-10 140,40" fill="#8a4b32"/>
+        <rect x="14" y="70" width="12" height="34" fill="#3a8fd6"/><rect x="28" y="70" width="22" height="34" fill="#f2c15a"/><rect x="50" y="70" width="12" height="34" fill="#3a8fd6"/>
+        <rect x="76" y="70" width="12" height="34" fill="#3a8fd6"/><rect x="90" y="70" width="22" height="34" fill="#f2c15a"/><rect x="112" y="70" width="12" height="34" fill="#3a8fd6"/>
+        <rect x="55" y="118" width="22" height="32" fill="#6b4a32"/>
+        <!-- onion-dome church -->
+        <rect x="160" y="60" width="110" height="90" fill="#f3ead2"/>
+        <polygon points="165,60 215,60 215,40 190,20 165,40" fill="#e9e2cb"/>
+        <path d="M190 -8 q26 16 22 44 h-44 q-4 -28 22 -44z" fill="#2f7a63"/>
+        <rect x="178" y="88" width="20" height="32" fill="#f2c15a"/><rect x="232" y="88" width="20" height="32" fill="#f2c15a"/>
+        <!-- lozenge gable house -->
+        <rect x="300" y="30" width="120" height="120" fill="#f4f6f8"/>
+        <polygon points="290,30 360,-14 430,30" fill="url(#loz)"/>
+        <rect x="318" y="62" width="26" height="34" fill="#f2c15a"/><rect x="376" y="62" width="26" height="34" fill="#f2c15a"/>
+        <rect x="300" y="110" width="120" height="14" fill="#c9674a" opacity=".85"/>
+        <!-- painted facade with flower boxes -->
+        <rect x="450" y="55" width="130" height="95" fill="#fbe6b8"/><polygon points="440,55 515,10 590,55" fill="#8a4b32"/>
+        <rect x="468" y="80" width="22" height="30" fill="#f2c15a"/><rect x="540" y="80" width="22" height="30" fill="#f2c15a"/>
+        <rect x="464" y="112" width="30" height="7" fill="#c9674a"/><rect x="536" y="112" width="30" height="7" fill="#c9674a"/>
+        <!-- maypole -->
+        <rect x="262" y="-5" width="4" height="160" fill="#c8a35a" transform="translate(-0,0)"/>
+      </g>
+      <text x="20" y="215" fill="#9aa3b0" font-size="14">Four figures (alcoves) — same pivots, rig and timing</text>
+      <g stroke="#2a3240">
+        <!-- 1 cooper (Schäffler) -->
+        <g transform="translate(40,230)"><circle cx="40" cy="20" r="16" fill="#e8c9a0"/><rect x="26" y="0" width="28" height="8" fill="#c9332b"/><rect x="18" y="40" width="44" height="90" rx="10" fill="#c9332b"/><rect x="20" y="70" width="40" height="10" fill="#f4f6f8"/></g>
+        <!-- 2 dirndl -->
+        <g transform="translate(190,230)"><circle cx="40" cy="20" r="16" fill="#e8c9a0"/><rect x="18" y="40" width="44" height="40" rx="10" fill="#f4f6f8"/><polygon points="14,70 66,70 74,130 6,130" fill="#3a8fd6"/><rect x="26" y="78" width="28" height="40" fill="#f4f6f8" opacity=".9"/></g>
+        <!-- 3 lederhosen + hat -->
+        <g transform="translate(340,230)"><circle cx="40" cy="20" r="16" fill="#e8c9a0"/><polygon points="22,6 58,6 50,-8 30,-8" fill="#2f7a63"/><rect x="18" y="40" width="44" height="46" rx="8" fill="#f4f6f8"/><rect x="18" y="86" width="44" height="44" rx="8" fill="#7a5233"/></g>
+        <!-- 4 brewer / jester -->
+        <g transform="translate(490,230)"><circle cx="40" cy="20" r="16" fill="#e8c9a0"/><polygon points="22,8 40,-12 58,8" fill="#3a8fd6"/><rect x="18" y="40" width="44" height="90" rx="10" fill="#f6efdc"/><rect x="18" y="58" width="44" height="16" fill="#3a8fd6"/></g>
+      </g>
+      <g fill="#9aa3b0" font-size="13" text-anchor="middle">
+        <text x="80" y="390">Figure 1 · cooper</text><text x="230" y="390">Figure 2 · dirndl</text><text x="380" y="390">Figure 3 · lederhosen</text><text x="530" y="390">Figure 4 · brewer</text>
+      </g>
+      <text x="20" y="430" fill="#9aa3b0" font-size="14">Dial runs backwards: counter-clockwise (10:08)</text>
+      <text x="20" y="452" fill="#9aa3b0" font-size="14">Door and bird unchanged · no mountains or backdrop</text>
+      <text x="20" y="474" fill="#9aa3b0" font-size="14">Parade travels the opposite way round · camera route same</text>
+      <g transform="translate(0,16)">
+      <circle cx="565" cy="448" r="52" fill="#f4f1e6" stroke="#6b5a3a" stroke-width="3"/>
+      <line x1="565.0" y1="400.0" x2="565.0" y2="407.0" stroke="#222" stroke-width="3"/>
+      <line x1="541.0" y1="406.4" x2="542.5" y2="409.0" stroke="#222" stroke-width="1.5"/>
+      <line x1="523.4" y1="424.0" x2="526.0" y2="425.5" stroke="#222" stroke-width="1.5"/>
+      <line x1="517.0" y1="448.0" x2="524.0" y2="448.0" stroke="#222" stroke-width="3"/>
+      <line x1="523.4" y1="472.0" x2="526.0" y2="470.5" stroke="#222" stroke-width="1.5"/>
+      <line x1="541.0" y1="489.6" x2="542.5" y2="487.0" stroke="#222" stroke-width="1.5"/>
+      <line x1="565.0" y1="496.0" x2="565.0" y2="489.0" stroke="#222" stroke-width="3"/>
+      <line x1="589.0" y1="489.6" x2="587.5" y2="487.0" stroke="#222" stroke-width="1.5"/>
+      <line x1="606.6" y1="472.0" x2="604.0" y2="470.5" stroke="#222" stroke-width="1.5"/>
+      <line x1="613.0" y1="448.0" x2="606.0" y2="448.0" stroke="#222" stroke-width="3"/>
+      <line x1="606.6" y1="424.0" x2="604.0" y2="425.5" stroke="#222" stroke-width="1.5"/>
+      <line x1="589.0" y1="406.4" x2="587.5" y2="409.0" stroke="#222" stroke-width="1.5"/>
+      <text x="565.0" y="423.0" fill="#222" font-size="14" font-weight="700" text-anchor="middle">12</text>
+      <text x="535.0" y="453.0" fill="#222" font-size="14" font-weight="700" text-anchor="middle">3</text>
+      <text x="565.0" y="483.0" fill="#222" font-size="14" font-weight="700" text-anchor="middle">6</text>
+      <text x="595.0" y="453.0" fill="#222" font-size="14" font-weight="700" text-anchor="middle">9</text>
+      <line x1="565" y1="448" x2="586.6" y2="433.5" stroke="#111" stroke-width="5" stroke-linecap="round"/>
+      <line x1="565" y1="448" x2="534.9" y2="420.9" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<div class="settings">
+  <span><b>Bavaria mode</b><span class="seg"><span>Off</span><span class="on">On</span></span></span>
+  <span><b>Sound</b> On</span>
+  <span><b>Window lights</b> On</span>
+  <span><b>Camera motion</b> Journey</span>
+  <span class="note">Field of CuckooVillageSettings, read at level entry; applies at the next launch.</span>
+</div>
+</body>
+</html>
