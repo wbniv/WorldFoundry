@@ -38,6 +38,23 @@ for texture in ('village_atlas.tga', 'tower-carved-wood.tga'):
     shutil.copyfile(LAYOUT / texture, HERE / texture)
 
 objs = bpy.data.objects
+
+# The prototype's hand meshes are bars offset sideways from their object origin (the hour bar sits +0.11 right of it,
+# the minute bar -0.14 left), so rotating the object swings each hand around a point that is not the dial centre and
+# the face reads wrong at almost every time (Will, 2026-11-21: "hands on village clock not correct"). Recentre each
+# bar on its pivot; the tail (below the pivot) and the length are kept. Directions were already right: 3:00 has the
+# minute hand up and the hour hand right.
+for hand_name in ('hour_hand', 'minute_hand'):
+    hand = objs[hand_name]
+    hand.data = hand.data.copy()
+    xs = [v.co.x for v in hand.data.vertices]
+    centre = (min(xs) + max(xs)) / 2
+    for v in hand.data.vertices:
+        v.co.x -= centre
+    hand.data.update()
+    xs = [v.co.x for v in hand.data.vertices]
+    assert abs(min(xs) + max(xs)) < 1e-6 and max(xs) - min(xs) < 0.1, f'{hand_name} is not centred on its pivot'
+
 assert abs(scope['tower_z'] - tl.TZ) < 1e-3, f"tower height {scope['tower_z']} differs from timeline TZ {tl.TZ}"
 
 
