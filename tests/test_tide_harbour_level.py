@@ -13,13 +13,12 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "wflevels" / "tide_harbour"))
 sys.path.insert(0, str(ROOT / "tests"))
 
-import forth  # noqa: E402
-import parts  # noqa: E402
-import timeline as tl  # noqa: E402
+import level_modules  # noqa: E402
 from debug_bridge_client import lev_name_to_pos  # noqa: E402
+
+tl, parts, forth = level_modules.load("tide_harbour", "timeline", "parts", "forth")
 
 LEV = ROOT / "wflevels" / "tide_harbour" / "tide_harbour.lev"
 MAP = json.loads((ROOT / "wflevels" / "tide_harbour" / "actor-map.json").read_text())

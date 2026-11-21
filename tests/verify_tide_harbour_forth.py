@@ -26,11 +26,11 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "wflevels" / "tide_harbour"))
 sys.path.insert(0, str(ROOT / "tests"))
-import forth  # noqa: E402
-import timeline as tl  # noqa: E402
-import verify_minute_machine_forth as mm  # noqa: E402  (its VM host and bootstrap builder)
+import level_modules  # noqa: E402
+
+tl, _parts, forth = level_modules.load("tide_harbour", "timeline", "parts", "forth")
+import verify_minute_machine_forth as mm  # noqa: E402  (its VM host and bootstrap builder; it imports Minute Machine's own modules)
 
 HOST = mm.HOST.replace('else if (line[0] == \'T\') {', '''else if (line[0] == 'R') { int i; sscanf(line + 2, "%d", &i); printf("V %d %.9g\\n", i, mbx.count(i) ? mbx[i] : 0.0f); fflush(stdout); }
     else if (line[0] == 'T') {''').replace('eval("mm-tick")', 'eval("th-tick")')

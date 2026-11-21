@@ -342,8 +342,13 @@ def moon_phase(ha: float) -> float:
 RECOLOUR: Dict[str, list] = {}       # actor -> [(slot, kind, day colour, lit colour, argument)], from parts.py
 
 
+PARTS = None                # parts.py sets this when it is imported (it imports this module, so not the other way round)
+
+
 def _recolour_table() -> None:
-    import parts           # the materials are the geometry's; parts imports this module, so import late
+    parts = PARTS
+    if parts is None:       # the materials are the geometry's
+        import parts
     RECOLOUR.clear()
     for name, slots in parts.recolour_slots().items():
         RECOLOUR[name] = slots

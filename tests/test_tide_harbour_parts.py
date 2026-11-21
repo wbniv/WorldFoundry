@@ -7,12 +7,13 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "wflevels" / "tide_harbour"))
+sys.path.insert(0, str(ROOT / "tests"))
 sys.path.insert(0, str(ROOT / "wflevels" / "clock_common"))
 
-import parts  # noqa: E402
-import timeline as tl  # noqa: E402
+import level_modules  # noqa: E402
 from clock_mesh import face_normal, signed_volume  # noqa: E402
+
+tl, parts = level_modules.load("tide_harbour", "timeline", "parts")
 
 FLAT = ("sky_", "sun", "moon", "dial")
 

@@ -378,3 +378,6 @@ def recolour_slots() -> Dict[str, List[Tuple[int, str, RGB, RGB, float]]]:
         if slots:
             out[mesh.name] = slots
     return out
+
+
+tl.PARTS = sys.modules[__name__]      # timeline.scene's colours come from these materials (see timeline._recolour_table)

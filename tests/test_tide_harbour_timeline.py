@@ -11,12 +11,12 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "wflevels" / "tide_harbour"))
 sys.path.insert(0, str(ROOT / "tests"))
 
-import parts  # noqa: E402
-import timeline as tl  # noqa: E402
+import level_modules  # noqa: E402
 from test_tide_constants import PUBLISHED  # noqa: E402  (events read by eye from the department's printed 2026 table)
+
+tl, parts = level_modules.load("tide_harbour", "timeline", "parts")
 
 TODAY = tl.wall_day(dt.date(2026, 11, 21))
 

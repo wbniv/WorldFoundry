@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "wflevels" / "tide_harbour"))
+sys.path.insert(0, str(ROOT / "tests"))
 
 
 @pytest.mark.skipif(shutil.which("cc") is None or shutil.which("c++") is None, reason="needs a C and C++ compiler")
@@ -25,7 +25,8 @@ def test_director_matches_the_reference_model():
 def test_the_script_obeys_the_level_guides():
     """docs/level-design-troubleshooting.md: ASCII only, a backslash comment only on the first line, no and/or/<0,
     the definitions above and the per-tick call last."""
-    import forth
+    import level_modules
+    _tl, _parts, forth = level_modules.load("tide_harbour", "timeline", "parts", "forth")
     text = forth.director_script(forth.default_indices())
     assert text.isascii()
     lines = text.strip().split("\n")
