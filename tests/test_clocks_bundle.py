@@ -30,6 +30,22 @@ def test_manifest_names_the_package_and_starts_with_minute_machine():
     assert MANIFEST.ids[0] == 'minute_machine'      # D2: level 0, never renumbered
 
 
+def test_the_roster_is_two_clocks_so_the_chooser_appears():
+    """Tide Harbour is appended as level 1 (D4: a new clock is appended, never inserted). With two entries the
+    engine shows its chooser; with one it starts that level directly."""
+    assert list(MANIFEST.ids) == ['minute_machine', 'tide_harbour']
+    assert [e.menu_name for e in MANIFEST.entries] == ['Minute Machine', 'Tide Harbour']
+
+
+def test_the_committed_bundle_holds_the_committed_levels():
+    """Plan Q12: the clocks commit their built levels and bundle (task clocks-check proves they rebuild identically)."""
+    data = (LEVELS / 'clocks-cd.iff').read_bytes()
+    toc = read_toc(data)
+    for (_, offset, size), clock in zip(toc[1:1 + len(MANIFEST.ids)], MANIFEST.ids):
+        assert data[offset:offset + size] == (LEVELS / f'{clock}-standalone.iff').read_bytes(), clock
+    assert read_menu(data)['entries'] == [(i, e.menu_name) for i, e in enumerate(MANIFEST.entries)]
+
+
 def test_every_manifest_id_has_a_level_source():
     """Each clock is built from wflevels/<id>/build.sh (the standalone .iff itself is a build output)."""
     missing = [i for i in MANIFEST.ids if not (LEVELS / i / 'build.sh').is_file()]
@@ -55,7 +71,7 @@ def test_unknown_id_stops_the_pack_naming_it(tmp_path, capsys):
 
 
 @pytest.mark.skipif(bool(packer.missing_levels(MANIFEST_PATH)),
-                    reason='build the clock levels first (task minute-machine-level)')
+                    reason='build the clock levels first (task minute-machine-level, task tide-harbour-level)')
 def test_bundle_toc_order_is_the_manifest_order(tmp_path, monkeypatch):
     monkeypatch.setenv('WF_CDPACK', str(cdpack_binary()))
     out = tmp_path / 'cd.iff'

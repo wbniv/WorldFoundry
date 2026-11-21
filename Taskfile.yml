@@ -1808,9 +1808,19 @@ tasks:
 
   clocks-bundle:
     desc: "Pack the WF Clocks bundle: every clock of wflevels/clocks-menu.manifest, in manifest order, with shell-menu.fth and the MENU chunk, into wflevels/clocks-cd.iff, linked as android/screensaver/src/clocks/assets/cd.iff (Linux container; a manifest id with no built level stops it). Plan docs/plans/2026-11-21-tide-harbour-clock.md"
-    deps: [minute-machine-level]
+    deps: [minute-machine-level, tide-harbour-level]
     cmds:
       - scripts/in-linux-container.sh bash -c 'set -euo pipefail; cargo build --release --quiet --manifest-path wftools/cdpack-rs/Cargo.toml; python3 scripts/pack-clocks-bundle.py'
+
+  clocks-regenerate:
+    desc: "Rebuild every clock of wflevels/clocks-menu.manifest and wflevels/clocks-cd.iff in the Blender container, writing the committed wflevels/ outputs; commit what changes. task clocks-check verifies them (plan docs/plans/2026-11-21-tide-harbour-clock.md, Q12)"
+    cmds:
+      - bash scripts/clocks-levels.sh regenerate
+
+  clocks-check:
+    desc: "Check the committed WF Clocks outputs are fresh: rebuild HEAD's inputs in a scratch copy (build-docker/level-check/) and compare every tracked file, as task aquarium-check does; fails listing the stale files: task clocks-check [-- --ref REF --keep]"
+    cmds:
+      - bash scripts/clocks-levels.sh check {{.CLI_ARGS}}
 
   build-clocks-apk:
     desc: "WF Clocks APK (org.worldfoundry.clocks: every clock, the engine chooser, the Dream) as a Release build (CMake Release: -O3 + thin LTO; debug-keystore signed for sideload) for arm64-v8a and armeabi-v7a (the Chromecasts need armeabi-v7a; the Pixel and the tablet arm64-v8a), checked in the APK. Builds the levels, packs the bundle, then offline Gradle. Lands at android/screensaver/build/outputs/apk/clocks/release/screensaver-clocks-release.apk"

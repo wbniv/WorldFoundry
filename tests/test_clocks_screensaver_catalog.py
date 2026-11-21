@@ -104,7 +104,7 @@ def test_build_clocks_apk_packs_the_bundle_and_checks_both_abis():
     """The Chromecasts are armeabi-v7a only; the Pixel 8 Pro and the Lenovo tablet are arm64-v8a."""
     import yaml
     tasks = yaml.safe_load((ROOT / 'Taskfile.yml').read_text())['tasks']
-    assert tasks['clocks-bundle']['deps'] == ['minute-machine-level']
+    assert tasks['clocks-bundle']['deps'] == ['minute-machine-level', 'tide-harbour-level']
     assert 'python3 scripts/pack-clocks-bundle.py' in ' '.join(tasks['clocks-bundle']['cmds'])
     apk = tasks['build-clocks-apk']
     assert apk['deps'] == ['clocks-bundle']
@@ -133,8 +133,8 @@ def test_clocks_replaces_the_minutemachine_flavor():
 
 
 def test_two_entry_test_build_never_touches_the_shipped_roster():
-    """Acceptance support: a two-entry bundle so the chooser really appears, built from a throwaway
-    manifest under the Gradle build directory; the shipped manifest keeps Minute Machine only."""
+    """Acceptance support from before the second clock: a two-entry bundle so the chooser appears, built from a
+    throwaway manifest under the Gradle build directory; the shipped manifest never carries its _b entry."""
     import yaml
     task = yaml.safe_load((ROOT / 'Taskfile.yml').read_text())['tasks']['build-clocks-two-entry-apk']
     script = '\n'.join(str(c) for c in task['cmds'])
