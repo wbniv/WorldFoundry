@@ -1,6 +1,6 @@
 # Minute Machine: a sixty-second chain reaction that drops the minute flap
 
-**Status: draft for review, 2026‑11‑21.** Nothing is built. The engine addition that tells a script the time of day is **approved** (Will, 2026‑11‑21: "yes, engine change to know TOD is pre-approved"). Decisions D1 to D10 below wait for Will.
+**Status: approved, 2026‑11‑21.** Will accepted every recommendation in D1 to D10 (2026‑11‑21: "D1-10: accept recommendations") and asked for it to be built ("implement / deploy / commit / push"). The engine addition that tells a script the time of day was approved first (Will, 2026‑11‑21: "yes, engine change to know TOD is pre-approved"). Phase 1 is next. Nothing is built yet.
 
 ## Context
 
@@ -31,7 +31,7 @@ The brainstorm sets four rules for a clock that works as a TV screensaver. This 
 
 ## Decisions for Will
 
-Each row has a recommendation and its alternatives. The [live mockup](2026-11-21-sixty-second-chain-reaction/machine.html) lets you judge D3 and D6 directly.
+Each row has a recommendation and its alternatives. **Will accepted all ten recommendations on 2026‑11‑21.** The [live mockup](2026-11-21-sixty-second-chain-reaction/machine.html) shows D3 and D6.
 
 | # | Decision | Recommendation | Alternatives |
 |---|---|---|---|

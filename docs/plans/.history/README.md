@@ -1,5 +1,7 @@
 | Date | Change |
 |------|--------|
+| [2026-11-14](https://github.com/wbniv/WorldFoundry/commit/b4e0899a) | One desktop build: task build runs CMake; engine/build_game.sh retires |
+| [2026-11-14](https://github.com/wbniv/WorldFoundry/commit/fccbdd6f) | Local CI: build wf_game and run the renderer and arena tests on a user timer |
 | [2026-11-14](https://github.com/wbniv/WorldFoundry/commit/c4dfbb7f) | Plans index: add the android-input-latency and planted-gl-memory-swing rows |
 | [2026-11-14](https://github.com/wbniv/WorldFoundry/commit/750a8db4) | Q*bert: the Blender generator regenerates a level that loads and plays |
 | [2026-11-14](https://github.com/wbniv/WorldFoundry/commit/583111c1) | Build a one-acre Snowgoons yard and add a snowgoon |
@@ -76,6 +78,16 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+b4e0899a	author	Will Norris
+b4e0899a	added	1
+b4e0899a	deleted	0
+b4e0899a	files	1
+b4e0899a	body	engine/build_game.sh and CMakeLists.txt built the desktop engine from two\nsource lists, and cd6b9e9e added two sources to CMake only, so task build\nhas not linked since. Only build_game.sh defined DESIGNER_CHEATS, which\ngates Linux --capture-frame, so no engine buildable at HEAD could pass the\nlocal CI's renderer freshness test.\n\n- CMakeLists.txt: WF_DESIGNER_CHEATS (DESIGNER_CHEATS=1) and WF_TEST_CODE\n  (DO_TEST_CODE=1), default ON for a desktop Linux build with the debug\n  defines, OFF for Release, and a configure error on Android, iOS, macOS\n  and the web, whose defines are unchanged. An editor build's engine is\n  engine/wf_game-dev.\n- cmake/wf-game-dev.cmake: the dev engine's initial cache (Debug and\n  task build's scripting roster). scripts/build-wf-game.sh configures with\n  it and builds wf_game; task build, task build-editor and\n  build-wf-game-container.sh --dev all go through it.\n- engine/build_game.sh deleted; tests/test-texture-atlas.sh becomes a\n  CMake wrapper; comments and docs that named it updated.\n- scripts/local-ci.sh: builders dev (default, the task build engine) and\n  release (build_game and cmake stay as aliases); the build scripts are the\n  runner's, and a commit whose CMakeLists.txt predates the option gets\n  -DCMAKE_CXX_FLAGS=-DDESIGNER_CHEATS=1, so old commits still back-test.\n\nPlan: docs/plans/2026-11-14-single-desktop-build.md\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
+fccbdd6f	author	Will Norris
+fccbdd6f	added	1
+fccbdd6f	deleted	0
+fccbdd6f	files	1
+fccbdd6f	body	Both guards for the inverted Snowgoons arena (Will, 2026-11-14) now run\non this PC: no Actions minutes, and Codemagic's Mac minutes stay for Mac\nwork. scripts/local-ci.sh (task ci:local) tests a commit of\norigin/2026-new-level in a throwaway sparse local clone (550 MB, objects\nhard-linked) under ~/.cache/wf-local-ci-scratch, builds the engine and\nruns tests/test_snowgoons_arena_faces_up.py and\ntests/test_renderer_references_fresh.py (xvfb-run) in wf-linux-test,\nmemory-capped, core dumps off, labelled through the new\nWF_CONTAINER_LABELS. A pytest skip is a failure. Results per commit and\na latest summary go to build-docker/local-ci/; a failure notifies.\nflock serialises runs; under 15 GB free it refuses. A systemd user timer\n(scripts/install-local-ci.sh, units in scripts/systemd/) polls every\n30 min and runs only when HEAD moved.\n\nProved on the bug: with the fix's tests overlaid (--tests-from 23658e9a)\nbe86bbb9 fails both (283/283 faces down; 39,809 px), and 23658e9a passes\nboth.\n\nOpen, needs a decision (plan, Findings): the freshness test cannot pass\nat HEAD. The CMake build never defines DESIGNER_CHEATS, which gates the\nLinux GL --capture-frame path, so no frame is written; engine/build_game.sh\ndefines it but has not linked since cd6b9e9e (planted_preview.cpp and\nruntime_diagnostics_form.cpp are CMake-only).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqR6tvK6k2yfENoAXy7
 c4dfbb7f	author	Will Norris
 c4dfbb7f	added	2
 c4dfbb7f	deleted	0
