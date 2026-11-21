@@ -6,7 +6,7 @@
 
 | Started by | Component | Does |
 |---|---|---|
-| The TV launcher, Homeboard's app tile or a person: plain `MAIN`, no extras | `.AquariumActivity` | the **tank menu**: the engine's level menu over the playable tanks, the same menu the Aquarium game app (`org.worldfoundry.wf_game.aquarium`) shows. Up and Down choose, Select starts, Back in a tank returns to the menu, Back on the menu leaves. Choosing a tank never changes the saved screensaver tank |
+| The TV launcher, Homeboard's app tile or a person: plain `MAIN`, no extras | `.AquariumActivity` | the **tank menu**: the engine's level menu over the playable tanks, the same menu the Aquarium game app (`org.worldfoundry.wf_game.aquarium`) shows. Up and Down choose, Select starts, Back in a tank returns to the menu, Back on the menu leaves; a press shorter than one frame still counts, because the native host latches each press until the engine's next frame reads it ([plan](../../docs/plans/2026-11-21-menu-key-latch.md)). Choosing a tank never changes the saved screensaver tank |
 | `--es org.worldfoundry.screensaver.LEVEL <id or random>` | `.AquariumActivity` or `.ScreensaverPreviewActivity` | that tank once, nothing saved; an unknown id is logged, shown and refused |
 | `--es org.worldfoundry.screensaver.DREAM <any>` | `.AquariumActivity` or `.ScreensaverPreviewActivity` | the saved tank (or Random), as the Dream |
 | No extras | `.ScreensaverPreviewActivity` | the saved tank (or Random); the preview never shows the menu |
