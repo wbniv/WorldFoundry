@@ -300,7 +300,7 @@ that change waits on the
 | Date | Document | Summary |
 |------|----------|---------|
 | 2026-11-21 | [Forth math words](docs/forth-math-words.md) | The contract for `sin-rev`, `cos-rev`, `tan-rev`, `asin-rev`, `acos-rev`, `atan-rev`, `atan2-rev`, `sincos-rev` and `sqrt`: angles in revolutions, accuracy, and loud domain errors. |
-| 2026-11-21 | [The tide at Bangkok](docs/reference/chao-phraya-tide-research.md) | Research behind the Tide Harbour clock and its A3 poster: the Navy's published tables, the harmonic fit and its out-of-sample error, the table's clock, and what was not found. |
+| 2026-11-21 | [The tide at Bangkok](docs/reference/chao-phraya-tide-research.md) | Research behind the Tide Harbour clock and its [A3 poster](docs/reference/chao-phraya-tide-poster/README.md): the Navy's published tables, the harmonic fit and its out-of-sample error, the table's clock, and what was not found. |
 | 2026-05-21 | [wf-edit user manual](docs/wf-edit-manual.md) | How to build, run, and use the collaborative editor (layout, OAD editing, live preview, save+compile, voice/video, automation env-vars, v1 limits), with screenshots throughout. |
 | 2026-04-16 | [Scripting languages in WF](docs/scripting-languages.md) | Survey of all engines covering integration surface, binary/RAM cost, compile-time switches, and reference scripts. |
 | 2026-04-16 | [Coding conventions](docs/coding-conventions.md) | Authoritative C++ style guide for WF runtime code; subsumes the old `codingstandards.txt`. |

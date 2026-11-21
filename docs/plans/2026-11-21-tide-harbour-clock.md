@@ -133,6 +133,7 @@ Will asked (2026‑11‑21): "update plan: make an a3 poster about the tides and
 - **Rules, from the seahorse poster:** the research document comes first and gives each source's locator and access limits; every printed claim wears a chip (**verified**, **other source**, **ours (measured)**); claims the research could not confirm stay out, and `make_poster.py` refuses to build if one is added; the drawings are original SVGs; the PDF is one 297 × 420 mm page, with a 300 DPI PNG and a `layout-review.json`.
 - **Print:** matte or uncoated A3 stock. The 2026‑10‑06 print was too glossy ([audit note](../reference/2026-10-06-aquarium-poster-reference-verification.md)); confirm a shop with matte A3 before going.
 - **Not on it:** the department's constants (not public), anything about the sun or moon (D12: not claimed), and anything from the two papers that could not be read.
+- **Built 2026‑11‑21:** [the A3 PDF](../reference/chao-phraya-tide-poster/chao-phraya-tide-a3.pdf), [the 300 DPI PNG](../reference/chao-phraya-tide-poster/poster.png) and [its README](../reference/chao-phraya-tide-poster/README.md). It follows the mockup's seven panels plus one (spring and neap tides, and a year of highs and lows, are new); panel 8 keeps the harbour as a design sketch.
 
 ### The bundle and the chooser
 
@@ -240,7 +241,7 @@ stateDiagram-v2
 | **3 Bundle and chooser** | Manifest, pack script, `LevelSettings` made a factory by clock id and one provider serving the playing clock's fields, `Clock*` classes, host change, flavor `clocks`, `minutemachine` flavor removed | T3 | Desktop and cast1: no argument shows the menu; a named clock skips it; the Dream never shows it |
 | **4 cast1** | Install, FPS gate, 10-minute Dream run, six moments checked on the TV, tide gauge checked against the model | T3 | D7 gate, and the moments match the mockups |
 | **5 Docs** | `android/screensaver/README.md`, `docs/level-building.md` note, `docs/forth-math-words.md` unaffected | T2 | `task md` renders |
-| **P The poster** | The [research document](../reference/chao-phraya-tide-research.md) is written. `docs/reference/chao-phraya-tide-poster/`: `make_poster.py`, `export_poster.py`, original SVG panels, `layout-review.json`, the PDF and a 300 DPI PNG; `tests/test_poster_chao_phraya_tide.py`. **Status: the seahorse poster's generator, exporter and test were read and the layout is mocked up; not yet built.** It needs only Phase 0(c), so it can be built at any time, including before the level exists; panel 6 (the harbour) is redrawn from the finished scene | T3 | PDF is one 297 × 420 mm page; the build refuses an unconfirmed claim; a person has read the printed-size proof |
+| **P The poster** | ~~The research document, `make_poster.py`, `export_poster.py`, the eight SVG panels, `layout-review.json`, the PDF, a 300 DPI PNG and `tests/test_poster_chao_phraya_tide.py`.~~ **Built 2026‑11‑21** in [`docs/reference/chao-phraya-tide-poster/`](../reference/chao-phraya-tide-poster/README.md) ([PDF](../reference/chao-phraya-tide-poster/chao-phraya-tide-a3.pdf), [PNG](../reference/chao-phraya-tide-poster/poster.png)); [record below](#poster-record). Panel 8's harbour is a design sketch, redrawn from the finished scene once Tide Harbour exists | T3 | ~~PDF is one 297 × 420 mm page; the build refuses an unconfirmed claim~~ Done. **Still open: a person reads the printed-size proof (Will), and it is printed on matte or uncoated stock** |
 
 ### Phase 0 record: the tide
 
@@ -299,6 +300,47 @@ Run 2026‑11‑21. `python3 scripts/audit-clock-settings.py`:
     ```
 
     **PASS.** The audit's own test: a fake clock with all six parts passes; removing the type, the capabilities asset or the test flips exactly that check; a level that neither places nor reads the object fails two; a type with no live field fails `fields`.
+
+### Poster record
+
+Built 2026‑11‑21. How to rebuild it is in its [README](../reference/chao-phraya-tide-poster/README.md); these are the runs that matter.
+
+1. `python3 docs/reference/chao-phraya-tide-poster/make_poster.py` (refuses to build on an unchipped or sourceless claim):
+
+    ```
+    poster.html: 8 panels, 27 claims, 8 sources
+    ```
+
+    **PASS.**
+
+2. `python3 docs/reference/chao-phraya-tide-poster/export_poster.py`:
+
+    ```
+    {"page_mm": {"width": 297, "height": 420}, "min_font_pt": 8.25, "overflowing": false, "fit": "ok"}
+    ```
+
+    **PASS.** The first layout overflowed in three places (the footer by 35 px, the header's fact box, one panel's claims); fixed by shortening wording and tightening line height from 15 to 14 px, never by shrinking type below the 8.25 pt floor.
+
+3. `pdfinfo docs/reference/chao-phraya-tide-poster/chao-phraya-tide-a3.pdf`:
+
+    ```
+    Pages:           1
+    Page size:       841.92 x 1191.12 pts (A3)
+    ```
+
+    **PASS.**
+
+4. `python3 -m pytest -q tests/test_poster_chao_phraya_tide.py`:
+
+    ```
+    .........                                                                [100%]
+    9 passed in 0.38s
+    ```
+
+    **PASS.** The tests refuse an unverified claim, a verified claim with no source, an ours claim with no script and an unknown source; check the printed numbers against the JSON the fit wrote; check the spring-and-neap period independently against NOAA's two speeds; and check every drawn text for size and contrast.
+
+What review found, and fixed, before it passed: a spring-and-neap period printed as negative (the gap between two speeds); a chip that called two design statements "measured"; the year panel's "lowest of the day" spiking on days that list no low, now classified by the table's strict high and low alternation; one caption at 2.30:1 contrast against its background (the test requires 4.5:1), now the dark ink; and a header title that wrapped over its subtitle.
+
 
 ### Phase 1 record: E1 built
 
@@ -387,7 +429,7 @@ These steps are the contract. Each is run when its phase lands, with the raw out
 8. Six screenshots from cast1, at the six times the mockups show: each reads the right time from the dial, and the tide gauge agrees with the model.
 9. `python3 -m pytest -q tests/test_tide_constants.py` and `python3 -I wflevels/tide_harbour/tide_fit/check_time_zone.py`: the constants reproduce the printed table, and the table's clock is UTC+7. Run 2026‑11‑21; output in the [Phase 0 record](#phase-0-record-the-tide). **PASS.**
 10. The Forth `tide-m` against the same table: in the VM and in the engine at eight chosen dates and times, within one centimetre of the Python sum (the float error), and within the fit's own error of the table's printed events.
-11. `python3 docs/reference/chao-phraya-tide-poster/make_poster.py`, then `export_poster.py`, then `python3 -m pytest -q tests/test_poster_chao_phraya_tide.py`: the PDF is one 297 × 420 mm page, every claim has a chip, no unconfirmed claim is present, and `layout-review.json` reports no overflow. A person reads the printed-size proof.
+11. `python3 docs/reference/chao-phraya-tide-poster/make_poster.py`, then `export_poster.py`, then `python3 -m pytest -q tests/test_poster_chao_phraya_tide.py`: the PDF is one 297 × 420 mm page, every claim has a chip, no unconfirmed claim is present, and `layout-review.json` reports no overflow. A person reads the printed-size proof. Run 2026‑11‑21; output in the [poster record](#poster-record). **PASS, except the last clause: a person reads the printed-size proof, which is Will's.**
 12. `python3 scripts/audit-clock-settings.py --strict`: every clock in the bundle has all six parts of a settings object, and `python3 -m pytest -q tests/test_audit_clock_settings.py` shows the audit itself can pass and can fail for each part. The test run is in the [audit record](#audit-record-settings-objects); the strict run waits for Phases 2 and 2b.
 13. `python3 -m pytest -q tests/test_minute_machine_settings.py tests/test_tide_harbour_settings.py`: each live field is set, the director stepped, and the pose checked, for every field of both clocks.
 

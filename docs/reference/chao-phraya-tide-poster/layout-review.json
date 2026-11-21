@@ -1,0 +1,70 @@
+{
+  "page_mm": {
+    "width": 297,
+    "height": 420
+  },
+  "page_px": {
+    "width": 1122.515625,
+    "height": 1587.390625
+  },
+  "content_bottom_limit_px": 1557.154425,
+  "footer_last_bottom_px": 1554.234375,
+  "footer_overflowing": false,
+  "document_overflowing": false,
+  "header_overflowing": false,
+  "orphaned_header_refs": [],
+  "panels": [
+    {
+      "id": "panel-days",
+      "clientHeight": 290,
+      "scrollHeight": 291,
+      "overflowing": false
+    },
+    {
+      "id": "panel-waves",
+      "clientHeight": 290,
+      "scrollHeight": 290,
+      "overflowing": false
+    },
+    {
+      "id": "panel-springneap",
+      "clientHeight": 290,
+      "scrollHeight": 290,
+      "overflowing": false
+    },
+    {
+      "id": "panel-year",
+      "clientHeight": 290,
+      "scrollHeight": 290,
+      "overflowing": false
+    },
+    {
+      "id": "panel-method",
+      "clientHeight": 290,
+      "scrollHeight": 290,
+      "overflowing": false
+    },
+    {
+      "id": "panel-accuracy",
+      "clientHeight": 290,
+      "scrollHeight": 290,
+      "overflowing": false
+    },
+    {
+      "id": "panel-clock",
+      "clientHeight": 290,
+      "scrollHeight": 290,
+      "overflowing": false
+    },
+    {
+      "id": "panel-harbour",
+      "clientHeight": 290,
+      "scrollHeight": 290,
+      "overflowing": false
+    }
+  ],
+  "min_font_px": 11,
+  "min_font_pt": 8.25,
+  "fit": "ok",
+  "overflowing": false
+}

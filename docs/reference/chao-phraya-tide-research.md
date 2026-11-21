@@ -74,7 +74,7 @@ A handful of constituents gets the look; it takes about 48 to get within 6 cm.
 
 Largest of the 64 (amplitude, period): K1 50.0 cm 23.93 h; M2 36.3 cm 12.42 h; O1 30.9 cm 25.82 h; S2 23.1 cm 12.00 h; Sa 17.1 cm one year; P1 13.2 cm 24.07 h; K2 8.5 cm 11.97 h; Mf 7.8 cm 13.66 days. The form factor (K1 + O1) / (M2 + S2) is **1.36**, in the "mixed, mainly semidiurnal" class (0.25 to 1.5) by the rule in [Aungsakul et al. 2011](https://wjst.wu.ac.th/index.php/wjst/article/view/128), which classifies the same station as 1.06, the same class.
 
-**Cautions.** (1) Time errors are larger than the height errors suggest: at a flat peak a few centimetres move the extremum by up to an hour or two, so "the time of high water" is only good to tens of minutes where the tide is flat; the median is 11 minutes. (2) The fit is to published predictions, not to observations or to the department's constants, so it can be no better than they are. (3) There is no nodal correction: NOAA's formula carries a yearly amplitude factor `f` that ours sets to 1 ([NOAA](https://tidesandcurrents.noaa.gov/about_harmonic_constituents.html)). One year ahead showed no loss (3.7 against 3.3 cm); the department publishes each year, so refitting yearly is cheap. (4) Sa (17 cm) is the annual cycle of the mean level, which in a river mixes the sea's seasonal level and the river's discharge; two years cannot separate them. (5) The compound set was chosen by us.
+**Cautions.** (1) Time errors are larger than the height errors suggest: at a flat peak a few centimetres move the extremum by up to an hour or two, so "the time of high water" is only good to tens of minutes where the tide is flat; the median is 13 minutes fitted on 2026 and scored on 2027, and 11 the other way. (2) The fit is to published predictions, not to observations or to the department's constants, so it can be no better than they are. (3) There is no nodal correction: NOAA's formula carries a yearly amplitude factor `f` that ours sets to 1 ([NOAA](https://tidesandcurrents.noaa.gov/about_harmonic_constituents.html)). One year ahead showed no loss (3.7 against 3.3 cm); the department publishes each year, so refitting yearly is cheap. (4) Sa (17 cm) is the annual cycle of the mean level, which in a river mixes the sea's seasonal level and the river's discharge; two years cannot separate them. (5) The compound set was chosen by us.
 
 ## The paper that gave a form factor
 
@@ -97,3 +97,5 @@ python3 -I wflevels/tide_harbour/tide_fit/check_time_zone.py
 python3 -I wflevels/tide_harbour/tide_fit/make_constants.py --n 64
 python3 -m pytest -q tests/test_tide_constants.py
 ```
+
+The A3 poster built from this research is in [chao-phraya-tide-poster](chao-phraya-tide-poster/README.md).
