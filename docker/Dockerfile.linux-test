@@ -62,6 +62,12 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends python3-brotli=1.1.0-2build2 python3-fonttools=4.46.0-1build2 \
  && rm -rf /var/lib/apt/lists/*
 
+# PyYAML: the tests that read Taskfile.yml (tests/test_aquarium_menu.py and others) import yaml,
+# and failed here until it was installed. Its own layer, like the ones above. Added 2026-11-21.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3-yaml \
+ && rm -rf /var/lib/apt/lists/*
+
 # Software GL, so every run renders with the same rasteriser whatever the host GPU is.
 ENV LIBGL_ALWAYS_SOFTWARE=1 \
     HOME=/tmp
