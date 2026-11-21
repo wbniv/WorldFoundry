@@ -1,6 +1,6 @@
 # Aquarium: close the gaps in the menu app and in launching one tank from a screensaver launcher
 
-**Status (2026‑11‑21): Phases 1 to 3 done; Phase 4 handoffs filed; device checks pending.** Phase 1 `9cf32704`. Phase 2: the `cdpack` column (`8a09a6c5`), the manifest labels (`f78cd411`), the Gradle copy (`7ec78180`), the build script, tests and README reading the manifest (`c4ea9a0f`) and `LevelCatalog` (`ec9b872e`). Phase 3: `LevelLaunch` and the `LEVEL` extra on `ScreensaverPreviewActivity` and `AquariumActivity` (`ec9b872e`). Phase 4 handoffs filed (coordinator `8a61073b`, Homeboard `67303e3`); our own manifest metadata is not started. **Not done:** the 3D Clocks manifest and launch wiring (waits for the remediation plan's package), Verification 5, 6 and 8 to 10 (a Chromecast, inside the remediation plan's step 4 reservation). D1 to D7 accepted. D3 accepted, and the scope widened (Will, 2026‑11‑21): "don't forget 3d clocks bundle, too! we [want] generic mechanisms and existing assets remediated".** So the catalogue and the one-run launch are **generic mechanisms**, not Aquarium code: the Aquarium and the 3D Clocks bundle use them, and the existing assets are brought onto them (the [remediation plan](2026-11-21-screensaver-app-and-remediation.md) audits and fixes each level). Will, 2026‑11‑21: "write plan to fix gaps in using app with menu as well as screensaver running a specific level. also consider what ../homeboard-tv/ provides for screensaver choosing, configuration, and everything it can control and do with screensavers". Reconciled with the [screensaver app and remediation plan](2026-11-21-screensaver-app-and-remediation.md) the same day: see [Reconciliation](#reconciliation-with-the-screensaver-app-and-remediation-plan). The three fixes were agreed in the conversation first: a `run-aquarium-menu` desktop task, an intent extra on `ScreensaverPreviewActivity`, and one source for the tank roster. This plan adds the Homeboard side and the order of work.
+**Status (2026‑11‑21): Phases 1 to 3 done; Phase 4 handoffs filed; device checks pending.** Phase 1 `9cf32704`. Phase 2: the `cdpack` column (`8a09a6c5`), the manifest labels (`f78cd411`), the Gradle copy (`7ec78180`), the build script, tests and README reading the manifest (`c4ea9a0f`) and `LevelCatalog` (`ec9b872e`). Phase 3: `LevelLaunch` and the `LEVEL` extra on `ScreensaverPreviewActivity` and `AquariumActivity` (`ec9b872e`). Phase 4 handoffs filed (coordinator `8a61073b`, Homeboard `67303e3`); our own manifest metadata is not started. **Done on cast1 (2026‑11‑21):** Verification 5 and 8, with 6 only partly (see below). **Not done:** Verification 9 (Homeboard) and 10 (the 3D Clocks package is on `feat/clocks-package`, unmerged, with its wiring already using `LevelLaunch`). D1 to D7 accepted. D3 accepted, and the scope widened (Will, 2026‑11‑21): "don't forget 3d clocks bundle, too! we [want] generic mechanisms and existing assets remediated".** So the catalogue and the one-run launch are **generic mechanisms**, not Aquarium code: the Aquarium and the 3D Clocks bundle use them, and the existing assets are brought onto them (the [remediation plan](2026-11-21-screensaver-app-and-remediation.md) audits and fixes each level). Will, 2026‑11‑21: "write plan to fix gaps in using app with menu as well as screensaver running a specific level. also consider what ../homeboard-tv/ provides for screensaver choosing, configuration, and everything it can control and do with screensavers". Reconciled with the [screensaver app and remediation plan](2026-11-21-screensaver-app-and-remediation.md) the same day: see [Reconciliation](#reconciliation-with-the-screensaver-app-and-remediation-plan). The three fixes were agreed in the conversation first: a `run-aquarium-menu` desktop task, an intent extra on `ScreensaverPreviewActivity`, and one source for the tank roster. This plan adds the Homeboard side and the order of work.
 
 ## Context
 
@@ -211,11 +211,18 @@ $ task test-level-catalog
 
 5. (Run inside the remediation plan's step 4 reservation, not as a separate campaign.) `adb shell am start -n org.worldfoundry.screensaver/.ScreensaverPreviewActivity --es org.worldfoundry.screensaver.LEVEL aquarium_jellyfish` on a Chromecast through the coordinator: the top activity is the preview, the Jellyfish tank plays, and `content call … getCapabilities` still shows the old saved tank.
 
-**Pending**: needs a Chromecast (steps 5, 6, 8) or another repo (8, 9, 10).
+Run 2026‑11‑21 on cast1 (`chromecast-test-01`, Chromecast HD) through the coordinator, release 0.1.213 (`screensaver-show` with the new `level` argument, which sends `--es org.worldfoundry.screensaver.LEVEL <id>` to `.ScreensaverPreviewActivity`). The saved tank was first set to Clownfish (`aquarium`), so only a build that honours the extra can show another tank:
+```
+$ WF_CC_LEVEL=aquarium_jellyfish python3 scripts/chromecast.py task screensaver-show
+J-a06ba925045f: completed {"error": null, "health": "ready"}
+observed_component: org.worldfoundry.screensaver/.ScreensaverPreviewActivity   display_mode: live-app-preview   screenshot_black: false
+saved tank read back after the show: aquarium
+```
+Evidence: [`docs/diagnostics/chromecast-screensaver-show-J-a06ba925045f`](../diagnostics/chromecast-screensaver-show-J-a06ba925045f/screensaver.png) (the screenshot shows the Jellyfish tank). `aquarium_sea_stars` (the settings-overrides path) also played: [`J‑96a3d917fd7c`](../diagnostics/chromecast-screensaver-show-J-96a3d917fd7c/screensaver.png). **PASS.** Afterwards cast1 was restored (saved tank `random`, Seahorse Dream selected, HOME pressed) and its idle, sleep and stay-on settings read back equal to the baseline. Not run: `random` and `AquariumActivity` with the extra.
 
 6. The same with `LEVEL` set to an unknown id: the activity logs the error and finishes, and the saved tank is unchanged.
 
-**Pending**: needs a Chromecast (steps 5, 6, 8) or another repo (8, 9, 10).
+**Partly verified.** Through the coordinator an unknown id never reaches the device (step 8). The on-device path (the activity logs "unknown level", shows it and finishes, the saved tank unchanged) has no coordinator route yet, because `screensaver-show` refuses first; it is covered by `LevelCatalogTest` (`choose()` throws and names the id) and by the code in `LevelLaunch.startChosen`, not by a device log. A raw `am start` was not used because cast1 belongs to the coordinator.
 
 7. With no extra, the preview plays the saved tank exactly as before (the existing `tests/test_aquarium_screensaver_*.py` pass, the catalogue one with its updated source of truth).
 
@@ -223,7 +230,12 @@ Included in the 80 above: `test_aquarium_screensaver_*` and `test_sea_stars_sett
 
 8. Coordinator `screensaver-show` with `tank` set shows that tank on Cast1 and leaves the saved tank alone; an id outside `getCapabilities` is refused before any launch.
 
-**Pending**: needs a Chromecast (steps 5, 6, 8) or another repo (8, 9, 10).
+```
+$ WF_CC_LEVEL=aquarium_no_such_tank python3 scripts/chromecast.py task screensaver-show
+J-9f5841b85543: failed {"error": "invalid-setting-value", "health": "ready"}
+That setting value is not allowed, so the request was not applied and nothing on the device changed. Check the value and try again.
+```
+**PASS** for both halves: `aquarium_jellyfish` was passed through and shown (step 5); the unknown id was refused before any wake or launch, with the device healthy and unchanged. Coordinator side: release 0.1.213, branch `level-launch-release` (`d322b2b8`).
 
 9. Homeboard Stage 5 on Cast1: Preview plays the chosen tank, **Use this screensaver** saves it, Restore returns the original screensaver. Recorded in Homeboard's testing record and linked back here.
 
@@ -231,7 +243,7 @@ Included in the 80 above: `test_aquarium_screensaver_*` and `test_sea_stars_sett
 
 10. **3D Clocks bundle.** For each clock id in its manifest, the coordinator starts the bundle's launch activity with `--es org.worldfoundry.screensaver.LEVEL <id>`: that clock plays with no chooser and the saved Dream clock is unchanged on readback. An unknown id is refused with the error logged. Run inside the remediation plan's step 4 reservation.
 
-**Pending**: needs a Chromecast (steps 5, 6, 8) or another repo (8, 9, 10).
+**Pending.** The 3D Clocks package exists on branch `feat/clocks-package` (flavor `clocks`, `org.worldfoundry.clocks`, manifest `wflevels/clocks-menu.manifest`): its `ClocksActivity` and `ClocksDreamService` already call `LevelLaunch.startChosen` with the `LEVEL` extra, so the wiring is done there. Left: merge that branch, register a `clocks` app with `level_launch_extra` in the coordinator, and run each clock on a Chromecast (the manifest lists only Minute Machine so far).
 
 11. **Seahorse Grid and Planted Tank are untouched.** `git diff --stat` for the Phase 2 and 3 commits lists no file under `android/screensaver/src/seahorse` or `.../planted`, and `SeahorseGridActivity` and `PlantedTankActivity` behave exactly as before.
 
