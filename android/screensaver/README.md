@@ -6,7 +6,7 @@
 
 The player has no phone-controller prompt, QR code, or controller server, and requests no `INTERNET` permission. The native host hides the engine FPS counter and links the existing `wfengine` target through an app-specific CMake project hook. The Planted Tank uses the shared engine launch-override table to apply values to its settings actor before each level load.
 
-All three Dreams and their live previews show only the level render. Each app has its own launcher icon with the approved lower-right World Foundry badge; their TV banners also include it. Regenerate icon resources with `python3 scripts/gen-screensaver-android-icons.py`.
+All three Dreams and their live previews show only the level render. Each app has its own launcher icon with the approved lower-right World Foundry badge; their TV banners also include it. Regenerate icon resources with `python3 scripts/gen-screensaver-android-icons.py`. The WF Clocks package's art (a clock on brass gears, not any one clock level) is drawn by `scripts/gen-wf-clocks-art.py` into `android/screensaver/art-src/wf-clocks-*.png`; run it first (in the container), then `python3 scripts/gen-screensaver-android-icons.py clocks` (it needs the system fonts for the banner name).
 
 All three Dreams ship as Release builds ([measurements](../../docs/diagnostics/dream-release-2026-11-09/README.md)). The release build type is signed with the debug keystore, like the game app's, so it installs by sideload.
 

@@ -7,8 +7,8 @@ The aquarium crop excludes its banner title and badge. Seahorse and Planted Tank
 artwork comes from local renders of the levels. All use the shared Android icon
 treatment. With no argument every flavor is rebuilt; name one to rewrite only
 that flavor's files (aquarium: src/main/res, seahorse: src/seahorse/res,
-planted: src/planted/res, clocks: src/clocks/res). The WF Clocks art is still
-Minute Machine's (its first clock), banner title included.
+planted: src/planted/res, clocks: src/clocks/res). The WF Clocks art is drawn
+by scripts/gen-wf-clocks-art.py (a clock face on brass gears), not taken from one clock level.
 """
 from __future__ import annotations
 
@@ -24,7 +24,8 @@ RES = ROOT / "android/screensaver/src/main/res"
 BANNER = RES / "drawable/tv_banner.png"
 SEAHORSE_FRAME = ROOT / "android/screensaver/art-src/seahorse-grid-frame.png"
 SEAHORSE_RES = ROOT / "android/screensaver/src/seahorse/res"
-MINUTE_FRAME = ROOT / "android/screensaver/art-src/minute-machine-frame.png"
+CLOCKS_FRAME = ROOT / "android/screensaver/art-src/wf-clocks-frame.png"
+CLOCKS_ICON = ROOT / "android/screensaver/art-src/wf-clocks-icon.png"
 CLOCKS_RES = ROOT / "android/screensaver/src/clocks/res"
 PLANTED_FRAME = ROOT / "android/screensaver/art-src/planted-tank-frame.png"
 PLANTED_RES = ROOT / "android/screensaver/src/planted/res"
@@ -85,15 +86,18 @@ def build_seahorse() -> None:
 
 
 def build_clocks() -> None:
-    frame = Image.open(MINUTE_FRAME).convert("RGB")
-    if frame.size != (1280, 720):
-        raise ValueError(f"unexpected Minute Machine frame size: {frame.size}")
-    # A 360 x 360 square on the hopper, the fallen dominoes and the bucket: no FPS counter, no table edge.
-    write_icons(frame.crop((560, 200, 920, 560)), CLOCKS_RES)
+    # The WF Clocks art is drawn, not rendered: scripts/gen-wf-clocks-art.py writes both files.
+    icon, frame = CLOCKS_ICON, CLOCKS_FRAME
+    for path, size in ((icon, (720, 720)), (frame, (1280, 720))):
+        if not path.exists():
+            raise FileNotFoundError(f"{path} is missing: run scripts/gen-wf-clocks-art.py")
+        if Image.open(path).size != size:
+            raise ValueError(f"unexpected size for {path}: {Image.open(path).size}")
+    write_icons(Image.open(icon).convert("RGB"), CLOCKS_RES)
     banner = android_icons.banner({
-        "banner": MINUTE_FRAME,
+        "banner": frame,
         "banner_crop": (0, 0, 1280, 720),
-        "name": "Minute Machine",
+        "name": "WF Clocks",
     })
     target = CLOCKS_RES / "drawable/tv_banner.png"
     target.parent.mkdir(parents=True, exist_ok=True)
