@@ -15,6 +15,7 @@ y into the screen. The water is z = 0; the camera looks along +y.
 from __future__ import annotations
 
 import math
+import os
 import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -23,6 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "minute_machine"
 from parts import Mesh  # noqa: E402  (Minute Machine's mesh class: box, prism_xz, cylinder_y)
 
 N_BARS = 36
+QUADS = os.environ.get('TANK_SPIKE_QUAD') == '1'            # experiment: build veils, glows and the sky as zero-thickness quads
 VARIANTS = {"a": 46, "b": 100, "c": 150, "d": 150}            # posed actors, not counting the veils and glows
 CAMERA = (0.0, -22.0, 4.5)
 LOOK_AT = (0.0, 12.0, 2.0)
@@ -82,13 +84,19 @@ def to_camera_ray(target: Tuple[float, float, float], distance: float) -> Tuple[
 def veil_mesh(i: int) -> Mesh:
     m = Mesh(f"veil_{i}")
     w, h = 16.0, 9.0
-    m.box((-w, 0.0, -h), (w, 0.5, h), f"veil_{i}")             # a box 0.5 m deep: a zero-thickness quad risks being invisible
+    if QUADS:
+        m.face([(-w, 0, -h), (w, 0, -h), (w, 0, h), (-w, 0, h)], f"veil_{i}")   # counter-clockwise seen from -y: faces the camera
+    else:
+        m.box((-w, 0.0, -h), (w, 0.5, h), f"veil_{i}")         # a box 0.5 m deep
     return m
 
 
 def glow_mesh(i: int, w: float, h: float) -> Mesh:
     m = Mesh(f"glow_{i}")
-    m.box((-w / 2, 0.0, -h / 2), (w / 2, 0.3, h / 2), "glow")
+    if QUADS:
+        m.face([(-w / 2, 0, -h / 2), (w / 2, 0, -h / 2), (w / 2, 0, h / 2), (-w / 2, 0, h / 2)], "glow")
+    else:
+        m.box((-w / 2, 0.0, -h / 2), (w / 2, 0.3, h / 2), "glow")
     return m
 
 
@@ -99,7 +107,11 @@ GLOW_TARGETS = [((-40.0, -8.05, 2.6), 1.6, 1.8), ((-34.0, -8.05, 2.6), 1.6, 1.8)
 
 
 def static_meshes() -> List[Mesh]:
-    sky = Mesh("sky"); sky.box((-300, 90, -10), (300, 92, 140), "sky")
+    sky = Mesh("sky")
+    if QUADS:
+        sky.face([(-300, 90, -10), (300, 90, -10), (300, 90, 140), (-300, 90, 140)], "sky")
+    else:
+        sky.box((-300, 90, -10), (300, 92, 140), "sky")
     bank = Mesh("bank"); bank.box((-200, 78, -0.3), (200, 90, 2.6), "bank")
     pier = Mesh("pier")
     pier.box((-47, -8, 0.9), (6, -2, 1.15), "wood_hi")

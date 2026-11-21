@@ -44,9 +44,14 @@ All fifteen readings agree with one rule: a face is lit when its normal opposes 
 
 An earlier version of this sweep gave identical results for every setting, because the knob never reached the Blender container (the build forwards only `TANK_*`, `AQUARIUM_*`, `LIONFISH_*`, `BETTA_*`, `PLANTED_*` and `SHRIMP_*`). That is now a troubleshooting entry too.
 
+## Finding 3: a zero-thickness quad is not invisible
+
+![Noon and 19:30 with the sky, veils and glows built as single quads](zero-thickness-quads.png)
+
+The troubleshooting guide says a mesh too thin along the camera's depth axis can be invisible. Variant d was rebuilt with the sky, all nine veils and all seven glows as **single quads** ([`TANK_SPIKE_QUAD=1`](../../../wflevels/tide_spike/spike.py)), wound counter-clockwise as seen from the camera. At 19:30 the sky and water regions are the same RGB as the box build (26, 39, 67 and 30, 41, 65), the glows show, and the veil dims the scene as before ([run](zero-thickness-quads-run.txt)). Minute Machine's 8 mm cards, thin along the same axis, render on the TV. So thickness is not the cause of the guide's invisible coin; that entry is corrected.
+
 ## What was not found or not measured
 
 - cast1: real frame rate for 46, 100 and 150 posed actors, the cost of a full-screen translucent veil, and banding on the TV.
-- Whether a zero-thickness quad is invisible (the troubleshooting guide says a thin object can be). The spike used boxes of real depth and never tested the quad.
 - Which near plane rules: `display.cc` passes 1.0, the baseline authors a CamShot `Hither` of 0.1.
 - Anything at the real 1080p resolution.

@@ -191,6 +191,15 @@ assert ROOM_POS.z - abs(ROOM_LOCAL_BBOX[5]) < P.z < ROOM_POS.z + abs(ROOM_LOCAL_
 
 ### 4. Object too thin in camera-depth axis — invisible
 
+> **Re-tested 2026‑11‑21: thickness alone is not the cause. Treat the explanation below as unproven.** Two
+> counterexamples: Minute Machine's flap cards are boxes only **8 mm** thick along the camera's depth axis (y), and they
+> render on the real Chromecast (the 09:33 reading was checked on the TV); and in the Tide Harbour spike a sky, nine veils
+> and seven glows built as **single zero-thickness quads**, wound counter-clockwise as seen from the camera, render exactly
+> as the same shapes built as boxes (identical pixels; `docs/diagnostics/tide-harbour-spike-2026-11-21/zero-thickness-quads.png`).
+> So the 2026‑05 coin was invisible for another reason that the bisect below did not separate from thickness (its
+> orientation or winding, which was not yet culled by default, or the thin axis it ended up with). If a thin mesh
+> vanishes, check winding (`WF_CULL=0`) and the room first.
+
 **Symptom:** Mesh actor has correct `Class Name`, `Model Type = Mesh`, `Visibility Mailbox` set to a true mailbox (or forced `=1`), valid `.iff` mesh on disk with a FLAT_SHADED MATL (`flags=0`, opaque color), and is comfortably inside a room bbox — but is invisible in-game. `RenderActor3DAnimates` log count matches the actor count (so the actor *did* get a renderer constructed). All the usual offenders below check out clean.
 
 **Cause:** The mesh is **too thin along the camera-depth axis** for the rasterizer / depth pass to draw anything. For the SMB side-scroller (camera at Y=−20 looking +Y, X-Z is the screen plane), a coin disc authored as `(X half-extent 0.3, Y half-extent 0.04, Z half-extent 0.3)` — i.e. 8 cm thick in Y — never appears even though the 60 cm × 60 cm X-Z face *is* the camera-facing surface. The pre-shipped commit `8a4f822` SMB `?`-block coin hit this.

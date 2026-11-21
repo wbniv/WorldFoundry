@@ -75,6 +75,7 @@ Recommendations are in the third column. Nothing is decided until Will answers.
 | Q9 | **What do all clocks share in their settings?** (Will, 2026‑11‑21: "make sure level has a settings object (same for all clocks---audit)") A common `Clock` sheet every clock's settings type includes, and each clock's own fields beside it. | Common: **Camera drift** (Slow, the default, or Off), the burn-in guard Minute Machine's D10 called "push-in". Minute Machine's own: **Hour format** (24 hours by default, or 12). Tide Harbour's own: **Dial numerals** (Thai by default, Roman, or none), **Gauge board** (on or off), **Boats and birds** (on or off). The first release ships these and no more. | The `.oas` files, Phases 2 and 2b |
 | Q10 | **Start the clocks from the baseline toolkit?** The level guides say new scenes should (a generated core with explicit defaults, no snowgoons import). Minute Machine and the spike use the old import; retrofitting Minute Machine is a small TODO item. | Yes: Tide Harbour and every later clock; Minute Machine on its next change. | Phase 2 |
 | Q11 | **May I prune Docker's build cache (only that)?** Free disk fell to about 5 GB, right at the stop line; Docker reports 21 GB of reclaimable build cache and 23 GB of reclaimable images, and the rootless Docker trial is the live engine, so I will touch none of it without your word. The cast1 half of Phase 0 needs an APK build. | Yes, the build cache only; I will show you the list first. | The cast1 half of Phase 0 |
+| Q12 | **Commit the clocks' built outputs, and check they stay fresh?** The aquarium levels commit their `.iff` files and bundles and CI proves they rebuild identically (`task aquarium-check`); Minute Machine git-ignores them. The clocks bundle could follow either. | Follow the aquarium: commit the built outputs and add a `clocks-check`, so a change to an input cannot ship a stale bundle. It adds a few MB per clock to the repository. | Phase 3 |
 
 Optional, not blocking: which of the other 48 ideas comes after Tide Harbour.
 
@@ -358,7 +359,7 @@ Run 2026‑11‑21; full account, captures and the raw numbers in [the spike's R
 1. **The veils work** (D5): nine translucent boxes, one shown at a time, turn the scene from day to dusk, night and pre-dawn; glows drawn in front stay bright. The dial and the moon are dimmed and must be drawn in front too.
 2. **The guide's lighting recipe has the wrong sign** (measured, fifteen readings): `B = +alt` tilts a directional light down. `docs/level-building.md` is corrected. Minute Machine's sun (`B = +40°, C = 90°`) turns out to be aimed correctly.
 3. **Faint horizontal lines** show across the daytime water. Whether they band on the TV is the open question for cast1.
-4. **Not measured:** everything on cast1; whether a zero-thickness quad is invisible; which near plane rules.
+4. **A zero-thickness quad is not invisible** (measured, same capture pixels as a box); the guide's thin-object entry is corrected. **Not measured:** everything on cast1; which near plane rules.
 
 ### What the level guides require of every clock level
 
@@ -367,7 +368,7 @@ Read in full 2026‑11‑21, after asking whether they had been ([level-building
 - **Start from the baseline toolkit**, not the snowgoons import: the guides say "for new scenes, use the baseline toolkit" ([`wflevels/baseline/`](../../wflevels/baseline/README.md)). Minute Machine and the spike import snowgoons, which is how the grey fog default came in ([Q10](#open)).
 - **Set the camera's fog explicitly.** The snowgoons scaffold's default is `#888888` from 20 to 30 m: everything past that fades to flat grey.
 - **Keep every actor inside the room**, including the sun and moon at their lowest, and give the room a floor below anywhere the Player can fall. An actor that leaves the room can end the level.
-- **Face winding is load-bearing:** faces are culled by default, so a wrong-way face vanishes. Single-sided sheets (a veil, a sky) are wound counter-clockwise seen from their visible side; better, make them boxes with real depth (a thin object can be invisible).
+- **Face winding is load-bearing:** faces are culled by default, so a wrong-way face vanishes. Single-sided sheets (a veil, a sky) are wound counter-clockwise seen from their visible side. A zero-thickness quad renders (2026‑11‑21, measured), so thickness is not required.
 - **Never leave two faces in one plane:** overlapping neighbours (the water bars) flicker. Offset them by a centimetre.
 - **Light:** author a Directional and an Ambient; aim with `B = +alt` and **verify with a capture**.
 - **Mesh origin:** a mesh that rests on a surface has its base at local z = 0; a scaled one grows from its origin.
@@ -377,6 +378,26 @@ Read in full 2026‑11‑21, after asking whether they had been ([level-building
 - **Bundles are append-only** (`level <name>-standalone.iff | <Name>`; a level's position is its index) and built outputs are committed and kept fresh by a CI check; the clocks bundle needs the same check.
 - **Settings objects** need a unique editor label (`wf_Editor Label`), and the shared host opens them on a held OK.
 - **Profile on the device:** `--frame-profile`; large translucent sheets are the case the guide says is unmeasured.
+
+### Audit record: Minute Machine against the level guides
+
+Run 2026‑11‑21 by reading `blender_create_minute_machine.py`, `forth.py` and its tests against the guides (the `[T2]` audit item). Mechanical checks were run; the rest is read from the source.
+
+| Rule | Minute Machine | Finding |
+|---|---|---|
+| Start from the baseline toolkit | Imports the snowgoons level | **Gap** ([Q10](#open)) |
+| Camera fog set explicitly | Not set: inherits `#888888`, 20 to 30 m | **Gap, harmless today:** the scene lies within about 10 m of the camera. One line to fix, with the next rebuild |
+| Actors inside the room | Room (−40, −45, −8) to (50, 12, 24) holds the camera at its 7.5 m orbit and drift | Pass (the engine comparison and the cast1 run never left it) |
+| Directional light aim | `B = +40°, C = 90°`: travels toward +y and down | **Pass, and correct under the measured convention** |
+| Ambient light | (0.38, 0.39, 0.45) | Pass |
+| Winding and coplanar faces | Signed-volume tests; 16 mm card stack | Pass (tests) |
+| Thin objects | 8 mm cards | Pass: they render on the TV; this is a counterexample to the guide's thin-object entry |
+| Scripts | Director is ASCII, has no backslash after its first line, no `and`, `or` or `<0`, definitions above the last `;` | Pass (checked mechanically) |
+| Mailboxes | Scratch cells 600 to 627 | Pass (global user range) |
+| Mesh names | At most 30 characters, asserted | Pass |
+| Settings object | None | **Gap** (D13, Phase 2b) |
+| Built outputs committed and kept fresh | Only the `.lev`, `actor-map.json` and the wrapper are tracked; the `.iff` files and the Dream bundle are git-ignored and built on demand | **Differs from the aquarium levels**, whose outputs are committed and checked by `task aquarium-check` ([Q12](#open)) |
+| Frame rate profiled on the device | 59.7 FPS median on cast1 | Pass |
 
 ### Phase 1 record: E1 built
 
