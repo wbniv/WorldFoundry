@@ -193,6 +193,9 @@ for name, mesh in parts.all_meshes().items():
     group = parts.visibility_group(name)
     mesh_actor(mesh, 'platform', poses[name], visibility=tl.VIS[group] if group else 1)
 
+# The exporter reads matrix_world, which Blender only recomputes on a depsgraph update: without this every actor
+# placed after the last update exports at the origin (found by scripts/check-tide-harbour.py, 2026-11-21).
+bpy.context.view_layer.update()
 objects = [o for o in bpy.context.scene.objects if o.get('wf_schema_path')]
 indices = {o.name: i + 1 for i, o in enumerate(objects)}
 for prefix, count in (('bar_', tl.N_BARS), ('lantern_', len(tl.LANTERNS)), ('glint_', len(tl.GLINTS))):
