@@ -1,0 +1,18 @@
+#ifndef _TideHarbourSettings_HP
+#define _TideHarbourSettings_HP
+#include "actor.hp"
+// Tide Harbour's settings holder (oas/tideharboursettings.oas): values only. It never renders or
+// updates; the director reads its fields with property@ every frame (plan
+// docs/plans/2026-11-21-tide-harbour-clock.md, D13), so an applied edit needs no callback.
+class TideHarbourSettings: public Actor {
+public:
+    TideHarbourSettings(const SObjectStartupData* startupData);
+    virtual ~TideHarbourSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadTideHarbourSettings(const SObjectStartupData* startupData);
+#endif

@@ -56,6 +56,7 @@ enum EActorKind {
         FieldTypes_KIND,
         LevelRenderSettings_KIND,
         SeaStarsSettings_KIND,
+        TideHarbourSettings_KIND,
 	};
 
 

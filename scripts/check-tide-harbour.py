@@ -11,8 +11,10 @@ Run inside the Linux container, against the container-built engine, under xvfb:
                        actor's position, rotation and scale, the tide cell and the visibility cells from the
                        engine, and compare each with wflevels/tide_harbour/timeline.py (1 mm, 0.5 degrees,
                        0.1 % scale; the tide within 1 cm)
-  --options            for every value of every setting, write the settings cell over the debug bridge, step,
-                       and compare the poses and visibility the setting changes (plan Verification 13, engine half)
+  --options            for every value of every setting, start the engine with it as a launch override
+                       (--property="TideHarbourSettings.<field>=<value>", the path the Dream's saved settings take),
+                       and compare the camera, the visibility cells and the settings cells with the model; the
+                       director's count of fields property@ answered must be 4 (plan Verification 13, engine half)
   --capture OUTDIR     one PNG per --times entry (default: the plan's six moments)
   --times T [T ...]    YYYY-MM-DDTHH:MM:SS[.mmm] Thai times for either mode
 
@@ -46,6 +48,7 @@ X_POS, Y_POS, Z_POS, ROT_A, ROT_B, ROT_C, X_SCALE, Y_SCALE, Z_SCALE = 3009, 3010
 FIELDS = (X_POS, Y_POS, Z_POS, ROT_A, ROT_B, ROT_C, X_SCALE, Y_SCALE, Z_SCALE)
 TIME_MBX = 1906
 TIDE_CELL = 600 + forth.CELLS.index("tide")
+ANSWERED_CELL = 600 + forth.CELLS.index("sv")
 # The plan's six moments (the mockups): dawn at low tide (1.36 m), noon, the sunset of the concept art, dusk, night (1.96 m),
 # deep night at another tide (2.56 m)
 MOMENTS = ["2026-11-17T06:20:00", "2026-11-21T12:00:00", "2026-11-21T17:38:00", "2026-11-21T18:10:00",
@@ -62,7 +65,7 @@ def indices() -> dict:
 
 
 class Engine:
-    def __init__(self, when: str, port: int):
+    def __init__(self, when: str, port: int, extra: list[str] | None = None):
         env = os.environ.copy()
         env["LD_LIBRARY_PATH"] = f"{ROOT / 'engine' / 'libs'}:{env.get('LD_LIBRARY_PATH', '')}"
         env["LSAN_OPTIONS"] = "detect_leaks=0"
@@ -70,7 +73,7 @@ class Engine:
         self.log = open(ROOT / "tests" / f".wf_tide_harbour_{port}.log", "w")
         self.proc = subprocess.Popen(
             [str(WF_GAME), f"-L{LEVEL}", "-width=1280", "-height=720", "-rate20",
-             "--debug-port", str(port), "--debug-bind", "127.0.0.1"],
+             "--debug-port", str(port), "--debug-bind", "127.0.0.1", *(extra or [])],
             cwd=str(GAME_CWD), env=env, stdout=self.log, stderr=subprocess.STDOUT,
             preexec_fn=lambda: resource.setrlimit(resource.RLIMIT_CORE, (0, 0)))
         self.client = BridgeClient("127.0.0.1", port, timeout=60.0)
@@ -160,15 +163,23 @@ def check_scene(e: Engine, spec: str, options: dict | None, names: list[str] | N
                     worst[kind] = (d, f"{n}/{mbx}")
                 if d > limit:
                     failures.append(f"{spec} {options or ''} {n} mailbox {mbx}: engine {v:.6f} reference {want:.6f} (off {d:.6f})")
-    cells = [(ix["Player"], TIDE_CELL)] + [(ix["Player"], c) for c in sc.visible]
+    cells = ([(ix["Player"], TIDE_CELL), (ix["Player"], ANSWERED_CELL)] + [(ix["Player"], c) for c in sc.visible]
+             + [(ix["Player"], c) for c in tl.OPTION_CELLS.values()])
     got = e.read(cells, frames=1)
+    answered = got[(ix["Player"], ANSWERED_CELL)]
+    if answered != len(tl.FIELD_LABELS):
+        failures.append(f"{spec} {options or ''}: property@ answered {answered} of {len(tl.FIELD_LABELS)} TideHarbourSettings fields")
+    for name, cell in tl.OPTION_CELLS.items():
+        want = (options or {}).get(name, 0)
+        if got[(ix["Player"], cell)] != want:
+            failures.append(f"{spec} {options or ''} setting {name} (cell {cell}): engine {got[(ix['Player'], cell)]} wanted {want}")
     tide = got[(ix["Player"], TIDE_CELL)]
     if not abs(tide - sc.tide) <= 0.01:
         failures.append(f"{spec} tide: engine {tide:.5f} reference {sc.tide:.5f}")
     for cell, want in sc.visible.items():
         if got[(ix["Player"], cell)] != want:
             failures.append(f"{spec} {options or ''} visibility {cell}: engine {got[(ix['Player'], cell)]} reference {want}")
-    print(f"{spec} {options or ''}: {len(names)} actors; tide {tide:.4f} m (model {sc.tide:.4f}); worst position "
+    print(f"{spec} {options or ''}: {len(names)} actors; settings answered {answered:g}; tide {tide:.4f} m (model {sc.tide:.4f}); worst position "
           f"{worst['pos'][0]*1000:.3f} mm ({worst['pos'][1]}), rotation {worst['rot'][0]*360:.3f} deg ({worst['rot'][1]}), "
           f"scale {worst['scale'][0]:.5f} ({worst['scale'][1]})", flush=True)
     return sc.visible
@@ -189,20 +200,20 @@ def compare(times: list[str], port: int) -> int:
 
 
 def options(port: int) -> int:
-    """Each setting's every value, written into its cell over the bridge (the settings object will write it)."""
+    """Each setting's every value as a launch override of the level's TideHarbourSettings object."""
     failures: list[str] = []
     spec = "2026-11-21T15:02:30"
-    e = Engine(spec, port)
-    try:
-        e.step(4)
-        touched = ["cs_wide", "LookAt"]
-        for name, values in tl.OPTIONS.items():
-            for value in range(len(values)):
-                e.client.set_mailbox(tl.OPTION_CELLS[name], value, idx=0)
+    touched = ["cs_wide", "LookAt"] + [f"boat_{i}" for i in range(4)]
+    k = 0
+    for name, values in tl.OPTIONS.items():
+        for value in range(len(values)):
+            e = Engine(spec, port + k, [f"--property={tl.SETTINGS_ACTOR}.{tl.FIELD_LABELS[name]}={value}"])
+            k += 1
+            try:
+                e.step(4)
                 check_scene(e, spec, {name: value}, touched, failures)
-            e.client.set_mailbox(tl.OPTION_CELLS[name], 0, idx=0)
-    finally:
-        e.close()
+            finally:
+                e.close()
     for line in failures[:40]:
         print("FAIL", line)
     print("PASS" if not failures else f"FAIL: {len(failures)} mismatches")

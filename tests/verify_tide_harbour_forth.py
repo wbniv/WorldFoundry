@@ -32,15 +32,27 @@ import level_modules  # noqa: E402
 tl, _parts, forth = level_modules.load("tide_harbour", "timeline", "parts", "forth")
 import verify_minute_machine_forth as mm  # noqa: E402  (its VM host and bootstrap builder; it imports Minute Machine's own modules)
 
-HOST = mm.HOST.replace('else if (line[0] == \'T\') {', '''else if (line[0] == 'R') { int i; sscanf(line + 2, "%d", &i); printf("V %d %.9g\\n", i, mbx.count(i) ? mbx[i] : 0.0f); fflush(stdout); }
-    else if (line[0] == 'T') {''').replace('eval("mm-tick")', 'eval("th-tick")')
-assert HOST.count("th-tick") == 1 and "line[0] == 'R'" in HOST
+# The host also answers property@ ( actor field -- value valid ), syscall 178 as scripting_zforth.cc registers it,
+# from a table the test fills with 'P actor field value' ('Q' empties it: every read is then invalid).
+HOST = (mm.HOST
+        .replace('static std::vector<W> writes;', 'static std::vector<W> writes;\nstatic std::map<std::pair<int,int>, float> props;')
+        .replace('  else if ((int)id >= 128 && wf::forthmath::HandleSyscall(c, (int)id - 128)) {}',
+                 '''  else if ((int)id == 178) { int f = (int)zf_pop(c); int a = (int)zf_pop(c); auto it = props.find({a, f});
+    zf_push(c, it == props.end() ? 0.0f : it->second); zf_push(c, it == props.end() ? 0.0f : 1.0f); }
+  else if ((int)id >= 128 && wf::forthmath::HandleSyscall(c, (int)id - 128)) {}''')
+        .replace('else if (line[0] == \'T\') {', '''else if (line[0] == 'R') { int i; sscanf(line + 2, "%d", &i); printf("V %d %.9g\\n", i, mbx.count(i) ? mbx[i] : 0.0f); fflush(stdout); }
+    else if (line[0] == 'P') { int a, f; float v; sscanf(line + 2, "%d %d %f", &a, &f, &v); props[{a, f}] = v; }
+    else if (line[0] == 'Q') { props.clear(); }
+    else if (line[0] == 'T') {''')
+        .replace('eval("mm-tick")', 'eval("th-tick")'))
+assert HOST.count("th-tick") == 1 and "line[0] == 'R'" in HOST and "(int)id == 178" in HOST and "line[0] == 'P'" in HOST
 
 CONSTANTS = ["X_POS", "Y_POS", "Z_POS", "ROTATION_A", "ROTATION_B", "ROTATION_C", "X_SCALE", "Y_SCALE", "Z_SCALE",
              "FACE_COLOR_TOP", "WALL_HOUR", "WALL_MINUTE", "WALL_SECOND", "WALL_DAY"]
 FIELDS = [("X_POS", 0), ("Y_POS", 1), ("Z_POS", 2), ("ROTATION_A", 3), ("ROTATION_B", 4), ("ROTATION_C", 5),
           ("X_SCALE", 6), ("Y_SCALE", 7), ("Z_SCALE", 8)]
 TIDE_CELL = 600 + forth.CELLS.index("tide")
+ANSWERED_CELL = 600 + forth.CELLS.index("sv")          # how many settings fields property@ answered this frame
 WRAP = {**{f"cloud_{i}": tl.CLOUD_SPAN for i in range(len(tl.CLOUDS))}, **{f"bird_{i}": tl.BIRD_SPAN for i in range(len(tl.BIRDS))},
         "boat_3": tl.FERRY_SPAN}
 
@@ -53,18 +65,27 @@ def build(tmp: Path):
         ids, ix = mm.build(tmp)
     finally:
         mm.forth = src_forth
+    with open(tmp / "bootstrap.fth", "a") as f:          # the engine registers property@ beside its other words
+        f.write(": property@ 178 sys ;\n")
     return ids, ix
 
 
 class Host(mm.Host):
-    def frame_at(self, day: int, sod: float, options=None, reset_look=True):
+    def set_settings(self, options):
+        """The TideHarbourSettings object's fields, as property@ will answer them; None: the object does not answer."""
+        self.proc.stdin.write("Q\n")
+        if options is not None:
+            actor = self.ix[tl.SETTINGS_ACTOR]
+            for name, label in tl.FIELD_LABELS.items():
+                self.proc.stdin.write(f"P {actor} {self.fields[label]} {options.get(name, 0)}\n")
+
+    def frame_at(self, day: int, sod: float, options=None, reset_look=True, answer=True):
         h, m = int(sod // 3600) % 24, int(sod // 60) % 60
         sec = sod % 60.0
         lines = [("WALL_DAY", day), ("WALL_HOUR", h), ("WALL_MINUTE", m), ("WALL_SECOND", sec)]
         for name, v in lines:
             self.proc.stdin.write(f"M {self.ids[name]} {v!r}\n")
-        for name, cell in tl.OPTION_CELLS.items():
-            self.proc.stdin.write(f"M {cell} {(options or {}).get(name, 0)}\n")
+        self.set_settings((options or {}) if answer else None)
         if reset_look:
             self.proc.stdin.write(f"M {forth.PREVQ} 0\n")      # force the re-colour pass so every colour is checked
         self.proc.stdin.write("T\n")
@@ -135,6 +156,9 @@ def compare(host: Host, ix, ids, cases):
             got = host.read(cell)
             if got != want:
                 bad.append(f"{label} visibility {cell}: forth {got} reference {want}")
+        answered = host.read(ANSWERED_CELL)
+        if answered != len(tl.FIELD_LABELS):
+            bad.append(f"{label}: property@ answered {answered} of {len(tl.FIELD_LABELS)} settings fields")
         tide = host.read(TIDE_CELL)
         worst["tide"] = max(worst["tide"], abs(tide - sc.tide))
         if abs(tide - sc.tide) > 0.01:
@@ -172,6 +196,7 @@ def main() -> int:
         tmp = Path(t)
         ids, ix = build(tmp)
         host = Host(tmp, ids)
+        host.ix, host.fields = ix, forth.settings_fields()
         cs = cases()
         worst, bad = compare(host, ix, ids, cs)
         host.close()

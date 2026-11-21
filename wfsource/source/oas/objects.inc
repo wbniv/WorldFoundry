@@ -84,6 +84,8 @@
 #include "levelrendersettings.hp"
         	
 #include "seastarssettings.hp"
+        	
+#include "tideharboursettings.hp"
 
 
 

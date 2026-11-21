@@ -161,6 +161,10 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
 			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
 				object = OadSeaStarsSettings(startData); 
 			break;
+        	case Actor::TideHarbourSettings_KIND:
+			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
+				object = OadTideHarbourSettings(startData); 
+			break;
 
 
 
@@ -337,6 +341,9 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
 			break;
         	case Actor::SeaStarsSettings_KIND:
 			object = OadSeaStarsSettings(startData); 
+			break;
+        	case Actor::TideHarbourSettings_KIND:
+			object = OadTideHarbourSettings(startData); 
 			break;
 
 

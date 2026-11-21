@@ -287,7 +287,11 @@ ROOM = (-360.0, -80.0, -60.0, 360.0, 140.0, 240.0)    # one room holds everythin
 
 # Visibility mailboxes (global cells the director writes; 1 shows the actor)
 VIS = {"sun": 700, "moon": 701, "birds": 702, "boats": 703, "gauge": 704, "numerals_thai": 705, "numerals_roman": 706}
-# Settings: global cells nobody writes until the settings object exists (plan D13); 0 is the default.
+# Settings (plan D13, Q9): the TideHarbourSettings object's fields (wfsource/source/oas/tideharboursettings.oas,
+# with the clocks' shared clocksettings.inc). The director copies each field into its cell every frame with
+# property@; 0, a field's first choice, is the default.
+SETTINGS_ACTOR = "TideHarbourSettings"
+FIELD_LABELS = {"drift": "Camera drift", "numerals": "Dial numerals", "gauge": "Gauge board", "life": "Boats and birds"}
 OPTION_CELLS = {"drift": 690, "numerals": 691, "gauge": 692, "life": 693}
 OPTIONS = {   # name -> the values, default first (the cell holds the index)
     "drift": ("Slow", "Off"),
