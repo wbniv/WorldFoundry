@@ -28,6 +28,13 @@ def glyph_texts() -> list:
 
 
 class GlyphCoverage(unittest.TestCase):
+    def test_the_map_credit_is_drawn(self):
+        """The river map is OpenStreetMap data (ODbL): the panel must carry the credit wherever the map is shown."""
+        src = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("CREDIT = '© OpenStreetMap contributors'", src)
+        self.assertIn("shapes[CREDIT]", src)
+        self.assertIn("put(body, CREDIT,", src)
+
     def test_the_lists_are_found(self):
         self.assertGreaterEqual(len(glyph_texts()), 15)
 
