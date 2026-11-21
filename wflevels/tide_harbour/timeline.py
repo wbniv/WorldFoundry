@@ -237,7 +237,7 @@ def byte(v: float) -> int:
 # ---------------------------------------------------------------------------------------------
 # Layout
 N_BARS = 36
-WATER_NEAR, WATER_FAR = -40.0, 92.0                 # the water runs back behind the camera
+WATER_NEAR, WATER_FAR = -70.0, 92.0                 # the water runs back behind the camera, and past it: the river panel pulls the camera back to y = -56
 BAR_HALF_WIDTH = 260.0                              # wide enough for the frame's far corners at full drift
 BAR_THICK = 0.45
 BAR_OVERLAP = 1.18
@@ -385,6 +385,15 @@ def colour_of(kind: str, day_rgb, lit_rgb, pal, arg: float = 0.0):
     raise ValueError(kind)
 
 
+def camera_poses(sod: float, opt: Dict[str, int]):
+    """(cs_wide, LookAt, the panel is at the left, how much of it is on screen): where the camera shot is told to be."""
+    az = DRIFT_DEG / 360.0 * sin_rev(sod / DRIFT_PERIOD) if opt["drift"] == 0 else 0.0
+    left, vis = pn.slide(sod)
+    dist = CAMERA_R / pn.harbour_scale(vis)
+    lx = LOOK_AT[0] + pn.camera_shift_m(left, vis, dist)
+    return (Pose(lx + dist * sin_rev(az), LOOK_AT[1] - dist * cos_rev(az), CAMERA_Z), Pose(lx, LOOK_AT[1], LOOK_AT[2]), left, vis)
+
+
 def scene(day: int, sod: float, options: Dict[str, int] | None = None) -> Scene:
     opt = dict(DEFAULT_OPTIONS, **(options or {}))
     sod = sod % 86400.0
@@ -453,12 +462,7 @@ def scene(day: int, sod: float, options: Dict[str, int] | None = None) -> Scene:
     # the camera: drifts slowly round the look-at point (burn-in, D10), or stands still. The river panel takes a side of
     # the screen (panel.py): the camera pulls back and shifts so the harbour sits in what the panel leaves, and the panel's
     # parts are posed from the camera's frame.
-    az = DRIFT_DEG / 360.0 * sin_rev(sod / DRIFT_PERIOD) if opt["drift"] == 0 else 0.0
-    left, vis = pn.slide(sod)
-    dist = CAMERA_R / pn.harbour_scale(vis)
-    lx = LOOK_AT[0] + pn.camera_shift_m(left, vis, dist)
-    P["cs_wide"] = Pose(lx + dist * sin_rev(az), LOOK_AT[1] - dist * cos_rev(az), CAMERA_Z)
-    P["LookAt"] = Pose(lx, LOOK_AT[1], LOOK_AT[2])
+    P["cs_wide"], P["LookAt"], left, vis = camera_poses(sod, opt)
     reading = turns.panel_reading(day, sod)
     P.update(pn.panel_poses(pn.frame_from(P["cs_wide"], P["LookAt"]), sod, left, vis, reading, h))
 

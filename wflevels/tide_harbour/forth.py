@@ -43,12 +43,13 @@ KEPT0 = 760                      # the scan in progress: 8 x (time, height, kind
 RES0 = 784                       # the last finished scan, which the picks read
 assert len(SCAN_CELLS) <= KEPT0 - SCAN0
 PANEL0 = 810                     # the river panel's working cells (panel_words): 810-859
-PANEL_CELLS = ["pl", "pv", "ps", "pd", "pe", "pw", "px", "pk", "ph", "pcu", "lx", "cx", "cy", "cz", "fx", "fy", "fz", "dh", "dn",
-               "rx", "ry", "ux", "uy", "uz", "pa", "pc", "pu", "pq", "pdp", "pac", "psc", "pm", "pt", "pslot", "phour", "pten"]
+PANEL_CELLS = ["pl", "pv", "ps", "pd", "pe", "pw", "px", "pk", "ph", "pcu", "lx", "cx", "cy", "cz", "kx", "ky", "kz", "fx", "fy", "fz",
+               "rx", "ry", "ux", "uy", "uz", "pa", "pc", "pu", "pq", "pdp", "pac", "psc", "pm", "pt", "pslot", "phour", "pten",
+               "pcs", "pcc", "pbs", "pbc", "pdv"]
 assert len(PANEL_CELLS) <= 50 and not set(PANEL_CELLS) & set(CELLS)
 WORDS = {"floor", "frac", "trunc", "mod", "c01", "x", "y", "z", "a", "b", "c", "sx", "sy", "sz", "col", "byte", "pack",
          "ramp", "tide-sum", "sun", "slow", "palette", "bar-rgb", "recolour", "bars", "boats", "sky", "lights", "clock",
-         "show", "tick", "prevq", "poll", "settings", "scan", "slide", "pframe", "pplace", "pdrums", "panel"} | {"opt-" + k for k in tl.OPTION_CELLS} | {"f-" + k for k in tl.OPTION_CELLS}
+         "show", "tick", "prevq", "poll", "settings", "scan", "slide", "pframe", "pplace", "pdrum", "pdrums", "panel", "cam@"} | {"opt-" + k for k in tl.OPTION_CELLS} | {"f-" + k for k in tl.OPTION_CELLS}
 WORDS |= {"sc-" + c for c in SCAN_CELLS} | {"sc-y", "sc-add", "sc-turn", "sc-step", "sc-start", "sc-finish", "sc-kept", "sc-res", "sc-append", "sc-replace", "sc-pick"}
 
 
@@ -352,25 +353,35 @@ def panel_words(ix: Dict[str, int]) -> List[str]:
            "  th-c01 dup dup * swap 2 * 3 swap - * " + f"{cell('pe')} th!",
            f"  {g('pe')} .5 < if 0 else 1 then {cell('pl')} th!  1 {g('pe')} 2 * - abs {cell('pv')} th!",
            f"  {g('pl')} if {n(-pn.HALF_W - pn.W / 2)} {n(pn.W)} {g('pv')} * + else {n(pn.HALF_W + pn.W / 2)} {n(pn.W)} {g('pv')} * - then {cell('pcu')} th! ;",
-           # the camera's forward, right and up from cs_wide (cx cy cz) looking at (lx, LOOK_AT y, z)
+           # the panel is pinned to the camera the engine really has, which eases towards cs_wide rather than jumping to it
+           # (about 10 % of the way a frame): the Camera actor's position and its pitch (b) and heading (c), in revolutions.
+           # Its forward is (sin c cos b, cos c cos b, sin b); with no roll, right is (cos c, -sin c, 0) and up is right x forward.
+           f": th-cam@ {ix['Camera']} read-actor-mailbox ;",
            ": th-pframe",
-           f"  {g('lx')} {g('cx')} - {cell('fx')} th!  {n(tl.LOOK_AT[1])} {g('cy')} - {cell('fy')} th!  {n(tl.LOOK_AT[2])} {g('cz')} - {cell('fz')} th!",
-           f"  {g('fx')} dup * {g('fy')} dup * + {g('fz')} dup * + sqrt {cell('dn')} th!",
-           f"  {g('fx')} {g('dn')} / {cell('fx')} th!  {g('fy')} {g('dn')} / {cell('fy')} th!  {g('fz')} {g('dn')} / {cell('fz')} th!",
-           f"  {g('fx')} dup * {g('fy')} dup * + sqrt {cell('dh')} th!",
-           f"  {g('fy')} {g('dh')} / {cell('rx')} th!  0 {g('fx')} - {g('dh')} / {cell('ry')} th!",
-           f"  {g('ry')} {g('fz')} * {cell('ux')} th!  0 {g('rx')} - {g('fz')} * {cell('uy')} th!  {g('rx')} {g('fy')} * {g('ry')} {g('fx')} * - {cell('uz')} th!",
-           f"  {g('fz')} {g('dh')} atan2-rev {cell('pa')} th!  {g('ry')} {g('rx')} atan2-rev {cell('pc')} th! ;",
+           f"  INDEXOF_X_POS th-cam@ {cell('kx')} th!  INDEXOF_Y_POS th-cam@ {cell('ky')} th!  INDEXOF_Z_POS th-cam@ {cell('kz')} th!",
+           f"  INDEXOF_ROTATION_C th-cam@ sincos-rev {cell('pcc')} th! {cell('pcs')} th!",
+           f"  INDEXOF_ROTATION_B th-cam@ sincos-rev {cell('pbc')} th! {cell('pbs')} th!",
+           f"  {g('pcs')} {g('pbc')} * {cell('fx')} th!  {g('pcc')} {g('pbc')} * {cell('fy')} th!  {g('pbs')} {cell('fz')} th!",
+           f"  {g('pcc')} {cell('rx')} th!  0 {g('pcs')} - {cell('ry')} th!",
+           f"  {g('ry')} {g('fz')} * {cell('ux')} th!  0 {g('rx')} - {g('fz')} * {cell('uy')} th!  {g('pbc')} {cell('uz')} th!",
+           f"  INDEXOF_ROTATION_B th-cam@ {cell('pa')} th!  0 INDEXOF_ROTATION_C th-cam@ - {cell('pc')} th! ;",
            # ( u v depth actor -- ): u and v in panel metres
            ": th-pplace",
            f"  {cell('pac')} th! {cell('pdp')} th! {cell('pq')} th! {cell('pu')} th!",
            f"  {g('pdp')} {n(pn.DEPTH)} / {cell('psc')} th!",
            f"  {g('pu')} {g('pcu')} + {g('psc')} * {cell('pu')} th!  {g('pq')} {g('psc')} * {cell('pq')} th!",
-           f"  {g('cx')} {g('pdp')} {g('fx')} * + {g('pu')} {g('rx')} * + {g('pq')} {g('ux')} * + {g('pac')} th-x",
-           f"  {g('cy')} {g('pdp')} {g('fy')} * + {g('pu')} {g('ry')} * + {g('pq')} {g('uy')} * + {g('pac')} th-y",
-           f"  {g('cz')} {g('pdp')} {g('fz')} * + {g('pq')} {g('uz')} * + {g('pac')} th-z",
+           f"  {g('kx')} {g('pdp')} {g('fx')} * + {g('pu')} {g('rx')} * + {g('pq')} {g('ux')} * + {g('pac')} th-x",
+           f"  {g('ky')} {g('pdp')} {g('fy')} * + {g('pu')} {g('ry')} * + {g('pq')} {g('uy')} * + {g('pac')} th-y",
+           f"  {g('kz')} {g('pdp')} {g('fz')} * + {g('pq')} {g('uz')} * + {g('pac')} th-z",
            f"  {g('pa')} {g('pac')} th-a  {g('pc')} {g('pac')} th-c",
-           f"  {g('psc')} {g('pac')} th-sx  {g('psc')} {g('pac')} th-sy  {g('psc')} {g('pac')} th-sz ;"]
+           f"  {g('psc')} {g('pac')} th-sx  {g('psc')} {g('pac')} th-sy  {g('psc')} {g('pac')} th-sz ;",
+           # ( u v value actor -- ): a drum, its axis R_DRUM behind its front digit, turned about the camera's right axis
+           ": th-pdrum",
+           f"  {cell('pac')} th! {cell('pdv')} th! {cell('pq')} th! {g('pcu')} + {cell('pu')} th!",
+           f"  {g('kx')} {n(pn.DEPTH + pn.R_DRUM)} {g('fx')} * + {g('pu')} {g('rx')} * + {g('pq')} {g('ux')} * + {g('pac')} th-x",
+           f"  {g('ky')} {n(pn.DEPTH + pn.R_DRUM)} {g('fy')} * + {g('pu')} {g('ry')} * + {g('pq')} {g('uy')} * + {g('pac')} th-y",
+           f"  {g('kz')} {n(pn.DEPTH + pn.R_DRUM)} {g('fz')} * + {g('pq')} {g('uz')} * + {g('pac')} th-z",
+           f"  {g('pa')} {g('pdv')} {n(pn.SLOT_REV)} * + {g('pac')} th-a  {g('pc')} {g('pac')} th-c ;"]
 
     def put(name: str, layer: str, u: str, v: str) -> str:
         return f"  {u} {v} {n(pn.D[layer])} {A(name)} th-pplace"
@@ -385,7 +396,7 @@ def panel_words(ix: Dict[str, int]) -> List[str]:
         values = {"h10": f"{g('phour')} 10 / th-floor", "h1": f"{g('phour')} 10 th-mod", "m10": f"{g('pslot')} 6 th-mod",
                   "t1": f"{g('pten')} 10 / th-floor", "t01": f"{g('pten')} 10 th-mod"}
         for name in pn.DRUMS:
-            out.append("  " + put(f"panel_drum_{row}_{name}", "drum", n(pn.row_u(name)), f"{values[name]} {n(pn.PITCH)} * {n(pn.row_v(row))} +"))
+            out.append(f"  {n(pn.row_u(name))} {n(pn.row_v(row))} {values[name]} {A(f'panel_drum_{row}_{name}')} th-pdrum")
     out += ["  then ;"]
     L = [": th-panel", "  th-pframe", f"  {g('t')} 1800 th-mod 900 / dup 1 > if 2 swap - then .5 * cos-rev {n(pn.PAN_KM / 2.0 * pn.M_PER_KM)} * {n(-pn.BAND_H / 2.0)} + {cell('pm')} th!",
          put("panel_paper", "paper", "0", "0"), put("panel_map", "map", "0", g("pm")), put("panel_col_body", "column", "0", "0"),
@@ -545,7 +556,7 @@ def tick() -> List[str]:
 def default_indices() -> Dict[str, int]:
     """Made-up actor indices for tests: each group contiguous, as the level builder guarantees."""
     names = (list(parts.all_meshes()) + [m.name for m in parts.static_meshes() + parts.toggled_static_meshes()]
-             + ["cs_wide", "LookAt", tl.SETTINGS_ACTOR])
+             + ["Camera", "cs_wide", "LookAt", tl.SETTINGS_ACTOR])
     return {name: 100 + i for i, name in enumerate(names)}
 
 

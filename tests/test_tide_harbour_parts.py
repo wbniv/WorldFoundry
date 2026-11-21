@@ -41,6 +41,8 @@ def test_every_pose_has_a_mesh_and_every_mesh_a_pose():
 def test_closed_meshes_wind_outward_and_flat_ones_face_the_camera():
     """Faces are culled by default, so a face wound the wrong way vanishes (level-design-troubleshooting.md)."""
     for m in every_mesh():
+        if m.name.startswith("panel_drum_"):
+            continue                                  # a ring of digit slots: test_tide_harbour_panel_parts checks its faces
         if m.name.startswith(FLAT):
             for f in m.faces:
                 n = face_normal([m.vertices[i] for i in f])

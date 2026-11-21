@@ -79,6 +79,18 @@ class Host(mm.Host):
             for name, label in tl.FIELD_LABELS.items():
                 self.proc.stdin.write(f"P {actor} {self.fields[label]} {options.get(name, 0)}\n")
 
+    def set_camera(self, sod: float, options):
+        """The Camera actor as the engine has it once it has caught up with cs_wide (it eases towards it, about 10 % of the
+        way a frame): position, pitch in b and heading in c, in revolutions, wrapped into 0..1 as the engine writes them."""
+        cam, look, _left, _vis = tl.camera_poses(sod % 86400.0, dict(tl.DEFAULT_OPTIONS, **(options or {})))
+        d = (look.x - cam.x, look.y - cam.y, look.z - cam.z)
+        n = math.sqrt(sum(v * v for v in d))
+        pitch = math.asin(d[2] / n) / math.tau
+        heading = math.atan2(d[0], d[1]) / math.tau
+        actor = self.ix["Camera"]
+        for fname, v in (("X_POS", cam.x), ("Y_POS", cam.y), ("Z_POS", cam.z), ("ROTATION_B", pitch % 1.0), ("ROTATION_C", heading % 1.0)):
+            self.proc.stdin.write(f"A {actor} {self.ids[fname]} {v!r}\n")
+
     def frame_at(self, day: int, sod: float, options=None, reset_look=True, answer=True):
         h, m = int(sod // 3600) % 24, int(sod // 60) % 60
         sec = sod % 60.0
@@ -86,6 +98,7 @@ class Host(mm.Host):
         for name, v in lines:
             self.proc.stdin.write(f"M {self.ids[name]} {v!r}\n")
         self.set_settings((options or {}) if answer else None)
+        self.set_camera(sod, options)
         if reset_look:
             self.proc.stdin.write(f"M {forth.PREVQ} 0\n")      # force the re-colour pass so every colour is checked
         self.proc.stdin.write("T\n")

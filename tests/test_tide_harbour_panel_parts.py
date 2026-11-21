@@ -1,5 +1,6 @@
 """The river panel's geometry (wflevels/tide_harbour/panel_parts.py)."""
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -17,11 +18,25 @@ def area(face, mesh):
     return abs(sum(pts[i][0] * pts[(i + 1) % len(pts)][2] - pts[(i + 1) % len(pts)][0] * pts[i][2] for i in range(len(pts)))) / 2
 
 
-def test_every_face_faces_the_camera_and_lies_in_the_panel_plane():
+def test_every_flat_face_faces_the_camera_and_lies_in_the_panel_plane():
     for name, m in pp.panel_meshes().items():
+        if name.startswith("panel_drum_"):
+            continue                                              # a drum is a ring: its faces look outward, the next test
         for f in m.faces:
             assert face_normal([m.vertices[i] for i in f])[1] < 0, f"{name}: a face looks away from the camera"
         assert all(abs(v[1]) < 1e-9 for v in m.vertices), f"{name}: not flat"
+
+
+def test_every_face_of_a_drum_looks_outward_from_its_axis():
+    for name, m in pp.panel_meshes().items():
+        if not name.startswith("panel_drum_"):
+            continue
+        for f in m.faces:
+            pts = [m.vertices[i] for i in f]
+            n = face_normal(pts)
+            centre = [sum(p[k] for p in pts) / len(pts) for k in range(3)]
+            assert n[1] * centre[1] + n[2] * centre[2] > 0, f"{name}: a tick faces the axis"
+            assert abs(n[0]) < 1e-9
 
 
 def test_a_recoloured_material_is_in_the_first_three_slots():
@@ -63,18 +78,44 @@ def test_the_river_fills_the_window_over_the_whole_pan():
     assert pn.map_v(pn.PAN_S) + south < bottom, "at the northern end the mouth has gone, as the pan intends"
 
 
-def test_the_mask_leaves_a_window_for_every_digit_and_nothing_else_open():
-    m = pp.band_mask_mesh()
-    wood = sum(area(f, m) for f, c in zip(m.faces, m.colors) if c == "p_wood")
-    rows = 2 * pn.W * pn.ROW_H
-    holes = len(pp.windows()) * pn.WIN_W * pn.WIN_H
-    # the icons, colons and dots lie on the wood too, so they only add: the wood is the rows minus the windows
-    assert abs(wood - (rows - holes)) < 1e-6, (wood, rows - holes)
+def test_the_band_is_solid_wood_with_a_dark_plate_behind_each_digit():
+    back = pp.band_back_mesh()
+    assert abs(sum(area(f, back) for f in back.faces) - pn.W * pn.BAND_H) < 1e-9
+    mask = pp.band_mask_mesh()
+    plates = [f for f, c in zip(mask.faces, mask.colors) if c == "p_ink" and abs(area(f, mask) - pn.WIN_W * pn.WIN_H) < 1e-9]
+    assert len(plates) == len(pp.windows()) == 10
+    assert mask.material_keys()[0] == "p_text"                    # the marks come first: the recoloured material is slot 0
 
 
-def test_a_window_is_taller_than_a_digit_and_a_drum_hides_its_neighbours():
-    assert pn.GLYPH_H < pn.WIN_H
-    assert pn.PITCH - pn.GLYPH_H / 2 > pn.WIN_H / 2, "the digit above or below would show through the window"
+def _turned(point, value):
+    """A point of the drum's mesh once the drum is turned to show `value`: about the x axis by value slots, as panel_poses
+    turns it (the engine's pitch: a larger a carries y towards +z)."""
+    a = math.tau * value * pn.SLOT_REV
+    x, y, z = point
+    return (x, y * math.cos(a) - z * math.sin(a), y * math.sin(a) + z * math.cos(a))
+
+
+def test_a_turned_drum_shows_its_value_at_the_front_and_hides_every_other_digit_behind_the_plate():
+    """Digit slot k's glyph spans GLYPH_H high at ring slot k. Turn the drum to show v: slot v's glyph is flat at the front
+    (depth 0 behind the front plane) facing the camera, and every point of every other slot is deeper than the paper layer,
+    so the band's plate (and below the band the paper) lies in front of it."""
+    margin = pn.LAYER_OFFSET["paper"]
+    for v in range(10):
+        for k in range(10):
+            corners = [_turned(pp.on_ring(x, z, k), v) for x in (-pn.WIN_W / 2, pn.WIN_W / 2) for z in (-pn.GLYPH_H / 2, pn.GLYPH_H / 2)]
+            depth = [c[1] + pn.R_DRUM for c in corners]                 # behind the front plane
+            if k == v:
+                assert all(abs(d) < 1e-9 for d in depth), (v, depth)
+                n = face_normal([_turned(pp.on_ring(x, z, k), v) for x, z in ((-1, -1), (1, -1), (1, 1), (-1, 1))])
+                assert n[1] < 0 and abs(n[2]) < 1e-9
+            else:
+                assert min(depth) > margin + 0.004, (v, k, min(depth))
+
+
+def test_the_layers_stack_so_the_front_digit_is_nearest_and_the_paper_farthest():
+    order = sorted(pn.LAYER_OFFSET, key=pn.LAYER_OFFSET.get)
+    assert order == ["digit", "arrow", "mask", "plate", "pointer", "fill", "column", "map", "paper"], order
+    assert pn.LAYER_OFFSET["mask"] < pn.LAYER_OFFSET["plate"] < pn.LAYER_OFFSET["map"]    # the plate hides the map under the band, the mask marks the plate
 
 
 def test_the_two_copies_of_the_river_are_the_same():

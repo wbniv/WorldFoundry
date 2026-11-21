@@ -75,28 +75,17 @@ def windows() -> List[Tuple[int, str, float, float]]:
 
 
 def band_mask_mesh() -> Mesh:
-    """The wood in front of the drums, with a window for each digit, plus the marks that stay: the high and low icons
-    and the colons and dots. (The unit label and the minute units' zero are glyphs: Blender adds them.)"""
+    """What sits on the band's wood: the high and low icons, the colons and decimal points, a dark plate behind each digit,
+    and a rule under the band. (The unit label and the minute units' zero are glyphs: Blender adds them.) The wood itself is
+    band_back_mesh, solid: a drum's other digits are turned away behind it, so no window needs cutting."""
     m = Mesh("panel_band_mask")
-    left, right = -pn.W / 2, pn.W / 2
-    for row in (0, 1):
-        top, bottom = pn.H / 2 - pn.ROW_H * row, pn.H / 2 - pn.ROW_H * (row + 1)
-        wins = sorted((u, v) for r, _n, u, v in windows() if r == row)
-        x = left
-        for u, v in wins:
-            x0, x1 = u - pn.WIN_W / 2, u + pn.WIN_W / 2
-            _quad(m, x, bottom, x0, top, "p_wood")                      # the wood between the windows
-            _quad(m, x0, v + pn.WIN_H / 2, x1, top, "p_wood")           # above this window
-            _quad(m, x0, bottom, x1, v - pn.WIN_H / 2, "p_wood")        # below it
-            x = x1
-        _quad(m, x, bottom, right, top, "p_wood")
+    for row in (0, 1):                                              # the marks first, so p_text is this mesh's first material
         v = pn.row_v(row)
-        # the icon: a triangle over a water line (high water) or under one (low water)
         iu = pn.row_u("icon")
-        if row == 0:
+        if row == 0:                                                # a triangle over a water line: high water
             _tri(m, (iu - 0.045, v - 0.01), (iu + 0.045, v - 0.01), (iu, v + 0.075), "p_text")
             _quad(m, iu - 0.05, v - 0.065, iu + 0.05, v - 0.045, "p_text")
-        else:
+        else:                                                       # under one: low water
             _tri(m, (iu - 0.045, v + 0.01), (iu + 0.045, v + 0.01), (iu, v - 0.075), "p_text")
             _quad(m, iu - 0.05, v + 0.045, iu + 0.05, v + 0.065, "p_text")
         cu = pn.row_u("colon")
@@ -104,7 +93,9 @@ def band_mask_mesh() -> Mesh:
             _quad(m, cu - 0.012, v + dv - 0.012, cu + 0.012, v + dv + 0.012, "p_text")
         du = pn.row_u("dot")
         _quad(m, du - 0.013, v - WIN_BASE - 0.013, du + 0.013, v - WIN_BASE + 0.013, "p_text")
-    _quad(m, left, pn.H / 2 - pn.BAND_H - 0.012, right, pn.H / 2 - pn.BAND_H, "p_ink")        # a rule under the band
+    for _row, _name, u, v in windows():                             # the plate each digit shows on
+        _quad(m, u - pn.WIN_W / 2, v - pn.WIN_H / 2, u + pn.WIN_W / 2, v + pn.WIN_H / 2, "p_ink")
+    _quad(m, -pn.W / 2, pn.H / 2 - pn.BAND_H - 0.012, pn.W / 2, pn.H / 2 - pn.BAND_H, "p_ink")        # a rule under the band
     return m
 
 
@@ -140,11 +131,11 @@ def column_body_mesh() -> Mesh:
         _quad(m, pn.COL_X - cw - 0.03, v - 0.003, pn.COL_X - cw, v + 0.003, "p_ink")
     nx, nz = -pn.W / 2 + 0.07, pn.H / 2 - pn.BAND_H - 0.12                       # north arrow, under the band at the left
     _tri(m, (nx, nz + 0.07), (nx + 0.03, nz - 0.03), (nx - 0.03, nz - 0.03), "p_ink")
-    bx, bz = -pn.W / 2 + 0.05, -pn.H / 2 + 0.07                                  # scale bar: 5 km
-    km5 = 5.0 * pn.M_PER_KM
-    _quad(m, bx, bz - 0.004, bx + km5, bz + 0.004, "p_ink")
+    km = pn.SCALE_KM * pn.M_PER_KM                                               # the scale bar, right of where the map reaches
+    bx, bz = pn.SCALE_X1 - km, pn.SCALE_V
+    _quad(m, bx, bz - 0.004, bx + km, bz + 0.004, "p_ink")
     _quad(m, bx - 0.004, bz - 0.02, bx + 0.004, bz + 0.02, "p_ink")
-    _quad(m, bx + km5 - 0.004, bz - 0.02, bx + km5 + 0.004, bz + 0.02, "p_ink")
+    _quad(m, bx + km - 0.004, bz - 0.02, bx + km + 0.004, bz + 0.02, "p_ink")
     return m
 
 
@@ -207,17 +198,23 @@ def map_mesh() -> Mesh:
     return m
 
 
-DRUM_TOP = 0.5 * pn.PITCH                 # a drum's strip runs from half a pitch above its zero
-DRUM_BOTTOM = -9.5 * pn.PITCH             # to half a pitch below its nine: digit k is centred at z = -k * PITCH
+def on_ring(x: float, z: float, slot: int):
+    """A point (x, z) of the front digit's plane, carried to digit slot `slot` of a drum whose axis is the mesh's origin:
+    the front is y = -R_DRUM, and slot k is the front turned back by k * 36 degrees about the x axis."""
+    a = -math.tau * slot * pn.SLOT_REV
+    y0 = -pn.R_DRUM
+    return (x, y0 * math.cos(a) - z * math.sin(a), y0 * math.sin(a) + z * math.cos(a))
 
 
 def drum_mesh(row: int, name: str) -> Mesh:
-    """One drum: a dark strip for the ten digits to sit on, and a tick beside each digit's place. The digits themselves
-    are glyphs of the Thai or Roman font, so only Blender draws them (the p_text material, the slot after the strip's)."""
+    """One drum: a ring of ten digit slots about the mesh's origin (its axis). Turning the drum about the camera's right
+    axis by k slots brings slot k to the front, facing the camera (panel.panel_poses). A small tick marks each slot, which
+    also gives the mesh its p_text material; the digits themselves are glyphs of the Thai font, so Blender adds them."""
     m = Mesh(f"panel_drum_{row}_{name}")
-    _quad(m, -pn.WIN_W / 2, DRUM_BOTTOM, pn.WIN_W / 2, DRUM_TOP, "p_ink")
     for k in range(10):
-        _quad(m, -pn.WIN_W / 2, -k * pn.PITCH - 0.003, -pn.WIN_W / 2 + 0.012, -k * pn.PITCH + 0.003, "p_text")
+        pts = [on_ring(x, z, k) for x, z in ((-pn.WIN_W / 2, -0.003), (-pn.WIN_W / 2 + 0.012, -0.003),
+                                              (-pn.WIN_W / 2 + 0.012, 0.003), (-pn.WIN_W / 2, 0.003))]
+        m.face(pts, "p_text")
     return m
 
 

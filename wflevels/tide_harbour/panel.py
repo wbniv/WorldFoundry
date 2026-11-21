@@ -115,7 +115,8 @@ def panel_u_range(side: int) -> Tuple[float, float]:
 # The three burn-in measures (Will, 2026-11-21: "swap sides, pan the map, dim at night") and the layout.
 SWAP_S = 600.0                     # the panel changes side on every ten-minute mark of the clock
 SLIDE_S = 2.6                      # and takes this long to leave one side and arrive at the other
-SCALE_AT_PANEL = 0.82              # the harbour is drawn at this scale beside the panel (the camera pulls back to 1/0.82)
+SCALE_AT_PANEL = 0.74              # the harbour is drawn at this scale beside the panel (the camera pulls back to 1/0.74): the whole
+                                   # picture, houses to tower, must fit the 73 % of the screen the panel leaves (captured 2026-11-21: 0.82 clipped the pier)
 PAN_S = 900.0                      # the map's view goes once along its range in this many seconds, and back
 PAN_KM = 11.0                      # the range, in kilometres of latitude
 DIM = 1.0 / 6.0                    # the panel's brightness at night, against day
@@ -126,14 +127,21 @@ ROW_H = BAND_H / 2.0
 WIN_W, WIN_H = 0.095, 0.20         # a digit's window
 PITCH = 0.26                       # the drum's spacing between digits: more than a window, so neighbours stay hidden
 GLYPH_H = 0.17                     # a digit's height on the drum
+SLOT_REV = 0.1                     # a drum carries ten digits round its axis: 36 degrees apart
+R_DRUM = PITCH / (2.0 * math.sin(math.pi * SLOT_REV))   # ten digits PITCH apart on a ring: its radius (0.42 m)
 M_PER_KM = 0.066                   # the map's scale: the river and Bangkok Bar, 12.1 km across, fit between the margin and the column
 COL_X = W / 2 - 0.095              # the level column, right of the map, in panel coordinates
 COL_V0, COL_V1, COL_MAX_M = -0.80, 0.40, 3.5    # its foot and head in v, and the tide at its head
+SCALE_KM = 2.0                     # the scale bar, under the column where no map reaches (the map ends 0.09 m left of it)
+SCALE_X1, SCALE_V = W / 2.0 - 0.015, -H / 2.0 + 0.07       # its right end and its height
 
 # depths from the camera: nearer is smaller. Back to front: paper, map, the column and its water and pointer, the band's
 # plate, the drums, the band's mask and its marks, the arrows
-LAYERS = ("paper", "map", "column", "fill", "pointer", "plate", "drum", "mask", "arrow")
-D = {name: DEPTH + (len(LAYERS) - 1 - k) * LAYER for k, name in enumerate(LAYERS)}
+# plate, the mask and its marks, the arrows, and in front of all of them the front digit of each drum. The drums are
+# cylinders (below): their other digits turn away behind the plate, which hides them, so nothing needs clipping.
+LAYER_OFFSET = {"digit": 0.0, "arrow": 0.006, "mask": 0.010, "plate": 0.014, "pointer": 0.016, "fill": 0.018, "column": 0.020,
+                "map": 0.022, "paper": 0.024}
+D = {name: DEPTH + off for name, off in LAYER_OFFSET.items()}
 PTR_DU = 0.036                     # the pointer's tip sits this far right of the column's centre
 PTEXT_DIM = 0.5                    # the readings dim to this at night, so they stay legible
 # the map's centre of view, and the river's middle: latitude of the map's origin (the map is built about it)
@@ -218,11 +226,6 @@ def digits(seconds_ahead: float, rsec: float, metres: float) -> Tuple[int, int, 
     return hour // 10, hour % 10, slot % 6, tenths // 10, tenths % 10
 
 
-def drum_v(value: int) -> float:
-    """How far a drum sits above its window's centre so that digit `value` shows (digit k is k pitches below its zero)."""
-    return value * PITCH
-
-
 def level_v(metres: float) -> float:
     """The v of the water level on the column, in panel coordinates."""
     m = 0.0 if metres < 0.0 else COL_MAX_M if metres > COL_MAX_M else metres
@@ -259,7 +262,10 @@ def panel_poses(fr: Frame, sod: float, left: bool, vis: float, reading, tide: fl
     for row, turn in ((0, reading.high), (1, reading.low)):
         values = dict(zip(DRUMS, digits(turn.t, reading.mark, turn.h)))
         for name in DRUMS:
-            put(f"panel_drum_{row}_{name}", "drum", row_u(name), row_v(row) + drum_v(values[name]))
+            # a drum's origin is its axis, R_DRUM behind its front digit, which is turned to face the camera by
+            # turning the drum about the camera's right axis: that is a larger pitch (a), SLOT_REV for each digit
+            x, y, z = place(fr, cu + row_u(name), row_v(row), DEPTH + R_DRUM)
+            out[f"panel_drum_{row}_{name}"] = tl.Pose(x, y, z, a + values[name] * SLOT_REV, b, c)
     put("panel_band_mask", "mask", 0.0, 0.0)
     put("panel_arrow_up", "arrow", row_u("arrow"), H / 2.0 - ROW_H)
     put("panel_arrow_dn", "arrow", row_u("arrow"), H / 2.0 - ROW_H)

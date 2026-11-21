@@ -29,6 +29,8 @@ import wf_core  # noqa: E402
 from wf_blender.export_level import export_scene_to_lev, _seed_defaults  # noqa: E402
 
 import forth  # noqa: E402
+import panel as pn  # noqa: E402
+import panel_parts as pp  # noqa: E402
 import parts  # noqa: E402
 import timeline as tl  # noqa: E402
 
@@ -38,6 +40,8 @@ REFERENCE = tl.parse_when('2026-11-21T12:00:00')     # the pose the level is bui
 THAI_FONT = Path('/usr/lib/blender/datafiles/fonts/NotoSansThai-VariableFont_wdth,wght.woff2')
 THAI = ['๑๒', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙', '๑๐', '๑๑']     # 12 at the top, then clockwise
 ROMAN = ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI']
+THAI_DIGITS = '๐๑๒๓๔๕๖๗๘๙'                          # the river panel's drums and numerals: always Thai (the Roman option is the dial's)
+DRUM_DIGITS = {'h10': 3, 'h1': 10, 'm10': 6, 't1': 10, 't01': 10}     # how many digits a drum can show: hours tens 0-2, minute tens 0-5
 LIGHT_B, LIGHT_C = 45.0, 90.0          # degrees: the light travels toward +y and down at 45, so tops and camera-facing fronts light alike
 DIRECTIONAL, AMBIENT = 0.64, 0.55      # top = front = 0.55 + 0.64 sin 45 = 1.0; sides 0.55
 MATERIALS = {}
@@ -104,9 +108,8 @@ def mesh_actor(mesh, cls='platform', pose=None, visibility=1):
     return obj
 
 
-def numerals(name, texts, font, height, max_width):
-    """The twelve numerals on the dial as one mesh facing -y, each centred on its hour: one height for all (the
-    tallest glyph `height` high), and any numeral wider than `max_width` scaled down to fit between its neighbours."""
+def outlines(name, texts, font):
+    """Each text's outline as triangles in the xy plane (size 1.0, facing +z): [(verts, faces)]."""
     glyphs = []
     for k, text in enumerate(texts):
         curve = bpy.data.curves.new(f'{name}_{k}', type='FONT')
@@ -139,6 +142,13 @@ def numerals(name, texts, font, height, max_width):
         shapes.append((verts, faces))
         bpy.data.objects.remove(obj, do_unlink=True)
         bpy.data.meshes.remove(me)
+    return shapes
+
+
+def numerals(name, texts, font, height, max_width):
+    """The twelve numerals on the dial as one mesh facing -y, each centred on its hour: one height for all (the
+    tallest glyph `height` high), and any numeral wider than `max_width` scaled down to fit between its neighbours."""
+    shapes = outlines(name, texts, font)
     tallest = max(max(v[1] for v in verts) - min(v[1] for v in verts) for verts, _f in shapes)
     s = height / tallest
     radius = tl.DIAL_R * 0.70
@@ -159,6 +169,56 @@ def numerals(name, texts, font, height, max_width):
     from clock_mesh import face_normal
     assert all(face_normal([m.vertices[i] for i in f])[1] < 0 for f in m.faces), f'{name}: a numeral face looks away from the camera'
     return m
+
+
+def panel_glyphs(meshes, font):
+    """The river panel's glyphs, added to the meshes panel_parts draws: the Thai digits on the drums, the unit label and
+    the minute units' zero in the band's mask, the column's numerals, the scale bar's label and the map's place names.
+    Every glyph is a flat outline facing -y, centred (or aligned) on its place in the part's own coordinates."""
+    texts = list(THAI_DIGITS) + ['ม.', 'กรุงเทพฯ', 'ปากน้ำ', 'อ่าวไทย', 'กม.']
+    shapes = dict(zip(texts, outlines('pg', texts, font)))
+    em = pn.GLYPH_H / max(max(v[1] for v in shapes[d][0]) - min(v[1] for v in shapes[d][0]) for d in THAI_DIGITS)     # metres per font unit
+    added = []
+
+    def put(mesh, text, x, z, scale=1.0, align='c', color='p_text', max_width=None, slot=None):
+        verts, faces = shapes[text]
+        k = em * scale
+        x0, x1 = min(v[0] for v in verts), max(v[0] for v in verts)
+        if max_width is not None:
+            k = min(k, max_width / (x1 - x0))
+        dx = {'c': -(x0 + x1) / 2, 'l': -x0, 'r': -x1}[align]
+        my = (max(v[1] for v in verts) + min(v[1] for v in verts)) / 2
+        base = len(mesh.vertices)
+        flat = [(x + (vx + dx) * k, z + (vy - my) * k) for vx, vy, _vz in verts]
+        # on a drum the glyph is carried to its ring slot (panel_parts.on_ring); anywhere else it is flat on the panel
+        mesh.vertices.extend(pp.on_ring(px, pz, slot) if slot is not None else (px, 0.0, pz) for px, pz in flat)
+        for f in faces:
+            mesh.faces.append(tuple(base + i for i in f))
+            mesh.colors.append(color)
+        added.append((mesh.name, text))
+
+    for row in (0, 1):
+        for name, count in DRUM_DIGITS.items():
+            for k in range(count):
+                put(meshes[f'panel_drum_{row}_{name}'], THAI_DIGITS[k], 0.0, 0.0, max_width=pn.WIN_W * 0.9, slot=k)
+        v = pn.row_v(row)
+        put(meshes['panel_band_mask'], 'ม.', pn.row_u('unit'), v, 0.55, max_width=0.095)
+        put(meshes['panel_band_mask'], THAI_DIGITS[0], pn.row_u('m1'), v, max_width=pn.WIN_W * 0.9)
+    body = meshes['panel_col_body']
+    for metres in (1, 2, 3):
+        put(body, THAI_DIGITS[metres], pn.COL_X - 0.026 - 0.075, pn.level_v(float(metres)), 0.42, color='p_ink')
+    mid = pn.SCALE_X1 - pn.SCALE_KM * pn.M_PER_KM / 2.0                           # the scale bar's label, centred above it
+    half = pn.SCALE_KM * pn.M_PER_KM / 2.0 - 0.004                                   # each half of the label stays within its half of the bar
+    put(body, THAI_DIGITS[int(pn.SCALE_KM)], mid - 0.004, pn.SCALE_V + 0.06, 0.32, 'r', 'p_ink', max_width=half * 0.6)
+    put(body, 'กม.', mid + 0.004, pn.SCALE_V + 0.06, 0.32, 'l', 'p_ink', max_width=half)
+    river = meshes['panel_map']
+    doc = json.loads(pp.CENTRELINE.read_text())
+    hx, hz = pp.map_xy(doc['station_HD']['lon'], doc['station_HD']['lat'])
+    mx, mz = pp.river_points()[0]
+    put(river, 'กรุงเทพฯ', hx + 0.055, hz + 0.02, 0.42, 'l', 'p_ink')               # the tower's name, to its right, over the land
+    put(river, 'ปากน้ำ', mx - 0.04, mz + 0.045, 0.40, 'r', 'p_ink')                   # the river's mouth, to the left of it
+    put(river, 'อ่าวไทย', mx - 0.25, mz - 0.20, 0.50, 'c', 'p_ink')                  # the gulf, below the ripples
+    return added
 
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -209,7 +269,10 @@ assert THAI_FONT.is_file(), f'{THAI_FONT}: the Thai font is missing from this Bl
 thai = bpy.data.fonts.load(str(THAI_FONT))
 mesh_actor(numerals('numerals_thai', THAI, thai, 1.0, 1.0), 'platform', visibility=tl.VIS['numerals_thai'])
 mesh_actor(numerals('numerals_roman', ROMAN, None, 0.75, 1.4), 'platform', visibility=tl.VIS['numerals_roman'])
-for name, mesh in parts.all_meshes().items():
+moving = parts.all_meshes()
+glyphs = panel_glyphs(moving, thai)
+print(f'{TAG} {len(glyphs)} panel glyphs')
+for name, mesh in moving.items():
     group = parts.visibility_group(name)
     mesh_actor(mesh, 'platform', poses[name], visibility=tl.VIS[group] if group else 1)
 
