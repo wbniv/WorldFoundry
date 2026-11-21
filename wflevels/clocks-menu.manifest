@@ -9,3 +9,4 @@
 title WF Clocks
 prompt Choose a clock
 level minute_machine-standalone.iff | Minute Machine | Minute Machine
+level cuckoo_village-standalone.iff | Cuckoo Village | Cuckoo Village
