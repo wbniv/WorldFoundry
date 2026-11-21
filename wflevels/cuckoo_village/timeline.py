@@ -7,7 +7,8 @@ formulas as zForth for the director; scripts/check-cuckoo-village.py compares th
 mailboxes against all_poses() here. Units are Blender/World Foundry units, angles are revolutions.
 
     all_poses(sod) -> {actor name: (x, y, z, a, b, c, sx, sy, sz)}
-    window_states(sod) -> [bool] * 13   (twelve houses, then the tower)
+    window_states(sod) -> [bool] * 13   (the thirteen cottages)
+    bird_visible(sod) -> bool
 """
 from __future__ import annotations
 
@@ -17,17 +18,19 @@ from typing import Dict, List, Tuple
 TAU = math.tau
 Pose = Tuple[float, float, float, float, float, float, float, float, float]
 
-# --- the tower (units: the asset README's tower, front facing -Y) ---------------------------
-DIAL = (0.0, -1.10, 4.08)          # hand pivots at the dial centre
+# --- the tower: wflevels/cuckoo_village_layout (tower_art.py and generate.py), front facing -Y ----------
+# The build asserts these against the scene it generates, so a change in the art fails loudly here.
+TZ = 0.1888                         # the tower stands on the terrain: height(0, 0) - 0.08
+DIAL = (0.0, -1.10, 4.08 + TZ)      # hand pivots at the dial centre
 MINUTE_Y = -1.125                   # the minute hand sits in front of the hour hand: no z-fighting at 12:00
-DOOR = (0.0, -1.04, 4.55)           # bird door hinge origin (left edge)
-BIRD_REST = (0.0, -0.995, 4.60)     # behind the closed door
-FIG_Z0 = 2.55                       # balcony floor
-FIG_HOME_Y = -1.30
+BIRD_NAME = "tower_bird"
+BIRD_REST = (0.0, -1.27, 4.60 + TZ) # the bird's pivot, in the carved alcove above the dial
+FIG_Z0 = 2.50 + TZ                  # figure pivots stand on the balcony floor
+FIG_HOME_Y = -1.61
 FIG_X = [-0.87, -0.29, 0.29, 0.87]  # alcove centres, left to right
-FIG_NAMES = ["figure_1", "figure_2", "figure_3", "figure_4"]
-LOOP_A, LOOP_B, LOOP_CX, LOOP_CY = 1.15, 0.18, 0.0, -1.50   # the parade oval on the balcony
-STEP_OUT = 0.30                     # a solo figure steps this far toward the railing
+FIG_NAMES = ["tower_figure_1", "tower_figure_2", "tower_figure_3", "tower_figure_4"]
+LOOP_A, LOOP_B, LOOP_CX, LOOP_CY = 1.15, 0.18, 0.0, -1.45   # the parade oval on the balcony, between the wall and the rail
+STEP_OUT = 0.08                     # a solo figure steps this far toward the rail (the rail is 0.26 in front of the pivots)
 
 # --- the schedule ------------------------------------------------------------------------------
 SOLO_AT = [900.0, 1800.0, 2700.0]   # seconds into the hour, figures 1 to 3
@@ -39,14 +42,13 @@ PARADE_EXIT_AT, PARADE_EXIT_LEN = 20.0, 3.5
 ENTRY_AT = [2.0, 2.5, 3.0, 0.0]     # figure 4 steps forward first, then the others join
 ENTRY_LEN = 2.0
 CALL_FIRST, CALL_GAP = 1.0, 1.4
-DOOR_OPEN_AT, DOOR_EASE = 0.2, 0.6
-DOOR_SWING = 0.27                   # revolutions, outward (toward -Y)
-BIRD_OUT = 0.30
+BIRD_SHOW_AT, BIRD_EASE = 0.2, 0.6   # the bird is shown (visibility mailbox) from the first call until the last
+BIRD_LUNGE = 0.05                   # how far the bird leans toward the viewer on a call
 
 # --- windows: local-time schedule, one stagger per house ---------------------------------------
 DUSK_START, DUSK_LEN = 17.5 * 3600, 3600.0
 DAWN_START, DAWN_LEN = 5.5 * 3600, 3600.0
-HOUSES = 12
+HOUSES = 13                          # the thirteen cottages; the open-mechanism tower has no window glow
 
 
 def stagger(i: int) -> float:
@@ -57,10 +59,10 @@ def stagger(i: int) -> float:
 LAP = 225.0                         # seconds: 900 / 225 = 4, so a quarter boundary is always the start of a lap
 HOLD_HOUR, HOLD_QUARTER = 26.0, 10.0
 CAM_FRONT_R, CAM_FAR_R = 6.3, 16.0
-CAM_FRONT_H, CAM_FAR_H = 3.6, 8.5
-CAM_X_STRETCH = 1.1
-LOOK_FRONT = (0.0, -1.1, 3.7)
-LOOK_FAR = (0.0, 0.0, 1.5)
+CAM_FRONT_H, CAM_FAR_H = 3.6 + TZ, 10.5
+CAM_X_STRETCH = 1.4
+LOOK_FRONT = (0.0, -1.1, 3.7 + TZ)
+LOOK_FAR = (0.0, 1.0, 1.2)
 RISE = 0.12
 
 
@@ -122,24 +124,29 @@ def figure(i: int, tm: float) -> Tuple[float, float, float, float, float]:
     return x, y, z, bow * (1.0 - w), w * c_loop
 
 
-def bird(hr: int, tm: float) -> Tuple[float, float, float]:
-    """door opening o (0..1), bird forward travel, bird bob (0..1)."""
+def bird(hr: int, tm: float) -> Tuple[float, float]:
+    """bird shown amount o (visible when above 0.02) and bob (0..1)."""
     n = calls_for(hr)
     t_end = CALL_FIRST + CALL_GAP * (n - 1) + 1.0
     o = 0.0
     bob = 0.0
     if 0.0 <= tm < PARADE_LEN:
-        o = sm((tm - DOOR_OPEN_AT) / DOOR_EASE) * (1.0 - sm((tm - t_end) / DOOR_EASE))
+        o = sm((tm - BIRD_SHOW_AT) / BIRD_EASE) * (1.0 - sm((tm - t_end) / BIRD_EASE))
         k = tm - CALL_FIRST
         if k >= 0.0 and k < CALL_GAP * n:
             p = (k % CALL_GAP) / CALL_GAP
             bob = math.sin(math.pi * clamp(p / 0.45, 0.0, 1.0))
-    return o, o, bob
+    return o, bob
+
+
+def bird_visible(sod: float) -> bool:
+    hr, mi, sc = _split(sod)
+    return bird(hr, mi * 60 + sc)[0] > 0.02
 
 
 def window_states(sod: float) -> List[bool]:
     out = []
-    for i in range(HOUSES + 1):
+    for i in range(HOUSES):
         s = stagger(i)
         out.append(sod >= DUSK_START + s * DUSK_LEN or sod < DAWN_START + s * DAWN_LEN)
     return out
@@ -169,9 +176,8 @@ def all_poses(sod: float) -> Dict[str, Pose]:
     for i, name in enumerate(FIG_NAMES):
         x, y, z, a, c = figure(i, tm)
         poses[name] = (x, y, z, a, 0.0, c, *ONE)
-    o, out, bob = bird(hr, tm)
-    poses["bird_door"] = (DOOR[0], DOOR[1], DOOR[2], 0.0, 0.0, -DOOR_SWING * o, *ONE)
-    poses["bird"] = (BIRD_REST[0], BIRD_REST[1] - BIRD_OUT * out - 0.05 * bob, BIRD_REST[2] + 0.04 * bob, 0.06 * bob, 0.0, 0.0, *ONE)
+    o, bob = bird(hr, tm)
+    poses[BIRD_NAME] = (BIRD_REST[0], BIRD_REST[1] - BIRD_LUNGE * bob, BIRD_REST[2] + 0.04 * bob, 0.06 * bob, 0.0, 0.0, *ONE)
     (cx, cy, cz), (lx, ly, lz) = camera(tm)
     poses["cs_wide"] = (cx, cy, cz, 0.0, 0.0, 0.0, *ONE)
     poses["LookAt"] = (lx, ly, lz, 0.0, 0.0, 0.0, *ONE)
@@ -182,4 +188,4 @@ if __name__ == "__main__":
     for spec in ("10:08:22", "12:00:00", "12:00:05", "15:15:03", "18:00:00"):
         h, m, s = (float(v) for v in spec.split(":"))
         poses = all_poses(h * 3600 + m * 60 + s)
-        print(spec, {k: tuple(round(v, 3) for v in poses[k][:6]) for k in ("minute_hand", "hour_hand", "figure_4", "cs_wide")})
+        print(spec, {k: tuple(round(v, 3) for v in poses[k][:6]) for k in ("minute_hand", "hour_hand", "tower_figure_4", "cs_wide")})

@@ -63,7 +63,7 @@ class Engine:
         self.log = open(ROOT / "tests" / f".wf_cuckoo_village_{port}.log", "w")
         self.proc = subprocess.Popen(
             [str(WF_GAME), f"-L{LEVEL}", "-width=1280", "-height=720", "-rate20",
-             "--vram-width=4096", "--vram-height=2048", "--vram-slot-width=1024", "--vram-slot-height=1024",
+             "--vram-width=4096", "--vram-height=2048", "--vram-slot-width=2048", "--vram-slot-height=2048",
              "--vram-perm-width=1024", "--vram-perm-height=1024",
              "--debug-port", str(port), "--debug-bind", "127.0.0.1"],
             cwd=str(GAME_CWD), env=env, stdout=self.log, stderr=subprocess.STDOUT,
@@ -172,7 +172,8 @@ def compare(times: list[str], port: int) -> int:
             # window glow: global user cells 200..212 (twelve houses, then the tower) against the schedule
             director = indices["Director"]
             states = tl.window_states(sod(spec))
-            cells = [(director, 200 + i) for i in range(len(states))]
+            cells = [(director, 200 + i) for i in range(len(states))] + [(director, 213)]     # 213: the bird's visibility
+            states = states + [tl.bird_visible(sod(spec))]
             for actor, mbx in cells:
                 e.client.watch(idx=actor, mailbox=mbx)
             e.step(3)

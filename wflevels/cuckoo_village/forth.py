@@ -54,7 +54,7 @@ def director_script(ix: Dict[str, int]) -> str:
         ": cv-wa ( v actor -- ) INDEXOF_ROTATION_A swap write-actor-mailbox ;",
         ": cv-wb ( v actor -- ) INDEXOF_ROTATION_B swap write-actor-mailbox ;",
         ": cv-wc ( v actor -- ) INDEXOF_ROTATION_C swap write-actor-mailbox ;",
-        f": cv-ai {ix['figure_1']} cv-i cv@ + ;",
+        f": cv-ai {ix['tower_figure_1']} cv-i cv@ + ;",
     ]
     A, B, CX, CY = tl.LOOP_A, tl.LOOP_B, tl.LOOP_CX, tl.LOOP_CY
     # one figure: pose of figure cv-i from cv-tm (seconds into the hour)
@@ -96,16 +96,16 @@ def director_script(ix: Dict[str, int]) -> str:
         "  cv-hr cv@ 12 cv-mod dup 0 = if drop 12 then cv-n cv!",
         "  0 cv-o cv!  0 cv-bob cv!",
         f"  cv-tm cv@ {n(tl.PARADE_LEN)} < if",
-        f"    cv-tm cv@ {n(tl.DOOR_OPEN_AT)} - {n(tl.DOOR_EASE)} / cv-sm  1 cv-tm cv@ {end_expr} - {n(tl.DOOR_EASE)} / cv-sm - * cv-o cv!",
+        f"    cv-tm cv@ {n(tl.BIRD_SHOW_AT)} - {n(tl.BIRD_EASE)} / cv-sm  1 cv-tm cv@ {end_expr} - {n(tl.BIRD_EASE)} / cv-sm - * cv-o cv!",
         f"    cv-tm cv@ {n(tl.CALL_FIRST)} - cv-k cv!",
         f"    cv-k cv@ 0 >= cv-k cv@ cv-n cv@ {n(tl.CALL_GAP)} * < & if",
         f"      cv-k cv@ {n(tl.CALL_GAP)} cv-mod {n(tl.CALL_GAP)} / .45 / 0 max 1 min .5 * cv-sin cv-bob cv!",
         "    then",
         "  then",
-        f"  cv-o cv@ {n(tl.DOOR_SWING)} * negate {ix['bird_door']} cv-wc",
-        f"  {n(-tl.BIRD_REST[1])} negate {n(tl.BIRD_OUT)} cv-o cv@ * - .05 cv-bob cv@ * - {ix['bird']} cv-wy",
-        f"  {n(tl.BIRD_REST[2])} .04 cv-bob cv@ * + {ix['bird']} cv-wz",
-        f"  cv-bob cv@ .06 * {ix['bird']} cv-wa ;",
+        f"  0 cv-on cv!  cv-o cv@ .02 > if 1 cv-on cv! then  cv-on cv@ 213 cv!",
+        f"  {n(-tl.BIRD_REST[1])} negate {n(tl.BIRD_LUNGE)} cv-bob cv@ * - {ix[tl.BIRD_NAME]} cv-wy",
+        f"  {n(tl.BIRD_REST[2])} .04 cv-bob cv@ * + {ix[tl.BIRD_NAME]} cv-wz",
+        f"  cv-bob cv@ .06 * {ix[tl.BIRD_NAME]} cv-wa ;",
     ]
     # window glow: global user cells 200..212 are the visibility mailboxes of the twelve houses and the tower
     L += [
@@ -155,8 +155,8 @@ def main(argv: List[str]) -> int:
     ap.add_argument("--out", metavar="FILE.fth", help="write the script here (default: stdout)")
     args = ap.parse_args(argv)
     ix = json.load(open(args.indices))["indices"] if args.indices else {
-        k: 100 + j for j, k in enumerate(["figure_1", "figure_2", "figure_3", "figure_4", "bird", "bird_door", "hour_hand",
-                                          "minute_hand", "cs_wide", "LookAt"])}
+        k: 100 + j for j, k in enumerate(["tower_figure_1", "tower_figure_2", "tower_figure_3", "tower_figure_4", "tower_bird",
+                                          "hour_hand", "minute_hand", "cs_wide", "LookAt"])}
     text = director_script(ix)
     if args.out:
         with open(args.out, "w", encoding="utf-8") as f:
