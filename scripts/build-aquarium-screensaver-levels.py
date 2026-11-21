@@ -21,10 +21,11 @@ LEVELS = ROOT / "wflevels"
 TANKS = (
     "aquarium", "aquarium_blue_shrimp", "aquarium_betta", "aquarium_jellyfish",
     "aquarium_lionfish", "aquarium_plants", "aquarium_arowana",
-    "aquarium_tiger_barbs", "aquarium_thai_reef", "aquarium_thai_reef_anime",
+    "aquarium_tiger_barbs", "aquarium_thai_reef", "aquarium_thai_reef_anime", "aquarium_sea_stars",
 )
 SCRIPT_NAMES = {"aquarium": "aquarium_screensaver.fth",
-                "aquarium_tiger_barbs": "tiger_barbs_screensaver.fth"}
+                "aquarium_tiger_barbs": "tiger_barbs_screensaver.fth",
+                "aquarium_sea_stars": "sea_stars_screensaver.fth"}
 SCRIPT_FIELD = re.compile(r"(\{ 'STR' \{ 'NAME' \"Script\" \} \{ 'STR' )"
                           r"(\"(?:\\.|[^\"\\])*\")", re.S)
 
@@ -40,7 +41,11 @@ def player_script(level_text: str, tank: str, driver: str) -> str:
     if not found:
         raise ValueError(f"{tank}: Player script missing")
     script = json.loads(found.group(2))
-    if tank in SCRIPT_NAMES:
+    if tank == "aquarium_sea_stars":
+        if ": st-dream 0 ;" not in script or not script.rstrip().endswith("st-tick"):
+            raise ValueError("Sea Stars: unexpected Player controller")
+        script = script.replace(": st-dream 0 ;", ": st-dream 1 ;")
+    elif tank in SCRIPT_NAMES:
         entry = "aq-player-tick"
         if not script.rstrip().endswith(entry):
             raise ValueError(f"{tank}: unexpected Player entry")

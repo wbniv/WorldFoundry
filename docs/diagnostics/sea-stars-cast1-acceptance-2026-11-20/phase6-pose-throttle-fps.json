@@ -1,0 +1,14 @@
+{
+ "what": "cast1 steady-state FPS before and after throttling each resident's pose update to one frame in three (the player's star poses every frame)",
+ "gate_fps": 20,
+ "default_population": {
+  "before": 20.35,
+  "after": 22.2,
+  "job_after": "J-7a70c3545012"
+ },
+ "maximum_population_17": {
+  "before": 11.8,
+  "after": 13.1,
+  "job_after": "J-2fdf6a0248ad"
+ }
+}

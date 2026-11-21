@@ -133,6 +133,26 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativePrepare(JNIEnv*, jclass) {
 }
 
 // Called on the player thread before nativeRun, Planted flavor only, with PlantedConfig.toLine().
+// One engine launch override, schema + OAD field key + value: the engine validates it against the
+// field and applies it when the level's registry loads. Level-agnostic (LevelSettings sends them);
+// the Planted bridge is a separate, Planted-specific path and is not involved.
+static std::string toStdString(JNIEnv* env, jstring text) {
+    std::string out;
+    if (!text) return out;
+    const char* chars = env->GetStringUTFChars(text, nullptr);
+    if (chars) {
+        out = chars;
+        env->ReleaseStringUTFChars(text, chars);
+    }
+    return out;
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_org_worldfoundry_screensaver_TankPlayer_nativeLaunchOverride(
+        JNIEnv* env, jclass, jstring schema, jstring key, jstring value) {
+    launchOverrideSink.set(toStdString(env, schema), toStdString(env, key), toStdString(env, value));
+}
+
 extern "C" JNIEXPORT void JNICALL
 Java_org_worldfoundry_screensaver_TankPlayer_nativeConfigure(JNIEnv* env, jclass, jstring line) {
     std::string text;
@@ -154,7 +174,7 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeStop(JNIEnv*, jclass) {
 extern "C" JNIEXPORT void JNICALL
 Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         JNIEnv* env, jclass, jobject manager, jobject surface, jint level, jstring logPath) {
-    if (level < 0 || level > 9) return;
+    if (level < 0 || level > 10) return;
     if (logPath) {
         const char* path = env->GetStringUTFChars(logPath, nullptr);
         if (path) {
@@ -175,8 +195,10 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         windowReady.store(true);
         // The positional argument selects the same TOC index as TankChoice.IDS.
         char arg0[] = "wf_dream";
-        char arg1[] = "0";
-        arg1[0] = static_cast<char>('0' + level);
+        // Decimal, not one ASCII digit: index 10 (Sea Stars) as '0' + 10 is ':', which atoi()
+        // reads as 0, so the Dream played the Clownfish tank. The engine parses it with atoi.
+        char arg1[12];
+        std::snprintf(arg1, sizeof arg1, "%d", int(level));
         char slotWidth[] = "--vram-slot-width=1024";
         char slotHeight[] = "--vram-slot-height=1024";
         char permWidth[] = "--vram-perm-width=1024";

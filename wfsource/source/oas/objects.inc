@@ -82,6 +82,8 @@
 #include "fieldtypes.hp"
         	
 #include "levelrendersettings.hp"
+        	
+#include "seastarssettings.hp"
 
 
 

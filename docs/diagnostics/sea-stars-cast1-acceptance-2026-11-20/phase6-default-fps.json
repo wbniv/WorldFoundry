@@ -1,0 +1,17 @@
+{
+  "what": "cast1 steady-state level FPS: the median of the 10 s buckets from 20 s to 90 s of each 120 s profile run (the first 10 s are the menu at 60 FPS; a form opened by hand skews the tail)",
+  "gate_fps": 20,
+  "old_nine_resident_build_J-a40ff60e3f1a": 20.7,
+  "seventeen_placed_before_visibility_fix": {
+    "J-5aee10f7c14c": 18.45,
+    "J-9eb7de73b9e3": 18.5,
+    "J-9cc38ac64323": 18.6
+  },
+  "seventeen_placed_after_visibility_fix": {
+    "J-c5225d47a161": 20.3,
+    "J-caef35d89c9a": 20.35,
+    "J-a763d40f66c6": 20.35
+  },
+  "median_after_fix": 20.35,
+  "verdict": "PASS"
+}

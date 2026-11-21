@@ -1,0 +1,69 @@
+{
+  "status": "PASS",
+  "source": "/src/wflevels/aquarium_sea_stars/sea_stars_assets.blend",
+  "species": {
+    "BlueStar": {
+      "scientific": "Linckia laevigata",
+      "vertices": 2822,
+      "faces": 3000,
+      "bones": 20
+    },
+    "ChipOne": {
+      "scientific": "Protoreaster nodosus",
+      "vertices": 1863,
+      "faces": 1952,
+      "bones": 20
+    },
+    "FromiaOne": {
+      "scientific": "Fromia milleporella",
+      "vertices": 1702,
+      "faces": 1800,
+      "bones": 20
+    },
+    "SandOne": {
+      "scientific": "Archaster typicus",
+      "vertices": 3482,
+      "faces": 3960,
+      "bones": 20
+    },
+    "Brittle": {
+      "scientific": "Ophiarachna incrassata",
+      "vertices": 7762,
+      "faces": 6890,
+      "bones": 80
+    },
+    "Cushion": {
+      "scientific": "Culcita novaeguineae",
+      "vertices": 1702,
+      "faces": 1800,
+      "bones": 0
+    }
+  },
+  "packed_textures": [
+    "stars_atlas.tga"
+  ],
+  "actions": [
+    "SandOne_bury",
+    "SandOne_rise",
+    "SandTwo_bury",
+    "SandTwo_rise",
+    "brittle_hide",
+    "brittle_row",
+    "chip_glide",
+    "chip_glide.001",
+    "chip_lead",
+    "chip_lead.001",
+    "cushion_puff",
+    "fromia_glide",
+    "fromia_glide.001",
+    "fromia_glide.002",
+    "linckia_corner",
+    "linckia_glide",
+    "linckia_lead",
+    "linckia_reach",
+    "sand_glide",
+    "sand_glide.001"
+  ],
+  "scope": "Source-asset verification only; gameplay/device acceptance pending.",
+  "brittle_curled_rest_pose": true
+}

@@ -25,9 +25,8 @@ public final class ScreensaverPreviewActivity extends Activity {
     protected void onResume() {
         super.onResume();
         String dream = getIntent().getStringExtra(EXTRA_DREAM);
-        int level = SEAHORSE_GRID.equals(dream)
-                ? 0 : TankChoice.indexOf(TankChoice.chooseForDream(this));
-        player.start(level);
+        if (SEAHORSE_GRID.equals(dream)) player.start(0);
+        else TankLaunch.startChosen(this, player);
     }
 
     @Override

@@ -63,6 +63,7 @@ OBJECTSHEADER
         OBJECTENTRY(RuntimeDiagnostics,0)
         OBJECTENTRY(FieldTypes,0)
         OBJECTENTRY(LevelRenderSettings,0)
+        OBJECTENTRY(SeaStarsSettings,0)
 OBJECTSFOOTER
 
 @*============================================================================

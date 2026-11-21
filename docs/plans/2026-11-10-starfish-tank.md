@@ -1,6 +1,6 @@
 # Sea Stars: an eleventh aquarium tank of Indo-Pacific starfish
 
-**Status: approved, 2026‑11‑20.** Will accepted every recommendation in D1–D10 on 2026‑11‑20 ("D1-D10: all"). **D11 is deferred** (Will, 2026‑11‑20: "i changed my mind again. let's do D11 later"): the first release has **no settings object, no parking and no Dream-settings form**, and the level ships with the default population. The settings design below is kept as the spec for the later item. Phase 0 is next. Nothing is built yet.
+**Status: approved, 2026‑11‑20.** Will accepted every recommendation in D1–D10 on 2026‑11‑20 ("D1-D10: all"). **D11 is deferred** (Will, 2026‑11‑20: "i changed my mind again. let's do D11 later"): the first release has **no settings object, no parking and no Dream-settings form**, and the level ships with the default population. The settings design below is kept as the spec for the later item. Implementation started 2026‑11‑20. Will subsequently requested **all 3D modelling and images first**. The six-species meshes, 512² atlas, tank scenery, editable Blender arm rigs and review renders are ready for review in `feat/sea-stars` (`.worktrees/sea-stars`). The crawl controller passes its zForth VM prototype tests; real-engine acceptance is still pending. **Will approved the assets on 2026‑11‑20**, which lifted the hold. The real desktop engine now passes `scripts/check-sea-stars.py` (planes, front-glass climb with the oral side to the glass, four side corners, Jolt and script positions agree, brittle escape, sand-star contact burial; [evidence](../diagnostics/sea-stars-2026-11-20/results.json)). Two bugs surfaced and are fixed with tests: a held stick stepped the star straight back off the glass, and the glass pitch showed the dorsal skin. **cast1, 2026‑11‑20 ([evidence](../diagnostics/sea-stars-cast1-acceptance-2026-11-20/README.md)):** the selector and Back pass, wide idle is **23.99 FPS** (gate ≥ 20), and the Dream shows Sea Stars after a Dream-host fix (`f941db11`) for 383 s. Still open: step 10's no-actor gate, a full 10-minute Dream with a recorded glass climb. The Blender master reopens with its packed atlas and saved arm actions; all 16 asset checks pass. [Asset review](../reference/sea-stars-art/README.md).
 
 ## Context
 
@@ -272,7 +272,7 @@ Each five-armed star is one mesh with one `DFRM` v2 curve per arm (5 of the 16 a
 | `hide` | brittle star | the disc is still and two or three tips wave |
 | `bury` / `rise` | sand-sifting star | transforms only: it sinks 1 cm into the sand while the arms flatten |
 
-The cushion star has no arms worth bending. Its puff is a scale transform.
+The cushion star has no arms worth bending. Its puff is a scale transform. **Research clarification, 2026‑11‑20:** Will approved retaining the puff and exact reaction timings as intentionally stylized animation/gameplay; they are not claimed as measured biological behaviour. See the [species sheet](../reference/sea-stars-research.md).
 
 **Mailboxes:** each animated actor needs its control-block cells. Phase 4 allocates a global range next to the reef's [table](2026-11-02-gulf-of-thailand-reef-tank.md#reef-global-mailbox-allocation) and records it there.
 
