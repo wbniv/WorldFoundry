@@ -73,4 +73,9 @@ def test_a_type_with_no_live_field_fails_the_fields_check(fake):
 def test_the_two_real_clocks_are_audited(capsys):
     audit.ROOT = Path(__file__).resolve().parent.parent
     names = audit.clocks()
-    assert "minute_machine" in names and "tide_harbour" in names
+    # The audited clocks are the bundle's (wflevels/clocks-menu.manifest). Tide Harbour joins it, and
+    # so the audit, with one appended manifest line once its level is built; until then the built-in
+    # list, which still names it, applies only when there is no manifest.
+    assert names[0] == "minute_machine" and "tide_harbour" in audit.BUILTIN
+    assert names == [l.split()[1][:-len("-standalone.iff")] for l in audit.MANIFEST.read_text().splitlines()
+                     if l.startswith("level ")]

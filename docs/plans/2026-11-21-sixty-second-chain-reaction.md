@@ -229,6 +229,8 @@ Everything below is in `wflevels/minute_machine/`, `tests/` and `scripts/`, push
 
 [![The TV's screensaver list with Minute Machine selected, the TV banner, a portrait phone showing the scene as a strip, and a TV whose clock is wrong](2026-11-21-sixty-second-chain-reaction/picker.png)](2026-11-21-sixty-second-chain-reaction/picker.html)
 
+**Superseded 2026‑11‑21:** the `minutemachine` flavor and `task build-minute-machine-apk` were replaced by the `clocks` flavor (WF Clocks, `org.worldfoundry.clocks`, `task build-clocks-apk`), where Minute Machine is level 0; see the [Tide Harbour plan](2026-11-21-tide-harbour-clock.md), decision D2. As built here:
+
 The `minutemachine` flavor copies the Seahorse Grid flavor's shape: its own manifest, `MinuteMachineDreamService`, `MinuteMachineActivity` for the launcher, a settings provider that offers orientation only, a launcher icon and a TV banner with the World Foundry badge, and `cd.iff` as its asset. A device whose clock is wrong shows what the device believes; the machine never shows a blank or an error.
 
 ```mermaid

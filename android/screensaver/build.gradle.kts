@@ -10,6 +10,13 @@ val copyAquariumLevelCatalog by tasks.registering(Copy::class) {
     rename { "levels.manifest" }
     into(aquariumCatalogAssets)
 }
+// WF Clocks (docs/plans/2026-11-21-tide-harbour-clock.md): the same, from wflevels/clocks-menu.manifest.
+val clocksCatalogAssets = layout.buildDirectory.dir("generated/levelCatalog/clocks/assets")
+val copyClocksLevelCatalog by tasks.registering(Copy::class) {
+    from(rootProject.file("../wflevels/clocks-menu.manifest"))
+    rename { "levels.manifest" }
+    into(clocksCatalogAssets)
+}
 
 android {
     namespace = "org.worldfoundry.screensaver"
@@ -38,9 +45,9 @@ android {
             versionCode = 1
             versionName = "0.1"
         }
-        create("minutemachine") {
+        create("clocks") {                 // WF Clocks: every clock of wflevels/clocks-menu.manifest
             dimension = "dream"
-            applicationId = "org.worldfoundry.minutemachine"
+            applicationId = "org.worldfoundry.clocks"
             versionCode = 1
             versionName = "0.1"
         }
@@ -99,6 +106,7 @@ android {
     // The aquarium flavor's level roster: wflevels/aquarium-menu.manifest, copied (never checked
     // in twice) into generated assets as levels.manifest, which LevelCatalog reads at runtime.
     sourceSets.getByName("aquarium").assets.srcDir(aquariumCatalogAssets)
+    sourceSets.getByName("clocks").assets.srcDir(clocksCatalogAssets)
 }
 
-tasks.named("preBuild") { dependsOn(copyAquariumLevelCatalog) }
+tasks.named("preBuild") { dependsOn(copyAquariumLevelCatalog, copyClocksLevelCatalog) }

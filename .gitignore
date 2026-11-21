@@ -109,11 +109,12 @@ wflevels/planted-screensaver-cd.iff
 # The Planted Tank APK's coordinator settings, generated from settings.oad by build_planted().
 android/screensaver/src/planted/assets/planted-settings.json
 
-# Minute Machine: built by `task minute-machine-level` / `task build-minute-machine-apk`; captures by scripts/check-minute-machine.py
+# Minute Machine: built by `task minute-machine-level` (packed into WF Clocks by `task clocks-bundle`); captures by scripts/check-minute-machine.py
 wflevels/minute_machine.iff
 wflevels/minute_machine-standalone.iff
-wflevels/minutemachine-screensaver-cd.iff
 tests/mm-captures/
+# WF Clocks: every clock of wflevels/clocks-menu.manifest, packed by scripts/pack-clocks-bundle.py
+wflevels/clocks-cd.iff
 
 # Tide Harbour Phase 0 spike: throwaway builds, rebuilt by wflevels/tide_spike/build.sh
 /wflevels/tide_spike_*

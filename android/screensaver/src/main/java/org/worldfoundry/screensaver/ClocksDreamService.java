@@ -2,8 +2,12 @@ package org.worldfoundry.screensaver;
 
 import android.service.dreams.DreamService;
 
-/** A separate Dream that runs the Minute Machine World Foundry level. */
-public final class MinuteMachineDreamService extends DreamService {
+/**
+ * The WF Clocks Dream (clocks flavor): plays the saved clock choice (default Random, resolved once
+ * per run by LevelLaunch), never the chooser, because a screensaver must never wait for a person.
+ * docs/plans/2026-11-21-tide-harbour-clock.md, decision D3.
+ */
+public final class ClocksDreamService extends DreamService {
     private TankPlayer player;
 
     @Override
@@ -19,7 +23,7 @@ public final class MinuteMachineDreamService extends DreamService {
     @Override
     public void onDreamingStarted() {
         super.onDreamingStarted();
-        player.start(0);
+        LevelLaunch.startChosen(this, player, null);
     }
 
     @Override
