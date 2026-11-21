@@ -29,9 +29,9 @@ That picture is the look to aim at. The plan has two jobs that happen to ship to
 | Is more animation machinery needed? | **No, not for motion.** The expensive kind is the mesh deformer: Seahorse Grid manages 29.6 FPS with 24 deforming meshes, and `DFRM` v1 poses only one curve per mesh ([reef plan](2026-11-02-gulf-of-thailand-reef-tank.md)). A river can be made from many rigid bars (below), which costs what Minute Machine's pieces cost. |
 | Can a script change colour or light? | **Not today.** A `Light` actor reads its red, green and blue fields once, when it is built ([`light.cc:51`](../../wfsource/source/game/light.cc)); the clear colour is fixed too. Runtime light control is a separate engine feature, now its own TODO item, and **this plan does not use it**. The day turns to dusk and night with parts that already move: a sliding sky, glow actors and keyed looks ([D5](#decisions)). |
 | What does the tide need that the engine lacks? | A **date**. The engine's clock mailboxes carry hour, minute and second only. A tide is set by the Moon: its heights repeat roughly every 24 h 50 min, so the same clock time gives a different water level each day. |
-| Where do real predictions come from? | The Royal Thai Navy Hydrographic Department has been Thailand's tide authority since 1954 and publishes predictions for 29 sites from harmonic constants fitted to a year of observations ([IHO national report, 2024](https://iho.int/uploads/user/Inter-Regional%20Coordination/RHC/NIOHC/NIOHC23/NIOHC23-8.1I_2024_National%20Report%20Thailand.pdf); [GLOSS report, 2001](https://gloss-sealevel.org/gloss/gloss/sites/gloss/files/publications/documents/thailand_2001.pdf)). Its gauge at Bangkok Bar is [PSMSL station 287](https://psmsl.org/data/obtaining/stations/287.php) and Ko Sichang is [station 449](https://psmsl.org/data/obtaining/stations/449.php). **Not found yet:** the river's tide type and amplitudes, or a ready table of constants for a Chao Phraya station. Phase 0 looks. Until then the mockups use an invented curve and say so. |
+| Where do real predictions come from? | **Found.** The Royal Thai Navy Hydrographic Department posts, for every day, the predicted time and height of each high and low water at 31 stations, as a public PDF per station per year ([2026](https://hydro.navy.mi.th/sevicetide), [2027](https://hydro.navy.mi.th/servicetide2570)). Station **HD, Royal Thai Navy Headquarters**, is on the river inside Bangkok. Heights are metres above the lowest low water and the times are Thai local time, UTC+7, which was **measured** against Ko Lak's observed hourly record (median 11 min at +7 h, 308 min at 0). The Bangkok tide is **mixed, mainly semidiurnal** (form factor 1.36 from our fit; 1.06 in an independent model study), and the year's listed highs and lows run from 0.53 m to 3.33 m. Fitting 64 harmonic constituents to the 2026 table and scoring them on the 2027 table, which the fit never saw, gives a **median error of 4.5 cm** (and 4.1 cm the other way round). The department's own constants are not public, so ours are a fit to its published predictions. Everything, with sources, locators and what was not found, is in the [research document](../reference/chao-phraya-tide-research.md). |
 
-The numbers are not guessed: nothing below states a tidal range, a tide type or a harmonic constant for Bangkok, because none was found.
+Nothing in this plan states a tidal range, a tide type, a harmonic constant or an error that is not in the [research document](../reference/chao-phraya-tide-research.md) with its source or its script.
 
 ## Decisions
 
@@ -44,11 +44,13 @@ Recommendations are in the third column. Nothing is decided until Will answers.
 | D3 | How the clock is chosen | Launcher with no clock named: **the chooser**. `--es clock tide_harbour` on the launcher activity: **straight to that clock**. The Dream: its saved choice (default **Random**, resolved once at start), never the chooser. The settings provider offers the choice | A chooser inside the Dream (a screensaver must never wait for a person) |
 | D4 | The order and names of clocks | **Stable ids**, as `TankChoice.IDS`: `minute_machine`, `tide_harbour`. The index is the table-of-contents position; a new clock is appended | Sort alphabetically (an index change would silently re-point saved choices) |
 | D5 | How the day turns to night | **No engine change.** A tall gradient mesh for the sky that slides past the camera; glow actors for lamps and windows, moved in front of the dark glass at dusk; and the water, boats and buildings drawn in a few keyed looks (day, dusk, night) cross-faded by moving the lit set forward. Phase 0 shows how well this holds and records the gaps | Runtime light control (a script-writable light colour): would dim everything with one write, but it is an engine feature in its own right and is **deferred to a TODO item, not used here**. Bake one fixed sunset: cheap, but then the look says nothing about the time |
-| D6 | The tide itself | **Real harmonic constants from the Hydrographic Department** if Phase 0 finds them, summed in Forth from the date. If it finds none, a labelled synthetic curve with the right period (about 12 h 25 min and 24 h 50 min) and no claim to be a prediction | A free online table (not licensed for embedding; fetch only what the task needs) |
+| D6 | The tide itself | **Settled by the research: fitted harmonic constants for Bangkok**, summed in Forth from the date. 64 constituents, median error 4 to 5 cm on an unseen year ([tide_constants.json](../../wflevels/tide_harbour/tide_constants.json)). The department publishes a new table each year, so `task tide-refit` repeats the fit (the years and the file addresses in `tide_fit/` are edited by hand first); the scene needs no nodal correction for the next year (3.7 cm against 3.3 cm) | A synthetic curve (no longer needed); a third-party table (the department's own tables are public and primary) |
 | D7 | Frame-rate gate | **At least 30 FPS** on cast1, Release, median over 120 s, the same gate Minute Machine used. Actor budget **150 rigid actors**, measured in Phase 0 on boxes first | A higher gate: the water bars are the likely cost, so measure first |
 | D8 | The dial | **Roman numerals**, as in the concept art: legible from across a room. Thai numerals ๑–๑๒ are a later variant | Thai numerals now: more local, harder to read at a glance |
 | D9 | Art style | **Low-poly, flat colour, a few small textures** (roof tile, wood, dial face), built in Blender in the container. Reads as the concept art at a distance and fits the VRAM page | Painterly textures like the concept art: much heavier on the 2048 × 2048 page |
 | D10 | Burn-in | **The camera drifts slowly all the time**, as Minute Machine's does; the water, sky and clouds always move, so no pixel sits still | A static camera: the tower dial would burn in |
+| D11 | An A3 poster about the tides and the calculation | **Yes, portrait A3 (297 × 420 mm), on the repository's poster pipeline** ([seahorse poster](../reference/seahorse-biomechanics-poster/README.md)): the [research document](../reference/chao-phraya-tide-research.md) first, then `make_poster.py` and `export_poster.py` (PDF, 300 DPI PNG, `layout-review.json`) and a pytest guard. Every claim wears a chip (**verified**, **other source**, **ours (measured)**); the build refuses an unconfirmed claim. See [the poster](#the-poster) | A figure in the plan only: no printable object, and the research would stay buried here |
+| D12 | Sun and moon | **No tables, and no claim about the moon.** The sun's rise and set come from a closed-form formula (the sun's declination and the equation of time, for Bangkok's latitude and longitude and the date), a few lines of Forth using the new trig words, and checked in Phase 2 against five published sunrise and sunset times. The moon is only a disc on an arc: its phase and position are **not** claimed, in the scene or on the poster. Will asked (2026‑11‑21): "should we??" about researching sunrise, sunset and moon tables; the answer was no | Tables for every date (a lot of data for a look nobody can check); a fixed 06:00 and 18:00 (seasonal drift is a few tens of minutes, which would pass, but the formula is as cheap and is right); the real moon (phase and position are a project of their own, and the plan's moon-phase stretch is already out of scope) |
 
 ## Approach
 
@@ -82,9 +84,9 @@ The water is a stack of 36 long thin boxes, near to far, slightly overlapping. E
 
 ### The tide and the sun
 
-- **Tide:** `tide-m` sums a few constituents, `amplitude × cos(2π × (hours × cycles per hour) + phase)`, with the K1, O1, M2 and S2 constituents the usual starting set. K1 and O1 are the once-a-day constituents (periods 23.93 h and 25.82 h) and M2 the twice-a-day one (12.42 h), from the [USGS tables](https://pubs.usgs.gov/dds/dds74/OTHER/tide_key.pdf). Which of them matter on the Chao Phraya is for Phase 0 to find; the set above is only where such a fit usually starts. The date supplies the phase. A float cell holds about seven digits, so **days since 2000‑01‑01 reduced to a phase** keeps the error to a few minutes of tide. Phase 0 measures the real error against the department's own table and writes it down.
+- **Tide:** `tide-m` sums the 64 fitted waves, `amplitude × cos(2π × (cycles per hour × hours + phase))`, plus the mean level, with `hours` counted from 2026‑01‑01 00:00 Thai time. The four that define the tide are K1 (50.0 cm, 23.93 h), M2 (36.3 cm, 12.42 h), O1 (30.9 cm, 25.82 h) and S2 (23.1 cm, 12.00 h); the other 60 add the annual cycle, the other lunar and solar terms, and the shallow-water compound tides a river makes. Fewer would do for the look (12 waves leave a median error of 21 cm; 48 leave 5.6 cm), and the tide only needs evaluating about once a second, so 64 cosines is cheap. The date supplies the phase: `WALL_DAY` minus the epoch's day number, times the cycles per day, plus the hour. A float cell holds about seven digits, so Phase 2 measures the real float error against the table and records it; it is expected to stay under a centimetre.
 - **Time zone:** the constants are for Thai local time (UTC+7, no daylight saving). E1 also exposes the device's UTC offset, so a TV elsewhere still shows Bangkok's tide at the right Bangkok moment, or can be told otherwise by a setting later.
-- **Sun and moon:** sunrise and sunset move through the year, by an amount Phase 0 takes from NOAA's solar tables for Bangkok, not from memory. They are fitted to one smooth curve of the day of year, which the new Forth trig words compute. The moon rises opposite the sun; its phase is a stretch goal, not in this plan.
+- **Sun and moon:** by [D12](#decisions), the sun's rise and set follow from its declination and the equation of time for Bangkok and the date, computed in Forth with the trig words, and checked in Phase 2 against five published times; no table is stored. The moon is a disc on an arc, rising opposite the sun, with no claim about its phase or position.
 - **What the tide moves:** the river's mean level, the boats on their ropes (the rope lengths change), the raft between its posts, the water hyacinth drifting up and down the bank, and a **tide gauge board** on a pier post with a pointer, so the tide can be read as well as seen.
 
 ### The clock tower
@@ -96,6 +98,17 @@ The dial is the one thing that tells the time. The hour, minute and second hands
 [![Six moments from dawn to deep night, each a different tide and a different light](2026-11-21-tide-harbour-clock/moments.png)](2026-11-21-tide-harbour-clock/moments.html)
 
 Six frozen moments from the same code: dawn at low tide, noon, the sunset of the concept art, dusk, night and deep night at another tide. The sky, the water colour, the lit windows and lanterns, and the water level all change with the clock, which is what makes the picture say what time it is even without reading the dial. The mockups draw the day's light freely; how closely the engine's existing moving parts can match them, with no light control, is what the Phase 0 spike must show.
+
+### The poster
+
+Will asked (2026‑11‑21): "update plan: make an a3 poster about the tides and calculations/etc". It is a printable object in its own right, and it makes the research readable. The [mockup](2026-11-21-tide-harbour-clock/poster.html) draws the layout on the real data: panels 1, 4 and 5 are the shipped constants against the Navy's printed events, the out-of-sample errors and the Ko Lak clock check; panel 6 is a placeholder for the finished harbour.
+
+[![A3 portrait poster in seven panels: two highs a day or one, a sum of waves, from a table to constants, how good, which clock, what the harbour does, what we do not know](2026-11-21-tide-harbour-clock/poster.png)](2026-11-21-tide-harbour-clock/poster.html)
+
+- **Content (seven panels):** two highs a day or only one, on three real days; a tide as a sum of waves (K1, O1, M2, S2 and their sum); from a table of highs and lows to constants (the fit); how good it is, against the number of waves kept, on a year the fit never saw; which clock the table uses (the Ko Lak check); what the harbour does with the number; and what we do not know.
+- **Rules, from the seahorse poster:** the research document comes first and gives each source's locator and access limits; every printed claim wears a chip (**verified**, **other source**, **ours (measured)**); claims the research could not confirm stay out, and `make_poster.py` refuses to build if one is added; the drawings are original SVGs; the PDF is one 297 × 420 mm page, with a 300 DPI PNG and a `layout-review.json`.
+- **Print:** matte or uncoated A3 stock. The 2026‑10‑06 print was too glossy ([audit note](../reference/2026-10-06-aquarium-poster-reference-verification.md)); confirm a shop with matte A3 before going.
+- **Not on it:** the department's constants (not public), anything about the sun or moon (D12: not claimed), and anything from the two papers that could not be read.
 
 ### The bundle and the chooser
 
@@ -172,12 +185,51 @@ stateDiagram-v2
 
 | Phase | Work | Tier | Gate |
 |---|---|---|---|
-| **0 Spikes and research** | (a) 36 plain bars plus 100 boxes on a placeholder level, on cast1: FPS and banding. (b) The look of the day with no light control: a sliding sky, glow actors and keyed looks, judged on the TV at the six moments. (c) The tide: find the Hydrographic Department's constants for a Chao Phraya station, or record that none are public; check the arithmetic against their table. (d) Sunrise and sunset by day of year against NOAA | T4 | Answers D5, D6, D7 and the water risk; the plan is revised with the results |
+| **0 Spikes and research** | (a) 36 plain bars plus 100 boxes on a placeholder level, on cast1: FPS and banding. (b) The look of the day with no light control: a sliding sky, glow actors and keyed looks, judged on the TV at the six moments. ~~(c) The tide: find the Hydrographic Department's constants for a Chao Phraya station, or record that none are public; check the arithmetic against their table.~~ Done 2026‑11‑21: no public constants, but the department's published highs and lows were fitted and validated; [record below](#phase-0-record-the-tide). ~~(d) Sunrise and sunset by day of year against NOAA~~ Dropped by D12: a formula, checked in Phase 2, in place of research | T4 | Answers D5, D7 and the water risk; the plan is revised with the results |
 | ~~**1 Engine E1**~~ | ~~Mailboxes, override, tests~~ Done 2026‑11‑21; [record below](#phase-1-record-e1-built) | T4 | ~~`task test-wall-clock` passes with a date; Minute Machine unaffected~~ |
 | **2 Tide Harbour level** | `clock_common` hoisted; `wflevels/tide_harbour/` with `timeline.py`, `channels.py`, `parts.py`, Blender build, `-standalone.iff`; director VM test; engine comparison | T3 | Director matches the model in the VM and the engine, as Minute Machine's did |
 | **3 Bundle and chooser** | Manifest, pack script, `Clock*` classes, host change, flavor `clocks`, `minutemachine` flavor removed | T3 | Desktop and cast1: no argument shows the menu; a named clock skips it; the Dream never shows it |
 | **4 cast1** | Install, FPS gate, 10-minute Dream run, six moments checked on the TV, tide gauge checked against the model | T3 | D7 gate, and the moments match the mockups |
 | **5 Docs** | `android/screensaver/README.md`, `docs/level-building.md` note, `docs/forth-math-words.md` unaffected | T2 | `task md` renders |
+| **P The poster** | The [research document](../reference/chao-phraya-tide-research.md) is written. `docs/reference/chao-phraya-tide-poster/`: `make_poster.py`, `export_poster.py`, original SVG panels, `layout-review.json`, the PDF and a 300 DPI PNG; `tests/test_poster_chao_phraya_tide.py`. It needs only Phase 0(c), so it can be built at any time, including before the level exists; panel 6 (the harbour) is redrawn from the finished scene | T3 | PDF is one 297 × 420 mm page; the build refuses an unconfirmed claim; a person has read the printed-size proof |
+
+### Phase 0 record: the tide
+
+Done 2026‑11‑21. Tooling in `wflevels/tide_harbour/tide_fit/`; the full account is the [research document](../reference/chao-phraya-tide-research.md). The three runs below are the evidence.
+
+1. `python3 -I wflevels/tide_harbour/tide_fit/check_time_zone.py`: which clock the department's table uses.
+
+    ```
+    Ko Lak: 6562 observed hourly samples in 2025 (GMT), 736 table events for 2026
+      table minus GMT =  +7.0 h: median mismatch   11.0 min
+      table minus GMT =  +6.5 h: median mismatch   22.0 min
+      table minus GMT =  +7.5 h: median mismatch   40.0 min
+      table minus GMT =  +0.0 h: median mismatch  308.5 min   (the table is not in GMT)
+    RESULT: the table's times are Thai local time (UTC+7)
+    ```
+
+    **PASS.**
+
+2. `python3 -I wflevels/tide_harbour/tide_fit/make_constants.py --n 64`: the fit, scored on the year it never saw, both ways.
+
+    ```
+    events: 2026 1225, 2027 1222; basis 171 constituents; keeping 64
+    fitted on 2026, scored on 2027 (unseen): median 4.5 cm, 90th 11.3, max 22.6  (1222 events)
+    fitted on 2027, scored on 2026 (unseen): median 4.1 cm, 90th 10.6, max 21.5  (1225 events)
+    shipped constants (both years, 64 constituents), in sample: median 5.2 cm, 90th 11.4, max 19.8
+    wrote ../tide_constants.json
+    ```
+
+    **PASS.** The first fit that tried (22 constituents) gave a median of 16 cm and was rejected; the Doodson-number basis brought it to 7 cm and the shallow-water compound tides to 3 to 4 cm. The error was the same in and out of sample at every step, which is what showed the model was too small and not overfitted.
+
+3. `python3 -m pytest -q tests/test_tide_constants.py`:
+
+    ```
+    .....                                                                    [100%]
+    5 passed in 0.25s
+    ```
+
+    **PASS.** Mutation check: reading the table as GMT (7 h off) gives a 125.5 cm median and fails; a K1 phase moved by a quarter turn gives 40.1 cm and fails; halving M2 gives 11.9 cm and fails; as shipped, 4.3 cm.
 
 ### Phase 1 record: E1 built
 
@@ -212,6 +264,7 @@ Built 2026‑11‑21. `WALL_DAY` is mailbox 1925 (whole calendar days since 2000
 flowchart LR
     P0["Phase 0<br/>spikes"] --> P1["Phase 1<br/>E1"]
     P0 --> P2
+    P0 --> PP["Phase P<br/>the poster"]
     P1 --> P2["Phase 2<br/>the level"]
     P2 --> P3["Phase 3<br/>bundle and chooser"]
     P2 --> P4
@@ -224,7 +277,11 @@ flowchart LR
 | File | Change |
 |---|---|
 | `wflevels/clock_common/` | New: the generic parts of `channels.py`, `forth.py` and helpers, moved from `wflevels/minute_machine/` |
-| `wflevels/tide_harbour/` | New: `timeline.py`, `parts.py`, `forth.py`, `blender_create_tide_harbour.py`, `build.sh`, `actor-map.json`, `tide_harbour.lev`, `tide_harbour-standalone.iff.txt`, `tide_constants.json` (with its source, date and licence) |
+| `wflevels/tide_harbour/` | New: `timeline.py`, `parts.py`, `forth.py`, `blender_create_tide_harbour.py`, `build.sh`, `actor-map.json`, `tide_harbour.lev`, `tide_harbour-standalone.iff.txt`, `tide_constants.json` (done: with its source and the hashes of the tables it was fitted to) |
+| `wflevels/tide_harbour/tide_fit/` | Done: `fetch_sources.sh` (one request per file, a pause between), `parse_hd.py`, `constituents.py`, `make_constants.py`, `check_time_zone.py` |
+| `tests/test_tide_constants.py` | Done: pins the constants to eight days copied by hand from the printed table; mutation-checked (a 7 h time-zone slip, a wrong K1 phase and a halved M2 each fail it) |
+| `docs/reference/chao-phraya-tide-research.md` | Done: sources, calculation, accuracy, and what was not found |
+| `docs/reference/chao-phraya-tide-poster/`, `tests/test_poster_chao_phraya_tide.py` | New (Phase P) |
 | `wflevels/clocks-menu.manifest` | New |
 | `scripts/pack-clocks-bundle.py`, `scripts/check-tide-harbour.py` | New |
 | `android/screensaver/src/main/java/org/worldfoundry/screensaver/Clock*.java`, `ClocksActivity`, `ClocksDreamService`, `ClocksSettingsProvider` | New; the three `MinuteMachine*.java` classes removed |
@@ -254,9 +311,12 @@ These steps are the contract. Each is run when its phase lands, with the raw out
 6. `task build-clocks-apk`, then on cast1: `am start … --es clock tide_harbour` shows no menu; the Dream with the saved choice `clock:minute_machine` plays Minute Machine; Random picks one and keeps it for the whole run.
 7. cast1 `profile` workflow, Release: median at least 30 FPS over 120 s, and the count of animated actors printed.
 8. Six screenshots from cast1, at the six times the mockups show: each reads the right time from the dial, and the tide gauge agrees with the model.
+9. `python3 -m pytest -q tests/test_tide_constants.py` and `python3 -I wflevels/tide_harbour/tide_fit/check_time_zone.py`: the constants reproduce the printed table, and the table's clock is UTC+7. Run 2026‑11‑21; output in the [Phase 0 record](#phase-0-record-the-tide). **PASS.**
+10. The Forth `tide-m` against the same table: in the VM and in the engine at eight chosen dates and times, within one centimetre of the Python sum (the float error), and within the fit's own error of the table's printed events.
+11. `python3 docs/reference/chao-phraya-tide-poster/make_poster.py`, then `export_poster.py`, then `python3 -m pytest -q tests/test_poster_chao_phraya_tide.py`: the PDF is one 297 × 420 mm page, every claim has a chip, no unconfirmed claim is present, and `layout-review.json` reports no overflow. A person reads the printed-size proof.
 
 ## Housekeeping done with this plan
 
 - A `TODO.md` entry for each of the two jobs, ranked.
 - A row in the [plan index](README.md).
-- The mockups are schematics of the design, not game assets. Their tide curve is **invented** and labelled so; the water bars are the technique, flat.
+- The mockups are schematics of the design, not game assets. Their tide is now the **real fitted tide** for the date, drawn at an exaggerated scale; the water bars are the technique, flat. The poster mockup's harbour panel is a placeholder.

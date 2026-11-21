@@ -11,7 +11,7 @@ button{font:inherit;color:#e8eaf0;background:#1c1f27;border:1px solid #3a3f4c;bo
 button:hover{background:#262a35}button.on{background:#34405c;border-color:#6d86c9}
 label{color:#c3c8d3;user-select:none}
 input[type=range]{accent-color:#e0704f}
-</style></head><body><div class="tv" style="left:150px;top:14px;width:1140px;height:650px"><svg id="scene" viewBox="0 0 1120 630"></svg></div><div class="cap" style="left:14px;top:20px;width:128px;font-size:12.5px;line-height:1.5">Flat view of a 3D scene. The water is dozens of separate bars, each posed with its own height and tilt: the technique the plan proposes, shown live.</div><div class="cap" style="left:1304px;top:20px;width:128px;font-size:12.5px;line-height:1.5"><b>Illustrative</b> tide curve: made-up amplitudes, not a prediction. The gauge board at the pier reads it.</div><div style="position:absolute;left:160px;top:682px;width:1120px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button id="b-now">Now</button><button id="b-dawn">Dawn</button><button id="b-low">Low tide</button><button id="b-high">High tide</button><button id="b-sun">Sunset</button><button id="b-night">Night</button><button id="b-play">Run ×600</button><label><input type="checkbox" id="c-out"> outline the water bars</label><span id="readout" style="margin-left:auto;font:600 20px ui-monospace,Menlo,monospace;color:#eef0f4"></span></div><div style="position:absolute;left:160px;top:730px;width:1120px;display:flex;gap:12px;align-items:center"><span style="color:#8d94a3;font-size:13px">hour</span><input type="range" id="scrub" min="0" max="24" step="0.01" style="flex:1"><span id="what" style="color:#aeb4c0;font-size:13px;width:330px;text-align:right"></span></div><div style="position:absolute;left:160px;top:785px;width:1120px"><svg id="curve" viewBox="0 0 1120 90" width="1120" height="90"></svg></div><script>
+</style></head><body><div class="tv" style="left:150px;top:14px;width:1140px;height:650px"><svg id="scene" viewBox="0 0 1120 630"></svg></div><div class="cap" style="left:14px;top:20px;width:128px;font-size:12.5px;line-height:1.5">Flat view of a 3D scene. The water is dozens of separate bars, each posed with its own height and tilt: the technique the plan proposes, shown live.</div><div class="cap" style="left:1304px;top:20px;width:128px;font-size:12.5px;line-height:1.5">The tide is from the <b>shipped constants</b>, a fit to the Navy's published predictions for Bangkok, for today's date. The gauge board reads metres above the lowest low water.</div><div style="position:absolute;left:160px;top:682px;width:1120px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button id="b-now">Now</button><button id="b-dawn">Dawn</button><button id="b-low">Low tide</button><button id="b-high">High tide</button><button id="b-sun">Sunset</button><button id="b-night">Night</button><button id="b-play">Run ×600</button><label><input type="checkbox" id="c-out"> outline the water bars</label><span id="readout" style="margin-left:auto;font:600 20px ui-monospace,Menlo,monospace;color:#eef0f4"></span></div><div style="position:absolute;left:160px;top:730px;width:1120px;display:flex;gap:12px;align-items:center"><span style="color:#8d94a3;font-size:13px">hour</span><input type="range" id="scrub" min="0" max="24" step="0.01" style="flex:1"><span id="what" style="color:#aeb4c0;font-size:13px;width:330px;text-align:right"></span></div><div style="position:absolute;left:160px;top:785px;width:1120px"><svg id="curve" viewBox="0 0 1120 90" width="1120" height="90"></svg></div><script>
 const TAU = Math.PI * 2;
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const lerp = (a, b, u) => a + (b - a) * u;
@@ -30,9 +30,12 @@ function sky(t) {
   }
   return { top: KEYS[0][1], bot: KEYS[0][2], water: KEYS[0][3], glow: 1 };
 }
-// ILLUSTRATIVE tide in metres: made-up amplitudes, not a prediction (the plan's Phase 0 finds the real constants)
-const tide = t => 1.35 + .45 * Math.sin(TAU * (t - 3.0) / 24.0) + .30 * Math.sin(TAU * (t - 1.5) / 12.42) + .18 * Math.sin(TAU * (t - 5.2) / 25.82);
-const PX_PER_M = 40;
+// The tide, from the shipped constants (wflevels/tide_harbour/tide_constants.json): a fit to the Navy's published predictions
+// for Bangkok. Metres above the lowest low water. t is the hour of day in Thai time (UTC+7) on TIDE_DAY.
+const TIDE = [2.2892,[[0.041780746111111114,0.50016,0.483028],[0.08051140055555556,0.36263,0.651953],[0.03873065444444444,0.30916,0.708823],[0.08333333333333334,0.23096,0.265559],[0.00011407388888888888,0.17144,0.027315],[0.04155258722222222,0.13171,0.367611],[0.08356149222222223,0.08459,0.972096],[0.0030500916666666667,0.07751,0.871321],[0.0372185025,0.0664,0.714562],[0.07899924861111111,0.05748,0.754807],[0.04483083777777778,0.05516,0.835356],[0.00022815888888888888,0.05381,0.391934],[0.04460267888888889,0.05101,0.686926],[0.12229214666666667,0.04144,0.336148],[0.12206398777777779,0.04088,0.398347],[0.20562548000000003,0.03434,0.949524],[0.03590872166666667,0.03122,0.718062],[0.12511407944444444,0.0309,0.098902],[0.040268594166666664,0.03082,0.586538],[0.08028324166666666,0.03041,0.268673],[0.07768946777777777,0.0286,0.618877],[0.24435613444444443,0.02743,0.080877],[0.07748709666666667,0.02554,0.797001],[0.002821932777777778,0.02516,0.722197],[0.0015121519444444445,0.02444,0.74437],[0.038958813333333335,0.02281,0.579048],[0.0820235525,0.02114,0.107332],[0.20257538833333336,0.01997,0.098023],[0.1610228011111111,0.01953,0.544188],[0.24717806722222224,0.01802,0.690823],[0.043292898055555556,0.01781,0.361725],[0.119242055,0.01773,0.504095],[0.04166667222222223,0.01602,0.150532],[0.08073955944444446,0.01494,0.257158],[0.08638342500000001,0.01455,0.587786],[0.08507364416666667,0.01453,0.834888],[0.2028035472222222,0.01436,0.429086],[0.03742087361111111,0.01365,0.961438],[0.20585363888888888,0.01207,0.578966],[0.042008905,0.01203,0.182063],[0.20539732111111111,0.01138,0.685254],[0.24284398249999997,0.01076,0.146098],[0.11947021388888888,0.01076,0.532782],[0.04189482,0.01072,0.286122],[0.005872024444444454,0.01065,0.424428],[0.2474062261111111,0.01031,0.453744],[0.08321925944444444,0.01025,0.509192],[0.16407289277777778,0.0094,0.260659],[0.11901389611111111,0.00925,0.111562],[0.24458429333333334,0.00906,0.804649],[0.07594915694444444,0.00831,0.703916],[0.041438513333333336,0.0078,0.374539],[0.15951064916666668,0.00731,0.525552],[0.0866115838888889,0.00714,0.547284],[0.12488592055555557,0.0071,0.200329],[0.12055183583333334,0.00703,0.652491],[0.08344740722222223,0.00677,0.338299],[0.04309052694444444,0.0055,0.139892],[0.12534223833333333,0.00541,0.805225],[0.2010632363888889,0.00507,0.112378],[0.074437005,0.00435,0.010179],[0.00456224361111111,0.00398,0.592998],[0.20411332805555557,0.00384,0.915273],[0.04611483083333334,0.00351,0.262702]]];   // [z0, [[cycles per hour, amplitude m, phase rev], ...]]
+let TIDE_DAY = Math.floor((Date.now() + 7 * 3600e3 - Date.UTC(2026, 0, 1)) / 86400e3);   // days since 2026-01-01, Thai calendar
+const tide = t => { const T = TIDE_DAY * 24 + t; let h = TIDE[0]; for (const c of TIDE[1]) h += c[1] * Math.cos(TAU * (c[0] * T + c[2])); return h; };
+const PX_PER_M = 30;
 const WATER_TOP = 336, WATER_BOT = 630, STRIPS = 36;
 const rect = (x, y, w, h, fill, extra = '') => `<rect x="${f1(x)}" y="${f1(y)}" width="${f1(w)}" height="${f1(h)}" fill="${fill}" ${extra}/>`;
 
@@ -40,7 +43,7 @@ function renderScene(t, phase, o) {
   o = o || {};
   const id = o.id || 's';
   const S = sky(t), dark = clamp(S.glow);
-  const level = (tide(t) - 1.35) * PX_PER_M;                 // pixels the water is above its mean
+  const level = (tide(t) - TIDE[0]) * PX_PER_M;                 // pixels the water is above its mean
   const wy = 452 - level;                                   // the water line at the piers
   let g = '', n = 0;
   g += `<defs><linearGradient id="${id}sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${S.top}"/><stop offset="1" stop-color="${S.bot}"/></linearGradient>
@@ -88,8 +91,8 @@ function renderScene(t, phase, o) {
   g += `<polygon points="420,380 470,380 440,430 400,430" fill="none"/>`;
   // tide gauge board on a post
   g += rect(742, 380, 8, 118, mix('#1a110a', '#6a4a2c', 1 - dark * .6)); n++;
-  for (let m = 0; m <= 4; m++) g += rect(742, wyMark(m), 8, 1.5, '#e8e0cc'), n;
-  function wyMark(m) { return 452 - (m - 1.35) * PX_PER_M; }
+  for (let m = 1; m <= 3; m++) g += rect(742, wyMark(m), 8, 1.5, '#e8e0cc'), n;
+  function wyMark(m) { return 452 - (m - TIDE[0]) * PX_PER_M; }
   g += `<polygon points="754,${f1(wy)} 774,${f1(wy - 7)} 774,${f1(wy + 7)}" fill="#ff7a4a"/>`; n++;
 
   // the raft rides the tide between two posts; the ropes change length

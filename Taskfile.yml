@@ -1737,6 +1737,14 @@ tasks:
       - |
         docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O1 -Wall -Wextra -I/src/wfsource/source /src/tests/wall_clock_test.cpp -o /tmp/wall_clock_test && /tmp/wall_clock_test'
 
+  tide-refit:
+    desc: "Refit the Bangkok tide constants to the Hydrographic Department's published tables (one request per file, a pause between), check the table's clock, and run the guard test. The years and the URL ids are edited by hand in tide_fit/ each year; plan docs/plans/2026-11-21-tide-harbour-clock.md"
+    cmds:
+      - bash wflevels/tide_harbour/tide_fit/fetch_sources.sh
+      - python3 -I wflevels/tide_harbour/tide_fit/check_time_zone.py
+      - python3 -I wflevels/tide_harbour/tide_fit/make_constants.py --n 64
+      - python3 -m pytest -q tests/test_tide_constants.py
+
   build-planted-level:
     desc: "Build the Planted Tank screensaver level and bundle (wflevels/planted-screensaver-cd.iff, linked into the planted flavor) via wflevels/planted_tank_screensaver/build.sh, which runs Blender in its container (docs/plans/2026-10-21-planted-tank-screensaver.md)."
     cmds:

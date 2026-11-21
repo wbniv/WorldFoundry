@@ -58,9 +58,12 @@ function sky(t) {
   }
   return { top: KEYS[0][1], bot: KEYS[0][2], water: KEYS[0][3], glow: 1 };
 }
-// ILLUSTRATIVE tide in metres: made-up amplitudes, not a prediction (the plan's Phase 0 finds the real constants)
-const tide = t => 1.35 + .45 * Math.sin(TAU * (t - 3.0) / 24.0) + .30 * Math.sin(TAU * (t - 1.5) / 12.42) + .18 * Math.sin(TAU * (t - 5.2) / 25.82);
-const PX_PER_M = 40;
+// The tide, from the shipped constants (wflevels/tide_harbour/tide_constants.json): a fit to the Navy's published predictions
+// for Bangkok. Metres above the lowest low water. t is the hour of day in Thai time (UTC+7) on TIDE_DAY.
+const TIDE = __TIDE__;   // [z0, [[cycles per hour, amplitude m, phase rev], ...]]
+let TIDE_DAY = Math.floor((Date.now() + 7 * 3600e3 - Date.UTC(2026, 0, 1)) / 86400e3);   // days since 2026-01-01, Thai calendar
+const tide = t => { const T = TIDE_DAY * 24 + t; let h = TIDE[0]; for (const c of TIDE[1]) h += c[1] * Math.cos(TAU * (c[0] * T + c[2])); return h; };
+const PX_PER_M = 30;
 const WATER_TOP = 336, WATER_BOT = 630, STRIPS = 36;
 const rect = (x, y, w, h, fill, extra = '') => `<rect x="${f1(x)}" y="${f1(y)}" width="${f1(w)}" height="${f1(h)}" fill="${fill}" ${extra}/>`;
 
@@ -68,7 +71,7 @@ function renderScene(t, phase, o) {
   o = o || {};
   const id = o.id || 's';
   const S = sky(t), dark = clamp(S.glow);
-  const level = (tide(t) - 1.35) * PX_PER_M;                 // pixels the water is above its mean
+  const level = (tide(t) - TIDE[0]) * PX_PER_M;                 // pixels the water is above its mean
   const wy = 452 - level;                                   // the water line at the piers
   let g = '', n = 0;
   g += `<defs><linearGradient id="${id}sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${S.top}"/><stop offset="1" stop-color="${S.bot}"/></linearGradient>
@@ -116,8 +119,8 @@ function renderScene(t, phase, o) {
   g += `<polygon points="420,380 470,380 440,430 400,430" fill="none"/>`;
   // tide gauge board on a post
   g += rect(742, 380, 8, 118, mix('#1a110a', '#6a4a2c', 1 - dark * .6)); n++;
-  for (let m = 0; m <= 4; m++) g += rect(742, wyMark(m), 8, 1.5, '#e8e0cc'), n;
-  function wyMark(m) { return 452 - (m - 1.35) * PX_PER_M; }
+  for (let m = 1; m <= 3; m++) g += rect(742, wyMark(m), 8, 1.5, '#e8e0cc'), n;
+  function wyMark(m) { return 452 - (m - TIDE[0]) * PX_PER_M; }
   g += `<polygon points="754,${f1(wy)} 774,${f1(wy - 7)} 774,${f1(wy + 7)}" fill="#ff7a4a"/>`; n++;
 
   // the raft rides the tide between two posts; the ropes change length
@@ -167,10 +170,17 @@ const hhmm = t => { const m = Math.floor(t * 60 + 1e-6); return String(Math.floo
 """
 
 
+def tide_js() -> str:
+    import json
+    d = json.loads((HERE.parents[2] / "wflevels" / "tide_harbour" / "tide_constants.json").read_text())
+    return json.dumps([d["z0_m"], [[c["cycles_per_hour"], c["amp_m"], c["phase_rev"]] for c in d["constituents"]]], separators=(",", ":"))
+
+
 def page(title: str, body: str, script: str = "") -> str:
+    scene = SCENE_JS.replace("__TIDE__", tide_js())
     return (f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>{title}</title>"
             f"<meta name=\"viewport\" content=\"width=1440\"><style>{CSS}</style></head><body>{body}"
-            f"<script>{SCENE_JS}\n{script}</script></body></html>")
+            f"<script>{scene}\n{script}</script></body></html>")
 
 
 def harbour() -> str:
@@ -178,8 +188,8 @@ def harbour() -> str:
         '<div class="tv" style="left:150px;top:14px;width:1140px;height:650px"><svg id="scene" viewBox="0 0 1120 630"></svg></div>'
         '<div class="cap" style="left:14px;top:20px;width:128px;font-size:12.5px;line-height:1.5">Flat view of a 3D scene. The water is '
         'dozens of separate bars, each posed with its own height and tilt: the technique the plan proposes, shown live.</div>'
-        '<div class="cap" style="left:1304px;top:20px;width:128px;font-size:12.5px;line-height:1.5"><b>Illustrative</b> tide curve: '
-        'made-up amplitudes, not a prediction. The gauge board at the pier reads it.</div>'
+        '<div class="cap" style="left:1304px;top:20px;width:128px;font-size:12.5px;line-height:1.5">The tide is from the <b>shipped constants</b>, '
+        'a fit to the Navy\'s published predictions for Bangkok, for today\'s date. The gauge board reads metres above the lowest low water.</div>'
         '<div style="position:absolute;left:160px;top:682px;width:1120px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">'
         '<button id="b-now">Now</button><button id="b-dawn">Dawn</button><button id="b-low">Low tide</button><button id="b-high">High tide</button>'
         '<button id="b-sun">Sunset</button><button id="b-night">Night</button><button id="b-play">Run ×600</button>'
@@ -230,12 +240,30 @@ const m = /h=(\d+(?:\.\d+)?)/.exec(location.hash); if (m) set(parseFloat(m[1]));
     return page("Tide Harbour: the harbour", body, script)
 
 
-MOMENTS = [(6.1, "<b>06:06</b> Dawn. The tide is low and the water lies below the gauge's first mark; the tower dial reads six."),
-           (12.0, "<b>12:00</b> Noon, flat light. The boats ride higher on their ropes; the raft has risen with them."),
-           (17.85, "<b>17:51</b> Sunset, the look of the concept art: gold on the water and the lanterns coming on."),
-           (19.3, "<b>19:18</b> Dusk. The sky has gone to violet, and the windows and the tower arch glow."),
-           (23.5, "<b>23:30</b> Night. The moon is up, the water is dark and the dial is still readable by lamplight."),
-           (3.2, "<b>03:12</b> Deep night at a different tide. The scene is a pure function of the date and the time.")]
+def tide_at(hour: float, year=2026, month=11, day=21):
+    """The shipped tide, metres above the lowest low water, at an hour of Thai time on a date, and whether it is rising."""
+    import datetime as dt
+    import json
+    import math
+    d = json.loads((HERE.parents[2] / "wflevels" / "tide_harbour" / "tide_constants.json").read_text())
+    t0 = (dt.datetime(year, month, day) - dt.datetime(2026, 1, 1)).total_seconds() / 3600.0
+
+    def h(x):
+        return d["z0_m"] + sum(c["amp_m"] * math.cos(2 * math.pi * (c["cycles_per_hour"] * (t0 + x) + c["phase_rev"])) for c in d["constituents"])
+    return h(hour), h(hour + 0.1) > h(hour - 0.1)
+
+
+def _moment(hour: float, label: str, text: str):
+    m, up = tide_at(hour)
+    return (hour, f"<b>{label}</b> {text} Water {m:.2f} m above the lowest low water, {'rising' if up else 'falling'}.")
+
+
+MOMENTS = [_moment(6.1, "06:06", "Dawn. The tower dial reads six."),
+           _moment(12.0, "12:00", "Noon, flat light."),
+           _moment(17.85, "17:51", "Sunset, the look of the concept art: gold on the water and the lanterns coming on."),
+           _moment(19.3, "19:18", "Dusk. The sky has gone to violet, and the windows and the tower arch glow."),
+           _moment(23.5, "23:30", "Night. The moon is up and the dial is still readable by lamplight."),
+           _moment(3.2, "03:12", "Deep night. The scene is a pure function of the date and the time.")]
 
 
 def moments() -> str:
@@ -245,7 +273,8 @@ def moments() -> str:
         x, y = 40 + col * 460, 84 + row * 392
         body += (f'<div class="tv" style="left:{x}px;top:{y}px;width:440px;height:258px;border-width:6px;border-radius:9px"><svg id="m{i}" viewBox="0 0 1120 630"></svg></div>'
                  f'<div class="cap" style="left:{x + 4}px;top:{y + 268}px;width:432px">{MOMENTS[i][1]}</div>')
-    script = ("const MOM=" + str([m[0] for m in MOMENTS]) + ";"
+    script = ("TIDE_DAY = Math.floor((Date.UTC(2026, 10, 21) - Date.UTC(2026, 0, 1)) / 86400e3);\n"
+              "const MOM=" + str([m[0] for m in MOMENTS]) + ";"
               "MOM.forEach((h,i)=>{document.getElementById('m'+i).innerHTML=renderScene(h,3.0+i*1.7,{id:'m'+i+'_'}).svg;});")
     return page("Tide Harbour: six moments", body, script)
 
@@ -287,7 +316,100 @@ def chooser() -> str:
     return page("Tide Harbour: the clocks bundle", body, script)
 
 
-PAGES = {"harbour": harbour, "moments": moments, "chooser": chooser}
+
+def poster() -> str:
+    """The A3 poster layout (portrait, 297 x 420 mm) drawn on the 1440x900 canvas, from the real constants and numbers."""
+    import datetime as dt
+    import json
+    import math
+    doc = json.loads((HERE.parents[2] / "wflevels" / "tide_harbour" / "tide_constants.json").read_text())
+    epoch = dt.datetime(2026, 1, 1)
+
+    def h(when):
+        t = (when - epoch).total_seconds() / 3600.0
+        return doc["z0_m"] + sum(c["amp_m"] * math.cos(2 * math.pi * (c["cycles_per_hour"] * t + c["phase_rev"])) for c in doc["constituents"])
+
+    # the department's printed highs and lows for 8, 9 and 10 January 2026 (station HD): time, metres
+    pub = {8: [("0437", 1.12), ("1132", 3.09), ("1731", 2.44), ("2043", 2.73)], 9: [("0446", 1.33), ("1139", 3.02), ("1804", 2.28), ("2139", 2.56)],
+           10: [("0439", 1.59), ("1120", 2.97), ("1844", 2.14), ("2243", 2.39)]}
+    X0, X1, Y0, Y1 = 10, 280, 20, 100                       # panel 1 plot box (user units of a 290 x 130 viewBox)
+
+    def px(hours): return X0 + (X1 - X0) * hours / 72.0
+    def py(m): return Y1 - (Y1 - Y0) * (m - 0.8) / (3.4 - 0.8)
+    t_start = dt.datetime(2026, 1, 8)
+    pts = " ".join(f"{px(k / 6):.1f},{py(h(t_start + dt.timedelta(minutes=10 * k))):.1f}" for k in range(0, 72 * 6 + 1))
+    dots = ""
+    for day, evs in pub.items():
+        for hhmm, m in evs:
+            hours = (day - 8) * 24 + int(hhmm[:2]) + int(hhmm[2:]) / 60.0
+            dots += f'<circle cx="{px(hours):.1f}" cy="{py(m):.1f}" r="1.9" fill="#d9552b"/>'
+    grid = "".join(f'<line x1="{px(24 * d)}" y1="{Y0 - 6}" x2="{px(24 * d)}" y2="{Y1 + 2}" stroke="#d6d1c4" stroke-width=".4"/><text x="{px(24 * d) + 2}" y="{Y1 + 9}" font-size="5.2" fill="#6b665a">{8 + d} Jan 00:00</text>' for d in range(3))
+    p1 = (f'<svg viewBox="0 0 290 120" width="100%"><rect x="{X0}" y="{Y0 - 6}" width="{X1 - X0}" height="{Y1 - Y0 + 8}" fill="#fbf8ef"/>{grid}'
+          f'<polyline points="{pts}" fill="none" stroke="#2c5d8a" stroke-width="1.1"/>{dots}</svg>')
+
+    # panel 2: the four main waves and their sum, for one day
+    c4 = {c["name"]: c for c in doc["constituents"] if c["name"] in ("K1", "O1", "M2", "S2")}
+    def wave(name, k): 
+        c = c4[name]; t = k / 6.0 + 7 * 24 * 1.0 + 24 * 7
+        return c["amp_m"] * math.cos(2 * math.pi * (c["cycles_per_hour"] * t + c["phase_rev"]))
+    rows = ""
+    for i, name in enumerate(("K1", "O1", "M2", "S2")):
+        base = 18 + i * 24
+        path = " ".join(f"{10 + 270 * k / 144:.1f},{base - 17 * wave(name, k) / 0.5:.1f}" for k in range(145))
+        rows += f'<polyline points="{path}" fill="none" stroke="#2c5d8a" stroke-width=".9"/><text x="8" y="{base - 12}" font-size="6" fill="#3d382c" text-anchor="end">{name}</text>'
+    sumpath = " ".join(f"{10 + 270 * k / 144:.1f},{116 - 20 * sum(wave(n, k) for n in c4) / 1.4:.1f}" for k in range(145))
+    p2 = f'<svg viewBox="0 0 290 130" width="100%">{rows}<line x1="10" y1="104" x2="280" y2="104" stroke="#8a8474" stroke-width=".4"/><polyline points="{sumpath}" fill="none" stroke="#d9552b" stroke-width="1.3"/><text x="146" y="127" font-size="5.5" fill="#d9552b" text-anchor="middle">sum of the four</text></svg>'
+
+    # panel 4: error against the number of constituents (fitted 2026, scored on 2027)
+    ns = [(6, 28.0), (12, 21.3), (24, 10.6), (32, 8.2), (48, 5.6), (64, 4.3), (96, 3.8), (171, 3.7)]
+    bars = "".join(f'<rect x="{18 + i * 32}" y="{100 - e * 2.8:.1f}" width="22" height="{e * 2.8:.1f}" fill="{"#d9552b" if n == 64 else "#2c5d8a"}"/><text x="{29 + i * 32}" y="109" font-size="6" text-anchor="middle" fill="#3d382c">{n}</text><text x="{29 + i * 32}" y="{96 - e * 2.8:.1f}" font-size="6" text-anchor="middle" fill="#3d382c">{e}</text>' for i, (n, e) in enumerate(ns))
+    p4 = f'<svg viewBox="0 0 290 120" width="100%">{bars}<text x="145" y="119" font-size="5.5" fill="#6b665a" text-anchor="middle">constituents kept (median error in cm, on a year the fit never saw)</text></svg>'
+
+    # panel 5: the time-zone check
+    zs = [("0 h (GMT)", 308.5), ("+6.5 h", 22.0), ("+7 h", 11.0), ("+7.5 h", 40.0)]
+    zb = "".join(f'<rect x="{20 + i * 66}" y="{100 - min(m, 120) * .75:.1f}" width="44" height="{min(m, 120) * .75:.1f}" fill="{"#d9552b" if "7 h" == lab[:3] and lab == "+7 h" else "#2c5d8a"}"/><text x="{42 + i * 66}" y="109" font-size="6" text-anchor="middle" fill="#3d382c">{lab}</text><text x="{42 + i * 66}" y="{96 - min(m, 120) * .75:.1f}" font-size="6" text-anchor="middle" fill="#3d382c">{m:g} min</text>' for i, (lab, m) in enumerate(zs))
+    p5 = f'<svg viewBox="0 0 290 120" width="100%">{zb}<text x="145" y="119" font-size="5.5" fill="#6b665a" text-anchor="middle">shift of the table against GMT: median mismatch with Ko Lak observations</text></svg>'
+
+    def chip(kind):
+        col = {"V": "#2a7a4b", "O": "#8a6d1f", "K": "#6b3fa0"}[kind]
+        txt = {"V": "verified", "O": "other source", "K": "ours (measured)"}[kind]
+        return f'<span style="display:inline-block;font-size:7.5px;padding:0 4px;border-radius:6px;background:{col};color:#fff;margin-left:4px;vertical-align:1px">{txt}</span>'
+
+    def panel(n, title, body, caption):
+        return (f'<div style="background:#fff;border:.6px solid #cfc9b8;padding:7px 8px 6px;margin-bottom:8px">'
+                f'<div style="font:700 11.5px/1.15 Georgia,serif;color:#241f12"><span style="color:#d9552b">{n}</span> {title}</div>{body}'
+                f'<div style="font-size:8.3px;line-height:1.3;color:#3d382c">{caption}</div></div>')
+
+    flow = ('<div style="display:flex;gap:4px;align-items:center;font-size:8px;margin:6px 0">'
+            + "".join(f'<div style="flex:1;border:.6px solid #8a8474;padding:4px 3px;text-align:center;background:#fbf8ef">{x}</div>' + ('<span style="color:#d9552b">▶</span>' if i < 4 else "")
+                      for i, x in enumerate(["published table<br/>1225 highs and lows", "at each event:<br/>height = listed,<br/>slope = 0", "one linear<br/>least squares", "171 candidate<br/>waves, keep 64", "tide_constants<br/>.json"])) + '</div>')
+    sheet = (
+        '<div style="width:608px;height:860px;background:#f6f2e6;border:1px solid #aaa49a;box-shadow:0 3px 14px #0008;padding:18px 20px;overflow:hidden;font-family:Georgia,serif;color:#241f12"><div style="zoom:1.24">'
+        '<div style="border-bottom:2px solid #241f12;padding-bottom:6px;margin-bottom:9px"><div style="font:700 25px/1 Georgia,serif;letter-spacing:.2px">The tide at Bangkok</div>'
+        '<div style="font:11px/1.35 Georgia,serif;color:#3d382c;margin-top:3px">What the Chao Phraya does every day, how a computer can add it up, and how far to trust the sum. '
+        'Station: Royal Thai Navy Headquarters, 13° 44′ N 100° 29′ E.</div></div>'
+        '<div style="display:flex;gap:9px"><div style="flex:1.1">'
+        + panel("1", "Two highs a day, or only one" + chip("K"), p1, "Three days of January 2026. Dots are the Navy&rsquo;s printed highs and lows; the line is our sum of 64 waves. Heights are metres above the lowest low water" + chip("V"))
+        + panel("2", "A tide is a sum of waves" + chip("V"), p2, "K1 and O1 come once a day, M2 and S2 twice. Added, they make the lumpy curve above. 64 such waves are used in all.")
+        + panel("3", "From a table to constants" + chip("K"), flow, "The table lists only the tops and bottoms, so nothing is drawn through them. Where it lists no event the tide has a flat shoulder.")
+        + '</div><div style="flex:1">'
+        + panel("4", "How good is it?" + chip("K"), p4, "Fitted to 2026 and scored on 2027, and the reverse: median error 4.1 to 4.5 cm, 90th percentile 11 cm, on a range of 2.8 m.")
+        + panel("5", "Which clock does the table use?" + chip("K"), p5, "Observed hourly water at Ko Lak (GMT) lines up with the Navy&rsquo;s table only when the table is read as UTC+7: Thai local time.")
+        + panel("6", "What the harbour does with it", '<div style="height:92px;margin:5px 0;background:linear-gradient(#e8dcc0 0 35%,#7aa3c0 35% 100%);position:relative"><div style="position:absolute;left:14px;top:8px;width:7px;height:78px;background:#6a4a2c"></div><div style="position:absolute;left:44px;top:46px;width:70px;height:13px;background:#8a4a2a;border-radius:0 0 30px 30px"></div><div style="position:absolute;right:16px;top:6px;width:36px;height:46px;background:#cfc7b0"></div></div>',
+                 "The gauge board, the boats and their ropes, the raft and the hyacinth all follow this one number; the dial on the tower tells the time.")
+        + panel("7", "What we do not know" + chip("O"), '<div style="height:2px"></div>', "The Navy&rsquo;s own constants are not public. Our fit is to its published predictions. No nodal correction. Discharge of the river is absorbed into the annual wave. Bangkok&rsquo;s form factor is 1.36 here and 1.06 in a model study, both &lsquo;mixed, mainly semidiurnal&rsquo;.")
+        + '</div></div></div></div>')
+    note = ('<div class="cap" style="left:690px;top:40px;width:700px;font-size:15px;line-height:1.5"><b>A3 poster, portrait, 297 &times; 420 mm</b> (drawn here at about 1:1.5 of a screen).<br/><br/>'
+            'Every claim wears a chip: <b style="color:#2a7a4b">verified</b> (a source was read and says it), <b style="color:#8a6d1f">other source</b>, or <b style="color:#6b3fa0">ours (measured)</b> with the script that measures it. '
+            'What could not be confirmed stays in the research document and is never printed; the build refuses if it is added.<br/><br/>'
+            'Panels 1, 4 and 5 are <b>real data</b>: the shipped constants against the Navy&rsquo;s printed events, the out-of-sample errors, and the Ko Lak clock check. '
+            'The harbour drawing in panel 6 is a placeholder for the finished scene.<br/><br/>'
+            'Print on matte or uncoated A3 stock (the 2026&#8209;10&#8209;06 print was too glossy).</div>')
+    body = f'<div style="position:absolute;left:40px;top:20px">{sheet}</div>{note}'
+    return page("Tide Harbour: the tide poster", body)
+
+
+PAGES = {"harbour": harbour, "moments": moments, "chooser": chooser, "poster": poster}
 
 
 def main() -> int:
