@@ -122,14 +122,14 @@ ROW_H = BAND_H / 2.0
 WIN_W, WIN_H = 0.095, 0.20         # a digit's window
 PITCH = 0.26                       # the drum's spacing between digits: more than a window, so neighbours stay hidden
 GLYPH_H = 0.17                     # a digit's height on the drum
-M_PER_KM = 0.075                   # the map's scale: 11.7 km of the river's width fits the map area
+M_PER_KM = 0.066                   # the map's scale: the river and Bangkok Bar, 12.1 km across, fit between the margin and the column
 COL_X = W / 2 - 0.095              # the level column, right of the map, in panel coordinates
 COL_V0, COL_V1, COL_MAX_M = -0.80, 0.40, 3.5    # its foot and head in v, and the tide at its head
 
 # depths from the camera: nearer is smaller. Back to front: paper, map, column, the band's plate, the drums, the band's mask
 D_PAPER, D_MAP, D_COLUMN, D_PLATE, D_DRUM, D_MASK = (DEPTH + k * LAYER for k in (5, 4, 3, 2, 1, 0))
 # the map's centre of view, and the river's middle: latitude of the map's origin (the map is built about it)
-MAP_LAT0, MAP_LON0 = 13.69, 100.541
+MAP_LAT0, MAP_LON0 = 13.6745, 100.5591    # chosen so the river fills the window over the whole pan (test_tide_harbour_panel_parts)
 
 
 def smooth(x: float) -> float:
