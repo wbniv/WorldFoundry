@@ -1,7 +1,7 @@
 # One Aquarium app: the tank menu when launched normally, the screensaver when started as one
 
 Date: 2026‑11‑21  
-Status: plan written by the coordinator session for Will; the implementing agent records what it measures and decides under **Open for the implementer**, then builds. Nothing is built or installed yet.
+Status: plan written by the coordinator session for Will; the implementing agent records what it measures and decides under **Open for the implementer**, then builds. **Built 2026‑11‑21** (branch `one-aquarium-app`); Verification 1 to 3 and 8 recorded below; 4 to 7 wait for the coordinator session on Cast1. Nothing is installed.
 
 ## Context
 
@@ -94,7 +94,7 @@ The activity already finishes on `onPause`, so leaving the app by Home or recent
 - The engine opens a bundle by the fixed name `cd.iff` (`game.cc`, `ui_font_engine.cc`). The APK keeps the autopilot bundle as `assets/cd.iff`, untouched for every screensaver start, and adds the game app's menu bundle as `assets/menu-cd.iff` (a symlink to the tracked `wflevels/aquarium-menu-cd.iff`, as the game app's own asset is). One Android-only setter in the asset accessor, `WFAndroidSetBundleAsset`, redirects the engine's `cd.iff` for that run; the game app never calls it and is unchanged.
 - **Rejected: one merged bundle** (22 levels, the menu listing the playable half). Same bytes, but the assets are stored deflated and opened with `AASSET_MODE_RANDOM`, so a seek reinflates from the start of the asset: every tank behind 25&nbsp;MB of the other mode's levels would load slower, and it needs a new build product. Two bundles keep each mode's loading exactly as in today's two apps.
 - **Rejected: the game app's `NativeActivity` and `libwf_game.so` inside this package.** A second copy of the engine (about 1.7&nbsp;MB compressed per ABI) and Java shared across two Gradle modules, to get the phone controller, which a TV-only menu does not need.
-- Size: the menu bundle is 25&nbsp;239&nbsp;552 bytes raw, 6&nbsp;838&nbsp;028 gzip‑6 (`gzip -6 -c wflevels/aquarium-menu-cd.iff | wc -c`), so the APK should grow from about 10.6&nbsp;MB to about 17.4&nbsp;MB. The built size is under Verification 3.
+- Size: the menu bundle is 25&nbsp;239&nbsp;552 bytes raw, 6&nbsp;838&nbsp;028 gzip‑6 (`gzip -6 -c wflevels/aquarium-menu-cd.iff | wc -c`), so the APK should grow from about 10.6&nbsp;MB to about 17.4&nbsp;MB. Built: **17&nbsp;386&nbsp;111 bytes** (Verification 3), against 10&nbsp;593&nbsp;217 for the last screensaver build in the main checkout.
 
 **2. Back.** The game app's rules, moved onto the game thread of the screensaver's host (`applyMenuBack`): an open settings form closes first, Back in a tank calls `levelmenu::RequestReturn()` (the engine's own return to the menu, used by the game app), Back on the menu ends the engine, and `TankPlayer` then finishes the activity and ends the process as after any run. The menu bundle is the game app's file and is opened alone, so the autopilot bundle beside it changes nothing in it. The remote's key table moves to one header, `hal/android/key_map.h`, used by both hosts.
 
@@ -123,10 +123,71 @@ The activity already finishes on `onPause`, so leaving the app by Home or recent
 ## Verification
 
 1. **The mode function.** JVM unit tests cover every row of the table: no extras gives `MENU`; `DREAM` gives `PLAY_SAVED`; `LEVEL=<id>` gives `PLAY_LEVEL(id)`; `LEVEL=random` is accepted; an unknown `LEVEL` is refused as the contract says; the Dream and preview paths never return `MENU`.
+
+    ```
+    $ task test-aquarium-launch-mode
+    37 checks, 0 failures
+    ```
+
+    The same test against the tip's `AquariumActivity` (the launcher started a tank) fails, so it would have caught the report:
+
+    ```
+    FAIL AquariumActivity decides through LaunchMode
+    FAIL AquariumActivity starts the menu for MENU
+    37 checks, 2 failures
+    ```
+
+    **PASS.** Rows: no extras `MENU`; `DREAM` `PLAY_SAVED`; `LEVEL=<id>` and `LEVEL=random`, with or without `DREAM`, `PLAY_LEVEL`; `LEVEL` empty, `3` or unknown is `PLAY_LEVEL` and the real catalogue refuses it naming the id; the Dream and preview never reference `LaunchMode`, `startMenu` or `TankPlayer.MENU` and still start through `LevelLaunch`. `task test-level-catalog` still gives `52 checks, 0 failures`.
 2. **Saved choice untouched.** A test (or a documented on-device read) shows `screensaver`/`tank` is unchanged after choosing and playing a tank from the menu.
+
+    Covered by the same 37 checks: `TankChoice.set(` has one caller in the package, `TankSettingsProvider.java`, and `AquariumActivity` has no `getSharedPreferences` or `TankChoice.set`. The menu itself runs inside the engine, which has no route to the Java preferences. **PASS** (source guard; the on-device readback belongs with step 4).
 3. **The build.** The one APK builds with the repo's own route; record the exact command, the APK path and its size.
+
+    ```
+    $ task vendor-unpack-archives     # now a dep of the task below; a fresh worktree has no unpacked Jolt
+    $ task build-aquarium-screensaver-apk
+    BUILD SUCCESSFUL in 30m 33s
+    $ ls -l android/screensaver/build/outputs/apk/aquarium/release/screensaver-aquarium-release.apk
+    -rw-rw-r-- 1 will will 17386111 Nov 21 20:16 android/screensaver/build/outputs/apk/aquarium/release/screensaver-aquarium-release.apk
+    $ unzip -v …/screensaver-aquarium-release.apk | grep -E "lib/|assets/"
+     4364112  Defl:N  1764007  60% … lib/arm64-v8a/libwf_dream.so
+     3473952  Defl:N  1731085  50% … lib/armeabi-v7a/libwf_dream.so
+    25245696  Defl:N  6793031  73% … assets/cd.iff
+        1461  Defl:N      617  58% … assets/levels.manifest
+    25239552  Defl:N  6790018  73% … assets/menu-cd.iff
+        2627  Defl:N      652  75% … assets/sea-stars-settings.json
+    $ aapt2 dump badging … | grep -E "^package|leanback"
+    package: name='org.worldfoundry.screensaver' versionCode='3' versionName='0.3' …
+    leanback-launchable-activity: name='org.worldfoundry.screensaver.AquariumActivity' …
+    $ apksigner verify --print-certs …
+    Signer #1 certificate DN: C=US, O=Android, CN=Android Debug
+    ```
+
+    **PASS.** `assets/cd.iff` is byte for byte the screensaver bundle the main checkout last built (sha256 `13f7e9a7…1683`, rebuilt here by the task's container step), `assets/menu-cd.iff` is the tracked game-app bundle, and both `libwf_dream.so` carry `TankPlayer_nativeKey`, `TankPlayer_nativeBack`, `WFAndroidSetBundleAsset` and `menu-cd.iff`. A frozen copy is `build/screensaver-aquarium-one-app-61952e23.apk` in the worktree (sha256 `5e2508d4…ec28`).
 4. **Normal launch shows the menu on Cast1** (coordinator session): install through `screensaver:install`, start the launcher activity, capture the screen: the tank menu, not a tank.
+
+    **Pending** (coordinator session). Expected: top activity `org.worldfoundry.screensaver/.AquariumActivity`; logcat tag `wf_dream` shows `start the launcher menu (menu-cd.iff)` then `level-menu: showing 11 entries ("WF Aquarium")`.
 5. **Preview and level start unchanged on Cast1:** `screensaver-show` with no level and with `LEVEL=aquarium_plants`: `ScreensaverPreviewActivity` on top, the saved tank unchanged, no menu.
+
+    **Pending** (coordinator session). Expected: `.ScreensaverPreviewActivity` on top; `wf_dream` logs `start level <n>` (`aquarium_plants` is index 5), never `launcher menu`.
 6. **The Dream** still starts a tank and not the menu (select the screensaver, trigger it).
+
+    **Pending** (coordinator session). Expected: `AquariumDreamService` in `org.worldfoundry.screensaver:dream`, `start level <n>`.
 7. **Back** in a tank returns to the menu; Back in the menu leaves (remote key presses through the coordinator).
+
+    **Pending** (coordinator session). Expected: `wf_dream` logs `Back in a tank: returning to the menu`, then `level-menu: showing 11 entries`; on the menu `Back on the menu: leaving the app` and `HALStart returned (Back on the menu)`, and the launcher is on top again.
 8. **Nothing else moved:** the JVM suite and the repo's Python roster and manifest tests pass; `git diff --stat` shows no change to the DreamService, `ScreensaverPreviewActivity`'s contract, the provider authority or the preference keys.
+
+    ```
+    $ git diff --stat 5c2e263c HEAD -- …/AquariumDreamService.java …/ScreensaverPreviewActivity.java …/TankSettingsProvider.java …/TankChoice.java …/LevelLaunch.java android/screensaver/src/aquarium/AndroidManifest.xml android/screensaver/src/main/AndroidManifest.xml
+    $
+    $ scripts/in-linux-container.sh python3 -m pytest -p no:cacheprovider -q tests/test_one_aquarium_app.py tests/test_dream_host_vram.py tests/test_screensaver_overlay.py tests/test_aquarium_menu.py tests/test_aquarium_screensaver_catalog.py tests/test_aquarium_screensaver_input.py tests/test_sea_stars_settings.py tests/test_aquarium_android.py
+    FAILED tests/test_aquarium_screensaver_catalog.py::test_canonical_planted_tank_keeps_freshwater_default
+    FAILED tests/test_aquarium_screensaver_catalog.py::test_built_planted_dream_is_saltwater
+    FAILED tests/test_aquarium_android.py::test_aquarium_assets_are_its_cd_iff_and_the_phone_controller
+    FAILED tests/test_aquarium_android.py::test_snowgoons_assets_and_main_has_none
+    FAILED tests/test_aquarium_android.py::test_no_task_points_at_pre_flavor_apk_paths
+    5 failed, 68 passed, 32 skipped in 25.53s
+    ```
+
+    **PASS for this change, with five failures that are not it.** The diff over the Dream, the preview, the provider, the preference keys, `LevelLaunch` and both manifests is empty. The five failures fail the same way on a clean checkout of the tip `5c2e263c`: two need `wftools/wf_attr_edit/target/release/catalog`, which is not built in a fresh worktree, and three assert the game app's asset list (it now has `wf_args.txt`), `src/main/assets` (it now has `runtime-property-ui.json`) and an old `chromecast-aquarium` command. `test_dream_host_vram.py` also failed on the tip (it read `TankChoice.IDS`, removed in `ec9b872e`) and now passes, reading the manifest. JVM: steps 1 and 2.

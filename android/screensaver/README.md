@@ -1,10 +1,22 @@
 # Android TV screensaver APKs
 
-`android/screensaver` builds three Android TV applications. Aquarium (`org.worldfoundry.screensaver`) renders eight aquarium level variants live. Each tank has an autonomous Player script built from its canonical gameplay export. The app chooses one tank when the Aquarium Dream starts; the default saved `random` preference draws from the eight tank IDs.
+`android/screensaver` builds three Android TV applications. Aquarium (`org.worldfoundry.screensaver`) renders the tanks of `wflevels/aquarium-menu.manifest` live. As a screensaver each tank has an autonomous Player script built from its canonical gameplay export; the app chooses one tank when the Aquarium Dream starts, and the default saved `random` preference draws from every tank in the manifest.
+
+**One app, two modes** ([plan](../../docs/plans/2026-11-21-one-aquarium-app.md)). How the Aquarium is started decides what it does:
+
+| Started by | Component | Does |
+|---|---|---|
+| The TV launcher, Homeboard's app tile or a person: plain `MAIN`, no extras | `.AquariumActivity` | the **tank menu**: the engine's level menu over the playable tanks, the same menu the Aquarium game app (`org.worldfoundry.wf_game.aquarium`) shows. Up and Down choose, Select starts, Back in a tank returns to the menu, Back on the menu leaves. Choosing a tank never changes the saved screensaver tank |
+| `--es org.worldfoundry.screensaver.LEVEL <id or random>` | `.AquariumActivity` or `.ScreensaverPreviewActivity` | that tank once, nothing saved; an unknown id is logged, shown and refused |
+| `--es org.worldfoundry.screensaver.DREAM <any>` | `.AquariumActivity` or `.ScreensaverPreviewActivity` | the saved tank (or Random), as the Dream |
+| No extras | `.ScreensaverPreviewActivity` | the saved tank (or Random); the preview never shows the menu |
+| Android, when idle | `AquariumDreamService` | the saved tank (or Random); never the menu |
+
+The APK carries two bundles: `assets/cd.iff` (the autopilot variants, `wflevels/aquarium-screensaver-cd.iff`) for every screensaver start and `assets/menu-cd.iff` (the playable tanks with the menu, the game app's tracked `wflevels/aquarium-menu-cd.iff`, rebuilt by `task build-cd-iff-aquarium-menu`) for the launcher menu. The native host picks one per run before the engine opens its bundle (`WFAndroidSetBundleAsset`). The JVM test is `task test-aquarium-launch-mode`.
 
 **Seahorse Grid** (`org.worldfoundry.seahorsegrid`) has its own DreamService, launcher icon and level bundle. Its World Foundry level has 24 visible seahorses in six columns and four rows against a dark background, alternating the existing female and male models. The level places the actors; each seahorse runs the same autonomous animation script. Build the level with `python3 scripts/build-seahorse-grid-level.py`. This Dream has no tank setting; its one setting is the orientation (see [Orientation](#orientation)). Audio is not yet configured for it.
 
-The player has no phone-controller prompt, QR code, or controller server, and requests no `INTERNET` permission. The native host hides the engine FPS counter and links the existing `wfengine` target through an app-specific CMake project hook. The Planted Tank uses the shared engine launch-override table to apply values to its settings actor before each level load.
+The player has no phone-controller prompt, QR code, or controller server, and requests no `INTERNET` permission; the Aquarium's launcher menu takes the TV remote only (the game app's phone controller is not in this package). The native host hides the engine FPS counter and links the existing `wfengine` target through an app-specific CMake project hook. The Planted Tank uses the shared engine launch-override table to apply values to its settings actor before each level load.
 
 All three Dreams and their live previews show only the level render. Each app has its own launcher icon with the approved lower-right World Foundry badge; their TV banners also include it. Regenerate icon resources with `python3 scripts/gen-screensaver-android-icons.py`.
 
