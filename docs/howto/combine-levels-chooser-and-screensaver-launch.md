@@ -115,7 +115,7 @@ Single-level apps (Seahorse Grid, the Planted Tank app) are not part of this mec
 
 ## 5. Give every level settings, and a way to open them
 
-A level offers user-controlled settings when it carries a **settings object**: an empty actor of a `<Name>Settings` type whose fields are `SHOW_AS_LIVE`. Six pieces make one, and `scripts/audit-level-settings.py` checks all six for every level in both rosters.
+**Every 3D clock must have a settings object and the hold-A keypress that opens it** (Will, 2026‑11‑21), and every aquarium tank should; the audit exits 1 until they do. A level offers user-controlled settings when it carries a **settings object**: an empty actor of a `<Name>Settings` type whose fields are `SHOW_AS_LIVE`. Six pieces make one, and `scripts/audit-level-settings.py` checks all six for every level in both rosters.
 
 | Piece | What it is | Model to copy |
 |---|---|---|
@@ -125,6 +125,8 @@ A level offers user-controlled settings when it carries a **settings object**: a
 | director | the level's script reads each field with `property@ ( actor field -- value valid )`; the actor index comes from the export, the field index from the `catalog` tool (`wftools/wf_attr_edit`), written into the script at export time | `wflevels/cuckoo_village/forth.py` |
 | phone | `android/screensaver/src/<flavor>/assets/*.json`, made from the `.oad` by `scripts/gen-settings-capabilities.py`, so the phone and the coordinator can list the fields | the Sea Stars asset |
 | test | a `tests/test_<name>_settings.py` that checks the field ranges and defaults and the registry position | `tests/test_cuckoo_village_settings.py` |
+
+Two limits today: the phone form is served by `LevelSettings.java`, which knows only Sea Stars until the Tide Harbour plan's Phase 3 generalises it by clock id, so a phone asset for another level is not yet read; and Minute Machine's object is that plan's Phase 2b.
 
 Adding a type is an **engine change** (C++ and the registry), so it needs the owner's explicit permission in a project that forbids engine edits.
 

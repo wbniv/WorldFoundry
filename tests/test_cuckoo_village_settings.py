@@ -2,8 +2,8 @@
 
 docs/plans/2026-11-21-cuckoo-village.md ("Level settings"). The type is modelled on ReefSettings and
 SeaStarsSettings (53d7c718): an .oas schema, the generated .oad and .ht, one line appended to each
-object registry file, and a trivial Actor subclass. The director tests (edit a field, step the
-director, check the pose) are in test_cuckoo_village_director.py.
+object registry file, and a trivial Actor subclass. The effect of the fields on the timeline and the
+generated Forth is in test_cuckoo_village_settings_effect.py.
 """
 import json
 from pathlib import Path
