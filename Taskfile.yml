@@ -1790,6 +1790,22 @@ tasks:
     cmds:
       - bash wflevels/minute_machine/build.sh
 
+  tide-harbour-level:
+    desc: "Build the Tide Harbour level (Blender container -> wflevels/tide_harbour-standalone.iff, the committed output); plan docs/plans/2026-11-21-tide-harbour-clock.md, Verification 2"
+    cmds:
+      - bash wflevels/tide_harbour/build.sh
+
+  test-tide-harbour:
+    desc: "Tide Harbour without the engine, in the Linux container: the model (tide against the printed table, sunrise and sunset against five published times, the hands, the options), the geometry (budget, winding, colour slots) and the director in the real zForth VM against the model; plan docs/plans/2026-11-21-tide-harbour-clock.md, Verification 1"
+    cmds:
+      - scripts/in-linux-container.sh python3 -m pytest -q tests/test_tide_harbour_timeline.py tests/test_tide_harbour_parts.py tests/test_tide_harbour_forth.py tests/test_tide_constants.py
+
+  check-tide-harbour:
+    desc: "Tide Harbour on the desktop engine (Linux container, Debug engine, xvfb): the director against the model at eight dates and times, and every value of every setting written over the debug bridge (scripts/check-tide-harbour.py --compare --options); plan Verification 3 and 13"
+    cmds:
+      - scripts/in-linux-container.sh scripts/build-wf-game-container.sh --dev
+      - WF_CONTAINER_ENV="WF_GAME=/build/wf-game-dev/src/engine/wf_game" scripts/in-linux-container.sh bash -c 'timeout 1500 xvfb-run -a -s "-screen 0 1280x720x24" python3 scripts/check-tide-harbour.py --compare --options'
+
   clocks-bundle:
     desc: "Pack the WF Clocks bundle: every clock of wflevels/clocks-menu.manifest, in manifest order, with shell-menu.fth and the MENU chunk, into wflevels/clocks-cd.iff, linked as android/screensaver/src/clocks/assets/cd.iff (Linux container; a manifest id with no built level stops it). Plan docs/plans/2026-11-21-tide-harbour-clock.md"
     deps: [minute-machine-level]
