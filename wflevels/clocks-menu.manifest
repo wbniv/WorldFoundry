@@ -1,0 +1,11 @@
+# WF Clocks: the clock roster of the `clocks` Android package (org.worldfoundry.clocks).
+# scripts/pack-clocks-bundle.py packs these levels, in this order, into the package's cd.iff (the
+# order is the TOC index); Gradle copies this file into the flavor's assets as levels.manifest,
+# where the shared LevelCatalog reads the ids and Dream labels. Add a clock here only, and only
+# by appending: the index is the TOC position, and a saved Dream choice is the id.
+# Format: `level <id>-standalone.iff | <menu name> [| <Dream label>]`; the id is the file name
+# without -standalone.iff (wflevels/<id>-standalone.iff must exist).
+# Plan: docs/plans/2026-11-21-tide-harbour-clock.md, "The bundle and the chooser" (D2 to D4)
+title WF Clocks
+prompt Choose a clock
+level minute_machine-standalone.iff | Minute Machine | Minute Machine
