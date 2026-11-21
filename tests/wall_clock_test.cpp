@@ -1,5 +1,7 @@
-// wf::WallClock (wfsource/source/game/wallclock.hp), the time of day behind the WALL_HOUR,
-// WALL_MINUTE and WALL_SECOND mailboxes. Plan: docs/plans/2026-11-21-sixty-second-chain-reaction.md.
+// wf::WallClock (wfsource/source/game/wallclock.hp), the date and time of day behind the WALL_HOUR,
+// WALL_MINUTE, WALL_SECOND, WALL_DAY and WALL_UTC_OFFSET mailboxes. Plans:
+// docs/plans/2026-11-21-sixty-second-chain-reaction.md (time of day) and
+// docs/plans/2026-11-21-tide-harbour-clock.md, E1 (the date and the offset).
 // Built and run by `task test-wall-clock` in wf-linux-test:local; tests/test_wall_clock.py runs it too.
 #undef NDEBUG  // the checks below carry side effects
 #include <cassert>
@@ -16,7 +18,16 @@ int failures = 0;
 bool parse(const char* s, double& start, double& rate)
 {
     std::string err;
-    return wf::ParseWallClockSpec(s, start, rate, err);
+    wf::WallClockSpec spec;
+    const bool ok = wf::ParseWallClockSpec(s, spec, err);
+    start = spec.startSecondOfDay;
+    rate = spec.rate;
+    return ok;
+}
+bool parseSpec(const char* s, wf::WallClockSpec& spec)
+{
+    std::string err;
+    return wf::ParseWallClockSpec(s, spec, err);
 }
 }  // namespace
 
@@ -35,12 +46,87 @@ int main()
     for (const char* bad : {"", "noon", "10:08", "10:08:22x", "24:00:00", "10:60:00", "10:08:60",
                             "10:08:22@", "10:08:22@fast", "10:08:22@-1", "-1:00:00", "10:08:22@1e999", "10:08:22 "}) {
         std::string err;
-        double s, r;
-        const bool ok = wf::ParseWallClockSpec(bad, s, r, err);
+        wf::WallClockSpec spec;
+        const bool ok = wf::ParseWallClockSpec(bad, spec, err);
         if (ok) std::fprintf(stderr, "accepted '%s'\n", bad);
         CHECK(!ok);
         CHECK(!err.empty());
     }
+
+    // the date and the offset (E1). Day numbers are days since 2000-01-01, checked against an independent count
+    CHECK(wf::DayNumber(2000, 1, 1) == 0 && wf::DayNumber(2000, 2, 29) == 59 && wf::DayNumber(2000, 3, 1) == 60);
+    CHECK(wf::DayNumber(2024, 2, 29) == 8825 && wf::DayNumber(2026, 11, 21) == 9821 && wf::DayNumber(2026, 12, 31) == 9861);
+    CHECK(wf::DayNumber(2027, 1, 1) == 9862 && wf::DayNumber(2099, 12, 31) == 36524);
+    CHECK(wf::DaysInMonth(2000, 2) == 29 && wf::DaysInMonth(2100, 2) == 28 && wf::DaysInMonth(2024, 2) == 29 && wf::DaysInMonth(2026, 11) == 30);
+    wf::WallClockSpec sp;
+    CHECK(parseSpec("2026-11-21T10:08:22", sp) && sp.hasDate && sp.day == 9821 && !sp.hasOffset && sp.startSecondOfDay == 36502.0 && sp.rate == 1.0);
+    CHECK(parseSpec("2026-11-21T10:08:22+07:00@0", sp) && sp.hasOffset && sp.utcOffsetMinutes == 420 && sp.rate == 0.0 && sp.hasDate);
+    CHECK(parseSpec("2026-11-21T10:08:22.5-03:30", sp) && sp.utcOffsetMinutes == -210 && sp.startSecondOfDay == 36502.5);
+    CHECK(parseSpec("10:08:22Z", sp) && !sp.hasDate && sp.hasOffset && sp.utcOffsetMinutes == 0);
+    CHECK(parseSpec("10:08:22+05:45@600", sp) && !sp.hasDate && sp.utcOffsetMinutes == 345 && sp.rate == 600.0);
+    CHECK(parseSpec("2000-01-01T00:00:00", sp) && sp.day == 0);
+    CHECK(parseSpec("2099-12-31T23:59:59", sp) && sp.day == 36524);
+    CHECK(parseSpec("2024-02-29T12:00:00", sp) && sp.day == 8825);
+    for (const char* bad : {"2026-11-21", "2026-11-21T", "2026-13-01T10:00:00", "2026-00-10T10:00:00", "2026-11-31T10:00:00",
+                            "2023-02-29T10:00:00", "2100-02-29T10:00:00", "1999-12-31T23:59:59", "2100-01-01T00:00:00",
+                            "2026-11-21 10:08:22", "26-11-21T10:08:22", "2026-11-21T10:08:22+7", "2026-11-21T10:08:22+15:00",
+                            "2026-11-21T10:08:22+07:60", "2026-11-21T10:08:22*07:00", "10:08:22+07:00x", "2026/11/21T10:08:22"}) {
+        std::string err;
+        wf::WallClockSpec spec;
+        const bool ok = wf::ParseWallClockSpec(bad, spec, err);
+        if (ok) std::fprintf(stderr, "accepted '%s'\n", bad);
+        CHECK(!ok);
+        CHECK(!err.empty());
+    }
+    {
+        // a frozen clock reports exactly the date, offset and time it was given
+        wf::WallClock frozen;
+        wf::WallClockSpec spec;
+        CHECK(parseSpec("2026-11-21T10:08:22+07:00@0", spec));
+        frozen.setOverride(spec);
+        const auto f = frozen.sample();
+        CHECK(f.day == 9821 && f.utcOffsetMinutes == 420 && f.hour == 10 && f.minute == 8 && f.second == 22.0f);
+        // the same instant gives the same day however often it is read
+        const auto f2 = frozen.sample();
+        CHECK(f2.day == f.day && f2.hour == f.hour && f2.minute == f.minute);
+        // a date-only-omitted override uses today's date and this machine's offset, matching the real clock
+        wf::WallClock today;
+        today.setOverride(3600.0, 0.0);
+        wf::WallClock real;
+        const auto td = today.sample();
+        const auto rl = real.sample();
+        CHECK(td.day == rl.day || td.day == rl.day + 1 || td.day == rl.day - 1);   // a midnight may fall between the two reads
+        CHECK(td.utcOffsetMinutes == rl.utcOffsetMinutes);
+    }
+    {
+        // the day rolls over with midnight, on the very sample that wraps the hour
+        wf::WallClock clock;
+        wf::WallClockSpec spec;
+        CHECK(parseSpec("2026-12-31T23:59:30+07:00", spec));                  // real time, from 30 s before the new year
+        clock.setOverride(spec);
+        auto at = [&](double elapsed) { return clock.sampleAfter(elapsed); };
+        auto before = at(29.0);                                               // 23:59:59
+        CHECK(before.day == 9861 && before.hour == 23 && before.minute == 59 && before.second > 58.9f && before.second < 59.1f);
+        auto edge = at(30.0);                                                 // exactly midnight
+        CHECK(edge.day == 9862 && edge.hour == 0 && edge.minute == 0 && edge.second == 0.0f);
+        auto after = at(31.5);
+        CHECK(after.day == 9862 && after.hour == 0 && after.minute == 0 && after.second == 1.5f);
+        CHECK(at(30.0 + 86400.0).day == 9863 && at(30.0 + 86400.0).hour == 0);            // a full day later
+        CHECK(at(0.0).day == 9861 && at(0.0).utcOffsetMinutes == 420);
+        // the hour and the day always move together: no sample is ever 23:xx on the new day or 00:xx on the old one
+        for (double e = 0.0; e < 120.0; e += 0.37) {
+            const auto t = at(e);
+            CHECK((t.day == 9861 && t.hour == 23) || (t.day == 9862 && t.hour == 0));
+        }
+        // a fast clock: an hour a second, from 23:00 on the last day of February in a leap year
+        wf::WallClock fast;
+        CHECK(parseSpec("2024-02-29T23:00:00+07:00@3600", spec));
+        fast.setOverride(spec);
+        CHECK(fast.sampleAfter(0.0).day == 8825 && fast.sampleAfter(0.0).hour == 23);
+        CHECK(fast.sampleAfter(1.0).day == 8826 && fast.sampleAfter(1.0).hour == 0);        // 2024-03-01
+        CHECK(fast.sampleAfter(25.0).day == 8827 && fast.sampleAfter(25.0).hour == 0);
+    }
+    CHECK(wf::WallTimeFromSecondOfDay(0.0).day == 0 && wf::WallTimeFromSecondOfDay(0.0).utcOffsetMinutes == 0);   // defaults
 
     // second of day -> hour, minute, second, including the rollovers
     auto w = wf::WallTimeFromSecondOfDay(10 * 3600 + 8 * 60 + 22.5);
@@ -88,8 +174,16 @@ int main()
     const auto r0 = real.sample();
     CHECK(r0.hour >= 0 && r0.hour <= 23 && r0.minute >= 0 && r0.minute <= 59 && r0.second >= 0.0f && r0.second < 60.0f);
     CHECK(!real.overridden());
+    CHECK(r0.day >= wf::DayNumber(2026, 1, 1) && r0.day < wf::DayNumber(2100, 1, 1));    // a plausible date
+    CHECK(r0.utcOffsetMinutes >= -14 * 60 && r0.utcOffsetMinutes <= 14 * 60);
 
     // WF_WALL_CLOCK from the environment, through the same path the engine uses
+    setenv("WF_WALL_CLOCK", "2026-11-21T10:08:22+07:00@0", 1);
+    wf::WallClock envDate;
+    std::string errDate;
+    CHECK(envDate.initFromEnvironment(errDate) && envDate.overridden());
+    const auto ed = envDate.sample();
+    CHECK(ed.day == 9821 && ed.utcOffsetMinutes == 420 && ed.hour == 10 && ed.minute == 8 && ed.second == 22.0f);
     setenv("WF_WALL_CLOCK", "10:08:22@0", 1);
     wf::WallClock env;
     std::string err;

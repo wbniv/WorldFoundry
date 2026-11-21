@@ -1288,9 +1288,11 @@ Level::update(Scalar deltaTime)
 	// deal the the discontinuity in _deltaClock values.
 	levelClock.Tick( newtime );
 
-	// The time of day, sampled once so the three WALL_* mailboxes always agree.
+	// The date and time of day, sampled once so the five WALL_* mailboxes always agree.
 	{
 		const wf::WallTime wall = wf::TheWallClock().sample();
+		_wallDay = wall.day;
+		_wallUtcOffset = wall.utcOffsetMinutes;
 		_wallHour = wall.hour;
 		_wallMinute = wall.minute;
 		_wallSecond = wall.second;
@@ -2039,6 +2041,12 @@ Level::ReadSystemMailbox( int boxnum ) const
 
         case EMAILBOX_WALL_SECOND:
             return Scalar::FromFloat( _wallSecond );
+
+        case EMAILBOX_WALL_DAY:
+            return Scalar::FromFloat( static_cast<float>( _wallDay ) );
+
+        case EMAILBOX_WALL_UTC_OFFSET:
+            return Scalar::FromFloat( static_cast<float>( _wallUtcOffset ) );
 
         case EMAILBOX_DELTA_TIME:
             return LevelClock().Delta();

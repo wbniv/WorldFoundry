@@ -15,7 +15,7 @@ import time
 # GLOBAL_USER_MAX is the *inclusive* last valid user-region index.
 GLOBAL_USER_MAX     = 1900
 GLOBAL_SYSTEM_START = 1901
-GLOBAL_SYSTEM_MAX   = 1925  # exclusive — last named system slot is WALL_SECOND=1924
+GLOBAL_SYSTEM_MAX   = 1927  # exclusive — last named system slot is WALL_UTC_OFFSET=1926
 
 
 def test_global_user_max_is_writable(bridge):

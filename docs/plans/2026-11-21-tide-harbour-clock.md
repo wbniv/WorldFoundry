@@ -173,11 +173,40 @@ stateDiagram-v2
 | Phase | Work | Tier | Gate |
 |---|---|---|---|
 | **0 Spikes and research** | (a) 36 plain bars plus 100 boxes on a placeholder level, on cast1: FPS and banding. (b) The look of the day with no light control: a sliding sky, glow actors and keyed looks, judged on the TV at the six moments. (c) The tide: find the Hydrographic Department's constants for a Chao Phraya station, or record that none are public; check the arithmetic against their table. (d) Sunrise and sunset by day of year against NOAA | T4 | Answers D5, D6, D7 and the water risk; the plan is revised with the results |
-| **1 Engine E1** | Mailboxes, override, tests | T4 | `task test-wall-clock` passes with a date; Minute Machine unaffected |
+| ~~**1 Engine E1**~~ | ~~Mailboxes, override, tests~~ Done 2026‑11‑21; [record below](#phase-1-record-e1-built) | T4 | ~~`task test-wall-clock` passes with a date; Minute Machine unaffected~~ |
 | **2 Tide Harbour level** | `clock_common` hoisted; `wflevels/tide_harbour/` with `timeline.py`, `channels.py`, `parts.py`, Blender build, `-standalone.iff`; director VM test; engine comparison | T3 | Director matches the model in the VM and the engine, as Minute Machine's did |
 | **3 Bundle and chooser** | Manifest, pack script, `Clock*` classes, host change, flavor `clocks`, `minutemachine` flavor removed | T3 | Desktop and cast1: no argument shows the menu; a named clock skips it; the Dream never shows it |
 | **4 cast1** | Install, FPS gate, 10-minute Dream run, six moments checked on the TV, tide gauge checked against the model | T3 | D7 gate, and the moments match the mockups |
 | **5 Docs** | `android/screensaver/README.md`, `docs/level-building.md` note, `docs/forth-math-words.md` unaffected | T2 | `task md` renders |
+
+### Phase 1 record: E1 built
+
+Built 2026‑11‑21. `WALL_DAY` is mailbox 1925 (whole calendar days since 2000‑01‑01 in the clock's own time zone, so 2026‑11‑21 is 9821), `WALL_UTC_OFFSET` is 1926 (minutes; Bangkok is 420), and `GLOBAL_SYSTEM_MAX` is 1927. `WF_WALL_CLOCK` takes `[YYYY-MM-DDT]HH:MM:SS[.mmm][+HH:MM|-HH:MM|Z][@rate]`; the time-only form is unchanged. All five mailboxes are latched from one instant per frame. The scripts' `INDEXOF_WALL_DAY` and `INDEXOF_WALL_UTC_OFFSET` come from `mailbox.inc` with no further change. Files: `wallclock.hp`, `mailbox.inc`, `level.hp`, `level.cc`, `tests/wall_clock_test.cpp`, `tests/test_wall_clock.py`, `tests/test_mailbox_global_bounds.py`, `docs/command-line-switches.md`.
+
+1. `task test-wall-clock` (pure C++, no engine; day numbers checked against an independent count, a leap day, the years 2000 and 2100, bad dates and offsets, midnight and a leap-day rollover stepped at exact instants):
+
+    ```
+    wall_clock_test: OK
+    ```
+
+    **PASS.**
+
+2. The container Debug engine (`scripts/build-wf-game-container.sh --dev`, 70 of 70 linked), then `tests/test_wall_clock.py` and `tests/test_mailbox_global_bounds.py` under `xvfb-run`:
+
+    ```
+    tests/test_wall_clock.py::test_frozen_override_reads_back_exactly PASSED [ 11%]
+    tests/test_wall_clock.py::test_fast_clock_crosses_a_minute_an_hour_and_midnight PASSED [ 22%]
+    tests/test_wall_clock.py::test_without_an_override_it_is_the_device_time PASSED [ 33%]
+    tests/test_wall_clock.py::test_a_dated_override_reads_back_the_day_and_the_offset PASSED [ 44%]
+    tests/test_wall_clock.py::test_the_day_advances_at_midnight PASSED       [ 55%]
+    tests/test_wall_clock.py::test_without_an_override_the_day_and_offset_are_the_devices PASSED [ 66%]
+    tests/test_wall_clock.py::test_a_malformed_override_stops_the_engine_at_startup PASSED [ 77%]
+    tests/test_mailbox_global_bounds.py::test_global_user_max_is_writable PASSED [ 88%]
+    tests/test_mailbox_global_bounds.py::test_global_user_max_minus_one_is_writable PASSED [100%]
+    ============================== 9 passed in 16.51s ==============================
+    ```
+
+    **PASS.** The three time-of-day tests Minute Machine already had still pass, so its clock is unaffected.
 
 ```mermaid
 flowchart LR

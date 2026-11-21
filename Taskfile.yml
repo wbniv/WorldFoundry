@@ -1732,7 +1732,7 @@ tasks:
         docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; for mode in "" "-DWF_FORTH_MATH_FLOAT"; do g++ -std=c++17 -O1 -Wall -Wextra $mode -I/src/engine/stubs -I/src/tests /src/tests/forth_math_test.cpp -o /tmp/forth_math_test && /tmp/forth_math_test; done'
 
   test-wall-clock:
-    desc: "WALL_HOUR/WALL_MINUTE/WALL_SECOND clock logic (wfsource/source/game/wallclock.hp), pure C++ in wf-linux-test:local; plan docs/plans/2026-11-21-sixty-second-chain-reaction.md"
+    desc: "WALL_HOUR/MINUTE/SECOND/DAY/UTC_OFFSET clock logic (wfsource/source/game/wallclock.hp), pure C++ in wf-linux-test:local; plans docs/plans/2026-11-21-sixty-second-chain-reaction.md and 2026-11-21-tide-harbour-clock.md"
     cmds:
       - |
         docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O1 -Wall -Wextra -I/src/wfsource/source /src/tests/wall_clock_test.cpp -o /tmp/wall_clock_test && /tmp/wall_clock_test'
