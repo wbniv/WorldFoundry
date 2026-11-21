@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440, initial-scale=1">
+<title>Cuckoo Village: Christmas candles</title>
+<style>
+  :root { --bg:#0e1116; --panel:#171c24; --ink:#e8e6df; --dim:#9aa3b0; --line:#2a3240; --blue:#3a8fd6; --gold:#e0b04a; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; width:1440px; height:900px; background:var(--bg); color:var(--ink);
+    font:16px/1.4 system-ui,"Segoe UI",Roboto,sans-serif; overflow:hidden; }
+  h1 { font-size:26px; margin:0; padding:28px 40px 4px; font-weight:600; }
+  .sub { padding:0 40px 16px; color:var(--dim); }
+  .row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; padding:0 40px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px 18px; height:520px; }
+  .card h2 { margin:0 0 2px; font-size:19px; }
+  .card .tag { color:var(--dim); font-size:14px; margin-bottom:8px; min-height:40px; }
+  svg { display:block; width:100%; }
+  .timeline { margin:18px 40px 0; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 20px 10px; }
+  .timeline .cap { color:var(--dim); font-size:14px; margin-bottom:4px; }
+  .settings { margin:14px 40px 0; background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:10px 20px; display:flex; gap:26px; align-items:center; }
+  .settings b { color:var(--dim); font-weight:500; }
+  .seg { display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-left:10px; }
+  .seg span { padding:5px 14px; }
+  .seg .on { background:var(--blue); color:#fff; }
+  .note { color:var(--dim); font-size:14px; margin-left:auto; }
+</style>
+</head>
+<body>
+<h1>Cuckoo Village — Christmas candles, 1 December to 6 January</h1>
+<div class="sub">Schematic mockup of the trees only, not a rendering. Candles are a date-driven visibility switch; the glow follows the day, dusk and night blend and the Window lights setting.</div>
+
+<div class="row">
+
+  <div class="card">
+    <h2>Out of season</h2>
+    <div class="tag">Before 1 December, or after 6 January: bare trees, and the candle meshes are hidden</div>
+    <svg viewBox="0 0 400 400" role="img" aria-label="Conifers without candles, day lighting">
+      <rect width="400" height="400" fill="#1b212b"/>
+      <g fill="#2f6b4a" stroke="#1d4630" stroke-width="2">
+        <polygon points="110,90 50,200 170,200"/><polygon points="110,140 35,260 185,260"/><polygon points="110,195 20,330 200,330"/>
+        <polygon points="300,150 255,225 345,225"/><polygon points="300,185 242,275 358,275"/><polygon points="300,230 228,335 372,335"/>
+      </g>
+      <rect x="100" y="330" width="20" height="40" fill="#6b4a32"/><rect x="290" y="335" width="20" height="35" fill="#6b4a32"/>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h2>In season, by day</h2>
+    <div class="tag">Candles stand unlit: small cream sticks, no glow, no light cast</div>
+    <svg viewBox="0 0 400 400" role="img" aria-label="Conifers with unlit candles, day lighting">
+      <rect width="400" height="400" fill="#2a3340"/>
+      <g fill="#3a7a58" stroke="#245a3d" stroke-width="2">
+        <polygon points="110,90 50,200 170,200"/><polygon points="110,140 35,260 185,260"/><polygon points="110,195 20,330 200,330"/>
+        <polygon points="300,150 255,225 345,225"/><polygon points="300,185 242,275 358,275"/><polygon points="300,230 228,335 372,335"/>
+      </g>
+      <rect x="100" y="330" width="20" height="40" fill="#6b4a32"/><rect x="290" y="335" width="20" height="35" fill="#6b4a32"/>
+      <g fill="#f1ead2" stroke="#8a7f62" stroke-width="1">
+        <rect x="76" y="176" width="5" height="14"/><rect x="138" y="176" width="5" height="14"/><rect x="108" y="150" width="5" height="14"/>
+        <rect x="52" y="238" width="5" height="14"/><rect x="104" y="226" width="5" height="14"/><rect x="164" y="238" width="5" height="14"/>
+        <rect x="36" y="302" width="5" height="14"/><rect x="82" y="296" width="5" height="14"/><rect x="132" y="304" width="5" height="14"/><rect x="180" y="302" width="5" height="14"/>
+        <rect x="284" y="212" width="5" height="14"/><rect x="316" y="212" width="5" height="14"/>
+        <rect x="264" y="262" width="5" height="14"/><rect x="298" y="252" width="5" height="14"/><rect x="334" y="262" width="5" height="14"/>
+        <rect x="244" y="318" width="5" height="14"/><rect x="284" y="310" width="5" height="14"/><rect x="326" y="316" width="5" height="14"/><rect x="354" y="318" width="5" height="14"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h2>In season, dusk and night</h2>
+    <div class="tag">Flames fade on with the window blend, each at its own fixed offset, with a tiny deterministic flicker</div>
+    <svg viewBox="0 0 400 400" role="img" aria-label="Conifers with lit candles, night lighting">
+      <defs>
+        <radialGradient id="glow"><stop offset="0" stop-color="#ffcf6b" stop-opacity=".95"/><stop offset=".35" stop-color="#ffb347" stop-opacity=".4"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="400" height="400" fill="#0f141c"/>
+      <g fill="#24503a" stroke="#183a2a" stroke-width="2">
+        <polygon points="110,90 50,200 170,200"/><polygon points="110,140 35,260 185,260"/><polygon points="110,195 20,330 200,330"/>
+        <polygon points="300,150 255,225 345,225"/><polygon points="300,185 242,275 358,275"/><polygon points="300,230 228,335 372,335"/>
+      </g>
+      <rect x="100" y="330" width="20" height="40" fill="#4a3424"/><rect x="290" y="335" width="20" height="35" fill="#4a3424"/>
+      <g>
+        <circle cx="78" cy="170" r="22" fill="url(#glow)"/><circle cx="140" cy="170" r="22" fill="url(#glow)"/><circle cx="110" cy="144" r="22" fill="url(#glow)"/>
+        <circle cx="54" cy="232" r="22" fill="url(#glow)"/><circle cx="106" cy="220" r="22" fill="url(#glow)"/><circle cx="166" cy="232" r="22" fill="url(#glow)"/>
+        <circle cx="38" cy="296" r="22" fill="url(#glow)"/><circle cx="84" cy="290" r="22" fill="url(#glow)"/><circle cx="134" cy="298" r="22" fill="url(#glow)"/><circle cx="182" cy="296" r="22" fill="url(#glow)"/>
+        <circle cx="286" cy="206" r="22" fill="url(#glow)"/><circle cx="318" cy="206" r="22" fill="url(#glow)"/>
+        <circle cx="266" cy="256" r="22" fill="url(#glow)"/><circle cx="300" cy="246" r="22" fill="url(#glow)"/><circle cx="336" cy="256" r="22" fill="url(#glow)"/>
+        <circle cx="246" cy="312" r="22" fill="url(#glow)"/><circle cx="286" cy="304" r="22" fill="url(#glow)"/><circle cx="328" cy="310" r="22" fill="url(#glow)"/><circle cx="356" cy="312" r="22" fill="url(#glow)"/>
+      </g>
+      <g fill="#f6efd8">
+        <rect x="76" y="176" width="5" height="14"/><rect x="138" y="176" width="5" height="14"/><rect x="108" y="150" width="5" height="14"/>
+        <rect x="52" y="238" width="5" height="14"/><rect x="104" y="226" width="5" height="14"/><rect x="164" y="238" width="5" height="14"/>
+        <rect x="36" y="302" width="5" height="14"/><rect x="82" y="296" width="5" height="14"/><rect x="132" y="304" width="5" height="14"/><rect x="180" y="302" width="5" height="14"/>
+        <rect x="284" y="212" width="5" height="14"/><rect x="316" y="212" width="5" height="14"/>
+        <rect x="264" y="262" width="5" height="14"/><rect x="298" y="252" width="5" height="14"/><rect x="334" y="262" width="5" height="14"/>
+        <rect x="244" y="318" width="5" height="14"/><rect x="284" y="310" width="5" height="14"/><rect x="326" y="316" width="5" height="14"/><rect x="354" y="318" width="5" height="14"/>
+      </g>
+      <g fill="#ffd36e">
+        <ellipse cx="78.5" cy="170" rx="2.6" ry="5"/><ellipse cx="140.5" cy="170" rx="2.6" ry="5"/><ellipse cx="110.5" cy="144" rx="2.6" ry="5"/>
+        <ellipse cx="54.5" cy="232" rx="2.6" ry="5"/><ellipse cx="106.5" cy="220" rx="2.6" ry="5"/><ellipse cx="166.5" cy="232" rx="2.6" ry="5"/>
+        <ellipse cx="38.5" cy="296" rx="2.6" ry="5"/><ellipse cx="84.5" cy="290" rx="2.6" ry="5"/><ellipse cx="134.5" cy="298" rx="2.6" ry="5"/><ellipse cx="182.5" cy="296" rx="2.6" ry="5"/>
+        <ellipse cx="286.5" cy="206" rx="2.6" ry="5"/><ellipse cx="318.5" cy="206" rx="2.6" ry="5"/>
+        <ellipse cx="266.5" cy="256" rx="2.6" ry="5"/><ellipse cx="300.5" cy="246" rx="2.6" ry="5"/><ellipse cx="336.5" cy="256" rx="2.6" ry="5"/>
+        <ellipse cx="246.5" cy="312" rx="2.6" ry="5"/><ellipse cx="286.5" cy="304" rx="2.6" ry="5"/><ellipse cx="328.5" cy="310" rx="2.6" ry="5"/><ellipse cx="356.5" cy="312" rx="2.6" ry="5"/>
+      </g>
+    </svg>
+  </div>
+
+</div>
+
+<div class="timeline">
+  <div class="cap">Season on the local calendar, wrapping the year boundary</div>
+  <svg viewBox="0 0 1360 56" role="img" aria-label="Timeline: candles shown from 1 December to 6 January">
+    <rect x="0" y="22" width="1360" height="12" rx="6" fill="#2a3240"/>
+    <rect x="1000" y="22" width="360" height="12" rx="6" fill="#e0b04a"/>
+    <g fill="#9aa3b0" font-size="13" text-anchor="middle">
+      <text x="0" y="52" text-anchor="start">1 Jan</text>
+      <text x="1000" y="52">1 Dec · candles on</text>
+      <text x="1360" y="52" text-anchor="end">31 Dec</text>
+    </g>
+    <rect x="0" y="22" width="60" height="12" rx="6" fill="#e0b04a"/>
+    <text x="60" y="16" fill="#9aa3b0" font-size="13" text-anchor="middle">6 Jan · candles off</text>
+  </svg>
+</div>
+
+<div class="settings">
+  <span><b>Christmas candles</b><span class="seg"><span>Off</span><span class="on">On</span></span></span>
+  <span><b>Window lights</b> On</span>
+  <span><b>Bavaria mode</b> Off</span>
+  <span class="note">Fields of CuckooVillageSettings, read at level entry. The season itself is sampled from the local date.</span>
+</div>
+</body>
+</html>

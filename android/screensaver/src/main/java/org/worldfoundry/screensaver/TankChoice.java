@@ -5,18 +5,12 @@ import android.content.SharedPreferences;
 
 import java.security.SecureRandom;
 
-/** The content choice shared by the TV app, Dream, and coordinator settings call. */
+/**
+ * The content choice shared by the TV app, Dream, and coordinator settings call. The tanks are the
+ * package's LevelCatalog (wflevels/aquarium-menu.manifest, the one roster), read once per process.
+ */
 final class TankChoice {
-    static final String RANDOM = "random";
-    static final String[] IDS = {
-            "aquarium", "aquarium_blue_shrimp", "aquarium_betta", "aquarium_jellyfish",
-            "aquarium_lionfish", "aquarium_plants", "aquarium_arowana",
-            "aquarium_tiger_barbs", "aquarium_thai_reef", "aquarium_thai_reef_anime", "aquarium_sea_stars"
-    };
-    static final String[] LABELS = {
-            "Clownfish", "Blue Shrimp", "Betta", "Jellyfish", "Lionfish",
-            "Planted Urchin", "Arowana", "Tiger Barbs", "Thai Reef", "Thai Reef Anime", "Sea Stars"
-    };
+    static final String RANDOM = LevelCatalog.RANDOM;
 
     private static final String PREFS = "screensaver";
     private static final String KEY = "tank";
@@ -24,36 +18,34 @@ final class TankChoice {
 
     private TankChoice() { }
 
-    static boolean valid(String id) {
-        if (RANDOM.equals(id)) return true;
-        for (String candidate : IDS) {
-            if (candidate.equals(id)) return true;
-        }
-        return false;
+    /** The package's tanks, from its levels.manifest asset. */
+    static LevelCatalog catalog(Context context) {
+        final Context app = context.getApplicationContext() != null ? context.getApplicationContext() : context;
+        return LevelCatalog.shared(() -> app.getAssets().open(LevelCatalog.ASSET));
     }
 
-    static int indexOf(String id) {
-        for (int i = 0; i < IDS.length; i++) {
-            if (IDS[i].equals(id)) return i;
-        }
-        return 0;
+    static boolean valid(Context context, String id) {
+        return catalog(context).valid(id);
+    }
+
+    static int indexOf(Context context, String id) {
+        return catalog(context).indexOf(id);
     }
 
     static String get(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         String id = prefs.getString(KEY, RANDOM);
-        return valid(id) ? id : RANDOM;
+        return valid(context, id) ? id : RANDOM;
     }
 
     static boolean set(Context context, String id) {
-        if (!valid(id)) return false;
+        if (!valid(context, id)) return false;
         return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
                 .edit().putString(KEY, id).commit();
     }
 
-    /** Resolve Random once when the Dream starts, never on each frame. */
-    static String chooseForDream(Context context) {
-        String id = get(context);
-        return RANDOM.equals(id) ? IDS[RNG.nextInt(IDS.length)] : id;
+    /** The generator that resolves Random, once per run (see LevelCatalog#choose). */
+    static SecureRandom rng() {
+        return RNG;
     }
 }

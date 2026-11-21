@@ -18,7 +18,7 @@ public final class AquariumDreamService extends DreamService {
     @Override
     public void onDreamingStarted() {
         super.onDreamingStarted();
-        TankLaunch.startChosen(this, player);
+        LevelLaunch.startChosen(this, player, null);
     }
 
     @Override

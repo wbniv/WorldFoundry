@@ -13,6 +13,10 @@ codemagic.yaml:
           launch per device through a fixed timeline (below), keeping
           screenshots, the launch log and a verdict.
 
+Before the launch, settle() waits until the simulator answers screenshots on
+time (TIMELINE_NOTE); a screenshot the verdict uses that starts late on the
+app's clock fails the device as TIMELINE LATE.
+
 Timeline of `run`, seconds after `simctl launch` returns:
 
    0     launch with no launch arguments, so the engine gets its arguments
@@ -32,17 +36,39 @@ Timeline of `run`, seconds after `simctl launch` returns:
          push the scripted presses out of step with the screenshots.
 
 The touch script is the engine's own CI input path: it presses each button's
-on-screen centre through the same tracker and hit test a finger uses; only
-UIKit's touch delivery is skipped. simctl itself has no tap injection.
+on-screen point through the same pad and shared touch logic a finger uses;
+only UIKit's touch delivery is skipped. simctl itself has no tap injection.
+The chapter launch pins landscape (-WFOrientation landscape), so the
+timeline keeps its landscape baseline now that the app allows portrait.
+
+After the timeline, two HUD tours per device (touch parity, finding-your-way
+docs/plans/2026-11-08-ios-touch-parity.md, layer 2), each a fresh launch with
+TOUR_SCRIPT, first pinned to landscape and then to portrait:
+
+  20     screenshot: the opening card; only A and C are drawn
+  20.5   script presses B, then LEFT at 21.5: hidden over a card, no bits
+  23     script presses C: bits 0x0004, the card closes ("touch reading off")
+  26     screenshot: the full HUD, joystick and A to D
+  27-31  script holds the stick right with B and D (0x200a)
+  29.5   screenshot: the knob pushed right, B and D bright
+
+Last, the audio probe (informational, AUDIO PROBE lines): one launch with
+WF_IOS_SIM_AUDIO=1, to see whether CoreAudio init still deadlocks on the
+simulator (hal/ios/audio.mm skips it there by default).
+
+tour_verdict() reads the order of the "touch reading" and "touch buttons"
+log lines. TOUCH PARITY is MET (scripted) when the landscape tour passes on
+both devices; the portrait tours are reported on their own line, with the
+VIEW line (the authored frame's view in portrait).
 
 Verdict per device (`IOS IPHONE: OK` / `IOS IPAD: OK`) needs install, launch,
 alive at 20 s and at the end, wf_args.txt read with its arguments,
 `ROOM-RENDER scope=current-only`, no zForth or texture-slot error, the
 pause/resume frame-rate check, and a solid patch of changed fire-coloured
 pixels between the two brazier screenshots (a flame flickers as a blob; the
-thin edges a swaying banner or the camera leaves do not count). The iOS touch HUD is a D-pad with A and B, not Android's
-joystick with A to D (see hal/ios/input.mm and hal/android/touch_controls.h),
-so touch parity is reported on its own line and is not part of OK.
+thin edges a swaying banner or the camera leaves do not count), and no late
+card, opening or brazier screenshot (timeline_late). Touch parity
+(the HUD tours above) is reported on its own lines and is not part of OK.
 """
 from __future__ import annotations
 
@@ -60,6 +86,7 @@ import time
 import zipfile
 import zlib
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -74,6 +101,14 @@ LOVE_AT = 39.0
 RESUME_AT = 40.0
 RESUME_SETTLE = 3.0
 TOUCH_SCRIPT = "a@22+0.5,up@27+2,up@29.3+3.2,a@33.4+0.5,a@35.5+0.5"
+ORIENTATION_PIN = ["-WFOrientation", "landscape"]   # hal/ios/native_app_entry.mm
+# The HUD tour (module docstring). B and D are 0x0002 and 0x0008, LEFT 0x4000,
+# C 0x0004; the chord is RIGHT | B | D.
+TOUR_SCRIPT = "b@20.5+0.6,left@21.5+0.6,c@23+0.6,right@27+4,b@27+4,d@27+4"
+TOUR_CARD_AT, TOUR_FULL_AT, TOUR_HELD_AT, TOUR_END = 20.0, 26.0, 29.5, 32.0
+TOUR_CHORD = 0x2000 | 0x0002 | 0x0008
+TOUR_HIDDEN_BITS = 0x0002 | 0x0008 | 0x0800 | 0x1000 | 0x2000 | 0x4000
+TOUCH_EVENT = re.compile(r"touch (?:buttons 0x([0-9a-fA-F]+)|reading (on|off))")
 # ROUTE_NOTE. Select at the Love portal acts only within 2.5 units of the
 # portal's spot (0, 9): `fy-near` in the chapter's chapter_script.py. The
 # Cast1 route's 4 s of UP ends close to that edge. Run 6ae72785 crossed it on
@@ -91,6 +126,34 @@ TOUCH_SCRIPT = "a@22+0.5,up@27+2,up@29.3+3.2,a@33.4+0.5,a@35.5+0.5"
 # accumulated frame time (fy-input, each frame's share clamped to 0.05 s), so
 # 0.5 s stays a short press.
 FIRE_BLOB_MIN = 20   # run 1, iPhone: the brazier's cluster was 60 pixels at 471x1024
+
+# TIMELINE_NOTE. The touch script runs on the app's clock and the screenshots on
+# this script's, so a screenshot is evidence only if it was taken on time. Run
+# 6af19fcd's iPad simulator was still finishing its first boot after `bootstatus
+# -b` returned (the dock's icons were grey placeholders at 10:40:16 and 10:40:37,
+# drawn by 10:41:17): `simctl launch` took 41 s (3 s in run 6af131a7), the card
+# and opening screenshots 21 s and 26 s each (about 1 s), and the engine drew
+# fewer than 600 frames in 78 s (600 in 10.5 s in 6af131a7). The card screenshot
+# was taken at 26 s instead of 20 (the card already closed), the opening at 47 s
+# instead of 24 (after the walk at 27 had moved the player), and FRAME CHECK read
+# 54.25 %, which looked like a wrong frame. So:
+#   - settle(): before the timed launch, wait until the simulator answers two
+#     screenshots in a row within SETTLE_SHOT_MAX s (deadline SETTLE_DEADLINE);
+#   - timeline_late(): a screenshot the verdict uses (TIMED_SNAPS) that started
+#     more than SNAP_LATE_MAX s after its time on the app's clock makes the device
+#     FAIL with that reason, instead of a frame check of the wrong moment.
+# The app's clock starts at its "touch script: N entries" line (script_offset).
+SETTLE_SHOT_MAX = 3.0
+SETTLE_DEADLINE = 300.0
+SNAP_LATE_MAX = 2.0
+TIMED_SNAPS = ("card", "opening", "fire-1", "fire-2")
+SCRIPT_START = re.compile(r"^(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\.\d+)\s.*wf_game: touch script: \d+ entries", re.M)
+# The audio probe (informational): one more launch with WF_IOS_SIM_AUDIO=1
+# (hal/ios/audio.mm). The first frame comes after audio init, so a "presented=1"
+# line means CoreAudio init returned; AudioToolbox's abort says "Apparently deadlocked".
+AUDIO_PROBE_DEADLINE = 60.0
+AUDIO_DEADLOCK = "Apparently deadlocked"
+FIRST_FRAME = "presented=1 "
 
 # The authored frame (finding-your-way docs/plans/2026-11-02-fill-screen-keep-authored-
 # frame.md). FYW_LAUNCH_ARGS (codemagic.yaml) is passed to the app as launch arguments,
@@ -292,10 +355,39 @@ def log_findings(text: str) -> dict:
     }
 
 
+def script_offset(ulog: str, t0_wall: float):
+    """App clock minus this script's: the "touch script" line's time minus t0 (s), or None.
+
+    The unified log's compact timestamps are the Mac's local time; with several
+    launches in the window, the line nearest t0 is this launch's.
+    """
+    best = None
+    for m in SCRIPT_START.finditer(ulog):
+        d = datetime.strptime(m.group(1), "%Y-%m-%d %H:%M:%S.%f").timestamp() - t0_wall
+        if best is None or abs(d) < abs(best):
+            best = d
+    return None if best is None else round(best, 2)
+
+
+def timeline_late(snaps: list, offset, limit: float = SNAP_LATE_MAX) -> list[str]:
+    """The TIMED_SNAPS screenshots that started more than `limit` s late on the app's clock.
+
+    snaps: (tag, scheduled t, t when the screenshot started), on this script's clock.
+    A snap at script time t is app time t - offset (offset None: taken as 0).
+    """
+    late = []
+    for tag, at, started in snaps:
+        lateness = started - (offset or 0.0) - at
+        if tag in TIMED_SNAPS and lateness > limit:
+            late.append(f"{tag} +{lateness:.1f} s")
+    return late
+
+
 def device_ok(v: dict) -> bool:
     ok = (v["install"] and v["launch"] and v["alive_20s"] and v["alive_end"]
           and v["wf_args"] > 0 and v["room_render"] and not v["zforth_errors"]
-          and not v["texture_slot_error"] and v["fps_check"] and v["fire_blob_pixels"] >= FIRE_BLOB_MIN)
+          and not v["texture_slot_error"] and v["fps_check"] and v["fire_blob_pixels"] >= FIRE_BLOB_MIN
+          and not v.get("timeline_late"))
     if v.get("authored_expected"):
         ok = ok and bool(v.get("view_ok")) and bool(v.get("crop_ok")) \
             and v.get("frame_check_pct") is not None and v["frame_check_pct"] <= FRAME_CHECK_MAX_PCT
@@ -410,14 +502,58 @@ def authored_band(w: int, h: int, authored: float) -> tuple[int, int, int, int]:
     return 0, (h - bh) // 2, w, bh
 
 
+def touch_layout(view_w: float, view_h: float, top: float, left: float, bottom: float, right: float):
+    """(cell, joystick square, A-to-D block) in points, (x0, y0, x1, y1): a mirror of
+    wftouch::layout(w, h, 1, Insets) in hal/touch_controls.h, the layout Android and iOS
+    share. None when the view is too small for any control."""
+    w, h = view_w - left - right, view_h - top
+    margin = 12.0
+    bot = h - max(bottom, 24.0) - 6.0
+    avail = bot - margin
+    cell = max(48.0, min(64.0, avail * .15))
+    cell = min(cell, avail / 3, (w - 3 * margin) / 5.4)
+    if w <= 0 or h <= 0 or cell <= 0:
+        return None
+    pad_cell = cell * 1.2 * 2 / 3
+    pad = (left + margin, top + bot - 3 * pad_cell, left + margin + 3 * pad_cell, top + bot)
+    edge = 1.2 * cell
+    x1 = left + w - margin
+    block = (x1 - 2 * edge, top + bot - 2 * edge, x1, top + bot)
+    return cell, pad, block
+
+
 def hud_rects(view_w: float, view_h: float, top: float, left: float, bottom: float, right: float,
               cell: float, scale: float) -> list[tuple[float, float, float, float]]:
-    """The touch HUD's D-pad and A/B block in surface pixels (x0, y0, x1, y1): a mirror of
-    wf_touch::ComputeLayout (hal/ios/touch_pad.cc) from the logged layout line."""
-    m, s = 12.0, cell * 120.0 / 66.0
-    dpad = (left + m, view_h - bottom - m - 3 * cell, left + m + 3 * cell, view_h - bottom - m)
-    ab = (view_w - right - m - 2 * s, view_h - bottom - m - s, view_w - right - m, view_h - bottom - m)
-    return [tuple(c * scale for c in r) for r in (dpad, ab)]
+    """The touch HUD's joystick square and A-to-D block in surface pixels, from the logged
+    layout line (its cell is a cross-check: it must match the mirror)."""
+    l = touch_layout(view_w, view_h, top, left, bottom, right)
+    if not l:
+        return []
+    if abs(l[0] - cell) > 0.06:
+        log(f"hud_rects: logged cell {cell} pt, mirror {l[0]:.2f} pt: hal/touch_controls.h changed?")
+    return [tuple(c * scale for c in r) for r in (l[1], l[2])]
+
+
+def tour_verdict(text: str) -> dict:
+    """Judge a HUD tour from the order of its touch log lines (TOUR_SCRIPT):
+    the card narrows the HUD before any press; B and LEFT over the card send nothing;
+    C sends 0x0004 and closes the card; then the chord RIGHT | B | D comes through."""
+    events = [("buttons", int(m.group(1), 16)) if m.group(1) else ("reading", m.group(2))
+              for m in TOUCH_EVENT.finditer(text)]
+    r = {"events": len(events), "reading_first": False, "hidden_ignored": False,
+         "c_closes": False, "chord": False}
+    first_press = next((i for i, (k, v) in enumerate(events) if k == "buttons" and v), None)
+    on = next((i for i, e in enumerate(events) if e == ("reading", "on")), None)
+    if on is None or first_press is None:
+        return r | {"ok": False}
+    r["reading_first"] = on < first_press
+    off = next((i for i, e in enumerate(events) if e == ("reading", "off") and i > on), None)
+    card = events[on:off if off is not None else len(events)]
+    r["hidden_ignored"] = not any(k == "buttons" and v & TOUR_HIDDEN_BITS for k, v in card)
+    r["c_closes"] = events[first_press] == ("buttons", 0x0004) and off is not None and off > first_press
+    r["chord"] = off is not None and ("buttons", TOUR_CHORD) in events[off:]
+    r["ok"] = all(r[k] for k in ("reading_first", "hidden_ignored", "c_closes", "chord"))
+    return r
 
 
 def band_mask(band: tuple[int, int, int, int], rects, size=FIXTURE_SIZE) -> list[bool]:
@@ -565,13 +701,16 @@ def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
     v["install"] = sh(["xcrun", "simctl", "install", udid, str(app)]).returncode == 0
     if not v["install"]:
         return v | log_findings("")
+    v |= settle(label, udid, out)
     env = dict(os.environ, SIMCTL_CHILD_WF_FRAME_RATE_CHECKS="1",
                SIMCTL_CHILD_WF_TOUCH_SCRIPT=TOUCH_SCRIPT)
     start_wall = time.time()
     r = sh(["xcrun", "simctl", "launch", "--terminate-running-process",
-            f"--stdout={stdout_f}", f"--stderr={stderr_f}", udid, BUNDLE_ID, *LAUNCH_ARGS], env=env)
+            f"--stdout={stdout_f}", f"--stderr={stderr_f}", udid, BUNDLE_ID, *LAUNCH_ARGS, *ORIENTATION_PIN], env=env)
     log(r.stdout.strip() + r.stderr.strip())
-    t0 = time.monotonic()
+    t0, t0_wall = time.monotonic(), time.time()
+    v["launch_s"] = round(t0_wall - start_wall, 1)
+    snaps: list = []
     v["launch"] = r.returncode == 0
     if not v["launch"]:
         return v | log_findings("")
@@ -585,27 +724,30 @@ def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
                 log(f"{label}: ROOM-RENDER seen at t={now:.1f} s")
             time.sleep(min(0.5, t - now))
 
-    def snap(tag: str) -> Path:
+    def snap(tag: str, at: float) -> Path:
         p = shot(tag)
+        started = time.monotonic() - t0
         sh(["xcrun", "simctl", "io", udid, "screenshot", str(p)])
-        log(f"{label}: screenshot {p.name} at t={time.monotonic() - t0:.1f} s")
+        snaps.append((tag, at, round(started, 2)))
+        log(f"{label}: screenshot {p.name} at t={started:.1f} s (due {at:.1f}), "
+            f"done at t={time.monotonic() - t0:.1f} s")
         return p
 
     wait_until(CARD_AT)
     v["alive_20s"] = alive()
-    card = snap("card")
-    wait_until(OPENING_AT); opening = snap("opening")
-    wait_until(FIRE_AT[0]); fire1 = snap("fire-1")
-    wait_until(FIRE_AT[1]); fire2 = snap("fire-2")
-    wait_until(PORTAL_AT); portal = snap("portal")
-    wait_until(LOVE_AT); love = snap("love")
-    wait_until(RESUME_AT); before = snap("resume-before")
+    card = snap("card", CARD_AT)
+    wait_until(OPENING_AT); opening = snap("opening", OPENING_AT)
+    wait_until(FIRE_AT[0]); fire1 = snap("fire-1", FIRE_AT[0])
+    wait_until(FIRE_AT[1]); fire2 = snap("fire-2", FIRE_AT[1])
+    wait_until(PORTAL_AT); portal = snap("portal", PORTAL_AT)
+    wait_until(LOVE_AT); love = snap("love", LOVE_AT)
+    wait_until(RESUME_AT); before = snap("resume-before", RESUME_AT)
     sh(["xcrun", "simctl", "launch", udid, "com.apple.Preferences"])
     time.sleep(2)
     sh(["xcrun", "simctl", "launch", udid, BUNDLE_ID])
     log(f"{label}: resumed at t={time.monotonic() - t0:.1f} s")
     time.sleep(RESUME_SETTLE)
-    after = snap("resume-after")
+    after = snap("resume-after", time.monotonic() - t0)
     fps = sh([sys.executable, str(REPO / "tests" / "check_frame_rate_log.py"), str(stdout_f), "--resume"])
     log(f"{label}: frame-rate check: {(fps.stdout + fps.stderr).strip()[-300:]}")
     v["fps_check"] = fps.returncode == 0
@@ -633,21 +775,132 @@ def run_device(label: str, udid: str, name: str, app: Path, out: Path) -> dict:
         f.unlink()
 
     ulog = sh(["xcrun", "simctl", "spawn", udid, "log", "show", "--predicate",
-               'processImagePath CONTAINS "wf_game"', "--style", "compact", "--last", "3m"]).stdout
+               'processImagePath CONTAINS "wf_game"', "--style", "compact",
+               "--last", f"{int(time.time() - start_wall) + 30}s"]).stdout   # the whole launch
     text = "\n".join(p.read_text(errors="replace") for p in (stdout_f, stderr_f) if p.exists())
     (out / f"ios-chapter-{label}-launch.log").write_text(
         f"=== {label}: {name} ({udid}) ===\n=== stdout ===\n"
         + (stdout_f.read_text(errors="replace") if stdout_f.exists() else "")
         + "=== stderr ===\n" + (stderr_f.read_text(errors="replace") if stderr_f.exists() else "")
-        + "=== unified log (wf_game, last 3m) ===\n" + ulog)
+        + "=== unified log (wf_game, since launch) ===\n" + ulog)
     v |= log_findings(text + "\n" + ulog)
+    v["script_offset_s"] = script_offset(ulog, t0_wall)
+    v["snaps"] = snaps
+    v["timeline_late"] = timeline_late(snaps, v["script_offset_s"])
+    log(f"{label}: launch took {v['launch_s']} s; app clock offset {v['script_offset_s']} s; "
+        f"late screenshots (> {SNAP_LATE_MAX} s): {', '.join(v['timeline_late']) or 'none'}")
     v |= authored_frame(label, text, {"opening": opening, "card": card, "portal": portal, "love": love}, out)
+    for orientation in ("landscape", "portrait"):
+        v[f"tour_{orientation}"] = hud_tour(label, udid, orientation, out)
+    v["audio_probe"] = audio_probe(label, udid, out)
     for f in Path.home().glob("Library/Logs/DiagnosticReports/wf_game*"):
         if f.stat().st_mtime >= start_wall:
             shutil.copy(f, out / f"ios-chapter-crash-{label}-{f.name}")
             log(f"{label}: crash report {f.name}")
     sh(["xcrun", "simctl", "terminate", udid, BUNDLE_ID])
     sh(["xcrun", "simctl", "shutdown", udid])
+    return v
+
+
+def load_average() -> str:
+    """The Mac's 1/5/15-minute load averages, for the settle and timeline evidence."""
+    r = subprocess.run(["sysctl", "-n", "vm.loadavg"], capture_output=True, text=True)
+    return r.stdout.strip() or r.stderr.strip()
+
+
+def settle(label: str, udid: str, out: Path) -> dict:
+    """Wait until the booted simulator answers screenshots on time (TIMELINE_NOTE).
+
+    Two screenshots in a row within SETTLE_SHOT_MAX s; SETTLE_DEADLINE is the
+    failure guard. Not settling does not fail by itself: the timed launch runs
+    and timeline_late() reports what it costs. The last probe stays as evidence.
+    """
+    probe = out / f"ios-chapter-{label}-settle.png"
+    t0, fast, shots = time.monotonic(), 0, []
+    while fast < 2 and time.monotonic() - t0 < SETTLE_DEADLINE:
+        s = time.monotonic()
+        r = sh(["xcrun", "simctl", "io", udid, "screenshot", str(probe)])
+        dt = time.monotonic() - s
+        shots.append(round(dt, 1))
+        fast = fast + 1 if r.returncode == 0 and dt <= SETTLE_SHOT_MAX else 0
+        log(f"{label}: settle probe {len(shots)}: {dt:.1f} s (rc {r.returncode}), load {load_average()}")
+    settled = fast >= 2
+    log(f"{label}: simulator {'settled' if settled else 'NOT settled'} after "
+        f"{time.monotonic() - t0:.1f} s, probes {shots}")
+    return {"settled": settled, "settle_s": round(time.monotonic() - t0, 1), "settle_probes": shots}
+
+
+def audio_probe(label: str, udid: str, out: Path) -> dict:
+    """Informational: does CoreAudio init still deadlock on this simulator? (hal/ios/audio.mm)
+
+    One launch with WF_IOS_SIM_AUDIO=1, waiting for the first frame (audio init
+    returned) or the process's end; AUDIO_PROBE_DEADLINE is the failure guard.
+    """
+    stderr_f = out / f"ios-chapter-{label}-audio-stderr.txt"
+    env = dict(os.environ, SIMCTL_CHILD_WF_IOS_SIM_AUDIO="1")
+    start_wall = time.time()
+    r = sh(["xcrun", "simctl", "launch", "--terminate-running-process", f"--stderr={stderr_f}",
+            udid, BUNDLE_ID, *LAUNCH_ARGS, *ORIENTATION_PIN], env=env)
+    t0 = time.monotonic()
+    if r.returncode != 0:
+        log(f"{label}: audio probe: launch failed: {r.stderr.strip()}")
+        return {"launch": False, "init_returned": False, "deadlocked": False, "first_frame_s": None}
+    pid = r.stdout.strip().split()[-1]
+    first_frame, alive = None, True
+    while time.monotonic() - t0 < AUDIO_PROBE_DEADLINE:
+        err = stderr_f.read_text(errors="replace") if stderr_f.exists() else ""
+        if FIRST_FRAME in err:
+            first_frame = round(time.monotonic() - t0, 1)
+            break
+        if subprocess.run(["ps", "-p", pid], stdout=subprocess.DEVNULL).returncode != 0:
+            alive = False
+            break
+        time.sleep(0.5)
+    ulog = sh(["xcrun", "simctl", "spawn", udid, "log", "show", "--predicate",
+               'processImagePath CONTAINS "wf_game"', "--style", "compact",
+               "--last", f"{int(time.time() - start_wall) + 10}s"]).stdout
+    err = stderr_f.read_text(errors="replace") if stderr_f.exists() else ""
+    (out / f"ios-chapter-{label}-audio.log").write_text(f"=== stderr ===\n{err}=== unified log ===\n{ulog}")
+    audio_lines = [l for l in (err + "\n" + ulog).splitlines()
+                   if re.search(r"audio|AURemoteIO|CoreAudio|AudioUnit", l, re.I)][:12]
+    v = {"launch": True, "init_returned": first_frame is not None, "first_frame_s": first_frame,
+         "alive": alive, "deadlocked": AUDIO_DEADLOCK in err + ulog, "audio_lines": audio_lines}
+    log(f"{label}: audio probe: {v}")
+    sh(["xcrun", "simctl", "terminate", udid, BUNDLE_ID])
+    return v
+
+
+def hud_tour(label: str, udid: str, orientation: str, out: Path) -> dict:
+    """One HUD tour launch (module docstring): three screenshots and the verdict."""
+    tag = f"ios-chapter-{label}-tour-{orientation}"
+    stderr_f = out / f"{tag}-stderr.txt"
+    env = dict(os.environ, SIMCTL_CHILD_WF_TOUCH_SCRIPT=TOUR_SCRIPT)
+    r = sh(["xcrun", "simctl", "launch", "--terminate-running-process", f"--stderr={stderr_f}",
+            udid, BUNDLE_ID, *LAUNCH_ARGS, "-WFOrientation", orientation], env=env)
+    t0 = time.monotonic()
+    if r.returncode != 0:
+        log(f"{label}: tour {orientation}: launch failed: {r.stderr.strip()}")
+        return {"ok": False, "launch": False}
+    for at, name in ((TOUR_CARD_AT, "card"), (TOUR_FULL_AT, "full"), (TOUR_HELD_AT, "held")):
+        time.sleep(max(0.0, at - (time.monotonic() - t0)))
+        sh(["xcrun", "simctl", "io", udid, "screenshot", str(out / f"{tag}-{name}.png")])
+        log(f"{label}: tour {orientation}: screenshot {name} at t={time.monotonic() - t0:.1f} s")
+    time.sleep(max(0.0, TOUR_END - (time.monotonic() - t0)))
+    seconds = int(time.monotonic() - t0) + 5
+    ulog = sh(["xcrun", "simctl", "spawn", udid, "log", "show", "--predicate",
+               'processImagePath CONTAINS "wf_game"', "--style", "compact", "--last", f"{seconds}s"]).stdout
+    err = stderr_f.read_text(errors="replace") if stderr_f.exists() else ""
+    (out / f"{tag}.log").write_text(f"=== stderr ===\n{err}=== unified log (last {seconds}s) ===\n{ulog}")
+    # NSLog reaches the unified log; use the stderr copy only if the unified log has none.
+    v = tour_verdict(ulog if TOUCH_EVENT.search(ulog) else err)
+    view = last_view_line(err + "\n" + ulog)
+    lm = None
+    for lm in TOUCH_LAYOUT.finditer(ulog + "\n" + err):
+        pass
+    v |= {"launch": True, "view_line": view.group(0) if view else None,
+          "layout_line": lm.group(0) if lm else None}
+    log(f"{label}: tour {orientation}: {v}")
+    sh(["xcrun", "simctl", "terminate", udid, BUNDLE_ID])
     return v
 
 
@@ -665,9 +918,24 @@ def letterbox_state(w: int, h: int, px, y3: int, ch3: int) -> tuple[bool, bool]:
     return bars_dark and inside > 20, bars_dark
 
 
-def app_frame(shot: Path, surface: tuple[int, int], out_png: Path):
+def band_kind(device: str, w: int, h: int, px, y3: int, ch3: int) -> tuple[bool, bool, bool]:
+    """(band, verified_if_band, bars_dark) for a portrait screenshot of the landscape app
+    whose band would span rows y3..y3+ch3 (see app_frame)."""
+    letterboxed, bars_dark = letterbox_state(w, h, px, y3, ch3)
+    windowed = device == "ipad" and not letterboxed and row_mean(w, px, y3 + 2, y3 + ch3 - 2) > 20
+    return letterboxed or device == "ipad", letterboxed or windowed, bars_dark
+
+
+def app_frame(shot: Path, surface: tuple[int, int], out_png: Path, device: str = "iphone"):
     """The app area of a simulator screenshot, upright, at a third of the surface size,
-    written to out_png. Returns (w, h, px, placement, verified)."""
+    written to out_png. Returns (w, h, px, placement, verified).
+
+    On the iPad the landscape app on a portrait simulator is always a band: iPadOS scales
+    the landscape window into the portrait screen. While the app was landscape-only the
+    band sat in black bars; since it also allows portrait (and CI pins landscape with
+    -WFOrientation), iPadOS draws the same band as a window over the home screen
+    (build 6af12b6d), so the bars are wallpaper and the dock, not black. The black-bar
+    test still decides between band and rotate on the iPhone only."""
     small = shot.with_suffix(".third.png")
     sw, sh_ = struct.unpack(">II", shot.read_bytes()[16:24])   # the PNG IHDR
     subprocess.run(["sips", "--resampleHeightWidth", str(sh_ // FRAME_SCALE), str(sw // FRAME_SCALE),
@@ -678,8 +946,8 @@ def app_frame(shot: Path, surface: tuple[int, int], out_png: Path):
     W, H = surface
     _, (_, by, _, bh) = app_placement(sw, sh_, W, H, True)
     y3, ch3 = by // FRAME_SCALE, bh // FRAME_SCALE
-    letterboxed, bars_dark = letterbox_state(w, h, px, y3, ch3)
-    kind, _ = app_placement(sw, sh_, W, H, letterboxed)
+    is_band, band_ok, bars_dark = band_kind(device, w, h, px, y3, ch3)
+    kind, _ = app_placement(sw, sh_, W, H, is_band)
     verified = True
     if kind == "rotate":
         # A letterboxed frame must never pass as a sideways one (run 6ae806b1's iPad
@@ -687,7 +955,7 @@ def app_frame(shot: Path, surface: tuple[int, int], out_png: Path):
         verified = not bars_dark
         w, h, px = rotate_ccw(w, h, px)
     if kind == "band":
-        verified = letterboxed
+        verified = band_ok
         w, h, px = crop(w, h, px, 0, y3, w, ch3)
     verified = verified and abs(w / h - W / H) < 0.01
     write_png(out_png, w, h, px)
@@ -728,7 +996,7 @@ def authored_frame(label: str, text: str, shots: dict, out: Path) -> dict:
     for tag, shot in shots.items():
         if shot.exists():
             try:
-                frames[tag] = app_frame(shot, (W, H), out / f"ios-chapter-{label}-{tag}-app.png")
+                frames[tag] = app_frame(shot, (W, H), out / f"ios-chapter-{label}-{tag}-app.png", label)
             except Exception as e:  # one bad frame must not lose the verdict
                 log(f"{label}: app crop of {tag} failed: {e}")
     if "opening" not in frames:
@@ -790,12 +1058,35 @@ def run(app: Path, out: Path) -> int:
         print(f"  {v['label']} FRAME CHECK: {v.get('frame_check_pct')} % (max {FRAME_CHECK_MAX_PCT} %, "
               f"{'part of OK' if v.get('authored_expected') else 'informational'}), surface={v.get('surface')}, "
               f"crop={v.get('crop')} verified={v.get('crop_ok')}")
+        print(f"  {v['label']} timeline: settled={v.get('settled')} in {v.get('settle_s')} s "
+              f"(probes {v.get('settle_probes')}), launch {v.get('launch_s')} s, "
+              f"app clock offset {v.get('script_offset_s')} s, snaps (tag, due, started) {v.get('snaps')}")
         for line in v["zforth_errors"]:
             print(f"  zforth: {line}")
-        print(f"IOS {v['label'].upper()}: {'OK' if ok else 'FAIL'}")
-    print("TOUCH PARITY: NOT MET (iOS HUD is a D-pad with A and B, hal/ios/input.mm; "
-          "Android draws a joystick with A to D and narrows to A and C over a card, "
-          "hal/android/touch_controls.h)")
+        late = v.get("timeline_late")
+        print(f"IOS {v['label'].upper()}: {'OK' if ok else 'FAIL'}"
+              + (f" (TIMELINE LATE: {', '.join(late)}; the simulator was too slow, so these "
+                 f"screenshots are not of their moments: TIMELINE_NOTE)" if late else ""))
+    for v in results:
+        for o in ("landscape", "portrait"):
+            t = v.get(f"tour_{o}") or {}
+            print(f"  {v['label']} tour {o}: ok={t.get('ok')} reading_first={t.get('reading_first')} "
+                  f"hidden_ignored={t.get('hidden_ignored')} c_closes={t.get('c_closes')} chord={t.get('chord')}")
+            print(f"    {t.get('layout_line')}")
+            print(f"    {t.get('view_line')}")
+    met = bool(results) and all((v.get("tour_landscape") or {}).get("ok") for v in results)
+    print(f"TOUCH PARITY: {'MET' if met else 'NOT MET'} (scripted: WF_TOUCH_SCRIPT skips UIKit touch delivery; "
+          "joystick and A to D, A and C only over a card, hal/touch_controls.h)")
+    portrait = bool(results) and all((v.get("tour_portrait") or {}).get("ok") for v in results)
+    print(f"TOUCH PORTRAIT: {'MET' if portrait else 'NOT MET'} (scripted, -WFOrientation portrait)")
+    for v in results:
+        a = v.get("audio_probe") or {}
+        state = ("init returned, first frame at t=%s s" % a.get("first_frame_s") if a.get("init_returned")
+                 else "DEADLOCKED (AudioToolbox abort)" if a.get("deadlocked")
+                 else "no first frame, alive=%s" % a.get("alive"))
+        print(f"AUDIO PROBE {v['label'].upper()}: {state} (informational: WF_IOS_SIM_AUDIO=1, hal/ios/audio.mm)")
+        for line in a.get("audio_lines") or []:
+            print(f"    {line[:200]}")
     if not any(d[0] == "ipad" for d in devices):
         print("IOS IPAD: FAIL (no iPad on an iOS runtime with an iPhone)")
     return rc

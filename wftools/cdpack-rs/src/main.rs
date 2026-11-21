@@ -44,10 +44,17 @@ fn check_name(what: &str, s: &str, origin: &str) -> Result<(), String> {
     Ok(())
 }
 
-/// Parse a manifest. Lines: `# comment`, blank, `title <text>`, `prompt <text>`, `level <path> | <name>`.
-/// Level paths are relative to the manifest's directory.
+/// Parse a manifest. Lines: `# comment`, blank, `title <text>`, `prompt <text>`,
+/// `level <path> | <name> [| <dream label>]`. Level paths are relative to the manifest's directory.
+/// The optional third column is the screensaver's label for the level (read by the Android
+/// screensaver's LevelCatalog); it is checked like a name and otherwise ignored, so it never
+/// changes a bundle (docs/plans/2026-11-21-aquarium-menu-and-screensaver-launch.md, Phase 2).
 fn parse_manifest(path: &str) -> Result<Manifest, String> {
     let text = fs::read_to_string(path).map_err(|e| format!("reading {}: {}", path, e))?;
+    parse_manifest_text(&text, path)
+}
+
+fn parse_manifest_text(text: &str, path: &str) -> Result<Manifest, String> {
     let base = Path::new(path).parent().unwrap_or_else(|| Path::new("."));
     let mut title = String::from("World Foundry");
     let mut prompt = String::from("Choose a game");
@@ -70,14 +77,18 @@ fn parse_manifest(path: &str) -> Result<Manifest, String> {
                 prompt = rest.to_string();
             }
             "level" => {
-                let (file, name) = rest
-                    .split_once('|')
-                    .ok_or_else(|| format!("{}: want `level <path> | <name>`", origin))?;
-                let (file, name) = (file.trim(), name.trim());
+                let fields: Vec<&str> = rest.split('|').map(str::trim).collect();
+                if fields.len() < 2 || fields.len() > 3 {
+                    return Err(format!("{}: want `level <path> | <name> [| <dream label>]`", origin));
+                }
+                let (file, name) = (fields[0], fields[1]);
                 if file.is_empty() {
                     return Err(format!("{}: empty level path", origin));
                 }
                 check_name("name", name, &origin)?;
+                if let Some(label) = fields.get(2) {
+                    check_name("dream label", label, &origin)?;
+                }
                 levels.push((base.join(file).to_string_lossy().into_owned(), name.to_string()));
             }
             _ => return Err(format!("{}: unknown keyword {:?} (want title, prompt or level)", origin, key)),
@@ -131,6 +142,7 @@ const USAGE: &str = "Usage: cdpack <shel.fth> <L0.iff> [<L1.iff> ...] -o <cd.iff
                      cdpack <shel.fth> --manifest <menu.manifest> -o <cd.iff>\n\n\
                      --manifest  levels and their menu names, one `level <path> | <name>` per line\n            \
                      (paths relative to the manifest), optional `title <text>` and `prompt <text>`;\n            \
+                     an optional third `| <dream label>` column is checked and ignored;\n            \
                      adds a MENU chunk after the levels (docs/plans/2026-10-01-level-menu-selector.md)\n\
                      --ui-font   the UI font atlas packed last as the UIFT chunk (default: ui-font.wfga\n            \
                      beside the SHEL script; docs/plans/2026-10-17-settings-editor-font.md)\n\
@@ -377,5 +389,38 @@ fn main() {
     match &ui_font {
         Some(f) => eprintln!("  UIFT: {} bytes at sector {} ({})", f.len(), ui_font_offset / SECTOR, ui_font_path),
         None => eprintln!("  UIFT: none (--no-ui-font): the engine refuses this bundle"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn levels(m: &Manifest) -> Vec<(String, String)> {
+        m.levels.clone()
+    }
+
+    #[test]
+    fn third_column_is_ignored() {
+        let two = "title T\nprompt P\nlevel a-standalone.iff | Alpha\nlevel b-standalone.iff | Beta\n";
+        let three = "title T\nprompt P\nlevel a-standalone.iff | Alpha | Dream A\nlevel b-standalone.iff | Beta\n";
+        let (m2, m3) = (parse_manifest_text(two, "w/m").unwrap(), parse_manifest_text(three, "w/m").unwrap());
+        assert_eq!(levels(&m2), levels(&m3));
+        assert_eq!(menu_chunk(&m2), menu_chunk(&m3));
+        assert_eq!(levels(&m3)[0], ("w/a-standalone.iff".to_string(), "Alpha".to_string()));
+    }
+
+    #[test]
+    fn bad_level_lines_are_refused() {
+        for (line, want) in [
+            ("level a.iff", "want `level"),
+            ("level a.iff | A | B | C", "want `level"),
+            ("level a.iff | A |", "dream label must be 1 to"),
+            ("level a.iff | A | Dr\u{e9}am", "only printable ASCII"),
+            ("level  | A", "empty level path"),
+        ] {
+            let err = parse_manifest_text(line, "m").err().unwrap_or_default();
+            assert!(err.contains(want), "{:?}: got {:?}", line, err);
+        }
     }
 }

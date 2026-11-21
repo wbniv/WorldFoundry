@@ -1,6 +1,7 @@
 """Run the screensaver's Player drivers in the engine's zForth interpreter."""
 import re
 import runpy
+import sys
 from pathlib import Path
 
 import pytest
@@ -150,14 +151,13 @@ def test_direct_player_holds_releases_and_reverses(host, tank):
         assert h.read(output) == -1
 
 
-def test_generated_player_variants_match_sources_and_tank_order():
+def test_generated_player_variants_match_sources_and_manifest_order():
+    sys.path.insert(0, str(ROOT / "scripts"))  # the builder imports its sibling modules
     builder = runpy.run_path(str(ROOT / "scripts/build-aquarium-screensaver-levels.py"))
     tanks = builder["TANKS"]
-    ids = (ROOT / "android/screensaver/src/main/java/org/worldfoundry/screensaver/"
-           "TankChoice.java").read_text()
-    declared = re.search(r"static final String\[\] IDS = \{(.*?)\};", ids, re.S)
-    assert declared is not None
-    assert tuple(re.findall(r'"([a-z_]+)"', declared.group(1))) == tanks
+    # The bundle order is the manifest's order (the Dream's LevelCatalog.indexOf reads the same file).
+    manifest = (ROOT / "wflevels/aquarium-menu.manifest").read_text()
+    assert tuple(re.findall(r"(?m)^level\s+(\S+)-standalone\.iff\s*\|", manifest)) == tanks
     for tank in tanks:
         name = builder["SCRIPT_NAMES"].get(tank, "screensaver_player.fth")
         source = ROOT / "wflevels" / tank
@@ -166,5 +166,7 @@ def test_generated_player_variants_match_sources_and_tank_order():
         expected = builder["player_script"](
             (source / f"{tank}.lev").read_text(), tank,
             (driver_dir / name).read_text())
+        if tank == "aquarium_plants":  # the Dream plays the Planted Tank as saltwater (Water type 1)
+            expected = builder["planted_saltwater_variant"](expected)
         generated = ROOT / "wflevels" / f"{tank}_screensaver" / f"{tank}_screensaver.lev"
         assert generated.read_text() == expected, tank

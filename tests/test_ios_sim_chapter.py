@@ -231,11 +231,65 @@ def test_authored_band_and_resize():
 
 
 def test_hud_rects_mirror_the_touch_layout():
-    # iPad: "touch layout 1376x1032 pt, safe {0,0,25,0}, cell 72.0 pt", surface 2752 x 2064.
-    dpad, ab = chapter.hud_rects(1376, 1032, 0, 0, 25, 0, 72.0, 2.0)
-    assert dpad == (24.0, (1032 - 25 - 12 - 216) * 2, (12 + 216) * 2, (1032 - 25 - 12) * 2)
-    s = 72.0 * 120 / 66
-    assert ab == ((1376 - 12 - 2 * s) * 2, (1032 - 25 - 12 - s) * 2, (1376 - 12) * 2, (1032 - 25 - 12) * 2)
+    # iPhone: "touch layout 874x402 pt, safe {0,62,20,62}" with the shared layout
+    # (hal/touch_controls.h): cell 54, joystick square 2.4 cells, A to D block 2.4 cells.
+    cell, pad, block = chapter.touch_layout(874, 402, 0, 62, 20, 62)
+    assert cell == pytest.approx(54.0)
+    assert pad == pytest.approx((74.0, 242.4, 203.6, 372.0))
+    assert block == pytest.approx((670.4, 242.4, 800.0, 372.0))
+    stick, ab = chapter.hud_rects(874, 402, 0, 62, 20, 62, 54.0, 3.0)
+    assert stick == pytest.approx(tuple(c * 3 for c in pad))
+    assert ab == pytest.approx(tuple(c * 3 for c in block))
+    # iPad: the 64 pt cap; portrait iPhone: the top inset is reserved, the cap holds.
+    assert chapter.touch_layout(1376, 1032, 0, 0, 25, 0)[0] == pytest.approx(64.0)
+    cell, pad, block = chapter.touch_layout(402, 874, 62, 0, 34, 0)
+    assert cell == pytest.approx(64.0) and pad[3] == pytest.approx(874 - 34 - 6)
+    assert pad[2] < block[0]
+    assert chapter.touch_layout(100, 100, 0, 60, 0, 60) is None
+    assert chapter.hud_rects(100, 100, 0, 60, 0, 60, 0.0, 1.0) == []
+
+
+TOUR_GOOD = """\
+wf_game: touch layout 874x402 pt, safe {0,62,20,62}, cell 54.0 pt
+wf_game: touch reading on
+wf_game: touch buttons 0x0004
+wf_game: touch reading off
+wf_game: touch buttons 0x0000
+wf_game: touch buttons 0x2000
+wf_game: touch buttons 0x200a
+wf_game: touch buttons 0x0000
+"""
+
+
+def test_tour_verdict_passes_the_scripted_tour():
+    v = chapter.tour_verdict(TOUR_GOOD)
+    assert v["ok"] and v["reading_first"] and v["hidden_ignored"] and v["c_closes"] and v["chord"]
+
+
+def test_tour_verdict_fails_each_parity_defect():
+    # Today's iOS HUD: never narrows over a card.
+    assert not chapter.tour_verdict(TOUR_GOOD.replace("wf_game: touch reading on\n", ""))["ok"]
+    # B (hidden over a card) still sends its bit.
+    leak = TOUR_GOOD.replace("touch reading on\n", "touch reading on\nwf_game: touch buttons 0x0002\nwf_game: touch buttons 0x0000\n")
+    v = chapter.tour_verdict(leak)
+    assert not v["ok"] and not v["hidden_ignored"]
+    # LEFT on the joystick still works over a card (it would close the card).
+    v = chapter.tour_verdict(TOUR_GOOD.replace("touch reading on\n", "touch reading on\nwf_game: touch buttons 0x4000\n"))
+    assert not v["ok"] and not v["hidden_ignored"]
+    # C pressed but the card stayed open.
+    v = chapter.tour_verdict(TOUR_GOOD.replace("wf_game: touch reading off\n", ""))
+    assert not v["ok"] and not v["c_closes"]
+    # No C or D on the HUD: the chord never comes through.
+    v = chapter.tour_verdict(TOUR_GOOD.replace("0x200a", "0x2002"))
+    assert not v["ok"] and not v["chord"]
+    assert not chapter.tour_verdict("")["ok"]
+
+
+def test_tour_script_parses_and_presses_what_the_verdict_expects():
+    entries = [e.split("@")[0] for e in chapter.TOUR_SCRIPT.split(",")]
+    assert entries == ["b", "left", "c", "right", "b", "d"]
+    assert chapter.TOUR_CHORD == 0x200a
+    assert chapter.ORIENTATION_PIN == ["-WFOrientation", "landscape"]
 
 
 def test_frame_check_passes_the_authored_frame_and_fails_a_cut_one(tmp_path):
@@ -325,3 +379,64 @@ def test_row_mean_and_outline():
     px = bytearray(3 * 4 * 4)
     out = chapter.outline(4, 4, px, (0, 0, 4, 4), colour=(255, 255, 255), width=1)
     assert chapter.row_mean(4, out, 0, 1) == 255 and chapter.row_mean(4, out, 1, 3) < 255
+
+
+def test_ipad_band_holds_when_ipados_draws_it_as_a_window():
+    # Build 6af12b6d: with portrait allowed and -WFOrientation landscape, iPadOS draws the
+    # landscape app as a band over the home screen (wallpaper and dock), not in black bars.
+    # The black-bar test called that "rotate" (crop verified by aspect only) and the FRAME
+    # CHECK compared a sideways frame: 90.15 %. On the iPad it is always the band.
+    w, h, y3, ch3 = 688, 917, 200, 516
+    px = bytearray()
+    for y in range(h):
+        colour = (40, 120, 200) if not (y3 <= y < y3 + ch3) else (150, 130, 100)   # wallpaper / scene
+        px += bytes(colour) * w
+    assert chapter.letterbox_state(w, h, px, y3, ch3) == (False, False)
+    assert chapter.band_kind("ipad", w, h, px, y3, ch3) == (True, True, False)
+    # The iPhone keeps the old rule: no black bars means the frame is the app turned a quarter.
+    assert chapter.band_kind("iphone", w, h, px, y3, ch3) == (False, False, False)
+    # A black-letterboxed iPad (the app before portrait) is still a verified band.
+    dark = bytearray()
+    for y in range(h):
+        dark += bytes((150, 130, 100) if y3 <= y < y3 + ch3 else (0, 0, 0)) * w
+    assert chapter.band_kind("ipad", w, h, dark, y3, ch3) == (True, True, True)
+    # An iPad band with nothing drawn in it is not verified.
+    blank = bytearray(bytes((40, 120, 200)) * (w * y3) + bytes((0, 0, 0)) * (w * ch3)
+                      + bytes((40, 120, 200)) * (w * (h - y3 - ch3)))
+    assert chapter.band_kind("ipad", w, h, blank, y3, ch3)[1] is False
+
+
+def test_timeline_late_fails_run_6af19fcd_ipad_and_passes_6af131a7():
+    """TIMELINE_NOTE: run 6af19fcd's iPad screenshots started 6 to 49 s late."""
+    late_run = [("card", 20.0, 26.1), ("opening", 24.0, 47.1), ("fire-1", 25.0, 73.2),
+                ("fire-2", 26.0, 76.7), ("portal", 33.0, 80.6), ("love", 39.0, 85.4)]
+    late = chapter.timeline_late(late_run, 0.25)
+    assert [s.split()[0] for s in late] == ["card", "opening", "fire-1", "fire-2"]   # not portal/love
+    assert late[0] == "card +5.9 s"
+    on_time = [("card", 20.0, 20.1), ("opening", 24.0, 24.0), ("fire-1", 25.0, 25.0),
+               ("fire-2", 26.0, 26.0), ("portal", 33.0, 36.0), ("resume-after", 48.0, 48.0)]
+    assert chapter.timeline_late(on_time, 0.25) == []
+    assert chapter.timeline_late(on_time, None) == []
+    # An app that started 3 s before this script's t0 is 3 s ahead: on-time snaps are late.
+    assert [s.split()[0] for s in chapter.timeline_late(on_time, -3.0)] == ["card", "opening", "fire-1", "fire-2"]
+
+
+def test_script_offset_reads_the_app_clock_from_the_unified_log():
+    from datetime import datetime
+    t0 = datetime(2026, 11, 9, 10, 39, 49, 900000).timestamp()
+    ulog = "\n".join([
+        "2026-11-09 10:36:05.637 Df wf_game[2802:55f3] wf_game: touch script: 6 entries, 31.6 s",
+        "2026-11-09 10:39:50.151 wf_game[3079:28102] wf_game: touch script: 5 entries, 36.0 s",
+        "2026-11-09 10:39:50.152 Df wf_game[3079:7d18] wf_game: touch script: 5 entries, 36.0 s",
+        "2026-11-09 10:40:12.159 wf_game[3079:28102] wf_game: touch buttons 0x0001",
+    ])
+    assert chapter.script_offset(ulog, t0) == 0.25
+    assert chapter.script_offset("no script line", t0) is None
+
+
+def test_device_ok_fails_a_late_timeline():
+    good = {"install": True, "launch": True, "alive_20s": True, "alive_end": True, "wf_args": 8,
+            "room_render": True, "zforth_errors": [], "texture_slot_error": False,
+            "fps_check": True, "fire_blob_pixels": 60, "timeline_late": []}
+    assert chapter.device_ok(good)
+    assert not chapter.device_ok(good | {"timeline_late": ["opening +23.1 s"]})

@@ -2,6 +2,28 @@ plugins {
     id("com.android.application")
 }
 
+// docs/plans/2026-11-21-aquarium-menu-and-screensaver-launch.md, Phase 2: one roster per package.
+// A package that adds its own catalogue copies its manifest the same way, into its own flavor.
+val aquariumCatalogAssets = layout.buildDirectory.dir("generated/levelCatalog/aquarium/assets")
+val copyAquariumLevelCatalog by tasks.registering(Copy::class) {
+    from(rootProject.file("../wflevels/aquarium-menu.manifest"))
+    rename { "levels.manifest" }
+    into(aquariumCatalogAssets)
+}
+// WF Clocks (docs/plans/2026-11-21-tide-harbour-clock.md): the same, from wflevels/clocks-menu.manifest.
+// Test builds only (task build-clocks-two-entry-apk): -PwfClocksManifest=<manifest> and
+// -PwfClocksAssets=<dir holding its cd.iff> replace the shipped roster and bundle for that build.
+val clocksManifest = (findProperty("wfClocksManifest") as String?)?.let { file(it) }
+    ?: rootProject.file("../wflevels/clocks-menu.manifest")
+val clocksBundleAssets = (findProperty("wfClocksAssets") as String?)?.let { file(it) }
+    ?: file("src/clocks/assets")
+val clocksCatalogAssets = layout.buildDirectory.dir("generated/levelCatalog/clocks/assets")
+val copyClocksLevelCatalog by tasks.registering(Copy::class) {
+    from(clocksManifest)
+    rename { "levels.manifest" }
+    into(clocksCatalogAssets)
+}
+
 android {
     namespace = "org.worldfoundry.screensaver"
     compileSdk = 34
@@ -29,9 +51,15 @@ android {
             versionCode = 1
             versionName = "0.1"
         }
-        create("minutemachine") {
+        create("clocks") {                 // WF Clocks: every clock of wflevels/clocks-menu.manifest
             dimension = "dream"
-            applicationId = "org.worldfoundry.minutemachine"
+            applicationId = "org.worldfoundry.clocks"
+            versionCode = 1
+            versionName = "0.1"
+        }
+        create("tidespike") {              // Tide Harbour Phase 0 spike: throwaway, one APK for four levels
+            dimension = "dream"
+            applicationId = "org.worldfoundry.tidespike"
             versionCode = 1
             versionName = "0.1"
         }
@@ -80,4 +108,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
+    // The aquarium flavor's level roster: wflevels/aquarium-menu.manifest, copied (never checked
+    // in twice) into generated assets as levels.manifest, which LevelCatalog reads at runtime.
+    sourceSets.getByName("aquarium").assets.srcDir(aquariumCatalogAssets)
+    sourceSets.getByName("clocks").assets.setSrcDirs(listOf(clocksBundleAssets, clocksCatalogAssets))
 }
+
+tasks.named("preBuild") { dependsOn(copyAquariumLevelCatalog, copyClocksLevelCatalog) }

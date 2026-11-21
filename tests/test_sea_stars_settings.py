@@ -377,20 +377,20 @@ def test_the_java_cpp_and_provider_agree_on_names_and_routes():
     assert "native void nativeLaunchOverride(String schema, String key, String value)" in player
     assert "Java_org_worldfoundry_screensaver_TankPlayer_nativeLaunchOverride" in host
     assert "launchOverrideSink.set(" in host
-    # The tank that carries the settings is the one TankChoice lists last, by the same id the level uses.
-    ids = re.search(r"IDS = \{(.*?)\};", (JAVA / "TankChoice.java").read_text(), re.S).group(1)
-    tanks = re.findall(r'"(aquarium\w*)"', ids)
+    # The tank that carries the settings is the one the manifest lists last, by the same id the level uses.
+    manifest = (ROOT / "wflevels/aquarium-menu.manifest").read_text()
+    tanks = re.findall(r"(?m)^level\s+(\S+)-standalone\.iff\s*\|", manifest)
     assert tanks[-1] == "aquarium_sea_stars"
     settings = (JAVA / "LevelSettings.java").read_text()
     assert 'SEA_STARS_TANK = "aquarium_sea_stars"' in settings and 'SEA_STARS_PREFIX = "sea-stars."' in settings
-    # Every place that starts a tank goes through TankLaunch, so the overrides always reach the engine.
+    # Every place that starts a tank goes through LevelLaunch, so the overrides always reach the engine.
     for name in ("AquariumDreamService", "AquariumActivity", "ScreensaverPreviewActivity"):
         text = (JAVA / f"{name}.java").read_text()
-        assert "TankLaunch.startChosen(this, player)" in text, name
+        assert "LevelLaunch.startChosen(this, player, " in text, name
         assert "player.start(TankChoice" not in text, name
     assert "LevelSettings.SEA_STARS_PREFIX" in (JAVA / "TankSettingsProvider.java").read_text()
     # It is not the Planted bridge: nothing of the Sea Stars path touches it.
-    for name in ("LevelSettings", "LevelSettingField", "TankLaunch"):
+    for name in ("LevelSettings", "LevelSettingField", "LevelLaunch"):
         assert "Planted" not in (JAVA / f"{name}.java").read_text(), name
 
 

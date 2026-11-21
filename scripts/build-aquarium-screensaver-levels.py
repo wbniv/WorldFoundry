@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build isolated, auto-driven variants of the eight existing aquarium tanks.
+"""Build isolated, auto-driven variants of the aquarium tanks in wflevels/aquarium-menu.manifest.
 
 The canonical gameplay levels and their player scripts stay untouched. Each
 variant starts from the exported .lev, swaps only the Player's script, then uses
@@ -15,19 +15,26 @@ import re
 import subprocess
 
 from level_asset_links import link_source_assets
+import level_manifest
 
 ROOT = Path(__file__).resolve().parent.parent
 LEVELS = ROOT / "wflevels"
-TANKS = (
-    "aquarium", "aquarium_blue_shrimp", "aquarium_betta", "aquarium_jellyfish",
-    "aquarium_lionfish", "aquarium_plants", "aquarium_arowana",
-    "aquarium_tiger_barbs", "aquarium_thai_reef", "aquarium_thai_reef_anime", "aquarium_sea_stars",
-)
+# The roster is wflevels/aquarium-menu.manifest, the one place a tank is added; its order is the
+# screensaver bundle's table-of-contents order, which the Dream's LevelCatalog.indexOf relies on.
+TANKS = level_manifest.read().ids
 SCRIPT_NAMES = {"aquarium": "aquarium_screensaver.fth",
                 "aquarium_tiger_barbs": "tiger_barbs_screensaver.fth",
                 "aquarium_sea_stars": "sea_stars_screensaver.fth"}
 SCRIPT_FIELD = re.compile(r"(\{ 'STR' \{ 'NAME' \"Script\" \} \{ 'STR' )"
                           r"(\"(?:\\.|[^\"\\])*\")", re.S)
+
+
+def check_roster(tanks, levels: Path = LEVELS) -> None:
+    """Stop, naming the ids, when the manifest lists a tank that has no wflevels/<id>/ directory."""
+    missing = [tank for tank in tanks if not (levels / tank).is_dir()]
+    if missing:
+        raise ValueError("wflevels/aquarium-menu.manifest lists " + ", ".join(missing)
+                         + ", which has no wflevels/<id>/ directory")
 
 
 def player_script(level_text: str, tank: str, driver: str) -> str:
@@ -209,17 +216,14 @@ def build_planted() -> Path:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("tanks", nargs="*", choices=(*TANKS, "planted"),
-                        help="Default: all eight tanks. 'planted' builds only the Planted Tank screensaver bundle")
+                        help="Default: every tank in the manifest. 'planted' builds only the Planted Tank screensaver bundle")
     args = parser.parse_args()
     if "planted" in args.tanks:
         if len(args.tanks) != 1:
             parser.error("'planted' builds on its own")
         print(f"planted screensaver bundle: {build_planted()}", flush=True)
         return
-    java_choice = (ROOT / "android/screensaver/src/main/java/org/worldfoundry/screensaver/TankChoice.java").read_text()
-    ids_match = re.search(r"static final String\[\] IDS = \{(.*?)\};", java_choice, re.S)
-    if not ids_match or tuple(re.findall(r'"([a-z_]+)"', ids_match.group(1))) != TANKS:
-        raise ValueError("TankChoice.IDS must match the screensaver bundle order")
+    check_roster(TANKS)
     for tank in args.tanks or TANKS:
         print(f"Screensaver level: {tank}", flush=True)
         print(build(tank), flush=True)
