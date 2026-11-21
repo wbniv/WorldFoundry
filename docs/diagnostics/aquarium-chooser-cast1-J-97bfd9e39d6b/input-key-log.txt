@@ -1,0 +1,7 @@
+         1795257229.332 16049 16069 I wf_game : android_main: waiting for APP_CMD_INIT_WINDOW
+         1795257229.337 16049 16069 I wf_game : APP_CMD_RESUME
+         1795257229.382 16049 16069 I wf_game : APP_CMD_INIT_WINDOW
+         1795257239.925 16049 16069 I wf_game : key code=4 action=0 (Back: hides the phone panel)
+         1795257239.959 16049 16069 I wf_game : key code=4 action=1 (Back: hides the phone panel)
+         1795257261.595 16049 16069 I wf_game : key code=20 action=0 mask=0x1000
+         1795257261.768 16049 16069 I wf_game : key code=20 action=1 mask=0x1000
