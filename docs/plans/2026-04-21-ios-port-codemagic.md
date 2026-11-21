@@ -91,6 +91,13 @@ Recommendation: native Metal. The fallback exists only if MSL translation become
   - Assert the log lines `touch buttons 0x2000` / `0x4000`, `suspend (applicationWillResignActive)` / `resume (applicationDidBecomeActive)` around a trip out to Settings and back (`simctl launch … com.apple.Preferences`, then relaunch the app), and that the pid survives. Compare screenshots taken before and after the RIGHT hold.
   - `idb ui tap` (`brew install facebook/fb/idb-companion` + `pip install fb-idb`, coordinates in points per `hid.py`) is the option that would also exercise UIKit, at the cost of installing it on every run.
 
+**Status update (2026‑11‑21, branch `feat/ios-touch-parity`): CI green on the simulator; real-device clauses not verified.** The touch controls are Android's (`hal/touch_controls.h`, plan: finding-your-way `docs/plans/2026-11-08-ios-touch-parity.md`). Codemagic `ios-simulator-chapter` build `6b01461c` (commit `70dfa1a3`, 14.3 min): `IOS IPHONE: OK`, `IOS IPAD: OK`, `TOUCH PARITY: MET`, `TOUCH PORTRAIT: MET`.
+- **Touch moves the player: PASS (scripted), mostly PASS (real taps).** The scripted walk (`WF_TOUCH_SCRIPT`, through the same pad code a finger uses) carries the player from the Temple compass to the Love portal on both devices (`love_frame_diff` 59.25 and 37.78). XCUITest real taps through UIKit pass on iPhone in landscape and portrait and on iPad in portrait. On iPad in landscape, a 51 ms tap on C reached the app (`touch buttons 0x0004`), but the engine never saw it, so the card stayed open. The iOS HAL hands the engine only the current button state, and the tap ended between two engine frames, 4.5 s after the first frame.
+- **HUD shows: PASS.** `ios-chapter-*-tour-*-full.png`; the XCUITest finds `wf.touch.A`…`D` and the stick.
+- **Background and foreground without a crash: PASS.** A trip out to Settings and back gives `suspend (applicationWillResignActive)` and then `resume (applicationDidBecomeActive)`. The process is the same pid at the end, and the frame-rate check after resume reads `PASS … resume=True` on both devices.
+- **Audio through CoreAudio: NOT VERIFIED.** The simulator guard in `hal/ios/audio.mm` is still needed. The new audio probe launches with `WF_IOS_SIM_AUDIO=1` and still aborts on both devices: `Initialize: RPC timeout. Apparently deadlocked. Aborting now.` That leaves a real device (Phase 5).
+- **Fixed on the way.** `43d57146`: NSUserDefaults launch pairs no longer reach the engine. Before, `-WFTouchDiagnostics 1` became the starting level, so every XCUITest launch loaded level 1 and aborted. `5352441a`: the chapter run now waits for the simulator to settle, and reports a late screenshot as `TIMELINE LATE`. Build `6af19fcd` failed because its iPad simulator was too slow, which made the frame check compare a frame taken at the wrong moment. `70dfa1a3`: the HUD keeps its accessibility elements, so XCUITest can find them.
+
 ### Phase 4 — Apple Developer Program + signed IPA on Codemagic (**gated on $99 spend**)
 
 This is the first phase that costs real money. Only start after Phase 3 is green and there's a working Simulator build worth pushing to hardware.
@@ -158,6 +165,6 @@ This is the first phase that costs real money. Only start after Phase 3 is green
 | 0 | Codemagic log shows CMake error about missing iOS HAL | Codemagic build run |
 | 1 | `.app` launches in Simulator, no crash on `HALGetAssetAccessor` | Codemagic artifact + Simulator log |
 | 2 | snowgoons first frame renders in Simulator | Golden-image diff vs. Android frame 1 |
-| 3 | snowgoons plays end-to-end in Simulator with touch + audio — **logic PASS on Linux (313 checks); Simulator run not yet done** | Demo video from Simulator; `tests/test_ios_touch_pad.py` |
+| 3 | snowgoons plays end-to-end in Simulator with touch + audio — **logic PASS on Linux (576 checks); Simulator: touch, HUD, resume PASS (Finding Your Way chapter, build `6b01461c`); audio NOT verified (simulator CoreAudio still deadlocks)** | Codemagic `ios-simulator-chapter` artifacts; `tests/test_ios_touch_pad.py` |
 | 4 | `codesign -v` on the release IPA passes | `.ipa` in Codemagic artifacts |
 | 5 | Collaborator runs snowgoons on iPhone; `wf.log` returned; lifecycle torture clean | Video + log from collaborator |
