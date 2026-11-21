@@ -404,3 +404,39 @@ def test_ipad_band_holds_when_ipados_draws_it_as_a_window():
     blank = bytearray(bytes((40, 120, 200)) * (w * y3) + bytes((0, 0, 0)) * (w * ch3)
                       + bytes((40, 120, 200)) * (w * (h - y3 - ch3)))
     assert chapter.band_kind("ipad", w, h, blank, y3, ch3)[1] is False
+
+
+def test_timeline_late_fails_run_6af19fcd_ipad_and_passes_6af131a7():
+    """TIMELINE_NOTE: run 6af19fcd's iPad screenshots started 6 to 49 s late."""
+    late_run = [("card", 20.0, 26.1), ("opening", 24.0, 47.1), ("fire-1", 25.0, 73.2),
+                ("fire-2", 26.0, 76.7), ("portal", 33.0, 80.6), ("love", 39.0, 85.4)]
+    late = chapter.timeline_late(late_run, 0.25)
+    assert [s.split()[0] for s in late] == ["card", "opening", "fire-1", "fire-2"]   # not portal/love
+    assert late[0] == "card +5.9 s"
+    on_time = [("card", 20.0, 20.1), ("opening", 24.0, 24.0), ("fire-1", 25.0, 25.0),
+               ("fire-2", 26.0, 26.0), ("portal", 33.0, 36.0), ("resume-after", 48.0, 48.0)]
+    assert chapter.timeline_late(on_time, 0.25) == []
+    assert chapter.timeline_late(on_time, None) == []
+    # An app that started 3 s before this script's t0 is 3 s ahead: on-time snaps are late.
+    assert [s.split()[0] for s in chapter.timeline_late(on_time, -3.0)] == ["card", "opening", "fire-1", "fire-2"]
+
+
+def test_script_offset_reads_the_app_clock_from_the_unified_log():
+    from datetime import datetime
+    t0 = datetime(2026, 11, 9, 10, 39, 49, 900000).timestamp()
+    ulog = "\n".join([
+        "2026-11-09 10:36:05.637 Df wf_game[2802:55f3] wf_game: touch script: 6 entries, 31.6 s",
+        "2026-11-09 10:39:50.151 wf_game[3079:28102] wf_game: touch script: 5 entries, 36.0 s",
+        "2026-11-09 10:39:50.152 Df wf_game[3079:7d18] wf_game: touch script: 5 entries, 36.0 s",
+        "2026-11-09 10:40:12.159 wf_game[3079:28102] wf_game: touch buttons 0x0001",
+    ])
+    assert chapter.script_offset(ulog, t0) == 0.25
+    assert chapter.script_offset("no script line", t0) is None
+
+
+def test_device_ok_fails_a_late_timeline():
+    good = {"install": True, "launch": True, "alive_20s": True, "alive_end": True, "wf_args": 8,
+            "room_render": True, "zforth_errors": [], "texture_slot_error": False,
+            "fps_check": True, "fire_blob_pixels": 60, "timeline_late": []}
+    assert chapter.device_ok(good)
+    assert not chapter.device_ok(good | {"timeline_late": ["opening +23.1 s"]})
