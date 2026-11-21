@@ -83,4 +83,36 @@ No visible surface: the menu draws exactly as before; only which key presses rea
 
 ### Results
 
-(recorded after the run)
+Recorded 2026‑11‑21 on branch `menu-key-latch`, after commit `d6092449`.
+
+1. `task test-menu-key-latch`
+
+    ```
+    task: [test-menu-key-latch] docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O1 -Wall -Wextra -Werror -pthread -I/src/android/screensaver/src/main/cpp /src/tests/menu_key_latch_test.cpp -o /tmp/menu_key_latch && /tmp/menu_key_latch'
+
+    menu_key_latch: 18 checks passed
+    ```
+
+    **PASS**
+
+2. `scripts/in-linux-container.sh python3 -m pytest tests/test_one_aquarium_app.py -q`
+
+    ```
+    ......s                                                                  [100%]
+    6 passed, 1 skipped in 0.06s
+    ```
+
+    **PASS** (the skip is `test_the_apk_carries_both_bundles`, which needs the APK). `tests/test_dream_host_vram.py`, which also reads `dream_host.cc`: `3 passed in 0.03s`.
+
+3. `df -h /`
+
+    ```
+    Filesystem      Size  Used Avail Use% Mounted on
+    /dev/nvme0n1p2  469G  439G  5.8G  99% /
+    ```
+
+    **NOT RUN.** A full checkout of this branch takes 4.7&nbsp;GB (measured: the first `git worktree add` left 314&nbsp;MB free, so it was removed at once and this work was done in a sparse checkout). A tree that can run `task build-aquarium-screensaver-apk` would leave about 1.1&nbsp;GB before any build output, under the 4&nbsp;GB floor set for this build, with the coordinator's database on the same volume. The build waits for free space, or for a build from an existing full tree.
+
+4. APK copy, size and sha256: **NOT RUN** (no build; see step 3).
+
+5. On cast1: **PENDING (Will)**, after the APK is built and installed.
