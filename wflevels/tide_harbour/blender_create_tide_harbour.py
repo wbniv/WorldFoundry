@@ -37,6 +37,7 @@ import timeline as tl  # noqa: E402
 TAG = '[tide-harbour]'
 OAS = REPO / 'wfsource/source/oas'
 REFERENCE = tl.parse_when('2026-11-21T12:00:00')     # the pose the level is built in: noon, so the authored colours are the day's
+STOP_SIZE, STOP_GAP = 0.016, 0.006      # the full stop after ม and กม: a square on the baseline, in metres
 THAI_FONT = Path('/usr/lib/blender/datafiles/fonts/NotoSansThai-VariableFont_wdth,wght.woff2')
 THAI = ['๑๒', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙', '๑๐', '๑๑']     # 12 at the top, then clockwise
 ROMAN = ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI']
@@ -175,7 +176,7 @@ def panel_glyphs(meshes, font):
     """The river panel's glyphs, added to the meshes panel_parts draws: the Thai digits on the drums, the unit label and
     the minute units' zero in the band's mask, the column's numerals, the scale bar's label and the map's place names.
     Every glyph is a flat outline facing -y, centred (or aligned) on its place in the part's own coordinates."""
-    texts = list(THAI_DIGITS) + ['ม.', 'กรุงเทพฯ', 'ปากน้ำ', 'อ่าวไทย', 'กม.']
+    texts = list(THAI_DIGITS) + ['ม', 'กรุงเทพฯ', 'ปากน้ำ', 'อ่าวไทย', 'กม']
     shapes = dict(zip(texts, outlines('pg', texts, font)))
     em = pn.GLYPH_H / max(max(v[1] for v in shapes[d][0]) - min(v[1] for v in shapes[d][0]) for d in THAI_DIGITS)     # metres per font unit
     added = []
@@ -196,13 +197,20 @@ def panel_glyphs(meshes, font):
             mesh.faces.append(tuple(base + i for i in f))
             mesh.colors.append(color)
         added.append((mesh.name, text))
+        return max(x for x, _z in flat), z + (min(v[1] for v in verts) - my) * k          # the glyph's right edge and its baseline
+
+    def stop(mesh, x_right, z_base, color='p_text'):
+        """A full stop after a glyph: Noto Sans Thai has none (it would come out as the font's missing-glyph box), so it is a
+        small square on the baseline, as the decimal point is."""
+        pp._quad(mesh, x_right + STOP_GAP, z_base, x_right + STOP_GAP + STOP_SIZE, z_base + STOP_SIZE, color)
 
     for row in (0, 1):
         for name, count in DRUM_DIGITS.items():
             for k in range(count):
                 put(meshes[f'panel_drum_{row}_{name}'], THAI_DIGITS[k], 0.0, 0.0, max_width=pn.WIN_W * 0.9, slot=k)
         v = pn.row_v(row)
-        put(meshes['panel_band_mask'], 'ม.', pn.row_u('unit'), v, 0.55, max_width=0.095)
+        xr, zb = put(meshes['panel_band_mask'], 'ม', pn.row_u('unit') - (STOP_GAP + STOP_SIZE) / 2, v, 0.55, max_width=0.095 - STOP_GAP - STOP_SIZE)
+        stop(meshes['panel_band_mask'], xr, zb)
         put(meshes['panel_band_mask'], THAI_DIGITS[0], pn.row_u('m1'), v, max_width=pn.WIN_W * 0.9)
     body = meshes['panel_col_body']
     for metres in (1, 2, 3):
@@ -210,7 +218,8 @@ def panel_glyphs(meshes, font):
     mid = pn.SCALE_X1 - pn.SCALE_KM * pn.M_PER_KM / 2.0                           # the scale bar's label, centred above it
     half = pn.SCALE_KM * pn.M_PER_KM / 2.0 - 0.004                                   # each half of the label stays within its half of the bar
     put(body, THAI_DIGITS[int(pn.SCALE_KM)], mid - 0.004, pn.SCALE_V + 0.06, 0.32, 'r', 'p_ink', max_width=half * 0.6)
-    put(body, 'กม.', mid + 0.004, pn.SCALE_V + 0.06, 0.32, 'l', 'p_ink', max_width=half)
+    xr, zb = put(body, 'กม', mid + 0.004, pn.SCALE_V + 0.06, 0.32, 'l', 'p_ink', max_width=half - STOP_GAP - STOP_SIZE)
+    stop(body, xr, zb, 'p_ink')
     river = meshes['panel_map']
     doc = json.loads(pp.CENTRELINE.read_text())
     hx, hz = pp.map_xy(doc['station_HD']['lon'], doc['station_HD']['lat'])
