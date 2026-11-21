@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Tide Harbour: the river map</title><meta name="viewport" content="width=1440"><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Tide Harbour: the river panel</title><meta name="viewport" content="width=1440"><style>
 *{box-sizing:border-box}
 html,body{margin:0;background:#0b0c10;color:#d9dce3;font:15px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 body{width:1440px;height:900px;position:relative;overflow:hidden}
@@ -11,7 +11,7 @@ button{font:inherit;color:#e8eaf0;background:#1c1f27;border:1px solid #3a3f4c;bo
 button:hover{background:#262a35}button.on{background:#34405c;border-color:#6d86c9}
 label{color:#c3c8d3;user-select:none}
 input[type=range]{accent-color:#e0704f}
-</style></head><body><h1 style="left:14px;top:12px">Tide Harbour: an inset map of the river <span style="font-weight:400;color:#aeb4c0;font-size:14px">&nbsp; proposal, not built</span></h1><div class="tv" style="left:14px;top:46px;width:868px;height:494px"><svg id="scene" viewBox="0 0 1120 630"></svg></div><div class="cap" style="left:900px;top:46px"><b>The map, close up</b></div><div style="position:absolute;left:900px;top:70px;width:324px;height:540px"><svg id="close" viewBox="0 0 240 400" width="324" height="540"></svg></div><div class="cap" style="left:1240px;top:70px;width:190px;font-size:12.5px;line-height:1.45"><b>The river is real:</b> its course from the sea to the city, drawn from OpenStreetMap.<br><br><b>The tower</b> marks this harbour: the Navy's Bangkok station, <b>50&nbsp;km up the river</b> from its mouth (measured along that line).<br><br><b>The column</b> is the tide here and now, in metres, with the rising or falling arrow. The same model moves the water.<br><br><b>The staff at the bottom</b> is Bangkok Bar, where the Navy publishes a second table.<br><br><b>Not shown as fact:</b> how long high water takes to travel from the bar to the city. Fitting the bar's table with the same tool would measure it; until then the travelling band is a sketch, off by default.<br><br><b>Actors</b> (proposed, untested): one painted board, a lamp at the tower, the pointer and the arrow.</div><div style="position:absolute;left:14px;top:554px;width:868px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button id="b-now">Now</button><button id="b-high">High</button><button id="b-low">Low</button><button id="b-night">Night</button><span style="width:8px"></span><button id="b-corner" class="on">Corner</button><button id="b-board">On the pier</button><label style="margin-left:8px"><input type="checkbox" id="c-thai" checked> Thai</label><label style="margin-left:8px"><input type="checkbox" id="c-crest"> travelling high water (sketch)</label></div><div style="position:absolute;left:14px;top:596px;width:868px;display:flex;gap:12px;align-items:center"><span style="color:#8d94a3;font-size:13px">hour</span><input type="range" id="scrub" min="0" max="24" step="0.01" style="flex:1"><span id="readout" style="font:600 14px ui-monospace,Menlo,monospace;color:#eef0f4;width:330px;text-align:right;white-space:nowrap"></span></div><div class="cap" style="left:14px;top:630px"><b>States</b> (the same day)</div><div id="states" style="position:absolute;left:14px;top:654px;width:560px;display:flex;gap:16px"></div><div class="cap" style="left:590px;top:654px;width:292px;font-size:12.5px;line-height:1.45"><b>Where it goes.</b> A map fixed to a corner never moves, and this clock's rule against burn-in (D10) is that nothing sits still. So either the inset drifts with the camera, or the same map is a <b>chart board standing on the pier</b>, inside the world. Both are here: <b>Corner</b> and <b>On the pier</b>.<br><br><b>Credit.</b> A map made from OpenStreetMap must say so wherever it is shown: &copy;&nbsp;OpenStreetMap contributors. In the app that is a line in the credits.</div><div class="cap" style="left:900px;top:650px;width:526px;font-size:12.5px;line-height:1.45"><b>Sources.</b> River: &copy; OpenStreetMap contributors (ODbL), 74 points, <code>chao-phraya-centreline.json</code>. Station position: the department's table (13&deg;&nbsp;44&prime;&nbsp;36&Prime;&nbsp;N, 100&deg;&nbsp;29&prime;&nbsp;25&Prime;&nbsp;E). Bangkok Bar: PSMSL station 287 (13.45&deg;&nbsp;N, 100.6&deg;&nbsp;E). The coast is not drawn: only the river was fetched.</div><script>
+</style></head><body><h1 style="left:14px;top:12px">Tide Harbour: the river panel, full height at one side <span style="font-weight:400;color:#aeb4c0;font-size:14px">&nbsp; proposal, not built</span></h1><div class="tv" style="left:14px;top:46px;width:868px;height:494px"><svg id="scene" viewBox="0 0 1120 630"></svg></div><div class="cap" style="left:900px;top:46px"><b>The panel, close up</b></div><div style="position:absolute;left:900px;top:70px;width:262px;height:550px"><svg id="close" viewBox="0 0 300 630" width="262" height="550"></svg></div><div class="cap" style="left:1178px;top:70px;width:252px;font-size:12.5px;line-height:1.42"><b>At the top:</b> the next high water and the next low water, with time and height, and the rising or falling arrow (the <a href="tide-board.html" style="color:#9ec1ff">tide board</a>).<br><br><b>The river is real:</b> its course from the sea to the city, drawn from OpenStreetMap.<br><br><b>The tower</b> marks this harbour: the Navy's Bangkok station, <b>50&nbsp;km up the river</b> from its mouth (measured along that line).<br><br><b>The column</b> is the tide here and now, in metres, with the rising or falling arrow. The same model moves the water.<br><br><b>The staff at the bottom</b> is Bangkok Bar, where the Navy publishes a second table.<br><br><b>Not shown as fact:</b> how long high water takes to travel from the bar to the city. Fitting the bar's table with the same tool would measure it; until then the travelling band is a sketch, off by default.<br><br><b>Untested:</b> whether the engine draws a panel fixed to the screen. If not, it is a slab the camera carries.</div><div style="position:absolute;left:14px;top:554px;width:868px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button id="b-now">Now</button><button id="b-high">High</button><button id="b-low">Low</button><button id="b-night">Night</button><span style="width:8px"></span><button id="b-right" class="on">Right side</button><button id="b-left">Left side</button><label style="margin-left:8px"><input type="checkbox" id="c-thai" checked> Thai</label><label style="margin-left:8px"><input type="checkbox" id="c-crest"> travelling high water (sketch)</label></div><div style="position:absolute;left:14px;top:596px;width:868px;display:flex;gap:12px;align-items:center"><span style="color:#8d94a3;font-size:13px">hour</span><input type="range" id="scrub" min="0" max="24" step="0.01" style="flex:1"><span id="readout" style="font:600 14px ui-monospace,Menlo,monospace;color:#eef0f4;width:330px;text-align:right;white-space:nowrap"></span></div><div class="cap" style="left:14px;top:630px"><b>States</b> (the same day)</div><div id="states" style="position:absolute;left:14px;top:654px;width:560px;display:flex;gap:16px"></div><div class="cap" style="left:590px;top:654px;width:292px;font-size:12.5px;line-height:1.45"><b>Where it goes.</b> A full-height panel at one side, 27% of the width (Will, 2026&#8209;11&#8209;21). The harbour is framed in the rest, so the camera pulls back to keep the house and the tower in view (drawn here at 82%). Left or right is still open: both are here. <b>One thing to settle:</b> a panel that never moves is against this clock's burn-in rule (D10, nothing sits still). The fix proposed is small: the panel drifts a few pixels with the camera.<br><br><b>Credit.</b> Wherever the map is shown: &copy;&nbsp;OpenStreetMap contributors, a line in the app's credits.</div><div class="cap" style="left:900px;top:650px;width:526px;font-size:12.5px;line-height:1.45"><b>Sources.</b> River: &copy; OpenStreetMap contributors (ODbL), 74 points, <code>chao-phraya-centreline.json</code>. Station position: the department's table (13&deg;&nbsp;44&prime;&nbsp;36&Prime;&nbsp;N, 100&deg;&nbsp;29&prime;&nbsp;25&Prime;&nbsp;E). Bangkok Bar: PSMSL station 287 (13.45&deg;&nbsp;N, 100.6&deg;&nbsp;E). The coast is not drawn: only the river was fetched.</div><script>
 const TAU = Math.PI * 2;
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const lerp = (a, b, u) => a + (b - a) * u;
@@ -171,6 +171,29 @@ function reading(t) {
   return { now: tide(t), rising: kept.length ? kept[0].high : tide(t + .05) > tide(t), hi, lo, kept, skipped };
 }
 
+// The board: dark is 0 by day and 1 at night, when its lantern lights it.
+const FONT = `'IBM Plex Sans Thai','Noto Sans Thai','Sarabun',system-ui,sans-serif`;
+function board(r, dark, bare) {      // bare: no frame, the wood runs to the edges (the river panel)
+  const wood = mix('#3b2716', '#7d5a33', 1 - dark * .7), edge = mix('#170f08', '#3d2915', 1 - dark * .6), ink = '#f8efd6';
+  let g = bare ? `<rect width="400" height="200" fill="${wood}"/>` : `<rect width="400" height="200" rx="10" fill="${edge}"/><rect x="6" y="6" width="388" height="188" rx="7" fill="${wood}"/>`;
+  if (dark > .05) g += bare ? `<rect width="400" height="200" fill="#ffb347" opacity="${(.2 * dark).toFixed(2)}"/>` : `<rect x="6" y="6" width="388" height="188" rx="7" fill="#ffb347" opacity="${(.2 * dark).toFixed(2)}"/>`;
+  g += `<line x1="16" y1="100" x2="322" y2="100" stroke="${edge}" stroke-width="3"/>`;
+  const row = (y, high, e) => {
+    // the mark: a water line with a triangle above it (high water) or below it (low water)
+    const mark = high ? `<line x1="18" y1="${y + 16}" x2="62" y2="${y + 16}" stroke="${ink}" stroke-width="5"/><polygon points="40,${y - 24} 58,${y + 4} 22,${y + 4}" fill="${ink}"/>`
+                      : `<line x1="18" y1="${y - 16}" x2="62" y2="${y - 16}" stroke="${ink}" stroke-width="5"/><polygon points="40,${y + 24} 58,${y - 4} 22,${y - 4}" fill="${ink}"/>`;
+    const txt = e ? `<text x="76" y="${y + 17}" font-size="47" font-weight="700" fill="${ink}" font-family="${FONT}">${fmtTime(e.t)}</text>` +
+                    `<text x="318" y="${y + 14}" font-size="34" font-weight="600" fill="${ink}" font-family="${FONT}" text-anchor="end">${fmtH(e.h)}</text>`
+                  : `<text x="76" y="${y + 17}" font-size="47" fill="${ink}" font-family="${FONT}">--:--</text>`;
+    return mark + txt;
+  };
+  g += row(53, true, r.hi) + row(147, false, r.lo);
+  // the arrow: one actor, turned up (rising) or down (falling)
+  const col = r.rising ? '#9be28f' : '#ff9466';
+  g += `<g transform="translate(359,100) rotate(${r.rising ? 0 : 180})"><polygon points="0,-62 26,-18 10,-18 10,58 -10,58 -10,-18 -26,-18" fill="${col}"/></g>`;
+  return g;
+}
+
 
 const RIVER = [[100.59455,13.54216],[100.58151,13.55205],[100.57802,13.55689],[100.57636,13.56211],[100.5767,13.56841],[100.57785,13.5723],[100.59054,13.59052],[100.59249,13.59751],[100.59151,13.60536],[100.58921,13.60845],[100.58582,13.61002],[100.56531,13.61136],[100.55905,13.61382],[100.55127,13.61856],[100.54549,13.62395],[100.54018,13.63043],[100.53547,13.64045],[100.53394,13.64986],[100.53514,13.65585],[100.53733,13.65937],[100.53928,13.66059],[100.54377,13.66059],[100.55469,13.65626],[100.55894,13.65571],[100.56492,13.65692],[100.57047,13.66039],[100.57934,13.6692],[100.58733,13.67975],[100.58913,13.68419],[100.58924,13.68687],[100.58855,13.69004],[100.58609,13.69422],[100.58018,13.69911],[100.56787,13.70417],[100.55993,13.7064],[100.55495,13.7056],[100.55283,13.70388],[100.55147,13.70063],[100.55254,13.68624],[100.55064,13.67716],[100.54669,13.67167],[100.54248,13.66963],[100.53915,13.66909],[100.53516,13.66971],[100.53107,13.67161],[100.51439,13.68429],[100.49832,13.68737],[100.49205,13.69105],[100.49055,13.69328],[100.48988,13.69662],[100.49221,13.70092],[100.50391,13.70821],[100.51013,13.71505],[100.51208,13.71934],[100.51276,13.72577],[100.51197,13.73061],[100.50922,13.73545],[100.50608,13.73705],[100.49476,13.74018],[100.49091,13.74356],[100.48788,13.74956],[100.48798,13.75712],[100.48996,13.76095],[100.4972,13.76903],[100.50529,13.78579],[100.5143,13.79586],[100.51679,13.80109],[100.51759,13.80719],[100.51662,13.81139],[100.51441,13.81372],[100.50562,13.81674],[100.50287,13.81858],[100.49879,13.82731],[100.49092,13.83964]];                     // [[lon, lat], ...], mouth first
 const HD = [100.49028, 13.74333], BB = [100.6, 13.45];              // [lon, lat]
@@ -183,15 +206,15 @@ const KM = [0]; for (let i = 1; i < RIVER.length; i++) KM.push(KM[i - 1] + Math.
 function along(km) { for (let i = 1; i < RIVER.length; i++) if (KM[i] >= km) { const u = (km - KM[i - 1]) / (KM[i] - KM[i - 1]); return [lerp(RIVER[i - 1][0], RIVER[i][0], u), lerp(RIVER[i - 1][1], RIVER[i][1], u)]; } return RIVER[RIVER.length - 1]; }
 const LABEL = { city: ['กรุงเทพฯ', 'Bangkok'], mouth: ['ปากน้ำ', 'Pak Nam'], gulf: ['อ่าวไทย', 'Gulf of Thailand'], km: ['กม.', 'km'], sea: ['จากทะเล', 'from the sea'] };
 const L = k => LABEL[k][thai ? 0 : 1];
-const FONT = `'IBM Plex Sans Thai','Noto Sans Thai','Sarabun',system-ui,sans-serif`;
 const CREST_H = 2;   // ILLUSTRATIVE: hours assumed for high water to travel from the mouth to the city. Not measured.
 let crest = false;
 
-function riverMap(r, dark, phase) {
-  const paper = mix('#8f8262', '#eadfc2', 1 - dark * .8), ink = mix('#1d150c', '#3a2a18', 1 - dark), frame = mix('#170f08', '#3d2915', 1 - dark * .6);
+const paperOf = dark => mix('#8f8262', '#eadfc2', 1 - dark * .8);
+function riverMap(r, dark, phase, bare) {      // bare: no frame and no paper of its own (the panel supplies the paper)
+  const paper = paperOf(dark), ink = mix('#1d150c', '#3a2a18', 1 - dark), frame = mix('#170f08', '#3d2915', 1 - dark * .6);
   const water = mix('#2c5f86', '#3f86b8', 1 - dark * .5);
-  let g = `<rect width="240" height="400" rx="8" fill="${frame}"/><rect x="5" y="5" width="230" height="390" rx="5" fill="${paper}"/>`;
-  if (dark > .05) g += `<rect x="5" y="5" width="230" height="390" rx="5" fill="#ffb347" opacity="${(.16 * dark).toFixed(2)}"/>`;
+  let g = bare ? '' : `<rect width="240" height="400" rx="8" fill="${frame}"/><rect x="5" y="5" width="230" height="390" rx="5" fill="${paper}"/>`;
+  if (dark > .05 && !bare) g += `<rect x="5" y="5" width="230" height="390" rx="5" fill="#ffb347" opacity="${(.16 * dark).toFixed(2)}"/>`;
   const d = SHOWN.map((p, i) => (i ? 'L' : 'M') + MX(p[0]).toFixed(1) + ' ' + MY(p[1]).toFixed(1)).join('');
   g += `<path d="${d}" fill="none" stroke="${water}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>`;
   // the open sea below the mouth: only a label and three ripples, because the coast was not fetched
@@ -224,20 +247,30 @@ function riverMap(r, dark, phase) {
   return g;
 }
 
-let place = 'corner', hour = 16.5, t0 = performance.now();
-function overlay(t, r, phase) {
-  const dark = clamp(sky(t).glow);
-  if (place === 'corner') return `<g transform="translate(16,16) scale(.62)">${riverMap(r, dark * .5, phase)}</g>`;
-  const post = mix('#1a110a', '#5a3d22', 1 - dark * .6);
-  return rect(366, 366, 6, 16, post) + rect(440, 366, 6, 16, post) + `<g transform="translate(356,202) scale(.41)">${riverMap(r, dark, phase)}</g>` +
-    `<circle cx="405" cy="197" r="5" fill="#ffb347" opacity="${(.3 + .7 * dark).toFixed(2)}"/>`;
+// The panel: 300 x 630, the full height of the 1120 x 630 screen. The tide board's readings above, the river below.
+// No border (Will, 2026-11-21: "it needs no border"): the wood band and the paper run to the panel's edges.
+function panel(r, dark, phase) {
+  return `<rect width="300" height="630" fill="${paperOf(dark)}"/>` +
+    (dark > .05 ? `<rect width="300" height="630" fill="#ffb347" opacity="${(.16 * dark).toFixed(2)}"/>` : '') +
+    `<g transform="scale(.75)">${board(r, dark, true)}</g>` +
+    `<g transform="translate(6,150) scale(1.2)">${riverMap(r, dark, phase, true)}</g>`;
+}
+let place = 'right', hour = 16.5, t0 = performance.now();
+// The harbour is framed in the other 820 pixels. The house, the pier and the tower span more than that, so the
+// camera pulls back: the scene is drawn at 82%, with more sky above it. The engine's framing is its own to choose.
+function frame(scene, t, r, phase) {
+  const dark = clamp(sky(t).glow), left = place === 'left', x0 = left ? 300 : 0, px = left ? 0 : 820;
+  return `<defs><clipPath id="view"><rect x="${x0}" y="0" width="820" height="630"/></clipPath></defs>` +
+    `<rect x="${x0}" y="0" width="820" height="630" fill="${sky(t).top}"/>` +
+    `<g clip-path="url(#view)"><g transform="translate(${x0 - 49},113) scale(.82)">${scene}</g></g>` +
+    `<g transform="translate(${px},0)">${panel(r, dark, phase)}</g>`;
 }
 const read = t => ({ ...reading(t), t });
 const DATE = () => new Date(Date.UTC(2026, 0, 1) + TIDE_DAY * 86400e3).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 function draw() {
   const r = read(hour), phase = (performance.now() - t0) / 1000;
-  $('scene').innerHTML = renderScene(hour, phase, {}).svg + overlay(hour, r, phase);
-  $('close').innerHTML = riverMap(r, clamp(sky(hour).glow), phase);
+  $('scene').innerHTML = frame(renderScene(hour, phase, {}).svg, hour, r, phase);
+  $('close').innerHTML = panel(r, clamp(sky(hour).glow), phase);
   $('readout').textContent = DATE() + ' ' + hhmm(hour) + ' · ' + r.now.toFixed(2) + ' m, ' + (r.rising ? 'rising' : 'falling');
   if (document.activeElement !== $('scrub')) $('scrub').value = hour;
 }
@@ -246,7 +279,7 @@ let P = null;
 function states() {
   P = pick(); const keep = crest;
   const list = [['High water', P.high % 24, false], ['Low water', P.low % 24, false], ['Night', P.night, false], ['On its way (sketch)', (P.high - 1) % 24, true]];
-  $('states').innerHTML = list.map(([name, h, c]) => { crest = c; const s = `<div style="width:120px"><svg viewBox="0 0 240 400" width="120" height="200">${riverMap(read(h), clamp(sky(h).glow), 0)}</svg>` +
+  $('states').innerHTML = list.map(([name, h, c]) => { crest = c; const s = `<div style="width:120px"><svg viewBox="0 0 300 630" width="100" height="210">${panel(read(h), clamp(sky(h).glow), 0)}</svg>` +
     `<div style="color:#aeb4c0;font-size:12px;margin-top:2px;line-height:1.3">${name} <span style="color:#8d94a3">(${hhmm(h)})</span></div></div>`; return s; }).join('');
   crest = keep;
 }
@@ -256,16 +289,16 @@ $('b-now').onclick = () => { const d = new Date(Date.now() + 7 * 3600e3); TIDE_D
 $('b-high').onclick = () => set(P.high);
 $('b-low').onclick = () => set(P.low);
 $('b-night').onclick = () => set(P.night);
-const where = p => { place = p; $('b-corner').className = p === 'corner' ? 'on' : ''; $('b-board').className = p === 'board' ? 'on' : ''; draw(); };
-$('b-corner').onclick = () => where('corner');
-$('b-board').onclick = () => where('board');
+const where = p => { place = p; $('b-right').className = p === 'right' ? 'on' : ''; $('b-left').className = p === 'left' ? 'on' : ''; draw(); };
+$('b-right').onclick = () => where('right');
+$('b-left').onclick = () => where('left');
 $('c-thai').onchange = e => { thai = e.target.checked; all(); };
 $('c-crest').onchange = e => { crest = e.target.checked; draw(); };
 $('scrub').oninput = e => set(parseFloat(e.target.value));
 const hd = /d=(\d+)/.exec(location.hash), hh = /h=(\d+(?:\.\d+)?)/.exec(location.hash);
 if (hd) TIDE_DAY = parseInt(hd[1], 10);
 if (hh) hour = parseFloat(hh[1]); else { const d = new Date(Date.now() + 7 * 3600e3); hour = d.getUTCHours() + d.getUTCMinutes() / 60; }
-if (/place=board/.test(location.hash)) place = 'board';
+if (/place=left/.test(location.hash)) place = 'left';
 all(); where(place);
 (function loop() { if (document.activeElement !== $('scrub')) draw(); setTimeout(() => requestAnimationFrame(loop), 120); })();
 document.documentElement.dataset.ready = '1';
