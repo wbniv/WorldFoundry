@@ -1,6 +1,6 @@
 # Tide Harbour: the second 3D clock, and the clocks bundle that holds it
 
-**Status: plan for review, 2026‑11‑21.** The level and the bundle are not built. Done so far: the one engine addition, E1 (a date mailbox), is approved and built ([Phase 1 record](#phase-1-record-e1-built)); the Bangkok tide is fitted to the Navy's published predictions and validated on an unseen year ([Phase 0 record](#phase-0-record-the-tide), [research document](../reference/chao-phraya-tide-research.md)). Next: the A3 poster ([D11](#decisions), Phase P), which needs only that research, and the Phase 0 spikes on cast1, which need your answers to [the questions below](#questions-for-will). **Runtime control of lights is deliberately not part of this plan** (Will, 2026‑11‑21: "more likely the task is to add control of lights from runtime. today, put it on TODO, and don't use as part of the screensaver implementation for now"); it is its own TODO item.
+**Status: plan for review, 2026‑11‑21.** The level and the bundle are not built. Done so far: the one engine addition, E1 (a date mailbox), is approved and built ([Phase 1 record](#phase-1-record-e1-built)); the Bangkok tide is fitted to the Navy's published predictions and validated on an unseen year ([Phase 0 record](#phase-0-record-the-tide), [research document](../reference/chao-phraya-tide-research.md)). **Approved: D1 to D12 and the answers to Q1 to Q8 at my recommendations, except Q2, which Will answered Thai: the dial uses Thai numerals** (Will, 2026‑11‑21: "accept all except answer to q2 is thai"). Next: the A3 poster (Phase P), and the Phase 0 spikes on cast1. **Runtime control of lights is deliberately not part of this plan** (Will, 2026‑11‑21: "more likely the task is to add control of lights from runtime. today, put it on TODO, and don't use as part of the screensaver implementation for now"); it is its own TODO item.
 
 ## Context
 
@@ -46,29 +46,28 @@ Recommendations are in the third column. Nothing is decided until Will answers.
 | D5 | How the day turns to night | **No engine change.** A tall gradient mesh for the sky that slides past the camera; glow actors for lamps and windows, moved in front of the dark glass at dusk; and the water, boats and buildings drawn in a few keyed looks (day, dusk, night) cross-faded by moving the lit set forward. Phase 0 shows how well this holds and records the gaps | Runtime light control (a script-writable light colour): would dim everything with one write, but it is an engine feature in its own right and is **deferred to a TODO item, not used here**. Bake one fixed sunset: cheap, but then the look says nothing about the time |
 | D6 | The tide itself | **Settled by the research: fitted harmonic constants for Bangkok**, summed in Forth from the date. 64 constituents, median error 4 to 5 cm on an unseen year ([tide_constants.json](../../wflevels/tide_harbour/tide_constants.json)). The department publishes a new table each year, so `task tide-refit` repeats the fit (the years and the file addresses in `tide_fit/` are edited by hand first); the scene needs no nodal correction for the next year (3.7 cm against 3.3 cm) | A synthetic curve (no longer needed); a third-party table (the department's own tables are public and primary) |
 | D7 | Frame-rate gate | **At least 30 FPS** on cast1, Release, median over 120 s, the same gate Minute Machine used. Actor budget **150 rigid actors**, measured in Phase 0 on boxes first | A higher gate: the water bars are the likely cost, so measure first |
-| D8 | The dial | **Roman numerals**, as in the concept art: legible from across a room. Thai numerals ๑–๑๒ are a later variant | Thai numerals now: more local, harder to read at a glance |
+| D8 | The dial | **Thai numerals ๑ to ๑๒** (Will's answer to Q2), as a Bangkok tower would carry. The cost is legibility across a room, so the digits are drawn large and heavy, and the tower's dial is checked at TV distance in Phase 2. The [harbour mockup](2026-11-21-tide-harbour-clock/harbour.html) shows the problem at its scale: all twelve are small. Two remedies, in order: draw the dial about 1.5 times larger than in the concept art, or carry digits only at ๑๒, ๓, ๖ and ๙ with plain ticks between; if both fail, the concept art's Roman numerals are the fallback | Roman numerals, as in the concept art: more legible, less local |
 | D9 | Art style | **Low-poly, flat colour, a few small textures** (roof tile, wood, dial face), built in Blender in the container. Reads as the concept art at a distance and fits the VRAM page | Painterly textures like the concept art: much heavier on the 2048 × 2048 page |
 | D10 | Burn-in | **The camera drifts slowly all the time**, as Minute Machine's does; the water, sky and clouds always move, so no pixel sits still | A static camera: the tower dial would burn in |
 | D11 | An A3 poster about the tides and the calculation | **Yes, portrait A3 (297 × 420 mm), on the repository's poster pipeline** ([seahorse poster](../reference/seahorse-biomechanics-poster/README.md)): the [research document](../reference/chao-phraya-tide-research.md) first, then `make_poster.py` and `export_poster.py` (PDF, 300 DPI PNG, `layout-review.json`) and a pytest guard. Every claim wears a chip (**verified**, **other source**, **ours (measured)**); the build refuses an unconfirmed claim. See [the poster](#the-poster) | A figure in the plan only: no printable object, and the research would stay buried here |
 | D12 | Sun and moon | **No tables, and no claim about the moon.** The sun's rise and set come from a closed-form formula (the sun's declination and the equation of time, for Bangkok's latitude and longitude and the date), a few lines of Forth using the new trig words, and checked in Phase 2 against five published sunrise and sunset times. The moon is only a disc on an arc: its phase and position are **not** claimed, in the scene or on the poster. Will asked (2026‑11‑21): "should we??" about researching sunrise, sunset and moon tables; the answer was no | Tables for every date (a lot of data for a look nobody can check); a fixed 06:00 and 18:00 (seasonal drift is a few tens of minutes, which would pass, but the formula is as cheap and is right); the real moon (phase and position are a project of their own, and the plan's moon-phase stretch is already out of scope) |
 
-## Questions for Will
+## Questions for Will: answered
 
-Nothing is decided until Will answers. **No engine permission is pending:** E1 is approved and built, and light control is deferred. Everything below is a choice, with my recommendation first. "Accept all" is a complete answer.
+**Answered 2026‑11‑21** (Will, 2026‑11‑21: "accept all except answer to q2 is thai"). Every recommendation was accepted except Q2. No engine permission is pending: E1 is approved and built, and light control is deferred.
 
-| # | Question | Recommendation | What it blocks |
-|---|---|---|---|
-| Q1 | **Accept D1 to D12 as written?** Or name the ones to change. | Accept all. | Phase 0 spikes, then everything |
-| Q2 | **Dial numerals** (D8): Roman, as in the concept art, or Thai numerals ๑ to ๑๒ for a Bangkok scene? | Roman: legible across a room. Thai numerals as a later variant. | The tower dial's texture, Phase 2 |
-| Q3 | **Art style** (D9): low-poly flat colour with a few small textures, or painterly textures like the concept art? | Low-poly: reads as the concept art at a distance and fits the 2048 × 2048 texture page. The painterly version is much heavier. | The Blender build, Phase 2 |
-| Q4 | **Retire the Minute Machine app** (D2): remove the `minutemachine` flavor and uninstall its package from cast1, now that the `clocks` app holds it as level 0? | Yes, in the same change. | Phase 3 |
-| Q5 | **Poster language** (D11): English only, or also a Thai edition? | English only for now; a Thai edition is its own piece of work. | The poster's text |
-| Q6 | **How big is the tide on screen?** The real range is about 2.8 m between extremes of the year, and a typical day swings about 1.65 m. Show it true to scale against the pier and the gauge board, or exaggerate it so it is easy to see from a sofa? | True to scale: the gauge board then reads real numbers, and a 1.65 m swing is already visible. | The water, boats and ropes, Phase 2 |
-| Q7 | **A TV outside Thailand.** Show a Thai day at the viewer's own clock time (self-consistent, but not the real tide in Bangkok at that instant), or the real tide in Bangkok now with a dial that may disagree with the sky? | The first: device time everywhere, as if Thai. You are in Bangkok, so it makes no difference today. | Phase 2 |
-| Q8 | **Attribution for the tide.** The constants are our fit to the Navy's published predictions; no terms of use were found on its pages, and the poster credits the department. Is that enough, or should the department be asked? | Enough, with credit. | Printing the poster |
+| # | Question | Answer |
+|---|---|---|
+| Q1 | Accept D1 to D12 as written? | ~~Accept all.~~ **Accepted**, with D8 changed by Q2. |
+| Q2 | Dial numerals (D8)? | **Thai numerals ๑ to ๑๒** (not the recommended Roman). |
+| Q3 | Art style (D9)? | ~~Low-poly flat colour with a few small textures.~~ **Accepted.** |
+| Q4 | Retire the Minute Machine app and uninstall its package from cast1? | ~~Yes, in the same change.~~ **Accepted.** |
+| Q5 | Poster language? | ~~English only for now.~~ **Accepted.** |
+| Q6 | Tide size on screen? | ~~True to scale against the pier and the gauge board.~~ **Accepted.** |
+| Q7 | A TV outside Thailand? | ~~Device time everywhere, as if Thai.~~ **Accepted.** |
+| Q8 | Attribution for the tide? | ~~Credit the department; no further step.~~ **Accepted.** |
 
-Optional, not blocking: which of the other 48 ideas comes after Tide Harbour. The engine's level menu scrolls (six rows at a time), so the bundle can hold many.
-
+Optional, not blocking: which of the other 48 ideas comes after Tide Harbour.
 
 ## Approach
 
@@ -109,7 +108,7 @@ The water is a stack of 36 long thin boxes, near to far, slightly overlapping. E
 
 ### The clock tower
 
-The dial is the one thing that tells the time. The hour, minute and second hands are three actors turned by the clock, the second hand sweeping. Under the dial, the arch glows at dusk. The tower is the tallest thing in the frame and is lit even at night, so the dial stays readable ([moments](#moments)).
+The dial is the one thing that tells the time, and carries **Thai numerals ๑ to ๑๒** (D8). The hour, minute and second hands are three actors turned by the clock, the second hand sweeping. Under the dial, the arch glows at dusk. The tower is the tallest thing in the frame and is lit even at night, so the dial stays readable ([moments](#moments)).
 
 ### Moments
 
@@ -205,7 +204,7 @@ stateDiagram-v2
 |---|---|---|---|
 | **0 Spikes and research** | (a) 36 plain bars plus 100 boxes on a placeholder level, on cast1: FPS and banding. (b) The look of the day with no light control: a sliding sky, glow actors and keyed looks, judged on the TV at the six moments. ~~(c) The tide: find the Hydrographic Department's constants for a Chao Phraya station, or record that none are public; check the arithmetic against their table.~~ Done 2026‑11‑21: no public constants, but the department's published highs and lows were fitted and validated; [record below](#phase-0-record-the-tide). ~~(d) Sunrise and sunset by day of year against NOAA~~ Dropped by D12: a formula, checked in Phase 2, in place of research | T4 | Answers D5, D7 and the water risk; the plan is revised with the results |
 | ~~**1 Engine E1**~~ | ~~Mailboxes, override, tests~~ Done 2026‑11‑21; [record below](#phase-1-record-e1-built) | T4 | ~~`task test-wall-clock` passes with a date; Minute Machine unaffected~~ |
-| **2 Tide Harbour level** | `clock_common` hoisted; `wflevels/tide_harbour/` with `timeline.py`, `channels.py`, `parts.py`, Blender build, `-standalone.iff`; director VM test; engine comparison | T3 | Director matches the model in the VM and the engine, as Minute Machine's did |
+| **2 Tide Harbour level** | `clock_common` hoisted; `wflevels/tide_harbour/` with `timeline.py`, `channels.py`, `parts.py`, Blender build (the dial's Thai numerals are drawn from a Thai font inside the Blender container, so Phase 2 first checks that a Thai font is in the image and adds one to the Dockerfile if not), `-standalone.iff`; director VM test; engine comparison | T3 | Director matches the model in the VM and the engine, as Minute Machine's did |
 | **3 Bundle and chooser** | Manifest, pack script, `Clock*` classes, host change, flavor `clocks`, `minutemachine` flavor removed | T3 | Desktop and cast1: no argument shows the menu; a named clock skips it; the Dream never shows it |
 | **4 cast1** | Install, FPS gate, 10-minute Dream run, six moments checked on the TV, tide gauge checked against the model | T3 | D7 gate, and the moments match the mockups |
 | **5 Docs** | `android/screensaver/README.md`, `docs/level-building.md` note, `docs/forth-math-words.md` unaffected | T2 | `task md` renders |
