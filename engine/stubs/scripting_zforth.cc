@@ -1467,6 +1467,13 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
 #else
                 fprintf(stderr, "zforth: neural-forth syscall (200) received but WF_NEURAL_FORTH not compiled in\n");
 #endif
+            } else if (custom == 73) {
+                // sin-rev ( revolutions -- sin ): the real sine of a fraction of a turn, in double
+                // precision, so it is exact where the hand-rolled parabolas in older level scripts
+                // are about 0.16 % off. cos is sin-rev of a quarter turn more.
+                const double turns = (double)zf_pop(ctx);
+                const double frac = turns - std::floor(turns);
+                zf_push(ctx, (zf_cell)std::sin(6.283185307179586 * frac));
             } else {
                 fprintf(stderr, "zforth: unknown sys id %d\n", (int)id);
             }
@@ -1714,6 +1721,7 @@ void Init(MailboxesManager& mgr)
         { "fl-navigate",  "148 sys" },
         { "fl-flydown",   "149 sys" },
         { "hsv>rgb",      "150 sys" },
+        { "sin-rev",      "201 sys" },     // custom 73, see zf_host_sys
     };
     for (const auto& w : kFlWords) {
         char buf[64];

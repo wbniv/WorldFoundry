@@ -108,3 +108,9 @@ wflevels/aquarium-screensaver-cd.iff
 wflevels/planted-screensaver-cd.iff
 # The Planted Tank APK's coordinator settings, generated from settings.oad by build_planted().
 android/screensaver/src/planted/assets/planted-settings.json
+
+# Minute Machine: built by `task minute-machine-level` / `task build-minute-machine-apk`; captures by scripts/check-minute-machine.py
+wflevels/minute_machine.iff
+wflevels/minute_machine-standalone.iff
+wflevels/minutemachine-screensaver-cd.iff
+tests/mm-captures/

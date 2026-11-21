@@ -74,6 +74,7 @@ BUCKET_X, BUCKET_TOP, BUCKET_H = 890.0, 330.0, 56.0
 BUCKET_SINK = 46.0
 SPRING_TOP_REST, PIN_TOP_REST, SPRING_REST = 170.0, 214.0, 44.0
 PIN_X = 1031.0
+PULLEY_Y = 92.0
 PAWL = (1052.0, 300.0)
 DISPLAY_CENTRE_X, DISPLAY_Z_PX = 1031.0, 390.0
 LIFT_BASE_Y = TABLE + 40.0                  # the marble waits under the table
@@ -86,7 +87,7 @@ BELL = (625.0, 126.0)
 HAMMER = (600.0, 124.0)
 DRUM_X = (958.0 + 15.5, 993.0 + 15.5, 1038.0 + 15.5, 1073.0 + 15.5)   # spindles
 DRUM_SIZES = (3, 10, 6, 10)                  # tens of hours, hours, tens of minutes, minutes
-CAMERA_R_PX = 1100.0                         # the wide camera's distance
+CAMERA_R_PX = 750.0                         # the wide camera's distance
 SCENE_CENTRE = (560.0, 300.0)
 LATCH_POINT = (1031.0, 300.0)
 
@@ -317,6 +318,19 @@ def card_angle_deg(k: int, c: int, sod: float) -> float:
     return card_deg(q, n)
 
 
+CARD_STACK = 0.01      # metres between neighbouring fallen cards, so no two faces share a plane
+
+
+def card_depth(q: float, n: int) -> float:
+    """How far behind the front plane a card sits: 0 for the upright and the hanging card, then one
+    CARD_STACK per place it has fallen, and back to 0 as it swings up behind to become the next card."""
+    if q <= 1.0:
+        return 0.0
+    if q < n - 1.0:
+        return (q - 1.0) * CARD_STACK
+    return (n - 2.0) * CARD_STACK * (1.0 - sm(2.0 * (q - (n - 1.0))))
+
+
 # ---------------------------------------------------------------------------
 # Bell, camera
 
@@ -343,7 +357,7 @@ PIECE_ROWS = {      # the plan's pose table: row -> the pieces that implement it
     "Domino i": [f"domino_{i:02d}" for i in range(DOMINO_COUNT)],
     "Seesaw, rod, gate": ["seesaw", "rod", "hopper_gate", "rail_gate"],
     "Sand": ["hopper_sand", "bucket_sand", "trough_sand", "stream", "pour"],
-    "Spring": ["spring"],
+    "Spring": ["spring", "string_l", "string_r"],
     "Latch pin": ["pin", "pawl"],
     "Flap card": [f"card_{k}_{c}" for k in range(4) for c in range(DRUM_SIZES[k])],
     "Bell": ["bell", "hammer"],
@@ -392,6 +406,9 @@ def all_poses(sod: float) -> Dict[str, Pose]:
     spring_len = (PIN_TOP_REST - pin) - spring_top
     P["spring"] = Pose(m(PIN_X), 0.0, zm(spring_top), sz=spring_len / SPRING_REST)
     P["pin"] = Pose(m(PIN_X), 0.0, zm(PIN_TOP_REST - pin))
+    # The two strings hang from the pulleys at pixel row PULLEY_Y; unit-length meshes scaled in z.
+    P["string_l"] = Pose(m(BUCKET_X), 0.0, zm(PULLEY_Y), sz=max((BUCKET_TOP + sink - 18.0) - PULLEY_Y, 1.0) * PX)
+    P["string_r"] = Pose(m(PIN_X), 0.0, zm(PULLEY_Y), sz=max(spring_top - PULLEY_Y, 1.0) * PX)
     P["pawl"] = Pose(m(PAWL[0]), 0.0, zm(PAWL[1]), b=-rev(22.0 * pawl_click(t)))
 
     lo, hi = TL["marble_lift"]
@@ -402,7 +419,8 @@ def all_poses(sod: float) -> Dict[str, Pose]:
     for k in range(4):
         n = DRUM_SIZES[k]
         for c in range(n):
-            P[f"card_{k}_{c}"] = Pose(m(DRUM_X[k]), 0.0, zm(DISPLAY_Z_PX), a=rev(card_angle_deg(k, c, sod)))
+            q = (drum_pos(k, sod) - c) % n
+            P[f"card_{k}_{c}"] = Pose(m(DRUM_X[k]), card_depth(q, n), zm(DISPLAY_Z_PX), a=rev(card_deg(q, n)))
 
     hour_strike = minute == 0
     P["bell"] = Pose(m(BELL[0]), 0.0, zm(BELL[1]), b=rev(bell_swing_deg(t)) if hour_strike else 0.0)
