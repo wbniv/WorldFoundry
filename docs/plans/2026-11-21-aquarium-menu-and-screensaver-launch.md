@@ -1,6 +1,6 @@
 # Aquarium: close the gaps in the menu app and in launching one tank from a screensaver launcher
 
-**Status: draft for review (2026‑11‑21).** Will, 2026‑11‑21: "write plan to fix gaps in using app with menu as well as screensaver running a specific level. also consider what ../homeboard-tv/ provides for screensaver choosing, configuration, and everything it can control and do with screensavers". The three fixes were agreed in the conversation first: a `run-aquarium-menu` desktop task, an intent extra on `ScreensaverPreviewActivity`, and one source for the tank roster. This plan adds the Homeboard side and the order of work.
+**Status: draft for review (2026‑11‑21).** Will, 2026‑11‑21: "write plan to fix gaps in using app with menu as well as screensaver running a specific level. also consider what ../homeboard-tv/ provides for screensaver choosing, configuration, and everything it can control and do with screensavers". Reconciled with the [screensaver app and remediation plan](2026-11-21-screensaver-app-and-remediation.md) the same day: see [Reconciliation](#reconciliation-with-the-screensaver-app-and-remediation-plan). The three fixes were agreed in the conversation first: a `run-aquarium-menu` desktop task, an intent extra on `ScreensaverPreviewActivity`, and one source for the tank roster. This plan adds the Homeboard side and the order of work.
 
 ## Context
 
@@ -32,7 +32,7 @@ Homeboard TV (`~/homeboard-tv`, [screensaver plan](../../../homeboard-tv/docs/pl
 | **Options per entry** | built for its own entries; for ours it plans to read our settings document (Stage 5) | `getCapabilities` already returns the tank as a choice (schema 1) and Sea Stars' level settings (schema 2, on the branch) |
 | **Use this screensaver** | built | `setSetting tank:<id>` already saves the choice |
 | **Use everywhere** | built; Cast1 setup screen, one-time question and Restore passed on 2026‑11‑21; Cast2 pending | nothing; it writes Android's `screensaver_components` with `WRITE_SECURE_SETTINGS` |
-| **This TV's screensaver**: Start now, Open ‹app› settings, Restore the original | built | `Open Aquarium settings` needs a settings activity the Dream declares; we have `@xml/dream` |
+| **This TV's screensaver**: Start now, Open ‹app› settings, Restore the original | built | `Open Aquarium settings` needs a settings activity the Dream declares. **We have none:** `res/xml/dream.xml` is an empty `<dream/>` with no `settingsActivity`. The [remediation plan](2026-11-21-screensaver-app-and-remediation.md) supplies one dialog per level |
 | **Start on Home after** 1, 2, 5, 10, 15 or 30 min | built, Home only; "Android decides" is the default | for our entry it plays the preview activity, so again needs the tank extra |
 | **Remote key mapped to "screensaver"** | built | the same preview path |
 | A timer or alarm always ends the screensaver | built | nothing |
@@ -58,12 +58,12 @@ Four phases, in this order. Each ships alone and has its own test.
 
 "One file" therefore means one file for the **roster**. A tank with new behaviour still needs its own level and, if it needs a driver, one line in `SCRIPT_NAMES`.
 
-**Phase 3 · `EXTRA_TANK` on the preview activity.** `ScreensaverPreviewActivity` and `AquariumActivity` accept `org.worldfoundry.screensaver.TANK`: a catalogue id or `random`. It applies for that run only and never touches the saved choice. With no extra, behaviour is unchanged. An id the catalogue does not hold is an error: log it, show it, `finish()`; there is no fallback to the saved tank (engine rule: fail loud). The decision lives in one place, `TankLaunch.startChosen(context, player, requested)`, so Sea Stars' launch overrides apply the same way (`settings_launch_extra` already carries them in `PlantedTankActivity`). `adb` proof: `am start -n org.worldfoundry.screensaver/.ScreensaverPreviewActivity --es org.worldfoundry.screensaver.TANK aquarium_jellyfish`.
+**Phase 3 · `EXTRA_LEVEL` on the preview activity.** `ScreensaverPreviewActivity` and `AquariumActivity` accept `org.worldfoundry.screensaver.LEVEL`: a catalogue id or `random`. It applies for that run only and never touches the saved choice. With no extra, behaviour is unchanged. An id the catalogue does not hold is an error: log it, show it, `finish()`; there is no fallback to the saved tank (engine rule: fail loud). The decision lives in one place, `TankLaunch.startChosen(context, player, requested)`, so Sea Stars' launch overrides apply the same way (`settings_launch_extra` already carries them in `PlantedTankActivity`). `adb` proof: `am start -n org.worldfoundry.screensaver/.ScreensaverPreviewActivity --es org.worldfoundry.screensaver.LEVEL aquarium_jellyfish`.
 
 **Phase 4 · Homeboard and the coordinator.** Cross-repo, so each half is a handoff item in the other repo, not an edit from here.
 
-- **Coordinator** (`~/chromecast-coordinator`): `applications.json` gains `tank_launch_extra` beside `settings_launch_extra`, and `screensaver-show` accepts a bounded `tank` argument, validated against `getCapabilities`, that it passes through that extra. `screensaver-select` stays the persistent route.
-- **Homeboard** (Stage 5): our manifest declares, as `<meta-data>`, the preview activity, the extra's name and the settings authority (already `org.worldfoundry.screensaver.SETTINGS_AUTHORITY`). Homeboard maps **Preview** to a one-run start with `TANK`, **Use this screensaver** to `setSetting tank:<id>`, and the Home idle timer, the remote key and **Show on TV now** to the same one-run start.
+- **Coordinator** (`~/chromecast-coordinator`): `applications.json` gains `level_launch_extra` beside `settings_launch_extra`, and `screensaver-show` accepts a bounded `tank` argument, validated against `getCapabilities`, that it passes through that extra. `screensaver-select` stays the persistent route.
+- **Homeboard** (Stage 5): our manifest declares, as `<meta-data>`, the preview activity, the extra's name and the settings authority (already `org.worldfoundry.screensaver.SETTINGS_AUTHORITY`). Homeboard maps **Preview** to a one-run start with `LEVEL`, **Use this screensaver** to `setSetting tank:<id>`, and the Home idle timer, the remote key and **Show on TV now** to the same one-run start.
 - **Docs:** Homeboard's "eight tanks" becomes "the tanks the app lists".
 
 The mockup shows what Homeboard's Options screen does with this: the tank is a choice in the app's settings document, Preview plays it once, and an unknown id is an error.
@@ -83,7 +83,7 @@ flowchart LR
     D[Idle: Android starts the Dream] --> P[Saved choice<br/>Random or one id]
     H[Homeboard, coordinator, adb<br/>start the preview activity] --> P
     P --> C[TankLaunch.startChosen]
-    H -.->|new: TANK extra, one run| C
+    H -.->|new: LEVEL extra, one run| C
     C --> L2[Dream tank, autopilot variant]
     X[Desktop: run-aquarium-menu<br/>new in Phase 1] --> S
 ```
@@ -113,7 +113,7 @@ sequenceDiagram
     H->>A: getCapabilities
     A-->>H: tank choice (Random + tanks), level settings
     P->>H: Preview Jellyfish
-    H->>A: start preview activity, TANK=aquarium_jellyfish
+    H->>A: start preview activity, LEVEL=aquarium_jellyfish
     A-->>P: Jellyfish plays, saved tank unchanged
     P->>H: OK, use it
     H->>A: setSetting tank:aquarium_jellyfish
@@ -127,21 +127,40 @@ Modes of the tank choice. A run has one of two sources, and only one of them is 
 ```mermaid
 stateDiagram-v2
     [*] --> Saved
-    Saved --> OneRun: preview or launcher starts with TANK
+    Saved --> OneRun: preview or launcher starts with LEVEL
     OneRun --> Saved: run ends, nothing written
     Saved --> Saved: setSetting tank:id (writes the choice)
     OneRun --> Error: unknown id
     Error --> Saved: finish, logged, nothing written
 ```
 
+## Reconciliation with the screensaver app and remediation plan
+
+The [screensaver app and remediation plan](2026-11-21-screensaver-app-and-remediation.md) (the "remediation plan", proposed 2026‑11‑21) covers the shared 3D Clocks package and a settings and launch contract for **every** World Foundry screensaver level. Where the two overlap, one of them owns the item and the other follows it.
+
+| Topic | This plan | Remediation plan | Resolution |
+|---|---|---|---|
+| Start one named level without touching the saved Dream choice | Phase 3: the `LEVEL` extra | Contract items 2 and 4: a documented, authorized entry; "previewing must not overwrite the persisted Dream selection"; invalid ids rejected, never substituted | **Same mechanism. This plan defines it for the Aquarium package** (D2 is its "reject invalid ids"); the 3D Clocks package adopts the same extra name and the same rules. The extra is named `LEVEL`, not `TANK`, so one key serves tanks and clocks (D6) |
+| One catalogue for launcher, automation, settings and Dream; stable ids; easy to add levels | Phase 2: the manifest is the roster, `TankCatalog` reads it | Contract item 4, for the clocks package | **Same pattern, per package.** The 3D Clocks package keeps its own catalogue; whether it reuses the manifest format and the parser is for that work to decide once its package ID is recorded. Nothing here reaches into it |
+| A settings dialog for every level, with Save, Cancel, reset | not planned; only the provider's tank choice | **Owns it**, for all levels including the Aquarium's ten and Sea Stars | This plan does **not** build dialogs. Its Homeboard "Open Aquarium settings" button waits for them: `dream.xml` is empty today, so there is no target. One fact to carry over: Sea Stars (on `feat/sea-stars`) is an eleventh tank with its own schema 2 settings; the remediation plan's inventory counts ten |
+| Stale documentation: the README says eight tanks, `TankChoice` lists ten | Phase 2 rewrites the README sentence that ties the bundle order to `TankChoice.IDS` | Inventory step corrects stale catalogue and README text | One edit, made once. **Phase 2 lands first** so the inventory records the manifest as the source rather than a list that changes under it |
+| `TankChoice`, `TankLaunch`, `ScreensaverPreviewActivity`, the build script and `tests/test_aquarium_menu.py` | edited by Phases 2 and 3 | "Coordinate changes in shared files with ongoing work" | The remediation plan's baseline (step 1) freezes the inventory **before** these edits and re-runs it after (step 3) |
+| Device evidence | Verification 5, 6 and 8 run on a Chromecast | Step 4 reserves cast1 and cast2 for installed acceptance | **One reservation, not two.** Verification 5 and 6 are folded into step 4's per-level launch check, so this plan adds no separate device campaign. Verification 8 (the coordinator's `screensaver-show`) is its "documented automation interface" |
+| Access control on the automation entry | `ScreensaverPreviewActivity` is already `exported="true"`; the extra writes nothing | "Define and test the actual invocation, export and access controls" | Open. The minimal design is: exported, no persistent effect, unknown id refused. A signature permission would also stop the coordinator's `adb shell am start`, so any tighter rule has to be tried against that path first. Settle in Phase 3 together with the 3D Clocks work |
+| The desktop menu task, Homeboard handoff | Phases 1 and 4 | not covered | Stays here |
+| Separate-app versus shared package | keeps the Aquarium package as it is | "Use the existing package boundaries for Aquarium, Seahorse and Planted"; all clocks go in one 3D Clocks package; the Minute Machine plan's own app is being reconciled to it | Agreed. The playable menu app stays its own package too |
+
+**Order.** Remediation step 1 (baseline and inventory), then this plan's Phase 1 (independent), then Phases 2 and 3, then the remediation plan's steps 2 to 4, whose acceptance run exercises them on cast1 and cast2. Phase 4 follows Homeboard's Stage 5.
+
 ## Decisions
 
 Recommended answers are filled in; change any before work starts.
 
 - **D1. Roster source.** The existing manifest with an optional third column (the Dream label), against a new JSON file that generates the manifest. **Recommended: the manifest**, as you asked: no generated file to check in or go stale, one `cdpack` change that existing bundles do not see.
-- **D2. A bad `TANK` id.** Fail loudly (log, show, finish) against falling back to the saved tank. **Recommended: fail loudly.** A silent fallback would make a typo in a caller look like it worked.
+- **D2. A bad `LEVEL` id.** Fail loudly (log, show, finish) against falling back to the saved tank. **Recommended: fail loudly.** A silent fallback would make a typo in a caller look like it worked.
 - **D3. Which activities take the extra.** Both `ScreensaverPreviewActivity` and the TV launcher entry `AquariumActivity`, through `TankLaunch`. **Recommended: both**, so a launcher shortcut such as "Open Jellyfish" works without a second mechanism.
 - **D4. How Homeboard lists the tanks.** One entry "World Foundry Aquarium" with Tank as an option, against one entry per tank. **Recommended: one entry**, because Homeboard shows four entries per page and a tank is a setting of the same screensaver. This is Homeboard's call at its Stage 5; the mockup shows the one-entry form.
+- **D6. The name of the one-run extra.** `org.worldfoundry.screensaver.LEVEL` (a catalogue id or `random`), shared with the 3D Clocks package, against `TANK` for the Aquarium and a different key per package. **Recommended: `LEVEL`.** The coordinator then needs one `level_launch_extra` convention instead of one per package; Homeboard still reads the key's name from each app's metadata.
 - **D5. Order against the Sea Stars branch.** Phases 2 and 3 edit `TankChoice`, `ScreensaverPreviewActivity`, `build-aquarium-screensaver-levels.py` and `tests/test_aquarium_menu.py`, all of which `feat/sea-stars` already edits. **Recommended: merge `feat/sea-stars` into `2026-new-level` first**, then build on it; Phase 1 does not depend on it and can go now. Who merges it is not decided here.
 
 ## Rank and cost
@@ -150,7 +169,7 @@ Recommended answers are filled in; change any before work starts.
 |---|---|---|
 | 1 `run-aquarium-menu` | T1 | copy of a task that exists; the recipe is fixed |
 | 2 one roster | T3 | Rust parser, Gradle, Java, Python and tests, against the settled design above |
-| 3 `EXTRA_TANK` | T2 | two activities and `TankLaunch`, one test file; follows Phase 2 |
+| 3 `EXTRA_LEVEL` | T2 | two activities and `TankLaunch`, one test file; follows Phase 2 |
 | 4 Homeboard and coordinator | T3 | two other repos and a contract; the handoff items are small |
 
 No cloud resources are created or changed, so there is no AWS cost. Device checks use the coordinator's recipes and leave the TV as they found it.
@@ -159,6 +178,7 @@ No cloud resources are created or changed, so there is no AWS cost. Device check
 
 - **One APK that is both the playable app and the Dream** (Homeboard decision 4, [distribution research](../../../homeboard-tv/docs/investigations/2026-11-20-screensaver-distribution.md)). It would merge the two tables in Context; this plan keeps the split and adds nothing that depends on it.
 - **A desktop bundle of every World Foundry level** (the second use case in the [level menu plan](2026-10-01-level-menu-selector.md)).
+- **A settings dialog for each tank, the full screensaver inventory, the 3D Clocks package and the Minute Machine app question.** Owned by the [remediation plan](2026-11-21-screensaver-app-and-remediation.md).
 - **Seahorse Grid and the Planted Tank app** as roster members. They stay separate apps; `PlantedTankActivity` keeps its own `settings_launch_extra`.
 - **Homeboard Stages 2 to 5 themselves** (providers, directory, phone panel, companion apps). Phase 4 only supplies what they will read.
 - **Changing Android's idle time from Homeboard.** Its Stage 0 question 5 is still open.
@@ -169,8 +189,8 @@ No cloud resources are created or changed, so there is no AWS cost. Device check
 2. `task run-aquarium-menu` opens the menu with every manifest tank in order; Space starts one; Backspace returns. The headless scripted-input run in `tests/level_menu_harness.py` selects the third entry and reaches its level.
 3. `cdpack` on `wflevels/smb-menu.manifest` and on a copy of `aquarium-menu.manifest` with a third column on every line produces bundles byte for byte equal to the two-column ones.
 4. The screensaver's JVM unit tests (a `task` entry added in Phase 2, in the pattern of `task test-planted-screensaver`, which runs `PlantedConfigTest`; offline Gradle per `android/screensaver/README.md`) pass `TankCatalogTest`: ids, labels, `valid`, `indexOf`, the order equals the screensaver bundle's table of contents, and an unknown id is rejected.
-5. `adb shell am start -n org.worldfoundry.screensaver/.ScreensaverPreviewActivity --es org.worldfoundry.screensaver.TANK aquarium_jellyfish` on a Chromecast through the coordinator: the top activity is the preview, the Jellyfish tank plays, and `content call … getCapabilities` still shows the old saved tank.
-6. The same with `TANK` set to an unknown id: the activity logs the error and finishes, and the saved tank is unchanged.
+5. (Run inside the remediation plan's step 4 reservation, not as a separate campaign.) `adb shell am start -n org.worldfoundry.screensaver/.ScreensaverPreviewActivity --es org.worldfoundry.screensaver.LEVEL aquarium_jellyfish` on a Chromecast through the coordinator: the top activity is the preview, the Jellyfish tank plays, and `content call … getCapabilities` still shows the old saved tank.
+6. The same with `LEVEL` set to an unknown id: the activity logs the error and finishes, and the saved tank is unchanged.
 7. With no extra, the preview plays the saved tank exactly as before (the existing `tests/test_aquarium_screensaver_*.py` pass, the catalogue one with its updated source of truth).
 8. Coordinator `screensaver-show` with `tank` set shows that tank on Cast1 and leaves the saved tank alone; an id outside `getCapabilities` is refused before any launch.
 9. Homeboard Stage 5 on Cast1: Preview plays the chosen tank, **Use this screensaver** saves it, Restore returns the original screensaver. Recorded in Homeboard's testing record and linked back here.
