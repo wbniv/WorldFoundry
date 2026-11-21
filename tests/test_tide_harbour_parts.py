@@ -15,7 +15,7 @@ from clock_mesh import face_normal, signed_volume  # noqa: E402
 
 tl, parts = level_modules.load("tide_harbour", "timeline", "parts")
 
-FLAT = ("sky_", "sun", "moon", "dial")
+FLAT = ("sky_", "sun", "moon", "dial", "panel_")
 
 
 def every_mesh():

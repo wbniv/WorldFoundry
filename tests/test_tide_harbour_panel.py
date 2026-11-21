@@ -12,16 +12,19 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "wflevels" / "tide_harbour"))
-import panel as pn  # noqa: E402
-import timeline as tl  # noqa: E402
+sys.path.insert(0, str(ROOT / "tests"))
+import level_modules  # noqa: E402
+
+pn, tl, _parts = level_modules.load("tide_harbour", "panel", "timeline", "parts")   # parts sets timeline.PARTS (the recolour table)
 
 DAY = tl.wall_day(dt.date(2026, 11, 21))
 TIMES = [k * 600.0 for k in range(144)]          # a day, ten minutes apart: the camera drifts through its whole swing
 
 
 def test_the_engines_field_of_view_puts_the_dial_where_the_capture_shows_it():
-    fr = pn.camera_frame(DAY, 12 * 3600.0)       # noon: the drift is at zero
+    sod = 12 * 3600.0 + 0.5 * pn.SLIDE_S         # halfway through a swap the panel is off screen and the camera is at its usual place
+    assert pn.slide(sod)[1] < 1e-6
+    fr = pn.camera_frame(DAY, sod, {"drift": 1})
     x, y = pn.project(fr, tl.DIAL)
     assert abs(x - 948) < 3 and abs(y - 268) < 5, (x, y)     # the capture: about (948, 268)
 

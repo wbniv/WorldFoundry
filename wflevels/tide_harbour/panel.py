@@ -19,7 +19,7 @@ at the camera and is never skewed.
 from __future__ import annotations
 
 import math
-from typing import NamedTuple, Tuple
+from typing import Dict, NamedTuple, Tuple
 
 import timeline as tl
 
@@ -55,15 +55,19 @@ def _cross(a: V3, b: V3) -> V3:
     return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
 
 
-def camera_frame(day: int, sod: float, options=None) -> Frame:
-    """The camera's position and axes at the given time: timeline.scene's cs_wide looking at its LookAt, no roll."""
-    sc = tl.scene(day, sod, options)
-    c, look = sc.poses["cs_wide"], sc.poses["LookAt"]
-    pos = (c.x, c.y, c.z)
-    f = _norm((look.x - c.x, look.y - c.y, look.z - c.z))
+def frame_from(cam, look) -> Frame:
+    """The camera's position and axes for a camera pose looking at a look-at pose, no roll."""
+    pos = (cam.x, cam.y, cam.z)
+    f = _norm((look.x - cam.x, look.y - cam.y, look.z - cam.z))
     r = _norm(_cross(f, (0.0, 0.0, 1.0)))
     u = _cross(r, f)
     return Frame(pos, r, f, u)
+
+
+def camera_frame(day: int, sod: float, options=None) -> Frame:
+    """The camera's position and axes at the given time: timeline.scene's cs_wide looking at its LookAt, no roll."""
+    sc = tl.scene(day, sod, options)
+    return frame_from(sc.poses["cs_wide"], sc.poses["LookAt"])
 
 
 def place(fr: Frame, u: float, v: float, depth: float = DEPTH) -> V3:
@@ -126,8 +130,12 @@ M_PER_KM = 0.066                   # the map's scale: the river and Bangkok Bar,
 COL_X = W / 2 - 0.095              # the level column, right of the map, in panel coordinates
 COL_V0, COL_V1, COL_MAX_M = -0.80, 0.40, 3.5    # its foot and head in v, and the tide at its head
 
-# depths from the camera: nearer is smaller. Back to front: paper, map, column, the band's plate, the drums, the band's mask
-D_PAPER, D_MAP, D_COLUMN, D_PLATE, D_DRUM, D_MASK = (DEPTH + k * LAYER for k in (5, 4, 3, 2, 1, 0))
+# depths from the camera: nearer is smaller. Back to front: paper, map, the column and its water and pointer, the band's
+# plate, the drums, the band's mask and its marks, the arrows
+LAYERS = ("paper", "map", "column", "fill", "pointer", "plate", "drum", "mask", "arrow")
+D = {name: DEPTH + (len(LAYERS) - 1 - k) * LAYER for k, name in enumerate(LAYERS)}
+PTR_DU = 0.036                     # the pointer's tip sits this far right of the column's centre
+PTEXT_DIM = 0.5                    # the readings dim to this at night, so they stay legible
 # the map's centre of view, and the river's middle: latitude of the map's origin (the map is built about it)
 MAP_LAT0, MAP_LON0 = 13.6745, 100.5591    # chosen so the river fills the window over the whole pan (test_tide_harbour_panel_parts)
 
@@ -202,10 +210,10 @@ def row_v(row: int) -> float:
 
 def digits(seconds_ahead: float, rsec: float, metres: float) -> Tuple[int, int, int, int, int]:
     """The five drum values of one row: hour tens and units, minute tens (time to the nearest ten minutes), and the
-    height's units and tenths (to 0.1 m). seconds_ahead counts from the scan's start second rsec."""
+    height's units and tenths (to 0.1 m, never below zero). seconds_ahead counts from the scan's start second rsec."""
     t = rsec + seconds_ahead
     slot = int(math.floor(t / 600.0 + 0.5)) % 144          # ten-minute slots in a day
-    tenths = int(math.floor(metres * 10.0 + 0.5))
+    tenths = max(0, int(math.floor(metres * 10.0 + 0.5)))
     hour = slot // 6
     return hour // 10, hour % 10, slot % 6, tenths // 10, tenths % 10
 
@@ -226,6 +234,36 @@ def map_v(sod: float) -> float:
     north up; the window is the panel below the band, whose centre is at -BAND_H/2. To show the latitude the pan has
     reached in the window's centre, the map's origin sits below it by that many kilometres at the map's scale."""
     return -BAND_H / 2.0 - pan_dlat_km(sod) * M_PER_KM
+
+
+def panel_poses(fr: Frame, sod: float, left: bool, vis: float, reading, tide: float) -> Dict[str, "tl.Pose"]:
+    """The pose of every panel actor, from the camera's frame: the part's mesh origin is placed at its (u, v) in panel
+    coordinates at its layer's depth, scaled by depth / DEPTH so that it lands on the screen where the panel's plane would
+    put it, and turned to face the camera. reading is turns.panel_reading's; tide the water level (m) now."""
+    a, b, c = euler_of(fr)
+    cu = panel_centre_u(left, vis)
+    out: Dict[str, tl.Pose] = {}
+
+    def put(name: str, layer: str, u: float, v: float, sz: float = 1.0) -> None:
+        d = D[layer]
+        s = d / DEPTH
+        x, y, z = place(fr, s * (cu + u), s * v, d)
+        out[name] = tl.Pose(x, y, z, a, b, c, s, s, s * sz)
+
+    put("panel_paper", "paper", 0.0, 0.0)
+    put("panel_map", "map", 0.0, map_v(sod))
+    put("panel_col_body", "column", 0.0, 0.0)
+    put("panel_col_fill", "fill", COL_X, COL_V0, max(0.01, min(1.0, tide / COL_MAX_M)))
+    put("panel_col_ptr", "pointer", COL_X + PTR_DU, level_v(tide))
+    put("panel_band_back", "plate", 0.0, 0.0)
+    for row, turn in ((0, reading.high), (1, reading.low)):
+        values = dict(zip(DRUMS, digits(turn.t, reading.mark, turn.h)))
+        for name in DRUMS:
+            put(f"panel_drum_{row}_{name}", "drum", row_u(name), row_v(row) + drum_v(values[name]))
+    put("panel_band_mask", "mask", 0.0, 0.0)
+    put("panel_arrow_up", "arrow", row_u("arrow"), H / 2.0 - ROW_H)
+    put("panel_arrow_dn", "arrow", row_u("arrow"), H / 2.0 - ROW_H)
+    return out
 
 
 def main() -> int:

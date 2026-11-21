@@ -4,11 +4,12 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "wflevels" / "tide_harbour"))
+sys.path.insert(0, str(ROOT / "tests"))
 sys.path.insert(0, str(ROOT / "wflevels" / "clock_common"))
-import panel as pn  # noqa: E402
-import panel_parts as pp  # noqa: E402
+import level_modules  # noqa: E402
 from clock_mesh import face_normal  # noqa: E402
+
+pn, pp = level_modules.load("tide_harbour", "panel", "panel_parts")
 
 
 def area(face, mesh):
@@ -36,8 +37,8 @@ def test_the_panel_parts_fit_in_the_panel_except_the_map_which_slides_under_the_
         if name == "panel_map":
             continue
         (x0, _y0, z0), (x1, _y1, z1) = m.bounds()
-        if name in ("panel_col_fill",):
-            continue                                              # built from its foot: z from 0
+        if name == "panel_col_fill" or name.startswith("panel_drum_"):
+            continue                                              # the fill is built from its foot; a drum slides behind the mask
         assert x0 >= -pn.W / 2 - 1e-6 and x1 <= pn.W / 2 + 1e-6, name
         assert z0 >= -pn.H / 2 - 1e-6 and z1 <= pn.H / 2 + 1e-6, name
 
@@ -83,5 +84,5 @@ def test_the_two_copies_of_the_river_are_the_same():
 
 
 def test_the_actor_budget():
-    actors = len(pp.panel_meshes()) + len(pp.DRUM_NAMES)
-    assert actors == 19, actors                                   # 9 meshes and 10 drums; the level has headroom to 150
+    actors = len(pp.panel_meshes())
+    assert actors == 19 and set(pp.DRUM_NAMES) <= set(pp.panel_meshes()), actors    # 9 meshes and 10 drums; the level has headroom to 150

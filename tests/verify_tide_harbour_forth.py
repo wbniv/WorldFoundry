@@ -109,11 +109,24 @@ class Host(mm.Host):
         return float(line[2])
 
 
+def prime(host: Host, day: int, sod: float, options=None) -> None:
+    """Run frames at this time until the next-turn scan has finished, as the level would have by the time the panel is
+    seen: the panel's drums and arrows read its result."""
+    for name in ("rdy", "act"):
+        host.proc.stdin.write(f"M {scan_cell(name)} 0\n")
+    for _ in range(40):
+        host.frame_at(day, sod, options, reset_look=False)
+        if host.read(scan_cell("rdy")) == 1 and host.read(scan_cell("act")) == 0:
+            return
+    raise RuntimeError(f"the scan did not finish at {tl.date_of(day)} {sod}")
+
+
 def compare(host: Host, ix, ids, cases):
     worst = {"pos": 0.0, "rot": 0.0, "scale": 0.0, "colour": 0, "tide": 0.0}
     bad = []
     colour_box = ids["FACE_COLOR_TOP"]
     for day, sod, options in cases:
+        prime(host, day, sod, options)
         r, dsp, rsp, writes = host.frame_at(day, sod, options)
         label = f"{tl.date_of(day)} {sod:.2f} {options or ''}"
         if r != 0 or dsp != 0 or rsp != 0:
@@ -248,6 +261,10 @@ def cases():
                  "2026-11-21T21:30:00", "2027-03-02T02:45:00", "2026-11-21T10:59:59.95", "2026-11-21T23:59:59.95",
                  "2026-06-21T18:30:12", "2025-12-31T23:59:30", "2026-01-01T00:00:00", "2030-07-04T16:20:05.5"):
         out.append((*tl.parse_when(spec), None))
+    # the river panel: inside a swap of sides (the slide takes 2.6 s from each ten-minute mark), both ways, and across the map's pan
+    for sod in (9 * 3600 + 0.4, 9 * 3600 + 1.15, 9 * 3600 + 2.2, 9 * 3600 + 600 + 0.9, 9 * 3600 + 600 + 1.45, 9 * 3600 + 600 + 1.9,
+                10 * 3600 + 300.0, 10 * 3600 + 450.0, 10 * 3600 + 900.0, 10 * 3600 + 1350.0):
+        out.append((today, sod, None))
     # every value of every setting (Verification 13): drift off, Roman, no numerals, no gauge, no boats and birds
     for options in ({"drift": 1}, {"numerals": 1}, {"numerals": 2}, {"gauge": 1}, {"life": 1},
                     {"drift": 1, "numerals": 2, "gauge": 1, "life": 1}):

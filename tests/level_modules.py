@@ -17,10 +17,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def load(level: str, *names: str):
-    directory = str(ROOT / "wflevels" / level)
+def _forget(directory: str, names) -> None:
+    """Drop the named modules and every module that came from the level's directory (a module imported by one of them,
+    like Tide Harbour's panel and turns, would otherwise stay behind for the next level to find)."""
     for name in names:
         sys.modules.pop(name, None)
+    for name, module in list(sys.modules.items()):
+        file = getattr(module, "__file__", None)
+        if file and Path(file).parent == Path(directory):
+            sys.modules.pop(name, None)
+
+
+def load(level: str, *names: str):
+    directory = str(ROOT / "wflevels" / level)
+    _forget(directory, names)
     sys.path.insert(0, directory)
     try:
         modules = [importlib.import_module(name) for name in names]
@@ -28,6 +38,5 @@ def load(level: str, *names: str):
             assert Path(module.__file__).parent == Path(directory), (name, module.__file__)
     finally:
         sys.path.remove(directory)
-        for name in names:
-            sys.modules.pop(name, None)
+        _forget(directory, names)
     return modules[0] if len(modules) == 1 else modules

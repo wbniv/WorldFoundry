@@ -41,7 +41,7 @@ PANEL_MATERIALS: Dict[str, Tuple[str, Tuple[float, float, float]]] = {
     "p_up": ("ptext", (0.38, 0.78, 0.36)),
     "p_dn": ("ptext", (0.95, 0.52, 0.30)),
     "p_ink": ("fixed", (0.11, 0.08, 0.05)),
-    "p_ptr": ("fixed", (0.88, 0.35, 0.18)),
+    "p_ptr": ("ptext", (0.88, 0.35, 0.18)),
 }
 
 
@@ -207,11 +207,31 @@ def map_mesh() -> Mesh:
     return m
 
 
-def panel_meshes() -> Dict[str, Mesh]:
-    """Every panel actor's mesh that Python can draw, in the order the level places them. The drums and the glyphs are
-    Blender's: see DRUM_NAMES."""
-    return {m.name: m for m in (paper_mesh(), map_mesh(), column_body_mesh(), column_fill_mesh(), column_pointer_mesh(),
-                                band_back_mesh(), band_mask_mesh(), arrow_up_mesh(), arrow_dn_mesh())}
+DRUM_TOP = 0.5 * pn.PITCH                 # a drum's strip runs from half a pitch above its zero
+DRUM_BOTTOM = -9.5 * pn.PITCH             # to half a pitch below its nine: digit k is centred at z = -k * PITCH
+
+
+def drum_mesh(row: int, name: str) -> Mesh:
+    """One drum: a dark strip for the ten digits to sit on, and a tick beside each digit's place. The digits themselves
+    are glyphs of the Thai or Roman font, so only Blender draws them (the p_text material, the slot after the strip's)."""
+    m = Mesh(f"panel_drum_{row}_{name}")
+    _quad(m, -pn.WIN_W / 2, DRUM_BOTTOM, pn.WIN_W / 2, DRUM_TOP, "p_ink")
+    for k in range(10):
+        _quad(m, -pn.WIN_W / 2, -k * pn.PITCH - 0.003, -pn.WIN_W / 2 + 0.012, -k * pn.PITCH + 0.003, "p_text")
+    return m
 
 
 DRUM_NAMES = [f"panel_drum_{row}_{name}" for row in (0, 1) for name in pn.DRUMS]
+
+
+def panel_meshes() -> Dict[str, Mesh]:
+    """Every panel actor's mesh that Python draws, in the order the level places them (the same order panel.panel_poses
+    poses them). The digits, the unit label and the map's place names are glyphs Blender adds to these."""
+    out = {m.name: m for m in (paper_mesh(), map_mesh(), column_body_mesh(), column_fill_mesh(), column_pointer_mesh(),
+                               band_back_mesh())}
+    for row in (0, 1):
+        for name in pn.DRUMS:
+            out[f"panel_drum_{row}_{name}"] = drum_mesh(row, name)
+    for m in (band_mask_mesh(), arrow_up_mesh(), arrow_dn_mesh()):
+        out[m.name] = m
+    return out

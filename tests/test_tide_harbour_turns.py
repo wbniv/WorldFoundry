@@ -14,10 +14,11 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "wflevels" / "tide_harbour"))
+sys.path.insert(0, str(ROOT / "tests"))
 sys.path.insert(0, str(ROOT / "wflevels" / "tide_harbour" / "tide_fit"))
-import timeline as tl  # noqa: E402
-import turns as tn  # noqa: E402
+import level_modules  # noqa: E402
+
+tl, tn = level_modules.load("tide_harbour", "timeline", "turns")
 
 CACHE = Path(os.environ.get("CHAO_PHRAYA_TIDE_CACHE", Path.home() / "tmp" / "chao-phraya-tide"))
 

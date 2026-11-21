@@ -286,7 +286,8 @@ PARK = (0.0, SUN_Y, -40.0)                          # a hidden disc waits here, 
 ROOM = (-360.0, -80.0, -60.0, 360.0, 140.0, 240.0)    # one room holds everything, the sky included
 
 # Visibility mailboxes (global cells the director writes; 1 shows the actor)
-VIS = {"sun": 700, "moon": 701, "birds": 702, "boats": 703, "gauge": 704, "numerals_thai": 705, "numerals_roman": 706}
+VIS = {"sun": 700, "moon": 701, "birds": 702, "boats": 703, "gauge": 704, "numerals_thai": 705, "numerals_roman": 706,
+       "arrow_up": 707, "arrow_dn": 708}
 # Settings (plan D13, Q9): the TideHarbourSettings object's fields (wfsource/source/oas/tideharboursettings.oas,
 # with the clocks' shared clocksettings.inc). The director copies each field into its cell every frame with
 # property@; 0, a field's first choice, is the default.
@@ -379,6 +380,8 @@ def colour_of(kind: str, day_rgb, lit_rgb, pal, arg: float = 0.0):
         return mix(tuple(0.25 + 0.8 * h for h in hor), MOON_GLINT, lit)
     if kind == "sun":
         return pal["sun"]
+    if kind in ("panel", "ptext"):          # the river panel: dimmed at night (panel.DIM), the readings less (panel.PTEXT_DIM)
+        return mul(day_rgb, (1.0 - (1.0 - (pn.DIM if kind == "panel" else pn.PTEXT_DIM)) * lit,) * 3)
     raise ValueError(kind)
 
 
@@ -447,10 +450,17 @@ def scene(day: int, sod: float, options: Dict[str, int] | None = None) -> Scene:
     for i, (x, y, ph, hz) in enumerate(GLINTS):
         P[f"glint_{i}"] = Pose(x, y, h + 0.14, sx=max(0.05, sin_rev(hz * t + ph)))
 
-    # the camera: drifts slowly round the look-at point (burn-in, D10), or stands still
+    # the camera: drifts slowly round the look-at point (burn-in, D10), or stands still. The river panel takes a side of
+    # the screen (panel.py): the camera pulls back and shifts so the harbour sits in what the panel leaves, and the panel's
+    # parts are posed from the camera's frame.
     az = DRIFT_DEG / 360.0 * sin_rev(sod / DRIFT_PERIOD) if opt["drift"] == 0 else 0.0
-    P["cs_wide"] = Pose(LOOK_AT[0] + CAMERA_R * sin_rev(az), LOOK_AT[1] - CAMERA_R * cos_rev(az), CAMERA_Z)
-    P["LookAt"] = Pose(*LOOK_AT)
+    left, vis = pn.slide(sod)
+    dist = CAMERA_R / pn.harbour_scale(vis)
+    lx = LOOK_AT[0] + pn.camera_shift_m(left, vis, dist)
+    P["cs_wide"] = Pose(lx + dist * sin_rev(az), LOOK_AT[1] - dist * cos_rev(az), CAMERA_Z)
+    P["LookAt"] = Pose(lx, LOOK_AT[1], LOOK_AT[2])
+    reading = turns.panel_reading(day, sod)
+    P.update(pn.panel_poses(pn.frame_from(P["cs_wide"], P["LookAt"]), sod, left, vis, reading, h))
 
     # colours
     if not RECOLOUR:
@@ -464,7 +474,8 @@ def scene(day: int, sod: float, options: Dict[str, int] | None = None) -> Scene:
     life = opt["life"] == 0
     visible = {VIS["sun"]: int(sun_on), VIS["moon"]: int(moon_on), VIS["birds"]: int(life and s.alt_deg > 0.0),
                VIS["boats"]: int(life), VIS["gauge"]: int(opt["gauge"] == 0),
-               VIS["numerals_thai"]: int(opt["numerals"] == 0), VIS["numerals_roman"]: int(opt["numerals"] == 1)}
+               VIS["numerals_thai"]: int(opt["numerals"] == 0), VIS["numerals_roman"]: int(opt["numerals"] == 1),
+               VIS["arrow_up"]: int(reading.rise), VIS["arrow_dn"]: int(not reading.rise)}
     return Scene(P, colours, visible, h, q, s)
 
 
@@ -501,6 +512,11 @@ def main(argv: List[str]) -> int:
             print(f"{name:16s}", " ".join(f"{v:9.4f}" for v in p))
     return 0
 
+
+# The river panel and the next-turn search use this module (and it uses them): imported last, so each finds this module
+# complete in sys.modules whichever of the three was imported first.
+import panel as pn  # noqa: E402
+import turns  # noqa: E402
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
