@@ -23,5 +23,17 @@
         <activity android:name=".TideSpikeDActivity"
             android:exported="true"
             android:configChanges="orientation|screenSize|smallestScreenSize" />
+        <activity android:name=".TideSpikeNActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize" />
+        <activity android:name=".TideSpikeVActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize" />
+        <activity android:name=".TideSpikeGActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize" />
+        <activity android:name=".TideSpikeN720Activity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize" />
     </application>
 </manifest>

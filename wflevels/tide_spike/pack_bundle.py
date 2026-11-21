@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Pack the four spike levels into one cd.iff (level 0 to 3 = variants a to d) and link it into the tidespike flavor.
+"""Pack the seven spike levels into one cd.iff (level 0 to 6 = variants a, b, c, d, n, v, g) and link it into the tidespike flavor.
 
     python3 wflevels/tide_spike/pack_bundle.py [-h]
 
-Needs wflevels/tide_spike_{a,b,c,d}-standalone.iff (bash wflevels/tide_spike/build.sh) and a built cdpack
+Needs wflevels/tide_spike_{a,b,c,d,n,v,g}-standalone.iff (bash wflevels/tide_spike/build.sh) and a built cdpack
 (WF_CDPACK, or wftools/cdpack-rs/target/release/cdpack here or in the main checkout).
 """
 import argparse
@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-LEVELS = [ROOT / f"wflevels/tide_spike_{v}-standalone.iff" for v in "abcd"]
+LEVELS = [ROOT / f"wflevels/tide_spike_{v}-standalone.iff" for v in "abcdnvg"]
 BUNDLE = ROOT / "wflevels/tide_spike_cd.iff"
 ASSETS = ROOT / "android/screensaver/src/tidespike/assets"
 

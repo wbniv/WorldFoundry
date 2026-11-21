@@ -25,7 +25,7 @@ from parts import Mesh  # noqa: E402  (Minute Machine's mesh class: box, prism_x
 
 N_BARS = 36
 QUADS = os.environ.get('TANK_SPIKE_QUAD') == '1'            # experiment: build veils, glows and the sky as zero-thickness quads
-VARIANTS = {"a": 46, "b": 100, "c": 150, "d": 150}            # posed actors, not counting the veils and glows
+VARIANTS = {"a": 46, "b": 100, "c": 150, "d": 150, "n": 150, "v": 150, "g": 150}   # posed actors, not counting the veils and glows
 CAMERA = (0.0, -22.0, 4.5)
 LOOK_AT = (0.0, 12.0, 2.0)
 VEIL_DISTANCE = 3.0                                             # the engine's near plane is 1.0 m, fixed
@@ -34,6 +34,11 @@ N_VEILS = 9                                                     # 1..3 warm (gol
 VEIL_MAILBOX = 700                                              # 700..708: 1 when that veil is shown
 GLOW_MAILBOX = 710                                              # 710..716
 DAY_SECONDS_PER_HOUR = 10.0                                     # variant d: a day in 240 s
+# The night probe (2026-11-21). On cast1 variant d ran 58 FPS in the morning but 29.97 FPS at night, with the dark veil and the
+# lit-window glows on screen. n, v and g are d started at 21:00 (so a 30 s run is all night) with the veil and the glows switched
+# on or off, to find what costs the time: n both (the control), v the veil only, g the glows only. d is unchanged (06:00).
+FEATURES = {"d": dict(start=6, veils=True, glows=True), "n": dict(start=21, veils=True, glows=True),
+            "v": dict(start=21, veils=True, glows=False), "g": dict(start=21, veils=False, glows=True)}
 
 PALETTE: Dict[str, Tuple[float, float, float]] = {
     "sky": (0.44, 0.67, 0.88), "sun": (1.0, 0.93, 0.62), "moon": (0.93, 0.95, 1.0), "wood": (0.40, 0.27, 0.15),
@@ -215,8 +220,8 @@ def director_script(variant: str, ix: Dict[str, int]) -> str:
         ": ts-mod ( a b -- r ) over over / ts-floor * - ;",
         ": ts-sin sin-rev ; : ts-cos cos-rev ;",
     ]
-    if variant == "d":
-        clock = f"INDEXOF_TIME ts@ {n(1 / DAY_SECONDS_PER_HOUR)} * 6 + 24 ts-mod ts-h ts!"
+    if variant in FEATURES:
+        clock = f"INDEXOF_TIME ts@ {n(1 / DAY_SECONDS_PER_HOUR)} * {FEATURES[variant]['start']} + 24 ts-mod ts-h ts!"
     else:
         clock = "INDEXOF_WALL_HOUR ts@ INDEXOF_WALL_MINUTE ts@ 60 / + INDEXOF_WALL_SECOND ts@ 3600 / + ts-h ts!"
     # seconds for the swells, from the level clock; hours of the day from the line above
@@ -247,19 +252,21 @@ def director_script(variant: str, ix: Dict[str, int]) -> str:
     body += [f"  ts-h ts@ 12 - 24 / ts-az ts!",
              f"  ts-az ts@ ts-sin 70 * {ix['sun']} ts-x", f"  ts-az ts@ ts-cos 40 * 4 - {ix['sun']} ts-z",
              f"  ts-az ts@ ts-sin -70 * {ix['moon']} ts-x", f"  ts-az ts@ ts-cos -40 * 4 - {ix['moon']} ts-z"]
-    if variant == "d":
+    if variant in FEATURES:
         # darkness d: 0 by day, 1 by night; ramps over 17:00-19:30 and 04:30-07:00
         body += ["  0 ts-d ts!",
                  "  ts-h ts@ 17 >= if ts-h ts@ 17 - 2.5 / 0 max 1 min ts-d ts! then",
                  "  ts-h ts@ 19.5 >= if 1 ts-d ts! then",
                  "  ts-h ts@ 7 < if 1 ts-h ts@ 4.5 - 2.5 / 0 max 1 min - ts-d ts! then",
                  f"  ts-d ts@ {N_VEILS} * 0.5 + ts-floor ts-k ts!"]
-        body += ["  0 ts-i ts!", "  begin",
-                 f"    ts-k ts@ ts-i ts@ 1 + = if 1 else 0 then {VEIL_MAILBOX} ts-i ts@ + ts!",
-                 f"    ts-i ts@ 1 + dup ts-i ts! {N_VEILS} =", "  until"]
-        body += ["  0 ts-i ts!", "  begin",
-                 f"    ts-d ts@ 0.45 > if 1 else 0 then {GLOW_MAILBOX} ts-i ts@ + ts!",
-                 f"    ts-i ts@ 1 + dup ts-i ts! {len(GLOW_TARGETS)} =", "  until"]
+        if FEATURES[variant]["veils"]:
+            body += ["  0 ts-i ts!", "  begin",
+                     f"    ts-k ts@ ts-i ts@ 1 + = if 1 else 0 then {VEIL_MAILBOX} ts-i ts@ + ts!",
+                     f"    ts-i ts@ 1 + dup ts-i ts! {N_VEILS} =", "  until"]
+        if FEATURES[variant]["glows"]:
+            body += ["  0 ts-i ts!", "  begin",
+                     f"    ts-d ts@ 0.45 > if 1 else 0 then {GLOW_MAILBOX} ts-i ts@ + ts!",
+                     f"    ts-i ts@ 1 + dup ts-i ts! {len(GLOW_TARGETS)} =", "  until"]
     out.append(": ts-tick")
     out += body
     out.append(";")
