@@ -2,6 +2,8 @@
 
 **Status: plan for review, 2026‑11‑21.** The level and the bundle are not built. Done so far: the one engine addition, E1 (a date mailbox), is approved and built ([Phase 1 record](#phase-1-record-e1-built)); the Bangkok tide is fitted to the Navy's published predictions and validated on an unseen year ([Phase 0 record](#phase-0-record-the-tide), [research document](../reference/chao-phraya-tide-research.md)). **Approved: D1 to D12 and the answers to Q1 to Q8 at my recommendations, except Q2, which Will answered Thai: the dial uses Thai numerals** (Will, 2026‑11‑21: "accept all except answer to q2 is thai"). The A3 poster is built (Phase P). **Phase 0 is done on the desktop and on cast1 ([records](#phase-0-record-the-spike-cast1-half)): the 150-actor budget holds the display's refresh rate by day (59.3 FPS), but the veil approach halves the frame rate at night (29.97 FPS), so D5 is open again and needs a decision before Phase 2.** **Runtime control of lights is deliberately not part of this plan** (Will, 2026‑11‑21: "more likely the task is to add control of lights from runtime. today, put it on TODO, and don't use as part of the screensaver implementation for now"); it is its own TODO item.
 
+**State, 2026‑11‑21 evening: Phase 2 is built and checked on the desktop** ([record](#phase-2-record-the-level-built)), on branch `feat/tide-harbour`. `wflevels/tide_harbour-standalone.iff` exists (113 actors, 87 posed, budget 150), the director matches the model in the zForth VM and in the Debug engine at eight dates and times, and WF Clocks now lists two clocks, so the chooser appears. **D5 is revised: the night is re-coloured materials, with no veil** ([decision](#phase-2-decision-the-night-without-a-veil-d5-revised)); its cost on cast1 is not measured. Q9, Q10 and Q12 are applied at my recommendations, **pending Will's confirmation**. **Escalated:** the settings object (D13) needs a new engine object type, which Phase 2 may not add; the director already reads Q9's fields from cells that the object will write. Nothing has run on a TV (Phase 4).
+
 ## Context
 
 Will asked on 2026‑11‑21: "turn Tide harbour entry into the next screensaver in the 3d clock series. we're going to need more animation, i believe / this will be our second 3d clock screensaver / we're gong to implement several of the 50 ideas (each as a separate level) and then bundle them all together info a single cd.iff (i suppose with a menu chooser like the aquarium). when starting as a screensaver, should be able to pass in which clock level to play and not show the chooser menu". While the plan was being researched he added: "we can also move actors in 3d space!!!"
@@ -43,7 +45,7 @@ Recommendations are in the third column. Nothing is decided until Will answers.
 | D2 | Where Minute Machine goes | **Into the bundle as level 0.** A new `clocks` flavor, application `org.worldfoundry.clocks`, replaces the `minutemachine` flavor in the same change; cast1 gets the old package uninstalled | Keep both apps: two icons and two screensaver entries for one family |
 | D3 | How the clock is chosen | Launcher with no clock named: **the chooser**. `--es org.worldfoundry.screensaver.LEVEL tide_harbour` on the launcher activity: **straight to that clock**. The extra is the one shared `LEVEL` extra of the [aquarium launch plan](2026-11-21-aquarium-menu-and-screensaver-launch.md) (Will, 2026‑11‑21: "LEVEL is correct"), not a clock-only key. The Dream: its saved choice (default **Random**, resolved once at start), never the chooser. The settings provider offers the choice | A chooser inside the Dream (a screensaver must never wait for a person) |
 | D4 | The order and names of clocks | **Stable ids**, as the Aquarium's, read from `clocks-menu.manifest` by the shared `LevelCatalog`: `minute_machine`, `tide_harbour`. The index is the table-of-contents position; a new clock is appended | Sort alphabetically (an index change would silently re-point saved choices) |
-| D5 | How the day turns to night | **No engine change: translucent veils** (measured on the desktop 2026‑11‑21, [spike](../diagnostics/tide-harbour-spike-2026-11-21/README.md)). A handful of large boxes with a translucent tinted material (`wf_opacity`) in front of the camera, from faint warm to dark blue, and the director shows exactly one at a time through its visibility mailbox. What must stay bright (lit windows, lanterns, **the dial and the moon**) is drawn in front of the veil, scaled along the same ray. Replaces the earlier idea of a sliding sky and re-textured sets, which the spike made unnecessary. **Measured on cast1 2026‑11‑21: not as built.** With the dark veil and the lit-window glows on screen, a Chromecast HD locked to 30 FPS (every frame 33.4 ms, 100% of refreshes missed); by day, with no veil showing, it ran 58 to 59 FPS ([record](#phase-0-record-the-spike-cast1-half)). The cause (veil fill rate, the glows, or 1080p) is not isolated, so D5 needs a revision or a split probe before Phase 2. **Open:** that, and the horizon glow a veil cannot give | Runtime light control (a script-writable light colour): would dim everything with one write, but it is an engine feature in its own right and is **deferred to a TODO item, not used here**. Bake one fixed sunset: cheap, but then the look says nothing about the time |
+| D5 | How the day turns to night | **No engine change: translucent veils** (measured on the desktop 2026‑11‑21, [spike](../diagnostics/tide-harbour-spike-2026-11-21/README.md)). A handful of large boxes with a translucent tinted material (`wf_opacity`) in front of the camera, from faint warm to dark blue, and the director shows exactly one at a time through its visibility mailbox. What must stay bright (lit windows, lanterns, **the dial and the moon**) is drawn in front of the veil, scaled along the same ray. Replaces the earlier idea of a sliding sky and re-textured sets, which the spike made unnecessary. **Measured on cast1 2026‑11‑21: not as built.** With the dark veil and the lit-window glows on screen, a Chromecast HD locked to 30 FPS (every frame 33.4 ms, 100% of refreshes missed); by day, with no veil showing, it ran 58 to 59 FPS ([record](#phase-0-record-the-spike-cast1-half)). The cause (veil fill rate, the glows, or 1080p) is not isolated, so D5 needs a revision or a split probe before Phase 2. **Open:** that, and the horizon glow a veil cannot give. **Revised for Phase 2 (2026‑11‑21, pending Will): no veil.** The director re-colours the day's materials through the per-material colour mailboxes; nothing is translucent ([decision](#phase-2-decision-the-night-without-a-veil-d5-revised)) | Runtime light control (a script-writable light colour): would dim everything with one write, but it is an engine feature in its own right and is **deferred to a TODO item, not used here**. Bake one fixed sunset: cheap, but then the look says nothing about the time |
 | D6 | The tide itself | **Settled by the research: fitted harmonic constants for Bangkok**, summed in Forth from the date. 64 constituents, median error 4 to 5 cm on an unseen year ([tide_constants.json](../../wflevels/tide_harbour/tide_constants.json)). The department publishes a new table each year, so `task tide-refit` repeats the fit (the years and the file addresses in `tide_fit/` are edited by hand first); the scene needs no nodal correction for the next year (3.7 cm against 3.3 cm) | A synthetic curve (no longer needed); a third-party table (the department's own tables are public and primary) |
 | D7 | Frame-rate gate | **At least 30 FPS** on cast1, Release, median over 120 s, the same gate Minute Machine used. Actor budget **150 rigid actors**, measured in Phase 0 on boxes first: **59.3 FPS median on cast1 by day** with 150 posed actors, so the budget holds; the night scene with the veil does not ([record](#phase-0-record-the-spike-cast1-half)) | A higher gate: the water bars are the likely cost, so measure first |
 | D8 | The dial | **Thai numerals ๑ to ๑๒** (Will's answer to Q2), as a Bangkok tower would carry. The cost is legibility across a room, so the digits are drawn large and heavy, and the tower's dial is checked at TV distance in Phase 2. The [harbour mockup](2026-11-21-tide-harbour-clock/harbour.html) shows the problem at its scale: all twelve are small. Two remedies, in order: draw the dial about 1.5 times larger than in the concept art, or carry digits only at ๑๒, ๓, ๖ and ๙ with plain ticks between; if both fail, the concept art's Roman numerals are the fallback | Roman numerals, as in the concept art: more legible, less local |
@@ -72,10 +74,10 @@ Recommendations are in the third column. Nothing is decided until Will answers.
 
 | # | Question | Recommendation | What it blocks |
 |---|---|---|---|
-| Q9 | **What do all clocks share in their settings?** (Will, 2026‑11‑21: "make sure level has a settings object (same for all clocks---audit)") A common `Clock` sheet every clock's settings type includes, and each clock's own fields beside it. | Common: **Camera drift** (Slow, the default, or Off), the burn-in guard Minute Machine's D10 called "push-in". Minute Machine's own: **Hour format** (24 hours by default, or 12). Tide Harbour's own: **Dial numerals** (Thai by default, Roman, or none), **Gauge board** (on or off), **Boats and birds** (on or off). The first release ships these and no more. | The `.oas` files, Phases 2 and 2b |
-| Q10 | **Start the clocks from the baseline toolkit?** The level guides say new scenes should (a generated core with explicit defaults, no snowgoons import). Minute Machine and the spike use the old import; retrofitting Minute Machine is a small TODO item. | Yes: Tide Harbour and every later clock; Minute Machine on its next change. | Phase 2 |
+| Q9 | **What do all clocks share in their settings?** (Will, 2026‑11‑21: "make sure level has a settings object (same for all clocks---audit)") A common `Clock` sheet every clock's settings type includes, and each clock's own fields beside it. | Common: **Camera drift** (Slow, the default, or Off), the burn-in guard Minute Machine's D10 called "push-in". Minute Machine's own: **Hour format** (24 hours by default, or 12). Tide Harbour's own: **Dial numerals** (Thai by default, Roman, or none), **Gauge board** (on or off), **Boats and birds** (on or off). The first release ships these and no more. **Applied in Phase 2, pending Will's confirmation:** the model and the director implement exactly these four fields, read from cells 690 to 693 (0 is the default). The `.oas` type itself is escalated: every settings type is a registered engine object type ([Phase 2 record](#phase-2-record-the-level-built)) | The `.oas` files, Phases 2 and 2b |
+| Q10 | **Start the clocks from the baseline toolkit?** The level guides say new scenes should (a generated core with explicit defaults, no snowgoons import). Minute Machine and the spike use the old import; retrofitting Minute Machine is a small TODO item. | Yes: Tide Harbour and every later clock; Minute Machine on its next change. **Applied to Tide Harbour, pending Will's confirmation:** its build creates every actor from its OAD with the schema's defaults and explicit values, as `wflevels/baseline/generate.py` does, with no Snowgoons import. | Phase 2 |
 | Q11 | **May I prune Docker's build cache (only that)?** Free disk fell to about 5 GB, right at the stop line; Docker reports 21 GB of reclaimable build cache and 23 GB of reclaimable images, and the rootless Docker trial is the live engine, so I will touch none of it without your word. The cast1 half of Phase 0 needs an APK build. | Yes, the build cache only; I will show you the list first. | The cast1 half of Phase 0 |
-| Q12 | **Commit the clocks' built outputs, and check they stay fresh?** The aquarium levels commit their `.iff` files and bundles and CI proves they rebuild identically (`task aquarium-check`); Minute Machine git-ignores them. The clocks bundle could follow either. | Follow the aquarium: commit the built outputs and add a `clocks-check`, so a change to an input cannot ship a stale bundle. It adds a few MB per clock to the repository. | Phase 3 |
+| Q12 | **Commit the clocks' built outputs, and check they stay fresh?** The aquarium levels commit their `.iff` files and bundles and CI proves they rebuild identically (`task aquarium-check`); Minute Machine git-ignores them. The clocks bundle could follow either. | Follow the aquarium: commit the built outputs and add a `clocks-check`, so a change to an input cannot ship a stale bundle. It adds a few MB per clock to the repository. **Applied, pending Will's confirmation:** both clocks' `.iff` files and `wflevels/clocks-cd.iff` are committed, and `task clocks-check` (`scripts/clocks-levels.sh`, the aquarium's recipe) rebuilds them from a clean copy and compares. | Phase 3 |
 
 Optional, not blocking: which of the other 48 ideas comes after Tide Harbour.
 
@@ -239,7 +241,7 @@ stateDiagram-v2
 |---|---|---|---|
 | **0 Spikes and research** | (a) 36 plain bars plus 100 boxes on a placeholder level, on cast1: FPS and banding. **Done 2026‑11‑21, desktop and cast1:** 59.3 FPS for 150 actors by day, and the bars band on the TV. (b) The look of the day with no light control: **done as translucent veils (D5); the cast1 cost of the night scene is a halved frame rate (29.97 FPS), so D5 is reopened.** ~~(c) The tide: find the Hydrographic Department's constants for a Chao Phraya station, or record that none are public; check the arithmetic against their table.~~ Done 2026‑11‑21: no public constants, but the department's published highs and lows were fitted and validated; [record below](#phase-0-record-the-tide). ~~(d) Sunrise and sunset by day of year against NOAA~~ Dropped by D12: a formula, checked in Phase 2, in place of research | T4 | Answers D5, D7 and the water risk; the plan is revised with the results |
 | ~~**1 Engine E1**~~ | ~~Mailboxes, override, tests~~ Done 2026‑11‑21; [record below](#phase-1-record-e1-built) | T4 | ~~`task test-wall-clock` passes with a date; Minute Machine unaffected~~ |
-| **2 Tide Harbour level** | `clock_common` hoisted, and its scene core built from the baseline toolkit ([Q10](#open)); `wflevels/tide_harbour/` with `timeline.py`, `channels.py`, `parts.py`, Blender build (the dial's Thai numerals are drawn from a Thai font inside the Blender container, so Phase 2 first checks that a Thai font is in the image and adds one to the Dockerfile if not), `-standalone.iff`; **the settings object (D13)**; director VM test; engine comparison | T3 | Director matches the model in the VM and the engine, as Minute Machine's did |
+| **2 Tide Harbour level** — built 2026‑11‑21 on the desktop ([record](#phase-2-record-the-level-built)); the settings object is escalated | `clock_common` hoisted, and its scene core built from the baseline toolkit ([Q10](#open)); `wflevels/tide_harbour/` with `timeline.py`, `channels.py`, `parts.py`, Blender build (the dial's Thai numerals are drawn from a Thai font inside the Blender container, so Phase 2 first checks that a Thai font is in the image and adds one to the Dockerfile if not), `-standalone.iff`; **the settings object (D13)**; director VM test; engine comparison | T3 | Director matches the model in the VM and the engine, as Minute Machine's did |
 | **2b Minute Machine settings object** | The retrofit the audit found: `minutemachinesettings.oas` including `clocksettings.inc`, one object placed in the Blender-built level, the director reading it with `property@`, the capabilities asset, and `tests/test_minute_machine_settings.py` | T3 | `scripts/audit-clock-settings.py --strict` passes for Minute Machine; its timeline and director tests are unchanged |
 | **3 Bundle and chooser** | Manifest, pack script, `LevelSettings` made a factory by clock id and one provider serving the playing clock's fields, `Clock*` classes, host change, flavor `clocks`, `minutemachine` flavor removed | T3 | Desktop and cast1: no argument shows the menu; a named clock skips it; the Dream never shows it |
 | **4 cast1** | Install, FPS gate, 10-minute Dream run, six moments checked on the TV, tide gauge checked against the model | T3 | D7 gate, and the moments match the mockups |
@@ -446,6 +448,56 @@ Built 2026‑11‑21. `WALL_DAY` is mailbox 1925 (whole calendar days since 2000
 
     **PASS.** The three time-of-day tests Minute Machine already had still pass, so its clock is unaffected.
 
+### Phase 2 decision: the night without a veil (D5, revised)
+
+Made 2026‑11‑21 for Phase 2, pending Will's confirmation, because the spike's veil held cast1 at 29.97 FPS at night and cast1 is fenced, so the split probe (veil, glows, 720p) could not run.
+
+**What the level does.** Nothing is translucent and no light changes. The director re-colours the materials of the day's actors through the per-material colour mailboxes `FACE_COLOR_TOP`, `_LIT` and `_SHADOW` (3037 to 3039, added for the Q*bert cubes in May), which set a material's colour and re-bake the actor's primitives. The look is a function of the sun's altitude in whole degrees, from −16° (night blue) through twilight and the golden hour to 12° (day), and constant above 12°, so between about 07:00 and 16:40 nothing is re-coloured; on 2026‑11‑21 the look changes 56 times, between 05:19 and 18:50. Windows, lanterns, the tower's arch and the far bank's windows are materials whose colour goes to warm light at night. The dial, its numerals, the hands and the moon are never re-coloured and nothing is drawn in front of them, so spike finding 4 (the dial and moon dimmed by the veil) cannot happen. The sky is six bands re-coloured between a horizon and a zenith palette, which gives the horizon glow at sunset that a veil could not.
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    Day: Day (sun above 12°)<br/>authored colours, nothing re-coloured
+    Golden: Golden hour (12° to 0°)<br/>warm K, warm horizon bands
+    Twilight: Twilight (0° to -9°)<br/>windows, lanterns, arch light up
+    Night: Night (below -9°)<br/>night blue, moon shown
+    Day --> Golden: sun sinks
+    Golden --> Twilight
+    Twilight --> Night
+    Night --> Twilight: dawn
+    Twilight --> Golden
+    Golden --> Day
+```
+
+Each whole degree of altitude between −16° and 12° is one look step; the director re-colours only when the step changes.
+
+**Why.** By night the GPU draws the same opaque scene it draws by day: no full-screen blended pass, no extra overlay actors. The day scene with 150 posed actors ran 59.3 FPS on cast1.
+
+**Rejected.** Keeping one veil with fewer glows: it is still a full-screen blend at 1080p, the likeliest cost, and unmeasured. Runtime light control: an engine feature Will deferred to its own TODO item.
+
+**What it costs, and what is not measured.** A mesh whose colour content changes twice leaves the static vertex-buffer path for good (`STATIC_CHURN` in `gfx/glpipeline/static_mesh.cc`) and is streamed every frame. After the first dusk, 86 actors with 1 844 faces stream instead of drawing from baked buffers. The cost of that on cast1 is **not measured**; `--frame-profile` counts the excluded objects. If it is too slow, the fallbacks are fewer look steps or re-colouring only the large flat actors (sky bands and water bars). Also not measured on the TV: whether the night colours read as night, and whether the new light angle removes the water's seams.
+
+### Phase 2 record: the level, built
+
+Built 2026‑11‑21 on branch `feat/tide-harbour` (not merged, not pushed). Desktop only: no TV has run it.
+
+**What is built.**
+
+- `wflevels/tide_harbour/timeline.py`, the model: every pose, material colour and visibility as a pure function of `WALL_DAY`, the second of the day and the settings. The tide is the 64 fitted waves, summed with the day split as 64q + r so that the director's 32-bit products stay small, once per whole second. The sun is NOAA's declination and equation-of-time series for station HD in Thai time (D12). The device's clock is read as Thai time (Q7), so `WALL_UTC_OFFSET` is not used.
+- `parts.py`, the geometry: low-poly flat colour (D9). 85 moving actors (36 water bars, 4 boats, 2 ropes, the raft, 6 water hyacinth, the gauge pointer, 3 hands, the sun, the moon, 6 clouds, 6 birds, 8 lanterns, 10 glints), plus the camera shot and its target: **87 posed, budget 150** (D1, D7). The static scenery is ten sky bands, the far bank with a temple, the pier, three stilt houses, the tower on its quay, the dial and the gauge board.
+- `forth.py`, the director, generated from the model formula for formula; `blender_create_tide_harbour.py` and `build.sh`, the level built in the Blender container **from the baseline toolkit's recipe** (Q10); the committed `tide_harbour.lev`, `actor-map.json`, `wflevels/tide_harbour.iff` and `wflevels/tide_harbour-standalone.iff` (113 actors).
+- **The dial's Thai numerals** (D8) are drawn from Noto Sans Thai, which the Blender package already ships (`/usr/lib/blender/datafiles/fonts/NotoSansThai-VariableFont_wdth,wght.woff2`), so `docker/Dockerfile.blender` and the container registry needed no change. Roman numerals are built too and hidden.
+- `wflevels/clock_common/clock_mesh.py`: the mesh builder hoisted from Minute Machine (plan "Shared code"); Minute Machine's rebuilt `.lev` and `actor-map.json` are byte-identical. Only the mesh class was hoisted; Minute Machine's channels and director helpers stay where they are.
+- WF Clocks: `wflevels/clocks-menu.manifest` lists Tide Harbour as level 1, so the chooser appears; the built levels and `wflevels/clocks-cd.iff` are committed and `task clocks-check` keeps them fresh (Q12).
+
+**The settings object (D13) is escalated, not built.** Every settings type is a registered engine object type: an `objects.mac` entry, the regenerated `objects.*` tables, and a C++ class in `wfsource/source/game/` (`seastarssettings.cc`, `fieldtypes.cc` and the rest). Concretely, an object whose class is not in `objects.lc` stops the level build (`levcomp-rs/src/editable.rs:187`: "unknown class"), and an object kind the engine was not built with stops it at load (`wfsource/source/oas/objects.c`, the `default:` case: `assert(0); // attempted to construct object not in list`). Sea Stars' type (`53d7c718`) touched `objects.mac`, `.c`, `.col`, `.e`, `.h`, `.inc`, `.lc` and `.names`, and added `game/seastarssettings.{cc,hp}`; the engine then has to be rebuilt for the desktop and both Android ABIs. Phase 2 may not change the engine beyond E1, so `TideHarbourSettings` and the shared `clocksettings.inc` are not written, and four of the audit's six columns (type, fields, level, director) and the phone asset (whose owner is the placed object's index) wait on that decision. What is built is everything the object will plug into: Q9's four fields in the model, the director reading them from global cells 690 to 693 (0 is the default, nothing writes them yet), `tests/test_tide_harbour_settings.py` setting every value in the zForth VM, and `scripts/check-tide-harbour.py --options` writing every value over the debug bridge in the engine. Once Will approves the engine type, the remaining work is: the `.oas` with `@include settings.inc` and `clocksettings.inc`, its registration and class, one object in the level, the director copying `property@` values into the cells, and the capabilities asset. `scripts/audit-clock-settings.py --strict` fails until then.
+
+**Found and fixed on the way:** a bird's bob period (37 s) that did not divide the hour, and a sun disc thrown 2 km away when high in the sky (both by the model's tests); float32 losses in the clouds and the wing beat (by the VM test); every moving actor exported at the origin, because the export read a stale `matrix_world` (by the engine check; `tests/test_tide_harbour_level.py` now guards it); broken Thai glyphs from concave n-gons; and Minute Machine's tests failing when run after Tide Harbour's in one pytest process, because both levels' modules are named `timeline`, `parts` and `forth` (`tests/level_modules.py`).
+
+**Not measured:** anything on a TV. The frame rate by day and at night (86 actors are streamed instead of baked after the first dusk), the 10-minute run, the banding of the water and of the sky at 1080p, how the night colours read, and the dial's legibility across a room. The six desktop captures and what is wrong with them are in the [Phase 2 evidence](../diagnostics/tide-harbour-phase2-2026-11-21/README.md).
+
+**What remains for Phase 4** (once a TV is free): build the `clocks` APK from this two-clock bundle (`task build-clocks-apk`; the flavor, the chooser's remote input and the host's menu request are already on the branch this was cut from), then on cast1: install, the chooser and `--es org.worldfoundry.screensaver.LEVEL tide_harbour` (Verification 6), `profile` by day and at night with the frame profile's static-excluded count (Verification 7), a 10-minute Dream, the six moments on the TV and the dial read across the room (Verification 8), and the tide gauge against the model.
+
 ```mermaid
 flowchart LR
     P0["Phase 0<br/>spikes"] --> P1["Phase 1<br/>E1"]
@@ -464,7 +516,7 @@ flowchart LR
 
 | File | Change |
 |---|---|
-| `wflevels/clock_common/` | New: the generic parts of `channels.py`, `forth.py` and helpers, moved from `wflevels/minute_machine/` |
+| `wflevels/clock_common/` | New: the generic parts of `channels.py`, `forth.py` and helpers, moved from `wflevels/minute_machine/`. **Phase 2 hoisted only the mesh builder (`clock_mesh.py`)**; Minute Machine's rebuilt level is byte-identical |
 | `wflevels/tide_harbour/` | New: `timeline.py`, `parts.py`, `forth.py`, `blender_create_tide_harbour.py`, `build.sh`, `actor-map.json`, `tide_harbour.lev`, `tide_harbour-standalone.iff.txt`, `tide_constants.json` (done: with its source and the hashes of the tables it was fitted to) |
 | `wflevels/tide_harbour/tide_fit/` | Done: `fetch_sources.sh` (one request per file, a pause between), `parse_hd.py`, `constituents.py`, `make_constants.py`, `check_time_zone.py` |
 | `tests/test_tide_constants.py` | Done: pins the constants to eight days copied by hand from the printed table; mutation-checked (a 7 h time-zone slip, a wrong K1 phase and a halved M2 each fail it) |
@@ -479,7 +531,11 @@ flowchart LR
 | `android/screensaver/src/main/cpp/dream_host.cc`, `tests/test_dream_host_vram.py` | Menu request (-1), bundle bound |
 | `android/screensaver/build.gradle.kts`, `src/clocks/`, `src/minutemachine/` (removed) | Flavor `clocks` |
 | `mailbox.inc`, `level.cc`, `level.hp`, `wallclock.hp`, `tests/wall_clock_test.cpp` | E1; `docs/command-line-switches.md` for the date override |
-| `Taskfile.yml` | `tide-harbour-level`, `clocks-bundle`, `build-clocks-apk`, `test-tide-harbour` |
+| `Taskfile.yml` | `tide-harbour-level`, `clocks-bundle`, `build-clocks-apk`, `test-tide-harbour`; **added in Phase 2:** `check-tide-harbour`, `clocks-regenerate`, `clocks-check` |
+| `scripts/clocks-levels.sh` | **New in Phase 2 (not listed before):** `regenerate` and `check` for the committed clock outputs (Q12), the aquarium's recipe |
+| `tests/test_tide_harbour_timeline.py`, `_parts.py`, `_forth.py`, `_level.py`, `verify_tide_harbour_forth.py`, `tests/level_modules.py` | **New in Phase 2:** the model, the geometry, the director in the VM, the built `.lev`, and importing each level's modules apart |
+| `wflevels/tide_harbour.iff`, `wflevels/tide_harbour-standalone.iff`, `wflevels/minute_machine*.iff`, `wflevels/clocks-cd.iff`, `.gitignore` | **Phase 2:** committed (Q12) |
+| `docs/diagnostics/tide-harbour-phase2-2026-11-21/` | **New in Phase 2:** the six desktop moments and the engine check's output |
 | `docs/plans/2026-11-21-tide-harbour-clock/` | These mockups and `build_mockups.py` |
 
 ## Out of scope
@@ -487,7 +543,7 @@ flowchart LR
 - The other 48 ideas. The bundle makes each one a level and a manifest line; which comes next is Will's call.
 - Runtime control of lights (a script-writable light colour, and the clear colour): its own engine feature, in `TODO.md`. This plan works without it.
 - The moon's phase, spring and neap tides as a display, weather, sound, other harbours.
-- Thai dial numerals (D8), a painterly texture pass (D9), a runtime settings screen beyond the clock choice.
+- A painterly texture pass (D9), a runtime settings screen beyond the clock choice. (Thai dial numerals were listed here before Will's answer to Q2 put them in scope.)
 - Any claim that the on-screen tide is a navigation-grade prediction. It is a picture of the tide, to the accuracy Phase 0 measures and prints.
 
 ## Verification
@@ -495,18 +551,106 @@ flowchart LR
 These steps are the contract. Each is run when its phase lands, with the raw output recorded under it.
 
 1. `task test-tide-harbour`: the timeline is a pure function of date and time; the tide sum matches the department's table to the error Phase 0 recorded; sunrise and sunset match the checked figures; the director in the real zForth VM matches `timeline.py` for every actor at 125 frames.
+
+    Run 2026‑11‑21 (Phase 2), in the Linux container; the task also runs the built level's and the settings' tests:
+
+    ```
+    task: [test-tide-harbour] scripts/in-linux-container.sh python3 -m pytest -q tests/test_tide_harbour_timeline.py tests/test_tide_harbour_parts.py tests/test_tide_harbour_forth.py tests/test_tide_harbour_level.py tests/test_tide_harbour_settings.py tests/test_tide_constants.py
+    ........................................                                 [100%]
+    40 passed in 6.58s
+    ```
+
+    The VM comparison inside it (`python3 tests/verify_tide_harbour_forth.py`) checks 56 frames, not 125: a day in 45-minute steps, the six moments, the hour and midnight, other dates and years, and every value of every setting, with poses, colours, visibility and the tide cell:
+
+    ```
+    56 frames; worst position 0.2041 mm, rotation 0.0017 deg, scale 0.000021, colour 0 step(s), tide 0.007 mm
+    PASS
+    ```
+
+    Sunrise and sunset against five published Bangkok times (timeanddate.com, 2026‑01‑01, 03‑20, 06‑21, 09‑22 and 11‑21): within 1.3 minutes of each, the test's limit is 2.5. **PASS**, with 56 VM frames in place of the 125 the step names.
+
 2. `task tide-harbour-level`: the Blender container builds `tide_harbour-standalone.iff`; the level has at most 150 animated actors; its signed-volume winding test passes.
+
+    `bash wflevels/tide_harbour/build.sh` (what the task runs), in `wf-blender:local`, 2026‑11‑21:
+
+    ```
+    [tide-harbour] 113 actors (87 posed by the director, budget 150)
+    [tide-harbour] Exported 113 objects to /src/wflevels/tide_harbour/tide_harbour.lev
+    [tide-harbour] done
+    ✓ built /src/wflevels/tide_harbour.iff (251904 bytes)
+    ✓ built /src/wflevels/tide_harbour-standalone.iff (256000 bytes)
+    ```
+
+    The winding (signed volume, flat faces toward the camera) is `tests/test_tide_harbour_parts.py`, in step 1. **PASS.**
+
 3. `python3 scripts/check-tide-harbour.py --compare`: the real engine, set to eight chosen dates and times with `WF_WALL_CLOCK`, agrees with the model on every actor (position, rotation, scale).
+
+    Debug engine in the Linux container under `xvfb-run`, 2026‑11‑21 (full output, and the settings half, in the [Phase 2 evidence](../diagnostics/tide-harbour-phase2-2026-11-21/README.md)):
+
+    ```
+    2026-11-21T10:08:22 : 87 actors; tide 2.3562 m (model 2.3562); worst position 0.022 mm (bird_1/3009), rotation 0.005 deg (lantern_7/3013), scale 0.00001 (bird_5/3042)
+    2026-11-21T17:40:00 : 87 actors; tide 2.6276 m (model 2.6276); worst position 0.081 mm (cloud_5/3009), rotation 0.005 deg (raft/3012), scale 0.00000 (rope_1/3041)
+    2026-11-21T18:12:30.5 : 87 actors; tide 2.5821 m (model 2.5821); worst position 0.045 mm (bird_2/3009), rotation 0.005 deg (bar_31/3012), scale 0.00001 (bird_1/3042)
+    2026-11-21T23:59:59.9 : 87 actors; tide 1.7738 m (model 1.7738); worst position 0.301 mm (bird_2/3009), rotation 0.006 deg (lantern_1/3013), scale 0.00001 (bird_3/3042)
+    2026-11-22T00:00:00.4 : 87 actors; tide 1.7738 m (model 1.7738); worst position 0.014 mm (bar_14/3010), rotation 0.005 deg (boat_0/3014), scale 0.00000 (glint_1/3040)
+    2027-03-02T02:45:00 : 87 actors; tide 2.5899 m (model 2.5899); worst position 0.075 mm (bird_1/3009), rotation 0.006 deg (lantern_3/3013), scale 0.00000 (rope_0/3041)
+    2026-06-21T18:30:12 : 87 actors; tide 1.1314 m (model 1.1314); worst position 0.121 mm (sun/3011), rotation 0.005 deg (lantern_7/3013), scale 0.00000 (glint_7/3040)
+    2030-07-04T16:20:05.5 : 87 actors; tide 0.7815 m (model 0.7815); worst position 0.088 mm (bird_1/3009), rotation 0.006 deg (bar_31/3012), scale 0.00000 (rope_0/3041)
+    PASS
+    ```
+
+    **PASS.** The first run found every moving actor exported at the origin (a 112 m error in the parked sun's y); fixed and guarded, see the [Phase 2 record](#phase-2-record-the-level-built).
+
 4. `task clocks-bundle`, then `cdpack --list wflevels/clocks-screensaver-cd.iff`: two levels in the stated order and a `MENU` chunk.
+
+    `cdpack` has no `--list` and the bundle is `wflevels/clocks-cd.iff`, so the pack's own report and the table of contents read with `tests/level_menu_harness.py` stand in, 2026‑11‑21:
+
+    ```
+      L0: 202752 bytes at sector 2 (minute_machine-standalone.iff)
+      L1: 256000 bytes at sector 101 (tide_harbour-standalone.iff)
+      MENU: 85 bytes at sector 226 ("WF Clocks", 2 entries)
+    SHEL 2048 431
+    L4   4096 202752
+    L4   206848 256000
+    MENU 462848 85
+    UIFT 464896 2770440
+    {'version': 1, 'levels': 2, 'title': 'WF Clocks', 'prompt': 'Choose a clock', 'entries': [(0, 'Minute Machine'), (1, 'Tide Harbour')]}
+    ```
+
+    **PASS.** `task clocks-check` rebuilds both levels and the bundle from a clean copy of the commit: `level outputs fresh: all 1613 tracked files rebuild identically from 1d35537cbfbc`; with one byte of the rebuilt Tide Harbour level changed, it reports `level outputs STALE: 1 of 1613 tracked files` and exits 1.
+
 5. Desktop engine in the container, three runs: no level argument shows the menu (debug-bridge screenshot); `1` plays Tide Harbour with no menu; `0` plays Minute Machine with no menu.
 6. `task build-clocks-apk`, then on cast1: `am start … --es org.worldfoundry.screensaver.LEVEL tide_harbour` shows no menu; the Dream with the saved choice `clock:minute_machine` plays Minute Machine; Random picks one and keeps it for the whole run.
 7. cast1 `profile` workflow, Release: median at least 30 FPS over 120 s, and the count of animated actors printed.
 8. Six screenshots from cast1, at the six times the mockups show: each reads the right time from the dial, and the tide gauge agrees with the model.
 9. `python3 -m pytest -q tests/test_tide_constants.py` and `python3 -I wflevels/tide_harbour/tide_fit/check_time_zone.py`: the constants reproduce the printed table, and the table's clock is UTC+7. Run 2026‑11‑21; output in the [Phase 0 record](#phase-0-record-the-tide). **PASS.**
 10. The Forth `tide-m` against the same table: in the VM and in the engine at eight chosen dates and times, within one centimetre of the Python sum (the float error), and within the fit's own error of the table's printed events.
+
+    Phase 2, 2026‑11‑21: in the VM the director's tide cell is within **0.007 mm** of the Python sum over 56 frames (step 1); in the engine it equals the model to the printed 0.1 mm at all eight instants (step 3). The model reproduces the department's printed events with a median error under 8 cm and none over 30 cm (`test_the_tide_reproduces_the_departments_printed_table`). **PASS.**
+
 11. `python3 docs/reference/chao-phraya-tide-poster/make_poster.py`, then `export_poster.py`, then `python3 -m pytest -q tests/test_poster_chao_phraya_tide.py`: the PDF is one 297 × 420 mm page, every claim has a chip, no unconfirmed claim is present, and `layout-review.json` reports no overflow. A person reads the printed-size proof. Run 2026‑11‑21; output in the [poster record](#poster-record). **PASS, except the last clause: a person reads the printed-size proof, which is Will's.**
 12. `python3 scripts/audit-clock-settings.py --strict`: every clock in the bundle has all six parts of a settings object, and `python3 -m pytest -q tests/test_audit_clock_settings.py` shows the audit itself can pass and can fail for each part. The test run is in the [audit record](#audit-record-settings-objects); the strict run waits for Phases 2 and 2b.
+
+    Phase 2, 2026‑11‑21, **FAIL as expected**: the settings type is escalated (an engine object type), and Phase 2b has not run:
+
+    ```
+    clock            type     fields   level    director phone    test     settings object
+    minute_machine   MISSING  MISSING  MISSING  MISSING  MISSING  MISSING  6 of 6 missing
+    tide_harbour     MISSING  MISSING  MISSING  MISSING  MISSING  yes      5 of 6 missing
+    2 clocks audited, 2 without a complete settings object
+    ```
+
 13. `python3 -m pytest -q tests/test_minute_machine_settings.py tests/test_tide_harbour_settings.py`: each live field is set, the director stepped, and the pose checked, for every field of both clocks.
+
+    Phase 2, 2026‑11‑21, Tide Harbour only (Minute Machine's is Phase 2b), against the cells the settings object will write:
+
+    ```
+    scripts/in-linux-container.sh python3 -m pytest -q tests/test_tide_harbour_settings.py
+    6 passed in 1.78s
+    ```
+
+    **PASS for the director's half;** the object's half waits on the escalation.
+
 
 ## Housekeeping done with this plan
 
