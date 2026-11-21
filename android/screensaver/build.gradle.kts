@@ -44,6 +44,12 @@ android {
             versionCode = 1
             versionName = "0.1"
         }
+        create("tidespike") {              // Tide Harbour Phase 0 spike: throwaway, one APK for four levels
+            dimension = "dream"
+            applicationId = "org.worldfoundry.tidespike"
+            versionCode = 1
+            versionName = "0.1"
+        }
         create("planted") {
             dimension = "dream"
             applicationId = "org.worldfoundry.plantedtank"
