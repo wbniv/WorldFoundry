@@ -318,7 +318,7 @@ def card_angle_deg(k: int, c: int, sod: float) -> float:
     return card_deg(q, n)
 
 
-CARD_STACK = 0.01      # metres between neighbouring fallen cards, so no two faces share a plane
+CARD_STACK = 0.016     # metres between neighbouring fallen cards: more than a card's thickness plus its art, or art behind shows through
 
 
 def card_depth(q: float, n: int) -> float:

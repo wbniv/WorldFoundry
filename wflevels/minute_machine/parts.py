@@ -116,7 +116,9 @@ def m(px: float) -> float:
 
 # ---------------------------------------------------------------------------
 SEGMENTS = {0: "abcdef", 1: "bc", 2: "abdeg", 3: "abcdg", 4: "bcfg", 5: "acdfg", 6: "acdefg", 7: "abc", 8: "abcdefg", 9: "abcdfg"}
-CARD_W, CARD_HALF, CARD_T = 0.31, 0.52, 0.018
+CARD_W, CARD_HALF, CARD_T = 0.31, 0.52, 0.008
+ART_T = 0.004                 # how far a digit stands off its card
+HOUSING_BACK_Y = 0.15         # the housing's back plate: behind the deepest fallen card
 DIG_X, DIG_H, SEG = 0.095, 0.44, 0.052
 
 
@@ -132,7 +134,7 @@ def card_mesh(k: int, c: int) -> Mesh:
 
     def half(digit, top, y, direction):
         segs = SEGMENTS[digit]
-        thick = 0.010
+        thick = ART_T
         y0, y1 = (y - thick, y) if direction > 0 else (y, y + thick)
         t = SEG / 2
         spans = {"a": (-DIG_X, DIG_X, DIG_H - SEG, DIG_H), "g": (-DIG_X + SEG, DIG_X - SEG, 0.0, t),
@@ -158,16 +160,16 @@ def housing_static() -> Mesh:
     mesh = Mesh("display_housing")
     cx = [m(tl.DRUM_X[k]) for k in range(4)]
     z0, z1 = m(tl.TABLE - (tl.DISPLAY_Z_PX + 62.0)), m(tl.TABLE - (tl.DISPLAY_Z_PX - 62.0))
-    mesh.box((m(951.0), 0.12, z0), (m(1113.0), 0.18, z1), "housing")
-    mesh.box((m(951.0), -0.06, z0), (m(960.0), 0.18, z1), "housing")
-    mesh.box((m(1103.0), -0.06, z0), (m(1113.0), 0.18, z1), "housing")
-    mesh.box((m(951.0), -0.06, z1 - 0.07), (m(1113.0), 0.18, z1), "housing")
-    mesh.box((m(951.0), -0.06, z0), (m(1113.0), 0.18, z0 + 0.07), "housing")
+    mesh.box((m(951.0), HOUSING_BACK_Y, z0), (m(1113.0), HOUSING_BACK_Y + 0.06, z1), "housing")
+    mesh.box((m(951.0), -0.06, z0), (m(960.0), HOUSING_BACK_Y + 0.06, z1), "housing")
+    mesh.box((m(1103.0), -0.06, z0), (m(1113.0), HOUSING_BACK_Y + 0.06, z1), "housing")
+    mesh.box((m(951.0), -0.06, z1 - 0.07), (m(1113.0), HOUSING_BACK_Y + 0.06, z1), "housing")
+    mesh.box((m(951.0), -0.06, z0), (m(1113.0), HOUSING_BACK_Y + 0.06, z0 + 0.07), "housing")
     zc = m(tl.TABLE - tl.DISPLAY_Z_PX)
     for dz in (-0.14, 0.14):
         mesh.sphere((m(1031.0), 0.0, zc + dz), 0.035, "digit", 8, 6)
     for x in cx:
-        mesh.cylinder_y(x, zc, 0.012, -0.05, 0.14, "steel", 6)
+        mesh.cylinder_y(x, zc, 0.012, -0.05, HOUSING_BACK_Y, "steel", 6)
     return mesh
 
 
