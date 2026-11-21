@@ -14,7 +14,7 @@ zForth VM against timeline.scene; scripts/check-tide-harbour.py runs it in the e
 
 Global user mailboxes: 600-659 scratch, 689 the last look step, 690-693 the settings (copied every frame
 from the TideHarbourSettings object with property@, plan D13; 0 is the default), 700-706 visibility,
-720-783 the next-turn scan (scan_words).
+720-807 the next-turn scan (scan_words).
 """
 from __future__ import annotations
 
@@ -34,16 +34,17 @@ CELLS = ["t", "sod", "hr", "mi", "sec", "day", "key", "ckey", "cday", "tide", "q
          "son", "mon", "i", "u", "bz", "dy", "dz", "az", "sn", "cs", "kk", "sv"]
 assert 600 + len(CELLS) <= 689
 PREVQ = 689
-SCAN0 = 720                      # the next-turn scan's cells: 720-759 state and results, 760-783 the kept turns (8 x t, h, kind)
+SCAN0 = 720                      # the next-turn scan's cells: 720-759 state and results, 760-783 the scan, 784-807 its result
 SCAN_BURST = 20                  # samples per frame: a scan of 182 takes about ten frames, and runs only when a turn has passed
 SCAN_CELLS = ["s", "s0day", "s0sec", "ya", "yb", "yc", "nt", "act", "rdy", "nht", "nhh", "nlt", "nlh", "rday", "rsec", "rise",
-              "tt", "tv", "tk", "i", "first", "ahead", "lk", "lh", "ok", "den", "off", "bi"]
-KEPT0 = 760
+              "tt", "tv", "tk", "i", "first", "mark", "lk", "lh", "ok", "den", "off", "bi", "rn", "cmark", "now"]
+KEPT0 = 760                      # the scan in progress: 8 x (time, height, kind)
+RES0 = 784                       # the last finished scan, which the picks read
 assert len(SCAN_CELLS) <= KEPT0 - SCAN0
 WORDS = {"floor", "frac", "trunc", "mod", "c01", "x", "y", "z", "a", "b", "c", "sx", "sy", "sz", "col", "byte", "pack",
          "ramp", "tide-sum", "sun", "slow", "palette", "bar-rgb", "recolour", "bars", "boats", "sky", "lights", "clock",
          "show", "tick", "prevq", "poll", "settings", "scan"} | {"opt-" + k for k in tl.OPTION_CELLS} | {"f-" + k for k in tl.OPTION_CELLS}
-WORDS |= {"sc-" + c for c in SCAN_CELLS} | {"sc-y", "sc-add", "sc-turn", "sc-step", "sc-start", "sc-finish", "sc-kept", "sc-append", "sc-replace"}
+WORDS |= {"sc-" + c for c in SCAN_CELLS} | {"sc-y", "sc-add", "sc-turn", "sc-step", "sc-start", "sc-finish", "sc-kept", "sc-res", "sc-append", "sc-replace", "sc-pick"}
 
 
 def check_names() -> None:
@@ -338,11 +339,13 @@ def settings_fields() -> Dict[str, int]:
 def scan_words() -> List[str]:
     """The next high and low water, as turns.next_high_low (one scan, SCAN_BURST samples a frame).
 
-    th-scan restarts a scan when there is no result yet or the nearer of the two turns has passed, then takes
-    SCAN_BURST samples of the tide at 10 minute steps from the scan's start, finds each change of direction,
-    places it with a parabola through the three samples round it, and keeps it by the streaming rule of
-    turns.filtered. The result cells: th-sc-nht/nhh (the next high: seconds after the scan's start, metres),
-    th-sc-nlt/nlh (the next low), th-sc-rise (1 when the next turn is a high), th-sc-rday/rsec (the scan's start).
+    th-scan starts a scan on every ten-minute mark of the clock (and when there is no result yet), takes SCAN_BURST
+    samples of the tide a frame at 10 minute steps from the mark, finds each change of direction, places it with a
+    parabola through the three samples round it, and keeps it by the streaming rule of turns.filtered. A finished
+    scan is copied to the result buffer, and every tick th-sc-pick reads from it the first high and first low
+    still ahead: th-sc-nht/nhh (the next high: seconds after the scan's start, metres), th-sc-nlt/nlh (the next low),
+    th-sc-rise (1 when the next turn is a high), th-sc-rsec/rday (the scan's start). So the reading is a function of
+    the time alone, as turns.panel_reading.
     It reuses th-tide-sum and so overwrites the dd, hh, q64 and r64 cells (th-slow has finished with them) and
     restores th-tide, which the frame words use.
     """
@@ -389,26 +392,40 @@ def scan_words() -> List[str]:
         "    th-sc-add",
         "  then ;",
         ": th-sc-start",
-        f"  th-day th@ {tl.EPOCH_DAY} - {st('s0day')}  th-key th@ {st('s0sec')}",
+        f"  th-day th@ {tl.EPOCH_DAY} - {st('s0day')}  th-key th@ {int(turns.MARK_S)} / th-floor {int(turns.MARK_S)} * {st('s0sec')}",
+        f"  {g('s0day')} 144 * {g('s0sec')} {int(turns.MARK_S)} / + {st('cmark')}",
         f"  -1 {st('s')}  0 {st('nt')}  1 {st('act')} ;",
-        # after the last sample: the first high and the first low ahead, and whether the next turn is a high
+        # the result buffer: element i, field k ( i k -- addr )
+        ": th-sc-res ( i k -- addr ) swap 3 * + " + str(RES0) + " + ;",
+        # after the last sample: the scan becomes the result
         ": th-sc-finish",
-        f"  -1 {st('nht')}  -1 {st('nlt')}  -1 {st('first')}",
+        f"  {g('nt')} {st('rn')}",
+        f"  0 {st('i')}",
         f"  {g('nt')} 0 > if",
-        f"    0 {st('i')}",
         "    begin",
-        f"      {g('i')} 0 th-sc-kept th@ 0 > if",
-        f"        {g('first')} 0 < if {g('i')} 2 th-sc-kept th@ {st('rise')}  1 {st('first')} then",
-        f"        {g('i')} 2 th-sc-kept th@ 1 = if",
-        f"          {g('nht')} 0 < if {g('i')} 0 th-sc-kept th@ {st('nht')}  {g('i')} 1 th-sc-kept th@ {st('nhh')} then",
-        "        else",
-        f"          {g('nlt')} 0 < if {g('i')} 0 th-sc-kept th@ {st('nlt')}  {g('i')} 1 th-sc-kept th@ {st('nlh')} then",
-        "        then",
-        "      then",
+        f"      {g('i')} 0 th-sc-kept th@ {g('i')} 0 th-sc-res th!  {g('i')} 1 th-sc-kept th@ {g('i')} 1 th-sc-res th!  {g('i')} 2 th-sc-kept th@ {g('i')} 2 th-sc-res th!",
         f"      {g('i')} 1 + dup {st('i')} {g('nt')} =",
         "    until",
         "  then",
         f"  {g('s0day')} {st('rday')}  {g('s0sec')} {st('rsec')}  1 {st('rdy')}  0 {st('act')} ;",
+        # every tick: the first high and the first low water still ahead of now, and whether the next turn is a high
+        ": th-sc-pick",
+        f"  -1 {st('nht')}  -1 {st('nlt')}  -1 {st('first')}",
+        f"  th-day th@ {tl.EPOCH_DAY} - {g('rday')} - 86400 * th-key th@ + {g('rsec')} - {st('now')}",
+        f"  {g('rdy')} 0 > {g('rn')} 0 > & if",
+        f"    0 {st('i')}",
+        "    begin",
+        f"      {g('i')} 0 th-sc-res th@ {g('now')} > if",
+        f"        {g('first')} 0 < if {g('i')} 2 th-sc-res th@ {st('rise')}  1 {st('first')} then",
+        f"        {g('i')} 2 th-sc-res th@ 1 = if",
+        f"          {g('nht')} 0 < if {g('i')} 0 th-sc-res th@ {st('nht')}  {g('i')} 1 th-sc-res th@ {st('nhh')} then",
+        "        else",
+        f"          {g('nlt')} 0 < if {g('i')} 0 th-sc-res th@ {st('nlt')}  {g('i')} 1 th-sc-res th@ {st('nlh')} then",
+        "        then",
+        "      then",
+        f"      {g('i')} 1 + dup {st('i')} {g('rn')} =",
+        "    until",
+        "  then ;",
         # one sample: the first two prime ya and yb; from the third on, yb is tested
         ": th-sc-step",
         f"  {g('s')} th-sc-y {st('yc')}",
@@ -419,8 +436,7 @@ def scan_words() -> List[str]:
         ": th-scan",
         f"  {g('act')} 0 = if",
         f"    {g('rdy')} 0 = if th-sc-start else",
-        f"      th-day th@ {tl.EPOCH_DAY} - {g('rday')} - 86400 * th-key th@ + {g('rsec')} - {st('ahead')}",
-        f"      {g('nht')} {g('nlt')} < if {g('nht')} else {g('nlt')} then {g('ahead')} swap > if else th-sc-start then",
+        f"      th-day th@ 144 * {tl.EPOCH_DAY * 144} - th-key th@ {int(turns.MARK_S)} / th-floor + {g('cmark')} <> if th-sc-start then",
         "    then",
         "  then",
         f"  {g('act')} if",
@@ -428,7 +444,8 @@ def scan_words() -> List[str]:
         "    begin",
         f"      th-sc-step {g('bi')} 1 + dup {st('bi')} {SCAN_BURST} = {g('act')} 0 = | ",
         "    until",
-        "  then ;",
+        "  then",
+        "  th-sc-pick ;",
     ]
     return out
 

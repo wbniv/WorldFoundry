@@ -79,3 +79,20 @@ def test_the_search_finds_the_navy_tables_highs_and_lows():
     assert found / total > 0.97, (found, total)                              # measured 98.3 %
     assert statistics.median(time_err) < 12                                  # measured 8 minutes
     assert statistics.median(height_err) < 7                                 # measured 4.9 cm: the fit's own accuracy
+
+
+def test_the_panel_reading_is_a_function_of_the_time_and_moves_on_when_a_turn_passes():
+    day = tl.wall_day(dt.date(2026, 11, 21))
+    a = tn.panel_reading(day, 16.5 * 3600 + 11)
+    assert a.mark == 16.5 * 3600 and a.now == 11
+    b = tn.panel_reading(day, 16.5 * 3600 + 500)              # the same ten-minute mark: the same scan, the same turns
+    assert (b.mark, b.high, b.low, b.rise) == (a.mark, a.high, a.low, a.rise)
+    # just after the next low water the reading's low is a later one, with no new scan needed within the mark
+    lo = a.low
+    t_after = a.mark + lo.t + 30.0
+    c = tn.panel_reading(day, t_after)
+    assert c.low.t > lo.t + 3 * 3600                          # a low is about 12 hours apart, never within three hours
+    assert c.mark == (t_after // 600) * 600
+    for sod in (0.0, 86399.0, 12 * 3600.0):                    # the ends of the day: the horizon reaches into the next day
+        r = tn.panel_reading(day, sod)
+        assert r.high.t > r.now and r.low.t > r.now

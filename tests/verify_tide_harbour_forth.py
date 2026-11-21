@@ -189,37 +189,53 @@ def scan_cases():
 
 
 def check_scan(host: Host, cs):
-    """Each case: start a fresh scan, run frames until it finishes (counting them), and compare the results with
-    turns.next_high_low and turns.rising: times within 5 s, heights within 0.5 cm (float32 against double)."""
-    bad, frames, worst_t, worst_h = [], [], 0.0, 0.0
-    for day, sod in cs:
-        for name in ("rdy", "act"):
-            host.proc.stdin.write(f"M {scan_cell(name)} 0\n")
+    """Each case: start a fresh scan, run frames until it settles (counting them), and compare what the panel would
+    show with turns.panel_reading: the scan's mark, the next high and low (times within 5 s, heights within 0.5 cm,
+    float32 against double) and whether the next turn is a high. Then step the clock, without a reset, to 40 seconds
+    either side of the next high and low: the pick must move on by itself when a turn passes, and a new scan must
+    start on a ten-minute mark, and each time the reading equals the model's."""
+    bad, frames, worst = [], [], {"t": 0.0, "h": 0.0}
+
+    def settle(day, sod, label):
         n = 0
         while True:
             r, dsp, rsp, _w = host.frame_at(day, sod)
             n += 1
             if r != 0 or dsp != 0 or rsp != 0:
-                bad.append(f"scan {tl.date_of(day)} {sod:.0f}: VM result {r}, data stack {dsp}, return stack {rsp}")
-                break
+                bad.append(f"{label}: VM result {r}, data stack {dsp}, return stack {rsp}")
+                return n, None
             if host.read(scan_cell("rdy")) == 1 and host.read(scan_cell("act")) == 0:
                 break
             if n > 40:
-                bad.append(f"scan {tl.date_of(day)} {sod:.0f}: not finished after {n} frames")
-                break
+                bad.append(f"{label}: not finished after {n} frames")
+                return n, None
+        rd = turns.panel_reading(day, sod)
+        got = {k: host.read(scan_cell(k)) for k in ("nht", "nhh", "nlt", "nlh", "rise", "rn", "rsec")}
+        if abs(got["rsec"] - rd.mark) > 0.5:
+            bad.append(f"{label}: the scan started at {got['rsec']:.0f} s, the model's mark is {rd.mark:.0f} s")
+        for (t, h), want in (((got["nht"], got["nhh"]), rd.high), ((got["nlt"], got["nlh"]), rd.low)):
+            worst["t"], worst["h"] = max(worst["t"], abs(t - want.t)), max(worst["h"], abs(h - want.h))
+            if abs(t - want.t) > 5.0 or abs(h - want.h) > 0.005:
+                bad.append(f"{label}: forth {t:.1f} s {h:.4f} m, reference {want.t:.1f} s {want.h:.4f} m")
+        if got["rise"] != float(rd.rise):
+            bad.append(f"{label}: rising {got['rise']}, reference {rd.rise}")
+        if got["rn"] >= turns.KEPT_MAX:
+            bad.append(f"{label}: the scan kept {got['rn']:.0f} turns, its room is {turns.KEPT_MAX}")
+        return n, rd
+
+    for day, sod in cs:
+        for name in ("rdy", "act"):
+            host.proc.stdin.write(f"M {scan_cell(name)} 0\n")
+        n, rd = settle(day, sod, f"scan {tl.date_of(day)} {sod:.0f}")
         frames.append(n)
-        hi, lo = turns.next_high_low(day, float(int(sod)))
-        label = f"scan {tl.date_of(day)} {sod:.0f}"
-        got = {k: host.read(scan_cell(k)) for k in ("nht", "nhh", "nlt", "nlh", "rise", "nt")}
-        for (t, h), (want_t, want_h) in (((got["nht"], got["nhh"]), (hi.t, hi.h)), ((got["nlt"], got["nlh"]), (lo.t, lo.h))):
-            worst_t, worst_h = max(worst_t, abs(t - want_t)), max(worst_h, abs(h - want_h))
-            if abs(t - want_t) > 5.0 or abs(h - want_h) > 0.005:
-                bad.append(f"{label}: forth {t:.1f} s {h:.4f} m, reference {want_t:.1f} s {want_h:.4f} m")
-        if got["rise"] != float(turns.rising(day, float(int(sod)))):
-            bad.append(f"{label}: rising {got['rise']}, reference {turns.rising(day, float(int(sod)))}")
-        if got["nt"] >= turns.KEPT_MAX:
-            bad.append(f"{label}: the scan kept {got['nt']:.0f} turns, its room is {turns.KEPT_MAX}")
-    return frames, worst_t, worst_h, bad
+        if rd is None:
+            continue
+        for turn in (rd.high, rd.low):
+            for dt_s in (-40.0, 40.0):
+                t = rd.mark + turn.t + dt_s
+                if t > sod + 1.0 and t < 86400.0:
+                    settle(day, t, f"scan {tl.date_of(day)} {t:.0f} (turn at {rd.mark + turn.t:.0f}, started {sod:.0f})")
+    return frames, worst["t"], worst["h"], bad
 
 
 def cases():

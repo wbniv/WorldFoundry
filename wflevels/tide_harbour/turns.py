@@ -16,6 +16,7 @@ extreme; a turn of the other kind is kept only if it is far enough from it.
 from __future__ import annotations
 
 import argparse
+import math
 import sys
 from typing import List, NamedTuple, Tuple
 
@@ -75,6 +76,28 @@ def filtered(turns: List[Turn], min_swing: float = MIN_SWING_M) -> List[Turn]:
         else:
             continue          # a wiggle: the turn is too close in height to the one before it
     return kept
+
+
+MARK_S = 600.0               # the panel's scan starts on every ten-minute mark of the clock, so its reading is a function of the time
+
+
+class Reading(NamedTuple):
+    mark: float              # the scan's start, second of the day
+    high: Turn               # the next high water: t counts from the mark
+    low: Turn
+    rise: bool               # the next turn is a high
+    now: float               # seconds from the mark to the second asked about
+
+
+def panel_reading(day: int, sod: float) -> Reading:
+    """What the river panel shows at second of day sod (whole seconds, as the director's clock): the scan that started
+    on the latest ten-minute mark, with the first high and first low water still ahead of sod. Times are from the mark."""
+    s = math.floor(sod)
+    mark = math.floor(s / MARK_S) * MARK_S
+    ts = filtered(raw_turns(day, mark))
+    now = s - mark
+    ahead = [t for t in ts if t.t > now]
+    return Reading(mark, next(t for t in ahead if t.high), next(t for t in ahead if not t.high), ahead[0].high, now)
 
 
 def next_turns(day: int, sod: float, horizon_h: float = HORIZON_H) -> List[Turn]:

@@ -107,6 +107,127 @@ def panel_u_range(side: int) -> Tuple[float, float]:
     return (-HALF_W, -HALF_W + PANEL_W) if side else (HALF_W - PANEL_W, HALF_W)
 
 
+# ---------------------------------------------------------------------------------------------
+# The three burn-in measures (Will, 2026-11-21: "swap sides, pan the map, dim at night") and the layout.
+SWAP_S = 600.0                     # the panel changes side on every ten-minute mark of the clock
+SLIDE_S = 2.6                      # and takes this long to leave one side and arrive at the other
+SCALE_AT_PANEL = 0.82              # the harbour is drawn at this scale beside the panel (the camera pulls back to 1/0.82)
+PAN_S = 900.0                      # the map's view goes once along its range in this many seconds, and back
+PAN_KM = 11.0                      # the range, in kilometres of latitude
+DIM = 1.0 / 6.0                    # the panel's brightness at night, against day
+
+W, H = PANEL_W, PANEL_H            # the panel, in metres at DEPTH: 1.109 x 2.309
+BAND_H = 0.62                      # the wood band at the top: two rows of readings
+ROW_H = BAND_H / 2.0
+WIN_W, WIN_H = 0.095, 0.20         # a digit's window
+PITCH = 0.26                       # the drum's spacing between digits: more than a window, so neighbours stay hidden
+GLYPH_H = 0.17                     # a digit's height on the drum
+M_PER_KM = 0.075                   # the map's scale: 11.7 km of the river's width fits the map area
+COL_X = W / 2 - 0.095              # the level column, right of the map, in panel coordinates
+COL_V0, COL_V1, COL_MAX_M = -0.80, 0.40, 3.5    # its foot and head in v, and the tide at its head
+
+# depths from the camera: nearer is smaller. Back to front: paper, map, column, the band's plate, the drums, the band's mask
+D_PAPER, D_MAP, D_COLUMN, D_PLATE, D_DRUM, D_MASK = (DEPTH + k * LAYER for k in (5, 4, 3, 2, 1, 0))
+# the map's centre of view, and the river's middle: latitude of the map's origin (the map is built about it)
+MAP_LAT0, MAP_LON0 = 13.69, 100.541
+
+
+def smooth(x: float) -> float:
+    x = 0.0 if x < 0.0 else 1.0 if x > 1.0 else x
+    return x * x * (3.0 - 2.0 * x)
+
+
+def slide(sod: float) -> Tuple[bool, float]:
+    """(the panel is at the left, how much of it is on screen 0..1) at second of day sod. It sits on one side for
+    ten minutes, then slides off that edge, and in at the other: visible = |1 - 2 e| with e the eased position."""
+    k = math.floor(sod / SWAP_S)
+    want = k % 2
+    since = sod - k * SWAP_S
+    pos = float(want) if since >= SLIDE_S else (1 - want) + (2 * want - 1) * (since / SLIDE_S)
+    e = smooth(pos)
+    return e >= 0.5, abs(1.0 - 2.0 * e)
+
+
+def harbour_scale(vis: float) -> float:
+    """The harbour's scale on the screen: 0.82 with the panel in, 1 with it out."""
+    return 1.0 - (1.0 - SCALE_AT_PANEL) * vis
+
+
+def panel_centre_u(left: bool, vis: float) -> float:
+    """The panel centre's u at DEPTH: its near edge is at the screen's edge when vis is 1, outside it when 0."""
+    return (-HALF_W + vis * W - W / 2.0) if left else (HALF_W - vis * W + W / 2.0)
+
+
+def camera_shift_m(left: bool, vis: float, dist: float) -> float:
+    """How far the camera and its look-at move along x so that the harbour is centred in what the panel leaves:
+    the harbour moves away from the panel by half its visible width."""
+    view_w = 2.0 * dist * TAN_V * ASPECT
+    return (-1.0 if left else 1.0) * (PANEL_FRAC * vis / 2.0) * view_w
+
+
+def pan_dlat_km(sod: float) -> float:
+    """The map view's offset from the middle, in kilometres of latitude: a slow back and forth, -PAN_KM/2 to +PAN_KM/2."""
+    u = (sod % (2.0 * PAN_S)) / PAN_S
+    tri = u if u < 1.0 else 2.0 - u
+    return PAN_KM * ((1.0 - math.cos(math.pi * tri)) / 2.0 - 0.5)
+
+
+def dim(lit: float) -> float:
+    """The panel's brightness: 1 by day, DIM at night. lit is the director's night amount (timeline's lit ramp, 0 to 1)."""
+    return 1.0 - (1.0 - DIM) * lit
+
+
+# the readings band: widths along a row, left to right (metres), and the drum each digit belongs to
+ROW = (("margin", 0.04), ("icon", 0.10), ("gap", 0.02), ("h10", WIN_W), ("h1", WIN_W), ("colon", 0.04), ("m10", WIN_W),
+       ("m1", WIN_W), ("gap", 0.03), ("t1", WIN_W), ("dot", 0.035), ("t01", WIN_W), ("gap", 0.02), ("unit", 0.10),
+       ("arrow", 0.09))
+assert sum(w for _n, w in ROW) < W, "the readings row must fit the panel"
+DRUMS = ("h10", "h1", "m10", "t1", "t01")          # the minute units digit is always 0 (times are shown to ten minutes)
+
+
+def row_u(name: str) -> float:
+    """The centre of a named cell of a readings row, in panel coordinates (u from the panel's centre)."""
+    u = -W / 2.0
+    for n, w in ROW:
+        if n == name:
+            return u + w / 2.0
+        u += w
+    raise KeyError(name)
+
+
+def row_v(row: int) -> float:
+    """The centre of readings row 0 (the next high water) or 1 (the next low), in panel coordinates."""
+    return H / 2.0 - ROW_H * (row + 0.5)
+
+
+def digits(seconds_ahead: float, rsec: float, metres: float) -> Tuple[int, int, int, int, int]:
+    """The five drum values of one row: hour tens and units, minute tens (time to the nearest ten minutes), and the
+    height's units and tenths (to 0.1 m). seconds_ahead counts from the scan's start second rsec."""
+    t = rsec + seconds_ahead
+    slot = int(math.floor(t / 600.0 + 0.5)) % 144          # ten-minute slots in a day
+    tenths = int(math.floor(metres * 10.0 + 0.5))
+    hour = slot // 6
+    return hour // 10, hour % 10, slot % 6, tenths // 10, tenths % 10
+
+
+def drum_v(value: int) -> float:
+    """How far a drum sits above its window's centre so that digit `value` shows (digit k is k pitches below its zero)."""
+    return value * PITCH
+
+
+def level_v(metres: float) -> float:
+    """The v of the water level on the column, in panel coordinates."""
+    m = 0.0 if metres < 0.0 else COL_MAX_M if metres > COL_MAX_M else metres
+    return COL_V0 + (COL_V1 - COL_V0) * m / COL_MAX_M
+
+
+def map_v(sod: float) -> float:
+    """Where the map actor sits in v, in panel coordinates. The map is built about the point at latitude MAP_LAT0 with
+    north up; the window is the panel below the band, whose centre is at -BAND_H/2. To show the latitude the pan has
+    reached in the window's centre, the map's origin sits below it by that many kilometres at the map's scale."""
+    return -BAND_H / 2.0 - pan_dlat_km(sod) * M_PER_KM
+
+
 def main() -> int:
     import argparse
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
