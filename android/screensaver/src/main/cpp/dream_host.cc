@@ -10,6 +10,7 @@
 #include <string>
 #include <thread>
 #include <unistd.h>
+#include <vector>
 
 #include <hal/hal.h>
 #include <hal/android/touch_controls.h>
@@ -32,6 +33,29 @@ AAssetManager* assets = nullptr;
 ANativeWindow* activeWindow = nullptr;
 int surfaceWidth = 0;
 int surfaceHeight = 0;
+
+// TankPlayer.start(-1), ClocksActivity's launcher with no LEVEL extra: leave out the positional
+// level so a shell-menu.fth bundle shows the engine's chooser, and keep the menu drawer installed.
+// docs/plans/2026-11-21-tide-harbour-clock.md, "The bundle and the chooser".
+constexpr int kShowMenu = -1;
+std::atomic<bool> showMenu{false};
+
+// The number of levels in the APK's cd.iff: its TOC less SHEL, the trailing UIFT and a MENU
+// (cdpack's layout: SHEL, the levels, [MENU], UIFT). -1 when the asset or its TOC is unreadable.
+int bundleLevelCount(AAssetManager* manager) {
+    AAsset* asset = AAssetManager_open(manager, "cd.iff", AASSET_MODE_RANDOM);
+    if (!asset) return -1;
+    std::vector<uint8_t> sector(2048);           // DiskFileCD::_SECTOR_SIZE: the TOC sector
+    const int got = AAsset_read(asset, sector.data(), sector.size());
+    AAsset_close(asset);
+    std::vector<levelmenu::TocEntry> toc;
+    if (got <= 0 || !levelmenu::ParseToc(sector.data(), size_t(got), &toc)) return -1;
+    size_t n = toc.size();
+    if (n > 0 && toc[n - 1].tag == levelmenu::Tag("UIFT")) --n;
+    if (n > 0 && toc[n - 1].tag == levelmenu::Tag("MENU")) --n;
+    if (n < 2 || toc.front().tag != levelmenu::Tag("SHEL")) return -1;
+    return int(n) - 1;
+}
 
 // Planted Tank parameters (planted_bridge.h). Unconfigured, and so inert, for the Aquarium and
 // Seahorse flavors, which never call nativeConfigure.
@@ -96,6 +120,7 @@ extern "C" void WFAndroidRequestClose() { closing.store(true); }
 // tank's seed strip, its settings panel, the level menu) must never draw. The engine draws all of
 // it through levelmenu::Drawer(), which Display installs once at start-up, so clear it every frame
 // rather than editing the engine. Without a drawer the level menu starts level 0 (game.cc).
+// The exception is kShowMenu, a launcher asking for the chooser: there the drawer stays.
 extern "C" void WFAndroidPumpEvents() {
     if (activeWindow) {
         const int width = ANativeWindow_getWidth(activeWindow);
@@ -107,7 +132,7 @@ extern "C" void WFAndroidPumpEvents() {
             surfaceHeight = height;
         }
     }
-    if (levelmenu::Drawer()) levelmenu::SetDrawer(nullptr);
+    if (!showMenu.load() && levelmenu::Drawer()) levelmenu::SetDrawer(nullptr);
     plantedBridge.pump(launchOverrideSink);
 }
 extern "C" void WFAndroidTouchLayout(int, int, androidtouch::Layout* layout,
@@ -174,7 +199,16 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeStop(JNIEnv*, jclass) {
 extern "C" JNIEXPORT void JNICALL
 Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         JNIEnv* env, jclass, jobject manager, jobject surface, jint level, jstring logPath) {
-    if (level < 0 || level > 10) return;
+    // The index bound is the bundle's own length (it was the Aquarium's hard-coded 10). An index
+    // outside it is the caller's error: say so and start nothing, never another level.
+    AAssetManager* bundleAssets = AAssetManager_fromJava(env, manager);
+    const int levels = bundleLevelCount(bundleAssets);
+    if (levels <= 0 || level < kShowMenu || level >= levels) {
+        __android_log_print(ANDROID_LOG_ERROR, "wf_dream",
+                            "level %d rejected: cd.iff holds %d levels (-1 shows the menu)", int(level), levels);
+        return;
+    }
+    showMenu.store(level == kShowMenu);
     if (logPath) {
         const char* path = env->GetStringUTFChars(logPath, nullptr);
         if (path) {
@@ -182,7 +216,7 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
             env->ReleaseStringUTFChars(logPath, path);
         }
     }
-    std::fprintf(stderr, "\n=== wf_dream start level %d ===\n", int(level));
+    std::fprintf(stderr, "\n=== wf_dream start level %d of %d ===\n", int(level), levels);
     __android_log_print(ANDROID_LOG_INFO, "wf_dream", "start level %d", int(level));
     ANativeWindow* window = ANativeWindow_fromSurface(env, surface);
     if (!window) return;
@@ -193,7 +227,8 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         surfaceWidth = ANativeWindow_getWidth(window);
         surfaceHeight = ANativeWindow_getHeight(window);
         windowReady.store(true);
-        // The positional argument selects the same TOC index as TankChoice.IDS.
+        // The positional argument selects the same TOC index as the package's LevelCatalog;
+        // kShowMenu leaves it out (argv ends one early), so a shell-menu bundle asks the player.
         char arg0[] = "wf_dream";
         // Decimal, not one ASCII digit: index 10 (Sea Stars) as '0' + 10 is ':', which atoi()
         // reads as 0, so the Dream played the Clownfish tank. The engine parses it with atoi.
@@ -210,11 +245,13 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         char vramHeight[] = "--vram-height=2048";
         char noFps[] = "--no-fps";
         char* argv[] = {arg0, slotWidth, slotHeight, permWidth, permHeight, vramWidth, vramHeight, noFps, arg1, nullptr};
-        __argc = 9;
+        const int argc = level == kShowMenu ? 8 : 9;
+        argv[argc] = nullptr;
+        __argc = argc;
         __argv = argv;
         // Tank 0's overrides: the engine applies them when the level registry loads.
         plantedBridge.startFirstTank(launchOverrideSink);
-        HALStart(9, argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
+        HALStart(argc, argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
         std::fprintf(stderr, "wf_dream: HALStart returned\n");
         windowReady.store(false);
         activeWindow = nullptr;
