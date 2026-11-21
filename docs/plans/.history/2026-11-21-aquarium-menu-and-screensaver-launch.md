@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-21](https://github.com/wbniv/WorldFoundry/commit/85e376b1) | Aquarium launch plan: D7 narrowed (Planted already in the roster, Seahorse Grid out); linux-test image gains python3-yaml |
 | [2026-11-21](https://github.com/wbniv/WorldFoundry/commit/9cf32704) | Aquarium: run-aquarium-menu desktop task (Phase 1); runs the shipped menu bundle with the Android app's engine flags |
 | [2026-11-21](https://github.com/wbniv/WorldFoundry/commit/615f8daa) | Aquarium launch plan: D6 accepted, the extra is named LEVEL |
 | [2026-11-21](https://github.com/wbniv/WorldFoundry/commit/b46e28c2) | Aquarium launch plan: D1-D5 accepted; generic LevelCatalog and LEVEL extra across Aquarium, 3D Clocks and single-level packages |
@@ -7,6 +8,11 @@
 | [2026-11-21](https://github.com/wbniv/WorldFoundry/commit/07ee3ca1) | Aquarium menu and screensaver launch plan: desktop menu task, one tank roster, TANK intent extra, Homeboard handoff |
 
 <!--history-meta v1
+85e376b1	author	Will Norris
+85e376b1	added	9
+85e376b1	deleted	9
+85e376b1	files	1
+85e376b1	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqPZiAJGsGH8BoMrdUT
 9cf32704	author	Will Norris
 9cf32704	added	4
 9cf32704	deleted	2
