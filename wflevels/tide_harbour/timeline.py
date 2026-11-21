@@ -238,14 +238,14 @@ def byte(v: float) -> int:
 # Layout
 N_BARS = 36
 WATER_NEAR, WATER_FAR = -40.0, 92.0                 # the water runs back behind the camera
-BAR_HALF_WIDTH = 170.0
+BAR_HALF_WIDTH = 260.0                              # wide enough for the frame's far corners at full drift
 BAR_THICK = 0.45
 BAR_OVERLAP = 1.18
 WAVE_F = (0.11, 0.07)                               # Hz; times 3600 a whole number, so the hour wraps cleanly
 WAVE_K = (0.07, 0.11)                               # cycles per bar
-LOOK_AT = (0.0, 12.0, 5.5)
-CAMERA_R = 42.0                                     # horizontal distance from the look-at point
-CAMERA_Z = 10.5
+LOOK_AT = (-2.0, 10.0, 8.0)
+CAMERA_R = 54.0                                     # horizontal distance from the look-at point
+CAMERA_Z = 12.5
 DRIFT_DEG = 6.0
 DRIFT_PERIOD = 600.0                                # divides 86400: no jump at midnight
 CAMERA_REF = (LOOK_AT[0], LOOK_AT[1] - CAMERA_R, CAMERA_Z)
@@ -266,10 +266,11 @@ RAFT = (4.0, -9.0)
 GAUGE = (-3.0, -13.6)                               # the gauge post, in front of the pier's end
 HYACINTH = [(-8.0 + 7.3 * i, 2.0 + (i * 11) % 23, 0.27 * i) for i in range(6)]
 HYACINTH_DRIFT = 9.0                                # metres of drift per metre of tide (flood goes upstream)
-TOWER = (16.0, 1.0)                                 # tower centre (x, y): the tower stands on a quay on the right
-DIAL = (16.0, -2.08, 14.0)                          # dial centre; its face looks along -y, at the camera
-DIAL_R = 3.2
-HAND_LEN = {"hand_h": 1.75, "hand_m": 2.55, "hand_s": 2.75}
+TOWER = (15.0, -5.0)                                # tower centre (x, y): the tower stands on a quay on the right
+TOWER_HALF = 4.2
+DIAL = (15.0, -9.28, 14.6)                          # dial centre; its face looks along -y, at the camera
+DIAL_R = 3.7                                        # D8: the digits must read across a room; the dial is drawn large
+HAND_LEN = {"hand_h": 2.0, "hand_m": 2.95, "hand_s": 3.2}
 HAND_Y = {"hand_h": DIAL[1] - 0.10, "hand_m": DIAL[1] - 0.16, "hand_s": DIAL[1] - 0.22}
 SKY_Y = 118.0
 SUN_Y = 112.0                                       # the sun and moon discs: in front of the sky, behind the far bank
@@ -366,7 +367,7 @@ def colour_of(kind: str, day_rgb, lit_rgb, pal, arg: float = 0.0):
         return mix(hor, zen, arg)
     if kind == "bar":
         far = tuple(0.55 * h + 0.45 * kk * f for h, kk, f in zip(hor, k, WATER_FAR_DAY))
-        near = tuple(kk * n + 0.12 * h for kk, n, h in zip(k, WATER_NEAR_DAY, hor))
+        near = tuple(kk * n + 0.25 * z for kk, n, z in zip(k, WATER_NEAR_DAY, zen))      # the near water mirrors the sky overhead
         return mix(far, near, arg)
     if kind == "cloud":
         return mix(mul(day_rgb, k), hor, 0.35)

@@ -62,11 +62,11 @@ MATERIALS: Dict[str, Tuple[str, RGB, RGB, float]] = {
     "moon": ("fixed", (0.93, 0.95, 1.00), NONE, 0.0),
     "bird": ("fixed", (0.10, 0.10, 0.12), NONE, 0.0),
 }
-SKY_EDGES = (-20.0, 6.0, 14.0, 24.0, 38.0, 60.0, 220.0)
+SKY_EDGES = (-20.0, 4.0, 8.0, 13.0, 19.0, 26.0, 34.0, 44.0, 58.0, 80.0, 220.0)   # narrow near the horizon, where the colour changes fastest
 for _i in range(len(SKY_EDGES) - 1):
     MATERIALS[f"sky_{_i}"] = ("sky", (0.6, 0.75, 0.9), NONE, (_i / (len(SKY_EDGES) - 2)) ** 0.8)
 for _k in range(tl.N_BARS):
-    MATERIALS[f"water_{_k:02d}"] = ("bar", (0.3, 0.4, 0.45), NONE, _k / (tl.N_BARS - 1))
+    MATERIALS[f"water_{_k:02d}"] = ("bar", (0.3, 0.4, 0.45), NONE, 1.0 - _k / (tl.N_BARS - 1))     # nearness: bar 0 is the nearest
 
 
 def day_colour(key: str) -> RGB:
@@ -152,12 +152,16 @@ def tower_mesh() -> Mesh:
     tx, ty = tl.TOWER
     front = tl.DIAL[1] + 0.08                           # the tower's front face, just behind the dial
     m.box((tx - 6.0, front - 2.0, -1.5), (tx + 6.0, ty + 5.0, tl.DECK_Z), "stone")          # the quay
-    m.box((tx - 3.0, front, tl.DECK_Z), (tx + 3.0, ty + 3.0, 18.4), "stone")                 # the tower
+    th = tl.TOWER_HALF
+    top = tl.DIAL[2] + tl.DIAL_R + 1.2
+    m.box((tx - th, front, tl.DECK_Z), (tx + th, ty + 3.0, top), "stone")                     # the tower
     m.box((tx - 1.1, front - 0.04, tl.DECK_Z), (tx + 1.1, front, tl.DECK_Z + 3.6), "arch")    # the arch, lit at dusk
-    m.box((tx - 3.4, front - 0.4, 18.4), (tx + 3.4, ty + 3.4, 19.0), "gold")                 # cornice
-    for k, (half, z0, z1) in enumerate(((2.6, 19.0, 21.2), (1.8, 21.2, 23.0), (1.0, 23.0, 24.4))):
-        m.box((tx - half, ty - half, z0), (tx + half, ty + half, z1), "stone" if k % 2 else "gold")
-    m.prism_xz([(tx - 0.7, 24.4), (tx + 0.7, 24.4), (tx, 28.5)], ty - 0.7, ty + 0.7, "gold")    # the spire
+    m.box((tx - th - 0.4, front - 0.4, top), (tx + th + 0.4, ty + 3.4, top + 0.6), "gold")    # cornice
+    z = top + 0.6
+    for k, (half, h) in enumerate(((3.2, 2.2), (2.2, 1.8), (1.2, 1.4))):
+        m.box((tx - half, ty - half, z), (tx + half, ty + half, z + h), "stone" if k % 2 else "gold")
+        z += h
+    m.prism_xz([(tx - 0.7, z), (tx + 0.7, z), (tx, z + 4.0)], ty - 0.7, ty + 0.7, "gold")      # the spire
     return m
 
 

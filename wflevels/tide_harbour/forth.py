@@ -196,7 +196,7 @@ def bar_rgb() -> List[str]:
     lines = [": th-bar-rgb", f"  {cell('u')} th!"]
     for ch in range(3):
         far = f"{get(HOR[ch])} .55 * {get(K[ch])} {n(tl.WATER_FAR_DAY[ch])} * .45 * +"
-        near = f"{get(K[ch])} {n(tl.WATER_NEAR_DAY[ch])} * {get(HOR[ch])} .12 * +"
+        near = f"{get(K[ch])} {n(tl.WATER_NEAR_DAY[ch])} * {get(ZEN[ch])} .25 * +"
         lines.append(f"  {far} dup {near} swap - {get('u')} * +")
     lines.append(";")
     return lines
@@ -207,7 +207,7 @@ def recolour_words(ix: Dict[str, int]) -> List[str]:
     lines = bar_rgb() + [": th-recolour", "  th-palette"]
     bar0 = ix["bar_00"]
     lines += ["  0 th-i th!", "  begin",
-              f"    {get('i')} {tl.N_BARS - 1} / th-bar-rgb th-pack {bar0} {get('i')} + 0 th-col",
+              f"    1 {get('i')} {tl.N_BARS - 1} / - th-bar-rgb th-pack {bar0} {get('i')} + 0 th-col",      # nearness: bar 0 is the nearest
               f"    {get('i')} 1 + dup th-i th! {tl.N_BARS} =", "  until"]
     for name, entries in slots.items():
         if name.startswith("bar_"):

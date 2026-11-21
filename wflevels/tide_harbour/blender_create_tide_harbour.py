@@ -16,6 +16,7 @@ import math
 import sys
 from pathlib import Path
 
+import bmesh
 import bpy
 
 HERE = Path(__file__).resolve().parent
@@ -37,7 +38,7 @@ THAI_FONT = Path('/usr/lib/blender/datafiles/fonts/NotoSansThai-VariableFont_wdt
 THAI = ['๑๒', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙', '๑๐', '๑๑']     # 12 at the top, then clockwise
 ROMAN = ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI']
 LIGHT_B, LIGHT_C = 45.0, 90.0          # degrees: the light travels toward +y and down at 45, so tops and camera-facing fronts light alike
-DIRECTIONAL, AMBIENT = 0.78, 0.45      # top = front = 0.45 + 0.78 sin 45 = 1.0; sides 0.45
+DIRECTIONAL, AMBIENT = 0.64, 0.55      # top = front = 0.55 + 0.64 sin 45 = 1.0; sides 0.55
 MATERIALS = {}
 
 
@@ -102,8 +103,9 @@ def mesh_actor(mesh, cls='platform', pose=None, visibility=1):
     return obj
 
 
-def numerals(name, texts, font, height):
-    """The twelve numerals on the dial as one mesh facing -y, each centred on its hour, the tallest `height` high."""
+def numerals(name, texts, font, height, max_width):
+    """The twelve numerals on the dial as one mesh facing -y, each centred on its hour: one height for all (the
+    tallest glyph `height` high), and any numeral wider than `max_width` scaled down to fit between its neighbours."""
     glyphs = []
     for k, text in enumerate(texts):
         curve = bpy.data.curves.new(f'{name}_{k}', type='FONT')
@@ -113,7 +115,7 @@ def numerals(name, texts, font, height):
         curve.size = 1.0
         curve.align_x = 'CENTER'
         curve.align_y = 'CENTER'
-        curve.offset = 0.035                      # embolden: the digits must read across a room (D8)
+        curve.offset = 0.02                       # embolden: the digits must read across a room (D8)
         curve.resolution_u = 3                    # few faces: the outlines are a metre high and seen from 40 m
         obj = bpy.data.objects.new(f'{name}_{k}', curve)
         bpy.context.scene.collection.objects.link(obj)
@@ -123,15 +125,22 @@ def numerals(name, texts, font, height):
     shapes = []
     for obj in glyphs:
         me = bpy.data.meshes.new_from_object(obj.evaluated_get(deps))
-        verts = [tuple(v.co) for v in me.vertices]
-        faces = [tuple(p.vertices) for p in me.polygons]
+        # triangulate here: a glyph's fill has concave n-gons, which the exporter's fan triangulation breaks
+        # (the first build's numerals lost pieces of ๓ and ๙)
+        bm = bmesh.new()
+        bm.from_mesh(me)
+        bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method='BEAUTY', ngon_method='BEAUTY')
+        verts = [tuple(v.co) for v in bm.verts]
+        bm.verts.index_update()
+        faces = [tuple(v.index for v in f.verts) for f in bm.faces]
+        bm.free()
         assert faces, f'{obj.name}: the font gave no outline for {obj.data.body!r}'
         shapes.append((verts, faces))
         bpy.data.objects.remove(obj, do_unlink=True)
         bpy.data.meshes.remove(me)
     tallest = max(max(v[1] for v in verts) - min(v[1] for v in verts) for verts, _f in shapes)
     s = height / tallest
-    radius = tl.DIAL_R * 0.72
+    radius = tl.DIAL_R * 0.70
     cx, y, cz = tl.DIAL
     m = parts.Mesh(name)
     for k, (verts, faces) in enumerate(shapes):
@@ -139,9 +148,10 @@ def numerals(name, texts, font, height):
         ox, oz = cx + radius * math.sin(a), cz + radius * math.cos(a)
         mx = (max(v[0] for v in verts) + min(v[0] for v in verts)) / 2
         my = (max(v[1] for v in verts) + min(v[1] for v in verts)) / 2
+        k_s = min(s, max_width / (max(v[0] for v in verts) - min(v[0] for v in verts)))
         base = len(m.vertices)
         # (x, y, 0) on the text plane, normal +z, becomes (x, -0.05, y): a quarter turn about x, so the normal is -y
-        m.vertices.extend((ox + (vx - mx) * s, y - 0.05, oz + (vy - my) * s) for vx, vy, _vz in verts)
+        m.vertices.extend((ox + (vx - mx) * k_s, y - 0.05, oz + (vy - my) * k_s) for vx, vy, _vz in verts)
         for f in faces:
             m.faces.append(tuple(base + i for i in f))
             m.colors.append('ink')
@@ -187,8 +197,8 @@ for mesh in parts.toggled_static_meshes():
     mesh_actor(mesh, 'platform', visibility=tl.VIS[parts.VISIBLE_STATICS[mesh.name]])
 assert THAI_FONT.is_file(), f'{THAI_FONT}: the Thai font is missing from this Blender (it ships in the blender package)'
 thai = bpy.data.fonts.load(str(THAI_FONT))
-mesh_actor(numerals('numerals_thai', THAI, thai, 0.95), 'platform', visibility=tl.VIS['numerals_thai'])
-mesh_actor(numerals('numerals_roman', ROMAN, None, 0.70), 'platform', visibility=tl.VIS['numerals_roman'])
+mesh_actor(numerals('numerals_thai', THAI, thai, 1.0, 1.0), 'platform', visibility=tl.VIS['numerals_thai'])
+mesh_actor(numerals('numerals_roman', ROMAN, None, 0.75, 1.4), 'platform', visibility=tl.VIS['numerals_roman'])
 for name, mesh in parts.all_meshes().items():
     group = parts.visibility_group(name)
     mesh_actor(mesh, 'platform', poses[name], visibility=tl.VIS[group] if group else 1)
