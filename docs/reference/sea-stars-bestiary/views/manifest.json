@@ -1,0 +1,121 @@
+{
+  "source_blend": "wflevels/aquarium_sea_stars/sea_stars_assets.blend",
+  "source_sha256": "74a1c88e935e02c780828e54e4af7697bb49165289aecc4e330e33026e9df7e2",
+  "species": [
+    {
+      "kind": "linckia",
+      "object": "BlueStar",
+      "scientific": "Linckia laevigata",
+      "images": {
+        "dorsal": {
+          "file": "linckia-dorsal.png",
+          "sha256": "faa834e3e7e3f8f500719cc5bf40c4859f344c20e6786fee78ead80cd2ab8fb6"
+        },
+        "side": {
+          "file": "linckia-side.png",
+          "sha256": "9fb617b0e5b5be794d811a3c109355d98887076011e8846dee09d9024b5d64e4"
+        },
+        "oral": {
+          "file": "linckia-oral.png",
+          "sha256": "bef119c1d229e1be3840a7f846636a3b102f6efd9ab98f6b25fa6d2afd89ce6f"
+        }
+      }
+    },
+    {
+      "kind": "chip",
+      "object": "ChipOne",
+      "scientific": "Protoreaster nodosus",
+      "images": {
+        "dorsal": {
+          "file": "chip-dorsal.png",
+          "sha256": "5fb98bca0f0688bcfdb6989b9b6b37bd808ce42af2478837001fa386ca5a973a"
+        },
+        "side": {
+          "file": "chip-side.png",
+          "sha256": "3cd1459d5826f1605b9f75126357e799aff263dc9595170ff18d5678a15c992d"
+        },
+        "oral": {
+          "file": "chip-oral.png",
+          "sha256": "d8ade7a78f3929c55ff13f86fd20ac86241706ad388dd2465ea1ff37a2638339"
+        }
+      }
+    },
+    {
+      "kind": "fromia",
+      "object": "FromiaOne",
+      "scientific": "Fromia milleporella",
+      "images": {
+        "dorsal": {
+          "file": "fromia-dorsal.png",
+          "sha256": "93a1d35d388e2f0fb46538499f3cb6dd7324e21576f80140e6a778004493d9ec"
+        },
+        "side": {
+          "file": "fromia-side.png",
+          "sha256": "5820c756f45fc075875d621def442c86f7592f2a895d0f3c0b07c20145df86b8"
+        },
+        "oral": {
+          "file": "fromia-oral.png",
+          "sha256": "2e632704d88ecfc30beb3fccec68d33f2dae6423d53896d80064adcbe783d678"
+        }
+      }
+    },
+    {
+      "kind": "sand",
+      "object": "SandOne",
+      "scientific": "Archaster typicus",
+      "images": {
+        "dorsal": {
+          "file": "sand-dorsal.png",
+          "sha256": "0839de8c3ea85e153feda0de0a636610708d3baf33afa86ac783aa0b4c31f473"
+        },
+        "side": {
+          "file": "sand-side.png",
+          "sha256": "5781f11b1251ca260b83adfe37ba38732462c10d883f77d60a86b26519e11c16"
+        },
+        "oral": {
+          "file": "sand-oral.png",
+          "sha256": "95f9606d577be820ece4cc85647d15dad03e8dc264c1fb4ec5cec7775a890e58"
+        }
+      }
+    },
+    {
+      "kind": "brittle",
+      "object": "Brittle",
+      "scientific": "Ophiarachna incrassata",
+      "images": {
+        "dorsal": {
+          "file": "brittle-dorsal.png",
+          "sha256": "1057e1d1f26f8794b59c73963e1c755788650f01620b36148a7afe3b35e445c5"
+        },
+        "side": {
+          "file": "brittle-side.png",
+          "sha256": "75a191317202d6cf16acd032c56928064d99cd838d8e0b141d384d00b820ad5b"
+        },
+        "oral": {
+          "file": "brittle-oral.png",
+          "sha256": "1f95baaa8662fe81d46d2c14cba0f524c9277611e8da7e64a1f62ac3c08fad57"
+        }
+      }
+    },
+    {
+      "kind": "cushion",
+      "object": "Cushion",
+      "scientific": "Culcita novaeguineae",
+      "images": {
+        "dorsal": {
+          "file": "cushion-dorsal.png",
+          "sha256": "09643bf4df4cfcc8583f9cdb32536de23a979aebdc20786c45828f21b5a54df2"
+        },
+        "side": {
+          "file": "cushion-side.png",
+          "sha256": "0cb83cb1f36c1ef3bb031bc14617a50be30bbf6af74beba8575e28962aed06bc"
+        },
+        "oral": {
+          "file": "cushion-oral.png",
+          "sha256": "3149a1021ff304dd73f555acf4373b0970d870438d6839eaccce73721f2b634d"
+        }
+      }
+    }
+  ],
+  "representation": "Neutral views of the authored 3D models and materials; runtime acceptance remains pending."
+}

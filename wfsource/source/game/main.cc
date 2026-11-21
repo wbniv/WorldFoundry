@@ -73,6 +73,8 @@ const char* gCapturePath  = nullptr;
 // the existing headless CI smoke keeps running exactly as it did in Phases 2-3,
 // and so a machine with no window-server session is never asked for a window it
 // cannot provide. Ignored on platforms whose HAL already owns a window.
+// hal/macos/platform_main.cc also sets it when the bundle is launched with no
+// arguments (a Finder double-click), which has no other way to ask for one.
 bool        gWindowed     = false;
 bool gWfmutThreadTest     = false;      // true = run --wfmut-thread-test (X5 death-test)
 int  gFrameStepCycles = 1;              // --cycles=N: how many Load/Unload cycles to run

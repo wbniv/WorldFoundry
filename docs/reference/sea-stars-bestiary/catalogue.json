@@ -1,0 +1,78 @@
+{
+  "title": "Sea Stars · Bestiary catalogue",
+  "date": "20 November 2026",
+  "species": [
+    {
+      "kind": "linckia",
+      "title": "Blue sea star",
+      "scientific": "Linckia laevigata",
+      "object": "BlueStar",
+      "role": "Player",
+      "count": 1,
+      "diameter": "18 cm",
+      "appearance": "Cobalt-blue skin, long rounded arms and a small red eyespot at each tip. The oral face has five grooves converging on the central mouth.",
+      "behavior": "Any arm can lead. The player glides over sand, climbs all four glass walls and performs a two-second Reach. Idle and Dream driving share an autopilot route.",
+      "poses": "Glide · Lead · Corner · Reach"
+    },
+    {
+      "kind": "chip",
+      "title": "Chocolate-chip star",
+      "scientific": "Protoreaster nodosus",
+      "object": "ChipOne / ChipTwo",
+      "role": "Resident",
+      "count": 2,
+      "diameter": "20 cm",
+      "appearance": "Broad tan disc, thick tapered arms and dark raised knobs. The knobs are part of the 3D mesh, giving the species a distinct profile.",
+      "behavior": "Wanders between grazing spots on the open sand, with long rests between short journeys. Its heavier silhouette contrasts with the slender blue player.",
+      "poses": "Glide · Lead"
+    },
+    {
+      "kind": "fromia",
+      "title": "Red Fromia",
+      "scientific": "Fromia milleporella",
+      "object": "FromiaOne / Two / Three",
+      "role": "Resident",
+      "count": 3,
+      "diameter": "8 cm",
+      "appearance": "Small red star with tapered arms and fine dark pores. Three individuals punctuate the bare rock outcrops with warm colour.",
+      "behavior": "Creeps along authored routes on the rock faces. These routes are prepared with the assets; the player’s free rock climbing remains outside the level’s scope.",
+      "poses": "Glide"
+    },
+    {
+      "kind": "sand",
+      "title": "Sand-sifting star",
+      "scientific": "Archaster typicus",
+      "object": "SandOne / SandTwo",
+      "role": "Resident",
+      "count": 2,
+      "diameter": "11.2 cm",
+      "appearance": "A flattened grey-tan body with slender arms and pale marginal plates. Its low profile lets the whole animal disappear beneath the sand.",
+      "behavior": "Alternates between burial, emergence and short glides across the sand. Player contact is designed to trigger a quicker retreat beneath the surface.",
+      "poses": "Glide · Bury · Rise"
+    },
+    {
+      "kind": "brittle",
+      "title": "Green brittle star",
+      "scientific": "Ophiarachna incrassata",
+      "object": "Brittle",
+      "role": "Resident · ophiuroid",
+      "count": 1,
+      "diameter": "34 cm extended span",
+      "appearance": "A 3.8 cm disc carries five tapering, segmented arms, each 15 cm long. The arms form different S bends and hooked curls, with small lateral spines and muted bands.",
+      "behavior": "Rests with sinuous arms partly curled around its refuge. During escape, the middle arm segments row while the distal portions remain flexible and can lift from the substrate.",
+      "poses": "Row · Hide"
+    },
+    {
+      "kind": "cushion",
+      "title": "Cushion star",
+      "scientific": "Culcita novaeguineae",
+      "object": "Cushion",
+      "role": "Resident",
+      "count": 1,
+      "diameter": "14.4 cm",
+      "appearance": "A thick, rounded pentagon with almost no projecting arms. Warm orange-brown skin carries an irregular darker net pattern.",
+      "behavior": "Remains almost stationary. A gentle vertical puff provides a contrasting animation; the puff is approved stylization rather than a claim about the animal’s breathing.",
+      "poses": "Puff · transform animation"
+    }
+  ]
+}

@@ -1,0 +1,289 @@
+{
+  "level": "aquarium_sea_stars",
+  "actors": {
+    "Room": 1,
+    "SunLight": 2,
+    "Camera": 3,
+    "Director": 4,
+    "LevelObj": 5,
+    "Matte": 6,
+    "cs_wide": 7,
+    "LookAt": 8,
+    "Player": 9,
+    "sea_shell": 10,
+    "sea_rocks": 11,
+    "sea_grass": 12,
+    "sea_ledge": 13,
+    "RockProxy0": 14,
+    "RockProxy1": 15,
+    "RockProxy2": 16,
+    "BlueStar": 17,
+    "ChipOne": 18,
+    "ChipTwo": 19,
+    "FromiaOne": 20,
+    "FromiaTwo": 21,
+    "FromiaThree": 22,
+    "SandOne": 23,
+    "SandTwo": 24,
+    "Brittle": 25,
+    "Cushion": 26,
+    "ChipThree": 27,
+    "ChipFour": 28,
+    "FromiaFour": 29,
+    "FromiaFive": 30,
+    "SandThree": 31,
+    "SandFour": 32,
+    "BrittleTwo": 33,
+    "CushionTwo": 34,
+    "AmbientLight": 35,
+    "SeaStarsSettings": 36
+  },
+  "indices": {
+    "Room": 1,
+    "SunLight": 2,
+    "Camera": 3,
+    "Director": 4,
+    "LevelObj": 5,
+    "Matte": 6,
+    "cs_wide": 7,
+    "LookAt": 8,
+    "Player": 9,
+    "sea_shell": 10,
+    "sea_rocks": 11,
+    "sea_grass": 12,
+    "sea_ledge": 13,
+    "RockProxy0": 14,
+    "RockProxy1": 15,
+    "RockProxy2": 16,
+    "BlueStar": 17,
+    "ChipOne": 18,
+    "ChipTwo": 19,
+    "FromiaOne": 20,
+    "FromiaTwo": 21,
+    "FromiaThree": 22,
+    "SandOne": 23,
+    "SandTwo": 24,
+    "Brittle": 25,
+    "Cushion": 26,
+    "ChipThree": 27,
+    "ChipFour": 28,
+    "FromiaFour": 29,
+    "FromiaFive": 30,
+    "SandThree": 31,
+    "SandFour": 32,
+    "BrittleTwo": 33,
+    "CushionTwo": 34,
+    "AmbientLight": 35,
+    "SeaStarsSettings": 36
+  },
+  "static_triangles": {
+    "sea_shell": 30,
+    "sea_rocks": 2448,
+    "sea_grass": 960,
+    "sea_ledge": 36
+  },
+  "animated_triangles": {
+    "BlueStar": 5620,
+    "ChipOne": 3568,
+    "ChipTwo": 3568,
+    "FromiaOne": 3400,
+    "FromiaTwo": 3400,
+    "FromiaThree": 3400,
+    "SandOne": 6480,
+    "SandTwo": 6480,
+    "Brittle": 11980,
+    "Cushion": 3400,
+    "ChipThree": 3568,
+    "ChipFour": 3568,
+    "FromiaFour": 3400,
+    "FromiaFive": 3400,
+    "SandThree": 6480,
+    "SandFour": 6480,
+    "BrittleTwo": 11980,
+    "CushionTwo": 3400
+  },
+  "residents": [
+    {
+      "name": "ChipOne",
+      "kind": "chip",
+      "position": [
+        -3.5,
+        -0.9,
+        0.8
+      ]
+    },
+    {
+      "name": "ChipTwo",
+      "kind": "chip",
+      "position": [
+        3.1,
+        -0.9,
+        0.8
+      ]
+    },
+    {
+      "name": "FromiaOne",
+      "kind": "fromia",
+      "position": [
+        -3.5,
+        0.6,
+        1.8
+      ]
+    },
+    {
+      "name": "FromiaTwo",
+      "kind": "fromia",
+      "position": [
+        0,
+        1.0,
+        1.35
+      ]
+    },
+    {
+      "name": "FromiaThree",
+      "kind": "fromia",
+      "position": [
+        3.4,
+        0.5,
+        1.8
+      ]
+    },
+    {
+      "name": "SandOne",
+      "kind": "sand",
+      "position": [
+        -1.8,
+        -1.55,
+        0.8
+      ]
+    },
+    {
+      "name": "SandTwo",
+      "kind": "sand",
+      "position": [
+        1.8,
+        -1.4,
+        0.8
+      ]
+    },
+    {
+      "name": "Brittle",
+      "kind": "brittle",
+      "position": [
+        3.3,
+        0.25,
+        0.8
+      ]
+    },
+    {
+      "name": "Cushion",
+      "kind": "cushion",
+      "position": [
+        -4.7,
+        0,
+        0.8
+      ]
+    },
+    {
+      "name": "ChipThree",
+      "kind": "chip",
+      "position": [
+        -1.0,
+        -0.4,
+        0.8
+      ]
+    },
+    {
+      "name": "ChipFour",
+      "kind": "chip",
+      "position": [
+        1.2,
+        -1.7,
+        0.8
+      ]
+    },
+    {
+      "name": "FromiaFour",
+      "kind": "fromia",
+      "position": [
+        -3.0,
+        0.9,
+        1.8
+      ]
+    },
+    {
+      "name": "FromiaFive",
+      "kind": "fromia",
+      "position": [
+        3.8,
+        0.9,
+        1.95
+      ]
+    },
+    {
+      "name": "SandThree",
+      "kind": "sand",
+      "position": [
+        -0.3,
+        -1.7,
+        0.8
+      ]
+    },
+    {
+      "name": "SandFour",
+      "kind": "sand",
+      "position": [
+        4.2,
+        -1.6,
+        0.8
+      ]
+    },
+    {
+      "name": "BrittleTwo",
+      "kind": "brittle",
+      "position": [
+        -2.6,
+        0.2,
+        0.8
+      ]
+    },
+    {
+      "name": "CushionTwo",
+      "kind": "cushion",
+      "position": [
+        4.6,
+        -0.5,
+        0.8
+      ]
+    }
+  ],
+  "mailboxes": {
+    "init": 600,
+    "x": 601,
+    "y": 602,
+    "z": 603,
+    "surface": 604,
+    "old": 605,
+    "roll": 606,
+    "reach": 607,
+    "idle": 608,
+    "clock": 609,
+    "dx": 610,
+    "dy": 611,
+    "buttons": 612,
+    "prev": 613,
+    "dt": 614,
+    "neutral": 615,
+    "auto-phase": 616,
+    "heading": 617,
+    "a": 618,
+    "b": 619,
+    "c": 620,
+    "leader": 621,
+    "turn": 622,
+    "auto-step": 623,
+    "auto-wait": 624,
+    "lock": 625
+  },
+  "empty": false
+}

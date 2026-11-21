@@ -19,15 +19,17 @@ import pytest
 import yaml
 
 REPO = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
-STEP = 'Close paths and fullscreen (⌘Q, red button, Esc, -fullscreen)'
+STEP = 'Close paths, fullscreen and bundle launch (⌘Q, red button, Esc, -fullscreen, open .app)'
 WORKFLOW = 'macos-desktop-debug'
 # Same steps and artifacts built Release (codemagic.yaml reuses them by YAML alias).
 RELEASE_TWIN = 'macos-desktop-release'
 SCRIPT = 'scripts/macos/close-paths-ci.sh'
 PROBE = 'scripts/macos/wf_ui_probe.swift'
 LEVEL = 'wflevels/snowgoons-blender/snowgoons-standalone.iff'
-ARTIFACTS = ['macos-close-paths.log', 'macos-close-*.log', 'macos-fullscreen.png', 'cm-build.log']
-VERDICTS = ['MACOS CMD-Q', 'MACOS RED BUTTON', 'MACOS ESC STAYS OPEN', 'MACOS FULLSCREEN']
+ARTIFACTS = ['macos-close-paths.log', 'macos-close-*.log', 'macos-fullscreen.png', 'macos-bundle-*',
+             'cm-build.log']
+VERDICTS = ['MACOS CMD-Q', 'MACOS RED BUTTON', 'MACOS ESC STAYS OPEN', 'MACOS FULLSCREEN',
+            'MACOS BUNDLE LAUNCH']
 
 
 @pytest.fixture(scope='module')
@@ -103,13 +105,43 @@ def test_script_conventions():
 
 # --- drive the script with stubs (no Mac) --------------------------------------------------------
 
+# The stub game logs Right (GLFW 262) and Esc (GLFW 256) presses on its own when STUB_KEYS=works,
+# standing in for the engine's WF_MACOS_KEYLOG output; it cannot tell which mechanism sent them.
 GAME = r'''#!/bin/bash
 echo $$ > "$CM_BUILD_DIR/game.pid"
 trap 'echo "Calling PIGSExit()"; exit 0' USR1
 trap 'exit 143' TERM
+[ $# -eq 0 ] && echo "macos: launched with no arguments (Finder / LaunchServices): windowed"
 echo "macos: window 640x480 points, 640x480 pixels (scale 1.0), CAMetalLayer attached"
-i=0
-while true; do i=$((i+1)); echo "ball pos: ($i.000, 0.000, 0.000)" >&2; sleep 0.3; done
+[ "${WF_MACOS_KEYLOG:-}" = 1 ] && echo "macos: keylog on; window focus 1, key window 1, app active 1"
+while true; do
+  if [ "${WF_MACOS_KEYLOG:-}" = 1 ] && [ "$STUB_KEYS" = works ]; then
+    echo "macos: key 262 scancode 124 action 1 mods 0"
+    echo "macos: key 256 scancode 53 action 1 mods 0"
+  fi
+  sleep 0.3
+done
+'''
+
+# open / Finder stub: start the bundle's executable detached with no arguments, as LaunchServices
+# would, honouring open's --env/--stdout/--stderr. STUB_LAUNCH=broken makes it fail like a
+# bundle whose CFBundleExecutable names no file.
+OPEN = r'''#!/bin/bash
+[ "$STUB_LAUNCH" = works ] || { echo "The application cannot be opened (-10827)" >&2; exit 1; }
+out=/dev/null err=/dev/null envs=()
+while [ $# -gt 1 ]; do
+  case "$1" in --env) envs+=("$2"); shift 2 ;; --stdout) out=$2; shift 2 ;; --stderr) err=$2; shift 2 ;; *) shift ;; esac
+done
+app=$1
+env "${envs[@]}" "$app/Contents/MacOS/wf_game" >"$out" 2>"$err" </dev/null &
+exit 0
+'''
+
+# pgrep stub: only ever "finds" the stub game, never a real wf_game on the host.
+PGREP = r'''#!/bin/bash
+f="$CM_BUILD_DIR/game.pid"
+[ -s "$f" ] && kill -0 "$(cat "$f")" 2>/dev/null && cat "$f"
+exit 0
 '''
 
 # osascript stub: ⌘Q and the red-button click "quit" the stub game (SIGUSR1 -> exit 0) when the
@@ -120,6 +152,8 @@ case "$all" in
   *"UI elements enabled"*) echo true ;;
   *'keystroke "q" using command down'*) [ "$STUB_CMDQ" = works ] && kill -USR1 "$(cat "$CM_BUILD_DIR/game.pid")" ;;
   *AXCloseButton*click*|*click*AXCloseButton*) [ "$STUB_RED" = works ] && kill -USR1 "$(cat "$CM_BUILD_DIR/game.pid")" ;;
+  *'"Finder" to open'*) app=$(sed -n 's/.*POSIX file "\([^"]*\)".*/\1/p' <<< "$all")
+                        [ "$STUB_FINDER" = works ] && open "$app" ;;
 esac
 exit 0
 '''
@@ -148,7 +182,8 @@ def _exe(path, body):
     path.chmod(0o755)
 
 
-def _run(tmp_path, strict='', cmdq='works', red='works', win='0,0 1920x1080'):
+def _run(tmp_path, strict='', cmdq='works', red='works', win='0,0 1920x1080', keys='works',
+         finder='works', launch='works'):
     build = tmp_path / 'build'
     (build / 'wfsource' / 'source' / 'game').mkdir(parents=True)
     (build / 'engine/wf_game.app/Contents/MacOS').mkdir(parents=True)
@@ -159,11 +194,15 @@ def _run(tmp_path, strict='', cmdq='works', red='works', win='0,0 1920x1080'):
     stubs.mkdir()
     _exe(stubs / 'osascript', OSASCRIPT)
     _exe(stubs / 'swiftc', SWIFTC)
+    _exe(stubs / 'open', OPEN)
+    _exe(stubs / 'pgrep', PGREP)
+    _exe(stubs / 'plutil', '#!/bin/bash\necho wf_game\n')
     for name in ('sw_vers', 'csrutil', 'screencapture', 'killall'):
         _exe(stubs / name, '#!/bin/bash\nexit 0\n')
     _exe(stubs / 'sudo', '#!/bin/bash\nexit 1\n')  # no sudo: TCC grants are skipped
     env = dict(os.environ, CM_BUILD_DIR=str(build), CLOSE_PATHS_STRICT=strict,
-               PATH=f'{stubs}:{os.environ["PATH"]}', STUB_CMDQ=cmdq, STUB_RED=red, STUB_WIN=win)
+               PATH=f'{stubs}:{os.environ["PATH"]}', STUB_CMDQ=cmdq, STUB_RED=red, STUB_WIN=win,
+               STUB_KEYS=keys, STUB_FINDER=finder, STUB_LAUNCH=launch)
     p = subprocess.run(['bash', os.path.join(REPO, SCRIPT)], cwd=build, env=env,
                        capture_output=True, text=True, timeout=240)
     return p
@@ -175,13 +214,36 @@ def _verdict(out, label):
 
 
 def test_all_paths_ok_with_working_stubs(tmp_path):
-    p = _run(tmp_path, strict='cmdq red esc fullscreen')
+    p = _run(tmp_path, strict='cmdq red esc fullscreen bundle')
     assert p.returncode == 0, p.stdout[-3000:] + p.stderr[-2000:]
     for v in VERDICTS:
         assert _verdict(p.stdout, v) == 'OK', (v, p.stdout[-3000:])
     assert 'via system-events' in p.stdout
     assert 'exit status 0' in p.stdout
     assert 'Retina NOT testable' in p.stdout
+    assert re.search(r'^MACOS BUNDLE LAUNCH: OK \(via finder; .*arguments \[\]', p.stdout, re.M), p.stdout[-3000:]
+    assert re.search(r'^MACOS BUNDLE KEYS: Right presses logged: .*Esc presses logged [1-9]', p.stdout, re.M)
+    assert 'Esc reached the key callback' in p.stdout
+
+
+def test_bundle_falls_back_to_open_when_finder_fails(tmp_path):
+    p = _run(tmp_path, strict='bundle', finder='broken')
+    assert p.returncode == 0, p.stdout[-3000:]
+    assert 'MACOS BUNDLE LAUNCH: OK (via launchservices-open;' in p.stdout
+
+
+def test_bundle_that_cannot_launch_fails_strict(tmp_path):
+    p = _run(tmp_path, strict='bundle', finder='broken', launch='broken')
+    assert p.returncode == 1
+    assert _verdict(p.stdout, 'MACOS BUNDLE LAUNCH') == 'FAIL'
+    assert 'STRICT: bundle failed' in p.stdout
+
+
+def test_esc_unproven_without_key_log(tmp_path):
+    # Still running after Esc means nothing unless Esc is seen in the key callback.
+    p = _run(tmp_path, keys='broken')
+    assert _verdict(p.stdout, 'MACOS ESC STAYS OPEN') == 'FAIL'
+    assert 'no Esc press reached the key callback' in p.stdout
 
 
 def test_failures_are_reported_not_swallowed(tmp_path):
@@ -190,9 +252,8 @@ def test_failures_are_reported_not_swallowed(tmp_path):
     assert _verdict(p.stdout, 'MACOS CMD-Q') == 'FAIL'
     assert _verdict(p.stdout, 'MACOS RED BUTTON') == 'FAIL'
     assert _verdict(p.stdout, 'MACOS FULLSCREEN') == 'FAIL'
-    # With no ⌘Q, Esc's "still running" is only OK because the input control moved the player
-    # (the stub game's ball pos advances on its own, which the stub can't distinguish).
-    assert _verdict(p.stdout, 'MACOS ESC STAYS OPEN') in ('OK', 'FAIL')
+    # The stub game logs Esc presses on its own, so Esc is OK here even with ⌘Q broken.
+    assert _verdict(p.stdout, 'MACOS ESC STAYS OPEN') == 'OK'
 
 
 def test_strict_check_fails_the_step(tmp_path):
@@ -208,3 +269,13 @@ def test_release_twin_is_the_debug_workflow_built_release(config):
     assert release['environment']['vars']['WF_BUILD_TYPE'] == 'Release'
     configure = next(s['script'] for s in debug['scripts'] if s['name'].startswith('Configure CMake'))
     assert '-DCMAKE_BUILD_TYPE="${WF_BUILD_TYPE:-Debug}"' in configure
+
+
+def test_macos_info_plist_uses_cmake_variables_only():
+    # The macOS bundle is built by Ninja, not Xcode: CMake's configure_file expands ${VAR} and
+    # @VAR@ but leaves Xcode's $(VAR) literal. A literal CFBundleExecutable of "$(EXECUTABLE_NAME)"
+    # shipped until 2026-11-16; LaunchServices then finds no executable, so a double-click (or
+    # `open`) cannot start the app even though running Contents/MacOS/wf_game directly works.
+    body = open(os.path.join(REPO, 'macos', 'Info.plist')).read()
+    assert '$(' not in body
+    assert '<string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>' in body

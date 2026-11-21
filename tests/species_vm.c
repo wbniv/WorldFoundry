@@ -43,6 +43,7 @@ int main(int argc,char**argv){
   else if(strncmp(line,"prop",4)==0){int pa,pf;float v;sscanf(line,"prop %d %d %f",&pa,&pf,&v);if(pa>=0&&pa<1024&&pf>=0&&pf<16){props[pa][pf]=v;propset[pa][pf]=1;}}
   else if(strncmp(line,"set",3)==0){int mb;float v;sscanf(line,"set %d %f",&mb,&v);globals[mb]=v;}
   else if(strncmp(line,"dumpa",5)==0){int lo,hi;sscanf(line,"dumpa %d %d",&lo,&hi);for(int k=lo;k<=hi&&k<1024;k++)printf("A %d %.6g %.6g %.6g %.6g %.6g %.6g\n",k,actors[k][3009],actors[k][3010],actors[k][3011],actors[k][3012],actors[k][3013],actors[k][3014]);}
+  else if(strncmp(line,"dumpsc",6)==0){int lo,hi;sscanf(line,"dumpsc %d %d",&lo,&hi);for(int k=lo;k<=hi&&k<1024;k++)printf("S %d %.6g %.6g %.6g\n",k,actors[k][3040],actors[k][3041],actors[k][3042]);}
   else if(strncmp(line,"dumpg",5)==0){int lo,hi;sscanf(line,"dumpg %d %d",&lo,&hi);printf("G %d",lo);for(int k=lo;k<=hi&&k<7000;k++)printf(" %.6g",globals[k]);printf("\n");}
   else if(strncmp(line,"rng",3)==0){sscanf(line,"rng %u",&rng);}
   else {

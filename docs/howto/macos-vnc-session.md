@@ -69,7 +69,7 @@ Alternative if the VNC desktop is awkward: run the **SSH command** from Step 2 i
 
 ## Step 5 — Try things (this is the actual test)
 
-> **Already automated (2026‑09‑30):** every `macos-desktop-debug` build now runs checks 2–4 and 6 itself. See the step "Close paths and fullscreen" and [the close-paths plan](../plans/2026-09-21-macos-close-paths.md). ⌘Q and the red button pass there with real System Events input. For those, a human session adds only a look at a real display. Esc and Retina still need eyes.
+> **Already automated (2026‑09‑30):** every `macos-desktop-debug` build now runs checks 2–4 and 6 itself. See the step "Close paths, fullscreen and bundle launch" and [the close-paths plan](../plans/2026-09-21-macos-close-paths.md). ⌘Q and the red button pass there with real System Events input. For those, a human session adds only a look at a real display. Esc and Retina still need eyes.
 
 Do these in order and note what happens for each. "It didn't work" is a useful answer too — just say what you saw.
 

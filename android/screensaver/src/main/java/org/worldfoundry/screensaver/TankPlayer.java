@@ -20,10 +20,12 @@ final class TankPlayer implements SurfaceHolder.Callback {
     private volatile boolean started;
     private int level;
     private String configureLine;
+    private String[] launchOverrideTriples = new String[0];
 
     private static native void nativeRun(android.content.res.AssetManager assets, Surface surface,
                                          int level, String logPath);
     private static native void nativeConfigure(String line);
+    private static native void nativeLaunchOverride(String schema, String key, String value);
     private static native void nativePrepare();
     private static native void nativeStop();
 
@@ -69,6 +71,18 @@ final class TankPlayer implements SurfaceHolder.Callback {
     /** Hands the engine a launch-parameter line on the next start; unset leaves other flavors untouched. */
     void configure(String line) { configureLine = line; }
 
+    /** Engine launch overrides (schema, OAD field key, value) to set on the player thread before the level loads. */
+    void launchOverrides(String schema, java.util.Map<String, String> values) {
+        String[] triples = new String[values.size() * 3];
+        int at = 0;
+        for (java.util.Map.Entry<String, String> entry : values.entrySet()) {
+            triples[at++] = schema;
+            triples[at++] = entry.getKey();
+            triples[at++] = entry.getValue();
+        }
+        launchOverrideTriples = triples;
+    }
+
     void stop() {
         started = false;
         nativeStop();
@@ -79,11 +93,15 @@ final class TankPlayer implements SurfaceHolder.Callback {
         final Surface surface = view.getHolder().getSurface();
         final int selected = level;
         final String configure = configureLine;
+        final String[] overrides = launchOverrideTriples;
         File logDirectory = view.getContext().getExternalFilesDir(null);
         final String logPath = logDirectory == null ? null : new File(logDirectory, "wf.log").getAbsolutePath();
         nativePrepare();
         thread = new Thread(() -> {
             if (started && configure != null) nativeConfigure(configure);
+            for (int i = 0; started && i + 2 < overrides.length; i += 3) {
+                nativeLaunchOverride(overrides[i], overrides[i + 1], overrides[i + 2]);
+            }
             if (started) nativeRun(view.getContext().getAssets(), surface, selected, logPath);
             // The renderer has process-lifetime globals. Both callers run in a
             // dedicated process, so ending a stopped player resets them safely.

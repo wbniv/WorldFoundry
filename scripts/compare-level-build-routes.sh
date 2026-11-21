@@ -6,7 +6,7 @@
 set -euo pipefail
 
 TANKS_DEFAULT=(aquarium_jellyfish aquarium_blue_shrimp aquarium_lionfish aquarium_betta
-               aquarium_plants aquarium_arowana aquarium_tiger_barbs)
+               aquarium_plants aquarium_arowana aquarium_tiger_barbs aquarium_sea_stars)
 
 usage() {
     cat <<EOF

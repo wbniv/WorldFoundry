@@ -1,0 +1,14 @@
+{
+  "_comment": "One entry per aquarium tank. Content rule (Will, 2026-11-02): no species appears in two tanks. Meshes, rigs and shells may be shared. The Gulf of Thailand Reef and its anime twin are one roster.",
+  "aquarium": ["clownfish", "Entacmaea quadricolor"],
+  "aquarium_blue_shrimp": ["blue shrimp"],
+  "aquarium_betta": ["betta"],
+  "aquarium_jellyfish": ["jellyfish"],
+  "aquarium_lionfish": ["lionfish", "goldfish"],
+  "aquarium_plants": ["Diadema setosum", "Hippocampus reidi", "rainbow goby"],
+  "aquarium_arowana": ["Asian arowana"],
+  "aquarium_tiger_barbs": ["tiger barb"],
+  "aquarium_thai_reef": ["Dascyllus reticulatus", "Ostracion cubicus", "Stenopus hispidus", "Trapezia cymodoce", "Tridacna squamosa", "Phyllidia varicosa", "Lamprometra palmata", "Christmas tree worm", "hermit crab", "feather duster"],
+  "aquarium_thai_reef_anime": [],
+  "aquarium_sea_stars": ["Linckia laevigata", "Protoreaster nodosus", "Fromia milleporella", "Archaster typicus", "Ophiarachna incrassata", "Culcita novaeguineae"]
+}

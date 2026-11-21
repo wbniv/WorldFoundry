@@ -39,6 +39,8 @@
 
 #include <atomic>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 // The joystick-button seam the engine reads. Linux feeds it from
 // ProcessXEvents (gfx/gl/mesa.cc:263), Android from native_app_entry.cc:134.
@@ -65,6 +67,11 @@ CAMetalLayer*  g_layer      = nil;
 bool           g_inited     = false;
 joystickButtonsF g_buttons  = 0;
 std::atomic<int> g_closeRequested{0};
+// WF_MACOS_KEYLOG=1: print every GLFW key event and focus change on stdout.
+// The CI close-paths step (scripts/macos/close-paths-ci.sh) needs to see that
+// a key reached this callback, mapped or not (Esc is deliberately unmapped),
+// rather than infer it from the player moving.
+bool           g_keyLog     = false;
 
 // Same chords as the Linux X11 path (gfx/gl/mesa.cc:288-345) so muscle memory
 // and the level-design docs carry over unchanged. Deliberately a mapping
@@ -91,13 +98,25 @@ joystickButtonsF ButtonForKey(int key)
 // close through the window's own close paths -- red button, Cmd-Q, gamepad
 // Start -- not a key that is easy to hit mid-play. Esc is simply unmapped here,
 // same as any other key ButtonForKey does not know.
-void KeyCallback(GLFWwindow*, int key, int, int action, int)
+void KeyCallback(GLFWwindow*, int key, int scancode, int action, int mods)
 {
+    if (g_keyLog)
+    {
+        std::printf("macos: key %d scancode %d action %d mods %d\n", key, scancode, action, mods);
+        std::fflush(stdout);
+    }
     const joystickButtonsF bit = ButtonForKey(key);
     if (!bit) return;
     if      (action == GLFW_PRESS)   g_buttons |=  bit;
     else if (action == GLFW_RELEASE) g_buttons &= ~bit;
     _HALSetJoystickButtons(g_buttons);
+}
+
+void FocusCallback(GLFWwindow*, int focused)
+{
+    if (!g_keyLog) return;
+    std::printf("macos: window focus %d (app active %d)\n", focused, [NSApp isActive] ? 1 : 0);
+    std::fflush(stdout);
 }
 
 void CloseCallback(GLFWwindow*)
@@ -236,6 +255,7 @@ bool Create(int width, int height, bool fullscreen, const char* title)
     SyncDrawableSize();
 
     glfwSetKeyCallback(g_window, KeyCallback);
+    glfwSetWindowFocusCallback(g_window, FocusCallback);
     glfwSetWindowCloseCallback(g_window, CloseCallback);
     glfwSetFramebufferSizeCallback(g_window, FramebufferSizeCallback);
 
@@ -245,6 +265,12 @@ bool Create(int width, int height, bool fullscreen, const char* title)
                 "CAMetalLayer attached\n",
                 width, height, fbw, fbh,
                 (double)(nsw ? [nsw backingScaleFactor] : 1.0));
+    const char* keyLog = std::getenv("WF_MACOS_KEYLOG");
+    g_keyLog = keyLog && std::strcmp(keyLog, "1") == 0;
+    if (g_keyLog)
+        std::printf("macos: keylog on; window focus %d, key window %d, app active %d\n",
+                    glfwGetWindowAttrib(g_window, GLFW_FOCUSED),
+                    [nsw isKeyWindow] ? 1 : 0, [NSApp isActive] ? 1 : 0);
     std::fflush(stdout);
     return true;
 }

@@ -3,8 +3,8 @@
 //
 // macOS desktop boots like Linux ("Linux-minus-X11"), NOT like iOS: a thin
 // main() that calls HALStart() on the main thread — no UIApplicationMain, no
-// engine pthread. The renderer is a true no-op for this bring-up, so there is
-// no window to create here.
+// engine pthread. The window itself is opened later, by Display (see
+// hal/macos/display_macos.cc), when gWindowed is set.
 //
 // Mirrors hal/linux/platform_main.cc. The engine-needed helpers
 // (_PlatformSpecificInit, FatalError, ParseWindowSwitches, _halWindow*
@@ -21,10 +21,25 @@
 #include <hal/hal.h>
 #include <hal/_platfor.h>
 #include <cassert>
+#include <cstdio>
 #include <cstring>
 
 extern char szAppName[];
 extern void ParseWindowSwitches(int, char**);
+extern bool gWindowed;   // game/main.cc (--windowed)
+
+// Finder and LaunchServices (`open wf_game.app`) start the bundle with no
+// arguments; macOS before 10.9 appended one -psn_X_Y process-serial argument.
+// Every CI and scripted run passes flags (-L, --frame-step-smoke, ...), so "no
+// arguments" identifies a double-click launch without guessing at the parent.
+static bool
+LaunchedWithoutArguments(int argc, char* argv[])
+{
+	for (int i = 1; i < argc; ++i)
+		if (strncmp(argv[i], "-psn_", 5) != 0)
+			return false;
+	return true;
+}
 
 int
 main(int argc, char* argv[])
@@ -35,6 +50,17 @@ main(int argc, char* argv[])
 
 	assert(argv[0]);
 	strcpy(argv[0], szAppName);
+
+	// A double-clicked bundle must open a window. --windowed is opt-in for the
+	// headless CI runs, but with no arguments nobody can pass it, and the
+	// offscreen fallback would leave a process running with no window, no menu
+	// and no way to quit it short of Force Quit.
+	if (LaunchedWithoutArguments(argc, argv))
+	{
+		gWindowed = true;
+		std::printf("macos: launched with no arguments (Finder / LaunchServices): windowed\n");
+		std::fflush(stdout);
+	}
 
 	ParseWindowSwitches(argc, argv);
 

@@ -1,7 +1,7 @@
 # macOS: prove ⌘Q and the red close button quit cleanly — and that Esc does not
 
 **Date:** 2026‑09‑21
-**Status:** **⌘Q and red button PASS in CI (2026‑09‑30)** on real System Events input, no human. `-fullscreen` covers the display but switches its mode. Esc-does-not-quit is PASS from the 09‑21 VNC session but unproven in CI. See **CI step** below. (Session history: the 09‑21 VNC session ended ~22:55 UTC+7 / 15:55 UTC. Esc was unmapped then.)
+**Status:** **⌘Q, red button, Esc-stays-open and the double-click launch all PASS in CI (⌘Q/red 2026‑09‑30; Esc and bundle launch 2026‑11‑16)** on real OS input, no human. Esc is now proven by the engine's key log, not inferred from the player moving. `-fullscreen` now keeps the native mode (`MACOS FULLSCREEN NATIVE MODE: OK` on build `6afa8fb2`). Retina is the only item left that needs hardware. See **CI step** and **2026‑11‑16** below.
 **Parent:** [2026-09-20-macos-metal-renderer.md](2026-09-20-macos-metal-renderer.md) Phase 4 · runbook [2026-09-21-macos-human-verification.md](2026-09-21-macos-human-verification.md)
 **TODO:** `TODO.md` — *macOS Metal renderer* (close paths are the last unproven interactive item besides Retina).
 
@@ -109,3 +109,43 @@ What it **does not** prove:
 Either a VNC client that speaks Apple's ARD authentication *and* delivers pointer/modifier events (Remmina's VNC plugin or RealVNC Viewer — TigerVNC fails at auth), with a human pressing ⌘Q and clicking the red button; or, over the SSH script, grant Accessibility to `/usr/bin/osascript` and `/usr/libexec/sshd-keygen-wrapper` in the VM's TCC database (SIP is off there) and then drive System Events. Both are in the runbook. Two runs, ~2 Mac-minutes each, plus the session time.
 
 When 1–3 pass, record them in the parent plan's §8 step 11 (real exit: close paths ✔) and in the runbook's checklist; the macOS Metal TODO item then has Retina as its only remaining human-verification gap.
+
+## 2026‑11‑16: double-click launch, and Esc proven at the key callback
+
+Build [`6afa8fb2`](https://codemagic.io/app/6aafa6886ab3f21cf431a6cb/build/6afa8fb260f9595b44258e83) (commit `7e33b6e3`, branch `macos-metal-close`, 4.9 Mac-min, every step green). The step is now named "Close paths, fullscreen and bundle launch (⌘Q, red button, Esc, -fullscreen, open .app)" and runs `CLOSE_PATHS_STRICT="cmdq red fullscreen bundle"`.
+
+**Why Esc was unproven.** Two different reasons. In the 09‑30 builds, the `ball pos` line printed and did not move; the cause of that is not established. From `d6851aa7` (2026‑10‑10) on, the line no longer existed: that commit deleted the Jolt `ball pos:` logger. So build `6af718ec` (2026‑11‑13) logged `ball pos: start [] … [] … []`, and its control could never pass. The fix measures the right thing. `hal/macos/window_macos.mm` prints every GLFW key event and focus change when `WF_MACOS_KEYLOG=1`, and the script counts presses of GLFW 262 (Right) and 256 (Esc) per delivery mechanism. A press and release inside one `glfwPollEvents` now counts too; a moving player could not show it.
+
+```
+focus at start: macos: keylog on; window focus 0, key window 0, app active 0;macos: window focus 1 (app active 1);
+Right presses in the key log: start 0, after cgevent-pid 1, after system-events 6, after hid-tap 7
+INPUT CONTROL: cgevent-pid reached=yes, system-events reached=yes, hid-tap reached=yes
+after Esc x2 each via system-events, cgevent-pid, hid-tap; 4 s later: still running=yes; Esc presses in the key log: 6
+MACOS ESC STAYS OPEN: OK (Esc reached the key callback 6 time(s) and the app was still running 4 s later; Right reached it via: hid-tap, cgevent-pid, system-events)
+```
+
+**PASS.** All three mechanisms deliver plain keys to GLFW's key callback. A window launched from a shell starts unfocused, and becomes key once `front` activates it. Esc reaches the callback and does not quit. The step keeps `esc` out of `CLOSE_PATHS_STRICT` for now; adding it is a one-word change once another green run confirms it.
+
+**Double-click launch (runs D and E).** Run D asks Finder to open `engine/wf_game.app`, the Apple Event a double-click sends, with LaunchServices `open` as the fallback. That needs one more ephemeral TCC row, Apple Events → `com.apple.finder`. Run D then requires a `wf_game` process with an on-screen window, and ⌘Q must end it. Run E repeats the launch through `open --env WF_MACOS_KEYLOG=1 --stdout … --stderr …` to collect a log and key counts. Two engine-side bugs had to go first:
+
+- **The bundle named no executable.** `macos/Info.plist` said `CFBundleExecutable = $(EXECUTABLE_NAME)`. That is an Xcode build-setting reference, and CMake + Ninja copies it through literally. Build `6af718ec`'s `wf_game.app.zip` contains exactly that string. Running `Contents/MacOS/wf_game` directly worked, which is all CI had ever done. LaunchServices looks the executable up by that key, so a double-click could not start the app. Now `${MACOSX_BUNDLE_EXECUTABLE_NAME}`; `tests/test_codemagic_close_paths.py::test_macos_info_plist_uses_cmake_variables_only` guards it.
+- **No arguments meant no window.** `--windowed` is opt-in, so the headless smokes are unchanged. Finder passes no arguments, so the app would have rendered offscreen, with no window and no menu to quit from. `hal/macos/platform_main.cc` now sets `gWindowed` when there are no arguments other than a legacy `-psn_…`. Every scripted run passes flags, so they are unaffected.
+
+```
+Info.plist CFBundleExecutable=[wf_game]; Contents/MacOS/wf_game executable: yes
+launch via Finder (open POSIX file — the double-click's own Apple Event)
+ 4137     1 builder Users/builder/clone/engine/wf_game.app/Contents/MacOS/wf_game
+probe: window layer=0 onscreen=true bounds=192,67 640x512
+MACOS BUNDLE LAUNCH: OK (via finder; pid 4137, parent pid 1, arguments []; on-screen window 192,67 640x512; quit by ⌘Q, gone 0.2 s later; CFBundleExecutable=wf_game)
+macos: launched with no arguments (Finder / LaunchServices): windowed
+argc = 1, commandIndex = 1
+macos: window 640x480 points, 640x480 pixels (scale 1.0), CAMetalLayer attached
+Opening cd.iff
+Level::Level: leveldata= 0xc783c5028, object count  = 133
+MACOS BUNDLE KEYS: Right presses logged: cgevent-pid 1, system-events 5, hid-tap 1; Esc presses logged 2, still running after Esc: yes; focus: macos: keylog on; window focus 1, key window 1, app active 1;
+```
+
+**PASS.** Screenshot: [`ci-bundle-launch-2026-11-16.png`](2026-09-21-macos-human-verification/ci-bundle-launch-2026-11-16.png). It shows the "World Foundry" window, the "WorldFoundry" menu bar, and SMB W1‑1 (the bundled `cd.iff`'s level 0) running at 34.7 fps. A macOS 26 "bash is requesting to bypass the system private window picker" prompt covers the middle of the window. That prompt comes from the script's `screencapture` call, not from the app. The bundle-launched app came up focused and active at once (`window focus 1, key window 1, app active 1`), unlike the shell-launched runs.
+
+Linux checks: `tests/test_codemagic_close_paths.py`, 15 tests, all passed in the `linux-test` container (python3-yaml installed ephemerally), after one fix to the stub-driven argument parsing.
+

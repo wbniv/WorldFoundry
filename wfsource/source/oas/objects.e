@@ -57,6 +57,7 @@
         RuntimeDiagnostics_KIND,
         FieldTypes_KIND,
         LevelRenderSettings_KIND,
+        SeaStarsSettings_KIND,
 
 
 
