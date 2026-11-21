@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-11](https://github.com/wbniv/WorldFoundry/commit/cd6b9e9e) | Migrate runtime settings to actor OADs and preserve diagnostics |
 | [2026-11-10](https://github.com/wbniv/WorldFoundry/commit/5e02476e) | Seahorse Grid and Planted Dreams ship as Release (cast1: 4.2->29.6, 6.1->40.0 FPS) |
 | [2026-11-09](https://github.com/wbniv/WorldFoundry/commit/12caf005) | Aquarium Dream ships as Release: 2.98 -> 21.8 FPS on the reef (cast1) |
 | [2026-10-24](https://github.com/wbniv/WorldFoundry/commit/fe428850) | Take the default orientation from a string resource |
@@ -15,6 +16,10 @@
 | [2026-10-18](https://github.com/wbniv/WorldFoundry/commit/54f44b51) | Add live aquarium screensaver with per-tank players |
 
 <!--history-meta v1
+cd6b9e9e	author	Will Norris
+cd6b9e9e	added	8
+cd6b9e9e	deleted	8
+cd6b9e9e	files	1
 5e02476e	author	Will Norris
 5e02476e	added	8
 5e02476e	deleted	11

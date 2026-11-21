@@ -84,7 +84,7 @@ def test_third_column_leaves_the_bundle_byte_identical(manifest, tmp_path):
             lines.append(raw)
     copy = tmp_path / manifest
     copy.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    assert sum(1 for line in lines if line.count("|") == 2) == sum(1 for line in lines if line.startswith("level "))
+    assert sum(1 for line in lines if line.startswith("level ") and line.count("|") == 2) == sum(1 for line in lines if line.startswith("level "))
     two, three = tmp_path / "two.iff", tmp_path / "three.iff"
     cdpack(SHELL_MENU, "--manifest", LEVELS / manifest, "-o", two)
     cdpack(SHELL_MENU, "--manifest", copy, "-o", three)
