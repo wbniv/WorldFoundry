@@ -1,0 +1,84 @@
+{
+ "device": "chromecast-test-01 (Chromecast HD, display 59.94 Hz)",
+ "apk_sha256": "f7c65adb01256e5d89358a4664d9c1214b53644f4beb52cf63a00ddcc0ec7fe9",
+ "method": "coordinator profile workflow, 2 runs of 30 s after a 10 s warm-up; the fast day starts at 21:00 at launch (FEATURES in wflevels/tide_spike/spike.py)",
+ "source": "median and per-run values copied from each job summary.json; reproduce with: task chromecast:evidence JOB=<job> OUT=<dir>",
+ "probes": [
+  {
+   "variant": "n",
+   "scene": "dark veil and lit-window glows, 1080p, night (the control)",
+   "job": "J-8e94dab0a4c0",
+   "activity": "TideSpikeNActivity",
+   "runs": [
+    {
+     "fps": 29.969989576023064,
+     "frames": 908,
+     "missed_refresh_percent": 100.0
+    },
+    {
+     "fps": 29.969989576824943,
+     "frames": 903,
+     "missed_refresh_percent": 100.0
+    }
+   ],
+   "median_fps": 29.969989576424005
+  },
+  {
+   "variant": "v",
+   "scene": "the veil only, 1080p, night",
+   "job": "J-1f4e64825a2e",
+   "activity": "TideSpikeVActivity",
+   "runs": [
+    {
+     "fps": 29.96998948935133,
+     "frames": 899,
+     "missed_refresh_percent": 100.0
+    },
+    {
+     "fps": 29.969989553947194,
+     "frames": 903,
+     "missed_refresh_percent": 100.0
+    }
+   ],
+   "median_fps": 29.96998952164926
+  },
+  {
+   "variant": "g",
+   "scene": "the glows only, 1080p, night",
+   "job": "J-d7e6085e11f1",
+   "activity": "TideSpikeGActivity",
+   "runs": [
+    {
+     "fps": 57.65623623836432,
+     "frames": 1742,
+     "missed_refresh_percent": 3.960964408725603
+    },
+    {
+     "fps": 59.247603037330045,
+     "frames": 1797,
+     "missed_refresh_percent": 1.1686143572621035
+    }
+   ],
+   "median_fps": 58.45191963784718
+  },
+  {
+   "variant": "n at 720p",
+   "scene": "dark veil and glows on a fixed 1280 x 720 surface, night",
+   "job": "J-3db7f1d2618a",
+   "activity": "TideSpikeN720Activity",
+   "runs": [
+    {
+     "fps": 59.31112209691956,
+     "frames": 1792,
+     "missed_refresh_percent": 1.0602678571428572
+    },
+    {
+     "fps": 59.30903211137475,
+     "frames": 1786,
+     "missed_refresh_percent": 1.0638297872340425
+    }
+   ],
+   "median_fps": 59.310077104147155
+  }
+ ]
+}

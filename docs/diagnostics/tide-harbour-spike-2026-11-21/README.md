@@ -66,7 +66,7 @@ Variants a to c hold the display's refresh rate to within about 1.3%, and the th
 
 **Variant d in the morning says nothing about the veil.** The fast day starts at 06:00 at launch and runs 10 s per hour, and the day-time runs measured the first minute: one veil of nine is shown at a time, and none is shown by day. Its 1.3 FPS and the extra missed refreshes against c are the cost of the glow and veil actors being in the scene, not of drawing a veil.
 
-**At night the frame rate halves.** One run of 30 s with the dark veil and the seven lit-window glows on screen (frames below): 909 frames, **every interval 33.4 ms** from the first to the last (p50, p99 and worst are all 33.37 ms), 29.97 FPS, 100% of refreshes missed. The display is locked to every second refresh: drawing a frame takes just over 16.7 ms. The Android thermal status was 0 and the board temperature 38 °C, the same as in the day run, so it is not throttling. The plan's gate is 30 FPS median over 120 s (Phase 4); 29.97 is on that line with no headroom, and the cause was not isolated (the full-screen veil, the glows, or filling 1080p). That is the spike's central finding: **the veil approach (D5) as built does not leave headroom on a Chromecast HD at night.**
+**At night the frame rate halves, and the night probe below isolates why.** One 30 s run with the dark veil and the seven lit-window glows on screen: 909 frames, **every interval 33.4 ms** (p50, p99 and worst all 33.37 ms), 29.97 FPS, 100% of refreshes missed: the display is locked to every second refresh, so drawing a frame takes just over 16.7 ms. The thermal status was 0 and the board 38 °C, the same as in the day run, so it is not throttling. The plan's gate is 30 FPS median over 120 s (Phase 4): 29.97 is on that line with no headroom.
 
 **The engine log is cumulative.** `wf.log` in a job's evidence contains every launch since the APK was installed: the start lines read `0,0,0` (variant a), `1,1` (b), `2,2` (c), a single `0` that I cannot attribute, then `3,3` (d), and the device's own logcat for a later job shows `start level 3`. Reading only the first two matches of a `grep` makes every variant look like level 0. One level‑0 start sits between c and d; each measured run's layer names the right activity, so the table stands.
 
@@ -84,9 +84,30 @@ Variants a to c hold the display's refresh rate to within about 1.3%, and the th
 
 `cast1-d-night-idle.png` and `cast1-d-night-end.png` (1920 × 1080; raw numbers in `cast1-d-night-summary.json`). The veil darkens the whole scene, the lit windows and the lantern boxes stay bright in front of it, the moon is dim, and **the tower dial is dimmed so far that its hands are hard to read**: the dial and the moon need the same drawn-in-front treatment as the glows (as in the software-GL finding above). The water bands at night as well, in the foreground below the pier (at y of about 800, 887 and 1015 in the second frame).
 
+### The night probe: the veil costs it, and it is fill rate
+
+Three levels start the fast day at 21:00 (so a 30 s run is all night) with the veil and the glows switched on or off, and one activity draws the full scene to a fixed 1280 × 720 surface. Same Release APK (`f7c65adb…`), same method (2 runs of 30 s after a 10 s warm-up). Raw numbers: [`night-probe-summary.json`](night-probe-summary.json).
+
+| Probe | Night scene | Median FPS | Runs (FPS) | Missed refreshes |
+|---|---|---|---|---|
+| `n`, the control | veil and glows, 1080p | **29.97** | 29.97, 29.97 | 100%, 100% |
+| `v` | the veil only, 1080p | **29.97** | 29.97, 29.97 | 100%, 100% |
+| `g` | the glows only, 1080p | **58.45** | 57.66, 59.25 | 4.0%, 1.2% |
+| `n` at 720p | veil and glows, **1280 × 720** | **59.31** | 59.31, 59.31 | 1.1%, 1.1% |
+
+1. **The control reproduces.** `n` gives exactly the earlier night result, twice (29.97 FPS, every refresh missed), so the half rate is stable, not a one-off.
+2. **The veil alone costs all of it.** `v` (no glows) is as slow as `n`; `g` (glows, no veil) is as fast as the morning.
+3. **It is fill rate.** The same veil-and-glows scene on a 1280 × 720 surface, which the compositor scales to the 1080p TV, holds 59.31 FPS. A full-screen translucent quad at 1080p is just over a refresh on this GPU; at 44% of the pixels it is not.
+4. **What 720p looks like** (the surface is scaled, the capture is still 1920 × 1080): in this flat-shaded scene the edges are slightly softer and nothing is lost at this size. The dial's small Thai numerals are the real test and are not in this scene.
+
+[![Variant n at 1280 x 720 on the TV at night](cast1-n720-night-end.png)](cast1-n720-night-end.png)
+
+`cast1-n720-night-idle.png` and `cast1-n720-night-end.png`.
+
 ## What was not found or not measured
 
-- What costs the extra frame time at night: the veil, the glows or the 1080p fill rate. Not isolated.
+- Whether a surface between 720p and 1080p (1600 × 900, 1440 × 810) also holds 60 FPS with the veil: only 1280 × 720 and 1920 × 1080 were run.
+- Whether small text (the Thai numerals) stays legible on a 720p surface scaled to 1080p.
 - The warm dusk veils (1 to 3) on the TV, and a measurement of night at 120 s or more.
 - Which near plane rules: `display.cc` passes 1.0, the baseline authors a CamShot `Hither` of 0.1.
 - One level‑0 engine start between the c and d measurements.
