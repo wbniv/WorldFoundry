@@ -45,6 +45,7 @@
 #include <cmath>
 #include <cstdlib>
 
+#include "press_latch.hp"
 #include "touch_pad.hp"
 #import "touch_hud.h"
 
@@ -74,13 +75,17 @@ namespace bitmaptext { bool ReaderOpen(); }
 //=============================================================================
 // HAL joystick entry points — same set as hal/android/input.cc.
 
-// Written on the main thread, read on the engine thread.
-static std::atomic<joystickButtonsF> _buttons{0};
+// Written on the main thread, read on the engine thread. A press stays until
+// the engine has read it, for at least one engine frame (hal/ios/press_latch.hp):
+// in build 6b01461c a 51 ms tap fell between two engine samples and was lost.
+// WFIosTouchFrame ends each engine frame.
+static_assert(sizeof(joystickButtonsF) == sizeof(uint32_t), "PressLatch holds 32 button bits");
+static wfios::PressLatch gButtons;
 
 extern "C" void
 _HALSetJoystickButtons(joystickButtonsF joystickButtons)
 {
-    _buttons.store(joystickButtons, std::memory_order_release);
+    gButtons.Set(joystickButtons);
 }
 
 // Public host-injection wrapper — see hal/_input.h. Cross-platform parity:
@@ -97,7 +102,7 @@ void _TermJoystickInterface(void) {}
 
 int _JoystickUserAbort(void)
 {
-    return (_buttons.load(std::memory_order_acquire) & 0x8000000) ? 1 : 0;
+    return (gButtons.Held() & 0x8000000) ? 1 : 0;
 }
 
 joystickButtonsF
@@ -105,7 +110,7 @@ _JoystickButtonsF(IJoystick joystick)
 {
     SJoystick* self = ITEMRETRIEVE(joystick, SJoystick);
     if (self->_stickNum == EJW_JOYSTICK1)
-        return _buttons.load(std::memory_order_acquire);
+        return gButtons.Read();
     return 0;
 }
 
@@ -428,6 +433,7 @@ WFIosInputSuspend(void)
     gInputSuspended = true;
     gPad.ReleaseAll();
     RecomputeTouch();
+    gButtons.Clear();   // no unread tap survives the trip out either
 }
 
 extern "C" void
@@ -440,9 +446,11 @@ WFIosInputResume(void)
 // Engine thread, once per frame after it is drawn (Display::RenderEnd in
 // hal/ios/display_ios.cc). The card flag is written while the frame is drawn
 // on this thread; the main thread only ever sees it through the queue.
+// It also ends the frame for the press latch: the taps this frame read go.
 extern "C" void
 WFIosTouchFrame(void)
 {
+    gButtons.FrameEnd();
     static std::atomic<int> last{0};
     const int open = bitmaptext::ReaderOpen() ? 1 : 0;
     if (last.exchange(open) == open) return;
