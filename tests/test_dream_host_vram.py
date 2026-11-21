@@ -104,3 +104,18 @@ def test_bundle_level_count_rule_on_the_built_bundles():
             checked += 1
     if not checked:
         pytest.skip('no Dream bundle built')
+
+
+def test_aquarium_and_clocks_ranges_from_their_manifests():
+    """The bound is each APK's cd.iff length, which is its manifest's level count (the Aquarium Dream
+    bundle packs aquarium-menu.manifest's tanks in order; WF Clocks packs clocks-menu.manifest). So the
+    Aquarium keeps exactly the old 0..10 while it has 11 tanks, and the clocks accept 0..n-1 and -1."""
+    import sys
+    sys.path.insert(0, str(ROOT / 'scripts'))
+    import level_manifest
+    tanks = len(level_manifest.read(ROOT / 'wflevels/aquarium-menu.manifest').ids)
+    assert tanks == 11, f'the Aquarium now has {tanks} tanks: its Dream range is 0..{tanks - 1}'
+    clocks = level_manifest.read(ROOT / 'wflevels/clocks-menu.manifest').ids
+    assert clocks and clocks[0] == 'minute_machine'
+    host = HOST.read_text()
+    assert re.search(r'level < kShowMenu \|\| level >= levels', host)

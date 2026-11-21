@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Build the screensaver launcher icons and TV banners with the approved WF badge.
 
-Usage: gen-screensaver-android-icons.py [-h] [{all,aquarium,seahorse,minutemachine,planted}]
+Usage: gen-screensaver-android-icons.py [-h] [{all,aquarium,seahorse,clocks,planted}]
 
 The aquarium crop excludes its banner title and badge. Seahorse and Planted Tank
 artwork comes from local renders of the levels. All use the shared Android icon
 treatment. With no argument every flavor is rebuilt; name one to rewrite only
 that flavor's files (aquarium: src/main/res, seahorse: src/seahorse/res,
-planted: src/planted/res, minutemachine: src/minutemachine/res).
+planted: src/planted/res, clocks: src/clocks/res). The WF Clocks art is still
+Minute Machine's (its first clock), banner title included.
 """
 from __future__ import annotations
 
@@ -24,7 +25,7 @@ BANNER = RES / "drawable/tv_banner.png"
 SEAHORSE_FRAME = ROOT / "android/screensaver/art-src/seahorse-grid-frame.png"
 SEAHORSE_RES = ROOT / "android/screensaver/src/seahorse/res"
 MINUTE_FRAME = ROOT / "android/screensaver/art-src/minute-machine-frame.png"
-MINUTE_RES = ROOT / "android/screensaver/src/minutemachine/res"
+CLOCKS_RES = ROOT / "android/screensaver/src/clocks/res"
 PLANTED_FRAME = ROOT / "android/screensaver/art-src/planted-tank-frame.png"
 PLANTED_RES = ROOT / "android/screensaver/src/planted/res"
 DENSITIES = {"mdpi": 108, "hdpi": 162, "xhdpi": 216, "xxhdpi": 324, "xxxhdpi": 432}
@@ -83,18 +84,18 @@ def build_seahorse() -> None:
     print(f"Wrote {target}")
 
 
-def build_minutemachine() -> None:
+def build_clocks() -> None:
     frame = Image.open(MINUTE_FRAME).convert("RGB")
     if frame.size != (1280, 720):
         raise ValueError(f"unexpected Minute Machine frame size: {frame.size}")
     # A 360 x 360 square on the hopper, the fallen dominoes and the bucket: no FPS counter, no table edge.
-    write_icons(frame.crop((560, 200, 920, 560)), MINUTE_RES)
+    write_icons(frame.crop((560, 200, 920, 560)), CLOCKS_RES)
     banner = android_icons.banner({
         "banner": MINUTE_FRAME,
         "banner_crop": (0, 0, 1280, 720),
         "name": "Minute Machine",
     })
-    target = MINUTE_RES / "drawable/tv_banner.png"
+    target = CLOCKS_RES / "drawable/tv_banner.png"
     target.parent.mkdir(parents=True, exist_ok=True)
     banner.save(target, optimize=True)
     print(f"Wrote {target}")
@@ -117,7 +118,7 @@ def build_planted() -> None:
     print(f"Wrote {target}")
 
 
-FLAVORS = {"aquarium": build_aquarium, "seahorse": build_seahorse, "minutemachine": build_minutemachine, "planted": build_planted}
+FLAVORS = {"aquarium": build_aquarium, "seahorse": build_seahorse, "clocks": build_clocks, "planted": build_planted}
 
 
 def main() -> None:

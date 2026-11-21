@@ -45,12 +45,6 @@ android {
             versionCode = 1
             versionName = "0.1"
         }
-        create("minutemachine") {
-            dimension = "dream"
-            applicationId = "org.worldfoundry.minutemachine"
-            versionCode = 1
-            versionName = "0.1"
-        }
         create("clocks") {                 // WF Clocks: every clock of wflevels/clocks-menu.manifest
             dimension = "dream"
             applicationId = "org.worldfoundry.clocks"

@@ -109,3 +109,19 @@ def test_build_clocks_apk_packs_the_bundle_and_checks_both_abis():
     for abi in ('arm64-v8a', 'armeabi-v7a'):
         assert abi in script, abi
     assert re.search(r'abiFilters \+= setOf\("arm64-v8a", "armeabi-v7a"\)', GRADLE)
+
+
+def test_clocks_replaces_the_minutemachine_flavor():
+    """D2: one app for the clocks. The old flavor, its classes, source set, task and pack script are gone."""
+    import yaml
+    assert 'create("minutemachine")' not in GRADLE
+    assert not (APP / 'src/minutemachine').exists()
+    assert not list(JAVA.glob('MinuteMachine*.java'))
+    assert not (ROOT / 'scripts/pack-minute-machine-bundle.py').exists()
+    tasks = yaml.safe_load((ROOT / 'Taskfile.yml').read_text())['tasks']
+    assert 'build-minute-machine-apk' not in tasks and 'minute-machine-level' in tasks
+    icons = (ROOT / 'scripts/gen-screensaver-android-icons.py').read_text()
+    assert '"clocks": build_clocks' in icons and 'minutemachine' not in icons
+    for density in ('mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi'):
+        assert (APP / f'src/clocks/res/mipmap-{density}/ic_launcher.png').is_file(), density
+    assert (APP / 'src/clocks/res/drawable/tv_banner.png').is_file()
