@@ -1,6 +1,6 @@
 # Forth math words: the full trig set in the zForth bridge
 
-**Status: draft for review, 2026‑11‑21.** Nothing is built. Eight decisions (D1 to D8) wait for Will.
+**Status: D1, D2, D4, D5, D6, D7 and D8 answered; D3 has a new recommendation after research; D9 (fixed point) is new and open (2026‑11‑21).** Will: "d1: sure", "d2: revolutions only", "d4: fail loudly", "d5: ok (not sure i care?)", "d6: add to TODO", "d7: sure!", "d8: use whatever the hardware is internally and interface with 32-bit float (and maybe fixed point again? will we need fixed point again for esp32 support?)", and on D3: "i'd lean towards exact not required, but that has upstream client implementations. need more research and a new recommendation". The research for [D3](#research-for-d3) and for [D8 and D9](#research-for-d8-and-d9) is below. Nothing is built.
 
 ## Context
 
@@ -40,14 +40,52 @@ Each row has a recommendation and its alternatives.
 
 | # | Decision | Recommendation | Alternatives |
 |---|---|---|---|
-| D1 | Which words | **Eight:** `cos-rev`, `tan-rev`, `asin-rev`, `acos-rev`, `atan-rev`, `atan2-rev`, `sincos-rev`, `sqrt` (with the existing `sin-rev`, the full circular set plus the square root every `atan2` user needs for a distance) | Only the six circular functions. Or add the six hyperbolic ones (`sinh`, `cosh`, `tanh`, `asinh`, `acosh`, `atanh`): nothing in the repository uses them, so they would be untested speculation |
-| D2 | Angle unit | **Revolutions only**, every word suffixed `-rev`, like `sin-rev` and like the engine's Euler angles `a`, `b`, `c` | Also radian words (`sin`, `cos`, …): two units in one script is how a 360 ends up in a radian argument |
-| D3 | Exactness | **Exact at the quarter turns.** `sin-rev` and `cos-rev` give exactly 0, 1, 0, −1 at 0, ¼, ½, ¾ of a turn, by reducing the argument to a quadrant first, and are odd and even functions exactly: `sin-rev (−x)` = −`sin-rev x` | Call `std::sin(2π x)` directly, as `sin-rev` does today |
-| D4 | Domain errors | **Fail loudly:** print the word and the argument to stderr, then abort the script's frame (`ZF_ABORT_EXTERNAL`). The domain errors are `asin-rev` and `acos-rev` outside −1 to 1, `tan-rev` at exactly ¼ or ¾ of a turn, and `sqrt` of a negative (the [words table](#the-words) has each one). The one tolerance: an argument up to 10⁻⁶ outside −1 to 1 is clamped, because the dot product of two unit vectors in a 32-bit cell is often 1.0000001 | Return 0 and keep going. The engine's rule is against that |
-| D5 | One implementation | **A header-only `engine/stubs/forth_math.hpp`**, used by the bridge and by the VM test host, so the tests run the code that ships | Write the maths in the bridge and again in the test host |
-| D6 | Migrating the 13 hand-rolled definitions | **A separate item, after this one.** Each one changes motion slightly, because an approximation becomes the true value, and ten shipped tanks have captures and checks. Folded into this plan, a seven-file behaviour change would hide inside a maths-library addition. The consumer in this plan is the Minute Machine director | Migrate them here |
-| D7 | `sincos-rev ( rev -- sin cos )` | **Yes, one syscall for both.** `tk-root` computes the sine and cosine of the same pitch and roll angles back to back, and a rotation matrix always needs the pair | Leave the pair as two calls |
-| D8 | Precision and speed | **Double inside, float out.** `zf_cell` is a 32-bit float, so each result is the correctly rounded double result, within one ulp of the true value. No tables and no fixed point: a hardware sine is both faster and exact | Look-up tables, to save the call |
+| D1 | Which words (**answered: yes**, Will) | **Eight:** `cos-rev`, `tan-rev`, `asin-rev`, `acos-rev`, `atan-rev`, `atan2-rev`, `sincos-rev`, `sqrt` (with the existing `sin-rev`, the full circular set plus the square root every `atan2` user needs for a distance) | Only the six circular functions. Or add the six hyperbolic ones (`sinh`, `cosh`, `tanh`, `asinh`, `acosh`, `atanh`): nothing in the repository uses them, so they would be untested speculation |
+| D2 | Angle unit (**answered: revolutions only**, Will) | **Revolutions only**, every word suffixed `-rev`, like `sin-rev` and like the engine's Euler angles `a`, `b`, `c` | Also radian words (`sin`, `cos`, …): two units in one script is how a 360 ends up in a radian argument |
+| D3 | Exactness (**open: new recommendation**) | **Not exact: plain `libm`, plus a shared file of test vectors.** The contract is "the true value, rounded to a 32-bit float, within one ulp", with no promise at special points such as `sin-rev 0.5` (about 1.2 × 10⁻¹⁶) or `cos-rev 0.25`. Every client, now and later, tests against the same language-neutral vectors ([research](#research-for-d3)). Exactness can be added later without breaking any script, because it only shrinks errors; it could not be taken away | **A.** Exact at the quarter turns, by a quadrant reduction every client would have to copy bit for bit (my first recommendation). **C.** Plain `libm` plus a four-entry special case at the quarter turns |
+| D4 | Domain errors (**answered: fail loudly**, Will) | **Fail loudly:** print the word and the argument to stderr, then abort the script's frame (`ZF_ABORT_EXTERNAL`). The domain errors are `asin-rev` and `acos-rev` outside −1 to 1, and `sqrt` of a negative; `tan-rev` at exactly ¼ or ¾ of a turn too, but only if D3 keeps the quarter turns exact (otherwise its pole just returns a very large number). The [words table](#the-words) has each one. The one tolerance: an argument up to 10⁻⁶ outside −1 to 1 is clamped, because the dot product of two unit vectors in a 32-bit cell is often 1.0000001 | Return 0 and keep going. The engine's rule is against that |
+| D5 | One implementation (**answered: ok**, Will: "not sure i care?") | | One implementation | **A header-only `engine/stubs/forth_math.hpp`**, used by the bridge and by the VM test host, so the tests run the code that ships | Write the maths in the bridge and again in the test host |
+| D6 | Migrating the 13 hand-rolled definitions (**answered: add to TODO**, done) | | Migrating the 13 hand-rolled definitions | **A separate item, after this one.** Each one changes motion slightly, because an approximation becomes the true value, and ten shipped tanks have captures and checks. Folded into this plan, a seven-file behaviour change would hide inside a maths-library addition. The consumer in this plan is the Minute Machine director | Migrate them here |
+| D7 | `sincos-rev ( rev -- sin cos )` (**answered: yes**, Will) | | `sincos-rev ( rev -- sin cos )` | **Yes, one syscall for both.** `tk-root` computes the sine and cosine of the same pitch and roll angles back to back, and a rotation matrix always needs the pair | Leave the pair as two calls |
+| D8 | Precision and speed (**answered**, Will: "use whatever the hardware is internally and interface with 32-bit float") | **Hardware-native precision inside, 32-bit float at the interface.** The maths runs in the widest type the chip does natively: `double` on phones and desktops, `float` (`sinf`, `atan2f`…) on a chip whose FPU is single-precision. `zf_cell` stays a 32-bit float. The type is one `Real` typedef in `forth_math.hpp`, chosen at compile time, and the conversion to and from a cell happens in one place, the bridge | Look-up tables, to save the call. Always `double`, which a single-precision chip would run in software |
+| D9 | Fixed point for ESP32-class chips (**new, open**) | **Not now.** No ESP32 plan or chip exists in the repository, and a fixed-point build with no target is untestable. Keep the door open: the `Real` typedef and the single cell boundary (D8) are the only two places a fixed-point variant would touch. Decide with the ESP32 plan, once it names a chip ([research](#research-for-d8-and-d9)) | Build a 16.16 variant now. Or make `float` the only supported cell forever |
+
+## Research for D3
+
+Will's concern, 2026‑11‑21: exactness "has upstream client implementations". I read that as: every other implementation of these words would have to reproduce it. Here is what the repository shows.
+
+| Question | Finding |
+|---|---|
+| Who else implements or uses these words? | **Nobody.** Only the zForth bridge exposes them. The Lua, QuickJS, JerryScript, WAMR, Wren and PILOT hosts and the five other Forth hosts (`ficl`, `atlast`, `embed`, `libforth`, `pforth`) expose no trigonometry at all, and no level script in those languages calls it: the only matches in the tree are vendored test files. (`grep` over `engine/stubs/scripting_*.cc` and `wflevels`) |
+| Which builds run scripts at all? | The mobile builds are Forth-only (`WF_FORTH_ENGINE=zforth`, the others forced off, `CMakeLists.txt:80-86`). Only the desktop dev build compiles every engine |
+| Is there a second zForth? | A TypeScript port is recommended in [the JS port plan](2026-05-12-zforth-js-port-recommendation.md); **no code exists**. It would be the first real client of the word set |
+| What about Homeboard? | It will embed this engine as a pinned prebuilt library (`homeboard-tv/TODO.md`): the same C++, so the same words, not a reimplementation |
+| Does a different `libm` change a result? | Not visibly. The double result is rounded to a float, so two libms that differ in the last double bit (about 10⁻¹⁶) give the same float except about once in 10⁸ calls (my arithmetic; I have not run the other platforms' libms). `sin(2π · 0.5)` is the same 1.2246467991473532 × 10⁻¹⁶ in every IEEE `libm`, because the argument is computed identically. The Codemagic parity test (`tests/test_codemagic_aquarium_parity.py`) is where a difference would show |
+
+So exactness is **not needed for the platforms to agree**; it is a convenience for scripts that compare a float with 0. It is also the one part of the specification that forces a *particular algorithm* on every future client, whereas "the true value rounded to a float" is a single line in any language (in JavaScript: `Math.fround(Math.sin(2 * Math.PI * (x - Math.floor(x))))`).
+
+| Option | What a client has to do | What a script gets |
+|---|---|---|
+| **A.** Exact at the quarter turns | Reproduce the quadrant reduction exactly, and the pole check in `tan-rev` | Exact 0, 1, 0, −1; `tan-rev` refuses ¼ and ¾ |
+| **B.** Plain `libm` (recommended) | One line per word, checked against the shared vectors | The true value within one ulp; `sin-rev 0.5` is 1.2 × 10⁻¹⁶, so a script must not compare it with 0, as it must not for any float |
+| **C.** Plain `libm` and four special cases | The line, plus a four-entry table | Exact quarter turns only |
+
+**The recommendation is B, with a shared vector file.** `tests/data/forth_math_vectors.json` holds a few hundred cases per word, generated by `tests/gen_forth_math_vectors.py` from Python's `math` module in double precision: the quarter and eighth turns, tiny and huge arguments, the poles, the edges of the `asin` and `acos` domain including the 10⁻⁶ slack, the eight directions of `atan2-rev`, and each domain error as `{"error": "domain"}`. A result passes if it is within one float ulp or 10⁻⁷ of the stored value, whichever is larger. The C++ bridge tests against the file now; the JavaScript port, if it is ever written, loads the same file. Moving from B to A or C later breaks nothing, because it only makes results more exact; moving the other way would.
+
+
+## Research for D8 and D9
+
+Will asked: "maybe fixed point again? will we need fixed point again for esp32 support?" What the repository shows, and what it does not:
+
+| Question | Finding |
+|---|---|
+| Is there an ESP32 plan or a chosen chip? | **No.** ESP32 appears in two allocator-alignment plans ([lmalloc non-aligned requests](2026-05-31-lmalloc-nonaligned-caller-requests.md), [hard-coded HAL alignment](2026-05-19-replace-hard-coded-hal-allocator-alignment-with.md)) as a platform whose alignment rules matter, and nowhere else |
+| Does the engine still have fixed point? | **Yes, in the source, unused.** `wfsource/source/math/scalar.hp` has a `SCALAR_TYPE_FIXED` mode, but no CMake target sets it: every build is `SCALAR_TYPE_FLOAT` |
+| What is the Forth cell? | `typedef float zf_cell` in `engine/stubs/zfconf.h`. Upstream zForth uses an integer cell, so a fixed-point Forth would be a different build of the VM, not a flag |
+| Which Espressif chips have a hardware FPU? | **From my memory, so check the datasheet of the chip chosen:** the classic ESP32 (Xtensa LX6) and the S3 have a single-precision FPU, and `double` there runs in software; the S2 and the RISC-V parts (C3, C2, C6, H2) have none, so even `float` runs in software |
+
+What follows: on a single-precision-FPU chip a `float` build is fast and needs no fixed point, as long as the maths uses `float` and not `double`, which is exactly what D8's `Real` typedef does. Fixed point only starts to pay on a chip with no FPU at all, and whether the project targets one is not decided anywhere. So D9 recommends waiting for that decision rather than building a variant nobody can run, and D8 is written so that nothing has to be undone then.
+
 
 ## The words
 
@@ -55,10 +93,10 @@ All angles are in **revolutions**. `sincos-rev` leaves the sine below the cosine
 
 | Word | Stack effect | Range of the result | Domain error |
 |---|---|---|---|
-| `sin-rev` (exists) | `( rev -- sin )` | −1 to 1 | none; exact 0, 1, 0, −1 at the quarter turns (D3) |
-| `cos-rev` | `( rev -- cos )` | −1 to 1 | none; exact at the quarter turns |
+| `sin-rev` (exists) | `( rev -- sin )` | −1 to 1 | none; within one ulp of the true value (D3) |
+| `cos-rev` | `( rev -- cos )` | −1 to 1 | none; within one ulp of the true value (D3) |
 | `sincos-rev` | `( rev -- sin cos )` | each −1 to 1 | none |
-| `tan-rev` | `( rev -- tan )` | any | **an argument of exactly ¼ or ¾ of a turn** (the tangent is infinite); the argument is exact, so the test is exact |
+| `tan-rev` | `( rev -- tan )` | any | none under the recommended D3: near ¼ and ¾ of a turn it returns a very large number (about 1.6 × 10¹⁶ at ¼). Under option A it would refuse exactly ¼ and ¾ |
 | `asin-rev` | `( x -- rev )` | −¼ to ¼ | \|x\| > 1 + 10⁻⁶ |
 | `acos-rev` | `( x -- rev )` | 0 to ½ | \|x\| > 1 + 10⁻⁶ |
 | `atan-rev` | `( x -- rev )` | −¼ to ¼, never reached | none |
@@ -95,7 +133,7 @@ flowchart TD
     P4 --> DONE
 ```
 
-- **Phase 1, the maths** (T3). `forth_math.hpp`: pure functions on `double` that return a value and an error code, with no engine types, so a test includes it alone. Quadrant reduction for the circular functions (D3), the domain checks and the clamp (D4). `tests/forth_math_test.cpp` and a `task test-forth-math`, in the same shape as `task test-wall-clock`. Phase 1 also re-counts the 13 hand-rolled definitions and measures, for the record, how far each is from the true function (the parabola's 0.16 % is known; the arctangent's is not).
+- **Phase 1, the maths** (T3). `forth_math.hpp`: pure functions on `double` that return a value and an error code, with no engine types, so a test includes it alone. Plain `libm` calls on the hardware-native `Real` type (D3 as recommended, D8; a quadrant reduction if Will chooses A), the domain checks and the clamp (D4). `tests/data/forth_math_vectors.json` with `tests/gen_forth_math_vectors.py` (D3). `tests/forth_math_test.cpp`, which checks every vector, and a `task test-forth-math`, in the same shape as `task test-wall-clock`. Phase 1 also re-counts the 13 hand-rolled definitions and measures, for the record, how far each is from the true function (the parabola's 0.16 % is known; the arctangent's is not).
 - **Phase 2, the bridge** (T3). The eight syscalls and their words, `sin-rev` moved onto the exact implementation, one message per domain error before the abort. `docs/forth-math-words.md`: the table above, with the units and the domains, linked from `docs/scripting-languages.md`.
 - **Phase 3, the VM test** (T2). `tests/verify_forth_math.py`, modelled on `tests/verify_forth_source.py` and on `tests/verify_minute_machine_forth.py`: it compiles the real zForth VM with a host that calls `forth_math.hpp`, and runs every word. The Minute Machine's VM host drops its private `sin-rev` and uses the shared header, and the director's camera switches from `.25 + mm-sin` to `sincos-rev`.
 - **Phase 4, the engine test** (T2). `tests/verify_forth_math_engine.py`, modelled on `tests/verify_forth_reload.py`: hot-load a script that computes each word and writes the results to mailboxes, in the real engine, and read them back through the debug bridge. This is the only test that goes through the bridge's own dispatcher rather than a copy of it.
@@ -110,7 +148,7 @@ No mockups: the change has no visible surface (a script-language library).
 |---|---|---|
 | `engine/stubs/forth_math.hpp` | new | the maths, header-only |
 | `engine/stubs/scripting_zforth.cc` | changed | syscalls 74 to 81, the word table, `sin-rev` on the shared code |
-| `tests/forth_math_test.cpp`, `Taskfile.yml` (`test-forth-math`) | new / changed | the C++ unit test |
+| `tests/forth_math_test.cpp`, `tests/data/forth_math_vectors.json`, `tests/gen_forth_math_vectors.py`, `Taskfile.yml` (`test-forth-math`) | new / changed | the C++ unit test and the shared vectors |
 | `tests/verify_forth_math.py` | new | every word in the real VM |
 | `tests/verify_forth_math_engine.py` | new | every word in the real engine |
 | `tests/test_forth_math_docs.py` | new | the doc's table equals the registered table |
@@ -127,7 +165,7 @@ No mockups: the change has no visible surface (a script-language library).
 
 ## Verification
 
-1. The C++ unit test passes: exact values at the quarter turns for `sin-rev` and `cos-rev`, the odd and even symmetries, `sin² + cos² = 1` to 10⁻⁷, `asin-rev (sin-rev x) = x` and the other round trips, the eight directions of `atan2-rev`, every domain error flagged, an argument 10⁻⁷ over 1 clamped and one 10⁻⁵ over refused, and 100 000 random arguments within one float ulp of a `long double` reference.
+1. The C++ unit test passes: every case in the shared vector file within one float ulp or 10⁻⁷, 100 000 random arguments within one float ulp of a `long double` reference, the odd and even symmetries and `sin² + cos² = 1` to 10⁻⁷, the round trips, the eight directions of `atan2-rev`, every domain error flagged, an argument 10⁻⁷ over 1 clamped and one 10⁻⁵ over refused. (If D3 is A, also exact 0, 1, 0, −1 at the quarter turns.)
     ```
     task test-forth-math
     ```
