@@ -29,7 +29,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tests"))
 import level_modules  # noqa: E402
 
-tl, _parts, forth = level_modules.load("tide_harbour", "timeline", "parts", "forth")
+tl, _parts, forth, turns = level_modules.load("tide_harbour", "timeline", "parts", "forth", "turns")
 import verify_minute_machine_forth as mm  # noqa: E402  (its VM host and bootstrap builder; it imports Minute Machine's own modules)
 
 # The host also answers property@ ( actor field -- value valid ), syscall 178 as scripting_zforth.cc registers it,
@@ -173,6 +173,55 @@ def compare(host: Host, ix, ids, cases):
     return worst, bad
 
 
+def scan_cell(name: str) -> int:
+    return forth.SCAN0 + forth.SCAN_CELLS.index(name)
+
+
+def scan_cases():
+    """Where the next-turn scan is checked: a day in steps, the six moments' neighbours and the awkward ones (midnight
+    between turns, a year boundary, a far date)."""
+    today = tl.wall_day(dt.date(2026, 11, 21))
+    out = [(today, k * 2700.0 + 11.0) for k in range(32)]
+    for spec in ("2026-11-21T16:30:00", "2026-11-21T23:50:00", "2026-11-22T00:00:00", "2025-12-31T23:30:00",
+                 "2026-01-01T00:00:00", "2027-03-02T02:45:00", "2030-07-04T16:20:05.5", "2026-06-21T18:30:12"):
+        out.append(tl.parse_when(spec))
+    return out
+
+
+def check_scan(host: Host, cs):
+    """Each case: start a fresh scan, run frames until it finishes (counting them), and compare the results with
+    turns.next_high_low and turns.rising: times within 5 s, heights within 0.5 cm (float32 against double)."""
+    bad, frames, worst_t, worst_h = [], [], 0.0, 0.0
+    for day, sod in cs:
+        for name in ("rdy", "act"):
+            host.proc.stdin.write(f"M {scan_cell(name)} 0\n")
+        n = 0
+        while True:
+            r, dsp, rsp, _w = host.frame_at(day, sod)
+            n += 1
+            if r != 0 or dsp != 0 or rsp != 0:
+                bad.append(f"scan {tl.date_of(day)} {sod:.0f}: VM result {r}, data stack {dsp}, return stack {rsp}")
+                break
+            if host.read(scan_cell("rdy")) == 1 and host.read(scan_cell("act")) == 0:
+                break
+            if n > 40:
+                bad.append(f"scan {tl.date_of(day)} {sod:.0f}: not finished after {n} frames")
+                break
+        frames.append(n)
+        hi, lo = turns.next_high_low(day, float(int(sod)))
+        label = f"scan {tl.date_of(day)} {sod:.0f}"
+        got = {k: host.read(scan_cell(k)) for k in ("nht", "nhh", "nlt", "nlh", "rise", "nt")}
+        for (t, h), (want_t, want_h) in (((got["nht"], got["nhh"]), (hi.t, hi.h)), ((got["nlt"], got["nlh"]), (lo.t, lo.h))):
+            worst_t, worst_h = max(worst_t, abs(t - want_t)), max(worst_h, abs(h - want_h))
+            if abs(t - want_t) > 5.0 or abs(h - want_h) > 0.005:
+                bad.append(f"{label}: forth {t:.1f} s {h:.4f} m, reference {want_t:.1f} s {want_h:.4f} m")
+        if got["rise"] != float(turns.rising(day, float(int(sod)))):
+            bad.append(f"{label}: rising {got['rise']}, reference {turns.rising(day, float(int(sod)))}")
+        if got["nt"] >= turns.KEPT_MAX:
+            bad.append(f"{label}: the scan kept {got['nt']:.0f} turns, its room is {turns.KEPT_MAX}")
+    return frames, worst_t, worst_h, bad
+
+
 def cases():
     out = []
     today = tl.wall_day(dt.date(2026, 11, 21))
@@ -199,9 +248,14 @@ def main() -> int:
         host.ix, host.fields = ix, forth.settings_fields()
         cs = cases()
         worst, bad = compare(host, ix, ids, cs)
+        scs = scan_cases()
+        frames, wt, wh, sbad = check_scan(host, scs)
+        bad += sbad
         host.close()
     print(f"{len(cs)} frames; worst position {worst['pos']*1000:.4f} mm, rotation {worst['rot']*360:.4f} deg, "
           f"scale {worst['scale']:.6f}, colour {worst['colour']} step(s), tide {worst['tide']*1000:.3f} mm")
+    print(f"{len(scs)} scans, {min(frames)} to {max(frames)} frames each at {forth.SCAN_BURST} samples a frame; worst time "
+          f"{wt:.2f} s, worst height {wh * 100:.3f} cm against turns.py")
     for b in bad[:30]:
         print("FAIL", b)
     print("PASS" if not bad else f"FAIL: {len(bad)} mismatches")

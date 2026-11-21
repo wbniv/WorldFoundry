@@ -13,7 +13,8 @@ FACE_COLOR mailboxes (3037 + slot). tests/verify_tide_harbour_forth.py runs this
 zForth VM against timeline.scene; scripts/check-tide-harbour.py runs it in the engine.
 
 Global user mailboxes: 600-659 scratch, 689 the last look step, 690-693 the settings (copied every frame
-from the TideHarbourSettings object with property@, plan D13; 0 is the default), 700-706 visibility.
+from the TideHarbourSettings object with property@, plan D13; 0 is the default), 700-706 visibility,
+720-783 the next-turn scan (scan_words).
 """
 from __future__ import annotations
 
@@ -25,6 +26,7 @@ from typing import Dict, List
 
 import parts
 import timeline as tl
+import turns
 
 CELLS = ["t", "sod", "hr", "mi", "sec", "day", "key", "ckey", "cday", "tide", "q", "w1", "w2", "w3", "w4", "w5",
          "kr", "kg", "kb", "hor-r", "hor-g", "hor-b", "zen-r", "zen-g", "zen-b", "sun-r", "sun-g", "sun-b", "lit",
@@ -32,9 +34,16 @@ CELLS = ["t", "sod", "hr", "mi", "sec", "day", "key", "ckey", "cday", "tide", "q
          "son", "mon", "i", "u", "bz", "dy", "dz", "az", "sn", "cs", "kk", "sv"]
 assert 600 + len(CELLS) <= 689
 PREVQ = 689
+SCAN0 = 720                      # the next-turn scan's cells: 720-759 state and results, 760-783 the kept turns (8 x t, h, kind)
+SCAN_BURST = 20                  # samples per frame: a scan of 182 takes about ten frames, and runs only when a turn has passed
+SCAN_CELLS = ["s", "s0day", "s0sec", "ya", "yb", "yc", "nt", "act", "rdy", "nht", "nhh", "nlt", "nlh", "rday", "rsec", "rise",
+              "tt", "tv", "tk", "i", "first", "ahead", "lk", "lh", "ok", "den", "off", "bi"]
+KEPT0 = 760
+assert len(SCAN_CELLS) <= KEPT0 - SCAN0
 WORDS = {"floor", "frac", "trunc", "mod", "c01", "x", "y", "z", "a", "b", "c", "sx", "sy", "sz", "col", "byte", "pack",
          "ramp", "tide-sum", "sun", "slow", "palette", "bar-rgb", "recolour", "bars", "boats", "sky", "lights", "clock",
-         "show", "tick", "prevq", "poll", "settings"} | {"opt-" + k for k in tl.OPTION_CELLS} | {"f-" + k for k in tl.OPTION_CELLS}
+         "show", "tick", "prevq", "poll", "settings", "scan"} | {"opt-" + k for k in tl.OPTION_CELLS} | {"f-" + k for k in tl.OPTION_CELLS}
+WORDS |= {"sc-" + c for c in SCAN_CELLS} | {"sc-y", "sc-add", "sc-turn", "sc-step", "sc-start", "sc-finish", "sc-kept", "sc-append", "sc-replace"}
 
 
 def check_names() -> None:
@@ -326,6 +335,104 @@ def settings_fields() -> Dict[str, int]:
     return json.loads((Path(__file__).resolve().parent / "actor-map.json").read_text())["settings_fields"]
 
 
+def scan_words() -> List[str]:
+    """The next high and low water, as turns.next_high_low (one scan, SCAN_BURST samples a frame).
+
+    th-scan restarts a scan when there is no result yet or the nearer of the two turns has passed, then takes
+    SCAN_BURST samples of the tide at 10 minute steps from the scan's start, finds each change of direction,
+    places it with a parabola through the three samples round it, and keeps it by the streaming rule of
+    turns.filtered. The result cells: th-sc-nht/nhh (the next high: seconds after the scan's start, metres),
+    th-sc-nlt/nlh (the next low), th-sc-rise (1 when the next turn is a high), th-sc-rday/rsec (the scan's start).
+    It reuses th-tide-sum and so overwrites the dd, hh, q64 and r64 cells (th-slow has finished with them) and
+    restores th-tide, which the frame words use.
+    """
+    g = lambda name: f"th-sc-{name} th@"
+    st = lambda name: f"th-sc-{name} th!"
+    step, last = int(turns.STEP_S), turns.N_SAMPLES - 1
+    out = [f": th-sc-{c} {SCAN0 + i} ;" for i, c in enumerate(SCAN_CELLS)]
+    out += [
+        ": th-sc-kept ( i k -- addr ) swap 3 * + " + str(KEPT0) + " + ;",        # k: 0 time, 1 height, 2 kind
+        # the tide at the scan's start plus s samples ( s -- metres )
+        ": th-sc-y",
+        f"  {step} * {g('s0sec')} + 3600 /",
+        "  dup 24 / th-floor",
+        f"  dup {g('s0day')} + th-dd th!",
+        "  24 * - th-hh th!",
+        "  th-tide th@ >r th-tide-sum th-tide th@ r> th-tide th! ;",
+        # append the candidate (tt seconds, tv metres, tk 1 for a high) to the kept turns, room permitting
+        ": th-sc-append",
+        f"  {g('nt')} {turns.KEPT_MAX} < if",
+        f"    {g('tt')} {g('nt')} 0 th-sc-kept th!  {g('tv')} {g('nt')} 1 th-sc-kept th!  {g('tk')} {g('nt')} 2 th-sc-kept th!",
+        f"    {g('nt')} 1 + {st('nt')}",
+        "  then ;",
+        ": th-sc-replace",
+        f"  {g('tt')} {g('nt')} 1 - 0 th-sc-kept th!  {g('tv')} {g('nt')} 1 - 1 th-sc-kept th!  {g('tk')} {g('nt')} 1 - 2 th-sc-kept th! ;",
+        # turns.filtered: the same kind as the last kept replaces it if more extreme; the other kind is kept if 4 cm away
+        ": th-sc-add",
+        f"  {g('nt')} 0 = if th-sc-append else",
+        f"    {g('nt')} 1 - 2 th-sc-kept th@ {st('lk')}  {g('nt')} 1 - 1 th-sc-kept th@ {st('lh')}",
+        f"    {g('lk')} {g('tk')} = if",
+        f"      {g('tv')} {g('lh')} > if 1 else 0 then {g('tk')} = if th-sc-replace then",
+        "    else",
+        f"      {g('tv')} {g('lh')} - dup * {n(turns.MIN_SWING_M ** 2)} < if 0 else 1 then {st('ok')}",
+        f"      {g('ok')} if th-sc-append then",
+        "    then",
+        "  then ;",
+        # the middle sample yb of ya, yb, yc is a turn if the direction changes there
+        ": th-sc-turn",
+        f"  {g('yb')} {g('ya')} - {g('yc')} {g('yb')} - * 0 < if",
+        f"    {g('ya')} {g('yb')} 2 * - {g('yc')} + {st('den')}",
+        f"    {g('ya')} {g('yc')} - .5 * {g('den')} / {st('off')}",
+        f"    {g('yb')} {g('ya')} {g('yc')} - .25 * {g('off')} * - {st('tv')}",
+        f"    {g('yb')} {g('ya')} > if 1 else 0 then {st('tk')}",
+        f"    {g('s')} 1 - {g('off')} + {step} * {st('tt')}",
+        "    th-sc-add",
+        "  then ;",
+        ": th-sc-start",
+        f"  th-day th@ {tl.EPOCH_DAY} - {st('s0day')}  th-key th@ {st('s0sec')}",
+        f"  -1 {st('s')}  0 {st('nt')}  1 {st('act')} ;",
+        # after the last sample: the first high and the first low ahead, and whether the next turn is a high
+        ": th-sc-finish",
+        f"  -1 {st('nht')}  -1 {st('nlt')}  -1 {st('first')}",
+        f"  {g('nt')} 0 > if",
+        f"    0 {st('i')}",
+        "    begin",
+        f"      {g('i')} 0 th-sc-kept th@ 0 > if",
+        f"        {g('first')} 0 < if {g('i')} 2 th-sc-kept th@ {st('rise')}  1 {st('first')} then",
+        f"        {g('i')} 2 th-sc-kept th@ 1 = if",
+        f"          {g('nht')} 0 < if {g('i')} 0 th-sc-kept th@ {st('nht')}  {g('i')} 1 th-sc-kept th@ {st('nhh')} then",
+        "        else",
+        f"          {g('nlt')} 0 < if {g('i')} 0 th-sc-kept th@ {st('nlt')}  {g('i')} 1 th-sc-kept th@ {st('nlh')} then",
+        "        then",
+        "      then",
+        f"      {g('i')} 1 + dup {st('i')} {g('nt')} =",
+        "    until",
+        "  then",
+        f"  {g('s0day')} {st('rday')}  {g('s0sec')} {st('rsec')}  1 {st('rdy')}  0 {st('act')} ;",
+        # one sample: the first two prime ya and yb; from the third on, yb is tested
+        ": th-sc-step",
+        f"  {g('s')} th-sc-y {st('yc')}",
+        f"  {g('s')} 1 < if else th-sc-turn then",
+        f"  {g('yb')} {st('ya')}  {g('yc')} {st('yb')}",
+        f"  {g('s')} 1 + {st('s')}",
+        f"  {g('s')} {last} > if th-sc-finish then ;",
+        ": th-scan",
+        f"  {g('act')} 0 = if",
+        f"    {g('rdy')} 0 = if th-sc-start else",
+        f"      th-day th@ {tl.EPOCH_DAY} - {g('rday')} - 86400 * th-key th@ + {g('rsec')} - {st('ahead')}",
+        f"      {g('nht')} {g('nlt')} < if {g('nht')} else {g('nlt')} then {g('ahead')} swap > if else th-sc-start then",
+        "    then",
+        "  then",
+        f"  {g('act')} if",
+        f"    0 {st('bi')}",
+        "    begin",
+        f"      th-sc-step {g('bi')} 1 + dup {st('bi')} {SCAN_BURST} = {g('act')} 0 = | ",
+        "    until",
+        "  then ;",
+    ]
+    return out
+
+
 def tick() -> List[str]:
     return [": th-tick",
             f"  INDEXOF_WALL_HOUR th@ {cell('hr')} th!  INDEXOF_WALL_MINUTE th@ {cell('mi')} th!",
@@ -333,7 +440,7 @@ def tick() -> List[str]:
             f"  {get('mi')} 60 * {get('sec')} + {cell('t')} th!",
             f"  {get('hr')} 3600 * {get('mi')} 60 * + {get('sec')} th-floor + {cell('key')} th!",
             f"  {get('key')} {get('ckey')} <> {get('day')} 1 + {get('cday')} <> | if th-slow then",
-            "  th-poll",
+            "  th-poll th-scan",
             "  th-bars th-boats th-sky th-lights th-clock th-show",
             f"  {get('q')} 100 + th-prevq th@ <> if th-recolour {get('q')} 100 + th-prevq th! then ;"]
 
@@ -349,7 +456,7 @@ def definitions(ix: Dict[str, int], fields: Dict[str, int] | None = None) -> str
     """The script without its per-frame call (the last line, th-tick)."""
     fields = fields or settings_fields()
     lines = (library() + tide_sum() + sun_words() + slow_words() + palette_words() + recolour_words(ix) + frame_words(ix)
-             + poll_words(ix, fields) + tick())
+             + poll_words(ix, fields) + scan_words() + tick())
     return "\n".join(lines) + "\n"
 
 
