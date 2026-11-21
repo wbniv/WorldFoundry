@@ -33,9 +33,9 @@ public final class TankSettingsProvider extends ContentProvider {
             JSONArray options = new JSONArray();
             try {
                 options.put(new JSONObject().put("id", TankChoice.RANDOM).put("label", "Random"));
-                for (int i = 0; i < TankChoice.IDS.length; i++) {
-                    options.put(new JSONObject().put("id", TankChoice.IDS[i])
-                            .put("label", TankChoice.LABELS[i]));
+                LevelCatalog tanks = TankChoice.catalog(getContext());
+                for (String id : tanks.ids()) {
+                    options.put(new JSONObject().put("id", id).put("label", tanks.label(id)));
                 }
                 JSONObject setting = new JSONObject().put("id", "tank")
                         .put("type", "choice").put("label", "Tank")
@@ -64,7 +64,7 @@ public final class TankSettingsProvider extends ContentProvider {
         } else if ("setSetting".equals(method) && arg != null && arg.startsWith(ORIENTATION + ":")) {
             putOrientation(getContext(), result, arg.substring(ORIENTATION.length() + 1));
         } else if ("setSetting".equals(method)) {
-            if (arg == null || !arg.startsWith("tank:") || !TankChoice.valid(arg.substring(5))) {
+            if (arg == null || !arg.startsWith("tank:") || !TankChoice.valid(getContext(), arg.substring(5))) {
                 throw new IllegalArgumentException("Unknown tank");
             }
             result.putBoolean("saved", TankChoice.set(getContext(), arg.substring(5)));

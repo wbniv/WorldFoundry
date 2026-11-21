@@ -20,7 +20,7 @@ public final class AquariumActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        TankLaunch.startChosen(this, player);
+        if (!LevelLaunch.startChosen(this, player, getIntent().getStringExtra(LevelLaunch.EXTRA_LEVEL))) finish();
     }
 
     @Override
