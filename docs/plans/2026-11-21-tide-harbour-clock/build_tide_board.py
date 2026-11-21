@@ -90,10 +90,10 @@ function reading(t) {
 
 // The board, in a 400 x 200 box. dark is 0 by day and 1 at night, when its lantern lights it.
 const FONT = `'IBM Plex Sans Thai','Noto Sans Thai','Sarabun',system-ui,sans-serif`;
-function board(r, dark) {
+function board(r, dark, bare) {      // bare: no frame, the wood runs to the edges (the river panel)
   const wood = mix('#3b2716', '#7d5a33', 1 - dark * .7), edge = mix('#170f08', '#3d2915', 1 - dark * .6), ink = '#f8efd6';
-  let g = `<rect width="400" height="200" rx="10" fill="${edge}"/><rect x="6" y="6" width="388" height="188" rx="7" fill="${wood}"/>`;
-  if (dark > .05) g += `<rect x="6" y="6" width="388" height="188" rx="7" fill="#ffb347" opacity="${(.2 * dark).toFixed(2)}"/>`;
+  let g = bare ? `<rect width="400" height="200" fill="${wood}"/>` : `<rect width="400" height="200" rx="10" fill="${edge}"/><rect x="6" y="6" width="388" height="188" rx="7" fill="${wood}"/>`;
+  if (dark > .05 && !bare) g += `<rect x="6" y="6" width="388" height="188" rx="7" fill="#ffb347" opacity="${(.2 * dark).toFixed(2)}"/>`;   // bare: no lamp, it dims with the panel
   g += `<line x1="16" y1="100" x2="322" y2="100" stroke="${edge}" stroke-width="3"/>`;
   const row = (y, high, e) => {
     // the mark: a water line with a triangle above it (high water) or below it (low water)
@@ -179,6 +179,8 @@ document.documentElement.dataset.ready = '1';
 
 # The numerals, the turning-point search and the reading: shared with build_river_map.py.
 COMMON_JS = SCRIPT.split("// The board, in a 400 x 200 box.", 1)[0]
+# The board itself (and FONT), for the river panel, which carries the same readings above its map.
+BOARD_JS = "// The board:" + SCRIPT.split("// The board, in a 400 x 200 box.", 1)[1].split("// The board in the scene", 1)[0]
 
 
 def tide_board() -> str:

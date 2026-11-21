@@ -166,9 +166,15 @@ def test_the_options_change_only_what_they_name():
     sod = 15 * 3600 + 150.0                        # mid drift swing
     base = tl.scene(TODAY, sod)
     off = tl.scene(TODAY, sod, {"drift": 1})
-    assert off.poses["cs_wide"] == tl.Pose(tl.LOOK_AT[0], tl.LOOK_AT[1] - tl.CAMERA_R, tl.CAMERA_Z)
+    pn = tl.pn                                      # the panel is in, at the right: the camera is pulled back and shifted for it
+    left, vis = pn.slide(sod)
+    assert (left, vis) == (False, 1.0)
+    dist = tl.CAMERA_R / pn.harbour_scale(vis)
+    lx = tl.LOOK_AT[0] + pn.camera_shift_m(left, vis, dist)
+    assert off.poses["cs_wide"] == tl.Pose(lx, tl.LOOK_AT[1] - dist, tl.CAMERA_Z)
     assert base.poses["cs_wide"] != off.poses["cs_wide"]
-    assert {k: v for k, v in off.poses.items() if k != "cs_wide"} == {k: v for k, v in base.poses.items() if k != "cs_wide"}
+    follows_camera = lambda k: k == "cs_wide" or k.startswith("panel_")        # the panel is posed from the camera's frame
+    assert {k: v for k, v in off.poses.items() if not follows_camera(k)} == {k: v for k, v in base.poses.items() if not follows_camera(k)}
     roman = tl.scene(TODAY, sod, {"numerals": 1}).visible
     none = tl.scene(TODAY, sod, {"numerals": 2}).visible
     assert (base.visible[705], base.visible[706]) == (1, 0) and (roman[705], roman[706]) == (0, 1) and (none[705], none[706]) == (0, 0)

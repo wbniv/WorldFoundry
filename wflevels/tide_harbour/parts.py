@@ -20,6 +20,7 @@ import timeline as tl
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "clock_common"))
 from clock_mesh import Mesh, face_normal  # noqa: E402
+import panel_parts  # noqa: E402
 
 RGB = Tuple[float, float, float]
 NONE: RGB = (0.0, 0.0, 0.0)
@@ -55,6 +56,7 @@ MATERIALS: Dict[str, Tuple[str, RGB, RGB, float]] = {
     "sun": ("sun", (1.00, 0.95, 0.75), NONE, 0.0),
     # never re-coloured: what tells the time stays readable at night (spike finding 4), and the moon stays bright
     "dial": ("fixed", (0.96, 0.93, 0.84), NONE, 0.0),
+    **{key: (kind, day, NONE, 0.0) for key, (kind, day) in panel_parts.PANEL_MATERIALS.items()},
     "rim": ("fixed", (0.84, 0.64, 0.22), NONE, 0.0),
     "ink": ("fixed", (0.10, 0.08, 0.06), NONE, 0.0),
     "hand": ("fixed", (0.08, 0.07, 0.06), NONE, 0.0),
@@ -342,6 +344,7 @@ def all_meshes() -> Dict[str, Mesh]:
         out[f"lantern_{i}"] = lantern_mesh(i)
     for i in range(len(tl.GLINTS)):
         out[f"glint_{i}"] = glint_mesh(i)
+    out.update(panel_parts.panel_meshes())
     return out
 
 
@@ -355,6 +358,8 @@ def visibility_group(name: str) -> str | None:
         return "boats"
     if name == "gauge_pointer":
         return "gauge"
+    if name in ("panel_arrow_up", "panel_arrow_dn"):
+        return name[len("panel_"):]
     return VISIBLE_STATICS.get(name)
 
 

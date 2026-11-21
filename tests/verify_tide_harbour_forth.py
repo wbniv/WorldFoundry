@@ -29,7 +29,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tests"))
 import level_modules  # noqa: E402
 
-tl, _parts, forth = level_modules.load("tide_harbour", "timeline", "parts", "forth")
+tl, _parts, forth, turns = level_modules.load("tide_harbour", "timeline", "parts", "forth", "turns")
 import verify_minute_machine_forth as mm  # noqa: E402  (its VM host and bootstrap builder; it imports Minute Machine's own modules)
 
 # The host also answers property@ ( actor field -- value valid ), syscall 178 as scripting_zforth.cc registers it,
@@ -79,6 +79,18 @@ class Host(mm.Host):
             for name, label in tl.FIELD_LABELS.items():
                 self.proc.stdin.write(f"P {actor} {self.fields[label]} {options.get(name, 0)}\n")
 
+    def set_camera(self, sod: float, options):
+        """The Camera actor as the engine has it once it has caught up with cs_wide (it eases towards it, about 10 % of the
+        way a frame): position, pitch in b and heading in c, in revolutions, wrapped into 0..1 as the engine writes them."""
+        cam, look, _left, _vis = tl.camera_poses(sod % 86400.0, dict(tl.DEFAULT_OPTIONS, **(options or {})))
+        d = (look.x - cam.x, look.y - cam.y, look.z - cam.z)
+        n = math.sqrt(sum(v * v for v in d))
+        pitch = math.asin(d[2] / n) / math.tau
+        heading = math.atan2(d[0], d[1]) / math.tau
+        actor = self.ix["Camera"]
+        for fname, v in (("X_POS", cam.x), ("Y_POS", cam.y), ("Z_POS", cam.z), ("ROTATION_B", pitch % 1.0), ("ROTATION_C", heading % 1.0)):
+            self.proc.stdin.write(f"A {actor} {self.ids[fname]} {v!r}\n")
+
     def frame_at(self, day: int, sod: float, options=None, reset_look=True, answer=True):
         h, m = int(sod // 3600) % 24, int(sod // 60) % 60
         sec = sod % 60.0
@@ -86,6 +98,7 @@ class Host(mm.Host):
         for name, v in lines:
             self.proc.stdin.write(f"M {self.ids[name]} {v!r}\n")
         self.set_settings((options or {}) if answer else None)
+        self.set_camera(sod, options)
         if reset_look:
             self.proc.stdin.write(f"M {forth.PREVQ} 0\n")      # force the re-colour pass so every colour is checked
         self.proc.stdin.write("T\n")
@@ -109,11 +122,24 @@ class Host(mm.Host):
         return float(line[2])
 
 
+def prime(host: Host, day: int, sod: float, options=None) -> None:
+    """Run frames at this time until the next-turn scan has finished, as the level would have by the time the panel is
+    seen: the panel's drums and arrows read its result."""
+    for name in ("rdy", "act"):
+        host.proc.stdin.write(f"M {scan_cell(name)} 0\n")
+    for _ in range(40):
+        host.frame_at(day, sod, options, reset_look=False)
+        if host.read(scan_cell("rdy")) == 1 and host.read(scan_cell("act")) == 0:
+            return
+    raise RuntimeError(f"the scan did not finish at {tl.date_of(day)} {sod}")
+
+
 def compare(host: Host, ix, ids, cases):
     worst = {"pos": 0.0, "rot": 0.0, "scale": 0.0, "colour": 0, "tide": 0.0}
     bad = []
     colour_box = ids["FACE_COLOR_TOP"]
     for day, sod, options in cases:
+        prime(host, day, sod, options)
         r, dsp, rsp, writes = host.frame_at(day, sod, options)
         label = f"{tl.date_of(day)} {sod:.2f} {options or ''}"
         if r != 0 or dsp != 0 or rsp != 0:
@@ -173,6 +199,71 @@ def compare(host: Host, ix, ids, cases):
     return worst, bad
 
 
+def scan_cell(name: str) -> int:
+    return forth.SCAN0 + forth.SCAN_CELLS.index(name)
+
+
+def scan_cases():
+    """Where the next-turn scan is checked: a day in steps, the six moments' neighbours and the awkward ones (midnight
+    between turns, a year boundary, a far date)."""
+    today = tl.wall_day(dt.date(2026, 11, 21))
+    out = [(today, k * 2700.0 + 11.0) for k in range(32)]
+    for spec in ("2026-11-21T16:30:00", "2026-11-21T23:50:00", "2026-11-22T00:00:00", "2025-12-31T23:30:00",
+                 "2026-01-01T00:00:00", "2027-03-02T02:45:00", "2030-07-04T16:20:05.5", "2026-06-21T18:30:12"):
+        out.append(tl.parse_when(spec))
+    return out
+
+
+def check_scan(host: Host, cs):
+    """Each case: start a fresh scan, run frames until it settles (counting them), and compare what the panel would
+    show with turns.panel_reading: the scan's mark, the next high and low (times within 5 s, heights within 0.5 cm,
+    float32 against double) and whether the next turn is a high. Then step the clock, without a reset, to 40 seconds
+    either side of the next high and low: the pick must move on by itself when a turn passes, and a new scan must
+    start on a ten-minute mark, and each time the reading equals the model's."""
+    bad, frames, worst = [], [], {"t": 0.0, "h": 0.0}
+
+    def settle(day, sod, label):
+        n = 0
+        while True:
+            r, dsp, rsp, _w = host.frame_at(day, sod)
+            n += 1
+            if r != 0 or dsp != 0 or rsp != 0:
+                bad.append(f"{label}: VM result {r}, data stack {dsp}, return stack {rsp}")
+                return n, None
+            if host.read(scan_cell("rdy")) == 1 and host.read(scan_cell("act")) == 0:
+                break
+            if n > 40:
+                bad.append(f"{label}: not finished after {n} frames")
+                return n, None
+        rd = turns.panel_reading(day, sod)
+        got = {k: host.read(scan_cell(k)) for k in ("nht", "nhh", "nlt", "nlh", "rise", "rn", "rsec")}
+        if abs(got["rsec"] - rd.mark) > 0.5:
+            bad.append(f"{label}: the scan started at {got['rsec']:.0f} s, the model's mark is {rd.mark:.0f} s")
+        for (t, h), want in (((got["nht"], got["nhh"]), rd.high), ((got["nlt"], got["nlh"]), rd.low)):
+            worst["t"], worst["h"] = max(worst["t"], abs(t - want.t)), max(worst["h"], abs(h - want.h))
+            if abs(t - want.t) > 5.0 or abs(h - want.h) > 0.005:
+                bad.append(f"{label}: forth {t:.1f} s {h:.4f} m, reference {want.t:.1f} s {want.h:.4f} m")
+        if got["rise"] != float(rd.rise):
+            bad.append(f"{label}: rising {got['rise']}, reference {rd.rise}")
+        if got["rn"] >= turns.KEPT_MAX:
+            bad.append(f"{label}: the scan kept {got['rn']:.0f} turns, its room is {turns.KEPT_MAX}")
+        return n, rd
+
+    for day, sod in cs:
+        for name in ("rdy", "act"):
+            host.proc.stdin.write(f"M {scan_cell(name)} 0\n")
+        n, rd = settle(day, sod, f"scan {tl.date_of(day)} {sod:.0f}")
+        frames.append(n)
+        if rd is None:
+            continue
+        for turn in (rd.high, rd.low):
+            for dt_s in (-40.0, 40.0):
+                t = rd.mark + turn.t + dt_s
+                if t > sod + 1.0 and t < 86400.0:
+                    settle(day, t, f"scan {tl.date_of(day)} {t:.0f} (turn at {rd.mark + turn.t:.0f}, started {sod:.0f})")
+    return frames, worst["t"], worst["h"], bad
+
+
 def cases():
     out = []
     today = tl.wall_day(dt.date(2026, 11, 21))
@@ -183,6 +274,10 @@ def cases():
                  "2026-11-21T21:30:00", "2027-03-02T02:45:00", "2026-11-21T10:59:59.95", "2026-11-21T23:59:59.95",
                  "2026-06-21T18:30:12", "2025-12-31T23:59:30", "2026-01-01T00:00:00", "2030-07-04T16:20:05.5"):
         out.append((*tl.parse_when(spec), None))
+    # the river panel: inside a swap of sides (the slide takes 2.6 s from each ten-minute mark), both ways, and across the map's pan
+    for sod in (9 * 3600 + 0.4, 9 * 3600 + 1.15, 9 * 3600 + 2.2, 9 * 3600 + 600 + 0.9, 9 * 3600 + 600 + 1.45, 9 * 3600 + 600 + 1.9,
+                10 * 3600 + 300.0, 10 * 3600 + 450.0, 10 * 3600 + 900.0, 10 * 3600 + 1350.0):
+        out.append((today, sod, None))
     # every value of every setting (Verification 13): drift off, Roman, no numerals, no gauge, no boats and birds
     for options in ({"drift": 1}, {"numerals": 1}, {"numerals": 2}, {"gauge": 1}, {"life": 1},
                     {"drift": 1, "numerals": 2, "gauge": 1, "life": 1}):
@@ -199,9 +294,14 @@ def main() -> int:
         host.ix, host.fields = ix, forth.settings_fields()
         cs = cases()
         worst, bad = compare(host, ix, ids, cs)
+        scs = scan_cases()
+        frames, wt, wh, sbad = check_scan(host, scs)
+        bad += sbad
         host.close()
     print(f"{len(cs)} frames; worst position {worst['pos']*1000:.4f} mm, rotation {worst['rot']*360:.4f} deg, "
           f"scale {worst['scale']:.6f}, colour {worst['colour']} step(s), tide {worst['tide']*1000:.3f} mm")
+    print(f"{len(scs)} scans, {min(frames)} to {max(frames)} frames each at {forth.SCAN_BURST} samples a frame; worst time "
+          f"{wt:.2f} s, worst height {wh * 100:.3f} cm against turns.py")
     for b in bad[:30]:
         print("FAIL", b)
     print("PASS" if not bad else f"FAIL: {len(bad)} mismatches")

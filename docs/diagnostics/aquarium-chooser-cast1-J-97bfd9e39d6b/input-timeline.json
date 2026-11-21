@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "score_sha256": "84839e99ede65a0f61441e22cee0e383b37a94027ea3f4be95124b0ac231ac52",
+  "clock_calibration": {
+    "offset_seconds": 0.8339319229125977,
+    "uncertainty_seconds": 0.1149439344406128
+  },
+  "device_anchor": {
+    "device_uptime_ms": 153163745,
+    "device_wall_ms": 1795257249533
+  },
+  "host_start_wall": 1795257248.585906,
+  "events": [
+    {
+      "seq": 1,
+      "t": 12000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 153175808,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 12063,
+      "lateness_ms": 63
+    },
+    {
+      "seq": 2,
+      "t": 12200,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 153175985,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 12240,
+      "lateness_ms": 40
+    }
+  ],
+  "emergency_releases": [],
+  "foreground_aborts": [],
+  "captures": [
+    {
+      "label": "chooser-first",
+      "planned_ms": 10000,
+      "started": 1795257260.3670402,
+      "ended": 1795257261.8376856,
+      "file": "input-frame-001.png",
+      "bytes": 76166,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "chooser-second",
+      "planned_ms": 15000,
+      "started": 1795257265.367053,
+      "ended": 1795257267.085755,
+      "file": "input-frame-002.png",
+      "bytes": 76454,
+      "schedule_lateness_ms": 0
+    }
+  ],
+  "result": "completed",
+  "key_log": {
+    "tolerance_ms": 100,
+    "log_interval_complete": false,
+    "matching_edges": [
+      {
+        "seq": 1,
+        "logged": {
+          "device_wall_ms": 1795257261595,
+          "code": 20,
+          "edge": "down"
+        },
+        "difference_ms": -1
+      },
+      {
+        "seq": 2,
+        "logged": {
+          "device_wall_ms": 1795257261768,
+          "code": 20,
+          "edge": "up"
+        },
+        "difference_ms": -5
+      }
+    ],
+    "ambiguous": [],
+    "foreign_keys": [],
+    "unmatched_observed_if_incomplete": [
+      {
+        "device_wall_ms": 1795257239925,
+        "code": 4,
+        "edge": "down"
+      },
+      {
+        "device_wall_ms": 1795257239959,
+        "code": 4,
+        "edge": "up"
+      }
+    ],
+    "dropped_sensitive_lines": 1,
+    "truncated": false
+  }
+}

@@ -55,6 +55,8 @@ MOMENTS = ["2026-11-17T06:20:00", "2026-11-21T12:00:00", "2026-11-21T17:38:00", 
            "2026-11-21T21:30:00", "2026-11-24T04:40:00"]
 COMPARE = ["2026-11-21T10:08:22", "2026-11-21T17:40:00", "2026-11-21T18:12:30.5", "2026-11-21T23:59:59.9",
            "2026-11-22T00:00:00.4", "2027-03-02T02:45:00", "2026-06-21T18:30:12", "2030-07-04T16:20:05.5"]
+SETTLE = 200              # frames before a comparison: the camera eases towards its shot (about 10 % of the way a frame, so 200
+                          # frames leave nothing) and the river panel, pinned to the camera and the next-turn scan, has caught up
 FRAME = 3276 / 65536      # the level clock advances this much per stepped frame at -rate20
 WRAP = {**{f"cloud_{i}": tl.CLOUD_SPAN for i in range(len(tl.CLOUDS))}, **{f"bird_{i}": tl.BIRD_SPAN for i in range(len(tl.BIRDS))},
         "boat_3": tl.FERRY_SPAN}
@@ -87,6 +89,20 @@ class Engine:
 
     def step(self, frames: int) -> None:
         start = self.value(self.clock_actor, TIME_MBX)
+        if math.isnan(start):
+            # the clock has not reported yet (the watch was only just set), so there is no start to count frames from and the
+            # wait below would return at the first value: that made every 'step(N)' of a fresh engine about one frame long
+            # (found 2026-11-21: the camera was still easing in and the next-turn scan unfinished in every capture)
+            self.client.send({"op": "step", "frames": 1})
+            until = time.monotonic() + 60
+            while math.isnan(self.value(self.clock_actor, TIME_MBX)):
+                if time.monotonic() > until or self.proc.poll() is not None:
+                    raise TimeoutError("the level clock never reported")
+                time.sleep(0.01)
+            frames = max(frames - 1, 0)
+            start = self.value(self.clock_actor, TIME_MBX)
+            if frames == 0:
+                return
         self.client.send({"op": "step", "frames": frames})
         until = time.monotonic() + 120
         while time.monotonic() < until:
@@ -190,6 +206,7 @@ def compare(times: list[str], port: int) -> int:
     for i, spec in enumerate(times):
         e = Engine(spec, port + i)
         try:
+            e.step(SETTLE)         # the wall clock is frozen, so the model's time does not move while the engine settles
             check_scene(e, spec, None, None, failures)
         finally:
             e.close()
@@ -220,13 +237,13 @@ def options(port: int) -> int:
     return 1 if failures else 0
 
 
-def capture(outdir: Path, times: list[str], port: int) -> int:
+def capture(outdir: Path, times: list[str], port: int, frames: int = 40) -> int:
     outdir = outdir.resolve()          # the engine runs from another directory
     outdir.mkdir(parents=True, exist_ok=True)
     for i, spec in enumerate(times):
         e = Engine(spec, port + i)
         try:
-            e.step(8)
+            e.step(frames)          # enough for the next-turn scan (ten frames) and the panel to settle
             name = spec.replace(":", "").replace("-", "")
             e.screenshot(outdir / f"{name}.png")
             print(f"captured {spec} -> {outdir / (name + '.png')}")
@@ -241,6 +258,7 @@ def main() -> int:
     ap.add_argument("--options", action="store_true")
     ap.add_argument("--capture", type=Path, metavar="OUTDIR")
     ap.add_argument("--times", nargs="+")
+    ap.add_argument("--frames", type=int, default=40, help="frames to step before each capture (default 40)")
     ap.add_argument("--port", type=int, default=7830)
     args = ap.parse_args()
     if not WF_GAME.exists():
@@ -250,7 +268,7 @@ def main() -> int:
         print(f"level not built: {LEVEL} (task tide-harbour-level)", file=sys.stderr)
         return 2
     if args.capture:
-        return capture(args.capture, args.times or MOMENTS, args.port)
+        return capture(args.capture, args.times or MOMENTS, args.port, args.frames)
     rc = 0
     if args.compare:
         rc |= compare(args.times or COMPARE, args.port)

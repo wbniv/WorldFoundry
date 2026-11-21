@@ -1,0 +1,34 @@
+{
+  "score": {
+    "version": 1,
+    "timebase": "milliseconds-from-run-start",
+    "events": [
+      {
+        "seq": 1,
+        "t": 12000,
+        "key": "DPAD_DOWN",
+        "edge": "down"
+      },
+      {
+        "seq": 2,
+        "t": 12200,
+        "key": "DPAD_DOWN",
+        "edge": "up"
+      }
+    ]
+  },
+  "captures": [
+    {
+      "t": 10000,
+      "label": "chooser-first",
+      "step": 0
+    },
+    {
+      "t": 15000,
+      "label": "chooser-second",
+      "step": 3
+    }
+  ],
+  "sha256": "84839e99ede65a0f61441e22cee0e383b37a94027ea3f4be95124b0ac231ac52",
+  "bytes": 167
+}
