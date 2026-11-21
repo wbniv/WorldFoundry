@@ -50,6 +50,7 @@ This file must be in the same directory as all of the .oad files
         fieldtypes
         levelrendersettings
         seastarssettings
+        cuckoovillagesettings
 }
 
 

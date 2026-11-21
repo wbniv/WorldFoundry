@@ -76,12 +76,26 @@ objs['Matte']['wf_Matte Type'] = 'Color'
 objs['Matte']['wf_Background Color'] = 0x0b1115
 objs['Player'].location = (0, -3, 1)
 
+# The user-controlled settings object: an empty carrying the CuckooVillageSettings schema (no model, no mass).
+# The director reads each field with property@ using the settings actor's index and the catalog's field index.
+import subprocess
+settings = bpy.data.objects.new('CuckooVillageSettings', None)
+bpy.context.scene.collection.objects.link(settings)
+settings['wf_schema_path'] = str(ROOT / 'wfsource/source/oas/cuckoovillagesettings.oad')
+settings['wf_Model Type'] = 'None'
+settings['wf_Mass'] = 0.0
+settings['wf_original_bbox'] = (-.1, -.1, -.1, .1, .1, .1)
+settings['wf_had_authored_bbox'] = True
+catalog = json.loads(subprocess.check_output([str(ROOT / 'wftools/wf_attr_edit/target/release/catalog'), settings['wf_schema_path']], text=True))
+settings_fields = {f['key']: f['index'] for f in catalog['fields'] if f['width'] and f['key'] in tl.SETTINGS_DEFAULTS}
+assert set(settings_fields) == set(tl.SETTINGS_DEFAULTS), settings_fields
+
 scene = bpy.context.scene
 objects = [o for o in scene.objects if o.get('wf_schema_path')]
 indices = {o.name: i + 1 for i, o in enumerate(objects)}
 for a, b in zip(tl.FIG_NAMES, tl.FIG_NAMES[1:]):
     assert indices[b] - indices[a] == 1, 'the four figures must be contiguous'
-objs['Director']['wf_Script'] = forth.director_script(indices)
+objs['Director']['wf_Script'] = forth.director_script(indices, settings_fields)
 (HERE / 'actor-map.json').write_text(json.dumps(dict(indices=indices, reference=REFERENCE), indent=1) + '\n')
 print(f'{TAG} {len(objects)} actors')
 bpy.ops.wf.export_level(filepath=str(HERE / 'cuckoo_village.lev'))

@@ -1,0 +1,16 @@
+#ifndef _CuckooVillageSettings_HP
+#define _CuckooVillageSettings_HP
+#include "actor.hp"
+class CuckooVillageSettings: public Actor {
+public:
+    CuckooVillageSettings(const SObjectStartupData* startupData);
+    virtual ~CuckooVillageSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    // The Director polls the overlay and rebuilds its layout when it changes.
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadCuckooVillageSettings(const SObjectStartupData* startupData);
+#endif

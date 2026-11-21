@@ -144,20 +144,27 @@ def bird_visible(sod: float) -> bool:
     return bird(hr, mi * 60 + sc)[0] > 0.02
 
 
-def window_states(sod: float) -> List[bool]:
+# The settings object (CuckooVillageSettings, wfsource/source/oas/cuckoovillagesettings.oas): label -> (default, field read by the director).
+SETTINGS_DEFAULTS = {"Bavaria mode": 0, "Seasonal events": 1, "Christmas candles": 1, "Window lights": 1, "Sound": 1, "Camera motion": 0}
+
+
+def window_states(sod: float, settings: Dict[str, int] = None) -> List[bool]:
+    lights = (settings or SETTINGS_DEFAULTS).get("Window lights", 1)
     out = []
     for i in range(HOUSES):
         s = stagger(i)
-        out.append(sod >= DUSK_START + s * DUSK_LEN or sod < DAWN_START + s * DAWN_LEN)
+        out.append(bool(lights) and (sod >= DUSK_START + s * DUSK_LEN or sod < DAWN_START + s * DAWN_LEN))
     return out
 
 
-def camera(tm: float) -> Tuple[Tuple[float, float, float], Tuple[float, float, float]]:
+def camera(tm: float, still: bool = False) -> Tuple[Tuple[float, float, float], Tuple[float, float, float]]:
     cycle = int(tm // LAP)
     lap_t = tm - cycle * LAP
     hold = HOLD_HOUR if cycle == 0 else (HOLD_QUARTER if cycle in (4, 8, 12) else 0.0)
     u = sm((lap_t - hold) / (LAP - hold))
     b = sm(u / RISE) * sm((1.0 - u) / RISE)
+    if still:                       # Camera motion = Still: the wide establishing view from the front, always
+        u, b = 0.0, 1.0
     phi = TAU * (-0.25 + u)
     r = CAM_FRONT_R + (CAM_FAR_R - CAM_FRONT_R) * b
     h = CAM_FRONT_H + (CAM_FAR_H - CAM_FRONT_H) * b
@@ -166,7 +173,7 @@ def camera(tm: float) -> Tuple[Tuple[float, float, float], Tuple[float, float, f
     return pos, look      # type: ignore[return-value]
 
 
-def all_poses(sod: float) -> Dict[str, Pose]:
+def all_poses(sod: float, settings: Dict[str, int] = None) -> Dict[str, Pose]:
     hr, mi, sc = _split(sod)
     tm = mi * 60 + sc
     ONE = (1.0, 1.0, 1.0)
@@ -178,7 +185,8 @@ def all_poses(sod: float) -> Dict[str, Pose]:
         poses[name] = (x, y, z, a, 0.0, c, *ONE)
     o, bob = bird(hr, tm)
     poses[BIRD_NAME] = (BIRD_REST[0], BIRD_REST[1] - BIRD_LUNGE * bob, BIRD_REST[2] + 0.04 * bob, 0.06 * bob, 0.0, 0.0, *ONE)
-    (cx, cy, cz), (lx, ly, lz) = camera(tm)
+    still = bool((settings or SETTINGS_DEFAULTS).get("Camera motion", 0))
+    (cx, cy, cz), (lx, ly, lz) = camera(tm, still)
     poses["cs_wide"] = (cx, cy, cz, 0.0, 0.0, 0.0, *ONE)
     poses["LookAt"] = (lx, ly, lz, 0.0, 0.0, 0.0, *ONE)
     return poses

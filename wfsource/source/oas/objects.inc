@@ -84,6 +84,7 @@
 #include "levelrendersettings.hp"
         	
 #include "seastarssettings.hp"
+#include "cuckoovillagesettings.hp"
 
 
 

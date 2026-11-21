@@ -99,18 +99,51 @@ stateDiagram-v2
 | Coordinator `screensaver-show` | **not yet.** It accepts only settings `overrides`. A `level_launch_extra` field in `applications.json` and a `level` argument are the open TODO item "Homeboard and coordinator one-run tank start" |
 | Homeboard Preview, idle timer, remote key | Homeboard's Stage 5; filed in its `TODO.md` |
 
-## 4. Make another package use it
+## 4. Make a new screensaver pack
 
-Everything above is generic. To give another set of levels (for example the 3D Clocks) the same chooser and launch:
+Two packs exist today, built the same way: **WF Aquarium** (flavor `aquarium`, `wflevels/aquarium-menu.manifest`, 11 tanks) and **WF Clocks**, the 3D Clocks (flavor `clocks`, `wflevels/clocks-menu.manifest`, Minute Machine and Cuckoo Village). A third pack follows the same steps. The roster is append-only: a level's position is its id in the bundle.
 
-1. Write its `<package>-menu.manifest` in the format above.
-2. Give its Gradle flavor a `Copy` task that puts the manifest in its assets as `levels.manifest`, like `copyAquariumLevelCatalog`, and add the output to that flavor's `assets` source set.
-3. In its launch activities, call `LevelLaunch.startChosen(this, player, getIntent().getStringExtra(LevelLaunch.EXTRA_LEVEL))` and `finish()` when it returns `false`.
-4. Do **not** copy `LevelCatalog` or `LevelLaunch`; add the source directory to the flavor if it is not in this module.
+1. Write `wflevels/<package>-menu.manifest` in the format above.
+2. Give its Gradle flavor a `Copy` task that puts the manifest in its assets as `levels.manifest`, like `copyAquariumLevelCatalog` and the Clocks equivalent in `android/screensaver/build.gradle.kts`, and add the output to that flavor's `assets` source set.
+3. Pack the bundle (`cdpack --manifest`, for Clocks `scripts/pack-clocks-bundle.py`) into the flavor's assets.
+4. In its launch activities, call `LevelLaunch.startChosen(this, player, getIntent().getStringExtra(LevelLaunch.EXTRA_LEVEL))` and `finish()` when it returns `false`.
+5. Do **not** copy `LevelCatalog` or `LevelLaunch`; add the source directory to the flavor if it is not in this module.
+6. If any level's textures are larger than the Dream host's default 1024 slot, ship `assets/wf_args.txt` with `--vram-slot-width=...` for the flavor (Clocks does: the village's room page is 2048 wide). `tests/test_dream_host_vram.py` checks every page in the bundle fits.
+7. **Give every level in the roster a settings object** (next section), then run the audit.
 
-The 3D Clocks package does not exist yet, so this step is parked in the TODO item "Screensaver `LEVEL` extra: Chromecast acceptance and the 3D Clocks wiring". Single-level apps (Seahorse Grid, the Planted Tank app) are not part of this mechanism.
+Single-level apps (Seahorse Grid, the Planted Tank app) are not part of this mechanism.
 
-## 5. Check your work
+## 5. Give every level settings, and a way to open them
+
+A level offers user-controlled settings when it carries a **settings object**: an empty actor of a `<Name>Settings` type whose fields are `SHOW_AS_LIVE`. Six pieces make one, and `scripts/audit-level-settings.py` checks all six for every level in both rosters.
+
+| Piece | What it is | Model to copy |
+|---|---|---|
+| type | `wfsource/source/oas/<name>settings.oas` (`@include settings.inc`, `PROPERTY_SHEET_HEADER`, fields), its generated `.oad` and `.ht`, one line appended to each of the eight `objects.*` registry files, and a trivial `Actor` subclass `wfsource/source/game/<name>settings.{cc,hp}` that never renders or updates | `cuckoovillagesettings.*`, `seastarssettings.*` (53d7c718) |
+| fields | at least one `SHOW_AS_LIVE` field; no commas in help strings (`prep` splits macro arguments on commas even in quotes) | `cuckoovillagesettings.oas` |
+| level | the generator places one empty carrying `wf_schema_path` = the `.oad`, no model, no mass | `wflevels/cuckoo_village/blender_create_cuckoo_village.py` |
+| director | the level's script reads each field with `property@ ( actor field -- value valid )`; the actor index comes from the export, the field index from the `catalog` tool (`wftools/wf_attr_edit`), written into the script at export time | `wflevels/cuckoo_village/forth.py` |
+| phone | `android/screensaver/src/<flavor>/assets/*.json`, made from the `.oad` by `scripts/gen-settings-capabilities.py`, so the phone and the coordinator can list the fields | the Sea Stars asset |
+| test | a `tests/test_<name>_settings.py` that checks the field ranges and defaults and the registry position | `tests/test_cuckoo_village_settings.py` |
+
+Adding a type is an **engine change** (C++ and the registry), so it needs the owner's explicit permission in a project that forbids engine edits.
+
+### How a user opens the settings
+
+- **On the TV remote or a gamepad: hold A, the remote's centre (OK) button, alone for 1 second, in the level.** `Host::gesture` in `engine/runtime_property_host.cpp` counts the hold; a tap, or A with any direction held, is an ordinary level control and resets it. At 1 s the host opens the form of the one editable object, or a picker when several objects are editable. It works only when the level has at least one editable object: an object with a stored, non-read-only field. Without a settings object the gesture does nothing, which is exactly what a level with no settings looks like on a TV.
+- **On a phone: the Dream settings form**, through the `org.worldfoundry.screensaver.settings` provider, which needs the phone asset above.
+- **From the coordinator or Homeboard:** the same `getCapabilities`/`setSetting` calls, again from the phone asset.
+
+### Check it
+
+```
+python3 scripts/audit-level-settings.py            # both rosters, one row per level, "opens with" column
+python3 scripts/audit-level-settings.py --strict   # exit 1 while any level lacks any of the six
+```
+
+A level whose row ends in `NOTHING` has no way to open settings. Then test on a device: install the pack, start the level, hold OK for a second, and expect the form to list your fields.
+
+## 6. Check your work
 
 | What | Command |
 |---|---|
@@ -119,5 +152,6 @@ The 3D Clocks package does not exist yet, so this step is parked in the TODO ite
 | The catalogue and `choose()` in plain Java, and its order against the bundle's | `task test-level-catalog` |
 | The screensaver variants follow the manifest | `scripts/in-linux-container.sh python3 -m pytest tests/test_aquarium_screensaver_input.py tests/test_aquarium_screensaver_catalog.py -q` |
 | The menu on the desktop | `task run-aquarium-menu` |
+| Every level has a settings object and a way to open it | `python3 scripts/audit-level-settings.py` (section 5) |
 
 Builds and tests run in containers, never on the host: see the Containers section of the repository `CLAUDE.md`.
