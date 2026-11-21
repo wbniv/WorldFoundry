@@ -70,7 +70,29 @@ def test_menu_bundle_is_current_and_keeps_the_smb_indices(tmp_path):
                     "entries": list(enumerate(WORLDS))}
 
 
-@pytest.mark.parametrize("case", ["no-levels", "non-ascii", "too-long", "missing-file", "both", "keyword"])
+@pytest.mark.parametrize("manifest", ["smb-menu.manifest", "aquarium-menu.manifest"])
+def test_third_column_leaves_the_bundle_byte_identical(manifest, tmp_path):
+    """The optional `| <dream label>` column (docs/plans/2026-11-21-aquarium-menu-and-screensaver-launch.md, D1)
+    is read by the Android screensaver only: a copy with a third column on every level line, and none of the
+    original's own, packs to the same bytes as the original (and the committed bundle pins the original)."""
+    lines = []
+    for raw in (LEVELS / manifest).read_text(encoding="utf-8").splitlines():
+        if raw.startswith("level "):
+            fields = [f.strip() for f in raw[len("level "):].split("|")]
+            lines.append(f"level {LEVELS / fields[0]} | {fields[1]} | Dream {fields[1][:50]}")
+        else:
+            lines.append(raw)
+    copy = tmp_path / manifest
+    copy.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    assert sum(1 for line in lines if line.count("|") == 2) == sum(1 for line in lines if line.startswith("level "))
+    two, three = tmp_path / "two.iff", tmp_path / "three.iff"
+    cdpack(SHELL_MENU, "--manifest", LEVELS / manifest, "-o", two)
+    cdpack(SHELL_MENU, "--manifest", copy, "-o", three)
+    assert three.read_bytes() == two.read_bytes(), f"a third column changed the bundle of {manifest}"
+
+
+@pytest.mark.parametrize("case", ["no-levels", "non-ascii", "too-long", "missing-file", "both", "keyword",
+                                  "four-columns", "bad-label"])
 def test_refuses_bad_manifests(case, tmp_path):
     lvl = LEVELS / SMB_LEVELS[0]
     lines = {
@@ -80,6 +102,8 @@ def test_refuses_bad_manifests(case, tmp_path):
         "missing-file": "level no-such-level.iff | World 9-9\n",
         "both": f"level {lvl} | World 1-1\n",
         "keyword": f"levle {lvl} | World 1-1\n",
+        "four-columns": f"level {lvl} | World 1-1 | Dream | Extra\n",
+        "bad-label": f"level {lvl} | World 1-1 | Wörld\n",
     }[case]
     manifest = tmp_path / "m.manifest"
     manifest.write_text(lines, encoding="utf-8")
