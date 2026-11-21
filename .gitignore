@@ -117,3 +117,4 @@ tests/mm-captures/
 
 # Tide Harbour Phase 0 spike: throwaway builds, rebuilt by wflevels/tide_spike/build.sh
 /wflevels/tide_spike_*
+/android/screensaver/src/tidespike/assets/

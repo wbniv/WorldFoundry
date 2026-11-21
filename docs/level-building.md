@@ -467,8 +467,7 @@ Phase 0 spike (`wflevels/tide_spike/`, evidence in
 - What must stay bright (lit windows, lantern glows, a clock dial, the moon) is **drawn in front of
   the veil**: an actor closer to the camera than the veil, scaled down along the same ray so it lands
   where the real one is. It is then not dimmed.
-- Make veils and overlays **boxes with real depth** (0.3 to 0.5 m), not zero-thickness quads: a mesh
-  too thin along the camera-depth axis can be invisible (see the troubleshooting entry on thin objects).
+- A veil or an overlay can be a **single quad**, provided it is wound counter-clockwise as seen from the camera (the engine culls faces by default). Zero-thickness quads rendered exactly like boxes in the spike (2026‑11‑21), so the older advice that a thin mesh can be invisible is not a reason to thicken them.
 - A veil is lit like any face, so its colour is multiplied by that face's lit factor. A face lit to
   about 1.0 shows its authored tint; one at ambient 0.5 shows half of it.
 - The near plane: `display.cc` passes 1.0 to `SetProjection`, while the baseline authors a CamShot
