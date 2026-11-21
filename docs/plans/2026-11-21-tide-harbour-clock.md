@@ -1,6 +1,6 @@
 # Tide Harbour: the second 3D clock, and the clocks bundle that holds it
 
-**Status: plan for review, 2026‑11‑21.** Nothing here is built. The one engine addition, [E1, a date mailbox](#engine-changes-needing-permission), is **approved** (Will, 2026‑11‑21: "approval to add date to engine"); everything else uses what the engine already does. **Runtime control of lights is deliberately not part of this plan** (Will, 2026‑11‑21: "more likely the task is to add control of lights from runtime. today, put it on TODO, and don't use as part of the screensaver implementation for now"); it is its own TODO item.
+**Status: plan for review, 2026‑11‑21.** The level and the bundle are not built. Done so far: the one engine addition, E1 (a date mailbox), is approved and built ([Phase 1 record](#phase-1-record-e1-built)); the Bangkok tide is fitted to the Navy's published predictions and validated on an unseen year ([Phase 0 record](#phase-0-record-the-tide), [research document](../reference/chao-phraya-tide-research.md)). Next: the A3 poster ([D11](#decisions), Phase P), which needs only that research, and the Phase 0 spikes on cast1, which need your answers to [the questions below](#questions-for-will). **Runtime control of lights is deliberately not part of this plan** (Will, 2026‑11‑21: "more likely the task is to add control of lights from runtime. today, put it on TODO, and don't use as part of the screensaver implementation for now"); it is its own TODO item.
 
 ## Context
 
@@ -51,6 +51,24 @@ Recommendations are in the third column. Nothing is decided until Will answers.
 | D10 | Burn-in | **The camera drifts slowly all the time**, as Minute Machine's does; the water, sky and clouds always move, so no pixel sits still | A static camera: the tower dial would burn in |
 | D11 | An A3 poster about the tides and the calculation | **Yes, portrait A3 (297 × 420 mm), on the repository's poster pipeline** ([seahorse poster](../reference/seahorse-biomechanics-poster/README.md)): the [research document](../reference/chao-phraya-tide-research.md) first, then `make_poster.py` and `export_poster.py` (PDF, 300 DPI PNG, `layout-review.json`) and a pytest guard. Every claim wears a chip (**verified**, **other source**, **ours (measured)**); the build refuses an unconfirmed claim. See [the poster](#the-poster) | A figure in the plan only: no printable object, and the research would stay buried here |
 | D12 | Sun and moon | **No tables, and no claim about the moon.** The sun's rise and set come from a closed-form formula (the sun's declination and the equation of time, for Bangkok's latitude and longitude and the date), a few lines of Forth using the new trig words, and checked in Phase 2 against five published sunrise and sunset times. The moon is only a disc on an arc: its phase and position are **not** claimed, in the scene or on the poster. Will asked (2026‑11‑21): "should we??" about researching sunrise, sunset and moon tables; the answer was no | Tables for every date (a lot of data for a look nobody can check); a fixed 06:00 and 18:00 (seasonal drift is a few tens of minutes, which would pass, but the formula is as cheap and is right); the real moon (phase and position are a project of their own, and the plan's moon-phase stretch is already out of scope) |
+
+## Questions for Will
+
+Nothing is decided until Will answers. **No engine permission is pending:** E1 is approved and built, and light control is deferred. Everything below is a choice, with my recommendation first. "Accept all" is a complete answer.
+
+| # | Question | Recommendation | What it blocks |
+|---|---|---|---|
+| Q1 | **Accept D1 to D12 as written?** Or name the ones to change. | Accept all. | Phase 0 spikes, then everything |
+| Q2 | **Dial numerals** (D8): Roman, as in the concept art, or Thai numerals ๑ to ๑๒ for a Bangkok scene? | Roman: legible across a room. Thai numerals as a later variant. | The tower dial's texture, Phase 2 |
+| Q3 | **Art style** (D9): low-poly flat colour with a few small textures, or painterly textures like the concept art? | Low-poly: reads as the concept art at a distance and fits the 2048 × 2048 texture page. The painterly version is much heavier. | The Blender build, Phase 2 |
+| Q4 | **Retire the Minute Machine app** (D2): remove the `minutemachine` flavor and uninstall its package from cast1, now that the `clocks` app holds it as level 0? | Yes, in the same change. | Phase 3 |
+| Q5 | **Poster language** (D11): English only, or also a Thai edition? | English only for now; a Thai edition is its own piece of work. | The poster's text |
+| Q6 | **How big is the tide on screen?** The real range is about 2.8 m between extremes of the year, and a typical day swings about 1.65 m. Show it true to scale against the pier and the gauge board, or exaggerate it so it is easy to see from a sofa? | True to scale: the gauge board then reads real numbers, and a 1.65 m swing is already visible. | The water, boats and ropes, Phase 2 |
+| Q7 | **A TV outside Thailand.** Show a Thai day at the viewer's own clock time (self-consistent, but not the real tide in Bangkok at that instant), or the real tide in Bangkok now with a dial that may disagree with the sky? | The first: device time everywhere, as if Thai. You are in Bangkok, so it makes no difference today. | Phase 2 |
+| Q8 | **Attribution for the tide.** The constants are our fit to the Navy's published predictions; no terms of use were found on its pages, and the poster credits the department. Is that enough, or should the department be asked? | Enough, with credit. | Printing the poster |
+
+Optional, not blocking: which of the other 48 ideas comes after Tide Harbour. The engine's level menu scrolls (six rows at a time), so the bundle can hold many.
+
 
 ## Approach
 
@@ -191,7 +209,7 @@ stateDiagram-v2
 | **3 Bundle and chooser** | Manifest, pack script, `Clock*` classes, host change, flavor `clocks`, `minutemachine` flavor removed | T3 | Desktop and cast1: no argument shows the menu; a named clock skips it; the Dream never shows it |
 | **4 cast1** | Install, FPS gate, 10-minute Dream run, six moments checked on the TV, tide gauge checked against the model | T3 | D7 gate, and the moments match the mockups |
 | **5 Docs** | `android/screensaver/README.md`, `docs/level-building.md` note, `docs/forth-math-words.md` unaffected | T2 | `task md` renders |
-| **P The poster** | The [research document](../reference/chao-phraya-tide-research.md) is written. `docs/reference/chao-phraya-tide-poster/`: `make_poster.py`, `export_poster.py`, original SVG panels, `layout-review.json`, the PDF and a 300 DPI PNG; `tests/test_poster_chao_phraya_tide.py`. It needs only Phase 0(c), so it can be built at any time, including before the level exists; panel 6 (the harbour) is redrawn from the finished scene | T3 | PDF is one 297 × 420 mm page; the build refuses an unconfirmed claim; a person has read the printed-size proof |
+| **P The poster** | The [research document](../reference/chao-phraya-tide-research.md) is written. `docs/reference/chao-phraya-tide-poster/`: `make_poster.py`, `export_poster.py`, original SVG panels, `layout-review.json`, the PDF and a 300 DPI PNG; `tests/test_poster_chao_phraya_tide.py`. **Status: the seahorse poster's generator, exporter and test were read and the layout is mocked up; not yet built.** It needs only Phase 0(c), so it can be built at any time, including before the level exists; panel 6 (the harbour) is redrawn from the finished scene | T3 | PDF is one 297 × 420 mm page; the build refuses an unconfirmed claim; a person has read the printed-size proof |
 
 ### Phase 0 record: the tide
 
