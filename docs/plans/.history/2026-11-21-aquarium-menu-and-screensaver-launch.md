@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-11-21](https://github.com/wbniv/WorldFoundry/commit/b46e28c2) | Aquarium launch plan: D1-D5 accepted; generic LevelCatalog and LEVEL extra across Aquarium, 3D Clocks and single-level packages |
 | [2026-11-21](https://github.com/wbniv/WorldFoundry/commit/86e66618) | Aquarium launch plan: reconcile with the screensaver app and remediation plan; one LEVEL extra for every package |
 | [2026-11-21](https://github.com/wbniv/WorldFoundry/commit/07ee3ca1) | Aquarium menu and screensaver launch plan: desktop menu task, one tank roster, TANK intent extra, Homeboard handoff |
 
 <!--history-meta v1
+b46e28c2	author	Will Norris
+b46e28c2	added	23
+b46e28c2	deleted	19
+b46e28c2	files	1
+b46e28c2	body	Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqPZiAJGsGH8BoMrdUT
 86e66618	author	Will Norris
 86e66618	added	32
 86e66618	deleted	12
