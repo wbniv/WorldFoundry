@@ -61,12 +61,14 @@ static_assert(wf_touch::kBtnRight == EJ_BUTTONF_RIGHT, "touch_controls.h Right d
 // pull in the renderer headers that one includes.
 namespace bitmaptext { bool ReaderOpen(); }
 
-// The iOS target builds without ARC (see dealloc below); the per-query
-// accessibility elements must not leak either way.
+// The iOS target builds without ARC (see dealloc below); the cached
+// accessibility elements must neither leak nor die early either way.
 #if __has_feature(objc_arc)
 #define WF_AUTORELEASE(x) (x)
+#define WF_RELEASE(x)     ((void)0)
 #else
 #define WF_AUTORELEASE(x) [(x) autorelease]
+#define WF_RELEASE(x)     [(x) release]
 #endif
 
 //=============================================================================
@@ -125,6 +127,22 @@ bool                   gInputSuspended = false;
 bool                   gHudEnabled     = true;
 bool                   gDiagnostics    = false;
 WFTouchHudView*        gHud            = nil;   // owned by the view hierarchy
+// The HUD's accessibility elements, kept until the controls change. XCTest
+// names an element by its address (the elementID in its log) and asks for its
+// attributes later, so elements made fresh (and autoreleased) on every query
+// were gone by then: in Codemagic build 6b013d1a, XCUITest saw the A and C
+// elements in the tree but each one "faulted in" with kAXErrorInvalidUIElement,
+// and wf.touch.A never existed for the test. Owned (+1) here.
+NSArray*               gAxElements     = nil;
+
+// Drop the cached elements (the controls moved, or which are shown changed)
+// and tell UIKit to ask again.
+void InvalidateAccessibility()
+{
+    WF_RELEASE(gAxElements);
+    gAxElements = nil;
+    UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
+}
 
 void Emit()
 {
@@ -165,7 +183,7 @@ void ApplyReading(bool reading)
     gPad.SetReading(reading);
     NSLog(@"wf_game: touch reading %s", reading ? "on" : "off");
     [gHud setNeedsDisplay];
-    UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
+    InvalidateAccessibility();   // the card shows only A and C
     RecomputeTouch();
 }
 
@@ -181,6 +199,19 @@ UIAccessibilityElement* ControlElement(id container, const wftouch::Rect& r,
 }
 
 }  // namespace
+
+// wf.touch.state (-WFTouchDiagnostics 1): one cached element whose value is
+// read live, so a UI test polling it sees each press without a new element.
+@interface WFTouchStateElement : UIAccessibilityElement
+@end
+
+@implementation WFTouchStateElement
+- (NSString*)accessibilityValue
+{
+    return [NSString stringWithFormat:@"held=0x%04x seen=0x%04x reading=%d",
+            (unsigned)gTouchButtons, (unsigned)gSeenButtons, gPad.Reading() ? 1 : 0];
+}
+@end
 
 //=============================================================================
 
@@ -205,7 +236,12 @@ UIAccessibilityElement* ControlElement(id container, const wftouch::Rect& r,
 
 - (void)dealloc
 {
-    if (gHud == self) gHud = nil;
+    if (gHud == self)
+    {
+        gHud = nil;
+        WF_RELEASE(gAxElements);   // they name this view as their container
+        gAxElements = nil;
+    }
 #if !__has_feature(objc_arc)
     [super dealloc];
 #endif
@@ -226,7 +262,7 @@ UIAccessibilityElement* ControlElement(id container, const wftouch::Rect& r,
     NSLog(@"wf_game: touch layout %gx%g pt, safe {%g,%g,%g,%g}, cell %.1f pt",
           sz.width, sz.height, in.top, in.left, in.bottom, in.right, gPad.CurrentLayout().cell);
     [self setNeedsDisplay];
-    UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
+    InvalidateAccessibility();
     RecomputeTouch();   // held fingers are re-hit against the new layout
 }
 
@@ -328,9 +364,17 @@ FillDisc(CGFloat cx, CGFloat cy, CGFloat r, CGFloat red, CGFloat green, CGFloat 
 }
 
 //-----------------------------------------------------------------------------
-// Accessibility: one element per visible control (hidden ones have none).
+// Accessibility: one element per visible control (hidden ones have none),
+// built once per control change and kept (gAxElements, InvalidateAccessibility).
 
 - (NSArray*)accessibilityElements
+{
+    if (!gAxElements)
+        gAxElements = [[self buildAccessibilityElements] copy];   // +1, kept
+    return gAxElements;
+}
+
+- (NSArray*)buildAccessibilityElements
 {
     NSMutableArray* out = [NSMutableArray array];
     const wftouch::Layout& l = gPad.CurrentLayout();
@@ -352,12 +396,10 @@ FillDisc(CGFloat cx, CGFloat cy, CGFloat r, CGFloat red, CGFloat green, CGFloat 
     }
     if (gDiagnostics)
     {
-        UIAccessibilityElement* e = WF_AUTORELEASE([[UIAccessibilityElement alloc] initWithAccessibilityContainer:self]);
+        UIAccessibilityElement* e = WF_AUTORELEASE([[WFTouchStateElement alloc] initWithAccessibilityContainer:self]);
         e.accessibilityFrameInContainerSpace = CGRectMake(0, 0, 4, 4);
         e.accessibilityIdentifier = @"wf.touch.state";
         e.accessibilityLabel      = @"Touch state";
-        e.accessibilityValue      = [NSString stringWithFormat:@"held=0x%04x seen=0x%04x reading=%d",
-                                     (unsigned)gTouchButtons, (unsigned)gSeenButtons, gPad.Reading() ? 1 : 0];
         e.accessibilityTraits     = UIAccessibilityTraitStaticText;
         [out addObject:e];
     }
@@ -375,6 +417,7 @@ WFIosSetHudEnabled(int enabled)
     gHud.hidden = !gHudEnabled;       // hidden views receive no touches
     if (!gHudEnabled)
         gPad.ReleaseAll();
+    InvalidateAccessibility();
     RecomputeTouch();
     NSLog(@"wf_game: touch HUD %s", gHudEnabled ? "enabled" : "disabled");
 }
