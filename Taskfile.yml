@@ -1737,6 +1737,12 @@ tasks:
       - |
         docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O1 -Wall -Wextra -Werror -I/src/android/screensaver/src/main/cpp /src/tests/planted_bridge_test.cpp /src/android/screensaver/src/main/cpp/planted_bridge.cc -o /tmp/planted_bridge && /tmp/planted_bridge'
 
+  test-menu-key-latch:
+    desc: "The launcher menu's key latch (android/screensaver/src/main/cpp/menu_key_latch.h, docs/plans/2026-11-21-menu-key-latch.md): a tap inside one frame reads once, holds and key repeat, two keys in one frame, the clears. Runs in wf-linux-test:local, repo mounted read-only."
+    cmds:
+      - |
+        docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O1 -Wall -Wextra -Werror -pthread -I/src/android/screensaver/src/main/cpp /src/tests/menu_key_latch_test.cpp -o /tmp/menu_key_latch && /tmp/menu_key_latch'
+
   test-forth-math:
     desc: "The Forth math words' maths (engine/stubs/forth_math.hpp): every shared vector, identities, domain errors and 100000 random arguments, built twice (double Real, then -DWF_FORTH_MATH_FLOAT for single-FPU chips); plan docs/plans/2026-11-21-forth-trig-words.md"
     cmds:
