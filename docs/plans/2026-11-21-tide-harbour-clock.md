@@ -51,6 +51,7 @@ Recommendations are in the third column. Nothing is decided until Will answers.
 | D10 | Burn-in | **The camera drifts slowly all the time**, as Minute Machine's does; the water, sky and clouds always move, so no pixel sits still | A static camera: the tower dial would burn in |
 | D11 | An A3 poster about the tides and the calculation | **Yes, portrait A3 (297 × 420 mm), on the repository's poster pipeline** ([seahorse poster](../reference/seahorse-biomechanics-poster/README.md)): the [research document](../reference/chao-phraya-tide-research.md) first, then `make_poster.py` and `export_poster.py` (PDF, 300 DPI PNG, `layout-review.json`) and a pytest guard. Every claim wears a chip (**verified**, **other source**, **ours (measured)**); the build refuses an unconfirmed claim. See [the poster](#the-poster) | A figure in the plan only: no printable object, and the research would stay buried here |
 | D12 | Sun and moon | **No tables, and no claim about the moon.** The sun's rise and set come from a closed-form formula (the sun's declination and the equation of time, for Bangkok's latitude and longitude and the date), a few lines of Forth using the new trig words, and checked in Phase 2 against five published sunrise and sunset times. The moon is only a disc on an arc: its phase and position are **not** claimed, in the scene or on the poster. Will asked (2026‑11‑21): "should we??" about researching sunrise, sunset and moon tables; the answer was no | Tables for every date (a lot of data for a look nobody can check); a fixed 06:00 and 18:00 (seasonal drift is a few tens of minutes, which would pass, but the formula is as cheap and is right); the real moon (phase and position are a project of their own, and the plan's moon-phase stretch is already out of scope) |
+| D13 | A settings object in every clock level | **Decided** (Will, 2026‑11‑21: "make sure level has a settings object (same for all clocks---audit)"). Every clock level carries one settings object, built the same way for all clocks: an `.oas` type that includes `settings.inc` with live fields, one instance placed in the level, read by the director with `property@`, a TV form and a phone Dream form both generated from its `.oad`, and a test that edits and checks every live field. [`scripts/audit-clock-settings.py`](../../scripts/audit-clock-settings.py) checks all six and is run in verification. The audit found **no clock has one yet**: see [Settings objects](#settings-objects) | A settings object only where a clock needs options today (what Minute Machine did; it leaves each later clock to decide, and the phone form and the chooser then differ clock to clock) |
 
 ## Questions for Will: answered
 
@@ -66,6 +67,12 @@ Recommendations are in the third column. Nothing is decided until Will answers.
 | Q6 | Tide size on screen? | ~~True to scale against the pier and the gauge board.~~ **Accepted.** |
 | Q7 | A TV outside Thailand? | ~~Device time everywhere, as if Thai.~~ **Accepted.** |
 | Q8 | Attribution for the tide? | ~~Credit the department; no further step.~~ **Accepted.** |
+
+### Open
+
+| # | Question | Recommendation | What it blocks |
+|---|---|---|---|
+| Q9 | **What do all clocks share in their settings?** (Will, 2026‑11‑21: "make sure level has a settings object (same for all clocks---audit)") A common `Clock` sheet every clock's settings type includes, and each clock's own fields beside it. | Common: **Camera drift** (Slow, the default, or Off), the burn-in guard Minute Machine's D10 called "push-in". Minute Machine's own: **Hour format** (24 hours by default, or 12). Tide Harbour's own: **Dial numerals** (Thai by default, Roman, or none), **Gauge board** (on or off), **Boats and birds** (on or off). The first release ships these and no more. | The `.oas` files, Phases 2 and 2b |
 
 Optional, not blocking: which of the other 48 ideas comes after Tide Harbour.
 
@@ -174,6 +181,30 @@ What changes, file by file:
 - `build.gradle.kts`: flavor `clocks`; the `minutemachine` flavor, its three `MinuteMachine*.java` classes and its source set are removed, and the manifest, strings, icons and banner are kept under the new name.
 - `scripts/gen-screensaver-android-icons.py` and the Taskfile follow.
 
+### Settings objects
+
+Will, 2026‑11‑21: "make sure level has a settings object (same for all clocks---audit)". Every clock level carries one settings object, built the way the Planted Tank, Jellyfish, Reef and Sea Stars levels build theirs ([Sea Stars settings plan](2026-11-20-sea-stars-settings.md), [settings.inc](../../wfsource/source/oas/settings.inc)):
+
+1. **The type.** `wfsource/source/oas/<clock>settings.oas` does `@include settings.inc` and declares fields as `SHOW_AS_…|SHOW_AS_LIVE`; the `.mas` rules generate the `.oad` and `.ht`. A field marked live is one the engine re-reads after the level loads, and that is what makes `levcomp` list the object as editable.
+2. **The instance.** The level places one object of that type with no model and no mass. Minute Machine is built through Blender, whose exporter already supports an object that carries `wf_schema_path` ([export_level.py](../../wftools/wf_blender/export_level.py)); Phase 2b confirms a no-model empty works.
+3. **The reader.** The director reads each field with `property@ ( actor field -- value valid )`, using the settings actor's index and the field indices written into the script at export time. Nothing scans for the type at run time.
+4. **The forms.** The TV form (hold OK) is generated from the `.oad`. The phone's Dream form comes from `scripts/gen-settings-capabilities.py`, which turns the `.oad` into a capabilities asset; the Dream's shared `LevelSettings` saves what the person changed and sends it as launch overrides, which the engine applies when the level loads. The `clocks` app serves the playing clock's fields through one provider, so no clock needs its own.
+5. **The Dream variant** keeps the object, its Editable Objects entry and its `OAD ` chunk.
+6. **The test** sets every live field, steps the director and checks the pose, as the project rule for live fields requires.
+
+**Audit,** 2026‑11‑21, by `scripts/audit-clock-settings.py` against that list:
+
+| Clock | Type | Live fields | Placed | Read by the director | Phone form | Test | Finding |
+|---|---|---|---|---|---|---|---|
+| Minute Machine | none | none | none | no `property@` | orientation only | none | **Gap.** Its plan's D10 chose "no settings object" and left one as a later item; that deferral is withdrawn |
+| Tide Harbour | none | none | none | none | none | none | **Gap, by design:** not built yet; Phase 2 must build it |
+| Sea Stars, for comparison | yes | yes | yes | yes | yes | yes | The reference implementation |
+
+**Common base.** Fields every clock shares go in one include, `wfsource/source/oas/clocksettings.inc`, a `Clock` property sheet that each clock's `.oas` includes after `settings.inc`; adding a field to `settings.inc` itself would change the struct of every settings type, so it is not touched. Each clock's own fields follow in their own sheet. What goes in each is [Q9](#open).
+
+**What changes.** Phase 2 builds Tide Harbour's object with the level; Phase 2b retrofits Minute Machine's; Phase 3 generalises the Dream's `LevelSettings` from its Sea Stars constants to a factory by clock id (its own comment says "not specific to any level") and serves the playing clock's fields; and the audit becomes part of verification so a third clock cannot ship without one.
+
+
 ### Shared code
 
 `channels.py`, `forth.py`, the Blender part helpers and the check scripts in `wflevels/minute_machine/` are mostly not about Minute Machine. They are hoisted into `wflevels/clock_common/` in Phase 2, and Minute Machine is rebuilt from them with its tests unchanged, so a third clock starts from a library, not a copy.
@@ -204,8 +235,9 @@ stateDiagram-v2
 |---|---|---|---|
 | **0 Spikes and research** | (a) 36 plain bars plus 100 boxes on a placeholder level, on cast1: FPS and banding. (b) The look of the day with no light control: a sliding sky, glow actors and keyed looks, judged on the TV at the six moments. ~~(c) The tide: find the Hydrographic Department's constants for a Chao Phraya station, or record that none are public; check the arithmetic against their table.~~ Done 2026‑11‑21: no public constants, but the department's published highs and lows were fitted and validated; [record below](#phase-0-record-the-tide). ~~(d) Sunrise and sunset by day of year against NOAA~~ Dropped by D12: a formula, checked in Phase 2, in place of research | T4 | Answers D5, D7 and the water risk; the plan is revised with the results |
 | ~~**1 Engine E1**~~ | ~~Mailboxes, override, tests~~ Done 2026‑11‑21; [record below](#phase-1-record-e1-built) | T4 | ~~`task test-wall-clock` passes with a date; Minute Machine unaffected~~ |
-| **2 Tide Harbour level** | `clock_common` hoisted; `wflevels/tide_harbour/` with `timeline.py`, `channels.py`, `parts.py`, Blender build (the dial's Thai numerals are drawn from a Thai font inside the Blender container, so Phase 2 first checks that a Thai font is in the image and adds one to the Dockerfile if not), `-standalone.iff`; director VM test; engine comparison | T3 | Director matches the model in the VM and the engine, as Minute Machine's did |
-| **3 Bundle and chooser** | Manifest, pack script, `Clock*` classes, host change, flavor `clocks`, `minutemachine` flavor removed | T3 | Desktop and cast1: no argument shows the menu; a named clock skips it; the Dream never shows it |
+| **2 Tide Harbour level** | `clock_common` hoisted; `wflevels/tide_harbour/` with `timeline.py`, `channels.py`, `parts.py`, Blender build (the dial's Thai numerals are drawn from a Thai font inside the Blender container, so Phase 2 first checks that a Thai font is in the image and adds one to the Dockerfile if not), `-standalone.iff`; **the settings object (D13)**; director VM test; engine comparison | T3 | Director matches the model in the VM and the engine, as Minute Machine's did |
+| **2b Minute Machine settings object** | The retrofit the audit found: `minutemachinesettings.oas` including `clocksettings.inc`, one object placed in the Blender-built level, the director reading it with `property@`, the capabilities asset, and `tests/test_minute_machine_settings.py` | T3 | `scripts/audit-clock-settings.py --strict` passes for Minute Machine; its timeline and director tests are unchanged |
+| **3 Bundle and chooser** | Manifest, pack script, `LevelSettings` made a factory by clock id and one provider serving the playing clock's fields, `Clock*` classes, host change, flavor `clocks`, `minutemachine` flavor removed | T3 | Desktop and cast1: no argument shows the menu; a named clock skips it; the Dream never shows it |
 | **4 cast1** | Install, FPS gate, 10-minute Dream run, six moments checked on the TV, tide gauge checked against the model | T3 | D7 gate, and the moments match the mockups |
 | **5 Docs** | `android/screensaver/README.md`, `docs/level-building.md` note, `docs/forth-math-words.md` unaffected | T2 | `task md` renders |
 | **P The poster** | The [research document](../reference/chao-phraya-tide-research.md) is written. `docs/reference/chao-phraya-tide-poster/`: `make_poster.py`, `export_poster.py`, original SVG panels, `layout-review.json`, the PDF and a 300 DPI PNG; `tests/test_poster_chao_phraya_tide.py`. **Status: the seahorse poster's generator, exporter and test were read and the layout is mocked up; not yet built.** It needs only Phase 0(c), so it can be built at any time, including before the level exists; panel 6 (the harbour) is redrawn from the finished scene | T3 | PDF is one 297 × 420 mm page; the build refuses an unconfirmed claim; a person has read the printed-size proof |
@@ -248,6 +280,26 @@ Done 2026‑11‑21. Tooling in `wflevels/tide_harbour/tide_fit/`; the full acco
 
     **PASS.** Mutation check: reading the table as GMT (7 h off) gives a 125.5 cm median and fails; a K1 phase moved by a quarter turn gives 40.1 cm and fails; halving M2 gives 11.9 cm and fails; as shipped, 4.3 cm.
 
+### Audit record: settings objects
+
+Run 2026‑11‑21. `python3 scripts/audit-clock-settings.py`:
+
+    ```
+    clock            type     fields   level    director phone    test     settings object
+    minute_machine   MISSING  MISSING  MISSING  MISSING  MISSING  MISSING  6 of 6 missing
+    tide_harbour     MISSING  MISSING  MISSING  MISSING  MISSING  MISSING  6 of 6 missing
+    2 clocks audited, 2 without a complete settings object
+    ```
+
+    **Finding: neither clock has a settings object.** `python3 -m pytest -q tests/test_audit_clock_settings.py`:
+
+    ```
+    ........                                                                 [100%]
+    8 passed in 0.15s
+    ```
+
+    **PASS.** The audit's own test: a fake clock with all six parts passes; removing the type, the capabilities asset or the test flips exactly that check; a level that neither places nor reads the object fails two; a type with no live field fails `fields`.
+
 ### Phase 1 record: E1 built
 
 Built 2026‑11‑21. `WALL_DAY` is mailbox 1925 (whole calendar days since 2000‑01‑01 in the clock's own time zone, so 2026‑11‑21 is 9821), `WALL_UTC_OFFSET` is 1926 (minutes; Bangkok is 420), and `GLOBAL_SYSTEM_MAX` is 1927. `WF_WALL_CLOCK` takes `[YYYY-MM-DDT]HH:MM:SS[.mmm][+HH:MM|-HH:MM|Z][@rate]`; the time-only form is unchanged. All five mailboxes are latched from one instant per frame. The scripts' `INDEXOF_WALL_DAY` and `INDEXOF_WALL_UTC_OFFSET` come from `mailbox.inc` with no further change. Files: `wallclock.hp`, `mailbox.inc`, `level.hp`, `level.cc`, `tests/wall_clock_test.cpp`, `tests/test_wall_clock.py`, `tests/test_mailbox_global_bounds.py`, `docs/command-line-switches.md`.
@@ -283,6 +335,8 @@ flowchart LR
     P0 --> P2
     P0 --> PP["Phase P<br/>the poster"]
     P1 --> P2["Phase 2<br/>the level"]
+    P1 --> P2b["Phase 2b<br/>Minute Machine settings"]
+    P2b --> P3
     P2 --> P3["Phase 3<br/>bundle and chooser"]
     P2 --> P4
     P3 --> P4["Phase 4<br/>cast1"]
@@ -299,6 +353,9 @@ flowchart LR
 | `tests/test_tide_constants.py` | Done: pins the constants to eight days copied by hand from the printed table; mutation-checked (a 7 h time-zone slip, a wrong K1 phase and a halved M2 each fail it) |
 | `docs/reference/chao-phraya-tide-research.md` | Done: sources, calculation, accuracy, and what was not found |
 | `docs/reference/chao-phraya-tide-poster/`, `tests/test_poster_chao_phraya_tide.py` | New (Phase P) |
+| `wfsource/source/oas/clocksettings.inc`, `minutemachinesettings.oas`, `tideharboursettings.oas` (+ generated `.oad`, `.ht`) | New: the common `Clock` sheet and one settings type per clock (Q9) |
+| `scripts/audit-clock-settings.py`, `tests/test_audit_clock_settings.py` | Done: the audit, and its own test (a fake tree with all six pieces passes; removing each flips exactly its check) |
+| `tests/test_minute_machine_settings.py`, `tests/test_tide_harbour_settings.py`, `android/screensaver/src/clocks/assets/<clock>-settings.json` | New: per-clock live-field tests and the generated capabilities assets |
 | `wflevels/clocks-menu.manifest` | New |
 | `scripts/pack-clocks-bundle.py`, `scripts/check-tide-harbour.py` | New |
 | `android/screensaver/src/main/java/org/worldfoundry/screensaver/Clock*.java`, `ClocksActivity`, `ClocksDreamService`, `ClocksSettingsProvider` | New; the three `MinuteMachine*.java` classes removed |
@@ -331,6 +388,8 @@ These steps are the contract. Each is run when its phase lands, with the raw out
 9. `python3 -m pytest -q tests/test_tide_constants.py` and `python3 -I wflevels/tide_harbour/tide_fit/check_time_zone.py`: the constants reproduce the printed table, and the table's clock is UTC+7. Run 2026‑11‑21; output in the [Phase 0 record](#phase-0-record-the-tide). **PASS.**
 10. The Forth `tide-m` against the same table: in the VM and in the engine at eight chosen dates and times, within one centimetre of the Python sum (the float error), and within the fit's own error of the table's printed events.
 11. `python3 docs/reference/chao-phraya-tide-poster/make_poster.py`, then `export_poster.py`, then `python3 -m pytest -q tests/test_poster_chao_phraya_tide.py`: the PDF is one 297 × 420 mm page, every claim has a chip, no unconfirmed claim is present, and `layout-review.json` reports no overflow. A person reads the printed-size proof.
+12. `python3 scripts/audit-clock-settings.py --strict`: every clock in the bundle has all six parts of a settings object, and `python3 -m pytest -q tests/test_audit_clock_settings.py` shows the audit itself can pass and can fail for each part. The test run is in the [audit record](#audit-record-settings-objects); the strict run waits for Phases 2 and 2b.
+13. `python3 -m pytest -q tests/test_minute_machine_settings.py tests/test_tide_harbour_settings.py`: each live field is set, the director stepped, and the pose checked, for every field of both clocks.
 
 ## Housekeeping done with this plan
 

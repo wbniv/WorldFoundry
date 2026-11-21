@@ -44,7 +44,7 @@ Each row has a recommendation and its alternatives. **Will accepted all ten reco
 | D7 | Look | **A painted wooden toy on a dark table**: wood rails, brass pulleys, a red marble, dominoes in a run of colours, black flap cards with off-white digits | Brass and steel laboratory apparatus. Or bright nursery colours on a light table |
 | D8 | Sound | **Silent**, like the other three Dreams | Clicks for the last five seconds and a bell on the hour |
 | D9 | Frame-rate gate on cast1 | **At least 30 FPS** as a Release build, median over 120 s. Seahorse Grid manages 29.6 FPS with 24 deforming meshes; this scene has no deformers | At least 20 FPS, the reef's gate |
-| D10 | Machines and settings in the first release | **One machine and no settings object.** Orientation is the only setting, as in Seahorse Grid. The timeline is a table, so a second machine is a second table, chosen from the minute of the day; it and a settings object are later items | Build two machines now. Or add settings now: machine, push-in, 12‑hour |
+| D10 | Machines and settings in the first release | **One machine and no settings object.** Orientation is the only setting, as in Seahorse Grid. The timeline is a table, so a second machine is a second table, chosen from the minute of the day; it and a settings object are later items | Build two machines now. Or add settings now: machine, push-in, 12‑hour | **Superseded 2026‑11‑21, for the settings object only:** Will, 2026‑11‑21: "make sure level has a settings object (same for all clocks---audit)". Every clock level now carries one, built the same way; Minute Machine's retrofit is Phase 2b of the [Tide Harbour plan](2026-11-21-tide-harbour-clock.md#settings-objects) and a TODO item. One machine stays.
 
 ## The machine
 

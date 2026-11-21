@@ -69,6 +69,21 @@ def score(z0, amp, speeds, events):
     return {"events": len(events), "median_cm": float(np.median(err)), "p90_cm": float(np.percentile(err, 90)), "max_cm": float(err.max())}
 
 
+def time_error(z0, amp, speeds, events):
+    """Minutes between each listed high or low and the nearest extremum of the model (within 2.5 hours)."""
+    t = np.array([hours(x) for x, _ in events])
+    grid = np.arange(t.min() - 6, t.max() + 6, 1 / 60)
+    h = predict(z0, amp, speeds, grid)
+    d = np.diff(h)
+    et = grid[np.where(np.sign(d[:-1]) != np.sign(d[1:]))[0] + 1]
+    errs = []
+    for x in t:
+        j = int(np.argmin(np.abs(et - x)))
+        if abs(et[j] - x) <= 2.5:
+            errs.append(abs(et[j] - x) * 60)
+    return {"matched": len(errs), "of": len(t), "median_min": float(np.median(errs)), "p90_min": float(np.percentile(errs, 90))}
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--cache", default=os.path.expanduser("~/tmp/chao-phraya-tide"))
@@ -97,8 +112,32 @@ def main():
         z0, amp = fit(ev[a], keep)
         validation[f"fitted_{a}_scored_on_{b}"] = score(z0, amp, keep, ev[b])
         validation[f"fitted_{a}_scored_on_{a}"] = score(z0, amp, keep, ev[a])
+        validation[f"fitted_{a}_time_error_on_{b}"] = time_error(z0, amp, keep, ev[b])
         v = validation[f"fitted_{a}_scored_on_{b}"]
         print(f"fitted on {a}, scored on {b} (unseen): median {v['median_cm']:.1f} cm, 90th {v['p90_cm']:.1f}, max {v['max_cm']:.1f}  ({v['events']} events)")
+
+    # how many waves are enough: fitted to 2026 with the N largest, scored on the unseen 2027
+    _, amp26 = fit(ev[2026], full)
+    error_vs_n = {}
+    for n in (6, 12, 24, 32, 48, 64, 96, len(full)):
+        keep_n = {k: full[k] for k in top(amp26, n)}
+        z0n, ampn = fit(ev[2026], keep_n)
+        error_vs_n[str(n)] = score(z0n, ampn, keep_n, ev[2027])
+    print("median error on unseen 2027 by waves kept:", {k: round(v["median_cm"], 1) for k, v in error_vs_n.items()})
+
+    from collections import Counter
+    table_stats = {}
+    for year in (2026, 2027):
+        hs_y = [h for _, h in ev[year]]
+        by_day = {}
+        for t, h in ev[year]:
+            by_day.setdefault(t.date(), []).append(h)
+        rng = sorted(max(v) - min(v) for v in by_day.values() if len(v) > 1)
+        counts = Counter(len(v) for v in by_day.values())
+        table_stats[str(year)] = {"events": len(ev[year]), "days": len(by_day), "min_m": min(hs_y), "max_m": max(hs_y),
+                                  "days_by_event_count": {str(k): counts[k] for k in sorted(counts)},
+                                  "daily_range_median_m": rng[len(rng) // 2], "daily_range_max_m": rng[-1],
+                                  "max_gap_between_events_h": max((b[0] - a[0]).total_seconds() / 3600 for a, b in zip(ev[year], ev[year][1:]))}
 
     both = ev[2026] + ev[2027]
     _, amp_full = fit(both, full)
@@ -129,6 +168,8 @@ def main():
         "range_of_listed_extrema_m": [min(heights), max(heights)],
         "n_constituents": len(consts),
         "validation_height_error_at_listed_events": validation,
+        "error_vs_constituents_fitted_2026_scored_2027": error_vs_n,
+        "table_stats": table_stats,
         "shipped_fit_in_sample": in_sample,
         "constituents": consts,
         "sources": {"station": "HD, Royal Thai Navy Headquarters (Bangkok Metropolitan), 13 44' 36\" N 100 29' 25\" E",

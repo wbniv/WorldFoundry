@@ -39,7 +39,9 @@ A **mixed** tide, as the station's two-high days and one-high days both occur in
 
 ## The time zone, measured
 
-The table does not say which clock it uses. **Ours (measured):** `check_time_zone.py` fits harmonic constants to the observed 2025 hourly sea level at Ko Lak ([UHSLC station 328](https://uhslc.soest.hawaii.edu/data/), GMT), predicts 2026, and slides the department's published Ko Lak events (`KL2026.pdf`) against the prediction. Median mismatch is **11 minutes at a shift of +7.0 hours** and 308 minutes at no shift; the next-best half-hour shifts are 22 and 40 minutes. The table is in **Thai local time, UTC+7**. Ko Lak is strongly diurnal, so a 7-hour shift is 105 degrees of the K1 phase and cannot be confused with another offset.
+The table does not say which clock it uses. **Ours (measured):** `check_time_zone.py` fits harmonic constants to the observed 2025 hourly sea level at Ko Lak ([UHSLC station 328](https://uhslc.soest.hawaii.edu/data/)), predicts 2026, and slides the department's published Ko Lak events (`KL2026.pdf`) against the prediction. Median mismatch is **11 minutes with the table 7.0 hours ahead of the record** and 308 minutes with no shift; the next-best half-hour shifts are 22 and 40 minutes. Ko Lak is strongly diurnal, so a 7-hour shift is 105 degrees of the K1 phase and cannot be confused with another offset.
+
+**Verified:** the GLOSS station handbook gives Ko Lak's time zone as "105E, GMT + 7hrs" ([GLOSS handbook, station 39](https://www.bodc.ac.uk/resources/inventories/gloss_handbook/stations/39/)). **Not verified:** which clock the UHSLC hourly file itself uses; none of the UHSLC pages read says. The conclusion that the table is in **Thai local time, UTC+7** therefore rests on the record being in GMT, as such archives conventionally are, and on 7 hours matching Thailand's own zone; any other reading needs an offset such as GMT+14 that no one uses.
 
 ## The calculation
 
@@ -66,13 +68,13 @@ How many constituents are enough? Fitted to 2026 and scored on unseen 2027:
 
 | Constituents kept | 6 | 12 | 24 | 32 | 48 | 64 | 96 | 171 |
 |---|---|---|---|---|---|---|---|---|
-| Median height error (cm) | 28.0 | 21.3 | 10.6 | 8.2 | 5.6 | 4.3 | 3.8 | 3.7 |
+| Median height error (cm) | 28.0 | 21.3 | 10.6 | 8.2 | 5.6 | 4.5 | 3.8 | 3.7 |
 
 A handful of constituents gets the look; it takes about 48 to get within 6 cm.
 
 Largest of the 64 (amplitude, period): K1 50.0 cm 23.93 h; M2 36.3 cm 12.42 h; O1 30.9 cm 25.82 h; S2 23.1 cm 12.00 h; Sa 17.1 cm one year; P1 13.2 cm 24.07 h; K2 8.5 cm 11.97 h; Mf 7.8 cm 13.66 days. The form factor (K1 + O1) / (M2 + S2) is **1.36**, in the "mixed, mainly semidiurnal" class (0.25 to 1.5) by the rule in [Aungsakul et al. 2011](https://wjst.wu.ac.th/index.php/wjst/article/view/128), which classifies the same station as 1.06, the same class.
 
-**Cautions.** (1) Time errors are larger than the height errors suggest: at a flat peak a few centimetres move the extremum by up to an hour or two, so "the time of high water" is only good to tens of minutes where the tide is flat; the median is 11 minutes. (2) The fit is to published predictions, not to observations or to the department's constants, so it can be no better than they are. (3) There is no nodal correction: amplitudes of M2, K1 and O1 drift by a few percent over the 18.6-year lunar node cycle. One year ahead showed no loss (3.7 against 3.3 cm); the department publishes each year, so refitting yearly is cheap. (4) Sa (17 cm) is the annual cycle of the mean level, which in a river mixes the sea's seasonal level and the river's discharge; two years cannot separate them. (5) The compound set was chosen by us.
+**Cautions.** (1) Time errors are larger than the height errors suggest: at a flat peak a few centimetres move the extremum by up to an hour or two, so "the time of high water" is only good to tens of minutes where the tide is flat; the median is 11 minutes. (2) The fit is to published predictions, not to observations or to the department's constants, so it can be no better than they are. (3) There is no nodal correction: NOAA's formula carries a yearly amplitude factor `f` that ours sets to 1 ([NOAA](https://tidesandcurrents.noaa.gov/about_harmonic_constituents.html)). One year ahead showed no loss (3.7 against 3.3 cm); the department publishes each year, so refitting yearly is cheap. (4) Sa (17 cm) is the annual cycle of the mean level, which in a river mixes the sea's seasonal level and the river's discharge; two years cannot separate them. (5) The compound set was chosen by us.
 
 ## The paper that gave a form factor
 

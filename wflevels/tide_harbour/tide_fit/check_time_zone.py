@@ -24,6 +24,7 @@ from parse_hd import parse
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--cache", default=os.path.expanduser("~/tmp/chao-phraya-tide"))
+    ap.add_argument("--json", help="also write the result to this file")
     args = ap.parse_args()
     kl = parse(os.path.join(args.cache, "KL2026.pdf"), 2026)
     t0 = dt.datetime(2025, 1, 1)
@@ -57,6 +58,13 @@ def main():
     zero = [m for m, s in results if s == 0.0][0]
     print(f"  table minus GMT =  +0.0 h: median mismatch {zero:6.1f} min   (the table is not in GMT)")
     best = results[0][1]
+    if args.json:
+        import json
+        with open(args.json, "w") as fh:
+            json.dump({"station": "Ko Lak (UHSLC 328, observed 2025; department table KL2026)", "observed_samples": len(obs), "table_events": len(kl),
+                       "median_mismatch_min_by_shift_h": {f"{s:+.1f}": round(m, 1) for m, s in sorted(results, key=lambda r: r[1])},
+                       "best_shift_h": best, "mismatch_at_best_min": round(results[0][0], 1), "mismatch_at_zero_min": round(zero, 1)}, fh, indent=1)
+            fh.write("\n")
     print("RESULT: the table's times are Thai local time (UTC+7)" if best == 7.0 else f"RESULT: unexpected shift {best:+.1f} h")
     return 0 if best == 7.0 else 1
 
