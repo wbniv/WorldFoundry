@@ -114,3 +114,6 @@ wflevels/minute_machine.iff
 wflevels/minute_machine-standalone.iff
 wflevels/minutemachine-screensaver-cd.iff
 tests/mm-captures/
+
+# Tide Harbour Phase 0 spike: throwaway builds, rebuilt by wflevels/tide_spike/build.sh
+/wflevels/tide_spike_*

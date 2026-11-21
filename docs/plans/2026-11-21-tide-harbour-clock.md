@@ -43,7 +43,7 @@ Recommendations are in the third column. Nothing is decided until Will answers.
 | D2 | Where Minute Machine goes | **Into the bundle as level 0.** A new `clocks` flavor, application `org.worldfoundry.clocks`, replaces the `minutemachine` flavor in the same change; cast1 gets the old package uninstalled | Keep both apps: two icons and two screensaver entries for one family |
 | D3 | How the clock is chosen | Launcher with no clock named: **the chooser**. `--es clock tide_harbour` on the launcher activity: **straight to that clock**. The Dream: its saved choice (default **Random**, resolved once at start), never the chooser. The settings provider offers the choice | A chooser inside the Dream (a screensaver must never wait for a person) |
 | D4 | The order and names of clocks | **Stable ids**, as `TankChoice.IDS`: `minute_machine`, `tide_harbour`. The index is the table-of-contents position; a new clock is appended | Sort alphabetically (an index change would silently re-point saved choices) |
-| D5 | How the day turns to night | **No engine change.** A tall gradient mesh for the sky that slides past the camera; glow actors for lamps and windows, moved in front of the dark glass at dusk; and the water, boats and buildings drawn in a few keyed looks (day, dusk, night) cross-faded by moving the lit set forward. Phase 0 shows how well this holds and records the gaps | Runtime light control (a script-writable light colour): would dim everything with one write, but it is an engine feature in its own right and is **deferred to a TODO item, not used here**. Bake one fixed sunset: cheap, but then the look says nothing about the time |
+| D5 | How the day turns to night | **No engine change: translucent veils** (measured on the desktop 2026‑11‑21, [spike](../diagnostics/tide-harbour-spike-2026-11-21/README.md)). A handful of large boxes with a translucent tinted material (`wf_opacity`) in front of the camera, from faint warm to dark blue, and the director shows exactly one at a time through its visibility mailbox. What must stay bright (lit windows, lanterns, **the dial and the moon**) is drawn in front of the veil, scaled along the same ray. Replaces the earlier idea of a sliding sky and re-textured sets, which the spike made unnecessary. **Open:** the cost on cast1, and the horizon glow a veil cannot give | Runtime light control (a script-writable light colour): would dim everything with one write, but it is an engine feature in its own right and is **deferred to a TODO item, not used here**. Bake one fixed sunset: cheap, but then the look says nothing about the time |
 | D6 | The tide itself | **Settled by the research: fitted harmonic constants for Bangkok**, summed in Forth from the date. 64 constituents, median error 4 to 5 cm on an unseen year ([tide_constants.json](../../wflevels/tide_harbour/tide_constants.json)). The department publishes a new table each year, so `task tide-refit` repeats the fit (the years and the file addresses in `tide_fit/` are edited by hand first); the scene needs no nodal correction for the next year (3.7 cm against 3.3 cm) | A synthetic curve (no longer needed); a third-party table (the department's own tables are public and primary) |
 | D7 | Frame-rate gate | **At least 30 FPS** on cast1, Release, median over 120 s, the same gate Minute Machine used. Actor budget **150 rigid actors**, measured in Phase 0 on boxes first | A higher gate: the water bars are the likely cost, so measure first |
 | D8 | The dial | **Thai numerals ๑ to ๑๒** (Will's answer to Q2), as a Bangkok tower would carry. The cost is legibility across a room, so the digits are drawn large and heavy, and the tower's dial is checked at TV distance in Phase 2. The [harbour mockup](2026-11-21-tide-harbour-clock/harbour.html) shows the problem at its scale: all twelve are small. Two remedies, in order: draw the dial about 1.5 times larger than in the concept art, or carry digits only at ๑๒, ๓, ๖ and ๙ with plain ticks between; if both fail, the concept art's Roman numerals are the fallback | Roman numerals, as in the concept art: more legible, less local |
@@ -73,6 +73,8 @@ Recommendations are in the third column. Nothing is decided until Will answers.
 | # | Question | Recommendation | What it blocks |
 |---|---|---|---|
 | Q9 | **What do all clocks share in their settings?** (Will, 2026‑11‑21: "make sure level has a settings object (same for all clocks---audit)") A common `Clock` sheet every clock's settings type includes, and each clock's own fields beside it. | Common: **Camera drift** (Slow, the default, or Off), the burn-in guard Minute Machine's D10 called "push-in". Minute Machine's own: **Hour format** (24 hours by default, or 12). Tide Harbour's own: **Dial numerals** (Thai by default, Roman, or none), **Gauge board** (on or off), **Boats and birds** (on or off). The first release ships these and no more. | The `.oas` files, Phases 2 and 2b |
+| Q10 | **Start the clocks from the baseline toolkit?** The level guides say new scenes should (a generated core with explicit defaults, no snowgoons import). Minute Machine and the spike use the old import; retrofitting Minute Machine is a small TODO item. | Yes: Tide Harbour and every later clock; Minute Machine on its next change. | Phase 2 |
+| Q11 | **May I prune Docker's build cache (only that)?** Free disk fell to about 5 GB, right at the stop line; Docker reports 21 GB of reclaimable build cache and 23 GB of reclaimable images, and the rootless Docker trial is the live engine, so I will touch none of it without your word. The cast1 half of Phase 0 needs an APK build. | Yes, the build cache only; I will show you the list first. | The cast1 half of Phase 0 |
 
 Optional, not blocking: which of the other 48 ideas comes after Tide Harbour.
 
@@ -234,9 +236,9 @@ stateDiagram-v2
 
 | Phase | Work | Tier | Gate |
 |---|---|---|---|
-| **0 Spikes and research** | (a) 36 plain bars plus 100 boxes on a placeholder level, on cast1: FPS and banding. (b) The look of the day with no light control: a sliding sky, glow actors and keyed looks, judged on the TV at the six moments. ~~(c) The tide: find the Hydrographic Department's constants for a Chao Phraya station, or record that none are public; check the arithmetic against their table.~~ Done 2026‑11‑21: no public constants, but the department's published highs and lows were fitted and validated; [record below](#phase-0-record-the-tide). ~~(d) Sunrise and sunset by day of year against NOAA~~ Dropped by D12: a formula, checked in Phase 2, in place of research | T4 | Answers D5, D7 and the water risk; the plan is revised with the results |
+| **0 Spikes and research** | (a) 36 plain bars plus 100 boxes on a placeholder level, on cast1: FPS and banding. **Desktop half done 2026‑11‑21; the cast1 half needs an APK and disk space (Q11).** (b) The look of the day with no light control: **done on the desktop as translucent veils (D5); the cast1 cost of a full-screen veil is unmeasured.** ~~(c) The tide: find the Hydrographic Department's constants for a Chao Phraya station, or record that none are public; check the arithmetic against their table.~~ Done 2026‑11‑21: no public constants, but the department's published highs and lows were fitted and validated; [record below](#phase-0-record-the-tide). ~~(d) Sunrise and sunset by day of year against NOAA~~ Dropped by D12: a formula, checked in Phase 2, in place of research | T4 | Answers D5, D7 and the water risk; the plan is revised with the results |
 | ~~**1 Engine E1**~~ | ~~Mailboxes, override, tests~~ Done 2026‑11‑21; [record below](#phase-1-record-e1-built) | T4 | ~~`task test-wall-clock` passes with a date; Minute Machine unaffected~~ |
-| **2 Tide Harbour level** | `clock_common` hoisted; `wflevels/tide_harbour/` with `timeline.py`, `channels.py`, `parts.py`, Blender build (the dial's Thai numerals are drawn from a Thai font inside the Blender container, so Phase 2 first checks that a Thai font is in the image and adds one to the Dockerfile if not), `-standalone.iff`; **the settings object (D13)**; director VM test; engine comparison | T3 | Director matches the model in the VM and the engine, as Minute Machine's did |
+| **2 Tide Harbour level** | `clock_common` hoisted, and its scene core built from the baseline toolkit ([Q10](#open)); `wflevels/tide_harbour/` with `timeline.py`, `channels.py`, `parts.py`, Blender build (the dial's Thai numerals are drawn from a Thai font inside the Blender container, so Phase 2 first checks that a Thai font is in the image and adds one to the Dockerfile if not), `-standalone.iff`; **the settings object (D13)**; director VM test; engine comparison | T3 | Director matches the model in the VM and the engine, as Minute Machine's did |
 | **2b Minute Machine settings object** | The retrofit the audit found: `minutemachinesettings.oas` including `clocksettings.inc`, one object placed in the Blender-built level, the director reading it with `property@`, the capabilities asset, and `tests/test_minute_machine_settings.py` | T3 | `scripts/audit-clock-settings.py --strict` passes for Minute Machine; its timeline and director tests are unchanged |
 | **3 Bundle and chooser** | Manifest, pack script, `LevelSettings` made a factory by clock id and one provider serving the playing clock's fields, `Clock*` classes, host change, flavor `clocks`, `minutemachine` flavor removed | T3 | Desktop and cast1: no argument shows the menu; a named clock skips it; the Dream never shows it |
 | **4 cast1** | Install, FPS gate, 10-minute Dream run, six moments checked on the TV, tide gauge checked against the model | T3 | D7 gate, and the moments match the mockups |
@@ -341,6 +343,40 @@ Built 2026‑11‑21. How to rebuild it is in its [README](../reference/chao-phr
 
 What review found, and fixed, before it passed: a spring-and-neap period printed as negative (the gap between two speeds); a chip that called two design statements "measured"; the year panel's "lowest of the day" spiking on days that list no low, now classified by the table's strict high and low alternation; one caption at 2.30:1 contrast against its background (the test requires 4.5:1), now the dark ink; and a header title that wrapped over its subtitle.
 
+
+### Phase 0 record: the spike, desktop half
+
+Run 2026‑11‑21; full account, captures and the raw numbers in [the spike's README](../diagnostics/tide-harbour-spike-2026-11-21/README.md). Software GL in the Debug engine: relative cost and look only.
+
+| Variant | Posed actors | Median frame, ms |
+|---|---|---|
+| a | 46 | 20.6 |
+| b | 100 | 23.5 |
+| c | 150 (the D7 budget) | 35.6 |
+| d | 150, fast day, veils | 33.6 |
+
+1. **The veils work** (D5): nine translucent boxes, one shown at a time, turn the scene from day to dusk, night and pre-dawn; glows drawn in front stay bright. The dial and the moon are dimmed and must be drawn in front too.
+2. **The guide's lighting recipe has the wrong sign** (measured, fifteen readings): `B = +alt` tilts a directional light down. `docs/level-building.md` is corrected. Minute Machine's sun (`B = +40°, C = 90°`) turns out to be aimed correctly.
+3. **Faint horizontal lines** show across the daytime water. Whether they band on the TV is the open question for cast1.
+4. **Not measured:** everything on cast1; whether a zero-thickness quad is invisible; which near plane rules.
+
+### What the level guides require of every clock level
+
+Read in full 2026‑11‑21, after asking whether they had been ([level-building.md](../level-building.md), [level-design-troubleshooting.md](../level-design-troubleshooting.md)). Each is a rule Phase 2 and Phase 3 must satisfy, and the spike broke four of them before the guides were read.
+
+- **Start from the baseline toolkit**, not the snowgoons import: the guides say "for new scenes, use the baseline toolkit" ([`wflevels/baseline/`](../../wflevels/baseline/README.md)). Minute Machine and the spike import snowgoons, which is how the grey fog default came in ([Q10](#open)).
+- **Set the camera's fog explicitly.** The snowgoons scaffold's default is `#888888` from 20 to 30 m: everything past that fades to flat grey.
+- **Keep every actor inside the room**, including the sun and moon at their lowest, and give the room a floor below anywhere the Player can fall. An actor that leaves the room can end the level.
+- **Face winding is load-bearing:** faces are culled by default, so a wrong-way face vanishes. Single-sided sheets (a veil, a sky) are wound counter-clockwise seen from their visible side; better, make them boxes with real depth (a thin object can be invisible).
+- **Never leave two faces in one plane:** overlapping neighbours (the water bars) flicker. Offset them by a centimetre.
+- **Light:** author a Directional and an Ambient; aim with `B = +alt` and **verify with a capture**.
+- **Mesh origin:** a mesh that rests on a surface has its base at local z = 0; a scaled one grows from its origin.
+- **Scripts:** a definition-only script above the last `;`, the per-tick call last; a backslash comment only on the first line; no `and`, `or` or `<0`; no bytes outside ASCII.
+- **Mailboxes:** global user cells are 2 to 1900; 1901 and up are system (side effects); 0 and 1 are fixed.
+- **Level builds run in the Blender container:** only `TANK_*`, `AQUARIUM_*` and three other prefixes reach it from the environment.
+- **Bundles are append-only** (`level <name>-standalone.iff | <Name>`; a level's position is its index) and built outputs are committed and kept fresh by a CI check; the clocks bundle needs the same check.
+- **Settings objects** need a unique editor label (`wf_Editor Label`), and the shared host opens them on a held OK.
+- **Profile on the device:** `--frame-profile`; large translucent sheets are the case the guide says is unmeasured.
 
 ### Phase 1 record: E1 built
 

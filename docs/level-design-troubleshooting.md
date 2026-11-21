@@ -367,7 +367,7 @@ shot looks textured. The cause is the **fog OAS fields on the `camera` actor**
 
 Levels scaffolded by importing snowgoons inherit its Earth-fog defaults:
 `#888888` ramp 20 → 30 m. The engine reads these per-level at
-[`game/camera.cc:56-57`](../wfsource/source/game/camera.cc) and calls
+[`game/camera.cc:68-69`](../wfsource/source/game/camera.cc) and calls
 `SetFog` accordingly, so anything past 30 m fogs to flat mid-grey — and that
 mid-grey happens to be close to the `v_color × v_lit` value an
 unsuccessfully-textured primitive would render, so the symptom reads as
@@ -1220,6 +1220,36 @@ winding or camera settings cannot repair the wrong source-data interpretation.
 
 ---
 
+## A directional light lights nothing: every face at exactly the ambient term
+
+**Symptom (2026‑11‑21).** The scene renders, and every face is the same flat tone: base colour times the
+ambient value (0.50 for ambient 0.5), whatever its normal. Changing the sun's colour does nothing.
+
+**Cause.** The light's direction is the vector `(cos B·cos C, cos B·sin C, −sin B)` from its Euler
+`(0, B, C)`, and for the outward-wound geometry every level now has, a face is lit when its normal
+**opposes** that vector. Following the older recipe (`B = −alt`) therefore aims the light away from every
+face you can see. Measured with five settings and four faces of known normal: `B=+40 C=90` lit tops
+(1.00) and camera-facing fronts (1.10); `B=−50 C=110` lit fronts (0.97) but not tops (0.50); `B=−50 C=−70`
+lit neither (0.50, 0.50). The 2026‑09‑20 recipe predates the 2026‑10‑16 reversal of the engine's face-normal
+hand; that is the likely cause and was not tested.
+
+**Fix.** `B = +alt` and `C` = the bearing the light should travel toward: `C = 90°` lights faces a camera at
+−y can see. See [Lighting](level-building.md#lighting--every-level-needs-directional-and-ambient). Verify
+with a capture, not by reasoning: compare a face's rendered colour to its authored colour.
+
+---
+
+## A level-build knob (environment variable) has no effect
+
+**Symptom.** You export `MY_KNOB=…` before `bash wflevels/<level>/build.sh` and the Blender script reads the
+default. **Cause.** The build re-runs itself in the Blender container, and `scripts/level-build.sh` forwards only
+`TANK_*`, `AQUARIUM_*`, `LIONFISH_*`, `BETTA_*`, `PLANTED_*` and `SHRIMP_*`. **Fix.** Name the knob with one of
+those prefixes (the spike used `TANK_SPIKE_SUN`), or set it inside the build script after the
+`wf_level_build "$0" "$@"` line, where it already runs in the container. An experiment that sweeps a knob
+this way produces identical output for every setting, which is the tell.
+
+---
+
 ## Black screen — light orientation wrong
 
 **Symptom:** Level loads and runs but the viewport is completely black. No geometry visible.
@@ -1649,6 +1679,15 @@ grep "actor idx=" /tmp/actorlist.log
 ```
 
 Then update any `<index> write-actor-mailbox` literal in the Blender script.
+
+**Qualification (2026‑11‑21).** For a level built by the Blender exporter from a script that names every
+actor, the index is the actor's position among the exported objects that carry a schema, counting
+from 1 (the order the script created them in). Minute Machine's director and the Tide Harbour spike
+use exactly that (`actor-map.json`), and it held: the real engine agreed with the reference model on
+all 75 Minute Machine actors to 0.015 mm (`scripts/check-minute-machine.py --compare`), and the spike's
+bar 18 moved when its mapped index was written. The warning above stands for counting by hand from a
+`.lev`, for imported levels, and for anything that spawns. When you build the map from the script, prove
+it the same way: write one mailbox and watch that actor, or read `--debug-print-actors`.
 
 ## Spawned actor despawns instantly if it uses `startupData->currentTime` for TTL
 
