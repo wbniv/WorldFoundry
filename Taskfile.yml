@@ -1809,6 +1809,32 @@ tasks:
         done
         unzip -l "$apk" | grep ' lib/'
 
+  build-clocks-two-entry-apk:
+    desc: "TEST ONLY: the WF Clocks Release APK with a two-entry bundle (Minute Machine twice, as minute_machine and minute_machine_b) so the engine chooser really appears, for remote acceptance. Same package id as the shipped app, so it replaces it on a device. The throwaway manifest and bundle live in android/screensaver/build/clocks-two-entry/; wflevels/clocks-menu.manifest and src/clocks/assets/cd.iff are not touched. Lands at android/screensaver/build/clocks-two-entry/screensaver-clocks-two-entry-release.apk; run task build-clocks-apk afterwards to get the shipped APK back"
+    deps: [minute-machine-level]
+    cmds:
+      - |
+        set -euo pipefail
+        d=android/screensaver/build/clocks-two-entry
+        rm -rf "$d"
+        mkdir -p "$d/assets"
+        ln -s ../../../../wflevels/minute_machine-standalone.iff "$d/minute_machine-standalone.iff"
+        ln -s ../../../../wflevels/minute_machine-standalone.iff "$d/minute_machine_b-standalone.iff"
+        printf '%s\n' 'title WF Clocks (two-entry test)' 'prompt Choose a clock' \
+          'level minute_machine-standalone.iff | Minute Machine | Minute Machine' \
+          'level minute_machine_b-standalone.iff | Minute Machine (second entry) | Minute Machine B' > "$d/clocks-menu.manifest"
+      - scripts/in-linux-container.sh bash -c 'set -euo pipefail; d=android/screensaver/build/clocks-two-entry; cargo build --release --quiet --manifest-path wftools/cdpack-rs/Cargo.toml; python3 scripts/pack-clocks-bundle.py --manifest "$d/clocks-menu.manifest" --output "$d/clocks-cd.iff" --no-link'
+      - |
+        set -euo pipefail
+        d="$PWD/android/screensaver/build/clocks-two-entry"
+        ln -sf ../clocks-cd.iff "$d/assets/cd.iff"
+        (cd android && ANDROID_HOME=${ANDROID_HOME:-/usr/lib/android-sdk} ./gradlew :screensaver:assembleClocksRelease --offline -PwfClocksManifest="$d/clocks-menu.manifest" -PwfClocksAssets="$d/assets")
+        cp android/screensaver/build/outputs/apk/clocks/release/screensaver-clocks-release.apk "$d/screensaver-clocks-two-entry-release.apk"
+        for abi in arm64-v8a armeabi-v7a; do
+          unzip -l "$d/screensaver-clocks-two-entry-release.apk" | grep -q "lib/$abi/libwf_dream.so" || { echo "no lib/$abi/libwf_dream.so" >&2; exit 1; }
+        done
+        unzip -l "$d/screensaver-clocks-two-entry-release.apk" | grep -E ' lib/| assets/(cd.iff|levels.manifest)'
+
   build-tide-spike-apk:
     desc: "Tide Harbour Phase 0 spike APK (Release; one app, four levels: am start -n org.worldfoundry.tidespike/org.worldfoundry.screensaver.TideSpikeActivity --ei level 0..3). Throwaway; plan docs/plans/2026-11-21-tide-harbour-clock.md"
     cmds:

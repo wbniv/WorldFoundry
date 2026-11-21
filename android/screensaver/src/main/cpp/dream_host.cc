@@ -25,6 +25,8 @@ extern "C" bool WFAndroidEglInit(ANativeWindow* window);
 extern "C" void WFAndroidEglTerm();
 extern "C" void WFAndroidSetSurfaceSize(int width, int height);
 extern "C" void WFAndroidSetHudEnabled(int enabled);
+// The engine's joystick-state setter (hal/android/input.cc), as the NativeActivity glue uses it.
+extern "C" void _HALSetJoystickButtons(joystickButtonsF joystickButtons);
 
 namespace {
 std::atomic<bool> closing{false};
@@ -39,6 +41,15 @@ int surfaceHeight = 0;
 // docs/plans/2026-11-21-tide-harbour-clock.md, "The bundle and the chooser".
 constexpr int kShowMenu = -1;
 std::atomic<bool> showMenu{false};
+
+// The TV remote, for ClocksActivity's chooser only (nativeButtons). Never set by the Aquarium,
+// Seahorse or Planted flavors or by any Dream, so for them the pump below never touches the
+// engine's buttons. The UI thread stores; the game thread applies, once a frame.
+constexpr uint32_t kRemoteButtons = EJ_BUTTONF_A | EJ_BUTTONF_UP | EJ_BUTTONF_DOWN;
+static_assert(EJ_BUTTONF_A == (1u << EJ_BUTTONB_A) && EJ_BUTTONF_UP == (1u << EJ_BUTTONB_UP)
+              && EJ_BUTTONF_DOWN == (1u << EJ_BUTTONB_DOWN), "the remote's bits are sjoystic.h's");
+std::atomic<bool> remoteInput{false};
+std::atomic<uint32_t> remoteButtons{0};
 
 // The number of levels in the APK's cd.iff: its TOC less SHEL, the trailing UIFT and a MENU
 // (cdpack's layout: SHEL, the levels, [MENU], UIFT). -1 when the asset or its TOC is unreadable.
@@ -133,6 +144,7 @@ extern "C" void WFAndroidPumpEvents() {
         }
     }
     if (!showMenu.load() && levelmenu::Drawer()) levelmenu::SetDrawer(nullptr);
+    if (remoteInput.load()) _HALSetJoystickButtons(joystickButtonsF(remoteButtons.load()));
     plantedBridge.pump(launchOverrideSink);
 }
 extern "C" void WFAndroidTouchLayout(int, int, androidtouch::Layout* layout,
@@ -154,6 +166,8 @@ extern "C" int WFAndroidPhoneOverlayRects(int, int, const PhonepadRect** rects,
 extern "C" JNIEXPORT void JNICALL
 Java_org_worldfoundry_screensaver_TankPlayer_nativePrepare(JNIEnv*, jclass) {
     closing.store(false);
+    remoteButtons.store(0);
+    remoteInput.store(false);
     plantedBridge.reset();
 }
 
@@ -189,6 +203,24 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeConfigure(JNIEnv* env, jclass
         }
     }
     plantedBridge.configure(text);
+}
+
+// The remote buttons held now, as EJ_BUTTONF_* bits (ClocksActivity: up, down, OK). Only the
+// chooser's bits pass; 0 releases them all (key-up, pause).
+extern "C" JNIEXPORT void JNICALL
+Java_org_worldfoundry_screensaver_TankPlayer_nativeButtons(JNIEnv*, jclass, jint mask) {
+    remoteButtons.store(uint32_t(mask) & kRemoteButtons);
+    remoteInput.store(true);
+}
+
+// Back in a clock picked from the chooser: ask the engine to return to the chooser (the level
+// menu plan's rule; game.cc consumes the request while a menu bundle's level runs) and say so.
+// False when no chooser has been shown or it is showing now: the caller then leaves the app.
+extern "C" JNIEXPORT jboolean JNICALL
+Java_org_worldfoundry_screensaver_TankPlayer_nativeBackToMenu(JNIEnv*, jclass) {
+    if (!showMenu.load() || !levelmenu::MenuRunning() || levelmenu::SelectorVisible()) return JNI_FALSE;
+    levelmenu::RequestReturn();
+    return JNI_TRUE;
 }
 
 extern "C" JNIEXPORT void JNICALL
