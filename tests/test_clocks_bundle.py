@@ -30,11 +30,11 @@ def test_manifest_names_the_package_and_starts_with_minute_machine():
     assert MANIFEST.ids[0] == 'minute_machine'      # D2: level 0, never renumbered
 
 
-def test_the_roster_is_two_clocks_so_the_chooser_appears():
-    """Tide Harbour is appended as level 1 (D4: a new clock is appended, never inserted). With two entries the
-    engine shows its chooser; with one it starts that level directly."""
-    assert list(MANIFEST.ids) == ['minute_machine', 'tide_harbour']
-    assert [e.menu_name for e in MANIFEST.entries] == ['Minute Machine', 'Tide Harbour']
+def test_the_roster_is_three_clocks_so_the_chooser_appears():
+    """Tide Harbour is appended as level 1 and Cuckoo Village as level 2 (D4: a new clock is appended, never
+    inserted). With more than one entry the engine shows its chooser; with one it starts that level directly."""
+    assert list(MANIFEST.ids) == ['minute_machine', 'tide_harbour', 'cuckoo_village']
+    assert [e.menu_name for e in MANIFEST.entries] == ['Minute Machine', 'Tide Harbour', 'Cuckoo Village']
 
 
 def test_the_committed_bundle_holds_the_committed_levels():

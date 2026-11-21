@@ -38,7 +38,9 @@ EOF
 # imports the Snowgoons scaffold (its baseline retrofit is a TODO item), so that level is an input too.
 INPUTS=(wftools wfsource/source scripts docker wflevels/snowgoons-blender wflevels/clocks-menu.manifest
         wflevels/clock_common wflevels/minute_machine wflevels/tide_harbour
-        ':(glob)wflevels/minute_machine*.iff' ':(glob)wflevels/tide_harbour*.iff' wflevels/clocks-cd.iff)
+        wflevels/cuckoo_village wflevels/cuckoo_village_layout wflevels/cuckoo_village_assets
+        ':(glob)wflevels/minute_machine*.iff' ':(glob)wflevels/tide_harbour*.iff' ':(glob)wflevels/cuckoo_village*.iff'
+        wflevels/clocks-cd.iff)
 REGENERATE_CMD="task clocks-regenerate"
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

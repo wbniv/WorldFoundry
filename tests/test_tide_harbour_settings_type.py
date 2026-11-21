@@ -26,13 +26,14 @@ def test_the_type_includes_settings_and_the_shared_clock_sheet():
     assert "int32 Cameradrift;" in (OAS / "tideharboursettings.ht").read_text()
 
 
-def test_every_registry_file_puts_the_type_last_after_sea_stars():
-    """Append-only: the position is the type id compiled into every level, so no existing id may move."""
+def test_every_registry_file_puts_the_type_right_after_sea_stars():
+    """Append-only: the position is the type id compiled into every level, so no existing id may move.
+    Tide Harbour was appended after Sea Stars; Cuckoo Village was appended after it (docs/plans/2026-11-21-cuckoo-village.md)."""
     mac = re.findall(r"^\s*OBJECTENTRY\((\w+),", (OAS / "objects.mac").read_text(), re.M)
-    assert mac[-2:] == ["SeaStarsSettings", "TideHarbourSettings"]
+    assert mac[-3:-1] == ["SeaStarsSettings", "TideHarbourSettings"]
     for name, pattern in (("objects.h", r"(\w+)_KIND"), ("objects.e", r"(\w+)_KIND"), ("objects.names", r'"(\w+)"')):
         found = re.findall(pattern, (OAS / name).read_text())
-        assert found[-2:] == ["SeaStarsSettings", "TideHarbourSettings"], name
+        assert found[-3:-1] == ["SeaStarsSettings", "TideHarbourSettings"], name
     lc = (OAS / "objects.lc").read_text().split()
     assert lc.index("tideharboursettings") == lc.index("seastarssettings") + 1
     assert '#include "tideharboursettings.hp"' in (OAS / "objects.inc").read_text()

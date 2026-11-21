@@ -1,0 +1,2 @@
+--vram-slot-width=2048
+--vram-slot-height=1024

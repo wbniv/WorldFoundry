@@ -36,6 +36,33 @@ ANativeWindow* activeWindow = nullptr;
 int surfaceWidth = 0;
 int surfaceHeight = 0;
 
+// Optional per-flavor override of one VRAM size: the flavor's assets/wf_args.txt, one `--vram-...=N` per line
+// (the aquarium app's file format). Only the clocks flavor ships one: Cuckoo Village packs its textures into a
+// 2048 x 1024 page, which the default 1024 x 1024 slot rejects (FatalError: LoadTexture ... does not fit its
+// VRAM slot). Every other flavor has no file and keeps the defaults below. Returns true and fills `out` when
+// the file has a line starting with `prefix`.
+bool vramOverride(const char* prefix, char* out, size_t capacity) {
+    if (!assets) return false;
+    AAsset* file = AAssetManager_open(assets, "wf_args.txt", AASSET_MODE_BUFFER);
+    if (!file) return false;
+    const std::string text(static_cast<const char*>(AAsset_getBuffer(file)), size_t(AAsset_getLength(file)));
+    AAsset_close(file);
+    const std::string want(prefix);
+    bool found = false;
+    for (size_t pos = 0; pos < text.size();) {
+        size_t end = text.find('\n', pos);
+        if (end == std::string::npos) end = text.size();
+        std::string line = text.substr(pos, end - pos);
+        while (!line.empty() && (line.back() == '\r' || line.back() == ' ')) line.pop_back();
+        if (line.compare(0, want.size(), want) == 0 && line.size() < capacity) {
+            std::snprintf(out, capacity, "%s", line.c_str());
+            found = true;
+        }
+        pos = end + 1;
+    }
+    return found;
+}
+
 // TankPlayer.start(-1), ClocksActivity's launcher with no LEVEL extra: leave out the positional
 // level so a shell-menu.fth bundle shows the engine's chooser, and keep the menu drawer installed.
 // docs/plans/2026-11-21-tide-harbour-clock.md, "The bundle and the chooser".
@@ -279,6 +306,16 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         char* argv[] = {arg0, slotWidth, slotHeight, permWidth, permHeight, vramWidth, vramHeight, noFps, arg1, nullptr};
         const int argc = level == kShowMenu ? 8 : 9;
         argv[argc] = nullptr;
+        // The flavor's own VRAM sizes, if it ships a wf_args.txt (argv[1..6] are slot, perm and page width/height).
+        char overrides[6][48];
+        const char* const prefixes[6] = {"--vram-slot-width=", "--vram-slot-height=", "--vram-perm-width=",
+                                         "--vram-perm-height=", "--vram-width=", "--vram-height="};
+        for (int i = 0; i < 6; ++i) {
+            if (vramOverride(prefixes[i], overrides[i], sizeof overrides[i])) {
+                argv[1 + i] = overrides[i];
+                __android_log_print(ANDROID_LOG_INFO, "wf_dream", "vram override: %s", overrides[i]);
+            }
+        }
         __argc = argc;
         __argv = argv;
         // Tank 0's overrides: the engine applies them when the level registry loads.

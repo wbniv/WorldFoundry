@@ -65,6 +65,7 @@ OBJECTSHEADER
         OBJECTENTRY(LevelRenderSettings,0)
         OBJECTENTRY(SeaStarsSettings,0)
         OBJECTENTRY(TideHarbourSettings,0)
+        OBJECTENTRY(CuckooVillageSettings,0)
 OBJECTSFOOTER
 
 @*============================================================================

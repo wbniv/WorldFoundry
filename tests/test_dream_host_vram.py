@@ -119,3 +119,25 @@ def test_aquarium_and_clocks_ranges_from_their_manifests():
     assert clocks and clocks[0] == 'minute_machine'
     host = HOST.read_text()
     assert re.search(r'level < kShowMenu \|\| level >= levels', host)
+
+
+CLOCKS_ARGS = ROOT / 'android/screensaver/src/clocks/assets/wf_args.txt'
+
+
+def test_clocks_flavor_slot_fits_every_texture_page_in_its_bundle():
+    """2026-11-21, cast1: Cuckoo Village's hillside art packs its textures into a 2048 x 1024 room page
+    (wflevels/cuckoo_village/textile.flags: PAGEX=2048), and the Dream host's default 1024 x 1024 slot
+    aborted the engine with "LoadTexture: 2048x1024 texture does not fit its 1024x1024 VRAM slot". The
+    host reads the flavor's assets/wf_args.txt for the VRAM sizes (dream_host.cc: vramOverride), and the
+    clocks flavor must ship a slot at least as wide as the widest page of a level in its roster."""
+    flags = dict(re.findall(r'(\w+)=(\d+)', (ROOT / 'wflevels/cuckoo_village/textile.flags').read_text()))
+    page_width = int(flags['PAGEX'])
+    args = dict(VRAM.findall(CLOCKS_ARGS.read_text()))
+    assert int(args['slot-width']) >= page_width, f'clocks slot {args} narrower than the {page_width} page'
+    # The override must be wired: the host reads the file and replaces argv[1..6], and every other flavor
+    # (no wf_args.txt) keeps the pinned defaults the tests above check.
+    host = HOST.read_text()
+    assert 'AAssetManager_open(assets, "wf_args.txt"' in host
+    assert re.search(r'argv\[1 \+ i\] = overrides\[i\];', host)
+    other = [p for p in (ROOT / 'android/screensaver/src').glob('*/assets/wf_args.txt') if p.parent.parent.name != 'clocks']
+    assert other == [], f'a flavor other than clocks overrides the VRAM sizes: {other}'
