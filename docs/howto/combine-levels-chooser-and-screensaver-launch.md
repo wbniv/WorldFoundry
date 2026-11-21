@@ -111,6 +111,8 @@ Two packs exist today, built the same way: **WF Aquarium** (flavor `aquarium`, `
 6. If any level's textures are larger than the Dream host's default 1024 slot, ship `assets/wf_args.txt` with `--vram-slot-width=...` for the flavor (Clocks does: the village's room page is 2048 wide). `tests/test_dream_host_vram.py` checks every page in the bundle fits.
 7. **Give every level in the roster a settings object** (next section), then run the audit.
 
+**One app, two modes.** A pack is one package that is both the app and the screensaver. A normal launch from the launcher shows the chooser menu; the Dream, the preview activity and any start with a `LEVEL` or `DREAM` extra play a level and never show the menu. The decision is one pure function, `LaunchMode`, with a unit test row for every start (`task test-aquarium-launch-mode`). The pack holds two bundles, the menu's and the autopilot's, and the menu never writes the saved choice. Aquarium does this today ([plan](../plans/2026-11-21-one-aquarium-app.md), merged 2026‑11‑21); WF Clocks follows the same shape.
+
 Single-level apps (Seahorse Grid, the Planted Tank app) are not part of this mechanism.
 
 ## 5. Give every level settings, and a way to open them
