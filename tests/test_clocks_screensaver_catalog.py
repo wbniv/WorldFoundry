@@ -63,7 +63,7 @@ def test_launcher_opens_the_chooser_without_an_extra_and_starts_the_extra_throug
     java = (JAVA / 'ClocksActivity.java').read_text()
     assert 'static final int SHOW_MENU = -1;' in java
     assert 'getIntent().getStringExtra(LevelLaunch.EXTRA_LEVEL)' in java
-    assert 'if (requested == null) player.start(SHOW_MENU);' in java
+    assert 'chooser = requested == null;' in java and 'if (chooser) player.start(SHOW_MENU);' in java
     assert 'else if (!LevelLaunch.startChosen(this, player, requested)) finish();' in java
 
 

@@ -28,6 +28,8 @@ final class TankPlayer implements SurfaceHolder.Callback {
     private static native void nativeLaunchOverride(String schema, String key, String value);
     private static native void nativePrepare();
     private static native void nativeStop();
+    private static native void nativeButtons(int mask);
+    private static native boolean nativeBackToMenu();
 
     TankPlayer(Context context) {
         view = new SurfaceView(context);
@@ -82,6 +84,15 @@ final class TankPlayer implements SurfaceHolder.Callback {
         }
         launchOverrideTriples = triples;
     }
+
+    /**
+     * The remote buttons held now, as the engine's EJ_BUTTONF_* bits (see ClocksActivity); 0 releases
+     * them. Only ClocksActivity's chooser calls it: Dreams and the other flavors never send input.
+     */
+    void buttons(int mask) { nativeButtons(mask); }
+
+    /** Back in a clock picked from the chooser: return to the chooser. False: leave the app instead. */
+    boolean backToMenu() { return nativeBackToMenu(); }
 
     void stop() {
         started = false;
