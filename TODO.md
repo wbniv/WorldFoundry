@@ -101,7 +101,6 @@
 
 - [T2] Investigate [Tripo3D studio](https://studio.tripo3d.ai/?from=landingpage_header&category=featured&model_type=all&recommended=recommended&use_case=all)
 - [T4] **Aquarium: ten more fish that school and swarm around the player's fish** — Couzin-model zones with the player as leader; Phase 0 measures the cost of ten fish in Forth on the Chromecast first. T4: the open work is tuning a fixed-point Forth behaviour that shares the rig with the player's fish (plan Phases 2 to 4); later polish and tests rank T3 in the plan. [plan](docs/plans/2026-10-01-aquarium-schooling.md)
-- [T1] **Aquarium: add `run-aquarium-menu` (desktop task).** Copy of `run-smb-menu` for `aquarium-menu-cd.iff`; headless scripted-input test through `tests/level_menu_harness.py`. Phase 1; independent of the Sea Stars merge. [plan](docs/plans/2026-11-21-aquarium-menu-and-screensaver-launch.md)
 - [T3] **Screensavers: one generic `LevelCatalog`, a manifest per package.** Aquarium roster in `aquarium-menu.manifest` with an optional third column (Dream label; `cdpack` ignores it); 3D Clocks, Seahorse and Planted get manifests of the same format; build script and tests read the manifest. Phase 2; D1 accepted; after `feat/sea-stars` merges (D5). [plan](docs/plans/2026-11-21-aquarium-menu-and-screensaver-launch.md)
 - [T3] **Screensavers: one `org.worldfoundry.screensaver.LEVEL` extra on the Aquarium, 3D Clocks, Seahorse and Planted launch activities.** One run, never saves; unknown id fails loudly; one `LevelLaunch`. D2 and D3 accepted 2026‑11‑21. Phase 3, after the roster item. [plan](docs/plans/2026-11-21-aquarium-menu-and-screensaver-launch.md)
 - [T3] **Aquarium × Homeboard and coordinator: one-run tank start.** Coordinator `level_launch_extra` and `screensaver-show level`; manifest metadata for Homeboard Stage 5; fix its "eight tanks" text. Phase 4, handoff items in both repos. [plan](docs/plans/2026-11-21-aquarium-menu-and-screensaver-launch.md)
@@ -204,6 +203,7 @@
 
 
 ## Done
+- ✅ 2026‑11‑21 — [run-aquarium-menu] `task run-aquarium-menu` runs the tank selector on the desktop; engine smoke picks Calm Betta. See [plan](docs/plans/2026-11-21-aquarium-menu-and-screensaver-launch.md).
 - ✅ 2026‑11‑15 — [dfrm-strand-debug] `dfrm_strand_test` compiles in Debug (`#undef new`/`delete`); zforth dict comment says 128 KB. See [plan](docs/plans/2026-11-14-single-desktop-build.md).
 - ✅ 2026‑11‑15 — [single-desktop-build] `task build` is CMake (`WF_DESIGNER_CHEATS`), Linux capture works; all 9 steps PASS. See [plan](docs/plans/2026-11-14-single-desktop-build.md).
 - ✅ 2026‑11‑15 — [local-ci] Timer CI runs origin's runner clone; build, arena, renderer-fresh PASS at HEAD. See [plan](docs/plans/2026-11-14-local-ci.md).

@@ -1622,6 +1622,19 @@ tasks:
           -Lwflevels/aquarium-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
         if [ -n "$RECOUT" ] && [ -f output.mp4 ]; then mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"; fi
 
+  run-aquarium-menu:
+    desc: "Run wf_game on the Aquarium tank selector (wflevels/aquarium-menu-cd.iff, run from build-aquarium-menu/, gitignored): Up/Down choose, Space starts, Backspace in a tank returns to the menu. The same bundle the Android aquarium app ships, with that app's engine flags (android/app/src/aquarium/assets/wf_args.txt: the reef tanks' 1024-wide textures need them). Extra wf_game flags after --"
+    deps: [ensure-build, build-cd-iff-aquarium-menu]
+    cmds:
+      - |
+        set -euo pipefail
+        mkdir -p build-aquarium-menu
+        cp wflevels/aquarium-menu-cd.iff build-aquarium-menu/cd.iff
+        # One source for the VRAM flags: the Android app's wf_args.txt (one flag per line).
+        mapfile -t WF_ARGS < android/app/src/aquarium/assets/wf_args.txt
+        cd build-aquarium-menu
+        LD_LIBRARY_PATH=../engine/libs DISPLAY="${DISPLAY:-:0}" ../engine/wf_game "${WF_ARGS[@]}" {{.CLI_ARGS}}
+
   video-aquarium:
     desc: "Record the aquarium steer-and-swim demo in real time (640x480, injected input, CLEAN runs only) → ~/tmp/aquarium-phase4/motion-demo.mp4 + .srt + .txt segment list. AQUARIUM_VIDEO=path overrides."
     deps: [ensure-build, aquarium-level]

@@ -49,3 +49,30 @@ def test_menu_build_includes_new_tiger_barb_task():
     import yaml
     tasks=yaml.safe_load((ROOT/'Taskfile.yml').read_text())['tasks']
     assert 'aquarium-tiger-barbs-level' in tasks['build-cd-iff-aquarium-menu']['deps']
+
+
+def test_run_aquarium_menu_task_runs_the_shipped_bundle_with_the_android_flags():
+    """Phase 1 of docs/plans/2026-11-21-aquarium-menu-and-screensaver-launch.md: the desktop twin of run-smb-menu."""
+    import yaml
+    task = yaml.safe_load((ROOT/'Taskfile.yml').read_text())['tasks']['run-aquarium-menu']
+    assert task['deps'] == ['ensure-build', 'build-cd-iff-aquarium-menu']
+    script = '\n'.join(str(c) for c in task['cmds'])
+    assert 'wflevels/aquarium-menu-cd.iff build-aquarium-menu/cd.iff' in script
+    assert 'android/app/src/aquarium/assets/wf_args.txt' in script
+    assert (ROOT/'android/app/src/aquarium/assets/wf_args.txt').is_file()
+    assert 'set -euo pipefail' in script
+
+
+def test_aquarium_menu_lists_every_tank_and_picks_the_third(tmp_path_factory):
+    """The menu logic (host build, no display) reads the real bundle, lists the tanks in manifest order and picks one."""
+    from level_menu_harness import build_host, run_host, states
+    host = build_host(tmp_path_factory.mktemp('aquarium-menu-host'))
+    bundle = ROOT/'wflevels/aquarium-menu-cd.iff'
+    out = run_host(host, [f'bundle {bundle}', 'autopick'])
+    assert out[:2] == ['TITLE WF Aquarium', 'PROMPT Choose a tank']
+    assert out[2:2+len(TITLES)] == [f'ENTRY {i} {i} {t}' for i, t in enumerate(TITLES)]
+    assert out[2+len(TITLES):] == [f'BUNDLE ok levels={len(LEVELS)} entries={len(TITLES)}', 'AUTO -1']
+    down, a = 0x1000, 0x1
+    s = states(run_host(host, [f'bundle {bundle}', 'menu 0', 'input 0 0', f'input {down:x} 16', 'input 0 32',
+                               f'input {down:x} 48', 'input 0 64', f'input {a:x} 80', f'input {a:x} 200', 'input 0 216']))
+    assert (s[-1]['done'], s[-1]['level']) == (1, 2), 'the third tank is TOC level 2 (Betta)'
