@@ -1,6 +1,6 @@
 # Minute Machine: a sixty-second chain reaction that drops the minute flap
 
-**Status: approved, 2026‑11‑21.** Will accepted every recommendation in D1 to D10 (2026‑11‑21: "D1-10: accept recommendations") and asked for it to be built ("implement / deploy / commit / push"). The engine addition that tells a script the time of day was approved first (Will, 2026‑11‑21: "yes, engine change to know TOD is pre-approved"). Phase 1 is next. Nothing is built yet.
+**Status: approved, 2026‑11‑21.** Will accepted every recommendation in D1 to D10 (2026‑11‑21: "D1-10: accept recommendations") and asked for it to be built ("implement / deploy / commit / push"). The engine addition that tells a script the time of day was approved first (Will, 2026‑11‑21: "yes, engine change to know TOD is pre-approved"). Phases 1 to 5 are built and pushed; Phase 6 (cast1) is in progress. See [What was built, and where it differs](#what-was-built-and-where-it-differs).
 
 ## Context
 
@@ -207,6 +207,22 @@ sequenceDiagram
 ```
 
 Other timepieces from the brainstorm (the orrery, the sundial, the globe) will want the date. That is a later addition in the same place, not part of this plan.
+
+## What was built, and where it differs
+
+Everything below is in `wflevels/minute_machine/`, `tests/` and `scripts/`, pushed to `2026-new-level`.
+
+| Plan | What happened |
+|---|---|
+| Phase 1 spike on a placeholder level of boxes | **Not built as a separate level.** The real level was built directly (Phases 3 and 4), so the spike's questions were answered on it: 73 animated actors pose from the clock; two-sided cards need no special handling, because each card is a closed box with art on both faces; the camera drifts on a proxy; the mailboxes stay exact across midnight. The cast1 frame-rate measurement moved to Phase 6, as planned |
+| Mailboxes `WALL_HOUR`, `WALL_MINUTE`, `WALL_SECOND` | As planned, ids 1922 to 1924, `GLOBAL_SYSTEM_MAX` 1925. Tested without an engine (`task test-wall-clock`) and in the Debug ASan engine (`tests/test_wall_clock.py`) |
+| The Forth's own sine | **Added, not in the plan:** `sin-rev ( revolutions -- sin )`, a double-precision sine in the Forth bridge (Will, 2026‑11‑21: "probably nothing is cheaper than a real sine on a real cpu's fp hw"). My first director used the older parabola, which is about 0.16 % off and put the camera 14 mm out; with `sin-rev` the whole director agrees with `timeline.py` to 0.002 mm |
+| Comb re-arm "one every 0.7 s" | 0.46 s, because 24 dominoes at 0.7 s would not finish by :52 |
+| Flap card back | Shows the digit **after** the card's own, not before |
+| Fallen flap cards | **Added:** stacked 1 cm apart in depth (`CARD_STACK`). In the first capture the fallen cards all lay in one plane and their digits z-fought |
+| Two strings | **Added:** the pail string and the spring string change length, so each is a unit mesh scaled in z |
+| Director arithmetic | Each piecewise motion is a sum of eased steps (`channels.py`); a test proves the steps equal `timeline.py` on 1 ms samples, and the Forth is generated from the same steps. The director also runs, in the real zForth VM against mocked mailboxes, against `timeline.py` (`tests/verify_minute_machine_forth.py`: 125 frames across minute, hour and midnight, worst 0.0015 mm) |
+| Camera | `CAMERA_R_PX` is 750 (7.5 m), after the first capture showed the machine filling 60 % of the width at 11 m |
 
 ## Android: a fourth Dream
 
