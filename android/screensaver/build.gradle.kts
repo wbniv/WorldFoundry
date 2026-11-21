@@ -2,6 +2,15 @@ plugins {
     id("com.android.application")
 }
 
+// docs/plans/2026-11-21-aquarium-menu-and-screensaver-launch.md, Phase 2: one roster per package.
+// A package that adds its own catalogue copies its manifest the same way, into its own flavor.
+val aquariumCatalogAssets = layout.buildDirectory.dir("generated/levelCatalog/aquarium/assets")
+val copyAquariumLevelCatalog by tasks.registering(Copy::class) {
+    from(rootProject.file("../wflevels/aquarium-menu.manifest"))
+    rename { "levels.manifest" }
+    into(aquariumCatalogAssets)
+}
+
 android {
     namespace = "org.worldfoundry.screensaver"
     compileSdk = 34
@@ -74,4 +83,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
+    // The aquarium flavor's level roster: wflevels/aquarium-menu.manifest, copied (never checked
+    // in twice) into generated assets as levels.manifest, which LevelCatalog reads at runtime.
+    sourceSets.getByName("aquarium").assets.srcDir(aquariumCatalogAssets)
 }
+
+tasks.named("preBuild") { dependsOn(copyAquariumLevelCatalog) }
