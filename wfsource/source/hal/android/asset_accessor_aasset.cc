@@ -16,6 +16,25 @@
 
 #include <android/asset_manager.h>
 
+#include <cstring>
+#include <string>
+
+namespace
+{
+// The asset the engine's "cd.iff" names. Empty: cd.iff itself, as every app had before.
+// An APK that carries two bundles (the screensaver's autopilot tanks as cd.iff and the
+// launcher menu's playable tanks as menu-cd.iff) picks one before HALStart; the game
+// (game.cc) and the UI font (ui_font_engine.cc) both open "cd.iff", so both follow it.
+// docs/plans/2026-11-21-one-aquarium-app.md.
+std::string gBundleAsset;
+}
+
+extern "C" WF_ANDROID_EXPORT void
+WFAndroidSetBundleAsset(const char* name)
+{
+    gBundleAsset = name ? name : "";
+}
+
 // native_app_entry.cc stashes app->activity->assetManager here at
 // android_main entry so this backend can grab it without threading it
 // through HALStart / _PlatformSpecificInit.
@@ -46,6 +65,8 @@ AssetHandle*
 AAssetAccessor::OpenForRead(const char* path)
 {
     assert(path);
+    if (!gBundleAsset.empty() && std::strcmp(path, "cd.iff") == 0)
+        path = gBundleAsset.c_str();
     // AASSET_MODE_RANDOM: we seek around in cd.iff based on the FORM index,
     // so the accessor must not use the (faster, streaming) unbuffered mode.
     AAsset* a = AAssetManager_open(_mgr, path, AASSET_MODE_RANDOM);

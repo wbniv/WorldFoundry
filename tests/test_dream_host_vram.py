@@ -24,9 +24,12 @@ def host_argv():
     # The level index is formatted at run time into a sized buffer (`char arg1[12];`).
     strings.update({n: '0' for n in re.findall(r'char (\w+)\[\d+\];', source)})
     argv = [strings[n] for n in entries]
-    argc = re.search(r'__argc = (\d+);', source)
-    start = re.search(r'HALStart\((\d+), argv', source)
-    return argv, int(argc.group(1)), int(start.group(1))
+    # The Dream passes every entry; the launcher menu (docs/plans/2026-11-21-one-aquarium-app.md)
+    # drops the trailing positional level. Returns the Dream's argv and both counts.
+    counts = re.search(r'const int argc = menu \? (\d+) : (\d+);', source)
+    assert counts, 'dream_host.cc: argc for the menu and the Dream not found'
+    assert '__argc = argc;' in source and re.search(r'HALStart\(argc, argv', source)
+    return argv, int(counts.group(2)), int(counts.group(1))
 
 
 def test_dream_host_vram_matches_aquarium_app():
@@ -37,8 +40,11 @@ def test_dream_host_vram_matches_aquarium_app():
 
 
 def test_dream_host_argc_counts_argv():
-    argv, argc, start = host_argv()
-    assert argc == start == len(argv), (argc, start, argv)
+    argv, dream_argc, menu_argc = host_argv()
+    assert dream_argc == len(argv), (dream_argc, argv)
+    # The menu run passes the same flags without the positional level, which is last.
+    assert menu_argc == len(argv) - 1 and argv[-1] == '0', (menu_argc, argv)
+    assert re.search(r'if \(menu\) argv\[%d\] = nullptr;' % menu_argc, HOST.read_text())
 
 
 def test_dream_host_level_index_is_decimal_and_covers_every_tank():
@@ -48,8 +54,9 @@ def test_dream_host_level_index_is_decimal_and_covers_every_tank():
     host = HOST.read_text()
     assert "'0' + level" not in host and '"0" + level' not in host
     assert re.search(r'snprintf\(arg1,\s*sizeof arg1,\s*"%d",\s*int\(level\)\)', host)
-    java = (HOST.parents[1] / 'java/org/worldfoundry/screensaver/TankChoice.java').read_text()
-    ids = re.search(r'IDS = \{(.*?)\};', java, re.S).group(1)
-    tanks = len(re.findall(r'"aquarium[a-z_]*"', ids))
+    # The roster is the manifest (TankChoice.IDS went with LevelCatalog, ec9b872e); its last index
+    # is the highest level the Dream may start.
+    manifest = (ROOT / 'wflevels/aquarium-menu.manifest').read_text()
+    tanks = len(re.findall(r'(?m)^level\s+\S+-standalone\.iff\s*\|', manifest))
     guard = re.search(r'level < 0 \|\| level > (\d+)', host)
     assert guard and int(guard.group(1)) == tanks - 1, (guard and guard.group(1), tanks)

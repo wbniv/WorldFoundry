@@ -12,11 +12,14 @@
 #include <unistd.h>
 
 #include <hal/hal.h>
+#include <hal/_input.h>
+#include <hal/android/key_map.h>
 #include <hal/android/touch_controls.h>
 #include <game/level_menu.h>
 #include <hal/phonepad/phonepad_overlay.h>
 #include <pigsys/pigsys.hp>
 #include <runtime_properties.hpp>
+#include <runtime_property_host.hpp>
 
 #include "planted_bridge.h"
 
@@ -24,6 +27,7 @@ extern "C" bool WFAndroidEglInit(ANativeWindow* window);
 extern "C" void WFAndroidEglTerm();
 extern "C" void WFAndroidSetSurfaceSize(int width, int height);
 extern "C" void WFAndroidSetHudEnabled(int enabled);
+extern "C" void WFAndroidSetBundleAsset(const char* name);   // hal/android/asset_accessor_aasset.cc
 
 namespace {
 std::atomic<bool> closing{false};
@@ -32,6 +36,34 @@ AAssetManager* assets = nullptr;
 ANativeWindow* activeWindow = nullptr;
 int surfaceWidth = 0;
 int surfaceHeight = 0;
+
+// The launcher menu (docs/plans/2026-11-21-one-aquarium-app.md). TankPlayer.MENU as the level runs
+// the playable menu bundle (assets/menu-cd.iff, the Aquarium app's aquarium-menu-cd.iff) with no
+// positional level, so its shell asks the player, and keeps the engine's menu drawer. Every other
+// level index is the Dream path, exactly as before: cd.iff, a positional level, no overlay.
+constexpr int kMenuLevel = -1;
+constexpr const char* kMenuBundleAsset = "menu-cd.iff";
+std::atomic<bool> menuMode{false};
+// Remote keys from AquariumActivity (UI thread), applied on the game thread in WFAndroidPumpEvents.
+std::atomic<uint32_t> menuButtons{0};
+std::atomic<bool> backPending{false};
+std::atomic<bool> leaveRequested{false};
+
+// Back, on the game thread, as the game app's NativeActivity host does it
+// (hal/android/native_app_entry.cc): an open settings form closes first; Back in a tank returns
+// to the menu; Back on the menu leaves (the engine exits, and TankPlayer finishes the activity).
+void applyMenuBack() {
+    if (wfprops::host().modal) {
+        wfprops::host().back();
+    } else if (levelmenu::SelectorVisible()) {
+        __android_log_write(ANDROID_LOG_INFO, "wf_dream", "Back on the menu: leaving the app");
+        leaveRequested.store(true);
+        closing.store(true);
+    } else if (levelmenu::MenuRunning()) {
+        __android_log_write(ANDROID_LOG_INFO, "wf_dream", "Back in a tank: returning to the menu");
+        levelmenu::RequestReturn();
+    }
+}
 
 // Planted Tank parameters (planted_bridge.h). Unconfigured, and so inert, for the Aquarium and
 // Seahorse flavors, which never call nativeConfigure.
@@ -96,6 +128,7 @@ extern "C" void WFAndroidRequestClose() { closing.store(true); }
 // tank's seed strip, its settings panel, the level menu) must never draw. The engine draws all of
 // it through levelmenu::Drawer(), which Display installs once at start-up, so clear it every frame
 // rather than editing the engine. Without a drawer the level menu starts level 0 (game.cc).
+// The launcher menu is the one exception: it keeps the drawer and takes the remote's keys.
 extern "C" void WFAndroidPumpEvents() {
     if (activeWindow) {
         const int width = ANativeWindow_getWidth(activeWindow);
@@ -107,7 +140,12 @@ extern "C" void WFAndroidPumpEvents() {
             surfaceHeight = height;
         }
     }
-    if (levelmenu::Drawer()) levelmenu::SetDrawer(nullptr);
+    if (menuMode.load()) {
+        HALInjectJoystickButtons(menuButtons.load());
+        if (backPending.exchange(false)) applyMenuBack();
+    } else if (levelmenu::Drawer()) {
+        levelmenu::SetDrawer(nullptr);
+    }
     plantedBridge.pump(launchOverrideSink);
 }
 extern "C" void WFAndroidTouchLayout(int, int, androidtouch::Layout* layout,
@@ -129,7 +167,27 @@ extern "C" int WFAndroidPhoneOverlayRects(int, int, const PhonepadRect** rects,
 extern "C" JNIEXPORT void JNICALL
 Java_org_worldfoundry_screensaver_TankPlayer_nativePrepare(JNIEnv*, jclass) {
     closing.store(false);
+    leaveRequested.store(false);
+    backPending.store(false);
+    menuButtons.store(0);
     plantedBridge.reset();
+}
+
+// A remote key while the launcher menu runs (UI thread). Returns true when the engine uses the key,
+// so the activity consumes it; any other key keeps its system meaning.
+extern "C" JNIEXPORT jboolean JNICALL
+Java_org_worldfoundry_screensaver_TankPlayer_nativeKey(JNIEnv*, jclass, jint keyCode, jboolean down) {
+    const uint32_t mask = WFAndroidMapKeyCode(keyCode);
+    if (!mask || !menuMode.load()) return JNI_FALSE;
+    if (down) menuButtons.fetch_or(mask);
+    else menuButtons.fetch_and(~mask);
+    return JNI_TRUE;
+}
+
+// Back released while the launcher menu runs (UI thread); applied on the game thread.
+extern "C" JNIEXPORT void JNICALL
+Java_org_worldfoundry_screensaver_TankPlayer_nativeBack(JNIEnv*, jclass) {
+    if (menuMode.load()) backPending.store(true);
 }
 
 // Called on the player thread before nativeRun, Planted flavor only, with PlantedConfig.toLine().
@@ -174,7 +232,8 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeStop(JNIEnv*, jclass) {
 extern "C" JNIEXPORT void JNICALL
 Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         JNIEnv* env, jclass, jobject manager, jobject surface, jint level, jstring logPath) {
-    if (level < 0 || level > 10) return;
+    const bool menu = level == kMenuLevel;
+    if (!menu && (level < 0 || level > 10)) return;
     if (logPath) {
         const char* path = env->GetStringUTFChars(logPath, nullptr);
         if (path) {
@@ -182,12 +241,20 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
             env->ReleaseStringUTFChars(logPath, path);
         }
     }
-    std::fprintf(stderr, "\n=== wf_dream start level %d ===\n", int(level));
-    __android_log_print(ANDROID_LOG_INFO, "wf_dream", "start level %d", int(level));
+    if (menu) {
+        std::fprintf(stderr, "\n=== wf_dream start the launcher menu (%s) ===\n", kMenuBundleAsset);
+        __android_log_print(ANDROID_LOG_INFO, "wf_dream", "start the launcher menu (%s)", kMenuBundleAsset);
+    } else {
+        std::fprintf(stderr, "\n=== wf_dream start level %d ===\n", int(level));
+        __android_log_print(ANDROID_LOG_INFO, "wf_dream", "start level %d", int(level));
+    }
     ANativeWindow* window = ANativeWindow_fromSurface(env, surface);
     if (!window) return;
     assets = AAssetManager_fromJava(env, manager);
     WFAndroidSetHudEnabled(0);
+    // Set before HALStart opens the bundle, and on every run: one process may hold both modes.
+    WFAndroidSetBundleAsset(menu ? kMenuBundleAsset : nullptr);
+    menuMode.store(menu);
     if (WFAndroidEglInit(window)) {
         activeWindow = window;
         surfaceWidth = ANativeWindow_getWidth(window);
@@ -210,16 +277,21 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         char vramHeight[] = "--vram-height=2048";
         char noFps[] = "--no-fps";
         char* argv[] = {arg0, slotWidth, slotHeight, permWidth, permHeight, vramWidth, vramHeight, noFps, arg1, nullptr};
-        __argc = 9;
+        // The menu has no positional level: the menu bundle's shell (shell-menu.fth) asks the player.
+        const int argc = menu ? 8 : 9;
+        if (menu) argv[8] = nullptr;
+        __argc = argc;
         __argv = argv;
         // Tank 0's overrides: the engine applies them when the level registry loads.
         plantedBridge.startFirstTank(launchOverrideSink);
-        HALStart(9, argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
-        std::fprintf(stderr, "wf_dream: HALStart returned\n");
+        HALStart(argc, argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
+        std::fprintf(stderr, "wf_dream: HALStart returned%s\n", leaveRequested.load() ? " (Back on the menu)" : "");
         windowReady.store(false);
         activeWindow = nullptr;
         WFAndroidEglTerm();
     }
+    menuMode.store(false);
+    menuButtons.store(0);
     assets = nullptr;
     ANativeWindow_release(window);
 }
