@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Homeboard Options for the Aquarium screensaver</title>
+<style>
+  :root {
+    --bg: #0e1116; --panel: #171c24; --panel2: #1e2530; --line: #2c3544;
+    --text: #e8edf3; --dim: #9aa6b6; --accent: #4cc2ff; --ok: #5fd08a; --warn: #ffb454; --bad: #ff6b6b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { width: 1440px; height: 900px; padding: 28px 32px; overflow: hidden; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--dim); margin: 0 0 18px; max-width: 1200px; }
+  .row { display: flex; gap: 22px; align-items: flex-start; }
+  .tv { flex: 1 1 0; background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 14px 16px 16px; min-width: 0; }
+  .cap { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+  .screen { background: #0a0d12; border: 1px solid var(--line); border-radius: 10px; padding: 14px; height: 640px; position: relative; overflow: hidden; }
+  .title { font-size: 17px; font-weight: 600; margin: 0 0 2px; }
+  .hint { color: var(--dim); font-size: 13px; margin: 0 0 10px; }
+  .field { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; }
+  .field .k { color: var(--dim); font-size: 12px; }
+  .field .v { font-size: 15px; }
+  .list { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+  .item { padding: 6px 10px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; font-size: 14px; }
+  .item:last-child { border-bottom: 0; }
+  .item.sel { background: #12324a; outline: 2px solid var(--accent); outline-offset: -2px; }
+  .item .tag { color: var(--ok); font-size: 12px; }
+  .btns { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .btn { padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel2); font-size: 13.5px; }
+  .btn.focus { outline: 2px solid var(--accent); }
+  .btn.primary { background: #123a55; border-color: #1f6a99; }
+  .note { font-size: 12.5px; color: var(--dim); margin-top: 8px; }
+  .banner { position: absolute; left: 14px; right: 14px; bottom: 14px; border-radius: 8px; padding: 9px 12px; font-size: 13.5px; }
+  .banner.info { background: #12324a; border: 1px solid #1f6a99; }
+  .banner.err { background: #3a1a1e; border: 1px solid #8a3039; }
+  .tank { position: absolute; inset: 0; background: linear-gradient(#0b3a56, #05192a 70%, #3b2f1e);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; color: #bfe7ff; font-size: 38px; letter-spacing: .04em; }
+  .tank small { display: block; font-size: 14px; color: #7fb6d6; letter-spacing: 0; text-align: center; margin-top: 6px; }
+  .legend { margin-top: 14px; color: var(--dim); font-size: 13px; }
+  .legend b { color: var(--text); }
+  .e { color: var(--bad); }
+</style>
+</head>
+<body>
+<h1>Homeboard · Screensaver · World Foundry Aquarium</h1>
+<p class="sub">Homeboard's side of the contract, drawn to show what the Aquarium app has to supply. The tank list and labels come from the app's settings document; <b>Preview</b> starts the app's preview activity for one run with <code>org.worldfoundry.screensaver.TANK</code>; <b>Use this screensaver</b> saves the choice with <code>setSetting tank:&lt;id&gt;</code>.</p>
+<div class="row">
+
+  <div class="tv">
+    <div class="cap">1 · Options, loaded</div>
+    <div class="screen">
+      <p class="title">World Foundry Aquarium</p>
+      <p class="hint">Tank. Saved: Random. Six of eleven shown.</p>
+      <div class="list">
+        <div class="item"><span>Random</span><span class="tag">In use</span></div>
+        <div class="item"><span>Clownfish</span><span></span></div>
+        <div class="item sel"><span>Jellyfish</span><span></span></div>
+        <div class="item"><span>Planted Urchin</span><span></span></div>
+        <div class="item"><span>Thai Reef</span><span></span></div>
+        <div class="item"><span>Sea Stars</span><span></span></div>
+      </div>
+      <div class="btns">
+        <span class="btn primary focus">Preview Jellyfish</span>
+        <span class="btn">Use this screensaver</span>
+        <span class="btn">Open Aquarium settings</span>
+      </div>
+      <p class="note">Preview shows Jellyfish once and changes nothing that is saved. Sea Stars also lists its own level settings (counts, speed, caustics) from the same document.</p>
+    </div>
+  </div>
+
+  <div class="tv">
+    <div class="cap">2 · Preview playing</div>
+    <div class="screen">
+      <div class="tank">Jellyfish<small>live scene from the app's preview activity</small></div>
+      <div class="banner info">OK uses this screensaver · Back cancels. The saved tank is still Random.</div>
+    </div>
+  </div>
+
+  <div class="tv">
+    <div class="cap">3 · Errors</div>
+    <div class="screen">
+      <p class="title">World Foundry Aquarium</p>
+      <p class="hint">Tank. Saved: Random.</p>
+      <div class="field"><div class="k">Settings document</div><div class="v e">Not available</div></div>
+      <p class="note">The app has not admitted Homeboard as a caller, or its settings provider did not answer. Homeboard shows the entry without options and Preview is off.</p>
+      <div class="btns"><span class="btn focus">Retry</span><span class="btn">Open Aquarium settings</span></div>
+      <div class="banner err">Could not start tank “aquarium_jelyfish”. The preview activity refused it and nothing was changed. (An unknown id is an error, never a fallback to the saved tank.)</div>
+    </div>
+  </div>
+
+</div>
+<p class="legend"><b>Two paths, one app.</b> Homeboard can already read the list and save a choice through the settings provider (<code>getCapabilities</code>, <code>setSetting</code>). What is missing is the middle one: a one-run start of a named tank. Without it, Preview has to save the tank first, which would silently change what the TV plays when idle.</p>
+</body>
+</html>
