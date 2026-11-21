@@ -93,7 +93,7 @@ const FONT = `'IBM Plex Sans Thai','Noto Sans Thai','Sarabun',system-ui,sans-ser
 function board(r, dark, bare) {      // bare: no frame, the wood runs to the edges (the river panel)
   const wood = mix('#3b2716', '#7d5a33', 1 - dark * .7), edge = mix('#170f08', '#3d2915', 1 - dark * .6), ink = '#f8efd6';
   let g = bare ? `<rect width="400" height="200" fill="${wood}"/>` : `<rect width="400" height="200" rx="10" fill="${edge}"/><rect x="6" y="6" width="388" height="188" rx="7" fill="${wood}"/>`;
-  if (dark > .05) g += bare ? `<rect width="400" height="200" fill="#ffb347" opacity="${(.2 * dark).toFixed(2)}"/>` : `<rect x="6" y="6" width="388" height="188" rx="7" fill="#ffb347" opacity="${(.2 * dark).toFixed(2)}"/>`;
+  if (dark > .05 && !bare) g += `<rect x="6" y="6" width="388" height="188" rx="7" fill="#ffb347" opacity="${(.2 * dark).toFixed(2)}"/>`;   // bare: no lamp, it dims with the panel
   g += `<line x1="16" y1="100" x2="322" y2="100" stroke="${edge}" stroke-width="3"/>`;
   const row = (y, high, e) => {
     // the mark: a water line with a triangle above it (high water) or below it (low water)

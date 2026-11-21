@@ -37,16 +37,17 @@ BODY = (
     '<b>At the top:</b> the next high water and the next low water, with time and height, and the rising or falling arrow '
     '(the <a href="tide-board.html" style="color:#9ec1ff">tide board</a>).<br><br>'
     '<b>The river is real:</b> its course from the sea to the city, drawn from OpenStreetMap.<br><br>'
-    '<b>The tower</b> marks this harbour: the Navy\'s Bangkok station, <b>50&nbsp;km up the river</b> from its mouth (measured along that line).<br><br>'
+    '<b>The tower</b> marks this harbour: the Navy\'s Bangkok station, <b>50&nbsp;km up the river</b> from its mouth (measured along that line). '
+    'It leaves the view as the map pans.<br><br>'
     '<b>The column</b> is the tide here and now, in metres, with the rising or falling arrow. The same model moves the water.<br><br>'
-    '<b>The staff at the bottom</b> is Bangkok Bar, where the Navy publishes a second table.<br><br>'
+    '<b>The staff off the mouth</b> is Bangkok Bar, where the Navy publishes a second table.<br><br>'
     '<b>Not shown as fact:</b> how long high water takes to travel from the bar to the city. Fitting the bar\'s table with the same tool '
     'would measure it; until then the travelling band is a sketch, off by default.<br><br>'
     '<b>Untested:</b> whether the engine draws a panel fixed to the screen. If not, it is a slab the camera carries.</div>'
     # controls
     '<div style="position:absolute;left:14px;top:554px;width:868px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
     '<button id="b-now">Now</button><button id="b-high">High</button><button id="b-low">Low</button><button id="b-night">Night</button>'
-    '<span style="width:8px"></span><button id="b-right" class="on">Right side</button><button id="b-left">Left side</button>'
+    '<span style="width:8px"></span><button id="b-swap">Swap now</button><button id="b-play">Run &times;60</button>'
     '<label style="margin-left:8px"><input type="checkbox" id="c-thai" checked> Thai</label>'
     '<label style="margin-left:8px"><input type="checkbox" id="c-crest"> travelling high water (sketch)</label></div>'
     '<div style="position:absolute;left:14px;top:596px;width:868px;display:flex;gap:12px;align-items:center">'
@@ -56,11 +57,12 @@ BODY = (
     '<div class="cap" style="left:14px;top:630px"><b>States</b> (the same day)</div>'
     '<div id="states" style="position:absolute;left:14px;top:654px;width:560px;display:flex;gap:16px"></div>'
     '<div class="cap" style="left:590px;top:654px;width:292px;font-size:12.5px;line-height:1.45">'
-    '<b>Where it goes.</b> A full-height panel at one side, 27% of the width (Will, 2026&#8209;11&#8209;21). The harbour is framed in the rest, '
-    'so the camera pulls back to keep the house and the tower in view (drawn here at 82%). '
-    'Left or right is still open: both are here. <b>One thing to settle:</b> a panel that never moves is against this clock\'s '
-    'burn-in rule (D10, nothing sits still). The fix proposed is small: the panel drifts a few pixels with the camera.<br><br>'
-    '<b>Credit.</b> Wherever the map is shown: &copy;&nbsp;OpenStreetMap contributors, a line in the app\'s credits.</div>'
+    '<b>Burn-in: three measures</b> (Will, 2026&#8209;11&#8209;21: "swap sides, pan the map, dim at night"). '
+    '<b>Swap sides</b> every 10&nbsp;minutes, on the clock\'s marks: the panel slides off, the harbour fills the screen for a moment, '
+    'and it slides in at the other edge. <b>Pan the map:</b> the view follows the river from near the sea to past the city and back, '
+    'one pass in 15&nbsp;minutes. <b>Dim at night:</b> about a sixth of the daytime brightness. '
+    'Press <b>Run &times;60</b> to watch all three; the intervals are proposals.<br><br>'
+    '<b>Credit.</b> &copy;&nbsp;OpenStreetMap contributors, a line in the app\'s credits.</div>'
     '<div class="cap" style="left:900px;top:650px;width:526px;font-size:12.5px;line-height:1.45">'
     '<b>Sources.</b> River: &copy; OpenStreetMap contributors (ODbL), 74 points, <code>chao-phraya-centreline.json</code>. '
     'Station position: the department\'s table (13&deg;&nbsp;44&prime;&nbsp;36&Prime;&nbsp;N, 100&deg;&nbsp;29&prime;&nbsp;25&Prime;&nbsp;E). '
@@ -71,10 +73,11 @@ SCRIPT = r"""
 const RIVER = __RIVER__;                     // [[lon, lat], ...], mouth first
 const HD = __HD__, BB = __BB__;              // [lon, lat]
 const HD_KM = __HD_KM__;                     // km up the river from the line's start
-// The map box is 240 x 400. North is up; one pixel is KMPX kilometres.
-const LAT0 = 13.43, LAT1 = 13.80, LONC = 100.541, KMPX = (LAT1 - LAT0) * 111.2 / 360, COS = Math.cos(13.65 * Math.PI / 180);
-const MX = lon => 136 + (lon - LONC) * COS * 111.2 / KMPX, MY = lat => 380 - (lat - LAT0) * 111.2 / KMPX;
-const SHOWN = RIVER.filter(p => p[1] <= LAT1 + .004);
+// The map area is 190 x 400 of the 240 x 400 box (the level column takes the rest). North is up. The view is
+// centred on a point of the river and follows it (the pan), at KMPX kilometres to the pixel.
+const COS = Math.cos(13.65 * Math.PI / 180), KMPX = 0.0762;
+let VIEW = [100.541, 13.62];
+const MX = lon => 95 + (lon - VIEW[0]) * COS * 111.2 / KMPX, MY = lat => 200 - (lat - VIEW[1]) * 111.2 / KMPX;
 const KM = [0]; for (let i = 1; i < RIVER.length; i++) KM.push(KM[i - 1] + Math.hypot((RIVER[i][0] - RIVER[i - 1][0]) * COS, RIVER[i][1] - RIVER[i - 1][1]) * 111.2);
 function along(km) { for (let i = 1; i < RIVER.length; i++) if (KM[i] >= km) { const u = (km - KM[i - 1]) / (KM[i] - KM[i - 1]); return [lerp(RIVER[i - 1][0], RIVER[i][0], u), lerp(RIVER[i - 1][1], RIVER[i][1], u)]; } return RIVER[RIVER.length - 1]; }
 const LABEL = { city: ['กรุงเทพฯ', 'Bangkok'], mouth: ['ปากน้ำ', 'Pak Nam'], gulf: ['อ่าวไทย', 'Gulf of Thailand'], km: ['กม.', 'km'], sea: ['จากทะเล', 'from the sea'] };
@@ -82,38 +85,48 @@ const L = k => LABEL[k][thai ? 0 : 1];
 const CREST_H = 2;   // ILLUSTRATIVE: hours assumed for high water to travel from the mouth to the city. Not measured.
 let crest = false;
 
-const paperOf = dark => mix('#8f8262', '#eadfc2', 1 - dark * .8);
+// Burn-in, measure 2: the map pans. The view follows the river from near the sea to past the city and back, one
+// pass in PASS_MIN minutes, read from the clock like every other pose.
+const PASS_MIN = 15, PAN_LO = 8, PAN_HI = 56;
+function panKm(t) { const u = ((t * 60) % (2 * PASS_MIN) + 2 * PASS_MIN) % (2 * PASS_MIN) / PASS_MIN, tri = u < 1 ? u : 2 - u; return lerp(PAN_LO, PAN_HI, (1 - Math.cos(Math.PI * tri)) / 2); }
+// Burn-in, measure 3: the panel dims at night, to about a sixth of its daytime brightness. The ink stays dark.
+const paperOf = dark => mix('#6a6450', '#eadfc2', 1 - dark);
+let clipN = 0;
 function riverMap(r, dark, phase, bare) {      // bare: no frame and no paper of its own (the panel supplies the paper)
-  const paper = paperOf(dark), ink = mix('#1d150c', '#3a2a18', 1 - dark), frame = mix('#170f08', '#3d2915', 1 - dark * .6);
-  const water = mix('#2c5f86', '#3f86b8', 1 - dark * .5);
+  const paper = paperOf(dark), ink = mix('#120d07', '#3a2a18', 1 - dark), frame = mix('#170f08', '#3d2915', 1 - dark * .6);
+  const water = mix('#27506f', '#3f86b8', 1 - dark);
+  VIEW = along(panKm(r.t));
+  const id = 'map' + (clipN++);
   let g = bare ? '' : `<rect width="240" height="400" rx="8" fill="${frame}"/><rect x="5" y="5" width="230" height="390" rx="5" fill="${paper}"/>`;
-  if (dark > .05 && !bare) g += `<rect x="5" y="5" width="230" height="390" rx="5" fill="#ffb347" opacity="${(.16 * dark).toFixed(2)}"/>`;
-  const d = SHOWN.map((p, i) => (i ? 'L' : 'M') + MX(p[0]).toFixed(1) + ' ' + MY(p[1]).toFixed(1)).join('');
-  g += `<path d="${d}" fill="none" stroke="${water}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>`;
+  g += `<clipPath id="${id}"><rect x="0" y="0" width="190" height="400"/></clipPath><g clip-path="url(#${id})">`;
+  const d = RIVER.map((p, i) => (i ? 'L' : 'M') + MX(p[0]).toFixed(1) + ' ' + MY(p[1]).toFixed(1)).join('');
+  g += `<path d="${d}" fill="none" stroke="${water}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`;
   // the open sea below the mouth: only a label and three ripples, because the coast was not fetched
   const m = RIVER[0];
-  for (let k = 0; k < 3; k++) g += `<path d="M${MX(m[0]) - 34 + k * 10} ${MY(m[1]) + 16 + k * 9} q6 -5 12 0 t12 0 t12 0" fill="none" stroke="${water}" stroke-width="1.6" opacity=".7"/>`;
-  g += `<text x="${MX(m[0]) + 8}" y="${MY(m[1]) + 54}" font-size="13" text-anchor="end" fill="${ink}" font-family="${FONT}" font-style="italic">${L('gulf')}</text>`;
-  g += `<text x="${MX(m[0]) - 16}" y="${MY(m[1]) + 12}" font-size="12" text-anchor="end" fill="${ink}" font-family="${FONT}">${L('mouth')}</text>`;
+  for (let k = 0; k < 3; k++) g += `<path d="M${MX(m[0]) - 34 + k * 10} ${MY(m[1]) + 18 + k * 10} q6 -5 12 0 t12 0 t12 0" fill="none" stroke="${water}" stroke-width="1.8" opacity=".7"/>`;
+  g += `<text x="${MX(m[0]) + 8}" y="${MY(m[1]) + 62}" font-size="14" text-anchor="end" fill="${ink}" font-family="${FONT}" font-style="italic">${L('gulf')}</text>`;
+  g += `<text x="${MX(m[0]) - 16}" y="${MY(m[1]) + 12}" font-size="13" text-anchor="end" fill="${ink}" font-family="${FONT}">${L('mouth')}</text>`;
   // Bangkok Bar: a tide staff
   const bx = MX(BB[0]), by = MY(BB[1]);
   g += `<line x1="${bx}" y1="${by - 9}" x2="${bx}" y2="${by + 7}" stroke="${ink}" stroke-width="2"/><line x1="${bx - 4}" y1="${by - 5}" x2="${bx + 4}" y2="${by - 5}" stroke="${ink}" stroke-width="1.5"/><line x1="${bx - 4}" y1="${by + 1}" x2="${bx + 4}" y2="${by + 1}" stroke="${ink}" stroke-width="1.5"/>`;
   // the travelling high water (a sketch): a bright band that reaches the tower as the board's high water arrives
   if (crest && r.hi) { const lead = r.hi.t - r.t; if (lead >= 0 && lead <= CREST_H) { const p = along(HD_KM * (1 - lead / CREST_H));
-    g += `<circle cx="${MX(p[0]).toFixed(1)}" cy="${MY(p[1]).toFixed(1)}" r="9" fill="#fff6c8" opacity=".85"/><circle cx="${MX(p[0]).toFixed(1)}" cy="${MY(p[1]).toFixed(1)}" r="15" fill="none" stroke="#fff6c8" opacity=".5"/>`; } }
-  // this harbour: a small tower, a lamp that breathes, and its name
-  const hx = MX(HD[0]), hy = MY(HD[1]), pulse = 6 + 3 * Math.sin(TAU * phase * .5);
+    g += `<circle cx="${MX(p[0]).toFixed(1)}" cy="${MY(p[1]).toFixed(1)}" r="10" fill="#fff6c8" opacity=".85"/><circle cx="${MX(p[0]).toFixed(1)}" cy="${MY(p[1]).toFixed(1)}" r="17" fill="none" stroke="#fff6c8" opacity=".5"/>`; } }
+  // this harbour: a small tower, a lamp that breathes, and its name (on whichever side has room)
+  const hx = MX(HD[0]), hy = MY(HD[1]), pulse = 7 + 3 * Math.sin(TAU * phase * .5), lab = hx < 86 ? [hx + 13, 'start'] : [hx - 13, 'end'];
   g += `<circle cx="${hx}" cy="${hy}" r="${pulse.toFixed(1)}" fill="none" stroke="#e0592f" stroke-width="2" opacity=".8"/>`;
   g += `<rect x="${hx - 4}" y="${hy - 13}" width="8" height="15" fill="#f4ecd6" stroke="${ink}"/><polygon points="${hx - 6},${hy - 13} ${hx},${hy - 22} ${hx + 6},${hy - 13}" fill="#c9a04a" stroke="${ink}"/>`;
-  g += `<text x="${hx - 12}" y="${hy - 8}" font-size="15" font-weight="700" text-anchor="end" fill="${ink}" font-family="${FONT}">${L('city')}</text>`;
-  g += `<text x="${hx - 12}" y="${hy + 7}" font-size="10" text-anchor="end" fill="${ink}" font-family="${FONT}">${dg(50)} ${L('km')} ${L('sea')}</text>`;
-  // scale bar and north
+  g += `<text x="${lab[0]}" y="${hy - 8}" font-size="15" font-weight="700" text-anchor="${lab[1]}" fill="${ink}" font-family="${FONT}">${L('city')}</text>`;
+  g += `<text x="${lab[0]}" y="${hy + 7}" font-size="10" text-anchor="${lab[1]}" fill="${ink}" font-family="${FONT}">${dg(50)} ${L('km')} ${L('sea')}</text>`;
+  g += `</g>`;
+  // scale bar and north, on the paper so the river passing under them does not hide them
   const ten = 10 / KMPX;
+  g += `<rect x="8" y="370" width="${ten + 62}" height="24" fill="${paper}" opacity=".85"/><rect x="12" y="12" width="24" height="30" fill="${paper}" opacity=".85"/>`;
   g += `<line x1="16" y1="382" x2="${16 + ten}" y2="382" stroke="${ink}" stroke-width="2"/><line x1="16" y1="378" x2="16" y2="386" stroke="${ink}"/><line x1="${16 + ten}" y1="378" x2="${16 + ten}" y2="386" stroke="${ink}"/><text x="${20 + ten}" y="386" font-size="11" fill="${ink}" font-family="${FONT}">${dg(10)} ${L('km')}</text>`;
-  g += `<polygon points="24,20 30,38 24,34 18,38" fill="${ink}"/>`;
+  g += `<polygon points="24,18 30,36 24,32 18,36" fill="${ink}"/>`;
   // the level column: 0 to 3.5 m, the pointer at the tide now, the arrow above it
   const cy = v => 330 - v / 3.5 * 250;
-  g += `<rect x="205" y="${cy(3.5)}" width="9" height="250" fill="${mix('#6b5a3c', '#cdbf9a', 1 - dark * .6)}" stroke="${ink}"/><rect x="205" y="${cy(r.now).toFixed(1)}" width="9" height="${(330 - cy(r.now)).toFixed(1)}" fill="${water}"/>`;
+  g += `<rect x="205" y="${cy(3.5)}" width="9" height="250" fill="${mix('#57503e', '#cdbf9a', 1 - dark)}" stroke="${ink}"/><rect x="205" y="${cy(r.now).toFixed(1)}" width="9" height="${(330 - cy(r.now)).toFixed(1)}" fill="${water}"/>`;
   for (let v = 1; v <= 3; v++) g += `<line x1="200" y1="${cy(v)}" x2="214" y2="${cy(v)}" stroke="${ink}"/><text x="197" y="${cy(v) + 5}" font-size="13" font-weight="700" text-anchor="end" fill="${ink}" font-family="${FONT}">${dg(v)}</text>`;
   g += `<polygon points="217,${cy(r.now).toFixed(1)} 229,${(cy(r.now) - 6).toFixed(1)} 229,${(cy(r.now) + 6).toFixed(1)}" fill="#e0592f"/>`;
   g += `<g transform="translate(210,52) rotate(${r.rising ? 0 : 180})"><polygon points="0,-16 10,0 4,0 4,16 -4,16 -4,0 -10,0" fill="${r.rising ? '#3f9a4a' : '#d9643a'}"/></g>`;
@@ -124,19 +137,27 @@ function riverMap(r, dark, phase, bare) {      // bare: no frame and no paper of
 // No border (Will, 2026-11-21: "it needs no border"): the wood band and the paper run to the panel's edges.
 function panel(r, dark, phase) {
   return `<rect width="300" height="630" fill="${paperOf(dark)}"/>` +
-    (dark > .05 ? `<rect width="300" height="630" fill="#ffb347" opacity="${(.16 * dark).toFixed(2)}"/>` : '') +
     `<g transform="scale(.75)">${board(r, dark, true)}</g>` +
     `<g transform="translate(6,150) scale(1.2)">${riverMap(r, dark, phase, true)}</g>`;
 }
-let place = 'right', hour = 16.5, t0 = performance.now();
-// The harbour is framed in the other 820 pixels. The house, the pier and the tower span more than that, so the
-// camera pulls back: the scene is drawn at 82%, with more sky above it. The engine's framing is its own to choose.
+
+// Burn-in, measure 1: the panel swaps sides every SWAP_MIN minutes, on the clock's marks. It slides off its edge,
+// the harbour fills the screen for a moment, and it slides in at the other edge. pos is 0 at the right, 1 at the left.
+const SWAP_MIN = 10, SLIDE_S = 2.6;
+let hour = 16.5, t0 = performance.now(), flip = 0, pos = 0, playing = false;
+const wantPos = h => (Math.floor(h * 60 / SWAP_MIN + 1e-9) + flip) % 2;
+// The harbour is framed in what the panel leaves. The house, the pier and the tower span more than 820 pixels, so
+// the camera pulls back to 82% beside the panel and comes forward as it slides away. The engine's framing is its own.
 function frame(scene, t, r, phase) {
-  const dark = clamp(sky(t).glow), left = place === 'left', x0 = left ? 300 : 0, px = left ? 0 : 820;
-  return `<defs><clipPath id="view"><rect x="${x0}" y="0" width="820" height="630"/></clipPath></defs>` +
-    `<rect x="${x0}" y="0" width="820" height="630" fill="${sky(t).top}"/>` +
-    `<g clip-path="url(#view)"><g transform="translate(${x0 - 49},113) scale(.82)">${scene}</g></g>` +
-    `<g transform="translate(${px},0)">${panel(r, dark, phase)}</g>`;
+  const dark = clamp(sky(t).glow), e = pos * pos * (3 - 2 * pos);
+  const rightVis = 300 * clamp(1 - e * 2), leftVis = 300 * clamp(e * 2 - 1), avail = 1120 - rightVis - leftVis;
+  const s = lerp(.82, 1, (avail - 820) / 300), tx = leftVis + (avail - 1120 * s) / 2, ty = 630 * (1 - s);
+  const p = panel(r, dark, phase);
+  return `<defs><clipPath id="view"><rect x="${leftVis.toFixed(1)}" y="0" width="${avail.toFixed(1)}" height="630"/></clipPath></defs>` +
+    `<rect x="${leftVis.toFixed(1)}" y="0" width="${avail.toFixed(1)}" height="630" fill="${sky(t).top}"/>` +
+    `<g clip-path="url(#view)"><g transform="translate(${tx.toFixed(1)},${ty.toFixed(1)}) scale(${s.toFixed(4)})">${scene}</g></g>` +
+    (rightVis > 0 ? `<g transform="translate(${(1120 - rightVis).toFixed(1)},0)">${p}</g>` : '') +
+    (leftVis > 0 ? `<g transform="translate(${(leftVis - 300).toFixed(1)},0)">${p}</g>` : '');
 }
 const read = t => ({ ...reading(t), t });
 const DATE = () => new Date(Date.UTC(2026, 0, 1) + TIDE_DAY * 86400e3).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
@@ -151,29 +172,35 @@ function pick() { const day = turns(0, 24).kept; return { high: (day.find(e => e
 let P = null;
 function states() {
   P = pick(); const keep = crest;
-  const list = [['High water', P.high % 24, false], ['Low water', P.low % 24, false], ['Night', P.night, false], ['On its way (sketch)', (P.high - 1) % 24, true]];
+  const list = [['High water', P.high % 24, false], ['Low water', P.low % 24, false], ['Night: dimmed', P.night, false], ['On its way (sketch)', (P.high - 1) % 24, true]];
   $('states').innerHTML = list.map(([name, h, c]) => { crest = c; const s = `<div style="width:120px"><svg viewBox="0 0 300 630" width="100" height="210">${panel(read(h), clamp(sky(h).glow), 0)}</svg>` +
     `<div style="color:#aeb4c0;font-size:12px;margin-top:2px;line-height:1.3">${name} <span style="color:#8d94a3">(${hhmm(h)})</span></div></div>`; return s; }).join('');
   crest = keep;
 }
-function set(h) { hour = ((h % 24) + 24) % 24; draw(); }
+function set(h) { hour = ((h % 24) + 24) % 24; }
 function all() { states(); draw(); }
 $('b-now').onclick = () => { const d = new Date(Date.now() + 7 * 3600e3); TIDE_DAY = Math.floor((d - Date.UTC(2026, 0, 1)) / 86400e3); hour = d.getUTCHours() + d.getUTCMinutes() / 60; all(); };
 $('b-high').onclick = () => set(P.high);
 $('b-low').onclick = () => set(P.low);
 $('b-night').onclick = () => set(P.night);
-const where = p => { place = p; $('b-right').className = p === 'right' ? 'on' : ''; $('b-left').className = p === 'left' ? 'on' : ''; draw(); };
-$('b-right').onclick = () => where('right');
-$('b-left').onclick = () => where('left');
+$('b-swap').onclick = () => { flip ^= 1; };
+$('b-play').onclick = () => { playing = !playing; $('b-play').className = playing ? 'on' : ''; };
 $('c-thai').onchange = e => { thai = e.target.checked; all(); };
-$('c-crest').onchange = e => { crest = e.target.checked; draw(); };
+$('c-crest').onchange = e => { crest = e.target.checked; };
 $('scrub').oninput = e => set(parseFloat(e.target.value));
 const hd = /d=(\d+)/.exec(location.hash), hh = /h=(\d+(?:\.\d+)?)/.exec(location.hash);
 if (hd) TIDE_DAY = parseInt(hd[1], 10);
 if (hh) hour = parseFloat(hh[1]); else { const d = new Date(Date.now() + 7 * 3600e3); hour = d.getUTCHours() + d.getUTCMinutes() / 60; }
-if (/place=left/.test(location.hash)) place = 'left';
-all(); where(place);
-(function loop() { if (document.activeElement !== $('scrub')) draw(); setTimeout(() => requestAnimationFrame(loop), 120); })();
+pos = wantPos(hour);                 // no slide on arrival: the page opens with the panel where the clock puts it
+all();
+let last = performance.now();
+(function loop() {
+  const now = performance.now(), dt = Math.min(.1, (now - last) / 1000); last = now;
+  if (playing) set(hour + dt * 60 / 3600);                       // Run x60: one second is one minute
+  const want = wantPos(hour);
+  if (pos !== want) pos = want > pos ? Math.min(want, pos + dt / SLIDE_S) : Math.max(want, pos - dt / SLIDE_S);
+  draw(); setTimeout(() => requestAnimationFrame(loop), 40);
+})();
 document.documentElement.dataset.ready = '1';
 """
 
