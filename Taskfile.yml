@@ -1790,11 +1790,37 @@ tasks:
     cmds:
       - bash wflevels/minute_machine/build.sh
 
+  tide-harbour-level:
+    desc: "Build the Tide Harbour level (Blender container -> wflevels/tide_harbour-standalone.iff, the committed output); plan docs/plans/2026-11-21-tide-harbour-clock.md, Verification 2"
+    cmds:
+      - bash wflevels/tide_harbour/build.sh
+
+  test-tide-harbour:
+    desc: "Tide Harbour without the engine, in the Linux container: the model (tide against the printed table, sunrise and sunset against five published times, the hands, the options), the geometry (budget, winding, colour slots) and the director in the real zForth VM against the model; plan docs/plans/2026-11-21-tide-harbour-clock.md, Verification 1"
+    cmds:
+      - scripts/in-linux-container.sh python3 -m pytest -q tests/test_tide_harbour_timeline.py tests/test_tide_harbour_parts.py tests/test_tide_harbour_forth.py tests/test_tide_harbour_level.py tests/test_tide_harbour_settings.py tests/test_tide_constants.py
+
+  check-tide-harbour:
+    desc: "Tide Harbour on the desktop engine (Linux container, Debug engine, xvfb): the director against the model at eight dates and times, and every value of every setting written over the debug bridge (scripts/check-tide-harbour.py --compare --options); plan Verification 3 and 13"
+    cmds:
+      - scripts/in-linux-container.sh scripts/build-wf-game-container.sh --dev
+      - WF_CONTAINER_ENV="WF_GAME=/build/wf-game-dev/src/engine/wf_game" scripts/in-linux-container.sh bash -c 'timeout 1500 xvfb-run -a -s "-screen 0 1280x720x24" python3 scripts/check-tide-harbour.py --compare --options'
+
   clocks-bundle:
     desc: "Pack the WF Clocks bundle: every clock of wflevels/clocks-menu.manifest, in manifest order, with shell-menu.fth and the MENU chunk, into wflevels/clocks-cd.iff, linked as android/screensaver/src/clocks/assets/cd.iff (Linux container; a manifest id with no built level stops it). Plan docs/plans/2026-11-21-tide-harbour-clock.md"
-    deps: [minute-machine-level]
+    deps: [minute-machine-level, tide-harbour-level]
     cmds:
       - scripts/in-linux-container.sh bash -c 'set -euo pipefail; cargo build --release --quiet --manifest-path wftools/cdpack-rs/Cargo.toml; python3 scripts/pack-clocks-bundle.py'
+
+  clocks-regenerate:
+    desc: "Rebuild every clock of wflevels/clocks-menu.manifest and wflevels/clocks-cd.iff in the Blender container, writing the committed wflevels/ outputs; commit what changes. task clocks-check verifies them (plan docs/plans/2026-11-21-tide-harbour-clock.md, Q12)"
+    cmds:
+      - bash scripts/clocks-levels.sh regenerate
+
+  clocks-check:
+    desc: "Check the committed WF Clocks outputs are fresh: rebuild HEAD's inputs in a scratch copy (build-docker/level-check/) and compare every tracked file, as task aquarium-check does; fails listing the stale files: task clocks-check [-- --ref REF --keep]"
+    cmds:
+      - bash scripts/clocks-levels.sh check {{.CLI_ARGS}}
 
   build-clocks-apk:
     desc: "WF Clocks APK (org.worldfoundry.clocks: every clock, the engine chooser, the Dream) as a Release build (CMake Release: -O3 + thin LTO; debug-keystore signed for sideload) for arm64-v8a and armeabi-v7a (the Chromecasts need armeabi-v7a; the Pixel and the tablet arm64-v8a), checked in the APK. Builds the levels, packs the bundle, then offline Gradle. Lands at android/screensaver/build/outputs/apk/clocks/release/screensaver-clocks-release.apk"
