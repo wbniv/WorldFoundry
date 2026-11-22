@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets;
 
 /** Small shell-only contract for the coordinator's owned settings workflow. */
 public final class TankSettingsProvider extends ContentProvider {
-    private static final String AUTHORITY = "org.worldfoundry.screensaver.settings";
+    private static final String AUTHORITY = "org.worldfoundry.game.aquarium.settings";   // the manifest says ${applicationId}.settings
     static final String ORIENTATION = "orientation";
 
     @Override
