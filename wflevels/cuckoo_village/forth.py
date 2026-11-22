@@ -79,7 +79,20 @@ def _deform_words(ix: Dict[str, int]) -> List[str]:
     return out
 
 
-def director_script(ix: Dict[str, int], fields: Dict[str, int] = None, flames: str = None) -> str:
+def _study_words(ix: Dict[str, int], study: Dict) -> List[str]:
+    """The near study (flicker plan, 'Judging them by eye'): a fixed camera beside one pine, and the flicker driven by the level clock (mailbox
+    1906, seconds) instead of the wall clock, so stepped desktop frames are deterministic and 1/30 s apart. Builds made for the study only."""
+    cx, cy, cz = study["cam"]
+    lx, ly, lz = study["look"]
+    cs, lk, cam = ix["cs_wide"], ix["LookAt"], ix["Camera"]
+    # The Camera actor eases toward cs_wide far too slowly to arrive in a stepped capture, so the study also writes the Camera's own position and
+    # its heading (c in revolutions, forward = (sin c, cos c); 0 looks along +Y) and pitch (b = 0 level): the study camera stands 1.5 m outside one candle, looking at it.
+    return [": cv-study-clock  1906 cv@ 60 cv-mod cv-sc cv! ;",
+            f": cv-study  {n(cx)} {cs} cv-wx {n(cy)} {cs} cv-wy {n(cz)} {cs} cv-wz  {n(lx)} {lk} cv-wx {n(ly)} {lk} cv-wy {n(lz)} {lk} cv-wz  "
+            f"{n(cx)} {cam} cv-wx {n(cy)} {cam} cv-wy {n(cz)} {cam} cv-wz  0 {cam} cv-wb {n(study.get('heading', 0.0))} {cam} cv-wc ;"]
+
+
+def director_script(ix: Dict[str, int], fields: Dict[str, int] = None, flames: str = None, study: Dict = None) -> str:
     """fields: settings label -> field index in CuckooVillageSettings (the catalog's index); None = made-up, for tests."""
     check_names()
     mode = flames or os.environ.get("CANDLE_FLAMES", "static")
@@ -213,11 +226,13 @@ def director_script(ix: Dict[str, int], fields: Dict[str, int] = None, flames: s
         "  cv-mi cv@ cv-sc cv@ 60 / + 60 / cv-sgn * " + f"{ix['minute_hand']} cv-wb",
         "  cv-hr cv@ 12 cv-mod cv-mi cv@ 60 / + cv-sc cv@ 3600 / + 12 / cv-sgn * " + f"{ix['hour_hand']} cv-wb ;",
         f": cv-vis  cv-s-bavaria-mode if 1 else 0 then {tl.BAVARIA_CELL} cv!  cv-s-bavaria-mode if 0 else 1 then {tl.CLASSIC_CELL} cv! ;",
+        *(_study_words(ix, study) if study else []),
         ": cv-tick",
         "  INDEXOF_WALL_SECOND cv@ cv-sc cv!  INDEXOF_WALL_HOUR cv@ cv-hr cv!  INDEXOF_WALL_MINUTE cv@ cv-mi cv!",
         "  cv-mi cv@ 60 * cv-sc cv@ + cv-tm cv!",
         "  cv-hr cv@ 3600 * cv-tm cv@ + cv-sod cv!",
-        "  cv-hands cv-figs cv-bird cv-wins cv-candles cv-flames " + ("cv-deform " if mode == "deform" else "") + "cv-flowers cv-cam cv-vis ;",
+        "  cv-hands cv-figs cv-bird cv-wins cv-candles " + ("cv-study-clock " if study else "") + "cv-flames " + ("cv-deform " if mode == "deform" else "")
+        + "cv-flowers cv-cam " + ("cv-study " if study else "") + "cv-vis ;",
         "cv-tick",
     ]
     return "\n".join(L) + "\n"

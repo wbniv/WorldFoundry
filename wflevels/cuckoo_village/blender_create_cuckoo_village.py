@@ -321,7 +321,20 @@ indices = {o.name: i + 1 for i, o in enumerate(objects)}
 for names in (tl.FIG_NAMES, tl.FIG_B_NAMES):
     for a, b in zip(names, names[1:]):
         assert indices[b] - indices[a] == 1, 'the four figures of a set must be contiguous'
-objs['Director']['wf_Script'] = forth.director_script(indices, settings_fields)
+STUDY = None
+if os.environ.get('CANDLE_STUDY'):
+    # the near study (flicker plan, 'Judging them by eye'): a fixed camera on the village-camera side (-Y) of one pine, looking at its candles
+    # from about 1.5 m past the nearest of them; the flicker follows the level clock (forth.py), so stepped frames are deterministic
+    study_i = int(os.environ['CANDLE_STUDY'])
+    study_tree = objs[f"pine_{study_i + 1:02d}"]
+    base = cd.candle_bases(study_i, tuple(study_tree.location), study_tree.rotation_euler.z, study_tree.scale.x)[int(os.environ.get('CANDLE_STUDY_CANDLE', '6'))]
+    outx, outy = base[0] - study_tree.location.x, base[1] - study_tree.location.y
+    norm = math.hypot(outx, outy)
+    dist = float(os.environ.get('CANDLE_STUDY_DISTANCE', '1.5'))
+    cam = (base[0] + outx / norm * dist, base[1] + outy / norm * dist, base[2] + cd.STICK_HEIGHT + 0.05)
+    look = (base[0], base[1], base[2] + cd.STICK_HEIGHT + 0.04)
+    STUDY = dict(cam=cam, look=look, heading=(math.atan2(look[0] - cam[0], look[1] - cam[1]) / math.tau) % 1.0)
+objs['Director']['wf_Script'] = forth.director_script(indices, settings_fields, study=STUDY)
 (HERE / 'actor-map.json').write_text(json.dumps(dict(indices=indices, reference=REFERENCE), indent=1) + '\n')
 print(f'{TAG} {len(objects)} actors')
 bpy.ops.wf.export_level(filepath=str(HERE / 'cuckoo_village.lev'))
