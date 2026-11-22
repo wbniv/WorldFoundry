@@ -73,16 +73,25 @@ def test_every_box_has_edelweiss_and_a_yellow_heart_and_its_own_flowers():
             assert not parts["bloom_red"][1], i                 # no red on a petunia box
 
 
-def test_a_geranium_box_has_florets_of_ten_triangles_and_stays_inside_the_petunia_budget():
+def test_a_geranium_box_is_round_umbels_of_five_triangle_florets_inside_the_budget():
     box = fl.box_flowers(0, "full")                              # box 0 is a geranium box
     assert fl.box_kind(0) == "geranium"
     q = fl.QUALITY["full"]
-    florets = q["g_plants"] * q["g_florets"] + q["g_vines"] * q["vine_blooms"]          # 21: ten petal triangles each
-    buds = q["g_plants"] * q["g_buds"]                                                 # 5: four triangles each
+    florets = q["g_plants"] * q["g_umbel"] + q["g_vines"] * sum(q["g_ivy"])             # 5 x 7 + 2 x 9 = 53
     petals = sum(len(box[n][1]) for n in ("bloom_red", "bloom_magenta", "bloom_white"))
-    assert petals == 10 * florets + 4 * buds == 230
+    assert petals == 5 * florets == 265
     assert fl.triangle_count(box) <= FULL_PER_BOX
     assert fl.triangle_count(fl.box_flowers(1, "full")) <= FULL_PER_BOX
+
+
+def test_each_umbel_floret_sits_on_a_dome_so_the_head_reads_as_a_ball():
+    """Every floret of a plant's head is within one dome radius (plus a floret) of the head's centre and the head has a top floret."""
+    b = fl.Builder()
+    import random
+    fl.Builder.umbel(b, "bloom_red", (0.0, 0.0, 0.0), (0.0, -0.55, 0.83), 0.034, 7, 0.017, random.Random(1))
+    verts, faces = b.parts["bloom_red"]
+    assert len(faces) == 7 * 5
+    assert max(math.sqrt(x * x + y * y + z * z) for x, y, z in verts) <= 0.034 + 0.017 + 1e-9
 
 
 def test_the_soil_sits_above_the_box_top_so_it_shows():

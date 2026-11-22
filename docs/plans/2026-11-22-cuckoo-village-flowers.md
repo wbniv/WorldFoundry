@@ -12,14 +12,14 @@ Measured today with [`flowers_prototype.py`](../../wflevels/cuckoo_village_asset
 
 ## Approach
 
-**Geometry.** [`flowers.py`](../../wflevels/cuckoo_village_assets/flowers.py) builds one box of flowers as plain triangles per material, in code, so it is unit-tested without Blender ([`test_cuckoo_village_flowers.py`](../../tests/test_cuckoo_village_flowers.py), 10 tests passing). **One box in three is a geranium box** (boxes 0, 3, 6 and so on: 9 of the 26), the other 17 are petunia boxes, and every box has a soil bed and edelweiss. A box holds:
+**Geometry.** [`flowers.py`](../../wflevels/cuckoo_village_assets/flowers.py) builds one box of flowers as plain triangles per material, in code, so it is unit-tested without Blender ([`test_cuckoo_village_flowers.py`](../../tests/test_cuckoo_village_flowers.py), 11 tests passing). **One box in three is a geranium box** (boxes 0, 3, 6 and so on: 9 of the 26), the other 17 are petunia boxes, and every box has a soil bed and edelweiss. A box holds:
 
 - a **soil bed**, a four-triangle mound just above the box top;
 - **2 edelweiss tufts** nearer the ends, each with narrow silver leaves and two stems ending in a star (both kinds of box);
 - on a **petunia box**, 3 mounded petunias along the middle (three round leaves and three blooms each) and 4 trailing petunia stems that arch over the front rim and hang down the front (two leaves and three blooms each);
-- on a **geranium box**, 5 upright (zonal) geraniums along the middle (three round leaves, three florets and a bud each) and 2 trailing ivy geranium stems that hang down the front (two leaves and three florets each). The ivy geranium is the hanging flower on Bavarian balconies; the trailing stems give the street camera a hanging mass of colour on both kinds of box.
+- on a **geranium box**, 5 upright (zonal) geraniums along the middle and 2 trailing ivy geranium stems that hang down the front. An upright geranium is a thick stem with four big round leaves spiralling up it, topped by a dense round **umbel**: seven small florets packed on a dome, so from a distance the head is one ball of colour, as a real zonal geranium's is. An ivy geranium has pointed ivy-shaped leaves and two loose heads of five and four florets on the hanging stem. The ivy geranium is the hanging flower on Bavarian balconies; the trailing stems give the street camera a hanging mass of colour on both kinds of box.
 
-A **petunia bloom** is a funnel: ten petal triangles round a recessed rim of five lobes, plus five triangles of yellow throat (15 triangles). A **geranium floret** is five petals as a ten-point star cupped towards the viewer, with a four-triangle yellow heart (14 triangles). An **edelweiss head** is a flat star of seven pointed felty bracts (14 triangles) round a five-triangle yellow heart (19 triangles). Petunias rotate through magenta, violet and white; geraniums are mostly red, with pink and white ones among them. Everything is seeded by the box number, so a rebuild gives the same flowers.
+A **petunia bloom** is a funnel: ten petal triangles round a recessed rim of five lobes, plus five triangles of yellow throat (15 triangles). A **geranium floret** is five petals as a cupped pentagon (5 triangles); a head packs 7 of them on a dome (35 triangles). An **edelweiss head** is a flat star of seven pointed felty bracts (14 triangles) round a five-triangle yellow heart (19 triangles). Petunias rotate through magenta, violet and white; geraniums are mostly red, with pink and white ones among them. Everything is seeded by the box number, so a rebuild gives the same flowers.
 
 **The setting.** A new field, **Detailed flowers** (Off / On, default On), is appended to `CuckooVillageSettings`, a live field like the other six: it shows in the hold-A form on the TV and in the phone's Dream form. On shows the petunias and edelweiss. Off shows today's blocks. It exists so that one APK can be measured both ways: the same build, the same device, the same camera lap, with only this field changed. Whether it stays as a permanent option or is retired once the flowers are accepted is a decision for Will (see Out of scope).
 
@@ -32,7 +32,7 @@ A **petunia bloom** is a funnel: ten petal triangles round a recessed rim of fiv
 
 **Why one actor of flowers.** One baked actor costs 10 draw calls for all 26 boxes. One actor per cottage would cost 13 × 10 = 130. Triangles are cheap on this GPU and draw calls are not, so I chose the single actor, which gives up per-cottage culling. If the profiling says that was the wrong call, the fallback is four actors by quarter of the village (40 draw calls).
 
-**Fallback set.** `QUALITY["lean"]` is the same flowers with fewer parts (332 triangles on a petunia box instead of 649, 308 on a geranium box instead of 680: for example 2 mounds of 3 blooms, 2 vines of 2 blooms and 2 tufts of 1 head on a petunia box). It is a switch in code, not a setting. It is used only if the profiling gate fails (see Profiling).
+**Fallback set.** `QUALITY["lean"]` is the same flowers with fewer parts (332 triangles on a petunia box instead of 649, 325 on a geranium box instead of 697: for example 2 mounds of 3 blooms, 2 vines of 2 blooms and 2 tufts of 1 head on a petunia box). It is a switch in code, not a setting. It is used only if the profiling gate fails (see Profiling).
 
 Other files that change with the new field: `cuckoovillagesettings.oas` (+ the regenerated `.oad` and `.ht`), `timeline.py` (`SETTINGS_DEFAULTS` and the two cell numbers, 227 and 228, after the flame cells), the phone's capabilities asset (`scripts/gen-settings-capabilities.py` regenerates it from the `.oad`), and `test_cuckoo_village_settings.py` and `test_cuckoo_village_settings_effect.py` (seven fields instead of six).
 
@@ -61,7 +61,7 @@ flowchart LR
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Full: proposal, 649 to 680 triangles a box
+    [*] --> Full: proposal, 649 to 697 triangles a box
     Full --> Lean: profiling gate fails
     Lean --> Trimmed: gate still fails
     Trimmed --> Quarters: gate still fails
@@ -79,10 +79,10 @@ Counted from the code, not estimated (a test enforces the full set at 700 trian
 
 | | Today | Full (proposal) | Lean (fallback) |
 |---|---|---|---|
-| Triangles in one box | about 164 (14 cubes) | 649 (petunia), 680 (geranium) | 332 (petunia), 308 (geranium) |
-| Triangles in all 26 boxes (17 petunia, 9 geranium) | 4,264 | 17,153 | 8,416 |
+| Triangles in one box | about 164 (14 cubes) | 649 (petunia), 697 (geranium) | 332 (petunia), 325 (geranium) |
+| Triangles in all 26 boxes (17 petunia, 9 geranium) | 4,264 | 17,306 | 8,569 |
 | Cottage mesh (shared by 13) | 1,724 | 1,396 | 1,396 |
-| Whole level, setting On, about | 70,964 | 83,853 (+18.2 %) | 75,116 (+5.9 %) |
+| Whole level, setting On, about | 70,964 | 84,006 (+18.4 %) | 75,269 (+6.1 %) |
 | Whole level, setting Off | 70,964 | 70,964 (same blocks, as a separate actor) | 70,964 |
 | Draw calls added, On | 0 (shares the house's) | 10 | 10 |
 | Actors added | 0 | 2 (flowers and blocks) | 2 |
@@ -148,13 +148,13 @@ All ten are flat colours (Base Color only, no texture). "Per piece" is the trian
 
 | Material | Colour | Used for | Double-sided | Per piece | Pieces per box | Total |
 |---|---|---|---|---|---|---|
-| `bloom_red` | #C7120F | Geranium petals | yes | 10 per floret, 4 per bud | 4.4 florets, 1.0 buds | 1,248 |
-| `bloom_magenta` | #CC1775 | Petunia petals, and the pink geraniums | yes | 10 per bloom or floret, 4 per bud | 5.4 blooms or florets, 0.3 buds | 1,446 |
+| `bloom_red` | #C7120F | Geranium petals | yes | 5 per floret | 11.1 florets | 1,440 |
+| `bloom_magenta` | #CC1775 | Petunia petals, and the pink geraniums | yes | 10 per petunia bloom, 5 per geranium floret | 3.9 blooms, 3.8 florets | 1,515 |
 | `bloom_violet` | #6E30B2 | Petunia petals | yes | 10 per bloom | 5.0 blooms | 1,290 |
-| `bloom_white` | #F5F2EB | Petunia petals, and the white geraniums | yes | 10 per bloom or floret, 4 per bud | 6.2 blooms or florets, 0.3 buds | 1,656 |
-| `flower_centre` | #F7CC29 | Petunia throats, geranium hearts, edelweiss hearts | yes | 5 per throat or edelweiss heart, 4 per geranium heart | 17.7 of 5, 7.3 of 4 | 3,061 |
+| `bloom_white` | #F5F2EB | Petunia petals, and the white geraniums | yes | 10 per petunia bloom, 5 per geranium floret | 4.8 blooms, 3.5 florets | 1,710 |
+| `flower_centre` | #F7CC29 | Petunia throats and edelweiss hearts | yes | 5 per throat or heart | 17.7 | 2,305 |
 | `edelweiss_felt` | #DBDBC9 | Edelweiss bracts | yes | 14 per head | 4.0 heads | 1,456 |
-| `leaf_green` | #2B6E24 | Petunia and geranium leaves | yes | 6 per leaf | 17.7 leaves | 2,760 |
+| `leaf_green` | #2B6E24 | Petunia and geranium leaves | yes | 6.6 on average (6 petunia, 8 upright geranium, 5 ivy geranium) | 19.4 leaves | 3,354 |
 | `leaf_silver` | #809978 | Edelweiss leaves | yes | 4 per leaf | 6.0 leaves | 624 |
 | `stem_green` | #174517 | Stems | no | 12.3 on average (8 for a mound or edelweiss stem, 16 for an upright geranium, 18 for a trailing stem) | 11.0 stems | 3,508 |
 | `soil` | #331F12 | The soil bed in each box | no | 4 per bed | 1 bed | 104 |
@@ -166,16 +166,16 @@ A flower is its petals plus its yellow centre; the plant it sits on adds leaves 
 | Piece | Triangles | Made of |
 |---|---|---|
 | One petunia bloom | 15 | 10 petal + 5 throat |
-| One geranium floret | 14 | 10 petal + 4 heart |
-| One geranium bud | 4 | a four-sided pyramid |
+| One geranium floret | 5 | a cupped pentagon |
+| One geranium umbel (a round head) | 35 | 7 florets |
 | One edelweiss head | 19 | 14 bract + 5 heart |
 | A mounded petunia plant | 71 | stem 8, three leaves 18, three blooms 45 |
-| An upright geranium plant | 80 | stem 16, three leaves 18, three florets 42, one bud 4 |
+| An upright geranium plant | 83 | stem 16, four leaves 32, one umbel 35 |
 | A trailing petunia stem | 75 | stem 18, two leaves 12, three blooms 45 |
-| A trailing ivy geranium stem | 72 | stem 18, two leaves 12, three florets 42 |
+| A trailing ivy geranium stem | 73 | stem 18, two leaves 10, two heads of 5 and 4 florets 45 |
 | An edelweiss tuft | 66 | three silver leaves 12, two stems 16, two heads 38 |
 | One petunia box | 649 | 3 mounds 213, 4 trailing stems 300, 2 tufts 132, soil bed 4 |
-| One geranium box | 680 | 5 upright plants 400, 2 trailing stems 144, 2 tufts 132, soil bed 4 |
+| One geranium box | 697 | 5 upright plants 415, 2 trailing stems 146, 2 tufts 132, soil bed 4 |
 
 The lean set uses the same pieces in smaller numbers.
 
@@ -212,12 +212,12 @@ The render times come from one sequential run (before, then after, then lean) wh
 | View | Before: wall / CPU | After, full: wall / CPU | After, lean: wall / CPU |
 |---|---|---|---|
 | Close-up, petunia box | 162.2 s / 392 s | 83.5 s / 373 s | 79.3 s / 369 s |
-| Close-up, geranium box | 151.8 s / 402 s | 75.1 s / 380 s | 81.5 s / 386 s |
-| Cottage | 62.9 s / 293 s | 60.3 s / 296 s | not rendered |
-| Street | 43.3 s / 222 s | 44.2 s / 230 s | not rendered |
-| Total (the four views) | 420.2 s / 1,309 s | 263.1 s / 1,279 s | not comparable |
+| Close-up, geranium box | 151.8 s / 402 s | 152.5 s / 417 s | 174.5 s / 411 s |
+| Cottage | 62.9 s / 293 s | 122.1 s / 317 s | not rendered |
+| Street | 43.3 s / 222 s | 87.0 s / 237 s | not rendered |
+| Total (the four views) | 420.2 s / 1,309 s | 445.1 s / 1,344 s | not comparable |
 
-On CPU seconds the "after" is 2 % **less** than the "before" (1,279 s against 1,309 s), which is run-to-run noise: Cycles time is set by the samples, the resolution and the lighting, not by 1,329 more triangles on a scene of 1,700. **This is not the on-device cost.** The on-device cost is the profiling above.
+On CPU seconds the "after" is 2.7 % **more** than the "before" (1,344 s against 1,309 s), which is within run-to-run noise: Cycles time is set by the samples, the resolution and the lighting, not by about 1,000 more triangles on a scene of 1,700 (the house is 1,724 triangles before and 2,742 after, with two boxes). **This is not the on-device cost.** The on-device cost is the profiling above.
 
 ## Out of scope
 
@@ -230,8 +230,8 @@ On CPU seconds the "after" is 2 % **less** than the "before" (1,279 s against 
 
 ## Verification
 
-1. **The geometry tests pass.** `scripts/in-linux-container.sh python3 -m pytest tests/test_cuckoo_village_flowers.py -q` reports 10 passed. (Green today.)
-2. **The prototype reproduces the renders and counts.** `WF_CONTAINER_IMAGE=blender scripts/in-linux-container.sh blender --background --python wflevels/cuckoo_village_assets/flowers_prototype.py -- /src/build-docker/flowers/render-full full` prints `MESH house tris before 1724 removed 328 after 1396` and `MESH flowers tris 1329` (two boxes: a geranium box of 680 and a petunia box of 649).
+1. **The geometry tests pass.** `scripts/in-linux-container.sh python3 -m pytest tests/test_cuckoo_village_flowers.py -q` reports 11 passed. (Green today.)
+2. **The prototype reproduces the renders and counts.** `WF_CONTAINER_IMAGE=blender scripts/in-linux-container.sh blender --background --python wflevels/cuckoo_village_assets/flowers_prototype.py -- /src/build-docker/flowers/render-full full` prints `MESH house tris before 1724 removed 328 after 1396` and `MESH flowers tris 1346` (two boxes: a geranium box of 697 and a petunia box of 649).
 3. **The setting exists and is live.** `test_cuckoo_village_settings.py` and `test_cuckoo_village_settings_effect.py` pass with seven fields, and `Detailed flowers` is Off / On, default On, live. The regenerated `.oad` equals what `oas2oad` makes, and the phone's capabilities asset lists the field.
 4. **The director follows the field.** `tests/verify_cuckoo_village_forth.py` in the real zForth VM: with the field On the flowers cell is 1 and the blocks cell 0, with it Off the reverse, with it unset (default) On, at noon, dusk, night and dawn on dates in and out of the candle season.
 5. **The level builds with both versions.** `bash wflevels/cuckoo_village/build.sh` in the Blender container reports 88 actors (86 today plus `cottage_flowers` and `cottage_flower_blocks`) and the removed-triangle assertion holds (328).

@@ -44,9 +44,9 @@ BOX_WIDTH, BOX_DEPTH, BOX_HEIGHT = 0.69, 0.22, 0.15
 # Quality sets. "full" is the proposal; "lean" is the fallback if the frame-time gate on cast1 fails.
 QUALITY = {
     "full": dict(mounds=3, mound_blooms=3, mound_leaves=3, vines=4, vine_blooms=3, vine_leaves=2, tufts=2, heads=2,
-                 g_plants=5, g_florets=3, g_buds=1, g_leaves=3, g_vines=2),
+                 g_plants=5, g_umbel=7, g_leaves=4, g_vines=2, g_ivy=(5, 4)),
     "lean": dict(mounds=2, mound_blooms=3, mound_leaves=2, vines=2, vine_blooms=2, vine_leaves=2, tufts=2, heads=1,
-                 g_plants=3, g_florets=2, g_buds=0, g_leaves=2, g_vines=1),
+                 g_plants=3, g_umbel=5, g_leaves=3, g_vines=1, g_ivy=(4,)),
 }
 
 
@@ -149,34 +149,29 @@ class Builder:
             self.tri("flower_centre", ring[k], ring[(k + 1) % 5], _add(bottom, _scale(n, 0.001)))
 
     def floret(self, material: str, centre: Vec, facing: Vec, radius: float) -> None:
-        """A geranium floret: five petals as a ten-point star cupped along `facing` (ten triangles), with a four-triangle
-        yellow cone at its heart."""
+        """One small geranium floret: five petals as a cupped pentagon (five triangles), looking along `facing`."""
         self.pieces[(material, "geranium floret")] += 1
-        self.pieces[("flower_centre", "geranium heart")] += 1
         u, v, n = _frame(facing)
-        rim = []
-        for k in range(10):
-            a = math.tau * k / 10
-            r = radius if k % 2 == 0 else radius * 0.62
-            rim.append(_add(centre, _add(_add(_scale(u, r * math.cos(a)), _scale(v, r * math.sin(a))), _scale(n, -radius * 0.28))))
-        heart = _add(centre, _scale(n, radius * 0.18))
-        for k in range(10):
-            self.tri(material, heart, rim[k], rim[(k + 1) % 10])
-        hub = _add(centre, _scale(n, radius * 0.40))
-        ring = [_add(heart, _add(_scale(u, radius * 0.26 * math.cos(math.tau * k / 4)), _scale(v, radius * 0.26 * math.sin(math.tau * k / 4))))
-                for k in range(4)]
-        for k in range(4):
-            self.tri("flower_centre", ring[k], ring[(k + 1) % 4], hub)
+        rim = [_add(centre, _add(_add(_scale(u, radius * math.cos(math.tau * k / 5)), _scale(v, radius * math.sin(math.tau * k / 5))),
+                                 _scale(n, -radius * 0.30))) for k in range(5)]
+        heart = _add(centre, _scale(n, radius * 0.15))
+        for k in range(5):
+            self.tri(material, heart, rim[k], rim[(k + 1) % 5])
 
-    def bud(self, material: str, base: Vec, direction: Vec, size: float) -> None:
-        """A closed flower bud: a four-triangle pyramid."""
-        self.pieces[(material, "geranium bud")] += 1
-        u, v, n = _frame(direction)
-        ring = [_add(base, _add(_scale(u, size * 0.5 * math.cos(math.tau * k / 4)), _scale(v, size * 0.5 * math.sin(math.tau * k / 4))))
-                for k in range(4)]
-        tip = _add(base, _scale(n, size * 1.5))
-        for k in range(4):
-            self.tri(material, ring[k], ring[(k + 1) % 4], tip)
+    def umbel(self, material: str, centre: Vec, axis: Vec, radius: float, count: int, floret_radius: float,
+              rng: random.Random) -> None:
+        """A geranium's flower head: `count` small florets packed on a dome of `radius` round `centre`, one on top and the
+        rest in a ring below it, each facing outwards. Seen from a distance it is one round ball of colour."""
+        u, v, n = _frame(axis)
+        for i in range(count):
+            if i == 0:
+                polar, azimuth = 0.0, 0.0
+            else:
+                polar = math.radians(58 + rng.uniform(-6, 6))
+                azimuth = math.tau * (i - 1) / (count - 1) + rng.uniform(-0.2, 0.2)
+            d = _add(_add(_scale(u, math.sin(polar) * math.cos(azimuth)), _scale(v, math.sin(polar) * math.sin(azimuth))),
+                     _scale(n, math.cos(polar)))
+            self.floret(material, _add(centre, _scale(d, radius)), d, floret_radius * (0.9 + 0.2 * rng.random()))
 
     def edelweiss_head(self, centre: Vec, facing: Vec, radius: float) -> None:
         """An edelweiss head: a flat star of seven pointed felt bracts (14 triangles) round a five-triangle yellow heart."""
@@ -222,32 +217,32 @@ def trailing(b: Builder, start: Vec, rng: random.Random, colour: str, q: dict, d
     centres = b.stem(start, end, 0.0055, 0.0035, 3, segments=3, bow=(0.0, out, 0.0))
     for i in range(q["vine_leaves"]):
         p = centres[1 + i % 2]
-        b.leaf("leaf_green", (p[0], p[1] - 0.004, p[2]), math.pi * 1.5 + rng.uniform(-1.0, 1.0), 0.046, 0.024, 0.45)
-    for i in range(q["vine_blooms"]):
+        if geranium:           # ivy-leaved: pointed, five-triangle leaves
+            b.leaf("leaf_green", (p[0], p[1] - 0.004, p[2]), math.pi * 1.5 + rng.uniform(-1.0, 1.0), 0.052, 0.027, 0.45, ring=5)
+        else:
+            b.leaf("leaf_green", (p[0], p[1] - 0.004, p[2]), math.pi * 1.5 + rng.uniform(-1.0, 1.0), 0.046, 0.024, 0.45)
+    if geranium:               # loose ivy-geranium heads along the hanging stem, the last one at its tip
+        for i, count in enumerate(q["g_ivy"]):
+            p = centres[min(2 + i, 3)]
+            b.umbel(colour, (p[0], p[1] - 0.030, p[2]), (0.0, -0.85, 0.30), 0.024, count, 0.015, rng)
+    for i in range(0 if geranium else q["vine_blooms"]):
         p = centres[min(1 + i, 3)]
         side = (-1.0 if i % 2 else 1.0)
-        bloom = b.floret if geranium else b.petunia
-        bloom(colour, (p[0] + side * 0.018, p[1] - 0.026, p[2] + 0.004), (side * 0.35, -0.85, 0.30), 0.031 + 0.004 * rng.random())
+        b.petunia(colour, (p[0] + side * 0.018, p[1] - 0.026, p[2] + 0.004), (side * 0.35, -0.85, 0.30), 0.031 + 0.004 * rng.random())
 
 
 def geranium(b: Builder, root: Vec, rng: random.Random, colour: str, q: dict) -> None:
-    """An upright (zonal) geranium: a stem, round leaves fanned across the front, an umbel of florets and a bud."""
-    height = 0.095 + rng.uniform(0.0, 0.03)
+    """An upright (zonal) geranium: a thick stem, big round leaves spiralling up it, and a dense round umbel of florets."""
+    height = 0.125 + rng.uniform(0.0, 0.03)
     lean = (rng.uniform(-0.008, 0.008), -rng.uniform(0.0, 0.012), 0.0)
     top = (root[0], root[1], root[2] + height)
-    b.stem(root, top, 0.008, 0.005, 4, segments=2, bow=lean)
+    b.stem(root, top, 0.009, 0.006, 4, segments=2, bow=lean)
     crown = _add(top, lean)
     for i in range(q["g_leaves"]):
-        yaw = -math.pi * (0.12 + 0.76 * i / max(q["g_leaves"] - 1, 1)) + rng.uniform(-0.15, 0.15)
-        b.leaf("leaf_green", (root[0], root[1], root[2] + height * (0.30 + 0.18 * (i % 2))), yaw,
-               rng.uniform(0.050, 0.062), rng.uniform(0.027, 0.033), 0.30)
-    for i in range(q["g_florets"]):
-        a = math.tau * i / q["g_florets"] + rng.uniform(-0.4, 0.4)
-        c = (crown[0] + 0.034 * math.cos(a), crown[1] - 0.010 + 0.010 * math.sin(a), crown[2] + 0.012 * (i % 2) + 0.004)
-        b.floret(colour, c, (0.20 * math.cos(a), -0.70, 0.60), 0.034 + 0.004 * rng.random())
-    for i in range(q["g_buds"]):
-        a = math.pi * (0.35 + 0.3 * i) + rng.uniform(-0.3, 0.3)
-        b.bud(colour, (crown[0] + 0.012 * math.cos(a), crown[1] - 0.012, crown[2] - 0.004), (0.8 * math.cos(a), -0.45, 0.6), 0.012)
+        yaw = -math.pi * (0.10 + 0.80 * i / max(q["g_leaves"] - 1, 1)) + rng.uniform(-0.15, 0.15)
+        b.leaf("leaf_green", (root[0], root[1], root[2] + height * (0.22 + 0.42 * i / max(q["g_leaves"] - 1, 1))), yaw,
+               rng.uniform(0.060, 0.074), rng.uniform(0.032, 0.038), 0.22, ring=8)
+    b.umbel(colour, (crown[0], crown[1] - 0.012, crown[2] + 0.018), (0.0, -0.55, 0.83), 0.034, q["g_umbel"], 0.017, rng)
 
 
 def box_kind(index: int) -> str:
