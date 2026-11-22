@@ -14,9 +14,10 @@ Run inside the Linux container, against the container-built engine, under xvfb:
   --options            for every value of every setting, start the engine with it as a launch override
                        (--property="TideHarbourSettings.<field>=<value>", the path the Dream's saved settings take),
                        and compare the camera, the visibility cells and the settings cells with the model; the
-                       director's count of fields property@ answered must be 4 (plan Verification 13, engine half)
+                       director's count of fields property@ answered must be every field (5; plan Verification 13, engine half)
   --capture OUTDIR     one PNG per --times entry (default: the plan's six moments)
   --times T [T ...]    YYYY-MM-DDTHH:MM:SS[.mmm] Thai times for either mode
+  --set NAME=INDEX     with --capture: a setting's value (e.g. panel=1 turns the river panel Off)
   --no-fps             with --capture: hide the engine's frame-rate counter (the poster's picture)
 
 The colours the director writes (FACE_COLOR 3037-3039) are write-only in the engine, so they are checked in the
@@ -238,11 +239,15 @@ def options(port: int) -> int:
     return 1 if failures else 0
 
 
-def capture(outdir: Path, times: list[str], port: int, frames: int = 40, no_fps: bool = False) -> int:
+def capture(outdir: Path, times: list[str], port: int, frames: int = 40, no_fps: bool = False, sets: list[str] | None = None) -> int:
     outdir = outdir.resolve()          # the engine runs from another directory
     outdir.mkdir(parents=True, exist_ok=True)
     for i, spec in enumerate(times):
-        e = Engine(spec, port + i, ["--no-fps"] if no_fps else None)
+        extra = ["--no-fps"] if no_fps else []
+        for item in sets or []:                       # NAME=INDEX, a setting's launch override (the options mode's path)
+            name, _, value = item.partition("=")
+            extra.append(f"--property={tl.SETTINGS_ACTOR}.{tl.FIELD_LABELS[name]}={int(value)}")
+        e = Engine(spec, port + i, extra or None)
         try:
             e.step(frames)          # enough for the next-turn scan (ten frames) and the panel to settle
             name = spec.replace(":", "").replace("-", "")
@@ -260,6 +265,7 @@ def main() -> int:
     ap.add_argument("--capture", type=Path, metavar="OUTDIR")
     ap.add_argument("--times", nargs="+")
     ap.add_argument("--frames", type=int, default=40, help="frames to step before each capture (default 40)")
+    ap.add_argument("--set", action="append", metavar="NAME=INDEX", help="--capture: a setting's value, e.g. panel=1 (Off); names: " + ", ".join(tl.OPTIONS))
     ap.add_argument("--no-fps", action="store_true", help="--capture: hide the engine's frame-rate counter (for the poster)")
     ap.add_argument("--port", type=int, default=7830)
     args = ap.parse_args()
@@ -270,7 +276,7 @@ def main() -> int:
         print(f"level not built: {LEVEL} (task tide-harbour-level)", file=sys.stderr)
         return 2
     if args.capture:
-        return capture(args.capture, args.times or MOMENTS, args.port, args.frames, args.no_fps)
+        return capture(args.capture, args.times or MOMENTS, args.port, args.frames, args.no_fps, args.set)
     rc = 0
     if args.compare:
         rc |= compare(args.times or COMPARE, args.port)

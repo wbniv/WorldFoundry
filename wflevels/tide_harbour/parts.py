@@ -360,6 +360,8 @@ def visibility_group(name: str) -> str | None:
         return "gauge"
     if name in ("panel_arrow_up", "panel_arrow_dn"):
         return name[len("panel_"):]
+    if name.startswith("panel_"):
+        return "panel"                                  # every other part of the river panel: the River panel setting hides them together
     return VISIBLE_STATICS.get(name)
 
 

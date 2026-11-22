@@ -671,6 +671,17 @@ These steps are the contract. Each is run when its phase lands, with the raw out
 
     Each run also checks that the settings cells hold the requested value, so a rejected override would fail. **PASS for Tide Harbour.**
 
+    **Rerun 2026‑11‑22, with the fifth field (River panel: On or Off, cell 694; Off hides every part of the river panel and its arrows through visibility cell 709 and gives the harbour the whole screen, the camera as it was before the panel).** The same command, every value of every field, now answers 5 fields:
+
+    ```
+    2026-11-21T15:02:30 {'life': 1}: 6 actors; settings answered 5; tide 2.8381 m (model 2.8381); worst position 0.009 mm (boat_0/3010), rotation 0.005 deg (boat_0/3014), scale 0.00000 ()
+    2026-11-21T15:02:30 {'panel': 0}: 6 actors; settings answered 5; tide 2.8381 m (model 2.8381); worst position 0.009 mm (boat_0/3010), rotation 0.005 deg (boat_0/3014), scale 0.00000 ()
+    2026-11-21T15:02:30 {'panel': 1}: 6 actors; settings answered 5; tide 2.8381 m (model 2.8381); worst position 0.009 mm (boat_0/3010), rotation 0.005 deg (boat_0/3014), scale 0.00000 ()
+    PASS
+    ```
+
+    **PASS** (the other values in that run are the same as above, with 5 answered). The regenerated headers come from `task gen-oas-headers`, and `ht_and_objects_match_golden` passes; a capture with `--set panel=1` shows the harbour alone.
+
 
 ## Housekeeping done with this plan
 
