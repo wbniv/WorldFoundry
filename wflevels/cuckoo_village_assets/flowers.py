@@ -5,7 +5,7 @@ Plan: docs/plans/2026-11-22-cuckoo-village-flowers.md. Pure Python (no Blender),
 
 Two kinds of box alternate, two in every three petunia and one in three geranium (`box_kind`). A petunia box holds a few
 mounded petunia plants along the back and trailing petunia stems that hang over the front. A geranium box holds upright
-(zonal) geraniums and trailing ivy geraniums. Both kinds hold small edelweiss tufts. A geranium floret is a ten-point star of petals cupped towards the viewer round a yellow centre. A petunia bloom is a funnel: a five-lobed rim round a recessed throat. An edelweiss head is a flat
+(zonal) geraniums and more edelweiss. Both kinds hold small edelweiss tufts. A geranium floret is a ten-point star of petals cupped towards the viewer round a yellow centre. A petunia bloom is a funnel: a five-lobed rim round a recessed throat. An edelweiss head is a flat
 star of felty white bracts round a yellow heart of tiny florets, on a short stem with silvery leaves. Everything is returned
 per material name as (vertices, faces); faces are triangles. Local frame of a box: x along the box, y out of the wall
 (front is -y), z up; the origin is the middle of the box top. The old model put 14 cubes on each box (about 170 triangles).
@@ -44,9 +44,9 @@ BOX_WIDTH, BOX_DEPTH, BOX_HEIGHT = 0.69, 0.22, 0.15
 # Quality sets. "full" is the proposal; "lean" is the fallback if the frame-time gate on cast1 fails.
 QUALITY = {
     "full": dict(mounds=3, mound_blooms=3, mound_leaves=3, vines=4, vine_blooms=3, vine_leaves=2, tufts=2, heads=2,
-                 g_plants=5, g_umbel=7, g_leaves=4, g_vines=2, g_ivy=(5, 4)),
+                 g_plants=5, g_umbel=7, g_leaves=4, g_tufts=4),
     "lean": dict(mounds=2, mound_blooms=3, mound_leaves=2, vines=2, vine_blooms=2, vine_leaves=2, tufts=2, heads=1,
-                 g_plants=3, g_umbel=5, g_leaves=3, g_vines=1, g_ivy=(4,)),
+                 g_plants=3, g_umbel=5, g_leaves=3, g_tufts=2),
 }
 
 
@@ -208,24 +208,16 @@ def mound(b: Builder, root: Vec, rng: random.Random, colour: str, q: dict) -> No
         b.petunia(colour, c, (0.30 * math.cos(a), -0.75, 0.55), 0.034 + 0.004 * rng.random())
 
 
-def trailing(b: Builder, start: Vec, rng: random.Random, colour: str, q: dict, drop: float, sway: float,
-             geranium: bool = False) -> None:
-    """A trailing petunia (or, with `geranium`, ivy geranium) stem: leaves the box top at `start`, arches over the front rim and hangs `drop` down the
+def trailing(b: Builder, start: Vec, rng: random.Random, colour: str, q: dict, drop: float, sway: float) -> None:
+    """A trailing petunia stem: leaves the box top at `start`, arches over the front rim and hangs `drop` down the
     front, with leaves and blooms along it and a bloom at its tip."""
     out = -0.026                                                        # how far it bows away from the box front
     end = (start[0] + sway, start[1] - 0.05, start[2] - drop)
     centres = b.stem(start, end, 0.0055, 0.0035, 3, segments=3, bow=(0.0, out, 0.0))
     for i in range(q["vine_leaves"]):
         p = centres[1 + i % 2]
-        if geranium:           # ivy-leaved: pointed, five-triangle leaves
-            b.leaf("leaf_green", (p[0], p[1] - 0.004, p[2]), math.pi * 1.5 + rng.uniform(-1.0, 1.0), 0.052, 0.027, 0.45, ring=5)
-        else:
-            b.leaf("leaf_green", (p[0], p[1] - 0.004, p[2]), math.pi * 1.5 + rng.uniform(-1.0, 1.0), 0.046, 0.024, 0.45)
-    if geranium:               # loose ivy-geranium heads along the hanging stem, the last one at its tip
-        for i, count in enumerate(q["g_ivy"]):
-            p = centres[min(2 + i, 3)]
-            b.umbel(colour, (p[0], p[1] - 0.030, p[2]), (0.0, -0.85, 0.30), 0.024, count, 0.015, rng)
-    for i in range(0 if geranium else q["vine_blooms"]):
+        b.leaf("leaf_green", (p[0], p[1] - 0.004, p[2]), math.pi * 1.5 + rng.uniform(-1.0, 1.0), 0.046, 0.024, 0.45)
+    for i in range(q["vine_blooms"]):
         p = centres[min(1 + i, 3)]
         side = (-1.0 if i % 2 else 1.0)
         b.petunia(colour, (p[0] + side * 0.018, p[1] - 0.026, p[2] + 0.004), (side * 0.35, -0.85, 0.30), 0.031 + 0.004 * rng.random())
@@ -264,7 +256,7 @@ def tuft(b: Builder, root: Vec, rng: random.Random, q: dict) -> None:
 
 def _build(seed: int, quality_name: str) -> Builder:
     """The flowers of one window box in its local frame, by `box_kind(seed)`: a petunia box (mounded and trailing
-    petunias) or a geranium box (upright and trailing ivy geraniums), each with a soil bed and edelweiss tufts."""
+    petunias) or a geranium box (upright geraniums and extra edelweiss), each with a soil bed and edelweiss tufts."""
     q = QUALITY[quality_name]
     kind = box_kind(seed)
     rng = random.Random(seed)
@@ -277,9 +269,13 @@ def _build(seed: int, quality_name: str) -> Builder:
         b.tri("soil", ring[k], ring[(k + 1) % 4], mid)
     b.pieces[("soil", "soil bed")] += 1
     # Edelweiss tufts nearer the ends of every box; the plants go between them, forward of the window's glazing bars.
-    for i in range(q["tufts"]):
-        x = (-0.27 + 0.54 * i / max(q["tufts"] - 1, 1)) + rng.uniform(-0.015, 0.015)
-        tuft(b, (x, -0.050, soil_z + 0.004), rng, q)
+    # A geranium box has two at each end, one behind the other, in place of the hanging stems a petunia box has.
+    if kind == "petunia":
+        spots = [(-0.27 + 0.54 * i / max(q["tufts"] - 1, 1), -0.050) for i in range(q["tufts"])]
+    else:
+        spots = [(-0.276, -0.046), (0.276, -0.046), (-0.232, -0.078), (0.232, -0.078)][:q["g_tufts"]]
+    for x, y in spots:
+        tuft(b, (x + rng.uniform(-0.012, 0.012), y, soil_z + 0.004), rng, q)
     if kind == "petunia":
         colours = [PETUNIA_COLOURS[(seed + i) % 3] for i in range(8)]
         for i in range(q["mounds"]):
@@ -294,12 +290,8 @@ def _build(seed: int, quality_name: str) -> Builder:
         colours = [GERANIUM_COLOURS[(offset + i) % len(GERANIUM_COLOURS)] for i in range(8)]
         n = q["g_plants"]
         for i in range(n):
-            x = (i - (n - 1) / 2) * 0.095 + rng.uniform(-0.01, 0.01)
+            x = (i - (n - 1) / 2) * 0.085 + rng.uniform(-0.008, 0.008)
             geranium(b, (x, -0.060, soil_z + 0.004), rng, colours[i], q)
-        for i in range(q["g_vines"]):
-            x = (-0.14 + 0.28 * i / max(q["g_vines"] - 1, 1)) if q["g_vines"] > 1 else 0.0
-            trailing(b, (x + rng.uniform(-0.02, 0.02), -depth - 0.012, soil_z + 0.014), rng, colours[(i + 5) % 8], q,
-                     0.11 + 0.07 * rng.random(), rng.uniform(-0.04, 0.04), geranium=True)
     return b
 
 
