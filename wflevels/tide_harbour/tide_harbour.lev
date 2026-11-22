@@ -1122,7 +1122,7 @@
 		{ 'I32' { 'NAME' "Boats and birds" } { 'DATA' 0l } { 'STR' "On" } }  //On|Off
 		{ 'I32' { 'NAME' "River panel" } { 'DATA' 0l } { 'STR' "On" } }  //On|Off
 		{ 'I32' { 'NAME' "About the map" } { 'DATA' 0l } { 'STR' "(c) OpenStreetMap contributors" } }  //(c) OpenStreetMap contributors|ODbL: openstreetmap.org/copyright
-		{ 'I32' { 'NAME' "Show framerate" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Show framerate" } { 'DATA' 0l } { 'STR' "0" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "sky_0" }

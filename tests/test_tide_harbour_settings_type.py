@@ -32,10 +32,11 @@ def test_every_registry_file_puts_the_type_right_after_sea_stars():
     """Append-only: the position is the type id compiled into every level, so no existing id may move.
     Tide Harbour was appended after Sea Stars; Cuckoo Village was appended after it (docs/plans/2026-11-21-cuckoo-village.md)."""
     mac = re.findall(r"^\s*OBJECTENTRY\((\w+),", (OAS / "objects.mac").read_text(), re.M)
-    assert mac[-3:-1] == ["SeaStarsSettings", "TideHarbourSettings"]
+    # Later types are appended after these two (Cuckoo Village, then LevelSettings, the global holder), so test adjacency, not the tail.
+    assert mac.index("TideHarbourSettings") == mac.index("SeaStarsSettings") + 1
     for name, pattern in (("objects.h", r"(\w+)_KIND"), ("objects.e", r"(\w+)_KIND"), ("objects.names", r'"(\w+)"')):
         found = re.findall(pattern, (OAS / name).read_text())
-        assert found[-3:-1] == ["SeaStarsSettings", "TideHarbourSettings"], name
+        assert found.index("TideHarbourSettings") == found.index("SeaStarsSettings") + 1, name
     lc = (OAS / "objects.lc").read_text().split()
     assert lc.index("tideharboursettings") == lc.index("seastarssettings") + 1
     assert '#include "tideharboursettings.hp"' in (OAS / "objects.inc").read_text()
