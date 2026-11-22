@@ -16,6 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "wflevels" / "tide_harbour" / "blender_create_tide_harbour.py"
 FONT = Path("/usr/lib/blender/datafiles/fonts/NotoSansThai-VariableFont_wdth,wght.woff2")
+CREDIT_FONT = Path("/usr/lib/blender/datafiles/fonts/DejaVuSansMono.woff2")     # not Blender's default Inter: its M came out filled
 
 
 def glyph_texts() -> list:
@@ -34,6 +35,8 @@ class GlyphCoverage(unittest.TestCase):
         self.assertIn("CREDIT = '© OpenStreetMap contributors'", src)
         self.assertIn("shapes[CREDIT]", src)
         self.assertIn("put(body, CREDIT,", src)
+        self.assertIn("CREDIT_FONT = Path('/usr/lib/blender/datafiles/fonts/DejaVuSansMono.woff2')", src)
+        self.assertNotIn("outlines('pc', [CREDIT], None)", src, "the default font (Inter) draws a filled M: use CREDIT_FONT")
 
     def test_the_lists_are_found(self):
         self.assertGreaterEqual(len(glyph_texts()), 15)
@@ -53,6 +56,18 @@ class GlyphCoverage(unittest.TestCase):
         for t in glyph_texts():
             for ch in t:
                 self.assertIn(ord(ch), cmap, f"{t!r}: U+{ord(ch):04X} is not in the font")
+
+    def test_the_credit_is_in_its_font(self):
+        try:
+            from fontTools.ttLib import TTFont
+        except ImportError:
+            self.skipTest("fontTools is not installed")
+        if not CREDIT_FONT.is_file():
+            self.skipTest(f"{CREDIT_FONT} is not installed")
+        credit = re.search(r"^CREDIT = '(.+)'", SCRIPT.read_text(encoding="utf-8"), re.M).group(1)
+        cmap = TTFont(str(CREDIT_FONT)).getBestCmap()
+        for ch in credit:
+            self.assertIn(ord(ch), cmap, f"U+{ord(ch):04X} is not in {CREDIT_FONT.name}")
 
 
 if __name__ == "__main__":
