@@ -119,12 +119,30 @@ def test_the_audit_finds_the_field_in_a_built_level_and_reports_its_absence(tmp_
     assert audit.missing_globals("lacks") == ["Show framerate"]
 
 
-def test_the_levels_roster_prints_every_row_and_strict_fails_on_a_gap():
+def test_the_levels_roster_is_what_a_player_can_reach():
+    audit = _audit()
+    reachable = audit.shipped_levels()
+    # every manifest's levels, plus an app's own level
+    for manifest in (ROOT / "wflevels").glob("*.manifest"):
+        for line in manifest.read_text().splitlines():
+            m = re.match(r"\s*level\s+(\S+?)(?:-standalone)?\.iff\b", line)
+            if m:
+                assert m.group(1) in reachable, m.group(1)
+    assert "condo_639_640" in reachable
+    # not the style, practice or regression levels
+    for hidden in ("style_flat_anime", "mm_practice", "teleport_regression", "unloaded_actor_regression"):
+        assert hidden not in reachable
+    # an exemption always names its reason, and only reachable levels are exempt
+    assert audit.EXEMPT and all(reason.strip() and level in reachable for level, reason in audit.EXEMPT.items())
+
+
+def test_the_audit_prints_every_row_and_strict_fails_exactly_when_a_reachable_level_is_missing():
     import subprocess, sys
-    plain = subprocess.run([sys.executable, str(ROOT / "scripts/audit-level-settings.py"), "--roster", "levels"],
-                           capture_output=True, text=True)
+    run = lambda *a: subprocess.run([sys.executable, str(ROOT / "scripts/audit-level-settings.py"), *a],
+                                    capture_output=True, text=True)
+    plain = run("--roster", "levels")
     assert plain.returncode == 0 and "levels audited" in plain.stdout        # prints even without --strict
-    strict = subprocess.run([sys.executable, str(ROOT / "scripts/audit-level-settings.py"), "--roster", "levels", "--strict"],
-                            capture_output=True, text=True)
-    assert strict.returncode == (1 if " without the global settings" in strict.stdout
-                                 and not strict.stdout.rstrip().endswith("0 without the global settings") else 0)
+    strict = run("--roster", "levels", "--strict")
+    assert strict.returncode == (1 if "MISSING" in strict.stdout else 0)
+    built = run("--roster", "built")
+    assert built.returncode == 0 and "every wflevels/<id>-standalone.iff" in built.stdout

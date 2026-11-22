@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Audit: does every clock and every aquarium tank carry a settings object, and a way to open it?
 
-    python3 scripts/audit-level-settings.py [--roster clocks|aquarium|all|levels] [--strict] [-h]
+    python3 scripts/audit-level-settings.py [--roster clocks|aquarium|all|levels|built] [--strict] [-h]
 
 Rosters: wflevels/clocks-menu.manifest (the 3D Clocks package) and wflevels/aquarium-menu.manifest
 (the Aquarium package). A level has a settings object when all six hold; the type is found from the
@@ -23,10 +23,13 @@ Ways to open the settings, which follow from the six:
   phone     the Dream form on the phone. Needs `phone`.
 
 Prints one row per level and exits 0; with --strict it exits 1 if any level lacks any of the six.
-Roster `levels` is a different audit: every built level (wflevels/<id>-standalone.iff, not only the two
-packs) must carry the settings every level offers (wfsource/source/oas/global_settings.inc, today **Show
-framerate**), so the player can switch the overlay on in any of them. A level has it when its built file
-lists the field's key. `--strict` exits 1 while any built level lacks it
+Roster `levels` is a different audit: every level a player can reach must carry the settings every level
+offers (wfsource/source/oas/global_settings.inc, today **Show framerate**), so the overlay can be switched
+on in any of them. A reachable level is one a pack manifest lists (wflevels/*.manifest) or an app ships on
+its own (SHIPPED_BY_APP). A level has the settings when its built file lists the field's key; EXEMPT names
+the few that cannot, with the reason. `--strict` exits 1 while a reachable level lacks them.
+Roster `built` is the same check over every wflevels/<id>-standalone.iff, for information (the style,
+practice and regression levels are not reachable, so they are not required to have it)
 (docs/plans/2026-11-22-global-level-settings.md).
 Docs: docs/howto/combine-levels-chooser-and-screensaver-launch.md, "Give every level settings".
 """
@@ -66,6 +69,26 @@ def settings_types():
     return [n for n in names if n not in NOT_A_LEVEL_TYPE]
 
 
+# Levels an app ships on its own, outside any pack manifest.
+SHIPPED_BY_APP = {"condo_639_640": "the condo app (condo-cd.iff)"}
+# Reachable levels that cannot carry the global settings, and why. A level here is not counted as a gap.
+EXEMPT = {
+    "snowgoons": "hand-authored legacy IFF (snowgoons.iff.txt): no .lev, so levcomp has nothing to add the holder to",
+    "marble-madness-3d-astra": "hand-authored IFF with no .lev, so levcomp has nothing to add the holder to",
+}
+
+
+def shipped_levels():
+    """Every level a player can reach: the pack manifests' levels plus the apps' own."""
+    ids = set(SHIPPED_BY_APP)
+    for manifest in sorted((ROOT / "wflevels").glob("*.manifest")):
+        for line in read(manifest).splitlines():
+            m = re.match(r"\s*level\s+(\S+?)(?:-standalone)?\.iff\b", line)
+            if m:
+                ids.add(m.group(1))
+    return sorted(ids)
+
+
 def global_keys():
     """The keys global_settings.inc declares: the one place a global setting is declared."""
     return re.findall(r"^\s*TYPEENTRY\w+\(([^,]+),", read(OAS / "global_settings.inc"), re.M)
@@ -83,17 +106,26 @@ def missing_globals(level_id, keys=None):
     return [k for k in keys if k.encode() not in data]
 
 
-def audit_globals():
-    """Print one row per built level; return how many lack a global setting."""
+def audit_globals(roster="levels"):
+    """Print one row per level; return how many (not exempt) lack a global setting."""
     keys = global_keys()
-    print(f"\nlevels (every wflevels/<id>-standalone.iff) and the global settings {', '.join(keys)}")
-    gaps = 0
-    levels = built_levels()
+    levels = shipped_levels() if roster == "levels" else built_levels()
+    what = "every level a player can reach (pack manifests and app levels)" if roster == "levels" else "every wflevels/<id>-standalone.iff"
+    print(f"\n{roster}: {what}; the global settings {', '.join(keys)}")
+    gaps = exempt = 0
     for level in levels:
+        if not (ROOT / "wflevels" / f"{level}-standalone.iff").exists():
+            print(f"{level:40s} MISSING its built file wflevels/{level}-standalone.iff")
+            gaps += 1
+            continue
         lacking = missing_globals(level, keys)
+        if lacking and level in EXEMPT:
+            exempt += 1
+            print(f"{level:40s} exempt: {EXEMPT[level]}")
+            continue
         gaps += bool(lacking)
         print(f"{level:40s} " + ("yes" if not lacking else "MISSING " + ", ".join(lacking)))
-    print(f"\n{len(levels)} levels audited, {gaps} without the global settings")
+    print(f"\n{len(levels)} levels audited, {gaps} without the global settings" + (f", {exempt} exempt" if exempt else ""))
     return gaps
 
 
@@ -127,11 +159,11 @@ def audit(level_id, types=None):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--roster", choices=[*ROSTERS, "all", "levels"], default="all")
+    ap.add_argument("--roster", choices=[*ROSTERS, "all", "levels", "built"], default="all")
     ap.add_argument("--strict", action="store_true", help="exit 1 if any level lacks any of the six")
     args = ap.parse_args()
-    if args.roster == "levels":
-        gaps = audit_globals()
+    if args.roster in ("levels", "built"):
+        gaps = audit_globals(args.roster)
         return 1 if (args.strict and gaps) else 0
     types = settings_types()
     gaps = total = 0
