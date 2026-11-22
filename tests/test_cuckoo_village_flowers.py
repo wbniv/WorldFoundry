@@ -12,7 +12,7 @@ sys.path.insert(0, str(ROOT / "wflevels/cuckoo_village_assets"))
 import flowers as fl  # noqa: E402
 
 BOXES = 26                       # 13 cottages with two front window boxes each
-FULL_PER_BOX, LEAN_PER_BOX = 700, 350
+FULL_PER_BOX, LEAN_PER_BOX = 700, 360
 FULL_TOTAL = 18_200              # 26 x 700: the plan's budget
 
 
@@ -73,15 +73,24 @@ def test_every_box_has_edelweiss_and_a_yellow_heart_and_its_own_flowers():
             assert not parts["bloom_red"][1], i                 # no red on a petunia box
 
 
-def test_a_geranium_box_is_round_umbels_of_five_triangle_florets_inside_the_budget():
+def test_a_geranium_box_is_round_umbels_with_four_edelweiss_tufts_inside_the_budget():
     box = fl.box_flowers(0, "full")                              # box 0 is a geranium box
     assert fl.box_kind(0) == "geranium"
     q = fl.QUALITY["full"]
-    florets = q["g_plants"] * q["g_umbel"] + q["g_vines"] * sum(q["g_ivy"])             # 5 x 7 + 2 x 9 = 53
+    florets = q["g_plants"] * q["g_umbel"]                       # 5 x 7 = 35: no hanging stems on a geranium box
     petals = sum(len(box[n][1]) for n in ("bloom_red", "bloom_magenta", "bloom_white"))
-    assert petals == 5 * florets == 265
-    assert fl.triangle_count(box) <= FULL_PER_BOX
-    assert fl.triangle_count(fl.box_flowers(1, "full")) <= FULL_PER_BOX
+    assert petals == 5 * florets == 175
+    heads = fl.box_pieces(0, "full")[("edelweiss_felt", "edelweiss head")]
+    assert heads == q["g_tufts"] * q["heads"] == 8               # twice a petunia box's four: more edelweiss instead of vines
+    assert fl.box_pieces(1, "full")[("edelweiss_felt", "edelweiss head")] == 4
+    assert fl.triangle_count(box) <= FULL_PER_BOX and fl.triangle_count(fl.box_flowers(1, "full")) <= FULL_PER_BOX
+
+
+def test_a_geranium_box_has_no_trailing_stems():
+    """Nothing on a geranium box hangs below the box top: the lowest vertex is the box's own rim line, not down its front."""
+    verts = [v for m in fl.box_flowers(0, "full").values() for v in m[0]]
+    assert min(z for _, _, z in verts) >= -0.005
+    assert min(z for _, _, z in (v for m in fl.box_flowers(1, "full").values() for v in m[0])) < -0.05   # a petunia box does hang
 
 
 def test_each_umbel_floret_sits_on_a_dome_so_the_head_reads_as_a_ball():
