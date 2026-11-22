@@ -17,6 +17,7 @@
 mod asset_registry;
 mod common_block;
 mod decompile;
+mod default_holder;
 mod editable;
 mod lc_parser;
 mod lev_parser;
@@ -35,12 +36,15 @@ use std::process;
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn usage() -> ! {
-    eprintln!("Usage: levcomp <input.lev.bin> <objects.lc> <output.lvl> [<oad_dir>] [--mesh-dir <dir>] [--iff-txt <path>] [--textile-ini <path>]");
+    eprintln!("Usage: levcomp <input.lev.bin> <objects.lc> <output.lvl> [<oad_dir>] [--mesh-dir <dir>] [--iff-txt <path>] [--no-default-settings] [--textile-ini <path>]");
     eprintln!("       levcomp decompile <input.iff> <objects.lc> [--oad-dir <dir>] [-o <output.lev>] [--list | --level <tag|index>]");
     eprintln!();
     eprintln!("  oad_dir:        directory of compiled <class>.oad files (optional).");
     eprintln!("                  When present, each object's OAD data block is sized");
     eprintln!("                  from its class schema; when absent, OADSize = 0.");
+    eprintln!("  --no-default-settings: do not append a default LevelSettings holder to a level that");
+    eprintln!("                  has none (default: appended when oad_dir holds global_settings.inc,");
+    eprintln!("                  so every level offers the global settings such as Show framerate).");
     eprintln!("  --mesh-dir:     directory containing mesh .iff files (optional).");
     eprintln!("  --mesh-ref-prefix: path prefix prepended to mesh file-include refs in the");
     eprintln!("                  .iff.txt (e.g. \"../smb/\" for a shared mesh dir; default none).");
@@ -153,6 +157,7 @@ fn main() {
     let mut mesh_dir_str: Option<String> = None;
     let mut iff_txt_str: Option<String> = None;
     let mut textile_ini_str: Option<String> = None;
+    let mut no_default_settings = false;
     let mut mesh_ref_prefix = String::new();
     {
         let mut i = 4;
@@ -169,6 +174,8 @@ fn main() {
                 i += 1;
                 if i >= args.len() { usage(); }
                 iff_txt_str = Some(args[i].clone());
+            } else if args[i] == "--no-default-settings" {
+                no_default_settings = true;
             } else if args[i] == "--textile-ini" {
                 i += 1;
                 if i >= args.len() { usage(); }
@@ -198,7 +205,7 @@ fn main() {
         process::exit(1);
     });
 
-    let objects = lev_parser::parse(&lev_data).unwrap_or_else(|e| {
+    let mut objects = lev_parser::parse(&lev_data).unwrap_or_else(|e| {
         eprintln!("error: parsing {}: {}", lev_path.display(), e);
         process::exit(1);
     });
@@ -221,6 +228,32 @@ fn main() {
     } else {
         oad_loader::OadSchemas::empty()
     };
+
+    // A level with no settings holder gets a default one, so every level offers the global settings
+    // (oas/global_settings.inc, today Show framerate). Needs the OAD directory, which holds that file.
+    if !no_default_settings {
+        if let Some(d) = oad_dir {
+            if let Ok(text) = std::fs::read_to_string(d.join("global_settings.inc")) {
+                let keys = default_holder::global_keys(&text);
+                let has_key = |class: &str, key: &str| {
+                    schemas.get(class).map_or(false, |oad| {
+                        oad.entries.iter().any(|e| {
+                            let end = e.name.iter().position(|&b| b == 0).unwrap_or(e.name.len());
+                            &e.name[..end] == key.as_bytes()
+                        })
+                    })
+                };
+                match default_holder::ensure(&mut objects, &keys, &|c| classes.index_of(c).is_some(), &has_key) {
+                    Ok(default_holder::Outcome::Added) => eprintln!(
+                        "  no settings holder: added a default '{}' ({}) so the level offers {}",
+                        "Level Settings", default_holder::HOLDER_CLASS, keys.join(", ")),
+                    Ok(default_holder::Outcome::Skipped(why)) => eprintln!("  default settings holder skipped: {why}"),
+                    Ok(default_holder::Outcome::AlreadyHas) => {}
+                    Err(e) => { eprintln!("error: default settings holder: {e}"); process::exit(1); }
+                }
+            }
+        }
+    }
 
     // Warn if no Ambient-type Light actor authored. With Camera::SetAmbientColor
     // defaulting to Color::black (wfsource/source/game/level.cc:1158) and the
