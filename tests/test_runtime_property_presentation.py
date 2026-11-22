@@ -76,14 +76,15 @@ def test_the_nine_new_controls_differ_from_a_plain_row(tv):
 
 # The row-navigation policy (Will, 2026-11-01, option 6), mirroring wfprops::keys in
 # engine/runtime_property_presentation.hpp: (Left / Right change, Left on the first value goes to
-# the rail, A opens the list). Choice rows with up to CYCLE_CHOICES_MAX options cycle and leave
+# the rail, A opens the list). A checkbox leaves like a switch (Will, 2026-11-22: a section of only
+# checkboxes had no way to the rail). Choice rows with up to CYCLE_CHOICES_MAX options cycle and leave
 # from the first option; with more they only open the list. The key tests follow the engine's
 # table; this mirror pins the policy itself.
 CYCLE_CHOICES_MAX = 4
 FIXED = {
     "number": (0, 0, 0), "number-with-bounds": (0, 0, 0), "slider": (1, 0, 0), "path": (0, 0, 0),
     "segments": (1, 1, 0), "switch": (1, 1, 0),
-    "chips": (1, 0, 0), "stepped-slider": (1, 0, 0), "checkbox": (1, 0, 0),
+    "chips": (1, 0, 0), "stepped-slider": (1, 0, 0), "checkbox": (1, 1, 0),
 }
 
 

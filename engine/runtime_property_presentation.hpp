@@ -56,7 +56,9 @@ inline Keys keys(Control c,int options=0){
     const bool cycling=choiceList(c)&&options>=2&&options<=kCycleChoicesMax;
     k.leftRightChange=c==Control::Slider||c==Control::Chips||c==Control::SteppedSlider||c==Control::Segments||
                       c==Control::Checkbox||c==Control::Switch||cycling;
-    k.leftOnFirstToRail=c==Control::Segments||c==Control::Switch||cycling;
+    // A checkbox leaves like a switch: Left on an unticked box goes to the rail (Will, 2026-11-22: a section of only
+    // checkboxes, like Display, left no way to the rail; the earlier policy had Left only change a checkbox).
+    k.leftOnFirstToRail=c==Control::Segments||c==Control::Switch||c==Control::Checkbox||cycling;
     k.aOpensList=choiceList(c);
     return k;
 }
