@@ -59,12 +59,13 @@ def prism(base: Vec, radius: float, height: float, sides: int = 8) -> Tuple[List
     return verts, faces
 
 
-def flame(base: Vec, radius: float, height: float, sides: int = 4) -> Tuple[List[Vec], List[Face]]:
-    """A diamond (two pyramids) whose widest ring is a third of the way up: the flame, standing on `base`."""
+def flame(base: Vec, radius: float, height: float, sides: int = 4, lean: float = 0.0) -> Tuple[List[Vec], List[Face]]:
+    """A diamond (two pyramids) whose widest ring is a third of the way up: the flame, standing on `base`. `lean` moves the tip that
+    far along DRAUGHT (world +X) and the ring a third of it, so the flame bends rather than slides (0: today's upright flame)."""
     ring_z = height / 3.0
-    verts = [(base[0] + radius * math.cos(math.tau * k / sides), base[1] + radius * math.sin(math.tau * k / sides), base[2] + ring_z)
+    verts = [(base[0] + radius * math.cos(math.tau * k / sides) + lean / 3.0, base[1] + radius * math.sin(math.tau * k / sides), base[2] + ring_z)
              for k in range(sides)]
-    verts += [(base[0], base[1], base[2]), (base[0], base[1], base[2] + height)]
+    verts += [(base[0], base[1], base[2]), (base[0] + lean, base[1], base[2] + height)]
     foot, tip = sides, sides + 1
     faces: List[Face] = [(k, (k + 1) % sides, foot) for k in range(sides)] + [((k + 1) % sides, k, tip) for k in range(sides)]
     return verts, faces
@@ -78,6 +79,22 @@ def merge(parts) -> Tuple[List[Vec], List[Face]]:
         faces += [tuple(i + len(verts) for i in face) for face in f]
         verts += v
     return verts, faces
+
+
+# The flicker's two flame shapes (plan docs/plans/2026-11-22-cuckoo-village-candle-flicker.md): (height, ring radius, lean toward DRAUGHT),
+# metres. Today's flame is (FLAME_HEIGHT, FLAME_RADIUS, 0). Every shape is the same 8 triangles.
+DRAUGHT = (1.0, 0.0)
+FLAME_SHAPES = {1: (0.090, 0.020, 0.014), 2: (0.060, 0.024, -0.010)}
+
+
+def tree_flame_shapes(tree: int, location: Vec, rot_z: float, scale: float):
+    """{(group, shape): parts}: the tree's flames split into group 0 (the candles with j = 0) and group 1 (j = 1), each built in both
+    shapes. Every group holds PER_TREE / PER_TIER candles; the stick under each is the one tree_candles builds."""
+    out = {(g, s): [] for g in range(PER_TIER) for s in FLAME_SHAPES}
+    for n, base in enumerate(candle_bases(tree, location, rot_z, scale)):
+        for shape, (h, r, lean) in FLAME_SHAPES.items():
+            out[(n % PER_TIER, shape)].append(flame((base[0], base[1], base[2] + STICK_HEIGHT), r, h, lean=lean))
+    return out
 
 
 def tree_candles(tree: int, location: Vec, rot_z: float, scale: float):

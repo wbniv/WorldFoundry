@@ -156,6 +156,14 @@ DAY0 = _dt.date(2000, 1, 1)
 BAVARIA_CELL, CLASSIC_CELL = 230, 231   # visibility mailboxes: 1 shows the Bavarian parts (Bavaria mode On) / the Classic parts that Bavaria replaces (Off)
 CANDLE_CELL = 214                 # the visibility mailbox of the candle sticks: 1 in season, or when Candles all year is On
 FLAME_CELL0 = 215                 # tree i's flames: FLAME_CELL0 + i, lit while the candles show and the window glow of house i % 13 is on
+# The flicker (plan docs/plans/2026-11-22-cuckoo-village-candle-flicker.md, Option A): each tree's ten flames are two groups of five
+# (the candles with j = 0 and j = 1 of candles.candle_bases), each group built in two shapes. Group index i = 2 * tree + group has two
+# visibility cells, FLICKER_CELL0 + 2i (shape 1: tall, leaning one way) and the next (shape 2: short, leaning the other); exactly one is 1
+# while the group is lit. Cells 232 to 279; the director's scratch cells start at 600.
+FLICKER_CELL0 = 232
+FLICKER_F1, FLICKER_F2 = 2.3, 3.7      # revolutions a second: whole cycles a minute (138 and 222), so the pattern repeats each minute
+FLICKER_PHI = 0.618034
+FLICKER_GROUPS = 2 * 12                # twelve trees, two groups each
 TREES = 12
 FLOWERS_CELL = 227                # cottage_flowers (the petunia and geranium boxes) shows when Detailed flowers is On
 BLOCKS_CELL = 228                 # cottage_flower_blocks (today's blocks) shows when it is Off
@@ -231,3 +239,19 @@ if __name__ == "__main__":
         h, m, s = (float(v) for v in spec.split(":"))
         poses = all_poses(h * 3600 + m * 60 + s)
         print(spec, {k: tuple(round(v, 3) for v in poses[k][:6]) for k in ("minute_hand", "hour_hand", "tower_figure_4", "cs_wide")})
+
+
+def flicker_phase(group_index: int) -> float:
+    """The group's phase, in revolutions: group_index is 2 * tree + group, so all 24 differ."""
+    return (group_index * FLICKER_PHI) % 1.0
+
+
+def flame_drive(t: float, group_index: int) -> float:
+    """The two-sine drive of a group's flame at t seconds into the minute: above 0 is shape 1, otherwise shape 2."""
+    p = flicker_phase(group_index)
+    return math.sin(math.tau * (FLICKER_F1 * t + p)) + math.sin(math.tau * (FLICKER_F2 * t + 2.0 * p))
+
+
+def flame_shape(t: float, tree: int, group: int) -> int:
+    """1 (tall, leaning toward the draught) or 2 (short, leaning away) for a tree's group (0 = A, 1 = B) at t seconds into the minute."""
+    return 1 if flame_drive(t, 2 * tree + group) > 0.0 else 2

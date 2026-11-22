@@ -31,6 +31,9 @@ import bavaria as bv         # noqa: E402
 TAG = '[cuckoo-village]'
 REFERENCE = 10 * 3600 + 8 * 60 + 22.0       # the pose the level starts from: 10:08
 GLOW_CELL0, BIRD_CELL = 200, 213
+import os
+FLAMES = os.environ.get('WF_CANDLE_FLAMES', 'static')       # 'static' (today) or 'swap' (flicker plan, Option A); a spike switch
+assert FLAMES in ('static', 'swap'), FLAMES
 
 source = (LAYOUT / 'generate.py').read_text()
 cut = source.index('scene=bpy.context.scene')       # everything after this is the layout's review render and export
@@ -82,8 +85,16 @@ for i in range(tl.TREES):
     tree = objs[f'pine_{i + 1:02}']
     sticks, flames = cd.tree_candles(i, tuple(tree.location), tree.rotation_euler.z, tree.scale.x)
     stick_parts += sticks
-    flame_verts, flame_faces = cd.merge(flames)
-    mesh_actor(f'candle_flames_{i + 1:02}', flame_verts, flame_faces, cd.FLAME_TILE)['wf_Visibility Mailbox'] = tl.FLAME_CELL0 + i
+    if FLAMES == 'swap':
+        # Option A of the flicker plan: four flame actors a tree (group 0 or 1, shape 1 or 2), one visibility cell each, the director shows one
+        # shape of each group at a time (docs/plans/2026-11-22-cuckoo-village-candle-flicker.md)
+        for (group, shape), parts in sorted(cd.tree_flame_shapes(i, tuple(tree.location), tree.rotation_euler.z, tree.scale.x).items()):
+            verts, faces = cd.merge(parts)
+            cell = tl.FLICKER_CELL0 + 2 * (2 * i + group) + (shape - 1)
+            mesh_actor(f'candle_flames_{"ab"[group]}{shape}_{i + 1:02}', verts, faces, cd.FLAME_TILE)['wf_Visibility Mailbox'] = cell
+    else:
+        flame_verts, flame_faces = cd.merge(flames)
+        mesh_actor(f'candle_flames_{i + 1:02}', flame_verts, flame_faces, cd.FLAME_TILE)['wf_Visibility Mailbox'] = tl.FLAME_CELL0 + i
 stick_verts, stick_faces = cd.merge(stick_parts)
 mesh_actor('candle_sticks', stick_verts, stick_faces, cd.STICK_TILE)['wf_Visibility Mailbox'] = tl.CANDLE_CELL
 
