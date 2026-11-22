@@ -682,6 +682,8 @@ These steps are the contract. Each is run when its phase lands, with the raw out
 
     **PASS** (the other values in that run are the same as above, with 5 answered). The regenerated headers come from `task gen-oas-headers`, and `ht_and_objects_match_golden` passes; a capture with `--set panel=1` shows the harbour alone.
 
+    **The sun's bearing, 2026‑11‑22.** The sun disc is placed on the ray from the camera to the sun, on a plane about 150 m away. The model and the director cast that ray from a fixed reference camera (`CAMERA_REF`), but the river panel pulls the camera back and shifts it sideways, and the drift swings it, so the camera the shot really has is elsewhere and the disc sat 3 to 8 degrees off its true bearing as that camera saw it (model, panel on: 3.5° at 16:05 and 8.2° at 17:35 on 21 November; in the engine at 17:51 on 8 January the disc was 79 px, about 5.6°, from where its bearing projects). The ray now starts at the camera's own position: `timeline.scene()` uses `cs_wide`, and the director's new `th-sun` uses the Camera actor it reads for the panel. Measured after, in the engine: at 17:35 the disc is at (400, 297) where the true bearing projects to (401, 297); at 16:05, (288, 25) against (294, 27). `tests/test_tide_harbour_timeline.py` pins the angle at under a millionth of a degree for the panel on, off and with no drift, and keeps the old placement's error as a measurement.
+
 
 ## Housekeeping done with this plan
 

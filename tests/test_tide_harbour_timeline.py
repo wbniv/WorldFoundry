@@ -197,3 +197,36 @@ def test_the_river_panel_setting_off_hides_the_panel_and_gives_the_harbour_the_w
     assert on.poses["cs_wide"] != off.poses["cs_wide"]
     assert parts.visibility_group("panel_map") == "panel" and parts.visibility_group("panel_drum_0_h10") == "panel"
     assert parts.visibility_group("panel_arrow_up") == "arrow_up"
+
+
+def _unit(v):
+    n = math.sqrt(sum(c * c for c in v))
+    return tuple(c / n for c in v)
+
+
+def _angle_deg(a, b):
+    return math.degrees(math.acos(max(-1.0, min(1.0, sum(x * y for x, y in zip(a, b))))))
+
+
+@pytest.mark.parametrize("opt", [{}, {"panel": 1}, {"drift": 1}], ids=["panel on", "panel off", "no drift"])
+@pytest.mark.parametrize("hh", [15.0, 16.0, 17.0, 17.5, 17.7])
+def test_the_sun_is_on_its_true_bearing_as_the_camera_the_shot_really_has_sees_it(hh, opt):
+    """The disc is about 150 m away, so a ray from a fixed reference camera puts it 3 to 8 degrees off once the river panel
+    pulls the camera back and sideways (found with the panel on, 2026-11-22). The ray starts at the camera's own position."""
+    sod = hh * 3600.0 + 300.0
+    sc = tl.scene(TODAY, sod, opt)
+    if not sc.visible[tl.VIS["sun"]]:
+        pytest.skip("the sun is out of frame at this time")
+    cam, disc, s = sc.poses["cs_wide"], sc.poses["sun"], sc.sun
+    seen = _unit((disc.x - cam.x, disc.y - cam.y, disc.z - cam.z))
+    assert _angle_deg(seen, (s.north, s.west, s.up)) < 1e-6
+
+
+def test_the_old_reference_camera_placement_was_off_with_the_panel_on():
+    """The measurement behind the fix: placing the sun from CAMERA_REF, as the level did, is several degrees off at sunset."""
+    sod = 17.5 * 3600.0 + 300.0
+    sc = tl.scene(TODAY, sod)
+    s, cam = sc.sun, sc.poses["cs_wide"]
+    k = (tl.SUN_Y - tl.CAMERA_REF[1]) / s.west
+    old = (tl.CAMERA_REF[0] + s.north * k - cam.x, tl.SUN_Y - cam.y, tl.CAMERA_REF[2] + s.up * k - cam.z)
+    assert _angle_deg(_unit(old), (s.north, s.west, s.up)) > 3.0

@@ -441,13 +441,8 @@ def scene(day: int, sod: float, options: Dict[str, int] | None = None) -> Scene:
     P["hand_m"] = Pose(DIAL[0], HAND_Y["hand_m"], DIAL[2], b=(mi + sec / 60.0) / 60.0)
     P["hand_s"] = Pose(DIAL[0], HAND_Y["hand_s"], DIAL[2], b=sec / 60.0)
 
-    # the sun: where the ray from the camera toward it meets the disc plane; hidden behind the camera or below the bank
+    # the sun: hidden behind the camera or below the bank (it is placed below, once the camera is known)
     sun_on = s.west > 0.5 and -2.0 < s.alt_deg < 25.0        # within 60 degrees of west and low: in or near the frame
-    if sun_on:
-        k = (SUN_Y - CAMERA_REF[1]) / s.west
-        P["sun"] = Pose(CAMERA_REF[0] + s.north * k, SUN_Y, max(-40.0, CAMERA_REF[2] + s.up * k))
-    else:
-        P["sun"] = Pose(*PARK)
     # the moon: a disc on an arc across the night, right to left; no claim about its phase or place
     f = moon_phase(s.ha)
     moon_on = 0.0 < f < 1.0 and s.alt_deg < -4.0
@@ -467,6 +462,15 @@ def scene(day: int, sod: float, options: Dict[str, int] | None = None) -> Scene:
     # the screen (panel.py): the camera pulls back and shifts so the harbour sits in what the panel leaves, and the panel's
     # parts are posed from the camera's frame.
     P["cs_wide"], P["LookAt"], left, vis = camera_poses(sod, opt)
+    # the sun sits on the ray from the camera the shot really has, not from a reference position: the panel pulls the camera
+    # back and shifts it sideways and the drift swings it, and the disc is only about 150 m away, so a ray from CAMERA_REF
+    # puts the sun a few degrees off its true bearing as the camera sees it
+    cam = P["cs_wide"]
+    if sun_on:
+        k = (SUN_Y - cam.y) / s.west
+        P["sun"] = Pose(cam.x + s.north * k, SUN_Y, max(-40.0, cam.z + s.up * k))
+    else:
+        P["sun"] = Pose(*PARK)
     reading = turns.panel_reading(day, sod)
     P.update(pn.panel_poses(pn.frame_from(P["cs_wide"], P["LookAt"]), sod, left, vis, reading, h))
 

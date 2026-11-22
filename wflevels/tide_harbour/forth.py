@@ -275,12 +275,8 @@ def frame_words(ix: Dict[str, int]) -> List[str]:
                  f"  {t} .17 * {n(ph)} + sin-rev .02 * {tide} + {name} th-z  {t} 1800 / {n(ph)} + th-frac {name} th-c")
     L.append(f"  {tide} {A('gauge_pointer')} th-z ;")
     # the sky: sun, moon, clouds, birds
-    k_sun = (tl.SUN_Y - tl.CAMERA_REF[1])
     L += [": th-sky",
-          f"  {get('son')} if {n(k_sun)} {get('we')} / {cell('kk')} th!",
-          f"    {get('no')} {get('kk')} * {n(tl.CAMERA_REF[0])} + {A('sun')} th-x",
-          f"    {get('up')} {get('kk')} * {n(tl.CAMERA_REF[2])} + -40 max {A('sun')} th-z",
-          f"  else {n(tl.PARK[0])} {A('sun')} th-x {n(tl.PARK[2])} {A('sun')} th-z then",
+          f"  {get('son')} 0 = if {n(tl.PARK[0])} {A('sun')} th-x {n(tl.PARK[2])} {A('sun')} th-z then",       # on, th-sun places it
           f"  {get('mon')} if 60 120 {get('mf')} * - {A('moon')} th-x {get('mf')} .5 * sin-rev 30 * 4 + {A('moon')} th-z",
           f"  else {n(tl.PARK[0])} {A('moon')} th-x {n(tl.PARK[2])} {A('moon')} th-z then"]
     for i, (z, period, ph, _half) in enumerate(tl.CLOUDS):
@@ -400,7 +396,11 @@ def panel_words(ix: Dict[str, int]) -> List[str]:
         for name in pn.DRUMS:
             out.append(f"  {n(pn.row_u(name))} {n(pn.row_v(row))} {values[name]} {A(f'panel_drum_{row}_{name}')} th-pdrum")
     out += ["  then ;"]
-    L = [": th-panel", "  th-pframe", f"  {g('t')} 1800 th-mod 900 / dup 1 > if 2 swap - then .5 * cos-rev {n(pn.PAN_KM / 2.0 * pn.M_PER_KM)} * {n(-pn.BAND_H / 2.0)} + {cell('pm')} th!",
+    L = [": th-sun",     # the sun on the ray from the camera the engine really has (th-pframe has read it), not from a reference position
+         f"  {g('son')} if {n(tl.SUN_Y)} {g('ky')} - {g('we')} / {cell('kk')} th!",
+         f"    {g('no')} {g('kk')} * {g('kx')} + {A('sun')} th-x",
+         f"    {g('up')} {g('kk')} * {g('kz')} + -40 max {A('sun')} th-z then ;",
+         ": th-panel", "  th-pframe th-sun", f"  {g('t')} 1800 th-mod 900 / dup 1 > if 2 swap - then .5 * cos-rev {n(pn.PAN_KM / 2.0 * pn.M_PER_KM)} * {n(-pn.BAND_H / 2.0)} + {cell('pm')} th!",
          put("panel_paper", "paper", "0", "0"), put("panel_map", "map", "0", g("pm")), put("panel_col_body", "column", "0", "0"),
          put("panel_col_fill", "fill", n(pn.COL_X), n(pn.COL_V0)),
          f"  {g('tide')} {n(1.0 / pn.COL_MAX_M)} * th-c01 .01 max {g('psc')} * {A('panel_col_fill')} th-sz",
