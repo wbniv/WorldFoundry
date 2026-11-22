@@ -398,7 +398,10 @@ def camera_poses(sod: float, opt: Dict[str, int]):
     return (Pose(lx + dist * sin_rev(az), LOOK_AT[1] - dist * cos_rev(az), CAMERA_Z), Pose(lx, LOOK_AT[1], LOOK_AT[2]), left, vis)
 
 
-def scene(day: int, sod: float, options: Dict[str, int] | None = None) -> Scene:
+DISPLAY_16_9 = (16.0 / 9.0, 60.0)                  # (DISPLAY_ASPECT, DISPLAY_VFOV) the panel was drawn for: a 16:9 television
+
+
+def scene(day: int, sod: float, options: Dict[str, int] | None = None, display: Tuple[float, float] = DISPLAY_16_9) -> Scene:
     opt = dict(DEFAULT_OPTIONS, **(options or {}))
     sod = sod % 86400.0
     t = sod % 3600.0                                  # second of the hour: every fast motion's period divides it
@@ -472,7 +475,7 @@ def scene(day: int, sod: float, options: Dict[str, int] | None = None) -> Scene:
     else:
         P["sun"] = Pose(*PARK)
     reading = turns.panel_reading(day, sod)
-    P.update(pn.panel_poses(pn.frame_from(P["cs_wide"], P["LookAt"]), sod, left, vis, reading, h))
+    P.update(pn.panel_poses(pn.frame_from(P["cs_wide"], P["LookAt"]), sod, left, vis, reading, h, pn.half_w(*display)))
 
     # colours
     if not RECOLOUR:
@@ -492,8 +495,8 @@ def scene(day: int, sod: float, options: Dict[str, int] | None = None) -> Scene:
     return Scene(P, colours, visible, h, q, s)
 
 
-def all_poses(day: int, sod: float, options: Dict[str, int] | None = None) -> Dict[str, Pose]:
-    return scene(day, sod, options).poses
+def all_poses(day: int, sod: float, options: Dict[str, int] | None = None, display: Tuple[float, float] = DISPLAY_16_9) -> Dict[str, Pose]:
+    return scene(day, sod, options, display).poses
 
 
 def piece_names() -> List[str]:
