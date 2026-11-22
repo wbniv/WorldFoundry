@@ -60,7 +60,7 @@ flowchart TD
 
 ## 2. Use the same list in a screensaver
 
-The Aquarium app's Dream half (`android/screensaver`, flavor `aquarium`; its `applicationId` is `org.worldfoundry.screensaver` today and becomes `org.worldfoundry.game.aquarium` in the rename of [One Aquarium APK](../plans/2026-11-22-one-aquarium-apk.md)) plays a level on its own, with an autopilot, when Android starts it.
+The Aquarium app's Dream half (`android/screensaver`, flavor `aquarium`; its `applicationId` is `org.worldfoundry.game.aquarium`, renamed on 2026‑11‑22 from `org.worldfoundry.screensaver`, which stays the Java code package; see [One Aquarium APK](../plans/2026-11-22-one-aquarium-apk.md)) plays a level on its own, with an autopilot, when Android starts it.
 
 1. **Autopilot variants.** `python3 scripts/build-aquarium-screensaver-levels.py` (run in the container: `scripts/in-linux-container.sh python3 scripts/build-aquarium-screensaver-levels.py`) reads the manifest, builds an `<id>_screensaver` variant of each level, and packs `wflevels/aquarium-screensaver-cd.iff` in manifest order. A manifest id with no `wflevels/<id>/` directory stops the build and names the id.
 2. **The catalogue.** Gradle copies the manifest into the flavor's assets as `levels.manifest` (`copyAquariumLevelCatalog` in `android/screensaver/build.gradle.kts`). `LevelCatalog` parses it at runtime: `ids()`, `label(id)`, `valid(id)`, `indexOf(id)` (the level's index in the bundle) and `choose(requested, saved, rng)`. It is one generic class: a second package copies its own manifest into its own flavor the same way, never a copy of the class.
@@ -71,11 +71,11 @@ The Aquarium app's Dream half (`android/screensaver`, flavor `aquarium`; its `ap
 A launcher, `adb` or the coordinator can start a named level without changing what the Dream plays when idle. Pass the **`org.worldfoundry.screensaver.LEVEL`** string extra to the preview activity or the TV launcher activity:
 
 ```
-adb shell am start -n org.worldfoundry.screensaver/.ScreensaverPreviewActivity \
+adb shell am start -n org.worldfoundry.game.aquarium/org.worldfoundry.screensaver.ScreensaverPreviewActivity \
     --es org.worldfoundry.screensaver.LEVEL aquarium_jellyfish
 ```
 
-The short form `-n <applicationId>/.Class` resolves the leading dot against the **applicationId**, not the code package. It works today because the two are both `org.worldfoundry.screensaver`; after the rename to `org.worldfoundry.game.aquarium` use the full class, `org.worldfoundry.game.aquarium/org.worldfoundry.screensaver.ScreensaverPreviewActivity`. The extra's key, `org.worldfoundry.screensaver.LEVEL`, is a plain string and does not change.
+The short form `-n <applicationId>/.Class` resolves the leading dot against the **applicationId**, not the code package. The `applicationId` is `org.worldfoundry.game.aquarium` and the classes live in `org.worldfoundry.screensaver`, so the dot form would name a class that does not exist: always use the full class, `org.worldfoundry.game.aquarium/org.worldfoundry.screensaver.ScreensaverPreviewActivity`. The extra's key, `org.worldfoundry.screensaver.LEVEL`, is a plain string and does not change.
 
 - The value is a catalogue id, or `random`.
 - It applies to that run only. It never writes the saved choice.
@@ -105,7 +105,7 @@ stateDiagram-v2
 
 Two packs exist today, built the same way: **WF Aquarium** (flavor `aquarium`, `wflevels/aquarium-menu.manifest`, 11 tanks) and **WF Clocks**, the 3D Clocks (flavor `clocks`, `wflevels/clocks-menu.manifest`, Minute Machine and Cuckoo Village). A third pack follows the same steps. The roster is append-only: a level's position is its id in the bundle.
 
-1. **Name the package `org.worldfoundry.game.<name>`** (Will, 2026‑11‑22: `org.worldfoundry.game.aquarium`, `org.worldfoundry.game.clocks`) and set it as the flavor's `applicationId` in `android/screensaver/build.gradle.kts`. The name is the game, never the mechanism: not `…screensaver`, not `…wf_game.<name>`. The Java `namespace` (`org.worldfoundry.screensaver`) is a separate setting and stays. Aquarium and Clocks still carry their old ids until the rename lands, so the tables below use the ids as they are today ([One Aquarium APK](../plans/2026-11-22-one-aquarium-apk.md), D5).
+1. **Name the package `org.worldfoundry.game.<name>`** (Will, 2026‑11‑22: `org.worldfoundry.game.aquarium`, `org.worldfoundry.game.clocks`) and set it as the flavor's `applicationId` in `android/screensaver/build.gradle.kts`. The name is the game, never the mechanism: not `…screensaver`, not `…wf_game.<name>`. The Java `namespace` (`org.worldfoundry.screensaver`) is a separate setting and stays. Aquarium and Clocks carry the new ids since 2026‑11‑22, and the tables below show them ([One Aquarium APK](../plans/2026-11-22-one-aquarium-apk.md), D5).
 2. Write `wflevels/<package>-menu.manifest` in the format above.
 3. Give its Gradle flavor a `Copy` task that puts the manifest in its assets as `levels.manifest`, like `copyAquariumLevelCatalog` and the Clocks equivalent in `android/screensaver/build.gradle.kts`, and add the output to that flavor's `assets` source set.
 4. Pack the bundle (`cdpack --manifest`, for Clocks `scripts/pack-clocks-bundle.py`) into the flavor's assets.
@@ -147,7 +147,7 @@ Adding a type is an **engine change** (C++ and the registry), so it needs the ow
 ### How a user opens the settings
 
 - **On the TV remote or a gamepad: hold A, the remote's centre (OK) button, alone for 1 second, in the level.** `Host::gesture` in `engine/runtime_property_host.cpp` counts the hold; a tap, or A with any direction held, is an ordinary level control and resets it. At 1 s the host opens the form of the one editable object, or a picker when several objects are editable. It works only when the level has at least one editable object: an object with a stored, non-read-only field. Without a settings object the gesture does nothing, which is exactly what a level with no settings looks like on a TV.
-- **On a phone: the Dream settings form**, through the `org.worldfoundry.screensaver.settings` provider, which needs the phone asset above.
+- **On a phone: the Dream settings form**, through the `org.worldfoundry.game.aquarium.settings` provider, which needs the phone asset above.
 - **From the coordinator or Homeboard:** the same `getCapabilities`/`setSetting` calls, again from the phone asset.
 
 ### Check it
@@ -164,10 +164,10 @@ A level whose row ends in `NOTHING` has no way to open settings. Then test on a 
 Devices belong to the coordinator's queue: use it, not raw `adb`. Everything here is a job; each device runs one job at a time.
 
 1. **Install.** `task chromecast:screensaver:install DEVICE=chromecast-test-01 APK=/absolute/path/screensaver-aquarium-release.apk`. Its launcher check (`verify-launch`) compares the **home-screen icon artwork**; it does not start the app, and neither does a separate `verify-launch` job.
-2. **A normal launch** (the menu): `task chromecast:check DEVICE=chromecast-test-01 APP=screensaver DURATION=20`. It runs `am start -W -n …/.AquariumActivity`, holds for the duration, then restores the previous screen. Download the evidence with `task chromecast:evidence JOB=<id> OUT=<empty-dir>`: `screenshot.png` shows the screen, `wf.log` the app's own log (section 8).
+2. **A normal launch** (the menu): `task chromecast:check DEVICE=chromecast-test-01 APP=screensaver DURATION=20`. It runs `am start -W -n …/org.worldfoundry.screensaver.AquariumActivity`, holds for the duration, then restores the previous screen. Download the evidence with `task chromecast:evidence JOB=<id> OUT=<empty-dir>`: `screenshot.png` shows the screen, `wf.log` the app's own log (section 8).
 3. **A tank for one run** (no menu). `screensaver-show` acts on the **selected** screensaver, so select the app first, then restore the original:
    ```
-   task chromecast:screensaver:select DEVICE=… COMPONENT=org.worldfoundry.screensaver/org.worldfoundry.screensaver.AquariumDreamService
+   task chromecast:screensaver:select DEVICE=… COMPONENT=org.worldfoundry.game.aquarium/org.worldfoundry.screensaver.AquariumDreamService
    WF_CC_LEVEL=aquarium_plants task chromecast:screensaver:show DEVICE=…
    task chromecast:screensaver:select DEVICE=… COMPONENT=<the component you read before>
    ```
@@ -225,18 +225,18 @@ The coordinator knows a screensaver package through one entry in `scripts/wf_dev
 | Field | What it is | Aquarium | 3D Clocks | Seahorse Grid |
 |---|---|---|---|---|
 | key | the registry name | `screensaver` | `clocks-screensaver` | `seahorse-screensaver` |
-| `package` | Android package | `org.worldfoundry.screensaver` | `org.worldfoundry.clocks` | `org.worldfoundry.seahorsegrid` |
+| `package` | Android package | `org.worldfoundry.game.aquarium` | `org.worldfoundry.game.clocks` | `org.worldfoundry.seahorsegrid` |
 | `kind` | `screensaver` | yes | yes | yes |
-| `activity` | what a plain `launch` starts: the menu for the Aquarium | `…/.AquariumActivity` | `…/…ClocksActivity` | `…/…SeahorseGridActivity` |
+| `activity` | what a plain `launch` starts: the menu for the Aquarium | `…/org.worldfoundry.screensaver.AquariumActivity` | `…/org.worldfoundry.screensaver.ClocksActivity` | `…/…SeahorseGridActivity` |
 | `dream_component` | the DreamService to select | `…AquariumDreamService` | `…ClocksDreamService` | `…SeahorseGridDreamService` |
-| `preview_activity` | what `screensaver-show` starts | `…/.ScreensaverPreviewActivity` | the launcher activity | its own preview activity |
+| `preview_activity` | what `screensaver-show` starts | `…/org.worldfoundry.screensaver.ScreensaverPreviewActivity` | `…/org.worldfoundry.screensaver.ScreensaverPreviewActivity` | its own preview activity |
 | `preview_extra`, `preview_value` | an extra `show` always adds | `…DREAM` = `aquarium` | none | `…DREAM` = `seahorse_grid` |
 | `level_launch_extra` | the one-run extra; present means "supports `LEVEL`" | `…LEVEL` | `…LEVEL` | none |
 | `level_setting_id` | the settings-provider setting whose choices are the levels | `tank` | `clock` | none |
-| `settings_authority` | the content provider for `getCapabilities` and `setSetting` | `….screensaver.settings` | `….clocks.settings` | `….seahorsegrid.settings` |
+| `settings_authority` | the content provider for `getCapabilities` and `setSetting` | `org.worldfoundry.game.aquarium.settings` | `org.worldfoundry.game.clocks.settings` | `….seahorsegrid.settings` |
 | `native`, `scenes` | `false`, `[]` for a screensaver | | | |
 
-**When a package is renamed** (Aquarium and Clocks, to `org.worldfoundry.game.<name>`), its registry entry's `package`, `activity`, `dream_component`, `preview_activity` and `settings_authority` change in the same administrator upgrade of the coordinator as the Gradle `applicationId`. Either half alone breaks installs: an APK whose package is not the registered one cannot be installed or launched by its registry key. The old package stays installed beside the new one until it is removed by hand, because the coordinator has no uninstall.
+**When a package is renamed** (as Aquarium and Clocks were on 2026‑11‑22, to `org.worldfoundry.game.<name>`: coordinator 0.1.222), its registry entry's `package`, `activity`, `dream_component`, `preview_activity` and `settings_authority` change in the same administrator upgrade of the coordinator as the Gradle `applicationId`. Either half alone breaks installs: an APK whose package is not the registered one cannot be installed or launched by its registry key. The old package stays installed beside the new one until it is removed by hand, because the coordinator has no uninstall.
 
 The level list is not in the registry: the coordinator and the tray read it from the app's own settings provider (the `level_setting_id` setting's options), and refuse an id the app does not list before any launch. A package with no `level_launch_extra` gets no chooser and a `screensaver-level-unavailable` refusal.
 
