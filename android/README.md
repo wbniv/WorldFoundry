@@ -92,3 +92,7 @@ Plans: [the Chromecast plan](../docs/plans/2026-09-30-aquarium-chromecast.md) (P
 ## Activity lifecycle
 
 The game's NativeActivity uses `singleTask`: opening its launcher tile again resumes the existing game thread. Home preserves the engine and EGL context. Back destroys the activity, signals the shared level/menu loops to stop, and exits the game process after engine teardown so reopening starts with fresh globals. See the [2026-10-02 lifecycle verification](../docs/plans/2026-10-02-android-wflogo-badge.md).
+
+## Package names
+
+Every new app uses `org.worldfoundry.game.{{name}}` as its `applicationId` (Will, 2026‑11‑22): `org.worldfoundry.game.aquarium`, `org.worldfoundry.game.clocks`. The name is the game, never the mechanism, so nothing is called "screensaver" even when it also runs as one. The Java code package (`namespace`) is a separate setting and keeps its name. The older `org.worldfoundry.wf_game.*` ids are renamed when each app is next rebuilt; the plan is [One Aquarium APK](../docs/plans/2026-11-22-one-aquarium-apk.md).
