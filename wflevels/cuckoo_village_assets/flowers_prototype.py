@@ -6,6 +6,7 @@ old cube plants from the house mesh, adds the new flat-coloured flowers (flowers
 Prints a line per render: RENDER <view> <before|after> <seconds>. Cycles on the CPU, 48 samples, denoised.
 """
 import math
+import os
 import sys
 import time
 from pathlib import Path
@@ -52,6 +53,7 @@ BOX_TOP = 1.655
 BOXES = [(-0.78, -1.12), (0.78, -1.12)]
 VIEWS = {   # name: (camera position, look-at, focal length mm). The street view is what the TV shows from the tower camera.
     'closeup': ((0.45, -2.9, 1.95), (0.78, -1.12, 1.62), 50),
+    'geranium': ((-1.05, -2.9, 1.95), (-0.78, -1.12, 1.62), 50),   # box 0, the left box, is a geranium box
     'cottage': ((-1.6, -7.2, 2.6), (0, -1.0, 1.6), 50),
     'street':  ((-3.5, -11.5, 3.6), (0, -1.0, 1.6), 50),
 }
@@ -62,8 +64,9 @@ def render(view, tag):
     cam.location = pos; cam.data.lens = lens
     cam.rotation_euler = (Vector(target) - Vector(pos)).to_track_quat('-Z', 'Y').to_euler()
     scene.render.filepath = str(out / f'{view}-{tag}.png')
-    t = time.perf_counter(); bpy.ops.render.render(write_still=True)
-    print(f'RENDER {view} {tag} {time.perf_counter() - t:.1f}', flush=True)
+    t, c = time.perf_counter(), time.process_time(); bpy.ops.render.render(write_still=True)
+    # wall seconds, and the CPU seconds of all render threads (which another job on the machine barely changes)
+    print(f'RENDER {view} {tag} {time.perf_counter() - t:.1f} cpu {time.process_time() - c:.0f} load {os.getloadavg()[0]:.0f}', flush=True)
 
 
 only = [a[6:] for a in argv if a.startswith('views=')]

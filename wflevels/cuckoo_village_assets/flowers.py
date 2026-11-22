@@ -1,10 +1,11 @@
-"""Cottage window-box flowers: trailing petunias and edelweiss, modelled with real petals and flat-coloured materials.
+"""Cottage window-box flowers: petunias and geraniums, each with edelweiss, modelled with real petals and flat-coloured materials.
 
 Plan: docs/plans/2026-11-22-cuckoo-village-flowers.md. Pure Python (no Blender), so the geometry is tested on its own
 (tests/test_cuckoo_village_flowers.py) and the same code feeds the prototype renders and, later, the level build.
 
-A box holds a few mounded petunia plants along the back, trailing petunia stems that hang over the front of the box, and
-small edelweiss tufts. A petunia bloom is a funnel: a five-lobed rim round a recessed throat. An edelweiss head is a flat
+Two kinds of box alternate, two in every three petunia and one in three geranium (`box_kind`). A petunia box holds a few
+mounded petunia plants along the back and trailing petunia stems that hang over the front. A geranium box holds upright
+(zonal) geraniums and trailing ivy geraniums. Both kinds hold small edelweiss tufts. A geranium floret is a ten-point star of petals cupped towards the viewer round a yellow centre. A petunia bloom is a funnel: a five-lobed rim round a recessed throat. An edelweiss head is a flat
 star of felty white bracts round a yellow heart of tiny florets, on a short stem with silvery leaves. Everything is returned
 per material name as (vertices, faces); faces are triangles. Local frame of a box: x along the box, y out of the wall
 (front is -y), z up; the origin is the middle of the box top. The old model put 14 cubes on each box (about 170 triangles).
@@ -13,6 +14,7 @@ from __future__ import annotations
 
 import math
 import random
+from collections import Counter
 from typing import Dict, List, Tuple
 
 Vec = Tuple[float, float, float]
@@ -20,9 +22,10 @@ Mesh = Tuple[List[Vec], List[Tuple[int, ...]]]
 
 # Flat materials: name -> sRGB base colour. Colour is the only thing that distinguishes them: none has a texture.
 MATERIALS: Dict[str, Tuple[float, float, float]] = {
-    "petunia_magenta": (0.80, 0.09, 0.46),
-    "petunia_violet": (0.43, 0.19, 0.70),
-    "petunia_white": (0.96, 0.95, 0.92),
+    "bloom_red": (0.78, 0.07, 0.06),         # geraniums
+    "bloom_magenta": (0.80, 0.09, 0.46),     # petunias, and the pink geraniums
+    "bloom_violet": (0.43, 0.19, 0.70),
+    "bloom_white": (0.96, 0.95, 0.92),
     "flower_centre": (0.97, 0.80, 0.16),     # petunia throats and the yellow heart of an edelweiss
     "edelweiss_felt": (0.86, 0.86, 0.79),    # the felty white-grey bracts
     "leaf_green": (0.17, 0.43, 0.14),
@@ -32,15 +35,18 @@ MATERIALS: Dict[str, Tuple[float, float, float]] = {
 }
 # Thin one-sided surfaces: the engine culls back faces, so these materials are exported double-sided (flag 8,
 # `wf_double_sided` on the Blender material) and a petal or leaf seen edge-on or from behind does not vanish.
-DOUBLE_SIDED = {"petunia_magenta", "petunia_violet", "petunia_white", "flower_centre", "edelweiss_felt", "leaf_green",
+DOUBLE_SIDED = {"bloom_red", "bloom_magenta", "bloom_violet", "bloom_white", "flower_centre", "edelweiss_felt", "leaf_green",
                 "leaf_silver"}
-PETUNIA_COLOURS = ("petunia_magenta", "petunia_violet", "petunia_white")
+PETUNIA_COLOURS = ("bloom_magenta", "bloom_violet", "bloom_white")
+GERANIUM_COLOURS = ("bloom_red", "bloom_red", "bloom_magenta", "bloom_red", "bloom_white")   # mostly red, as on a real balcony
 
 BOX_WIDTH, BOX_DEPTH, BOX_HEIGHT = 0.69, 0.22, 0.15
 # Quality sets. "full" is the proposal; "lean" is the fallback if the frame-time gate on cast1 fails.
 QUALITY = {
-    "full": dict(mounds=3, mound_blooms=3, mound_leaves=3, vines=4, vine_blooms=3, vine_leaves=2, tufts=2, heads=2),
-    "lean": dict(mounds=2, mound_blooms=3, mound_leaves=2, vines=2, vine_blooms=2, vine_leaves=2, tufts=2, heads=1),
+    "full": dict(mounds=3, mound_blooms=3, mound_leaves=3, vines=4, vine_blooms=3, vine_leaves=2, tufts=2, heads=2,
+                 g_plants=5, g_florets=3, g_buds=1, g_leaves=3, g_vines=2),
+    "lean": dict(mounds=2, mound_blooms=3, mound_leaves=2, vines=2, vine_blooms=2, vine_leaves=2, tufts=2, heads=1,
+                 g_plants=3, g_florets=2, g_buds=0, g_leaves=2, g_vines=1),
 }
 
 
@@ -74,6 +80,7 @@ class Builder:
 
     def __init__(self) -> None:
         self.parts: Dict[str, Mesh] = {name: ([], []) for name in MATERIALS}
+        self.pieces: Counter = Counter()          # (material, piece kind) -> how many were built, for the plan's budget table
 
     def tri(self, material: str, a: Vec, b: Vec, c: Vec) -> None:
         verts, faces = self.parts[material]
@@ -85,6 +92,7 @@ class Builder:
              bow: Vec = (0.0, 0.0, 0.0)) -> List[Vec]:
         """A tapered prism from base to top, bowed sideways by `bow` at the top; sides*2 triangles per segment, no caps.
         Returns the centre line (one point per ring) so blooms can sit on it."""
+        self.pieces[("stem_green", "stem")] += 1
         rings, centres = [], []
         for s in range(segments + 1):
             t = s / segments
@@ -104,6 +112,7 @@ class Builder:
     def leaf(self, material: str, base: Vec, yaw: float, length: float, width: float, droop: float, ring: int = 6) -> None:
         """A leaf: a fan of `ring` triangles round a raised centre, an ellipse `length` long and `width` either side,
         growing from `base` towards heading `yaw` and sagging by `droop` (0 flat, 1 steep) towards its tip."""
+        self.pieces[(material, "leaf")] += 1
         fx, fy = math.cos(yaw), math.sin(yaw)
         sx, sy = -fy, fx
 
@@ -122,6 +131,8 @@ class Builder:
     def petunia(self, material: str, centre: Vec, facing: Vec, radius: float) -> None:
         """A petunia bloom seen as a funnel: ten rim points (five lobe tips between five notches), a yellow throat
         recessed behind the rim. Ten triangles of petal and five of throat."""
+        self.pieces[(material, "petunia bloom")] += 1
+        self.pieces[("flower_centre", "petunia throat")] += 1
         u, v, n = _frame(facing)
         rim = []
         for k in range(10):
@@ -137,8 +148,40 @@ class Builder:
         for k in range(5):
             self.tri("flower_centre", ring[k], ring[(k + 1) % 5], _add(bottom, _scale(n, 0.001)))
 
+    def floret(self, material: str, centre: Vec, facing: Vec, radius: float) -> None:
+        """A geranium floret: five petals as a ten-point star cupped along `facing` (ten triangles), with a four-triangle
+        yellow cone at its heart."""
+        self.pieces[(material, "geranium floret")] += 1
+        self.pieces[("flower_centre", "geranium heart")] += 1
+        u, v, n = _frame(facing)
+        rim = []
+        for k in range(10):
+            a = math.tau * k / 10
+            r = radius if k % 2 == 0 else radius * 0.62
+            rim.append(_add(centre, _add(_add(_scale(u, r * math.cos(a)), _scale(v, r * math.sin(a))), _scale(n, -radius * 0.28))))
+        heart = _add(centre, _scale(n, radius * 0.18))
+        for k in range(10):
+            self.tri(material, heart, rim[k], rim[(k + 1) % 10])
+        hub = _add(centre, _scale(n, radius * 0.40))
+        ring = [_add(heart, _add(_scale(u, radius * 0.26 * math.cos(math.tau * k / 4)), _scale(v, radius * 0.26 * math.sin(math.tau * k / 4))))
+                for k in range(4)]
+        for k in range(4):
+            self.tri("flower_centre", ring[k], ring[(k + 1) % 4], hub)
+
+    def bud(self, material: str, base: Vec, direction: Vec, size: float) -> None:
+        """A closed flower bud: a four-triangle pyramid."""
+        self.pieces[(material, "geranium bud")] += 1
+        u, v, n = _frame(direction)
+        ring = [_add(base, _add(_scale(u, size * 0.5 * math.cos(math.tau * k / 4)), _scale(v, size * 0.5 * math.sin(math.tau * k / 4))))
+                for k in range(4)]
+        tip = _add(base, _scale(n, size * 1.5))
+        for k in range(4):
+            self.tri(material, ring[k], ring[(k + 1) % 4], tip)
+
     def edelweiss_head(self, centre: Vec, facing: Vec, radius: float) -> None:
         """An edelweiss head: a flat star of seven pointed felt bracts (14 triangles) round a five-triangle yellow heart."""
+        self.pieces[("edelweiss_felt", "edelweiss head")] += 1
+        self.pieces[("flower_centre", "edelweiss heart")] += 1
         u, v, n = _frame(facing)
         hub = _add(centre, _scale(n, radius * 0.12))
         rim = []
@@ -170,8 +213,9 @@ def mound(b: Builder, root: Vec, rng: random.Random, colour: str, q: dict) -> No
         b.petunia(colour, c, (0.30 * math.cos(a), -0.75, 0.55), 0.034 + 0.004 * rng.random())
 
 
-def trailing(b: Builder, start: Vec, rng: random.Random, colour: str, q: dict, drop: float, sway: float) -> None:
-    """A trailing petunia stem: leaves the box top at `start`, arches over the front rim and hangs `drop` down the
+def trailing(b: Builder, start: Vec, rng: random.Random, colour: str, q: dict, drop: float, sway: float,
+             geranium: bool = False) -> None:
+    """A trailing petunia (or, with `geranium`, ivy geranium) stem: leaves the box top at `start`, arches over the front rim and hangs `drop` down the
     front, with leaves and blooms along it and a bloom at its tip."""
     out = -0.026                                                        # how far it bows away from the box front
     end = (start[0] + sway, start[1] - 0.05, start[2] - drop)
@@ -182,7 +226,33 @@ def trailing(b: Builder, start: Vec, rng: random.Random, colour: str, q: dict, d
     for i in range(q["vine_blooms"]):
         p = centres[min(1 + i, 3)]
         side = (-1.0 if i % 2 else 1.0)
-        b.petunia(colour, (p[0] + side * 0.018, p[1] - 0.026, p[2] + 0.004), (side * 0.35, -0.85, 0.30), 0.031 + 0.004 * rng.random())
+        bloom = b.floret if geranium else b.petunia
+        bloom(colour, (p[0] + side * 0.018, p[1] - 0.026, p[2] + 0.004), (side * 0.35, -0.85, 0.30), 0.031 + 0.004 * rng.random())
+
+
+def geranium(b: Builder, root: Vec, rng: random.Random, colour: str, q: dict) -> None:
+    """An upright (zonal) geranium: a stem, round leaves fanned across the front, an umbel of florets and a bud."""
+    height = 0.095 + rng.uniform(0.0, 0.03)
+    lean = (rng.uniform(-0.008, 0.008), -rng.uniform(0.0, 0.012), 0.0)
+    top = (root[0], root[1], root[2] + height)
+    b.stem(root, top, 0.008, 0.005, 4, segments=2, bow=lean)
+    crown = _add(top, lean)
+    for i in range(q["g_leaves"]):
+        yaw = -math.pi * (0.12 + 0.76 * i / max(q["g_leaves"] - 1, 1)) + rng.uniform(-0.15, 0.15)
+        b.leaf("leaf_green", (root[0], root[1], root[2] + height * (0.30 + 0.18 * (i % 2))), yaw,
+               rng.uniform(0.050, 0.062), rng.uniform(0.027, 0.033), 0.30)
+    for i in range(q["g_florets"]):
+        a = math.tau * i / q["g_florets"] + rng.uniform(-0.4, 0.4)
+        c = (crown[0] + 0.034 * math.cos(a), crown[1] - 0.010 + 0.010 * math.sin(a), crown[2] + 0.012 * (i % 2) + 0.004)
+        b.floret(colour, c, (0.20 * math.cos(a), -0.70, 0.60), 0.034 + 0.004 * rng.random())
+    for i in range(q["g_buds"]):
+        a = math.pi * (0.35 + 0.3 * i) + rng.uniform(-0.3, 0.3)
+        b.bud(colour, (crown[0] + 0.012 * math.cos(a), crown[1] - 0.012, crown[2] - 0.004), (0.8 * math.cos(a), -0.45, 0.6), 0.012)
+
+
+def box_kind(index: int) -> str:
+    """One box in three is a geranium box (indices 0, 3, 6 ...: 9 of the 26), the rest are petunia boxes."""
+    return "geranium" if index % 3 == 0 else "petunia"
 
 
 def tuft(b: Builder, root: Vec, rng: random.Random, q: dict) -> None:
@@ -197,9 +267,11 @@ def tuft(b: Builder, root: Vec, rng: random.Random, q: dict) -> None:
         b.edelweiss_head((top[0], top[1], top[2] + 0.004), (0.25 * math.cos(a), -0.40, 0.88), 0.030)
 
 
-def box_flowers(seed: int, quality_name: str = "full") -> Dict[str, Mesh]:
-    """The flowers of one window box in its local frame: soil, mounded petunias, trailing petunias and edelweiss tufts."""
+def _build(seed: int, quality_name: str) -> Builder:
+    """The flowers of one window box in its local frame, by `box_kind(seed)`: a petunia box (mounded and trailing
+    petunias) or a geranium box (upright and trailing ivy geraniums), each with a soil bed and edelweiss tufts."""
     q = QUALITY[quality_name]
+    kind = box_kind(seed)
     rng = random.Random(seed)
     b = Builder()
     half, depth = BOX_WIDTH / 2 - 0.045, BOX_DEPTH / 2 - 0.03
@@ -208,21 +280,42 @@ def box_flowers(seed: int, quality_name: str = "full") -> Dict[str, Mesh]:
     mid = (0.0, 0.0, soil_z + 0.014)                                         # a gentle mound
     for k in range(4):
         b.tri("soil", ring[k], ring[(k + 1) % 4], mid)
-    colours = [PETUNIA_COLOURS[(seed + i) % 3] for i in range(8)]
-    # Mounded petunias along the back, edelweiss tufts nearer the ends, trailing stems along the front.
-    for i in range(q["mounds"]):
-        x = (i - (q["mounds"] - 1) / 2) * 0.17 + rng.uniform(-0.02, 0.02)
-        mound(b, (x, -0.060, soil_z + 0.004), rng, colours[i], q)     # forward of the window's glazing bars
+    b.pieces[("soil", "soil bed")] += 1
+    # Edelweiss tufts nearer the ends of every box; the plants go between them, forward of the window's glazing bars.
     for i in range(q["tufts"]):
-        x = (-0.27 + 0.54 * i / max(q["tufts"] - 1, 1)) * (1.0 if q["tufts"] > 1 else 0.0) + rng.uniform(-0.015, 0.015)
-        if q["tufts"] == 3 and i == 1:
-            x = (0.085 if seed % 2 else -0.085)                              # the middle tuft sits between two mounds
+        x = (-0.27 + 0.54 * i / max(q["tufts"] - 1, 1)) + rng.uniform(-0.015, 0.015)
         tuft(b, (x, -0.050, soil_z + 0.004), rng, q)
-    for i in range(q["vines"]):
-        x = (-0.255 + 0.51 * i / max(q["vines"] - 1, 1)) if q["vines"] > 1 else 0.0
-        trailing(b, (x + rng.uniform(-0.02, 0.02), -depth - 0.012, soil_z + 0.014), rng, colours[(i + 3) % 8], q,
-                 0.11 + 0.07 * rng.random(), rng.uniform(-0.04, 0.04))
-    return b.parts
+    if kind == "petunia":
+        colours = [PETUNIA_COLOURS[(seed + i) % 3] for i in range(8)]
+        for i in range(q["mounds"]):
+            x = (i - (q["mounds"] - 1) / 2) * 0.17 + rng.uniform(-0.02, 0.02)
+            mound(b, (x, -0.060, soil_z + 0.004), rng, colours[i], q)
+        for i in range(q["vines"]):
+            x = (-0.255 + 0.51 * i / max(q["vines"] - 1, 1)) if q["vines"] > 1 else 0.0
+            trailing(b, (x + rng.uniform(-0.02, 0.02), -depth - 0.012, soil_z + 0.014), rng, colours[(i + 3) % 8], q,
+                     0.11 + 0.07 * rng.random(), rng.uniform(-0.04, 0.04))
+    else:
+        offset = seed // 3
+        colours = [GERANIUM_COLOURS[(offset + i) % len(GERANIUM_COLOURS)] for i in range(8)]
+        n = q["g_plants"]
+        for i in range(n):
+            x = (i - (n - 1) / 2) * 0.095 + rng.uniform(-0.01, 0.01)
+            geranium(b, (x, -0.060, soil_z + 0.004), rng, colours[i], q)
+        for i in range(q["g_vines"]):
+            x = (-0.14 + 0.28 * i / max(q["g_vines"] - 1, 1)) if q["g_vines"] > 1 else 0.0
+            trailing(b, (x + rng.uniform(-0.02, 0.02), -depth - 0.012, soil_z + 0.014), rng, colours[(i + 5) % 8], q,
+                     0.11 + 0.07 * rng.random(), rng.uniform(-0.04, 0.04), geranium=True)
+    return b
+
+
+def box_flowers(seed: int, quality_name: str = "full") -> Dict[str, Mesh]:
+    """The per-material triangle meshes of window box number `seed` (see `_build`)."""
+    return _build(seed, quality_name).parts
+
+
+def box_pieces(seed: int, quality_name: str = "full") -> Counter:
+    """How many of each (material, piece) the box holds: blooms, florets, buds, heads, leaves, stems, the soil bed."""
+    return _build(seed, quality_name).pieces
 
 
 def triangle_count(parts: Dict[str, Mesh]) -> int:

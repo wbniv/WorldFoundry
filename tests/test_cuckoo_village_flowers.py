@@ -1,7 +1,7 @@
 """Window-box flower geometry (wflevels/cuckoo_village_assets/flowers.py), without Blender.
 
-Plan docs/plans/2026-11-22-cuckoo-village-flowers.md: trailing petunias and edelweiss in flat-coloured materials, inside
-a triangle budget, baked into one actor for all 26 boxes.
+Plan docs/plans/2026-11-22-cuckoo-village-flowers.md: petunia boxes (two in three) and geranium boxes (one in three), each
+with edelweiss, in flat-coloured materials, inside a triangle budget, baked into one actor for all 26 boxes.
 """
 import math
 import sys
@@ -28,8 +28,8 @@ def test_the_triangle_budget_holds_for_every_box_and_for_the_whole_village():
     assert fl.triangle_count(fl.merge(all_boxes("lean"))) < fl.triangle_count(fl.merge(all_boxes("full")))
 
 
-def test_materials_are_flat_colours_and_there_are_at_most_nine():
-    assert len(fl.MATERIALS) <= 9
+def test_materials_are_flat_colours_and_there_are_at_most_ten():
+    assert len(fl.MATERIALS) <= 10
     for name, rgb in fl.MATERIALS.items():
         assert len(rgb) == 3 and all(0.0 <= c <= 1.0 for c in rgb), name
     assert fl.DOUBLE_SIDED <= set(fl.MATERIALS) and "soil" not in fl.DOUBLE_SIDED and "stem_green" not in fl.DOUBLE_SIDED
@@ -57,11 +57,32 @@ def test_the_flowers_stay_on_the_box_and_never_reach_into_the_wall():
                     assert -0.20 <= z <= 0.22, z          # a vine hangs down the front, blooms stand a hand above the rim
 
 
-def test_every_box_has_petunias_in_two_colours_edelweiss_and_a_yellow_heart():
-    for parts in all_boxes("full"):
-        petunia = [n for n in ("petunia_magenta", "petunia_violet", "petunia_white") if parts[n][1]]
-        assert len(petunia) >= 2
+def test_one_box_in_three_is_a_geranium_box():
+    kinds = [fl.box_kind(i) for i in range(BOXES)]
+    assert kinds.count("geranium") == 9 and kinds.count("petunia") == 17
+    assert all(fl.box_kind(i) == "geranium" for i in range(0, BOXES, 3))
+
+
+def test_every_box_has_edelweiss_and_a_yellow_heart_and_its_own_flowers():
+    for i, parts in enumerate(all_boxes("full")):
         assert parts["edelweiss_felt"][1] and parts["flower_centre"][1] and parts["leaf_silver"][1]
+        if fl.box_kind(i) == "geranium":
+            assert parts["bloom_red"][1], i                     # geraniums are mostly red
+        else:
+            assert len([n for n in ("bloom_magenta", "bloom_violet", "bloom_white") if parts[n][1]]) >= 2, i
+            assert not parts["bloom_red"][1], i                 # no red on a petunia box
+
+
+def test_a_geranium_box_has_florets_of_ten_triangles_and_stays_inside_the_petunia_budget():
+    box = fl.box_flowers(0, "full")                              # box 0 is a geranium box
+    assert fl.box_kind(0) == "geranium"
+    q = fl.QUALITY["full"]
+    florets = q["g_plants"] * q["g_florets"] + q["g_vines"] * q["vine_blooms"]          # 21: ten petal triangles each
+    buds = q["g_plants"] * q["g_buds"]                                                 # 5: four triangles each
+    petals = sum(len(box[n][1]) for n in ("bloom_red", "bloom_magenta", "bloom_white"))
+    assert petals == 10 * florets + 4 * buds == 230
+    assert fl.triangle_count(box) <= FULL_PER_BOX
+    assert fl.triangle_count(fl.box_flowers(1, "full")) <= FULL_PER_BOX
 
 
 def test_the_soil_sits_above_the_box_top_so_it_shows():
@@ -71,7 +92,7 @@ def test_the_soil_sits_above_the_box_top_so_it_shows():
 
 def test_the_geometry_is_deterministic_and_boxes_differ():
     assert fl.box_flowers(5) == fl.box_flowers(5)
-    assert fl.box_flowers(5)["petunia_violet"] != fl.box_flowers(6)["petunia_violet"]
+    assert fl.box_flowers(4)["bloom_violet"] != fl.box_flowers(5)["bloom_violet"]       # two petunia boxes
 
 
 def test_placing_and_merging_keep_the_triangle_count_and_move_the_flowers():
