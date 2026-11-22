@@ -11,7 +11,6 @@
 
 - [T4] **Mip mapping** (Will, 2026‑11‑22: "add MIP MAPPING to TODO"). No plan yet and nothing measured, so what it covers is open: the GL and GLES renderers' textures, the palette and atlas paths, and which hardware (Chromecast HD, Pixel) gains from it. Ranked T4 because it crosses the texture upload and sampling paths in both renderers, so a wrong turn is expensive. First step is a plan with the current texture path read and a measurement on cast1.
 
-- [wip T4] **Global level settings: Show framerate in every level, declared once** (Will, 2026‑11‑22: "Show framerate: hook that up and make sure all wf levels include this level setting, at a minimum (update docs, update starting templates)"; "i recommend having a global declaration (right now consisting only of Show FPS) so you only have to change in 1 place in future"). One `global_settings.inc` included by `settings.inc` (every `*Settings` type carries it), a minimal `LevelSettings` holder for levels that have none, one engine table (`global_settings.cc`) mapping a key to its effect, an audit roster `all` with a `global` check, then roll-out to about 160 level sources, docs and the starting templates. Phase 1 merged into 2026-new-level (c0e00e8e): the sheet goes last in each holder so no field id moves; five aquarium levels rebuilt, Cuckoo and Tide Harbour with the Clocks session. **levcomp now adds a default holder to a level with none; 22 of 23 reachable levels carry the field or are exempt (`minute_machine` is the Clocks session's). Docs and starting templates are done (Phase 4). Open: the device check (Phase 5), and `minute_machine` (Clocks session).** [plan](docs/plans/2026-11-22-global-level-settings.md)
 
 - [wip T4] **On-screen controller for the combined Aquarium and Clocks apps on a phone** (Will, 2026‑11‑22: "new app doesn't present joystick interface to me"; "newly-installed clocks doesn't have d-pad either"). The retired standalone Aquarium app drew a joystick and D, B, C, A over its menu and tanks; the shared host of the combined apps drew nothing, so on the Pixel the menu could not be moved, nor the Clocks chooser and its hold-A settings form used. Built on the shared host (`touch_bridge.h`, `TankPlayer.java`): touches become the remote's joystick bits through the key latch, only on a touchscreen device that is not a TV, never in the Dream. `task test-touch-bridge` passes (28 checks); the APK is building; **not yet checked on the Pixel** (a `phone-input` tap on A, a swipe on the stick, the Clocks hold-A form). The Clocks session rebuilds its APK once this is pushed. [plan](docs/plans/2026-11-22-aquarium-clocks-touch-controls.md)
 
@@ -238,6 +237,8 @@
 
 
 ## Done
+
+- ✅ 2026-11-22 — [global-level-settings] Show framerate: one declaration, a default holder in levcomp, 22 of 23 reachable levels; cast1 proved. See [plan](docs/plans/2026-11-22-global-level-settings.md).
 
 - ✅ 2026‑11‑22 — [candle-flicker] Option A built: four flame meshes a tree, 24 two-sine rules, 38,080 VM cells pass; Will chose it over B. See [plan](docs/plans/2026-11-22-cuckoo-village-candle-flicker.md).
 - ✅ 2026‑11‑22 — [cuckoo-bavaria] Bavaria mode built, merged and checked on cast1: reversed hands and parade seen across 20:00. See [plan](docs/plans/2026-11-21-cuckoo-village.md).

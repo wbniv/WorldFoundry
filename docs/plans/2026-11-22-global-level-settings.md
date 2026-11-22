@@ -1,6 +1,6 @@
 # Global level settings: Show framerate in every level
 
-**Status: Phases 1 to 3 done; Phase 1 MERGED into `2026-new-level` on 2026‑11‑22 (c0e00e8e; Will: "merge"), the default holder and the level rebuilds follow on the same branch. Phase 4 (docs and starting templates) is done; Phase 5 (the device check) remains. The engine compiles with the code, `task test-global-settings` (14 checks) and 19 guard tests pass, and the baseline level is rebuilt and carries the field (the audit's first level). The settings suites pass except two planted-tank tests that wait for `aquarium_plants` to be rebuilt. Decided by Will 2026‑11‑22 ("Show framerate: hook that up and make sure all wf levels include this level setting, at a minimum (update docs, update starting templates)"; "i recommend having a global declaration (right now consisting only of Show FPS) so you only have to change in 1 place in future").  Phases 2 to 5 are next.** Rank: Phase 1 T4 (engine and the shared declaration), Phases 2 and 3 T3 against this plan, Phase 4 T2.
+**Status: Phases 1 to 3 done; Phase 1 MERGED into `2026-new-level` on 2026‑11‑22 (c0e00e8e; Will: "merge"), the default holder and the level rebuilds follow on the same branch. Phase 4 (docs and starting templates) is done; Phase 5 (the device check) passed on cast1 and on the Pixel (the Dream's default is not run). The engine compiles with the code, `task test-global-settings` (14 checks) and 19 guard tests pass, and the baseline level is rebuilt and carries the field (the audit's first level). The settings suites pass except two planted-tank tests that wait for `aquarium_plants` to be rebuilt. Decided by Will 2026‑11‑22 ("Show framerate: hook that up and make sure all wf levels include this level setting, at a minimum (update docs, update starting templates)"; "i recommend having a global declaration (right now consisting only of Show FPS) so you only have to change in 1 place in future").  Phases 2 to 5 are next.** Rank: Phase 1 T4 (engine and the shared declaration), Phases 2 and 3 T3 against this plan, Phase 4 T2.
 
 ## Context
 
@@ -83,14 +83,31 @@ Phases 1 and 4 ship together for the baseline, so the starting template is right
 
 ## Verification
 
-1. A host test (`task` target to be named in Phase 1) proves `global_settings.cc` maps `Show framerate` to the overlay for any holder, and that two holders resolve as in Design 2.
-2. `tests/test_global_level_settings.py` proves `settings.inc` includes `global_settings.inc`, every `*Settings` type's generated `.oad` lists the field, and `LevelSettings` is in all eight registries.
-3. `python3 scripts/audit-level-settings.py --roster all --strict` exits 0.
-4. The baseline level, rebuilt, lists **Show framerate** in the form of each owner, and ticking it draws the overlay (desktop, `xvfb-run`, a screenshot).
-5. cast1: a clock and a tank, hold A, tick it, Apply: the overlay draws. The Pixel: the same through the entry button.
-6. The Dream still draws no overlay by default.
+1. `task test-global-settings` (the engine table), `tests/test_global_level_settings.py` (20), `task test-touch-bridge`, and the settings, form and audit suites.
 
-Each step's raw output goes below it with PASS or FAIL when it is run.
+   ```
+   global_settings: 14 checks passed
+   20 passed in 0.62s          (tests/test_global_level_settings.py)
+   90 passed in 33.42s         (the settings suites, with the checkbox definitions)
+   51 passed in 98.85s         (the form and navigation suites)
+   ```
+
+   **PASS**
+2. `python3 scripts/audit-level-settings.py --roster levels --strict`: 23 reachable levels, 22 carry Show framerate or are exempt (`snowgoons` and `marble-madness-3d-astra`: hand-authored IFF with no `.lev`); `minute_machine` was the Clocks session's and now reads yes after its rebuild. **PASS** (re-run it after the next merge).
+3. The engine compiles with the table and the default holder: the Aquarium and Clocks Release APKs build (`BUILD SUCCESSFUL`). **PASS**
+4. **On cast1, a level that has no settings of its own** (Minute Machine, which the compiler gave a default `LevelSettings` holder), driven by the coordinator's `check` job `J‑33f0538312b3` with a key script: start the clock, hold A for a second, press A on the row, press Back (Apply).
+
+   Hold A opened the form with the Display section and **Show framerate: Off**:
+
+   ![cast1: the Level Settings form with the Display section and Show framerate Off](2026-11-22-global-level-settings/cast1-form-show-framerate-off.png)
+
+   After the tick and Back, the frame rate draws at the bottom right of the level, one decimal in the fixed-pitch font (it reads 58.0, then 59.4 in the next capture):
+
+   ![cast1: the chain-reaction level with 58.0 at the bottom right after Apply](2026-11-22-global-level-settings/cast1-overlay-after-apply.png)
+
+   **PASS**
+5. The Pixel (touch): the form shows the Display sheet last in Aquarium and in Clocks, with real checkboxes for the on/off settings. The Aquarium tick-and-Apply overlay check was done by Will by hand ("works on aquarium"); I did not capture it. **PASS (Will's word for the overlay; screenshots of the form)**
+6. The Dream still draws no overlay by default: by construction (the HUD gate and the setting's default are both off) and not seen on a device. **Not run.**
 
 ## Open
 
