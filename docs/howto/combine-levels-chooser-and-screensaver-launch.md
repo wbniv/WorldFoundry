@@ -165,7 +165,7 @@ Devices belong to the coordinator's queue: use it, not raw `adb`. Everything her
 3. **A tank for one run** (no menu). `screensaver-show` acts on the **selected** screensaver, so select the app first, then restore the original:
    ```
    task chromecast:screensaver:select DEVICE=… COMPONENT=org.worldfoundry.screensaver/org.worldfoundry.screensaver.AquariumDreamService
-   task chromecast:screensaver:show   DEVICE=… LEVEL=aquarium_plants
+   WF_CC_LEVEL=aquarium_plants task chromecast:screensaver:show DEVICE=…
    task chromecast:screensaver:select DEVICE=… COMPONENT=<the component you read before>
    ```
    Read the original selection first with `task chromecast:screensaver:status DEVICE=…` (`selected_component`). Evidence: `screensaver.png`, `screensaver.json` (`observed_component` must be `.ScreensaverPreviewActivity`; the `tank` setting must still be the saved value) and `commands.json` (the `am start` line must carry `--es …LEVEL <id>`).
@@ -175,7 +175,7 @@ Devices belong to the coordinator's queue: use it, not raw `adb`. Everything her
 Gotchas, each one met in practice:
 
 - `screensaver-show` on a screensaver without level support (Seahorse Grid selected) is refused with `screensaver-level-unavailable` before anything launches. That is the check working.
-- `LEVEL=` before coordinator 0.1.219 is ignored without an error: look at `commands.json` (step 3).
+- **`LEVEL=aquarium_plants` on the `task` line is dropped silently**, whatever the coordinator version: the Taskfile maps `OVERRIDES` but not `LEVEL`, so the client never sees it. Put the level in the environment as `WF_CC_LEVEL=aquarium_plants task chromecast:screensaver:show DEVICE=…` (measured on cast1, 2026‑11‑22: the `am start` line gained `--es …LEVEL aquarium_plants` only then). Before coordinator 0.1.219 the service also ignores a level without an error. Either way, look at `commands.json` (step 3) for the `LEVEL` extra.
 - `screensaver-select` of a component that is **not installed** used to end `plugin-error` and fence the device (a readd had to clear it). From 0.1.219 it is a clean refusal, `invalid-request` with `screensaver-component-not-installed`, health unchanged.
 - A direct screenshot (`capture PERSONAL=true`) is refused while another job holds the device; a queued `capture` job is not.
 - The coordinator tasks run from the `chromecast-coordinator` checkout; the APK path is a file path, not a hash.

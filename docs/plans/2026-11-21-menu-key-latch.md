@@ -77,42 +77,10 @@ No visible surface: the menu draws exactly as before; only which key presses rea
 
 1. `task test-menu-key-latch`: the helper's cases compiled with g++ in `wf-linux-test:local`.
 2. `scripts/in-linux-container.sh python3 -m pytest tests/test_one_aquarium_app.py -q`: the source checks, including that `nativeKey` latches and `WFAndroidPumpEvents` consumes the latch.
-3. `df -h /`, then, only with at least 4&nbsp;GB free, `task build-aquarium-screensaver-apk`.
-4. Copy the APK to `build/screensaver-aquarium-menu-latch-<short-commit>.apk`; record its size and sha256.
-5. On cast1 (Will): install, start the menu with `am start -n org.worldfoundry.screensaver/.AquariumActivity`, then a coordinator `remote-tap` of Down moves the highlight from "1 / 11" to "2 / 11", and a `remote-tap` of Select starts the tank.
-
-### Results
-
-Recorded 2026‑11‑21 on branch `menu-key-latch`, after commit `d6092449`.
-
-1. `task test-menu-key-latch`
-
-    ```
-    task: [test-menu-key-latch] docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O1 -Wall -Wextra -Werror -pthread -I/src/android/screensaver/src/main/cpp /src/tests/menu_key_latch_test.cpp -o /tmp/menu_key_latch && /tmp/menu_key_latch'
-
-    menu_key_latch: 18 checks passed
-    ```
+3. `df -h /`: **NOT RUN on 2026‑11‑21, and run on 2026‑11‑22 in a sparse tree.** The tree had 18 GB free on 2026‑11‑22. Command: `bash build-aquarium-apk.sh <tree>`, which writes `android/local.properties`, copies the extracted Jolt tree, runs `scripts/in-linux-container.sh python3 scripts/build-aquarium-screensaver-levels.py`, then `./gradlew :screensaver:assembleAquariumRelease --offline` with `ANDROID_HOME=/home/will/android-sdk-local`. A fresh tree also needs the Rust level tools built in the container first (`cargo build --release` for `iffcomp-rs`, `levcomp-rs`, `textile-rs`, `cdpack-rs`): the first attempt stopped at `missing …/iffcomp`. `BUILD SUCCESSFUL in 9m`; `test_the_apk_carries_both_bundles` now runs and passes (20 tests in `test_one_aquarium_app.py`, `test_launcher_parity.py` and `test_dream_host_vram.py`).
 
     **PASS**
+4. APK copy, size and sha256: `build/coordinator-artifacts/aquarium-latch-bef848b8.apk`, built from `bef848b8` (the latch on top of the unified launcher, rebased onto `2026-new-level`): 18 467 357 bytes, sha256 `a0a44ba7eca9bfee510513db9aedf436168d062c14ed9c7ebf731a463b3195ee`.
 
-2. `scripts/in-linux-container.sh python3 -m pytest tests/test_one_aquarium_app.py -q`
-
-    ```
-    ......s                                                                  [100%]
-    6 passed, 1 skipped in 0.06s
-    ```
-
-    **PASS** (the skip is `test_the_apk_carries_both_bundles`, which needs the APK). `tests/test_dream_host_vram.py`, which also reads `dream_host.cc`: `3 passed in 0.03s`.
-
-3. `df -h /`
-
-    ```
-    Filesystem      Size  Used Avail Use% Mounted on
-    /dev/nvme0n1p2  469G  439G  5.8G  99% /
-    ```
-
-    **NOT RUN.** A full checkout of this branch takes 4.7&nbsp;GB (measured: the first `git worktree add` left 314&nbsp;MB free, so it was removed at once and this work was done in a sparse checkout). A tree that can run `task build-aquarium-screensaver-apk` would leave about 1.1&nbsp;GB before any build output, under the 4&nbsp;GB floor set for this build, with the coordinator's database on the same volume. The build waits for free space, or for a build from an existing full tree.
-
-4. APK copy, size and sha256: **NOT RUN** (no build; see step 3).
-
-5. On cast1: **PENDING (Will)**, after the APK is built and installed.
+    **PASS**
+5. On cast1: **PASS**, 2026‑11‑22. Installed with job `J‑d297aa348794`. Job `J‑3efc2e7072c3` started `AquariumActivity` and pressed DPAD_DOWN with the coordinator's input script: a tap held **23 ms** on the device clock (down at uptime 225 306 498 ms, up at 225 306 521 ms) moved the highlight from **1 / 11** to **2 / 11** ([before](../diagnostics/aquarium-cast1-menu-latch-2026-11-22/menu-1-normal-launch.png), [after](../diagnostics/aquarium-cast1-menu-latch-2026-11-22/menu-2-after-20ms-tap.png)); a 46 ms tap moved it to **3 / 11** ([frame](../diagnostics/aquarium-cast1-menu-latch-2026-11-22/menu-3-after-50ms-hold.png)); OK started that tank. **What this does and does not show:** the shortest tap the coordinator can inject is about 1.4 frames at 60 Hz, so a tap shorter than one frame was not tried on the device, and no build without the latch was run for comparison. It shows the latch build takes short taps and loses none; the sub-frame case is covered by the 18 helper checks in step 1.

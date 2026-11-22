@@ -1,0 +1,244 @@
+{
+  "schema": 1,
+  "score_sha256": "ee14b56e6aa4bb7f04dda6fdd4129412328a402f434e4ad5ce6ee17b45f79238",
+  "clock_calibration": {
+    "offset_seconds": 1.1751940250396729,
+    "uncertainty_seconds": 0.1541839370727539
+  },
+  "device_anchor": {
+    "device_uptime_ms": 225301466,
+    "device_wall_ms": 1795329387254
+  },
+  "host_start_wall": 1795329387.2913988,
+  "events": [
+    {
+      "seq": 1,
+      "t": 5000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 225306498,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 5032,
+      "lateness_ms": 32
+    },
+    {
+      "seq": 2,
+      "t": 5020,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 225306521,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 5055,
+      "lateness_ms": 35
+    },
+    {
+      "seq": 3,
+      "t": 8000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 225309477,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 8011,
+      "lateness_ms": 11
+    },
+    {
+      "seq": 4,
+      "t": 8050,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 225309523,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 8057,
+      "lateness_ms": 7
+    },
+    {
+      "seq": 5,
+      "t": 11000,
+      "key": "DPAD_CENTER",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 225312482,
+        "code": 23,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 11016,
+      "lateness_ms": 16
+    },
+    {
+      "seq": 6,
+      "t": 11050,
+      "key": "DPAD_CENTER",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 225312527,
+        "code": 23,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 11061,
+      "lateness_ms": 11
+    },
+    {
+      "seq": 7,
+      "t": 18000,
+      "key": "BACK",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 225319487,
+        "code": 4,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 18021,
+      "lateness_ms": 21
+    },
+    {
+      "seq": 8,
+      "t": 18100,
+      "key": "BACK",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 225319584,
+        "code": 4,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 18118,
+      "lateness_ms": 18
+    },
+    {
+      "seq": 9,
+      "t": 23000,
+      "key": "BACK",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 225324495,
+        "code": 4,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 23029,
+      "lateness_ms": 29
+    },
+    {
+      "seq": 10,
+      "t": 23100,
+      "key": "BACK",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 225324589,
+        "code": 4,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 23123,
+      "lateness_ms": 23
+    }
+  ],
+  "emergency_releases": [],
+  "foreground_aborts": [],
+  "captures": [
+    {
+      "label": "menu1",
+      "planned_ms": 4000,
+      "started": 1795329392.429304,
+      "ended": 1795329393.835169,
+      "file": "input-frame-001.png",
+      "bytes": 76166,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "menu2",
+      "planned_ms": 7000,
+      "started": 1795329395.429368,
+      "ended": 1795329396.8637264,
+      "file": "input-frame-002.png",
+      "bytes": 76454,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "menu3",
+      "planned_ms": 10000,
+      "started": 1795329398.4292705,
+      "ended": 1795329399.968036,
+      "file": "input-frame-003.png",
+      "bytes": 76663,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "tank",
+      "planned_ms": 17000,
+      "started": 1795329405.429305,
+      "ended": 1795329406.997696,
+      "file": "input-frame-004.png",
+      "bytes": 68628,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "menu_back",
+      "planned_ms": 22000,
+      "started": 1795329410.4292908,
+      "ended": 1795329411.8156464,
+      "file": "input-frame-005.png",
+      "bytes": 76663,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "after_leave",
+      "planned_ms": 27000,
+      "started": 1795329415.429776,
+      "ended": 1795329420.8682632,
+      "file": "input-frame-006.png",
+      "bytes": 2769169,
+      "schedule_lateness_ms": 1
+    }
+  ],
+  "result": "completed",
+  "key_log": {
+    "tolerance_ms": 100,
+    "log_interval_complete": true,
+    "matching_edges": [],
+    "ambiguous": [],
+    "foreign_keys": [],
+    "unmatched_observed_if_incomplete": [],
+    "dropped_sensitive_lines": 0,
+    "truncated": false
+  }
+}
