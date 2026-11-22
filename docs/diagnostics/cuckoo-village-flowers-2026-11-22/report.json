@@ -1,0 +1,76 @@
+{
+  "verdict": "pass",
+  "sets": {
+    "Off": {
+      "fps": 29.969989628704372,
+      "p50_ms": 33.366712,
+      "p90_ms": 33.366836,
+      "p95_ms": 33.366898,
+      "p99_ms": 33.367034,
+      "worst_ms": 33.367551,
+      "missed_refresh_percent": 100.0,
+      "runs": 1,
+      "pss_kib": 142944,
+      "thermal_max": 0
+    },
+    "On": {
+      "fps": 29.959205065527655,
+      "p50_ms": 33.366712,
+      "p90_ms": 33.366828,
+      "p95_ms": 33.366896,
+      "p99_ms": 33.367127,
+      "worst_ms": 50.050057,
+      "missed_refresh_percent": 99.78401727861771,
+      "runs": 1,
+      "pss_kib": 137379,
+      "thermal_max": 0
+    },
+    "Off again": {
+      "fps": 29.96998959330472,
+      "p50_ms": 33.366711,
+      "p90_ms": 33.366837,
+      "p95_ms": 33.366881,
+      "p99_ms": 33.367077,
+      "worst_ms": 33.368142,
+      "missed_refresh_percent": 100.0,
+      "runs": 1,
+      "pss_kib": 162303,
+      "thermal_max": 0
+    }
+  },
+  "difference": {
+    "fps": -0.010784545476891338,
+    "p50_ms": 4.999999987376214e-07,
+    "p90_ms": -8.499999999855845e-06,
+    "p95_ms": 6.499999997799932e-06,
+    "p99_ms": 7.150000000422096e-05,
+    "worst_ms": 16.682210500000004,
+    "missed_refresh_percent": -0.21598272138228936
+  },
+  "checks": [
+    {
+      "ok": true,
+      "text": "the two Off sets agree: p50 33.37 and 33.37 ms differ by 0.00 ms (at most 0.5)"
+    },
+    {
+      "ok": true,
+      "text": "p50 with the flowers: 33.37 ms against 33.37 ms Off, difference +0.00 ms (at most +1.0)"
+    },
+    {
+      "ok": true,
+      "text": "p95 with the flowers: 33.37 ms against 33.37 ms Off, difference +0.00 ms (at most +1.0)"
+    },
+    {
+      "ok": true,
+      "text": "fps with the flowers 29.96 (at least 29.5)"
+    },
+    {
+      "ok": true,
+      "text": "fps differs from Off by 0.01 (at most 0.5)"
+    },
+    {
+      "ok": true,
+      "text": "missed refreshes 99.8 % against 100.0 % Off, difference -0.2 points (at most +2.0)"
+    }
+  ]
+}

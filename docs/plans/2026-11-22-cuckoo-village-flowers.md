@@ -121,7 +121,9 @@ sequenceDiagram
     R-->>R: report.md and frame-time chart
 ```
 
-**The gate.** The flowers pass if all of these hold: the median p50 and the median p95 frame time with the field On are each within **1.0 ms** of the median of the two Off sets; the frames per second with it On stay within 0.5 of the Off sets and at least 59 (the refresh is 59.94 Hz); the missed-refresh percentage rises by no more than 2 points; and the two Off sets agree with each other to within 0.5 ms, otherwise the run is thrown away as drifted. If it fails, step down the ladder in the quality diagram and measure again.
+**The gate.** The flowers pass if all of these hold: the median p50 and the median p95 frame time with the field On are each within **1.0 ms** of the median of the two Off sets; the frames per second with it On stay within 0.5 of the Off sets and at least 59 for a 60 fps scene (the refresh is 59.94 Hz), or 29.5 for the village, which the Chromecast HD presents at 30; the missed-refresh percentage rises by no more than 2 points; and the two Off sets agree with each other to within 0.5 ms, otherwise the run is thrown away as drifted. If it fails, step down the ladder in the quality diagram and measure again.
+
+**Result, 2026‑11‑22.** The village in this build runs at **30 fps** on cast1: the Chromecast HD presents every second refresh, so every frame is 33.4 ms. That is the village's normal rate on this device as far as I can tell (there is no earlier village measurement to compare with), and Will's decision is that 30 fps is fine. With the field Off, On and Off again the three runs read 29.97, 29.96 and 29.97 fps, a median frame of 33.37 ms in all three, and a worst frame of 33.4, 50.1 and 33.4 ms; the report's verdict is **PASS** with the fps floor set to 29.5 for a 30 fps scene (`--fps-floor`; the default 59 is for a 60 fps scene). The report is [`docs/diagnostics/cuckoo-village-flowers-2026-11-22/report.md`](../diagnostics/cuckoo-village-flowers-2026-11-22/report.md). **What this result does not show:** a vsync-locked 30 fps scene hides any cost below one refresh (16.7 ms), so it says the flowers do not push the village under 30 fps, not that they are free. Each set is one run of 130 s with the first 85 s (the menu, the level load and the form) trimmed, so the measured window is 45 s of the Journey lap, not a whole 225 s lap, and the Off, On and Off again order was in fact On, Off, Off again. Finer analysis (the engine's own CPU and GPU frame times, a full lap, more runs) is left for when more than 30 fps is wanted.
 
 ### The report
 
@@ -344,6 +346,25 @@ F7. **The verdict.** The report's decision against the four rules, and either th
 10. **The profile, Off then On then Off.** The three `profile` runs described under Profiling, each 3 runs × 225 s on `chromecast-test-01` with the one APK; the three job numbers are recorded here.
 11. **The report is generated.** `python3 scripts/flowers-profile-report.py <the three evidence folders>` writes `docs/diagnostics/cuckoo-village-flowers-<date>/report.md` with every section in the table above filled from the evidence, and exits 0 only when the gate passes.
 12. **The gate.** The report's verdict is PASS (or, on FAIL, the next step down the quality ladder is built and steps 10 and 11 are repeated).
+
+### Results, 2026‑11‑22
+
+| Step | Result | Evidence |
+|---|---|---|
+| 1 | PASS | `tests/test_cuckoo_village_flowers.py`: 12 passed (11 at the first record, 1 added since for the geranium box without trailing stems) |
+| 2 | PASS | `MESH house tris before 1724 removed 328 after 1396`; `MESH flowers tris 1346` for the first geranium model, now 1332 (a geranium box of 683 and a petunia box of 649) |
+| 3 | PASS | `test_cuckoo_village_settings.py` and `test_cuckoo_village_settings_effect.py` pass with seven fields; the one failing test (`test_the_oad_is_what_the_tool_makes_from_the_oas`) needs `prep`, which the test image lacks, and the `.oad` was made by `oas2oad` itself |
+| 4 | PASS | the real-VM check covers four dates and four times with the field unset, On and Off: `flowers: 0 failures` |
+| 5 | PASS | the level builds with 88 actors at the time (103 objects once Bavaria mode landed); the 328-triangle assertion holds |
+| 6 | PASS | `cottage_flowers.iff`: 10 slots, no texture, 8 with flag 8; `cottage_flower_blocks.iff`: one atlas slot (`tests/test_cuckoo_village_flower_actors.py`) |
+| 7 | **FAIL by 0.006 MB** | the level grew by 755,712 bytes (+0.756 MB) against a limit of 0.75 MB; the estimate was low (see Budgets) |
+| 8 | PASS | the bundle, launcher, audit, candle, flower and report tests pass (75 in the last run on the rename branch) |
+| 9 | PARTLY | cast1 and the Pixel have the build installed; the TV form shows seven rows, the field defaults to On and Left turns it Off, and the Off village shows the old blocks (record job `J‑ac395662ad63`). A close-up capture of the flowers On was not taken |
+| 10 | DONE, reduced | three profile jobs on cast1 (`J‑58050a8dee54` On, `J‑5626261ca0cb` Off, `J‑5b8db57fba69` Off), one run each, 130 s, first 85 s trimmed; not the planned 3 runs of 305 s |
+| 11 | DONE | `docs/diagnostics/cuckoo-village-flowers-2026-11-22/report.md` and `report.json`, generated by `scripts/flowers-profile-report.py --trim 85 --fps-floor 29.5` |
+| 12 | PASS at 30 fps | the verdict is PASS (29.96 fps On against 29.97 Off, identical median and 95th percentile); see the result paragraph under Profiling for what it does and does not show |
+
+The report's level-size line (+923,648 bytes) compares against the commit before the window boxes and so includes the growth from Bavaria mode; step 7's 755,712 bytes is the flowers' own build.
 
 <!--
 When the work lands, this section becomes the permanent record: keep each step as written and paste the raw output under it, then PASS or FAIL.
