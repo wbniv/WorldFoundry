@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Report the cost of the Cuckoo Village window-box flowers from three coordinator `profile` evidence folders.
 
-    python3 scripts/flowers-profile-report.py --off DIR --on DIR --off-again DIR [--out DIR] [--trim SECONDS] [--level-ref REV]
+    python3 scripts/flowers-profile-report.py --off DIR --on DIR --off-again DIR [--out DIR] [--trim SECONDS] [--fps-floor FPS] [--level-ref REV]
                                               [--apk-sha256 HEX] [--picture-off PNG --picture-on PNG] [-h]
 
 The three folders are the evidence of the plan's profile runs on cast1, one APK, only the `Detailed flowers`
@@ -112,7 +112,7 @@ def intervals_ms(runs: list[dict], trim: float = 0.0) -> list[float]:
     return out
 
 
-def verdict(off: dict, on: dict, off2: dict) -> tuple[bool, list[tuple[bool, str]]]:
+def verdict(off: dict, on: dict, off2: dict, fps_floor: float = GATE["fps_floor"]) -> tuple[bool, list[tuple[bool, str]]]:
     off_mean = {k: (off[k] + off2[k]) / 2 for k in METRICS}
     rows = []
     drift = abs(off["p50_ms"] - off2["p50_ms"])
@@ -120,7 +120,7 @@ def verdict(off: dict, on: dict, off2: dict) -> tuple[bool, list[tuple[bool, str
     for key in ("p50_ms", "p95_ms"):
         d = on[key] - off_mean[key]
         rows.append((d <= GATE["frame_ms"], f"{key.replace('_ms', '')} with the flowers: {on[key]:.2f} ms against {off_mean[key]:.2f} ms Off, difference {d:+.2f} ms (at most +{GATE['frame_ms']})"))
-    rows.append((on["fps"] >= GATE["fps_floor"], f"fps with the flowers {on['fps']:.2f} (at least {GATE['fps_floor']})"))
+    rows.append((on["fps"] >= fps_floor, f"fps with the flowers {on['fps']:.2f} (at least {fps_floor:g})"))
     dfps = abs(on["fps"] - off_mean["fps"])
     rows.append((dfps <= GATE["fps_delta"], f"fps differs from Off by {dfps:.2f} (at most {GATE['fps_delta']})"))
     dm = on["missed_refresh_percent"] - off_mean["missed_refresh_percent"]
@@ -200,6 +200,7 @@ def main(argv=None) -> int:
     ap.add_argument("--out", type=Path, help="output folder (default docs/diagnostics/cuckoo-village-flowers-<date>)")
     ap.add_argument("--level-ref", help="a git revision from before the change, for the level file size")
     ap.add_argument("--apk-sha256", help="the APK that was profiled")
+    ap.add_argument("--fps-floor", type=float, default=GATE["fps_floor"], help="lowest acceptable fps with the flowers On (59 for a 60 fps scene; 29.5 for the village, which the Chromecast HD runs at 30)")
     ap.add_argument("--trim", type=float, default=0.0, help="seconds to drop from the start of every run (the menu and the settings form)")
     ap.add_argument("--picture-off", type=Path, help="a device capture with the field Off")
     ap.add_argument("--picture-on", type=Path, help="the same camera moment with the field On")
@@ -207,7 +208,7 @@ def main(argv=None) -> int:
 
     runs = {k: load_runs(p) for k, p in (("Off", args.off), ("On", args.on), ("Off again", args.off_again))}
     sets = {k: summarise(v, args.trim) for k, v in runs.items()}
-    ok, rows = verdict(sets["Off"], sets["On"], sets["Off again"])
+    ok, rows = verdict(sets["Off"], sets["On"], sets["Off again"], args.fps_floor)
     drifted = not rows[0][0]
     out = args.out or ROOT / "docs/diagnostics" / f"cuckoo-village-flowers-{dt.date.today().isoformat()}"
     out.mkdir(parents=True, exist_ok=True)

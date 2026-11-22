@@ -125,3 +125,19 @@ def test_trim_refuses_a_run_with_nothing_left(tmp_path):
         assert "nothing left to measure" in str(e)
     else:
         raise AssertionError("an empty trimmed run was accepted")
+
+
+def test_a_thirty_fps_scene_passes_with_a_thirty_fps_floor_and_fails_the_sixty_fps_default(tmp_path):
+    """The village is vsync-locked at 30 fps on the Chromecast HD: its frames are 33.4 ms and the default 59 fps floor would
+    fail it for the wrong reason, so the floor is an option."""
+    def make30(folder):
+        for n in (1, 2, 3):
+            run = folder / f"run-{n}"
+            run.mkdir(parents=True)
+            (run / "summary.json").write_text(json.dumps(dict(fps=29.97, p50_ms=33.37, p90_ms=33.37, p95_ms=33.37, p99_ms=33.37, worst_ms=50.1,
+                                                              missed_refresh_percent=100.0, refresh_ms=16.683)))
+        return folder
+    dirs = [make30(tmp_path / n) for n in ("off", "on", "off2")]
+    base = ["--off", str(dirs[0]), "--on", str(dirs[1]), "--off-again", str(dirs[2])]
+    assert report.main(base + ["--out", str(tmp_path / "default")]) == 1
+    assert report.main(base + ["--out", str(tmp_path / "thirty"), "--fps-floor", "29.5"]) == 0
