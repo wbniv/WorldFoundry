@@ -136,6 +136,35 @@ document.getElementById('pp').onclick=e=>{run=!run;e.target.textContent=run?'Pau
 if(STILL){t=3.1;draw()}else requestAnimationFrame(loop);
 </script></body></html>"""
 
+LOOK_HTML = """<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=1440"><title>Mockup: the look comparison</title><style>__CSS__
+.col{display:grid;gap:12px}.clip{background:#0b1015;border:1px solid var(--line);border-radius:8px;position:relative;overflow:hidden}.tag{position:absolute;left:8px;top:6px;font-size:12px;color:var(--mut)}
+.cap{color:var(--mut);font-size:13px;margin-top:4px}canvas{display:block;width:100%}</style></head><body><div class="wrap">
+<h1>How the three variants will be judged by eye</h1>
+<p class="sub">Same moment, same camera, three builds. Top row: a 10 s clip of the trees at the village's own view. Bottom row: the near study, a fixed camera 1.5 m from one tree. Simulated here from the proposed rules; the real clips are cast1 recordings.</p>
+<div class="grid" style="grid-template-columns:repeat(3,1fr);gap:16px">
+<div class="col"><div class="card"><h2>Today: static flames</h2><div class="clip"><span class="tag">trees, 10 s, 30 fps</span><canvas id="a0" width="420" height="150"></canvas></div><div class="clip"><span class="tag">near study, 1.5 m</span><canvas id="b0" width="420" height="190"></canvas></div><div class="cap">12 meshes; the reference</div></div></div>
+<div class="col"><div class="card"><h2 class="a">Option A: shape swap</h2><div class="clip"><span class="tag">trees, 10 s, 30 fps</span><canvas id="a1" width="420" height="150"></canvas></div><div class="clip"><span class="tag">near study, 1.5 m</span><canvas id="b1" width="420" height="190"></canvas></div><div class="cap">48 actors; snaps between two shapes, about every 136 ms</div></div></div>
+<div class="col"><div class="card"><h2 class="b">Option B: deformed flame</h2><div class="clip"><span class="tag">trees, 10 s, 30 fps</span><canvas id="a2" width="420" height="150"></canvas></div><div class="clip"><span class="tag">near study, 1.5 m</span><canvas id="b2" width="420" height="190"></canvas></div><div class="cap">12 DFRM meshes; sways smoothly</div></div></div></div>
+<div class="card" style="margin-top:14px"><h2>Frame strip: the near study, 8 consecutive frames at 30 fps (33 ms apart), one row a variant</h2><canvas id="st" width="1370" height="252"></canvas></div>
+<p class="sub" style="margin:8px 0 0">The strip is what shows whether a swap reads as a flicker or as a blink; the clips show how the whole tree looks; the CPU numbers decide what is affordable.</p>
+</div><script>
+const T=__TREE__,F1=2.3,F2=3.7,PHI=0.618034,STILL=location.hash==='#still',G='#ffb454',B='#5cc8ff';
+const ph=(i,g)=>((2*i+g)*PHI)%1,x_=(t,i,g)=>{const p=ph(i,g);return Math.sin(6.283185*(F1*t+p))+Math.sin(6.283185*(F2*t+2*p))};
+const R=[1.02,.979,.87,.835,.72,.55,.528,.421,.297,.02],rad=f=>{const x=Math.min(Math.max(f,0),1)*10,lo=Math.min(Math.floor(x),9),hi=Math.min(lo+1,9);return R[lo]+(R[hi]-R[lo])*(x-lo)};
+function flame(c,x,y,s,mode,t,g,i){const sh=x_(t,i,g);let h=.075,lean=0;if(mode==1){const k=sh>0;h=k?.09:.06;lean=k?.014:-.010}else if(mode==2){const u=Math.max(-1,Math.min(1,sh/1.4));h=.075+.015*u;lean=.012*u}
+ const H=h*s,L=lean*s,r=.022*s;c.fillStyle='#ffd37a';c.beginPath();c.moveTo(x,y);c.lineTo(x+r,y-H/3);c.lineTo(x+L,y-H);c.lineTo(x-r,y-H/3);c.fill()}
+function tree(c,ox,oy,sc,mode,t,i,E,cs){c.fillStyle='#1f4a35';c.beginPath();c.moveTo(ox,oy);for(let k=0;k<=20;k++){const f=k/20;c.lineTo(ox+rad(f)*sc*.55,oy-f*3.755*sc*.5)}for(let k=20;k>=0;k--){const f=k/20;c.lineTo(ox-rad(f)*sc*.55,oy-f*3.755*sc*.5)}c.fill();
+ T.forEach(cn=>{const cx=ox+cn.x*sc*.55,cy=oy-cn.z*sc*.5;c.fillStyle='#efe3c0';c.fillRect(cx-cs,cy-.12*sc*E*.7,cs*2,.12*sc*E*.7);flame(c,cx,cy-.12*sc*E*.7,sc*E*.7,mode,t,cn.group,i)})}
+function paint(t){[0,1,2].forEach(m=>{let c=document.getElementById('a'+m).getContext('2d');c.fillStyle='#0b1015';c.fillRect(0,0,420,150);[0,1,2].forEach(k=>tree(c,70+k*140,146,44,m,t,k,1.8,1.6));
+ c=document.getElementById('b'+m).getContext('2d');c.fillStyle='#0b1015';c.fillRect(0,0,420,190);tree(c,210,188,68,m,t,0,3.4,3.2)});
+ const s=document.getElementById('st').getContext('2d');s.fillStyle='#0b1015';s.fillRect(0,0,1370,252);
+ for(let m=0;m<3;m++)for(let k=0;k<8;k++){const ox=120+k*160,oy=62+m*80,tt=t+k/30;s.fillStyle='#efe3c0';s.fillRect(ox-6,oy-2,12,22);flame(s,ox,oy-2,520,m,tt,0,0);
+  s.fillStyle='#9aa6b6';s.font='11px sans-serif';if(m==0)s.fillText('+'+Math.round(k*33.3)+' ms',ox-18,14)}
+ ['today','A','B'].forEach((n,m)=>{s.fillStyle='#9aa6b6';s.font='13px sans-serif';s.fillText(n,10,70+m*80)})}
+let t=STILL?3.1:0,last=null;function loop(n){if(last===null)last=n;t+=(n-last)/1000;last=n;paint(t);requestAnimationFrame(loop)}
+if(STILL)paint(t);else requestAnimationFrame(loop);
+</script></body></html>"""
+
 
 def main(argv):
     if any(a in ("-h", "--help") for a in argv):
@@ -149,7 +178,8 @@ def main(argv):
     shapes = SHAPES_HTML.replace("__CSS__", CSS).replace("__TREE__", tree)
     sched = (SCHED_HTML.replace("__CSS__", CSS).replace("__TREE__", tree).replace("__CPS__", str(st["changes_per_second_per_group"]))
              .replace("__MS__", str(st["mean_ms_between"])).replace("__FR__", str(fr)))
-    for name, html in (("flame-shapes", shapes), ("flicker-schedule", sched)):
+    look = LOOK_HTML.replace("__CSS__", CSS).replace("__TREE__", tree)
+    for name, html in (("flame-shapes", shapes), ("flicker-schedule", sched), ("look-comparison", look)):
         path = os.path.abspath(os.path.join(out, name + ".html"))
         open(path, "w").write(html)
         subprocess.run(["google-chrome", "--headless=new", "--no-sandbox", "--disable-gpu", "--hide-scrollbars", "--window-size=1440,900",
