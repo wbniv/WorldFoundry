@@ -56,7 +56,9 @@ def test_the_phone_asset_lists_the_fields_of_the_placed_object():
     asset = json.loads((ROOT / "android/screensaver/src/clocks/assets/tide-harbour-settings.json").read_text())
     (owner,) = asset["objects"]
     assert owner["owner"] == MAP["indices"][tl.SETTINGS_ACTOR] and owner["type"] == "TideHarbourSettings"
-    got = {s["key"]: ([o["label"] for o in s["options"]], s["value"], s["readonly"]) for s in owner["settings"]}
+    GLOBAL_FIELDS = {"Show framerate"}      # oas/global_settings.inc: every settings type ends with these, a checkbox with no options
+    assert GLOBAL_FIELDS <= {s["key"] for s in owner["settings"]}
+    got = {s["key"]: ([o["label"] for o in s["options"]], s["value"], s["readonly"]) for s in owner["settings"] if s["key"] not in GLOBAL_FIELDS}
     want = {label: (list(Q9[k]), "0", False) for k, label in tl.FIELD_LABELS.items()}
     # the read-only About row: the river map's OpenStreetMap attribution (it left the panel in the same change)
     want["About the map"] = (["(c) OpenStreetMap contributors", "ODbL: openstreetmap.org/copyright"], "0", True)
