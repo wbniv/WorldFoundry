@@ -12,7 +12,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OLD = "org.worldfoundry.clocks"
 NEW = "org.worldfoundry.game.clocks"
-RENAME_NOTE = "was `org.worldfoundry.clocks` until"      # the one sentence in android/screensaver/README.md that records the rename
+RENAME_NOTES = ("was `org.worldfoundry.clocks` until",              # android/screensaver/README.md: records the rename
+                "The old `org.worldfoundry.clocks` stays installed")      # TODO.md: the landing item says what happens on the devices
 
 
 SKIP_DIRS = {".git", ".worktrees", "build", "build-docker", "node_modules", "target", ".gradle", "outputs", "__pycache__"}
@@ -37,7 +38,7 @@ def tracked_hits():
             except (UnicodeDecodeError, OSError):
                 continue
             hits += [f"{path.relative_to(ROOT)}:{n}" for n, line in enumerate(lines, 1)
-                     if re.search(re.escape(OLD) + r"(?!\w)", line) and RENAME_NOTE not in line]
+                     if re.search(re.escape(OLD) + r"(?!\w)", line) and not any(note in line for note in RENAME_NOTES)]
     return hits
 
 
