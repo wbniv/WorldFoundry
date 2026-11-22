@@ -37,10 +37,7 @@ import timeline as tl  # noqa: E402
 TAG = '[tide-harbour]'
 OAS = REPO / 'wfsource/source/oas'
 REFERENCE = tl.parse_when('2026-11-21T12:00:00')     # the pose the level is built in: noon, so the authored colours are the day's
-CREDIT = '© OpenStreetMap contributors'
-CREDIT_PLATE_H, CREDIT_SCALE = 0.062, 0.26       # the plate's height in metres; the text's size against a Thai digit
 STOP_SIZE, STOP_GAP = 0.016, 0.006      # the full stop after ม and กม: a square on the baseline, in metres
-CREDIT_FONT = Path('/usr/lib/blender/datafiles/fonts/DejaVuSansMono.woff2')
 THAI_FONT = HERE / 'fonts' / 'NotoSansThai-Bold.ttf'      # static and bold: no `offset` embolden, which tears the thin Thai features (fonts/README.md)
 THAI = ['๑๒', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙', '๑๐', '๑๑']     # 12 at the top, then clockwise
 ROMAN = ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI']
@@ -225,12 +222,8 @@ def panel_glyphs(meshes, font):
     put(body, THAI_DIGITS[int(pn.SCALE_KM)], mid - 0.004, pn.SCALE_V + 0.06, 0.32, 'r', 'p_ink', max_width=half * 0.6)
     xr, zb = put(body, 'กม', mid + 0.004, pn.SCALE_V + 0.06, 0.32, 'l', 'p_ink', max_width=half - STOP_GAP - STOP_SIZE)
     stop(body, xr, zb, 'p_ink')
-    # The map's credit (the ODbL asks for it wherever the map is shown): ink on a paper plate along the panel's foot, on the
-    # fixed column mesh so it stays put while the map pans under it. Latin and the copyright sign are not in the Thai font,
-    # so it is set in DejaVu Sans Mono, which Blender ships (Blender's default, Inter, has overlapping contours: its M came out with a filled centre on cast1).
-    shapes[CREDIT] = outlines('pc', [CREDIT], bpy.data.fonts.load(str(CREDIT_FONT)))[0]
-    body.quad_y(-pn.W / 2, -pn.H / 2, pn.W / 2, -pn.H / 2 + CREDIT_PLATE_H, 0.001, 'p_paper')     # 1 mm behind the text (coplanar, they would z-fight), in front of the map's layer
-    put(body, CREDIT, 0.0, -pn.H / 2 + CREDIT_PLATE_H / 2, CREDIT_SCALE, 'c', 'p_ink', max_width=pn.W - 0.08)
+    # The map's credit is not on the panel: the ODbL attribution lives in the settings form's read-only "About the map" row
+    # (tideharboursettings.oas), added in the same change that took the line off the panel.
     river = meshes['panel_map']
     doc = json.loads(pp.CENTRELINE.read_text())
     hx, hz = pp.map_xy(doc['station_HD']['lon'], doc['station_HD']['lat'])
