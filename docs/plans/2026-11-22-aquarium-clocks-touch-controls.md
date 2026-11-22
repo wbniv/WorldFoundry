@@ -43,9 +43,9 @@ The combined app is not the standard app plus a screensaver entry point. It is t
 |---|---|---|
 | Joystick and D, B, C, A over the menu and tanks | none | **Restored** (this plan), verified on the Pixel |
 | The engine's touch settings form (entry button at the top right, then the form) | none, so the form could not be opened or driven by touch | **Restored** in the same plan; verification below |
-| Tap a menu row to choose a tank (`levelmenu::TouchRowAt` and `QueueTouchRow`) | none | Open, Q1 below |
-| Story card reading layout (`androidtouch::reading`: the stick, B and D hide so a card reads) | always the full controller | Open, small; matters only for a level with a story card |
-| Hardware gamepad analog stick and hat (`AINPUT_SOURCE_JOYSTICK`, `AXIS_HAT_X`/`Y`) | keys only (a gamepad's buttons and the TV remote work, its analog stick does not) | Open |
+| Tap a menu row to choose a tank (`levelmenu::TouchRowAt` and `QueueTouchRow`) | `menuRowTouch` in `dream_host.cc` | **Restored**, built; not yet driven on a device |
+| Story card reading layout (`androidtouch::reading`: the stick, B and D hide so a card reads) | `TouchBridge::setReading(bitmaptext::ReaderOpen())` each frame | **Restored** (`TouchBridge::setReading`), built; not yet seen on a device |
+| Hardware gamepad analog stick and hat (`AINPUT_SOURCE_JOYSTICK`, `AXIS_HAT_X`/`Y`) | `GamepadStick` and `LauncherActivity.dispatchGenericMotionEvent` | **Restored**, built; not yet tried with a gamepad |
 | Phone as the TV's gamepad and settings editor (`hal/phonepad`, `PhoneInit`, the message the form sends the phone) | stubbed out (`WFAndroidPhoneOverlayRects` returns nothing) | Open; also needs the network permission the apps do not hold |
 | Crash handlers and the diagnostic log (`InstallCrashHandlers`, `OpenDiagnosticLog`) | only the engine log bridge | Open, diagnostics only |
 | Back dismissing the phone panel, and the system's own Back on a standalone selector | `applyMenuBack` | Replaced, works |
@@ -87,4 +87,4 @@ The combined app is not the standard app plus a screensaver entry point. It is t
 | # | Question | Recommendation |
 |---|---|---|
 | Q1 | Touch a menu row directly, as the old app allowed? | Not in this change; the joystick and A cover it. Add it if Will misses it. |
-| Q2 | Restore the rest of the table (gamepad stick, story-card layout, phone gamepad)? | Gamepad stick and story-card layout next, each small; the phone gamepad only if Will uses it on a TV. |
+| Q2 | Restore the rest of the table? | **Decided (Will, 2026‑11‑22): "why wouldn't i want all of it? didn't we develop those things for a reason?" Restore all.** Done above except the phone gamepad (TV) and the crash handler, which are next. |

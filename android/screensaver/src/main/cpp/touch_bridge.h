@@ -88,6 +88,9 @@ public:
 
     float density() const { return density_.load(); }
 
+    // A story card is open (bitmaptext::ReaderOpen): the controller narrows to A and C so the card reads.
+    void setReading(bool reading) { reading_.store(reading); }
+
     // A run starts or ends: no finger is down any more.
     void reset() {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -97,7 +100,8 @@ public:
 
 private:
     wftouch::Layout layoutLocked(int w, int h) const {
-        return wftouch::layout(float(w), float(h), density_.load(), 0.0f);
+        const auto l = wftouch::layout(float(w), float(h), density_.load(), 0.0f);
+        return reading_.load() ? wftouch::reading(l) : l;   // a story card hides the stick, B and D
     }
 
     void publishLocked(uint32_t mask, MenuKeyLatch& keys) {
@@ -107,6 +111,7 @@ private:
     }
 
     std::atomic<bool> enabled_{false};
+    std::atomic<bool> reading_{false};
     std::atomic<float> density_{1.0f};
     std::atomic<int> surfaceWidth_{0};
     std::atomic<int> surfaceHeight_{0};
@@ -114,3 +119,41 @@ private:
     wftouch::State state_;     // guarded by mutex_
     uint32_t mask_ = 0;        // guarded by mutex_
 };
+
+// A hardware gamepad's analog stick and hat (what the standalone app's NativeActivity host read as
+// AINPUT_SOURCE_JOYSTICK): past half deflection the stick presses Left, Right, Up or Down, through the same key latch
+// as the remote. The hat wins over the stick when it is pressed, as there.
+class GamepadStick {
+public:
+    static constexpr float kThreshold = 0.5f;
+
+    static uint32_t axes(float x, float y, float hatX, float hatY) {
+        if (hatX != 0.0f) x = hatX;
+        if (hatY != 0.0f) y = hatY;
+        uint32_t mask = 0;
+        if (x < -kThreshold) mask |= wftouch::Left;
+        if (x > kThreshold) mask |= wftouch::Right;
+        if (y < -kThreshold) mask |= wftouch::Up;
+        if (y > kThreshold) mask |= wftouch::Down;
+        return mask;
+    }
+
+    // UI thread: one motion event of the stick.
+    void update(float x, float y, float hatX, float hatY, MenuKeyLatch& keys) {
+        const uint32_t mask = axes(x, y, hatX, hatY);
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (const uint32_t pressed = mask & ~mask_) keys.keyDown(pressed);
+        if (const uint32_t released = mask_ & ~mask) keys.keyUp(released);
+        mask_ = mask;
+    }
+
+    void reset() {
+        std::lock_guard<std::mutex> lock(mutex_);
+        mask_ = 0;
+    }
+
+private:
+    std::mutex mutex_;
+    uint32_t mask_ = 0;
+};
+

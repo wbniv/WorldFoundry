@@ -182,6 +182,36 @@ int main() {
         CHECK(held == 0);
         CHECK(t.density() == kDensity);
     }
+    // A story card narrows the controller to A and C: the stick is gone, A still works.
+    {
+        TB t; MenuKeyLatch keys;
+        t.configure(true, kDensity);
+        t.setReading(true);
+        frame(t);
+        wftouch::Layout l; uint32_t held; float x, y;
+        t.layout(W, H, &l, &held, &x, &y);
+        CHECK(!l.stick && l.shown == (wftouch::A | wftouch::C));
+        auto p = stickRight(0.9f);
+        t.event(TB::kActionDown, 0, &p, 1, W, H, keys);
+        CHECK(keys.takeFrame() == 0);
+        t.event(TB::kActionUp, 0, &p, 1, W, H, keys);
+        const auto a = control(wftouch::A);
+        t.event(TB::kActionDown, 0, &a, 1, W, H, keys);
+        CHECK(keys.takeFrame() == wftouch::A);
+    }
+    // A gamepad's stick: past half deflection a direction, the hat wins, back to centre lets go.
+    {
+        CHECK(GamepadStick::axes(0.4f, 0, 0, 0) == 0);
+        CHECK(GamepadStick::axes(0.6f, 0, 0, 0) == wftouch::Right);
+        CHECK(GamepadStick::axes(-0.6f, -0.9f, 0, 0) == (wftouch::Left | wftouch::Up));
+        CHECK(GamepadStick::axes(0.9f, 0, -1, 0) == wftouch::Left);   // the hat wins
+        GamepadStick g; MenuKeyLatch keys;
+        g.update(0.9f, 0, 0, 0, keys);
+        CHECK(keys.takeFrame() == wftouch::Right);
+        CHECK(keys.takeFrame() == wftouch::Right);                    // held
+        g.update(0, 0, 0, 0, keys);
+        CHECK(keys.takeFrame() == 0);
+    }
     std::printf("touch_bridge: %d checks passed\n", checks);
     return 0;
 }

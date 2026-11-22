@@ -4,6 +4,7 @@
 #include <android/log.h>
 
 #include <atomic>
+#include <cmath>
 #include <cstdio>
 #include <cstdint>
 #include <fcntl.h>
@@ -18,6 +19,7 @@
 #include <hal/android/key_map.h>
 #include <hal/android/touch_controls.h>
 #include <game/level_menu.h>
+#include <game/bitmap_presenter.hp>   // ReaderOpen: a story card narrows the controller
 #include <game/runtime_property_touch.h>
 #include <hal/phonepad/phonepad_overlay.h>
 #include <pigsys/pigsys.hp>
@@ -99,6 +101,7 @@ std::atomic<bool> menuMode{false};
 // frame can be 200 ms) still reaches the menu (docs/plans/2026-11-21-menu-key-latch.md).
 MenuKeyLatch menuKeys;
 TouchBridge touchBridge;   // the on-screen controller on a phone; its buttons go through menuKeys
+GamepadStick gamepadStick; // a hardware gamepad's analog stick and hat, through menuKeys
 
 // Touch events from the UI thread, handled on the game thread: the engine's settings form and the controller both
 // change game state, and the engine is single-threaded. One record is one MotionEvent.
@@ -195,10 +198,48 @@ extern "C" void WFAndroidRequestClose() { closing.store(true); }
 // rather than editing the engine. Without a drawer the level menu starts level 0 (game.cc).
 // The menu is the one exception: it keeps the drawer and takes the remote's keys.
 
+// Tapping a row of the tank menu (the standalone host's gMenuTouchPointer logic): a down on a row remembers the finger,
+// the matching up within 24 pixels chooses the row. Game thread only. Returns true when the event is the menu's.
+static bool menuRowTouch(const TouchRecord& e, float fx, float fy) {
+    static int pointer = -1;
+    static float downX = 0, downY = 0;
+    if (!levelmenu::SelectorVisible() || wfprops::host().modal) {
+        pointer = -1;
+        return false;
+    }
+    const int w = int(e.viewWidth * fx + .5f), h = int(e.viewHeight * fy + .5f);
+    if (e.action == TouchBridge::kActionCancel) {
+        const bool mine = pointer >= 0;
+        pointer = -1;
+        return mine;
+    }
+    if (e.action == TouchBridge::kActionMove) return pointer >= 0;
+    if (e.actionIndex < 0 || size_t(e.actionIndex) >= e.points.size()) return false;
+    const auto& p = e.points[size_t(e.actionIndex)];
+    const float x = p.x * fx, y = p.y * fy;
+    if (e.action == TouchBridge::kActionDown || e.action == TouchBridge::kActionPointerDown) {
+        if (pointer < 0 && levelmenu::TouchRowAt(x, y, w, h) >= 0) {
+            pointer = p.id;
+            downX = x;
+            downY = y;
+            return true;
+        }
+        return false;
+    }
+    if (p.id != pointer) return false;
+    pointer = -1;
+    if (std::fabs(x - downX) < 24 && std::fabs(y - downY) < 24) {
+        const int row = levelmenu::TouchRowAt(x, y, w, h);
+        if (row >= 0) levelmenu::QueueTouchRow(row);
+    }
+    return true;
+}
+
 // The settings form first (its entry button at the top right, and the form itself), then the controller, exactly
 // as the NativeActivity host orders them (hal/android/native_app_entry.cc); a touch the form takes lets go of every
 // controller button. Game thread only.
 static void pumpTouch(int surfaceW, int surfaceH) {
+    touchBridge.setReading(bitmaptext::ReaderOpen());
     std::vector<TouchRecord> events;
     {
         std::lock_guard<std::mutex> lock(touchQueueMutex);
@@ -218,6 +259,10 @@ static void pumpTouch(int surfaceW, int surfaceH) {
             const auto& p = e.points[size_t(e.actionIndex)];
             const bool down = e.action == TouchBridge::kActionDown || e.action == TouchBridge::kActionPointerDown;
             settingsTouch = propertyui::touchEvent(down ? Phase::Down : Phase::Up, p.id, p.x * fx, p.y * fy, surfaceW, surfaceH);
+        }
+        if (!settingsTouch && menuRowTouch(e, fx, fy)) {
+            touchBridge.release(menuKeys);
+            continue;
         }
         if (settingsTouch) touchBridge.release(menuKeys);
         else touchBridge.event(e.action, e.actionIndex, e.points.data(), e.points.size(), e.viewWidth, e.viewHeight, menuKeys);
@@ -279,6 +324,7 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativePrepare(JNIEnv*, jclass) {
     backPending.store(false);
     menuKeys.clear();
     touchBridge.reset();
+    gamepadStick.reset();
     plantedBridge.reset();
 }
 
@@ -290,6 +336,14 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeKey(JNIEnv*, jclass, jint key
     if (!mask || !menuMode.load()) return JNI_FALSE;
     if (down) menuKeys.keyDown(mask);
     else menuKeys.keyUp(mask);
+    return JNI_TRUE;
+}
+
+// A hardware gamepad's stick and hat (UI thread): past half deflection a direction, through the key latch.
+extern "C" JNIEXPORT jboolean JNICALL
+Java_org_worldfoundry_screensaver_TankPlayer_nativeStick(JNIEnv*, jclass, jfloat x, jfloat y, jfloat hatX, jfloat hatY) {
+    if (!menuMode.load()) return JNI_FALSE;
+    gamepadStick.update(x, y, hatX, hatY, menuKeys);
     return JNI_TRUE;
 }
 
