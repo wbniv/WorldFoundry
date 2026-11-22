@@ -17,6 +17,9 @@ RENAME_NOTES = ("was `org.worldfoundry.clocks` until",              # android/sc
 
 
 SKIP_DIRS = {".git", ".worktrees", "build", "build-docker", "node_modules", "target", ".gradle", "outputs", "__pycache__"}
+# The HOWTO's registry tables name each app's ids as they were. The Aquarium owner rewrites them for both apps in the push that
+# lands the Aquarium half, so the file is exempt until then; delete this entry in that push.
+EXEMPT_FILES = {"docs/howto/combine-levels-chooser-and-screensaver-launch.md"}
 SKIP_PREFIXES = ("docs/diagnostics", "docs/plans", "docs/transcripts")          # history: transcripts, measurements and plans keep what was true then
 TEXT = {".md", ".py", ".sh", ".kts", ".xml", ".java", ".json", ".yml", ".yaml", ".manifest", ".txt", ".cc", ".h", ".hp", ".gradle",
         ".toml", ".cmake", ".properties"}
@@ -31,6 +34,8 @@ def tracked_hits():
         dirs[:] = [d for d in dirs if d not in SKIP_DIRS and not (f"{rel}/{d}" if rel != "." else d).startswith(SKIP_PREFIXES)]
         for name in files:
             path = Path(folder) / name
+            if path.relative_to(ROOT).as_posix() in EXEMPT_FILES:
+                continue
             if (path.suffix not in TEXT and name not in ("Taskfile.yml",)) or name == "test_clocks_package_name.py":
                 continue
             try:

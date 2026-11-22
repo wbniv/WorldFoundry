@@ -225,7 +225,7 @@ The coordinator knows a screensaver package through one entry in `scripts/wf_dev
 | Field | What it is | Aquarium | 3D Clocks | Seahorse Grid |
 |---|---|---|---|---|
 | key | the registry name | `screensaver` | `clocks-screensaver` | `seahorse-screensaver` |
-| `package` | Android package | `org.worldfoundry.screensaver` | `org.worldfoundry.game.clocks` | `org.worldfoundry.seahorsegrid` |
+| `package` | Android package | `org.worldfoundry.screensaver` | `org.worldfoundry.clocks` | `org.worldfoundry.seahorsegrid` |
 | `kind` | `screensaver` | yes | yes | yes |
 | `activity` | what a plain `launch` starts: the menu for the Aquarium | `…/.AquariumActivity` | `…/…ClocksActivity` | `…/…SeahorseGridActivity` |
 | `dream_component` | the DreamService to select | `…AquariumDreamService` | `…ClocksDreamService` | `…SeahorseGridDreamService` |
