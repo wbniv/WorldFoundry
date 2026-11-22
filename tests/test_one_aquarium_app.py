@@ -109,3 +109,16 @@ def test_the_aquarium_package_follows_the_game_naming_standard():
     manifest = (SCREENSAVER / "src/aquarium/AndroidManifest.xml").read_text()
     assert manifest.count("${applicationId}.settings") == 2, "the meta-data and the provider authority both follow the applicationId"
     assert "org.worldfoundry.screensaver.settings" not in manifest
+
+
+def test_the_aquarium_and_clocks_apps_have_a_phone_launcher_icon_as_well_as_the_tv_one():
+    """2026-11-22: after the rename the Pixel had no icon for either app. They declared only LEANBACK_LAUNCHER (the TV row);
+    a phone's app drawer lists an app only if its main activity also has the ordinary LAUNCHER category, as the retired
+    standalone Aquarium app did. The TV feature is optional, so the apps are not hidden from a phone."""
+    for flavor in ("aquarium", "clocks"):
+        manifest = (SCREENSAVER / "src" / flavor / "AndroidManifest.xml").read_text()
+        assert 'android.intent.category.LAUNCHER"' in manifest, flavor
+        assert "android.intent.category.LEANBACK_LAUNCHER" in manifest, flavor
+    main = (SCREENSAVER / "src/main/AndroidManifest.xml").read_text()
+    assert 'android:name="android.software.leanback" android:required="false"' in main
+
