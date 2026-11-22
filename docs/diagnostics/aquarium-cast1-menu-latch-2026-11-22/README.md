@@ -14,5 +14,8 @@ The unified-launcher Aquarium APK with the menu key latch, `screensaver-aquarium
 | `show-level-aquarium_plants-J-a59814391138.png` | `screensaver-show`, `WF_CC_LEVEL=aquarium_plants` | the planted tank, no menu |
 | `dream-check-J-95eed06d2d53.json`, `dumpsys-dreams-J-95eed06d2d53.txt` | `dream-check` | the real Dream, `AquariumDreamService`, not a preview |
 | `aquarium-engine-log-tail-J-8fa27c7326e3.txt` | `screensaver-list` | the app's engine log: `start level 10 of 11` (the `LEVEL` run) and `start level 3 of 11` (the Dream) |
+| `steer-1-clownfish-loaded.png` … `steer-5-after-hold-up-2s.png` | `J‑08baa5d0ca23` (`check`) | steering: in the clownfish tank started from the menu, no input for 2 s leaves the fish at x≈680; hold Right 3 s takes it to x≈1185, hold Left 3 s to x≈600, hold Up 2 s to the top-left corner. The player steers; it is not autopilot |
 
 Back on the menu left the app (the last capture of `J‑3efc2e7072c3` is the Google TV home screen, 2.7 MB, not kept). The Dream's own screenshot is solid black and is not kept.
+
+An earlier run of the steering script, `J‑52a12bbaba60`, ended `failed` with `target-left-foreground` about 5 s after the launch, before any key was sent: the TV launcher's `HomeActivity` was on top and the Aquarium task was not visible (the activity was not finished). Nothing else was using cast1 and no logcat was kept, so the cause is **unexplained**; the identical rerun completed. One such exit in four launches of this APK on cast1.
