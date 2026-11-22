@@ -1,6 +1,6 @@
 # An on-screen controller for the combined Aquarium and Clocks apps
 
-**Status: decided by Will 2026‑11‑22 ("new app doesn't present joystick interface to me", "newly-installed clocks doesn't have d-pad either"); built, not yet verified on the Pixel.** It reverses one part of decision D3 in [One Aquarium APK](2026-11-22-one-aquarium-apk.md), where Will accepted giving up the Aquarium's phone controller. That recommendation was mine and it was wrong for a phone: I weighed the TV remote's d-pad and not the Pixel, which has none. The diagnostic build stays given up.
+**Status: decided by Will 2026‑11‑22 ("new app doesn't present joystick interface to me", "newly-installed clocks doesn't have d-pad either"); built; the Aquarium half checked on the Pixel (steps 3 and 4 below), the TV and Clocks halves pending.** It reverses one part of decision D3 in [One Aquarium APK](2026-11-22-one-aquarium-apk.md), where Will accepted giving up the Aquarium's phone controller. That recommendation was mine and it was wrong for a phone: I weighed the TV remote's d-pad and not the Pixel, which has none. The diagnostic build stays given up.
 
 ## What was lost, and what comes back
 
@@ -38,11 +38,34 @@ sequenceDiagram
 ## Verification
 
 1. `task test-touch-bridge`: 28 checks in `wf-linux-test:local` (a tap inside one frame reads once, a hold reads every frame, the stick, two thumbs, cancel, a view and surface of different sizes, off on a TV).
-2. `scripts/in-linux-container.sh python3 -m pytest tests/test_one_aquarium_app.py -q` checks the wiring (the host, the JNI entry points, the Java listener, the TV exclusion).
-3. The Aquarium APK builds (`BUILD SUCCESSFUL`) and the Clocks APK builds from the same tip.
-4. On the Pixel, installed through the coordinator: the controller is drawn over the Aquarium menu; a coordinator `phone-input` tap on A starts the highlighted tank; a swipe from the stick centre to the right moves the fish; the controller is drawn over the Clocks chooser and a tap on A starts a clock; holding A for a second opens the Cuckoo Village settings form.
-5. On cast1 (a TV): no controller is drawn and the remote still works (the earlier key checks repeat).
-6. The Dream still starts from the lock screen with no controller.
+
+   ```
+   touch_bridge: 28 checks passed
+   ```
+
+   **PASS**
+2. `scripts/in-linux-container.sh python3 -m pytest tests/test_one_aquarium_app.py tests/test_launcher_parity.py tests/test_dream_host_vram.py -q` checks the wiring (the host, the JNI entry points, the Java listener, the TV exclusion).
+
+   ```
+   22 passed, 1 skipped in 0.18s
+   ```
+
+   **PASS**
+3. The Aquarium APK builds. The first build failed on a C++ typo of mine (a function-style cast read as a function declaration), fixed in b9ae1b3c.
+
+   ```
+   BUILD SUCCESSFUL in 3m 43s   (screensaver-aquarium-release.apk, sha256 1919799a97c88f82e1a1a2fe70df9a70ee9babf6c3a3caa9d238cbd68997c797)
+   ```
+
+   **PASS.** The Clocks APK built from the same tip by the Clocks session (sha256 151dbf0b1deb…257c): pending its own report.
+4. On the Pixel, installed through the coordinator (J‑63af254babac): a `check` job (J‑556c97267316) shows the controller over the Aquarium menu, joystick lower left and D, B, C, A lower right.
+
+   <img src="2026-11-22-aquarium-clocks-touch-controls/new-app-touch-controls-pixel.png" width="700">
+
+   Will then used it by hand on the Pixel: "works" (the stick moves the highlight, A starts a tank, the stick steers). **PASS** for the Aquarium app. A coordinator `phone-input` tap was not used: the workflow needs the app already in front, and a `check` job closes it when it ends.
+5. The controller over the Clocks chooser, A starting a clock, and a one-second hold on A opening the Cuckoo Village settings form, on the Pixel: **pending** (the Clocks session installs its APK; Will to confirm).
+6. On cast1 (a TV): no controller is drawn and the remote still works. The same build is installed (J‑5dbd3caa6f28, completed); the `check` job J‑38ab0ea65cff with the remote-key script is queued behind the Clocks session's profile job. **Pending.**
+7. The Dream still starts from the lock screen with no controller: **pending** (the HUD is off outside menu mode by construction; not yet seen on a device).
 
 ## Open
 
