@@ -35,6 +35,16 @@ struct Canvas {
  void button(float x,float y,float bw,float bh,const std::string& title,Kind kind,uint32_t colour=card,int index=0){box(x,y,bw,bh,colour);label(x+14,y+bh*.5f,18,title,ink,false,bw-25);hit(x,y,bw,bh,kind,index);}
 };
 float density(){return std::max(.5f,state.density);}
+// A short screen (a phone held sideways is about 450 dp tall) has no room for the phone layout's header and footer:
+// one field fits. The form, the choice sheet and the colour picker are laid out as if the screen were kLayoutHeight
+// dp tall, at a reduced scale, which also switches on the wide layout (sections at the left). Never below kMinScale,
+// so a row stays a comfortable target. Taller screens are unchanged.
+constexpr float kLayoutHeight=600.f,kMinScale=.72f;
+float layoutDensity(int heightPx){
+ const float d=density(),usable=(heightPx-state.top-state.bottom)/d;
+ return usable>=kLayoutHeight?d:d*std::max(kMinScale,usable/kLayoutHeight);
+}
+constexpr float kBarPad=12.f;   // a slider's hit area reaches this far past each end of its bar
 int choices(const wfprops::Field& field){return field.kind==2?std::max(0,field.maximum-field.minimum+1):0;}
 std::string choiceLabel(const wfprops::Field& field,int index){
  size_t start=0;for(int i=0;i<index;++i){auto p=field.choices.find('|',start);if(p==std::string::npos)return {};start=p+1;}
@@ -151,7 +161,7 @@ void renderForm(Canvas& c,wfprops::Form& form){
   c.box(listX,y,listW,74,field.readonly?0x1c302affu:field.kind==9?selected:card);
   // The row's own target goes first: targets are matched newest first, so segment taps
   // (added below) win over the row and choose that option instead of opening the sheet.
-  c.hit(listX,y,listW,74,field.show==2&&field.kind<=2&&!field.readonly?Kind::Slider:Kind::Row,i);
+  c.hit(listX,y,listW,74,Kind::Row,i);
   std::string group;
   for(size_t j=0;j<rows[size_t(i)];++j){const auto& marker=object->fields[j];if(marker.kind==6)group=marker.label;else if(marker.kind==5||marker.kind==7)group.clear();}
   if(!group.empty())c.label(listX+13,y+12,12,group,accent,false,listW-28);
@@ -185,7 +195,21 @@ void renderForm(Canvas& c,wfprops::Form& form){
   if(control==wfprops::Control::Switch){const bool on=valueLabel(form,field)=="On";c.box(listX+listW-66,y+35,52,27,on?0x68aa72ffu:0x5d6b63ffu);c.box(on?listX+listW-39:listX+listW-63,y+38,21,21,0xf4f6eeffu);}
   drawnRows().push_back(drawn);
   if(colour(&field)){auto v=form.edit.draft.find(field.id);c.box(listX+listW-60,y+34,38,29,(rgb(v==form.edit.draft.end()?field.initial:v->second)<<8)|255u);}
-  if(field.show==2&&field.kind<=2){c.box(listX+listW*.55f,y+57,listW*.39f,4,muted);}
+  if(field.show==2&&field.kind<=2){
+   // The slider: its bar, the part up to the current value, a tick at every step (every quarter when there are
+   // more than 24 steps), and a knob at the value. A tap or drag along the bar sets the value; a tap elsewhere
+   // on the row opens the exact editor.
+   const float sx=listX+listW*.55f,sw=listW*.39f,sy=y+57;
+   const double span=std::max(1.0,double(field.maximum)-double(field.minimum));
+   auto v=form.edit.draft.find(field.id);const std::string cur=v==form.edit.draft.end()?field.initial:v->second;
+   const double raw=field.kind==1?std::atof(cur.c_str())*(field.scale?field.scale:1):std::atof(cur.c_str());
+   const float frac=float(std::max(0.0,std::min(1.0,(raw-field.minimum)/span)));
+   c.box(sx,sy-2,sw,4,field.readonly?0x33463effu:muted);
+   if(!field.readonly)c.box(sx,sy-2,sw*frac,4,accent);
+   const int steps=int(std::min(span,1e6));const bool every=steps<=24;
+   for(int t=0;t<=(every?steps:4);++t){const float tx=sx+sw*(every?float(t)/float(steps):float(t)/4.f);c.box(tx-1,sy-9,2,18,field.readonly?muted:ink);}
+   if(!field.readonly){c.box(sx+sw*frac-8,sy-12,16,24,ink);c.hit(sx-kBarPad,y+20,sw+2*kBarPad,50,Kind::Slider,i);}
+  }
  }
  if(int(rows.size())>shown){c.button(listX+listW-110,top-55,48,48,"^",Kind::ScrollUp);c.button(listX+listW-54,top-55,48,48,"v",Kind::ScrollDown);}
  const auto* focused=form.field();
@@ -197,7 +221,7 @@ bool paint(int width,int height,std::vector<PhonepadRect>* rects,std::vector<bit
  auto& host=wfprops::host();host.checkOwner();syncSession(host);state.targets.clear();drawnRows().clear();
  if(!state.enabled||!host.modal||width<=0||height<=0)return false;
  if(host.picker&&host.pick==wfprops::PickMode::Scene)return false;
- float d=density(),top=state.top/d;
+ float d=layoutDensity(height),top=state.top/d;
  Canvas c{width,height,d,width/d,std::max(200.f,(height-state.top-state.bottom)/d),top,rects,glyphs};
  c.box(0,0,c.w,c.h,bg);
  if(host.picker)renderChooser(c,host);else renderForm(c,host.form);
@@ -228,7 +252,7 @@ void activate(const Target& target,float x){
  case Kind::Slider:{
   if(form.section>=form.sections.size()||size_t(target.index)>=form.sections[form.section].size())break;
   form.row=size_t(target.index);const auto* field=form.field();if(!field||field->readonly||field->kind==10)break;
-  if(target.kind==Kind::Slider){slider(form,*field,x,target.box.x1-target.box.x0,target.box.x0);break;}
+  if(target.kind==Kind::Slider){slider(form,*field,x,target.box.x1-target.box.x0-2*kBarPad,target.box.x0+kBarPad);break;}
   if(field->kind==9){if(form.action)form.action(field->key);}
   else if(field->kind==4)form.edit.set(field->id,form.value()=="1"?"0":"1");
   else if(field->kind==2){state.choiceMenu=true;state.firstChoice=0;}
@@ -268,7 +292,7 @@ bool touchEvent(TouchPhase phase,int pointer,float x,float y,int width,int heigh
   if(phase==TouchPhase::Up){float d=density();if(y>height-state.bottom-70*d)host.back();else if(host.pickHover(x*1920.f/width,y*1080.f/height))host.pickOk();}return true;
  }
  paint(width,height,nullptr,nullptr);
- float d=density(),px=x/d,py=(y-state.top)/d;
+ float d=layoutDensity(height),px=x/d,py=(y-state.top)/d;
  if(phase==TouchPhase::Down){if(state.pointer<0){state.pointer=pointer;state.downX=px;state.downY=state.lastY=py;state.moved=false;}return true;}
  if(pointer!=state.pointer)return true;
  if(phase==TouchPhase::Move){
