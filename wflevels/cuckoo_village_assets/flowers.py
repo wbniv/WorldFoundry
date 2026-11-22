@@ -47,7 +47,7 @@ QUALITY = {
     "full": dict(mounds=3, mound_blooms=3, mound_leaves=3, vines=4, vine_blooms=3, vine_leaves=2, tufts=2, heads=2,
                  g_plants=5, g_umbel=7, g_leaves=4, g_tufts=4),
     "lean": dict(mounds=2, mound_blooms=3, mound_leaves=2, vines=2, vine_blooms=2, vine_leaves=2, tufts=2, heads=1,
-                 g_plants=3, g_umbel=5, g_leaves=3, g_tufts=2),
+                 g_plants=3, g_umbel=5, g_leaves=3, g_tufts=4),
 }
 
 

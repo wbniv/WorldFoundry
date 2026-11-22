@@ -32,7 +32,7 @@ A **petunia bloom** is a funnel: ten petal triangles round a recessed rim of fiv
 
 **Why one actor of flowers.** One baked actor costs 10 draw calls for all 26 boxes. One actor per cottage would cost 13 × 10 = 130. Triangles are cheap on this GPU and draw calls are not, so I chose the single actor, which gives up per-cottage culling. If the profiling says that was the wrong call, the fallback is four actors by quarter of the village (40 draw calls).
 
-**Fallback set.** `QUALITY["lean"]` is the same flowers with fewer parts (332 triangles on a petunia box instead of 649, 277 on a geranium box instead of 683: for example 2 mounds of 3 blooms, 2 vines of 2 blooms and 2 tufts of 1 head on a petunia box). It is a switch in code, not a setting. It is used only if the profiling gate fails (see Profiling).
+**Fallback set.** `QUALITY["lean"]` is the same flowers with fewer parts (332 triangles on a petunia box instead of 649, 355 on a geranium box instead of 683: for example 2 mounds of 3 blooms, 2 vines of 2 blooms and 2 tufts of 1 head on a petunia box, and 3 plants of 5 florets and 4 tufts of 1 head on a geranium box, so a geranium box keeps all four of its edelweiss). It is a switch in code, not a setting. It is used only if the profiling gate fails (see Profiling).
 
 Other files that change with the new field: `cuckoovillagesettings.oas` (+ the regenerated `.oad` and `.ht`), `timeline.py` (`SETTINGS_DEFAULTS` and the two cell numbers, 227 and 228, after the flame cells), the phone's capabilities asset (`scripts/gen-settings-capabilities.py` regenerates it from the `.oad`), and `test_cuckoo_village_settings.py` and `test_cuckoo_village_settings_effect.py` (seven fields instead of six).
 
@@ -79,15 +79,15 @@ Counted from the code, not estimated (a test enforces the full set at 700 trian
 
 | | Today | Full (proposal) | Lean (fallback) |
 |---|---|---|---|
-| Triangles in one box | about 164 (14 cubes) | 649 (petunia), 683 (geranium) | 332 (petunia), 277 (geranium) |
-| Triangles in all 26 boxes (17 petunia, 9 geranium) | 4,264 | 17,180 | 8,137 |
+| Triangles in one box | about 164 (14 cubes) | 649 (petunia), 683 (geranium) | 332 (petunia), 355 (geranium) |
+| Triangles in all 26 boxes (17 petunia, 9 geranium) | 4,264 | 17,180 | 8,839 |
 | Cottage mesh (shared by 13) | 1,724 | 1,396 | 1,396 |
-| Whole level, setting On, about | 70,964 | 83,880 (+18.2 %) | 74,837 (+5.5 %) |
+| Whole level, setting On, about | 70,964 | 83,880 (+18.2 %) | 75,539 (+6.4 %) |
 | Whole level, setting Off | 70,964 | 70,964 (same blocks, as a separate actor) | 70,964 |
 | Draw calls added, On | 0 (shares the house's) | 10 | 10 |
 | Actors added | 0 | 2 (flowers and blocks) | 2 |
-| Level file, estimated, with the setting | 4.98 MB | about 5.58 MB (+0.60 MB) | about 5.33 MB (+0.35 MB) |
-| Level file, estimated, after the setting is retired | 4.98 MB | about 5.45 MB (+0.47 MB) | about 5.2 MB (+0.23 MB) |
+| Level file, estimated, with the setting | 4.98 MB | about 5.58 MB (+0.60 MB) | about 5.34 MB (+0.36 MB) |
+| Level file, estimated, after the setting is retired | 4.98 MB | about 5.45 MB (+0.47 MB) | about 5.22 MB (+0.24 MB) |
 
 The file estimate uses the cost the candles measured: 27.9 bytes a triangle (4,882,432 to 4,982,784 bytes for about 3,600 triangles and 13 actors). The setting keeps both versions in the file, which adds the 4,264 triangles of blocks (about 0.12 MB). It is an estimate until the level is built. The Clocks bundle (8.56 MB) grows by the same amount.
 
@@ -211,7 +211,7 @@ The render times come from one sequential run (before, then after, then lean) wh
 | View | Before: wall / CPU | After, full: wall / CPU | After, lean: wall / CPU |
 |---|---|---|---|
 | Close-up, petunia box | 162.2 s / 392 s | 83.5 s / 373 s | 79.3 s / 369 s |
-| Close-up, geranium box | 151.8 s / 402 s | 110.1 s / 403 s | 108.1 s / 383 s |
+| Close-up, geranium box | 151.8 s / 402 s | 110.1 s / 403 s | 94.9 s / 387 s |
 | Cottage | 62.9 s / 293 s | 89.2 s / 305 s | not rendered |
 | Street | 43.3 s / 222 s | 77.0 s / 234 s | not rendered |
 | Total (the four views) | 420.2 s / 1,309 s | 359.8 s / 1,315 s | not comparable |
@@ -246,7 +246,7 @@ The engine has no level-of-detail support of its own (a search of `wfsource`, `e
 | Level | What it is | Triangles a box |
 |---|---|---|
 | LOD0 | the full flowers of this plan | 649 (petunia), 683 (geranium) |
-| LOD1 | the lean set | 332, 277 |
+| LOD1 | the lean set | 332, 355 |
 | LOD2 | colour only: a few flat quads and a dome in the box's main colours, with no stems or leaves | about 12 (to be modelled) |
 
 Switch distances are set from the pixel sizes above (a first guess: LOD0 inside 9 m, LOD1 to 16 m, LOD2 beyond) and **tuned by the profiling**, with a **hysteresis of 1 m** so that a cottage at the boundary does not flip every frame, and the cottages switch independently.
@@ -311,7 +311,7 @@ Adopt a LOD variant only if all of these hold, otherwise keep the static flowers
 1. its p95 frame time is at least **0.5 ms** below the static Full's in the busiest 10 % of the lap;
 2. its p50 is not above the static Full's by more than 0.2 ms anywhere in the lap (the director's distance tests and the extra draw calls cost something);
 3. no pop pair exceeds the threshold, and no cottage switches more than 4 times a lap;
-4. the level file grows by no more than 0.4 MB over this plan's (LOD1 is the lean mesh, 8,137 triangles, about 0.23 MB, and LOD2 is small), and the plan's own gate still passes.
+4. the level file grows by no more than 0.4 MB over this plan's (LOD1 is the lean mesh, 8,839 triangles, about 0.25 MB, and LOD2 is small), and the plan's own gate still passes.
 
 ### Verification of the follow-up
 

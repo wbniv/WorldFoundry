@@ -12,7 +12,7 @@ sys.path.insert(0, str(ROOT / "wflevels/cuckoo_village_assets"))
 import flowers as fl  # noqa: E402
 
 BOXES = 26                       # 13 cottages with two front window boxes each
-FULL_PER_BOX, LEAN_PER_BOX = 700, 350
+FULL_PER_BOX, LEAN_PER_BOX = 700, 360
 FULL_TOTAL = 18_200              # 26 x 700: the plan's budget
 
 
