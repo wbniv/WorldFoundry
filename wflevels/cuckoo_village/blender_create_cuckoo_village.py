@@ -331,7 +331,9 @@ if os.environ.get('CANDLE_STUDY'):
     outx, outy = base[0] - study_tree.location.x, base[1] - study_tree.location.y
     norm = math.hypot(outx, outy)
     dist = float(os.environ.get('CANDLE_STUDY_DISTANCE', '1.5'))
-    cam = (base[0] + outx / norm * dist, base[1] + outy / norm * dist, base[2] + cd.STICK_HEIGHT + 0.05)
+    # the camera stands on the tangent through the candle, so the candle is at the tree's silhouette and its flame is seen against the dark sky;
+    # facing the trunk instead, most candles are hidden inside the foliage (the pine's profile radius is not its tiered branches' edge)
+    cam = (base[0] - outy / norm * dist, base[1] + outx / norm * dist, base[2] + cd.STICK_HEIGHT + 0.05)
     look = (base[0], base[1], base[2] + cd.STICK_HEIGHT + 0.04)
     STUDY = dict(cam=cam, look=look, heading=(math.atan2(look[0] - cam[0], look[1] - cam[1]) / math.tau) % 1.0)
 objs['Director']['wf_Script'] = forth.director_script(indices, settings_fields, study=STUDY)
