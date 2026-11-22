@@ -6,9 +6,13 @@
 
 Will asked how the candle flames flicker (2026-11-22). They do not. Each tree carries ten candles, and today the flames of one tree are **one static mesh** (`candle_flames_NN`, ten diamonds of 8 triangles, 80 triangles) whose only input is a visibility mailbox, cells 215 to 226. The director switches it on at dusk and off at dawn ([`forth.py`](../../wflevels/cuckoo_village/forth.py) `cv-flames`), so a lit flame is the same shape in every frame. A Christmas tree full of candles that never move looks like a string of lamps.
 
-The engine cannot bend a mesh, and the village is a static scene, so the flicker has to come from what the director already controls: **which actors are visible**, and where they are posed. The plan below uses visibility only.
+The village already moves a great deal, all of it driven by the director from the wall clock: the clock's hands, the parade figures on the hour, the cuckoo bird and the window lights. The engine can also **deform** a mesh: the `DFRM` chunk bends a rooted curve under script control, and version 2 carries up to 16 curves in one mesh, each with its own scale, clip and flex bias ([`dfrm_deform.h`](../../wfsource/source/renderassets/dfrm_deform.h)). What limits a flickering flame is therefore not that bending is impossible but what each way **costs a frame on cast1**, where the village already runs at 30 fps. Two ways are described below, and the plan's first step is to measure them against each other before building either.
 
 ## Approach
+
+### Option A: swap between two built shapes (visibility only)
+
+No new engine machinery: it costs what the village's other switched actors cost, the director writing visibility cells.
 
 **Two shapes, two groups, one rule.** Each flame is built in two shapes: **shape 1**, tall and leaning toward a fixed draught direction (the world +X axis), and **shape 2**, short and leaning the other way. The ten candles of a tree already come in two sets of five, `j = 0` and `j = 1` of [`candle_bases`](../../wflevels/cuckoo_village/candles.py), standing on opposite sides of the trunk; those are **group A** and **group B**. Each tree therefore gets four flame meshes (A1, A2, B1, B2) in place of today's one, and at any moment exactly one of A1 or A2, and one of B1 or B2, is visible when the tree is lit.
 
@@ -90,24 +94,40 @@ sequenceDiagram
     R-->>E: 12 trees × 2 groups × 1 shape drawn
 ```
 
+### Option B: a deformed flame (`DFRM`)
+
+Each tree's ten flames become **one `DFRM` v2 mesh with ten short curves**, one curve per flame (the format allows 16 a mesh). Each flame is a few rooted samples; the director writes each curve's **flex bias** (cell `40 + 4c` of the mesh's control block, degrees added to every sample of that curve) and, if wanted, its **scale** about its root, every frame, from the same kind of two-sine rule. A flame then sways and stretches smoothly instead of snapping between two shapes, and the flicker needs no extra actors: 12 deformed meshes replace 12 static ones, and the 36 extra actors and 36 extra cells of Option A are not needed.
+
+What is **known**: the format and its evaluator exist and are tested (`dfrm_deform.h`); one pose row can drive every curve; a curve's bias and scale are separate script cells. What is **not known**, and is the reason for the first verification step:
+
+- **The frame cost on cast1.** The measured numbers are for much larger meshes: Seahorse Grid reaches 29.6 FPS with 24 deforming meshes, and the six-pair seahorse comparison puts CPU `DFRM` at 47 to 69 ms a presented frame ([reef plan](2026-11-02-gulf-of-thailand-reef-tank.md), [seahorse comparison](2026-10-16-saltwater-seahorses/comparison.md)). A flame mesh is about 60 vertices a tree, far smaller, but the evaluator's per-mesh cost (pose, skin, upload, cull) may not scale down with the vertex count. The village sits at 30 fps (33.4 ms) already, so there is almost no headroom to spend.
+- **The authoring path.** The exporter and `dfrm_ref.py` were built for tails and fish. A tree's ten flames as ten curves of one mesh is a new rig to author and to check in `dfrm_ref.py`.
+- **The size of the effect.** A flame is 4 to 11 px tall on screen (below), so a smooth sway and a two-shape swap may look much the same at the Chromecast's distance. Smooth only wins if it is visible.
+
+GPU skinning ([plan](2026-10-16-gpu-skinning-chromecast-experiment.md)) would make Option B cheap if it is ever adopted, but it is not built, so it is not counted on here.
+
+**How to choose.** A short spike, on one tree: build the ten-curve flame mesh, drive its biases from the rule, and run the coordinator `profile` job on cast1 with all 12 trees against Option A's 48 actors. Option B is adopted only if its median frame time rises by less than 0.1 ms **and** the floor stays at 30 fps **and** the swaying flame is visibly better in a capture at the nearest view; otherwise Option A is built. The rest of this plan specifies Option A, which needs no new machinery; Option B replaces its Build and Director sections and shares everything else.
+
 ## Decisions for Will
 
-1. **Does the flicker stop under Camera motion Still?** Recommended: **no**. That setting stills the camera path (it exists so a screen is not always moving for burn-in), not candlelight, and a still camera is where a motionless tree would be most noticed. If a still screen should stay still for burn-in's sake, the rule gets one extra factor and the cost is nil.
-2. **Does it slow down or stop at a low frame rate?** Recommended: **no**. The rule is a function of the clock, not of frame count, so at 30 fps it is sampled every 33 ms and at 15 fps every 67 ms, still changing about every other sample. Nothing accumulates and nothing needs to catch up.
-3. **A new setting?** Recommended: **none** now. The flicker is not luminance: both shapes are the same flat colour, so nothing flashes, and each change is a few pixels (below). If a reduced-motion switch is wanted later it is one more field like Detailed flowers.
-4. **Two shapes or three?** Recommended: **two**. A third, upright and mid-height, makes the flicker softer but costs 24 more actors and another 24 cells; the mockup's schedule shows two shapes already give irregular motion.
-5. **The rate.** 7.4 changes a second per group is lively. A calmer pair, 1.3 and 2.1 revolutions a second (78 and 126 a minute), gives about 4 a second. Recommended: start at 2.3 and 3.7, judge it on cast1, and slow it if it reads as nervous. The numbers are constants in `timeline.py`.
+1. **A or B?** Recommended: **measure first** (the spike above, about a day), then take B only if it is cheap and visibly better; A is the safe default and is a day of work on its own.
+2. **Does the flicker stop under Camera motion Still?** Recommended: **no**. That setting stills the camera path (it exists so a screen is not always moving for burn-in), not candlelight, and a still camera is where a motionless tree would be most noticed. If a still screen should stay still for burn-in's sake, the rule gets one extra factor and the cost is nil.
+3. **Does it slow down or stop at a low frame rate?** Recommended: **no**. The rule is a function of the clock, not of frame count, so at 30 fps it is sampled every 33 ms and at 15 fps every 67 ms, still changing about every other sample. Nothing accumulates and nothing needs to catch up.
+4. **A new setting?** Recommended: **none** now. The flicker is not luminance: both shapes are the same flat colour, so nothing flashes, and each change is a few pixels (below). If a reduced-motion switch is wanted later it is one more field like Detailed flowers.
+5. **Two shapes or three?** (Option A only.) Recommended: **two**. A third, upright and mid-height, makes the flicker softer but costs 24 more actors and another 24 cells; the mockup's schedule shows two shapes already give irregular motion.
+6. **The rate.** 7.4 changes a second per group is lively. A calmer pair, 1.3 and 2.1 revolutions a second (78 and 126 a minute), gives about 4 a second. Recommended: start at 2.3 and 3.7, judge it on cast1, and slow it if it reads as nervous. The numbers are constants in `timeline.py`.
 
 ## Budgets
 
-| | Today | Planned |
-|---|---|---|
-| Flame actors | 12 | 48 (+36) |
-| Flame triangles in the level | 960 | 3,840 (every shape of every flame is in the level) |
-| Flame triangles drawn | 960 | 960 (one shape per group is visible; hidden actors are skipped) |
-| Flame visibility cells | 12 (215–226) | 48 (232–279) |
-| Level size | | about +40 KB (36 mesh actors); measured at build, see the note below |
-| Director work per frame | 12 cell writes | 48 cell writes and 24 × two sines |
+| | Today | Option A | Option B (to be measured) |
+|---|---|---|---|
+| Flame actors | 12 | 48 (+36) | 12 |
+| Flame triangles in the level | 960 | 3,840 (every shape of every flame is in the level) | 960 (one shape, bent) |
+| Flame triangles drawn | 960 | 960 (one shape per group is visible; hidden actors are skipped) | 960 |
+| Flame visibility cells | 12 (215–226) | 48 (232–279) | 12, plus 10 curve cells each in the mesh's control block |
+| Level size | | about +40 KB (36 mesh actors); measured at build, see the note below | about the same as today, plus the deformer chunk |
+| Director work per frame | 12 cell writes | 48 cell writes and 24 × two sines | 120 curve writes and 120 × two sines |
+| Renderer and deformer cost on cast1 | none new | none new (hidden actors are skipped) | **unknown**: 12 more deformed meshes against a village already at 33.4 ms |
 
 **On screen the flames are small.** At 1080p with the 60° view, a flame is 11 px tall and 7 px wide at the village's nearest camera distance (6.3 m) and 4 px by 3 px at the farthest (16 m). The change from shape 1 to shape 2 is a height change of 30 mm and a lean of 24 mm: 4 px at the nearest, 2 px at the farthest. At the far end of the orbit the effect is a **twinkle** of single pixels, not a visible waving flame; at the front of the orbit, and on a tablet held close or a phone, it reads as a flame. That is the cost of a candle being 75 mm tall in a village built at 1:1. If it proves too faint at distance, the lever is the lean and height difference (a larger swing, drawn only for the tall pose), not a faster rate.
 
@@ -122,6 +142,7 @@ sequenceDiagram
 
 ## Verification
 
+0. **The choice, measured first.** The spike under Option B: one tree's ten-curve `DFRM` flame mesh driven from the rule, then a coordinator `profile` job on cast1 in season (Candles all year On), with all 12 trees as deformed meshes against Option A's 48 actors and against today's 12 static ones. Record the median and floor of each. Adopt B only if its median rises by less than 0.1 ms over today, the floor stays at 30 fps and a capture at the nearest view shows a better flame than A's; else build A. Steps 1 to 8 are written for A and are adapted for B (the cells become curve biases).
 1. **The shapes.** `tests/test_cuckoo_village_candles.py` gains: each tree has four flame meshes; groups A and B hold five candles each, from `j = 0` and `j = 1`; every flame is 8 triangles in both shapes; the heights, radii and leans are the table's; the two shapes of a candle share its foot.
 2. **The rule in the model.** A test of `timeline.flame_shape` over 60 s at 600 samples a second for all 24 groups: between 7 and 8 changes a second per group, a mean of 120 to 150 ms between changes, the pattern identical one minute apart, no two groups with the same phase.
 3. **The director, in the real VM.** `tests/verify_cuckoo_village_forth.py` sets `WALL_SECOND` to a spread of values with the candles in season and the glow on: for each group exactly one of its two cells is 1 and the cell equals `timeline.flame_shape`; out of season, with Candles all year Off, both are 0; with Window lights Off, both are 0 for every group; with Candles all year On in July, the pairs follow the rule.
@@ -133,4 +154,4 @@ sequenceDiagram
 
 ## Who
 
-The village session owns this: `candles.py`, the build script, `timeline.py` and `forth.py` for Cuckoo Village. It touches no engine file and no other level. It lands after the display-mailboxes commits, which are unrelated; whoever builds the next Cuckoo Village level (the Show framerate setting changes `settings.inc` and forces a rebuild) should include it.
+The village session owns this: `candles.py`, the build script, `timeline.py` and `forth.py` for Cuckoo Village. It touches no engine file and no other level; Option B would add a `DFRM` rig for the flames and would need `dfrm_ref.py` and the exporter checked for a many-short-curves mesh, which is why it is measured before it is chosen. It lands after the display-mailboxes commits, which are unrelated; whoever builds the next Cuckoo Village level (the Show framerate setting changes `settings.inc` and forces a rebuild) should include it.

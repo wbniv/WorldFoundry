@@ -6,8 +6,8 @@
 Writes layouts.png (1440 x 900, five screens, two rows) and layouts.html (the same drawing live, with a slider for the
 screen's shape) into OUTDIR, default docs/plans/2026-11-22-display-mailboxes/. Plan: docs/plans/2026-11-22-display-mailboxes.md.
 
-The geometry is the Tide Harbour director's: the panel is a full-height strip PANEL_FRAC (0.27) of the screen's width wide,
-on one side (here the right). Today (wflevels/tide_harbour/panel.py: ASPECT = 16/9) its width and its edge are computed for a
+The geometry is the Tide Harbour director's: the panel is a full-height strip, 0.27 of a 16:9 frame wide (0.48 of the screen's height),
+on one side (here the right); with the mailboxes it keeps that size and sits against the real edge. Today (wflevels/tide_harbour/panel.py: ASPECT = 16/9) its width and its edge are computed for a
 16:9 frame centred on the screen, so on any other shape they are wrong; with the runtime display aspect they come from the
 screen that is really drawn. The Pixel row is the real measurement: a 1520 x 680 drawing area (aspect 2.235) on which the
 panel's right edge was at about x = 1445 of 1600 (docs/plans/2026-11-22-display-mailboxes/pixel-tide-now.png).
@@ -29,8 +29,11 @@ def panel_now(aspect, h=1.0):
 
 
 def panel_new(aspect, h=1.0):
+    """With the mailboxes: the panel keeps its own size (27 % of a 16:9 frame, so 0.48 of the height) and its near edge is the
+    screen's real edge, which the director now reads from DISPLAY_ASPECT. Its share of the width therefore follows the screen."""
     w = h * aspect
-    return w - PANEL_FRAC * w, w
+    pw = PANEL_FRAC * h * 16 / 9
+    return w - pw, w
 
 
 def visible(aspect, edges, h=1.0):
@@ -47,7 +50,7 @@ def png(out):
     reg = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 17)
     small = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 15)
     d.text((30, 20), "Where the river panel sits, on five screen shapes", fill=(240, 240, 228), font=bold)
-    d.text((30, 54), "Panel = a full-height strip 27 % of the screen's width, on the right. Red = off the screen.", fill=(170, 175, 165), font=reg)
+    d.text((30, 54), "Panel = a full-height strip, 0.48 of the screen's height wide (27 % of a 16:9 screen), on the right. Red = off the screen.", fill=(170, 175, 165), font=reg)
     h_px = 120
     for row, (title, fn) in enumerate((("Today: placed for a centred 16:9 frame", panel_now), ("With the display mailboxes: placed for the screen that is drawn", panel_new))):
         top = 120 + row * 380
@@ -73,7 +76,7 @@ def png(out):
                 d.rectangle([pl, y0, x0, y0 + h_px], outline=(235, 70, 60))
             d.text((x0, y0 + h_px + 12), name, fill=(235, 235, 225), font=reg)
             d.text((x0, y0 + h_px + 36), f"aspect {aspect:.3f}", fill=(170, 175, 165), font=small)
-            d.text((x0, y0 + h_px + 56), f"panel {PANEL_FRAC * 100 if row else (right - left) / w_px * 100:.0f} % wide, {vis * 100:.0f} % visible",
+            d.text((x0, y0 + h_px + 56), f"panel {(right - left) / w_px * 100:.0f} % wide, {vis * 100:.0f} % visible",
                    fill=(255, 120, 100) if vis < 0.99 else (140, 220, 150), font=small)
             gap = (x0 + w_px) - min(pr, x0 + w_px)
             d.text((x0, y0 + h_px + 76), f"gap to the edge {gap / h_px * 680:.0f} px at 680 high" if gap > 0.5 else "at the edge", fill=(170, 175, 165), font=small)
@@ -92,14 +95,14 @@ h1{font-size:20px;margin:0 0 4px}p{color:var(--mut);margin:4px 0 12px}.row{displ
 label{display:block;margin:10px 0 2px}input[type=range]{width:100%}.k{display:inline-block;margin:6px 10px 0 0;padding:2px 8px;border:1px solid var(--mut);border-radius:4px;cursor:pointer;color:var(--fg);background:none;font:inherit}
 .r{font-variant-numeric:tabular-nums}.w{color:var(--warn)}.o{color:var(--ok)}</style></head><body>
 <h1>Where the river panel sits, for any screen shape</h1>
-<p>A full-height strip, 27 % of the screen's width, on the right. Drag the slider or pick a screen. Red hatching is off the screen.</p>
+<p>A full-height strip, 0.48 of the screen's height wide (27 % of a 16:9 screen), on the right. Drag the slider or pick a screen. Red hatching is off the screen.</p>
 <div>__BUTTONS__</div><label for="a">Screen aspect (width / height): <b id="av">1.778</b></label>
 <input id="a" type="range" min="0.4" max="2.6" step="0.005" value="1.778">
 <div class="row"><div class="box"><h2 style="color:var(--amb)">Today: placed for a centred 16:9 frame</h2><canvas id="c0" width="560" height="320"></canvas><div class="r" id="t0"></div></div>
 <div class="box"><h2 style="color:var(--ok)">With the display mailboxes: placed for the screen that is drawn</h2><canvas id="c1" width="560" height="320"></canvas><div class="r" id="t1"></div></div></div>
 <script>
 const F=0.27,H=300;
-function place(kind,asp){const w=H*asp;if(kind==0){const fr=H*16/9,r=w/2+fr/2;return [r-F*fr,r]}return [w-F*w,w]}
+function place(kind,asp){const w=H*asp,fr=H*16/9;if(kind==0){const r=w/2+fr/2;return [r-F*fr,r]}return [w-F*fr,w]}
 function draw(cv,kind,asp,out){const x=cv.getContext('2d');x.clearRect(0,0,cv.width,cv.height);const w=H*asp,s=Math.min(1,(cv.width-80)/(w*1.4)),W=w*s,Hh=H*s,x0=(cv.width-W)/2-(kind==0?0:0),y0=10;
 x.fillStyle='#0e1428';x.fillRect(x0,y0,W,Hh);x.strokeStyle='#789';x.strokeRect(x0,y0,W,Hh);
 let [l,r]=place(kind,asp);l*=s;r*=s;const vl=Math.max(l,0),vr=Math.min(r,W);x.fillStyle='#96784a';if(vr>vl)x.fillRect(x0+vl,y0,vr-vl,Hh);

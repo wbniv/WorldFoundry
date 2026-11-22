@@ -27,7 +27,7 @@ The engine already knows the answer. `wfsource/source/gfx/authored_view.hp` comp
 
 **When they are written: at the start of a level, and when something that decides the view changes. Not every frame.** The inputs are the surface size and the level's authored and maximum aspect (and the `--authored-aspect` and `--maximum-aspect` overrides). A small cache of those four numbers, held beside the wall-clock sample in `Level`, is compared each frame, which costs two integer comparisons and two float comparisons, and the eight cells are written only when it differs or a new level has started (a new level has fresh mailboxes, so its first update always writes). The size comes from the call `WFGame::update` already makes each frame (`_display->GetSurfaceSize`, `wfsource/source/game/game.cc`, near line 673); the view comes from `wfview::current(width, height)`, the same function the projection uses, so the script and the picture can never disagree.
 
-**Tide Harbour then calculates the panel from them.** The director replaces the constant with the mailboxes: the half-width at the panel's depth `d` is `d × tan(DISPLAY_VFOV / 2) × DISPLAY_ASPECT`, and the panel is the same `PANEL_FRAC` (27 %) of it, flush against the real edge. `panel.py` and the Python reference model gain `aspect` and `vfov` parameters that default to 16:9 and 60°, so every existing number and test is reproduced exactly on a television. Because the director reads the cells every frame and a read is free, a window that is resized or a phone that is turned moves the panel within one frame.
+**Tide Harbour then calculates the panel from them.** The director replaces the constant with the mailboxes: the half-width at the panel's depth `d` is `d × tan(DISPLAY_VFOV / 2) × DISPLAY_ASPECT`, and the panel keeps its own size (27 % of a 16:9 frame, 0.48 of the screen's height, so it stays undistorted) and sits flush against the real edge. Its share of the width therefore follows the screen: 27 % on a television, 21 % on the Pixel, 36 % on a 4:3 tablet (measured below; changed from "27 % everywhere" on 2026‑11‑22 because that would stretch the panel's digits and map). `panel.py` and the Python reference model gain `aspect` and `vfov` parameters that default to 16:9 and 60°, so every existing number and test is reproduced exactly on a television. Because the director reads the cells every frame and a read is free, a window that is resized or a phone that is turned moves the panel within one frame.
 
 ### How it fits together
 
@@ -70,7 +70,7 @@ stateDiagram-v2
 
 ## Mockups
 
-The surface is a rendered scene, so the mockups are layouts. The first picture is the decision this plan makes: the same full-height panel, 27 % of the screen's width, on five screen shapes, today and with the mailboxes.
+The surface is a rendered scene, so the mockups are layouts. The first picture is the decision this plan makes: the same full-height panel, 0.48 of the screen's height wide (27 % of a 16:9 screen), on five screen shapes, today and with the mailboxes.
 
 [![The panel on five screen shapes, today and with the display mailboxes](2026-11-22-display-mailboxes/layouts.png)](2026-11-22-display-mailboxes/layouts.html)
 
@@ -82,7 +82,7 @@ The surface is a rendered scene, so the mockups are layouts. The first picture i
 | Pixel in landscape | 2.235 | 100 %, 156 px short of the edge (measured 155) | at the edge |
 | Ultrawide 21:9 | 2.333 | 100 %, 189 px short (at 680 high) | at the edge |
 | Tablet 4:3 | 1.333 | **54 %**, the rest off the screen | at the edge |
-| Phone portrait | 0.450 | **0 %**, entirely off the screen | at the edge, 27 % of the width |
+| Phone portrait | 0.450 | **0 %**, entirely off the screen | at the edge, but 0.48 of the height is wider than the screen (94 % visible): out of scope below |
 
 ## Budgets
 
@@ -99,20 +99,52 @@ The surface is a rendered scene, so the mockups are layouts. The first picture i
 
 - **Safe-area and cutout insets.** The Pixel screenshot has a black strip about 80 px wide at the left. Whether it is the display cutout or the activity's window is not established here, and the mailboxes describe the surface the engine draws, not what the phone covers. Insets would be more mailboxes in a later piece.
 - **The on-screen controller and the Settings button overlay the panel** on the phone (the joystick and D, B, C, A buttons, and the Settings button over the clock readings, in the screenshot). That is the touch layer's layout, owned by the Aquarium owner's touch controller work, and it can use these same mailboxes later.
-- **A portrait layout for the panel.** With the mailboxes the panel is still 27 % of the width, which is a thin strip on a portrait phone. Whether portrait should lay out differently (a bar at the bottom, say) is a design decision, not a placement bug.
+- **A portrait layout for the panel.** With the mailboxes the panel keeps its size, 0.48 of the height, which on a portrait phone is wider than the screen (measured: it covers all of a 600 × 1330 capture). Whether portrait should lay out differently (a bar at the bottom, say) is a design decision, not a placement bug.
 - **A change counter** (`DISPLAY_SERIAL`). A script that wants to know the display changed compares the aspect with its last value; a counter can be added if one needs it.
 - **Other levels.** Nothing else uses the mailboxes yet; they exist for any level that lays something out against the screen.
 
 ## Verification
 
 1. **The values are the view's.** A new CTest `display_mailboxes` (beside `authored_view` and `wall_clock_test`): for a set of surface sizes and the level and argument settings, the eight values equal `wfview::view` and the drawn rectangle; unchanged inputs write nothing (a counter on the writes stays at 1); a changed size writes once.
+   ```
+$ g++ -std=c++17 -Wall -Wextra -Iwfsource/source tests/display_mailboxes_test.cc && ./a.out
+display_mailboxes_test: 1118 checks passed
+```
+   **PASS** (2026‑11‑22, `ec778226`; registered as CTest `display_mailboxes`).
 2. **The mailbox table.** `tests/test_mailbox_global_bounds.py` follows `GLOBAL_SYSTEM_MAX` to 1935, and each new name has an `INDEXOF_` word the zForth bridge resolves.
+   ```
+tests/test_mailbox_global_bounds.py ..    (GLOBAL_SYSTEM_MAX = 1935)
+```
+   **PASS.** The zForth bridge resolved `INDEXOF_DISPLAY_ASPECT` and `INDEXOF_DISPLAY_VFOV` in the real-VM run of step 3 (the director would not have loaded otherwise).
 3. **The director, in the real VM.** The real-zForth check of the Tide Harbour director with the display cells set to each of the five shapes: the panel's edge equals the right edge of the visible frame within 1 mm at the panel's depth, and at 16:9 and 60° the poses are bit-for-bit the poses of today's model.
+   ```
+81 frames; worst position 0.4887 mm, rotation 0.0017 deg, scale 0.000021, colour 0 step(s), tide 0.007 mm
+40 scans, 10 to 10 frames each at 20 samples a frame; worst time 1.17 s, worst height 0.000 cm against turns.py
+PASS
+```
+   **PASS.** 15 of the 81 frames set the display cells to 1520 × 680 (2.235), 21:9, 4:3, 0.45 and 1:1; the model is the Python `timeline.scene(..., display)`. At 16:9 and 60° `panel.half_w()` equals `HALF_W` exactly (new test `test_the_television_is_unchanged_and_every_other_screen_gets_its_own_edge`), so the model's poses there are today's.
 4. **The desktop engine at five window sizes.** `scripts/check-tide-harbour.py --capture` at 1920 × 1080, 1520 × 680, 1920 × 823, 1440 × 1080 and 600 × 1330: in each capture the panel's right edge is within 2 px of the display's right edge, and its width is 27 % of the width within 2 px.
+   Measured on the brown readings band of each capture ([`after/`](2026-11-22-display-mailboxes/after/)):
+   ```
+1440x1080  panel x 0..517 = 518 px = 36.0 % of the width
+1520x680   panel x 0..325 = 326 px = 21.4 %
+1920x1080  panel x 0..517 = 518 px = 27.0 %
+1920x823   panel x 0..394 = 395 px = 20.6 %
+600x1330   panel x 0..599 = 600 px = 100.0 %   (the panel is wider than the screen)
+```
+   **PASS for the edge, FAIL for the width as written.** The panel is flush against the display's edge (x = 0, it was on the left at 10:00) in all five. Its width is 27.0 % only at 16:9: the plan's clause "27 % of the width" assumed the panel stretches, but it keeps its proportions, so the clause was wrong and the design text above is corrected. Whether to stretch it instead (distorting the digits and the map) is Will's call; the stretch is one multiplier in the director.
 5. **The television is unchanged.** The 1920 × 1080 capture matches today's capture (the committed reference) within the capture's own tolerance.
+   The 1920 × 1080 capture above has the panel at 518 px = 27.0 %, as before, and the real-VM frames at 16:9 are the model's unchanged poses. The engine-versus-model comparison on the desktop engine passes at four dates and times (`check-tide-harbour.py --compare`: worst position 0.219 mm, rotation 0.009°, tide equal to 4 digits, `PASS`). **PASS** against the model; no older capture of the same moment was kept, so a pixel diff against one was not run.
 6. **The resize.** On the desktop engine, resize the window while Tide Harbour runs: the log shows the eight cells written once for the change and not on the frames between, and the panel follows within a frame.
+   Not run on the desktop engine. The unit test covers the mechanism (CTest `display_mailboxes`: one write per change, none on the 1,000 frames between, a fresh tracker per level), and the director reads the cells every frame, but a window resize under xvfb was not driven. **NOT RUN** (open).
 7. **The Pixel.** The same screenshot as the one in Context, after the change: the panel's right edge at the right edge of the drawing area.
+   Needs an APK built with this engine and level and a take-over of Will's phone. **NOT RUN** (open: Will's call whether to put it on the Pixel).
 8. **The wall-clock mailboxes are untouched.** `tests/wall_clock_test.cpp` and the Tide Harbour and Minute Machine suites pass unchanged.
+   ```
+tests/test_wall_clock.py, test_minute_machine_{channels,forth,parts,timeline}.py, test_tide_harbour*.py: all passed
+wall_clock_test: OK
+```
+   **PASS.**
 
 ## Who
 
