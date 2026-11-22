@@ -19,7 +19,7 @@ Today there are two packages:
 ## Decisions (made 2026‑11‑21; the implementer does not reopen them)
 
 1. **`org.worldfoundry.screensaver` survives.** It is already the Dream, is registered in the coordinator (`applications.json` key `screensaver`) and in Homeboard, and owns the saved choice and the `LEVEL` extra. Its DreamService, preview activity, provider authority, preference keys and `LEVEL` contract do not change.
-2. **`org.worldfoundry.wf_game.aquarium` stays installed and unchanged for now.** The coordinator, Homeboard's directory and diagnostics still name it. Retiring it is a later decision; this task only lists what references it.
+2. **`org.worldfoundry.wf_game.aquarium` stays installed and unchanged for now.** **Superseded 2026‑11‑22:** Will wants one APK, so it is retired; see [One Aquarium APK](2026-11-22-one-aquarium-apk.md). The coordinator, Homeboard's directory and diagnostics still name it. Retiring it is a later decision; this task only lists what references it.
 3. **The menu changes nothing that is saved.** Choosing a tank in the menu starts it for that run. It never writes `screensaver`/`tank`; `setSetting tank:<id>` stays the only way to change what the Dream plays.
 4. **One roster.** A tank is added in one place, `wflevels/aquarium-menu.manifest`, read by one `LevelCatalog` (Phase 2 of the launch plan). The menu and the Dream both read it. No second list.
 
