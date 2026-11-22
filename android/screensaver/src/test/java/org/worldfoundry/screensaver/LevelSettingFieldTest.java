@@ -37,6 +37,16 @@ public final class LevelSettingFieldTest {
     }
 
     public static void main(String[] args) {
+        // An on/off setting (a checkbox): true or false on the wire, 1 or 0 to the engine; anything else is refused.
+        LevelSettingField caustics = new LevelSettingField("Caustics", "Caustics", "boolean", "true", 0, 0,
+                Collections.<String>emptyList(), Collections.<String>emptyList());
+        check(caustics.validate("true").equals("true") && caustics.validate("false").equals("false"), "boolean true and false");
+        check(caustics.validate("1").equals("true") && caustics.validate("0").equals("false"), "boolean accepts 1 and 0");
+        check(rejects(caustics, "yes") && rejects(caustics, "2") && rejects(caustics, "TRUE"), "boolean refuses other text");
+        check(caustics.engineValue("true").equals("1") && caustics.engineValue("false").equals("0"), "boolean goes to the engine as 1 or 0");
+        check(choice("Speed", "Slow", "Normal").engineValue("1").equals("1"), "a choice goes to the engine unchanged");
+        check(caustics.wireId("sea-stars.").equals("sea-stars.caustics"), "boolean wire id");
+
         // The wire ids the coordinator and the phone use.
         String[][] ids = {{"Chocolate-chip stars", "chocolate-chip-stars"}, {"Red Fromia", "red-fromia"},
                 {"Sand-sifting stars", "sand-sifting-stars"}, {"Brittle stars", "brittle-stars"},

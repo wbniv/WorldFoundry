@@ -30,8 +30,8 @@ TYPEHEADER(Sea Stars Settings,SeaStarsSettings)
 	PROPERTY_SHEET_HEADER(Tank,0)
 @*	-----------------------------
 	TYPEENTRYINT32(Speed,,0,2,1,"Slow|Normal|Fast",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"How fast the stars move: 10 or 20 or 40 times real speed")
-	TYPEENTRYINT32(Glass climbing,,0,1,1,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Whether the player star may climb the glass; a star on the glass climbs down first")
-	TYPEENTRYINT32(Caustics,,0,1,1,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Moving light patterns on the sand")
+	TYPEENTRYINT32(Glass climbing,,0,1,1,"",SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"Whether the player star may climb the glass; a star on the glass climbs down first")
+	TYPEENTRYINT32(Caustics,,0,1,1,"",SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"Moving light patterns on the sand")
 @*	Seed: INT32 capped at 2^31-1 (M4); larger saved values are clamped (R7).
 	TYPEENTRYINT32(Seed,,0,2147483647,0,"",SHOW_AS_NUMBER|SHOW_AS_LIVE,"Random number seed from 0 to 2147483647; 0 picks new resident spots on every entry")
 	PROPERTY_SHEET_FOOTER

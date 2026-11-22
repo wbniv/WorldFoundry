@@ -366,11 +366,27 @@ def test_the_asset_offers_exactly_the_nine_fields_with_the_d9_ranges():
     assert list(settings) == list(FIELDS) + sorted(GLOBAL_FIELDS)   # the nine, then the global sheet
     for label, (low, high, default) in FIELDS.items():
         s = settings[label]
-        assert int(s["value"]) == default and not s["readonly"], label
+        assert not s["readonly"], label
+        if s["type"] == "boolean":
+            # An on/off setting is a real checkbox (Will, 2026-11-22), "true"/"false" on the wire.
+            assert (low, high) == (0, 1) and s["show"] == 8 and s["value"] == ("true" if default else "false"), label
+            continue
+        assert int(s["value"]) == default, label
         if s["type"] == "choice":
             assert [o["id"] for o in s["options"]] == [str(i) for i in range(low, high + 1)], label
         else:
             assert (label, s["type"], int(s["minimum"]), int(s["maximum"])) == ("Seed", "integer", low, high)
+
+
+def test_the_on_off_fields_are_real_checkboxes_not_off_on_choices():
+    """Glass climbing and Caustics were "Off|On" radio buttons, drawn as Off/On segments while Show framerate was a
+    checkbox. Every on/off setting is now a checkbox: a boolean in the catalog and in the phone asset."""
+    kinds = {f["key"]: f for f in catalog()["fields"]}
+    for key in ("Glass climbing", "Caustics", "Show framerate"):
+        assert kinds[key]["kind"] == "Bool" and kinds[key]["show"] == 8, key
+    types = {s["key"]: s["type"] for s in json.loads(ASSET.read_text())["objects"][0]["settings"]}
+    assert types["Glass climbing"] == types["Caustics"] == types["Show framerate"] == "boolean"
+    assert 'Off|On' not in (OAS / "seastarssettings.oas").read_text()
 
 
 def test_the_java_cpp_and_provider_agree_on_names_and_routes():

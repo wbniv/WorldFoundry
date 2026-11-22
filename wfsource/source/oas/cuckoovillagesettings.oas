@@ -2,13 +2,13 @@
 TYPEHEADER(Cuckoo Village Settings,CuckooVillageSettings)
     @include settings.inc
     PROPERTY_SHEET_HEADER(Cuckoo Village,1)
-    TYPEENTRYINT32(Bavaria mode,,0,1,0,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Bavarian figures and a carved chalet case; the clock runs backwards: the dial and the hourly parade turn counter-clockwise")
-    TYPEENTRYINT32(Seasonal events,,0,1,1,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"With Bavaria mode on: Nikolaus and Krampus; Fasching; Oktoberfest; the maypole dressing on their dates")
-    TYPEENTRYINT32(Candles all year,,0,1,0,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Candles are always lit on the village trees from 1 December to 6 January and On also lights them the rest of the year")
-    TYPEENTRYINT32(Window lights,,0,1,1,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Cottage windows glow from dusk to dawn")
-    TYPEENTRYINT32(Sound,,0,1,1,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The cuckoo call on the hour; the bird still bobs with sound off")
+    TYPEENTRYINT32(Bavaria mode,,0,1,0,"",SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"Bavarian figures and a carved chalet case; the clock runs backwards: the dial and the hourly parade turn counter-clockwise")
+    TYPEENTRYINT32(Seasonal events,,0,1,1,"",SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"With Bavaria mode on: Nikolaus and Krampus; Fasching; Oktoberfest; the maypole dressing on their dates")
+    TYPEENTRYINT32(Candles all year,,0,1,0,"",SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"Candles are always lit on the village trees from 1 December to 6 January and On also lights them the rest of the year")
+    TYPEENTRYINT32(Window lights,,0,1,1,"",SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"Cottage windows glow from dusk to dawn")
+    TYPEENTRYINT32(Sound,,0,1,1,"",SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"The cuckoo call on the hour; the bird still bobs with sound off")
     TYPEENTRYINT32(Camera motion,,0,1,0,"Journey|Still",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Journey tours the village and holds the tower view at each quarter; Still stays on one wide view")
-    TYPEENTRYINT32(Detailed flowers,,0,1,1,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Detailed petunia geranium and edelweiss window boxes on the cottages and Off shows the simple blocks")
+    TYPEENTRYINT32(Detailed flowers,,0,1,1,"",SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"Detailed petunia geranium and edelweiss window boxes on the cottages and Off shows the simple blocks")
     PROPERTY_SHEET_FOOTER
 	@include global_settings.inc
 TYPEFOOTER

@@ -31,8 +31,12 @@ def holders():
 def test_one_declaration_holds_exactly_show_framerate_today():
     assert declared_globals() == ["Show framerate"]
     text = (OAS / "global_settings.inc").read_text()
-    assert "SHOW_AS_CHECKBOX|SHOW_AS_LIVE" in text, "a live checkbox: the form edits it and Apply takes effect"
-    assert ",0," in text.split("TYPEENTRYBOOLEAN(Show framerate", 1)[1].splitlines()[0], "default off"
+    line = text.split("TYPEENTRYINT32(Show framerate", 1)[1].splitlines()[0]
+    # An on/off setting is a real checkbox: a 0..1 integer with the checkbox display and an EMPTY choice string.
+    # TYPEENTRYBOOLEAN adds a hidden "False|True" choice list, which makes the catalog call it an Enum and the touch
+    # form draw a drop-down (Will, 2026-11-22: "i wish they were all checkboxes and actually had a checkbox").
+    assert ',0,1,0,"",SHOW_AS_CHECKBOX|SHOW_AS_LIVE,' in line, "a live checkbox, default off"
+    assert "TYPEENTRYBOOLEAN(" not in text.replace("Do not use TYPEENTRYBOOLEAN", "")
 
 
 def test_every_holder_ends_with_the_global_sheet_so_no_field_id_moves():
@@ -91,6 +95,7 @@ def test_each_compiled_holder_lists_the_global_field_last(name):
     fields = json.loads(subprocess.check_output([str(CATALOG), str(oad)], text=True))["fields"]
     stored = [f for f in fields if f["width"]]
     assert stored[-1]["key"] == "Show framerate", f"{name}.oad: regenerate it with oas2oad"
+    assert stored[-1]["kind"] == "Bool", f"{name}.oad: Show framerate must be a real checkbox (Bool), not an Enum"
     assert stored[-1]["live"] and stored[-1]["default"] in (0, "0"), name
     assert [f["key"] for f in stored].count("Show framerate") == 1
 
@@ -146,3 +151,10 @@ def test_the_audit_prints_every_row_and_strict_fails_exactly_when_a_reachable_le
     assert strict.returncode == (1 if "MISSING" in strict.stdout else 0)
     built = run("--roster", "built")
     assert built.returncode == 0 and "every wflevels/<id>-standalone.iff" in built.stdout
+
+
+def test_no_settings_holder_declares_an_on_off_setting_as_off_on_radio_buttons():
+    """Every on/off setting is a checkbox. A 0..1 choice labelled Off|On draws as Off/On segments and looks
+    different from the rest of the form."""
+    for oas in holders():
+        assert '"Off|On"' not in oas.read_text(), f"{oas.name}: declare it as a checkbox (see global_settings.inc)"
