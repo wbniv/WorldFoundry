@@ -17,7 +17,7 @@ Measured today with [`flowers_prototype.py`](../../wflevels/cuckoo_village_asset
 - a **soil bed**, a four-triangle mound just above the box top;
 - **edelweiss tufts**: 2 on a petunia box, 4 on a geranium box, each with narrow silver leaves and two stems ending in a star;
 - on a **petunia box**, 3 mounded petunias along the middle (three round leaves and three blooms each) and 4 trailing petunia stems that arch over the front rim and hang down the front (two leaves and three blooms each). The hanging stems give the street camera a mass of colour that survives the distance;
-- on a **geranium box**, 5 upright (zonal) geraniums along the middle and nothing hanging: a thick stem with four big round leaves spiralling up it, topped by a dense round **umbel**, seven small florets packed on a dome, so from a distance the head is one ball of colour, as a real zonal geranium's is. The four edelweiss tufts stand two at each end, one behind the other, in place of the hanging stems.
+- on a **geranium box**, 5 upright (zonal) geraniums along the middle and nothing hanging: a thick stem with four big round leaves spiralling up it, topped by a dense round **umbel**, seven small florets packed on a dome, so from a distance the head is one ball of colour, as a real zonal geranium's is. The four edelweiss tufts are spread across the whole width, one in each gap between the plants and a little forward of them, in place of the hanging stems (Will, 2026‑11‑22: "maybe edelweiss more distributed across the box?").
 
 A **petunia bloom** is a funnel: ten petal triangles round a recessed rim of five lobes, plus five triangles of yellow throat (15 triangles). A **geranium floret** is five petals as a cupped pentagon (5 triangles); a head packs 7 of them on a dome (35 triangles). An **edelweiss head** is a flat star of seven pointed felty bracts (14 triangles) round a five-triangle yellow heart (19 triangles). Petunias rotate through magenta, violet and white; geraniums are mostly red, with pink and white ones among them. Everything is seeded by the box number, so a rebuild gives the same flowers.
 
@@ -211,12 +211,12 @@ The render times come from one sequential run (before, then after, then lean) wh
 | View | Before: wall / CPU | After, full: wall / CPU | After, lean: wall / CPU |
 |---|---|---|---|
 | Close-up, petunia box | 162.2 s / 392 s | 83.5 s / 373 s | 79.3 s / 369 s |
-| Close-up, geranium box | 151.8 s / 402 s | 184.4 s / 427 s | 150.2 s / 406 s |
-| Cottage | 62.9 s / 293 s | 145.3 s / 329 s | not rendered |
-| Street | 43.3 s / 222 s | 91.2 s / 238 s | not rendered |
-| Total (the four views) | 420.2 s / 1,309 s | 504.4 s / 1,367 s | not comparable |
+| Close-up, geranium box | 151.8 s / 402 s | 110.1 s / 403 s | 108.1 s / 383 s |
+| Cottage | 62.9 s / 293 s | 89.2 s / 305 s | not rendered |
+| Street | 43.3 s / 222 s | 77.0 s / 234 s | not rendered |
+| Total (the four views) | 420.2 s / 1,309 s | 359.8 s / 1,315 s | not comparable |
 
-On CPU seconds the "after" is 4.4 % **more** than the "before" (1,367 s against 1,309 s), for about 1,000 more triangles in a 1,724-triangle scene (2,742 with the flowers). That is a small cost, and this experiment cannot separate it from the load on the machine, which also moves CPU seconds a little. **This is not the on-device cost.** The on-device cost is the profiling above.
+On CPU seconds the "after" is 0.5 % **more** than the "before" (1,315 s against 1,309 s), for about 1,000 more triangles in a 1,724-triangle scene (2,742 with the flowers). That is no measurable cost in Cycles, and the experiment is too coarse to see a small one, since the load on the machine also moves CPU seconds a little. **This is not the on-device cost.** The on-device cost is the profiling above.
 
 ## Follow-up: level-of-detail model replacement, with a lot of profiling
 
@@ -224,7 +224,7 @@ On CPU seconds the "after" is 4.4 % **more** than the "before" (1,367 s agains
 
 ### Why it might pay
 
-The flowers are modelled for a close look, and the Journey camera never gives one. Measured from `timeline.camera()` over one 225 s lap, with all 13 cottages sampled every second (the distance is from the camera to a point 2 m up a cottage, where its boxes are):
+The flowers are modelled for a close look, and today's Journey camera rarely gives one (Will expects closer camera work in the future, which is the other half of the case: a distance-driven swap is what lets the detail stay affordable when the camera does come in). Measured from `timeline.camera()` over one 225 s lap, with all 13 cottages sampled every second (the distance is from the camera to a point 2 m up a cottage, where its boxes are):
 
 | | Journey camera | Still camera |
 |---|---|---|
@@ -235,7 +235,7 @@ The flowers are modelled for a close look, and the Journey camera never gives on
 | Share between 8 and 14 m | 25 % | not measured, none under 16.8 m |
 | Share over 14 m | 70 % | 100 % |
 
-On the screen: with the shot's default 50° of horizontal field of view on a 1920-pixel-wide frame (the level's own value is read in step F1 below), the frame holds about 290 pixels per metre at 7.1 m, 169 at 12.2 m, 147 at 14 m and 59 at 35 m. A geranium umbel (0.10 m across) is therefore about 29 pixels wide at the closest approach and 15 at 14 m, and one floret (0.034 m) is about 10 pixels and 5. **So the petals the plan pays for are resolved on a few boxes for a few seconds, while the full set is drawn for all 26 boxes at every moment.** That is the case for swapping the model with distance. The case against is that the full set may cost nothing measurable, in which case the extra machinery is a loss.
+On the screen: with the shot's default 50° of horizontal field of view on a 1920-pixel-wide frame (the level's own value is read in step F1 below), the frame holds about 290 pixels per metre at 7.1 m, 169 at 12.2 m, 147 at 14 m and 59 at 35 m. A geranium umbel (0.10 m across) is therefore about 29 pixels wide at the closest approach and 15 at 14 m, and one floret (0.034 m) is about 10 pixels and 5. **So today the petals the plan pays for are resolved on a few boxes for a few seconds, while the full set is drawn for all 26 boxes at every moment.** That is the case for swapping the model with distance, and it gets stronger, not weaker, if a later camera moves closer: the near boxes then need the detail and the far ones still do not. The case against is that the full set may cost nothing measurable, in which case the extra machinery is a loss for now. The profiling therefore also measures the cost with the camera pulled in (a closer test lap, described in the profiling below), so the decision does not rest only on today's camera path.
 
 ### What exists, and the mechanism
 
@@ -275,15 +275,17 @@ stateDiagram-v2
 
 "A lot", because the answer depends on the distance and on how many draw calls the GPU tolerates, and a single before-and-after number would hide both. It all runs from **one APK**: the plan's two-way `Detailed flowers` field becomes a four-way **`Flower detail`** field (Blocks, Lean, Full, Auto), so no profile needs its own build.
 
-**Phase 0: is it needed at all?** The plan's own A/B/A profile gives the cost of the full flowers as `On` minus `Off`. **If that cost is under 0.5 ms at p95 and the gate has at least 1 ms of headroom, stop here**: the follow-up closes and the plan above stays as built.
+**Phase 0: is it needed at all, today and with a closer camera?** The plan's own A/B/A profile gives the cost of the full flowers as `On` minus `Off`. **If that cost is under 0.5 ms at p95 and the gate has at least 1 ms of headroom, defer the follow-up**: the plan above stays as built, and the numbers wait for the first closer camera. Phase 1 below adds a closer lap to the measurement so the deferral is not made blind.
 
 **Phase 1: the cost against distance.** The profile job records every frame's present time. The lap is a function of the clock, so each frame's lap phase gives its distance to the nearest cottage with no special camera and no test-only setting. Over 5 laps per variant, bucket the frames by the nearest cottage's distance (2 m wide buckets from 6 m to 36 m) and plot the median and the 95th percentile of the frame time per bucket for Blocks, Lean and Full. The gaps between the curves are the cost of the detail at each distance. It also shows whether the cost is spread over the lap or comes in bursts, which is when a switch helps.
+
+**A closer lap.** A test-build-only camera path (never a customer setting, like the test clock) that brings the camera to 3 m from each cottage in turn, along the same lane the Journey follows, so the frame time can also be measured at the distances a future camera might use. It is profiled for Blocks, Lean and Full, 3 laps each, in the same interleaved order.
 
 **Phase 2: static variants.** Blocks, Lean and Full, 5 laps each, interleaved (A B C A B C and so on) so heat and background load spread across all three, with the Blocks run repeated every ninth lap as a drift check.
 
 **Phase 3: dynamic variants.** Auto, built as B, C and D, each with two sets of switch distances, so 6 variants, 5 laps each.
 
-**Totals.** 3 static and 6 dynamic variants at 5 laps is 45 laps of 225 s plus a 15 s warm-up each, about 3 hours of cast1, run in the order above with the drift checks. It is the coordinator's `profile` workflow throughout, `screensaver-setting-set` between runs, and the same Journey lap.
+**Totals.** 3 static and 6 dynamic variants at 5 laps is 45 laps, and the closer lap adds 3 variants at 3 laps, so 54 laps of 225 s plus a 15 s warm-up each, about 3.6 hours of cast1, run in the order above with the drift checks. It is the coordinator's `profile` workflow throughout, `screensaver-setting-set` between runs, and the same Journey lap.
 
 **What each run records** (the profile job's evidence, per frame and per run):
 
@@ -317,7 +319,7 @@ F1. **The field of view and the pixel sizes.** Read the level's camera shot FOV 
 F2. **The counters.** Confirm the engine's log or debug server reports draw calls and triangles per frame; add them if not, with a test.
 F3. **Phase 0.** The A/B/A numbers from the plan, and the decision to continue or stop, written down here.
 F4. **Phase 1.** The cost-against-distance chart for Blocks, Lean and Full from 5 laps each.
-F5. **Phase 2 and 3.** The 45 laps, the three job lists, the drift checks, and the variants table.
+F5. **Phase 2 and 3, and the closer lap.** The 54 laps, the three job lists, the drift checks, and the variants table.
 F6. **The pop pairs.** The before and after frames at every switch distance and the measured change.
 F7. **The verdict.** The report's decision against the four rules, and either the chosen variant landed with its tests or the follow-up closed as not worth building.
 

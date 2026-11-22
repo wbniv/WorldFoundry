@@ -41,6 +41,7 @@ PETUNIA_COLOURS = ("bloom_magenta", "bloom_violet", "bloom_white")
 GERANIUM_COLOURS = ("bloom_red", "bloom_red", "bloom_magenta", "bloom_red", "bloom_white")   # mostly red, as on a real balcony
 
 BOX_WIDTH, BOX_DEPTH, BOX_HEIGHT = 0.69, 0.22, 0.15
+GERANIUM_PITCH = 0.13                     # the distance between neighbouring upright geraniums; an edelweiss tuft sits in each gap
 # Quality sets. "full" is the proposal; "lean" is the fallback if the frame-time gate on cast1 fails.
 QUALITY = {
     "full": dict(mounds=3, mound_blooms=3, mound_leaves=3, vines=4, vine_blooms=3, vine_leaves=2, tufts=2, heads=2,
@@ -269,11 +270,12 @@ def _build(seed: int, quality_name: str) -> Builder:
         b.tri("soil", ring[k], ring[(k + 1) % 4], mid)
     b.pieces[("soil", "soil bed")] += 1
     # Edelweiss tufts nearer the ends of every box; the plants go between them, forward of the window's glazing bars.
-    # A geranium box has two at each end, one behind the other, in place of the hanging stems a petunia box has.
+    # A geranium box spreads its tufts across the whole width, one in each gap between the plants, a little forward of them.
     if kind == "petunia":
         spots = [(-0.27 + 0.54 * i / max(q["tufts"] - 1, 1), -0.050) for i in range(q["tufts"])]
     else:
-        spots = [(-0.276, -0.046), (0.276, -0.046), (-0.232, -0.078), (0.232, -0.078)][:q["g_tufts"]]
+        spots = [(-GERANIUM_PITCH / 2, -0.076), (GERANIUM_PITCH / 2, -0.076),
+                 (-GERANIUM_PITCH * 1.5, -0.076), (GERANIUM_PITCH * 1.5, -0.076)][:q["g_tufts"]]
     for x, y in spots:
         tuft(b, (x + rng.uniform(-0.012, 0.012), y, soil_z + 0.004), rng, q)
     if kind == "petunia":
@@ -290,7 +292,7 @@ def _build(seed: int, quality_name: str) -> Builder:
         colours = [GERANIUM_COLOURS[(offset + i) % len(GERANIUM_COLOURS)] for i in range(8)]
         n = q["g_plants"]
         for i in range(n):
-            x = (i - (n - 1) / 2) * 0.085 + rng.uniform(-0.008, 0.008)
+            x = (i - (n - 1) / 2) * GERANIUM_PITCH + rng.uniform(-0.008, 0.008)
             geranium(b, (x, -0.060, soil_z + 0.004), rng, colours[i], q)
     return b
 
