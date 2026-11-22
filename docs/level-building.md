@@ -353,6 +353,27 @@ Live fields can be changed during play; other fields are read-only in the editor
 The baseline level also places `RuntimeDiagnostics`, which exposes runtime options
 and read-only memory and behavior diagnostics in a separate form.
 
+**Every level offers the settings in `wfsource/source/oas/global_settings.inc`**
+(today **Show framerate**, a checkbox that switches the frames-per-second overlay,
+default off). You do nothing to get them:
+
+- A holder you write ends its `.oas` with `@include global_settings.inc` just before
+  `TYPEFOOTER`, so the **Display** sheet is its last sheet and none of its own field
+  ids move. `tests/test_global_level_settings.py` fails if one forgets.
+- A level that places **no** holder gets one from the level compiler: `levcomp`
+  appends a `LevelSettings` object (the minimal holder: only the global sheet) when
+  no object's class declares the global keys, last in the level so no object index
+  moves. `levcomp ... --no-default-settings` turns that off (a fixture that must
+  compile unchanged). It acts only when the OAD directory holding `global_settings.inc`
+  is given, which the level build scripts do.
+- To add another global setting, add one line to `global_settings.inc` and one row to
+  the table in `wfsource/source/game/global_settings.cc`; regenerate every holder's
+  `.oad` and `.ht`, then rebuild the levels. `python3 scripts/audit-level-settings.py
+  --roster levels --strict` lists the levels a player can reach and fails while one
+  lacks the settings.
+
+Plan: [global level settings](plans/2026-11-22-global-level-settings.md).
+
 ### Materials and Cast1 performance
 
 The modern renderer supports painted textures, palette recoloring, lighting,
