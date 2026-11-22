@@ -73,17 +73,20 @@ near(objs[tl.BIRD_NAME].location, tl.BIRD_REST, tl.BIRD_NAME)
 near(objs['hour_hand'].location, tl.DIAL, 'hour_hand')
 assert [n for n in (f'cottage_light_{i + 1:02}' for i in range(tl.HOUSES)) if n not in objs] == [], 'cottage light actors changed'
 
-# Christmas candles (docs/plans/2026-11-21-cuckoo-village.md): all the sticks in one mesh, and each tree's flames in their own, so
-# every tree glows on its own stagger. Static meshes (never posed): the director only switches their visibility mailboxes.
+# Christmas candles (docs/plans/2026-11-21-cuckoo-village.md): all the sticks in one mesh, and each tree's flames in four, so every tree glows on its own
+# stagger and the flames flicker (docs/plans/2026-11-22-cuckoo-village-candle-flicker.md): two groups of five candles, each built in two shapes. Static meshes
+# (never posed): the director only switches their visibility mailboxes, showing one shape of each group at a time.
 assert [n for n in (f'pine_{i + 1:02}' for i in range(tl.TREES)) if n not in objs] == [], 'the pine trees changed'
 mesh_actor = scope['mesh_actor']          # the layout's helper: an anchored platform mesh actor from vertices, faces and an atlas tile
 stick_parts = []
 for i in range(tl.TREES):
     tree = objs[f'pine_{i + 1:02}']
-    sticks, flames = cd.tree_candles(i, tuple(tree.location), tree.rotation_euler.z, tree.scale.x)
+    sticks, _ = cd.tree_candles(i, tuple(tree.location), tree.rotation_euler.z, tree.scale.x)
     stick_parts += sticks
-    flame_verts, flame_faces = cd.merge(flames)
-    mesh_actor(f'candle_flames_{i + 1:02}', flame_verts, flame_faces, cd.FLAME_TILE)['wf_Visibility Mailbox'] = tl.FLAME_CELL0 + i
+    for (group, shape), parts in sorted(cd.tree_flame_shapes(i, tuple(tree.location), tree.rotation_euler.z, tree.scale.x).items()):
+        verts, faces = cd.merge(parts)
+        cell = tl.FLICKER_CELL0 + 2 * (2 * i + group) + (shape - 1)
+        mesh_actor(f'candle_flames_{"ab"[group]}{shape}_{i + 1:02}', verts, faces, cd.FLAME_TILE)['wf_Visibility Mailbox'] = cell
 stick_verts, stick_faces = cd.merge(stick_parts)
 mesh_actor('candle_sticks', stick_verts, stick_faces, cd.STICK_TILE)['wf_Visibility Mailbox'] = tl.CANDLE_CELL
 

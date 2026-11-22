@@ -21,7 +21,7 @@ from typing import Dict, List
 import timeline as tl
 
 CELLS = ["sod", "hr", "mi", "sc", "tm", "i", "hx", "f", "bow", "s", "w", "ent", "th", "lx", "ly", "cl", "hop", "vx", "vy",
-         "n", "o", "bob", "k", "on", "lap", "hold", "u", "bb", "phi", "r", "h", "day", "doy", "at"]
+         "n", "o", "bob", "k", "on", "lap", "hold", "u", "bb", "phi", "r", "h", "day", "doy", "at", "fp", "fx", "fl"]
 WORDS = {"sm", "frac", "floor", "mod", "sin", "cos", "wx", "wy", "wz", "wa", "wb", "wc", "ai", "fig", "figs", "bird", "win",
          "wins", "cam", "hands", "tick", "season", "candles", "flames", "flowers", "sgn", "calc", "put", "vis"}
 
@@ -34,6 +34,23 @@ def n(x: float) -> str:
 def check_names() -> None:
     clash = set(CELLS) & WORDS
     assert not clash, f"scratch cells shadow words: {sorted(clash)}"
+
+
+def _flame_words() -> List[str]:
+    """The candle flicker (plan docs/plans/2026-11-22-cuckoo-village-candle-flicker.md, Option A). For each of the 24 groups of five flames (index
+    i = 2 * tree + group), phase p = frac(i * PHI), drive x = sin(2 pi (F1 t + p)) + sin(2 pi (F2 t + 2 p)) with t = cv-sc, the second of the minute with its
+    fraction; the group's shape 1 cell is lit x (x > 0) and its shape 2 cell lit x (x <= 0), where lit is the candles' cell times the window glow of house
+    (tree mod 13), so Window lights still puts every flame out. timeline.flame_shape is the reference model."""
+    c = tl.FLICKER_CELL0
+    return [
+        ": cv-flames  0 cv-i cv!  begin",
+        f"  cv-i cv@ {n(tl.FLICKER_PHI)} * cv-frac cv-fp cv!",
+        f"  cv-sc cv@ {n(tl.FLICKER_F1)} * cv-fp cv@ + sin-rev  cv-sc cv@ {n(tl.FLICKER_F2)} * cv-fp cv@ 2 * + sin-rev +  cv-fx cv!",
+        f"  {tl.CANDLE_CELL} cv@  cv-i cv@ 2 / cv-floor 13 cv-mod 200 + cv@ *  cv-fl cv!",
+        f"  cv-fx cv@ 0 > if cv-fl cv@ else 0 then  {c} cv-i cv@ 2 * + cv!",
+        f"  cv-fx cv@ 0 > if 0 else cv-fl cv@ then  {c + 1} cv-i cv@ 2 * + cv!",
+        f"  cv-i cv@ 1 + dup cv-i cv! {tl.FLICKER_GROUPS} =  until ;",
+    ]
 
 
 def director_script(ix: Dict[str, int], fields: Dict[str, int] = None) -> str:
@@ -142,8 +159,7 @@ def director_script(ix: Dict[str, int], fields: Dict[str, int] = None) -> str:
         f": cv-candles  cv-season cv-s-candles-all-year + if 1 else 0 then {tl.CANDLE_CELL} cv! ;",      # season, or the switch
         # a tree's flames burn while the candles show and the glow of the house of the same stagger (index mod 13) is on, so the
         # Window lights setting dims them too (plan: "the glow of the Christmas candles")
-        f": cv-flames  0 cv-i cv!  begin  {tl.CANDLE_CELL} cv@  cv-i cv@ 13 cv-mod 200 + cv@ *  {tl.FLAME_CELL0} cv-i cv@ + cv!  "
-        f"cv-i cv@ 1 + dup cv-i cv! {tl.TREES} =  until ;",
+        *_flame_words(),
     ]
     # camera: one lap is 225 s so every quarter boundary starts a lap at the front-facing tower view
     L += [

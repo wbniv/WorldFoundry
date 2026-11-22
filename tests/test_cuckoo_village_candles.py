@@ -69,7 +69,7 @@ def test_the_candles_are_tiny_decorations_and_use_the_cream_and_glow_atlas_tiles
     assert (cd.STICK_TILE, cd.FLAME_TILE) == (15, 6)       # village_atlas.tga: pale cream, and the windows' warm glow
 
 
-def test_each_trees_flames_have_their_own_cell_beside_the_sticks_cell():
-    cells = [tl.FLAME_CELL0 + i for i in range(tl.TREES)]
-    assert len(set(cells)) == 12 and tl.CANDLE_CELL not in cells
+def test_each_trees_flames_have_their_own_cells_beside_the_sticks_cell():
+    cells = list(tl.FLICKER_CELLS)
+    assert len(set(cells)) == 48 and tl.CANDLE_CELL not in cells        # four meshes a tree: two groups, two shapes
     assert max(cells) < 600 and min(cells) > tl.CANDLE_CELL - 1        # below the director's scratch cells, above the bird (213)
