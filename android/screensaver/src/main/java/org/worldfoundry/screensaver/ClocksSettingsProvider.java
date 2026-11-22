@@ -20,7 +20,6 @@ import java.nio.charset.StandardCharsets;
  * docs/plans/2026-11-21-tide-harbour-clock.md, "The bundle and the chooser".
  */
 public final class ClocksSettingsProvider extends ContentProvider {
-    private static final String AUTHORITY = "org.worldfoundry.clocks.settings";
     static final String CLOCK = "clock";
 
     @Override

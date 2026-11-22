@@ -53,7 +53,7 @@ android {
         }
         create("clocks") {                 // WF Clocks: every clock of wflevels/clocks-menu.manifest
             dimension = "dream"
-            applicationId = "org.worldfoundry.clocks"
+            applicationId = "org.worldfoundry.game.clocks"
             versionCode = 1
             versionName = "0.1"
         }

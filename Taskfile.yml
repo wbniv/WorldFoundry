@@ -1817,7 +1817,7 @@ tasks:
       - bash scripts/clocks-levels.sh check {{.CLI_ARGS}}
 
   build-clocks-apk:
-    desc: "WF Clocks APK (org.worldfoundry.clocks: every clock, the engine chooser, the Dream) as a Release build (CMake Release: -O3 + thin LTO; debug-keystore signed for sideload) for arm64-v8a and armeabi-v7a (the Chromecasts need armeabi-v7a; the Pixel and the tablet arm64-v8a), checked in the APK. Builds the levels, packs the bundle, then offline Gradle. Lands at android/screensaver/build/outputs/apk/clocks/release/screensaver-clocks-release.apk"
+    desc: "WF Clocks APK (org.worldfoundry.game.clocks: every clock, the engine chooser, the Dream) as a Release build (CMake Release: -O3 + thin LTO; debug-keystore signed for sideload) for arm64-v8a and armeabi-v7a (the Chromecasts need armeabi-v7a; the Pixel and the tablet arm64-v8a), checked in the APK. Builds the levels, packs the bundle, then offline Gradle. Lands at android/screensaver/build/outputs/apk/clocks/release/screensaver-clocks-release.apk"
     deps: [clocks-bundle]
     cmds:
       - cd android && ANDROID_HOME=${ANDROID_HOME:-/usr/lib/android-sdk} ./gradlew :screensaver:assembleClocksRelease --offline
