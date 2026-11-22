@@ -29,6 +29,11 @@ class Part:
         self.verts: List[Vec] = []
         self.faces: List[Tuple[int, ...]] = []
         self.tiles: List[int] = []
+        self.sections: List[Tuple[str, int]] = []      # (label, first face): what the catalogue shows apart (scripts/cuckoo-village-catalogue.py)
+
+    def mark(self, label: str) -> None:
+        """Everything added from here to the next mark is one labelled piece of this part."""
+        self.sections.append((label, len(self.faces)))
 
     def add(self, tile: int, verts: List[Vec], faces: List[Tuple[int, ...]]) -> None:
         off = len(self.verts)
@@ -272,10 +277,13 @@ def to_world(part: Part, loc: Vec, angle_deg: float, scale: float) -> None:
 def cottage_trim(index: int, loc: Vec, angle_deg: float, scale: float) -> Part:
     """The Bavarian painting of one cottage: a white-and-blue lozenge frieze under the eaves, a timber belt and corner posts."""
     p = Part(f"bavaria_trim_{index + 1:02d}")
+    p.mark("Timber belts")
     p.box(DARKWOOD, 0.0, HOUSE_FRONT_Y - 0.03, FRIEZE_Z - 0.17, 2.30, 0.05, 0.07)                    # the belt under the frieze
     p.box(DARKWOOD, 0.0, HOUSE_FRONT_Y - 0.03, FRIEZE_Z + 0.17, 2.30, 0.05, 0.07)                    # and the one over it
+    p.mark("Lozenge frieze")
     for k in range(9):                                                                             # nine lozenges across the front, blue and white in turn
         p.diamond(BLUE if k % 2 == 0 else CREAM, -1.0 + k * 0.25, HOUSE_FRONT_Y - 0.035, FRIEZE_Z, 0.24, 0.30)
+    p.mark("Corner posts")
     for sx in (-1, 1):
         p.box(DARKWOOD, sx * 1.10, HOUSE_FRONT_Y - 0.03, 1.25, 0.09, 0.06, 2.35)                      # corner posts of the timber frame
     to_world(p, loc, angle_deg, scale)
@@ -286,10 +294,13 @@ def onion_dome(loc: Vec, angle_deg: float, scale: float) -> Part:
     """A green onion dome on a short drum, with a gold ball and spire, standing on a cottage's ridge."""
     p = Part("bavaria_dome")
     z0 = HOUSE_RIDGE - 0.10
+    p.mark("Drum and gold ring")
     p.cone(DARKWOOD, 0.0, 0.0, z0, 0.34, 0.30, 0.28, 12)                       # the drum
     p.cone(GOLD, 0.0, 0.0, z0 + 0.28, 0.40, 0.40, 0.04, 12)                    # a gold ring where the dome begins
+    p.mark("Green bulb and point")
     p.sphere(SAGE, 0.0, 0.0, z0 + 0.52, 0.40, 0.40, 0.30, 12, 8)               # the bulb of the dome
     p.cone(SAGE, 0.0, 0.0, z0 + 0.74, 0.20, 0.0, 0.46, 12)                     # tapering to a point
+    p.mark("Gold ball and spire")
     p.sphere(GOLD, 0.0, 0.0, z0 + 1.22, 0.07, 0.07, 0.07, 8, 5)                # the ball
     p.cone(GOLD, 0.0, 0.0, z0 + 1.27, 0.025, 0.0, 0.28, 6)                     # and the spire
     to_world(p, loc, angle_deg, scale)
@@ -299,17 +310,22 @@ def onion_dome(loc: Vec, angle_deg: float, scale: float) -> Part:
 def maypole(x: float, y: float, z: float) -> Part:
     """A painted maypole: a tall pole spiralled white and blue, a green wreath, ribbons, crests, and a low stone ring."""
     p = Part("bavaria_maypole")
+    p.mark("Stone footing")
     p.cone(STONE, x, y, z, 0.42, 0.40, 0.10, 14)                              # the footing
+    p.mark("Spiral pole")
     height, r = 3.4, 0.07
     segs = 12
     for k in range(segs):                                                      # the spiral: alternate tiles, each segment a short drum
         p.cone(BLUE if k % 2 == 0 else CREAM, x, y, z + 0.10 + k * height / segs, r, r, height / segs, 8)
     top = z + 0.10 + height
+    p.mark("Wreath and ball")
     p.ring(PINE, x, y - 0.02, top - 0.20, 0.36, 0.27, 20)                      # the wreath, facing the front
     p.sphere(GOLD, x, y, top + 0.08, 0.09, 0.09, 0.09, 8, 5)                   # the ball on top
+    p.mark("Ribbons")
     for i, tile in enumerate((BLUE, CREAM, BLUE, CREAM, BLUE, CREAM)):         # ribbons falling from the wreath
         a = math.tau * i / 6
         p.beam(tile, (x + 0.06 * math.sin(a), y - 0.06 * math.cos(a), top - 0.20), (x + 0.32 * math.sin(a), y - 0.32 * math.cos(a) - 0.05, top - 1.30), 0.045, 0.01)
+    p.mark("Crests")
     for j, zc in enumerate((z + 1.45, z + 2.05)):                              # carved crests, the craftsmen's signs, on the pole
         p.box(GOLDEN, x, y - 0.075, zc, 0.20, 0.03, 0.20)
         p.diamond(BLUE if j == 0 else RED, x, y - 0.095, zc, 0.13, 0.15, 0.01)
@@ -325,18 +341,22 @@ def tower_chalet(tower_z: float) -> Part:
     tz = tower_z
     # a steep gable in front of the roof, with fascia boards along its two slopes
     gy, g0, g1, gw = -1.38, 5.13 + tz, 6.02 + tz, 0.82
+    p.mark("Gable board and roof slopes")
     p.add(WOOD, [(-gw, gy, g0), (gw, gy, g0), (0.0, gy, g1)], [(0, 1, 2)])
     p.add(ROOFTILE, [(-gw - 0.10, gy - 0.04, g0 - 0.03), (0.0, gy - 0.04, g1 + 0.07), (0.0, -0.62, g1 - 0.15), (-gw - 0.10, -0.62, g0 - 0.03)], [(0, 1, 2, 3)])
     p.add(ROOFTILE, [(gw + 0.10, gy - 0.04, g0 - 0.03), (gw + 0.10, -0.62, g0 - 0.03), (0.0, -0.62, g1 - 0.15), (0.0, gy - 0.04, g1 + 0.07)], [(0, 1, 2, 3)])
+    p.mark("Carved fascia boards, scalloped")
     for sx in (-1, 1):
         p.beam(DARKWOOD, (sx * (gw + 0.07), gy - 0.05, g0 - 0.02), (0.0, gy - 0.05, g1 + 0.06), 0.085, 0.05)      # the carved fascia boards
         for k in range(1, 6):                                                                                   # with a scalloped edge
             t = k / 6.0
             p.sphere(GOLDEN, sx * (gw + 0.07) * (1 - t), gy - 0.085, g0 - 0.02 + (g1 + 0.06 - g0 + 0.02) * t - 0.07, 0.035, 0.02, 0.035, 6, 4)
+    p.mark("Tie beam and gable lozenge")
     p.box(DARKWOOD, 0.0, gy - 0.03, g0 + 0.02, 2 * gw + 0.2, 0.06, 0.08)                                     # the tie beam
     p.diamond(BLUE, 0.0, gy - 0.02, g0 + 0.34, 0.30, 0.38, 0.015)                                            # a lozenge in the gable
     p.diamond(CREAM, 0.0, gy - 0.04, g0 + 0.34, 0.15, 0.19, 0.012)
     # the vine: carved leaves in a ring round the dial's case
+    p.mark("Vine of carved leaves round the dial")
     for k in range(20):
         a = math.tau * k / 20
         cx, cz = 0.66 * math.sin(a), 4.08 + tz + 0.66 * math.cos(a)
@@ -344,6 +364,7 @@ def tower_chalet(tower_z: float) -> Part:
         p.beam(SAGE if k % 2 == 0 else GOLDEN, (cx - d[0], -1.10, cz + d[1]), (cx + d[0], -1.10, cz - d[1]), 0.045, 0.02)
     p.ring(GOLDEN, 0.0, -1.093, 4.08 + tz, 0.60, 0.575, 28)
     # two stags, facing each other, standing on the gable's tie beam in front of its board
+    p.mark("Two stags")
     for sx in (-1, 1):
         x0, y0, z0 = sx * 0.50, gy - 0.07, g0 + 0.06
         p.box(DARKWOOD, x0, y0, z0 + 0.10, 0.20, 0.06, 0.09)                                            # the body
@@ -354,6 +375,7 @@ def tower_chalet(tower_z: float) -> Part:
         for dx in (0.0, 0.035):                                                                          # antlers
             p.beam(GOLDEN, (x0 - sx * (0.14 - dx), y0, z0 + 0.31), (x0 - sx * (0.14 + 0.02 + dx), y0, z0 + 0.40), 0.012, 0.012)
     # a carved balcony rail in front of the Classic one: a scalloped top rail and a row of hearts
+    p.mark("Heart balcony rail")
     p.box(DARKWOOD, 0.0, -1.95, 2.80 + tz, 2.62, 0.05, 0.06)
     for k in range(-5, 6):
         x = k * 0.23
@@ -361,6 +383,7 @@ def tower_chalet(tower_z: float) -> Part:
         p.sphere(RED, x + 0.035, -1.955, 2.66 + tz, 0.035, 0.015, 0.035, 6, 4)
         p.cone(RED, x, -1.955, 2.59 + tz, 0.055, 0.0, 0.07, 6)
     # pinecone weights on chains, one each side of the tower
+    p.mark("Pinecone weights on chains")
     for sx in (-1, 1):
         x = sx * 1.62
         p.box(DARKWOOD, x, -1.0, 4.75 + tz, 0.025, 0.025, 1.50)                                         # the chain, from the roof's edge
