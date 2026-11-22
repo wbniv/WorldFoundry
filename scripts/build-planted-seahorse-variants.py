@@ -2,7 +2,7 @@
 """Seahorse device variants of one built aquarium APK: the planted tank's authored
 settings are cooked into the bundled selector cd.iff (plant_settings_actor.configure_cd),
 everything else (native libraries, wf_args.txt, resources) is kept byte for byte, and the
-APK is aligned and signed with the local debug key, as build-aquarium-variant.py does.
+APK is aligned and signed with the local debug key, as the archived docs/reference/device-harnesses/build-aquarium-variant.py.txt did.
 
 Variants (docs/plans/2026-10-16-saltwater-seahorses.md, Phase 3 step 10 and Phase 4):
   none, pair1, pair2, pair6   saltwater with Seahorses = None / 1 / 2 / 6 pairs

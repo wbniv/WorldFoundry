@@ -343,7 +343,7 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         char slotHeight[] = "--vram-slot-height=1024";
         char permWidth[] = "--vram-perm-width=1024";
         char permHeight[] = "--vram-perm-height=1024";
-        // The same VRAM page as the aquarium app (android/app/src/aquarium/assets/wf_args.txt).
+        // The same VRAM page as the aquarium app (wflevels/aquarium-wf_args.txt).
         // The reef tanks carry 1024-wide textures, which the 1024 default width rejects
         // (rmuv.hpi asserts w < VRAMWidth); tests/test_dream_host_vram.py keeps the two in step.
         char vramWidth[] = "--vram-width=2048";

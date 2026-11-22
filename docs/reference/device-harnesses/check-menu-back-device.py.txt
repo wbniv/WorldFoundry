@@ -1,3 +1,5 @@
+Historical pre-coordinator procedure for the retired standalone Aquarium app (org.worldfoundry.wf_game.aquarium, retired 2026-11-22, docs/plans/2026-11-22-one-aquarium-apk.md); its Back-handling check is replaced by a coordinator check job with an input_script (docs/howto/combine-levels-chooser-and-screensaver-launch.md, section 6). Do not execute; device operations must use task chromecast:* under coordinator ownership.
+
 #!/usr/bin/env python3
 """Verify short Back: selected level -> selector -> exit, plus animated Betta and resume."""
 import argparse,hashlib,json,re,subprocess,time,zipfile

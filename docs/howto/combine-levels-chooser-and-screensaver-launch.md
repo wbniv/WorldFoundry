@@ -52,7 +52,7 @@ flowchart TD
 
    Add a `build-cd-iff-<package>-menu` task that depends on each level's build task, as `build-cd-iff-aquarium-menu` does. `shell-menu.fth` replaces `shell.fth` for a menu bundle. Without `--manifest` a bundle has no menu and is byte for byte what it was.
 4. **Run it on the desktop.** Copy the task `run-aquarium-menu` (Taskfile): it copies the bundle to a gitignored `build-<package>-menu/cd.iff` and runs `wf_game` there. Up and Down choose, Space starts, Backspace in a level returns to the menu, Escape quits. On Android, Back in a level returns to the menu and Back on the menu exits.
-5. **Put it in the app.** The Android flavor's `assets/cd.iff` is a symlink to the menu bundle (`android/app/src/aquarium/assets/cd.iff` is the example). A flavor that needs more video memory reads its flags from `assets/wf_args.txt`, one flag per line; `run-aquarium-menu` reads the same file so the desktop run matches.
+5. **Put it in the app.** The app's `assets/menu-cd.iff` (or `cd.iff` for a pack with no separate menu) is a symlink to the menu bundle: `android/screensaver/src/aquarium/assets/menu-cd.iff` is the example. The VRAM flags the Aquarium uses are `wflevels/aquarium-wf_args.txt`, one flag per line; `run-aquarium-menu` reads that file so the desktop run matches. A pack that needs more video memory ships its own `assets/wf_args.txt` (Clocks does).
 
 **Adding a level later:** build its standalone, add one `level` line, rebuild the bundle. That is the only place a level is added. A level that needs a driver for the screensaver also needs one line in `SCRIPT_NAMES` in `scripts/build-aquarium-screensaver-levels.py`; a level without an entry takes the generic path.
 

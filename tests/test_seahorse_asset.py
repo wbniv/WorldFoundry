@@ -202,7 +202,7 @@ def test_one_256_atlas_for_both_colourways_in_a_1024_permanent_page():
     assert 'PERMPAGEX=1024' in flags and 'PERMPAGEY=1024' in flags
     perm = Image.open(HERE / 'Perm.tga')
     assert perm.size[0] <= 1024 and perm.size[1] <= 1024 and perm.size[0] > 512
-    args = (ROOT / 'android/app/src/aquarium/assets/wf_args.txt').read_text().split()
+    args = (ROOT / 'wflevels/aquarium-wf_args.txt').read_text().split()
     assert '--vram-perm-width=1024' in args and '--vram-perm-height=1024' in args
     for tank in ('aquarium_plants', 'aquarium_lionfish'):
         run = (ROOT / 'wflevels' / tank / 'run.sh').read_text()

@@ -34,7 +34,7 @@ from debug_bridge_client import BridgeClient  # noqa: E402
 
 OK, DOWN, RIGHT, LEFT = 1, 1 << 12, 1 << 13, 1 << 14
 SIZE = ['-width=1920', '-height=1080']
-AQUARIUM_VRAM = (ROOT / 'android/app/src/aquarium/assets/wf_args.txt').read_text().split()
+AQUARIUM_VRAM = (ROOT / 'wflevels/aquarium-wf_args.txt').read_text().split()
 BASELINE_VRAM = ['--vram-width=5120', '--vram-height=2048', '--vram-slot-width=1024', '--vram-slot-height=1024',
                  '--vram-perm-width=1024', '--vram-perm-height=1024']
 
