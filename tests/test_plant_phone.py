@@ -16,7 +16,7 @@ def test_complete_phone_settings_and_reconnection(executable,tmp_path):
     schema=json.loads(subprocess.check_output([str(ROOT/'wftools/wf_attr_edit/target/release/catalog'),str(ROOT/'wfsource/source/oas/plantedtanksettings.oad')],text=True))
     fields={f['key']:f['index'] for f in schema['fields']}
     seed=f"#property-{fields['Seed']}";water=f"#property-{fields['Water type']}";speed=f"#property-{fields['Growth speed']}"
-    process=subprocess.Popen([str(executable),str(ROOT/'wfsource/source/hal/phonepad/controller.html'),str(ROOT/'android/app/src/aquarium/assets/layout.json')],stdout=subprocess.PIPE,text=True)
+    process=subprocess.Popen([str(executable),str(ROOT/'wfsource/source/hal/phonepad/controller.html'),str(ROOT/'wfsource/source/hal/phonepad/aquarium-layout.json')],stdout=subprocess.PIPE,text=True)
     try:
         port=int(process.stdout.readline());url=f'http://127.0.0.1:{port}/?k=123456'
         with sync_playwright() as p:
@@ -47,7 +47,7 @@ def test_complete_phone_settings_and_reconnection(executable,tmp_path):
 def test_generic_colour_and_text_transactions(executable,tmp_path):
     """Packed RGB and UTF-8 travel through the actual native edit transaction."""
     from playwright.sync_api import sync_playwright,expect
-    process=subprocess.Popen([str(executable),str(ROOT/'wfsource/source/hal/phonepad/controller.html'),str(ROOT/'android/app/src/aquarium/assets/layout.json'),'controls'],stdout=subprocess.PIPE,text=True)
+    process=subprocess.Popen([str(executable),str(ROOT/'wfsource/source/hal/phonepad/controller.html'),str(ROOT/'wfsource/source/hal/phonepad/aquarium-layout.json'),'controls'],stdout=subprocess.PIPE,text=True)
     try:
         port=int(process.stdout.readline());url=f'http://127.0.0.1:{port}/?k=123456'
         with sync_playwright() as p:

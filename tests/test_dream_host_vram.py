@@ -4,14 +4,14 @@
 ``w = 1024, Display::VRAMWidth = 1024`` in gfx/rmuv.hpi and showed the TV home
 screen, because dream_host.cc passed no ``--vram-width`` and the engine default
 is 1024, while the reef tanks carry 1024-wide textures. The aquarium game app
-runs the same levels with ``android/app/src/aquarium/assets/wf_args.txt``.
+runs the same levels with ``wflevels/aquarium-wf_args.txt``.
 """
 import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 HOST = ROOT / 'android/screensaver/src/main/cpp/dream_host.cc'
-APP_ARGS = ROOT / 'android/app/src/aquarium/assets/wf_args.txt'
+APP_ARGS = ROOT / 'wflevels/aquarium-wf_args.txt'
 VRAM = re.compile(r'--vram-(width|height|slot-width|slot-height|perm-width|perm-height)=(\d+)')
 
 

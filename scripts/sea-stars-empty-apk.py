@@ -5,7 +5,7 @@ Verification step 10 of docs/plans/2026-11-10-starfish-tank.md is the early gate
 static tank with no actors must run at <= 38 ms on cast1. The shipped menu always plays
 the full tank, so this builds a one-off APK for the measurement. It reuses the exact
 native libraries of --base-apk and replaces only assets/cd.iff, as scripts/
-build-aquarium-variant.py --base-apk does, then aligns and signs with the debug key.
+the archived docs/reference/device-harnesses/build-aquarium-variant.py.txt did with --base-apk, then aligns and signs with the debug key.
 
   bash wflevels/aquarium_sea_stars/build.sh --empty        # writes the empty standalone
   cp wflevels/aquarium_sea_stars-standalone.iff build-docker/sea-stars-empty/

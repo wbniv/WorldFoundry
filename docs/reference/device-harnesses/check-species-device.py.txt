@@ -1,3 +1,5 @@
+Historical pre-coordinator procedure for the retired standalone Aquarium app (org.worldfoundry.wf_game.aquarium, retired 2026-11-22, docs/plans/2026-11-22-one-aquarium-apk.md). Do not execute; device operations must use task chromecast:* under coordinator ownership.
+
 #!/usr/bin/env python3
 """Verify the installed species movement build using release logs and timed Android inputs."""
 from pathlib import Path

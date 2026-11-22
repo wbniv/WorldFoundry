@@ -1,3 +1,5 @@
+Historical pre-coordinator procedure for the retired standalone Aquarium app (org.worldfoundry.wf_game.aquarium, retired 2026-11-22, docs/plans/2026-11-22-one-aquarium-apk.md). Do not execute; device operations must use task chromecast:* under coordinator ownership.
+
 #!/usr/bin/env python3
 """Prepare frozen 0/3-prey APKs or summarize managed Chromecast evidence.
 
@@ -53,7 +55,7 @@ def prepare(a):
                     for info in src.infolist():
                         if info.filename=='assets/wf_args.txt' or (info.filename.startswith('META-INF/') and (info.filename.endswith(('.SF','.RSA','.DSA')) or info.filename=='META-INF/MANIFEST.MF')):continue
                         dst.writestr(info,cd.read_bytes() if info.filename=='assets/cd.iff' else src.read(info.filename))
-                    flags=(checkout/'android/app/src/aquarium/assets/wf_args.txt').read_text() if size==512 else ''
+                    flags=(checkout/'wflevels/aquarium-wf_args.txt').read_text() if size==512 else ''
                     flags+='--frame-profile\n' if cpu else ''
                     if flags:dst.writestr('assets/wf_args.txt',flags)
                 run([a.build_tools/'zipalign','-f','-p','4',unsigned,aligned])

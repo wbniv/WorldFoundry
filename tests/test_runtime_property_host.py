@@ -28,7 +28,7 @@ def test_instance_selection_lifecycle_and_transactions(builds):
 def test_phone_picker_isolation_fractional_values_and_reconnect(builds,tmp_path):
     from playwright.sync_api import sync_playwright,expect
     out,catalog=builds
-    process=subprocess.Popen([str(out/'phone'),str(catalog),str(ROOT/'wfsource/source/hal/phonepad/controller.html'),str(ROOT/'android/app/src/aquarium/assets/layout.json')],stdout=subprocess.PIPE,text=True)
+    process=subprocess.Popen([str(out/'phone'),str(catalog),str(ROOT/'wfsource/source/hal/phonepad/controller.html'),str(ROOT/'wfsource/source/hal/phonepad/aquarium-layout.json')],stdout=subprocess.PIPE,text=True)
     try:
         port=int(process.stdout.readline())
         with sync_playwright() as p:

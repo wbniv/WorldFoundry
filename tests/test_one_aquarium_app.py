@@ -25,8 +25,8 @@ APK = SCREENSAVER / "build/outputs/apk/aquarium/release/screensaver-aquarium-rel
 def test_the_menu_bundle_is_the_game_apps_bundle_and_the_dream_keeps_cd_iff():
     assert os.readlink(ASSETS / "menu-cd.iff") == "../../../../../wflevels/aquarium-menu-cd.iff"
     assert os.readlink(ASSETS / "cd.iff") == "../../../../../wflevels/aquarium-screensaver-cd.iff"
-    game = ROOT / "android/app/src/aquarium/assets/cd.iff"
-    assert (ASSETS / "menu-cd.iff").resolve() == game.resolve(), "one menu bundle for both packages"
+    menu = ROOT / "wflevels/aquarium-menu-cd.iff"
+    assert (ASSETS / "menu-cd.iff").resolve() == menu.resolve(), "the menu bundle is the tracked wflevels bundle"
 
 
 def test_the_host_runs_the_menu_from_menu_cd_iff_only_in_menu_mode():

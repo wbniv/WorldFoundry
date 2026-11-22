@@ -117,7 +117,7 @@ int main()
 
     std::vector<std::string> inputs = {
         chapter, aquarium, condo,
-        aquarium + "--frame-profile\n",                    // scripts/build-aquarium-variant.py --profile
+        aquarium + "--frame-profile\n",                    // the archived build-aquarium-variant.py --profile
         chapter + "\n--frame-profile\n",                   // scripts/build-seahorse-close-variants.py
         "--frame-profile\n",
         "", " ", "\n\n\r\n\t",

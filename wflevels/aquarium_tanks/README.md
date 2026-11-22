@@ -104,7 +104,7 @@ The Director owns every prey write; scratch 1300–1347 is transient flow work.
 A reservation never immobilizes prey. Swept aperture entry starts engulfment;
 intraoral transport, rather than a timer, completes consumption.
 
-Prepare measurement APKs with `scripts/profile-lionfish-realism.py prepare`
+Prepare measurement APKs with `profile-lionfish-realism.py prepare` (archived, `docs/reference/device-harnesses/profile-lionfish-realism.py.txt`, with the standalone app it measured)
 (`--help` lists the exact baseline-checkout/APK and signing options), submit its
 recipe with `task chromecast:submit DEVICE=all RECIPE=/absolute/path/recipe.json`,
 and fetch evidence with `task chromecast:evidence BATCH=... OUT=...`. Fixed

@@ -1541,7 +1541,7 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
 
     # Two aquarium tanks carry textures larger than the default 256² VRAM slot
     # (lionfish Perm/Room0 512 wide, plants Perm 1024² since the seahorses). With the slot sizes the
-    # aquarium app ships (android/app/src/aquarium/assets/wf_args.txt) they must
+    # aquarium app ships (wflevels/aquarium-wf_args.txt) they must
     # run 240 frames and exit 0. Without them, LoadTexture must refuse the
     # texture: a Release build used to write it past the 256² PixelMap buffer
     # and die at exit in ~VideoMemory with "free(): invalid pointer" (lionfish)
