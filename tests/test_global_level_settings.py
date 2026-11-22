@@ -93,3 +93,38 @@ def test_each_compiled_holder_lists_the_global_field_last(name):
     assert stored[-1]["key"] == "Show framerate", f"{name}.oad: regenerate it with oas2oad"
     assert stored[-1]["live"] and stored[-1]["default"] in (0, "0"), name
     assert [f["key"] for f in stored].count("Show framerate") == 1
+
+
+def _audit():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("audit_level_settings", ROOT / "scripts/audit-level-settings.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_the_audit_reads_its_keys_from_the_one_declaration():
+    assert _audit().global_keys() == declared_globals() == ["Show framerate"]
+
+
+def test_the_audit_finds_the_field_in_a_built_level_and_reports_its_absence(tmp_path, monkeypatch):
+    audit = _audit()
+    levels = tmp_path / "wflevels"
+    levels.mkdir()
+    (levels / "has-standalone.iff").write_bytes(b"\x00junk\x00Show framerate\x00more")
+    (levels / "lacks-standalone.iff").write_bytes(b"\x00junk\x00Seed\x00")
+    monkeypatch.setattr(audit, "ROOT", tmp_path)
+    assert audit.built_levels() == ["has", "lacks"]
+    assert audit.missing_globals("has") == []
+    assert audit.missing_globals("lacks") == ["Show framerate"]
+
+
+def test_the_levels_roster_prints_every_row_and_strict_fails_on_a_gap():
+    import subprocess, sys
+    plain = subprocess.run([sys.executable, str(ROOT / "scripts/audit-level-settings.py"), "--roster", "levels"],
+                           capture_output=True, text=True)
+    assert plain.returncode == 0 and "levels audited" in plain.stdout        # prints even without --strict
+    strict = subprocess.run([sys.executable, str(ROOT / "scripts/audit-level-settings.py"), "--roster", "levels", "--strict"],
+                            capture_output=True, text=True)
+    assert strict.returncode == (1 if " without the global settings" in strict.stdout
+                                 and not strict.stdout.rstrip().endswith("0 without the global settings") else 0)

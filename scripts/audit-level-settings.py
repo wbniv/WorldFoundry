@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Audit: does every clock and every aquarium tank carry a settings object, and a way to open it?
 
-    python3 scripts/audit-level-settings.py [--roster clocks|aquarium|all] [--strict] [-h]
+    python3 scripts/audit-level-settings.py [--roster clocks|aquarium|all|levels] [--strict] [-h]
 
 Rosters: wflevels/clocks-menu.manifest (the 3D Clocks package) and wflevels/aquarium-menu.manifest
 (the Aquarium package). A level has a settings object when all six hold; the type is found from the
@@ -23,6 +23,11 @@ Ways to open the settings, which follow from the six:
   phone     the Dream form on the phone. Needs `phone`.
 
 Prints one row per level and exits 0; with --strict it exits 1 if any level lacks any of the six.
+Roster `levels` is a different audit: every built level (wflevels/<id>-standalone.iff, not only the two
+packs) must carry the settings every level offers (wfsource/source/oas/global_settings.inc, today **Show
+framerate**), so the player can switch the overlay on in any of them. A level has it when its built file
+lists the field's key. `--strict` exits 1 while any built level lacks it
+(docs/plans/2026-11-22-global-level-settings.md).
 Docs: docs/howto/combine-levels-chooser-and-screensaver-launch.md, "Give every level settings".
 """
 import argparse
@@ -61,6 +66,37 @@ def settings_types():
     return [n for n in names if n not in NOT_A_LEVEL_TYPE]
 
 
+def global_keys():
+    """The keys global_settings.inc declares: the one place a global setting is declared."""
+    return re.findall(r"^\s*TYPEENTRY\w+\(([^,]+),", read(OAS / "global_settings.inc"), re.M)
+
+
+def built_levels():
+    """Every built level: the ids of wflevels/<id>-standalone.iff."""
+    return sorted(p.name[: -len("-standalone.iff")] for p in (ROOT / "wflevels").glob("*-standalone.iff"))
+
+
+def missing_globals(level_id, keys=None):
+    """The global settings a built level does not list, by key (field names are plain text in the built file)."""
+    keys = global_keys() if keys is None else keys
+    data = (ROOT / "wflevels" / f"{level_id}-standalone.iff").read_bytes()
+    return [k for k in keys if k.encode() not in data]
+
+
+def audit_globals():
+    """Print one row per built level; return how many lack a global setting."""
+    keys = global_keys()
+    print(f"\nlevels (every wflevels/<id>-standalone.iff) and the global settings {', '.join(keys)}")
+    gaps = 0
+    levels = built_levels()
+    for level in levels:
+        lacking = missing_globals(level, keys)
+        gaps += bool(lacking)
+        print(f"{level:40s} " + ("yes" if not lacking else "MISSING " + ", ".join(lacking)))
+    print(f"\n{len(levels)} levels audited, {gaps} without the global settings")
+    return gaps
+
+
 def level_source(level_id):
     """The level's .lev (objects and the director script) plus its generator scripts."""
     level_dir = ROOT / "wflevels" / level_id
@@ -91,9 +127,12 @@ def audit(level_id, types=None):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--roster", choices=[*ROSTERS, "all"], default="all")
+    ap.add_argument("--roster", choices=[*ROSTERS, "all", "levels"], default="all")
     ap.add_argument("--strict", action="store_true", help="exit 1 if any level lacks any of the six")
     args = ap.parse_args()
+    if args.roster == "levels":
+        gaps = audit_globals()
+        return 1 if (args.strict and gaps) else 0
     types = settings_types()
     gaps = total = 0
     for name in (ROSTERS if args.roster == "all" else [args.roster]):

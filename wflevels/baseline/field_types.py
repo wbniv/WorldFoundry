@@ -213,6 +213,8 @@ def actor_oas(types, shows):
             lines.append(entry)
         if group is not None: lines.append('GROUP_STOP()')
         lines.append('PROPERTY_SHEET_FOOTER')
+    # The settings every level offers (oas/global_settings.inc), last so no field id above moves.
+    lines.append('    @include global_settings.inc')
     lines.append('TYPEFOOTER')
     return '\n'.join(lines) + '\n'
 
