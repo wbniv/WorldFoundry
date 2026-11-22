@@ -8,5 +8,6 @@ TYPEHEADER(Cuckoo Village Settings,CuckooVillageSettings)
     TYPEENTRYINT32(Window lights,,0,1,1,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Cottage windows glow from dusk to dawn")
     TYPEENTRYINT32(Sound,,0,1,1,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The cuckoo call on the hour; the bird still bobs with sound off")
     TYPEENTRYINT32(Camera motion,,0,1,0,"Journey|Still",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Journey tours the village and holds the tower view at each quarter; Still stays on one wide view")
+    TYPEENTRYINT32(Detailed flowers,,0,1,1,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Detailed petunia geranium and edelweiss window boxes on the cottages and Off shows the simple blocks")
     PROPERTY_SHEET_FOOTER
 TYPEFOOTER

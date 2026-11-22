@@ -78,13 +78,15 @@ class Host(mm.Host):
         super().__init__(tmp, ids)
         self.ix = ix
 
-    def frame_at(self, day: int, sod: float, candles=None, lights=None):
+    def frame_at(self, day: int, sod: float, candles=None, lights=None, flowers=None):
         """One frame at local day `day` and second-of-day `sod`; candles: the Candles all year field (None: unanswered, so its default Off)."""
         self.proc.stdin.write("Q\n")
         if candles is not None:
             self.proc.stdin.write(f"P {self.ix['CuckooVillageSettings']} {FIELDS['Candles all year']} {candles}\n")
         if lights is not None:
             self.proc.stdin.write(f"P {self.ix['CuckooVillageSettings']} {FIELDS['Window lights']} {lights}\n")
+        if flowers is not None:
+            self.proc.stdin.write(f"P {self.ix['CuckooVillageSettings']} {FIELDS['Detailed flowers']} {flowers}\n")
         h, m = int(sod // 3600) % 24, int(sod // 60) % 60
         for name, v in (("WALL_DAY", day), ("WALL_HOUR", h), ("WALL_MINUTE", m), ("WALL_SECOND", sod % 60.0)):
             self.proc.stdin.write(f"M {self.ids[name]} {v!r}\n")
@@ -154,6 +156,20 @@ def main() -> int:
                                     print(f"FAIL flame {i} {tl.date_of(day)} {sod:7.0f} s switch={candles} lights={lights}: {got}, want {want}")
             print(f"flames: {flame_failures} failures")
             failures += flame_failures
+            # the window boxes: exactly one of the two actors shows. Detailed flowers On (or unanswered: the default is On) shows the
+            # flowers and hides the blocks, Off the reverse, whatever the date or the time, and the other cells are untouched.
+            flower_failures = 0
+            for day in (day_of(2026, 12, 25), day_of(2026, 7, 4), day_of(2000, 1, 1), day_of(2099, 12, 31)):
+                for sod in (0.0, 12 * 3600.0, 17.5 * 3600 + 600.0, 23 * 3600.0 + 3599.0):
+                    for flowers, want_on in ((None, 1.0), (1, 1.0), (0, 0.0)):
+                        host.frame_at(day, sod, flowers=flowers)
+                        got = (host.read(tl.FLOWERS_CELL), host.read(tl.BLOCKS_CELL))
+                        if got != (want_on, 1.0 - want_on):
+                            flower_failures += 1
+                            if flower_failures <= 10:
+                                print(f"FAIL flowers {tl.date_of(day)} {sod:7.0f} s field={flowers}: cells {got}, want {(want_on, 1.0 - want_on)}")
+            print(f"flowers: {flower_failures} failures")
+            failures += flower_failures
         finally:
             host.close()
     return 1 if failures else 0

@@ -34,7 +34,7 @@ A **petunia bloom** is a funnel: ten petal triangles round a recessed rim of fiv
 
 **Fallback set.** `QUALITY["lean"]` is the same flowers with fewer parts (332 triangles on a petunia box instead of 649, 355 on a geranium box instead of 683: for example 2 mounds of 3 blooms, 2 vines of 2 blooms and 2 tufts of 1 head on a petunia box, and 3 plants of 5 florets and 4 tufts of 1 head on a geranium box, so a geranium box keeps all four of its edelweiss). It is a switch in code, not a setting. It is used only if the profiling gate fails (see Profiling).
 
-Other files that change with the new field: `cuckoovillagesettings.oas` (+ the regenerated `.oad` and `.ht`), `timeline.py` (`SETTINGS_DEFAULTS` and the two cell numbers, 227 and 228, after the flame cells), the phone's capabilities asset (`scripts/gen-settings-capabilities.py` regenerates it from the `.oad`), and `test_cuckoo_village_settings.py` and `test_cuckoo_village_settings_effect.py` (seven fields instead of six).
+Other files that change with the new field: `cuckoovillagesettings.oas` (+ the regenerated `.oad` and `.ht`), `timeline.py` (`SETTINGS_DEFAULTS` and the two cell numbers, 227 and 228, after the flame cells), and `test_cuckoo_village_settings.py and `test_cuckoo_village_settings_effect.py` (seven fields instead of six). The village has no phone capabilities asset (only Tide Harbour has one), so the field does not appear in the phone's Dream form, and the coordinator's persistent `screensaver-setting-set` route does not reach it; the TV form and the profile job's key presses do (see Profiling). Giving the village a capabilities asset is a separate piece of work.
 
 ### Build flow
 
@@ -86,10 +86,10 @@ Counted from the code, not estimated (a test enforces the full set at 700 trian
 | Whole level, setting Off | 70,964 | 70,964 (same blocks, as a separate actor) | 70,964 |
 | Draw calls added, On | 0 (shares the house's) | 10 | 10 |
 | Actors added | 0 | 2 (flowers and blocks) | 2 |
-| Level file, estimated, with the setting | 4.98 MB | about 5.58 MB (+0.60 MB) | about 5.34 MB (+0.36 MB) |
-| Level file, estimated, after the setting is retired | 4.98 MB | about 5.45 MB (+0.47 MB) | about 5.22 MB (+0.24 MB) |
+| Level file, with the setting | 4.98 MB | 5.74 MB (+0.76 MB, measured) | about 5.49 MB (+0.51 MB, estimated) |
+| Level file, after the setting is retired | 4.98 MB | about 5.56 MB (+0.58 MB) | about 5.30 MB (+0.32 MB, estimated) |
 
-The file estimate uses the cost the candles measured: 27.9 bytes a triangle (4,882,432 to 4,982,784 bytes for about 3,600 triangles and 13 actors). The setting keeps both versions in the file, which adds the 4,264 triangles of blocks (about 0.12 MB). It is an estimate until the level is built. The Clocks bundle (8.56 MB) grows by the same amount.
+The full flowers' file size is measured: the built level is 5,738,496 bytes against 4,982,784, so +755,712 bytes, of which the flowers mesh is 582,072 bytes (34 bytes a triangle) and the blocks mesh 183,544 (43 bytes a triangle). My first estimate used the candles' 27.9 bytes a triangle and so said +0.60 MB, a quarter too low: the flowers share fewer vertices than the candles do. The lean figures use the measured 34 bytes a triangle and are still estimates. The Clocks bundle (8.56 MB, now 9.37 MB) grows by the same amount.
 
 None of these numbers is a frame time; the profiling below is.
 
@@ -99,13 +99,13 @@ The setting makes this a like-for-like measurement: **one APK, one device, only 
 
 **Method.** On cast1 (`chromecast-test-01`, the Chromecast HD that is the performance target), with the coordinator's `profile` workflow:
 
-1. Install the one APK, and select the village.
-2. Set **Detailed flowers** Off with the `screensaver-setting-set` workflow, and run `profile` with `warmup` 15 s, `runs` 3 and `duration` 225 s. The Journey camera's lap is 225 s, so every run covers one whole lap and the flowers are on screen at their nearest and furthest in each.
-3. Set the field On and run the same `profile`.
-4. Set it Off again and run the same `profile` a third time, so any drift (heat, background load) shows up as the difference between the two Off sets instead of being credited to the flowers.
+1. Install the one APK.
+2. Run `profile` with `warmup` 5 s, `runs` 3, `duration` 305 s, `panel` `require-hidden` and an input script that picks the village in the chooser and, **for an Off run**, opens the settings form (hold A for 1.6 s), moves down six rows to **Detailed flowers**, presses Left, and closes the form with Back, all inside the first 75 s. The key sequence is tested on cast1: the form shows seven rows, the field defaults to On, and Left turns it Off. For an On run the script is the same without the Left press. The form's changes are not saved and every run relaunches the app, so each run sets the field itself. (The village has no phone capabilities asset, so the coordinator's persistent `screensaver-setting-set` route does not reach the field.)
+3. **Trim the menu.** A key script has to fit inside the run's duration, so the first 80 s of each run (the chooser, the level load and the form) are inside its window. `scripts/flowers-profile-report.py --trim 80` drops them and recomputes every statistic from the per-frame present times of the rest: the last 225 s, which is exactly one lap because the camera is a function of the wall clock, so the flowers are on screen at their nearest and furthest in every run.
+4. Run the same profile with the On script, then with the Off script a third time, so any drift (heat, background load) shows up as the difference between the two Off sets instead of being credited to the flowers.
 5. Run `scripts/flowers-profile-report.py` on the three evidence folders.
 
-Each run records, per the profile job: achieved frames per second, the median, 90th, 95th and 99th percentile frame time, the worst frame, the percentage of missed refreshes, the memory (`meminfo`), the thermal status, and the per-frame present times. About 36 minutes of cast1 in all (3 × 3 runs × 4 minutes).
+Each run records, per the profile job: achieved frames per second, the median, 90th, 95th and 99th percentile frame time, the worst frame, the percentage of missed refreshes, the memory (`meminfo`), the thermal status, and the per-frame present times. About 47 minutes of cast1 in all (3 sets × 3 runs × 310 s).
 
 ```mermaid
 sequenceDiagram
@@ -113,14 +113,11 @@ sequenceDiagram
     participant C as Coordinator
     participant D as cast1
     C->>D: install the APK (once)
-    C->>D: setting Detailed flowers = Off
-    C->>D: profile, 3 runs x 225 s (A)
-    C->>D: setting Detailed flowers = On
-    C->>D: profile, 3 runs x 225 s (B)
-    C->>D: setting Detailed flowers = Off
-    C->>D: profile, 3 runs x 225 s (A again)
+    C->>D: profile A, 3 runs x 305 s, key script sets the field Off
+    C->>D: profile B, 3 runs x 305 s, key script leaves it On
+    C->>D: profile A again, 3 runs x 305 s, key script sets it Off
     C-->>R: evidence folders A, B, A again
-    R->>R: medians, deltas, drift check, gate
+    R->>R: trim 80 s, medians, deltas, drift check, gate
     R-->>R: report.md and frame-time chart
 ```
 
@@ -285,7 +282,7 @@ stateDiagram-v2
 
 **Phase 3: dynamic variants.** Auto, built as B, C and D, each with two sets of switch distances, so 6 variants, 5 laps each.
 
-**Totals.** 3 static and 6 dynamic variants at 5 laps is 45 laps, and the closer lap adds 3 variants at 3 laps, so 54 laps of 225 s plus a 15 s warm-up each, about 3.6 hours of cast1, run in the order above with the drift checks. It is the coordinator's `profile` workflow throughout, `screensaver-setting-set` between runs, and the same Journey lap.
+**Totals.** 3 static and 6 dynamic variants at 5 laps is 45 laps, and the closer lap adds 3 variants at 3 laps, so 54 laps of 225 s plus a 15 s warm-up each, about 3.6 hours of cast1, run in the order above with the drift checks. It is the coordinator's `profile` workflow throughout, the field set by the key script in each run (the form is not saved), and the same Journey lap.
 
 **What each run records** (the profile job's evidence, per frame and per run):
 
