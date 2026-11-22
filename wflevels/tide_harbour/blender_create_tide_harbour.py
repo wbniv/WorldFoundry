@@ -41,7 +41,7 @@ CREDIT = '© OpenStreetMap contributors'
 CREDIT_PLATE_H, CREDIT_SCALE = 0.062, 0.26       # the plate's height in metres; the text's size against a Thai digit
 STOP_SIZE, STOP_GAP = 0.016, 0.006      # the full stop after ม and กม: a square on the baseline, in metres
 CREDIT_FONT = Path('/usr/lib/blender/datafiles/fonts/DejaVuSansMono.woff2')
-THAI_FONT = Path('/usr/lib/blender/datafiles/fonts/NotoSansThai-VariableFont_wdth,wght.woff2')
+THAI_FONT = HERE / 'fonts' / 'NotoSansThai-Bold.ttf'      # static and bold: no `offset` embolden, which tears the thin Thai features (fonts/README.md)
 THAI = ['๑๒', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙', '๑๐', '๑๑']     # 12 at the top, then clockwise
 ROMAN = ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI']
 THAI_DIGITS = '๐๑๒๓๔๕๖๗๘๙'                          # the river panel's drums and numerals: always Thai (the Roman option is the dial's)
@@ -123,7 +123,9 @@ def outlines(name, texts, font):
         curve.size = 1.0
         curve.align_x = 'CENTER'
         curve.align_y = 'CENTER'
-        curve.offset = 0.02                       # embolden: the digits must read across a room (D8)
+        # embolden: the digits must read across a room (D8). Thai text is already bold and is NOT offset: an offset curve self-intersects
+        # on the thin loops of ๕ ๗ ๘ and the fill tears (bitten digits on cast1, 2026-11-22)
+        curve.offset = 0.0 if (font is not None and Path(font.filepath).name == THAI_FONT.name) else 0.02
         curve.resolution_u = 3                    # few faces: the outlines are a metre high and seen from 40 m
         obj = bpy.data.objects.new(f'{name}_{k}', curve)
         bpy.context.scene.collection.objects.link(obj)
@@ -137,7 +139,7 @@ def outlines(name, texts, font):
         # (the first build's numerals lost pieces of ๓ and ๙)
         bm = bmesh.new()
         bm.from_mesh(me)
-        bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method='BEAUTY', ngon_method='BEAUTY')
+        bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method='BEAUTY', ngon_method='EAR_CLIP')     # BEAUTY puts triangles outside a concave outline: bitten digits
         verts = [tuple(v.co) for v in bm.verts]
         bm.verts.index_update()
         faces = [tuple(v.index for v in f.verts) for f in bm.faces]
@@ -283,7 +285,7 @@ for mesh in parts.static_meshes():
     mesh_actor(mesh, 'statplat')
 for mesh in parts.toggled_static_meshes():
     mesh_actor(mesh, 'platform', visibility=tl.VIS[parts.VISIBLE_STATICS[mesh.name]])
-assert THAI_FONT.is_file(), f'{THAI_FONT}: the Thai font is missing from this Blender (it ships in the blender package)'
+assert THAI_FONT.is_file(), f'{THAI_FONT}: the Thai font is missing from the repo (wflevels/tide_harbour/fonts)'
 thai = bpy.data.fonts.load(str(THAI_FONT))
 mesh_actor(numerals('numerals_thai', THAI, thai, 1.0, 1.0), 'platform', visibility=tl.VIS['numerals_thai'])
 mesh_actor(numerals('numerals_roman', ROMAN, None, 0.75, 1.4), 'platform', visibility=tl.VIS['numerals_roman'])

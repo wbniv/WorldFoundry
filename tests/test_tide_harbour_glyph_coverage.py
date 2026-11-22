@@ -3,8 +3,8 @@
 
 A character the font lacks comes out as its missing-glyph box. Noto Sans Thai has no full stop, so the unit labels
 once read "ม" plus a hollow box (seen on cast1, 2026-11-21); the stops are now drawn as squares
-(blender_create_tide_harbour.py `stop`). The font is Blender's; the test is skipped where it is not installed
-(the Blender container has it, the linux-test image does not).
+(blender_create_tide_harbour.py `stop`). The font is the repo's static copy; the cmap test is skipped where fontTools is not installed
+(fontTools is not in the images).
 """
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "wflevels" / "tide_harbour" / "blender_create_tide_harbour.py"
-FONT = Path("/usr/lib/blender/datafiles/fonts/NotoSansThai-VariableFont_wdth,wght.woff2")
+FONT = ROOT / "wflevels" / "tide_harbour" / "fonts" / "NotoSansThai-Bold.ttf"     # static and bold: no offset embolden, which tears (fonts/README.md)
 CREDIT_FONT = Path("/usr/lib/blender/datafiles/fonts/DejaVuSansMono.woff2")     # not Blender's default Inter: its M came out filled
 
 
@@ -37,6 +37,15 @@ class GlyphCoverage(unittest.TestCase):
         self.assertIn("put(body, CREDIT,", src)
         self.assertIn("CREDIT_FONT = Path('/usr/lib/blender/datafiles/fonts/DejaVuSansMono.woff2')", src)
         self.assertNotIn("outlines('pc', [CREDIT], None)", src, "the default font (Inter) draws a filled M: use CREDIT_FONT")
+
+    def test_thai_text_is_bold_and_not_offset(self):
+        """An offset (embolden) curve self-intersects on the thin loops of ๕ ๗ ๘ and Blender's fill tears them: the digits came
+        out bitten on cast1 (2026-11-22). Thai text is a static bold font drawn with offset 0."""
+        src = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("THAI_FONT = HERE / 'fonts' / 'NotoSansThai-Bold.ttf'", src)
+        self.assertIn("curve.offset = 0.0 if (font is not None and Path(font.filepath).name == THAI_FONT.name) else 0.02", src)
+        self.assertTrue((ROOT / "wflevels" / "tide_harbour" / "fonts" / "NotoSansThai-Bold.ttf").is_file())
+        self.assertTrue((ROOT / "wflevels" / "tide_harbour" / "fonts" / "LICENSE-Noto.txt").is_file())
 
     def test_the_lists_are_found(self):
         self.assertGreaterEqual(len(glyph_texts()), 15)
