@@ -5,8 +5,9 @@ No engine, no display: the VM from engine/vendor is compiled with a host that pr
 tests/verify_minute_machine_forth.py, as tests/verify_tide_harbour_forth.py uses it). Each case sets WALL_DAY and the
 clock, runs one frame (cv-tick) and reads the candle visibility cell:
 
-  - Christmas candles (plan docs/plans/2026-11-21-cuckoo-village.md): visible from 1 December through 6 January of the
-    local date, across the year boundary and through leap years, only while the Christmas candles setting is On.
+  - Christmas candles (plan docs/plans/2026-11-21-cuckoo-village.md): always visible from 1 December through 6 January
+    of the local date, across the year boundary and through leap years, whatever the switch says; visible the rest of
+    the year only while the "Candles all year" setting is On.
 
     python3 tests/verify_cuckoo_village_forth.py        # also run by tests/test_cuckoo_village_forth.py
 """
@@ -78,10 +79,10 @@ class Host(mm.Host):
         self.ix = ix
 
     def frame_at(self, day: int, sod: float, candles=None):
-        """One frame at local day `day` and second-of-day `sod`; candles: the Christmas candles field (None: unanswered)."""
+        """One frame at local day `day` and second-of-day `sod`; candles: the Candles all year field (None: unanswered, so its default Off)."""
         self.proc.stdin.write("Q\n")
         if candles is not None:
-            self.proc.stdin.write(f"P {self.ix['CuckooVillageSettings']} {FIELDS['Christmas candles']} {candles}\n")
+            self.proc.stdin.write(f"P {self.ix['CuckooVillageSettings']} {FIELDS['Candles all year']} {candles}\n")
         h, m = int(sod // 3600) % 24, int(sod // 60) % 60
         for name, v in (("WALL_DAY", day), ("WALL_HOUR", h), ("WALL_MINUTE", m), ("WALL_SECOND", sod % 60.0)):
             self.proc.stdin.write(f"M {self.ids[name]} {v!r}\n")
@@ -120,14 +121,14 @@ def main() -> int:
             days = season_days()
             for day in days:
                 for sod in (0.0, 43200.0, 86399.0):             # midnight, noon, the last second
-                    for candles, default in ((None, 1), (1, 1), (0, 0)):
+                    for candles, switch in ((None, 0), (1, 1), (0, 0)):
                         host.frame_at(day, sod, candles)
                         got = host.read(tl.CANDLE_CELL)
-                        want = float(tl.christmas_season(day) and bool(default))
+                        want = float(tl.christmas_season(day) or bool(switch))
                         if got != want:
                             failures += 1
                             if failures <= 10:
-                                print(f"FAIL {tl.date_of(day)} {sod:7.0f} s candles={candles}: cell {tl.CANDLE_CELL} = {got}, want {want}")
+                                print(f"FAIL {tl.date_of(day)} {sod:7.0f} s switch={candles}: cell {tl.CANDLE_CELL} = {got}, want {want}")
             print(f"{len(days)} days x 3 times x 3 settings = {len(days) * 9} frames, {failures} failures")
         finally:
             host.close()

@@ -23,7 +23,7 @@ OAS2OAD = ROOT / "wftools/oas2oad-rs/target/release/oas2oad"
 FIELDS = {
     "Bavaria mode": (0, 1, 0),
     "Seasonal events": (0, 1, 1),
-    "Christmas candles": (0, 1, 1),
+    "Candles all year": (0, 1, 0),
     "Window lights": (0, 1, 1),
     "Sound": (0, 1, 1),
     "Camera motion": (0, 1, 0),
@@ -59,7 +59,8 @@ def test_the_defaults_are_classic_mode_with_everything_else_on():
     only take effect with the feature they belong to (events need Bavaria mode)."""
     assert FIELDS["Bavaria mode"][2] == 0
     assert FIELDS["Camera motion"][2] == 0, "0 is Journey, the shipped camera"
-    assert all(FIELDS[k][2] == 1 for k in ("Seasonal events", "Christmas candles", "Window lights", "Sound"))
+    assert all(FIELDS[k][2] == 1 for k in ("Seasonal events", "Window lights", "Sound"))
+    assert FIELDS["Candles all year"][2] == 0, "the candles are lit 1 Dec to 6 Jan regardless; the switch adds the rest of the year"
 
 
 def test_help_text_has_no_commas_the_preprocessor_would_split_on():

@@ -105,14 +105,14 @@ For the initial version, define a predictable **local-time lighting schedule**, 
 
 ### Christmas candles
 
-From 1 December to 6 January the village trees carry small lit candles, in the German tradition of the candlelit Christmas tree. The season is a function of the local calendar date, taken from the same wall-clock sample as the dial and lighting. It applies in both Classic and Bavaria modes, because both villages have the same trees.
+From 1 December to 6 January the village trees always carry small lit candles, in the German tradition of the candlelit Christmas tree; a setting, **Candles all year**, lights them the rest of the year too (Will, 2026‑11‑22: "always on dec 1 - jan 6 but can be turned on other times with the switch"). The season is a function of the local calendar date, taken from the same wall-clock sample as the dial and lighting. It applies in both Classic and Bavaria modes, because both villages have the same trees.
 
 [![Trees out of season, in season by day, and in season at dusk and night, with the season timeline and settings](2026-11-21-cuckoo-village/christmas-candles.png)](2026-11-21-cuckoo-village/christmas-candles.html)
 
-- **Season.** Candles are shown from `Dec 1 00:00` through `Jan 6 23:59:59` local time (Advent to Epiphany) and hidden otherwise. The season spans the year boundary, so test it as a date range that wraps. This is a visibility switch on candle meshes sampled each frame, not accumulated state, so a start on any date, a clock correction, a time-zone or DST change, and a run that crosses midnight on 30 November, 31 December or 6 January all show the right state without a restart.
+- **Season.** Candles are shown from `Dec 1 00:00` through `Jan 6 23:59:59` local time (Advent to Epiphany) and, outside that range, shown only when **Candles all year** is On. The season spans the year boundary, so test it as a date range that wraps. This is a visibility switch on candle meshes sampled each frame, not accumulated state, so a start on any date, a clock correction, a time-zone or DST change, and a run that crosses midnight on 30 November, 31 December or 6 January all show the right state without a restart.
 - **Where.** A few small candles on each of the conifers and on one or two trees in the square, spaced so that a single tree never carries more than a dozen. Candles are tiny cream sticks with a small warm flame. They are decoration and must not touch the dial, balcony alcoves or cuckoo door, or hide them from the front-facing performance view.
 - **Light.** Flames glow with the same day / dusk / night blend as the windows, with the same fixed per-candle stagger derived from its index. By day they stand unlit. A very small flicker is a deterministic function of the wall-clock sample and candle index, never random per frame. Use baked emissive materials, with no real-time light per candle, as for the windows, and confirm the approach on the target renderer. The **Window lights** setting also controls candle glow.
-- **Setting.** **Christmas candles** (On / Off, default On) in `CuckooVillageSettings`, read at level entry. With it off, the trees stay bare in the season.
+- **Setting.** **Candles all year** (Off / On, default Off) in `CuckooVillageSettings`, a live field. Off: candles only from 1 December to 6 January. On: candles all year. The setting can add candles but never removes them in the season. (It replaces the first draft's "Christmas candles" On/Off, which could switch the season's candles off.) A later change could make the setting a date range, with 1 December to 6 January as its default; that is a TODO item to consider.
 - **Budget.** Candles share one mesh and one material, instanced or batched. Count them against the measured performance budget of the two existing clock levels. The candle meshes exist all year but are hidden outside the season, and hidden candles draw nothing.
 - **Test.** The test build's deterministic test clock covers the date, so the season can be checked in any month. Do not expose a date override as a customer setting.
 
@@ -126,7 +126,7 @@ flowchart LR
 
 ### Seasonal events (Bavaria mode)
 
-Bavaria mode also carries dated Bavarian customs. They are decoration on the same village, shown only when Bavaria mode is on, and controlled by one **Seasonal events** setting (see [Level settings](#level-settings)). The **Christmas candles** stay separate and apply in both modes. Every event is a visibility switch sampled from the local date, like the candles, and never accumulated state.
+Bavaria mode also carries dated Bavarian customs. They are decoration on the same village, shown only when Bavaria mode is on, and controlled by one **Seasonal events** setting (see [Level settings](#level-settings)). The **Christmas candles** (and their **Candles all year** switch) stay separate and apply in both modes. Every event is a visibility switch sampled from the local date, like the candles, and never accumulated state.
 
 [![A year timeline of the seasonal events and a small picture of each](2026-11-21-cuckoo-village/seasonal-calendar.png)](2026-11-21-cuckoo-village/seasonal-calendar.html)
 
@@ -169,7 +169,7 @@ Recommended Cuckoo Village settings:
 |---|---|---|---|
 | Sound | On / Off | On | Cuckoo calls and optional quarter cues; animation remains visible when off |
 | Window lights | On / Off | On | Dusk/dawn window glow, and the glow of the Christmas candles; ambient day/night lighting still changes |
-| Christmas candles | On / Off | On | Shows lit candles on the village trees from 1 December to 6 January. Off leaves the trees bare |
+| Candles all year | Off / On | Off | Candles are always lit on the village trees from 1 December to 6 January; On also lights them the rest of the year |
 | Seasonal events | On / Off | On | Shows the dated [Bavarian events](#seasonal-events-bavaria-mode) (Nikolaus, Krampus, Fasching, Oktoberfest, maypole dressing). They appear only while Bavaria mode is on |
 | Bavaria mode | On / Off | Off | Switches the village and figures to the [Bavaria mode](#bavaria-mode) theme; layout, timeline, lighting and sound are unchanged |
 | Camera motion | Journey / Still | Journey | Slow village tour with performance views, or fixed wide establishing view |
@@ -185,7 +185,7 @@ Do not expose test-only time overrides as customer settings. The companion plan 
 |---|---|
 | Window lights | **Built.** Off keeps every cottage window dark; `tests/test_cuckoo_village_settings_effect.py` |
 | Camera motion | **Built.** Still holds the wide establishing view from the front; same test |
-| Bavaria mode, Seasonal events, Christmas candles, Sound | **The field exists and the director has a reader word for it; nothing responds yet.** Each lands with its feature: Bavarian figures and the reversed dial and parade, the events, the candles, the audio |
+| Bavaria mode, Seasonal events, Candles all year, Sound | **The field exists and the director has a reader word for it; nothing responds yet.** Each lands with its feature: Bavarian figures and the reversed dial and parade, the events, the candles, the audio |
 
 The field indices are the catalog's (129 to 134) and are written into the director at export time, never hand-typed. The phone's Dream form needs a capabilities asset generated from the `.oad` (`scripts/gen-settings-capabilities.py`), and the Dream's `LevelSettings` serves only Sea Stars today; generalising it by clock id is Phase 3 of the [Tide Harbour plan](2026-11-21-tide-harbour-clock.md). Until then the village's settings are reached by holding A on a TV or gamepad.
 

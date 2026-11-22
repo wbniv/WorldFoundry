@@ -1,5 +1,6 @@
 """The generated Cuckoo Village director, run in the real zForth VM (tests/verify_cuckoo_village_forth.py), and the
-season reference it is checked against (timeline.christmas_season)."""
+season reference it is checked against (timeline.christmas_season). Candles: lit in season always, and out of season
+only when the Candles all year switch is On."""
 import datetime as dt
 import shutil
 import subprocess
@@ -36,3 +37,13 @@ def test_the_director_in_the_real_vm_agrees_with_the_season_reference():
                        capture_output=True, text=True, timeout=600)
     assert r.returncode == 0, r.stdout[-2000:] + r.stderr[-2000:]
     assert " 0 failures" in r.stdout, r.stdout[-500:]
+
+
+def test_the_candle_switch_only_adds_the_rest_of_the_year():
+    """Will, 2026-11-22: always on from 1 December to 6 January, and the setting turns them on at other times.
+    The reference rule, then the director's cell in the VM (the test above) must agree with it."""
+    for d, switch, want in ((day(2026, 12, 25), False, True), (day(2026, 12, 25), True, True),
+                            (day(2026, 7, 4), False, False), (day(2026, 7, 4), True, True),
+                            (day(2027, 1, 6), False, True), (day(2027, 1, 7), False, False)):
+        assert (tl.christmas_season(d) or switch) is want, (tl.date_of(d), switch)
+    assert tl.SETTINGS_DEFAULTS["Candles all year"] == 0

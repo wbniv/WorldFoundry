@@ -144,8 +144,8 @@ def bird_visible(sod: float) -> bool:
     return bird(hr, mi * 60 + sc)[0] > 0.02
 
 
-# Christmas candles (plan "Christmas candles"): from 1 December through 6 January of the device's local calendar, in both
-# modes. WALL_DAY (the engine's E1) counts whole local days since 2000-01-01; the director reads it every frame, so the
+# Christmas candles (plan "Christmas candles"): always lit from 1 December through 6 January of the device's local calendar, in
+# both modes, and lit the rest of the year only when the user turns on the "Candles all year" setting. WALL_DAY (the engine's E1) counts whole local days since 2000-01-01; the director reads it every frame, so the
 # season is a function of the date, never accumulated state.
 import datetime as _dt
 
@@ -164,7 +164,7 @@ def christmas_season(day: int) -> bool:
 
 
 # The settings object (CuckooVillageSettings, wfsource/source/oas/cuckoovillagesettings.oas): label -> (default, field read by the director).
-SETTINGS_DEFAULTS = {"Bavaria mode": 0, "Seasonal events": 1, "Christmas candles": 1, "Window lights": 1, "Sound": 1, "Camera motion": 0}
+SETTINGS_DEFAULTS = {"Bavaria mode": 0, "Seasonal events": 1, "Candles all year": 0, "Window lights": 1, "Sound": 1, "Camera motion": 0}
 
 
 def window_states(sod: float, settings: Dict[str, int] = None) -> List[bool]:
