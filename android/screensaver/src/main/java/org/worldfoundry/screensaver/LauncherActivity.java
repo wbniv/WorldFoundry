@@ -3,7 +3,9 @@ package org.worldfoundry.screensaver;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.InputDevice;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 
 /**
@@ -80,6 +82,19 @@ public abstract class LauncherActivity extends Activity {
             }
         }
         return super.dispatchKeyEvent(event);
+    }
+
+    /** A gamepad's analog stick and hat press the four directions in the menu, as the standalone app's host did. */
+    @Override
+    public boolean dispatchGenericMotionEvent(MotionEvent event) {
+        if (mode.kind == LaunchMode.Kind.MENU
+                && (event.getSource() & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK
+                && event.getAction() == MotionEvent.ACTION_MOVE
+                && player.stick(event.getAxisValue(MotionEvent.AXIS_X), event.getAxisValue(MotionEvent.AXIS_Y),
+                        event.getAxisValue(MotionEvent.AXIS_HAT_X), event.getAxisValue(MotionEvent.AXIS_HAT_Y))) {
+            return true;
+        }
+        return super.dispatchGenericMotionEvent(event);
     }
 
     @Override

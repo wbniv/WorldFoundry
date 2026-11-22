@@ -41,6 +41,7 @@ final class TankPlayer implements SurfaceHolder.Callback {
     private static native void nativeStop();
     private static native boolean nativeKey(int keyCode, boolean down);
     private static native void nativeTouchConfigure(boolean enabled, float density);
+    private static native boolean nativeStick(float x, float y, float hatX, float hatY);
     private static native boolean nativeTouch(int action, int actionIndex, int viewWidth, int viewHeight,
                                               int[] ids, float[] xs, float[] ys);
     private static native void nativeBack();
@@ -101,6 +102,9 @@ final class TankPlayer implements SurfaceHolder.Callback {
 
     /** A remote key for the tank menu; true when the engine uses it. Inert outside the menu. */
     boolean key(int keyCode, boolean down) { return nativeKey(keyCode, down); }
+
+    /** A hardware gamepad's left stick and hat; true when the host took them. */
+    boolean stick(float x, float y, float hatX, float hatY) { return nativeStick(x, y, hatX, hatY); }
 
     /** One touch on the surface view, handed to the controller; true when it took the event. */
     private static boolean touch(View v, MotionEvent event) {

@@ -35,6 +35,21 @@ sequenceDiagram
 - **Back** stays the phone's own back gesture, which already reaches `nativeBack`. A is the remote's OK, including the one-second hold.
 - **What is not copied from the old app:** touching a menu row directly (the menu is driven by Up, Down and A), the story-card reading layout, and the phone-as-gamepad web page for a TV (`controller.html`), which needs a network permission the apps do not have.
 
+## What else the standalone host did that the combined host does not
+
+The combined app is not the standard app plus a screensaver entry point. It is the screensaver module's own host (`dream_host.cc` and `TankPlayer.java`, built for the Dream) grown a menu mode. The standalone Aquarium was the NativeActivity host (`wfsource/source/hal/android/native_app_entry.cc`, 899 lines against 470). Retiring it dropped everything that host did and the screensaver host did not. Audited by reading both hosts on 2026‑11‑22; only the first two rows are confirmed on a device.
+
+| Feature of the standalone host | Combined host | Status |
+|---|---|---|
+| Joystick and D, B, C, A over the menu and tanks | none | **Restored** (this plan), verified on the Pixel |
+| The engine's touch settings form (entry button at the top right, then the form) | none, so the form could not be opened or driven by touch | **Restored** in the same plan; verification below |
+| Tap a menu row to choose a tank (`levelmenu::TouchRowAt` and `QueueTouchRow`) | `menuRowTouch` in `dream_host.cc` | **Restored**, built; not yet driven on a device |
+| Story card reading layout (`androidtouch::reading`: the stick, B and D hide so a card reads) | `TouchBridge::setReading(bitmaptext::ReaderOpen())` each frame | **Restored** (`TouchBridge::setReading`), built; not yet seen on a device |
+| Hardware gamepad analog stick and hat (`AINPUT_SOURCE_JOYSTICK`, `AXIS_HAT_X`/`Y`) | `GamepadStick` and `LauncherActivity.dispatchGenericMotionEvent` | **Restored**, built; not yet tried with a gamepad |
+| Phone as the TV's gamepad and settings editor (`hal/phonepad`, `PhoneInit`, the message the form sends the phone) | stubbed out (`WFAndroidPhoneOverlayRects` returns nothing) | Open; also needs the network permission the apps do not hold |
+| Crash handlers and the diagnostic log (`InstallCrashHandlers`, `OpenDiagnosticLog`) | only the engine log bridge | Open, diagnostics only |
+| Back dismissing the phone panel, and the system's own Back on a standalone selector | `applyMenuBack` | Replaced, works |
+
 ## Verification
 
 1. `task test-touch-bridge`: 28 checks in `wf-linux-test:local` (a tap inside one frame reads once, a hold reads every frame, the stick, two thumbs, cancel, a view and surface of different sizes, off on a TV).
@@ -72,3 +87,4 @@ sequenceDiagram
 | # | Question | Recommendation |
 |---|---|---|
 | Q1 | Touch a menu row directly, as the old app allowed? | Not in this change; the joystick and A cover it. Add it if Will misses it. |
+| Q2 | Restore the rest of the table? | **Decided (Will, 2026‑11‑22): "why wouldn't i want all of it? didn't we develop those things for a reason?" Restore all.** Done above except the phone gamepad (TV) and the crash handler, which are next. |

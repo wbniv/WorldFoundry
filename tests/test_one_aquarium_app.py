@@ -140,3 +140,21 @@ def test_the_touch_controller_is_wired_through_the_shared_host():
     bridge = (SCREENSAVER / "src/main/cpp/touch_bridge.h").read_text()
     assert "keys.keyDown(pressed)" in bridge and "keys.keyUp(released)" in bridge   # through the key latch
 
+
+def test_the_settings_form_gets_touch_before_the_controller_on_the_game_thread():
+    """Will, 2026-11-22: "i'm unable to navigate level settings for both aquarium and 3d clocks; iirc, touch used to
+    work". The standalone app (a NativeActivity host) fed touches to the engine's own settings form, with an entry
+    button at the top right. The combined host never did, so neither the button nor the form worked. The touches
+    reach the form first, as in hal/android/native_app_entry.cc, on the game thread (the engine is single-threaded)."""
+    host = HOST
+    assert "#include <game/runtime_property_touch.h>" in host
+    assert "propertyui::touchConfigure(menu && touchBridge.enabled(), touchBridge.density());" in host
+    assert "propertyui::touchEvent(" in host
+    assert "static void pumpTouch(" in host and "pumpTouch(surfaceWidth, surfaceHeight);" in host
+    # the UI thread only queues; the form and the controller are driven from the per-frame hook
+    jni = host[host.index("TankPlayer_nativeTouch("):]
+    jni = jni[: jni.index("\n}\n")]
+    assert "touchQueue.push_back" in jni and "propertyui::" not in jni and "touchBridge.event" not in jni
+    # a touch the form takes lets go of every controller button
+    assert "if (settingsTouch) touchBridge.release(menuKeys);" in host
+
