@@ -60,7 +60,7 @@ flowchart TD
 
 ## 2. Use the same list in a screensaver
 
-The Android screensaver (`android/screensaver`, package `org.worldfoundry.screensaver`, flavor `aquarium`) plays a level on its own, with an autopilot, when Android starts it.
+The Aquarium app's Dream half (`android/screensaver`, flavor `aquarium`; its `applicationId` is `org.worldfoundry.screensaver` today and becomes `org.worldfoundry.game.aquarium` in the rename of [One Aquarium APK](../plans/2026-11-22-one-aquarium-apk.md)) plays a level on its own, with an autopilot, when Android starts it.
 
 1. **Autopilot variants.** `python3 scripts/build-aquarium-screensaver-levels.py` (run in the container: `scripts/in-linux-container.sh python3 scripts/build-aquarium-screensaver-levels.py`) reads the manifest, builds an `<id>_screensaver` variant of each level, and packs `wflevels/aquarium-screensaver-cd.iff` in manifest order. A manifest id with no `wflevels/<id>/` directory stops the build and names the id.
 2. **The catalogue.** Gradle copies the manifest into the flavor's assets as `levels.manifest` (`copyAquariumLevelCatalog` in `android/screensaver/build.gradle.kts`). `LevelCatalog` parses it at runtime: `ids()`, `label(id)`, `valid(id)`, `indexOf(id)` (the level's index in the bundle) and `choose(requested, saved, rng)`. It is one generic class: a second package copies its own manifest into its own flavor the same way, never a copy of the class.
@@ -74,6 +74,8 @@ A launcher, `adb` or the coordinator can start a named level without changing wh
 adb shell am start -n org.worldfoundry.screensaver/.ScreensaverPreviewActivity \
     --es org.worldfoundry.screensaver.LEVEL aquarium_jellyfish
 ```
+
+The short form `-n <applicationId>/.Class` resolves the leading dot against the **applicationId**, not the code package. It works today because the two are both `org.worldfoundry.screensaver`; after the rename to `org.worldfoundry.game.aquarium` use the full class, `org.worldfoundry.game.aquarium/org.worldfoundry.screensaver.ScreensaverPreviewActivity`. The extra's key, `org.worldfoundry.screensaver.LEVEL`, is a plain string and does not change.
 
 - The value is a catalogue id, or `random`.
 - It applies to that run only. It never writes the saved choice.
@@ -99,17 +101,18 @@ stateDiagram-v2
 | Coordinator `screensaver-show` | **not yet.** It accepts only settings `overrides`. A `level_launch_extra` field in `applications.json` and a `level` argument are the open TODO item "Homeboard and coordinator one-run tank start" |
 | Homeboard Preview, idle timer, remote key | Homeboard's Stage 5; filed in its `TODO.md` |
 
-## 4. Make a new screensaver pack
+## 4. Make a new pack (an app that is also the screensaver)
 
 Two packs exist today, built the same way: **WF Aquarium** (flavor `aquarium`, `wflevels/aquarium-menu.manifest`, 11 tanks) and **WF Clocks**, the 3D Clocks (flavor `clocks`, `wflevels/clocks-menu.manifest`, Minute Machine and Cuckoo Village). A third pack follows the same steps. The roster is append-only: a level's position is its id in the bundle.
 
-1. Write `wflevels/<package>-menu.manifest` in the format above.
-2. Give its Gradle flavor a `Copy` task that puts the manifest in its assets as `levels.manifest`, like `copyAquariumLevelCatalog` and the Clocks equivalent in `android/screensaver/build.gradle.kts`, and add the output to that flavor's `assets` source set.
-3. Pack the bundle (`cdpack --manifest`, for Clocks `scripts/pack-clocks-bundle.py`) into the flavor's assets.
-4. Add one launcher activity, `public final class <Pack>Activity extends LauncherActivity {}`, and declare it in the flavor's manifest with the `LEANBACK_LAUNCHER` category. It has no code of its own: every pack's launch behaviour is `LauncherActivity`'s (next paragraph). Its Dream service calls `LevelLaunch.startChosen(this, player, null)`.
-5. Do **not** copy `LevelCatalog` or `LevelLaunch`; add the source directory to the flavor if it is not in this module.
-6. If any level's textures are larger than the Dream host's default 1024 slot, ship `assets/wf_args.txt` with `--vram-slot-width=...` for the flavor (Clocks does: the village's room page is 2048 wide). `tests/test_dream_host_vram.py` checks every page in the bundle fits.
-7. **Give every level in the roster a settings object** (next section), then run the audit.
+1. **Name the package `org.worldfoundry.game.<name>`** (Will, 2026‑11‑22: `org.worldfoundry.game.aquarium`, `org.worldfoundry.game.clocks`) and set it as the flavor's `applicationId` in `android/screensaver/build.gradle.kts`. The name is the game, never the mechanism: not `…screensaver`, not `…wf_game.<name>`. The Java `namespace` (`org.worldfoundry.screensaver`) is a separate setting and stays. Aquarium and Clocks still carry their old ids until the rename lands, so the tables below use the ids as they are today ([One Aquarium APK](../plans/2026-11-22-one-aquarium-apk.md), D5).
+2. Write `wflevels/<package>-menu.manifest` in the format above.
+3. Give its Gradle flavor a `Copy` task that puts the manifest in its assets as `levels.manifest`, like `copyAquariumLevelCatalog` and the Clocks equivalent in `android/screensaver/build.gradle.kts`, and add the output to that flavor's `assets` source set.
+4. Pack the bundle (`cdpack --manifest`, for Clocks `scripts/pack-clocks-bundle.py`) into the flavor's assets.
+5. Add one launcher activity, `public final class <Pack>Activity extends LauncherActivity {}`, and declare it in the flavor's manifest with the `LEANBACK_LAUNCHER` category. It has no code of its own: every pack's launch behaviour is `LauncherActivity`'s (next paragraph). Its Dream service calls `LevelLaunch.startChosen(this, player, null)`.
+6. Do **not** copy `LevelCatalog` or `LevelLaunch`; add the source directory to the flavor if it is not in this module.
+7. If any level's textures are larger than the Dream host's default 1024 slot, ship `assets/wf_args.txt` with `--vram-slot-width=...` for the flavor (Clocks does: the village's room page is 2048 wide). `tests/test_dream_host_vram.py` checks every page in the bundle fits.
+8. **Give every level in the roster a settings object** (next section), then run the audit.
 
 **Every pack behaves the same.** A pack is one APK that is both the app and the screensaver, and WF Aquarium and WF Clocks behave identically (Will, 2026‑11‑21). One class, `LauncherActivity`, decides what a start does, through the pure function `LaunchMode`:
 
@@ -232,6 +235,8 @@ The coordinator knows a screensaver package through one entry in `scripts/wf_dev
 | `level_setting_id` | the settings-provider setting whose choices are the levels | `tank` | `clock` | none |
 | `settings_authority` | the content provider for `getCapabilities` and `setSetting` | `….screensaver.settings` | `….clocks.settings` | `….seahorsegrid.settings` |
 | `native`, `scenes` | `false`, `[]` for a screensaver | | | |
+
+**When a package is renamed** (Aquarium and Clocks, to `org.worldfoundry.game.<name>`), its registry entry's `package`, `activity`, `dream_component`, `preview_activity` and `settings_authority` change in the same administrator upgrade of the coordinator as the Gradle `applicationId`. Either half alone breaks installs: an APK whose package is not the registered one cannot be installed or launched by its registry key. The old package stays installed beside the new one until it is removed by hand, because the coordinator has no uninstall.
 
 The level list is not in the registry: the coordinator and the tray read it from the app's own settings provider (the `level_setting_id` setting's options), and refuse an id the app does not list before any launch. A package with no `level_launch_extra` gets no chooser and a `screensaver-level-unavailable` refusal.
 
