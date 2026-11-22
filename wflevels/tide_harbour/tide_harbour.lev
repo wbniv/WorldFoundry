@@ -1121,6 +1121,7 @@
 		{ 'I32' { 'NAME' "Gauge board" } { 'DATA' 0l } { 'STR' "On" } }  //On|Off
 		{ 'I32' { 'NAME' "Boats and birds" } { 'DATA' 0l } { 'STR' "On" } }  //On|Off
 		{ 'I32' { 'NAME' "River panel" } { 'DATA' 0l } { 'STR' "On" } }  //On|Off
+		{ 'I32' { 'NAME' "About the map" } { 'DATA' 0l } { 'STR' "(c) OpenStreetMap contributors" } }  //(c) OpenStreetMap contributors|ODbL: openstreetmap.org/copyright
 	}
 	{ 'OBJ' 
 		{ 'NAME' "sky_0" }
@@ -11460,7 +11461,7 @@
 		} }
 		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.0099999904632568(1.15.16) 1.0099999904632568(1.15.16) 1.0099999904632568(1.15.16)  //x,y,z
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.5597988177132009(1.15.16) 0.0000000000000000(1.15.16) -1.1665645286558686(1.15.16) 0.5597988177132009(1.15.16) 0.0010100000384357(1.15.16) 0.4895475314526507(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.5193987964224220(1.15.16) 0.0000000000000000(1.15.16) -1.1157475604562705(1.15.16) 0.5486888404535648(1.15.16) 0.0000000000000000(1.15.16) 0.4895475314526507(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "panel_col_body.iff" } }
@@ -11548,9 +11549,9 @@
 		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.9950186798759594(1.15.16) } { 'STR' "-0.995019" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0049813200498132(1.15.16) } { 'STR' "0.004981" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 60.7148041923378088(1.15.16) } { 'STR' "60.714804" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.9999999997181813(1.15.16) } { 'STR' "-1.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 60.9568023509852992(1.15.16) } { 'STR' "60.956802" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "panel_col_fill" }

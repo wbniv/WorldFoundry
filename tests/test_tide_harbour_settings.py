@@ -3,7 +3,8 @@ set, the director stepped and the pose checked.
 
 The type is wfsource/source/oas/tideharboursettings.oas: settings.inc, the clocks' shared Clock sheet
 (clocksettings.inc: Camera drift, Slow or Off) and Tide Harbour's own sheet (Dial numerals: Roman, Thai or none;
-Gauge board: on or off; Boats and birds: on or off; River panel: on or off), every field live and its first choice the default. One object
+Gauge board: on or off; Boats and birds: on or off; River panel: on or off), every field live and its first choice the default, and
+then one read-only About the map row (the OpenStreetMap credit). One object
 stands in the level; every frame the director reads each field with property@ and copies it into global cells
 690 to 693. The VM half sets the object's fields as property@ answers them; scripts/check-tide-harbour.py --options
 does the same in the engine with --property launch overrides.
@@ -56,7 +57,10 @@ def test_the_phone_asset_lists_the_fields_of_the_placed_object():
     (owner,) = asset["objects"]
     assert owner["owner"] == MAP["indices"][tl.SETTINGS_ACTOR] and owner["type"] == "TideHarbourSettings"
     got = {s["key"]: ([o["label"] for o in s["options"]], s["value"], s["readonly"]) for s in owner["settings"]}
-    assert got == {label: (list(Q9[k]), "0", False) for k, label in tl.FIELD_LABELS.items()}
+    want = {label: (list(Q9[k]), "0", False) for k, label in tl.FIELD_LABELS.items()}
+    # the read-only About row: the river map's OpenStreetMap attribution (it left the panel in the same change)
+    want["About the map"] = (["(c) OpenStreetMap contributors", "ODbL: openstreetmap.org/copyright"], "0", True)
+    assert got == want
 
 
 def test_the_cells_are_global_user_mailboxes_written_only_from_property_at():
