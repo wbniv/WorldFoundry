@@ -7,4 +7,5 @@ TYPEHEADER(Reef Settings,ReefSettings)
     TYPEENTRYINT32(Colonies,,0,2,1,"Sparse|Normal|Dense",SHOW_AS_SLIDER|SHOW_AS_LIVE,"Random layout: how much attached life grows on the rock")
     TYPEENTRYINT32(Seed,,0,16777215,0,"",SHOW_AS_NUMBER|SHOW_AS_LIVE,"Random layout: 0 draws a new reef on every entry; any other value repeats it")
     PROPERTY_SHEET_FOOTER
+	@include global_settings.inc
 TYPEFOOTER

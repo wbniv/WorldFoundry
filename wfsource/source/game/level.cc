@@ -93,6 +93,7 @@
 #include "levelobj.hp"
 #include "game.hp"
 #include "gamestrm.hp"
+#include "global_settings.hp"
 
 #include "debug_server.hp"
 
@@ -915,6 +916,7 @@ Level::Level
 					static_cast<Actor*>(_actors[index])->OnPropertiesChanged(changed.data(), changed.size());
 				const auto* object = _runtimeProperties.object(index);
 				if (object && object->schema == "LevelRenderSettings") applyStainedGlassLight(*object);
+				if (object) wfglobals::applyChanged(*object);   // the settings every level offers
 			};
 			if (objdata->type == Actor::RuntimeDiagnostics_KIND) {
 				const std::map<std::string, std::string> memory = {
@@ -957,6 +959,7 @@ Level::Level
 	wfview::levelSettings()=view;const auto& overrides=wfview::argumentOverrides();
 	wfview::source()=(overrides.authoredAspect>=0.0f||overrides.maximumAspect>=0.0f)?"argument":(authoredFound||maximumFound)?"level":"default";
 	if(const auto* settings=_runtimeProperties.schema("LevelRenderSettings"))applyStainedGlassLight(*settings);
+	wfglobals::applyAtLoad(_runtimeProperties);   // Show framerate and the other global settings
 	wfoptions::registerRuntimeOptions(_runtimeProperties);
 
 	if ( !_camera )

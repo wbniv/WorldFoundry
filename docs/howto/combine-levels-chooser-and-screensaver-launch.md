@@ -27,6 +27,19 @@ flowchart TD
     LL --> DREAM["Dream or preview activity<br/>plays one level"]
 ```
 
+### What the app is on the device
+
+The combined app is **the screensaver module's host grown a menu mode**, not the standard NativeActivity app plus a screensaver entry point. One Java `SurfaceView` (`TankPlayer`) and one native host (`android/screensaver/src/main/cpp/dream_host.cc`) run the menu, a tank started from it, and the Dream. The standalone Aquarium app (the NativeActivity host, `hal/android/native_app_entry.cc`) was retired when the two became one, so **a feature of that host exists in the combined app only if `dream_host.cc` or `TankPlayer.java` has it.** What the combined host does with input (all in menu mode; the Dream takes none):
+
+| Input | Where it goes |
+|---|---|
+| TV remote keys, a gamepad's buttons | `TankPlayer.key` to `MenuKeyLatch` (a tap shorter than one frame still reads once), then `HALInjectJoystickButtons` |
+| A gamepad's analog stick and hat | `LauncherActivity.dispatchGenericMotionEvent` to `GamepadStick` to the same latch |
+| A touch on a phone (a touchscreen and no TV) | queued by `TankPlayer`, handled on the game thread: the engine's touch settings form first (`propertyui::touchEvent`: the entry button at the top right, then the form), then a tap on a menu row, then the on-screen controller (`TouchBridge`: joystick, D, B, C, A; narrowed to A and C while a story card is open) |
+| Back | `LauncherActivity` to `applyMenuBack` |
+
+Still missing from the old host, tracked in [the touch plan](../plans/2026-11-22-aquarium-clocks-touch-controls.md): the phone as a TV's gamepad and settings editor, and the crash log.
+
 ## 1. Combine levels into one bundle with a chooser
 
 1. **Build each level's standalone bundle**, `wflevels/<id>-standalone.iff`. It must be the L4-rooted file, not the bare `<id>.iff`: `game.cc` seeks one sector before it reads each level's RAM chunk. A level's id is its file name without `-standalone.iff`.
@@ -144,6 +157,12 @@ Two limits today: the phone form is served by `LevelSettings.java`, which knows 
 
 Adding a type is an **engine change** (C++ and the registry), so it needs the owner's explicit permission in a project that forbids engine edits.
 
+### The settings every level offers (Show framerate)
+
+**Every settings holder also carries the global sheet, declared once** in `wfsource/source/oas/global_settings.inc` (today one field, **Show framerate**, a live checkbox, default off). A holder gets it by ending its `.oas` with `@include global_settings.inc` just before `TYPEFOOTER`; it goes **last**, so none of the holder's own field ids move. A level with no settings of its own places one **`LevelSettings`** object (`levelsettings.oas`, the minimal holder: nothing but the global sheet), made the same way as the table above. The engine's side is one row per global in `wfsource/source/game/global_settings.cc` (`"Show framerate"` sets `fpscounter::enabled`), applied when a holder is edited and once when the level loads.
+
+To add a global setting: one line in `global_settings.inc`, one row in `global_settings.cc`, then regenerate every holder's `.oad` and `.ht` (`oas2oad`, `wfsource/source/oas/regen-headers.sh`), the phone assets (`scripts/gen-settings-capabilities.py`) and rebuild the levels. `tests/test_global_level_settings.py` fails if a holder forgets the include, if the `.inc` and the engine table disagree, or if a compiled `.oad` lacks the field. Plan and roll-out status: [global level settings](../plans/2026-11-22-global-level-settings.md); until the levels are rebuilt, a level built earlier works unchanged and simply lacks the field.
+
 ### How a user opens the settings
 
 - **On the TV remote or a gamepad: hold A, the remote's centre (OK) button, alone for 1 second, in the level.** `Host::gesture` in `engine/runtime_property_host.cpp` counts the hold; a tap, or A with any direction held, is an ordinary level control and resets it. At 1 s the host opens the form of the one editable object, or a picker when several objects are editable. It works only when the level has at least one editable object: an object with a stored, non-read-only field. Without a settings object the gesture does nothing, which is exactly what a level with no settings looks like on a TV.
@@ -182,6 +201,15 @@ Gotchas, each one met in practice:
 - `screensaver-select` of a component that is **not installed** used to end `plugin-error` and fence the device (a readd had to clear it). From 0.1.219 it is a clean refusal, `invalid-request` with `screensaver-component-not-installed`, health unchanged.
 - A direct screenshot (`capture PERSONAL=true`) is refused while another job holds the device; a queued `capture` job is not.
 - The coordinator tasks run from the `chromecast-coordinator` checkout; the APK path is a file path, not a hash.
+
+### On a phone (the Pixel)
+
+The Pixel is Will's daily phone: ask before a job that takes the screen. A Dream starts only on lock **while charging**, not after idle minutes.
+
+1. **Install** with the same `install` job against `phone-pixel-8-pro`; the phone must be awake and unlocked (`device-locked` otherwise).
+2. **See the controller.** A `check` job launches the app and keeps a screenshot (`panel: require-hidden`): the menu with the joystick at the lower left and D, B, C, A at the lower right. The job closes the app when it ends, so a coordinator `phone-input` tap cannot follow it; driving the app is a person's job.
+3. **Drive it.** Stick down moves the highlight, **A** starts the tank (or tap a row), the stick steers in the tank. In a tank with settings the **entry button at the top right** opens the form; tick, then Apply. A hold on A for one second also opens it where the level takes that gesture.
+4. **A TV is the other half of the check:** on cast1 no controller is drawn and the remote's keys work (section 6, the `input_script` check).
 
 ## 7. The tanks: ids, menu names and Dream labels
 
@@ -252,5 +280,7 @@ The level list is not in the registry: the coordinator and the tray read it from
 | The launch-mode decision (every row of section 4) | `task test-aquarium-launch-mode` |
 | The menu on a real Chromecast, a level start, the Dream | section 6 |
 | Every level has a settings object and a way to open it | `python3 scripts/audit-level-settings.py` (section 5) |
+| The on-screen controller and the gamepad stick (pure logic) | `task test-touch-bridge` |
+| The global settings (one declaration, every holder, the engine table) | `scripts/in-linux-container.sh python3 -m pytest tests/test_global_level_settings.py -q` |
 
 Builds and tests run in containers, never on the host: see the Containers section of the repository `CLAUDE.md`.

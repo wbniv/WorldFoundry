@@ -50,9 +50,12 @@ def test_the_seven_fields_have_the_plan_ranges_and_defaults_and_are_live():
         assert f["live"], f"{label} must be SHOW_AS_LIVE or the forms cannot edit it"
 
 
-def test_only_the_seven_settings_fields_are_live():
+GLOBAL_FIELDS = {"Show framerate"}   # oas/global_settings.inc: every settings type carries these
+
+
+def test_only_the_seven_settings_fields_and_the_global_ones_are_live():
     live = {f["key"] for f in catalog()["fields"] if f["live"]}
-    assert live == set(FIELDS)
+    assert live == set(FIELDS) | GLOBAL_FIELDS
 
 
 def test_the_defaults_are_classic_mode_with_everything_else_on():
@@ -77,11 +80,12 @@ def test_the_type_is_registered_once_and_appended_after_every_existing_type():
     into every level. Every registry file must agree on that position."""
     mac = re.findall(r"^\s*OBJECTENTRY\((\w+),", (OAS / "objects.mac").read_text(), re.M)
     assert mac.count(TYPE) == 1
-    assert mac[-1] == TYPE and mac[-2] == "TideHarbourSettings", "appended last, after the previous newest type"
+    assert mac.index(TYPE) == mac.index("TideHarbourSettings") + 1, "appended right after the type that was newest then"
     position = mac.index(TYPE)
     kinds = re.findall(r"^\s*(\w+)_KIND,", (OAS / "objects.h").read_text(), re.M)
     assert kinds.index(TYPE) == position + (len(kinds) - len(mac))
-    assert re.findall(r"^\s*(\w+)_KIND,", (OAS / "objects.e").read_text(), re.M)[-1] == TYPE
+    kinds_e = re.findall(r"^\s*(\w+)_KIND,", (OAS / "objects.e").read_text(), re.M)
+    assert kinds_e.index(TYPE) == kinds_e.index("TideHarbourSettings") + 1
     names = re.findall(r'^\s*"(\w+)",', (OAS / "objects.names").read_text(), re.M)
     assert names.index(TYPE) == names.index("TideHarbourSettings") + 1
     lc = (OAS / "objects.lc").read_text().split()

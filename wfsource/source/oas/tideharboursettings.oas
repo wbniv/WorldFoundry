@@ -24,4 +24,5 @@ TYPEHEADER(Tide Harbour Settings,TideHarbourSettings)
 	TYPEENTRYINT32(Boats and birds,,0,1,0,"On|Off",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The boats on the river and the birds over it")
 	TYPEENTRYINT32(River panel,,0,1,0,"On|Off",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The side panel with the next high and low water and a map of the river")
 	PROPERTY_SHEET_FOOTER
+	@include global_settings.inc
 TYPEFOOTER

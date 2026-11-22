@@ -1,0 +1,16 @@
+@*============================================================================
+@* levelsettings.oas: the minimal settings holder
+@*============================================================================
+@*
+@* A level that has no settings of its own places one object of this type so it
+@* still offers the global settings (global_settings.inc: Show framerate). It
+@* has no sheet of its own: everything it carries comes from settings.inc.
+@* A level with its own holder (PlantedTankSettings, CuckooVillageSettings, ...)
+@* does not need this type; it gets the global settings from settings.inc.
+@* docs/plans/2026-11-22-global-level-settings.md.
+@*============================================================================
+
+TYPEHEADER(Level Settings,LevelSettings)
+	@include settings.inc
+	@include global_settings.inc
+TYPEFOOTER

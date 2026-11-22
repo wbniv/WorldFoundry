@@ -88,6 +88,8 @@
 #include "tideharboursettings.hp"
         	
 #include "cuckoovillagesettings.hp"
+        	
+#include "levelsettings.hp"
 
 
 

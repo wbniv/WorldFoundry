@@ -49,9 +49,12 @@ def test_the_nine_fields_have_the_d9_ranges_and_defaults_and_are_live():
         assert f["live"], f"{label} must be SHOW_AS_LIVE or a runtime edit has no effect"
 
 
-def test_only_the_nine_settings_fields_are_live():
+GLOBAL_FIELDS = {"Show framerate"}   # oas/global_settings.inc: every settings type carries these
+
+
+def test_only_the_nine_settings_fields_and_the_global_ones_are_live():
     live = {f["key"] for f in catalog()["fields"] if f["live"]}
-    assert live == set(FIELDS)
+    assert live == set(FIELDS) | GLOBAL_FIELDS
 
 
 def test_default_and_maximum_population_match_the_plan():
@@ -360,7 +363,7 @@ def test_the_asset_offers_exactly_the_nine_fields_with_the_d9_ranges():
     owner = doc["objects"][0]
     assert owner["type"] == "SeaStarsSettings"
     settings = {s["key"]: s for s in owner["settings"]}
-    assert list(settings) == list(FIELDS)
+    assert list(settings) == list(FIELDS) + sorted(GLOBAL_FIELDS)   # the nine, then the global sheet
     for label, (low, high, default) in FIELDS.items():
         s = settings[label]
         assert int(s["value"]) == default and not s["readonly"], label
@@ -384,7 +387,8 @@ def test_the_java_cpp_and_provider_agree_on_names_and_routes():
     settings = (JAVA / "LevelSettings.java").read_text()
     assert 'SEA_STARS_TANK = "aquarium_sea_stars"' in settings and 'SEA_STARS_PREFIX = "sea-stars."' in settings
     # Every place that starts a tank goes through LevelLaunch, so the overrides always reach the engine.
-    for name in ("AquariumDreamService", "AquariumActivity", "ScreensaverPreviewActivity"):
+    # AquariumActivity is now LauncherActivity (ac98d049): one launcher shell for both packs.
+    for name in ("AquariumDreamService", "LauncherActivity", "ScreensaverPreviewActivity"):
         text = (JAVA / f"{name}.java").read_text()
         assert "LevelLaunch.startChosen(this, player, " in text, name
         assert "player.start(TankChoice" not in text, name

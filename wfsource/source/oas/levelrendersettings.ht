@@ -21,6 +21,7 @@
     Scalar GetAuthoredaspect() const { return Scalar::FromFixed32(Authoredaspect); }
     fixed32 Maximumaspect;         /* Minumum: 0 Maximum: 6553600 */
     Scalar GetMaximumaspect() const { return Scalar::FromFixed32(Maximumaspect); }
+	int32 Showframerate;        /* Default: 0 */
 };
 /*============================================================================*/
 #endif         /* levelrendersettings_HT */

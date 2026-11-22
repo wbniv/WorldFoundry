@@ -169,6 +169,10 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
 			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
 				object = OadCuckooVillageSettings(startData); 
 			break;
+        	case Actor::LevelSettings_KIND:
+			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
+				object = OadLevelSettings(startData); 
+			break;
 
 
 
@@ -351,6 +355,9 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
 			break;
         	case Actor::CuckooVillageSettings_KIND:
 			object = OadCuckooVillageSettings(startData); 
+			break;
+        	case Actor::LevelSettings_KIND:
+			object = OadLevelSettings(startData); 
 			break;
 
 

@@ -1,0 +1,15 @@
+#ifndef _GLOBAL_SETTINGS_HP
+#define _GLOBAL_SETTINGS_HP
+// The settings every level offers (oas/global_settings.inc) and what each one does. Declared once in the .inc; the
+// engine's side is one row per setting in global_settings.cc. docs/plans/2026-11-22-global-level-settings.md.
+#include <runtime_properties.hpp>
+
+namespace wfglobals
+{
+// A holder was edited (its form was applied): every global field it declares takes effect exactly as set.
+void applyChanged(const wfprops::Object& holder);
+// A level has loaded: a global field a holder has switched on takes effect; a field left at its default does not
+// override what the command line or the runtime options chose.
+void applyAtLoad(const wfprops::Registry& registry);
+}
+#endif

@@ -24,6 +24,7 @@
 	int32 Glassclimbing;               /* Minumum: 0 Maximum: 1 Default: 1 */
 	int32 Caustics;               /* Minumum: 0 Maximum: 1 Default: 1 */
 	int32 Seed;               /* Minumum: 0 Maximum: 2147483647 Default: 0 */
+	int32 Showframerate;        /* Default: 0 */
 };
 /*============================================================================*/
 #endif         /* seastarssettings_HT */
