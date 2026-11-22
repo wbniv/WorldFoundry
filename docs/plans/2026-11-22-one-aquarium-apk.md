@@ -49,7 +49,7 @@ flowchart LR
 |---|---|---|
 | D1 | The end state is one Aquarium package. | Will, 2026‑11‑22. |
 | D2 | The old flavor is removed in Phase 1, not kept as a hidden dev build. | A second APK that nobody installs still gets built, tested and named in scripts. `git revert` restores it. |
-| D3 | The phone-pad controller and the diagnostic build are given up. | The combined app has neither; the d-pad steers. If either is wanted back it becomes a feature of the combined app, not a second package. |
+| D3 | The phone-pad controller and the diagnostic build are given up. | The combined app has neither; the d-pad steers. If either is wanted back it becomes a feature of the combined app, not a second package. **Reversed for the phone controller, 2026‑11‑22:** on the Pixel the combined app could not be driven without it, so it comes back, shared by both apps ([touch controls](2026-11-22-aquarium-clocks-touch-controls.md)). The diagnostic build stays given up. |
 | D4 | Phase 0 is manual. | There is no uninstall in the coordinator; adding one is a protected capability and not worth building for this. |
 | D5 | **Package names are `org.worldfoundry.game.{{name}}`**, for the combined Aquarium app and the 3D Clocks now, and for every new app. The Java code package (`namespace`) is not renamed; only the Gradle `applicationId` is. Existing `org.worldfoundry.wf_game.*` apps (condo, smb, qbert, baseline, parmenides, the original) and Seahorse Grid are not renamed by this plan. | Will, 2026‑11‑22. A new `applicationId` is a new app to Android: installs sit beside the old ones, saved settings start fresh (`tank` returns to `random`), and the selected Dream component changes. The code package stays so that no class, test or `LEVEL` extra key has to move. |
 

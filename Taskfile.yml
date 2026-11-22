@@ -1724,6 +1724,12 @@ tasks:
       - |
         docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O1 -Wall -Wextra -Werror -pthread -I/src/android/screensaver/src/main/cpp /src/tests/menu_key_latch_test.cpp -o /tmp/menu_key_latch && /tmp/menu_key_latch'
 
+  test-touch-bridge:
+    desc: "The combined apps' on-screen controller (android/screensaver/src/main/cpp/touch_bridge.h, docs/plans/2026-11-22-aquarium-clocks-touch-controls.md): a tap inside one frame reads once, a hold reads every frame, the stick, two thumbs, cancel, view and surface of different sizes, the controller off on a TV. Runs in wf-linux-test:local, repo mounted read-only."
+    cmds:
+      - |
+        docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O1 -Wall -Wextra -Werror -pthread -I/src/android/screensaver/src/main/cpp -I/src/wfsource/source /src/tests/touch_bridge_test.cpp -o /tmp/touch_bridge && /tmp/touch_bridge'
+
   test-forth-math:
     desc: "The Forth math words' maths (engine/stubs/forth_math.hpp): every shared vector, identities, domain errors and 100000 random arguments, built twice (double Real, then -DWF_FORTH_MATH_FLOAT for single-FPU chips); plan docs/plans/2026-11-21-forth-trig-words.md"
     cmds:

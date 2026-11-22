@@ -122,3 +122,21 @@ def test_the_aquarium_and_clocks_apps_have_a_phone_launcher_icon_as_well_as_the_
     main = (SCREENSAVER / "src/main/AndroidManifest.xml").read_text()
     assert 'android:name="android.software.leanback" android:required="false"' in main
 
+
+def test_the_touch_controller_is_wired_through_the_shared_host():
+    """Will, 2026-11-22: the combined apps had no joystick or buttons on the Pixel once the standalone Aquarium app
+    (which had them) was retired, and the Clocks chooser and its hold-A settings form need keys. The host both apps
+    share draws the engine's controller on a touchscreen phone and turns touches into the remote's joystick bits."""
+    host = HOST
+    assert '#include "touch_bridge.h"' in host
+    assert "TouchBridge touchBridge;" in host
+    assert "touchBridge.layout(w, h, layout, held, x, y);" in host        # WFAndroidTouchLayout draws it
+    assert "WFAndroidSetHudEnabled(menu && touchBridge.enabled() ? 1 : 0);" in host   # the HUD is only this controller
+    assert "TankPlayer_nativeTouch(" in host and "TankPlayer_nativeTouchConfigure(" in host
+    assert "touchBridge.reset();" in host
+    java = (SCREENSAVER / "src/main/java/org/worldfoundry/screensaver/TankPlayer.java").read_text()
+    assert "nativeTouchConfigure(" in java and "setOnTouchListener" in java
+    assert "FEATURE_TOUCHSCREEN" in java and "FEATURE_LEANBACK" in java      # a phone yes, a TV no
+    bridge = (SCREENSAVER / "src/main/cpp/touch_bridge.h").read_text()
+    assert "keys.keyDown(pressed)" in bridge and "keys.keyUp(released)" in bridge   # through the key latch
+

@@ -23,6 +23,7 @@
 #include <runtime_property_host.hpp>
 
 #include "menu_key_latch.h"
+#include "touch_bridge.h"
 #include "planted_bridge.h"
 
 extern "C" bool WFAndroidEglInit(ANativeWindow* window);
@@ -95,6 +96,7 @@ std::atomic<bool> menuMode{false};
 // Held keys plus a latch of presses not yet read, so a tap shorter than one frame (a Chromecast HD
 // frame can be 200 ms) still reaches the menu (docs/plans/2026-11-21-menu-key-latch.md).
 MenuKeyLatch menuKeys;
+TouchBridge touchBridge;   // the on-screen controller on a phone; its buttons go through menuKeys
 bool menuSelectorWasVisible = false;   // game thread only
 std::atomic<bool> backPending{false};
 std::atomic<bool> leaveRequested{false};
@@ -204,11 +206,17 @@ extern "C" void WFAndroidPumpEvents() {
     }
     plantedBridge.pump(launchOverrideSink);
 }
-extern "C" void WFAndroidTouchLayout(int, int, androidtouch::Layout* layout,
+// The on-screen controller (joystick and A to D) is drawn while the menu, or a tank started from it, runs on a
+// touchscreen phone. The Dream and the TV draw nothing. docs/plans/2026-11-22-aquarium-clocks-touch-controls.md.
+extern "C" void WFAndroidTouchLayout(int w, int h, androidtouch::Layout* layout,
                                        uint32_t* held, float* x, float* y) {
-    *layout = androidtouch::Layout{};
-    *held = 0;
-    *x = *y = 0;
+    if (!menuMode.load()) {
+        *layout = androidtouch::Layout{};
+        *held = 0;
+        *x = *y = 0;
+        return;
+    }
+    touchBridge.layout(w, h, layout, held, x, y);
 }
 extern "C" int WFAndroidPhoneOverlayRects(int, int, const PhonepadRect** rects,
                                             int* changed, const bitmaptext::Quad** glyphs,
@@ -226,6 +234,7 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativePrepare(JNIEnv*, jclass) {
     leaveRequested.store(false);
     backPending.store(false);
     menuKeys.clear();
+    touchBridge.reset();
     plantedBridge.reset();
 }
 
@@ -238,6 +247,31 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeKey(JNIEnv*, jclass, jint key
     if (down) menuKeys.keyDown(mask);
     else menuKeys.keyUp(mask);
     return JNI_TRUE;
+}
+
+// Whether this device draws the on-screen controller (a touchscreen and no TV) and its density scale; once per player.
+extern "C" JNIEXPORT void JNICALL
+Java_org_worldfoundry_screensaver_TankPlayer_nativeTouchConfigure(JNIEnv*, jclass, jboolean enabled, jfloat density) {
+    touchBridge.configure(enabled == JNI_TRUE, density);
+}
+
+// One touch event on the surface view (UI thread): the controller's buttons become the same joystick bits as the
+// remote's keys. Returns true when the controller took the event.
+extern "C" JNIEXPORT jboolean JNICALL
+Java_org_worldfoundry_screensaver_TankPlayer_nativeTouch(JNIEnv* env, jclass, jint action, jint actionIndex,
+                                                          jint viewWidth, jint viewHeight, jintArray ids,
+                                                          jfloatArray xs, jfloatArray ys) {
+    if (!touchBridge.enabled() || !menuMode.load()) return JNI_FALSE;
+    const jsize count = env->GetArrayLength(ids);
+    std::vector<jint> id(size_t(count));
+    std::vector<jfloat> x(size_t(count)), y(size_t(count));
+    env->GetIntArrayRegion(ids, 0, count, id.data());
+    env->GetFloatArrayRegion(xs, 0, count, x.data());
+    env->GetFloatArrayRegion(ys, 0, count, y.data());
+    std::vector<androidtouch::Point> points(size_t(count));
+    for (size_t i = 0; i < points.size(); ++i) points[i] = {x[i], y[i], id[i]};
+    return touchBridge.event(action, actionIndex, points.data(), points.size(), float(viewWidth), float(viewHeight),
+                             menuKeys) ? JNI_TRUE : JNI_FALSE;
 }
 
 // Back released while the launcher menu runs (UI thread); applied on the game thread.
@@ -320,7 +354,8 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
     ANativeWindow* window = ANativeWindow_fromSurface(env, surface);
     if (!window) return;
     assets = AAssetManager_fromJava(env, manager);
-    WFAndroidSetHudEnabled(0);
+    // The HUD here is only the on-screen controller: on for the menu and its tanks on a phone, off for the Dream and the TV.
+    WFAndroidSetHudEnabled(menu && touchBridge.enabled() ? 1 : 0);
     // Set before HALStart opens the bundle, and on every run: one process may hold both modes.
     WFAndroidSetBundleAsset(secondBundle ? kMenuBundleAsset : nullptr);
     // The menu starts with no key held or latched; the game thread is not running yet.
