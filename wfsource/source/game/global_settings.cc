@@ -5,7 +5,9 @@
 #include <cstddef>
 #include <string>
 
-#include "fps_overlay.hp"
+// The flag the overlay checks every frame (defined in fps_overlay.cc). Declared here, not included, so this file
+// and its host test (tests/global_settings_test.cpp) need no renderer or font headers.
+namespace fpscounter { extern bool enabled; }
 
 namespace wfglobals
 {
