@@ -68,6 +68,7 @@
 #include "../../../engine/runtime_edit_all.hpp"
 #include <cstdint>
 #include <vector>
+#include "display_mailboxes.hp"
 
 //============================================================================
 // Class and Structure Prototypes
@@ -194,6 +195,9 @@ class Level
 	// mailbox methods
 	void WriteSystemMailbox( int boxnum, Scalar value );
 	Scalar ReadSystemMailbox( int boxnum ) const;
+	// The DISPLAY_* system mailboxes (docs/plans/2026-11-22-display-mailboxes.md): called every frame by WFGame::update with the
+	// surface size; recomputes only at the start of the level and when the size or the view settings change.
+	void SetDisplaySize( int width, int height );
     Mailboxes& GetMailboxes();
 
    const Clock& LevelClock() const;
@@ -286,6 +290,7 @@ private:
 	// system mailboxes requiring storage
 	int32						_camRollMailBox;						// mailbox index (was long → 8 bytes on LP64)
 	// Latched once per frame in update(): the date and time of day, read by the WALL_* system mailboxes.
+	wf::DisplayTracker			_displayTracker;						// the DISPLAY_* mailboxes' values, rewritten only on a change
 	int32						_wallDay = 0;
 	int32						_wallUtcOffset = 0;
 	int32						_wallHour = 0;

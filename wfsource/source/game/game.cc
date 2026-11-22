@@ -671,6 +671,7 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 	DBSTREAM2( cflow << "WFGame::update: curLevel->Update" << std::endl; )
     int optionsWidth=0,optionsHeight=0;_display->GetSurfaceSize(optionsWidth,optionsHeight);
     wfoptions::surfaceSize(optionsWidth,optionsHeight);
+    _curLevel->SetDisplaySize(optionsWidth,optionsHeight);   // the DISPLAY_* mailboxes: written at level start and when the size changes only
 	auto& settings=wfprops::host();
     if(settings.modal||settings.waitingForRelease())_curLevel->RefreshHardwareInput();
     auto buttons=uint32_t(_curLevel->GetMailboxes().ReadMailbox(1909).AsFloat());
