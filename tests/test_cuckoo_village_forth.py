@@ -36,7 +36,7 @@ def test_the_director_in_the_real_vm_agrees_with_the_season_reference():
     r = subprocess.run([sys.executable, str(ROOT / "tests" / "verify_cuckoo_village_forth.py")],
                        capture_output=True, text=True, timeout=600)
     assert r.returncode == 0, r.stdout[-2000:] + r.stderr[-2000:]
-    assert " 0 failures" in r.stdout and "flames: 0 failures" in r.stdout, r.stdout[-500:]
+    assert " 0 failures" in r.stdout and "flames: 0 failures" in r.stdout and "flowers: 0 failures" in r.stdout, r.stdout[-500:]
 
 
 def test_the_candle_switch_only_adds_the_rest_of_the_year():
@@ -47,3 +47,4 @@ def test_the_candle_switch_only_adds_the_rest_of_the_year():
                             (day(2027, 1, 6), False, True), (day(2027, 1, 7), False, False)):
         assert (tl.christmas_season(d) or switch) is want, (tl.date_of(d), switch)
     assert tl.SETTINGS_DEFAULTS["Candles all year"] == 0
+    assert tl.SETTINGS_DEFAULTS["Detailed flowers"] == 1                     # the detailed flowers are the default

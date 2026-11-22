@@ -153,6 +153,8 @@ DAY0 = _dt.date(2000, 1, 1)
 CANDLE_CELL = 214                 # the visibility mailbox of the candle sticks: 1 in season, or when Candles all year is On
 FLAME_CELL0 = 215                 # tree i's flames: FLAME_CELL0 + i, lit while the candles show and the window glow of house i % 13 is on
 TREES = 12
+FLOWERS_CELL = 227                # cottage_flowers (the petunia and geranium boxes) shows when Detailed flowers is On
+BLOCKS_CELL = 228                 # cottage_flower_blocks (today's blocks) shows when it is Off
 
 
 def date_of(day: int) -> _dt.date:
@@ -166,7 +168,8 @@ def christmas_season(day: int) -> bool:
 
 
 # The settings object (CuckooVillageSettings, wfsource/source/oas/cuckoovillagesettings.oas): label -> (default, field read by the director).
-SETTINGS_DEFAULTS = {"Bavaria mode": 0, "Seasonal events": 1, "Candles all year": 0, "Window lights": 1, "Sound": 1, "Camera motion": 0}
+SETTINGS_DEFAULTS = {"Bavaria mode": 0, "Seasonal events": 1, "Candles all year": 0, "Window lights": 1, "Sound": 1, "Camera motion": 0,
+                     "Detailed flowers": 1}
 
 
 def window_states(sod: float, settings: Dict[str, int] = None) -> List[bool]:

@@ -23,7 +23,7 @@ import timeline as tl
 CELLS = ["sod", "hr", "mi", "sc", "tm", "i", "hx", "f", "bow", "s", "w", "ent", "th", "lx", "ly", "cl", "hop", "vx", "vy",
          "n", "o", "bob", "k", "on", "lap", "hold", "u", "bb", "phi", "r", "h", "day", "doy"]
 WORDS = {"sm", "frac", "floor", "mod", "sin", "cos", "wx", "wy", "wz", "wa", "wb", "wc", "ai", "fig", "figs", "bird", "win",
-         "wins", "cam", "hands", "tick", "season", "candles", "flames"}
+         "wins", "cam", "hands", "tick", "season", "candles", "flames", "flowers"}
 
 
 def n(x: float) -> str:
@@ -131,6 +131,8 @@ def director_script(ix: Dict[str, int], fields: Dict[str, int] = None) -> str:
         "  INDEXOF_WALL_DAY cv@ 1461 cv-mod cv-day cv!",
         "  cv-day cv@ 366 < if cv-day cv@ cv-doy cv!  1 else cv-day cv@ 366 - 365 cv-mod cv-doy cv!  0 then",
         "  334 + cv-doy cv@ swap >=  cv-doy cv@ 6 <  + if 1 else 0 then ;",      # zForth true is -1: make the flag 1 or 0
+        # the window boxes: the detailed flowers when the setting is On, today's blocks when it is Off (docs/plans/2026-11-22-cuckoo-village-flowers.md)
+        f": cv-flowers  cv-s-detailed-flowers if 1 else 0 then dup {tl.FLOWERS_CELL} cv!  1 swap - {tl.BLOCKS_CELL} cv! ;",
         f": cv-candles  cv-season cv-s-candles-all-year + if 1 else 0 then {tl.CANDLE_CELL} cv! ;",      # season, or the switch
         # a tree's flames burn while the candles show and the glow of the house of the same stagger (index mod 13) is on, so the
         # Window lights setting dims them too (plan: "the glow of the Christmas candles")
@@ -164,7 +166,7 @@ def director_script(ix: Dict[str, int], fields: Dict[str, int] = None) -> str:
         "  INDEXOF_WALL_SECOND cv@ cv-sc cv!  INDEXOF_WALL_HOUR cv@ cv-hr cv!  INDEXOF_WALL_MINUTE cv@ cv-mi cv!",
         "  cv-mi cv@ 60 * cv-sc cv@ + cv-tm cv!",
         "  cv-hr cv@ 3600 * cv-tm cv@ + cv-sod cv!",
-        "  cv-hands cv-figs cv-bird cv-wins cv-candles cv-flames cv-cam ;",
+        "  cv-hands cv-figs cv-bird cv-wins cv-candles cv-flames cv-flowers cv-cam ;",
         "cv-tick",
     ]
     return "\n".join(L) + "\n"

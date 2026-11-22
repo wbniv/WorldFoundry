@@ -21,6 +21,7 @@
     int32 Windowlights;               /* Minumum: 0 Maximum: 1 Default: 1 */
     int32 Sound;               /* Minumum: 0 Maximum: 1 Default: 1 */
     int32 Cameramotion;               /* Minumum: 0 Maximum: 1 Default: 0 */
+    int32 Detailedflowers;               /* Minumum: 0 Maximum: 1 Default: 1 */
 };
 /*============================================================================*/
 #endif         /* cuckoovillagesettings_HT */
