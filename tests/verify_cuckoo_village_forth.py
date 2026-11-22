@@ -33,6 +33,8 @@ HOST = (mm.HOST
         .replace('  else if ((int)id >= 128 && wf::forthmath::HandleSyscall(c, (int)id - 128)) {}',
                  '''  else if ((int)id == 178) { int f = (int)zf_pop(c); int a = (int)zf_pop(c); auto it = props.find({a, f});
     zf_push(c, it == props.end() ? 0.0f : it->second); zf_push(c, it == props.end() ? 0.0f : 1.0f); }
+  else if ((int)id == 182) { int actor = (int)zf_pop(c); (void)zf_pop(c); int cells = (int)zf_pop(c); int block = (int)zf_pop(c);
+    mbx[20000 + actor] = block * 1000.0f + cells; mbx[19999] = mbx[19999] + 1.0f; zf_push(c, 0.0f); }   // deform-block: record the call, status 0
   else if ((int)id >= 128 && wf::forthmath::HandleSyscall(c, (int)id - 128)) {}''')
         .replace('else if (line[0] == \'T\') {', '''else if (line[0] == 'R') { int i; sscanf(line + 2, "%d", &i); printf("V %d %.9g\\n", i, mbx.count(i) ? mbx[i] : 0.0f); fflush(stdout); }
     else if (line[0] == 'P') { int a, f; float v; sscanf(line + 2, "%d %d %f", &a, &f, &v); props[{a, f}] = v; }
@@ -44,7 +46,7 @@ assert HOST.count("cv-tick") == 1 and "line[0] == 'R'" in HOST and "(int)id == 1
 CONSTANTS = ["X_POS", "Y_POS", "Z_POS", "ROTATION_A", "ROTATION_B", "ROTATION_C", "X_SCALE", "Y_SCALE", "Z_SCALE",
              "FACE_COLOR_TOP", "WALL_HOUR", "WALL_MINUTE", "WALL_SECOND", "WALL_DAY"]
 NAMES = ["tower_figure_1", "tower_figure_2", "tower_figure_3", "tower_figure_4", "tower_figure_b1", "tower_figure_b2", "tower_figure_b3", "tower_figure_b4", "tower_bird", "hour_hand", "minute_hand",
-         "cs_wide", "LookAt", "CuckooVillageSettings"]
+         "cs_wide", "LookAt", "CuckooVillageSettings", *[f"candle_flames_{i + 1:02d}" for i in range(12)]]
 FIELDS = {label: 129 + i for i, label in enumerate(tl.SETTINGS_DEFAULTS)}
 
 
@@ -61,7 +63,9 @@ class Shim:
         return "\n".join(lines[:-1]) + "\n"
 
 
-SWAP = os.environ.get("WF_CANDLE_FLAMES", "static") == "swap"
+MODE = os.environ.get("CANDLE_FLAMES", "static")
+SWAP = MODE == "swap"
+DEFORM = MODE == "deform"
 
 
 def build(tmp: Path):
@@ -73,7 +77,7 @@ def build(tmp: Path):
     finally:
         mm.forth = src_forth
     with open(tmp / "bootstrap.fth", "a") as f:          # the engine registers property@ beside its other words
-        f.write(": property@ 178 sys ;\n")
+        f.write(": property@ 178 sys ; : deform-block 182 sys ; : dfrm-pose-curves >r 4 * 40 + 6 r> deform-block ;\n")
     return ids, ix
 
 
@@ -167,7 +171,7 @@ def main() -> int:
                                     print(f"FAIL flame {i} {tl.date_of(day)} {sod:7.0f} s switch={candles} lights={lights}: {got}, want {want}")
             print(f"flames: {flame_failures} failures")
             failures += flame_failures
-            # the flicker (WF_CANDLE_FLAMES=swap, plan docs/plans/2026-11-22-cuckoo-village-candle-flicker.md): for each of the 24 groups
+            # the flicker (CANDLE_FLAMES=swap, plan docs/plans/2026-11-22-cuckoo-village-candle-flicker.md): for each of the 24 groups
             # exactly one of its two cells is the group's lit state, and which one is timeline.flame_shape at that second. Seconds within
             # 1e-3 of a zero crossing of the drive are skipped: the VM's float32 and the model's float64 may fall either side of it.
             flicker_failures = flicker_checked = 0
@@ -192,7 +196,36 @@ def main() -> int:
                                 flicker_failures += 1
                                 if flicker_failures <= 10:
                                     print(f"FAIL flicker group {gi} {tl.date_of(day)} {sod:9.2f} s switch={candles} lights={lights}: {got}, want {want}")
-            print(f"flicker: {flicker_failures} failures in {flicker_checked} cells" if SWAP else "flicker: not built (static flames)")
+            if DEFORM:
+                # Option B: one dfrm-pose-curves call a lit tree (block 640 + 80 i, 80 cells, actor candle_flames_NN), and the ten curve records
+                # (scale, clip 0, clip start 0, flex bias) are the model's; an unlit tree is not posed
+                for day, sod0, candles, lights in ((day_of(2026, 12, 25), 23 * 3600.0, None, None), (day_of(2026, 7, 4), 23 * 3600.0, 1, 1),
+                                                   (day_of(2026, 7, 4), 23 * 3600.0, None, None), (day_of(2026, 12, 25), 12 * 3600.0, None, None),
+                                                   (day_of(2026, 12, 25), 23 * 3600.0, 1, 0)):
+                    for k in range(0, 600, 5):
+                        sod = sod0 + 17 * 60.0 + k * 0.1
+                        host.proc.stdin.write("M 19999 0\n")
+                        host.frame_at(day, sod, candles, lights)
+                        on = tl.christmas_season(day) or bool(candles)
+                        glow = tl.window_states(sod, {"Window lights": 1 if lights is None else lights})
+                        lit_trees = [i for i in range(tl.TREES) if on and glow[i % tl.HOUSES]]
+                        if host.read(19999) != float(len(lit_trees)):
+                            flicker_failures += 1
+                            if flicker_failures <= 10:
+                                print(f"FAIL deform {tl.date_of(day)} {sod:9.2f} s switch={candles} lights={lights}: {host.read(19999)} calls, want {len(lit_trees)}")
+                        for i in lit_trees:
+                            if host.read(20000 + host.ix[f"candle_flames_{i + 1:02d}"]) != float((tl.DFRM_BASE + tl.DFRM_BLOCK * i) * 1000 + 80):
+                                flicker_failures += 1
+                            for c in range(10):
+                                ctrl = tl.DFRM_BASE + tl.DFRM_BLOCK * i + 40 + 4 * c
+                                want = tl.deform_cells(sod % 60.0, i, c)
+                                got = (host.read(ctrl), host.read(ctrl + 3), host.read(ctrl + 1), host.read(ctrl + 2))
+                                flicker_checked += 1
+                                if abs(got[0] - want[0]) > 1e-4 or abs(got[1] - want[1]) > 2e-3 or got[2] != 0.0 or got[3] != 0.0:
+                                    flicker_failures += 1
+                                    if flicker_failures <= 10:
+                                        print(f"FAIL deform tree {i} curve {c} {sod:9.2f} s: scale/flex {got}, want {want}")
+            print(f"flicker: {flicker_failures} failures in {flicker_checked} cells" if (SWAP or DEFORM) else "flicker: not built (static flames)")
             failures += flicker_failures
             # the window boxes: exactly one of the two actors shows. Detailed flowers On (or unanswered: the default is On) shows the
             # flowers and hides the blocks, Off the reverse, whatever the date or the time, and the other cells are untouched.

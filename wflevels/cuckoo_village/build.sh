@@ -14,4 +14,6 @@ cd "$ROOT"
 source scripts/level-build.sh
 wf_level_build "$0" "$@"
 blender --background --python-exit-code 1 --python wflevels/cuckoo_village/blender_create_cuckoo_village.py
+# CANDLE_FLAMES=deform (flicker plan, Option B): bind each tree's flames to ten DFRM curves in the exported meshes
+if [ "${CANDLE_FLAMES:-static}" = deform ]; then python3 wflevels/cuckoo_village/flame_rig.py; fi
 bash wftools/wf_blender/build_level_binary.sh cuckoo_village

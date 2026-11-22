@@ -32,8 +32,9 @@ TAG = '[cuckoo-village]'
 REFERENCE = 10 * 3600 + 8 * 60 + 22.0       # the pose the level starts from: 10:08
 GLOW_CELL0, BIRD_CELL = 200, 213
 import os
-FLAMES = os.environ.get('WF_CANDLE_FLAMES', 'static')       # 'static' (today) or 'swap' (flicker plan, Option A); a spike switch
-assert FLAMES in ('static', 'swap'), FLAMES
+FLAMES = os.environ.get('CANDLE_FLAMES', 'static')       # 'static' (today) or 'swap' (flicker plan, Option A); a spike switch
+assert FLAMES in ('static', 'swap', 'deform'), FLAMES
+FLAME_FEET = []                                   # deform: per tree, the ten flame feet in candle_bases order, for flame_rig.py
 
 source = (LAYOUT / 'generate.py').read_text()
 cut = source.index('scene=bpy.context.scene')       # everything after this is the layout's review render and export
@@ -92,9 +93,17 @@ for i in range(tl.TREES):
             verts, faces = cd.merge(parts)
             cell = tl.FLICKER_CELL0 + 2 * (2 * i + group) + (shape - 1)
             mesh_actor(f'candle_flames_{"ab"[group]}{shape}_{i + 1:02}', verts, faces, cd.FLAME_TILE)['wf_Visibility Mailbox'] = cell
+    elif FLAMES == 'deform':
+        # Option B: the same one flame mesh a tree, built upright at its tallest, bound to ten DFRM curves after the export (flame_rig.py)
+        feet = [(b[0], b[1], b[2] + cd.STICK_HEIGHT) for b in cd.candle_bases(i, tuple(tree.location), tree.rotation_euler.z, tree.scale.x)]
+        FLAME_FEET.append(feet)
+        flame_verts, flame_faces = cd.merge([cd.flame(f, cd.FLAME_RADIUS, cd.FLAME_SHAPES[1][0]) for f in feet])
+        mesh_actor(f'candle_flames_{i + 1:02}', flame_verts, flame_faces, cd.FLAME_TILE)['wf_Visibility Mailbox'] = tl.FLAME_CELL0 + i
     else:
         flame_verts, flame_faces = cd.merge(flames)
         mesh_actor(f'candle_flames_{i + 1:02}', flame_verts, flame_faces, cd.FLAME_TILE)['wf_Visibility Mailbox'] = tl.FLAME_CELL0 + i
+if FLAMES == 'deform':
+    (HERE / 'flame-bases.json').write_text(json.dumps(FLAME_FEET))
 stick_verts, stick_faces = cd.merge(stick_parts)
 mesh_actor('candle_sticks', stick_verts, stick_faces, cd.STICK_TILE)['wf_Visibility Mailbox'] = tl.CANDLE_CELL
 

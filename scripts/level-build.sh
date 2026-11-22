@@ -72,7 +72,7 @@ wf_level_build() {
     local env=(CARGO_HOME=/build/cargo-home) name
     while IFS= read -r name; do
         case "$name" in
-            TANK_*|AQUARIUM_*|LIONFISH_*|BETTA_*|PLANTED_*|SHRIMP_*) env+=("$name") ;;
+            TANK_*|AQUARIUM_*|LIONFISH_*|BETTA_*|PLANTED_*|SHRIMP_*|CANDLE_*) env+=("$name") ;;
         esac
     done < <(compgen -e)
     WF_CONTAINER_IMAGE=blender WF_CONTAINER_NETWORK=host WF_CONTAINER_ENV="${env[*]}" \

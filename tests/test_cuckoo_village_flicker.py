@@ -1,5 +1,5 @@
 """The Cuckoo Village candle flicker, Option A (plan docs/plans/2026-11-22-cuckoo-village-candle-flicker.md): the model, the geometry,
-and the director in the real zForth VM with WF_CANDLE_FLAMES=swap."""
+and the director in the real zForth VM with CANDLE_FLAMES=swap."""
 from __future__ import annotations
 
 import math
@@ -90,9 +90,26 @@ def test_a_zero_lean_flame_is_todays_flame_exactly():
 
 @pytest.mark.skipif(shutil.which("cc") is None or shutil.which("c++") is None, reason="needs a C and C++ compiler")
 def test_the_director_in_the_real_vm_follows_the_flicker_model():
-    env = dict(os.environ, WF_CANDLE_FLAMES="swap")
+    env = dict(os.environ, CANDLE_FLAMES="swap")
     r = subprocess.run([sys.executable, str(ROOT / "tests" / "verify_cuckoo_village_forth.py")], capture_output=True, text=True, timeout=900, env=env)
     assert r.returncode == 0, r.stdout[-2500:] + r.stderr[-2500:]
     assert "flicker: 0 failures in" in r.stdout, r.stdout[-1500:]
     checked = int(r.stdout.split("flicker: 0 failures in ")[1].split()[0])
     assert checked > 5000, checked
+
+
+@pytest.mark.skipif(shutil.which("cc") is None or shutil.which("c++") is None, reason="needs a C and C++ compiler")
+def test_the_director_in_the_real_vm_drives_the_deformer_blocks_like_the_model():
+    env = dict(os.environ, CANDLE_FLAMES="deform")
+    r = subprocess.run([sys.executable, str(ROOT / "tests" / "verify_cuckoo_village_forth.py")], capture_output=True, text=True, timeout=900, env=env)
+    assert r.returncode == 0, r.stdout[-2500:] + r.stderr[-2500:]
+    assert "flicker: 0 failures in" in r.stdout, r.stdout[-1500:]
+    assert int(r.stdout.split("flicker: 0 failures in ")[1].split()[0]) > 3000
+
+
+def test_option_b_writes_a_scale_and_a_flex_inside_the_deformers_limits():
+    for gi in range(tl.FLICKER_GROUPS):
+        for k in range(0, 3600, 3):
+            scale, flex = tl.deform_cells(k / 60.0, gi // 2, gi % 2)
+            assert 0.67 - 1e-9 <= scale <= 1.0 + 1e-9 and 0.02 <= scale <= 1.0      # the format clamps a curve's scale to 0.02..1
+            assert abs(flex) <= 5.0 + 1e-9                                            # inside the rig's 35-degree limits

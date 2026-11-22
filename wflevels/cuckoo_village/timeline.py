@@ -255,3 +255,19 @@ def flame_drive(t: float, group_index: int) -> float:
 def flame_shape(t: float, tree: int, group: int) -> int:
     """1 (tall, leaning toward the draught) or 2 (short, leaning away) for a tree's group (0 = A, 1 = B) at t seconds into the minute."""
     return 1 if flame_drive(t, 2 * tree + group) > 0.0 else 2
+
+
+# Option B (a DFRM mesh a tree, ten curves; plan docs/plans/2026-11-22-cuckoo-village-candle-flicker.md): the same drive, as a smooth value
+# u = clamp(drive / 1.4, -1, 1); a curve's scale is SCALE0 + SPAN u (0.67 to 1.0, the mesh is authored at its tallest) and its flex bias FLEX_DEG u.
+FLICKER_SCALE0, FLICKER_SCALE_SPAN, FLICKER_FLEX_DEG = 0.835, 0.165, 5.0
+DFRM_BASE, DFRM_BLOCK = 640, 80        # tree i's control block: 40 header cells, then ten 4-cell curve records
+
+
+def flame_u(t: float, group_index: int) -> float:
+    return max(-1.0, min(1.0, flame_drive(t, group_index) / 1.4))
+
+
+def deform_cells(t: float, tree: int, curve: int):
+    """(scale, flex bias in degrees) written to curve `curve` (0 to 9; its group is curve mod 2) of tree `tree` at t seconds into the minute."""
+    u = flame_u(t, 2 * tree + curve % 2)
+    return FLICKER_SCALE0 + FLICKER_SCALE_SPAN * u, FLICKER_FLEX_DEG * u
