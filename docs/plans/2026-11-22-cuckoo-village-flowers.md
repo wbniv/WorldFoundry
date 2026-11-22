@@ -84,19 +84,34 @@ The file estimate uses the cost the candles measured: 27.9 bytes a triangle (4,
 
 ## Materials
 
-All nine are flat colours (Base Color only, no texture). "Triangles" is the total over all 26 boxes in the full set.
+All nine are flat colours (Base Color only, no texture). "Per piece" is the triangles in one petal set, leaf or stem, averaged where pieces vary; "Pieces per box" is how many of those a box holds, averaged over the 26 boxes where the colours rotate; "Total" is the whole village (26 boxes, full set).
 
-| Material | Colour | Used for | Double-sided | Triangles |
-|---|---|---|---|---|
-| `petunia_magenta` | #CC1775 | Petunia petals | yes | 1,830 |
-| `petunia_violet` | #6E30B2 | Petunia petals | yes | 1,830 |
-| `petunia_white` | #F5F2EB | Petunia petals | yes | 1,800 |
-| `flower_centre` | #F7CC29 | Petunia throats and the edelweiss heart | yes | 3,250 |
-| `edelweiss_felt` | #DBDBC9 | Edelweiss bracts | yes | 1,456 |
-| `leaf_green` | #2B6E24 | Petunia leaves | yes | 2,652 |
-| `leaf_silver` | #809978 | Edelweiss leaves | yes | 624 |
-| `stem_green` | #174517 | Stems | no | 3,328 |
-| `soil` | #331F12 | The soil bed in each box | no | 104 |
+| Material | Colour | Used for | Double-sided | Per piece | Pieces per box | Total |
+|---|---|---|---|---|---|---|
+| `petunia_magenta` | #CC1775 | Petunia petals | yes | 10 per bloom | 7.0 blooms | 1,830 |
+| `petunia_violet` | #6E30B2 | Petunia petals | yes | 10 per bloom | 7.0 blooms | 1,830 |
+| `petunia_white` | #F5F2EB | Petunia petals | yes | 10 per bloom | 6.9 blooms | 1,800 |
+| `flower_centre` | #F7CC29 | Petunia throats and the edelweiss heart | yes | 5 per bloom or head | 25 (21 throats, 4 hearts) | 3,250 |
+| `edelweiss_felt` | #DBDBC9 | Edelweiss bracts | yes | 14 per head | 4 heads | 1,456 |
+| `leaf_green` | #2B6E24 | Petunia leaves | yes | 6 per leaf | 17 leaves | 2,652 |
+| `leaf_silver` | #809978 | Edelweiss leaves | yes | 4 per leaf | 6 leaves | 624 |
+| `stem_green` | #174517 | Stems | no | 11.6 on average (8 for a mound or edelweiss stem, 18 for a trailing stem) | 11 stems | 3,328 |
+| `soil` | #331F12 | The soil bed in each box | no | 4 per bed | 1 bed | 104 |
+
+### What one flower costs
+
+A flower is its petals plus its yellow centre; the plant it sits on adds leaves and a stem.
+
+| Piece | Triangles | Made of |
+|---|---|---|
+| One petunia bloom | 15 | 10 petal + 5 throat |
+| One edelweiss head | 19 | 14 bract + 5 heart |
+| A mounded petunia plant | 71 | stem 8, three leaves 18, three blooms 45 |
+| A trailing petunia stem | 75 | stem 18, two leaves 12, three blooms 45 |
+| An edelweiss tuft | 66 | three silver leaves 12, two stems 16, two heads 38 |
+| One whole box | 649 | 3 mounds 213, 4 trailing stems 300, 2 tufts 132, soil bed 4 |
+
+The lean set uses the same pieces: 2 mounds of 3 blooms, 2 trailing stems of 2 blooms and 2 tufts of 1 head.
 
 ## Renders, before and after
 
