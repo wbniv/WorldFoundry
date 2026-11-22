@@ -1,6 +1,6 @@
 # Global level settings: Show framerate in every level
 
-**Status: Phases 1 to 3 done; Phase 1 MERGED into `2026-new-level` on 2026‑11‑22 (c0e00e8e; Will: "merge"), the default holder and the level rebuilds follow on the same branch. Phase 4 (docs and starting templates) is done; Phase 5 (the device check) passed on cast1 and on the Pixel (the Dream's default is not run). The engine compiles with the code, `task test-global-settings` (14 checks) and 19 guard tests pass, and the baseline level is rebuilt and carries the field (the audit's first level). The settings suites pass except two planted-tank tests that wait for `aquarium_plants` to be rebuilt. Decided by Will 2026‑11‑22 ("Show framerate: hook that up and make sure all wf levels include this level setting, at a minimum (update docs, update starting templates)"; "i recommend having a global declaration (right now consisting only of Show FPS) so you only have to change in 1 place in future").  Phases 2 to 5 are next.** Rank: Phase 1 T4 (engine and the shared declaration), Phases 2 and 3 T3 against this plan, Phase 4 T2.
+**Status: Phases 1 to 3 done; Phase 1 MERGED into `2026-new-level` on 2026‑11‑22 (c0e00e8e; Will: "merge"), the default holder and the level rebuilds follow on the same branch. Phase 4 (docs and starting templates) is done; Phase 5 (the device check) passed on cast1 and on the Pixel (only the Dream's default, no overlay, is not run). The engine compiles with the code, `task test-global-settings` (14 checks) and 19 guard tests pass, and the baseline level is rebuilt and carries the field (the audit's first level). The settings suites pass except two planted-tank tests that wait for `aquarium_plants` to be rebuilt. Decided by Will 2026‑11‑22 ("Show framerate: hook that up and make sure all wf levels include this level setting, at a minimum (update docs, update starting templates)"; "i recommend having a global declaration (right now consisting only of Show FPS) so you only have to change in 1 place in future").  Phases 2 to 5 are next.** Rank: Phase 1 T4 (engine and the shared declaration), Phases 2 and 3 T3 against this plan, Phase 4 T2.
 
 ## Context
 
@@ -106,7 +106,11 @@ Phases 1 and 4 ship together for the baseline, so the starting template is right
    ![cast1: the chain-reaction level with 58.0 at the bottom right after Apply](2026-11-22-global-level-settings/cast1-overlay-after-apply.png)
 
    **PASS**
-5. The Pixel (touch): the form shows the Display sheet last in Aquarium and in Clocks, with real checkboxes for the on/off settings. The Aquarium tick-and-Apply overlay check was done by Will by hand ("works on aquarium"); I did not capture it. **PASS (Will's word for the overlay; screenshots of the form)**
+5. The Pixel (touch): the form shows the Display sheet last in Aquarium and in Clocks, with real checkboxes for the on/off settings, and with Show framerate on the lionfish tank (whose default holder the compiler added) the frame rate draws at the bottom right, with the touch controller and the **Settings** entry button on the same screen (screenshot `J‑13a5b28da310`):
+
+   <img src="2026-11-22-global-level-settings/pixel-lionfish-overlay.png" width="700">
+
+   **PASS**
 6. The Dream still draws no overlay by default: by construction (the HUD gate and the setting's default are both off) and not seen on a device. **Not run.**
 
 ## Open
