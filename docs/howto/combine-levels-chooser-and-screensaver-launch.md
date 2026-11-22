@@ -165,17 +165,17 @@ Devices belong to the coordinator's queue: use it, not raw `adb`. Everything her
 3. **A tank for one run** (no menu). `screensaver-show` acts on the **selected** screensaver, so select the app first, then restore the original:
    ```
    task chromecast:screensaver:select DEVICE=… COMPONENT=org.worldfoundry.screensaver/org.worldfoundry.screensaver.AquariumDreamService
-   task chromecast:screensaver:show   DEVICE=… LEVEL=aquarium_plants
+   WF_CC_LEVEL=aquarium_plants task chromecast:screensaver:show DEVICE=…
    task chromecast:screensaver:select DEVICE=… COMPONENT=<the component you read before>
    ```
    Read the original selection first with `task chromecast:screensaver:status DEVICE=…` (`selected_component`). Evidence: `screensaver.png`, `screensaver.json` (`observed_component` must be `.ScreensaverPreviewActivity`; the `tank` setting must still be the saved value) and `commands.json` (the `am start` line must carry `--es …LEVEL <id>`).
 4. **The Dream.** Select the app's Dream as above, then `task chromecast:screensaver:trigger DEVICE=…`; the job waits for Android to start it. Restore the selection afterwards.
-5. **Back.** Needs key presses while the app is in front, so a coordinator Remote session; not part of a one-shot job.
+5. **Keys, Back, and short taps.** A one-shot `check` job can press remote keys and capture the screen at chosen moments, so the menu, a tank, Back and a short tap are all testable without a Remote session. Give the job an `input_script` (MCP `job-submit`, workflow `check`, `app` the registered name, `panel: "require-hidden"`, `duration` longer than the last event): `{"at": 4, "capture": "menu1"}`, `{"at": 5, "key": "DPAD_DOWN", "action": "down"}`, `{"at": 5.02, "key": "DPAD_DOWN", "action": "up"}`, `{"at": 11, "key": "DPAD_CENTER", "action": "down"}`, `{"at": 11.05, "key": "DPAD_CENTER", "action": "up"}`, `{"at": 18, "key": "BACK", "action": "down"}`, `{"at": 18.1, "key": "BACK", "action": "up"}`, and so on (`at` is seconds from the start; `action: "hold"` takes `ms`, 50 at least). The evidence has `input-frame-NNN.png` for each capture, in order, and `input-timeline.json` with every key edge and its **device uptime**: read it for the real tap length, which ran about 3 ms longer than planned (a planned 20 ms tap was held 23 ms; the shortest the coordinator can send is about 1.4 frames at 60 Hz, so it cannot test a tap shorter than one frame). A script whose last Back leaves the app ends `failed` with `target-left-foreground`: that is the checker noticing the app left, so look at the last capture (the Google TV home screen) rather than at the status. A Dream's own screenshot is solid black; prove what it ran from the app's engine log (section 8, selecting the app's Dream first so `screensaver-list` reads that package's `wf.log`).
 
 Gotchas, each one met in practice:
 
 - `screensaver-show` on a screensaver without level support (Seahorse Grid selected) is refused with `screensaver-level-unavailable` before anything launches. That is the check working.
-- `LEVEL=` before coordinator 0.1.219 is ignored without an error: look at `commands.json` (step 3).
+- **`LEVEL=aquarium_plants` on the `task` line is dropped silently**, whatever the coordinator version: the Taskfile maps `OVERRIDES` but not `LEVEL`, so the client never sees it. Put the level in the environment as `WF_CC_LEVEL=aquarium_plants task chromecast:screensaver:show DEVICE=…` (measured on cast1, 2026‑11‑22: the `am start` line gained `--es …LEVEL aquarium_plants` only then). Before coordinator 0.1.219 the service also ignores a level without an error. Either way, look at `commands.json` (step 3) for the `LEVEL` extra.
 - `screensaver-select` of a component that is **not installed** used to end `plugin-error` and fence the device (a readd had to clear it). From 0.1.219 it is a clean refusal, `invalid-request` with `screensaver-component-not-installed`, health unchanged.
 - A direct screenshot (`capture PERSONAL=true`) is refused while another job holds the device; a queued `capture` job is not.
 - The coordinator tasks run from the `chromecast-coordinator` checkout; the APK path is a file path, not a hash.
