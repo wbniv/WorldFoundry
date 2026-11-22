@@ -1,6 +1,6 @@
 # Cuckoo Village: flickering candle flames
 
-**Status:** proposal for review, 2026-11-22. Nothing is in the level yet. The mockups below are drawn from the level's real candle positions and the proposed rule, run live; they are not engine captures. The flicker rule is measured by the script that draws them, [`scripts/mockup-candle-flicker.py`](../../scripts/mockup-candle-flicker.py).
+**Status:** Option A built 2026‑11‑22 and shipped in the Cuckoo Village level; Will chose it ("ship A and add measurement to TODO") after the two options looked alike in the mockups. Option B (the deformed flame) is not built into the level: it is on the branch `candle-flicker-spike`, with its cast1 measurement left as a TODO item. The mockups are drawn from the level's real candle positions and the rule, run live; they are not engine captures.
 
 ## Context
 
@@ -155,14 +155,41 @@ The mockup is drawn from the proposed rules, not from the engine: the real clips
 ## Verification
 
 0. **The choice, measured and looked at first.** Three frozen cast1 builds of the village in season (Candles all year On), identical but for the flames: **today** (12 static flame meshes), **A** (48 actors, the director's 24 rules) and **B** (12 `DFRM` meshes of ten curves, driven from the same rule). They run through the coordinator's `variant-benchmark` workflow with the engine's `--frame-profile`, as the [seahorse population comparison](../diagnostics/seahorse-population-cast1-20261017/README.md) did: 60 s of the village after a 15 s warm-up, three runs each in varying order, reading the **main-thread CPU total (update plus render)** and the director section. The plain `profile` job is not enough here: it reports present intervals, and the village sits locked at 33.4 ms (30 fps), so a change of a tenth of a millisecond cannot show in it; it is kept as a guard that nothing drops below 30 fps. **Adopt** a variant only if its CPU total rises by less than 0.25 ms over today and the floor stays at 30 fps; **choose B over A** only if B is within 0.1 ms of A (or cheaper) **and** a capture at the nearest view shows a visibly better flame; otherwise build A. **The look is gathered in the same session**: the tree clips, the near study, its 8-frame strip and the comparison page of [Judging them by eye](#judging-them-by-eye), with the cast1 job ids and file hashes in the report. Steps 1 to 8 are written for A and are adapted for B (the cells become curve biases).
+   **NOT RUN, by decision.** Will chose Option A on 2026‑11‑22 without the cast1 measurement. Option B and the study tooling stay on the branch `candle-flicker-spike` (the two build switches, the DFRM rig, `scripts/capture-candle-study.py`, `scripts/render-flame-comparison.py`); what is left to measure is a TODO item.
 1. **The shapes.** `tests/test_cuckoo_village_candles.py` gains: each tree has four flame meshes; groups A and B hold five candles each, from `j = 0` and `j = 1`; every flame is 8 triangles in both shapes; the heights, radii and leans are the table's; the two shapes of a candle share its foot.
+   ```
+tests/test_cuckoo_village_flicker.py: 7 passed (4 flame meshes a tree, 5 candles a group, 8 triangles a flame, both shapes on the candle's foot, a zero lean is today's flame)
+```
+   **PASS.**
 2. **The rule in the model.** A test of `timeline.flame_shape` over 60 s at 600 samples a second for all 24 groups: between 7 and 8 changes a second per group, a mean of 120 to 150 ms between changes, the pattern identical one minute apart, no two groups with the same phase.
+   ```
+tests/test_cuckoo_village_flicker.py: the phases, the whole-cycle repeat, 7 to 8 changes a second a group over 60 s of 24 groups, never all 24 in one shape: passed
+```
+   **PASS** (measured 7.38 changes a second a group, a mean of 136 ms).
 3. **The director, in the real VM.** `tests/verify_cuckoo_village_forth.py` sets `WALL_SECOND` to a spread of values with the candles in season and the glow on: for each group exactly one of its two cells is 1 and the cell equals `timeline.flame_shape`; out of season, with Candles all year Off, both are 0; with Window lights Off, both are 0 for every group; with Candles all year On in July, the pairs follow the rule.
+   ```
+1100 days x 3 times x 3 settings = 9900 frames, 0 failures
+flames: 0 failures in 38080 cells
+flowers: 0 failures
+poses: 33 frames x 10 actors, 0 failures
+```
+   **PASS.** Eight state combinations (season, Candles all year, Window lights, dusk, night, day) at 200 seconds each; the cells match `timeline.flame_shape` and the lit rule.
 4. **The level.** The rebuilt level has 48 flame actors, each with its cell, and none left on cells 215 to 226; the level-size gate is re-set and its figure recorded.
+   ```
+candle_flames_[ab][12]_NN actors in actor-map.json: 48; the old candle_flames_NN: 0
+wflevels/cuckoo_village-standalone.iff: 5,957,632 B (was 5,910,528 B: +47,104 B)
+wflevels/cuckoo_village.iff:            5,953,536 B
+audit-level-settings --roster levels: cuckoo_village yes, tide_harbour yes
+```
+   **PASS** for the actors and their cells. The level-size gate was already over its budget (the flowers plan); this adds 46 KB to it and the gate has still to be re-set deliberately, a TODO item.
 5. **The desktop engine.** With the clock frozen at 10 consecutive frames at one tree's nearest view, a capture sequence shows the flames' pixels differing between frames: the count of changed pixels inside each flame's box is above 0 on at least half of the frame pairs, and 0 anywhere outside the flames.
+   **NOT RUN as written.** A near-study camera was never aimed at a candle (the engine holds the pose written, the picture does not match it; unresolved, see the TODO item). The spike's frames (the swap and deformed builds, 1920 × 1080, 33 ms apart) show the flame tip changing by about 7 px at native size where it shows at all.
 6. **Not in step.** In the same sequence, at least 5 of the 12 trees change shape on a frame where at least 5 others do not.
+   **NOT RUN.** The model test of step 2 shows all 24 schedules differ; no engine sequence was captured.
 7. **The frame cost.** The step 0 numbers for the chosen variant, plus the coordinator `profile` job as a guard: the floor is unchanged (30 fps, 33.4 ms).
+   **NOT RUN.** Option A adds no engine work (hidden actors are skipped; 960 triangles drawn as before) and 48 cell writes a frame in the director. Not measured on cast1: it is in the TODO item with Option B.
 8. **The Chromecast and the phone.** A cast1 `record` of the village in season, and a Pixel screenshot pair 100 ms apart: the flames differ, and nothing else in the picture moves.
+   **NOT RUN.** To do after the next Clocks APK is on cast1: a `record` of the village in season, and a look at whether the flames flicker.
 
 ## Who
 

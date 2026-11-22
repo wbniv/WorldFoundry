@@ -145,23 +145,33 @@ def main() -> int:
                             if failures <= 10:
                                 print(f"FAIL {tl.date_of(day)} {sod:7.0f} s switch={candles}: cell {tl.CANDLE_CELL} = {got}, want {want}")
             print(f"{len(days)} days x 3 times x 3 settings = {len(days) * 9} frames, {failures} failures")
-            # the flames: each tree's cell is the candles' state times the window glow of house (tree mod 13), so they burn at
-            # night and dusk only, on the windows' stagger, and the Window lights setting dims them
-            flame_failures = 0
-            for day in (day_of(2026, 12, 25), day_of(2026, 7, 4)):
-                for sod in (12 * 3600.0, 17.5 * 3600 + 600.0, 19 * 3600.0, 23 * 3600.0, 3 * 3600.0, 5.5 * 3600 + 900.0):
-                    for candles, lights in ((None, None), (1, 1), (1, 0), (0, 1)):
-                        host.frame_at(day, sod, candles, lights)
-                        on = tl.christmas_season(day) or bool(candles)
-                        glow = tl.window_states(sod, {"Window lights": 1 if lights is None else lights})
-                        for i in range(tl.TREES):
-                            want = float(on and glow[i % tl.HOUSES])
-                            got = host.read(tl.FLAME_CELL0 + i)
-                            if got != want:
-                                flame_failures += 1
-                                if flame_failures <= 10:
-                                    print(f"FAIL flame {i} {tl.date_of(day)} {sod:7.0f} s switch={candles} lights={lights}: {got}, want {want}")
-            print(f"flames: {flame_failures} failures")
+            # the flicker (plan docs/plans/2026-11-22-cuckoo-village-candle-flicker.md): for each of the 24 groups exactly one of its two cells is the group's
+            # lit state (the candles' state times the window glow of house tree mod 13, so they burn at night and dusk only, on the windows' stagger, and Window
+            # lights puts them out), and which one is timeline.flame_shape at that second. Seconds within 1e-3 of a zero crossing of the drive are skipped:
+            # the VM's float32 and the model's float64 may fall either side of it.
+            flame_failures = flame_checked = 0
+            for day, sod0, candles, lights in ((day_of(2026, 12, 25), 23 * 3600.0, None, None), (day_of(2026, 7, 4), 23 * 3600.0, 1, 1),
+                                               (day_of(2026, 7, 4), 23 * 3600.0, None, None), (day_of(2026, 12, 25), 12 * 3600.0, None, None),
+                                               (day_of(2026, 12, 25), 23 * 3600.0, 1, 0), (day_of(2026, 12, 25), 17.5 * 3600 + 600.0, None, None),
+                                               (day_of(2026, 12, 25), 5.5 * 3600 + 900.0, None, None), (day_of(2026, 7, 4), 3 * 3600.0, 0, 1)):
+                for k in range(0, 600, 3):
+                    sod = sod0 + 17 * 60.0 + k * 0.1
+                    host.frame_at(day, sod, candles, lights)
+                    on = tl.christmas_season(day) or bool(candles)
+                    glow = tl.window_states(sod, {"Window lights": 1 if lights is None else lights})
+                    for gi in range(tl.FLICKER_GROUPS):
+                        x = tl.flame_drive(sod % 60.0, gi)
+                        if abs(x) < 1e-3:
+                            continue
+                        lit = float(on and glow[(gi // 2) % tl.HOUSES])
+                        want = (lit, 0.0) if x > 0 else (0.0, lit)
+                        got = (host.read(tl.FLICKER_CELL0 + 2 * gi), host.read(tl.FLICKER_CELL0 + 2 * gi + 1))
+                        flame_checked += 1
+                        if got != want:
+                            flame_failures += 1
+                            if flame_failures <= 10:
+                                print(f"FAIL flame group {gi} {tl.date_of(day)} {sod:9.2f} s switch={candles} lights={lights}: {got}, want {want}")
+            print(f"flames: {flame_failures} failures in {flame_checked} cells")
             failures += flame_failures
             # the window boxes: exactly one of the two actors shows. Detailed flowers On (or unanswered: the default is On) shows the
             # flowers and hides the blocks, Off the reverse, whatever the date or the time, and the other cells are untouched.

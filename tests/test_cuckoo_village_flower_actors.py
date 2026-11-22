@@ -40,7 +40,7 @@ def test_the_level_has_both_window_box_actors_on_their_visibility_cells():
 
 
 def test_the_two_cells_are_distinct_and_clear_of_the_candles_and_flames():
-    cells = [tl.CANDLE_CELL, *[tl.FLAME_CELL0 + i for i in range(tl.TREES)], tl.FLOWERS_CELL, tl.BLOCKS_CELL]
+    cells = [tl.CANDLE_CELL, *tl.FLICKER_CELLS, tl.FLOWERS_CELL, tl.BLOCKS_CELL]
     assert len(set(cells)) == len(cells)
 
 

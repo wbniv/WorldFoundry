@@ -54,5 +54,5 @@ def test_the_director_drives_the_two_window_box_cells_from_the_detailed_flowers_
     assert f": cv-s-detailed-flowers {ix['CuckooVillageSettings']} {fields['Detailed flowers']} property@ if else drop 1 then ;" in script
     assert f"dup {tl.FLOWERS_CELL} cv!  1 swap - {tl.BLOCKS_CELL} cv!" in script
     assert "cv-flames cv-flowers cv-cam" in script                     # it runs every tick
-    cells = [tl.CANDLE_CELL] + [tl.FLAME_CELL0 + i for i in range(tl.TREES)] + [tl.FLOWERS_CELL, tl.BLOCKS_CELL]
+    cells = [tl.CANDLE_CELL] + list(tl.FLICKER_CELLS) + [tl.FLOWERS_CELL, tl.BLOCKS_CELL]
     assert len(set(cells)) == len(cells) and tl.FLOWERS_CELL == 227 and tl.BLOCKS_CELL == 228

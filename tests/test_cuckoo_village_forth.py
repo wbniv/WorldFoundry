@@ -36,6 +36,7 @@ def test_the_director_in_the_real_vm_agrees_with_the_season_reference():
     r = subprocess.run([sys.executable, str(ROOT / "tests" / "verify_cuckoo_village_forth.py")],
                        capture_output=True, text=True, timeout=600)
     assert r.returncode == 0, r.stdout[-2000:] + r.stderr[-2000:]
+    assert int(r.stdout.split("flames: 0 failures in ")[1].split()[0]) > 5000, r.stdout[-700:]       # the flicker: every group, 8 times and settings
     assert " 0 failures" in r.stdout and "flames: 0 failures" in r.stdout and "flowers: 0 failures" in r.stdout and ", 0 failures" in r.stdout.split("poses:")[1], r.stdout[-700:]
 
 
