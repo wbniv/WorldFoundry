@@ -64,18 +64,19 @@ def test_clocks_flavor_does_not_copy_the_generic_classes():
     assert not list((APP / 'src/clocks').rglob('*.java'))
 
 
-def test_launcher_opens_the_chooser_without_an_extra_and_starts_the_extra_through_level_launch():
+def test_launcher_is_the_shared_launcher_activity():
+    """The Clocks launcher has no behaviour of its own: tests/test_launcher_parity.py checks the shared one."""
     java = (JAVA / 'ClocksActivity.java').read_text()
-    assert 'static final int SHOW_MENU = -1;' in java
-    assert 'getIntent().getStringExtra(LevelLaunch.EXTRA_LEVEL)' in java
-    assert 'chooser = requested == null;' in java and 'if (chooser) player.start(SHOW_MENU);' in java
-    assert 'else if (!LevelLaunch.startChosen(this, player, requested)) finish();' in java
+    assert 'public final class ClocksActivity extends LauncherActivity {' in java
+    shared = (JAVA / 'LauncherActivity.java').read_text()
+    assert 'LaunchMode.forLauncherActivity(' in shared and 'player.startMenu();' in shared
+    assert 'LevelLaunch.startChosen(this, player, mode.level)' in shared
 
 
 def test_dream_plays_the_saved_choice_never_the_chooser():
     java = (JAVA / 'ClocksDreamService.java').read_text()
     assert 'LevelLaunch.startChosen(this, player, null);' in java
-    assert 'SHOW_MENU' not in java and 'start(-1)' not in java
+    assert 'startMenu' not in java and 'start(-1)' not in java and 'MENU' not in java
     assert 'setInteractive(false);' in java
 
 

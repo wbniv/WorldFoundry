@@ -186,9 +186,13 @@ def test_no_task_points_at_pre_flavor_apk_paths():
 # ---- the remote / gamepad key map -----------------------------------------------------------------------
 
 def _key_map() -> dict[str, str]:
-    """AKEYCODE_* -> EJ_BUTTONF_* from MapKeyCode() in the Android entry point."""
-    src = (REPO / "wfsource" / "source" / "hal" / "android" / "native_app_entry.cc").read_text()
-    body = re.search(r"uint32_t MapKeyCode\(int32_t code\)\s*\{(.*?)\n\}", src, re.S).group(1)
+    """AKEYCODE_* -> EJ_BUTTONF_* from the Android key table, which the entry point's MapKeyCode()
+    and the screensaver's launcher menu share (hal/android/key_map.h, docs/plans/2026-11-21-one-aquarium-app.md)."""
+    android = REPO / "wfsource" / "source" / "hal" / "android"
+    entry = (android / "native_app_entry.cc").read_text()
+    assert "return WFAndroidMapKeyCode(code);" in entry, "MapKeyCode no longer uses the shared table"
+    src = (android / "key_map.h").read_text()
+    body = re.search(r"inline uint32_t WFAndroidMapKeyCode\(int32_t code\)\s*\{(.*?)\n\}", src, re.S).group(1)
     return dict(re.findall(r"case (AKEYCODE_\w+):\s*return (EJ_BUTTONF_\w+);", body))
 
 

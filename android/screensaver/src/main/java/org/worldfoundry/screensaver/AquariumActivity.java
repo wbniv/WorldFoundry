@@ -1,32 +1,8 @@
 package org.worldfoundry.screensaver;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.view.WindowManager;
-
-public final class AquariumActivity extends Activity {
-    private TankPlayer player;
-
-    @Override
-    protected void onCreate(Bundle state) {
-        super.onCreate(state);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        DreamOrientation.apply(this, OrientationSettings.load(this));
-        player = new TankPlayer(this);
-        setContentView(player.view());
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (!LevelLaunch.startChosen(this, player, getIntent().getStringExtra(LevelLaunch.EXTRA_LEVEL))) finish();
-    }
-
-    @Override
-    protected void onPause() {
-        player.stop();
-        super.onPause();
-        finish();
-    }
+/**
+ * WF Aquarium's TV launcher entry. All of its behaviour is {@link LauncherActivity}'s, the same for
+ * every pack; this class is only the name its manifest declares. Roster: wflevels/aquarium-menu.manifest.
+ */
+public final class AquariumActivity extends LauncherActivity {
 }

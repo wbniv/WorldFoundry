@@ -24,8 +24,8 @@ def host_argv():
     # The level index is formatted at run time into a sized buffer (`char arg1[12];`).
     strings.update({n: '0' for n in re.findall(r'char (\w+)\[\d+\];', source)})
     argv = [strings[n] for n in entries]
-    # A level plays with every entry; kShowMenu (-1) ends argv one early, before the level.
-    counts = re.search(r'const int argc = level == kShowMenu \? (\d+) : (\d+);', source)
+    # A level plays with every entry; the menu (kMenuLevel, -1) ends argv one early, before the level.
+    counts = re.search(r'const int argc = menu \? (\d+) : (\d+);', source)
     assert counts, 'dream_host.cc: the menu/level argc choice not found'
     assert re.search(r'argv\[argc\] = nullptr;', source)
     assert re.search(r'__argc = argc;', source) and re.search(r'HALStart\(argc, argv', source)
@@ -59,9 +59,9 @@ def test_dream_host_level_index_is_decimal_and_bounded_by_the_bundle():
     assert "'0' + level" not in host and '"0" + level' not in host
     assert re.search(r'snprintf\(arg1,\s*sizeof arg1,\s*"%d",\s*int\(level\)\)', host)
     assert 'level > 10' not in host
-    assert 'constexpr int kShowMenu = -1;' in host
+    assert 'constexpr int kMenuLevel = -1;' in host
     assert re.search(r'const int levels = bundleLevelCount\(', host)
-    assert re.search(r'if \(levels <= 0 \|\| level < kShowMenu \|\| level >= levels\) \{', host)
+    assert re.search(r'if \(levels <= 0 \|\| level < kMenuLevel \|\| level >= levels\) \{', host)
     assert 'ANDROID_LOG_ERROR' in host
     # bundleLevelCount: the TOC less SHEL, a trailing UIFT and a MENU (cdpack's layout).
     for tag in ('"UIFT"', '"MENU"', '"SHEL"'):
@@ -70,8 +70,9 @@ def test_dream_host_level_index_is_decimal_and_bounded_by_the_bundle():
 
 def test_menu_keeps_the_drawer_and_a_level_clears_it():
     host = HOST.read_text()
-    assert 'showMenu.store(level == kShowMenu);' in host
-    assert 'if (!showMenu.load() && levelmenu::Drawer()) levelmenu::SetDrawer(nullptr);' in host
+    assert 'menuMode.store(menu);' in host
+    # The menu, in either pack, keeps the drawer; every level clears it.
+    assert re.search(r'else if \(levelmenu::Drawer\(\)\) \{\s*levelmenu::SetDrawer\(nullptr\);', host)
 
 
 def toc_level_count(path):
@@ -118,7 +119,7 @@ def test_aquarium_and_clocks_ranges_from_their_manifests():
     clocks = level_manifest.read(ROOT / 'wflevels/clocks-menu.manifest').ids
     assert clocks and clocks[0] == 'minute_machine'
     host = HOST.read_text()
-    assert re.search(r'level < kShowMenu \|\| level >= levels', host)
+    assert re.search(r'level < kMenuLevel \|\| level >= levels', host)
 
 
 CLOCKS_ARGS = ROOT / 'android/screensaver/src/clocks/assets/wf_args.txt'

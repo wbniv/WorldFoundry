@@ -64,6 +64,7 @@
 #include <hal/phonepad/phonepad.h>
 #include <hal/phonepad/phonepad_overlay.h>
 #include <hal/android/touch_controls.h>
+#include <hal/android/key_map.h>
 #if defined(WF_INPUT_PROBE)
 #include <hal/android/input_probe.h>
 #endif
@@ -411,26 +412,8 @@ void RecomputeTouchState(AInputEvent* event, bool clearOnUp)
     gTouchButtons=gTouchState.update(TouchLayout(_halWindowWidth,_halWindowHeight),points.data(),points.size(),phase,changed);
 }
 
-uint32_t MapKeyCode(int32_t code)
-{
-    switch (code)
-    {
-        case AKEYCODE_DPAD_LEFT:       return EJ_BUTTONF_LEFT;
-        case AKEYCODE_DPAD_RIGHT:      return EJ_BUTTONF_RIGHT;
-        case AKEYCODE_DPAD_UP:         return EJ_BUTTONF_UP;
-        case AKEYCODE_DPAD_DOWN:       return EJ_BUTTONF_DOWN;
-        case AKEYCODE_BUTTON_A:        return EJ_BUTTONF_A;
-        case AKEYCODE_DPAD_CENTER:     return EJ_BUTTONF_A;   // Chromecast / Google TV remote's OK
-        case AKEYCODE_BUTTON_B:        return EJ_BUTTONF_B;
-        case AKEYCODE_BUTTON_X:        return EJ_BUTTONF_C;
-        case AKEYCODE_BUTTON_Y:        return EJ_BUTTONF_D;
-        case AKEYCODE_BUTTON_L1:       return EJ_BUTTONF_E;
-        case AKEYCODE_BUTTON_R1:       return EJ_BUTTONF_F;
-        case AKEYCODE_BUTTON_START:    return EJ_BUTTONF_G;
-        case AKEYCODE_BUTTON_SELECT:   return EJ_BUTTONF_H;
-        default:                       return 0;
-    }
-}
+// The key table is shared with the screensaver's launcher menu (hal/android/key_map.h).
+uint32_t MapKeyCode(int32_t code) { return WFAndroidMapKeyCode(code); }
 
 void HandleAppCmd(struct android_app* app, int32_t cmd)
 {

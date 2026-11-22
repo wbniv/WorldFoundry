@@ -10,9 +10,16 @@ import android.view.View;
 import android.widget.FrameLayout;
 import java.io.File;
 
-/** Surface and render thread shared by the Dream and the TV launcher preview. */
+/** Surface and render thread shared by the Dream, the preview and the TV launcher's tank menu. */
 final class TankPlayer implements SurfaceHolder.Callback {
     static { System.loadLibrary("wf_dream"); }
+
+    /**
+     * The level index that runs the launcher's tank menu instead of one tank: the playable menu
+     * bundle (assets/menu-cd.iff) with the engine's own level menu. dream_host.cc's kMenuLevel.
+     * docs/plans/2026-11-21-one-aquarium-app.md.
+     */
+    static final int MENU = -1;
 
     private final SurfaceView view;
     private final FrameLayout contentView;
@@ -21,6 +28,8 @@ final class TankPlayer implements SurfaceHolder.Callback {
     private int level;
     private String configureLine;
     private String[] launchOverrideTriples = new String[0];
+    private Runnable onEngineExit;
+    private volatile boolean engineExited;
 
     private static native void nativeRun(android.content.res.AssetManager assets, Surface surface,
                                          int level, String logPath);
@@ -28,8 +37,8 @@ final class TankPlayer implements SurfaceHolder.Callback {
     private static native void nativeLaunchOverride(String schema, String key, String value);
     private static native void nativePrepare();
     private static native void nativeStop();
-    private static native void nativeButtons(int mask);
-    private static native boolean nativeBackToMenu();
+    private static native boolean nativeKey(int keyCode, boolean down);
+    private static native void nativeBack();
 
     TankPlayer(Context context) {
         view = new SurfaceView(context);
@@ -70,6 +79,21 @@ final class TankPlayer implements SurfaceHolder.Callback {
         startIfReady();
     }
 
+    /** The launcher's tank menu (Up and Down choose, Select starts, Back returns, Back leaves). */
+    void startMenu() { start(MENU); }
+
+    /**
+     * Run on the main thread when the engine ends by itself while started: Back on the tank menu.
+     * The caller finishes its activity; {@link #stop} then ends the process, as after any run.
+     */
+    void onEngineExit(Runnable action) { onEngineExit = action; }
+
+    /** A remote key for the tank menu; true when the engine uses it. Inert outside the menu. */
+    boolean key(int keyCode, boolean down) { return nativeKey(keyCode, down); }
+
+    /** Back released in the tank menu: closes a settings form, returns from a tank, or leaves. */
+    void back() { nativeBack(); }
+
     /** Hands the engine a launch-parameter line on the next start; unset leaves other flavors untouched. */
     void configure(String line) { configureLine = line; }
 
@@ -85,18 +109,11 @@ final class TankPlayer implements SurfaceHolder.Callback {
         launchOverrideTriples = triples;
     }
 
-    /**
-     * The remote buttons held now, as the engine's EJ_BUTTONF_* bits (see ClocksActivity); 0 releases
-     * them. Only ClocksActivity's chooser calls it: Dreams and the other flavors never send input.
-     */
-    void buttons(int mask) { nativeButtons(mask); }
-
-    /** Back in a clock picked from the chooser: return to the chooser. False: leave the app instead. */
-    boolean backToMenu() { return nativeBackToMenu(); }
-
     void stop() {
         started = false;
         nativeStop();
+        // The engine already ended (Back on the menu): its process-lifetime globals end with the process.
+        if (engineExited) Process.killProcess(Process.myPid());
     }
 
     private void startIfReady() {
@@ -116,7 +133,14 @@ final class TankPlayer implements SurfaceHolder.Callback {
             if (started) nativeRun(view.getContext().getAssets(), surface, selected, logPath);
             // The renderer has process-lifetime globals. Both callers run in a
             // dedicated process, so ending a stopped player resets them safely.
+            // engineExited is written before started is read, and stop() writes started before
+            // reading engineExited, so whichever runs second ends the process.
+            engineExited = true;
             if (!started) Process.killProcess(Process.myPid());
+            // Still started: the engine ended by itself (Back on the tank menu). Let the activity
+            // finish; its onPause calls stop(), which then ends the process.
+            final Runnable exit = onEngineExit;
+            if (exit != null) view.post(exit);
         }, "aquarium-player");
         thread.start();
     }

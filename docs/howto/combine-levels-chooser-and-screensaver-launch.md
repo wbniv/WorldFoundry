@@ -106,12 +106,21 @@ Two packs exist today, built the same way: **WF Aquarium** (flavor `aquarium`, `
 1. Write `wflevels/<package>-menu.manifest` in the format above.
 2. Give its Gradle flavor a `Copy` task that puts the manifest in its assets as `levels.manifest`, like `copyAquariumLevelCatalog` and the Clocks equivalent in `android/screensaver/build.gradle.kts`, and add the output to that flavor's `assets` source set.
 3. Pack the bundle (`cdpack --manifest`, for Clocks `scripts/pack-clocks-bundle.py`) into the flavor's assets.
-4. In its launch activities, call `LevelLaunch.startChosen(this, player, getIntent().getStringExtra(LevelLaunch.EXTRA_LEVEL))` and `finish()` when it returns `false`.
+4. Add one launcher activity, `public final class <Pack>Activity extends LauncherActivity {}`, and declare it in the flavor's manifest with the `LEANBACK_LAUNCHER` category. It has no code of its own: every pack's launch behaviour is `LauncherActivity`'s (next paragraph). Its Dream service calls `LevelLaunch.startChosen(this, player, null)`.
 5. Do **not** copy `LevelCatalog` or `LevelLaunch`; add the source directory to the flavor if it is not in this module.
 6. If any level's textures are larger than the Dream host's default 1024 slot, ship `assets/wf_args.txt` with `--vram-slot-width=...` for the flavor (Clocks does: the village's room page is 2048 wide). `tests/test_dream_host_vram.py` checks every page in the bundle fits.
 7. **Give every level in the roster a settings object** (next section), then run the audit.
 
-**One app, two modes.** A pack is one package that is both the app and the screensaver. A normal launch from the launcher shows the chooser menu; the Dream, the preview activity and any start with a `LEVEL` or `DREAM` extra play a level and never show the menu. The decision is one pure function, `LaunchMode`, with a unit test row for every start (`task test-aquarium-launch-mode`). The pack holds two bundles, the menu's and the autopilot's, and the menu never writes the saved choice. Aquarium does this today ([plan](../plans/2026-11-21-one-aquarium-app.md), merged 2026‑11‑21); WF Clocks follows the same shape.
+**Every pack behaves the same.** A pack is one APK that is both the app and the screensaver, and WF Aquarium and WF Clocks behave identically (Will, 2026‑11‑21). One class, `LauncherActivity`, decides what a start does, through the pure function `LaunchMode`:
+
+| How it starts | What happens |
+|---|---|
+| Starting the app (launcher, remote, a person) | The engine's **chooser menu** over the pack's levels. Choosing one plays it for this run only and writes nothing; Back in a level returns to the menu, Back on the menu leaves |
+| The system running the screensaver (the Dream service) | **A random level**, or the saved choice if the user set one, and never the menu |
+| Any start with the `LEVEL` extra (a catalogue id or `random`) | **That level**, no menu; an unknown id starts nothing |
+| Any start with the `DREAM` extra (the preview activity, `screensaver-show`) | The saved choice, `random` by default, no menu |
+
+`LaunchMode` has a unit-test row for every start (`task test-aquarium-launch-mode`), and `tests/test_launcher_parity.py` checks that each pack's activity is empty, extends `LauncherActivity`, and that one menu path in the host (`dream_host.cc`) serves both. **Where the menu comes from** is the one thing a pack chooses: the engine's menu is a MENU chunk in the pack's bundle. WF Clocks keeps it inside its `cd.iff` (one set of levels serves the app and the screensaver). WF Aquarium plays playable tanks from the menu and autopilot tanks as the screensaver, so it ships the playable menu bundle as a second asset, `menu-cd.iff`, beside the autopilot `cd.iff`; the host takes the second bundle only when the APK carries it. The decision and its reasons are in [`plans/2026-11-21-one-aquarium-app.md`](../plans/2026-11-21-one-aquarium-app.md).
 
 Single-level apps (Seahorse Grid, the Planted Tank app) are not part of this mechanism.
 
