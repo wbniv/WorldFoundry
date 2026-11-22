@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Report the cost of the Cuckoo Village window-box flowers from three coordinator `profile` evidence folders.
 
-    python3 scripts/flowers-profile-report.py --off DIR --on DIR --off-again DIR [--out DIR] [--level-ref REV]
+    python3 scripts/flowers-profile-report.py --off DIR --on DIR --off-again DIR [--out DIR] [--trim SECONDS] [--level-ref REV]
                                               [--apk-sha256 HEX] [--picture-off PNG --picture-on PNG] [-h]
 
 The three folders are the evidence of the plan's profile runs on cast1, one APK, only the `Detailed flowers`
@@ -14,6 +14,9 @@ docs/diagnostics/cuckoo-village-flowers-<date>/) and exits 0 only if the gate pa
 The gate, all of: median p50 and median p95 frame time with the field On each within 1.0 ms of the mean of the two
 Off sets; fps On at least 59 and within 0.5 of the Off sets; missed refreshes up by no more than 2 points; and the two
 Off sets agree with each other to within 0.5 ms (otherwise the run drifted and is thrown away: exit 2).
+
+`--trim N` drops the first N seconds of every run and recomputes the statistics from the per-frame present times, for runs
+whose first seconds are the menu and the settings form that set the field.
 """
 from __future__ import annotations
 
@@ -42,11 +45,39 @@ def load_runs(folder: Path) -> list[dict]:
     return runs
 
 
+def percentile(sorted_vals: list[float], q: float) -> float:
+    """Nearest-rank percentile of an ascending list, q in 0..100."""
+    return sorted_vals[min(len(sorted_vals) - 1, max(0, int(round(q / 100 * len(sorted_vals) + 0.5)) - 1))]
+
+
+def trimmed(run: dict, trim: float) -> dict:
+    """The run's statistics recomputed from its per-frame present times with the first `trim` seconds dropped (the menu and
+    the settings form, which a scripted run cannot keep out of its window). A missed refresh is an interval over 1.5
+    refresh periods, which matches the profile job's own count. Without a trim, or without present times, the job's own
+    summary is used unchanged."""
+    path = run["_dir"] / "presents-ns.json"
+    if trim <= 0 or not path.exists():
+        return run
+    ts = json.loads(path.read_text())
+    cut = ts[0] + trim * 1e9
+    kept = [t for t in ts if t >= cut]
+    if len(kept) < 31:
+        raise SystemExit(f"{run['_dir']}: only {len(kept)} frames after the first {trim} s: nothing left to measure")
+    iv = [(b - a) / 1e6 for a, b in zip(kept, kept[1:])]
+    srt = sorted(iv)
+    refresh = float(run.get("refresh_ms") or 16.683)
+    out = dict(run)
+    out.update(fps=len(iv) / ((kept[-1] - kept[0]) / 1e9), p50_ms=percentile(srt, 50), p90_ms=percentile(srt, 90), p95_ms=percentile(srt, 95),
+               p99_ms=percentile(srt, 99), worst_ms=srt[-1], missed_refresh_percent=100.0 * sum(1 for v in iv if v > 1.5 * refresh) / len(iv))
+    return out
+
+
 def median(runs: list[dict], key: str) -> float:
     return statistics.median(float(r[key]) for r in runs)
 
 
-def summarise(runs: list[dict]) -> dict:
+def summarise(runs: list[dict], trim: float = 0.0) -> dict:
+    runs = [trimmed(r, trim) for r in runs]
     out = {k: median(runs, k) for k in METRICS}
     out["runs"] = len(runs)
     out["pss_kib"] = statistics.median(v for v in (pss(r["_dir"]) for r in runs) if v is not None) if any(pss(r["_dir"]) is not None for r in runs) else None
@@ -69,12 +100,14 @@ def thermal(run_dir: Path) -> list[int]:
     return [int(x) for x in re.findall(r"Thermal Status:\s*(\d+)", path.read_text(errors="replace"))] if path.exists() else []
 
 
-def intervals_ms(runs: list[dict]) -> list[float]:
+def intervals_ms(runs: list[dict], trim: float = 0.0) -> list[float]:
     out: list[float] = []
     for r in runs:
         path = r["_dir"] / "presents-ns.json"
         if path.exists():
             t = json.loads(path.read_text())
+            if trim > 0:
+                t = [x for x in t if x >= t[0] + trim * 1e9]
             out += [(b - a) / 1e6 for a, b in zip(t, t[1:])]
     return out
 
@@ -167,17 +200,18 @@ def main(argv=None) -> int:
     ap.add_argument("--out", type=Path, help="output folder (default docs/diagnostics/cuckoo-village-flowers-<date>)")
     ap.add_argument("--level-ref", help="a git revision from before the change, for the level file size")
     ap.add_argument("--apk-sha256", help="the APK that was profiled")
+    ap.add_argument("--trim", type=float, default=0.0, help="seconds to drop from the start of every run (the menu and the settings form)")
     ap.add_argument("--picture-off", type=Path, help="a device capture with the field Off")
     ap.add_argument("--picture-on", type=Path, help="the same camera moment with the field On")
     args = ap.parse_args(argv)
 
     runs = {k: load_runs(p) for k, p in (("Off", args.off), ("On", args.on), ("Off again", args.off_again))}
-    sets = {k: summarise(v) for k, v in runs.items()}
+    sets = {k: summarise(v, args.trim) for k, v in runs.items()}
     ok, rows = verdict(sets["Off"], sets["On"], sets["Off again"])
     drifted = not rows[0][0]
     out = args.out or ROOT / "docs/diagnostics" / f"cuckoo-village-flowers-{dt.date.today().isoformat()}"
     out.mkdir(parents=True, exist_ok=True)
-    chart = histogram(intervals_ms(runs["Off"] + runs["Off again"]), intervals_ms(runs["On"]), out / "frame-time-histogram.png")
+    chart = histogram(intervals_ms(runs["Off"] + runs["Off again"], args.trim), intervals_ms(runs["On"], args.trim), out / "frame-time-histogram.png")
 
     off_mean = {k: (sets["Off"][k] + sets["Off again"][k]) / 2 for k in METRICS}
     diff = {k: sets["On"][k] - off_mean[k] for k in METRICS}
@@ -186,6 +220,8 @@ def main(argv=None) -> int:
           "[the window-box plan](../../plans/2026-11-22-cuckoo-village-flowers.md).", "",
           f"**Verdict: {'PASS' if ok else ('INVALID: the Off sets drifted' if drifted else 'FAIL')}**", ""]
     md += [f"- {'PASS' if good else 'FAIL'}: {text}" for good, text in rows]
+    if args.trim > 0:
+        md += ["", f"Statistics are recomputed from the per-frame present times with the first {args.trim:g} s of every run dropped (the menu and the settings form)."]
     md += ["", "## Build facts", ""] + level_facts(args.level_ref)
     if args.apk_sha256:
         md.append(f"- APK profiled: sha256 `{args.apk_sha256}`.")

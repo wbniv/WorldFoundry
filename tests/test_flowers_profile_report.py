@@ -85,3 +85,43 @@ def test_pss_and_thermal_parsers_read_the_dumpsys_shapes(tmp_path):
     assert report.pss(tmp_path) == 123456
     (tmp_path / "thermal.txt").write_text("Thermal Status: 0\n...\nThermal Status: 2\n")
     assert report.thermal(tmp_path) == [0, 2]
+
+
+def test_trim_drops_the_menu_period_and_recomputes_from_the_present_times(tmp_path):
+    """A run whose first 20 s are slow (the menu and form) passes once those seconds are trimmed, and fails without the trim."""
+    def slow_start(folder, steady_ms):
+        for n in (1, 2, 3):
+            run = folder / f"run-{n}"
+            run.mkdir(parents=True)
+            t, ts = 1_000_000_000, []
+            for _ in range(60):                       # 20 s of 333 ms frames: the menu
+                ts.append(t); t += int(333e6)
+            for _ in range(900):                      # then 60 fps-ish frames
+                ts.append(t); t += int(steady_ms * 1e6)
+            (run / "presents-ns.json").write_text(json.dumps(ts))
+            (run / "summary.json").write_text(json.dumps(dict(
+                run=n, fps=20.0, p50_ms=60.0, p90_ms=333.0, p95_ms=333.0, p99_ms=333.0, worst_ms=333.0, missed_refresh_percent=40.0, refresh_ms=16.683)))
+        return folder
+    dirs = [slow_start(tmp_path / n, ms) for n, ms in (("off", 16.7), ("on", 16.75), ("off2", 16.7))]
+    base = ["--off", str(dirs[0]), "--on", str(dirs[1]), "--off-again", str(dirs[2])]
+    assert report.main(base + ["--out", str(tmp_path / "raw")]) == 1             # untrimmed, the job's own numbers are the menu's: 20 fps fails
+    code = report.main(base + ["--out", str(tmp_path / "trimmed"), "--trim", "20"])
+    assert code == 0
+    data = json.loads((tmp_path / "trimmed/report.json").read_text())
+    assert abs(data["sets"]["On"]["p50_ms"] - 16.75) < 0.2 and abs(data["sets"]["Off"]["p50_ms"] - 16.7) < 0.2
+    assert data["sets"]["On"]["missed_refresh_percent"] == 0.0
+    assert "first 20 s of every run dropped" in (tmp_path / "trimmed/report.md").read_text()
+
+
+def test_trim_refuses_a_run_with_nothing_left(tmp_path):
+    run = tmp_path / "run-1"
+    run.mkdir()
+    (run / "presents-ns.json").write_text(json.dumps([i * 16_700_000 for i in range(40)]))
+    (run / "summary.json").write_text(json.dumps(dict(fps=60, p50_ms=16.7, p90_ms=16.7, p95_ms=16.7, p99_ms=16.7, worst_ms=16.7, missed_refresh_percent=0)))
+    runs = report.load_runs(tmp_path)
+    try:
+        report.trimmed(runs[0], 5.0)
+    except SystemExit as e:
+        assert "nothing left to measure" in str(e)
+    else:
+        raise AssertionError("an empty trimmed run was accepted")
