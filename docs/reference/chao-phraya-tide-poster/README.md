@@ -22,6 +22,14 @@ python3 docs/reference/chao-phraya-tide-poster/export_poster.py
 python3 -m pytest -q tests/test_poster_chao_phraya_tide.py
 ```
 
-`make_poster.py` writes `poster.html` and the eight editable SVG panels (`01-days.svg` … `08-harbour.svg`). `export_poster.py` needs Python Playwright with Chromium and poppler's `pdftoppm`; it reuses the seahorse poster's exporter, changing only the PDF name, and writes the PDF, the PNG and `layout-review.json`, which records the page size, the smallest type (8.25 pt) and that no panel overflows.
+`make_poster.py` writes `poster.html` and the eight editable SVG panels (`01-days.svg` … `08-harbour.svg`; panel 08 embeds `08-harbour-engine.png`). `export_poster.py` needs Python Playwright with Chromium and poppler's `pdftoppm`; it reuses the seahorse poster's exporter, changing only the PDF name, and writes the PDF, the PNG and `layout-review.json`, which records the page size, the smallest type (8.25 pt) and that no panel overflows.
 
-The harbour drawing in panel 08 is a design sketch, not an engine screenshot. It is redrawn from the finished scene once Tide Harbour exists (plan Phase P).
+The harbour picture in panel 08 is the engine's own drawing of the finished level, with its river panel (`08-harbour-engine.png`, 2026‑11‑22), not a sketch. Redo it after a change to the level's look:
+
+```sh
+scripts/in-linux-container.sh bash -c 'xvfb-run -a -s "-screen 0 1280x720x24" python3 scripts/check-tide-harbour.py \
+    --capture build/poster-capture --no-fps --times 2026-01-08T17:51:00'      # the engine built as the script's header says
+cp build/poster-capture/20260108T175100.png docs/reference/chao-phraya-tide-poster/08-harbour-engine.png
+```
+
+The moment, 8 January 17:51 Thai time, is the "now" dot on panel 08's tide curve; if you change one, change the other, and the readings quoted in the panel's first claim (`turns.py --at` computes them).

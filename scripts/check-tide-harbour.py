@@ -17,6 +17,7 @@ Run inside the Linux container, against the container-built engine, under xvfb:
                        director's count of fields property@ answered must be 4 (plan Verification 13, engine half)
   --capture OUTDIR     one PNG per --times entry (default: the plan's six moments)
   --times T [T ...]    YYYY-MM-DDTHH:MM:SS[.mmm] Thai times for either mode
+  --no-fps             with --capture: hide the engine's frame-rate counter (the poster's picture)
 
 The colours the director writes (FACE_COLOR 3037-3039) are write-only in the engine, so they are checked in the
 VM (tests/verify_tide_harbour_forth.py) and seen in the captures. Plan: docs/plans/2026-11-21-tide-harbour-clock.md
@@ -237,11 +238,11 @@ def options(port: int) -> int:
     return 1 if failures else 0
 
 
-def capture(outdir: Path, times: list[str], port: int, frames: int = 40) -> int:
+def capture(outdir: Path, times: list[str], port: int, frames: int = 40, no_fps: bool = False) -> int:
     outdir = outdir.resolve()          # the engine runs from another directory
     outdir.mkdir(parents=True, exist_ok=True)
     for i, spec in enumerate(times):
-        e = Engine(spec, port + i)
+        e = Engine(spec, port + i, ["--no-fps"] if no_fps else None)
         try:
             e.step(frames)          # enough for the next-turn scan (ten frames) and the panel to settle
             name = spec.replace(":", "").replace("-", "")
@@ -259,6 +260,7 @@ def main() -> int:
     ap.add_argument("--capture", type=Path, metavar="OUTDIR")
     ap.add_argument("--times", nargs="+")
     ap.add_argument("--frames", type=int, default=40, help="frames to step before each capture (default 40)")
+    ap.add_argument("--no-fps", action="store_true", help="--capture: hide the engine's frame-rate counter (for the poster)")
     ap.add_argument("--port", type=int, default=7830)
     args = ap.parse_args()
     if not WF_GAME.exists():
@@ -268,7 +270,7 @@ def main() -> int:
         print(f"level not built: {LEVEL} (task tide-harbour-level)", file=sys.stderr)
         return 2
     if args.capture:
-        return capture(args.capture, args.times or MOMENTS, args.port, args.frames)
+        return capture(args.capture, args.times or MOMENTS, args.port, args.frames, args.no_fps)
     rc = 0
     if args.compare:
         rc |= compare(args.times or COMPARE, args.port)
