@@ -21,9 +21,9 @@ from typing import Dict, List
 import timeline as tl
 
 CELLS = ["sod", "hr", "mi", "sc", "tm", "i", "hx", "f", "bow", "s", "w", "ent", "th", "lx", "ly", "cl", "hop", "vx", "vy",
-         "n", "o", "bob", "k", "on", "lap", "hold", "u", "bb", "phi", "r", "h"]
+         "n", "o", "bob", "k", "on", "lap", "hold", "u", "bb", "phi", "r", "h", "day", "doy"]
 WORDS = {"sm", "frac", "floor", "mod", "sin", "cos", "wx", "wy", "wz", "wa", "wb", "wc", "ai", "fig", "figs", "bird", "win",
-         "wins", "cam", "hands", "tick"}
+         "wins", "cam", "hands", "tick", "season", "candles"}
 
 
 def n(x: float) -> str:
@@ -124,6 +124,15 @@ def director_script(ix: Dict[str, int], fields: Dict[str, int] = None) -> str:
         "  cv-on cv@ cv-s-window-lights * swap 200 + cv! ;",
         ": cv-wins  0 cv-i cv!  begin  cv-i cv@ cv-win  cv-i cv@ 1 + dup cv-i cv! 13 =  until ;",
     ]
+    # Christmas candles: season is 1 December to 6 January. WALL_DAY counts whole local days from 2000-01-01, a leap year, and
+    # between 2001 and 2099 a leap year is every fourth: a 1461-day cycle is one leap year then three common ones.
+    L += [
+        ": cv-season",
+        "  INDEXOF_WALL_DAY cv@ 1461 cv-mod cv-day cv!",
+        "  cv-day cv@ 366 < if cv-day cv@ cv-doy cv!  1 else cv-day cv@ 366 - 365 cv-mod cv-doy cv!  0 then",
+        "  334 + cv-doy cv@ swap >=  cv-doy cv@ 6 <  + if 1 else 0 then ;",      # zForth true is -1: make the flag 1 or 0
+        f": cv-candles  cv-season cv-s-christmas-candles * {tl.CANDLE_CELL} cv! ;",
+    ]
     # camera: one lap is 225 s so every quarter boundary starts a lap at the front-facing tower view
     L += [
         ": cv-cam",
@@ -151,7 +160,7 @@ def director_script(ix: Dict[str, int], fields: Dict[str, int] = None) -> str:
         "  INDEXOF_WALL_SECOND cv@ cv-sc cv!  INDEXOF_WALL_HOUR cv@ cv-hr cv!  INDEXOF_WALL_MINUTE cv@ cv-mi cv!",
         "  cv-mi cv@ 60 * cv-sc cv@ + cv-tm cv!",
         "  cv-hr cv@ 3600 * cv-tm cv@ + cv-sod cv!",
-        "  cv-hands cv-figs cv-bird cv-wins cv-cam ;",
+        "  cv-hands cv-figs cv-bird cv-wins cv-candles cv-cam ;",
         "cv-tick",
     ]
     return "\n".join(L) + "\n"
