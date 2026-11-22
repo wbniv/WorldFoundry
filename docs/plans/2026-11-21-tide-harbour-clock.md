@@ -139,7 +139,7 @@ Will asked (2026‑11‑21): "update plan: make an a3 poster about the tides and
 - **Rules, from the seahorse poster:** the research document comes first and gives each source's locator and access limits; every printed claim wears a chip (**verified**, **other source**, **ours (measured)**); claims the research could not confirm stay out, and `make_poster.py` refuses to build if one is added; the drawings are original SVGs; the PDF is one 297 × 420 mm page, with a 300 DPI PNG and a `layout-review.json`.
 - **Print:** matte or uncoated A3 stock. The 2026‑10‑06 print was too glossy ([audit note](../reference/2026-10-06-aquarium-poster-reference-verification.md)); confirm a shop with matte A3 before going.
 - **Not on it:** the department's constants (not public), anything about the sun or moon (D12: not claimed), and anything from the two papers that could not be read.
-- **Built 2026‑11‑21:** [the A3 PDF](../reference/chao-phraya-tide-poster/chao-phraya-tide-a3.pdf), [the 300 DPI PNG](../reference/chao-phraya-tide-poster/poster.png) and [its README](../reference/chao-phraya-tide-poster/README.md). It follows the mockup's seven panels plus one (spring and neap tides, and a year of highs and lows, are new); panel 8 keeps the harbour as a design sketch.
+- **Built 2026‑11‑21:** [the A3 PDF](../reference/chao-phraya-tide-poster/chao-phraya-tide-a3.pdf), [the 300 DPI PNG](../reference/chao-phraya-tide-poster/poster.png) and [its README](../reference/chao-phraya-tide-poster/README.md). It follows the mockup's seven panels plus one (spring and neap tides, and a year of highs and lows, are new); panel 8 kept the harbour as a design sketch until 2026‑11‑22, when it was redrawn from the engine's own picture of the finished level with its river panel (`08-harbour-engine.png`; the poster states the panel's readings at 17:51 on 8 January, computed by `turns.py`, and carries the map's © OpenStreetMap credit).
 
 ### The bundle and the chooser
 
@@ -670,6 +670,17 @@ These steps are the contract. Each is run when its phase lands, with the raw out
     ```
 
     Each run also checks that the settings cells hold the requested value, so a rejected override would fail. **PASS for Tide Harbour.**
+
+    **Rerun 2026‑11‑22, with the fifth field (River panel: On or Off, cell 694; Off hides every part of the river panel and its arrows through visibility cell 709 and gives the harbour the whole screen, the camera as it was before the panel).** The same command, every value of every field, now answers 5 fields:
+
+    ```
+    2026-11-21T15:02:30 {'life': 1}: 6 actors; settings answered 5; tide 2.8381 m (model 2.8381); worst position 0.009 mm (boat_0/3010), rotation 0.005 deg (boat_0/3014), scale 0.00000 ()
+    2026-11-21T15:02:30 {'panel': 0}: 6 actors; settings answered 5; tide 2.8381 m (model 2.8381); worst position 0.009 mm (boat_0/3010), rotation 0.005 deg (boat_0/3014), scale 0.00000 ()
+    2026-11-21T15:02:30 {'panel': 1}: 6 actors; settings answered 5; tide 2.8381 m (model 2.8381); worst position 0.009 mm (boat_0/3010), rotation 0.005 deg (boat_0/3014), scale 0.00000 ()
+    PASS
+    ```
+
+    **PASS** (the other values in that run are the same as above, with 5 answered). The regenerated headers come from `task gen-oas-headers`, and `ht_and_objects_match_golden` passes; a capture with `--set panel=1` shows the harbour alone.
 
 
 ## Housekeeping done with this plan

@@ -156,7 +156,86 @@ python3 scripts/audit-level-settings.py --strict   # exit 1 while any level lack
 
 A level whose row ends in `NOTHING` has no way to open settings. Then test on a device: install the pack, start the level, hold OK for a second, and expect the form to list your fields.
 
-## 6. Check your work
+## 6. Test it on a real Chromecast through the coordinator
+
+Devices belong to the coordinator's queue: use it, not raw `adb`. Everything here is a job; each device runs one job at a time.
+
+1. **Install.** `task chromecast:screensaver:install DEVICE=chromecast-test-01 APK=/absolute/path/screensaver-aquarium-release.apk`. Its launcher check (`verify-launch`) compares the **home-screen icon artwork**; it does not start the app, and neither does a separate `verify-launch` job.
+2. **A normal launch** (the menu): `task chromecast:check DEVICE=chromecast-test-01 APP=screensaver DURATION=20`. It runs `am start -W -n …/.AquariumActivity`, holds for the duration, then restores the previous screen. Download the evidence with `task chromecast:evidence JOB=<id> OUT=<empty-dir>`: `screenshot.png` shows the screen, `wf.log` the app's own log (section 8).
+3. **A tank for one run** (no menu). `screensaver-show` acts on the **selected** screensaver, so select the app first, then restore the original:
+   ```
+   task chromecast:screensaver:select DEVICE=… COMPONENT=org.worldfoundry.screensaver/org.worldfoundry.screensaver.AquariumDreamService
+   task chromecast:screensaver:show   DEVICE=… LEVEL=aquarium_plants
+   task chromecast:screensaver:select DEVICE=… COMPONENT=<the component you read before>
+   ```
+   Read the original selection first with `task chromecast:screensaver:status DEVICE=…` (`selected_component`). Evidence: `screensaver.png`, `screensaver.json` (`observed_component` must be `.ScreensaverPreviewActivity`; the `tank` setting must still be the saved value) and `commands.json` (the `am start` line must carry `--es …LEVEL <id>`).
+4. **The Dream.** Select the app's Dream as above, then `task chromecast:screensaver:trigger DEVICE=…`; the job waits for Android to start it. Restore the selection afterwards.
+5. **Back.** Needs key presses while the app is in front, so a coordinator Remote session; not part of a one-shot job.
+
+Gotchas, each one met in practice:
+
+- `screensaver-show` on a screensaver without level support (Seahorse Grid selected) is refused with `screensaver-level-unavailable` before anything launches. That is the check working.
+- `LEVEL=` before coordinator 0.1.219 is ignored without an error: look at `commands.json` (step 3).
+- `screensaver-select` of a component that is **not installed** used to end `plugin-error` and fence the device (a readd had to clear it). From 0.1.219 it is a clean refusal, `invalid-request` with `screensaver-component-not-installed`, health unchanged.
+- A direct screenshot (`capture PERSONAL=true`) is refused while another job holds the device; a queued `capture` job is not.
+- The coordinator tasks run from the `chromecast-coordinator` checkout; the APK path is a file path, not a hash.
+
+## 7. The tanks: ids, menu names and Dream labels
+
+One manifest line gives three names. `wflevels/aquarium-menu.manifest` is the source; the Dream label is the optional third column. The id is the file name without `-standalone.iff`, and it is what `LEVEL` and `setSetting tank:<id>` take.
+
+| id | Menu name | Dream label |
+|---|---|---|
+| `random` | (not a level) | Random: the saved-choice default; the menu does not list it, and the tray's level chooser does not offer it |
+| `aquarium` | Clownfish & Sea Anemone | Clownfish |
+| `aquarium_blue_shrimp` | Blue Shrimp | Blue Shrimp |
+| `aquarium_betta` | Calm Betta | Betta |
+| `aquarium_jellyfish` | Jellyfish | Jellyfish |
+| `aquarium_lionfish` | Lionfish | Lionfish |
+| `aquarium_plants` | Planted Tank | **Planted Urchin** |
+| `aquarium_arowana` | Asian Arowana | Arowana |
+| `aquarium_tiger_barbs` | Tiger Barbs | Tiger Barbs |
+| `aquarium_thai_reef` | Gulf of Thailand Reef | Thai Reef |
+| `aquarium_thai_reef_anime` | Gulf of Thailand Reef - Anime | Thai Reef Anime |
+| `aquarium_sea_stars` | Sea Stars | Sea Stars |
+
+The menu shows eleven entries (1 of 11); the Dream's `tank` setting offers twelve choices, those eleven plus `random`. Two frames seen on Cast1 (2026‑11‑21) so you know what right looks like: `aquarium_jellyfish` is jellyfish drifting between two curved glass panes; `aquarium_plants` ("Planted Urchin") is tall plant stems with seahorses clinging to them and a purple sea urchin on the sand. The names differ on purpose, so a tank reported by the wrong name is usually not a bug: check the id.
+
+## 8. Read the engine log
+
+Each package writes its engine log to `/sdcard/Android/data/<package>/files/wf.log`. The coordinator collects it for you: `screensaver-list` saves the last 300 lines as `screensaver-engine.log` when the selected screensaver is a registered one, and a `check` job saves `wf.log` in its evidence. Lines seen so far:
+
+| Line | Meaning |
+|---|---|
+| `=== wf_dream start the menu (…) of N ===` | menu mode: a normal start |
+| `level-menu: showing 11 entries ("WF Aquarium")` | the menu opened with the manifest's eleven tanks |
+| `=== wf_dream start level N ===` | a tank, by its index in the bundle (manifest order), for the Dream, the preview or `LEVEL` |
+| `Back in a tank: returning to the menu`, `Back on the menu: leaving the app` | Back handling |
+| `PLANTS generation=… shoots=… mode=saltwater` | the planted-tank generator ran: the Planted Urchin tank |
+| `PLANTS settings-source=OAD … selector_override=0` | not yet explained. It appeared on a run whose frame showed the requested tank, so it does not mean the level was ignored |
+| `delta too large: …` | a long frame time, normal while a tank loads |
+
+## 9. Register a package with the coordinator
+
+The coordinator knows a screensaver package through one entry in `scripts/wf_device/plugins/android/applications.json` (in the `chromecast-coordinator` repo; the contract is `docs/settings-provider-contract.md` there). Without it `screensaver-show`, the tray and the level chooser do not know the package. Fields, from the Aquarium, Clocks and Seahorse Grid entries:
+
+| Field | What it is | Aquarium | 3D Clocks | Seahorse Grid |
+|---|---|---|---|---|
+| key | the registry name | `screensaver` | `clocks-screensaver` | `seahorse-screensaver` |
+| `package` | Android package | `org.worldfoundry.screensaver` | `org.worldfoundry.clocks` | `org.worldfoundry.seahorsegrid` |
+| `kind` | `screensaver` | yes | yes | yes |
+| `activity` | what a plain `launch` starts: the menu for the Aquarium | `…/.AquariumActivity` | `…/…ClocksActivity` | `…/…SeahorseGridActivity` |
+| `dream_component` | the DreamService to select | `…AquariumDreamService` | `…ClocksDreamService` | `…SeahorseGridDreamService` |
+| `preview_activity` | what `screensaver-show` starts | `…/.ScreensaverPreviewActivity` | the launcher activity | its own preview activity |
+| `preview_extra`, `preview_value` | an extra `show` always adds | `…DREAM` = `aquarium` | none | `…DREAM` = `seahorse_grid` |
+| `level_launch_extra` | the one-run extra; present means "supports `LEVEL`" | `…LEVEL` | `…LEVEL` | none |
+| `level_setting_id` | the settings-provider setting whose choices are the levels | `tank` | `clock` | none |
+| `settings_authority` | the content provider for `getCapabilities` and `setSetting` | `….screensaver.settings` | `….clocks.settings` | `….seahorsegrid.settings` |
+| `native`, `scenes` | `false`, `[]` for a screensaver | | | |
+
+The level list is not in the registry: the coordinator and the tray read it from the app's own settings provider (the `level_setting_id` setting's options), and refuse an id the app does not list before any launch. A package with no `level_launch_extra` gets no chooser and a `screensaver-level-unavailable` refusal.
+
+## 10. Check your work
 
 | What | Command |
 |---|---|
@@ -165,6 +244,8 @@ A level whose row ends in `NOTHING` has no way to open settings. Then test on a 
 | The catalogue and `choose()` in plain Java, and its order against the bundle's | `task test-level-catalog` |
 | The screensaver variants follow the manifest | `scripts/in-linux-container.sh python3 -m pytest tests/test_aquarium_screensaver_input.py tests/test_aquarium_screensaver_catalog.py -q` |
 | The menu on the desktop | `task run-aquarium-menu` |
+| The launch-mode decision (every row of section 4) | `task test-aquarium-launch-mode` |
+| The menu on a real Chromecast, a level start, the Dream | section 6 |
 | Every level has a settings object and a way to open it | `python3 scripts/audit-level-settings.py` (section 5) |
 
 Builds and tests run in containers, never on the host: see the Containers section of the repository `CLAUDE.md`.

@@ -287,18 +287,20 @@ ROOM = (-360.0, -80.0, -60.0, 360.0, 140.0, 240.0)    # one room holds everythin
 
 # Visibility mailboxes (global cells the director writes; 1 shows the actor)
 VIS = {"sun": 700, "moon": 701, "birds": 702, "boats": 703, "gauge": 704, "numerals_thai": 705, "numerals_roman": 706,
-       "arrow_up": 707, "arrow_dn": 708}
+       "arrow_up": 707, "arrow_dn": 708, "panel": 709}
 # Settings (plan D13, Q9): the TideHarbourSettings object's fields (wfsource/source/oas/tideharboursettings.oas,
 # with the clocks' shared clocksettings.inc). The director copies each field into its cell every frame with
 # property@; 0, a field's first choice, is the default.
 SETTINGS_ACTOR = "TideHarbourSettings"
-FIELD_LABELS = {"drift": "Camera drift", "numerals": "Dial numerals", "gauge": "Gauge board", "life": "Boats and birds"}
-OPTION_CELLS = {"drift": 690, "numerals": 691, "gauge": 692, "life": 693}
+FIELD_LABELS = {"drift": "Camera drift", "numerals": "Dial numerals", "gauge": "Gauge board", "life": "Boats and birds",
+                "panel": "River panel"}
+OPTION_CELLS = {"drift": 690, "numerals": 691, "gauge": 692, "life": 693, "panel": 694}
 OPTIONS = {   # name -> the values, default first (the cell holds the index)
     "drift": ("Slow", "Off"),
     "numerals": ("Roman", "Thai", "None"),     # Roman is the default (Will, 2026-11-21, reversing Q2)
     "gauge": ("On", "Off"),
     "life": ("On", "Off"),          # boats and birds
+    "panel": ("On", "Off"),         # the river panel: Off hides it and gives the harbour the whole screen
 }
 DEFAULT_OPTIONS = {k: 0 for k in OPTIONS}
 
@@ -389,6 +391,8 @@ def camera_poses(sod: float, opt: Dict[str, int]):
     """(cs_wide, LookAt, the panel is at the left, how much of it is on screen): where the camera shot is told to be."""
     az = DRIFT_DEG / 360.0 * sin_rev(sod / DRIFT_PERIOD) if opt["drift"] == 0 else 0.0
     left, vis = pn.slide(sod)
+    if opt["panel"] != 0:
+        vis = 0.0                                       # the panel is switched off: none of it is on screen, so the harbour has the whole screen
     dist = CAMERA_R / pn.harbour_scale(vis)
     lx = LOOK_AT[0] + pn.camera_shift_m(left, vis, dist)
     return (Pose(lx + dist * sin_rev(az), LOOK_AT[1] - dist * cos_rev(az), CAMERA_Z), Pose(lx, LOOK_AT[1], LOOK_AT[2]), left, vis)
@@ -479,7 +483,8 @@ def scene(day: int, sod: float, options: Dict[str, int] | None = None) -> Scene:
     visible = {VIS["sun"]: int(sun_on), VIS["moon"]: int(moon_on), VIS["birds"]: int(life and s.alt_deg > 0.0),
                VIS["boats"]: int(life), VIS["gauge"]: int(opt["gauge"] == 0),
                VIS["numerals_thai"]: int(opt["numerals"] == 1), VIS["numerals_roman"]: int(opt["numerals"] == 0),
-               VIS["arrow_up"]: int(reading.rise), VIS["arrow_dn"]: int(not reading.rise)}
+               VIS["arrow_up"]: int(reading.rise and opt["panel"] == 0), VIS["arrow_dn"]: int(not reading.rise and opt["panel"] == 0),
+               VIS["panel"]: int(opt["panel"] == 0)}
     return Scene(P, colours, visible, h, q, s)
 
 

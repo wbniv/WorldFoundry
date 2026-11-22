@@ -7,7 +7,7 @@
 @* docs/plans/2026-11-21-tide-harbour-clock.md, D13 and Q9). One object of this
 @* type stands in the Tide Harbour level; levcomp lists it as editable because
 @* it declares SHOW_AS_LIVE fields. The director reads every field each frame
-@* with property@ and copies it into global cells 690 to 693, so an edit takes
+@* with property@ and copies it into global cells 690 to 694, so an edit takes
 @* effect at once. Every field's first choice is its default, and 0.
 @*
 @* Help strings must not contain commas: prep splits macro arguments on them.
@@ -22,5 +22,6 @@ TYPEHEADER(Tide Harbour Settings,TideHarbourSettings)
 	TYPEENTRYINT32(Dial numerals,,0,2,0,"Roman|Thai|None",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The numerals on the tower dial: Roman numerals or Thai digits or none")
 	TYPEENTRYINT32(Gauge board,,0,1,0,"On|Off",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The tide gauge board on the pier post")
 	TYPEENTRYINT32(Boats and birds,,0,1,0,"On|Off",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The boats on the river and the birds over it")
+	TYPEENTRYINT32(River panel,,0,1,0,"On|Off",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The side panel with the next high and low water and a map of the river")
 	PROPERTY_SHEET_FOOTER
 TYPEFOOTER

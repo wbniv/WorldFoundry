@@ -22,6 +22,7 @@
 #include <runtime_properties.hpp>
 #include <runtime_property_host.hpp>
 
+#include "menu_key_latch.h"
 #include "planted_bridge.h"
 
 extern "C" bool WFAndroidEglInit(ANativeWindow* window);
@@ -91,7 +92,10 @@ constexpr int kMenuLevel = -1;      // TankPlayer.MENU: "show the engine's menu"
 constexpr const char* kMenuBundleAsset = "menu-cd.iff";
 std::atomic<bool> menuMode{false};
 // Remote keys from AquariumActivity (UI thread), applied on the game thread in WFAndroidPumpEvents.
-std::atomic<uint32_t> menuButtons{0};
+// Held keys plus a latch of presses not yet read, so a tap shorter than one frame (a Chromecast HD
+// frame can be 200 ms) still reaches the menu (docs/plans/2026-11-21-menu-key-latch.md).
+MenuKeyLatch menuKeys;
+bool menuSelectorWasVisible = false;   // game thread only
 std::atomic<bool> backPending{false};
 std::atomic<bool> leaveRequested{false};
 
@@ -187,7 +191,13 @@ extern "C" void WFAndroidPumpEvents() {
         }
     }
     if (menuMode.load()) {            // the launcher menu, in either app: it keeps the drawer and takes the remote
-        HALInjectJoystickButtons(menuButtons.load());
+        // A tank starting from the menu, or the menu coming back, drops presses not yet read.
+        const bool selectorVisible = levelmenu::SelectorVisible();
+        if (selectorVisible != menuSelectorWasVisible) {
+            menuSelectorWasVisible = selectorVisible;
+            menuKeys.clearLatch();
+        }
+        HALInjectJoystickButtons(menuKeys.takeFrame());
         if (backPending.exchange(false)) applyMenuBack();
     } else if (levelmenu::Drawer()) {
         levelmenu::SetDrawer(nullptr);
@@ -215,7 +225,7 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativePrepare(JNIEnv*, jclass) {
     closing.store(false);
     leaveRequested.store(false);
     backPending.store(false);
-    menuButtons.store(0);
+    menuKeys.clear();
     plantedBridge.reset();
 }
 
@@ -225,8 +235,8 @@ extern "C" JNIEXPORT jboolean JNICALL
 Java_org_worldfoundry_screensaver_TankPlayer_nativeKey(JNIEnv*, jclass, jint keyCode, jboolean down) {
     const uint32_t mask = WFAndroidMapKeyCode(keyCode);
     if (!mask || !menuMode.load()) return JNI_FALSE;
-    if (down) menuButtons.fetch_or(mask);
-    else menuButtons.fetch_and(~mask);
+    if (down) menuKeys.keyDown(mask);
+    else menuKeys.keyUp(mask);
     return JNI_TRUE;
 }
 
@@ -313,6 +323,9 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
     WFAndroidSetHudEnabled(0);
     // Set before HALStart opens the bundle, and on every run: one process may hold both modes.
     WFAndroidSetBundleAsset(secondBundle ? kMenuBundleAsset : nullptr);
+    // The menu starts with no key held or latched; the game thread is not running yet.
+    menuKeys.clear();
+    menuSelectorWasVisible = false;
     menuMode.store(menu);
     if (WFAndroidEglInit(window)) {
         activeWindow = window;
@@ -360,7 +373,7 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         WFAndroidEglTerm();
     }
     menuMode.store(false);
-    menuButtons.store(0);
+    menuKeys.clear();
     assets = nullptr;
     ANativeWindow_release(window);
 }

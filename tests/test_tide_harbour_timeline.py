@@ -183,3 +183,17 @@ def test_the_options_change_only_what_they_name():
     life = tl.scene(TODAY, sod, {"life": 1}).visible
     assert life[tl.VIS["boats"]] == 0 and life[tl.VIS["birds"]] == 0 and base.visible[tl.VIS["boats"]] == 1
     assert base.visible[tl.VIS["birds"]] == 1
+
+
+def test_the_river_panel_setting_off_hides_the_panel_and_gives_the_harbour_the_whole_screen():
+    sod = 15 * 3600 + 150.0                        # the panel is fully on screen at the right with the setting On
+    on, off = tl.scene(TODAY, sod), tl.scene(TODAY, sod, {"panel": 1})
+    assert on.visible[tl.VIS["panel"]] == 1 and off.visible[tl.VIS["panel"]] == 0
+    assert off.visible[tl.VIS["arrow_up"]] == 0 and off.visible[tl.VIS["arrow_dn"]] == 0          # the arrows follow the panel
+    assert on.visible[tl.VIS["arrow_up"]] + on.visible[tl.VIS["arrow_dn"]] == 1
+    drift = tl.DRIFT_DEG / 360.0 * tl.sin_rev(sod / tl.DRIFT_PERIOD)
+    assert off.poses["cs_wide"] == tl.Pose(tl.LOOK_AT[0] + tl.CAMERA_R * tl.sin_rev(drift),
+                                           tl.LOOK_AT[1] - tl.CAMERA_R * tl.cos_rev(drift), tl.CAMERA_Z)   # no pull-back, no shift
+    assert on.poses["cs_wide"] != off.poses["cs_wide"]
+    assert parts.visibility_group("panel_map") == "panel" and parts.visibility_group("panel_drum_0_h10") == "panel"
+    assert parts.visibility_group("panel_arrow_up") == "arrow_up"

@@ -19,6 +19,7 @@
 	int32 Dialnumerals;               /* Minumum: 0 Maximum: 2 Default: 0 */
 	int32 Gaugeboard;               /* Minumum: 0 Maximum: 1 Default: 0 */
 	int32 Boatsandbirds;               /* Minumum: 0 Maximum: 1 Default: 0 */
+	int32 Riverpanel;               /* Minumum: 0 Maximum: 1 Default: 0 */
 };
 /*============================================================================*/
 #endif         /* tideharboursettings_HT */

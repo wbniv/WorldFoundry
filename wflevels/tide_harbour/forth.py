@@ -12,8 +12,8 @@ When the look's whole-degree step changes it re-colours every re-coloured materi
 FACE_COLOR mailboxes (3037 + slot). tests/verify_tide_harbour_forth.py runs this script in the real
 zForth VM against timeline.scene; scripts/check-tide-harbour.py runs it in the engine.
 
-Global user mailboxes: 600-659 scratch, 689 the last look step, 690-693 the settings (copied every frame
-from the TideHarbourSettings object with property@, plan D13; 0 is the default), 700-706 visibility,
+Global user mailboxes: 600-659 scratch, 689 the last look step, 690-694 the settings (copied every frame
+from the TideHarbourSettings object with property@, plan D13; 0 is the default), 700-709 visibility,
 720-807 the next-turn scan (scan_words).
 """
 from __future__ import annotations
@@ -330,8 +330,9 @@ def frame_words(ix: Dict[str, int]) -> List[str]:
           f"  th-opt-gauge th@ 0 = if 1 else 0 then {V['gauge']} th!",
           f"  th-opt-numerals th@ 1 = if 1 else 0 then {V['numerals_thai']} th!",
           f"  th-opt-numerals th@ 0 = if 1 else 0 then {V['numerals_roman']} th!",
-          f"  {sc('rise')} 1 = if 1 else 0 then {V['arrow_up']} th!",
-          f"  {sc('rise')} 1 = if 0 else 1 then {V['arrow_dn']} th! ;"]
+          f"  {sc('rise')} 1 = th-opt-panel th@ 0 = & if 1 else 0 then {V['arrow_up']} th!",
+          f"  {sc('rise')} 1 = 0 = th-opt-panel th@ 0 = & if 1 else 0 then {V['arrow_dn']} th!",
+          f"  th-opt-panel th@ 0 = if 1 else 0 then {V['panel']} th! ;"]
     return L
 
 
@@ -352,6 +353,7 @@ def panel_words(ix: Dict[str, int]) -> List[str]:
            f"  {g('px')} {n(pn.SLIDE_S)} < if 1 {g('pw')} - 2 {g('pw')} * 1 - {g('px')} * {n(pn.SLIDE_S)} / + else {g('pw')} then",
            "  th-c01 dup dup * swap 2 * 3 swap - * " + f"{cell('pe')} th!",
            f"  {g('pe')} .5 < if 0 else 1 then {cell('pl')} th!  1 {g('pe')} 2 * - abs {cell('pv')} th!",
+           f"  th-opt-panel th@ if 0 {cell('pv')} th! then",          # the River panel setting Off: none of it is on screen
            f"  {g('pl')} if {n(-pn.HALF_W - pn.W / 2)} {n(pn.W)} {g('pv')} * + else {n(pn.HALF_W + pn.W / 2)} {n(pn.W)} {g('pv')} * - then {cell('pcu')} th! ;",
            # the panel is pinned to the camera the engine really has, which eases towards cs_wide rather than jumping to it
            # (about 10 % of the way a frame): the Camera actor's position and its pitch (b) and heading (c), in revolutions.

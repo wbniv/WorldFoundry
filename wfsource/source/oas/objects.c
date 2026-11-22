@@ -164,6 +164,7 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
         	case Actor::TideHarbourSettings_KIND:
 			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
 				object = OadTideHarbourSettings(startData); 
+			break;
         	case Actor::CuckooVillageSettings_KIND:
 			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
 				object = OadCuckooVillageSettings(startData); 
@@ -347,6 +348,7 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
 			break;
         	case Actor::TideHarbourSettings_KIND:
 			object = OadTideHarbourSettings(startData); 
+			break;
         	case Actor::CuckooVillageSettings_KIND:
 			object = OadCuckooVillageSettings(startData); 
 			break;

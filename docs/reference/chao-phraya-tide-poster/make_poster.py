@@ -14,6 +14,7 @@ printed table. Writes poster.html and the eight editable SVG panels (01-days.svg
 """
 from __future__ import annotations
 
+import base64
 import cmath
 import datetime as dt
 import html
@@ -224,13 +225,14 @@ PANELS = [
              text='The record’s own clock is not stated on the pages read. If it is GMT, as such archives usually are, the table is in Thai local time, UTC+7.'),
     ]),
     dict(key='harbour', title='In the harbour, and what we do not know', claims=[
-        dict(status='ours', src=[], by='design', chip='design (ours)',
-             text='In the Tide Harbour clock, one number moves the river, the boats on their ropes, the raft and a gauge board. The dial on the tower tells the time.'),
+        dict(status='ours', src=[], by='design; turns.py', chip='design (ours)',
+             text='One number moves the river, the boats and the raft; the tower’s dial tells the time. A side panel shows the next high and low water '
+                  '(17:51: 20:40, 2.7 m; 04:50, 1.3 m, as <code>turns.py</code> finds them), the level and a river map (© OpenStreetMap contributors), and swaps sides every ten minutes.'),
         dict(status='ours', src=['noaa'], by='make_constants.py',
-             text=f'NOAA’s formula carries a yearly amplitude factor <i>f</i>; ours sets it to 1. One year on lost almost nothing: '
+             text=f'NOAA’s formula has a yearly amplitude factor <i>f</i>; ours sets it to 1 and loses almost nothing: '
                   f'{VAL["fitted_2026_scored_on_2026"]["median_cm"]:.1f} cm on the fitted year, {VAL["fitted_2026_scored_on_2027"]["median_cm"]:.1f} cm on the next.'),
         dict(status='ours', src=[], by='design', chip='limit (ours)',
-             text='River flow is absorbed into the yearly wave and the compound terms, not modelled. Nothing here is about the Sun’s or Moon’s position.'),
+             text='River flow is folded into the yearly wave. Nothing here concerns the Sun or Moon.'),
     ]),
 ]
 
@@ -497,21 +499,13 @@ def panel_clock():
 
 
 def panel_harbour():
-    out = [svg_open('A design sketch of the harbour: a gauge board, a boat on its rope and a tide curve')]
-    out.append(f'<rect x="0" y="0" width="262" height="{SVG_H}" fill="#f3e7cf"/>')
-    wl = 86
-    out.append(f'<rect x="0" y="{wl}" width="262" height="{SVG_H - wl}" fill="#7aa3c0"/>')
-    out.append(f'<rect x="206" y="14" width="40" height="72" fill="#cfc7b0"/><circle cx="226" cy="36" r="13" fill="#fff8e6" stroke="#9a7a2e" stroke-width="2"/>')
-    out.append(line(226, 36, 226, 28, INK, 1.6) + line(226, 36, 233, 38, INK, 1.6))
-    out.append(f'<rect x="22" y="22" width="9" height="106" fill="#6a4a2c"/>')
-    for i, m in enumerate((1, 2, 3)):
-        y = wl + (Z0 - m) * 22 - 0
-        out.append(line(22, y, 31, y, '#fff', 1.6))
-        out.append(T(36, y + 4, f'{m} m', 11, 'start', INK, 400, '#f3e7cf' if y < wl else '#7aa3c0'))
-    out.append(f'<polygon points="9,{wl} 21,{wl - 6} 21,{wl + 6}" fill="{CORAL}"/>')
-    out.append(f'<path d="M92 {wl - 8} Q108 {wl + 10} 134 {wl + 10} L168 {wl + 10} Q186 {wl + 8} 194 {wl - 12} Q150 {wl - 4} 92 {wl - 8}Z" fill="#8a4a2a"/>')
-    out.append(line(194, wl - 10, 214, wl - 22, '#d8c8a0', 1.6))
-    out.append(T(6, 146, 'design sketch, not an engine screenshot', 11, 'start', INK, 400, '#7aa3c0'))
+    """The shipped level drawn by the engine (08-harbour-engine.png: scripts/check-tide-harbour.py --capture --no-fps --times
+    2026-01-08T17:51:00), beside the tide curve of that same day with 'now' at the moment of the picture."""
+    out = [svg_open('The Tide Harbour clock as the engine draws it, with its river panel, and that day’s tide curve')]
+    img = base64.b64encode((HERE / '08-harbour-engine.png').read_bytes()).decode('ascii')
+    out.append(f'<image x="0" y="0" width="232" height="130.5" href="data:image/png;base64,{img}"/>')
+    out.append(f'<rect x="0" y="0" width="232" height="130.5" fill="none" stroke="{GRID}" stroke-width="1"/>')
+    out.append(T(0, 146, 'engine capture, 8 Jan 17:51 Thai time', 11, 'start', MUTED))
     X0, X1, Y0, Y1 = 290, HALF - 12, 14, 112
     day = dt.datetime(2026, 1, 8)
     X = lambda h: X0 + (X1 - X0) * h / 24.0

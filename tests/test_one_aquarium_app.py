@@ -47,6 +47,25 @@ def test_one_key_table_for_both_hosts():
         assert "case AKEYCODE_DPAD_CENTER" not in source, "a second copy of the key table"
 
 
+def test_a_short_press_is_latched_until_the_game_thread_reads_it():
+    """docs/plans/2026-11-21-menu-key-latch.md: a tap shorter than one frame still reaches the menu."""
+    assert '#include "menu_key_latch.h"' in HOST
+    assert "menuButtons" not in HOST, "a bare held mask loses a tap between two frames"
+    key = re.search(r"TankPlayer_nativeKey\(.*?\n\}", HOST, re.S).group(0)
+    assert "menuKeys.keyDown(mask)" in key and "menuKeys.keyUp(mask)" in key
+    pump = re.search(r"void WFAndroidPumpEvents\(\) \{(.*?)\n\}", HOST, re.S).group(1)
+    assert "HALInjectJoystickButtons(menuKeys.takeFrame())" in pump
+    assert pump.index("menuKeys.clearLatch()") < pump.index("menuKeys.takeFrame()")
+    prepare = re.search(r"TankPlayer_nativePrepare\(.*?\n\}", HOST, re.S).group(0)
+    assert "menuKeys.clear()" in prepare
+    run = re.search(r"TankPlayer_nativeRun\(.*?\n\}", HOST, re.S).group(0)
+    assert run.index("menuKeys.clear()") < run.index("menuMode.store(menu)") < run.index("HALStart(")
+    assert run.rindex("menuKeys.clear()") > run.index("HALStart(")
+    latch = (SCREENSAVER / "src/main/cpp/menu_key_latch.h").read_text()
+    assert "#include <jni.h>" not in latch and "hal/" not in latch, "the latch stays pure C++"
+    assert "pressed_.exchange(0)" in latch
+
+
 def test_back_follows_the_game_app():
     """Back in a tank returns to the menu; Back on the menu leaves; an open form closes first."""
     body = re.search(r"void applyMenuBack\(\) \{(.*?)\n\}", HOST, re.S).group(1)

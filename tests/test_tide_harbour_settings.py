@@ -3,7 +3,7 @@ set, the director stepped and the pose checked.
 
 The type is wfsource/source/oas/tideharboursettings.oas: settings.inc, the clocks' shared Clock sheet
 (clocksettings.inc: Camera drift, Slow or Off) and Tide Harbour's own sheet (Dial numerals: Roman, Thai or none;
-Gauge board: on or off; Boats and birds: on or off), every field live and its first choice the default. One object
+Gauge board: on or off; Boats and birds: on or off; River panel: on or off), every field live and its first choice the default. One object
 stands in the level; every frame the director reads each field with property@ and copies it into global cells
 690 to 693. The VM half sets the object's fields as property@ answers them; scripts/check-tide-harbour.py --options
 does the same in the engine with --property launch overrides.
@@ -27,7 +27,8 @@ import level_modules  # noqa: E402
 
 tl, _parts, forth = level_modules.load("tide_harbour", "timeline", "parts", "forth")
 
-Q9 = {"drift": ("Slow", "Off"), "numerals": ("Roman", "Thai", "None"), "gauge": ("On", "Off"), "life": ("On", "Off")}
+Q9 = {"drift": ("Slow", "Off"), "numerals": ("Roman", "Thai", "None"), "gauge": ("On", "Off"), "life": ("On", "Off"),
+      "panel": ("On", "Off")}
 MAP = json.loads((ROOT / "wflevels/tide_harbour/actor-map.json").read_text())
 TODAY = tl.wall_day(dt.date(2026, 11, 21))
 
@@ -50,7 +51,7 @@ def test_one_object_in_the_level_and_the_director_reads_it_with_property_at():
         assert f"th-settings th-f-{k} property@ if th-opt-{k} th!" in text
 
 
-def test_the_phone_asset_lists_the_four_fields_of_the_placed_object():
+def test_the_phone_asset_lists_the_fields_of_the_placed_object():
     asset = json.loads((ROOT / "android/screensaver/src/clocks/assets/tide-harbour-settings.json").read_text())
     (owner,) = asset["objects"]
     assert owner["owner"] == MAP["indices"][tl.SETTINGS_ACTOR] and owner["type"] == "TideHarbourSettings"
@@ -96,11 +97,11 @@ def test_every_value_of_every_field_poses_the_scene_as_the_model_says(vm, field)
 
 def test_a_settings_object_that_does_not_answer_leaves_the_last_values(vm):
     v, host, ix, ids = vm
-    last = {"drift": 1, "numerals": 2, "gauge": 1, "life": 1}
+    last = {"drift": 1, "numerals": 2, "gauge": 1, "life": 1, "panel": 1}
     host.frame_at(TODAY, 54150.0, last)
     _r, dsp, rsp, writes = host.frame_at(TODAY, 54150.5, answer=False)
     assert (dsp, rsp) == (0, 0)
     assert host.read(v.ANSWERED_CELL) == 0
-    assert [host.read(c) for c in tl.OPTION_CELLS.values()] == [1, 2, 1, 1]
+    assert [host.read(c) for c in tl.OPTION_CELLS.values()] == [1, 2, 1, 1, 1]
     want = tl.scene(TODAY, 54150.5, last).poses["cs_wide"]
     assert abs(writes[(ix["cs_wide"], ids["X_POS"])] - want.x) < 1e-3
