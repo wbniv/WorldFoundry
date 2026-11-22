@@ -48,7 +48,7 @@ HOST = (mm.HOST
 assert HOST.count("th-tick") == 1 and "line[0] == 'R'" in HOST and "(int)id == 178" in HOST and "line[0] == 'P'" in HOST
 
 CONSTANTS = ["X_POS", "Y_POS", "Z_POS", "ROTATION_A", "ROTATION_B", "ROTATION_C", "X_SCALE", "Y_SCALE", "Z_SCALE",
-             "FACE_COLOR_TOP", "WALL_HOUR", "WALL_MINUTE", "WALL_SECOND", "WALL_DAY"]
+             "FACE_COLOR_TOP", "WALL_HOUR", "WALL_MINUTE", "WALL_SECOND", "WALL_DAY", "DISPLAY_ASPECT", "DISPLAY_VFOV"]
 FIELDS = [("X_POS", 0), ("Y_POS", 1), ("Z_POS", 2), ("ROTATION_A", 3), ("ROTATION_B", 4), ("ROTATION_C", 5),
           ("X_SCALE", 6), ("Y_SCALE", 7), ("Z_SCALE", 8)]
 TIDE_CELL = 600 + forth.CELLS.index("tide")
@@ -91,10 +91,11 @@ class Host(mm.Host):
         for fname, v in (("X_POS", cam.x), ("Y_POS", cam.y), ("Z_POS", cam.z), ("ROTATION_B", pitch % 1.0), ("ROTATION_C", heading % 1.0)):
             self.proc.stdin.write(f"A {actor} {self.ids[fname]} {v!r}\n")
 
-    def frame_at(self, day: int, sod: float, options=None, reset_look=True, answer=True):
+    def frame_at(self, day: int, sod: float, options=None, reset_look=True, answer=True, display=tl.DISPLAY_16_9):
         h, m = int(sod // 3600) % 24, int(sod // 60) % 60
         sec = sod % 60.0
-        lines = [("WALL_DAY", day), ("WALL_HOUR", h), ("WALL_MINUTE", m), ("WALL_SECOND", sec)]
+        lines = [("WALL_DAY", day), ("WALL_HOUR", h), ("WALL_MINUTE", m), ("WALL_SECOND", sec),
+                 ("DISPLAY_ASPECT", display[0]), ("DISPLAY_VFOV", display[1])]       # the engine's display mailboxes
         for name, v in lines:
             self.proc.stdin.write(f"M {self.ids[name]} {v!r}\n")
         self.set_settings((options or {}) if answer else None)
@@ -122,13 +123,13 @@ class Host(mm.Host):
         return float(line[2])
 
 
-def prime(host: Host, day: int, sod: float, options=None) -> None:
+def prime(host: Host, day: int, sod: float, options=None, display=tl.DISPLAY_16_9) -> None:
     """Run frames at this time until the next-turn scan has finished, as the level would have by the time the panel is
     seen: the panel's drums and arrows read its result."""
     for name in ("rdy", "act"):
         host.proc.stdin.write(f"M {scan_cell(name)} 0\n")
     for _ in range(40):
-        host.frame_at(day, sod, options, reset_look=False)
+        host.frame_at(day, sod, options, reset_look=False, display=display)
         if host.read(scan_cell("rdy")) == 1 and host.read(scan_cell("act")) == 0:
             return
     raise RuntimeError(f"the scan did not finish at {tl.date_of(day)} {sod}")
@@ -138,14 +139,15 @@ def compare(host: Host, ix, ids, cases):
     worst = {"pos": 0.0, "rot": 0.0, "scale": 0.0, "colour": 0, "tide": 0.0}
     bad = []
     colour_box = ids["FACE_COLOR_TOP"]
-    for day, sod, options in cases:
-        prime(host, day, sod, options)
-        r, dsp, rsp, writes = host.frame_at(day, sod, options)
-        label = f"{tl.date_of(day)} {sod:.2f} {options or ''}"
+    for day, sod, options, *rest in cases:
+        display = rest[0] if rest else tl.DISPLAY_16_9          # (DISPLAY_ASPECT, DISPLAY_VFOV); a television unless the case says
+        prime(host, day, sod, options, display)
+        r, dsp, rsp, writes = host.frame_at(day, sod, options, display=display)
+        label = f"{tl.date_of(day)} {sod:.2f} {options or ''}" + (f" display {display[0]:.3f}:1 {display[1]:g} deg" if rest else "")
         if r != 0 or dsp != 0 or rsp != 0:
             bad.append(f"{label}: VM result {r}, data stack {dsp}, return stack {rsp}")
             continue
-        sc = tl.scene(day, sod, options)
+        sc = tl.scene(day, sod, options, display)
         for name, pose in sc.poses.items():
             for fname, k in FIELDS:
                 key = (ix[name], ids[fname])
@@ -283,6 +285,10 @@ def cases():
                     {"drift": 1, "numerals": 2, "gauge": 1, "life": 1}):
         out.append((today, 15 * 3600 + 150.0, options))
         out.append((today, 21 * 3600 + 10.0, options))
+    # the display mailboxes (plan docs/plans/2026-11-22-display-mailboxes.md): the panel at both sides, in and sliding, on five screen shapes
+    for aspect in (1520 / 680, 21 / 9, 4 / 3, 0.45, 1.0):
+        for sod in (10 * 3600 + 30.0, 9 * 3600 + 600 + 1.45, 10 * 3600 + 700.0):
+            out.append((today, sod, None, (aspect, 60.0)))
     return out
 
 

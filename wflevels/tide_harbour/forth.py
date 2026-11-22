@@ -45,7 +45,7 @@ assert len(SCAN_CELLS) <= KEPT0 - SCAN0
 PANEL0 = 810                     # the river panel's working cells (panel_words): 810-859
 PANEL_CELLS = ["pl", "pv", "ps", "pd", "pe", "pw", "px", "pk", "ph", "pcu", "lx", "cx", "cy", "cz", "kx", "ky", "kz", "fx", "fy", "fz",
                "rx", "ry", "ux", "uy", "uz", "pa", "pc", "pu", "pq", "pdp", "pac", "psc", "pm", "pt", "pslot", "phour", "pten",
-               "pcs", "pcc", "pbs", "pbc", "pdv"]
+               "pcs", "pcc", "pbs", "pbc", "pdv", "phw"]
 assert len(PANEL_CELLS) <= 50 and not set(PANEL_CELLS) & set(CELLS)
 WORDS = {"floor", "frac", "trunc", "mod", "c01", "x", "y", "z", "a", "b", "c", "sx", "sy", "sz", "col", "byte", "pack",
          "ramp", "tide-sum", "sun", "slow", "palette", "bar-rgb", "recolour", "bars", "boats", "sky", "lights", "clock",
@@ -350,7 +350,10 @@ def panel_words(ix: Dict[str, int]) -> List[str]:
            "  th-c01 dup dup * swap 2 * 3 swap - * " + f"{cell('pe')} th!",
            f"  {g('pe')} .5 < if 0 else 1 then {cell('pl')} th!  1 {g('pe')} 2 * - abs {cell('pv')} th!",
            f"  th-opt-panel th@ if 0 {cell('pv')} th! then",          # the River panel setting Off: none of it is on screen
-           f"  {g('pl')} if {n(-pn.HALF_W - pn.W / 2)} {n(pn.W)} {g('pv')} * + else {n(pn.HALF_W + pn.W / 2)} {n(pn.W)} {g('pv')} * - then {cell('pcu')} th! ;",
+           # the screen's edge at the panel's depth, from the engine's display mailboxes (written at the start and when the
+           # display changes size): DEPTH * tan(vfov / 2) * aspect. The panel keeps its size; its edge sits at the real screen edge.
+           f"  INDEXOF_DISPLAY_VFOV th@ 720 / tan-rev {n(pn.DEPTH)} * INDEXOF_DISPLAY_ASPECT th@ * {cell('phw')} th!",
+           f"  {g('pl')} if {g('phw')} -1 * {n(-pn.W / 2)} + {n(pn.W)} {g('pv')} * + else {g('phw')} {n(pn.W / 2)} + {n(pn.W)} {g('pv')} * - then {cell('pcu')} th! ;",
            # the panel is pinned to the camera the engine really has, which eases towards cs_wide rather than jumping to it
            # (about 10 % of the way a frame): the Camera actor's position and its pitch (b) and heading (c), in revolutions.
            # Its forward is (sin c cos b, cos c cos b, sin b); with no roll, right is (cos c, -sin c, 0) and up is right x forward.

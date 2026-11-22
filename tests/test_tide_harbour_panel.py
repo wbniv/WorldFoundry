@@ -50,6 +50,21 @@ def test_the_panel_fills_the_screen_edge_to_edge_on_both_sides():
             assert abs(top) < 0.01 and abs(bottom - 720) < 0.01, (sod, top, bottom)
 
 
+def test_the_television_is_unchanged_and_every_other_screen_gets_its_own_edge():
+    # plan docs/plans/2026-11-22-display-mailboxes.md: half_w() defaults are the 16:9 television, exactly today's HALF_W
+    assert pn.half_w() == pn.HALF_W and pn.half_w(16.0 / 9.0, 60.0) == pn.HALF_W
+    for aspect, w, h in ((1520 / 680, 1520, 680), (21 / 9, 2520, 1080), (4 / 3, 1440, 1080), (0.45, 450, 1000), (1.0, 900, 900)):
+        hw = pn.half_w(aspect, 60.0)
+        for sod in TIMES:
+            fr = pn.camera_frame(DAY, sod)
+            lo, hi = pn.panel_u_range(1, hw)          # the panel at the left: its near edge is the screen's left edge
+            x, _ = pn.project(fr, pn.place(fr, lo, 0.0), w, h)
+            assert abs(x) < 0.01, (aspect, sod, x)
+            lo, hi = pn.panel_u_range(0, hw)          # at the right: its near edge is the screen's right edge
+            x, _ = pn.project(fr, pn.place(fr, hi, 0.0), w, h)
+            assert abs(x - w) < 0.01, (aspect, sod, x, w)
+
+
 def test_a_part_keeps_its_place_on_the_screen_as_the_camera_drifts():
     spots = []
     for sod in TIMES:

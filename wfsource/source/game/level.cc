@@ -2014,6 +2014,14 @@ Level::WriteSystemMailbox( int boxnum, Scalar value )
 
 //==============================================================================
 
+void
+Level::SetDisplaySize( int width, int height )
+{
+	_displayTracker.update( width, height );	// effective settings: the level's own, overridden by the arguments
+}
+
+//==============================================================================
+
 Scalar
 Level::ReadSystemMailbox( int boxnum ) const
 {
@@ -2050,6 +2058,16 @@ Level::ReadSystemMailbox( int boxnum ) const
 
         case EMAILBOX_WALL_UTC_OFFSET:
             return Scalar::FromFloat( static_cast<float>( _wallUtcOffset ) );
+
+        // The display's shape, written at level start and on a size change (display_mailboxes.hp).
+        case EMAILBOX_DISPLAY_ASPECT:      return Scalar::FromFloat( _displayTracker.state().aspect );
+        case EMAILBOX_DISPLAY_VFOV:        return Scalar::FromFloat( _displayTracker.state().verticalFov );
+        case EMAILBOX_DISPLAY_WIDTH:       return Scalar::FromFloat( static_cast<float>( _displayTracker.state().width ) );
+        case EMAILBOX_DISPLAY_HEIGHT:      return Scalar::FromFloat( static_cast<float>( _displayTracker.state().height ) );
+        case EMAILBOX_DISPLAY_VIEW_X:      return Scalar::FromFloat( static_cast<float>( _displayTracker.state().viewX ) );
+        case EMAILBOX_DISPLAY_VIEW_Y:      return Scalar::FromFloat( static_cast<float>( _displayTracker.state().viewY ) );
+        case EMAILBOX_DISPLAY_VIEW_WIDTH:  return Scalar::FromFloat( static_cast<float>( _displayTracker.state().viewWidth ) );
+        case EMAILBOX_DISPLAY_VIEW_HEIGHT: return Scalar::FromFloat( static_cast<float>( _displayTracker.state().viewHeight ) );
 
         case EMAILBOX_DELTA_TIME:
             return LevelClock().Delta();

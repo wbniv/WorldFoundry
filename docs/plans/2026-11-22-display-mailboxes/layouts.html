@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Display layouts</title><style>
+:root{--bg:#161a18;--fg:#f0f0e4;--mut:#aab1a4;--warn:#ff7864;--ok:#8cdc96;--amb:#ffbe5a}
+@media (prefers-color-scheme: light){:root{--bg:#f4f4ec;--fg:#1c211d;--mut:#555d54;--warn:#c0392b;--ok:#1e7a37;--amb:#a15f00}}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,sans-serif;padding:16px;max-width:1100px;margin:auto}
+h1{font-size:20px;margin:0 0 4px}p{color:var(--mut);margin:4px 0 12px}.row{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+.box{flex:1 1 360px}.box h2{font-size:15px;margin:0 0 6px}canvas{width:100%;background:#0e1428;border:1px solid var(--mut)}
+label{display:block;margin:10px 0 2px}input[type=range]{width:100%}.k{display:inline-block;margin:6px 10px 0 0;padding:2px 8px;border:1px solid var(--mut);border-radius:4px;cursor:pointer;color:var(--fg);background:none;font:inherit}
+.r{font-variant-numeric:tabular-nums}.w{color:var(--warn)}.o{color:var(--ok)}</style></head><body>
+<h1>Where the river panel sits, for any screen shape</h1>
+<p>A full-height strip, 0.48 of the screen's height wide (27 % of a 16:9 screen), on the right. Drag the slider or pick a screen. Red hatching is off the screen.</p>
+<div><button class="k" data-a="1.7778">TV 16:9 (1.778)</button><button class="k" data-a="2.2353">Pixel landscape (2.235)</button><button class="k" data-a="2.3333">Ultrawide 21:9 (2.333)</button><button class="k" data-a="1.3333">Tablet 4:3 (1.333)</button><button class="k" data-a="0.4500">Phone portrait (0.450)</button></div><label for="a">Screen aspect (width / height): <b id="av">1.778</b></label>
+<input id="a" type="range" min="0.4" max="2.6" step="0.005" value="1.778">
+<div class="row"><div class="box"><h2 style="color:var(--amb)">Today: placed for a centred 16:9 frame</h2><canvas id="c0" width="560" height="320"></canvas><div class="r" id="t0"></div></div>
+<div class="box"><h2 style="color:var(--ok)">With the display mailboxes: placed for the screen that is drawn</h2><canvas id="c1" width="560" height="320"></canvas><div class="r" id="t1"></div></div></div>
+<script>
+const F=0.27,H=300;
+function place(kind,asp){const w=H*asp,fr=H*16/9;if(kind==0){const r=w/2+fr/2;return [r-F*fr,r]}return [w-F*fr,w]}
+function draw(cv,kind,asp,out){const x=cv.getContext('2d');x.clearRect(0,0,cv.width,cv.height);const w=H*asp,s=Math.min(1,(cv.width-80)/(w*1.4)),W=w*s,Hh=H*s,x0=(cv.width-W)/2-(kind==0?0:0),y0=10;
+x.fillStyle='#0e1428';x.fillRect(x0,y0,W,Hh);x.strokeStyle='#789';x.strokeRect(x0,y0,W,Hh);
+let [l,r]=place(kind,asp);l*=s;r*=s;const vl=Math.max(l,0),vr=Math.min(r,W);x.fillStyle='#96784a';if(vr>vl)x.fillRect(x0+vl,y0,vr-vl,Hh);
+x.strokeStyle='#eb463c';if(r>W){for(let k=0;k<r-W;k+=6){x.beginPath();x.moveTo(x0+W+k,y0+Hh);x.lineTo(x0+W+k+6,y0);x.stroke()}x.strokeRect(x0+W,y0,r-W,Hh)}
+if(l<0)x.strokeRect(x0+l,y0,-l,Hh);const vis=Math.max(0,vr-vl)/(r-l),gap=W-Math.min(r,W);
+out.innerHTML='panel '+((r-l)/W*100).toFixed(0)+' % of the screen wide, <span class="'+(vis<.99?'w':'o')+'">'+(vis*100).toFixed(0)+' % visible</span>, '+(gap>0.5?'gap to the edge '+(gap/Hh*680).toFixed(0)+' px at 680 high':'at the edge')}
+const a=document.getElementById('a'),av=document.getElementById('av');
+function go(){const v=+a.value;av.textContent=v.toFixed(3);draw(document.getElementById('c0'),0,v,document.getElementById('t0'));draw(document.getElementById('c1'),1,v,document.getElementById('t1'))}
+a.oninput=go;document.querySelectorAll('.k').forEach(b=>b.onclick=()=>{a.value=b.dataset.a;go()});go();
+</script></body></html>

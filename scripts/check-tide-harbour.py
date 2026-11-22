@@ -19,6 +19,7 @@ Run inside the Linux container, against the container-built engine, under xvfb:
   --times T [T ...]    YYYY-MM-DDTHH:MM:SS[.mmm] Thai times for either mode
   --set NAME=INDEX     with --capture: a setting's value (e.g. panel=1 turns the river panel Off)
   --no-fps             with --capture: hide the engine's frame-rate counter (the poster's picture)
+  --size WxH           with --capture: the window size, repeatable (the display mailboxes' five shapes, plan 2026-11-22-display-mailboxes)
 
 The colours the director writes (FACE_COLOR 3037-3039) are write-only in the engine, so they are checked in the
 VM (tests/verify_tide_harbour_forth.py) and seen in the captures. Plan: docs/plans/2026-11-21-tide-harbour-clock.md
@@ -69,14 +70,14 @@ def indices() -> dict:
 
 
 class Engine:
-    def __init__(self, when: str, port: int, extra: list[str] | None = None):
+    def __init__(self, when: str, port: int, extra: list[str] | None = None, size: tuple[int, int] = (1280, 720)):
         env = os.environ.copy()
         env["LD_LIBRARY_PATH"] = f"{ROOT / 'engine' / 'libs'}:{env.get('LD_LIBRARY_PATH', '')}"
         env["LSAN_OPTIONS"] = "detect_leaks=0"
         env["WF_WALL_CLOCK"] = f"{when}+07:00@0"
         self.log = open(ROOT / "tests" / f".wf_tide_harbour_{port}.log", "w")
         self.proc = subprocess.Popen(
-            [str(WF_GAME), f"-L{LEVEL}", "-width=1280", "-height=720", "-rate20",
+            [str(WF_GAME), f"-L{LEVEL}", f"-width={size[0]}", f"-height={size[1]}", "-rate20",
              "--debug-port", str(port), "--debug-bind", "127.0.0.1", *(extra or [])],
             cwd=str(GAME_CWD), env=env, stdout=self.log, stderr=subprocess.STDOUT,
             preexec_fn=lambda: resource.setrlimit(resource.RLIMIT_CORE, (0, 0)))
@@ -239,18 +240,20 @@ def options(port: int) -> int:
     return 1 if failures else 0
 
 
-def capture(outdir: Path, times: list[str], port: int, frames: int = 40, no_fps: bool = False, sets: list[str] | None = None) -> int:
+def capture(outdir: Path, times: list[str], port: int, frames: int = 40, no_fps: bool = False, sets: list[str] | None = None,
+            sizes: list[tuple[int, int]] | None = None) -> int:
     outdir = outdir.resolve()          # the engine runs from another directory
     outdir.mkdir(parents=True, exist_ok=True)
-    for i, spec in enumerate(times):
+    runs = [(spec, size) for size in (sizes or [(1280, 720)]) for spec in times]
+    for i, (spec, size) in enumerate(runs):
         extra = ["--no-fps"] if no_fps else []
         for item in sets or []:                       # NAME=INDEX, a setting's launch override (the options mode's path)
             name, _, value = item.partition("=")
             extra.append(f"--property={tl.SETTINGS_ACTOR}.{tl.FIELD_LABELS[name]}={int(value)}")
-        e = Engine(spec, port + i, extra or None)
+        e = Engine(spec, port + i, extra or None, size)
         try:
             e.step(frames)          # enough for the next-turn scan (ten frames) and the panel to settle
-            name = spec.replace(":", "").replace("-", "")
+            name = spec.replace(":", "").replace("-", "") + (f"-{size[0]}x{size[1]}" if sizes else "")
             e.screenshot(outdir / f"{name}.png")
             print(f"captured {spec} -> {outdir / (name + '.png')}")
         finally:
@@ -267,6 +270,7 @@ def main() -> int:
     ap.add_argument("--frames", type=int, default=40, help="frames to step before each capture (default 40)")
     ap.add_argument("--set", action="append", metavar="NAME=INDEX", help="--capture: a setting's value, e.g. panel=1 (Off); names: " + ", ".join(tl.OPTIONS))
     ap.add_argument("--no-fps", action="store_true", help="--capture: hide the engine's frame-rate counter (for the poster)")
+    ap.add_argument("--size", action="append", metavar="WxH", help="--capture: the window size (default 1280x720); repeat for several. The names carry the size")
     ap.add_argument("--port", type=int, default=7830)
     args = ap.parse_args()
     if not WF_GAME.exists():
@@ -276,7 +280,8 @@ def main() -> int:
         print(f"level not built: {LEVEL} (task tide-harbour-level)", file=sys.stderr)
         return 2
     if args.capture:
-        return capture(args.capture, args.times or MOMENTS, args.port, args.frames, args.no_fps, args.set)
+        return capture(args.capture, args.times or MOMENTS, args.port, args.frames, args.no_fps, args.set,
+                       [tuple(int(v) for v in s.lower().split("x")) for s in args.size] if args.size else None)
     rc = 0
     if args.compare:
         rc |= compare(args.times or COMPARE, args.port)

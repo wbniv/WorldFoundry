@@ -16,7 +16,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "wflevels" / "tide_harbour" / "blender_create_tide_harbour.py"
 FONT = ROOT / "wflevels" / "tide_harbour" / "fonts" / "NotoSansThai-Bold.ttf"     # static and bold: no offset embolden, which tears (fonts/README.md)
-CREDIT_FONT = Path("/usr/lib/blender/datafiles/fonts/DejaVuSansMono.woff2")     # not Blender's default Inter: its M came out filled
 
 
 def glyph_texts() -> list:
@@ -29,14 +28,17 @@ def glyph_texts() -> list:
 
 
 class GlyphCoverage(unittest.TestCase):
-    def test_the_map_credit_is_drawn(self):
-        """The river map is OpenStreetMap data (ODbL): the panel must carry the credit wherever the map is shown."""
+    def test_the_credit_left_the_panel_and_is_in_the_settings_form(self):
+        """The river map is OpenStreetMap data (ODbL). Will, 2026-11-22: "remove the (c) from the panel. you can add it to an about
+        box". The attribution moves in one change: no credit plate on the panel, and a read-only About row in the settings form."""
         src = SCRIPT.read_text(encoding="utf-8")
-        self.assertIn("CREDIT = '© OpenStreetMap contributors'", src)
-        self.assertIn("shapes[CREDIT]", src)
-        self.assertIn("put(body, CREDIT,", src)
-        self.assertIn("CREDIT_FONT = Path('/usr/lib/blender/datafiles/fonts/DejaVuSansMono.woff2')", src)
-        self.assertNotIn("outlines('pc', [CREDIT], None)", src, "the default font (Inter) draws a filled M: use CREDIT_FONT")
+        self.assertNotIn("CREDIT", src, "the panel must not carry the credit any more")
+        oas = (ROOT / "wfsource/source/oas/tideharboursettings.oas").read_text(encoding="utf-8")
+        row = [l for l in oas.splitlines() if l.lstrip().startswith("TYPEENTRYINT32(About the map")]
+        self.assertEqual(len(row), 1, "the settings form needs exactly one About row")
+        self.assertIn('"(c) OpenStreetMap contributors|ODbL: openstreetmap.org/copyright"', row[0],
+                      "the form must show the credit and where the licence is")
+        self.assertNotIn("SHOW_AS_LIVE", row[0], "the About row is read-only: a live field would be editable")
 
     def test_thai_text_is_bold_and_not_offset(self):
         """An offset (embolden) curve self-intersects on the thin loops of ๕ ๗ ๘ and Blender's fill tears them: the digits came
@@ -65,18 +67,6 @@ class GlyphCoverage(unittest.TestCase):
         for t in glyph_texts():
             for ch in t:
                 self.assertIn(ord(ch), cmap, f"{t!r}: U+{ord(ch):04X} is not in the font")
-
-    def test_the_credit_is_in_its_font(self):
-        try:
-            from fontTools.ttLib import TTFont
-        except ImportError:
-            self.skipTest("fontTools is not installed")
-        if not CREDIT_FONT.is_file():
-            self.skipTest(f"{CREDIT_FONT} is not installed")
-        credit = re.search(r"^CREDIT = '(.+)'", SCRIPT.read_text(encoding="utf-8"), re.M).group(1)
-        cmap = TTFont(str(CREDIT_FONT)).getBestCmap()
-        for ch in credit:
-            self.assertIn(ord(ch), cmap, f"U+{ord(ch):04X} is not in {CREDIT_FONT.name}")
 
 
 if __name__ == "__main__":

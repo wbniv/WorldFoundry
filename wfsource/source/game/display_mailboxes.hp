@@ -1,0 +1,73 @@
+// display_mailboxes.hp: the screen's shape, for the DISPLAY_* system mailboxes. Header-only and free of engine types, so a unit
+// test can include it alone (tests/display_mailboxes_test.cc, CTest display_mailboxes).
+//
+// Plan: docs/plans/2026-11-22-display-mailboxes.md. A level script that lays something out against the screen (the Tide Harbour
+// river panel) used to assume a 16:9 frame because it could not read the real one. The engine already computes the view the
+// projection uses (gfx/authored_view.hp: aspect, vertical field of view, the rectangle actually drawn); this publishes it.
+//
+//   DISPLAY_ASPECT 1927       the projection's aspect, the drawn rectangle's width / height
+//   DISPLAY_VFOV 1928         the projection's vertical field of view, degrees
+//   DISPLAY_WIDTH 1929        the surface in pixels
+//   DISPLAY_HEIGHT 1930
+//   DISPLAY_VIEW_X 1931       the rectangle actually drawn, in surface pixels (the whole surface unless a maximum aspect
+//   DISPLAY_VIEW_Y 1932       pillarboxes it)
+//   DISPLAY_VIEW_WIDTH 1933
+//   DISPLAY_VIEW_HEIGHT 1934
+//
+// They are NOT sampled every frame. update() takes the surface size and the level's authored and maximum aspect (the
+// arguments override applied, as wfview::effective() does), and recomputes only when one of those four differs from the last
+// call or nothing has been computed yet: at the start of a level (a new Level has a fresh tracker) and when the surface changes
+// size (a rotated phone, a resized window, split screen). Every other frame costs two integer and two float comparisons.
+#ifndef WF_GAME_DISPLAY_MAILBOXES_HP
+#define WF_GAME_DISPLAY_MAILBOXES_HP
+
+#include <gfx/authored_view.hp>
+
+namespace wf {
+
+struct DisplayState {
+    float aspect = 0.0f;       // DISPLAY_ASPECT
+    float verticalFov = 0.0f;  // DISPLAY_VFOV, degrees
+    int   width = 0;           // DISPLAY_WIDTH
+    int   height = 0;          // DISPLAY_HEIGHT
+    int   viewX = 0;           // DISPLAY_VIEW_X
+    int   viewY = 0;           // DISPLAY_VIEW_Y
+    int   viewWidth = 0;       // DISPLAY_VIEW_WIDTH
+    int   viewHeight = 0;      // DISPLAY_VIEW_HEIGHT
+};
+
+class DisplayTracker {
+public:
+    // Recompute when the inputs changed (or on the first call). Returns true if the state was rewritten.
+    bool update(int width, int height, float authoredAspect, float maximumAspect) {
+        if (valid_ && width == width_ && height == height_ && authoredAspect == authored_ && maximumAspect == maximum_)
+            return false;
+        valid_ = true;
+        width_ = width; height_ = height; authored_ = authoredAspect; maximum_ = maximumAspect;
+        const wfview::View v = wfview::view(width, height, authoredAspect, maximumAspect);
+        state_.aspect = v.aspect;
+        state_.verticalFov = v.verticalFov;
+        state_.width = width < 1 ? 1 : width;           // wfview::view treats a zero or negative size as 1
+        state_.height = height < 1 ? 1 : height;
+        state_.viewX = v.x; state_.viewY = v.y; state_.viewWidth = v.width; state_.viewHeight = v.height;
+        ++writes_;
+        return true;
+    }
+    // The same, with the level's effective settings (the level's own, overridden by --authored-aspect and --maximum-aspect).
+    bool update(int width, int height) {
+        const wfview::Settings s = wfview::effective();
+        return update(width, height, s.authoredAspect, s.maximumAspect);
+    }
+    const DisplayState& state() const { return state_; }
+    int writes() const { return writes_; }   // how many times the state was rewritten: 1 per level start or change
+private:
+    DisplayState state_;
+    bool  valid_ = false;
+    int   width_ = 0, height_ = 0;
+    float authored_ = 0.0f, maximum_ = 0.0f;
+    int   writes_ = 0;
+};
+
+} // namespace wf
+
+#endif

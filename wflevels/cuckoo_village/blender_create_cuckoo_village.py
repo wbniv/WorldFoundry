@@ -194,6 +194,7 @@ cottages = [(tuple(objs[f'cottage_{i + 1:02}'].location), math.degrees(objs[f'co
 for part in bv.all_parts(tl.TZ, cottages, scope['height']).values():
     actor = mesh_actor(part.name, part.verts, part.faces, part.tiles)
     actor['wf_Visibility Mailbox'] = tl.BAVARIA_CELL
+    actor['cat_sections'] = json.dumps([list(s) for s in part.sections])        # the parts catalogue's labelled pieces
     if part.name in tl.FIG_B_NAMES:
         actor.location = objs[tl.FIG_NAMES[tl.FIG_B_NAMES.index(part.name)]].location     # the twin's pivot
 
@@ -201,6 +202,25 @@ for part in bv.all_parts(tl.TZ, cottages, scope['height']).values():
 for i in range(tl.HOUSES):
     objs[f'cottage_light_{i + 1:02}']['wf_Visibility Mailbox'] = GLOW_CELL0 + i
 objs[tl.BIRD_NAME]['wf_Visibility Mailbox'] = BIRD_CELL
+
+# Part inventory (not part of a normal build): CUCKOO_INVENTORY=<file.json> writes one record per actor, for the parts catalogue
+# (scripts/cuckoo-village-catalogue.py): its name, mesh, triangles, size, place, what shows it and the director's reach.
+inventory_path = os.environ.get('CUCKOO_INVENTORY')
+if inventory_path:
+    rows = []
+    for o in objs:
+        mesh = o.data if o.type == 'MESH' else None
+        row = dict(name=o.name, type=o.type, parent=o.parent.name if o.parent else None, location=[round(v, 4) for v in o.location],
+                   rotation_deg=[round(math.degrees(v), 2) for v in o.rotation_euler], scale=[round(v, 4) for v in o.scale],
+                   mailbox=o.get('wf_Visibility Mailbox'), schema=o.get('wf_schema_path'), props={k: (v if isinstance(v, (int, float, str)) else str(v))
+                   for k, v in o.items() if k.startswith('wf_') or k == 'component'})
+        if mesh is not None:
+            row.update(mesh=mesh.name, users=mesh.users, triangles=sum(len(p.vertices) - 2 for p in mesh.polygons), vertices=len(mesh.vertices),
+                       dimensions=[round(v, 4) for v in o.dimensions], materials=[m.name if m else None for m in mesh.materials],
+                       images=sorted({n.image.name for m in mesh.materials if m and m.use_nodes for n in m.node_tree.nodes if n.type == 'TEX_IMAGE' and n.image}))
+        rows.append(row)
+    Path(inventory_path).write_text(json.dumps(rows, indent=1))
+    print(f'{TAG} inventory: {len(rows)} objects -> {inventory_path}')
 
 # Review renders (not part of a normal build): CUCKOO_REVIEW_RENDER=<dir> renders close-ups with Cycles on the CPU. CUCKOO_REVIEW_BAVARIA=1
 # poses the scene as Bavaria mode (the Bavarian parts shown, the Classic ones they replace hidden); CUCKOO_REVIEW_TIME=HH:MM:SS picks the moment.
@@ -231,6 +251,17 @@ objs['Camera'].location = wide.location
 objs['Matte']['wf_Matte Type'] = 'Color'
 objs['Matte']['wf_Background Color'] = 0x0b1115
 objs['Player'].location = (0, -3, 1)
+
+# The parts catalogue (not part of a normal build): CUCKOO_CATALOGUE=<dir> renders every part's pictures and stops (scripts/cuckoo-village-catalogue.py);
+# CUCKOO_CATALOGUE_ONLY=id,id limits it to those entries.
+catalogue_dir = os.environ.get('CUCKOO_CATALOGUE')
+if catalogue_dir:
+    import catalogue_entries as ce          # noqa: E402
+    import catalogue_render as cr           # noqa: E402
+    only = os.environ.get('CUCKOO_CATALOGUE_ONLY')
+    chosen = [e for e in ce.ENTRIES if not only or e['id'] in only.split(',')]
+    cr.run(list(objs), chosen, catalogue_dir, tl.TZ, ce.ENTRIES)
+    sys.exit(0)
 
 # The user-controlled settings object: an empty carrying the CuckooVillageSettings schema (no model, no mass).
 # The director reads each field with property@ using the settings actor's index and the catalog's field index.

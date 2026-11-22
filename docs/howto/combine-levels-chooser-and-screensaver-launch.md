@@ -282,5 +282,7 @@ The level list is not in the registry: the coordinator and the tray read it from
 | Every level has a settings object and a way to open it | `python3 scripts/audit-level-settings.py` (section 5) |
 | The on-screen controller and the gamepad stick (pure logic) | `task test-touch-bridge` |
 | The global settings (one declaration, every holder, the engine table) | `scripts/in-linux-container.sh python3 -m pytest tests/test_global_level_settings.py -q` |
+| The engine's table of global settings (a level load against an Apply, two holders) | `task test-global-settings` |
+| Every built level carries the global settings | `python3 scripts/audit-level-settings.py --roster levels --strict` |
 
 Builds and tests run in containers, never on the host: see the Containers section of the repository `CLAUDE.md`.
