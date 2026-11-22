@@ -1,0 +1,39 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=1440"><title>Mockup: flame shapes</title><style>
+:root{--bg:#0e1218;--panel:#161c25;--line:#2c3644;--fg:#e8ecf2;--mut:#9aa6b6;--a:#ffb454;--b:#5cc8ff;--ok:#8cdc96;--cream:#efe3c0;--pine:#1f4a35}
+*{box-sizing:border-box}body{margin:0;width:1440px;height:900px;overflow:hidden;background:var(--bg);color:var(--fg);font:15px/1.45 ui-sans-serif,system-ui,sans-serif}
+h1{font-size:24px;margin:0}h2{font-size:15px;margin:0 0 8px;color:var(--mut);font-weight:600;letter-spacing:.02em}.wrap{padding:22px 30px}
+.sub{color:var(--mut);margin:2px 0 14px}.grid{display:grid;gap:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+table{border-collapse:collapse;width:100%}td,th{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}th{color:var(--mut);font-weight:600}
+.a{color:var(--a)}.b{color:var(--b)}code{font:13px ui-monospace,monospace;color:var(--cream)}label{color:var(--mut);font-size:14px}
+input[type=range]{width:200px;vertical-align:middle}button{background:var(--line);color:var(--fg);border:0;border-radius:6px;padding:5px 12px;font:inherit;cursor:pointer}
+.k{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+</style></head><body><div class="wrap">
+<h1>Four flame meshes per tree, two shapes for each of two groups</h1>
+<p class="sub">Drawn from the level's real candle positions (a pine at scale 1). Each group is the five candles on one side of the tree; the director shows one of its two shapes at a time.</p>
+<div class="grid" style="grid-template-columns:430px 1fr">
+<div class="card"><h2>One flame, three poses (side view, millimetres)</h2><svg id="poses" width="398" height="330" viewBox="0 0 398 330"></svg>
+<table style="margin-top:6px"><tr><th>Pose</th><th>Height</th><th>Ring radius</th><th>Tip leans</th></tr>
+<tr><td>Today (static)</td><td>75</td><td>22</td><td>0</td></tr><tr><td class="a">Shape 1: tall</td><td>90</td><td>20</td><td>+14 toward the draught</td></tr><tr><td class="b">Shape 2: short</td><td>60</td><td>24</td><td>&minus;10 away from it</td></tr></table></div>
+<div class="card"><h2>The ten candles of one pine, side view (metres)</h2><svg id="tree" width="860" height="360" viewBox="0 0 860 360"></svg>
+<div style="margin-top:4px"><span class="k" style="background:var(--a)"></span>group A (5 candles, one side)&nbsp;&nbsp;<span class="k" style="background:var(--b)"></span>group B (the other 5, opposite side)&nbsp;&nbsp;<span class="mut" style="color:var(--mut)">a flame is 8 triangles in every pose, so 80 triangles show per tree at any moment</span></div></div></div>
+<div class="card" style="margin-top:16px"><h2>The four actors of each tree, and what shows when</h2><table>
+<tr><th>Actor</th><th>Candles</th><th>Visibility cell (tree <code>i</code>)</th><th>Shows when</th></tr>
+<tr><td><code>candle_flames_a1_NN</code></td><td class="a">group A, shape 1</td><td><code>232 + 4i</code></td><td>lit and the group's rule says shape 1</td></tr>
+<tr><td><code>candle_flames_a2_NN</code></td><td class="a">group A, shape 2</td><td><code>233 + 4i</code></td><td>lit and the rule says shape 2</td></tr>
+<tr><td><code>candle_flames_b1_NN</code></td><td class="b">group B, shape 1</td><td><code>234 + 4i</code></td><td>lit and group B's rule says shape 1</td></tr>
+<tr><td><code>candle_flames_b2_NN</code></td><td class="b">group B, shape 2</td><td><code>235 + 4i</code></td><td>lit and group B's rule says shape 2</td></tr></table>
+<p class="sub" style="margin:8px 0 0">&ldquo;Lit&rdquo; is today's rule: the candles show (1 December to 6 January, or Candles all year) and the window glow of house <code>i mod 13</code> is on, so Window lights Off puts every flame out.</p></div>
+</div><script>
+const T=[{"x": 0.8699220000000001, "y": 0.0, "z": 0.5257000000000001, "group": 0}, {"x": -0.8699220000000001, "y": 1.065347192807864e-16, "z": 0.5257000000000001, "group": 1}, {"x": -0.10089296970305352, "y": 0.77653304647291, "z": 1.0514000000000001, "group": 0}, {"x": 0.1008929697030536, "y": -0.77653304647291, "z": 1.0514000000000001, "group": 1}, {"x": -0.6167979109018445, "y": -0.16303011227107778, "z": 1.5771, "group": 0}, {"x": 0.6167979109018445, "y": 0.163030112271078, "z": 1.5771, "group": 1}, {"x": 0.18869556062814485, "y": -0.46218890897037995, "z": 2.1028000000000002, "group": 0}, {"x": -0.1886955606281448, "y": 0.46218890897037995, "z": 2.1028000000000002, "group": 1}, {"x": 0.34039519939666707, "y": 0.19346020037129924, "z": 2.6285, "group": 0}, {"x": -0.3403951993966669, "y": -0.19346020037129952, "z": 2.6285, "group": 1}],GOLD='#ffb454',BLUE='#5cc8ff';
+function pose(svg,ox,h,r,lean,col,label){const s=1.3,y0=300,x=ox;const p=(dx,dy)=>[x+dx*s,y0-dy*s];
+ const ring=h/3,pts=[p(0,0),p(r,ring),p(lean,h),p(-r,ring)];svg.insertAdjacentHTML('beforeend','<rect x="'+(x-30*s)+'" y="'+y0+'" width="'+(60*s)+'" height="'+(120*s*0.45)+'" fill="#efe3c0"/><polygon points="'+pts.map(q=>q.join(',')).join(' ')+'" fill="'+col+'" fill-opacity=".9" stroke="'+col+'"/>'
+ +'<text x="'+x+'" y="'+(y0+120*s*0.45+22)+'" fill="#9aa6b6" font-size="13" text-anchor="middle">'+label+'</text>')}
+(function(){const s=document.getElementById('poses');pose(s,75,75,22,0,'#ffcf6e','today');pose(s,200,90,20,14,GOLD,'shape 1');pose(s,325,60,24,-10,BLUE,'shape 2');
+ s.insertAdjacentHTML('beforeend','<line x1="20" y1="300" x2="378" y2="300" stroke="#2c3644"/><text x="20" y="22" fill="#9aa6b6" font-size="13">flame and stick to one scale (a stick is 120 mm; its top is drawn)</text>')})();
+(function(){const s=document.getElementById('tree'),sc=84,ox=430,oy=345;const X=x=>ox+x*sc,Y=z=>oy-z*sc;
+ let d='<polygon points="'+[[0,0]].concat(Array.from({length:21},(_,i)=>{const f=i/20;return [cd(f),f*3.755]})).map(q=>X(q[0])+','+Y(q[1])).join(' ')+' '+Array.from({length:21},(_,i)=>{const f=1-i/20;return X(-cd(f))+','+Y(f*3.755)}).join(' ')+'" fill="#1f4a35" stroke="#2f6a4d"/>';
+ s.insertAdjacentHTML('beforeend',d);
+ T.forEach(c=>{const col=c.group?BLUE:GOLD;s.insertAdjacentHTML('beforeend','<rect x="'+(X(c.x)-4)+'" y="'+Y(c.z+.12*2.5)+'" width="8" height="'+(.12*2.5*sc)+'" fill="#efe3c0"/><polygon points="'+[X(c.x),Y(c.z+.3),X(c.x)+5,Y(c.z+.3+.075*2.5/3),X(c.x),Y(c.z+.3+.075*2.5),X(c.x)-5,Y(c.z+.3+.075*2.5/3)].join(' ')+'" fill="'+col+'"/>')});
+ function cd(f){const R=[1.02,.979,.87,.835,.72,.55,.528,.421,.297,.02];const x=Math.min(Math.max(f,0),1)*10,lo=Math.min(Math.floor(x),9),hi=Math.min(lo+1,9);return R[lo]+(R[hi]-R[lo])*(x-lo)}
+ s.insertAdjacentHTML('beforeend','<text x="20" y="28" fill="#9aa6b6" font-size="13">sticks and flames drawn 2.5 times their size; the groups sit on opposite sides</text>')})();
+</script></body></html>
