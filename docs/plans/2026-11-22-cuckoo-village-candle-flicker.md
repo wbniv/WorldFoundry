@@ -78,7 +78,7 @@ sequenceDiagram
     participant D as Director (cv-tick)
     participant C as Mailbox cells
     participant R as Render loop
-    E->>D: update; WALL_SECOND latched
+    E->>D: update, WALL_SECOND latched
     D->>D: cv-candles: season or Candles all year
     D->>D: cv-wins: window glow cells 200 to 212
     loop 24 groups
