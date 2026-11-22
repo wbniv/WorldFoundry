@@ -263,12 +263,13 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeTouch(JNIEnv* env, jclass, ji
                                                           jfloatArray xs, jfloatArray ys) {
     if (!touchBridge.enabled() || !menuMode.load()) return JNI_FALSE;
     const jsize count = env->GetArrayLength(ids);
-    std::vector<jint> id(size_t(count));
-    std::vector<jfloat> x(size_t(count)), y(size_t(count));
+    const size_t n = static_cast<size_t>(count);
+    std::vector<jint> id(n);
+    std::vector<jfloat> x(n), y(n);
     env->GetIntArrayRegion(ids, 0, count, id.data());
     env->GetFloatArrayRegion(xs, 0, count, x.data());
     env->GetFloatArrayRegion(ys, 0, count, y.data());
-    std::vector<androidtouch::Point> points(size_t(count));
+    std::vector<androidtouch::Point> points(n);
     for (size_t i = 0; i < points.size(); ++i) points[i] = {x[i], y[i], id[i]};
     return touchBridge.event(action, actionIndex, points.data(), points.size(), float(viewWidth), float(viewHeight),
                              menuKeys) ? JNI_TRUE : JNI_FALSE;
