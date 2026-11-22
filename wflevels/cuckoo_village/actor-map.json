@@ -72,7 +72,20 @@
   "tower_figure_3": 70,
   "tower_figure_4": 71,
   "tower_carved_panel": 72,
-  "CuckooVillageSettings": 73
+  "candle_flames_01": 73,
+  "candle_flames_02": 74,
+  "candle_flames_03": 75,
+  "candle_flames_04": 76,
+  "candle_flames_05": 77,
+  "candle_flames_06": 78,
+  "candle_flames_07": 79,
+  "candle_flames_08": 80,
+  "candle_flames_09": 81,
+  "candle_flames_10": 82,
+  "candle_flames_11": 83,
+  "candle_flames_12": 84,
+  "candle_sticks": 85,
+  "CuckooVillageSettings": 86
  },
  "reference": 36502.0
 }

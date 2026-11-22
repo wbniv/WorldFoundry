@@ -78,11 +78,13 @@ class Host(mm.Host):
         super().__init__(tmp, ids)
         self.ix = ix
 
-    def frame_at(self, day: int, sod: float, candles=None):
+    def frame_at(self, day: int, sod: float, candles=None, lights=None):
         """One frame at local day `day` and second-of-day `sod`; candles: the Candles all year field (None: unanswered, so its default Off)."""
         self.proc.stdin.write("Q\n")
         if candles is not None:
             self.proc.stdin.write(f"P {self.ix['CuckooVillageSettings']} {FIELDS['Candles all year']} {candles}\n")
+        if lights is not None:
+            self.proc.stdin.write(f"P {self.ix['CuckooVillageSettings']} {FIELDS['Window lights']} {lights}\n")
         h, m = int(sod // 3600) % 24, int(sod // 60) % 60
         for name, v in (("WALL_DAY", day), ("WALL_HOUR", h), ("WALL_MINUTE", m), ("WALL_SECOND", sod % 60.0)):
             self.proc.stdin.write(f"M {self.ids[name]} {v!r}\n")
@@ -100,6 +102,10 @@ class Host(mm.Host):
         line = self.proc.stdout.readline().split()
         assert line[0] == "V" and int(line[1]) == cell, line
         return float(line[2])
+
+
+def day_of(y, m, d):
+    return (dt.date(y, m, d) - tl.DAY0).days
 
 
 def season_days():
@@ -130,6 +136,24 @@ def main() -> int:
                             if failures <= 10:
                                 print(f"FAIL {tl.date_of(day)} {sod:7.0f} s switch={candles}: cell {tl.CANDLE_CELL} = {got}, want {want}")
             print(f"{len(days)} days x 3 times x 3 settings = {len(days) * 9} frames, {failures} failures")
+            # the flames: each tree's cell is the candles' state times the window glow of house (tree mod 13), so they burn at
+            # night and dusk only, on the windows' stagger, and the Window lights setting dims them
+            flame_failures = 0
+            for day in (day_of(2026, 12, 25), day_of(2026, 7, 4)):
+                for sod in (12 * 3600.0, 17.5 * 3600 + 600.0, 19 * 3600.0, 23 * 3600.0, 3 * 3600.0, 5.5 * 3600 + 900.0):
+                    for candles, lights in ((None, None), (1, 1), (1, 0), (0, 1)):
+                        host.frame_at(day, sod, candles, lights)
+                        on = tl.christmas_season(day) or bool(candles)
+                        glow = tl.window_states(sod, {"Window lights": 1 if lights is None else lights})
+                        for i in range(tl.TREES):
+                            want = float(on and glow[i % tl.HOUSES])
+                            got = host.read(tl.FLAME_CELL0 + i)
+                            if got != want:
+                                flame_failures += 1
+                                if flame_failures <= 10:
+                                    print(f"FAIL flame {i} {tl.date_of(day)} {sod:7.0f} s switch={candles} lights={lights}: {got}, want {want}")
+            print(f"flames: {flame_failures} failures")
+            failures += flame_failures
         finally:
             host.close()
     return 1 if failures else 0

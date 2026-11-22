@@ -22,6 +22,7 @@ LAYOUT = ROOT / 'wflevels/cuckoo_village_layout'
 sys.path.insert(0, str(HERE))
 import forth                 # noqa: E402
 import timeline as tl        # noqa: E402
+import candles as cd         # noqa: E402
 
 TAG = '[cuckoo-village]'
 REFERENCE = 10 * 3600 + 8 * 60 + 22.0       # the pose the level starts from: 10:08
@@ -67,6 +68,20 @@ for i, name in enumerate(tl.FIG_NAMES):
 near(objs[tl.BIRD_NAME].location, tl.BIRD_REST, tl.BIRD_NAME)
 near(objs['hour_hand'].location, tl.DIAL, 'hour_hand')
 assert [n for n in (f'cottage_light_{i + 1:02}' for i in range(tl.HOUSES)) if n not in objs] == [], 'cottage light actors changed'
+
+# Christmas candles (docs/plans/2026-11-21-cuckoo-village.md): all the sticks in one mesh, and each tree's flames in their own, so
+# every tree glows on its own stagger. Static meshes (never posed): the director only switches their visibility mailboxes.
+assert [n for n in (f'pine_{i + 1:02}' for i in range(tl.TREES)) if n not in objs] == [], 'the pine trees changed'
+mesh_actor = scope['mesh_actor']          # the layout's helper: an anchored platform mesh actor from vertices, faces and an atlas tile
+stick_parts = []
+for i in range(tl.TREES):
+    tree = objs[f'pine_{i + 1:02}']
+    sticks, flames = cd.tree_candles(i, tuple(tree.location), tree.rotation_euler.z, tree.scale.x)
+    stick_parts += sticks
+    flame_verts, flame_faces = cd.merge(flames)
+    mesh_actor(f'candle_flames_{i + 1:02}', flame_verts, flame_faces, cd.FLAME_TILE)['wf_Visibility Mailbox'] = tl.FLAME_CELL0 + i
+stick_verts, stick_faces = cd.merge(stick_parts)
+mesh_actor('candle_sticks', stick_verts, stick_faces, cd.STICK_TILE)['wf_Visibility Mailbox'] = tl.CANDLE_CELL
 
 # window glow: one visibility mailbox per cottage; the bird is shown only during the hourly calls
 for i in range(tl.HOUSES):

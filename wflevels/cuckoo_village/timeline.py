@@ -150,7 +150,9 @@ def bird_visible(sod: float) -> bool:
 import datetime as _dt
 
 DAY0 = _dt.date(2000, 1, 1)
-CANDLE_CELL = 214                 # the visibility mailbox of every candle actor (1 in season and the setting is On)
+CANDLE_CELL = 214                 # the visibility mailbox of the candle sticks: 1 in season, or when Candles all year is On
+FLAME_CELL0 = 215                 # tree i's flames: FLAME_CELL0 + i, lit while the candles show and the window glow of house i % 13 is on
+TREES = 12
 
 
 def date_of(day: int) -> _dt.date:
