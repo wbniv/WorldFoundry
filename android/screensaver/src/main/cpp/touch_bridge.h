@@ -78,6 +78,16 @@ public:
         *stickY = state_.position.y;
     }
 
+    // The settings form took the gesture (its entry button, or a touch inside it): the controller lets go of every
+    // button, as if the fingers had lifted.
+    void release(MenuKeyLatch& keys) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        state_.clear();
+        publishLocked(0, keys);
+    }
+
+    float density() const { return density_.load(); }
+
     // A run starts or ends: no finger is down any more.
     void reset() {
         std::lock_guard<std::mutex> lock(mutex_);

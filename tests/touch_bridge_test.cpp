@@ -167,6 +167,21 @@ int main() {
         t.layout(W, H, &l, &held, &x, &y);
         CHECK(held == 0);
     }
+    // release(): the settings form took the gesture, so a held button lets go at once.
+    {
+        TB t; MenuKeyLatch keys;
+        t.configure(true, kDensity);
+        frame(t);
+        const auto a = control(wftouch::A);
+        t.event(TB::kActionDown, 0, &a, 1, W, H, keys);
+        CHECK(keys.takeFrame() == wftouch::A);
+        t.release(keys);
+        CHECK(keys.takeFrame() == 0);
+        wftouch::Layout l; uint32_t held; float x, y;
+        t.layout(W, H, &l, &held, &x, &y);
+        CHECK(held == 0);
+        CHECK(t.density() == kDensity);
+    }
     std::printf("touch_bridge: %d checks passed\n", checks);
     return 0;
 }

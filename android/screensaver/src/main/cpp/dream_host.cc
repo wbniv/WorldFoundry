@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <cstdint>
 #include <fcntl.h>
+#include <mutex>
 #include <string>
 #include <thread>
 #include <unistd.h>
@@ -17,6 +18,7 @@
 #include <hal/android/key_map.h>
 #include <hal/android/touch_controls.h>
 #include <game/level_menu.h>
+#include <game/runtime_property_touch.h>
 #include <hal/phonepad/phonepad_overlay.h>
 #include <pigsys/pigsys.hp>
 #include <runtime_properties.hpp>
@@ -97,6 +99,17 @@ std::atomic<bool> menuMode{false};
 // frame can be 200 ms) still reaches the menu (docs/plans/2026-11-21-menu-key-latch.md).
 MenuKeyLatch menuKeys;
 TouchBridge touchBridge;   // the on-screen controller on a phone; its buttons go through menuKeys
+
+// Touch events from the UI thread, handled on the game thread: the engine's settings form and the controller both
+// change game state, and the engine is single-threaded. One record is one MotionEvent.
+struct TouchRecord {
+    int action = 0, actionIndex = 0;
+    float viewWidth = 0, viewHeight = 0;
+    std::vector<androidtouch::Point> points;
+};
+std::mutex touchQueueMutex;
+std::vector<TouchRecord> touchQueue;
+constexpr size_t kTouchQueueMax = 256;
 bool menuSelectorWasVisible = false;   // game thread only
 std::atomic<bool> backPending{false};
 std::atomic<bool> leaveRequested{false};
@@ -181,6 +194,36 @@ extern "C" void WFAndroidRequestClose() { closing.store(true); }
 // it through levelmenu::Drawer(), which Display installs once at start-up, so clear it every frame
 // rather than editing the engine. Without a drawer the level menu starts level 0 (game.cc).
 // The menu is the one exception: it keeps the drawer and takes the remote's keys.
+
+// The settings form first (its entry button at the top right, and the form itself), then the controller, exactly
+// as the NativeActivity host orders them (hal/android/native_app_entry.cc); a touch the form takes lets go of every
+// controller button. Game thread only.
+static void pumpTouch(int surfaceW, int surfaceH) {
+    std::vector<TouchRecord> events;
+    {
+        std::lock_guard<std::mutex> lock(touchQueueMutex);
+        events.swap(touchQueue);
+    }
+    for (const TouchRecord& e : events) {
+        if (e.viewWidth <= 0 || e.viewHeight <= 0 || surfaceW <= 0 || surfaceH <= 0) continue;
+        const float fx = float(surfaceW) / e.viewWidth, fy = float(surfaceH) / e.viewHeight;
+        bool settingsTouch = false;
+        using Phase = propertyui::TouchPhase;
+        if (e.action == TouchBridge::kActionCancel) {
+            settingsTouch = propertyui::touchEvent(Phase::Cancel, -1, 0, 0, surfaceW, surfaceH);
+        } else if (e.action == TouchBridge::kActionMove) {
+            for (const auto& p : e.points)
+                settingsTouch = propertyui::touchEvent(Phase::Move, p.id, p.x * fx, p.y * fy, surfaceW, surfaceH) || settingsTouch;
+        } else if (e.actionIndex >= 0 && size_t(e.actionIndex) < e.points.size()) {
+            const auto& p = e.points[size_t(e.actionIndex)];
+            const bool down = e.action == TouchBridge::kActionDown || e.action == TouchBridge::kActionPointerDown;
+            settingsTouch = propertyui::touchEvent(down ? Phase::Down : Phase::Up, p.id, p.x * fx, p.y * fy, surfaceW, surfaceH);
+        }
+        if (settingsTouch) touchBridge.release(menuKeys);
+        else touchBridge.event(e.action, e.actionIndex, e.points.data(), e.points.size(), e.viewWidth, e.viewHeight, menuKeys);
+    }
+}
+
 extern "C" void WFAndroidPumpEvents() {
     if (activeWindow) {
         const int width = ANativeWindow_getWidth(activeWindow);
@@ -199,6 +242,7 @@ extern "C" void WFAndroidPumpEvents() {
             menuSelectorWasVisible = selectorVisible;
             menuKeys.clearLatch();
         }
+        pumpTouch(surfaceWidth, surfaceHeight);
         HALInjectJoystickButtons(menuKeys.takeFrame());
         if (backPending.exchange(false)) applyMenuBack();
     } else if (levelmenu::Drawer()) {
@@ -255,8 +299,8 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeTouchConfigure(JNIEnv*, jclas
     touchBridge.configure(enabled == JNI_TRUE, density);
 }
 
-// One touch event on the surface view (UI thread): the controller's buttons become the same joystick bits as the
-// remote's keys. Returns true when the controller took the event.
+// One touch event on the surface view (UI thread): queued for the game thread, which gives it to the settings form
+// and the controller. Returns true when this device takes touches here (the controller is drawn).
 extern "C" JNIEXPORT jboolean JNICALL
 Java_org_worldfoundry_screensaver_TankPlayer_nativeTouch(JNIEnv* env, jclass, jint action, jint actionIndex,
                                                           jint viewWidth, jint viewHeight, jintArray ids,
@@ -269,10 +313,17 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeTouch(JNIEnv* env, jclass, ji
     env->GetIntArrayRegion(ids, 0, count, id.data());
     env->GetFloatArrayRegion(xs, 0, count, x.data());
     env->GetFloatArrayRegion(ys, 0, count, y.data());
-    std::vector<androidtouch::Point> points(n);
-    for (size_t i = 0; i < points.size(); ++i) points[i] = {x[i], y[i], id[i]};
-    return touchBridge.event(action, actionIndex, points.data(), points.size(), float(viewWidth), float(viewHeight),
-                             menuKeys) ? JNI_TRUE : JNI_FALSE;
+    TouchRecord record;
+    record.action = action;
+    record.actionIndex = actionIndex;
+    record.viewWidth = float(viewWidth);
+    record.viewHeight = float(viewHeight);
+    record.points.resize(n);
+    for (size_t i = 0; i < n; ++i) record.points[i] = {x[i], y[i], id[i]};
+    std::lock_guard<std::mutex> lock(touchQueueMutex);
+    if (touchQueue.size() >= kTouchQueueMax) touchQueue.erase(touchQueue.begin());
+    touchQueue.push_back(std::move(record));
+    return JNI_TRUE;
 }
 
 // Back released while the launcher menu runs (UI thread); applied on the game thread.
@@ -357,6 +408,10 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
     assets = AAssetManager_fromJava(env, manager);
     // The HUD here is only the on-screen controller: on for the menu and its tanks on a phone, off for the Dream and the TV.
     WFAndroidSetHudEnabled(menu && touchBridge.enabled() ? 1 : 0);
+    // The engine's own touch settings form (an entry button at the top right, then the form) goes with the controller.
+    propertyui::touchConfigure(menu && touchBridge.enabled(), touchBridge.density());
+    propertyui::touchReset();
+    { std::lock_guard<std::mutex> lock(touchQueueMutex); touchQueue.clear(); }
     // Set before HALStart opens the bundle, and on every run: one process may hold both modes.
     WFAndroidSetBundleAsset(secondBundle ? kMenuBundleAsset : nullptr);
     // The menu starts with no key held or latched; the game thread is not running yet.
