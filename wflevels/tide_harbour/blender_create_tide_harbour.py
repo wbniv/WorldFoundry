@@ -235,8 +235,8 @@ def panel_glyphs(meshes, font):
     doc = json.loads(pp.CENTRELINE.read_text())
     hx, hz = pp.map_xy(doc['station_HD']['lon'], doc['station_HD']['lat'])
     mx, mz = pp.river_points()[0]
-    put(river, 'กรุงเทพฯ', hx + 0.055, hz + 0.02, 0.42, 'l', 'p_ink')               # the tower's name, to its right, over the land
-    put(river, 'ปากน้ำ', mx - 0.04, mz + 0.045, 0.40, 'r', 'p_ink')                   # the river's mouth, to the left of it
+    put(river, 'กรุงเทพฯ', hx + pp.STATION_DX + 0.055, hz + 0.02, 0.42, 'l', 'p_ink')               # the tower's name, to its right, over the land
+    put(river, 'ปากน้ำ', mx - 0.085, mz + 0.045, 0.40, 'r', 'p_ink')                   # the river's mouth, to the left of it
     put(river, 'อ่าวไทย', mx - 0.25, mz - 0.20, 0.50, 'c', 'p_ink')                  # the gulf, below the ripples
     return added
 

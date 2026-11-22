@@ -27,6 +27,7 @@ HERE = Path(__file__).resolve().parent
 # The river: OpenStreetMap contributors (ODbL), 74 points; the copy the mockup reads is docs/plans/2026-11-21-tide-harbour-clock/ (a test keeps them equal)
 CENTRELINE = HERE / "chao_phraya_centreline.json"
 RIVER_WIDTH = 0.018            # metres on the panel
+STATION_DX = RIVER_WIDTH / 2 + 0.035      # a station marker stands this far east of the river's centreline, on the bank
 WIN_BASE = pn.WIN_H / 2 - 0.02     # the decimal point sits at a digit's foot
 LAT_M = 111.2                  # kilometres per degree of latitude
 
@@ -124,8 +125,12 @@ def column_body_mesh() -> Mesh:
     while the map slides under them."""
     m = Mesh("panel_col_body")
     cw = 0.026
-    _quad(m, pn.COL_X - cw - 0.008, pn.COL_V0 - 0.008, pn.COL_X + cw + 0.008, pn.COL_V1 + 0.008, "p_ink")
-    _quad(m, pn.COL_X - cw, pn.COL_V0, pn.COL_X + cw, pn.COL_V1, "p_stone")
+    x0, x1, z0, z1, t = pn.COL_X - cw, pn.COL_X + cw, pn.COL_V0, pn.COL_V1, 0.008
+    _quad(m, x0, z0, x1, z1, "p_stone")                                    # the tube; its frame is four strips round it, not a quad under it:
+    _quad(m, x0 - t, z0 - t, x0, z1 + t, "p_ink")                          # two quads of one depth z-fight (the column looked garbled on cast1)
+    _quad(m, x1, z0 - t, x1 + t, z1 + t, "p_ink")
+    _quad(m, x0, z0 - t, x1, z0, "p_ink")
+    _quad(m, x0, z1, x1, z1 + t, "p_ink")
     for metres in (1.0, 2.0, 3.0):
         v = pn.level_v(metres)
         _quad(m, pn.COL_X - cw - 0.03, v - 0.003, pn.COL_X - cw, v + 0.003, "p_ink")
@@ -189,9 +194,11 @@ def map_mesh() -> Mesh:
             _quad(m, x0 + 0.05 * i, z0 + (0.008 if i % 2 else 0.0) - 0.003, x0 + 0.05 * i + 0.045, z0 + (0.008 if i % 2 else 0.0) + 0.003, "p_water")
     doc = json.loads(CENTRELINE.read_text())
     hx, hz = map_xy(doc["station_HD"]["lon"], doc["station_HD"]["lat"])      # the tower: this harbour
+    hx += STATION_DX                                                          # on the east bank: on the ribbon it would z-fight with the water
     _quad(m, hx - 0.02, hz, hx + 0.02, hz + 0.07, "p_stone")
     _tri(m, (hx - 0.03, hz + 0.07), (hx + 0.03, hz + 0.07), (hx, hz + 0.115), "p_gold")
     bx, bz = map_xy(doc["station_BB"]["lon"], doc["station_BB"]["lat"])      # Bangkok Bar: a tide staff
+    bx += STATION_DX
     _quad(m, bx - 0.004, bz - 0.04, bx + 0.004, bz + 0.04, "p_ink")
     for dz in (-0.02, 0.01):
         _quad(m, bx - 0.02, bz + dz - 0.003, bx + 0.02, bz + dz + 0.003, "p_ink")

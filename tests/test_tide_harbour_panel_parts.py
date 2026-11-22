@@ -127,3 +127,56 @@ def test_the_two_copies_of_the_river_are_the_same():
 def test_the_actor_budget():
     actors = len(pp.panel_meshes())
     assert actors == 19 and set(pp.DRUM_NAMES) <= set(pp.panel_meshes()), actors    # 9 meshes and 10 drums; the level has headroom to 150
+
+
+def _poly(face, mesh):
+    return [(mesh.vertices[i][0], mesh.vertices[i][2]) for i in face]
+
+
+def _overlap_depth(p, q):
+    """The smallest penetration of two convex polygons along their edge normals (separating-axis test): > 0 means they overlap
+    in area, <= 0 that they only touch or are apart."""
+    best = float("inf")
+    for poly in (p, q):
+        for k in range(len(poly)):
+            (x0, z0), (x1, z1) = poly[k], poly[(k + 1) % len(poly)]
+            nx, nz = z1 - z0, x0 - x1
+            n = math.hypot(nx, nz)
+            if n == 0:
+                continue
+            nx, nz = nx / n, nz / n
+            a = [nx * x + nz * z for x, z in p]
+            b = [nx * x + nz * z for x, z in q]
+            best = min(best, min(max(a), max(b)) - max(min(a), min(b)))
+    return best
+
+
+def coplanar_overlaps(mesh):
+    """Pairs of flat faces of different colours that overlap in area: they share a depth, so the engine's depth test cannot say
+    which is in front and the pixels flicker between them (the level column's frame and tube, seen on cast1)."""
+    polys = [(_poly(f, mesh), mesh.colors[k]) for k, f in enumerate(mesh.faces)]
+    boxes = [(min(x for x, _ in p), max(x for x, _ in p), min(z for _, z in p), max(z for _, z in p)) for p, _ in polys]
+    out = []
+    for i, (p, ca) in enumerate(polys):
+        for j in range(i + 1, len(polys)):
+            q, cb = polys[j]
+            if ca == cb:
+                continue
+            a, b = boxes[i], boxes[j]
+            if min(a[1], b[1]) - max(a[0], b[0]) <= 1e-6 or min(a[3], b[3]) - max(a[2], b[2]) <= 1e-6:
+                continue
+            d = _overlap_depth(p, q)
+            if d > 1e-5:
+                out.append((ca, cb, round(d, 5)))
+    return out
+
+
+def test_no_two_faces_of_different_colours_overlap_in_one_plane():
+    bad = {}
+    for name, m in pp.panel_meshes().items():
+        if name.startswith("panel_drum_"):
+            continue                                              # a drum's ticks are on a ring, each its own slot
+        found = coplanar_overlaps(m)
+        if found:
+            bad[name] = found[:3]
+    assert not bad, f"coplanar overlaps (they z-fight): {bad}"
