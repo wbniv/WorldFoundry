@@ -32,7 +32,7 @@ def test_the_default_settings_leave_the_journey_unchanged():
 
 
 def test_the_director_reads_every_field_with_property_at_and_the_given_indices():
-    names = ["tower_figure_1", "tower_figure_2", "tower_figure_3", "tower_figure_4", "tower_bird",
+    names = ["tower_figure_1", "tower_figure_2", "tower_figure_3", "tower_figure_4", "tower_figure_b1", "tower_figure_b2", "tower_figure_b3", "tower_figure_b4", "tower_bird",
              "hour_hand", "minute_hand", "cs_wide", "LookAt", "CuckooVillageSettings"]
     ix = {n: 50 + i for i, n in enumerate(names)}
     fields = {label: 200 + i for i, label in enumerate(tl.SETTINGS_DEFAULTS)}
@@ -46,7 +46,8 @@ def test_the_director_reads_every_field_with_property_at_and_the_given_indices()
 def test_the_director_drives_the_two_window_box_cells_from_the_detailed_flowers_field():
     """Docs/plans/2026-11-22-cuckoo-village-flowers.md: one of cottage_flowers (cell 227) and cottage_flower_blocks (cell 228) shows."""
     import forth
-    ix = {n: 100 + i for i, n in enumerate(["tower_figure_1", "tower_figure_2", "tower_figure_3", "tower_figure_4", "tower_bird",
+    ix = {n: 100 + i for i, n in enumerate(["tower_figure_1", "tower_figure_2", "tower_figure_3", "tower_figure_4", "tower_figure_b1", "tower_figure_b2",
+                                            "tower_figure_b3", "tower_figure_b4", "tower_bird",
                                             "hour_hand", "minute_hand", "cs_wide", "LookAt", "CuckooVillageSettings"])}
     fields = {k: 129 + i for i, k in enumerate(tl.SETTINGS_DEFAULTS)}
     script = forth.director_script(ix, fields)

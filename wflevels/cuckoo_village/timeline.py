@@ -29,6 +29,8 @@ FIG_Z0 = 2.50 + TZ                  # figure pivots stand on the balcony floor
 FIG_HOME_Y = -1.61
 FIG_X = [-0.87, -0.29, 0.29, 0.87]  # alcove centres, left to right
 FIG_NAMES = ["tower_figure_1", "tower_figure_2", "tower_figure_3", "tower_figure_4"]
+FIG_B_NAMES = ["tower_figure_b1", "tower_figure_b2", "tower_figure_b3", "tower_figure_b4"]   # Bavaria mode: the cooper, the dirndl, the lederhosen figure and the brewer,
+                                                                                              # on the same pivots, posed by the same formulas
 LOOP_A, LOOP_B, LOOP_CX, LOOP_CY = 1.15, 0.18, 0.0, -1.45   # the parade oval on the balcony, between the wall and the rail
 STEP_OUT = 0.08                     # a solo figure steps this far toward the rail (the rail is 0.26 in front of the pivots)
 
@@ -97,8 +99,9 @@ def calls_for(hr: int) -> int:
     return (hr % 12) or 12
 
 
-def figure(i: int, tm: float) -> Tuple[float, float, float, float, float]:
-    """x, y, z, a, c of figure i at tm seconds into the hour."""
+def figure(i: int, tm: float, sign: float = 1.0) -> Tuple[float, float, float, float, float]:
+    """x, y, z, a, c of figure i at tm seconds into the hour. sign is -1 for Bavaria mode: the same parade timeline with its progress
+    along the oval reversed, so each figure leaves its own alcove, travels the loop the other way and returns to it."""
     home_x = FIG_X[i]
     f = bow = 0.0
     if i < 3:
@@ -110,12 +113,12 @@ def figure(i: int, tm: float) -> Tuple[float, float, float, float, float]:
     lx = ly = c_loop = hop = 0.0
     if 0.0 <= tm < PARADE_LEN:
         theta0 = 0.75 + asin_rev(home_x / LOOP_A)
-        theta = theta0 + clamp(tm - PARADE_LOOP_START, 0.0, PARADE_LOOP_SECONDS) * PARADE_RATE
+        theta = theta0 + sign * clamp(tm - PARADE_LOOP_START, 0.0, PARADE_LOOP_SECONDS) * PARADE_RATE
         w = sm((tm - ENTRY_AT[i]) / ENTRY_LEN) * (1.0 - sm((tm - PARADE_EXIT_AT) / PARADE_EXIT_LEN))
         lx = LOOP_CX + LOOP_A * math.cos(TAU * theta)
         ly = LOOP_CY + LOOP_B * math.sin(TAU * theta)
-        vx = -LOOP_A * math.sin(TAU * theta)
-        vy = LOOP_B * math.cos(TAU * theta)
+        vx = -LOOP_A * math.sin(TAU * theta) * sign
+        vy = LOOP_B * math.cos(TAU * theta) * sign
         c_loop = math.atan2(vx, -vy) / TAU
         hop = 0.03 * math.sin(TAU * theta * 6.0) ** 2
     x = home_x * (1.0 - w) + lx * w
@@ -150,6 +153,7 @@ def bird_visible(sod: float) -> bool:
 import datetime as _dt
 
 DAY0 = _dt.date(2000, 1, 1)
+BAVARIA_CELL, CLASSIC_CELL = 230, 231   # visibility mailboxes: 1 shows the Bavarian parts (Bavaria mode On) / the Classic parts that Bavaria replaces (Off)
 CANDLE_CELL = 214                 # the visibility mailbox of the candle sticks: 1 in season, or when Candles all year is On
 FLAME_CELL0 = 215                 # tree i's flames: FLAME_CELL0 + i, lit while the candles show and the window glow of house i % 13 is on
 TREES = 12
@@ -170,6 +174,11 @@ def christmas_season(day: int) -> bool:
 # The settings object (CuckooVillageSettings, wfsource/source/oas/cuckoovillagesettings.oas): label -> (default, field read by the director).
 SETTINGS_DEFAULTS = {"Bavaria mode": 0, "Seasonal events": 1, "Candles all year": 0, "Window lights": 1, "Sound": 1, "Camera motion": 0,
                      "Detailed flowers": 1}
+
+
+def bavaria_sign(settings: Dict[str, int] = None) -> float:
+    """+1 in Classic, -1 in Bavaria mode: the one sign the dial's hands and the parade's direction take (plan "Bavaria mode")."""
+    return -1.0 if (settings or SETTINGS_DEFAULTS).get("Bavaria mode", 0) else 1.0
 
 
 def window_states(sod: float, settings: Dict[str, int] = None) -> List[bool]:
@@ -202,11 +211,12 @@ def all_poses(sod: float, settings: Dict[str, int] = None) -> Dict[str, Pose]:
     tm = mi * 60 + sc
     ONE = (1.0, 1.0, 1.0)
     poses: Dict[str, Pose] = {}
-    poses["hour_hand"] = (DIAL[0], DIAL[1], DIAL[2], 0.0, hour_rev(hr, mi, sc), 0.0, *ONE)
-    poses["minute_hand"] = (DIAL[0], MINUTE_Y, DIAL[2], 0.0, minute_rev(mi, sc), 0.0, *ONE)
+    sign = bavaria_sign(settings)      # Bavaria mode: the hands sweep anti-clockwise and the parade goes the other way round
+    poses["hour_hand"] = (DIAL[0], DIAL[1], DIAL[2], 0.0, sign * hour_rev(hr, mi, sc), 0.0, *ONE)
+    poses["minute_hand"] = (DIAL[0], MINUTE_Y, DIAL[2], 0.0, sign * minute_rev(mi, sc), 0.0, *ONE)
     for i, name in enumerate(FIG_NAMES):
-        x, y, z, a, c = figure(i, tm)
-        poses[name] = (x, y, z, a, 0.0, c, *ONE)
+        x, y, z, a, c = figure(i, tm, sign)
+        poses[name] = poses[FIG_B_NAMES[i]] = (x, y, z, a, 0.0, c, *ONE)
     o, bob = bird(hr, tm)
     poses[BIRD_NAME] = (BIRD_REST[0], BIRD_REST[1] - BIRD_LUNGE * bob, BIRD_REST[2] + 0.04 * bob, 0.06 * bob, 0.0, 0.0, *ONE)
     still = bool((settings or SETTINGS_DEFAULTS).get("Camera motion", 0))

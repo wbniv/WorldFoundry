@@ -85,7 +85,9 @@ def build(mesh_actor, tower_z):
     ring(12,0,-1.078,4.08,.50,.435)
     ring(0,0,-1.079,4.08,.55,.50)
     ring(12,0,-1.082,4.08,.424,.411)
-    # Roman hour marks are built as strokes, so they stay crisp at close range.
+    # Roman hour marks are built as strokes, so they stay crisp at close range. They are their own actor so that the level can
+    # hide them: Bavaria mode shows a reversed dial instead (wflevels/cuckoo_village/bavaria.py).
+    component = 'dial_numerals_classic'
     numerals=('XII','I','II','III','IV','V','VI','VII','VIII','IX','X','XI')
     for i, numeral in enumerate(numerals):
         a=math.tau*i/12; r=.35
@@ -101,6 +103,7 @@ def build(mesh_actor, tower_z):
             else:
                 beam(12,(x-w/2,y,cz-h/2),(x+w/2,y,cz+h/2),.007,.009)
                 beam(12,(x-w/2,y,cz+h/2),(x+w/2,y,cz-h/2),.007,.009)
+    component = 'tower_case'
     # Floral clock-case carving and sweeping brackets.
     for side in (-1,1):
         for i in range(7):

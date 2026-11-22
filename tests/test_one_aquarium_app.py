@@ -82,7 +82,7 @@ def test_the_manifest_entries_keep_their_contract():
     assert re.search(r'<activity android:name="\.AquariumActivity".*?android\.intent\.category\.LEANBACK_LAUNCHER',
                      manifest, re.S)
     assert 'android:name=".AquariumDreamService"' in manifest
-    assert 'android:authorities="org.worldfoundry.screensaver.settings"' in manifest
+    assert 'android:authorities="${applicationId}.settings"' in manifest
     main = (SCREENSAVER / "src/main/AndroidManifest.xml").read_text()
     assert 'android:name=".ScreensaverPreviewActivity"' in main
 
@@ -97,3 +97,15 @@ def test_the_apk_carries_both_bundles():
         screensaver = ROOT / "wflevels/aquarium-screensaver-cd.iff"
         if screensaver.exists():
             assert z.read("assets/cd.iff") == screensaver.read_bytes()
+
+
+def test_the_aquarium_package_follows_the_game_naming_standard():
+    """Will, 2026-11-22: apps are org.worldfoundry.game.{{name}}; the combined Aquarium app is not called screensaver.
+    Only the applicationId changes: the Java code package (namespace) stays org.worldfoundry.screensaver."""
+    gradle = (SCREENSAVER / "build.gradle.kts").read_text()
+    aquarium = re.search(r'create\("aquarium"\) \{(.*?)\n        \}', gradle, re.S).group(1)
+    assert 'applicationId = "org.worldfoundry.game.aquarium"' in aquarium
+    assert 'namespace = "org.worldfoundry.screensaver"' in gradle
+    manifest = (SCREENSAVER / "src/aquarium/AndroidManifest.xml").read_text()
+    assert manifest.count("${applicationId}.settings") == 2, "the meta-data and the provider authority both follow the applicationId"
+    assert "org.worldfoundry.screensaver.settings" not in manifest

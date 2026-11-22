@@ -31,7 +31,7 @@ All three Dreams ship as Release builds ([measurements](../../docs/diagnostics/d
 
 The Aquarium and Seahorse tasks build the level bundles in the Linux container with `python3 scripts/build-aquarium-screensaver-levels.py`, which also runs `scripts/build-seahorse-grid-level.py`. They then run `./gradlew :screensaver:assemble<Flavor>Release --offline` on the host. The Debug variants (`assemble<Flavor>Debug`) still build, for the coordinator's simpleperf, which needs a debuggable or profileable APK. Freeze copies before submitting coordinator jobs. The Aquarium bundle order in `scripts/build-aquarium-screensaver-levels.py` is the order of `wflevels/aquarium-menu.manifest`, the tank roster; Gradle copies that file into the Dream's assets as `levels.manifest` and `LevelCatalog` reads it, so a tank is added in the manifest only (plus a `SCRIPT_NAMES` line if it needs its own driver); the Seahorse bundle has its sole level at index zero.
 
-The selected Dream advertises `org.worldfoundry.screensaver.settings`. Its shell-only provider answers `getCapabilities` with a base64-encoded schema-1 JSON choice list and accepts `setSetting` with `tank:<id>` or `orientation:<value>`. The coordinator uses a reviewed mapping for this Dream package and authority, validates the response, and offers those choices in the KDE tray. A changed preference takes effect at the next Dream start.
+The selected Dream advertises `org.worldfoundry.game.aquarium.settings` (`${applicationId}.settings`). Its shell-only provider answers `getCapabilities` with a base64-encoded schema-1 JSON choice list and accepts `setSetting` with `tank:<id>` or `orientation:<value>`. The coordinator uses a reviewed mapping for this Dream package and authority, validates the response, and offers those choices in the KDE tray. A changed preference takes effect at the next Dream start.
 
 Install, settings, and idle activation checks use the shared coordinator through `task chromecast:*`. See [the implementation plan](../../docs/plans/2026-10-18-aquarium-screensaver-player-and-tray-settings.md). The former video prototype and its evidence are documented in [the investigation](../../docs/investigations/2026-10-17-chromecast-screensaver-from-a-level.md).
 
@@ -51,7 +51,7 @@ Each app's shell-only settings provider offers the choice, and a change takes ef
 
 | App | Authority | Setting ID |
 |---|---|---|
-| Aquarium | `org.worldfoundry.screensaver.settings` | `orientation` (schema 1, beside `tank`) |
+| Aquarium | `org.worldfoundry.game.aquarium.settings` | `orientation` (schema 1, beside `tank`) |
 | Seahorse Grid | `org.worldfoundry.seahorsegrid.settings` (`SeahorseSettingsProvider`) | `orientation` (schema 1, its only setting) |
 | Planted Tank | `org.worldfoundry.plantedtank.settings` | `31.orientation` (schema 2: the adapter appends it to the settings actor, currently actor `31`) |
 | WF Clocks | `org.worldfoundry.game.clocks.settings` (`ClocksSettingsProvider`) | `orientation` (schema 1, beside `clock`) |

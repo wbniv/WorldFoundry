@@ -42,7 +42,7 @@ assert HOST.count("cv-tick") == 1 and "line[0] == 'R'" in HOST and "(int)id == 1
 
 CONSTANTS = ["X_POS", "Y_POS", "Z_POS", "ROTATION_A", "ROTATION_B", "ROTATION_C", "X_SCALE", "Y_SCALE", "Z_SCALE",
              "FACE_COLOR_TOP", "WALL_HOUR", "WALL_MINUTE", "WALL_SECOND", "WALL_DAY"]
-NAMES = ["tower_figure_1", "tower_figure_2", "tower_figure_3", "tower_figure_4", "tower_bird", "hour_hand", "minute_hand",
+NAMES = ["tower_figure_1", "tower_figure_2", "tower_figure_3", "tower_figure_4", "tower_figure_b1", "tower_figure_b2", "tower_figure_b3", "tower_figure_b4", "tower_bird", "hour_hand", "minute_hand",
          "cs_wide", "LookAt", "CuckooVillageSettings"]
 FIELDS = {label: 129 + i for i, label in enumerate(tl.SETTINGS_DEFAULTS)}
 
@@ -78,8 +78,9 @@ class Host(mm.Host):
         super().__init__(tmp, ids)
         self.ix = ix
 
-    def frame_at(self, day: int, sod: float, candles=None, lights=None, flowers=None):
-        """One frame at local day `day` and second-of-day `sod`; candles: the Candles all year field (None: unanswered, so its default Off)."""
+    def frame_at(self, day: int, sod: float, candles=None, lights=None, flowers=None, bavaria=None):
+        """One frame at local day `day` and second-of-day `sod`; candles: the Candles all year field (None: unanswered, so its default Off);
+        bavaria: the Bavaria mode field likewise. Returns the director's actor-mailbox writes, {(actor index, mailbox id): value}."""
         self.proc.stdin.write("Q\n")
         if candles is not None:
             self.proc.stdin.write(f"P {self.ix['CuckooVillageSettings']} {FIELDS['Candles all year']} {candles}\n")
@@ -87,6 +88,8 @@ class Host(mm.Host):
             self.proc.stdin.write(f"P {self.ix['CuckooVillageSettings']} {FIELDS['Window lights']} {lights}\n")
         if flowers is not None:
             self.proc.stdin.write(f"P {self.ix['CuckooVillageSettings']} {FIELDS['Detailed flowers']} {flowers}\n")
+        if bavaria is not None:
+            self.proc.stdin.write(f"P {self.ix['CuckooVillageSettings']} {FIELDS['Bavaria mode']} {bavaria}\n")
         h, m = int(sod // 3600) % 24, int(sod // 60) % 60
         for name, v in (("WALL_DAY", day), ("WALL_HOUR", h), ("WALL_MINUTE", m), ("WALL_SECOND", sod % 60.0)):
             self.proc.stdin.write(f"M {self.ids[name]} {v!r}\n")
@@ -95,8 +98,12 @@ class Host(mm.Host):
         head = self.proc.stdout.readline().split()
         if not head or head[0] != "RESULT":
             raise RuntimeError(f"host: {head}")
-        while self.proc.stdout.readline().split()[0] != "END":
-            pass
+        writes = {}
+        while True:
+            line = self.proc.stdout.readline().split()
+            if line[0] == "END":
+                return writes
+            writes[(int(line[1]), int(line[2]))] = float(line[3])
 
     def read(self, cell: int) -> float:
         self.proc.stdin.write(f"R {cell}\n")
@@ -170,6 +177,34 @@ def main() -> int:
                                 print(f"FAIL flowers {tl.date_of(day)} {sod:7.0f} s field={flowers}: cells {got}, want {(want_on, 1.0 - want_on)}")
             print(f"flowers: {flower_failures} failures")
             failures += flower_failures
+            # Bavaria mode: the hands and the four figures, every pose, against the reference, with the field Off, On and unanswered
+            pose_failures = 0
+            channels = {name: ("X_POS", "Y_POS", "Z_POS", "ROTATION_A", "ROTATION_C") for name in
+                        (*tl.FIG_NAMES, *tl.FIG_B_NAMES)}      # the channels the director writes
+            channels.update({"hour_hand": ("ROTATION_B",), "minute_hand": ("ROTATION_B",)})
+            slot = {"X_POS": 0, "Y_POS": 1, "Z_POS": 2, "ROTATION_A": 3, "ROTATION_B": 4, "ROTATION_C": 5}      # the order of a pose tuple
+            frames = 0
+            for bavaria in (None, 0, 1):
+                setting = {**tl.SETTINGS_DEFAULTS, "Bavaria mode": 1 if bavaria else 0}
+                for sod in (10 * 3600 + 8 * 60 + 22.0, 12 * 3600 + 0.5, 12 * 3600 + 2.5, 12 * 3600 + 4.0, 12 * 3600 + 9.0, 12 * 3600 + 14.0,
+                            12 * 3600 + 19.0, 12 * 3600 + 22.0, 12 * 3600 + 30.0, 15 * 3600 + 15 * 60 + 3.0, 23 * 3600 + 59 * 60 + 59.0):
+                    writes = host.frame_at(day_of(2026, 11, 22), sod, bavaria=bavaria)
+                    want_poses = tl.all_poses(sod, setting)
+                    frames += 1
+                    for cell, want_cell in ((tl.BAVARIA_CELL, float(bool(bavaria))), (tl.CLASSIC_CELL, float(not bavaria))):
+                        if host.read(cell) != want_cell:                   # the Bavarian parts show with the mode On, the Classic parts it replaces with it Off
+                            pose_failures += 1
+                            print(f"FAIL visibility cell {cell} Bavaria={bavaria}: {host.read(cell)}, want {want_cell}")
+                    for name, chans in channels.items():
+                        for ch in chans:
+                            got = writes[(ix[name], host.ids[ch])]
+                            want = want_poses[name][slot[ch]]
+                            if abs(got - want) > 2e-4:
+                                pose_failures += 1
+                                if pose_failures <= 10:
+                                    print(f"FAIL pose {name} {ch} Bavaria={bavaria} {sod:8.1f} s: {got}, want {want}")
+            print(f"poses: {frames} frames x {len(channels)} actors, {pose_failures} failures")
+            failures += pose_failures
         finally:
             host.close()
     return 1 if failures else 0
