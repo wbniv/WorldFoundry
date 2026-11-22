@@ -11,6 +11,7 @@ Writes cuckoo_village.lev and actor-map.json.
 """
 import json
 import math
+import os
 import sys
 from pathlib import Path
 
@@ -25,6 +26,7 @@ import timeline as tl        # noqa: E402
 import candles as cd         # noqa: E402
 sys.path.insert(0, str(ROOT / 'wflevels/cuckoo_village_assets'))
 import flowers as fw         # noqa: E402
+import bavaria as bv         # noqa: E402
 
 TAG = '[cuckoo-village]'
 REFERENCE = 10 * 3600 + 8 * 60 + 22.0       # the pose the level starts from: 10:08
@@ -181,14 +183,36 @@ for mi, name_ in enumerate(f_names):
 used = [n for n in f_names if joined[n][1]]
 assert len(f_faces) == fw.triangle_count(joined) and len(boxes) == 2 * tl.HOUSES
 static_actor('cottage_flowers', f_verts, f_faces, f_mat, [flower_materials[n] for n in f_names], [(0.0, 0.0)] * (3 * len(f_faces)), tl.FLOWERS_CELL)
-print(f'{TAG} window boxes: {len(f_faces)} flower triangles in {len(used)} materials, {len(sum(len(f) - 2 for f in block_faces)} block triangles')
+print(f'{TAG} window boxes: {len(f_faces)} flower triangles in {len(used)} materials, {sum(len(f) - 2 for f in block_faces)} block triangles')
+# Bavaria mode (plan "Bavaria mode"): the Bavarian parts show with the BAVARIA cell and the Classic parts they replace with the CLASSIC
+# cell. The four Bavarian figures stand on the Classic figures' pivots and are posed by the same formulas (the director writes to both
+# sets), so their meshes are pivot-local; every other Bavarian part is in world coordinates and never moves.
+for name in tl.FIG_NAMES + ['dial_numerals_classic']:
+    objs[name]['wf_Visibility Mailbox'] = tl.CLASSIC_CELL
+cottages = [(tuple(objs[f'cottage_{i + 1:02}'].location), math.degrees(objs[f'cottage_{i + 1:02}'].rotation_euler.z), objs[f'cottage_{i + 1:02}'].scale.x)
+            for i in range(tl.HOUSES)]
+for part in bv.all_parts(tl.TZ, cottages, scope['height']).values():
+    actor = mesh_actor(part.name, part.verts, part.faces, part.tiles)
+    actor['wf_Visibility Mailbox'] = tl.BAVARIA_CELL
+    if part.name in tl.FIG_B_NAMES:
+        actor.location = objs[tl.FIG_NAMES[tl.FIG_B_NAMES.index(part.name)]].location     # the twin's pivot
 
 # window glow: one visibility mailbox per cottage; the bird is shown only during the hourly calls
 for i in range(tl.HOUSES):
     objs[f'cottage_light_{i + 1:02}']['wf_Visibility Mailbox'] = GLOW_CELL0 + i
 objs[tl.BIRD_NAME]['wf_Visibility Mailbox'] = BIRD_CELL
 
+# Review renders (not part of a normal build): CUCKOO_REVIEW_RENDER=<dir> renders close-ups with Cycles on the CPU. CUCKOO_REVIEW_BAVARIA=1
+# poses the scene as Bavaria mode (the Bavarian parts shown, the Classic ones they replace hidden); CUCKOO_REVIEW_TIME=HH:MM:SS picks the moment.
+review_dir = os.environ.get('CUCKOO_REVIEW_RENDER')
+review_bavaria = bool(os.environ.get('CUCKOO_REVIEW_BAVARIA'))
+review_time = os.environ.get('CUCKOO_REVIEW_TIME')
+if review_time:
+    h_, m_, s_ = (float(v) for v in review_time.split(':'))
+    REFERENCE = h_ * 3600 + m_ * 60 + s_
 poses = tl.all_poses(REFERENCE)
+if review_bavaria:                         # a review render only: the poses as Bavaria mode has them
+    poses = tl.all_poses(REFERENCE, {**tl.SETTINGS_DEFAULTS, 'Bavaria mode': 1})
 for name, p in poses.items():
     if name in ('cs_wide', 'LookAt'):
         continue
@@ -222,11 +246,61 @@ catalog = json.loads(subprocess.check_output([str(ROOT / 'wftools/wf_attr_edit/t
 settings_fields = {f['key']: f['index'] for f in catalog['fields'] if f['width'] and f['key'] in tl.SETTINGS_DEFAULTS}
 assert set(settings_fields) == set(tl.SETTINGS_DEFAULTS), settings_fields
 
+if review_dir:
+    # the Bavarian parts and the Classic ones they replace: show one set. The renders are for looking, so the visibility mailboxes
+    # (which only the engine reads) become the renderer's hide flags
+    for o in objs:
+        cell = o.get('wf_Visibility Mailbox')
+        if cell == tl.BAVARIA_CELL:
+            o.hide_render = not review_bavaria
+        elif cell == tl.CLASSIC_CELL:
+            o.hide_render = review_bavaria
+    from mathutils import Vector
+    sc = bpy.context.scene
+    sc.render.engine = 'CYCLES'
+    sc.cycles.device = 'CPU'
+    sc.cycles.samples = 24
+    sc.render.resolution_x, sc.render.resolution_y = 1280, 720
+    sc.world = bpy.data.worlds.new('review_world')
+    sc.world.use_nodes = True
+    sc.world.node_tree.nodes['Background'].inputs[0].default_value = (0.55, 0.65, 0.80, 1.0)
+    sc.world.node_tree.nodes['Background'].inputs[1].default_value = 1.2
+    sun = bpy.data.objects.new('review_sun', bpy.data.lights.new('review_sun', 'SUN'))
+    sun.data.energy = 3.5
+    sun.rotation_euler = (math.radians(55), 0, math.radians(-25))
+    sc.collection.objects.link(sun)
+    cam_data = bpy.data.cameras.new('review_cam')
+    cam = bpy.data.objects.new('review_cam', cam_data)
+    sc.collection.objects.link(cam)
+    sc.camera = cam
+    tz = tl.TZ
+    views = {'tower_front': ((0.0, -7.2, 3.6 + tz), (0.0, -1.4, 3.7 + tz), 50),
+             'tower_balcony': ((0.0, -3.6, 3.2 + tz), (0.0, -1.5, 3.1 + tz), 50),
+             'tower_dial': ((0.0, -3.4, 4.3 + tz), (0.0, -1.1, 4.1 + tz), 50),
+             'maypole': ((6.5, -8.0, 2.4), (2.3, -2.4, 1.9), 40),
+             'dome_cottage': ((15.5, -3.0, 6.5), (7.0, 6.0, 3.6), 40),
+             'tower_top': ((0.0, -9.0, 6.0 + tz), (0.0, -1.0, 5.3 + tz), 50),
+             'figures': ((0.0, -6.2, 3.3 + tz), (0.0, -1.6, 3.0 + tz), 70)}
+    only = os.environ.get('CUCKOO_REVIEW_VIEWS')
+    if only:
+        views = {k: v for k, v in views.items() if k in only.split(',')}
+    os.makedirs(review_dir, exist_ok=True)
+    suffix = '-bavaria' if review_bavaria else '-classic'
+    for name, (loc, target, lens) in views.items():
+        cam.location = loc
+        cam_data.lens = lens
+        cam.rotation_euler = (Vector(target) - Vector(loc)).to_track_quat('-Z', 'Y').to_euler()
+        sc.render.filepath = os.path.join(review_dir, name + suffix + '.png')
+        bpy.ops.render.render(write_still=True)
+    bpy.data.objects.remove(sun, do_unlink=True)
+    bpy.data.objects.remove(cam, do_unlink=True)
+
 scene = bpy.context.scene
 objects = [o for o in scene.objects if o.get('wf_schema_path')]
 indices = {o.name: i + 1 for i, o in enumerate(objects)}
-for a, b in zip(tl.FIG_NAMES, tl.FIG_NAMES[1:]):
-    assert indices[b] - indices[a] == 1, 'the four figures must be contiguous'
+for names in (tl.FIG_NAMES, tl.FIG_B_NAMES):
+    for a, b in zip(names, names[1:]):
+        assert indices[b] - indices[a] == 1, 'the four figures of a set must be contiguous'
 objs['Director']['wf_Script'] = forth.director_script(indices, settings_fields)
 (HERE / 'actor-map.json').write_text(json.dumps(dict(indices=indices, reference=REFERENCE), indent=1) + '\n')
 print(f'{TAG} {len(objects)} actors')

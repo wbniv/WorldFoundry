@@ -20,7 +20,8 @@ the art therefore flows into this level, and a geometry change fails the build l
 | `build.sh` | Level build: Blender, then `build_level_binary.sh`. Output `wflevels/cuckoo_village{,-standalone}.iff`. |
 | `build_engine_apk.sh` | Gradle: the Minute Machine flavor APK from this branch's engine (needs `android/local.properties`, the Jolt tree; about 10 min; its `assets/cd.iff` symlink target is made with `cdpack`). |
 | `build_device_apk.sh` | Swaps the level into an APK's `assets/cd.iff`, signs with the debug key. |
-| `../../scripts/check-cuckoo-village.py` | Desktop engine check: `--compare` against `timeline.py`, `--capture` PNGs (2048 texture slots). |
+| `bavaria.py` | Bavaria mode's geometry (the four figures, the reversed dial's numerals, the chalet trim, the cottages' painting, the dome, the maypole), pure Python. `CUCKOO_REVIEW_RENDER=<dir> [CUCKOO_REVIEW_BAVARIA=1] [CUCKOO_REVIEW_TIME=HH:MM:SS] [CUCKOO_REVIEW_VIEWS=a,b]` makes `blender_create_cuckoo_village.py` render close-ups (Cycles, CPU) as well. |
+| `../../scripts/check-cuckoo-village.py` | Desktop engine check: `--compare` against `timeline.py`, `--capture` PNGs (2048 texture slots); `--bavaria` starts the level with Bavaria mode On. |
 
 ## Verified (2026-11-21)
 
@@ -34,7 +35,7 @@ the art therefore flows into this level, and a geometry change fails the build l
 - cast1 with this art: the APK is built but not installed, because cast1 was fenced by another session's failed `clocks`
   cleanup (needs an administrator).
 - The bird's door is hidden behind the carved alcove, so the bird is shown and hidden by a visibility mailbox.
-- Bavaria mode, December and the other seasonal events, `CuckooVillageSettings`, audio, the dusk lighting blend (the
+- Seasonal events other than the candles, audio, the dusk lighting blend (Bavaria mode is built: see `bavaria.py` and the plan) (the
   engine has no runtime light control; windows switch per cottage), a measured frame rate on cast1 (the tower alone is
   about 21,000 triangles), the 10% dial target on the device, and the desktop camera mismatch: in the container the engine
   camera did not follow the shot position, on the device it did. Cause not found.

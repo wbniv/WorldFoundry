@@ -21,9 +21,9 @@ from typing import Dict, List
 import timeline as tl
 
 CELLS = ["sod", "hr", "mi", "sc", "tm", "i", "hx", "f", "bow", "s", "w", "ent", "th", "lx", "ly", "cl", "hop", "vx", "vy",
-         "n", "o", "bob", "k", "on", "lap", "hold", "u", "bb", "phi", "r", "h", "day", "doy"]
+         "n", "o", "bob", "k", "on", "lap", "hold", "u", "bb", "phi", "r", "h", "day", "doy", "at"]
 WORDS = {"sm", "frac", "floor", "mod", "sin", "cos", "wx", "wy", "wz", "wa", "wb", "wc", "ai", "fig", "figs", "bird", "win",
-         "wins", "cam", "hands", "tick", "season", "candles", "flames", "flowers"}
+         "wins", "cam", "hands", "tick", "season", "candles", "flames", "flowers", "sgn", "calc", "put", "vis"}
 
 
 def n(x: float) -> str:
@@ -56,12 +56,20 @@ def director_script(ix: Dict[str, int], fields: Dict[str, int] = None) -> str:
         ": cv-wa ( v actor -- ) INDEXOF_ROTATION_A swap write-actor-mailbox ;",
         ": cv-wb ( v actor -- ) INDEXOF_ROTATION_B swap write-actor-mailbox ;",
         ": cv-wc ( v actor -- ) INDEXOF_ROTATION_C swap write-actor-mailbox ;",
-        f": cv-ai {ix['tower_figure_1']} cv-i cv@ + ;",
+        ": cv-ai cv-at cv@ ;",                    # the actor a figure word is writing to: a Classic figure, then its Bavarian twin
     ]
+    # the settings object: property@ ( actor field -- value valid ); an absent overlay or field gives the default
+    owner = ix.get("CuckooVillageSettings", 0)
+    for label, default in tl.SETTINGS_DEFAULTS.items():
+        word = "cv-s-" + label.lower().replace(" ", "-")
+        L.append(f": {word} {owner} {fields[label]} property@ if else drop {default} then ;")
+    # Bavaria mode: one sign, +1 in Classic and -1 in Bavaria mode, for the dial's hands and the parade's direction
+    L += [": cv-sgn cv-s-bavaria-mode if -1 else 1 then ;"]
     A, B, CX, CY = tl.LOOP_A, tl.LOOP_B, tl.LOOP_CX, tl.LOOP_CY
-    # one figure: pose of figure cv-i from cv-tm (seconds into the hour)
+    # one figure: pose of figure cv-i from cv-tm (seconds into the hour), worked out once (cv-calc) and written to the Classic figure
+    # and to its Bavarian twin (cv-put): both sets are always posed, and the visibility cells show one of them
     L += [
-        ": cv-fig",
+        ": cv-calc",
         f"  cv-i cv@ {n(tl.FIG_X[1] - tl.FIG_X[0])} * {n(tl.FIG_X[3])} - cv-hx cv!",
         "  0 cv-f cv!  0 cv-bow cv!",
         "  cv-i cv@ 3 < if",
@@ -74,22 +82,25 @@ def director_script(ix: Dict[str, int], fields: Dict[str, int] = None) -> str:
         "  0 cv-w cv!  0 cv-lx cv!  0 cv-ly cv!  0 cv-cl cv!  0 cv-hop cv!",
         f"  cv-tm cv@ {n(tl.PARADE_LEN)} < if",
         f"    cv-hx cv@ {n(A)} / asin-rev .75 + cv-tm cv@ {n(tl.PARADE_LOOP_START)} - 0 max {n(tl.PARADE_LOOP_SECONDS)} min "
-        f"{n(tl.PARADE_RATE)} * + cv-th cv!",
+        f"{n(tl.PARADE_RATE)} * cv-sgn * + cv-th cv!",
         f"    cv-i cv@ 3 = if 0 else cv-i cv@ {n(tl.ENTRY_AT[1] - tl.ENTRY_AT[0])} * {n(tl.ENTRY_AT[0])} + then cv-ent cv!",
         f"    cv-tm cv@ cv-ent cv@ - {n(tl.ENTRY_LEN)} / cv-sm  1 cv-tm cv@ {n(tl.PARADE_EXIT_AT)} - {n(tl.PARADE_EXIT_LEN)} / cv-sm - * cv-w cv!",
         f"    cv-th cv@ cv-cos {n(A)} * {n(CX)} + cv-lx cv!",
         f"    cv-th cv@ cv-sin {n(B)} * {n(-CY)} - cv-ly cv!",
-        f"    cv-th cv@ cv-sin {n(A)} * negate cv-vx cv!",
-        f"    cv-th cv@ cv-cos {n(B)} * cv-vy cv!",
+        f"    cv-th cv@ cv-sin {n(A)} * negate cv-sgn * cv-vx cv!",
+        f"    cv-th cv@ cv-cos {n(B)} * cv-sgn * cv-vy cv!",
         "    cv-vx cv@ cv-vy cv@ negate atan2-rev cv-cl cv!",
         "    cv-th cv@ 6 * cv-sin dup * .03 * cv-hop cv!",
-        "  then",
+        "  then ;",
+        ": cv-put",                                  # the pose cv-calc worked out, written to the actor in cv-at
         f"  cv-hx cv@ 1 cv-w cv@ - * cv-lx cv@ cv-w cv@ * + cv-ai cv-wx",
         f"  {n(-tl.FIG_HOME_Y)} negate {n(tl.STEP_OUT)} cv-f cv@ * - 1 cv-w cv@ - * cv-ly cv@ cv-w cv@ * + cv-ai cv-wy",
         f"  {n(tl.FIG_Z0)} cv-f cv@ .5 * cv-sin .05 * + cv-w cv@ cv-hop cv@ * + cv-ai cv-wz",
         "  cv-bow cv@ 1 cv-w cv@ - * cv-ai cv-wa",
         "  cv-w cv@ cv-cl cv@ * cv-ai cv-wc ;",
-        ": cv-figs  0 cv-i cv!  begin  cv-fig  cv-i cv@ 1 + dup cv-i cv! 4 =  until ;",
+        ": cv-figs  0 cv-i cv!  begin  cv-calc  "
+        f"{ix['tower_figure_1']} cv-i cv@ + cv-at cv!  cv-put  {ix['tower_figure_b1']} cv-i cv@ + cv-at cv!  cv-put  "
+        "cv-i cv@ 1 + dup cv-i cv! 4 =  until ;",
     ]
     # bird and its door
     end_expr = f"cv-n cv@ 1 - {n(tl.CALL_GAP)} * {n(tl.CALL_FIRST + 1.0)} +"
@@ -109,11 +120,6 @@ def director_script(ix: Dict[str, int], fields: Dict[str, int] = None) -> str:
         f"  {n(tl.BIRD_REST[2])} .04 cv-bob cv@ * + {ix[tl.BIRD_NAME]} cv-wz",
         f"  cv-bob cv@ .06 * {ix[tl.BIRD_NAME]} cv-wa ;",
     ]
-    # the settings object: property@ ( actor field -- value valid ); an absent overlay or field gives the default
-    owner = ix.get("CuckooVillageSettings", 0)
-    for label, default in tl.SETTINGS_DEFAULTS.items():
-        word = "cv-s-" + label.lower().replace(" ", "-")
-        L.append(f": {word} {owner} {fields[label]} property@ if else drop {default} then ;")
     # window glow: global user cells 200..212 are the visibility mailboxes of the twelve houses and the tower
     L += [
         ": cv-win ( i -- )",
@@ -160,13 +166,14 @@ def director_script(ix: Dict[str, int], fields: Dict[str, int] = None) -> str:
     ]
     L += [
         ": cv-hands",
-        "  cv-mi cv@ cv-sc cv@ 60 / + 60 / " + f"{ix['minute_hand']} cv-wb",
-        "  cv-hr cv@ 12 cv-mod cv-mi cv@ 60 / + cv-sc cv@ 3600 / + 12 / " + f"{ix['hour_hand']} cv-wb ;",
+        "  cv-mi cv@ cv-sc cv@ 60 / + 60 / cv-sgn * " + f"{ix['minute_hand']} cv-wb",
+        "  cv-hr cv@ 12 cv-mod cv-mi cv@ 60 / + cv-sc cv@ 3600 / + 12 / cv-sgn * " + f"{ix['hour_hand']} cv-wb ;",
+        f": cv-vis  cv-s-bavaria-mode if 1 else 0 then {tl.BAVARIA_CELL} cv!  cv-s-bavaria-mode if 0 else 1 then {tl.CLASSIC_CELL} cv! ;",
         ": cv-tick",
         "  INDEXOF_WALL_SECOND cv@ cv-sc cv!  INDEXOF_WALL_HOUR cv@ cv-hr cv!  INDEXOF_WALL_MINUTE cv@ cv-mi cv!",
         "  cv-mi cv@ 60 * cv-sc cv@ + cv-tm cv!",
         "  cv-hr cv@ 3600 * cv-tm cv@ + cv-sod cv!",
-        "  cv-hands cv-figs cv-bird cv-wins cv-candles cv-flames cv-flowers cv-cam ;",
+        "  cv-hands cv-figs cv-bird cv-wins cv-candles cv-flames cv-flowers cv-cam cv-vis ;",
         "cv-tick",
     ]
     return "\n".join(L) + "\n"
@@ -178,7 +185,7 @@ def main(argv: List[str]) -> int:
     ap.add_argument("--out", metavar="FILE.fth", help="write the script here (default: stdout)")
     args = ap.parse_args(argv)
     ix = json.load(open(args.indices))["indices"] if args.indices else {
-        k: 100 + j for j, k in enumerate(["tower_figure_1", "tower_figure_2", "tower_figure_3", "tower_figure_4", "tower_bird",
+        k: 100 + j for j, k in enumerate(["tower_figure_1", "tower_figure_2", "tower_figure_3", "tower_figure_4", "tower_figure_b1", "tower_figure_b2", "tower_figure_b3", "tower_figure_b4", "tower_bird",
                                           "hour_hand", "minute_hand", "cs_wide", "LookAt"])}
     text = director_script(ix)
     if args.out:
