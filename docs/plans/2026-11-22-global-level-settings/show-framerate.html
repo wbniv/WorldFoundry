@@ -16,7 +16,7 @@ h1{margin:0;padding:22px 32px 4px;font-size:24px}p.sub{margin:0;padding:0 32px 1
 .btns{display:flex;gap:12px;justify-content:flex-end;margin-top:12px}.btn{padding:8px 20px;border-radius:8px;background:#22305a}.btn.p{background:var(--accent);color:#2a1800;font-weight:700}
 .tank{position:relative;height:250px;border-radius:10px;background:linear-gradient(#1a5d8f,#0b2b4a 70%,#c9b27a 71%,#8d7a4d);overflow:hidden}
 .fish{position:absolute;left:210px;top:120px;width:90px;height:44px;border-radius:50% 60% 60% 50%;background:#ff8a2b;box-shadow:80px 50px 0 -6px #ff8a2b}
-.fps{position:absolute;right:12px;top:10px;background:#000a;padding:4px 10px;border-radius:6px;font:700 15px ui-monospace,monospace;color:var(--on)}
+.fps{position:absolute;right:3%;bottom:4%;background:rgba(16,24,32,.69);padding:3px 6px;font:500 15px/1 ui-monospace,"DejaVu Sans Mono",monospace;color:#fff;letter-spacing:0;white-space:pre}
 .off .fps{display:none}
 .note{margin:12px 32px 0;color:var(--muted);font-size:14px}
 .tag{display:inline-block;background:#22305a;border-radius:6px;padding:1px 8px;margin-left:8px;font-size:13px;color:var(--fg)}
@@ -25,24 +25,24 @@ h1{margin:0;padding:22px 32px 4px;font-size:24px}p.sub{margin:0;padding:0 32px 1
 <p class="sub">Declared once; every level's settings object carries it, whatever else that level exposes.</p>
 <div class="row">
  <div class="card"><h2>1 · Any level's settings form (hold A, or the entry button on a phone)</h2>
-  <div class="form"><div class="sheet">Display</div>
-   <div class="field"><div>Show framerate<small>Show the frames-per-second overlay</small></div><span class="box"></span></div>
-   <div class="sheet" style="margin-top:14px">Cuckoo Village<span class="tag">the level's own sheets, unchanged</span></div>
+  <div class="form"><div class="sheet">Cuckoo Village<span class="tag">the level's own sheets, unchanged</span></div>
    <div class="field"><div>Bavaria mode</div><span class="box"></span></div>
    <div class="field"><div>Window lights</div><span class="box on"></span></div>
+   <div class="sheet" style="margin-top:14px">Display<span class="tag">the global sheet, always last</span></div>
+   <div class="field"><div>Show framerate<small>Show the frames-per-second overlay</small></div><span class="box"></span></div>
    <div class="btns"><span class="btn">Cancel</span><span class="btn p">Apply</span></div></div></div>
- <div class="card"><h2>2 · After Apply with it ticked</h2>
-  <div class="tank"><div class="fish"></div><div class="fps">60.0 fps</div></div>
+ <div class="card"><h2>2 · After Apply with it ticked: the engine's own overlay, bottom right</h2>
+  <div class="tank"><div class="fish"></div><div class="fps">60.0</div></div>
   <div class="form" style="margin-top:12px"><div class="field" style="border:0;padding:4px 0"><div>Show framerate</div><span class="box on"></span></div></div></div>
 </div>
 <div class="row" style="margin-top:16px">
- <div class="card off"><h2>3 · Default: off (nothing drawn)</h2><div class="tank" style="height:200px"><div class="fish"></div><div class="fps">60.0 fps</div></div></div>
+ <div class="card off"><h2>3 · Default: off (nothing drawn)</h2><div class="tank" style="height:200px"><div class="fish"></div><div class="fps">60.0</div></div></div>
  <div class="card"><h2>4 · Where it lives</h2><div class="form" style="font:14px/1.7 ui-monospace,monospace">
   global_settings.inc &nbsp;&nbsp;← the one declaration (Show framerate)<br>
-  &nbsp;&nbsp;↓ included by settings.inc<br>
+  &nbsp;&nbsp;↓ @include at the end of each holder<br>
   every *Settings type &nbsp;+&nbsp; LevelSettings (the minimal holder)<br>
   &nbsp;&nbsp;↓ read by name<br>
   global_settings.cc &nbsp;&nbsp;← one row per global: key → what it does</div></div>
 </div>
-<p class="note">States shown: unticked default, ticked after Apply, a level with its own sheets keeping them. The phone shows the same rows in the touch form.</p>
+<p class="note">The overlay is the one the engine already draws (fps_overlay.cc): the number only, one decimal, small fixed-pitch font, white on a dark plate, 3 % in from the bottom-right corner. This setting only switches it. States shown: unticked default, ticked after Apply, a level with its own sheets keeping them.</p>
 </body></html>
