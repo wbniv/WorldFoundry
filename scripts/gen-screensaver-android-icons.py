@@ -3,7 +3,9 @@
 
 Usage: gen-screensaver-android-icons.py [-h] [{all,aquarium,seahorse,clocks,planted}]
 
-The aquarium crop excludes its banner title and badge. Seahorse and Planted Tank
+The aquarium icons and its "WF Aquarium" banner come from the approved artwork
+android/app/art-src/aquarium-icon-2026-10-03/artwork-betta-lowered.png (clownfish, tiger barb
+and betta; the same source as the older android/app Aquarium icon). Seahorse and Planted Tank
 artwork comes from local renders of the levels. All use the shared Android icon
 treatment. With no argument every flavor is rebuilt; name one to rewrite only
 that flavor's files (aquarium: src/main/res, seahorse: src/seahorse/res,
@@ -22,6 +24,8 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parent.parent
 RES = ROOT / "android/screensaver/src/main/res"
 BANNER = RES / "drawable/tv_banner.png"
+AQUARIUM_ART = ROOT / "android/app/art-src/aquarium-icon-2026-10-03/artwork-betta-lowered.png"
+AQUARIUM_BAND_TOP = 0.5   # 0 = the top of the art, 1 = the bottom: where the 16:9 banner band sits
 SEAHORSE_FRAME = ROOT / "android/screensaver/art-src/seahorse-grid-frame.png"
 SEAHORSE_RES = ROOT / "android/screensaver/src/seahorse/res"
 CLOCKS_FRAME = ROOT / "android/screensaver/art-src/wf-clocks-frame.png"
@@ -64,9 +68,23 @@ def write_icons(art: Image.Image, res: Path) -> None:
 
 
 def build_aquarium() -> None:
-    # The badge already on the aquarium banner is at x=563..622; its title ends before x=175.
-    aquarium_art = Image.open(BANNER).convert("RGB").crop((175, 0, 535, 360))
-    write_icons(aquarium_art, RES)
+    # The approved Aquarium artwork (clownfish, tiger barb, betta; 2026-10-03, README beside it), the same source
+    # as the older android/app Aquarium icon. The banner is a 16:9 band of it with the name "WF Aquarium".
+    if not AQUARIUM_ART.exists():
+        raise FileNotFoundError(f"{AQUARIUM_ART} is missing")
+    art = Image.open(AQUARIUM_ART).convert("RGB")
+    if art.width != art.height:
+        raise ValueError(f"the Aquarium artwork must be square, got {art.size}")
+    write_icons(art, RES)
+    band = round(art.width * 9 / 16)
+    top = round((art.height - band) * AQUARIUM_BAND_TOP)
+    banner = android_icons.banner({
+        "banner": AQUARIUM_ART,
+        "banner_crop": (0, top, art.width, top + band),
+        "name": "WF Aquarium",
+    })
+    banner.save(BANNER, optimize=True)
+    print(f"Wrote {BANNER}")
 
 
 def build_seahorse() -> None:
