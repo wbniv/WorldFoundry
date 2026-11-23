@@ -7,8 +7,8 @@ framework. Plan: docs/plans/2026-11-22-discus-tank.md.
 
 The mesh is the discus asset's (wflevels/discus_asset/discus_geometry.py, shared with its
 model.py), scaled from its 0.167 m source length to LENGTH_M. X points toward the nose,
-Y through the body, Z up; the origin is the asset's. One colourway ships in the tank: the
-asset's `wild-brown` (the photograph's own colours), resampled to TEXTURE_SIZE.
+Y through the body, Z up; the origin is the asset's. The tank shares one indexed image
+and twelve lookup tables; `wild-brown` (the photograph's own colours) is the default.
 """
 import sys
 from pathlib import Path
@@ -17,6 +17,7 @@ HERE = Path(__file__).resolve().parent
 ASSET = HERE.parent / 'discus_asset'
 sys.path.insert(0, str(ASSET))
 import discus_geometry as DG                                        # noqa: E402
+import discus_palettes as DP                                        # noqa: E402
 from tiger_barb import forth_constants, mailbox_ranges              # noqa: E402,F401  same mailbox layout (≤ 29 residents)
 
 TITLE = 'Discus'
@@ -60,17 +61,14 @@ def geometry(quad=False, refined=False):
 
 
 def texture_path(out_dir):
-    return Path(out_dir) / 'discus.tga'
+    return Path(out_dir) / 'discus-index-rgb555.png'
 
 
 def prepare_texture(out_dir):
-    """Resample the shipped colourway to TEXTURE_SIZE² as the TGA textile reads; return its path.
-    Pipeline encoding only (as the barb atlas's resize): the art is the asset's."""
-    from PIL import Image
+    """Prepare one encoded index image and the separate color lookup tables."""
     out = texture_path(out_dir)
     out.parent.mkdir(parents=True, exist_ok=True)
-    image = Image.open(ASSET / f'{COLOURWAY}.png').convert('RGB')
-    image.resize((TEXTURE_SIZE, TEXTURE_SIZE), Image.Resampling.LANCZOS).save(out)
+    DP.write_palette_assets(out.parent)
     return out
 
 
@@ -82,6 +80,7 @@ def blender_mesh(bpy, quad, texture, refined=False):
     mat.use_nodes = True
     mat['wf_prelit'] = True          # the asset's flags: prelit photograph, single-face fins drawn
     mat['wf_double_sided'] = True    # from both sides
+    mat['wf_indexed_palette'] = True
     bsdf = next(n for n in mat.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
     tex = mat.node_tree.nodes.new('ShaderNodeTexImage')
     tex.image = bpy.data.images.load(str(Path(texture).resolve()), check_existing=True)

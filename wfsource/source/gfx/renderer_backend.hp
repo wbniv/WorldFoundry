@@ -146,6 +146,10 @@ public:
     // Opt-in shared grayscale texture palette; disabled materials keep old rendering.
     virtual void SetTexturePalette(bool /*enabled*/, unsigned /*dark*/, unsigned /*light*/) {}
 
+    // A material's atlas image encodes immutable indices; the active level
+    // supplies the 256-entry color table separately.
+    virtual void SetIndexedPalette(bool /*enabled*/) {}
+
     // Explicit opt-in material opacity. Legacy materials remain opaque.
     virtual void SetOpacity(float /*opacity*/) {}
 

@@ -17,8 +17,8 @@
         'OBJD' 400000l
         'PERM' 1000000l
         'ROOM' 8000000l
-        'FLAG' 1l 1l                    // doomstick, bungeecam (snowgoons defaults)
-        'SLOT' 1l
+        'FLAG' 1l 1l
+        'SLOT' 1l                    // doomstick, bungeecam (snowgoons defaults)
     }
     { 'ALGN' .align( 2048 ) }
     [ "../aquarium_discus.iff" ]

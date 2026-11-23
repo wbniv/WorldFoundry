@@ -317,6 +317,8 @@ workflows:
             local out="$CM_BUILD_DIR/ios-$label-stdout.tmp"
             local err="$CM_BUILD_DIR/ios-$label-stderr.tmp"
             local install=no launch=no alive=no colours=0 dominant=100 pid="" launch_out=""
+            local -a launch_args=()
+            if [[ "$label" == aquarium-* ]]; then launch_args+=("--property=DiscusSettings.Palette=1"); fi
             local marker="$CM_BUILD_DIR/.ios-$label-start"
             touch "$marker"
             echo "=== $label: $name ($udid) ==="
@@ -332,7 +334,7 @@ workflows:
             if [ "$install" = yes ]; then
               echo "--- launch ---"
               if launch_out=$(SIMCTL_CHILD_WF_FRAME_RATE_CHECKS=1 xcrun simctl launch --terminate-running-process \
-                    --stdout="$out" --stderr="$err" "$udid" "$BUNDLE_ID"); then
+                    --stdout="$out" --stderr="$err" "$udid" "$BUNDLE_ID" "${launch_args[@]}"); then
                 launch=yes
                 pid=$(echo "$launch_out" | awk '{print $NF}')
                 echo "$launch_out (pid $pid)"
@@ -413,7 +415,7 @@ workflows:
           # in place of its cd.iff (the default bundle is untouched; the
           # simulator build is unsigned, so no re-sign). Same checks as above;
           # set WF_IOS_AQUARIUM=0 to skip (about 1 Mac-minute).
-          AQ_IFF="$CM_BUILD_DIR/wflevels/aquarium-cd.iff"
+          AQ_IFF="$CM_BUILD_DIR/wflevels/discus-palette-ci-cd.iff"
           if [ "${WF_IOS_AQUARIUM:-1}" != 0 ] && [ -f "$AQ_IFF" ]; then
             rm -rf "$CM_BUILD_DIR/aquarium-app"; mkdir -p "$CM_BUILD_DIR/aquarium-app"
             AQ_APP="$CM_BUILD_DIR/aquarium-app/wf_game.app"
@@ -455,7 +457,7 @@ workflows:
           done
           for label in aquarium-iphone aquarium-ipad; do
             line=$(grep "^$label|" "$VERDICT" || true)
-            [ -n "$line" ] || continue
+            if [ -z "$line" ]; then echo "IOS $label: DISCUS PALETTE FAIL (missing)"; rc=1; continue; fi
             upper=$(echo "$label" | tr '[:lower:]-' '[:upper:] ')
             IFS='|' read -r _ name install launch alive colours dominant <<EOF
           $line
@@ -463,9 +465,13 @@ workflows:
             echo "$label: $name install=$install launch=$launch alive_after_20s=$alive centre_colours=$colours dominant_pct=${dominant:-100}"
             if [ "$install" = yes ] && [ "$launch" = yes ] && [ "$alive" = yes ] \
                && [ "${colours:-0}" -gt 50 ] 2>/dev/null; then
-              echo "IOS $upper: OK (informational)"
+              if grep -q "INDEXED_PALETTE selection=1" "$CM_BUILD_DIR/ios-$label-launch.log"; then
+                echo "IOS $upper: DISCUS PALETTE OK"
+              else
+                echo "IOS $upper: DISCUS PALETTE FAIL (no selection)"; rc=1
+              fi
             else
-              echo "IOS $upper: FAIL (informational)"
+              echo "IOS $upper: DISCUS PALETTE FAIL"; rc=1
             fi
           done
           exit "$rc"
@@ -878,6 +884,28 @@ workflows:
           # exit code via pipefail so a compile/link failure fails the step.
           cmake --build . --target wf_game 2>&1 | tee ../macos-build.log
 
+      - name: Exercise Discus indexed palettes through Metal
+        script: |
+          set -euo pipefail
+          WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
+          LEVEL="$CM_BUILD_DIR/wflevels/aquarium_discus-standalone.iff"
+          cd "$CM_BUILD_DIR/wfsource/source/game"
+          for palette in 0 1; do
+            "$WF_GAME" --frame-step-smoke=35 --cycles=1 -L"$LEVEL" -rate20 \
+              --no-fps --vram-width=2048 --vram-height=2048 \
+              --vram-slot-width=1024 --vram-slot-height=1024 \
+              --vram-perm-width=1024 --vram-perm-height=1024 \
+              --property=DiscusSettings.Palette=$palette \
+              --capture-frame=30="$CM_BUILD_DIR/macos-discus-$palette.png" \
+              > "$CM_BUILD_DIR/macos-discus-$palette.log" 2>&1
+            test -s "$CM_BUILD_DIR/macos-discus-$palette.png"
+          done
+          grep -q 'INDEXED_PALETTE selection=1' "$CM_BUILD_DIR/macos-discus-1.log"
+          if cmp -s "$CM_BUILD_DIR/macos-discus-0.png" "$CM_BUILD_DIR/macos-discus-1.png"; then
+            echo 'DISCUS METAL: FAIL (palette frames identical)'; exit 1
+          fi
+          echo 'DISCUS METAL: PASS'
+
       - name: Verify portable box colors
         script: |
           set -euo pipefail
@@ -1122,6 +1150,8 @@ workflows:
       - macos-fps-overlay.log
       - macos-frame20.png
       # Aquarium Metal-vs-GL parity (informational; plan step 21).
+      - macos-discus-*.png
+      - macos-discus-*.log
       - macos-aquarium-frame20.png
       - macos-aquarium-comparison.log
       - macos-aquarium-frame100.png

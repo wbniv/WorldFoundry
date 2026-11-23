@@ -173,6 +173,10 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
 			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
 				object = OadLevelSettings(startData); 
 			break;
+        	case Actor::DiscusSettings_KIND:
+			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
+				object = OadDiscusSettings(startData); 
+			break;
 
 
 
@@ -358,6 +362,9 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
 			break;
         	case Actor::LevelSettings_KIND:
 			object = OadLevelSettings(startData); 
+			break;
+        	case Actor::DiscusSettings_KIND:
+			object = OadDiscusSettings(startData); 
 			break;
 
 

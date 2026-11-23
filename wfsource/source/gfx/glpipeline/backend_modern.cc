@@ -1,4 +1,5 @@
 #include <game/runtime_profile.hp>
+#include "../../../../engine/indexed_palette.h"
 //=============================================================================
 // gfx/glpipeline/backend_modern.cc: VBO + shader backend for renderer seam
 // Copyright ( c ) 2026 World Foundry Group
@@ -164,6 +165,8 @@ static const char* kFS =
     "in vec3 v_palette_light;\n"
     "out vec4 frag;\n"
     "uniform sampler2D u_tex;\n"
+    "uniform sampler2D u_index_palette;\n"
+    "uniform int u_indexed;\n"
     "uniform int u_use_tex;\n"
     "#ifndef WF_TEX_MODE\n"
     "#define WF_TEX_MODE u_use_tex\n"
@@ -208,6 +211,14 @@ static const char* kFS =
     "    if (WF_TEX_MODE != 0) {\n"
     "        float is_white = step(0.99, min(v_color.r, min(v_color.g, v_color.b)));\n"
     "        vec4 texel = texture(u_tex, v_uv);\n"
+    "        if (u_indexed != 0) {\n"
+    "            ivec2 dims = textureSize(u_tex, 0);\n"
+    "            ivec2 p = clamp(ivec2(floor(v_uv * vec2(dims))), ivec2(0), dims - 1);\n"
+    "            vec4 index_texel = texelFetch(u_tex, p, 0);\n"
+    "            int hi = int(floor(index_texel.r * 255.0 + 0.5)) / 8;\n"
+    "            int lo = int(floor(index_texel.g * 255.0 + 0.5)) / 8;\n"
+    "            texel = texelFetch(u_index_palette, ivec2(hi * 8 + lo, 0), 0);\n"
+    "        }\n"
     "#ifndef WF_OPAQUE\n"
     "        if (u_alpha_cutout != 0 && (is_white > 0.5 || (WF_TEX_MODE & 2) != 0) && texel.a < 0.5) discard;\n"
     "#endif\n"
@@ -530,6 +541,11 @@ public:
         // Streaming palette belongs to each vertex, so sorted translucent fish
         // can share a draw call even when palettes alternate in depth order.
         _paletteEnabled=e;_paletteDark=dark;_paletteLight=light;
+    }
+    void SetIndexedPalette(bool enabled) override
+    {
+        if (_indexedPaletteEnabled != enabled) Flush();
+        _indexedPaletteEnabled = enabled;
     }
     void SetOpacity(float opacity) override
     {
@@ -934,6 +950,8 @@ public:
         _opaqueProg = 0;
         _opaqueTexProg = 0;
         _noPaletteProg = 0;
+        _indexedPaletteTexture = 0;
+        _indexedPaletteRevision = 0;
         _uniforms = ProgramUniforms{};
         _opaqueUniforms = ProgramUniforms{};
         _opaqueTexUniforms = ProgramUniforms{};
@@ -1166,6 +1184,7 @@ private:
     struct ProgramUniforms
     {
         GLint mvp=-1, mv=-1, tex=-1, useTex=-1, alphaCutout=-1;
+        GLint indexed=-1, indexPalette=-1;
         GLint lighting=-1, compact=-1, ambient=-1, lightDir=-1, lightColor=-1;
         GLint fog=-1, fogColor=-1, fogStart=-1, fogEnd=-1;
         GLint eyeToWorld=-1, absorb=-1, toonBands=-1, caustic=-1;   // WF_STYLE only
@@ -1186,6 +1205,9 @@ private:
     enum { kBatchPalette = 1, kBatchOrdinary = 2 };
     unsigned char _batchPaletteKinds = 0;
     bool _customProgram = false;
+    bool _indexedPaletteEnabled = false;
+    GLuint _indexedPaletteTexture = 0;
+    std::uint64_t _indexedPaletteRevision = 0;
     bool _paletteEnabled=false; unsigned _paletteDark=0,_paletteLight=0xffffff;
     float _opacity = 1.0f;
     float _batchOpacity = 1.0f;
@@ -1252,6 +1274,8 @@ private:
         uniforms.mvp        = glGetUniformLocation(program, "u_mvp");
         uniforms.mv         = glGetUniformLocation(program, "u_mv");
         uniforms.tex        = glGetUniformLocation(program, "u_tex");
+        uniforms.indexed    = glGetUniformLocation(program, "u_indexed");
+        uniforms.indexPalette = glGetUniformLocation(program, "u_index_palette");
         uniforms.useTex     = glGetUniformLocation(program, "u_use_tex");
         uniforms.alphaCutout = glGetUniformLocation(program, "u_alpha_cutout");
         uniforms.lighting   = glGetUniformLocation(program, "u_lighting");
@@ -1463,6 +1487,30 @@ private:
 
         if (_curTexture)
         {
+            glUniform1i(uniforms.indexed, _indexedPaletteEnabled ? 1 : 0);
+            if (_indexedPaletteEnabled) {
+                const auto& palette = wfpalette::active();
+                const auto* rgb = palette.colors();
+                if (!rgb) { std::fprintf(stderr, "INDEXED_PALETTE missing table\n"); std::abort(); }
+                glActiveTexture(GL_TEXTURE1);
+                if (!_indexedPaletteTexture) {
+                    glGenTextures(1, &_indexedPaletteTexture);
+                    _indexedPaletteRevision = 0;
+                }
+                glBindTexture(GL_TEXTURE_2D, _indexedPaletteTexture);
+                if (_indexedPaletteRevision != palette.revision()) {
+                    unsigned char rgba[256 * 4];
+                    for (int i = 0; i < 256; ++i) {
+                        rgba[4*i] = rgb[3*i]; rgba[4*i+1] = rgb[3*i+1];
+                        rgba[4*i+2] = rgb[3*i+2]; rgba[4*i+3] = 255;
+                    }
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba);
+                    _indexedPaletteRevision = palette.revision();
+                }
+                glUniform1i(uniforms.indexPalette, 1);
+            }
             glActiveTexture(GL_TEXTURE0);
             _curTexture->SetGLTexture();
             glUniform1i(uniforms.tex, 0);

@@ -126,6 +126,10 @@ def build(tank: str) -> Path:
     (target / ".gitignore").write_text("# Generated screensaver level and linked assets\n*\n")
     subprocess.run(["bash", "wftools/wf_blender/build_level_binary.sh", target_name],
                    cwd=ROOT, check=True)
+    if tank == 'aquarium_discus':
+        from attach_indexed_palette import attach
+        result = LEVELS / (target_name + '-standalone.iff')
+        result.write_bytes(attach(result.read_bytes(), (source / 'discus-palettes.bin').read_bytes()))
     check_actor_settings((LEVELS / (target_name + "-standalone.iff")).read_bytes(), tank)
     return LEVELS / (target_name + "-standalone.iff")
 

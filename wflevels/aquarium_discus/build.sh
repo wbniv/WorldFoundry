@@ -12,3 +12,4 @@ export AQUARIUM_SCHOOL_N=9
 export AQUARIUM_FOLLOWER_ASSET=discus
 blender --background --python-exit-code 1 --python wflevels/aquarium/blender_create_aquarium.py
 bash wftools/wf_blender/build_level_binary.sh aquarium_discus
+python3 scripts/attach_indexed_palette.py wflevels/aquarium_discus-standalone.iff wflevels/aquarium_discus/discus-palettes.bin wflevels/aquarium_discus-standalone.iff

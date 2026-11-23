@@ -59,6 +59,7 @@ enum EActorKind {
         TideHarbourSettings_KIND,
         CuckooVillageSettings_KIND,
         LevelSettings_KIND,
+        DiscusSettings_KIND,
 	};
 
 

@@ -19,6 +19,32 @@ use crate::allocmap::{AllocationMap, round};
 use crate::config::{Config, TargetSystem};
 use crate::profile;
 
+#[cfg(test)]
+mod indexed_palette_cook_test {
+    use super::Bitmap;
+    use crate::config::Config;
+
+    #[test]
+    fn png_index_encoding_survives_the_real_rgb555_loader() {
+        let dir = std::env::temp_dir().join(format!("wf-index-cook-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("indices.png");
+        let image = image::RgbImage::from_fn(256, 1, |x, _| {
+            image::Rgb([((x >> 3) << 3) as u8, ((x & 7) << 3) as u8, 8])
+        });
+        image.save(&path).unwrap();
+        let cooked = Bitmap::load(&path, &Config::default()).unwrap();
+        assert_eq!(cooked.bitdepth, 16);
+        for i in 0..256usize {
+            let pixel = u16::from_le_bytes([cooked.pixels[2 * i], cooked.pixels[2 * i + 1]]);
+            assert_eq!((((pixel >> 10) & 31) << 3) | ((pixel >> 5) & 31), i as u16);
+            assert_eq!(pixel & 31, 1, "index zero must not become transparent");
+        }
+        std::fs::remove_file(path).unwrap();
+        std::fs::remove_dir(dir).unwrap();
+    }
+}
+
 const TRANSLUCENT_BIT: u16 = 1 << 15;
 
 // ─── Colour conversion ───────────────────────────────────────────────────────

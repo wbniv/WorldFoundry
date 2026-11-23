@@ -73,6 +73,7 @@
     "room-backdrop": 26,
     "AmbientLight": 27,
     "LookB": 28,
-    "cs_school": 29
+    "cs_school": 29,
+    "DiscusSettings": 30
   }
 }
