@@ -1,0 +1,6 @@
+@* Live settings for the Metronome Forest clock.
+TYPEHEADER(Metronome Forest Settings,MetronomeForestSettings)
+	@include settings.inc
+	@include clocksettings.inc
+	@include global_settings.inc
+TYPEFOOTER

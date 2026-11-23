@@ -1,0 +1,15 @@
+#ifndef _MetronomeForestSettings_HP
+#define _MetronomeForestSettings_HP
+#include "actor.hp"
+class MetronomeForestSettings : public Actor {
+public:
+    MetronomeForestSettings(const SObjectStartupData* startupData);
+    virtual ~MetronomeForestSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadMetronomeForestSettings(const SObjectStartupData* startupData);
+#endif

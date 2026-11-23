@@ -67,6 +67,8 @@ int collisionTable[] =
         	0,	// TrainLoopsSettings
         	0,	// HourTreeSettings
         	0,	// BambooPondSettings
+        	0,	// TourbillonSettings
+        	0,	// MetronomeForestSettings
 	
 };
 

@@ -73,6 +73,8 @@ OBJECTSHEADER
         OBJECTENTRY(TrainLoopsSettings,0)
         OBJECTENTRY(HourTreeSettings,0)
         OBJECTENTRY(BambooPondSettings,0)
+        OBJECTENTRY(TourbillonSettings,0)
+        OBJECTENTRY(MetronomeForestSettings,0)
 OBJECTSFOOTER
 
 @*============================================================================

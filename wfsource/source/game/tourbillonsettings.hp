@@ -1,0 +1,15 @@
+#ifndef _TourbillonSettings_HP
+#define _TourbillonSettings_HP
+#include "actor.hp"
+class TourbillonSettings : public Actor {
+public:
+    TourbillonSettings(const SObjectStartupData* startupData);
+    virtual ~TourbillonSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadTourbillonSettings(const SObjectStartupData* startupData);
+#endif

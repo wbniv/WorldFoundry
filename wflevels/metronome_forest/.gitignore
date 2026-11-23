@@ -1,0 +1,10 @@
+*
+!.gitignore
+!*.py
+!*.sh
+!metronome_forest.lev
+!metronome_forest-standalone.iff.txt
+!actor-map.json
+!settings-capabilities.json
+!*.blend
+!*-source.png

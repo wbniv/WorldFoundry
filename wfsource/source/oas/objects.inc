@@ -102,6 +102,10 @@
 #include "hourtreesettings.hp"
         	
 #include "bamboopondsettings.hp"
+        	
+#include "tourbillonsettings.hp"
+        	
+#include "metronomeforestsettings.hp"
 
 
 

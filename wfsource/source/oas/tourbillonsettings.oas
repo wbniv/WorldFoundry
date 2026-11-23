@@ -1,0 +1,6 @@
+@* Live settings for the Triple-axis Tourbillon clock.
+TYPEHEADER(Triple-axis Tourbillon Settings,TourbillonSettings)
+	@include settings.inc
+	@include clocksettings.inc
+	@include global_settings.inc
+TYPEFOOTER

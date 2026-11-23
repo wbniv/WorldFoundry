@@ -197,6 +197,14 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
 			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
 				object = OadBambooPondSettings(startData); 
 			break;
+        	case Actor::TourbillonSettings_KIND:
+			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
+				object = OadTourbillonSettings(startData); 
+			break;
+        	case Actor::MetronomeForestSettings_KIND:
+			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
+				object = OadMetronomeForestSettings(startData); 
+			break;
 
 
 
@@ -401,6 +409,12 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
 			break;
         	case Actor::BambooPondSettings_KIND:
 			object = OadBambooPondSettings(startData); 
+			break;
+        	case Actor::TourbillonSettings_KIND:
+			object = OadTourbillonSettings(startData); 
+			break;
+        	case Actor::MetronomeForestSettings_KIND:
+			object = OadMetronomeForestSettings(startData); 
 			break;
 
 

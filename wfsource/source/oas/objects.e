@@ -67,6 +67,8 @@
         TrainLoopsSettings_KIND,
         HourTreeSettings_KIND,
         BambooPondSettings_KIND,
+        TourbillonSettings_KIND,
+        MetronomeForestSettings_KIND,
 
 
 
