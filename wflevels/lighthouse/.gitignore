@@ -1,0 +1,11 @@
+*
+!.gitignore
+!*.py
+!*.sh
+!*.blend
+!lighthouse.lev
+!lighthouse-standalone.iff.txt
+!actor-map.json
+!settings-capabilities.json
+!*-source.png
+!textile.flags

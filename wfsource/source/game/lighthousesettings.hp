@@ -1,0 +1,15 @@
+#ifndef _LighthouseSettings_HP
+#define _LighthouseSettings_HP
+#include "actor.hp"
+class LighthouseSettings : public Actor {
+public:
+    LighthouseSettings(const SObjectStartupData* startupData);
+    virtual ~LighthouseSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadLighthouseSettings(const SObjectStartupData* startupData);
+#endif

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="580" viewBox="0 0 1100 580" role="img" aria-labelledby="title desc">
+ <title id="title">Lighthouse water motion: swell, surf and boat wake</title>
+ <desc id="desc">An overhead view shows broad moving swell, irregular surf around stationary rock piles, a V-shaped wake behind the orbiting boat, and a rotating beam reflection. A side section shows a gently displaced sea surface and floating boat.</desc>
+ <defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#d2eaf1"/></marker></defs>
+ <rect width="1100" height="580" rx="18" fill="#0b1725"/>
+ <g font-family="sans-serif" fill="#e5f1f5"><text x="35" y="43" font-size="26" font-weight="bold">One sea, four layers of motion</text><text x="45" y="84" font-size="19">Overhead view</text><text x="615" y="84" font-size="19">Side section</text></g>
+ <g transform="translate(270 260)">
+  <circle r="166" fill="#123754" stroke="#5b8291" stroke-width="2"/>
+  <path d="M-128 -35 Q-75 -58 -15 -37 T110 -39 M-130 22 Q-72 0 -10 23 T120 22 M-112 78 Q-52 53 6 76 T111 70" fill="none" stroke="#4f899c" stroke-width="3" opacity=".7"/>
+  <path d="M-105 -115 q12 -10 24 0 M40 -150 q15 -10 28 1 M126 -62 q14 3 18 16 M119 83 q-8 14 -23 16 M-48 142 q-15 2 -26 -10" fill="none" stroke="#a4c8cf" stroke-width="4" stroke-linecap="round"/>
+  <g fill="#737e82"><circle cx="-95" cy="-115" r="14"/><circle cx="55" cy="-145" r="14"/><circle cx="135" cy="-55" r="14"/><circle cx="110" cy="90" r="14"/><circle cx="-62" cy="140" r="14"/></g>
+  <circle r="31" fill="#6b7272"/><rect x="-10" y="-28" width="20" height="45" fill="#d7654e"/><circle cy="-31" r="6" fill="#ffe08a"/>
+  <path d="M16 -15 L140 40 L125 67 Z" fill="#e4b35a" opacity=".33"/>
+  <path d="M78 -84 l24 12 l-25 8 z" fill="#f0dbbb" stroke="#a66838" stroke-width="3"/>
+  <path d="M76 -70 Q48 -49 26 -35 M80 -67 Q65 -35 56 -17" fill="none" stroke="#c8e3df" stroke-width="3" stroke-linecap="round"/>
+  <path d="M-115 -35 L-70 -35 M-110 20 L-65 20" stroke="#d2eaf1" stroke-width="2" marker-end="url(#arr)"/>
+ </g>
+ <g font-family="sans-serif" font-size="17" fill="#dbeaf0"><text x="48" y="474">Broad, low swell moves across the sea.</text><text x="48" y="504">Surf stays anchored to the island and each rock.</text><text x="48" y="534">The V-shaped wake travels behind the boat.</text></g>
+ <path d="M625 276 Q650 251 680 270 T740 268 T800 270 T860 270 T920 268 T980 270 T1040 270" fill="none" stroke="#65a0b1" stroke-width="6"/>
+ <path d="M625 280 L1040 280 L1040 340 L625 340 Z" fill="#123754"/>
+ <path d="M800 264 l45 0 l-7 15 l-30 0 z" fill="#9a633e"/><path d="M820 263 v-42 l22 38 z" fill="#e8dbbc"/>
+ <path d="M676 210 V249 M670 216 l6 -8 l6 8 M670 243 l6 8 l6 -8" fill="none" stroke="#d8edf2" stroke-width="2"/>
+ <g font-family="sans-serif" font-size="17" fill="#dbeaf0"><text x="620" y="380">Small vertical displacement, never a tilting disc.</text><text x="620" y="413">The boat bobs and tilts subtly with the swell.</text><text x="620" y="446">Beam reflection sweeps with the seconds.</text><text x="620" y="479">Water motion Off keeps the sea calm.</text></g>
+</svg>

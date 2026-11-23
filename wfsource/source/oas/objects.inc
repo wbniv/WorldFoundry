@@ -108,6 +108,8 @@
 #include "metronomeforestsettings.hp"
         	
 #include "lavalampdigitssettings.hp"
+        	
+#include "lighthousesettings.hp"
 
 
 

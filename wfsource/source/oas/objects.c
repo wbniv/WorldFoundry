@@ -209,6 +209,10 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
 			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
 				object = OadLavaLampDigitsSettings(startData); 
 			break;
+        	case Actor::LighthouseSettings_KIND:
+			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
+				object = OadLighthouseSettings(startData); 
+			break;
 
 
 
@@ -422,6 +426,9 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
 			break;
         	case Actor::LavaLampDigitsSettings_KIND:
 			object = OadLavaLampDigitsSettings(startData); 
+			break;
+        	case Actor::LighthouseSettings_KIND:
+			object = OadLighthouseSettings(startData); 
 			break;
 
 

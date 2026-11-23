@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" width="480" height="270" font-family="Inter, 'Segoe UI', 'DejaVu Sans', sans-serif" role="img" aria-label="Lighthouse">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#c9d3e6"/></marker><radialGradient id="g0" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#d8dbe0"/><stop offset=".5" stop-color="#aab0bc"/><stop offset="1" stop-color="#47494e"/></radialGradient><radialGradient id="g1" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#b2b8c4"/><stop offset=".5" stop-color="#55627d"/><stop offset="1" stop-color="#232934"/></radialGradient><radialGradient id="g2" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffeaba"/><stop offset=".5" stop-color="#ffd166"/><stop offset="1" stop-color="#6b572a"/></radialGradient></defs>
+<rect width="480" height="270" rx="14" fill="#0f1420"/>
+<path d="M321.1,218.8 L309.8,224.5 L297.3,229.3 L283.9,233.1 L269.7,235.9 L255.0,237.6 L240.0,238.2 L225.0,237.6 L210.3,235.9 L196.1,233.1 L182.7,229.3 L170.2,224.5 L158.9,218.8 L149.1,212.3 L140.7,205.1 L134.1,197.3 L129.3,189.1 L126.3,180.6 L125.4,172.0 L126.3,163.4 L129.3,154.9 L134.1,146.7 L140.7,138.9 L149.1,131.7 L158.9,125.2 L170.2,119.5 L182.7,114.7 L196.1,110.9 L210.3,108.1 L225.0,106.4 L240.0,105.8 L255.0,106.4 L269.7,108.1 L283.9,110.9 L297.3,114.7 L309.8,119.5 L321.1,125.2 L330.9,131.7 L339.3,138.9 L345.9,146.7 L350.7,154.9 L353.7,163.4 L354.6,172.0 L353.7,180.6 L350.7,189.1 L345.9,197.3 L339.3,205.1 L330.9,212.3 L321.1,218.8Z" fill="#0f2740" stroke="#2a3550" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<circle cx="240.0" cy="112.0" r="6.3" fill="url(#g0)" opacity="1"/>
+<circle cx="289.6" cy="119.7" r="5.0" fill="url(#g1)" opacity="1"/>
+<circle cx="190.4" cy="119.7" r="5.0" fill="url(#g1)" opacity="1"/>
+<circle cx="325.9" cy="140.7" r="5.0" fill="url(#g1)" opacity="1"/>
+<circle cx="154.1" cy="140.7" r="5.0" fill="url(#g1)" opacity="1"/>
+<circle cx="339.2" cy="169.3" r="6.3" fill="url(#g0)" opacity="1"/>
+<text x="240.0" y="100.9" fill="#e8eef7" font-size="10" text-anchor="middle" font-weight="700">12</text>
+<text x="370.1" y="176.0" fill="#e8eef7" font-size="10" text-anchor="middle" font-weight="700">3</text>
+<text x="109.9" y="176.0" fill="#e8eef7" font-size="10" text-anchor="middle" font-weight="700">9</text>
+<polygon points="282.1,144.2 291.5,149.6 291.5,146.0 282.1,140.6" fill="#69492c" stroke="none" stroke-width="1" stroke-linejoin="round" opacity="1"/>
+<polygon points="296.2,146.9 291.5,149.6 291.5,146.0 296.2,143.3" fill="#8c613b" stroke="none" stroke-width="1" stroke-linejoin="round" opacity="1"/>
+<polygon points="286.8,137.9 296.2,143.3 291.5,146.0 282.1,140.6" fill="#b07a4a" stroke="none" stroke-width="1" stroke-linejoin="round" opacity="1"/>
+<polyline points="289.1,142.0 289.1,129.4" fill="none" stroke="#e8eef7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<polygon points="289.1,140.2 289.1,130.3 294.6,143.3" fill="#e8eef7" stroke="none" stroke-width="1" stroke-linejoin="round" opacity="0.85"/>
+<path d="M260.3,183.4 L257.4,184.9 L254.3,186.1 L251.0,187.0 L247.4,187.7 L243.7,188.1 L240.0,188.3 L236.3,188.1 L232.6,187.7 L229.0,187.0 L225.7,186.1 L222.6,184.9 L219.7,183.4 L217.3,181.8 L215.2,180.0 L213.5,178.1 L212.3,176.0 L211.6,173.9 L211.3,171.7 L211.6,169.6 L212.3,167.4 L213.5,165.4 L215.2,163.5 L217.3,161.7 L219.7,160.0 L222.6,158.6 L225.7,157.4 L229.0,156.4 L232.6,155.7 L236.3,155.3 L240.0,155.2 L243.7,155.3 L247.4,155.7 L251.0,156.4 L254.3,157.4 L257.4,158.6 L260.3,160.0 L262.7,161.7 L264.8,163.5 L266.5,165.4 L267.7,167.4 L268.4,169.6 L268.7,171.7 L268.4,173.9 L267.7,176.0 L266.5,178.1 L264.8,180.0 L262.7,181.8 L260.3,183.4Z" fill="#3a4660" stroke="none" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<path d="M225.7,172.0 A14.3,8.3 0 0 0 254.3,172.0 L254.3,145.0 L225.7,145.0 Z" fill="#8e9299" opacity="1"/>
+<ellipse cx="240.0" cy="145.0" rx="14.3" ry="8.3" fill="#d8dee9" opacity="1"/>
+<path d="M227.9,145.0 A12.1,7.0 0 0 0 252.1,145.0 L252.1,119.8 L227.9,119.8 Z" fill="#a8463e" opacity="1"/>
+<ellipse cx="240.0" cy="119.8" rx="12.1" ry="7.0" fill="#ff6b5e" opacity="1"/>
+<path d="M230.1,119.8 A9.9,5.7 0 0 0 249.9,119.8 L249.9,96.4 L230.1,96.4 Z" fill="#8e9299" opacity="1"/>
+<ellipse cx="240.0" cy="96.4" rx="9.9" ry="5.7" fill="#d8dee9" opacity="1"/>
+<path d="M226.2,96.4 A13.8,8.0 0 0 0 253.8,96.4 L253.8,93.7 L226.2,93.7 Z" fill="#171d2c" opacity="1"/>
+<ellipse cx="240.0" cy="93.7" rx="13.8" ry="8.0" fill="#232c44" opacity="1"/>
+<circle cx="236.5" cy="173.0" r="1.8" fill="#ffd166" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="243.5" cy="167.3" r="1.8" fill="#ffd166" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="236.5" cy="161.6" r="1.8" fill="#ffd166" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="243.5" cy="156.0" r="1.8" fill="#ffd166" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="236.5" cy="149.0" r="1.8" fill="#ffd166" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="243.5" cy="143.3" r="1.8" fill="#ffd166" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="236.5" cy="137.7" r="1.8" fill="#ffd166" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="243.5" cy="132.0" r="1.8" fill="#ffd166" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="236.5" cy="126.3" r="1.8" fill="#ffd166" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="243.5" cy="119.4" r="1.8" fill="#ffd166" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="236.5" cy="113.7" r="1.8" fill="#55627d" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="243.5" cy="108.1" r="1.8" fill="#55627d" stroke="none" stroke-width="1" opacity="1"/>
+<polygon points="240.0,87.4 336.1,206.2 312.1,221.6" fill="#ffd166" stroke="none" stroke-width="1" stroke-linejoin="round" opacity="0.2"/>
+<polyline points="240.0,87.4 325.2,214.5" fill="none" stroke="#ffd166" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+<circle cx="240.0" cy="87.4" r="6.8" fill="url(#g2)" opacity="1"/>
+<polyline points="240.0,81.1 240.0,73.9" fill="none" stroke="#9fb3c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<circle cx="140.8" cy="169.3" r="6.3" fill="url(#g0)" opacity="1"/>
+<circle cx="325.9" cy="197.9" r="5.0" fill="url(#g1)" opacity="1"/>
+<circle cx="154.1" cy="197.9" r="5.0" fill="url(#g1)" opacity="1"/>
+<circle cx="289.6" cy="218.9" r="5.0" fill="url(#g1)" opacity="1"/>
+<circle cx="190.4" cy="218.9" r="5.0" fill="url(#g1)" opacity="1"/>
+<circle cx="240.0" cy="226.6" r="6.3" fill="url(#g0)" opacity="1"/>
+<text x="24.0" y="70.0" fill="#7f8aa3" font-size="10.5" text-anchor="start" font-weight="400">10 lit windows: the hour</text>
+<line x1="160.0" y1="66.5" x2="236.0" y2="142.0" stroke="#7f8aa3" stroke-width="0.8" stroke-linecap="round" opacity="0.8"/>
+<circle cx="236.0" cy="142.0" r="1.8" fill="#7f8aa3" stroke="none" stroke-width="1" opacity="1"/>
+<text x="330.0" y="62.0" fill="#7f8aa3" font-size="10.5" text-anchor="start" font-weight="400">boat: one lap an hour</text>
+<line x1="326.0" y1="58.5" x2="289.1" y2="139.3" stroke="#7f8aa3" stroke-width="0.8" stroke-linecap="round" opacity="0.8"/>
+<circle cx="289.1" cy="139.3" r="1.8" fill="#7f8aa3" stroke="none" stroke-width="1" opacity="1"/>
+<text x="372.0" y="200.0" fill="#7f8aa3" font-size="10.5" text-anchor="start" font-weight="400">beam: one</text>
+<line x1="368.0" y1="196.5" x2="310.4" y2="194.2" stroke="#7f8aa3" stroke-width="0.8" stroke-linecap="round" opacity="0.8"/>
+<circle cx="310.4" cy="194.2" r="1.8" fill="#7f8aa3" stroke="none" stroke-width="1" opacity="1"/>
+<text x="372.0" y="213.0" fill="#7f8aa3" font-size="10.5" text-anchor="start" font-weight="400">sweep a minute</text>
+<text x="16" y="24" fill="#e8eef7" font-size="12.5" font-weight="700">43  Lighthouse</text>
+<text x="16" y="258" fill="#d9a441" font-size="10.5">Reads 10:08:22: 10 lit windows, boat at 8 min, beam at 22 s</text>
+</svg>
