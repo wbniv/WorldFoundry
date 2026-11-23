@@ -63,6 +63,8 @@ int collisionTable[] =
         	0,	// LevelSettings
         	0,	// DiscusSettings
         	0,	// AnamorphicShardsSettings
+        	0,	// GlobeSunRingSettings
+        	0,	// TrainLoopsSettings
 	
 };
 

@@ -1,0 +1,15 @@
+#ifndef _GlobeSunRingSettings_HP
+#define _GlobeSunRingSettings_HP
+#include "actor.hp"
+class GlobeSunRingSettings : public Actor {
+public:
+    GlobeSunRingSettings(const SObjectStartupData* startupData);
+    virtual ~GlobeSunRingSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadGlobeSunRingSettings(const SObjectStartupData* startupData);
+#endif

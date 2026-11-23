@@ -181,6 +181,14 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
 			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
 				object = OadAnamorphicShardsSettings(startData); 
 			break;
+        	case Actor::GlobeSunRingSettings_KIND:
+			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
+				object = OadGlobeSunRingSettings(startData); 
+			break;
+        	case Actor::TrainLoopsSettings_KIND:
+			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
+				object = OadTrainLoopsSettings(startData); 
+			break;
 
 
 
@@ -372,6 +380,12 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
 			break;
         	case Actor::AnamorphicShardsSettings_KIND:
 			object = OadAnamorphicShardsSettings(startData); 
+			break;
+        	case Actor::GlobeSunRingSettings_KIND:
+			object = OadGlobeSunRingSettings(startData); 
+			break;
+        	case Actor::TrainLoopsSettings_KIND:
+			object = OadTrainLoopsSettings(startData); 
 			break;
 
 

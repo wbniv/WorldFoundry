@@ -1,0 +1,6 @@
+@* Live settings for the Train Loops clock.
+TYPEHEADER(Train Loops Settings,TrainLoopsSettings)
+	@include settings.inc
+	@include clocksettings.inc
+	@include global_settings.inc
+TYPEFOOTER

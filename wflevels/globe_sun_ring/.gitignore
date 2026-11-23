@@ -1,0 +1,10 @@
+*
+!.gitignore
+!*.py
+!*.sh
+!globe_sun_ring.lev
+!globe_sun_ring-standalone.iff.txt
+!actor-map.json
+!blue-marble-nasa.png
+!textile.flags
+!settings-capabilities.json

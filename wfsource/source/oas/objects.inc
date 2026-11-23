@@ -94,6 +94,10 @@
 #include "discussettings.hp"
         	
 #include "anamorphicshardssettings.hp"
+        	
+#include "globesunringsettings.hp"
+        	
+#include "trainloopssettings.hp"
 
 
 

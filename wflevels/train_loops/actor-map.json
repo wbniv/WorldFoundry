@@ -1,0 +1,73 @@
+{
+  "indices": {
+    "Level": 1,
+    "Room": 2,
+    "Director": 3,
+    "Player": 4,
+    "Camera": 5,
+    "LookAt": 6,
+    "cs_wide": 7,
+    "Ambient": 8,
+    "Background": 9,
+    "TrainLoopsSettings": 10,
+    "Table": 11,
+    "Tracks": 12,
+    "StationsAndTrees": 13,
+    "StationLights": 14,
+    "StationPlaques": 15,
+    "StationAM": 16,
+    "StationPM": 17,
+    "HourEngine": 18,
+    "HourCar": 19,
+    "MinuteEngine": 20,
+    "MinuteCar1": 21,
+    "MinuteCar2": 22,
+    "MinuteCar3": 23,
+    "Express": 24
+  },
+  "camera_drift_field": 129,
+  "vehicles": [
+    {
+      "name": "HourEngine",
+      "kind": "hour_engine",
+      "loop": "hour",
+      "offset_radians": 0.0
+    },
+    {
+      "name": "HourCar",
+      "kind": "car",
+      "loop": "hour",
+      "offset_radians": 0.34
+    },
+    {
+      "name": "MinuteEngine",
+      "kind": "minute_engine",
+      "loop": "minute",
+      "offset_radians": 0.0
+    },
+    {
+      "name": "MinuteCar1",
+      "kind": "car",
+      "loop": "minute",
+      "offset_radians": 0.225
+    },
+    {
+      "name": "MinuteCar2",
+      "kind": "car",
+      "loop": "minute",
+      "offset_radians": 0.45
+    },
+    {
+      "name": "MinuteCar3",
+      "kind": "car",
+      "loop": "minute",
+      "offset_radians": 0.675
+    },
+    {
+      "name": "Express",
+      "kind": "express",
+      "loop": "express",
+      "offset_radians": 0.0
+    }
+  ]
+}

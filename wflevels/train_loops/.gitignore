@@ -1,0 +1,8 @@
+*
+!.gitignore
+!*.py
+!*.sh
+!train_loops.lev
+!train_loops-standalone.iff.txt
+!actor-map.json
+!settings-capabilities.json

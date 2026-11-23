@@ -63,6 +63,8 @@
         LevelSettings_KIND,
         DiscusSettings_KIND,
         AnamorphicShardsSettings_KIND,
+        GlobeSunRingSettings_KIND,
+        TrainLoopsSettings_KIND,
 
 
 

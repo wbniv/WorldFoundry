@@ -1,0 +1,15 @@
+#ifndef _TrainLoopsSettings_HP
+#define _TrainLoopsSettings_HP
+#include "actor.hp"
+class TrainLoopsSettings : public Actor {
+public:
+    TrainLoopsSettings(const SObjectStartupData* startupData);
+    virtual ~TrainLoopsSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadTrainLoopsSettings(const SObjectStartupData* startupData);
+#endif

@@ -69,6 +69,8 @@ OBJECTSHEADER
         OBJECTENTRY(LevelSettings,0)
         OBJECTENTRY(DiscusSettings,0)
         OBJECTENTRY(AnamorphicShardsSettings,0)
+        OBJECTENTRY(GlobeSunRingSettings,0)
+        OBJECTENTRY(TrainLoopsSettings,0)
 OBJECTSFOOTER
 
 @*============================================================================
