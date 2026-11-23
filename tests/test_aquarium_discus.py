@@ -67,7 +67,7 @@ def test_model_and_tank_share_one_mesh_source():
     assert len(verts) == DS.BODY_VERTEX_COUNT == 1451
     length = max(v[0] for v in verts) - min(v[0] for v in verts)
     assert length == pytest.approx(DS.LENGTH_M)
-    assert 1.5 <= DS.LENGTH_M <= 2.0, '15-20 cm at WORLD_SCALE 10'
+    assert DS.LENGTH_M == pytest.approx(0.75), '7.5 cm at WORLD_SCALE 10'
 
 
 def test_group_of_ten_single_mesh_discus_and_no_marine_habitat():
@@ -104,7 +104,7 @@ def test_every_fish_stays_inside_the_water_at_the_school_bounds():
     bl = h['sd-bl']
     assert h['sd-hx'] * bl + reach_xy < C.INNER_X_M
     assert h['sd-hy'] * bl + reach_xy < C.INNER_Y_M
-    assert h['sd-cz'] + h['sd-hz'] * bl + up < C.WATER_LINE_M
+    assert h['sd-cz'] + h['sd-hz'] * bl + up < C.m(DS.WATER_HEIGHT_IN)
     assert h['sd-cz'] - h['sd-hz'] * bl - down > C.SAND_TOP_M
 
 
@@ -114,12 +114,12 @@ def test_built_level_carries_the_default_settings_holder():
 
 
 def test_room_budget_is_carried_by_playable_and_screensaver_levels():
-    # Ten deformable fish exhausted the old 3 MB room heap during level load.
+    # Thirty deformable fish exhausted the previous 8 MB room heap during level load.
     for name in ('aquarium_discus', 'aquarium_discus_screensaver'):
         data = (LEVELS / f'{name}-standalone.iff').read_bytes()
         assert data[2048:2052] == b'RAM\0'
         assert data[2072:2076] == b'ROOM'
-        assert struct.unpack_from('<I', data, 2076)[0] == 8_000_000
+        assert struct.unpack_from('<I', data, 2076)[0] == 20_000_000
         assert data[2092:2096] == b'SLOT'
         assert struct.unpack_from('<I', data, 2096)[0] == 1
 

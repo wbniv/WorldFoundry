@@ -16,7 +16,7 @@
   else
     INDEXOF_X_POS read-mailbox aq-screen-x 0.6 aq-screen-axis aq-dx fish!
     INDEXOF_Y_POS read-mailbox 0 0.3 aq-screen-axis aq-dy fish!
-    INDEXOF_Z_POS read-mailbox 2.7 0.4 aq-screen-axis aq-dz fish!
+    INDEXOF_Z_POS read-mailbox 3.5 0.4 aq-screen-axis aq-dz fish!
     aq-dx fish@ 0 = if
       1 aq-screen-leg fish@ - aq-screen-leg fish!
       4 aq-screen-pause fish!

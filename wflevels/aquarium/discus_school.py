@@ -1,4 +1,4 @@
-"""The Discus tank's fish: one textured discus mesh per actor, a loose group of ten.
+"""The Discus tank's fish: one textured discus mesh per actor, a larger school.
 
 The species module for AQUARIUM_TANK=discus, with the same API as tiger_barb.py
 (LENGTH_M, geometry(), blender_mesh(), forth_constants(), school_length(), mailbox_ranges()),
@@ -24,15 +24,16 @@ TITLE = 'Discus'
 ACTOR_STEM = 'discus'              # actors discus-player, discus-1 .. discus-9
 MESH_NAME = 'discus'               # discus.iff
 PLAYER_TICK = 'discus-player-tick'
-# 15 cm total length (nose to tail tip) at WORLD_SCALE = 10: an adult Symphysodon reaches
-# 15-20 cm; the tank's 13 in (33 cm) front-to-back depth suits the low end.
-LENGTH_M = 1.5
-SCHOOL_N = 9                       # residents; with the player, a group of ten
+# Smaller juvenile-sized fish, approximately 7.5 cm at WORLD_SCALE = 10.
+LENGTH_M = 0.75
+SCHOOL_N = 29                      # residents; thirty fish including the player
+TANK_HEIGHT_IN = 29.0
+WATER_HEIGHT_IN = 27.0
 COLOURWAY = 'wild-brown'
 TEXTURE_SIZE = 512                 # the asset's 1024² map resampled; 512² pages (textile.flags)
 # Discus cruise slowly: the tank's speeds are the clownfish's 3.4 body lengths a second
 # scaled by length (as the barbs'), times this, so 2.0 BL/s.
-SPEED_SCALE = 0.6
+SPEED_SCALE = 0.45
 # swim.fth's body wave, in fish-deform's length-relative terms: its swim-deform call passes
 # amplitude 0.085 m over the x10 review mesh's span -1.07..0.6 (1.67 m), bend 0 and fin
 # amplitude 0, which is exactly fish-deform's wave (swim_deform.h: body.deform + 0 + 0) at
@@ -45,8 +46,8 @@ SOURCE_LENGTH_M = max(v[0] for v in _SOURCE_VERTS) - min(v[0] for v in _SOURCE_V
 SCALE = LENGTH_M / SOURCE_LENGTH_M
 BODY_VERTEX_COUNT = len(_SOURCE_VERTS)
 
-# Residents 11-16 cm: sub-adults to adults, mostly near the player's size.
-SCHOOL_LENGTHS_M = (1.10, 1.20, 1.30, 1.35, 1.40, 1.45, 1.50, 1.55, 1.60)
+# Resident lengths are roughly 6.2–8.2 cm at WORLD_SCALE = 10.
+SCHOOL_LENGTHS_M = (0.62, 0.65, 0.68, 0.70, 0.73, 0.75, 0.78, 0.80, 0.82)
 
 
 def school_length(k):

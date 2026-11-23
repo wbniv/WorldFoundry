@@ -72,6 +72,8 @@ Decide the motion architecture before merging parts. Independent pectoral stroke
 
 Maintain editable source, reproducible generation/export commands and actual triangle, vertex, material and actor counts. A polygon target is a starting budget, not a guarantee of performance. Profile representative populations and views before making claims about cost.
 
+For a school, measure the full intended fish count with deformation enabled. Each animated instance can consume its own mesh and room memory even when the source asset is shared; test the cooked level for allocation failures. If a tank-only simplified mesh is needed, retain the high-detail source and texture, inspect silhouette and UVs in the cooked view, and record the actual geometry budget and device results. Do not trade away required fin motion without making that limitation visible.
+
 ## 4. Texture, UVs and palette variants
 
 Choose a source that resolves at the fish's actual on-screen size. If adapting a photograph, align the head, eye, gill cover and fins to the mesh, remove or mask background, and check both flanks. A photographed pectoral fin baked into the flank will remain visible when a separate fin moves. Build separate UV islands and texture detail where needed instead of projecting the same flank photograph onto every fin. Check seams, mirrored features, padding and close views. Texture resolution alone does not improve an unsuitable pattern or mesh.
@@ -103,6 +105,8 @@ Use the standard Blender exporter, level compiler and texture cook for an engine
 Before installing a new level on a device, run its cooked standalone level in the desktop engine and inspect startup, rendering and representative movement, including press, hold and release. Run the assembled app's menu and screensaver paths on desktop where supported, and record the commands and results. Unit tests, a successful build and a Blender preview do not replace this run. If the desktop check fails or cannot be run, leave device installation pending and report the blocker.
 
 When applicable, freeze the APK before using the shared Chromecast coordinator. Follow the repository's device instructions, queue and reservations; capture and profile the owned session and record its job and evidence. No raw-device fallback is allowed. Record desktop evidence and device evidence separately; a desktop capture is not a device performance result. If there is no runnable device integration, report it as unverified.
+
+When a profiling run includes menu navigation or loading, the overall FPS includes those screens. Capture the selected tank and calculate frame intervals for a documented steady-state segment after it has loaded; report duration, FPS and a frame-time percentile, not just an overall average. Keep the APK hash and compare variants under the same workload. A fixed-timestep video encoded at a chosen frame rate demonstrates motion, not real-time performance. Device installation, launcher verification, gameplay and the screensaver are separate outcomes; report each one actually checked.
 
 ### Preview and evidence template
 

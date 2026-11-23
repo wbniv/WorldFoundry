@@ -8,7 +8,7 @@ cd "$TANK_ROOT"
 source scripts/level-build.sh
 wf_level_build "$0" "$@"
 export AQUARIUM_TANK=discus
-export AQUARIUM_SCHOOL_N=9
+export AQUARIUM_SCHOOL_N=29
 export AQUARIUM_FOLLOWER_ASSET=discus
 blender --background --python-exit-code 1 --python wflevels/aquarium/blender_create_aquarium.py
 bash wftools/wf_blender/build_level_binary.sh aquarium_discus

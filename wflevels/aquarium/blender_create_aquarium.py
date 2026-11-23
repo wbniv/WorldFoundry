@@ -80,11 +80,17 @@ BARBS = FOLLOWER_ASSET != 'clownfish'    # single-mesh followers (barbs or discu
 if BARBS:
     import importlib
     SP = importlib.import_module('discus_school' if FOLLOWER_ASSET == 'discus' else 'tiger_barb')
+if TANK == 'discus':
+    # A taller display and a wider camera view give the larger school room to swim.
+    C.WATER_Z, C.EXT_Z = SP.WATER_HEIGHT_IN, SP.TANK_HEIGHT_IN
+    C.WATER_LINE_M, C.EXT_Z_M = C.m(C.WATER_Z), C.m(C.EXT_Z)
+    C.FISH_SPAWN = (-1.6, 0.0, 3.5)
+    C.CAM_A_POS, C.CAM_A_LOOK = (0.0, -14.0, 3.5), (0.0, 0.0, 3.5)
 SPEED_SCALE = getattr(SP, 'SPEED_SCALE', 1.0) if PLAYER_SCHOOL else 1.0
 FISH_STEM = getattr(SP, 'ACTOR_STEM', 'tiger-barb') if BARBS else ''   # the single-mesh fish's actor names
 SCHOOL_N = int(os.environ.get('AQUARIUM_SCHOOL_N', str(getattr(SP, 'SCHOOL_N', 49)) if PLAYER_SCHOOL else '29' if BARBS else '0') or 0)
 assert 0 <= SCHOOL_N <= (49 if PLAYER_SCHOOL else 29 if BARBS else 10), 'follower count exceeds allocated mailbox blocks'
-BARB_UPDATES = int(os.environ.get('AQUARIUM_BARB_UPDATES', '5'))
+BARB_UPDATES = int(os.environ.get('AQUARIUM_BARB_UPDATES', '10' if TANK == 'discus' else '5'))
 assert 1 <= BARB_UPDATES <= 29
 BARB_ANIMATE = FOLLOWER_ASSET in ('barb_mesh', 'barb_refined', 'discus') and os.environ.get('AQUARIUM_BARB_ANIMATE', '1') != '0'
 BARB_FROZEN = os.environ.get('AQUARIUM_BARB_FROZEN') == '1'
@@ -358,6 +364,18 @@ if BARBS and (SCHOOL_N or PLAYER_SCHOOL):
         texture = os.path.join(OUT_DIR, 'tiger_barb.tga')
         image.save(texture)
     barb_mesh = SP.blender_mesh(bpy, FOLLOWER_ASSET == 'barb_quad', texture, refined=FOLLOWER_ASSET == 'barb_refined')
+    if FOLLOWER_ASSET == 'discus':
+        # The tank has thirty individually animated copies. Reduce runtime
+        # geometry while retaining the original model and texture assets.
+        probe = bpy.data.objects.new('_discus_simplify', barb_mesh)
+        scene.collection.objects.link(probe)
+        bpy.context.view_layer.objects.active = probe
+        probe.select_set(True)
+        modifier = probe.modifiers.new('tank geometry budget', 'DECIMATE')
+        modifier.ratio = 0.12
+        bpy.ops.object.modifier_apply(modifier=modifier.name)
+        barb_mesh = probe.data
+        bpy.data.objects.remove(probe, do_unlink=True)
     if PLAYER_SCHOOL:
         player.data = barb_mesh
         player['wf_Mesh Name'] = barb_mesh.name + '.iff'
@@ -949,6 +967,10 @@ if SCHOOL_N:            # the followers: school.fth's model, school_rig.fth's gl
         sd_gen += (f': sd-cx 0 ; : sd-cy 0 ; : sd-cz {fnum((C.WATER_LINE_M + C.SAND_TOP_M) / 2)} ; : sd-bl {fnum(BLm)} ;\n'
                    f': sd-hx {fnum(hx)} ; : sd-hy {fnum(hy)} ; : sd-hz {fnum(hz)} ;\n')
     rig = open(os.path.join(SCRIPT_DIR, 'barb_school_rig.fth' if BARBS else 'school_rig.fth')).read()
+    if TANK == 'discus':
+        rig = rig.replace(': sd-speed 2 ;', ': sd-speed 0.85 ;')
+        rig = rig.replace('dup sd-dt 120 sd-speed sch-set-dt', 'dup sd-dt 45 sd-speed sch-set-dt')
+        rig = rig.replace('fish-dt 0.5 * dup negate', 'fish-dt 0.25 * dup negate')
     if not BARBS:
         rig = rig.replace('  sd-round-robin\n  sd-pose-all ;', '  4 profile-begin sd-round-robin 4 profile-end\n  5 profile-begin sd-pose-all 5 profile-end ;')
     school_core = open(os.path.join(SCRIPT_DIR, 'school.fth')).read()
@@ -1045,9 +1067,9 @@ if LEVEL_NAME != 'aquarium':                     # its own wrapper; the whole di
             open(os.path.join(OUT_DIR, LEVEL_NAME + '-standalone.iff.txt'), 'w') as dst:
         txt = src.read().replace('"../aquarium.iff"', f'"../{LEVEL_NAME}.iff"')
         if LEVEL_NAME == 'aquarium_discus':
-            # Ten deformed discus meshes need more room asset memory than the barb tank.
+            # Thirty deformed discus meshes need additional room asset memory.
             # This tank has one room, so allocate one room slot rather than the default nine.
-            txt = txt.replace("'ROOM' 3000000l", "'ROOM' 8000000l")
+            txt = txt.replace("'ROOM' 3000000l", "'ROOM' 20000000l")
             txt = txt.replace("'FLAG' 1l 1l", "'FLAG' 1l 1l\n        'SLOT' 1l")
         dst.write(txt)
     if not PLAYER_SCHOOL:
