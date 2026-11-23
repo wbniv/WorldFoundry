@@ -334,7 +334,7 @@ workflows:
             if [ "$install" = yes ]; then
               echo "--- launch ---"
               if launch_out=$(SIMCTL_CHILD_WF_FRAME_RATE_CHECKS=1 xcrun simctl launch --terminate-running-process \
-                    --stdout="$out" --stderr="$err" "$udid" "$BUNDLE_ID" "${launch_args[@]}"); then
+                    --stdout="$out" --stderr="$err" "$udid" "$BUNDLE_ID" ${launch_args[@]+"${launch_args[@]}"}); then
                 launch=yes
                 pid=$(echo "$launch_out" | awk '{print $NF}')
                 echo "$launch_out (pid $pid)"
@@ -422,7 +422,10 @@ workflows:
             cp -R "$APP" "$AQ_APP"
             find "$AQ_APP" -name cd.iff > aquarium-cdiff.txt || true
             echo "aquarium: replacing $(wc -l < aquarium-cdiff.txt) cd.iff in the copy"
-            while IFS= read -r f; do cp "$AQ_IFF" "$f"; done < aquarium-cdiff.txt
+            while IFS= read -r f; do
+              cp "$AQ_IFF" "$f"
+              cp "$CM_BUILD_DIR/wflevels/aquarium-wf_args.txt" "$(dirname "$f")/wf_args.txt"
+            done < aquarium-cdiff.txt
             DEFAULT_APP="$APP"; APP="$AQ_APP"
             if [ -n "${IPHONE_ID:-}" ]; then run_device aquarium-iphone "$IPHONE_ID" "$IPHONE_NAME"; fi
             if [ -n "${IPAD_ID:-}" ]; then run_device aquarium-ipad "$IPAD_ID" "$IPAD_NAME"; fi
