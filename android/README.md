@@ -38,12 +38,11 @@ soundfont, `task soundfont`, or `-x lintVitalAnalyzeSnowgoonsRelease -x lintVita
 | Flavor (`<app>`) | applicationId | Label / banner | `assets/cd.iff` |
 |---|---|---|---|
 | `snowgoons` | `org.worldfoundry.wf_game` | Snowgoons (`src/snowgoons/res`) | `wflevels/snowgoons-cd.iff` (task `build-cd-iff-snowgoons`), plus `level0.mid` + soundfont |
-| `aquarium` | `org.worldfoundry.wf_game.aquarium` | WF Aquarium (`src/aquarium/res`) | `wflevels/aquarium-menu-cd.iff` (task `build-cd-iff-aquarium-menu`): eight tanks behind the shared selector |
 | `condo` | `org.worldfoundry.wf_game.condo` | WF Condo (`src/condo/res`) | `wflevels/condo-cd.iff` (task `build-cd-iff-condo`), plus `wf_args.txt` (the engine flags the level needs) |
 | `smb` | `org.worldfoundry.wf_game.smb` | WF SMB (`src/smb/res`; placeholder name) | `wflevels/smb-menu-cd.iff` (task `build-cd-iff-smb-menu`): a world select (D-pad, OK starts, Back held 1 s returns), then W1‑1 to W1‑4, which chain ([plan](../docs/plans/2026-10-01-level-menu-selector.md)) |
 | `qbert` | `org.worldfoundry.wf_game.qbert` | WF Q\*bert (`src/qbert/res`; placeholder name) | `wflevels/qbert-cd.iff` (task `build-cd-iff-qbert`) |
 
-Each flavor's `cd.iff` is a symlink in `android/app/src/<app>/assets/`; the AAssetAccessor reads
+The Aquarium is no longer a flavor here: its standalone app `org.worldfoundry.wf_game.aquarium` was retired on 2026‑11‑22 ([One Aquarium APK](../docs/plans/2026-11-22-one-aquarium-apk.md)); the one Aquarium app is built by `android/screensaver` (see its README). Each flavor's `cd.iff` is a symlink in `android/app/src/<app>/assets/`; the AAssetAccessor reads
 it directly from the APK at runtime. Every app's banner and icons come from
 `scripts/gen-android-icons.py`, using the [approved badge standard](../docs/reference/android-brand-badge.md). The desktop's multi-level `wfsource/source/game/cd.iff` (task `build-cd-iff`: SMB, snowgoons, Q\*bert,
 Astra Marble Madness) ships in no app; Astra Marble Madness has no app.
@@ -92,3 +91,7 @@ Plans: [the Chromecast plan](../docs/plans/2026-09-30-aquarium-chromecast.md) (P
 ## Activity lifecycle
 
 The game's NativeActivity uses `singleTask`: opening its launcher tile again resumes the existing game thread. Home preserves the engine and EGL context. Back destroys the activity, signals the shared level/menu loops to stop, and exits the game process after engine teardown so reopening starts with fresh globals. See the [2026-10-02 lifecycle verification](../docs/plans/2026-10-02-android-wflogo-badge.md).
+
+## Package names
+
+Every new app uses `org.worldfoundry.game.{{name}}` as its `applicationId` (Will, 2026‑11‑22): `org.worldfoundry.game.aquarium`, `org.worldfoundry.game.clocks`. The name is the game, never the mechanism, so nothing is called "screensaver" even when it also runs as one. The Java code package (`namespace`) is a separate setting and keeps its name. The older `org.worldfoundry.wf_game.*` ids are renamed when each app is next rebuilt; the plan is [One Aquarium APK](../docs/plans/2026-11-22-one-aquarium-apk.md).

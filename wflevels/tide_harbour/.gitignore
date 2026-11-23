@@ -8,3 +8,6 @@
 !tide_fit/**
 !tide_harbour.lev
 !tide_harbour-standalone.iff.txt
+!fonts/
+!fonts/**
+/fonts/.history/

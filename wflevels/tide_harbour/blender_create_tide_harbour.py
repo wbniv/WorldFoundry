@@ -37,10 +37,8 @@ import timeline as tl  # noqa: E402
 TAG = '[tide-harbour]'
 OAS = REPO / 'wfsource/source/oas'
 REFERENCE = tl.parse_when('2026-11-21T12:00:00')     # the pose the level is built in: noon, so the authored colours are the day's
-CREDIT = '© OpenStreetMap contributors'
-CREDIT_PLATE_H, CREDIT_SCALE = 0.062, 0.17       # the plate's height in metres; the text's size against a Thai digit
 STOP_SIZE, STOP_GAP = 0.016, 0.006      # the full stop after ม and กม: a square on the baseline, in metres
-THAI_FONT = Path('/usr/lib/blender/datafiles/fonts/NotoSansThai-VariableFont_wdth,wght.woff2')
+THAI_FONT = HERE / 'fonts' / 'NotoSansThai-Bold.ttf'      # static and bold: no `offset` embolden, which tears the thin Thai features (fonts/README.md)
 THAI = ['๑๒', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙', '๑๐', '๑๑']     # 12 at the top, then clockwise
 ROMAN = ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI']
 THAI_DIGITS = '๐๑๒๓๔๕๖๗๘๙'                          # the river panel's drums and numerals: always Thai (the Roman option is the dial's)
@@ -122,7 +120,9 @@ def outlines(name, texts, font):
         curve.size = 1.0
         curve.align_x = 'CENTER'
         curve.align_y = 'CENTER'
-        curve.offset = 0.02                       # embolden: the digits must read across a room (D8)
+        # embolden: the digits must read across a room (D8). Thai text is already bold and is NOT offset: an offset curve self-intersects
+        # on the thin loops of ๕ ๗ ๘ and the fill tears (bitten digits on cast1, 2026-11-22)
+        curve.offset = 0.0 if (font is not None and Path(font.filepath).name == THAI_FONT.name) else 0.02
         curve.resolution_u = 3                    # few faces: the outlines are a metre high and seen from 40 m
         obj = bpy.data.objects.new(f'{name}_{k}', curve)
         bpy.context.scene.collection.objects.link(obj)
@@ -136,7 +136,7 @@ def outlines(name, texts, font):
         # (the first build's numerals lost pieces of ๓ and ๙)
         bm = bmesh.new()
         bm.from_mesh(me)
-        bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method='BEAUTY', ngon_method='BEAUTY')
+        bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method='BEAUTY', ngon_method='EAR_CLIP')     # BEAUTY puts triangles outside a concave outline: bitten digits
         verts = [tuple(v.co) for v in bm.verts]
         bm.verts.index_update()
         faces = [tuple(v.index for v in f.verts) for f in bm.faces]
@@ -222,18 +222,16 @@ def panel_glyphs(meshes, font):
     put(body, THAI_DIGITS[int(pn.SCALE_KM)], mid - 0.004, pn.SCALE_V + 0.06, 0.32, 'r', 'p_ink', max_width=half * 0.6)
     xr, zb = put(body, 'กม', mid + 0.004, pn.SCALE_V + 0.06, 0.32, 'l', 'p_ink', max_width=half - STOP_GAP - STOP_SIZE)
     stop(body, xr, zb, 'p_ink')
-    # The map's credit (the ODbL asks for it wherever the map is shown): ink on a paper plate along the panel's foot, on the
-    # fixed column mesh so it stays put while the map pans under it. Latin and the copyright sign are not in the Thai font,
-    # so it is set in Blender's own font.
-    shapes[CREDIT] = outlines('pc', [CREDIT], None)[0]
-    body.quad_y(-pn.W / 2, -pn.H / 2, pn.W / 2, -pn.H / 2 + CREDIT_PLATE_H, 0.001, 'p_paper')     # 1 mm behind the text (coplanar, they would z-fight), in front of the map's layer
-    put(body, CREDIT, 0.0, -pn.H / 2 + CREDIT_PLATE_H / 2, CREDIT_SCALE, 'c', 'p_ink', max_width=pn.W - 0.08)
+    # The map's credit is not on the panel: the ODbL attribution lives in the settings form's read-only "About the map" row
+    # (tideharboursettings.oas), added in the same change that took the line off the panel.
     river = meshes['panel_map']
     doc = json.loads(pp.CENTRELINE.read_text())
     hx, hz = pp.map_xy(doc['station_HD']['lon'], doc['station_HD']['lat'])
     mx, mz = pp.river_points()[0]
-    put(river, 'กรุงเทพฯ', hx + 0.055, hz + 0.02, 0.42, 'l', 'p_ink')               # the tower's name, to its right, over the land
-    put(river, 'ปากน้ำ', mx - 0.04, mz + 0.045, 0.40, 'r', 'p_ink')                   # the river's mouth, to the left of it
+    put(river, 'กรุงเทพฯ', hx + pp.STATION_DX + 0.055, hz + 0.02, 0.42, 'l', 'p_ink')               # the tower's name, to its right, over the land
+    lz = mz + 0.045                                                           # the mouth's name, left of the water at its height: glyphs and water share a plane
+    west = min([x for poly in pp.outline()['polygons'] for x, z in (pp.map_xy(lo, la) for lo, la in poly['pts']) if abs(z - lz) < 0.05] or [mx - 0.07])
+    put(river, 'ปากน้ำ', west - 0.02, lz, 0.40, 'r', 'p_ink')
     put(river, 'อ่าวไทย', mx - 0.25, mz - 0.20, 0.50, 'c', 'p_ink')                  # the gulf, below the ripples
     return added
 
@@ -282,7 +280,7 @@ for mesh in parts.static_meshes():
     mesh_actor(mesh, 'statplat')
 for mesh in parts.toggled_static_meshes():
     mesh_actor(mesh, 'platform', visibility=tl.VIS[parts.VISIBLE_STATICS[mesh.name]])
-assert THAI_FONT.is_file(), f'{THAI_FONT}: the Thai font is missing from this Blender (it ships in the blender package)'
+assert THAI_FONT.is_file(), f'{THAI_FONT}: the Thai font is missing from the repo (wflevels/tide_harbour/fonts)'
 thai = bpy.data.fonts.load(str(THAI_FONT))
 mesh_actor(numerals('numerals_thai', THAI, thai, 1.0, 1.0), 'platform', visibility=tl.VIS['numerals_thai'])
 mesh_actor(numerals('numerals_roman', ROMAN, None, 0.75, 1.4), 'platform', visibility=tl.VIS['numerals_roman'])

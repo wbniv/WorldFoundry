@@ -287,18 +287,20 @@ ROOM = (-360.0, -80.0, -60.0, 360.0, 140.0, 240.0)    # one room holds everythin
 
 # Visibility mailboxes (global cells the director writes; 1 shows the actor)
 VIS = {"sun": 700, "moon": 701, "birds": 702, "boats": 703, "gauge": 704, "numerals_thai": 705, "numerals_roman": 706,
-       "arrow_up": 707, "arrow_dn": 708}
+       "arrow_up": 707, "arrow_dn": 708, "panel": 709}
 # Settings (plan D13, Q9): the TideHarbourSettings object's fields (wfsource/source/oas/tideharboursettings.oas,
 # with the clocks' shared clocksettings.inc). The director copies each field into its cell every frame with
 # property@; 0, a field's first choice, is the default.
 SETTINGS_ACTOR = "TideHarbourSettings"
-FIELD_LABELS = {"drift": "Camera drift", "numerals": "Dial numerals", "gauge": "Gauge board", "life": "Boats and birds"}
-OPTION_CELLS = {"drift": 690, "numerals": 691, "gauge": 692, "life": 693}
+FIELD_LABELS = {"drift": "Camera drift", "numerals": "Dial numerals", "gauge": "Gauge board", "life": "Boats and birds",
+                "panel": "River panel"}
+OPTION_CELLS = {"drift": 690, "numerals": 691, "gauge": 692, "life": 693, "panel": 694}
 OPTIONS = {   # name -> the values, default first (the cell holds the index)
     "drift": ("Slow", "Off"),
     "numerals": ("Roman", "Thai", "None"),     # Roman is the default (Will, 2026-11-21, reversing Q2)
     "gauge": ("On", "Off"),
     "life": ("On", "Off"),          # boats and birds
+    "panel": ("On", "Off"),         # the river panel: Off hides it and gives the harbour the whole screen
 }
 DEFAULT_OPTIONS = {k: 0 for k in OPTIONS}
 
@@ -389,12 +391,17 @@ def camera_poses(sod: float, opt: Dict[str, int]):
     """(cs_wide, LookAt, the panel is at the left, how much of it is on screen): where the camera shot is told to be."""
     az = DRIFT_DEG / 360.0 * sin_rev(sod / DRIFT_PERIOD) if opt["drift"] == 0 else 0.0
     left, vis = pn.slide(sod)
+    if opt["panel"] != 0:
+        vis = 0.0                                       # the panel is switched off: none of it is on screen, so the harbour has the whole screen
     dist = CAMERA_R / pn.harbour_scale(vis)
     lx = LOOK_AT[0] + pn.camera_shift_m(left, vis, dist)
     return (Pose(lx + dist * sin_rev(az), LOOK_AT[1] - dist * cos_rev(az), CAMERA_Z), Pose(lx, LOOK_AT[1], LOOK_AT[2]), left, vis)
 
 
-def scene(day: int, sod: float, options: Dict[str, int] | None = None) -> Scene:
+DISPLAY_16_9 = (16.0 / 9.0, 60.0)                  # (DISPLAY_ASPECT, DISPLAY_VFOV) the panel was drawn for: a 16:9 television
+
+
+def scene(day: int, sod: float, options: Dict[str, int] | None = None, display: Tuple[float, float] = DISPLAY_16_9) -> Scene:
     opt = dict(DEFAULT_OPTIONS, **(options or {}))
     sod = sod % 86400.0
     t = sod % 3600.0                                  # second of the hour: every fast motion's period divides it
@@ -437,13 +444,8 @@ def scene(day: int, sod: float, options: Dict[str, int] | None = None) -> Scene:
     P["hand_m"] = Pose(DIAL[0], HAND_Y["hand_m"], DIAL[2], b=(mi + sec / 60.0) / 60.0)
     P["hand_s"] = Pose(DIAL[0], HAND_Y["hand_s"], DIAL[2], b=sec / 60.0)
 
-    # the sun: where the ray from the camera toward it meets the disc plane; hidden behind the camera or below the bank
+    # the sun: hidden behind the camera or below the bank (it is placed below, once the camera is known)
     sun_on = s.west > 0.5 and -2.0 < s.alt_deg < 25.0        # within 60 degrees of west and low: in or near the frame
-    if sun_on:
-        k = (SUN_Y - CAMERA_REF[1]) / s.west
-        P["sun"] = Pose(CAMERA_REF[0] + s.north * k, SUN_Y, max(-40.0, CAMERA_REF[2] + s.up * k))
-    else:
-        P["sun"] = Pose(*PARK)
     # the moon: a disc on an arc across the night, right to left; no claim about its phase or place
     f = moon_phase(s.ha)
     moon_on = 0.0 < f < 1.0 and s.alt_deg < -4.0
@@ -463,8 +465,17 @@ def scene(day: int, sod: float, options: Dict[str, int] | None = None) -> Scene:
     # the screen (panel.py): the camera pulls back and shifts so the harbour sits in what the panel leaves, and the panel's
     # parts are posed from the camera's frame.
     P["cs_wide"], P["LookAt"], left, vis = camera_poses(sod, opt)
+    # the sun sits on the ray from the camera the shot really has, not from a reference position: the panel pulls the camera
+    # back and shifts it sideways and the drift swings it, and the disc is only about 150 m away, so a ray from CAMERA_REF
+    # puts the sun a few degrees off its true bearing as the camera sees it
+    cam = P["cs_wide"]
+    if sun_on:
+        k = (SUN_Y - cam.y) / s.west
+        P["sun"] = Pose(cam.x + s.north * k, SUN_Y, max(-40.0, cam.z + s.up * k))
+    else:
+        P["sun"] = Pose(*PARK)
     reading = turns.panel_reading(day, sod)
-    P.update(pn.panel_poses(pn.frame_from(P["cs_wide"], P["LookAt"]), sod, left, vis, reading, h))
+    P.update(pn.panel_poses(pn.frame_from(P["cs_wide"], P["LookAt"]), sod, left, vis, reading, h, pn.half_w(*display)))
 
     # colours
     if not RECOLOUR:
@@ -479,12 +490,13 @@ def scene(day: int, sod: float, options: Dict[str, int] | None = None) -> Scene:
     visible = {VIS["sun"]: int(sun_on), VIS["moon"]: int(moon_on), VIS["birds"]: int(life and s.alt_deg > 0.0),
                VIS["boats"]: int(life), VIS["gauge"]: int(opt["gauge"] == 0),
                VIS["numerals_thai"]: int(opt["numerals"] == 1), VIS["numerals_roman"]: int(opt["numerals"] == 0),
-               VIS["arrow_up"]: int(reading.rise), VIS["arrow_dn"]: int(not reading.rise)}
+               VIS["arrow_up"]: int(reading.rise and opt["panel"] == 0), VIS["arrow_dn"]: int(not reading.rise and opt["panel"] == 0),
+               VIS["panel"]: int(opt["panel"] == 0)}
     return Scene(P, colours, visible, h, q, s)
 
 
-def all_poses(day: int, sod: float, options: Dict[str, int] | None = None) -> Dict[str, Pose]:
-    return scene(day, sod, options).poses
+def all_poses(day: int, sod: float, options: Dict[str, int] | None = None, display: Tuple[float, float] = DISPLAY_16_9) -> Dict[str, Pose]:
+    return scene(day, sod, options, display).poses
 
 
 def piece_names() -> List[str]:

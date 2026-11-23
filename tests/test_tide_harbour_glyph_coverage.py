@@ -3,8 +3,8 @@
 
 A character the font lacks comes out as its missing-glyph box. Noto Sans Thai has no full stop, so the unit labels
 once read "ม" plus a hollow box (seen on cast1, 2026-11-21); the stops are now drawn as squares
-(blender_create_tide_harbour.py `stop`). The font is Blender's; the test is skipped where it is not installed
-(the Blender container has it, the linux-test image does not).
+(blender_create_tide_harbour.py `stop`). The font is the repo's static copy; the cmap test is skipped where fontTools is not installed
+(fontTools is not in the images).
 """
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "wflevels" / "tide_harbour" / "blender_create_tide_harbour.py"
-FONT = Path("/usr/lib/blender/datafiles/fonts/NotoSansThai-VariableFont_wdth,wght.woff2")
+FONT = ROOT / "wflevels" / "tide_harbour" / "fonts" / "NotoSansThai-Bold.ttf"     # static and bold: no offset embolden, which tears (fonts/README.md)
 
 
 def glyph_texts() -> list:
@@ -28,12 +28,26 @@ def glyph_texts() -> list:
 
 
 class GlyphCoverage(unittest.TestCase):
-    def test_the_map_credit_is_drawn(self):
-        """The river map is OpenStreetMap data (ODbL): the panel must carry the credit wherever the map is shown."""
+    def test_the_credit_left_the_panel_and_is_in_the_settings_form(self):
+        """The river map is OpenStreetMap data (ODbL). Will, 2026-11-22: "remove the (c) from the panel. you can add it to an about
+        box". The attribution moves in one change: no credit plate on the panel, and a read-only About row in the settings form."""
         src = SCRIPT.read_text(encoding="utf-8")
-        self.assertIn("CREDIT = '© OpenStreetMap contributors'", src)
-        self.assertIn("shapes[CREDIT]", src)
-        self.assertIn("put(body, CREDIT,", src)
+        self.assertNotIn("CREDIT", src, "the panel must not carry the credit any more")
+        oas = (ROOT / "wfsource/source/oas/tideharboursettings.oas").read_text(encoding="utf-8")
+        row = [l for l in oas.splitlines() if l.lstrip().startswith("TYPEENTRYINT32(About the map")]
+        self.assertEqual(len(row), 1, "the settings form needs exactly one About row")
+        self.assertIn('"(c) OpenStreetMap contributors|ODbL: openstreetmap.org/copyright"', row[0],
+                      "the form must show the credit and where the licence is")
+        self.assertNotIn("SHOW_AS_LIVE", row[0], "the About row is read-only: a live field would be editable")
+
+    def test_thai_text_is_bold_and_not_offset(self):
+        """An offset (embolden) curve self-intersects on the thin loops of ๕ ๗ ๘ and Blender's fill tears them: the digits came
+        out bitten on cast1 (2026-11-22). Thai text is a static bold font drawn with offset 0."""
+        src = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("THAI_FONT = HERE / 'fonts' / 'NotoSansThai-Bold.ttf'", src)
+        self.assertIn("curve.offset = 0.0 if (font is not None and Path(font.filepath).name == THAI_FONT.name) else 0.02", src)
+        self.assertTrue((ROOT / "wflevels" / "tide_harbour" / "fonts" / "NotoSansThai-Bold.ttf").is_file())
+        self.assertTrue((ROOT / "wflevels" / "tide_harbour" / "fonts" / "LICENSE-Noto.txt").is_file())
 
     def test_the_lists_are_found(self):
         self.assertGreaterEqual(len(glyph_texts()), 15)

@@ -6,8 +6,8 @@
 @* (clocksettings.inc) and Tide Harbour's own fields (plan
 @* docs/plans/2026-11-21-tide-harbour-clock.md, D13 and Q9). One object of this
 @* type stands in the Tide Harbour level; levcomp lists it as editable because
-@* it declares SHOW_AS_LIVE fields. The director reads every field each frame
-@* with property@ and copies it into global cells 690 to 693, so an edit takes
+@* it declares SHOW_AS_LIVE fields (and its About the map row is read-only). The director reads every field each frame
+@* with property@ and copies it into global cells 690 to 694, so an edit takes
 @* effect at once. Every field's first choice is its default, and 0.
 @*
 @* Help strings must not contain commas: prep splits macro arguments on them.
@@ -22,5 +22,13 @@ TYPEHEADER(Tide Harbour Settings,TideHarbourSettings)
 	TYPEENTRYINT32(Dial numerals,,0,2,0,"Roman|Thai|None",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The numerals on the tower dial: Roman numerals or Thai digits or none")
 	TYPEENTRYINT32(Gauge board,,0,1,0,"On|Off",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The tide gauge board on the pier post")
 	TYPEENTRYINT32(Boats and birds,,0,1,0,"On|Off",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The boats on the river and the birds over it")
+	TYPEENTRYINT32(River panel,,0,1,0,"On|Off",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The side panel with the next high and low water and a map of the river")
+@*	About: the river map's attribution. The map is OpenStreetMap data under the Open Database Licence (ODbL), which asks for
+@*	this credit wherever the map is shown; it used to be printed on the panel and now lives here, in the settings form
+@*	(hold A on a television, the settings button on a phone). Not SHOW_AS_LIVE, so the form shows it read-only. Two choices
+@*	(a single-value range is not a choice to the form or to the phone's capabilities asset, which would show "0"): the
+@*	credit, selected, and where the licence is. ASCII only (the form's font) and no commas (prep splits macro arguments on them).
+	TYPEENTRYINT32(About the map,,0,1,0,"(c) OpenStreetMap contributors|ODbL: openstreetmap.org/copyright",SHOW_AS_RADIOBUTTONS,"The river map is OpenStreetMap data under the Open Database Licence (ODbL)")
 	PROPERTY_SHEET_FOOTER
+	@include global_settings.inc
 TYPEFOOTER

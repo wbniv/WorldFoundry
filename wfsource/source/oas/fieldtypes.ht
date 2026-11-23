@@ -37,6 +37,7 @@ int32 enummany;               /* Minumum: 0 Maximum: 11 Default: 3 */
 int32 enumlong;               /* Minumum: 0 Maximum: 2 Default: 0 */
 int32 boolcheckbox;               /* Minumum: 0 Maximum: 1 Default: 1 */
 int32 booltoggle;               /* Minumum: 0 Maximum: 1 Default: 1 */
+	int32 Showframerate;               /* Minumum: 0 Maximum: 1 Default: 0 */
 };
 /*============================================================================*/
 #endif         /* fieldtypes_HT */

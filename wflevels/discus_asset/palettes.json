@@ -1,0 +1,86 @@
+{
+  "wild-brown": {
+    "pattern": "brown-photograph",
+    "hue_rotation": 0,
+    "saturation_scale": 1,
+    "value_scale": 1
+  },
+  "warm-brown": {
+    "pattern": "brown-photograph",
+    "hue_rotation": -0.025,
+    "saturation_scale": 1,
+    "value_scale": 1
+  },
+  "copper-brown": {
+    "pattern": "brown-photograph",
+    "hue_rotation": -0.045,
+    "saturation_scale": 0.88,
+    "value_scale": 1
+  },
+  "golden-brown": {
+    "pattern": "brown-photograph",
+    "hue_rotation": 0.012,
+    "saturation_scale": 1.05,
+    "value_scale": 1
+  },
+  "olive-brown": {
+    "pattern": "brown-photograph",
+    "hue_rotation": 0.035,
+    "saturation_scale": 0.85,
+    "value_scale": 1
+  },
+  "pale-brown": {
+    "pattern": "brown-photograph",
+    "hue_rotation": 0.0,
+    "saturation_scale": 0.68,
+    "value_scale": 1.08
+  },
+  "blue-brown": {
+    "pattern": "brown-photograph",
+    "hue_rotation": 0.105,
+    "saturation_scale": 0.82,
+    "value_scale": 1
+  },
+  "green-brown": {
+    "pattern": "brown-photograph",
+    "hue_rotation": 0.065,
+    "saturation_scale": 0.85,
+    "value_scale": 1
+  },
+  "amber": {
+    "pattern": "brown-photograph",
+    "hue_rotation": -0.012,
+    "saturation_scale": 1.12,
+    "value_scale": 1
+  },
+  "smoky-brown": {
+    "pattern": "brown-photograph",
+    "hue_rotation": 0.0,
+    "saturation_scale": 0.55,
+    "value_scale": 0.86
+  },
+  "light-olive": {
+    "pattern": "brown-photograph",
+    "hue_rotation": 0.045,
+    "saturation_scale": 0.6,
+    "value_scale": 1.06
+  },
+  "cool-brown": {
+    "pattern": "brown-photograph",
+    "hue_rotation": 0.075,
+    "saturation_scale": 0.62,
+    "value_scale": 0.96
+  },
+  "spotted-reference": {
+    "pattern": "spotted-reference",
+    "hue_rotation": 0,
+    "saturation_scale": 1,
+    "value_scale": 1
+  },
+  "turquoise-pattern": {
+    "pattern": "turquoise-pattern",
+    "hue_rotation": 0,
+    "saturation_scale": 1,
+    "value_scale": 1
+  }
+}

@@ -108,6 +108,13 @@ to leave before it starts HOME. If verification still fails, the job ends
 `failed` with `launcher-home-occluded` or `launcher-unverified`, keeps its
 installation, and does not fence the device.
 
+The `refreshing-launcher` phase can include multiple launcher scans and retries;
+its duration alone does not establish that a job is stuck. Follow the job to a
+terminal result and inspect `launcher/result.json` and its captured views before
+diagnosing the cause. Report installation separately from launcher verification:
+an installed APK may have an unverified tile, and a successful direct app launch
+does not verify launcher artwork.
+
 Use `BATCH` with status/watch/evidence/cancel. Evidence is stored under
 `item-NN/device/job`, with a batch manifest. Cancellation affects only your
 unfinished jobs and preserves completed installs. Closing a watcher never

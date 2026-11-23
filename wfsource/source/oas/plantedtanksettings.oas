@@ -38,6 +38,7 @@ TYPEHEADER(Planted Tank Settings,PlantedTankSettings)
 	TYPEENTRYINT32(Hold seconds,,0,86400,120,"",SHOW_AS_NUMBER|SHOW_AS_LIVE,"Seconds a fully grown tank stays on screen before the next tank")
 	PROPERTY_SHEET_FOOTER
 
+	@include global_settings.inc
 TYPEFOOTER
 
 @*============================================================================

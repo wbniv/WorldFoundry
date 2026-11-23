@@ -17,10 +17,12 @@
 	int32 TemplateObject;        /* Default: 0 */
     int32 Bavariamode;               /* Minumum: 0 Maximum: 1 Default: 0 */
     int32 Seasonalevents;               /* Minumum: 0 Maximum: 1 Default: 1 */
-    int32 Christmascandles;               /* Minumum: 0 Maximum: 1 Default: 1 */
+    int32 Candlesallyear;               /* Minumum: 0 Maximum: 1 Default: 0 */
     int32 Windowlights;               /* Minumum: 0 Maximum: 1 Default: 1 */
     int32 Sound;               /* Minumum: 0 Maximum: 1 Default: 1 */
     int32 Cameramotion;               /* Minumum: 0 Maximum: 1 Default: 0 */
+    int32 Detailedflowers;               /* Minumum: 0 Maximum: 1 Default: 1 */
+	int32 Showframerate;               /* Minumum: 0 Maximum: 1 Default: 0 */
 };
 /*============================================================================*/
 #endif         /* cuckoovillagesettings_HT */

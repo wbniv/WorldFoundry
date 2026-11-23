@@ -95,6 +95,7 @@ RenderObject3D::StreamFaces(int firstFace, int endFace)
         RendererBackendGet().SetTextureModulation((globalRendererVariables.currentRenderMaterial->GetMaterialFlags() & Material::TEXTURE_MODULATE) != 0);
         const Material& mat=*globalRendererVariables.currentRenderMaterial;
         RendererBackendGet().SetTexturePalette((mat.GetMaterialFlags() & Material::TEXTURE_PALETTE)!=0, mat.PaletteDark(),mat.PaletteLight());
+        RendererBackendGet().SetIndexedPalette((mat.GetMaterialFlags() & Material::TEXTURE_INDEXED)!=0);
 		renderer = globalRendererVariables.currentRenderMaterial->Get3DRenderer();
 		int currentMaterial = globalRendererVariables.currentRenderFace->materialIndex;
 
@@ -116,6 +117,7 @@ RenderObject3D::StreamFaces(int firstFace, int endFace)
 			globalRendererVariables.currentRenderFace++;
 		}
 	}
+	RendererBackendGet().SetIndexedPalette(false);
 }
 
 //============================================================================

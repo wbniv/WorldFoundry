@@ -1,8 +1,10 @@
 package org.worldfoundry.screensaver;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Process;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -38,11 +40,21 @@ final class TankPlayer implements SurfaceHolder.Callback {
     private static native void nativePrepare();
     private static native void nativeStop();
     private static native boolean nativeKey(int keyCode, boolean down);
+    private static native void nativeTouchConfigure(boolean enabled, float density);
+    private static native boolean nativeStick(float x, float y, float hatX, float hatY);
+    private static native boolean nativeTouch(int action, int actionIndex, int viewWidth, int viewHeight,
+                                              int[] ids, float[] xs, float[] ys);
     private static native void nativeBack();
 
     TankPlayer(Context context) {
         view = new SurfaceView(context);
         view.getHolder().addCallback(this);
+        // The on-screen controller (joystick and A to D) for a touchscreen phone, which has no remote; a TV has one.
+        PackageManager features = context.getPackageManager();
+        nativeTouchConfigure(features.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)
+                && !features.hasSystemFeature(PackageManager.FEATURE_LEANBACK),
+                context.getResources().getDisplayMetrics().density);
+        view.setOnTouchListener((v, event) -> touch(v, event));
         contentView = new FrameLayout(context) {
             private int surfaceHeight;
 
@@ -90,6 +102,23 @@ final class TankPlayer implements SurfaceHolder.Callback {
 
     /** A remote key for the tank menu; true when the engine uses it. Inert outside the menu. */
     boolean key(int keyCode, boolean down) { return nativeKey(keyCode, down); }
+
+    /** A hardware gamepad's left stick and hat; true when the host took them. */
+    boolean stick(float x, float y, float hatX, float hatY) { return nativeStick(x, y, hatX, hatY); }
+
+    /** One touch on the surface view, handed to the controller; true when it took the event. */
+    private static boolean touch(View v, MotionEvent event) {
+        int count = event.getPointerCount();
+        int[] ids = new int[count];
+        float[] xs = new float[count];
+        float[] ys = new float[count];
+        for (int i = 0; i < count; i++) {
+            ids[i] = event.getPointerId(i);
+            xs[i] = event.getX(i);
+            ys[i] = event.getY(i);
+        }
+        return nativeTouch(event.getActionMasked(), event.getActionIndex(), v.getWidth(), v.getHeight(), ids, xs, ys);
+    }
 
     /** Back released in the tank menu: closes a settings form, returns from a tank, or leaves. */
     void back() { nativeBack(); }

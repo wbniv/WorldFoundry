@@ -33,7 +33,9 @@ def test_menu_matches_current_standalones_and_manifest(tmp_path):
 
 
 def test_android_uses_selector_and_apple_keeps_direct_bundle():
-    asset = ROOT/'android/app/src/aquarium/assets/cd.iff'
+    # The combined Aquarium app (android/screensaver, flavor aquarium) carries the selector bundle as menu-cd.iff;
+    # the standalone android/app flavor that used to is retired (docs/plans/2026-11-22-one-aquarium-apk.md).
+    asset = ROOT/'android/screensaver/src/aquarium/assets/menu-cd.iff'
     assert asset.is_symlink()
     assert asset.resolve() == (ROOT/'wflevels/aquarium-menu-cd.iff').resolve()
     assert all(t[0] != b'MENU' for t in read_toc((ROOT/'wflevels/aquarium-cd.iff').read_bytes()))
@@ -43,7 +45,8 @@ def test_both_apk_builds_use_the_single_eight_tank_menu_task():
     import yaml
     tasks=yaml.safe_load((ROOT/'Taskfile.yml').read_text())['tasks']
     for name in ['build-apk','build-apk-debug']:
-        assert 'build-cd-iff-aquarium-menu' in tasks[name]['deps']
+        # The android/app aquarium flavor is retired, so these builds no longer need the menu bundle.
+        assert 'build-cd-iff-aquarium-menu' not in tasks[name]['deps']
         assert not any('five-tank' in dep for dep in tasks[name]['deps'])
     assert 'aquarium-arowana-level' in tasks['build-cd-iff-aquarium-menu']['deps']
     assert 'aquarium-plants-level' in tasks['build-cd-iff-aquarium-menu']['deps']
@@ -63,8 +66,8 @@ def test_run_aquarium_menu_task_runs_the_shipped_bundle_with_the_android_flags()
     assert task['deps'] == ['ensure-build', 'build-cd-iff-aquarium-menu']
     script = '\n'.join(str(c) for c in task['cmds'])
     assert 'wflevels/aquarium-menu-cd.iff build-aquarium-menu/cd.iff' in script
-    assert 'android/app/src/aquarium/assets/wf_args.txt' in script
-    assert (ROOT/'android/app/src/aquarium/assets/wf_args.txt').is_file()
+    assert 'wflevels/aquarium-wf_args.txt' in script
+    assert (ROOT/'wflevels/aquarium-wf_args.txt').is_file()
     assert 'set -euo pipefail' in script
 
 

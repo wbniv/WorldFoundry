@@ -583,38 +583,29 @@ tasks:
         echo "Gradle itself is via the repo-vendored android/gradlew wrapper — no system install needed."
 
   build-apk:
-    desc: "Assemble the Android APKs, one per app flavor (snowgoons, aquarium, condo, smb, qbert) (release: -O3 + LTO + section GC; debug-keystore signed for sideload)"
-    deps: [android-sdk-install, build-cd-iff-aquarium-menu]
+    desc: "Assemble the Android APKs, one per app flavor (snowgoons, condo, smb, qbert) (release: -O3 + LTO + section GC; debug-keystore signed for sideload)"
+    deps: [android-sdk-install]
     dir: android
     env:
       ANDROID_HOME: /usr/lib/android-sdk
     cmds:
       - ./gradlew assembleRelease
-      - echo "APKs → android/app/build/outputs/apk/{snowgoons,aquarium,condo,smb,qbert}/release/worldfoundry-{snowgoons,aquarium,condo,smb,qbert}-release.apk"
+      - echo "APKs → android/app/build/outputs/apk/{snowgoons,condo,smb,qbert}/release/worldfoundry-{snowgoons,condo,smb,qbert}-release.apk"
 
   build-apk-debug:
-    desc: "Assemble the Android APKs, one per app flavor (snowgoons, aquarium, condo, smb, qbert) (debug: -O0 -g, for attaching ndk-gdb / lldb)"
-    deps: [android-sdk-install, build-cd-iff-aquarium-menu]
+    desc: "Assemble the Android APKs, one per app flavor (snowgoons, condo, smb, qbert) (debug: -O0 -g, for attaching ndk-gdb / lldb)"
+    deps: [android-sdk-install]
     dir: android
     env:
       ANDROID_HOME: /usr/lib/android-sdk
     cmds:
       - ./gradlew assembleDebug
-      - echo "APKs → android/app/build/outputs/apk/{snowgoons,aquarium,condo,smb,qbert}/debug/worldfoundry-{snowgoons,aquarium,condo,smb,qbert}-debug.apk"
-
-  build-apk-diagnostic:
-    desc: "Build the opt-in Aquarium read-only runtime diagnostic APK (release optimization)"
-    dir: android
-    env:
-      ANDROID_HOME: /usr/lib/android-sdk
-    cmds:
-      - ./gradlew assembleAquariumDiagnostic
-      - echo "APK → android/app/build/outputs/apk/aquarium/diagnostic/worldfoundry-aquarium-diagnostic.apk"
+      - echo "APKs → android/app/build/outputs/apk/{snowgoons,condo,smb,qbert}/debug/worldfoundry-{snowgoons,condo,smb,qbert}-debug.apk"
 
   install-apk:
-    desc: "Install + start one app's release APK on a device (APP=aquarium|snowgoons|condo|smb|qbert, default aquarium; -- <ip> for network ADB), evidence → ~/tmp/android-device-run/ (scripts/android-device-run.sh)"
+    desc: "Install + start one app's release APK on a device (APP=snowgoons|condo|smb|qbert, default snowgoons; -- <ip> for network ADB), evidence → ~/tmp/android-device-run/ (scripts/android-device-run.sh)"
     vars:
-      APP: '{{.APP | default "aquarium"}}'
+      APP: '{{.APP | default "snowgoons"}}'
     cmds:
       - bash scripts/android-device-run.sh --release --app {{.APP}} {{.CLI_ARGS}}
 
@@ -896,16 +887,6 @@ tasks:
     cmds:
       - python3 scripts/chromecast.py task input-timeline
 
-  chromecast-aquarium:
-    desc: "Compatibility alias: use task chromecast:check APP=aquarium DEVICE=..."
-    cmds:
-      - task: chromecast:check
-        vars:
-          APP: aquarium
-          DEVICE: '{{.DEVICE | default ""}}'
-          POOL: '{{.POOL | default ""}}'
-          APK: '{{.APK | default ""}}'
-
   chromecast-condo:
     desc: "Compatibility alias: use task chromecast:check APP=condo DEVICE=..."
     cmds:
@@ -1156,7 +1137,7 @@ tasks:
 
   build-cd-iff-aquarium-menu:
     desc: "Package the Aquarium tanks with the selector for Android (standalone/Apple bundle remains aquarium-cd.iff)"
-    deps: [tools-build, aquarium-level, aquarium-blue-shrimp-level, aquarium-betta-level, aquarium-jellyfish-level, aquarium-lionfish-level, aquarium-plants-level, aquarium-arowana-level, aquarium-tiger-barbs-level, aquarium-thai-reef-level, aquarium-thai-reef-anime-level, aquarium-sea-stars-level]
+    deps: [tools-build, aquarium-level, aquarium-blue-shrimp-level, aquarium-betta-level, aquarium-jellyfish-level, aquarium-lionfish-level, aquarium-plants-level, aquarium-arowana-level, aquarium-tiger-barbs-level, aquarium-thai-reef-level, aquarium-thai-reef-anime-level, aquarium-sea-stars-level, aquarium-discus-level]
     cmds:
       - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell-menu.fth --manifest wflevels/aquarium-menu.manifest -o wflevels/aquarium-menu-cd.iff
 
@@ -1438,6 +1419,21 @@ tasks:
     generates:
       - wflevels/aquarium_tiger_barbs-standalone.iff
 
+  aquarium-discus-level:
+    desc: "Build the independent ten-discus Discus tank (docs/plans/2026-11-22-discus-tank.md)"
+    cmds:
+      - bash wflevels/aquarium_discus/build.sh   # in the Blender container; builds its own tools
+    sources:
+      - wflevels/aquarium_discus/build.sh
+      - wflevels/aquarium_discus/textile.flags
+      - scripts/level-build.sh
+      - wflevels/aquarium/*.py
+      - wflevels/aquarium/*.fth
+      - wflevels/discus_asset/discus_geometry.py
+      - wflevels/discus_asset/wild-brown.png
+    generates:
+      - wflevels/aquarium_discus-standalone.iff
+
   aquarium-betta-level:
     desc: "Build the independent betta Aquarium tank"
     cmds:
@@ -1638,7 +1634,7 @@ tasks:
         if [ -n "$RECOUT" ] && [ -f output.mp4 ]; then mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"; fi
 
   run-aquarium-menu:
-    desc: "Run wf_game on the Aquarium tank selector (wflevels/aquarium-menu-cd.iff, run from build-aquarium-menu/, gitignored): Up/Down choose, Space starts, Backspace in a tank returns to the menu. The same bundle the Android aquarium app ships, with that app's engine flags (android/app/src/aquarium/assets/wf_args.txt: the reef tanks' 1024-wide textures need them). Extra wf_game flags after --"
+    desc: "Run wf_game on the Aquarium tank selector (wflevels/aquarium-menu-cd.iff, run from build-aquarium-menu/, gitignored): Up/Down choose, Space starts, Backspace in a tank returns to the menu. The same bundle the Android aquarium app ships, with that app's engine flags (wflevels/aquarium-wf_args.txt: the reef tanks' 1024-wide textures need them). Extra wf_game flags after --"
     deps: [ensure-build, build-cd-iff-aquarium-menu]
     cmds:
       - |
@@ -1646,7 +1642,7 @@ tasks:
         mkdir -p build-aquarium-menu
         cp wflevels/aquarium-menu-cd.iff build-aquarium-menu/cd.iff
         # One source for the VRAM flags: the Android app's wf_args.txt (one flag per line).
-        mapfile -t WF_ARGS < android/app/src/aquarium/assets/wf_args.txt
+        mapfile -t WF_ARGS < wflevels/aquarium-wf_args.txt
         cd build-aquarium-menu
         LD_LIBRARY_PATH=../engine/libs DISPLAY="${DISPLAY:-:0}" ../engine/wf_game "${WF_ARGS[@]}" {{.CLI_ARGS}}
 
@@ -1736,6 +1732,24 @@ tasks:
     cmds:
       - |
         docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O1 -Wall -Wextra -Werror -I/src/android/screensaver/src/main/cpp /src/tests/planted_bridge_test.cpp /src/android/screensaver/src/main/cpp/planted_bridge.cc -o /tmp/planted_bridge && /tmp/planted_bridge'
+
+  test-menu-key-latch:
+    desc: "The launcher menu's key latch (android/screensaver/src/main/cpp/menu_key_latch.h, docs/plans/2026-11-21-menu-key-latch.md): a tap inside one frame reads once, holds and key repeat, two keys in one frame, the clears. Runs in wf-linux-test:local, repo mounted read-only."
+    cmds:
+      - |
+        docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O1 -Wall -Wextra -Werror -pthread -I/src/android/screensaver/src/main/cpp /src/tests/menu_key_latch_test.cpp -o /tmp/menu_key_latch && /tmp/menu_key_latch'
+
+  test-global-settings:
+    desc: "The engine's table of global settings (wfsource/source/game/global_settings.cc, docs/plans/2026-11-22-global-level-settings.md): Show framerate on a level load against a player's Apply, two holders, other keys, no holder. Runs in wf-linux-test:local, repo mounted read-only."
+    cmds:
+      - |
+        docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O1 -Wall -Wextra -Werror -pthread -I/src/wfsource/source -I/src/engine /src/tests/global_settings_test.cpp /src/wfsource/source/game/global_settings.cc /src/engine/runtime_properties.cpp /src/wftools/wf_attr_edit/target/release/libwf_attr_edit.a -ldl -lpthread -lm -o /tmp/global_settings && /tmp/global_settings'
+
+  test-touch-bridge:
+    desc: "The combined apps' on-screen controller (android/screensaver/src/main/cpp/touch_bridge.h, docs/plans/2026-11-22-aquarium-clocks-touch-controls.md): a tap inside one frame reads once, a hold reads every frame, the stick, two thumbs, cancel, view and surface of different sizes, the controller off on a TV. Runs in wf-linux-test:local, repo mounted read-only."
+    cmds:
+      - |
+        docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O1 -Wall -Wextra -Werror -pthread -I/src/android/screensaver/src/main/cpp -I/src/wfsource/source /src/tests/touch_bridge_test.cpp -o /tmp/touch_bridge && /tmp/touch_bridge'
 
   test-forth-math:
     desc: "The Forth math words' maths (engine/stubs/forth_math.hpp): every shared vector, identities, domain errors and 100000 random arguments, built twice (double Real, then -DWF_FORTH_MATH_FLOAT for single-FPU chips); plan docs/plans/2026-11-21-forth-trig-words.md"
@@ -1830,7 +1844,7 @@ tasks:
       - bash scripts/clocks-levels.sh check {{.CLI_ARGS}}
 
   build-clocks-apk:
-    desc: "WF Clocks APK (org.worldfoundry.clocks: every clock, the engine chooser, the Dream) as a Release build (CMake Release: -O3 + thin LTO; debug-keystore signed for sideload) for arm64-v8a and armeabi-v7a (the Chromecasts need armeabi-v7a; the Pixel and the tablet arm64-v8a), checked in the APK. Builds the levels, packs the bundle, then offline Gradle. Lands at android/screensaver/build/outputs/apk/clocks/release/screensaver-clocks-release.apk"
+    desc: "WF Clocks APK (org.worldfoundry.game.clocks: every clock, the engine chooser, the Dream) as a Release build (CMake Release: -O3 + thin LTO; debug-keystore signed for sideload) for arm64-v8a and armeabi-v7a (the Chromecasts need armeabi-v7a; the Pixel and the tablet arm64-v8a), checked in the APK. Builds the levels, packs the bundle, then offline Gradle. Lands at android/screensaver/build/outputs/apk/clocks/release/screensaver-clocks-release.apk"
     deps: [clocks-bundle]
     cmds:
       - cd android && ANDROID_HOME=${ANDROID_HOME:-/usr/lib/android-sdk} ./gradlew :screensaver:assembleClocksRelease --offline

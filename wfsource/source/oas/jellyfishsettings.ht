@@ -19,6 +19,7 @@
     int32 Strokestrength;               /* Minumum: 0 Maximum: 2 Default: 1 */
     int32 Companions;               /* Minumum: 0 Maximum: 50 Default: 5 */
     int32 Jellyfishsize;               /* Minumum: 0 Maximum: 2 Default: 1 */
+	int32 Showframerate;               /* Minumum: 0 Maximum: 1 Default: 0 */
 };
 /*============================================================================*/
 #endif         /* jellyfishsettings_HT */

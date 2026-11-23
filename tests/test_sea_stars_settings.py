@@ -49,9 +49,12 @@ def test_the_nine_fields_have_the_d9_ranges_and_defaults_and_are_live():
         assert f["live"], f"{label} must be SHOW_AS_LIVE or a runtime edit has no effect"
 
 
-def test_only_the_nine_settings_fields_are_live():
+GLOBAL_FIELDS = {"Show framerate"}   # oas/global_settings.inc: every settings type carries these
+
+
+def test_only_the_nine_settings_fields_and_the_global_ones_are_live():
     live = {f["key"] for f in catalog()["fields"] if f["live"]}
-    assert live == set(FIELDS)
+    assert live == set(FIELDS) | GLOBAL_FIELDS
 
 
 def test_default_and_maximum_population_match_the_plan():
@@ -360,14 +363,30 @@ def test_the_asset_offers_exactly_the_nine_fields_with_the_d9_ranges():
     owner = doc["objects"][0]
     assert owner["type"] == "SeaStarsSettings"
     settings = {s["key"]: s for s in owner["settings"]}
-    assert list(settings) == list(FIELDS)
+    assert list(settings) == list(FIELDS) + sorted(GLOBAL_FIELDS)   # the nine, then the global sheet
     for label, (low, high, default) in FIELDS.items():
         s = settings[label]
-        assert int(s["value"]) == default and not s["readonly"], label
+        assert not s["readonly"], label
+        if s["type"] == "boolean":
+            # An on/off setting is a real checkbox (Will, 2026-11-22), "true"/"false" on the wire.
+            assert (low, high) == (0, 1) and s["show"] == 8 and s["value"] == ("true" if default else "false"), label
+            continue
+        assert int(s["value"]) == default, label
         if s["type"] == "choice":
             assert [o["id"] for o in s["options"]] == [str(i) for i in range(low, high + 1)], label
         else:
             assert (label, s["type"], int(s["minimum"]), int(s["maximum"])) == ("Seed", "integer", low, high)
+
+
+def test_the_on_off_fields_are_real_checkboxes_not_off_on_choices():
+    """Glass climbing and Caustics were "Off|On" radio buttons, drawn as Off/On segments while Show framerate was a
+    checkbox. Every on/off setting is now a checkbox: a boolean in the catalog and in the phone asset."""
+    kinds = {f["key"]: f for f in catalog()["fields"]}
+    for key in ("Glass climbing", "Caustics", "Show framerate"):
+        assert kinds[key]["kind"] == "Bool" and kinds[key]["show"] == 8, key
+    types = {s["key"]: s["type"] for s in json.loads(ASSET.read_text())["objects"][0]["settings"]}
+    assert types["Glass climbing"] == types["Caustics"] == types["Show framerate"] == "boolean"
+    assert 'Off|On' not in (OAS / "seastarssettings.oas").read_text()
 
 
 def test_the_java_cpp_and_provider_agree_on_names_and_routes():
@@ -377,14 +396,16 @@ def test_the_java_cpp_and_provider_agree_on_names_and_routes():
     assert "native void nativeLaunchOverride(String schema, String key, String value)" in player
     assert "Java_org_worldfoundry_screensaver_TankPlayer_nativeLaunchOverride" in host
     assert "launchOverrideSink.set(" in host
-    # The tank that carries the settings is the one the manifest lists last, by the same id the level uses.
+    # The tank that carries the settings is in the manifest, by the same id the level uses. (It was the
+    # last entry until the Discus tank was appended on 2026-11-22; LevelLaunch matches the id, not a position.)
     manifest = (ROOT / "wflevels/aquarium-menu.manifest").read_text()
     tanks = re.findall(r"(?m)^level\s+(\S+)-standalone\.iff\s*\|", manifest)
-    assert tanks[-1] == "aquarium_sea_stars"
+    assert "aquarium_sea_stars" in tanks
     settings = (JAVA / "LevelSettings.java").read_text()
     assert 'SEA_STARS_TANK = "aquarium_sea_stars"' in settings and 'SEA_STARS_PREFIX = "sea-stars."' in settings
     # Every place that starts a tank goes through LevelLaunch, so the overrides always reach the engine.
-    for name in ("AquariumDreamService", "AquariumActivity", "ScreensaverPreviewActivity"):
+    # AquariumActivity is now LauncherActivity (ac98d049): one launcher shell for both packs.
+    for name in ("AquariumDreamService", "LauncherActivity", "ScreensaverPreviewActivity"):
         text = (JAVA / f"{name}.java").read_text()
         assert "LevelLaunch.startChosen(this, player, " in text, name
         assert "player.start(TankChoice" not in text, name

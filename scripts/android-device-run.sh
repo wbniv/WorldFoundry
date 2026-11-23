@@ -25,7 +25,7 @@ TARGET  Chromecast / phone IP for network debugging (port 5555 is added when
         already lists.
 
 Options:
-  --app NAME     aquarium (default), snowgoons, condo, smb or qbert
+  --app NAME     snowgoons (default), condo, smb or qbert
   --release      install the release APK (-O3 + LTO, debug-keystore signed)
                  instead of the debug APK (-O0); the release APK is the one to
                  judge frame rate with
@@ -58,13 +58,13 @@ run "$ADB pair <ip>:<pairing port> <code>" once, then pass <ip>:<port> shown
 under Wireless debugging as TARGET.
 
 Examples:
-  task chromecast-aquarium -- 192.168.1.50
+  task install-apk APP=condo -- 192.168.1.50
   scripts/android-device-run.sh --app snowgoons --release --build 192.168.1.50
 EOF
 }
 
 # ---- arguments ---------------------------------------------------------------
-APP=aquarium
+APP=snowgoons
 TYPE=debug
 BUILD=0
 APK=""
@@ -89,12 +89,11 @@ while (($#)); do
 done
 
 case "$APP" in
-    aquarium)  PKG=org.worldfoundry.wf_game.aquarium ;;
     snowgoons) PKG=org.worldfoundry.wf_game ;;
     condo)     PKG=org.worldfoundry.wf_game.condo ;;
     smb)       PKG=org.worldfoundry.wf_game.smb ;;
     qbert)     PKG=org.worldfoundry.wf_game.qbert ;;
-    *) echo "android-device-run: --app must be aquarium, snowgoons, condo, smb or qbert, not '$APP'" >&2; exit 2 ;;
+    *) echo "android-device-run: --app must be snowgoons, condo, smb or qbert, not '$APP'" >&2; exit 2 ;;
 esac
 [[ "$SECONDS_TO_RUN" =~ ^[0-9]+$ ]] || { echo "android-device-run: --seconds wants a whole number" >&2; exit 2; }
 

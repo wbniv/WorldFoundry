@@ -44,13 +44,6 @@ android {
             // bundles the snowgoons-only cd.iff, so it boots snowgoons (the
             // multi-level desktop cd.iff booted SMB W1-1, its TOC level 0).
         }
-        create("aquarium") {
-            dimension = "game"
-            manifestPlaceholders["gameOrientation"] = "landscape"
-            versionCode = 70  // cast1 has a versionCode 69 profiling APK; ship a normal upgrade.
-            applicationIdSuffix = ".aquarium"   // org.worldfoundry.wf_game.aquarium
-            versionNameSuffix   = "-aquarium"
-        }
         create("condo") {
             dimension = "game"
             applicationIdSuffix = ".condo"      // org.worldfoundry.wf_game.condo
@@ -147,7 +140,7 @@ android {
 
     // Override the AGP default (app-<flavor>-debug.apk) so the file uploaded to
     // Drive and downloaded on the phone shows up as, e.g.,
-    // "worldfoundry-aquarium-debug.apk" (in apk/<flavor>/<buildType>/).
+    // "worldfoundry-condo-debug.apk" (in apk/<flavor>/<buildType>/).
     applicationVariants.all {
         val variant = this
         outputs.all {
@@ -164,10 +157,6 @@ android {
     //     plus level0.mid + florestan-subset.sf2 — the loose MIDI + soundfont
     //     are a dev shortcut; the real remediation is docs/plans/2026-04-18-
     //     audio-assets-from-iff.md (move audio inside cd.iff).
-    //   aquarium: cd.iff → wflevels/aquarium-menu-cd.iff (task build-cd-iff-aquarium-menu),
-    //     eight tanks behind the shared selector; aquarium-cd.iff remains the standalone/Apple bundle.
-    //     No MIDI or soundfont: the level has no music, and MusicPlayer::play
-    //     returns quietly when the soundfont asset is absent.
     //   condo: cd.iff → wflevels/condo-cd.iff (task build-cd-iff-condo; the
     //     condo_639_640 standalone level, docs/plans/2026-10-01-condo-chromecast.md).
     //   smb: cd.iff → wflevels/smb-cd.iff (task build-cd-iff-smb). No MIDI or soundfont.

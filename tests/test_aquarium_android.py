@@ -97,14 +97,6 @@ def _link(p: Path) -> Path:
 PHONE_PAGE = REPO / "wfsource" / "source" / "hal" / "phonepad" / "controller.html"
 
 
-def test_aquarium_assets_are_its_cd_iff_and_the_phone_controller():
-    assets = SRC / "aquarium" / "assets"
-    assert sorted(p.name for p in assets.iterdir()) == ["cd.iff", "controller.html", "layout.json"]
-    assert _link(assets / "cd.iff") == AQ_MENU.resolve()
-    # Phase E: the page is shared (a symlink, so main/assets stays empty and snowgoons does not get it);
-    # the layout is this app's own (tests/test_phone_controller_android.py checks its bits).
-    assert _link(assets / "controller.html") == PHONE_PAGE.resolve()
-    assert not (assets / "layout.json").is_symlink()
 
 
 def test_snowgoons_assets_and_main_has_none():
@@ -116,21 +108,36 @@ def test_snowgoons_assets_and_main_has_none():
         assert (assets / name).resolve() == (game / name).resolve()
     # The snowgoons-only bundle since docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md (tests/test_game_apps_android.py).
     assert os.readlink(assets / "cd.iff") == "../../../../../wflevels/snowgoons-cd.iff"
-    assert not (SRC / "main" / "assets").exists(), "main assets would ship in every app"
+    # main/assets ships in every app, so it holds only what every app needs: the runtime property editor's page.
+    main_assets = SRC / "main" / "assets"
+    assert not main_assets.exists() or sorted(p.name for p in main_assets.iterdir()) == ["runtime-property-ui.json"]
 
 
 def test_gradle_flavors():
     g = GRADLE.read_text()
     assert re.search(r'flavorDimensions \+= "game"', g)
     sn = re.search(r'create\("snowgoons"\) \{(.*?)\n        \}', g, re.S)
-    aq = re.search(r'create\("aquarium"\) \{(.*?)\n        \}', g, re.S)
-    assert sn and aq, "both product flavors must exist"
+    assert sn, "the snowgoons product flavor must exist"
     assert "applicationId" not in re.sub(r"//.*", "", sn.group(1)), "snowgoons keeps org.worldfoundry.wf_game"
-    assert 'applicationIdSuffix = ".aquarium"' in aq.group(1)
     assert 'applicationId = "org.worldfoundry.wf_game"' in g
     assert '"worldfoundry-${variant.flavorName}-${variant.buildType.name}.apk"' in g
     # One native build for every flavor: no per-flavor externalNativeBuild.
-    assert "externalNativeBuild" not in sn.group(1) + aq.group(1)
+    assert "externalNativeBuild" not in sn.group(1)
+
+
+def test_the_standalone_aquarium_flavor_is_retired():
+    """Will, 2026-11-22: one Aquarium APK, the combined app (docs/plans/2026-11-22-one-aquarium-apk.md)."""
+    assert 'create("aquarium")' not in GRADLE.read_text()
+    assert not (SRC / "aquarium").exists(), "android/app/src/aquarium came back"
+    tasks = yaml.safe_load((REPO / "Taskfile.yml").read_text())["tasks"]
+    assert "chromecast-aquarium" not in tasks and "build-apk-diagnostic" not in tasks
+
+
+def test_no_live_file_starts_the_retired_package():
+    live = [REPO / "Taskfile.yml", *sorted((REPO / "scripts").glob("*")), *sorted((REPO / "android" / "app" / "src").rglob("*.xml")),
+            *sorted((REPO / "android" / "screensaver" / "src").rglob("*.xml")), GRADLE]
+    hits = [str(p.relative_to(REPO)) for p in live if p.is_file() and "wf_game.aquarium" in p.read_text(errors="ignore")]
+    assert hits == [], f"still names org.worldfoundry.wf_game.aquarium: {hits}"
 
 
 def test_manifest_keeps_both_launchers_and_banner():
@@ -141,26 +148,7 @@ def test_manifest_keeps_both_launchers_and_banner():
         assert s in m, s
     for feat in ("android.software.leanback", "android.hardware.touchscreen", "android.hardware.gamepad"):
         assert re.search(rf'android:name="{re.escape(feat)}" android:required="false"', m), feat
-    # The flavors share main's application and activities. Since Phase E the aquarium's own manifest
-    # adds exactly one thing, the INTERNET permission for the phone controller (snowgoons gets none).
-    aq = (SRC / "aquarium" / "AndroidManifest.xml").read_text()
-    assert "<application" not in aq and "<activity" not in aq, "the flavors share main's manifest"
-    assert re.findall(r"<uses-permission[^>]*>", aq) == ['<uses-permission android:name="android.permission.INTERNET" />']
 
-
-def test_aquarium_launcher_art_overrides_main():
-    from PIL import Image
-    main, aq = SRC / "main" / "res", SRC / "aquarium" / "res"
-    assert Image.open(aq / "drawable" / "tv_banner.png").size == Image.open(main / "drawable" / "tv_banner.png").size
-    assert (aq / "drawable" / "tv_banner.png").read_bytes() != (main / "drawable" / "tv_banner.png").read_bytes()
-    for d in DENSITIES:
-        for name in ("ic_launcher.png", "ic_launcher_round.png", "ic_launcher_foreground.png"):
-            a, b = aq / f"mipmap-{d}" / name, main / f"mipmap-{d}" / name
-            assert Image.open(a).size == Image.open(b).size, (a, b)
-    strings = (aq / "values" / "strings.xml").read_text()
-    assert re.search(r'name="app_name">WF Aquarium<', strings)
-    assert 'name="log_viewer_label"' in strings
-    assert 'name="ic_launcher_background"' in (aq / "values" / "colors.xml").read_text()
 
 
 # ---- CI + tasks -----------------------------------------------------------------------------------------
@@ -177,9 +165,8 @@ def test_no_task_points_at_pre_flavor_apk_paths():
     t = (REPO / "Taskfile.yml").read_text()
     assert "apk/debug/worldfoundry-debug.apk" not in t and "apk/release/worldfoundry-release.apk" not in t
     tasks = yaml.safe_load(t)["tasks"]
-    for name in ("build-cd-iff-aquarium", "chromecast-aquarium", "install-apk"):
+    for name in ("build-cd-iff-aquarium", "install-apk"):
         assert name in tasks, name
-    assert "android-device-run.sh --app aquarium" in str(tasks["chromecast-aquarium"]["cmds"])
     assert "build-cd-iff-aquarium" in str(tasks["aquarium-level"]["cmds"])
 
 
@@ -219,9 +206,8 @@ def test_device_script_parses_and_helps():
     h = subprocess.run(["bash", str(SCRIPT), "-h"], capture_output=True, text=True, timeout=30)
     assert h.returncode == 0 and h.stdout.startswith("Usage:"), h
     bad = subprocess.run(["bash", str(SCRIPT), "--app", "mario"], capture_output=True, text=True, timeout=30)
-    assert bad.returncode == 2 and "aquarium, snowgoons, condo, smb or qbert" in bad.stderr, bad
-    for pkg in ("org.worldfoundry.wf_game.aquarium", "org.worldfoundry.wf_game"):
-        assert pkg in body
+    assert bad.returncode == 2 and "snowgoons, condo, smb or qbert" in bad.stderr, bad
+    assert "org.worldfoundry.wf_game" in body
 
 
 # ---- a built APK (skipped unless one exists) ----------------------------------------------------------
@@ -235,15 +221,10 @@ def _apk(flavor):
     return p
 
 
-def test_built_aquarium_apk_contents():
-    with zipfile.ZipFile(_apk("aquarium")) as z:
-        names = set(z.namelist())
-        assert z.read("assets/cd.iff") == AQ_MENU.read_bytes()
-        assert "lib/arm64-v8a/libwf_game.so" in names
-        assert not {n for n in names if n.startswith("assets/")} - {"assets/cd.iff", "assets/controller.html",
-                                                                   "assets/layout.json"}
+def test_built_apk_contents():
     with zipfile.ZipFile(_apk("snowgoons")) as z:
         assert z.read("assets/cd.iff") == (REPO / "wflevels" / "snowgoons-cd.iff").read_bytes()
+        assert "lib/arm64-v8a/libwf_game.so" in set(z.namelist())
 
 
 def test_built_apks_badging():
@@ -251,8 +232,7 @@ def test_built_apks_badging():
     aapt = next((a for sdk in sdks for a in sorted(sdk.glob("build-tools/*/aapt"))), None) or shutil.which("aapt")
     if not aapt:
         pytest.skip("no aapt")
-    for flavor, pkg, label in (("aquarium", "org.worldfoundry.wf_game.aquarium", "WF Aquarium"),
-                               ("snowgoons", "org.worldfoundry.wf_game", "Snowgoons")):
+    for flavor, pkg, label in (("snowgoons", "org.worldfoundry.wf_game", "Snowgoons"),):
         out = subprocess.run([str(aapt), "dump", "badging", str(_apk(flavor))], capture_output=True,
                              text=True, check=True).stdout
         assert f"package: name='{pkg}'" in out

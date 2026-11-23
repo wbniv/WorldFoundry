@@ -26,6 +26,7 @@
 	int32 Seahorses;               /* Minumum: 0 Maximum: 6 Default: 6 */
 	int32 Greeting;        /* Default: 1 */
 	int32 Holdseconds;               /* Minumum: 0 Maximum: 86400 Default: 120 */
+	int32 Showframerate;               /* Minumum: 0 Maximum: 1 Default: 0 */
 };
 /*============================================================================*/
 #endif         /* plantedtanksettings_HT */

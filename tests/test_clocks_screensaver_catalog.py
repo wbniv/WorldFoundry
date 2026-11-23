@@ -28,7 +28,7 @@ def flavor_block(name):
 
 
 def test_clocks_flavor_has_its_own_application_id():
-    assert 'applicationId = "org.worldfoundry.clocks"' in flavor_block('clocks')
+    assert 'applicationId = "org.worldfoundry.game.clocks"' in flavor_block('clocks')
 
 
 def test_gradle_copies_the_clocks_manifest_into_the_flavor_assets_as_levels_manifest():
@@ -53,7 +53,8 @@ def test_flavor_manifest_declares_the_three_clocks_components():
     for name in ['.ClocksActivity', '.ClocksDreamService', '.ClocksSettingsProvider']:
         assert f'android:name="{name}"' in xml, name
         assert (JAVA / f'{name[1:]}.java').is_file(), name
-    assert xml.count('org.worldfoundry.clocks.settings') == 2      # the Dream's meta-data and the provider
+    assert xml.count('${applicationId}.settings') == 2             # the Dream's meta-data and the provider: they follow the applicationId
+    assert 'org.worldfoundry' not in xml.replace('org.worldfoundry.screensaver.SETTINGS_AUTHORITY', '').split('-->', 1)[1]   # no hard-coded id
     assert 'LEANBACK_LAUNCHER' in xml and 'android.service.dreams.DreamService' in xml
 
 
@@ -89,7 +90,7 @@ def test_only_the_settings_provider_writes_the_saved_choice():
 def test_settings_provider_offers_random_and_every_clock_and_rejects_unknown_ids():
     java = (JAVA / 'ClocksSettingsProvider.java').read_text()
     assert 'static final String CLOCK = "clock";' in java
-    assert 'AUTHORITY = "org.worldfoundry.clocks.settings"' in java
+    assert 'AUTHORITY' not in java            # the authority is the manifest's ${applicationId}.settings, not a constant
     assert 'TankChoice.RANDOM' in java and 'clocks.ids()' in java
     assert 'TankSettingsProvider.orientationSetting(' in java
     assert re.search(r'if \(!TankChoice\.valid\(getContext\(\), id\)\) throw new IllegalArgumentException', java)

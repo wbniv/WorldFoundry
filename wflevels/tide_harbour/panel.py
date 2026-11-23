@@ -39,6 +39,15 @@ PANEL_W = 2.0 * HALF_W * PANEL_FRAC
 PANEL_H = 2.0 * HALF_H
 
 
+def half_w(aspect: float = ASPECT, vfov_deg: float = VFOV_DEG) -> float:
+    """Half the width of the view at DEPTH, from the engine's DISPLAY_ASPECT and DISPLAY_VFOV mailboxes (plan
+    docs/plans/2026-11-22-display-mailboxes.md). The defaults are the 16:9 television and 60 degrees the panel was drawn for, so
+    HALF_W is half_w() exactly. The panel's own size stays W x H (it keeps its proportions); only the screen edge it sits against
+    moves, so on a wider or narrower screen the panel is a different share of the width. The harbour's shift is unaffected: the
+    panel's angular width and the view's both scale with the aspect, so camera_shift_m comes out the same for every aspect."""
+    return DEPTH * math.tan(math.radians(vfov_deg / 2.0)) * aspect
+
+
 class Frame(NamedTuple):
     pos: V3
     right: V3
@@ -106,9 +115,9 @@ def project(fr: Frame, p: V3, width: int = 1280, height: int = 720) -> Tuple[flo
     return width / 2.0 + focal * x / depth, height / 2.0 - focal * y / depth
 
 
-def panel_u_range(side: int) -> Tuple[float, float]:
+def panel_u_range(side: int, hw: float = HALF_W) -> Tuple[float, float]:
     """The panel's left and right edges in u at DEPTH. side 0: the right edge of the screen; 1: the left."""
-    return (-HALF_W, -HALF_W + PANEL_W) if side else (HALF_W - PANEL_W, HALF_W)
+    return (-hw, -hw + PANEL_W) if side else (hw - PANEL_W, hw)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -169,9 +178,9 @@ def harbour_scale(vis: float) -> float:
     return 1.0 - (1.0 - SCALE_AT_PANEL) * vis
 
 
-def panel_centre_u(left: bool, vis: float) -> float:
+def panel_centre_u(left: bool, vis: float, hw: float = HALF_W) -> float:
     """The panel centre's u at DEPTH: its near edge is at the screen's edge when vis is 1, outside it when 0."""
-    return (-HALF_W + vis * W - W / 2.0) if left else (HALF_W - vis * W + W / 2.0)
+    return (-hw + vis * W - W / 2.0) if left else (hw - vis * W + W / 2.0)
 
 
 def camera_shift_m(left: bool, vis: float, dist: float) -> float:
@@ -239,12 +248,12 @@ def map_v(sod: float) -> float:
     return -BAND_H / 2.0 - pan_dlat_km(sod) * M_PER_KM
 
 
-def panel_poses(fr: Frame, sod: float, left: bool, vis: float, reading, tide: float) -> Dict[str, "tl.Pose"]:
+def panel_poses(fr: Frame, sod: float, left: bool, vis: float, reading, tide: float, hw: float = HALF_W) -> Dict[str, "tl.Pose"]:
     """The pose of every panel actor, from the camera's frame: the part's mesh origin is placed at its (u, v) in panel
     coordinates at its layer's depth, scaled by depth / DEPTH so that it lands on the screen where the panel's plane would
     put it, and turned to face the camera. reading is turns.panel_reading's; tide the water level (m) now."""
     a, b, c = euler_of(fr)
-    cu = panel_centre_u(left, vis)
+    cu = panel_centre_u(left, vis, hw)        # hw: half the view's width at DEPTH, half_w(aspect, vfov) of the display
     out: Dict[str, tl.Pose] = {}
 
     def put(name: str, layer: str, u: float, v: float, sz: float = 1.0) -> None:

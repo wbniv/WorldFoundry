@@ -33,7 +33,7 @@ from plant_settings_actor import configure_level  # noqa: E402
 import seahorse as sh  # noqa: E402
 
 VRAM = ['--vram-width=2048', '--vram-height=1024', '--vram-slot-width=512', '--vram-slot-height=512',
-        '--vram-perm-width=1024', '--vram-perm-height=1024']   # android/app/src/aquarium/assets/wf_args.txt
+        '--vram-perm-width=1024', '--vram-perm-height=1024']   # wflevels/aquarium-wf_args.txt
 STATES = ('hold', 'release', 'swim', 'probe', 'grasp', 'strike', 'greet')
 CELLS = {'state': 41, 'spot': 43, 'x': 45, 'y': 46, 'z': 47, 'yaw': 48, 'progress': 24, 'status': 39,
          'cx': 33, 'cy': 34, 'ax': 65, 'ay': 66, 'init': 40}

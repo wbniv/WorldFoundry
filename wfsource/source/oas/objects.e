@@ -60,6 +60,8 @@
         SeaStarsSettings_KIND,
         TideHarbourSettings_KIND,
         CuckooVillageSettings_KIND,
+        LevelSettings_KIND,
+        DiscusSettings_KIND,
 
 
 

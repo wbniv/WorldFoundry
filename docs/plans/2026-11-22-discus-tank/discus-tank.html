@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<!-- Plan mockup: docs/plans/2026-11-22-discus-tank.md. Self-contained, 1440x900 logical canvas. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Discus Tank Mockup</title>
+<style>
+  :root { --bg:#0b1016; --fg:#e6edf3; --muted:#8b96a3; --line:#2a3440; --panel:#121a23; --accent:#f0b35a; }
+  * { box-sizing: border-box; }
+  body { margin:0; width:1440px; height:900px; overflow:hidden; background:var(--bg); color:var(--fg);
+         font:15px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display:flex; align-items:baseline; gap:16px; padding:14px 28px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header h1 { margin:0; font-size:18px; font-weight:600; }
+  header .sub { color:var(--muted); font-size:13px; }
+  .grid { display:grid; grid-template-columns: 430px 1fr; grid-template-rows: 1fr 300px; gap:20px; padding:20px 28px; height:calc(900px - 52px); }
+  .card { border:1px solid var(--line); border-radius:10px; background:var(--panel); padding:14px 16px; position:relative; }
+  .card h2 { margin:0 0 4px; font-size:13px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
+  .note { font-size:12.5px; color:var(--muted); margin-top:8px; }
+  .tv { background:#05080b; border:6px solid #1c232c; border-radius:6px; position:relative; overflow:hidden; }
+  /* menu */
+  .menu { height:520px; padding:22px 26px; font-family: ui-monospace, Menlo, monospace; }
+  .menu .t { font-size:20px; color:#fff; margin-bottom:2px; }
+  .menu .p { font-size:13px; color:#9fb3c2; margin-bottom:14px; }
+  .menu ol { list-style:none; margin:0; padding:0; font-size:15px; }
+  .menu li { padding:4px 10px; border-radius:4px; color:#c9d6df; }
+  .menu li.sel { background:#f0b35a; color:#1b1206; font-weight:700; }
+  .menu .pos { position:absolute; right:18px; bottom:12px; font-size:12px; color:#9fb3c2; font-family: ui-monospace, Menlo, monospace; }
+  .new { display:inline-block; margin-left:8px; font:600 10px ui-monospace,monospace; color:var(--accent); border:1px solid var(--accent); border-radius:8px; padding:0 6px; vertical-align:middle; }
+  /* tank */
+  .tank { height:520px; }
+  .tank svg { display:block; width:100%; height:100%; }
+  .fps { position:absolute; left:10px; top:8px; font:12px ui-monospace,monospace; color:#d8f6ff; opacity:.85; }
+  /* settings */
+  .form { width:360px; margin:10px auto 0; background:#1a2430; border:1px solid #344456; border-radius:8px; padding:12px 14px; }
+  .form .h { font-weight:600; margin-bottom:8px; }
+  .row { display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-top:1px solid #2a3846; font-size:14px; }
+  .box { width:18px; height:18px; border:2px solid #9fb3c2; border-radius:3px; }
+  .dream { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+  .chip { font-size:12.5px; border:1px solid var(--line); border-radius:12px; padding:2px 10px; color:#c9d6df; }
+  .chip.on { border-color:var(--accent); color:var(--accent); }
+  .err { margin-top:10px; font-size:12.5px; color:#ffb4a8; border:1px dashed #6b3a33; border-radius:6px; padding:6px 8px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Discus: the Aquarium's twelfth tank</h1>
+  <span class="sub">Menu entry 12 of 12 · ten discus, player-led · Dream label "Discus" · default Level Settings (Show framerate)</span>
+</header>
+<div class="grid">
+  <div class="card">
+    <h2>1 · Chooser menu (app start)</h2>
+    <div class="tv menu">
+      <div class="t">WF Aquarium</div>
+      <div class="p">Choose a tank</div>
+      <ol>
+        <li>Clownfish &amp; Sea Anemone</li><li>Blue Shrimp</li><li>Calm Betta</li><li>Jellyfish</li>
+        <li>Lionfish</li><li>Planted Tank</li><li>Asian Arowana</li><li>Tiger Barbs</li>
+        <li>Gulf of Thailand Reef</li><li>Gulf of Thailand Reef - Anime</li><li>Sea Stars</li>
+        <li class="sel">Discus</li>
+      </ol>
+      <div class="pos">12 / 12</div>
+    </div>
+    <div class="note">Appended last <span class="new">NEW</span>: indices 0..10 unchanged, Discus is TOC level 11.</div>
+  </div>
+  <div class="card">
+    <h2>2 · The tank, camera A (loaded)</h2>
+    <div class="tv tank">
+      <svg viewBox="0 0 960 520" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#33a0b3"/><stop offset="1" stop-color="#0d4d61"/></linearGradient>
+          <radialGradient id="body" cx=".45" cy=".45" r=".6"><stop offset="0" stop-color="#c8864a"/><stop offset=".7" stop-color="#8a4f26"/><stop offset="1" stop-color="#5a3216"/></radialGradient>
+          <g id="discus">
+            <path d="M-62 0 L-92 -22 L-90 22 Z" fill="#7a4520"/>
+            <path d="M-50 -40 Q-10 -78 40 -42 L30 -30 Q-10 -60 -45 -30 Z" fill="#6b3c1c"/>
+            <path d="M-50 40 Q-10 80 34 44 L26 32 Q-10 62 -45 30 Z" fill="#6b3c1c"/>
+            <ellipse cx="0" cy="0" rx="58" ry="62" fill="url(#body)"/>
+            <g stroke="#4a2810" stroke-width="5" opacity=".55"><line x1="-30" y1="-52" x2="-30" y2="52"/><line x1="-10" y1="-60" x2="-10" y2="60"/><line x1="12" y1="-58" x2="12" y2="58"/><line x1="32" y1="-48" x2="32" y2="48"/></g>
+            <circle cx="40" cy="-6" r="6" fill="#d23b2b"/><circle cx="40" cy="-6" r="2.5" fill="#111"/>
+            <path d="M20 40 L26 70 L14 44 Z" fill="#7a4520"/>
+          </g>
+        </defs>
+        <rect x="0" y="0" width="960" height="520" fill="#0a0f16"/>
+        <rect x="30" y="30" width="900" height="400" fill="url(#w)"/>
+        <g fill="#e8f7fb" opacity=".07"><polygon points="250,30 320,30 380,430 260,430"/><polygon points="520,30 580,30 640,430 540,430"/></g>
+        <rect x="30" y="400" width="900" height="45" fill="#e2c48d"/>
+        <rect x="18" y="22" width="924" height="12" fill="#bfe8f2"/>
+        <rect x="0" y="445" width="960" height="75" fill="#2a170c"/>
+        <use href="#discus" transform="translate(300 230) scale(.95)"/>
+        <use href="#discus" transform="translate(420 170) scale(.80)"/>
+        <use href="#discus" transform="translate(520 260) scale(1.00)"/>
+        <use href="#discus" transform="translate(640 190) scale(.88)"/>
+        <use href="#discus" transform="translate(205 300) scale(.75)"/>
+        <use href="#discus" transform="translate(735 300) scale(.92)"/>
+        <use href="#discus" transform="translate(400 320) scale(.85) scale(-1 1)"/>
+        <use href="#discus" transform="translate(600 345) scale(.78) scale(-1 1)"/>
+        <use href="#discus" transform="translate(800 200) scale(.82) scale(-1 1)"/>
+        <g transform="translate(470 120)"><use href="#discus" transform="scale(1.0)"/><circle r="74" fill="none" stroke="#f0b35a" stroke-width="2" stroke-dasharray="6 5"/></g>
+      </svg>
+      <div class="fps">60 fps</div>
+    </div>
+    <div class="note">Ten discus (player ringed: arrows steer, B/C depth, A darts) on the barb tank's shell, sand and lights, no rock or anemone (freshwater). Sizes 11-16 cm; 15 cm player. Overlay only when Show framerate is on.</div>
+  </div>
+  <div class="card">
+    <h2>3 · Hold A for 1 s: settings</h2>
+    <div class="form">
+      <div class="h">Level Settings</div>
+      <div class="row"><span>Show framerate</span><span class="box"></span></div>
+    </div>
+    <div class="note">The default holder levcomp adds to a level with no settings object; no new type.</div>
+  </div>
+  <div class="card">
+    <h2>4 · Dream (screensaver) and a missing build</h2>
+    <div class="dream">
+      <span class="chip">Random</span><span class="chip">Tiger Barbs</span><span class="chip">Thai Reef</span><span class="chip">Sea Stars</span><span class="chip on">Discus</span>
+    </div>
+    <div class="note">The Dream plays aquarium_discus_screensaver: the same level with the Player on autopilot (slow legs to x = ±4 m, a 4 s pause at each end). The Dream bundle packs it as level 11, in manifest order.</div>
+    <div class="err">Error state: if wflevels/aquarium_discus-standalone.iff is missing, cdpack stops with the file name and the menu bundle is not written; the audit lists the tank as MISSING.</div>
+  </div>
+</div>
+</body>
+</html>

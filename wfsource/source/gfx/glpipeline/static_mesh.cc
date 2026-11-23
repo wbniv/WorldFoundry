@@ -816,6 +816,11 @@ RenderObject3D::StaticBakeStale() const
 bool
 RenderObject3D::RenderStatic(const Matrix34& position)
 {
+	// The indexed material's lookup state is dynamic and is not recorded by
+	// the static-mesh bake. Stream it until the bake carries this state too.
+	for (int i = 0; i < _materialCount; ++i)
+		if (_materialList[i].GetMaterialFlags() & Material::TEXTURE_INDEXED)
+			return false;
 	if(!StaticMeshEnabled())
 		return false;
 	if(_staticState != STATIC_BAKEABLE)

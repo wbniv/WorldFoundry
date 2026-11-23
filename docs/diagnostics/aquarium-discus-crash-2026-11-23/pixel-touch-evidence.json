@@ -1,0 +1,292 @@
+{
+  "schema": 1,
+  "job": "J-7938126170ec",
+  "device": "3A131FDJG005WF",
+  "package": "org.worldfoundry.game.aquarium",
+  "apk": "ff8e05416ceb1e71591f988c3db29769fded9c0f299c0e7608752538def899ad.apk",
+  "score_sha256": "d925dfbc8701b88a2c69d30515bf681cd0a7042c6fdfb433b7df106fcedfd567",
+  "frame": {
+    "width": 2244,
+    "height": 1008,
+    "rotation": 1,
+    "display_id": 0,
+    "content_rect": [
+      113,
+      0,
+      2244,
+      1008
+    ]
+  },
+  "initial": {
+    "file": "touch-initial.png",
+    "sha256": "092463e8551b016b6bd1b88f8eabaf583481d3ef341693a337fd46d345e76334",
+    "bytes": 74221,
+    "width": 2244,
+    "height": 1008,
+    "started": 1795405630.4240067,
+    "ended": 1795405631.303774
+  },
+  "final": {
+    "file": "touch-final.png",
+    "sha256": "0ac5a7c1ce651c1dc869754a32b4e3615a3f9f8fe9370bfaa17c6cf73bb3bfd2",
+    "bytes": 188716,
+    "width": 2244,
+    "height": 1008,
+    "started": 1795405648.4949746,
+    "ended": 1795405649.172052
+  },
+  "captures": [
+    {
+      "file": "touch-frame-001.png",
+      "sha256": "385b2d6b073fbe217815d46fc969243ed0ef59472bada4802daafc845cc409fc",
+      "bytes": 76720,
+      "width": 2244,
+      "height": 1008,
+      "started": 1795405640.3830373,
+      "ended": 1795405640.9908628,
+      "label": "selection",
+      "planned_ms": 8000,
+      "host_lateness_ms": 1286,
+      "planned_device_uptime_ms": 170657280
+    },
+    {
+      "file": "touch-frame-002.png",
+      "sha256": "3f4cb89293917cc6c35480b6154b6a1a3322448476cbce8c48081fe2339dbbcd",
+      "bytes": 173772,
+      "width": 2244,
+      "height": 1008,
+      "started": 1795405647.251187,
+      "ended": 1795405647.8532636,
+      "label": "tank",
+      "planned_ms": 15000,
+      "host_lateness_ms": 1148,
+      "planned_device_uptime_ms": 170664280
+    }
+  ],
+  "device_anchor": {
+    "device_uptime_ms": 170649280,
+    "device_wall_ms": 1795405634985
+  },
+  "observed_edges": {
+    "1": {
+      "device_uptime_ms": 170651318,
+      "contact": 0,
+      "action": 0,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405637023
+    },
+    "2": {
+      "device_uptime_ms": 170651509,
+      "contact": 0,
+      "action": 2,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405637214
+    },
+    "3": {
+      "device_uptime_ms": 170651816,
+      "contact": 0,
+      "action": 0,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405637521
+    },
+    "4": {
+      "device_uptime_ms": 170652025,
+      "contact": 0,
+      "action": 2,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405637730
+    },
+    "5": {
+      "device_uptime_ms": 170652305,
+      "contact": 0,
+      "action": 0,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405638010
+    },
+    "6": {
+      "device_uptime_ms": 170652517,
+      "contact": 0,
+      "action": 2,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405638222
+    },
+    "7": {
+      "device_uptime_ms": 170652824,
+      "contact": 0,
+      "action": 0,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405638529
+    },
+    "8": {
+      "device_uptime_ms": 170653009,
+      "contact": 0,
+      "action": 2,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405638714
+    },
+    "9": {
+      "device_uptime_ms": 170653313,
+      "contact": 0,
+      "action": 0,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405639018
+    },
+    "10": {
+      "device_uptime_ms": 170653517,
+      "contact": 0,
+      "action": 2,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405639222
+    },
+    "11": {
+      "device_uptime_ms": 170653814,
+      "contact": 0,
+      "action": 0,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405639519
+    },
+    "12": {
+      "device_uptime_ms": 170654009,
+      "contact": 0,
+      "action": 2,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405639714
+    },
+    "13": {
+      "device_uptime_ms": 170654304,
+      "contact": 0,
+      "action": 0,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405640009
+    },
+    "14": {
+      "device_uptime_ms": 170654509,
+      "contact": 0,
+      "action": 2,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405640214
+    },
+    "15": {
+      "device_uptime_ms": 170654823,
+      "contact": 0,
+      "action": 0,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405640528
+    },
+    "16": {
+      "device_uptime_ms": 170655010,
+      "contact": 0,
+      "action": 2,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405640715
+    },
+    "17": {
+      "device_uptime_ms": 170655304,
+      "contact": 0,
+      "action": 0,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405641009
+    },
+    "18": {
+      "device_uptime_ms": 170655517,
+      "contact": 0,
+      "action": 2,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405641222
+    },
+    "19": {
+      "device_uptime_ms": 170655813,
+      "contact": 0,
+      "action": 0,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405641518
+    },
+    "20": {
+      "device_uptime_ms": 170656017,
+      "contact": 0,
+      "action": 2,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405641722
+    },
+    "21": {
+      "device_uptime_ms": 170656314,
+      "contact": 0,
+      "action": 0,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405642019
+    },
+    "22": {
+      "device_uptime_ms": 170656510,
+      "contact": 0,
+      "action": 2,
+      "x": 295,
+      "y": 845,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405642215
+    },
+    "23": {
+      "device_uptime_ms": 170658311,
+      "contact": 0,
+      "action": 0,
+      "x": 2135,
+      "y": 815,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405644016
+    },
+    "24": {
+      "device_uptime_ms": 170658518,
+      "contact": 0,
+      "action": 2,
+      "x": 2135,
+      "y": 815,
+      "accepted": true,
+      "device_reported_wall_ms": 1795405644223
+    }
+  },
+  "host_start_wall": 1795405631.7049296,
+  "host_start_monotonic": 253917.084615685,
+  "result": "device-edges-verified",
+  "timeline": "touch-timeline.csv"
+}

@@ -132,7 +132,7 @@ final class LevelSettings {
             String saved = prefs.getString(field.key, null);
             if (saved == null) continue;
             try {
-                out.put(field.key, field.validate(saved));   // a stale or hand-edited value is dropped
+                out.put(field.key, field.engineValue(field.validate(saved)));   // a stale or hand-edited value is dropped
             } catch (IllegalArgumentException stale) {
                 // Not an option or out of range any more: the level's default applies.
             }
@@ -154,9 +154,9 @@ final class LevelSettings {
                             .put("label", field.optionLabels.get(i)));
                 }
                 entry.put("options", options);
-            } else {
+            } else if (LevelSettingField.INTEGER.equals(field.type)) {
                 entry.put("minimum", Long.toString(field.minimum)).put("maximum", Long.toString(field.maximum));
-            }
+            }   // a boolean has neither options nor a range
             out.put(entry);
         }
         return out;

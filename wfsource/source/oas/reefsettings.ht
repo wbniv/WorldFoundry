@@ -19,6 +19,7 @@
     int32 Rocks;               /* Minumum: 1 Maximum: 5 Default: 3 */
     int32 Colonies;               /* Minumum: 0 Maximum: 2 Default: 1 */
     int32 Seed;               /* Minumum: 0 Maximum: 16777215 Default: 0 */
+	int32 Showframerate;               /* Minumum: 0 Maximum: 1 Default: 0 */
 };
 /*============================================================================*/
 #endif         /* reefsettings_HT */

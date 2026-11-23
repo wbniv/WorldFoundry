@@ -16,6 +16,7 @@
 	int32 shadowPageOffset;                 /* offset in page data for this objects page */
 	int32 TemplateObject;        /* Default: 0 */
     int32 Showruntimediagnostics;        /* Default: 1 */
+	int32 Showframerate;               /* Minumum: 0 Maximum: 1 Default: 0 */
 };
 /*============================================================================*/
 #endif         /* runtimediagnostics_HT */

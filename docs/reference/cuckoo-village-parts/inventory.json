@@ -1,0 +1,5689 @@
+[
+ {
+  "name": "AmbientLight",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   -20.0,
+   1.0
+  ],
+  "rotation_deg": [
+   0.0,
+   40.0,
+   90.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 0,
+  "schema": "/src/wfsource/source/oas/light.oad",
+  "props": {
+   "wf_original_mesh_name": "",
+   "wf_had_authored_bbox": true,
+   "wf_original_bbox": "<bpy id property array [6]>",
+   "wf_schema_path": "/src/wfsource/source/oas/light.oad",
+   "wf__open_Movement": false,
+   "wf_MovementClass": 23,
+   "wf_Mobility": "Anchored",
+   "wf_Mass": 0.0,
+   "wf_Moves Between Rooms": "False",
+   "wf_Movement Mailbox": 1,
+   "wf_Step Size": 0.54998779296875,
+   "wf_Vertical Elasticity": 0.5,
+   "wf_Horizontal Elasticity": 0.5,
+   "wf_Surface Friction": 0.9499969482421875,
+   "wf_At End Of Path": "Ping-Pong",
+   "wf_Object To Follow": "",
+   "wf_Follow Offset": "",
+   "wf_Running Acceleration": 1.0,
+   "wf_Running Deceleration": 0.899993896484375,
+   "wf_Max Ground Speed": 10.0,
+   "wf_Turn Rate": 5.0,
+   "wf_Crawling Acceleration": 0.5,
+   "wf_Jumping Acceleration": 18.0,
+   "wf_Jumping Momentum Transfer": 0.5,
+   "wf_Air Acceleration": 1.0,
+   "wf_Horiz Air Drag": 0.25,
+   "wf_Vert Air Drag": 0.25,
+   "wf_Max Air Speed": 10.0,
+   "wf_Falling Acceleration": 9.80999755859375,
+   "wf_Fall Anim Threshold": 2.0,
+   "wf_Stun Threshold": 2.5,
+   "wf_Stun Duration": 1.0,
+   "wf__open_Toolset": false,
+   "wf_Tool A": "",
+   "wf_Tool B": "",
+   "wf_Tool C": "",
+   "wf_Tool D": "",
+   "wf_Tool E": "",
+   "wf_Tool F": "",
+   "wf__open_Common": false,
+   "wf_hp": 32767.0,
+   "wf_Number Of Local Mailboxes": 0,
+   "wf_Poof": "",
+   "wf_Is Needle Gun Target": "False",
+   "wf_Write To Mailbox On Death": 0,
+   "wf_Script Controls Input": "False",
+   "wf__open_Mesh": false,
+   "wf_Mesh Name": "",
+   "wf_Model Type": "None",
+   "wf_Animation Mailbox": 1,
+   "wf_Visibility Mailbox": 0,
+   "wf_Matte Type": "Color",
+   "wf_Background Color": 0,
+   "wf_Debug Background Color": 7829367,
+   "wf_Distance": 8000.0,
+   "wf_Tiles": "",
+   "wf_Map": "",
+   "wf_X Rotation Scale": 1.0,
+   "wf_Y Rotation Scale": 1.0,
+   "wf_generationType": "Pulse",
+   "wf_period": 0.149993896484375,
+   "wf_timeDelay": 0.0,
+   "wf_yArc": 1.0,
+   "wf_zArc": 1.0,
+   "wf_initialSphereRadius": 0.0999908447265625,
+   "wf_sphereExpansionRate": 0.0999908447265625,
+   "wf_nParticles": 1,
+   "wf_initialVelocity": 0.29998779296875,
+   "wf_initialAngleA": 0.0,
+   "wf_initialAngleB": 0.0,
+   "wf_initialAngleC": 0.0,
+   "wf_deltaAngleA": 0.0,
+   "wf_deltaAngleB": 0.0,
+   "wf_deltaAngleC": 0.0,
+   "wf_lifeTime": 2.0,
+   "wf_initialAlpha": 1.0,
+   "wf_alphaDecrement": 0.04998779296875,
+   "wf_Type": "None",
+   "wf_magnitude": 0.29998779296875,
+   "wf_vectorX": 0.0,
+   "wf_vectorY": 0.0,
+   "wf_vectorZ": 0.0,
+   "wf_forceType": "None",
+   "wf_magnitude2": 0.29998779296875,
+   "wf_vectorX2": 0.0,
+   "wf_vectorY2": 0.0,
+   "wf_vectorZ2": 0.0,
+   "wf__open_Shadow": false,
+   "wf_Shadow Object Template": "",
+   "wf_Check Below Only Once": "True",
+   "wf__open_Flags": false,
+   "wf_Template Object": "False",
+   "wf__open_Light": true,
+   "wf_lightRed": 0.42,
+   "wf_lightGreen": 0.42,
+   "wf_lightBlue": 0.42,
+   "wf_lightX": 0.0,
+   "wf_lightY": 0.0,
+   "wf_lightZ": 0.0,
+   "wf_lightType": "Ambient",
+   "wf_slopeA": 0.0,
+   "wf_slopeB": 0.0,
+   "wf_slopeC": 0.0,
+   "wf_slopeD": 0.0,
+   "wf_Cave Logic Studios Notes|": "",
+   "wf_Script": ""
+  },
+  "mesh": "light_7",
+  "users": 2,
+  "triangles": 12,
+  "vertices": 8,
+  "dimensions": [
+   0.25,
+   0.25,
+   0.25
+  ],
+  "materials": [],
+  "images": []
+ },
+ {
+  "name": "bavaria_chalet",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 230,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 230,
+   "wf_Mesh Name": "bavaria_chalet.iff",
+   "wf_original_mesh_name": "bavaria_chalet.iff"
+  },
+  "mesh": "bavaria_chalet",
+  "users": 1,
+  "triangles": 2491,
+  "vertices": 1612,
+  "dimensions": [
+   3.48,
+   1.3826,
+   3.5187
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "bavaria_dome",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 230,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 230,
+   "wf_Mesh Name": "bavaria_dome.iff",
+   "wf_original_mesh_name": "bavaria_dome.iff"
+  },
+  "mesh": "bavaria_dome",
+  "users": 1,
+  "triangles": 392,
+  "vertices": 224,
+  "dimensions": [
+   0.7825,
+   0.7825,
+   1.55
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "bavaria_maypole",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 230,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 230,
+   "wf_Mesh Name": "bavaria_maypole.iff",
+   "wf_original_mesh_name": "bavaria_maypole.iff"
+  },
+  "mesh": "bavaria_maypole",
+  "users": 1,
+  "triangles": 628,
+  "vertices": 388,
+  "dimensions": [
+   0.84,
+   0.8189,
+   3.67
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "bavaria_trim_01",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 230,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 230,
+   "wf_Mesh Name": "bavaria_trim_01.iff",
+   "wf_original_mesh_name": "bavaria_trim_01.iff"
+  },
+  "mesh": "bavaria_trim_01",
+  "users": 1,
+  "triangles": 156,
+  "vertices": 104,
+  "dimensions": [
+   1.8951,
+   0.92,
+   2.187
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "bavaria_trim_03",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 230,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 230,
+   "wf_Mesh Name": "bavaria_trim_03.iff",
+   "wf_original_mesh_name": "bavaria_trim_03.iff"
+  },
+  "mesh": "bavaria_trim_03",
+  "users": 1,
+  "triangles": 156,
+  "vertices": 104,
+  "dimensions": [
+   1.9217,
+   0.5596,
+   2.0898
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "bavaria_trim_05",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 230,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 230,
+   "wf_Mesh Name": "bavaria_trim_05.iff",
+   "wf_original_mesh_name": "bavaria_trim_05.iff"
+  },
+  "mesh": "bavaria_trim_05",
+  "users": 1,
+  "triangles": 156,
+  "vertices": 104,
+  "dimensions": [
+   2.2029,
+   0.7647,
+   2.43
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "bavaria_trim_07",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 230,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 230,
+   "wf_Mesh Name": "bavaria_trim_07.iff",
+   "wf_original_mesh_name": "bavaria_trim_07.iff"
+  },
+  "mesh": "bavaria_trim_07",
+  "users": 1,
+  "triangles": 156,
+  "vertices": 104,
+  "dimensions": [
+   2.1471,
+   0.5081,
+   2.3085
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "bavaria_trim_09",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 230,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 230,
+   "wf_Mesh Name": "bavaria_trim_09.iff",
+   "wf_original_mesh_name": "bavaria_trim_09.iff"
+  },
+  "mesh": "bavaria_trim_09",
+  "users": 1,
+  "triangles": 156,
+  "vertices": 104,
+  "dimensions": [
+   1.6845,
+   0.925,
+   1.9926
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "bavaria_trim_11",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 230,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 230,
+   "wf_Mesh Name": "bavaria_trim_11.iff",
+   "wf_original_mesh_name": "bavaria_trim_11.iff"
+  },
+  "mesh": "bavaria_trim_11",
+  "users": 1,
+  "triangles": 156,
+  "vertices": 104,
+  "dimensions": [
+   2.0652,
+   0.8769,
+   2.3328
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "bird_door",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   -1.04,
+   4.7388
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "bird_door.iff",
+   "wf_original_mesh_name": "bird_door.iff"
+  },
+  "mesh": "Cube.217",
+  "users": 1,
+  "triangles": 12,
+  "vertices": 8,
+  "dimensions": [
+   0.48,
+   0.08,
+   0.3
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "bridge",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "bridge.iff",
+   "wf_original_mesh_name": "bridge.iff"
+  },
+  "mesh": "bridge",
+  "users": 1,
+  "triangles": 2,
+  "vertices": 4,
+  "dimensions": [
+   2.0,
+   0.9,
+   0.0
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "bridge_lane",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "bridge_lane.iff",
+   "wf_original_mesh_name": "bridge_lane.iff"
+  },
+  "mesh": "bridge_lane",
+  "users": 1,
+  "triangles": 48,
+  "vertices": 50,
+  "dimensions": [
+   5.6819,
+   4.6472,
+   0.253
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "Camera",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   14.0,
+   -25.0,
+   18.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/camera.oad",
+  "props": {
+   "wf_original_mesh_name": "",
+   "wf_had_authored_bbox": true,
+   "wf_original_bbox": "<bpy id property array [6]>",
+   "wf_schema_path": "/src/wfsource/source/oas/camera.oad",
+   "wf__open_Movement": false,
+   "wf_MovementClass": 13,
+   "wf_Mobility": "Camera",
+   "wf_Mass": 0.0,
+   "wf_Moves Between Rooms": "True",
+   "wf_Movement Mailbox": 1,
+   "wf_Step Size": 0.54998779296875,
+   "wf_Vertical Elasticity": 0.5,
+   "wf_Horizontal Elasticity": 0.5,
+   "wf_Surface Friction": 0.9499969482421875,
+   "wf_At End Of Path": "Ping-Pong",
+   "wf_Object To Follow": "",
+   "wf_Follow Offset": "",
+   "wf_Running Acceleration": 1.0,
+   "wf_Running Deceleration": 0.899993896484375,
+   "wf_Max Ground Speed": 10.0,
+   "wf_Turn Rate": 5.0,
+   "wf_Crawling Acceleration": 0.5,
+   "wf_Jumping Acceleration": 18.0,
+   "wf_Jumping Momentum Transfer": 0.5,
+   "wf_Air Acceleration": 1.0,
+   "wf_Horiz Air Drag": 0.25,
+   "wf_Vert Air Drag": 0.25,
+   "wf_Max Air Speed": 10.0,
+   "wf_Falling Acceleration": 9.80999755859375,
+   "wf_Fall Anim Threshold": 2.0,
+   "wf_Stun Threshold": 2.5,
+   "wf_Stun Duration": 1.0,
+   "wf__open_Toolset": false,
+   "wf_Tool A": "",
+   "wf_Tool B": "",
+   "wf_Tool C": "",
+   "wf_Tool D": "",
+   "wf_Tool E": "",
+   "wf_Tool F": "",
+   "wf__open_Common": false,
+   "wf_hp": 32767.0,
+   "wf_Number Of Local Mailboxes": 0,
+   "wf_Poof": "",
+   "wf_Is Needle Gun Target": "False",
+   "wf_Write To Mailbox On Death": 0,
+   "wf_Script Controls Input": "False",
+   "wf__open_Mesh": false,
+   "wf_Mesh Name": "",
+   "wf_Model Type": "None",
+   "wf_Animation Mailbox": 1,
+   "wf_Visibility Mailbox": 1,
+   "wf_Matte Type": "Color",
+   "wf_Background Color": 0,
+   "wf_Debug Background Color": 7829367,
+   "wf_Distance": 8000.0,
+   "wf_Tiles": "",
+   "wf_Map": "",
+   "wf_X Rotation Scale": 1.0,
+   "wf_Y Rotation Scale": 1.0,
+   "wf_generationType": "Pulse",
+   "wf_period": 0.149993896484375,
+   "wf_timeDelay": 0.0,
+   "wf_yArc": 1.0,
+   "wf_zArc": 1.0,
+   "wf_initialSphereRadius": 0.0999908447265625,
+   "wf_sphereExpansionRate": 0.0999908447265625,
+   "wf_nParticles": 1,
+   "wf_initialVelocity": 0.29998779296875,
+   "wf_initialAngleA": 0.0,
+   "wf_initialAngleB": 0.0,
+   "wf_initialAngleC": 0.0,
+   "wf_deltaAngleA": 0.0,
+   "wf_deltaAngleB": 0.0,
+   "wf_deltaAngleC": 0.0,
+   "wf_lifeTime": 2.0,
+   "wf_initialAlpha": 1.0,
+   "wf_alphaDecrement": 0.04998779296875,
+   "wf_Type": "None",
+   "wf_magnitude": 0.29998779296875,
+   "wf_vectorX": 0.0,
+   "wf_vectorY": 0.0,
+   "wf_vectorZ": 0.0,
+   "wf_forceType": "None",
+   "wf_magnitude2": 0.29998779296875,
+   "wf_vectorX2": 0.0,
+   "wf_vectorY2": 0.0,
+   "wf_vectorZ2": 0.0,
+   "wf__open_Shadow": false,
+   "wf_Shadow Object Template": "",
+   "wf_Check Below Only Once": "True",
+   "wf__open_Flags": false,
+   "wf_Template Object": "False",
+   "wf__open_Camera": true,
+   "wf_EyeDistance": 0.024993896484375,
+   "wf_EyeAngle": 2.5,
+   "wf__open_Fogging": false,
+   "wf_FoggingColor": 0,
+   "wf_FoggingStartDistance": 999.0,
+   "wf_FoggingCompleteDistance": 1000.0,
+   "wf__open_Style Shading": false,
+   "wf_WaterAbsorbR": 0.0,
+   "wf_WaterAbsorbG": 0.0,
+   "wf_WaterAbsorbB": 0.0,
+   "wf_CausticStrength": 0.0,
+   "wf_CausticScale": 0.0,
+   "wf_ToonBands": 0,
+   "wf_slopeA": 0.0,
+   "wf_slopeB": 0.0,
+   "wf_slopeC": 0.0,
+   "wf_slopeD": 0.0,
+   "wf_Cave Logic Studios Notes|": "",
+   "wf_Script": ""
+  },
+  "mesh": "camera_8",
+  "users": 1,
+  "triangles": 12,
+  "vertices": 8,
+  "dimensions": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "materials": [],
+  "images": []
+ },
+ {
+  "name": "candle_flames_01",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 215,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 215,
+   "wf_Mesh Name": "candle_flames_01.iff",
+   "wf_original_mesh_name": "candle_flames_01.iff"
+  },
+  "mesh": "candle_flames_01",
+  "users": 1,
+  "triangles": 80,
+  "vertices": 60,
+  "dimensions": [
+   1.6099,
+   1.4418,
+   1.9675
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "candle_flames_02",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 216,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 216,
+   "wf_Mesh Name": "candle_flames_02.iff",
+   "wf_original_mesh_name": "candle_flames_02.iff"
+  },
+  "mesh": "candle_flames_02",
+  "users": 1,
+  "triangles": 80,
+  "vertices": 60,
+  "dimensions": [
+   1.749,
+   1.6061,
+   2.1778
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "candle_flames_03",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 217,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 217,
+   "wf_Mesh Name": "candle_flames_03.iff",
+   "wf_original_mesh_name": "candle_flames_03.iff"
+  },
+  "mesh": "candle_flames_03",
+  "users": 1,
+  "triangles": 80,
+  "vertices": 60,
+  "dimensions": [
+   1.3254,
+   1.2509,
+   1.7572
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "candle_flames_04",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 218,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 218,
+   "wf_Mesh Name": "candle_flames_04.iff",
+   "wf_original_mesh_name": "candle_flames_04.iff"
+  },
+  "mesh": "candle_flames_04",
+  "users": 1,
+  "triangles": 80,
+  "vertices": 60,
+  "dimensions": [
+   1.048,
+   1.0202,
+   1.547
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "candle_flames_05",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 219,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 219,
+   "wf_Mesh Name": "candle_flames_05.iff",
+   "wf_original_mesh_name": "candle_flames_05.iff"
+  },
+  "mesh": "candle_flames_05",
+  "users": 1,
+  "triangles": 80,
+  "vertices": 60,
+  "dimensions": [
+   1.2533,
+   1.2949,
+   2.1778
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "candle_flames_06",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 220,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 220,
+   "wf_Mesh Name": "candle_flames_06.iff",
+   "wf_original_mesh_name": "candle_flames_06.iff"
+  },
+  "mesh": "candle_flames_06",
+  "users": 1,
+  "triangles": 80,
+  "vertices": 60,
+  "dimensions": [
+   1.1247,
+   1.3641,
+   1.9675
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "candle_flames_07",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 221,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 221,
+   "wf_Mesh Name": "candle_flames_07.iff",
+   "wf_original_mesh_name": "candle_flames_07.iff"
+  },
+  "mesh": "candle_flames_07",
+  "users": 1,
+  "triangles": 80,
+  "vertices": 60,
+  "dimensions": [
+   1.421,
+   1.6678,
+   2.1778
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "candle_flames_08",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 222,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 222,
+   "wf_Mesh Name": "candle_flames_08.iff",
+   "wf_original_mesh_name": "candle_flames_08.iff"
+  },
+  "mesh": "candle_flames_08",
+  "users": 1,
+  "triangles": 80,
+  "vertices": 60,
+  "dimensions": [
+   1.3922,
+   1.5881,
+   1.9675
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "candle_flames_09",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 223,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 223,
+   "wf_Mesh Name": "candle_flames_09.iff",
+   "wf_original_mesh_name": "candle_flames_09.iff"
+  },
+  "mesh": "candle_flames_09",
+  "users": 1,
+  "triangles": 80,
+  "vertices": 60,
+  "dimensions": [
+   1.2912,
+   1.4351,
+   1.7572
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "candle_flames_10",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 224,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 224,
+   "wf_Mesh Name": "candle_flames_10.iff",
+   "wf_original_mesh_name": "candle_flames_10.iff"
+  },
+  "mesh": "candle_flames_10",
+  "users": 1,
+  "triangles": 80,
+  "vertices": 60,
+  "dimensions": [
+   1.29,
+   1.3978,
+   1.7572
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "candle_flames_11",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 225,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 225,
+   "wf_Mesh Name": "candle_flames_11.iff",
+   "wf_original_mesh_name": "candle_flames_11.iff"
+  },
+  "mesh": "candle_flames_11",
+  "users": 1,
+  "triangles": 80,
+  "vertices": 60,
+  "dimensions": [
+   1.3881,
+   1.464,
+   1.9675
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "candle_flames_12",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 226,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 226,
+   "wf_Mesh Name": "candle_flames_12.iff",
+   "wf_original_mesh_name": "candle_flames_12.iff"
+  },
+  "mesh": "candle_flames_12",
+  "users": 1,
+  "triangles": 80,
+  "vertices": 60,
+  "dimensions": [
+   1.1397,
+   1.1641,
+   1.7572
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "candle_sticks",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 214,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 214,
+   "wf_Mesh Name": "candle_sticks.iff",
+   "wf_original_mesh_name": "candle_sticks.iff"
+  },
+  "mesh": "candle_sticks",
+  "users": 1,
+  "triangles": 2640,
+  "vertices": 1920,
+  "dimensions": [
+   27.5314,
+   15.7235,
+   3.395
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "clock_tower",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.1888
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "clock_tower.iff",
+   "wf_original_mesh_name": "clock_tower.iff"
+  },
+  "mesh": "Cube.001",
+  "users": 1,
+  "triangles": 994,
+  "vertices": 632,
+  "dimensions": [
+   2.9,
+   3.045,
+   5.64
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_01",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -11.0,
+   4.2,
+   1.0328
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   -25.0
+  ],
+  "scale": [
+   0.9,
+   0.9,
+   0.9
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "standard_house.iff",
+   "wf_original_mesh_name": "standard_house.iff"
+  },
+  "mesh": "Cube",
+  "users": 13,
+  "triangles": 1396,
+  "vertices": 994,
+  "dimensions": [
+   2.61,
+   2.25,
+   3.051
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_02",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -7.0,
+   6.2,
+   1.1651
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   15.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "standard_house.iff",
+   "wf_original_mesh_name": "standard_house.iff"
+  },
+  "mesh": "Cube",
+  "users": 13,
+  "triangles": 1396,
+  "vertices": 994,
+  "dimensions": [
+   2.9,
+   2.5,
+   3.39
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_03",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -3.4,
+   4.2,
+   0.5475
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   -15.0
+  ],
+  "scale": [
+   0.86,
+   0.86,
+   0.86
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "standard_house.iff",
+   "wf_original_mesh_name": "standard_house.iff"
+  },
+  "mesh": "Cube",
+  "users": 13,
+  "triangles": 1396,
+  "vertices": 994,
+  "dimensions": [
+   2.494,
+   2.15,
+   2.9154
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_04",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   1.2,
+   6.4,
+   0.5023
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   20.0
+  ],
+  "scale": [
+   0.9,
+   0.9,
+   0.9
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "standard_house.iff",
+   "wf_original_mesh_name": "standard_house.iff"
+  },
+  "mesh": "Cube",
+  "users": 13,
+  "triangles": 1396,
+  "vertices": 994,
+  "dimensions": [
+   2.61,
+   2.25,
+   3.051
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_05",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   7.0,
+   6.0,
+   1.1169
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   -18.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "standard_house.iff",
+   "wf_original_mesh_name": "standard_house.iff"
+  },
+  "mesh": "Cube",
+  "users": 13,
+  "triangles": 1396,
+  "vertices": 994,
+  "dimensions": [
+   2.9,
+   2.5,
+   3.39
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_06",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   11.5,
+   3.8,
+   0.7401
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   32.0
+  ],
+  "scale": [
+   0.9,
+   0.9,
+   0.9
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "standard_house.iff",
+   "wf_original_mesh_name": "standard_house.iff"
+  },
+  "mesh": "Cube",
+  "users": 13,
+  "triangles": 1396,
+  "vertices": 994,
+  "dimensions": [
+   2.61,
+   2.25,
+   3.051
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_07",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -11.0,
+   1.0,
+   0.4502
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   -12.0
+  ],
+  "scale": [
+   0.95,
+   0.95,
+   0.95
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "standard_house.iff",
+   "wf_original_mesh_name": "standard_house.iff"
+  },
+  "mesh": "Cube",
+  "users": 13,
+  "triangles": 1396,
+  "vertices": 994,
+  "dimensions": [
+   2.755,
+   2.375,
+   3.2205
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_08",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -7.8,
+   -0.7,
+   0.3198
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   35.0
+  ],
+  "scale": [
+   0.88,
+   0.88,
+   0.88
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "standard_house.iff",
+   "wf_original_mesh_name": "standard_house.iff"
+  },
+  "mesh": "Cube",
+  "users": 13,
+  "triangles": 1396,
+  "vertices": 994,
+  "dimensions": [
+   2.552,
+   2.2,
+   2.9832
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_09",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -4.0,
+   -0.5,
+   0.1904
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   -28.0
+  ],
+  "scale": [
+   0.82,
+   0.82,
+   0.82
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "standard_house.iff",
+   "wf_original_mesh_name": "standard_house.iff"
+  },
+  "mesh": "Cube",
+  "users": 13,
+  "triangles": 1396,
+  "vertices": 994,
+  "dimensions": [
+   2.378,
+   2.05,
+   2.7798
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_10",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   8.6,
+   3.0,
+   0.8089
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   10.0
+  ],
+  "scale": [
+   0.8,
+   0.8,
+   0.8
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "standard_house.iff",
+   "wf_original_mesh_name": "standard_house.iff"
+  },
+  "mesh": "Cube",
+  "users": 13,
+  "triangles": 1396,
+  "vertices": 994,
+  "dimensions": [
+   2.32,
+   2.0,
+   2.712
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_11",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   11.0,
+   -2.7,
+   0.4273
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   -22.0
+  ],
+  "scale": [
+   0.96,
+   0.96,
+   0.96
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "standard_house.iff",
+   "wf_original_mesh_name": "standard_house.iff"
+  },
+  "mesh": "Cube",
+  "users": 13,
+  "triangles": 1396,
+  "vertices": 994,
+  "dimensions": [
+   2.784,
+   2.4,
+   3.2544
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_12",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   7.0,
+   -3.2,
+   0.3369
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   24.0
+  ],
+  "scale": [
+   1.02,
+   1.02,
+   1.02
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "standard_house.iff",
+   "wf_original_mesh_name": "standard_house.iff"
+  },
+  "mesh": "Cube",
+  "users": 13,
+  "triangles": 1396,
+  "vertices": 994,
+  "dimensions": [
+   2.958,
+   2.55,
+   3.4578
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_13",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -8.0,
+   -3.9,
+   0.3226
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   -14.0
+  ],
+  "scale": [
+   0.86,
+   0.86,
+   0.86
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "standard_house.iff",
+   "wf_original_mesh_name": "standard_house.iff"
+  },
+  "mesh": "Cube",
+  "users": 13,
+  "triangles": 1396,
+  "vertices": 994,
+  "dimensions": [
+   2.494,
+   2.15,
+   2.9154
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_flower_blocks",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 228,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 228,
+   "wf_Mesh Name": "cottage_flower_blocks.iff",
+   "wf_original_mesh_name": "cottage_flower_blocks.iff"
+  },
+  "mesh": "cottage_flower_blocks",
+  "users": 1,
+  "triangles": 4264,
+  "vertices": 8528,
+  "dimensions": [
+   25.3858,
+   10.9641,
+   1.4489
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_flowers",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 227,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 227,
+   "wf_Mesh Name": "cottage_flowers.iff",
+   "wf_original_mesh_name": "cottage_flowers.iff"
+  },
+  "mesh": "cottage_flowers",
+  "users": 1,
+  "triangles": 17180,
+  "vertices": 51540,
+  "dimensions": [
+   25.286,
+   11.075,
+   1.6311
+  ],
+  "materials": [
+   "bloom_red",
+   "bloom_magenta",
+   "bloom_violet",
+   "bloom_white",
+   "flower_centre",
+   "edelweiss_felt",
+   "leaf_green",
+   "leaf_silver",
+   "stem_green",
+   "soil"
+  ],
+  "images": []
+ },
+ {
+  "name": "cottage_light_01",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -11.0,
+   4.2,
+   1.0328
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   -25.0
+  ],
+  "scale": [
+   0.9,
+   0.9,
+   0.9
+  ],
+  "mailbox": 200,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 200,
+   "wf_Mesh Name": "house_glow.iff",
+   "wf_original_mesh_name": "house_glow.iff"
+  },
+  "mesh": "Cube.010",
+  "users": 13,
+  "triangles": 120,
+  "vertices": 80,
+  "dimensions": [
+   2.3472,
+   1.9818,
+   1.215
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_light_02",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -7.0,
+   6.2,
+   1.1651
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   15.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 201,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 201,
+   "wf_Mesh Name": "house_glow.iff",
+   "wf_original_mesh_name": "house_glow.iff"
+  },
+  "mesh": "Cube.010",
+  "users": 13,
+  "triangles": 120,
+  "vertices": 80,
+  "dimensions": [
+   2.608,
+   2.202,
+   1.35
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_light_03",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -3.4,
+   4.2,
+   0.5475
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   -15.0
+  ],
+  "scale": [
+   0.86,
+   0.86,
+   0.86
+  ],
+  "mailbox": 202,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 202,
+   "wf_Mesh Name": "house_glow.iff",
+   "wf_original_mesh_name": "house_glow.iff"
+  },
+  "mesh": "Cube.010",
+  "users": 13,
+  "triangles": 120,
+  "vertices": 80,
+  "dimensions": [
+   2.2429,
+   1.8937,
+   1.161
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_light_04",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   1.2,
+   6.4,
+   0.5023
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   20.0
+  ],
+  "scale": [
+   0.9,
+   0.9,
+   0.9
+  ],
+  "mailbox": 203,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 203,
+   "wf_Mesh Name": "house_glow.iff",
+   "wf_original_mesh_name": "house_glow.iff"
+  },
+  "mesh": "Cube.010",
+  "users": 13,
+  "triangles": 120,
+  "vertices": 80,
+  "dimensions": [
+   2.3472,
+   1.9818,
+   1.215
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_light_05",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   7.0,
+   6.0,
+   1.1169
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   -18.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 204,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 204,
+   "wf_Mesh Name": "house_glow.iff",
+   "wf_original_mesh_name": "house_glow.iff"
+  },
+  "mesh": "Cube.010",
+  "users": 13,
+  "triangles": 120,
+  "vertices": 80,
+  "dimensions": [
+   2.608,
+   2.202,
+   1.35
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_light_06",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   11.5,
+   3.8,
+   0.7401
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   32.0
+  ],
+  "scale": [
+   0.9,
+   0.9,
+   0.9
+  ],
+  "mailbox": 205,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 205,
+   "wf_Mesh Name": "house_glow.iff",
+   "wf_original_mesh_name": "house_glow.iff"
+  },
+  "mesh": "Cube.010",
+  "users": 13,
+  "triangles": 120,
+  "vertices": 80,
+  "dimensions": [
+   2.3472,
+   1.9818,
+   1.215
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_light_07",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -11.0,
+   1.0,
+   0.4502
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   -12.0
+  ],
+  "scale": [
+   0.95,
+   0.95,
+   0.95
+  ],
+  "mailbox": 206,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 206,
+   "wf_Mesh Name": "house_glow.iff",
+   "wf_original_mesh_name": "house_glow.iff"
+  },
+  "mesh": "Cube.010",
+  "users": 13,
+  "triangles": 120,
+  "vertices": 80,
+  "dimensions": [
+   2.4776,
+   2.0919,
+   1.2825
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_light_08",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -7.8,
+   -0.7,
+   0.3198
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   35.0
+  ],
+  "scale": [
+   0.88,
+   0.88,
+   0.88
+  ],
+  "mailbox": 207,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 207,
+   "wf_Mesh Name": "house_glow.iff",
+   "wf_original_mesh_name": "house_glow.iff"
+  },
+  "mesh": "Cube.010",
+  "users": 13,
+  "triangles": 120,
+  "vertices": 80,
+  "dimensions": [
+   2.295,
+   1.9378,
+   1.188
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_light_09",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -4.0,
+   -0.5,
+   0.1904
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   -28.0
+  ],
+  "scale": [
+   0.82,
+   0.82,
+   0.82
+  ],
+  "mailbox": 208,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 208,
+   "wf_Mesh Name": "house_glow.iff",
+   "wf_original_mesh_name": "house_glow.iff"
+  },
+  "mesh": "Cube.010",
+  "users": 13,
+  "triangles": 120,
+  "vertices": 80,
+  "dimensions": [
+   2.1386,
+   1.8056,
+   1.107
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_light_10",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   8.6,
+   3.0,
+   0.8089
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   10.0
+  ],
+  "scale": [
+   0.8,
+   0.8,
+   0.8
+  ],
+  "mailbox": 209,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 209,
+   "wf_Mesh Name": "house_glow.iff",
+   "wf_original_mesh_name": "house_glow.iff"
+  },
+  "mesh": "Cube.010",
+  "users": 13,
+  "triangles": 120,
+  "vertices": 80,
+  "dimensions": [
+   2.0864,
+   1.7616,
+   1.08
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_light_11",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   11.0,
+   -2.7,
+   0.4273
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   -22.0
+  ],
+  "scale": [
+   0.96,
+   0.96,
+   0.96
+  ],
+  "mailbox": 210,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 210,
+   "wf_Mesh Name": "house_glow.iff",
+   "wf_original_mesh_name": "house_glow.iff"
+  },
+  "mesh": "Cube.010",
+  "users": 13,
+  "triangles": 120,
+  "vertices": 80,
+  "dimensions": [
+   2.5037,
+   2.1139,
+   1.296
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_light_12",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   7.0,
+   -3.2,
+   0.3369
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   24.0
+  ],
+  "scale": [
+   1.02,
+   1.02,
+   1.02
+  ],
+  "mailbox": 211,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 211,
+   "wf_Mesh Name": "house_glow.iff",
+   "wf_original_mesh_name": "house_glow.iff"
+  },
+  "mesh": "Cube.010",
+  "users": 13,
+  "triangles": 120,
+  "vertices": 80,
+  "dimensions": [
+   2.6602,
+   2.246,
+   1.377
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cottage_light_13",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -8.0,
+   -3.9,
+   0.3226
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   -14.0
+  ],
+  "scale": [
+   0.86,
+   0.86,
+   0.86
+  ],
+  "mailbox": 212,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 212,
+   "wf_Mesh Name": "house_glow.iff",
+   "wf_original_mesh_name": "house_glow.iff"
+  },
+  "mesh": "Cube.010",
+  "users": 13,
+  "triangles": 120,
+  "vertices": 80,
+  "dimensions": [
+   2.2429,
+   1.8937,
+   1.161
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "cs_wide",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   14.0,
+   -25.0,
+   18.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/camshot.oad",
+  "props": {
+   "wf_original_mesh_name": "",
+   "wf_had_authored_bbox": true,
+   "wf_original_bbox": "<bpy id property array [6]>",
+   "wf_schema_path": "/src/wfsource/source/oas/camshot.oad",
+   "wf__open_Movement": false,
+   "wf_MovementClass": 16,
+   "wf_Mobility": "Anchored",
+   "wf_Mass": 0.0,
+   "wf_Moves Between Rooms": "False",
+   "wf_Movement Mailbox": 1,
+   "wf_Step Size": 0.54998779296875,
+   "wf_Vertical Elasticity": 0.5,
+   "wf_Horizontal Elasticity": 0.5,
+   "wf_Surface Friction": 0.9499969482421875,
+   "wf_At End Of Path": "Ping-Pong",
+   "wf_Object To Follow": "",
+   "wf_Follow Offset": "",
+   "wf_Running Acceleration": 1.0,
+   "wf_Running Deceleration": 0.899993896484375,
+   "wf_Max Ground Speed": 10.0,
+   "wf_Turn Rate": 5.0,
+   "wf_Crawling Acceleration": 0.5,
+   "wf_Jumping Acceleration": 18.0,
+   "wf_Jumping Momentum Transfer": 0.5,
+   "wf_Air Acceleration": 1.0,
+   "wf_Horiz Air Drag": 0.25,
+   "wf_Vert Air Drag": 0.25,
+   "wf_Max Air Speed": 10.0,
+   "wf_Falling Acceleration": 9.80999755859375,
+   "wf_Fall Anim Threshold": 2.0,
+   "wf_Stun Threshold": 2.5,
+   "wf_Stun Duration": 1.0,
+   "wf__open_Toolset": false,
+   "wf_Tool A": "",
+   "wf_Tool B": "",
+   "wf_Tool C": "",
+   "wf_Tool D": "",
+   "wf_Tool E": "",
+   "wf_Tool F": "",
+   "wf__open_Common": false,
+   "wf_hp": 32767.0,
+   "wf_Number Of Local Mailboxes": 0,
+   "wf_Poof": "",
+   "wf_Is Needle Gun Target": "False",
+   "wf_Write To Mailbox On Death": 0,
+   "wf_Script Controls Input": "False",
+   "wf__open_Mesh": false,
+   "wf_Mesh Name": "",
+   "wf_Model Type": "None",
+   "wf_Animation Mailbox": 1,
+   "wf_Visibility Mailbox": 1,
+   "wf_Matte Type": "Color",
+   "wf_Background Color": 0,
+   "wf_Debug Background Color": 7829367,
+   "wf_Distance": 8000.0,
+   "wf_Tiles": "",
+   "wf_Map": "",
+   "wf_X Rotation Scale": 1.0,
+   "wf_Y Rotation Scale": 1.0,
+   "wf_generationType": "Pulse",
+   "wf_period": 0.149993896484375,
+   "wf_timeDelay": 0.0,
+   "wf_yArc": 1.0,
+   "wf_zArc": 1.0,
+   "wf_initialSphereRadius": 0.0999908447265625,
+   "wf_sphereExpansionRate": 0.0999908447265625,
+   "wf_nParticles": 1,
+   "wf_initialVelocity": 0.29998779296875,
+   "wf_initialAngleA": 0.0,
+   "wf_initialAngleB": 0.0,
+   "wf_initialAngleC": 0.0,
+   "wf_deltaAngleA": 0.0,
+   "wf_deltaAngleB": 0.0,
+   "wf_deltaAngleC": 0.0,
+   "wf_lifeTime": 2.0,
+   "wf_initialAlpha": 1.0,
+   "wf_alphaDecrement": 0.04998779296875,
+   "wf_Type": "None",
+   "wf_magnitude": 0.29998779296875,
+   "wf_vectorX": 0.0,
+   "wf_vectorY": 0.0,
+   "wf_vectorZ": 0.0,
+   "wf_forceType": "None",
+   "wf_magnitude2": 0.29998779296875,
+   "wf_vectorX2": 0.0,
+   "wf_vectorY2": 0.0,
+   "wf_vectorZ2": 0.0,
+   "wf__open_Shadow": false,
+   "wf_Shadow Object Template": "",
+   "wf_Check Below Only Once": "True",
+   "wf__open_Flags": false,
+   "wf_Template Object": "False",
+   "wf__open_CamShot": true,
+   "wf_Camera": 0,
+   "wf_Target": "LookAt",
+   "wf_Follow": "LookAt",
+   "wf_Climb Rate": 5.0,
+   "wf_Elasticity": 10.0,
+   "wf_Track Object Mailbox": 0,
+   "wf_Track Object": "LookAt",
+   "wf_Rotation": "Fixed",
+   "wf_Position X": "Absolute",
+   "wf_Position Y": "Absolute",
+   "wf_Position Z": "Absolute",
+   "wf_FOV": 50.0,
+   "wf_Roll": 0.0,
+   "wf_Pan Time In Seconds": 1.0,
+   "wf_Hither": 0.0999755859375,
+   "wf_Yon": 1000.0,
+   "wf_slopeA": 0.0,
+   "wf_slopeB": 0.0,
+   "wf_slopeC": 0.0,
+   "wf_slopeD": 0.0,
+   "wf_Cave Logic Studios Notes|": "",
+   "wf_Script": ""
+  },
+  "mesh": "camshot_12",
+  "users": 1,
+  "triangles": 12,
+  "vertices": 8,
+  "dimensions": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "materials": [],
+  "images": []
+ },
+ {
+  "name": "dial_numerals_bavaria",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 230,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 230,
+   "wf_Mesh Name": "dial_numerals_bavaria.iff",
+   "wf_original_mesh_name": "dial_numerals_bavaria.iff"
+  },
+  "mesh": "dial_numerals_bavaria",
+  "users": 1,
+  "triangles": 420,
+  "vertices": 280,
+  "dimensions": [
+   0.7553,
+   0.009,
+   0.7538
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "dial_numerals_classic",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 231,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 231,
+   "wf_Mesh Name": "dial_numerals_classic.iff",
+   "wf_original_mesh_name": "dial_numerals_classic.iff"
+  },
+  "mesh": "dial_numerals_classic",
+  "users": 1,
+  "triangles": 420,
+  "vertices": 280,
+  "dimensions": [
+   0.746,
+   0.009,
+   0.7538
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "Director",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   -20.0,
+   1.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/director.oad",
+  "props": {
+   "wf_original_mesh_name": "",
+   "wf_had_authored_bbox": true,
+   "wf_original_bbox": "<bpy id property array [6]>",
+   "wf_schema_path": "/src/wfsource/source/oas/director.oad",
+   "wf__open_Movement": false,
+   "wf_MovementClass": 20,
+   "wf_Mobility": "Anchored",
+   "wf_Mass": 0.0,
+   "wf_Moves Between Rooms": "False",
+   "wf_Movement Mailbox": 1,
+   "wf_Step Size": 0.54998779296875,
+   "wf_Vertical Elasticity": 0.5,
+   "wf_Horizontal Elasticity": 0.5,
+   "wf_Surface Friction": 0.9499969482421875,
+   "wf_At End Of Path": "Ping-Pong",
+   "wf_Object To Follow": "",
+   "wf_Follow Offset": "",
+   "wf_Running Acceleration": 1.0,
+   "wf_Running Deceleration": 0.899993896484375,
+   "wf_Max Ground Speed": 10.0,
+   "wf_Turn Rate": 5.0,
+   "wf_Crawling Acceleration": 0.5,
+   "wf_Jumping Acceleration": 18.0,
+   "wf_Jumping Momentum Transfer": 0.5,
+   "wf_Air Acceleration": 1.0,
+   "wf_Horiz Air Drag": 0.25,
+   "wf_Vert Air Drag": 0.25,
+   "wf_Max Air Speed": 10.0,
+   "wf_Falling Acceleration": 9.80999755859375,
+   "wf_Fall Anim Threshold": 2.0,
+   "wf_Stun Threshold": 2.5,
+   "wf_Stun Duration": 1.0,
+   "wf__open_Toolset": false,
+   "wf_Tool A": "",
+   "wf_Tool B": "",
+   "wf_Tool C": "",
+   "wf_Tool D": "",
+   "wf_Tool E": "",
+   "wf_Tool F": "",
+   "wf__open_Common": false,
+   "wf_hp": 32767.0,
+   "wf_Number Of Local Mailboxes": 0,
+   "wf_Poof": "",
+   "wf_Is Needle Gun Target": "False",
+   "wf_Write To Mailbox On Death": 0,
+   "wf_Script Controls Input": "False",
+   "wf__open_Mesh": false,
+   "wf_Mesh Name": "",
+   "wf_Model Type": "None",
+   "wf_Animation Mailbox": 1,
+   "wf_Visibility Mailbox": 1,
+   "wf_Matte Type": "Color",
+   "wf_Background Color": 0,
+   "wf_Debug Background Color": 7829367,
+   "wf_Distance": 8000.0,
+   "wf_Tiles": "",
+   "wf_Map": "",
+   "wf_X Rotation Scale": 1.0,
+   "wf_Y Rotation Scale": 1.0,
+   "wf_generationType": "Pulse",
+   "wf_period": 0.149993896484375,
+   "wf_timeDelay": 0.0,
+   "wf_yArc": 1.0,
+   "wf_zArc": 1.0,
+   "wf_initialSphereRadius": 0.0999908447265625,
+   "wf_sphereExpansionRate": 0.0999908447265625,
+   "wf_nParticles": 1,
+   "wf_initialVelocity": 0.29998779296875,
+   "wf_initialAngleA": 0.0,
+   "wf_initialAngleB": 0.0,
+   "wf_initialAngleC": 0.0,
+   "wf_deltaAngleA": 0.0,
+   "wf_deltaAngleB": 0.0,
+   "wf_deltaAngleC": 0.0,
+   "wf_lifeTime": 2.0,
+   "wf_initialAlpha": 1.0,
+   "wf_alphaDecrement": 0.04998779296875,
+   "wf_Type": "None",
+   "wf_magnitude": 0.29998779296875,
+   "wf_vectorX": 0.0,
+   "wf_vectorY": 0.0,
+   "wf_vectorZ": 0.0,
+   "wf_forceType": "None",
+   "wf_magnitude2": 0.29998779296875,
+   "wf_vectorX2": 0.0,
+   "wf_vectorY2": 0.0,
+   "wf_vectorZ2": 0.0,
+   "wf__open_Shadow": false,
+   "wf_Shadow Object Template": "",
+   "wf_Check Below Only Once": "True",
+   "wf__open_Flags": false,
+   "wf_Template Object": "False",
+   "wf__open_Director": true,
+   "wf_Script": "",
+   "wf_slopeA": 0.0,
+   "wf_slopeB": 0.0,
+   "wf_slopeC": 0.0,
+   "wf_slopeD": 0.0,
+   "wf_Cave Logic Studios Notes|": ""
+  },
+  "mesh": "director_9",
+  "users": 1,
+  "triangles": 12,
+  "vertices": 8,
+  "dimensions": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "materials": [],
+  "images": []
+ },
+ {
+  "name": "garden",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "garden.iff",
+   "wf_original_mesh_name": "garden.iff"
+  },
+  "mesh": "garden",
+  "users": 1,
+  "triangles": 2,
+  "vertices": 4,
+  "dimensions": [
+   2.8,
+   1.4,
+   0.0544
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "garden_row_0",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "garden_row_0.iff",
+   "wf_original_mesh_name": "garden_row_0.iff"
+  },
+  "mesh": "garden_row_0",
+  "users": 1,
+  "triangles": 2,
+  "vertices": 4,
+  "dimensions": [
+   0.3174,
+   0.9747,
+   0.0095
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "garden_row_1",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "garden_row_1.iff",
+   "wf_original_mesh_name": "garden_row_1.iff"
+  },
+  "mesh": "garden_row_1",
+  "users": 1,
+  "triangles": 2,
+  "vertices": 4,
+  "dimensions": [
+   0.3174,
+   0.9747,
+   0.0126
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "garden_row_2",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "garden_row_2.iff",
+   "wf_original_mesh_name": "garden_row_2.iff"
+  },
+  "mesh": "garden_row_2",
+  "users": 1,
+  "triangles": 2,
+  "vertices": 4,
+  "dimensions": [
+   0.3174,
+   0.9747,
+   0.0163
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "garden_row_3",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "garden_row_3.iff",
+   "wf_original_mesh_name": "garden_row_3.iff"
+  },
+  "mesh": "garden_row_3",
+  "users": 1,
+  "triangles": 2,
+  "vertices": 4,
+  "dimensions": [
+   0.3174,
+   0.9747,
+   0.0206
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "hour_hand",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   -1.1,
+   4.2688
+  ],
+  "rotation_deg": [
+   0.0,
+   304.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "hour_hand.iff",
+   "wf_original_mesh_name": "hour_hand.iff"
+  },
+  "mesh": "Cube.004",
+  "users": 1,
+  "triangles": 12,
+  "vertices": 8,
+  "dimensions": [
+   0.055,
+   0.03,
+   0.27
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "LevelObj",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   -20.0,
+   1.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/levelobj.oad",
+  "props": {
+   "wf_original_mesh_name": "",
+   "wf_had_authored_bbox": true,
+   "wf_original_bbox": "<bpy id property array [6]>",
+   "wf_schema_path": "/src/wfsource/source/oas/levelobj.oad",
+   "wf__open_Movement": false,
+   "wf_MovementClass": 15,
+   "wf_Mobility": "Anchored",
+   "wf_Mass": 0.0,
+   "wf_Moves Between Rooms": "False",
+   "wf_Movement Mailbox": 1,
+   "wf_Step Size": 0.54998779296875,
+   "wf_Vertical Elasticity": 0.5,
+   "wf_Horizontal Elasticity": 0.5,
+   "wf_Surface Friction": 0.9499969482421875,
+   "wf_At End Of Path": "Ping-Pong",
+   "wf_Object To Follow": "",
+   "wf_Follow Offset": "",
+   "wf_Running Acceleration": 1.0,
+   "wf_Running Deceleration": 0.899993896484375,
+   "wf_Max Ground Speed": 10.0,
+   "wf_Turn Rate": 5.0,
+   "wf_Crawling Acceleration": 0.5,
+   "wf_Jumping Acceleration": 18.0,
+   "wf_Jumping Momentum Transfer": 0.5,
+   "wf_Air Acceleration": 1.0,
+   "wf_Horiz Air Drag": 0.25,
+   "wf_Vert Air Drag": 0.25,
+   "wf_Max Air Speed": 10.0,
+   "wf_Falling Acceleration": 9.80999755859375,
+   "wf_Fall Anim Threshold": 2.0,
+   "wf_Stun Threshold": 2.5,
+   "wf_Stun Duration": 1.0,
+   "wf__open_Toolset": false,
+   "wf_Tool A": "",
+   "wf_Tool B": "",
+   "wf_Tool C": "",
+   "wf_Tool D": "",
+   "wf_Tool E": "",
+   "wf_Tool F": "",
+   "wf__open_Common": false,
+   "wf_hp": 32767.0,
+   "wf_Number Of Local Mailboxes": 0,
+   "wf_Poof": "",
+   "wf_Is Needle Gun Target": "False",
+   "wf_Write To Mailbox On Death": 0,
+   "wf_Script Controls Input": "False",
+   "wf__open_Mesh": false,
+   "wf_Mesh Name": "",
+   "wf_Model Type": "None",
+   "wf_Animation Mailbox": 1,
+   "wf_Visibility Mailbox": 1,
+   "wf_Matte Type": "Color",
+   "wf_Background Color": 0,
+   "wf_Debug Background Color": 7829367,
+   "wf_Distance": 8000.0,
+   "wf_Tiles": "",
+   "wf_Map": "",
+   "wf_X Rotation Scale": 1.0,
+   "wf_Y Rotation Scale": 1.0,
+   "wf_generationType": "Pulse",
+   "wf_period": 0.149993896484375,
+   "wf_timeDelay": 0.0,
+   "wf_yArc": 1.0,
+   "wf_zArc": 1.0,
+   "wf_initialSphereRadius": 0.0999908447265625,
+   "wf_sphereExpansionRate": 0.0999908447265625,
+   "wf_nParticles": 1,
+   "wf_initialVelocity": 0.29998779296875,
+   "wf_initialAngleA": 0.0,
+   "wf_initialAngleB": 0.0,
+   "wf_initialAngleC": 0.0,
+   "wf_deltaAngleA": 0.0,
+   "wf_deltaAngleB": 0.0,
+   "wf_deltaAngleC": 0.0,
+   "wf_lifeTime": 2.0,
+   "wf_initialAlpha": 1.0,
+   "wf_alphaDecrement": 0.04998779296875,
+   "wf_Type": "None",
+   "wf_magnitude": 0.29998779296875,
+   "wf_vectorX": 0.0,
+   "wf_vectorY": 0.0,
+   "wf_vectorZ": 0.0,
+   "wf_forceType": "None",
+   "wf_magnitude2": 0.29998779296875,
+   "wf_vectorX2": 0.0,
+   "wf_vectorY2": 0.0,
+   "wf_vectorZ2": 0.0,
+   "wf__open_Shadow": false,
+   "wf_Shadow Object Template": "",
+   "wf_Check Below Only Once": "True",
+   "wf__open_Flags": false,
+   "wf_Template Object": "False",
+   "wf__open_Level Object": true,
+   "wf_Number Of Mailboxes": 101,
+   "wf_Number Of Scratch Mailboxes": 10,
+   "wf_Number Of Temporary Objects": 200,
+   "wf__open_Sound Effects Bank": false,
+   "wf_sfx0": "",
+   "wf_sfx1": "",
+   "wf_sfx2": "",
+   "wf_sfx3": "",
+   "wf_sfx4": "",
+   "wf_sfx5": "",
+   "wf_sfx6": "",
+   "wf_sfx7": "",
+   "wf_sfx8": "",
+   "wf_sfx9": "",
+   "wf_sfx10": "",
+   "wf_sfx11": "",
+   "wf_sfx12": "",
+   "wf_sfx13": "",
+   "wf_sfx14": "",
+   "wf_sfx15": "",
+   "wf_sfx16": "",
+   "wf_sfx17": "",
+   "wf_sfx18": "",
+   "wf_sfx19": "",
+   "wf_sfx20": "",
+   "wf_sfx21": "",
+   "wf_sfx22": "",
+   "wf_sfx23": "",
+   "wf_sfx24": "",
+   "wf_sfx25": "",
+   "wf_sfx26": "",
+   "wf_sfx27": "",
+   "wf_sfx28": "",
+   "wf_sfx29": "",
+   "wf_sfx30": "",
+   "wf_sfx31": "",
+   "wf_sfx32": "",
+   "wf_sfx33": "",
+   "wf_sfx34": "",
+   "wf_sfx35": "",
+   "wf_sfx36": "",
+   "wf_sfx37": "",
+   "wf_sfx38": "",
+   "wf_sfx39": "",
+   "wf_sfx40": "",
+   "wf_sfx41": "",
+   "wf_sfx42": "",
+   "wf_sfx43": "",
+   "wf_sfx44": "",
+   "wf_sfx45": "",
+   "wf_sfx46": "",
+   "wf_sfx47": "",
+   "wf_sfx48": "",
+   "wf_sfx49": "",
+   "wf_sfx50": "",
+   "wf_sfx51": "",
+   "wf_sfx52": "",
+   "wf_sfx53": "",
+   "wf_sfx54": "",
+   "wf_sfx55": "",
+   "wf_sfx56": "",
+   "wf_sfx57": "",
+   "wf_sfx58": "",
+   "wf_sfx59": "",
+   "wf_sfx60": "",
+   "wf_sfx61": "",
+   "wf_sfx62": "",
+   "wf_sfx63": "",
+   "wf_sfx64": "",
+   "wf_sfx65": "",
+   "wf_sfx66": "",
+   "wf_sfx67": "",
+   "wf_sfx68": "",
+   "wf_sfx69": "",
+   "wf_sfx70": "",
+   "wf_sfx71": "",
+   "wf_sfx72": "",
+   "wf_sfx73": "",
+   "wf_sfx74": "",
+   "wf_sfx75": "",
+   "wf_sfx76": "",
+   "wf_sfx77": "",
+   "wf_sfx78": "",
+   "wf_sfx79": "",
+   "wf_sfx80": "",
+   "wf_sfx81": "",
+   "wf_sfx82": "",
+   "wf_sfx83": "",
+   "wf_sfx84": "",
+   "wf_sfx85": "",
+   "wf_sfx86": "",
+   "wf_sfx87": "",
+   "wf_sfx88": "",
+   "wf_sfx89": "",
+   "wf_sfx90": "",
+   "wf_sfx91": "",
+   "wf_sfx92": "",
+   "wf_sfx93": "",
+   "wf_sfx94": "",
+   "wf_sfx95": "",
+   "wf_sfx96": "",
+   "wf_sfx97": "",
+   "wf_sfx98": "",
+   "wf_sfx99": "",
+   "wf_sfx100": "",
+   "wf_sfx101": "",
+   "wf_sfx102": "",
+   "wf_sfx103": "",
+   "wf_sfx104": "",
+   "wf_sfx105": "",
+   "wf_sfx106": "",
+   "wf_sfx107": "",
+   "wf_sfx108": "",
+   "wf_sfx109": "",
+   "wf_sfx110": "",
+   "wf_sfx111": "",
+   "wf_sfx112": "",
+   "wf_sfx113": "",
+   "wf_sfx114": "",
+   "wf_sfx115": "",
+   "wf_sfx116": "",
+   "wf_sfx117": "",
+   "wf_sfx118": "",
+   "wf_sfx119": "",
+   "wf_sfx120": "",
+   "wf_sfx121": "",
+   "wf_sfx122": "",
+   "wf_sfx123": "",
+   "wf_sfx124": "",
+   "wf_sfx125": "",
+   "wf_sfx126": "",
+   "wf_sfx127": "",
+   "wf_Sound Yon": 20.0,
+   "wf__open_Music": false,
+   "wf_MusicVh": "",
+   "wf_MusicVb": "",
+   "wf_MusicSeq": "",
+   "wf__open_Rendering": false,
+   "wf_Prewarm No Palette Program": "False",
+   "wf__open_Runtime Editing": false,
+   "wf_slopeA": 0.0,
+   "wf_slopeB": 0.0,
+   "wf_slopeC": 0.0,
+   "wf_slopeD": 0.0,
+   "wf_Cave Logic Studios Notes|": "",
+   "wf_Script": ""
+  },
+  "mesh": "levelobj_10",
+  "users": 1,
+  "triangles": 12,
+  "vertices": 8,
+  "dimensions": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "materials": [],
+  "images": []
+ },
+ {
+  "name": "LookAt",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   1.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/target.oad",
+  "props": {
+   "wf_original_mesh_name": "",
+   "wf_had_authored_bbox": true,
+   "wf_original_bbox": "<bpy id property array [6]>",
+   "wf_schema_path": "/src/wfsource/source/oas/target.oad",
+   "wf__open_Movement": false,
+   "wf_MovementClass": 3,
+   "wf_Mobility": "Anchored",
+   "wf_Mass": 0.0,
+   "wf_Moves Between Rooms": "False",
+   "wf_Movement Mailbox": 1,
+   "wf_Step Size": 0.54998779296875,
+   "wf_Vertical Elasticity": 0.5,
+   "wf_Horizontal Elasticity": 0.5,
+   "wf_Surface Friction": 0.9499969482421875,
+   "wf_At End Of Path": "Ping-Pong",
+   "wf_Object To Follow": "",
+   "wf_Follow Offset": "",
+   "wf_Running Acceleration": 1.0,
+   "wf_Running Deceleration": 0.899993896484375,
+   "wf_Max Ground Speed": 10.0,
+   "wf_Turn Rate": 5.0,
+   "wf_Crawling Acceleration": 0.5,
+   "wf_Jumping Acceleration": 18.0,
+   "wf_Jumping Momentum Transfer": 0.5,
+   "wf_Air Acceleration": 1.0,
+   "wf_Horiz Air Drag": 0.25,
+   "wf_Vert Air Drag": 0.25,
+   "wf_Max Air Speed": 10.0,
+   "wf_Falling Acceleration": 9.80999755859375,
+   "wf_Fall Anim Threshold": 2.0,
+   "wf_Stun Threshold": 2.5,
+   "wf_Stun Duration": 1.0,
+   "wf__open_Toolset": false,
+   "wf_Tool A": "",
+   "wf_Tool B": "",
+   "wf_Tool C": "",
+   "wf_Tool D": "",
+   "wf_Tool E": "",
+   "wf_Tool F": "",
+   "wf__open_Common": false,
+   "wf_hp": 32767.0,
+   "wf_Number Of Local Mailboxes": 0,
+   "wf_Poof": "",
+   "wf_Is Needle Gun Target": "False",
+   "wf_Write To Mailbox On Death": 0,
+   "wf_Script Controls Input": "False",
+   "wf__open_Mesh": false,
+   "wf_Mesh Name": "",
+   "wf_Model Type": "None",
+   "wf_Animation Mailbox": 1,
+   "wf_Visibility Mailbox": 1,
+   "wf_Matte Type": "Color",
+   "wf_Background Color": 0,
+   "wf_Debug Background Color": 7829367,
+   "wf_Distance": 8000.0,
+   "wf_Tiles": "",
+   "wf_Map": "",
+   "wf_X Rotation Scale": 1.0,
+   "wf_Y Rotation Scale": 1.0,
+   "wf_generationType": "Pulse",
+   "wf_period": 0.149993896484375,
+   "wf_timeDelay": 0.0,
+   "wf_yArc": 1.0,
+   "wf_zArc": 1.0,
+   "wf_initialSphereRadius": 0.0999908447265625,
+   "wf_sphereExpansionRate": 0.0999908447265625,
+   "wf_nParticles": 1,
+   "wf_initialVelocity": 0.29998779296875,
+   "wf_initialAngleA": 0.0,
+   "wf_initialAngleB": 0.0,
+   "wf_initialAngleC": 0.0,
+   "wf_deltaAngleA": 0.0,
+   "wf_deltaAngleB": 0.0,
+   "wf_deltaAngleC": 0.0,
+   "wf_lifeTime": 2.0,
+   "wf_initialAlpha": 1.0,
+   "wf_alphaDecrement": 0.04998779296875,
+   "wf_Type": "None",
+   "wf_magnitude": 0.29998779296875,
+   "wf_vectorX": 0.0,
+   "wf_vectorY": 0.0,
+   "wf_vectorZ": 0.0,
+   "wf_forceType": "None",
+   "wf_magnitude2": 0.29998779296875,
+   "wf_vectorX2": 0.0,
+   "wf_vectorY2": 0.0,
+   "wf_vectorZ2": 0.0,
+   "wf__open_Shadow": false,
+   "wf_Shadow Object Template": "",
+   "wf_Check Below Only Once": "True",
+   "wf__open_Flags": false,
+   "wf_Template Object": "False",
+   "wf_slopeA": 0.0,
+   "wf_slopeB": 0.0,
+   "wf_slopeC": 0.0,
+   "wf_slopeD": 0.0,
+   "wf_Cave Logic Studios Notes|": "",
+   "wf_Script": ""
+  },
+  "mesh": "target_13",
+  "users": 1,
+  "triangles": 12,
+  "vertices": 8,
+  "dimensions": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "materials": [],
+  "images": []
+ },
+ {
+  "name": "lower_lane",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "lower_lane.iff",
+   "wf_original_mesh_name": "lower_lane.iff"
+  },
+  "mesh": "lower_lane",
+  "users": 1,
+  "triangles": 192,
+  "vertices": 194,
+  "dimensions": [
+   24.9797,
+   12.1025,
+   1.1685
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "main_lane",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "main_lane.iff",
+   "wf_original_mesh_name": "main_lane.iff"
+  },
+  "mesh": "main_lane",
+  "users": 1,
+  "triangles": 160,
+  "vertices": 162,
+  "dimensions": [
+   28.9589,
+   4.7522,
+   0.8876
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "Matte",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   -20.0,
+   1.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/matte.oad",
+  "props": {
+   "wf_original_mesh_name": "",
+   "wf_had_authored_bbox": true,
+   "wf_original_bbox": "<bpy id property array [6]>",
+   "wf_schema_path": "/src/wfsource/source/oas/matte.oad",
+   "wf__open_Movement": false,
+   "wf_MovementClass": 11,
+   "wf_Mobility": "Anchored",
+   "wf_Mass": 0.0,
+   "wf_Moves Between Rooms": "False",
+   "wf_Movement Mailbox": 1,
+   "wf_Step Size": 0.54998779296875,
+   "wf_Vertical Elasticity": 0.5,
+   "wf_Horizontal Elasticity": 0.5,
+   "wf_Surface Friction": 0.9499969482421875,
+   "wf_At End Of Path": "Ping-Pong",
+   "wf_Object To Follow": "",
+   "wf_Follow Offset": "",
+   "wf_Running Acceleration": 1.0,
+   "wf_Running Deceleration": 0.899993896484375,
+   "wf_Max Ground Speed": 10.0,
+   "wf_Turn Rate": 5.0,
+   "wf_Crawling Acceleration": 0.5,
+   "wf_Jumping Acceleration": 18.0,
+   "wf_Jumping Momentum Transfer": 0.5,
+   "wf_Air Acceleration": 1.0,
+   "wf_Horiz Air Drag": 0.25,
+   "wf_Vert Air Drag": 0.25,
+   "wf_Max Air Speed": 10.0,
+   "wf_Falling Acceleration": 9.80999755859375,
+   "wf_Fall Anim Threshold": 2.0,
+   "wf_Stun Threshold": 2.5,
+   "wf_Stun Duration": 1.0,
+   "wf__open_Toolset": false,
+   "wf_Tool A": "",
+   "wf_Tool B": "",
+   "wf_Tool C": "",
+   "wf_Tool D": "",
+   "wf_Tool E": "",
+   "wf_Tool F": "",
+   "wf__open_Common": false,
+   "wf_hp": 32767.0,
+   "wf_Number Of Local Mailboxes": 0,
+   "wf_Poof": "",
+   "wf_Is Needle Gun Target": "False",
+   "wf_Write To Mailbox On Death": 0,
+   "wf_Script Controls Input": "False",
+   "wf__open_Mesh": false,
+   "wf_Mesh Name": "",
+   "wf_Model Type": "None",
+   "wf_Animation Mailbox": 1,
+   "wf_Visibility Mailbox": 1,
+   "wf_Matte Type": "Color",
+   "wf_Background Color": 725269,
+   "wf_Debug Background Color": 0,
+   "wf_Distance": 8000.0,
+   "wf_Tiles": "",
+   "wf_Map": "",
+   "wf_X Rotation Scale": 1.0,
+   "wf_Y Rotation Scale": 1.0,
+   "wf_generationType": "Pulse",
+   "wf_period": 0.149993896484375,
+   "wf_timeDelay": 0.0,
+   "wf_yArc": 1.0,
+   "wf_zArc": 1.0,
+   "wf_initialSphereRadius": 0.0999908447265625,
+   "wf_sphereExpansionRate": 0.0999908447265625,
+   "wf_nParticles": 1,
+   "wf_initialVelocity": 0.29998779296875,
+   "wf_initialAngleA": 0.0,
+   "wf_initialAngleB": 0.0,
+   "wf_initialAngleC": 0.0,
+   "wf_deltaAngleA": 0.0,
+   "wf_deltaAngleB": 0.0,
+   "wf_deltaAngleC": 0.0,
+   "wf_lifeTime": 2.0,
+   "wf_initialAlpha": 1.0,
+   "wf_alphaDecrement": 0.04998779296875,
+   "wf_Type": "None",
+   "wf_magnitude": 0.29998779296875,
+   "wf_vectorX": 0.0,
+   "wf_vectorY": 0.0,
+   "wf_vectorZ": 0.0,
+   "wf_forceType": "None",
+   "wf_magnitude2": 0.29998779296875,
+   "wf_vectorX2": 0.0,
+   "wf_vectorY2": 0.0,
+   "wf_vectorZ2": 0.0,
+   "wf__open_Shadow": false,
+   "wf_Shadow Object Template": "",
+   "wf_Check Below Only Once": "True",
+   "wf__open_Flags": false,
+   "wf_Template Object": "False",
+   "wf__open_Matte": true,
+   "wf_slopeA": 0.0,
+   "wf_slopeB": 0.0,
+   "wf_slopeC": 0.0,
+   "wf_slopeD": 0.0,
+   "wf_Cave Logic Studios Notes|": "",
+   "wf_Script": ""
+  },
+  "mesh": "matte_11",
+  "users": 1,
+  "triangles": 12,
+  "vertices": 8,
+  "dimensions": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "materials": [],
+  "images": []
+ },
+ {
+  "name": "minute_hand",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   -1.1,
+   4.2688
+  ],
+  "rotation_deg": [
+   0.0,
+   48.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "minute_hand.iff",
+   "wf_original_mesh_name": "minute_hand.iff"
+  },
+  "mesh": "Cube.005",
+  "users": 1,
+  "triangles": 12,
+  "vertices": 8,
+  "dimensions": [
+   0.055,
+   0.03,
+   0.38
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "pine_01",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -13.0,
+   3.0,
+   0.5794
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   0.9,
+   0.9,
+   0.9
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "pine_tree.iff",
+   "wf_original_mesh_name": "pine_tree.iff"
+  },
+  "mesh": "Cylinder",
+  "users": 12,
+  "triangles": 1804,
+  "vertices": 984,
+  "dimensions": [
+   1.836,
+   1.836,
+   3.3795
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "pine_02",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -10.0,
+   6.6,
+   1.2211
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   31.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "pine_tree.iff",
+   "wf_original_mesh_name": "pine_tree.iff"
+  },
+  "mesh": "Cylinder",
+  "users": 12,
+  "triangles": 1804,
+  "vertices": 984,
+  "dimensions": [
+   2.04,
+   2.04,
+   3.755
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "pine_03",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -5.0,
+   7.5,
+   0.7206
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   62.0
+  ],
+  "scale": [
+   0.8,
+   0.8,
+   0.8
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "pine_tree.iff",
+   "wf_original_mesh_name": "pine_tree.iff"
+  },
+  "mesh": "Cylinder",
+  "users": 12,
+  "triangles": 1804,
+  "vertices": 984,
+  "dimensions": [
+   1.632,
+   1.632,
+   3.004
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "pine_04",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -1.0,
+   4.1,
+   0.3851
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   93.0
+  ],
+  "scale": [
+   0.7,
+   0.7,
+   0.7
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "pine_tree.iff",
+   "wf_original_mesh_name": "pine_tree.iff"
+  },
+  "mesh": "Cylinder",
+  "users": 12,
+  "triangles": 1804,
+  "vertices": 984,
+  "dimensions": [
+   1.428,
+   1.428,
+   2.6285
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "pine_05",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   4.0,
+   6.7,
+   0.8062
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   124.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "pine_tree.iff",
+   "wf_original_mesh_name": "pine_tree.iff"
+  },
+  "mesh": "Cylinder",
+  "users": 12,
+  "triangles": 1804,
+  "vertices": 984,
+  "dimensions": [
+   2.04,
+   2.04,
+   3.755
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "pine_06",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   9.0,
+   7.0,
+   1.0711
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   155.0
+  ],
+  "scale": [
+   0.9,
+   0.9,
+   0.9
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "pine_tree.iff",
+   "wf_original_mesh_name": "pine_tree.iff"
+  },
+  "mesh": "Cylinder",
+  "users": 12,
+  "triangles": 1804,
+  "vertices": 984,
+  "dimensions": [
+   1.836,
+   1.836,
+   3.3795
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "pine_07",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   13.0,
+   3.0,
+   0.5098
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   186.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "pine_tree.iff",
+   "wf_original_mesh_name": "pine_tree.iff"
+  },
+  "mesh": "Cylinder",
+  "users": 12,
+  "triangles": 1804,
+  "vertices": 984,
+  "dimensions": [
+   2.04,
+   2.04,
+   3.755
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "pine_08",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -13.0,
+   -2.0,
+   0.3945
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   217.0
+  ],
+  "scale": [
+   0.9,
+   0.9,
+   0.9
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "pine_tree.iff",
+   "wf_original_mesh_name": "pine_tree.iff"
+  },
+  "mesh": "Cylinder",
+  "users": 12,
+  "triangles": 1804,
+  "vertices": 984,
+  "dimensions": [
+   1.836,
+   1.836,
+   3.3795
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "pine_09",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -12.0,
+   -6.0,
+   0.2867
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   248.0
+  ],
+  "scale": [
+   0.8,
+   0.8,
+   0.8
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "pine_tree.iff",
+   "wf_original_mesh_name": "pine_tree.iff"
+  },
+  "mesh": "Cylinder",
+  "users": 12,
+  "triangles": 1804,
+  "vertices": 984,
+  "dimensions": [
+   1.632,
+   1.632,
+   3.004
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "pine_10",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -5.0,
+   -6.3,
+   0.154
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   279.0
+  ],
+  "scale": [
+   0.8,
+   0.8,
+   0.8
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "pine_tree.iff",
+   "wf_original_mesh_name": "pine_tree.iff"
+  },
+  "mesh": "Cylinder",
+  "users": 12,
+  "triangles": 1804,
+  "vertices": 984,
+  "dimensions": [
+   1.632,
+   1.632,
+   3.004
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "pine_11",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   12.0,
+   -5.0,
+   0.3164
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   310.0
+  ],
+  "scale": [
+   0.9,
+   0.9,
+   0.9
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "pine_tree.iff",
+   "wf_original_mesh_name": "pine_tree.iff"
+  },
+  "mesh": "Cylinder",
+  "users": 12,
+  "triangles": 1804,
+  "vertices": 984,
+  "dimensions": [
+   1.836,
+   1.836,
+   3.3795
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "pine_12",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   4.0,
+   -7.0,
+   0.1559
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   341.0
+  ],
+  "scale": [
+   0.8,
+   0.8,
+   0.8
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "pine_tree.iff",
+   "wf_original_mesh_name": "pine_tree.iff"
+  },
+  "mesh": "Cylinder",
+  "users": 12,
+  "triangles": 1804,
+  "vertices": 984,
+  "dimensions": [
+   1.632,
+   1.632,
+   3.004
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "Player",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   -3.0,
+   1.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 2002,
+  "schema": "/src/wfsource/source/oas/player.oad",
+  "props": {
+   "wf_original_mesh_name": "player.iff",
+   "wf_had_authored_bbox": true,
+   "wf_original_bbox": "<bpy id property array [6]>",
+   "wf_schema_path": "/src/wfsource/source/oas/player.oad",
+   "wf__open_Movement": false,
+   "wf_MovementClass": 22,
+   "wf_Mobility": "Physics",
+   "wf_Mass": 0.0,
+   "wf_Moves Between Rooms": "True",
+   "wf_Movement Mailbox": 1,
+   "wf_Step Size": 0.25,
+   "wf_Vertical Elasticity": 0.0,
+   "wf_Horizontal Elasticity": 0.5,
+   "wf_Surface Friction": 0.9499969482421875,
+   "wf_At End Of Path": "Ping-Pong",
+   "wf_Object To Follow": "",
+   "wf_Follow Offset": "",
+   "wf_Running Acceleration": 15.0,
+   "wf_Running Deceleration": 0.899993896484375,
+   "wf_Max Ground Speed": 15.0,
+   "wf_Turn Rate": 0.25,
+   "wf_Crawling Acceleration": 0.5,
+   "wf_Jumping Acceleration": 40.0,
+   "wf_Jumping Momentum Transfer": 0.5,
+   "wf_Air Acceleration": 10.0,
+   "wf_Horiz Air Drag": 0.0,
+   "wf_Vert Air Drag": 0.0,
+   "wf_Max Air Speed": 12.0,
+   "wf_Falling Acceleration": 9.79998779296875,
+   "wf_Fall Anim Threshold": 2.0,
+   "wf_Stun Threshold": 2.5,
+   "wf_Stun Duration": 1.0,
+   "wf__open_Toolset": false,
+   "wf_Tool A": "",
+   "wf_Tool B": "",
+   "wf_Tool C": "",
+   "wf_Tool D": "",
+   "wf_Tool E": "",
+   "wf_Tool F": "",
+   "wf__open_Common": false,
+   "wf_hp": 32767.0,
+   "wf_Number Of Local Mailboxes": 6,
+   "wf_Poof": "",
+   "wf_Is Needle Gun Target": "False",
+   "wf_Write To Mailbox On Death": 0,
+   "wf_Script Controls Input": "True",
+   "wf__open_Mesh": false,
+   "wf_Mesh Name": "",
+   "wf_Model Type": "None",
+   "wf_Animation Mailbox": 1,
+   "wf_Visibility Mailbox": 2002,
+   "wf_Matte Type": "Color",
+   "wf_Background Color": 0,
+   "wf_Debug Background Color": 7829367,
+   "wf_Distance": 8000.0,
+   "wf_Tiles": "",
+   "wf_Map": "",
+   "wf_X Rotation Scale": 1.0,
+   "wf_Y Rotation Scale": 1.0,
+   "wf_generationType": "Pulse",
+   "wf_period": 0.149993896484375,
+   "wf_timeDelay": 0.0,
+   "wf_yArc": 1.0,
+   "wf_zArc": 1.0,
+   "wf_initialSphereRadius": 0.0999908447265625,
+   "wf_sphereExpansionRate": 0.0999908447265625,
+   "wf_nParticles": 1,
+   "wf_initialVelocity": 0.29998779296875,
+   "wf_initialAngleA": 0.0,
+   "wf_initialAngleB": 0.0,
+   "wf_initialAngleC": 0.0,
+   "wf_deltaAngleA": 0.0,
+   "wf_deltaAngleB": 0.0,
+   "wf_deltaAngleC": 0.0,
+   "wf_lifeTime": 2.0,
+   "wf_initialAlpha": 1.0,
+   "wf_alphaDecrement": 0.04998779296875,
+   "wf_Type": "None",
+   "wf_magnitude": 0.29998779296875,
+   "wf_vectorX": 0.0,
+   "wf_vectorY": 0.0,
+   "wf_vectorZ": 0.0,
+   "wf_forceType": "None",
+   "wf_magnitude2": 0.29998779296875,
+   "wf_vectorX2": 0.0,
+   "wf_vectorY2": 0.0,
+   "wf_vectorZ2": 0.0,
+   "wf__open_Shadow": false,
+   "wf_Shadow Object Template": "",
+   "wf_Check Below Only Once": "True",
+   "wf__open_Flags": false,
+   "wf_Template Object": "False",
+   "wf__open_Player": true,
+   "wf_Script": "",
+   "wf_slopeA": 0.0,
+   "wf_slopeB": 0.0,
+   "wf_slopeC": 0.0,
+   "wf_slopeD": -0.0,
+   "wf_Cave Logic Studios Notes|": ""
+  },
+  "mesh": "player_33",
+  "users": 1,
+  "triangles": 12,
+  "vertices": 8,
+  "dimensions": [
+   0.5,
+   0.5,
+   2.5
+  ],
+  "materials": [
+   "player_33_mat0"
+  ],
+  "images": []
+ },
+ {
+  "name": "rolling_terrain",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "rolling_terrain.iff",
+   "wf_original_mesh_name": "rolling_terrain.iff"
+  },
+  "mesh": "rolling_terrain",
+  "users": 1,
+  "triangles": 1472,
+  "vertices": 769,
+  "dimensions": [
+   32.5197,
+   20.2023,
+   1.169
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "Room",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": null,
+  "schema": "/src/wfsource/source/oas/room.oad",
+  "props": {
+   "wf_original_mesh_name": "",
+   "wf_had_authored_bbox": true,
+   "wf_original_bbox": "<bpy id property array [6]>",
+   "wf_schema_path": "/src/wfsource/source/oas/room.oad",
+   "wf__open_Common": false,
+   "wf_hp": 32767.0,
+   "wf_Number Of Local Mailboxes": 0,
+   "wf_Poof": "",
+   "wf_Is Needle Gun Target": "False",
+   "wf_Write To Mailbox On Death": 0,
+   "wf_Script Controls Input": "False",
+   "wf__open_Room": true,
+   "wf_Adjacent Room 1": "",
+   "wf_Adjacent Room 2": "",
+   "wf_Room Loaded Mailbox": 0,
+   "wf_slopeA": 0.0,
+   "wf_slopeB": 0.0,
+   "wf_slopeC": 0.0,
+   "wf_slopeD": 0.0,
+   "wf_Cave Logic Studios Notes|": "",
+   "wf_Mass": 0.0,
+   "wf_Model Type": "None",
+   "wf_Script": ""
+  },
+  "mesh": "room_6",
+  "users": 1,
+  "triangles": 12,
+  "vertices": 8,
+  "dimensions": [
+   185.3892,
+   154.8,
+   103.2
+  ],
+  "materials": [],
+  "images": []
+ },
+ {
+  "name": "stream",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "stream.iff",
+   "wf_original_mesh_name": "stream.iff"
+  },
+  "mesh": "stream",
+  "users": 1,
+  "triangles": 80,
+  "vertices": 82,
+  "dimensions": [
+   7.9633,
+   3.0235,
+   0.284
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "SunLight",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   -20.0,
+   1.0
+  ],
+  "rotation_deg": [
+   0.0,
+   40.0,
+   90.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 0,
+  "schema": "/src/wfsource/source/oas/light.oad",
+  "props": {
+   "wf_original_mesh_name": "",
+   "wf_had_authored_bbox": true,
+   "wf_original_bbox": "<bpy id property array [6]>",
+   "wf_schema_path": "/src/wfsource/source/oas/light.oad",
+   "wf__open_Movement": false,
+   "wf_MovementClass": 23,
+   "wf_Mobility": "Anchored",
+   "wf_Mass": 0.0,
+   "wf_Moves Between Rooms": "False",
+   "wf_Movement Mailbox": 1,
+   "wf_Step Size": 0.54998779296875,
+   "wf_Vertical Elasticity": 0.5,
+   "wf_Horizontal Elasticity": 0.5,
+   "wf_Surface Friction": 0.9499969482421875,
+   "wf_At End Of Path": "Ping-Pong",
+   "wf_Object To Follow": "",
+   "wf_Follow Offset": "",
+   "wf_Running Acceleration": 1.0,
+   "wf_Running Deceleration": 0.899993896484375,
+   "wf_Max Ground Speed": 10.0,
+   "wf_Turn Rate": 5.0,
+   "wf_Crawling Acceleration": 0.5,
+   "wf_Jumping Acceleration": 18.0,
+   "wf_Jumping Momentum Transfer": 0.5,
+   "wf_Air Acceleration": 1.0,
+   "wf_Horiz Air Drag": 0.25,
+   "wf_Vert Air Drag": 0.25,
+   "wf_Max Air Speed": 10.0,
+   "wf_Falling Acceleration": 9.80999755859375,
+   "wf_Fall Anim Threshold": 2.0,
+   "wf_Stun Threshold": 2.5,
+   "wf_Stun Duration": 1.0,
+   "wf__open_Toolset": false,
+   "wf_Tool A": "",
+   "wf_Tool B": "",
+   "wf_Tool C": "",
+   "wf_Tool D": "",
+   "wf_Tool E": "",
+   "wf_Tool F": "",
+   "wf__open_Common": false,
+   "wf_hp": 32767.0,
+   "wf_Number Of Local Mailboxes": 0,
+   "wf_Poof": "",
+   "wf_Is Needle Gun Target": "False",
+   "wf_Write To Mailbox On Death": 0,
+   "wf_Script Controls Input": "False",
+   "wf__open_Mesh": false,
+   "wf_Mesh Name": "",
+   "wf_Model Type": "None",
+   "wf_Animation Mailbox": 1,
+   "wf_Visibility Mailbox": 0,
+   "wf_Matte Type": "Color",
+   "wf_Background Color": 0,
+   "wf_Debug Background Color": 7829367,
+   "wf_Distance": 8000.0,
+   "wf_Tiles": "",
+   "wf_Map": "",
+   "wf_X Rotation Scale": 1.0,
+   "wf_Y Rotation Scale": 1.0,
+   "wf_generationType": "Pulse",
+   "wf_period": 0.149993896484375,
+   "wf_timeDelay": 0.0,
+   "wf_yArc": 1.0,
+   "wf_zArc": 1.0,
+   "wf_initialSphereRadius": 0.0999908447265625,
+   "wf_sphereExpansionRate": 0.0999908447265625,
+   "wf_nParticles": 1,
+   "wf_initialVelocity": 0.29998779296875,
+   "wf_initialAngleA": 0.0,
+   "wf_initialAngleB": 0.0,
+   "wf_initialAngleC": 0.0,
+   "wf_deltaAngleA": 0.0,
+   "wf_deltaAngleB": 0.0,
+   "wf_deltaAngleC": 0.0,
+   "wf_lifeTime": 2.0,
+   "wf_initialAlpha": 1.0,
+   "wf_alphaDecrement": 0.04998779296875,
+   "wf_Type": "None",
+   "wf_magnitude": 0.29998779296875,
+   "wf_vectorX": 0.0,
+   "wf_vectorY": 0.0,
+   "wf_vectorZ": 0.0,
+   "wf_forceType": "None",
+   "wf_magnitude2": 0.29998779296875,
+   "wf_vectorX2": 0.0,
+   "wf_vectorY2": 0.0,
+   "wf_vectorZ2": 0.0,
+   "wf__open_Shadow": false,
+   "wf_Shadow Object Template": "",
+   "wf_Check Below Only Once": "True",
+   "wf__open_Flags": false,
+   "wf_Template Object": "False",
+   "wf__open_Light": true,
+   "wf_lightRed": 0.8,
+   "wf_lightGreen": 0.78,
+   "wf_lightBlue": 0.72,
+   "wf_lightX": 0.0,
+   "wf_lightY": 0.0,
+   "wf_lightZ": 0.0,
+   "wf_lightType": "Directional",
+   "wf_slopeA": 0.0,
+   "wf_slopeB": 0.0,
+   "wf_slopeC": 0.0,
+   "wf_slopeD": 0.0,
+   "wf_Cave Logic Studios Notes|": "",
+   "wf_Script": ""
+  },
+  "mesh": "light_7",
+  "users": 2,
+  "triangles": 12,
+  "vertices": 8,
+  "dimensions": [
+   0.25,
+   0.25,
+   0.25
+  ],
+  "materials": [],
+  "images": []
+ },
+ {
+  "name": "tower_bird",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   -1.27,
+   4.7888
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 213,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 213,
+   "wf_Mesh Name": "tower_bird.iff",
+   "wf_original_mesh_name": "tower_bird.iff"
+  },
+  "mesh": "tower_bird",
+  "users": 1,
+  "triangles": 492,
+  "vertices": 280,
+  "dimensions": [
+   0.3743,
+   0.2,
+   0.27
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "tower_carved_panel",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "tower_carved_panel.iff",
+   "wf_original_mesh_name": "tower_carved_panel.iff"
+  },
+  "mesh": "tower_carved_panel",
+  "users": 1,
+  "triangles": 2,
+  "vertices": 4,
+  "dimensions": [
+   2.14,
+   0.0,
+   1.15
+  ],
+  "materials": [
+   "tower_carved_wood"
+  ],
+  "images": [
+   "tower-carved-wood.tga"
+  ]
+ },
+ {
+  "name": "tower_case",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "tower_case.iff",
+   "wf_original_mesh_name": "tower_case.iff"
+  },
+  "mesh": "tower_case",
+  "users": 1,
+  "triangles": 14078,
+  "vertices": 8627,
+  "dimensions": [
+   3.3,
+   3.275,
+   7.33
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "tower_figure_1",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -0.87,
+   -1.61,
+   2.6888
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 231,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 231,
+   "wf_Mesh Name": "tower_figure_1.iff",
+   "wf_original_mesh_name": "tower_figure_1.iff"
+  },
+  "mesh": "tower_figure_1",
+  "users": 1,
+  "triangles": 1364,
+  "vertices": 780,
+  "dimensions": [
+   0.42,
+   0.36,
+   0.795
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "tower_figure_2",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -0.29,
+   -1.61,
+   2.6888
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 231,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 231,
+   "wf_Mesh Name": "tower_figure_2.iff",
+   "wf_original_mesh_name": "tower_figure_2.iff"
+  },
+  "mesh": "tower_figure_2",
+  "users": 1,
+  "triangles": 1228,
+  "vertices": 704,
+  "dimensions": [
+   0.42,
+   0.28,
+   0.91
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "tower_figure_3",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.29,
+   -1.61,
+   2.6888
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 231,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 231,
+   "wf_Mesh Name": "tower_figure_3.iff",
+   "wf_original_mesh_name": "tower_figure_3.iff"
+  },
+  "mesh": "tower_figure_3",
+  "users": 1,
+  "triangles": 1364,
+  "vertices": 780,
+  "dimensions": [
+   0.42,
+   0.36,
+   0.795
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "tower_figure_4",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.87,
+   -1.61,
+   2.6888
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 231,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 231,
+   "wf_Mesh Name": "tower_figure_4.iff",
+   "wf_original_mesh_name": "tower_figure_4.iff"
+  },
+  "mesh": "tower_figure_4",
+  "users": 1,
+  "triangles": 1228,
+  "vertices": 704,
+  "dimensions": [
+   0.42,
+   0.32,
+   0.88
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "tower_figure_b1",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -0.87,
+   -1.61,
+   2.6888
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 230,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 230,
+   "wf_Mesh Name": "tower_figure_b1.iff",
+   "wf_original_mesh_name": "tower_figure_b1.iff"
+  },
+  "mesh": "tower_figure_b1",
+  "users": 1,
+  "triangles": 640,
+  "vertices": 402,
+  "dimensions": [
+   0.42,
+   0.2291,
+   1.045
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "tower_figure_b2",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   -0.29,
+   -1.61,
+   2.6888
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 230,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 230,
+   "wf_Mesh Name": "tower_figure_b2.iff",
+   "wf_original_mesh_name": "tower_figure_b2.iff"
+  },
+  "mesh": "tower_figure_b2",
+  "users": 1,
+  "triangles": 1016,
+  "vertices": 600,
+  "dimensions": [
+   0.45,
+   0.39,
+   0.855
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "tower_figure_b3",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.29,
+   -1.61,
+   2.6888
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 230,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 230,
+   "wf_Mesh Name": "tower_figure_b3.iff",
+   "wf_original_mesh_name": "tower_figure_b3.iff"
+  },
+  "mesh": "tower_figure_b3",
+  "users": 1,
+  "triangles": 644,
+  "vertices": 386,
+  "dimensions": [
+   0.42,
+   0.3234,
+   0.89
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "tower_figure_b4",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.87,
+   -1.61,
+   2.6888
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 230,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 230,
+   "wf_Mesh Name": "tower_figure_b4.iff",
+   "wf_original_mesh_name": "tower_figure_b4.iff"
+  },
+  "mesh": "tower_figure_b4",
+  "users": 1,
+  "triangles": 948,
+  "vertices": 578,
+  "dimensions": [
+   0.538,
+   0.3242,
+   0.835
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "village_square",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "village_square.iff",
+   "wf_original_mesh_name": "village_square.iff"
+  },
+  "mesh": "village_square",
+  "users": 1,
+  "triangles": 6,
+  "vertices": 8,
+  "dimensions": [
+   4.1,
+   2.6,
+   0.0583
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ },
+ {
+  "name": "wooden_base",
+  "type": "MESH",
+  "parent": null,
+  "location": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "rotation_deg": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "scale": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "mailbox": 1,
+  "schema": "/src/wfsource/source/oas/platform.oad",
+  "props": {
+   "wf_schema_path": "/src/wfsource/source/oas/platform.oad",
+   "wf_Mobility": "Anchored",
+   "wf_Model Type": "Mesh",
+   "wf_Mass": 0.0,
+   "wf_Visibility Mailbox": 1,
+   "wf_Mesh Name": "wooden_base.iff",
+   "wf_original_mesh_name": "wooden_base.iff"
+  },
+  "mesh": "wooden_base",
+  "users": 1,
+  "triangles": 128,
+  "vertices": 128,
+  "dimensions": [
+   32.5197,
+   20.2023,
+   1.7074
+  ],
+  "materials": [
+   "village_atlas"
+  ],
+  "images": [
+   "village_atlas.tga"
+  ]
+ }
+]

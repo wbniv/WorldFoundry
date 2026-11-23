@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=1440"><title>Mockup: flicker schedule</title><style>
+:root{--bg:#0e1218;--panel:#161c25;--line:#2c3644;--fg:#e8ecf2;--mut:#9aa6b6;--a:#ffb454;--b:#5cc8ff;--ok:#8cdc96;--cream:#efe3c0;--pine:#1f4a35}
+*{box-sizing:border-box}body{margin:0;width:1440px;height:900px;overflow:hidden;background:var(--bg);color:var(--fg);font:15px/1.45 ui-sans-serif,system-ui,sans-serif}
+h1{font-size:24px;margin:0}h2{font-size:15px;margin:0 0 8px;color:var(--mut);font-weight:600;letter-spacing:.02em}.wrap{padding:22px 30px}
+.sub{color:var(--mut);margin:2px 0 14px}.grid{display:grid;gap:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+table{border-collapse:collapse;width:100%}td,th{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}th{color:var(--mut);font-weight:600}
+.a{color:var(--a)}.b{color:var(--b)}code{font:13px ui-monospace,monospace;color:var(--cream)}label{color:var(--mut);font-size:14px}
+input[type=range]{width:200px;vertical-align:middle}button{background:var(--line);color:var(--fg);border:0;border-radius:6px;padding:5px 12px;font:inherit;cursor:pointer}
+.k{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+</style></head><body><div class="wrap">
+<h1>The flicker rule, run live</h1>
+<p class="sub">Each of the 24 groups (12 trees x 2) flips between shape 1 and shape 2 when <code>sin(2&pi;(2.3 t + p)) + sin(2&pi;(3.7 t + 2p)) &gt; 0</code>, with its own phase <code>p</code>. Gold = shape 1, blue = shape 2. The ruler is the 30 fps frame the Chromecast shows.</p>
+<div class="card"><canvas id="c" width="1370" height="372" style="width:100%"></canvas>
+<div style="margin-top:8px"><button id="pp">Pause</button>&nbsp; <label>speed <input id="sp" type="range" min="0" max="2" step="0.05" value="1"></label>&nbsp;&nbsp;<label>frame rate <select id="fr"><option>30</option><option>60</option><option>15</option></select> fps</label>
+&nbsp;&nbsp;<span id="info" style="color:var(--mut)"></span></div></div>
+<div class="grid" style="grid-template-columns:1fr 1fr 1fr;margin-top:16px">
+<div class="card"><h2>One tree, three frames 100 ms apart</h2><canvas id="f" width="400" height="200" style="width:100%"></canvas><p class="sub" style="margin:4px 0 0">the same ten candles, flames drawn 3 times their size; the two sides do not move together</p></div>
+<div class="card"><h2>How big a flame is on the screen (1080p, 60&deg; view)</h2><canvas id="px" width="400" height="200" style="width:100%"></canvas><p class="sub" style="margin:4px 0 0" id="pxn"></p></div>
+<div class="card"><h2>What the numbers say</h2><table id="st"></table></div></div></div>
+<script>
+const F1=2.3,F2=3.7,PHI=0.618034,N=12,STILL=location.hash==='#still';
+const ph=(i,g)=>((2*i+g)*PHI)%1,shp=(t,i,g)=>{const p=ph(i,g);return Math.sin(6.283185*(F1*t+p))+Math.sin(6.283185*(F2*t+2*p))>0?1:2};
+const c=document.getElementById('c'),x=c.getContext('2d'),W=c.width,H=c.height,SPAN=4,L=60,GOLD='#ffb454',BLUE='#5cc8ff';
+let t0=STILL?0:null,t=STILL?0.0:0,run=!STILL,speed=1,fps=30;
+function draw(now){x.clearRect(0,0,W,H);x.font='12px ui-sans-serif';x.fillStyle='#9aa6b6';const rows=24,rh=(H-26)/rows;
+ for(let r=0;r<rows;r++){const i=r>>1,g=r&1,y=r*rh+4;x.fillStyle='#9aa6b6';if(!g)x.fillText('tree '+(i+1),4,y+rh*1.1);
+  for(let px=0;px<W-L;px++){const tt=t+px/(W-L)*SPAN-SPAN;const q=Math.floor(tt*fps)/fps;x.fillStyle=shp(q,i,g)==1?GOLD:BLUE;x.globalAlpha=g?.78:1;x.fillRect(L+px,y,1,rh-1.5)}}
+ x.globalAlpha=1;x.fillStyle='#e8ecf2';x.fillRect(W-1,0,1,H-22);for(let k=0;k<=SPAN*4;k++){const px=L+(W-L)*k/(SPAN*4);x.fillStyle='#2c3644';x.fillRect(px,H-22,1,6);}
+ x.fillStyle='#9aa6b6';x.fillText('now',W-26,H-4);x.fillText('-'+SPAN+' s',L,H-4);
+ // frames
+ const f=document.getElementById('f').getContext('2d');f.clearRect(0,0,400,200);[0,1,2].forEach(k=>{drawTree(f,20+k*128,t-0.2+k*0.1)});
+ const p=document.getElementById('px').getContext('2d');p.clearRect(0,0,400,200);
+ [[6.3,'6.3 m'],[16,'16 m']].forEach((d,k)=>{const ppm=1080/(2*d[0]*Math.tan(Math.PI/6)),Z=3,hh=.075*ppm*Z,ww=.044*ppm*Z,x0=110+k*190;p.fillStyle='#ffcf6e';p.beginPath();p.moveTo(x0,118);p.lineTo(x0+ww/2,118-hh/3);p.lineTo(x0,118-hh);p.lineTo(x0-ww/2,118-hh/3);p.fill();
+  p.fillStyle='#efe3c0';p.fillRect(x0-.03*ppm*Z,118,.06*ppm*Z,.12*ppm*Z);p.fillStyle='#9aa6b6';p.fillText('at '+d[1]+': '+(hh/Z).toFixed(0)+' x '+(ww/Z).toFixed(0)+' px on screen',x0-62,196);});
+ document.getElementById('pxn').textContent='drawn at 3x: a flame is 11 px tall at the nearest orbit (6.3 m) and 4 px at the farthest (16 m).';
+ let fl=0,tt=t-1;for(let q=0;q<1*fps;q++){}
+ document.getElementById('info').textContent='t = '+t.toFixed(2)+' s';}
+function drawTree(f,ox,tt){const T=[{"x": 0.8699220000000001, "y": 0.0, "z": 0.5257000000000001, "group": 0}, {"x": -0.8699220000000001, "y": 1.065347192807864e-16, "z": 0.5257000000000001, "group": 1}, {"x": -0.10089296970305352, "y": 0.77653304647291, "z": 1.0514000000000001, "group": 0}, {"x": 0.1008929697030536, "y": -0.77653304647291, "z": 1.0514000000000001, "group": 1}, {"x": -0.6167979109018445, "y": -0.16303011227107778, "z": 1.5771, "group": 0}, {"x": 0.6167979109018445, "y": 0.163030112271078, "z": 1.5771, "group": 1}, {"x": 0.18869556062814485, "y": -0.46218890897037995, "z": 2.1028000000000002, "group": 0}, {"x": -0.1886955606281448, "y": 0.46218890897037995, "z": 2.1028000000000002, "group": 1}, {"x": 0.34039519939666707, "y": 0.19346020037129924, "z": 2.6285, "group": 0}, {"x": -0.3403951993966669, "y": -0.19346020037129952, "z": 2.6285, "group": 1}];const sc=46,oy=198,q=Math.floor(tt*fps)/fps,E=3;
+ const R=[1.02,.979,.87,.835,.72,.55,.528,.421,.297,.02],rad=fr=>{const x=Math.min(Math.max(fr,0),1)*10,lo=Math.min(Math.floor(x),9),hi=Math.min(lo+1,9);return R[lo]+(R[hi]-R[lo])*(x-lo)};
+ f.fillStyle='#1f4a35';f.beginPath();f.moveTo(ox+60,oy);for(let k=0;k<=20;k++){const fr=k/20;f.lineTo(ox+60+rad(fr)*sc*.55,oy-fr*3.755*sc*.5)}for(let k=20;k>=0;k--){const fr=k/20;f.lineTo(ox+60-rad(fr)*sc*.55,oy-fr*3.755*sc*.5)}f.fill();
+ T.forEach(cn=>{const s=shp(q,0,cn.group),col=s==1?GOLD:BLUE,cx=ox+60+cn.x*sc*.55,cy=oy-cn.z*sc*.5,h=(s==1?.09:.06)*sc*E,lean=(s==1?.014:-.010)*sc*E;
+  f.fillStyle='#efe3c0';f.fillRect(cx-1.5,cy-.12*sc*E*.7,3,.12*sc*E*.7);f.fillStyle=col;f.beginPath();f.moveTo(cx,cy-.12*sc*E*.7);f.lineTo(cx+3,cy-.12*sc*E*.7-h/3);f.lineTo(cx+lean,cy-.12*sc*E*.7-h);f.lineTo(cx-3,cy-.12*sc*E*.7-h/3);f.fill()})}
+// the table
+(function(){const tb=document.getElementById('st');tb.innerHTML='<tr><th>Per group</th><th></th></tr><tr><td>changes a second</td><td>7.38</td></tr><tr><td>mean time between changes</td><td>136 ms</td></tr><tr><td>frames between changes at 30 fps</td><td>about 4.1</td></tr><tr><td>groups in step with another</td><td>none: 24 different phases</td></tr><tr><td>pattern repeats every</td><td>60 s (whole cycles)</td></tr>'})();
+let last=null;function loop(now){if(last===null)last=now;const dt=(now-last)/1000;last=now;if(run)t+=dt*speed;draw();if(!STILL)requestAnimationFrame(loop)}
+document.getElementById('pp').onclick=e=>{run=!run;e.target.textContent=run?'Pause':'Play'};document.getElementById('sp').oninput=e=>speed=+e.target.value;document.getElementById('fr').onchange=e=>{fps=+e.target.value};
+if(STILL){t=3.1;draw()}else requestAnimationFrame(loop);
+</script></body></html>

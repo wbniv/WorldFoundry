@@ -22,7 +22,8 @@ def test_planted_actor_capabilities_use_oad_field_indices():
     owner, = result['objects']
     assert owner['owner'] == 17
     fields = {field['key']: field for field in owner['settings']}
-    assert len(fields) == 8 and fields['Seed']['maximum'] == '2147483647'
+    assert len(fields) == 9 and 'Show framerate' in fields   # the eight, then the global sheet (oas/global_settings.inc)
+    assert fields['Seed']['maximum'] == '2147483647'
     assert fields['Hold seconds']['value'] == '120' and fields['Hold seconds']['maximum'] == '86400'
     assert not fields['Hold seconds']['readonly'] and fields['Initial age']['readonly']
 

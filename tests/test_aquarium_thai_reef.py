@@ -120,7 +120,7 @@ def test_blockout_geometry_is_deterministic_and_within_group_budget():
 
 def test_reef_room_pages_fit_aquarium_texture_slots():
     args = dict(line.removeprefix('--').split('=', 1) for line in
-                (ROOT / 'android/app/src/aquarium/assets/wf_args.txt').read_text().splitlines())
+                (ROOT / 'wflevels/aquarium-wf_args.txt').read_text().splitlines())
     for level in ('aquarium_thai_reef', 'aquarium_thai_reef_anime'):
         header = (ROOT / 'wflevels' / level / 'Room0.tga').read_bytes()[:18]
         width, height = struct.unpack_from('<HH', header, 12)

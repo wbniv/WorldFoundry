@@ -14,6 +14,8 @@ import java.util.Locale;
 final class LevelSettingField {
     static final String CHOICE = "choice";
     static final String INTEGER = "integer";
+    /** An on/off setting (a checkbox): "true" or "false" on the wire, "1" or "0" to the engine. */
+    static final String BOOLEAN = "boolean";
 
     /** The OAD field key, exactly as the engine's launch overrides name it ("Red Fromia"). */
     final String key;
@@ -28,7 +30,7 @@ final class LevelSettingField {
 
     LevelSettingField(String key, String label, String type, String defaultValue,
                       long minimum, long maximum, List<String> optionIds, List<String> optionLabels) {
-        if (!CHOICE.equals(type) && !INTEGER.equals(type)) {
+        if (!CHOICE.equals(type) && !INTEGER.equals(type) && !BOOLEAN.equals(type)) {
             throw new IllegalArgumentException("Unsupported setting type " + type);
         }
         if (optionIds.size() != optionLabels.size()) {
@@ -68,9 +70,19 @@ final class LevelSettingField {
      * one of its option ids. An integer must be plain digits inside its range: no sign, no
      * spaces, no leading zeros, so "007" and "-1" are refused rather than guessed at.
      */
+    /** The value the engine's launch override takes: a boolean is 1 or 0, everything else is already its own text. */
+    String engineValue(String canonical) {
+        return BOOLEAN.equals(type) ? ("true".equals(canonical) ? "1" : "0") : canonical;
+    }
+
     String validate(String requested) {
         if (requested == null || requested.isEmpty()) {
             throw new IllegalArgumentException(label + ": empty value");
+        }
+        if (BOOLEAN.equals(type)) {
+            if (requested.equals("true") || requested.equals("1")) return "true";
+            if (requested.equals("false") || requested.equals("0")) return "false";
+            throw new IllegalArgumentException(label + ": " + requested + " is not true or false");
         }
         if (CHOICE.equals(type)) {
             if (!optionIds.contains(requested)) {

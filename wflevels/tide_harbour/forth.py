@@ -12,8 +12,8 @@ When the look's whole-degree step changes it re-colours every re-coloured materi
 FACE_COLOR mailboxes (3037 + slot). tests/verify_tide_harbour_forth.py runs this script in the real
 zForth VM against timeline.scene; scripts/check-tide-harbour.py runs it in the engine.
 
-Global user mailboxes: 600-659 scratch, 689 the last look step, 690-693 the settings (copied every frame
-from the TideHarbourSettings object with property@, plan D13; 0 is the default), 700-706 visibility,
+Global user mailboxes: 600-659 scratch, 689 the last look step, 690-694 the settings (copied every frame
+from the TideHarbourSettings object with property@, plan D13; 0 is the default), 700-709 visibility,
 720-807 the next-turn scan (scan_words).
 """
 from __future__ import annotations
@@ -45,7 +45,7 @@ assert len(SCAN_CELLS) <= KEPT0 - SCAN0
 PANEL0 = 810                     # the river panel's working cells (panel_words): 810-859
 PANEL_CELLS = ["pl", "pv", "ps", "pd", "pe", "pw", "px", "pk", "ph", "pcu", "lx", "cx", "cy", "cz", "kx", "ky", "kz", "fx", "fy", "fz",
                "rx", "ry", "ux", "uy", "uz", "pa", "pc", "pu", "pq", "pdp", "pac", "psc", "pm", "pt", "pslot", "phour", "pten",
-               "pcs", "pcc", "pbs", "pbc", "pdv"]
+               "pcs", "pcc", "pbs", "pbc", "pdv", "phw"]
 assert len(PANEL_CELLS) <= 50 and not set(PANEL_CELLS) & set(CELLS)
 WORDS = {"floor", "frac", "trunc", "mod", "c01", "x", "y", "z", "a", "b", "c", "sx", "sy", "sz", "col", "byte", "pack",
          "ramp", "tide-sum", "sun", "slow", "palette", "bar-rgb", "recolour", "bars", "boats", "sky", "lights", "clock",
@@ -275,12 +275,8 @@ def frame_words(ix: Dict[str, int]) -> List[str]:
                  f"  {t} .17 * {n(ph)} + sin-rev .02 * {tide} + {name} th-z  {t} 1800 / {n(ph)} + th-frac {name} th-c")
     L.append(f"  {tide} {A('gauge_pointer')} th-z ;")
     # the sky: sun, moon, clouds, birds
-    k_sun = (tl.SUN_Y - tl.CAMERA_REF[1])
     L += [": th-sky",
-          f"  {get('son')} if {n(k_sun)} {get('we')} / {cell('kk')} th!",
-          f"    {get('no')} {get('kk')} * {n(tl.CAMERA_REF[0])} + {A('sun')} th-x",
-          f"    {get('up')} {get('kk')} * {n(tl.CAMERA_REF[2])} + -40 max {A('sun')} th-z",
-          f"  else {n(tl.PARK[0])} {A('sun')} th-x {n(tl.PARK[2])} {A('sun')} th-z then",
+          f"  {get('son')} 0 = if {n(tl.PARK[0])} {A('sun')} th-x {n(tl.PARK[2])} {A('sun')} th-z then",       # on, th-sun places it
           f"  {get('mon')} if 60 120 {get('mf')} * - {A('moon')} th-x {get('mf')} .5 * sin-rev 30 * 4 + {A('moon')} th-z",
           f"  else {n(tl.PARK[0])} {A('moon')} th-x {n(tl.PARK[2])} {A('moon')} th-z then"]
     for i, (z, period, ph, _half) in enumerate(tl.CLOUDS):
@@ -330,8 +326,9 @@ def frame_words(ix: Dict[str, int]) -> List[str]:
           f"  th-opt-gauge th@ 0 = if 1 else 0 then {V['gauge']} th!",
           f"  th-opt-numerals th@ 1 = if 1 else 0 then {V['numerals_thai']} th!",
           f"  th-opt-numerals th@ 0 = if 1 else 0 then {V['numerals_roman']} th!",
-          f"  {sc('rise')} 1 = if 1 else 0 then {V['arrow_up']} th!",
-          f"  {sc('rise')} 1 = if 0 else 1 then {V['arrow_dn']} th! ;"]
+          f"  {sc('rise')} 1 = th-opt-panel th@ 0 = & if 1 else 0 then {V['arrow_up']} th!",
+          f"  {sc('rise')} 1 = 0 = th-opt-panel th@ 0 = & if 1 else 0 then {V['arrow_dn']} th!",
+          f"  th-opt-panel th@ 0 = if 1 else 0 then {V['panel']} th! ;"]
     return L
 
 
@@ -352,7 +349,11 @@ def panel_words(ix: Dict[str, int]) -> List[str]:
            f"  {g('px')} {n(pn.SLIDE_S)} < if 1 {g('pw')} - 2 {g('pw')} * 1 - {g('px')} * {n(pn.SLIDE_S)} / + else {g('pw')} then",
            "  th-c01 dup dup * swap 2 * 3 swap - * " + f"{cell('pe')} th!",
            f"  {g('pe')} .5 < if 0 else 1 then {cell('pl')} th!  1 {g('pe')} 2 * - abs {cell('pv')} th!",
-           f"  {g('pl')} if {n(-pn.HALF_W - pn.W / 2)} {n(pn.W)} {g('pv')} * + else {n(pn.HALF_W + pn.W / 2)} {n(pn.W)} {g('pv')} * - then {cell('pcu')} th! ;",
+           f"  th-opt-panel th@ if 0 {cell('pv')} th! then",          # the River panel setting Off: none of it is on screen
+           # the screen's edge at the panel's depth, from the engine's display mailboxes (written at the start and when the
+           # display changes size): DEPTH * tan(vfov / 2) * aspect. The panel keeps its size; its edge sits at the real screen edge.
+           f"  INDEXOF_DISPLAY_VFOV th@ 720 / tan-rev {n(pn.DEPTH)} * INDEXOF_DISPLAY_ASPECT th@ * {cell('phw')} th!",
+           f"  {g('pl')} if {g('phw')} -1 * {n(-pn.W / 2)} + {n(pn.W)} {g('pv')} * + else {g('phw')} {n(pn.W / 2)} + {n(pn.W)} {g('pv')} * - then {cell('pcu')} th! ;",
            # the panel is pinned to the camera the engine really has, which eases towards cs_wide rather than jumping to it
            # (about 10 % of the way a frame): the Camera actor's position and its pitch (b) and heading (c), in revolutions.
            # Its forward is (sin c cos b, cos c cos b, sin b); with no roll, right is (cos c, -sin c, 0) and up is right x forward.
@@ -398,7 +399,11 @@ def panel_words(ix: Dict[str, int]) -> List[str]:
         for name in pn.DRUMS:
             out.append(f"  {n(pn.row_u(name))} {n(pn.row_v(row))} {values[name]} {A(f'panel_drum_{row}_{name}')} th-pdrum")
     out += ["  then ;"]
-    L = [": th-panel", "  th-pframe", f"  {g('t')} 1800 th-mod 900 / dup 1 > if 2 swap - then .5 * cos-rev {n(pn.PAN_KM / 2.0 * pn.M_PER_KM)} * {n(-pn.BAND_H / 2.0)} + {cell('pm')} th!",
+    L = [": th-sun",     # the sun on the ray from the camera the engine really has (th-pframe has read it), not from a reference position
+         f"  {g('son')} if {n(tl.SUN_Y)} {g('ky')} - {g('we')} / {cell('kk')} th!",
+         f"    {g('no')} {g('kk')} * {g('kx')} + {A('sun')} th-x",
+         f"    {g('up')} {g('kk')} * {g('kz')} + -40 max {A('sun')} th-z then ;",
+         ": th-panel", "  th-pframe th-sun", f"  {g('t')} 1800 th-mod 900 / dup 1 > if 2 swap - then .5 * cos-rev {n(pn.PAN_KM / 2.0 * pn.M_PER_KM)} * {n(-pn.BAND_H / 2.0)} + {cell('pm')} th!",
          put("panel_paper", "paper", "0", "0"), put("panel_map", "map", "0", g("pm")), put("panel_col_body", "column", "0", "0"),
          put("panel_col_fill", "fill", n(pn.COL_X), n(pn.COL_V0)),
          f"  {g('tide')} {n(1.0 / pn.COL_MAX_M)} * th-c01 .01 max {g('psc')} * {A('panel_col_fill')} th-sz",

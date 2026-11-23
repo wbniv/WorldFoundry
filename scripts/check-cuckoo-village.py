@@ -12,6 +12,7 @@ Run inside the Linux container, against the container-built engine, under xvfb:
                        wflevels/cuckoo_village/timeline.py (1 mm, 0.5 degrees, 0.1 % scale)
   --capture OUTDIR     one PNG per --times entry (default: the plan's six moments)
   --times T [T ...]    HH:MM:SS[.mmm] clock times for either mode
+  --bavaria            start the level with Bavaria mode On (compare against the Bavarian poses, or capture it)
 
 Plan: docs/plans/2026-11-21-cuckoo-village.md (Implementation and verification, steps 3 and 5).
 """
@@ -55,7 +56,7 @@ def sod(spec: str) -> float:
 
 
 class Engine:
-    def __init__(self, clock: str, port: int):
+    def __init__(self, clock: str, port: int, bavaria: bool = False):
         env = os.environ.copy()
         env["LD_LIBRARY_PATH"] = f"{ROOT / 'engine' / 'libs'}:{env.get('LD_LIBRARY_PATH', '')}"
         env["LSAN_OPTIONS"] = "detect_leaks=0"
@@ -65,7 +66,8 @@ class Engine:
             [str(WF_GAME), f"-L{LEVEL}", "-width=1280", "-height=720", "-rate20",
              "--vram-width=4096", "--vram-height=2048", "--vram-slot-width=2048", "--vram-slot-height=2048",
              "--vram-perm-width=1024", "--vram-perm-height=1024",
-             "--debug-port", str(port), "--debug-bind", "127.0.0.1"],
+             "--debug-port", str(port), "--debug-bind", "127.0.0.1",
+             *(["--property=CuckooVillageSettings.Bavaria mode=1"] if bavaria else [])],
             cwd=str(GAME_CWD), env=env, stdout=self.log, stderr=subprocess.STDOUT,
             preexec_fn=lambda: resource.setrlimit(resource.RLIMIT_CORE, (0, 0)))
         self.client = BridgeClient("127.0.0.1", port, timeout=40.0)
@@ -111,14 +113,14 @@ class Engine:
             self.log.close()
 
 
-def capture(outdir: Path, times: list[str], port: int) -> int:
+def capture(outdir: Path, times: list[str], port: int, bavaria: bool = False) -> int:
     outdir = outdir.resolve()          # the engine runs from another directory
     outdir.mkdir(parents=True, exist_ok=True)
     for i, spec in enumerate(times):
-        e = Engine(spec, port + i)
+        e = Engine(spec, port + i, bavaria)
         try:
             e.step(int(os.environ.get('CV_FRAMES', '8')))
-            name = spec.replace(":", "")
+            name = spec.replace(":", "") + ("-bavaria" if bavaria else "")
             e.screenshot(outdir / f"{name}.png")
             print(f"captured {spec} -> {outdir / (name + '.png')}")
         finally:
@@ -126,13 +128,13 @@ def capture(outdir: Path, times: list[str], port: int) -> int:
     return 0
 
 
-def compare(times: list[str], port: int) -> int:
+def compare(times: list[str], port: int, bavaria: bool = False) -> int:
     indices = json.loads((ROOT / "wflevels" / "cuckoo_village" / "actor-map.json").read_text())["indices"]
     failures = []
     for i, spec in enumerate(times):
-        e = Engine(spec, port + i)
+        e = Engine(spec, port + i, bavaria)
         try:
-            poses = tl.all_poses(sod(spec))
+            poses = tl.all_poses(sod(spec), {**tl.SETTINGS_DEFAULTS, "Bavaria mode": 1} if bavaria else None)
             worst = {"pos": (0.0, ""), "rot": (0.0, ""), "scale": (0.0, "")}
             names = list(poses)
             # The bridge broadcasts a watch's first value in one write, and a batch of hundreds of
@@ -172,8 +174,8 @@ def compare(times: list[str], port: int) -> int:
             # window glow: global user cells 200..212 (twelve houses, then the tower) against the schedule
             director = indices["Director"]
             states = tl.window_states(sod(spec))
-            cells = [(director, 200 + i) for i in range(len(states))] + [(director, 213)]     # 213: the bird's visibility
-            states = states + [tl.bird_visible(sod(spec))]
+            cells = [(director, 200 + i) for i in range(len(states))] + [(director, 213), (director, tl.BAVARIA_CELL), (director, tl.CLASSIC_CELL)]     # 213: the bird's visibility
+            states = states + [tl.bird_visible(sod(spec)), bool(bavaria), not bavaria]      # and the Bavarian and the Classic parts' cells
             for actor, mbx in cells:
                 e.client.watch(idx=actor, mailbox=mbx)
             e.step(3)
@@ -201,6 +203,7 @@ def main() -> int:
     ap.add_argument("--compare", action="store_true")
     ap.add_argument("--capture", type=Path, metavar="OUTDIR")
     ap.add_argument("--times", nargs="+")
+    ap.add_argument("--bavaria", action="store_true", help="start the level with Bavaria mode On (the launch override of the settings object)")
     ap.add_argument("--port", type=int, default=7810)
     args = ap.parse_args()
     if not WF_GAME.exists():
@@ -210,9 +213,9 @@ def main() -> int:
         print(f"level not built: {LEVEL} (bash wflevels/cuckoo_village/build.sh)", file=sys.stderr)
         return 2
     if args.capture:
-        return capture(args.capture, args.times or MOMENTS, args.port)
+        return capture(args.capture, args.times or MOMENTS, args.port, args.bavaria)
     if args.compare:
-        return compare(args.times or COMPARE, args.port)
+        return compare(args.times or COMPARE, args.port, args.bavaria)
     ap.print_help()
     return 2
 

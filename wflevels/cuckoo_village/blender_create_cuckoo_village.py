@@ -11,6 +11,7 @@ Writes cuckoo_village.lev and actor-map.json.
 """
 import json
 import math
+import os
 import sys
 from pathlib import Path
 
@@ -22,6 +23,10 @@ LAYOUT = ROOT / 'wflevels/cuckoo_village_layout'
 sys.path.insert(0, str(HERE))
 import forth                 # noqa: E402
 import timeline as tl        # noqa: E402
+import candles as cd         # noqa: E402
+sys.path.insert(0, str(ROOT / 'wflevels/cuckoo_village_assets'))
+import flowers as fw         # noqa: E402
+import bavaria as bv         # noqa: E402
 
 TAG = '[cuckoo-village]'
 REFERENCE = 10 * 3600 + 8 * 60 + 22.0       # the pose the level starts from: 10:08
@@ -68,12 +73,169 @@ near(objs[tl.BIRD_NAME].location, tl.BIRD_REST, tl.BIRD_NAME)
 near(objs['hour_hand'].location, tl.DIAL, 'hour_hand')
 assert [n for n in (f'cottage_light_{i + 1:02}' for i in range(tl.HOUSES)) if n not in objs] == [], 'cottage light actors changed'
 
+# Christmas candles (docs/plans/2026-11-21-cuckoo-village.md): all the sticks in one mesh, and each tree's flames in four, so every tree glows on its own
+# stagger and the flames flicker (docs/plans/2026-11-22-cuckoo-village-candle-flicker.md): two groups of five candles, each built in two shapes. Static meshes
+# (never posed): the director only switches their visibility mailboxes, showing one shape of each group at a time.
+assert [n for n in (f'pine_{i + 1:02}' for i in range(tl.TREES)) if n not in objs] == [], 'the pine trees changed'
+mesh_actor = scope['mesh_actor']          # the layout's helper: an anchored platform mesh actor from vertices, faces and an atlas tile
+stick_parts = []
+for i in range(tl.TREES):
+    tree = objs[f'pine_{i + 1:02}']
+    sticks, _ = cd.tree_candles(i, tuple(tree.location), tree.rotation_euler.z, tree.scale.x)
+    stick_parts += sticks
+    for (group, shape), parts in sorted(cd.tree_flame_shapes(i, tuple(tree.location), tree.rotation_euler.z, tree.scale.x).items()):
+        verts, faces = cd.merge(parts)
+        cell = tl.FLICKER_CELL0 + 2 * (2 * i + group) + (shape - 1)
+        mesh_actor(f'candle_flames_{"ab"[group]}{shape}_{i + 1:02}', verts, faces, cd.FLAME_TILE)['wf_Visibility Mailbox'] = cell
+stick_verts, stick_faces = cd.merge(stick_parts)
+mesh_actor('candle_sticks', stick_verts, stick_faces, cd.STICK_TILE)['wf_Visibility Mailbox'] = tl.CANDLE_CELL
+
+# The window boxes (docs/plans/2026-11-22-cuckoo-village-flowers.md). The 13 cottages share one mesh, `standard_house`, which today
+# carries the blocky plants of its two front window boxes. They come out of it into their own actor, `cottage_flower_blocks` (all
+# 26 boxes, the village atlas, shown when Detailed flowers is Off), and the new flowers go into one more actor, `cottage_flowers`
+# (all 26 boxes, ten flat-coloured materials, no texture, shown when it is On). The director shows exactly one of them.
+import bmesh                      # noqa: E402
+from mathutils import Vector      # noqa: E402
+
+bpy.context.view_layer.update()                 # matrix_world is stale in a headless run until the dependency graph has been evaluated
+COTTAGES = [objs[f'cottage_{i + 1:02}'] for i in range(tl.HOUSES)]
+HOUSE = COTTAGES[0]                  # the layout deletes its template object, so the shared mesh is reached through any cottage
+assert all(c.data is HOUSE.data for c in COTTAGES), 'the cottages no longer share one mesh'
+BOX_TOP, BOX_X, BOX_Y = 1.655, (-0.78, 0.78), -1.12                  # the boxes' middle of the top, in the house mesh's own frame
+OLD_PLANT_TRIANGLES = 328                                            # two boxes of seven posts and seven blocks, measured in the plan
+
+
+def is_old_plant(face):
+    c = face.calc_center_median()
+    return c.y < -1.07 and BOX_TOP + 0.005 < c.z < 1.90 and 0.4 < abs(c.x) < 1.2
+
+
+bm = bmesh.new(); bm.from_mesh(HOUSE.data)
+doomed = [f for f in bm.faces if is_old_plant(f)]
+assert sum(len(f.verts) - 2 for f in doomed) == OLD_PLANT_TRIANGLES, 'the cottage art changed: the old plant faces are not the 328 triangles the plan measured'
+uv_layer = bm.loops.layers.uv.active
+old_verts, old_faces, old_uvs = [], [], []
+for f in doomed:                                                     # keep a copy, with its atlas coordinates, for the blocks actor
+    base = len(old_verts)
+    old_verts += [tuple(l.vert.co) for l in f.loops]
+    old_uvs += [tuple(l[uv_layer].uv) for l in f.loops]
+    old_faces.append(tuple(range(base, base + len(f.loops))))
+bmesh.ops.delete(bm, geom=doomed, context='FACES')
+bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context='VERTS')
+bm.to_mesh(HOUSE.data); bm.free(); HOUSE.data.update()
+
+
+def static_actor(name, verts, faces, face_material, materials, uvs, cell):
+    """An anchored platform mesh actor from several parts joined: one mesh, one material slot per entry of `materials`."""
+    mesh = bpy.data.meshes.new(name)
+    mesh.from_pydata(verts, [], faces); mesh.update()
+    for m in materials:
+        mesh.materials.append(m)
+    for poly, mi in zip(mesh.polygons, face_material):
+        poly.material_index = mi; poly.use_smooth = False
+    layer = mesh.uv_layers.new(name='UVMap')
+    for poly in mesh.polygons:
+        for li in poly.loop_indices:
+            layer.data[li].uv = uvs[li]
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    obj['wf_schema_path'] = str(ROOT / 'wfsource/source/oas/platform.oad')
+    obj['wf_Mobility'] = 'Anchored'; obj['wf_Model Type'] = 'Mesh'; obj['wf_Mass'] = 0.0
+    obj['wf_Visibility Mailbox'] = cell
+    obj['wf_Mesh Name'] = name + '.iff'; obj['wf_original_mesh_name'] = name + '.iff'
+    return obj
+
+
+def to_world(cottage, local):
+    return tuple(cottage.matrix_world @ Vector(local))
+
+
+# The blocks: the removed faces, once for each cottage, in the atlas material they always had.
+block_verts, block_faces, block_uvs = [], [], []
+for cottage in COTTAGES:
+    base = len(block_verts)
+    block_verts += [to_world(cottage, v) for v in old_verts]
+    block_uvs += old_uvs
+    block_faces += [tuple(i + base for i in f) for f in old_faces]
+static_actor('cottage_flower_blocks', block_verts, block_faces, [0] * len(block_faces), [bpy.data.materials['village_atlas']],
+             block_uvs, tl.BLOCKS_CELL)
+
+# The flowers: 26 boxes (cottage k has box 2k on the left and 2k + 1 on the right), petunia and geranium boxes by box_kind, one
+# mesh with a flat-coloured material slot for each of the ten colours. Thin petals and leaves are double-sided (flag 8).
+flower_materials = {}
+for name_, rgb in fw.MATERIALS.items():
+    m = bpy.data.materials.new(name_); m.use_nodes = True
+    bsdf = next(n for n in m.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
+    bsdf.inputs['Base Color'].default_value = (*rgb, 1.0)
+    if name_ in fw.DOUBLE_SIDED:
+        m['wf_double_sided'] = True
+    flower_materials[name_] = m
+boxes = []
+for k, cottage in enumerate(COTTAGES):
+    for side, bx in enumerate(BOX_X):
+        index = 2 * k + side
+        boxes.append(fw.placed(fw.box_flowers(index, 'full'), to_world(cottage, (bx, BOX_Y, BOX_TOP)), cottage.rotation_euler.z, cottage.scale.x))
+joined = fw.merge(boxes)
+f_verts, f_faces, f_mat, f_names = [], [], [], list(joined)
+for mi, name_ in enumerate(f_names):
+    verts_, faces_ = joined[name_]
+    base = len(f_verts)
+    f_verts += verts_
+    f_faces += [tuple(i + base for i in face) for face in faces_]
+    f_mat += [mi] * len(faces_)
+used = [n for n in f_names if joined[n][1]]
+assert len(f_faces) == fw.triangle_count(joined) and len(boxes) == 2 * tl.HOUSES
+static_actor('cottage_flowers', f_verts, f_faces, f_mat, [flower_materials[n] for n in f_names], [(0.0, 0.0)] * (3 * len(f_faces)), tl.FLOWERS_CELL)
+print(f'{TAG} window boxes: {len(f_faces)} flower triangles in {len(used)} materials, {sum(len(f) - 2 for f in block_faces)} block triangles')
+# Bavaria mode (plan "Bavaria mode"): the Bavarian parts show with the BAVARIA cell and the Classic parts they replace with the CLASSIC
+# cell. The four Bavarian figures stand on the Classic figures' pivots and are posed by the same formulas (the director writes to both
+# sets), so their meshes are pivot-local; every other Bavarian part is in world coordinates and never moves.
+for name in tl.FIG_NAMES + ['dial_numerals_classic']:
+    objs[name]['wf_Visibility Mailbox'] = tl.CLASSIC_CELL
+cottages = [(tuple(objs[f'cottage_{i + 1:02}'].location), math.degrees(objs[f'cottage_{i + 1:02}'].rotation_euler.z), objs[f'cottage_{i + 1:02}'].scale.x)
+            for i in range(tl.HOUSES)]
+for part in bv.all_parts(tl.TZ, cottages, scope['height']).values():
+    actor = mesh_actor(part.name, part.verts, part.faces, part.tiles)
+    actor['wf_Visibility Mailbox'] = tl.BAVARIA_CELL
+    actor['cat_sections'] = json.dumps([list(s) for s in part.sections])        # the parts catalogue's labelled pieces
+    if part.name in tl.FIG_B_NAMES:
+        actor.location = objs[tl.FIG_NAMES[tl.FIG_B_NAMES.index(part.name)]].location     # the twin's pivot
+
 # window glow: one visibility mailbox per cottage; the bird is shown only during the hourly calls
 for i in range(tl.HOUSES):
     objs[f'cottage_light_{i + 1:02}']['wf_Visibility Mailbox'] = GLOW_CELL0 + i
 objs[tl.BIRD_NAME]['wf_Visibility Mailbox'] = BIRD_CELL
 
+# Part inventory (not part of a normal build): CUCKOO_INVENTORY=<file.json> writes one record per actor, for the parts catalogue
+# (scripts/cuckoo-village-catalogue.py): its name, mesh, triangles, size, place, what shows it and the director's reach.
+inventory_path = os.environ.get('CUCKOO_INVENTORY')
+if inventory_path:
+    rows = []
+    for o in objs:
+        mesh = o.data if o.type == 'MESH' else None
+        row = dict(name=o.name, type=o.type, parent=o.parent.name if o.parent else None, location=[round(v, 4) for v in o.location],
+                   rotation_deg=[round(math.degrees(v), 2) for v in o.rotation_euler], scale=[round(v, 4) for v in o.scale],
+                   mailbox=o.get('wf_Visibility Mailbox'), schema=o.get('wf_schema_path'), props={k: (v if isinstance(v, (int, float, str)) else str(v))
+                   for k, v in o.items() if k.startswith('wf_') or k == 'component'})
+        if mesh is not None:
+            row.update(mesh=mesh.name, users=mesh.users, triangles=sum(len(p.vertices) - 2 for p in mesh.polygons), vertices=len(mesh.vertices),
+                       dimensions=[round(v, 4) for v in o.dimensions], materials=[m.name if m else None for m in mesh.materials],
+                       images=sorted({n.image.name for m in mesh.materials if m and m.use_nodes for n in m.node_tree.nodes if n.type == 'TEX_IMAGE' and n.image}))
+        rows.append(row)
+    Path(inventory_path).write_text(json.dumps(rows, indent=1))
+    print(f'{TAG} inventory: {len(rows)} objects -> {inventory_path}')
+
+# Review renders (not part of a normal build): CUCKOO_REVIEW_RENDER=<dir> renders close-ups with Cycles on the CPU. CUCKOO_REVIEW_BAVARIA=1
+# poses the scene as Bavaria mode (the Bavarian parts shown, the Classic ones they replace hidden); CUCKOO_REVIEW_TIME=HH:MM:SS picks the moment.
+review_dir = os.environ.get('CUCKOO_REVIEW_RENDER')
+review_bavaria = bool(os.environ.get('CUCKOO_REVIEW_BAVARIA'))
+review_time = os.environ.get('CUCKOO_REVIEW_TIME')
+if review_time:
+    h_, m_, s_ = (float(v) for v in review_time.split(':'))
+    REFERENCE = h_ * 3600 + m_ * 60 + s_
 poses = tl.all_poses(REFERENCE)
+if review_bavaria:                         # a review render only: the poses as Bavaria mode has them
+    poses = tl.all_poses(REFERENCE, {**tl.SETTINGS_DEFAULTS, 'Bavaria mode': 1})
 for name, p in poses.items():
     if name in ('cs_wide', 'LookAt'):
         continue
@@ -93,6 +255,17 @@ objs['Matte']['wf_Matte Type'] = 'Color'
 objs['Matte']['wf_Background Color'] = 0x0b1115
 objs['Player'].location = (0, -3, 1)
 
+# The parts catalogue (not part of a normal build): CUCKOO_CATALOGUE=<dir> renders every part's pictures and stops (scripts/cuckoo-village-catalogue.py);
+# CUCKOO_CATALOGUE_ONLY=id,id limits it to those entries.
+catalogue_dir = os.environ.get('CUCKOO_CATALOGUE')
+if catalogue_dir:
+    import catalogue_entries as ce          # noqa: E402
+    import catalogue_render as cr           # noqa: E402
+    only = os.environ.get('CUCKOO_CATALOGUE_ONLY')
+    chosen = [e for e in ce.ENTRIES if not only or e['id'] in only.split(',')]
+    cr.run(list(objs), chosen, catalogue_dir, tl.TZ, ce.ENTRIES)
+    sys.exit(0)
+
 # The user-controlled settings object: an empty carrying the CuckooVillageSettings schema (no model, no mass).
 # The director reads each field with property@ using the settings actor's index and the catalog's field index.
 import subprocess
@@ -107,11 +280,61 @@ catalog = json.loads(subprocess.check_output([str(ROOT / 'wftools/wf_attr_edit/t
 settings_fields = {f['key']: f['index'] for f in catalog['fields'] if f['width'] and f['key'] in tl.SETTINGS_DEFAULTS}
 assert set(settings_fields) == set(tl.SETTINGS_DEFAULTS), settings_fields
 
+if review_dir:
+    # the Bavarian parts and the Classic ones they replace: show one set. The renders are for looking, so the visibility mailboxes
+    # (which only the engine reads) become the renderer's hide flags
+    for o in objs:
+        cell = o.get('wf_Visibility Mailbox')
+        if cell == tl.BAVARIA_CELL:
+            o.hide_render = not review_bavaria
+        elif cell == tl.CLASSIC_CELL:
+            o.hide_render = review_bavaria
+    from mathutils import Vector
+    sc = bpy.context.scene
+    sc.render.engine = 'CYCLES'
+    sc.cycles.device = 'CPU'
+    sc.cycles.samples = 24
+    sc.render.resolution_x, sc.render.resolution_y = 1280, 720
+    sc.world = bpy.data.worlds.new('review_world')
+    sc.world.use_nodes = True
+    sc.world.node_tree.nodes['Background'].inputs[0].default_value = (0.55, 0.65, 0.80, 1.0)
+    sc.world.node_tree.nodes['Background'].inputs[1].default_value = 1.2
+    sun = bpy.data.objects.new('review_sun', bpy.data.lights.new('review_sun', 'SUN'))
+    sun.data.energy = 3.5
+    sun.rotation_euler = (math.radians(55), 0, math.radians(-25))
+    sc.collection.objects.link(sun)
+    cam_data = bpy.data.cameras.new('review_cam')
+    cam = bpy.data.objects.new('review_cam', cam_data)
+    sc.collection.objects.link(cam)
+    sc.camera = cam
+    tz = tl.TZ
+    views = {'tower_front': ((0.0, -7.2, 3.6 + tz), (0.0, -1.4, 3.7 + tz), 50),
+             'tower_balcony': ((0.0, -3.6, 3.2 + tz), (0.0, -1.5, 3.1 + tz), 50),
+             'tower_dial': ((0.0, -3.4, 4.3 + tz), (0.0, -1.1, 4.1 + tz), 50),
+             'maypole': ((6.5, -8.0, 2.4), (2.3, -2.4, 1.9), 40),
+             'dome_cottage': ((15.5, -3.0, 6.5), (7.0, 6.0, 3.6), 40),
+             'tower_top': ((0.0, -9.0, 6.0 + tz), (0.0, -1.0, 5.3 + tz), 50),
+             'figures': ((0.0, -6.2, 3.3 + tz), (0.0, -1.6, 3.0 + tz), 70)}
+    only = os.environ.get('CUCKOO_REVIEW_VIEWS')
+    if only:
+        views = {k: v for k, v in views.items() if k in only.split(',')}
+    os.makedirs(review_dir, exist_ok=True)
+    suffix = '-bavaria' if review_bavaria else '-classic'
+    for name, (loc, target, lens) in views.items():
+        cam.location = loc
+        cam_data.lens = lens
+        cam.rotation_euler = (Vector(target) - Vector(loc)).to_track_quat('-Z', 'Y').to_euler()
+        sc.render.filepath = os.path.join(review_dir, name + suffix + '.png')
+        bpy.ops.render.render(write_still=True)
+    bpy.data.objects.remove(sun, do_unlink=True)
+    bpy.data.objects.remove(cam, do_unlink=True)
+
 scene = bpy.context.scene
 objects = [o for o in scene.objects if o.get('wf_schema_path')]
 indices = {o.name: i + 1 for i, o in enumerate(objects)}
-for a, b in zip(tl.FIG_NAMES, tl.FIG_NAMES[1:]):
-    assert indices[b] - indices[a] == 1, 'the four figures must be contiguous'
+for names in (tl.FIG_NAMES, tl.FIG_B_NAMES):
+    for a, b in zip(names, names[1:]):
+        assert indices[b] - indices[a] == 1, 'the four figures of a set must be contiguous'
 objs['Director']['wf_Script'] = forth.director_script(indices, settings_fields)
 (HERE / 'actor-map.json').write_text(json.dumps(dict(indices=indices, reference=REFERENCE), indent=1) + '\n')
 print(f'{TAG} {len(objects)} actors')

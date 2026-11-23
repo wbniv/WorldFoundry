@@ -1,6 +1,6 @@
 # How to combine several levels, add a chooser menu, and start one level from a screensaver
 
-This is the recipe for a package that holds more than one World Foundry level: one bundle, a menu that picks a level, and the same list driving a screensaver (Dream) that plays a saved choice or one named level for one run. The Aquarium is the worked example (eleven tanks). The SMB world select is the other menu example.
+This is the recipe for a package that holds more than one World Foundry level: one bundle, a menu that picks a level, and the same list driving a screensaver (Dream) that plays a saved choice or one named level for one run. The Aquarium is the worked example (twelve tanks). The SMB world select is the other menu example.
 
 Related, so nothing is said twice:
 
@@ -27,6 +27,19 @@ flowchart TD
     LL --> DREAM["Dream or preview activity<br/>plays one level"]
 ```
 
+### What the app is on the device
+
+The combined app is **the screensaver module's host grown a menu mode**, not the standard NativeActivity app plus a screensaver entry point. One Java `SurfaceView` (`TankPlayer`) and one native host (`android/screensaver/src/main/cpp/dream_host.cc`) run the menu, a tank started from it, and the Dream. The standalone Aquarium app (the NativeActivity host, `hal/android/native_app_entry.cc`) was retired when the two became one, so **a feature of that host exists in the combined app only if `dream_host.cc` or `TankPlayer.java` has it.** What the combined host does with input (all in menu mode; the Dream takes none):
+
+| Input | Where it goes |
+|---|---|
+| TV remote keys, a gamepad's buttons | `TankPlayer.key` to `MenuKeyLatch` (a tap shorter than one frame still reads once), then `HALInjectJoystickButtons` |
+| A gamepad's analog stick and hat | `LauncherActivity.dispatchGenericMotionEvent` to `GamepadStick` to the same latch |
+| A touch on a phone (a touchscreen and no TV) | queued by `TankPlayer`, handled on the game thread: the engine's touch settings form first (`propertyui::touchEvent`: the entry button at the top right, then the form), then a tap on a menu row, then the on-screen controller (`TouchBridge`: joystick, D, B, C, A; narrowed to A and C while a story card is open) |
+| Back | `LauncherActivity` to `applyMenuBack` |
+
+Still missing from the old host, tracked in [the touch plan](../plans/2026-11-22-aquarium-clocks-touch-controls.md): the phone as a TV's gamepad and settings editor, and the crash log.
+
 ## 1. Combine levels into one bundle with a chooser
 
 1. **Build each level's standalone bundle**, `wflevels/<id>-standalone.iff`. It must be the L4-rooted file, not the bare `<id>.iff`: `game.cc` seeks one sector before it reads each level's RAM chunk. A level's id is its file name without `-standalone.iff`.
@@ -52,15 +65,17 @@ flowchart TD
 
    Add a `build-cd-iff-<package>-menu` task that depends on each level's build task, as `build-cd-iff-aquarium-menu` does. `shell-menu.fth` replaces `shell.fth` for a menu bundle. Without `--manifest` a bundle has no menu and is byte for byte what it was.
 4. **Run it on the desktop.** Copy the task `run-aquarium-menu` (Taskfile): it copies the bundle to a gitignored `build-<package>-menu/cd.iff` and runs `wf_game` there. Up and Down choose, Space starts, Backspace in a level returns to the menu, Escape quits. On Android, Back in a level returns to the menu and Back on the menu exits.
-5. **Put it in the app.** The Android flavor's `assets/cd.iff` is a symlink to the menu bundle (`android/app/src/aquarium/assets/cd.iff` is the example). A flavor that needs more video memory reads its flags from `assets/wf_args.txt`, one flag per line; `run-aquarium-menu` reads the same file so the desktop run matches.
+5. **Put it in the app.** The app's `assets/menu-cd.iff` (or `cd.iff` for a pack with no separate menu) is a symlink to the menu bundle: `android/screensaver/src/aquarium/assets/menu-cd.iff` is the example. The VRAM flags the Aquarium uses are `wflevels/aquarium-wf_args.txt`, one flag per line; `run-aquarium-menu` reads that file so the desktop run matches. A pack that needs more video memory ships its own `assets/wf_args.txt` (Clocks does).
 
 **Adding a level later:** build its standalone, add one `level` line, rebuild the bundle. That is the only place a level is added. A level that needs a driver for the screensaver also needs one line in `SCRIPT_NAMES` in `scripts/build-aquarium-screensaver-levels.py`; a level without an entry takes the generic path.
+
+**Finish both halves of the combined package:** after a new level runs on the desktop, rebuild the chooser bundle *and* the bundle used by the Dream before building the APK. For Aquarium, `task build-cd-iff-aquarium-menu` packs the playable menu and `task build-aquarium-screensaver-apk` rebuilds the Dream variants and bundle and packages both. For WF Clocks, add the clock to `wflevels/clocks-menu.manifest`, run `task clocks-regenerate` and `task clocks-check`, then `task build-clocks-apk`. Keep existing manifest entries in order: their positions are the saved level indices. Inspect the APK's `assets/menu-cd.iff` and `assets/cd.iff` (Clocks may use a shared bundle), exercise both the chooser and the Dream on the computer, then freeze the APK and test the combined app and screensaver through the coordinator. A successful playable-menu build alone does not update the Aquarium Dream bundle.
 
 **Level chains.** A level that ends by loading another one (the SMB flagpoles) writes `LEVEL_TO_RUN` (mailbox 5000) and `END_OF_LEVEL` (mailbox 1905). The index it writes is the TOC index, so keep a chain's levels in the same relative order in every bundle that holds it. The SMB menu bundle is the reference.
 
 ## 2. Use the same list in a screensaver
 
-The Android screensaver (`android/screensaver`, package `org.worldfoundry.screensaver`, flavor `aquarium`) plays a level on its own, with an autopilot, when Android starts it.
+The Aquarium app's Dream half (`android/screensaver`, flavor `aquarium`; its `applicationId` is `org.worldfoundry.game.aquarium`, renamed on 2026‑11‑22 from `org.worldfoundry.screensaver`, which stays the Java code package; see [One Aquarium APK](../plans/2026-11-22-one-aquarium-apk.md)) plays a level on its own, with an autopilot, when Android starts it.
 
 1. **Autopilot variants.** `python3 scripts/build-aquarium-screensaver-levels.py` (run in the container: `scripts/in-linux-container.sh python3 scripts/build-aquarium-screensaver-levels.py`) reads the manifest, builds an `<id>_screensaver` variant of each level, and packs `wflevels/aquarium-screensaver-cd.iff` in manifest order. A manifest id with no `wflevels/<id>/` directory stops the build and names the id.
 2. **The catalogue.** Gradle copies the manifest into the flavor's assets as `levels.manifest` (`copyAquariumLevelCatalog` in `android/screensaver/build.gradle.kts`). `LevelCatalog` parses it at runtime: `ids()`, `label(id)`, `valid(id)`, `indexOf(id)` (the level's index in the bundle) and `choose(requested, saved, rng)`. It is one generic class: a second package copies its own manifest into its own flavor the same way, never a copy of the class.
@@ -71,9 +86,11 @@ The Android screensaver (`android/screensaver`, package `org.worldfoundry.screen
 A launcher, `adb` or the coordinator can start a named level without changing what the Dream plays when idle. Pass the **`org.worldfoundry.screensaver.LEVEL`** string extra to the preview activity or the TV launcher activity:
 
 ```
-adb shell am start -n org.worldfoundry.screensaver/.ScreensaverPreviewActivity \
+adb shell am start -n org.worldfoundry.game.aquarium/org.worldfoundry.screensaver.ScreensaverPreviewActivity \
     --es org.worldfoundry.screensaver.LEVEL aquarium_jellyfish
 ```
+
+The short form `-n <applicationId>/.Class` resolves the leading dot against the **applicationId**, not the code package. The `applicationId` is `org.worldfoundry.game.aquarium` and the classes live in `org.worldfoundry.screensaver`, so the dot form would name a class that does not exist: always use the full class, `org.worldfoundry.game.aquarium/org.worldfoundry.screensaver.ScreensaverPreviewActivity`. The extra's key, `org.worldfoundry.screensaver.LEVEL`, is a plain string and does not change.
 
 - The value is a catalogue id, or `random`.
 - It applies to that run only. It never writes the saved choice.
@@ -99,17 +116,18 @@ stateDiagram-v2
 | Coordinator `screensaver-show` | **not yet.** It accepts only settings `overrides`. A `level_launch_extra` field in `applications.json` and a `level` argument are the open TODO item "Homeboard and coordinator one-run tank start" |
 | Homeboard Preview, idle timer, remote key | Homeboard's Stage 5; filed in its `TODO.md` |
 
-## 4. Make a new screensaver pack
+## 4. Make a new pack (an app that is also the screensaver)
 
-Two packs exist today, built the same way: **WF Aquarium** (flavor `aquarium`, `wflevels/aquarium-menu.manifest`, 11 tanks) and **WF Clocks**, the 3D Clocks (flavor `clocks`, `wflevels/clocks-menu.manifest`, Minute Machine and Cuckoo Village). A third pack follows the same steps. The roster is append-only: a level's position is its id in the bundle.
+Two packs exist today, built the same way: **WF Aquarium** (flavor `aquarium`, `wflevels/aquarium-menu.manifest`, 12 tanks) and **WF Clocks**, the 3D Clocks (flavor `clocks`, `wflevels/clocks-menu.manifest`, Minute Machine and Cuckoo Village). A third pack follows the same steps. The roster is append-only: a level's position is its id in the bundle.
 
-1. Write `wflevels/<package>-menu.manifest` in the format above.
-2. Give its Gradle flavor a `Copy` task that puts the manifest in its assets as `levels.manifest`, like `copyAquariumLevelCatalog` and the Clocks equivalent in `android/screensaver/build.gradle.kts`, and add the output to that flavor's `assets` source set.
-3. Pack the bundle (`cdpack --manifest`, for Clocks `scripts/pack-clocks-bundle.py`) into the flavor's assets.
-4. Add one launcher activity, `public final class <Pack>Activity extends LauncherActivity {}`, and declare it in the flavor's manifest with the `LEANBACK_LAUNCHER` category. It has no code of its own: every pack's launch behaviour is `LauncherActivity`'s (next paragraph). Its Dream service calls `LevelLaunch.startChosen(this, player, null)`.
-5. Do **not** copy `LevelCatalog` or `LevelLaunch`; add the source directory to the flavor if it is not in this module.
-6. If any level's textures are larger than the Dream host's default 1024 slot, ship `assets/wf_args.txt` with `--vram-slot-width=...` for the flavor (Clocks does: the village's room page is 2048 wide). `tests/test_dream_host_vram.py` checks every page in the bundle fits.
-7. **Give every level in the roster a settings object** (next section), then run the audit.
+1. **Name the package `org.worldfoundry.game.<name>`** (Will, 2026‑11‑22: `org.worldfoundry.game.aquarium`, `org.worldfoundry.game.clocks`) and set it as the flavor's `applicationId` in `android/screensaver/build.gradle.kts`. The name is the game, never the mechanism: not `…screensaver`, not `…wf_game.<name>`. The Java `namespace` (`org.worldfoundry.screensaver`) is a separate setting and stays. Aquarium and Clocks carry the new ids since 2026‑11‑22, and the tables below show them ([One Aquarium APK](../plans/2026-11-22-one-aquarium-apk.md), D5).
+2. Write `wflevels/<package>-menu.manifest` in the format above.
+3. Give its Gradle flavor a `Copy` task that puts the manifest in its assets as `levels.manifest`, like `copyAquariumLevelCatalog` and the Clocks equivalent in `android/screensaver/build.gradle.kts`, and add the output to that flavor's `assets` source set.
+4. Pack the bundle (`cdpack --manifest`, for Clocks `scripts/pack-clocks-bundle.py`) into the flavor's assets.
+5. Add one launcher activity, `public final class <Pack>Activity extends LauncherActivity {}`, and declare it in the flavor's manifest with the `LEANBACK_LAUNCHER` category. It has no code of its own: every pack's launch behaviour is `LauncherActivity`'s (next paragraph). Its Dream service calls `LevelLaunch.startChosen(this, player, null)`.
+6. Do **not** copy `LevelCatalog` or `LevelLaunch`; add the source directory to the flavor if it is not in this module.
+7. If any level's textures are larger than the Dream host's default 1024 slot, ship `assets/wf_args.txt` with `--vram-slot-width=...` for the flavor (Clocks does: the village's room page is 2048 wide). `tests/test_dream_host_vram.py` checks every page in the bundle fits.
+8. **Give every level in the roster a settings object** (next section), then run the audit.
 
 **Every pack behaves the same.** A pack is one APK that is both the app and the screensaver, and WF Aquarium and WF Clocks behave identically (Will, 2026‑11‑21). One class, `LauncherActivity`, decides what a start does, through the pure function `LaunchMode`:
 
@@ -141,10 +159,16 @@ Two limits today: the phone form is served by `LevelSettings.java`, which knows 
 
 Adding a type is an **engine change** (C++ and the registry), so it needs the owner's explicit permission in a project that forbids engine edits.
 
+### The settings every level offers (Show framerate)
+
+**Every settings holder also carries the global sheet, declared once** in `wfsource/source/oas/global_settings.inc` (today one field, **Show framerate**, a live checkbox, default off). A holder gets it by ending its `.oas` with `@include global_settings.inc` just before `TYPEFOOTER`; it goes **last**, so none of the holder's own field ids move. A level with no settings of its own places one **`LevelSettings`** object (`levelsettings.oas`, the minimal holder: nothing but the global sheet), made the same way as the table above. The engine's side is one row per global in `wfsource/source/game/global_settings.cc` (`"Show framerate"` sets `fpscounter::enabled`), applied when a holder is edited and once when the level loads.
+
+To add a global setting: one line in `global_settings.inc`, one row in `global_settings.cc`, then regenerate every holder's `.oad` and `.ht` (`oas2oad`, `wfsource/source/oas/regen-headers.sh`), the phone assets (`scripts/gen-settings-capabilities.py`) and rebuild the levels. `tests/test_global_level_settings.py` fails if a holder forgets the include, if the `.inc` and the engine table disagree, or if a compiled `.oad` lacks the field. Plan and roll-out status: [global level settings](../plans/2026-11-22-global-level-settings.md); until the levels are rebuilt, a level built earlier works unchanged and simply lacks the field.
+
 ### How a user opens the settings
 
 - **On the TV remote or a gamepad: hold A, the remote's centre (OK) button, alone for 1 second, in the level.** `Host::gesture` in `engine/runtime_property_host.cpp` counts the hold; a tap, or A with any direction held, is an ordinary level control and resets it. At 1 s the host opens the form of the one editable object, or a picker when several objects are editable. It works only when the level has at least one editable object: an object with a stored, non-read-only field. Without a settings object the gesture does nothing, which is exactly what a level with no settings looks like on a TV.
-- **On a phone: the Dream settings form**, through the `org.worldfoundry.screensaver.settings` provider, which needs the phone asset above.
+- **On a phone: the Dream settings form**, through the `org.worldfoundry.game.aquarium.settings` provider, which needs the phone asset above.
 - **From the coordinator or Homeboard:** the same `getCapabilities`/`setSetting` calls, again from the phone asset.
 
 ### Check it
@@ -156,7 +180,98 @@ python3 scripts/audit-level-settings.py --strict   # exit 1 while any level lack
 
 A level whose row ends in `NOTHING` has no way to open settings. Then test on a device: install the pack, start the level, hold OK for a second, and expect the form to list your fields.
 
-## 6. Check your work
+## 6. Test it on a real Chromecast through the coordinator
+
+Devices belong to the coordinator's queue: use it, not raw `adb`. Everything here is a job; each device runs one job at a time.
+
+1. **Install.** `task chromecast:screensaver:install DEVICE=chromecast-test-01 APK=/absolute/path/screensaver-aquarium-release.apk`. Its launcher check (`verify-launch`) compares the **home-screen icon artwork**; it does not start the app, and neither does a separate `verify-launch` job.
+2. **A normal launch** (the menu): `task chromecast:check DEVICE=chromecast-test-01 APP=screensaver DURATION=20`. It runs `am start -W -n …/org.worldfoundry.screensaver.AquariumActivity`, holds for the duration, then restores the previous screen. Download the evidence with `task chromecast:evidence JOB=<id> OUT=<empty-dir>`: `screenshot.png` shows the screen, `wf.log` the app's own log (section 8).
+3. **A tank for one run** (no menu). `screensaver-show` acts on the **selected** screensaver, so select the app first, then restore the original:
+   ```
+   task chromecast:screensaver:select DEVICE=… COMPONENT=org.worldfoundry.game.aquarium/org.worldfoundry.screensaver.AquariumDreamService
+   WF_CC_LEVEL=aquarium_plants task chromecast:screensaver:show DEVICE=…
+   task chromecast:screensaver:select DEVICE=… COMPONENT=<the component you read before>
+   ```
+   Read the original selection first with `task chromecast:screensaver:status DEVICE=…` (`selected_component`). Evidence: `screensaver.png`, `screensaver.json` (`observed_component` must be `.ScreensaverPreviewActivity`; the `tank` setting must still be the saved value) and `commands.json` (the `am start` line must carry `--es …LEVEL <id>`).
+4. **The Dream.** Select the app's Dream as above, then `task chromecast:screensaver:trigger DEVICE=…`; the job waits for Android to start it. Restore the selection afterwards.
+5. **Keys, Back, and short taps.** A one-shot `check` job can press remote keys and capture the screen at chosen moments, so the menu, a tank, Back and a short tap are all testable without a Remote session. Give the job an `input_script` (MCP `job-submit`, workflow `check`, `app` the registered name, `panel: "require-hidden"`, `duration` longer than the last event): `{"at": 4, "capture": "menu1"}`, `{"at": 5, "key": "DPAD_DOWN", "action": "down"}`, `{"at": 5.02, "key": "DPAD_DOWN", "action": "up"}`, `{"at": 11, "key": "DPAD_CENTER", "action": "down"}`, `{"at": 11.05, "key": "DPAD_CENTER", "action": "up"}`, `{"at": 18, "key": "BACK", "action": "down"}`, `{"at": 18.1, "key": "BACK", "action": "up"}`, and so on (`at` is seconds from the start; `action: "hold"` takes `ms`, 50 at least). The evidence has `input-frame-NNN.png` for each capture, in order, and `input-timeline.json` with every key edge and its **device uptime**: read it for the real tap length, which ran about 3 ms longer than planned (a planned 20 ms tap was held 23 ms; the shortest the coordinator can send is about 1.4 frames at 60 Hz, so it cannot test a tap shorter than one frame). A script whose last Back leaves the app ends `failed` with `target-left-foreground`: that is the checker noticing the app left, so look at the last capture (the Google TV home screen) rather than at the status. A Dream's own screenshot is solid black; prove what it ran from the app's engine log (section 8, selecting the app's Dream first so `screensaver-list` reads that package's `wf.log`).
+
+Gotchas, each one met in practice:
+
+- `screensaver-show` on a screensaver without level support (Seahorse Grid selected) is refused with `screensaver-level-unavailable` before anything launches. That is the check working.
+- **`LEVEL=aquarium_plants` on the `task` line is dropped silently**, whatever the coordinator version: the Taskfile maps `OVERRIDES` but not `LEVEL`, so the client never sees it. Put the level in the environment as `WF_CC_LEVEL=aquarium_plants task chromecast:screensaver:show DEVICE=…` (measured on cast1, 2026‑11‑22: the `am start` line gained `--es …LEVEL aquarium_plants` only then). Before coordinator 0.1.219 the service also ignores a level without an error. Either way, look at `commands.json` (step 3) for the `LEVEL` extra.
+- `screensaver-select` of a component that is **not installed** used to end `plugin-error` and fence the device (a readd had to clear it). From 0.1.219 it is a clean refusal, `invalid-request` with `screensaver-component-not-installed`, health unchanged.
+- A direct screenshot (`capture PERSONAL=true`) is refused while another job holds the device; a queued `capture` job is not.
+- The coordinator tasks run from the `chromecast-coordinator` checkout; the APK path is a file path, not a hash.
+
+### On a phone (the Pixel)
+
+The Pixel is Will's daily phone: ask before a job that takes the screen. A Dream starts only on lock **while charging**, not after idle minutes.
+
+1. **Install** with the same `install` job against `phone-pixel-8-pro`; the phone must be awake and unlocked (`device-locked` otherwise).
+2. **See the controller.** A `check` job launches the app and keeps a screenshot (`panel: require-hidden`): the menu with the joystick at the lower left and D, B, C, A at the lower right. The job closes the app when it ends, so a coordinator `phone-input` tap cannot follow it; driving the app is a person's job.
+3. **Drive it.** Stick down moves the highlight, **A** starts the tank (or tap a row), the stick steers in the tank. In a tank with settings the **entry button at the top right** opens the form; tick, then Apply. A hold on A for one second also opens it where the level takes that gesture.
+4. **A TV is the other half of the check:** on cast1 no controller is drawn and the remote's keys work (section 6, the `input_script` check).
+
+## 7. The tanks: ids, menu names and Dream labels
+
+One manifest line gives three names. `wflevels/aquarium-menu.manifest` is the source; the Dream label is the optional third column. The id is the file name without `-standalone.iff`, and it is what `LEVEL` and `setSetting tank:<id>` take.
+
+| id | Menu name | Dream label |
+|---|---|---|
+| `random` | (not a level) | Random: the saved-choice default; the menu does not list it, and the tray's level chooser does not offer it |
+| `aquarium` | Clownfish & Sea Anemone | Clownfish |
+| `aquarium_blue_shrimp` | Blue Shrimp | Blue Shrimp |
+| `aquarium_betta` | Calm Betta | Betta |
+| `aquarium_jellyfish` | Jellyfish | Jellyfish |
+| `aquarium_lionfish` | Lionfish | Lionfish |
+| `aquarium_plants` | Planted Tank | **Planted Urchin** |
+| `aquarium_arowana` | Asian Arowana | Arowana |
+| `aquarium_tiger_barbs` | Tiger Barbs | Tiger Barbs |
+| `aquarium_thai_reef` | Gulf of Thailand Reef | Thai Reef |
+| `aquarium_thai_reef_anime` | Gulf of Thailand Reef - Anime | Thai Reef Anime |
+| `aquarium_sea_stars` | Sea Stars | Sea Stars |
+| `aquarium_discus` | Discus | Discus |
+
+The menu shows twelve entries (1 of 12); the Dream's `tank` setting offers thirteen choices, those twelve plus `random`. Discus, the twelfth, was appended on 2026‑11‑22 ([plan](../plans/2026-11-22-discus-tank.md)): the roster is append-only, so no earlier tank's index moved. Two frames seen on Cast1 (2026‑11‑21) so you know what right looks like: `aquarium_jellyfish` is jellyfish drifting between two curved glass panes; `aquarium_plants` ("Planted Urchin") is tall plant stems with seahorses clinging to them and a purple sea urchin on the sand. The names differ on purpose, so a tank reported by the wrong name is usually not a bug: check the id.
+
+## 8. Read the engine log
+
+Each package writes its engine log to `/sdcard/Android/data/<package>/files/wf.log`. The coordinator collects it for you: `screensaver-list` saves the last 300 lines as `screensaver-engine.log` when the selected screensaver is a registered one, and a `check` job saves `wf.log` in its evidence. Lines seen so far:
+
+| Line | Meaning |
+|---|---|
+| `=== wf_dream start the menu (…) of N ===` | menu mode: a normal start |
+| `level-menu: showing 12 entries ("WF Aquarium")` | the menu opened with the manifest's twelve tanks |
+| `=== wf_dream start level N ===` | a tank, by its index in the bundle (manifest order), for the Dream, the preview or `LEVEL` |
+| `Back in a tank: returning to the menu`, `Back on the menu: leaving the app` | Back handling |
+| `PLANTS generation=… shoots=… mode=saltwater` | the planted-tank generator ran: the Planted Urchin tank |
+| `PLANTS settings-source=OAD … selector_override=0` | not yet explained. It appeared on a run whose frame showed the requested tank, so it does not mean the level was ignored |
+| `delta too large: …` | a long frame time, normal while a tank loads |
+
+## 9. Register a package with the coordinator
+
+The coordinator knows a screensaver package through one entry in `scripts/wf_device/plugins/android/applications.json` (in the `chromecast-coordinator` repo; the contract is `docs/settings-provider-contract.md` there). Without it `screensaver-show`, the tray and the level chooser do not know the package. Fields, from the Aquarium, Clocks and Seahorse Grid entries:
+
+| Field | What it is | Aquarium | 3D Clocks | Seahorse Grid |
+|---|---|---|---|---|
+| key | the registry name | `screensaver` | `clocks-screensaver` | `seahorse-screensaver` |
+| `package` | Android package | `org.worldfoundry.game.aquarium` | `org.worldfoundry.game.clocks` | `org.worldfoundry.seahorsegrid` |
+| `kind` | `screensaver` | yes | yes | yes |
+| `activity` | what a plain `launch` starts: the menu for the Aquarium | `…/org.worldfoundry.screensaver.AquariumActivity` | `…/org.worldfoundry.screensaver.ClocksActivity` | `…/…SeahorseGridActivity` |
+| `dream_component` | the DreamService to select | `…AquariumDreamService` | `…ClocksDreamService` | `…SeahorseGridDreamService` |
+| `preview_activity` | what `screensaver-show` starts | `…/org.worldfoundry.screensaver.ScreensaverPreviewActivity` | `…/org.worldfoundry.screensaver.ScreensaverPreviewActivity` | its own preview activity |
+| `preview_extra`, `preview_value` | an extra `show` always adds | `…DREAM` = `aquarium` | none | `…DREAM` = `seahorse_grid` |
+| `level_launch_extra` | the one-run extra; present means "supports `LEVEL`" | `…LEVEL` | `…LEVEL` | none |
+| `level_setting_id` | the settings-provider setting whose choices are the levels | `tank` | `clock` | none |
+| `settings_authority` | the content provider for `getCapabilities` and `setSetting` | `org.worldfoundry.game.aquarium.settings` | `org.worldfoundry.game.clocks.settings` | `….seahorsegrid.settings` |
+| `native`, `scenes` | `false`, `[]` for a screensaver | | | |
+
+**When a package is renamed** (as Aquarium and Clocks were on 2026‑11‑22, to `org.worldfoundry.game.<name>`: coordinator 0.1.222), its registry entry's `package`, `activity`, `dream_component`, `preview_activity` and `settings_authority` change in the same administrator upgrade of the coordinator as the Gradle `applicationId`. Either half alone breaks installs: an APK whose package is not the registered one cannot be installed or launched by its registry key. The old package stays installed beside the new one until it is removed by hand, because the coordinator has no uninstall.
+
+The level list is not in the registry: the coordinator and the tray read it from the app's own settings provider (the `level_setting_id` setting's options), and refuse an id the app does not list before any launch. A package with no `level_launch_extra` gets no chooser and a `screensaver-level-unavailable` refusal.
+
+## 10. Check your work
 
 | What | Command |
 |---|---|
@@ -165,6 +280,12 @@ A level whose row ends in `NOTHING` has no way to open settings. Then test on a 
 | The catalogue and `choose()` in plain Java, and its order against the bundle's | `task test-level-catalog` |
 | The screensaver variants follow the manifest | `scripts/in-linux-container.sh python3 -m pytest tests/test_aquarium_screensaver_input.py tests/test_aquarium_screensaver_catalog.py -q` |
 | The menu on the desktop | `task run-aquarium-menu` |
+| The launch-mode decision (every row of section 4) | `task test-aquarium-launch-mode` |
+| The menu on a real Chromecast, a level start, the Dream | section 6 |
 | Every level has a settings object and a way to open it | `python3 scripts/audit-level-settings.py` (section 5) |
+| The on-screen controller and the gamepad stick (pure logic) | `task test-touch-bridge` |
+| The global settings (one declaration, every holder, the engine table) | `scripts/in-linux-container.sh python3 -m pytest tests/test_global_level_settings.py -q` |
+| The engine's table of global settings (a level load against an Apply, two holders) | `task test-global-settings` |
+| Every built level carries the global settings | `python3 scripts/audit-level-settings.py --roster levels --strict` |
 
 Builds and tests run in containers, never on the host: see the Containers section of the repository `CLAUDE.md`.

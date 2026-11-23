@@ -1,4 +1,5 @@
 #include "../../../engine/runtime_options.hpp"
+#include "../../../engine/indexed_palette.h"
 #include "../../../engine/runtime_property_host.hpp"
 #include "../../../engine/room_render_settings.hpp"
 #include "../../../engine/runtime_diagnostics.hpp"
@@ -93,6 +94,7 @@
 #include "levelobj.hp"
 #include "game.hp"
 #include "gamestrm.hp"
+#include "global_settings.hp"
 
 #include "debug_server.hp"
 
@@ -663,6 +665,31 @@ Level::Level
 	Memory* newMemory = new (HALLmalloc) DMalloc(HALLmalloc,plmc->cbObjectsDRam,MEMORY_NAMED("Level DMalloc"));
 	assert( ValidPtr( newMemory ) );
 	_memory.Set(newMemory,&HALLmalloc);
+    // A level may carry indexed palette tables after its ordinary assets.
+    // The sector-aligned locator is in RAM; the payload is immutable and its
+    // selected table is copied into the shared runtime selection.
+    wfpalette::active().reset();
+    bool indexedPaletteLoaded = false;
+    for (unsigned off = 44; off + 12 <= ramSize + 8 && off + 12 <= 2048; off += 4) {
+        uint32 locator[3]; std::memcpy(locator, memoryConfigurationBytes + off, 12);
+        if (locator[0] != IFFTAG('I','P','L','T')) continue;
+        if (indexedPaletteLoaded || locator[1] < 2048 || locator[1] % 2048 ||
+            locator[2] < 16 || locator[2] > 256 * wfpalette::kTableBytes + 4096 ||
+            locator[2] % 2048 || locator[1] > uint32(INT32_MAX - propertyRamStart) - locator[2]) {
+            std::fprintf(stderr, "INDEXED_PALETTE invalid locator\n"); std::abort();
+        }
+        std::vector<std::uint8_t> bundle(locator[2]);
+        const int32 resume = _levelFile->FilePos();
+        _levelFile->SeekRandom(propertyRamStart + locator[1]);
+        _levelFile->ReadBytes(bundle.data(), locator[2]);
+        _levelFile->SeekRandom(resume);
+        uint32 payload = 0; std::memcpy(&payload, bundle.data() + 4, 4);
+        if (std::memcmp(bundle.data(), "IPLT", 4) || payload > locator[2] - 8 ||
+            !wfpalette::active().load(bundle.data() + 8, payload)) {
+            std::fprintf(stderr, "INDEXED_PALETTE invalid payload\n"); std::abort();
+        }
+        indexedPaletteLoaded = true;
+    }
     // Optional pre-rendered glyph catalog in RAM padding. The locator is not
     // part of actor/LVL structures.
     for(unsigned off=44;off+12<=ramSize+8&&off+12<=2048;off+=4){
@@ -915,6 +942,7 @@ Level::Level
 					static_cast<Actor*>(_actors[index])->OnPropertiesChanged(changed.data(), changed.size());
 				const auto* object = _runtimeProperties.object(index);
 				if (object && object->schema == "LevelRenderSettings") applyStainedGlassLight(*object);
+				if (object) wfglobals::applyChanged(*object);   // the settings every level offers
 			};
 			if (objdata->type == Actor::RuntimeDiagnostics_KIND) {
 				const std::map<std::string, std::string> memory = {
@@ -957,6 +985,7 @@ Level::Level
 	wfview::levelSettings()=view;const auto& overrides=wfview::argumentOverrides();
 	wfview::source()=(overrides.authoredAspect>=0.0f||overrides.maximumAspect>=0.0f)?"argument":(authoredFound||maximumFound)?"level":"default";
 	if(const auto* settings=_runtimeProperties.schema("LevelRenderSettings"))applyStainedGlassLight(*settings);
+	wfglobals::applyAtLoad(_runtimeProperties);   // Show framerate and the other global settings
 	wfoptions::registerRuntimeOptions(_runtimeProperties);
 
 	if ( !_camera )
@@ -1040,6 +1069,7 @@ Level::Level
 
 Level::~Level()
 {
+    wfpalette::active().reset();
     if(_bitmapPresenter){_bitmapPresenter->~Presenter();_memory->Free(_bitmapPresenter);_bitmapPresenter=NULL;}
     if(_bitmapBundle){_memory->Free(_bitmapBundle);_bitmapBundle=NULL;}
 
@@ -2011,6 +2041,14 @@ Level::WriteSystemMailbox( int boxnum, Scalar value )
 
 //==============================================================================
 
+void
+Level::SetDisplaySize( int width, int height )
+{
+	_displayTracker.update( width, height );	// effective settings: the level's own, overridden by the arguments
+}
+
+//==============================================================================
+
 Scalar
 Level::ReadSystemMailbox( int boxnum ) const
 {
@@ -2047,6 +2085,16 @@ Level::ReadSystemMailbox( int boxnum ) const
 
         case EMAILBOX_WALL_UTC_OFFSET:
             return Scalar::FromFloat( static_cast<float>( _wallUtcOffset ) );
+
+        // The display's shape, written at level start and on a size change (display_mailboxes.hp).
+        case EMAILBOX_DISPLAY_ASPECT:      return Scalar::FromFloat( _displayTracker.state().aspect );
+        case EMAILBOX_DISPLAY_VFOV:        return Scalar::FromFloat( _displayTracker.state().verticalFov );
+        case EMAILBOX_DISPLAY_WIDTH:       return Scalar::FromFloat( static_cast<float>( _displayTracker.state().width ) );
+        case EMAILBOX_DISPLAY_HEIGHT:      return Scalar::FromFloat( static_cast<float>( _displayTracker.state().height ) );
+        case EMAILBOX_DISPLAY_VIEW_X:      return Scalar::FromFloat( static_cast<float>( _displayTracker.state().viewX ) );
+        case EMAILBOX_DISPLAY_VIEW_Y:      return Scalar::FromFloat( static_cast<float>( _displayTracker.state().viewY ) );
+        case EMAILBOX_DISPLAY_VIEW_WIDTH:  return Scalar::FromFloat( static_cast<float>( _displayTracker.state().viewWidth ) );
+        case EMAILBOX_DISPLAY_VIEW_HEIGHT: return Scalar::FromFloat( static_cast<float>( _displayTracker.state().viewHeight ) );
 
         case EMAILBOX_DELTA_TIME:
             return LevelClock().Delta();

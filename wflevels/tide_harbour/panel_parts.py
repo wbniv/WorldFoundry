@@ -26,7 +26,10 @@ from clock_mesh import Mesh  # noqa: E402
 HERE = Path(__file__).resolve().parent
 # The river: OpenStreetMap contributors (ODbL), 74 points; the copy the mockup reads is docs/plans/2026-11-21-tide-harbour-clock/ (a test keeps them equal)
 CENTRELINE = HERE / "chao_phraya_centreline.json"
-RIVER_WIDTH = 0.018            # metres on the panel
+OUTLINE = HERE / "chao_phraya_outline.json"     # the banks as water polygons (fetch_river_outline.py): (c) OpenStreetMap contributors, ODbL
+RIVER_WIDTH = 0.018            # metres on the panel: only the station markers' offset now (the river is drawn at its true width)
+COAST_WIDTH = 0.006            # the coast's stroke, metres on the panel
+STATION_DX = RIVER_WIDTH / 2 + 0.035      # a station marker stands this far east of the river's centreline, on the bank
 WIN_BASE = pn.WIN_H / 2 - 0.02     # the decimal point sits at a digit's foot
 LAT_M = 111.2                  # kilometres per degree of latitude
 
@@ -124,8 +127,12 @@ def column_body_mesh() -> Mesh:
     while the map slides under them."""
     m = Mesh("panel_col_body")
     cw = 0.026
-    _quad(m, pn.COL_X - cw - 0.008, pn.COL_V0 - 0.008, pn.COL_X + cw + 0.008, pn.COL_V1 + 0.008, "p_ink")
-    _quad(m, pn.COL_X - cw, pn.COL_V0, pn.COL_X + cw, pn.COL_V1, "p_stone")
+    x0, x1, z0, z1, t = pn.COL_X - cw, pn.COL_X + cw, pn.COL_V0, pn.COL_V1, 0.008
+    _quad(m, x0, z0, x1, z1, "p_stone")                                    # the tube; its frame is four strips round it, not a quad under it:
+    _quad(m, x0 - t, z0 - t, x0, z1 + t, "p_ink")                          # two quads of one depth z-fight (the column looked garbled on cast1)
+    _quad(m, x1, z0 - t, x1 + t, z1 + t, "p_ink")
+    _quad(m, x0, z0 - t, x1, z0, "p_ink")
+    _quad(m, x0, z1, x1, z1 + t, "p_ink")
     for metres in (1.0, 2.0, 3.0):
         v = pn.level_v(metres)
         _quad(m, pn.COL_X - cw - 0.03, v - 0.003, pn.COL_X - cw, v + 0.003, "p_ink")
@@ -153,6 +160,10 @@ def column_pointer_mesh() -> Mesh:
     return m
 
 
+def outline() -> dict:
+    return json.loads(OUTLINE.read_text())
+
+
 def river_points() -> List[Tuple[float, float]]:
     """The river as panel metres about the map's origin (latitude MAP_LAT0, longitude MAP_LON0): x east, z north."""
     doc = json.loads(CENTRELINE.read_text())
@@ -165,33 +176,107 @@ def map_xy(lon: float, lat: float) -> Tuple[float, float]:
     return (lon - pn.MAP_LON0) * cosl * LAT_M * pn.M_PER_KM, (lat - pn.MAP_LAT0) * LAT_M * pn.M_PER_KM
 
 
+def _clip_segment(p: Tuple[float, float], q: Tuple[float, float], x0: float, x1: float, z0: float, z1: float):
+    """Liang-Barsky: the part of the segment p-q inside the rectangle, or None."""
+    t0, t1 = 0.0, 1.0
+    dx, dz = q[0] - p[0], q[1] - p[1]
+    for pk, qk in ((-dx, p[0] - x0), (dx, x1 - p[0]), (-dz, p[1] - z0), (dz, z1 - p[1])):
+        if pk == 0:
+            if qk < 0:
+                return None
+        else:
+            r = qk / pk
+            if pk < 0:
+                if r > t1:
+                    return None
+                t0 = max(t0, r)
+            else:
+                if r < t0:
+                    return None
+                t1 = min(t1, r)
+    return (p[0] + t0 * dx, p[1] + t0 * dz), (p[0] + t1 * dx, p[1] + t1 * dz)
+
+
+def _clip_rect(poly: List[Tuple[float, float]], x0: float, x1: float, z0: float, z1: float) -> List[Tuple[float, float]]:
+    """Sutherland-Hodgman: a convex polygon cut to the rectangle, vertices in the same turning order."""
+    def cut(pts, inside, cross):
+        out = []
+        for i, p in enumerate(pts):
+            q = pts[(i + 1) % len(pts)]
+            if inside(p):
+                out.append(p)
+                if not inside(q):
+                    out.append(cross(p, q))
+            elif inside(q):
+                out.append(cross(p, q))
+        return out
+    at_x = lambda xv: (lambda p, q: (xv, p[1] + (q[1] - p[1]) * (xv - p[0]) / (q[0] - p[0])))
+    at_z = lambda zv: (lambda p, q: (p[0] + (q[0] - p[0]) * (zv - p[1]) / (q[1] - p[1]), zv))
+    for inside, cross in ((lambda p: p[0] >= x0, at_x(x0)), (lambda p: p[0] <= x1, at_x(x1)),
+                          (lambda p: p[1] >= z0, at_z(z0)), (lambda p: p[1] <= z1, at_z(z1))):
+        poly = cut(poly, inside, cross) if poly else poly
+    return poly
+
+
 def map_mesh() -> Mesh:
-    """The river as a ribbon of quads with a hexagon at each joint, the Navy's station as a small tower, the Bangkok Bar
-    tide staff, and three ripples for the sea off the mouth. The place names are glyphs: Blender adds them."""
+    """The river as the water polygons of its real banks (chao_phraya_outline.json: OpenStreetMap, ODbL; fetch_river_outline.py),
+    the Gulf's coast either side of the mouth as a thin stroke, the Navy's station as a small tower, the Bangkok Bar tide staff,
+    and three ripples for the sea off the mouth. The place names are glyphs: Blender adds them."""
     m = Mesh("panel_map")
-    pts = river_points()
-    half = RIVER_WIDTH / 2
-    for p, q in zip(pts, pts[1:]):
-        dx, dz = q[0] - p[0], q[1] - p[1]
-        n = math.hypot(dx, dz)
-        if n == 0.0:
-            continue
-        nx, nz = -dz / n * half, dx / n * half
-        a, b, c, d = (p[0] + nx, p[1] + nz), (q[0] + nx, q[1] + nz), (q[0] - nx, q[1] - nz), (p[0] - nx, p[1] - nz)
-        area = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
-        quad = [a, b, c, d] if area > 0 else [a, d, c, b]
-        m.face([(x, 0.0, z) for x, z in quad], "p_water")
-    for x, z in pts:
-        m.disc_y(x, z, half, 0.0, "p_water", sides=6)
+    pts = river_points()                                                   # the centreline: only where the window's extent comes from
+    left, right = -pn.W / 2 + 0.03, pn.COL_X - 0.09                         # the window the map may fill (the fit test pins it)
+    south, north = min(z for _x, z in pts) - 0.3, max(z for _x, z in pts) + 0.1
+    for poly in outline()["polygons"]:                                     # the river's real banks and width, under the stroke
+        xy = [map_xy(lon, lat) for lon, lat in poly["pts"]]
+        used: Dict[int, int] = {}                                         # a polygon's vertex -> its index in the mesh, added when first used
+
+        def vertex(i: int) -> int:
+            if i not in used:
+                used[i] = len(m.vertices)
+                m.vertices.append((xy[i][0], 0.0, xy[i][1]))
+            return used[i]
+
+        for a, b, c in poly["tris"]:                                      # counter-clockwise in (x, z): faces the camera
+            tri = [xy[a], xy[b], xy[c]]
+            if all(left <= x <= right and south <= z <= north for x, z in tri):
+                m.faces.append((vertex(a), vertex(b), vertex(c)))
+                m.colors.append("p_water")
+                continue
+            piece = _clip_rect(tri, left, right, south, north)            # a triangle over the window's edge: cut to it
+            for k in range(1, len(piece) - 1):
+                p0, p1, p2 = piece[0], piece[k], piece[k + 1]
+                if (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p1[1] - p0[1]) * (p2[0] - p0[0]) > 1e-9:
+                    start = len(m.vertices)
+                    m.vertices.extend((x, 0.0, z) for x, z in (p0, p1, p2))
+                    m.faces.append((start, start + 1, start + 2))
+                    m.colors.append("p_water")
+    for line in outline()["coast"]:                                        # the Gulf's coast either side of the mouth: a thin stroke
+        pts_c = [map_xy(lon, lat) for lon, lat in line]
+        for p, q in zip(pts_c, pts_c[1:]):
+            h = COAST_WIDTH / 2 + 1e-6                                     # the stroke's own half-width stays inside the window
+            seg = _clip_segment(p, q, left + h, right - h, south + h, north - h)
+            if seg is None:
+                continue
+            (x0, z0), (x1, z1) = seg
+            dx, dz = x1 - x0, z1 - z0
+            n = math.hypot(dx, dz)
+            if n < 1e-6:
+                continue
+            nx, nz = -dz / n * COAST_WIDTH / 2, dx / n * COAST_WIDTH / 2
+            quad = [(x0 + nx, z0 + nz), (x1 + nx, z1 + nz), (x1 - nx, z1 - nz), (x0 - nx, z0 - nz)]
+            area = (quad[1][0] - quad[0][0]) * (quad[2][1] - quad[0][1]) - (quad[1][1] - quad[0][1]) * (quad[2][0] - quad[0][0])
+            m.face([(x, 0.0, z) for x, z in (quad if area > 0 else [quad[0], quad[3], quad[2], quad[1]])], "p_water")
     for k in range(3):                                                     # ripples off the mouth
         x0, z0 = pts[0][0] - 0.14 + 0.03 * k, pts[0][1] - 0.07 - 0.04 * k
         for i in range(4):
             _quad(m, x0 + 0.05 * i, z0 + (0.008 if i % 2 else 0.0) - 0.003, x0 + 0.05 * i + 0.045, z0 + (0.008 if i % 2 else 0.0) + 0.003, "p_water")
     doc = json.loads(CENTRELINE.read_text())
     hx, hz = map_xy(doc["station_HD"]["lon"], doc["station_HD"]["lat"])      # the tower: this harbour
+    hx += STATION_DX                                                          # on the east bank: on the ribbon it would z-fight with the water
     _quad(m, hx - 0.02, hz, hx + 0.02, hz + 0.07, "p_stone")
     _tri(m, (hx - 0.03, hz + 0.07), (hx + 0.03, hz + 0.07), (hx, hz + 0.115), "p_gold")
     bx, bz = map_xy(doc["station_BB"]["lon"], doc["station_BB"]["lat"])      # Bangkok Bar: a tide staff
+    bx += STATION_DX
     _quad(m, bx - 0.004, bz - 0.04, bx + 0.004, bz + 0.04, "p_ink")
     for dz in (-0.02, 0.01):
         _quad(m, bx - 0.02, bz + dz - 0.003, bx + 0.02, bz + dz + 0.003, "p_ink")

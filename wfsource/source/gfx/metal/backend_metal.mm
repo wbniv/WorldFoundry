@@ -34,6 +34,7 @@
 
 #import <Metal/Metal.h>
 #import <simd/simd.h>
+#include "../../../../engine/indexed_palette.h"
 // CAMetalLayer / CAMetalDrawable for the Phase 4 windowed path. Metal.h does
 // NOT pull these in — they are QuartzCore types — which is what broke build
 // 6ab051f8b90e9b17b45ad5b1. Present on both Apple targets, and QuartzCore is
@@ -215,6 +216,9 @@ vertex VertexOut wf_vs(VertexIn v                  [[stage_in]],
 fragment float4 wf_fs(VertexOut v                  [[stage_in]],
                       constant Uniforms& u         [[buffer(1)]],
                       texture2d<float> tex         [[texture(0)]],
+#ifdef WF_INDEXED_PALETTE
+                      texture2d<float> index_palette [[texture(1)]],
+#endif
                       sampler          smp         [[sampler(0)]])
 {
     // WF_STYLE selects the style program. Without it this text preprocesses to
@@ -250,6 +254,16 @@ fragment float4 wf_fs(VertexOut v                  [[stage_in]],
     if (u.use_tex != 0) {
         float is_white = step(0.99, min(v.color.r, min(v.color.g, v.color.b)));
         float3 sample=tex.sample(smp,v.uv).rgb;
+#ifdef WF_INDEXED_PALETTE
+        if (u._pad != 0) {
+            float2 dims = float2(tex.get_width(), tex.get_height());
+            uint2 p = uint2(clamp(floor(v.uv * dims), float2(0.0), dims - 1.0));
+            float3 index_texel = tex.read(p).rgb;
+            uint hi = uint(floor(index_texel.r * 255.0 + 0.5)) / 8;
+            uint lo = uint(floor(index_texel.g * 255.0 + 0.5)) / 8;
+            sample = index_palette.read(uint2(hi * 8 + lo, 0)).rgb;
+        }
+#endif
         float3 albedo=v.palette_dark.a>0.5 ? mix(v.palette_dark.xyz,v.palette_light,clamp((sample.r-.08)/.85,0.0,1.0)) : ((u.use_tex & 2)!=0 ? sample*v.color : mix(v.color,sample,is_white));
         c=float4(albedo*WF_LIT,1.0);
     }
@@ -458,6 +472,11 @@ public:
     {
         // Per-vertex endpoints preserve batching through sorted fish fins.
         _paletteEnabled=e;_paletteDark=dark;_paletteLight=light;
+    }
+    void SetIndexedPalette(bool enabled) override
+    {
+        if (_indexedPaletteEnabled != enabled) Flush();
+        _indexedPaletteEnabled = enabled;
     }
     void SetOpacity(float opacity) override
     {
@@ -716,6 +735,11 @@ private:
     // active, so a level with every style field at 0 runs the pre-style program.
     id<MTLRenderPipelineState> _stylePipeline      = nil;
     id<MTLRenderPipelineState> _styleBlendPipeline = nil;
+    id<MTLRenderPipelineState> _indexedPipeline = nil;
+    id<MTLRenderPipelineState> _indexedBlendPipeline = nil;
+    id<MTLRenderPipelineState> _indexedStylePipeline = nil;
+    id<MTLRenderPipelineState> _indexedStyleBlendPipeline = nil;
+    MTLVertexDescriptor* _vertexDescriptor = nil;
     id<MTLDepthStencilState> _blendDepth = nil;
     id<MTLDepthStencilState> _overlayDepth = nil;
     bool _overlay = false;
@@ -728,6 +752,9 @@ private:
     float _opacity = 1.0f;
     bool _modulateTexture = false;
     bool _paletteEnabled=false; unsigned _paletteDark=0,_paletteLight=0xffffff;
+    bool _indexedPaletteEnabled=false;
+    RBTextureHandle _indexedPaletteTexture=nullptr;
+    std::uint64_t _indexedPaletteRevision=0;
     id<MTLDepthStencilState>   _depthState      = nil;
     id<MTLRenderCommandEncoder> _encoder        = nil;
     id<MTLSamplerState>        _sampler         = nil;
@@ -812,6 +839,7 @@ private:
         id<MTLFunction> fs = [lib newFunctionWithName:@"wf_fs"];
 
         MTLVertexDescriptor* vd = [[MTLVertexDescriptor alloc] init];
+        _vertexDescriptor = vd;
         // attribute 0: pos (float3)
         vd.attributes[0].format      = MTLVertexFormatFloat3;
         vd.attributes[0].offset      = offsetof(Vert, x);
@@ -956,7 +984,46 @@ private:
         _boundTexture = _curTexture ? _curTexture->GetTextureHandle() : NULL;
         if(_bitmapPass)_boundTexture=_bitmapHandle;
         u.use_tex = _bitmapPass ? 4 : (_boundTexture ? (_modulateTexture ? 3 : 1) : 0);
-        u._pad        = 0;
+        u._pad        = _indexedPaletteEnabled ? 1 : 0;
+    }
+
+    bool EnsureIndexedPipelines()
+    {
+        if (_indexedPipeline) return true;
+        NSError* error = nil;
+        NSString* source = [NSString stringWithUTF8String:kMSL];
+        MTLCompileOptions* indexedOptions = [[MTLCompileOptions alloc] init];
+        indexedOptions.preprocessorMacros = @{ @"WF_INDEXED_PALETTE": @1 };
+        MTLCompileOptions* styledOptions = [[MTLCompileOptions alloc] init];
+        styledOptions.preprocessorMacros = @{ @"WF_INDEXED_PALETTE": @1, @"WF_STYLE": @1 };
+        id<MTLLibrary> normal = [_device newLibraryWithSource:source options:indexedOptions error:&error];
+        if (!normal) { NSLog(@"wf_game: indexed shader compile failed: %@", error); return false; }
+        id<MTLLibrary> styled = [_device newLibraryWithSource:source options:styledOptions error:&error];
+        if (!styled) { NSLog(@"wf_game: indexed style shader compile failed: %@", error); return false; }
+        MTLRenderPipelineDescriptor* pd = [[MTLRenderPipelineDescriptor alloc] init];
+        pd.vertexDescriptor = _vertexDescriptor;
+        pd.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+        pd.depthAttachmentPixelFormat = kDepthFormat;
+        pd.vertexFunction = [normal newFunctionWithName:@"wf_vs"];
+        pd.fragmentFunction = [normal newFunctionWithName:@"wf_fs"];
+        _indexedPipeline = [_device newRenderPipelineStateWithDescriptor:pd error:&error];
+        pd.vertexFunction = [styled newFunctionWithName:@"wf_vs"];
+        pd.fragmentFunction = [styled newFunctionWithName:@"wf_fs"];
+        _indexedStylePipeline = [_device newRenderPipelineStateWithDescriptor:pd error:&error];
+        pd.colorAttachments[0].blendingEnabled = YES;
+        pd.colorAttachments[0].sourceRGBBlendFactor = MTLBlendFactorSourceAlpha;
+        pd.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
+        pd.colorAttachments[0].sourceAlphaBlendFactor = MTLBlendFactorOne;
+        pd.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
+        _indexedStyleBlendPipeline = [_device newRenderPipelineStateWithDescriptor:pd error:&error];
+        pd.vertexFunction = [normal newFunctionWithName:@"wf_vs"];
+        pd.fragmentFunction = [normal newFunctionWithName:@"wf_fs"];
+        _indexedBlendPipeline = [_device newRenderPipelineStateWithDescriptor:pd error:&error];
+        if (!_indexedPipeline || !_indexedStylePipeline || !_indexedBlendPipeline || !_indexedStyleBlendPipeline) {
+            NSLog(@"wf_game: indexed pipeline creation failed: %@", error);
+            return false;
+        }
+        return true;
     }
 
     void Flush()
@@ -1015,9 +1082,16 @@ private:
 
         // SetStyleShading flushes whenever activity changes, so one batch has one program.
         const bool styled = RBStyleShadingActive(_style);
-        [_encoder setRenderPipelineState:(_bitmapPass||_opacity < 1.0f
-                                          ? (styled ? _styleBlendPipeline : _blendPipeline)
-                                          : (styled ? _stylePipeline : _pipeline))];
+        if (_indexedPaletteEnabled && !EnsureIndexedPipelines()) std::abort();
+        if (!_indexedPaletteEnabled) {
+            [_encoder setRenderPipelineState:(_bitmapPass||_opacity < 1.0f
+                                              ? (styled ? _styleBlendPipeline : _blendPipeline)
+                                              : (styled ? _stylePipeline : _pipeline))];
+        } else {
+            [_encoder setRenderPipelineState:(_bitmapPass||_opacity < 1.0f
+                                              ? (styled ? _indexedStyleBlendPipeline : _indexedBlendPipeline)
+                                              : (styled ? _indexedStylePipeline : _indexedPipeline))];
+        }
         if (_depthState)
             [_encoder setDepthStencilState:(_overlay ? _overlayDepth : (_bitmapPass||_opacity < 1.0f ? _blendDepth : _depthState))];
         // One batch = one texture (DrawTriangle flushes on a texture change),
@@ -1026,6 +1100,25 @@ private:
         [_encoder setFragmentTexture:(u.use_tex ? HandleToTex(_boundTexture)
                                                 : _whiteTexture)
                              atIndex:0];
+        if (_indexedPaletteEnabled) {
+            const auto& palette = wfpalette::active();
+            const auto* rgb = palette.colors();
+            if (!rgb) { std::fprintf(stderr, "INDEXED_PALETTE missing table\n"); std::abort(); }
+            if (!_indexedPaletteTexture || _indexedPaletteRevision != palette.revision()) {
+                unsigned char rgba[256 * 4];
+                for (int i = 0; i < 256; ++i) {
+                    rgba[4*i] = rgb[3*i]; rgba[4*i+1] = rgb[3*i+1];
+                    rgba[4*i+2] = rgb[3*i+2]; rgba[4*i+3] = 255;
+                }
+                RBTextureHandle next = CreateTexture(256, 1, RB_TEX_RGBA8, rgba);
+                if (!next) { std::fprintf(stderr, "INDEXED_PALETTE texture allocation failed\n"); std::abort(); }
+                if (_indexedPaletteTexture) DestroyTexture(_indexedPaletteTexture);
+                _indexedPaletteTexture = next;
+                _indexedPaletteRevision = palette.revision();
+            }
+        }
+        if (_indexedPaletteEnabled)
+            [_encoder setFragmentTexture:HandleToTex(_indexedPaletteTexture) atIndex:1];
         [_encoder setFragmentSamplerState:(_bitmapPass ? _glyphSampler : _sampler) atIndex:0];
         [_encoder setVertexBuffer:vbuf offset:0 atIndex:0];
         [_encoder setVertexBytes:&u

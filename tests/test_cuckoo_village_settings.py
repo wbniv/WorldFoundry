@@ -1,4 +1,4 @@
-"""CuckooVillageSettings: the type's six fields and its registration.
+"""CuckooVillageSettings: the type's seven fields and its registration.
 
 docs/plans/2026-11-21-cuckoo-village.md ("Level settings"). The type is modelled on ReefSettings and
 SeaStarsSettings (53d7c718): an .oas schema, the generated .oad and .ht, one line appended to each
@@ -23,10 +23,11 @@ OAS2OAD = ROOT / "wftools/oas2oad-rs/target/release/oas2oad"
 FIELDS = {
     "Bavaria mode": (0, 1, 0),
     "Seasonal events": (0, 1, 1),
-    "Christmas candles": (0, 1, 1),
+    "Candles all year": (0, 1, 0),
     "Window lights": (0, 1, 1),
     "Sound": (0, 1, 1),
     "Camera motion": (0, 1, 0),
+    "Detailed flowers": (0, 1, 1),
 }
 TYPE = "CuckooVillageSettings"
 
@@ -40,7 +41,7 @@ def catalog():
     return json.loads(out)
 
 
-def test_the_six_fields_have_the_plan_ranges_and_defaults_and_are_live():
+def test_the_seven_fields_have_the_plan_ranges_and_defaults_and_are_live():
     fields = {f["key"]: f for f in catalog()["fields"]}
     for label, (low, high, default) in FIELDS.items():
         assert label in fields, label
@@ -49,9 +50,12 @@ def test_the_six_fields_have_the_plan_ranges_and_defaults_and_are_live():
         assert f["live"], f"{label} must be SHOW_AS_LIVE or the forms cannot edit it"
 
 
-def test_only_the_six_settings_fields_are_live():
+GLOBAL_FIELDS = {"Show framerate"}   # oas/global_settings.inc: every settings type carries these
+
+
+def test_only_the_seven_settings_fields_and_the_global_ones_are_live():
     live = {f["key"] for f in catalog()["fields"] if f["live"]}
-    assert live == set(FIELDS)
+    assert live == set(FIELDS) | GLOBAL_FIELDS
 
 
 def test_the_defaults_are_classic_mode_with_everything_else_on():
@@ -59,7 +63,8 @@ def test_the_defaults_are_classic_mode_with_everything_else_on():
     only take effect with the feature they belong to (events need Bavaria mode)."""
     assert FIELDS["Bavaria mode"][2] == 0
     assert FIELDS["Camera motion"][2] == 0, "0 is Journey, the shipped camera"
-    assert all(FIELDS[k][2] == 1 for k in ("Seasonal events", "Christmas candles", "Window lights", "Sound"))
+    assert all(FIELDS[k][2] == 1 for k in ("Seasonal events", "Window lights", "Sound", "Detailed flowers"))
+    assert FIELDS["Candles all year"][2] == 0, "the candles are lit 1 Dec to 6 Jan regardless; the switch adds the rest of the year"
 
 
 def test_help_text_has_no_commas_the_preprocessor_would_split_on():
@@ -75,11 +80,12 @@ def test_the_type_is_registered_once_and_appended_after_every_existing_type():
     into every level. Every registry file must agree on that position."""
     mac = re.findall(r"^\s*OBJECTENTRY\((\w+),", (OAS / "objects.mac").read_text(), re.M)
     assert mac.count(TYPE) == 1
-    assert mac[-1] == TYPE and mac[-2] == "TideHarbourSettings", "appended last, after the previous newest type"
+    assert mac.index(TYPE) == mac.index("TideHarbourSettings") + 1, "appended right after the type that was newest then"
     position = mac.index(TYPE)
     kinds = re.findall(r"^\s*(\w+)_KIND,", (OAS / "objects.h").read_text(), re.M)
     assert kinds.index(TYPE) == position + (len(kinds) - len(mac))
-    assert re.findall(r"^\s*(\w+)_KIND,", (OAS / "objects.e").read_text(), re.M)[-1] == TYPE
+    kinds_e = re.findall(r"^\s*(\w+)_KIND,", (OAS / "objects.e").read_text(), re.M)
+    assert kinds_e.index(TYPE) == kinds_e.index("TideHarbourSettings") + 1
     names = re.findall(r'^\s*"(\w+)",', (OAS / "objects.names").read_text(), re.M)
     assert names.index(TYPE) == names.index("TideHarbourSettings") + 1
     lc = (OAS / "objects.lc").read_text().split()

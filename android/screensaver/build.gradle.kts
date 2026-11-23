@@ -41,9 +41,9 @@ android {
     productFlavors {
         create("aquarium") {
             dimension = "dream"
-            applicationId = "org.worldfoundry.screensaver"
-            versionCode = 3
-            versionName = "0.3"
+            applicationId = "org.worldfoundry.game.aquarium"   // org.worldfoundry.game.{{name}}, Will 2026-11-22 (was org.worldfoundry.screensaver)
+            versionCode = 4
+            versionName = "0.4"
         }
         create("seahorse") {
             dimension = "dream"
@@ -53,7 +53,7 @@ android {
         }
         create("clocks") {                 // WF Clocks: every clock of wflevels/clocks-menu.manifest
             dimension = "dream"
-            applicationId = "org.worldfoundry.clocks"
+            applicationId = "org.worldfoundry.game.clocks"
             versionCode = 1
             versionName = "0.1"
         }

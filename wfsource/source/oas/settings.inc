@@ -18,9 +18,10 @@
 @* a holder of values that never renders and never moves, like Target: no
 @* mesh, no mass, invisible.
 @*
-@* Fields every settings holder comes to share go after actor.inc, in their
-@* own property sheet. Adding one changes the struct of every settings type,
-@* so do it only before a level that uses one is shipped.
+@* Fields every settings holder comes to share live in global_settings.inc, which
+@* each holder includes as the LAST thing before TYPEFOOTER, so a holder's own
+@* field ids (and the ids its directors and phone assets use) never move. Add a
+@* shared field there, not here (docs/plans/2026-11-22-global-level-settings.md).
 @*============================================================================
 
 @ifndef(DEFAULT_MASS)(@define DEFAULT_MASS 0)

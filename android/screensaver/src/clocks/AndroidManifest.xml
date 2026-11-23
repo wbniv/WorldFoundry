@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- WF Clocks (org.worldfoundry.clocks): every clock of wflevels/clocks-menu.manifest in one app.
+<!-- WF Clocks (org.worldfoundry.game.clocks): every clock of wflevels/clocks-menu.manifest in one app.
      docs/plans/2026-11-21-tide-harbour-clock.md, "The bundle and the chooser". -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
@@ -12,6 +12,7 @@
             android:configChanges="orientation|screenSize|smallestScreenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
@@ -26,10 +27,10 @@
             </intent-filter>
             <meta-data android:name="android.service.dream" android:resource="@xml/dream" />
             <meta-data android:name="org.worldfoundry.screensaver.SETTINGS_AUTHORITY"
-                android:value="org.worldfoundry.clocks.settings" />
+                android:value="${applicationId}.settings" />
         </service>
         <provider android:name=".ClocksSettingsProvider"
-            android:authorities="org.worldfoundry.clocks.settings"
+            android:authorities="${applicationId}.settings"
             android:exported="true" />
     </application>
 </manifest>

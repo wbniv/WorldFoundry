@@ -7,4 +7,5 @@ TYPEHEADER(Level Render Settings,LevelRenderSettings)
     TYPEENTRYFIXED32(Authored aspect,,0,6553600,0,SHOW_AS_NUMBER,"Authored camera aspect; zero uses the default")
     TYPEENTRYFIXED32(Maximum aspect,,0,6553600,0,SHOW_AS_NUMBER,"Maximum camera aspect; zero disables the cap")
     PROPERTY_SHEET_FOOTER
+	@include global_settings.inc
 TYPEFOOTER

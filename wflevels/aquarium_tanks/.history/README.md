@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-10-05](https://github.com/wbniv/WorldFoundry/commit/1feaf974) | Implement single-mesh lionfish rig and suction feeding |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/8d165c7c) | Record plant atlas resolution profiles and retain 256 default |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/e45a7ac1) | Reconcile plant docs with implemented runtime and final texture measurements |
 | [2026-10-04](https://github.com/wbniv/WorldFoundry/commit/0aa37847) | Add seeded growing plant tank, settings and leaf textures |
 | [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/9cef6dde) | Integrate aquarium tanks, feeding, and flowing betta fins |
 
 <!--history-meta v1
+1feaf974	author	Will Norris
+1feaf974	added	51
+1feaf974	deleted	1
+1feaf974	files	1
+1feaf974	body	Add selective native fin/jaw deformation, shared 256px texture maps and stable\nper-fish palettes. Preserve translucent batching across palette changes and\nintegrate transient suction, swept mouth capture and intraoral transport.\n\nInclude rebuilt Aquarium assets, the updated A3 poster, documented engine\napproval and permission rule, and baseline/final profiles on both Chromecasts.\nFix the separately approved debug-bridge command initialization and bounds.\n\nValidation: 57 tests passed; native feeding checks and all eight selector,\nBack-to-menu and Home/resume checks passed on both Chromecasts. Final normal\nAPK restored and verified on both devices. Cast1 retains about 30 FPS; cast2\nruns about 40 FPS versus 60 in the controlled baseline, as reported.
 8d165c7c	author	Will Norris
 8d165c7c	added	15
 8d165c7c	deleted	0

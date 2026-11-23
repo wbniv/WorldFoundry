@@ -124,6 +124,15 @@ The level has two settings owners, both `target` actors in `CONFIG` at (2, −4,
 | **Field types** (`FieldTypes`, schema `FieldTypes`) | [field_types.py](field_types.py) → `field-types.oas` | One field per case in the [touch settings examples](../../docs/plans/2026-10-29-touch-settings-examples.json): 27 rows in six sections (Numbers 9, Choices 9, Switches 2, Text 4, References 1, Actions 2). Labels and values come from that JSON. The action row has no consumer and does nothing |
 | **Runtime settings** (`RuntimeSettings`, schema `Settings`) | [settings_fixture.py](settings_fixture.py) → `runtime-settings.oas` | Runtime Options (79 rows in 8 groups), Level Memory (4), Level Behavior (2): 85 rows |
 
+**Every level offers Show framerate.** It is the one *global* setting
+([`global_settings.inc`](../../wfsource/source/oas/global_settings.inc), a **Display** sheet that goes last in every
+settings holder). The Field types owner carries it (its generator ends the schema with
+`@include global_settings.inc`); the Runtime settings owner already has the same switch as its `Show FPS` row.
+A level you build from this baseline needs nothing extra: if it places no settings holder of its own, the level
+compiler adds a default `LevelSettings` one, so its settings form lists **Show framerate** (hold A on a TV, the
+entry button on a phone). Give the level its own holder (see
+[Settings actors](../../docs/level-building.md#settings-actors)) and that holder carries the sheet too.
+
 `Show FPS` is authored editable on purpose: the engine lists an owner, and installs the
 runtime-options consumer on it, only when it has an editable field at load. After that,
 the backend decides which runtime rows are editable. See the

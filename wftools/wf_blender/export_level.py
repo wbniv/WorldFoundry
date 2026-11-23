@@ -744,6 +744,10 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
             tex=str(mat.get('wf_palette_texture',''))
             if not tex: raise ValueError('Palette material missing shared texture')
             flags |= 2|64
+        if mat.get('wf_indexed_palette', False):
+            if not tex or not (flags & 2): raise ValueError('Indexed palette material needs an index image')
+            if flags & 64: raise ValueError('Indexed and two-color palettes cannot be combined')
+            flags |= 128
         if mat.get('wf_double_sided', False): flags |= 8
         if mat.get('wf_prelit', False): flags |= 4
         if mat.get('wf_baked_vertex_color', False):

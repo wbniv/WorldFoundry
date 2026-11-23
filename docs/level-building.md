@@ -353,6 +353,27 @@ Live fields can be changed during play; other fields are read-only in the editor
 The baseline level also places `RuntimeDiagnostics`, which exposes runtime options
 and read-only memory and behavior diagnostics in a separate form.
 
+**Every level offers the settings in `wfsource/source/oas/global_settings.inc`**
+(today **Show framerate**, a checkbox that switches the frames-per-second overlay,
+default off). You do nothing to get them:
+
+- A holder you write ends its `.oas` with `@include global_settings.inc` just before
+  `TYPEFOOTER`, so the **Display** sheet is its last sheet and none of its own field
+  ids move. `tests/test_global_level_settings.py` fails if one forgets.
+- A level that places **no** holder gets one from the level compiler: `levcomp`
+  appends a `LevelSettings` object (the minimal holder: only the global sheet) when
+  no object's class declares the global keys, last in the level so no object index
+  moves. `levcomp ... --no-default-settings` turns that off (a fixture that must
+  compile unchanged). It acts only when the OAD directory holding `global_settings.inc`
+  is given, which the level build scripts do.
+- To add another global setting, add one line to `global_settings.inc` and one row to
+  the table in `wfsource/source/game/global_settings.cc`; regenerate every holder's
+  `.oad` and `.ht`, then rebuild the levels. `python3 scripts/audit-level-settings.py
+  --roster levels --strict` lists the levels a player can reach and fails while one
+  lacks the settings.
+
+Plan: [global level settings](plans/2026-11-22-global-level-settings.md).
+
 ### Materials and Cast1 performance
 
 The modern renderer supports painted textures, palette recoloring, lighting,
@@ -1018,7 +1039,7 @@ WF mailboxes form a hierarchy. Understanding scope prevents the most common cros
 |---|---|---|---|
 | 0–1 | `EMAILBOX_FALSE` / `EMAILBOX_TRUE` | Global, read-only | Set by engine at level load; write attempts are silently dropped (assert in debug builds). Use mb[1] as a "always-true" visibility mailbox. |
 | 2–1900 | Global user | **Shared across all actors** | Director, player, cube actors, etc. all read/write the same cells. `GLOBAL_USER_MAX` is 1900, inclusive (raised from 999 on 2026‑05‑09; [`mailbox.inc`](../wfsource/source/mailbox/mailbox.inc)). Q✱bert's cube-state mailboxes (200–227) and round counter (425) live here, as do the Minute Machine's scratch cells (600–699). A script may also use any of them as another actor's `wf_Visibility Mailbox`: write 1 or 0 and the actor is drawn or not (the tide spike used 700–716). |
-| 1901–1926 | Global system | Global, side-effects | `GLOBAL_SYSTEM_START` is 1901 and `GLOBAL_SYSTEM_MAX` 1927, exclusive ([`mailbox.inc`](../wfsource/source/mailbox/mailbox.inc)); this table said 1000–1999 until 2026‑11‑21. `INDEXOF_CAMSHOT` = **1921** writes the active camera. **It is NOT 1021**: an ActBoxOR/script that writes the wrong slot silently fails to switch the camera. 1922 to 1926 are read-only: `WALL_HOUR`, `WALL_MINUTE`, `WALL_SECOND`, `WALL_DAY` (whole days since 2000‑01‑01) and `WALL_UTC_OFFSET` (minutes), see [command-line-switches.md](command-line-switches.md). |
+| 1901–1934 | Global system | Global, side-effects | `GLOBAL_SYSTEM_START` is 1901 and `GLOBAL_SYSTEM_MAX` 1935, exclusive ([`mailbox.inc`](../wfsource/source/mailbox/mailbox.inc)); this table said 1000–1999 until 2026‑11‑21. `INDEXOF_CAMSHOT` = **1921** writes the active camera. **It is NOT 1021**: an ActBoxOR/script that writes the wrong slot silently fails to switch the camera. 1922 to 1926 are read-only: `WALL_HOUR`, `WALL_MINUTE`, `WALL_SECOND`, `WALL_DAY` (whole days since 2000‑01‑01) and `WALL_UTC_OFFSET` (minutes), see [command-line-switches.md](command-line-switches.md). 1927 to 1934 are read-only too, the screen's shape (added 2026‑11‑22, [plan](plans/2026-11-22-display-mailboxes.md)): `DISPLAY_ASPECT` (the projection's width over height, 1.778 on a 16:9 television), `DISPLAY_VFOV` (degrees), `DISPLAY_WIDTH` and `DISPLAY_HEIGHT` (the surface, pixels) and `DISPLAY_VIEW_X`, `_Y`, `_WIDTH`, `_HEIGHT` (the rectangle actually drawn, which a maximum aspect pillarboxes). They are the view the projection uses ([`authored_view.hp`](../wfsource/source/gfx/authored_view.hp)), written at the start of a level and when the surface changes size or the view settings change, **not** every frame, so a script may read them each frame for free and a rotated phone or resized window moves whatever it lays out within one frame. Lay out against the screen with `d tan(DISPLAY_VFOV / 2) × DISPLAY_ASPECT`, the half-width of the view at distance `d` (Tide Harbour's river panel does). |
 | 2000–2099 | Local user | Per-actor | Each actor has its own storage at this range. Rarely needed for game logic. |
 | 3000–3036 | Local system | Per-actor, side-effects | **`INDEXOF_X_POS` = 3009, `INDEXOF_Y_POS` = 3010, `INDEXOF_Z_POS` = 3011.** Writing here moves the *calling actor's* position. |
 | 4000–4099 | Scratch | Per-script-call | Temporary storage within a single script execution. |

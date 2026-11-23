@@ -237,7 +237,7 @@ def test_device_script_knows_every_app():
     assert "qbert)     PKG=org.worldfoundry.wf_game.qbert ;;" in body
     assert "snowgoons) PKG=org.worldfoundry.wf_game ;;" in body
     h = subprocess.run(["bash", str(script), "-h"], capture_output=True, text=True, timeout=30)
-    assert h.returncode == 0 and "aquarium (default), snowgoons, condo, smb or qbert" in h.stdout
+    assert h.returncode == 0 and "snowgoons (default), condo, smb or qbert" in h.stdout
     # An unknown --app fails before adb is touched; a known one gets past the app check (it then needs adb or a device).
     bad = subprocess.run(["bash", str(script), "--app", "marble"], capture_output=True, text=True, timeout=30)
     assert bad.returncode == 2 and "smb or qbert" in bad.stderr
@@ -261,7 +261,7 @@ def test_snowgoons_banner_is_a_level_screenshot():
 
 def test_every_label():
     """The user (2026-10-01): the snowgoons app is called "Snowgoons" (its id stays org.worldfoundry.wf_game); the others keep theirs."""
-    expected = {"snowgoons": "Snowgoons", "smb": "WF SMB", "qbert": "WF Q*bert", "aquarium": "WF Aquarium", "condo": "WF Condo"}
+    expected = {"snowgoons": "Snowgoons", "smb": "WF SMB", "qbert": "WF Q*bert", "condo": "WF Condo"}
     for flavor, label in expected.items():
         strings = (SRC / flavor / "res" / "values" / "strings.xml").read_text()
         assert re.search(rf'name="app_name">{re.escape(label)}<', strings), flavor

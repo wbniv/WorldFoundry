@@ -32,7 +32,7 @@ def test_the_default_settings_leave_the_journey_unchanged():
 
 
 def test_the_director_reads_every_field_with_property_at_and_the_given_indices():
-    names = ["tower_figure_1", "tower_figure_2", "tower_figure_3", "tower_figure_4", "tower_bird",
+    names = ["tower_figure_1", "tower_figure_2", "tower_figure_3", "tower_figure_4", "tower_figure_b1", "tower_figure_b2", "tower_figure_b3", "tower_figure_b4", "tower_bird",
              "hour_hand", "minute_hand", "cs_wide", "LookAt", "CuckooVillageSettings"]
     ix = {n: 50 + i for i, n in enumerate(names)}
     fields = {label: 200 + i for i, label in enumerate(tl.SETTINGS_DEFAULTS)}
@@ -41,3 +41,18 @@ def test_the_director_reads_every_field_with_property_at_and_the_given_indices()
         word = "cv-s-" + label.lower().replace(" ", "-")
         assert f": {word} {ix['CuckooVillageSettings']} {fields[label]} property@ if else drop {default} then ;" in script
     assert "cv-s-window-lights *" in script and "cv-s-camera-motion if" in script
+
+
+def test_the_director_drives_the_two_window_box_cells_from_the_detailed_flowers_field():
+    """Docs/plans/2026-11-22-cuckoo-village-flowers.md: one of cottage_flowers (cell 227) and cottage_flower_blocks (cell 228) shows."""
+    import forth
+    ix = {n: 100 + i for i, n in enumerate(["tower_figure_1", "tower_figure_2", "tower_figure_3", "tower_figure_4", "tower_figure_b1", "tower_figure_b2",
+                                            "tower_figure_b3", "tower_figure_b4", "tower_bird",
+                                            "hour_hand", "minute_hand", "cs_wide", "LookAt", "CuckooVillageSettings"])}
+    fields = {k: 129 + i for i, k in enumerate(tl.SETTINGS_DEFAULTS)}
+    script = forth.director_script(ix, fields)
+    assert f": cv-s-detailed-flowers {ix['CuckooVillageSettings']} {fields['Detailed flowers']} property@ if else drop 1 then ;" in script
+    assert f"dup {tl.FLOWERS_CELL} cv!  1 swap - {tl.BLOCKS_CELL} cv!" in script
+    assert "cv-flames cv-flowers cv-cam" in script                     # it runs every tick
+    cells = [tl.CANDLE_CELL] + list(tl.FLICKER_CELLS) + [tl.FLOWERS_CELL, tl.BLOCKS_CELL]
+    assert len(set(cells)) == len(cells) and tl.FLOWERS_CELL == 227 and tl.BLOCKS_CELL == 228

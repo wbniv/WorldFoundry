@@ -38,7 +38,7 @@ def vm(tmp_path_factory):
         text=(here/(level+'.lev')).read_text()
         paths=[]
         prefix='sh' if kind=='blue_shrimp' else 'tk'
-        entries=('aq-player-tick','barb-player-tick\naq-camera-tick\nsd-tick') if kind=='tiger_barbs' else ('tk-player-tick','reef-tick') if kind=='thai_reef' else (prefix+'-player-tick',prefix+'-director-tick')
+        entries=('aq-player-tick','barb-player-tick\naq-camera-tick\nsd-tick') if kind=='tiger_barbs' else ('aq-player-tick','discus-player-tick\naq-camera-tick\nsd-tick') if kind=='discus' else ('tk-player-tick','reef-tick') if kind=='thai_reef' else (prefix+'-player-tick',prefix+'-director-tick')
         for name,entry in zip(('Player','Director'),entries):
             block=text[text.index('{ \'NAME\' "'+name+'" }'):].split("{ 'OBJ'",1)[0]
             encoded=re.search(r'\{ \'STR\' \{ \'NAME\' "Script" \} \{ \'STR\' ("(?:\\.|[^"\\])*")',block).group(1)

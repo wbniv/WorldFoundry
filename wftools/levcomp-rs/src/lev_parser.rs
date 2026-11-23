@@ -187,7 +187,7 @@ pub fn parse(data: &[u8]) -> Result<Vec<LevObject>, String> {
 
 /// Returns `None` for objects with no Class Name — these are 3ds Max helper objects
 /// (e.g. light targets) whose position was consumed at export time.
-fn parse_obj(payload: &[u8]) -> Result<Option<LevObject>, String> {
+pub(crate) fn parse_obj(payload: &[u8]) -> Result<Option<LevObject>, String> {
     let fields = read_chunks(payload).map_err(|e: IffError| e.message)?;
 
     let mut name = String::new();

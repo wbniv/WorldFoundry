@@ -1,0 +1,17 @@
+#ifndef _LevelSettings_HP
+#define _LevelSettings_HP
+#include "actor.hp"
+// The minimal settings holder: a level with no settings of its own places one so it still offers the global
+// settings (oas/global_settings.inc). It never renders or updates. docs/plans/2026-11-22-global-level-settings.md.
+class LevelSettings: public Actor {
+public:
+    LevelSettings(const SObjectStartupData* startupData);
+    virtual ~LevelSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadLevelSettings(const SObjectStartupData* startupData);
+#endif

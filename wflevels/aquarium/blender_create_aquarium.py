@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""blender_create_aquarium.py — 55 gal aquarium, independent clownfish/anemone and tiger-barb tanks.
+"""blender_create_aquarium.py — 55 gal aquarium, independent clownfish/anemone, tiger-barb and discus tanks.
 
 Plan: docs/plans/2026-09-30-aquarium-level.md (Phase 2: the scene; Phase 3: fish, controls, cameras).
 Constants: aquarium_constants.py (the plan's tank table as code; WORLD_SCALE = 10).
@@ -34,6 +34,9 @@ arrows, B/C held for depth, A darts) → wflevels/aquarium/aquarium.lev; AQUARIU
 D-pad plus A/B only: A cycles Swim → Depth mode, B darts) → wflevels/aquarium_touch/ (regenerable,
 git-ignored).
 
+AQUARIUM_TANK=tiger_barbs / discus: a player-led school tank (wflevels/aquarium_tiger_barbs/build.sh,
+wflevels/aquarium_discus/build.sh); the species module is tiger_barb.py / discus_school.py.
+
 Run: task aquarium-level            (task aquarium-touch-level for the touch profile)
 or   blender --background --python-exit-code 1 --python wflevels/aquarium/blender_create_aquarium.py
      bash wftools/wf_blender/build_level_binary.sh aquarium
@@ -63,23 +66,39 @@ assert PROFILE in ('keyboard', 'touch'), f'AQUARIUM_PROFILE={PROFILE!r}: keyboar
 SCHOOL_BENCH  = os.environ.get('AQUARIUM_SCHOOL_BENCH') == '1'
 # AQUARIUM_SCHOOL_N: how many more fish school and swarm round the player's fish (school.fth + school_rig.fth,
 # docs/plans/2026-10-01-aquarium-schooling.md). Default no followers for the clownfish tank; the independent barb tank has 49. Explicit counts/assets retain reproducible historical benchmarks.
-PLAYER_BARBS = os.environ.get('AQUARIUM_TANK') == 'tiger_barbs'
-FOLLOWER_ASSET = os.environ.get('AQUARIUM_FOLLOWER_ASSET', 'barb_refined' if PLAYER_BARBS else 'clownfish')
-assert FOLLOWER_ASSET in ('clownfish', 'barb_quad', 'barb_mesh', 'barb_refined')
-BARBS = FOLLOWER_ASSET != 'clownfish'
+# AQUARIUM_TANK picks a player-led school tank, built on one framework: the player steers one
+# single-mesh fish and a school of the same mesh follows it. Each species is a module with one API
+# (tiger_barb.py, discus_school.py); `SP` is that module. Discus plan: docs/plans/2026-11-22-discus-tank.md.
+TANK = os.environ.get('AQUARIUM_TANK', '')
+SCHOOL_TANKS = {'tiger_barbs': ('barb_refined', 'aquarium_tiger_barbs'), 'discus': ('discus', 'aquarium_discus')}
+assert TANK in ('', *SCHOOL_TANKS), f'AQUARIUM_TANK={TANK!r}: one of {sorted(SCHOOL_TANKS)} or unset'
+PLAYER_SCHOOL = TANK in SCHOOL_TANKS
+FOLLOWER_ASSET = os.environ.get('AQUARIUM_FOLLOWER_ASSET', SCHOOL_TANKS[TANK][0] if PLAYER_SCHOOL else 'clownfish')
+assert FOLLOWER_ASSET in ('clownfish', 'barb_quad', 'barb_mesh', 'barb_refined', 'discus')
+assert (TANK == 'discus') == (FOLLOWER_ASSET == 'discus'), 'the discus mesh belongs to the Discus tank only'
+BARBS = FOLLOWER_ASSET != 'clownfish'    # single-mesh followers (barbs or discus), not five-part clownfish
 if BARBS:
-    import tiger_barb as TB
-SCHOOL_N = int(os.environ.get('AQUARIUM_SCHOOL_N', '49' if PLAYER_BARBS else '29' if BARBS else '0') or 0)
-assert 0 <= SCHOOL_N <= (49 if PLAYER_BARBS else 29 if BARBS else 10), 'follower count exceeds allocated mailbox blocks'
-BARB_UPDATES = int(os.environ.get('AQUARIUM_BARB_UPDATES', '5'))
+    import importlib
+    SP = importlib.import_module('discus_school' if FOLLOWER_ASSET == 'discus' else 'tiger_barb')
+if TANK == 'discus':
+    # A taller display and a wider camera view give the larger school room to swim.
+    C.WATER_Z, C.EXT_Z = SP.WATER_HEIGHT_IN, SP.TANK_HEIGHT_IN
+    C.WATER_LINE_M, C.EXT_Z_M = C.m(C.WATER_Z), C.m(C.EXT_Z)
+    C.FISH_SPAWN = (-1.6, 0.0, 3.5)
+    C.CAM_A_POS, C.CAM_A_LOOK = (0.0, -14.0, 3.5), (0.0, 0.0, 3.5)
+SPEED_SCALE = getattr(SP, 'SPEED_SCALE', 1.0) if PLAYER_SCHOOL else 1.0
+FISH_STEM = getattr(SP, 'ACTOR_STEM', 'tiger-barb') if BARBS else ''   # the single-mesh fish's actor names
+SCHOOL_N = int(os.environ.get('AQUARIUM_SCHOOL_N', str(getattr(SP, 'SCHOOL_N', 49)) if PLAYER_SCHOOL else '29' if BARBS else '0') or 0)
+assert 0 <= SCHOOL_N <= (49 if PLAYER_SCHOOL else 29 if BARBS else 10), 'follower count exceeds allocated mailbox blocks'
+BARB_UPDATES = int(os.environ.get('AQUARIUM_BARB_UPDATES', '10' if TANK == 'discus' else '5'))
 assert 1 <= BARB_UPDATES <= 29
-BARB_ANIMATE = FOLLOWER_ASSET in ('barb_mesh', 'barb_refined') and os.environ.get('AQUARIUM_BARB_ANIMATE', '1') != '0'
+BARB_ANIMATE = FOLLOWER_ASSET in ('barb_mesh', 'barb_refined', 'discus') and os.environ.get('AQUARIUM_BARB_ANIMATE', '1') != '0'
 BARB_FROZEN = os.environ.get('AQUARIUM_BARB_FROZEN') == '1'
 if SCHOOL_BENCH:
     SCHOOL_N = 0                                 # the bench level is the one-fish level plus the invisible Forth
 SCHOOL_IDLE   = os.environ.get('AQUARIUM_SCHOOL_IDLE') in ('1', 'hide')     # a cost probe: the followers exist (82 actors) but nothing moves them
 LEVEL_NAME    = ('aquarium_bench' if SCHOOL_BENCH else 'aquarium_probe' if SCHOOL_IDLE else
-                 'aquarium_tiger_barbs' if PLAYER_BARBS else 'aquarium' if PROFILE == 'keyboard' else 'aquarium_touch')
+                 SCHOOL_TANKS[TANK][1] if PLAYER_SCHOOL else 'aquarium' if PROFILE == 'keyboard' else 'aquarium_touch')
 OUT_DIR       = SCRIPT_DIR if LEVEL_NAME == 'aquarium' else os.path.join(REPO, 'wflevels', LEVEL_NAME)
 OUT_LEV       = os.path.join(OUT_DIR, LEVEL_NAME + '.lev')
 SWIM_FTH      = os.path.join(SCRIPT_DIR, 'aquarium_swim.fth')
@@ -292,12 +311,12 @@ print(f'{TAG} scaffold survivors:', sorted(o.name for o in bpy.data.objects))
 #    created right after the scaffold, so both come before the tank in actor order. The
 #    Director poses the parts every tick; nothing writes the Player's ROTATION_C.
 # ═════════════════════════════════════════════════════════════════════════════
-if PLAYER_BARBS:
-    player_scale = TB.LENGTH_M / m(C.FISH_LEN)
+if PLAYER_SCHOOL:
+    player_scale = SP.LENGTH_M / m(C.FISH_LEN)
     for speed_name in ('SWIM_SPEED', 'BURST_SPEED', 'DART_SPEED'):
-        setattr(C, speed_name, getattr(C, speed_name) * player_scale)
-FISH = CF.Clownfish(world_scale=S * (player_scale if PLAYER_BARBS else 1))
-assert PLAYER_BARBS or abs(FISH.length_m - m(C.FISH_LEN)) < 1e-9, 'clownfish.py and aquarium_constants.py disagree on the fish'
+        setattr(C, speed_name, getattr(C, speed_name) * player_scale * SPEED_SCALE)
+FISH = CF.Clownfish(world_scale=S * (player_scale if PLAYER_SCHOOL else 1))
+assert PLAYER_SCHOOL or abs(FISH.length_m - m(C.FISH_LEN)) < 1e-9, 'clownfish.py and aquarium_constants.py disagree on the fish'
 fish_mats = {}                                   # the fish's own material cache (clownfish.COLOURS)
 
 player = bpy.data.objects['Player']
@@ -314,7 +333,7 @@ player['wf_Horiz Air Drag'] = 0.0
 player['wf_Vert Air Drag'] = 0.0
 
 part_objs = []
-for name, mesh, off in ([] if PLAYER_BARBS else FISH.parts()):
+for name, mesh, off in ([] if PLAYER_SCHOOL else FISH.parts()):
     obj = bpy.data.objects.new(name, FISH.blender_mesh(bpy, mesh, fish_mats))
     obj.location = tuple(p + o for p, o in zip(C.FISH_SPAWN, off))   # rest pose; the Director moves it
     scene.collection.objects.link(obj)
@@ -326,27 +345,42 @@ for name, mesh, off in ([] if PLAYER_BARBS else FISH.parts()):
 # actor list before the tank like the player's, the Director poses them every tick (school_rig.fth).
 follower_objs = {}                               # k -> {part name: object}
 barb_mesh = None
-if BARBS and (SCHOOL_N or PLAYER_BARBS):
+if BARBS and (SCHOOL_N or PLAYER_SCHOOL):
     # Canonical art remains unmodified. This is pipeline encoding/resampling,
     # including the atlas's black colour key; it is not a new art treatment.
     from PIL import Image
     os.makedirs(OUT_DIR, exist_ok=True)
-    src = os.path.join(SCRIPT_DIR, 'art/tiger-barb-source.png')
-    image = Image.open(src).convert('RGBA').resize((256, 128), Image.Resampling.LANCZOS)
-    pixels = image.load()
-    for y in range(image.height):
-        for x in range(image.width):
-            r, g, b, a = pixels[x, y]
-            # Transparent colour key must not turn dark opaque stripes into holes.
-            pixels[x, y] = (0, 0, 0, 0) if a < 128 else (r, g, b, 255)
-    texture = os.path.join(OUT_DIR, 'tiger_barb.tga')
-    image.save(texture)
-    barb_mesh = TB.blender_mesh(bpy, FOLLOWER_ASSET == 'barb_quad', texture, refined=FOLLOWER_ASSET == 'barb_refined')
-    if PLAYER_BARBS:
+    if FOLLOWER_ASSET == 'discus':
+        texture = str(SP.prepare_texture(OUT_DIR))   # the asset's colourway, resampled (discus_school.py)
+    else:
+        src = os.path.join(SCRIPT_DIR, 'art/tiger-barb-source.png')
+        image = Image.open(src).convert('RGBA').resize((256, 128), Image.Resampling.LANCZOS)
+        pixels = image.load()
+        for y in range(image.height):
+            for x in range(image.width):
+                r, g, b, a = pixels[x, y]
+                # Transparent colour key must not turn dark opaque stripes into holes.
+                pixels[x, y] = (0, 0, 0, 0) if a < 128 else (r, g, b, 255)
+        texture = os.path.join(OUT_DIR, 'tiger_barb.tga')
+        image.save(texture)
+    barb_mesh = SP.blender_mesh(bpy, FOLLOWER_ASSET == 'barb_quad', texture, refined=FOLLOWER_ASSET == 'barb_refined')
+    if FOLLOWER_ASSET == 'discus':
+        # The tank has thirty individually animated copies. Reduce runtime
+        # geometry while retaining the original model and texture assets.
+        probe = bpy.data.objects.new('_discus_simplify', barb_mesh)
+        scene.collection.objects.link(probe)
+        bpy.context.view_layer.objects.active = probe
+        probe.select_set(True)
+        modifier = probe.modifiers.new('tank geometry budget', 'DECIMATE')
+        modifier.ratio = 0.12
+        bpy.ops.object.modifier_apply(modifier=modifier.name)
+        barb_mesh = probe.data
+        bpy.data.objects.remove(probe, do_unlink=True)
+    if PLAYER_SCHOOL:
         player.data = barb_mesh
         player['wf_Mesh Name'] = barb_mesh.name + '.iff'
         player['wf_original_mesh_name'] = barb_mesh.name + '.iff'
-        obj = bpy.data.objects.new('tiger-barb-player', barb_mesh)
+        obj = bpy.data.objects.new(f'{FISH_STEM}-player', barb_mesh)
         obj.location = C.FISH_SPAWN
         scene.collection.objects.link(obj)
         CF.apply_part_actor_fields(obj)
@@ -356,7 +390,7 @@ if BARBS and (SCHOOL_N or PLAYER_BARBS):
 for k in range(1, SCHOOL_N + 1):
     follower_objs[k] = {}
     if BARBS:
-        obj = bpy.data.objects.new(f'tiger-barb-{k}', barb_mesh)
+        obj = bpy.data.objects.new(f'{FISH_STEM}-{k}', barb_mesh)
         obj.location = C.FISH_SPAWN
         scene.collection.objects.link(obj)
         CF.apply_part_actor_fields(obj)
@@ -392,8 +426,8 @@ BOX_Z0, BOX_Z1 = EXT['bottom_z'] - BOB, EXT['top_z'] + BOB
 BOX_HY = max(EXT['half_width'], C.FIN_HALF_WIDTH)
 BOX_C = ((BOX_X0 + BOX_X1) / 2, (BOX_Z0 + BOX_Z1) / 2)
 BOX_H = ((BOX_X1 - BOX_X0) / 2, BOX_HY, (BOX_Z1 - BOX_Z0) / 2)
-if PLAYER_BARBS:
-    verts = TB.geometry(refined=True)[0]
+if PLAYER_SCHOOL:
+    verts = SP.geometry(refined=True)[0]
     BOX_X0, BOX_X1 = min(v[0] for v in verts), max(v[0] for v in verts)
     BOX_Z0, BOX_Z1 = min(v[2] for v in verts), max(v[2] for v in verts)
     BOX_HY = max(abs(v[1]) for v in verts) + .025
@@ -406,7 +440,7 @@ XMAX = C.INNER_X_M - C.CLAMP_MARGIN - BOX_HY
 YMAX = C.INNER_Y_M - C.CLAMP_MARGIN - BOX_HY
 ZMAX = C.WATER_LINE_M - C.CLAMP_MARGIN - BOX_Z1
 V = FISH.T['fish-swim-speed']
-assert abs(V - C.SWIM_SPEED) < 1e-9, 'the fish and the tank disagree on the swim speed'
+assert abs(V * SPEED_SCALE - C.SWIM_SPEED) < 1e-9, 'the fish and the tank disagree on the swim speed'
 
 # ═════════════════════════════════════════════════════════════════════════════
 # 3. Tank: one-piece shell (bottom, back, two ends), invisible front collider, rim.
@@ -822,14 +856,22 @@ for o in scene.objects:                          # nothing may carry an inherite
 #     body) and then the camera zones. Definitions go before the entry call: the zForth host
 #     compiles up to the script's last `;` once and runs only what follows it every tick.
 # ═════════════════════════════════════════════════════════════════════════════
-if PLAYER_BARBS:
+if PLAYER_SCHOOL:
     # Freshwater school: remove marine habitat before computing actor indices.
     for name in ['rock', 'anemone', *clump_objs]:
         bpy.data.objects.remove(bpy.data.objects[name], do_unlink=True)
+if TANK == 'discus':
+    settings = bpy.data.objects.new('DiscusSettings', None)
+    scene.collection.objects.link(settings)
+    settings['wf_schema_path'] = os.path.join(REPO, 'wfsource/source/oas/discussettings.oad')
+    settings['wf_Model Type'] = 'None'
+    settings['wf_Mass'] = 0.0
+    settings.location = director.location
+
 wf_objects = [o for o in scene.objects if o.get('wf_schema_path')]
 idx = {o.name: wf_objects.index(o) + ACTOR_IDX_BIAS for o in wf_objects}
 assert idx['Player'] < idx['tank-shell'], 'Player must be created before the one-piece tank'
-part_idx = ({name:idx['tiger-barb-player'] for name in CF.PART_NAMES} if PLAYER_BARBS else {o.name: idx[o.name] for o in part_objs})
+part_idx = ({name:idx[f'{FISH_STEM}-player'] for name in CF.PART_NAMES} if PLAYER_SCHOOL else {o.name: idx[o.name] for o in part_objs})
 ZONE_C = tuple(zone.location)
 AQ_MAILBOXES = ['aq-prev', 'aq-mode', 'aq-dart-t', 'aq-dart-req', 'aq-in-b', 'aq-dx', 'aq-dy', 'aq-dz',
                 'aq-vx', 'aq-vy', 'aq-vz',
@@ -888,12 +930,12 @@ aq_consts = [
 ] + [(n, AQ_MB_BASE + i, 'mailbox') for i, n in enumerate(AQ_MAILBOXES)] \
   + [(n, AQ_STEER_BASE + i, 'mailbox') for i, n in enumerate(AQ_STEER)] \
   + [('aq-sway-b', C.SWAY_MB_BASE + len(C.ANEMONE_CLUMPS), 'mailbox: sway scratch (the B angle)')]
-if PLAYER_BARBS:
+if PLAYER_SCHOOL:
     aq_consts = [(n,v,note) for n,v,note in aq_consts if n != 'aq-sway-b']
 # Anemone sway (Phase 4): one phase accumulator per clump in 720.., then the scratch cell above.
 assert C.SWAY_MB_BASE >= AQ_MB_BASE + 20 and len(C.ANEMONE_CLUMPS) + 1 <= 20
 SWAY = []                                        # (clump name, actor, amp_a rev, amp_b rev, phase rev, hz, mailbox)
-for k, (row, side, amp_b, amp_a, period, phase) in enumerate([] if PLAYER_BARBS else C.ANEMONE_CLUMPS):
+for k, (row, side, amp_b, amp_a, period, phase) in enumerate([] if PLAYER_SCHOOL else C.ANEMONE_CLUMPS):
     assert abs(period / 0.05 - round(period / 0.05)) < 1e-9, 'sway periods are whole 20 Hz ticks'
     name = C.clump_name(row, side)
     SWAY.append((name, idx[name], amp_a / 360.0, amp_b / 360.0, phase, 1.0 / period, C.SWAY_MB_BASE + k))
@@ -902,15 +944,15 @@ sway_tick = (': aq-sway-tick   \\ generated: amp-a amp-b phase hz phase-mailbox 
                          for n, a, aa, ab_, ph, hz, mb in SWAY) + '\n;\n')   # `;` on its own line: not in a comment
 aq_defs = ('\\ ---- generated by wflevels/aquarium/blender_create_aquarium.py ----\n'
            + '\n'.join(f': {n} {fnum(v)} ;' + (f'   \\ {note}' if note else '') for n, v, note in aq_consts)
-           + '\n' + (open(SWIM_FTH).read().split('\\ ---- Director: anemone sway')[0] if PLAYER_BARBS else open(SWIM_FTH).read()) + ('' if PLAYER_BARBS else sway_tick))
+           + '\n' + (open(SWIM_FTH).read().split('\\ ---- Director: anemone sway')[0] if PLAYER_SCHOOL else open(SWIM_FTH).read()) + ('' if PLAYER_SCHOOL else sway_tick))
 player['wf_Script'] = FISH.player_script(part_idx, idx['Player'], defs=aq_defs, entry='aq-player-tick')
 director = bpy.data.objects['Director']
-dir_defs, dir_extra = aq_defs, ('aq-camera-tick\n' if PLAYER_BARBS else 'aq-camera-tick\naq-sway-tick\n')
+dir_defs, dir_extra = aq_defs, ('aq-camera-tick\n' if PLAYER_SCHOOL else 'aq-camera-tick\naq-sway-tick\n')
 if SCHOOL_N:            # the followers: school.fth's model, school_rig.fth's glue, and the generated constants they are built on
     BLm = FISH.length_m
-    hx = C.INNER_X_M / BLm - (0.85 if PLAYER_BARBS else 0.6)
-    hy = C.INNER_Y_M / BLm - (0.85 if PLAYER_BARBS else 0.3)
-    hz = (C.WATER_LINE_M - C.SAND_TOP_M) / 2 / BLm - (0.85 if PLAYER_BARBS else 0.6)
+    hx = C.INNER_X_M / BLm - (0.85 if PLAYER_SCHOOL else 0.6)
+    hy = C.INNER_Y_M / BLm - (0.85 if PLAYER_SCHOOL else 0.3)
+    hz = (C.WATER_LINE_M - C.SAND_TOP_M) / 2 / BLm - (0.85 if PLAYER_SCHOOL else 0.6)
     sd_gen = (': sch-base 800 ; : sch-par 960 ; : sch-scr 985 ;\n'
               f': sch-n {SCHOOL_N + 1} ;\n'
               f': sd-cx 0 ; : sd-cy 0 ; : sd-cz {fnum((C.WATER_LINE_M + C.SAND_TOP_M) / 2)} ; : sd-bl {fnum(BLm)} ;\n'
@@ -920,15 +962,19 @@ if SCHOOL_N:            # the followers: school.fth's model, school_rig.fth's gl
                         for k in range(1, SCHOOL_N + 1) for j, nm in enumerate(CF.PART_NAMES) if not BARBS)
               + ';\n')
     if BARBS:
-        sd_gen = TB.forth_constants(SCHOOL_N, [idx[follower_objs[k]['barb'].name] for k in range(1, SCHOOL_N + 1)],
+        sd_gen = SP.forth_constants(SCHOOL_N, [idx[follower_objs[k]['barb'].name] for k in range(1, SCHOOL_N + 1)],
                                     updates=BARB_UPDATES, animate=BARB_ANIMATE, frozen=BARB_FROZEN)
         sd_gen += (f': sd-cx 0 ; : sd-cy 0 ; : sd-cz {fnum((C.WATER_LINE_M + C.SAND_TOP_M) / 2)} ; : sd-bl {fnum(BLm)} ;\n'
                    f': sd-hx {fnum(hx)} ; : sd-hy {fnum(hy)} ; : sd-hz {fnum(hz)} ;\n')
     rig = open(os.path.join(SCRIPT_DIR, 'barb_school_rig.fth' if BARBS else 'school_rig.fth')).read()
+    if TANK == 'discus':
+        rig = rig.replace(': sd-speed 2 ;', ': sd-speed 0.85 ;')
+        rig = rig.replace('dup sd-dt 120 sd-speed sch-set-dt', 'dup sd-dt 45 sd-speed sch-set-dt')
+        rig = rig.replace('fish-dt 0.5 * dup negate', 'fish-dt 0.25 * dup negate')
     if not BARBS:
         rig = rig.replace('  sd-round-robin\n  sd-pose-all ;', '  4 profile-begin sd-round-robin 4 profile-end\n  5 profile-begin sd-pose-all 5 profile-end ;')
     school_core = open(os.path.join(SCRIPT_DIR, 'school.fth')).read()
-    if BARBS and not PLAYER_BARBS:
+    if BARBS and not PLAYER_SCHOOL:
         school_core = school_core.replace(': r-rep MB_RR par@ ;', ': r-rep MB_YOU sc@ 0 = if 0.9 else MB_RR par@ then ;')
     dir_defs = aq_defs + sd_gen + school_core + rig
     dir_extra += '' if SCHOOL_IDLE else 'sd-tick\n'
@@ -954,27 +1000,36 @@ if SCHOOL_BENCH:        # the Forth core, with its mailbox blocks, and one call 
 '''
     dir_defs = aq_defs + SB_PRE + open(os.path.join(SCRIPT_DIR, 'school.fth')).read() + SB_INIT
     dir_extra += 'sb-init\nsch-tick\n'
-if PLAYER_BARBS:
+if PLAYER_SCHOOL:
     # zForth has no EXIT word in its minimal core: a nested selection is portable.
-    sizes = ': sd-size-scale ( k -- scale )\n' + ''.join(f'  dup {k} = if drop {TB.school_length(k)/TB.LENGTH_M:.6f} else\n' for k in range(1,SCHOOL_N+1)) + '  drop 1 ' + 'then '*SCHOOL_N + ';\n'
+    sizes = ': sd-size-scale ( k -- scale )\n' + ''.join(f'  dup {k} = if drop {SP.school_length(k)/SP.LENGTH_M:.6f} else\n' for k in range(1,SCHOOL_N+1)) + '  drop 1 ' + 'then '*SCHOOL_N + ';\n'
     rig = rig.replace('me 1 - 11 * 29 mod 28 / 0.15 * 0.45 + 0.525 / dup', 'me sd-size-scale dup')
     rig = rig.replace('me 1 - dup 8 mod - 8 / 1.5 - 0.55 * MB_Y me sch!', 'me 1 - 3 mod 1 - sd-hy 0.65 * * MB_Y me sch!')
     # Neighbour trajectories remain size-independent; clip every seeded centre.
     rig = rig.replace('  0 MB_STARTLE me sch!', '  0 MB_STARTLE me sch!\n  3 0 do i me sch@ i MB_LOX + par@ max i MB_HIX + par@ min i me sch! loop')
+    # The body wave: the barb's is 3 cycles/s at 0.04 of the length; a species may set its own.
+    beat, amp = getattr(SP, 'BEAT_HZ', 3), getattr(SP, 'DEFORM_AMP', 0.04)
+    if FOLLOWER_ASSET == 'discus':
+        for old, new in (('fish-dt 3 * startle-gain *', f'fish-dt {fnum(beat)} * startle-gain *'),
+                         ('0.04 startle-gain * sd-actor fish-deform', f'{fnum(amp)} startle-gain * sd-actor fish-deform')):
+            assert rig.count(old) == 1, f'barb_school_rig.fth changed: {old!r}'
+            rig = rig.replace(old, new)
     dir_defs = aq_defs + sd_gen + school_core + sizes + rig
+    tick = getattr(SP, 'PLAYER_TICK', 'barb-player-tick')
+    player_actor = idx[f'{FISH_STEM}-player']
     barb_rig = f"""
-: barb-player-write ( value mailbox -- ) {idx['tiger-barb-player']} write-actor-mailbox ;
-: barb-player-tick
+: barb-player-write ( value mailbox -- ) {player_actor} write-actor-mailbox ;
+: {tick}
   INDEXOF_X_POS fish-actor-player read-actor-mailbox INDEXOF_X_POS barb-player-write
   INDEXOF_Y_POS fish-actor-player read-actor-mailbox INDEXOF_Y_POS barb-player-write
   INDEXOF_Z_POS fish-actor-player read-actor-mailbox INDEXOF_Z_POS barb-player-write
   aq-roll fish@ INDEXOF_ROTATION_A barb-player-write
   aq-pitch fish@ INDEXOF_ROTATION_B barb-player-write
   aq-yaw fish@ INDEXOF_ROTATION_C barb-player-write
-  3 fish-ph-swim fish-advance
-  fish-ph-swim fish@ 0.04 {idx['tiger-barb-player']} fish-deform ;
+  {fnum(beat)} fish-ph-swim fish-advance
+  fish-ph-swim fish@ {fnum(amp)} {player_actor} fish-deform ;
 """
-    director['wf_Script'] = '\\ wf\n' + FISH.forth_library(part_idx,idx['Player']) + dir_defs + barb_rig + '\nbarb-player-tick\n' + dir_extra
+    director['wf_Script'] = '\\ wf\n' + FISH.forth_library(part_idx,idx['Player']) + dir_defs + barb_rig + f'\n{tick}\n' + dir_extra
 else:
     director['wf_Script'] = FISH.director_script(part_idx, idx['Player'], defs=dir_defs, extra=dir_extra, followers=bool(SCHOOL_N) and not BARBS)
 if BARBS or not SCHOOL_N:
@@ -1011,17 +1066,22 @@ if LEVEL_NAME != 'aquarium':                     # its own wrapper; the whole di
     with open(os.path.join(SCRIPT_DIR, 'aquarium-standalone.iff.txt')) as src, \
             open(os.path.join(OUT_DIR, LEVEL_NAME + '-standalone.iff.txt'), 'w') as dst:
         txt = src.read().replace('"../aquarium.iff"', f'"../{LEVEL_NAME}.iff"')
+        if LEVEL_NAME == 'aquarium_discus':
+            # Thirty deformed discus meshes need additional room asset memory.
+            # This tank has one room, so allocate one room slot rather than the default nine.
+            txt = txt.replace("'ROOM' 3000000l", "'ROOM' 20000000l")
+            txt = txt.replace("'FLAG' 1l 1l", "'FLAG' 1l 1l\n        'SLOT' 1l")
         dst.write(txt)
-    if not PLAYER_BARBS:
+    if not PLAYER_SCHOOL:
       with open(os.path.join(OUT_DIR, '.gitignore'), 'w') as f:
         f.write('# generated by blender_create_aquarium.py (AQUARIUM_PROFILE=touch or AQUARIUM_SCHOOL_BENCH=1); nothing here is committed\n*\n')
-if PLAYER_BARBS:
+if PLAYER_SCHOOL:
     import json
     bpy.data.objects['anemone-zone'].name = 'school-view-zone'
     bpy.data.objects['cs_anemone'].name = 'cs_school'
-    mapping = {'title':'Tiger Barbs','fish_count':SCHOOL_N+1,'resident_count':SCHOOL_N,
-               'player_length_m':TB.LENGTH_M,'resident_lengths_m':[TB.school_length(k) for k in range(1,SCHOOL_N+1)],
-               'mailboxes':TB.mailbox_ranges(SCHOOL_N),
+    mapping = {'title':getattr(SP, 'TITLE', 'Tiger Barbs'),'fish_count':SCHOOL_N+1,'resident_count':SCHOOL_N,
+               'player_length_m':SP.LENGTH_M,'resident_lengths_m':[SP.school_length(k) for k in range(1,SCHOOL_N+1)],
+               'mailboxes':SP.mailbox_ranges(SCHOOL_N),
                'indices':{o.name:i+ACTOR_IDX_BIAS for i,o in enumerate(wf_objects)}}
     with open(os.path.join(OUT_DIR,'actor-map.json'),'w') as f:
         json.dump(mapping,f,indent=2);f.write('\n')

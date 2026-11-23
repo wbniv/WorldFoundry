@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-10-03](https://github.com/wbniv/WorldFoundry/commit/55d87fb3) | Split tiger-barb tank and add profiled dense planting with A3 growth poster |
 | [2026-10-02](https://github.com/wbniv/WorldFoundry/commit/1bfe10f5) | Update Android badges and aquarium banner; fix NativeActivity reopening |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/ccede076) | The snowgoons app is called Snowgoons |
 | [2026-10-01](https://github.com/wbniv/WorldFoundry/commit/a40da0de) | The smb app ships the world select: Android menu drawer, Back held 1 s returns to the menu |
@@ -14,6 +15,10 @@
 | [2026-04-17](https://github.com/wbniv/WorldFoundry/commit/3b24f001) | feat(android): Phase 3 step 3 — Gradle project + AndroidManifest |
 
 <!--history-meta v1
+55d87fb3	author	Will Norris
+55d87fb3	added	1
+55d87fb3	deleted	1
+55d87fb3	files	1
 1bfe10f5	author	Will Norris
 1bfe10f5	added	5
 1bfe10f5	deleted	1

@@ -37,11 +37,12 @@ EOF
 }
 
 # The committed inputs a rebuild reads (git pathspecs); check archives exactly these.
-INPUTS=(wftools wfsource/source scripts docker wflevels/snowgoons-blender
+INPUTS=(wftools wfsource/source scripts docker wflevels/snowgoons-blender wflevels/discus_asset
         wflevels/aquarium-menu.manifest ':(glob)wflevels/aquarium*/**' ':(glob)wflevels/aquarium*.iff')
 # The seven tanks that have their own build.sh (scripts/level-build.sh).
 TANKS=(aquarium_blue_shrimp aquarium_betta aquarium_jellyfish aquarium_lionfish
-       aquarium_plants aquarium_arowana aquarium_tiger_barbs aquarium_thai_reef aquarium_thai_reef_anime aquarium_sea_stars)
+       aquarium_plants aquarium_arowana aquarium_tiger_barbs aquarium_thai_reef aquarium_thai_reef_anime aquarium_sea_stars
+       aquarium_discus)
 REGENERATE_CMD="task aquarium-regenerate"
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

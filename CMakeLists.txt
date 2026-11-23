@@ -1442,6 +1442,11 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     add_executable(authored_view_test tests/authored_view_test.cc)
     target_include_directories(authored_view_test PRIVATE ${SRC})
     add_test(NAME authored_view COMMAND authored_view_test)
+    # The DISPLAY_* system mailboxes: the screen's shape for level scripts, written at level start and on a size change
+    # (game/display_mailboxes.hp; docs/plans/2026-11-22-display-mailboxes.md).
+    add_executable(display_mailboxes_test tests/display_mailboxes_test.cc)
+    target_include_directories(display_mailboxes_test PRIVATE ${SRC})
+    add_test(NAME display_mailboxes COMMAND display_mailboxes_test)
     if(NOT WF_FORTH_ENGINE STREQUAL "none" AND NOT WF_FORTH_ENGINE STREQUAL "zforth")
         add_executable(frame_rate_forth_probe tests/frame_rate_forth_probe.cc
             ${STUB_SRC}/scripting_${WF_FORTH_ENGINE}.cc)
@@ -1541,7 +1546,7 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
 
     # Two aquarium tanks carry textures larger than the default 256² VRAM slot
     # (lionfish Perm/Room0 512 wide, plants Perm 1024² since the seahorses). With the slot sizes the
-    # aquarium app ships (android/app/src/aquarium/assets/wf_args.txt) they must
+    # aquarium app ships (wflevels/aquarium-wf_args.txt) they must
     # run 240 frames and exit 0. Without them, LoadTexture must refuse the
     # texture: a Release build used to write it past the 256² PixelMap buffer
     # and die at exit in ~VideoMemory with "free(): invalid pointer" (lionfish)
