@@ -1,0 +1,15 @@
+[
+  {
+    "input": "ff8e05416ceb1e71591f988c3db29769fded9c0f299c0e7608752538def899ad.apk",
+    "package": "org.worldfoundry.game.aquarium",
+    "before_sha256": null,
+    "action": "install",
+    "reason": "explicit-install",
+    "variant": null,
+    "status": "verified",
+    "start": 1795404859.103972,
+    "journal_key": "install:1",
+    "installed_sha256": "ff8e05416ceb1e71591f988c3db29769fded9c0f299c0e7608752538def899ad",
+    "end": 1795404875.1257987
+  }
+]
