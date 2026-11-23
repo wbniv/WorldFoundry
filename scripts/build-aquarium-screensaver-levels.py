@@ -24,7 +24,8 @@ LEVELS = ROOT / "wflevels"
 TANKS = level_manifest.read().ids
 SCRIPT_NAMES = {"aquarium": "aquarium_screensaver.fth",
                 "aquarium_tiger_barbs": "tiger_barbs_screensaver.fth",
-                "aquarium_sea_stars": "sea_stars_screensaver.fth"}
+                "aquarium_sea_stars": "sea_stars_screensaver.fth",
+                "aquarium_discus": "discus_screensaver.fth"}
 SCRIPT_FIELD = re.compile(r"(\{ 'STR' \{ 'NAME' \"Script\" \} \{ 'STR' )"
                           r"(\"(?:\\.|[^\"\\])*\")", re.S)
 

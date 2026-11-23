@@ -1,0 +1,78 @@
+{
+  "title": "Discus",
+  "fish_count": 10,
+  "resident_count": 9,
+  "player_length_m": 1.5,
+  "resident_lengths_m": [
+    1.1,
+    1.4,
+    1.6,
+    1.35,
+    1.55,
+    1.3,
+    1.5,
+    1.2,
+    1.45
+  ],
+  "mailboxes": {
+    "state": [
+      800,
+      1219
+    ],
+    "params": [
+      1220,
+      1241
+    ],
+    "scratch": [
+      1242,
+      1266
+    ],
+    "director": [
+      1267,
+      1299
+    ],
+    "actors": [
+      1300,
+      1328
+    ],
+    "times": [
+      1330,
+      1358
+    ],
+    "phases": [
+      1360,
+      1388
+    ]
+  },
+  "indices": {
+    "Camera": 1,
+    "Director": 2,
+    "LevelObj": 3,
+    "Matte": 4,
+    "cs_front": 5,
+    "LookAt": 6,
+    "Room": 7,
+    "Player": 8,
+    "SunLight": 9,
+    "discus-player": 10,
+    "discus-1": 11,
+    "discus-2": 12,
+    "discus-3": 13,
+    "discus-4": 14,
+    "discus-5": 15,
+    "discus-6": 16,
+    "discus-7": 17,
+    "discus-8": 18,
+    "discus-9": 19,
+    "tank-shell": 20,
+    "tank-front-collider": 21,
+    "tank-rim": 22,
+    "sand": 23,
+    "school-view-zone": 24,
+    "stand": 25,
+    "room-backdrop": 26,
+    "AmbientLight": 27,
+    "LookB": 28,
+    "cs_school": 29
+  }
+}

@@ -1137,7 +1137,7 @@ tasks:
 
   build-cd-iff-aquarium-menu:
     desc: "Package the Aquarium tanks with the selector for Android (standalone/Apple bundle remains aquarium-cd.iff)"
-    deps: [tools-build, aquarium-level, aquarium-blue-shrimp-level, aquarium-betta-level, aquarium-jellyfish-level, aquarium-lionfish-level, aquarium-plants-level, aquarium-arowana-level, aquarium-tiger-barbs-level, aquarium-thai-reef-level, aquarium-thai-reef-anime-level, aquarium-sea-stars-level]
+    deps: [tools-build, aquarium-level, aquarium-blue-shrimp-level, aquarium-betta-level, aquarium-jellyfish-level, aquarium-lionfish-level, aquarium-plants-level, aquarium-arowana-level, aquarium-tiger-barbs-level, aquarium-thai-reef-level, aquarium-thai-reef-anime-level, aquarium-sea-stars-level, aquarium-discus-level]
     cmds:
       - wftools/cdpack-rs/target/release/cdpack wfsource/source/game/shell-menu.fth --manifest wflevels/aquarium-menu.manifest -o wflevels/aquarium-menu-cd.iff
 
@@ -1418,6 +1418,21 @@ tasks:
       - wflevels/aquarium/art/tiger-barb-source.png
     generates:
       - wflevels/aquarium_tiger_barbs-standalone.iff
+
+  aquarium-discus-level:
+    desc: "Build the independent ten-discus Discus tank (docs/plans/2026-11-22-discus-tank.md)"
+    cmds:
+      - bash wflevels/aquarium_discus/build.sh   # in the Blender container; builds its own tools
+    sources:
+      - wflevels/aquarium_discus/build.sh
+      - wflevels/aquarium_discus/textile.flags
+      - scripts/level-build.sh
+      - wflevels/aquarium/*.py
+      - wflevels/aquarium/*.fth
+      - wflevels/discus_asset/discus_geometry.py
+      - wflevels/discus_asset/wild-brown.png
+    generates:
+      - wflevels/aquarium_discus-standalone.iff
 
   aquarium-betta-level:
     desc: "Build the independent betta Aquarium tank"

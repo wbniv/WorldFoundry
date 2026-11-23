@@ -91,7 +91,7 @@ def toc_level_count(path):
 
 
 def test_bundle_level_count_rule_on_the_built_bundles():
-    """The Aquarium Dream bundle keeps its 0..10 range; the clocks bundle counts the manifest's clocks."""
+    """The Aquarium Dream bundle keeps its 0..11 range; the clocks bundle counts the manifest's clocks."""
     import pytest
     import sys
     sys.path.insert(0, str(ROOT / 'scripts'))
@@ -110,12 +110,13 @@ def test_bundle_level_count_rule_on_the_built_bundles():
 def test_aquarium_and_clocks_ranges_from_their_manifests():
     """The bound is each APK's cd.iff length, which is its manifest's level count (the Aquarium Dream
     bundle packs aquarium-menu.manifest's tanks in order; WF Clocks packs clocks-menu.manifest). So the
-    Aquarium keeps exactly the old 0..10 while it has 11 tanks, and the clocks accept 0..n-1 and -1."""
+    Aquarium accepts exactly 0..11 with its 12 tanks (the Discus tank, 2026-11-22, appended as 11),
+    and the clocks accept 0..n-1 and -1."""
     import sys
     sys.path.insert(0, str(ROOT / 'scripts'))
     import level_manifest
     tanks = len(level_manifest.read(ROOT / 'wflevels/aquarium-menu.manifest').ids)
-    assert tanks == 11, f'the Aquarium now has {tanks} tanks: its Dream range is 0..{tanks - 1}'
+    assert tanks == 12, f'the Aquarium now has {tanks} tanks: its Dream range is 0..{tanks - 1}'
     clocks = level_manifest.read(ROOT / 'wflevels/clocks-menu.manifest').ids
     assert clocks and clocks[0] == 'minute_machine'
     host = HOST.read_text()

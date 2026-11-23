@@ -396,10 +396,11 @@ def test_the_java_cpp_and_provider_agree_on_names_and_routes():
     assert "native void nativeLaunchOverride(String schema, String key, String value)" in player
     assert "Java_org_worldfoundry_screensaver_TankPlayer_nativeLaunchOverride" in host
     assert "launchOverrideSink.set(" in host
-    # The tank that carries the settings is the one the manifest lists last, by the same id the level uses.
+    # The tank that carries the settings is in the manifest, by the same id the level uses. (It was the
+    # last entry until the Discus tank was appended on 2026-11-22; LevelLaunch matches the id, not a position.)
     manifest = (ROOT / "wflevels/aquarium-menu.manifest").read_text()
     tanks = re.findall(r"(?m)^level\s+(\S+)-standalone\.iff\s*\|", manifest)
-    assert tanks[-1] == "aquarium_sea_stars"
+    assert "aquarium_sea_stars" in tanks
     settings = (JAVA / "LevelSettings.java").read_text()
     assert 'SEA_STARS_TANK = "aquarium_sea_stars"' in settings and 'SEA_STARS_PREFIX = "sea-stars."' in settings
     # Every place that starts a tank goes through LevelLaunch, so the overrides always reach the engine.

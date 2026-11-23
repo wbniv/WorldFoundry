@@ -11,7 +11,8 @@ spec.loader.exec_module(audit)
 def test_rosters_follow_the_manifests():
     assert audit.roster("clocks")[:3] == ["minute_machine", "tide_harbour", "cuckoo_village"]
     tanks = audit.roster("aquarium")
-    assert len(tanks) == 11 and tanks[0] == "aquarium" and tanks[-1] == "aquarium_sea_stars"
+    # Append-only: the Discus tank (2026-11-22) is the twelfth, after Sea Stars.
+    assert len(tanks) == 12 and tanks[0] == "aquarium" and tanks[-2:] == ["aquarium_sea_stars", "aquarium_discus"]
 
 
 def test_sea_stars_has_all_six_pieces():

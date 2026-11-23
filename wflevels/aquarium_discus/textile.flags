@@ -1,0 +1,9 @@
+# The Discus tank's one texture is the asset's wild-brown colourway resampled to 512 x 512
+# (wflevels/aquarium/discus_school.py TEXTURE_SIZE). The fish is in both the room and the
+# permanent set (the Player carries its mesh), so both pages hold it: 512-square pages, inside
+# the Aquarium app's 1024-square slots (wflevels/aquarium-wf_args.txt). Plan:
+# docs/plans/2026-11-22-discus-tank.md.
+PAGEX=512
+PAGEY=512
+PERMPAGEX=512
+PERMPAGEY=512
