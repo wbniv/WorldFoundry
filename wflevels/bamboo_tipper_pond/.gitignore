@@ -1,0 +1,11 @@
+*
+!.gitignore
+!*.py
+!*.sh
+!bamboo_tipper_pond.lev
+!bamboo_tipper_pond-standalone.iff.txt
+!actor-map.json
+!settings-capabilities.json
+!*-source.png
+!*.blend
+!textile.flags

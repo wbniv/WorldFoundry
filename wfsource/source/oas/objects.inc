@@ -98,6 +98,10 @@
 #include "globesunringsettings.hp"
         	
 #include "trainloopssettings.hp"
+        	
+#include "hourtreesettings.hp"
+        	
+#include "bamboopondsettings.hp"
 
 
 
@@ -134,6 +138,7 @@
 	
 	
         
+
 
 
 

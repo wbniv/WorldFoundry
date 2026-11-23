@@ -189,6 +189,14 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
 			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
 				object = OadTrainLoopsSettings(startData); 
 			break;
+        	case Actor::HourTreeSettings_KIND:
+			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
+				object = OadHourTreeSettings(startData); 
+			break;
+        	case Actor::BambooPondSettings_KIND:
+			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
+				object = OadBambooPondSettings(startData); 
+			break;
 
 
 
@@ -225,6 +233,7 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
 	
 	
         
+
 
 
 
@@ -387,6 +396,12 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
         	case Actor::TrainLoopsSettings_KIND:
 			object = OadTrainLoopsSettings(startData); 
 			break;
+        	case Actor::HourTreeSettings_KIND:
+			object = OadHourTreeSettings(startData); 
+			break;
+        	case Actor::BambooPondSettings_KIND:
+			object = OadBambooPondSettings(startData); 
+			break;
 
 
 
@@ -423,6 +438,7 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
 	
 	
         
+
 
 
 

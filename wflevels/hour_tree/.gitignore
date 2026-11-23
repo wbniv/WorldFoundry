@@ -1,0 +1,15 @@
+*
+!.gitignore
+!*.py
+!*.sh
+!hour_tree.blend
+!hour_tree_art.blend
+!bark-source.png
+!landscape-source.png
+!leaf-source.png
+!leaf-veins-source.png
+!hour_tree.lev
+!hour_tree-standalone.iff.txt
+!actor-map.json
+!settings-capabilities.json
+!textile.flags

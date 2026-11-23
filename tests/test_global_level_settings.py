@@ -62,17 +62,18 @@ def test_the_level_applies_the_globals_on_change_and_at_load():
     assert "wfglobals::applyAtLoad(_runtimeProperties);" in level
 
 
-def test_level_settings_is_registered_last_in_every_registry():
-    """A new type is appended, never inserted: the position is the type id compiled into every level."""
+def test_level_settings_and_later_types_keep_consistent_registry_order():
+    """Later types are appended after LevelSettings in every generated registry."""
     mac = re.findall(r"^\s*OBJECTENTRY\((\w+),", (OAS / "objects.mac").read_text(), re.M)
-    assert mac.count("LevelSettings") == 1 and mac[-1] == "LevelSettings"
-    kinds = re.findall(r"^\s*(\w+)_KIND,", (OAS / "objects.e").read_text(), re.M)
-    assert kinds[-1] == "LevelSettings"
-    assert re.findall(r"^\s*(\w+)_KIND,", (OAS / "objects.h").read_text(), re.M)[-1] == "LevelSettings"
-    assert re.findall(r'^\s*"(\w+)",', (OAS / "objects.names").read_text(), re.M)[-1] == "LevelSettings"
-    assert [l.strip() for l in (OAS / "objects.lc").read_text().splitlines() if l.strip().isidentifier()][-1] == "levelsettings"
-    assert re.findall(r"//\s*(\w+)\s*$", (OAS / "objects.col").read_text(), re.M)[-1] == "LevelSettings"
-    assert re.findall(r'#include "(\w+)\.hp"', (OAS / "objects.inc").read_text())[-1] == "levelsettings"
+    assert mac.count("LevelSettings") == 1
+    suffix = mac[mac.index("LevelSettings"):]
+    assert suffix[:5] == ["LevelSettings", "DiscusSettings", "AnamorphicShardsSettings", "GlobeSunRingSettings", "TrainLoopsSettings"]
+    for name,pattern in (("objects.e",r"^\s*(\w+)_KIND,"), ("objects.h",r"^\s*(\w+)_KIND,"),
+                         ("objects.names",r'^\s*"(\w+)",'), ("objects.col",r"//\s*(\w+)\s*$")):
+        assert re.findall(pattern,(OAS/name).read_text(),re.M)[-len(suffix):] == suffix
+    lower=[name.lower() for name in suffix]
+    assert [l.strip() for l in (OAS / "objects.lc").read_text().splitlines() if l.strip().isidentifier()][-len(suffix):] == lower
+    assert re.findall(r'#include "(\w+)\.hp"', (OAS / "objects.inc").read_text())[-len(suffix):] == lower
     c = (OAS / "objects.c").read_text()
     assert c.count("case Actor::LevelSettings_KIND:") == 2 and c.count("OadLevelSettings(startData)") == 2
     header = (GAME / "levelsettings.hp").read_text()

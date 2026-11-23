@@ -1,0 +1,27 @@
+{
+  "indices": {
+    "Level": 1,
+    "Room": 2,
+    "Director": 3,
+    "Player": 4,
+    "Camera": 5,
+    "LookAt": 6,
+    "cs_wide": 7,
+    "Ambient": 8,
+    "Sun": 9,
+    "Background": 10,
+    "BambooPondSettings": 11,
+    "GardenBackdrop": 12,
+    "Garden": 13,
+    "BambooGrove": 14,
+    "PondWater": 15,
+    "FloatingLantern": 16,
+    "Koi": 17,
+    "KoiRipples": 18,
+    "LanternRipples": 19,
+    "BambooSupport": 20,
+    "Tipper": 21,
+    "TubeWater": 22,
+    "SpoutWater": 23
+  }
+}

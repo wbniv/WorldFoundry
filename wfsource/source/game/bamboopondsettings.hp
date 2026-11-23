@@ -1,0 +1,15 @@
+#ifndef _BambooPondSettings_HP
+#define _BambooPondSettings_HP
+#include "actor.hp"
+class BambooPondSettings : public Actor {
+public:
+    BambooPondSettings(const SObjectStartupData* startupData);
+    virtual ~BambooPondSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadBambooPondSettings(const SObjectStartupData* startupData);
+#endif

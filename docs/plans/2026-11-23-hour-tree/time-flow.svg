@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="340" viewBox="0 0 1000 340" role="img" aria-labelledby="title">
+<title id="title">Local time determines branches, leaves, buds and leaf fall</title>
+<defs><marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0 L10 4 L0 8 Z" fill="#56715d"/></marker></defs>
+<rect width="1000" height="340" rx="18" fill="#f3f7ef"/>
+<g font-family="sans-serif" font-size="20" text-anchor="middle" fill="#1b3625">
+<rect x="25" y="127" width="180" height="68" rx="12" fill="#c8dfc7"/><text x="115" y="168">Local wall time</text>
+<g fill="#fff" stroke="#9ab7a0"><rect x="300" y="18" width="310" height="58" rx="10"/><rect x="300" y="100" width="310" height="58" rx="10"/><rect x="300" y="182" width="310" height="58" rx="10"/><rect x="300" y="264" width="310" height="58" rx="10"/></g>
+<text x="455" y="54">Hour modulo 12</text><text x="455" y="136">Minute divided by 5</text><text x="455" y="218">Minute modulo 5</text><text x="455" y="300">00:00 or 12:00</text>
+<g fill="#dfedda"><rect x="690" y="18" width="280" height="58" rx="10"/><rect x="690" y="100" width="280" height="58" rx="10"/><rect x="690" y="182" width="280" height="58" rx="10"/><rect x="690" y="264" width="280" height="58" rx="10"/></g>
+<text x="830" y="54">Completed branches</text><text x="830" y="136">Leaves on new branch</text><text x="830" y="218">Buds on new branch</text><text x="830" y="300">Leaf fall and reset</text></g>
+<g fill="none" stroke="#56715d" stroke-width="3" marker-end="url(#arrow)"><path d="M205 160 C255 160 245 47 298 47"/><path d="M205 160 C245 160 255 129 298 129"/><path d="M205 160 C245 160 255 211 298 211"/><path d="M205 160 C255 160 245 293 298 293"/><path d="M610 47 H688 M610 129 H688 M610 211 H688 M610 293 H688"/></g></svg>

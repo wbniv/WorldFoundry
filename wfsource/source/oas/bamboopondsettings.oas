@@ -1,0 +1,11 @@
+@* Live settings for the Bamboo Tipper and Pond clock.
+TYPEHEADER(Bamboo Tipper and Pond Settings,BambooPondSettings)
+	@include settings.inc
+	@include clocksettings.inc
+	PROPERTY_SHEET_HEADER(Pond,1)
+	TYPEENTRYINT32(Water motion,,0,1,1,"",SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"Animate the pond surface")
+	TYPEENTRYINT32(Ripples,,0,1,1,"",SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"Show ripples around the koi and lantern")
+	TYPEENTRYINT32(Koi size,,0,2,1,"Small|Normal|Large",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Choose the size of the koi")
+	PROPERTY_SHEET_FOOTER
+	@include global_settings.inc
+TYPEFOOTER

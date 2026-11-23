@@ -1,0 +1,15 @@
+#ifndef _HourTreeSettings_HP
+#define _HourTreeSettings_HP
+#include "actor.hp"
+class HourTreeSettings : public Actor {
+public:
+    HourTreeSettings(const SObjectStartupData* startupData);
+    virtual ~HourTreeSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadHourTreeSettings(const SObjectStartupData* startupData);
+#endif

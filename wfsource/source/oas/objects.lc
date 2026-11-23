@@ -57,6 +57,8 @@ This file must be in the same directory as all of the .oad files
         anamorphicshardssettings
         globesunringsettings
         trainloopssettings
+        hourtreesettings
+        bamboopondsettings
 }
 
 
@@ -93,6 +95,7 @@ This file must be in the same directory as all of the .oad files
 	
 	
         
+
 
 
 

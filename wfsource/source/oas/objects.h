@@ -63,6 +63,8 @@ enum EActorKind {
         AnamorphicShardsSettings_KIND,
         GlobeSunRingSettings_KIND,
         TrainLoopsSettings_KIND,
+        HourTreeSettings_KIND,
+        BambooPondSettings_KIND,
 	};
 
 
@@ -100,6 +102,7 @@ COLTABLEHEADER
 	COLTABLEENTRY(Gold,StatPlat,CI_PHYSICS,CI_PHYSICS)
         COLTABLEENTRY(File,Player,CI_PHYSICS,CI_PHYSICS)
 COLTABLEFOOTER
+
 
 
 

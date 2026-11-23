@@ -71,6 +71,8 @@ OBJECTSHEADER
         OBJECTENTRY(AnamorphicShardsSettings,0)
         OBJECTENTRY(GlobeSunRingSettings,0)
         OBJECTENTRY(TrainLoopsSettings,0)
+        OBJECTENTRY(HourTreeSettings,0)
+        OBJECTENTRY(BambooPondSettings,0)
 OBJECTSFOOTER
 
 @*============================================================================
@@ -127,3 +129,4 @@ COLTABLEHEADER
 COLTABLEFOOTER
 
 @*============================================================================
+

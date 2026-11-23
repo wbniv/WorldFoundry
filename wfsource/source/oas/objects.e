@@ -65,6 +65,8 @@
         AnamorphicShardsSettings_KIND,
         GlobeSunRingSettings_KIND,
         TrainLoopsSettings_KIND,
+        HourTreeSettings_KIND,
+        BambooPondSettings_KIND,
 
 
 
@@ -101,6 +103,7 @@
 	
 	
         
+
 
 
 
