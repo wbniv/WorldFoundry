@@ -1,0 +1,4 @@
+iphone|iPhone 17 Pro|yes|yes|yes|286|82
+ipad|iPad Pro 13-inch (M5)|yes|yes|yes|345|83
+aquarium-iphone|iPhone 17 Pro|yes|yes|yes|1136|8
+aquarium-ipad|iPad Pro 13-inch (M5)|yes|yes|yes|2233|8

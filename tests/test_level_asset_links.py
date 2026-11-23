@@ -19,6 +19,7 @@ def test_generated_texture_pages_are_local_even_with_stale_symlinks(tmp_path):
         (target / page).symlink_to(source / page)
     (target / "Room1.tga").symlink_to(source / "Room0.tga")
     (source / "actor_atlas.tga").write_bytes(b"mesh texture")
+    (source / "indexed.png").write_bytes(b"index texture")
     (source / "actor.iff").write_bytes(b"mesh")
 
     link_source_assets(source, target)
@@ -26,6 +27,7 @@ def test_generated_texture_pages_are_local_even_with_stale_symlinks(tmp_path):
     assert all(not (target / page).is_symlink() for page in pages)
     assert not (target / "Room1.tga").is_symlink()
     assert (target / "actor_atlas.tga").is_symlink()
+    assert (target / "indexed.png").is_symlink()
     assert (target / "actor.iff").is_symlink()
     for page in pages:
         (target / page).write_bytes(b"derived " + page.encode())

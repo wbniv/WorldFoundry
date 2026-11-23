@@ -1,0 +1,8 @@
+@* Discus tank live settings. The palette index is read by the level controller.
+TYPEHEADER(Discus Settings,DiscusSettings)
+	@include settings.inc
+	PROPERTY_SHEET_HEADER(Discus,1)
+	TYPEENTRYINT32(Palette,,0,11,0,"Wild Brown|Warm Brown|Copper Brown|Golden Brown|Olive Brown|Pale Brown|Blue Brown|Green Brown|Amber|Smoky Brown|Light Olive|Cool Brown",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Color palette for the whole school")
+	PROPERTY_SHEET_FOOTER
+	@include global_settings.inc
+TYPEFOOTER

@@ -19,7 +19,7 @@ def link_source_assets(source: Path, target: Path) -> None:
     for asset in source.iterdir():
         if GENERATED_TEXTURE_PAGE.fullmatch(asset.name):
             continue
-        if asset.suffix not in {".iff", ".tga", ".flags"}:
+        if asset.suffix not in {".iff", ".tga", ".png", ".flags"}:
             continue
         link = target / asset.name
         # Relative links resolve the same on the host and in the build containers (repo at

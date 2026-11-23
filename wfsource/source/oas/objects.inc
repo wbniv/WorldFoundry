@@ -90,6 +90,8 @@
 #include "cuckoovillagesettings.hp"
         	
 #include "levelsettings.hp"
+        	
+#include "discussettings.hp"
 
 
 

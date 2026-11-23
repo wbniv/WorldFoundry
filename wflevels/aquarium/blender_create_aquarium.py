@@ -842,6 +842,14 @@ if PLAYER_SCHOOL:
     # Freshwater school: remove marine habitat before computing actor indices.
     for name in ['rock', 'anemone', *clump_objs]:
         bpy.data.objects.remove(bpy.data.objects[name], do_unlink=True)
+if TANK == 'discus':
+    settings = bpy.data.objects.new('DiscusSettings', None)
+    scene.collection.objects.link(settings)
+    settings['wf_schema_path'] = os.path.join(REPO, 'wfsource/source/oas/discussettings.oad')
+    settings['wf_Model Type'] = 'None'
+    settings['wf_Mass'] = 0.0
+    settings.location = director.location
+
 wf_objects = [o for o in scene.objects if o.get('wf_schema_path')]
 idx = {o.name: wf_objects.index(o) + ACTOR_IDX_BIAS for o in wf_objects}
 assert idx['Player'] < idx['tank-shell'], 'Player must be created before the one-piece tank'

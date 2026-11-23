@@ -1,4 +1,5 @@
 #include "../../../engine/runtime_options.hpp"
+#include "../../../engine/indexed_palette.h"
 #include "../../../engine/runtime_property_host.hpp"
 #include "../../../engine/room_render_settings.hpp"
 #include "../../../engine/runtime_diagnostics.hpp"
@@ -664,6 +665,31 @@ Level::Level
 	Memory* newMemory = new (HALLmalloc) DMalloc(HALLmalloc,plmc->cbObjectsDRam,MEMORY_NAMED("Level DMalloc"));
 	assert( ValidPtr( newMemory ) );
 	_memory.Set(newMemory,&HALLmalloc);
+    // A level may carry indexed palette tables after its ordinary assets.
+    // The sector-aligned locator is in RAM; the payload is immutable and its
+    // selected table is copied into the shared runtime selection.
+    wfpalette::active().reset();
+    bool indexedPaletteLoaded = false;
+    for (unsigned off = 44; off + 12 <= ramSize + 8 && off + 12 <= 2048; off += 4) {
+        uint32 locator[3]; std::memcpy(locator, memoryConfigurationBytes + off, 12);
+        if (locator[0] != IFFTAG('I','P','L','T')) continue;
+        if (indexedPaletteLoaded || locator[1] < 2048 || locator[1] % 2048 ||
+            locator[2] < 16 || locator[2] > 256 * wfpalette::kTableBytes + 4096 ||
+            locator[2] % 2048 || locator[1] > uint32(INT32_MAX - propertyRamStart) - locator[2]) {
+            std::fprintf(stderr, "INDEXED_PALETTE invalid locator\n"); std::abort();
+        }
+        std::vector<std::uint8_t> bundle(locator[2]);
+        const int32 resume = _levelFile->FilePos();
+        _levelFile->SeekRandom(propertyRamStart + locator[1]);
+        _levelFile->ReadBytes(bundle.data(), locator[2]);
+        _levelFile->SeekRandom(resume);
+        uint32 payload = 0; std::memcpy(&payload, bundle.data() + 4, 4);
+        if (std::memcmp(bundle.data(), "IPLT", 4) || payload > locator[2] - 8 ||
+            !wfpalette::active().load(bundle.data() + 8, payload)) {
+            std::fprintf(stderr, "INDEXED_PALETTE invalid payload\n"); std::abort();
+        }
+        indexedPaletteLoaded = true;
+    }
     // Optional pre-rendered glyph catalog in RAM padding. The locator is not
     // part of actor/LVL structures.
     for(unsigned off=44;off+12<=ramSize+8&&off+12<=2048;off+=4){
@@ -1043,6 +1069,7 @@ Level::Level
 
 Level::~Level()
 {
+    wfpalette::active().reset();
     if(_bitmapPresenter){_bitmapPresenter->~Presenter();_memory->Free(_bitmapPresenter);_bitmapPresenter=NULL;}
     if(_bitmapBundle){_memory->Free(_bitmapBundle);_bitmapBundle=NULL;}
 

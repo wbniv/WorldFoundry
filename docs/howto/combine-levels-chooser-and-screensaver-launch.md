@@ -69,6 +69,8 @@ Still missing from the old host, tracked in [the touch plan](../plans/2026-11-22
 
 **Adding a level later:** build its standalone, add one `level` line, rebuild the bundle. That is the only place a level is added. A level that needs a driver for the screensaver also needs one line in `SCRIPT_NAMES` in `scripts/build-aquarium-screensaver-levels.py`; a level without an entry takes the generic path.
 
+**Finish both halves of the combined package:** after a new level runs on the desktop, rebuild the chooser bundle *and* the bundle used by the Dream before building the APK. For Aquarium, `task build-cd-iff-aquarium-menu` packs the playable menu and `task build-aquarium-screensaver-apk` rebuilds the Dream variants and bundle and packages both. For WF Clocks, add the clock to `wflevels/clocks-menu.manifest`, run `task clocks-regenerate` and `task clocks-check`, then `task build-clocks-apk`. Keep existing manifest entries in order: their positions are the saved level indices. Inspect the APK's `assets/menu-cd.iff` and `assets/cd.iff` (Clocks may use a shared bundle), exercise both the chooser and the Dream on the computer, then freeze the APK and test the combined app and screensaver through the coordinator. A successful playable-menu build alone does not update the Aquarium Dream bundle.
+
 **Level chains.** A level that ends by loading another one (the SMB flagpoles) writes `LEVEL_TO_RUN` (mailbox 5000) and `END_OF_LEVEL` (mailbox 1905). The index it writes is the TOC index, so keep a chain's levels in the same relative order in every bundle that holds it. The SMB menu bundle is the reference.
 
 ## 2. Use the same list in a screensaver

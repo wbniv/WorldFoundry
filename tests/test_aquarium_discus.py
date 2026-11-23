@@ -133,7 +133,7 @@ def test_texture_fits_the_page_and_the_app_slot():
     from PIL import Image
     slot = dict(re.findall(r'--vram-(slot-width|slot-height)=(\d+)', (LEVELS / 'aquarium-wf_args.txt').read_text()))
     assert page(HERE, 'PAGEX') <= int(slot['slot-width']) and page(HERE, 'PAGEY') <= int(slot['slot-height'])
-    assert Image.open(HERE / 'discus.tga').size == (DS.TEXTURE_SIZE, DS.TEXTURE_SIZE)
+    assert Image.open(HERE / 'discus-index-rgb555.png').size == (DS.TEXTURE_SIZE, DS.TEXTURE_SIZE)
     for name, keys in (('Room0.tga', ('PAGEX', 'PAGEY')), ('Perm.tga', ('PERMPAGEX', 'PERMPAGEY'))):
         w, h = Image.open(HERE / name).size
         assert w <= page(HERE, keys[0]) and h <= page(HERE, keys[1]), name
