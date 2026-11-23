@@ -61,6 +61,7 @@
         TideHarbourSettings_KIND,
         CuckooVillageSettings_KIND,
         LevelSettings_KIND,
+        AnamorphicShardsSettings_KIND,
 
 
 

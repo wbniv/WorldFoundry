@@ -61,6 +61,7 @@ int collisionTable[] =
         	0,	// TideHarbourSettings
         	0,	// CuckooVillageSettings
         	0,	// LevelSettings
+		0,	// AnamorphicShardsSettings
 	
 };
 

@@ -91,6 +91,8 @@
         	
 #include "levelsettings.hp"
 
+#include "anamorphicshardssettings.hp"
+
 
 
 

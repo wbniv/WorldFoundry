@@ -51,7 +51,9 @@ def audit(clock):
     src = read(oas)
     res = {
         "type": oas.exists() and oad.exists() and "settings.inc" in src,
-        "fields": "SHOW_AS_LIVE" in src,
+        "fields": "SHOW_AS_LIVE" in src or any(
+            "SHOW_AS_LIVE" in read(oas.parent / inc)
+            for inc in re.findall(r'^\s*@include\s+([\w.-]+\.inc)', src, re.M)),
     }
     level_dir = ROOT / "wflevels" / clock
     gen = "".join(read(p) for p in sorted(level_dir.glob("*.py")) + sorted(level_dir.glob("*.lev")))

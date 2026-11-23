@@ -69,6 +69,10 @@ Still missing from the old host, tracked in [the touch plan](../plans/2026-11-22
 
 **Adding a level later:** build its standalone, add one `level` line, rebuild the bundle. That is the only place a level is added. A level that needs a driver for the screensaver also needs one line in `SCRIPT_NAMES` in `scripts/build-aquarium-screensaver-levels.py`; a level without an entry takes the generic path.
 
+**Order for a new level:** (1) build its standalone and exercise the actual level on the PC, including controls, animation, settings and any time-dependent transitions; (2) freeze a device build and test the level on a Chromecast through the coordinator, capturing its appearance and measuring frame time and memory; (3) append the approved level to the pack manifest and rebuild both the playable chooser and screensaver bundles; (4) build and freeze the combined release APK and deploy it to every intended available device, then verify the launcher and screensaver. Record unavailable devices and complete their checks when they return. A successful playable-menu build alone does not update the Aquarium Dream bundle. For WF Clocks, `task clocks-regenerate` rebuilds the clocks and bundle, `task clocks-check` checks the tracked outputs, and `task build-clocks-apk` builds the combined APK. For Aquarium, `task build-cd-iff-aquarium-menu` packs the playable menu and `task build-aquarium-screensaver-apk` rebuilds the Dream variants and bundle and packages both. Keep existing manifest entries in order: their positions are the saved level indices.
+
+For a temporary device-test manifest, check where its level paths resolve and refresh any copied standalone after every rebuild. Verify that the frozen APK's `assets/cd.iff` actually contains the current standalone bytes; a successful APK build alone can package an older copy.
+
 **Level chains.** A level that ends by loading another one (the SMB flagpoles) writes `LEVEL_TO_RUN` (mailbox 5000) and `END_OF_LEVEL` (mailbox 1905). The index it writes is the TOC index, so keep a chain's levels in the same relative order in every bundle that holds it. The SMB menu bundle is the reference.
 
 ## 2. Use the same list in a screensaver
@@ -116,7 +120,7 @@ stateDiagram-v2
 
 ## 4. Make a new pack (an app that is also the screensaver)
 
-Two packs exist today, built the same way: **WF Aquarium** (flavor `aquarium`, `wflevels/aquarium-menu.manifest`, 11 tanks) and **WF Clocks**, the 3D Clocks (flavor `clocks`, `wflevels/clocks-menu.manifest`, Minute Machine and Cuckoo Village). A third pack follows the same steps. The roster is append-only: a level's position is its id in the bundle.
+Two packs exist today, built the same way: **WF Aquarium** (flavor `aquarium`, `wflevels/aquarium-menu.manifest`, 11 tanks) and **WF Clocks**, the 3D Clocks (flavor `clocks`, `wflevels/clocks-menu.manifest`, including Anamorphic Shards). A third pack follows the same steps. The roster is append-only: a level's position is its id in the bundle.
 
 1. **Name the package `org.worldfoundry.game.<name>`** (Will, 2026‑11‑22: `org.worldfoundry.game.aquarium`, `org.worldfoundry.game.clocks`) and set it as the flavor's `applicationId` in `android/screensaver/build.gradle.kts`. The name is the game, never the mechanism: not `…screensaver`, not `…wf_game.<name>`. The Java `namespace` (`org.worldfoundry.screensaver`) is a separate setting and stays. Aquarium and Clocks carry the new ids since 2026‑11‑22, and the tables below show them ([One Aquarium APK](../plans/2026-11-22-one-aquarium-apk.md), D5).
 2. Write `wflevels/<package>-menu.manifest` in the format above.
@@ -155,7 +159,7 @@ Single-level apps (Seahorse Grid, the Planted Tank app) are not part of this mec
 
 Two limits today: the phone form is served by `LevelSettings.java`, which knows only Sea Stars until the Tide Harbour plan's Phase 3 generalises it by clock id, so a phone asset for another level is not yet read; and Minute Machine's object is that plan's Phase 2b.
 
-Adding a type is an **engine change** (C++ and the registry), so it needs the owner's explicit permission in a project that forbids engine edits.
+Adding a type touches engine registration and its small settings-holder actor. Will pre-approved those routine changes for settings objects in new levels on 2026‑11‑23: add the level's OAS/OAD, holder class and object-registry entries needed to expose its settings. Other engine changes still require discussion and explicit permission under `AGENTS.md`.
 
 ### The settings every level offers (Show framerate)
 
