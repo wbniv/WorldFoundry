@@ -68,6 +68,7 @@ OBJECTSHEADER
         OBJECTENTRY(CuckooVillageSettings,0)
         OBJECTENTRY(LevelSettings,0)
         OBJECTENTRY(DiscusSettings,0)
+        OBJECTENTRY(AnamorphicShardsSettings,0)
 OBJECTSFOOTER
 
 @*============================================================================

@@ -1,0 +1,12 @@
+// Standalone L4 wrapper for the playable clock and its screensaver bundle.
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 1000000l
+        'PERM' 2000000l
+        'ROOM' 12000000l
+        'FLAG' 1l 1l
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../anamorphic_shards.iff" ]
+}

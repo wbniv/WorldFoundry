@@ -60,6 +60,7 @@ enum EActorKind {
         CuckooVillageSettings_KIND,
         LevelSettings_KIND,
         DiscusSettings_KIND,
+        AnamorphicShardsSettings_KIND,
 	};
 
 

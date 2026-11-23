@@ -1,0 +1,15 @@
+#ifndef _AnamorphicShardsSettings_HP
+#define _AnamorphicShardsSettings_HP
+#include "actor.hp"
+class AnamorphicShardsSettings : public Actor {
+public:
+    AnamorphicShardsSettings(const SObjectStartupData* startupData);
+    virtual ~AnamorphicShardsSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadAnamorphicShardsSettings(const SObjectStartupData* startupData);
+#endif

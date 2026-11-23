@@ -1,0 +1,6 @@
+@* Live settings for the Anamorphic Shards clock.
+TYPEHEADER(Anamorphic Shards Settings,AnamorphicShardsSettings)
+	@include settings.inc
+	@include clocksettings.inc
+	@include global_settings.inc
+TYPEFOOTER

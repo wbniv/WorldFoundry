@@ -149,7 +149,9 @@ def audit(level_id, types=None):
     oas = OAS / f"{name.lower()}.oas"
     src = read(oas)
     res["type"] = oas.exists() and oas.with_suffix(".oad").exists() and "settings.inc" in src
-    res["fields"] = "SHOW_AS_LIVE" in src
+    # Shared sheets may declare the live fields in included .inc files.
+    includes = re.findall(r'^\s*@include\s+([\w.-]+\.inc)', src, re.M)
+    res["fields"] = "SHOW_AS_LIVE" in src or any("SHOW_AS_LIVE" in read(OAS / inc) for inc in includes)
     res["level"] = True
     res["director"] = "property@" in lev
     res["phone"] = any(name in read(p) for p in (ROOT / "android/screensaver/src").glob("*/assets/*.json"))

@@ -1,0 +1,8 @@
+# Authored sources and exported level; the build recreates intermediate assets.
+*
+!.gitignore
+!*.py
+!*.sh
+!anamorphic_shards.lev
+!anamorphic_shards-standalone.iff.txt
+!actor-map.json

@@ -1,6 +1,6 @@
 # How to combine several levels, add a chooser menu, and start one level from a screensaver
 
-This is the recipe for a package that holds more than one World Foundry level: one bundle, a menu that picks a level, and the same list driving a screensaver (Dream) that plays a saved choice or one named level for one run. The Aquarium is the worked example (twelve tanks). The SMB world select is the other menu example.
+This is the recipe for a package that holds more than one World Foundry level: one bundle, a menu that picks a level, and the same list driving a screensaver (Dream) that plays a saved choice or one named level for one run. The Aquarium is the worked example (eleven tanks). The SMB world select is the other menu example.
 
 Related, so nothing is said twice:
 
@@ -69,7 +69,11 @@ Still missing from the old host, tracked in [the touch plan](../plans/2026-11-22
 
 **Adding a level later:** build its standalone, add one `level` line, rebuild the bundle. That is the only place a level is added. A level that needs a driver for the screensaver also needs one line in `SCRIPT_NAMES` in `scripts/build-aquarium-screensaver-levels.py`; a level without an entry takes the generic path.
 
-**Finish both halves of the combined package:** after a new level runs on the desktop, rebuild the chooser bundle *and* the bundle used by the Dream before building the APK. For Aquarium, `task build-cd-iff-aquarium-menu` packs the playable menu and `task build-aquarium-screensaver-apk` rebuilds the Dream variants and bundle and packages both. For WF Clocks, add the clock to `wflevels/clocks-menu.manifest`, run `task clocks-regenerate` and `task clocks-check`, then `task build-clocks-apk`. Keep existing manifest entries in order: their positions are the saved level indices. Inspect the APK's `assets/menu-cd.iff` and `assets/cd.iff` (Clocks may use a shared bundle), exercise both the chooser and the Dream on the computer, then freeze the APK and test the combined app and screensaver through the coordinator. A successful playable-menu build alone does not update the Aquarium Dream bundle.
+**Order for a new level:** (1) build its standalone and exercise the actual level on the PC, including controls, animation, settings and any time-dependent transitions; (2) freeze a device build and test the level on a Chromecast through the coordinator, capturing its appearance and measuring frame time and memory; (3) append the approved level to the pack manifest and rebuild both the playable chooser and screensaver bundles; (4) build and freeze the combined release APK and deploy it to every intended available device, then verify the launcher and screensaver. Record unavailable devices and complete their checks when they return. A successful playable-menu build alone does not update the Aquarium Dream bundle. For WF Clocks, `task clocks-regenerate` rebuilds the clocks and bundle, `task clocks-check` checks the tracked outputs, and `task build-clocks-apk` builds the combined APK. For Aquarium, `task build-cd-iff-aquarium-menu` packs the playable menu and `task build-aquarium-screensaver-apk` rebuilds the Dream variants and bundle and packages both. Keep existing manifest entries in order: their positions are the saved level indices.
+
+For a temporary device-test manifest, check where its level paths resolve and refresh any copied standalone after every rebuild. Verify that the frozen APK's `assets/cd.iff` actually contains the current standalone bytes; a successful APK build alone can package an older copy.
+
+Inspect both `assets/menu-cd.iff` and `assets/cd.iff` when the pack has separate chooser and Dream bundles (Clocks can share one); exercise both paths on the computer before device verification.
 
 **Level chains.** A level that ends by loading another one (the SMB flagpoles) writes `LEVEL_TO_RUN` (mailbox 5000) and `END_OF_LEVEL` (mailbox 1905). The index it writes is the TOC index, so keep a chain's levels in the same relative order in every bundle that holds it. The SMB menu bundle is the reference.
 
@@ -118,7 +122,7 @@ stateDiagram-v2
 
 ## 4. Make a new pack (an app that is also the screensaver)
 
-Two packs exist today, built the same way: **WF Aquarium** (flavor `aquarium`, `wflevels/aquarium-menu.manifest`, 12 tanks) and **WF Clocks**, the 3D Clocks (flavor `clocks`, `wflevels/clocks-menu.manifest`, Minute Machine and Cuckoo Village). A third pack follows the same steps. The roster is append-only: a level's position is its id in the bundle.
+Two packs exist today, built the same way: **WF Aquarium** (flavor `aquarium`, `wflevels/aquarium-menu.manifest`, 12 tanks) and **WF Clocks**, the 3D Clocks (flavor `clocks`, `wflevels/clocks-menu.manifest`, including Anamorphic Shards). A third pack follows the same steps. The roster is append-only: a level's position is its id in the bundle.
 
 1. **Name the package `org.worldfoundry.game.<name>`** (Will, 2026‑11‑22: `org.worldfoundry.game.aquarium`, `org.worldfoundry.game.clocks`) and set it as the flavor's `applicationId` in `android/screensaver/build.gradle.kts`. The name is the game, never the mechanism: not `…screensaver`, not `…wf_game.<name>`. The Java `namespace` (`org.worldfoundry.screensaver`) is a separate setting and stays. Aquarium and Clocks carry the new ids since 2026‑11‑22, and the tables below show them ([One Aquarium APK](../plans/2026-11-22-one-aquarium-apk.md), D5).
 2. Write `wflevels/<package>-menu.manifest` in the format above.
@@ -157,7 +161,7 @@ Single-level apps (Seahorse Grid, the Planted Tank app) are not part of this mec
 
 Two limits today: the phone form is served by `LevelSettings.java`, which knows only Sea Stars until the Tide Harbour plan's Phase 3 generalises it by clock id, so a phone asset for another level is not yet read; and Minute Machine's object is that plan's Phase 2b.
 
-Adding a type is an **engine change** (C++ and the registry), so it needs the owner's explicit permission in a project that forbids engine edits.
+Adding a type touches engine registration and its small settings-holder actor. Will pre-approved those routine changes for settings objects in new levels on 2026‑11‑23: add the level's OAS/OAD, holder class and object-registry entries needed to expose its settings. Other engine changes still require discussion and explicit permission under `AGENTS.md`.
 
 ### The settings every level offers (Show framerate)
 
@@ -231,9 +235,8 @@ One manifest line gives three names. `wflevels/aquarium-menu.manifest` is the so
 | `aquarium_thai_reef` | Gulf of Thailand Reef | Thai Reef |
 | `aquarium_thai_reef_anime` | Gulf of Thailand Reef - Anime | Thai Reef Anime |
 | `aquarium_sea_stars` | Sea Stars | Sea Stars |
-| `aquarium_discus` | Discus | Discus |
 
-The menu shows twelve entries (1 of 12); the Dream's `tank` setting offers thirteen choices, those twelve plus `random`. Discus, the twelfth, was appended on 2026‑11‑22 ([plan](../plans/2026-11-22-discus-tank.md)): the roster is append-only, so no earlier tank's index moved. Two frames seen on Cast1 (2026‑11‑21) so you know what right looks like: `aquarium_jellyfish` is jellyfish drifting between two curved glass panes; `aquarium_plants` ("Planted Urchin") is tall plant stems with seahorses clinging to them and a purple sea urchin on the sand. The names differ on purpose, so a tank reported by the wrong name is usually not a bug: check the id.
+The menu shows eleven entries (1 of 11); the Dream's `tank` setting offers twelve choices, those eleven plus `random`. Two frames seen on Cast1 (2026‑11‑21) so you know what right looks like: `aquarium_jellyfish` is jellyfish drifting between two curved glass panes; `aquarium_plants` ("Planted Urchin") is tall plant stems with seahorses clinging to them and a purple sea urchin on the sand. The names differ on purpose, so a tank reported by the wrong name is usually not a bug: check the id.
 
 ## 8. Read the engine log
 
@@ -242,7 +245,7 @@ Each package writes its engine log to `/sdcard/Android/data/<package>/files/wf.l
 | Line | Meaning |
 |---|---|
 | `=== wf_dream start the menu (…) of N ===` | menu mode: a normal start |
-| `level-menu: showing 12 entries ("WF Aquarium")` | the menu opened with the manifest's twelve tanks |
+| `level-menu: showing 11 entries ("WF Aquarium")` | the menu opened with the manifest's eleven tanks |
 | `=== wf_dream start level N ===` | a tank, by its index in the bundle (manifest order), for the Dream, the preview or `LEVEL` |
 | `Back in a tank: returning to the menu`, `Back on the menu: leaving the app` | Back handling |
 | `PLANTS generation=… shoots=… mode=saltwater` | the planted-tank generator ran: the Planted Urchin tank |
