@@ -655,6 +655,16 @@ and the FSN `filesys` towers (2026-06-12, runtime template + scale). It is one
 rule, not a physics quirk. See also the scale-mailbox note in
 [level-design-troubleshooting.md](level-design-troubleshooting.md#b-runtime-xyz_scale-mailboxes-30403042--visual-only).
 
+### Triangle size and scene scale
+
+The engine's fixed-point normal calculation requires triangles to have enough area.
+If smooth or detailed meshes produce triangles below the safe area, consider scaling
+the entire scene up while preserving its geometry; scale the camera, room bounds and
+scripted distances and speeds with it. Rebuild, measure exported triangle areas and
+run the scene to verify framing and motion. Zero-area or otherwise invalid faces still
+need repair. See [the small-triangle FAQ](level-design-troubleshooting.md#probably-have-a-polygon-which-is-too-small--sub-threshold-triangles-abort-the-level)
+for the threshold and diagnostic details.
+
 ### Mesh face winding — Blender order in the engine (2026-10-16)
 
 **The renderer has a software backface cull, ON by default** (`WF_CULL=0` opts out; the flip

@@ -106,6 +106,8 @@
 #include "tourbillonsettings.hp"
         	
 #include "metronomeforestsettings.hp"
+        	
+#include "lavalampdigitssettings.hp"
 
 
 

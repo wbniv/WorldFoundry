@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="270" viewBox="0 0 1100 270" role="img" aria-labelledby="title desc">
+ <title id="title">A minute in the lava lamp clock</title><desc id="desc">New digits rise and merge after the minute. They hold legibly, then sag and break apart before the next minute.</desc>
+ <rect width="1100" height="270" rx="18" fill="#17101f"/>
+ <text x="35" y="43" fill="#fff2db" font-family="sans-serif" font-size="24" font-weight="bold">A minute in the tank</text>
+ <path d="M70 151H1030" stroke="#ffac58" stroke-width="4"/><g fill="#ffb557"><circle cx="70" cy="151" r="7"/><circle cx="220" cy="151" r="7"/><circle cx="880" cy="151" r="7"/><circle cx="1030" cy="151" r="7"/></g>
+ <g font-family="sans-serif" font-size="20" fill="#ffe9d5" text-anchor="middle"><text x="70" y="190">:00</text><text x="220" y="190">:06</text><text x="880" y="190">:54</text><text x="1030" y="190">:00</text></g>
+ <g font-family="sans-serif" font-size="19" fill="#ffb570" text-anchor="middle"><text x="145" y="102">Rise and merge</text><text x="550" y="102">Digits hold: current HH:MM</text><text x="955" y="102">Sag and sink</text></g>
+ <text x="550" y="236" fill="#dbc8dd" font-family="sans-serif" font-size="16" text-anchor="middle">Background blobs continue drifting; the display is deliberately unreadable during the change.</text>
+</svg>

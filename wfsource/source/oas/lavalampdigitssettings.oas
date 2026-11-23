@@ -1,0 +1,6 @@
+@* Live settings for the Metronome Forest clock.
+TYPEHEADER(Lava Lamp Digits Settings,LavaLampDigitsSettings)
+	@include settings.inc
+	@include clocksettings.inc
+	@include global_settings.inc
+TYPEFOOTER

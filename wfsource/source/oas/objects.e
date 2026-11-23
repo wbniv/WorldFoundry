@@ -69,6 +69,7 @@
         BambooPondSettings_KIND,
         TourbillonSettings_KIND,
         MetronomeForestSettings_KIND,
+        LavaLampDigitsSettings_KIND,
 
 
 

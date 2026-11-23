@@ -75,6 +75,7 @@ OBJECTSHEADER
         OBJECTENTRY(BambooPondSettings,0)
         OBJECTENTRY(TourbillonSettings,0)
         OBJECTENTRY(MetronomeForestSettings,0)
+        OBJECTENTRY(LavaLampDigitsSettings,0)
 OBJECTSFOOTER
 
 @*============================================================================

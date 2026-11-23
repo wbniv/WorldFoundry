@@ -1,0 +1,15 @@
+#ifndef _LavaLampDigitsSettings_HP
+#define _LavaLampDigitsSettings_HP
+#include "actor.hp"
+class LavaLampDigitsSettings : public Actor {
+public:
+    LavaLampDigitsSettings(const SObjectStartupData* startupData);
+    virtual ~LavaLampDigitsSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadLavaLampDigitsSettings(const SObjectStartupData* startupData);
+#endif

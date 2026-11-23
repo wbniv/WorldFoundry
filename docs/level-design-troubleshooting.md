@@ -1093,6 +1093,15 @@ can too.
 `face.calc_area() < 8e-5`, remove the orphaned verts (bmesh; see `clean_mesh()` in
 `blender_create_condo.py`). The log's last `jolt: mesh v… local=(…)` lines tell you which mesh.
 
+When small triangles are necessary for a smooth, detailed object, consider **scaling the
+whole level up** instead of discarding visible geometry. Triangle area grows with the
+square of the scale factor, so a 2× scale makes each nondegenerate triangle 4× the area.
+Scale actor positions and mesh geometry together, as well as camera positions and clip
+distances, room bounds and any scripted distances or speeds; then rebuild and measure the
+exported triangles and run the level on the PC. Scaling does not repair zero-area faces or
+bad topology, which still need cleaning. Check the engine's coordinate and memory limits
+and verify that the resulting camera framing and movement remain correct.
+
 ---
 
 ## Named "room" locators — use `target`, never a mesh-less `statplat`
