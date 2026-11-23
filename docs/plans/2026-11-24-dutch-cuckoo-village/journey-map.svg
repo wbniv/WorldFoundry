@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1536" height="1120" viewBox="0 0 1536 1120" font-family="DejaVu Sans, sans-serif">
+<title>Tulpenkade camera circuit</title>
+<rect width="1536" height="1120" fill="#172627"/>
+<image xlink:href="aerial-town.png" width="1536" height="1024"/>
+<path d="M750 763 C630 800 450 785 335 780 Q280 780 280 716 L280 646 Q325 625 318 540 Q313 477 302 456 Q282 414 306 351 Q322 310 353 312 Q400 315 450 274 Q482 251 558 251 Q600 251 600 301 Q590 376 665 411 Q733 444 766 391 Q791 338 871 308 Q945 278 1110 280 Q1153 288 1147 333 Q1132 384 1167 408 Q1238 433 1265 481 Q1300 545 1389 580 Q1460 615 1424 670 Q1376 766 1175 793 Q925 848 750 763 Z" fill="none" stroke="#182d34" stroke-opacity=".9" stroke-width="9"/>
+<path d="M750 763 C630 800 450 785 335 780 Q280 780 280 716 L280 646 Q325 625 318 540 Q313 477 302 456 Q282 414 306 351 Q322 310 353 312 Q400 315 450 274 Q482 251 558 251 Q600 251 600 301 Q590 376 665 411 Q733 444 766 391 Q791 338 871 308 Q945 278 1110 280 Q1153 288 1147 333 Q1132 384 1167 408 Q1238 433 1265 481 Q1300 545 1389 580 Q1460 615 1424 670 Q1376 766 1175 793 Q925 848 750 763 Z" fill="none" stroke="#a9f7ed" stroke-width="4" stroke-dasharray="14 5"/>
+<circle cx="750" cy="763" r="23" fill="#17353d" stroke="#d3fff3" stroke-width="3"/><text x="750" y="771.3" font-weight="bold" font-size="26.4" fill="#ffffff" text-anchor="middle">1</text>
+<circle cx="52" cy="1048" r="15" fill="#17353d" stroke="#d3fff3" stroke-width="3"/><text x="52" y="1053.4" font-weight="bold" font-size="17.2" fill="#ffffff" text-anchor="middle">1</text>
+<text x="80" y="1055" font-size="21" fill="#ffffff">Growers’ landing</text>
+<circle cx="280" cy="716" r="23" fill="#17353d" stroke="#d3fff3" stroke-width="3"/><text x="280" y="724.3" font-weight="bold" font-size="26.4" fill="#ffffff" text-anchor="middle">2</text>
+<circle cx="557" cy="1048" r="15" fill="#17353d" stroke="#d3fff3" stroke-width="3"/><text x="557" y="1053.4" font-weight="bold" font-size="17.2" fill="#ffffff" text-anchor="middle">2</text>
+<text x="585" y="1055" font-size="21" fill="#ffffff">White drawbridge</text>
+<circle cx="353" cy="312" r="23" fill="#17353d" stroke="#d3fff3" stroke-width="3"/><text x="353" y="320.3" font-weight="bold" font-size="26.4" fill="#ffffff" text-anchor="middle">3</text>
+<circle cx="1062" cy="1048" r="15" fill="#17353d" stroke="#d3fff3" stroke-width="3"/><text x="1062" y="1053.4" font-weight="bold" font-size="17.2" fill="#ffffff" text-anchor="middle">3</text>
+<text x="1090" y="1055" font-size="21" fill="#ffffff">Pump courtyard</text>
+<circle cx="665" cy="411" r="23" fill="#17353d" stroke="#d3fff3" stroke-width="3"/><text x="665" y="419.3" font-weight="bold" font-size="26.4" fill="#ffffff" text-anchor="middle">4</text>
+<circle cx="52" cy="1091" r="15" fill="#17353d" stroke="#d3fff3" stroke-width="3"/><text x="52" y="1096.4" font-weight="bold" font-size="17.2" fill="#ffffff" text-anchor="middle">4</text>
+<text x="80" y="1098" font-size="21" fill="#ffffff">Cheese market</text>
+<circle cx="1110" cy="280" r="23" fill="#17353d" stroke="#d3fff3" stroke-width="3"/><text x="1110" y="288.3" font-weight="bold" font-size="26.4" fill="#ffffff" text-anchor="middle">5</text>
+<circle cx="557" cy="1091" r="15" fill="#17353d" stroke="#d3fff3" stroke-width="3"/><text x="557" y="1096.4" font-weight="bold" font-size="17.2" fill="#ffffff" text-anchor="middle">5</text>
+<text x="585" y="1098" font-size="21" fill="#ffffff">Brick footbridge</text>
+<circle cx="1265" cy="481" r="23" fill="#17353d" stroke="#d3fff3" stroke-width="3"/><text x="1265" y="489.3" font-weight="bold" font-size="26.4" fill="#ffffff" text-anchor="middle">6</text>
+<circle cx="1062" cy="1091" r="15" fill="#17353d" stroke="#d3fff3" stroke-width="3"/><text x="1062" y="1096.4" font-weight="bold" font-size="17.2" fill="#ffffff" text-anchor="middle">6</text>
+<text x="1090" y="1098" font-size="21" fill="#ffffff">Boatyard &amp; mill</text>
+</svg>
