@@ -1,0 +1,10 @@
+# Keep the authored sources, the fitted constants, the level source and its wrapper; ignore everything the build writes.
+*
+!.gitignore
+!*.py
+!*.sh
+!*.json
+!tide_fit/
+!tide_fit/**
+!tide_harbour.lev
+!tide_harbour-standalone.iff.txt

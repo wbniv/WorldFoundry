@@ -10,6 +10,7 @@
 #include <string>
 #include <thread>
 #include <unistd.h>
+#include <vector>
 
 #include <hal/hal.h>
 #include <hal/_input.h>
@@ -37,11 +38,56 @@ ANativeWindow* activeWindow = nullptr;
 int surfaceWidth = 0;
 int surfaceHeight = 0;
 
+// Optional per-flavor override of one VRAM size: the flavor's assets/wf_args.txt, one `--vram-...=N` per line
+// (the aquarium app's file format). Only the clocks flavor ships one: Cuckoo Village packs its textures into a
+// 2048 x 1024 page, which the default 1024 x 1024 slot rejects (FatalError: LoadTexture ... does not fit its
+// VRAM slot). Every other flavor has no file and keeps the defaults below. Returns true and fills `out` when
+// the file has a line starting with `prefix`.
+bool vramOverride(const char* prefix, char* out, size_t capacity) {
+    if (!assets) return false;
+    AAsset* file = AAssetManager_open(assets, "wf_args.txt", AASSET_MODE_BUFFER);
+    if (!file) return false;
+    const std::string text(static_cast<const char*>(AAsset_getBuffer(file)), size_t(AAsset_getLength(file)));
+    AAsset_close(file);
+    const std::string want(prefix);
+    bool found = false;
+    for (size_t pos = 0; pos < text.size();) {
+        size_t end = text.find('\n', pos);
+        if (end == std::string::npos) end = text.size();
+        std::string line = text.substr(pos, end - pos);
+        while (!line.empty() && (line.back() == '\r' || line.back() == ' ')) line.pop_back();
+        if (line.compare(0, want.size(), want) == 0 && line.size() < capacity) {
+            std::snprintf(out, capacity, "%s", line.c_str());
+            found = true;
+        }
+        pos = end + 1;
+    }
+    return found;
+}
+
+
+// The number of levels in the APK's cd.iff: its TOC less SHEL, the trailing UIFT and a MENU
+// (cdpack's layout: SHEL, the levels, [MENU], UIFT). -1 when the asset or its TOC is unreadable.
+int bundleLevelCount(AAssetManager* manager) {
+    AAsset* asset = AAssetManager_open(manager, "cd.iff", AASSET_MODE_RANDOM);
+    if (!asset) return -1;
+    std::vector<uint8_t> sector(2048);           // DiskFileCD::_SECTOR_SIZE: the TOC sector
+    const int got = AAsset_read(asset, sector.data(), sector.size());
+    AAsset_close(asset);
+    std::vector<levelmenu::TocEntry> toc;
+    if (got <= 0 || !levelmenu::ParseToc(sector.data(), size_t(got), &toc)) return -1;
+    size_t n = toc.size();
+    if (n > 0 && toc[n - 1].tag == levelmenu::Tag("UIFT")) --n;
+    if (n > 0 && toc[n - 1].tag == levelmenu::Tag("MENU")) --n;
+    if (n < 2 || toc.front().tag != levelmenu::Tag("SHEL")) return -1;
+    return int(n) - 1;
+}
+
 // The launcher menu (docs/plans/2026-11-21-one-aquarium-app.md). TankPlayer.MENU as the level runs
 // the playable menu bundle (assets/menu-cd.iff, the Aquarium app's aquarium-menu-cd.iff) with no
 // positional level, so its shell asks the player, and keeps the engine's menu drawer. Every other
 // level index is the Dream path, exactly as before: cd.iff, a positional level, no overlay.
-constexpr int kMenuLevel = -1;
+constexpr int kMenuLevel = -1;      // TankPlayer.MENU: "show the engine's menu", from either app
 constexpr const char* kMenuBundleAsset = "menu-cd.iff";
 std::atomic<bool> menuMode{false};
 // Remote keys from AquariumActivity (UI thread), applied on the game thread in WFAndroidPumpEvents.
@@ -128,7 +174,7 @@ extern "C" void WFAndroidRequestClose() { closing.store(true); }
 // tank's seed strip, its settings panel, the level menu) must never draw. The engine draws all of
 // it through levelmenu::Drawer(), which Display installs once at start-up, so clear it every frame
 // rather than editing the engine. Without a drawer the level menu starts level 0 (game.cc).
-// The launcher menu is the one exception: it keeps the drawer and takes the remote's keys.
+// The menu is the one exception: it keeps the drawer and takes the remote's keys.
 extern "C" void WFAndroidPumpEvents() {
     if (activeWindow) {
         const int width = ANativeWindow_getWidth(activeWindow);
@@ -140,7 +186,7 @@ extern "C" void WFAndroidPumpEvents() {
             surfaceHeight = height;
         }
     }
-    if (menuMode.load()) {
+    if (menuMode.load()) {            // the launcher menu, in either app: it keeps the drawer and takes the remote
         HALInjectJoystickButtons(menuButtons.load());
         if (backPending.exchange(false)) applyMenuBack();
     } else if (levelmenu::Drawer()) {
@@ -232,8 +278,21 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeStop(JNIEnv*, jclass) {
 extern "C" JNIEXPORT void JNICALL
 Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         JNIEnv* env, jclass, jobject manager, jobject surface, jint level, jstring logPath) {
+    // The index bound is the bundle's own length (it was the Aquarium's hard-coded 10). An index
+    // outside it is the caller's error: say so and start nothing, never another level.
+    AAssetManager* bundleAssets = AAssetManager_fromJava(env, manager);
+    const int levels = bundleLevelCount(bundleAssets);
+    if (levels <= 0 || level < kMenuLevel || level >= levels) {
+        __android_log_print(ANDROID_LOG_ERROR, "wf_dream",
+                            "level %d rejected: cd.iff holds %d levels (-1 shows the menu)", int(level), levels);
+        return;
+    }
     const bool menu = level == kMenuLevel;
-    if (!menu && (level < 0 || level > 10)) return;
+    // The Aquarium app ships the playable menu as a second bundle; the Clocks app's chooser is inside cd.iff.
+    // Only an APK that carries menu-cd.iff takes the second-bundle path.
+    AAsset* menuAsset = menu ? AAssetManager_open(bundleAssets, kMenuBundleAsset, AASSET_MODE_UNKNOWN) : nullptr;
+    const bool secondBundle = menuAsset != nullptr;
+    if (menuAsset) AAsset_close(menuAsset);
     if (logPath) {
         const char* path = env->GetStringUTFChars(logPath, nullptr);
         if (path) {
@@ -242,10 +301,10 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         }
     }
     if (menu) {
-        std::fprintf(stderr, "\n=== wf_dream start the launcher menu (%s) ===\n", kMenuBundleAsset);
-        __android_log_print(ANDROID_LOG_INFO, "wf_dream", "start the launcher menu (%s)", kMenuBundleAsset);
+        std::fprintf(stderr, "\n=== wf_dream start the menu (%s) of %d ===\n", secondBundle ? kMenuBundleAsset : "cd.iff", levels);
+        __android_log_print(ANDROID_LOG_INFO, "wf_dream", "start the menu (%s)", secondBundle ? kMenuBundleAsset : "cd.iff");
     } else {
-        std::fprintf(stderr, "\n=== wf_dream start level %d ===\n", int(level));
+        std::fprintf(stderr, "\n=== wf_dream start level %d of %d ===\n", int(level), levels);
         __android_log_print(ANDROID_LOG_INFO, "wf_dream", "start level %d", int(level));
     }
     ANativeWindow* window = ANativeWindow_fromSurface(env, surface);
@@ -253,14 +312,15 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
     assets = AAssetManager_fromJava(env, manager);
     WFAndroidSetHudEnabled(0);
     // Set before HALStart opens the bundle, and on every run: one process may hold both modes.
-    WFAndroidSetBundleAsset(menu ? kMenuBundleAsset : nullptr);
+    WFAndroidSetBundleAsset(secondBundle ? kMenuBundleAsset : nullptr);
     menuMode.store(menu);
     if (WFAndroidEglInit(window)) {
         activeWindow = window;
         surfaceWidth = ANativeWindow_getWidth(window);
         surfaceHeight = ANativeWindow_getHeight(window);
         windowReady.store(true);
-        // The positional argument selects the same TOC index as TankChoice.IDS.
+        // The positional argument selects the same TOC index as the package's LevelCatalog;
+        // The menu leaves it out (argv ends one early), so the bundle's shell-menu.fth asks the player.
         char arg0[] = "wf_dream";
         // Decimal, not one ASCII digit: index 10 (Sea Stars) as '0' + 10 is ':', which atoi()
         // reads as 0, so the Dream played the Clownfish tank. The engine parses it with atoi.
@@ -277,9 +337,18 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         char vramHeight[] = "--vram-height=2048";
         char noFps[] = "--no-fps";
         char* argv[] = {arg0, slotWidth, slotHeight, permWidth, permHeight, vramWidth, vramHeight, noFps, arg1, nullptr};
-        // The menu has no positional level: the menu bundle's shell (shell-menu.fth) asks the player.
         const int argc = menu ? 8 : 9;
-        if (menu) argv[8] = nullptr;
+        argv[argc] = nullptr;
+        // The flavor's own VRAM sizes, if it ships a wf_args.txt (argv[1..6] are slot, perm and page width/height).
+        char overrides[6][48];
+        const char* const prefixes[6] = {"--vram-slot-width=", "--vram-slot-height=", "--vram-perm-width=",
+                                         "--vram-perm-height=", "--vram-width=", "--vram-height="};
+        for (int i = 0; i < 6; ++i) {
+            if (vramOverride(prefixes[i], overrides[i], sizeof overrides[i])) {
+                argv[1 + i] = overrides[i];
+                __android_log_print(ANDROID_LOG_INFO, "wf_dream", "vram override: %s", overrides[i]);
+            }
+        }
         __argc = argc;
         __argv = argv;
         // Tank 0's overrides: the engine applies them when the level registry loads.

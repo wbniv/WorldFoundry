@@ -24,12 +24,12 @@ def host_argv():
     # The level index is formatted at run time into a sized buffer (`char arg1[12];`).
     strings.update({n: '0' for n in re.findall(r'char (\w+)\[\d+\];', source)})
     argv = [strings[n] for n in entries]
-    # The Dream passes every entry; the launcher menu (docs/plans/2026-11-21-one-aquarium-app.md)
-    # drops the trailing positional level. Returns the Dream's argv and both counts.
+    # A level plays with every entry; the menu (kMenuLevel, -1) ends argv one early, before the level.
     counts = re.search(r'const int argc = menu \? (\d+) : (\d+);', source)
-    assert counts, 'dream_host.cc: argc for the menu and the Dream not found'
-    assert '__argc = argc;' in source and re.search(r'HALStart\(argc, argv', source)
-    return argv, int(counts.group(2)), int(counts.group(1))
+    assert counts, 'dream_host.cc: the menu/level argc choice not found'
+    assert re.search(r'argv\[argc\] = nullptr;', source)
+    assert re.search(r'__argc = argc;', source) and re.search(r'HALStart\(argc, argv', source)
+    return argv, int(counts.group(1)), int(counts.group(2))
 
 
 def test_dream_host_vram_matches_aquarium_app():
@@ -39,24 +39,106 @@ def test_dream_host_vram_matches_aquarium_app():
     assert host == app, f'Dream host VRAM {host} differs from the aquarium app {app}'
 
 
-def test_dream_host_argc_counts_argv():
-    argv, dream_argc, menu_argc = host_argv()
-    assert dream_argc == len(argv), (dream_argc, argv)
-    # The menu run passes the same flags without the positional level, which is last.
-    assert menu_argc == len(argv) - 1 and argv[-1] == '0', (menu_argc, argv)
-    assert re.search(r'if \(menu\) argv\[%d\] = nullptr;' % menu_argc, HOST.read_text())
+def test_dream_host_argument_lists_for_a_level_and_for_the_menu():
+    """docs/plans/2026-11-21-tide-harbour-clock.md: nativeRun(-1) leaves out the positional level so a
+    shell-menu.fth bundle shows the chooser; any other index is the last argument, every flag kept."""
+    argv, menu_argc, level_argc = host_argv()
+    flags = ['wf_dream', '--vram-slot-width=1024', '--vram-slot-height=1024', '--vram-perm-width=1024',
+             '--vram-perm-height=1024', '--vram-width=2048', '--vram-height=2048', '--no-fps']
+    assert argv == flags + ['0'], argv              # '0' stands for the formatted level index
+    assert level_argc == len(argv)
+    assert menu_argc == len(argv) - 1 and argv[:menu_argc] == flags
 
 
-def test_dream_host_level_index_is_decimal_and_covers_every_tank():
+def test_dream_host_level_index_is_decimal_and_bounded_by_the_bundle():
     """The level index is the positional argument. One ASCII digit ('0' + level) turned tank 10
-    (Sea Stars) into ':' = 0, so the Dream played the Clownfish tank on cast1 (2026-11-20)."""
-    import re
+    (Sea Stars) into ':' = 0, so the Dream played the Clownfish tank on cast1 (2026-11-20). The upper
+    bound is the APK's own cd.iff (it was the Aquarium's hard-coded 10, which TankChoice.IDS once
+    pinned); an index outside it, or below -1, is logged and starts nothing."""
     host = HOST.read_text()
     assert "'0' + level" not in host and '"0" + level' not in host
     assert re.search(r'snprintf\(arg1,\s*sizeof arg1,\s*"%d",\s*int\(level\)\)', host)
-    # The roster is the manifest (TankChoice.IDS went with LevelCatalog, ec9b872e); its last index
-    # is the highest level the Dream may start.
-    manifest = (ROOT / 'wflevels/aquarium-menu.manifest').read_text()
-    tanks = len(re.findall(r'(?m)^level\s+\S+-standalone\.iff\s*\|', manifest))
-    guard = re.search(r'level < 0 \|\| level > (\d+)', host)
-    assert guard and int(guard.group(1)) == tanks - 1, (guard and guard.group(1), tanks)
+    assert 'level > 10' not in host
+    assert 'constexpr int kMenuLevel = -1;' in host
+    assert re.search(r'const int levels = bundleLevelCount\(', host)
+    assert re.search(r'if \(levels <= 0 \|\| level < kMenuLevel \|\| level >= levels\) \{', host)
+    assert 'ANDROID_LOG_ERROR' in host
+    # bundleLevelCount: the TOC less SHEL, a trailing UIFT and a MENU (cdpack's layout).
+    for tag in ('"UIFT"', '"MENU"', '"SHEL"'):
+        assert f'levelmenu::Tag({tag})' in host, tag
+
+
+def test_menu_keeps_the_drawer_and_a_level_clears_it():
+    host = HOST.read_text()
+    assert 'menuMode.store(menu);' in host
+    # The menu, in either pack, keeps the drawer; every level clears it.
+    assert re.search(r'else if \(levelmenu::Drawer\(\)\) \{\s*levelmenu::SetDrawer\(nullptr\);', host)
+
+
+def toc_level_count(path):
+    """bundleLevelCount's rule, in Python, on a real cd.iff."""
+    import struct
+    data = Path(path).read_bytes()[:2048]
+    assert data[:4] == b'GAME' and data[8:12] == b'TOC\0'
+    size = struct.unpack_from('<I', data, 12)[0]
+    tags = [data[o:o + 4] for o in range(16, 16 + size, 12)]
+    if tags and tags[-1] == b'UIFT':
+        tags.pop()
+    if tags and tags[-1] == b'MENU':
+        tags.pop()
+    assert tags[0] == b'SHEL'
+    return len(tags) - 1
+
+
+def test_bundle_level_count_rule_on_the_built_bundles():
+    """The Aquarium Dream bundle keeps its 0..10 range; the clocks bundle counts the manifest's clocks."""
+    import pytest
+    import sys
+    sys.path.insert(0, str(ROOT / 'scripts'))
+    import level_manifest
+    checked = 0
+    for name, manifest in [('aquarium-screensaver-cd.iff', 'aquarium-menu.manifest'),
+                           ('clocks-cd.iff', 'clocks-menu.manifest')]:
+        bundle = ROOT / 'wflevels' / name
+        if bundle.is_file():
+            assert toc_level_count(bundle) == len(level_manifest.read(ROOT / 'wflevels' / manifest).ids), name
+            checked += 1
+    if not checked:
+        pytest.skip('no Dream bundle built')
+
+
+def test_aquarium_and_clocks_ranges_from_their_manifests():
+    """The bound is each APK's cd.iff length, which is its manifest's level count (the Aquarium Dream
+    bundle packs aquarium-menu.manifest's tanks in order; WF Clocks packs clocks-menu.manifest). So the
+    Aquarium keeps exactly the old 0..10 while it has 11 tanks, and the clocks accept 0..n-1 and -1."""
+    import sys
+    sys.path.insert(0, str(ROOT / 'scripts'))
+    import level_manifest
+    tanks = len(level_manifest.read(ROOT / 'wflevels/aquarium-menu.manifest').ids)
+    assert tanks == 11, f'the Aquarium now has {tanks} tanks: its Dream range is 0..{tanks - 1}'
+    clocks = level_manifest.read(ROOT / 'wflevels/clocks-menu.manifest').ids
+    assert clocks and clocks[0] == 'minute_machine'
+    host = HOST.read_text()
+    assert re.search(r'level < kMenuLevel \|\| level >= levels', host)
+
+
+CLOCKS_ARGS = ROOT / 'android/screensaver/src/clocks/assets/wf_args.txt'
+
+
+def test_clocks_flavor_slot_fits_every_texture_page_in_its_bundle():
+    """2026-11-21, cast1: Cuckoo Village's hillside art packs its textures into a 2048 x 1024 room page
+    (wflevels/cuckoo_village/textile.flags: PAGEX=2048), and the Dream host's default 1024 x 1024 slot
+    aborted the engine with "LoadTexture: 2048x1024 texture does not fit its 1024x1024 VRAM slot". The
+    host reads the flavor's assets/wf_args.txt for the VRAM sizes (dream_host.cc: vramOverride), and the
+    clocks flavor must ship a slot at least as wide as the widest page of a level in its roster."""
+    flags = dict(re.findall(r'(\w+)=(\d+)', (ROOT / 'wflevels/cuckoo_village/textile.flags').read_text()))
+    page_width = int(flags['PAGEX'])
+    args = dict(VRAM.findall(CLOCKS_ARGS.read_text()))
+    assert int(args['slot-width']) >= page_width, f'clocks slot {args} narrower than the {page_width} page'
+    # The override must be wired: the host reads the file and replaces argv[1..6], and every other flavor
+    # (no wf_args.txt) keeps the pinned defaults the tests above check.
+    host = HOST.read_text()
+    assert 'AAssetManager_open(assets, "wf_args.txt"' in host
+    assert re.search(r'argv\[1 \+ i\] = overrides\[i\];', host)
+    other = [p for p in (ROOT / 'android/screensaver/src').glob('*/assets/wf_args.txt') if p.parent.parent.name != 'clocks']
+    assert other == [], f'a flavor other than clocks overrides the VRAM sizes: {other}'

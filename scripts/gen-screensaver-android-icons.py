@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """Build the screensaver launcher icons and TV banners with the approved WF badge.
 
-Usage: gen-screensaver-android-icons.py [-h] [{all,aquarium,seahorse,minutemachine,planted}]
+Usage: gen-screensaver-android-icons.py [-h] [{all,aquarium,seahorse,clocks,planted}]
 
-The aquarium crop excludes its banner title and badge. Seahorse and Planted Tank
+The aquarium icons and its "WF Aquarium" banner come from the approved artwork
+android/app/art-src/aquarium-icon-2026-10-03/artwork-betta-lowered.png (clownfish, tiger barb
+and betta; the same source as the older android/app Aquarium icon). Seahorse and Planted Tank
 artwork comes from local renders of the levels. All use the shared Android icon
 treatment. With no argument every flavor is rebuilt; name one to rewrite only
 that flavor's files (aquarium: src/main/res, seahorse: src/seahorse/res,
-planted: src/planted/res, minutemachine: src/minutemachine/res).
+planted: src/planted/res, clocks: src/clocks/res). The WF Clocks art is drawn
+by scripts/gen-wf-clocks-art.py (a clock face on brass gears), not taken from one clock level.
 """
 from __future__ import annotations
 
@@ -21,10 +24,13 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parent.parent
 RES = ROOT / "android/screensaver/src/main/res"
 BANNER = RES / "drawable/tv_banner.png"
+AQUARIUM_ART = ROOT / "android/app/art-src/aquarium-icon-2026-10-03/artwork-betta-lowered.png"
+AQUARIUM_BAND_TOP = 0.5   # 0 = the top of the art, 1 = the bottom: where the 16:9 banner band sits
 SEAHORSE_FRAME = ROOT / "android/screensaver/art-src/seahorse-grid-frame.png"
 SEAHORSE_RES = ROOT / "android/screensaver/src/seahorse/res"
-MINUTE_FRAME = ROOT / "android/screensaver/art-src/minute-machine-frame.png"
-MINUTE_RES = ROOT / "android/screensaver/src/minutemachine/res"
+CLOCKS_FRAME = ROOT / "android/screensaver/art-src/wf-clocks-frame.png"
+CLOCKS_ICON = ROOT / "android/screensaver/art-src/wf-clocks-icon.png"
+CLOCKS_RES = ROOT / "android/screensaver/src/clocks/res"
 PLANTED_FRAME = ROOT / "android/screensaver/art-src/planted-tank-frame.png"
 PLANTED_RES = ROOT / "android/screensaver/src/planted/res"
 DENSITIES = {"mdpi": 108, "hdpi": 162, "xhdpi": 216, "xxhdpi": 324, "xxxhdpi": 432}
@@ -62,9 +68,23 @@ def write_icons(art: Image.Image, res: Path) -> None:
 
 
 def build_aquarium() -> None:
-    # The badge already on the aquarium banner is at x=563..622; its title ends before x=175.
-    aquarium_art = Image.open(BANNER).convert("RGB").crop((175, 0, 535, 360))
-    write_icons(aquarium_art, RES)
+    # The approved Aquarium artwork (clownfish, tiger barb, betta; 2026-10-03, README beside it), the same source
+    # as the older android/app Aquarium icon. The banner is a 16:9 band of it with the name "WF Aquarium".
+    if not AQUARIUM_ART.exists():
+        raise FileNotFoundError(f"{AQUARIUM_ART} is missing")
+    art = Image.open(AQUARIUM_ART).convert("RGB")
+    if art.width != art.height:
+        raise ValueError(f"the Aquarium artwork must be square, got {art.size}")
+    write_icons(art, RES)
+    band = round(art.width * 9 / 16)
+    top = round((art.height - band) * AQUARIUM_BAND_TOP)
+    banner = android_icons.banner({
+        "banner": AQUARIUM_ART,
+        "banner_crop": (0, top, art.width, top + band),
+        "name": "WF Aquarium",
+    })
+    banner.save(BANNER, optimize=True)
+    print(f"Wrote {BANNER}")
 
 
 def build_seahorse() -> None:
@@ -83,18 +103,21 @@ def build_seahorse() -> None:
     print(f"Wrote {target}")
 
 
-def build_minutemachine() -> None:
-    frame = Image.open(MINUTE_FRAME).convert("RGB")
-    if frame.size != (1280, 720):
-        raise ValueError(f"unexpected Minute Machine frame size: {frame.size}")
-    # A 360 x 360 square on the hopper, the fallen dominoes and the bucket: no FPS counter, no table edge.
-    write_icons(frame.crop((560, 200, 920, 560)), MINUTE_RES)
+def build_clocks() -> None:
+    # The WF Clocks art is drawn, not rendered: scripts/gen-wf-clocks-art.py writes both files.
+    icon, frame = CLOCKS_ICON, CLOCKS_FRAME
+    for path, size in ((icon, (720, 720)), (frame, (1280, 720))):
+        if not path.exists():
+            raise FileNotFoundError(f"{path} is missing: run scripts/gen-wf-clocks-art.py")
+        if Image.open(path).size != size:
+            raise ValueError(f"unexpected size for {path}: {Image.open(path).size}")
+    write_icons(Image.open(icon).convert("RGB"), CLOCKS_RES)
     banner = android_icons.banner({
-        "banner": MINUTE_FRAME,
+        "banner": frame,
         "banner_crop": (0, 0, 1280, 720),
-        "name": "Minute Machine",
+        "name": "WF Clocks",
     })
-    target = MINUTE_RES / "drawable/tv_banner.png"
+    target = CLOCKS_RES / "drawable/tv_banner.png"
     target.parent.mkdir(parents=True, exist_ok=True)
     banner.save(target, optimize=True)
     print(f"Wrote {target}")
@@ -117,7 +140,7 @@ def build_planted() -> None:
     print(f"Wrote {target}")
 
 
-FLAVORS = {"aquarium": build_aquarium, "seahorse": build_seahorse, "minutemachine": build_minutemachine, "planted": build_planted}
+FLAVORS = {"aquarium": build_aquarium, "seahorse": build_seahorse, "clocks": build_clocks, "planted": build_planted}
 
 
 def main() -> None:

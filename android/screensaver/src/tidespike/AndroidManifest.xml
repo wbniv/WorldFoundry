@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:banner="@drawable/tv_banner">
+        <!-- Start with: am start -n org.worldfoundry.tidespike/org.worldfoundry.screensaver.TideSpikeActivity, passing the integer extra level (0 to 3) -->
+        <activity android:name=".TideSpikeActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".TideSpikeBActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize" />
+        <activity android:name=".TideSpikeCActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize" />
+        <activity android:name=".TideSpikeDActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize" />
+        <activity android:name=".TideSpikeNActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize" />
+        <activity android:name=".TideSpikeVActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize" />
+        <activity android:name=".TideSpikeGActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize" />
+        <activity android:name=".TideSpikeN720Activity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize" />
+    </application>
+</manifest>

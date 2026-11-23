@@ -1,0 +1,10 @@
+# Keep the authored sources, the level source and its wrapper; ignore everything the build writes.
+*
+!.gitignore
+!*.py
+!*.sh
+!cuckoo_village.lev
+!cuckoo_village-standalone.iff.txt
+!actor-map.json
+!textile.flags
+!README.md

@@ -55,7 +55,7 @@ Rules for the mode:
 - **Same budget.** Share house shells, roofs, streets, gardens and the dial; swap material variants and a limited set of extra meshes (onion dome, maypole, flower boxes, shutters, chalet roof and carved case trim, deer, pinecone weights). Set the extra-mesh budget after measuring the two existing clock levels, and gate Bavaria mode on the same performance threshold as Classic.
 - **Still no surroundings.** No Alps, mountains, sky, horizon or backdrop, and no beer-hall or product branding. The uniform dark background rule from the visual target applies unchanged. The white-and-blue lozenge is a regional pattern used as decoration, not a coat of arms or a flag.
 - **No new audio.** The cuckoo call and optional cues are unchanged. No looped music, and no yodelling or other speech or song.
-- **Read once, at level entry.** The level reads the Bavaria mode field of `CuckooVillageSettings` when it loads, as the Planted Tank does for its entry-only fields. It is not a live toggle, and the clock director holds no mode state. A change takes effect on the next launch.
+- **Read once, at level entry.** The level reads the Bavaria mode field of `CuckooVillageSettings` through `property@`. Every field of the type is `SHOW_AS_LIVE`, and the director is a pure function of the clock that holds no mode state, so an edit made from the settings form takes effect on the next frame; nothing needs a relaunch. (This replaces the earlier entry-only wording: a live field costs nothing here.)
 - **Reversed dial, same time.** Use the Classic angle formulas unchanged, and apply the reversal at the dial: the hand pivots take the negated angle (minute `-6 × (minute + second/60)`, hour `-30 × ((hour % 12) + minute/60 + second/3600)` degrees from twelve), and the face texture carries the mirrored numeral layout. Do not mirror hand or face geometry with a negative scale: it flips triangle winding and trips back-face culling, which the engine's backface-cull invariant test guards. At 10:08 the minute hand points just past one on the left of twelve, and the hour hand just past ten on the right of twelve. The dial and the parade are the only places Bavaria mode changes behaviour. Do not change the dial's sampling or the performance and lighting timelines, and keep it a pure function of the wall-clock sample. The hands are the only dial elements that move.
 - **Reversed parade, same schedule.** Use one parade timeline for both modes. The director samples the same progress along the route over the same 24-second window and takes the direction as a fixed sign chosen at level entry: Bavaria mode traverses the route with progress reversed, so each figure leaves its own alcove, travels the loop the other way and returns to the same alcove. Start time, duration, settle-by `:24` and the bird's calls are unchanged. Solo turns at `:15`, `:30` and `:45` (step forward, bow, return) are not reversed. Pause and arbitrary-start behaviour stays a pure function of the wall-clock sample, with no accumulated state. Re-check that reversed figures do not collide, clip the carved balcony rail or pinecone weights, or hide the dial in the front-facing view, and that the camera hold still frames the whole parade.
 - **Dial stays readable.** The reversed dial must still pass the 10% picture-height and contrast rule in the front-facing view. Add a reading aid only if a 1080p capture and an actual TV show the reversed numerals are hard to read: for example, heavier marks at 12, 3, 6 and 9. A sticker or caption explaining the joke is not acceptable.
@@ -169,13 +169,25 @@ Recommended Cuckoo Village settings:
 |---|---|---|---|
 | Sound | On / Off | On | Cuckoo calls and optional quarter cues; animation remains visible when off |
 | Window lights | On / Off | On | Dusk/dawn window glow, and the glow of the Christmas candles; ambient day/night lighting still changes |
-| Christmas candles | On / Off | On | Shows lit candles on the village trees from 1 December to 6 January; entry-only. Off leaves the trees bare |
-| Seasonal events | On / Off | On | Shows the dated [Bavarian events](#seasonal-events-bavaria-mode) (Nikolaus, Krampus, Fasching, Oktoberfest, maypole dressing). They appear only while Bavaria mode is on; entry-only |
-| Bavaria mode | On / Off | Off | Switches the village and figures to the [Bavaria mode](#bavaria-mode) theme; layout, timeline, lighting and sound are unchanged. Entry-only: read at level entry, applied on the next launch |
+| Christmas candles | On / Off | On | Shows lit candles on the village trees from 1 December to 6 January. Off leaves the trees bare |
+| Seasonal events | On / Off | On | Shows the dated [Bavarian events](#seasonal-events-bavaria-mode) (Nikolaus, Krampus, Fasching, Oktoberfest, maypole dressing). They appear only while Bavaria mode is on |
+| Bavaria mode | On / Off | Off | Switches the village and figures to the [Bavaria mode](#bavaria-mode) theme; layout, timeline, lighting and sound are unchanged |
 | Camera motion | Journey / Still | Journey | Slow village tour with performance views, or fixed wide establishing view |
 | Orientation | Existing shared orientation choices | Existing package default | Use the package's shared implementation |
 
 Do not expose test-only time overrides as customer settings. The companion plan owns the shared settings interface and Dream lifecycle.
+
+### Opening the settings, and what is built
+
+**Every 3D clock carries a settings object and opens it with a keypress** (Will, 2026‑11‑21: "all 3d clocks will require settings object and keypress to activate"). The keypress is the engine's: hold **A, the remote's centre (OK) button, alone for 1 second** in the level (`Host::gesture`, `engine/runtime_property_host.cpp`). The host opens the form of the one editable object, here `CuckooVillageSettings`, which is editable because its fields are live. How the six pieces are built, and the audit that checks them for every clock and tank, is in the [pack HOWTO](../howto/combine-levels-chooser-and-screensaver-launch.md#5-give-every-level-settings-and-a-way-to-open-them).
+
+| Field | In the level today |
+|---|---|
+| Window lights | **Built.** Off keeps every cottage window dark; `tests/test_cuckoo_village_settings_effect.py` |
+| Camera motion | **Built.** Still holds the wide establishing view from the front; same test |
+| Bavaria mode, Seasonal events, Christmas candles, Sound | **The field exists and the director has a reader word for it; nothing responds yet.** Each lands with its feature: Bavarian figures and the reversed dial and parade, the events, the candles, the audio |
+
+The field indices are the catalog's (129 to 134) and are written into the director at export time, never hand-typed. The phone's Dream form needs a capabilities asset generated from the `.oad` (`scripts/gen-settings-capabilities.py`), and the Dream's `LevelSettings` serves only Sea Stars today; generalising it by clock id is Phase 3 of the [Tide Harbour plan](2026-11-21-tide-harbour-clock.md). Until then the village's settings are reached by holding A on a TV or gamepad.
 
 ## Implementation and verification
 

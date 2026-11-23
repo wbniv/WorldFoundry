@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
@@ -93,9 +94,14 @@ public final class LaunchModeTest {
                         name + " must not reach the menu");
                 check(text.contains("LevelLaunch.startChosen(this, player, "), name + " still starts through LevelLaunch");
             }
-            String activity = read(java.resolve("AquariumActivity.java"));
-            check(activity.contains("LaunchMode.forLauncherActivity("), "AquariumActivity decides through LaunchMode");
-            check(activity.contains("player.startMenu()"), "AquariumActivity starts the menu for MENU");
+            // Every pack behaves the same: one LauncherActivity decides, and each pack's activity only extends it.
+            String activity = read(java.resolve("LauncherActivity.java"));
+            check(activity.contains("LaunchMode.forLauncherActivity("), "LauncherActivity decides through LaunchMode");
+            check(activity.contains("player.startMenu()"), "LauncherActivity starts the menu for MENU");
+            for (String pack : new String[] {"AquariumActivity", "ClocksActivity"}) {
+                check(read(java.resolve(pack + ".java")).contains("public final class " + pack + " extends LauncherActivity"),
+                        pack + " extends the shared LauncherActivity");
+            }
             // The menu changes nothing that is saved: TankChoice.set has one caller, the settings provider.
             List<String> writers = new ArrayList<>();
             try (Stream<Path> files = Files.list(java)) {
@@ -104,10 +110,12 @@ public final class LaunchModeTest {
                     if (name.endsWith(".java") && read(p).contains("TankChoice.set(")) writers.add(name);
                 }
             }
-            check(writers.size() == 1 && writers.get(0).equals("TankSettingsProvider.java"),
-                    "only TankSettingsProvider writes the saved tank, found " + writers);
+            // Only a pack's settings provider writes its saved choice: the Aquarium's tank, the Clocks' clock.
+            writers.sort(null);
+            check(writers.equals(Arrays.asList("ClocksSettingsProvider.java", "TankSettingsProvider.java")),
+                    "only the settings providers write the saved choice, found " + writers);
             check(!activity.contains("getSharedPreferences") && !activity.contains("TankChoice.set"),
-                    "AquariumActivity writes no preference");
+                    "LauncherActivity writes no preference");
         }
 
         System.out.println(checks + " checks, " + failures + " failures");

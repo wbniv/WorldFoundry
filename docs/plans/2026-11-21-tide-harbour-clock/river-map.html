@@ -1,0 +1,330 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Tide Harbour: the river panel</title><meta name="viewport" content="width=1440"><style>
+*{box-sizing:border-box}
+html,body{margin:0;background:#0b0c10;color:#d9dce3;font:15px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{width:1440px;height:900px;position:relative;overflow:hidden}
+.tv{position:absolute;background:#000;border:10px solid #23252b;border-radius:14px;box-shadow:0 0 0 1px #3a3d46;overflow:hidden}
+.tv svg{display:block;width:100%;height:100%}
+.cap{position:absolute;color:#aeb4c0;font-size:14px}
+.cap b{color:#eef0f4;font-weight:600}
+h1{position:absolute;margin:0;font-size:19px;font-weight:600;color:#eef0f4}
+button{font:inherit;color:#e8eaf0;background:#1c1f27;border:1px solid #3a3f4c;border-radius:8px;padding:7px 12px;cursor:pointer}
+button:hover{background:#262a35}button.on{background:#34405c;border-color:#6d86c9}
+label{color:#c3c8d3;user-select:none}
+input[type=range]{accent-color:#e0704f}
+</style></head><body><h1 style="left:14px;top:12px">Tide Harbour: the river panel, full height at one side <span style="font-weight:400;color:#aeb4c0;font-size:14px">&nbsp; proposal, not built</span></h1><div class="tv" style="left:14px;top:46px;width:868px;height:494px"><svg id="scene" viewBox="0 0 1120 630"></svg></div><div class="cap" style="left:900px;top:46px"><b>The panel, close up</b></div><div style="position:absolute;left:900px;top:70px;width:262px;height:550px"><svg id="close" viewBox="0 0 300 630" width="262" height="550"></svg></div><div class="cap" style="left:1178px;top:70px;width:252px;font-size:12.5px;line-height:1.42"><b>At the top:</b> the next high water and the next low water, with time and height, and the rising or falling arrow (the <a href="tide-board.html" style="color:#9ec1ff">tide board</a>).<br><br><b>The river is real:</b> its course from the sea to the city, drawn from OpenStreetMap.<br><br><b>The tower</b> marks this harbour: the Navy's Bangkok station, <b>50&nbsp;km up the river</b> from its mouth (measured along that line). It leaves the view as the map pans.<br><br><b>The column</b> is the tide here and now, in metres, with the rising or falling arrow. The same model moves the water.<br><br><b>The staff off the mouth</b> is Bangkok Bar, where the Navy publishes a second table.<br><br><b>Not shown as fact:</b> how long high water takes to travel from the bar to the city. Fitting the bar's table with the same tool would measure it; until then the travelling band is a sketch, off by default.<br><br><b>Untested:</b> whether the engine draws a panel fixed to the screen. If not, it is a slab the camera carries.</div><div style="position:absolute;left:14px;top:554px;width:868px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button id="b-now">Now</button><button id="b-high">High</button><button id="b-low">Low</button><button id="b-night">Night</button><span style="width:8px"></span><button id="b-swap">Swap now</button><button id="b-play">Run &times;60</button><label style="margin-left:8px"><input type="checkbox" id="c-thai" checked> Thai</label><label style="margin-left:8px"><input type="checkbox" id="c-crest"> travelling high water (sketch)</label></div><div style="position:absolute;left:14px;top:596px;width:868px;display:flex;gap:12px;align-items:center"><span style="color:#8d94a3;font-size:13px">hour</span><input type="range" id="scrub" min="0" max="24" step="0.01" style="flex:1"><span id="readout" style="font:600 14px ui-monospace,Menlo,monospace;color:#eef0f4;width:330px;text-align:right;white-space:nowrap"></span></div><div class="cap" style="left:14px;top:630px"><b>States</b> (the same day)</div><div id="states" style="position:absolute;left:14px;top:654px;width:560px;display:flex;gap:16px"></div><div class="cap" style="left:590px;top:654px;width:292px;font-size:12.5px;line-height:1.45"><b>Burn-in: three measures</b> (Will, 2026&#8209;11&#8209;21: "swap sides, pan the map, dim at night"). <b>Swap sides</b> every 10&nbsp;minutes, on the clock's marks: the panel slides off, the harbour fills the screen for a moment, and it slides in at the other edge. <b>Pan the map:</b> the view follows the river from near the sea to past the city and back, one pass in 15&nbsp;minutes. <b>Dim at night:</b> about a sixth of the daytime brightness. Press <b>Run &times;60</b> to watch all three; the intervals are proposals.<br><br><b>Credit.</b> &copy;&nbsp;OpenStreetMap contributors, a line in the app's credits.</div><div class="cap" style="left:900px;top:650px;width:526px;font-size:12.5px;line-height:1.45"><b>Sources.</b> River: &copy; OpenStreetMap contributors (ODbL), 74 points, <code>chao-phraya-centreline.json</code>. Station position: the department's table (13&deg;&nbsp;44&prime;&nbsp;36&Prime;&nbsp;N, 100&deg;&nbsp;29&prime;&nbsp;25&Prime;&nbsp;E). Bangkok Bar: PSMSL station 287 (13.45&deg;&nbsp;N, 100.6&deg;&nbsp;E). The coast is not drawn: only the river was fetched.</div><script>
+const TAU = Math.PI * 2;
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, u) => a + (b - a) * u;
+const hex = h => h[0] === '#' ? [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)) : h.match(/\d+/g).slice(0, 3).map(Number);
+const mix = (a, b, u) => { const A = hex(a), B = hex(b); return 'rgb(' + A.map((v, i) => Math.round(lerp(v, B[i], u))).join(',') + ')'; };
+const f1 = v => (Math.round(v * 10) / 10).toString();
+
+// sky keys: hour, top, bottom, water, glow (lamps and windows)
+const KEYS = [[0, '#070b1f', '#141c3f', '#0c1a2e', 1], [5.3, '#0f1535', '#2a2a5a', '#102038', .9], [6.2, '#6a4c93', '#f4a261', '#4a4a78', .4],
+  [7.5, '#6db3e8', '#f6dcc0', '#3f7fa8', 0], [12, '#4fa3e0', '#bfe3f7', '#2f7fae', 0], [16.2, '#68a8d8', '#f2e0c0', '#3b7fa6', 0],
+  [17.8, '#8e5da8', '#f49f6b', '#6a5a8a', .35], [18.7, '#2b2d6e', '#c75d6a', '#2c3260', .8], [19.8, '#0b1030', '#26285a', '#0e1a30', 1], [24, '#070b1f', '#141c3f', '#0c1a2e', 1]];
+function sky(t) {
+  for (let i = 0; i < KEYS.length - 1; i++) {
+    const a = KEYS[i], b = KEYS[i + 1];
+    if (t >= a[0] && t <= b[0]) { const u = (t - a[0]) / (b[0] - a[0]); return { top: mix(a[1], b[1], u), bot: mix(a[2], b[2], u), water: mix(a[3], b[3], u), glow: lerp(a[4], b[4], u) }; }
+  }
+  return { top: KEYS[0][1], bot: KEYS[0][2], water: KEYS[0][3], glow: 1 };
+}
+// The tide, from the shipped constants (wflevels/tide_harbour/tide_constants.json): a fit to the Navy's published predictions
+// for Bangkok. Metres above the lowest low water. t is the hour of day in Thai time (UTC+7) on TIDE_DAY.
+const TIDE = [2.2892,[[0.041780746111111114,0.50016,0.483028],[0.08051140055555556,0.36263,0.651953],[0.03873065444444444,0.30916,0.708823],[0.08333333333333334,0.23096,0.265559],[0.00011407388888888888,0.17144,0.027315],[0.04155258722222222,0.13171,0.367611],[0.08356149222222223,0.08459,0.972096],[0.0030500916666666667,0.07751,0.871321],[0.0372185025,0.0664,0.714562],[0.07899924861111111,0.05748,0.754807],[0.04483083777777778,0.05516,0.835356],[0.00022815888888888888,0.05381,0.391934],[0.04460267888888889,0.05101,0.686926],[0.12229214666666667,0.04144,0.336148],[0.12206398777777779,0.04088,0.398347],[0.20562548000000003,0.03434,0.949524],[0.03590872166666667,0.03122,0.718062],[0.12511407944444444,0.0309,0.098902],[0.040268594166666664,0.03082,0.586538],[0.08028324166666666,0.03041,0.268673],[0.07768946777777777,0.0286,0.618877],[0.24435613444444443,0.02743,0.080877],[0.07748709666666667,0.02554,0.797001],[0.002821932777777778,0.02516,0.722197],[0.0015121519444444445,0.02444,0.74437],[0.038958813333333335,0.02281,0.579048],[0.0820235525,0.02114,0.107332],[0.20257538833333336,0.01997,0.098023],[0.1610228011111111,0.01953,0.544188],[0.24717806722222224,0.01802,0.690823],[0.043292898055555556,0.01781,0.361725],[0.119242055,0.01773,0.504095],[0.04166667222222223,0.01602,0.150532],[0.08073955944444446,0.01494,0.257158],[0.08638342500000001,0.01455,0.587786],[0.08507364416666667,0.01453,0.834888],[0.2028035472222222,0.01436,0.429086],[0.03742087361111111,0.01365,0.961438],[0.20585363888888888,0.01207,0.578966],[0.042008905,0.01203,0.182063],[0.20539732111111111,0.01138,0.685254],[0.24284398249999997,0.01076,0.146098],[0.11947021388888888,0.01076,0.532782],[0.04189482,0.01072,0.286122],[0.005872024444444454,0.01065,0.424428],[0.2474062261111111,0.01031,0.453744],[0.08321925944444444,0.01025,0.509192],[0.16407289277777778,0.0094,0.260659],[0.11901389611111111,0.00925,0.111562],[0.24458429333333334,0.00906,0.804649],[0.07594915694444444,0.00831,0.703916],[0.041438513333333336,0.0078,0.374539],[0.15951064916666668,0.00731,0.525552],[0.0866115838888889,0.00714,0.547284],[0.12488592055555557,0.0071,0.200329],[0.12055183583333334,0.00703,0.652491],[0.08344740722222223,0.00677,0.338299],[0.04309052694444444,0.0055,0.139892],[0.12534223833333333,0.00541,0.805225],[0.2010632363888889,0.00507,0.112378],[0.074437005,0.00435,0.010179],[0.00456224361111111,0.00398,0.592998],[0.20411332805555557,0.00384,0.915273],[0.04611483083333334,0.00351,0.262702]]];   // [z0, [[cycles per hour, amplitude m, phase rev], ...]]
+let TIDE_DAY = Math.floor((Date.now() + 7 * 3600e3 - Date.UTC(2026, 0, 1)) / 86400e3);   // days since 2026-01-01, Thai calendar
+const tide = t => { const T = TIDE_DAY * 24 + t; let h = TIDE[0]; for (const c of TIDE[1]) h += c[1] * Math.cos(TAU * (c[0] * T + c[2])); return h; };
+const PX_PER_M = 30;
+const WATER_TOP = 336, WATER_BOT = 630, STRIPS = 36;
+const rect = (x, y, w, h, fill, extra = '') => `<rect x="${f1(x)}" y="${f1(y)}" width="${f1(w)}" height="${f1(h)}" fill="${fill}" ${extra}/>`;
+
+function renderScene(t, phase, o) {
+  o = o || {};
+  const id = o.id || 's';
+  const S = sky(t), dark = clamp(S.glow);
+  const level = (tide(t) - TIDE[0]) * PX_PER_M;                 // pixels the water is above its mean
+  const wy = 452 - level;                                   // the water line at the piers
+  let g = '', n = 0;
+  g += `<defs><linearGradient id="${id}sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${S.top}"/><stop offset="1" stop-color="${S.bot}"/></linearGradient>
+    <radialGradient id="${id}sun"><stop offset="0" stop-color="#fff6d8"/><stop offset="1" stop-color="#ffb35a" stop-opacity="0"/></radialGradient></defs>`;
+  g += rect(0, 0, 1120, WATER_TOP + 2, `url(#${id}sk)`); n++;                      // the sky dome
+
+  // sun on its arc, moon on the other half of the day
+  const sunU = (t - 6) / 12, moonU = ((t < 6 ? t + 24 : t) - 18) / 12;
+  if (sunU > -.05 && sunU < 1.05) { const x = lerp(90, 1030, sunU), y = WATER_TOP - Math.sin(Math.PI * clamp(sunU)) * 250 + 10;
+    g += `<circle cx="${f1(x)}" cy="${f1(y)}" r="70" fill="url(#${id}sun)" opacity="${f1(1 - dark * .6)}"/><circle cx="${f1(x)}" cy="${f1(y)}" r="20" fill="#fff2cc"/>`; n += 2; }
+  if (moonU > 0 && moonU < 1) { const x = lerp(90, 1030, moonU), y = WATER_TOP - Math.sin(Math.PI * moonU) * 230 + 20;
+    g += `<circle cx="${f1(x)}" cy="${f1(y)}" r="16" fill="#e9eefc" opacity=".92"/>`; n++; }
+  // clouds drift
+  for (let k = 0; k < 3; k++) { const x = ((k * 420 + phase * 6 + t * 30) % 1500) - 200, y = 70 + k * 46;
+    g += `<ellipse cx="${f1(x)}" cy="${y}" rx="${90 + k * 24}" ry="${16 + k * 3}" fill="#fff" opacity="${f1(.16 * (1 - dark * .7))}"/>`; n++; }
+  // far bank and the temple spires
+  g += rect(0, WATER_TOP - 26, 1120, 28, mix('#1a2a2a', '#3a4a40', 1 - dark), ''); n++;
+  g += `<polygon points="520,${WATER_TOP - 26} 540,${WATER_TOP - 120} 560,${WATER_TOP - 26}" fill="${mix('#241a2e', '#6a5a70', 1 - dark)}"/>
+        <polygon points="578,${WATER_TOP - 26} 590,${WATER_TOP - 84} 602,${WATER_TOP - 26}" fill="${mix('#241a2e', '#6a5a70', 1 - dark)}"/>`; n += 2;
+
+  g += rect(0, WATER_TOP, 1120, WATER_BOT - WATER_TOP + 4, S.water); n++;                     // the river bed the bars ride on
+  // the river: STRIPS separately posed bars, each lifted by a sum of two waves and tilted to the slope
+  for (let i = 0; i < STRIPS; i++) {
+    const d = i / (STRIPS - 1), y = WATER_TOP + 294 * Math.pow(d, 1.35), h = 4 + 14 * d;
+    const w1 = Math.sin(TAU * (phase * .22 + d * 2.1 + i * .05)), w2 = Math.sin(TAU * (phase * .37 - d * 3.3));
+    const dy = (w1 * 1.4 + w2 * .9) * (.4 + d * 1.6), tilt = w1 * 1.2;
+    const glint = clamp(.5 + .5 * Math.sin(TAU * (phase * .6 + i * .31)));
+    const fill = mix(S.water, mix(S.bot, '#ffffff', .25), .22 + .22 * glint * (1 - dark * .7) * (.4 + d * .6));
+    g += `<rect x="-60" y="${f1(y + dy - level * .1 * (1 - d))}" width="1240" height="${f1(h + 1.5)}" fill="${fill}" transform="rotate(${f1(tilt)} 560 ${f1(y)})"${o.outline ? ' stroke="#ffd36a" stroke-width=".6" fill-opacity=".85"' : ''}/>`;
+    n++;
+  }
+  // sun glitter column
+  if (sunU > 0 && sunU < 1) { const x = lerp(90, 1030, sunU);
+    for (let k = 0; k < 12; k++) { const y = WATER_TOP + 8 + k * 24, w = 6 + k * 3 + 10 * Math.sin(TAU * (phase * .9 + k * .37));
+      g += rect(x - w / 2 + 10 * Math.sin(TAU * (phase * .4 + k)), y, Math.max(2, w), 3, '#fff2c8', `opacity="${f1(.5 * (1 - dark))}"`); n++; } }
+
+  // stilt houses and the pier (fixed), with the tide gauge board
+  g += rect(0, 300, 330, 20, mix('#3a1d18', '#7a3a2a', 1 - dark * .7)); n++;
+  g += `<polygon points="10,300 120,230 240,230 340,300" fill="${mix('#2a120f', '#8a3a2a', 1 - dark * .7)}"/>`; n++;
+  g += rect(60, 300, 230, 80, mix('#2a1c14', '#6a4a2c', 1 - dark * .7)); n++;
+  g += rect(92, 322, 34, 40, `rgb(255,${Math.round(190 + 30 * dark)},${Math.round(110 - 40 * dark)})`, `opacity="${f1(.25 + .7 * S.glow)}"`); n++;
+  g += rect(0, 380, 640, 14, mix('#2a1a10', '#8a6a3a', 1 - dark * .7)); n++;                  // pier deck
+  for (const x of [40, 150, 270, 400, 520, 640]) g += rect(x, 394, 12, 96, mix('#1a110a', '#5a3d22', 1 - dark * .6));
+  n += 6;
+  g += `<polygon points="420,380 470,380 440,430 400,430" fill="none"/>`;
+  // tide gauge board on a post
+  g += rect(742, 380, 8, 118, mix('#1a110a', '#6a4a2c', 1 - dark * .6)); n++;
+  for (let m = 1; m <= 3; m++) g += rect(742, wyMark(m), 8, 1.5, '#e8e0cc'), n;
+  function wyMark(m) { return 452 - (m - TIDE[0]) * PX_PER_M; }
+  g += `<polygon points="754,${f1(wy)} 774,${f1(wy - 7)} 774,${f1(wy + 7)}" fill="#ff7a4a"/>`; n++;
+
+  // the raft rides the tide between two posts; the ropes change length
+  const rx = 600 + 6 * Math.sin(TAU * phase * .15), ry = wy - 12 + 2 * Math.sin(TAU * (phase * .3));
+  g += rect(rx - 60, ry, 120, 14, mix('#2a1a10', '#9a7a44', 1 - dark * .7)); n++;
+  g += `<ellipse cx="${f1(rx - 34)}" cy="${f1(ry + 16)}" rx="9" ry="6" fill="#c76a2a"/><ellipse cx="${f1(rx + 34)}" cy="${f1(ry + 16)}" rx="9" ry="6" fill="#c76a2a"/>`; n += 2;
+  g += `<line x1="520" y1="${f1(wy - 40)}" x2="${f1(rx - 60)}" y2="${f1(ry + 4)}" stroke="#d8c8a0" stroke-width="1.5"/><line x1="640" y1="${f1(wy - 40)}" x2="${f1(rx + 60)}" y2="${f1(ry + 4)}" stroke="#d8c8a0" stroke-width="1.5"/>`; n += 2;
+
+  // boats bob, rock and swing on their moorings
+  function boat(cx, scale, ph, canopy) {
+    const bob = 2.6 * Math.sin(TAU * (phase * .27 + ph)), rock = 2.6 * Math.sin(TAU * (phase * .21 + ph * 1.7)), y = wy + 4 + bob;
+    let s = `<g transform="translate(${f1(cx)} ${f1(y)}) rotate(${f1(rock)}) scale(${scale})">`;
+    s += `<path d="M-70 -8 Q-60 18 -30 20 L40 20 Q70 18 84 -14 Q40 -2 -70 -8Z" fill="${mix('#2a120a', '#8a4a2a', 1 - dark * .7)}"/>`;
+    if (canopy) s += `<path d="M-46 -8 Q-44 -36 -10 -38 L26 -38 Q46 -36 50 -8Z" fill="${mix('#2a2014', '#b8924a', 1 - dark * .7)}"/>`;
+    return s + '</g>';
+  }
+  g += boat(300, 1.5, 0, true) + boat(470, 1.0, .3, false); n += 2;
+  // the long-tail boat crosses the river in a few minutes: its place is a function of the clock
+  const cross = (t * 60 / 7) % 1;
+  g += boat(lerp(-80, 1200, cross), .7, .6, false).replace('translate(', 'translate(').replace(`${f1(wy + 4)}`, f1(WATER_TOP + 58)); n++;
+  // water hyacinth drifts with the tide
+  for (let k = 0; k < 4; k++) { const x = 220 + k * 190 + level * 1.5 + 8 * Math.sin(TAU * (phase * .1 + k)), y = wy + 40 + k * 14;
+    g += `<ellipse cx="${f1(x)}" cy="${f1(y)}" rx="16" ry="5" fill="${mix('#102a14', '#4a8a3a', 1 - dark * .6)}"/>`; n++; }
+  // birds
+  for (let k = 0; k < 3; k++) { const x = ((phase * 22 + k * 140) % 1300) - 100, y = 120 + k * 36 + 10 * Math.sin(TAU * (phase * .2 + k));
+    g += `<path d="M${f1(x - 9)} ${f1(y)} Q${f1(x)} ${f1(y - 7 * Math.sin(TAU * (phase * 1.4 + k)))} ${f1(x + 9)} ${f1(y)}" fill="none" stroke="#1a1a22" stroke-width="2" opacity="${f1(1 - dark * .6)}"/>`; n++; }
+
+  // the clock tower and its dial: the one thing that tells the time
+  g += rect(890, 310, 190, 130, mix('#2a2824', '#b8b0a0', 1 - dark * .65)); n++;                   // plinth and stairs
+  g += rect(922, 150, 128, 168, mix('#3a342a', '#e8dcc0', 1 - dark * .65)); n++;                    // tower body
+  g += `<polygon points="906,152 986,66 1066,152" fill="${mix('#2a1e10', '#c9a24a', 1 - dark * .6)}"/><polygon points="960,70 986,14 1012,70" fill="${mix('#2a1e10', '#c9a24a', 1 - dark * .6)}"/>`; n += 2;
+  const cx = 986, cy = 218, R = 46;
+  g += `<circle cx="${cx}" cy="${cy}" r="${R + 5}" fill="#c9a24a"/><circle cx="${cx}" cy="${cy}" r="${R}" fill="${mix('#4a463c', '#f6efdc', 1 - dark * .55)}"/>`; n += 2;
+  for (let k = 0; k < 12; k++) { const a = k / 12 * TAU; g += `<line x1="${f1(cx + Math.sin(a) * (R - 9))}" y1="${f1(cy - Math.cos(a) * (R - 9))}" x2="${f1(cx + Math.sin(a) * (R - 2))}" y2="${f1(cy - Math.cos(a) * (R - 2))}" stroke="#2a2418" stroke-width="${k % 3 ? 1.6 : 3}"/>`; }
+  const THAI = ['๑๒', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙', '๑๐', '๑๑'];
+  for (let k = 0; k < 12; k++) { const a = k / 12 * TAU, r = R - 17; g += `<text x="${f1(cx + Math.sin(a) * r)}" y="${f1(cy - Math.cos(a) * r)}" font-size="9" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#2a2418" font-family="Noto Sans Thai, Noto Serif Thai, sans-serif">${THAI[k]}</text>`; }
+  const hh = (t % 12) / 12 * TAU, mm = ((t * 60) % 60) / 60 * TAU, ss = ((t * 3600) % 60) / 60 * TAU;
+  const hand = (a, len, w, col) => `<line x1="${cx}" y1="${cy}" x2="${f1(cx + Math.sin(a) * len)}" y2="${f1(cy - Math.cos(a) * len)}" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`;
+  g += hand(hh, 24, 4, '#1a1610') + hand(mm, 36, 3, '#1a1610') + hand(ss, 40, 1.2, '#c02a1a'); n += 3;
+  g += rect(944, 238 + 50, 84, 40, mix('#1a1410', '#8a7a58', 1 - dark * .6)); n++;                // the arch below the dial
+  g += rect(970, 296, 32, 20, `rgb(255,${Math.round(180 + 30 * dark)},100)`, `opacity="${f1(.2 + .75 * S.glow)}"`); n++;
+  // lanterns swing
+  for (let k = 0; k < 3; k++) { const x = 120 + k * 150, sw = 6 * Math.sin(TAU * (phase * .33 + k * .3));
+    g += `<line x1="${x}" y1="300" x2="${f1(x + sw)}" y2="322" stroke="#3a2a1a"/><circle cx="${f1(x + sw * 1.1)}" cy="328" r="7" fill="#ffb347" opacity="${f1(.35 + .65 * S.glow)}"/>`; n++; }
+  if (o.counter) g += `<text x="14" y="26" font-size="15" fill="#fff" font-family="ui-monospace,Menlo,monospace" opacity=".92">${n} actors posed this frame</text>`;
+  return { svg: g, actors: n, tide: tide(t), level: level };
+}
+const hhmm = t => { const m = Math.floor(t * 60 + 1e-6); return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
+
+
+const $ = id => document.getElementById(id);
+const TH = '๐๑๒๓๔๕๖๗๘๙';
+let thai = true;
+const dg = s => thai ? String(s).replace(/\d/g, d => TH[d]) : String(s);
+const pad2 = n => String(n).padStart(2, '0');
+// a time of day rounded to 10 minutes: the fit is not better than that
+function fmtTime(t) { const m = Math.round((((t % 24) + 24) % 24) * 6) * 10 % 1440; return dg(pad2(Math.floor(m / 60))) + ':' + dg(pad2(m % 60)); }
+const fmtH = h => dg(h.toFixed(1)) + (thai ? ' ม.' : ' m');
+
+// Every turn of the model in [t, t + span] hours, then drop the wiggles: a pair of neighbouring turns less than MIN_SWING apart.
+const MIN_SWING = 0.04;   // count_turns.py: 4 cm brings the count of turns to within 3 of the table's in both years
+function turns(t, span) {
+  const step = 1 / 60; let raw = [], prev = tide(t), cur = tide(t + step);
+  for (let x = t + step; x < t + span; x += step) { const nxt = tide(x + step);
+    if ((cur - prev) * (nxt - cur) < 0) raw.push({ t: x, h: cur, high: cur > prev });
+    prev = cur; cur = nxt; }
+  const kept = raw.map(e => ({ ...e })), skipped = [];
+  for (;;) { let k = -1, small = MIN_SWING;
+    for (let i = 0; i + 1 < kept.length; i++) { const s = Math.abs(kept[i + 1].h - kept[i].h); if (s < small) { small = s; k = i; } }
+    if (k < 0) break; skipped.push(kept[k], kept[k + 1]); kept.splice(k, 2); }
+  return { kept, skipped };
+}
+function reading(t) {
+  const { kept, skipped } = turns(t, 40);
+  const hi = kept.find(e => e.high), lo = kept.find(e => !e.high);
+  return { now: tide(t), rising: kept.length ? kept[0].high : tide(t + .05) > tide(t), hi, lo, kept, skipped };
+}
+
+// The board: dark is 0 by day and 1 at night, when its lantern lights it.
+const FONT = `'IBM Plex Sans Thai','Noto Sans Thai','Sarabun',system-ui,sans-serif`;
+function board(r, dark, bare) {      // bare: no frame, the wood runs to the edges (the river panel)
+  const wood = mix('#3b2716', '#7d5a33', 1 - dark * .7), edge = mix('#170f08', '#3d2915', 1 - dark * .6), ink = '#f8efd6';
+  let g = bare ? `<rect width="400" height="200" fill="${wood}"/>` : `<rect width="400" height="200" rx="10" fill="${edge}"/><rect x="6" y="6" width="388" height="188" rx="7" fill="${wood}"/>`;
+  if (dark > .05 && !bare) g += `<rect x="6" y="6" width="388" height="188" rx="7" fill="#ffb347" opacity="${(.2 * dark).toFixed(2)}"/>`;   // bare: no lamp, it dims with the panel
+  g += `<line x1="16" y1="100" x2="322" y2="100" stroke="${edge}" stroke-width="3"/>`;
+  const row = (y, high, e) => {
+    // the mark: a water line with a triangle above it (high water) or below it (low water)
+    const mark = high ? `<line x1="18" y1="${y + 16}" x2="62" y2="${y + 16}" stroke="${ink}" stroke-width="5"/><polygon points="40,${y - 24} 58,${y + 4} 22,${y + 4}" fill="${ink}"/>`
+                      : `<line x1="18" y1="${y - 16}" x2="62" y2="${y - 16}" stroke="${ink}" stroke-width="5"/><polygon points="40,${y + 24} 58,${y - 4} 22,${y - 4}" fill="${ink}"/>`;
+    const txt = e ? `<text x="76" y="${y + 17}" font-size="47" font-weight="700" fill="${ink}" font-family="${FONT}">${fmtTime(e.t)}</text>` +
+                    `<text x="318" y="${y + 14}" font-size="34" font-weight="600" fill="${ink}" font-family="${FONT}" text-anchor="end">${fmtH(e.h)}</text>`
+                  : `<text x="76" y="${y + 17}" font-size="47" fill="${ink}" font-family="${FONT}">--:--</text>`;
+    return mark + txt;
+  };
+  g += row(53, true, r.hi) + row(147, false, r.lo);
+  // the arrow: one actor, turned up (rising) or down (falling)
+  const col = r.rising ? '#9be28f' : '#ff9466';
+  g += `<g transform="translate(359,100) rotate(${r.rising ? 0 : 180})"><polygon points="0,-62 26,-18 10,-18 10,58 -10,58 -10,-18 -26,-18" fill="${col}"/></g>`;
+  return g;
+}
+
+
+const RIVER = [[100.59455,13.54216],[100.58151,13.55205],[100.57802,13.55689],[100.57636,13.56211],[100.5767,13.56841],[100.57785,13.5723],[100.59054,13.59052],[100.59249,13.59751],[100.59151,13.60536],[100.58921,13.60845],[100.58582,13.61002],[100.56531,13.61136],[100.55905,13.61382],[100.55127,13.61856],[100.54549,13.62395],[100.54018,13.63043],[100.53547,13.64045],[100.53394,13.64986],[100.53514,13.65585],[100.53733,13.65937],[100.53928,13.66059],[100.54377,13.66059],[100.55469,13.65626],[100.55894,13.65571],[100.56492,13.65692],[100.57047,13.66039],[100.57934,13.6692],[100.58733,13.67975],[100.58913,13.68419],[100.58924,13.68687],[100.58855,13.69004],[100.58609,13.69422],[100.58018,13.69911],[100.56787,13.70417],[100.55993,13.7064],[100.55495,13.7056],[100.55283,13.70388],[100.55147,13.70063],[100.55254,13.68624],[100.55064,13.67716],[100.54669,13.67167],[100.54248,13.66963],[100.53915,13.66909],[100.53516,13.66971],[100.53107,13.67161],[100.51439,13.68429],[100.49832,13.68737],[100.49205,13.69105],[100.49055,13.69328],[100.48988,13.69662],[100.49221,13.70092],[100.50391,13.70821],[100.51013,13.71505],[100.51208,13.71934],[100.51276,13.72577],[100.51197,13.73061],[100.50922,13.73545],[100.50608,13.73705],[100.49476,13.74018],[100.49091,13.74356],[100.48788,13.74956],[100.48798,13.75712],[100.48996,13.76095],[100.4972,13.76903],[100.50529,13.78579],[100.5143,13.79586],[100.51679,13.80109],[100.51759,13.80719],[100.51662,13.81139],[100.51441,13.81372],[100.50562,13.81674],[100.50287,13.81858],[100.49879,13.82731],[100.49092,13.83964]];                     // [[lon, lat], ...], mouth first
+const HD = [100.49028, 13.74333], BB = [100.6, 13.45];              // [lon, lat]
+const HD_KM = 49.5;                     // km up the river from the line's start
+// The map area is 190 x 400 of the 240 x 400 box (the level column takes the rest). North is up. The view is
+// centred on a point of the river and follows it (the pan), at KMPX kilometres to the pixel.
+const COS = Math.cos(13.65 * Math.PI / 180), KMPX = 0.0762;
+let VIEW = [100.541, 13.62];
+const MX = lon => 95 + (lon - VIEW[0]) * COS * 111.2 / KMPX, MY = lat => 200 - (lat - VIEW[1]) * 111.2 / KMPX;
+const KM = [0]; for (let i = 1; i < RIVER.length; i++) KM.push(KM[i - 1] + Math.hypot((RIVER[i][0] - RIVER[i - 1][0]) * COS, RIVER[i][1] - RIVER[i - 1][1]) * 111.2);
+function along(km) { for (let i = 1; i < RIVER.length; i++) if (KM[i] >= km) { const u = (km - KM[i - 1]) / (KM[i] - KM[i - 1]); return [lerp(RIVER[i - 1][0], RIVER[i][0], u), lerp(RIVER[i - 1][1], RIVER[i][1], u)]; } return RIVER[RIVER.length - 1]; }
+const LABEL = { city: ['กรุงเทพฯ', 'Bangkok'], mouth: ['ปากน้ำ', 'Pak Nam'], gulf: ['อ่าวไทย', 'Gulf of Thailand'], km: ['กม.', 'km'], sea: ['จากทะเล', 'from the sea'] };
+const L = k => LABEL[k][thai ? 0 : 1];
+const CREST_H = 2;   // ILLUSTRATIVE: hours assumed for high water to travel from the mouth to the city. Not measured.
+let crest = false;
+
+// Burn-in, measure 2: the map pans. The view follows the river from near the sea to past the city and back, one
+// pass in PASS_MIN minutes, read from the clock like every other pose.
+const PASS_MIN = 15, PAN_LO = 8, PAN_HI = 56;
+function panKm(t) { const u = ((t * 60) % (2 * PASS_MIN) + 2 * PASS_MIN) % (2 * PASS_MIN) / PASS_MIN, tri = u < 1 ? u : 2 - u; return lerp(PAN_LO, PAN_HI, (1 - Math.cos(Math.PI * tri)) / 2); }
+// Burn-in, measure 3: the panel dims at night, to about a sixth of its daytime brightness. The ink stays dark.
+const paperOf = dark => mix('#6a6450', '#eadfc2', 1 - dark);
+let clipN = 0;
+function riverMap(r, dark, phase, bare) {      // bare: no frame and no paper of its own (the panel supplies the paper)
+  const paper = paperOf(dark), ink = mix('#120d07', '#3a2a18', 1 - dark), frame = mix('#170f08', '#3d2915', 1 - dark * .6);
+  const water = mix('#27506f', '#3f86b8', 1 - dark);
+  VIEW = along(panKm(r.t));
+  const id = 'map' + (clipN++);
+  let g = bare ? '' : `<rect width="240" height="400" rx="8" fill="${frame}"/><rect x="5" y="5" width="230" height="390" rx="5" fill="${paper}"/>`;
+  g += `<clipPath id="${id}"><rect x="0" y="0" width="190" height="400"/></clipPath><g clip-path="url(#${id})">`;
+  const d = RIVER.map((p, i) => (i ? 'L' : 'M') + MX(p[0]).toFixed(1) + ' ' + MY(p[1]).toFixed(1)).join('');
+  g += `<path d="${d}" fill="none" stroke="${water}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`;
+  // the open sea below the mouth: only a label and three ripples, because the coast was not fetched
+  const m = RIVER[0];
+  for (let k = 0; k < 3; k++) g += `<path d="M${MX(m[0]) - 34 + k * 10} ${MY(m[1]) + 18 + k * 10} q6 -5 12 0 t12 0 t12 0" fill="none" stroke="${water}" stroke-width="1.8" opacity=".7"/>`;
+  g += `<text x="${MX(m[0]) + 8}" y="${MY(m[1]) + 62}" font-size="14" text-anchor="end" fill="${ink}" font-family="${FONT}" font-style="italic">${L('gulf')}</text>`;
+  g += `<text x="${MX(m[0]) - 16}" y="${MY(m[1]) + 12}" font-size="13" text-anchor="end" fill="${ink}" font-family="${FONT}">${L('mouth')}</text>`;
+  // Bangkok Bar: a tide staff
+  const bx = MX(BB[0]), by = MY(BB[1]);
+  g += `<line x1="${bx}" y1="${by - 9}" x2="${bx}" y2="${by + 7}" stroke="${ink}" stroke-width="2"/><line x1="${bx - 4}" y1="${by - 5}" x2="${bx + 4}" y2="${by - 5}" stroke="${ink}" stroke-width="1.5"/><line x1="${bx - 4}" y1="${by + 1}" x2="${bx + 4}" y2="${by + 1}" stroke="${ink}" stroke-width="1.5"/>`;
+  // the travelling high water (a sketch): a bright band that reaches the tower as the board's high water arrives
+  if (crest && r.hi) { const lead = r.hi.t - r.t; if (lead >= 0 && lead <= CREST_H) { const p = along(HD_KM * (1 - lead / CREST_H));
+    g += `<circle cx="${MX(p[0]).toFixed(1)}" cy="${MY(p[1]).toFixed(1)}" r="10" fill="#fff6c8" opacity=".85"/><circle cx="${MX(p[0]).toFixed(1)}" cy="${MY(p[1]).toFixed(1)}" r="17" fill="none" stroke="#fff6c8" opacity=".5"/>`; } }
+  // this harbour: a small tower, a lamp that breathes, and its name (on whichever side has room)
+  const hx = MX(HD[0]), hy = MY(HD[1]), pulse = 7 + 3 * Math.sin(TAU * phase * .5), lab = hx < 86 ? [hx + 13, 'start'] : [hx - 13, 'end'];
+  g += `<circle cx="${hx}" cy="${hy}" r="${pulse.toFixed(1)}" fill="none" stroke="#e0592f" stroke-width="2" opacity=".8"/>`;
+  g += `<rect x="${hx - 4}" y="${hy - 13}" width="8" height="15" fill="#f4ecd6" stroke="${ink}"/><polygon points="${hx - 6},${hy - 13} ${hx},${hy - 22} ${hx + 6},${hy - 13}" fill="#c9a04a" stroke="${ink}"/>`;
+  g += `<text x="${lab[0]}" y="${hy - 8}" font-size="15" font-weight="700" text-anchor="${lab[1]}" fill="${ink}" font-family="${FONT}">${L('city')}</text>`;
+  g += `<text x="${lab[0]}" y="${hy + 7}" font-size="10" text-anchor="${lab[1]}" fill="${ink}" font-family="${FONT}">${dg(50)} ${L('km')} ${L('sea')}</text>`;
+  g += `</g>`;
+  // scale bar and north, on the paper so the river passing under them does not hide them
+  const ten = 10 / KMPX;
+  g += `<rect x="8" y="370" width="${ten + 62}" height="24" fill="${paper}" opacity=".85"/><rect x="12" y="12" width="24" height="30" fill="${paper}" opacity=".85"/>`;
+  g += `<line x1="16" y1="382" x2="${16 + ten}" y2="382" stroke="${ink}" stroke-width="2"/><line x1="16" y1="378" x2="16" y2="386" stroke="${ink}"/><line x1="${16 + ten}" y1="378" x2="${16 + ten}" y2="386" stroke="${ink}"/><text x="${20 + ten}" y="386" font-size="11" fill="${ink}" font-family="${FONT}">${dg(10)} ${L('km')}</text>`;
+  g += `<polygon points="24,18 30,36 24,32 18,36" fill="${ink}"/>`;
+  // the level column: 0 to 3.5 m, the pointer at the tide now, the arrow above it
+  const cy = v => 330 - v / 3.5 * 250;
+  g += `<rect x="205" y="${cy(3.5)}" width="9" height="250" fill="${mix('#57503e', '#cdbf9a', 1 - dark)}" stroke="${ink}"/><rect x="205" y="${cy(r.now).toFixed(1)}" width="9" height="${(330 - cy(r.now)).toFixed(1)}" fill="${water}"/>`;
+  for (let v = 1; v <= 3; v++) g += `<line x1="200" y1="${cy(v)}" x2="214" y2="${cy(v)}" stroke="${ink}"/><text x="197" y="${cy(v) + 5}" font-size="13" font-weight="700" text-anchor="end" fill="${ink}" font-family="${FONT}">${dg(v)}</text>`;
+  g += `<polygon points="217,${cy(r.now).toFixed(1)} 229,${(cy(r.now) - 6).toFixed(1)} 229,${(cy(r.now) + 6).toFixed(1)}" fill="#e0592f"/>`;
+  g += `<g transform="translate(210,52) rotate(${r.rising ? 0 : 180})"><polygon points="0,-16 10,0 4,0 4,16 -4,16 -4,0 -10,0" fill="${r.rising ? '#3f9a4a' : '#d9643a'}"/></g>`;
+  return g;
+}
+
+// The panel: 300 x 630, the full height of the 1120 x 630 screen. The tide board's readings above, the river below.
+// No border (Will, 2026-11-21: "it needs no border"): the wood band and the paper run to the panel's edges.
+function panel(r, dark, phase) {
+  return `<rect width="300" height="630" fill="${paperOf(dark)}"/>` +
+    `<g transform="scale(.75)">${board(r, dark, true)}</g>` +
+    `<g transform="translate(6,150) scale(1.2)">${riverMap(r, dark, phase, true)}</g>`;
+}
+
+// Burn-in, measure 1: the panel swaps sides every SWAP_MIN minutes, on the clock's marks. It slides off its edge,
+// the harbour fills the screen for a moment, and it slides in at the other edge. pos is 0 at the right, 1 at the left.
+const SWAP_MIN = 10, SLIDE_S = 2.6;
+let hour = 16.5, t0 = performance.now(), flip = 0, pos = 0, playing = false;
+const wantPos = h => (Math.floor(h * 60 / SWAP_MIN + 1e-9) + flip) % 2;
+// The harbour is framed in what the panel leaves. The house, the pier and the tower span more than 820 pixels, so
+// the camera pulls back to 82% beside the panel and comes forward as it slides away. The engine's framing is its own.
+function frame(scene, t, r, phase) {
+  const dark = clamp(sky(t).glow), e = pos * pos * (3 - 2 * pos);
+  const rightVis = 300 * clamp(1 - e * 2), leftVis = 300 * clamp(e * 2 - 1), avail = 1120 - rightVis - leftVis;
+  const s = lerp(.82, 1, (avail - 820) / 300), tx = leftVis + (avail - 1120 * s) / 2, ty = 630 * (1 - s);
+  const p = panel(r, dark, phase);
+  return `<defs><clipPath id="view"><rect x="${leftVis.toFixed(1)}" y="0" width="${avail.toFixed(1)}" height="630"/></clipPath></defs>` +
+    `<rect x="${leftVis.toFixed(1)}" y="0" width="${avail.toFixed(1)}" height="630" fill="${sky(t).top}"/>` +
+    `<g clip-path="url(#view)"><g transform="translate(${tx.toFixed(1)},${ty.toFixed(1)}) scale(${s.toFixed(4)})">${scene}</g></g>` +
+    (rightVis > 0 ? `<g transform="translate(${(1120 - rightVis).toFixed(1)},0)">${p}</g>` : '') +
+    (leftVis > 0 ? `<g transform="translate(${(leftVis - 300).toFixed(1)},0)">${p}</g>` : '');
+}
+const read = t => ({ ...reading(t), t });
+const DATE = () => new Date(Date.UTC(2026, 0, 1) + TIDE_DAY * 86400e3).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+function draw() {
+  const r = read(hour), phase = (performance.now() - t0) / 1000;
+  $('scene').innerHTML = frame(renderScene(hour, phase, {}).svg, hour, r, phase);
+  $('close').innerHTML = panel(r, clamp(sky(hour).glow), phase);
+  $('readout').textContent = DATE() + ' ' + hhmm(hour) + ' · ' + r.now.toFixed(2) + ' m, ' + (r.rising ? 'rising' : 'falling');
+  if (document.activeElement !== $('scrub')) $('scrub').value = hour;
+}
+function pick() { const day = turns(0, 24).kept; return { high: (day.find(e => e.high) || { t: 12 }).t, low: (day.find(e => !e.high) || { t: 6 }).t, night: 22.5 }; }
+let P = null;
+function states() {
+  P = pick(); const keep = crest;
+  const list = [['High water', P.high % 24, false], ['Low water', P.low % 24, false], ['Night: dimmed', P.night, false], ['On its way (sketch)', (P.high - 1) % 24, true]];
+  $('states').innerHTML = list.map(([name, h, c]) => { crest = c; const s = `<div style="width:120px"><svg viewBox="0 0 300 630" width="100" height="210">${panel(read(h), clamp(sky(h).glow), 0)}</svg>` +
+    `<div style="color:#aeb4c0;font-size:12px;margin-top:2px;line-height:1.3">${name} <span style="color:#8d94a3">(${hhmm(h)})</span></div></div>`; return s; }).join('');
+  crest = keep;
+}
+function set(h) { hour = ((h % 24) + 24) % 24; }
+function all() { states(); draw(); }
+$('b-now').onclick = () => { const d = new Date(Date.now() + 7 * 3600e3); TIDE_DAY = Math.floor((d - Date.UTC(2026, 0, 1)) / 86400e3); hour = d.getUTCHours() + d.getUTCMinutes() / 60; all(); };
+$('b-high').onclick = () => set(P.high);
+$('b-low').onclick = () => set(P.low);
+$('b-night').onclick = () => set(P.night);
+$('b-swap').onclick = () => { flip ^= 1; };
+$('b-play').onclick = () => { playing = !playing; $('b-play').className = playing ? 'on' : ''; };
+$('c-thai').onchange = e => { thai = e.target.checked; all(); };
+$('c-crest').onchange = e => { crest = e.target.checked; };
+$('scrub').oninput = e => set(parseFloat(e.target.value));
+const hd = /d=(\d+)/.exec(location.hash), hh = /h=(\d+(?:\.\d+)?)/.exec(location.hash);
+if (hd) TIDE_DAY = parseInt(hd[1], 10);
+if (hh) hour = parseFloat(hh[1]); else { const d = new Date(Date.now() + 7 * 3600e3); hour = d.getUTCHours() + d.getUTCMinutes() / 60; }
+pos = wantPos(hour);                 // no slide on arrival: the page opens with the panel where the clock puts it
+all();
+let last = performance.now();
+(function loop() {
+  const now = performance.now(), dt = Math.min(.1, (now - last) / 1000); last = now;
+  if (playing) set(hour + dt * 60 / 3600);                       // Run x60: one second is one minute
+  const want = wantPos(hour);
+  if (pos !== want) pos = want > pos ? Math.min(want, pos + dt / SLIDE_S) : Math.max(want, pos - dt / SLIDE_S);
+  draw(); setTimeout(() => requestAnimationFrame(loop), 40);
+})();
+document.documentElement.dataset.ready = '1';
+</script></body></html>

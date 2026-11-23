@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build one Tide Harbour spike level (variant a, b, c or d from SPIKE_VARIANT); see spike.py for what each tests.
+"""Build one Tide Harbour spike level (variant a, b, c, d, n, v or g from SPIKE_VARIANT); see spike.py for what each tests.
 
 Run through build.sh, in the Blender container. Writes wflevels/tide_spike_<v>/tide_spike_<v>.lev and actor-map.json.
 Throwaway: it exists to answer the plan's Phase 0 questions on cast1, and is deleted or folded into Phase 2.
@@ -100,11 +100,13 @@ for mesh in sp.static_meshes():
 for grp in sp.groups(V).values():
     for name, mesh, pos in grp:
         actor(name, mesh, pos)
-if V == 'd':
-    for i, (name, mesh, pos) in enumerate(sp.veil_actors()):
-        actor(name, mesh, pos, visibility=sp.VEIL_MAILBOX + i)
-    for i, (name, mesh, pos) in enumerate(sp.glow_actors()):
-        actor(name, mesh, pos, visibility=sp.GLOW_MAILBOX + i)
+if V in sp.FEATURES:
+    if sp.FEATURES[V]['veils']:
+        for i, (name, mesh, pos) in enumerate(sp.veil_actors()):
+            actor(name, mesh, pos, visibility=sp.VEIL_MAILBOX + i)
+    if sp.FEATURES[V]['glows']:
+        for i, (name, mesh, pos) in enumerate(sp.glow_actors()):
+            actor(name, mesh, pos, visibility=sp.GLOW_MAILBOX + i)
 
 sun = bpy.data.objects['SunLight']
 # Measured 2026-11-21 (wflevels/tide_spike/shots, five settings, four faces of known normal): with outward-wound faces a directional

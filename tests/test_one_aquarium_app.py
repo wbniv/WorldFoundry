@@ -31,7 +31,9 @@ def test_the_menu_bundle_is_the_game_apps_bundle_and_the_dream_keeps_cd_iff():
 
 def test_the_host_runs_the_menu_from_menu_cd_iff_only_in_menu_mode():
     assert 'constexpr const char* kMenuBundleAsset = "menu-cd.iff";' in HOST
-    assert "WFAndroidSetBundleAsset(menu ? kMenuBundleAsset : nullptr);" in HOST
+    # Only an APK that carries menu-cd.iff (the Aquarium app) takes the second bundle; the Clocks chooser lives in cd.iff.
+    assert "WFAndroidSetBundleAsset(secondBundle ? kMenuBundleAsset : nullptr);" in HOST
+    assert "AAssetManager_open(bundleAssets, kMenuBundleAsset" in HOST
     # The accessor redirects exactly the engine's "cd.iff", and only when a host asked for it.
     assert 'if (!gBundleAsset.empty() && std::strcmp(path, "cd.iff") == 0)' in ACCESSOR
     assert "WFAndroidSetBundleAsset" not in GAME_HOST, "the game app keeps its one cd.iff"

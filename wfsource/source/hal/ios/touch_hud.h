@@ -14,10 +14,11 @@
 
 #import <UIKit/UIKit.h>
 
-// Transparent full-screen view: draws the D-pad + A/B (same layout and
-// colours as Android's HUD, gfx/gl/android_window.cc) and receives the
-// touches that drive them. Hidden when the HUD is disabled, which also
-// stops its touches, as Android suppresses touch in TV mode.
+// Transparent full-screen view: draws Android's touch controls (joystick and
+// A to D; A and C only over a story card; hal/touch_controls.h, the HUD look
+// of gfx/gl/android_window.cc) and receives the touches that drive them.
+// Hidden when the HUD is disabled, which also stops its touches, as Android
+// suppresses touch in TV mode.
 @interface WFTouchHudView : UIView
 @end
 
@@ -34,9 +35,17 @@ void WFIosSetHudEnabled(int enabled);
 void WFIosInputSuspend(void);
 void WFIosInputResume(void);
 
+// Engine thread, once per drawn frame (Display::RenderEnd): hands the story
+// card flag (bitmaptext::ReaderOpen) to the main thread, which narrows the
+// controls to A and C while a card is open. Plain C so display_ios.cc (C++)
+// can declare it without UIKit.
+void WFIosTouchFrame(void);
+
 // Simulator CI hook: plays the synthetic touch script in the launch
 // argument `-WFTouchScript <script>` or the environment variable
 // WF_TOUCH_SCRIPT (grammar in touch_pad.hp). No-op when neither is set.
+// Launch argument `-WFTouchDiagnostics 1` adds the wf.touch.state
+// accessibility element for UI tests (input.mm).
 void WFIosStartTouchScript(void);
 
 #ifdef __cplusplus

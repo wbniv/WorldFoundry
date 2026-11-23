@@ -12,12 +12,16 @@ engine's back-face cull and a flap card shows its art on both sides.
 from __future__ import annotations
 
 import math
-from typing import Dict, List, Sequence, Tuple
+import sys
+from pathlib import Path
+from typing import Dict, List, Tuple
 
 import timeline as tl
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "clock_common"))
+from clock_mesh import BOX_FACES, V3, Mesh  # noqa: E402,F401  (the shared mesh builder, hoisted from here)
+
 PX = tl.PX
-V3 = Tuple[float, float, float]
 
 PALETTE: Dict[str, Tuple[float, float, float]] = {
     "wood": (.45, .30, .17), "wood_hi": (.62, .43, .25), "table": (.23, .16, .11),
@@ -31,83 +35,6 @@ for _i, _k in enumerate(DOMINO_COLORS):
     h = (_i * 15.0 + 8.0) / 360.0
     r = [abs(6 * ((h + o) % 1.0) - 3) - 1 for o in (0.0, -2.0 / 3.0 + 1, -1.0 / 3.0 + 1)]
     PALETTE[_k] = tuple(max(0.0, min(1.0, .35 + .55 * v)) for v in r)
-
-BOX_FACES = [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]
-
-
-class Mesh:
-    def __init__(self, name: str):
-        self.name = name
-        self.vertices: List[V3] = []
-        self.faces: List[Tuple[int, ...]] = []
-        self.colors: List[str] = []
-
-    def face(self, points: Sequence[V3], color: str) -> None:
-        start = len(self.vertices)
-        self.vertices.extend(tuple(p) for p in points)
-        self.faces.append(tuple(range(start, len(self.vertices))))
-        self.colors.append(color)
-
-    def box(self, lo: V3, hi: V3, color: str) -> None:
-        a, b, c = lo
-        x, y, z = hi
-        v = [(a, b, c), (x, b, c), (x, y, c), (a, y, c), (a, b, z), (x, b, z), (x, y, z), (a, y, z)]
-        for f in BOX_FACES:
-            self.face([v[i] for i in f], color)
-
-    def prism_xz(self, poly: Sequence[Tuple[float, float]], y0: float, y1: float, color: str) -> None:
-        """A closed prism: a convex polygon in x-z (counter-clockwise seen from -y) extruded along y."""
-        n = len(poly)
-        front = [(x, y0, z) for x, z in poly]
-        back = [(x, y1, z) for x, z in poly]
-        self.face(front, color)                       # counter-clockwise seen from -y: normal toward -y
-        self.face(list(reversed(back)), color)        # normal toward +y
-        for i in range(n):
-            j = (i + 1) % n
-            self.face([front[j], front[i], back[i], back[j]], color)
-
-    def beam(self, p0: Tuple[float, float], p1: Tuple[float, float], thick: float, y0: float, y1: float, color: str) -> None:
-        """A bar between two points in x-z, `thick` across, extruded along y."""
-        dx, dz = p1[0] - p0[0], p1[1] - p0[1]
-        n = math.hypot(dx, dz)
-        nx, nz = -dz / n * thick / 2, dx / n * thick / 2
-        self.prism_xz([(p0[0] - nx, p0[1] - nz), (p1[0] - nx, p1[1] - nz), (p1[0] + nx, p1[1] + nz), (p0[0] + nx, p0[1] + nz)],
-                      y0, y1, color)
-
-    def sphere(self, center: V3, r: float, color: str, segments: int = 12, rings: int = 8) -> None:
-        def pt(i, j):
-            a, b = math.tau * i / segments, math.pi * j / rings
-            return (center[0] + r * math.sin(b) * math.cos(a), center[1] + r * math.sin(b) * math.sin(a), center[2] + r * math.cos(b))
-        for j in range(rings):
-            for i in range(segments):
-                quad = [pt(i, j), pt(i, j + 1), pt(i + 1, j + 1), pt(i + 1, j)]
-                quad = list(dict.fromkeys(tuple(round(v, 9) for v in p) for p in quad))
-                if len(quad) >= 3:
-                    self.face(quad, color)
-
-    def cylinder_y(self, cx: float, cz: float, r: float, y0: float, y1: float, color: str, sides: int = 14) -> None:
-        """A cylinder whose axis runs along y (a pulley)."""
-        ring0 = [(cx + r * math.cos(math.tau * i / sides), y0, cz + r * math.sin(math.tau * i / sides)) for i in range(sides)]
-        ring1 = [(x, y1, z) for x, _, z in ring0]
-        self.face(list(ring0), color)
-        self.face(list(reversed(ring1)), color)
-        for i in range(sides):
-            j = (i + 1) % sides
-            self.face([ring0[j], ring0[i], ring1[i], ring1[j]], color)
-
-    def column_z(self, cx: float, cy: float, z0: float, z1: float, r: float, color: str, sides: int = 10) -> None:
-        """A cylinder whose axis runs along z (a screw shaft)."""
-        lo = [(cx + r * math.cos(math.tau * i / sides), cy + r * math.sin(math.tau * i / sides), z0) for i in range(sides)]
-        hi = [(x, y, z1) for x, y, _ in lo]
-        self.face(list(reversed(lo)), color)
-        self.face(hi, color)
-        for i in range(sides):
-            j = (i + 1) % sides
-            self.face([lo[i], lo[j], hi[j], hi[i]], color)
-
-    def bounds(self) -> Tuple[V3, V3]:
-        xs, ys, zs = zip(*self.vertices)
-        return (min(xs), min(ys), min(zs)), (max(xs), max(ys), max(zs))
 
 
 def m(px: float) -> float:

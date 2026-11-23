@@ -1,0 +1,228 @@
+[
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1795252271.8586988,
+    "end": 1795252272.1055746,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package query-services --brief --components -a android.service.dreams.DreamService"
+    ],
+    "start": 1795252272.1139078,
+    "end": 1795252272.43782,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1795252272.440831,
+    "end": 1795252272.872872,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_enabled"
+    ],
+    "start": 1795252272.8760412,
+    "end": 1795252273.2710915,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_activate_on_sleep"
+    ],
+    "start": 1795252273.2749617,
+    "end": 1795252273.5361853,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get system screen_off_timeout"
+    ],
+    "start": 1795252273.5400016,
+    "end": 1795252273.8741946,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure sleep_timeout"
+    ],
+    "start": 1795252273.87734,
+    "end": 1795252274.113219,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get global stay_on_while_plugged_in"
+    ],
+    "start": 1795252274.1156752,
+    "end": 1795252274.3479674,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1795252274.3506932,
+    "end": 1795252274.7265725,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1795252274.7294989,
+    "end": 1795252275.142275,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "content call --uri content://org.worldfoundry.clocks.settings --method getCapabilities"
+    ],
+    "start": 1795252275.1464033,
+    "end": 1795252277.8241432,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "input keyevent KEYCODE_WAKEUP"
+    ],
+    "start": 1795252277.858721,
+    "end": 1795252278.9373393,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1795252279.0912297,
+    "end": 1795252279.4413943,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -S -W -n org.worldfoundry.clocks/org.worldfoundry.screensaver.ClocksActivity --es org.worldfoundry.screensaver.LEVEL minute_machine"
+    ],
+    "start": 1795252279.444872,
+    "end": 1795252280.6418207,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1795252280.6446497,
+    "end": 1795252281.0998917,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "screencap",
+      "-p"
+    ],
+    "start": 1795252281.1053042,
+    "end": 1795252282.70683,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1795252283.045368,
+    "end": 1795252283.3083625,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_enabled"
+    ],
+    "start": 1795252283.311836,
+    "end": 1795252283.710187,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_activate_on_sleep"
+    ],
+    "start": 1795252283.712833,
+    "end": 1795252284.123415,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get system screen_off_timeout"
+    ],
+    "start": 1795252284.1261513,
+    "end": 1795252284.3598804,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure sleep_timeout"
+    ],
+    "start": 1795252284.363007,
+    "end": 1795252284.7507486,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get global stay_on_while_plugged_in"
+    ],
+    "start": 1795252284.7532678,
+    "end": 1795252285.1478832,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys dreams"
+    ],
+    "start": 1795252285.1527116,
+    "end": 1795252285.5287669,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1795252285.5314703,
+    "end": 1795252285.9747481,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "content call --uri content://org.worldfoundry.clocks.settings --method getCapabilities"
+    ],
+    "start": 1795252285.9780293,
+    "end": 1795252288.2808537,
+    "returncode": 0
+  }
+]

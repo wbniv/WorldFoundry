@@ -1,0 +1,26 @@
+{
+  "score_sha256": "84839e99ede65a0f61441e22cee0e383b37a94027ea3f4be95124b0ac231ac52",
+  "host_start_wall": 1795257248.585906,
+  "host_start_monotonic": 105533.965592075,
+  "captures": [
+    {
+      "label": "chooser-first",
+      "planned_ms": 10000,
+      "started": 1795257260.3670402,
+      "ended": 1795257261.8376856,
+      "file": "input-frame-001.png",
+      "bytes": 76166,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "chooser-second",
+      "planned_ms": 15000,
+      "started": 1795257265.367053,
+      "ended": 1795257267.085755,
+      "file": "input-frame-002.png",
+      "bytes": 76454,
+      "schedule_lateness_ms": 0
+    }
+  ],
+  "result": "completed"
+}

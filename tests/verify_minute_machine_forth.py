@@ -34,11 +34,13 @@ HOST = r'''
 #include "forth_math_zforth.hpp"       // the shipped trigonometry glue, shared with the bridge
 static zf_ctx ctx;
 static std::map<int, float> mbx;
+static std::map<std::pair<int, int>, float> amb;            // an actor's mailboxes, set by the test with A (read-actor-mailbox, custom 24)
 struct W { int actor, idx; float val; };
 static std::vector<W> writes;
 extern "C" zf_input_state zf_host_sys(zf_ctx*c, zf_syscall_id id, const char*) {
   if (id == ZF_SYSCALL_EMIT) zf_pop(c);
   else if (id == ZF_SYSCALL_TELL) { zf_pop(c); zf_pop(c); }
+  else if ((int)id == 152) { int a = (int)zf_pop(c); int i = (int)zf_pop(c); zf_push(c, amb.count({a, i}) ? amb[{a, i}] : 0.0f); }
   else if ((int)id == 128) { int i = (int)zf_pop(c); zf_push(c, mbx.count(i) ? mbx[i] : 0.0f); }
   else if ((int)id == 129) { int i = (int)zf_pop(c); float v = zf_pop(c); mbx[i] = v; }
   else if ((int)id >= 128 && wf::forthmath::HandleSyscall(c, (int)id - 128)) {}
@@ -72,6 +74,7 @@ int main(int argc, char** argv) {
   char line[256];
   while (fgets(line, sizeof line, stdin)) {
     if (line[0] == 'M') { int i; float v; sscanf(line + 2, "%d %f", &i, &v); mbx[i] = v; }
+    else if (line[0] == 'A') { int a, i; float v; sscanf(line + 2, "%d %d %f", &a, &i, &v); amb[{a, i}] = v; }
     else if (line[0] == 'T') {
       writes.clear();
       int r = eval("mm-tick");
@@ -107,7 +110,7 @@ def build(tmp: Path):
     ids = mailbox_ids()
     consts = "\n".join(f"{ids[n]} constant INDEXOF_{n}" for n in CONSTANTS)
     (tmp / "bootstrap.fth").write_text(bootstrap + "\n: emit 0 sys ; : tell 2 sys ;\n" + strings +
-                                       "\n: read-mailbox 128 sys ; : write-mailbox 129 sys ; : write-actor-mailbox 130 sys ;\n" + consts + "\n")
+                                       "\n: read-mailbox 128 sys ; : write-mailbox 129 sys ; : write-actor-mailbox 130 sys ; : read-actor-mailbox 152 sys ;\n" + consts + "\n")
     ix = forth.default_indices()
     (tmp / "director.fth").write_text(forth.definitions(ix))
     (tmp / "host.cc").write_text(HOST)

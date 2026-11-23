@@ -1772,14 +1772,14 @@ tasks:
       - cd android && ANDROID_HOME=/usr/lib/android-sdk ./gradlew :screensaver:assembleAquariumRelease --offline
 
   test-level-catalog:
-    desc: "LevelCatalog (the screensaver's generic level roster) in plain Java: parser cases, plus the real wflevels/aquarium-menu.manifest and its order against the order build-aquarium-screensaver-levels.py packs the Dream bundle in. Repo mounted read-only."
+    desc: "LevelCatalog (the screensaver's generic level roster) in plain Java: parser cases, plus the real wflevels/aquarium-menu.manifest and wflevels/clocks-menu.manifest, and the Aquarium's order against the order build-aquarium-screensaver-levels.py packs the Dream bundle in. Repo mounted read-only."
     cmds:
       - |
         set -euo pipefail
         order=$(mktemp -d)
         trap 'rm -rf "$order"' EXIT
         docker run --rm --ulimit core=0 -v "$PWD":/src:ro -v "$order":/out wf-linux-test:local bash -c 'set -euo pipefail; cd /src/scripts && python3 -c "import runpy; print(chr(10).join(runpy.run_path(\"build-aquarium-screensaver-levels.py\", run_name=\"order\")[\"TANKS\"]))" > /out/bundle-order.txt; chmod a+r /out/bundle-order.txt'
-        docker run --rm --ulimit core=0 -v "$PWD":/src:ro -v "$order":/order:ro wf-linux-test:local bash -c 'set -euo pipefail; d=/src/android/screensaver/src; javac -d /tmp/out "$d"/main/java/org/worldfoundry/screensaver/LevelCatalog.java "$d"/test/java/org/worldfoundry/screensaver/LevelCatalogTest.java && java -cp /tmp/out org.worldfoundry.screensaver.LevelCatalogTest /src/wflevels/aquarium-menu.manifest /order/bundle-order.txt'
+        docker run --rm --ulimit core=0 -v "$PWD":/src:ro -v "$order":/order:ro wf-linux-test:local bash -c 'set -euo pipefail; d=/src/android/screensaver/src; javac -d /tmp/out "$d"/main/java/org/worldfoundry/screensaver/LevelCatalog.java "$d"/test/java/org/worldfoundry/screensaver/LevelCatalogTest.java && java -cp /tmp/out org.worldfoundry.screensaver.LevelCatalogTest /src/wflevels/aquarium-menu.manifest /order/bundle-order.txt && java -cp /tmp/out org.worldfoundry.screensaver.LevelCatalogTest /src/wflevels/clocks-menu.manifest'
 
   test-aquarium-launch-mode:
     desc: "LaunchMode (the one Aquarium app: tank menu on a normal launch, a tank for LEVEL, DREAM, the preview and the Dream) in plain Java: every row of docs/plans/2026-11-21-one-aquarium-app.md, an unknown LEVEL refused by the real catalogue, and source guards (the Dream and the preview never reach the menu; only the settings provider writes the saved tank). Repo mounted read-only."
@@ -1797,12 +1797,83 @@ tasks:
     cmds:
       - bash wflevels/minute_machine/build.sh
 
-  build-minute-machine-apk:
-    desc: "Minute Machine Dream screensaver APK as a Release build (CMake Release: -O3 + thin LTO; debug-keystore signed for sideload; arm64-v8a + armeabi-v7a). Builds the level, packs its cd.iff, then offline Gradle. Lands at android/screensaver/build/outputs/apk/minutemachine/release/screensaver-minutemachine-release.apk"
+  tide-harbour-level:
+    desc: "Build the Tide Harbour level (Blender container -> wflevels/tide_harbour-standalone.iff, the committed output); plan docs/plans/2026-11-21-tide-harbour-clock.md, Verification 2"
+    cmds:
+      - bash wflevels/tide_harbour/build.sh
+
+  test-tide-harbour:
+    desc: "Tide Harbour without the engine, in the Linux container: the model (tide against the printed table, sunrise and sunset against five published times, the hands, the options), the geometry (budget, winding, colour slots) and the director in the real zForth VM against the model; plan docs/plans/2026-11-21-tide-harbour-clock.md, Verification 1"
+    cmds:
+      - scripts/in-linux-container.sh python3 -m pytest -q tests/test_tide_harbour_timeline.py tests/test_tide_harbour_parts.py tests/test_tide_harbour_forth.py tests/test_tide_harbour_level.py tests/test_tide_harbour_settings.py tests/test_tide_constants.py
+
+  check-tide-harbour:
+    desc: "Tide Harbour on the desktop engine (Linux container, Debug engine, xvfb): the director against the model at eight dates and times, and every value of every setting written over the debug bridge (scripts/check-tide-harbour.py --compare --options); plan Verification 3 and 13"
+    cmds:
+      - scripts/in-linux-container.sh scripts/build-wf-game-container.sh --dev
+      - WF_CONTAINER_ENV="WF_GAME=/build/wf-game-dev/src/engine/wf_game" scripts/in-linux-container.sh bash -c 'timeout 1500 xvfb-run -a -s "-screen 0 1280x720x24" python3 scripts/check-tide-harbour.py --compare --options'
+
+  clocks-bundle:
+    desc: "Pack the WF Clocks bundle: every clock of wflevels/clocks-menu.manifest, in manifest order, with shell-menu.fth and the MENU chunk, into wflevels/clocks-cd.iff, linked as android/screensaver/src/clocks/assets/cd.iff (Linux container; a manifest id with no built level stops it). Plan docs/plans/2026-11-21-tide-harbour-clock.md"
+    deps: [minute-machine-level, tide-harbour-level]
+    cmds:
+      - scripts/in-linux-container.sh bash -c 'set -euo pipefail; cargo build --release --quiet --manifest-path wftools/cdpack-rs/Cargo.toml; python3 scripts/pack-clocks-bundle.py'
+
+  clocks-regenerate:
+    desc: "Rebuild every clock of wflevels/clocks-menu.manifest and wflevels/clocks-cd.iff in the Blender container, writing the committed wflevels/ outputs; commit what changes. task clocks-check verifies them (plan docs/plans/2026-11-21-tide-harbour-clock.md, Q12)"
+    cmds:
+      - bash scripts/clocks-levels.sh regenerate
+
+  clocks-check:
+    desc: "Check the committed WF Clocks outputs are fresh: rebuild HEAD's inputs in a scratch copy (build-docker/level-check/) and compare every tracked file, as task aquarium-check does; fails listing the stale files: task clocks-check [-- --ref REF --keep]"
+    cmds:
+      - bash scripts/clocks-levels.sh check {{.CLI_ARGS}}
+
+  build-clocks-apk:
+    desc: "WF Clocks APK (org.worldfoundry.clocks: every clock, the engine chooser, the Dream) as a Release build (CMake Release: -O3 + thin LTO; debug-keystore signed for sideload) for arm64-v8a and armeabi-v7a (the Chromecasts need armeabi-v7a; the Pixel and the tablet arm64-v8a), checked in the APK. Builds the levels, packs the bundle, then offline Gradle. Lands at android/screensaver/build/outputs/apk/clocks/release/screensaver-clocks-release.apk"
+    deps: [clocks-bundle]
+    cmds:
+      - cd android && ANDROID_HOME=${ANDROID_HOME:-/usr/lib/android-sdk} ./gradlew :screensaver:assembleClocksRelease --offline
+      - |
+        set -euo pipefail
+        apk=android/screensaver/build/outputs/apk/clocks/release/screensaver-clocks-release.apk
+        for abi in arm64-v8a armeabi-v7a; do
+          unzip -l "$apk" | grep -q "lib/$abi/libwf_dream.so" || { echo "$apk has no lib/$abi/libwf_dream.so" >&2; exit 1; }
+        done
+        unzip -l "$apk" | grep ' lib/'
+
+  build-clocks-two-entry-apk:
+    desc: "TEST ONLY: the WF Clocks Release APK with a two-entry bundle (Minute Machine twice, as minute_machine and minute_machine_b) so the engine chooser really appears, for remote acceptance. Same package id as the shipped app, so it replaces it on a device. The throwaway manifest and bundle live in android/screensaver/build/clocks-two-entry/; wflevels/clocks-menu.manifest and src/clocks/assets/cd.iff are not touched. Lands at android/screensaver/build/clocks-two-entry/screensaver-clocks-two-entry-release.apk; run task build-clocks-apk afterwards to get the shipped APK back"
     deps: [minute-machine-level]
     cmds:
-      - python3 scripts/pack-minute-machine-bundle.py
-      - cd android && ANDROID_HOME=${ANDROID_HOME:-/usr/lib/android-sdk} ./gradlew :screensaver:assembleMinutemachineRelease --offline
+      - |
+        set -euo pipefail
+        d=android/screensaver/build/clocks-two-entry
+        rm -rf "$d"
+        mkdir -p "$d/assets"
+        ln -s ../../../../wflevels/minute_machine-standalone.iff "$d/minute_machine-standalone.iff"
+        ln -s ../../../../wflevels/minute_machine-standalone.iff "$d/minute_machine_b-standalone.iff"
+        printf '%s\n' 'title WF Clocks (two-entry test)' 'prompt Choose a clock' \
+          'level minute_machine-standalone.iff | Minute Machine | Minute Machine' \
+          'level minute_machine_b-standalone.iff | Minute Machine (second entry) | Minute Machine B' > "$d/clocks-menu.manifest"
+      - scripts/in-linux-container.sh bash -c 'set -euo pipefail; d=android/screensaver/build/clocks-two-entry; cargo build --release --quiet --manifest-path wftools/cdpack-rs/Cargo.toml; python3 scripts/pack-clocks-bundle.py --manifest "$d/clocks-menu.manifest" --output "$d/clocks-cd.iff" --no-link'
+      - |
+        set -euo pipefail
+        d="$PWD/android/screensaver/build/clocks-two-entry"
+        ln -sf ../clocks-cd.iff "$d/assets/cd.iff"
+        (cd android && ANDROID_HOME=${ANDROID_HOME:-/usr/lib/android-sdk} ./gradlew :screensaver:assembleClocksRelease --offline -PwfClocksManifest="$d/clocks-menu.manifest" -PwfClocksAssets="$d/assets")
+        cp android/screensaver/build/outputs/apk/clocks/release/screensaver-clocks-release.apk "$d/screensaver-clocks-two-entry-release.apk"
+        for abi in arm64-v8a armeabi-v7a; do
+          unzip -l "$d/screensaver-clocks-two-entry-release.apk" | grep -q "lib/$abi/libwf_dream.so" || { echo "no lib/$abi/libwf_dream.so" >&2; exit 1; }
+        done
+        unzip -l "$d/screensaver-clocks-two-entry-release.apk" | grep -E ' lib/| assets/(cd.iff|levels.manifest)'
+
+  build-tide-spike-apk:
+    desc: "Tide Harbour Phase 0 spike APK (Release; one app, four levels: am start -n org.worldfoundry.tidespike/org.worldfoundry.screensaver.TideSpikeActivity --ei level 0..3). Throwaway; plan docs/plans/2026-11-21-tide-harbour-clock.md"
+    cmds:
+      - bash wflevels/tide_spike/build.sh
+      - python3 wflevels/tide_spike/pack_bundle.py
+      - cd android && ANDROID_HOME=${ANDROID_HOME:-/usr/lib/android-sdk} ./gradlew :screensaver:assembleTidespikeRelease --offline
 
   build-planted-apk:
     desc: "Planted Tank screensaver APK as a Release build (CMake Release: -O3 + thin LTO; debug-keystore signed for sideload) for arm64-v8a and armeabi-v7a (the Chromecasts need armeabi-v7a), offline Gradle per android/screensaver/README.md. Debug 6.1 FPS, Release 40.0 FPS on cast1 (docs/diagnostics/dream-release-2026-11-09). Lands at android/screensaver/build/outputs/apk/planted/release/screensaver-planted-release.apk; freeze a copy before submitting coordinator jobs."

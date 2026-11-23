@@ -1,0 +1,26 @@
+@*============================================================================
+@* tideharboursettings.oas: the Tide Harbour clock's level settings
+@*============================================================================
+@*
+@* A settings holder (settings.inc) with the clocks' shared Clock sheet
+@* (clocksettings.inc) and Tide Harbour's own fields (plan
+@* docs/plans/2026-11-21-tide-harbour-clock.md, D13 and Q9). One object of this
+@* type stands in the Tide Harbour level; levcomp lists it as editable because
+@* it declares SHOW_AS_LIVE fields. The director reads every field each frame
+@* with property@ and copies it into global cells 690 to 693, so an edit takes
+@* effect at once. Every field's first choice is its default, and 0.
+@*
+@* Help strings must not contain commas: prep splits macro arguments on them.
+@*============================================================================
+
+TYPEHEADER(Tide Harbour Settings,TideHarbourSettings)
+	@include settings.inc
+	@include clocksettings.inc
+
+	PROPERTY_SHEET_HEADER(Tide Harbour,0)
+@*	-------------------------------------
+	TYPEENTRYINT32(Dial numerals,,0,2,0,"Roman|Thai|None",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The numerals on the tower dial: Roman numerals or Thai digits or none")
+	TYPEENTRYINT32(Gauge board,,0,1,0,"On|Off",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The tide gauge board on the pier post")
+	TYPEENTRYINT32(Boats and birds,,0,1,0,"On|Off",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The boats on the river and the birds over it")
+	PROPERTY_SHEET_FOOTER
+TYPEFOOTER

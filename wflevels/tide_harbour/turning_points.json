@@ -1,0 +1,41 @@
+{
+ "what": "Turning points of the fitted tide against the highs and lows the table lists, per calendar year.",
+ "step_minutes": 1,
+ "min_swing_m": 0.04,
+ "years": {
+  "2026": {
+   "model_turns": 1440,
+   "table_events": 1225,
+   "extra": 215,
+   "swings_under_5_cm": 161,
+   "turns_kept": 1224,
+   "kept_minus_table": -1,
+   "kept_minus_table_by_min_swing_cm": {
+    "1": 81,
+    "2": 47,
+    "3": 13,
+    "4": -1,
+    "5": -11,
+    "7": -35,
+    "10": -63
+   }
+  },
+  "2027": {
+   "model_turns": 1459,
+   "table_events": 1222,
+   "extra": 237,
+   "swings_under_5_cm": 183,
+   "turns_kept": 1225,
+   "kept_minus_table": 3,
+   "kept_minus_table_by_min_swing_cm": {
+    "1": 95,
+    "2": 45,
+    "3": 21,
+    "4": 3,
+    "5": -17,
+    "7": -33,
+    "10": -63
+   }
+  }
+ }
+}

@@ -58,6 +58,8 @@ int collisionTable[] =
         	0,	// FieldTypes
         	0,	// LevelRenderSettings
         	0,	// SeaStarsSettings
+        	0,	// TideHarbourSettings
+        	0,	// CuckooVillageSettings
 	
 };
 

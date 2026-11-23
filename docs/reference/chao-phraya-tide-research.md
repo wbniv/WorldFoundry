@@ -76,6 +76,8 @@ Largest of the 64 (amplitude, period): K1 50.0 cm 23.93 h; M2 36.3 cm 12.42 h; O
 
 **Cautions.** (1) Time errors are larger than the height errors suggest: at a flat peak a few centimetres move the extremum by up to an hour or two, so "the time of high water" is only good to tens of minutes where the tide is flat; the median is 13 minutes fitted on 2026 and scored on 2027, and 11 the other way. (2) The fit is to published predictions, not to observations or to the department's constants, so it can be no better than they are. (3) There is no nodal correction: NOAA's formula carries a yearly amplitude factor `f` that ours sets to 1 ([NOAA](https://tidesandcurrents.noaa.gov/about_harmonic_constituents.html)). One year ahead showed no loss (3.7 against 3.3 cm); the department publishes each year, so refitting yearly is cheap. (4) Sa (17 cm) is the annual cycle of the mean level, which in a river mixes the sea's seasonal level and the river's discharge; two years cannot separate them. (5) The compound set was chosen by us.
 
+**Ours (measured): the fitted curve turns more often than the table.** `count_turns.py` steps the fitted tide through each year at one-minute intervals and counts where it changes direction: 1440 turns in 2026 and 1459 in 2027, where the table lists 1225 and 1222 highs and lows. The extra ones are wiggles at flat tops and shoulders, a few centimetres high: 161 of the swings between neighbouring turns in 2026 are under 5 cm. Anything that reads "the next high water" from the model has to ignore them. Dropping neighbouring pairs of turns less than **4 cm** apart, smallest first, leaves 1224 and 1225, within 3 of the table in both years. A larger threshold drops real events, because the table itself lists small secondary highs and lows: 10 cm leaves 63 fewer than the table in each year ([turning_points.json](../../wflevels/tide_harbour/turning_points.json)). This compares counts, not the events one by one.
+
 ## The paper that gave a form factor
 
 **Other source.** Aungsakul, Jaroensutasinee and Jaroensutasinee, "Numerical Study of Principal Tidal Constituents in the Gulf of Thailand and the Andaman Sea", *Walailak J. Sci. & Tech.* 4(1), 95–109, 2011 ([article](https://wjst.wu.ac.th/index.php/wjst/article/view/128), CC BY-NC-ND 4.0). Table 3 gives form factors for 21 stations; Royal Thai Navy Headquarters is 1.06, "Mixed, Semidiurnal", and its neighbours Bang Pakong 1.34, Tha Chin 1.41 and Mae Klong 1.38. Figure 2(e), read by eye, shows the four constituents at that station at roughly O1 0.12 m, K1 0.21 m, M2 0.19 m, S2 0.12 m (about ±0.02 m). **These amplitudes are not used**: they come from the paper's numerical model, and the table-derived K1 is 2.4 times larger. The paper's form factor is used only as the second, independent statement of the tide type.
@@ -95,6 +97,7 @@ Largest of the 64 (amplitude, period): K1 50.0 cm 23.93 h; M2 36.3 cm 12.42 h; O
 bash wflevels/tide_harbour/tide_fit/fetch_sources.sh            # one request per file, a pause between
 python3 -I wflevels/tide_harbour/tide_fit/check_time_zone.py
 python3 -I wflevels/tide_harbour/tide_fit/make_constants.py --n 64
+python3 -I wflevels/tide_harbour/tide_fit/count_turns.py --json wflevels/tide_harbour/turning_points.json
 python3 -m pytest -q tests/test_tide_constants.py
 ```
 

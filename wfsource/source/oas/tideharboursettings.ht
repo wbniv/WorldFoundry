@@ -1,0 +1,25 @@
+/*============================================================================*/
+/* tideharboursettings.ht: created from OADTYPES.S and tideharboursettings.oas DO NOT MODIFY */
+/*============================================================================*/
+#include <pigsys/pigsys.hp>
+#include <math/scalar.hp>
+/*      maximum value of a long int     */
+/* minimum value of a long int  */
+#ifndef tideharboursettings_HT
+#define tideharboursettings_HT
+ struct _TideHarbourSettings {
+	int32 moveblocPageOffset;                 /* offset in page data for this objects page */
+	int32 toolsetPageOffset;                 /* offset in page data for this objects page */
+	int32 commonPageOffset;                 /* offset in page data for this objects page */
+			int32 MeshName;	/* This is a packedAssetID */
+	int32 meshPageOffset;                 /* offset in page data for this objects page */
+	int32 shadowPageOffset;                 /* offset in page data for this objects page */
+	int32 TemplateObject;        /* Default: 0 */
+	int32 Cameradrift;               /* Minumum: 0 Maximum: 1 Default: 0 */
+	int32 Dialnumerals;               /* Minumum: 0 Maximum: 2 Default: 0 */
+	int32 Gaugeboard;               /* Minumum: 0 Maximum: 1 Default: 0 */
+	int32 Boatsandbirds;               /* Minumum: 0 Maximum: 1 Default: 0 */
+};
+/*============================================================================*/
+#endif         /* tideharboursettings_HT */
+/*============================================================================*/

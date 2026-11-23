@@ -1,0 +1,25 @@
+{
+ "variant": "d",
+ "posed_actors": 150,
+ "director_running": true,
+ "frames_seen": 126,
+ "frame_ms_median": 46.48,
+ "frame_ms_p90": 63.03,
+ "bar_18_z_moved": true,
+ "shots": {
+  "12.0": {
+   "ok": true,
+   "hour_cell": 12.002901,
+   "darkness": 0.0,
+   "veil": 0.0
+  },
+  "19.5": {
+   "ok": true,
+   "hour_cell": 19.502253,
+   "darkness": 1.0,
+   "veil": 9.0
+  }
+ },
+ "alive": true,
+ "log_problems": 0
+}

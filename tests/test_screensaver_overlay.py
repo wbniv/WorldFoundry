@@ -31,6 +31,7 @@ def test_only_the_launcher_menu_keeps_the_drawer():
     assert re.search(r'if \(menuMode\.load\(\)\) \{.*?\} else if \(levelmenu::Drawer\(\)\) \{\s*levelmenu::SetDrawer\(nullptr\);',
                      body, re.S), body
     # Menu mode is only the menu sentinel, set per run, and switched off when the run ends.
+    # One request, "show the engine's menu", for both packs, whichever bundle holds it.
     assert "const bool menu = level == kMenuLevel;" in HOST and "constexpr int kMenuLevel = -1;" in HOST
     assert "menuMode.store(menu);" in HOST and "menuMode.store(false);" in HOST
     player = (ROOT / "android/screensaver/src/main/java/org/worldfoundry/screensaver/TankPlayer.java").read_text()

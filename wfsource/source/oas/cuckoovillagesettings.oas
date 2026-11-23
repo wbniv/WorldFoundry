@@ -1,0 +1,12 @@
+@* Runtime controls for Cuckoo Village, the third 3D clock (docs/plans/2026-11-21-cuckoo-village.md).
+TYPEHEADER(Cuckoo Village Settings,CuckooVillageSettings)
+    @include settings.inc
+    PROPERTY_SHEET_HEADER(Cuckoo Village,1)
+    TYPEENTRYINT32(Bavaria mode,,0,1,0,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Bavarian figures and a carved chalet case; the clock runs backwards: the dial and the hourly parade turn counter-clockwise")
+    TYPEENTRYINT32(Seasonal events,,0,1,1,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"With Bavaria mode on: Nikolaus and Krampus; Fasching; Oktoberfest; the maypole dressing on their dates")
+    TYPEENTRYINT32(Christmas candles,,0,1,1,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Lit candles on the village trees from 1 December to 6 January")
+    TYPEENTRYINT32(Window lights,,0,1,1,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Cottage windows glow from dusk to dawn")
+    TYPEENTRYINT32(Sound,,0,1,1,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"The cuckoo call on the hour; the bird still bobs with sound off")
+    TYPEENTRYINT32(Camera motion,,0,1,0,"Journey|Still",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Journey tours the village and holds the tower view at each quarter; Still stays on one wide view")
+    PROPERTY_SHEET_FOOTER
+TYPEFOOTER

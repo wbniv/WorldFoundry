@@ -75,6 +75,12 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends openjdk-21-jdk-headless \
  && rm -rf /var/lib/apt/lists/*
 
+# poppler-utils: the tide poster's test (tests/test_poster_chao_phraya_tide.py) reads the Navy's table with
+# pdftotext, as make_poster.py does, and failed at collection here without it. Its own layer. Added 2026-11-21.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends poppler-utils \
+ && rm -rf /var/lib/apt/lists/*
+
 # Software GL, so every run renders with the same rasteriser whatever the host GPU is.
 ENV LIBGL_ALWAYS_SOFTWARE=1 \
     HOME=/tmp

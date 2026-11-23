@@ -1,0 +1,83 @@
+//=============================================================================
+// hal/ios/press_latch.hp: a touch press lasts until the engine has read it
+// Copyright ( c ) 2026 World Foundry Group
+// Part of the World Foundry 3D video game engine/production environment
+// for more information about World Foundry, see www.worldfoundry.org
+//=============================================================================
+// On iOS UIKit delivers touches on the main thread and the engine samples the
+// buttons on its own thread, once or more per frame. With only the current
+// state handed over, a tap that starts and ends between two samples is never
+// seen: in Codemagic build 6b01461c a 51 ms XCUITest tap on C on the iPad
+// (landscape) reached the HAL ("touch buttons 0x0004", then 0x0000) and the
+// story card stayed open.
+//
+// PressLatch keeps every pressed bit until the engine has read it and then
+// lets it go at the end of that engine frame:
+//   Set(held)    main thread: the current buttons; new presses are latched.
+//   Read()       engine thread: held | latched; marks what it returned.
+//   FrameEnd()   engine thread, once per frame after the reads: drops the
+//                latched bits that were read this frame. A bit still held
+//                stays, from Set; a bit pressed after the frame's reads stays
+//                latched for the next frame.
+//   Clear()      drop everything (suspend: nothing may stay pressed).
+// So a press is visible for at least one whole engine frame however short it
+// was, and a released button is gone one frame after the engine saw it.
+// A press and release of a bit the engine was already reading as held,
+// between its last read and FrameEnd, is not a second press: the engine saw
+// the bit pressed in that frame anyway.
+//
+// Header-only and platform-free, so tests/test_ios_press_latch.py tests it
+// on the Linux host; the caller is hal/ios/input.mm. Android does not use it.
+//=============================================================================
+
+#ifndef _WF_HAL_IOS_PRESS_LATCH_HP
+#define _WF_HAL_IOS_PRESS_LATCH_HP
+
+#include <atomic>
+#include <cstdint>
+
+namespace wfios
+{
+
+class PressLatch
+{
+public:
+    void Set(uint32_t held)
+    {
+        held_.store(held, std::memory_order_release);
+        latched_.fetch_or(held, std::memory_order_acq_rel);
+    }
+
+    uint32_t Read()
+    {
+        const uint32_t v = held_.load(std::memory_order_acquire)
+                         | latched_.load(std::memory_order_acquire);
+        read_.fetch_or(v, std::memory_order_relaxed);
+        return v;
+    }
+
+    void FrameEnd()
+    {
+        const uint32_t seen = read_.exchange(0, std::memory_order_relaxed);
+        latched_.fetch_and(~seen, std::memory_order_acq_rel);
+    }
+
+    void Clear()
+    {
+        held_.store(0, std::memory_order_release);
+        latched_.store(0, std::memory_order_release);
+        read_.store(0, std::memory_order_relaxed);
+    }
+
+    // The current buttons alone, without pending presses (user-abort check).
+    uint32_t Held() const { return held_.load(std::memory_order_acquire); }
+
+private:
+    std::atomic<uint32_t> held_{0};
+    std::atomic<uint32_t> latched_{0};
+    std::atomic<uint32_t> read_{0};
+};
+
+}  // namespace wfios
+
+#endif

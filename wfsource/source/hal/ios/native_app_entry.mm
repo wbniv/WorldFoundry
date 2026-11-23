@@ -25,6 +25,7 @@
 #include <hal/args_file.hp>
 #include <hal/asset_accessor.hp>
 #include <hal/hal.h>
+#include <hal/ios/launch_args.hp>
 #include <pigsys/pigsys.hp>
 
 #include <pthread.h>
@@ -73,10 +74,16 @@ static void WFBuildEngineArguments()
             if (data)
                 fileText.assign((const char*)data.bytes, (size_t)data.length);
         }
-        std::vector<std::string> launchArgs;
-        NSArray<NSString*>* processArgs = [[NSProcessInfo processInfo] arguments];
-        for (NSUInteger i = 1; i < processArgs.count; ++i)   // [0] is the executable
-            launchArgs.push_back(std::string([processArgs[i] UTF8String]));
+        std::vector<std::string> processArgs;
+        NSArray<NSString*>* nsArgs = [[NSProcessInfo processInfo] arguments];
+        for (NSUInteger i = 1; i < nsArgs.count; ++i)   // [0] is the executable
+            processArgs.push_back(std::string([nsArgs[i] UTF8String]));
+        // -WFOrientation landscape, -WFTouchDiagnostics 1 and the like are
+        // NSUserDefaults settings, not engine switches (hal/ios/launch_args.hp).
+        const std::vector<std::string> launchArgs = wfios::EngineLaunchArgs(processArgs);
+        if (launchArgs.size() != processArgs.size())
+            NSLog(@"wf_game: %zu launch argument(s) are NSUserDefaults settings, not engine switches",
+                  processArgs.size() - launchArgs.size());
 
         std::vector<std::string> settings;   // qr_logo=: no phone overlay on iOS
         sArgStore = wfargs::ComposeArgs("wf_game", fileText, launchArgs, &settings);
@@ -196,7 +203,7 @@ static void WFResume(UIView* root, const char* why)
 }
 
 // A game: keep the home indicator out of the way and make a swipe from the
-// bottom / side edges reach the D-pad and A/B first (a second swipe still
+// bottom / side edges reach the joystick and A to D first (a second swipe still
 // goes to the system).
 - (BOOL)prefersHomeIndicatorAutoHidden
 {
@@ -206,6 +213,19 @@ static void WFResume(UIView* root, const char* why)
 - (UIRectEdge)preferredScreenEdgesDeferringSystemGestures
 {
     return UIRectEdgeBottom | UIRectEdgeLeft | UIRectEdgeRight;
+}
+
+// Every orientation ios/Info.plist allows (portrait and landscape), unless the
+// launch argument -WFOrientation landscape|portrait pins one: a simulator boots
+// in portrait, so CI pins the chapter run to landscape to keep its baseline and
+// pins portrait for the portrait HUD tour (scripts/ios_sim_chapter.py).
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    NSString* pin = [[NSUserDefaults standardUserDefaults] stringForKey:@"WFOrientation"];
+    if ([pin isEqualToString:@"landscape"]) return UIInterfaceOrientationMaskLandscape;
+    if ([pin isEqualToString:@"portrait"])  return UIInterfaceOrientationMaskPortrait;
+    return [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad
+        ? UIInterfaceOrientationMaskAll : UIInterfaceOrientationMaskAllButUpsideDown;
 }
 
 - (void)viewWillLayoutSubviews
