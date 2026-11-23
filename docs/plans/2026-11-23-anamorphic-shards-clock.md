@@ -28,3 +28,15 @@ If an existing camera, overlay or inset capability is insufficient, prepare a co
 ## Implementation notes
 
 The level uses a single live camera. No existing simultaneous second-view facility was found during the read-only investigation, so the runtime has no inset. The [aligned PC capture](../diagnostics/anamorphic-shards-2026-11-23/registered-aligned.png) and [off-axis PC capture](../diagnostics/anamorphic-shards-2026-11-23/registered-off-axis.png) show separate views of the same three-dimensional pieces; they are not a live inset. The independent white time display stays readable throughout the move. Camera drift can be turned off in the level settings, holding the alignment.
+
+### Bar-shape correction
+
+The original illustration uses long, narrow bars, not the near-square pieces produced by splitting each stroke into thirds. Each stroke is now a single bar, back-projected to one of three depths. Different strokes retain different depths, so their projections still form the time at the alignment viewpoint and separate when the camera moves. The separate time overlay and the 60-second camera loop remain in place.
+
+![Original project illustration of the suspended bars](2026-11-23-anamorphic-shards-clock/original-illustration.svg)
+
+![Actual PC capture with bars aligned to read 10:08](2026-11-23-anamorphic-shards-clock/pc-bars-aligned.png)
+
+![Actual PC capture of the same bars off-axis](2026-11-23-anamorphic-shards-clock/pc-bars-off-axis.png)
+
+**PASS — PC, 2026-11-24:** the rebuilt standalone shows the bars in both views, and the projection test checks their aspect ratios, depth separation and off-axis parallax. Chromecast testing, bundle updates and deployment remain deferred until the clock batch is ready.

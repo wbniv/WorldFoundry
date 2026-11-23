@@ -39,19 +39,9 @@ def unproject(x, z, depth):
 
 
 def fragments(digit, segment):
-    """Three separate quadrilateral pieces at real depths, with small visible joints."""
+    """A long bar for each stroke; the strokes occupy different real depths."""
     x0, z0, x1, z1 = SEGMENTS[segment]
-    horizontal = x1 - x0 > z1 - z0
-    pieces = []
-    for i in range(3):
-        a, b = i / 3 + .012, (i + 1) / 3 - .012
-        if horizontal:
-            xa, xb = x0 + (x1-x0)*a, x0 + (x1-x0)*b
-            poly = ((xa,z0), (xb,z0+.025), (xb,z1), (xa,z1-.025))
-        else:
-            za, zb = z0 + (z1-z0)*a, z0 + (z1-z0)*b
-            poly = ((x0,za), (x1,za+.025), (x1-.02,zb), (x0,zb-.025))
-        depth = DEPTHS[(digit * 5 + segment * 2 + i) % 3]
-        pieces.append(tuple(unproject((DIGIT_X[digit] + x) * DISPLAY_SCALE,
-                                      CAMERA_Z + z * DISPLAY_SCALE, depth) for x,z in poly))
-    return pieces
+    depth = DEPTHS[(digit * 5 + segment * 2) % len(DEPTHS)]
+    poly = ((x0,z0),(x1,z0),(x1,z1),(x0,z1))
+    return [tuple(unproject((DIGIT_X[digit] + x) * DISPLAY_SCALE,
+                            CAMERA_Z + z * DISPLAY_SCALE, depth) for x,z in poly)]

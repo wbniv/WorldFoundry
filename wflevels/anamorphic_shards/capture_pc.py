@@ -13,7 +13,7 @@ stamp = sys.argv[1]
 out = root/'build-docker/quick-test'/sys.argv[2]
 env = dict(os.environ, WF_WALL_CLOCK=stamp if '@' in stamp else stamp+'@0', WF_REST_PORT='0')
 log = out.with_suffix('.log').open('w')
-args = [str(root/'build-docker/wf-game/src/engine/wf_game'),
+args = [os.environ.get('WF_PC_GAME', str(root/'build-docker/wf-game/src/engine/wf_game')),
                       '-L'+str(root/'wflevels/anamorphic_shards-standalone.iff'),
                       '-rate20', '--debug-port', '17777', '--debug-bind', '127.0.0.1',
                       '-width=1280', '-height=720', '--no-fps']

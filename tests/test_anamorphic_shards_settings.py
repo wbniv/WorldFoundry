@@ -17,13 +17,20 @@ def test_wall_time_and_all_digit_masks():
 
 def test_fragments_align_but_separate_from_another_view():
     for d in range(4):
+        pieces_by_digit = []
         for s in range(7):
             pieces = m.fragments(d, s)
-            assert len({piece[0][1] for piece in pieces}) == 3
-            aligned = [m.project(v) for piece in pieces for v in piece]
-            shifted = [m.project(v, 2.0) for piece in pieces for v in piece]
-            delta = [a[0] - b[0] for a, b in zip(aligned, shifted)]
-            assert max(delta) - min(delta) > .5
+            assert len(pieces) == 1
+            aligned = [m.project(v) for v in pieces[0]]
+            width = max(p[0] for p in aligned) - min(p[0] for p in aligned)
+            height = max(p[1] for p in aligned) - min(p[1] for p in aligned)
+            assert max(width, height) / min(width, height) >= 4.5
+            pieces_by_digit.extend(pieces)
+        assert len({piece[0][1] for piece in pieces_by_digit}) == 3
+        aligned = [m.project(v) for piece in pieces_by_digit for v in piece]
+        shifted = [m.project(v, 2.0) for piece in pieces_by_digit for v in piece]
+        delta = [a[0] - b[0] for a, b in zip(aligned, shifted)]
+        assert max(delta) - min(delta) > .5
 
 
 def test_minute_loop_has_stationary_hold_and_smooth_join():
