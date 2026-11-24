@@ -1,0 +1,9 @@
+@* Live settings for the Corolla Gauge clock.
+TYPEHEADER(Corolla Gauge Settings,CorollaGaugeSettings)
+	@include settings.inc
+	@include clocksettings.inc
+	PROPERTY_SHEET_HEADER(Tulip,0)
+	TYPEENTRYINT32(Palette,,0,5,0,"Scarlet|Rose|Apricot|Golden|Violet|Ivory",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Petal color while this level is loaded")
+	PROPERTY_SHEET_FOOTER
+	@include global_settings.inc
+TYPEFOOTER

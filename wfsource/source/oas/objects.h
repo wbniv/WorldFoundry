@@ -71,6 +71,7 @@ enum EActorKind {
         LighthouseSettings_KIND,
         MoonLanternSettings_KIND,
         MirrorHazeSettings_KIND,
+        CorollaGaugeSettings_KIND,
         DutchCuckooVillageSettings_KIND,
 	};
 

@@ -114,6 +114,9 @@
 #include "moonlanternsettings.hp"
         	
 #include "mirrorhazesettings.hp"
+        	
+#include "corollagaugesettings.hp"
+        	
 #include "dutchcuckoovillagesettings.hp"
 
 

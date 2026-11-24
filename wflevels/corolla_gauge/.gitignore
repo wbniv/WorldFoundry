@@ -1,0 +1,11 @@
+*
+!.gitignore
+!*.py
+!*.sh
+!*.blend
+!corolla_gauge.lev
+!corolla_gauge-standalone.iff.txt
+!actor-map.json
+!settings-capabilities.json
+!textile.flags
+!*-source.png

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" width="480" height="270" font-family="Inter, 'Segoe UI', 'DejaVu Sans', sans-serif" role="img" aria-label="The corolla gauge">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#c9d3e6"/></marker></defs>
+<rect width="480" height="270" rx="14" fill="#0f1420"/>
+<g transform="translate(219 184)">
+<path d="M0 0 Q-60 -17 -48 -122 Q-14 -92 0 0" fill="#e76678" stroke="none" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M0 0 Q12 -64 18 -119 Q34 -35 0 0" fill="#f3e5c7" stroke="none" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="0.0" y1="0.0" x2="0.0" y2="-125.0" stroke="#72a786" stroke-width="3" stroke-linecap="round" opacity="1"/>
+<line x1="0.0" y1="-124.0" x2="0.0" y2="-134.0" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="4.3" y1="-123.9" x2="4.5" y2="-128.9" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="8.6" y1="-123.7" x2="9.0" y2="-128.7" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="13.0" y1="-123.3" x2="13.5" y2="-128.3" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="17.3" y1="-122.8" x2="18.0" y2="-127.7" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="21.5" y1="-122.1" x2="23.3" y2="-132.0" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="25.8" y1="-121.3" x2="26.8" y2="-126.2" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="30.0" y1="-120.3" x2="31.2" y2="-125.2" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="34.2" y1="-119.2" x2="35.6" y2="-124.0" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="38.3" y1="-117.9" x2="39.9" y2="-122.7" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="42.4" y1="-116.5" x2="45.8" y2="-125.9" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="46.5" y1="-115.0" x2="48.3" y2="-119.6" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="50.4" y1="-113.3" x2="52.5" y2="-117.8" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="54.4" y1="-111.5" x2="56.5" y2="-115.9" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="58.2" y1="-109.5" x2="60.6" y2="-113.9" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="62.0" y1="-107.4" x2="67.0" y2="-116.0" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="65.7" y1="-105.2" x2="68.4" y2="-109.4" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="69.3" y1="-102.8" x2="72.1" y2="-106.9" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="72.9" y1="-100.3" x2="75.8" y2="-104.4" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="76.3" y1="-97.7" x2="79.4" y2="-101.7" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="79.7" y1="-95.0" x2="86.1" y2="-102.6" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="83.0" y1="-92.1" x2="86.3" y2="-95.9" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="86.1" y1="-89.2" x2="89.6" y2="-92.8" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="89.2" y1="-86.1" x2="92.8" y2="-89.6" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="92.1" y1="-83.0" x2="95.9" y2="-86.3" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="95.0" y1="-79.7" x2="102.6" y2="-86.1" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="97.7" y1="-76.3" x2="101.7" y2="-79.4" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="100.3" y1="-72.9" x2="104.4" y2="-75.8" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="102.8" y1="-69.3" x2="106.9" y2="-72.1" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="105.2" y1="-65.7" x2="109.4" y2="-68.4" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+<line x1="107.4" y1="-62.0" x2="116.0" y2="-67.0" stroke="#9fb3c8" stroke-width="1" stroke-linecap="round" opacity="1"/>
+</g>
+<path d="M274 76 l8 -13 h48 v26 h-48Z" fill="#d9a441" stroke="none" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="282.0" cy="76.0" r="2" fill="#0f1420" stroke="none" stroke-width="1" opacity="1"/>
+<text x="290.0" y="80.0" fill="#0f1420" font-size="13" text-anchor="start" font-weight="700">8°</text>
+<line x1="219.0" y1="182.0" x2="219.0" y2="209.0" stroke="#72a786" stroke-width="4" stroke-linecap="round" opacity="1"/>
+<path d="M184 218 l8 -13 h80 v26 h-80Z" fill="#d9a441" stroke="none" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="192.0" cy="218.0" r="2" fill="#0f1420" stroke="none" stroke-width="1" opacity="1"/>
+<text x="200.0" y="222.0" fill="#0f1420" font-size="13" text-anchor="start" font-weight="700">POT 10</text>
+<text x="16" y="24" fill="#e8eef7" font-size="12.5" font-weight="700">54  The corolla gauge</text>
+<text x="16" y="258" fill="#d9a441" font-size="10.5">10:08 · specimen 10, eight degrees open</text>
+</svg>

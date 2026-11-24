@@ -221,6 +221,10 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
 			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
 				object = OadMirrorHazeSettings(startData); 
 			break;
+        	case Actor::CorollaGaugeSettings_KIND:
+			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
+				object = OadCorollaGaugeSettings(startData); 
+			break;
         	case Actor::DutchCuckooVillageSettings_KIND:
 			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
 				object = OadDutchCuckooVillageSettings(startData); 
@@ -447,6 +451,9 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
 			break;
         	case Actor::MirrorHazeSettings_KIND:
 			object = OadMirrorHazeSettings(startData); 
+			break;
+        	case Actor::CorollaGaugeSettings_KIND:
+			object = OadCorollaGaugeSettings(startData); 
 			break;
         	case Actor::DutchCuckooVillageSettings_KIND:
 			object = OadDutchCuckooVillageSettings(startData); 

@@ -79,6 +79,7 @@ OBJECTSHEADER
         OBJECTENTRY(LighthouseSettings,0)
         OBJECTENTRY(MoonLanternSettings,0)
         OBJECTENTRY(MirrorHazeSettings,0)
+        OBJECTENTRY(CorollaGaugeSettings,0)
         OBJECTENTRY(DutchCuckooVillageSettings,0)
 OBJECTSFOOTER
 

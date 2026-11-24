@@ -1,0 +1,15 @@
+#ifndef _CorollaGaugeSettings_HP
+#define _CorollaGaugeSettings_HP
+#include "actor.hp"
+class CorollaGaugeSettings : public Actor {
+public:
+    CorollaGaugeSettings(const SObjectStartupData* startupData);
+    virtual ~CorollaGaugeSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadCorollaGaugeSettings(const SObjectStartupData* startupData);
+#endif
