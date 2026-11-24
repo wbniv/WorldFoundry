@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "device": "phone-pixel-8-pro",
+  "collected_at": "2026-11-24T06:44:16.514384+00:00",
+  "screensaver": {
+    "selected_component": null,
+    "enabled": "1",
+    "activate_on_sleep": "1",
+    "idle_timeout_ms": 300000,
+    "sleep_timeout_ms": -1,
+    "stay_on_while_plugged_in": 0,
+    "active_component": null,
+    "running_state": "not-running",
+    "preview_running": false,
+    "show_eligible": false,
+    "providers": [
+      "com.android.dreams.basic/com.android.dreams.basic.Colors",
+      "com.android.systemui/com.android.systemui.dreams.homecontrols.HomeControlsDreamService",
+      "com.android.systemui/com.android.systemui.lowlightclock.LowLightClockDreamService",
+      "com.google.android.apps.photos/com.google.android.apps.photos.daydream.PhotosDreamService",
+      "com.google.android.deskclock/com.android.deskclock.Screensaver",
+      "net.biohack.homeboard.debug/com.gathin.tvhome.ScreensaverDream",
+      "org.worldfoundry.game.aquarium/org.worldfoundry.screensaver.AquariumDreamService",
+      "org.worldfoundry.game.clocks/org.worldfoundry.screensaver.ClocksDreamService",
+      "org.worldfoundry.seahorsegrid/org.worldfoundry.screensaver.SeahorseGridDreamService"
+    ],
+    "selected_installed": null,
+    "content_settings": {
+      "state": "unavailable"
+    },
+    "field_states": {
+      "selected_component": "unreadable",
+      "enabled": "set",
+      "activate_on_sleep": "set",
+      "idle_timeout_ms": "set",
+      "sleep_timeout_ms": "set",
+      "stay_on_while_plugged_in": "set",
+      "running": "readable"
+    }
+  },
+  "job": null
+}

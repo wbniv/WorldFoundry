@@ -1,0 +1,10 @@
+# 3D Clocks batch deployment, 24 November 2026
+
+The combined 15-clock release APK is `clocks-release.apk`, SHA-256 `5960400432663a717df39a7f0ccc4600cf7cf5048716de1492b74954e2f0c4c4`. Built from the current working tree with `task clocks-regenerate` and `task build-clocks-apk`; it includes arm64-v8a and armeabi-v7a. Corolla Gauge is not included.
+
+- Bundle, package and catalog Python checks: 22 passed. Java catalog: 108 checks passed. Selected level model and settings checks: 34 passed.
+- The strict settings audit reports 13 incomplete rows. Some are false positives because it guesses type names (Bamboo Pond and Tourbillon use shorter names); it also reports missing phone capability files and per-level tests. Do not treat it as passed.
+- Pixel install J‑41e2030a5f4b completed with the frozen APK. Check J‑3a6decd240a3 completed and captured the 15-entry chooser in [screenshot](pixel-check/screenshot.png). This is not acceptance or profiling of each individual clock.
+- Pixel selection J‑67d9391f3df6 could not read `screensaver_components` and did not change the setting. The coordinator subsequently enabled screensavers and activation on sleep (J‑d1bda77875b9); the [new inventory](pixel-enabled/screensaver.json) confirms both are enabled, the Clocks Dream is installed, and the selected component remains unreadable. Selection and Dream testing remain outstanding.
+- Cast1 install J‑53b4611c8942 and screensaver selection J‑bafaf0a8d73f are queued. The coordinator sees the advertised device but its secure debugging handshake fails; two readd attempts failed. Neither installation nor selection has completed. All cast1 clock-by-clock testing and profiling remains outstanding.
+- `task clocks-check` archives a committed ref using an old fixed input list and cannot validate this uncommitted 15-clock roster as written. Update its inputs and validate a ref containing the intended sources and outputs before claiming reproducible release artifacts.
