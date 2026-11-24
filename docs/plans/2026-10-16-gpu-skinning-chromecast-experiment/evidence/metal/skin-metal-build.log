@@ -1,0 +1,719 @@
+info: downloading installer
+info: profile set to minimal
+info: default host tuple is aarch64-apple-darwin
+info: syncing channel updates for stable-aarch64-apple-darwin
+info: latest update on 2026-10-15 for version 1.99.1 (58cf8f9c3 2026-10-13)
+info: downloading 3 components
+info: default toolchain set to stable-aarch64-apple-darwin
+
+  stable-aarch64-apple-darwin installed - rustc 1.99.1 (58cf8f9c3 2026-10-13)
+
+
+Rust is installed now. Great!
+
+To get started you need Cargo's bin directory ($HOME/.cargo/bin) in your PATH
+environment variable. This has not been done automatically.
+
+To configure your current shell, you need to source
+the corresponding env file under $HOME/.cargo.
+
+Consider running the right command for your shell (note the leading DOT):
+. "$HOME/.cargo/env"           # For sh/ash/dash/pdksh/bash/zsh
+source "$HOME/.cargo/env.tcsh" # For tcsh
+-- The CXX compiler identification is AppleClang 21.0.0.21000101
+-- The C compiler identification is AppleClang 21.0.0.21000101
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- WF: release engine defines (no asserts, no DBSTREAM)
+-- The OBJCXX compiler identification is AppleClang 21.0.0.21000101
+-- Detecting OBJCXX compiler ABI info
+-- Detecting OBJCXX compiler ABI info - done
+-- Check for working OBJCXX compiler: /usr/bin/c++ - skipped
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Including Cocoa support
+-- The OBJC compiler identification is AppleClang 21.0.0.21000101
+-- Detecting OBJC compiler ABI info
+-- Detecting OBJC compiler ABI info - done
+-- Check for working OBJC compiler: /usr/bin/cc - skipped
+-- Configuring done (3.8s)
+-- Generating done (0.1s)
+-- Build files have been written to: /Users/builder/clone/build-skin-metal
+[  0%] Building C object CMakeFiles/zforth.dir/engine/vendor/zforth-41db72d1/src/zforth/zforth.c.o
+[  0%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/AABBTree/AABBTreeBuilder.cpp.o
+[  0%] Building C object glfw/src/CMakeFiles/glfw.dir/context.c.o
+[  1%] Generating runtime-properties/libwf_attr_edit.a
+warning: failed to connect to jobserver from environment variable `MAKEFLAGS="s --jobserver-fds=3,4 -j"`: cannot open file descriptor 3 from the jobserver environment variable value: Bad file descriptor (os error 9)
+   Compiling wf_oad v0.1.0 (/Users/builder/clone/wftools/wf_oad)
+[  2%] Linking C static library libzforth.a
+   Compiling wf_attr_schema v0.1.0 (/Users/builder/clone/wftools/wf_attr_schema)
+   Compiling wf_attr_validate v0.1.0 (/Users/builder/clone/wftools/wf_attr_validate)
+   Compiling wf_attr_edit v0.1.0 (/Users/builder/clone/wftools/wf_attr_edit)
+[  2%] Building C object glfw/src/CMakeFiles/glfw.dir/init.c.o
+    Finished `release` profile [optimized] target(s) in 0.85s
+[  2%] Built target wf_property_core_build
+[  2%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Core/Color.cpp.o
+[  3%] Building C object glfw/src/CMakeFiles/glfw.dir/input.c.o
+[  3%] Building C object glfw/src/CMakeFiles/glfw.dir/monitor.c.o
+[  3%] Building C object glfw/src/CMakeFiles/glfw.dir/platform.c.o
+[  3%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Core/Factory.cpp.o
+[  3%] Built target zforth
+[  5%] Building C object glfw/src/CMakeFiles/glfw.dir/vulkan.c.o
+[  5%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Core/IssueReporting.cpp.o
+[  5%] Building C object glfw/src/CMakeFiles/glfw.dir/window.c.o
+[  5%] Building C object glfw/src/CMakeFiles/glfw.dir/egl_context.c.o
+[  5%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Core/JobSystemSingleThreaded.cpp.o
+[  6%] Building C object glfw/src/CMakeFiles/glfw.dir/osmesa_context.c.o
+[  6%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Core/JobSystemThreadPool.cpp.o
+[  6%] Building C object glfw/src/CMakeFiles/glfw.dir/null_init.c.o
+[  6%] Building C object glfw/src/CMakeFiles/glfw.dir/null_monitor.c.o
+[  7%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Core/JobSystemWithBarrier.cpp.o
+[  7%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Core/LinearCurve.cpp.o
+[  7%] Building C object glfw/src/CMakeFiles/glfw.dir/null_window.c.o
+[  8%] Building C object glfw/src/CMakeFiles/glfw.dir/null_joystick.c.o
+[  8%] Building C object glfw/src/CMakeFiles/glfw.dir/macos_time.c.o
+[  8%] Building C object glfw/src/CMakeFiles/glfw.dir/posix_module.c.o
+[  8%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Core/Memory.cpp.o
+[  8%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Core/Profiler.cpp.o
+[  9%] Building C object glfw/src/CMakeFiles/glfw.dir/posix_thread.c.o
+[  9%] Building OBJC object glfw/src/CMakeFiles/glfw.dir/cocoa_init.m.o
+[  9%] Building OBJC object glfw/src/CMakeFiles/glfw.dir/cocoa_joystick.m.o
+[ 10%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Core/RTTI.cpp.o
+[ 10%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Core/Semaphore.cpp.o
+[ 10%] Building OBJC object glfw/src/CMakeFiles/glfw.dir/cocoa_monitor.m.o
+[ 10%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Core/StringTools.cpp.o
+[ 11%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Core/TickCounter.cpp.o
+[ 12%] Building OBJC object glfw/src/CMakeFiles/glfw.dir/cocoa_window.m.o
+[ 12%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Geometry/ConvexHullBuilder.cpp.o
+[ 12%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Geometry/ConvexHullBuilder2D.cpp.o
+[ 12%] Building OBJC object glfw/src/CMakeFiles/glfw.dir/nsgl_context.m.o
+[ 13%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Geometry/Indexify.cpp.o
+[ 13%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Geometry/OrientedBox.cpp.o
+[ 13%] Linking C static library libglfw3.a
+[ 13%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Math/Vec3.cpp.o
+[ 13%] Built target glfw
+[ 13%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/ObjectStream/SerializableObject.cpp.o
+[ 14%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Body/Body.cpp.o
+[ 14%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Body/BodyCreationSettings.cpp.o
+[ 14%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Body/BodyInterface.cpp.o
+[ 15%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Body/BodyManager.cpp.o
+[ 15%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Body/MassProperties.cpp.o
+[ 15%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Body/MotionProperties.cpp.o
+[ 15%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Character/Character.cpp.o
+[ 16%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Character/CharacterBase.cpp.o
+[ 16%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Character/CharacterVirtual.cpp.o
+[ 16%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/BroadPhase/BroadPhase.cpp.o
+[ 16%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/BroadPhase/BroadPhaseQuadTree.cpp.o
+[ 17%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/BroadPhase/BroadPhaseBruteForce.cpp.o
+[ 17%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/BroadPhase/QuadTree.cpp.o
+[ 18%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/CastConvexVsTriangles.cpp.o
+[ 18%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/CastSphereVsTriangles.cpp.o
+[ 18%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/CollideConvexVsTriangles.cpp.o
+[ 18%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/CollideSphereVsTriangles.cpp.o
+[ 19%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/CollisionDispatch.cpp.o
+[ 19%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/CollisionGroup.cpp.o
+[ 19%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/EstimateCollisionResponse.cpp.o
+[ 20%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/GroupFilter.cpp.o
+[ 20%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/GroupFilterTable.cpp.o
+[ 20%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/ManifoldBetweenTwoFaces.cpp.o
+[ 20%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/NarrowPhaseQuery.cpp.o
+[ 21%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/NarrowPhaseStats.cpp.o
+[ 21%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/PhysicsMaterial.cpp.o
+[ 21%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/PhysicsMaterialSimple.cpp.o
+[ 22%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/BoxShape.cpp.o
+[ 22%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/CapsuleShape.cpp.o
+[ 22%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/CompoundShape.cpp.o
+[ 23%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/ConvexHullShape.cpp.o
+[ 23%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/ConvexShape.cpp.o
+[ 23%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/CylinderShape.cpp.o
+[ 23%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/DecoratedShape.cpp.o
+[ 24%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/EmptyShape.cpp.o
+[ 24%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/HeightFieldShape.cpp.o
+[ 24%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/MeshShape.cpp.o
+[ 25%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/MutableCompoundShape.cpp.o
+[ 25%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/OffsetCenterOfMassShape.cpp.o
+[ 25%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/PlaneShape.cpp.o
+[ 25%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/RotatedTranslatedShape.cpp.o
+[ 26%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/ScaledShape.cpp.o
+[ 26%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/Shape.cpp.o
+[ 26%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/SphereShape.cpp.o
+[ 27%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/StaticCompoundShape.cpp.o
+[ 27%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/TaperedCapsuleShape.cpp.o
+[ 27%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/TaperedCylinderShape.cpp.o
+[ 28%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/Shape/TriangleShape.cpp.o
+[ 28%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/TransformedShape.cpp.o
+[ 28%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/ConeConstraint.cpp.o
+[ 28%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/Constraint.cpp.o
+[ 29%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/ConstraintManager.cpp.o
+[ 29%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/ContactConstraintManager.cpp.o
+[ 29%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/DistanceConstraint.cpp.o
+[ 30%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/FixedConstraint.cpp.o
+[ 30%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/GearConstraint.cpp.o
+[ 30%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/HingeConstraint.cpp.o
+[ 30%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/MotorSettings.cpp.o
+[ 31%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/PathConstraint.cpp.o
+[ 31%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/PathConstraintPath.cpp.o
+[ 31%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/PathConstraintPathHermite.cpp.o
+[ 32%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/PointConstraint.cpp.o
+[ 32%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/PulleyConstraint.cpp.o
+[ 32%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/RackAndPinionConstraint.cpp.o
+[ 33%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/SixDOFConstraint.cpp.o
+[ 33%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/SliderConstraint.cpp.o
+[ 33%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/SpringSettings.cpp.o
+[ 33%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/SwingTwistConstraint.cpp.o
+[ 34%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/TwoBodyConstraint.cpp.o
+[ 34%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/DeterminismLog.cpp.o
+[ 34%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/IslandBuilder.cpp.o
+[ 35%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/LargeIslandSplitter.cpp.o
+[ 35%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/PhysicsScene.cpp.o
+[ 35%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/PhysicsSystem.cpp.o
+[ 35%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/PhysicsUpdateContext.cpp.o
+[ 36%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Ragdoll/Ragdoll.cpp.o
+[ 36%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/SoftBody/SoftBodyCreationSettings.cpp.o
+[ 36%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/SoftBody/SoftBodyMotionProperties.cpp.o
+[ 37%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/SoftBody/SoftBodyShape.cpp.o
+[ 37%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/SoftBody/SoftBodySharedSettings.cpp.o
+[ 37%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/StateRecorderImpl.cpp.o
+[ 38%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Vehicle/MotorcycleController.cpp.o
+[ 38%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Vehicle/TrackedVehicleController.cpp.o
+[ 38%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Vehicle/VehicleAntiRollBar.cpp.o
+[ 38%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Vehicle/VehicleCollisionTester.cpp.o
+[ 39%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Vehicle/VehicleConstraint.cpp.o
+[ 39%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Vehicle/VehicleController.cpp.o
+[ 39%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Vehicle/VehicleDifferential.cpp.o
+[ 40%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Vehicle/VehicleEngine.cpp.o
+[ 40%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Vehicle/VehicleTrack.cpp.o
+[ 40%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Vehicle/VehicleTransmission.cpp.o
+[ 40%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Vehicle/Wheel.cpp.o
+[ 41%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Vehicle/WheeledVehicleController.cpp.o
+[ 41%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/RegisterTypes.cpp.o
+[ 41%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Renderer/DebugRenderer.cpp.o
+[ 42%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Renderer/DebugRendererPlayback.cpp.o
+[ 42%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Renderer/DebugRendererRecorder.cpp.o
+[ 42%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Renderer/DebugRendererSimple.cpp.o
+[ 43%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Skeleton/SkeletalAnimation.cpp.o
+[ 43%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Skeleton/Skeleton.cpp.o
+[ 43%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Skeleton/SkeletonMapper.cpp.o
+[ 43%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/Skeleton/SkeletonPose.cpp.o
+[ 44%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/TriangleSplitter/TriangleSplitter.cpp.o
+[ 44%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/TriangleSplitter/TriangleSplitterBinning.cpp.o
+[ 44%] Building CXX object CMakeFiles/Jolt.dir/engine/vendor/jolt-physics-5.5.0/Jolt/TriangleSplitter/TriangleSplitterMean.cpp.o
+[ 45%] Linking CXX static library libJolt.a
+[ 45%] Built target Jolt
+[ 46%] Regenerating OAS headers and generated maps
+prep not found — building via build.sh ...
+In file included from source.cc:42:
+   20 | extern int regexec(register regexp* prog, register const char* string);
+      |                    ^~~~~~~~
+   20 | extern int regexec(register regexp* prog, register const char* string);
+      |                                           ^~~~~~~~
+  470 |                                                 ostrstream formattedOutput;
+      |                                                 ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/c++/v1/strstream:274:7: note: 'ostrstream' has been explicitly marked deprecated here
+  274 | class _LIBCPP_DEPRECATED _LIBCPP_EXPORTED_FROM_ABI ostrstream : public ostream {
+      |       ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/c++/v1/__config:554:49: note: expanded from macro '_LIBCPP_DEPRECATED'
+  554 | #      define _LIBCPP_DEPRECATED __attribute__((__deprecated__))
+      |                                                 ^
+  518 |                                                 ostrstream formattedOutput;
+      |                                                 ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/c++/v1/strstream:274:7: note: 'ostrstream' has been explicitly marked deprecated here
+  274 | class _LIBCPP_DEPRECATED _LIBCPP_EXPORTED_FROM_ABI ostrstream : public ostream {
+      |       ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/c++/v1/__config:554:49: note: expanded from macro '_LIBCPP_DEPRECATED'
+  554 | #      define _LIBCPP_DEPRECATED __attribute__((__deprecated__))
+      |                                                 ^
+  827 |                         sprintf(buffer,"%ld",input[includeDepth]->LineNum());
+      |                         ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+  986 |     sprintf(buffer,"%ld",input[incDepth]->LineNum());
+      |     ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+6 warnings generated.
+In file included from recolib/infile.cc:10:
+In file included from /Users/builder/clone/wfsource/source/cpplib/stdstrm.hp:8:
+  268 | #define INT8_MIN                (-128)
+      |         ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/stdint.h:96:9: note: previous definition is here
+   96 | #define INT8_MIN          -128
+      |         ^
+In file included from recolib/infile.cc:10:
+In file included from /Users/builder/clone/wfsource/source/cpplib/stdstrm.hp:8:
+  270 | #define UINT8_MAX               255U
+      |         ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/stdint.h:107:9: note: previous definition is here
+  107 | #define UINT8_MAX         255
+      |         ^
+In file included from recolib/infile.cc:10:
+In file included from /Users/builder/clone/wfsource/source/cpplib/stdstrm.hp:8:
+  272 | #define INT16_MIN               (-32768)
+      |         ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/stdint.h:97:9: note: previous definition is here
+   97 | #define INT16_MIN         -32768
+      |         ^
+In file included from recolib/infile.cc:10:
+In file included from /Users/builder/clone/wfsource/source/cpplib/stdstrm.hp:8:
+  274 | #define UINT16_MAX              65535U
+      |         ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/stdint.h:108:9: note: previous definition is here
+  108 | #define UINT16_MAX        65535
+      |         ^
+In file included from recolib/infile.cc:10:
+In file included from /Users/builder/clone/wfsource/source/cpplib/stdstrm.hp:8:
+  276 | #define INT32_MIN               (-2147483647-1)
+      |         ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/stdint.h:104:9: note: previous definition is here
+  104 | #define INT32_MIN        (-INT32_MAX-1)
+      |         ^
+5 warnings generated.
+In file included from recolib/ktstoken.cc:12:
+In file included from /Users/builder/clone/wfsource/source/cpplib/stdstrm.hp:8:
+  268 | #define INT8_MIN                (-128)
+      |         ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/stdint.h:96:9: note: previous definition is here
+   96 | #define INT8_MIN          -128
+      |         ^
+In file included from recolib/ktstoken.cc:12:
+In file included from /Users/builder/clone/wfsource/source/cpplib/stdstrm.hp:8:
+  270 | #define UINT8_MAX               255U
+      |         ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/stdint.h:107:9: note: previous definition is here
+  107 | #define UINT8_MAX         255
+      |         ^
+In file included from recolib/ktstoken.cc:12:
+In file included from /Users/builder/clone/wfsource/source/cpplib/stdstrm.hp:8:
+  272 | #define INT16_MIN               (-32768)
+      |         ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/stdint.h:97:9: note: previous definition is here
+   97 | #define INT16_MIN         -32768
+      |         ^
+In file included from recolib/ktstoken.cc:12:
+In file included from /Users/builder/clone/wfsource/source/cpplib/stdstrm.hp:8:
+  274 | #define UINT16_MAX              65535U
+      |         ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/stdint.h:108:9: note: previous definition is here
+  108 | #define UINT16_MAX        65535
+      |         ^
+In file included from recolib/ktstoken.cc:12:
+In file included from /Users/builder/clone/wfsource/source/cpplib/stdstrm.hp:8:
+  276 | #define INT32_MIN               (-2147483647-1)
+      |         ^
+/Applications/Xcode-26.6.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/usr/include/stdint.h:104:9: note: previous definition is here
+  104 | #define INT32_MIN        (-INT32_MAX-1)
+      |         ^
+5 warnings generated.
+   62 |         yyerror( "divide by zero" );
+      |                  ^
+   96 |                                           { printf( "%d\n", (yyvsp[0].dval) ); (yyval.dval) = (yyvsp[0].dval); }
+      |                                                      ~~     ^~~~~~~~~~~~~~~
+      |                                                      %f
+ 1372 |       yyerror (YY_("syntax error"));
+      |                    ^
+ 1483 |   yyerror (YY_("memory exhausted"));
+      |                ^
+  139 |   yyerror( "Too many symbols" );
+      |            ^
+5 warnings generated.
+   29 |         sscanf( yytext+1, "%x", &num );
+      |                            ~~   ^~~~
+      |                            %lx
+   36 |         sscanf( yytext+2, "%x", &num );
+      |                            ~~   ^~~~
+      |                            %lx
+  152 |         fprintf( stderr, message );
+      |                          ^~~~~~~
+expr.l:152:19: note: treat the string as an argument to avoid this
+  152 |         fprintf( stderr, message );
+      |                          ^
+      |                          "%s", 
+3 warnings generated.
+In file included from regexp/regexp.cc:30:
+   20 | extern int regexec(register regexp* prog, register const char* string);
+      |                    ^~~~~~~~
+   20 | extern int regexec(register regexp* prog, register const char* string);
+      |                                           ^~~~~~~~
+  168 | STATIC char *regnext(register char*);
+      |                      ^~~~~~~~
+  191 |         register regexp *r;
+      |         ^~~~~~~~
+  192 |         register char *scan;
+      |         ^~~~~~~~
+  193 |         register char *longest;
+      |         ^~~~~~~~
+  194 |         register unsigned int len;
+      |         ^~~~~~~~
+  198 |                 FAIL("NULL argument");
+      |                      ^
+  211 |                 FAIL("regexp too big");
+      |                      ^
+  216 |                 FAIL("out of space");
+      |                      ^
+  276 |         register char *ret;
+      |         ^~~~~~~~
+  277 |         register char *br;
+      |         ^~~~~~~~
+  278 |         register char *ender;
+      |         ^~~~~~~~
+  279 |         register int parno;
+      |         ^~~~~~~~
+  287 |                         FAIL("too many ()");
+      |                              ^
+  326 |                 FAIL("unmatched ()");
+      |                      ^
+  329 |                         FAIL("unmatched ()");
+      |                              ^
+  331 |                         FAIL("junk on end");    /* "Can't happen". */
+      |                              ^
+  345 |         register char *ret;
+      |         ^~~~~~~~
+  346 |         register char *chain;
+      |         ^~~~~~~~
+  347 |         register char *latest;
+      |         ^~~~~~~~
+  382 |         register char *ret;
+      |         ^~~~~~~~
+  383 |         register char op;
+      |         ^~~~~~~~
+  384 |         register char *next;
+      |         ^~~~~~~~
+  398 |                 FAIL("*+ operand could be empty");
+      |                      ^
+  429 |                 FAIL("nested *?+");
+      |                      ^
+  444 |         register char *ret;
+      |         ^~~~~~~~
+  461 |                         register int class_;
+      |                         ^~~~~~~~
+  462 |                         register int classend;
+      |                         ^~~~~~~~
+  480 |                                                         FAIL("invalid [] range");
+      |                                                              ^
+  490 |                                 FAIL("unmatched []");
+      |                                      ^
+  504 |                 FAIL("internal urp");   /* Supposed to be caught earlier. */
+      |                      ^
+  509 |                 FAIL("?+* follows nothing");
+      |                      ^
+  513 |                         FAIL("trailing \\");
+      |                              ^
+  520 |                         register int len;
+      |                         ^~~~~~~~
+  521 |                         register char ender;
+      |                         ^~~~~~~~
+  526 |                                 FAIL("internal disaster");
+      |                                      ^
+  552 |         register char *ret;
+      |         ^~~~~~~~
+  553 |         register char *ptr;
+      |         ^~~~~~~~
+  590 |         register char *src;
+      |         ^~~~~~~~
+  591 |         register char *dst;
+      |         ^~~~~~~~
+  592 |         register char *place;
+      |         ^~~~~~~~
+  617 |         register char *scan;
+      |         ^~~~~~~~
+  618 |         register char *temp;
+      |         ^~~~~~~~
+  619 |         register int offset;
+      |         ^~~~~~~~
+  682 | regexec(register regexp* prog, register const char* string)
+      |         ^~~~~~~~
+  682 | regexec(register regexp* prog, register const char* string)
+      |                                ^~~~~~~~
+  684 |         register const char *s;
+      |         ^~~~~~~~
+  688 |                 regerror("NULL parameter");
+      |                          ^
+  694 |                 regerror("corrupted program");
+      |                          ^
+  709 |          regerror("string not found");
+      |                   ^
+  738 |    regerror("failed to match");
+      |             ^
+  748 |         register int i;
+      |         ^~~~~~~~
+  749 |         register const char **sp;
+      |         ^~~~~~~~
+  750 |         register const char **ep;
+      |         ^~~~~~~~
+  784 |         register char *scan;    /* Current node. */
+      |         ^~~~~~~~
+  814 |                                 register int len;
+      |                                 ^~~~~~~~
+  815 |                                 register char *opnd;
+      |                                 ^~~~~~~~
+  850 |                                 register int no;
+      |                                 ^~~~~~~~
+  851 |                                 register const char *save;
+      |                                 ^~~~~~~~
+  879 |                                 register int no;
+      |                                 ^~~~~~~~
+  880 |                                 register const char *save;
+      |                                 ^~~~~~~~
+  899 |                                 register const char *save;
+      |                                 ^~~~~~~~
+  918 |                                 register char nextch;
+      |                                 ^~~~~~~~
+  919 |                                 register int no;
+      |                                 ^~~~~~~~
+  920 |                                 register const char *save;
+      |                                 ^~~~~~~~
+  921 |                                 register int min;
+      |                                 ^~~~~~~~
+  949 |                         regerror("memory corruption");
+      |                                  ^
+  961 |         regerror("corrupted pointers");
+      |                  ^
+  970 |         register int count = 0;
+      |         ^~~~~~~~
+  971 |         register const char *scan;
+      |         ^~~~~~~~
+  972 |         register char *opnd;
+      |         ^~~~~~~~
+ 1000 |                 regerror("internal foulup");
+      |                          ^
+ 1013 | regnext(register char* p)
+      |         ^~~~~~~~
+ 1015 |         register int offset;
+      |         ^~~~~~~~
+75 warnings generated.
+In file included from regexp/regsub.cc:23:
+   20 | extern int regexec(register regexp* prog, register const char* string);
+      |                    ^~~~~~~~
+   20 | extern int regexec(register regexp* prog, register const char* string);
+      |                                           ^~~~~~~~
+   39 |         register const char *src;
+      |         ^~~~~~~~
+   40 |         register char *dst;
+      |         ^~~~~~~~
+   41 |         register char c;
+      |         ^~~~~~~~
+   42 |         register int no;
+      |         ^~~~~~~~
+   43 |         register int len;
+      |         ^~~~~~~~
+   46 |                 regerror("NULL parm to regsub");
+      |                          ^
+   50 |                 regerror("damaged regexp fed to regsub");
+      |                          ^
+   72 |                                 regerror("damaged match string");
+      |                                          ^
+10 warnings generated.
+prep built successfully
+Regenerating .ht headers...
+  43 .ht files written to /Users/builder/clone/wfsource/source/oas
+Regenerating objects.{c,col,e,h,inc,lc}...
+  objects.c objects.col objects.e objects.h objects.inc objects.lc written to /Users/builder/clone/wfsource/source/oas
+Generating engine/mutation/kpropmap_generated.inc...
+  kpropmap_generated.inc written
+Generating engine/wf_edit/name_to_path_generated.inc...
+  name_to_path_generated.inc written
+Done.
+[ 46%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/pigsys/_cf_linux.cc.o
+[ 46%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/pigsys/assert.cc.o
+[ 46%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/pigsys/_atexit.cc.o
+[ 47%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/pigsys/endian.cc.o
+[ 47%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/pigsys/fatal.cc.o
+[ 47%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/pigsys/new.cc.o
+[ 48%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/pigsys/pigsys.cc.o
+[ 48%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/pigsys/stack.cc.o
+[ 48%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/streams/binstrm.cc.o
+[ 50%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/cpplib/range.cc.o
+[ 50%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/math/angle.cc.o
+[ 50%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/math/euler.cc.o
+[ 50%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/math/matrix34.cc.o
+[ 51%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/math/plane.cc.o
+[ 51%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/math/scalar.cc.o
+[ 51%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/math/vector2.cc.o
+[ 52%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/math/vector3.cc.o
+[ 52%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/memory/dmalloc.cc.o
+[ 52%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/memory/lmalloc.cc.o
+[ 52%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/memory/memory.cc.o
+[ 53%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/memory/mempool.cc.o
+[ 53%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/memory/pooltest.cc.o
+[ 53%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/memory/realmalloc.cc.o
+[ 54%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/iff/disktoc.cc.o
+[ 54%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/mailbox/mailbox.cc.o
+[ 54%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/iff/iffread.cc.o
+[ 55%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/hal/_list.cc.o
+[ 55%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/hal/asset_accessor.cc.o
+[ 55%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/hal/dfhd.cc.o
+[ 55%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/hal/diskfile.cc.o
+[ 56%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/hal/general.cc.o
+[ 56%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/hal/hal.cc.o
+[ 56%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/hal/mempool.cc.o
+[ 57%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/hal/message.cc.o
+[ 57%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/hal/salloc.cc.o
+[ 57%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/hal/sjoystic.cc.o
+[ 57%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/hal/time.cc.o
+[ 58%] Building OBJCXX object CMakeFiles/wfengine.dir/wfsource/source/hal/macos/asset_accessor_nsbundle.mm.o
+[ 58%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/hal/macos/gl_stubs.cc.o
+[ 58%] Building OBJCXX object CMakeFiles/wfengine.dir/wfsource/source/hal/macos/window_macos.mm.o
+[ 59%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/callbacks.cc.o
+[ 59%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/camera.cc.o
+[ 59%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/ccyc.cc.o
+[ 60%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/ccycle.cc.o
+[ 60%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/color.cc.o
+[ 60%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/display.cc.o
+[ 60%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/handle.cc.o
+[ 61%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/material.cc.o
+[ 61%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/pixelmap.cc.o
+[ 61%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/rendmatt.cc.o
+[ 62%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/rendobj2.cc.o
+[ 62%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/rendobj3.cc.o
+[ 62%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/rmuv.cc.o
+[ 62%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/skinned_mesh.cc.o
+[ 63%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/texture.cc.o
+[ 63%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/viewport.cc.o
+[ 63%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/vmem.cc.o
+[ 64%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/glpipeline/backend_factory.cc.o
+[ 64%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/glpipeline/rendfcl.cc.o
+[ 64%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/glpipeline/rendfcp.cc.o
+[ 65%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/glpipeline/rendftl.cc.o
+[ 65%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/glpipeline/rendftp.cc.o
+[ 65%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/glpipeline/rendgcl.cc.o
+[ 65%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/glpipeline/rendgcp.cc.o
+[ 66%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/glpipeline/rendgtl.cc.o
+[ 66%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/glpipeline/rendgtp.cc.o
+[ 66%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/glpipeline/static_mesh.cc.o
+[ 67%] Building OBJCXX object CMakeFiles/wfengine.dir/wfsource/source/gfx/metal/backend_metal.mm.o
+[ 67%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/input/inputdig.cc.o
+[ 67%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/asset/assets.cc.o
+[ 67%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/asset/assslot.cc.o
+[ 68%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/baseobject/baseobject.cc.o
+[ 68%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/baseobject/commonblock.cc.o
+[ 68%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/baseobject/msgport.cc.o
+[ 69%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/movement/movefoll.cc.o
+[ 69%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/movement/movement.cc.o
+[ 69%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/movement/movementmanager.cc.o
+[ 70%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/movement/movementobject.cc.o
+[ 70%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/movement/movepath.cc.o
+[ 70%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/movement/movevehicle.cc.o
+[ 70%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/room/actroit.cc.o
+[ 71%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/room/actrooms.cc.o
+[ 71%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/room/room.cc.o
+[ 71%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/room/rooms.cc.o
+[ 72%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/physics/activate.cc.o
+[ 72%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/physics/colbox.cc.o
+[ 72%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/physics/collision.cc.o
+[ 72%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/physics/colspace.cc.o
+[ 73%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/physics/physical.cc.o
+[ 73%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/physics/physicalobject.cc.o
+[ 73%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/anim/anim.cc.o
+[ 74%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/anim/animcycl.cc.o
+[ 74%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/anim/animmang.cc.o
+[ 74%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/anim/channel.cc.o
+[ 75%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/anim/path.cc.o
+[ 75%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/timer/clock.cc.o
+[ 75%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/actbox.cc.o
+[ 75%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/actboxor.cc.o
+[ 76%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/actor.cc.o
+[ 76%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/bitmap_presenter.cc.o
+[ 76%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/bitmap_text.cc.o
+[ 77%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/callbacks.cc.o
+[ 77%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/camera.cc.o
+[ 77%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/camshot.cc.o
+[ 77%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/destroyer.cc.o
+[ 78%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/dir.cc.o
+[ 78%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/director.cc.o
+[ 78%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/enemy.cc.o
+[ 79%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/explode.cc.o
+[ 79%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/file.cc.o
+[ 79%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/fps_overlay.cc.o
+[ 80%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/game.cc.o
+[ 80%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/generator.cc.o
+[ 80%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/gold.cc.o
+[ 80%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/hscore.cc.o
+[ 81%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/level.cc.o
+[ 81%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/level_menu.cc.o
+[ 81%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/level_menu_host.cc.o
+[ 82%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/levelobj.cc.o
+[ 82%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/light.cc.o
+[ 82%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/mailbox.cc.o
+[ 82%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/main.cc.o
+[ 83%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/matte.cc.o
+[ 83%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/missile.cc.o
+[ 83%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/movecam.cc.o
+[ 84%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/plant_ui.cc.o
+[ 84%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/platform.cc.o
+[ 84%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/player.cc.o
+[ 85%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/runtime_options.cc.o
+[ 85%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/runtime_property_ui.cc.o
+[ 85%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/runtime_settings_ui.cc.o
+[ 85%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/scripting_stub.cc.o
+[ 86%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/shadow.cc.o
+[ 86%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/shield.cc.o
+[ 86%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/spike.cc.o
+[ 87%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/statplat.cc.o
+[ 87%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/target.cc.o
+[ 87%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/tool.cc.o
+[ 87%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/toolngun.cc.o
+[ 88%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/toolshld.cc.o
+[ 88%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/version.cc.o
+[ 88%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/game/warp.cc.o
+[ 89%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/renderassets/dfrm_deform.cc.o
+[ 89%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/renderassets/mesh_deformer.cc.o
+[ 89%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/renderassets/rendacto.cc.o
+[ 90%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/renderassets/rendcrow.cc.o
+[ 90%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/renderassets/skin_pose.cc.o
+[ 90%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/particle/emitter.cc.o
+[ 90%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/particle/particle.cc.o
+[ 91%] Building OBJCXX object CMakeFiles/wfengine.dir/wfsource/source/audio/linux/buffer.cc.o
+[ 91%] Building OBJCXX object CMakeFiles/wfengine.dir/wfsource/source/audio/linux/device.cc.o
+[ 91%] Building OBJCXX object CMakeFiles/wfengine.dir/wfsource/source/audio/linux/miniaudio_impl.cc.o
+[ 92%] Building OBJCXX object CMakeFiles/wfengine.dir/wfsource/source/audio/linux/music.cc.o
+[ 92%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/audio/linux/sfx_library.cc.o
+[ 92%] Building CXX object CMakeFiles/wfengine.dir/engine/stubs/scripting_stub.cc.o
+[ 92%] Building CXX object CMakeFiles/wfengine.dir/engine/stubs/platform_stubs.cc.o
+[ 93%] Building CXX object CMakeFiles/wfengine.dir/engine/stubs/stb_image_write_impl.cc.o
+[ 93%] Building CXX object CMakeFiles/wfengine.dir/engine/stubs/renderer_stub.cc.o
+[ 93%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/hal/linux/platform_init.cc.o
+[ 94%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/hal/linux/audio.cc.o
+[ 94%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/hal/linux/input.cc.o
+[ 94%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/hal/linux/lifecycle.cc.o
+[ 95%] Building CXX object CMakeFiles/wfengine.dir/engine/stubs/scripting_zforth.cc.o
+[ 95%] Building C object CMakeFiles/wfengine.dir/engine/neural-forth/dictionary.c.o
+[ 95%] Building C object CMakeFiles/wfengine.dir/engine/neural-forth/tensor.c.o
+[ 95%] Building C object CMakeFiles/wfengine.dir/engine/neural-forth/autograd.c.o
+[ 96%] Building C object CMakeFiles/wfengine.dir/engine/neural-forth/fuzzy.c.o
+[ 96%] Building C object CMakeFiles/wfengine.dir/engine/neural-forth/nn.c.o
+[ 96%] Building C object CMakeFiles/wfengine.dir/engine/neural-forth/slot.c.o
+[ 97%] Building CXX object CMakeFiles/wfengine.dir/engine/stubs/physics_jolt.cc.o
+[ 97%] Building CXX object CMakeFiles/wfengine.dir/wfsource/source/physics/jolt/jolt_backend.cc.o
+[ 97%] Building CXX object CMakeFiles/wfengine.dir/engine/stubs/debug_server.cc.o
+[ 97%] Building CXX object CMakeFiles/wfengine.dir/engine/mutation/wfmut.cpp.o
+[ 98%] Building CXX object CMakeFiles/wfengine.dir/engine/mutation/wfmut_smoke.cpp.o
+[ 98%] Building CXX object CMakeFiles/wfengine.dir/engine/runtime_properties.cpp.o
+[ 98%] Building CXX object CMakeFiles/wfengine.dir/engine/runtime_property_form.cpp.o
+[100%] Building CXX object CMakeFiles/wfengine.dir/engine/runtime_property_host.cpp.o
+[100%] Linking CXX static library libwfengine.a
+[100%] Built target wfengine
+[100%] Building CXX object CMakeFiles/wf_skinned_mesh_metal_test.dir/tests/skinned_mesh_metal.cc.o
+[100%] Linking CXX executable wf_skinned_mesh_metal_test
+[100%] Built target wf_skinned_mesh_metal_test
+[  0%] Building CXX object CMakeFiles/wf_skin_pose_math.dir/wfsource/source/renderassets/dfrm_deform.cc.o
+[  0%] Building CXX object CMakeFiles/wf_skin_pose_math.dir/tests/skin_pose_math.cc.o
+[  0%] Building CXX object CMakeFiles/wf_skin_pose_math.dir/wfsource/source/renderassets/skin_pose.cc.o
+[100%] Linking CXX executable wf_skin_pose_math
+[100%] Built target wf_skin_pose_math

@@ -1,0 +1,19 @@
+{
+  "device": "chromecast-test-01",
+  "completed": [
+    "close-idle/cpu/round-1",
+    "close-idle/gpu/round-1",
+    "close-crawl/cpu/round-1",
+    "close-crawl/gpu/round-1",
+    "close-idle/gpu/round-2",
+    "close-idle/cpu/round-2",
+    "close-crawl/gpu/round-2",
+    "close-crawl/cpu/round-2",
+    "close-idle/cpu/round-3"
+  ],
+  "total": 16,
+  "state": "stopped",
+  "current": "close-idle/gpu/round-3",
+  "job": "J-d8577a92e5f5",
+  "error": "Incomplete session/cleanup: close-idle/gpu/round-3 J-d8577a92e5f5"
+}

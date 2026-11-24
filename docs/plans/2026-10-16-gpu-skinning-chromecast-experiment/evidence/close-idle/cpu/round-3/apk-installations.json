@@ -1,0 +1,54 @@
+[
+  {
+    "input": "677bdc1f150e999168ebf420a16e5847a77408b83ebddd14f672189b7d10d3cc.apk",
+    "package": "org.worldfoundry.wf_game.aquarium",
+    "before_sha256": "3d796c773070795e16fe4505b80f43f711c8bf6555bcbef70101176264738d88",
+    "action": "install",
+    "reason": "different-hash",
+    "variant": "pair2",
+    "status": "verified",
+    "start": 1792236246.7193456,
+    "journal_key": "install:1",
+    "installed_sha256": "677bdc1f150e999168ebf420a16e5847a77408b83ebddd14f672189b7d10d3cc",
+    "end": 1792236250.9372501
+  },
+  {
+    "input": "0235df4bf415483c9f84dbecddbf452dbcd4bebd542e109c40a45a7d059e96ff.apk",
+    "package": "org.worldfoundry.wf_game.aquarium",
+    "before_sha256": "677bdc1f150e999168ebf420a16e5847a77408b83ebddd14f672189b7d10d3cc",
+    "action": "install",
+    "reason": "different-hash",
+    "variant": "pair6",
+    "status": "verified",
+    "start": 1792236349.0908933,
+    "journal_key": "install:2",
+    "installed_sha256": "0235df4bf415483c9f84dbecddbf452dbcd4bebd542e109c40a45a7d059e96ff",
+    "end": 1792236353.4619386
+  },
+  {
+    "input": "ccdbb53b0257e38d5d6b4890df4e40b87c952fc7c81199de42b63f235232a8a7.apk",
+    "package": "org.worldfoundry.wf_game.aquarium",
+    "before_sha256": "0235df4bf415483c9f84dbecddbf452dbcd4bebd542e109c40a45a7d059e96ff",
+    "action": "install",
+    "reason": "different-hash",
+    "variant": "none",
+    "status": "verified",
+    "start": 1792236452.6176493,
+    "journal_key": "install:3",
+    "installed_sha256": "ccdbb53b0257e38d5d6b4890df4e40b87c952fc7c81199de42b63f235232a8a7",
+    "end": 1792236457.5854921
+  },
+  {
+    "input": "d53747c1c0919539f8869d4b4bda780047ee4d2cf145208dba5371a733ba1966.apk",
+    "package": "org.worldfoundry.wf_game.aquarium",
+    "before_sha256": "ccdbb53b0257e38d5d6b4890df4e40b87c952fc7c81199de42b63f235232a8a7",
+    "action": "install",
+    "reason": "different-hash",
+    "variant": "pair1",
+    "status": "verified",
+    "start": 1792236557.6032646,
+    "journal_key": "install:4",
+    "installed_sha256": "d53747c1c0919539f8869d4b4bda780047ee4d2cf145208dba5371a733ba1966",
+    "end": 1792236562.1946106
+  }
+]

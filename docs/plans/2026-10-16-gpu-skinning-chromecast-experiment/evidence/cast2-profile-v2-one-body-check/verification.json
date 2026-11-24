@@ -1,0 +1,2010 @@
+{
+  "job": "J-be114610d338",
+  "profile_scope_version": 2,
+  "presentation": {
+    "source": "docs/plans/2026-10-16-gpu-skinning-chromecast-experiment/evidence/cast2-profile-v2-one-body-check/run-1",
+    "interval_count": 3592,
+    "mean_frame_ms": 16.706556361915368,
+    "fps": 59.8567399730337,
+    "p95_ms": 16.683622,
+    "observed_seconds": 60.009950452,
+    "total_pss_kib": 42479,
+    "thermal_status": 0,
+    "first_present_ns": 82723937489059,
+    "last_present_ns": 82783947439511,
+    "refresh_ms": 16.683333,
+    "p50_ms": 16.683333,
+    "p99_ms": 16.683748,
+    "missed_refresh_percent": 0.13919821826280623
+  },
+  "cpu_profile": {
+    "source": "docs/plans/2026-10-16-gpu-skinning-chromecast-experiment/evidence/cast2-profile-v2-one-body-check/run-1/wf.log",
+    "windows": [
+      {
+        "start_ns": 82724599121486,
+        "end_ns": 82729601101988,
+        "sections": {
+          "update": {
+            "frames": 300,
+            "mean": 0.5473
+          },
+          "actors": {
+            "frames": 300,
+            "mean": 0.1277
+          },
+          "director": {
+            "frames": 300,
+            "mean": 0.3988
+          },
+          "render": {
+            "frames": 300,
+            "mean": 1.2174
+          },
+          "school": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "pose": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "animation": {
+            "frames": 300,
+            "mean": 0.3388
+          },
+          "total": {
+            "frames": 300,
+            "mean": 1.7647
+          },
+          "skin-pose": {
+            "frames": 300,
+            "mean": 0.057
+          },
+          "skin-vertices": {
+            "frames": 300,
+            "mean": 0.1286
+          },
+          "skin-normals": {
+            "frames": 300,
+            "mean": 0.1196
+          },
+          "skin-cull": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-submit": {
+            "frames": 300,
+            "mean": 0.8926
+          }
+        },
+        "counters": {
+          "level-objects": {
+            "frames": 300,
+            "mean": 12.0
+          },
+          "render-actors": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "draws": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "triangles": {
+            "frames": 300,
+            "mean": 473.563
+          },
+          "actor-mailbox-writes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "fish-deformations": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "uploads": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "upload-bytes": {
+            "frames": 300,
+            "mean": 107972.44
+          },
+          "faces-submitted": {
+            "frames": 300,
+            "mean": 1027.0
+          },
+          "faces-culled": {
+            "frames": 300,
+            "mean": 553.437
+          },
+          "static-objects": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-draws": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-faces-culled": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-index-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-bakes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-bake-us": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-gpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-cpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-excluded-objects": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "static-deferred-objects": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-vertex-bytes": {
+            "frames": 300,
+            "mean": 107972.44
+          },
+          "skin-palette-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-draws": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-faces-submitted": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-fallbacks": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-gpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-cpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-rebuilds": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-index-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          }
+        }
+      },
+      {
+        "start_ns": 82729601101988,
+        "end_ns": 82734609656991,
+        "sections": {
+          "update": {
+            "frames": 299,
+            "mean": 0.5529
+          },
+          "actors": {
+            "frames": 299,
+            "mean": 0.1285
+          },
+          "director": {
+            "frames": 299,
+            "mean": 0.4031
+          },
+          "render": {
+            "frames": 299,
+            "mean": 1.2611
+          },
+          "school": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "pose": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "animation": {
+            "frames": 299,
+            "mean": 0.342
+          },
+          "total": {
+            "frames": 299,
+            "mean": 1.814
+          },
+          "skin-pose": {
+            "frames": 299,
+            "mean": 0.0576
+          },
+          "skin-vertices": {
+            "frames": 299,
+            "mean": 0.1298
+          },
+          "skin-normals": {
+            "frames": 299,
+            "mean": 0.121
+          },
+          "skin-cull": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-submit": {
+            "frames": 299,
+            "mean": 0.9295
+          }
+        },
+        "counters": {
+          "level-objects": {
+            "frames": 299,
+            "mean": 12.0
+          },
+          "render-actors": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "draws": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "triangles": {
+            "frames": 299,
+            "mean": 473.716
+          },
+          "actor-mailbox-writes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "fish-deformations": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "uploads": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "upload-bytes": {
+            "frames": 299,
+            "mean": 108007.184
+          },
+          "faces-submitted": {
+            "frames": 299,
+            "mean": 1027.0
+          },
+          "faces-culled": {
+            "frames": 299,
+            "mean": 553.284
+          },
+          "static-objects": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-draws": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-faces-culled": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-index-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-bakes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-bake-us": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-gpu-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-cpu-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-excluded-objects": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "static-deferred-objects": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-vertex-bytes": {
+            "frames": 299,
+            "mean": 108007.184
+          },
+          "skin-palette-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-draws": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-faces-submitted": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-fallbacks": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-gpu-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-cpu-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-rebuilds": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-index-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          }
+        }
+      },
+      {
+        "start_ns": 82734609656991,
+        "end_ns": 82739613236868,
+        "sections": {
+          "update": {
+            "frames": 300,
+            "mean": 0.5512
+          },
+          "actors": {
+            "frames": 300,
+            "mean": 0.1276
+          },
+          "director": {
+            "frames": 300,
+            "mean": 0.4027
+          },
+          "render": {
+            "frames": 300,
+            "mean": 1.2323
+          },
+          "school": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "pose": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "animation": {
+            "frames": 300,
+            "mean": 0.3419
+          },
+          "total": {
+            "frames": 300,
+            "mean": 1.7835
+          },
+          "skin-pose": {
+            "frames": 300,
+            "mean": 0.0585
+          },
+          "skin-vertices": {
+            "frames": 300,
+            "mean": 0.1301
+          },
+          "skin-normals": {
+            "frames": 300,
+            "mean": 0.1199
+          },
+          "skin-cull": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-submit": {
+            "frames": 300,
+            "mean": 0.903
+          }
+        },
+        "counters": {
+          "level-objects": {
+            "frames": 300,
+            "mean": 12.0
+          },
+          "render-actors": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "draws": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "triangles": {
+            "frames": 300,
+            "mean": 473.59
+          },
+          "actor-mailbox-writes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "fish-deformations": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "uploads": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "upload-bytes": {
+            "frames": 300,
+            "mean": 107978.52
+          },
+          "faces-submitted": {
+            "frames": 300,
+            "mean": 1027.0
+          },
+          "faces-culled": {
+            "frames": 300,
+            "mean": 553.41
+          },
+          "static-objects": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-draws": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-faces-culled": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-index-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-bakes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-bake-us": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-gpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-cpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-excluded-objects": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "static-deferred-objects": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-vertex-bytes": {
+            "frames": 300,
+            "mean": 107978.52
+          },
+          "skin-palette-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-draws": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-faces-submitted": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-fallbacks": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-gpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-cpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-rebuilds": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-index-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          }
+        }
+      },
+      {
+        "start_ns": 82739613236868,
+        "end_ns": 82744621365787,
+        "sections": {
+          "update": {
+            "frames": 300,
+            "mean": 0.5658
+          },
+          "actors": {
+            "frames": 300,
+            "mean": 0.1305
+          },
+          "director": {
+            "frames": 300,
+            "mean": 0.4139
+          },
+          "render": {
+            "frames": 300,
+            "mean": 1.2501
+          },
+          "school": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "pose": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "animation": {
+            "frames": 300,
+            "mean": 0.3515
+          },
+          "total": {
+            "frames": 300,
+            "mean": 1.8159
+          },
+          "skin-pose": {
+            "frames": 300,
+            "mean": 0.0593
+          },
+          "skin-vertices": {
+            "frames": 300,
+            "mean": 0.1341
+          },
+          "skin-normals": {
+            "frames": 300,
+            "mean": 0.1236
+          },
+          "skin-cull": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-submit": {
+            "frames": 300,
+            "mean": 0.9211
+          }
+        },
+        "counters": {
+          "level-objects": {
+            "frames": 300,
+            "mean": 12.0
+          },
+          "render-actors": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "draws": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "triangles": {
+            "frames": 300,
+            "mean": 473.647
+          },
+          "actor-mailbox-writes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "fish-deformations": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "uploads": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "upload-bytes": {
+            "frames": 300,
+            "mean": 107991.44
+          },
+          "faces-submitted": {
+            "frames": 300,
+            "mean": 1027.0
+          },
+          "faces-culled": {
+            "frames": 300,
+            "mean": 553.353
+          },
+          "static-objects": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-draws": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-faces-culled": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-index-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-bakes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-bake-us": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-gpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-cpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-excluded-objects": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "static-deferred-objects": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-vertex-bytes": {
+            "frames": 300,
+            "mean": 107991.44
+          },
+          "skin-palette-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-draws": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-faces-submitted": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-fallbacks": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-gpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-cpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-rebuilds": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-index-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          }
+        }
+      },
+      {
+        "start_ns": 82744621365787,
+        "end_ns": 82749639799790,
+        "sections": {
+          "update": {
+            "frames": 299,
+            "mean": 0.5425
+          },
+          "actors": {
+            "frames": 299,
+            "mean": 0.1243
+          },
+          "director": {
+            "frames": 299,
+            "mean": 0.3977
+          },
+          "render": {
+            "frames": 299,
+            "mean": 1.2295
+          },
+          "school": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "pose": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "animation": {
+            "frames": 299,
+            "mean": 0.3377
+          },
+          "total": {
+            "frames": 299,
+            "mean": 1.7719
+          },
+          "skin-pose": {
+            "frames": 299,
+            "mean": 0.0575
+          },
+          "skin-vertices": {
+            "frames": 299,
+            "mean": 0.1284
+          },
+          "skin-normals": {
+            "frames": 299,
+            "mean": 0.1185
+          },
+          "skin-cull": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-submit": {
+            "frames": 299,
+            "mean": 0.9005
+          }
+        },
+        "counters": {
+          "level-objects": {
+            "frames": 299,
+            "mean": 12.0
+          },
+          "render-actors": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "draws": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "triangles": {
+            "frames": 299,
+            "mean": 473.635
+          },
+          "actor-mailbox-writes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "fish-deformations": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "uploads": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "upload-bytes": {
+            "frames": 299,
+            "mean": 107988.883
+          },
+          "faces-submitted": {
+            "frames": 299,
+            "mean": 1027.0
+          },
+          "faces-culled": {
+            "frames": 299,
+            "mean": 553.365
+          },
+          "static-objects": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-draws": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-faces-culled": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-index-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-bakes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-bake-us": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-gpu-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-cpu-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-excluded-objects": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "static-deferred-objects": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-vertex-bytes": {
+            "frames": 299,
+            "mean": 107988.883
+          },
+          "skin-palette-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-draws": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-faces-submitted": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-fallbacks": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-gpu-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-cpu-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-rebuilds": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-index-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          }
+        }
+      },
+      {
+        "start_ns": 82749639799790,
+        "end_ns": 82754642892167,
+        "sections": {
+          "update": {
+            "frames": 300,
+            "mean": 0.5575
+          },
+          "actors": {
+            "frames": 300,
+            "mean": 0.1291
+          },
+          "director": {
+            "frames": 300,
+            "mean": 0.4068
+          },
+          "render": {
+            "frames": 300,
+            "mean": 1.2554
+          },
+          "school": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "pose": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "animation": {
+            "frames": 300,
+            "mean": 0.3453
+          },
+          "total": {
+            "frames": 300,
+            "mean": 1.8129
+          },
+          "skin-pose": {
+            "frames": 300,
+            "mean": 0.0586
+          },
+          "skin-vertices": {
+            "frames": 300,
+            "mean": 0.1312
+          },
+          "skin-normals": {
+            "frames": 300,
+            "mean": 0.1219
+          },
+          "skin-cull": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-submit": {
+            "frames": 300,
+            "mean": 0.9247
+          }
+        },
+        "counters": {
+          "level-objects": {
+            "frames": 300,
+            "mean": 12.0
+          },
+          "render-actors": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "draws": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "triangles": {
+            "frames": 300,
+            "mean": 473.583
+          },
+          "actor-mailbox-writes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "fish-deformations": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "uploads": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "upload-bytes": {
+            "frames": 300,
+            "mean": 107977.0
+          },
+          "faces-submitted": {
+            "frames": 300,
+            "mean": 1027.0
+          },
+          "faces-culled": {
+            "frames": 300,
+            "mean": 553.417
+          },
+          "static-objects": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-draws": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-faces-culled": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-index-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-bakes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-bake-us": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-gpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-cpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-excluded-objects": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "static-deferred-objects": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-vertex-bytes": {
+            "frames": 300,
+            "mean": 107977.0
+          },
+          "skin-palette-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-draws": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-faces-submitted": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-fallbacks": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-gpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-cpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-rebuilds": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-index-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          }
+        }
+      },
+      {
+        "start_ns": 82754642892167,
+        "end_ns": 82759648896461,
+        "sections": {
+          "update": {
+            "frames": 299,
+            "mean": 0.5395
+          },
+          "actors": {
+            "frames": 299,
+            "mean": 0.1262
+          },
+          "director": {
+            "frames": 299,
+            "mean": 0.3927
+          },
+          "render": {
+            "frames": 299,
+            "mean": 1.2344
+          },
+          "school": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "pose": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "animation": {
+            "frames": 299,
+            "mean": 0.3339
+          },
+          "total": {
+            "frames": 299,
+            "mean": 1.7739
+          },
+          "skin-pose": {
+            "frames": 299,
+            "mean": 0.0562
+          },
+          "skin-vertices": {
+            "frames": 299,
+            "mean": 0.1269
+          },
+          "skin-normals": {
+            "frames": 299,
+            "mean": 0.118
+          },
+          "skin-cull": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-submit": {
+            "frames": 299,
+            "mean": 0.9037
+          }
+        },
+        "counters": {
+          "level-objects": {
+            "frames": 299,
+            "mean": 12.0
+          },
+          "render-actors": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "draws": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "triangles": {
+            "frames": 299,
+            "mean": 473.569
+          },
+          "actor-mailbox-writes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "fish-deformations": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "uploads": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "upload-bytes": {
+            "frames": 299,
+            "mean": 107973.632
+          },
+          "faces-submitted": {
+            "frames": 299,
+            "mean": 1027.0
+          },
+          "faces-culled": {
+            "frames": 299,
+            "mean": 553.431
+          },
+          "static-objects": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-draws": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-faces-culled": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-index-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-bakes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-bake-us": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-gpu-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-cpu-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-excluded-objects": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "static-deferred-objects": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-vertex-bytes": {
+            "frames": 299,
+            "mean": 107973.632
+          },
+          "skin-palette-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-draws": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-faces-submitted": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-fallbacks": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-gpu-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-cpu-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-rebuilds": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-index-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          }
+        }
+      },
+      {
+        "start_ns": 82759648896461,
+        "end_ns": 82764652446797,
+        "sections": {
+          "update": {
+            "frames": 300,
+            "mean": 0.5442
+          },
+          "actors": {
+            "frames": 300,
+            "mean": 0.1255
+          },
+          "director": {
+            "frames": 300,
+            "mean": 0.3982
+          },
+          "render": {
+            "frames": 300,
+            "mean": 1.2334
+          },
+          "school": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "pose": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "animation": {
+            "frames": 300,
+            "mean": 0.3384
+          },
+          "total": {
+            "frames": 300,
+            "mean": 1.7777
+          },
+          "skin-pose": {
+            "frames": 300,
+            "mean": 0.0573
+          },
+          "skin-vertices": {
+            "frames": 300,
+            "mean": 0.1283
+          },
+          "skin-normals": {
+            "frames": 300,
+            "mean": 0.1193
+          },
+          "skin-cull": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-submit": {
+            "frames": 300,
+            "mean": 0.9023
+          }
+        },
+        "counters": {
+          "level-objects": {
+            "frames": 300,
+            "mean": 12.0
+          },
+          "render-actors": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "draws": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "triangles": {
+            "frames": 300,
+            "mean": 473.693
+          },
+          "actor-mailbox-writes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "fish-deformations": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "uploads": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "upload-bytes": {
+            "frames": 300,
+            "mean": 108002.08
+          },
+          "faces-submitted": {
+            "frames": 300,
+            "mean": 1027.0
+          },
+          "faces-culled": {
+            "frames": 300,
+            "mean": 553.307
+          },
+          "static-objects": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-draws": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-faces-culled": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-index-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-bakes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-bake-us": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-gpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-cpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-excluded-objects": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "static-deferred-objects": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-vertex-bytes": {
+            "frames": 300,
+            "mean": 108002.08
+          },
+          "skin-palette-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-draws": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-faces-submitted": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-fallbacks": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-gpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-cpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-rebuilds": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-index-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          }
+        }
+      },
+      {
+        "start_ns": 82764652446797,
+        "end_ns": 82769659306299,
+        "sections": {
+          "update": {
+            "frames": 299,
+            "mean": 0.5442
+          },
+          "actors": {
+            "frames": 299,
+            "mean": 0.1266
+          },
+          "director": {
+            "frames": 299,
+            "mean": 0.3972
+          },
+          "render": {
+            "frames": 299,
+            "mean": 1.2125
+          },
+          "school": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "pose": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "animation": {
+            "frames": 299,
+            "mean": 0.3371
+          },
+          "total": {
+            "frames": 299,
+            "mean": 1.7567
+          },
+          "skin-pose": {
+            "frames": 299,
+            "mean": 0.0572
+          },
+          "skin-vertices": {
+            "frames": 299,
+            "mean": 0.1285
+          },
+          "skin-normals": {
+            "frames": 299,
+            "mean": 0.1181
+          },
+          "skin-cull": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-submit": {
+            "frames": 299,
+            "mean": 0.8869
+          }
+        },
+        "counters": {
+          "level-objects": {
+            "frames": 299,
+            "mean": 12.0
+          },
+          "render-actors": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "draws": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "triangles": {
+            "frames": 299,
+            "mean": 473.625
+          },
+          "actor-mailbox-writes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "fish-deformations": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "uploads": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "upload-bytes": {
+            "frames": 299,
+            "mean": 107986.595
+          },
+          "faces-submitted": {
+            "frames": 299,
+            "mean": 1027.0
+          },
+          "faces-culled": {
+            "frames": 299,
+            "mean": 553.375
+          },
+          "static-objects": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-draws": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-faces-culled": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-index-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-bakes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-bake-us": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-gpu-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-cpu-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "static-excluded-objects": {
+            "frames": 299,
+            "mean": 1.0
+          },
+          "static-deferred-objects": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-vertex-bytes": {
+            "frames": 299,
+            "mean": 107986.595
+          },
+          "skin-palette-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-draws": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-faces-submitted": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-fallbacks": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-gpu-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-cpu-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-rebuilds": {
+            "frames": 299,
+            "mean": 0.0
+          },
+          "skin-index-bytes": {
+            "frames": 299,
+            "mean": 0.0
+          }
+        }
+      },
+      {
+        "start_ns": 82769659306299,
+        "end_ns": 82774664726177,
+        "sections": {
+          "update": {
+            "frames": 300,
+            "mean": 0.5473
+          },
+          "actors": {
+            "frames": 300,
+            "mean": 0.1249
+          },
+          "director": {
+            "frames": 300,
+            "mean": 0.4016
+          },
+          "render": {
+            "frames": 300,
+            "mean": 1.2285
+          },
+          "school": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "pose": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "animation": {
+            "frames": 300,
+            "mean": 0.3413
+          },
+          "total": {
+            "frames": 300,
+            "mean": 1.7758
+          },
+          "skin-pose": {
+            "frames": 300,
+            "mean": 0.0581
+          },
+          "skin-vertices": {
+            "frames": 300,
+            "mean": 0.1301
+          },
+          "skin-normals": {
+            "frames": 300,
+            "mean": 0.1197
+          },
+          "skin-cull": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-submit": {
+            "frames": 300,
+            "mean": 0.8994
+          }
+        },
+        "counters": {
+          "level-objects": {
+            "frames": 300,
+            "mean": 12.0
+          },
+          "render-actors": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "draws": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "triangles": {
+            "frames": 300,
+            "mean": 473.67
+          },
+          "actor-mailbox-writes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "fish-deformations": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "uploads": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "upload-bytes": {
+            "frames": 300,
+            "mean": 107996.76
+          },
+          "faces-submitted": {
+            "frames": 300,
+            "mean": 1027.0
+          },
+          "faces-culled": {
+            "frames": 300,
+            "mean": 553.33
+          },
+          "static-objects": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-draws": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-faces-culled": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-index-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-bakes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-bake-us": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-gpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-cpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-excluded-objects": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "static-deferred-objects": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-vertex-bytes": {
+            "frames": 300,
+            "mean": 107996.76
+          },
+          "skin-palette-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-draws": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-faces-submitted": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-fallbacks": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-gpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-cpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-rebuilds": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-index-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          }
+        }
+      },
+      {
+        "start_ns": 82774664726177,
+        "end_ns": 82779669628971,
+        "sections": {
+          "update": {
+            "frames": 300,
+            "mean": 0.5538
+          },
+          "actors": {
+            "frames": 300,
+            "mean": 0.1267
+          },
+          "director": {
+            "frames": 300,
+            "mean": 0.406
+          },
+          "render": {
+            "frames": 300,
+            "mean": 1.2291
+          },
+          "school": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "pose": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "animation": {
+            "frames": 300,
+            "mean": 0.3449
+          },
+          "total": {
+            "frames": 300,
+            "mean": 1.7828
+          },
+          "skin-pose": {
+            "frames": 300,
+            "mean": 0.0587
+          },
+          "skin-vertices": {
+            "frames": 300,
+            "mean": 0.1313
+          },
+          "skin-normals": {
+            "frames": 300,
+            "mean": 0.1215
+          },
+          "skin-cull": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-submit": {
+            "frames": 300,
+            "mean": 0.9029
+          }
+        },
+        "counters": {
+          "level-objects": {
+            "frames": 300,
+            "mean": 12.0
+          },
+          "render-actors": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "draws": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "triangles": {
+            "frames": 300,
+            "mean": 473.64
+          },
+          "actor-mailbox-writes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "fish-deformations": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "uploads": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "upload-bytes": {
+            "frames": 300,
+            "mean": 107989.92
+          },
+          "faces-submitted": {
+            "frames": 300,
+            "mean": 1027.0
+          },
+          "faces-culled": {
+            "frames": 300,
+            "mean": 553.36
+          },
+          "static-objects": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-draws": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-faces-culled": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-index-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-bakes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-bake-us": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-gpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-cpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "static-excluded-objects": {
+            "frames": 300,
+            "mean": 1.0
+          },
+          "static-deferred-objects": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-vertex-bytes": {
+            "frames": 300,
+            "mean": 107989.92
+          },
+          "skin-palette-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-draws": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-faces-submitted": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-fallbacks": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-gpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-cpu-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-rebuilds": {
+            "frames": 300,
+            "mean": 0.0
+          },
+          "skin-index-bytes": {
+            "frames": 300,
+            "mean": 0.0
+          }
+        }
+      }
+    ],
+    "covered_seconds": 55.070507485,
+    "measured_frames": 3296,
+    "frame_weighted_cpu_ms": {
+      "actors": 0.12705533980582526,
+      "animation": 0.34116787014563105,
+      "director": 0.40170488470873783,
+      "pose": 0.0,
+      "render": 1.2348824332524273,
+      "school": 0.0,
+      "skin-cull": 0.0,
+      "skin-normals": 0.12010145631067962,
+      "skin-pose": 0.05781902305825242,
+      "skin-submit": 0.9060556432038834,
+      "skin-vertices": 0.12975618932038835,
+      "total": 1.7845338288834953,
+      "update": 0.5496604672330097
+    },
+    "frame_weighted_counters": {
+      "actor-mailbox-writes": 0.0,
+      "draws": 1.0,
+      "faces-culled": 553.369916565534,
+      "faces-submitted": 1027.0,
+      "fish-deformations": 1.0,
+      "level-objects": 12.0,
+      "render-actors": 1.0,
+      "skin-cpu-bytes": 0.0,
+      "skin-draws": 0.0,
+      "skin-faces-submitted": 0.0,
+      "skin-fallbacks": 0.0,
+      "skin-gpu-bytes": 0.0,
+      "skin-index-bytes": 0.0,
+      "skin-palette-bytes": 0.0,
+      "skin-rebuilds": 0.0,
+      "skin-vertex-bytes": 107987.67594235437,
+      "static-bake-us": 0.0,
+      "static-bakes": 0.0,
+      "static-cpu-bytes": 0.0,
+      "static-deferred-objects": 0.0,
+      "static-draws": 0.0,
+      "static-excluded-objects": 1.0,
+      "static-faces-culled": 0.0,
+      "static-gpu-bytes": 0.0,
+      "static-index-bytes": 0.0,
+      "static-objects": 0.0,
+      "triangles": 473.630083434466,
+      "upload-bytes": 107987.67594235437,
+      "uploads": 1.0
+    }
+  },
+  "median_window_render_cpu_ms": 1.2323
+}

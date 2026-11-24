@@ -1,0 +1,39 @@
+{
+  "source_revision": "e64e5459660889ec8cda8dcadd059d10688c039c",
+  "native_sha256": "9ddd539f29600c729c0e26430ca162d61311b242a4c7d6defe0a97e4ff484b80",
+  "cpu_default": true,
+  "gl_fixture": "passed",
+  "dfrm_reference": "passed",
+  "aquarium_gl_parity": {
+    "exact_pixels": 307192,
+    "pixels": 307200,
+    "max_channel_delta": 1
+  },
+  "population16_gl_parity": {
+    "exact_pixels": 307192,
+    "pixels": 307200,
+    "max_channel_delta": 1
+  },
+  "population16_no_cull_gl_parity": {
+    "exact_pixels": 307192,
+    "pixels": 307200,
+    "max_channel_delta": 1
+  },
+  "metal_fixture": "passed",
+  "metal_build": "6ad3302ac27ce204978ad1ed",
+  "matched_cast1": "release-round-3-stopped-after-another-startup-exit-coordinator-owner-reviewing",
+  "cast2": "all-36-release-and-12-corrected-profile-runs-verified",
+  "lifecycle_device": "both-casts-home-surface-recreation-passed-context-reused",
+  "held_released_input": "both-casts-diagnostic-four-directions-passed-full-ui-validators-failed",
+  "population_device": "cast2-complete-cast1-awaits-safe-startup-deployment",
+  "gpu_time_ms": null,
+  "adoption_decision": "not-made",
+  "startup_reliability": "unresolved-cast1-exit-after-launch-back-before-warmup",
+  "release_native_sha256": "9ddd539f29600c729c0e26430ca162d61311b242a4c7d6defe0a97e4ff484b80",
+  "profile_native_sha256": "13f604947c1aff3c39dc729c51e650561e55c5fa45f06785cf7f29f15580663c",
+  "profile_scope_version": 2,
+  "profile_source_revision": "8f90bba8c65e47b32aca6511a7de9b461b433089",
+  "metal_profile_v2_fixture": "passed",
+  "metal_profile_v2_build": "6ad3602a12c0b2aac28778db",
+  "cpu_profile_v1": "superseded-final-batch-counter-loss-and-per-face-clock-perturbation"
+}

@@ -1,0 +1,35 @@
+{
+  "source_revision": "76a02b1624dc11f5c9d25bc40d4cc190b5864e4d",
+  "source_diff_sha256": "3cea93fdaf9653c0d1a7923857900682015b8707042206e93f65e8ee13a381d4",
+  "base_apk_sha256": "d3b650942119df482bc5ae597b4ebf4e99d46424ad7f803e8e186f0736ff4470",
+  "native": {
+    "lib/armeabi-v7a/libwf_game.so": "9ddd539f29600c729c0e26430ca162d61311b242a4c7d6defe0a97e4ff484b80"
+  },
+  "source_level_sha256": "a94598005ec3b7e1f07e758ff5471358ef1c2e84a5bb276d55f3a6f5460cf84b",
+  "variants": {
+    "selector-gpu": {
+      "apk_sha256": "ec7ae7bcd5b0ab3027d3d0baaf3e995eb17e364154fffdd2befb69d513476219",
+      "cd_sha256": "95cd794450c36bee8dcd951209193b0e39a641e23652725e52128d6e2768ce41",
+      "level_sha256": null,
+      "mode": "gpu",
+      "settings": {
+        "scope": "Unmodified base selector assets; input and lifecycle checks only"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": false
+    },
+    "selector-gpu-profile": {
+      "apk_sha256": "1650f2dab5b97823ba9d375d60e1db262a2047027dd93a3c7cffc5726c13009c",
+      "cd_sha256": "95cd794450c36bee8dcd951209193b0e39a641e23652725e52128d6e2768ce41",
+      "level_sha256": null,
+      "mode": "gpu",
+      "settings": {
+        "scope": "Unmodified base selector assets; input and lifecycle checks only"
+      },
+      "scripts": [],
+      "preservation": {},
+      "frame_profile": true
+    }
+  }
+}

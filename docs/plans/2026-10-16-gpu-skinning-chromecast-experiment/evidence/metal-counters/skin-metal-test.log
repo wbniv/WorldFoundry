@@ -1,0 +1,9 @@
+Test project /Users/builder/clone/build-skin-metal
+    Start 1: skinned_mesh_metal
+1/2 Test #1: skinned_mesh_metal ...............   Passed    0.44 sec
+    Start 2: skin_pose_math
+2/2 Test #2: skin_pose_math ...................   Passed    0.02 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.46 sec

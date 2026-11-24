@@ -1,0 +1,6 @@
+{
+  "superseded": true,
+  "profile_scope_version": 1,
+  "source": "superseded-profiles-v1/gpu-profile-verification.json",
+  "note": "Historical GPU counters only; use corrected scope-v2 profiles for the paired CPU comparison."
+}

@@ -1,0 +1,12 @@
+{
+  "job": "J-c4cccc5e4274",
+  "excluded": true,
+  "measurement_started": false,
+  "observations": [
+    "NativeActivity still reported resumed after Back; process no longer present",
+    "Fixed read-only inspect J-710d8d86588a captured an empty crash buffer",
+    "Original APK restored; ordinary coordinator recovery J-cbe8b24a2e53 resolved"
+  ],
+  "cause": "Unproven; launch-time Back sequence is the immediate preceding action",
+  "action": "One explicit retry after evidence review; preserve failure and stop on another failure"
+}
