@@ -1,5 +1,5 @@
 """Compile the local-time timetable and a periodic camera spline to level zForth."""
-from town import BERTHS, BRIDGE, MARKET, SPAN
+from town import BERTHS, BRIDGE, MARKET, SPAN, RAIN_CELL, RAIN_GROUPS, RAIN_TOP, RAIN_TRAVEL, RAIN_WIND, RING_FRAMES
 import forth
 
 # Landing, over the west quay, courtyard lane, square, footbridge, boatyard,
@@ -16,7 +16,7 @@ ROUTE = [
     (12.50,-5.32,8.02,3.65,1.42,1.45),
     (6.30,-12.0,8.30,-.65,.25,2.00),
 ]
-STILL=(-1.6,-16.5,14.0,-.5,1.4,1.20)
+STILL=(-1.6,-17.6,14.6,-.5,-1.65,.85)
 
 
 def coefficients(leg):
@@ -57,6 +57,26 @@ def camera_words(ix):
     return out+[' then ;']
 
 
+def rainfall_words(ix):
+    # Release each batch at cloud height. Decide its visibility at release time
+    # so an entire flight stays continuous through the onset and tail of a shower.
+    out = [': quay-rain']
+    for speed, period in enumerate((2, 2.5)):
+        out.append(f' cv-sc cv@ {period} / cv-frac cv-f cv!')
+        for i in range(speed, RAIN_GROUPS, 2):
+            actor = ix[f'RainFlight{i:02}']
+            phase = (i+.5)/RAIN_GROUPS
+            delay = ((i*7)%RAIN_GROUPS)*7.5/(RAIN_GROUPS-1)
+            out += [
+                f' cv-f cv@ {phase:.6f} + cv-frac cv-u cv!',
+                f' cv-s cv@ cv-u cv@ {period} * - dup {delay:.5f} >= swap {90-period-delay:.5f} < &',
+                f' if 1 else 0 then {RAIN_CELL+i} cv!',
+                f' cv-u cv@ {RAIN_TRAVEL} * dup {RAIN_WIND} * {actor} cv-wx',
+                f' {RAIN_TOP} swap - {actor} cv-wz',
+            ]
+    return out+[' ;']
+
+
 def script(ix,fields):
     who=ix['DutchCuckooVillageSettings']
     out=forth.common_words()+[': cv-sgn 1 ;']
@@ -64,6 +84,7 @@ def script(ix,fields):
         out.append(f': {word} {who} {fields[label]} property@ if else drop {default} then ;')
     out+=forth.hand_words(ix)+forth.clockwork_words(ix)
     out+=camera_words(ix)
+    out+=rainfall_words(ix)
     x,y,z=BRIDGE
     mx,my=MARKET
     out+=[': quay-crossing',
@@ -88,11 +109,10 @@ def script(ix,fields):
           ': quay-weather',
           ' cv-mi cv@ 10 cv-mod 60 * cv-sc cv@ + cv-s cv!',
           ' cv-s cv@ 10 / cv-sm 1 cv-s cv@ 80 - 10 / cv-sm - * cv-w cv!',
-          ' cv-w cv@ 0 > if 1 else 0 then 214 cv!',
           ' cv-s cv@ 120 < if 1 else 0 then 216 cv!',
-          f' cv-sc cv@ 2 * cv-frac -.52 * 1 cv-w cv@ - 2 * + {ix["Raindrops"]} cv-wz',
-          ' cv-sc cv@ 2 * cv-frac 3 * cv-floor cv-i cv!',
-          *[f' cv-i cv@ {i} = cv-w cv@ 0 > & if 1 else 0 then {217+i} cv!' for i in range(3)],
+          ' quay-rain',
+          f' cv-sc cv@ cv-frac {RING_FRAMES} * cv-floor cv-i cv!',
+          *[f' cv-i cv@ {i} = cv-w cv@ 0 > & if 1 else 0 then {217+i} cv!' for i in range(RING_FRAMES)],
           f' cv-sc cv@ 2 * cv-frac -.16 * cv-s cv@ 90 - 30 / cv-sm 1.4 * - {ix["Runoff"]} cv-wz',
           f' cv-sc cv@ 12 / cv-sin .13 * {ix["WaterGlints"]} cv-wx',
           ' cv-hr cv@ 60 * cv-mi cv@ + cv-s cv!']

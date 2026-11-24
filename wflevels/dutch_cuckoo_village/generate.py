@@ -12,7 +12,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 OAS = ROOT/'wfsource/source/oas'
 sys.path[:0] = [str(ROOT/'wftools'), str(HERE)]
-from town import build
+from town import add_rain, build
 from director import script, ROUTE
 from materials import SIZE, pixels, uv_material
 import wf_blender
@@ -70,9 +70,11 @@ sun.rotation_euler=(0,math.radians(40),math.radians(72))
 actor('Sky','matte',**{'Matte Type':'Color','Background Color':0x869d9d})
 holder=actor('DutchCuckooVillageSettings','dutchcuckoovillagesettings',**{'Editor Label':'Dutch Cuckoo Village'})
 from clearance import check
-models=build().models
-check(models)
-for name,(m,at,cell) in models.items():
+town=build()
+check(town.models)
+# The camera can pass through falling water. Check the solid town first.
+add_rain(town)
+for name,(m,at,cell) in town.models.items():
     mesh=bpy.data.meshes.new(name)
     mesh.from_pydata(m.vertices,[],m.faces)
     mesh.update()

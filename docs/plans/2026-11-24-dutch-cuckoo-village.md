@@ -11,10 +11,10 @@ the frames. The Journey camera now passes above the shop roofs. The director pla
 camera directly on its route when the level starts midway through a lap or the clock
 changes, so it can reach the market without travelling in a straight line from the
 landing. The build checked 1,010 positions around the spline against the town geometry.
-The closest sampled camera position was 1.14 m from a surface. The centre, edges and
+The closest sampled camera position was 1.22 m from the town geometry. The centre, edges and
 corners of the 16:9 near plane cleared the model at every sample.
 
-The wide view shows both banks and both mills at 10:08. The evening capture shows the
+The wide view at 10:08 shows thirteen rows of tulips on the growers’ bank. Eight new rows extend the foreground by 3.04 m, with room around the red post mill. The evening capture shows the
 raised bridge, a loaded barge and the staggered window lights. [Still at 10:08](2026-11-24-dutch-cuckoo-village/pc-still.jpg) · [Crossing at dusk](2026-11-24-dutch-cuckoo-village/pc-dusk.jpg)
 
 Compared with the concept art below, the PC model uses simpler flower heads and timber
@@ -185,7 +185,7 @@ camera modes, so a viewer who chooses Still can watch the town at work.
 | Continuously | Both hands sweep. The little west post mill makes one revolution in 48 seconds. The larger east mill takes 72 seconds. Both turn gently in the same prevailing wind, with an offset so their four sails pass upright at different moments. Only the sail assemblies rotate. |
 | Throughout the day | Slow ripples travel along the canals. Broken reflections of the quay, mills and window lights follow the water. Between crossings the bulb boat rests at its berth. |
 | Each minute, seconds 20–32 | The cheesemonger tips one wheel onto the pan over seconds 20–23. The beam dips and the opposite pan rises. Both settle by second 27. The merchant slides that wheel back onto the board by second 32 and the empty balance returns to level. |
-| First 90 seconds of every ten minutes | A light shower crosses the rooftops. Rings spread on the canal and isolated drops join in the courtyard gutter. Ease the rain in and out over ten seconds. Runoff thins for another 30 seconds; the cobbles keep their wet sheen between showers. |
+| First 90 seconds of every ten minutes | Rain falls on a slant across the tulip beds, rooftops and market. The streaks start above the tower and fall at two speeds. Rings spread on both canals and drops run from the courtyard gutter. Ease the rain in and out over ten seconds. Runoff thins for another 30 seconds; the cobbles keep their wet sheen between showers. |
 | At :15, :30 and :45, seconds 0–8 | The grower bows with the bulb tray at :15, the seller with tulips at :30, and the keeper with the flag at :45. Each returns to their own bay. |
 | On the hour, seconds 0–24 | The skipper leads all four toys out for two laps. The hatch opens and the cuckoo counts the hour, once at one o’clock through twelve times at twelve. The first bob starts at second 1, with 1.4 seconds between bobs. At twelve the last bob starts at second 16.4. The bird retracts, the hatch closes and the four figures settle by second 24. |
 | During that same hourly performance | In seconds 0–4 the bridge lifts and its counterweight descends. From 4–16 the loaded barge passes under the raised span, leaving a short wake. From 16–21 the bridge lowers behind its stern. The boat reaches the opposite berth by second 24. |

@@ -81,11 +81,36 @@ def check_director(tmp_path, monkeypatch):
         assert sample(10,8,0)['hour_hand','ROTATION_B'] == pytest.approx(304/360)
         assert sample(10,5,3)['cs_wide','X_POS'] != pytest.approx(director.STILL[0])
         host.proc.stdin.write(f'P {ix["DutchCuckooVillageSettings"]} 129 1\n')
+        flights = [f'RainFlight{i:02}' for i in range(director.RAIN_GROUPS)]
+        def visible_flights():
+            return sum(cell(director.RAIN_CELL+i) for i in range(len(flights)))
+
+        # Check frame-to-frame travel in the real VM across the minute rollover.
+        # The only upward step allowed is from below the canal to above the tower.
+        pose = sample(10,0,58.75)
+        for frame in range(1,66):
+            following = sample(10,0,58.75+frame*.04)
+            wraps = 0
+            for i,name in enumerate(flights):
+                dz = following[name,'Z_POS'] - pose[name,'Z_POS']
+                dx = following[name,'X_POS'] - pose[name,'X_POS']
+                if dz > 0:
+                    assert pose[name,'Z_POS'] < 0 and following[name,'Z_POS'] > 8
+                    wraps += 1
+                else:
+                    assert dz == pytest.approx(-director.RAIN_TRAVEL*.04/(2,2.5)[i%2], abs=.001)
+                assert dx == pytest.approx(-dz*director.RAIN_WIND, abs=.001)
+            assert wraps <= 2
+            pose = following
+
+        for sec in (5,85):
+            sample(10,0,sec)
+            assert 0 < visible_flights() < len(flights)
         for h,m,s,rain,drips in ((23,0,10,1,1),(10,1,45,0,1),(2,2,5,0,0)):
             pose=sample(h,m,s)
             for name,axis,want in zip(['cs_wide']*3+['LookAt']*3,['X_POS','Y_POS','Z_POS']*2,director.STILL):
                 assert pose[name,axis] == pytest.approx(want)
-            assert (cell(214),cell(216)) == (rain,drips)
+            assert (visible_flights(),cell(216)) == (rain*len(flights),drips)
         assert cell(200)==1
         host.proc.stdin.write(f'P {ix["DutchCuckooVillageSettings"]} 130 0\n')
         sample(2,2,5)

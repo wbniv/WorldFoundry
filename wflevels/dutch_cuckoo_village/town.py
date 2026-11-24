@@ -127,17 +127,23 @@ def tree(m,x,y,scale,blossom):
         ellipsoid(m,(x+dx*scale,y+dy*scale,z*scale),(.46*scale,.42*scale,.43*scale),'pink' if blossom else 'tree',8,4)
 
 
+# Grow the field toward the front (-Y), keeping the canal edge and mill fixed.
+FRONT_ROWS = 8
+ROW_PITCH = .38
+FIELD_EXTENSION = FRONT_ROWS * ROW_PITCH
+
+
 def flower_beds(t):
     randomizer=random.Random(913)
     for group in range(4):
         m=t.mesh('TulipBeds'+str(group))
-        for row in range(5):
-            y=-7.0+row*.38
+        for row in range(-FRONT_ROWS,5):
+            y=-7.0+row*ROW_PITCH
             x0=-10+group*5.2
             board(m,x0+2.15,y,.125,4.7,.30,.04,'mud')
             for plant in range(15):
                 x=x0+plant*.31+randomizer.uniform(-.03,.03)
-                if group==0 and plant<5 and row<4:
+                if group==0 and plant<5 and 0<=row<4:
                     continue
                 height=randomizer.uniform(.22,.32)
                 m.prism_xz([(x-.13,.18),(x+.015,.18),(x-.08,.18+height*.88)],y-.015,y+.012,'leaf')
@@ -286,9 +292,9 @@ WATER_Y=-3.05
 
 def waterways(t):
     land=t.mesh('Banks')
-    board(land,0,1.5,-.72,24,19,.58,'wood')
-    board(land,0,1.5,-.15,23.85,18.85,.15,'water')
-    for x,y,w,d,col in [(0,-6.12,23.75,3.55,'grass'),(-2.65,4.57,18.45,12.54,'pave'),(10.08,4.57,3.55,12.54,'grass')]:
+    board(land,0,1.5-FIELD_EXTENSION/2,-.72,24,19+FIELD_EXTENSION,.58,'wood')
+    board(land,0,1.5-FIELD_EXTENSION/2,-.15,23.85,18.85+FIELD_EXTENSION,.15,'water')
+    for x,y,w,d,col in [(0,-6.12-FIELD_EXTENSION/2,23.75,3.55+FIELD_EXTENSION,'grass'),(-2.65,4.57,18.45,12.54,'pave'),(10.08,4.57,3.55,12.54,'grass')]:
         board(land,x,y,-.07,w,d,.20,col)
     for y in (-4.36,-1.71):
         for i in range(41):
@@ -392,6 +398,32 @@ def stalls(t):
         m.column_z(x-2+k*.26,y-1,.56,.68,.15,'cheese',16)
 
 
+# Each flight starts above the weathervane and ends inside the plinth.
+RAIN_GROUPS = 24
+RAIN_CELL = 230
+RAIN_TOP = 9.0
+RAIN_TRAVEL = 9.6
+RAIN_WIND = .115
+RING_FRAMES = 8
+
+
+def add_rain(t):
+    rng = random.Random(1119)
+    for group in range(RAIN_GROUPS):
+        mesh = t.mesh(f'RainFlight{group:02}', visibility=RAIN_CELL+group)
+        # Jittered positions distribute every batch across the whole town.
+        for row in range(8):
+            for col in range(10):
+                x = -11.8 + (col+rng.random())*2.24
+                y = -7.8 - FIELD_EXTENSION + (row+rng.random())*(18.48+FIELD_EXTENSION)/8
+                z = rng.uniform(0, .23)
+                length = rng.uniform(.16, .29)
+                width = rng.uniform(.012, .023)
+                tail = (x-length*RAIN_WIND, y, z+length)
+                for dx,dy in ((width/2,0), (0,width/2)):
+                    mesh.face([(x-dx,y-dy,z), (x+dx,y+dy,z), tail], 'rain')
+
+
 def build():
     t=Town()
     waterways(t)
@@ -443,33 +475,32 @@ def build():
         person(yard,xx+.24,yy,.14,'coat')
     rng=random.Random(592)
     water=t.mesh('WaterGlints')
-    rain=t.mesh('Raindrops',visibility=214)
-    rings=[t.mesh('RainRings'+str(frame),visibility=217+frame) for frame in range(3)]
+    rings=[t.mesh('RainRings'+str(frame),visibility=217+frame) for frame in range(RING_FRAMES)]
     reflections=[t.mesh('Lamplight'+str(i),visibility=200+i) for i in range(8)]
     for i in range(8):
         x=-9.85+i*2.76
         for j in range(5):
             board(reflections[i],x+.11*math.sin(j*2.3),-1.92-j*.15,.016,.26-.024*j,.034,.002,'glow')
-    for i in range(36):
-        xx=rng.uniform(-10.70,6.23)
-        yy=rng.uniform(-1.02,7.90)
-        height=rng.uniform(1.56,3.66)
-        spar(rain,(xx,yy,height),(xx+.055,yy+.015,height+.17),.020,'rain')
-
     for i in range(64):
         xx=rng.uniform(-11.45,11.45)
         yy=rng.uniform(-4.19,-1.88)
         board(water,xx,yy,.009,.20+rng.random()*.36,.028,.005,'ripple')
-        zz=rng.uniform(.08,1.96)
-        spar(rain,(xx,yy,zz),(xx+.047,yy+.012,zz+.13),.016,'rain')
-        if i%2==0:
+    # Each impact grows about a fixed point, then rests before the next drop.
+    for i in range(120):
+        if i < 88:
+            x,y = rng.uniform(-11.6,11.6), rng.uniform(-4.17,-1.89)
+        else:
+            x,y = rng.uniform(6.81,8.13), rng.uniform(-1.4,10.55)
+        phase = rng.randrange(RING_FRAMES)
+        extent = rng.uniform(.085,.16)
+        for age in range(5):
+            radius = extent*(age+1)/5
+            inner = radius - .012
+            mesh = rings[(phase+age)%RING_FRAMES]
             for j in range(8):
-                a=j*math.tau/8
-                b=(j+1)*math.tau/8
-                for frame,mesh in enumerate(rings):
-                    radius=.055+.042*((frame+i)%3)
-                    spar(mesh,(xx+radius*math.cos(a),yy+radius*.66*math.sin(a),.018),
-                         (xx+radius*math.cos(b),yy+radius*.66*math.sin(b),.018),.016,'ripple')
+                a,b = j*math.tau/8, (j+1)*math.tau/8
+                mesh.face([(x+r*math.cos(angle),y+r*math.sin(angle),.018)
+                           for r,angle in ((inner,a),(radius,a),(radius,b),(inner,b))], 'ripple')
     drip=t.mesh('Runoff',(-4.01,2.49,0),216)
     for i in range(6):
         ellipsoid(drip,(0,0,.26+i*.21),(.027,.028,.058),'rain',6,3)
