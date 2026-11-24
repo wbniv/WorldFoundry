@@ -25,7 +25,7 @@ inline Controls& activeControls(){static Controls state;return state;}
 // What the last build drew, row by row: the control's name and its box on the canvas (1920 x
 // 1080 for the TV form, dp for touch), plus the number of text lines a wrapped value or
 // option took. Filled on every build; read by host layout tests. Cheap: a few rows.
-struct DrawnRow { uint32_t field=0; std::string control; float x0=0,y0=0,x1=0,y1=0; int lines=1; };
+struct DrawnRow { uint32_t field=0; std::string control; float x0=0,y0=0,x1=0,y1=0; int lines=1; int option=-1; };
 inline std::vector<DrawnRow>& drawnRows(){static std::vector<DrawnRow> rows;return rows;}
 // Up to two lines that fit maxWidth (measured by width()); the second is cut with "...".
 template<class Width> std::vector<std::string> wrapTwo(const std::string& text,float maxWidth,Width width){

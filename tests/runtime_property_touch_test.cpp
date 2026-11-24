@@ -49,6 +49,15 @@ int main(int argc,char** argv){
  if(field.readonly||field.kind==10){wfprops::Field extra;extra.id=302;extra.kind=0;extra.minimum=0;extra.maximum=10;extra.key=extra.label="Editable";extra.initial="1";object->fields.push_back(extra);object->values[extra.id]="1";}
  auto& host=wfprops::host();host.bind(&registry);
  bool acted=false;host.consumer(object->schema,wfprops::Consumer{{},{},[&](const wfprops::Object&,const std::string&){acted=true;}});
+ if(id=="int-slider"){
+  assert(host.open());std::vector<PhonepadRect> desktop;propertyui::buildHost(1920,1080,desktop,nullptr);
+  const auto* row=drawnRow(301);assert(row);float y=row->y0+62;
+  assert(propertyui::desktopPointer(0,630,y,1920,1080));assert(host.form.value()=="0");
+  assert(propertyui::desktopPointer(1,1630,y,1920,1080));assert(host.form.value()=="100");
+  assert(propertyui::desktopPointer(2,1630,y,1920,1080));
+  assert(propertyui::desktopPointer(0,1300,850,1920,1080));assert(!host.modal);
+  object->values[field.id]=field.initial;acted=false;
+ }
  propertyui::touchConfigure(true,2);
  constexpr int w=780,h=1688;
  auto tap=[&](float x,float y,int pointer=7){

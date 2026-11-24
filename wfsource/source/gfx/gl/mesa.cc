@@ -31,6 +31,7 @@
 #include <gfx/host_gl_context.h>
 #include <gfx/display.hp>
 #include <game/level_menu.h>   // levelmenu::RequestReturn (Backspace)
+#include <game/runtime_property_ui.h>
 
 // kts major kludge, both GL and WF should use namespaces
 #define Display XDisplay
@@ -147,7 +148,8 @@ OpenMainWindow( char *title )
     root = RootWindow(halDisplay.mainDisplay,halDisplay.visInfo->screen);
 
     attr.border_pixel = 0;
-    attr.event_mask = ExposureMask | StructureNotifyMask | KeyPressMask | KeyReleaseMask | FocusChangeMask;
+    attr.event_mask = ExposureMask | StructureNotifyMask | KeyPressMask | KeyReleaseMask | FocusChangeMask |
+                      ButtonPressMask | ButtonReleaseMask | PointerMotionMask;
     attr.colormap = XCreateColormap(halDisplay.mainDisplay, root, halDisplay.visInfo->visual, AllocNone);
 
     halDisplay.win = XCreateWindow(halDisplay.mainDisplay, root, x, y, wfInitialWindowWidth, wfInitialWindowHeight,
@@ -225,7 +227,7 @@ OpenMainWindow( char *title )
     XSizeHints sh;
     sh.flags = USPosition | USSize;
     XSetWMProperties(halDisplay.mainDisplay, halDisplay.win, &tp, &tp, 0, 0, &sh, 0, 0);
-    XSelectInput(halDisplay.mainDisplay, halDisplay.win, ButtonPressMask | ButtonReleaseMask | KeyPressMask | KeyReleaseMask | StructureNotifyMask|SubstructureNotifyMask);
+    XSelectInput(halDisplay.mainDisplay, halDisplay.win, ButtonPressMask | ButtonReleaseMask | PointerMotionMask | KeyPressMask | KeyReleaseMask | StructureNotifyMask|SubstructureNotifyMask);
     XMapWindow(halDisplay.mainDisplay, halDisplay.win);
 #endif
 }
@@ -484,14 +486,20 @@ void ProcessXEvents(XEvent event)
             break;
 
 
-        case ButtonPressMask:
-            printf("You pressed button %d\n", event.xbutton.button);
+        case ButtonPress:
+        case ButtonRelease:
+            if(event.xbutton.button==Button1){XWindowAttributes a;XGetWindowAttributes(halDisplay.mainDisplay,halDisplay.win,&a);propertyui::desktopPointer(event.type==ButtonPress?0:2,event.xbutton.x,event.xbutton.y,a.width,a.height);}
+            else if(event.type==ButtonPress&&(event.xbutton.button==Button4||event.xbutton.button==Button5)){XWindowAttributes a;XGetWindowAttributes(halDisplay.mainDisplay,halDisplay.win,&a);propertyui::desktopPointer(event.xbutton.button==Button4?4:5,event.xbutton.x,event.xbutton.y,a.width,a.height);}
+            break;
+        case MotionNotify:
+            {XWindowAttributes a;XGetWindowAttributes(halDisplay.mainDisplay,halDisplay.win,&a);propertyui::desktopPointer(1,event.xmotion.x,event.xmotion.y,a.width,a.height);}
             break;
 
        case FocusIn :
           SetX11AutoRepeat(0);
           break;
        case FocusOut :
+          propertyui::desktopPointer(3,0,0,1,1);
           SetX11AutoRepeat(1);
           break;
 

@@ -866,13 +866,13 @@ WFGame::PollLevelMenu()
 		if (f.back) levelmenu::RequestReturn();
 		if (f.quit) HALRequestClose();
 	}
-	// Back to the menu: the same early exit as the "level aborted" cheat
-	// (_bContinue = false ends RunLevel), with LEVEL_TO_RUN = "ask the player",
-	// so the next pass of RunGameScript's loop shows the menu again. Only while
-	// a menu bundle runs; elsewhere the request is left alone.
-	if (_levelMenuActive && levelmenu::ConsumeReturnRequest())
+	// Back closes settings in both standalone levels and menu bundles. Consume
+	// otherwise-unused standalone requests too, so an old Back cannot close a
+	// settings form opened later.
+	if (levelmenu::ConsumeReturnRequest())
 	{
         if(wfprops::host().modal){wfprops::host().back();return;}
+		if (!_levelMenuActive) return;
 		levelmenu::Log("back to the menu");
 		_desiredLevelNum = levelmenu::kAskPlayer;
 		_bContinue = false;

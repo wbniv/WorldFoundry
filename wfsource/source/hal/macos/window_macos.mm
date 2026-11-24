@@ -36,6 +36,8 @@
 #include <hal/lifecycle.h>
 #include <hal/sjoystic.h>          // joystickButtonsF, EJ_BUTTONF_*
 #include <hal/macos/window_macos.h>
+#include <game/runtime_property_ui.h>
+#include <game/level_menu.h>
 
 #include <atomic>
 #include <cstdio>
@@ -100,6 +102,7 @@ joystickButtonsF ButtonForKey(int key)
 // same as any other key ButtonForKey does not know.
 void KeyCallback(GLFWwindow*, int key, int scancode, int action, int mods)
 {
+    if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS) { levelmenu::RequestReturn(); return; }
     if (g_keyLog)
     {
         std::printf("macos: key %d scancode %d action %d mods %d\n", key, scancode, action, mods);
@@ -114,10 +117,19 @@ void KeyCallback(GLFWwindow*, int key, int scancode, int action, int mods)
 
 void FocusCallback(GLFWwindow*, int focused)
 {
+    if (!focused) propertyui::desktopPointer(3,0,0,1,1);
     if (!g_keyLog) return;
     std::printf("macos: window focus %d (app active %d)\n", focused, [NSApp isActive] ? 1 : 0);
     std::fflush(stdout);
 }
+
+void MouseCallback(GLFWwindow* window,int button,int action,int){
+    if(button!=GLFW_MOUSE_BUTTON_LEFT)return;
+    double x,y;int w,h;glfwGetCursorPos(window,&x,&y);glfwGetWindowSize(window,&w,&h);
+    propertyui::desktopPointer(action==GLFW_PRESS?0:2,float(x),float(y),w,h);
+}
+void CursorCallback(GLFWwindow* window,double x,double y){int w,h;glfwGetWindowSize(window,&w,&h);propertyui::desktopPointer(1,float(x),float(y),w,h);}
+void ScrollCallback(GLFWwindow* window,double,double yoffset){if(yoffset==0)return;double x,y;int w,h;glfwGetCursorPos(window,&x,&y);glfwGetWindowSize(window,&w,&h);propertyui::desktopPointer(yoffset>0?4:5,float(x),float(y),w,h);}
 
 void CloseCallback(GLFWwindow*)
 {
@@ -255,6 +267,9 @@ bool Create(int width, int height, bool fullscreen, const char* title)
     SyncDrawableSize();
 
     glfwSetKeyCallback(g_window, KeyCallback);
+    glfwSetMouseButtonCallback(g_window, MouseCallback);
+    glfwSetCursorPosCallback(g_window, CursorCallback);
+    glfwSetScrollCallback(g_window, ScrollCallback);
     glfwSetWindowFocusCallback(g_window, FocusCallback);
     glfwSetWindowCloseCallback(g_window, CloseCallback);
     glfwSetFramebufferSizeCallback(g_window, FramebufferSizeCallback);

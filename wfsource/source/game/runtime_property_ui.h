@@ -6,6 +6,8 @@ namespace propertyui {
 using FormInput=void(*)(wfprops::Form&,uint32_t);
 FormInput& inputHandler();
 void inputHost(uint32_t buttons);
+// Desktop pointer coordinates are in window pixels with the origin at top left.
+bool desktopPointer(int phase, float x, float y, int width, int height);
 // The settings editor, the object chooser and Pick in 3D (and planted::buildUI) as
 // rectangles plus, when `glyphs` is given, their text as UI-font quads for wfui::Draw.
 void buildHost(int w,int h,std::vector<PhonepadRect>& out,std::vector<bitmaptext::Quad>* glyphs=nullptr);

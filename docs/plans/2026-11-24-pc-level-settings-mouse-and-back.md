@@ -1,0 +1,27 @@
+# PC level settings: Backspace and mouse support
+
+**Status: implemented on Linux; macOS verification open, 2026-11-24.** Backspace and desktop pointer handling are implemented for Linux X11 and macOS GLFW. The Linux build succeeded; a live Tide Harbour preview verified Backspace, clicking a section and clicking Apply / close ([captures](../diagnostics/pc-settings-input-2026-11-24/)). The slider's desktop pointer path is covered by the settings harness; the touch plan and layout suites passed 31 tests. A broader `test_object_properties.py` run had one failure in `object_property_core_test.cpp:39` and seven passes; the failure needs investigation. The macOS changes have not been built or tested on a Mac. Menu-bundle Backspace and the full range of mouse editors still need live verification.
+
+## Problem
+
+In the standalone PC preview, holding Space opens the level settings, but Backspace does not close them. X11 maps Backspace to `levelmenu::RequestReturn()`, while `WFGame::PollLevelMenu()` previously consumed that request only when a menu bundle was active. Escape closes the entire application. On-screen settings controls also need to respond to mouse clicks and slider drags.
+
+The current in-progress change consumes a return request in both standalone and menu-bundle levels: it sends Back to the settings host when a form is open, returns to the chooser only for a menu bundle when no form is open, and otherwise discards the request. This prevents a stale standalone Back request from closing a form opened later. Review and test this behavior before considering the fix done.
+
+## Expected behavior
+
+- Backspace closes an open settings form and applies edits, matching the existing Back behavior. If an option list or editor is open, Backspace closes that first. A Backspace pressed while no standalone settings form is open must not affect a form opened later. Menu bundles retain Back-to-chooser behavior, and Escape retains its existing window-close behavior.
+- Mouse clicks select settings sections and rows, choose options, toggle checkboxes, operate numeric sliders, open and close option lists, and activate the visible apply/close control. Slider dragging updates the intended value continuously and clamps at its bounds. The UI's visible layout and hit targets must match at different window sizes and aspect ratios.
+- A click while a modal settings form is open belongs to that form and must not also control the level. Clicking outside the form should not silently commit or close it. Mouse actions outside settings retain existing level behavior. Preserve keyboard and remote controls and Android touch behavior.
+
+## Design and implementation
+
+1. Inspect the actual X11 event path, desktop settings renderer and existing Android touch controller before choosing the integration. `mesa.cc` currently subscribes to button events but its handler uses `case ButtonPressMask` rather than the X11 `ButtonPress` event type, and it does not subscribe to pointer motion. The existing `propertyui::touchEvent` and `buildTouchHost` implement a phone-oriented layout with its own hit targets; do not feed desktop coordinates to it while drawing a different desktop layout. Either share a common layout and hit-test description or add desktop hit testing that exactly matches `runtime_property_ui.cc`'s geometry. Keep the desktop form's established appearance unless a coherent shared layout is explicitly chosen and reviewed.
+2. Route left-button down, movement while held, and release through the settings UI on the game thread, using current surface dimensions and correct X11-to-renderer coordinates. Handle resize, pointer leaving the window and focus loss without leaving a slider stuck. Consume events only while the relevant UI owns them. Keep any cross-platform changes narrowly scoped; avoid changing TV/Android input behavior.
+3. Cover the desktop form's section rail, row selection, checkbox, radio choices, long choice lists, sliders, read-only rows, Back/apply and any picker/editor states that the desktop UI exposes. Use the same form/host operations as keyboard navigation, rather than writing properties outside the normal commit path.
+4. Add meaningful automated input tests for standalone and bundle Backspace behavior, stale requests, pointer hit testing, slider endpoints and drag/cancel, click isolation, resize and existing keyboard/touch paths. Use existing runtime property and touch test harnesses where appropriate. Run the relevant C++/Python tests and build the PC engine.
+5. Open Tide Harbour's current standalone night preview on PC. Verify with actual mouse input that settings open, sections and choices respond, the 0–100 Krathong count slider can be changed and applied, and settings close with both mouse and Backspace. Verify the selected count persists as designed and takes effect in the running level. Repeat Backspace in a menu bundle and confirm it returns to the chooser when settings are closed. Capture evidence and record the engine build and commands.
+
+## Completion
+
+Update this plan with implemented behavior, tests, visual evidence and any limitations. Preserve ongoing Tide Harbour work and unrelated uncommitted changes. The approved engine changes here cover the Backspace input path and the PC settings mouse interaction; unrelated engine changes still require separate permission.

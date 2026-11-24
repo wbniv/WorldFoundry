@@ -6,6 +6,56 @@
 #include <hal/remote_back_arrow.h>
 namespace propertyui {
 namespace { const bool registeredInput=[](){inputHandler()=&input;return true;}(); }
+namespace { bool desktopDragging=false; }
+bool desktopPointer(int phase,float px,float py,int width,int height){
+ auto& host=wfprops::host();host.checkOwner();
+ if(!host.modal||width<=0||height<=0){desktopDragging=false;return false;}
+ if(phase==3){desktopDragging=false;return true;}
+ float x=px*1920.f/width,y=py*1080.f/height;
+ auto& f=host.form;
+ if(phase==4||phase==5){if(!host.picker&&!f.drawer){uint32_t key=phase==4?(1u<<11):(1u<<12);input(f,0);input(f,key);input(f,0);}return true;}
+ auto slider=[&](){const auto* field=f.field();if(!field||field->readonly||field->show!=2||field->kind>2)return;
+  double fraction=std::max(0.f,std::min(1.f,(x-630.f)/1000.f));
+  double scale=field->kind==1&&field->scale?field->scale:1.;
+  double v=(field->minimum+(field->maximum-field->minimum)*fraction)/scale;
+  f.edit.set(field->id,field->kind==1?std::to_string(v):std::to_string(int(std::lround(v))));};
+ if(phase==1){if(desktopDragging)slider();return true;}
+ if(phase==2){if(desktopDragging)slider();desktopDragging=false;return true;}
+ if(phase!=0)return true;
+ if(y>=810&&y<=900&&x>=1200&&x<=1710){host.back();return true;}
+ if(host.picker){
+  if(host.pick==wfprops::PickMode::Scene){if(host.pickHover(x,y))host.pickOk();return true;}
+  if(host.pick==wfprops::PickMode::Group){if(x>=630&&x<1290&&y>=386){size_t row=size_t((y-386)/72);if(row<host.group.size()){host.groupSelected=row;host.pickOk();}}return true;}
+  if(x>=225&&x<1680&&y>=240){size_t first=host.selected>5?host.selected-5:0;size_t row=first+size_t((y-240)/85);if(row<=host.owners.size()){host.selected=row;host.pickOk();}}return true;
+ }
+ if(f.drawer){const auto* field=f.field();if(!colour(field))return true;auto& ui=controls(f);int focus=-1;
+  if(ui.page==0){for(int k=0;k<16;++k){float sx=645+(k%4)*130,sy=290+(k/4)*100;if(x>=sx&&x<sx+80&&y>=sy&&y<sy+80)focus=k;}
+   int n=int(recentColours().size());for(int k=0;k<n;++k){float sx=760+k*65;if(x>=sx&&x<sx+44&&y>=690&&y<734)focus=16+k;}
+   if(y>=760&&y<818){if(x>=630&&x<910)focus=16+n;else if(x>=940&&x<1220)focus=17+n;else if(x>=1250&&x<1530)focus=18+n;}
+  }else if(ui.page==1){if(x>=640&&x<1024&&y>=290&&y<674){ui.hue=(x-640)*360/384;ui.saturation=1-(y-290)/384;ui.preview=hsv(ui.hue,ui.saturation,ui.value);return true;}
+   if(x>=645&&x<=1026&&y>=700&&y<770){ui.value=std::max(0.f,std::min(1.f,(x-645)/381));ui.preview=hsv(ui.hue,ui.saturation,ui.value);return true;}
+   if(x>=1100&&x<1610){if(y>=565&&y<625)focus=2;else if(y>=640&&y<700)focus=3;else if(y>=715&&y<775)focus=4;}
+  }else if(x>=630&&x<1160){if(y>=300&&y<680)focus=int((y-300)/95);else if(y>=700&&y<765)focus=4;}
+  if(focus>=0){ui.focus=focus;input(f,0);input(f,1);input(f,0);}return true;}
+ if(f.list){const auto* field=f.field();if(!field)return true;
+  for(const auto& r:drawnRows())if(r.option>=0&&(r.control=="list-option"||r.control=="list-option-numbered")){if(x>=r.x0&&x<r.x1&&y>=r.y0&&y<r.y1){f.edit.set(field->id,std::to_string(field->minimum+r.option));f.list=false;break;}}return true;}
+ if(x>=225&&x<555&&y>=240){size_t start=f.section>5?f.section-5:0;int index=int((y-240)/85);if(index>=0&&index<6&&std::fmod(y-240,85.f)<68&&start+index<f.sections.size()){f.section=start+index;f.row=0;f.rail=false;}return true;}
+ if(f.section>=f.sections.size())return true;
+ for(const auto& r:drawnRows())if(x>=r.x0&&x<r.x1&&y>=r.y0&&y<r.y1&&r.control!="spacer"){
+  auto* obj=f.edit.object();if(!obj)return true;const auto& rows=f.sections[f.section];for(size_t i=0;i<rows.size();++i)if(obj->fields[rows[i]].id==r.field){f.row=i;f.rail=false;break;}
+  const auto* field=f.field();if(!field||field->readonly)return true;
+  if(field->show==2&&field->kind<=2){desktopDragging=true;slider();return true;}
+  auto type=wfprops::presentation(*field);
+  if(field->kind==4){f.edit.set(field->id,f.value()=="1"?"0":"1");return true;}
+  if(type==wfprops::Control::Chips){std::vector<std::string> labels;size_t start=0;while(start<=field->choices.size()){auto end=field->choices.find('|',start);labels.push_back(field->choices.substr(start,end==std::string::npos?end:end-start));if(end==std::string::npos)break;start=end+1;}size_t longest=0;for(const auto& s:labels)longest=std::max(longest,s.size());int cols=std::max(1,std::min(int(labels.size()),int(1040/std::max(140.f,float(longest)*16+44))));int selected=std::atoi(f.value().c_str())-field->minimum;int firstRow=std::max(0,selected/cols-2);int col=int((x-620)/(1040.f/cols));int row=int((y-(r.y0+45))/48);int index=(firstRow+row)*cols+col;if(x>=620&&col>=0&&col<cols&&row>=0&&index<int(labels.size()))f.edit.set(field->id,std::to_string(field->minimum+index));return true;}
+  if(type==wfprops::Control::Segments){std::vector<std::string> labels;size_t start=0;while(start<=field->choices.size()){auto end=field->choices.find('|',start);labels.push_back(field->choices.substr(start,end==std::string::npos?end:end-start));if(end==std::string::npos)break;start=end+1;}float right=1660;for(size_t k=labels.size();k-->0;){float w=textWidth(2.5f,labels[k])+44;float left=right-w;if(x>=left&&x<right){f.edit.set(field->id,std::to_string(field->minimum+int(k)));break;}right=left-10;}return true;}
+  if(field->kind==9){if(f.action)f.action(field->key);return true;}
+  if(wfprops::choiceList(type)){f.list=true;f.listIndex=size_t(std::max(0,std::atoi(f.value().c_str())-field->minimum));return true;}
+  if(type==wfprops::Control::Number||type==wfprops::Control::NumberWithBounds||type==wfprops::Control::Colour||type==wfprops::Control::Text||type==wfprops::Control::Digits||type==wfprops::Control::Multiline||type==wfprops::Control::Path){input(f,0);input(f,1);input(f,0);return true;}
+  return true;
+ }
+ return true;
+}
 // Title SemiBold 46 for the old x4 headings, Regular 36 for rows (x3, x3.4) and
 // Regular 28 for hints, help, slider and section labels (x2 to x2.7).
 wfui::Variant variantFor(float scale){return scale>=3.5f?wfui::Title:scale>=2.9f?wfui::Body:wfui::Small;}
@@ -132,7 +182,7 @@ void build(wfprops::Form& editor,bool phone,int w,int h,std::vector<PhonepadRect
       if(numbered){const std::string id=std::to_string(field->minimum+int(index));const float iw=textWidth(2.5f,id)+18;rect(tx,oy+oh*.5f-17,iw,34,0xe4efd9ffu);text(tx+9,oy+oh*.5f-3.5f*2.5f,2.5f,id,0x132b26ffu);tx+=iw+14;}
       for(size_t line=0;line<wrapped[k].size();++line)text(tx,oy+oh*.5f-3.5f*3+(float(line)-(wrapped[k].size()-1)*.5f)*36,3,wrapped[k][line]);
       if(int(index)==selected)rect(lx+lw-46,oy+oh*.5f-7,14,14,0xefce83ffu);
-      drawnRows().push_back({field->id,numbered?"list-option-numbered":"list-option",lx+12,oy,lx+lw-12,oy+oh,int(wrapped[k].size())});
+      drawnRows().push_back({field->id,numbered?"list-option-numbered":"list-option",lx+12,oy,lx+lw-12,oy+oh,int(wrapped[k].size()),int(index)});
       oy+=oh+8;}
     }
    }
