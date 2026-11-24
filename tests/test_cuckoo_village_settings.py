@@ -28,6 +28,8 @@ FIELDS = {
     "Sound": (0, 1, 1),
     "Camera motion": (0, 1, 0),
     "Detailed flowers": (0, 1, 1),
+    "Houses": (0, 24, 13),
+    "Trees": (0, 24, 12),
 }
 TYPE = "CuckooVillageSettings"
 

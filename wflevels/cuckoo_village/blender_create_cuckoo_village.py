@@ -30,7 +30,7 @@ import bavaria as bv         # noqa: E402
 
 TAG = '[cuckoo-village]'
 REFERENCE = 10 * 3600 + 8 * 60 + 22.0       # the pose the level starts from: 10:08
-GLOW_CELL0, BIRD_CELL = 200, 213
+GLOW_CELL0, BIRD_CELL = 500, 213
 
 source = (LAYOUT / 'generate.py').read_text()
 cut = source.index('scene=bpy.context.scene')       # everything after this is the layout's review render and export
@@ -43,6 +43,9 @@ for texture in ('village_atlas.tga', 'tower-carved-wood.tga'):
     shutil.copyfile(LAYOUT / texture, HERE / texture)
 
 objs = bpy.data.objects
+import alpine_sky
+alpine_sky.build(ROOT)
+objs['Room']['wf_original_bbox']=(-60,-60,-20,60,60,40)
 
 # The prototype's hand meshes are bars offset sideways from their object origin (the hour bar sits +0.11 right of it,
 # the minute bar -0.14 left), so rotating the object swings each hand around a point that is not the dial centre and
@@ -78,17 +81,16 @@ assert [n for n in (f'cottage_light_{i + 1:02}' for i in range(tl.HOUSES)) if n 
 # (never posed): the director only switches their visibility mailboxes, showing one shape of each group at a time.
 assert [n for n in (f'pine_{i + 1:02}' for i in range(tl.TREES)) if n not in objs] == [], 'the pine trees changed'
 mesh_actor = scope['mesh_actor']          # the layout's helper: an anchored platform mesh actor from vertices, faces and an atlas tile
-stick_parts = []
 for i in range(tl.TREES):
     tree = objs[f'pine_{i + 1:02}']
     sticks, _ = cd.tree_candles(i, tuple(tree.location), tree.rotation_euler.z, tree.scale.x)
-    stick_parts += sticks
+    stick_verts, stick_faces = cd.merge(sticks)
+    mesh_actor(f'candle_sticks_{i+1:02}', stick_verts, stick_faces, cd.STICK_TILE)['wf_Visibility Mailbox'] = 440+i
     for (group, shape), parts in sorted(cd.tree_flame_shapes(i, tuple(tree.location), tree.rotation_euler.z, tree.scale.x).items()):
         verts, faces = cd.merge(parts)
         cell = tl.FLICKER_CELL0 + 2 * (2 * i + group) + (shape - 1)
         mesh_actor(f'candle_flames_{"ab"[group]}{shape}_{i + 1:02}', verts, faces, cd.FLAME_TILE)['wf_Visibility Mailbox'] = cell
-stick_verts, stick_faces = cd.merge(stick_parts)
-mesh_actor('candle_sticks', stick_verts, stick_faces, cd.STICK_TILE)['wf_Visibility Mailbox'] = tl.CANDLE_CELL
+    tree['wf_Visibility Mailbox'] = 330+i
 
 # The window boxes (docs/plans/2026-11-22-cuckoo-village-flowers.md). The 13 cottages share one mesh, `standard_house`, which today
 # carries the blocky plants of its two front window boxes. They come out of it into their own actor, `cottage_flower_blocks` (all
@@ -152,13 +154,10 @@ def to_world(cottage, local):
 
 # The blocks: the removed faces, once for each cottage, in the atlas material they always had.
 block_verts, block_faces, block_uvs = [], [], []
-for cottage in COTTAGES:
-    base = len(block_verts)
-    block_verts += [to_world(cottage, v) for v in old_verts]
-    block_uvs += old_uvs
-    block_faces += [tuple(i + base for i in f) for f in old_faces]
-static_actor('cottage_flower_blocks', block_verts, block_faces, [0] * len(block_faces), [bpy.data.materials['village_atlas']],
-             block_uvs, tl.BLOCKS_CELL)
+for i,cottage in enumerate(COTTAGES):
+    cottage['wf_Visibility Mailbox']=300+i
+    vs=[to_world(cottage,v) for v in old_verts]
+    static_actor(f'cottage_blocks_{i+1:02}',vs,old_faces,[0]*len(old_faces),[bpy.data.materials['village_atlas']],old_uvs,400+i)
 
 # The flowers: 26 boxes (cottage k has box 2k on the left and 2k + 1 on the right), petunia and geranium boxes by box_kind, one
 # mesh with a flat-coloured material slot for each of the ten colours. Thin petals and leaves are double-sided (flag 8).
@@ -175,36 +174,60 @@ for k, cottage in enumerate(COTTAGES):
     for side, bx in enumerate(BOX_X):
         index = 2 * k + side
         boxes.append(fw.placed(fw.box_flowers(index, 'full'), to_world(cottage, (bx, BOX_Y, BOX_TOP)), cottage.rotation_euler.z, cottage.scale.x))
-joined = fw.merge(boxes)
-f_verts, f_faces, f_mat, f_names = [], [], [], list(joined)
-for mi, name_ in enumerate(f_names):
-    verts_, faces_ = joined[name_]
-    base = len(f_verts)
-    f_verts += verts_
-    f_faces += [tuple(i + base for i in face) for face in faces_]
-    f_mat += [mi] * len(faces_)
-used = [n for n in f_names if joined[n][1]]
-assert len(f_faces) == fw.triangle_count(joined) and len(boxes) == 2 * tl.HOUSES
-static_actor('cottage_flowers', f_verts, f_faces, f_mat, [flower_materials[n] for n in f_names], [(0.0, 0.0)] * (3 * len(f_faces)), tl.FLOWERS_CELL)
-print(f'{TAG} window boxes: {len(f_faces)} flower triangles in {len(used)} materials, {sum(len(f) - 2 for f in block_faces)} block triangles')
+assert len(boxes) == 2 * tl.HOUSES
+for i in range(tl.HOUSES):
+    joined=fw.merge(boxes[2*i:2*i+2]); f_verts=[]; f_faces=[]; f_mat=[]; f_names=list(joined)
+    for mi,name_ in enumerate(f_names):
+        verts_,faces_=joined[name_];base=len(f_verts);f_verts+=verts_
+        f_faces += [tuple(j+base for j in face) for face in faces_];f_mat += [mi]*len(faces_)
+    static_actor(f'cottage_flowers_{i+1:02}',f_verts,f_faces,f_mat,[flower_materials[n] for n in f_names],[(0.,0.)]*(3*len(f_faces)),360+i)
 # Bavaria mode (plan "Bavaria mode"): the Bavarian parts show with the BAVARIA cell and the Classic parts they replace with the CLASSIC
 # cell. The four Bavarian figures stand on the Classic figures' pivots and are posed by the same formulas (the director writes to both
 # sets), so their meshes are pivot-local; every other Bavarian part is in world coordinates and never moves.
-for name in tl.FIG_NAMES + ['dial_numerals_classic']:
+for name in tl.FIG_NAMES:
     objs[name]['wf_Visibility Mailbox'] = tl.CLASSIC_CELL
+objs['dial_numerals_classic']['wf_Visibility Mailbox'] = 799
 cottages = [(tuple(objs[f'cottage_{i + 1:02}'].location), math.degrees(objs[f'cottage_{i + 1:02}'].rotation_euler.z), objs[f'cottage_{i + 1:02}'].scale.x)
             for i in range(tl.HOUSES)]
 for part in bv.all_parts(tl.TZ, cottages, scope['height']).values():
     actor = mesh_actor(part.name, part.verts, part.faces, part.tiles)
-    actor['wf_Visibility Mailbox'] = tl.BAVARIA_CELL
+    actor['wf_Visibility Mailbox'] = 799 if part.name == 'dial_numerals_bavaria' else tl.BAVARIA_CELL
+    if part.name.startswith('bavaria_trim_'):
+        actor['wf_Visibility Mailbox'] = tl.BAVARIA_HOUSE_CELL0+int(part.name[-2:])-1
+    if part.name == 'bavaria_dome':
+        actor['wf_Visibility Mailbox'] = tl.BAVARIA_HOUSE_CELL0+bv.DOME_HOUSE
     actor['cat_sections'] = json.dumps([list(s) for s in part.sections])        # the parts catalogue's labelled pieces
     if part.name in tl.FIG_B_NAMES:
         actor.location = objs[tl.FIG_NAMES[tl.FIG_B_NAMES.index(part.name)]].location     # the twin's pivot
+
+for reverse in (False, True):
+    for late in (False, True):
+        part = bv.dial_24h_numerals(tl.TZ, reverse, late)
+        actor = mesh_actor(part.name, part.verts, part.faces, part.tiles)
+        actor['wf_Visibility Mailbox'] = 280 + 2 * int(reverse) + int(late)
 
 # window glow: one visibility mailbox per cottage; the bird is shown only during the hourly calls
 for i in range(tl.HOUSES):
     objs[f'cottage_light_{i + 1:02}']['wf_Visibility Mailbox'] = GLOW_CELL0 + i
 objs[tl.BIRD_NAME]['wf_Visibility Mailbox'] = BIRD_CELL
+
+# Lit windows, candle flames and the clock markings remain legible at night.
+# Copy their material slots so the village's ordinary atlas stays responsive
+# to the sun; avoid changing the shared source material on other objects.
+emissive_materials = {}
+for obj in list(objs):
+    if obj.type != 'MESH' or not (obj.name.startswith('cottage_light_') or
+                                   obj.name.startswith('candle_flames_') or obj.name.startswith('dial_24h_') or
+                                   obj.name in ('tower_glow', 'hour_hand', 'minute_hand')):
+        continue
+    obj.data = obj.data.copy()
+    for slot, original in enumerate(obj.data.materials):
+        if not original:
+            continue
+        if original.name not in emissive_materials:
+            glow = original.copy(); glow.name = original.name + '_night_glow'; glow['wf_prelit'] = True
+            emissive_materials[original.name] = glow
+        obj.data.materials[slot] = emissive_materials[original.name]
 
 # Part inventory (not part of a normal build): CUCKOO_INVENTORY=<file.json> writes one record per actor, for the parts catalogue
 # (scripts/cuckoo-village-catalogue.py): its name, mesh, triangles, size, place, what shows it and the director's reach.
@@ -332,6 +355,7 @@ if review_dir:
 scene = bpy.context.scene
 objects = [o for o in scene.objects if o.get('wf_schema_path')]
 indices = {o.name: i + 1 for i, o in enumerate(objects)}
+assert all(name in indices for name in ('SunLight', 'AmbientLight', 'AlpineSkyDay', 'AlpineSkyWarm')), 'day/night actors missing'
 for names in (tl.FIG_NAMES, tl.FIG_B_NAMES):
     for a, b in zip(names, names[1:]):
         assert indices[b] - indices[a] == 1, 'the four figures of a set must be contiguous'

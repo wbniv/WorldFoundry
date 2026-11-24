@@ -3,6 +3,7 @@
 Plan docs/plans/2026-11-21-cuckoo-village.md, "Christmas candles": tiny candles on the conifers, never more than a dozen
 on one tree, in shared meshes, deterministic, and kept off the dial, the alcoves and the cuckoo door.
 """
+import ast
 import math
 import sys
 from pathlib import Path
@@ -12,8 +13,11 @@ sys.path.insert(0, str(ROOT / "wflevels/cuckoo_village"))
 import candles as cd  # noqa: E402
 import timeline as tl  # noqa: E402
 
-PINES = [(-13, 3, .9), (-10, 6.6, 1), (-5, 7.5, .8), (-1, 4.1, .7), (4, 6.7, 1), (9, 7, .9), (13, 3, 1), (-13, -2, .9),
-         (-12, -6, .8), (-5, -6.3, .8), (12, -5, .9), (4, -7, .8)]       # wflevels/cuckoo_village_layout/generate.py
+layout=ast.parse((ROOT/'wflevels/cuckoo_village_layout/generate.py').read_text())
+pine_loop=next(n for n in layout.body if isinstance(n,ast.For) and isinstance(n.iter,ast.Call)
+               and isinstance(n.iter.func,ast.Name) and n.iter.func.id=='enumerate'
+               and isinstance(n.target,ast.Tuple) and ast.unparse(n.target).startswith('(i, (x, y, s))'))
+PINES=ast.literal_eval(pine_loop.iter.args[0])
 
 
 def feet(i, x, y, s):
@@ -22,7 +26,7 @@ def feet(i, x, y, s):
 
 def test_a_tree_never_carries_more_than_a_dozen_candles_and_there_are_twelve_trees():
     assert cd.PER_TREE == len(cd.TIERS) * cd.PER_TIER == 10 <= 12
-    assert tl.TREES == len(PINES) == 12
+    assert tl.TREES == len(PINES) == 24
     for i, (x, y, s) in enumerate(PINES):
         assert len(feet(i, x, y, s)) == cd.PER_TREE
 
@@ -71,5 +75,5 @@ def test_the_candles_are_tiny_decorations_and_use_the_cream_and_glow_atlas_tiles
 
 def test_each_trees_flames_have_their_own_cells_beside_the_sticks_cell():
     cells = list(tl.FLICKER_CELLS)
-    assert len(set(cells)) == 48 and tl.CANDLE_CELL not in cells        # four meshes a tree: two groups, two shapes
-    assert max(cells) < 600 and min(cells) > tl.CANDLE_CELL - 1        # below the director's scratch cells, above the bird (213)
+    assert len(set(cells)) == 4*tl.TREES and tl.CANDLE_CELL not in cells
+    assert min(cells) >= 700 and max(cells) < 799

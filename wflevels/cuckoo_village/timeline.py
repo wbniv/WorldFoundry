@@ -50,7 +50,7 @@ BIRD_LUNGE = 0.05                   # how far the bird leans toward the viewer o
 # --- windows: local-time schedule, one stagger per house ---------------------------------------
 DUSK_START, DUSK_LEN = 17.5 * 3600, 3600.0
 DAWN_START, DAWN_LEN = 5.5 * 3600, 3600.0
-HOUSES = 13                          # the thirteen cottages; the open-mechanism tower has no window glow
+HOUSES = 24                          # authored cottage sites; the clock tower is separate
 
 
 def stagger(i: int) -> float:
@@ -154,18 +154,19 @@ import datetime as _dt
 
 DAY0 = _dt.date(2000, 1, 1)
 BAVARIA_CELL, CLASSIC_CELL = 230, 231   # visibility mailboxes: 1 shows the Bavarian parts (Bavaria mode On) / the Classic parts that Bavaria replaces (Off)
+BAVARIA_HOUSE_CELL0 = 550
 CANDLE_CELL = 214                 # the visibility mailbox of the candle sticks: 1 in season, or when Candles all year is On
 # Cells 215 to 226 once held one lit flag a tree; the flames now use FLICKER_CELLS below, so they are free.
 # The flicker (plan docs/plans/2026-11-22-cuckoo-village-candle-flicker.md, Option A): each tree's ten flames are two groups of five
 # (the candles with j = 0 and j = 1 of candles.candle_bases), each group built in two shapes. Group index i = 2 * tree + group has two
 # visibility cells, FLICKER_CELL0 + 2i (shape 1: tall, leaning one way) and the next (shape 2: short, leaning the other); exactly one is 1
-# while the group is lit. Cells 232 to 279; the director's scratch cells start at 600.
-FLICKER_CELL0 = 232
+# while the group is lit. The director's scratch cells start at 600.
+FLICKER_CELL0 = 700
 FLICKER_F1, FLICKER_F2 = 2.3, 3.7      # revolutions a second: whole cycles a minute (138 and 222), so the pattern repeats each minute
 FLICKER_PHI = 0.618034
-FLICKER_GROUPS = 2 * 12                # twelve trees, two groups each
-FLICKER_CELLS = tuple(range(FLICKER_CELL0, FLICKER_CELL0 + 2 * FLICKER_GROUPS))      # 232 to 279
-TREES = 12
+FLICKER_GROUPS = 2 * 24                # two groups for each authored tree
+FLICKER_CELLS = tuple(range(FLICKER_CELL0, FLICKER_CELL0 + 2 * FLICKER_GROUPS))
+TREES = 24
 FLOWERS_CELL = 227                # cottage_flowers (the petunia and geranium boxes) shows when Detailed flowers is On
 BLOCKS_CELL = 228                 # cottage_flower_blocks (today's blocks) shows when it is Off
 
@@ -182,7 +183,7 @@ def christmas_season(day: int) -> bool:
 
 # The settings object (CuckooVillageSettings, wfsource/source/oas/cuckoovillagesettings.oas): label -> (default, field read by the director).
 SETTINGS_DEFAULTS = {"Bavaria mode": 0, "Seasonal events": 1, "Candles all year": 0, "Window lights": 1, "Sound": 1, "Camera motion": 0,
-                     "Detailed flowers": 1}
+                     "Detailed flowers": 1, "Houses": 13, "Trees": 12}
 
 
 def bavaria_sign(settings: Dict[str, int] = None) -> float:

@@ -257,6 +257,32 @@ def dial_numerals(tower_z: float, reverse: bool = True) -> Part:
     return p
 
 
+def dial_24h_labels(late: bool) -> Tuple[str, ...]:
+    return tuple(f'{i + (12 if late else 0):02d}' for i in range(12))
+
+
+def dial_24h_numerals(tower_z: float, reverse: bool, late: bool) -> Part:
+    """Twelve upright two-digit labels, 00–11 or 12–23, in the selected direction."""
+    p = Part('dial_24h_%s_%s' % ('bavaria' if reverse else 'classic', 'late' if late else 'early'))
+    segments = {
+        '0': 'abcdef', '1': 'bc', '2': 'abged', '3': 'abgcd', '4': 'fgbc',
+        '5': 'afgcd', '6': 'afgecd', '7': 'abc', '8': 'abcdefg', '9': 'abfgcd',
+    }
+    strokes = {'a': ((-.010,.026),(.010,.026)), 'b': ((.010,.026),(.010,0)),
+               'c': ((.010,0),(.010,-.026)), 'd': ((-.010,-.026),(.010,-.026)),
+               'e': ((-.010,0),(-.010,-.026)), 'f': ((-.010,.026),(-.010,0)),
+               'g': ((-.010,0),(.010,0))}
+    for i, numeral in enumerate(dial_24h_labels(late)):
+        a = math.tau * numeral_angle(i, reverse)
+        cx, cz = NUMERAL_R * math.sin(a), DIAL_Z + NUMERAL_R * math.cos(a) + tower_z
+        for j, ch in enumerate(numeral):
+            x = cx + (j - .5) * .026
+            for segment in segments[ch]:
+                (x1,z1),(x2,z2) = strokes[segment]
+                p.beam(GOLDEN, (x+x1,NUMERAL_Y,cz+z1), (x+x2,NUMERAL_Y,cz+z2), .009, .008)
+    return p
+
+
 # --- the village: cottages, a dome, a maypole (world coordinates; the caller passes where the terrain is) ---------------------
 
 HOUSE_X, HOUSE_Y, HOUSE_RIDGE = 1.45, 1.25, 3.39         # the cottage asset's half-width, half-depth and ridge height (village_assets.blend), at scale 1

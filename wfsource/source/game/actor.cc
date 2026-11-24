@@ -1287,6 +1287,8 @@ Actor::ReadSystemMailbox( int boxnum ) const
             return Scalar::zero;
         }
 
+        case EMAILBOX_MATERIAL_OPACITY:
+            return Scalar::zero; // write-only, as with material-color overrides
         case EMAILBOX_FACE_COLOR_TOP:
         case EMAILBOX_FACE_COLOR_LIT:
         case EMAILBOX_FACE_COLOR_SHADOW:
@@ -1607,7 +1609,10 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
        }
             break;
 
-        case EMAILBOX_FACE_COLOR_TOP:
+    case EMAILBOX_MATERIAL_OPACITY:
+        if (ValidPtr(_renderActor)) _renderActor->SetMaterialOpacity(0, value.AsFloat());
+        break;
+    case EMAILBOX_FACE_COLOR_TOP:
         case EMAILBOX_FACE_COLOR_LIT:
         case EMAILBOX_FACE_COLOR_SHADOW:
         {

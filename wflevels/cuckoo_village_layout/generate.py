@@ -35,10 +35,15 @@ for name in ('house_instance_1', 'house_instance_2', 'house_glow_1', 'house_glow
 
 # Soft, overlapping rises form a continuous model surface, including around the square.
 def height(x, y):
-    return (0.22 + 1.18 * math.exp(-((x + 9) / 5.6)**2 - ((y - 5.7) / 3.8)**2)
+    baseline = (0.22 + 1.18 * math.exp(-((x + 9) / 5.6)**2 - ((y - 5.7) / 3.8)**2)
             + 1.0 * math.exp(-((x - 8) / 6.4)**2 - ((y - 6) / 4.6)**2)
             + .34 * math.exp(-((x + 11) / 4.0)**2 - ((y + 3) / 3.4)**2)
             + .28 * math.exp(-((x - 10) / 4.5)**2 - ((y + 3) / 3.8)**2))
+    # Raise broad, irregular hills while keeping the tower's exact datum.
+    tower_clearance = 1 - math.exp(-(x*x+y*y)/30)
+    return baseline + tower_clearance * (1.7*math.exp(-((x+9)/6.8)**2-((y-5)/5.0)**2)
+                 + 1.4*math.exp(-((x-9)/7.2)**2-((y-5.5)/5.3)**2)
+                 + .65*math.exp(-((x+10)/5.3)**2-((y+3)/4.5)**2))
 
 material = bpy.data.materials['village_atlas']
 def mesh_actor(name, vertices, faces, tile):
@@ -72,8 +77,8 @@ for r in range(1, RINGS + 1):
     for i in range(N):
         a = 2 * math.pi * i / N
         wobble = 1 + .045 * math.sin(3*a + .4) + .025 * math.sin(5*a - 1)
-        x = 16 * r / RINGS * wobble * math.cos(a)
-        y = 10 * r / RINGS * wobble * math.sin(a)
+        x = 19 * r / RINGS * wobble * math.cos(a)
+        y = 12 * r / RINGS * wobble * math.sin(a)
         vertices.append((x, y, height(x, y)))
 faces = [(0, 1+i, 1+(i+1)%N) for i in range(N)]
 for r in range(RINGS-1):
@@ -85,7 +90,24 @@ mesh_actor('rolling_terrain', vertices, faces, 4)
 # Wooden plinth below the height field.
 outer = vertices[1+(RINGS-1)*N:1+RINGS*N]
 baseverts = [(x,y,-.7) for x,y,z in outer] + [(x,y,z-.04) for x,y,z in outer]
-mesh_actor('wooden_base', baseverts, [(i,(i+1)%N,N+(i+1)%N,N+i) for i in range(N)], 0)
+# The village now blends directly into the surrounding grass rather than
+# exposing the old tabletop rim in the middle of the hillside.
+
+# Continue the grass beyond the original model rim, so elevated camera views
+# meet foothills instead of the stretched underside of the panorama.
+foothill_verts=[]
+for ring in range(17):
+    t=ring/16
+    for x,y,z in outer:
+        scale=1+1.3*t
+        zz=(z-.06)*(1-t)+(-1.5+.35*math.sin(x*.35)*math.cos(y*.3))*t
+        foothill_verts.append((x*scale,y*scale,zz))
+foothill_faces=[]
+for ring in range(16):
+    for i in range(N):
+        j=(i+1)%N;lo=ring*N;hi=(ring+1)*N
+        foothill_faces.append((lo+i,hi+i,hi+j,lo+j))
+mesh_actor('alpine_foothills',foothill_verts,foothill_faces,4)
 
 def ribbon(name, points, width, tile, lift=.045):
     verts = []
@@ -136,11 +158,15 @@ def place(source, name, x, y, angle=0, scale=1):
 houses=[(-11,4.2,-25,.90),(-7,6.2,15,1.0),(-3.4,4.2,-15,.86),
         (1.2,6.4,20,.90),(7,6,-18,1.0),(11.5,3.8,32,.90),
         (-11,1,-12,.95),(-7.8,-.7,35,.88),(-4,-.5,-28,.82),
-        (8.6,3,10,.80),(11,-2.7,-22,.96),(7,-3.2,24,1.02),(-8,-3.9,-14,.86)]
+        (8.6,3,10,.80),(11,-2.7,-22,.96),(7,-3.2,24,1.02),(-8,-3.9,-14,.86),
+        (-14,-5,-10,.82),(-9,-8.3,15,.80),(-5,-9,-18,.78),(0,-8,12,.80),(6.5,-8.8,-14,.78),
+        (10,-7,18,.80),(14,-4,-12,.78),(15,0,20,.75),(13,6,-20,.78),(8,9,12,.76),(1,9,-12,.76)]
 for i,(x,y,a,s) in enumerate(houses):
     place('standard_house',f'cottage_{i+1:02}',x,y,a,s)
     place('house_glow',f'cottage_light_{i+1:02}',x,y,a,s)
-for i,(x,y,s) in enumerate([(-13,3,.9),(-10,6.6,1),(-5,7.5,.8),(-1,4.1,.7),(4,6.7,1),(9,7,.9),(13,3,1),(-13,-2,.9),(-12,-6,.8),(-5,-6.3,.8),(12,-5,.9),(4,-7,.8)]):
+for i,(x,y,s) in enumerate([(-13,3,.9),(-10,6.6,1),(-5,7.5,.8),(-1,4.1,.7),(4,6.7,1),(9,7,.9),(14,2,1),(-13,-2,.9),(-10.5,-5.5,.8),(-5,-6.3,.8),(12,-5.7,.9),(4,-7,.8),
+                            (-16,0,.8),(-15,-7,.8),(-8,-9,.8),(-3,-9,.8),(3,-9,.8),(8,-9,.8),
+                            (15,-7,.8),(17,2,.8),(15,7,.8),(10,9,.8),(4,9,.8),(-5,9,.8)]):
     place('pine_tree',f'pine_{i+1:02}',x,y,i*31,s)
 # Move the tower and all its independently pivoted pieces together.
 tower_z=height(0,0)-.08

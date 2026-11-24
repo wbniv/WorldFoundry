@@ -385,6 +385,19 @@ RenderObject3D::SetMaterialColor(int idx, const Color& color)
 	ApplyMaterials(_materialList);
 }
 
+void RenderObject3D::SetMaterialOpacity(int idx, float opacity)
+{
+    if (idx < 0 || idx >= _materialCount || !ValidPtr(_materialList)) return;
+    if (opacity < 0) opacity = 0;
+    if (opacity > 1) opacity = 1;
+    // Match the material's 8-bit display precision and avoid re-baking the
+    // primitive list every frame while a slow transition barely changes.
+    opacity = static_cast<int>(opacity * 255.0f + 0.5f) / 255.0f;
+    if (_materialList[idx].GetOpacity() == opacity) return;
+    _materialList[idx].SetOpacity(opacity);
+    ApplyMaterials(_materialList);
+}
+
 bool
 RenderObject3D::UpdateMaterialTextureRGBA8(int idx, int x, int y, int width, int height,
                                            const unsigned char* pixels)

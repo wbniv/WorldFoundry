@@ -18,16 +18,16 @@ import timeline as tl  # noqa: E402
 
 
 def test_there_are_24_groups_and_no_two_share_a_phase():
-    assert tl.FLICKER_GROUPS == 2 * tl.TREES == 24
+    assert tl.FLICKER_GROUPS == 2 * tl.TREES == 48
     phases = [round(tl.flicker_phase(i), 6) for i in range(tl.FLICKER_GROUPS)]
-    assert len(set(phases)) == 24
+    assert len(set(phases)) == tl.FLICKER_GROUPS
 
 
 def test_the_cells_sit_between_the_flowers_and_the_directors_scratch_cells():
     cells = [tl.FLICKER_CELL0 + k for k in range(2 * tl.FLICKER_GROUPS)]
-    assert cells == list(range(232, 280)) and len(set(cells)) == 48
+    assert cells == list(range(700, 796)) and len(set(cells)) == 96
     used = {tl.CANDLE_CELL, tl.FLOWERS_CELL, tl.BLOCKS_CELL, tl.BAVARIA_CELL, tl.CLASSIC_CELL, *range(200, 214), *range(215, 227)}
-    assert not used & set(cells) and max(cells) < 600
+    assert not used & set(cells) and min(cells) >= 700 and max(cells) < 799
 
 
 def test_the_pattern_repeats_every_minute_because_the_rates_are_whole_cycles_a_minute():
@@ -55,7 +55,7 @@ def test_a_group_changes_shape_about_seven_times_a_second_and_the_groups_are_not
         same += len(shapes) == 1
     assert same == 0
     schedules = {tuple(tl.flame_shape(k / 30.0, gi // 2, gi % 2) for k in range(1800)) for gi in range(tl.FLICKER_GROUPS)}
-    assert len(schedules) == 24
+    assert len(schedules) == tl.FLICKER_GROUPS
 
 
 def test_each_tree_has_four_flame_meshes_of_five_candles_in_eight_triangles_each():
