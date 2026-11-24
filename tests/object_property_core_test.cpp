@@ -36,7 +36,8 @@ int main(int argc,char** argv){
     assert(!form.adjust);form.input(0);form.input(1u<<13);assert(form.value()=="1"&&!form.rail);
     form.input(1u<<13);assert(form.value()=="1");
     form.input(0);form.input(1u<<14);assert(form.value()=="0"&&!form.rail);
-    form.input(0);form.input(1u<<14);assert(form.value()=="0"&&!form.rail);
+    form.input(0);form.input(1u<<14);assert(form.value()=="0"&&form.rail);
+    form.input(0);form.input(1u<<13);assert(!form.rail);
     form.input(0);form.input(1u<<12);assert(form.field()->id==3);
     form.input(0);form.input(1u<<13);assert(form.value()=="5"&&!form.adjust);
     auto session=std::to_string(form.edit.session);
