@@ -403,10 +403,19 @@ if C.KIND in ('plants','jellyfish'):
     bpy.context.scene.collection.objects.link(settings)
     settings['wf_schema_path']=str(REPO/'wfsource/source/oas'/f'{settings_name.lower()}.oad')
     settings['wf_Model Type']='None'
+    settings['wf_Mobility']='Anchored'
     settings['wf_Mass']=0.0
+    box_fields(settings,(-.1,-.1,-.1,.1,.1,.1))
     box_fields(settings,(-.1,-.1,-.1,.1,.1,.1))
     normalized=json.loads(subprocess.check_output([str(REPO/'wftools/wf_attr_edit/target/release/catalog'),settings['wf_schema_path']],text=True))
     settings_fields={field['key']:field['index'] for field in normalized['fields'] if field['width']}
+
+if C.KIND in ('betta','lionfish'):
+    settings=bpy.data.objects.new('LevelSettings',None)
+    bpy.context.scene.collection.objects.link(settings)
+    settings['wf_schema_path']=str(OAD/'levelsettings.oad')
+    settings['wf_Model Type']='None'
+    settings['wf_Mass']=0.0
 
 objects=[o for o in bpy.context.scene.objects if o.get('wf_schema_path')]
 indices={o.name:i+1 for i,o in enumerate(objects)}

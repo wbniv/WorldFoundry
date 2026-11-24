@@ -108,9 +108,7 @@ def test_snowgoons_assets_and_main_has_none():
         assert (assets / name).resolve() == (game / name).resolve()
     # The snowgoons-only bundle since docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md (tests/test_game_apps_android.py).
     assert os.readlink(assets / "cd.iff") == "../../../../../wflevels/snowgoons-cd.iff"
-    # main/assets ships in every app, so it holds only what every app needs: the runtime property editor's page.
-    main_assets = SRC / "main" / "assets"
-    assert not main_assets.exists() or sorted(p.name for p in main_assets.iterdir()) == ["runtime-property-ui.json"]
+    assert sorted(p.name for p in (SRC / "main" / "assets").iterdir()) == ["runtime-property-ui.json"]
 
 
 def test_gradle_flavors():

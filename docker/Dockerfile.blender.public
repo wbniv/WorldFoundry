@@ -37,6 +37,19 @@ RUN apt-get update \
       build-essential git pkg-config python3 \
  && rm -rf /var/lib/apt/lists/*
 
+# Intel Open Image Denoise (`oidnDenoise`), for cleaning Cycles grain. Ubuntu's Blender 5.0.1
+# is built without OpenImageDenoise (Cycles' denoiser list is empty) and the archive has no
+# OIDN package, so this is the upstream release, pinned by checksum (the digest GitHub
+# publishes for the asset). It is a standalone C++ tool with its own libraries and no Python,
+# so it does not disturb the host-matching Python above. Use (PFM files only): oidnDenoise --ldr --srgb in.pfm -o out.pfm
+ARG OIDN_VERSION=2.5.1
+ARG OIDN_SHA256=743c3e2aff8c220d5d70fe6cb970fb3d36f2702d2693c61d1d148e404cf37cd6
+RUN python3 -c "import urllib.request as u; u.urlretrieve('https://github.com/RenderKit/oidn/releases/download/v${OIDN_VERSION}/oidn-${OIDN_VERSION}.x86_64.linux.tar.gz', '/tmp/oidn.tgz')" \
+ && echo "${OIDN_SHA256}  /tmp/oidn.tgz" | sha256sum -c - \
+ && mkdir -p /opt/oidn && tar -xzf /tmp/oidn.tgz -C /opt/oidn --strip-components=1 \
+ && rm /tmp/oidn.tgz \
+ && ln -s /opt/oidn/bin/oidnDenoise /usr/local/bin/oidnDenoise
+
 # The Rust level tools (iffcomp, levcomp, textile, oas2oad, wf_core) build from the
 # repo with the same pinned toolchain as docker/Dockerfile.linux-test.
 ENV RUSTUP_HOME=/opt/rustup

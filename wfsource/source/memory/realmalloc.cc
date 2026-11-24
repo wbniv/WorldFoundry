@@ -1,3 +1,4 @@
+#include <wf_lifetime.hpp>
 //==============================================================================
 // RealMalloc.cc
 // Copyright ( c ) 1997,1998,1999,2000,2001,2003 World Foundry Group.  
@@ -96,6 +97,7 @@ RealMalloc::RealMalloc( MEMORY_NAMED( const char* name ) )
 
 RealMalloc::~RealMalloc()
 {
+    wflifetime::beforeArenaRelease(this,nullptr,nullptr);
 #pragma message( "spew `DEL' tracking messages for all allocations" )
 	Validate();
 }
@@ -156,6 +158,12 @@ RealMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int li
 //	DBSTREAM1( printf(" named %s ",_name); )
 //	printf(" at %p,size = %d, left = %d\n",retVal, size, _endMemory-_currentFree);
 	++_allocationCount;
+
+#if DO_ASSERTIONS
+    wflifetime::acquire(wflifetime::Kind::Pool,this,reinterpret_cast<std::uintptr_t>(retVal),size,"RealMalloc",file,line);
+#else
+    wflifetime::acquire(wflifetime::Kind::Pool,this,reinterpret_cast<std::uintptr_t>(retVal),size,"RealMalloc",__FILE__,__LINE__);
+#endif
 	return(retVal);
 }
 
@@ -166,6 +174,7 @@ RealMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int li
 void
 RealMalloc::Free(const void* mem)
 {
+    wflifetime::release(wflifetime::Kind::Pool,this,reinterpret_cast<std::uintptr_t>(mem));
 	Validate();
 
 //	NEW|DEL, size, rounded_size, file, line, index, address, comments

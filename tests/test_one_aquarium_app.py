@@ -124,9 +124,7 @@ def test_the_aquarium_and_clocks_apps_have_a_phone_launcher_icon_as_well_as_the_
 
 
 def test_the_touch_controller_is_wired_through_the_shared_host():
-    """Will, 2026-11-22: the combined apps had no joystick or buttons on the Pixel once the standalone Aquarium app
-    (which had them) was retired, and the Clocks chooser and its hold-A settings form need keys. The host both apps
-    share draws the engine's controller on a touchscreen phone and turns touches into the remote's joystick bits."""
+    """The shared host keeps touch and settings available without showing phone game controls."""
     host = HOST
     assert '#include "touch_bridge.h"' in host
     assert "TouchBridge touchBridge;" in host
@@ -156,5 +154,5 @@ def test_the_settings_form_gets_touch_before_the_controller_on_the_game_thread()
     jni = jni[: jni.index("\n}\n")]
     assert "touchQueue.push_back" in jni and "propertyui::" not in jni and "touchBridge.event" not in jni
     # a touch the form takes lets go of every controller button
-    assert "if (settingsTouch) touchBridge.release(menuKeys);" in host
+    assert "if (settingsTouch) {" in host and "touchBridge.release(menuKeys);" in host
 

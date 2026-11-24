@@ -1,3 +1,4 @@
+#include "include/wf_lifetime.hpp"
 #include "runtime_property_host.hpp"
 #include <algorithm>
 #include <cmath>
@@ -5,7 +6,7 @@ namespace wfprops {
 Host& host(){static Host value;return value;}
 void Host::bind(Registry* registry){if(registry_==registry)return;close();registry_=registry;}
 bool Host::available() const {return registry_&&!registry_->editableObjects().empty();}
-void Host::consumer(const std::string& schema,Consumer consumer){consumers_[schema]=std::move(consumer);}
+void Host::consumer(const std::string& schema,Consumer consumer){wflifetime::Scope hostOwner(wflifetime::Persistent);consumers_[schema]=std::move(consumer);}
 void Host::close(){form.edit.cancel();form.action={};modal=picker=false;owners.clear();selected=0;resetPick();previous_=pickerPrevious_=0;hold_=0;swallow_=true;}
 void Host::resetPick(){pick=PickMode::Off;pickCandidates.clear();pickTargets.clear();highlight=-1;highlightActor_=0;group.clear();groupSelected=0;}
 void Host::suspend(){close();}

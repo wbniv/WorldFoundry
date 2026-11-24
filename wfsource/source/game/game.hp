@@ -54,6 +54,10 @@ const int NumJoysticks = 2;
 
 class WFGame
 {
+#ifdef WF_LIFETIME_DIAGNOSTICS
+    wflifetime::Owner _lifetimeGeneration = 0;
+    wflifetime::Owner _lifetimePreviousOwner = 0;
+#endif
 public:
 	WFGame( const int nStartingLevel = 0 );
 	~WFGame();

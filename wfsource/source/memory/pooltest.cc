@@ -1,3 +1,6 @@
+#include <wf_lifetime.hpp>
+#include <cstdlib>
+#include <cstring>
 //==============================================================================
 // pooltest.cc
 // Copyright ( c ) 2026 World Foundry Group.
@@ -92,6 +95,31 @@ int
 TestPoolArrays()
 {
 	int failures = 0;
+
+#ifdef WF_LIFETIME_DIAGNOSTICS
+    struct LevelCheck {
+        wflifetime::Owner generation=wflifetime::beginLevel(-1);
+        wflifetime::Owner previous=wflifetime::exchange(generation);
+        ~LevelCheck(){wflifetime::exchange(previous);if(!wflifetime::endLevel(generation))std::abort();}
+    };
+    // Faults use the real DMalloc destructor, not a simulated registry call.
+    if(const char* fault=std::getenv("WF_LIFETIME_POOL_FAULT")){
+        auto generation=wflifetime::beginLevel(-1);
+        {
+            wflifetime::Scope level(generation);
+            alignas(16) static char bytes[4096];
+            LMalloc parent(bytes,sizeof(bytes) MEMORY_NAMED(COMMA "LifetimeFaultParent"));
+            DMalloc arena(parent,2048 MEMORY_NAMED(COMMA "LifetimeFaultArena"));
+            void* block=arena.Allocate(128 ASSERTIONS(COMMA __FILE__ COMMA __LINE__));
+            if(!std::strcmp(fault,"destructor")){
+                struct Tracked { WF_LIFETIME_OBJECT("PoolFaultObject") };
+                new(block) Tracked; // deliberately omit destructor AND Free
+            }
+        }
+        return wflifetime::endLevel(generation)?0:86;
+    }
+    LevelCheck lifetimeCheck;
+#endif
 
 	// LMalloc requires a WF_POINTER_ALIGN-aligned base; static (not stack) so a
 	// 64 KB buffer doesn't depend on the platform's stack budget.

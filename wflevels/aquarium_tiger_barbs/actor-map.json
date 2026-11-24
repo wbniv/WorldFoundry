@@ -153,6 +153,7 @@
     "room-backdrop": 66,
     "AmbientLight": 67,
     "LookB": 68,
-    "cs_school": 69
+    "cs_school": 69,
+    "LevelSettings": 70
   }
 }

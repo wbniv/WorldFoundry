@@ -867,6 +867,14 @@ if TANK == 'discus':
     settings['wf_Model Type'] = 'None'
     settings['wf_Mass'] = 0.0
     settings.location = director.location
+elif TANK in ('', 'clownfish', 'tiger_barbs'):
+    settings = bpy.data.objects.new('LevelSettings', None)
+    scene.collection.objects.link(settings)
+    settings['wf_schema_path'] = os.path.join(REPO, 'wfsource/source/oas/levelsettings.oad')
+    settings['wf_Model Type'] = 'None'
+    settings['wf_Mobility'] = 'Anchored'
+    settings['wf_Mass'] = 0.0
+    settings.location = director.location
 
 wf_objects = [o for o in scene.objects if o.get('wf_schema_path')]
 idx = {o.name: wf_objects.index(o) + ACTOR_IDX_BIAS for o in wf_objects}

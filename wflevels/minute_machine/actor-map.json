@@ -87,7 +87,8 @@
   "card_3_7": 85,
   "card_3_8": 86,
   "card_3_9": 87,
-  "AmbientLight": 88
+  "AmbientLight": 88,
+  "MinuteMachineSettings": 89
  },
  "reference": 36502.0
 }

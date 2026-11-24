@@ -31,6 +31,7 @@ COLORS = {
     'white': (.90,.93,.88), 'express': (.72,.80,.78), 'express_trim': (.13,.42,.62),
 }
 COLORS.update({'water':(.65,.85,.75), 'bamboo':(.90,.86,.44), 'fishwhite':(1.,.98,.90), 'fishred':(1.,.23,.12), 'koi_skin':(1.,1.,1.), 'moss':(.43,.66,.29), 'stone':(.72,.72,.62), 'dialstone':(.82,.80,.70), 'lantern':(1.,.84,.43), 'dark':(.32,.23,.12), 'stream':(.85,1.,1.), 'ripple':(.40,.61,.54), 'tree_light':(.18,.43,.14),'sky':(.55,.72,.63),'scene':(1.,1.,1.)})
+COLORS['night_glow']=(1.,.55,.08)
 materials = {}
 for key, rgb in COLORS.items():
     mat = bpy.data.materials.new(key)
@@ -214,6 +215,9 @@ for x in (-.25,.21):
     for y in (-.25,.21): lantern.box((x,y,.12),(x+.04,y+.04,.63),'dark')
 lantern.box((-.33,-.33,.57),(.33,.33,.64),'dark')
 actor('FloatingLantern','platform',lantern,pos=(0,3.55,0))
+night_lantern=Mesh('night_lantern')
+night_lantern.sphere((0,0,.36),.31,'night_glow',segments=16,rings=8)
+actor('NightLantern','platform',night_lantern,pos=(0,3.55,0),fields={'Visibility Mailbox':780})
 
 koi=Mesh('koi');ellipse(koi,(0,0,.13),(.30,.72,.20),'koi_skin')
 koi.face([(-.08,-.52,.13),(-.44,-1,.08),(0,-.82,.13),(.44,-1,.08),(.08,-.52,.13)],'fishwhite')
@@ -263,7 +267,8 @@ def spline_word(component):
     return f': bp-c{component} INDEXOF_WALL_SECOND read-mailbox 10 / {branches} {polynomial(5)} '+'then '*5+';'
 lines.extend(spline_word(i) for i in range(6))
 lines.append(': bp-tick')
-for name,phase,radius in (('FloatingLantern','bp-hour',3.55),('LanternRipples','bp-hour',3.55),('Koi','bp-minute',2.85),('KoiRipples','bp-minute',2.85)):
+lines.append(' INDEXOF_WALL_HOUR read-mailbox dup 6 < swap 18 >= | 780 write-mailbox')
+for name,phase,radius in (('FloatingLantern','bp-hour',3.55),('NightLantern','bp-hour',3.55),('LanternRipples','bp-hour',3.55),('Koi','bp-minute',2.85),('KoiRipples','bp-minute',2.85)):
     lines += [f' {phase} sin-rev {radius} * INDEXOF_X_POS {idx[name]} write-actor-mailbox',
               f' {phase} cos-rev {radius} * INDEXOF_Y_POS {idx[name]} write-actor-mailbox']
 lines.append(f' bp-minute negate INDEXOF_ROTATION_C {idx["Koi"]} write-actor-mailbox')

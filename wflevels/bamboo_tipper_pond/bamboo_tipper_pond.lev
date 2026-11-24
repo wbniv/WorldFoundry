@@ -293,7 +293,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ Bamboo pond: local time controls the two orbits and the silent tipper.\n: bp-hour INDEXOF_WALL_HOUR read-mailbox 12 / INDEXOF_WALL_MINUTE read-mailbox 720 / + INDEXOF_WALL_SECOND read-mailbox 43200 / + ;\n: bp-minute INDEXOF_WALL_MINUTE read-mailbox 60 / INDEXOF_WALL_SECOND read-mailbox 3600 / + ;\n: bp-tip INDEXOF_WALL_SECOND read-mailbox dup 1 < if .1 * else dup 2 < if drop .1 else dup 3 < if 3 swap - .1 * else drop 0 then then then ;\n: bp-fill INDEXOF_WALL_SECOND read-mailbox dup 3 < if drop 0 else 3 - 57 / then ;\n: bp-c0 INDEXOF_WALL_SECOND read-mailbox 10 / dup 1 < if dup dup 3.5000000 * -3.5000000 + * -3.0000000 + * 0.0000000 + else dup 2 < if 1 - dup dup -2.6000000 * 6.1000000 + * 0.5000000 + * -3.0000000 + else dup 3 < if 2 - dup dup -3.2000000 * 4.1000000 + * 4.9000000 + * 1.0000000 + else dup 4 < if 3 - dup dup -0.8000000 * -1.5000000 + * 3.5000000 + * 6.8000000 + else dup 5 < if 4 - dup dup 4.1000000 * -7.2000000 + * -1.9000000 + * 8.0000000 + else 5 - dup dup -1.0000000 * 2.0000000 + * -4.0000000 + * 3.0000000 + then then then then then ;\n: bp-c1 INDEXOF_WALL_SECOND read-mailbox 10 / dup 1 < if dup dup 0.5000000 * -0.5000000 + * 2.0000000 + * -11.0000000 + else dup 2 < if 1 - dup dup -1.5000000 * 2.0000000 + * 2.5000000 + * -9.0000000 + else dup 3 < if 2 - dup dup -1.5000000 * 0.5000000 + * 2.0000000 + * -6.0000000 + else dup 4 < if 3 - dup dup 2.5000000 * -5.0000000 + * -1.5000000 + * -5.0000000 + else dup 5 < if 4 - dup dup 3.0000000 * -3.0000000 + * -4.0000000 + * -9.0000000 + else 5 - dup dup -3.0000000 * 6.0000000 + * -1.0000000 + * -13.0000000 + then then then then then ;\n: bp-c2 INDEXOF_WALL_SECOND read-mailbox 10 / dup 1 < if dup dup 1.7500000 * -3.5000000 + * -0.7500000 + * 10.0000000 + else dup 2 < if 1 - dup dup 0.5500000 * -0.5500000 + * -2.5000000 + * 7.5000000 + else dup 3 < if 2 - dup dup 1.3500000 * -0.8000000 + * -1.9500000 + * 5.0000000 + else dup 4 < if 3 - dup dup -1.6000000 * 3.5000000 + * 0.5000000 + * 3.6000000 + else dup 5 < if 4 - dup dup -1.3000000 * 1.6000000 + * 2.7000000 + * 6.0000000 + else 5 - dup dup -0.7500000 * -0.2500000 + * 2.0000000 + * 9.0000000 + then then then then then ;\n: bp-c3 INDEXOF_WALL_SECOND read-mailbox 10 / dup 1 < if dup dup 2.7500000 * -3.3500000 + * -0.9000000 + * 0.7000000 + else dup 2 < if 1 - dup dup -1.8500000 * 4.0000000 + * 0.6500000 + * -0.8000000 + else dup 3 < if 2 - dup dup -2.7000000 * 3.0000000 + * 3.1000000 + * 2.0000000 + else dup 4 < if 3 - dup dup 1.6000000 * -4.0000000 + * 1.0000000 + * 5.4000000 + else dup 5 < if 4 - dup dup 2.1500000 * -2.9500000 + * -2.2000000 + * 4.0000000 + else 5 - dup dup -1.9500000 * 3.3000000 + * -1.6500000 + * 1.0000000 + then then then then then ;\n: bp-c4 INDEXOF_WALL_SECOND read-mailbox 10 / dup 1 < if dup dup -0.7500000 * 1.0000000 + * 0.2500000 + * 0.0000000 + else dup 2 < if 1 - dup dup 0.7500000 * -1.2500000 + * 0.0000000 + * 0.5000000 + else dup 3 < if 2 - dup dup -0.2500000 * 0.5000000 + * -0.2500000 + * 0.0000000 + else dup 4 < if 3 - dup dup 0.0000000 * 0.0000000 + * 0.0000000 + * 0.0000000 + else dup 5 < if 4 - dup dup 0.0000000 * 0.0000000 + * 0.0000000 + * 0.0000000 + else 5 - dup dup 0.2500000 * -0.2500000 + * 0.0000000 + * 0.0000000 + then then then then then ;\n: bp-c5 INDEXOF_WALL_SECOND read-mailbox 10 / dup 1 < if dup dup 0.0500000 * -0.0500000 + * 0.0000000 + * 0.0000000 + else dup 2 < if 1 - dup dup 0.4500000 * -0.4000000 + * 0.0500000 + * 0.0000000 + else dup 3 < if 2 - dup dup -1.4500000 * 1.9500000 + * 0.6000000 + * 0.1000000 + else dup 4 < if 3 - dup dup 1.1500000 * -2.1000000 + * 0.1500000 + * 1.2000000 + else dup 5 < if 4 - dup dup 0.0000000 * 0.2000000 + * -0.6000000 + * 0.4000000 + else 5 - dup dup -0.2000000 * 0.4000000 + * -0.2000000 + * 0.0000000 + then then then then then ;\n: bp-tick\n bp-hour sin-rev 3.55 * INDEXOF_X_POS 16 write-actor-mailbox\n bp-hour cos-rev 3.55 * INDEXOF_Y_POS 16 write-actor-mailbox\n bp-hour sin-rev 3.55 * INDEXOF_X_POS 19 write-actor-mailbox\n bp-hour cos-rev 3.55 * INDEXOF_Y_POS 19 write-actor-mailbox\n bp-minute sin-rev 2.85 * INDEXOF_X_POS 17 write-actor-mailbox\n bp-minute cos-rev 2.85 * INDEXOF_Y_POS 17 write-actor-mailbox\n bp-minute sin-rev 2.85 * INDEXOF_X_POS 18 write-actor-mailbox\n bp-minute cos-rev 2.85 * INDEXOF_Y_POS 18 write-actor-mailbox\n bp-minute negate INDEXOF_ROTATION_C 17 write-actor-mailbox\n 11 131 property@ if 0 <> else drop 1 then if INDEXOF_WALL_SECOND read-mailbox 60 / sin-rev .02 * else 0 then INDEXOF_ROTATION_C 15 write-actor-mailbox\n 11 132 property@ if 0 <> else drop 1 then 870 write-mailbox\n 11 133 property@ if dup 0 = if drop .75 else 2 = if 1.35 else 1 then then else drop 1 then INDEXOF_X_SCALE 17 write-actor-mailbox\n 11 133 property@ if dup 0 = if drop .75 else 2 = if 1.35 else 1 then then else drop 1 then INDEXOF_Y_SCALE 17 write-actor-mailbox\n 11 133 property@ if dup 0 = if drop .75 else 2 = if 1.35 else 1 then then else drop 1 then INDEXOF_Z_SCALE 17 write-actor-mailbox\n bp-tip INDEXOF_ROTATION_B 21 write-actor-mailbox\n bp-tip INDEXOF_ROTATION_B 22 write-actor-mailbox\n bp-fill .12 * 1.39 + INDEXOF_Z_POS 22 write-actor-mailbox\n 0 0 16 fish-deform\n 0 0 18 fish-deform\n 0 0 19 fish-deform\n 0 0 15 fish-deform\n 0 0 21 fish-deform\n 0 0 22 fish-deform\n INDEXOF_WALL_SECOND read-mailbox 2 / .04 17 fish-deform\n 11 129 property@ if 0 <> else drop 0 then if\n 0.0000000 INDEXOF_X_POS 7 write-actor-mailbox\n -8.0000000 INDEXOF_Y_POS 7 write-actor-mailbox\n 8.5000000 INDEXOF_Z_POS 7 write-actor-mailbox\n 0.7000000 INDEXOF_X_POS 6 write-actor-mailbox\n 0.0000000 INDEXOF_Y_POS 6 write-actor-mailbox\n 0.0000000 INDEXOF_Z_POS 6 write-actor-mailbox\n else\n bp-c0 INDEXOF_X_POS 7 write-actor-mailbox\n bp-c1 INDEXOF_Y_POS 7 write-actor-mailbox\n bp-c2 INDEXOF_Z_POS 7 write-actor-mailbox\n bp-c3 INDEXOF_X_POS 6 write-actor-mailbox\n bp-c4 INDEXOF_Y_POS 6 write-actor-mailbox\n bp-c5 INDEXOF_Z_POS 6 write-actor-mailbox\n then\n;\nbp-tick" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ Bamboo pond: local time controls the two orbits and the silent tipper.\n: bp-hour INDEXOF_WALL_HOUR read-mailbox 12 / INDEXOF_WALL_MINUTE read-mailbox 720 / + INDEXOF_WALL_SECOND read-mailbox 43200 / + ;\n: bp-minute INDEXOF_WALL_MINUTE read-mailbox 60 / INDEXOF_WALL_SECOND read-mailbox 3600 / + ;\n: bp-tip INDEXOF_WALL_SECOND read-mailbox dup 1 < if .1 * else dup 2 < if drop .1 else dup 3 < if 3 swap - .1 * else drop 0 then then then ;\n: bp-fill INDEXOF_WALL_SECOND read-mailbox dup 3 < if drop 0 else 3 - 57 / then ;\n: bp-c0 INDEXOF_WALL_SECOND read-mailbox 10 / dup 1 < if dup dup 3.5000000 * -3.5000000 + * -3.0000000 + * 0.0000000 + else dup 2 < if 1 - dup dup -2.6000000 * 6.1000000 + * 0.5000000 + * -3.0000000 + else dup 3 < if 2 - dup dup -3.2000000 * 4.1000000 + * 4.9000000 + * 1.0000000 + else dup 4 < if 3 - dup dup -0.8000000 * -1.5000000 + * 3.5000000 + * 6.8000000 + else dup 5 < if 4 - dup dup 4.1000000 * -7.2000000 + * -1.9000000 + * 8.0000000 + else 5 - dup dup -1.0000000 * 2.0000000 + * -4.0000000 + * 3.0000000 + then then then then then ;\n: bp-c1 INDEXOF_WALL_SECOND read-mailbox 10 / dup 1 < if dup dup 0.5000000 * -0.5000000 + * 2.0000000 + * -11.0000000 + else dup 2 < if 1 - dup dup -1.5000000 * 2.0000000 + * 2.5000000 + * -9.0000000 + else dup 3 < if 2 - dup dup -1.5000000 * 0.5000000 + * 2.0000000 + * -6.0000000 + else dup 4 < if 3 - dup dup 2.5000000 * -5.0000000 + * -1.5000000 + * -5.0000000 + else dup 5 < if 4 - dup dup 3.0000000 * -3.0000000 + * -4.0000000 + * -9.0000000 + else 5 - dup dup -3.0000000 * 6.0000000 + * -1.0000000 + * -13.0000000 + then then then then then ;\n: bp-c2 INDEXOF_WALL_SECOND read-mailbox 10 / dup 1 < if dup dup 1.7500000 * -3.5000000 + * -0.7500000 + * 10.0000000 + else dup 2 < if 1 - dup dup 0.5500000 * -0.5500000 + * -2.5000000 + * 7.5000000 + else dup 3 < if 2 - dup dup 1.3500000 * -0.8000000 + * -1.9500000 + * 5.0000000 + else dup 4 < if 3 - dup dup -1.6000000 * 3.5000000 + * 0.5000000 + * 3.6000000 + else dup 5 < if 4 - dup dup -1.3000000 * 1.6000000 + * 2.7000000 + * 6.0000000 + else 5 - dup dup -0.7500000 * -0.2500000 + * 2.0000000 + * 9.0000000 + then then then then then ;\n: bp-c3 INDEXOF_WALL_SECOND read-mailbox 10 / dup 1 < if dup dup 2.7500000 * -3.3500000 + * -0.9000000 + * 0.7000000 + else dup 2 < if 1 - dup dup -1.8500000 * 4.0000000 + * 0.6500000 + * -0.8000000 + else dup 3 < if 2 - dup dup -2.7000000 * 3.0000000 + * 3.1000000 + * 2.0000000 + else dup 4 < if 3 - dup dup 1.6000000 * -4.0000000 + * 1.0000000 + * 5.4000000 + else dup 5 < if 4 - dup dup 2.1500000 * -2.9500000 + * -2.2000000 + * 4.0000000 + else 5 - dup dup -1.9500000 * 3.3000000 + * -1.6500000 + * 1.0000000 + then then then then then ;\n: bp-c4 INDEXOF_WALL_SECOND read-mailbox 10 / dup 1 < if dup dup -0.7500000 * 1.0000000 + * 0.2500000 + * 0.0000000 + else dup 2 < if 1 - dup dup 0.7500000 * -1.2500000 + * 0.0000000 + * 0.5000000 + else dup 3 < if 2 - dup dup -0.2500000 * 0.5000000 + * -0.2500000 + * 0.0000000 + else dup 4 < if 3 - dup dup 0.0000000 * 0.0000000 + * 0.0000000 + * 0.0000000 + else dup 5 < if 4 - dup dup 0.0000000 * 0.0000000 + * 0.0000000 + * 0.0000000 + else 5 - dup dup 0.2500000 * -0.2500000 + * 0.0000000 + * 0.0000000 + then then then then then ;\n: bp-c5 INDEXOF_WALL_SECOND read-mailbox 10 / dup 1 < if dup dup 0.0500000 * -0.0500000 + * 0.0000000 + * 0.0000000 + else dup 2 < if 1 - dup dup 0.4500000 * -0.4000000 + * 0.0500000 + * 0.0000000 + else dup 3 < if 2 - dup dup -1.4500000 * 1.9500000 + * 0.6000000 + * 0.1000000 + else dup 4 < if 3 - dup dup 1.1500000 * -2.1000000 + * 0.1500000 + * 1.2000000 + else dup 5 < if 4 - dup dup 0.0000000 * 0.2000000 + * -0.6000000 + * 0.4000000 + else 5 - dup dup -0.2000000 * 0.4000000 + * -0.2000000 + * 0.0000000 + then then then then then ;\n: bp-tick\n INDEXOF_WALL_HOUR read-mailbox dup 6 < swap 18 >= | 780 write-mailbox\n bp-hour sin-rev 3.55 * INDEXOF_X_POS 16 write-actor-mailbox\n bp-hour cos-rev 3.55 * INDEXOF_Y_POS 16 write-actor-mailbox\n bp-hour sin-rev 3.55 * INDEXOF_X_POS 17 write-actor-mailbox\n bp-hour cos-rev 3.55 * INDEXOF_Y_POS 17 write-actor-mailbox\n bp-hour sin-rev 3.55 * INDEXOF_X_POS 20 write-actor-mailbox\n bp-hour cos-rev 3.55 * INDEXOF_Y_POS 20 write-actor-mailbox\n bp-minute sin-rev 2.85 * INDEXOF_X_POS 18 write-actor-mailbox\n bp-minute cos-rev 2.85 * INDEXOF_Y_POS 18 write-actor-mailbox\n bp-minute sin-rev 2.85 * INDEXOF_X_POS 19 write-actor-mailbox\n bp-minute cos-rev 2.85 * INDEXOF_Y_POS 19 write-actor-mailbox\n bp-minute negate INDEXOF_ROTATION_C 18 write-actor-mailbox\n 11 131 property@ if 0 <> else drop 1 then if INDEXOF_WALL_SECOND read-mailbox 60 / sin-rev .02 * else 0 then INDEXOF_ROTATION_C 15 write-actor-mailbox\n 11 132 property@ if 0 <> else drop 1 then 870 write-mailbox\n 11 133 property@ if dup 0 = if drop .75 else 2 = if 1.35 else 1 then then else drop 1 then INDEXOF_X_SCALE 18 write-actor-mailbox\n 11 133 property@ if dup 0 = if drop .75 else 2 = if 1.35 else 1 then then else drop 1 then INDEXOF_Y_SCALE 18 write-actor-mailbox\n 11 133 property@ if dup 0 = if drop .75 else 2 = if 1.35 else 1 then then else drop 1 then INDEXOF_Z_SCALE 18 write-actor-mailbox\n bp-tip INDEXOF_ROTATION_B 22 write-actor-mailbox\n bp-tip INDEXOF_ROTATION_B 23 write-actor-mailbox\n bp-fill .12 * 1.39 + INDEXOF_Z_POS 23 write-actor-mailbox\n 0 0 16 fish-deform\n 0 0 19 fish-deform\n 0 0 20 fish-deform\n 0 0 15 fish-deform\n 0 0 22 fish-deform\n 0 0 23 fish-deform\n INDEXOF_WALL_SECOND read-mailbox 2 / .04 18 fish-deform\n 11 129 property@ if 0 <> else drop 0 then if\n 0.0000000 INDEXOF_X_POS 7 write-actor-mailbox\n -8.0000000 INDEXOF_Y_POS 7 write-actor-mailbox\n 8.5000000 INDEXOF_Z_POS 7 write-actor-mailbox\n 0.7000000 INDEXOF_X_POS 6 write-actor-mailbox\n 0.0000000 INDEXOF_Y_POS 6 write-actor-mailbox\n 0.0000000 INDEXOF_Z_POS 6 write-actor-mailbox\n else\n bp-c0 INDEXOF_X_POS 7 write-actor-mailbox\n bp-c1 INDEXOF_Y_POS 7 write-actor-mailbox\n bp-c2 INDEXOF_Z_POS 7 write-actor-mailbox\n bp-c3 INDEXOF_X_POS 6 write-actor-mailbox\n bp-c4 INDEXOF_Y_POS 6 write-actor-mailbox\n bp-c5 INDEXOF_Z_POS 6 write-actor-mailbox\n then\n;\nbp-tick" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
@@ -1610,6 +1610,104 @@
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "NightLantern" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 3.5499999523162842(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3100000023841858(1.15.16) -0.3100000023841858(1.15.16) 0.0500000007450581(1.15.16) 0.3100000023841858(1.15.16) 0.3100000023841858(1.15.16) 0.6700000166893005(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "nightlantern.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 7l } { 'STR' "7" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Movement Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "Step Size" } { 'DATA' 0.5499877929687500(1.15.16) } { 'STR' "0.54998779296875" } }
+		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Horizontal Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.9499969482421875(1.15.16) } { 'STR' "0.9499969482421875" } }
+		{ 'I32' { 'NAME' "At End Of Path" } { 'STR' "Ping-Pong" } }
+		{ 'STR' { 'NAME' "Object To Follow" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Follow Offset" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.8999938964843750(1.15.16) } { 'STR' "0.899993896484375" } }
+		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 5.0000000000000000(1.15.16) } { 'STR' "5.0" } }
+		{ 'FX32' { 'NAME' "Crawling Acceleration" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Jumping Acceleration" } { 'DATA' 18.0000000000000000(1.15.16) } { 'STR' "18.0" } }
+		{ 'FX32' { 'NAME' "Jumping Momentum Transfer" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 9.8099975585937500(1.15.16) } { 'STR' "9.80999755859375" } }
+		{ 'FX32' { 'NAME' "Fall Anim Threshold" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "Stun Threshold" } { 'DATA' 2.5000000000000000(1.15.16) } { 'STR' "2.5" } }
+		{ 'FX32' { 'NAME' "Stun Duration" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'STR' { 'NAME' "Tool A" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool B" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool C" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool D" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool E" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Tool F" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "hp" } { 'DATA' 32767.0000000000000000(1.15.16) } { 'STR' "32767.0" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "NightLantern.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Animation Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 780l } { 'STR' "780" } }
+		{ 'I32' { 'NAME' "Matte Type" } { 'DATA' 1l } { 'STR' "Color" } }  //None|Color|Image
+		{ 'I32' { 'NAME' "Background Color" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Debug Background Color" } { 'DATA' 7829367l } { 'STR' "7829367" } }
+		{ 'FX32' { 'NAME' "Distance" } { 'DATA' 8000.0000000000000000(1.15.16) } { 'STR' "8000.0" } }
+		{ 'FILE' { 'NAME' "Tiles" } { 'STR' "" } }
+		{ 'FILE' { 'NAME' "Map" } { 'STR' "" } }
+		{ 'FX32' { 'NAME' "X Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Y Rotation Scale" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'I32' { 'NAME' "generationType" } { 'STR' "Pulse" } }
+		{ 'FX32' { 'NAME' "period" } { 'DATA' 0.1499938964843750(1.15.16) } { 'STR' "0.149993896484375" } }
+		{ 'FX32' { 'NAME' "timeDelay" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "yArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "zArc" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "initialSphereRadius" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'FX32' { 'NAME' "sphereExpansionRate" } { 'DATA' 0.0999908447265625(1.15.16) } { 'STR' "0.0999908447265625" } }
+		{ 'I32' { 'NAME' "nParticles" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "initialVelocity" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "initialAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "initialAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "deltaAngleC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "lifeTime" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
+		{ 'FX32' { 'NAME' "initialAlpha" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "alphaDecrement" } { 'DATA' 0.0499877929687500(1.15.16) } { 'STR' "0.04998779296875" } }
+		{ 'I32' { 'NAME' "Type" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'I32' { 'NAME' "forceType" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "magnitude2" } { 'DATA' 0.2999877929687500(1.15.16) } { 'STR' "0.29998779296875" } }
+		{ 'FX32' { 'NAME' "vectorX2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorY2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "vectorZ2" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0000000093132257(1.15.16) } { 'STR' "-0.000000" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 

@@ -775,6 +775,20 @@ tasks:
     cmds:
       - python3 scripts/chromecast.py task submit
 
+  chromecast:mcp:
+    desc: "Installed coordinator MCP over stdio (HOST=claude/codex/ci; run from repository root)"
+    silent: true
+    requires:
+      vars: [HOST]
+    cmds: ['python3 scripts/coordinator-mcp.py serve --host {{.HOST | shellQuote}}']
+
+  chromecast:mcp:freeze:
+    desc: "Freeze an existing APK into the MCP artifact root; does not build or submit"
+    silent: true
+    requires:
+      vars: [APK]
+    cmds: ['python3 scripts/coordinator-mcp.py freeze {{.APK | shellQuote}}']
+
   chromecast:check:
     desc: "Coordinated Chromecast check"
     silent: true
@@ -1783,7 +1797,7 @@ tasks:
     deps: [vendor-unpack-archives]
     cmds:
       - scripts/in-linux-container.sh python3 scripts/build-aquarium-screensaver-levels.py
-      - cd android && ANDROID_HOME=/usr/lib/android-sdk ./gradlew :screensaver:assembleAquariumRelease --offline
+      - cd android && ANDROID_HOME=${ANDROID_HOME:-/usr/lib/android-sdk} ./gradlew :screensaver:assembleAquariumRelease ${WF_GRADLE_OFFLINE:-}
 
   test-level-catalog:
     desc: "LevelCatalog (the screensaver's generic level roster) in plain Java: parser cases, plus the real wflevels/aquarium-menu.manifest and wflevels/clocks-menu.manifest, and the Aquarium's order against the order build-aquarium-screensaver-levels.py packs the Dream bundle in. Repo mounted read-only."
@@ -1845,9 +1859,9 @@ tasks:
 
   build-clocks-apk:
     desc: "WF Clocks APK (org.worldfoundry.game.clocks: every clock, the engine chooser, the Dream) as a Release build (CMake Release: -O3 + thin LTO; debug-keystore signed for sideload) for arm64-v8a and armeabi-v7a (the Chromecasts need armeabi-v7a; the Pixel and the tablet arm64-v8a), checked in the APK. Builds the levels, packs the bundle, then offline Gradle. Lands at android/screensaver/build/outputs/apk/clocks/release/screensaver-clocks-release.apk"
-    deps: [clocks-bundle]
+    deps: [clocks-bundle, vendor-unpack-archives]
     cmds:
-      - cd android && ANDROID_HOME=${ANDROID_HOME:-/usr/lib/android-sdk} ./gradlew :screensaver:assembleClocksRelease --offline
+      - cd android && ANDROID_HOME=${ANDROID_HOME:-/usr/lib/android-sdk} ./gradlew :screensaver:assembleClocksRelease ${WF_GRADLE_OFFLINE:-}
       - |
         set -euo pipefail
         apk=android/screensaver/build/outputs/apk/clocks/release/screensaver-clocks-release.apk

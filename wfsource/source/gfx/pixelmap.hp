@@ -1,3 +1,4 @@
+#include "../../../engine/include/wf_lifetime.hpp"
 //=============================================================================
 // PixelMap.hp:
 // Copyright ( c ) 1997,1999,2000,2001 World Foundry Group  
@@ -44,6 +45,10 @@
 
 class PixelMap
 {
+    WF_LIFETIME_OBJECT("PixelMap")
+#ifdef WF_LIFETIME_DIAGNOSTICS
+    wflifetime::Owner _lifetimeOwner = wflifetime::current() ? wflifetime::current() : wflifetime::Persistent;
+#endif
 public:
 
 	PixelMap(int flags, int xSize, int ySize);

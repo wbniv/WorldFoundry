@@ -34,6 +34,9 @@ bool enabled = true;
 
 int Overlay::Build(Scalar fps, int width, int height)
 {
+#ifdef WF_LIFETIME_DIAGNOSTICS
+    wflifetime::Scope cache(_lifetimeOwner);
+#endif
 	Validate();
 	char text[32];
 	std::snprintf(text, sizeof(text), "%.1f", fps.AsFloat());

@@ -158,7 +158,8 @@
     "room-backdrop": 156,
     "AmbientLight": 157,
     "LookClose": 158,
-    "cs_grazing": 159
+    "cs_grazing": 159,
+    "LevelSettings": 160
   },
   "count": 24,
   "profile": "keyboard",

@@ -76,3 +76,6 @@ void StaticMeshSampleGauges();
 bool StaticMeshEndFrame();
 
 #endif
+
+// Release renderer-owned CPU scratch after the final level unload.
+void StaticMeshReleaseScratch();

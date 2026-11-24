@@ -15,7 +15,8 @@ wf_blender.register()
 
 COLORS={'black':(.024,.029,.035),'edge':(.16,.19,.21),'metal':(.35,.38,.40),'bright':(.65,.68,.68),
         'gold':(.65,.44,.18),'glass':(.20,.24,.27),'amber':(1.,.52,.055),'green':(.08,1.,.30),'red':(1.,.10,.08),
-        'amberhaze':(.8,.28,.02),'greenhaze':(.04,.6,.12),'redhaze':(.65,.04,.025),'gauzehaze':(.13,.15,.17)}
+        'amberhaze':(.8,.28,.02),'greenhaze':(.04,.6,.12),'redhaze':(.65,.04,.025),'gauzehaze':(.13,.15,.17),
+        'nightlight':(.85,.88,1.)}
 materials={}
 for key,rgb in COLORS.items():
     mat=bpy.data.materials.new(key);mat.use_nodes=True;mat.diffuse_color=(*rgb,1)
@@ -88,6 +89,9 @@ for i in range(12):
     a=math.tau*i/12; x,y=.19*math.sin(a),.19*math.cos(a)
     case.column_z(x,y,.36,3.80,.025,'bright' if i%3==0 else 'edge',sides=6)
 actor('Instrument','platform',case)
+night_ring=Mesh('night_ring')
+rail(night_ring,4.20,3.82,.065,'nightlight')
+actor('NightRing','platform',night_ring,fields={'Visibility Mailbox':780})
 
 gauze=Mesh('gauze')
 for i in range(72):
@@ -125,6 +129,7 @@ lines=[r'\ Mirror and Haze: wall-clock hands with sub-second seconds motion.',
  ': mh-m INDEXOF_WALL_MINUTE read-mailbox mh-s + 60 / ;',
  ': mh-h INDEXOF_WALL_HOUR read-mailbox 12 mod mh-m + 12 / ;',
  ': mh-tick mh-sub',
+ ' INDEXOF_WALL_HOUR read-mailbox dup 6 < swap 18 >= | 780 write-mailbox',
  f' {idx["MirrorHazeSettings"]} {haze} property@ if 0 <> else drop 1 then 840 write-mailbox',
  f' 840 read-mailbox INDEXOF_X_POS {idx["HazeProbe"]} write-actor-mailbox']
 for name,phase in (('Hour','mh-h'),('Minute','mh-m'),('Second','mh-s')):

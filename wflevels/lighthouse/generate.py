@@ -29,7 +29,7 @@ COLORS = {
     'lamp': (1.,.93,.61), 'beam': (1.,.72,.22), 'beam_edge': (1.,.83,.40),
     'reflection': (.77,.49,.13),
     'hull': (.34,.14,.075), 'wood': (.52,.32,.15), 'sail': (.86,.80,.65),
-    'glass': (.70,.64,.40), 'cloud': (.19,.25,.31),
+    'glass': (.70,.64,.40), 'cloud': (.19,.25,.31), 'nightglow': (.45,.75,1.0),
 }
 materials = {}
 for key,rgb in COLORS.items():
@@ -37,7 +37,7 @@ for key,rgb in COLORS.items():
     mat.use_nodes = True
     mat.diffuse_color = (*rgb, 1)
     mat.node_tree.nodes.get('Principled BSDF').inputs['Base Color'].default_value = (*rgb, 1)
-    mat['wf_prelit'] = key in ('sea','light','lamp','beam','beam_edge','reflection','foam','foamlight','glass')
+    mat['wf_prelit'] = key in ('sea','light','lamp','beam','beam_edge','reflection','foam','foamlight','glass','nightglow')
     mat['wf_double_sided'] = True
     if key == 'beam':
         mat['wf_opacity'] = .22
@@ -187,6 +187,9 @@ for ring in range(16):
             water.face([vertex(r0,a),vertex(r1,a),vertex(r1,b),vertex(r0,b)],'sea')
 sea = actor('Sea','platform',water)
 sea.rotation_euler = (math.pi/2,0,0)
+night_glow = Mesh('night_sea_glow')
+annulus(night_glow,0,0,8.05,8.16,.025,'nightglow',sides=72)
+actor('NightSeaGlow','platform',night_glow,fields={'Visibility Mailbox':780})
 
 island = Mesh('island')
 rock(island,0,0,.14,1.8,1.55,.58,1)
@@ -331,6 +334,7 @@ lines = [r'\ Lighthouse: seconds beam, minutes boat, counted local hours.',
          ': lh-wave-step 870 read-mailbox if 700 read-mailbox INDEXOF_DELTA_TIME read-mailbox 0 max .1 min 12 / + dup 1 >= if 1 - then 700 write-mailbox then ;']
 lines.extend(spline_word(i) for i in range(6))
 lines.append(': lh-tick')
+lines.append(' INDEXOF_WALL_HOUR read-mailbox dup 6 < swap 18 >= | 780 write-mailbox')
 for i in range(11): lines.append(f' INDEXOF_WALL_HOUR read-mailbox 12 mod {i} > {800+i} write-mailbox')
 lines += [f' {idx["LighthouseSettings"]} {water_motion} property@ if 0 <> else drop 1 then 870 write-mailbox',
           ' 870 read-mailbox 871 write-mailbox',

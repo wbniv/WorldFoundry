@@ -1,3 +1,4 @@
+#include <wf_lifetime.hpp>
 // debug_server.cc — WF TCP/JSON debug bridge implementation.
 //
 // See debug_server.hp for the public interface.
@@ -301,6 +302,12 @@ static std::atomic<bool> gRunning  { false };
 // destroy a joinable static thread and hide the engine's assertion.
 static unsigned          gWorkers = 0;
 static std::condition_variable gWorkersDone;
+// Signal completion after worker locals have been destroyed. The C++ runtime's
+// detached-thread control block is outside the engine ownership scope.
+struct WorkerLifetime {
+    ~WorkerLifetime(){std::lock_guard<std::mutex> lock(gQueueMutex);--gWorkers;gWorkersDone.notify_all();}
+};
+
 
 //=============================================================================
 // Send a line to all connected clients. Must hold gQueueMutex.
@@ -320,6 +327,8 @@ static void send_all_locked(const std::string& line)
 
 static void handle_client(int fd)
 {
+    WorkerLifetime completion;
+    wflifetime::Scope workerOwner(wflifetime::Persistent);
     char buf[4096];
     std::string partial;
 
@@ -500,8 +509,7 @@ static void handle_client(int fd)
         disc.kind = PendingUpdate::CLIENT_DISCONNECT;
         if (gRunning) gQueue.push(disc);
         std::fprintf(stderr, "[debug] client disconnected fd=%d\n", fd);
-        --gWorkers;
-        gWorkersDone.notify_all();
+
     }
 }
 
@@ -510,6 +518,8 @@ static void handle_client(int fd)
 
 static void listener_loop(int fd)
 {
+    WorkerLifetime completion;
+    wflifetime::Scope workerOwner(wflifetime::Persistent);
     while (gRunning) {
         // shutdown() on a listening socket wakes a blocked accept() on Linux but
         // not on macOS/BSD, where Stop would then wait for this thread forever.
@@ -543,13 +553,12 @@ static void listener_loop(int fd)
         std::fprintf(stderr, "[debug] client connected fd=%d from %s\n", cfd, ip);
         gClients.push_back(cfd);
         ++gWorkers;
-        std::thread(handle_client, cfd).detach();
+        {wflifetime::Scope runtime(0);std::thread(handle_client, cfd).detach();}
     }
     std::lock_guard<std::mutex> lk(gQueueMutex);
     ::close(fd);
     gServerFd = -1;
-    --gWorkers;
-    gWorkersDone.notify_all();
+
 }
 
 //=============================================================================
@@ -587,7 +596,7 @@ void DebugServer_Start(int port)
         ++gWorkers;
     }
     std::fprintf(stderr, "[debug] listening on :%d\n", port);
-    std::thread(listener_loop, fd).detach();
+    {wflifetime::Scope runtime(0);std::thread(listener_loop, fd).detach();}
 
     static bool atexitRegistered = false;
     if (!atexitRegistered) {
@@ -610,7 +619,7 @@ void DebugServer_Stop()
         // Wait releases the mutex, letting each owner close its own socket.
         // A new level cannot reuse descriptors or state until all workers exit.
         gWorkersDone.wait(lk, [] { return gWorkers == 0; });
-        std::queue<PendingUpdate> empty;
+        auto empty=[](){wflifetime::Scope owner(wflifetime::Persistent);return std::queue<PendingUpdate>{};}();
         gQueue.swap(empty);
     }
     gPaused = false;
@@ -655,7 +664,7 @@ void DebugServer_DrainQueue(Level& level)
         ++it;
     }
 
-    std::queue<PendingUpdate> local;
+    auto local=[](){wflifetime::Scope owner(wflifetime::Persistent);return std::queue<PendingUpdate>{};}();
     {
         std::lock_guard<std::mutex> lk(gQueueMutex);
         std::swap(local, gQueue);

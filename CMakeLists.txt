@@ -31,6 +31,10 @@ set(WF_PHYSICS_ENGINE "jolt"    CACHE STRING "legacy | jolt")
 option(WF_REST_API        "REST API box PoC (HTTP runtime-mutation debug)" ON)
 option(WF_DEBUG_BRIDGE    "TCP/JSON debug bridge — level-design + AI-agent debugging (Blender live edit, etc.). Independent of WF_ENABLE_EDITOR." ON)
 option(WF_TELEPORT_UBSAN "Instrument room transitions for teleport regression diagnostics" OFF)
+option(WF_LIFETIME_DIAGNOSTICS "Track level object/allocation/resource survivors (fails diagnostic runs)" OFF)
+if(WF_LIFETIME_DIAGNOSTICS AND (IOS OR EMSCRIPTEN OR APPLE))
+    message(FATAL_ERROR "Lifetime diagnostics currently support Linux and Android GL backends")
+endif()
 option(WF_RUNTIME_DIAGNOSTICS "Read-only loopback runtime diagnostics (explicit diagnostic builds only)" OFF)
 if(WF_RUNTIME_DIAGNOSTICS AND (IOS OR EMSCRIPTEN))
     message(FATAL_ERROR "Runtime diagnostics currently support native desktop and Android only")
@@ -47,6 +51,13 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT ANDROID AND NOT IOS AND NOT EMSCRIP
     set(_WF_ASAN_DEFAULT ON)
 endif()
 option(WF_ASAN "AddressSanitizer + UBSan (default ON for host Debug; -DWF_ASAN=OFF = fast-debug)" ${_WF_ASAN_DEFAULT})
+if(WF_LIFETIME_DIAGNOSTICS AND WF_ASAN)
+    message(FATAL_ERROR "Use separate lifetime (-DWF_ASAN=OFF) and sanitizer (-DWF_LIFETIME_DIAGNOSTICS=OFF) builds; tracker addresses can keep leaks reachable to LSan")
+endif()
+if(WF_LIFETIME_DIAGNOSTICS AND NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    message(FATAL_ERROR "Lifetime shutdown ordering currently requires GCC or Clang")
+endif()
+
 
 # Editor stack — collaborative editor app, CRDT bridge, replay UI, etc.
 # Independent of WF_DEBUG_BRIDGE (the bridge is general-purpose debug
@@ -173,6 +184,9 @@ set(WF_INCLUDES  ${SRC} ${SRC}/game ${ENG_INC} ${STUB_SRC}
                  ${CMAKE_SOURCE_DIR}/engine/mutation
                  ${VENDOR}/miniaudio-0.11.25 ${VENDOR}/tsf)
 set(WF_DEFS)
+if(WF_LIFETIME_DIAGNOSTICS)
+    list(APPEND WF_DEFS WF_LIFETIME_DIAGNOSTICS)
+endif()
 set(WF_LINK_LIBS)
 
 # ─── Platform definitions ─────────────────────────────────────────────────────
@@ -1008,6 +1022,13 @@ add_custom_command(OUTPUT "${WF_PLANTED_OAD_INCLUDE}"
     DEPENDS "${CMAKE_SOURCE_DIR}/scripts/embed-planted-oad.py" "${CMAKE_SOURCE_DIR}/wfsource/source/oas/plantedtanksettings.oad"
     VERBATIM)
 list(APPEND WF_SOURCES "${CMAKE_SOURCE_DIR}/engine/runtime_properties.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_oad_adapter.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_property_form.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_property_host.cpp" "${CMAKE_SOURCE_DIR}/engine/planted_preview.cpp" "${CMAKE_SOURCE_DIR}/engine/runtime_diagnostics_form.cpp" "${WF_PLANTED_OAD_INCLUDE}" "${WF_RUNTIME_DIAGNOSTICS_INCLUDE}" "${CMAKE_SOURCE_DIR}/wfsource/source/game/runtime_options.cc")
+if(WF_LIFETIME_DIAGNOSTICS)
+    find_package(Threads REQUIRED)
+    add_library(wf_lifetime STATIC engine/lifetime_diagnostics.cpp engine/lifetime_heap.cpp)
+    target_include_directories(wf_lifetime PUBLIC ${ENG_INC})
+    target_compile_definitions(wf_lifetime PUBLIC WF_LIFETIME_DIAGNOSTICS)
+    target_link_libraries(wf_lifetime PUBLIC Threads::Threads ${CMAKE_DL_LIBS})
+endif()
 add_library(wfengine STATIC ${WF_SOURCES})
 # The UI font (game/ui_font.hp) comes from cd.iff's UIFT chunk. Linux desktop
 # -L runs often have no cd.iff in their working directory, so they read the
@@ -1025,6 +1046,9 @@ if(WF_TELEPORT_UBSAN)
     target_link_options(wfengine INTERFACE -fsanitize=undefined)
 endif()
 target_link_libraries(wfengine PUBLIC wf_property_core)
+if(WF_LIFETIME_DIAGNOSTICS)
+    target_link_libraries(wfengine PUBLIC wf_lifetime)
+endif()
 target_include_directories(wfengine PUBLIC ${WF_INCLUDES})
 target_include_directories(wfengine PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_compile_definitions(wfengine PUBLIC ${WF_DEFS})
@@ -1350,6 +1374,9 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
         ${SRC}/game/ui_font.cc ${SRC}/game/bitmap_text.cc)
     target_include_directories(fps_overlay_test PRIVATE ${SRC})
     target_compile_definitions(fps_overlay_test PRIVATE ${WF_DEFS} WF_UI_FONT_SOURCE_PATH="${WF_UI_FONT_FILE}")
+    if(WF_LIFETIME_DIAGNOSTICS)
+        target_link_libraries(fps_overlay_test PRIVATE wf_lifetime)
+    endif()
     add_test(NAME fps_overlay_layout COMMAND fps_overlay_test)
     # The UI font (docs/plans/2026-10-17-settings-editor-font.md, steps 3 and 4): the
     # committed ui-font.wfga passes Catalog::Load, covers the bake's list in all seven
@@ -1358,6 +1385,21 @@ if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     target_include_directories(ui_font_test PRIVATE ${SRC})
     add_test(NAME ui_font COMMAND ui_font_test ${WF_UI_FONT_FILE})
     # 3D object picker geometry (docs/plans/2026-10-16-runtime-object-editing.md, step 9).
+    if(WF_ASAN)
+        add_executable(lifetime_sanitizer_fixture tests/lifetime_sanitizer_fixture.cc)
+        add_test(NAME lifetime_external_sanitizers
+            COMMAND python3 ${CMAKE_SOURCE_DIR}/tests/check_lifetime_sanitizers.py $<TARGET_FILE:lifetime_sanitizer_fixture>)
+    endif()
+
+    find_package(Threads REQUIRED)
+    add_executable(lifetime_diagnostics_test tests/lifetime_diagnostics_test.cc
+        engine/lifetime_diagnostics.cpp engine/lifetime_heap.cpp)
+    target_include_directories(lifetime_diagnostics_test PRIVATE ${ENG_INC})
+    target_compile_definitions(lifetime_diagnostics_test PRIVATE WF_LIFETIME_DIAGNOSTICS)
+    target_link_libraries(lifetime_diagnostics_test PRIVATE Threads::Threads ${CMAKE_DL_LIBS})
+    add_test(NAME lifetime_diagnostics_faults
+        COMMAND python3 ${CMAKE_SOURCE_DIR}/tests/check_lifetime_diagnostics.py $<TARGET_FILE:lifetime_diagnostics_test>)
+
     add_executable(object_picker_test tests/object_picker_test.cc)
     target_include_directories(object_picker_test PRIVATE ${CMAKE_SOURCE_DIR}/engine)
     add_test(NAME object_picker COMMAND object_picker_test)

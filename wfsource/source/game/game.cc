@@ -1,3 +1,5 @@
+#include <gfx/static_mesh.hp>
+#include <wf_lifetime.hpp>
 #include "../../../engine/runtime_options.hpp"
 #include <game/plant_ui.h>
 #include <game/runtime_property_ui.h>
@@ -189,6 +191,7 @@ WFGame::~WFGame()
 	// LIFO-reverse Free: _gameFile, _viewPort, _videoMemory, _display, then
 	// MemPoolDestruct (which Frees _buffer then memPool obj — both LIFO-
 	// correct since _buffer was alloc'd just after the obj).
+	StaticMeshReleaseScratch();
 	MEMORY_DELETE(HALLmalloc,_viewPort,ViewPort);
 	MEMORY_DELETE(HALLmalloc,_videoMemory,VideoMemory);
 	MEMORY_DELETE(HALLmalloc,_display,Display);
@@ -349,6 +352,10 @@ WFGame::RunGameScript()				// runs the whole game, returns when game (really) ov
 void
 WFGame::LoadLevel(_DiskFile* levelFile)
 {
+#ifdef WF_LIFETIME_DIAGNOSTICS
+    _lifetimeGeneration=wflifetime::beginLevel(_desiredLevelNum);
+    _lifetimePreviousOwner=wflifetime::exchange(_lifetimeGeneration);
+#endif
 #ifdef WF_RUNTIME_DIAGNOSTICS
 	DebugServer_DiagnosticLevel(_desiredLevelNum);
 #endif
@@ -442,6 +449,11 @@ WFGame::UnloadLevel()
 	_curLevel = nullptr;
 	MEMORY_DELETE(HALLmalloc,_gameMailboxes,GameMailboxes);
 	_gameMailboxes = nullptr;
+#ifdef WF_LIFETIME_DIAGNOSTICS
+    wflifetime::exchange(_lifetimePreviousOwner);
+    if(!wflifetime::endLevel(_lifetimeGeneration)) std::abort();
+    _lifetimeGeneration=0;
+#endif
 }
 
 //-----------------------------------------------------------------------------

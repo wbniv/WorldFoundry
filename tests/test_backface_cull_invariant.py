@@ -6,8 +6,8 @@ docs/plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md
 
 Two invariants:
 
-1. **The default is ON.** `backend_modern.cc::DrawTriangle` reads `WF_CULL`
-   once as `!e || atoi(e) != 0`. A level whose faces are wound backwards
+1. **The default is ON.** `WfBackfaceCullEnabled()` in `gfx/backface_cull.hp`
+   reads `WF_CULL` once as `!e || atoi(e) != 0`. A level whose faces are wound backwards
    therefore renders the same with the variable unset as with `WF_CULL=1`,
    and differently with `WF_CULL=0`. Asserting all three at once is what
    catches someone flipping the sense back (or an `e && ...` typo) — a test
@@ -135,7 +135,7 @@ def _capture(level_path: Path, png_path: Path, cull: str | None,
             "--cycles=1",
             "-rate20",
             "-record_video",
-            "--no-fps",
+            "--no-fps",       # live FPS digits vary between otherwise identical captures
             *(extra or []),
             f"--capture-frame={CAPTURE_FRAME}={png_path}",
             f"-L{level_path}",
@@ -216,7 +216,7 @@ def test_cull_is_on_by_default(tmp_path):
     assert pngs["unset"] == pngs["on"], (
         "WF_CULL unset does not match WF_CULL=1 "
         f"({pngs['unset']} vs {pngs['on']}) — the backface cull is no longer on "
-        "by default. See backend_modern.cc::DrawTriangle's cullEnabled lambda: "
+        "by default. See WfBackfaceCullEnabled() in gfx/backface_cull.hp: "
         "it must read `!e || atoi(e) != 0`.")
     assert pngs["off"] != pngs["on"], (
         "WF_CULL=0 renders identically to WF_CULL=1 on a level whose faces are "

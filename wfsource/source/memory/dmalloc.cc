@@ -1,3 +1,4 @@
+#include <wf_lifetime.hpp>
 //==============================================================================
 // DMalloc.cc
 // Copyright ( c ) 1997,1998,1999,2000,2001 World Foundry Group.  
@@ -152,6 +153,7 @@ DMalloc::DMalloc(void* memory, size_t size MEMORY_NAMED( COMMA const char* name 
 
 DMalloc::~DMalloc()
 {
+    wflifetime::beforeArenaRelease(this,_memory,_endMemory);
 	Validate();
 	if(_flags & FLAG_MEMORY_OWNED)
 	{
@@ -199,6 +201,12 @@ DMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 			else
 				_firstChunk = newFreeChunk;
 			ASSERTIONS( DBSTREAM1( cmem << file << ',' << line << "," << retVal << "," << Name() << std::endl; ) )
+
+#if DO_ASSERTIONS
+    wflifetime::acquire(wflifetime::Kind::Pool,this,reinterpret_cast<std::uintptr_t>(retVal),size,"DMalloc",file,line);
+#else
+    wflifetime::acquire(wflifetime::Kind::Pool,this,reinterpret_cast<std::uintptr_t>(retVal),size,"DMalloc",__FILE__,__LINE__);
+#endif
 			return retVal;
 		}
 
@@ -213,6 +221,12 @@ DMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 			else
 				_firstChunk = chunkCopy.Next();
 			ASSERTIONS( DBSTREAM1( cmem << file << ',' << line << "," << retVal << "," << Name() << std::endl; ) )
+
+#if DO_ASSERTIONS
+    wflifetime::acquire(wflifetime::Kind::Pool,this,reinterpret_cast<std::uintptr_t>(retVal),size,"DMalloc",file,line);
+#else
+    wflifetime::acquire(wflifetime::Kind::Pool,this,reinterpret_cast<std::uintptr_t>(retVal),size,"DMalloc",__FILE__,__LINE__);
+#endif
 			return retVal;
 		}
 
@@ -233,6 +247,7 @@ DMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 inline void
 DMalloc::Free(const void* mem)
 {
+    wflifetime::release(wflifetime::Kind::Pool,this,reinterpret_cast<std::uintptr_t>(mem));
 	Validate();
 	assert(ValidPtr(mem));
 

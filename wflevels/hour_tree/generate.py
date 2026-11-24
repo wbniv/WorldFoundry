@@ -33,6 +33,7 @@ COLORS = {
 COLORS.update({'grass':(.32,.55,.25), 'trunk':(.51,.32,.16),
                'tree_light':(.42,.67,.18), 'window':(.85,.67,.25),
                'sky':(.58,.75,.90), 'hill':(.30,.50,.46), 'flower':(.98,.78,.74)})
+COLORS.update({'night_sky':(.035,.07,.14), 'night_star':(.95,.87,.62)})
 materials = {}
 for key, rgb in COLORS.items():
     mat = bpy.data.materials.new(key)
@@ -108,7 +109,13 @@ actor('Background','matte',fields={'Matte Type':'Color','Background Color':0x526
 actor('HourTreeSettings','hourtreesettings',fields={'Editor Label':'Hour Tree'})
 backdrop=Mesh('landscape')
 backdrop.quad_y(-24,-2,24,20,7,'sky')
-back_obj=actor('Landscape','platform',backdrop)
+back_obj=actor('Landscape','platform',backdrop,fields={'Visibility Mailbox':781})
+night_backdrop=Mesh('night_landscape')
+night_backdrop.quad_y(-24,-2,24,20,7,'night_sky')
+night_backdrop.disc_y(4.7,7.7,.45,6.95,'night_star',sides=24)
+for x,z in ((-7,8),(-5,10),(-2.5,8.7),(1.2,9.5),(7.5,9.2),(9,7)):
+    night_backdrop.disc_y(x,z,.065,6.95,'night_star',sides=8)
+actor('NightLandscape','platform',night_backdrop,fields={'Visibility Mailbox':780})
 backmat=bpy.data.materials.new('landscape texture'); backmat.use_nodes=True
 backmat.diffuse_color=(1,1,1,1); backmat['wf_double_sided']=True; backmat['wf_prelit']=True
 backtex=backmat.node_tree.nodes.new('ShaderNodeTexImage')
@@ -230,6 +237,7 @@ idx={o.name:i+1 for i,o in enumerate(objects)}
 catalog=json.loads(subprocess.check_output([str(ROOT/'wftools/wf_attr_edit/target/release/catalog'),str(OAS/'hourtreesettings.oad')],text=True))
 fields={f['key']:f for f in catalog['fields']}
 lines=[': ht-hour INDEXOF_WALL_HOUR read-mailbox 12 mod ;', ': ht-tick']
+lines.append(' INDEXOF_WALL_HOUR read-mailbox dup 6 < swap 18 >= | dup 780 write-mailbox 0 = 781 write-mailbox')
 for axis,mailbox in enumerate(('INDEXOF_X_POS','INDEXOF_Y_POS','INDEXOF_Z_POS')):
     tips=[(leaf_positions[i][0][0]-(.20 if leaf_positions[i][1][0]>leaf_positions[i][0][0] else -.20),leaf_positions[i][0][1]+.1,leaf_positions[i][0][2]+.22)[axis] for i in range(12)]
     expr=' '.join(f'ht-hour {i} = if {tips[i]:.7f} else' for i in range(11))+f' {tips[11]:.7f} '+'then '*11

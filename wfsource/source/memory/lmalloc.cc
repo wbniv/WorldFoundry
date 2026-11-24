@@ -1,3 +1,4 @@
+#include <wf_lifetime.hpp>
 //==============================================================================
 // lmalloc.cc
 // Copyright ( c ) 1997,1998,1999,2000,2001,2003 World Foundry Group.  
@@ -201,6 +202,7 @@ LMalloc::LMalloc(void* memory, size_t size MEMORY_NAMED( COMMA const char* name 
 
 LMalloc::~LMalloc()
 {
+    wflifetime::beforeArenaRelease(this,_memory,_endMemory,true);
 #pragma message( "spew `DEL' tracking messages for all allocations" )
 	Validate();
 	if(_flags & FLAG_MEMORY_OWNED)
@@ -280,6 +282,12 @@ LMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 //	printf("memory allocated from lmalloc ");
 //	DBSTREAM1( printf(" named %s ",_name); )
 //	printf(" at %p,size = %d, left = %d\n",retVal, size, _endMemory-_currentFree);
+
+#if DO_ASSERTIONS
+    wflifetime::acquire(wflifetime::Kind::Pool,this,reinterpret_cast<std::uintptr_t>(retVal),size,"LMalloc",file,line);
+#else
+    wflifetime::acquire(wflifetime::Kind::Pool,this,reinterpret_cast<std::uintptr_t>(retVal),size,"LMalloc",__FILE__,__LINE__);
+#endif
 	return(retVal);
 }
 
@@ -290,6 +298,7 @@ LMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 void
 LMalloc::Free(const void* mem)
 {
+    wflifetime::release(wflifetime::Kind::Pool,this,reinterpret_cast<std::uintptr_t>(mem));
 	Validate();
 
 //	NEW|DEL, size, rounded_size, file, line, index, address, comments

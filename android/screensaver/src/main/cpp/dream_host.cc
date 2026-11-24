@@ -27,6 +27,7 @@
 #include <runtime_property_host.hpp>
 
 #include "menu_key_latch.h"
+#include "clock_menu_touch.h"
 #include "touch_bridge.h"
 #include "planted_bridge.h"
 
@@ -101,6 +102,8 @@ std::atomic<bool> menuMode{false};
 // frame can be 200 ms) still reaches the menu (docs/plans/2026-11-21-menu-key-latch.md).
 MenuKeyLatch menuKeys;
 TouchBridge touchBridge;   // the on-screen controller on a phone; its buttons go through menuKeys
+ClockMenuTouch clockMenuTouch;
+std::atomic<bool> phoneTouch{false};
 GamepadStick gamepadStick; // a hardware gamepad's analog stick and hat, through menuKeys
 
 // Touch events from the UI thread, handled on the game thread: the engine's settings form and the controller both
@@ -204,10 +207,35 @@ static bool menuRowTouch(const TouchRecord& e, float fx, float fy) {
     static int pointer = -1;
     static float downX = 0, downY = 0;
     if (!levelmenu::SelectorVisible() || wfprops::host().modal) {
+        clockMenuTouch.cancel(menuKeys);
         pointer = -1;
         return false;
     }
     const int w = int(e.viewWidth * fx + .5f), h = int(e.viewHeight * fy + .5f);
+    if (phoneTouch.load()) {
+        if (e.action == TouchBridge::kActionCancel) {
+            clockMenuTouch.cancel(menuKeys);
+        } else if (e.action == TouchBridge::kActionMove) {
+            for (const auto& p : e.points) clockMenuTouch.move(p.id, p.y * fy, menuKeys);
+        } else if (e.actionIndex >= 0 && size_t(e.actionIndex) < e.points.size()) {
+            const auto& p = e.points[size_t(e.actionIndex)];
+            const float x = p.x * fx, y = p.y * fy;
+            const int row = levelmenu::TouchRowAt(x, y, w, h);
+            if (e.action == TouchBridge::kActionDown || e.action == TouchBridge::kActionPointerDown)
+                clockMenuTouch.down(p.id, x, y, row);
+            else {
+                const int chosen = clockMenuTouch.up(p.id, x, y, row, menuKeys);
+                if (chosen >= 0) {
+                    levelmenu::QueueTouchRow(chosen);
+                    // The menu consumes the row before this frame's button press.
+                    // Confirm it in the same frame so any row starts with one tap.
+                    menuKeys.keyDown(wftouch::A);
+                    menuKeys.keyUp(wftouch::A);
+                }
+            }
+        }
+        return true;
+    }
     if (e.action == TouchBridge::kActionCancel) {
         const bool mine = pointer >= 0;
         pointer = -1;
@@ -264,8 +292,12 @@ static void pumpTouch(int surfaceW, int surfaceH) {
             touchBridge.release(menuKeys);
             continue;
         }
-        if (settingsTouch) touchBridge.release(menuKeys);
-        else touchBridge.event(e.action, e.actionIndex, e.points.data(), e.points.size(), e.viewWidth, e.viewHeight, menuKeys);
+        if (settingsTouch) {
+            clockMenuTouch.cancel(menuKeys);
+            touchBridge.release(menuKeys);
+        } else if (!phoneTouch.load()) {
+            touchBridge.event(e.action, e.actionIndex, e.points.data(), e.points.size(), e.viewWidth, e.viewHeight, menuKeys);
+        }
     }
 }
 
@@ -285,6 +317,7 @@ extern "C" void WFAndroidPumpEvents() {
         const bool selectorVisible = levelmenu::SelectorVisible();
         if (selectorVisible != menuSelectorWasVisible) {
             menuSelectorWasVisible = selectorVisible;
+            clockMenuTouch.cancel(menuKeys);
             menuKeys.clearLatch();
         }
         pumpTouch(surfaceWidth, surfaceHeight);
@@ -295,8 +328,8 @@ extern "C" void WFAndroidPumpEvents() {
     }
     plantedBridge.pump(launchOverrideSink);
 }
-// The on-screen controller (joystick and A to D) is drawn while the menu, or a tank started from it, runs on a
-// touchscreen phone. The Dream and the TV draw nothing. docs/plans/2026-11-22-aquarium-clocks-touch-controls.md.
+// Keep the settings entry on touchscreen phones while hiding the game controls.
+// The Dream and the TV draw no touch overlay.
 extern "C" void WFAndroidTouchLayout(int w, int h, androidtouch::Layout* layout,
                                        uint32_t* held, float* x, float* y) {
     if (!menuMode.load()) {
@@ -306,6 +339,12 @@ extern "C" void WFAndroidTouchLayout(int w, int h, androidtouch::Layout* layout,
         return;
     }
     touchBridge.layout(w, h, layout, held, x, y);
+    if (phoneTouch.load()) {
+        layout->stick = false;
+        layout->shown = 0;
+        *held = 0;
+        *x = *y = 0;
+    }
 }
 extern "C" int WFAndroidPhoneOverlayRects(int, int, const PhonepadRect** rects,
                                             int* changed, const bitmaptext::Quad** glyphs,
@@ -324,6 +363,7 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativePrepare(JNIEnv*, jclass) {
     backPending.store(false);
     menuKeys.clear();
     touchBridge.reset();
+    clockMenuTouch.cancel(menuKeys);
     gamepadStick.reset();
     plantedBridge.reset();
 }
@@ -347,14 +387,15 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeStick(JNIEnv*, jclass, jfloat
     return JNI_TRUE;
 }
 
-// Whether this device draws the on-screen controller (a touchscreen and no TV) and its density scale; once per player.
+// Enable touch on phones (not TVs) and set the density scale once per player.
 extern "C" JNIEXPORT void JNICALL
 Java_org_worldfoundry_screensaver_TankPlayer_nativeTouchConfigure(JNIEnv*, jclass, jboolean enabled, jfloat density) {
     touchBridge.configure(enabled == JNI_TRUE, density);
+    phoneTouch.store(enabled == JNI_TRUE);
 }
 
 // One touch event on the surface view (UI thread): queued for the game thread, which gives it to the settings form
-// and the controller. Returns true when this device takes touches here (the controller is drawn).
+// and chooser. Returns true when this device takes touches here.
 extern "C" JNIEXPORT jboolean JNICALL
 Java_org_worldfoundry_screensaver_TankPlayer_nativeTouch(JNIEnv* env, jclass, jint action, jint actionIndex,
                                                           jint viewWidth, jint viewHeight, jintArray ids,

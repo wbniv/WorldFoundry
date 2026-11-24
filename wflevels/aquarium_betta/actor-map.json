@@ -36,7 +36,8 @@
     "room-backdrop": 29,
     "AmbientLight": 30,
     "LookClose": 31,
-    "cs_close": 32
+    "cs_close": 32,
+    "LevelSettings": 33
   },
   "mailboxes": {
     "init": 600,

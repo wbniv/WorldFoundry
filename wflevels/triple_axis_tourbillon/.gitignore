@@ -1,0 +1,10 @@
+*
+!.gitignore
+!*.py
+!*.sh
+!triple_axis_tourbillon.lev
+!triple_axis_tourbillon-standalone.iff.txt
+!actor-map.json
+!settings-capabilities.json
+!*.blend
+!*-source.png

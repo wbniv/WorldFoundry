@@ -1,3 +1,4 @@
+#include <wf_lifetime.hpp>
 //==============================================================================
 // lmalloc.hpi
 // Copyright ( c ) 1997,99,2000,2003 World Foundry Group.  
@@ -56,6 +57,7 @@ LMalloc::BytesFree() const         // returns # of bytes left in pool
 INLINE void
 LMalloc::Clear()
 {
+    wflifetime::beforeArenaRelease(this,_memory,_endMemory,true);
 	Validate();
 	_currentFree = _memory;
 }

@@ -133,6 +133,17 @@ bpy.data.objects['Player'].location = (5.6, -3.0, 2.2)
 box_fields(bpy.data.objects['Room'], (-40, -45, -8, 50, 12, 24))
 bpy.data.objects['Room'].location = (0, 0, 0)
 
+# This clock has no level-specific settings yet. The existing generic holder supplies
+# the global settings sheet, so the phone's settings button remains available.
+settings = bpy.data.objects.new('MinuteMachineSettings', None)
+bpy.context.scene.collection.objects.link(settings)
+settings['wf_schema_path'] = str(REPO / 'wfsource/source/oas/levelsettings.oad')
+settings['wf_Editor Label'] = 'Minute Machine'
+settings['wf_Mobility'] = 'Anchored'
+settings['wf_Model Type'] = 'None'
+settings['wf_Mass'] = 0.0
+box_fields(settings, (-.1, -.1, -.1, .1, .1, .1))
+
 objects = [o for o in bpy.context.scene.objects if o.get('wf_schema_path')]
 indices = {o.name: i + 1 for i, o in enumerate(objects)}
 for i in range(tl.DOMINO_COUNT - 1):
