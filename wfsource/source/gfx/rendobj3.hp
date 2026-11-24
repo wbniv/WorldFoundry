@@ -76,6 +76,7 @@ public:
 	// Updates _materialList[idx]._color in place and re-bakes primitives so the
 	// next Render() picks up the new color. No-op if idx is out of range.
 	void SetMaterialColor(int idx, const Color& color);
+	void SetMaterialOpacity(int idx, float opacity);
 	bool UpdateMaterialTextureRGBA8(int idx, int x, int y, int width, int height,
 	                                const unsigned char* pixels);
     void SetLionPalette(unsigned dark, unsigned light);

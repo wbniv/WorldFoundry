@@ -176,8 +176,8 @@ public:
 #endif
 
 	// mailbox / messages / inter-object communication
-	Scalar ReadSystemMailbox( int boxnum ) const;
-	void WriteSystemMailbox( int boxnum, const Scalar value );
+	virtual Scalar ReadSystemMailbox( int boxnum ) const;
+	virtual void WriteSystemMailbox( int boxnum, const Scalar value );
 
 	// hitpoints / health / shield-type stuff
 	static const Scalar INDESTRUCTIBLE_HP;

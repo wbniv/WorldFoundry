@@ -33,10 +33,11 @@ def actor_block(name):
 
 
 def test_the_level_has_both_window_box_actors_on_their_visibility_cells():
-    for name, cell in (("cottage_flowers", tl.FLOWERS_CELL), ("cottage_flower_blocks", tl.BLOCKS_CELL)):
-        block = actor_block(name)
-        assert re.search(r"Visibility Mailbox\" \} \{ 'DATA' %dl " % cell, block), (name, cell)
-        assert f'"{name}.iff"' in block
+    for i in range(tl.HOUSES):
+        for name,cell in ((f'cottage_flowers_{i+1:02}',360+i),(f'cottage_blocks_{i+1:02}',400+i)):
+            block=actor_block(name)
+            assert re.search(r"Visibility Mailbox\" \} \{ 'DATA' %dl " % cell,block),(name,cell)
+            assert f'"{name}.iff"' in block
 
 
 def test_the_two_cells_are_distinct_and_clear_of_the_candles_and_flames():
@@ -58,7 +59,7 @@ def matl(path):
 
 
 def test_the_exported_flower_materials_are_flat_colours_with_the_thin_ones_double_sided():
-    path = BUILD / "cottage_flowers.iff"
+    path = BUILD / "cottage_flowers_01.iff"
     if not path.exists():
         pytest.skip("build the level first: bash wflevels/cuckoo_village/build.sh (the mesh files are build outputs)")
     slots = matl(path)
@@ -71,7 +72,7 @@ def test_the_exported_flower_materials_are_flat_colours_with_the_thin_ones_doubl
 
 
 def test_the_exported_blocks_keep_the_one_atlas_material_they_always_had():
-    path = BUILD / "cottage_flower_blocks.iff"
+    path = BUILD / "cottage_blocks_01.iff"
     if not path.exists():
         pytest.skip("build the level first: bash wflevels/cuckoo_village/build.sh (the mesh files are build outputs)")
     assert matl(path) == [(2, 0xFFFFFF, "village_atlas.tga")]

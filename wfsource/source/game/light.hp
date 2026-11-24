@@ -59,6 +59,8 @@ public:
 	virtual void initPath( QInputDigital* inp );
 
 	virtual bool CanRender() const;					// kts until I can re-compile levelcon to know about a MODEL_TYPE of LIGHT
+	virtual Scalar ReadSystemMailbox(int mailbox) const;
+	virtual void WriteSystemMailbox(int mailbox, Scalar value);
 
 	void Set(Camera& camera, int index) const;
 	int Type() const;

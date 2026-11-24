@@ -38,6 +38,7 @@
 #include "actor.hp"
 #include "light.hp"
 #include "oas/light.ht"		// get oad structure information
+#include <mailbox/mailbox.hp>
 
 //============================================================================
 
@@ -97,6 +98,31 @@ bool
 Light::CanRender() const
 {
 	return true;
+}
+
+Scalar Light::ReadSystemMailbox(int mailbox) const
+{
+    switch (mailbox) {
+    case EMAILBOX_LIGHT_RED: return Scalar::FromFloat(_color.Red() / 255.0f);
+    case EMAILBOX_LIGHT_GREEN: return Scalar::FromFloat(_color.Green() / 255.0f);
+    case EMAILBOX_LIGHT_BLUE: return Scalar::FromFloat(_color.Blue() / 255.0f);
+    default: return Actor::ReadSystemMailbox(mailbox);
+    }
+}
+
+void Light::WriteSystemMailbox(int mailbox, Scalar value)
+{
+    if (mailbox < EMAILBOX_LIGHT_RED || mailbox > EMAILBOX_LIGHT_BLUE) {
+        Actor::WriteSystemMailbox(mailbox, value);
+        return;
+    }
+    float channel = value.AsFloat();
+    if (channel < 0) channel = 0;
+    if (channel > 1) channel = 1;
+    const uint8 byte = static_cast<uint8>(channel * 255.0f + 0.5f);
+    if (mailbox == EMAILBOX_LIGHT_RED) _color.SetRed(byte);
+    else if (mailbox == EMAILBOX_LIGHT_GREEN) _color.SetGreen(byte);
+    else _color.SetBlue(byte);
 }
 
 //=============================================================================

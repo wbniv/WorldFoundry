@@ -21,7 +21,7 @@ from typing import Dict, List
 import timeline as tl
 
 CELLS = ["sod", "hr", "mi", "sc", "tm", "i", "hx", "f", "bow", "s", "w", "ent", "th", "lx", "ly", "cl", "hop", "vx", "vy",
-         "n", "o", "bob", "k", "on", "lap", "hold", "u", "bb", "phi", "r", "h", "day", "doy", "at", "fp", "fx", "fl"]
+         "n", "o", "bob", "k", "on", "lap", "hold", "u", "bb", "phi", "r", "h", "day", "doy", "at", "fp", "fx", "fl", "light", "warm"]
 WORDS = {"sm", "frac", "floor", "mod", "sin", "cos", "wx", "wy", "wz", "wa", "wb", "wc", "ai", "fig", "figs", "bird", "win",
          "wins", "cam", "hands", "tick", "season", "candles", "flames", "flowers", "sgn", "calc", "put", "vis"}
 
@@ -46,7 +46,9 @@ def _flame_words() -> List[str]:
         ": cv-flames  0 cv-i cv!  begin",
         f"  cv-i cv@ {n(tl.FLICKER_PHI)} * cv-frac cv-fp cv!",
         f"  cv-sc cv@ {n(tl.FLICKER_F1)} * cv-fp cv@ + sin-rev  cv-sc cv@ {n(tl.FLICKER_F2)} * cv-fp cv@ 2 * + sin-rev +  cv-fx cv!",
-        f"  {tl.CANDLE_CELL} cv@  cv-i cv@ 2 / cv-floor 13 cv-mod 200 + cv@ *  cv-fl cv!",
+        "  cv-i cv@ 2 / cv-floor 5 * 13 cv-mod 13 / cv-s cv!",
+        f"  cv-sod cv@ {n(tl.DUSK_START)} cv-s cv@ {n(tl.DUSK_LEN)} * + >= cv-sod cv@ {n(tl.DAWN_START)} cv-s cv@ {n(tl.DAWN_LEN)} * + < + if 1 else 0 then",
+        f"  {tl.CANDLE_CELL} cv@ * cv-i cv@ 2 / cv-floor cv-s-trees < if 1 else 0 then * cv-s-window-lights * cv-fl cv!",
         f"  cv-fx cv@ 0 > if cv-fl cv@ else 0 then  {c} cv-i cv@ 2 * + cv!",
         f"  cv-fx cv@ 0 > if 0 else cv-fl cv@ then  {c + 1} cv-i cv@ 2 * + cv!",
         f"  cv-i cv@ 1 + dup cv-i cv! {tl.FLICKER_GROUPS} =  until ;",
@@ -164,8 +166,8 @@ def director_script(ix: Dict[str, int], fields: Dict[str, int] = None) -> str:
         "  0 cv-on cv!",
         f"  cv-sod cv@ {n(tl.DUSK_START)} cv-s cv@ {n(tl.DUSK_LEN)} * + >= if 1 cv-on cv! then",
         f"  cv-sod cv@ {n(tl.DAWN_START)} cv-s cv@ {n(tl.DAWN_LEN)} * + < if 1 cv-on cv! then",
-        "  cv-on cv@ cv-s-window-lights * swap 200 + cv! ;",
-        ": cv-wins  0 cv-i cv!  begin  cv-i cv@ cv-win  cv-i cv@ 1 + dup cv-i cv! 13 =  until ;",
+        "  cv-on cv@ cv-s-window-lights * over cv-s-houses < if else drop 0 then swap 500 + cv! ;",
+        f": cv-wins  0 cv-i cv!  begin  cv-i cv@ cv-win  cv-i cv@ 1 + dup cv-i cv! {tl.HOUSES} =  until ;",
     ]
     # Christmas candles: always lit from 1 December to 6 January; the "Candles all year" switch lights them the rest of the year. WALL_DAY counts whole local days from 2000-01-01, a leap year, and
     # between 2001 and 2099 a leap year is every fourth: a 1461-day cycle is one leap year then three common ones.
@@ -202,12 +204,32 @@ def director_script(ix: Dict[str, int], fields: Dict[str, int] = None) -> str:
     ]
     L += hand_words(ix)
     L += [
-        f": cv-vis  cv-s-bavaria-mode if 1 else 0 then {tl.BAVARIA_CELL} cv!  cv-s-bavaria-mode if 0 else 1 then {tl.CLASSIC_CELL} cv! ;",
+        ": cv-daynight",
+        "  cv-sod cv@ 19800 - 3600 / cv-sm  1 cv-sod cv@ 63000 - 3600 / cv-sm - * cv-light cv!",
+        "  cv-light cv@ 1 cv-light cv@ - * 4 * cv-warm cv!",
+        f"  cv-light cv@ 3051 {ix.get('AlpineSkyDay', 0)} write-actor-mailbox",
+        f"  cv-warm cv@ .45 * 3051 {ix.get('AlpineSkyWarm', 0)} write-actor-mailbox",
+        *[f"  {n(base)} cv-light cv@ {n(day-base)} * + cv-warm cv@ {n(warm)} * + {cell} {ix.get(actor, 0)} write-actor-mailbox"
+          for actor, base_rgb, day_rgb, warm_rgb in (
+              ('SunLight', (.20, .22, .30), (.80, .78, .72), (.12, .035, 0)),
+              ('AmbientLight', (.23, .25, .32), (.42, .42, .42), (.035, .008, 0)))
+          for cell, base, day, warm in zip((3048,3049,3050),base_rgb,day_rgb,warm_rgb)],
+        " ;",
+        f": cv-vis  cv-s-bavaria-mode if 1 else 0 then {tl.BAVARIA_CELL} cv!  cv-s-bavaria-mode if 0 else 1 then {tl.CLASSIC_CELL} cv!",
+        "  0 799 cv!",
+        "  1 284 cv! 1 285 cv! 1 286 cv!",
+        "  cv-s-bavaria-mode 0 = cv-hr cv@ 12 < & if 1 else 0 then 280 cv!",
+        "  cv-s-bavaria-mode 0 = cv-hr cv@ 12 >= & if 1 else 0 then 281 cv!",
+        "  cv-s-bavaria-mode 0 <> cv-hr cv@ 12 < & if 1 else 0 then 282 cv!",
+        "  cv-s-bavaria-mode 0 <> cv-hr cv@ 12 >= & if 1 else 0 then 283 cv!",
+        *[f"  {i} cv-s-houses < if 1 else 0 then dup {300+i} cv! dup cv-s-detailed-flowers * {360+i} cv! dup 1 cv-s-detailed-flowers - * {400+i} cv! cv-s-bavaria-mode * {tl.BAVARIA_HOUSE_CELL0+i} cv!" for i in range(tl.HOUSES)],
+        *[f"  {i} cv-s-trees < if 1 else 0 then dup {330+i} cv! {tl.CANDLE_CELL} cv@ * {440+i} cv!" for i in range(tl.TREES)],
+        " ;",
         ": cv-tick",
         "  INDEXOF_WALL_SECOND cv@ cv-sc cv!  INDEXOF_WALL_HOUR cv@ cv-hr cv!  INDEXOF_WALL_MINUTE cv@ cv-mi cv!",
         "  cv-mi cv@ 60 * cv-sc cv@ + cv-tm cv!",
         "  cv-hr cv@ 3600 * cv-tm cv@ + cv-sod cv!",
-        "  cv-hands cv-figs cv-bird cv-wins cv-candles cv-flames cv-flowers cv-cam cv-vis ;",
+        "  cv-hands cv-figs cv-bird cv-wins cv-candles cv-flames cv-flowers cv-cam cv-vis cv-daynight ;",
         "cv-tick",
     ]
     return "\n".join(L) + "\n"

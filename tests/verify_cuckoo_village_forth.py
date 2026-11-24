@@ -43,7 +43,7 @@ assert HOST.count("cv-tick") == 1 and "line[0] == 'R'" in HOST and "(int)id == 1
 CONSTANTS = ["X_POS", "Y_POS", "Z_POS", "ROTATION_A", "ROTATION_B", "ROTATION_C", "X_SCALE", "Y_SCALE", "Z_SCALE",
              "FACE_COLOR_TOP", "WALL_HOUR", "WALL_MINUTE", "WALL_SECOND", "WALL_DAY"]
 NAMES = ["tower_figure_1", "tower_figure_2", "tower_figure_3", "tower_figure_4", "tower_figure_b1", "tower_figure_b2", "tower_figure_b3", "tower_figure_b4", "tower_bird", "hour_hand", "minute_hand",
-         "cs_wide", "LookAt", "CuckooVillageSettings"]
+         "cs_wide", "LookAt", "CuckooVillageSettings", "SunLight", "AmbientLight", "AlpineSkyDay", "AlpineSkyWarm"]
 FIELDS = {label: 129 + i for i, label in enumerate(tl.SETTINGS_DEFAULTS)}
 
 
@@ -78,7 +78,7 @@ class Host(mm.Host):
         super().__init__(tmp, ids)
         self.ix = ix
 
-    def frame_at(self, day: int, sod: float, candles=None, lights=None, flowers=None, bavaria=None):
+    def frame_at(self, day: int, sod: float, candles=None, lights=None, flowers=None, bavaria=None, houses=None, trees=None):
         """One frame at local day `day` and second-of-day `sod`; candles: the Candles all year field (None: unanswered, so its default Off);
         bavaria: the Bavaria mode field likewise. Returns the director's actor-mailbox writes, {(actor index, mailbox id): value}."""
         self.proc.stdin.write("Q\n")
@@ -90,6 +90,10 @@ class Host(mm.Host):
             self.proc.stdin.write(f"P {self.ix['CuckooVillageSettings']} {FIELDS['Detailed flowers']} {flowers}\n")
         if bavaria is not None:
             self.proc.stdin.write(f"P {self.ix['CuckooVillageSettings']} {FIELDS['Bavaria mode']} {bavaria}\n")
+        if houses is not None:
+            self.proc.stdin.write(f"P {self.ix['CuckooVillageSettings']} {FIELDS['Houses']} {houses}\n")
+        if trees is not None:
+            self.proc.stdin.write(f"P {self.ix['CuckooVillageSettings']} {FIELDS['Trees']} {trees}\n")
         h, m = int(sod // 3600) % 24, int(sod // 60) % 60
         for name, v in (("WALL_DAY", day), ("WALL_HOUR", h), ("WALL_MINUTE", m), ("WALL_SECOND", sod % 60.0)):
             self.proc.stdin.write(f"M {self.ids[name]} {v!r}\n")
@@ -163,7 +167,7 @@ def main() -> int:
                         x = tl.flame_drive(sod % 60.0, gi)
                         if abs(x) < 1e-3:
                             continue
-                        lit = float(on and glow[(gi // 2) % tl.HOUSES])
+                        lit = float(on and gi // 2 < tl.SETTINGS_DEFAULTS['Trees'] and glow[(gi // 2) % 13])
                         want = (lit, 0.0) if x > 0 else (0.0, lit)
                         got = (host.read(tl.FLICKER_CELL0 + 2 * gi), host.read(tl.FLICKER_CELL0 + 2 * gi + 1))
                         flame_checked += 1
