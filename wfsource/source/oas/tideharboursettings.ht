@@ -21,6 +21,8 @@
 	int32 Boatsandbirds;               /* Minumum: 0 Maximum: 1 Default: 0 */
 	int32 Riverpanel;               /* Minumum: 0 Maximum: 1 Default: 0 */
 	int32 Aboutthemap;               /* Minumum: 0 Maximum: 1 Default: 0 */
+	int32 Riverkrathongs;               /* Minumum: 0 Maximum: 1 Default: 0 */
+	int32 Krathongcount;               /* Minumum: 0 Maximum: 100 Default: 30 */
 	int32 Showframerate;               /* Minumum: 0 Maximum: 1 Default: 0 */
 };
 /*============================================================================*/

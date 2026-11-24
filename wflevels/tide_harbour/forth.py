@@ -28,6 +28,7 @@ import panel as pn
 import parts
 import timeline as tl
 import turns
+import krathong_calendar
 
 CELLS = ["t", "sod", "hr", "mi", "sec", "day", "key", "ckey", "cday", "tide", "q", "w1", "w2", "w3", "w4", "w5",
          "kr", "kg", "kb", "hor-r", "hor-g", "hor-b", "zen-r", "zen-g", "zen-b", "sun-r", "sun-g", "sun-b", "lit",
@@ -554,8 +555,42 @@ def tick() -> List[str]:
             f"  {get('hr')} 3600 * {get('mi')} 60 * + {get('sec')} th-floor + {cell('key')} th!",
             f"  {get('key')} {get('ckey')} <> {get('day')} 1 + {get('cday')} <> | if th-slow then",
             "  th-poll th-scan",
-            "  th-bars th-boats th-sky th-lights th-clock th-panel th-show",
+            "  th-bars th-boats th-sky th-lights th-clock th-panel th-show th-krathongs",
             f"  {get('q')} 100 + th-prevq th@ <> if th-recolour {get('q')} 100 + th-prevq th! then ;"]
+
+
+def krathong_words(ix: Dict[str, int]) -> List[str]:
+    """Ages 1000-1099; visibility 1100-1199; timer 860 and live count 861."""
+    out = [": th-krathongs",
+           f"  {get('alt')} 0 < if",
+           "    th-opt-krathong_mode th@ 1 = if 1 else",
+           f"      {get('day')} {get('hr')} 12 < if 1 - then"]
+    for j, day in enumerate(krathong_calendar.FESTIVAL_DAYS):
+        out.append(f"      {'dup ' if j < len(krathong_calendar.FESTIVAL_DAYS)-1 else ''}{day} =" + (" >r" if j < len(krathong_calendar.FESTIVAL_DAYS)-1 else ""))
+    out += ["      r> | r> | r> |", "    then", "  else 0 then",
+            "  th-opt-krathong_count th@ 0 > & if",
+            "    0 861 th!",
+            "    860 th@ INDEXOF_DELTA_TIME th@ 0 max .1 min + 860 th!",
+            "    0 th-i th! begin",
+            f"      1000 {get('i')} + th@ 0 > if 1000 {get('i')} + th@ INDEXOF_DELTA_TIME th@ 0 max .1 min + dup 180 >= if drop 0 then dup 1000 {get('i')} + th! 0 > if 861 th@ 1 + 861 th! then then",
+            f"      {get('i')} 1 + dup th-i th! {tl.KRATHONG_MAX} = until",
+            "    0 th-i th! begin",
+            f"      860 th@ 1.2 >= 1000 {get('i')} + th@ 0 = & 861 th@ th-opt-krathong_count th@ < & if .001 1000 {get('i')} + th! 0 860 th! 861 th@ 1 + 861 th! then",
+            f"      {get('i')} 1 + dup th-i th! {tl.KRATHONG_MAX} = until",
+            "    860 th@ 1.2 min 860 th!",
+            "    0 th-i th! begin",
+            f"      1000 {get('i')} + th@ 0 > if 1 1100 {get('i')} + th!",
+            f"        {get('i')} 5 th-mod 0 = if 1000 {get('i')} + th@ 180 / 160 * 80 - else {get('i')} 2 th-mod if {get('cx')} 37 - 1000 {get('i')} + th@ 180 / 85 {get('i')} 7 * 11 th-mod + * + else 1000 {get('i')} + th@ 180 / 120 {get('i')} 11 * 15 th-mod + * 27 - {get('i')} 17 * 9 th-mod + then then {ix['krathong_0']} {get('i')} + th-x",
+            f"        {get('i')} 5 th-mod 0 = if 14 {get('i')} 7 * 18 th-mod + else {get('i')} 2 th-mod if {get('cy')} 24 + {get('i')} 7 * 9 th-mod + else -20 {get('i')} 7 * 5 th-mod + then then {ix['krathong_0']} {get('i')} + th-y",
+            f"        {get('tide')} .12 + 1000 {get('i')} + th@ .1 * {get('i')} .13 * + sin-rev .08 * + {ix['krathong_0']} {get('i')} + th-z",
+            f"        1 {get('sec')} 3 * {get('i')} .17 * + sin-rev .16 * .72 + .24 th-pack {ix['krathong_0']} {get('i')} + 2 th-col",
+            f"      else 0 1100 {get('i')} + th! then",
+            f"      {get('i')} 1 + dup th-i th! {tl.KRATHONG_MAX} = until",
+            "  else 0 860 th! 0 th-i th! begin",
+            f"    0 1000 {get('i')} + th! 0 1100 {get('i')} + th!",
+            f"    {get('i')} 1 + dup th-i th! {tl.KRATHONG_MAX} = until",
+            "  then ;"]
+    return out
 
 
 def default_indices() -> Dict[str, int]:
@@ -569,7 +604,7 @@ def definitions(ix: Dict[str, int], fields: Dict[str, int] | None = None) -> str
     """The script without its per-frame call (the last line, th-tick)."""
     fields = fields or settings_fields()
     lines = (library() + tide_sum() + sun_words() + slow_words() + palette_words() + recolour_words(ix)
-             + panel_words(ix) + frame_words(ix) + poll_words(ix, fields) + scan_words() + tick())
+             + panel_words(ix) + frame_words(ix) + poll_words(ix, fields) + scan_words() + krathong_words(ix) + tick())
     return "\n".join(lines) + "\n"
 
 

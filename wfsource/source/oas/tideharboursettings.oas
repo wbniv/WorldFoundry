@@ -29,6 +29,8 @@ TYPEHEADER(Tide Harbour Settings,TideHarbourSettings)
 @*	(a single-value range is not a choice to the form or to the phone's capabilities asset, which would show "0"): the
 @*	credit, selected, and where the licence is. ASCII only (the form's font) and no commas (prep splits macro arguments on them).
 	TYPEENTRYINT32(About the map,,0,1,0,"(c) OpenStreetMap contributors|ODbL: openstreetmap.org/copyright",SHOW_AS_RADIOBUTTONS,"The river map is OpenStreetMap data under the Open Database Licence (ODbL)")
+	TYPEENTRYINT32(River krathongs,,0,1,0,"Festival nights|Every night",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"When to launch candlelit krathongs")
+	TYPEENTRYINT32(Krathong count,,0,100,30,"",SHOW_AS_SLIDER|SHOW_AS_LIVE,"Maximum krathongs afloat at once")
 	PROPERTY_SHEET_FOOTER
 	@include global_settings.inc
 TYPEFOOTER

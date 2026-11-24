@@ -288,21 +288,26 @@ ROOM = (-360.0, -80.0, -60.0, 360.0, 140.0, 240.0)    # one room holds everythin
 # Visibility mailboxes (global cells the director writes; 1 shows the actor)
 VIS = {"sun": 700, "moon": 701, "birds": 702, "boats": 703, "gauge": 704, "numerals_thai": 705, "numerals_roman": 706,
        "arrow_up": 707, "arrow_dn": 708, "panel": 709}
+KRATHONG_MAX = 100
+VIS.update({f"krathong_{i}": 1100 + i for i in range(KRATHONG_MAX)})
 # Settings (plan D13, Q9): the TideHarbourSettings object's fields (wfsource/source/oas/tideharboursettings.oas,
 # with the clocks' shared clocksettings.inc). The director copies each field into its cell every frame with
 # property@; 0, a field's first choice, is the default.
 SETTINGS_ACTOR = "TideHarbourSettings"
 FIELD_LABELS = {"drift": "Camera drift", "numerals": "Dial numerals", "gauge": "Gauge board", "life": "Boats and birds",
-                "panel": "River panel"}
-OPTION_CELLS = {"drift": 690, "numerals": 691, "gauge": 692, "life": 693, "panel": 694}
+                "panel": "River panel", "krathong_mode": "River krathongs", "krathong_count": "Krathong count"}
+OPTION_CELLS = {"drift": 690, "numerals": 691, "gauge": 692, "life": 693, "panel": 694, "krathong_mode": 695, "krathong_count": 696}
 OPTIONS = {   # name -> the values, default first (the cell holds the index)
     "drift": ("Slow", "Off"),
     "numerals": ("Roman", "Thai", "None"),     # Roman is the default (Will, 2026-11-21, reversing Q2)
     "gauge": ("On", "Off"),
     "life": ("On", "Off"),          # boats and birds
     "panel": ("On", "Off"),         # the river panel: Off hides it and gives the harbour the whole screen
+    "krathong_mode": ("Festival nights", "Every night"),
+    "krathong_count": tuple(str(i) for i in range(KRATHONG_MAX + 1)),
 }
 DEFAULT_OPTIONS = {k: 0 for k in OPTIONS}
+DEFAULT_OPTIONS["krathong_count"] = 30
 
 
 def bar_y(k: int) -> float:
@@ -460,6 +465,9 @@ def scene(day: int, sod: float, options: Dict[str, int] | None = None, display: 
         P[f"lantern_{i}"] = Pose(x, y, z, b=0.012 * sin_rev(0.3 * t + i / 8.0))
     for i, (x, y, ph, hz) in enumerate(GLINTS):
         P[f"glint_{i}"] = Pose(x, y, h + 0.14, sx=max(0.05, sin_rev(hz * t + ph)))
+    for i in range(KRATHONG_MAX):
+        y = 14 + (i * 7 % 18) if i % 5 == 0 else (-32 + (i % 4) if i % 2 else -18 + (i % 4))
+        P[f"krathong_{i}"] = Pose(-24 if i % 5 else -80, y, h + 0.1)
 
     # the camera: drifts slowly round the look-at point (burn-in, D10), or stands still. The river panel takes a side of
     # the screen (panel.py): the camera pulls back and shifts so the harbour sits in what the panel leaves, and the panel's
@@ -492,6 +500,7 @@ def scene(day: int, sod: float, options: Dict[str, int] | None = None, display: 
                VIS["numerals_thai"]: int(opt["numerals"] == 1), VIS["numerals_roman"]: int(opt["numerals"] == 0),
                VIS["arrow_up"]: int(reading.rise and opt["panel"] == 0), VIS["arrow_dn"]: int(not reading.rise and opt["panel"] == 0),
                VIS["panel"]: int(opt["panel"] == 0)}
+    visible.update({VIS[f"krathong_{i}"]: 0 for i in range(KRATHONG_MAX)})
     return Scene(P, colours, visible, h, q, s)
 
 

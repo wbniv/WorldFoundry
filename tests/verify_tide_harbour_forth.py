@@ -48,7 +48,7 @@ HOST = (mm.HOST
 assert HOST.count("th-tick") == 1 and "line[0] == 'R'" in HOST and "(int)id == 178" in HOST and "line[0] == 'P'" in HOST
 
 CONSTANTS = ["X_POS", "Y_POS", "Z_POS", "ROTATION_A", "ROTATION_B", "ROTATION_C", "X_SCALE", "Y_SCALE", "Z_SCALE",
-             "FACE_COLOR_TOP", "WALL_HOUR", "WALL_MINUTE", "WALL_SECOND", "WALL_DAY", "DISPLAY_ASPECT", "DISPLAY_VFOV"]
+             "FACE_COLOR_TOP", "WALL_HOUR", "WALL_MINUTE", "WALL_SECOND", "WALL_DAY", "DISPLAY_ASPECT", "DISPLAY_VFOV", "DELTA_TIME"]
 FIELDS = [("X_POS", 0), ("Y_POS", 1), ("Z_POS", 2), ("ROTATION_A", 3), ("ROTATION_B", 4), ("ROTATION_C", 5),
           ("X_SCALE", 6), ("Y_SCALE", 7), ("Z_SCALE", 8)]
 TIDE_CELL = 600 + forth.CELLS.index("tide")
@@ -77,7 +77,7 @@ class Host(mm.Host):
         if options is not None:
             actor = self.ix[tl.SETTINGS_ACTOR]
             for name, label in tl.FIELD_LABELS.items():
-                self.proc.stdin.write(f"P {actor} {self.fields[label]} {options.get(name, 0)}\n")
+                self.proc.stdin.write(f"P {actor} {self.fields[label]} {options.get(name, tl.DEFAULT_OPTIONS[name])}\n")
 
     def set_camera(self, sod: float, options):
         """The Camera actor as the engine has it once it has caught up with cs_wide (it eases towards it, about 10 % of the
@@ -149,6 +149,8 @@ def compare(host: Host, ix, ids, cases):
             continue
         sc = tl.scene(day, sod, options, display)
         for name, pose in sc.poses.items():
+            if name.startswith('krathong_'):
+                continue  # independently stateful launch animation, tested over elapsed frames
             for fname, k in FIELDS:
                 key = (ix[name], ids[fname])
                 if key not in writes:
@@ -165,7 +167,7 @@ def compare(host: Host, ix, ids, cases):
                 worst[kind] = max(worst[kind], d)
                 if d > lim:
                     bad.append(f"{label} {name}.{fname}: forth {got:.6f} reference {want:.6f}")
-        missing = [n for n in sc.poses if not any((ix[n], ids[f]) in writes for f, _ in FIELDS)]
+        missing = [n for n in sc.poses if not n.startswith('krathong_') and not any((ix[n], ids[f]) in writes for f, _ in FIELDS)]
         if missing:
             bad.append(f"{label}: never posed: {missing}")
         near_step = abs(sc.sun.alt_deg - round(sc.sun.alt_deg)) < 1e-3       # float and double may floor apart here

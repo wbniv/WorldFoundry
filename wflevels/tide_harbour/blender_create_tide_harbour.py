@@ -41,7 +41,7 @@ STOP_SIZE, STOP_GAP = 0.016, 0.006      # the full stop after ม and กม: a 
 THAI_FONT = HERE / 'fonts' / 'NotoSansThai-Bold.ttf'      # static and bold: no `offset` embolden, which tears the thin Thai features (fonts/README.md)
 THAI = ['๑๒', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙', '๑๐', '๑๑']     # 12 at the top, then clockwise
 ROMAN = ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI']
-THAI_DIGITS = '๐๑๒๓๔๕๖๗๘๙'                          # the river panel's drums and numerals: always Thai (the Roman option is the dial's)
+PANEL_DIGITS = '0123456789'                          # the river panel uses Arabic digits; Thai text keeps its own font
 DRUM_DIGITS = {'h10': 3, 'h1': 10, 'm10': 6, 't1': 10, 't01': 10}     # how many digits a drum can show: hours tens 0-2, minute tens 0-5
 LIGHT_B, LIGHT_C = 45.0, 90.0          # degrees: the light travels toward +y and down at 45, so tops and camera-facing fronts light alike
 DIRECTIONAL, AMBIENT = 0.64, 0.55      # top = front = 0.55 + 0.64 sin 45 = 1.0; sides 0.55
@@ -175,17 +175,24 @@ def numerals(name, texts, font, height, max_width):
 
 
 def panel_glyphs(meshes, font):
-    """The river panel's glyphs, added to the meshes panel_parts draws: the Thai digits on the drums, the unit label and
+    """The river panel's glyphs, added to the meshes panel_parts draws: Arabic digits on the drums, the Thai unit label and
     the minute units' zero in the band's mask, the column's numerals, the scale bar's label and the map's place names.
     Every glyph is a flat outline facing -y, centred (or aligned) on its place in the part's own coordinates."""
-    texts = list(THAI_DIGITS) + ['ม', 'กรุงเทพฯ', 'ปากน้ำ', 'อ่าวไทย', 'กม']
-    shapes = dict(zip(texts, outlines('pg', texts, font)))
-    em = pn.GLYPH_H / max(max(v[1] for v in shapes[d][0]) - min(v[1] for v in shapes[d][0]) for d in THAI_DIGITS)     # metres per font unit
+    texts = ['ม', 'กรุงเทพฯ', 'ปากน้ำ', 'อ่าวไทย', 'กม']
+    shapes = dict(zip(PANEL_DIGITS, outlines('pg_digits', PANEL_DIGITS, None)))
+    shapes.update(zip(texts, outlines('pg_thai', texts, font)))
+    # Preserve the original Thai-label scale independently of the new digit font.
+    thai_metrics = outlines('pg_thai_metrics', '๐๑๒๓๔๕๖๗๘๙', font)
+    em = pn.GLYPH_H / max(max(v[1] for v in verts) - min(v[1] for v in verts) for verts, _faces in thai_metrics)
+    digit_em = pn.GLYPH_H / max(max(v[1] for v in shapes[d][0]) - min(v[1] for v in shapes[d][0]) for d in PANEL_DIGITS)
+    # Fit the widest digit once, so narrow digits retain the same height and weight.
+    widest_digit = max(max(v[0] for v in shapes[d][0]) - min(v[0] for v in shapes[d][0]) for d in PANEL_DIGITS)
+    digit_em = min(digit_em, pn.WIN_W * 0.9 / widest_digit)
     added = []
 
     def put(mesh, text, x, z, scale=1.0, align='c', color='p_text', max_width=None, slot=None):
         verts, faces = shapes[text]
-        k = em * scale
+        k = (digit_em if text in PANEL_DIGITS else em) * scale
         x0, x1 = min(v[0] for v in verts), max(v[0] for v in verts)
         if max_width is not None:
             k = min(k, max_width / (x1 - x0))
@@ -209,17 +216,17 @@ def panel_glyphs(meshes, font):
     for row in (0, 1):
         for name, count in DRUM_DIGITS.items():
             for k in range(count):
-                put(meshes[f'panel_drum_{row}_{name}'], THAI_DIGITS[k], 0.0, 0.0, max_width=pn.WIN_W * 0.9, slot=k)
+                put(meshes[f'panel_drum_{row}_{name}'], PANEL_DIGITS[k], 0.0, 0.0, max_width=pn.WIN_W * 0.9, slot=k)
         v = pn.row_v(row)
         xr, zb = put(meshes['panel_band_mask'], 'ม', pn.row_u('unit') - (STOP_GAP + STOP_SIZE) / 2, v, 0.55, max_width=0.095 - STOP_GAP - STOP_SIZE)
         stop(meshes['panel_band_mask'], xr, zb)
-        put(meshes['panel_band_mask'], THAI_DIGITS[0], pn.row_u('m1'), v, max_width=pn.WIN_W * 0.9)
+        put(meshes['panel_band_mask'], PANEL_DIGITS[0], pn.row_u('m1'), v, max_width=pn.WIN_W * 0.9)
     body = meshes['panel_col_body']
     for metres in (1, 2, 3):
-        put(body, THAI_DIGITS[metres], pn.COL_X - 0.026 - 0.075, pn.level_v(float(metres)), 0.42, color='p_ink')
+        put(body, PANEL_DIGITS[metres], pn.COL_X - 0.026 - 0.075, pn.level_v(float(metres)), 0.42, color='p_ink')
     mid = pn.SCALE_X1 - pn.SCALE_KM * pn.M_PER_KM / 2.0                           # the scale bar's label, centred above it
     half = pn.SCALE_KM * pn.M_PER_KM / 2.0 - 0.004                                   # each half of the label stays within its half of the bar
-    put(body, THAI_DIGITS[int(pn.SCALE_KM)], mid - 0.004, pn.SCALE_V + 0.06, 0.32, 'r', 'p_ink', max_width=half * 0.6)
+    put(body, PANEL_DIGITS[int(pn.SCALE_KM)], mid - 0.004, pn.SCALE_V + 0.06, 0.32, 'r', 'p_ink', max_width=half * 0.6)
     xr, zb = put(body, 'กม', mid + 0.004, pn.SCALE_V + 0.06, 0.32, 'l', 'p_ink', max_width=half - STOP_GAP - STOP_SIZE)
     stop(body, xr, zb, 'p_ink')
     # The map's credit is not on the panel: the ODbL attribution lives in the settings form's read-only "About the map" row
@@ -296,7 +303,7 @@ for name, mesh in moving.items():
 bpy.context.view_layer.update()
 objects = [o for o in bpy.context.scene.objects if o.get('wf_schema_path')]
 indices = {o.name: i + 1 for i, o in enumerate(objects)}
-for prefix, count in (('bar_', tl.N_BARS), ('lantern_', len(tl.LANTERNS)), ('glint_', len(tl.GLINTS))):
+for prefix, count in (('bar_', tl.N_BARS), ('lantern_', len(tl.LANTERNS)), ('glint_', len(tl.GLINTS)), ('krathong_', tl.KRATHONG_MAX)):
     names = [f'{prefix}{k:02d}' if prefix == 'bar_' else f'{prefix}{k}' for k in range(count)]
     for a, b in zip(names, names[1:]):
         assert indices[b] - indices[a] == 1, f'{a} and {b} must be contiguous: the director loops over them'

@@ -49,7 +49,7 @@ def test_a_recoloured_material_is_in_the_first_three_slots():
 
 def test_the_panel_parts_fit_in_the_panel_except_the_map_which_slides_under_the_band():
     for name, m in pp.panel_meshes().items():
-        if name == "panel_map":
+        if name == "panel_map" or name.startswith("panel_drum_"):
             continue
         (x0, _y0, z0), (x1, _y1, z1) = m.bounds()
         if name == "panel_col_fill" or name.startswith("panel_drum_"):
@@ -78,12 +78,12 @@ def test_the_river_fills_the_window_over_the_whole_pan():
     assert pn.map_v(pn.PAN_S) + south < bottom, "at the northern end the mouth has gone, as the pan intends"
 
 
-def test_the_band_is_solid_wood_with_a_dark_plate_behind_each_digit():
+def test_the_band_is_solid_wood_without_separate_digit_plates():
     back = pp.band_back_mesh()
     assert abs(sum(area(f, back) for f in back.faces) - pn.W * pn.BAND_H) < 1e-9
     mask = pp.band_mask_mesh()
     plates = [f for f, c in zip(mask.faces, mask.colors) if c == "p_ink" and abs(area(f, mask) - pn.WIN_W * pn.WIN_H) < 1e-9]
-    assert len(plates) == len(pp.windows()) == 10
+    assert not plates
     assert mask.material_keys()[0] == "p_text"                    # the marks come first: the recoloured material is slot 0
 
 

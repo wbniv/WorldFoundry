@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tide Harbour: every character the panel draws from the Thai font is in that font.
+"""Tide Harbour: every Thai character the panel draws is in its Thai font.
 
 A character the font lacks comes out as its missing-glyph box. Noto Sans Thai has no full stop, so the unit labels
 once read "ม" plus a hollow box (seen on cast1, 2026-11-21); the stops are now drawn as squares
@@ -19,12 +19,11 @@ FONT = ROOT / "wflevels" / "tide_harbour" / "fonts" / "NotoSansThai-Bold.ttf"   
 
 
 def glyph_texts() -> list:
-    """The strings the script turns into outlines: the Thai digits and the `texts` list in panel_glyphs."""
+    """The Thai strings the panel draws with its Thai font."""
     src = SCRIPT.read_text(encoding="utf-8")
-    digits = re.search(r"^THAI_DIGITS\s*=\s*(.+)$", src, re.M)
-    texts = re.search(r"texts = list\(THAI_DIGITS\) \+ (\[.*?\])\n", src)
-    assert digits and texts, "the glyph lists moved: update this test"
-    return list(ast.literal_eval(digits.group(1).split("#")[0].strip())) + ast.literal_eval(texts.group(1))
+    texts = re.search(r"^    texts = (\[.*?\])\n", src, re.M)
+    assert texts, "the glyph list moved: update this test"
+    return ast.literal_eval(texts.group(1))
 
 
 class GlyphCoverage(unittest.TestCase):
@@ -41,8 +40,7 @@ class GlyphCoverage(unittest.TestCase):
         self.assertNotIn("SHOW_AS_LIVE", row[0], "the About row is read-only: a live field would be editable")
 
     def test_thai_text_is_bold_and_not_offset(self):
-        """An offset (embolden) curve self-intersects on the thin loops of ๕ ๗ ๘ and Blender's fill tears them: the digits came
-        out bitten on cast1 (2026-11-22). Thai text is a static bold font drawn with offset 0."""
+        """Thai text keeps its static bold font and zero offset, avoiding self-intersecting glyph outlines."""
         src = SCRIPT.read_text(encoding="utf-8")
         self.assertIn("THAI_FONT = HERE / 'fonts' / 'NotoSansThai-Bold.ttf'", src)
         self.assertIn("curve.offset = 0.0 if (font is not None and Path(font.filepath).name == THAI_FONT.name) else 0.02", src)
@@ -50,7 +48,13 @@ class GlyphCoverage(unittest.TestCase):
         self.assertTrue((ROOT / "wflevels" / "tide_harbour" / "fonts" / "LICENSE-Noto.txt").is_file())
 
     def test_the_lists_are_found(self):
-        self.assertGreaterEqual(len(glyph_texts()), 15)
+        self.assertEqual(glyph_texts(), ['ม', 'กรุงเทพฯ', 'ปากน้ำ', 'อ่าวไทย', 'กม'])
+
+    def test_panel_uses_arabic_digits_and_keeps_thai_dial(self):
+        src = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("PANEL_DIGITS = '0123456789'", src)
+        self.assertIn("outlines('pg_digits', PANEL_DIGITS, None)", src)
+        self.assertIn("numerals('numerals_thai', THAI, thai", src)
 
     def test_no_full_stop_in_a_font_string(self):
         for t in glyph_texts():

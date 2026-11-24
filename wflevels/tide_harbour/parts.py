@@ -63,6 +63,9 @@ MATERIALS: Dict[str, Tuple[str, RGB, RGB, float]] = {
     "second": ("fixed", (0.75, 0.10, 0.08), NONE, 0.0),
     "moon": ("fixed", (0.93, 0.95, 1.00), NONE, 0.0),
     "bird": ("fixed", (0.10, 0.10, 0.12), NONE, 0.0),
+    "krathong_leaf": ("fixed", (0.18, 0.40, 0.08), NONE, 0.0),
+    "krathong_flower": ("fixed", (0.95, 0.47, 0.12), NONE, 0.0),
+    "krathong_flame": ("fixed", (1.0, 0.85, 0.35), NONE, 0.0),
 }
 SKY_EDGES = (-20.0, 4.0, 8.0, 13.0, 19.0, 26.0, 34.0, 44.0, 58.0, 80.0, 220.0)   # narrow near the horizon, where the colour changes fastest
 for _i in range(len(SKY_EDGES) - 1):
@@ -319,6 +322,21 @@ def glint_mesh(i: int) -> Mesh:
     return m
 
 
+def krathong_mesh(i: int) -> Mesh:
+    m = Mesh(f"krathong_{i}")
+    r = 0.65 + 0.08 * (i % 3)
+    m.column_z(0, 0, 0, .18, r, "krathong_leaf", sides=10)
+    for j in range(8):
+        a = math.tau * j / 8
+        x, y = .43 * r * math.cos(a), .43 * r * math.sin(a)
+        m.sphere((x, y, .25), .14, "krathong_flower", segments=6, rings=3)
+    m.column_z(0, 0, .18, .68, .055, "krathong_flame", sides=6)
+    m.sphere((0, 0, .77), .12, "krathong_flame", segments=6, rings=3)
+    # About 39–44 cm across: a hand-sized float rather than a boat-sized one.
+    m.vertices = [(x * .3, y * .3, z * .3) for x, y, z in m.vertices]
+    return m
+
+
 def all_meshes() -> Dict[str, Mesh]:
     """Every moving actor, in the order the level places them (each group contiguous for the director's loops)."""
     out: Dict[str, Mesh] = {}
@@ -344,6 +362,8 @@ def all_meshes() -> Dict[str, Mesh]:
         out[f"lantern_{i}"] = lantern_mesh(i)
     for i in range(len(tl.GLINTS)):
         out[f"glint_{i}"] = glint_mesh(i)
+    for i in range(tl.KRATHONG_MAX):
+        out[f"krathong_{i}"] = krathong_mesh(i)
     out.update(panel_parts.panel_meshes())
     return out
 
@@ -354,6 +374,8 @@ def visibility_group(name: str) -> str | None:
         return name
     if name.startswith("bird_"):
         return "birds"
+    if name.startswith("krathong_"):
+        return name
     if name.startswith("boat_") or name.startswith("rope_"):
         return "boats"
     if name == "gauge_pointer":

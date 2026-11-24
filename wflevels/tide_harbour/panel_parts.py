@@ -78,7 +78,7 @@ def windows() -> List[Tuple[int, str, float, float]]:
 
 
 def band_mask_mesh() -> Mesh:
-    """What sits on the band's wood: the high and low icons, the colons and decimal points, a dark plate behind each digit,
+    """What sits on the band's wood: the high and low icons, the colons and decimal points,
     and a rule under the band. (The unit label and the minute units' zero are glyphs: Blender adds them.) The wood itself is
     band_back_mesh, solid: a drum's other digits are turned away behind it, so no window needs cutting."""
     m = Mesh("panel_band_mask")
@@ -96,8 +96,6 @@ def band_mask_mesh() -> Mesh:
             _quad(m, cu - 0.012, v + dv - 0.012, cu + 0.012, v + dv + 0.012, "p_text")
         du = pn.row_u("dot")
         _quad(m, du - 0.013, v - WIN_BASE - 0.013, du + 0.013, v - WIN_BASE + 0.013, "p_text")
-    for _row, _name, u, v in windows():                             # the plate each digit shows on
-        _quad(m, u - pn.WIN_W / 2, v - pn.WIN_H / 2, u + pn.WIN_W / 2, v + pn.WIN_H / 2, "p_ink")
     _quad(m, -pn.W / 2, pn.H / 2 - pn.BAND_H - 0.012, pn.W / 2, pn.H / 2 - pn.BAND_H, "p_ink")        # a rule under the band
     return m
 
@@ -294,12 +292,8 @@ def on_ring(x: float, z: float, slot: int):
 def drum_mesh(row: int, name: str) -> Mesh:
     """One drum: a ring of ten digit slots about the mesh's origin (its axis). Turning the drum about the camera's right
     axis by k slots brings slot k to the front, facing the camera (panel.panel_poses). A small tick marks each slot, which
-    also gives the mesh its p_text material; the digits themselves are glyphs of the Thai font, so Blender adds them."""
+    the digits themselves are glyphs that Blender adds to the mesh."""
     m = Mesh(f"panel_drum_{row}_{name}")
-    for k in range(10):
-        pts = [on_ring(x, z, k) for x, z in ((-pn.WIN_W / 2, -0.003), (-pn.WIN_W / 2 + 0.012, -0.003),
-                                              (-pn.WIN_W / 2 + 0.012, 0.003), (-pn.WIN_W / 2, 0.003))]
-        m.face(pts, "p_text")
     return m
 
 
