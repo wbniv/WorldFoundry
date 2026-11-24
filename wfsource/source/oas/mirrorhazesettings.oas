@@ -1,0 +1,9 @@
+@* Live settings for the Mirror Haze clock.
+TYPEHEADER(Mirror Haze Settings,MirrorHazeSettings)
+	@include settings.inc
+	@include clocksettings.inc
+	PROPERTY_SHEET_HEADER(Atmosphere,0)
+	TYPEENTRYINT32(Haze,,0,1,1,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Show the softly colored haze around each beam")
+	PROPERTY_SHEET_FOOTER
+	@include global_settings.inc
+TYPEFOOTER

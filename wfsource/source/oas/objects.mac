@@ -78,6 +78,7 @@ OBJECTSHEADER
         OBJECTENTRY(LavaLampDigitsSettings,0)
         OBJECTENTRY(LighthouseSettings,0)
         OBJECTENTRY(MoonLanternSettings,0)
+        OBJECTENTRY(MirrorHazeSettings,0)
 OBJECTSFOOTER
 
 @*============================================================================

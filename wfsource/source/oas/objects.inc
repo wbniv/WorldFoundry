@@ -112,6 +112,8 @@
 #include "lighthousesettings.hp"
         	
 #include "moonlanternsettings.hp"
+        	
+#include "mirrorhazesettings.hp"
 
 
 

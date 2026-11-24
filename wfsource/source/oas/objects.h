@@ -70,6 +70,7 @@ enum EActorKind {
         LavaLampDigitsSettings_KIND,
         LighthouseSettings_KIND,
         MoonLanternSettings_KIND,
+        MirrorHazeSettings_KIND,
 	};
 
 

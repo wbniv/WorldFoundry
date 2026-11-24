@@ -1,0 +1,10 @@
+*
+!.gitignore
+!*.py
+!*.sh
+!*.blend
+!mirror_haze.lev
+!mirror_haze-standalone.iff.txt
+!actor-map.json
+!settings-capabilities.json
+!*-source.png

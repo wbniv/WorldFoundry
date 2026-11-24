@@ -1,0 +1,26 @@
+{
+  "indices": {
+    "Level": 1,
+    "Room": 2,
+    "Director": 3,
+    "Player": 4,
+    "Camera": 5,
+    "LookAt": 6,
+    "cs_wide": 7,
+    "Ambient": 8,
+    "Background": 9,
+    "MirrorHazeSettings": 10,
+    "HazeProbe": 11,
+    "Instrument": 12,
+    "Gauze": 13,
+    "HourMirror": 14,
+    "HourBeam": 15,
+    "HourHaze": 16,
+    "MinuteMirror": 17,
+    "MinuteBeam": 18,
+    "MinuteHaze": 19,
+    "SecondMirror": 20,
+    "SecondBeam": 21,
+    "SecondHaze": 22
+  }
+}

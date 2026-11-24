@@ -72,6 +72,7 @@ int collisionTable[] =
         	0,	// LavaLampDigitsSettings
         	0,	// LighthouseSettings
         	0,	// MoonLanternSettings
+        	0,	// MirrorHazeSettings
 	
 };
 

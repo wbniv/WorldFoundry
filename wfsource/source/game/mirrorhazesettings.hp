@@ -1,0 +1,15 @@
+#ifndef _MirrorHazeSettings_HP
+#define _MirrorHazeSettings_HP
+#include "actor.hp"
+class MirrorHazeSettings : public Actor {
+public:
+    MirrorHazeSettings(const SObjectStartupData* startupData);
+    virtual ~MirrorHazeSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadMirrorHazeSettings(const SObjectStartupData* startupData);
+#endif
