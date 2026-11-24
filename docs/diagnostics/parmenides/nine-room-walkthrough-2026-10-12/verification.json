@@ -1,0 +1,26 @@
+{
+  "video": "walkthrough.mp4",
+  "video_sha256": "21cb5c49c20538d6596a3838487743dd8acf79fe5f99cfe39aa419db9d37aae2",
+  "duration_seconds": 331.45,
+  "codec": "h264",
+  "resolution": [
+    1280,
+    720
+  ],
+  "frames": 6627,
+  "first_frame_epoch": 1791788468.255018,
+  "button_presses": 401,
+  "events": 936,
+  "completion_video_time_seconds": 325.23168897628784,
+  "last_input_video_time_seconds": 324.7467167377472,
+  "gameplay_realm_at_completion": 5,
+  "completion_card": 208,
+  "driver_sha256": "425e2caf2baa59f941664a984e7dca45d1fb0b708a8b54cdf2e84b524e5d1cf9",
+  "events_sha256": "2188eca1e59b321ee4f1e13c62905fa3611e622062df0d5ef13b3c612df57877",
+  "button_csv_sha256": "c739b1b077d513ce644586c49ef4710370b41c87a29d5393c24afd228b2967bc",
+  "level_sha256": "75d34e42389b3a8043cbf6c49de8cf8a70c80a9b3464d580828cf2f2178d104e",
+  "runtime_sha256": "b55693bc26147f3243332e21cd704cc0c1e60c4221d7a1217c96a0ad4223597a",
+  "room_layout": "scene9",
+  "room_count": 9,
+  "decode_check": "ffmpeg -v error -i walkthrough.mp4 -f null - passed"
+}

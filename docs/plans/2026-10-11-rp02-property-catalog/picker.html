@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup — object picker, today vs RP02</title>
+<style>
+  :root { --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --line:#30363d; --panel:#161b22; --accent:#4493f8; --tv:#061014; --tvpanel:#142d25; --row:#233e31; --sel:#497b51; --txt:#f1f2e4; --warn:#e3b341; --ok:#56d364; }
+  @media (prefers-color-scheme: light) { :root { --bg:#fff; --fg:#1f2328; --muted:#656d76; --line:#d1d9e0; --panel:#f6f8fa; --accent:#0969da; } }
+  * { box-sizing:border-box; }
+  body { margin:0; width:1440px; height:900px; overflow:hidden; background:var(--bg); color:var(--fg); font:15px/1.5 ui-sans-serif,system-ui,sans-serif; }
+  header { display:flex; align-items:center; gap:12px; padding:14px 24px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header h1 { margin:0; font-size:16px; font-weight:600; }
+  header .tag { margin-left:auto; font:600 11px ui-monospace,monospace; letter-spacing:.04em; color:var(--muted); border:1px solid var(--line); border-radius:10px; padding:2px 8px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; padding:24px; }
+  .card h2 { margin:0 0 4px; font-size:14px; }
+  .card p { margin:0 0 10px; color:var(--muted); font-size:13px; min-height:58px; }
+  .tv { background:var(--tv); border-radius:8px; padding:20px; height:330px; }
+  .tv .box { background:var(--tvpanel); height:100%; padding:16px 18px; font:14px ui-monospace,monospace; color:var(--txt); }
+  .tv .title { font-size:17px; margin-bottom:14px; }
+  .row { background:var(--row); padding:9px 12px; margin-bottom:8px; }
+  .row.sel { background:var(--sel); }
+  .hint { position:relative; top:6px; color:#d9c36a; font-size:12px; }
+  .phone { margin:0 auto; width:280px; height:170px; background:#2b2b25; border:8px solid #444; border-radius:22px; padding:14px; }
+  .phone button { display:block; width:100%; margin:0 0 10px; padding:12px; border:0; border-radius:8px; background:#4a4a3e; color:#f3f1e4; font:14px system-ui; text-align:left; }
+  .notes { padding:0 24px; display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .notes div { border:1px solid var(--line); border-radius:8px; padding:12px 16px; background:var(--panel); font-size:13px; }
+  .notes b { color:var(--fg); }
+  .bad { color:var(--warn); } .good { color:var(--ok); }
+  code { font:12px ui-monospace,monospace; background:var(--bg); padding:1px 5px; border-radius:4px; border:1px solid var(--line); }
+</style>
+</head>
+<body>
+<header><h1>Object picker — today vs RP02</h1><span class="tag">MOCKUP — NOT SHIPPED</span></header>
+<div class="grid">
+  <div class="card">
+    <h2>1. Today (TV)</h2>
+    <p>Both owners share one catalog title, so only the actor id tells them apart: <span class="bad">[19]</span> / <span class="bad">[20]</span>.</p>
+    <div class="tv"><div class="box"><div class="title">Choose an object</div>
+      <div class="row sel">Baseline settings [19]</div><div class="row">Baseline settings [20]</div>
+      <div class="hint">Up / down: select&nbsp;&nbsp; OK: open&nbsp;&nbsp; Back: cancel</div></div></div>
+  </div>
+  <div class="card">
+    <h2>2. RP02 — label from the instance's label field (TV)</h2>
+    <p>Each owner's own value of the designated string field. No actor id, no actor name: <span class="good">"Sample A"</span> / <span class="good">"Sample B"</span> are placeholders for whatever the designer types per instance.</p>
+    <div class="tv"><div class="box"><div class="title">Choose an object</div>
+      <div class="row sel">Sample A</div><div class="row">Sample B</div>
+      <div class="hint">Up / down: select&nbsp;&nbsp; OK: open&nbsp;&nbsp; Back: cancel</div></div></div>
+  </div>
+  <div class="card">
+    <h2>3. RP02 — same label on two owners</h2>
+    <p>The fallback: when labels collide (or the field is empty) the picker falls back to the title and appends the id so the rows stay distinguishable.</p>
+    <div class="tv"><div class="box"><div class="title">Choose an object</div>
+      <div class="row sel">Sample [19]</div><div class="row">Sample [20]</div><div class="row">Tank</div>
+      <div class="hint">Up / down: select&nbsp;&nbsp; OK: open&nbsp;&nbsp; Back: cancel</div></div></div>
+  </div>
+</div>
+<div class="grid" style="padding-top:0">
+  <div class="card"><h2>4. Phone picker today</h2><p>Same title and <code>[actor]</code> suffix (<code>controller.html</code>).</p>
+    <div class="phone"><button>Baseline settings [19]</button><button>Baseline settings [20]</button></div></div>
+  <div class="card"><h2>5. Phone picker after</h2><p>Same label rule as the TV.</p>
+    <div class="phone"><button>Sample A</button><button>Sample B</button></div></div>
+  <div class="card"><h2>What does not change</h2><p>The form itself: sheets, groups, fields, validation, apply and cancel are untouched. Only the picker's row text and the catalog bytes behind it change.</p></div>
+</div>
+<div class="notes">
+  <div><b>Reviewer decision.</b> Rule for a row: the owner's label-field value if non-empty and unique; else the catalog title; else the schema name. The id is appended only on a collision.</div>
+  <div><b>Not shown.</b> The actor name (Blender object name) is deliberately never in the catalog and never in the dialog, in any build.</div>
+</div>
+</body>
+</html>
