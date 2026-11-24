@@ -66,8 +66,24 @@ The pistil now uses a higher-contrast veined green texture. The rear petals were
 
 Will approved inclusion in the current batch. The final standalone SHA-256 is `ce93912dfd37f86a73f5a5232bf1b927629c89a96f3d8337611fbcba8511f1c0`. Its 2048 × 1024 room atlas needs a matching VRAM slot, already configured in the Clocks assets. Its indexed-palette table is attached to the standalone by `build.sh`; retain it when packing the chooser and Dream and verify all six palettes through the settings UI. The level registers `CorollaGaugeSettings` in the shared actor registry; recook other levels against the same registry when building the combined pack.
 
-The PC engine passed a live 10:59→11:00 rollover: the petal returned from nearly 60° to 0°, and the captures show the pot label change from 10 to 11. The independent stamen movement and the 10:45 petal angle also passed. The texture palette invariant test passes. Palette selection via the runtime settings UI, complete camera-path review, Chromecast profiling and combined app/Dream acceptance remain for the bundle owner. On this handoff both Chromecasts were unavailable; cast2 re-add job J‑ef9f6bda12d6 failed with `device-not-found-on-network`.
+The PC engine passed a live 10:59→11:00 rollover: the petal returned from nearly 60° to 0°, and the captures show the pot label change from 10 to 11. The independent stamen movement and the 10:45 petal angle also passed. The texture palette invariant test passes. On this handoff both Chromecasts were unavailable; cast2 re-add job J‑ef9f6bda12d6 failed with `device-not-found-on-network`.
 
 ![Before the hour](2026-11-24-corolla-gauge/pc-rollover-before.png)
 
 ![After the hour](2026-11-24-corolla-gauge/pc-rollover-after.png)
+
+## Additional PC verification, 24 November
+
+The moving camera was sampled every ten seconds for 150 seconds, covering both its 90-second horizontal and 140-second vertical cycles. All samples retained the gauge and pot in frame; the still setting held the camera at its authored position for 20 seconds. The silhouette and shading of the folded petal edges remain an artistic limitation at the normal viewing distance.
+
+![Camera sweep](2026-11-24-corolla-gauge/pc-camera-sweep.png)
+
+PC captures verified the pot labels at 00:30, 12:30, 13:30 and 23:30; the earlier live rollover captures show 10 changing to 11.
+
+![24-hour labels](2026-11-24-corolla-gauge/pc-24-hour.png)
+
+The TV controller form initially trapped focus on the Camera radio row, preventing entry to Tulip. With the authorized shared settings-navigation fix, Left at the first radio option returns to the section rail. Using a temporary two-entry **PC test bundle**, controller input opened settings, navigated to Tulip, selected and applied each of the six palettes, and returned to the running scene. The palette changes were confirmed in the engine log and captures. This was not a combined release or screensaver test.
+
+![Six palettes selected and applied through the controller settings UI](2026-11-24-corolla-gauge/pc-palettes-controller.png)
+
+Chromecast profiling and on-device controls, labels and rollover remain unverified because both devices were unreachable. Combined release and screensaver verification are assigned to the other agent.

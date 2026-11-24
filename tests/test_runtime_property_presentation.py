@@ -84,7 +84,7 @@ CYCLE_CHOICES_MAX = 4
 FIXED = {
     "number": (0, 0, 0), "number-with-bounds": (0, 0, 0), "slider": (1, 0, 0), "path": (0, 0, 0),
     "segments": (1, 1, 0), "switch": (1, 1, 0),
-    "chips": (1, 0, 0), "stepped-slider": (1, 0, 0), "checkbox": (1, 1, 0),
+    "chips": (1, 1, 0), "stepped-slider": (1, 0, 0), "checkbox": (1, 1, 0),
 }
 
 
@@ -155,12 +155,12 @@ def test_choice_row_keys_by_option_count(tv, options):
 
 def test_no_choices_row_traps_focus(tv, probes):
     """Every Choices row reaches the section rail: by Left from its first value, or, for the
-    rows that keep today's keys (chips, stepped slider), by Up / Down to a row that does."""
+    rows that keep today's keys (stepped slider), by Up / Down to a row that does."""
     rows, _ = tv
     choices = {k for k, r in rows.items() if r["section"] == rows["enum-default"]["section"]}
     escapes = {k for k in choices if probes[k][3][0] == 1}
     assert escapes and all(k in escapes or probes[k][2][0] == 1 for k in choices)
-    assert choices - escapes <= {"enum-radio", "enum-slider", "enum-many"}
+    assert choices - escapes <= {"enum-slider"}
 
 
 def test_open_list_selects_into_the_draft_and_closes(tv):

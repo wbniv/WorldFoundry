@@ -58,7 +58,7 @@ inline Keys keys(Control c,int options=0){
                       c==Control::Checkbox||c==Control::Switch||cycling;
     // A checkbox leaves like a switch: Left on an unticked box goes to the rail (Will, 2026-11-22: a section of only
     // checkboxes, like Display, left no way to the rail; the earlier policy had Left only change a checkbox).
-    k.leftOnFirstToRail=c==Control::Segments||c==Control::Switch||c==Control::Checkbox||cycling;
+    k.leftOnFirstToRail=c==Control::Segments||c==Control::Chips||c==Control::Switch||c==Control::Checkbox||cycling;
     k.aOpensList=choiceList(c);
     return k;
 }
