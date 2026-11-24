@@ -94,7 +94,9 @@ def texture_uv(obj,mesh=None):
             elif key=='moss':
                 verts=[data.vertices[data.loops[n].vertex_index].co for n in poly.loop_indices]
                 lowx=min(v.x for v in verts);lowy=min(v.y for v in verts)
-                uv.data[loop].uv=(min(1,(p.x-lowx)/5),1-min(1,(p.y-lowy)/5))
+                # Stay inside the atlas tile to avoid filtering adjacent pixels.
+                u=max(0,min(1,(p.x-lowx)/5)); v=max(0,min(1,(p.y-lowy)/5))
+                uv.data[loop].uv=(.02+.96*u,.98-.96*v)
             elif key in ('stone','dialstone'): uv.data[loop].uv=getattr(mesh,'stone_uv',{}).get(data.loops[loop].vertex_index,((p.x+9)/18,1-(p.y+9)/18))
             elif key=='scene': uv.data[loop].uv=((p.x+80)/160,1-(p.z+15)/55)
             elif key=='koi_skin': uv.data[loop].uv=((p.x+.75)/1.5,1-(p.y+.35)/.70)
@@ -167,11 +169,20 @@ garden=Mesh('garden')
 for ix in range(-6,6):
     for iy in range(-6,6):
         x,y=ix*5,iy*5
-        garden.face([(x-.01,y-.01,-.14),(x+5.01,y-.01,-.14),(x+5.01,y+5.01,-.14),(x-.01,y+5.01,-.14)],'moss')
+        # Adjacent tiles share exact edges: coplanar overlap causes z-fighting.
+        garden.face([(x,y,-.14),(x+5,y,-.14),(x+5,y+5,-.14),(x,y+5,-.14)],'moss')
 random.seed(39)
 for i in range(12):
     a=math.tau*i/12
     ellipse(garden,(4.20*math.sin(a),4.20*math.cos(a),.055),(.37,.37,.14),'dialstone')
+# A small brass sun inset distinguishes the twelve o'clock stone without a numeral.
+# It sits just above the irregular stone surface to avoid coplanar flicker.
+for i in range(16):
+    a,b=math.tau*i/16,math.tau*(i+1)/16
+    ra=.25 if i%2==0 else .12
+    rb=.25 if (i+1)%2==0 else .12
+    garden.face([(0,4.20,.23),(ra*math.sin(a),4.20+ra*math.cos(a),.23),
+                 (rb*math.sin(b),4.20+rb*math.cos(b),.23)],'lantern')
 for i in range(30):
     a=random.random()*math.tau;r=random.uniform(5.8,8)
     x,y=r*math.sin(a),r*math.cos(a)

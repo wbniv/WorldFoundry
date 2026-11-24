@@ -173,6 +173,8 @@ for i in range(24):
 actor('RingTicks', 'platform', strip_mesh('ring-ticks', tick_strips, ivory), pos=(0, 0, 3))
 
 # Seven-segment numerals are actual geometry on the ring, not a screen label.
+# Keep every numeral oriented toward the fixed camera so the near-side hours
+# are not upside down; only the positions follow the ring.
 digit_segments = ((-.40,.84,.40,1.0), (.32,.06,.48,.88), (.32,-.88,.48,-.06),
                   (-.40,-1.0,.40,-.84), (-.48,-.88,-.32,-.06),
                   (-.48,.06,-.32,.88), (-.40,-.08,.40,.08))
@@ -189,8 +191,7 @@ for hour in range(24):
             xoff = (digit_index - (len(digits)-1)/2) * .32
             poly = []
             for x,y in ((x0,y0),(x1,y0),(x1,y1),(x0,y1)):
-                tangential, radial = x*.27 + xoff, 4.30 + y*.27
-                poly.append((radial*c-tangential*s, radial*s+tangential*c, .05))
+                poly.append((4.30*c + x*.27 + xoff, 4.30*s + y*.27, .05))
             number_strips.append(poly)
 actor('RingNumbers', 'platform', strip_mesh('ring-numbers', number_strips, ivory), pos=(0, 0, 3))
 
