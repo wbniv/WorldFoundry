@@ -41,3 +41,19 @@ Following feedback, each dial mark is now a cluster of individually textured, ir
 The tower, gallery, lantern, rocks, foam, boat, beam and animated textured sea are modeled in the level. The PC render is more stylized than the mockup: the water, rocks and tower lack the mockup's fine photographic detail, and its distant sky and reflections are not modeled. The beam has a faint sea-level reflection so its direction remains visible when the vertical beam is edge-on.
 
 Water motion, animated surf and the boat wake are implemented and PC-verified in the separate [follow-up plan](2026-11-24-lighthouse-water-motion.md).
+
+## Appendix: nighttime indicator, 2026‑11‑24
+
+The hour is counted in tower windows rather than shown with numerals. A pale blue illuminated rim around the sea now appears from 18:00 through 05:59 local time, separate from the windows that carry the hour. The rim uses prelit geometry switched by the level director; it does not add a dynamic light or alter the beam, boat or hour-window count.
+
+**Before:** the earlier PC engine capture at a different time and camera position, before the night rim was added.
+
+![Before the nighttime indicator, the lighthouse and sea.](2026-11-24-lighthouse/pc-revised-rocks.png)
+
+**After:** PC engine captures at 10:08:22 and 22:08:22 show the rim off and on at matching clock and camera phases.
+
+![After the change, the rim is off at 10:08.](2026-11-24-lighthouse/day-night-sweep.png)
+
+![After the change, the blue rim is visible at 22:08.](2026-11-24-lighthouse/night-night-sweep.png)
+
+The standalone rebuilt, and both PC captures passed the existing boat, beam, wake and camera position checks. Switching boundaries, time jumps, the complete camera path, TV readability and Chromecast profiling remain to be checked. This change is not yet in the installed APK.

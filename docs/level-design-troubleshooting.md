@@ -1452,6 +1452,38 @@ This matches the engine's `VRAMPaletteWidth` on the PC path. The PSX path uses 3
 
 ---
 
+## Textured asset looks correct in Blender but colors change in World Foundry
+
+**Symptom:** a textured model previews correctly in Blender, but after export and
+cook the pine turns brown or roof tiles pick up a blue tile. The geometry is
+present and the texture page loads.
+
+**Check the atlas V convention first.** In the reef and
+[Cuckoo Village asset test](../wflevels/cuckoo_village_assets/README.md), UV
+`v` is expressed from the **top** of the source atlas for the World Foundry
+pipeline. Blender's image preview uses the opposite vertical direction. In the
+village test, assigning bottom-origin UVs made the Blender render look right but
+the engine sampled the opposite atlas row. The fix was top-origin UVs for
+export, with a V-flip in the Blender image node's preview mapping. The actual
+engine capture then showed a green pine and red roofs. This observation is for
+this exporter/textile path; validate other importers separately.
+
+Inspect the source TGA and generated `Room0.tga`, the texture name in the mesh,
+the `UVMap` and the cooked level in the engine. Use distinct diagnostic colors
+in the top and bottom atlas rows; a Blender screenshot alone cannot validate
+runtime remapping. A missing texture, incorrect material flags, absent room
+atlas or lighting can also change the result; see the neighboring texture
+entries before attributing every color error to V orientation.
+
+For independently switchable windows, the same asset test places a dark pane
+in the wall mesh and a separate warm pane just in front. The warm-pane actors
+use global visibility mailbox 200. The desktop bridge test writes 0 and 1,
+captures both states, and compares the scene pixels. This proves an on/off
+switch, not a smooth fade or automatic time-of-day control. Keep the panes'
+transforms in step with each house instance.
+
+---
+
 ## Texture assertion: `width < map.GetXSize()+1` (width = 1024) — texture bigger than the transient VRAM slot
 
 Same assert as the `width = 320` palette case above, but here the number is your

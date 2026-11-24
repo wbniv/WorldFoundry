@@ -105,6 +105,30 @@ field, etc. — see [docs/level-design-troubleshooting.md](level-design-troubles
 
 ## Tooling
 
+### Textured Blender assets: atlas and runtime checks
+
+The [Cuckoo Village asset test](../wflevels/cuckoo_village_assets/README.md) is a
+small worked example of image-textured, UV-mapped objects, a reusable house mesh,
+and separately pivoted tower parts. It generates an editable Blender scene,
+exports a level, cooks its texture page and captures the desktop engine. It is a
+prototype, not a finished art-quality benchmark.
+
+For generated atlases, check the coordinate convention at **both** ends. The
+reef and village pipelines specify UV `v` from the atlas's top edge for World
+Foundry. Blender's image preview uses the opposite vertical direction: the
+village material applies a preview-only vertical flip to its image node while
+leaving exported UVs in the engine convention. An image can look right in
+Blender and use entirely different atlas rows in the engine if this is reversed.
+Verify named test colors in an actual cooked engine capture before investing in
+more texture work; see the [texture FAQ](level-design-troubleshooting.md#textured-asset-looks-correct-in-blender-but-colors-change-in-world-foundry).
+
+Choose texture page dimensions and runtime VRAM slots together. The village
+prototype uses a 1024² source atlas and `textile.flags` for 1024² pages; its
+desktop runner supplies the corresponding `--vram-*` switches. A successful
+export and cook do not prove the runtime was configured with a large enough
+slot. Repeat the check in every target host and do not assume a desktop launch
+option is automatically present in an Android Dream.
+
 ### Blender MCP Connector
 
 The official Blender MCP server (released 2026-04-28, Blender + Anthropic) lets Claude

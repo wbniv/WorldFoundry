@@ -16,12 +16,13 @@
     "BambooGrove": 14,
     "PondWater": 15,
     "FloatingLantern": 16,
-    "Koi": 17,
-    "KoiRipples": 18,
-    "LanternRipples": 19,
-    "BambooSupport": 20,
-    "Tipper": 21,
-    "TubeWater": 22,
-    "SpoutWater": 23
+    "NightLantern": 17,
+    "Koi": 18,
+    "KoiRipples": 19,
+    "LanternRipples": 20,
+    "BambooSupport": 21,
+    "Tipper": 22,
+    "TubeWater": 23,
+    "SpoutWater": 24
   }
 }

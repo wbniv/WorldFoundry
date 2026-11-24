@@ -137,6 +137,14 @@ def main() -> int:
         ids, ix = build(tmp)
         host = Host(tmp, ids, ix)
         try:
+            for hour in (0, 11, 12, 23):
+                for bavaria in (0, 1):
+                    host.frame_at(day_of(2026, 11, 24), hour * 3600, bavaria=bavaria)
+                    cells = [host.read(cell) for cell in range(280, 284)]
+                    expected = [0.0] * 4
+                    expected[2 * bavaria + int(hour >= 12)] = 1.0
+                    if cells != expected or host.read(799) != 0:
+                        raise AssertionError((hour, bavaria, cells, expected))
             days = season_days()
             for day in days:
                 for sod in (0.0, 43200.0, 86399.0):             # midnight, noon, the last second

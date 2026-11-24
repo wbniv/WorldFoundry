@@ -694,3 +694,15 @@ These steps are the contract. Each is run when its phase lands, with the raw out
 - A `TODO.md` entry for each of the two jobs, ranked.
 - A row in the [plan index](README.md).
 - The mockups are schematics of the design, not game assets. Their tide is now the **real fitted tide** for the date, drawn at an exaggerated scale; the water bars are the technique, flat. The poster mockup's harbour panel is a placeholder.
+
+## Appendix: Arabic digits on the side panel, 2026‑11‑24
+
+Will clarified that the requested numeral change applies **only to the side panel**, not the clock tower. The panel's tide times, height drums, river-height scale and map scale now use Arabic digits `0`–`9`. Thai words and unit labels retain the Thai font, text and original sizing. The clock tower and its Roman/Thai/None settings have not been changed by this update.
+
+The following are actual PC engine captures at the same simulated local time, 2026‑11‑22 09:59:30. They show the side panel before and after the digit change:
+
+![Before: Thai digits and Thai labels on the side panel.](2026-11-21-tide-harbour-clock/panel-before-arabic.png)
+
+![After: Arabic digits with the same Thai labels and tower dial.](2026-11-21-tide-harbour-clock/panel-after-arabic.png)
+
+The standalone was rebuilt and the side panel compared in the PC renderer. Chromecast readability and the next combined bundle build remain to be checked.

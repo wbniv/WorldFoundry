@@ -193,3 +193,14 @@ The active manifest has **six tanks**, including Planted Tank. The generated lio
 - [ ] Physical phone and paired gamepad feel; actual remote held-Back return. A PC controller client and Android injected keys do not establish these physical-device interactions.
 
 The final installed release passed real phone-controller protocol checks for held A + DOWN producing one release, three-prey capacity, player approach + A capture, consumed-slot reuse, and natural resident capture. The client connected to the TV's LAN controller address and maintained the normal input heartbeat during screenshots; no actor teleport or debug bridge was used. The installed APK hash matches the build receipt. [Device interaction receipt](2026-10-02-lionfish-goldfish-feeding/device/checks.json), [three active prey](2026-10-02-lionfish-goldfish-feeding/device/three-goldfish.png), [after player capture](2026-10-02-lionfish-goldfish-feeding/device/after-player-gulp.png), [after resident capture](2026-10-02-lionfish-goldfish-feeding/device/after-resident-gulp.png). The app was left in a fresh lionfish tank with zero prey.
+
+
+## Appendix: standard framerate setting, 2026-11-24
+
+Added the existing generic Level Settings actor to this tank, exposing **Show framerate**. Rebuilt its playable and screensaver variants and repacked both Aquarium bundles. The scene itself is unchanged.
+
+| Before: earlier tank capture | After: shared settings panel on Pixel |
+| --- | --- |
+| ![Tank before the settings actor](2026-10-05-sea-urchin-realism/evidence/phase-3/menu-check/lionfish-screenshot.png) | ![Shared Show framerate panel](../diagnostics/aquarium-phone-controls-2026-11-24/framerate-settings-after.png) |
+
+The after screenshot shows the shared generic panel opened in Clownfish on Pixel (J‑cd8f69838be3); it is an example of the actor used here, not a separate on-device test of this tank. The compiled playable and screensaver levels contain the setting.

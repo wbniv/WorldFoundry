@@ -88,3 +88,9 @@ The combined app is not the standard app plus a screensaver entry point. It is t
 |---|---|---|
 | Q1 | Touch a menu row directly, as the old app allowed? | Not in this change; the joystick and A cover it. Add it if Will misses it. |
 | Q2 | Restore the rest of the table? | **Decided (Will, 2026‑11‑22): "why wouldn't i want all of it? didn't we develop those things for a reason?" Restore all.** Done above except the phone gamepad (TV) and the crash handler, which are next. |
+
+## Appendix: phone chooser and settings, 2026-11-24
+
+The shared Aquarium and Clocks host now hides the on-screen stick and game buttons on phones, while keeping touch for settings and chooser navigation. A single row tap starts the selected level; vertical swipes navigate the list. The Settings button remains available when a level supplies settings.
+
+All 12 Aquarium levels now contain **Show framerate** in both their playable and screensaver variants. Clownfish, Blue Shrimp, Betta, Lionfish, Arowana and Tiger Barbs gained the generic settings actor; the others already have their own settings actors. Both Aquarium bundles and the release APK were rebuilt. Pixel job J‑cd8f69838be3 launched Clownfish with one tap, showed its Settings button without the game controls, opened Settings and changed the framerate checkbox by touch. Individual device checks for the other tanks remain open.

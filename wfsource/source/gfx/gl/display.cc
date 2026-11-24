@@ -1,3 +1,7 @@
+#if defined(WF_LIFETIME_DIAGNOSTICS) && !defined(__ANDROID__)
+#define GL_GLEXT_PROTOTYPES 1
+#endif
+#include <wf_lifetime.hpp>
 #include <game/plant_ui.h>
 #include <game/runtime_property_ui.h>
 #include <game/level_menu.h>
@@ -41,6 +45,7 @@
 #  include <GL/glext.h>
 #endif
 
+#include <wf_lifetime_gl.hpp>
 #include <memory/memory.hp>
 #include <gfx/pixelmap.hp>
 #include <gfx/rendobj3.hp>
@@ -706,6 +711,7 @@ extern "C" void WFAndroidDrawLevelMenu(const PhonepadRect* rects, int count, int
 // Plan: docs/plans/2026-10-01-level-menu-selector.md
 #include <game/level_menu.h>
 
+
 static void DrawLevelMenuRects(const PhonepadRect* rects, int count, int w, int h)
 {
     glViewport(0, 0, w, h);
@@ -1328,14 +1334,14 @@ Display::PageFlip()
 #endif
 
 #if defined(__ANDROID__)
-    AndroidSwapBuffers();
+    {wflifetime::Scope driver(0);AndroidSwapBuffers();}
     AssertGLOK();
 #elif defined(__EMSCRIPTEN__)
     // No explicit swap on WebGL: the browser composites the canvas when the
     // frame yields to the event loop (ASYNCIFY emscripten_sleep in StepFrame /
     // the v2 main-loop callback return). glFlush() above is sufficient.
 #elif defined(__LINUX__)
-    glXSwapBuffers(halDisplay.mainDisplay, halDisplay.win);
+    {wflifetime::Scope driver(0);glXSwapBuffers(halDisplay.mainDisplay, halDisplay.win);}
     AssertGLOK();
          // glFinish();
 #else

@@ -1,3 +1,4 @@
+#include <wf_lifetime.hpp>
 // jolt_backend.cc — Jolt Physics world singleton implementation.
 //
 // Owns the PhysicsSystem, TempAllocator, JobSystem, body registry, and the
@@ -151,7 +152,7 @@ static uint32_t AllocEntry()
             return i;
     }
     // Grow the table.
-    gBodies.push_back(BodyEntry{});
+    {wflifetime::Scope tableOwner(wflifetime::Persistent);gBodies.push_back(BodyEntry{});}
     return (uint32_t)(gBodies.size() - 1);
 }
 
@@ -247,6 +248,7 @@ uint32_t JoltBodyCreate(const Vector3& pos, const Euler& rot,
     e.velCache = Vector3::zero;
     e.rotCache = rot;
     e.occupied = true;
+    wflifetime::acquire(wflifetime::Kind::Object,&gBodies,std::uintptr_t(handle)+1,0,"JoltBody",__FILE__,__LINE__);
     return handle;
 }
 
@@ -278,6 +280,7 @@ uint32_t JoltBodyCreateStatic(const Vector3& pos, const Euler& rot,
     e.velCache = Vector3::zero;
     e.rotCache = rot;
     e.occupied = true;
+    wflifetime::acquire(wflifetime::Kind::Object,&gBodies,std::uintptr_t(handle)+1,0,"JoltBody",__FILE__,__LINE__);
     return handle;
 }
 
@@ -350,12 +353,14 @@ uint32_t JoltBodyCreateStaticMesh(const Vector3& pos,
     e.velCache = Vector3::zero;
     e.rotCache = Euler(Angle::zero, Angle::zero, Angle::zero);
     e.occupied = true;
+    wflifetime::acquire(wflifetime::Kind::Object,&gBodies,std::uintptr_t(handle)+1,0,"JoltBody",__FILE__,__LINE__);
     return handle;
 }
 
 void JoltBodyDestroy(uint32_t handle)
 {
     if (!ValidHandle(handle)) return;
+    wflifetime::release(wflifetime::Kind::Object,&gBodies,std::uintptr_t(handle)+1);
     BodyEntry& e = gBodies[handle];
     // Belt-and-suspenders: if a registered entry's joltID is invalid (which
     // shouldn't be possible after the per-wrapper IsInvalid checks above),
@@ -570,7 +575,7 @@ static uint32_t AllocCharEntry()
 {
     for (uint32_t i = 0; i < (uint32_t)gCharacters.size(); ++i)
         if (!gCharacters[i].occupied) return i;
-    gCharacters.push_back(CharEntry{});
+    {wflifetime::Scope tableOwner(wflifetime::Persistent);gCharacters.push_back(CharEntry{});}
     return (uint32_t)(gCharacters.size() - 1);
 }
 
@@ -653,6 +658,7 @@ uint32_t JoltCharacterCreate(const Vector3& pos, const Euler& rot,
     e.velCache  = Vector3::zero;
     e.ctr       = ctr;
     e.occupied  = true;
+    wflifetime::acquire(wflifetime::Kind::Object,&gCharacters,std::uintptr_t(handle)+1,0,"JoltCharacter",__FILE__,__LINE__);
 
     // Wire the per-character contact listener; populates the per-actor
     // collision mailboxes (f4071a3) for this Jolt-managed actor. The Actor*
@@ -696,7 +702,7 @@ uint32_t JoltCharacterCreate(const Vector3& pos, const Euler& rot,
                 mn.GetY() <= charMinY && mx.GetY() >= charMaxY &&
                 mn.GetZ() <= charMinZ && mx.GetZ() >= charMaxZ)
             {
-                e.excludeBodies.push_back(be.joltID);
+                {wflifetime::Scope tableOwner(wflifetime::Persistent);e.excludeBodies.push_back(be.joltID);}
                 DBSTREAM4( ccollision << "jolt: character " << handle << " ignoring zone body id="
                     << be.joltID.GetIndexAndSequenceNumber() << std::endl; )
             }
@@ -709,7 +715,11 @@ uint32_t JoltCharacterCreate(const Vector3& pos, const Euler& rot,
 void JoltCharacterDestroy(uint32_t handle)
 {
     if (handle >= (uint32_t)gCharacters.size() || !gCharacters[handle].occupied) return;
+    wflifetime::release(wflifetime::Kind::Object,&gCharacters,std::uintptr_t(handle)+1);
     gCharacters[handle].character = nullptr;
+    gCharacters[handle].listener.reset();
+    gCharacters[handle].actor=nullptr;
+    gCharacters[handle].excludeBodies.clear();
     gCharacters[handle].occupied  = false;
 }
 
@@ -837,7 +847,7 @@ static uint32_t AllocVehicleEntry()
 {
     for (uint32_t i = 0; i < (uint32_t)gVehicles.size(); ++i)
         if (!gVehicles[i].occupied) return i;
-    gVehicles.push_back(VehicleEntry{});
+    {wflifetime::Scope tableOwner(wflifetime::Persistent);gVehicles.push_back(VehicleEntry{});}
     return (uint32_t)(gVehicles.size() - 1);
 }
 
@@ -929,12 +939,14 @@ uint32_t JoltVehicleCreate(const Vector3& pos, const Euler& rot,
     e.posCache   = Vector3(Scalar(pos.X()), Scalar(pos.Y()), Scalar(pos.Z()));
     e.rotCache   = rot;
     e.occupied   = true;
+    wflifetime::acquire(wflifetime::Kind::Object,&gVehicles,std::uintptr_t(handle)+1,0,"JoltVehicle",__FILE__,__LINE__);
     return handle;
 }
 
 void JoltVehicleDestroy(uint32_t handle)
 {
     if (handle >= (uint32_t)gVehicles.size() || !gVehicles[handle].occupied) return;
+    wflifetime::release(wflifetime::Kind::Object,&gVehicles,std::uintptr_t(handle)+1);
     VehicleEntry& e = gVehicles[handle];
     gPhysicsSystem->RemoveConstraint(e.constraint);
     gBodyInterface->RemoveBody(e.bodyID);

@@ -1,0 +1,25 @@
+{
+  "indices": {
+    "Level": 1,
+    "Room": 2,
+    "Director": 3,
+    "Player": 4,
+    "Camera": 5,
+    "LookAt": 6,
+    "cs_wide": 7,
+    "Ambient": 8,
+    "Sun": 9,
+    "Background": 10,
+    "TourbillonSettings": 11,
+    "Pedestal": 12,
+    "NightLamps": 13,
+    "OuterCage": 14,
+    "MiddleCage": 15,
+    "InnerCage": 16,
+    "Balance": 17,
+    "SecondBead": 18,
+    "Dial": 19,
+    "HourHand": 20,
+    "MinuteHand": 21
+  }
+}

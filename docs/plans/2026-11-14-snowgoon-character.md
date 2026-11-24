@@ -1,7 +1,7 @@
 # Snowgoon character, rig and snowball actions
 
 **Date:** 2026-11-14
-**Status:** planning; Will approved the 2D concept direction on 2026-11-14. Model, rig, and animation work remain.
+**Status:** the 2D concept and action references are approved; both TRELLIS seeds were generated and verified on 2026-11-14. Neither raw model nor the first 2,800-triangle projected salvage is accepted for production. Rigging and animation remain.
 **Builds on:** [one-acre Snowgoons yard](2026-11-13-snowgoons-one-acre-arena.md), which added the original two-headed snowman as a static Enemy mesh.
 
 ## Goal
@@ -54,10 +54,16 @@ retained alongside it.
 ### Action pose reference
 
 The turnaround defines the design. This separate flat 2D pose strip makes the
-action's body movement explicit for the modeler: fold forward through the torso
-to scoop, rise partway to pack, then bend through the throw and recovery.
+action's body movement explicit: fold forward through the torso to scoop, rise
+partway to pack the snowball with all three arms, then bend through the throw
+and recovery.
 
-![2D side-profile action poses showing a forward bend for scooping, a partial rise to pack, and a bent throw/recovery](2026-11-14-snowgoon-character/action-poses-2d-v1.png)
+![2D side-profile action poses showing a forward bend for scooping, three arms packing one snowball, and a bent throw/recovery; one carrot nose per pose; right-facing poses use the approved right-profile head order](2026-11-14-snowgoon-character/action-poses-2d-v4.png)
+
+The v1 strip accidentally added a second carrot-shaped protrusion beside each
+upper head. V2 corrected that to one nose per pose; v3 adds the three-arm pack
+pose; v4 corrects the head order to match the right-profile turnaround. V4 is
+the current action reference; earlier versions remain for change history.
 
 ### Calvin & Hobbes visual references
 
@@ -177,10 +183,12 @@ snow body bare.
 
 - Keep this work in the classic Snowgoons level and its own asset/build paths;
   do not change the shared Blender scaffold or unrelated levels.
-- This task produces 2D concept and modeling references. The 3D modeler owns
-  mesh, texture, rig, and animation creation; do not generate or build the 3D
-  model here. If the modeler chooses TRELLIS, the four views must condition
-  each shape seed together; retain raw colour and bake/paint a game texture.
+- The prepared 2D package feeds the GCP GPU Route C workflow documented in
+  [`Route C actor HOWTO`](../../../finding-your-way/docs/route-c-actor-how-to.md).
+  Generate two TRELLIS multi-view mesh/appearance candidates from all four
+  views jointly per seed. Do not hand this to an unspecified external
+  modeler. Use Blender for review, cleanup, rigging and export after candidate
+  generation; preserve the raw outputs and receipts.
 - Target at most 2,800 triangles for the complete snowgoon model, subject to
   review at game distance. Keep the final model, materials, animation and any
   projectile within the existing level's memory and frame budgets.
@@ -217,26 +225,106 @@ snow body bare.
   SHA-256 hashes in the unique run directory. The front input has the detached
   ink fleck masked; its raw crop is retained.
 
-**Gate:** approved 2D concept, spaced input layout, four crops, and action poses
-are ready for the 3D modeler. Do not start model generation in this task.
+**Gate:** approved 2D concept, spaced input layout, four hashed crops and action
+poses are ready for the Route C multi-view run.
 
-### 2. 3D modeler handoff: mesh and appearance
+### 2. GCP Route C: multi-view mesh and appearance candidates
 
-- [x] Prepare the modeler package: approved v10 turnaround, spaced v11 crops,
-  strip reference index, in-game baseline crop, and the 2D action-pose strip.
-- [ ] Hand off the package and request an editable Blender scene, a game-ready
-  textured model within the 2,800-triangle target, and front/back/profile/three-
-  quarter renders at game distance. Keep the original source mesh and textures
-  intact until the replacement is accepted.
-- [ ] Ask the modeler to show that both heads remain nearly equal in size, all
-  three thin arms have distinct shoulder roots and hand silhouettes, and the
-  model bends forward without body intersections or a broken silhouette.
-- [ ] Review returned geometry, materials, texture allocation, and scale against
-  the 2.20 m in-game baseline. Record the delivered source files and export
-  settings before integration.
+- [x] Prepare the Route C package: approved v10 sheet, spaced v11 layout, four
+  equal-sized inputs, strip reference index, in-game baseline and the 2D
+  action-pose strip. The source masks and hashes are recorded in the v11
+  manifest.
+- [x] Create a unique TRELLIS input manifest pinned to code revision
+  `193e0502b5cb3eb5997ec457d5340e95d09b158e`, model revision
+  `25e0d31ffbebe4b5a97464dd851910efc3002d96`, and seeds 42 and 7. Record all
+  four exact image hashes and use `front`, `left`, `back`, `right` names expected
+  by the worker.
+- [x] Create the run-specific four-image input directory and manifest at
+  [`gpu-run-2026-11-14/inputs/`](2026-11-14-snowgoon-character/gpu-run-2026-11-14/inputs/).
+  All four crops are 543 × 543 RGB with distinct hashes; the worker accepted
+  the manifest and seed list locally.
+- [x] Review the exact input set before GPU allocation:
 
-**Gate:** modeler delivers a reviewable asset; only then begin rig/runtime
-validation and integration planning.
+  ![Exact TRELLIS conditioning inputs labelled front, left, back and right](2026-11-14-snowgoon-character/gpu-run-2026-11-14/input-review.png)
+
+- The initial bounded VM was deleted before input upload when the action-sheet
+  head-order mismatch was noticed. No images were uploaded and no inference ran;
+  verify cleanup before creating a fresh VM for the corrected package.
+
+- [x] Pass the Route C read-only resource preflight on 2026-11-14: the project
+  has zero existing instances, disks and reserved addresses; the unique VM
+  identity is unused, and the output path does not exist. The official [GCP
+  Spot pricing page](https://cloud.google.com/spot-vms/pricing) currently lists
+  `g2-standard-4` with one L4 at $0.402748/hour. The four-hour automatic
+  deletion caps compute at about $1.62 at that rate; boot disk and transfer
+  charges are additional and depend on actual usage. Keep the run on bounded
+  Spot; do not escalate to Standard or extend its lifetime.
+- [x] Run the explicit preflight/create/wait/push/run/fetch/verify/delete
+  lifecycle in the Route C HOWTO. Preserve partial downloads on failure and
+  retry only into a fresh directory while the bounded VM remains available.
+  Retain both raw meshes, vertex attributes/colour, Gaussian appearance,
+  receipts, consumed conditioning images, logs, hashes and lifecycle evidence.
+- [x] Verify both outputs and receipts locally, confirm each receipt proves all
+  four views reached the same shape call, then delete the VM promptly and
+  verify cleanup before visual selection.
+- [x] Review both seeds from four axes. Neither raw candidate is accepted for
+  production: vertex-colour previews have weak/blurred facial detail, incorrect
+  pink arm colour and inconsistent face placement; the meshes contain about
+  668k and 678k triangles, far above the 2,800-triangle target. Preserve both
+  seeds and diagnose these gaps before any additional GPU allocation.
+
+**Gate:** both TRELLIS candidates, inputs, receipts and cleanup evidence are
+archived. Both raw candidates are rejected for production pending a corrective
+model/appearance approach; do not start rigging these raw meshes.
+
+#### Route C run evidence (2026-11-14)
+
+The successful run used the pinned TRELLIS code and weight revisions, with all
+four labelled 543 × 543 views supplied together for seeds 42 and 7. The
+downloaded receipts passed the Route C verifier and match the manifest and
+conditioning image hashes. [Verification JSON](2026-11-14-snowgoon-character/gpu-run-2026-11-14/download-verification.json),
+[GPU lifecycle record](2026-11-14-snowgoon-character/gpu-run-2026-11-14/gpu-lifecycle.json),
+[cleanup log](2026-11-14-snowgoon-character/gpu-run-2026-11-14/gpu-cleanup.log),
+[raw four-axis review](2026-11-14-snowgoon-character/gpu-run-2026-11-14/raw-review/index.html),
+and the failed first-attempt log are retained under
+[`gpu-run-2026-11-14/`](2026-11-14-snowgoon-character/gpu-run-2026-11-14/).
+
+![Blender raw previews of both TRELLIS seeds from front, left profile, back and right profile in the production yaw; neither candidate is production ready](2026-11-14-snowgoon-character/gpu-run-2026-11-14/raw-review-game-facing/contact-sheet.png)
+
+The first Blender contact sheet used yaw 0 and was useful only as an unlabelled
+four-axis inspection. The corrected game-facing preview applies the Route C
+`-Y` up-axis and 90-degree yaw, so +X is the front, -X the back, and the two
+profile views map to the approved left/right order. This corrected review is
+the visual reference for judging the candidates.
+
+The raw generated vertex colours are muddy on faces and turn the twig arms
+pink. A local salvage experiment collapsed seed 42 to exactly 2,800 triangles
+and projected the approved four source views onto a 512 × 512 UV texture. Four
+RGBA projection inputs and their [contact sheet](2026-11-14-snowgoon-character/gpu-run-2026-11-14/projection-input-review.png)
+are prepared by `prepare_projection_inputs.py`; connected white margins are
+transparent while enclosed snow stays opaque. The [projected review](2026-11-14-snowgoon-character/gpu-run-2026-11-14/salvage-seed42-projection2/contact-sheet.png)
+shows improved twig color and restored face marks, but severe seams, misplaced
+facial details and gaps remain where the generated geometry disagrees with the
+source views. This salvage is rejected for production. The first blank bake
+from an incorrect camera-group mask is preserved in `salvage-seed42/`; the
+corrected experiment is in `salvage-seed42-projection2/`, with its editable
+Blender scene, script and stats. Do not rig or integrate it. Next, improve the
+projection mappings/face-region masks or change the input/model approach before
+another GPU allocation.
+
+The first uploaded worker attempt exposed a quoting bug in the shared Route C
+shell script: it wrote literal `n` characters between pip constraints. A
+run-local worker copy fixes the quoting; the unchanged shared script is outside
+this repository and remains unmodified. That Spot VM was subsequently
+reclaimed. A second, successful bounded Spot run generated both candidates;
+the outputs were downloaded before deletion. Final cleanup confirmed zero
+instances, disks and reserved addresses. The earlier VM created before the
+action-sheet head-order correction was deleted before any input upload.
+
+Google's [Spot price page](https://cloud.google.com/spot-vms/pricing) listed
+`g2-standard-4` with one L4 at $0.402748/hour during preflight. The VM used a
+four-hour automatic deletion limit; that compute-rate estimate excludes the
+boot disk and transfer and is not an invoice.
 
 ### 3. Articulation and rig validation
 
@@ -244,20 +332,21 @@ validation and integration planning.
   Blender importer/exporter and actor scripts represent animated meshes.
   Separate confirmed support from assumptions; `snowgoon.iff` currently has no
   authored arm rig or action cycles.
-- [ ] Have the modeler build a simple, stable rig with torso/root and three
+- [ ] Build a simple, stable rig with torso/root and three
   distinct arm roots:
   two high shoulder roots and the added third arm root on the upper torso. Give
   each thin twig arm independently movable upper segment, elbow, forearm and
   forked hand pivots. Add a torso pivot at the middle/lower snow-body junction
   so the upper body and both heads can fold forward together, then rise partway
-  for packing. Include only enough head control for readable weight shifts and
-  aiming.
+  for packing. Bring all three hands to the snowball so they visibly press and
+  shape it together. Include only enough head control for readable weight
+  shifts and aiming.
 - [ ] Review poses in Blender: a visible forward torso fold lowers one hand to
-  the snow; the goon partly rises and brings two hands together to pack; the
-  throw uses torso bend/rotation, arm wind-up, release and follow-through. Use
-  the third arm to assist or balance. Reject body intersections, broken pivots,
-  reach achieved only by stretching arms, silhouette collapse and detached
-  limbs. Save labelled pose renders and the editable rig scene.
+  the snow; the goon partly rises and packs the snowball with all three arms;
+  the throw uses torso bend/rotation, arm wind-up, release and follow-through.
+  Reject body intersections, broken pivots, reach achieved only by stretching
+  arms, silhouette collapse and detached limbs. Save labelled pose renders and
+  the editable rig scene.
 - [ ] Determine whether the existing runtime can play the required rigged
   cycles. First test current asset/tool support and existing animation playback.
   If unsupported, document the exact format/runtime gap and propose the smallest
@@ -270,9 +359,9 @@ a reviewable engine-change proposal while asset/tooling work continues.
 
 ### 4. Animation and action behavior
 
-- [ ] Have the modeler author and export a seamless idle, scoop, pack, throw and
-  recovery cycle. Show a clear forward bend for scooping, a partial rise for
-  two-handed packing, then torso-led anticipation, one-handed release and
+- [ ] Author and export a seamless idle, scoop, pack, throw and recovery cycle.
+  Show a clear forward bend for scooping, a partial rise for three-armed
+  packing, then torso-led anticipation, one-handed release and
   follow-through. Keep the throwing hand, snowball and release frame aligned;
   return to idle without a visible pop.
 - [ ] Add a snowball prop with held and flying states. Show it between the hands

@@ -49,6 +49,8 @@
 #include <string>
 #include <vector>
 
+#include <wf_lifetime_gl.hpp>
+
 namespace
 {
 
@@ -642,6 +644,7 @@ public:
         Pack(tri[0], v0, nx, ny, nz);
         Pack(tri[1], v1, nx, ny, nz);
         Pack(tri[2], v2, nx, ny, nz);
+        wflifetime::Scope backendCache(wflifetime::Persistent);
         _cpu.push_back(tri[0]);
         _cpu.push_back(tri[1]);
         _cpu.push_back(tri[2]);
@@ -734,6 +737,7 @@ public:
     void DrawGlyphs(const bitmaptext::Quad* quads,int count,int width,int height,RBTextureHandle texture,
                     bool testDepth,float anchorX,float anchorY,float anchorDepth) override
     {
+        wflifetime::Scope backendCache(wflifetime::Persistent);
         if(!texture||count<=0||width<=0||height<=0)return;
         Flush();
         enum { BATCH_QUADS=256, VERTICES_PER_QUAD=6, FLOATS_PER_VERTEX=9 };
@@ -807,6 +811,7 @@ public:
                                   const void* pixels) override
     {
         if(format==RB_TEX_COVERAGE8){
+            wflifetime::Scope fontAtlas(wflifetime::Persistent);
             GLint binding,alignment;glGetIntegerv(GL_TEXTURE_BINDING_2D,&binding);glGetIntegerv(GL_UNPACK_ALIGNMENT,&alignment);
             GLuint name=0;glGenTextures(1,&name);if(!name)return NULL;
             glBindTexture(GL_TEXTURE_2D,name);glPixelStorei(GL_UNPACK_ALIGNMENT,1);
@@ -943,6 +948,9 @@ public:
     // presenter re-create theirs from their catalogs.
     void OnSurfaceLost()
     {
+#ifdef WF_LIFETIME_DIAGNOSTICS
+        wflifetime_gl::contextLost();
+#endif
         _inited      = false;
         _vao         = 0;
         _vbo         = 0;
@@ -1132,6 +1140,7 @@ public:
     void DrawStaticTriangles(RBStaticMeshHandle handle, const unsigned* triangles, int count,
                              const PixelMap* texture, bool prelit) override
     {
+        wflifetime::Scope backendCache(wflifetime::Persistent);
         if (count <= 0) return;             // all culled: DrawTriangle would queue nothing
         StaticMeshGL* mesh = static_cast<StaticMeshGL*>(handle);
         // Same batch key as DrawTriangle, with the mesh as part of it.
@@ -1328,6 +1337,7 @@ private:
 
     void LazyInit()
     {
+        wflifetime::Scope backendCache(wflifetime::Persistent);
         if (_inited) return;
 
         _prog = LinkBuiltinProgram("");
@@ -1620,4 +1630,9 @@ WFAndroidNotifySurfaceLost()
 {
     sModernBackend.OnSurfaceLost();
 }
+#endif
+
+#ifdef WF_LIFETIME_DIAGNOSTICS
+// Called only once the platform has actually released its GL context/display.
+extern "C" void WFLifetimeGraphicsContextEnded(){wflifetime_gl::contextLost();}
 #endif

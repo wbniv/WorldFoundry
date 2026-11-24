@@ -306,3 +306,14 @@ Lower the betta roughly seven percent of the full source height, preserving its 
 Aquarium version code 5 / version name 0.5 builds successfully and its launcher-resource check passes. The release APK is installed, and [the actual Google TV screenshot](2026-10-02-betta-poster-and-flowing-fins/device/aquarium-icon-v5-launcher.png) confirms the lower betta and preserved app order. The native libraries and game bundle are byte-identical to version 4.
 
 [Updated Aquarium APK](https://github.com/wbniv/WorldFoundry/releases/tag/android-2026-10-03-icon-v5). The other games remain available in the version 4 release.
+
+
+## Appendix: standard framerate setting, 2026-11-24
+
+Added the existing generic Level Settings actor to this tank, exposing **Show framerate**. Rebuilt its playable and screensaver variants and repacked both Aquarium bundles. The scene itself is unchanged.
+
+| Before: earlier tank capture | After: shared settings panel on Pixel |
+| --- | --- |
+| ![Tank before the settings actor](2026-10-05-sea-urchin-realism/evidence/phase-3/menu-check/betta-screenshot.png) | ![Shared Show framerate panel](../diagnostics/aquarium-phone-controls-2026-11-24/framerate-settings-after.png) |
+
+The after screenshot shows the shared generic panel opened in Clownfish on Pixel (J‑cd8f69838be3); it is an example of the actor used here, not a separate on-device test of this tank. The compiled playable and screensaver levels contain the setting.

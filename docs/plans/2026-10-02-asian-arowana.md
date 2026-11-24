@@ -107,3 +107,14 @@ Desktop evidence: [checks and telemetry](2026-10-02-asian-arowana/engine/checks.
 TV response update, 2026-10-03: Will identified TV remote speed and getting stuck as the problems. Inspection of the installed APK confirmed it still carried the original 2.0 world units/s cruise and 0.035 rev/s turn. The revised 2.8 cruise/controller was packaged into that installed release, preserving the other six level payloads, menu labels, native libraries and all other non-signature/non-bundle APK entries byte-for-byte. The resulting bundle matches the canonical local menu. The signed replacement is installed on Chromecast HD; the standard release APK output now matches it.
 
 [Native device checks](2026-10-02-asian-arowana/device/2026-10-03-response/checks.json) and [package preservation checks](2026-10-02-asian-arowana/device/2026-10-03-response/package-checks.json): a 2.5 s Right hold plus release coast reached X=7.556; continued Right approached the clearance boundary at X=15.507; a 6 s Left hold plus coast recovered to X=6.003, Y=0.849. Native position samples remained inside the reserve, and no script/runtime errors were logged. These tests use timed Android key events and the release engine's position log, because its debug bridge is disabled. They establish on-device movement/recovery, not the physical remote's hardware repeat/chord behavior. The app is left in Arowana ready for the remote. [TV screenshot](2026-10-02-asian-arowana/device/2026-10-03-response/ready-for-remote.png).
+
+
+## Appendix: standard framerate setting, 2026-11-24
+
+Added the existing generic Level Settings actor to this tank, exposing **Show framerate**. Rebuilt its playable and screensaver variants and repacked both Aquarium bundles. The scene itself is unchanged.
+
+| Before: earlier tank capture | After: shared settings panel on Pixel |
+| --- | --- |
+| ![Tank before the settings actor](2026-10-05-sea-urchin-realism/evidence/phase-3/menu-check/arowana-screenshot.png) | ![Shared Show framerate panel](../diagnostics/aquarium-phone-controls-2026-11-24/framerate-settings-after.png) |
+
+The after screenshot shows the shared generic panel opened in Clownfish on Pixel (J‑cd8f69838be3); it is an example of the actor used here, not a separate on-device test of this tank. The compiled playable and screensaver levels contain the setting.

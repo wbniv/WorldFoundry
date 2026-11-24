@@ -346,3 +346,13 @@ All four are self-contained, 1440 × 900, and rebuilt by `python3 docs/plans/2
 - [Six moments](2026-11-21-sixty-second-chain-reaction/moments.html): the states a Dream can start in, including the flap mid-fall and the hour cascade.
 - [One minute](2026-11-21-sixty-second-chain-reaction/timeline.html): each piece's armed, acting, spent and re-arming spans.
 - [Android surfaces](2026-11-21-sixty-second-chain-reaction/picker.html): the screensaver list, the TV banner, the portrait strip, and a TV whose clock is wrong.
+
+# Appendix: phone settings, 2026-11-24
+
+Added the existing `LevelSettings` holder to Minute Machine so the shared settings panel is available on phones. The Clocks host hides the joystick and game buttons on a touchscreen while retaining the Settings button and touch input. This does not change the clock's scene or animation.
+
+| Before: earlier Chromecast capture | After: Pixel, with Settings available |
+| --- | --- |
+| ![Minute Machine before the settings holder, captured on Chromecast](../diagnostics/clocks-merge-verification-2026-11-23/chooser-check/input-frame-002.png) | ![Minute Machine on Pixel with the Settings button and no game controls](../diagnostics/clocks-phone-controls-2026-11-24/minute-machine-after.png) |
+
+The captures are from different devices and builds. Pixel job J‑61ba34c10901 showed the updated level and its Settings button; tapping the settings panel itself still needs confirmation.

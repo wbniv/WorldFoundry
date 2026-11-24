@@ -23,12 +23,12 @@ COLORS = {'stone':(.095,.12,.17),'stoneedge':(.16,.19,.25),'gold':(.68,.43,.16),
           'goldlight':(.92,.70,.35),'metal':(.26,.28,.31),'dark':(.027,.035,.055),
           'shadow':(.025,.035,.065),'shadow2':(.035,.045,.075),'ivory':(.88,.85,.72),
           'moonlit':(.88,.84,.68),'moonshade':(.14,.17,.23),'glass':(.75,.48,.20),
-          'lantern':(1.,.70,.25),'tick':(.82,.77,.62)}
+          'lantern':(1.,.70,.25),'tick':(.82,.77,.62),'nightglow':(1.,.37,.08)}
 materials={}
 for key,rgb in COLORS.items():
     mat=bpy.data.materials.new(key);mat.use_nodes=True;mat.diffuse_color=(*rgb,1)
     mat.node_tree.nodes.get('Principled BSDF').inputs['Base Color'].default_value=(*rgb,1)
-    mat['wf_prelit']=key in ('shadow','shadow2','moonlit','moonshade','lantern','glass','tick')
+    mat['wf_prelit']=key in ('shadow','shadow2','moonlit','moonshade','lantern','glass','tick','nightglow')
     mat['wf_double_sided']=True
     materials[key]=mat
 
@@ -155,6 +155,9 @@ for z in (-.20,.02,.23):rail(lantern,.23,z,.035,'goldlight',n=16,sides=6)
 lantern.sphere((0,0,0),.14,'lantern',segments=12,rings=6)
 lantern.vertices=[tuple(v*1.35 for v in p) for p in lantern.vertices]
 actor('Lantern','platform',lantern,pos=(0,-3.65,3.65))
+night_lantern=Mesh('night_lantern')
+night_lantern.sphere((0,0,0),.31,'nightglow',segments=16,rings=8)
+actor('NightLantern','platform',night_lantern,pos=(0,-3.65,3.65),fields={'Visibility Mailbox':780})
 for i in range(32):actor('Moon'+str(i),'platform',phase_moon(i/32),pos=(0,-2.65,4.65),fields={'Visibility Mailbox':800+i})
 
 bpy.context.view_layer.update();objects=[o for o in bpy.context.scene.objects if o.get('wf_schema_path')]
@@ -169,12 +172,15 @@ lines=[r'\ Moon Lantern: local time and approximate UTC lunar elongation.',
  ': ml-moon 218.316 ml-d 13.176396 * + ml-d 13.064993 * 134.963 + 360 / sin-rev 6.289 * + ;',
  ': ml-sun 280.460 ml-d .9856474 * + ml-d .9856003 * 357.528 + 360 / sin-rev 1.915 * + ;',
  ': ml-tick',
+ ' INDEXOF_WALL_HOUR read-mailbox dup 6 < swap 18 >= | 780 write-mailbox',
  ' ml-moon ml-sun - 360 / ml-frac 650 write-mailbox',
  f' 650 read-mailbox INDEXOF_X_POS {idx["PhaseProbe"]} write-actor-mailbox',
  f' ml-h negate INDEXOF_ROTATION_C {idx["HourShadow"]} write-actor-mailbox',
  f' ml-m negate INDEXOF_ROTATION_C {idx["MinuteShadow"]} write-actor-mailbox',
  f' ml-m .5 + sin-rev 3.65 * INDEXOF_X_POS {idx["Lantern"]} write-actor-mailbox',
  f' ml-m .5 + cos-rev 3.65 * INDEXOF_Y_POS {idx["Lantern"]} write-actor-mailbox']
+lines += [f' ml-m .5 + sin-rev 3.65 * INDEXOF_X_POS {idx["NightLantern"]} write-actor-mailbox',
+          f' ml-m .5 + cos-rev 3.65 * INDEXOF_Y_POS {idx["NightLantern"]} write-actor-mailbox']
 for i in range(32):
     name='Moon'+str(i)
     lines += [f' 650 read-mailbox {i/32:.7f} >= 650 read-mailbox {(i+1)/32:.7f} < & {800+i} write-mailbox',

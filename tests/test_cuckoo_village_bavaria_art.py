@@ -12,6 +12,14 @@ import bavaria as bv        # noqa: E402
 import timeline as tl       # noqa: E402
 
 
+def test_24_hour_dial_covers_every_hour_in_both_directions():
+    assert bv.dial_24h_labels(False) == tuple(f'{h:02d}' for h in range(12))
+    assert bv.dial_24h_labels(True) == tuple(f'{h:02d}' for h in range(12, 24))
+    for reverse in (False, True):
+        for late in (False, True):
+            valid(bv.dial_24h_numerals(tl.TZ, reverse, late))
+
+
 def valid(part):
     assert part.verts and part.faces and len(part.faces) == len(part.tiles), part.name
     for f in part.faces:

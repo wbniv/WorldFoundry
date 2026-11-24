@@ -8,12 +8,38 @@ of the executable identifier or reference.
 
 ## Engine changes require explicit permission
 
+Will's standing authorization (2026-11-24): new level settings objects and
+their settings fields, registration and generated schema/header files are
+pre-approved. This authorization covers the established level-settings
+mechanism; unrelated engine changes still require explicit permission.
+
 Will requires discussion and explicit permission before modifying any World
 Foundry engine code. Authorization to implement a level, asset, animation or
 plan does not authorize engine changes. Read-only engine investigation is fine;
 prepare a concrete proposal describing the required engine changes and obtain
 permission before editing engine code. Continue authorized asset/script/tooling
 work independently when possible. This applies to every platform/backend.
+Prior authorization for engine changes already made on a branch carries through
+when merging those same changes; do not request it again merely for the merge.
+New engine changes beyond the authorized branch work still require permission.
+
+## Worktree lifecycle
+
+Work in the main checkout and on the mainline development branch by default.
+Create a separate branch or worktree only when needed to avoid conflicting
+parallel feature work in the same project. When creating one, record its purpose
+and intended integration branch.
+
+A request to merge signals that development should return to the integration
+branch, even if further testing or refinements remain. After merging, preserve
+unique changes and useful evidence, check ignored files and active use, and
+remove the temporary worktree and merged local branch once accounted for.
+Continue subsequent testing and refinements on the integration branch. Report
+anything that prevents cleanup, with a reason and next step.
+
+A topic change alone is not a signal that work is complete, paused permanently,
+or ready to merge or delete; Will may switch between topics and return later.
+Preserve unfinished work and avoid disruptive cleanup when its status is unclear.
 
 For JavaScript/CSS shipped in TV WebViews, support Chromium/WebView 91 as the
 current minimum: cast2 was measured at 91.0.4472.114 on 2026-10-05. Do not infer

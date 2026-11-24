@@ -10,7 +10,7 @@ root = Path(__file__).parent
 target = root / 'reef-refinement-catalogue.pdf'
 writer = PdfWriter()
 existing = PdfReader(target).pages
-motion_count = 5 if 'Feather dusters: new crowns' in existing[-3].extract_text() else 2
+motion_count = 6 if 'Clam: smoother shell contour' in existing[-1].extract_text() else (5 if 'Feather dusters: new crowns' in existing[-3].extract_text() else 2)
 for page in existing[:-motion_count]:
     writer.add_page(page)
 for key, title, description in (

@@ -13,6 +13,46 @@ Format per entry:
 
 ---
 
+## Actor teardown reclaimed NonStatPlatData without running its destructor — 2026-11-13
+
+**Status:** FIXED in the working tree (`wfsource/source/game/actor.cc`); not yet committed.
+
+**Symptom:** The new lifetime diagnostics found live `NonStatPlatData` objects when the level arena was released. No growing process-memory leak or gameplay failure has been attributed to this omission.
+
+**Root cause:** Every non-StatPlat actor placement-constructs `NonStatPlatData` in level memory, but `Actor::~Actor` never destroyed it. That skips member destruction for its movement state and message port. The script-controlled input device was likewise arena-reclaimed without destruction; `QInputDigital` owns its `InputScript`, so destroying the device must also destroy the script exactly once.
+
+**Origin:** `git blame` attributes the allocation, `_InitInput` ownership setup and destructor's original ending to the first Git import, [`a2784f6e`](https://github.com/wbniv/WorldFoundry/commit/a2784f6e) (2010-05-01). The omission therefore predates this catalogue's 2026 cutoff; its precise pre-import introduction has not been established.
+
+**Why dormant:** Releasing the whole level arena returns these objects' backing bytes without requiring their destructors to run. Ordinary heap leak checks can therefore see reclaimed memory even though object lifetimes were not closed. This establishes a destructor omission, not an explanation of the earlier PSS soak variation.
+
+**Fix:** After draining messages, destroy the actor-owned input device when present, then destroy/free the actor-owned `NonStatPlatData`. Leave the shared `_statPlatData` singleton alone. Qbert and the planted tank each pass five load/unload cycles with lifetime tracking, then five more with independent ASan/UBSan/LSan; tracked level and shutdown survivors are zero. Deliberate missing-destructor fixtures fail before arena reclamation. Android runtime validation remains unperformed.
+
+**Diff** (`wfsource/source/game/actor.cc`):
+
+```diff
+diff --git a/wfsource/source/game/actor.cc b/wfsource/source/game/actor.cc
+index d17d44aa..1fd6d46c 100644
+--- a/wfsource/source/game/actor.cc
++++ b/wfsource/source/game/actor.cc
+@@ -881,0 +882,12 @@ Actor::~Actor()
++    // The arena returning its backing bytes is not a substitute for these
++    // destructors: NonStatPlatData owns movement state and a message port.
++    if(_nonStatPlat != &_statPlatData){
++        if(_nonStatPlat->_inputScript){
++            // QInputDigital owns and destroys its InputScript.
++            MEMORY_DELETE(theLevel->GetMemory(),_nonStatPlat->_input,QInputDigital);
++            _nonStatPlat->_input=nullptr;
++            _nonStatPlat->_inputScript=nullptr;
++        }
++        MEMORY_DELETE(theLevel->GetMemory(),_nonStatPlat,NonStatPlatData);
++        _nonStatPlat=nullptr;
++    }
+```
+
+**Investigation:** [Engine lifetime plan](plans/2026-11-13-engine-lifetime-diagnostics.md) and [validation evidence](diagnostics/engine-lifetime-2026-11-13/README.md).
+
+---
+
 ## Texture-fits-slot check only in assertion builds: a Release build wrote a 512² texture past its 256² VRAM slot and died at exit in `~VideoMemory` — 2026‑10‑16
 
 **Status:** FIXED on branch `fix-exit-free-abort` (from `2026-new-level`; `gfx/texture.cc`), with ctests `wf_game_smoke_aquarium_{lionfish,plants}[_default_vram]`.

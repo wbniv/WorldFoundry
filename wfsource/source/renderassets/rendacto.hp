@@ -1,3 +1,4 @@
+#include "../../../engine/include/wf_lifetime.hpp"
 //============================================================================
 // rendacto.hp: RenderActor: interface between game and renderer
 // Copyright (c) 1997,1999,2000,2001,2002,2003 World Foundry Group.  
@@ -57,6 +58,7 @@ class Color;
 
 class RenderActor
 {
+    WF_LIFETIME_OBJECT("RenderActor")
 public:
 	RenderActor();
 	virtual ~RenderActor();

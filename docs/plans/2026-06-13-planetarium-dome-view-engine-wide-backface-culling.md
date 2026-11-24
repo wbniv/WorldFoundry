@@ -36,6 +36,8 @@ ad-hoc) — a single `glFrontFace`+cull would erase a large, hard-to-enumerate s
 require flipping every interior mesh (rooms, dome, skydome) inward. The software dot-product test
 sidesteps all of it.
 
+**Current-state correction, 2026-10-16:** The paragraph above records the original rationale, not the present state of those three examples. The 2026-09-19 Blender exporter intentionally reverses face order on export, so its exterior boxes agree with the engine's `(v2-v0) × (v1-v0)` normal convention. All 12 built-in cube normals point outward under that same convention. The tiled matte's two triangles have since been reordered to match it while remaining cull-exempt. Ordinary world draws still use software culling; a broader asset and transform audit is required before switching them to hardware culling. See the [GPU skinning experiment](2026-10-16-gpu-skinning-chromecast-experiment.md).
+
 **The test (one chokepoint).** All triangles from all 8 `RenderPoly3D*` renderers *and* the matte
 flow through `ModernRendererBackend::DrawTriangle` (`wfsource/source/gfx/glpipeline/backend_modern.cc:347-364`).
 Do the cull there, in **eye space** (camera at origin, looking −Z) using the already-maintained

@@ -1,3 +1,4 @@
+#include "../../../engine/include/wf_lifetime.hpp"
 //=============================================================================
 // Copyright ( c ) 1995,96,97,99,2000 World Foundry Group  
 // Part of the World Foundry 3D video game engine/production environment
@@ -41,6 +42,8 @@ struct IntArrayEntry
 
 class ScriptInterpreter 
 {
+    WF_LIFETIME_OBJECT("ScriptInterpreter")
+
 public:
 	ScriptInterpreter(MailboxesManager& manager);
 	virtual ~ScriptInterpreter();

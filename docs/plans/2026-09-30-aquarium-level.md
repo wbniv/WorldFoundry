@@ -1650,3 +1650,14 @@ breakdown: none — no infrastructure or paid service is involved.
 | 2, 3 | T3 | Multi-file against this plan once 0 and 1 have settled it. Phase 3 also needs the idle-animation spike (canonical fish) merged first |
 | 4 | T2 | Bounded, optional |
 | Final integration and review | T5 | Whole-session judgment |
+
+
+## Appendix: standard framerate setting, 2026-11-24
+
+Added the existing generic Level Settings actor to this tank, exposing **Show framerate**. Rebuilt its playable and screensaver variants and repacked both Aquarium bundles. The scene itself is unchanged.
+
+| Before: earlier tank capture | After: shared settings panel on Pixel |
+| --- | --- |
+| ![Tank before the settings actor](2026-10-05-sea-urchin-realism/evidence/phase-3/menu-check/clownfish-screenshot.png) | ![Shared Show framerate panel](../diagnostics/aquarium-phone-controls-2026-11-24/framerate-settings-after.png) |
+
+The after screenshot shows the shared generic panel opened in Clownfish on Pixel (J‑cd8f69838be3); it is an example of the actor used here, not a separate on-device test of this tank. The compiled playable and screensaver levels contain the setting.

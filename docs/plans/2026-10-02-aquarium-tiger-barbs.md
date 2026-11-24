@@ -352,3 +352,14 @@ Rebuild both standalones, the eight-entry selector and release APK. Verify speci
 **Chromecast validation:** the installed app was a direct-launch profiling APK (SHA-256 `23dc437dc154a22f61ebb5759ff5fde4586499327659bb79bfa69fc954434118`) with no MENU chunk and `--frame-profile` arguments. Replaced it with the eight-tank release using `adb install -r`; verified the installed hash matches the build receipt. The phone panel dismisses to the selector, Clownfish & Sea Anemone and Tiger Barbs both launch, and the back arrow returns to the selector. [Selector screenshot](2026-10-02-aquarium-tiger-barbs/split-tanks/chromecast/selector.png) and [Tiger Barbs on Chromecast](2026-10-02-aquarium-tiger-barbs/split-tanks/chromecast/tiger-barbs.png). After every direct-launch profiling session, reinstall and verify the normal menu release before handing the device back.
 
 **Pending measurements:** collect fresh 50-fish presentation and CPU traces. Preserve the earlier 30-fish comparisons as historical baselines and report the new population's deltas separately.
+
+
+## Appendix: standard framerate setting, 2026-11-24
+
+Added the existing generic Level Settings actor to this tank, exposing **Show framerate**. Rebuilt its playable and screensaver variants and repacked both Aquarium bundles. The scene itself is unchanged.
+
+| Before: earlier tank capture | After: shared settings panel on Pixel |
+| --- | --- |
+| ![Tank before the settings actor](2026-10-05-sea-urchin-realism/evidence/phase-3/menu-check/tiger-barbs-screenshot.png) | ![Shared Show framerate panel](../diagnostics/aquarium-phone-controls-2026-11-24/framerate-settings-after.png) |
+
+The after screenshot shows the shared generic panel opened in Clownfish on Pixel (J‑cd8f69838be3); it is an example of the actor used here, not a separate on-device test of this tank. The compiled playable and screensaver levels contain the setting.

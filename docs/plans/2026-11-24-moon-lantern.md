@@ -29,3 +29,19 @@ Inspect the existing rendering and clock authoring facilities, model the dial, p
 The level has a textured stone case, layered brass trim, supported tubular orbit rails, a crater-textured phase moon, a framed lantern, a slow camera drift, and a level settings object with camera and framerate options. The two dark shapes on the dial are modeled shadows, rotated opposite their respective moving objects; they are not dynamically cast light. Lunar illumination uses a low-order longitude approximation and 32 discrete phase meshes; it is not a precise ephemeris or a latitude-dependent depiction of lunar orientation.
 
 The PC engine was checked at the January 2000 new, first-quarter and full moons and at a 2026 local time, including actor positions, shadow angles and the calculated lunar phase; the quarter-phase capture also shows the expected half-lit moon. The geometry-size check passed, as did the Python phase and clock tests. The PC image still differs substantially from the visual target: the metal and glass are less realistic, illumination and contact shadows are absent, the case and lantern are simpler, and the dial has no physical moonlight or lantern glow. The standalone is open for visual feedback; explicit in-engine checks of clock rollovers, the still-camera option and framerate toggle remain to be completed.
+
+## Appendix: nighttime lantern, 2026‑11‑24
+
+The dial uses hour marks rather than numerals. An orange glow now appears inside the moving lantern from 18:00 through 05:59 local time. The glow follows its orbit and uses prelit scene geometry, not physically cast light; the lunar-phase calculation is unchanged.
+
+**Before:** an earlier PC capture at 14:30, before the nighttime glow. Its clock and camera positions differ from the after views.
+
+![Before the night glow, the original Moon Lantern.](2026-11-24-moon-lantern/pc-capture.png)
+
+**After:** PC captures at 10:08:22 and 22:08:22 local time on 24 November show the clock with the extra lantern glow off and on.
+
+![After the change at 10:08, without the nighttime glow.](2026-11-24-moon-lantern/day-night-sweep.png)
+
+![After the change at 22:08, with the warm nighttime glow.](2026-11-24-moon-lantern/night-night-sweep.png)
+
+The standalone rebuilt, and both PC captures passed the existing moon-phase, shadow-angle and lantern-position checks. The glow is small in the wide view: its TV readability, transition boundaries, time jumps and complete camera path remain to be verified, along with Chromecast testing and profiling. This change is not yet in the installed APK.

@@ -1,10 +1,10 @@
 | Date | Change |
 |------|--------|
-| [2026-11-24](https://github.com/wbniv/WorldFoundry/commit/97ed7c38) | Add Metronome Forest clock |
+| [2026-11-24](https://github.com/wbniv/WorldFoundry/commit/003b66309) | Add Metronome Forest clock |
 
 <!--history-meta v1
-97ed7c38	author	Will Norris
-97ed7c38	added	38
-97ed7c38	deleted	0
-97ed7c38	files	1
+003b66309	author	Will Norris
+003b66309	added	40
+003b66309	deleted	0
+003b66309	files	1
 -->

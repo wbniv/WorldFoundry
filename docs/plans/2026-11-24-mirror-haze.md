@@ -37,3 +37,19 @@ The standalone has three individually rotated mirror assemblies and colored beam
 The PC runtime was checked at 00:00, 12:00 and 10:08:30: the beam, mirror and haze rotations agreed with the expected clock angles. A separate accelerated run confirmed continuous hour, minute and second motion across noon. Measurements of the live second beam show movement between wall-clock seconds. Launch overrides verified haze off, the stationary camera and Show framerate; the regular moving camera and haze were also observed. The geometry-size check passed. Overlapping base and rim surfaces were separated after flicker was reported. The camera was raised and now moves vertically as well as horizontally, so the aligned beams at midnight can be seen without changing their clock directions.
 
 The reusable `scripts/check-beam-visibility.py` checks sampled rendered frames for each beam's color outside the central mechanism; `wflevels/mirror_haze/visibility_sweep.py` captures an accelerated clock and camera sweep. A midnight capture and 80 frames spanning the clock and camera cycles passed; removing green pixels deliberately caused the checker to fail. This samples views rather than proving visibility at every possible instant, and counts of colored pixels do not guarantee readability or distinguish every possible unrelated object of the same color. The settings checks used launch overrides; applying changes through the settings UI remains for device verification.
+
+## Appendix: nighttime indicator, 2026‑11‑24
+
+The dial uses marks rather than hour numerals. A pale ring around the top of the instrument now illuminates from 18:00 through 05:59 local time. The cue is independent of the amber, green and red clock beams and of the Haze setting. It is prelit scene geometry switched by the director, not a dynamic light source.
+
+**Before:** an earlier PC engine capture, before the night ring was added; the time and camera position differ from the after views.
+
+![Before the night ring, the original Mirror and Haze instrument.](2026-11-24-mirror-haze/pc-capture.png)
+
+**After:** PC engine captures at 10:08:22 and 22:08:22 show the ring off and on. Both runs verified the actual hour, minute and second beam angles against the wall clock.
+
+![After the change, the ring is off at 10:08.](2026-11-24-mirror-haze/day-night-sweep.png)
+
+![After the change, the pale ring is on at 22:08.](2026-11-24-mirror-haze/night-night-sweep.png)
+
+The standalone rebuilt successfully. Boundary transitions, direct entry and time jumps, the still and full moving camera path, beam visibility with the ring, and Chromecast testing and profiling remain outstanding. This change is not yet in the installed bundle.

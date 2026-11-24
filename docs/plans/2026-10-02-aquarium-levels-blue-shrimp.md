@@ -155,3 +155,14 @@ Desktop OpenGL and Android/Chromecast are the first delivery targets because the
 This plan covers one new tank and reusable selection for later tanks. Feeding, breeding, inventory, progression, new audio and aquarium transparency are separate features. No new paid services or external assets are needed for the proposed procedural model and local builds.
 
 Related: [Aquarium level](2026-09-30-aquarium-level.md), [schooling](2026-10-01-aquarium-schooling.md), [Aquarium Chromecast](2026-09-30-aquarium-chromecast.md), [app bundles](2026-10-01-split-cd-iff-one-app-per-game.md).
+
+
+## Appendix: standard framerate setting, 2026-11-24
+
+Added the existing generic Level Settings actor to this tank, exposing **Show framerate**. Rebuilt its playable and screensaver variants and repacked both Aquarium bundles. The scene itself is unchanged.
+
+| Before: earlier tank capture | After: shared settings panel on Pixel |
+| --- | --- |
+| ![Tank before the settings actor](2026-10-05-sea-urchin-realism/evidence/phase-3/menu-check/blue-shrimp-screenshot.png) | ![Shared Show framerate panel](../diagnostics/aquarium-phone-controls-2026-11-24/framerate-settings-after.png) |
+
+The after screenshot shows the shared generic panel opened in Clownfish on Pixel (J‑cd8f69838be3); it is an example of the actor used here, not a separate on-device test of this tank. The compiled playable and screensaver levels contain the setting.

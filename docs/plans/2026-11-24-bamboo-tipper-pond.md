@@ -44,4 +44,20 @@ On PC verify the lantern and koi positions at 12:00 and 10:08:22, 59:xx-to-00:xx
 
 PC results: the engine's lantern and koi positions matched the model at 10:08:22 and 12:00:01. A live 11:59:55 rollover showed the water reset and the tube tip and return; the still-camera override held the camera in place. The koi uses the Aquarium's fish-deformation primitive. The pond has moving surface texture and ripples; the Aquarium's underwater camera caustics are not applied to the outdoor garden. No knock is played. PC property overrides confirmed small and large koi, still water and hidden ripples; the [settings screen](2026-11-24-bamboo-tipper-pond/pc-settings.png) shows the Clock, Pond and Display sections. The spline camera and target matched the model at wide, across-pond and close-tipper positions. The current [wide view](2026-11-24-bamboo-tipper-pond/pc-wide.png) and an earlier [close view](2026-11-24-bamboo-tipper-pond/pc-tipper-close.png) show the actual stylized engine rendering; the concept illustration is not a screenshot.
 
+## Appendix: nighttime lantern, 2026‑11‑24
+
+The hour is indicated by the floating lantern's position, not hour numerals. The lantern now gains a warm orange inner glow from 18:00 through 05:59 local time. The glow follows the same orbit as the lantern and is controlled by the current wall-clock hour; it uses prelit geometry, not a runtime light source.
+
+**Before:** the original PC engine view, before the extra nighttime glow. Its capture time and camera position differ from the after captures.
+
+![Before the nighttime glow, the original pond and floating lantern.](2026-11-24-bamboo-tipper-pond/pc-wide.png)
+
+**After:** PC engine captures at 10:08:22 and 22:08:22 show the same clock and camera phases with the night glow off and on.
+
+![After the change, the pond at 10:08.](2026-11-24-bamboo-tipper-pond/day-night-sweep.png)
+
+![After the change, the lantern glows at 22:08.](2026-11-24-bamboo-tipper-pond/night-night-sweep.png)
+
+The standalone rebuilt and both PC captures passed the existing lantern, koi, tipper, water and camera position checks. Boundary transitions, direct entry and time jumps, full camera-path readability, and Chromecast testing and profiling remain outstanding. This change is not yet in the installed APK.
+
 ![Earlier PC pond capture](2026-11-24-bamboo-tipper-pond/pc-1008.png)

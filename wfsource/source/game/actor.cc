@@ -879,6 +879,18 @@ Actor::~Actor()
 	while ( GetMsgPort().GetMsg( msgType, &msgData, msgDataSize ) )
 		;
 
+    // The arena returning its backing bytes is not a substitute for these
+    // destructors: NonStatPlatData owns movement state and a message port.
+    if(_nonStatPlat != &_statPlatData){
+        if(_nonStatPlat->_inputScript){
+            // QInputDigital owns and destroys its InputScript.
+            MEMORY_DELETE(theLevel->GetMemory(),_nonStatPlat->_input,QInputDigital);
+            _nonStatPlat->_input=nullptr;
+            _nonStatPlat->_inputScript=nullptr;
+        }
+        MEMORY_DELETE(theLevel->GetMemory(),_nonStatPlat,NonStatPlatData);
+        _nonStatPlat=nullptr;
+    }
 	DBSTREAM3( cactor << "Actor destructor done" << std::endl; )
 }
 

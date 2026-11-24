@@ -49,7 +49,7 @@ final class TankPlayer implements SurfaceHolder.Callback {
     TankPlayer(Context context) {
         view = new SurfaceView(context);
         view.getHolder().addCallback(this);
-        // The on-screen controller (joystick and A to D) for a touchscreen phone, which has no remote; a TV has one.
+        // Enable phone touch for the chooser and settings; TVs use their remote.
         PackageManager features = context.getPackageManager();
         nativeTouchConfigure(features.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)
                 && !features.hasSystemFeature(PackageManager.FEATURE_LEANBACK),

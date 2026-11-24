@@ -1,3 +1,7 @@
+#include <wf_lifetime.hpp>
+#ifdef WF_LIFETIME_DIAGNOSTICS
+extern "C" void WFLifetimeGraphicsContextEnded();
+#endif
 //=============================================================================
 // gfx/win/mesa.cc: mesa gl specific portion of interface, included by display.cc
 // currently includes X windows interface portions as well
@@ -566,6 +570,9 @@ extern "C" void HALCloseWindow(void)
         glXMakeCurrent(halDisplay.mainDisplay, None, nullptr);
         XDestroyWindow(halDisplay.mainDisplay, halDisplay.win);
         XCloseDisplay(halDisplay.mainDisplay);
+#ifdef WF_LIFETIME_DIAGNOSTICS
+        WFLifetimeGraphicsContextEnded();
+#endif
         halDisplay.win = 0;
         halDisplay.mainDisplay = nullptr;
     }

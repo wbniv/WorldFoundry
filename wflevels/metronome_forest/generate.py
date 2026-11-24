@@ -128,7 +128,14 @@ actor('MetronomeForestSettings','metronomeforestsettings',fields={'Editor Label'
 stand=Mesh('stand')
 stand.box((-8,-3.35,-.22),(8,3.35,-.04),'base')
 stand.box((-8,-3.37,-.12),(8,-3.33,-.03),'goldshade')
+for x in (-6.8, 6.8):
+    stand.box((x-.11,-3.28,-.03),(x+.11,-3.06,.40),'dark')
+    stand.box((x-.25,-3.32,.38),(x+.25,-3.02,.45),'goldshade')
 actor('FlatDisplay','platform',stand)
+night_lamps=Mesh('night_lamps')
+for x in (-6.8, 6.8):
+    night_lamps.sphere((x,-3.17,.62),.25,'glow',segments=12,rings=6)
+actor('NightLamps','platform',night_lamps,fields={'Visibility Mailbox':780})
 
 for col in range(12):
     x=(col-5.5)*1.30
@@ -155,6 +162,7 @@ def spline_word(component):
     return f': mf-c{component} INDEXOF_WALL_SECOND read-mailbox 10 / {branches} {polynomial(5)} '+'then '*5+';'
 lines.extend(spline_word(i) for i in range(6))
 lines.append(': mf-tick')
+lines.append(' INDEXOF_WALL_HOUR read-mailbox dup 6 < swap 18 >= | 780 write-mailbox')
 for col in range(12):
     lines.append(f' mf-hour {col} > dup {800+col*2} write-mailbox 0 = {801+col*2} write-mailbox')
     for variant in ('Brass','Gray'):

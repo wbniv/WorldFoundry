@@ -1,3 +1,6 @@
+#if defined(WF_LIFETIME_DIAGNOSTICS) && !defined(__ANDROID__)
+#define GL_GLEXT_PROTOTYPES 1
+#endif
 //==============================================================================
 // pixelmap.cc: rectangle of pixels, either in main memory or video memory
 // Copyright ( c ) 1997,1998,1999,2000,2001,2002 World Foundry Group.  
@@ -37,6 +40,8 @@ struct RGB_pixel
 #pragma pack( 4 )
 
 //==============================================================================
+
+#include <wf_lifetime_gl.hpp>
 
 PixelMap::PixelMap(int flags, int xSize, int ySize)
 {
@@ -165,6 +170,9 @@ PixelMap::RestoreTextureAfterContextLoss() const
     GLint binding = 0;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &binding);
 #endif
+#ifdef WF_LIFETIME_DIAGNOSTICS
+    wflifetime::Scope textureOwner(_lifetimeOwner);
+#endif
     _textureHandle = backend.CreateTexture(_xSize, _ySize, PixelMapTextureFormat(), _pixelBuffer);
     _textureGeneration = generation;
 #if !defined(WF_TARGET_IOS) && !defined(WF_TARGET_MACOS)
@@ -270,6 +278,9 @@ PixelMap::Load(const void* memory, int xOffset, int yOffset, int xSize, int ySiz
         // DestroyTexture(NULL) is a no-op, so the first call is fine.
         RendererBackend& backend = RendererBackendGet();
         DestroyLiveTexture();
+#ifdef WF_LIFETIME_DIAGNOSTICS
+        wflifetime::Scope textureOwner(_lifetimeOwner);
+#endif
         _textureHandle = backend.CreateTexture(_xSize, _ySize, PixelMapTextureFormat(), pPB);
         _textureGeneration = backend.TextureGeneration();
         // NULL is tolerated, not asserted: a backend with no GPU (the headless

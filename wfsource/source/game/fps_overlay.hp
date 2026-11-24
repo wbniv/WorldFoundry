@@ -1,3 +1,4 @@
+#include "../../../engine/include/wf_lifetime.hpp"
 //=============================================================================
 // fps_overlay.hp: shared diagnostic frame-rate overlay
 // Copyright (c) 2026 World Foundry Group
@@ -38,6 +39,9 @@ extern bool enabled;
 // (Glyphs, for wfui::Draw). The UI font must be loaded.
 class Overlay
 {
+#ifdef WF_LIFETIME_DIAGNOSTICS
+    wflifetime::Owner _lifetimeOwner=wflifetime::current()?wflifetime::current():wflifetime::Persistent;
+#endif
 public:
 	int Build(Scalar fps, int width, int height);
 	const PhonepadRect* Rects() const { Validate(); return _rects; }

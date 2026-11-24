@@ -1821,8 +1821,8 @@ void Shutdown()
     // zForth state is a plain struct — no heap to free.
     g_mgr    = nullptr;
     g_curObj = 0;
-    g_scriptCache.clear();
-    g_actorOverride.clear();
+    decltype(g_scriptCache){}.swap(g_scriptCache);
+    decltype(g_actorOverride){}.swap(g_actorOverride);
     g_reloadCounter = 0;
 }
 

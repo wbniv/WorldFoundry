@@ -291,6 +291,14 @@ room = bpy.data.objects['Room']
 room.location = (0,0,0)
 box_fields(room, (-25,-30,-6,25,10,18))
 
+settings = bpy.data.objects.new('LevelSettings', None)
+bpy.context.scene.collection.objects.link(settings)
+settings['wf_schema_path'] = str(OAD / 'levelsettings.oad')
+settings['wf_Model Type'] = 'None'
+settings['wf_Mobility'] = 'Anchored'
+settings['wf_Mass'] = 0.0
+box_fields(settings, (-.1, -.1, -.1, .1, .1, .1))
+
 objects = [o for o in bpy.context.scene.objects if o.get('wf_schema_path')]
 indices = {o.name:i+1 for i,o in enumerate(objects)}
 assert indices['Player'] < indices['tank-base']

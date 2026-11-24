@@ -1,3 +1,4 @@
+#include <wf_lifetime.hpp>
 //=============================================================================
 // gfx/glpipeline/static_mesh.cc: E3 phase 1 — static mesh buffers
 // Copyright ( c ) 2026 World Foundry Group
@@ -134,15 +135,16 @@ namespace
 	unsigned*
 	Scratch(int count)
 	{
+        wflifetime::Scope cache(wflifetime::Persistent);
 		if(count > sScratchCapacity)
 		{
 			if(sScratch)
 			{
-				free(sScratch);
+				wflifetime::freeExternal(sScratch);
 				sCpuBytes -= size_t(sScratchCapacity) * sizeof(unsigned);
 			}
 			sScratchCapacity = count < 1024 ? 1024 : count;
-			sScratch = static_cast<unsigned*>(malloc(size_t(sScratchCapacity) * sizeof(unsigned)));
+			sScratch = static_cast<unsigned*>(wflifetime::allocateExternal(size_t(sScratchCapacity) * sizeof(unsigned),"Static mesh scratch",__FILE__,__LINE__));
 			assert(ValidPtr(sScratch));
 			sCpuBytes += size_t(sScratchCapacity) * sizeof(unsigned);
 		}
@@ -623,7 +625,7 @@ RenderObject3D::BakeFromRecording(RBStaticTriangle* triangles, RecordedFace* fac
 			++groupCount;
 
 	const size_t bakeBytes = sizeof(StaticMeshBake) + size_t(groupCount) * sizeof(StaticMeshGroup);
-	StaticMeshBake* bake = static_cast<StaticMeshBake*>(malloc(bakeBytes));
+	StaticMeshBake* bake = static_cast<StaticMeshBake*>(wflifetime::allocateExternal(bakeBytes,"Static mesh bake",__FILE__,__LINE__));
 	if(!bake)
 	{
 		_staticState = STATIC_UNBAKEABLE;
@@ -690,7 +692,7 @@ RenderObject3D::BakeFromRecording(RBStaticTriangle* triangles, RecordedFace* fac
 
 	if(!consistent || out == 0)
 	{
-		free(bake);
+		wflifetime::freeExternal(bake);
 		_staticState = consistent ? STATIC_NO_OPAQUE : STATIC_UNBAKEABLE;
 		return NULL;
 	}
@@ -698,7 +700,7 @@ RenderObject3D::BakeFromRecording(RBStaticTriangle* triangles, RecordedFace* fac
 
 	if(FastCull() || CheckMode())
 	{
-		bake->planeD = static_cast<float*>(malloc(size_t(out) * sizeof(float)));
+		bake->planeD = static_cast<float*>(wflifetime::allocateExternal(size_t(out) * sizeof(float),"Static mesh planes",__FILE__,__LINE__));
 		assert(ValidPtr(bake->planeD));
 		for(int32 t = 0; t < out; ++t)
 		{
@@ -716,7 +718,7 @@ RenderObject3D::BakeFromRecording(RBStaticTriangle* triangles, RecordedFace* fac
 		// and vertices (and the same AsFloat) that RenderStatic used to read
 		// every frame, and the centre from the same expression. The per-frame
 		// test then evaluates identical arithmetic on identical floats.
-		bake->cull = static_cast<float*>(malloc(size_t(out) * 6 * sizeof(float)));
+		bake->cull = static_cast<float*>(wflifetime::allocateExternal(size_t(out) * 6 * sizeof(float),"Static mesh culling",__FILE__,__LINE__));
 		assert(ValidPtr(bake->cull));
 		float* const nx = bake->cull;
 		float* const ny = nx + out;
@@ -751,9 +753,9 @@ RenderObject3D::BakeFromRecording(RBStaticTriangle* triangles, RecordedFace* fac
 	bake->mesh = RendererBackendGet().CreateStaticMesh(triangles, out);
 	if(!bake->mesh)
 	{
-		free(bake->planeD);
-		free(bake->cull);
-		free(bake);
+		wflifetime::freeExternal(bake->planeD);
+		wflifetime::freeExternal(bake->cull);
+		wflifetime::freeExternal(bake);
 		_staticState = STATIC_UNBAKEABLE;
 		return NULL;
 	}
@@ -761,7 +763,7 @@ RenderObject3D::BakeFromRecording(RBStaticTriangle* triangles, RecordedFace* fac
 	if(CheckMode())
 	{
 		// Debug only: keep the recording to compare against at every draw.
-		bake->check = static_cast<RBStaticTriangle*>(malloc(size_t(out) * sizeof(RBStaticTriangle)));
+		bake->check = static_cast<RBStaticTriangle*>(wflifetime::allocateExternal(size_t(out) * sizeof(RBStaticTriangle),"Static mesh check",__FILE__,__LINE__));
 		assert(ValidPtr(bake->check));
 		memcpy(bake->check, triangles, size_t(out) * sizeof(RBStaticTriangle));
 		bake->bytes += size_t(out) * sizeof(RBStaticTriangle);
@@ -781,10 +783,10 @@ RenderObject3D::StaticMeshDiscard()
 	RendererBackendGet().DestroyStaticMesh(bake->mesh);
 	sCpuBytes -= bake->bytes;
 	--sLiveBakes;
-	free(bake->planeD);
-	free(bake->cull);
-	free(bake->check);
-	free(bake);
+	wflifetime::freeExternal(bake->planeD);
+	wflifetime::freeExternal(bake->cull);
+	wflifetime::freeExternal(bake->check);
+	wflifetime::freeExternal(bake);
 }
 
 //============================================================================
@@ -1053,3 +1055,11 @@ RenderObject3D::RenderStatic(const Matrix34& position)
 }
 
 //============================================================================
+
+// The scratch array belongs to the renderer, not any one bake. Its lifetime
+// ends with WFGame, rather than relying on process reclamation of C malloc.
+void StaticMeshReleaseScratch()
+{
+    if(sScratch){wflifetime::freeExternal(sScratch);sScratch=nullptr;
+        sCpuBytes-=size_t(sScratchCapacity)*sizeof(unsigned);sScratchCapacity=0;}
+}

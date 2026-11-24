@@ -194,6 +194,14 @@ cam['wf_FoggingColor']=0x102b40;cam['wf_FoggingStartDistance']=9;cam['wf_Fogging
 bpy.data.objects['Matte']['wf_Matte Type']='Color';bpy.data.objects['Matte']['wf_Background Color']=0x09141e
 room=bpy.data.objects['Room'];room.location=(0,0,0);box_fields(room,(-60,-70,-6,60,30,40) if C.KIND=='arowana' else (-25,-30,-6,25,10,18))
 
+settings=bpy.data.objects.new('LevelSettings',None)
+bpy.context.scene.collection.objects.link(settings)
+settings['wf_schema_path']=str(OAD/'levelsettings.oad')
+settings['wf_Model Type']='None'
+settings['wf_Mobility']='Anchored'
+settings['wf_Mass']=0.0
+box_fields(settings,(-.1,-.1,-.1,.1,.1,.1))
+
 objects=[o for o in bpy.context.scene.objects if o.get('wf_schema_path')]
 indices={o.name:i+1 for i,o in enumerate(objects)}
 player['wf_Script'],bpy.data.objects['Director']['wf_Script'],ar_values=arowana.scripts(

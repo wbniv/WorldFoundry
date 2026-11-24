@@ -2,7 +2,18 @@
   "mcpServers": {
     "blender": {
       "command": "uvx",
-      "args": ["blender-mcp"]
+      "args": [
+        "blender-mcp"
+      ]
+    },
+    "chromecast-coordinator": {
+      "command": "python3",
+      "args": [
+        "scripts/coordinator-mcp.py",
+        "serve",
+        "--host",
+        "claude"
+      ]
     }
   }
 }
