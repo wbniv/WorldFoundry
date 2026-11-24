@@ -209,6 +209,10 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
 			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
 				object = OadLavaLampDigitsSettings(startData); 
 			break;
+        	case Actor::DutchCuckooVillageSettings_KIND:
+			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
+				object = OadDutchCuckooVillageSettings(startData); 
+			break;
 
 
 
@@ -422,6 +426,9 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
 			break;
         	case Actor::LavaLampDigitsSettings_KIND:
 			object = OadLavaLampDigitsSettings(startData); 
+			break;
+        	case Actor::DutchCuckooVillageSettings_KIND:
+			object = OadDutchCuckooVillageSettings(startData); 
 			break;
 
 

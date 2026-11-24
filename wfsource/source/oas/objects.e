@@ -70,6 +70,7 @@
         TourbillonSettings_KIND,
         MetronomeForestSettings_KIND,
         LavaLampDigitsSettings_KIND,
+        DutchCuckooVillageSettings_KIND,
 
 
 

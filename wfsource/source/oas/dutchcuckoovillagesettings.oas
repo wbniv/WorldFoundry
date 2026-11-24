@@ -1,0 +1,9 @@
+@* Tulpenkade clock settings.
+TYPEHEADER(Dutch Cuckoo Village Settings,DutchCuckooVillageSettings)
+    @include settings.inc
+    PROPERTY_SHEET_HEADER(Tulpenkade,1)
+    TYPEENTRYINT32(Camera motion,,0,1,0,"Journey|Still",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Tour the town or hold the wide village view")
+    TYPEENTRYINT32(Window lights,,0,1,1,"",SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"Light the windows at dusk")
+    PROPERTY_SHEET_FOOTER
+    @include global_settings.inc
+TYPEFOOTER

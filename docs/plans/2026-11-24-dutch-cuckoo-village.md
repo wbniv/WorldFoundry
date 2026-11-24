@@ -1,6 +1,28 @@
 # Dutch Cuckoo Village — Tulpenkade
 
-**Proposed · 24 November 2026**
+**Standalone PC implementation · 24 November 2026**
+
+## Running level
+
+![Six desktop frames from the raised Journey route, from the hourly crossing through the courtyard and market to the mill and growers’ bank.](2026-11-24-dutch-cuckoo-village/pc-journey.jpg)
+
+These are captures from the standalone desktop engine at the local times printed below
+the frames. The Journey camera now passes above the shop roofs. The director places the
+camera directly on its route when the level starts midway through a lap or the clock
+changes, so it can reach the market without travelling in a straight line from the
+landing. The build checked 1,010 positions around the spline against the town geometry.
+The closest sampled camera position was 1.14 m from a surface. The centre, edges and
+corners of the 16:9 near plane cleared the model at every sample.
+
+The wide view shows both banks and both mills at 10:08. The evening capture shows the
+raised bridge, a loaded barge and the staggered window lights. [Still at 10:08](2026-11-24-dutch-cuckoo-village/pc-still.jpg) · [Crossing at dusk](2026-11-24-dutch-cuckoo-village/pc-dusk.jpg)
+
+Compared with the concept art below, the PC model uses simpler flower heads and timber
+details. Rain rings and window reflections are modeled strips. The audible call and
+general camera collision detection are deferred. Pack and TV integration follow the
+clock batch workflow. [Build and run](../../wflevels/dutch_cuckoo_village/README.md) · [TODO](../../TODO.md)
+
+## Visual target
 
 ![Tulpenkade seen above the bulb beds, with the Delft-inspired belfry on the quay, a red post mill by the tulips at lower left and a dark polder mill at the far right.](2026-11-24-dutch-cuckoo-village/town-wide-two-mills.png)
 

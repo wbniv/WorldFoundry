@@ -70,6 +70,7 @@ int collisionTable[] =
         	0,	// TourbillonSettings
         	0,	// MetronomeForestSettings
         	0,	// LavaLampDigitsSettings
+        	0,	// DutchCuckooVillageSettings
 	
 };
 

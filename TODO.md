@@ -2,6 +2,10 @@
 
 ## Open
 
+- **Camera collisions for authored journeys.** In Tulpenkade, test the moving camera and its near clipping plane against roofs, façades, awnings, bridge parts and both turning mills. Resolve an obstruction smoothly and rejoin the authored shot. Check mid-lap starts, clock jumps and Still/Journey switches. [Dutch village camera](docs/plans/2026-11-24-dutch-cuckoo-village.md#camera-and-controls)
+
+- **Dutch Cuckoo Village audio.** Add an original two-note cuckoo call and a Sound setting. On desktop and Android, synchronize each call with the bird’s bob, skip missed calls after resume or clock changes, and verify mute, volume and Dream audio focus. Will deferred sound changes on 2026-11-24. [Tulpenkade plan](docs/plans/2026-11-24-dutch-cuckoo-village.md)
+
 - [T3] **Lava-lamp digits: investigate a physical wax simulation.** Explore using Jolt and any needed engine or Forth bindings to replace the authored wax animation with a simulation that rises, merges into the time and melts apart. Assess feasibility, performance and controls, then design and verify the necessary changes. [Clock plan](docs/plans/2026-11-24-lava-lamp-digits.md)
 
 - [T3] **Persist level settings across launches.** The Discus palette currently lasts only while the level is loaded, by design for now; the Dream starts with its default. Follow up by saving level settings and applying the saved values to both the playable level and its screensaver, with relaunch and Dream verification. [Discus palette plan](docs/plans/2026-11-23-discus-palette-selector.md)

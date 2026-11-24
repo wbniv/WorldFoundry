@@ -1,0 +1,15 @@
+#ifndef _DutchCuckooVillageSettings_HP
+#define _DutchCuckooVillageSettings_HP
+#include "actor.hp"
+class DutchCuckooVillageSettings : public Actor {
+public:
+    DutchCuckooVillageSettings(const SObjectStartupData* startupData);
+    virtual ~DutchCuckooVillageSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadDutchCuckooVillageSettings(const SObjectStartupData* startupData);
+#endif
