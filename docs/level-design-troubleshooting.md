@@ -714,6 +714,24 @@ xxd Room0.tga | head   # first pixels should NOT be 0x0000
 
 ---
 
+## Painted atlas looks correct in Blender but the textured level is black
+
+Tulpenkade's solid-colour test drew the town, and an unlit copy of the
+textured material still rendered black. Replacing the cooked atlas pixels
+with a coordinate grid made the sampled rows visible. Blender had put the
+brick and slate at the bottom of the image. The cooked texture read the same
+numeric V coordinates from the top, where the atlas had unused black tiles.
+
+Inspect the pixels of `Room0.tga` and the UVs of an identifiable face. For
+this level's atlas, the generator converts Blender V to `1 - V` when it builds
+the World Foundry mesh. Its Blender review render uses the original UVs.
+Keep this conversion local to the asset that uses this layout. Existing
+levels may already author UVs in cooked-image order. A solid-colour pass with
+the same face indices also helps distinguish an atlas issue from a winding
+issue. [Tulpenkade generator](../wflevels/dutch_cuckoo_village/generate.py)
+
+---
+
 ## Texture colour disappears in-game (transparent key 0x0000)
 
 **Symptom:** Texture looks correct in an image viewer but text or dark regions are invisible
@@ -1272,17 +1290,24 @@ this way produces identical output for every setting, which is the tell.
 
 **Symptom:** Level loads and runs but the viewport is completely black. No geometry visible.
 
-**Cause:** A directional light with rotation `(0, 0, 0)` (default Blender orientation) doesn't illuminate mesh geometry. The light direction ends up perpendicular to all surface normals, so the dot-product lighting gives zero illumination.
+With exterior faces wound outward as in Blender, a horizontal sun at Euler
+`(0, 0, 0)` sends light along +X. A roof facing +Z gets only the ambient
+term. The renderer derives the light direction from Euler B and C. Rotating
+around X (Euler A) leaves that direction unchanged.
 
-**Fix:** Set the light object's `rotation_euler` to `(π/2, 0, 0)` in the Blender/MCP script — this is a 90° rotation around X, pointing the light downward along Z:
+For a camera on the −Y side of a model, this measured setup lights roofs and
+front façades. Set an ambient light in the same room so shaded sides remain
+visible.
 
 ```python
-import math
-light_obj = make_empty('Light01', LIGHT_POS, 'light', props={...})
-light_obj.rotation_euler = (math.pi / 2, 0, 0)
+light_obj.rotation_euler = (0, math.radians(40), math.radians(90))
 ```
 
-This matches the orientation used by the working `mm_practice` level. When diagnosing a black screen, check light orientation BEFORE checking textures or visibility mailboxes.
+Compare a roof and a front wall of known colour in the engine. If the
+background and both faces are still black, check the active camera, room
+membership and visibility mailboxes before changing mesh winding. See the
+[lighting measurements](#a-directional-light-lights-nothing-every-face-at-exactly-the-ambient-term)
+and [face-normal convention](#mesh-face-normals--backface-culling).
 
 ---
 

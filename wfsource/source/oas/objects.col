@@ -73,6 +73,7 @@ int collisionTable[] =
         	0,	// LighthouseSettings
         	0,	// MoonLanternSettings
         	0,	// MirrorHazeSettings
+        	0,	// DutchCuckooVillageSettings
 	
 };
 

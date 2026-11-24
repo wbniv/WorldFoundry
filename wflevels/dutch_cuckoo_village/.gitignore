@@ -1,0 +1,11 @@
+*
+!.gitignore
+!*.py
+!*.sh
+!*.md
+!*.lev
+!*-standalone.iff.txt
+!actor-map.json
+!textile.flags
+!*.wav
+!settings-capabilities.json
