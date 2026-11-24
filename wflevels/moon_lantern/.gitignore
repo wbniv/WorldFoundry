@@ -1,0 +1,10 @@
+*
+!.gitignore
+!*.py
+!*.sh
+!*.blend
+!moon_lantern.lev
+!moon_lantern-standalone.iff.txt
+!actor-map.json
+!settings-capabilities.json
+!*-source.png

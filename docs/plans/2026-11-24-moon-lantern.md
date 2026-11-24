@@ -1,6 +1,6 @@
 # Moon Lantern
 
-Status: plan and standalone implementation in progress. Chromecast testing, bundling and deployment are deferred until the current batch is ready.
+Status: standalone implementation open for PC feedback. Chromecast testing, bundling and deployment are deferred until the current batch is ready.
 
 ## Experience
 
@@ -21,3 +21,11 @@ Calculate lunar phase from the existing `WALL_DAY`, `WALL_HOUR`, `WALL_MINUTE`, 
 ## Implementation and PC verification
 
 Inspect the existing rendering and clock authoring facilities, model the dial, post, moon and lantern to match the visual target, and register the ordinary level settings type. Use smooth camera motion and existing capabilities; engine modifications require separate explicit permission. Verify phase at reference dates, hour/minute direction, shadows opposite their lights, a shadow crossing, noon and midnight, moving/still camera and Show framerate in the actual PC engine. Compare PC captures against the mockup, record discrepancies and open the real standalone at local time for Will's feedback. Do not update the pack manifest or deploy during this batch.
+
+### PC implementation and review
+
+![PC capture at 2026-11-24 14:30 UTC+7](2026-11-24-moon-lantern/pc-capture.png)
+
+The level has a textured stone case, layered brass trim, supported tubular orbit rails, a crater-textured phase moon, a framed lantern, a slow camera drift, and a level settings object with camera and framerate options. The two dark shapes on the dial are modeled shadows, rotated opposite their respective moving objects; they are not dynamically cast light. Lunar illumination uses a low-order longitude approximation and 32 discrete phase meshes; it is not a precise ephemeris or a latitude-dependent depiction of lunar orientation.
+
+The PC engine was checked at the January 2000 new, first-quarter and full moons and at a 2026 local time, including actor positions, shadow angles and the calculated lunar phase; the quarter-phase capture also shows the expected half-lit moon. The geometry-size check passed, as did the Python phase and clock tests. The PC image still differs substantially from the visual target: the metal and glass are less realistic, illumination and contact shadows are absent, the case and lantern are simpler, and the dial has no physical moonlight or lantern glow. The standalone is open for visual feedback; explicit in-engine checks of clock rollovers, the still-camera option and framerate toggle remain to be completed.

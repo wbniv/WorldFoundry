@@ -110,6 +110,8 @@
 #include "lavalampdigitssettings.hp"
         	
 #include "lighthousesettings.hp"
+        	
+#include "moonlanternsettings.hp"
 
 
 

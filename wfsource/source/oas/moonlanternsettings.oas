@@ -1,0 +1,6 @@
+@* Live settings for the Moon Lantern clock.
+TYPEHEADER(Moon Lantern Settings,MoonLanternSettings)
+	@include settings.inc
+	@include clocksettings.inc
+	@include global_settings.inc
+TYPEFOOTER

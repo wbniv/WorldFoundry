@@ -1,0 +1,15 @@
+#ifndef _MoonLanternSettings_HP
+#define _MoonLanternSettings_HP
+#include "actor.hp"
+class MoonLanternSettings : public Actor {
+public:
+    MoonLanternSettings(const SObjectStartupData* startupData);
+    virtual ~MoonLanternSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadMoonLanternSettings(const SObjectStartupData* startupData);
+#endif

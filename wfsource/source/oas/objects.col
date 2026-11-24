@@ -71,6 +71,7 @@ int collisionTable[] =
         	0,	// MetronomeForestSettings
         	0,	// LavaLampDigitsSettings
         	0,	// LighthouseSettings
+        	0,	// MoonLanternSettings
 	
 };
 

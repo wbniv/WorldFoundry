@@ -71,6 +71,7 @@
         MetronomeForestSettings_KIND,
         LavaLampDigitsSettings_KIND,
         LighthouseSettings_KIND,
+        MoonLanternSettings_KIND,
 
 
 
