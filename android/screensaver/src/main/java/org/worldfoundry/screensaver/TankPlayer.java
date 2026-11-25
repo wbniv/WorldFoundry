@@ -5,6 +5,9 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Process;
 import android.view.MotionEvent;
+import android.view.Display;
+import android.graphics.Point;
+import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -32,6 +35,9 @@ final class TankPlayer implements SurfaceHolder.Callback {
     private String[] launchOverrideTriples = new String[0];
     private Runnable onEngineExit;
     private volatile boolean engineExited;
+    private final boolean tvDevice;
+    private int requestedWidth;
+    private int requestedHeight;
 
     private static native void nativeRun(android.content.res.AssetManager assets, Surface surface,
                                          int level, String logPath);
@@ -51,6 +57,7 @@ final class TankPlayer implements SurfaceHolder.Callback {
         view.getHolder().addCallback(this);
         // Enable phone touch for the chooser and settings; TVs use their remote.
         PackageManager features = context.getPackageManager();
+        tvDevice = features.hasSystemFeature(PackageManager.FEATURE_LEANBACK);
         nativeTouchConfigure(features.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)
                 && !features.hasSystemFeature(PackageManager.FEATURE_LEANBACK),
                 context.getResources().getDisplayMetrics().density);
@@ -75,12 +82,45 @@ final class TankPlayer implements SurfaceHolder.Callback {
                 int height = bottom - top;
                 int surfaceTop = (height - surfaceHeight) / 2;
                 view.layout(0, surfaceTop, width, surfaceTop + surfaceHeight);
+                updateSurfaceSize();
             }
         };
         contentView.setBackgroundColor(Color.BLACK);
         contentView.addView(view, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
 
+    }
+
+    // A TV may composite its UI at 1080p even while outputting 4K. Request a
+    // physical-size rendering buffer only when this view occupies the display.
+    private void updateSurfaceSize() {
+        Display display = view.getDisplay();
+        int width = 0, height = 0;
+        if (tvDevice && display != null && view.getWidth() > 0 && view.getHeight() > 0) {
+            Point logical = new Point();
+            display.getRealSize(logical);
+            Display.Mode mode = display.getMode();
+            int physicalWidth = mode.getPhysicalWidth(), physicalHeight = mode.getPhysicalHeight();
+            if ((logical.x < logical.y) != (physicalWidth < physicalHeight)) {
+                int swap = physicalWidth; physicalWidth = physicalHeight; physicalHeight = swap;
+            }
+            if (view.getWidth() == logical.x && view.getHeight() == logical.y
+                    && physicalWidth >= 3840 && physicalHeight >= 2160
+                    && (long) physicalWidth * logical.y == (long) physicalHeight * logical.x) {
+                width = physicalWidth; height = physicalHeight;
+            }
+        }
+        if (width == requestedWidth && height == requestedHeight) return;
+        requestedWidth = width; requestedHeight = height;
+        try {
+            if (width > 0) view.getHolder().setFixedSize(width, height);
+            else view.getHolder().setSizeFromLayout();
+            Log.i("TankPlayer", "surface requested=" + width + "x" + height);
+        } catch (RuntimeException error) {
+            requestedWidth = requestedHeight = 0;
+            view.getHolder().setSizeFromLayout();
+            Log.w("TankPlayer", "native surface request failed; using layout", error);
+        }
     }
 
     View view() { return contentView; }
@@ -175,7 +215,9 @@ final class TankPlayer implements SurfaceHolder.Callback {
     }
 
     @Override public void surfaceCreated(SurfaceHolder holder) { startIfReady(); }
-    @Override public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) { }
+    @Override public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        Log.i("TankPlayer", "surface actual=" + width + "x" + height);
+    }
     @Override public void surfaceDestroyed(SurfaceHolder holder) {
         stop();
         if (thread != null) {
