@@ -42,7 +42,7 @@ CELLS = ["t", "hr", "mi", "phr", "pmi", "k", "n", "cur", "prv", "st", "tau", "ac
 
 def check_names() -> None:
     """A scratch cell and a word must never share a name: the later definition shadows the earlier."""
-    words = {"x", "y", "z", "a", "b", "c", "sz", "u", "lin", "sq", "sm", "frac", "floor", "mod", "sin", "c01", "dig", "size",
+    words = {"x", "y", "z", "a", "b", "c", "sz", "u", "lin", "sq", "sm", "frac", "mod", "sin", "c01", "dig", "size",
              "drum", "card-deg", "cbase", "cards", "dominoes", "tick"}
     clash = words & set(CELLS)
     assert not clash, f"scratch cells shadow words: {sorted(clash)}"
@@ -60,9 +60,8 @@ def library() -> str:
         ": mm-lin mm-u ;",
         ": mm-sq mm-u dup * ;",
         ": mm-sm mm-u dup dup * swap 2 * 3 swap - * ;",
-        ": mm-frac begin dup 1 >= if 1 - 0 else 1 then until begin dup 0 < if 1 + 0 else 1 then until ;",
-        ": mm-floor dup mm-frac - ;",
-        ": mm-mod ( a b -- r ) over over / mm-floor * - ;",
+        ": mm-frac dup floor - ;",                                    # the engine's floor (docs/forth-math-words.md)
+        ": mm-mod ( a b -- r ) over over / floor * - ;",            # floored: takes the divisor's sign, unlike fmod
         ": mm-sin sin-rev ;",
         ": mm-x ( v actor -- ) INDEXOF_X_POS swap write-actor-mailbox ;",
         ": mm-y ( v actor -- ) INDEXOF_Y_POS swap write-actor-mailbox ;",
@@ -164,9 +163,9 @@ def pieces(ix: Dict[str, int]) -> str:
         "  until ;",
         # drums: digit k of (hour, minute)
         ": mm-dig ( hr mi k -- d )",
-        "  dup 0 = if drop drop 10 / mm-floor else",
+        "  dup 0 = if drop drop 10 / floor else",
         "  dup 1 = if drop drop 10 mm-mod else",
-        "  dup 2 = if drop nip 10 / mm-floor else",
+        "  dup 2 = if drop nip 10 / floor else",
         "  drop nip 10 mm-mod then then then ;",
         ": mm-size mm-k mm@ 0 = if 3 else mm-k mm@ 2 = if 6 else 10 then then ;",
         ": mm-drum",
