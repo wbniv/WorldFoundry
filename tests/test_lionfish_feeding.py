@@ -142,7 +142,8 @@ def test_export_slots_visibility_material_and_mailboxes():
     import struct
     here=ROOT/'wflevels/aquarium_lionfish'
     mapping=json.loads((here/'actor-map.json').read_text())
-    assert len(mapping['indices'])==31 and mapping['feeding']['slots']==3
+    # 31 actors plus levcomp's default LevelSettings holder (561119f5b, rebuilt in 8c78b004a)
+    assert len(mapping['indices'])==32 and 'LevelSettings' in mapping['indices'] and mapping['feeding']['slots']==3
     assert len([n for n in mapping['indices'] if n.startswith('animal-')])==2
     assert len([n for n in mapping['indices'] if n.startswith('goldfish-')])==3
     text=(here/'aquarium_lionfish.lev').read_text()

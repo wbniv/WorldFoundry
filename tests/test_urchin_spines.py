@@ -2,7 +2,9 @@
 import math,json
 from pathlib import Path
 import pytest
+import sys
 from test_urchin_motion import host,binaries,tick,ROOT
+sys.path.insert(0,str(ROOT/'wflevels/aquarium_tanks'))   # urchin.py; alone, nothing else had put it on the path
 from urchin import PIVOT_SPINES,spine_specs,urchin,spine_mesh,tube_foot
 SPECS=[spine_specs()[index] for index in PIVOT_SPINES]
 CALLS=' '.join(f"{s['root'][0]} {s['root'][1]} {s['root'][2]} {-math.asin(s['direction'][2])/math.tau} {math.atan2(s['direction'][1],s['direction'][0])/math.tau} {4.1+k*.41} {1 if k%2==0 else -1} {k} {k+11} us-spine" for k,s in enumerate(SPECS))
@@ -55,4 +57,9 @@ def test_generated_binding_ownership_and_no_duplicated_geometry():
  triangles=lambda m:sum(len(f)-2 for f in m.faces)
  assert triangles(urchin())+sum(triangles(spine_mesh(i)) for i in PIVOT_SPINES)==triangles(urchin(articulated=False))
  assert triangles(urchin())+8*triangles(tube_foot())+sum(triangles(spine_mesh(i)) for i in PIVOT_SPINES)==3540
- assert len(mapping['indices'])==46
+ # The tank had 46 actors when this was written (2026-10-05); the seahorses and their posts (3ccd97e15, 328215330)
+ # and the settings actor (cd6b9e9e0) came later, so check the urchin's own actors instead of the total.
+ indices=mapping['indices']
+ assert len(set(indices.values()))==len(indices)
+ urchin_actors={i for n,i in indices.items() if n.startswith('urchin')}
+ assert {s['actor'] for s in bind['spines']}<=urchin_actors

@@ -207,7 +207,7 @@ def test_director_runs_the_rig_then_the_camera_with_the_right_indices(objs):
 
 
 def test_clownfish_tank_has_no_school_actors_or_mailbox_reads(objs):
-    assert len(objs)==32
+    assert len(objs)==33 and objs[-1]['name']=='LevelSettings'   # levcomp's default holder (561119f5b), appended last
     assert not any(o['name'].startswith('tiger-barb') for o in objs)
     for name in ('Director','Player'):
         script=by_name(objs,name)['script']
