@@ -14,7 +14,8 @@ coordinator app `wf-native-tests`, runs a `check` on one device, downloads the e
 test under build/device-native-tests/<device>/, where tests/forth_math_agreement.py and
 tests/forth_math_vm_cost.py read them.
 
-Never point this at phone-pixel-8-pro (Will's daily phone) without his go-ahead; `run` refuses it.
+Never point this at phone-pixel-8-pro (Will's daily phone) without his go-ahead: `run` refuses it unless
+`--approved "<who, date, words>"` records that go-ahead (printed, and kept beside the results as approval.txt).
 """
 from __future__ import annotations
 
@@ -247,9 +248,11 @@ def coordinator(operation: str, **env: str) -> subprocess.CompletedProcess:
     return r
 
 
-def run(device: str, duration: int, apk: Path | None) -> int:
+def run(device: str, duration: int, apk: Path | None, approved: str | None = None) -> int:
     if device in REFUSED_DEVICES:
-        sys.exit(f"run: {device}: {REFUSED_DEVICES[device]}")
+        if not approved:
+            sys.exit(f"run: {device}: {REFUSED_DEVICES[device]} (pass --approved \"<who, date, words>\" to record it)")
+        print(f"run: {device}: approved: {approved}")
     apk = apk or build()
     r = coordinator("app-register", app=APP, apk=str(apk), activity=ACTIVITY, replace="true")
     if r.returncode:
@@ -271,6 +274,9 @@ def run(device: str, duration: int, apk: Path | None) -> int:
     if e.returncode or not logs:
         sys.exit(f"run: no wf.log in the evidence of {job} (check rc={r.returncode}, evidence rc={e.returncode})")
     print(f"evidence: {logs[0].relative_to(ROOT)} ({logs[0].stat().st_size:,} bytes)")
+    if approved:
+        (RESULTS / device).mkdir(parents=True, exist_ok=True)
+        (RESULTS / device / "approval.txt").write_text(f"{approved}\njob {job}\n")
     try:
         collect(device, logs[0])
     except CollectError as error:
@@ -291,6 +297,7 @@ def main() -> int:
     r.add_argument("--device", required=True)
     r.add_argument("--duration", type=int, default=30, help="the check's wait, seconds (a deadline; the done line is the signal)")
     r.add_argument("--apk", type=Path, help="an already built APK under build/coordinator-artifacts")
+    r.add_argument("--approved", help="the recorded go-ahead for a refused device, e.g. \"Will, 2026-11-26: run pixel\"")
     args = ap.parse_args()
     if args.command == "build":
         build()
@@ -302,7 +309,7 @@ def main() -> int:
             print(f"collect: {error}", file=sys.stderr)
             return 1
         return 0
-    return run(args.device, args.duration, args.apk)
+    return run(args.device, args.duration, args.apk, args.approved)
 
 
 if __name__ == "__main__":

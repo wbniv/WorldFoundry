@@ -106,8 +106,8 @@ def main() -> int:
                 results[target] = parse(run_pc(tmp))
             elif target == "wasm":
                 results[target] = parse(run_wasm(tmp))
-            elif target == "phone-pixel-8-pro":
-                print(f"{target}: NOT RUN: Will's daily phone; never run here")
+            elif target == "phone-pixel-8-pro" and not (DEVICE_RESULTS / target / "approval.txt").exists():
+                print(f"{target}: NOT RUN: Will's daily phone; needs an approved `device_native_tests.py run --approved`")
             elif (text := run_device(target)) is not None:
                 results[target] = parse(text)
     if len(results) < 2:

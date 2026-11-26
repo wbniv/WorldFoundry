@@ -443,6 +443,57 @@ No visible surface: these are engine words and a reference document, so this pla
 
     **PC, WebAssembly, `chromecast-test-01` and `chromecast-test-02`: PASS**, bit-identical for all 36 words, `fma` included. **`phone-pixel-8-pro`: NOT RUN:** Will's daily phone; it waits for his go-ahead. (The route's `fmaf-probe` still shows bionic's own `fmaf` returning `0x3f801001`: the fix is that we no longer call it there.)
 
+    **Pixel run, 2026‑11‑26** (Will: "run pixel"): `python3 scripts/device_native_tests.py run --device phone-pixel-8-pro --approved "Will, 2026-11-26: run pixel"` (job J‑73de7334b91f, all four tests rc=0), then the plan's command with `EMCC_DIR=/home/will/bsnes-jg-player/emsdk/upstream/emscripten`:
+
+    ```text
+    wasm: emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.4 (fe5be6afdff43ad58860d821fcc8572a23f92d19); node v22.16.0
+    phone-pixel-8-pro: WF Native Tests v2, arm64-v8a, NDK clang and bionic libm; collected from /home/will/WorldFoundry-wbniv/build/device-native-tests/phone-pixel-8-pro/J-73de7334b91f/wf.log
+    chromecast-test-01: WF Native Tests v2, armeabi-v7a, NDK clang and bionic libm; collected from /home/will/WorldFoundry-wbniv/build/device-native-tests/chromecast-test-01/J-a65c1a966084/wf.log
+    chromecast-test-02: WF Native Tests v2, armeabi-v7a, NDK clang and bionic libm; collected from /home/will/WorldFoundry-wbniv/build/device-native-tests/chromecast-test-02/J-dd0d26859a46/wf.log
+    74990 results per target; reference pc
+    word         group                    wasm      phone-pixel-8-pro     chromecast-test-01     chromecast-test-02
+    acos-rev     trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    asin-rev     trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    atan-rev     trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    atan2-rev    trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    cos-rev      trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    sin-rev      trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    sincos-rev   trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    sqrt         trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    tan-rev      trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    ceil         A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    clz          A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    copysign     A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    ctz          A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    floor        A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    fma          A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    fmod         A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    popcount     A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    round        A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    roundeven    A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    trunc        A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    acosh        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    asinh        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    atanh        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    cbrt         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    cosh         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    exp          C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    exp2         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    expm1        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    hypot        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    ln           C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    log10        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    log1p        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    log2         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    pow          C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    sinh         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    tanh         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    PASS
+    rc=0
+    ```
+
+    **PASS on all five targets**: PC, WebAssembly, Pixel (arm64-v8a), cast1 and cast2, all 36 words 0 differ, 0 ulp.
+
 6. The four levels whose hand-rolled floors were replaced still match their references:
 
     ```bash
