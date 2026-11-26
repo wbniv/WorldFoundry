@@ -15,7 +15,9 @@ ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "android/app/art-src/baseline-icon-2026-10-11"
 # shipped file, clean art, shipped size, corner as (x0, x1, y0, y1) fractions of width and height
 CASES = [
-    ("icon.png", "icon-art.png", (256, 256), (0.78, 0.92, 0.78, 0.93)),
+    # 6bd292d34 moved the icon's badge inward (safe_circle=1.0, scale 0.24) so Google TV's round mask keeps it: its
+    # light pixels now span about 0.64-0.82 of the width and 0.61-0.84 of the height.
+    ("icon.png", "icon-art.png", (256, 256), (0.68, 0.85, 0.68, 0.85)),
     ("tv_banner.png", "banner-art.png", (640, 360), (0.89, 0.96, 0.75, 0.93)),
 ]
 
@@ -32,7 +34,7 @@ def bright_fraction(image, corner):
 def test_shipped_art_has_the_logo_in_the_corner(shipped, clean, size, corner):
     image = Image.open(ART / shipped).convert("RGB")
     assert image.size == size
-    # Measured 0.28 (icon) and 0.48 (banner); the clean art measures 0.
+    # Measured 0.35 (icon, since 6bd292d34) and 0.48 (banner); the clean art measures 0.
     assert bright_fraction(image, corner) >= 0.15, f"{shipped} has no logo at bottom-right"
     clean_art = Image.open(ART / clean).convert("RGB").resize(size, Image.LANCZOS)
     assert bright_fraction(clean_art, corner) <= 0.01, f"{clean} is not clean art: it already has a logo"
