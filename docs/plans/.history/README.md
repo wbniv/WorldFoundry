@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/c71b9fa4d) | Plan index: persist level settings row |
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/e2fca2b56) | WF Native Tests: run native test code on the Android devices through the coordinator's check |
 | [2026-11-24](https://github.com/wbniv/WorldFoundry/commit/2e3609364) | Build Tulpenkade Dutch cuckoo clock with a roof-clearing camera journey |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/a35980cc5) | Plan: flickering candle flames (four meshes a tree, a clock-driven shape swap), with mockups and diagrams |
@@ -88,6 +89,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa69) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+c71b9fa4d	author	Will Norris
+c71b9fa4d	added	1
+c71b9fa4d	deleted	0
+c71b9fa4d	files	1
+c71b9fa4d	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqPBXQwjNMi8EXwe2or
 e2fca2b56	author	Will Norris
 e2fca2b56	added	1
 e2fca2b56	deleted	0
