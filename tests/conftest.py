@@ -10,6 +10,7 @@ import os
 import shutil
 import signal
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -109,3 +110,70 @@ def pytest_collection_modifyitems(config, items):
             if not located:
                 item.add_marker(pytest.mark.skip(reason=f"missing build output {fragment}: run `{command}`"))
                 break
+
+
+# ---------------------------------------------------------------------------
+# Per-module isolation of level-local modules.
+#
+# Level suites import their level's helpers by bare name after a sys.path.insert
+# (`import timeline`, `from config import ...`, `import forth`), and several levels
+# ship a module of the same name. Python caches an import by name, so the first level
+# collected won: a later level's `import timeline` silently got the wrong file and its
+# collection died with an AttributeError or ImportError (and, since collection errors
+# abort the run, so did every `-k` filter). `--import-mode=importlib` does not help:
+# it changes how *test* files are imported, not these bare imports.
+#
+# Each test module is therefore collected against a clean slate of repo-local modules
+# (anything whose file lives in the repo outside tests/: level and tool directories,
+# docs/ poster generators, ...). The modules it brought in,
+# and the sys.path it ended collection with, are replayed around each of its tests, so
+# a lazy `from config import ...` inside a test body resolves to the same file the
+# module-level import did. sys.path itself keeps accumulating during collection, as it
+# always has: a suite may import a sibling test module that did the path insert.
+# ---------------------------------------------------------------------------
+_TESTS_DIR = Path(__file__).resolve().parent
+_isolated: dict = {}   # test module path -> (sys.path at the end of its collection, its local modules)
+
+
+def _local_modules() -> dict:
+    found = {}
+    for name, mod in list(sys.modules.items()):
+        origin = getattr(mod, "__file__", None)
+        if origin:
+            parents = Path(origin).resolve().parents
+            if REPO_ROOT in parents and _TESTS_DIR not in parents:
+                found[name] = mod
+    return found
+
+
+def _swap_in(local: dict) -> None:
+    for name in _local_modules():
+        del sys.modules[name]
+    sys.modules.update(local)
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_make_collect_report(collector):
+    if not isinstance(collector, pytest.Module):
+        yield
+        return
+    outside = _local_modules()
+    _swap_in({})
+    yield
+    _isolated[collector.path] = (list(sys.path), _local_modules())
+    _swap_in(outside)
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_protocol(item, nextitem):
+    entry = _isolated.get(item.path)
+    if entry is None:
+        yield
+        return
+    outside, path = _local_modules(), list(sys.path)
+    _swap_in(entry[1])
+    sys.path[:] = entry[0]
+    yield
+    entry[1].update(_local_modules())   # keep what a test imported lazily for its siblings
+    _swap_in(outside)
+    sys.path[:] = path
