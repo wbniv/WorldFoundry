@@ -13,7 +13,6 @@
 
 - [T3] **Replace the remaining hand-rolled `*-frac` loops with `floor`.** `aquarium_sea_stars/sea_star_player.fth`, `aquarium_blue_shrimp/shrimp.fth`, `aquarium_tanks/controller.fth`, `moon_lantern/generate.py` still loop once per unit, the pattern the math plan removed from four levels. Keep floored semantics (`over over / floor * -`, not `fmod`), rebuild, and check each level; the aquarium ones ship in the Dream APK. T3: shipped levels, device check. [Math plan](docs/plans/2026-11-26-forth-math-words.md)
 
-- [wip T2] **`pytest tests -k …` stops at collection.** Levels share module names (`timeline`, `config`, `forth`), and `aquarium_sea_stars` lacks a constant a test imports, and `test_pipe_hop` connects at import, so a filtered run of the suite fails before any test runs. Fix the collisions (for example `--import-mode=importlib` or per-level packages) and the import-time side effects. T2: bounded test-infrastructure fix. <!-- agent:a35036c6c27b38da8 -->
 
 - [T4] **Pre-existing test failures seen during the math work.** `test_cuckoo_village_settings` fails because `oas2oad` exits 1; Tide Harbour fails its actor budget (206 > 150) and its settings-type tests. Not caused by the math change (found by its run, 2026‑11‑26). T4: unknown root causes.
 
@@ -264,6 +263,7 @@
 
 ## Done
 
+- ✅ 2026‑11‑26 — [pytest-collection] conftest isolates level-local modules per test module, test_pipe_hop inert on import; `pytest tests` collects 1867, no errors. See 36df18455, bc63287de.
 - ✅ 2026‑11‑26 — [device-native-tests] WF Native Tests APK runs native tests via the coordinator's check; cast1, cast2 run. See [plan](docs/plans/2026-11-26-device-native-test-route.md).
 - ✅ 2026-11-22 — [global-level-settings] Show framerate: one declaration, a default holder in levcomp, 22 of 23 reachable levels; cast1 proved. See [plan](docs/plans/2026-11-22-global-level-settings.md).
 
