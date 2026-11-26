@@ -1,9 +1,0 @@
-*
-!.gitignore
-!*.py
-!*.sh
-!*.blend
-!*.lev
-!*-standalone.iff.txt
-!actor-map.json
-!settings-capabilities.json
