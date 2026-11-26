@@ -25,6 +25,12 @@
             <meta-data android:name="android.service.dream" android:resource="@xml/dream" />
             <meta-data android:name="org.worldfoundry.screensaver.SETTINGS_AUTHORITY"
                 android:value="org.worldfoundry.seahorsegrid.settings" />
+            <meta-data android:name="org.worldfoundry.screensaver.PREVIEW_ACTIVITY"
+                android:value="org.worldfoundry.screensaver.ScreensaverPreviewActivity" />
+            <meta-data android:name="org.worldfoundry.screensaver.PREVIEW_EXTRA"
+                android:value="org.worldfoundry.screensaver.DREAM" />
+            <meta-data android:name="org.worldfoundry.screensaver.PREVIEW_VALUE"
+                android:value="seahorse_grid" />
         </service>
         <provider android:name=".SeahorseSettingsProvider"
             android:authorities="org.worldfoundry.seahorsegrid.settings"

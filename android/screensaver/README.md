@@ -33,6 +33,18 @@ The Aquarium and Seahorse tasks build the level bundles in the Linux container w
 
 The selected Dream advertises `org.worldfoundry.game.aquarium.settings` (`${applicationId}.settings`). Its shell-only provider answers `getCapabilities` with a base64-encoded schema-1 JSON choice list and accepts `setSetting` with `tank:<id>` or `orientation:<value>`. The coordinator uses a reviewed mapping for this Dream package and authority, validates the response, and offers those choices in the KDE tray. A changed preference takes effect at the next Dream start.
 
+## Preview metadata
+
+Beside `org.worldfoundry.screensaver.SETTINGS_AUTHORITY`, each Dream `<service>` (Aquarium, Clocks, Seahorse Grid; not Planted Tank or the spikes) declares how a companion such as Homeboard previews it. The contract is the screensaver companion contract (`docs/plans/2026-11-26-screensaver-companion-contract.md` in the homeboard-tv repo), "What each app declares"; the values equal the coordinator registry's `preview_activity`, `preview_extra` and `preview_value`.
+
+| Meta-data name | Value | Declared by |
+|---|---|---|
+| `org.worldfoundry.screensaver.PREVIEW_ACTIVITY` | `org.worldfoundry.screensaver.ScreensaverPreviewActivity`: the full class name only, never a leading `.` and never the package (the companion joins it with the Dream's own package) | all three |
+| `org.worldfoundry.screensaver.PREVIEW_EXTRA` | the string extra name to send, `org.worldfoundry.screensaver.DREAM` | Aquarium, Seahorse Grid |
+| `org.worldfoundry.screensaver.PREVIEW_VALUE` | the extra's value: `aquarium` or `seahorse_grid` | Aquarium, Seahorse Grid |
+
+`ScreensaverPreviewActivity` is exported from `src/main/AndroidManifest.xml`, so every flavor has it. With no extra it plays the saved level (Clocks declares no extra); `DREAM=seahorse_grid` plays the Seahorse Grid level, and any other `DREAM` value (Aquarium's `aquarium`) plays the saved tank. `task test-screensaver-preview-metadata` checks the manifests, and the registry too when `~/chromecast-coordinator` is present (or `WF_COORDINATOR_APPLICATIONS_JSON` points at its `applications.json`); without the registry the cross-check is skipped, visibly.
+
 Install, settings, and idle activation checks use the shared coordinator through `task chromecast:*`. See [the implementation plan](../../docs/plans/2026-10-18-aquarium-screensaver-player-and-tray-settings.md). The former video prototype and its evidence are documented in [the investigation](../../docs/investigations/2026-10-17-chromecast-screensaver-from-a-level.md).
 
 ## Orientation

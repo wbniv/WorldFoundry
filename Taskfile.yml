@@ -1916,6 +1916,11 @@ tasks:
       - |
         docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; d=/src/android/screensaver/src; javac -d /tmp/out "$d"/main/java/org/worldfoundry/screensaver/OrientationChoice.java "$d"/test/java/org/worldfoundry/screensaver/OrientationChoiceTest.java && java -cp /tmp/out org.worldfoundry.screensaver.OrientationChoiceTest'
 
+  test-screensaver-preview-metadata:
+    desc: "Each Dream <service> (Aquarium, Clocks, Seahorse Grid) declares PREVIEW_ACTIVITY (and PREVIEW_EXTRA/PREVIEW_VALUE for Aquarium and Seahorse Grid), the preview activity is exported, and the values equal the coordinator's applications.json (cross-check skipped, with a reason, when ~/chromecast-coordinator is absent; override with WF_COORDINATOR_APPLICATIONS_JSON). Host pytest, no container."
+    cmds:
+      - python3 -m pytest -q -rs tests/test_screensaver_preview_metadata.py
+
   test-planted-screensaver:
     desc: "Planted Tank screensaver checks, including OAD-derived Settings capabilities and the plain-Java PlantedConfigTest. Repo mounted read-only; build the level first."
     cmds:

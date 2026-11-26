@@ -1,5 +1,7 @@
 | Date | Change |
 |------|--------|
+| [2026-11-24](https://github.com/wbniv/WorldFoundry/commit/7ed6d60c5) | Check in Aquarium and Clocks development build inputs |
+| [2026-11-24](https://github.com/wbniv/WorldFoundry/commit/f59b5b8fa) | Capture Aquarium and Clocks rebuild inputs |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/95c2a96fd) | Aquarium: the applicationId becomes org.worldfoundry.game.aquarium (Will: the combined app is not called screensaver) |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/417ce50eb) | WF Clocks: applicationId org.worldfoundry.game.clocks (not pushed: lands with the registry change) |
 | [2026-11-21](https://github.com/wbniv/WorldFoundry/commit/9e4f57ee4) | Menu key latch: record the verification (tests pass; APK build not run, the root volume cannot hold a full tree) and the README line |
@@ -26,6 +28,14 @@
 | [2026-10-18](https://github.com/wbniv/WorldFoundry/commit/54f44b515) | Add live aquarium screensaver with per-tank players |
 
 <!--history-meta v1
+7ed6d60c5	author	Will Norris
+7ed6d60c5	added	1
+7ed6d60c5	deleted	1
+7ed6d60c5	files	1
+f59b5b8fa	author	Will Norris
+f59b5b8fa	added	1
+f59b5b8fa	deleted	1
+f59b5b8fa	files	1
 95c2a96fd	author	Will Norris
 95c2a96fd	added	2
 95c2a96fd	deleted	2

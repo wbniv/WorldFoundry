@@ -28,6 +28,8 @@
             <meta-data android:name="android.service.dream" android:resource="@xml/dream" />
             <meta-data android:name="org.worldfoundry.screensaver.SETTINGS_AUTHORITY"
                 android:value="${applicationId}.settings" />
+            <meta-data android:name="org.worldfoundry.screensaver.PREVIEW_ACTIVITY"
+                android:value="org.worldfoundry.screensaver.ScreensaverPreviewActivity" />
         </service>
         <provider android:name=".ClocksSettingsProvider"
             android:authorities="${applicationId}.settings"
