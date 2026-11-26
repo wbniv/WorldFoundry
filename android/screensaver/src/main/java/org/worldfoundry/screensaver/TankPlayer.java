@@ -7,6 +7,9 @@ import android.os.Process;
 import android.view.MotionEvent;
 import android.view.Display;
 import android.graphics.Point;
+import android.hardware.display.DisplayManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -85,6 +88,24 @@ final class TankPlayer implements SurfaceHolder.Callback {
                 updateSurfaceSize();
             }
         };
+        DisplayManager displays = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
+        DisplayManager.DisplayListener displayListener = new DisplayManager.DisplayListener() {
+            @Override public void onDisplayAdded(int id) { view.post(TankPlayer.this::updateSurfaceSize); }
+            @Override public void onDisplayRemoved(int id) { view.post(TankPlayer.this::updateSurfaceSize); }
+            @Override public void onDisplayChanged(int id) {
+                Display active = view.getDisplay();
+                if (active == null || active.getDisplayId() == id) view.post(TankPlayer.this::updateSurfaceSize);
+            }
+        };
+        view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override public void onViewAttachedToWindow(View v) {
+                if (displays != null) displays.registerDisplayListener(displayListener, new Handler(Looper.getMainLooper()));
+                view.post(TankPlayer.this::updateSurfaceSize);
+            }
+            @Override public void onViewDetachedFromWindow(View v) {
+                if (displays != null) displays.unregisterDisplayListener(displayListener);
+            }
+        });
         contentView.setBackgroundColor(Color.BLACK);
         contentView.addView(view, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
@@ -100,15 +121,9 @@ final class TankPlayer implements SurfaceHolder.Callback {
             Point logical = new Point();
             display.getRealSize(logical);
             Display.Mode mode = display.getMode();
-            int physicalWidth = mode.getPhysicalWidth(), physicalHeight = mode.getPhysicalHeight();
-            if ((logical.x < logical.y) != (physicalWidth < physicalHeight)) {
-                int swap = physicalWidth; physicalWidth = physicalHeight; physicalHeight = swap;
-            }
-            if (view.getWidth() == logical.x && view.getHeight() == logical.y
-                    && physicalWidth >= 3840 && physicalHeight >= 2160
-                    && (long) physicalWidth * logical.y == (long) physicalHeight * logical.x) {
-                width = physicalWidth; height = physicalHeight;
-            }
+            int[] requested = SurfaceResolution.choose(tvDevice, view.getWidth(), view.getHeight(),
+                    logical.x, logical.y, mode.getPhysicalWidth(), mode.getPhysicalHeight());
+            width = requested[0]; height = requested[1];
         }
         if (width == requestedWidth && height == requestedHeight) return;
         requestedWidth = width; requestedHeight = height;
