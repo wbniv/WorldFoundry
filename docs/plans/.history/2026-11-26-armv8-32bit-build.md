@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/4e6b15da1) | ARMv8 32-bit plan: cast1 Aquarium restore verified |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/4f88937df) | ARMv8 32-bit Chromecast build: measured, recommend keeping ARMv7 |
 
 <!--history-meta v1
+4e6b15da1	author	Will Norris
+4e6b15da1	added	3
+4e6b15da1	deleted	2
+4e6b15da1	files	1
+4e6b15da1	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqPBXQwjNMi8EXwe2or
 4f88937df	author	Will Norris
 4f88937df	added	306
 4f88937df	deleted	0

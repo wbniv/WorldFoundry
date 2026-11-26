@@ -1,6 +1,6 @@
 # An ARMv8 32-bit build for the Chromecasts: measure, then decide
 
-**Status: measured 2026‑11‑27 on cast1 and cast2; a decision for Will.** Recommendation: **keep** the shipped ARMv7 build (see [Recommendation](#recommendation)). Nothing here changes the shipped build.
+**Status: decided 2026‑11‑27: keep ARMv7.** Will: "yes: keep ARMv7" (measured on cast1 and cast2 the same day). Recommendation: **keep** the shipped ARMv7 build (see [Recommendation](#recommendation)). Nothing here changes the shipped build.
 
 TODO item: **Measure an ARMv8 32-bit build for the Chromecasts** (T4). It comes from Q2 of the [Forth math words plan](2026-11-26-forth-math-words.md) and its hardware matrix, and it uses the [device native test route](2026-11-26-device-native-test-route.md).
 
