@@ -609,6 +609,7 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** Wax digits: dropped "for now", per Will. The old plan stays as the record. — _from [2026-11-26-lava-lamp.md](docs/plans/2026-11-26-lava-lamp.md)_  <!-- fp:e827c4349a5845d0 -->
 - [ ] **(triage)** New settings widgets (colour swatches in the touch form). — _from [2026-11-26-lava-lamp.md](docs/plans/2026-11-26-lava-lamp.md)_  <!-- fp:af8237f86cd5e78c -->
 - [verify] **2026-11-26-lava-lamp** — Verification section present but no PASS recorded — run + record the steps. _from [2026-11-26-lava-lamp.md](docs/plans/2026-11-26-lava-lamp.md)_  <!-- fp:e3044e49733f53c0 -->
+- [verify] **2026-11-26-music-soundfont-leak** — Verification section present but no PASS recorded — run + record the steps. _from [2026-11-26-music-soundfont-leak.md](docs/plans/2026-11-26-music-soundfont-leak.md)_  <!-- fp:a852accc570e4079 -->
 <!-- END auto-captured-deferrals -->
 - [ ] **(triage)** A second machine, and the rule that picks one for each minute (D10). — _from [2026-11-21-sixty-second-chain-reaction.md](docs/plans/2026-11-21-sixty-second-chain-reaction.md)_  <!-- fp:9ef908da50e937e2 -->
 - [ ] **(triage)** Sound (D8). — _from [2026-11-21-sixty-second-chain-reaction.md](docs/plans/2026-11-21-sixty-second-chain-reaction.md)_  <!-- fp:208c993d9c8f6dc6 -->

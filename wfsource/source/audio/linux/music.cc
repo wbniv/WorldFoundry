@@ -154,6 +154,8 @@ MusicPlayer::MusicPlayer() : _playing(false), _impl(nullptr)
 MusicPlayer::~MusicPlayer()
 {
 	stop();
+	// stop() keeps the SoundFont cached for the next song; destruction owns it.
+	if (_impl->synth) tsf_close(_impl->synth);
 	delete _impl;
 }
 
