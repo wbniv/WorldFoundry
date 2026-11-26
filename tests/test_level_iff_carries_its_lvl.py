@@ -32,3 +32,11 @@ def pairs():
 def test_the_iff_holds_the_committed_lvl(lvl, iff):
     assert lvl.read_bytes() in iff.read_bytes(), \
         f"{iff.relative_to(ROOT)} was not built from {lvl.relative_to(ROOT)}: rebuild the level (task build-level -- {lvl.stem})"
+
+
+@pytest.mark.parametrize('filename', ['filesys.iff', 'filesys-standalone.iff'])
+def test_filesys_iff_holds_its_committed_lvl(filename):
+    # This historical level has no Level Settings sheet, but its checked-in
+    # binaries must still correspond to its checked-in level source.
+    lvl = (ROOT / 'wflevels/filesys/filesys.lvl').read_bytes()
+    assert lvl in (ROOT / 'wflevels' / filename).read_bytes()

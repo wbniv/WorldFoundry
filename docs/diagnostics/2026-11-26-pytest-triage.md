@@ -63,7 +63,7 @@ The 82 include one fixed by another session in the meantime (`test_clocks_bundle
 ## Also found
 
 - **ASan leak in the dev engine.** The `--dev` container build (Debug + ASan) exits 1 at the end of a smoke run because LeakSanitizer reports 15,737,640 bytes in 5 allocations, all from `tsf_load_presets` via `MusicPlayer::play` (`audio/linux/music.cc:175`). The SoundFont is never freed. Release builds are unaffected, which is why row 5 uses a Release build. This is an engine change, so it is not made here.
-- **`filesys.iff` and `filesys-standalone.iff`** were also replaced in `7ed6d60c5` (2,783 bytes differ, an `ALGN` padding change) without matching the committed `filesys.lvl`. No test fails, and the level is not reachable, so it is left alone and noted here.
+- **`filesys.iff` and `filesys-standalone.iff`:** `7ed6d60c5` replaced the embedded level without updating `filesys.lvl`; the earlier claim that the mismatch was only ALGN padding was not established. A subsequent isolated rebuild from committed inputs and freshly built Rust tools produced a 10,928-byte `.lvl` with a default Level Settings object, plus matching IFFs. Two consecutive builds produced identical hashes for all three outputs; the regenerated outputs and a specific consistency check replace the inconsistent artifacts. This does not establish bit-for-bit reproducibility across different machines or toolchains.
 
 ## Verification
 
