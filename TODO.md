@@ -12,7 +12,7 @@
 
 
 
-- [wip T1] **Rebuild `wf-linux-test:local` with `fonts-noto-core`.** The Dockerfile layer landed in `fefea345a`, but the local tag was not rebuilt because free disk was under 6 GB, and one attempt stalled at zero build steps. Run `task linux-test-image` once more than 8 GB is free, then run `tests/test_swarming.py tests/test_poster_clownfish_biomechanics.py -k committed_html` in the container: both should pass, not skip. T1: known recipe. <!-- agent:a240b8886981b53d0 -->
+- [T1] **Rebuild `wf-linux-test:local` with `fonts-noto-core`.** The Dockerfile layer landed in `fefea345a`, but the local tag was not rebuilt because free disk was under 6 GB, and one attempt stalled at zero build steps. Run `task linux-test-image` once more than 8 GB is free, then run `tests/test_swarming.py tests/test_poster_clownfish_biomechanics.py -k committed_html` in the container: both should pass, not skip. T1: known recipe.
 
 - [wip T4] **Measure an ARMv8 32-bit build for the Chromecasts.** Both Chromecasts have ARMv8 cores (Cortex-A35, A55) but run our `armeabi-v7a` build (ARMv7 VFPv3-D16 + NEON), so `vrint` rounding and `vfma` never reach Jolt, the deformers or the Forth words. Build a variant with `-march=armv8-a -mfpu=neon-fp-armv8`, compare FPS on cast1 and cast2, and decide; it drops true ARMv7 devices. T4: build-wide, with compatibility judgment. [Math plan, Q2](docs/plans/2026-11-26-forth-math-words.md) <!-- agent:ac6555f887933f2db -->
 
