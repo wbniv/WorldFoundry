@@ -89,6 +89,11 @@ public:
 	// Rebuild the primitives from the current vertex colours (a deformer that
 	// writes prelit colours: Morph). Same work as ApplyMaterials.
 	void RefreshPrimitives() { ApplyMaterials(_materialList); }
+	// A deformer that changed colours only (Morph with no targets) leaves the
+	// geometry alone, so the object may be baked again: ApplyMaterials bumped the
+	// bake's version, and the next bake takes the new colours. The lava lamp's
+	// liquid, wall glow and table light then draw from static buffers.
+	void AllowStaticBakeAgain() { if (_staticState == STATIC_DEFORMED) _staticState = STATIC_BAKEABLE; }
 	bool SetRuntimeGeometry(int vertices, Vertex3D* vertexList, int faces, TriFace* faceList, bool textured=true);
 
 	// Should only be used by the animation system. Handing out writable

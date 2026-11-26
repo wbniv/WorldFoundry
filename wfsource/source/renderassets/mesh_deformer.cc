@@ -339,7 +339,10 @@ public:
     }
     DeformStatus Pose(const DeformTarget& t, const float* c, int n) override
     {
-        if (_posed && std::equal(c, c + n, _last)) return DeformStatus::Ok;
+        if (_posed && std::equal(c, c + n, _last)) {
+            if (!_evaluator.MovesVertices()) t.object.AllowStaticBakeAgain();   // taking the list marked it deformed
+            return DeformStatus::Ok;
+        }
         _evaluator.Evaluate(c);
         const std::vector<uint8_t>& colours = _evaluator.Colours();
         for (int i = 0; i < t.count; ++i)
@@ -351,6 +354,7 @@ public:
             RecomputeFaceNormals(t);
         }
         t.object.RefreshPrimitives();
+        if (!_evaluator.MovesVertices()) t.object.AllowStaticBakeAgain();   // a tint actor: back to baked buffers
         std::copy(c, c + n, _last);
         _posed = true;
         return DeformStatus::Ok;
