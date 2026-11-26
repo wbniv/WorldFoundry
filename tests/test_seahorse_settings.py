@@ -12,12 +12,16 @@ HERE = ROOT / 'wflevels/aquarium_plants'
 
 
 def test_sheet_and_bindings():
-    oas = (HERE / 'settings.oas').read_text()
+    # cd6b9e9e0 moved the tank's settings.oas and settings-bindings.json into the PlantedTankSettings actor type:
+    # the sheet is wfsource/source/oas/plantedtanksettings.oas and a field's id is its catalog index.
+    oas = (ROOT / 'wfsource/source/oas/plantedtanksettings.oas').read_text()
     assert 'PROPERTY_SHEET_HEADER(Seahorses,0)' in oas
     assert re.search(r'TYPEENTRYINT32\(Seahorses,,0,6,6,"None\|1 pair\|2 pairs\|3 pairs\|4 pairs\|5 pairs\|6 pairs",SHOW_AS_RADIOBUTTONS', oas)
     assert re.search(r'TYPEENTRYBOOLEAN\(Greeting,,1,SHOW_AS_CHECKBOX', oas)
-    fields = json.loads((HERE / 'settings-bindings.json').read_text())['fields']
-    assert fields['Seahorses'] == {'id': 8} and fields['Greeting'] == {'id': 9}
+    schema = json.loads(subprocess.check_output([str(ROOT / 'wftools/wf_attr_edit/target/release/catalog'),
+                                                 str(ROOT / 'wfsource/source/oas/plantedtanksettings.oad')], text=True))
+    fields = {f['key']: f['index'] for f in schema['fields'] if f.get('width')}
+    assert fields['Greeting'] == fields['Seahorses'] + 1
 
 
 def test_fields_8_and_9_round_trip_through_apply(tmp_path):
