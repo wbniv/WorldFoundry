@@ -4,6 +4,13 @@
     python3 scripts/device_native_tests.py build
     python3 scripts/device_native_tests.py run --device chromecast-test-01 [--duration 90]
     python3 scripts/device_native_tests.py collect --device chromecast-test-01 --wf-log PATH
+    python3 scripts/device_native_tests.py run --arm32 armv8 --device chromecast-test-02
+
+`--arm32 armv8` (build and run) compiles the armeabi-v7a library for ARMv8 32-bit instead of the NDK's
+ARMv7 default (docs/plans/2026-11-26-armv8-32bit-build.md): the APK is frozen as wf-native-tests-armv8-<sha16>.apk
+and the results land in build/device-native-tests/<device>-armv8/, so
+`tests/forth_math_agreement.py --target <device>-armv8` compares that build with the others. It is a
+measurement option; the shipped engine build is unchanged.
 
 Plan: docs/plans/2026-11-26-device-native-test-route.md. `build` makes the WF Native Tests APK
 (android/native-tests: a NativeActivity with no Java) in the linux-test container, with the Android SDK
@@ -49,6 +56,8 @@ APP = "wf-native-tests"
 PACKAGE = "org.worldfoundry.nativetests"
 ACTIVITY = "android.app.NativeActivity"
 MIN_FREE_BYTES = 6 * 1024**3
+# The armeabi-v7a code generation: the NDK default (ARMv7-A, VFPv3-D16 + NEON) or ARMv8 32-bit (vrint, vfma).
+ARM32_FLAGS = {"armv7": "", "armv8": "-march=armv8-a -mfpu=neon-fp-armv8 -mfloat-abi=softfp"}
 REFUSED_DEVICES = {"phone-pixel-8-pro": "Will's daily phone: never without his go-ahead"}
 
 START = re.compile(r"^=== wf-native-tests (\d+) start abi=(\S+)$")
@@ -167,7 +176,7 @@ rm -rf "$work/obj" "$work/apk"
 mkdir -p "$work/apk"
 for abi in {abis}; do
     case $abi in
-        armeabi-v7a) triple=armv7a-linux-androideabi{api}; arch=(-mthumb) ;;
+        armeabi-v7a) triple=armv7a-linux-androideabi{api}; arch=(-mthumb {arm32}) ;;
         arm64-v8a)   triple=aarch64-linux-android{api};    arch=() ;;
     esac
     obj=$work/obj/$abi; mkdir -p "$obj" "$work/apk/lib/$abi"
@@ -204,7 +213,12 @@ def free_bytes() -> int:
     return shutil.disk_usage(ROOT).free
 
 
-def build() -> Path:
+def label(device: str, arm32: str = "armv7") -> str:
+    """The results directory name of a device run: the device, or <device>-armv8 for the ARMv8 32-bit build."""
+    return device if arm32 == "armv7" else f"{device}-{arm32}"
+
+
+def build(arm32: str = "armv7") -> Path:
     if free_bytes() < MIN_FREE_BYTES:
         sys.exit(f"build: only {free_bytes() / 1024**3:.1f} GB free on the disk; stopping below 6 GB")
     for need in (SDK / "ndk" / NDK_VERSION, SDK / "build-tools" / BUILD_TOOLS, SDK / "platforms" / PLATFORM):
@@ -214,7 +228,7 @@ def build() -> Path:
     KEY.parent.mkdir(parents=True, exist_ok=True)
     generate(WORK)
     script = CONTAINER_SCRIPT.format(ndk=NDK_VERSION, build_tools=BUILD_TOOLS, platform=PLATFORM, api=API,
-                                     abis=" ".join(ABIS))
+                                     abis=" ".join(ABIS), arm32=ARM32_FLAGS[arm32])
     env = dict(os.environ, WF_CONTAINER_MOUNTS=f"{SDK}:/opt/android-sdk:ro {KEY.parent}:/keys",
                WF_CONTAINER_MEMORY=os.environ.get("WF_CONTAINER_MEMORY", "4g"))
     if subprocess.run([str(ROOT / "scripts/in-linux-container.sh"), "bash", "-c", script], env=env).returncode:
@@ -222,7 +236,8 @@ def build() -> Path:
     signed = WORK / "signed.apk"
     digest = hashlib.sha256(signed.read_bytes()).hexdigest()
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
-    frozen = ARTIFACTS / f"wf-native-tests-{digest[:16]}.apk"
+    prefix = "wf-native-tests-" if arm32 == "armv7" else f"wf-native-tests-{arm32}-"
+    frozen = ARTIFACTS / f"{prefix}{digest[:16]}.apk"
     shutil.copyfile(signed, frozen)
     sources = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
                for p in [*sorted(SOURCE.glob("*")), ROOT / "tests/forth_math_dump.cpp", ROOT / "tests/forth_math_vm_cost.py",
@@ -230,8 +245,9 @@ def build() -> Path:
                          ROOT / "engine/stubs/forth_math_zforth.hpp", ROOT / "engine/stubs/scripting_zforth.cc"]
                if p.is_file()}
     receipt = {"apk": str(frozen), "sha256": digest, "package": PACKAGE, "activity": ACTIVITY, "app": APP,
-               "abis": list(ABIS), "ndk": NDK_VERSION, "sources": sources}
-    (RESULTS / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
+               "abis": list(ABIS), "ndk": NDK_VERSION, "arm32": arm32, "armeabi_v7a_flags": ARM32_FLAGS[arm32],
+               "sources": sources}
+    (RESULTS / ("receipt.json" if arm32 == "armv7" else f"receipt-{arm32}.json")).write_text(json.dumps(receipt, indent=2) + "\n")
     print(f"build: {frozen.relative_to(ROOT)} ({', '.join(ABIS)}), sha256 {digest}")
     return frozen
 
@@ -248,12 +264,13 @@ def coordinator(operation: str, **env: str) -> subprocess.CompletedProcess:
     return r
 
 
-def run(device: str, duration: int, apk: Path | None, approved: str | None = None) -> int:
+def run(device: str, duration: int, apk: Path | None, approved: str | None = None, arm32: str = "armv7") -> int:
     if device in REFUSED_DEVICES:
         if not approved:
             sys.exit(f"run: {device}: {REFUSED_DEVICES[device]} (pass --approved \"<who, date, words>\" to record it)")
         print(f"run: {device}: approved: {approved}")
-    apk = apk or build()
+    apk = apk or build(arm32)
+    name = label(device, arm32)
     r = coordinator("app-register", app=APP, apk=str(apk), activity=ACTIVITY, replace="true")
     if r.returncode:
         sys.exit(f"run: app-register failed (rc={r.returncode})")
@@ -268,17 +285,17 @@ def run(device: str, duration: int, apk: Path | None, approved: str | None = Non
     if not job:
         sys.exit("run: the check was not accepted")
     job = job.group(1)
-    out = RESULTS / device / job
+    out = RESULTS / name / job
     e = coordinator("evidence", job=job, out=str(out))
     logs = sorted(out.rglob("wf.log"))
     if e.returncode or not logs:
         sys.exit(f"run: no wf.log in the evidence of {job} (check rc={r.returncode}, evidence rc={e.returncode})")
     print(f"evidence: {logs[0].relative_to(ROOT)} ({logs[0].stat().st_size:,} bytes)")
     if approved:
-        (RESULTS / device).mkdir(parents=True, exist_ok=True)
-        (RESULTS / device / "approval.txt").write_text(f"{approved}\njob {job}\n")
+        (RESULTS / name).mkdir(parents=True, exist_ok=True)
+        (RESULTS / name / "approval.txt").write_text(f"{approved}\njob {job}\n")
     try:
-        collect(device, logs[0])
+        collect(name, logs[0])
     except CollectError as error:
         print(f"collect: {error}", file=sys.stderr)
         return 1
@@ -288,7 +305,8 @@ def run(device: str, duration: int, apk: Path | None, approved: str | None = Non
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="command", required=True)
-    sub.add_parser("build", help="build the WF Native Tests APK in the container")
+    b = sub.add_parser("build", help="build the WF Native Tests APK in the container")
+    b.add_argument("--arm32", choices=list(ARM32_FLAGS), default="armv7", help="armeabi-v7a code generation (default the NDK's ARMv7)")
     c = sub.add_parser("collect", help="check and split a WF Native Tests wf.log")
     c.add_argument("--device", required=True)
     c.add_argument("--wf-log", type=Path, required=True)
@@ -297,10 +315,11 @@ def main() -> int:
     r.add_argument("--device", required=True)
     r.add_argument("--duration", type=int, default=30, help="the check's wait, seconds (a deadline; the done line is the signal)")
     r.add_argument("--apk", type=Path, help="an already built APK under build/coordinator-artifacts")
+    r.add_argument("--arm32", choices=list(ARM32_FLAGS), default="armv7", help="armeabi-v7a code generation (default the NDK's ARMv7)")
     r.add_argument("--approved", help="the recorded go-ahead for a refused device, e.g. \"Will, 2026-11-26: run pixel\"")
     args = ap.parse_args()
     if args.command == "build":
-        build()
+        build(args.arm32)
         return 0
     if args.command == "collect":
         try:
@@ -309,7 +328,7 @@ def main() -> int:
             print(f"collect: {error}", file=sys.stderr)
             return 1
         return 0
-    return run(args.device, args.duration, args.apk, args.approved)
+    return run(args.device, args.duration, args.apk, args.approved, args.arm32)
 
 
 if __name__ == "__main__":

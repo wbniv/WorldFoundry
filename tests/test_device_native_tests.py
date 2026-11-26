@@ -54,3 +54,23 @@ def test_broken_logs_are_refused(tmp_path, text, message):
 def test_run_refuses_the_daily_phone():
     with pytest.raises(SystemExit, match="daily phone"):
         dnt.run("phone-pixel-8-pro", 90, None)
+
+
+def script_for(arm32):
+    return dnt.CONTAINER_SCRIPT.format(ndk=dnt.NDK_VERSION, build_tools=dnt.BUILD_TOOLS, platform=dnt.PLATFORM,
+                                       api=dnt.API, abis=" ".join(dnt.ABIS), arm32=dnt.ARM32_FLAGS[arm32])
+
+
+def test_arm32_armv8_changes_only_the_armeabi_v7a_flags():
+    """--arm32 armv8 (docs/plans/2026-11-26-armv8-32bit-build.md) adds the ARMv8 flags to armeabi-v7a, nothing else."""
+    v7, v8 = script_for("armv7"), script_for("armv8")
+    v7a = next(line for line in v8.splitlines() if line.strip().startswith("armeabi-v7a)"))
+    assert "-march=armv8-a -mfpu=neon-fp-armv8 -mfloat-abi=softfp" in v7a
+    assert "-march" not in next(line for line in v8.splitlines() if line.strip().startswith("arm64-v8a)"))
+    assert "-march" not in v7
+    assert [a for a in v7.splitlines() if "armeabi-v7a)" not in a] == [b for b in v8.splitlines() if "armeabi-v7a)" not in b]
+
+
+def test_arm32_results_have_their_own_directory():
+    assert dnt.label("chromecast-test-02") == "chromecast-test-02"
+    assert dnt.label("chromecast-test-02", "armv8") == "chromecast-test-02-armv8"

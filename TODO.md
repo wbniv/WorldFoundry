@@ -13,7 +13,7 @@
 
 
 
-- [wip T4] **Measure an ARMv8 32-bit build for the Chromecasts.** Both Chromecasts have ARMv8 cores (Cortex-A35, A55) but run our `armeabi-v7a` build (ARMv7 VFPv3-D16 + NEON), so `vrint` rounding and `vfma` never reach Jolt, the deformers or the Forth words. Build a variant with `-march=armv8-a -mfpu=neon-fp-armv8`, compare FPS on cast1 and cast2, and decide; it drops true ARMv7 devices. T4: build-wide, with compatibility judgment. [Math plan, Q2](docs/plans/2026-11-26-forth-math-words.md) <!-- agent:ac6555f887933f2db -->
+- [T4] **Decide: ARMv8 32-bit build for the Chromecasts (measured 2026‑11‑27).** The `-march=armv8-a -mfpu=neon-fp-armv8` `armeabi-v7a` build swaps nine libm rounding calls for `vrint`, fuses about 11,000 multiply-adds (`vfma`), and keeps all 36 Forth words bit-identical with the PC on both casts. Lionfish FPS: cast1 47.06 → 47.24 (+0.4 %, inside noise), cast2 30.01 → 30.03 (GPU-bound at native 4K). None of our devices would break; any ARMv7 phone or box would. Recommendation: **keep** the ARMv7 build; a run-time split if a CPU-bound scene ever needs it. Will decides: keep, switch or split. [Plan and results](docs/plans/2026-11-26-armv8-32bit-build.md)
 
 - [verify T3] **Lava lamp A3 poster (Phase P).** Built 2026‑11‑27 as a marked review draft (7 panels, 32 claims, 6 patents with QR codes, the Cycles hero, the level's Forth); `task poster-lava-lamp`, 16 tests pass. Left: Will's visual review, then set "Poster visual review: approved" in docs/reference/lava-lamp-research.md, rebuild without `--draft` and run verification 10. [Plan](docs/plans/2026-11-26-lava-lamp.md#poster-record-2026-11-27)
 
