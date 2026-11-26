@@ -125,13 +125,11 @@ def show_expr(d, s):
     return ' '.join(f'{d} sh-digit {n} =' for n in valid) + ' ' + ' |' * (len(valid)-1)
 
 lines = [r'\ Anamorphic Shards: wall-clock-driven visibility and camera.',
-         ': sh-frac begin dup 1 >= if 1 - 0 else 1 then until ;',
-         ': sh-floor dup sh-frac - ;',
-         ': sh-mod over over / sh-floor * - ;',
+         ': sh-mod over over / floor * - ;',            # floored, with the engine's floor (docs/forth-math-words.md)
          ': sh-digit ( k -- d )',
-         '  dup 0 = if drop INDEXOF_WALL_HOUR read-mailbox 10 / sh-floor else',
+         '  dup 0 = if drop INDEXOF_WALL_HOUR read-mailbox 10 / floor else',
          '  dup 1 = if drop INDEXOF_WALL_HOUR read-mailbox 10 sh-mod else',
-         '  dup 2 = if drop INDEXOF_WALL_MINUTE read-mailbox 10 / sh-floor else',
+         '  dup 2 = if drop INDEXOF_WALL_MINUTE read-mailbox 10 / floor else',
          '  drop INDEXOF_WALL_MINUTE read-mailbox 10 sh-mod then then then ;',
          ': sh-tick',
          f'  {indices["AnamorphicShardsSettings"]} {drift["index"]} property@ if 0 <> else drop 0 then',
