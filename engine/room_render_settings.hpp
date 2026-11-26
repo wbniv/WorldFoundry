@@ -45,4 +45,25 @@ inline float aspectSetting(Registry& registry, const char* key, bool& found, std
     }
     return 0.0f;
 }
+
+// LevelRenderSettings "Maximum surface height": draw at most this many rows (the compositor scales the picture up
+// to the display), 0 for the display's own size. Android TV only (dream_host.cc); a level whose fill rate cannot
+// hold a 4K TV's refresh asks for 1080. docs/plans/2026-11-26-lava-lamp.md, build record.
+inline int maximumSurfaceHeight(Registry& registry, std::string& error) {
+    const Object* settings = registry.schema("LevelRenderSettings");
+    if (!settings) return 0;
+    for (const Field& field : settings->fields) {
+        if (field.key != "Maximum surface height") continue;
+        const std::string* value = settings->get(field.id);
+        if (!value || value->empty()) return 0;
+        char* end = nullptr;
+        const long h = std::strtol(value->c_str(), &end, 10);
+        if (end == value->c_str() || *end != '\0' || h < 0 || h > 4320) {
+            error = "LevelRenderSettings: Maximum surface height must be 0 to 4320, got " + *value;
+            return 0;
+        }
+        return int(h);
+    }
+    return 0;
+}
 }

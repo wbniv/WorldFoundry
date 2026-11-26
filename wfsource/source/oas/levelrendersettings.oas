@@ -6,6 +6,7 @@ TYPEHEADER(Level Render Settings,LevelRenderSettings)
     TYPEENTRYBOOLEAN(Stained glass light,,0,SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"Enable the stained glass light")
     TYPEENTRYFIXED32(Authored aspect,,0,6553600,0,SHOW_AS_NUMBER,"Authored camera aspect; zero uses the default")
     TYPEENTRYFIXED32(Maximum aspect,,0,6553600,0,SHOW_AS_NUMBER,"Maximum camera aspect; zero disables the cap")
+    TYPEENTRYINT32(Maximum surface height,,0,4320,0,"",SHOW_AS_NUMBER,"Draw at most this many rows on an Android TV and let it scale up; zero draws at the display's size")
     PROPERTY_SHEET_FOOTER
 	@include global_settings.inc
 TYPEFOOTER

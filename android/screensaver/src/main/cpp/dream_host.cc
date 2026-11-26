@@ -301,8 +301,32 @@ static void pumpTouch(int surfaceW, int surfaceH) {
     }
 }
 
+extern "C" int WFMaximumSurfaceHeight();   // engine (game/level.cc): the level's cap on rows, 0 for none
+
+// A level that asks for fewer rows than the display (LevelRenderSettings "Maximum surface height": the lava lamp
+// draws a 4K TV at 1080) gets a smaller buffer the compositor scales up, as SurfaceHolder.setFixedSize would; the
+// size before the cap comes back when a level without one runs. docs/plans/2026-11-26-lava-lamp.md.
+static int cappedFromWidth = 0, cappedFromHeight = 0, appliedCap = 0;
+static void applySurfaceCap(ANativeWindow* window) {
+    const int cap = WFMaximumSurfaceHeight();
+    if (cap == appliedCap) return;
+    const int width = ANativeWindow_getWidth(window), height = ANativeWindow_getHeight(window);
+    if (cap > 0) {
+        if (appliedCap == 0) { cappedFromWidth = width; cappedFromHeight = height; }
+        if (cappedFromHeight <= cap) { appliedCap = cap; return; }    // the display is no taller than the cap
+        const int w = (cappedFromWidth * cap + cappedFromHeight / 2) / cappedFromHeight;
+        ANativeWindow_setBuffersGeometry(window, w, cap, 0);
+        __android_log_print(ANDROID_LOG_INFO, "wf_dream", "surface capped: %dx%d -> %dx%d", cappedFromWidth, cappedFromHeight, w, cap);
+    } else {
+        ANativeWindow_setBuffersGeometry(window, cappedFromWidth, cappedFromHeight, 0);
+        __android_log_print(ANDROID_LOG_INFO, "wf_dream", "surface cap released: %dx%d", cappedFromWidth, cappedFromHeight);
+    }
+    appliedCap = cap;
+}
+
 extern "C" void WFAndroidPumpEvents() {
     if (activeWindow) {
+        applySurfaceCap(activeWindow);
         const int width = ANativeWindow_getWidth(activeWindow);
         const int height = ANativeWindow_getHeight(activeWindow);
         if (width > 0 && height > 0 && (width != surfaceWidth || height != surfaceHeight)) {
@@ -515,6 +539,7 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
     menuMode.store(menu);
     if (WFAndroidEglInit(window)) {
         activeWindow = window;
+        appliedCap = 0;                // a new window starts at its own size: apply the level's cap again
         surfaceWidth = ANativeWindow_getWidth(window);
         surfaceHeight = ANativeWindow_getHeight(window);
         windowReady.store(true);
