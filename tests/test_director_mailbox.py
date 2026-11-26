@@ -12,6 +12,9 @@ Verifies per all 16 rounds:
 
 Run with the game live on --debug-port 7778:
     python3 tests/test_director_mailbox.py
+
+A script, not a pytest suite: the per-round check is run_round, not test_round, so pytest does not collect
+it and fail on a missing 'cli' fixture (triage 2026-11-26).
 """
 from __future__ import annotations
 import os
@@ -269,7 +272,7 @@ def check_enemy_mix(cli: BridgeClient, level: int) -> None:
               f"CE2_active={egg2}")
 
 
-def test_round(cli: BridgeClient, r: int) -> None:
+def run_round(cli: BridgeClient, r: int) -> None:
     level = r // 4            # 0=L1, 1=L2, 2=L3, 3=L4
     is_two_step = (level % 2) == 1   # L2 and L4
     level_name = f"L{level+1}R{(r%4)+1}"
@@ -332,7 +335,7 @@ def main() -> None:
 
     # ── Cube-cycle + palette: all 16 rounds ────────────────────────────────
     for r in range(16):
-        test_round(cli, r)
+        run_round(cli, r)
 
     # ── Enemy mix: one check per level boundary ─────────────────────────────
     for r, level in [(0, 0), (4, 1), (8, 2), (12, 3)]:
