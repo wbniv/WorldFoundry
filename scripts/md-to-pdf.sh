@@ -362,6 +362,11 @@ for line in lines:
         close_table()
 
     # Blockquotes (with optional GitHub-style alert callouts: > [!NOTE], etc.)
+    # A bare '>' (or '> ', stripped to '>') inside a quote is an empty continuation line: a paragraph break
+    # within the quote, never its end (tests/test_md_to_pdf_alerts.py::test_bare_gt_continues_alert).
+    if stripped == '>' and in_blockquote:
+        flush_bq_para()
+        continue
     if stripped.startswith('> '):
         flush_para(); close_lists(); close_table()
         body = stripped[2:]

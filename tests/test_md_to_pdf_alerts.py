@@ -55,8 +55,8 @@ def test_important_renders_as_alert_div(rendered_html: str) -> None:
     assert "Important</p>" in body
     assert "This is important." in body
     assert "It spans two lines." in body
-    # Two body <p>s (one per line) plus the title <p>
-    assert body.count("<p>") == 2
+    # The two source lines reflow into one body <p> (d82372d4e: multi-line blockquotes reflow), plus the title <p>
+    assert body.count("<p>") == 1 and "This is important. It spans two lines." in body
     assert "[!IMPORTANT]" not in rendered_html
 
 
