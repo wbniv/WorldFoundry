@@ -3,7 +3,7 @@ TYPEHEADER(Lighthouse Settings,LighthouseSettings)
 	@include settings.inc
 	@include clocksettings.inc
 	PROPERTY_SHEET_HEADER(Sea,0)
-	TYPEENTRYINT32(Water motion,,0,1,1,"Off|On",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Animate the surface of the sea")
+	TYPEENTRYINT32(Water motion,,0,1,1,"",SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"Animate the surface of the sea")
 	PROPERTY_SHEET_FOOTER
 	@include global_settings.inc
 TYPEFOOTER

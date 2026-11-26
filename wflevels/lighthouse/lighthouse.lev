@@ -1117,7 +1117,7 @@
 		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Camera drift" } { 'DATA' 0l } { 'STR' "Slow" } }  //Slow|Off
-		{ 'I32' { 'NAME' "Water motion" } { 'DATA' 1l } { 'STR' "On" } }  //Off|On
+		{ 'I32' { 'NAME' "Water motion" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'I32' { 'NAME' "Show framerate" } { 'DATA' 0l } { 'STR' "0" } }
 	}
 	{ 'OBJ' 
