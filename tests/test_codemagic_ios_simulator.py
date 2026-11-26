@@ -104,7 +104,14 @@ shift
 case "$1" in
   list) if [ "${2:-}" = -j ]; then cat "$STUB_DEVICES"; else echo "(device list)"; fi ;;
   launch)
-    for a in "$@"; do case "$a" in --stdout=*) echo "engine stdout" > "${a#--stdout=}";; esac; done
+    # The engine runs with WF_FRAME_RATE_CHECKS=1 and the step checks its log with tests/check_frame_rate_log.py
+    # --resume (dd7388aec): a zero baseline and a positive rate, then both again after the Preferences round trip.
+    for a in "$@"; do case "$a" in --stdout=*)
+      printf 'engine stdout\nFPS CHECK PASS backend=metal raw=0 script=0 generation=1\nFPS CHECK PASS backend=metal raw=59.9 script=59.9 generation=1\n' > "${a#--stdout=}"
+      echo "${a#--stdout=}" > "$STUB_CALLS.stdout";; esac; done
+    if [ "${3:-}" = org.worldfoundry.wf-game ] && [ "${2:-}" != --terminate-running-process ] && [ -s "$STUB_CALLS.stdout" ]; then
+      printf 'FPS CHECK PASS backend=metal raw=0 script=0 generation=2\nFPS CHECK PASS backend=metal raw=60 script=60 generation=2\n' >> "$(cat "$STUB_CALLS.stdout")"
+    fi
     [ -n "${STUB_LAUNCH_FAIL:-}" ] && exit 1
     echo "org.worldfoundry.wf-game: $STUB_PID" ;;
   io) udid="$2"; out="$4"
