@@ -75,7 +75,7 @@ OBJECTSHEADER
         OBJECTENTRY(BambooPondSettings,0)
         OBJECTENTRY(TourbillonSettings,0)
         OBJECTENTRY(MetronomeForestSettings,0)
-        OBJECTENTRY(LavaLampDigitsSettings,0)
+        OBJECTENTRY(LavaLampSettings,0)
         OBJECTENTRY(LighthouseSettings,0)
         OBJECTENTRY(MoonLanternSettings,0)
         OBJECTENTRY(MirrorHazeSettings,0)

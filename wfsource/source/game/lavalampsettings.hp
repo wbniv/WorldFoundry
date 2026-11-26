@@ -1,0 +1,15 @@
+#ifndef _LavaLampSettings_HP
+#define _LavaLampSettings_HP
+#include "actor.hp"
+class LavaLampSettings : public Actor {
+public:
+    LavaLampSettings(const SObjectStartupData* startupData);
+    virtual ~LavaLampSettings() {}
+    virtual EActorKind kind() const;
+    virtual void update();
+    virtual bool CanRender() const;
+    virtual bool CanUpdate() const;
+    virtual void OnPropertiesChanged(const std::uint32_t*, size_t) override {}
+};
+Actor* OadLavaLampSettings(const SObjectStartupData* startupData);
+#endif

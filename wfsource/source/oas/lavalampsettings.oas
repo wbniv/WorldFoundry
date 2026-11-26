@@ -1,0 +1,26 @@
+@*============================================================================
+@* lavalampsettings.oas: the lava lamp clock's level settings
+@*============================================================================
+@*
+@* A settings holder (settings.inc) with the clocks' shared Clock sheet
+@* (clocksettings.inc), the Lava lamp sheet and the global Display sheet, so the
+@* form's rail reads Clock, Lava lamp, Display. The director reads the three
+@* Lava lamp fields with property@ every frame and applies them when they
+@* change (plan docs/plans/2026-11-26-lava-lamp.md, D7, D8, Q2): Lava color and
+@* Water color recolour the wax, the pool, the liquid, the glass, the wall glow
+@* and the table light through the Morph deformer; Time display Off hides the
+@* numerals and leaves the faint starlight holes.
+@*
+@* Help strings must not contain commas: prep splits macro arguments on them.
+@*============================================================================
+@* Live settings for the lava lamp clock. docs/plans/2026-11-26-lava-lamp.md
+TYPEHEADER(Lava Lamp Settings,LavaLampSettings)
+	@include settings.inc
+	@include clocksettings.inc
+	PROPERTY_SHEET_HEADER(Lava lamp,0)
+	TYPEENTRYINT32(Lava color,,0,7,1,"Red|Orange|Yellow|Pink|Purple|Turquoise|Green|White",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Wax color while this level is loaded")
+	TYPEENTRYINT32(Water color,,0,7,4,"Clear|Yellow|Orange|Pink|Violet|Blue|Turquoise|Green",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Liquid color while this level is loaded")
+	TYPEENTRYINT32(Time display,,0,1,0,"Base|Off",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Show the time in the base of the lamp; Off leaves just the lava lamp")
+	PROPERTY_SHEET_FOOTER
+	@include global_settings.inc
+TYPEFOOTER

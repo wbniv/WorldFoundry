@@ -69,7 +69,7 @@ int collisionTable[] =
         	0,	// BambooPondSettings
         	0,	// TourbillonSettings
         	0,	// MetronomeForestSettings
-        	0,	// LavaLampDigitsSettings
+        	0,	// LavaLampSettings
         	0,	// LighthouseSettings
         	0,	// MoonLanternSettings
         	0,	// MirrorHazeSettings

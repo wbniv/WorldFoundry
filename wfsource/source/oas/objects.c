@@ -205,9 +205,9 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
 			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
 				object = OadMetronomeForestSettings(startData); 
 			break;
-        	case Actor::LavaLampDigitsSettings_KIND:
+        	case Actor::LavaLampSettings_KIND:
 			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
-				object = OadLavaLampDigitsSettings(startData); 
+				object = OadLavaLampSettings(startData); 
 			break;
         	case Actor::LighthouseSettings_KIND:
 			if(!(startData->objectData->oadFlags & (1<<OADFLAG_TEMPLATE_OBJECT))) 
@@ -440,8 +440,8 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
         	case Actor::MetronomeForestSettings_KIND:
 			object = OadMetronomeForestSettings(startData); 
 			break;
-        	case Actor::LavaLampDigitsSettings_KIND:
-			object = OadLavaLampDigitsSettings(startData); 
+        	case Actor::LavaLampSettings_KIND:
+			object = OadLavaLampSettings(startData); 
 			break;
         	case Actor::LighthouseSettings_KIND:
 			object = OadLighthouseSettings(startData); 

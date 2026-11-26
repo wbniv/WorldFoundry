@@ -67,7 +67,7 @@ enum EActorKind {
         BambooPondSettings_KIND,
         TourbillonSettings_KIND,
         MetronomeForestSettings_KIND,
-        LavaLampDigitsSettings_KIND,
+        LavaLampSettings_KIND,
         LighthouseSettings_KIND,
         MoonLanternSettings_KIND,
         MirrorHazeSettings_KIND,
