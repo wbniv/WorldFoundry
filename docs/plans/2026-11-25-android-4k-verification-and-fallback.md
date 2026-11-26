@@ -43,3 +43,7 @@ Pixel Clocks launch J‑7c18271672cf completed with a phone-sized surface. Autom
 ## Physical-detail observation
 
 On 26 November, Homeboard 4K Tester job J‑2ba2fe642904 ran on cast2. Its [capture](../diagnostics/android-4k-baseline-2026-11-25/cast2-physical-final/screenshot.png) reports a 3840×2160 surface and 3840×2160@60 output. Will observed that the finest lines looked gray. This is not proof that individual one-pixel black and white lines reached the panel distinctly; it also does not identify whether the cause is rendering, capture, TV processing, or visual resolution. Record as inconclusive rather than a native-pixel pass.
+
+## Pixel touch verification
+
+After pairing and unlocking the Pixel, touch job J‑94b372597b17 completed using the observed landscape window bounds (113, 0, 2244, 1008). The [after capture](../diagnostics/android-4k-baseline-2026-11-25/pixel-touch-pass/touch-frame-002.png) shows Minute Machine after tapping its chooser row; the coordinator recorded both touch edges. This verifies that selection in this landscape configuration; rotation and settings-touch coverage remain open.
