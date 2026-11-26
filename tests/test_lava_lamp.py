@@ -46,7 +46,7 @@ def test_exported_blob_keeps_every_morph_target():
     iff = _mesh("blob")
     names, pos, shade, count = mrph_chunk.decode(mrph_chunk.find_chunk(iff, b"MRPH"))
     base = _vertices(iff)
-    assert names == list(shapes.BLOB_TARGETS) and count == len(base) and count >= 600
+    assert names == list(shapes.BLOB_TARGETS) and count == len(base) and count >= 300
     worst = 0.0
     for t, (name, fn) in enumerate(shapes.BLOB_TARGETS.items()):
         for i, b in enumerate(base):

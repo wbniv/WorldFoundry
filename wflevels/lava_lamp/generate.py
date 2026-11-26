@@ -152,7 +152,7 @@ def uv_sphere(seg=32, rings=20):
 
 def blob_mesh():
     """The unit wax blob (radius 1, centred: a sphere may rest on its middle) and its six morph targets."""
-    verts, faces = uv_sphere()
+    verts, faces = uv_sphere(24, 14)     # 314 vertices: 610 cost cast1 its last frames (build record)
     keys = {name: [fn(v) for v in verts] for name, fn in shapes.BLOB_TARGETS.items()}
     shades = [shapes.blob_shade(v) for v in verts]
     return mesh('blob', verts, faces, shades, mat='wax', keys=keys)

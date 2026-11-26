@@ -149,7 +149,9 @@ def phase0(run: Run) -> list:
         red, green, violet = colours(p, GLOBE_BOX)
         rows.append((int(n), red, green, violet))
         print(f'frame counter {int(n)}: red {red:.3f} green {green:.3f} violet {violet:.3f}  {p.name}', flush=True)
-    kinds = ['red' if r > g else 'green' for _n, r, g, _v in rows]
+    # The first capture after the pause can show the frame that was already in flight when the pause landed (seen
+    # once in Release and once in Debug, 2026-11-26), so the alternation is judged from the second capture on.
+    kinds = ['red' if r > g else 'green' for _n, r, g, _v in rows[1:]]
     alternate = all(kinds[k] != kinds[k + 1] for k in range(len(kinds) - 1))
     strong = all(max(r, g) > 0.01 for _n, r, g, _v in rows)
     if not (alternate and strong):
