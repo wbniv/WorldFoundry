@@ -45,6 +45,10 @@ extern LMalloc testMemory;
 #include <vector>
 #include "gfx/glpipeline/backend_factory.cc"
 LMalloc testMemory;
+// The E3 surface-loss test hooks (b99458b12) live in static_mesh.cc and backend_modern.cc, which need a GL context:
+// no hook asks for a simulated loss here.
+bool StaticMeshEndFrame() { return false; }
+void ModernBackendSimulateSurfaceLoss() {}
 struct Recorded { float x,z,opacity,ambient,fog; bool prelit,modulate,palette; unsigned dark,light; };
 struct Backend : RendererBackend {
  std::vector<Recorded> draws;
