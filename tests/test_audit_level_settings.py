@@ -9,7 +9,10 @@ spec.loader.exec_module(audit)
 
 
 def test_rosters_follow_the_manifests():
-    assert audit.roster("clocks")[:3] == ["minute_machine", "tide_harbour", "cuckoo_village"]
+    # 7ed6d60c5 replaced the clocks manifest's append-only rule (the saved Dream choice is the id, not the index) and put
+    # the new clocks before Cuckoo Village; the first two are unchanged.
+    clocks = audit.roster("clocks")
+    assert clocks[:2] == ["minute_machine", "tide_harbour"] and "cuckoo_village" in clocks
     tanks = audit.roster("aquarium")
     # Append-only: the Discus tank (2026-11-22) is the twelfth, after Sea Stars.
     assert len(tanks) == 12 and tanks[0] == "aquarium" and tanks[-2:] == ["aquarium_sea_stars", "aquarium_discus"]
@@ -22,7 +25,9 @@ def test_sea_stars_has_all_six_pieces():
 
 
 def test_a_level_with_no_settings_object_reports_nothing():
-    r = audit.audit("aquarium_betta")
+    # aquarium_betta was this level until 8c78b004a gave every reachable level the global Level Settings holder
+    # ("Show framerate"); the primitive test level cube has no settings object at all.
+    r = audit.audit("cube")
     assert r["type_name"] is None and not any(r[k] for k in audit.CHECKS)
 
 

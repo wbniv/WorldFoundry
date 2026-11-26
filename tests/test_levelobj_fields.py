@@ -139,9 +139,15 @@ def test_old_level_decodes_off_without_reading_past_its_payload(probe, tmp_path)
 
 
 def test_level_before_runtime_editing_has_nothing_editable(probe, tmp_path):
-    """A level compiled before the Runtime Editing appends loads unchanged, with nothing editable."""
+    """A level compiled before the Runtime Editing appends loads unchanged, with nothing editable.
+
+    PREWARM_LEVEL was such a level until it was rebuilt with the offsets (288b73df2), and since 561119f5b levcomp
+    gives every level a settings holder, so none can be compiled that way now. The fields are appended (see
+    test_field_is_appended_after_the_original_layout), so the payload cut back to its first PREWARM_BYTES is
+    byte for byte what that compiler wrote."""
     payload = level_object_payload(PREWARM_LEVEL.read_bytes())
-    assert len(payload) == PREWARM_BYTES
+    assert len(payload) >= PREWARM_BYTES
+    payload = payload[:PREWARM_BYTES]
     checked = run(probe, "decode", payload, tmp_path)
     assert checked.returncode == 0, checked.stderr
     assert checked.stdout.strip() == f"payload-bytes={PREWARM_BYTES} prewarm=0 {NOTHING_EDITABLE}"
@@ -159,10 +165,13 @@ def test_recompiled_level_round_trips_the_field(probe, tmp_path):
         payload = level_object_payload(compile_level(text, work))
         assert len(payload) == CURRENT_BYTES, label
         assert payload[:ORIGINAL_BYTES] == old, f"{label}: original Level Object bytes changed"
-        assert payload[PREWARM_BYTES:] == b"\xff" * 12, f"{label}: nothing editable must write -1 offsets"
+        # mm_practice authors no settings object; since 561119f5b levcomp adds the default LevelSettings holder,
+        # so the three Runtime Editing offsets point at it instead of being -1.
+        offsets = struct.unpack_from("<3i", payload, PREWARM_BYTES)
+        assert all(o > 0 for o in offsets), (label, offsets)
         decoded = run(probe, "decode", payload, tmp_path)
         assert decoded.returncode == 0, decoded.stderr
         results[label] = decoded.stdout.strip()
-    assert results == {"absent": f"payload-bytes={CURRENT_BYTES} prewarm=0 {NOTHING_EDITABLE}",
-                       "false": f"payload-bytes={CURRENT_BYTES} prewarm=0 {NOTHING_EDITABLE}",
-                       "true": f"payload-bytes={CURRENT_BYTES} prewarm=1 {NOTHING_EDITABLE}"}
+    assert results["absent"].startswith(f"payload-bytes={CURRENT_BYTES} prewarm=0 ") and "has-editable=1" in results["absent"]
+    assert results["false"] == results["absent"]
+    assert results["true"] == results["absent"].replace("prewarm=0", "prewarm=1")

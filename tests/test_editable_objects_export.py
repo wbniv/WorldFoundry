@@ -176,7 +176,9 @@ def test_descriptors_are_trimmed_to_the_types_own_sheets(editable_level):
     entries = oad_entries(oad)
     assert entries[0][1] == "Plant growth" and entries[0][0] == 8   # BUTTON_PROPERTY_SHEET
     live = [name for _, name, show in entries if show & SHOW_AS_LIVE]
-    assert live == ["Seed", "Water type", "Growth speed", "Textures", "Sway", "Seahorses", "Greeting", "Hold seconds"]
+    # ... then the global sheet every settings holder includes (global_settings.inc, 4383a30a8)
+    assert live == ["Seed", "Water type", "Growth speed", "Textures", "Sway", "Seahorses", "Greeting", "Hold seconds",
+                    "Show framerate"]
     screensaver = next(i for i, entry in enumerate(entries) if entry[1] == "Screensaver")
     assert entries[screensaver + 1][1] == "Hold seconds"
     # The payload offset finds the first object's authored Seed, then Water type.
@@ -184,8 +186,9 @@ def test_descriptors_are_trimmed_to_the_types_own_sheets(editable_level):
     seed, water = struct.unpack_from("<ii", first_settings, payload_offset)
     assert (seed, water) == (2147483647, 1), "a radio|live field authored by label must compile to its index"
     second_settings = editable_level.objects[editable_level.editable()[1]][1]
-    assert struct.unpack_from("<i", first_settings, len(first_settings) - 4)[0] == 600
-    assert struct.unpack_from("<i", second_settings, len(second_settings) - 4)[0] == 120
+    # Hold seconds is the type's own last field; the global sheet's Show framerate (off) follows it (4383a30a8).
+    assert struct.unpack_from("<ii", first_settings, len(first_settings) - 8) == (600, 0)
+    assert struct.unpack_from("<ii", second_settings, len(second_settings) - 8) == (120, 0)
 
 
 def test_duplicate_label_fails_the_build(tmp_path):
@@ -202,7 +205,13 @@ def test_a_single_object_gets_the_bare_type_name(tmp_path):
     assert Level((tmp_path / "level.lvl").read_bytes()).labels() == ["Planted Tank Settings"]
 
 
-def test_a_level_without_live_types_lists_nothing(tmp_path):
+def test_a_level_without_live_types_lists_only_the_default_holder(tmp_path):
+    """mm_practice authors no settings object. Since 561119f5b levcomp gives such a level a default LevelSettings
+    holder (the global "Show framerate"), so it lists exactly that one object, not nothing."""
     result = compile_level((BASE / "mm_practice.lev").read_text(), tmp_path)
     assert result.returncode == 0, result.stderr
-    assert Level((tmp_path / "level.lvl").read_bytes()).editing_offsets() == (-1, -1, -1)
+    level = Level((tmp_path / "level.lvl").read_bytes())
+    assert -1 not in level.editing_offsets()
+    assert level.labels() == ["Level Settings"]
+    (_, first, _, oad), = level.types()
+    assert first == 128 and [n for _, n, show in oad_entries(oad) if show & SHOW_AS_LIVE] == ["Show framerate"]
