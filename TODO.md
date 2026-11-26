@@ -14,7 +14,7 @@
 
 - [T3] **Replace the remaining hand-rolled `*-frac` loops with `floor`.** `aquarium_sea_stars/sea_star_player.fth`, `aquarium_blue_shrimp/shrimp.fth`, `aquarium_tanks/controller.fth`, `moon_lantern/generate.py` still loop once per unit, the pattern the math plan removed from four levels. Keep floored semantics (`over over / floor * -`, not `fmod`), rebuild, and check each level; the aquarium ones ship in the Dream APK. T3: shipped levels, device check. [Math plan](docs/plans/2026-11-26-forth-math-words.md)
 
-- [T2] **`pytest tests -k …` stops at collection.** Levels share module names (`timeline`, `config`, `forth`), and `aquarium_sea_stars` lacks a constant a test imports, and `test_pipe_hop` connects at import, so a filtered run of the suite fails before any test runs. Fix the collisions (for example `--import-mode=importlib` or per-level packages) and the import-time side effects. T2: bounded test-infrastructure fix.
+- [wip T2] **`pytest tests -k …` stops at collection.** Levels share module names (`timeline`, `config`, `forth`), and `aquarium_sea_stars` lacks a constant a test imports, and `test_pipe_hop` connects at import, so a filtered run of the suite fails before any test runs. Fix the collisions (for example `--import-mode=importlib` or per-level packages) and the import-time side effects. T2: bounded test-infrastructure fix. <!-- agent:a35036c6c27b38da8 -->
 
 - [T4] **Pre-existing test failures seen during the math work.** `test_cuckoo_village_settings` fails because `oas2oad` exits 1; Tide Harbour fails its actor budget (206 > 150) and its settings-type tests. Not caused by the math change (found by its run, 2026‑11‑26). T4: unknown root causes.
 
