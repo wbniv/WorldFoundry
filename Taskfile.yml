@@ -1986,6 +1986,25 @@ tasks:
     cmds:
       - scripts/in-linux-container.sh python3 -m pytest tests/test_poster_sea_stars.py -v
 
+  poster-lava-lamp:
+    desc: "Lava lamp A3 poster (docs/plans/2026-11-26-lava-lamp.md, Phase P): research-checked claims, the Cycles hero, six patents with QR codes, the level's Forth -> docs/reference/lava-lamp-poster/{poster.html,poster.png,layout-review.json} and the PDF. A marked review draft until docs/reference/lava-lamp-research.md records Will's approval. Needs Python Playwright with Chromium and pdftoppm"
+    cmds:
+      - python3 docs/reference/lava-lamp-poster/make_poster.py {{if not .APPROVED}}--draft{{end}}
+      - python3 docs/reference/lava-lamp-poster/export_poster.py
+    vars:
+      APPROVED:
+        sh: "grep -q '^Poster visual review: approved' docs/reference/lava-lamp-research.md && echo yes || true"
+
+  poster-lava-lamp-hero:
+    desc: "Re-render the lava lamp poster's hero image (CPU Cycles in the Blender container) from wflevels/lava_lamp/lava_lamp.blend"
+    cmds:
+      - WF_CONTAINER_IMAGE=blender WF_CONTAINER_MEMORY=6g scripts/in-linux-container.sh blender --background wflevels/lava_lamp/lava_lamp.blend --python-exit-code 1 --python docs/reference/lava-lamp-poster/render_hero.py
+
+  test-poster-lava-lamp:
+    desc: "Regression guard for the lava lamp poster: claims traceable to the research file, the review gate, committed HTML reproduces, the model's numbers and the shipped Forth, type >= 8 pt, one A3 page"
+    cmds:
+      - scripts/in-linux-container.sh python3 -m pytest tests/test_lava_lamp_poster.py -q
+
   poster-swarming:
     desc: "Swarming poster, A3 (docs/plans/2026-10-01-swarming-poster.md): sweep.json, tank.json, measured.json, school.fth and the Couzin snapshots → docs/reference/swarming-poster/{data.json,schooling-poster.html,schooling-poster.pdf,schooling-poster.png}. Recompute the inputs with `task swarming-measure`. Needs google-chrome and pdftoppm."
     cmds:
