@@ -75,7 +75,12 @@ def test_export_population_anchored_parts_and_mailbox_limits(kind):
     c=config(kind);mapping=json.loads((here/'actor-map.json').read_text())
     assert mapping['count']==c.COUNT
     names=[n for n in mapping['indices'] if n.startswith('animal-')]
-    assert len(names)==c.COUNT*len(mapping['parts'])
+    # Every animal is its parts, or (the jellyfish's companions since 967a73460) one actor combining them, *_full.
+    animals={}
+    for n in names:
+        animals.setdefault(int(n.split('-')[1]),[]).append(n.split('-',2)[2])
+    assert sorted(animals)==list(range(c.COUNT))
+    assert all(parts==mapping['parts'] or (len(parts)==1 and parts[0].endswith('_full')) for parts in animals.values()), animals
     assert len(set(mapping['indices'].values()))==len(mapping['indices'])
     assert max(mapping['mailboxes'].values())<650
     assert 800+12*(c.COUNT-1)<1900

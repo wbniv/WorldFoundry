@@ -39,13 +39,18 @@ def test_exported_material_opacity_and_model_integrity():
 
 def test_all_six_jellies_share_the_translucent_models():
     mapping = json.loads((LEVEL / 'actor-map.json').read_text())
-    assert mapping['count'] == 6
+    # 967a73460 added up to 45 companions (Companions 0-50, default 5): each is one jelly_full actor combining the
+    # bell and arms meshes. The original six keep their two translucent parts.
+    assert mapping['count'] >= 6
     assert mapping['parts'] == ['bell', 'arms']
     for k in range(6):
         for part in mapping['parts']:
             assert f'animal-{k:02d}-{part}' in mapping['indices']
-    # Representative other animal tanks retain legacy opaque materials.
-    for level in ['aquarium_betta', 'aquarium_lionfish']:
+    for k in range(6, mapping['count']):
+        assert f'animal-{k:02d}-jelly_full' in mapping['indices']
+    # Representative other animal tanks retain legacy opaque materials. (Not the lionfish since its single-mesh rig,
+    # 1feaf974f, two days after this test: its player_hull.iff carries an OPAC chunk.)
+    for level in ['aquarium_betta', 'aquarium_arowana']:
         for path in (ROOT / 'wflevels' / level).glob('*.iff'):
             if path.read_bytes()[:4] == b'MODL':
                 assert b'OPAC' not in chunks(path)
