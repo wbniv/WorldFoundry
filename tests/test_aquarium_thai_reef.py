@@ -131,13 +131,19 @@ def test_reef_room_pages_fit_aquarium_texture_slots():
 
 
 def test_screensaver_native_host_accepts_both_reef_choices_and_texture_pages():
+    # Since ec9b872e9 the choices are not a Java array: TankChoice reads the package's LevelCatalog, built from
+    # wflevels/aquarium-menu.manifest (the one roster). Both reefs are there, in order.
     java = (ROOT / 'android/screensaver/src/main/java/org/worldfoundry/screensaver/TankChoice.java').read_text()
-    ids = re.search(r'static final String\[\] IDS = \{(.*?)\};', java, re.S).group(1)
-    choices = re.findall(r'"([a-z_]+)"', ids)
-    assert choices[-2:] == ['aquarium_thai_reef', 'aquarium_thai_reef_anime']
+    assert 'LevelCatalog.ASSET' in java
+    choices = re.findall(r'^level (\S+)-standalone\.iff \|', (ROOT / 'wflevels/aquarium-menu.manifest').read_text(), re.M)
+    reef = choices.index('aquarium_thai_reef')
+    assert choices[reef + 1] == 'aquarium_thai_reef_anime'
     host = (ROOT / 'android/screensaver/src/main/cpp/dream_host.cc').read_text()
-    maximum = int(re.search(r'if \(level < 0 \|\| level > (\d+)\) return;', host).group(1))
-    assert maximum >= len(choices) - 1
+    # Since 62c609367 the host has no hard-coded maximum: the bound is the bundle's own level count, so every choice
+    # the bundle carries is accepted.
+    run = host[host.index('Java_org_worldfoundry_screensaver_TankPlayer_nativeRun('):]
+    assert 'const int levels = bundleLevelCount(bundleAssets);' in run
+    assert re.search(r'if \(levels <= 0 \|\| level < kMenuLevel \|\| level >= levels\)', run)
     height = int(re.search(r'--vram-height=(\d+)', host).group(1))
     for level in choices[-2:]:
         page_height = struct.unpack_from('<H', (ROOT / 'wflevels' / level / 'Room0.tga').read_bytes(), 14)[0]
@@ -222,6 +228,9 @@ def test_worm_engine_pose_leaves_other_crowns_unchanged(tmp_path):
     binary = ROOT/'build-docker/jelly-engine/dfrm_strand_test'
     if not binary.exists():
         pytest.skip('requires the built dfrm_strand_test engine harness')
+    from engine_binary import unloadable_reason          # here it was built on the host and cannot load in the container
+    if unloadable_reason(binary):
+        pytest.skip(unloadable_reason(binary))
     path = ROOT/'wflevels/aquarium_thai_reef/wormcrowns.iff'
     data = path.read_bytes()
     count = struct.unpack_from('<I', data, 12)[0] // 24
