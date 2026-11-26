@@ -81,7 +81,8 @@ int main(int argc, char** argv) {
 '''
 
 
-def build(tmp: Path):
+def build(tmp: Path, host: str = HOST, opt: tuple = ()):
+    """Compile the VM and a host (this file's, or tests/forth_math_vm_cost.py's) into tmp/host."""
     src = (ROOT / "engine/stubs/scripting_zforth.cc").read_text()
     core = src[src.index("static const char* kCoreBootstrap ="):src.index("void Init(")]
     core = re.sub(r"//[^\n]*", "", core)
@@ -89,10 +90,10 @@ def build(tmp: Path):
     vendor = (ROOT / "engine/vendor/zforth-41db72d1/forth/core.zf").read_text()
     strings = vendor[vendor.index(': s"'):vendor.index("\n\n\n(", vendor.index(': ."'))]
     (tmp / "bootstrap.fth").write_text(bootstrap + "\n: emit 0 sys ; : tell 2 sys ;\n" + strings + "\n")
-    (tmp / "host.cc").write_text(HOST)
+    (tmp / "host.cc").write_text(host)
     inc = ["-I" + str(ROOT / "engine/stubs"), "-I" + str(ROOT / "engine/vendor/zforth-41db72d1/src/zforth")]
-    subprocess.run(["cc", *inc, "-c", str(ROOT / "engine/vendor/zforth-41db72d1/src/zforth/zforth.c"), "-o", str(tmp / "vm.o")], check=True)
-    subprocess.run(["c++", "-std=c++17", "-Wall", *inc, str(tmp / "host.cc"), str(tmp / "vm.o"), "-o", str(tmp / "host")], check=True)
+    subprocess.run(["cc", *opt, *inc, "-c", str(ROOT / "engine/vendor/zforth-41db72d1/src/zforth/zforth.c"), "-o", str(tmp / "vm.o")], check=True)
+    subprocess.run(["c++", "-std=c++17", "-Wall", *opt, *inc, str(tmp / "host.cc"), str(tmp / "vm.o"), "-o", str(tmp / "host")], check=True)
 
 
 class Host:
