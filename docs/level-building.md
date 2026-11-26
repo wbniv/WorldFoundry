@@ -1783,3 +1783,10 @@ The `Actor::reset()` / `_InitTools()` pattern:
 - `Actor::reset()` calls `_InitTools()` and `_InitShadow()`
 - `_InitTools()` calls `ConstructTemplateObject()` for each tool slot, then `AddObject()`
 - Tools are added as temp objects (index >= `_levelData->objectCount`)
+
+## Morph targets and the surface cap (the lava lamp)
+
+The lava lamp ([plan](plans/2026-11-26-lava-lamp.md)) replaced Codex's lava-lamp digits level and brought two tools any level can use:
+
+- **Morph targets.** Shape keys named `morph_<name>` (at most six, relative to the basis) export as an `MRPH` mesh chunk; an optional corner colour layer of the same name gives the target a shade. A mesh with `wf_morph` set and no such keys gets an empty chunk: a pure tint actor. A script poses it with `deform-block` kind 7 and ten cells: six weights, tint R G B, glow. The material must be prelit with a baked vertex colour layer (`wf_prelit`, `wf_baked_vertex_color`), because only prelit materials are Gouraud-shaded. Write vertex colours with `color_srgb`, not `color`, or Blender stores your shade as linear and the engine shows it brighter.
+- **Maximum surface height.** A hidden global setting (`global_settings.inc`): set `wf_Maximum surface height` on the level's settings object and an Android TV draws at most that many rows and scales up. The lava lamp sets 1080, so a 4K TV holds 60 FPS.

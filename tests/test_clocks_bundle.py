@@ -35,7 +35,7 @@ def test_roster_has_the_intended_browsing_order():
         'minute_machine', 'tide_harbour', 'train_loops', 'bamboo_tipper_pond',
         'triple_axis_tourbillon', 'cuckoo_village', 'moon_lantern', 'metronome_forest',
         'lighthouse', 'anamorphic_shards', 'hour_tree', 'corolla_gauge', 'dutch_cuckoo_village',
-        'mirror_haze', 'globe_sun_ring', 'lava_lamp_digits',
+        'mirror_haze', 'globe_sun_ring', 'lava_lamp',
     ]
 
 

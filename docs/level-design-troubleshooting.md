@@ -2621,3 +2621,9 @@ references the actor, so the camera is never active and tracking a despawned act
 **Cause:** `Actor::WriteSystemMailbox` kept one `static Euler` shared by every actor and applied it only on a `ROTATION_C` write. An A or B write was held until *some* actor wrote C, and then landed on that actor. In the Thai reef, the sea fan's sway never applied, and the guard crab's threat tilt pitched the boxfish.
 
 **Fix:** each of A, B and C now updates the writing actor's own rotation immediately (`wfsource/source/game/actor.cc`, guarded by `tests/test_actor_rotation_mailboxes.py`). All values are revolutions: write `.5` for a half turn, not `3.14159`. Levels that wrote only B and C (the urchin scripts) now keep their own A instead of inheriting another actor's.
+
+## A level misses the refresh rate on a 4K TV or a Chromecast HD (the lava lamp, 2026‑11‑26)
+
+**Symptom:** cast1 (Chromecast HD) runs well below 60 FPS, and a Chromecast 4K locks at 30 FPS at its native 3840 × 2160.
+
+**Cause and fixes, measured** ([lava lamp plan, build record](plans/2026-11-26-lava-lamp.md#build-record-2026-11-26)): a translucent sheet over a large part of the screen is fill-bound, and meshes posed on the CPU every frame cost in proportion to their vertices. Fake glass with opaque highlight strips and edge bands; keep posed meshes light (the lava blob went from 610 to 314 vertices); let tint-only Morph actors bake (automatic). On a 4K TV set the hidden global **Maximum surface height** to 1080 on the level's settings object: the host draws 1920 × 1080 and the TV scales it (the log says `surface capped: 3840x2160 -> 1920x1080`). A level whose settings form opens on a picker instead of its sheet has two editable settings objects; keep one.
