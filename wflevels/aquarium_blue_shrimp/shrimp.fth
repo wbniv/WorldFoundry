@@ -2,8 +2,7 @@
 \ Generated header supplies actor indices, tuning and sh-* mailbox addresses.
 \ Global state 600..639; residents 800..1213. Independent of other levels.
 : sh@ read-mailbox ; : sh! write-mailbox ;
-: sh-frac begin dup 1 >= if 1 - 0 else 1 then until
-  begin dup 0 < if 1 + 0 else 1 then until ;
+: sh-frac dup floor - ;   \ the engine's floor (docs/forth-math-words.md)
 : sh-sin sh-frac dup .5 > if .5 - -1 else 1 then >r
   2 * dup 1 swap - * dup 16 * swap 4 * 5 swap - / r> * ;
 : sh-cos .25 + sh-sin ;

@@ -168,7 +168,7 @@ lines=[r'\ Moon Lantern: local time and approximate UTC lunar elongation.',
  ': ml-h INDEXOF_WALL_HOUR read-mailbox 12 mod 12 / INDEXOF_WALL_MINUTE read-mailbox 720 / + INDEXOF_WALL_SECOND read-mailbox 43200 / + ;',
  ': ml-m INDEXOF_WALL_MINUTE read-mailbox 60 / INDEXOF_WALL_SECOND read-mailbox 3600 / + ;',
  ': ml-d INDEXOF_WALL_DAY read-mailbox INDEXOF_WALL_HOUR read-mailbox 24 / + INDEXOF_WALL_MINUTE read-mailbox 1440 / + INDEXOF_WALL_SECOND read-mailbox 86400 / + INDEXOF_WALL_UTC_OFFSET read-mailbox 1440 / - .5 - ;',
- ': ml-frac begin dup 1 >= if 1 - 0 else dup 0 < if 1 + 0 else 1 then then until ;',
+ ': ml-frac dup floor - dup 1 >= if 1 - then ;',  # the engine floor; a tiny negative rounds to 1, which wraps to 0 as the old loop did
  ': ml-moon 218.316 ml-d 13.176396 * + ml-d 13.064993 * 134.963 + 360 / sin-rev 6.289 * + ;',
  ': ml-sun 280.460 ml-d .9856474 * + ml-d .9856003 * 357.528 + 360 / sin-rev 1.915 * + ;',
  ': ml-tick',

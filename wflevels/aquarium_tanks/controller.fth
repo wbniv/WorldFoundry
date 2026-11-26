@@ -1,7 +1,6 @@
 \ Three independent tanks: bounded phases, input, neutral buoyancy and posing.
 : tk@ read-mailbox ; : tk! write-mailbox ;
-: tk-frac begin dup 1 >= if 1 - 0 else 1 then until
-  begin dup 0 < if 1 + 0 else 1 then until ;
+: tk-frac dup floor - ;   \ the engine's floor (docs/forth-math-words.md)
 : tk-sin tk-frac dup .5 > if .5 - -1 else 1 then >r
   2 * dup 1 swap - * dup 16 * swap 4 * 5 swap - / r> * ;
 : tk-cos .25 + tk-sin ;
