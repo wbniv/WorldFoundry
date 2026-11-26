@@ -1470,8 +1470,11 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
 #endif
             } else if (wf::forthmath::HandleSyscall(ctx, custom)) {
                 // custom 73 to 81: sin-rev cos-rev tan-rev asin-rev acos-rev atan-rev atan2-rev
-                // sincos-rev sqrt. Angles are in revolutions; the maths is in forth_math.hpp and the
-                // stack effects and aborts in forth_math_zforth.hpp. Plan: docs/plans/2026-11-21-forth-trig-words.md
+                // sincos-rev sqrt. Angles are in revolutions. Custom 82 to 108: floor ceil trunc round
+                // roundeven fma copysign fmod popcount clz ctz exp expm1 exp2 pow ln log1p log2 log10
+                // cbrt hypot sinh cosh tanh asinh acosh atanh. The maths is in forth_math.hpp and the
+                // stack effects and aborts in forth_math_zforth.hpp. Plans: docs/plans/2026-11-21-forth-trig-words.md,
+                // docs/plans/2026-11-26-forth-math-words.md
             } else {
                 fprintf(stderr, "zforth: unknown sys id %d\n", (int)id);
             }
@@ -1726,7 +1729,7 @@ void Init(MailboxesManager& mgr)
         if (zf_eval(&g_ctx, buf) != ZF_OK)
             fprintf(stderr, "zforth: init failed (%s)\n", w.name);
     }
-    // The trigonometry words (forth_math_zforth.hpp's table): ZF_SYSCALL_USER + custom.
+    // The math words (forth_math_zforth.hpp's table): ZF_SYSCALL_USER + custom.
     for (const auto& w : wf::forthmath::kWords) {
         char buf[64];
         snprintf(buf, sizeof(buf), ": %s %d sys ;", w.name, (int)ZF_SYSCALL_USER + w.custom);

@@ -1,5 +1,5 @@
 // The Forth math words' maths (engine/stubs/forth_math.hpp), no engine and no VM.
-// Plan: docs/plans/2026-11-21-forth-trig-words.md. Built and run by `task test-forth-math`, twice:
+// Plans: docs/plans/2026-11-21-forth-trig-words.md and docs/plans/2026-11-26-forth-math-words.md. Built and run by `task test-forth-math`, twice:
 // once with the default Real (double) and once with -DWF_FORTH_MATH_FLOAT, the single-precision
 // FPU mode, where the contract's absolute tolerance is looser (tests/data/forth_math_vectors.json).
 #undef NDEBUG  // the checks below carry side effects
@@ -19,7 +19,7 @@ namespace {
 struct Case {
     const char* word;
     int n_in;
-    double in[2];
+    double in[3];
     int n_out;
     double out[2];
     bool error;
@@ -69,11 +69,29 @@ struct Out {
     const char* why = nullptr;
 };
 
+// Groups A and B of the second plan: the result must be the exact answer, bit for bit.
+const char* const kExact[] = {"floor", "ceil", "trunc", "round", "roundeven", "fma", "copysign", "fmod", "popcount", "clz", "ctz"};
+bool is_exact(const char* word)
+{
+    for (const char* w : kExact)
+        if (!std::strcmp(w, word)) return true;
+    return false;
+}
+
+bool same_bits(float a, float b) { return std::memcmp(&a, &b, sizeof a) == 0; }
+
+// Within one float ulp of the reference, with no absolute floor (the second plan's group C).
+bool within_ulp(double got, double want, double ulps = 1.0)
+{
+    if (!std::isfinite(got) || !std::isfinite(want)) return false;
+    return std::fabs(got - want) <= ulps * ulp(want);
+}
+
 Out call(const char* word, const double* in)
 {
     Out o;
     auto one = [&](const Result& r) { if (!r.ok()) o.why = r.why; else { o.n = 1; o.v[0] = r.value; } };
-    const Real a = static_cast<Real>(in[0]), b = static_cast<Real>(in[1]);
+    const Real a = static_cast<Real>(in[0]), b = static_cast<Real>(in[1]), c = static_cast<Real>(in[2]);
     if (!std::strcmp(word, "sin-rev")) one(SinRev(a));
     else if (!std::strcmp(word, "cos-rev")) one(CosRev(a));
     else if (!std::strcmp(word, "tan-rev")) one(TanRev(a));
@@ -82,6 +100,33 @@ Out call(const char* word, const double* in)
     else if (!std::strcmp(word, "atan-rev")) one(AtanRev(a));
     else if (!std::strcmp(word, "atan2-rev")) one(Atan2Rev(a, b));
     else if (!std::strcmp(word, "sqrt")) one(Sqrt(a));
+    else if (!std::strcmp(word, "floor")) one(Floor(a));
+    else if (!std::strcmp(word, "ceil")) one(Ceil(a));
+    else if (!std::strcmp(word, "trunc")) one(Trunc(a));
+    else if (!std::strcmp(word, "round")) one(Round(a));
+    else if (!std::strcmp(word, "roundeven")) one(RoundEven(a));
+    else if (!std::strcmp(word, "fma")) one(Fma(a, b, c));
+    else if (!std::strcmp(word, "copysign")) one(CopySign(a, b));
+    else if (!std::strcmp(word, "fmod")) one(Fmod(a, b));
+    else if (!std::strcmp(word, "popcount")) one(Popcount(a));
+    else if (!std::strcmp(word, "clz")) one(Clz(a));
+    else if (!std::strcmp(word, "ctz")) one(Ctz(a));
+    else if (!std::strcmp(word, "exp")) one(Exp(a));
+    else if (!std::strcmp(word, "expm1")) one(Expm1(a));
+    else if (!std::strcmp(word, "exp2")) one(Exp2(a));
+    else if (!std::strcmp(word, "pow")) one(Pow(a, b));
+    else if (!std::strcmp(word, "ln")) one(Ln(a));
+    else if (!std::strcmp(word, "log1p")) one(Log1p(a));
+    else if (!std::strcmp(word, "log2")) one(Log2(a));
+    else if (!std::strcmp(word, "log10")) one(Log10(a));
+    else if (!std::strcmp(word, "cbrt")) one(Cbrt(a));
+    else if (!std::strcmp(word, "hypot")) one(Hypot(a, b));
+    else if (!std::strcmp(word, "sinh")) one(Sinh(a));
+    else if (!std::strcmp(word, "cosh")) one(Cosh(a));
+    else if (!std::strcmp(word, "tanh")) one(Tanh(a));
+    else if (!std::strcmp(word, "asinh")) one(Asinh(a));
+    else if (!std::strcmp(word, "acosh")) one(Acosh(a));
+    else if (!std::strcmp(word, "atanh")) one(Atanh(a));
     else if (!std::strcmp(word, "sincos-rev")) {
         const Pair p = SinCosRev(a);
         if (!p.sin.ok()) o.why = p.sin.why; else { o.n = 2; o.v[0] = p.sin.value; o.v[1] = p.cos.value; }
@@ -109,13 +154,13 @@ int main()
             if (o.why != nullptr) std::fprintf(stderr, "unexpected error for %s(%.9g, %.9g): %s\n", c.word, c.in[0], c.in[1], o.why);
             CHECK(o.why == nullptr && o.n == c.n_out);
             for (int k = 0; k < c.n_out && o.n == c.n_out; ++k) {
-                const bool ok = close(o.v[k], c.out[k], c.word);
+                const bool ok = is_exact(c.word) ? same_bits(o.v[k], static_cast<float>(c.out[k])) : close(o.v[k], c.out[k], c.word);
                 if (!ok) std::fprintf(stderr, "%s(%.9g, %.9g)[%d]: got %.9g want %.9g\n", c.word, c.in[0], c.in[1], k, (double)o.v[k], c.out[k]);
                 CHECK(ok);
             }
         }
     }
-    CHECK(words == 9);
+    CHECK(words == 36);
 
     // 2. symmetries and identities
     for (double x = -3.0; x <= 3.0; x += 0.0173) {
@@ -188,6 +233,101 @@ int main()
     }
     CHECK(bad == 0);
     if (bad) std::fprintf(stderr, "%d of 800000 random results out of tolerance\n", bad);
+
+    // 8. the second plan's words: rounding rules, signs, the bit words' edges and every domain edge
+    CHECK(Round(2.5).value == 3.0f && Round(-2.5).value == -3.0f && Round(0.5).value == 1.0f);           // ties away from zero
+    CHECK(RoundEven(2.5).value == 2.0f && RoundEven(3.5).value == 4.0f && RoundEven(-2.5).value == -2.0f); // ties to even
+    CHECK(same_bits(Ceil(-0.5).value, -0.0f) && same_bits(Trunc(-0.7).value, -0.0f));                     // the sign of zero kept
+    CHECK(Floor(-0.5).value == -1.0f && Floor(16777215).value == 16777215.0f);
+    CHECK(Fmod(-7, 3).value == -1.0f && Fmod(7, -3).value == 1.0f && !Fmod(1, 0).ok() && !Fmod(1, -0.0).ok());
+    CHECK(CopySign(2, -0.0).value == -2.0f && CopySign(-2, 0).value == 2.0f);
+    {   // one rounding: (1 + 2^-12)^2 + 1e-24 is a tie in float after a double rounding, and not before it
+        const Real big = static_cast<Real>(1.0 + 1.0 / 4096.0);
+        CHECK(same_bits(Fma(big, big, static_cast<Real>(1e-24f)).value, 1.0f + 1.0f / 2048.0f + 1.0f / 8388608.0f));
+    }
+    CHECK(!Fma(3e38f, 10, 0).ok() && !Fma(INFINITY, 0, 1).ok());
+    CHECK(Popcount(16777215).value == 24.0f && Popcount(16777216).value == 1.0f && Popcount(0).value == 0.0f);
+    CHECK(Clz(0).value == 32.0f && Ctz(0).value == 32.0f && Clz(1).value == 31.0f && Ctz(16777216).value == 24.0f);
+    CHECK(!Popcount(-1).ok() && !Popcount(0.5).ok() && !Clz(16777218).ok() && !Ctz(1e30f).ok() && !Popcount(NAN).ok());
+    CHECK(!Pow(-8, static_cast<Real>(1.0 / 3.0)).ok() && Pow(-2, 3).value == -8.0f && !Pow(0, -1).ok() && Pow(0, 0).value == 1.0f);
+    CHECK(!Pow(10, 39).ok() && Pow(10, 38).ok());                      // 1e39 does not fit a float cell
+    CHECK(!Ln(0).ok() && !Ln(-0.0).ok() && !Ln(-1).ok() && !Log2(0).ok() && !Log10(-1e-30f).ok());
+    CHECK(!Log1p(-1).ok() && Log1p(static_cast<Real>(-0.99999994f)).ok());
+    CHECK(!Acosh(static_cast<Real>(0.99999994f)).ok() && Acosh(1).value == 0.0f);
+    CHECK(!Atanh(1).ok() && !Atanh(-1).ok() && Atanh(static_cast<Real>(0.99999994f)).ok());
+    CHECK(!Exp(89).ok() && Exp(88).ok() && Exp(-1e30f).value == 0.0f && !Exp2(128).ok() && Exp2(127).ok());
+    CHECK(!Sinh(-1e30f).ok() && !Cosh(1e30f).ok() && Tanh(1e30f).value == 1.0f && !Hypot(3e38f, 3e38f).ok());
+    CHECK(!Exp(NAN).ok() && !Cbrt(INFINITY).ok() && !Tanh(-INFINITY).ok() && !Floor(NAN).ok() && !CopySign(1, NAN).ok());
+    CHECK(Expm1(static_cast<Real>(1e-7f)).value != 0.0f && Log1p(static_cast<Real>(1e-7f)).value != 0.0f);   // their reason to exist
+    CHECK(Cbrt(-27).value == -3.0f && Hypot(3, 4).value == 5.0f && Exp2(10).value == 1024.0f && Log2(1024).value == 10.0f);
+
+    // 9. 100 000 random arguments of each new word: groups A and B exact, group C within one float ulp of long double
+#ifdef WF_FORTH_MATH_FLOAT
+    constexpr double kUlps = 2.0;      // float libm (Real = float): its own error plus the cell's rounding
+#else
+    constexpr double kUlps = 1.0;
+#endif
+    std::mt19937 rng2(20261126);
+    std::uniform_real_distribution<double> hundred(-100.0, 100.0), ten(-10.0, 10.0), unit01(0.0, 1.0);
+    auto logu = [&](double lo, double hi) { return std::exp(std::log(lo) + unit01(rng2) * (std::log(hi) - std::log(lo))); };
+    int bad2 = 0, refused2 = 0;
+    auto exact1 = [&](const char* w, const Result& r, long double want) {
+        const float wf = static_cast<float>(want);
+        if (!r.ok() || !same_bits(r.value, wf)) { if (bad2 < 10) std::fprintf(stderr, "%s: got %.9g want %.9g\n", w, (double)r.value, (double)wf); ++bad2; }
+    };
+    auto libm1 = [&](const char* w, const Result& r, long double want, double arg) {
+        const float wf = static_cast<float>(want);
+        if (!std::isfinite(wf)) { if (r.ok()) ++bad2; else ++refused2; return; }     // must refuse what does not fit
+        if (!r.ok() || !within_ulp(r.value, wf, kUlps)) {
+            if (bad2 < 10) std::fprintf(stderr, "%s(%.9g): got %.9g want %.9g\n", w, arg, (double)r.value, (double)wf);
+            ++bad2;
+        }
+    };
+    for (int i = 0; i < 100000; ++i) {
+        const float x = static_cast<float>(hundred(rng2)), y = static_cast<float>(ten(rng2)), z = static_cast<float>(ten(rng2));
+        exact1("floor", Floor(x), floorl(x));
+        exact1("ceil", Ceil(x), ceill(x));
+        exact1("trunc", Trunc(x), truncl(x));
+        exact1("round", Round(x), roundl(x));
+        exact1("roundeven", RoundEven(x), nearbyintl(x));
+        exact1("fma", Fma(x, y, z), fmal(x, y, z));
+        exact1("copysign", CopySign(x, y), copysignl(x, y));
+        if (y != 0) exact1("fmod", Fmod(x, y), fmodl(x, y));
+        const unsigned n = static_cast<unsigned>(unit01(rng2) * 16777217.0);
+        int pc = 0, lz = 32, tz = 32;
+        for (int b = 0; b < 32; ++b) if (n >> b & 1u) { ++pc; lz = 31 - b; }
+        for (int b = 31; b >= 0; --b) if (n >> b & 1u) tz = b;
+        exact1("popcount", Popcount(static_cast<Real>(n)), pc);
+        exact1("clz", Clz(static_cast<Real>(n)), lz);
+        exact1("ctz", Ctz(static_cast<Real>(n)), tz);
+
+        const float e = static_cast<float>(hundred(rng2) * 0.9);     // -90 to 90: crosses exp's overflow at 88.7
+        libm1("exp", Exp(e), expl(e), e);
+        libm1("expm1", Expm1(e), expm1l(e), e);
+        const float tiny = static_cast<float>(ten(rng2) * 1e-6);
+        libm1("expm1", Expm1(tiny), expm1l(tiny), tiny);
+        libm1("exp2", Exp2(e * 1.5f), exp2l(e * 1.5f), e * 1.5f);
+        libm1("sinh", Sinh(e), sinhl(e), e);
+        libm1("cosh", Cosh(e), coshl(e), e);
+        libm1("tanh", Tanh(y), tanhl(y), y);
+        const float p = static_cast<float>(logu(1e-6, 1e6)), q = static_cast<float>(hundred(rng2) * 0.2);
+        libm1("pow", Pow(p, q), powl(p, q), p);
+        libm1("ln", Ln(p), logl(p), p);
+        libm1("log2", Log2(p), log2l(p), p);
+        libm1("log10", Log10(p), log10l(p), p);
+        const float l1 = static_cast<float>(logu(1e-6, 1e3) - 1.0);
+        libm1("log1p", Log1p(l1), log1pl(l1), l1);
+        libm1("cbrt", Cbrt(x * p), cbrtl(static_cast<float>(x * p)), x * p);
+        libm1("hypot", Hypot(x, y), hypotl(x, y), x);
+        libm1("asinh", Asinh(x * p), asinhl(static_cast<float>(x * p)), x * p);
+        const float a1 = static_cast<float>(1.0 + logu(1e-6, 1e4));
+        libm1("acosh", Acosh(a1), acoshl(a1), a1);
+        const float t1 = static_cast<float>(unit01(rng2) * 1.9998 - 0.9999);
+        libm1("atanh", Atanh(t1), atanhl(t1), t1);
+    }
+    CHECK(bad2 == 0);
+    CHECK(refused2 > 0);       // the exp overflow was crossed, and refused
+    if (bad2) std::fprintf(stderr, "%d random results of the second plan's words out of tolerance\n", bad2);
 
     if (failures) {
         std::fprintf(stderr, "forth_math_test (%s): %d of %d checks failed\n", kMode, failures, checks);

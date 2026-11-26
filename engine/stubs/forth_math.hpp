@@ -1,6 +1,7 @@
-// forth_math.hpp: the maths behind the zForth bridge's trigonometry words.
+// forth_math.hpp: the maths behind the zForth bridge's math words.
 //
-// Plan: docs/plans/2026-11-21-forth-trig-words.md. Header-only and free of engine types, so a
+// Plans: docs/plans/2026-11-21-forth-trig-words.md (the trigonometry and sqrt) and
+// docs/plans/2026-11-26-forth-math-words.md (rounding, integer bits, exponentials, logarithms). Header-only and free of engine types, so a
 // unit test includes it alone; the zForth glue (stack effects, aborts) is in forth_math_zforth.hpp.
 //
 // Contract (decision D3, recommended option B):
@@ -111,6 +112,156 @@ inline Result Sqrt(Real x)
     if (!(x >= 0)) return Fail("argument is negative or not a number");  // -0 passes
     if (!std::isfinite(x)) return Fail("argument is not a finite number");
     return Value(std::sqrt(x));
+}
+
+// ---------------------------------------------------------------------------------------------
+// Part 2: rounding, integer bits, exponentials and logarithms.
+// Plan: docs/plans/2026-11-26-forth-math-words.md.
+// Same contract as above: plain libm in Real, rounded into the float cell. A non-finite argument and
+// a non-finite result are refused (a result that overflows the float cell counts as non-finite), and
+// so is each domain error in the plan's table. Group A and B results are exact.
+
+constexpr const char* kNotFinite = "argument is not a finite number";
+constexpr const char* kResultNotFinite = "result is not a finite number";
+
+inline bool Finite(Real x) { return std::isfinite(x); }
+
+// The result as the cell will hold it, refused if it does not fit (exp 89 is finite in double and
+// infinite in float).
+inline Result Checked(Real v)
+{
+    const float f = static_cast<float>(v);
+    if (!std::isfinite(f)) return Fail(kResultNotFinite);
+    return Result{f, nullptr};
+}
+
+// --- A: exact -------------------------------------------------------------------------------
+inline Result Floor(Real x) { return Finite(x) ? Checked(std::floor(x)) : Fail(kNotFinite); }
+inline Result Ceil(Real x) { return Finite(x) ? Checked(std::ceil(x)) : Fail(kNotFinite); }
+inline Result Trunc(Real x) { return Finite(x) ? Checked(std::trunc(x)) : Fail(kNotFinite); }
+// Ties away from zero: 2.5 -> 3, -2.5 -> -3 (C round).
+inline Result Round(Real x) { return Finite(x) ? Checked(std::round(x)) : Fail(kNotFinite); }
+// Ties to even: 2.5 -> 2, 3.5 -> 4 (C23 roundeven, WebAssembly nearest). nearbyint rounds in the
+// current rounding mode, which the engine never changes from the default, round-to-nearest-even.
+inline Result RoundEven(Real x) { return Finite(x) ? Checked(std::nearbyint(x)) : Fail(kNotFinite); }
+
+// a*b + c with ONE rounding, straight into the float cell. It is computed as a float fma, not in
+// Real: a double fma rounded to float would round twice, and can then differ from the exact answer
+// (1.000244140625 * 1.000244140625 + 1e-24 is one such case).
+inline Result Fma(Real a, Real b, Real c)
+{
+    if (!Finite(a) || !Finite(b) || !Finite(c)) return Fail(kNotFinite);
+    const float r = std::fma(static_cast<float>(a), static_cast<float>(b), static_cast<float>(c));
+    if (!std::isfinite(r)) return Fail(kResultNotFinite);
+    return Result{r, nullptr};
+}
+
+// |x| with the sign of y (-0 counts as negative, as in IEEE 754).
+inline Result CopySign(Real x, Real y)
+{
+    if (!Finite(x) || !Finite(y)) return Fail(kNotFinite);
+    return Checked(std::copysign(x, y));
+}
+
+// x - n*y with n = trunc(x / y): the result takes x's sign (-7 3 fmod is -1). Exact.
+inline Result Fmod(Real x, Real y)
+{
+    if (!Finite(x) || !Finite(y)) return Fail(kNotFinite);
+    if (y == 0) return Fail("divisor is zero");
+    return Checked(std::fmod(x, y));
+}
+
+// --- B: integer bits ------------------------------------------------------------------------
+// The argument must be a whole number from 0 to 2^24, the range a float cell holds exactly; the
+// count is over 32 bits, so clz 0 and ctz 0 are 32, as in C++20 and WebAssembly.
+constexpr Real kMaxExactInt = static_cast<Real>(16777216.0);
+constexpr const char* kNotWhole = "argument is not a whole number from 0 to 16777216";
+
+inline bool WholeInRange(Real x) { return x >= 0 && x <= kMaxExactInt && x == std::floor(x); }   // NaN fails
+
+inline Result Popcount(Real x)
+{
+    if (!WholeInRange(x)) return Fail(kNotWhole);
+    return Value(static_cast<Real>(__builtin_popcount(static_cast<unsigned>(x))));
+}
+
+inline Result Clz(Real x)
+{
+    if (!WholeInRange(x)) return Fail(kNotWhole);
+    const unsigned n = static_cast<unsigned>(x);
+    return Value(static_cast<Real>(n == 0 ? 32 : __builtin_clz(n)));        // __builtin_clz(0) is undefined
+}
+
+inline Result Ctz(Real x)
+{
+    if (!WholeInRange(x)) return Fail(kNotWhole);
+    const unsigned n = static_cast<unsigned>(x);
+    return Value(static_cast<Real>(n == 0 ? 32 : __builtin_ctz(n)));
+}
+
+// --- C: libm --------------------------------------------------------------------------------
+inline Result Exp(Real x) { return Finite(x) ? Checked(std::exp(x)) : Fail(kNotFinite); }
+inline Result Expm1(Real x) { return Finite(x) ? Checked(std::expm1(x)) : Fail(kNotFinite); }
+inline Result Exp2(Real x) { return Finite(x) ? Checked(std::exp2(x)) : Fail(kNotFinite); }
+
+// x^y. A negative base needs a whole exponent, and zero has no negative powers.
+inline Result Pow(Real x, Real y)
+{
+    if (!Finite(x) || !Finite(y)) return Fail(kNotFinite);
+    if (x < 0 && y != std::floor(y)) return Fail("negative base with a non-integer exponent");
+    if (x == 0 && y < 0) return Fail("zero to a negative power");
+    return Checked(std::pow(x, y));
+}
+
+constexpr const char* kNotPositive = "argument is zero or negative";
+inline Result Ln(Real x)
+{
+    if (!Finite(x)) return Fail(kNotFinite);
+    if (!(x > 0)) return Fail(kNotPositive);
+    return Checked(std::log(x));
+}
+inline Result Log1p(Real x)
+{
+    if (!Finite(x)) return Fail(kNotFinite);
+    if (!(x > -1)) return Fail("argument is -1 or less");
+    return Checked(std::log1p(x));
+}
+inline Result Log2(Real x)
+{
+    if (!Finite(x)) return Fail(kNotFinite);
+    if (!(x > 0)) return Fail(kNotPositive);
+    return Checked(std::log2(x));
+}
+inline Result Log10(Real x)
+{
+    if (!Finite(x)) return Fail(kNotFinite);
+    if (!(x > 0)) return Fail(kNotPositive);
+    return Checked(std::log10(x));
+}
+
+inline Result Cbrt(Real x) { return Finite(x) ? Checked(std::cbrt(x)) : Fail(kNotFinite); }
+
+inline Result Hypot(Real x, Real y)
+{
+    if (!Finite(x) || !Finite(y)) return Fail(kNotFinite);
+    return Checked(std::hypot(x, y));
+}
+
+inline Result Sinh(Real x) { return Finite(x) ? Checked(std::sinh(x)) : Fail(kNotFinite); }
+inline Result Cosh(Real x) { return Finite(x) ? Checked(std::cosh(x)) : Fail(kNotFinite); }
+inline Result Tanh(Real x) { return Finite(x) ? Checked(std::tanh(x)) : Fail(kNotFinite); }
+inline Result Asinh(Real x) { return Finite(x) ? Checked(std::asinh(x)) : Fail(kNotFinite); }
+inline Result Acosh(Real x)
+{
+    if (!Finite(x)) return Fail(kNotFinite);
+    if (!(x >= 1)) return Fail("argument is less than 1");
+    return Checked(std::acosh(x));
+}
+inline Result Atanh(Real x)
+{
+    if (!Finite(x)) return Fail(kNotFinite);
+    if (!(std::fabs(x) < 1)) return Fail("argument is -1 or less, or 1 or more");
+    return Checked(std::atanh(x));
 }
 
 }  // namespace forthmath
