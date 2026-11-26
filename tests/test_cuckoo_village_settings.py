@@ -18,6 +18,10 @@ OAS = ROOT / "wfsource/source/oas"
 GAME = ROOT / "wfsource/source/game"
 CATALOG = ROOT / "wftools/wf_attr_edit/target/release/catalog"
 OAS2OAD = ROOT / "wftools/oas2oad-rs/target/release/oas2oad"
+# The repo's own prep, passed explicitly as tests/test_level_memory_settings.py does: oas2oad otherwise runs `prep`
+# from PATH, which the host has (apt.worldfoundry.org) and the wf-linux-test container does not (triage 2026-11-26:
+# "failed to run prep (prep): No such file or directory", exit 1).
+PREP = ROOT / "wftools/prep/prep"
 
 # label: (min, max, default). The phone's Dream form and the TV form are built from these labels.
 FIELDS = {
@@ -114,9 +118,11 @@ def test_the_actor_class_is_a_trivial_settings_holder_that_never_renders_or_upda
 def test_the_oad_is_what_the_tool_makes_from_the_oas():
     if not OAS2OAD.exists():
         pytest.skip("build oas2oad first: cargo build --release --manifest-path wftools/oas2oad-rs/Cargo.toml")
+    if not PREP.exists():
+        pytest.skip("build prep first: bash wftools/prep/build.sh")
     with tempfile.TemporaryDirectory() as tmp:
         out = Path(tmp) / "cuckoovillagesettings.oad"
-        subprocess.run([str(OAS2OAD), "-o", str(out), str(OAS / "cuckoovillagesettings.oas")],
+        subprocess.run([str(OAS2OAD), f"--prep={PREP}", "-o", str(out), str(OAS / "cuckoovillagesettings.oas")],
                        check=True, capture_output=True, cwd=str(OAS))
         assert out.read_bytes() == (OAS / "cuckoovillagesettings.oad").read_bytes(), \
             "cuckoovillagesettings.oad is stale: regenerate it with oas2oad"
