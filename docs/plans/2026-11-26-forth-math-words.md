@@ -527,6 +527,41 @@ No visible surface: these are engine words and a reference document, so this pla
     ```
     The tide tests in the selection are Tide Harbour's (its own director, not Tide spike's); their four failures and twelve errors are in files this change does not touch. Tide spike has no reference test: variants a and d rebuilt and d ran in the engine without a zforth error.
 
+    **Re-run 2026‑11‑26, after the pytest collection fix (`bc63287de`):** the command now collects and runs.
+
+    ```text
+    125 frames; worst position 0.0015 mm, rotation 0.0008 deg, scale 0.000006
+    PASS
+    rc=0
+                           "About the map": (0, 1, 0, "(c) OpenStreetMap contributors|ODbL: openstreetmap.org/copyright", False)}   # read-only: the credit
+    E       AssertionError: assert {'About the m...', True), ...} == {'About the m...', True), ...}
+    E         Omitting 6 identical items, use -vv to show
+    E         Left contains 2 more items:
+    E         {'Krathong count': (0, 100, 30, '', True),
+    E          'River krathongs': (0, 1, 0, 'Festival nights|Every night', True)}
+    E         Use -v to get more diff
+    
+    tests/test_tide_harbour_settings_type.py:22: AssertionError
+    =========================== short test summary info ============================
+    FAILED tests/test_cuckoo_village_settings.py::test_the_oad_is_what_the_tool_makes_from_the_oas
+    FAILED tests/test_tide_harbour_level.py::test_the_actor_map_is_the_level_order_and_within_budget
+    FAILED tests/test_tide_harbour_settings_type.py::test_the_type_includes_settings_and_the_shared_clock_sheet
+    ERROR tests/test_tide_harbour_settings.py::test_every_value_of_every_field_poses_the_scene_as_the_model_says[drift]
+    ERROR tests/test_tide_harbour_settings.py::test_every_value_of_every_field_poses_the_scene_as_the_model_says[numerals]
+    ERROR tests/test_tide_harbour_settings.py::test_every_value_of_every_field_poses_the_scene_as_the_model_says[gauge]
+    ERROR tests/test_tide_harbour_settings.py::test_every_value_of_every_field_poses_the_scene_as_the_model_says[life]
+    ERROR tests/test_tide_harbour_settings.py::test_every_value_of_every_field_poses_the_scene_as_the_model_says[panel]
+    ERROR tests/test_tide_harbour_settings.py::test_every_value_of_every_field_poses_the_scene_as_the_model_says[krathong_mode]
+    ERROR tests/test_tide_harbour_settings.py::test_every_value_of_every_field_poses_the_scene_as_the_model_says[krathong_count]
+    ERROR tests/test_tide_harbour_settings.py::test_festival_launches_gradually_in_the_real_vm
+    ERROR tests/test_tide_harbour_settings.py::test_one_hundred_can_accumulate_without_an_early_departure
+    ERROR tests/test_tide_harbour_settings.py::test_launched_paths_clear_the_tower_quay
+    ERROR tests/test_tide_harbour_settings.py::test_a_settings_object_that_does_not_answer_leaves_the_last_values
+    3 failed, 179 passed, 15 skipped, 1684 deselected, 11 errors in 277.69s (0:04:37)
+    ```
+
+    **FAIL as written**, on failures that predate this plan, all tracked in the TODO item "Pre-existing test failures seen during the math work": `oas2oad` exits 1 (Cuckoo Village settings) and Tide Harbour's actor budget, settings type and settings tests. No failure is in the changed Forth: Minute Machine matches its reference (0.0015 mm), and the Cuckoo, Anamorphic and Tide spike tests that exercise the new `floor` pass (179 passed). The step passes once that item is fixed.
+
 7. Nothing else moved: the existing Forth tests still pass:
 
     ```bash

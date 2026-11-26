@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/677552b8f) | Forth math: Pixel agreement run (Will's go-ahead); --approved override for refused devices |
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/fbe8beb75) | Forth math verification 5: all 36 words bit-identical on cast1 and cast2 |
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/f182f1080) | Forth math: exact fma without fmaf where there is no hardware FMA (D8) |
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/61cb482a2) | Forth math on cast1 and cast2: CPU rows, VM cost, agreement (fma FAILs) |
@@ -8,6 +9,11 @@
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/a7e37975d) | Plan: Forth math words part 2, with a hardware support matrix |
 
 <!--history-meta v1
+677552b8f	author	Will Norris
+677552b8f	added	51
+677552b8f	deleted	0
+677552b8f	files	1
+677552b8f	body	device_native_tests.py run still refuses phone-pixel-8-pro unless\n--approved records who agreed, and when (kept as approval.txt); the\nagreement check reads the Pixel only after such a run. Verification 5\nnow passes on all five targets.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqPBXQwjNMi8EXwe2or
 fbe8beb75	author	Will Norris
 fbe8beb75	added	54
 fbe8beb75	deleted	2
