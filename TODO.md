@@ -12,7 +12,6 @@
 
 
 
-- [wip T3] **Lighthouse and Mirror and Haze: on/off settings as checkboxes.** `lighthousesettings.oas` ("Water motion") and `mirrorhazesettings.oas` ("Haze") declare `"Off|On"` radio buttons, against the checkbox rule (`288b73df2`); `test_global_level_settings` fails on it. Make each a `TYPEENTRYBOOLEAN … SHOW_AS_CHECKBOX` (see `global_settings.inc`), regenerate the `.oad`/`.ht`, rebuild both levels, repack the Clocks bundle and regenerate the phone asset. T3: settled fix, several shipped artefacts, coordinate with the Clocks sessions. [Triage, row 31](docs/diagnostics/2026-11-26-pytest-triage.md) <!-- agent:a48678b546ccea778 -->
 - [T1] **Rebuild `wf-linux-test:local` with `fonts-noto-core`.** The Dockerfile layer landed in `fefea345a`, but the local tag was not rebuilt because free disk was under 6 GB, and one attempt stalled at zero build steps. Run `task linux-test-image` once more than 8 GB is free, then run `tests/test_swarming.py tests/test_poster_clownfish_biomechanics.py -k committed_html` in the container: both should pass, not skip. T1: known recipe.
 
 - [T4] **Measure an ARMv8 32-bit build for the Chromecasts.** Both Chromecasts have ARMv8 cores (Cortex-A35, A55) but run our `armeabi-v7a` build (ARMv7 VFPv3-D16 + NEON), so `vrint` rounding and `vfma` never reach Jolt, the deformers or the Forth words. Build a variant with `-march=armv8-a -mfpu=neon-fp-armv8`, compare FPS on cast1 and cast2, and decide; it drops true ARMv7 devices. T4: build-wide, with compatibility judgment. [Math plan, Q2](docs/plans/2026-11-26-forth-math-words.md)
@@ -263,6 +262,7 @@
 
 - ✅ 2026‑11‑26 — [tide-krathong-cap-70] Will: "cap the count at about 70"; 176 posed, cast1 night 31.07 FPS. See [plan](docs/plans/2026-11-24-tide-harbour-loy-krathong.md).
 - ✅ 2026‑11‑26 — [forth-math-words-2] 27 more Forth math words; verification 1–7 PASS (6 after the Tide cap). See [plan](docs/plans/2026-11-26-forth-math-words.md).
+- ✅ 2026‑11‑26 — [lighthouse-haze-checkboxes] Water motion and Haze are checkboxes; both clocks rebuilt (`02377b71e`). See [triage](docs/diagnostics/2026-11-26-pytest-triage.md).
 - ✅ 2026‑11‑26 — [frac-loops-floor] Sea Stars, Blue Shrimp, six tanks, Moon Lantern use `floor`; C test hosts get math words. See [plan](docs/plans/2026-11-26-forth-math-words.md).
 - ✅ 2026‑11‑26 — [pytest-triage] 129 failures by root cause: 82 pass, 45 skip with reasons, 2 left (Tide budget, Off/On radios). See [triage](docs/diagnostics/2026-11-26-pytest-triage.md).
 
