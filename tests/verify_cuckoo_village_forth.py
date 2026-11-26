@@ -61,13 +61,7 @@ class Shim:
 
 
 def build(tmp: Path):
-    mm.CONSTANTS[:] = CONSTANTS
-    mm.HOST = HOST
-    src_forth, mm.forth = mm.forth, Shim
-    try:
-        ids, ix = mm.build(tmp)
-    finally:
-        mm.forth = src_forth
+    ids, ix = mm.build_with(tmp, HOST, CONSTANTS, Shim)   # restores Minute Machine's host for the next importer
     with open(tmp / "bootstrap.fth", "a") as f:          # the engine registers property@ beside its other words
         f.write(": property@ 178 sys ;\n")
     return ids, ix

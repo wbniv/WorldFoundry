@@ -120,6 +120,23 @@ def build(tmp: Path):
     return ids, ix
 
 
+def build_with(tmp: Path, host: str, constants: list[str], generator):
+    """build() with another level's host source, mailbox constants and director generator, then put Minute
+    Machine's own back. The other levels' verifiers (Cuckoo Village, Tide Harbour) derive their HOST from this
+    module's HOST when they are imported, so one that left its own here broke the next importer in the same
+    pytest process: Tide Harbour's 11 settings tests errored after the Cuckoo Village tests (triage 2026-11-26,
+    tests/test_forth_verifier_isolation.py)."""
+    global HOST, forth
+    saved = HOST, CONSTANTS[:], forth
+    HOST, forth = host, generator
+    CONSTANTS[:] = constants
+    try:
+        return build(tmp)
+    finally:
+        HOST, forth = saved[0], saved[2]
+        CONSTANTS[:] = saved[1]
+
+
 class Host:
     def __init__(self, tmp: Path, ids):
         self.ids = ids

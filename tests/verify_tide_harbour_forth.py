@@ -58,13 +58,7 @@ WRAP = {**{f"cloud_{i}": tl.CLOUD_SPAN for i in range(len(tl.CLOUDS))}, **{f"bir
 
 
 def build(tmp: Path):
-    mm.CONSTANTS[:] = CONSTANTS
-    mm.HOST = HOST
-    src_forth, mm.forth = mm.forth, forth                 # mm.build writes forth.definitions(forth.default_indices())
-    try:
-        ids, ix = mm.build(tmp)
-    finally:
-        mm.forth = src_forth
+    ids, ix = mm.build_with(tmp, HOST, CONSTANTS, forth)  # mm.build writes forth.definitions(forth.default_indices())
     with open(tmp / "bootstrap.fth", "a") as f:          # the engine registers property@ beside its other words
         f.write(": property@ 178 sys ;\n")
     return ids, ix
