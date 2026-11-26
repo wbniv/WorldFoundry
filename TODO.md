@@ -10,6 +10,8 @@
 
 - [T3] **Forth math words, part 2: exponentials, logarithms, rounding, integer bits.** 27 words in three groups: exact (`floor` `ceil` `trunc` `round` `roundeven` `fma` `copysign` `fmod`), bits (`popcount` `clz` `ctz`), libm (`exp` `expm1` `exp2` `pow` `ln` `log1p` `log2` `log10` `cbrt` `hypot`, six hyperbolics); custom syscalls 82–108; hardware matrix per target; replaces four levels' hand-rolled floors. T3: the trig plan's settled pattern, but six files, three test layers and a device agreement run. [Plan](docs/plans/2026-11-26-forth-math-words.md)
 
+- [T4] **Measure an ARMv8 32-bit build for the Chromecasts.** Both Chromecasts have ARMv8 cores (Cortex-A35, A55) but run our `armeabi-v7a` build (ARMv7 VFPv3-D16 + NEON), so `vrint` rounding and `vfma` never reach Jolt, the deformers or the Forth words. Build a variant with `-march=armv8-a -mfpu=neon-fp-armv8`, compare FPS on cast1 and cast2, and decide; it drops true ARMv7 devices. T4: build-wide, with compatibility judgment. [Math plan, Q2](docs/plans/2026-11-26-forth-math-words.md)
+
 - [T3] **Lava lamp A3 poster (Phase P).** Research document first, then the poster pipeline: physics, wax properties, history, six patents with links and QR codes, Forth, with chips on every claim. Follows the level (needs the shipped Cycles render). [Plan](docs/plans/2026-11-26-lava-lamp.md#the-a3-poster)
 
 - [T3] **Persist level settings across launches.** The Discus palette currently lasts only while the level is loaded, by design for now; the Dream starts with its default. Follow up by saving level settings and applying the saved values to both the playable level and its screensaver, with relaunch and Dream verification. [Discus palette plan](docs/plans/2026-11-23-discus-palette-selector.md)

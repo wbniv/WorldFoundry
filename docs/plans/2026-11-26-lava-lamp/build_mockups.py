@@ -233,50 +233,92 @@ LAMP_BODY = """
 <div class="tv" style="left:34px;top:70px"><canvas id="tv" width="1024" height="576"></canvas></div>
 <div id="marks"></div>
 <div id="panel" style="position:absolute;left:1112px;top:70px;width:300px">
-  <div class="h">Lava color</div><div class="sw" id="lavaSw"></div>
-  <div class="h">Water color</div><div class="sw" id="waterSw"></div>
-  <div class="h">Base close-up <span class="m">(the time, in starlight holes)</span></div>
+  <div class="h">Level settings <span class="m">· the LavaLampSettings object</span></div>
+  <div id="form" tabindex="0">
+    <div class="ttl">Level Settings</div>
+    <div class="rail" id="rail"></div>
+    <div id="rows"></div>
+    <div class="hint" id="hint"></div>
+    <div class="foot"><span>↑ ↓ select · ← → change</span><button id="apply">⇠ Apply / close</button></div>
+  </div>
+  <div class="h" style="margin-top:14px">Base close-up <span class="m">(the time, in starlight holes)</span></div>
   <canvas id="zoom" width="300" height="168" style="border-radius:8px;border:1px solid #2a2f36"></canvas>
-  <div class="note">Swatches are this mockup's controls, standing in for the level settings form. On the TV they're two radio fields on a <i>Lava lamp</i> sheet.</div>
+  <div class="note">The level's own settings form: the TV and the phone open this over the scene. It's drawn beside the screen here so you can try it. Lava color and Water color live on its <i>Lava lamp</i> sheet; changes reach the scene on Apply.</div>
 </div>
 <div id="legend" style="position:absolute;left:34px;top:684px;width:1046px;columns:2;column-gap:36px;font-size:13px"></div>
 """
 LAMP_CSS = """
 #panel .h{font-weight:650;margin:2px 0 6px;font-size:13px;color:#d9d2c4}
 #panel .m{color:var(--muted);font-weight:400}
-.sw{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
-.sw button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:#cfc8ba;padding:5px 0;border-radius:7px;border:1px solid #2a2f36;background:#13161a}
-.sw button i{width:26px;height:26px;border-radius:50%;box-shadow:inset 0 -6px 10px rgba(0,0,0,.35)}
-.sw button[aria-pressed=true]{border-color:var(--accent);background:#1e1b14;color:#fff}
+#form{background:#172d27;color:#f0ead6;border-radius:6px;padding:10px 12px 10px;outline:none;font-family:system-ui,sans-serif;box-shadow:0 0 0 1px #24453b}
+#form:focus{box-shadow:0 0 0 2px #e7c873}
+#form .ttl{font-weight:650;font-size:15px;margin-bottom:8px}
+#form .rail{display:flex;gap:4px;margin-bottom:8px}
+#form .rail div{flex:1;text-align:center;font-size:12px;padding:4px 0;cursor:pointer;border-radius:3px}
+#form .rail div.on{background:#213b31}
+#form .row{display:flex;align-items:center;font-size:13px;padding:5px 6px;margin-bottom:3px;cursor:pointer;border-radius:3px}
+#form .row.f{background:#4a7d52}
+#form .row .v{margin-left:auto;display:flex;align-items:center;gap:6px}
+#form .row .v i{display:inline-block;width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 1px rgba(255,255,255,.35)}
+#form .row button{all:unset;cursor:pointer;width:16px;text-align:center;color:#e7c873;visibility:hidden}
+#form .row.f button{visibility:visible}
+#form .hint{font-size:11px;color:#b9c2bb;min-height:30px;margin-top:4px}
+#form .foot{display:flex;align-items:center;font-size:11px;color:#e7c873;margin-top:2px}
+#form .foot button{all:unset;cursor:pointer;margin-left:auto;color:#f0ead6;font-size:12px;padding:2px 6px;border-radius:3px}
+#form .foot button.dirty{background:#4a7d52}
 .note{margin-top:10px;font-size:12px;color:var(--muted)}
 .mk{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#141006;font:700 12px/22px system-ui;text-align:center}
-.mk::before{content:"";position:absolute;right:22px;top:10px;width:9px;height:2px;background:var(--accent)}
 #legend p{margin:0 0 7px;break-inside:avoid}
 #legend b{display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#141006;text-align:center;font:700 11px/20px system-ui;margin-right:8px}
 """
 LAMP_SCRIPT = r"""
-const st={lava:DEF_LAVA,water:DEF_WATER};
-const sim=makeSim(7,8);
+// Applied values: what the level is running with. Pending: what the form shows until Apply.
+const applied={lava:DEF_LAVA,water:DEF_WATER,drift:0,fps:0};
+const pending=Object.assign({},applied);
+const SHEETS=[
+ ["Clock",[["drift","Camera drift",["Slow","Off"],"The camera drifts slowly so no pixel sits still on the screen; Off holds it still"]]],
+ ["Lava lamp",[["lava","Lava color",LAVA.map(x=>x[0]),"Wax color while this level is loaded"],["water","Water color",WATER.map(x=>x[0]),"Liquid color while this level is loaded"]]],
+ ["Display",[["fps","Show framerate",["Off","On"],"Show the frames per second overlay at the bottom right"]]]];
+let sheet=1,row=0;
+function renderForm(){
+ document.getElementById('rail').innerHTML=SHEETS.map(([n],i)=>`<div class="${i===sheet?'on':''}" data-i="${i}">${n}</div>`).join('');
+ const fields=SHEETS[sheet][1];
+ document.getElementById('rows').innerHTML=fields.map(([k,label,opts],i)=>{const v=pending[k];const sw=k==='lava'?LAVA[v][1]:k==='water'?WATER[v][1]:null;
+  return `<div class="row ${i===row?'f':''}" data-r="${i}">${label}<span class="v"><button data-d="-1">◀</button>${sw?`<i style="background:${sw}"></i>`:''}${opts[v]}<button data-d="1">▶</button></span></div>`;}).join('');
+ document.getElementById('hint').textContent=fields[row][3];
+ document.getElementById('apply').className=JSON.stringify(pending)!==JSON.stringify(applied)?'dirty':'';
+}
+function change(d){const [k,,opts]=SHEETS[sheet][1][row];pending[k]=(pending[k]+d+opts.length)%opts.length;renderForm();}
+function apply(){Object.assign(applied,pending);renderForm();window.__redraw&&window.__redraw();}
+document.getElementById('rail').onclick=e=>{const i=e.target.dataset.i;if(i!==undefined){sheet=+i;row=0;renderForm();}};
+document.getElementById('rows').onclick=e=>{const b=e.target.closest('button'),r=e.target.closest('.row');if(r){row=+r.dataset.r;}if(b&&r&&r.classList.contains('f'))change(+b.dataset.d);else renderForm();};
+document.getElementById('apply').onclick=apply;
+document.getElementById('form').onkeydown=e=>{const n=SHEETS[sheet][1].length;
+ if(e.key==='ArrowUp'){row=(row+n-1)%n;}else if(e.key==='ArrowDown'){row=(row+1)%n;}
+ else if(e.key==='ArrowLeft'){change(-1);e.preventDefault();return;}else if(e.key==='ArrowRight'){change(1);e.preventDefault();return;}
+ else if(e.key==='Enter'){apply();}else if(e.key==='Tab'){sheet=(sheet+(e.shiftKey?2:1))%3;row=0;}else return;
+ e.preventDefault();renderForm();};
+renderForm();
+const sim=makeSim(7,8);let fpsShown=60,lastT=performance.now();
 const views=[
- {canvas:document.getElementById('tv'),sim,draw:(ctx,W,H,v)=>{v.G=drawScene(ctx,W,H,{sim,lava:st.lava,water:st.water,time:nowHHMM(),cache:v.cache||(v.cache={}),drift:W*0.006*Math.sin(sim.t*2*Math.PI/600)});}},
- {canvas:document.getElementById('zoom'),sim,frozen:true,draw:(ctx,W,H,v)=>{drawScene(ctx,W,H,{sim,lava:st.lava,water:st.water,time:nowHHMM(),cache:v.cache||(v.cache={}),scale:1.25,baseFrac:0.96});}}];
-function swatches(id,list,key){const el=document.getElementById(id);list.forEach(([n,h],i)=>{const b=document.createElement('button');b.innerHTML=`<i style="background:${h}"></i>${n}`;b.onclick=()=>{st[key]=i;sync();};el.appendChild(b);});}
-function sync(){[...document.querySelectorAll('#lavaSw button')].forEach((b,i)=>b.setAttribute('aria-pressed',i===st.lava));[...document.querySelectorAll('#waterSw button')].forEach((b,i)=>b.setAttribute('aria-pressed',i===st.water));window.__redraw&&window.__redraw();}
-swatches('lavaSw',LAVA,'lava');swatches('waterSw',WATER,'water');sync();
+ {canvas:document.getElementById('tv'),sim,draw:(ctx,W,H,v)=>{const now=performance.now(),dt=now-lastT;lastT=now;if(dt>0&&dt<200)fpsShown=fpsShown*0.95+0.05*(1000/dt);
+   v.G=drawScene(ctx,W,H,{sim,lava:applied.lava,water:applied.water,time:nowHHMM(),cache:v.cache||(v.cache={}),drift:applied.drift?0:W*0.006*Math.sin(sim.t*2*Math.PI/600)});
+   if(applied.fps){ctx.font='13px ui-monospace,monospace';const t=fpsShown.toFixed(1),w=ctx.measureText(t).width;ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(W-w-22,H-28,w+12,19);ctx.fillStyle='#fff';ctx.fillText(t,W-w-16,H-14);}}},
+ {canvas:document.getElementById('zoom'),sim,frozen:true,draw:(ctx,W,H,v)=>{drawScene(ctx,W,H,{sim,lava:applied.lava,water:applied.water,time:nowHHMM(),cache:v.cache||(v.cache={}),scale:1.25,baseFrac:0.96});}}];
 const LEG=[["Cap","conical metal cap; the top of the globe is the coolest place, where wax rests and cools before it sinks"],
 ["Glass","tapered globe, widest a quarter of the way up; painted highlight strips and darkened edges give the cylinder its volume"],
 ["Rising blob","heated wax stretches into a teardrop as it climbs, cools as it goes, then flattens against the top"],
-["Liquid","lit from below: bright and warm over the bulb, deep and dark at the top. It tints the wax and the room"],
+["Liquid","lit from below: bright and warm over the bulb, deep and dark at the top. Its colour is the Water color setting"],
 ["Coil and pool","cold wax pools on the wire coil; when the pool is hot enough a tower rises and pinches off"],
 ["Starlight digits","the current local time, 24-hour, in the perforated gold base: lit holes spell HH:MM; the others glow faintly"],
 ["Wall glow","the lamp lights the wall in a mix of liquid and wax colour"],
 ["Sideboard","a pool of light at the foot of the lamp; nothing else in the room moves"]];
 document.getElementById('legend').innerHTML=LEG.map(([t,d],i)=>`<p><b>${i+1}</b><strong>${t}</strong>: ${d}</p>`).join('');
 let placed=false;
-runViews(views,()=>{if(placed||!views[0].G)return;placed=true;const G=views[0].G,ox=45,oy=81,x=1085;
+runViews(views,()=>{if(placed||!views[0].G)return;placed=true;const G=views[0].G,oy=81,x=1085;
  const ys=[G.gt-G.hc*0.5,G.gt+G.Hg*0.12,G.gb-G.Hg*0.55,G.gb-G.Hg*0.28,G.gb-G.Hg*0.03,G.baseY-G.hb*0.5];
  const m=document.getElementById('marks');ys.forEach((y,i)=>{const d=document.createElement('div');d.className='mk';d.style.left=x+'px';d.style.top=(oy+y-11)+'px';d.textContent=i+1;m.appendChild(d);});
- [[G.gb-G.Hg*1.2,7],[G.baseY+4,8]].forEach(([y,n])=>{const d=document.createElement('div');d.className='mk';d.style.left='4px';d.style.top=(oy+y-11)+'px';d.textContent=n;d.style.setProperty('--x','0');m.appendChild(d);});});
+ [[G.gb-G.Hg*1.2,7],[G.baseY+4,8]].forEach(([y,n])=>{const d=document.createElement('div');d.className='mk';d.style.left='6px';d.style.top=(oy+y-11)+'px';d.textContent=n;m.appendChild(d);});});
 """
 
 # ------------------------------------------------------- time-options.html
@@ -574,7 +616,7 @@ def main():
     import json
     opts = json.dumps([[n, a, b, c, d, e] for n, a, b, c, d, e in OPTIONS])
     pages = {
-        'lamp.html': page('Lava lamp: the screensaver', 'Live: the plan’s wax model, real local time in the base (24-hour)', LAMP_BODY, LAMP_SCRIPT, LAMP_CSS),
+        'lamp.html': page('Lava lamp: the screensaver', 'Live: the plan’s wax model, real local time in the base (24-hour), colours from the Level Settings form', LAMP_BODY, LAMP_SCRIPT, LAMP_CSS),
         'time-options.html': page('Twenty ways to show the time', '★ recommended · ●●●●● legibility from a sofa · S/M build size', '<div id="grid"></div>', OPT_SCRIPT.replace('__OPTS__', opts), OPT_CSS),
         'palettes.html': page('Lava × water: all 64 pairings', 'The two new settings, every combination, at 21:47', '<div id="pal"></div><div id="key"></div>', PAL_SCRIPT, PAL_CSS),
         'settings.html': page('Level settings: lava and water color', 'TV overlay, result after Apply, phone form', SET_BODY, SET_SCRIPT, SET_CSS),

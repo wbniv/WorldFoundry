@@ -1,6 +1,6 @@
 # Forth math words, part 2: exponentials, logarithms, rounding and the hardware
 
-**Status: plan for review, 2026‑11‑26.** Nothing is built. This plan follows the [trig words plan](2026-11-21-forth-trig-words.md): the same table, the same `libm` policy, the same loud refusals and the same three test layers. It grew out of the [lava lamp plan](2026-11-26-lava-lamp.md), which needs `exp`, `expm1`, `cbrt` and `floor`. Will's direction (2026‑11‑26):
+**Status: approved 2026‑11‑26; implementation started.** Will: "yes to all 3 math" (Q1–Q3 accepted at the recommendations), then "implement math plan". This plan follows the [trig words plan](2026-11-21-forth-trig-words.md): the same table, the same `libm` policy, the same loud refusals and the same three test layers. It grew out of the [lava lamp plan](2026-11-26-lava-lamp.md), which needs `exp`, `expm1`, `cbrt` and `floor`. Will's direction (2026‑11‑26):
 
 > "we could add exp to the engine … we already added trig functions … exp, ln, log, etc would be natural next steps … consider other functions to add? what are the functions getting added?"
 
@@ -183,9 +183,9 @@ sequenceDiagram
 
 | # | Question | My recommendation |
 |---|---|---|
-| Q1 | Add group B (`popcount`, `clz`, `ctz`) now, with no level needing them yet? | **Yes**: three table rows, and the hardware does them in one instruction almost everywhere |
-| Q2 | Open a separate TODO to measure the Chromecasts on an ARMv8 32-bit build (`vrint`, `vfma`, and whatever else the compiler finds in Jolt and the deformers)? | **Yes**, as a T4 measurement: it could be free frame rate on our slowest device, but it drops true ARMv7 devices |
-| Q3 | Run the agreement check (verification 5) on the devices too, not only in the container? | **Yes**: it is the only evidence that the PC's reference results are what the Chromecast computes |
+| Q1 | Add group B (`popcount`, `clz`, `ctz`) now, with no level needing them yet? | ~~**Yes**: three table rows, and the hardware does them in one instruction almost everywhere~~ **Accepted.** |
+| Q2 | Open a separate TODO to measure the Chromecasts on an ARMv8 32-bit build (`vrint`, `vfma`, and whatever else the compiler finds in Jolt and the deformers)? | ~~**Yes**, as a T4 measurement~~ **Accepted**: TODO item added. |
+| Q3 | Run the agreement check (verification 5) on the devices too, not only in the container? | ~~**Yes**~~ **Accepted**: verification 5 runs on the Pixel, cast1 and cast2. |
 
 ## Phases
 
