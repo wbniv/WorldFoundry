@@ -1412,6 +1412,8 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                 // docs/plans/2026-10-16-saltwater-seahorses.md, E0 and E3. DFRM v2 blocks are
                 // 40 + 4 x curves cells, at most 104 (DfrmMaxBlock;
                 // docs/plans/2026-11-02-gulf-of-thailand-reef-tank.md, E4).
+                // Morph (kind 7) takes 10 cells: six weights, tint R G B, glow
+                // (docs/plans/2026-11-26-lava-lamp.md, E1).
                 const int actor=int(zf_pop(ctx)),kind=int(zf_pop(ctx)),n=int(zf_pop(ctx));
                 const int maxChannels=custom==53?8:104;
                 float channels[104]={0};
@@ -1424,7 +1426,7 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                         Mailboxes& mb=g_mgr->LookupMailboxes(g_curObj);
                         for(int i=0;i<n;++i) channels[i]=mb.ReadMailbox(block+i).AsFloat();
                     }
-                    if(kind>=int(DeformKind::Fish)&&kind<=int(DeformKind::Dfrm)&&(custom==53||(g_mgr&&block>0))&&
+                    if(kind>=int(DeformKind::Fish)&&kind<=int(DeformKind::Morph)&&(custom==53||(g_mgr&&block>0))&&
                         theLevel&&actor>0&&actor<theLevel->GetMaxObjectIndex()) {
                         BaseObject* object=theLevel->GetObject(actor);
                         if(object&&IsActor(object)) {

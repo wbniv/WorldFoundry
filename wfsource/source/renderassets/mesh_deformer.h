@@ -1,7 +1,7 @@
 //============================================================================
 // mesh_deformer.h: one deformer slot per RenderActor3D, for every kind.
 //
-// Each kind (fish, fin, swim, jelly, lion, DFRM) is a MeshDeformer. An actor
+// Each kind (fish, fin, swim, jelly, lion, DFRM, morph) is a MeshDeformer. An actor
 // holds at most one, so exclusivity is structural: a call for a different kind
 // returns OtherKindBound. The five species kinds were moved here verbatim from
 // RenderActor3D; their maths stays in fish_deform.h ... lionfish_deform.h.
@@ -17,12 +17,13 @@
 // Values are what scripts see (deform/deform-block return them, and DFRM
 // writes them to block + 39): 0 ok, 1 no metadata, 2 another kind bound,
 // 3 posed but a joint clamped, 4 non-finite input, 5 bad input.
-enum class DeformKind : uint8_t { Fish = 1, Fin, Swim, Jelly, Lion, Dfrm };
+// Morph (7): MRPH targets and prelit vertex colours, docs/plans/2026-11-26-lava-lamp.md E1.
+enum class DeformKind : uint8_t { Fish = 1, Fin, Swim, Jelly, Lion, Dfrm, Morph };
 enum class DeformStatus : uint8_t { Ok = 0, NoMetadata = 1, OtherKindBound = 2, Clamped = 3, NotFinite = 4, BadInput = 5 };
 
 struct DeformTarget {                   // everything a deformer may touch
     Vertex3D* vertices; int count;      // writable list: the actor streams, as before
-    RenderObject3D& object;             // metadata (LRIG, DFRM), faces and side effects (lion palette)
+    RenderObject3D& object;             // metadata (LRIG, DFRM, MRPH), faces and side effects (lion palette, primitives)
     double time;                        // level seconds (DFRM clip playback); 0 for the species kinds
     // The actor's world rotation, row-major, row i = model axis i in world space
     // (Matrix34 rows). DFRM's vertical-post lead-in turns the tail horizontal in

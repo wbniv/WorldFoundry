@@ -67,6 +67,7 @@ RenderObject3D::RenderObject3D( Memory& memory, const RenderObject3D& obj3d )
 
     _lionRig=obj3d._lionRig;
 	_dfrm=obj3d._dfrm;
+	_morph=obj3d._morph;
 	_materialList = obj3d._materialList;
 	_materialCount = obj3d._materialCount;
 
@@ -86,8 +87,8 @@ RenderObject3D::RenderObject3D( Memory& memory, const RenderObject3D& obj3d )
     }
 	_faceCount = obj3d._faceCount;
 	_faceList = obj3d._faceList;
-	if(_dfrm) {
-		// DFRM writes positions and face normals: each copy needs its own.
+	if(_dfrm || _morph) {
+		// DFRM and MRPH write positions (MRPH also colours) and face normals: each copy needs its own.
 		_vertexList=new(memory) Vertex3D[_vertexCount];
 		for(int i=0;i<_vertexCount;i++) _vertexList[i]=obj3d._vertexList[i];
 		_faceList=new(memory) TriFace[_faceCount+1];
@@ -265,6 +266,22 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
                 const char* reason="";
                 if(!_dfrm && wf_render::ParseDfrm(bytes.data(),bytes.size(),vertexCount,*data,reason)) _dfrm=data;
                 else std::fprintf(stderr,"DFRM: chunk dropped, mesh keeps its rest pose (%s)\n",_dfrm?"duplicate chunk":reason);
+                break;
+            }
+            case IFFTAG('M','R','P','H'):
+            {
+                // MRPH v1 (renderassets/morph_deform.h): morph targets for the Morph
+                // deformer. The exporter writes it from shape keys, so a bad one is a
+                // tool bug: fail loud (a Release build drops it whole and says so).
+                std::vector<uint8> bytes(chunkIter->BytesLeft());
+                if(!bytes.empty()) chunkIter->ReadBytes(bytes.data(),int(bytes.size()));
+                auto data=std::make_shared<wf_render::MorphData>();
+                const char* reason="duplicate chunk";
+                if(!_morph && wf_render::ParseMorph(bytes.data(),bytes.size(),vertexCount,*data,reason)) _morph=data;
+                else {
+                    std::fprintf(stderr,"MRPH: chunk dropped (%s)\n",reason);
+                    AssertMsg(0,"MRPH chunk is invalid: " << reason);
+                }
                 break;
             }
             case IFFTAG('O','P','A','C'):

@@ -1,5 +1,6 @@
 // deformer_golden: bit-for-bit regression guard for the five per-species mesh
-// deformers (fish, fin, swim, jelly, lion).
+// deformers (fish, fin, swim, jelly, lion) and the Morph kind (positions and
+// vertex colours; docs/plans/2026-11-26-lava-lamp.md, E1).
 //
 // Loads the real aquarium meshes through RenderActor3D's on-disk constructor,
 // exactly as the engine does, drives the public Set*Deformation / SetLionPose
@@ -66,8 +67,9 @@ std::vector<char> ReadFile(const std::string& path)
     return bytes;
 }
 
-// One recorded state: positions as raw float bits, then each material's palette.
-void Capture(RenderActor3D& actor, std::vector<uint32_t>& out)
+// One recorded state: positions as raw float bits, then each material's palette;
+// with colours (the Morph kind), then every vertex colour as 0x00RRGGBB.
+void Capture(RenderActor3D& actor, std::vector<uint32_t>& out, bool colours = false)
 {
     RenderObject3D& object = const_cast<RenderObject3D&>(*actor.GetRenderObject());
     const int count = object.GetVertexCount();
@@ -83,6 +85,10 @@ void Capture(RenderActor3D& actor, std::vector<uint32_t>& out)
         out.push_back(object.GetMaterial(i).PaletteDark());
         out.push_back(object.GetMaterial(i).PaletteLight());
     }
+    if (colours)
+        for (int i = 0; i < count; ++i)
+            out.push_back((uint32_t(vertices[i].color.Red()) << 16) | (uint32_t(vertices[i].color.Green()) << 8) |
+                          uint32_t(vertices[i].color.Blue()));
 }
 
 // Largest component difference between each face's stored normal and a fresh
@@ -119,7 +125,11 @@ struct Case
     const char* name;
     const char* mesh;
     std::vector<std::function<void(RenderActor&)>> steps;
+    bool colours = false;           // also record vertex colours (the Morph kind writes them)
 };
+
+// Morph: six weights, tint R G B, glow (docs/plans/2026-11-26-lava-lamp.md, E1).
+DeformStatus Morph(RenderActor& a, std::vector<float> c) { return a.Deform(DeformKind::Morph, c.data(), int(c.size())); }
 
 const float NaN = std::numeric_limits<float>::quiet_NaN();
 const float ArowanaMin = -3.5563973f, ArowanaMax = 2.9436027f;   // arowana.py TAIL_X / NOSE_X
@@ -176,6 +186,22 @@ std::vector<Case> Cases()
         [](A a) { a.SetLionPose(-.25f, .5f, .2f, 1.f, 0x123456u, 0x654321u); },
         [](A a) { a.SetFinDeformation(.1f, .1f, 0.f, 1.f); },                    // refused: lion is bound
     }});
+    // The lava lamp's wax blob: six targets (rise fall squash neck wobble_a wobble_b) and prelit colours.
+    cases.push_back({"morph_lava_blob", "wflevels/lava_lamp/blob.iff", {
+        [](A a) { Morph(a, {0, 0, 0, 0, 0, 0, 1, 1, 1, 1}); },                     // rest pose, untinted
+        [](A a) { Morph(a, {.7f, 0, 0, 0, .5f, .5f, .97f, .62f, .17f, 1.1f}); },   // a rising teardrop, orange
+        [](A a) { Morph(a, {0, .3f, 1, .4f, .2f, .8f, .2f, .9f, .3f, .8f}); },     // a pancake with a neck, green
+        [](A a) { Morph(a, {0, .3f, 1, .4f, .2f, .8f, .2f, .9f, .3f, .8f}); },     // repeated: skipped, same state
+        [](A a) { Morph(a, {-.5f, 2, 0, 0, 0, 1.5f, 2, 1, .5f, 1.5f}); },          // weights unclamped; colours clamp at 255
+        [](A a) { Morph(a, {0, 0, 0, 0, 0, 0, NaN, 1, 1, 1}); },                   // refused: not finite
+        [](A a) { Morph(a, {0, 0, 0, 0, 0, 0, 1, 1, 1}); },                        // refused: nine channels
+        [](A a) { a.SetFishDeformation(.3f, .05f); },                              // refused: morph is bound
+    }, true});
+    // A pure tint actor (an MRPH chunk with no targets): colours change, positions never move.
+    cases.push_back({"morph_lava_liquid", "wflevels/lava_lamp/liquid.iff", {
+        [](A a) { Morph(a, {0, 0, 0, 0, 0, 0, .478f, .173f, 1, 1}); },             // violet water
+        [](A a) { Morph(a, {1, 1, 1, 1, 1, 1, 1, .824f, .227f, .9f}); },           // yellow; weights ignored, no targets
+    }, true});
     return cases;
 }
 
@@ -248,7 +274,7 @@ int main(int argc, char** argv)
         float normalError = 0;
         int normalFaces = 0;
         for (const auto& step : c.steps) {
-            step(actor); Capture(actor, got);
+            step(actor); Capture(actor, got, c.colours);
             normalFaces = CheckNormals(actor, normalError);
         }
         if (!record) {

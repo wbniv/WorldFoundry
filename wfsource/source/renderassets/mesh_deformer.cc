@@ -1,7 +1,7 @@
 //============================================================================
 // mesh_deformer.cc: the deformer kinds behind RenderActor3D's one slot.
 //
-// Fish, fin, swim, jelly and lion are moved verbatim from RenderActor3D
+// Morph (MRPH) is new with the lava lamp. Fish, fin, swim, jelly and lion are moved verbatim from RenderActor3D
 // (rendacto.cc before the E0 move): the same clamps, the same arithmetic order,
 // the same weights. deformer_golden compares them bit for bit with fixtures
 // recorded from the old code. The generic checks (finite channels, the slot's
@@ -14,6 +14,7 @@
 #include <renderassets/jelly_deform.h>
 #include <renderassets/lionfish_deform.h>
 #include <renderassets/dfrm_deform.h>
+#include <renderassets/morph_deform.h>
 #include <renderassets/face_normal.h>
 
 #include <algorithm>
@@ -306,6 +307,60 @@ private:
     int _cells = wf_render::DfrmInputCount;     // the bound chunk's block size
 };
 
+// Morph: MRPH targets blended by six weights, and prelit vertex colours (tint
+// x shade x glow) for a Gouraud-shaded prelit material
+// (renderassets/morph_deform.h). The colours reach the screen through the
+// primitives, so a pose rebuilds them (RefreshPrimitives); a repeated pose is
+// skipped, and an unrepeated one persists (vertices and primitives keep it).
+// A mesh with no targets is a pure tint actor: colours only, the positions
+// and face normals are never touched.
+// docs/plans/2026-11-26-lava-lamp.md, "Engine addition E1".
+class MorphDeformer : public MeshDeformer {
+public:
+    DeformKind Kind() const override { return DeformKind::Morph; }
+    int MaxChannels() const override { return wf_render::MorphChannels; }
+    DeformStatus Check(const float*, int n) const override
+    {
+        return n == wf_render::MorphChannels ? DeformStatus::Ok : DeformStatus::BadInput;
+    }
+    DeformStatus Bind(const DeformTarget& t, const float*, int) override
+    {
+        const wf_render::MorphData* data = t.object.GetMorph();
+        if (!data) return DeformStatus::NoMetadata;
+        std::vector<float> rest(3 * size_t(t.count));
+        std::vector<uint8_t> colours(3 * size_t(t.count));
+        for (int i = 0; i < t.count; ++i) {
+            const Vertex3D& v = t.vertices[i];
+            rest[3*i] = v.position.X().AsFloat(); rest[3*i+1] = v.position.Y().AsFloat(); rest[3*i+2] = v.position.Z().AsFloat();
+            colours[3*i] = uint8_t(v.color.Red()); colours[3*i+1] = uint8_t(v.color.Green()); colours[3*i+2] = uint8_t(v.color.Blue());
+        }
+        if (!_evaluator.Bind(*data, rest.data(), colours.data(), t.count)) return DeformStatus::NoMetadata;
+        return DeformStatus::Ok;
+    }
+    DeformStatus Pose(const DeformTarget& t, const float* c, int n) override
+    {
+        if (_posed && std::equal(c, c + n, _last)) return DeformStatus::Ok;
+        _evaluator.Evaluate(c);
+        const std::vector<uint8_t>& colours = _evaluator.Colours();
+        for (int i = 0; i < t.count; ++i)
+            t.vertices[i].color = Color(colours[3*i], colours[3*i+1], colours[3*i+2]);
+        if (_evaluator.MovesVertices()) {
+            const std::vector<float>& p = _evaluator.Positions();
+            for (int i = 0; i < t.count; ++i)
+                t.vertices[i].position = Vector3(Scalar(p[3*i]), Scalar(p[3*i+1]), Scalar(p[3*i+2]));
+            RecomputeFaceNormals(t);
+        }
+        t.object.RefreshPrimitives();
+        std::copy(c, c + n, _last);
+        _posed = true;
+        return DeformStatus::Ok;
+    }
+private:
+    wf_render::MorphEvaluator _evaluator;
+    float _last[wf_render::MorphChannels] = {0};
+    bool _posed = false;
+};
+
 } // namespace
 
 std::unique_ptr<MeshDeformer> MakeDeformer(DeformKind kind)
@@ -317,6 +372,7 @@ std::unique_ptr<MeshDeformer> MakeDeformer(DeformKind kind)
         case DeformKind::Jelly: return std::unique_ptr<MeshDeformer>(new JellyDeformer);
         case DeformKind::Lion:  return std::unique_ptr<MeshDeformer>(new LionDeformer);
         case DeformKind::Dfrm:  return std::unique_ptr<MeshDeformer>(new DfrmDeformer);
+        case DeformKind::Morph: return std::unique_ptr<MeshDeformer>(new MorphDeformer);
         default:                return nullptr;
     }
 }
