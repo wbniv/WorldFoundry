@@ -8,6 +8,12 @@
 # The repo is mounted at /src and build-docker/ at /build, both as the calling
 # user (no root-owned files). Core dumps are off and memory is capped, per the
 # house rule for batch engine runs. Builds the image on first use.
+#
+# --init runs a minimal init as PID 1, so orphaned processes are reaped. Without
+# it the command itself was PID 1 and never reaped them: a detached child that had
+# exited stayed a zombie, `kill -0` still found it, and the macOS close-paths
+# test's "gone within 10 s of Cmd-Q" check failed here though it passes on a Mac
+# (triage 2026-11-26, docs/diagnostics/2026-11-26-pytest-triage.md).
 set -euo pipefail
 
 usage() {
@@ -79,7 +85,7 @@ done
 user=(--user "$(id -u):$(id -g)")
 security="$(docker info --format '{{.SecurityOptions}}' 2>/dev/null || true)"
 case "$security" in *rootless*) user=(--user 0:0) ;; esac
-exec docker run --rm \
+exec docker run --rm --init \
     "${user[@]}" \
     --ulimit core=0 --memory "${WF_CONTAINER_MEMORY:-12g}" "${extra[@]}" \
     -v "$root":/src -v "$root/build-docker":/build -w /src \
