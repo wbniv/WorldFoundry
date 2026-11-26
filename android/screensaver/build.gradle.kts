@@ -63,6 +63,12 @@ android {
             versionCode = 1
             versionName = "0.1"
         }
+        create("lavaspike") {              // Lava lamp Phase 0/6 device runs: throwaway, the tidespike activities on the lava lamp bundle
+            dimension = "dream"
+            applicationId = "org.worldfoundry.lavaspike"
+            versionCode = 1
+            versionName = "0.1"
+        }
         create("planted") {
             dimension = "dream"
             applicationId = "org.worldfoundry.plantedtank"
@@ -113,6 +119,15 @@ android {
     // in twice) into generated assets as levels.manifest, which LevelCatalog reads at runtime.
     sourceSets.getByName("aquarium").assets.srcDir(aquariumCatalogAssets)
     sourceSets.getByName("clocks").assets.setSrcDirs(listOf(clocksBundleAssets, clocksCatalogAssets))
+    // Lava lamp device runs (docs/plans/2026-11-26-lava-lamp.md, Phase 0 and 6): the tidespike activities (level 0 of
+    // the bundle; N720 draws a fixed 1280 x 720 surface) on build/lavaspike-assets/cd.iff, packed by
+    // wflevels/lava_lamp/device_apk.sh. The tidespike package is retired in the coordinator's registry.
+    sourceSets.getByName("lavaspike") {
+        java.srcDir("src/tidespike/java")
+        res.srcDir("src/tidespike/res")
+        manifest.srcFile("src/tidespike/AndroidManifest.xml")
+        assets.srcDir(layout.buildDirectory.dir("lavaspike-assets"))
+    }
 }
 
 tasks.named("preBuild") { dependsOn(copyAquariumLevelCatalog, copyClocksLevelCatalog) }
