@@ -1,0 +1,161 @@
+{
+  "output": {
+    "width": 3840,
+    "height": 2160,
+    "refresh": 60.0
+  },
+  "modes": [
+    {
+      "width": 1920,
+      "height": 1080,
+      "fps": 59.94006
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "fps": 60.000004
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "fps": 59.94006
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "fps": 60.000004
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "fps": 50.0
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "fps": 29.97003
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "fps": 30.000002
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "fps": 25.0
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "fps": 23.976025
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "fps": 24.000002
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "fps": 50.0
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "fps": 29.97003
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.000002
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "fps": 25.0
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "fps": 23.976025
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "fps": 24.000002
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "fps": 59.94006
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "fps": 60.000004
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "fps": 50.0
+    }
+  ],
+  "preferred": {
+    "width": 3840,
+    "height": 2160,
+    "fps": 60.000004
+  },
+  "changed": true,
+  "product": {
+    "name": "LG TV SSCR2",
+    "pnp_id": "GSM",
+    "product_id": 1,
+    "manufacture_week": 1,
+    "manufacture_year": 2022
+  },
+  "previous_output": {
+    "width": 3840,
+    "height": 2160,
+    "refresh": 60.0
+  },
+  "previous_preferred": {
+    "width": 3840,
+    "height": 2160,
+    "fps": 60.000004
+  },
+  "verified": true,
+  "applied_output": {
+    "width": 1920,
+    "height": 1080,
+    "refresh": 60.0
+  },
+  "applied_preferred": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 60.000004
+  },
+  "temporary": true,
+  "restored": true,
+  "display_path": {
+    "display": {
+      "unique_id": "local:4621372464007046667",
+      "physical_port": 11,
+      "product": {
+        "name": "LG TV SSCR2",
+        "pnp_id": "GSM",
+        "product_id": 1,
+        "manufacture_week": 1,
+        "manufacture_year": 2022
+      }
+    },
+    "output": {
+      "width": 3840,
+      "height": 2160,
+      "refresh": 60.0
+    },
+    "software": {
+      "os_build": "UTTC.250917.004.14193937"
+    }
+  }
+}
