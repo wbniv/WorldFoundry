@@ -134,7 +134,7 @@ function drawHoleBand(ctx,cx,yT,yB,rAt,text,mode,th){
   th=th||1.0;const level=mode==='dim'?0.45:1;
   for(let c=0;c<nC;c++)for(let r=0;r<nR;r++){
     const y=yT+(r+0.5)*pitch,rr=rAt(y),a=((c-(nC-1)/2)/((nC-1)/2))*th,x=cx+rr*Math.sin(a),w=Math.cos(a);
-    if(cols[c][r]){ctx.fillStyle='rgba(20,12,3,0.9)';ell(ctx,x,y,hr*w*1.15,hr*1.15);lit.push([x,y,w]);}else{ctx.fillStyle='rgba(60,40,10,0.55)';ell(ctx,x,y,hr*w*0.8,hr*0.8);ctx.fillStyle='rgba(255,206,130,0.12)';ell(ctx,x,y,hr*w*0.5,hr*0.5);}
+    if(cols[c][r]&&mode!=='off'){ctx.fillStyle='rgba(20,12,3,0.9)';ell(ctx,x,y,hr*w*1.15,hr*1.15);lit.push([x,y,w]);}else{ctx.fillStyle='rgba(60,40,10,0.55)';ell(ctx,x,y,hr*w*0.8,hr*0.8);ctx.fillStyle='rgba(255,206,130,0.12)';ell(ctx,x,y,hr*w*0.5,hr*0.5);}
   }
   ctx.save();ctx.globalCompositeOperation='lighter';
   for(const [x,y,w] of lit){const g=ctx.createRadialGradient(x,y,0,x,y,hr*2.1);g.addColorStop(0,`rgba(255,196,110,${0.3*level})`);g.addColorStop(1,'rgba(255,170,80,0)');
