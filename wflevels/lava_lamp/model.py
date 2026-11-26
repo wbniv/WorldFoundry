@@ -26,6 +26,7 @@ on for days loses no precision (the mockup used raw seconds).
 from __future__ import annotations
 
 import math
+import os
 from typing import Dict, List
 
 import numpy as np
@@ -35,8 +36,10 @@ import lamp as _lamp
 F = np.float32
 TWO_PI = 6.283185307179586476925286766559
 
-N_BLOBS = 8
-SEED = 7
+# Six blobs: eight cost cast1 its refresh rate (docs/plans/2026-11-26-lava-lamp.md, build record). LAVA_BLOBS
+# overrides it for a diagnostic build.
+N_BLOBS = int(os.environ.get('LAVA_BLOBS', '6'))
+SEED = 2                           # with six blobs; seeds 1-11 give resting 0.28-0.37 (build record)
 DT = F(1.0) / F(30.0)              # the engine's DELTA_TIME, 1/30 s rounded to a float
 MAX_STEPS = 4                      # steps per frame at most (a long frame drops the rest)
 WARM_STEPS = 4500                  # D9: the level opens mid-flow (150 s, run at build time)

@@ -40,6 +40,9 @@ HOST = (mm.HOST
         .replace('  else if ((int)id >= 128 && wf::forthmath::HandleSyscall(c, (int)id - 128)) {}',
                  '''  else if ((int)id == 178) { int f = (int)zf_pop(c); int a = (int)zf_pop(c); auto it = props.find({a, f});
     zf_push(c, it == props.end() ? 0.0f : it->second); zf_push(c, it == props.end() ? 0.0f : 1.0f); }
+  else if ((int)id == 184) { float dt = zf_pop(c); int n = (int)zf_pop(c); int stride = (int)zf_pop(c); int first = (int)zf_pop(c);
+    std::vector<float> cells(n * stride); for (int i = 0; i < n * stride; i++) cells[i] = mbx.count(first + i) ? mbx[first + i] : 0.0f;
+    wf::lava::Pairs(cells.data(), stride, n, dt); for (int i = 0; i < n * stride; i++) mbx[first + i] = cells[i]; }
   else if ((int)id == 182) { int a = (int)zf_pop(c); int k = (int)zf_pop(c); int n = (int)zf_pop(c); int b = (int)zf_pop(c);
     deforms.push_back({b, n, k, a}); zf_push(c, 0.0f); }
   else if ((int)id >= 128 && wf::forthmath::HandleSyscall(c, (int)id - 128)) {}''')
@@ -53,7 +56,8 @@ HOST = (mm.HOST
       for (auto& x : deforms) printf("D %d %d %d %d\\n", x.block, x.n, x.kind, x.actor);
       printf("END\\n"); fflush(stdout); if (r) { zf_abort(&ctx, ZF_OK); } }
     else if (line[0] == 'T') {'''))
-assert "(int)id == 182" in HOST and "line[0] == 'E'" in HOST
+HOST = HOST.replace('#include "forth_math_zforth.hpp"', '#include "forth_math_zforth.hpp"\n#include "lava_pairs.hpp"', 1)
+assert "(int)id == 182" in HOST and "line[0] == 'E'" in HOST and "lava_pairs.hpp" in HOST
 
 CONSTANTS = ["X_POS", "Z_POS", "ROTATION_B", "X_SCALE", "Y_SCALE", "Z_SCALE",
              "WALL_HOUR", "WALL_MINUTE", "WALL_SECOND", "WALL_DAY", "DELTA_TIME"]
@@ -297,7 +301,7 @@ def main() -> int:
             mm.forth = src
         with open(tmp / "bootstrap.fth", "a") as f:
             # the engine registers these after its bootstrap (scripting_zforth.cc Init)
-            f.write(": property@ 178 sys ; : deform-block 182 sys ;\n: r@ ' lit , 0 , ' pickr , ; immediate\n")
+            f.write(": property@ 178 sys ; : deform-block 182 sys ; : lava-pairs 184 sys ;\n: r@ ' lit , 0 , ' pickr , ; immediate\n")
         host = Lamp(tmp, ids, ix, fields)
         if "--palette" not in sys.argv:
             worst, exact, lamp = check_trace(host, bad)

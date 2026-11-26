@@ -83,25 +83,8 @@ def model_words() -> List[str]:
             f"swap dup 0 > if drop {g('x')} {lit(-0.05)} * "
             f"else {lit(-0.01)} < if {g('x')} 0 < if {lit(-0.035)} else {lit(0.035)} then else 0 then then "
             f"+ {g('vx')} {lit(1.2)} * - {DT} * {g('vx')} + {p('vx')} ;")
-    for i in range(N):
-        for j in range(i + 1, N):
-            a = lambda f: at(i, f)   # noqa: E731
-            c = lambda f: at(j, f)   # noqa: E731
-            pa = lambda f: put(i, f)  # noqa: E731
-            pc = lambda f: put(j, f)  # noqa: E731
-            out.append(
-                f": ll-pair{i}{j} "
-                f"{c('x')} {a('x')} - {c('y')} {a('y')} - 2dup hypot dup 0 = if drop {lit(1e-6)} then "
-                f"{a('r')} {c('r')} + {lit(0.85)} * 2dup < if "
-                f"over - {lit(1.5)} * {DT} * swap / tuck * -rot * "
-                f"{a('vx')} over - {pa('vx')} {c('vx')} + {pc('vx')} "
-                f"{a('vy')} over - {pa('vy')} {c('vy')} + {pc('vy')} "
-                f"{c('T')} {a('T')} - {lit(0.08)} * {DT} * dup {a('T')} + {pa('T')} {c('T')} swap - {pc('T')} "
-                f"else drop dup {lit(0.3)} < if "
-                f"dup {lit(0.3)} / 1 swap - {lit(0.004)} * {DT} * swap / tuck * -rot * "
-                f"dup {a('vx')} + {pa('vx')} {c('vx')} swap - {pc('vx')} "
-                f"dup {a('vy')} + {pa('vy')} {c('vy')} swap - {pc('vy')} "
-                f"else drop drop drop then then ;")
+    # The pairs (model.Lamp.pair over every i < j) run natively: lava-pairs (F3, engine/stubs/lava_pairs.hpp), the
+    # same float32 operations in the same order; in Forth they cost cast1 its refresh rate (build record).
     for i in range(N):
         g = lambda f: at(i, f)   # noqa: E731
         p = lambda f: put(i, f)  # noqa: E731
@@ -118,7 +101,7 @@ def model_words() -> List[str]:
             f"over abs over > if swap 0 < if negate then {g('vx')} {lit(-0.2)} * {p('vx')} else drop then "
             f"{p('x')} ;")
     steps = (" ".join(f"ll-heat{i}" for i in range(N)) + " " +
-             " ".join(f"ll-pair{i}{j}" for i in range(N) for j in range(i + 1, N)) + " " +
+             f"{L.BLOB0} {L.BLOB_STRIDE} {N} {DT} lava-pairs " +
              " ".join(f"ll-int{i}" for i in range(N)))
     phases = " ".join(f"{rd(c)} {lit(rate * M.DT)} + dup floor - {wr(c)}"
                       for c, rate in ((L.P1, M.RATE1), (L.P2, M.RATE2), (L.P3, M.RATE3)))

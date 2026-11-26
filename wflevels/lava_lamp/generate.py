@@ -13,6 +13,7 @@ forth.py's script.
 """
 import json
 import math
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -56,7 +57,7 @@ MATS = {
     'wax': material('wax'),
     'gold': material('gold'),
     'liquid': material('liquid', double=True),
-    'glass': material('glass', double=True, opacity=0.18),
+    'glass': material('glass', double=True),
     'bulb': material('bulb', double=True, opacity=0.45),
     'room': material('room', double=True),
     'hole': material('hole', double=True),
@@ -271,18 +272,29 @@ def liquid_mesh():
 
 
 def glass_mesh():
-    """The globe's front sheet: translucent, with two painted highlight strips and darkened edges."""
+    """The globe's glass, faked opaque (the Risks answer to fill rate: a translucent sheet over the whole globe cost
+    cast1 its refresh rate): two painted highlight strips and a darkened band at each edge, drawn only where the
+    translucent sheet showed, in the shades it blended to. Tinted with the glass colour like the old sheet."""
     prof = globe_profile(1.03)
-    v, f, n = revolve(prof, 32, -math.pi / 2, math.pi / 2, closed=False)
-    sh = []
-    for j in range(len(prof)):
-        for k in range(n):
-            a = -math.pi / 2 + math.pi * k / 32
-            limb = abs(math.sin(a))
-            strip = 1.3 * math.exp(-((a + 0.55) / 0.10) ** 2) + 0.6 * math.exp(-((a - 0.35) / 0.06) ** 2)
-            val = 0.05 + 0.55 * limb ** 3 + strip
-            sh.append((val, val, val))
-    return mesh('glass', scaled(v), f, sh, mat='glass', morph=True)
+    verts, faces, sh = [], [], []
+
+    def band(a0, a1, segs, shade):
+        v, f, n = revolve(prof, segs, a0, a1, closed=False)
+        o = len(verts)
+        verts.extend(v)
+        faces.extend(tuple(i + o for i in t) for t in f)
+        for _j in range(len(prof)):
+            for k in range(n):
+                t = k / segs                      # 0..1 across the band
+                val = shade(t)
+                sh.append((val, val, val))
+    def strip(peak, edge):
+        return lambda t: edge + (peak - edge) * math.exp(-((t - 0.5) / 0.28) ** 2)
+    band(-0.55 - 0.045, -0.55 + 0.045, 4, strip(1.0, 0.40))   # the broad highlight, left of centre
+    band(0.35 - 0.022, 0.35 + 0.022, 2, strip(0.75, 0.40))     # the narrow one, right of centre
+    band(-math.pi / 2, -1.30, 3, lambda t: 0.12 + 0.10 * t)   # edge darkening: darkest at the very edge
+    band(1.30, math.pi / 2, 3, lambda t: 0.22 - 0.10 * t)
+    return mesh('glass', scaled(verts), faces, sh, mat='glass', morph=True)
 
 
 def bulb_glow_mesh():
@@ -451,6 +463,8 @@ actor('cs_wide', 'camshot', pos=(0, CAM_Y, EYE_Z),
 actor('Ambient', 'light', fields={'lightType': 'Ambient', 'lightRed': .5, 'lightGreen': .5, 'lightBlue': .5})
 actor('Background', 'matte', fields={'Matte Type': 'Color', 'Background Color': 0x07050b})
 actor('LavaLampSettings', 'lavalampsettings', fields={'Editor Label': 'Lava lamp'})
+# A 4K TV draws the lamp at 1080 rows and scales it up: at 2160 the fill rate missed every refresh (build record).
+actor('RenderSettings', 'levelrendersettings', fields={'Editor Label': 'Rendering', 'Maximum surface height': 1080})
 
 wall, board, table = room_meshes()
 finish(actor('WallGlow', 'platform', wall), wall)
@@ -474,7 +488,9 @@ for k in range(L.N_MERGED):
 bulb = bulb_glow_mesh()
 finish(actor('BulbGlow', 'platform', bulb), bulb)
 glass = glass_mesh()
-finish(actor('Glass', 'platform', glass), glass)
+# LAVA_DIAG=noglass: a diagnostic build with the glass sheet hidden (visibility mailbox 0, always false).
+finish(actor('Glass', 'platform', glass,
+             fields={'Visibility Mailbox': 0 if 'noglass' in os.environ.get('LAVA_DIAG', '') else 1}), glass)
 
 every = [(c, r) for c in range(COLS) for r in range(ROWS)]
 lit_any = set()
