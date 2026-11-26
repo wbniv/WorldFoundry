@@ -215,9 +215,8 @@ def director_script(variant: str, ix: Dict[str, int]) -> str:
         ": ts-x INDEXOF_X_POS swap write-actor-mailbox ;", ": ts-y INDEXOF_Y_POS swap write-actor-mailbox ;",
         ": ts-z INDEXOF_Z_POS swap write-actor-mailbox ;", ": ts-a INDEXOF_ROTATION_A swap write-actor-mailbox ;",
         ": ts-b INDEXOF_ROTATION_B swap write-actor-mailbox ;",
-        ": ts-frac begin dup 1 >= if 1 - 0 else 1 then until begin dup 0 < if 1 + 0 else 1 then until ;",
-        ": ts-floor dup ts-frac - ;",
-        ": ts-mod ( a b -- r ) over over / ts-floor * - ;",
+        ": ts-frac dup floor - ;",                                    # the engine's floor (docs/forth-math-words.md)
+        ": ts-mod ( a b -- r ) over over / floor * - ;",            # floored: takes the divisor's sign, unlike fmod
         ": ts-sin sin-rev ; : ts-cos cos-rev ;",
     ]
     if variant in FEATURES:
@@ -258,7 +257,7 @@ def director_script(variant: str, ix: Dict[str, int]) -> str:
                  "  ts-h ts@ 17 >= if ts-h ts@ 17 - 2.5 / 0 max 1 min ts-d ts! then",
                  "  ts-h ts@ 19.5 >= if 1 ts-d ts! then",
                  "  ts-h ts@ 7 < if 1 ts-h ts@ 4.5 - 2.5 / 0 max 1 min - ts-d ts! then",
-                 f"  ts-d ts@ {N_VEILS} * 0.5 + ts-floor ts-k ts!"]
+                 f"  ts-d ts@ {N_VEILS} * 0.5 + floor ts-k ts!"]
         if FEATURES[variant]["veils"]:
             body += ["  0 ts-i ts!", "  begin",
                      f"    ts-k ts@ ts-i ts@ 1 + = if 1 else 0 then {VEIL_MAILBOX} ts-i ts@ + ts!",
