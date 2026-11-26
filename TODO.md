@@ -10,7 +10,6 @@
 
 - [verify T3] **Forth math words, part 2: exponentials, logarithms, rounding, integer bits.** Built and pushed (a6ed5868e..57abb43d2): 27 words, custom syscalls 82–108; four levels' hand-rolled floors replaced. Verification 1–3 and 7 PASS; PC and WebAssembly agree bit for bit on all 36 words. Still open: 4 and 5 on cast1, cast2 and the Pixel (no route to run code on the devices; see the item below); 6 FAIL only because the plan's `pytest tests -k` command stops at collection (per-level runs pass). [Plan](docs/plans/2026-11-26-forth-math-words.md) <!-- agent:a6f577a2e9c7edd6f -->
 
-- [wip T4] **A route to run native test code on the Android devices.** The chromecast coordinator has no workflow that runs a native binary or shell command, or returns a file, and none reads `/proc/cpuinfo`. Add one: a coordinator workflow, or an APK vector-dump mode whose output a workflow returns. It unblocks the math plan's verification 4–5 (`tests/forth_math_agreement.py` already takes device targets), cast2's CPU row and the ARMv8 measurement. T4: new infrastructure across the coordinator and the APK. [Math plan](docs/plans/2026-11-26-forth-math-words.md) <!-- agent:a8d74aacab8791539 -->
 
 - [T3] **Replace the remaining hand-rolled `*-frac` loops with `floor`.** `aquarium_sea_stars/sea_star_player.fth`, `aquarium_blue_shrimp/shrimp.fth`, `aquarium_tanks/controller.fth`, `moon_lantern/generate.py` still loop once per unit, the pattern the math plan removed from four levels. Keep floored semantics (`over over / floor * -`, not `fmod`), rebuild, and check each level; the aquarium ones ship in the Dream APK. T3: shipped levels, device check. [Math plan](docs/plans/2026-11-26-forth-math-words.md)
 
@@ -264,6 +263,7 @@
 
 ## Done
 
+- ✅ 2026‑11‑26 — [device-native-tests] WF Native Tests APK runs native tests via the coordinator's check; cast1, cast2 run. See [plan](docs/plans/2026-11-26-device-native-test-route.md).
 - ✅ 2026-11-22 — [global-level-settings] Show framerate: one declaration, a default holder in levcomp, 22 of 23 reachable levels; cast1 proved. See [plan](docs/plans/2026-11-22-global-level-settings.md).
 
 - ✅ 2026‑11‑22 — [candle-flicker] Option A built: four flame meshes a tree, 24 two-sine rules, 38,080 VM cells pass; Will chose it over B. See [plan](docs/plans/2026-11-22-cuckoo-village-candle-flicker.md).
