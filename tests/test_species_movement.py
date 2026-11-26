@@ -29,7 +29,7 @@ def vm(tmp_path_factory):
     definitions+=re.search(r'zf_eval\(&g_ctx, "(: profile-begin [^"]*)"\)',src).group(1)+'\n'
     vendor=ROOT/'engine/vendor/zforth-41db72d1/src/zforth'
     binary=tmp/'vm'
-    subprocess.run(['cc','-O1','-I'+str(ROOT/'engine/stubs'),'-I'+str(vendor),str(ROOT/'tests/species_vm.c'),str(vendor/'zforth.c'),'-lm','-o',str(binary)],check=True)
+    from forth_math_host import build_c_host; build_c_host(ROOT/'tests/species_vm.c', binary)   # with the engine's math words
     def run(kind,trace):
         level='aquarium_'+kind; here=ROOT/'wflevels'/level
         if kind == 'thai_reef' and os.environ.get('REEF_TEST_LEVEL_DIR'):

@@ -12,6 +12,8 @@ static unsigned rng=1;
    to actor OADs (cd6b9e9e0) a settings object's fields start past 128 (ReefSettings: 129-132), so 16 lost them all. */
 #define NPROPF 512
 static float props[1024][NPROPF]; static char propset[1024][NPROPF];
+/* The engine's math words (floor, sqrt ...): tests/forth_math_host.cpp, linked in by every test that builds this host. */
+int wf_forth_math_sys(zf_ctx*c,int id); int wf_forth_math_register(zf_ctx*c);
 zf_input_state zf_host_sys(zf_ctx*c,zf_syscall_id id,const char*w) {
  int mb,a;
  if(id==128){mb=zf_pop(c);zf_push(c,mb<1900?globals[mb]:actors[current_actor][mb]);}
@@ -31,13 +33,14 @@ zf_input_state zf_host_sys(zf_ctx*c,zf_syscall_id id,const char*w) {
  else if(id==181){zf_pop(c);zf_pop(c);int n=zf_pop(c);for(int i=0;i<n;i++)zf_pop(c);zf_push(c,0);}  /* deform: status Ok */
  else if(id==182){for(int i=0;i<4;i++)zf_pop(c);zf_push(c,0);}                /* deform-block: status Ok */
  else if(id==169||id==170||id==0||id==1){zf_pop(c);}
+ else if(wf_forth_math_sys(c,id)){}
  else {fprintf(stderr,"Unexpected syscall %d\n",id);exit(1);}
  return ZF_INPUT_INTERPRET;
 }
 void zf_host_trace(zf_ctx*c,const char*f,va_list v){}
 zf_cell zf_host_parse_num(zf_ctx*c,const char*s){char*e;float n=strtof(s,&e);if(*e){fprintf(stderr,"Unknown %s\n",s);zf_abort(c,ZF_ABORT_NOT_A_WORD);}return n;}
 static void eval(zf_ctx*c,const char*s){int r=zf_eval(c,s);if(r){fprintf(stderr,"Forth error %d: %.150s\n",r,s);exit(1);}zf_cell depth;zf_uservar_get(c,ZF_USERVAR_DSP,&depth);if(depth!=0){fprintf(stderr,"Unbalanced stack %g in %s\n",(double)depth,s);exit(1);}}
-static void load(zf_ctx*c,const char*path){char buf[200000];FILE*f=fopen(path,"r");if(!f)exit(2);int n=fread(buf,1,sizeof(buf)-1,f);buf[n]=0;fclose(f);zf_init(c,0);zf_bootstrap(c);eval(c,buf);}
+static void load(zf_ctx*c,const char*path){char buf[200000];FILE*f=fopen(path,"r");if(!f)exit(2);int n=fread(buf,1,sizeof(buf)-1,f);buf[n]=0;fclose(f);zf_init(c,0);zf_bootstrap(c);if(wf_forth_math_register(c))exit(2);eval(c,buf);}
 int main(int argc,char**argv){
  player=atoi(argv[3]);director=atoi(argv[4]);load(&pvm,argv[1]);load(&dvm,argv[2]);
  char line[200];int frame=0;

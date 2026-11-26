@@ -35,7 +35,7 @@ def build_crawl(tmp, dream=False):
     definitions += ": read-mailbox 128 sys ; : write-mailbox 129 sys ; : write-actor-mailbox 130 sys ; : read-actor-mailbox 152 sys ; : r@ ' lit , 0 , ' pickr , ; immediate\n"
     vendor = ROOT/'engine/vendor/zforth-41db72d1/src/zforth'
     binary = tmp/'vm'
-    subprocess.run(['cc','-O1','-I'+str(ROOT/'engine/stubs'),'-I'+str(vendor),str(ROOT/'tests/species_vm.c'),str(vendor/'zforth.c'),'-lm','-o',str(binary)],check=True)
+    from forth_math_host import build_c_host; build_c_host(ROOT/'tests/species_vm.c', binary)   # with the engine's math words
     (tmp/'player.fth').write_text(definitions+(player().replace(': st-dream 0 ;', ': st-dream 1 ;') if dream else player()))
     definitions += re.search(r'zf_eval\(&g_ctx, "(: profile-begin [^"]*)"\)',src).group(1)+'\n'
     indices = {'Player':1,'Director':2,'BlueStar':3,'cs_wide':4,**{n:i+5 for i,(n,_,_) in enumerate(RESIDENTS)}}

@@ -23,6 +23,13 @@
 static float g_mail[NMAIL];
 static long g_reads, g_writes;           /* mailbox calls, reported by N */
 
+#ifdef WF_FORTH_MATH
+/* The engine's math words (floor, sqrt ...) from tests/forth_math_host.cpp; the tests build with it
+   (tests/forth_math_host.py), the device bench without. */
+int wf_forth_math_sys(zf_ctx *ctx, int id);
+int wf_forth_math_register(zf_ctx *ctx);
+#endif
+
 zf_input_state zf_host_sys(zf_ctx *ctx, zf_syscall_id id, const char *last_word)
 {
     (void)last_word;
@@ -31,7 +38,11 @@ zf_input_state zf_host_sys(zf_ctx *ctx, zf_syscall_id id, const char *last_word)
     case 129: { g_writes++; int i = (int)zf_pop(ctx); float v = (float)zf_pop(ctx); if (i >= 0 && i < NMAIL) g_mail[i] = v; break; }
     case ZF_SYSCALL_PRINT: { zf_cell v = zf_pop(ctx); printf(ZF_CELL_FMT " ", v); break; }
     case ZF_SYSCALL_EMIT: { putchar((char)zf_pop(ctx)); break; }
-    default: break;
+    default:
+#ifdef WF_FORTH_MATH
+        if (wf_forth_math_sys(ctx, (int)id)) break;
+#endif
+        break;
     }
     return ZF_INPUT_INTERPRET;
 }
@@ -74,6 +85,9 @@ int main(int argc, char **argv)
     static zf_ctx ctx;
     zf_init(&ctx, 0);
     zf_bootstrap(&ctx);
+#ifdef WF_FORTH_MATH
+    if (wf_forth_math_register(&ctx)) return 2;
+#endif
     char line[1 << 16];
     while (fgets(line, sizeof line, stdin)) {
         size_t n = strlen(line);

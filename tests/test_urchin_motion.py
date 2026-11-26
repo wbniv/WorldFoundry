@@ -17,7 +17,7 @@ def binaries(tmp_path_factory):
   text=source.read_text()
   if mode=='fixed':text=text.replace('g_mail[i] = v;', 'g_mail[i] = (float)((int)(v*65536))/65536;')
   src.write_text(text);binary=folder/mode
-  subprocess.run(['cc','-O1','-I'+str(ROOT/'engine/stubs'),'-I'+str(ROOT/'engine/vendor/zforth-41db72d1/src/zforth'),str(src),str(ROOT/'engine/vendor/zforth-41db72d1/src/zforth/zforth.c'),'-lm','-o',str(binary)],check=True)
+  from forth_math_host import build_c_host; build_c_host(src,binary,'-DWF_FORTH_MATH')   # with the engine's math words
   paths[mode]=binary
  return paths
 
