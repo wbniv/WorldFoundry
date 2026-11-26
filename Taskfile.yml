@@ -1866,7 +1866,7 @@ tasks:
         set -euo pipefail
         apk=android/screensaver/build/outputs/apk/clocks/release/screensaver-clocks-release.apk
         for abi in arm64-v8a armeabi-v7a; do
-          unzip -l "$apk" | grep -q "lib/$abi/libwf_dream.so" || { echo "$apk has no lib/$abi/libwf_dream.so" >&2; exit 1; }
+          unzip -l "$apk" | grep "lib/$abi/libwf_dream.so" >/dev/null || { echo "$apk has no lib/$abi/libwf_dream.so" >&2; exit 1; }
         done
         unzip -l "$apk" | grep ' lib/'
 
@@ -1892,7 +1892,7 @@ tasks:
         (cd android && ANDROID_HOME=${ANDROID_HOME:-/usr/lib/android-sdk} ./gradlew :screensaver:assembleClocksRelease --offline -PwfClocksManifest="$d/clocks-menu.manifest" -PwfClocksAssets="$d/assets")
         cp android/screensaver/build/outputs/apk/clocks/release/screensaver-clocks-release.apk "$d/screensaver-clocks-two-entry-release.apk"
         for abi in arm64-v8a armeabi-v7a; do
-          unzip -l "$d/screensaver-clocks-two-entry-release.apk" | grep -q "lib/$abi/libwf_dream.so" || { echo "no lib/$abi/libwf_dream.so" >&2; exit 1; }
+          unzip -l "$d/screensaver-clocks-two-entry-release.apk" | grep "lib/$abi/libwf_dream.so" >/dev/null || { echo "no lib/$abi/libwf_dream.so" >&2; exit 1; }
         done
         unzip -l "$d/screensaver-clocks-two-entry-release.apk" | grep -E ' lib/| assets/(cd.iff|levels.manifest)'
 
