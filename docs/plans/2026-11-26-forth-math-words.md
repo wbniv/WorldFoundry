@@ -1,6 +1,6 @@
 # Forth math words, part 2: exponentials, logarithms, rounding and the hardware
 
-**Status: approved 2026‑11‑26; implemented 2026‑11‑26 (Phases 1, 2 and 4 done; Phase 0 and 3 done on the PC and in WebAssembly; the device rows are pending: there is no route to run the vectors on a device, see Phase 3).** Will: "yes to all 3 math" (Q1–Q3 accepted at the recommendations), then "implement math plan". This plan follows the [trig words plan](2026-11-21-forth-trig-words.md): the same table, the same `libm` policy, the same loud refusals and the same three test layers. It grew out of the [lava lamp plan](2026-11-26-lava-lamp.md), which needs `exp`, `expm1`, `cbrt` and `floor`. Will's direction (2026‑11‑26):
+**Status: approved 2026‑11‑26; implemented 2026‑11‑26 (Phases 1, 2 and 4 done; Phase 0 and 3 done on the PC, in WebAssembly and, since 2026‑11‑26, on cast1 and cast2 through the [WF Native Tests route](2026-11-26-device-native-test-route.md); the Pixel rows wait for Will's go-ahead; verification 5 fails for `fma` on both Chromecasts, a bionic `fmaf` rounding bug awaiting Will's decision).** Will: "yes to all 3 math" (Q1–Q3 accepted at the recommendations), then "implement math plan". This plan follows the [trig words plan](2026-11-21-forth-trig-words.md): the same table, the same `libm` policy, the same loud refusals and the same three test layers. It grew out of the [lava lamp plan](2026-11-26-lava-lamp.md), which needs `exp`, `expm1`, `cbrt` and `floor`. Will's direction (2026‑11‑26):
 
 > "we could add exp to the engine … we already added trig functions … exp, ln, log, etc would be natural next steps … consider other functions to add? what are the functions getting added?"
 
@@ -30,8 +30,8 @@ The hardware matrix below marks which compile to a single instruction on each ma
 | Machine | CPU | Instruction set our build targets | Source |
 |---|---|---|---|
 | This PC and the Linux container | Intel Core i7‑1185G7 (Tiger Lake): SSE4.1, FMA3, AVX2, AVX‑512, POPCNT, LZCNT, BMI1 | **x86‑64 baseline (SSE2)**: CMake passes no `-march` | `lscpu`; `CMakeLists.txt` |
-| Chromecast HD (cast1, "boreal") | Amlogic S805X2, 4 × Cortex‑A35 (ARMv8‑A) | **`armeabi-v7a`**: ARMv7, VFPv3‑D16 + NEON. The device reports only 32-bit ABIs | [CNX Software](https://www.cnx-software.com/2022/09/23/chromecast-with-google-tv-hd-amlogic-s805x2-cpu-av1-video/); coordinator device list; [NDK Neon guide](https://developer.android.com/ndk/guides/cpu-arm-neon) |
-| Chromecast 4K (cast2, "sabrina") | Amlogic S905X3-class, Cortex‑A55 (ARMv8.2‑A) per CNX; Phase 0 reads `/proc/cpuinfo` to confirm | **`armeabi-v7a`**, as above | CNX (same article); coordinator |
+| Chromecast HD (cast1, "boreal") | Amlogic S805X2 (`ro.soc.model` AMLS805X2), 4 × Cortex‑A35 (CPU part `0xd04`, ARMv8‑A), 1.8 GHz. A 32-bit process sees Features `half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt lpae evtstrm aes pmull sha1 sha2 crc32` | **`armeabi-v7a`**: ARMv7, VFPv3‑D16 + NEON. The device reports only 32-bit ABIs | `/proc/cpuinfo` and `ro.soc.*` read on the device (WF Native Tests, J‑35fecef59c35); [CNX Software](https://www.cnx-software.com/2022/09/23/chromecast-with-google-tv-hd-amlogic-s805x2-cpu-av1-video/); [NDK Neon guide](https://developer.android.com/ndk/guides/cpu-arm-neon) |
+| Chromecast 4K (cast2, "sabrina") | Amlogic S905D3 (`ro.soc.model` AMLS905D3), 4 × Cortex‑A55 (CPU part `0xd05`, ARMv8.2‑A), 1.908 GHz. Features as cast1, `vfpv4` included | **`armeabi-v7a`**, as above | `/proc/cpuinfo` and `ro.soc.*` read on the device (WF Native Tests, J‑1fa92c283b27) |
 | Pixel 8 Pro, Lenovo Tab P11 Pro | ARMv8 and ARMv9 cores | **`arm64-v8a`**: ARMv8.0 | coordinator; `android/*/build.gradle.kts` |
 | iOS (Metal build) | Apple A-series | **arm64**: ARMv8 | |
 | Browser (`wf_game`, `wf-edit`) | any | **WebAssembly** (Emscripten) | `Taskfile.yml` |
@@ -198,8 +198,8 @@ flowchart LR
 ```
 
 - **Phase 0, measure.**
-  - ~~Time 10,000 calls of `sqrt`, `atan2-rev` and a dummy syscall in the VM on the PC~~ and on cast1 (`profile-begin` / `profile-end`) to test "the VM dominates". **PC done** with `tests/forth_math_vm_cost.py` (the real VM and word table, `-O2`, in the container; each word's cost over the bare `do … loop`, best of 31). **The VM dominates:** one iteration of an empty `do 2 drop loop` costs 274 ns; on top of that a trivial syscall costs 33 ns, `sqrt` 32, `floor` 45, `exp` 55, `fma` 67, `pow` 87 and `atan2-rev` 89. A one-instruction word and a `libm` word differ by about 20 ns, a tenth of the interpreter's own cost per step. The machine was shared (load average 6), and repeated runs moved each number by up to 2×, never the ordering against the loop. **cast1: not run**, no route (Phase 3).
-  - Read cast2's `/proc/cpuinfo` (Features, CPU part) to confirm its core. **Not run:** the coordinator has no shell or file-read workflow, and its `device-facts` and inventory do not record the CPU (checked 2026‑11‑26).
+  - ~~Time 10,000 calls of `sqrt`, `atan2-rev` and a dummy syscall in the VM on the PC~~ and on cast1 (`profile-begin` / `profile-end`) to test "the VM dominates". **PC done** with `tests/forth_math_vm_cost.py` (the real VM and word table, `-O2`, in the container; each word's cost over the bare `do … loop`, best of 31). **The VM dominates:** one iteration of an empty `do 2 drop loop` costs 274 ns; on top of that a trivial syscall costs 33 ns, `sqrt` 32, `floor` 45, `exp` 55, `fma` 67, `pow` 87 and `atan2-rev` 89. A one-instruction word and a `libm` word differ by about 20 ns, a tenth of the interpreter's own cost per step. The machine was shared (load average 6), and repeated runs moved each number by up to 2×, never the ordering against the loop. **cast1 done** (2026‑11‑26, WF Native Tests): the bare loop step costs 1,062 ns, a trivial syscall 168, `floor` 256, `exp` 314 and `atan2-rev` 446; the VM dominates there too. Verification 4 has the table.
+  - ~~Read cast2's `/proc/cpuinfo` (Features, CPU part) to confirm its core.~~ **Done** 2026‑11‑26 through WF Native Tests: Cortex‑A55 (part `0xd05`) in an Amlogic S905D3 at 1.908 GHz; cast1 is Cortex‑A35 (`0xd04`), S805X2, 1.8 GHz. Both report `vfpv4` (so `vfma`) to 32-bit code, which our VFPv3 build does not use. The machine table has the rows.
   - ~~Run the existing nine words' vector file on every target~~, as the baseline for Phase 3. **PC and WebAssembly done** (folded into Phase 3's run, which covers all 36 words); devices pending.
 - ~~**Phase 1, the words.**~~ **Done 2026‑11‑26** (commit `a6ed5868e`).
   - `forth_math.hpp`: the maths and its `Result`.
@@ -288,7 +288,36 @@ No visible surface: these are engine words and a reference document, so this pla
     fma                                  67.3       2.02x
     ```
 
-    **PC: PASS** (recorded; "the VM dominates" holds: the loop step alone is 274 ns, and `floor` and `exp` differ by 10 ns). **cast1: NOT RUN:** no route to run code and read a timing back from a device (Phase 3).
+    ```
+    $ python3 scripts/device_native_tests.py run --device chromecast-test-01
+    ...
+    J-35fecef59c35: completed; verified 16 artifacts -> /home/will/WorldFoundry-wbniv/build/device-native-tests/chromecast-test-01/J-35fecef59c35
+    collect: cpuinfo rc=0 1 ms · forth-math-dump rc=0 208 ms · forth-math-vm-cost rc=0 4,159 ms · fmaf-probe rc=0 0 ms
+    $ python3 tests/forth_math_vm_cost.py --device chromecast-test-01
+    chromecast-test-01: 10000 calls per run, best of 31, VM compiled -O2; loop overhead 1062.4 ns per iteration
+    word                          ns per call  vs nop-sys
+    nop-sys (trivial syscall)           167.6       1.00x
+    sqrt                                244.9       1.46x
+    atan2-rev                           445.5       2.66x
+    floor                               256.2       1.53x
+    exp                                 313.5       1.87x
+    pow                                 576.4       3.44x
+    fma                                 385.4       2.30x
+    rc=0
+    $ python3 tests/forth_math_vm_cost.py --device chromecast-test-02
+    chromecast-test-02: 10000 calls per run, best of 31, VM compiled -O2; loop overhead 735.2 ns per iteration
+    word                          ns per call  vs nop-sys
+    nop-sys (trivial syscall)           137.7       1.00x
+    sqrt                                186.5       1.35x
+    atan2-rev                           308.4       2.24x
+    floor                               171.8       1.25x
+    exp                                 196.1       1.42x
+    pow                                 368.1       2.67x
+    fma                                 262.2       1.90x
+    rc=0
+    ```
+
+    **PC: PASS** (recorded; "the VM dominates" holds: the loop step alone is 274 ns, and `floor` and `exp` differ by 10 ns). **cast1: PASS** (recorded 2026‑11‑26 through the [WF Native Tests route](2026-11-26-device-native-test-route.md): the same host, request script and VM, compiled `-O2` by the NDK for `armeabi-v7a`, run inside a coordinator `check`). The VM dominates on cast1 as well: the loop step alone is 1,062 ns, and `floor` and `exp` differ by 57 ns. cast2 (Cortex‑A55) is recorded too, about 30 % faster throughout. An earlier cast1 run (J‑308101d5f422) gave the same picture within 10 %.
 
 5. Agreement across machines. Group A and group B are bit-identical on the PC, WebAssembly, the Pixel, cast1 and cast2; groups C and trig are within one float ulp, with the spread recorded per word:
 
@@ -307,7 +336,57 @@ No visible surface: these are engine words and a reference document, so this pla
     PASS
     ```
 
-    **PC and WebAssembly: PASS**, bit-identical for all 36 words. **`phone-pixel-8-pro`: NOT RUN:** Will's daily phone, never used for this. **`chromecast-test-01`, `chromecast-test-02`: NOT RUN:** no coordinator workflow runs a native binary or returns its output (Phase 3); the script reports device targets as NOT RUN rather than inventing a route.
+    Re-run 2026‑11‑26 with the device targets, after `python3 scripts/device_native_tests.py run --device chromecast-test-01` and `--device chromecast-test-02` collected their dumps:
+
+    ```
+    $ EMCC_DIR=/home/will/bsnes-jg-player/emsdk/upstream/emscripten python3 tests/forth_math_agreement.py --target pc --target wasm --target phone-pixel-8-pro --target chromecast-test-01 --target chromecast-test-02
+    wasm: emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.4 (fe5be6afdff43ad58860d821fcc8572a23f92d19); node v22.16.0
+    phone-pixel-8-pro: NOT RUN: Will's daily phone; never run here
+    chromecast-test-01: WF Native Tests v2, armeabi-v7a, NDK clang and bionic libm; collected from /home/will/WorldFoundry-wbniv/build/device-native-tests/chromecast-test-01/J-35fecef59c35/wf.log
+    chromecast-test-02: WF Native Tests v2, armeabi-v7a, NDK clang and bionic libm; collected from /home/will/WorldFoundry-wbniv/build/device-native-tests/chromecast-test-02/J-1fa92c283b27/wf.log
+    74990 results per target; reference pc
+    word         group                    wasm     chromecast-test-01     chromecast-test-02
+    acos-rev     trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    asin-rev     trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    atan-rev     trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    atan2-rev    trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    cos-rev      trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    sin-rev      trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    sincos-rev   trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    sqrt         trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    tan-rev      trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    ceil         A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    clz          A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    copysign     A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    ctz          A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    floor        A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    fma          A/B       0 differ, max 0 ulp FAIL 1 differ, max 1 ulp FAIL 1 differ, max 1 ulp
+    fmod         A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    popcount     A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    round        A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    roundeven    A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    trunc        A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    acosh        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    asinh        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    atanh        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    cbrt         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    cosh         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    exp          C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    exp2         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    expm1        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    hypot        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    ln           C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    log10        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    log1p        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    log2         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    pow          C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    sinh         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    tanh         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    FAIL: fma on chromecast-test-01, fma on chromecast-test-02
+    rc=1
+    ```
+
+    **PC and WebAssembly: PASS**, bit-identical for all 36 words. **`phone-pixel-8-pro`: NOT RUN:** Will's daily phone; it waits for his go-ahead. **`chromecast-test-01`, `chromecast-test-02`: FAIL, for `fma` only.** The other 35 words are bit-identical with the PC on both Chromecasts, groups C and trig included (0 ulp, no refusal differs). `fma` differs in one case, the plan's own double-rounding vector `1.000244140625 1.000244140625 -1e-24`: the devices give `0x3f801001`, one ulp above the correctly rounded `0x3f801000` that glibc, WebAssembly and the oracle give. The cause is bionic's `fmaf`, not our code: our `armeabi-v7a` build is VFPv3, so `std::fma(float…)` calls bionic's software `fmaf`, and the route's `fmaf-probe` shows on both devices that the rounding mode does change in this process and that the same msun algorithm written out with volatile operands returns `0x3f801000`, while the library's `fmaf` returns `0x3f801001` (details in the route plan's Findings). How to fix it is Will's decision; the three options, with a recommendation, are in the [route plan's Findings](2026-11-26-device-native-test-route.md#findings).
 
 6. The four levels whose hand-rolled floors were replaced still match their references:
 

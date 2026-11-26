@@ -15,13 +15,17 @@ Targets:
   pc     g++ and glibc in the wf-linux-test container (docker/Dockerfile.linux-test)
   wasm   em++ (Emscripten), run under Emscripten's Node. The compiler is $EMCC_DIR/em++, by default the
          repo's pinned emsdk (engine/vendor/emsdk-6.0.0/upstream/emscripten; `task setup-emsdk`).
-  <device>  an Android device by coordinator name. There is no route yet to run a native binary on a
-         device through the chromecast coordinator (its workflows install and drive APKs only), so a
-         device target fails loudly rather than pretending; see the plan's Phase 3 notes.
+  <device>  an Android device by coordinator name: the same tests/forth_math_dump.cpp, compiled by the NDK into
+         the WF Native Tests APK and run on the device through the coordinator's ordinary `check`
+         (docs/plans/2026-11-26-device-native-test-route.md). This script reads the collected output,
+         build/device-native-tests/<device>/forth-math-dump.txt; produce it with
+         `python3 scripts/device_native_tests.py run --device <device>`. A device with no collected run
+         reports NOT RUN and is left out of the comparison.
 """
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import subprocess
 import sys
@@ -61,6 +65,22 @@ def run_wasm(tmp: Path) -> str:
     return subprocess.run([node, str(out)], capture_output=True, text=True, check=True).stdout
 
 
+DEVICE_RESULTS = ROOT / "build/device-native-tests"
+
+
+def run_device(device: str) -> str | None:
+    """The collected forth-math-dump output of a device, or None (and a NOT RUN line) if there is none."""
+    path = DEVICE_RESULTS / device / "forth-math-dump.txt"
+    if not path.exists():
+        print(f"{device}: NOT RUN: no collected result at {path.relative_to(ROOT)}; "
+              f"run `python3 scripts/device_native_tests.py run --device {device}`")
+        return None
+    summary = json.loads((path.parent / "summary.json").read_text())
+    print(f"{device}: WF Native Tests v{summary['version']}, {summary['abi']}, NDK clang and bionic libm; "
+          f"collected from {summary['source']}")
+    return path.read_text()
+
+
 def parse(text: str) -> dict:
     out = {}
     for line in text.splitlines():
@@ -88,14 +108,14 @@ def main() -> int:
                 results[target] = parse(run_wasm(tmp))
             elif target == "phone-pixel-8-pro":
                 print(f"{target}: NOT RUN: Will's daily phone; never run here")
-            else:
-                print(f"{target}: NOT RUN: no route to run a native binary on a device through the coordinator")
+            elif (text := run_device(target)) is not None:
+                results[target] = parse(text)
     if len(results) < 2:
         print("fewer than two targets ran: nothing to compare")
         return 1
     names = list(results)
     ref = results[names[0]]
-    failures = 0
+    failures = []                                      # (word, target)
     print(f"{len(ref)} results per target; reference {names[0]}")
     print(f"{'word':12s} {'group':6s} " + " ".join(f"{n:>22s}" for n in names[1:]))
     for word in sorted({w for w, _ in ref}, key=lambda w: (w not in TRIG, w not in EXACT, w)):
@@ -115,10 +135,11 @@ def main() -> int:
                     diff += d != 0
                     worst = max(worst, d)
             bad = status or (group == "A/B" and diff) or worst > 1
-            failures += bool(bad)
+            if bad:
+                failures.append((word, other))
             cells.append(f"{'FAIL ' if bad else ''}{diff} differ, max {worst} ulp" + (f", {status} refusal" if status else ""))
         print(f"{word:12s} {group:6s} " + " ".join(f"{c:>22s}" for c in cells))
-    print("PASS" if not failures else f"FAIL ({failures} words)")
+    print("PASS" if not failures else "FAIL: " + ", ".join(f"{w} on {t}" for w, t in failures))
     return 1 if failures else 0
 
 
