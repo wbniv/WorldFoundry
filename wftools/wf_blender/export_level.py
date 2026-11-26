@@ -457,6 +457,39 @@ def _dfrm_module():
     return dfrm_chunk
 
 
+def _mrph_module():
+    try:
+        from . import mrph_chunk
+    except ImportError:          # loaded outside the add-on package (tests, scripts)
+        import mrph_chunk
+    return mrph_chunk
+
+
+def _collect_morph(blobj):
+    """MRPH inputs for one mesh, or None: target names and, per target, the
+    shape key's position delta per Blender vertex and the name of its optional
+    shade layer (a corner colour layer named like the key). Shape keys named
+    ``morph_*``, in key order; ``wf_morph`` alone gives a pure tint chunk.
+    docs/plans/2026-11-26-lava-lamp.md, E1."""
+    mrph = _mrph_module()
+    mesh = blobj.data
+    keys = [k for k in (mesh.shape_keys.key_blocks if mesh.shape_keys else []) if k.name.startswith(mrph.PREFIX)]
+    if not keys and not blobj.get('wf_morph', False):
+        return None
+    if len(keys) > mrph.MAX_TARGETS:
+        raise ValueError(f'{blobj.name}: MRPH allows at most {mrph.MAX_TARGETS} morph_ shape keys, got {len(keys)}')
+    if blobj.get('wf_lion_rig', False) or blobj.get('wf_dfrm_rig', False):
+        raise ValueError(f'{blobj.name}: MRPH cannot share a mesh with LRIG or DFRM (one deformer per actor)')
+    names, deltas, layers = [], [], []
+    for key in keys:
+        if key.relative_key is not None and key.relative_key != mesh.shape_keys.reference_key:
+            raise ValueError(f'{blobj.name}: shape key {key.name} must be relative to the basis')
+        names.append(mrph.target_name(key.name))
+        deltas.append([tuple(k.co - v.co) for k, v in zip(key.data, mesh.vertices)])
+        layers.append(key.name)
+    return {'names': names, 'deltas': deltas, 'layers': layers}
+
+
 def _dfrm_limits(pbone, name):
     """(ventral, dorsal, lateral, twist) degrees from a Limit Rotation constraint or wf_limits."""
     con = next((c for c in pbone.constraints if c.type == 'LIMIT_ROTATION'), None)
@@ -619,6 +652,10 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
     dfrm_meta = ([(k, i, round(w * 65536)) for k, i, w in dfrm_rig['bindings']]
                  if dfrm_rig is not None else None)
 
+    # MRPH: each target's position and shade delta is part of the vertex
+    # identity too (a seam may carry different target shades).
+    morph = _collect_morph(blobj)
+
     # Triangulate into a temporary bmesh
     bm = _bmesh.new()
     bm.from_mesh(mesh)
@@ -634,6 +671,14 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
         bm.free()
         raise ValueError(f'{blobj.name}: baked material requires a vertex color layer')
 
+    morph_layers = []
+    if morph is not None:
+        for name in morph['layers']:
+            morph_layers.append(bm.loops.layers.color.get(name))
+            if morph_layers[-1] is not None and color_layer is None:
+                bm.free()
+                raise ValueError(f'{blobj.name}: shade layer {name!r} needs a base vertex color layer')
+
     bm.verts.ensure_lookup_table()
     bm.faces.ensure_lookup_table()
 
@@ -642,6 +687,7 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
     # vertex — without splitting, seam edges pick up the wrong UV from whichever
     # loop was visited first.
     split_rig = []
+    split_morph = []          # per split vertex: quantised MRPH deltas (empty without MRPH)
     split_verts = []          # list of (co, u, v, packed RGB)
     split_map   = {}          # (orig_vi, u_key, v_key, color) → new_vi
 
@@ -661,12 +707,21 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
             v_key = int(round(v * 65536))
             rgb = tuple(max(0, min(255, round(float(c) * 255))) for c in loop[color_layer][:3]) if color_layer else (255, 255, 255)
             packed_color = (rgb[0] << 16) | (rgb[1] << 8) | rgb[2]
-            key = (orig_vi, u_key, v_key, packed_color)
+            morph_meta = ()
+            if morph is not None:
+                mrph = _mrph_module()
+                for t, layer in enumerate(morph_layers):
+                    morph_meta += tuple(mrph.fixed(c) for c in morph['deltas'][t][orig_vi])
+                    target = (tuple(max(0, min(255, round(float(c) * 255))) for c in loop[layer][:3])
+                              if layer is not None else rgb)
+                    morph_meta += tuple(mrph.shade((a - b) / 255) for a, b in zip(target, rgb))
+            key = (orig_vi, u_key, v_key, packed_color, morph_meta)
             if key not in split_map:
                 split_map[key] = len(split_verts)
                 split_verts.append((bm.verts[orig_vi].co.copy(), u, v, packed_color))
                 split_rig.append((rig[orig_vi] if rig is not None else ()) +
                                  (dfrm_meta[orig_vi] if dfrm_meta is not None else ()))
+                split_morph.append(morph_meta)
             tri.append(split_map[key])
         face_triples.append((tri[0], tri[1], tri[2], face.material_index))
 
@@ -685,13 +740,13 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
                 int(round(u * 65536)), int(round(v * 65536)), color)
     # Metadata is part of identity: coincident roots with different rig roles
     # must not merge even when their position and UV are identical.
-    keys=[_vkey(*v)+meta for v,meta in zip(split_verts,split_rig)]
+    keys=[_vkey(*v)+meta+mm for v,meta,mm in zip(split_verts,split_rig,split_morph)]
     _canon={key:i for i,key in enumerate(sorted(set(keys)))}
     _old_to_new=[_canon[key] for key in keys]
-    _canon_verts=[None]*len(_canon);_canon_rig=[None]*len(_canon)
-    for v,meta,key in zip(split_verts,split_rig,keys):
-        _canon_verts[_canon[key]]=v;_canon_rig[_canon[key]]=meta
-    split_verts=_canon_verts;split_rig=_canon_rig
+    _canon_verts=[None]*len(_canon);_canon_rig=[None]*len(_canon);_canon_morph=[None]*len(_canon)
+    for v,meta,mm,key in zip(split_verts,split_rig,split_morph,keys):
+        _canon_verts[_canon[key]]=v;_canon_rig[_canon[key]]=meta;_canon_morph[_canon[key]]=mm
+    split_verts=_canon_verts;split_rig=_canon_rig;split_morph=_canon_morph
     _faces = []
     for a, b, c, m in face_triples:
         na, nb, nc = _old_to_new[a], _old_to_new[b], _old_to_new[c]
@@ -789,11 +844,17 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
         positions=[tuple(bl_to_wf(co.x,co.y,co.z)) for co,_u,_v,_c in split_verts]
         dfrm_chunk_bytes=_write_iff_chunk('DFRM',_dfrm_module().build_chunk_curves(
             dfrm_rig['chains'],positions,bindings,dfrm_rig['transforms'],dfrm_rig['clips']))
+    mrph_chunk_bytes=b''
+    if morph is not None:
+        n=len(morph['names'])
+        positions=[[tuple(v/65536 for v in mm[6*t:6*t+3]) for mm in split_morph] for t in range(n)]
+        shades=[[tuple(v/_mrph_module().SHADE_ONE for v in mm[6*t+3:6*t+6]) for mm in split_morph] for t in range(n)]
+        mrph_chunk_bytes=_write_iff_chunk('MRPH',_mrph_module().encode(morph['names'],positions,shades,len(split_verts)))
     # Assemble MODL
     inner = (
         _write_iff_chunk('VRTX', bytes(vrtx)) + lrig +
         _write_iff_chunk('MATL', matl) + opac +
-        _write_iff_chunk('FACE', bytes(face_data)) + dfrm_chunk_bytes
+        _write_iff_chunk('FACE', bytes(face_data)) + dfrm_chunk_bytes + mrph_chunk_bytes
     )
     modl = _write_iff_chunk('MODL', inner)
 
