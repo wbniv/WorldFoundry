@@ -7,6 +7,13 @@ import subprocess
 import pytest
 ROOT=Path(__file__).resolve().parents[1]
 
+
+def _playwright():
+    """Playwright drives a real phone browser. The host has it (pip, with Chromium); the wf-linux-test container
+    has neither the module nor a browser, so there these tests skip (triage 2026-11-26)."""
+    api = pytest.importorskip("playwright.sync_api", reason="needs Playwright and its Chromium (host only, not in wf-linux-test)")
+    return api.expect, api.sync_playwright
+
 @pytest.fixture(scope='module')
 def builds(tmp_path_factory):
     out=tmp_path_factory.mktemp('generic-settings')
@@ -26,7 +33,7 @@ def test_instance_selection_lifecycle_and_transactions(builds):
     out,catalog=builds;subprocess.run([out/'check',catalog],check=True)
 
 def test_phone_picker_isolation_fractional_values_and_reconnect(builds,tmp_path):
-    from playwright.sync_api import sync_playwright,expect
+    expect, sync_playwright = _playwright()
     out,catalog=builds
     process=subprocess.Popen([str(out/'phone'),str(catalog),str(ROOT/'wfsource/source/hal/phonepad/controller.html'),str(ROOT/'wfsource/source/hal/phonepad/aquarium-layout.json')],stdout=subprocess.PIPE,text=True)
     try:

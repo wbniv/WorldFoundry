@@ -5,6 +5,13 @@ import subprocess
 import pytest
 from plant_preview_build import preview_sources
 ROOT=Path(__file__).resolve().parents[1]
+
+def _playwright():
+    """Playwright drives a real phone browser. The host has it (pip, with Chromium); the wf-linux-test container
+    has neither the module nor a browser, so there these tests skip (triage 2026-11-26)."""
+    api = pytest.importorskip("playwright.sync_api", reason="needs Playwright and its Chromium (host only, not in wf-linux-test)")
+    return api.expect, api.sync_playwright
+
 @pytest.fixture(scope='module')
 def executable(tmp_path_factory):
     exe=tmp_path_factory.mktemp('plant-phone')/'host'
@@ -12,7 +19,7 @@ def executable(tmp_path_factory):
     return exe
 
 def test_complete_phone_settings_and_reconnection(executable,tmp_path):
-    from playwright.sync_api import sync_playwright,expect
+    expect, sync_playwright = _playwright()
     schema=json.loads(subprocess.check_output([str(ROOT/'wftools/wf_attr_edit/target/release/catalog'),str(ROOT/'wfsource/source/oas/plantedtanksettings.oad')],text=True))
     fields={f['key']:f['index'] for f in schema['fields']}
     seed=f"#property-{fields['Seed']}";water=f"#property-{fields['Water type']}";speed=f"#property-{fields['Growth speed']}"
@@ -46,7 +53,7 @@ def test_complete_phone_settings_and_reconnection(executable,tmp_path):
 
 def test_generic_colour_and_text_transactions(executable,tmp_path):
     """Packed RGB and UTF-8 travel through the actual native edit transaction."""
-    from playwright.sync_api import sync_playwright,expect
+    expect, sync_playwright = _playwright()
     process=subprocess.Popen([str(executable),str(ROOT/'wfsource/source/hal/phonepad/controller.html'),str(ROOT/'wfsource/source/hal/phonepad/aquarium-layout.json'),'controls'],stdout=subprocess.PIPE,text=True)
     try:
         port=int(process.stdout.readline());url=f'http://127.0.0.1:{port}/?k=123456'
