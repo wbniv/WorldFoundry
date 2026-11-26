@@ -1,0 +1,80 @@
+{
+  "score_sha256": "aacdb16bbd9e63892ae40c220776606a30b761daf0580298331001d9bde0ed13",
+  "host_start_wall": 1795700646.0171564,
+  "host_start_monotonic": 180366.636840495,
+  "captures": [
+    {
+      "label": "scene-start",
+      "planned_ms": 18000,
+      "started": 1795700665.5235505,
+      "ended": 1795700666.9518485,
+      "file": "input-frame-001.png",
+      "bytes": 35088,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "mode-before",
+      "planned_ms": 33500,
+      "started": 1795700681.0495555,
+      "ended": 1795700682.532976,
+      "file": "input-frame-002.png",
+      "bytes": 90316,
+      "schedule_lateness_ms": 26
+    },
+    {
+      "label": "count-before",
+      "planned_ms": 38000,
+      "started": 1795700685.5235348,
+      "ended": 1795700686.99558,
+      "file": "input-frame-003.png",
+      "bytes": 90541,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "count-set",
+      "planned_ms": 57500,
+      "started": 1795700705.0288384,
+      "ended": 1795700706.416777,
+      "file": "input-frame-004.png",
+      "bytes": 89904,
+      "schedule_lateness_ms": 5
+    },
+    {
+      "label": "river-90s",
+      "planned_ms": 90000,
+      "started": 1795700737.5235372,
+      "ended": 1795700738.9730282,
+      "file": "input-frame-005.png",
+      "bytes": 35074,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "river-185s",
+      "planned_ms": 185000,
+      "started": 1795700832.5235455,
+      "ended": 1795700834.0629919,
+      "file": "input-frame-006.png",
+      "bytes": 44044,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "river-300s",
+      "planned_ms": 300000,
+      "started": 1795700947.5235376,
+      "ended": 1795700949.0093842,
+      "file": "input-frame-007.png",
+      "bytes": 38596,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "restored",
+      "planned_ms": 421400,
+      "started": 1795701068.9235365,
+      "ended": 1795701070.3895133,
+      "file": "input-frame-008.png",
+      "bytes": 90521,
+      "schedule_lateness_ms": 0
+    }
+  ],
+  "result": "completed"
+}
