@@ -234,10 +234,11 @@ Run 2026‑11‑27 from HEAD `c2f281f8c`. Device runs between 23:21Z and 23:40Z 
     cast2: first job J-6836ee7a4d3d before_sha256 92d9eb0bec6cf680be37286052245614b870c661293663f6d370157c5af89099
            restore J-ed04f45be50d: ('org.worldfoundry.game.aquarium', 'd4f2d2040695', '92d9eb0bec6cf680be37286052245614b870c661293663f6d370157c5af89099', 'verified')
     cast1: first job J-071dc9d121c8 before_sha256 92d9eb0bec6cf680be37286052245614b870c661293663f6d370157c5af89099
-           restore J-6b8192df66e4 (install, then launcher verification): job-get installation 92d9eb0bec6cf680be37286052245614b870c661293663f6d370157c5af89099.apk, phase verifying-launcher
+           restore J-6b8192df66e4: ('org.worldfoundry.game.aquarium', 'd4f2d2040695', '92d9eb0bec6cf680be37286052245614b870c661293663f6d370157c5af89099', 'verified')
+           receipt: status failed, reason deadline-exceeded (launcher-tile verification), health ready; every journal entry restored; cleanup: restored, safe
     ```
 
-    **cast2: PASS** (the installed hash is back to `92d9eb0b…`). **cast1: install PASS, launcher verification still running** when this was written: the coordinator installed `92d9eb0b…` and then started its launcher-tile verification, which can take more than 10 minutes on cast1. Both casts had the same Aquarium (`92d9eb0b…`, 2026‑11‑25) before the runs.
+    **PASS on both casts for the installed APK**: each is back to `92d9eb0b…` (2026‑11‑25), which both had before the runs. On cast1 the coordinator's `install` job then ran its launcher-tile verification, which did not finish inside the job's deadline (`deadline-exceeded`, a known slow step on cast1); the install itself is verified, cleanup restored the foreground, and the device is `ready`.
 
 8. The Forth words on the ARMv8 build agree with the PC bit for bit in groups A and B (`fma` included) and within one ulp in group C and trig, on both casts; the VM cost table both ways:
 
