@@ -22,7 +22,7 @@ import timeline as tl
 
 CELLS = ["sod", "hr", "mi", "sc", "tm", "i", "hx", "f", "bow", "s", "w", "ent", "th", "lx", "ly", "cl", "hop", "vx", "vy",
          "n", "o", "bob", "k", "on", "lap", "hold", "u", "bb", "phi", "r", "h", "day", "doy", "at", "fp", "fx", "fl", "light", "warm"]
-WORDS = {"sm", "frac", "floor", "mod", "sin", "cos", "wx", "wy", "wz", "wa", "wb", "wc", "ai", "fig", "figs", "bird", "win",
+WORDS = {"sm", "frac", "mod", "sin", "cos", "wx", "wy", "wz", "wa", "wb", "wc", "ai", "fig", "figs", "bird", "win",
          "wins", "cam", "hands", "tick", "season", "candles", "flames", "flowers", "sgn", "calc", "put", "vis"}
 
 
@@ -46,9 +46,9 @@ def _flame_words() -> List[str]:
         ": cv-flames  0 cv-i cv!  begin",
         f"  cv-i cv@ {n(tl.FLICKER_PHI)} * cv-frac cv-fp cv!",
         f"  cv-sc cv@ {n(tl.FLICKER_F1)} * cv-fp cv@ + sin-rev  cv-sc cv@ {n(tl.FLICKER_F2)} * cv-fp cv@ 2 * + sin-rev +  cv-fx cv!",
-        "  cv-i cv@ 2 / cv-floor 5 * 13 cv-mod 13 / cv-s cv!",
+        "  cv-i cv@ 2 / floor 5 * 13 cv-mod 13 / cv-s cv!",
         f"  cv-sod cv@ {n(tl.DUSK_START)} cv-s cv@ {n(tl.DUSK_LEN)} * + >= cv-sod cv@ {n(tl.DAWN_START)} cv-s cv@ {n(tl.DAWN_LEN)} * + < + if 1 else 0 then",
-        f"  {tl.CANDLE_CELL} cv@ * cv-i cv@ 2 / cv-floor cv-s-trees < if 1 else 0 then * cv-s-window-lights * cv-fl cv!",
+        f"  {tl.CANDLE_CELL} cv@ * cv-i cv@ 2 / floor cv-s-trees < if 1 else 0 then * cv-s-window-lights * cv-fl cv!",
         f"  cv-fx cv@ 0 > if cv-fl cv@ else 0 then  {c} cv-i cv@ 2 * + cv!",
         f"  cv-fx cv@ 0 > if 0 else cv-fl cv@ then  {c + 1} cv-i cv@ 2 * + cv!",
         f"  cv-i cv@ 1 + dup cv-i cv! {tl.FLICKER_GROUPS} =  until ;",
@@ -131,9 +131,8 @@ def common_words() -> List[str]:
         L.append(f": cv-{name} {600 + i} ;")
     L += [
         ": cv-sm 0 max 1 min dup dup * swap 2 * 3 swap - * ;",
-        ": cv-frac begin dup 1 >= if 1 - 0 else 1 then until begin dup 0 < if 1 + 0 else 1 then until ;",
-        ": cv-floor dup cv-frac - ;",
-        ": cv-mod ( a b -- r ) over over / cv-floor * - ;",
+        ": cv-frac dup floor - ;",                                    # the engine's floor (docs/forth-math-words.md)
+        ": cv-mod ( a b -- r ) over over / floor * - ;",            # floored: takes the divisor's sign, unlike fmod
         ": cv-sin sin-rev ; : cv-cos cos-rev ;",
         ": cv-wx ( v actor -- ) INDEXOF_X_POS swap write-actor-mailbox ;",
         ": cv-wy ( v actor -- ) INDEXOF_Y_POS swap write-actor-mailbox ;",
@@ -186,7 +185,7 @@ def director_script(ix: Dict[str, int], fields: Dict[str, int] = None) -> str:
     # camera: one lap is 225 s so every quarter boundary starts a lap at the front-facing tower view
     L += [
         ": cv-cam",
-        f"  cv-tm cv@ {n(tl.LAP)} / cv-floor cv-k cv!",
+        f"  cv-tm cv@ {n(tl.LAP)} / floor cv-k cv!",
         f"  cv-tm cv@ cv-k cv@ {n(tl.LAP)} * - cv-lap cv!",
         f"  cv-k cv@ 0 = if {n(tl.HOLD_HOUR)} else cv-k cv@ 4 = cv-k cv@ 8 = + cv-k cv@ 12 = + if {n(tl.HOLD_QUARTER)} else 0 then then cv-hold cv!",
         f"  cv-lap cv@ cv-hold cv@ - {n(tl.LAP)} cv-hold cv@ - / cv-sm cv-u cv!",

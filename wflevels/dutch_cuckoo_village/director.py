@@ -52,7 +52,7 @@ def camera_words(ix):
           # Slow the first and last eight percent of each lap down to a stop.
           ' dup .08 < if dup .08 / dup 2 swap - * * else',
           ' dup .92 > if 1 swap - dup .08 / dup 2 swap - * * 1 swap - then then',
-          f' {len(ROUTE)} * dup cv-floor cv-k cv! cv-frac cv-u cv!']
+          f' {len(ROUTE)} * dup floor cv-k cv! cv-frac cv-u cv!']
     out += [f' cv-k cv@ {i} = if quay-leg-{i} then' for i in range(len(ROUTE))]
     return out+[' then ;']
 
@@ -111,7 +111,7 @@ def script(ix,fields):
           ' cv-s cv@ 10 / cv-sm 1 cv-s cv@ 80 - 10 / cv-sm - * cv-w cv!',
           ' cv-s cv@ 120 < if 1 else 0 then 216 cv!',
           ' quay-rain',
-          f' cv-sc cv@ cv-frac {RING_FRAMES} * cv-floor cv-i cv!',
+          f' cv-sc cv@ cv-frac {RING_FRAMES} * floor cv-i cv!',
           *[f' cv-i cv@ {i} = cv-w cv@ 0 > & if 1 else 0 then {217+i} cv!' for i in range(RING_FRAMES)],
           f' cv-sc cv@ 2 * cv-frac -.16 * cv-s cv@ 90 - 30 / cv-sm 1.4 * - {ix["Runoff"]} cv-wz',
           f' cv-sc cv@ 12 / cv-sin .13 * {ix["WaterGlints"]} cv-wx',
