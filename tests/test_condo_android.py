@@ -34,12 +34,17 @@ def test_condo_cd_iff_is_shell_plus_the_current_level():
     data = CONDO_CD.read_bytes()
     toc = read_game_toc(data)
     level = CONDO_LEVEL.read_bytes()
-    assert [t[0] for t in toc] == [b"SHEL", level[:4]], toc
-    (_, shel_off, shel_len), (_, lvl_off, lvl_len) = toc
+    # cdpack packs the UI font last (2258fce5c, docs/plans/2026-10-17-settings-editor-font.md).
+    assert [t[0] for t in toc] == [b"SHEL", level[:4], b"UIFT"], toc
+    (_, shel_off, shel_len), (_, lvl_off, lvl_len), (_, ui_off, ui_len) = toc
     assert (shel_off, shel_len) == (SECTOR, len(SHELL.read_bytes()))
     assert (lvl_off, lvl_len) == (2 * SECTOR, len(level))
     assert data[lvl_off:lvl_off + lvl_len] == level, (
         "wflevels/condo-cd.iff is stale against wflevels/condo_639_640-standalone.iff: task build-cd-iff-condo")
+    assert ui_off == lvl_off + -(-lvl_len // SECTOR) * SECTOR
+    font = (REPO / "wfsource/source/game/ui-font.wfga").read_bytes()
+    assert data[ui_off:ui_off + ui_len] == b"UIFT" + len(font).to_bytes(4, "little") + font
+    assert len(data) == ui_off + -(-ui_len // SECTOR) * SECTOR
 
 
 def test_condo_assets():

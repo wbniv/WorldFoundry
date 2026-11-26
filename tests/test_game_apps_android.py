@@ -37,13 +37,25 @@ def standalone(level):
     return LEVELS / f"{level}-standalone.iff"
 
 
+UI_FONT = REPO / "wfsource" / "source" / "game" / "ui-font.wfga"
+
+
+def check_ui_font_last(data, toc, after):
+    """cdpack packs the UI font last, as a UIFT chunk (2258fce5c, docs/plans/2026-10-17-settings-editor-font.md)."""
+    tag, off, size = toc[-1]
+    font = UI_FONT.read_bytes()
+    assert (tag, off) == (b"UIFT", after)
+    assert data[off:off + size] == b"UIFT" + len(font).to_bytes(4, "little") + font
+    return off + -(-size // SECTOR) * SECTOR
+
+
 @pytest.mark.parametrize("game", GAMES)
 def test_bundle_is_shell_plus_the_current_levels(game):
     name, levels = GAMES[game]
     data = (LEVELS / name).read_bytes()
     toc = read_game_toc(data)
     bodies = [standalone(lv).read_bytes() for lv in levels]
-    assert [t[0] for t in toc] == [b"SHEL"] + [b[:4] for b in bodies], toc
+    assert [t[0] for t in toc] == [b"SHEL"] + [b[:4] for b in bodies] + [b"UIFT"], toc
     _, shel_off, shel_len = toc[0]
     assert (shel_off, shel_len) == (SECTOR, len(SHELL.read_bytes()))
     assert data[shel_off + 8:shel_off + 8 + shel_len] == SHELL.read_bytes()
@@ -52,7 +64,7 @@ def test_bundle_is_shell_plus_the_current_levels(game):
         assert (lv_off, lv_len) == (off, len(body)), lv
         assert data[lv_off:lv_off + lv_len] == body, f"wflevels/{name} is stale against {lv}: task build-cd-iff-{game}"
         off += -(-lv_len // SECTOR) * SECTOR
-    assert len(data) == off
+    assert len(data) == check_ui_font_last(data, toc, off)
 
 
 def test_bundle_tasks():
@@ -105,15 +117,19 @@ def test_audit_every_target_is_inside_its_bundle(game):
 
 
 def test_desktop_cd_iff_unchanged():
-    """The desktop bundle is out of scope: still shell.fth + the seven levels in the original order."""
+    """The desktop bundle is out of scope: its first seven levels are still the original seven, in the original order.
+
+    Since 7203249cd its levels are wflevels/main-cd.manifest's (append-only; the baseline was appended as level 7) and
+    tests/test_main_cd_manifest.py checks the whole bundle against it; here, only that the games' indices hold."""
+    import sys
+    sys.path.insert(0, str(REPO / "scripts"))
+    import cd_manifest
     data = (REPO / "wfsource" / "source" / "game" / "cd.iff").read_bytes()
     toc = read_game_toc(data)
     order = ["smb_w1_1", "smb_w1_2", "smb_w1_3", "smb_w1_4", "snowgoons", "qbert_practice", "marble-madness-3d-astra"]
-    assert len(toc) == 1 + len(order)
+    assert [lv.path.name for lv in cd_manifest.load()][:len(order)] == [standalone(lv).name for lv in order]
     for (_, off, size), level in zip(toc[1:], order):
         assert data[off:off + size] == standalone(level).read_bytes(), level
-    cmds = str(yaml.safe_load((REPO / "Taskfile.yml").read_text())["tasks"]["build-cd-iff"]["cmds"])
-    assert re.findall(r"wflevels/(\S+)-standalone\.iff", cmds) == order
 
 
 # ---- the apps ----------------------------------------------------------------------------------------------------
@@ -146,7 +162,7 @@ def test_flavor_boots_its_own_game(flavor):
     toc, plain = read_game_toc(data), read_game_toc((LEVELS / GAMES[flavor][0]).read_bytes())
     first = standalone(GAMES[flavor][1][0]).read_bytes()
     assert data[toc[1][1]:toc[1][1] + toc[1][2]] == first
-    assert toc[1:1 + len(GAMES[flavor][1])] == plain[1:], "the levels keep the plain bundle's TOC entries"
+    assert toc[1:1 + len(GAMES[flavor][1])] == plain[1:-1], "the levels keep the plain bundle's TOC entries (UIFT last)"
     assert sorted(p.name for p in (SRC / flavor / "assets").iterdir()) == FLAVORS[flavor][2]
 
 
