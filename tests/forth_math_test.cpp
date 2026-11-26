@@ -6,7 +6,9 @@
 #include <cassert>
 #include <cmath>
 #include <cstdio>
+#include <cstdint>
 #include <cstring>
+#include <limits>
 #include <random>
 #include <string>
 
@@ -329,10 +331,53 @@ int main()
     CHECK(refused2 > 0);       // the exp overflow was crossed, and refused
     if (bad2) std::fprintf(stderr, "%d random results of the second plan's words out of tolerance\n", bad2);
 
+    // 10. ExactFmaf, the fma used where the target has no hardware FMA (math plan D8), against glibc's
+    //     correctly rounded fmaf: bit for bit on edge cases and 100 000 random cases of each kind.
+    {
+        int fbad = 0;
+        auto fcheck = [&](float a, float b, float c) {
+            ++checks;
+            const float got = ExactFmaf(a, b, c), want = ::fmaf(a, b, c);
+            if (!same_bits(got, want) && !(std::isnan(got) && std::isnan(want))) {
+                if (++fbad <= 10)
+                    std::fprintf(stderr, "ExactFmaf(%a, %a, %a) = %a, fmaf %a\n", a, b, c, got, want);
+            }
+        };
+        const float tiny = std::numeric_limits<float>::denorm_min(), fmin = std::numeric_limits<float>::min();
+        const float fmax = std::numeric_limits<float>::max(), inf = std::numeric_limits<float>::infinity();
+        const float big = 1.0f + 1.0f / 4096.0f;
+        CHECK(same_bits(ExactFmaf(big, big, -1e-24f), 1.0f + 1.0f / 2048.0f));   // the bionic case: 0x3f801000
+        CHECK(same_bits(ExactFmaf(big, big, 1e-24f), 1.0f + 1.0f / 2048.0f + 1.0f / 8388608.0f));
+        const float edges[] = {0.0f, -0.0f, tiny, -tiny, 3 * tiny, fmin, -fmin, fmin * 0.5f, 1.0f, -1.0f, big, -big,
+                               0.5f, 3.0f, 1e-24f, -1e-24f, 1e-30f, 1e30f, -1e30f, 1.8446744e19f, fmax, -fmax,
+                               fmax * 0.5f, inf, -inf};
+        for (float a : edges) for (float b : edges) for (float c : edges) fcheck(a, b, c);   // zeros' signs, overflow, subnormals
+        CHECK(same_bits(ExactFmaf(0.0f, 5.0f, -0.0f), 0.0f) && same_bits(ExactFmaf(-0.0f, 5.0f, -0.0f), -0.0f));
+        CHECK(same_bits(ExactFmaf(2.0f, 3.0f, -6.0f), 0.0f));                           // exact cancellation is +0
+        CHECK(std::isinf(ExactFmaf(fmax, 2.0f, 0.0f)) && !Fma(fmax, 2, 0).ok());         // overflow: inf, and refused
+        std::mt19937 rng3(20261127);
+        std::uniform_int_distribution<uint32_t> bits32;
+        std::uniform_int_distribution<int> twelve(1, 4095), small(-149, -100), mid(-40, 40);
+        auto from_bits = [](uint32_t u) { float f; std::memcpy(&f, &u, sizeof f); return f; };
+        auto finite_bits = [&]() { float f; do f = from_bits(bits32(rng3)); while (!std::isfinite(f)); return f; };
+        auto scaled = [&](int lo_exp) { return std::ldexp(1.0f + static_cast<float>(twelve(rng3)) / 4096.0f, lo_exp); };
+        for (int i = 0; i < 100000; ++i) {
+            fcheck(finite_bits(), finite_bits(), finite_bits());                         // any finite floats
+            const float a = scaled(mid(rng3)), b = scaled(mid(rng3));                    // 13-bit operands: exact products
+            const float ties[] = {0.0f, tiny, -tiny, 1e-24f * a * b, -1e-24f * a * b};   // land on float ties, then nudge
+            fcheck(a, b, ties[i % 5]);
+            fcheck(a, b, -(a * b));                                                      // cancellation to the remainder
+            fcheck(scaled(small(rng3) / 2), scaled(small(rng3) / 2), from_bits(bits32(rng3) & 0x807fffffu));   // subnormal
+        }
+        CHECK(fbad == 0);
+        if (fbad) std::fprintf(stderr, "%d ExactFmaf results differ from fmaf\n", fbad);
+    }
+
     if (failures) {
         std::fprintf(stderr, "forth_math_test (%s): %d of %d checks failed\n", kMode, failures, checks);
         return 1;
     }
-    std::printf("forth_math_test (%s Real): OK, %d checks, %zu shared vectors across %d words\n", kMode, checks, sizeof(kCases) / sizeof(kCases[0]), words);
+    std::printf("forth_math_test (%s Real, %s fma): OK, %d checks, %zu shared vectors across %d words\n", kMode,
+                WF_FORTH_MATH_HARDWARE_FMA ? "hardware" : "exact software", checks, sizeof(kCases) / sizeof(kCases[0]), words);
     return 0;
 }

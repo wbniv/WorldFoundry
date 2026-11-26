@@ -1766,11 +1766,11 @@ tasks:
         docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; g++ -std=c++17 -O1 -Wall -Wextra -Werror -pthread -I/src/android/screensaver/src/main/cpp -I/src/wfsource/source /src/tests/touch_bridge_test.cpp -o /tmp/touch_bridge && /tmp/touch_bridge'
 
   test-forth-math:
-    desc: "The Forth math words' maths (engine/stubs/forth_math.hpp): every shared vector (36 words; the exact ones bit for bit), identities, domain errors and 100000 random arguments, built twice (double Real, then -DWF_FORTH_MATH_FLOAT for single-FPU chips); plans docs/plans/2026-11-21-forth-trig-words.md and 2026-11-26-forth-math-words.md"
+    desc: "The Forth math words' maths (engine/stubs/forth_math.hpp): every shared vector (36 words; the exact ones bit for bit), identities, domain errors and 100000 random arguments, built five ways (double Real; -DWF_FORTH_MATH_FLOAT for single-FPU chips; -mfma for the hardware fma path; -DWF_FORTH_MATH_SOFT_FMA forcing the exact software fma, ExactFmaf, which is also checked against glibc fmaf bit for bit); plans docs/plans/2026-11-21-forth-trig-words.md and 2026-11-26-forth-math-words.md"
     cmds:
       - python3 tests/gen_forth_math_vectors.py --check
       - |
-        docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; for mode in "" "-DWF_FORTH_MATH_FLOAT"; do g++ -std=c++17 -O1 -Wall -Wextra $mode -I/src/engine/stubs -I/src/tests /src/tests/forth_math_test.cpp -o /tmp/forth_math_test && /tmp/forth_math_test; done'
+        docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; for mode in "" "-DWF_FORTH_MATH_FLOAT" "-mfma" "-mfma -DWF_FORTH_MATH_SOFT_FMA" "-DWF_FORTH_MATH_FLOAT -DWF_FORTH_MATH_SOFT_FMA"; do g++ -std=c++17 -O1 -Wall -Wextra $mode -I/src/engine/stubs -I/src/tests /src/tests/forth_math_test.cpp -o /tmp/forth_math_test && /tmp/forth_math_test; done'
 
   test-wall-clock:
     desc: "WALL_HOUR/MINUTE/SECOND/DAY/UTC_OFFSET clock logic (wfsource/source/game/wallclock.hp), pure C++ in wf-linux-test:local; plans docs/plans/2026-11-21-sixty-second-chain-reaction.md and 2026-11-21-tide-harbour-clock.md"

@@ -14,7 +14,10 @@
 #ifndef WF_FORTH_MATH_HPP
 #define WF_FORTH_MATH_HPP
 
+#include <cfloat>
 #include <cmath>
+#include <cstdint>
+#include <cstring>
 
 namespace wf {
 namespace forthmath {
@@ -145,13 +148,62 @@ inline Result Round(Real x) { return Finite(x) ? Checked(std::round(x)) : Fail(k
 // current rounding mode, which the engine never changes from the default, round-to-nearest-even.
 inline Result RoundEven(Real x) { return Finite(x) ? Checked(std::nearbyint(x)) : Fail(kNotFinite); }
 
+// a*b + c for floats with ONE rounding, computed without fmaf and without touching the rounding mode
+// (decision D8 of docs/plans/2026-11-26-forth-math-words.md). The product of two floats is exact in
+// double (24 + 24 = 48 significant bits, exponents within double's range, and every product a multiple
+// of 2^-298, far above double's smallest normal), so only the sum needs care. Two-sum gives the double
+// nearest the exact sum and the exact remainder; rounding that double to odd (when the remainder is
+// not zero, force the last bit to 1 by stepping one ulp toward the remainder) keeps the information a
+// second rounding needs, and a double has 53 >= 24 + 2 bits, so the one conversion to float is then
+// correctly rounded, halfway cases, subnormal results and overflow to infinity included. It needs only
+// the default round-to-nearest, which the engine never changes. A non-finite input or sum is returned
+// as it is, for the caller to refuse.
+inline float ExactFmaf(float a, float b, float c)
+{
+    const double p = static_cast<double>(a) * static_cast<double>(b);   // exact
+    const double q = static_cast<double>(c);
+    const double s = p + q;
+    if (!std::isfinite(s)) return static_cast<float>(s);
+    const double bv = s - p;                                            // two-sum (Knuth): s + t == p + q
+    const double t = (p - (s - bv)) + (q - bv);
+    if (t == 0.0) return static_cast<float>(s);
+    uint64_t bits;
+    std::memcpy(&bits, &s, sizeof bits);
+    if ((bits & 1u) == 0) bits = ((t > 0.0) == (s > 0.0)) ? bits + 1 : bits - 1;   // toward t: odd
+    double odd;
+    std::memcpy(&odd, &bits, sizeof odd);
+    return static_cast<float>(odd);
+}
+
+// Hardware FMA or not (that plan's D8). Where the compiler reports a fused multiply-add instruction
+// for the target (__ARM_FEATURE_FMA: 32-bit ARM with VFPv4 or ARMv8, and all AArch64; __FMA__: x86
+// with FMA3; __FP_FAST_FMAF: the compiler's own statement that fmaf is an instruction) std::fma is
+// that instruction, correctly rounded by IEEE 754, and is kept. Everywhere else std::fma(float) is a
+// library routine, and those differ: bionic's on armeabi-v7a returns 0x3f801001 for (1 + 2^-12)^2 -
+// 1e-24 where the answer is 0x3f801000 (both Chromecasts, 2026-11-26), so those builds (armeabi-v7a,
+// x86-64 at our baseline SSE2, WebAssembly) use ExactFmaf, which gives the same bits as a
+// correct fmaf. WF_FORTH_MATH_SOFT_FMA forces ExactFmaf, for the tests.
+#if !defined(WF_FORTH_MATH_SOFT_FMA) && \
+    (defined(__ARM_FEATURE_FMA) || defined(__FMA__) || defined(__FP_FAST_FMAF))
+#define WF_FORTH_MATH_HARDWARE_FMA 1
+#else
+#define WF_FORTH_MATH_HARDWARE_FMA 0
+#if defined(FLT_EVAL_METHOD) && FLT_EVAL_METHOD == 2
+#error "ExactFmaf needs double arithmetic in double (FLT_EVAL_METHOD 0 or 1), not in x87 long double"
+#endif
+#endif
+
 // a*b + c with ONE rounding, straight into the float cell. It is computed as a float fma, not in
 // Real: a double fma rounded to float would round twice, and can then differ from the exact answer
 // (1.000244140625 * 1.000244140625 + 1e-24 is one such case).
 inline Result Fma(Real a, Real b, Real c)
 {
     if (!Finite(a) || !Finite(b) || !Finite(c)) return Fail(kNotFinite);
+#if WF_FORTH_MATH_HARDWARE_FMA
     const float r = std::fma(static_cast<float>(a), static_cast<float>(b), static_cast<float>(c));
+#else
+    const float r = ExactFmaf(static_cast<float>(a), static_cast<float>(b), static_cast<float>(c));
+#endif
     if (!std::isfinite(r)) return Fail(kResultNotFinite);
     return Result{r, nullptr};
 }
