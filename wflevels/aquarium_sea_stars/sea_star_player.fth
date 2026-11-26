@@ -1,8 +1,7 @@
 \ Sea Stars: surface id 0 sand, 1 front, 2 right, 3 back, 4 left.
 \ All collision/clearance bounds are authored by the exporter.
 : st@ read-mailbox ; : st! write-mailbox ;
-: st-frac begin dup 1 >= if 1 - 0 else 1 then until
-  begin dup 0 < if 1 + 0 else 1 then until ;
+: st-frac dup floor - ;   \ the engine's floor (docs/forth-math-words.md)
 : st-sin st-frac dup .5 > if .5 - -1 else 1 then >r
   2 * dup 1 swap - * dup 16 * swap 4 * 5 swap - / r> * ;
 : st-mod >r r@ / st-frac r> * ;
