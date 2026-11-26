@@ -25,6 +25,9 @@ Environment:
   WF_CONTAINER_LABELS   space-separated docker --label entries, KEY=VALUE (no spaces
                         inside an entry), e.g. org.wbniv.purpose=local-ci
   WF_CONTAINER_NETWORK  docker --network value (default: Docker's default bridge)
+  WF_CONTAINER_MOUNTS   space-separated extra bind mounts, HOST:CONTAINER[:ro] (no spaces
+                        inside an entry), e.g. the Android SDK for the native-test APK:
+                        /home/will/android-sdk-local:/opt/android-sdk:ro
   WF_BLENDER_DOCKERFILE the Dockerfile for blender's first build (default Dockerfile.blender;
                         Dockerfile.blender.public where the lab registry is unreachable)
   WF_BLENDER_IMAGE      the blender image tag (default wf-blender:local)
@@ -65,6 +68,9 @@ for entry in ${WF_CONTAINER_ENV:-}; do
 done
 for entry in ${WF_CONTAINER_LABELS:-}; do
     extra+=(--label "$entry")
+done
+for entry in ${WF_CONTAINER_MOUNTS:-}; do
+    extra+=(-v "$entry")
 done
 # Files must come out owned by the calling user. A rootful daemon maps container
 # uids 1:1, so run as $(id -u). A rootless daemon maps container uid 0 to the
