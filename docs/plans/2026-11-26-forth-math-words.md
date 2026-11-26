@@ -1,6 +1,6 @@
 # Forth math words, part 2: exponentials, logarithms, rounding and the hardware
 
-**Status: approved 2026‑11‑26; implemented 2026‑11‑26 (Phases 1, 2 and 4 done; Phase 0 and 3 done on the PC, in WebAssembly and, since 2026‑11‑26, on cast1 and cast2 through the [WF Native Tests route](2026-11-26-device-native-test-route.md); the Pixel rows wait for Will's go-ahead; verification 5 fails for `fma` on both Chromecasts, a bionic `fmaf` rounding bug awaiting Will's decision).** Will: "yes to all 3 math" (Q1–Q3 accepted at the recommendations), then "implement math plan". This plan follows the [trig words plan](2026-11-21-forth-trig-words.md): the same table, the same `libm` policy, the same loud refusals and the same three test layers. It grew out of the [lava lamp plan](2026-11-26-lava-lamp.md), which needs `exp`, `expm1`, `cbrt` and `floor`. Will's direction (2026‑11‑26):
+**Status: approved 2026‑11‑26; implemented 2026‑11‑26 (Phases 1, 2 and 4 done; Phase 0 and 3 done on the PC, in WebAssembly and, since 2026‑11‑26, on cast1 and cast2 through the [WF Native Tests route](2026-11-26-device-native-test-route.md); the Pixel rows wait for Will's go-ahead; verification 5 passes on both Chromecasts since D8 replaced bionic's faulty `fmaf` with our exact `ExactFmaf`).** Will: "yes to all 3 math" (Q1–Q3 accepted at the recommendations), then "implement math plan". This plan follows the [trig words plan](2026-11-21-forth-trig-words.md): the same table, the same `libm` policy, the same loud refusals and the same three test layers. It grew out of the [lava lamp plan](2026-11-26-lava-lamp.md), which needs `exp`, `expm1`, `cbrt` and `floor`. Will's direction (2026‑11‑26):
 
 > "we could add exp to the engine … we already added trig functions … exp, ln, log, etc would be natural next steps … consider other functions to add? what are the functions getting added?"
 
@@ -389,7 +389,59 @@ No visible surface: these are engine words and a reference document, so this pla
     rc=1
     ```
 
-    **PC and WebAssembly: PASS**, bit-identical for all 36 words. **`phone-pixel-8-pro`: NOT RUN:** Will's daily phone; it waits for his go-ahead. **`chromecast-test-01`, `chromecast-test-02`: FAIL, for `fma` only.** The other 35 words are bit-identical with the PC on both Chromecasts, groups C and trig included (0 ulp, no refusal differs). `fma` differs in one case, the plan's own double-rounding vector `1.000244140625 1.000244140625 -1e-24`: the devices give `0x3f801001`, one ulp above the correctly rounded `0x3f801000` that glibc, WebAssembly and the oracle give. The cause is bionic's `fmaf`, not our code: our `armeabi-v7a` build is VFPv3, so `std::fma(float…)` calls bionic's software `fmaf`, and the route's `fmaf-probe` shows on both devices that the rounding mode does change in this process and that the same msun algorithm written out with volatile operands returns `0x3f801000`, while the library's `fmaf` returns `0x3f801001` (details in the route plan's Findings). How to fix it is Will's decision; the three options, with a recommendation, are in the [route plan's Findings](2026-11-26-device-native-test-route.md#findings).
+    **First device run, before D8:** PC and WebAssembly PASS, bit-identical for all 36 words. **`phone-pixel-8-pro`: NOT RUN:** Will's daily phone; it waits for his go-ahead. **`chromecast-test-01`, `chromecast-test-02`: FAIL, for `fma` only.** The other 35 words are bit-identical with the PC on both Chromecasts, groups C and trig included (0 ulp, no refusal differs). `fma` differs in one case, the plan's own double-rounding vector `1.000244140625 1.000244140625 -1e-24`: the devices give `0x3f801001`, one ulp above the correctly rounded `0x3f801000` that glibc, WebAssembly and the oracle give. The cause is bionic's `fmaf`, not our code: our `armeabi-v7a` build is VFPv3, so `std::fma(float…)` calls bionic's software `fmaf`, and the route's `fmaf-probe` shows on both devices that the rounding mode does change in this process and that the same msun algorithm written out with volatile operands returns `0x3f801000`, while the library's `fmaf` returns `0x3f801001` (details in the route plan's Findings). Will chose to compute `fma` ourselves where there is no hardware FMA (D8).
+
+    Re-run 2026‑11‑26 after D8 (`ExactFmaf`), with WF Native Tests rebuilt from it (`wf-native-tests-5e88a19a22b95a27.apk`) and run on both Chromecasts (J‑a65c1a966084 on cast1, J‑dd0d26859a46 on cast2):
+
+    ```
+    $ EMCC_DIR=/home/will/bsnes-jg-player/emsdk/upstream/emscripten python3 tests/forth_math_agreement.py --target pc --target wasm --target phone-pixel-8-pro --target chromecast-test-01 --target chromecast-test-02
+    wasm: emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.4 (fe5be6afdff43ad58860d821fcc8572a23f92d19); node v22.16.0
+    phone-pixel-8-pro: NOT RUN: Will's daily phone; never run here
+    chromecast-test-01: WF Native Tests v2, armeabi-v7a, NDK clang and bionic libm; collected from /home/will/WorldFoundry-wbniv/build/device-native-tests/chromecast-test-01/J-a65c1a966084/wf.log
+    chromecast-test-02: WF Native Tests v2, armeabi-v7a, NDK clang and bionic libm; collected from /home/will/WorldFoundry-wbniv/build/device-native-tests/chromecast-test-02/J-dd0d26859a46/wf.log
+    74990 results per target; reference pc
+    word         group                    wasm     chromecast-test-01     chromecast-test-02
+    acos-rev     trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    asin-rev     trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    atan-rev     trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    atan2-rev    trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    cos-rev      trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    sin-rev      trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    sincos-rev   trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    sqrt         trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    tan-rev      trig      0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    ceil         A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    clz          A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    copysign     A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    ctz          A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    floor        A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    fma          A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    fmod         A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    popcount     A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    round        A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    roundeven    A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    trunc        A/B       0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    acosh        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    asinh        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    atanh        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    cbrt         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    cosh         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    exp          C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    exp2         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    expm1        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    hypot        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    ln           C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    log10        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    log1p        C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    log2         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    pow          C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    sinh         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    tanh         C         0 differ, max 0 ulp    0 differ, max 0 ulp    0 differ, max 0 ulp
+    PASS
+    rc=0
+    ```
+
+    **PC, WebAssembly, `chromecast-test-01` and `chromecast-test-02`: PASS**, bit-identical for all 36 words, `fma` included. **`phone-pixel-8-pro`: NOT RUN:** Will's daily phone; it waits for his go-ahead. (The route's `fmaf-probe` still shows bionic's own `fmaf` returning `0x3f801001`: the fix is that we no longer call it there.)
 
 6. The four levels whose hand-rolled floors were replaced still match their references:
 

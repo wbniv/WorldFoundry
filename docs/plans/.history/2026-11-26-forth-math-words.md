@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/f182f1080) | Forth math: exact fma without fmaf where there is no hardware FMA (D8) |
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/61cb482a2) | Forth math on cast1 and cast2: CPU rows, VM cost, agreement (fma FAILs) |
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/57abb43d2) | Plan: Forth math words part 2, verification recorded |
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/7e365fa79) | Lava lamp mockup: colours through the Level Settings form; math plan Q1-Q3 accepted |
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/a7e37975d) | Plan: Forth math words part 2, with a hardware support matrix |
 
 <!--history-meta v1
+f182f1080	author	Will Norris
+f182f1080	added	3
+f182f1080	deleted	0
+f182f1080	files	1
+f182f1080	body	Will chose option 1 (2026-11-26, "yes"). bionic's software fmaf, which\nthe Chromecasts' armeabi-v7a build calls because VFPv3 has no vfma,\nreturns 0x3f801001 for (1 + 2^-12)^2 - 1e-24 instead of 0x3f801000.\n\nforth_math.hpp gains ExactFmaf: the float product is exact in double, an\nerror-free two-sum adds c, the sum is rounded to odd, and one conversion\nto float rounds correctly (53 >= 24 + 2 bits). No rounding-mode change.\nFma keeps std::fma where the compiler reports an FMA instruction\n(__ARM_FEATURE_FMA, __FMA__, __FP_FAST_FMAF: AArch64, VFPv4/ARMv8 32-bit,\nx86 FMA3) and uses ExactFmaf elsewhere (armeabi-v7a, x86-64 at the SSE2\nbaseline, WebAssembly). WF_FORTH_MATH_SOFT_FMA forces it for tests; an\nx87 FLT_EVAL_METHOD 2 build is refused at compile time.\n\nforth_math_test checks ExactFmaf against glibc fmaf bit for bit: all\nedge-case triples (signed zeros, subnormals, FLT_MAX overflow, inf) and\n400,000 random cases (any finite floats, exact float ties nudged by tiny\nc, cancellation, subnormal results). task test-forth-math now builds five\nways, including -mfma (hardware path) and -DWF_FORTH_MATH_SOFT_FMA; all\nfive pass with 423,077 checks. A mutant without the round-to-odd step\nfails 10,050 of them. docs/forth-math-words.md and the plan's D8 say why.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqPBXQwjNMi8EXwe2or
 61cb482a2	author	Will Norris
 61cb482a2	added	86
 61cb482a2	deleted	7

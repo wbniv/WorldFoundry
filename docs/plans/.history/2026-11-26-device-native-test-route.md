@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/61cb482a2) | Forth math on cast1 and cast2: CPU rows, VM cost, agreement (fma FAILs) |
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/e2fca2b56) | WF Native Tests: run native test code on the Android devices through the coordinator's check |
 
 <!--history-meta v1
+61cb482a2	author	Will Norris
+61cb482a2	added	4
+61cb482a2	deleted	1
+61cb482a2	files	1
+61cb482a2	body	forth_math_agreement.py reads a device target's dump collected by\nscripts/device_native_tests.py instead of reporting every device NOT RUN,\nand its FAIL line names each failing word and target.\n\nRecorded in the math plan:\n- machine table: cast1 Amlogic S805X2, 4 x Cortex-A35 (0xd04), 1.8 GHz;\n  cast2 Amlogic S905D3, 4 x Cortex-A55 (0xd05), 1.908 GHz; both expose\n  vfpv4 to 32-bit code.\n- verification 4 on cast1: PASS (loop step 1,062 ns; floor 256, exp 314).\n- verification 5 on cast1 and cast2: 35 words bit-identical with the PC;\n  fma FAILs by one ulp on the plan's double-rounding vector, because\n  bionic's software fmaf (our armeabi-v7a code has no vfma) does not see\n  its own rounding-mode change. The Pixel stays NOT RUN.\nThe route plan lists the three fixes for Will to choose from.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqPBXQwjNMi8EXwe2or
 e2fca2b56	author	Will Norris
 e2fca2b56	added	208
 e2fca2b56	deleted	0
