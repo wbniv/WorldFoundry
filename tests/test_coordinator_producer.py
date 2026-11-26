@@ -8,6 +8,13 @@ from types import SimpleNamespace
 import pytest
 
 ROOT=Path(__file__).resolve().parents[1]
+
+# android/*/install.py import scripts/wf_device, a shim over the installed coordinator package; it refuses to import
+# without /opt/wf-device-coordinator, which the host has and the wf-linux-test container does not (triage 2026-11-26).
+# Run these in the container with WF_CONTAINER_MOUNTS=/opt/wf-device-coordinator:/opt/wf-device-coordinator:ro.
+needs_coordinator = pytest.mark.skipif(not Path('/opt/wf-device-coordinator/scripts/wf_device').is_dir(),
+                                       reason='needs the installed chromecast-coordinator at /opt/wf-device-coordinator (host only; '
+                                              'mount it with WF_CONTAINER_MOUNTS)')
 sys.path.insert(0,str(ROOT/'scripts'))
 from coordinator_producer import require_capabilities
 
@@ -33,6 +40,7 @@ def test_compatible_service_admits_producer():
     assert require_capabilities(SimpleNamespace(call=lambda _:caps),'check','prime-study')==caps
 
 
+@needs_coordinator
 def test_prime_installer_does_not_read_app_deploy_review_or_run_sudo(tmp_path,monkeypatch):
     spec=importlib.util.spec_from_file_location('prime_producer',ROOT/'android/prime-numbers/install.py')
     installer=importlib.util.module_from_spec(spec);spec.loader.exec_module(installer)
@@ -46,6 +54,7 @@ def test_prime_installer_does_not_read_app_deploy_review_or_run_sudo(tmp_path,mo
     assert 'Standalone Chromecast coordinator' in (installer.OUT/'installation.log').read_text()
 
 
+@needs_coordinator
 @pytest.mark.parametrize('cause',[FileNotFoundError('socket missing'),ConnectionRefusedError('stopped')])
 def test_bomberman_stops_without_service_deployment(tmp_path,monkeypatch,cause):
     spec=importlib.util.spec_from_file_location('bomberman_producer',ROOT/'android/bomberman/install.py')

@@ -7,6 +7,14 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 
+# android/*/install.py import scripts/wf_device, a shim over the installed coordinator package; it refuses to import
+# without /opt/wf-device-coordinator, which the host has and the wf-linux-test container does not (triage 2026-11-26).
+# Run these in the container with WF_CONTAINER_MOUNTS=/opt/wf-device-coordinator:/opt/wf-device-coordinator:ro.
+needs_coordinator = pytest.mark.skipif(not Path('/opt/wf-device-coordinator/scripts/wf_device').is_dir(),
+                                       reason='needs the installed chromecast-coordinator at /opt/wf-device-coordinator (host only; '
+                                              'mount it with WF_CONTAINER_MOUNTS)')
+pytestmark = needs_coordinator
+
 
 def installer(tmp_path, monkeypatch, states, initial=None):
     spec = importlib.util.spec_from_file_location('prime_installer', ROOT/'android/prime-numbers/install.py')
