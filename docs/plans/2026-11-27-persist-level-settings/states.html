@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<!-- Mockup for docs/plans/2026-11-27-persist-level-settings.md: the four states. Self-contained, 1440x900. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup: saved level settings, the states</title>
+<style>
+:root{--bg:#070d14;--panel:#152d27;--rail:#203b33;--focus:#4a7f52;--fg:#efeee4;--muted:#a9b3aa;--hint:#f1d48a;--dim:#6f7d74;--note:#93a0bd}
+*{box-sizing:border-box}
+body{margin:0;width:1440px;height:900px;overflow:hidden;background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,"Segoe UI",sans-serif}
+h1{margin:0;padding:16px 28px 10px;font-size:22px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 26px;padding:0 28px}
+.cell h2{margin:0 0 6px;font-size:14px;color:var(--note);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.tv{width:660px;height:300px;background:#05090e;border:5px solid #1b1f26;border-radius:8px;position:relative;overflow:hidden}
+.form{position:absolute;left:30px;top:16px;right:30px;bottom:16px;background:var(--panel);padding:10px 14px}
+.form h3{margin:0 0 8px;font-size:17px;font-weight:600}
+.rail{position:absolute;left:14px;top:44px;width:120px;font-size:13px}
+.rail div{padding:4px 7px;margin-bottom:4px}.rail .sel{background:var(--rail)}.rail .dim{color:var(--dim)}.rail .gap{margin-top:12px}
+.rows{position:absolute;left:146px;top:44px;right:14px;font-size:13px}
+.rows div{padding:5px 8px;margin-bottom:4px}.rows .focus{background:var(--focus)}.rows .dim{color:var(--dim)}
+.help{position:absolute;left:146px;right:14px;bottom:30px;font-size:11.5px;color:var(--muted)}
+.foot{position:absolute;left:14px;right:14px;bottom:9px;display:flex;justify-content:space-between;font-size:11.5px}.foot .h{color:var(--hint)}
+.note{color:var(--note);font-size:12.5px;margin-top:6px;width:660px}
+code{font:12px ui-monospace,monospace;color:#cfe3d4}
+.pair{display:flex;gap:14px}
+.phone{width:220px;height:300px;background:#0d1117;border:5px solid #1b1f26;border-radius:20px;padding:10px;position:relative;font-size:12px}
+.phone b{font-weight:600}.phone .s{color:var(--hint);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;margin:7px 0 2px}
+.phone .f{display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid #21303f}
+.phone .btns{position:absolute;left:10px;right:10px;bottom:10px;display:flex;gap:6px}
+.phone .btns span{flex:1;text-align:center;padding:6px 0;border-radius:7px;background:#22305a}.phone .btns .p{background:var(--focus);font-weight:700}
+.scene{width:420px;height:300px;border:5px solid #1b1f26;border-radius:8px;background:radial-gradient(circle at 50% 40%,#1b2433,#05090e 70%);position:relative}
+.glass{position:absolute;left:180px;top:30px;width:60px;height:200px;border-radius:30px 30px 12px 12px;background:#5b3f8f}
+.blob{position:absolute;border-radius:50%;background:#ff6fb1}
+.base{position:absolute;left:172px;top:230px;width:76px;height:44px;background:#2b2f38;border-radius:5px 5px 10px 10px}
+</style>
+</head>
+<body>
+<h1>Saved level settings: first launch, after a relaunch, a value out of range, the phone</h1>
+<div class="grid">
+ <div class="cell"><h2>1 &middot; First launch: nothing saved</h2>
+  <div class="tv"><div class="form"><h3>Level Settings</h3>
+   <div class="rail"><div>Clock</div><div class="sel">Lava lamp</div><div>Display</div><div class="gap dim">&#8634;&nbsp; Defaults</div></div>
+   <div class="rows"><div class="focus">Lava color: Orange</div><div>Water color: Violet</div><div>Time display: Base</div></div>
+   <div class="help">Wax color</div>
+   <div class="foot"><span class="h">Up / down: select &nbsp; Left / right: change</span><span>&#8672;&nbsp; Apply / close</span></div></div></div>
+  <p class="note">Every value is the level's default, so <b>Defaults</b> is dimmed and its one row does nothing. No file exists yet.</p></div>
+
+ <div class="cell"><h2>2 &middot; After a relaunch, and in the Dream</h2>
+  <div class="pair">
+   <div class="tv" style="width:226px"><div class="form" style="left:10px;right:10px"><h3 style="font-size:14px">Level Settings</h3>
+    <div class="rows" style="left:12px;top:36px"><div class="focus">Lava color: Pink</div><div>Water color: Violet</div><div>Time display: Off</div></div>
+    <div class="rail" style="left:12px;top:150px;width:180px"><div class="gap">&#8634;&nbsp; Defaults</div></div></div></div>
+   <div class="scene"><div class="glass"></div><div class="blob" style="left:196px;top:60px;width:28px;height:36px"></div><div class="blob" style="left:190px;top:130px;width:40px;height:46px"></div><div class="base"></div></div>
+  </div>
+  <p class="note">Pink lava and no clock in the base, as applied last time, before the first frame. The Dream (its own <code>:dream</code> process) reads the same file. <b>Defaults</b> is lit because values differ from the level's own.</p></div>
+
+ <div class="cell"><h2>3 &middot; A saved value the level no longer allows</h2>
+  <div class="tv"><div class="form"><h3>Level Settings</h3>
+   <div class="rail"><div>Clock</div><div class="sel">Tide Harbour</div><div>Display</div><div class="gap">&#8634;&nbsp; Defaults</div></div>
+   <div class="rows"><div>Dial numerals: Thai</div><div>River krathongs: Every night</div><div class="focus">Krathong count: 70 &nbsp;&#9664; &#9654;</div></div>
+   <div class="help">Maximum krathongs afloat at once</div>
+   <div class="foot"><span class="h">Up / down: select &nbsp; Left / right: change</span><span>&#8672;&nbsp; Apply / close</span></div></div></div>
+  <p class="note">The file says 90 from an older build whose maximum was higher; the level now allows 0 to 70, so the engine uses 70 and logs <code>SAVED-SETTINGS tide_harbour TideHarbourSettings.Krathong count 90 clamped to 70</code>. Nothing on screen says so. A choice whose label is gone falls back to the default the same way.</p></div>
+
+ <div class="cell"><h2>4 &middot; Phone controller (narrow)</h2>
+  <div class="pair">
+   <div class="phone"><b style="font-size:13px">Level Settings</b>
+    <div class="s">Clock</div><div class="f"><span>Camera drift</span><b>Slow</b></div>
+    <div class="s">Lava lamp</div><div class="f"><span>Lava color</span><b>Pink</b></div><div class="f"><span>Water color</span><b>Violet</b></div><div class="f"><span>Time display</span><b>Off</b></div>
+    <div class="s">Display</div><div class="f"><span>Show framerate</span><b>Off</b></div>
+    <div class="btns"><span>Cancel</span><span>&#8634; Reset</span><span class="p">Apply</span></div></div>
+   <p class="note" style="width:420px;margin-top:0">The phone gets the same snapshot as the TV form, so it shows the saved values. <b>Reset</b> sends <code>r:&lt;session&gt;:reset</code>: the draft goes back to the defaults, and <b>Apply</b> saves that, which removes the level's entry. <b>Cancel</b> keeps what was saved. Hidden fields (Maximum surface height) never appear here and are never saved.</p>
+  </div></div>
+</div>
+</body>
+</html>
