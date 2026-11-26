@@ -34,6 +34,7 @@
 #include "scripting_forth.hp"
 #include "forth_source.hp"
 #include "forth_math_zforth.hpp"
+#include "lava_pairs.hpp"         // lava-pairs: the lava lamp's blob-pair pass (F3)
 
 extern "C" {
 #include <zforth.h>
@@ -1451,6 +1452,24 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                     }
                 }
                 zf_push(ctx,(zf_cell)float(int(status)));
+            } else if (custom == 56) {
+                // lava-pairs (184) ( first stride count dt -- ): the lava lamp's blob-pair pass (F3,
+                // engine/stubs/lava_pairs.hpp) on `count` blobs of `stride` cells from mailbox `first`
+                // (x y vx vy r T), the running script's mailboxes. docs/plans/2026-11-26-lava-lamp.md.
+                const float dt = float(zf_pop(ctx));
+                const int count = int(zf_pop(ctx)), stride = int(zf_pop(ctx)), first = int(zf_pop(ctx));
+                if (g_mgr && first > 0 && stride >= 6 && stride <= 16 && count > 0 && count <= 16) {
+                    Mailboxes& mb = g_mgr->LookupMailboxes(g_curObj);
+                    float cells[16 * 16];
+                    for (int i = 0; i < count * stride; ++i) cells[i] = mb.ReadMailbox(first + i).AsFloat();
+                    wf::lava::Pairs(cells, stride, count, dt);
+                    for (int b = 0; b < count; ++b)
+                        for (int k = 2; k < 6; ++k)
+                            mb.WriteMailbox(first + b * stride + k, Scalar::FromFloat(cells[b * stride + k]));
+                } else {
+                    fprintf(stderr, "zforth: lava-pairs refused (first %d stride %d count %d)\n", first, stride, count);
+                    assert(0 && "lava-pairs: bad arguments");
+                }
             } else if (custom == 55) {
                 // doom-fire-frame ( actor x y width height clock reduced modal -- )
                 const bool modal = zf_pop(ctx) != 0;
@@ -1648,7 +1667,7 @@ void Init(MailboxesManager& mgr)
 
     // dfrm-pose ( block actor -- status ): a v1 DFRM block, cells 0..32 in.
     // dfrm-pose-curves ( block curves actor -- status ): a v2 block, 40 + 4 x curves cells.
-    r = zf_eval(&g_ctx, ": profile-begin 169 sys ; : profile-end 170 sys ; : fish-deform 171 sys ; : fin-deform 172 sys ; : swim-deform 173 sys ; : jelly-deform 174 sys ; : plant-register 175 sys ; : plant-step 176 sys ; : lion-pose 177 sys ; : property@ 178 sys ; : property-int-bytes@ 179 sys ; : property-text-byte@ 180 sys ; : deform 181 sys ; : deform-block 182 sys ; : dfrm-pose >r 33 6 r> deform-block ; : dfrm-pose-curves >r 4 * 40 + 6 r> deform-block ;");
+    r = zf_eval(&g_ctx, ": profile-begin 169 sys ; : profile-end 170 sys ; : fish-deform 171 sys ; : fin-deform 172 sys ; : swim-deform 173 sys ; : jelly-deform 174 sys ; : plant-register 175 sys ; : plant-step 176 sys ; : lion-pose 177 sys ; : property@ 178 sys ; : property-int-bytes@ 179 sys ; : property-text-byte@ 180 sys ; : deform 181 sys ; : deform-block 182 sys ; : lava-pairs 184 sys ; : dfrm-pose >r 33 6 r> deform-block ; : dfrm-pose-curves >r 4 * 40 + 6 r> deform-block ;");
     if (r != ZF_OK) fprintf(stderr, "zforth: profiling/fish bridge init failed: %d\n", r);
 
     // FSN filesystem bridge words (custom 3-7 / sys 131-135)
