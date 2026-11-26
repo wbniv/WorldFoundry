@@ -262,7 +262,7 @@
 
 ## Done
 
-- ✅ 2026-11-26 — [screensaver-preview-metadata] Aquarium, Clocks, Seahorse Grid Dreams declare PREVIEW_* (5a117e85d). See [contract](../homeboard-tv/docs/plans/2026-11-26-screensaver-companion-contract.md).
+- ✅ 2026‑11‑26 — [screensaver-preview-metadata] Aquarium, Clocks, Seahorse Grid Dreams declare PREVIEW_* (5a117e85d). See [contract](../homeboard-tv/docs/plans/2026-11-26-screensaver-companion-contract.md).
 - ✅ 2026‑11‑26 — [pytest-collection] conftest isolates level-local modules per test module, test_pipe_hop inert on import; `pytest tests` collects 1867, no errors. See 36df18455, bc63287de.
 - ✅ 2026‑11‑26 — [device-native-tests] WF Native Tests APK runs native tests via the coordinator's check; cast1, cast2 run. See [plan](docs/plans/2026-11-26-device-native-test-route.md).
 - ✅ 2026-11-22 — [global-level-settings] Show framerate: one declaration, a default holder in levcomp, 22 of 23 reachable levels; cast1 proved. See [plan](docs/plans/2026-11-22-global-level-settings.md).
