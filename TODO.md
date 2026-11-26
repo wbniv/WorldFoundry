@@ -11,7 +11,6 @@
 - [verify T3] **Forth math words, part 2: exponentials, logarithms, rounding, integer bits.** Built and pushed: 27 words, custom syscalls 82–108; four levels' hand-rolled floors replaced; exact `fma` without hardware FMA (D8). Verification 1–5 and 7 PASS: all 36 words bit-identical on PC, WebAssembly, the Pixel, cast1 and cast2 (Pixel run approved by Will 2026‑11‑26). Only 6 is open: re-run 2026‑11‑26 after the triage, it fails on one test only, Tide Harbour's actor budget, which waits for Will's decision (item below); the changed levels pass. [Plan](docs/plans/2026-11-26-forth-math-words.md) <!-- agent:a6f577a2e9c7edd6f -->
 
 
-- [wip T3] **Replace the remaining hand-rolled `*-frac` loops with `floor`.** `aquarium_sea_stars/sea_star_player.fth`, `aquarium_blue_shrimp/shrimp.fth`, `aquarium_tanks/controller.fth`, `moon_lantern/generate.py` still loop once per unit, the pattern the math plan removed from four levels. Keep floored semantics (`over over / floor * -`, not `fmod`), rebuild, and check each level; the aquarium ones ship in the Dream APK. T3: shipped levels, device check. [Math plan](docs/plans/2026-11-26-forth-math-words.md) <!-- agent:adafddfd8da0d1c24 -->
 
 
 - [T5] **Tide Harbour actor budget: Will's call.** `test_tide_harbour_level` fails: 206 posed actors against the approved D7 budget of 150, since Loy Krathong added 100 floats (`a54cbd6ec`). The only device figure is 26.26 FPS from a forced-daytime stress run, below D7's 30 FPS gate. Either accept 206 (raise the budget after a real nighttime 100-float profile on cast1) or lower the Krathong count maximum so the level fits 150. This blocks math-words verification step 6. T5: a product trade-off. [Triage, row 30](docs/diagnostics/2026-11-26-pytest-triage.md)
@@ -264,6 +263,7 @@
 
 ## Done
 
+- ✅ 2026‑11‑26 — [frac-loops-floor] Sea Stars, Blue Shrimp, six tanks, Moon Lantern use `floor`; C test hosts get math words. See [plan](docs/plans/2026-11-26-forth-math-words.md).
 - ✅ 2026‑11‑26 — [pytest-triage] 129 failures by root cause: 82 pass, 45 skip with reasons, 2 left (Tide budget, Off/On radios). See [triage](docs/diagnostics/2026-11-26-pytest-triage.md).
 
 - ✅ 2026‑11‑26 — [screensaver-preview-metadata] Aquarium, Clocks, Seahorse Grid Dreams declare PREVIEW_* (5a117e85d). See [contract](../homeboard-tv/docs/plans/2026-11-26-screensaver-companion-contract.md).

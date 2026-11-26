@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/a9cbca806) | Forth math plan: step 6 re-run after the triage; only Tide Harbour's actor budget fails |
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/79e19d7a7) | Forth math: step 6 re-run after the collection fix |
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/677552b8f) | Forth math: Pixel agreement run (Will's go-ahead); --approved override for refused devices |
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/fbe8beb75) | Forth math verification 5: all 36 words bit-identical on cast1 and cast2 |
@@ -10,6 +11,11 @@
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/a7e37975d) | Plan: Forth math words part 2, with a hardware support matrix |
 
 <!--history-meta v1
+a9cbca806	author	Will Norris
+a9cbca806	added	21
+a9cbca806	deleted	0
+a9cbca806	files	1
+a9cbca806	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqPBXQwjNMi8EXwe2or
 79e19d7a7	author	Will Norris
 79e19d7a7	added	35
 79e19d7a7	deleted	0
