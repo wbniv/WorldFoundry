@@ -6,7 +6,11 @@
 
 - **Dutch Cuckoo Village audio.** Add an original two-note cuckoo call and a Sound setting. On desktop and Android, synchronize each call with the bird’s bob, skip missed calls after resume or clock changes, and verify mute, volume and Dream audio focus. Will deferred sound changes on 2026-11-24. [Tulpenkade plan](docs/plans/2026-11-24-dutch-cuckoo-village.md)
 
-- [T3] **Lava-lamp digits: investigate a physical wax simulation.** Explore using Jolt and any needed engine or Forth bindings to replace the authored wax animation with a simulation that rises, merges into the time and melts apart. Assess feasibility, performance and controls, then design and verify the necessary changes. [Clock plan](docs/plans/2026-11-24-lava-lamp-digits.md)
+- [T4] **Lava lamp screensaver (replaces Lava-lamp digits).** Model a real 1963-style Astro lamp: Morph deformer kind for wax shapes (E1), a zForth buoyancy model, the time in the base (Will picks from 20 options), Lava color and Water color settings. T4: E1's vertex-colour path is an open unknown, and the work spans engine, exporter, level and Forth. Awaiting Will's review of D1–D12 and Q1–Q8. [Plan](docs/plans/2026-11-26-lava-lamp.md)
+
+- [T3] **Forth math words: exp, log, hyperbolic, roots and rounding (E2).** 21 words (`exp` `expm1` `exp2` `pow` `ln` `log1p` `log2` `log10` `cbrt` `hypot` `sinh` `cosh` `tanh` `asinh` `acosh` `atanh` `floor` `ceil` `round` `trunc` `fmod`) on the trig words' pattern, custom syscalls 82–102. T3: settled pattern, but six files and three test layers. [Plan, E2](docs/plans/2026-11-26-lava-lamp.md#engine-addition-e2-the-next-forth-math-words)
+
+- [T3] **Lava lamp A3 poster (Phase P).** Research document first, then the poster pipeline: physics, wax properties, history, six patents with links and QR codes, Forth, with chips on every claim. Follows the level (needs the shipped Cycles render). [Plan](docs/plans/2026-11-26-lava-lamp.md#the-a3-poster)
 
 - [T3] **Persist level settings across launches.** The Discus palette currently lasts only while the level is loaded, by design for now; the Dream starts with its default. Follow up by saving level settings and applying the saved values to both the playable level and its screensaver, with relaunch and Dream verification. [Discus palette plan](docs/plans/2026-11-23-discus-palette-selector.md)
 
@@ -190,6 +194,8 @@
 
 
 ## Parked
+
+- [T3] **Lava-lamp digits: investigate a physical wax simulation.** Superseded 2026-11-26 by the lava lamp plan's D6 (a zForth buoyancy model; Jolt is option F4 there): wax no longer forms the time. Explore Jolt and any needed bindings only if that model falls short. [Old plan](docs/plans/2026-11-24-lava-lamp-digits.md) · [New plan](docs/plans/2026-11-26-lava-lamp.md)
 
 - [T4] **Cyber does not load, and four of its kept meshes are unchecked after the face-normal migration.** A texture is larger than its VRAM slot (an assert), even with the VRAM flags, so the keep audit could not render it. A geometry scan flags the kept meshes `c12bea52`, `6f00cbf1`, `a4272183` and `0147c081` as mostly downward horizontal faces; ceilings and inverted floors cannot be told apart without a render. Parked 2026‑11‑14 (Will): "we'll probably never revive it tho, there wasn't much to it". If ever unparked: T4, unknown root cause, likely engine code, which needs Will's permission. [evidence](docs/diagnostics/metal-snowgoons-cull-2026-10-17/README.md)
 
@@ -584,6 +590,10 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [verify] **2026-10-12-parmenides-nine-room-walkthrough-video** — Verification section present but no PASS recorded — run + record the steps. _from [2026-10-12-parmenides-nine-room-walkthrough-video.md](docs/plans/2026-10-12-parmenides-nine-room-walkthrough-video.md)_  <!-- fp:026ec073f51924ff -->
 - [verify] **2026-11-25-android-4k-rendering** — Verification section present but no PASS recorded — run + record the steps. _from [2026-11-25-android-4k-rendering.md](docs/plans/2026-11-25-android-4k-rendering.md)_  <!-- fp:542f9b558b021795 -->
 - [verify] **2026-11-25-android-4k-verification-and-fallback** — Verification section present but no PASS recorded — run + record the steps. _from [2026-11-25-android-4k-verification-and-fallback.md](docs/plans/2026-11-25-android-4k-verification-and-fallback.md)_  <!-- fp:de0bd9762f10b8ae -->
+- [ ] **(triage)** Emulsified (cloudy) lamps, a cold start that takes real hours, and a lamp you can shake. — _from [2026-11-26-lava-lamp.md](docs/plans/2026-11-26-lava-lamp.md)_  <!-- fp:b98084e6a81ec22b -->
+- [ ] **(triage)** Wax digits: dropped "for now", per Will. The old plan stays as the record. — _from [2026-11-26-lava-lamp.md](docs/plans/2026-11-26-lava-lamp.md)_  <!-- fp:e827c4349a5845d0 -->
+- [ ] **(triage)** New settings widgets (colour swatches in the touch form). — _from [2026-11-26-lava-lamp.md](docs/plans/2026-11-26-lava-lamp.md)_  <!-- fp:af8237f86cd5e78c -->
+- [verify] **2026-11-26-lava-lamp** — Verification section present but no PASS recorded — run + record the steps. _from [2026-11-26-lava-lamp.md](docs/plans/2026-11-26-lava-lamp.md)_  <!-- fp:e3044e49733f53c0 -->
 <!-- END auto-captured-deferrals -->
 - [ ] **(triage)** A second machine, and the rule that picks one for each minute (D10). — _from [2026-11-21-sixty-second-chain-reaction.md](docs/plans/2026-11-21-sixty-second-chain-reaction.md)_  <!-- fp:9ef908da50e937e2 -->
 - [ ] **(triage)** Sound (D8). — _from [2026-11-21-sixty-second-chain-reaction.md](docs/plans/2026-11-21-sixty-second-chain-reaction.md)_  <!-- fp:208c993d9c8f6dc6 -->

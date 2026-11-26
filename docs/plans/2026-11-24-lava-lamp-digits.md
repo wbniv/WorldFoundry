@@ -1,5 +1,7 @@
 # Lava-lamp digits
 
+**Superseded 2026‑11‑26 by [Lava lamp: a real lamp, with the time in its base](2026-11-26-lava-lamp.md).** Will (2026‑11‑26): "let's change the design (for now) from using the lava to make the digits of the time to 'simply' modelling and emulating a regular lava lamp." This record stays as the history of the first attempt.
+
 Status: standalone built and checked on PC; visual refinement and feedback remain. Device testing, bundling and deployment wait for the current batch.
 
 ## Visual target
