@@ -301,9 +301,9 @@ static void pumpTouch(int surfaceW, int surfaceH) {
     }
 }
 
-extern "C" int WFMaximumSurfaceHeight();   // engine (game/level.cc): the level's cap on rows, 0 for none
+extern "C" int WFMaximumSurfaceHeight();   // engine (game/global_settings.cc): the level's cap on rows, 0 for none
 
-// A level that asks for fewer rows than the display (LevelRenderSettings "Maximum surface height": the lava lamp
+// A level that asks for fewer rows than the display (the hidden global setting "Maximum surface height": the lava lamp
 // draws a 4K TV at 1080) gets a smaller buffer the compositor scales up, as SurfaceHolder.setFixedSize would; the
 // size before the cap comes back when a level without one runs. docs/plans/2026-11-26-lava-lamp.md.
 static int cappedFromWidth = 0, cappedFromHeight = 0, appliedCap = 0;

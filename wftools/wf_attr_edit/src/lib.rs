@@ -100,7 +100,10 @@ pub unsafe extern "C" fn wf_attr_oad_visit(
     let Ok(oad) = wf_oad::OadFile::read(&mut std::io::Cursor::new(bytes)) else { return 1; };
     let schema = wf_attr_schema::from_oad(&oad);
     for (index, field) in schema.fields.iter().enumerate() {
-        if !field.is_visible() { continue; }
+        // Hidden integer fields reach the runtime registry too (show 6): the engine reads them (the global
+        // Maximum surface height, docs/plans/2026-11-26-lava-lamp.md) and the forms skip them.
+        let hidden_int = field.show_as == 6 && matches!(field.kind, FieldKind::Int);
+        if !field.is_visible() && !hidden_int { continue; }
         let (kind, choices) = match &field.kind {
             FieldKind::Int => (0, String::new()),
             FieldKind::Float => (1, String::new()),

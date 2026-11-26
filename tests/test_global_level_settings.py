@@ -29,7 +29,11 @@ def holders():
 
 
 def test_one_declaration_holds_exactly_show_framerate_today():
-    assert declared_globals() == ["Show framerate"]
+    # Show framerate, then the hidden Maximum surface height (the lava lamp asks a 4K TV for 1080 rows;
+    # docs/plans/2026-11-26-lava-lamp.md): appended, so no field a level already uses moves.
+    assert declared_globals() == ["Show framerate", "Maximum surface height"]
+    hidden = (OAS / "global_settings.inc").read_text().split("TYPEENTRYINT32(Maximum surface height", 1)[1].splitlines()[0]
+    assert ',0,4320,0,"",SHOW_AS_HIDDEN,' in hidden, "hidden, not live, default 0 (the display's size)"
     text = (OAS / "global_settings.inc").read_text()
     line = text.split("TYPEENTRYINT32(Show framerate", 1)[1].splitlines()[0]
     # An on/off setting is a real checkbox: a 0..1 integer with the checkbox display and an EMPTY choice string.
@@ -95,9 +99,11 @@ def test_each_compiled_holder_lists_the_global_field_last(name):
     oad = OAS / f"{name}.oad"
     fields = json.loads(subprocess.check_output([str(CATALOG), str(oad)], text=True))["fields"]
     stored = [f for f in fields if f["width"]]
-    assert stored[-1]["key"] == "Show framerate", f"{name}.oad: regenerate it with oas2oad"
-    assert stored[-1]["kind"] == "Bool", f"{name}.oad: Show framerate must be a real checkbox (Bool), not an Enum"
-    assert stored[-1]["live"] and stored[-1]["default"] in (0, "0"), name
+    globals_ = declared_globals()
+    assert [f["key"] for f in stored[-len(globals_):]] == globals_, f"{name}.oad: regenerate it with oas2oad"
+    framerate = stored[-len(globals_)]
+    assert framerate["kind"] == "Bool", f"{name}.oad: Show framerate must be a real checkbox (Bool), not an Enum"
+    assert framerate["live"] and framerate["default"] in (0, "0"), name
     assert [f["key"] for f in stored].count("Show framerate") == 1
 
 
@@ -110,7 +116,8 @@ def _audit():
 
 
 def test_the_audit_reads_its_keys_from_the_one_declaration():
-    assert _audit().global_keys() == declared_globals() == ["Show framerate"]
+    assert _audit().global_keys() == ["Show framerate"]           # the player-facing ones: hidden globals are not audited
+    assert declared_globals()[0] == "Show framerate"
 
 
 def test_the_audit_finds_the_field_in_a_built_level_and_reports_its_absence(tmp_path, monkeypatch):

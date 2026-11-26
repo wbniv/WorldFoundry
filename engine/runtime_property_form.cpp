@@ -8,7 +8,7 @@ bool Form::begin(Registry& registry,uint32_t actor,uint32_t openingButtons){
     auto* object=edit.object();
     for(size_t i=0;i<object->fields.size();++i){const auto& f=object->fields[i];
         if(f.kind==5){sections.emplace_back();titles.push_back(f.label);}
-        else if(f.kind==6||f.kind==7)continue;
+        else if(f.kind==6||f.kind==7||f.show==6)continue;   // groups, and hidden fields (show 6) the engine reads but no one edits
         else {if(sections.empty()){sections.emplace_back();titles.push_back("Properties");}sections.back().push_back(i);}
     }
     for(size_t i=sections.size();i>0;--i)if(sections[i-1].empty()){sections.erase(sections.begin()+i-1);titles.erase(titles.begin()+i-1);}

@@ -1781,7 +1781,14 @@ def _emit_lev_fields(obj, schema, fp, refs=None) -> list[str]:
         if kind == "Skip" and (val == "" or val == 0):
             continue
         if field.show_as == 6 and kind != "Skip":  # hidden non-content
-            continue
+            # Hidden fields are never seeded (_seed_defaults), so one set to a value other than its default was set
+            # on purpose and is written: the lava lamp's Maximum surface height (a hidden global setting).
+            try:
+                deliberate = int(val) != int(field.default_raw)
+            except (TypeError, ValueError):
+                deliberate = False
+            if not deliberate:
+                continue
 
         # max2lev (oadobj.cc:504) writes GetName() = the internal key,
         # NOT the display label.  The .lev reader (iff2lvl) and our own

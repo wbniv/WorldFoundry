@@ -527,11 +527,6 @@ ReportLevelLoadStats(const LevelRooms& levelRooms)
 
 //==============================================================================
 
-// The level's LevelRenderSettings "Maximum surface height" (0: none), read by the Android TV host
-// (android/screensaver/src/main/cpp/dream_host.cc), which then draws to that many rows.
-static int gMaximumSurfaceHeight = 0;
-extern "C" int WFMaximumSurfaceHeight() { return gMaximumSurfaceHeight; }
-
 Level::Level
 (
 	WFGame& game
@@ -986,8 +981,6 @@ Level::Level
 	bool authoredFound=false, maximumFound=false;std::string viewError;wfview::Settings view;
 	view.authoredAspect=wfprops::aspectSetting(_runtimeProperties,"Authored aspect",authoredFound,viewError);
 	view.maximumAspect=wfprops::aspectSetting(_runtimeProperties,"Maximum aspect",maximumFound,viewError);
-	gMaximumSurfaceHeight=wfprops::maximumSurfaceHeight(_runtimeProperties,viewError);
-	if(gMaximumSurfaceHeight>0)std::fprintf(stderr,"VIEW maximum surface height %d\n",gMaximumSurfaceHeight);
 	if(!viewError.empty())std::fprintf(stderr,"VIEW setting invalid: %s\n",viewError.c_str());
 	wfview::levelSettings()=view;const auto& overrides=wfview::argumentOverrides();
 	wfview::source()=(overrides.authoredAspect>=0.0f||overrides.maximumAspect>=0.0f)?"argument":(authoredFound||maximumFound)?"level":"default";

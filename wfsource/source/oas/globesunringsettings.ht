@@ -18,6 +18,7 @@
 	int32 Cameradrift;               /* Minumum: 0 Maximum: 1 Default: 0 */
 	int32 Citylights;               /* Minumum: 0 Maximum: 1 Default: 1 */
 	int32 Showframerate;               /* Minumum: 0 Maximum: 1 Default: 0 */
+	int32 Maximumsurfaceheight;               /* Minumum: 0 Maximum: 4320 Default: 0 */
 };
 /*============================================================================*/
 #endif         /* globesunringsettings_HT */

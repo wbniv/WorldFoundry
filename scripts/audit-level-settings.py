@@ -90,8 +90,11 @@ def shipped_levels():
 
 
 def global_keys():
-    """The keys global_settings.inc declares: the one place a global setting is declared."""
-    return re.findall(r"^\s*TYPEENTRY\w+\(([^,]+),", read(OAS / "global_settings.inc"), re.M)
+    """The keys of the player-facing global settings global_settings.inc declares (the one place a global setting is
+    declared). Hidden ones (SHOW_AS_HIDDEN, such as Maximum surface height) are written only by the levels that set
+    them, so a level without one lacks nothing."""
+    return [m.group(1) for m in re.finditer(r"^\s*TYPEENTRY\w+\(([^,]+),.*$", read(OAS / "global_settings.inc"), re.M)
+            if "SHOW_AS_HIDDEN" not in m.group(0)]
 
 
 def built_levels():

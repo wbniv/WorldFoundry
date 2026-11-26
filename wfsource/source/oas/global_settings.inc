@@ -26,4 +26,5 @@
 	PROPERTY_SHEET_HEADER(Display,0)
 @*	--------------------------------
 	TYPEENTRYINT32(Show framerate,,0,1,0,"",SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"Show the frames per second overlay at the bottom right")
+	TYPEENTRYINT32(Maximum surface height,,0,4320,0,"",SHOW_AS_HIDDEN,"Draw at most this many rows on an Android TV and let it scale up; zero draws at the display size")
 	PROPERTY_SHEET_FOOTER

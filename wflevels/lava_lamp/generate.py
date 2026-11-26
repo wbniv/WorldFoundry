@@ -462,9 +462,9 @@ actor('cs_wide', 'camshot', pos=(0, CAM_Y, EYE_Z),
               'Position Y': 'Absolute', 'Position Z': 'Absolute', 'Hither': 2., 'Yon': 600., 'FOV': 60., 'Pan Time In Seconds': 0.})
 actor('Ambient', 'light', fields={'lightType': 'Ambient', 'lightRed': .5, 'lightGreen': .5, 'lightBlue': .5})
 actor('Background', 'matte', fields={'Matte Type': 'Color', 'Background Color': 0x07050b})
-actor('LavaLampSettings', 'lavalampsettings', fields={'Editor Label': 'Lava lamp'})
-# A 4K TV draws the lamp at 1080 rows and scales it up: at 2160 the fill rate missed every refresh (build record).
-actor('RenderSettings', 'levelrendersettings', fields={'Editor Label': 'Rendering', 'Maximum surface height': 1080})
+# Maximum surface height (a hidden global setting): a 4K TV draws the lamp at 1080 rows and scales it up; at 2160
+# the fill rate missed every refresh (build record).
+actor('LavaLampSettings', 'lavalampsettings', fields={'Editor Label': 'Lava lamp', 'Maximum surface height': 1080})
 
 wall, board, table = room_meshes()
 finish(actor('WallGlow', 'platform', wall), wall)

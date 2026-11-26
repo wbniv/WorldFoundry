@@ -20,6 +20,7 @@
 	int32 Watercolor;               /* Minumum: 0 Maximum: 7 Default: 4 */
 	int32 Timedisplay;               /* Minumum: 0 Maximum: 1 Default: 0 */
 	int32 Showframerate;               /* Minumum: 0 Maximum: 1 Default: 0 */
+	int32 Maximumsurfaceheight;               /* Minumum: 0 Maximum: 4320 Default: 0 */
 };
 /*============================================================================*/
 #endif         /* lavalampsettings_HT */
