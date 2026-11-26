@@ -81,15 +81,20 @@ int main(int argc, char** argv) {
 '''
 
 
-def build(tmp: Path, host: str = HOST, opt: tuple = ()):
-    """Compile the VM and a host (this file's, or tests/forth_math_vm_cost.py's) into tmp/host."""
+def bootstrap() -> str:
+    """The engine's core bootstrap and the vendor string words, as the hosts load them (bootstrap.fth)."""
     src = (ROOT / "engine/stubs/scripting_zforth.cc").read_text()
     core = src[src.index("static const char* kCoreBootstrap ="):src.index("void Init(")]
     core = re.sub(r"//[^\n]*", "", core)
-    bootstrap = "".join(ast.literal_eval(x) for x in re.findall(r'"(?:\\.|[^"\\])*"', core))
+    text = "".join(ast.literal_eval(x) for x in re.findall(r'"(?:\\.|[^"\\])*"', core))
     vendor = (ROOT / "engine/vendor/zforth-41db72d1/forth/core.zf").read_text()
     strings = vendor[vendor.index(': s"'):vendor.index("\n\n\n(", vendor.index(': ."'))]
-    (tmp / "bootstrap.fth").write_text(bootstrap + "\n: emit 0 sys ; : tell 2 sys ;\n" + strings + "\n")
+    return text + "\n: emit 0 sys ; : tell 2 sys ;\n" + strings + "\n"
+
+
+def build(tmp: Path, host: str = HOST, opt: tuple = ()):
+    """Compile the VM and a host (this file's, or tests/forth_math_vm_cost.py's) into tmp/host."""
+    (tmp / "bootstrap.fth").write_text(bootstrap())
     (tmp / "host.cc").write_text(host)
     inc = ["-I" + str(ROOT / "engine/stubs"), "-I" + str(ROOT / "engine/vendor/zforth-41db72d1/src/zforth")]
     subprocess.run(["cc", *opt, *inc, "-c", str(ROOT / "engine/vendor/zforth-41db72d1/src/zforth/zforth.c"), "-o", str(tmp / "vm.o")], check=True)
