@@ -252,6 +252,9 @@ def test_page_fits(tmp_path):
     assert m.group(1) == "ok", f"content overflows the page by {m.group(2)} px"
 
 
+@pytest.mark.skipif(not all(Path(f).exists() for f in M.FP._FONT_FILES.values()),
+                    reason="needs Noto Sans (fonts-noto-core): the generator measures SVG text with it and falls back to an "
+                           "estimate without it, so the HTML differs (in wf-linux-test since the 2026-11-26 Dockerfile layer)")
 def test_committed_html_is_current(html_text):
     committed = POSTER_DIR / "schooling-poster.html"
     assert committed.exists(), "run: task poster-swarming"

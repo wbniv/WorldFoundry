@@ -81,6 +81,13 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends poppler-utils \
  && rm -rf /var/lib/apt/lists/*
 
+# Noto Sans: the clownfish and swarming posters measure their SVG text with PIL in NotoSans-Regular/Bold.ttf and fall
+# back to a per-character estimate without it, so their committed-HTML tests failed here and passed on the host. With
+# it both posters reproduce the committed files byte for byte. Its own layer. Added 2026-11-26.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends fonts-noto-core \
+ && rm -rf /var/lib/apt/lists/*
+
 # Software GL, so every run renders with the same rasteriser whatever the host GPU is.
 ENV LIBGL_ALWAYS_SOFTWARE=1 \
     HOME=/tmp
