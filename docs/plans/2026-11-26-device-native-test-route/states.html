@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mockup — WF Native Tests states</title>
+<style>
+  :root { --bg:#ffffff; --fg:#1f2328; --muted:#656d76; --line:#d1d9e0; --panel:#f6f8fa; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --line:#30363d; --panel:#161b22; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; width:1440px; height:900px; overflow:hidden; background:var(--bg); color:var(--fg);
+         font:15px/1.5 ui-sans-serif, system-ui, "Segoe UI", sans-serif; padding:32px 40px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  p.sub { margin:0 0 20px; color:var(--muted); }
+  .row { display:flex; gap:28px; }
+  .tv { width:440px; }
+  .screen { width:440px; height:248px; border:10px solid #111; border-radius:6px; position:relative; }
+  .screen.run { background:#b7791f; }
+  .screen.pass { background:#2f855a; }
+  .screen.fail { background:#c53030; }
+  .screen .bar { position:absolute; left:0; bottom:0; height:10px; background:rgba(255,255,255,.55); }
+  .tv h2 { font-size:16px; margin:10px 0 2px; }
+  .tv p { margin:0; color:var(--muted); font-size:14px; }
+  pre { margin:28px 0 0; background:var(--panel); border:1px solid var(--line); border-radius:6px;
+        padding:16px 18px; font:13px/1.5 ui-monospace, "DejaVu Sans Mono", monospace; white-space:pre; }
+  .ok { color:#2f855a; } .bad { color:#c53030; } .dim { color:var(--muted); }
+</style>
+</head>
+<body>
+  <h1>WF Native Tests: what the TV shows, and what the host tool prints</h1>
+  <p class="sub">The window is one colour, so the coordinator's screenshot.png states the outcome at a glance; the strip along the bottom grows with each finished test.</p>
+  <div class="row">
+    <div class="tv">
+      <div class="screen run"><div class="bar" style="width:33%"></div></div>
+      <h2>Running</h2>
+      <p>Amber. 1 of 3 tests finished (cpuinfo); forth-math-dump in progress.</p>
+    </div>
+    <div class="tv">
+      <div class="screen pass"><div class="bar" style="width:100%"></div></div>
+      <h2>Done, every test rc=0</h2>
+      <p>Green. wf.log ends with "=== wf-native-tests done tests=3 failed=0".</p>
+    </div>
+    <div class="tv">
+      <div class="screen fail"><div class="bar" style="width:66%"></div></div>
+      <h2>Done, a test failed</h2>
+      <p>Red. The failing test's "=== end … rc=1" line names it; the rest still ran.</p>
+    </div>
+  </div>
+<pre><span class="dim">$ python3 scripts/device_native_tests.py run --device chromecast-test-01</span>
+build: build/coordinator-artifacts/wf-native-tests-3f9c0a1b2d4e5f60.apk (armeabi-v7a, arm64-v8a)
+register: wf-native-tests → org.worldfoundry.nativetests/android.app.NativeActivity
+check: J-0123456789ab on chromecast-test-01, duration 90 s ... completed
+evidence: build/device-native-tests/chromecast-test-01/J-0123456789ab/wf.log (1,742,311 bytes, sha256 ok)
+collect: <span class="ok">cpuinfo rc=0 4 ms · forth-math-dump rc=0 1,903 ms · forth-math-vm-cost rc=0 8,415 ms</span>
+         → build/device-native-tests/chromecast-test-01/{cpuinfo,forth-math-dump,forth-math-vm-cost}.txt
+
+<span class="dim">$ python3 scripts/device_native_tests.py collect --device chromecast-test-02 --wf-log short.log</span>
+<span class="bad">collect: no "=== wf-native-tests done" line: the suite did not finish within the check's duration (last test begun: forth-math-vm-cost)</span>
+<span class="dim">exit 1</span></pre>
+</body>
+</html>

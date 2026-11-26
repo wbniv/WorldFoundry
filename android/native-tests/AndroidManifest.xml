@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- WF Native Tests: runs a fixed suite of native test programs compiled into libwfnativetests.so and
+     writes their output to <external files>/wf.log, which the coordinator's `check` returns as evidence.
+     No Java code (hasCode=false); see docs/plans/2026-11-26-device-native-test-route.md. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="org.worldfoundry.nativetests"
+          android:versionCode="1" android:versionName="1">
+  <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="34"/>
+  <uses-feature android:name="android.software.leanback" android:required="false"/>
+  <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
+  <application android:label="WF Native Tests" android:hasCode="false" android:allowBackup="false"
+               android:extractNativeLibs="true" android:banner="@drawable/banner" android:icon="@drawable/banner">
+    <activity android:name="android.app.NativeActivity" android:exported="true"
+              android:configChanges="orientation|keyboardHidden|screenSize|screenLayout|density|uiMode"
+              android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
+      <meta-data android:name="android.app.lib_name" android:value="wfnativetests"/>
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+        <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
+      </intent-filter>
+    </activity>
+  </application>
+</manifest>
