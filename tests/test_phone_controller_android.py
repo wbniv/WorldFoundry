@@ -30,8 +30,15 @@ def engine_bits() -> dict[str, int]:
             if int(m.group(2)) < 16}
 
 
+# 778008db4 retired the android/app aquarium flavor; its phone-pad layout moved to the engine's phonepad directory,
+# where the screensaver's host and the plant phone tests read it. The condo is the one android/app phone flavor left.
+LAYOUTS = {"aquarium": REPO / "wfsource" / "source" / "hal" / "phonepad" / "aquarium-layout.json",
+           "condo": SRC / "condo" / "assets" / "layout.json"}
+PHONE_FLAVORS = ("condo",)
+
+
 def layout(app: str) -> dict:
-    return json.loads((SRC / app / "assets" / "layout.json").read_text())
+    return json.loads(LAYOUTS[app].read_text())
 
 
 @pytest.mark.parametrize("app", ["aquarium", "condo"])
@@ -110,7 +117,8 @@ def test_binds_the_lan_address_only():
 def test_back_hides_the_panel_before_the_key_is_dropped():
     src = ENTRY.read_text()
     key = src[src.index("if (type == AINPUT_EVENT_TYPE_KEY)"):src.index("if (type == AINPUT_EVENT_TYPE_MOTION)")]
-    assert key.index("AKEYCODE_BACK && gPhoneOverlay.PanelVisible") < key.index("if (mask == 0) return 0;")
+    # (ef99d415e: the drop is now `if (mask == 0) {wfdiag::Consume(...);return 0;}`)
+    assert key.index("AKEYCODE_BACK && gPhoneOverlay.PanelVisible") < key.index("if (mask == 0)")
 
 
 def test_overlay_drawn_after_the_hud_on_every_swap():
@@ -133,19 +141,25 @@ def test_cmake_builds_phonepad_into_the_android_library():
 def test_internet_only_for_the_phone_flavors():
     main = (SRC / "main" / "AndroidManifest.xml").read_text()
     assert "uses-permission" not in main
-    for app in ("aquarium", "condo"):
+    assert not (SRC / "aquarium").exists(), "the aquarium flavor stays retired (778008db4)"
+    for app in PHONE_FLAVORS:
         perms = re.findall(r'<uses-permission android:name="([^"]+)"', (SRC / app / "AndroidManifest.xml").read_text())
         assert perms == ["android.permission.INTERNET"], (app, perms)
     for app in ("snowgoons", "smb", "qbert"):   # docs/plans/2026-10-01-split-cd-iff-one-app-per-game.md
         assert not (SRC / app / "AndroidManifest.xml").exists(), app
 
 
-@pytest.mark.parametrize("app", ["aquarium", "condo"])
+@pytest.mark.parametrize("app", PHONE_FLAVORS)
 def test_built_release_apk_has_the_controller(app):
     import zipfile
     p = APK / app / "release" / f"worldfoundry-{app}-release.apk"
     if not p.exists():
         pytest.skip(f"{p.relative_to(REPO)} not built (cd android && ./gradlew :app:assemble{app.title()}Release)")
+    from build_freshness import stale_reason
+    stale = stale_reason(p, [REPO / "wfsource/source/hal/phonepad/controller.html", LAYOUTS[app]],
+                         f"cd android && ./gradlew :app:assemble{app.title()}Release")
+    if stale:
+        pytest.skip(stale)
     with zipfile.ZipFile(p) as z:
         assert z.read("assets/controller.html") == (REPO / "wfsource/source/hal/phonepad/controller.html").read_bytes()
         assert z.read("assets/layout.json") == (SRC / app / "assets" / "layout.json").read_bytes()
@@ -165,7 +179,7 @@ def test_qr_logo_switch_is_read_from_wf_args_and_kept_from_the_engine():
     assert "qr_logo" not in loop[loop.index("for (std::string& s : argStore)"):]
     hdr = (REPO / "wfsource" / "source" / "hal" / "phonepad" / "phonepad_overlay.h").read_text()
     assert "int         logo_       = kLogoPlanet;" in hdr
-    for app in ("aquarium", "condo"):
+    for app in PHONE_FLAVORS:
         args = SRC / app / "assets" / "wf_args.txt"
         assert not args.exists() or "qr_logo=" not in args.read_text(), "the default (planet) is committed"
 

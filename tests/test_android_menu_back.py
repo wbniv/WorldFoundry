@@ -25,8 +25,11 @@ int repeat=0;int AKeyEvent_getRepeatCount(void*){return repeat;}
 int NowMs(){return 0;}
 struct App { void* activity; } app{},*gApp=&app;
 int exits=0;void ANativeActivity_finish(void*){++exits;}
+// The branch reports each consumed key to the runtime diagnostics (wfdiag::Consume, since ef99d415e): stub it.
+namespace wfdiag { template<class... A> void Consume(A...) {} }
 int handle(int keyCode,int action) {
 void* event=nullptr;
+unsigned held=0; int receipt=0;
 '''+branch+r'''
 return 0;
 }
