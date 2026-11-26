@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/f548479cf) | Forth math plan: the remaining *-frac loops are gone; TODO item done |
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/a9cbca806) | Forth math plan: step 6 re-run after the triage; only Tide Harbour's actor budget fails |
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/79e19d7a7) | Forth math: step 6 re-run after the collection fix |
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/677552b8f) | Forth math: Pixel agreement run (Will's go-ahead); --approved override for refused devices |
@@ -11,6 +12,11 @@
 | [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/a7e37975d) | Plan: Forth math words part 2, with a hardware support matrix |
 
 <!--history-meta v1
+f548479cf	author	Will Norris
+f548479cf	added	1
+f548479cf	deleted	1
+f548479cf	files	1
+f548479cf	body	Records the four levels' replacement, the bit-for-bit VM evidence, the\nMoon Lantern wrap and the clocks bundle left for its owner.\n\nPlan: docs/plans/2026-11-26-forth-math-words.md (Phase 4).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqPBXQwjNMi8EXwe2or
 a9cbca806	author	Will Norris
 a9cbca806	added	21
 a9cbca806	deleted	0

@@ -288,7 +288,7 @@ ROOM = (-360.0, -80.0, -60.0, 360.0, 140.0, 240.0)    # one room holds everythin
 # Visibility mailboxes (global cells the director writes; 1 shows the actor)
 VIS = {"sun": 700, "moon": 701, "birds": 702, "boats": 703, "gauge": 704, "numerals_thai": 705, "numerals_roman": 706,
        "arrow_up": 707, "arrow_dn": 708, "panel": 709}
-KRATHONG_MAX = 100
+KRATHONG_MAX = 70     # Will 2026-11-26: "cap the count at about 70" (cast1 at night: 24.58 FPS at 100, 30 FPS breaks near 75-80)
 VIS.update({f"krathong_{i}": 1100 + i for i in range(KRATHONG_MAX)})
 # Settings (plan D13, Q9): the TideHarbourSettings object's fields (wfsource/source/oas/tideharboursettings.oas,
 # with the clocks' shared clocksettings.inc). The director copies each field into its cell every frame with

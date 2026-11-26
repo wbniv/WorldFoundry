@@ -1,0 +1,89 @@
+{
+  "score_sha256": "c5bcebeee8bc85818c8bd0e8f36b85cccef446bd422d19b87136968887ca9a8d",
+  "host_start_wall": 1795704624.3909035,
+  "host_start_monotonic": 184345.010587437,
+  "captures": [
+    {
+      "label": "scene-start",
+      "planned_ms": 18000,
+      "started": 1795704643.3483567,
+      "ended": 1795704644.936094,
+      "file": "input-frame-001.png",
+      "bytes": 36293,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "mode-before",
+      "planned_ms": 33500,
+      "started": 1795704658.8501182,
+      "ended": 1795704660.3179219,
+      "file": "input-frame-002.png",
+      "bytes": 90316,
+      "schedule_lateness_ms": 2
+    },
+    {
+      "label": "count-before",
+      "planned_ms": 38000,
+      "started": 1795704663.348389,
+      "ended": 1795704664.8406408,
+      "file": "input-frame-003.png",
+      "bytes": 90658,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "count-set",
+      "planned_ms": 50900,
+      "started": 1795704676.2482097,
+      "ended": 1795704677.702269,
+      "file": "input-frame-004.png",
+      "bytes": 90247,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "river-100s",
+      "planned_ms": 100000,
+      "started": 1795704725.3481913,
+      "ended": 1795704726.7227116,
+      "file": "input-frame-005.png",
+      "bytes": 40277,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "river-140s",
+      "planned_ms": 140000,
+      "started": 1795704765.3482091,
+      "ended": 1795704766.904823,
+      "file": "input-frame-006.png",
+      "bytes": 40531,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "river-200s",
+      "planned_ms": 200000,
+      "started": 1795704825.3481882,
+      "ended": 1795704826.7212675,
+      "file": "input-frame-007.png",
+      "bytes": 41166,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "river-260s",
+      "planned_ms": 260000,
+      "started": 1795704885.3700683,
+      "ended": 1795704886.9167287,
+      "file": "input-frame-008.png",
+      "bytes": 37458,
+      "schedule_lateness_ms": 22
+    },
+    {
+      "label": "restored",
+      "planned_ms": 299800,
+      "started": 1795704925.1505337,
+      "ended": 1795704926.579804,
+      "file": "input-frame-009.png",
+      "bytes": 90641,
+      "schedule_lateness_ms": 2
+    }
+  ],
+  "result": "completed"
+}

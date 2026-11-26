@@ -1,0 +1,15 @@
+[
+  {
+    "input": "052292fc80939e9dfc2d0356376bd5ef7e8725fb506b7e479cab2913229afa0d.apk",
+    "package": "org.worldfoundry.game.clocks",
+    "before_sha256": "4ab6bddd8404430d28e2bf29568b10453c92919587f1ae8ab4264275ecd1511b",
+    "action": "install",
+    "reason": "different-hash",
+    "variant": null,
+    "status": "verified",
+    "start": 1795704574.0211322,
+    "journal_key": "install:1",
+    "installed_sha256": "052292fc80939e9dfc2d0356376bd5ef7e8725fb506b7e479cab2913229afa0d",
+    "end": 1795704608.4819283
+  }
+]

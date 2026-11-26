@@ -8,12 +8,10 @@
 
 - [wip T4] **Lava lamp screensaver (replaces Lava-lamp digits).** Model a real 1963-style Astro lamp: Morph deformer kind for wax shapes (E1), a zForth buoyancy model, the time in the base (Will picks from 20 options), Lava color and Water color settings. T4: E1's vertex-colour path is an open unknown, and the work spans engine, exporter, level and Forth. Approved 2026‑11‑26 (Q1 starlight holes, Q2 Time display setting, Q7 naturist-film line; the rest at recommendations). E2 is built. [Plan](docs/plans/2026-11-26-lava-lamp.md) <!-- agent:a3269cec9ae8f8f9f -->
 
-- [verify T3] **Forth math words, part 2: exponentials, logarithms, rounding, integer bits.** Built and pushed: 27 words, custom syscalls 82–108; four levels' hand-rolled floors replaced; exact `fma` without hardware FMA (D8). Verification 1–5 and 7 PASS: all 36 words bit-identical on PC, WebAssembly, the Pixel, cast1 and cast2 (Pixel run approved by Will 2026‑11‑26). Only 6 is open: re-run 2026‑11‑26 after the triage, it fails on one test only, Tide Harbour's actor budget, which waits for Will's decision (item below); the changed levels pass. [Plan](docs/plans/2026-11-26-forth-math-words.md) <!-- agent:a6f577a2e9c7edd6f -->
 
 
 
 
-- [T5] **Tide Harbour actor budget: Will's call.** `test_tide_harbour_level` fails: 206 posed actors against the approved D7 budget of 150, since Loy Krathong added 100 floats (`a54cbd6ec`). The real nighttime 100-float profile on cast1 (J‑f98fe5c023f4, 2026‑11‑26, shipped code, normal spacing) holds **24.58 FPS** steady at 100 floats (p50 33.4 ms, p95 50.1 ms, 99.8 % missed refresh), below D7's 30 FPS gate; 30 FPS breaks at roughly 75–80 floats. Either accept 206 and the frame rate, or lower the Krathong count maximum so the level fits 150. This blocks math-words verification step 6. T5: a product trade-off. [Triage, row 30](docs/diagnostics/2026-11-26-pytest-triage.md)
 - [wip T3] **Lighthouse and Mirror and Haze: on/off settings as checkboxes.** `lighthousesettings.oas` ("Water motion") and `mirrorhazesettings.oas` ("Haze") declare `"Off|On"` radio buttons, against the checkbox rule (`288b73df2`); `test_global_level_settings` fails on it. Make each a `TYPEENTRYBOOLEAN … SHOW_AS_CHECKBOX` (see `global_settings.inc`), regenerate the `.oad`/`.ht`, rebuild both levels, repack the Clocks bundle and regenerate the phone asset. T3: settled fix, several shipped artefacts, coordinate with the Clocks sessions. [Triage, row 31](docs/diagnostics/2026-11-26-pytest-triage.md) <!-- agent:a48678b546ccea778 -->
 - [T1] **Rebuild `wf-linux-test:local` with `fonts-noto-core`.** The Dockerfile layer landed in `fefea345a`, but the local tag was not rebuilt because free disk was under 6 GB, and one attempt stalled at zero build steps. Run `task linux-test-image` once more than 8 GB is free, then run `tests/test_swarming.py tests/test_poster_clownfish_biomechanics.py -k committed_html` in the container: both should pass, not skip. T1: known recipe.
 
@@ -263,6 +261,8 @@
 
 ## Done
 
+- ✅ 2026‑11‑26 — [tide-krathong-cap-70] Will: "cap the count at about 70"; 176 posed, cast1 night 31.07 FPS. See [plan](docs/plans/2026-11-24-tide-harbour-loy-krathong.md).
+- ✅ 2026‑11‑26 — [forth-math-words-2] 27 more Forth math words; verification 1–7 PASS (6 after the Tide cap). See [plan](docs/plans/2026-11-26-forth-math-words.md).
 - ✅ 2026‑11‑26 — [frac-loops-floor] Sea Stars, Blue Shrimp, six tanks, Moon Lantern use `floor`; C test hosts get math words. See [plan](docs/plans/2026-11-26-forth-math-words.md).
 - ✅ 2026‑11‑26 — [pytest-triage] 129 failures by root cause: 82 pass, 45 skip with reasons, 2 left (Tide budget, Off/On radios). See [triage](docs/diagnostics/2026-11-26-pytest-triage.md).
 

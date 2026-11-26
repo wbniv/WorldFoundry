@@ -583,6 +583,21 @@ No visible surface: these are engine words and a reference document, so this pla
 
     **FAIL as written**, now on one test only. The `oas2oad` failure, the settings type and the 11 settings errors are fixed (`84c571de2`, `e3ba6b46b`, `defc0716d`). What is left is Tide Harbour's actor budget: 206 posed actors against D7's 150, because of the 100 Loy Krathong floats. That is Will's decision (raise the budget or cap the floats), not a fault in the math words.
 
+    **Re-run 2026‑11‑26 14:48 UTC (21:48 Bangkok), after Will's decision.** Will chose to *"cap the count at about 70"*. The run was at `a00a8d336` plus the uncommitted 70-float cap, committed afterwards with this record. That cap sets the Krathong count maximum and the float pool to 70, for 176 posed actors, and moves the budget test to 176 ([Loy Krathong plan](2026-11-24-tide-harbour-loy-krathong.md)). Both commands ran in the `wf-linux-test` container, the first as `scripts/in-linux-container.sh python3 tests/verify_minute_machine_forth.py`:
+
+    ```text
+    125 frames; worst position 0.0015 mm, rotation 0.0008 deg, scale 0.000006
+    PASS
+    rc=0
+    ........................................................................ [ 34%]
+    .................ssssssss............................................... [ 69%]
+    ......................................sss................s....           [100%]
+    194 passed, 15 skipped, 1733 deselected in 488.78s (0:08:08)
+    rc=0
+    ```
+
+    **PASS.** Minute Machine matches its reference (0.0015&nbsp;mm), and every Cuckoo, Anamorphic and Tide test passes, Tide Harbour's actor budget included.
+
 7. Nothing else moved: the existing Forth tests still pass:
 
     ```bash

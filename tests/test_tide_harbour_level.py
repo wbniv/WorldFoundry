@@ -36,7 +36,10 @@ def objects():
 def test_the_actor_map_is_the_level_order_and_within_budget():
     names = list(objects())
     assert MAP["indices"] == {n: i + 1 for i, n in enumerate(names)}
-    assert len(parts.all_meshes()) + 2 <= 150
+    # D7's budget was 150 posed actors; Loy Krathong's floats raised it. Will, 2026-11-26: "cap the count at
+    # about 70" -- the nighttime cast1 profile at 100 floats held 24.58 FPS steady (J-f98fe5c023f4), and 30 FPS
+    # broke near 75-80 floats (docs/diagnostics/tide-krathong-night-100-cast1-2026-11-26). 70 floats: 176 posed.
+    assert len(parts.all_meshes()) + 2 <= 176
 
 
 def test_every_actor_is_placed_at_its_reference_pose():

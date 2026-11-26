@@ -1,0 +1,393 @@
+--------- beginning of main
+11-26 21:50:08.994 10020 10020 I dry.game.clocks: Using CollectorTypeCMC GC.
+11-26 21:50:09.009 10020 10020 E dry.game.clocks: Not starting debugger since process cannot load the jdwp agent.
+11-26 21:50:09.054 10020 10020 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10133; state: ENABLED
+11-26 21:50:09.055 10020 10020 D CompatibilityChangeReporter: Compat change id reported: 242716250; UID 10133; state: ENABLED
+11-26 21:50:09.072 10020 10020 I dry.game.clocks: Failed to add image file: Failed to find OatDexFile for DexFile /data/app/~~8a1UV8bZnttvYYYQiD98LA==/org.worldfoundry.game.clocks-qp4wC-9790r9-oByCgiLwA==/base.apk (canonical path /data/app/~~8a1UV8bZnttvYYYQiD98LA==/org.worldfoundry.game.clocks-qp4wC-9790r9-oByCgiLwA==/base.apk) in OatFile /data/app/~~Pm3Kd0FMoCkB2H5JLixzQw==/org.worldfoundry.game.clocks-KazSq8vfT4sh7IgSI_xO9w==/oat/arm/base.odex
+11-26 21:50:09.076 10020 10020 D nativeloader: Configuring clns-4 for other apk /data/app/~~Pm3Kd0FMoCkB2H5JLixzQw==/org.worldfoundry.game.clocks-KazSq8vfT4sh7IgSI_xO9w==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~Pm3Kd0FMoCkB2H5JLixzQw==/org.worldfoundry.game.clocks-KazSq8vfT4sh7IgSI_xO9w==/lib/arm:/data/app/~~Pm3Kd0FMoCkB2H5JLixzQw==/org.worldfoundry.game.clocks-KazSq8vfT4sh7IgSI_xO9w==/base.apk!/lib/armeabi-v7a, permitted_path=/data:/mnt/expand:/data/user/0/org.worldfoundry.game.clocks
+11-26 21:50:09.093 10020 10020 V GraphicsEnvironment: Currently set values for:
+11-26 21:50:09.095 10020 10020 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+11-26 21:50:09.095 10020 10020 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+11-26 21:50:09.095 10020 10020 V GraphicsEnvironment: ANGLE GameManagerService for org.worldfoundry.game.clocks: false
+11-26 21:50:09.096 10020 10020 V GraphicsEnvironment: org.worldfoundry.game.clocks is not listed in per-application setting
+11-26 21:50:09.096 10020 10020 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+11-26 21:50:09.160 10020 10020 D CompatibilityChangeReporter: Compat change id reported: 237531167; UID 10133; state: DISABLED
+11-26 21:50:09.162 10020 10020 W OpenGLRenderer: Unknown dataspace 0
+11-26 21:50:09.189 10020 10037 W libc    : Access denied finding property "vendor.mali.platform.config"
+11-26 21:50:09.194 10020 10037 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+11-26 21:50:09.195 10020 10037 W libc    : Access denied finding property "vendor.mali.debug.config"
+11-26 21:50:09.196 10020 10037 W libc    : Access denied finding property "vendor.mali.base_max_nr_instances"
+11-26 21:50:09.198 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_unnamed"
+11-26 21:50:09.201 10020 10020 I TankPlayer: surface actual=1920x1080
+11-26 21:50:09.201 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_default_heap"
+11-26 21:50:09.201 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_base_internal"
+11-26 21:50:09.202 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_framepool"
+11-26 21:50:09.202 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_tiler"
+11-26 21:50:09.202 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_program"
+11-26 21:50:09.202 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane"
+11-26 21:50:09.202 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_egl_color_plane_imported"
+11-26 21:50:09.202 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vao"
+11-26 21:50:09.202 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_img"
+11-26 21:50:09.203 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_internal_surface"
+11-26 21:50:09.203 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_buf"
+11-26 21:50:09.203 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_crc"
+11-26 21:50:09.203 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_hmem"
+11-26 21:50:09.203 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_rsd"
+11-26 21:50:09.203 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_mbs2"
+11-26 21:50:09.203 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cpom_static"
+11-26 21:50:09.203 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_hmem"
+11-26 21:50:09.203 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_sample_pos"
+11-26 21:50:09.203 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_discard"
+11-26 21:50:09.203 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cframe_tess_geom"
+11-26 21:50:09.204 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cobj_hmem"
+11-26 21:50:09.204 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_hmem"
+11-26 21:50:09.204 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_prof_dump"
+11-26 21:50:09.204 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cblend_hmem"
+11-26 21:50:09.204 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_hmem"
+11-26 21:50:09.204 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query"
+11-26 21:50:09.204 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_query_host"
+11-26 21:50:09.204 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gles_multiview"
+11-26 21:50:09.204 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cdeps_hmem"
+11-26 21:50:09.204 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_suballoc"
+11-26 21:50:09.204 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_hoard"
+11-26 21:50:09.205 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmem_registry"
+11-26 21:50:09.205 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_payload"
+11-26 21:50:09.205 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_wlm_tls"
+11-26 21:50:09.205 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_hmem"
+11-26 21:50:09.205 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_svm"
+11-26 21:50:09.205 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cl_protected"
+11-26 21:50:09.205 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cinstr"
+11-26 21:50:09.205 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_uncached"
+11-26 21:50:09.205 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_cpu_cached"
+11-26 21:50:09.205 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_transient"
+11-26 21:50:09.205 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_memory_protected"
+11-26 21:50:09.206 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external"
+11-26 21:50:09.206 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_external_swapchain"
+11-26 21:50:09.206 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal"
+11-26 21:50:09.206 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_tls"
+11-26 21:50:09.206 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_host"
+11-26 21:50:09.206 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_protected"
+11-26 21:50:09.206 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_device_internal_transient"
+11-26 21:50:09.206 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_descriptor_pool"
+11-26 21:50:09.206 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator"
+11-26 21:50:09.206 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_host"
+11-26 21:50:09.206 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_command_allocator_protected"
+11-26 21:50:09.206 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_host"
+11-26 21:50:09.206 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device"
+11-26 21:50:09.207 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_gfx_graph_internal_device_transient"
+11-26 21:50:09.207 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_buffer"
+11-26 21:50:09.207 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_vk_bound_image"
+11-26 21:50:09.207 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_signal"
+11-26 21:50:09.207 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_flush_chain"
+11-26 21:50:09.207 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_cmar_metadata_list"
+11-26 21:50:09.207 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_jit"
+11-26 21:50:09.207 10020 10037 W libc    : Access denied finding property "vendor.mali.cctx_memory_class_mmu"
+11-26 21:50:09.207 10020 10037 W libc    : Access denied finding property "vendor.mali.osu_protected_memory_heap_name"
+11-26 21:50:09.208 10020 10037 W libc    : Access denied finding property "vendor.mali.osu_ion_protected_memory_heap_name"
+11-26 21:50:09.208 10020 10037 W libc    : Access denied finding property "vendor.mali.platform_agt_frequency_khz"
+11-26 21:50:09.208 10020 10037 W libc    : Access denied finding property "vendor.mali.hal_dump_dir"
+11-26 21:50:09.208 10020 10037 W libc    : Access denied finding property "vendor.mali.platform.config"
+11-26 21:50:09.208 10020 10037 I mali    : Successfully parsed 1 environment variable(s) from /vendor/etc/mali_platform.config.
+11-26 21:50:09.208 10020 10037 W libc    : Access denied finding property "vendor.mali.debug.config"
+11-26 21:50:09.210 10020 10042 I wf_dream: start the menu (cd.iff)
+11-26 21:50:09.211 10020 10045 I wf_dream: 
+11-26 21:50:09.211 10020 10045 I wf_dream: === wf_dream start the menu (cd.iff) of 16 ===
+11-26 21:50:09.215 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.hal_format"
+11-26 21:50:09.215 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.recordable"
+11-26 21:50:09.215 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuyv.dataspaces_to_exclude"
+11-26 21:50:09.215 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.hal_format"
+11-26 21:50:09.215 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.recordable"
+11-26 21:50:09.215 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv12.dataspaces_to_exclude"
+11-26 21:50:09.215 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.hal_format"
+11-26 21:50:09.215 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.recordable"
+11-26 21:50:09.216 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv21.dataspaces_to_exclude"
+11-26 21:50:09.216 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.hal_format"
+11-26 21:50:09.216 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.recordable"
+11-26 21:50:09.216 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.nv16.dataspaces_to_exclude"
+11-26 21:50:09.216 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.hal_format"
+11-26 21:50:09.216 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.recordable"
+11-26 21:50:09.216 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yuv420.dataspaces_to_exclude"
+11-26 21:50:09.216 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.hal_format"
+11-26 21:50:09.216 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.recordable"
+11-26 21:50:09.216 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.yvu420.dataspaces_to_exclude"
+11-26 21:50:09.217 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.hal_format"
+11-26 21:50:09.217 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.recordable"
+11-26 21:50:09.217 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y410.dataspaces_to_exclude"
+11-26 21:50:09.217 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.hal_format"
+11-26 21:50:09.217 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.recordable"
+11-26 21:50:09.217 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y210.dataspaces_to_exclude"
+11-26 21:50:09.217 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.hal_format"
+11-26 21:50:09.217 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.recordable"
+11-26 21:50:09.217 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.y0l2.dataspaces_to_exclude"
+11-26 21:50:09.217 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.hal_format"
+11-26 21:50:09.218 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.recordable"
+11-26 21:50:09.218 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p210.dataspaces_to_exclude"
+11-26 21:50:09.218 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.hal_format"
+11-26 21:50:09.218 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.recordable"
+11-26 21:50:09.218 10020 10037 W libc    : Access denied finding property "ro.vendor.arm.egl.configs.p010.dataspaces_to_exclude"
+11-26 21:50:09.234 10020 10042 I wf_game : EGL surface ready: 1920x1080 (context reused)
+11-26 21:50:09.235 10020 10042 I wf_dream: vram override: --vram-slot-width=2048
+11-26 21:50:09.235 10020 10042 I wf_dream: vram override: --vram-slot-height=1024
+11-26 21:50:09.237 10020 10042 I AAudio  : AAudioStreamBuilder_openStream() called ----------------------------------------
+11-26 21:50:09.238 10020 10042 I AudioStreamBuilder: rate   =      0, channels  = 0, channelMask = 0, format   = 5, sharing = SH, dir = OUTPUT
+11-26 21:50:09.238 10020 10042 I AudioStreamBuilder: device =      0, sessionId = -1, perfMode = 12, callback: ON with frames = 0
+11-26 21:50:09.238 10020 10042 I AudioStreamBuilder: usage  =      0, contentType = 0, inputPreset = 0, allowedCapturePolicy = 0
+11-26 21:50:09.238 10020 10042 I AudioStreamBuilder: privacy sensitive = false, opPackageName = (null), attributionTag = (null)
+11-26 21:50:09.241 10020 10042 D dry.game.clocks: PlayerBase::PlayerBase()
+11-26 21:50:09.247 10020 10037 E OpenGLRenderer: Unable to match the desired swap behavior.
+11-26 21:50:09.290 10020 10042 D AudioStreamInternal_Client: configureDataInformation() original HW burst = 384, minMicros = 1000 => SW burst = 384
+11-26 21:50:09.290 10020 10042 D IsochronousClockModel: setFramesPerBurst() - mFramesPerBurst = 384 - mBurstPeriodNanos = 8000000
+11-26 21:50:09.290 10020 10042 D AAudioStream: setState(s#1) from 0 to 2
+11-26 21:50:09.290 10020 10042 I AAudioFlowGraph: configure() source format = 0x00000005, channels = 2, sink format = 0x00000005, channels = 2, useMonoBlend = 0, audioBalance = 0.000000, isExclusive 0
+11-26 21:50:09.292 10020 10042 I AAudio  : AAudioStreamBuilder_openStream() returns 0 = AAUDIO_OK for s#1 ----------------
+11-26 21:50:09.294 10020 10042 D AAudio  : AAudioStream_requestStart(s#1) called --------------
+11-26 21:50:09.294 10020 10042 D AAudioStream: setState(s#1) from 2 to 3
+11-26 21:50:09.343 10020 10042 D AAudio  : AAudioStream_requestStart(s#1) returned 0 ---------
+11-26 21:50:09.346 10020 10060 D AudioStreamInternalPlay_Client: callbackLoop() entering >>>>>>>>>>>>>>>
+11-26 21:50:09.347 10020 10060 D AudioStreamInternal_Client: onEventFromServer - got AAUDIO_SERVICE_EVENT_STARTED
+11-26 21:50:09.347 10020 10060 D AAudioStream: setState(s#1) from 3 to 4
+11-26 21:50:09.347 10020 10045 I wf_dream: audio: miniaudio v0.11.25 ready
+11-26 21:50:09.704 10020 10045 I wf_dream: UI_FONT 1024x2048 atlas, 2770432 bytes
+11-26 21:50:09.704 10020 10045 I wf_dream: jolt: RegisterDefaultAllocator
+11-26 21:50:09.704 10020 10045 I wf_dream: jolt: Factory
+11-26 21:50:09.704 10020 10045 I wf_dream: jolt: RegisterTypes
+11-26 21:50:09.704 10020 10045 I wf_dream: jolt: RunSelftest
+11-26 21:50:09.707 10020 10045 I wf_dream: jolt: selftest ok (sphere fell to z=5.098)
+11-26 21:50:09.707 10020 10045 I wf_dream: jolt: backend init
+11-26 21:50:09.707 10020 10045 I wf_dream: jolt: init complete
+11-26 21:50:09.720 10020 10045 I wf_dream: zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+11-26 21:50:09.721 10020 10045 I wf_dream: zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+11-26 21:50:10.051 10020 10042 I wf_game : level-menu: showing 16 entries ("WF Clocks"), cursor on 0
+11-26 21:50:10.052 10020 10045 I wf_dream: VIEW authored=0.000 screen=1.778 hfov=91.5 vfov=60.0 maximum=0.000 surface=1920x1080 viewport=0,0,1920x1080 pillarbox=0 source=default
+11-26 21:50:10.660 10020 10045 I wf_dream: delta too large: 0.6087646484
+11-26 21:50:10.660 10020 10045 I wf_dream: timeofday:1795704610:660565
+11-26 21:50:10.660 10020 10045 I wf_dream: lasttimeofday: 1795704610:51787
+11-26 21:50:10.661 10020 10045 I wf_dream: deltatime:0:608778
+11-26 21:50:10.661 10020 10045 I wf_dream: delta: 0.6087646484
+11-26 21:50:30.610 10020 10042 I wf_game : level-menu: cursor on 1 (Tide Harbour)
+11-26 21:50:32.813 10020 10042 I wf_game : level-menu: LEVEL_TO_RUN=1 (Tide Harbour)
+11-26 21:50:32.813 10020 10042 I wf_game : level-menu: level 1 starts
+11-26 21:50:32.817 10020 10045 I wf_dream: Level::Level: leveldata= 0xde198228, object count  = 204
+11-26 21:50:32.818 10020 10045 I wf_dream: PixelMap::Load: this = 0xdbc5a750
+11-26 21:50:32.819 10020 10045 I wf_dream: PixelMap::Load: this = 0xdbc5a778
+11-26 21:50:32.837 10020 10045 I wf_dream: [Actor] idx=3 class=20 commonOff=42496 NumberOfLocalMailboxes=0
+11-26 21:50:32.837 10020 10045 I wf_dream: [Actor] idx=4 class=22 commonOff=42648 NumberOfLocalMailboxes=0
+11-26 21:50:32.838 10020 10045 I wf_dream: [Actor] idx=5 class=13 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.838 10020 10045 I wf_dream: this = 0xdbc5deb0,setting _memory to 0xdbc5d918
+11-26 21:50:32.838 10020 10045 I wf_dream: [Actor] idx=6 class=3 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.838 10020 10045 I wf_dream: [Actor] idx=7 class=16 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.838 10020 10045 I wf_dream: [Actor] idx=8 class=23 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.838 10020 10045 I wf_dream: [Actor] idx=9 class=23 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.838 10020 10045 I wf_dream: [Actor] idx=10 class=11 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.845 10020 10045 I wf_dream: [Actor] idx=11 class=36 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.845 10020 10045 I wf_dream: [Actor] idx=12 class=5 commonOff=43604 NumberOfLocalMailboxes=0
+11-26 21:50:32.845 10020 10045 I wf_dream: [Actor] idx=13 class=5 commonOff=43604 NumberOfLocalMailboxes=0
+11-26 21:50:32.845 10020 10045 I wf_dream: [Actor] idx=14 class=5 commonOff=43604 NumberOfLocalMailboxes=0
+11-26 21:50:32.845 10020 10045 I wf_dream: [Actor] idx=15 class=5 commonOff=43604 NumberOfLocalMailboxes=0
+11-26 21:50:32.845 10020 10045 I wf_dream: [Actor] idx=16 class=5 commonOff=43604 NumberOfLocalMailboxes=0
+11-26 21:50:32.845 10020 10045 I wf_dream: [Actor] idx=17 class=5 commonOff=43604 NumberOfLocalMailboxes=0
+11-26 21:50:32.845 10020 10045 I wf_dream: [Actor] idx=18 class=5 commonOff=43604 NumberOfLocalMailboxes=0
+11-26 21:50:32.845 10020 10045 I wf_dream: [Actor] idx=19 class=5 commonOff=43604 NumberOfLocalMailboxes=0
+11-26 21:50:32.845 10020 10045 I wf_dream: [Actor] idx=20 class=5 commonOff=43804 NumberOfLocalMailboxes=0
+11-26 21:50:32.845 10020 10045 I wf_dream: [Actor] idx=21 class=5 commonOff=43604 NumberOfLocalMailboxes=0
+11-26 21:50:32.845 10020 10045 I wf_dream: [Actor] idx=22 class=5 commonOff=43848 NumberOfLocalMailboxes=0
+11-26 21:50:32.845 10020 10045 I wf_dream: [Actor] idx=23 class=5 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.845 10020 10045 I wf_dream: [Actor] idx=24 class=5 commonOff=43892 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=25 class=5 commonOff=43936 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=26 class=5 commonOff=43804 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=27 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=28 class=7 commonOff=43604 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=29 class=7 commonOff=43604 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=30 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=31 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=32 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=33 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=34 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=35 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=36 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=37 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=38 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=39 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=40 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=41 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=42 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=43 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=44 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=45 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=46 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=47 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=48 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=49 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.846 10020 10045 I wf_dream: [Actor] idx=50 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=51 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=52 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=53 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=54 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=55 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=56 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=57 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=58 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=59 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=60 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=61 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=62 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=63 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=64 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=65 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=66 class=7 commonOff=44556 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=67 class=7 commonOff=44756 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=68 class=7 commonOff=44800 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=69 class=7 commonOff=44844 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=70 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=71 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=72 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=73 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=74 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=75 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=76 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=77 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=78 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=79 class=7 commonOff=44888 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=80 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.847 10020 10045 I wf_dream: [Actor] idx=81 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=82 class=7 commonOff=44932 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=83 class=7 commonOff=44976 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=84 class=7 commonOff=44976 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=85 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=86 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=87 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=88 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=89 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=90 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=91 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=92 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=93 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=94 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=95 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=96 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=97 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=98 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=99 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=100 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=101 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=102 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=103 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=104 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=105 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=106 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=107 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=108 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=109 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=110 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.848 10020 10045 I wf_dream: [Actor] idx=111 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=112 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=113 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=114 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=115 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=116 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=117 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=118 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=119 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=120 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=121 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=122 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=123 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=124 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=125 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=126 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=127 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=128 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=129 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=130 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=131 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=132 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=133 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=134 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=135 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=136 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=137 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=138 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=139 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=140 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=141 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.849 10020 10045 I wf_dream: [Actor] idx=142 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=143 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=144 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=145 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=146 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=147 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=148 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=149 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=150 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=151 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=152 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=153 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=154 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=155 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=156 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=157 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=158 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=159 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=160 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=161 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=162 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=163 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=164 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=165 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=166 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=167 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=168 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=169 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=170 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=171 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=172 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=173 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.850 10020 10045 I wf_dream: [Actor] idx=174 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=175 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=176 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=177 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=178 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=179 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=180 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=181 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=182 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=183 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=184 class=7 commonOff=42180 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=185 class=7 commonOff=56408 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=186 class=7 commonOff=56608 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=187 class=7 commonOff=56652 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=188 class=7 commonOff=56696 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=189 class=7 commonOff=56740 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=190 class=7 commonOff=56784 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=191 class=7 commonOff=56828 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=192 class=7 commonOff=56872 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=193 class=7 commonOff=56916 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=194 class=7 commonOff=56872 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=195 class=7 commonOff=56872 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=196 class=7 commonOff=56960 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=197 class=7 commonOff=57004 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=198 class=7 commonOff=57048 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=199 class=7 commonOff=57004 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=200 class=7 commonOff=57004 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=201 class=7 commonOff=57092 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=202 class=7 commonOff=57136 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: [Actor] idx=203 class=7 commonOff=57136 NumberOfLocalMailboxes=0
+11-26 21:50:32.851 10020 10045 I wf_dream: ROOM-RENDER scope=all-active source=default
+11-26 21:50:32.865 10020 10045 I wf_dream: PixelMap::Load: this = 0xdbc5a7a0
+11-26 21:50:32.865 10020 10045 I wf_dream: PixelMap::Load: this = 0xdbc5a7c8
+11-26 21:50:32.960 10020 10045 I wf_dream: zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+11-26 21:50:32.961 10020 10042 I wf_dream: PERM_POOL used_bytes=120 total_bytes=2000000 free_bytes=1999880
+11-26 21:50:32.961 10020 10045 I wf_dream: zforth: INDEXOF_CAMSHOT = 1921 (expect 1921)
+11-26 21:50:32.961 10020 10045 I wf_dream: audio: MusicPlayer — soundfont not found: florestan-subset.sf2
+11-26 21:50:32.962 10020 10045 I wf_dream: audio: sfx[0] not found: wflevels/qbert_practice/sfx/qbert_hop.wav
+11-26 21:50:32.962 10020 10045 I wf_dream: audio: sfx[1] not found: wflevels/qbert_practice/sfx/qbert_land.wav
+11-26 21:50:32.962 10020 10045 I wf_dream: audio: sfx[2] not found: wflevels/qbert_practice/sfx/qbert_fall.wav
+11-26 21:50:32.962 10020 10045 I wf_dream: audio: sfx[3] not found: wflevels/qbert_practice/sfx/qbert_swear.wav
+11-26 21:50:32.962 10020 10045 I wf_dream: audio: sfx[4] not found: wflevels/qbert_practice/sfx/qbert_round_clear.wav
+11-26 21:50:32.962 10020 10045 I wf_dream: audio: sfx[5] not found: wflevels/qbert_practice/sfx/qbert_kill.wav
+11-26 21:50:32.962 10020 10045 I wf_dream: audio: sfx[6] not found: wflevels/qbert_practice/sfx/qbert_disc.wav
+11-26 21:50:33.079 10020 10045 I wf_dream: delta too large: 0.2646484375
+11-26 21:50:33.079 10020 10045 I wf_dream: timeofday:1795704633:78276
+11-26 21:50:33.079 10020 10045 I wf_dream: lasttimeofday: 1795704632:813615
+11-26 21:50:33.079 10020 10045 I wf_dream: deltatime:0:264661
+11-26 21:50:33.079 10020 10045 I wf_dream: delta: 0.2646484375

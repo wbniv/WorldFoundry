@@ -1,0 +1,4175 @@
+{
+  "schema": 1,
+  "score_sha256": "c5bcebeee8bc85818c8bd0e8f36b85cccef446bd422d19b87136968887ca9a8d",
+  "clock_calibration": {
+    "offset_seconds": 0.7581069469451904,
+    "uncertainty_seconds": 0.13876874542236328
+  },
+  "device_anchor": {
+    "device_uptime_ms": 149324761,
+    "device_wall_ms": 1795704624590
+  },
+  "host_start_wall": 1795704624.3909035,
+  "events": [
+    {
+      "seq": 1,
+      "t": 500,
+      "key": "DPAD_UP",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149325294,
+        "code": 19,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 533,
+      "lateness_ms": 33
+    },
+    {
+      "seq": 2,
+      "t": 620,
+      "key": "DPAD_UP",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149325400,
+        "code": 19,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 639,
+      "lateness_ms": 19
+    },
+    {
+      "seq": 3,
+      "t": 740,
+      "key": "DPAD_UP",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149325522,
+        "code": 19,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 761,
+      "lateness_ms": 21
+    },
+    {
+      "seq": 4,
+      "t": 860,
+      "key": "DPAD_UP",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149325634,
+        "code": 19,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 873,
+      "lateness_ms": 13
+    },
+    {
+      "seq": 5,
+      "t": 980,
+      "key": "DPAD_UP",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149325753,
+        "code": 19,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 992,
+      "lateness_ms": 12
+    },
+    {
+      "seq": 6,
+      "t": 1100,
+      "key": "DPAD_UP",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149325885,
+        "code": 19,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 1124,
+      "lateness_ms": 24
+    },
+    {
+      "seq": 7,
+      "t": 1220,
+      "key": "DPAD_UP",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149326004,
+        "code": 19,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 1243,
+      "lateness_ms": 23
+    },
+    {
+      "seq": 8,
+      "t": 1340,
+      "key": "DPAD_UP",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149326118,
+        "code": 19,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 1357,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 9,
+      "t": 1460,
+      "key": "DPAD_UP",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149326239,
+        "code": 19,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 1478,
+      "lateness_ms": 18
+    },
+    {
+      "seq": 10,
+      "t": 1580,
+      "key": "DPAD_UP",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149326368,
+        "code": 19,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 1607,
+      "lateness_ms": 27
+    },
+    {
+      "seq": 11,
+      "t": 1700,
+      "key": "DPAD_UP",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149326474,
+        "code": 19,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 1713,
+      "lateness_ms": 13
+    },
+    {
+      "seq": 12,
+      "t": 1820,
+      "key": "DPAD_UP",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149326601,
+        "code": 19,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 1840,
+      "lateness_ms": 20
+    },
+    {
+      "seq": 13,
+      "t": 1940,
+      "key": "DPAD_UP",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149326723,
+        "code": 19,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 1962,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 14,
+      "t": 2060,
+      "key": "DPAD_UP",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149326835,
+        "code": 19,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 2074,
+      "lateness_ms": 14
+    },
+    {
+      "seq": 15,
+      "t": 2180,
+      "key": "DPAD_UP",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149326962,
+        "code": 19,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 2201,
+      "lateness_ms": 21
+    },
+    {
+      "seq": 16,
+      "t": 2300,
+      "key": "DPAD_UP",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149327069,
+        "code": 19,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 2308,
+      "lateness_ms": 8
+    },
+    {
+      "seq": 17,
+      "t": 2420,
+      "key": "DPAD_UP",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149327207,
+        "code": 19,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 2446,
+      "lateness_ms": 26
+    },
+    {
+      "seq": 18,
+      "t": 2540,
+      "key": "DPAD_UP",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149327319,
+        "code": 19,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 2558,
+      "lateness_ms": 18
+    },
+    {
+      "seq": 19,
+      "t": 2660,
+      "key": "DPAD_UP",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149327438,
+        "code": 19,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 2677,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 20,
+      "t": 2780,
+      "key": "DPAD_UP",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149327552,
+        "code": 19,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 2791,
+      "lateness_ms": 11
+    },
+    {
+      "seq": 21,
+      "t": 2900,
+      "key": "DPAD_UP",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149327671,
+        "code": 19,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 2910,
+      "lateness_ms": 10
+    },
+    {
+      "seq": 22,
+      "t": 3020,
+      "key": "DPAD_UP",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149327803,
+        "code": 19,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 3042,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 23,
+      "t": 3140,
+      "key": "DPAD_UP",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149327922,
+        "code": 19,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 3161,
+      "lateness_ms": 21
+    },
+    {
+      "seq": 24,
+      "t": 3260,
+      "key": "DPAD_UP",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149328054,
+        "code": 19,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 3293,
+      "lateness_ms": 33
+    },
+    {
+      "seq": 25,
+      "t": 3380,
+      "key": "DPAD_UP",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149328157,
+        "code": 19,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 3396,
+      "lateness_ms": 16
+    },
+    {
+      "seq": 26,
+      "t": 3500,
+      "key": "DPAD_UP",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149328270,
+        "code": 19,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 3509,
+      "lateness_ms": 9
+    },
+    {
+      "seq": 27,
+      "t": 3620,
+      "key": "DPAD_UP",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149328412,
+        "code": 19,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 3651,
+      "lateness_ms": 31
+    },
+    {
+      "seq": 28,
+      "t": 3740,
+      "key": "DPAD_UP",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149328520,
+        "code": 19,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 3759,
+      "lateness_ms": 19
+    },
+    {
+      "seq": 29,
+      "t": 3860,
+      "key": "DPAD_UP",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149328640,
+        "code": 19,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 3879,
+      "lateness_ms": 19
+    },
+    {
+      "seq": 30,
+      "t": 3980,
+      "key": "DPAD_UP",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149328754,
+        "code": 19,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 3993,
+      "lateness_ms": 13
+    },
+    {
+      "seq": 31,
+      "t": 4100,
+      "key": "DPAD_UP",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149328875,
+        "code": 19,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 4114,
+      "lateness_ms": 14
+    },
+    {
+      "seq": 32,
+      "t": 4220,
+      "key": "DPAD_UP",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149329011,
+        "code": 19,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 4250,
+      "lateness_ms": 30
+    },
+    {
+      "seq": 33,
+      "t": 6000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149330775,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 6014,
+      "lateness_ms": 14
+    },
+    {
+      "seq": 34,
+      "t": 6200,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149330973,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 6212,
+      "lateness_ms": 12
+    },
+    {
+      "seq": 35,
+      "t": 8000,
+      "key": "DPAD_CENTER",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149332778,
+        "code": 23,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 8017,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 36,
+      "t": 8200,
+      "key": "DPAD_CENTER",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149332975,
+        "code": 23,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 8214,
+      "lateness_ms": 14
+    },
+    {
+      "seq": 37,
+      "t": 21000,
+      "key": "DPAD_CENTER",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149345775,
+        "code": 23,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 21014,
+      "lateness_ms": 14
+    },
+    {
+      "seq": 38,
+      "t": 22800,
+      "key": "DPAD_CENTER",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149347573,
+        "code": 23,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 22812,
+      "lateness_ms": 12
+    },
+    {
+      "seq": 39,
+      "t": 24000,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149348778,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 24017,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 40,
+      "t": 24200,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149348974,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 24213,
+      "lateness_ms": 13
+    },
+    {
+      "seq": 41,
+      "t": 25000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149349777,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 25016,
+      "lateness_ms": 16
+    },
+    {
+      "seq": 42,
+      "t": 25200,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149349975,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 25214,
+      "lateness_ms": 14
+    },
+    {
+      "seq": 43,
+      "t": 26000,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149350778,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 26017,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 44,
+      "t": 26200,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149350976,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 26215,
+      "lateness_ms": 15
+    },
+    {
+      "seq": 45,
+      "t": 28000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149352780,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 28019,
+      "lateness_ms": 19
+    },
+    {
+      "seq": 46,
+      "t": 28200,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149352978,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 28217,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 47,
+      "t": 29000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149353783,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 29022,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 48,
+      "t": 29200,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149353979,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 29218,
+      "lateness_ms": 18
+    },
+    {
+      "seq": 49,
+      "t": 30000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149354785,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 30024,
+      "lateness_ms": 24
+    },
+    {
+      "seq": 50,
+      "t": 30200,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149354980,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 30219,
+      "lateness_ms": 19
+    },
+    {
+      "seq": 51,
+      "t": 31000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149355783,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 31022,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 52,
+      "t": 31200,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149355981,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 31220,
+      "lateness_ms": 20
+    },
+    {
+      "seq": 53,
+      "t": 32000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149356784,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 32023,
+      "lateness_ms": 23
+    },
+    {
+      "seq": 54,
+      "t": 32200,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149356982,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 32221,
+      "lateness_ms": 21
+    },
+    {
+      "seq": 55,
+      "t": 36000,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149360774,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 36013,
+      "lateness_ms": 13
+    },
+    {
+      "seq": 56,
+      "t": 36200,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149360986,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 36225,
+      "lateness_ms": 25
+    },
+    {
+      "seq": 57,
+      "t": 37000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149361791,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 37030,
+      "lateness_ms": 30
+    },
+    {
+      "seq": 58,
+      "t": 37200,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149361987,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 37226,
+      "lateness_ms": 26
+    },
+    {
+      "seq": 59,
+      "t": 40000,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149364777,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 40016,
+      "lateness_ms": 16
+    },
+    {
+      "seq": 60,
+      "t": 40100,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149364890,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 40129,
+      "lateness_ms": 29
+    },
+    {
+      "seq": 61,
+      "t": 40220,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149364992,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 40231,
+      "lateness_ms": 11
+    },
+    {
+      "seq": 62,
+      "t": 40320,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149365090,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 40329,
+      "lateness_ms": 9
+    },
+    {
+      "seq": 63,
+      "t": 40440,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149365212,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 40451,
+      "lateness_ms": 11
+    },
+    {
+      "seq": 64,
+      "t": 40540,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149365324,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 40563,
+      "lateness_ms": 23
+    },
+    {
+      "seq": 65,
+      "t": 40660,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149365446,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 40685,
+      "lateness_ms": 25
+    },
+    {
+      "seq": 66,
+      "t": 40760,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149365541,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 40780,
+      "lateness_ms": 20
+    },
+    {
+      "seq": 67,
+      "t": 40880,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149365663,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 40902,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 68,
+      "t": 40980,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149365764,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 41003,
+      "lateness_ms": 23
+    },
+    {
+      "seq": 69,
+      "t": 41100,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149365895,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 41134,
+      "lateness_ms": 34
+    },
+    {
+      "seq": 70,
+      "t": 41200,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149365974,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 41213,
+      "lateness_ms": 13
+    },
+    {
+      "seq": 71,
+      "t": 41320,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149366094,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 41333,
+      "lateness_ms": 13
+    },
+    {
+      "seq": 72,
+      "t": 41420,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149366191,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 41430,
+      "lateness_ms": 10
+    },
+    {
+      "seq": 73,
+      "t": 41540,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149366313,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 41552,
+      "lateness_ms": 12
+    },
+    {
+      "seq": 74,
+      "t": 41640,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149366425,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 41664,
+      "lateness_ms": 24
+    },
+    {
+      "seq": 75,
+      "t": 41760,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149366544,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 41783,
+      "lateness_ms": 23
+    },
+    {
+      "seq": 76,
+      "t": 41860,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149366658,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 41897,
+      "lateness_ms": 37
+    },
+    {
+      "seq": 77,
+      "t": 41980,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149366778,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 42017,
+      "lateness_ms": 37
+    },
+    {
+      "seq": 78,
+      "t": 42080,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149366876,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 42115,
+      "lateness_ms": 35
+    },
+    {
+      "seq": 79,
+      "t": 42200,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149366978,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 42217,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 80,
+      "t": 42300,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149367076,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 42315,
+      "lateness_ms": 15
+    },
+    {
+      "seq": 81,
+      "t": 42420,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149367195,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 42434,
+      "lateness_ms": 14
+    },
+    {
+      "seq": 82,
+      "t": 42520,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149367292,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 42531,
+      "lateness_ms": 11
+    },
+    {
+      "seq": 83,
+      "t": 42640,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149367412,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 42651,
+      "lateness_ms": 11
+    },
+    {
+      "seq": 84,
+      "t": 42740,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149367526,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 42765,
+      "lateness_ms": 25
+    },
+    {
+      "seq": 85,
+      "t": 42860,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149367647,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 42886,
+      "lateness_ms": 26
+    },
+    {
+      "seq": 86,
+      "t": 42960,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149367743,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 42982,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 87,
+      "t": 43080,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149367865,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 43104,
+      "lateness_ms": 24
+    },
+    {
+      "seq": 88,
+      "t": 43180,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149367959,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 43198,
+      "lateness_ms": 18
+    },
+    {
+      "seq": 89,
+      "t": 43300,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149368083,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 43322,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 90,
+      "t": 43400,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149368177,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 43416,
+      "lateness_ms": 16
+    },
+    {
+      "seq": 91,
+      "t": 43520,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149368297,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 43536,
+      "lateness_ms": 16
+    },
+    {
+      "seq": 92,
+      "t": 43620,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149368393,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 43632,
+      "lateness_ms": 12
+    },
+    {
+      "seq": 93,
+      "t": 43740,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149368513,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 43752,
+      "lateness_ms": 12
+    },
+    {
+      "seq": 94,
+      "t": 43840,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149368610,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 43849,
+      "lateness_ms": 9
+    },
+    {
+      "seq": 95,
+      "t": 43960,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149368751,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 43990,
+      "lateness_ms": 30
+    },
+    {
+      "seq": 96,
+      "t": 44060,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149368844,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 44083,
+      "lateness_ms": 23
+    },
+    {
+      "seq": 97,
+      "t": 44180,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149368963,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 44202,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 98,
+      "t": 44280,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149369061,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 44300,
+      "lateness_ms": 20
+    },
+    {
+      "seq": 99,
+      "t": 44400,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149369197,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 44436,
+      "lateness_ms": 36
+    },
+    {
+      "seq": 100,
+      "t": 44500,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149369278,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 44517,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 101,
+      "t": 44620,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149369400,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 44639,
+      "lateness_ms": 19
+    },
+    {
+      "seq": 102,
+      "t": 44720,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149369494,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 44733,
+      "lateness_ms": 13
+    },
+    {
+      "seq": 103,
+      "t": 44840,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149369631,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 44870,
+      "lateness_ms": 30
+    },
+    {
+      "seq": 104,
+      "t": 44940,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149369711,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 44950,
+      "lateness_ms": 10
+    },
+    {
+      "seq": 105,
+      "t": 45060,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149369833,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 45072,
+      "lateness_ms": 12
+    },
+    {
+      "seq": 106,
+      "t": 45160,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149369945,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 45184,
+      "lateness_ms": 24
+    },
+    {
+      "seq": 107,
+      "t": 45280,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149370065,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 45304,
+      "lateness_ms": 24
+    },
+    {
+      "seq": 108,
+      "t": 45380,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149370179,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 45418,
+      "lateness_ms": 38
+    },
+    {
+      "seq": 109,
+      "t": 45500,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149370283,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 45522,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 110,
+      "t": 45600,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149370379,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 45618,
+      "lateness_ms": 18
+    },
+    {
+      "seq": 111,
+      "t": 45720,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149370499,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 45738,
+      "lateness_ms": 18
+    },
+    {
+      "seq": 112,
+      "t": 45820,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149370595,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 45834,
+      "lateness_ms": 14
+    },
+    {
+      "seq": 113,
+      "t": 45940,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149370733,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 45972,
+      "lateness_ms": 32
+    },
+    {
+      "seq": 114,
+      "t": 46040,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149370829,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 46068,
+      "lateness_ms": 28
+    },
+    {
+      "seq": 115,
+      "t": 46160,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149370951,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 46190,
+      "lateness_ms": 30
+    },
+    {
+      "seq": 116,
+      "t": 46260,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149371046,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 46285,
+      "lateness_ms": 25
+    },
+    {
+      "seq": 117,
+      "t": 46380,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149371166,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 46405,
+      "lateness_ms": 25
+    },
+    {
+      "seq": 118,
+      "t": 46480,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149371263,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 46502,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 119,
+      "t": 46600,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149371383,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 46622,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 120,
+      "t": 46700,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149371480,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 46719,
+      "lateness_ms": 19
+    },
+    {
+      "seq": 121,
+      "t": 46820,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149371599,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 46838,
+      "lateness_ms": 18
+    },
+    {
+      "seq": 122,
+      "t": 46920,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149371713,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 46952,
+      "lateness_ms": 32
+    },
+    {
+      "seq": 123,
+      "t": 47040,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149371816,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 47055,
+      "lateness_ms": 15
+    },
+    {
+      "seq": 124,
+      "t": 47140,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149371914,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 47153,
+      "lateness_ms": 13
+    },
+    {
+      "seq": 125,
+      "t": 47260,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149372032,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 47271,
+      "lateness_ms": 11
+    },
+    {
+      "seq": 126,
+      "t": 47360,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149372131,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 47370,
+      "lateness_ms": 10
+    },
+    {
+      "seq": 127,
+      "t": 47480,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149372250,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 47489,
+      "lateness_ms": 9
+    },
+    {
+      "seq": 128,
+      "t": 47580,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149372364,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 47603,
+      "lateness_ms": 23
+    },
+    {
+      "seq": 129,
+      "t": 47700,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149372501,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 47740,
+      "lateness_ms": 40
+    },
+    {
+      "seq": 130,
+      "t": 47800,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149372597,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 47836,
+      "lateness_ms": 36
+    },
+    {
+      "seq": 131,
+      "t": 47920,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149372700,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 47939,
+      "lateness_ms": 19
+    },
+    {
+      "seq": 132,
+      "t": 48020,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149372798,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 48037,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 133,
+      "t": 48140,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149372922,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 48161,
+      "lateness_ms": 21
+    },
+    {
+      "seq": 134,
+      "t": 48240,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149373015,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 48254,
+      "lateness_ms": 14
+    },
+    {
+      "seq": 135,
+      "t": 48360,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149373134,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 48373,
+      "lateness_ms": 13
+    },
+    {
+      "seq": 136,
+      "t": 48460,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149373231,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 48470,
+      "lateness_ms": 10
+    },
+    {
+      "seq": 137,
+      "t": 48580,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149373350,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 48589,
+      "lateness_ms": 9
+    },
+    {
+      "seq": 138,
+      "t": 48680,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149373465,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 48704,
+      "lateness_ms": 24
+    },
+    {
+      "seq": 139,
+      "t": 48800,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149373584,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 48823,
+      "lateness_ms": 23
+    },
+    {
+      "seq": 140,
+      "t": 48900,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149373682,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 48921,
+      "lateness_ms": 21
+    },
+    {
+      "seq": 141,
+      "t": 49020,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149373819,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 49058,
+      "lateness_ms": 38
+    },
+    {
+      "seq": 142,
+      "t": 49120,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149373916,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 49155,
+      "lateness_ms": 35
+    },
+    {
+      "seq": 143,
+      "t": 49240,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149374020,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 49259,
+      "lateness_ms": 19
+    },
+    {
+      "seq": 144,
+      "t": 49340,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149374116,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 49355,
+      "lateness_ms": 15
+    },
+    {
+      "seq": 145,
+      "t": 49460,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149374236,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 49475,
+      "lateness_ms": 15
+    },
+    {
+      "seq": 146,
+      "t": 49560,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149374333,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 49572,
+      "lateness_ms": 12
+    },
+    {
+      "seq": 147,
+      "t": 49680,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149374453,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 49692,
+      "lateness_ms": 12
+    },
+    {
+      "seq": 148,
+      "t": 49780,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149374550,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 49789,
+      "lateness_ms": 9
+    },
+    {
+      "seq": 149,
+      "t": 53500,
+      "key": "BACK",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149378273,
+        "code": 4,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 53512,
+      "lateness_ms": 12
+    },
+    {
+      "seq": 150,
+      "t": 53700,
+      "key": "BACK",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149378504,
+        "code": 4,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 53743,
+      "lateness_ms": 43
+    },
+    {
+      "seq": 151,
+      "t": 275000,
+      "key": "DPAD_CENTER",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149599778,
+        "code": 23,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 275017,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 152,
+      "t": 276800,
+      "key": "DPAD_CENTER",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149601577,
+        "code": 23,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 276816,
+      "lateness_ms": 16
+    },
+    {
+      "seq": 153,
+      "t": 278000,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149602782,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 278021,
+      "lateness_ms": 21
+    },
+    {
+      "seq": 154,
+      "t": 278200,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149602978,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 278217,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 155,
+      "t": 279000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149603782,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 279021,
+      "lateness_ms": 21
+    },
+    {
+      "seq": 156,
+      "t": 279200,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149603979,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 279218,
+      "lateness_ms": 18
+    },
+    {
+      "seq": 157,
+      "t": 280000,
+      "key": "DPAD_RIGHT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149604783,
+        "code": 22,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 280022,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 158,
+      "t": 280200,
+      "key": "DPAD_RIGHT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149604980,
+        "code": 22,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 280219,
+      "lateness_ms": 19
+    },
+    {
+      "seq": 159,
+      "t": 282000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149606788,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 282027,
+      "lateness_ms": 27
+    },
+    {
+      "seq": 160,
+      "t": 282200,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149606982,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 282221,
+      "lateness_ms": 21
+    },
+    {
+      "seq": 161,
+      "t": 283000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149607786,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 283025,
+      "lateness_ms": 25
+    },
+    {
+      "seq": 162,
+      "t": 283200,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149607983,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 283222,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 163,
+      "t": 284000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149608774,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 284013,
+      "lateness_ms": 13
+    },
+    {
+      "seq": 164,
+      "t": 284200,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149608984,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 284223,
+      "lateness_ms": 23
+    },
+    {
+      "seq": 165,
+      "t": 285000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149609787,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 285026,
+      "lateness_ms": 26
+    },
+    {
+      "seq": 166,
+      "t": 285200,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149610003,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 285242,
+      "lateness_ms": 42
+    },
+    {
+      "seq": 167,
+      "t": 286000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149610777,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 286016,
+      "lateness_ms": 16
+    },
+    {
+      "seq": 168,
+      "t": 286200,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149610986,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 286225,
+      "lateness_ms": 25
+    },
+    {
+      "seq": 169,
+      "t": 288000,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149612774,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 288013,
+      "lateness_ms": 13
+    },
+    {
+      "seq": 170,
+      "t": 288200,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149612989,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 288228,
+      "lateness_ms": 28
+    },
+    {
+      "seq": 171,
+      "t": 289000,
+      "key": "DPAD_DOWN",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149613775,
+        "code": 20,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 289014,
+      "lateness_ms": 14
+    },
+    {
+      "seq": 172,
+      "t": 289200,
+      "key": "DPAD_DOWN",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149613972,
+        "code": 20,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 289211,
+      "lateness_ms": 11
+    },
+    {
+      "seq": 173,
+      "t": 290000,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149614778,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 290017,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 174,
+      "t": 290100,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149614891,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 290130,
+      "lateness_ms": 30
+    },
+    {
+      "seq": 175,
+      "t": 290220,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149614995,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 290234,
+      "lateness_ms": 14
+    },
+    {
+      "seq": 176,
+      "t": 290320,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149615090,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 290329,
+      "lateness_ms": 9
+    },
+    {
+      "seq": 177,
+      "t": 290440,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149615245,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 290484,
+      "lateness_ms": 44
+    },
+    {
+      "seq": 178,
+      "t": 290540,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149615341,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 290580,
+      "lateness_ms": 40
+    },
+    {
+      "seq": 179,
+      "t": 290660,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149615443,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 290682,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 180,
+      "t": 290760,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149615557,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 290796,
+      "lateness_ms": 36
+    },
+    {
+      "seq": 181,
+      "t": 290880,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149615659,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 290898,
+      "lateness_ms": 18
+    },
+    {
+      "seq": 182,
+      "t": 290980,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149615758,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 290997,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 183,
+      "t": 291100,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149615881,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 291120,
+      "lateness_ms": 20
+    },
+    {
+      "seq": 184,
+      "t": 291200,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149615976,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 291215,
+      "lateness_ms": 15
+    },
+    {
+      "seq": 185,
+      "t": 291320,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149616096,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 291335,
+      "lateness_ms": 15
+    },
+    {
+      "seq": 186,
+      "t": 291420,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149616191,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 291430,
+      "lateness_ms": 10
+    },
+    {
+      "seq": 187,
+      "t": 291540,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149616312,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 291551,
+      "lateness_ms": 11
+    },
+    {
+      "seq": 188,
+      "t": 291640,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149616425,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 291664,
+      "lateness_ms": 24
+    },
+    {
+      "seq": 189,
+      "t": 291760,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149616545,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 291784,
+      "lateness_ms": 24
+    },
+    {
+      "seq": 190,
+      "t": 291860,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149616641,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 291880,
+      "lateness_ms": 20
+    },
+    {
+      "seq": 191,
+      "t": 291980,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149616762,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 292001,
+      "lateness_ms": 21
+    },
+    {
+      "seq": 192,
+      "t": 292080,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149616859,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 292098,
+      "lateness_ms": 18
+    },
+    {
+      "seq": 193,
+      "t": 292200,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149616978,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 292217,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 194,
+      "t": 292300,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149617075,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 292314,
+      "lateness_ms": 14
+    },
+    {
+      "seq": 195,
+      "t": 292420,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149617195,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 292434,
+      "lateness_ms": 14
+    },
+    {
+      "seq": 196,
+      "t": 292520,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149617294,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 292533,
+      "lateness_ms": 13
+    },
+    {
+      "seq": 197,
+      "t": 292640,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149617415,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 292654,
+      "lateness_ms": 14
+    },
+    {
+      "seq": 198,
+      "t": 292740,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149617544,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 292783,
+      "lateness_ms": 43
+    },
+    {
+      "seq": 199,
+      "t": 292860,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149617649,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 292888,
+      "lateness_ms": 28
+    },
+    {
+      "seq": 200,
+      "t": 292960,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149617743,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 292982,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 201,
+      "t": 293080,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149617863,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 293102,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 202,
+      "t": 293180,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149617960,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 293199,
+      "lateness_ms": 19
+    },
+    {
+      "seq": 203,
+      "t": 293300,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149618079,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 293318,
+      "lateness_ms": 18
+    },
+    {
+      "seq": 204,
+      "t": 293400,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149618176,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 293415,
+      "lateness_ms": 15
+    },
+    {
+      "seq": 205,
+      "t": 293520,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149618296,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 293535,
+      "lateness_ms": 15
+    },
+    {
+      "seq": 206,
+      "t": 293620,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149618393,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 293632,
+      "lateness_ms": 12
+    },
+    {
+      "seq": 207,
+      "t": 293740,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149618516,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 293755,
+      "lateness_ms": 15
+    },
+    {
+      "seq": 208,
+      "t": 293840,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149618611,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 293850,
+      "lateness_ms": 10
+    },
+    {
+      "seq": 209,
+      "t": 293960,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149618732,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 293971,
+      "lateness_ms": 11
+    },
+    {
+      "seq": 210,
+      "t": 294060,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149618845,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 294084,
+      "lateness_ms": 24
+    },
+    {
+      "seq": 211,
+      "t": 294180,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149618964,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 294203,
+      "lateness_ms": 23
+    },
+    {
+      "seq": 212,
+      "t": 294280,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149619061,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 294300,
+      "lateness_ms": 20
+    },
+    {
+      "seq": 213,
+      "t": 294400,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149619180,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 294419,
+      "lateness_ms": 19
+    },
+    {
+      "seq": 214,
+      "t": 294500,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149619278,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 294517,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 215,
+      "t": 294620,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149619397,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 294636,
+      "lateness_ms": 16
+    },
+    {
+      "seq": 216,
+      "t": 294720,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149619494,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 294733,
+      "lateness_ms": 13
+    },
+    {
+      "seq": 217,
+      "t": 294840,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149619617,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 294856,
+      "lateness_ms": 16
+    },
+    {
+      "seq": 218,
+      "t": 294940,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149619711,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 294950,
+      "lateness_ms": 10
+    },
+    {
+      "seq": 219,
+      "t": 295060,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149619832,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 295071,
+      "lateness_ms": 11
+    },
+    {
+      "seq": 220,
+      "t": 295160,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149619945,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 295184,
+      "lateness_ms": 24
+    },
+    {
+      "seq": 221,
+      "t": 295280,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149620065,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 295304,
+      "lateness_ms": 24
+    },
+    {
+      "seq": 222,
+      "t": 295380,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149620163,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 295402,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 223,
+      "t": 295500,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149620282,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 295521,
+      "lateness_ms": 21
+    },
+    {
+      "seq": 224,
+      "t": 295600,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149620395,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 295634,
+      "lateness_ms": 34
+    },
+    {
+      "seq": 225,
+      "t": 295720,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149620501,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 295740,
+      "lateness_ms": 20
+    },
+    {
+      "seq": 226,
+      "t": 295820,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149620596,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 295835,
+      "lateness_ms": 15
+    },
+    {
+      "seq": 227,
+      "t": 295940,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149620715,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 295954,
+      "lateness_ms": 14
+    },
+    {
+      "seq": 228,
+      "t": 296040,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149620830,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 296069,
+      "lateness_ms": 29
+    },
+    {
+      "seq": 229,
+      "t": 296160,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149620931,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 296170,
+      "lateness_ms": 10
+    },
+    {
+      "seq": 230,
+      "t": 296260,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149621062,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 296301,
+      "lateness_ms": 41
+    },
+    {
+      "seq": 231,
+      "t": 296380,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149621166,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 296405,
+      "lateness_ms": 25
+    },
+    {
+      "seq": 232,
+      "t": 296480,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149621263,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 296502,
+      "lateness_ms": 22
+    },
+    {
+      "seq": 233,
+      "t": 296600,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149621384,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 296623,
+      "lateness_ms": 23
+    },
+    {
+      "seq": 234,
+      "t": 296700,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149621480,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 296719,
+      "lateness_ms": 19
+    },
+    {
+      "seq": 235,
+      "t": 296820,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149621604,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 296843,
+      "lateness_ms": 23
+    },
+    {
+      "seq": 236,
+      "t": 296920,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149621698,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 296937,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 237,
+      "t": 297040,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149621816,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 297055,
+      "lateness_ms": 15
+    },
+    {
+      "seq": 238,
+      "t": 297140,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149621913,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 297152,
+      "lateness_ms": 12
+    },
+    {
+      "seq": 239,
+      "t": 297260,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149622033,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 297272,
+      "lateness_ms": 12
+    },
+    {
+      "seq": 240,
+      "t": 297360,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149622130,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 297369,
+      "lateness_ms": 9
+    },
+    {
+      "seq": 241,
+      "t": 297480,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149622252,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 297491,
+      "lateness_ms": 11
+    },
+    {
+      "seq": 242,
+      "t": 297580,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149622347,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 297586,
+      "lateness_ms": 6
+    },
+    {
+      "seq": 243,
+      "t": 297700,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149622485,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 297724,
+      "lateness_ms": 24
+    },
+    {
+      "seq": 244,
+      "t": 297800,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149622581,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 297820,
+      "lateness_ms": 20
+    },
+    {
+      "seq": 245,
+      "t": 297920,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149622701,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 297940,
+      "lateness_ms": 20
+    },
+    {
+      "seq": 246,
+      "t": 298020,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149622798,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 298037,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 247,
+      "t": 298140,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149622918,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 298157,
+      "lateness_ms": 17
+    },
+    {
+      "seq": 248,
+      "t": 298240,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149623014,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 298253,
+      "lateness_ms": 13
+    },
+    {
+      "seq": 249,
+      "t": 298360,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149623135,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 298374,
+      "lateness_ms": 14
+    },
+    {
+      "seq": 250,
+      "t": 298460,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149623231,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 298470,
+      "lateness_ms": 10
+    },
+    {
+      "seq": 251,
+      "t": 298580,
+      "key": "DPAD_LEFT",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149623354,
+        "code": 21,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 298593,
+      "lateness_ms": 13
+    },
+    {
+      "seq": 252,
+      "t": 298680,
+      "key": "DPAD_LEFT",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149623449,
+        "code": 21,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 298688,
+      "lateness_ms": 8
+    },
+    {
+      "seq": 253,
+      "t": 301800,
+      "key": "BACK",
+      "edge": "down",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149626571,
+        "code": 4,
+        "edge": "down",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 301810,
+      "lateness_ms": 10
+    },
+    {
+      "seq": 254,
+      "t": 302000,
+      "key": "BACK",
+      "edge": "up",
+      "source": "script",
+      "actual": {
+        "device_uptime_ms": 149626803,
+        "code": 4,
+        "edge": "up",
+        "accepted": true
+      },
+      "outcome": "applied",
+      "score_relative_ms": 302042,
+      "lateness_ms": 42
+    }
+  ],
+  "emergency_releases": [],
+  "foreground_aborts": [],
+  "captures": [
+    {
+      "label": "scene-start",
+      "planned_ms": 18000,
+      "started": 1795704643.3483567,
+      "ended": 1795704644.936094,
+      "file": "input-frame-001.png",
+      "bytes": 36293,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "mode-before",
+      "planned_ms": 33500,
+      "started": 1795704658.8501182,
+      "ended": 1795704660.3179219,
+      "file": "input-frame-002.png",
+      "bytes": 90316,
+      "schedule_lateness_ms": 2
+    },
+    {
+      "label": "count-before",
+      "planned_ms": 38000,
+      "started": 1795704663.348389,
+      "ended": 1795704664.8406408,
+      "file": "input-frame-003.png",
+      "bytes": 90658,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "count-set",
+      "planned_ms": 50900,
+      "started": 1795704676.2482097,
+      "ended": 1795704677.702269,
+      "file": "input-frame-004.png",
+      "bytes": 90247,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "river-100s",
+      "planned_ms": 100000,
+      "started": 1795704725.3481913,
+      "ended": 1795704726.7227116,
+      "file": "input-frame-005.png",
+      "bytes": 40277,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "river-140s",
+      "planned_ms": 140000,
+      "started": 1795704765.3482091,
+      "ended": 1795704766.904823,
+      "file": "input-frame-006.png",
+      "bytes": 40531,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "river-200s",
+      "planned_ms": 200000,
+      "started": 1795704825.3481882,
+      "ended": 1795704826.7212675,
+      "file": "input-frame-007.png",
+      "bytes": 41166,
+      "schedule_lateness_ms": 0
+    },
+    {
+      "label": "river-260s",
+      "planned_ms": 260000,
+      "started": 1795704885.3700683,
+      "ended": 1795704886.9167287,
+      "file": "input-frame-008.png",
+      "bytes": 37458,
+      "schedule_lateness_ms": 22
+    },
+    {
+      "label": "restored",
+      "planned_ms": 299800,
+      "started": 1795704925.1505337,
+      "ended": 1795704926.579804,
+      "file": "input-frame-009.png",
+      "bytes": 90641,
+      "schedule_lateness_ms": 2
+    }
+  ],
+  "result": "completed",
+  "key_log": {
+    "tolerance_ms": 100,
+    "log_interval_complete": false,
+    "matching_edges": [],
+    "ambiguous": [],
+    "foreign_keys": [],
+    "unmatched_observed_if_incomplete": [],
+    "dropped_sensitive_lines": 0,
+    "truncated": false
+  }
+}

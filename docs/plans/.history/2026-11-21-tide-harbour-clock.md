@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-24](https://github.com/wbniv/WorldFoundry/commit/7ed6d60c5) | Check in Aquarium and Clocks development build inputs |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/ba9dae81f) | Tide plan: Tide ships in the Clocks APK; the About row needs a Clocks build from the current branch |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/2c3aea8e2) | Tide Harbour: the OpenStreetMap credit moves from the panel to a read-only About row in the settings form |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/e3f5f720d) | Tide Harbour plan: the sun's bearing verified on cast1 (within 1.4 px) |
@@ -29,6 +30,10 @@
 | [2026-11-21](https://github.com/wbniv/WorldFoundry/commit/77614a8ce) | Tide Harbour plan: the second 3D clock, and the clocks bundle that holds it |
 
 <!--history-meta v1
+7ed6d60c5	author	Will Norris
+7ed6d60c5	added	12
+7ed6d60c5	deleted	0
+7ed6d60c5	files	1
 ba9dae81f	author	Will Norris
 ba9dae81f	added	1
 ba9dae81f	deleted	1

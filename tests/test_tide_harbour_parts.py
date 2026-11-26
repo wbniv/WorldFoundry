@@ -23,12 +23,14 @@ def every_mesh():
 
 
 def test_the_actor_budget_holds():
-    """D7: at most 150 posed actors (measured on cast1 at 59.3 FPS by day); the river is 36 bars (D1)."""
+    """D7: at most 150 posed actors besides the krathongs (measured on cast1 at 59.3 FPS by day); the river is
+    36 bars (D1). The krathong pool is 70 (Will 2026-11-26, "cap the count at about 70": 24.58 FPS at 100 on cast1
+    at night, 30 FPS broke near 75-80), 176 posed in all."""
     moving = parts.all_meshes()
     posed = len(moving) + 2                       # and the camera shot and its look-at target
     assert posed - tl.KRATHONG_MAX <= 150, posed
     assert sum(1 for n in moving if n.startswith("bar_")) == 36
-    assert sum(n.startswith('krathong_') for n in moving) == 100
+    assert sum(n.startswith('krathong_') for n in moving) == tl.KRATHONG_MAX == 70
     faces = sum(len(m.faces) for m in every_mesh() if not m.name.startswith('krathong_'))
     assert faces < 6000, faces
 

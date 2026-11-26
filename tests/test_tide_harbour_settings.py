@@ -29,7 +29,7 @@ import level_modules  # noqa: E402
 tl, _parts, forth = level_modules.load("tide_harbour", "timeline", "parts", "forth")
 
 Q9 = {"drift": ("Slow", "Off"), "numerals": ("Roman", "Thai", "None"), "gauge": ("On", "Off"), "life": ("On", "Off"),
-      "panel": ("On", "Off"), "krathong_mode": ("Festival nights", "Every night"), "krathong_count": tuple(str(i) for i in range(101))}
+      "panel": ("On", "Off"), "krathong_mode": ("Festival nights", "Every night"), "krathong_count": tuple(str(i) for i in range(tl.KRATHONG_MAX + 1))}
 MAP = json.loads((ROOT / "wflevels/tide_harbour/actor-map.json").read_text())
 TODAY = tl.wall_day(dt.date(2026, 11, 21))
 
@@ -59,7 +59,7 @@ def test_the_phone_asset_lists_the_fields_of_the_placed_object():
     GLOBAL_FIELDS = {"Show framerate"}      # oas/global_settings.inc: every settings type ends with these, a checkbox with no options
     assert GLOBAL_FIELDS <= {s["key"] for s in owner["settings"]}
     count = next(s for s in owner['settings'] if s['key'] == 'Krathong count')
-    assert (count['type'], count['minimum'], count['maximum'], count['value']) == ('integer', '0', '100', '30')
+    assert (count['type'], count['minimum'], count['maximum'], count['value']) == ('integer', '0', str(tl.KRATHONG_MAX), '30')
     got = {s["key"]: ([o["label"] for o in s["options"]], s["value"], s["readonly"]) for s in owner["settings"] if s["key"] not in GLOBAL_FIELDS | {'Krathong count'}}
     want = {label: (list(Q9[k]), str(tl.DEFAULT_OPTIONS[k]), False) for k, label in tl.FIELD_LABELS.items() if k != 'krathong_count'}
     # the read-only About row: the river map's OpenStreetMap attribution (it left the panel in the same change)
@@ -95,7 +95,7 @@ def vm():
 @pytest.mark.parametrize("field", list(Q9))
 def test_every_value_of_every_field_poses_the_scene_as_the_model_says(vm, field):
     v, host, ix, ids = vm
-    values = (0, 30, 100) if field == 'krathong_count' else range(len(Q9[field]))
+    values = (0, 30, tl.KRATHONG_MAX) if field == 'krathong_count' else range(len(Q9[field]))
     cases = [(TODAY, sod, {field: value}) for value in values for sod in (15 * 3600 + 150.0, 21 * 3600 + 10.0)]
     worst, bad = v.compare(host, ix, ids, cases)
     assert not bad, bad[:10]
@@ -128,15 +128,15 @@ def test_festival_launches_gradually_in_the_real_vm(vm):
     host.proc.stdin.write(f"M {ids['DELTA_TIME']} 0\n")
 
 
-def test_one_hundred_can_accumulate_without_an_early_departure(vm):
+def test_the_maximum_can_accumulate_without_an_early_departure(vm):
     _, host, _, ids = vm
     day = tl.wall_day(dt.date(2026, 11, 24))
     host.proc.stdin.write(f"M {ids['DELTA_TIME']} 0.1\n")
     host.frame_at(day, 20 * 3600, {'krathong_count': 0})
     for _ in range(1450):
-        result, ds, rs, _ = host.frame_at(day, 20 * 3600, {'krathong_count': 100}, reset_look=False)
+        result, ds, rs, _ = host.frame_at(day, 20 * 3600, {'krathong_count': tl.KRATHONG_MAX}, reset_look=False)
         assert (result, ds, rs) == (0, 0, 0)
-    assert sum(host.read(tl.VIS[f'krathong_{i}']) for i in range(tl.KRATHONG_MAX)) == 100
+    assert sum(host.read(tl.VIS[f'krathong_{i}']) for i in range(tl.KRATHONG_MAX)) == tl.KRATHONG_MAX
     host.frame_at(day, 20 * 3600, {'krathong_count': 0}, reset_look=False)
     host.proc.stdin.write(f"M {ids['DELTA_TIME']} 0\n")
 
