@@ -23,6 +23,10 @@ from pathlib import Path
 
 import pytest
 
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from engine_binary import unloadable_reason  # noqa: E402
+
 REPO = Path(__file__).resolve().parents[1]
 WF_GAME = Path(os.environ.get('WF_GAME', REPO / 'engine' / 'wf_game'))
 GAME_CWD = REPO / 'wfsource' / 'source' / 'game'
@@ -31,7 +35,7 @@ TOOLS = [REPO / 'wftools' / c / 'target' / 'release' / b
          for c, b in (('iffcomp-rs', 'iffcomp'), ('levcomp-rs', 'levcomp'), ('textile-rs', 'textile'))]
 
 pytestmark = [
-    pytest.mark.skipif(not WF_GAME.exists(), reason=f'engine not built: {WF_GAME}'),
+    pytest.mark.skipif(unloadable_reason(WF_GAME) is not None, reason=str(unloadable_reason(WF_GAME))),
     pytest.mark.skipif(not all(t.exists() for t in TOOLS), reason='Rust level tools not built (task build-level-tools)'),
     pytest.mark.skipif(shutil.which('xvfb-run') is None, reason='xvfb-run missing (run in the linux-test container)'),
 ]

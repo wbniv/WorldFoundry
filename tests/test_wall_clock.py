@@ -25,6 +25,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from debug_bridge_client import BridgeClient  # noqa: E402
+from engine_binary import unloadable_reason  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 WF_GAME = Path(os.environ.get("WF_GAME", REPO_ROOT / "engine" / "wf_game"))
@@ -34,7 +35,7 @@ LEVEL = REPO_ROOT / "wflevels" / "aquarium_idle-standalone.iff"
 WALL_HOUR, WALL_MINUTE, WALL_SECOND, WALL_DAY, WALL_UTC_OFFSET = 1922, 1923, 1924, 1925, 1926
 PORT = 7791
 
-needs_engine = pytest.mark.skipif(not WF_GAME.exists(), reason=f"wf_game not built: {WF_GAME}")
+needs_engine = pytest.mark.skipif(unloadable_reason(WF_GAME) is not None, reason=str(unloadable_reason(WF_GAME)))
 needs_display = pytest.mark.skipif(not os.environ.get("DISPLAY"), reason="no DISPLAY (run under xvfb-run)")
 
 
