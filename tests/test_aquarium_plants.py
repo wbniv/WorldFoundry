@@ -40,8 +40,9 @@ def test_one_visible_urchin_no_fish_or_resident_rig():
 
 def test_menu_appends_planted_tank_without_changing_existing_indices():
     entries=[s for s in (ROOT/'wflevels/aquarium-menu.manifest').read_text().splitlines() if s.startswith('level ')]
-    assert len(entries)==8
-    assert entries[5]=='level aquarium_plants-standalone.iff | Planted Tank'
+    # Append-only: later tanks follow (twelve by 2026-11-22), and f78cd4114 added a Dream-label column to every line.
+    assert len(entries)>=8
+    assert entries[5]=='level aquarium_plants-standalone.iff | Planted Tank | Planted Urchin'
     assert entries[0].startswith('level aquarium-standalone.iff | ')
 
 
