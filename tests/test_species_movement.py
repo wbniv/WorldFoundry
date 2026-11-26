@@ -51,6 +51,19 @@ def vm(tmp_path_factory):
         return [dict(zip(keys,map(float,row))) for row in csv.reader(io.StringIO(result.stdout))]
     return run
 
+def settings_reads(kind):
+    """Where a level's director reads its settings: since cd6b9e9e0 moved settings to actor OADs, from the settings
+    object's catalog fields (ReefSettings 129-132, PlantedTankSettings' Water type 130), not the Director's own
+    fields 1-4. {cell or word: (actor, field)}, parsed from the generated Director script (triage 2026-11-26)."""
+    level = 'aquarium_' + kind
+    text = (ROOT/'wflevels'/level/(level+'.lev')).read_text()
+    block = text[text.index('{ \'NAME\' "Director" }'):].split("{ 'OBJ'", 1)[0]
+    script = json.loads(re.search(r'\{ \'STR\' \{ \'NAME\' "Script" \} \{ \'STR\' ("(?:\\.|[^"\\])*")', block).group(1))
+    reads = {int(cell): (int(a), int(f)) for a, f, cell in re.findall(r'(\d+) (\d+) property(?:-int-bytes)?@ if .*? then (\d+) tk!', script)}
+    reads.update({word: (int(a), int(f)) for word, a, f in re.findall(r': (\S+) (\d+) (\d+) property@ if else drop \S+ then ;', script)})
+    return reads
+
+
 def test_reef_boxfish_input_starts_and_stops(vm):
     rows = vm('thai_reef', 'reset 0 0 2.5\nstep 60 8192 .0166667\nstep 180 0 .0166667\n')
     assert rows[59]['vx'] > .5
@@ -273,8 +286,9 @@ def test_shrimp_stops_walking_swims_and_escapes_backwards(vm):
     assert all(r['z']>=.9649 for r in rows)
 
 def test_urchin_depth_diagonal_cap_and_action_only_view(vm):
-    # Saltwater (Director field 2 = 1) is the urchin's tank; with no properties pg-salt reads freshwater and the goby plays.
-    rows=vm('plants','prop 4 2 1\nreset 0 -.5 .865\nstep 1200 10240 .05\nstep 40 1 .05\n')
+    # Saltwater (PlantedTankSettings' Water type = 1) is the urchin's tank; with no properties pg-salt reads freshwater and the goby plays.
+    actor, field = settings_reads('plants')['pg-salt']           # the Water type field of PlantedTankSettings
+    rows=vm('plants',f'prop {actor} {field} 1\nreset 0 -.5 .865\nstep 1200 10240 .05\nstep 40 1 .05\n')
     assert rows[1199]['x']>.50 and rows[1199]['y']>0
     assert all(math.sqrt(r['vx']**2+r['vy']**2)<=.012501 for r in rows)
     assert all(abs(r['z']-.865)<1e-6 for r in rows)
@@ -354,5 +368,7 @@ def test_reef_director_reads_reef_settings(vm):
     director = mapping.get('indices', mapping['actors'])['Director']
     defaults = vm('thai_reef', 'reset 4 0 4\nstep 2 0 .0166667\n')
     assert (defaults[-1][860], defaults[-1][861], defaults[-1][862], defaults[-1][863]) == (0, 3, 1, 0)
-    chosen = vm('thai_reef', f'prop {director} 1 1\nprop {director} 2 5\nprop {director} 3 2\nreset 4 0 4\nstep 2 0 .0166667\n')
+    reads = settings_reads('thai_reef')                          # Layout, Rocks, Colonies: cells 860-862
+    chosen = vm('thai_reef', ''.join(f'prop {reads[cell][0]} {reads[cell][1]} {v}\n' for cell, v in ((860, 1), (861, 5), (862, 2)))
+                + 'reset 4 0 4\nstep 2 0 .0166667\n')
     assert (chosen[-1][860], chosen[-1][861], chosen[-1][862]) == (1, 5, 2)

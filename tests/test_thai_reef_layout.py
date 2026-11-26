@@ -52,13 +52,26 @@ def run(tmp_path_factory):
         block = text[text.index('{ \'NAME\' "' + name + '" }'):].split("{ 'OBJ'", 1)[0]
         encoded = re.search(r'\{ \'STR\' \{ \'NAME\' "Script" \} \{ \'STR\' ("(?:\\.|[^"\\])*")', block).group(1)
         path = tmp / f'{name}.fth'
-        path.write_text(definitions + json.loads(encoded).removesuffix('\n' + entry + '\n'))
+        script = json.loads(encoded)
+        path.write_text(definitions + script.removesuffix('\n' + entry + '\n'))
         paths.append(path)
+        if name == 'Director':
+            # Since cd6b9e9e0 (settings migrated to actor OADs) the director reads Layout, Rocks, Colonies and Seed
+            # from the ReefSettings actor's catalog fields, not from its own fields 1-4: map each settings cell
+            # (860-863) to the (actor, field) its reef-poll reads (triage 2026-11-26).
+            reads = {int(cell): (int(actor), int(field)) for actor, field, cell in
+                     re.findall(r'(\d+) (\d+) property(?:-int-bytes)?@ if .*? then (\d+) tk!', script)}
     director = mapping['indices']['Director']
+    assert [859 + k in reads for k in (1, 2, 3, 4)] == [True] * 4, reads
+
+    def prop(key, value):
+        """The trace line that sets settings field `key` (1 Layout, 2 Rocks, 3 Colonies, 4 Seed) where the director reads it."""
+        actor, field = reads[859 + key]
+        return f'prop {actor} {field} {value}\n'
 
     def go(props, steps=2, extra='', player=(4, -1.2, 2.5)):
         trace = f'reset {player[0]} {player[1]} {player[2]}\n'
-        trace += ''.join(f'prop {director} {field} {value}\n' for field, value in props.items())
+        trace += ''.join(prop(field, value) for field, value in props.items())
         trace += f'step {steps} 0 .0166667\n{extra}dumpa 1 {len(mapping["indices"]) + 1}\ndumpg 0 1100\n'
         result = subprocess.run([str(binary), *map(str, paths), str(mapping['indices']['Player']), str(director),
                                  'tk-player-tick', 'reef-tick'], input=trace, text=True, capture_output=True)
@@ -73,6 +86,7 @@ def run(tmp_path_factory):
                 cells = {int(f[1]) + i: float(v) for i, v in enumerate(f[2:])}
         return actors, cells
     go.mapping = mapping
+    go.prop = prop
     return go
 
 
@@ -156,11 +170,10 @@ def test_same_seed_same_reef_other_seed_other_reef(run):
 
 
 def test_seed_zero_draws_a_seed_and_keeps_it_across_other_changes(run):
-    director = run.mapping['indices']['Director']
     _, first = _layout(run, rocks=4, seed=0)
     assert first[875] >= 1
     # Colonies changes a second later: the reef re-lays out with the same drawn seed.
-    _, later = run({1: 1, 2: 4, 3: 1, 4: 0}, steps=2, extra=f'prop {director} 3 2\nstep 70 0 .0166667\n')
+    _, later = run({1: 1, 2: 4, 3: 1, 4: 0}, steps=2, extra=run.prop(3, 2) + 'step 70 0 .0166667\n')
     assert later[872] == 2 and later[875] == first[875]
     assert [later[k] for k in range(880, 904)] == [first[k] for k in range(880, 904)]
 
