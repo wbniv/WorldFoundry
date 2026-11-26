@@ -1,6 +1,6 @@
 # Forth math words, part 2: exponentials, logarithms, rounding and the hardware
 
-**Status: approved 2026‑11‑26; implementation started.** Will: "yes to all 3 math" (Q1–Q3 accepted at the recommendations), then "implement math plan". This plan follows the [trig words plan](2026-11-21-forth-trig-words.md): the same table, the same `libm` policy, the same loud refusals and the same three test layers. It grew out of the [lava lamp plan](2026-11-26-lava-lamp.md), which needs `exp`, `expm1`, `cbrt` and `floor`. Will's direction (2026‑11‑26):
+**Status: approved 2026‑11‑26; implemented 2026‑11‑26 (Phases 1, 2 and 4 done; Phase 0 and 3 done on the PC and in WebAssembly; the device rows are pending: there is no route to run the vectors on a device, see Phase 3).** Will: "yes to all 3 math" (Q1–Q3 accepted at the recommendations), then "implement math plan". This plan follows the [trig words plan](2026-11-21-forth-trig-words.md): the same table, the same `libm` policy, the same loud refusals and the same three test layers. It grew out of the [lava lamp plan](2026-11-26-lava-lamp.md), which needs `exp`, `expm1`, `cbrt` and `floor`. Will's direction (2026‑11‑26):
 
 > "we could add exp to the engine … we already added trig functions … exp, ln, log, etc would be natural next steps … consider other functions to add? what are the functions getting added?"
 
@@ -198,23 +198,26 @@ flowchart LR
 ```
 
 - **Phase 0, measure.**
-  - Time 10,000 calls of `sqrt`, `atan2-rev` and a dummy syscall in the VM on the PC and on cast1 (`profile-begin` / `profile-end`) to test "the VM dominates".
-  - Read cast2's `/proc/cpuinfo` (Features, CPU part) to confirm its core.
-  - Run the existing nine words' vector file on every target, as the baseline for Phase 3.
-- **Phase 1, the words.**
+  - ~~Time 10,000 calls of `sqrt`, `atan2-rev` and a dummy syscall in the VM on the PC~~ and on cast1 (`profile-begin` / `profile-end`) to test "the VM dominates". **PC done** with `tests/forth_math_vm_cost.py` (the real VM and word table, `-O2`, in the container; each word's cost over the bare `do … loop`, best of 31). **The VM dominates:** one iteration of an empty `do 2 drop loop` costs 274 ns; on top of that a trivial syscall costs 33 ns, `sqrt` 32, `floor` 45, `exp` 55, `fma` 67, `pow` 87 and `atan2-rev` 89. A one-instruction word and a `libm` word differ by about 20 ns, a tenth of the interpreter's own cost per step. The machine was shared (load average 6), and repeated runs moved each number by up to 2×, never the ordering against the loop. **cast1: not run**, no route (Phase 3).
+  - Read cast2's `/proc/cpuinfo` (Features, CPU part) to confirm its core. **Not run:** the coordinator has no shell or file-read workflow, and its `device-facts` and inventory do not record the CPU (checked 2026‑11‑26).
+  - ~~Run the existing nine words' vector file on every target~~, as the baseline for Phase 3. **PC and WebAssembly done** (folded into Phase 3's run, which covers all 36 words); devices pending.
+- ~~**Phase 1, the words.**~~ **Done 2026‑11‑26** (commit `a6ed5868e`).
   - `forth_math.hpp`: the maths and its `Result`.
   - `forth_math_zforth.hpp`: the table and dispatch, extending `kLastCustom` to 108.
   - The prelude line in `scripting_zforth.cc`.
   - `tests/gen_forth_math_vectors.py`: special values, each domain edge and random arguments against a `long double` reference.
   - `tests/forth_math_test.cpp` in both precisions.
   - `tests/test_forth_math_vm.py`: every word through the real VM, stacks left empty, refusals that abort and leave the VM usable.
-- **Phase 2, engine and docs.**
+- ~~**Phase 2, engine and docs.**~~ **Done 2026‑11‑26** (commits `a6ed5868e`, `5dda162e2`). The engine test now reads the mailboxes through the Director: with the test script in its place nothing holds the Player up, and once it falls out of the room (about 30 s in) the bridge stops reporting through it.
   - `tests/verify_forth_math_engine.py` through the engine's own dispatcher.
   - `docs/forth-math-words.md` gains the 27 rows, the names rule and the hardware matrix, and `tests/test_forth_math_docs.py` keeps it equal to the table.
 - **Phase 3, agreement.** A new `tests/forth_math_agreement.py` runs the vectors on the PC (glibc), in WebAssembly (Emscripten, under Node), on the Pixel (bionic, arm64) and on cast1 and cast2 (bionic, `armeabi-v7a`). It reports, per word, whether group A is bit-identical everywhere (it must be) and the worst ulp spread for groups C and trig.
-- **Phase 4, the hand-rolled floors.**
-  - Replace the `*-frac` / `*-floor` / `*-mod` definitions in Minute Machine, Tide spike, Cuckoo Village and Anamorphic Shards with `floor` and `fmod`.
-  - Rebuild each level, and check each against its reference.
+  - ~~PC and WebAssembly~~ **done** (commit `7ecfe5a17`): `tests/forth_math_dump.cpp` prints the float bits of all 36 words on the 2,990 shared vectors and 2,000 portable random arguments each (74,990 results, 615 of them refusals). glibc in the container and Emscripten 6.0.4 under its Node 22.16 agree on **every bit of every result**, groups C and trig included (0 differ, 0 ulp). The repo pins emsdk 6.0.0 (`task setup-emsdk`), which is not installed and would not fit the disk's 13 GB headroom, so this run used the emsdk 6.0.4 already on the machine via `EMCC_DIR`.
+  - **Devices: pending, no route.** The chromecast coordinator's workflows install, launch, profile and capture APKs; none runs a native binary or a shell command, or returns a file from the device. Running the vectors on cast1 and cast2 needs either such a workflow or an APK with a vector-dump mode whose output a workflow returns. The Pixel is never used for this.
+- ~~**Phase 4, the hand-rolled floors.**~~ **Done 2026‑11‑26** (commits `dabc51dc8`, `f1a57fb91`, `8708716d0`, `86f07fdae`).
+  - ~~Replace the `*-frac` / `*-floor` / `*-mod` definitions in Minute Machine, Tide spike, Cuckoo Village and Anamorphic Shards with `floor` and `fmod`.~~ Each `*-frac` is now `dup floor -`, each `*-floor` is gone (its uses call `floor`), and each `*-mod` is `over over / floor * -`. **Not `fmod`:** the old `*-mod` is a floored modulo whose result takes the divisor's sign, and `fmod` truncates and takes the dividend's, so they differ for negative operands; the floored form keeps every result identical. Dutch Cuckoo Village shares Cuckoo Village's library and called `cv-floor` itself, so it changed and was rebuilt too.
+  - ~~Rebuild each level, and check each against its reference.~~ Each level rebuilt in the Blender container; each `.lev` diff is exactly the changed definitions (Dutch also gained two cell definitions its committed build predated). Tide spike's outputs are gitignored: variants a and d were rebuilt, and d ran 40 s in the Debug engine with no zforth error.
+  - Found and left alone (not in this plan's list): the same loop in `aquarium_sea_stars/sea_star_player.fth`, `aquarium_blue_shrimp/shrimp.fth`, `aquarium_tanks/controller.fth` and `moon_lantern/generate.py`.
 
 No visible surface: these are engine words and a reference document, so this plan has no mockups.
 
@@ -226,12 +229,33 @@ No visible surface: these are engine words and a reference document, so this pla
     task test-forth-math
     ```
 
+    ```
+    task: [test-forth-math] python3 tests/gen_forth_math_vectors.py --check
+    vectors up to date
+    task: [test-forth-math] docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; for mode in "" "-DWF_FORTH_MATH_FLOAT"; do g++ -std=c++17 -O1 -Wall -Wextra $mode -I/src/engine/stubs -I/src/tests /src/tests/forth_math_test.cpp -o /tmp/forth_math_test && /tmp/forth_math_test; done'
+
+    forth_math_test (double Real): OK, 7446 checks, 2990 shared vectors across 36 words
+    forth_math_test (float Real): OK, 7446 checks, 2990 shared vectors across 36 words
+    rc=0
+    ```
+
+    **PASS.** 2,990 shared vectors across 36 words in both `Real` modes, the exact words compared bit for bit, and 100,000 random arguments of every new word against `long double`: groups A and B exact, group C within one float ulp with no absolute floor in `double`. The `float` (single-FPU) build needs two ulps for group C (251 of its random results sit at two ulps with float `libm`, measured with the bar at one), so the test and `docs/forth-math-words.md` say two there.
+
 2. The bridge registers exactly the 36 words (9 + 27) with the stack effects in the table, and the reference document lists the same:
 
     ```bash
     python3 tests/verify_forth_math.py
     scripts/in-linux-container.sh python3 -m pytest tests/test_forth_math_docs.py tests/test_forth_math_vm.py -q
     ```
+
+    ```
+    155 checks across 36 words in the real zForth VM: PASS
+    ......                                                                   [100%]
+    6 passed in 7.80s
+    rc=0
+    ```
+
+    **PASS.**
 
 3. Every word works through the engine's own dispatcher, and a refusal names the word in the engine log and leaves the engine running:
 
@@ -240,13 +264,50 @@ No visible surface: these are engine words and a reference document, so this pla
     WF_CONTAINER_ENV="WF_GAME=/build/wf-game-dev/src/engine/wf_game" scripts/in-linux-container.sh bash -c 'timeout 400 xvfb-run -a -s "-screen 0 1280x720x24" python3 tests/verify_forth_math_engine.py'
     ```
 
+    ```
+    [140/140] Linking CXX executable /build/wf-game-dev/src/engine/wf_game
+    -rwxr-xr-x 1 root root 231290272 Nov 26 04:09 /build/wf-game-dev/src/engine/wf_game
+    EXIT 0
+    51 engine checks: PASS
+    ```
+
+    **PASS.** The Debug ASan engine: all 36 words through the bridge's own dispatcher, the `asin-rev` refusal and a two-argument `pow` refusal named in the engine log (`zforth: pow: negative base with a non-integer exponent (arguments -8 0.5)`), the engine still running, and recovered by a good script each time. The first run failed two checks after the `pow` refusal; the cause was the test reading the mailboxes through the Player, which falls out of the room about 30 s in with the test script in the Director's place, not the words. It now reads them through the Director.
+
 4. The VM cost per word is recorded for the PC and cast1, for `floor`, `exp` and a dummy syscall (Phase 0's measurement, repeated on the finished words).
+
+    ```
+    $ scripts/in-linux-container.sh python3 tests/forth_math_vm_cost.py --repeats 31
+    10000 calls per run, best of 31, VM compiled -O2; loop overhead 274.2 ns per iteration
+    word                          ns per call  vs nop-sys
+    nop-sys (trivial syscall)            33.3       1.00x
+    sqrt                                 32.3       0.97x
+    atan2-rev                            88.9       2.67x
+    floor                                44.5       1.34x
+    exp                                  54.6       1.64x
+    pow                                  87.1       2.62x
+    fma                                  67.3       2.02x
+    ```
+
+    **PC: PASS** (recorded; "the VM dominates" holds: the loop step alone is 274 ns, and `floor` and `exp` differ by 10 ns). **cast1: NOT RUN:** no route to run code and read a timing back from a device (Phase 3).
 
 5. Agreement across machines. Group A and group B are bit-identical on the PC, WebAssembly, the Pixel, cast1 and cast2; groups C and trig are within one float ulp, with the spread recorded per word:
 
     ```bash
     python3 tests/forth_math_agreement.py --target pc --target wasm --target phone-pixel-8-pro --target chromecast-test-01 --target chromecast-test-02
     ```
+
+    ```
+    $ EMCC_DIR=/home/will/bsnes-jg-player/emsdk/upstream/emscripten python3 tests/forth_math_agreement.py --target pc --target wasm
+    wasm: emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.4 (fe5be6afdff43ad58860d821fcc8572a23f92d19); node v22.16.0
+    74990 results per target; reference pc
+    word         group                    wasm
+    acos-rev     trig      0 differ, max 0 ulp
+    ...          (all 36 words: 0 differ, max 0 ulp)
+    tanh         C         0 differ, max 0 ulp
+    PASS
+    ```
+
+    **PC and WebAssembly: PASS**, bit-identical for all 36 words. **`phone-pixel-8-pro`: NOT RUN:** Will's daily phone, never used for this. **`chromecast-test-01`, `chromecast-test-02`: NOT RUN:** no coordinator workflow runs a native binary or returns its output (Phase 3); the script reports device targets as NOT RUN rather than inventing a route.
 
 6. The four levels whose hand-rolled floors were replaced still match their references:
 
@@ -255,8 +316,42 @@ No visible surface: these are engine words and a reference document, so this pla
     scripts/in-linux-container.sh python3 -m pytest tests -q -k "cuckoo or anamorphic or tide"
     ```
 
+    ```
+    125 frames; worst position 0.0015 mm, rotation 0.0008 deg, scale 0.000006
+    PASS
+    ...
+    =========================== short test summary info ============================
+    ERROR tests/test_aquarium_thai_reef.py
+    ERROR tests/test_minute_machine_channels.py - AttributeError: module 'timelin...
+    ERROR tests/test_minute_machine_parts.py - AttributeError: module 'timeline' ...
+    ERROR tests/test_pipe_hop.py - RuntimeError: could not connect to 127.0.0.1:7...
+    ERROR tests/test_thai_reef_placement.py
+    !!!!!!!!!!!!!!!!!!! Interrupted: 5 errors during collection !!!!!!!!!!!!!!!!!!!!
+    3 skipped, 1582 deselected, 5 errors in 29.75s
+    rc=2
+    ```
+
+    **Minute Machine: PASS** (0.0015 mm, as before the change; the engine `--compare` also gives the trig plan's 0.015 mm at all eight times). **The pytest command as written: FAIL**, interrupted by five collection errors in modules this change does not touch (`timeline` and `config` module-name collisions between levels, a missing `aquarium_sea_stars` constant, a test that connects to a server at import). Run per level in the container instead, after the rebuilds:
+    ```
+    83 Cuckoo Village, Dutch Cuckoo Village and Anamorphic Shards tests: 81 passed, 2 failed
+      test_cuckoo_village_settings_effect: passes alone (5 passed); fails only after test_dutch_cuckoo_village
+        has imported Dutch's own `forth` module (the same collision)
+      test_cuckoo_village_settings::test_the_oad_is_what_the_tool_makes_from_the_oas: oas2oad exits 1 (the tool, not a script)
+    verify_cuckoo_village_forth.py: 1100 days x 3 times x 3 settings = 9900 frames, 0 failures; flames 0; flowers 0
+    Minute Machine forth, timeline, channels, parts: 21 passed
+    ```
+    The tide tests in the selection are Tide Harbour's (its own director, not Tide spike's); their four failures and twelve errors are in files this change does not touch. Tide spike has no reference test: variants a and d rebuilt and d ran in the engine without a zforth error.
+
 7. Nothing else moved: the existing Forth tests still pass:
 
     ```bash
     task test-forth-source
     ```
+
+    ```
+    task: [test-forth-source] python3 tests/verify_forth_source.py
+    PASS: 10105 checks, including 10000 repeated calls
+    rc=0
+    ```
+
+    **PASS.**
