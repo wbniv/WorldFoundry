@@ -52,6 +52,13 @@ int main() {
 def test_launcher_reuses_the_single_native_engine():
     manifest = ET.parse(ROOT / "android/app/src/main/AndroidManifest.xml")
     ns = "{http://schemas.android.com/apk/res/android}"
-    native = next(a for a in manifest.findall("application/activity")
-                  if a.get(ns + "name") == "android.app.NativeActivity")
+    # Since d77eb1c76 the native engine runs in WorldFoundryActivity (a NativeActivity subclass, for native text
+    # entry); android.app.NativeActivity is an activity-alias onto it that keeps the launcher component name.
+    alias = next(a for a in manifest.findall("application/activity-alias")
+                 if a.get(ns + "name") == "android.app.NativeActivity")
+    target = alias.get(ns + "targetActivity")
+    native = next(a for a in manifest.findall("application/activity") if a.get(ns + "name") == target)
     assert native.get(ns + "launchMode") == "singleTask"
+    assert [a.get(ns + "name") for a in manifest.findall("application/activity")
+            if a.find("meta-data[@{%s}name='android.app.lib_name']" % ns[1:-1]) is not None] == [target], \
+        "one activity hosts the native engine"

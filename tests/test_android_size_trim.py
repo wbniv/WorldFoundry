@@ -152,8 +152,8 @@ def test_no_live_exception_code_in_android_sources():
 # The defined dynamic symbols of the release libwf_game.so: nothing more, nothing less.
 # Only ANativeActivity_onCreate is looked up by name (the framework's NativeActivity dlsym()s it,
 # AndroidManifest android.app.lib_name=wf_game). android_main is called directly by
-# android_native_app_glue.c; the other 18 are the plan's WF_ANDROID_EXPORT HAL calls, kept
-# visible as the plan specifies (cheap: 20 symbols, ~0.5 KB of .dynsym).
+# android_native_app_glue.c; the others are WF_ANDROID_EXPORT HAL calls, kept visible as the plan
+# specifies (cheap: 27 symbols, under 1 KB of .dynsym).
 EXPORTS = {
     "ANativeActivity_onCreate", "android_main",
     "WFAndroidEglInit", "WFAndroidEglTerm", "WFAndroidSetHudEnabled",
@@ -162,6 +162,12 @@ EXPORTS = {
     "HALNotifySuspend", "HALNotifyResume", "HALIsSuspended", "HALPumpSuspendedEvents",
     "HALWindowCloseRequested", "HALCloseWindow", "HALRequestClose",
     "SetHostGLContext", "GetHostGLContext", "ClearHostGLContext",
+    # Added with their features, each marked WF_ANDROID_EXPORT in the source (this list had not followed them):
+    "WFAndroidRequestClose", "WFAndroidCloseRequested",               # 1bfe10f5c, 2026-10-02
+    "HALLifecycleGeneration",                                         # 402d0f2f1, 2026-10-03
+    "WFAndroidTouchLayout",                                           # ef99d415e, 2026-10-09
+    "WFAndroidInputProbeFlash", "WFAndroidInputProbeSwapped",         # 8200a7663, 2026-11-13
+    "WFAndroidSetBundleAsset",                                        # e381a6b13, 2026-11-21
 }
 NEEDED = {"libEGL.so", "libGLESv3.so", "libandroid.so", "liblog.so", "libm.so", "libdl.so", "libc.so",
           "libOpenSLES.so"}
