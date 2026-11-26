@@ -15,8 +15,15 @@ spec=importlib.util.spec_from_file_location('zfhost',PRIMARY/'docs/reference/swa
 zfhost=importlib.util.module_from_spec(spec);spec.loader.exec_module(zfhost)
 import goldfish
 
+@pytest.fixture(scope='session')
+def zf_math_host(tmp_path_factory):
+    # The level script calls the engine's math words (floor ...), so the host carries them.
+    from forth_math_host import build_c_host
+    return build_c_host(ROOT/'docs/reference/swarming-poster/zf_host.c',tmp_path_factory.mktemp('zf-math')/'zf_host','-DWF_FORTH_MATH')
+
 @pytest.fixture
-def tank(tmp_path,request):
+def tank(tmp_path,request,zf_math_host):
+    zfhost.BIN=zf_math_host
     h=zfhost.Host()
     try:
         fields={'HARDWARE_JOYSTICK1_RAW':1909,'DELTA_TIME':1907,'INPUT':1908,
