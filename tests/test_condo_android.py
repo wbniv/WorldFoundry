@@ -96,12 +96,18 @@ def test_built_condo_apk_contents():
     p = APP / "build" / "outputs" / "apk" / "condo" / "release" / "worldfoundry-condo-release.apk"
     if not p.exists():
         pytest.skip(f"{p.relative_to(REPO)} not built (cd android && ./gradlew :app:assembleCondoRelease)")
+    from build_freshness import stale_reason
+    stale = stale_reason(p, [CONDO_CD, REPO / "wfsource/source/hal/phonepad/controller.html", SRC / "condo/assets/layout.json"],
+                         "cd android && ./gradlew :app:assembleCondoRelease")
+    if stale:
+        pytest.skip(stale)
     with zipfile.ZipFile(p) as z:
         names = set(z.namelist())
         assert z.read("assets/cd.iff") == CONDO_CD.read_bytes()
         assert {"lib/arm64-v8a/libwf_game.so", "lib/armeabi-v7a/libwf_game.so"} <= names
+        main = {f"assets/{a.name}" for a in (SRC / "main" / "assets").iterdir()}   # runtime-property-ui.json (d77eb1c76)
         assert {n for n in names if n.startswith("assets/")} == {"assets/cd.iff", "assets/wf_args.txt",
-                                                                 "assets/controller.html", "assets/layout.json"}
+                                                                 "assets/controller.html", "assets/layout.json"} | main
 
 
 def test_suspended_until_the_window_returns():

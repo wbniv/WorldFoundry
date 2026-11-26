@@ -198,11 +198,18 @@ def test_built_release_apk(flavor):
     p = APP / "build" / "outputs" / "apk" / flavor / "release" / f"worldfoundry-{flavor}-release.apk"
     if not p.exists():
         pytest.skip(f"{p.relative_to(REPO)} not built (cd android && ./gradlew :app:assemble{flavor.title()}Release)")
+    from build_freshness import stale_reason
+    stale = stale_reason(p, [shipped(flavor), *(SRC / flavor / "assets").iterdir()],
+                         f"cd android && ./gradlew :app:assemble{flavor.title()}Release")
+    if stale:
+        pytest.skip(stale)
     with zipfile.ZipFile(p) as z:
         names = set(z.namelist())
         assert z.read("assets/cd.iff") == shipped(flavor).read_bytes()
         assert {"lib/arm64-v8a/libwf_game.so", "lib/armeabi-v7a/libwf_game.so"} <= names
-        assert {n for n in names if n.startswith("assets/")} == {f"assets/{a}" for a in FLAVORS[flavor][2]}
+        # every flavor also ships main's assets (runtime-property-ui.json since d77eb1c76)
+        main = {f"assets/{a.name}" for a in (SRC / "main" / "assets").iterdir()}
+        assert {n for n in names if n.startswith("assets/")} == {f"assets/{a}" for a in FLAVORS[flavor][2]} | main
 
 
 # ---- CI, tasks and the device script know every flavor ------------------------------------------------------------
