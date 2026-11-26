@@ -121,8 +121,20 @@ def test_settings_actor_has_screensaver_hold():
     assert "PlantedTankSettings" in json.loads((LEVEL / "actor-map.json").read_text())["indices"]
 
 
+def _skip_if_stale(output):
+    """The standalone level and its bundle are gitignored local builds. Built on 2026-11-10 05:53, before the level
+    was regenerated (20:18) and before cd6b9e9e0 replaced the RPRP chunk with actor OADs, they failed the RPRP
+    check (triage 2026-11-26). A build older than the level's source says nothing about it."""
+    from build_freshness import stale_reason
+    reason = stale_reason(output, [LEVEL / "planted_tank_screensaver.lev", LEVEL / "actor-map.json",
+                                   ROOT / "wfsource/source/oas/plantedtanksettings.oad"], "bash wflevels/planted_tank_screensaver/build.sh")
+    if reason:
+        pytest.skip(reason)
+
+
 @pytest.mark.skipif(not STANDALONE.is_file(), reason="build wflevels/planted_tank_screensaver first")
 def test_standalone_level_carries_the_actor_descriptor():
+    _skip_if_stale(STANDALONE)
     level = STANDALONE.read_bytes()
     assert b"RPRP" not in level and b"Hold seconds" in level
 
@@ -134,6 +146,7 @@ def _toc(bundle: bytes):
 
 @pytest.mark.skipif(not BUNDLE.is_file(), reason="build wflevels/planted_tank_screensaver first")
 def test_bundle_holds_exactly_one_level():
+    _skip_if_stale(BUNDLE)
     bundle = BUNDLE.read_bytes()
     assert _toc(bundle) == [b"SHEL", b"L4\0\0", b"UIFT"]
     assert b"RPRP" not in bundle and b"Hold seconds" in bundle
