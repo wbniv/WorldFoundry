@@ -54,7 +54,14 @@ def test_flavor_manifest_declares_the_three_clocks_components():
         assert f'android:name="{name}"' in xml, name
         assert (JAVA / f'{name[1:]}.java').is_file(), name
     assert xml.count('${applicationId}.settings') == 2             # the Dream's meta-data and the provider: they follow the applicationId
-    assert 'org.worldfoundry' not in xml.replace('org.worldfoundry.screensaver.SETTINGS_AUTHORITY', '').split('-->', 1)[1]   # no hard-coded id
+    # No hard-coded application id. The meta-data keys and the preview activity's class live in the code's package
+    # (namespace org.worldfoundry.screensaver), which is not the applicationId (PREVIEW_ACTIVITY: 5a117e85d).
+    code = ('org.worldfoundry.screensaver.SETTINGS_AUTHORITY', 'org.worldfoundry.screensaver.PREVIEW_ACTIVITY',
+            'org.worldfoundry.screensaver.ScreensaverPreviewActivity')
+    body = xml.split('-->', 1)[1]
+    for name in code:
+        body = body.replace(name, '')
+    assert 'org.worldfoundry' not in body
     assert 'LEANBACK_LAUNCHER' in xml and 'android.service.dreams.DreamService' in xml
 
 
@@ -109,9 +116,10 @@ def test_build_clocks_apk_packs_the_bundle_and_checks_both_abis():
     assert tasks['clocks-bundle']['deps'] == ['minute-machine-level', 'tide-harbour-level']
     assert 'python3 scripts/pack-clocks-bundle.py' in ' '.join(tasks['clocks-bundle']['cmds'])
     apk = tasks['build-clocks-apk']
-    assert apk['deps'] == ['clocks-bundle']
+    assert apk['deps'] == ['clocks-bundle', 'vendor-unpack-archives']    # the vendored Jolt archive, unpacked (7ed6d60c5)
     script = '\n'.join(str(c) for c in apk['cmds'])
-    assert ':screensaver:assembleClocksRelease --offline' in script
+    # Offline is opt-in since 7ed6d60c5 (docs/howto/rebuild-aquarium-and-clocks.md: the first run downloads dependencies)
+    assert ':screensaver:assembleClocksRelease ${WF_GRADLE_OFFLINE:-}' in script
     assert 'set -euo pipefail' in script
     for abi in ('arm64-v8a', 'armeabi-v7a'):
         assert abi in script, abi

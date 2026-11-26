@@ -17,7 +17,9 @@ RENAME_NOTES = ("was `org.worldfoundry.clocks` until",              # android/sc
                 "Will removes `org.worldfoundry.wf_game.aquarium`")      # TODO.md: the old packages Will removes by hand
 
 
-SKIP_DIRS = {".git", ".worktrees", "build", "build-docker", "node_modules", "target", ".gradle", "outputs", "__pycache__"}
+# .history: the per-file revision archives (android/screensaver/.history/README.md since 7ed6d60c5) are history too.
+SKIP_DIRS = {".git", ".worktrees", "build", "build-docker", "node_modules", "target", ".gradle", "outputs", "__pycache__",
+             ".history"}
 SKIP_PREFIXES = ("docs/diagnostics", "docs/plans", "docs/transcripts")          # history: transcripts, measurements and plans keep what was true then
 TEXT = {".md", ".py", ".sh", ".kts", ".xml", ".java", ".json", ".yml", ".yaml", ".manifest", ".txt", ".cc", ".h", ".hp", ".gradle",
         ".toml", ".cmake", ".properties"}
