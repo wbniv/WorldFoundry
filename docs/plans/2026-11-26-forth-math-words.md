@@ -562,6 +562,27 @@ No visible surface: these are engine words and a reference document, so this pla
 
     **FAIL as written**, on failures that predate this plan, all tracked in the TODO item "Pre-existing test failures seen during the math work": `oas2oad` exits 1 (Cuckoo Village settings) and Tide Harbour's actor budget, settings type and settings tests. No failure is in the changed Forth: Minute Machine matches its reference (0.0015 mm), and the Cuckoo, Anamorphic and Tide spike tests that exercise the new `floor` pass (179 passed). The step passes once that item is fixed.
 
+    **Re-run 2026‑11‑26 12:39 UTC (19:39 Bangkok), at `c6ad565b3`, after the triage** ([triage](../diagnostics/2026-11-26-pytest-triage.md)). Both commands ran in the `wf-linux-test` container (house rule: tests run in containers), the first as `scripts/in-linux-container.sh python3 tests/verify_minute_machine_forth.py`:
+
+    ```text
+    125 frames; worst position 0.0015 mm, rotation 0.0008 deg, scale 0.000006
+    PASS
+    rc=0
+    ........................................................................ [ 34%]
+    .................ssssssss.................F............................. [ 69%]
+    ......................................sss................s....           [100%]
+    E        +    where {'bar_00': <clock_mesh.Mesh object at 0x7df9ff4690d0>, ...} = <function all_meshes at 0x7df9ffc29a80>()
+    E        +      where <function all_meshes at 0x7df9ffc29a80> = parts.all_meshes
+
+    tests/test_tide_harbour_level.py:39: AssertionError
+    =========================== short test summary info ============================
+    FAILED tests/test_tide_harbour_level.py::test_the_actor_map_is_the_level_order_and_within_budget
+    1 failed, 193 passed, 15 skipped, 1730 deselected in 414.83s (0:06:54)
+    rc=1
+    ```
+
+    **FAIL as written**, now on one test only. The `oas2oad` failure, the settings type and the 11 settings errors are fixed (`84c571de2`, `e3ba6b46b`, `defc0716d`). What is left is Tide Harbour's actor budget: 206 posed actors against D7's 150, because of the 100 Loy Krathong floats. That is Will's decision (raise the budget or cap the floats), not a fault in the math words.
+
 7. Nothing else moved: the existing Forth tests still pass:
 
     ```bash
