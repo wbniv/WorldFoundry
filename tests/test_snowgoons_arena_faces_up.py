@@ -60,8 +60,10 @@ def test_arena_horizontal_faces_point_up_everywhere():
     found = list(_arena_models())
     # The classic Android/web chain now uses yard01 (covered by the acre tests).
     # Source models, Blender bundles and historical CDs retain quadpatch01.
-    assert len(found) >= 10, f"expected every retained arena copy, found {[f[0] for f in found]}"
-    rebuilt = ["wflevels/snowgoons.iff", "wflevels/snowgoons-standalone.iff", "wflevels/snowgoons-cd.iff"]
+    # The main cd.iff was the tenth copy until the 2026-11-22 rebuilds (1d712f282 onward) packed the yard01 snowgoons.
+    assert len(found) >= 9, f"expected every retained arena copy, found {[f[0] for f in found]}"
+    rebuilt = ["wflevels/snowgoons.iff", "wflevels/snowgoons-standalone.iff", "wflevels/snowgoons-cd.iff",
+               "wfsource/source/game/cd.iff"]
     assert not any(where.split("@")[0] in rebuilt for where, _, _ in found)
     for where, verts, faces in found:
         up = down = 0
