@@ -124,7 +124,7 @@ function drawHoleBand(ctx,cx,yT,yB,rAt,text,mode,th){
   th=th||1.0;const level=mode==='dim'?0.45:1;
   for(let c=0;c<nC;c++)for(let r=0;r<nR;r++){
     const y=yT+(r+0.5)*pitch,rr=rAt(y),a=((c-(nC-1)/2)/((nC-1)/2))*th,x=cx+rr*Math.sin(a),w=Math.cos(a);
-    if(cols[c][r]){ctx.fillStyle='rgba(20,12,3,0.9)';ell(ctx,x,y,hr*w*1.15,hr*1.15);lit.push([x,y,w]);}else{ctx.fillStyle='rgba(60,40,10,0.55)';ell(ctx,x,y,hr*w*0.8,hr*0.8);ctx.fillStyle='rgba(255,206,130,0.12)';ell(ctx,x,y,hr*w*0.5,hr*0.5);}
+    if(cols[c][r]&&mode!=='off'){ctx.fillStyle='rgba(20,12,3,0.9)';ell(ctx,x,y,hr*w*1.15,hr*1.15);lit.push([x,y,w]);}else{ctx.fillStyle='rgba(60,40,10,0.55)';ell(ctx,x,y,hr*w*0.8,hr*0.8);ctx.fillStyle='rgba(255,206,130,0.12)';ell(ctx,x,y,hr*w*0.5,hr*0.5);}
   }
   ctx.save();ctx.globalCompositeOperation='lighter';
   for(const [x,y,w] of lit){const g=ctx.createRadialGradient(x,y,0,x,y,hr*2.1);g.addColorStop(0,`rgba(255,196,110,${0.3*level})`);g.addColorStop(1,'rgba(255,170,80,0)');
@@ -273,11 +273,11 @@ LAMP_CSS = """
 """
 LAMP_SCRIPT = r"""
 // Applied values: what the level is running with. Pending: what the form shows until Apply.
-const applied={lava:DEF_LAVA,water:DEF_WATER,drift:0,fps:0};
+const applied={lava:DEF_LAVA,water:DEF_WATER,time:0,drift:0,fps:0};
 const pending=Object.assign({},applied);
 const SHEETS=[
  ["Clock",[["drift","Camera drift",["Slow","Off"],"The camera drifts slowly so no pixel sits still on the screen; Off holds it still"]]],
- ["Lava lamp",[["lava","Lava color",LAVA.map(x=>x[0]),"Wax color while this level is loaded"],["water","Water color",WATER.map(x=>x[0]),"Liquid color while this level is loaded"]]],
+ ["Lava lamp",[["lava","Lava color",LAVA.map(x=>x[0]),"Wax color while this level is loaded"],["water","Water color",WATER.map(x=>x[0]),"Liquid color while this level is loaded"],["time","Time display",["Base","Off"],"Show the time in the base of the lamp; Off leaves just the lava lamp"]]],
  ["Display",[["fps","Show framerate",["Off","On"],"Show the frames per second overlay at the bottom right"]]]];
 let sheet=1,row=0;
 function renderForm(){
@@ -302,9 +302,9 @@ renderForm();
 const sim=makeSim(7,8);let fpsShown=60,lastT=performance.now();
 const views=[
  {canvas:document.getElementById('tv'),sim,draw:(ctx,W,H,v)=>{const now=performance.now(),dt=now-lastT;lastT=now;if(dt>0&&dt<200)fpsShown=fpsShown*0.95+0.05*(1000/dt);
-   v.G=drawScene(ctx,W,H,{sim,lava:applied.lava,water:applied.water,time:nowHHMM(),cache:v.cache||(v.cache={}),drift:applied.drift?0:W*0.006*Math.sin(sim.t*2*Math.PI/600)});
+   v.G=drawScene(ctx,W,H,{sim,lava:applied.lava,water:applied.water,time:applied.time?null:nowHHMM(),mode:applied.time?'off':'',cache:v.cache||(v.cache={}),drift:applied.drift?0:W*0.006*Math.sin(sim.t*2*Math.PI/600)});
    if(applied.fps){ctx.font='13px ui-monospace,monospace';const t=fpsShown.toFixed(1),w=ctx.measureText(t).width;ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(W-w-22,H-28,w+12,19);ctx.fillStyle='#fff';ctx.fillText(t,W-w-16,H-14);}}},
- {canvas:document.getElementById('zoom'),sim,frozen:true,draw:(ctx,W,H,v)=>{drawScene(ctx,W,H,{sim,lava:applied.lava,water:applied.water,time:nowHHMM(),cache:v.cache||(v.cache={}),scale:1.25,baseFrac:0.96});}}];
+ {canvas:document.getElementById('zoom'),sim,frozen:true,draw:(ctx,W,H,v)=>{drawScene(ctx,W,H,{sim,lava:applied.lava,water:applied.water,time:applied.time?null:nowHHMM(),mode:applied.time?'off':'',cache:v.cache||(v.cache={}),scale:1.25,baseFrac:0.96});}}];
 const LEG=[["Cap","conical metal cap; the top of the globe is the coolest place, where wax rests and cools before it sinks"],
 ["Glass","tapered globe, widest a quarter of the way up; painted highlight strips and darkened edges give the cylinder its volume"],
 ["Rising blob","heated wax stretches into a teardrop as it climbs, cools as it goes, then flattens against the top"],
@@ -450,7 +450,7 @@ SET_BODY = """
 <div class="tv" style="left:34px;top:70px"><div style="position:relative;width:680px;height:383px;font-size:21px;overflow:hidden;border-radius:3px">
  <div class="ov"><div class="pnl"><h2>Level Settings</h2>
  <div class="rail"><div>Clock</div><div class="on">Lava lamp</div><div>Display</div></div>
- <div class="rows"><div class="f">Lava color: Orange</div><div>Water color: Violet</div></div>
+ <div class="rows"><div class="f">Lava color: Orange</div><div>Water color: Violet</div><div>Time display: Base</div></div>
  <div class="hint">Wax color while this level is loaded</div>
  <div class="foot"><span>Up / down: select</span><span>Left / right: change</span><span>⇠&nbsp; Apply / close</span></div></div></div></div></div>
 <div class="cap" style="left:40px;top:478px"><b>1 · TV, settings open.</b> The new <i>Lava lamp</i> sheet sits between the shared Clock and Display sheets.<small>Left / right steps through the eight names; the scene behind updates when you apply.</small></div>
@@ -459,13 +459,14 @@ SET_BODY = """
 <div class="phone" style="left:40px;top:560px"><div style="position:relative;width:620px;height:279px;font-size:17px;overflow:hidden;border-radius:4px">
  <div class="ov"><div class="pnl"><h2>Level Settings</h2>
  <div class="rail"><div>Clock</div><div class="on">Lava lamp</div><div>Display</div></div>
- <div class="rows"><div>Lava color: Orange</div><div class="f">Water color: Turquoise</div></div>
+ <div class="rows"><div>Lava color: Orange</div><div class="f">Water color: Turquoise</div><div>Time display: Base</div></div>
  <div class="hint">Liquid color while this level is loaded</div>
  <div class="foot"><span>Tap a row · tap again to change</span><span>⇠&nbsp; Apply / close</span></div></div></div></div></div>
 <div class="cap" style="left:730px;top:478px;display:none"></div>
 <table id="tbl"><tr><th>Sheet</th><th>Field</th><th>Choices</th><th>Default</th></tr>
 <tr><td>Lava lamp</td><td><code>Lava color</code></td><td>Red · Orange · Yellow · Pink · Purple · Turquoise · Green · White</td><td>Orange</td></tr>
 <tr><td>Lava lamp</td><td><code>Water color</code></td><td>Clear · Yellow · Orange · Pink · Violet · Blue · Turquoise · Green</td><td>Violet</td></tr>
+<tr><td>Lava lamp</td><td><code>Time display</code></td><td>Base · Off (Off: just a lava lamp)</td><td>Base</td></tr>
 <tr><td>Clock (shared)</td><td><code>Camera drift</code></td><td>Slow · Off</td><td>Slow</td></tr>
 <tr><td>Display (global)</td><td><code>Show framerate</code></td><td>Off · On</td><td>Off</td></tr>
 <tr><td colspan="4" style="color:#9aa0a6">3 · Phone (left): the existing touch form, drawn from the same catalog; this plan adds fields, not widgets. The phone frame shows the narrow layout with the second field focused.</td></tr></table>
@@ -576,7 +577,7 @@ POSTER_BODY = r"""
  <p>The hero image on the sheet is this mockup's canvas lamp. The print uses a Cycles render of the shipped Blender scene, as the aquarium posters do.</p>
  <p>The patent table links each number to Google Patents. The PDF keeps the links, and the print adds a QR code per row (Q8).</p>
  <p>Panel 05 runs from Dunnet's 1950 filing to Cloudflare's wall of about 100 lamps in 2017. Events are spaced evenly, not to scale.</p>
- <p>Q7 asks whether the timeline should mention that Craven Walker also directed <i>Travelling Light</i> (1959), the first naturist film released publicly in the UK.</p>
+ <p>Q7, yes: the timeline includes 1959, when Craven Walker (as Michael Keatering) directed <i>Travelling Light</i>, the first naturist film released publicly in the UK.</p>
  <p>Panel 06 is the movement code. Panel 07 lists the four ways to move the wax that the plan weighs (D6); the Forth model is ticked as recommended.</p>
 </div>
 """
@@ -606,8 +607,8 @@ S('dens',`<rect x="0" y="0" width="190" height="150" fill="#fff8ea" rx="8"/><pat
 ${T(150,136,'temperature →',{fs:10})}${T(12,70,'ρ',{fs:14,w:700})}${T(58,28,'wax',{fs:10,c:'#c2481a',w:700})}${T(58,72,'liquid',{fs:10,c:'#3d6fb0',w:700})}
 ${T(62,146,'sinks',{fs:10})}${T(150,146,'rises',{fs:10})}`);
 // 05: evenly spaced timeline, two-line labels
-const ev=[['1950','Dunnet files','GB 703,924'],['1963','Astro','launched'],['1965','US rights:','Lava Lite, Chicago'],['1968','US 3,387,396','granted'],['1970','CCl₄ banned','in US lamps'],['late 1970s','Haggerty buys','the US rights'],['1992','Crestworth','becomes Mathmos'],['1998','Lavarand','patent granted'],['2000','Craven Walker','dies'],['2017','Cloudflare’s','lamp wall']];
-S('tl',`<path d="M10 40 H994" stroke="#5a4a3a" stroke-width="2"/>`+ev.map(([y,a,b],i)=>{const x=60+i*98;return `<circle cx="${x}" cy="40" r="5" fill="#c2581a"/>${T(x,26,y,{w:700,fs:13})}${T(x,62,a,{fs:11})}${T(x,76,b,{fs:11})}`;}).join(''));
+const ev=[['1950','Dunnet files','GB 703,924'],['1959','Travelling Light,','his naturist film'],['1963','Astro','launched'],['1965','Lava Lite,','Chicago'],['1968','US 3,387,396','granted'],['1970','CCl₄ banned','in US lamps'],['late 1970s','Haggerty buys','the US rights'],['1992','renamed','Mathmos'],['1998','Lavarand','patent'],['2000','Craven Walker','dies'],['2017','Cloudflare’s','lamp wall']];
+S('tl',`<path d="M10 40 H994" stroke="#5a4a3a" stroke-width="2"/>`+ev.map(([y,a,b],i)=>{const x=50+i*90;return `<circle cx="${x}" cy="40" r="5" fill="#c2581a"/>${T(x,26,y,{w:700,fs:13})}${T(x,62,a,{fs:11})}${T(x,76,b,{fs:11})}`;}).join(''));
 window.__ready=true;
 """
 

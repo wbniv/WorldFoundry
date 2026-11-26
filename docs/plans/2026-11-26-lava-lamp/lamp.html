@@ -165,7 +165,7 @@ function drawHoleBand(ctx,cx,yT,yB,rAt,text,mode,th){
   th=th||1.0;const level=mode==='dim'?0.45:1;
   for(let c=0;c<nC;c++)for(let r=0;r<nR;r++){
     const y=yT+(r+0.5)*pitch,rr=rAt(y),a=((c-(nC-1)/2)/((nC-1)/2))*th,x=cx+rr*Math.sin(a),w=Math.cos(a);
-    if(cols[c][r]){ctx.fillStyle='rgba(20,12,3,0.9)';ell(ctx,x,y,hr*w*1.15,hr*1.15);lit.push([x,y,w]);}else{ctx.fillStyle='rgba(60,40,10,0.55)';ell(ctx,x,y,hr*w*0.8,hr*0.8);ctx.fillStyle='rgba(255,206,130,0.12)';ell(ctx,x,y,hr*w*0.5,hr*0.5);}
+    if(cols[c][r]&&mode!=='off'){ctx.fillStyle='rgba(20,12,3,0.9)';ell(ctx,x,y,hr*w*1.15,hr*1.15);lit.push([x,y,w]);}else{ctx.fillStyle='rgba(60,40,10,0.55)';ell(ctx,x,y,hr*w*0.8,hr*0.8);ctx.fillStyle='rgba(255,206,130,0.12)';ell(ctx,x,y,hr*w*0.5,hr*0.5);}
   }
   ctx.save();ctx.globalCompositeOperation='lighter';
   for(const [x,y,w] of lit){const g=ctx.createRadialGradient(x,y,0,x,y,hr*2.1);g.addColorStop(0,`rgba(255,196,110,${0.3*level})`);g.addColorStop(1,'rgba(255,170,80,0)');
@@ -242,11 +242,11 @@ function runViews(views,onFrame){
 
 
 // Applied values: what the level is running with. Pending: what the form shows until Apply.
-const applied={lava:DEF_LAVA,water:DEF_WATER,drift:0,fps:0};
+const applied={lava:DEF_LAVA,water:DEF_WATER,time:0,drift:0,fps:0};
 const pending=Object.assign({},applied);
 const SHEETS=[
  ["Clock",[["drift","Camera drift",["Slow","Off"],"The camera drifts slowly so no pixel sits still on the screen; Off holds it still"]]],
- ["Lava lamp",[["lava","Lava color",LAVA.map(x=>x[0]),"Wax color while this level is loaded"],["water","Water color",WATER.map(x=>x[0]),"Liquid color while this level is loaded"]]],
+ ["Lava lamp",[["lava","Lava color",LAVA.map(x=>x[0]),"Wax color while this level is loaded"],["water","Water color",WATER.map(x=>x[0]),"Liquid color while this level is loaded"],["time","Time display",["Base","Off"],"Show the time in the base of the lamp; Off leaves just the lava lamp"]]],
  ["Display",[["fps","Show framerate",["Off","On"],"Show the frames per second overlay at the bottom right"]]]];
 let sheet=1,row=0;
 function renderForm(){
@@ -271,9 +271,9 @@ renderForm();
 const sim=makeSim(7,8);let fpsShown=60,lastT=performance.now();
 const views=[
  {canvas:document.getElementById('tv'),sim,draw:(ctx,W,H,v)=>{const now=performance.now(),dt=now-lastT;lastT=now;if(dt>0&&dt<200)fpsShown=fpsShown*0.95+0.05*(1000/dt);
-   v.G=drawScene(ctx,W,H,{sim,lava:applied.lava,water:applied.water,time:nowHHMM(),cache:v.cache||(v.cache={}),drift:applied.drift?0:W*0.006*Math.sin(sim.t*2*Math.PI/600)});
+   v.G=drawScene(ctx,W,H,{sim,lava:applied.lava,water:applied.water,time:applied.time?null:nowHHMM(),mode:applied.time?'off':'',cache:v.cache||(v.cache={}),drift:applied.drift?0:W*0.006*Math.sin(sim.t*2*Math.PI/600)});
    if(applied.fps){ctx.font='13px ui-monospace,monospace';const t=fpsShown.toFixed(1),w=ctx.measureText(t).width;ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(W-w-22,H-28,w+12,19);ctx.fillStyle='#fff';ctx.fillText(t,W-w-16,H-14);}}},
- {canvas:document.getElementById('zoom'),sim,frozen:true,draw:(ctx,W,H,v)=>{drawScene(ctx,W,H,{sim,lava:applied.lava,water:applied.water,time:nowHHMM(),cache:v.cache||(v.cache={}),scale:1.25,baseFrac:0.96});}}];
+ {canvas:document.getElementById('zoom'),sim,frozen:true,draw:(ctx,W,H,v)=>{drawScene(ctx,W,H,{sim,lava:applied.lava,water:applied.water,time:applied.time?null:nowHHMM(),mode:applied.time?'off':'',cache:v.cache||(v.cache={}),scale:1.25,baseFrac:0.96});}}];
 const LEG=[["Cap","conical metal cap; the top of the globe is the coolest place, where wax rests and cools before it sinks"],
 ["Glass","tapered globe, widest a quarter of the way up; painted highlight strips and darkened edges give the cylinder its volume"],
 ["Rising blob","heated wax stretches into a teardrop as it climbs, cools as it goes, then flattens against the top"],

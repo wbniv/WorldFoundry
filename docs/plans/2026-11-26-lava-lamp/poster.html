@@ -94,7 +94,7 @@ header .tag{margin-left:auto;font:600 11px ui-monospace,SFMono-Regular,Menlo,mon
  <p>The hero image on the sheet is this mockup's canvas lamp. The print uses a Cycles render of the shipped Blender scene, as the aquarium posters do.</p>
  <p>The patent table links each number to Google Patents. The PDF keeps the links, and the print adds a QR code per row (Q8).</p>
  <p>Panel 05 runs from Dunnet's 1950 filing to Cloudflare's wall of about 100 lamps in 2017. Events are spaced evenly, not to scale.</p>
- <p>Q7 asks whether the timeline should mention that Craven Walker also directed <i>Travelling Light</i> (1959), the first naturist film released publicly in the UK.</p>
+ <p>Q7, yes: the timeline includes 1959, when Craven Walker (as Michael Keatering) directed <i>Travelling Light</i>, the first naturist film released publicly in the UK.</p>
  <p>Panel 06 is the movement code. Panel 07 lists the four ways to move the wax that the plan weighs (D6); the Forth model is ticked as recommended.</p>
 </div>
 
@@ -206,7 +206,7 @@ function drawHoleBand(ctx,cx,yT,yB,rAt,text,mode,th){
   th=th||1.0;const level=mode==='dim'?0.45:1;
   for(let c=0;c<nC;c++)for(let r=0;r<nR;r++){
     const y=yT+(r+0.5)*pitch,rr=rAt(y),a=((c-(nC-1)/2)/((nC-1)/2))*th,x=cx+rr*Math.sin(a),w=Math.cos(a);
-    if(cols[c][r]){ctx.fillStyle='rgba(20,12,3,0.9)';ell(ctx,x,y,hr*w*1.15,hr*1.15);lit.push([x,y,w]);}else{ctx.fillStyle='rgba(60,40,10,0.55)';ell(ctx,x,y,hr*w*0.8,hr*0.8);ctx.fillStyle='rgba(255,206,130,0.12)';ell(ctx,x,y,hr*w*0.5,hr*0.5);}
+    if(cols[c][r]&&mode!=='off'){ctx.fillStyle='rgba(20,12,3,0.9)';ell(ctx,x,y,hr*w*1.15,hr*1.15);lit.push([x,y,w]);}else{ctx.fillStyle='rgba(60,40,10,0.55)';ell(ctx,x,y,hr*w*0.8,hr*0.8);ctx.fillStyle='rgba(255,206,130,0.12)';ell(ctx,x,y,hr*w*0.5,hr*0.5);}
   }
   ctx.save();ctx.globalCompositeOperation='lighter';
   for(const [x,y,w] of lit){const g=ctx.createRadialGradient(x,y,0,x,y,hr*2.1);g.addColorStop(0,`rgba(255,196,110,${0.3*level})`);g.addColorStop(1,'rgba(255,170,80,0)');
@@ -307,7 +307,7 @@ S('dens',`<rect x="0" y="0" width="190" height="150" fill="#fff8ea" rx="8"/><pat
 ${T(150,136,'temperature →',{fs:10})}${T(12,70,'ρ',{fs:14,w:700})}${T(58,28,'wax',{fs:10,c:'#c2481a',w:700})}${T(58,72,'liquid',{fs:10,c:'#3d6fb0',w:700})}
 ${T(62,146,'sinks',{fs:10})}${T(150,146,'rises',{fs:10})}`);
 // 05: evenly spaced timeline, two-line labels
-const ev=[['1950','Dunnet files','GB 703,924'],['1963','Astro','launched'],['1965','US rights:','Lava Lite, Chicago'],['1968','US 3,387,396','granted'],['1970','CCl₄ banned','in US lamps'],['late 1970s','Haggerty buys','the US rights'],['1992','Crestworth','becomes Mathmos'],['1998','Lavarand','patent granted'],['2000','Craven Walker','dies'],['2017','Cloudflare’s','lamp wall']];
-S('tl',`<path d="M10 40 H994" stroke="#5a4a3a" stroke-width="2"/>`+ev.map(([y,a,b],i)=>{const x=60+i*98;return `<circle cx="${x}" cy="40" r="5" fill="#c2581a"/>${T(x,26,y,{w:700,fs:13})}${T(x,62,a,{fs:11})}${T(x,76,b,{fs:11})}`;}).join(''));
+const ev=[['1950','Dunnet files','GB 703,924'],['1959','Travelling Light,','his naturist film'],['1963','Astro','launched'],['1965','Lava Lite,','Chicago'],['1968','US 3,387,396','granted'],['1970','CCl₄ banned','in US lamps'],['late 1970s','Haggerty buys','the US rights'],['1992','renamed','Mathmos'],['1998','Lavarand','patent'],['2000','Craven Walker','dies'],['2017','Cloudflare’s','lamp wall']];
+S('tl',`<path d="M10 40 H994" stroke="#5a4a3a" stroke-width="2"/>`+ev.map(([y,a,b],i)=>{const x=50+i*90;return `<circle cx="${x}" cy="40" r="5" fill="#c2581a"/>${T(x,26,y,{w:700,fs:13})}${T(x,62,a,{fs:11})}${T(x,76,b,{fs:11})}`;}).join(''));
 window.__ready=true;
 </script></body></html>
