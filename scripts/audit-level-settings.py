@@ -70,7 +70,10 @@ def settings_types():
 
 
 # Levels an app ships on its own, outside any pack manifest.
-SHIPPED_BY_APP = {"condo_639_640": "the condo app (condo-cd.iff)"}
+SHIPPED_BY_APP = {
+    "condo_639_640": "the condo app (condo-cd.iff)",
+    "seahorse_grid": "the Seahorse Grid screensaver app (seahorse-screensaver-cd.iff)",
+}
 # Reachable levels that cannot carry the global settings, and why. A level here is not counted as a gap.
 EXEMPT = {
     "snowgoons": "hand-authored legacy IFF (snowgoons.iff.txt): no .lev, so levcomp has nothing to add the holder to",

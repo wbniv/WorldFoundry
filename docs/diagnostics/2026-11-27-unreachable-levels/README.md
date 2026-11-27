@@ -37,13 +37,13 @@ A fixture or experiment is judged only on two questions: is it still a useful te
 | `marble-madness` | experiment | ROM‑decoded Marble Madness paths, six generators | web‑build preload; `marble-madness-2` reads its `.lev` | yes | 0.8 MB | **archive** (MM is low priority) |
 | `marble-madness-2` | experiment | MM physics copy with timer and goal | lists only | yes | 0.4 MB | **archive** |
 | `moon_site01` | real level | Artemis III Site 01 lunar terrain, lander, rovers | ⚠ the **web build's default level** | yes (script error) | 13.8 MB | **keep + upgrade** |
-| `seahorse_grid` | real level | 24 animated seahorses | ⚠ **ships** as the Seahorse Grid screensaver app | yes (already has the setting) | 2.8 MB | **keep**; add it to `SHIPPED_BY_APP` |
+| `seahorse_grid` | real level | 24 animated seahorses | ⚠ **ships** as the Seahorse Grid screensaver app | yes (already has the setting) | 2.8 MB | **keep** (Will, 2026‑11‑27); added to `SHIPPED_BY_APP` |
 
 In this table, "Lists only" means the backface‑cull test's tolerance table, `scripts/sweep_blender_levels.py`, a `run-*` Taskfile task and old plans. None of them would fail if the level went; they would only need the entry removed. Size counts tracked plus untracked files and leaves out symlinks into other levels.
 
 ## What else turned up
 
-- **Two are real levels, and both are reachable.** `seahorse_grid` ships in the Seahorse Grid screensaver app (`org.worldfoundry.seahorsegrid`), and `scripts/audit-level-settings.py` does not list it. The web build preloads `moon_site01` (as its default level), `marble-madness` and `pilot_demo` (`WF_WEB_LEVELS`, `CMakeLists.txt:1261`).
+- **Two are real levels, and both are reachable.** `seahorse_grid` ships in the Seahorse Grid screensaver app (`org.worldfoundry.seahorsegrid`), and is now listed in `SHIPPED_BY_APP` in `scripts/audit-level-settings.py` (Will, 2026‑11‑27: keep). The web build preloads `moon_site01` (as its default level), `marble-madness` and `pilot_demo` (`WF_WEB_LEVELS`, `CMakeLists.txt:1261`).
 - **Seven Director scripts no longer compile.** `filesys`, `filelight`, `treemap` and `dome` stop at `zforth unknown token: \\` (each Script starts `"\\\\ wf\n"`). `moon_site01`, `pilot_demo` and `snowgoons-blender` stop at `zforth unknown token: wf` in a camshot script they share. The shipped `snowgoons` has no compile errors.
 - `filesys` and `seahorse_grid` already carry Show framerate.
 
@@ -68,5 +68,5 @@ In this table, "Lists only" means the backface‑cull test's tolerance table, `s
 - [ ] `mm_practice_blender`, `mm_practice_blender_rt`: retire (suggested) / keep
 - [ ] `marble-madness`, `marble-madness-2`: archive, frozen (suggested) / retire (and drop MM from `WF_WEB_LEVELS`)
 - [ ] `moon_site01`: keep + upgrade (suggested) / other
-- [ ] `seahorse_grid`: keep, and add it to `SHIPPED_BY_APP` (suggested)
+- [x] `seahorse_grid`: keep, and add it to `SHIPPED_BY_APP` (Will, 2026‑11‑27; done)
 - [ ] The `wf`‑token Director error (`moon_site01`, `pilot_demo`, `snowgoons-blender`): open a fix item (suggested) / ignore
