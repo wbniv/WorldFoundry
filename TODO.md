@@ -621,7 +621,6 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [ ] **(triage)** Seahorse Grid and Planted Tank (retiring) choosers (D7). — _from [2026-11-27-screensaver-chooser.md](docs/plans/2026-11-27-screensaver-chooser.md)_  <!-- fp:a6a0eb0db05e7a92 -->
 - [ ] **(triage)** Any change to the coordinator, its registry or Homeboard. — _from [2026-11-27-screensaver-chooser.md](docs/plans/2026-11-27-screensaver-chooser.md)_  <!-- fp:1221fb45a638b9b8 -->
 - [ ] **(triage)** Debugging switched off (Homeboard investigation, "Not decided here"). — _from [2026-11-27-screensaver-chooser.md](docs/plans/2026-11-27-screensaver-chooser.md)_  <!-- fp:26765222278a2fe4 -->
-- [verify] **2026-11-27-screensaver-chooser** — Verification section present but no PASS recorded — run + record the steps. _from [2026-11-27-screensaver-chooser.md](docs/plans/2026-11-27-screensaver-chooser.md)_  <!-- fp:0e50368efca2c132 -->
 <!-- END auto-captured-deferrals -->
 - [ ] **(triage)** A second machine, and the rule that picks one for each minute (D10). — _from [2026-11-21-sixty-second-chain-reaction.md](docs/plans/2026-11-21-sixty-second-chain-reaction.md)_  <!-- fp:9ef908da50e937e2 -->
 - [ ] **(triage)** Sound (D8). — _from [2026-11-21-sixty-second-chain-reaction.md](docs/plans/2026-11-21-sixty-second-chain-reaction.md)_  <!-- fp:208c993d9c8f6dc6 -->
