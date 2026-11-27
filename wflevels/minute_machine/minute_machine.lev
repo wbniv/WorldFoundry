@@ -877,7 +877,7 @@
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "player.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 22l } { 'STR' "22" } }
-		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Movement Mailbox" } { 'DATA' 1l } { 'STR' "1" } }

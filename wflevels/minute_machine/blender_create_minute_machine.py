@@ -130,6 +130,10 @@ bpy.data.objects['Camera'].location = wide.location
 bpy.data.objects['Matte']['wf_Matte Type'] = 'Color'
 bpy.data.objects['Matte']['wf_Background Color'] = 0x0b0c10
 bpy.data.objects['Player'].location = (5.6, -3.0, 2.2)
+# Anchored, as in the other clocks: the base scene's Player is Physics, and with nothing solid under it the engine
+# dropped it out of the room within seconds (the Debug build stops on "not in any room"). A screensaver's Player never moves.
+bpy.data.objects['Player']['wf_Mobility'] = 'Anchored'
+bpy.data.objects['Player']['wf_Mass'] = 0.0
 box_fields(bpy.data.objects['Room'], (-40, -45, -8, 50, 12, 24))
 bpy.data.objects['Room'].location = (0, 0, 0)
 

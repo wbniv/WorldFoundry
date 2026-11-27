@@ -277,6 +277,10 @@ objs['Camera'].location = wide.location
 objs['Matte']['wf_Matte Type'] = 'Color'
 objs['Matte']['wf_Background Color'] = 0x0b1115
 objs['Player'].location = (0, -3, 1)
+# Anchored, as in the other clocks: the base scene's Player is Physics, and with nothing solid under it the engine
+# dropped it out of the room within seconds (the Debug build stops on "not in any room"). A screensaver's Player never moves.
+objs['Player']['wf_Mobility'] = 'Anchored'
+objs['Player']['wf_Mass'] = 0.0
 
 # The parts catalogue (not part of a normal build): CUCKOO_CATALOGUE=<dir> renders every part's pictures and stops (scripts/cuckoo-village-catalogue.py);
 # CUCKOO_CATALOGUE_ONLY=id,id limits it to those entries.
