@@ -1,6 +1,6 @@
 # Retire the remaining GitHub Actions workflows
 
-**Status:** approved (Will, 2026‑11‑27: "d1-d5: ok"); D1–D5 taken as recommended. Phases 1–2 in progress.
+**Status:** approved (Will, 2026‑11‑27: "d1-d5: ok"); D1–D5 taken as recommended. Phases 1–2 done (`57d753965`, `cc22ca5a0`); Phase 3 waits on the `wf-org-terraform` AWS profile.
 **TODO:** `[T4] Retire the remaining GitHub Actions workflows: local replacements first`.
 **Repos:** this one (`wbniv/WorldFoundry`, branch `2026-new-level`) and `~/worldfoundry.org`.
 
