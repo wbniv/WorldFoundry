@@ -219,4 +219,31 @@ Builds and device runs happen only after Will's decisions; device jobs go throug
 7. Cast2 (4K) and Cast1 at 2.0x text: the same capture as step 5's first frame; the layout matches mockups 1 and 7 (no cut-off names, title column folded at 2.0x). Restore Cast1's text size afterwards.
 8. Pixel (`DEVICE=phone-pixel-8-pro`): Settings, Display, Screen saver: the gear beside WF Clocks opens the chooser; tap Random; Preview plays; system Back returns to Settings; rotate the phone while the chooser is open (the list keeps the saved mark); `task chromecast:screensaver-show` plays the saved choice. A `uiautomator` dump in the same recipe shows each row's spoken text ("Tide Harbour, saved, 3 of 17").
 9. Homeboard on Cast1 (closes Homeboard's [companion contract](../../../homeboard-tv/docs/plans/2026-11-26-screensaver-companion-contract.md) Verification 3): Homeboard's Screensaver list, WF Clocks, **Open WF Clocks settings** opens the chooser; choose a clock; Back returns to Homeboard with the WF Clocks entry focused; Homeboard's Preview of WF Clocks then plays the new choice. Seahorse Grid's entry shows no Open settings button. Record the result in that plan.
+
+    ```
+    $ task chromecast:check DEVICE=chromecast-test-01 APP=homeboard-tv \
+        APK=artifacts/deployments/0.1.177/homeboard.apk RECIPE=dev/device/chooser-cast1-open-settings.json
+    J-b7b0107aa62e: completed {"error": null, "health": "ready"}
+      05 foreground org.worldfoundry.game.clocks/org.worldfoundry.screensaver.ScreensaverChooserActivity
+         "16 choices", no row marked, "Nothing is chosen, so the screensaver picks one at random…"
+      07 Tide Harbour [Saved] [Preview] [Undo]; "Saved. … Tide Harbour from its next start. Before: one at random."
+      08 Back → Homeboard, WF Clocks entry, Open WF Clocks settings focused
+    $ task chromecast:check … RECIPE=dev/device/chooser-cast1-preview.json
+    J-0cca79e86613: completed; 17:58:48 HomeboardScreensaver: screensaver started mode=preview entry=…ClocksDreamService
+      frames 02–03: Tide Harbour
+    ```
+
+    **PASS (2026‑11‑27)**, WF Clocks `a66b87250` (sha256 `9b5fdec3…`) and Homeboard 0.1.177. Seahorse Grid shows only
+    **Use everywhere…** (`J‑40be0dd4e61f`). Recorded in Homeboard's contract plan (homeboard‑tv `bebdc00`).
 10. Coordinator unchanged: `task chromecast:screensaver-setting DEVICE=chromecast-test-01 SETTING_ID=clock VALUE=lighthouse` succeeds, and the chooser opened afterwards shows Lighthouse saved.
+
+    ```
+    $ task chromecast:screensaver:setting DEVICE=chromecast-test-01 SETTING_ID=clock VALUE=lighthouse
+    $ task chromecast:screensaver:status DEVICE=chromecast-test-01      # J-ef8d201c094d
+            "id": "clock",
+            "value": "lighthouse",
+    $ task chromecast:check … RECIPE=dev/device/chooser-cast1-saved-mark.json   # J-042ac1005111
+      02 foreground …ScreensaverChooserActivity: Lighthouse [Saved] [Preview], focused
+    ```
+
+    **PASS (2026‑11‑27).**

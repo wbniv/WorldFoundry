@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/a66b87250) | todo, plan: screensaver chooser built and merged; APK and devices left |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/1539de805) | plan: one data-driven chooser for every WF screensaver bundle |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/8b8637c7a) | plan: Will decides the screensaver chooser (D4: no Random row) |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/88befddc5) | Plan: Aquarium and Clocks screensaver chooser behind the Dream's settings link |
 
 <!--history-meta v1
+a66b87250	author	Will Norris
+a66b87250	added	2
+a66b87250	deleted	0
+a66b87250	files	1
+a66b87250	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqQzN1oGqYJXjCkzVJ1
 1539de805	author	Will Norris
 1539de805	added	21
 1539de805	deleted	0
